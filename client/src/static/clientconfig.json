@@ -14,7 +14,32 @@
   "tools": [
     {
       "type": "layerswitcher",
-      "options": {}
+      "options": {
+        "groups": [
+          {
+            "id": 1,
+            "name": "Lagergrupp 1",
+            "groups": [
+              {
+                "id": 2,
+                "name": "Lagergrupp 2"
+              },
+              {
+                "id": 3,
+                "name": "Lagergrupp 3",
+                "groups": [{
+                  "id": 4,
+                  "name": "Lagergrupp 4"
+                }]
+              }
+            ]
+          },
+          {
+            "id": 5,
+            "name": "Lagergrupp 5"
+          }
+        ]
+      }
     },
     {
       "type": "infoclick",
@@ -66,6 +91,7 @@
       "type": "wmts",
       "options": {
         "name": "Background WMTS",
+        "group": 1,
         "caption": "Adresskarta",
         "visible": true,
         "queryable": false,
@@ -77,6 +103,7 @@
     {
       "type": "wms",
       "options": {
+        "group": 2,
         "url": "/util/proxy/geturl/194.71.132.27/geoserver28/wms?",
         "name": "fastighetsyta",
         "caption": "Fastighetsyta",
@@ -106,6 +133,7 @@
     {
       "type": "wms",
       "options": {
+        "group": 3,
         "url": "/util/proxy/geturl/194.71.132.27/geoserver28/wms?",
         "name": "adress",
         "caption": "Adress",
@@ -135,6 +163,7 @@
     {
       "type": "wfs",
       "options": {
+        "group": 4,
         "name": "schools",
         "filterable": false,
         "caption": "Skolor",
@@ -163,6 +192,41 @@
           "srsname": "EPSG:3006",
           "bbox": "",
           "format_options": "callback:addSchools"
+        }
+      }
+    },
+    {
+      "type": "wfs",
+      "options": {
+        "group": 5,
+        "name": "schools2",
+        "filterable": false,
+        "caption": "Skolor 2",
+        "visible": false,
+        "legend" : [
+          {"Url" : "assets/icons/skola.png", "Description" : "Skola"}
+        ],
+        "url": "/util/proxy/geturl/194.71.132.27/geoserver28/wfs",
+        "style": {
+          "icon": "assets/icons/skola.png"
+        },
+        "callbackFunction": "addSchools2",
+        "information": "{namn}",
+        "search": {
+          "url": "/postProxy.aspx?url=http://194.71.132.27/geoserver28/wfs/",
+          "featureType": "skola",
+          "propertyName": "namn",
+          "srsName": "EPSG:3006"
+        },
+        "params": {
+          "service": "WFS",
+          "version": "1.1.0",
+          "request": "GetFeature",
+          "typename": "sweco:skola",
+          "outputFormat": "text/javascript",
+          "srsname": "EPSG:3006",
+          "bbox": "",
+          "format_options": "callback:addSchools2"
         }
       }
     }

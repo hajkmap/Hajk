@@ -231,11 +231,15 @@ module.exports = ToolModel.extend({
    *
    */
   search: function (done) {
+
     var value = this.get('value');
     var items = [];
     var promises = [];
-    var layers = this.getLayers();
+    var layers;
 
+    if (value === "") return;
+
+    layers = this.getLayers();
     this.set('selectedIndices', []);
 
     layers.forEach(layer => {

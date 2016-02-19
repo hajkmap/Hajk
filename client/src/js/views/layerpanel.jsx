@@ -1,5 +1,4 @@
 var Panel = require('views/panel');
-var Filter = require('views/filter');
 var LayerItem = require('views/layeritem');
 /**
  *
@@ -21,16 +20,11 @@ var LayerPanel = React.createClass({
    *
    */
   componentDidMount: function () {
-
     this.props.model.on("change:layerCollection", this.onLayerCollectionChanged, this);
-
     this.setState({
-      layers: this.props.model.get("layerCollection"),
-      filterTool: this.getFilterTool()
+      layers: this.props.model.get("layerCollection")
     });
   },
-
-
   /**
    *
    *
@@ -38,7 +32,6 @@ var LayerPanel = React.createClass({
   componentWillUnmount: function () {
     this.props.model.off("change:layerCollection", this.onLayerCollectionChanged, this);
   },
-
   /**
    *
    *
@@ -47,71 +40,46 @@ var LayerPanel = React.createClass({
     this.setState({ layers: this.props.model.get("layerCollection") });
   },
 
-  /**
-   *
-   *
-   */
-  getFilterTool: function () {
-    var toolCollection = this.props.model.get("shell").getToolCollection().toArray();
-    var filterTool;
-    filterTool = _.find(toolCollection, tool => tool.get('type') === 'filter');
-    return filterTool;
+  getLayers: function (group) {
+    var layers = this.props.model.get("layerCollection");
+
+    if (!layers) return null;
+
+    layers = layers.toArray();
+    return layers
+          .filter(layer => layer.get('group') === group)
+          .map((layer, index) => <LayerItem key={"layer_" + index} layer={layer} /> )
+          .reverse();
   },
 
-  /**
-   *
-   *
-   */
-  groupLayers: function (layers) {
-
-    var groups = {};
-
-    layers.forEach((layer, i) => {
-      var g = layer.get('group');
-      if (g) {
-        if (!groups.hasOwnProperty(g)) {
-          groups[g] = [];
-        }
-        groups[g].push(layer);
-        delete layers[i]; // Pop the layers.
+  renderGroups: function recursive(groups) {
+    return groups.map((group, i) => {
+      var layers = this.getLayers(group.id)
+      ,   subgroups;
+      if (group.hasOwnProperty("groups")) {
+        subgroups = recursive.call(this, group.groups);
       }
-    });
-
-    layers = layers.filter((layer) => layer !== undefined);
-
-    // Put the layergroup on top.
-    for (var i in groups) {
-      layers.push({
-        groupLayer: true,
-        layers: groups[i]
-      });
-    }
-
-    return layers;
+      return (
+        <div key={i}>
+          <div>{group.name}</div>
+          {layers}
+          {subgroups}
+        </div>
+      )
+    })
   },
   /**
    *
    *
    */
   render: function () {
-    var layers = [],
-       filterTool = this.getFilterTool();
-
-    if (this.state.layers) {
-      layers = this.state.layers
-                   .toArray()
-                   .map((layer, index) =>
-                      <LayerItem key={"layer_" + index} layer={layer} />
-                    )
-                   .reverse();
-    }
-
-    //<Filter tool={filterTool}/>
+    var layers = []
+    var groups = this.renderGroups(this.props.model.get('groups'));
 
     return (
       <Panel title="Teckenförklaring" onCloseClicked={this.props.onCloseClicked} >
         <div className="layer-panel">
-          {layers}
+          {groups}
         </div>
       </Panel>
     );
