@@ -44,8 +44,6 @@ var NavigationPanel = React.createClass({
        this.setState({ "activePanel" : panel });
     });
 
-    console.log("MODEL", this.props.model);
-
     this.props.model.on("change:visible", (sender, visible) => {
       this.setState({ 'toggled': visible });
     });

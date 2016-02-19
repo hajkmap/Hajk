@@ -87,7 +87,8 @@ module.exports = React.createClass({
 
   getInitialState: function() {
     return {
-      visible: false
+      visible: false,
+      interactionVisible: true
     };
   },
 
@@ -112,13 +113,22 @@ module.exports = React.createClass({
     });
   },
 
+  reset: function () {
+    this.setState({
+      interactionVisible: !this.state.interactionVisible
+    });
+    this.state.interactionVisible ? this.props.model.removeInteractions() :
+                                    this.props.model.createInteractions();
+  },
+
   render: function () {
     var coordinates = this.state.coordinates.transformed;
-
+    var buttonText  = this.state.interactionVisible ? "Dölj" : "Visa";
     return (
       <Panel title="Koordinater" onCloseClicked={this.props.onCloseClicked}>
         <div className="coordinate-display">
           <CoordinatesList coordinates={coordinates} />
+          <button onClick={this.reset} className="btn btn-default">{buttonText} verktyg</button>
         </div>
       </Panel>
     );
