@@ -1,0 +1,129 @@
+{
+  "react": {
+    "components": {
+      "files": {
+        "compiled/fabutton.js": ["src/js/views/components/fabutton.jsx"],
+        "compiled/filterbutton.js": ["src/js/views/components/filterbutton.jsx"],
+        "compiled/filteritem.js": ["src/js/views/components/filteritem.jsx"],
+        "compiled/labelpanel.js": ["src/js/views/components/labelpanel.jsx"],
+        "compiled/legenditem.js": ["src/js/views/components/legenditem.jsx"],
+        "compiled/legend.js": ["src/js/views/components/legend.jsx"],
+        "compiled/legendbutton.js": ["src/js/views/components/legendbutton.jsx"],
+        "compiled/featureinfo.js": ["src/js/views/components/featureinfo.jsx"],
+        "compiled/filterresultbutton.js": ["src/js/views/components/filterresultbutton.jsx"],
+        "compiled/filterresultalternatives.js": ["src/js/views/components/filterresultalternatives.jsx"],
+        "compiled/filterresultitem.js": ["src/js/views/components/filterresultitem.jsx"],
+        "compiled/itemlist.js": ["src/js/views/components/itemlist.jsx"],
+        "compiled/filterresultbar.js": ["src/js/views/components/filterresultbar.jsx"]
+      }
+    },
+    "mapview": {
+      "files": {
+        "compiled/mapview.js": ["src/js/views/mapview.jsx"]
+      }
+    },
+    "toolbar": {
+      "files": {
+        "compiled/toolbar.js": ["src/js/views/toolbar.jsx"]
+      }
+    },
+    "infopanel": {
+      "files": {
+        "compiled/infopanel.js": ["src/js/views/infopanel.jsx"]
+      }
+    },
+    "bookmarkpanel": {
+      "files": {
+        "compiled/bookmarkpanel.js": ["src/js/views/bookmarkpanel.jsx"]
+      }
+    },
+    "shell": {
+      "files": {
+        "compiled/shell.js": ["src/js/views/shell.jsx"]
+      }
+    },
+    "panel": {
+      "files": {
+        "compiled/panel.js": ["src/js/views/panel.jsx"],
+        "compiled/layerpanel.js": ["src/js/views/layerpanel.jsx"],
+        "compiled/layeritem.js": ["src/js/views/layeritem.jsx"],
+        "compiled/searchpanel.js": ["src/js/views/searchpanel.jsx"],
+        "compiled/coordinatespanel.js": ["src/js/views/coordinatespanel.jsx"],
+        "compiled/exportpanel.js": ["src/js/views/exportpanel.jsx"],
+        "compiled/drawpanel.js": ["src/js/views/drawpanel.jsx"],
+        "compiled/anchorpanel.js": ["src/js/views/anchorpanel.jsx"]
+      }
+    },
+    "navigationpanel": {
+      "files": {
+        "compiled/navigationpanel.js": ["src/js/views/navigationpanel.jsx"]
+      }
+    },
+    "filter": {
+      "files": {
+        "compiled/filter.js": ["src/js/views/filter.jsx"]
+      }
+    },
+    "application": {
+      "files": {
+        "compiled/application.js": ["src/js/views/application.jsx"]
+      }
+    }
+  },
+  "browserify": {
+     "files": [
+        "src/js/index.js"
+      ],
+      "aliases": {
+        "models/navigation": "./src/js/models/navigationmodel.js",
+        "models/map": "./src/js/models/mapmodel.js",
+        "models/shell": "./src/js/models/shell.js",
+        "tools/tool": "./src/js/tools/tool.js",
+        "tools/layerswitcher": "./src/js/tools/layerswitcher.js",
+        "tools/savestate": "./src/js/tools/savestate.js",
+        "tools/infoclick": "./src/js/tools/infoclick.js",
+        "tools/filter": "./src/js/tools/filter.js",
+        "tools/search": "./src/js/tools/search.js",
+        "tools/coordinates": "./src/js/tools/coordinates.js",
+        "tools/export": "./src/js/tools/export.js",
+        "tools/draw": "./src/js/tools/draw.js",
+        "tools/anchor": "./src/js/tools/anchor.js",
+        "layers/layer": "./src/js/layers/layer.js",
+        "layers/wmslayer": "./src/js/layers/wmslayer.js",
+        "layers/wmtslayer": "./src/js/layers/wmtslayer.js",
+        "layers/wfslayer": "./src/js/layers/wfslayer.js",
+        "layers/highlightlayer" : "./src/js/layers/highlightlayer.js",
+        "collections/layers": "./src/js/collections/layercollection.js",
+        "collections/tools": "./src/js/collections/toolcollection.js",
+        "components/fabutton": "./compiled/fabutton.js",
+        "components/filterbutton": "./compiled/filterbutton.js",
+        "components/filteritem": "./compiled/filteritem.js",
+        "components/labelpanel": "./compiled/labelpanel.js",
+        "components/legenditem": "./compiled/legenditem.js",
+        "components/legend": "./compiled/legend.js",
+        "components/legendbutton": "./compiled/legendbutton.js",
+        "components/featureinfo": "./compiled/featureinfo.js",
+        "components/filterresultbutton": "./compiled/filterresultbutton.js",
+        "components/filterresultalternatives": "./compiled/filterresultalternatives.js",
+        "components/filterresultitem": "./compiled/filterresultitem.js",
+        "components/itemlist": "./compiled/itemlist.js",
+        "components/filterresultbar": "./compiled/filterresultbar.js",
+        "views/filter": "./compiled/filter.js",
+        "views/map": "./compiled/mapview.js",
+        "views/toolbar": "./compiled/toolbar.js",
+        "views/infopanel": "./compiled/infopanel.js",
+        "views/bookmarkpanel": "./compiled/bookmarkpanel.js",
+        "views/searchpanel": "./compiled/searchpanel.js",
+        "views/coordinatespanel": "./compiled/coordinatespanel.js",
+        "views/drawpanel": "./compiled/drawpanel.js",
+        "views/anchorpanel": "./compiled/anchorpanel.js",
+        "views/exportpanel": "./compiled/exportpanel.js",
+        "views/panel": "./compiled/panel.js",
+        "views/layerpanel": "./compiled/layerpanel.js",
+        "views/layeritem": "./compiled/layeritem.js",
+        "views/navigationpanel": "./compiled/navigationpanel.js",
+        "views/shell": "./compiled/shell.js",
+        "views/application": "./compiled/application.js"
+    }
+  }
+}

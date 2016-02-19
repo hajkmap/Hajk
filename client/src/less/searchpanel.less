@@ -1,0 +1,65 @@
+.search-tools input[type="search"] {
+	width: 100%;
+	border: none;
+	border-bottom: 1px solid black;
+}
+
+.search-tools input:focus {
+	outline: none;
+}
+
+.search-tools .hidden {
+	display: none;
+}
+
+.search-tools h3 {
+	margin: 10px 0px;
+}
+
+.search-tools label {
+	font-weight: normal;
+	display: inline-block;
+	width: 110px;
+}
+
+.search-tools .label {
+    background: #FFFFFF;
+    color: black;
+    border-radius: 50px;
+    padding: 5px;
+    min-width: 23px;
+    display: inline-block;
+    text-align: center;
+    font-weight: 600;
+    margin-left: 5px;
+}
+
+.search-tools .group {
+	background: @color-yellow;
+    padding: 10px;
+    margin: 7px -5px;
+}
+
+.search-tools .group + div {
+	background: #eee;
+    margin: -5px;
+    padding: 5px;
+}
+
+.search-tools .group + div > div {
+	padding: 5px;
+	border-bottom: 1px solid #FFF;
+	cursor: pointer;
+}
+
+.search-tools .group + div > div:hover {
+	background: #E2E2E2;
+}
+
+.search-tools .group + div > div.selected {
+	background: #ccc;
+}
+
+.search-tools .group + div > div:last-child {
+	border-bottom: none;
+}

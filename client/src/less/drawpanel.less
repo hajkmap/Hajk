@@ -1,0 +1,85 @@
+.draw-tools ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.draw-tools li {
+    background: #E7E7E7;
+    padding: 6px;
+    margin: 4px 2px;
+    border-bottom: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.draw-tools li.selected {
+	background: @color-yellow !important;
+	color: @color-white;
+}
+
+.draw-tools li:hover {
+	cursor: pointer;
+}
+
+#labels {
+	text-align: right;
+}
+
+#abort {
+	display: none;
+}
+
+label {
+	margin-left: 2px;
+}
+
+.green {
+	background-color: #5cb85c !important;
+	border: 1px solid #4cae4c;
+	color: white;
+}
+
+.swatch {
+	width: 313px;
+}
+
+.modal {
+	position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+}
+
+.modal-dialog {
+	background: rgba(255, 255, 255, 0.9);
+	width: 250px;
+	margin: auto;
+	margin-top: 20px;
+	border-radius: 3px;
+	overflow: hidden;
+}
+
+.modal-header, .modal-footer,  .modal-body {
+	padding: 10px;
+}
+
+.modal-header {
+	background: white;
+    border-bottom: 1px solid #CCCCCC;
+}
+
+.modal-foooter {
+}
+
+.modal-body {
+}
+
+.modal-body input {
+	width: 100%;
+}
+
+.modal-title {
+	margin: 0;
+}

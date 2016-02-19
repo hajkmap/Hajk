@@ -1,0 +1,157 @@
+.info-panel .navigation {
+  text-align: center;
+  font-size: 23px;
+  padding: 3px;
+  margin-top: -9px;
+  border-bottom: 1px solid #D2D2D2;
+}
+
+.info-panel .navigation .left:hover, .info-panel .navigation .right:hover {
+  box-shadow: 1px 1px 2px #333;
+}
+
+.info-panel .navigation .left, .info-panel .navigation .right {
+  font-size: 25px;
+  cursor: pointer;
+  box-shadow: 1px 1px 2px #9A9A9A;
+  border-radius: 100px;
+}
+
+.header {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.header h1 {
+  display: inline;
+  vertical-align: sub;
+}
+
+.header img {
+  display: inline;
+  padding-right: 5px;
+}
+
+.info-panel .navigation .left {
+   margin-right: 10px;
+}
+
+.info-panel .navigation .right {
+   margin-left: 10px;
+}
+
+.info-panel h1 {
+   font-size: 14pt;
+   margin: 10px 0;
+}
+
+.info-panel h2 {
+   font-size: 12pt;
+   margin: 0;
+   padding: 2pt 0;
+}
+
+.info-panel p {
+   font-size: 12pt;
+}
+
+.info-panel .info-item {
+   margin-bottom: 10pt;
+}
+
+.info-panel .information img {
+  width: 100%;
+}
+
+.info-panel a img {
+  border: none;
+}
+
+.no-info {
+   font-style: italic;
+   text-align: center;
+   color: #9A9A9A;
+   padding-top: 25px;
+   font-size: 14px;
+}
+
+.lightbox {
+   position: fixed;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   background: rgba(0, 0, 0, 0.4);
+   text-align: center;
+   padding: 10px;
+   z-index: 1001;
+   display: none;
+}
+
+.lightbox img {
+   width: auto;
+   height: 90%;
+   border: #555 solid 1px;
+   background-color: #fff;
+   padding: 5px;
+}
+
+#loader {
+   display: none;
+}
+
+.info-panel .thumbnail {
+  padding: 0 !important;
+  border: none !important;
+}
+
+.spinner {
+  margin: 100px auto 0;
+  width: 70px;
+  text-align: center;
+}
+
+.spinner > div {
+  width: 18px;
+  height: 18px;
+  background-color: #333;
+
+  border-radius: 100%;
+  display: inline-block;
+  -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+  animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+}
+
+.spinner .bounce1 {
+  -webkit-animation-delay: -0.32s;
+  animation-delay: -0.32s;
+}
+
+.spinner .bounce2 {
+  -webkit-animation-delay: -0.16s;
+  animation-delay: -0.16s;
+}
+
+@-webkit-keyframes sk-bouncedelay {
+  0%, 80%, 100% { -webkit-transform: scale(0) }
+  40% { -webkit-transform: scale(1.0) }
+}
+
+@keyframes sk-bouncedelay {
+  0%, 80%, 100% {
+    -webkit-transform: scale(0);
+    transform: scale(0);
+  } 40% {
+    -webkit-transform: scale(1.0);
+    transform: scale(1.0);
+  }
+}
+
+.info-panel .panel-heading {
+  border: none;
+
+}
+
+.info-panel .panel-body {
+  border-top: 1px solid #dddddd;
+}

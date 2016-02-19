@@ -1,0 +1,138 @@
+{
+  "version": "1.0.2",
+  "projections": [{
+    "code": "EPSG:3006",
+    "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+    "extent": [181896.33, 6101648.07, 864416.00, 7689478.31],
+    "units": "m"
+  }, {
+    "code": "http://www.opengis.net/gml/srs/epsg.xml#3006",
+    "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+    "extent": [181896.33, 6101648.07, 864416.00, 7689478.31],
+    "units": "m"
+  }],
+  "tools": [
+    {
+      "type": "layerswitcher",
+      "options": {}
+    },
+    {
+      "type": "infoclick",
+      "options": {
+      }
+    },
+    {
+
+      "type": "savestate",
+      "options": {
+        "settingsUrl": "/mapservice/settings/"
+      }
+    },
+    {
+      "type": "search",
+      "options": {
+      }
+    },
+    {
+      "type": "coordinates",
+      "options": {
+      }
+    },
+    {
+      "type": "export",
+      "options": {
+        "url": "/mapservice/export/"
+      }
+    },
+    {
+      "type": "draw",
+      "options": {
+      }
+    }
+  ],
+  "layers": [
+    {
+      "type": "wmts",
+      "options": {
+        "name": "Background WMTS",
+        "caption": "Adresskarta",
+        "visible": true,
+        "queryable": false,
+        "url": "/util/proxy/geturl/rproxy.msb.se/lantmateriet_wmts/",
+        "layer": "topowebb",
+        "opacity": 0.7
+      }
+    },
+    {
+      "type": "wms",
+      "options": {
+        "url": "/util/proxy/geturl/194.71.132.27/geoserver28/wms?",
+        "name": "fastighetsyta",
+        "caption": "Fastighetsyta",
+        "visible": true,
+        "singleTile" : false,
+        "opacity": 0.5,
+        "queryable": true,
+        "information": "Namn: {fastighet}",
+        "legend" : [{
+          "Url" : "http://194.71.132.27/geoserver28/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=sweco:fastighetsyta",
+          "Description" : "Fastighetsyta"
+        }],
+        "search": {
+          "url": "/postProxy.aspx?url=http://194.71.132.27/geoserver28/wfs/",
+          "featureType": "fastighetsyta",
+          "propertyName": "fastighet",
+          "srsName": "EPSG:3006"
+        },
+        "params": {
+          "LAYERS": "sweco:fastighetsyta",
+          "FORMAT": "image/png",
+          "VERSION": "1.1.0",
+          "SRS": "EPSG:3006"
+        }
+      }
+    },
+    {
+      "type": "wfs",
+      "options": {
+        "name": "schools",
+        "filterable": false,
+        "caption": "Skolor",
+        "visible": true,
+        "legend" : [
+          {"Url" : "assets/icons/skola.png", "Description" : "Skola"}
+        ],
+        "url": "/util/proxy/geturl/194.71.132.27/geoserver28/wfs",
+        "style": {
+          "icon": "assets/icons/skola.png"
+        },
+        "callbackFunction": "addSchools",
+        "information": "{namn}",
+        "search": {
+          "url": "/postProxy.aspx?url=http://194.71.132.27/geoserver28/wfs/",
+          "featureType": "skola",
+          "propertyName": "namn",
+          "srsName": "EPSG:3006"
+        },
+        "params": {
+          "service": "WFS",
+          "version": "1.1.0",
+          "request": "GetFeature",
+          "typename": "sweco:skola",
+          "outputFormat": "text/javascript",
+          "srsname": "EPSG:3006",
+          "bbox": "",
+          "format_options": "callback:addSchools"
+        }
+      }
+    }
+  ],
+  "map": {
+    "target": "map",
+    "center": [328928, 6402496],
+    "projection": "EPSG:3006",
+    "zoom": 10,
+    "maxZoom": 15,
+    "minZoom": 1
+  }
+}

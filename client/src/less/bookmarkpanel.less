@@ -1,0 +1,33 @@
+.bookmark-panel ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+
+.bookmark-panel ul li {
+	padding: 5px;
+	background: @panel-default-heading-bg;
+	border-left: 1px solid  @panel-default-border;
+	border-right: 1px solid  @panel-default-border;
+	border-bottom: 1px solid  @panel-default-border;
+}
+
+.bookmark-panel ul li:hover {
+	cursor: pointer;
+}
+
+.bookmark-panel ul li:first-child {
+	border-top: 1px solid  @panel-default-border;
+	border-top-left-radius: @panel-border-radius;
+	border-top-right-radius: @panel-border-radius;
+}
+
+.bookmark-panel ul li:last-child {
+	border-bottom-left-radius: @panel-border-radius;
+	border-bottom-right-radius :@panel-border-radius;
+}
+
+.bookmark-panel .favourite {
+	margin-right: 4px;
+}

@@ -1,0 +1,116 @@
+
+.panel {
+  border-radius: 0;
+}
+
+.collapsed-naviation-panel, .navigation-panel .toggle-button-expand {
+  position: fixed;
+  top: .5em;
+  left: .5em;
+}
+
+.navigation-panel.folded {
+   left: -100%;
+}
+
+.navigation-panel {
+   position: absolute;
+   z-index: 1000;
+   bottom: 0;
+   top: 0;
+   margin-left: 0;
+   width: 400px;
+}
+
+@media only screen and (max-device-width: 736px) {
+  .navigation-panel {
+    width: 100%;
+  }
+}
+
+.navigation-panel-inner {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  top: 0px;
+  margin: 0;
+  height: 100%;
+  margin: 0;
+  background-color: white;
+  border: none;
+  border-right: 1px solid @color-yellow;
+  border-radius: 0;
+  overflow: auto;
+}
+
+.navigation-panel-inner > .panel-body {
+  padding: 5px;
+  bottom: 0;
+  position: absolute;
+  top: 50px;
+  width: 100%;
+}
+
+
+.navigation-panel-inner > .panel-body .panel-row {
+  margin-top: 6px;
+  border-bottom: 1px solid #EFEFEF;
+}
+
+.navigation-panel-inner > .panel-body .panel-row:last-child {
+  border-bottom: none;
+}
+
+.navigation-panel-inner > .panel-heading {
+  font-size: 20px;
+  border-radius: 0;
+  color: @color-green;
+  background-color: @color-yellow;
+  border-color: darken(@color-yellow, 10%);
+}
+
+.navigation-panel-inner > .panel-heading i {
+  color: white;
+}
+
+
+.navigation-panel-inner .layer-panel .panel-heading {
+  color: #333333;
+  background-color: #f5f5f5;
+  padding: 7px 10px;
+  border-top-right-radius: 3px;
+  border-top-left-radius: 3px;
+  border: none;
+}
+
+.navigation-panel .panel-content {
+  padding: 4px;
+  background: white;
+}
+
+.navigation-panel .panel-close {
+  position: relative;
+  top: -6px;
+  left: 7px;
+  padding: 10px;
+}
+
+.layer-panel .panel-body {
+  border-top: 1px solid #dddddd;
+}
+
+.layer-panel .input-group {
+  z-index: 101;
+}
+
+.list-group-item {
+  border-radius: 0;
+}
+
+.list-group-item:first-child {
+  border-radius: 0;
+}
+
+.list-group-item:last-child {
+  border-radius: 0;
+}
