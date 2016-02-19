@@ -1,6 +1,6 @@
-# 6604525000_Geodata-Varmlandstrafik
+# Hajk2
 
-Webkartlösning för värmlandstrafik.
+Modern webbplatform för kartapplikationer.
 
 Bygger på
 * [OpenLayers 3](http://openlayers.org/)
@@ -27,7 +27,7 @@ Bygger på
   * grunt build - bygger js-, css-, html-filer samt kopierar statiska filer.
 
 ## Debug
-  * grunt debug - Startar debug session på http://localhost:3000/.
+  * grunt debug - Lyssnar på förändringar i projektet, bygger vid behov.
   * avsluta ctrl-c
 
 
