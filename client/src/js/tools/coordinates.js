@@ -3,7 +3,7 @@ var ToolModel = require('tools/tool');
 module.exports = ToolModel.extend({
 
 	defaults: {
-		type: 'Coordinates',
+		type: 'coordinates',
 		panel: 'CoordinatesPanel',
 		title: 'Visa koordinater',
 		visible: false,

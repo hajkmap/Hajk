@@ -37,9 +37,11 @@ module.exports = ToolModel.extend({
     ,   z = olMap.getView().getZoom()
     ,   x = c[0]
     ,   y = c[1]
-    ,   l = layers.filter(layer => layer.getVisible() === true).map(layer => encodeURIComponent(layer.getName())).join(',');
+    ,   l = layers.filter(layer => layer.getVisible() === true)
+                  .map(layer => encodeURIComponent(layer.getName())).join(',')
+    ,   t = this.get('layerswitcher').get('selectedTheme');
 
-    a += `?x=${x}&y=${y}&z=${z}&l=${l}`;
+    a += `?x=${x}&y=${y}&z=${z}&l=${l}&t=${t}`;
     this.set("anchor", a);
 
     return a;
@@ -54,6 +56,13 @@ module.exports = ToolModel.extend({
 
     this.set('map', shell.getMap());
     this.set('layers', shell.getLayerCollection());
+    this.set(
+      'layerswitcher',
+      shell.getToolCollection()
+           .find(tool =>
+              tool.get('type') === 'layerswitcher'
+            )
+    );
 
   },
   /**

@@ -1,5 +1,5 @@
 {
-  "version": "1.0.2",
+  "version": "1.0.5",
   "projections": [{
     "code": "EPSG:3006",
     "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
@@ -15,28 +15,75 @@
     {
       "type": "layerswitcher",
       "options": {
-        "groups": [
+        "selectedTheme": 1,
+        "themes": [
           {
             "id": 1,
-            "name": "Lagergrupp 1",
+            "name": "Karttema 1",
             "groups": [
               {
-                "id": 2,
-                "name": "Lagergrupp 2"
+                "id": 1,
+                "name": "Lagergrupp 1",
+                "toggled": true,
+                "layers": [1, 2],
+                "groups": [
+                  {
+                    "id": 2,
+                    "parent": 1,
+                    "name": "Lagergrupp 2",
+                    "toggled": true,
+                    "layers": [3],
+                    "groups": [
+                      {
+                        "id": 4,
+                        "parent": 2,
+                        "name": "Lagergrupp 4",
+                        "toggled": true,
+                        "layers": [4, 5]
+                      }
+                    ]
+                  }
+                ]
               },
               {
                 "id": 3,
                 "name": "Lagergrupp 3",
-                "groups": [{
-                  "id": 4,
-                  "name": "Lagergrupp 4"
-                }]
+                "toggled": true,
+                "layers": []
               }
             ]
           },
           {
-            "id": 5,
-            "name": "Lagergrupp 5"
+            "id": 2,
+            "name": "Karttema 2",
+            "groups": [
+              {
+                "id": 1,
+                "name": "Lagergrupp 1",
+                "toggled": true,
+                "layers": [5],
+                "groups": [
+                  {
+                    "id": 2,
+                    "name": "Lagergrupp 2",
+                    "toggled": true,
+                    "layers": [4]
+                  },
+                  {
+                    "id": 3,
+                    "name": "Lagergrupp 3",
+                    "toggled": false,
+                    "layers": [2]
+                  }
+                ]
+              },
+              {
+                "id": 4,
+                "name": "Lagergrupp 4",
+                "toggled": false,
+                "layers": [1]
+              }
+            ]
           }
         ]
       }
@@ -90,8 +137,8 @@
     {
       "type": "wmts",
       "options": {
-        "name": "Background WMTS",
-        "group": 1,
+        "id": 1,
+        "name": "background_WMTS",
         "caption": "Adresskarta",
         "visible": true,
         "queryable": false,
@@ -103,7 +150,7 @@
     {
       "type": "wms",
       "options": {
-        "group": 2,
+        "id": 2,
         "url": "/util/proxy/geturl/194.71.132.27/geoserver28/wms?",
         "name": "fastighetsyta",
         "caption": "Fastighetsyta",
@@ -133,7 +180,7 @@
     {
       "type": "wms",
       "options": {
-        "group": 3,
+        "id": 3,
         "url": "/util/proxy/geturl/194.71.132.27/geoserver28/wms?",
         "name": "adress",
         "caption": "Adress",
@@ -163,7 +210,7 @@
     {
       "type": "wfs",
       "options": {
-        "group": 4,
+        "id": 4,
         "name": "schools",
         "filterable": false,
         "caption": "Skolor",
@@ -198,7 +245,7 @@
     {
       "type": "wfs",
       "options": {
-        "group": 5,
+        "id": 5,
         "name": "schools2",
         "filterable": false,
         "caption": "Skolor 2",

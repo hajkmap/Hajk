@@ -53,14 +53,19 @@
    */
   that.mergeConfig = function(a, b) {
 
+      var ls = a.tools.find(tool => tool.type === 'layerswitcher');
+
       var x = parseFloat(b.x) || a.map.center[0]
       ,   y = parseFloat(b.y) || a.map.center[1]
       ,   z = parseInt(b.z) || a.map.zoom
-      ,   l = b.l;
+      ,   l = b.l
+      ,   t = parseInt(b.t) || ((ls && ls.options) ? ls.options.selectedTheme : 1);
 
       a.map.center[0] = x;
       a.map.center[1] = y;
       a.map.zoom      = z;
+
+      ls.options.selectedTheme = t;
 
       if (l) {
         l = l.split(',');

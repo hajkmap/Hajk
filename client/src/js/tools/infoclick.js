@@ -21,7 +21,7 @@ var FeatureCollection = Backbone.Collection.extend({
 module.exports = ToolModel.extend({
 
   defaults: {
-      type: 'InfoClick',
+      type: 'infoclick',
       panel: 'InfoPanel',
       visible: false,
       map: undefined,
