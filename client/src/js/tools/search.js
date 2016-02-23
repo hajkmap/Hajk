@@ -101,6 +101,15 @@ module.exports = ToolModel.extend({
    */
   doWFSSearch: function (props) {
 
+    var filters = props.propertyName.split(',').map((property) =>
+      `<ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
+         <ogc:PropertyIsLike matchCase="false" wildCard="*" singleChar="." escapeChar="!">
+           <ogc:PropertyName>${property}</ogc:PropertyName>
+           <ogc:Literal>*${props.value}*</ogc:Literal>
+         </ogc:PropertyIsLike>
+       </ogc:Filter>`
+    ).join('');
+
     var str = `
       <wfs:GetFeature
         xmlns:wfs="http://www.opengis.net/wfs"
@@ -110,12 +119,7 @@ module.exports = ToolModel.extend({
         xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
         maxFeatures="1000000">
         <wfs:Query typeName="feature:${props.featureType}" srsName="${props.srsName}">
-          <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
-            <ogc:PropertyIsLike matchCase="false" wildCard="*" singleChar="." escapeChar="!">
-              <ogc:PropertyName>${props.propertyName}</ogc:PropertyName>
-              <ogc:Literal>*${props.value}*</ogc:Literal>
-            </ogc:PropertyIsLike>
-          </ogc:Filter>
+          ${filters}
         </wfs:Query>
       </wfs:GetFeature>
     `;
@@ -255,7 +259,7 @@ module.exports = ToolModel.extend({
             if (features.length > 0) {
               items.push({
                 layer: layer.get('caption'),
-                propertyName: searchProps.propertyName,
+                propertyName: searchProps.displayName,
                 hits: features
               });
             }
