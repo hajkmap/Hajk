@@ -47,7 +47,7 @@ var Application = Backbone.View.extend({
     }
 
     if (force) {
-      React.unmountComponentAtNode(el);
+      ReactDOM.unmountComponentAtNode(el);
     }
 
     if (this.shell.get('canStart')) {

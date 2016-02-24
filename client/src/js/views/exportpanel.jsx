@@ -8,7 +8,7 @@ module.exports = React.createClass({
 	},
 
 	exportImage: function () {
-		var node = $(this.getDOMNode()).find('#image');
+		var node = $(ReactDOM.findDOMNode(this)).find('#image');
 		node.html('');
 		this.props.model.exportImage((anchor) => {
 			node.html(anchor);
@@ -16,7 +16,7 @@ module.exports = React.createClass({
 	},
 
 	exportPDF: function () {
-		var node = $(this.getDOMNode()).find('#pdf');
+		var node = $(ReactDOM.findDOMNode(this)).find('#pdf');
 		node.html('');
 		this.props.model.exportPDF((anchor) => {
 			node.html(anchor);
