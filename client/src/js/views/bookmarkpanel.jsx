@@ -38,8 +38,8 @@ var BookmarkPanel = React.createClass({
    * @return {undefined}
    */
   bind: function () {
-    var node = $(this.getDOMNode()); //Öh va?
-    node.find('li').mousedown(() => false); //fortsättning på öh va.....
+    var node = $(ReactDOM.findDOMNode(this));
+    node.find('li').mousedown(() => false);
   },
   /**
    * Delegate to handle insertion of bookmarks.
@@ -48,7 +48,7 @@ var BookmarkPanel = React.createClass({
    * @return {undefined}
    */
   onSubmitForm: function (e) {
-    var name = this.refs.name.getDOMNode().value;
+    var name = ReactDOM.findDOMNode(this.refs.name).value;
     this.props.model.addBookmark(name, () => this.forceUpdate());
     e.preventDefault();
   },

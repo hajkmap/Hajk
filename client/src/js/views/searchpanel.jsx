@@ -8,7 +8,7 @@ SearchResultGroup = React.createClass({
    */
   componentDidMount: function () {
 
-    var groups = $(this.getDOMNode()).find('.group');
+    var groups = $(ReactDOM.findDOMNode(this)).find('.group');
 
     groups.click(function() {
       $(this).next().toggleClass('hidden');
@@ -40,7 +40,7 @@ SearchResultGroup = React.createClass({
   handleClick: function (hit, index, event) {
 
     var element = $(event.target)
-    ,   parent = ReactDOM.findDOMNode(this) //$(this.getDOMNode())
+    ,   parent = $(ReactDOM.findDOMNode(this))
     ,   group = parent.find('.group');
 
     parent.find('div').each(function () { $(this).removeClass('selected') });

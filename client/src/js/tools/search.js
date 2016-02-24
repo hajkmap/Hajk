@@ -102,12 +102,10 @@ module.exports = ToolModel.extend({
   doWFSSearch: function (props) {
 
     var filters = props.propertyName.split(',').map((property) =>
-      `<ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
-         <ogc:PropertyIsLike matchCase="false" wildCard="*" singleChar="." escapeChar="!">
-           <ogc:PropertyName>${property}</ogc:PropertyName>
-           <ogc:Literal>*${props.value}*</ogc:Literal>
-         </ogc:PropertyIsLike>
-       </ogc:Filter>`
+      `<ogc:PropertyIsLike matchCase="false" wildCard="*" singleChar="." escapeChar="!">
+         <ogc:PropertyName>${property}</ogc:PropertyName>
+         <ogc:Literal>*${props.value}*</ogc:Literal>
+       </ogc:PropertyIsLike>`
     ).join('');
 
     var str = `
@@ -119,7 +117,11 @@ module.exports = ToolModel.extend({
         xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
         maxFeatures="1000000">
         <wfs:Query typeName="feature:${props.featureType}" srsName="${props.srsName}">
-          ${filters}
+          <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
+            <ogc:Or>
+              ${filters}
+            </ogc:Or>
+          </ogc:Filter>
         </wfs:Query>
       </wfs:GetFeature>
     `;
@@ -333,7 +335,7 @@ module.exports = ToolModel.extend({
     this.set('visible', true);
   },
   /**
-   * Handle click event on toolbar button.
+   * Get style for search hit layer.
    *
    * @params:
    * @returns: undefined

@@ -29,7 +29,8 @@ module.exports = ToolModel.extend({
       features: undefined,
       selectedFeature: undefined,
       highlightLayer: undefined,
-      selectInteraction: undefined
+      selectInteraction: undefined,
+      markerImg: "http://localhost/gbg/assets/icons/marker.png"
   },
 
   initialize: function (options) {
@@ -40,13 +41,19 @@ module.exports = ToolModel.extend({
             multi: false,
             active: false,
             style: new ol.style.Style({
-              image: new ol.style.Circle({
-                  fill: undefined,
-                  stroke: new ol.style.Stroke({
-                    color: '#00000',
-                    width: 5
-                  }),
-                  radius: 20
+              fill: new ol.style.Fill({
+                color: 'rgba(255, 255, 255, 0.6)'
+              }),
+              stroke: new ol.style.Stroke({
+                color: 'rgba(0, 0, 0, 0.6)',
+                width: 4
+              }),
+              image: new ol.style.Icon({
+                anchor: [0.5, 32],
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'pixels',
+                src: this.get('markerImg'),
+                imgSize: [32, 32]
               })
             })
       });
