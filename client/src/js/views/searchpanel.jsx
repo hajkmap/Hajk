@@ -39,9 +39,9 @@ SearchResultGroup = React.createClass({
    */
   handleClick: function (hit, index, event) {
 
-    var element = $(event.target);
-    var parent = $(this.getDOMNode());
-    var group = parent.find('.group');
+    var element = $(event.target)
+    ,   parent = ReactDOM.findDOMNode(this) //$(this.getDOMNode())
+    ,   group = parent.find('.group');
 
     parent.find('div').each(function () { $(this).removeClass('selected') });
     element.addClass('selected');

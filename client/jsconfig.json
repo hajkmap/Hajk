@@ -3,18 +3,12 @@
     "components": {
       "files": {
         "compiled/fabutton.js": ["src/js/views/components/fabutton.jsx"],
-        "compiled/filterbutton.js": ["src/js/views/components/filterbutton.jsx"],
-        "compiled/filteritem.js": ["src/js/views/components/filteritem.jsx"],
         "compiled/labelpanel.js": ["src/js/views/components/labelpanel.jsx"],
         "compiled/legenditem.js": ["src/js/views/components/legenditem.jsx"],
         "compiled/legend.js": ["src/js/views/components/legend.jsx"],
         "compiled/legendbutton.js": ["src/js/views/components/legendbutton.jsx"],
         "compiled/featureinfo.js": ["src/js/views/components/featureinfo.jsx"],
-        "compiled/filterresultbutton.js": ["src/js/views/components/filterresultbutton.jsx"],
-        "compiled/filterresultalternatives.js": ["src/js/views/components/filterresultalternatives.jsx"],
-        "compiled/filterresultitem.js": ["src/js/views/components/filterresultitem.jsx"],
-        "compiled/itemlist.js": ["src/js/views/components/itemlist.jsx"],
-        "compiled/filterresultbar.js": ["src/js/views/components/filterresultbar.jsx"]
+        "compiled/itemlist.js": ["src/js/views/components/itemlist.jsx"]
       }
     },
     "mapview": {
@@ -59,11 +53,6 @@
         "compiled/navigationpanel.js": ["src/js/views/navigationpanel.jsx"]
       }
     },
-    "filter": {
-      "files": {
-        "compiled/filter.js": ["src/js/views/filter.jsx"]
-      }
-    },
     "application": {
       "files": {
         "compiled/application.js": ["src/js/views/application.jsx"]
@@ -82,7 +71,6 @@
         "tools/layerswitcher": "./src/js/tools/layerswitcher.js",
         "tools/savestate": "./src/js/tools/savestate.js",
         "tools/infoclick": "./src/js/tools/infoclick.js",
-        "tools/filter": "./src/js/tools/filter.js",
         "tools/search": "./src/js/tools/search.js",
         "tools/coordinates": "./src/js/tools/coordinates.js",
         "tools/export": "./src/js/tools/export.js",
@@ -96,19 +84,11 @@
         "collections/layers": "./src/js/collections/layercollection.js",
         "collections/tools": "./src/js/collections/toolcollection.js",
         "components/fabutton": "./compiled/fabutton.js",
-        "components/filterbutton": "./compiled/filterbutton.js",
-        "components/filteritem": "./compiled/filteritem.js",
         "components/labelpanel": "./compiled/labelpanel.js",
         "components/legenditem": "./compiled/legenditem.js",
         "components/legend": "./compiled/legend.js",
         "components/legendbutton": "./compiled/legendbutton.js",
         "components/featureinfo": "./compiled/featureinfo.js",
-        "components/filterresultbutton": "./compiled/filterresultbutton.js",
-        "components/filterresultalternatives": "./compiled/filterresultalternatives.js",
-        "components/filterresultitem": "./compiled/filterresultitem.js",
-        "components/itemlist": "./compiled/itemlist.js",
-        "components/filterresultbar": "./compiled/filterresultbar.js",
-        "views/filter": "./compiled/filter.js",
         "views/map": "./compiled/mapview.js",
         "views/toolbar": "./compiled/toolbar.js",
         "views/infopanel": "./compiled/infopanel.js",

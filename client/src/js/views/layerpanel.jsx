@@ -148,8 +148,7 @@ var LayerPanel = React.createClass({
         recur.call(this, group.parent);
       }
 
-      var all = layers.every(lyr => lyr.getVisible() === true);
-      this.refs["group_" + groupId].checked = all;
+      this.refs["group_" + groupId].checked = layers.every(lyr => lyr.getVisible() === true);
 
     }, 0);
 

@@ -1,7 +1,6 @@
 var Tool          = require('tools/tool'),
     LayerSwitcher = require('tools/layerswitcher'),
     InfoClick     = require('tools/infoclick'),
-    Filter        = require('tools/filter'),
     SaveState     = require('tools/savestate'),
     Search        = require('tools/search'),
     Coordinates   = require('tools/coordinates'),
@@ -20,8 +19,6 @@ module.exports = Backbone.Collection.extend({
             return new LayerSwitcher(args.options);
         case "infoclick":
             return new InfoClick(args.options);
-        case "filter":
-            return new Filter(args.options);
         case "savestate":
             return new SaveState(args.options);
         case "search":

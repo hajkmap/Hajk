@@ -43,7 +43,7 @@ module.exports = ToolModel.extend({
               image: new ol.style.Circle({
                   fill: undefined,
                   stroke: new ol.style.Stroke({
-                    color: '#0D753D',
+                    color: '#00000',
                     width: 5
                   }),
                   radius: 20
