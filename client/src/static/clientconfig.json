@@ -25,14 +25,14 @@
                 "id": 1,
                 "name": "Lagergrupp 1",
                 "toggled": true,
-                "layers": [1, 2],
+                "layers": [1, 6],
                 "groups": [
                   {
                     "id": 2,
                     "parent": 1,
                     "name": "Lagergrupp 2",
                     "toggled": true,
-                    "layers": [3],
+                    "layers": [3, 2],
                     "groups": [
                       {
                         "id": 4,
@@ -145,6 +145,25 @@
         "url": "/util/proxy/geturl/rproxy.msb.se/lantmateriet_wmts/",
         "layer": "topowebb",
         "opacity": 0.7
+      }
+    },
+    {
+      "type": "wms",
+      "options": {
+        "id": 6,
+        "url": "/util/proxy/geturl/asp-mapservices.com/ravegeo/map2/WMS?name=lm2013",
+        "name": "background_WMS",
+        "caption": "Bakgrundskarta WMS",
+        "visible": false,
+        "singleTile" : true,
+        "opacity": 1,
+        "queryable": false,
+        "params": {
+          "LAYERS": "_All_",
+          "FORMAT": "image/png",
+          "VERSION": "1.1.0",
+          "SRS": "EPSG:3006"
+        }
       }
     },
     {

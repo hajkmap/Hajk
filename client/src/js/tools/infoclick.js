@@ -150,7 +150,6 @@ module.exports = ToolModel.extend({
       }
     });
 
-
     // Kontrollerar om någon wms feature träffades.
     // Lägg till resultat i lista av uppslag.
     _.each(wmsLayers, (wmsLayer, index) => {
@@ -168,7 +167,7 @@ module.exports = ToolModel.extend({
                 success: (features, layer) => {
                     if (features instanceof Array && features.length > 0) {
                       this.addInformation(features[0], wmsLayer, (featureInfo) => {
-                          infos[wmsLayer.index + infosLen] = featureInfo; // Callbacken körs ibland i fel ordning. Därför är det viktigt att inte bara köra push.
+                          infos[wmsLayer.index + infosLen] = featureInfo;
                       });
                     }
                 resolve();
@@ -179,8 +178,6 @@ module.exports = ToolModel.extend({
     });
 
     this.set('loadFishished', false);
-
-    // När alla uppslag är lösta, uppdatera resultat i panel.
     Promise.all(promises).then(() => {
         $('body').css({cursor: 'default'});
         _.each(infos, (info) => {

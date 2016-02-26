@@ -16,6 +16,7 @@ using System.Text;
 using System.Xml;
 using System.Net.Http;
 using Sweco.Services.HTTP;
+using System.Web.Hosting;
 
 namespace Sweco.Services
 {
@@ -45,10 +46,13 @@ namespace Sweco.Services
         /// <param name="y"></param>
         private void drawImage(XGraphics gfx, string jpegSamplePath, int x, int y)
         {
-            XImage image = XImage.FromFile(jpegSamplePath);
+            XImage image = XImage.FromFile(jpegSamplePath);            
             double width = image.PixelWidth;
-            double height = image.PixelHeight;
+            double height = image.PixelHeight;            
             gfx.DrawImage(image, x, y, width, height);
+            
+            XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "App_Data", "logo.png"));           
+            gfx.DrawImage(logo, gfx.PageSize.Width - 60, 10);
         }
 
         /// <summary>
@@ -132,6 +136,12 @@ namespace Sweco.Services
             string source = String.Empty;
             string type = String.Empty;
             string body = String.Empty;
+            string format = "A4";
+            PdfSharp.PageSize pageSize = PdfSharp.PageSize.A4;
+            PdfSharp.PageOrientation orientation = PdfSharp.PageOrientation.Landscape;
+            string orient = "L";
+            int x = 0;
+            int y = 0;
                         
             using (var stream = OperationContext.Current.RequestContext.RequestMessage.GetBody<Stream>())            
             {                
@@ -139,7 +149,37 @@ namespace Sweco.Services
                 body = reader.ReadToEnd();
                 string[] content = body.Split(';');
                 type = content[0];
-                source = content[1];
+                if (type == "pdf")
+                {
+                    x = int.Parse(content[1]);
+                    y = int.Parse(content[2]);
+                    format = content[3];
+                    orient = content[4];          
+                    source = content[5];
+                    switch (orient)
+                    {
+                        case ("L"):
+                            orientation = PdfSharp.PageOrientation.Landscape;
+                            break;
+                        case ("P"):
+                            orientation = PdfSharp.PageOrientation.Portrait;
+                            break;
+                    }
+                    switch (format)
+                    {
+                        case ("A4"):
+                            pageSize = PdfSharp.PageSize.A4;
+                            break;
+                        case ("A3"):
+                            pageSize = PdfSharp.PageSize.A3;
+                            break;
+                    }
+                }
+                else
+                {
+                    source = content[1];
+                }
+                
             }            
             
             byte[] image = Convert.FromBase64String(HttpContext.Current.Server.UrlDecode(source));
@@ -152,7 +192,7 @@ namespace Sweco.Services
             string local = path + filename;            
 
             MemoryStream ms = new MemoryStream(image);
-            Image img = Image.FromStream(ms);
+            Image img = Image.FromStream(ms);            
             
             img.Save(local, ImageFormat.Png);
 
@@ -161,17 +201,14 @@ namespace Sweco.Services
                 filename = Guid.NewGuid() + ".pdf";
                 string localPdf = path + filename;
 
-                PdfDocument document = new PdfDocument();
+                PdfDocument document = new PdfDocument();                
                 PdfPage page = document.AddPage();
-                page.Orientation = PdfSharp.PageOrientation.Landscape;
-
-                int imageCenterX = img.Width / 2;
-                int imageCenterY = img.Height / 2;
-                int pageCenterX = (int)page.Width / 2;
-                int pageCenterY = (int)page.Height / 2;
-
-                int x = pageCenterX - imageCenterX;
-                int y = pageCenterY - imageCenterY;
+                
+                page.Size = pageSize;
+                page.Orientation = orientation;
+                
+                x = -x;
+                y = -y;
 
                 XGraphics gfx = XGraphics.FromPdfPage(page);
                 this.drawImage(gfx, local, x, y);
