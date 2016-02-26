@@ -79,6 +79,7 @@ var Shell = React.createClass({
     var views = this.state.views;
     return (
       <div className="shell">
+        <div className="map-logo"></div>
         {views}
       </div>
     );

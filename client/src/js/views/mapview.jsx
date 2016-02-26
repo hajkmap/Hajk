@@ -27,7 +27,9 @@ var MapView = React.createClass({
    *
    */
   render: function () {
-      return <div id={this.props.id} className="map-fullscreen"></div>;
+      return (
+        <div id={this.props.id} className="map-fullscreen"></div>
+      );
   }
 });
 
