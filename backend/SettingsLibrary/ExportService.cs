@@ -51,7 +51,7 @@ namespace Sweco.Services
             double height = image.PixelHeight;            
             gfx.DrawImage(image, x, y, width, height);
             
-            XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "App_Data", "logo.png"));           
+            XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "assets", "logo.png"));           
             gfx.DrawImage(logo, gfx.PageSize.Width - 60, 10);
         }
 
