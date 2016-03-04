@@ -82,6 +82,49 @@ module.exports = ToolModel.extend({
 
     return data;
   },
+
+  findVector: function () {
+
+    var drawLayer = this.get('olMap').getLayers().getArray().find(layer => layer.get('name') === 'draw-layer');
+
+    function asObject(style) {
+      return {
+        fillColor: "#FC345C",
+        fillOpacity:  0.5,
+        strokeColor: "#FC345C",
+        strokeOpacity: 1,
+        strokeWidth:  3,
+        strokeLinecap: "round",
+        strokeDashstyle:  "solid",
+        pointRadius:  10,
+        labelAlign:  "cm",
+        labelOutlineColor: "white",
+        labelOutlineWidth: 3,
+        fontSize:  "16",
+        fontColor:  "#FFFFFF"
+      }
+    }
+
+    function asPairs(coordinates) {
+    }
+
+    function generate(features) {
+      console.log(features)
+      return features.map((feature) => {
+        return {
+          type: feature.getProperties().type,
+          attributes: {
+            text: feature.getProperties() ? feature.getProperties().description : undefined,
+            style: asObject(feature.getStyle())
+          },
+          coordinates: asPairs(feature.getGeometry().getCoordinates())
+        }
+      });
+    }
+
+    //console.log(generate(drawLayer.getSource().getFeatures()))
+    //return generate(drawLayer.getFeatures());
+  },
   /*
    * @desc Clone map canvas and add copyright.
    *       Call the toDataUrl to produce a Base64-encoded image url.
@@ -104,7 +147,6 @@ module.exports = ToolModel.extend({
       if (!size.x) {
         context.fillText(this.get('copyright'), 10, 25);
       }
-
       var img = new Image();
       img.src = this.generateScaleBar();
       img.onload = function() {
@@ -122,7 +164,6 @@ module.exports = ToolModel.extend({
    */
   exportImage: function(callback) {
     this.exportMap((href) => {
-
       $.ajax({
         url: this.get('url'),
         type: 'post',
@@ -134,7 +175,6 @@ module.exports = ToolModel.extend({
             target: '_blank',
             download: 'karta.png'
           });
-
           callback(anchor);
         }
       });
@@ -145,8 +185,8 @@ module.exports = ToolModel.extend({
    * @param {function} callback
    */
   exportPDF: function(options, callback) {
+    //this.findVector();
     this.exportMap((href) => {
-
       $.ajax({
         url: this.get('url'),
         type: 'post',
@@ -158,7 +198,6 @@ module.exports = ToolModel.extend({
             target: '_blank',
             download: 'karta.pdf'
           });
-
           callback(anchor);
         }
       });

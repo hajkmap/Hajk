@@ -25,7 +25,7 @@
                 "id": 1,
                 "name": "Lagergrupp 1",
                 "toggled": true,
-                "layers": [1, 6],
+                "layers": [1],
                 "groups": [
                   {
                     "id": 2,
