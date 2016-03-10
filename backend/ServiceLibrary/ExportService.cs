@@ -17,6 +17,7 @@ using System.Xml;
 using System.Net.Http;
 using Sweco.Services.HTTP;
 using System.Web.Hosting;
+using Sweco.Services.MapExport;
 
 namespace Sweco.Services
 {
@@ -25,6 +26,9 @@ namespace Sweco.Services
     {
         [OperationContract]
         string Export();
+
+        [OperationContract]
+        string ExportPDF(MapExportItem exportItem);
 
         [OperationContract]
         string ExportKML();
@@ -44,14 +48,15 @@ namespace Sweco.Services
         /// <param name="jpegSamplePath"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        private void drawImage(XGraphics gfx, string jpegSamplePath, int x, int y)
+        private void drawImage(XGraphics gfx, string jpegSamplePath, int x, int y, PdfPage page)
         {
             XImage image = XImage.FromFile(jpegSamplePath);            
-            double width = image.PixelWidth;
-            double height = image.PixelHeight;            
-            gfx.DrawImage(image, x, y, width, height);
             
-            XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "assets", "logo.png"));           
+            double horizontal = (page.Width.Millimeter / 25.4) * 72;
+            double vertical = (page.Height.Millimeter / 25.4) * 72;
+            gfx.DrawImage(image, x, y, horizontal, vertical);
+            
+            XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "assets", "logo.png"));
             gfx.DrawImage(logo, gfx.PageSize.Width - 60, 10);
         }
 
@@ -125,6 +130,43 @@ namespace Sweco.Services
             System.IO.File.WriteAllBytes(fileinfo[0], ms.ToArray());
             return HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileinfo[1];
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [WebInvoke(Method = "POST", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/pdf")]
+        public string ExportPDF(MapExportItem exportItem)
+        {
+            string[] fileinfo = this.generateFileInfo("ImageExport", "tiff", "/Temp/Kartexport/");
+            string[] zipFileInfo = this.generateFileInfo("Kartexport", "zip");
+
+            string dir = HttpContext.Current.Server.MapPath("/Temp/Kartexport/");
+            DirectoryInfo directoryInfo = System.IO.Directory.CreateDirectory(dir);
+
+            Image img = MapImageCreator.GetImage(exportItem, fileinfo);
+            img.Save(fileinfo[0], System.Drawing.Imaging.ImageFormat.Tiff);
+
+            string folder = "/Temp/";
+            string path = HttpContext.Current.Server.MapPath(folder);
+            string filename = Guid.NewGuid() + ".pdf";
+            string localPdf = path + filename;
+
+            PdfDocument document = new PdfDocument();
+            PdfPage page = document.AddPage();
+
+            page.Size = PdfSharp.PageSize.A4;
+            page.Orientation = PdfSharp.PageOrientation.Portrait;
+
+            XGraphics gfx = XGraphics.FromPdfPage(page);
+            this.drawImage(gfx, fileinfo[0], 0, 0, page);
+
+            document.Save(localPdf);
+            
+            //DeleteDirectory(dir);
+
+            return HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + zipFileInfo[1];
+        }        
 
         /// <summary>
         /// 
@@ -211,7 +253,7 @@ namespace Sweco.Services
                 y = -y;
 
                 XGraphics gfx = XGraphics.FromPdfPage(page);
-                this.drawImage(gfx, local, x, y);
+                this.drawImage(gfx, local, x, y, page);
                 this.drawText(gfx, "© Lantmäteriverket i2009/00858", 10, 25);
 
                 document.Save(localPdf);

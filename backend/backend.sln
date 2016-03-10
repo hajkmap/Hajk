@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceLibrary", "SettingsLibrary\ServiceLibrary.csproj", "{A3559294-4F5A-4CDF-9BC9-4A29F77EA8AD}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mapservice", "mapservice\mapservice.csproj", "{10D33701-77C2-44D0-BF6B-7F1A8F2EB980}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceLibrary", "ServiceLibrary\ServiceLibrary.csproj", "{A3559294-4F5A-4CDF-9BC9-4A29F77EA8AD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A3559294-4F5A-4CDF-9BC9-4A29F77EA8AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A3559294-4F5A-4CDF-9BC9-4A29F77EA8AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A3559294-4F5A-4CDF-9BC9-4A29F77EA8AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A3559294-4F5A-4CDF-9BC9-4A29F77EA8AD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{10D33701-77C2-44D0-BF6B-7F1A8F2EB980}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{10D33701-77C2-44D0-BF6B-7F1A8F2EB980}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10D33701-77C2-44D0-BF6B-7F1A8F2EB980}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10D33701-77C2-44D0-BF6B-7F1A8F2EB980}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3559294-4F5A-4CDF-9BC9-4A29F77EA8AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3559294-4F5A-4CDF-9BC9-4A29F77EA8AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3559294-4F5A-4CDF-9BC9-4A29F77EA8AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3559294-4F5A-4CDF-9BC9-4A29F77EA8AD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

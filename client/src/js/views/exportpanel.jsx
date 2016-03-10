@@ -87,27 +87,20 @@ var ExportSettings = React.createClass({
   },
 
   removePreview: function () {
-    if (this.exportPreviewFrame) {
-      this.exportPreviewFrame.remove();
-    }
+    this.props.model.removePreview();
   },
 
   addPreview: function (map) {
-    var size = this.getPaperMeasures();
-    this.removePreview();
-    this.exportPreviewFrame = $('<div></div>');
-    this.exportPreviewFrame.css({
-      top: '50%',
-      left: '50%',
-      marginTop: `-${size.height / 2}px`,
-      marginLeft: `-${size.width / 2}px`,
-      border: '1px solid',
-      position: 'absolute',
-      background: 'rgba(0,0,0,0.5)',
-      width: size.width,
-      height: size.height
-    });
-    $('.ol-viewport').append(this.exportPreviewFrame);
+
+    var scale = this.getScale(map);
+    var center = map.getView().getCenter();
+    var paper = {
+      width: 210,
+      height: 297
+    };
+
+    this.props.model.addPreview(scale, paper, center);
+
   },
 
   exportPDF: function () {
@@ -115,7 +108,8 @@ var ExportSettings = React.createClass({
     ,   options = {
           size: this.getPaperMeasures(),
           orientation: this.getOrientation(),
-          format: this.getFormat()
+          format: this.getFormat(),
+          scale: this.getScale(this.props.olMap)
         }
     ;
     node.html('');

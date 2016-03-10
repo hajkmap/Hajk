@@ -19,7 +19,47 @@ module.exports = ToolModel.extend({
    */
   configure: function (shell) {
     this.set('olMap', shell.getMap().getMap());
+    this.addPreviewLayer();
   },
+
+  addPreviewLayer: function () {
+    this.previewLayer = new ol.layer.Vector({
+      source: new ol.source.Vector()
+    });
+    this.get('olMap').addLayer(this.previewLayer);
+  },
+
+  removePreview: function () {
+    this.previewLayer.getSource().clear();
+  },
+
+  addPreview: function (scale, paper, center) {
+
+    var dpi = 25.4 / 0.28;
+    var ipu = 39.37;
+
+    var w = paper.width / dpi / ipu * scale / 2;
+    var y = paper.height / dpi  / ipu * scale / 2;
+
+    var coords = [
+      [
+        [center[0] - w, center[1] - y],
+        [center[0] - w, center[1] + y],
+        [center[0] + w, center[1] + y],
+        [center[0] + w, center[1] - y],
+        [center[0] - w, center[1] - y]
+      ]
+    ];
+
+    var feature = new ol.Feature({
+      geometry: new ol.geom.Polygon(coords)
+    });
+
+    this.removePreview();
+    this.previewLayer.getSource().addFeature(feature);
+
+  },
+
   /*
    * @desc Make a clone of a canvas element.
    * @param {DOMElement} oldCcanvas
@@ -83,6 +123,34 @@ module.exports = ToolModel.extend({
     return data;
   },
 
+  findWMS: function () {
+
+    var exportable = layer =>
+      layer instanceof ol.layer.Tile && (
+      layer.getSource() instanceof ol.source.TileWMS ||
+      layer.getSource() instanceof ol.source.ImageWMS) &&
+      layer.getVisible();
+
+    var formatUrl = url =>
+      /^\//.test(url) ?
+      (window.location.protocol + "//" + window.location.host + url) :
+      url;
+
+    return this.get('olMap')
+      .getLayers()
+      .getArray()
+      .filter(exportable)
+      .map((layer, i) => {
+        return {
+          url: formatUrl(layer.getSource().getUrls()[0]),
+          layers: layer.getSource().getParams()["LAYERS"].split(','),
+          zIndex: i,
+          workspacePrefix: null,
+          coordinateSystemId: this.get('olMap').getView().getProjection().getCode().split(':')[1]
+        }
+      });
+  },
+
   findVector: function () {
 
     var drawLayer = this.get('olMap').getLayers().getArray().find(layer => layer.get('name') === 'draw-layer');
@@ -105,11 +173,22 @@ module.exports = ToolModel.extend({
       }
     }
 
-    function asPairs(coordinates) {
+    function as2DPairs(coordinates) {
+      return (
+        coordinates
+        .toString()
+        .split(',')
+        .map(i => parseFloat(i))
+        .reduce((r, n, i, a) => {
+          if (i % 2 !== 0) {
+            r.push([a[i - 1], a[i]]);
+          }
+          return r;
+        }, [])
+      );
     }
 
     function generate(features) {
-      console.log(features)
       return features.map((feature) => {
         return {
           type: feature.getProperties().type,
@@ -117,13 +196,12 @@ module.exports = ToolModel.extend({
             text: feature.getProperties() ? feature.getProperties().description : undefined,
             style: asObject(feature.getStyle())
           },
-          coordinates: asPairs(feature.getGeometry().getCoordinates())
+          coordinates: as2DPairs(feature.getGeometry().getCoordinates())
         }
       });
     }
 
-    //console.log(generate(drawLayer.getSource().getFeatures()))
-    //return generate(drawLayer.getFeatures());
+    return generate(drawLayer.getSource().getFeatures());
   },
   /*
    * @desc Clone map canvas and add copyright.
@@ -185,23 +263,61 @@ module.exports = ToolModel.extend({
    * @param {function} callback
    */
   exportPDF: function(options, callback) {
-    //this.findVector();
-    this.exportMap((href) => {
-      $.ajax({
-        url: this.get('url'),
-        type: 'post',
-        contentType: 'text/plain',
-        data: `pdf;${options.size.x};${options.size.y};${options.format};${options.orientation};${encodeURIComponent(href)}`,
-        success: response => {
-          var anchor = $('<a>Hämta</a>').attr({
-            href: response,
-            target: '_blank',
-            download: 'karta.pdf'
-          });
-          callback(anchor);
-        }
-      });
-    }, options.size);
+    var extent = this.previewLayer.getSource().getFeatures()[0].getGeometry().getExtent()
+    ,   left   = extent[0]
+    ,   right  = extent[2]
+    ,   bottom = extent[1]
+    ,   top    = extent[3]
+    ,   scale  = options.scale
+    ,   dpi    = 150
+    ,   data   = {
+      wmsLayers: [],
+      vectorLayers: [],
+      size: null,
+      resolution: dpi,
+      bbox: null
+    };
+
+    data.vectorLayers = this.findVector() || [];
+    data.wmsLayers = this.findWMS() || [];
+
+    dx = Math.abs(left - right);
+    dy = Math.abs(bottom - top);
+    data.size = [
+      parseInt(100 * (dx / scale) * dpi),
+      parseInt(100 * (dy / scale) * dpi)
+    ];
+    data.bbox = [left, right, bottom, top];
+
+    $.ajax({
+      type: "post",
+      url: "/mapservice/export/pdf",
+      data: JSON.stringify(data),
+      contentType: "application/json",
+      success: function (rsp) {
+        console.log(rsp);
+      },
+      error: function (rsp) {
+        console.error(rsp);
+      }
+    });
+
+    // this.exportMap((href) => {
+    //   $.ajax({
+    //     url: this.get('url'),
+    //     type: 'post',
+    //     contentType: 'text/plain',
+    //     data: `pdf;${options.size.x};${options.size.y};${options.format};${options.orientation};${encodeURIComponent(href)}`,
+    //     success: response => {
+    //       var anchor = $('<a>Hämta</a>').attr({
+    //         href: response,
+    //         target: '_blank',
+    //         download: 'karta.pdf'
+    //       });
+    //       callback(anchor);
+    //     }
+    //   });
+    // }, options.size);
   },
   /*
    * @desc Handle click event on toolbar button.
