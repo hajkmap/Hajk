@@ -105,6 +105,8 @@
     <Content Include="Global.asax" />
     <Content Include="index.html" />
     <Content Include="packages.config" />
+    <Content Include="App_Data\layers.json" />
+    <Content Include="App_Data\map_default.json" />
     <None Include="Properties\PublishProfiles\Local.pubxml" />
     <None Include="_bin_deployableAssemblies\x86\sqlcese40.dll" />
     <None Include="_bin_deployableAssemblies\x86\sqlceqp40.dll" />
@@ -142,9 +144,7 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="App_Data\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\ServiceLibrary\ServiceLibrary.csproj">
       <Project>{a3559294-4f5a-4cdf-9bc9-4a29f77ea8ad}</Project>

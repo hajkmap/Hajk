@@ -34,9 +34,10 @@
     "jquery": "^2.2.0",
     "load-grunt-tasks": "^3.4.0",
     "matchdep": "^1.0.1",
+    "openlayers": "^3.13.1",
     "react": "^0.14.7",
     "react-dom": "^0.14.7",
-    "underscore": "^1.8.3",
-    "openlayers": "^3.13.1"
+    "react-simple-alert": "0.0.2",
+    "underscore": "^1.8.3"
   }
 }

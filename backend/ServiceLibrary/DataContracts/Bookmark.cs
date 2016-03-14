@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sweco.Services
+namespace Sweco.Services.DataContracts
 {
     [DataContract]    
     public class Bookmark

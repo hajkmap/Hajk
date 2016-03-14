@@ -2,14 +2,7 @@
 
   "use strict";
 
-  var route_config = [
-    { name: "manager", title: "Lagerhanterare", default: true },
-    { name: "menu",    title: "Lagermeny" },
-    { name: "map",     title: "Karta" },
-    { name: "release", title: "Driftsätt" }
-  ];
-
-  function create_routes(routes) {
+  function create_routes(routes, application_model) {
     var route_settings = {
       routes: {}
     };
@@ -25,16 +18,23 @@
     return route_settings;
   }
 
-  var application_view = require('views/application')
-  ,   application_model = require('models/application')
-  ,   application_element = React.createElement(application_view, {
-        model: application_model,
-        tabs: route_config
-      })
-  ,   router = Backbone.Router.extend(create_routes(route_config));
+  function load(config) {
+    var application_view = require('views/application')
+    ,   application_model = require('models/application')
+    ,   application_element = React.createElement(application_view, {
+          model: application_model,
+          tabs: config.router,
+          config: config
+        })
+    ,   router = Backbone.Router.extend(create_routes(config.router, application_model));
 
-  new router();
-  Backbone.history.start();
-  ReactDOM.render(application_element, document.getElementById('app'));
+    new router();
+    Backbone.history.start();
+    ReactDOM.render(application_element, document.getElementById('app'));
+  }
+
+  $.get('config.json', function (config) {
+    load(config);
+  });
 
 }());

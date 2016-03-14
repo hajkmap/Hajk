@@ -1,9 +1,14 @@
 ﻿using log4net;
+using Sweco.Services.DataContracts;
 using System;
+using System.IO;
 using System.Linq;
 using System.ServiceModel;
 using System.ServiceModel.Activation;
 using System.ServiceModel.Web;
+using System.Text;
+using System.Web;
+using System.Web.Hosting;
 
 namespace Sweco.Services
 {
@@ -19,7 +24,7 @@ namespace Sweco.Services
         Bookmark[] Settings();
 
         /// <summary>
-        /// Sparar inställningar för en avnändare.
+        /// Sparar inställningar för en användare.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -40,20 +45,51 @@ namespace Sweco.Services
         /// <returns></returns>
         [OperationContract]
         Bookmark[] UpdateSetting(Bookmark bookmark);
+
+        /// <summary> 
+        /// Hämta inställningar från JSON
+        /// </summary>
+        /// <returns></returns>
+        [OperationContract]
+        Stream Config(string name);
+
+        /// <summary>
+        /// Radera layer per ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void RemoveLayer(string id);
+
+        /// <summary>
+        /// Radera lager per ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void UpdateLayer(WMSConfig layer);
+
+        /// <summary>
+        /// Lägg till lager.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void AddLayer(WMSConfig layer);
     }
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerCall, ConcurrencyMode = ConcurrencyMode.Multiple)]
     [AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Allowed)]
     public sealed class SettingsService: ISettingsService, IDisposable
     {
-        private readonly DataAccess.SettingsDbContext _settingsDbContext;
+        private readonly DataAccess.SettingsDbContext settingsDataContext;
         private static readonly ILog Logger = LogManager.GetLogger("Inställningar");
 
         public SettingsService()
         {
             try
             {
-                _settingsDbContext = new DataAccess.SettingsDbContext();
+                this.settingsDataContext = new DataAccess.SettingsDbContext();
             }
             catch (Exception ex)
             {
@@ -103,7 +139,7 @@ namespace Sweco.Services
             try
             {
                 string username = this.GetUserName();
-                return _settingsDbContext.GetBookmarks(username);
+                return this.settingsDataContext.GetBookmarks(username);
             }
             catch (Exception ex)
             {
@@ -130,8 +166,8 @@ namespace Sweco.Services
             }
             try
             {
-                _settingsDbContext.SaveBookmark(bookmark);
-                return _settingsDbContext.GetBookmarks(username);
+                this.settingsDataContext.SaveBookmark(bookmark);
+                return this.settingsDataContext.GetBookmarks(username);
             }
             catch (Exception ex)
             {
@@ -150,9 +186,9 @@ namespace Sweco.Services
             try
             {
                 int uid = int.Parse(id);
-                _settingsDbContext.RemoveBookmark(uid);
+                this.settingsDataContext.RemoveBookmark(uid);
                 string username = this.GetUserName();
-                return _settingsDbContext.GetBookmarks(username);
+                return this.settingsDataContext.GetBookmarks(username);
             }
             catch (Exception ex)
             {
@@ -171,9 +207,9 @@ namespace Sweco.Services
         {
             try
             {
-                _settingsDbContext.UpdateBookmark(bookmark);
+                this.settingsDataContext.UpdateBookmark(bookmark);
                 string username = this.GetUserName();
-                return _settingsDbContext.GetBookmarks(username);
+                return this.settingsDataContext.GetBookmarks(username);
             }
             catch (Exception ex)
             {
@@ -182,11 +218,65 @@ namespace Sweco.Services
             }
         }
 
+        /// <summary>
+        /// Get config
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [WebGet(ResponseFormat = WebMessageFormat.Json, UriTemplate = "/config/{name}")]
+        public Stream Config(string name)
+        {
+            string file = String.Format("{0}App_Data\\{1}.json", HostingEnvironment.ApplicationPhysicalPath, name);
+            if (System.IO.File.Exists(file))
+            {
+                string json_data = System.IO.File.ReadAllText(file);
+                WebOperationContext.Current.OutgoingResponse.ContentType = "application/json; charset=utf-8";
+                return new MemoryStream(Encoding.UTF8.GetBytes(json_data));  
+            }
+            else
+            {
+                throw new HttpException(404, "File not found");
+            }         
+        }
+
+        /// <summary>
+        /// Remove layer
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [WebInvoke(Method = "DELETE", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/layer/{id}")]
+        public void RemoveLayer(string id)
+        {
+
+        }
+
+        /// <summary>
+        /// Update layer
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [WebInvoke(Method = "PUT", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/layer")]
+        public void UpdateLayer(WMSConfig config)
+        {
+
+        }
+
+        /// <summary>
+        /// Add layer
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [WebInvoke(Method = "POST", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/layer")]
+        public void AddLayer(WMSConfig layer)
+        {
+            this.settingsDataContext.AddWMSLayer(layer);
+        }
+
         public void Dispose()
         {
             try
             {
-                _settingsDbContext.Dispose();
+                this.settingsDataContext.Dispose();
             }
             catch (Exception ex)
             {

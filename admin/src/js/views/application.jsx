@@ -45,7 +45,10 @@ class Application extends React.Component {
     catch (e) {
       return (<div>404</div>)
     }
-    return React.createElement(content, {model: model});
+    return React.createElement(content, {
+      model: model,
+      config: this.props.config[this.state.content]
+    });
   }
 
   render() {

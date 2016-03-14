@@ -1,5 +1,12 @@
 body {
 	margin: 20px;
+	width: 1400px;
+}
+
+input[type="text"] {
+	border: 1px solid #999;
+	padding: 5px;
+	border-radius: 3px;
 }
 
 section {
@@ -8,23 +15,36 @@ section {
 
 aside {
 	float: left;
+	width: 300px;
+}
+
+aside input[type="text"] {
+	width: 100%;
+	margin-bottom: 5px;
 }
 
 article {
 	float: left;
 	margin: 50px;
 	margin-top: -5px;
+	width: 690px;
+}
+
+article textarea {
+	width: 400px;
+	height: 150px;
+	border-radius: 3px;
 }
 
 article label {
 	width: 150px;
+	display: inline-block;
+	margin: 0;
 	vertical-align: top;
 }
 
 article input[type="text"] {
-	width: 500px;
-	border: 1px solid black;
-	padding: 2px;
+	width: 400px;
 	margin-right: 5px;
 }
 
@@ -32,11 +52,126 @@ article fieldset > div {
 	margin: 7px;
 }
 
+.details {
+	float: left;
+	width: 310px;
+}
+
+.layer-list-choosen {
+	border: 1px solid #999;
+	border-radius: 3px;
+	display: inline-block;
+	width: 500px;
+	min-height: 40px;
+	max-height: 350px;
+	overflow: auto;
+	cursor: pointer;
+}
+
+.layer-list-choosen ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.layer-list-choosen li {
+	padding: 5px;
+	margin: 5px;
+}
+
+.layer-list-choosen .layer {
+	display: inline-block;
+	padding: 4px;
+	border-radius: 3px;
+	background: #5cb85c;
+	color: white;
+	margin-right: 4px;
+	margin-bottom: 4px;
+}
+
 .layer-list {
-	border: 1px solid black;
+	border: 1px solid #999;
+	border-radius: 3px;
 	display: inline-block;
 	width: 500px;
 	min-height: 150px;
-	max-height: 250px;
+	max-height: 350px;
 	overflow: auto;
+	padding: 5px;
+	cursor: pointer;
+}
+
+.layer-list ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.layer-list li {
+	padding: 5px;
+}
+
+.layer-list li:hover {
+	background: #dedede;
+}
+
+.layer-list li:nth-child(even)  {
+
+}
+
+.layer-list li:nth-child(odd)  {
+
+}
+
+.layer-list li i {
+	float: right;
+	margin-top: 1px;
+	padding: 4px;
+	border: 1px solid rgba(0,0,0,0);
+}
+
+.layer-list li i.active {
+    color: #a94442;
+    border: 1px solid;
+}
+
+.config-layer-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.config-layer-list li {
+	border: 1px solid #ccc;
+	background: #f8f8f8;
+	margin-bottom: 5px;
+	padding: 10px;
+	width: 100%;
+	cursor: pointer;
+}
+
+.config-layer-list li i {
+	float: right;
+	cursor: pointer;
+	font-size: 20px;
+}
+
+table {
+
+}
+
+table th {
+	text-align: center;
+	padding: 4px;
+	border: 1px solid;
+}
+
+table td {
+	padding: 4px;
+	text-align: left;
+	border: 1px solid;
+}
+
+.validation-error {
+	background: #d9534f;
 }

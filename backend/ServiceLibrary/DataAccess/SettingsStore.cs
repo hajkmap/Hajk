@@ -5,6 +5,10 @@ using System.Data.Entity;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 using System.ComponentModel.DataAnnotations.Schema;
+using Sweco.Services.DataContracts;
+using System.Web.Hosting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Sweco.Services.DataAccess
 {      
@@ -136,5 +140,39 @@ namespace Sweco.Services.DataAccess
                     this.SaveChanges();
                 }
             }
-        }
+       
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="layer"></param>
+            public void AddWMSLayer(WMSConfig layer) 
+            {
+                string file = String.Format("{0}App_Data\\layers.json", HostingEnvironment.ApplicationPhysicalPath);
+                string jsonInput = System.IO.File.ReadAllText(file);
+
+                LayerConfig layerConfig = JsonConvert.DeserializeObject<LayerConfig>(jsonInput);
+                layerConfig.layers.Add(layer);
+                
+                string jsonOutput = JsonConvert.SerializeObject(layerConfig);
+                System.IO.File.WriteAllText(file, jsonOutput);
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="layer"></param>
+            public void UpdateWMSLayer(WMSConfig layer)
+            {
+
+            }
+            
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="id"></param>
+            public void RemoveLayer(int id)
+            {
+                
+            }
+    }
 }

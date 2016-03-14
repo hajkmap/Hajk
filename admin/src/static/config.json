@@ -1,0 +1,14 @@
+{
+  "manager": {
+    "owner_options": [
+      { "value": "SBK", "title": "SBK" },
+      { "value": "Lantmäterienheten", "title": "Lantmäterienheten" }
+    ]
+  },
+  "router": [
+    { "name": "manager", "title": "Lagerhanterare", "default": true },
+    { "name": "menu",    "title": "Lagermeny" },
+    { "name": "map",     "title": "Karta" },
+    { "name": "release", "title": "Driftsätt" }
+  ]
+}
