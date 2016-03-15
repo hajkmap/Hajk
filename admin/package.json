@@ -37,7 +37,6 @@
     "openlayers": "^3.13.1",
     "react": "^0.14.7",
     "react-dom": "^0.14.7",
-    "react-simple-alert": "0.0.2",
     "underscore": "^1.8.3"
   }
 }
