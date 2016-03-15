@@ -247,7 +247,7 @@ namespace Sweco.Services
         [WebInvoke(Method = "DELETE", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/layer/{id}")]
         public void RemoveLayer(string id)
         {
-
+            this.settingsDataContext.RemoveWMSLayer(id);
         }
 
         /// <summary>
@@ -256,9 +256,9 @@ namespace Sweco.Services
         /// <param name="id"></param>
         /// <returns></returns>
         [WebInvoke(Method = "PUT", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/layer")]
-        public void UpdateLayer(WMSConfig config)
+        public void UpdateLayer(WMSConfig layer)
         {
-
+            this.settingsDataContext.UpdateWMSLayer(layer);
         }
 
         /// <summary>

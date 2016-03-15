@@ -1,4 +1,53 @@
-var Alert = require('react-simple-alert');
+const defaultState = {
+  load: false,
+  capabilities: false,
+  alert: false,
+  alertMessage: "",
+  validationErrors: [],
+  mode: "add",
+  layers: [],
+  addedLayers: [],
+  id: "",
+  caption: "",
+  content: "",
+  date: "Fylls i per automatik",
+  infobox: "",
+  legend: "",
+  owner: "",
+  searchFields: "",
+  url: "194.71.132.27/geoserver28/wms",
+  visibleAtStart: false
+};
+/**
+ *
+ */
+class Alert extends React.Component {
+
+  constructor() {
+    super();
+  }
+
+  render() {
+    var options = this.props.options;
+    return !options.visible ? false : (
+      <div className="modal">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h4 className="modal-title">Meddelande</h4>
+            </div>
+            <div className="modal-body">
+              <p>{options.message}</p>
+            </div>
+            <div className="modal-footer">
+              <button type="button" onClick={options.onClick} className="btn btn-default">OK</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+}
 /**
  *
  */
@@ -8,25 +57,7 @@ class Manager extends React.Component {
    */
   constructor() {
     super();
-    this.state = {
-      load: false,
-      capabilities: false,
-      alert: false,
-      alertMessage: "",
-      validationErrors: [],
-      mode: "add",
-      layers: [],
-      addedLayers: [],
-      caption: "",
-      content: "",
-      date: "Fylls i per automatik",
-      infobox: "",
-      legend: "",
-      owner: "a",
-      searchFields: "",
-      url: "194.71.132.27/geoserver/wms",
-      visibleAtStart: false
-    };
+    this.state = defaultState;
   }
   /**
    *
@@ -49,9 +80,25 @@ class Manager extends React.Component {
   /**
    *
    */
-  removeLayer(e) {
+  removeLayer(e, layer) {
+    this.props.model.removeLayer(layer, success => {
+      if (success) {
+        this.props.model.getConfig('/mapservice/settings/config/layers');
+        this.setState({
+          alert: true,
+          alertMessage: `Lagret ${layer.caption} togs bort!`
+        });
+        if (this.state.id === layer.id) {
+          this.abort();
+        }
+      } else {
+        this.setState({
+          alert: true,
+          alertMessage: "Lagret kunde inte tas bort. Försök igen senare."
+        });
+      }
+    });
     e.stopPropagation();
-    console.log("Remove");
   }
   /**
    *
@@ -60,6 +107,7 @@ class Manager extends React.Component {
 
     this.setState({
       mode: "edit",
+      id: layer.id,
       caption: layer.caption,
       content: layer.content,
       date: layer.date,
@@ -72,10 +120,15 @@ class Manager extends React.Component {
     });
 
     setTimeout(() => {
+      this.validate("url");
+      this.validate("caption");
+      this.validate("content");
+      this.validate("searchFields");
       this.loadWMSCapabilities(undefined, () => {
         this.setState({
           addedLayers: layer.layers
         });
+        this.validate("layers");
         layer.layers.forEach(layer => {
           this.refs[layer].checked = true;
         });
@@ -91,7 +144,6 @@ class Manager extends React.Component {
 
     this.setState({
       load: true,
-      alert: false,
       addedLayers: [],
       capabilities: false,
       layerProperties: undefined,
@@ -112,7 +164,7 @@ class Manager extends React.Component {
       if (capabilities === false) {
         this.setState({
           alert: true,
-          alertMessage: "Server svarar inte. Försök med en annan URL."
+          alertMessage: "Servern svarar inte. Försök med en annan URL."
         })
       }
       if (callback) {
@@ -273,9 +325,9 @@ class Manager extends React.Component {
    *
    */
   getLayersWithFilter(filter) {
-    return this.props.model.get('layers').filter(layer =>
-      (new RegExp(this.state.filter)).test(layer.options.caption.toLowerCase())
-    );
+    return this.props.model.get('layers').filter(layer => {
+      return (new RegExp(this.state.filter)).test(layer.caption.toLowerCase())
+    });
   }
   /**
    *
@@ -285,7 +337,7 @@ class Manager extends React.Component {
     return layers.map((layer, i) =>
       <li onClick={(e) => this.loadLayer(e, layer)} key={Math.random()}>
         <span>{layer.caption}</span>
-        <i title="Radera lager" onClick={this.removeLayer} className="fa fa-trash"></i>
+        <i title="Radera lager" onClick={(e) => this.removeLayer(e, layer)} className="fa fa-trash"></i>
       </li>
     );
   }
@@ -293,22 +345,7 @@ class Manager extends React.Component {
    *
    */
   abort (e) {
-    this.setState({
-      mode: "add",
-      capabilities: false,
-      validationErrors: [],
-      layers: [],
-      addedLayers: [],
-      caption: "",
-      content: "",
-      date: "Fylls i per automatik",
-      infobox: "",
-      legend: "",
-      owner: "a",
-      searchFields: "",
-      url: "194.71.132.27/geoserver/wms",
-      visibleAtStart: false
-    });
+    this.setState(defaultState);
   }
   /**
    *
@@ -319,6 +356,13 @@ class Manager extends React.Component {
     ,   valid = true;
 
     switch (fieldName) {
+      case "searchFields":
+        valid = value.every(val => /^\w+$/.test(val));
+        if (value.length === 1 && value[0] === "") {
+          valid = true;
+        }
+
+        break;
       case "layers":
         if (value.length === 0) {
           valid = false;
@@ -355,7 +399,7 @@ class Manager extends React.Component {
   getValue(fieldName) {
 
     function create_date() {
-      return (new Date()).toLocaleString();
+      return (new Date()).getTime();
     }
 
     function format_layers(layers) {
@@ -375,46 +419,115 @@ class Manager extends React.Component {
   /**
    *
    */
+  createGuid() {
+    function s4() {
+      return Math
+        .floor((1 + Math.random()) * 0x10000)
+        .toString(16)
+        .substring(1);
+    }
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+  }
+  /**
+   *
+   */
   submit(e) {
 
     var validations = [
       this.validate("url"),
       this.validate("caption"),
       this.validate("content"),
-      this.validate("layers")
+      this.validate("layers"),
+      this.validate("searchFields")
     ];
 
     if (validations.every(v => v === true)) {
-      $.ajax({
-        url: "/mapservice/settings/layer",
-        method: this.state.mode === 'edit' ? 'PUT' : 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({
-          caption: this.getValue("caption"),
-          url: this.getValue("url"),
-          owner: this.getValue("owner"),
-          date: this.getValue("date"),
-          content: this.getValue("content"),
-          legend: this.getValue("legend"),
-          layers: this.getValue("layers"),
-          infobox: this.getValue("infobox"),
-          searchFields: this.getValue("searchFields"),
-          visibleAtStart: this.getValue("visibleAtStart")
-        })
-      });
-    }
 
+      let layer = {
+        id: this.state.id,
+        caption: this.getValue("caption"),
+        url: this.getValue("url"),
+        owner: this.getValue("owner"),
+        date: this.getValue("date"),
+        content: this.getValue("content"),
+        legend: this.getValue("legend"),
+        layers: this.getValue("layers"),
+        infobox: this.getValue("infobox"),
+        searchFields: this.getValue("searchFields"),
+        visibleAtStart: this.getValue("visibleAtStart")
+      };
+
+      if (this.state.mode === "add") {
+        layer.id = this.createGuid();
+        this.props.model.addLayer(layer, success => {
+          if (success) {
+            this.props.model.getConfig('/mapservice/settings/config/layers');
+            this.abort();
+            this.setState({
+              alert: true,
+              alertMessage: "Lagret har lagt till i listan av tillgängliga lager."
+            });
+          } else {
+            this.setState({
+              alert: true,
+              alertMessage: "Lagret kunde inte läggas till. Försök igen senare."
+            });
+          }
+        });
+      }
+
+      if (this.state.mode === "edit") {
+        this.props.model.updateLayer(layer, success => {
+          if (success) {
+            this.props.model.getConfig('/mapservice/settings/config/layers');
+            this.setState({
+              date: layer.date,
+              alert: true,
+              alertMessage: "Uppdateringen lyckades!"
+            });
+          } else {
+            this.setState({
+              alert: true,
+              alertMessage: "Uppdateringen misslyckades."
+            });
+          }
+        });
+      }
+    }
     e.preventDefault();
+  }
+  /**
+   *
+   */
+  resetAlert() {
+    this.setState({
+      alert: false,
+      alertMessage: ""
+    });
   }
   /**
    *
    */
   getAlertOptions() {
     return {
-      title: "Meddelande",
+      visible: this.state.alert,
       message: this.state.alertMessage,
-      alert: this.state.alert
+      onClick: () => {
+        this.setState({
+          alert: false,
+          alertMessage: ""
+        })
+      }
     };
+  }
+  /**
+   *
+   */
+  parseDate() {
+    var parsed = parseInt(this.state.date);
+    return isNaN(parsed) ?
+      this.state.date :
+      (new Date(parsed)).toLocaleString();
   }
   /**
    *
@@ -432,7 +545,7 @@ class Manager extends React.Component {
 
     return (
       <section className="tab-pane active">
-        <Alert options={this.getAlertOptions()} />
+        <Alert options={this.getAlertOptions()}/>
         <aside>
           <input placeholder="fitrera" type="text" onChange={(e) => this.filterLayers(e)} />
           <ul className="config-layer-list">
@@ -472,7 +585,7 @@ class Manager extends React.Component {
               </div>
               <div>
                 <label>Senast ändrad</label>
-                <span ref="input_date"><i>{this.state.date}</i></span>
+                <span ref="input_date"><i>{this.parseDate()}</i></span>
               </div>
               <div>
                 <label>Innehåll*</label>
@@ -521,6 +634,7 @@ class Manager extends React.Component {
                   ref="input_searchFields"
                   onChange={(e) => this.validate("searchFields", e)}
                   value={this.state.searchFields}
+                  className={this.getValidationClass("searchFields")}
                 />
               </div>
               <div>
@@ -528,7 +642,11 @@ class Manager extends React.Component {
                 <input
                   type="checkbox"
                   ref="input_visibleAtStart"
-                  onChange={(e) => this.validate("visibleAtStart", e)}
+                  onChange={
+                    (e) => {
+                      this.setState({visibleAtStart: e.target.checked})
+                    }
+                  }
                   checked={this.state.visibleAtStart}
                 />
               </div>

@@ -51,6 +51,29 @@ namespace Sweco.Services.DataAccess
 
     sealed class SettingsDbContext : DbContext
         {
+            private string layerFile = "layers.json";
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <returns></returns>
+            private LayerConfig readLayerConfigFromFile()
+            {
+                string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.layerFile);
+                string jsonInput = System.IO.File.ReadAllText(file);
+                return JsonConvert.DeserializeObject<LayerConfig>(jsonInput);
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="layerConfig"></param>
+            private void saveLayerConfigToFile(LayerConfig layerConfig) 
+            {
+                string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.layerFile);
+                string jsonOutput = JsonConvert.SerializeObject(layerConfig);
+                System.IO.File.WriteAllText(file, jsonOutput);
+            }
+
             /// <summary>
             /// Property bookmarks.
             /// </summary>
@@ -146,15 +169,10 @@ namespace Sweco.Services.DataAccess
             /// </summary>
             /// <param name="layer"></param>
             public void AddWMSLayer(WMSConfig layer) 
-            {
-                string file = String.Format("{0}App_Data\\layers.json", HostingEnvironment.ApplicationPhysicalPath);
-                string jsonInput = System.IO.File.ReadAllText(file);
-
-                LayerConfig layerConfig = JsonConvert.DeserializeObject<LayerConfig>(jsonInput);
-                layerConfig.layers.Add(layer);
-                
-                string jsonOutput = JsonConvert.SerializeObject(layerConfig);
-                System.IO.File.WriteAllText(file, jsonOutput);
+            {                                
+                LayerConfig layerConfig = this.readLayerConfigFromFile();
+                layerConfig.layers.Add(layer);  
+                this.saveLayerConfigToFile(layerConfig);              
             }
 
             /// <summary>
@@ -162,17 +180,29 @@ namespace Sweco.Services.DataAccess
             /// </summary>
             /// <param name="layer"></param>
             public void UpdateWMSLayer(WMSConfig layer)
-            {
-
+            {                
+                LayerConfig layerConfig = this.readLayerConfigFromFile();
+                var index = layerConfig.layers.FindIndex(item => item.id == layer.id);
+                if (index != -1)
+                {
+                    layerConfig.layers[index] = layer;
+                }
+                this.saveLayerConfigToFile(layerConfig);
             }
             
             /// <summary>
             /// 
             /// </summary>
             /// <param name="id"></param>
-            public void RemoveLayer(int id)
+            public void RemoveWMSLayer(string id)
             {
-                
+                LayerConfig layerConfig = this.readLayerConfigFromFile();
+                var index = layerConfig.layers.FindIndex(item => item.id == id);
+                if (index != -1) 
+                {
+                    layerConfig.layers.RemoveAt(index);
+                }
+                this.saveLayerConfigToFile(layerConfig);
             }
     }
 }
