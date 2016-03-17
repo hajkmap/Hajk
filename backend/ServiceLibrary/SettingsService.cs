@@ -9,6 +9,7 @@ using System.ServiceModel.Web;
 using System.Text;
 using System.Web;
 using System.Web.Hosting;
+using Sweco.Services.DataContracts.ToolOptions;
 
 namespace Sweco.Services
 {
@@ -76,6 +77,14 @@ namespace Sweco.Services
         /// <returns></returns>
         [OperationContract]
         void AddLayer(WMSConfig layer);
+
+        /// <summary>
+        /// Radera lager per ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void UpdateLayerMenu(LayerMenuOptions config);
     }
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerCall, ConcurrencyMode = ConcurrencyMode.Multiple)]
@@ -270,6 +279,16 @@ namespace Sweco.Services
         public void AddLayer(WMSConfig layer)
         {
             this.settingsDataContext.AddWMSLayer(layer);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="config"></param>
+        [WebInvoke(Method = "PUT", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/layermenu")]
+        public void UpdateLayerMenu(LayerMenuOptions config)
+        {
+            this.settingsDataContext.UpdateLayerMenu(config);
         }
 
         public void Dispose()

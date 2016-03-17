@@ -1,8 +1,6 @@
 const defaultState = {
   load: false,
   capabilities: false,
-  alert: false,
-  alertMessage: "",
   validationErrors: [],
   mode: "add",
   layers: [],
@@ -18,36 +16,6 @@ const defaultState = {
   url: "194.71.132.27/geoserver28/wms",
   visibleAtStart: false
 };
-/**
- *
- */
-class Alert extends React.Component {
-
-  constructor() {
-    super();
-  }
-
-  render() {
-    var options = this.props.options;
-    return !options.visible ? false : (
-      <div className="modal">
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h4 className="modal-title">Meddelande</h4>
-            </div>
-            <div className="modal-body">
-              <p>{options.message}</p>
-            </div>
-            <div className="modal-footer">
-              <button type="button" onClick={options.onClick} className="btn btn-default">OK</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-}
 /**
  *
  */
@@ -84,7 +52,7 @@ class Manager extends React.Component {
     this.props.model.removeLayer(layer, success => {
       if (success) {
         this.props.model.getConfig('/mapservice/settings/config/layers');
-        this.setState({
+        this.props.application.setState({
           alert: true,
           alertMessage: `Lagret ${layer.caption} togs bort!`
         });
@@ -92,7 +60,7 @@ class Manager extends React.Component {
           this.abort();
         }
       } else {
-        this.setState({
+        this.props.application.setState({
           alert: true,
           alertMessage: "Lagret kunde inte tas bort. Försök igen senare."
         });
@@ -162,7 +130,7 @@ class Manager extends React.Component {
         load: false
       });
       if (capabilities === false) {
-        this.setState({
+        this.props.application.setState({
           alert: true,
           alertMessage: "Servern svarar inte. Försök med en annan URL."
         })
@@ -463,12 +431,12 @@ class Manager extends React.Component {
           if (success) {
             this.props.model.getConfig('/mapservice/settings/config/layers');
             this.abort();
-            this.setState({
+            this.props.application.setState({
               alert: true,
               alertMessage: "Lagret har lagt till i listan av tillgängliga lager."
             });
           } else {
-            this.setState({
+            this.props.application.setState({
               alert: true,
               alertMessage: "Lagret kunde inte läggas till. Försök igen senare."
             });
@@ -480,13 +448,15 @@ class Manager extends React.Component {
         this.props.model.updateLayer(layer, success => {
           if (success) {
             this.props.model.getConfig('/mapservice/settings/config/layers');
-            this.setState({
-              date: layer.date,
+            this.props.application.setState({
               alert: true,
               alertMessage: "Uppdateringen lyckades!"
             });
-          } else {
             this.setState({
+              date: layer.date,
+            });
+          } else {
+            this.props.application.setState({
               alert: true,
               alertMessage: "Uppdateringen misslyckades."
             });
@@ -495,30 +465,6 @@ class Manager extends React.Component {
       }
     }
     e.preventDefault();
-  }
-  /**
-   *
-   */
-  resetAlert() {
-    this.setState({
-      alert: false,
-      alertMessage: ""
-    });
-  }
-  /**
-   *
-   */
-  getAlertOptions() {
-    return {
-      visible: this.state.alert,
-      message: this.state.alertMessage,
-      onClick: () => {
-        this.setState({
-          alert: false,
-          alertMessage: ""
-        })
-      }
-    };
   }
   /**
    *
@@ -545,7 +491,6 @@ class Manager extends React.Component {
 
     return (
       <section className="tab-pane active">
-        <Alert options={this.getAlertOptions()}/>
         <aside>
           <input placeholder="fitrera" type="text" onChange={(e) => this.filterLayers(e)} />
           <ul className="config-layer-list">

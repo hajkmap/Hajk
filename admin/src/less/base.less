@@ -179,3 +179,62 @@ table td {
 .modal {
 	display: inherit !important;
 }
+
+body.dragging, body.dragging * {
+  cursor: move !important;
+}
+
+.dragged {
+	position: absolute;
+	opacity: 1;
+	z-index: 2000;
+}
+
+.tree-view > ul li.placeholder {
+	position: relative;
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+
+.tree-view > ul li.placeholder:before {
+	position: absolute;
+	content: "";
+	width: 0;
+	height: 0;
+	margin-top: -3px;
+	left: -3px;
+	top: -2px;
+	border: 5px solid transparent;
+	border-left-color: black;
+	border-right: none;
+}
+
+.tree-view {
+	float: left;
+	margin-left: 20px;
+}
+
+.tree-view ul {
+	list-style: none;
+	padding-left: 15px;
+}
+
+.tree-view ul li {
+	min-width: 300px;
+	margin: 3px;
+}
+
+.tree-view .layer-node {
+	border: 1px solid #ccc;
+    background: #f8f8f8;
+    margin-bottom: 5px;
+    padding: 10px;
+    width: 100%;
+    cursor: pointer;
+}
+
+.tree-view .group-name {
+	font-weight: bold;
+	cursor: pointer;
+}

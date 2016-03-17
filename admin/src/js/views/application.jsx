@@ -1,10 +1,27 @@
+const Alert = require('views/alert');
 
+var defaultState = {
+  alert: false,
+  corfirm: false,
+  alertMessage: "",
+  content: "",
+  confirmAction: () => {},
+  denyAction: () => {}
+};
+/**
+ *
+ */
 class Application extends React.Component {
-
+  /**
+   *
+   */
   constructor() {
     super();
+    this.state = defaultState;
   }
-
+  /**
+   *
+   */
   componentDidMount () {
     this.setState({
       content: this.props.model.get('content')
@@ -16,9 +33,53 @@ class Application extends React.Component {
       });
     });
   }
-
+  /**
+   *
+   */
+  resetAlert() {
+    this.setState({
+      alert: false,
+      alertMessage: ""
+    });
+  }
+  /**
+   *
+   */
+  getAlertOptions() {
+    return {
+      visible: this.state.alert,
+      message: this.state.alertMessage,
+      confirm: this.state.confirm,
+      confirmAction: () => {
+        this.state.confirmAction();
+        this.setState({
+          alert: false,
+          confirm: false,
+          alertMessage: ""
+        })
+      },
+      denyAction: () => {
+        this.state.denyAction();
+        this.setState({
+          alert: false,
+          confirm: false,
+          alertMessage: ""
+        })
+      },
+      onClick: () => {
+        this.setState({
+          alert: false,
+          alertMessage: ""
+        })
+      }
+    };
+  }
+  /**
+   *
+   */
   renderTabs() {
     if (!this.state) return null;
+
     var tabs = this.props.tabs;
 
     return tabs.map((item, i) =>  {
@@ -31,7 +92,9 @@ class Application extends React.Component {
       );
     });
   }
-
+  /**
+   *
+   */
   renderContent() {
     if (!this.state) return null;
 
@@ -43,19 +106,23 @@ class Application extends React.Component {
       model = require("models/" + this.state.content);
     }
     catch (e) {
-      return (<div>404</div>)
+      return (<div></div>)
     }
     return React.createElement(content, {
       model: model,
-      config: this.props.config[this.state.content]
+      config: this.props.config[this.state.content],
+      application: this
     });
   }
-
+  /**
+   *
+   */
   render() {
     var content = this.renderContent();
     var tabs = this.renderTabs();
     return (
       <main>
+        <Alert options={this.getAlertOptions()}/>
         <nav>
           <ul className="nav nav-tabs">
             {tabs}

@@ -9,6 +9,7 @@ using Sweco.Services.DataContracts;
 using System.Web.Hosting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Sweco.Services.DataContracts.ToolOptions;
 
 namespace Sweco.Services.DataAccess
 {      
@@ -51,6 +52,7 @@ namespace Sweco.Services.DataAccess
 
     sealed class SettingsDbContext : DbContext
         {
+            private string mapFile = "map_1.json";
             private string layerFile = "layers.json";
             /// <summary>
             /// 
@@ -66,11 +68,33 @@ namespace Sweco.Services.DataAccess
             /// <summary>
             /// 
             /// </summary>
+            /// <returns></returns>
+            private MapConfig readMapConfigFromFile()
+            {
+                string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.mapFile);
+                string jsonInput = System.IO.File.ReadAllText(file);
+                return JsonConvert.DeserializeObject<MapConfig>(jsonInput);
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="mapConfig"></param>
+            private void saveMapConfigToFile(MapConfig mapConfig)
+            {
+                string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.mapFile);
+                string jsonOutput = JsonConvert.SerializeObject(mapConfig, Formatting.Indented);
+                System.IO.File.WriteAllText(file, jsonOutput);
+            }
+
+            /// <summary>
+            /// 
+            /// </summary>
             /// <param name="layerConfig"></param>
             private void saveLayerConfigToFile(LayerConfig layerConfig) 
             {
                 string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.layerFile);
-                string jsonOutput = JsonConvert.SerializeObject(layerConfig);
+                string jsonOutput = JsonConvert.SerializeObject(layerConfig, Formatting.Indented);
                 System.IO.File.WriteAllText(file, jsonOutput);
             }
 
@@ -203,6 +227,14 @@ namespace Sweco.Services.DataAccess
                     layerConfig.layers.RemoveAt(index);
                 }
                 this.saveLayerConfigToFile(layerConfig);
+            }
+
+            public void UpdateLayerMenu(LayerMenuOptions layerMenu)
+            {
+                MapConfig config = readMapConfigFromFile();
+                var tool = config.tools.Find(t => t.type == "layerswitcher");
+                tool.options = layerMenu;
+                this.saveMapConfigToFile(config);
             }
     }
 }

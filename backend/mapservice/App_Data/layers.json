@@ -1,1 +1,96 @@
-{"layers":[{"id":"fda4ceb6-b207-48f2-4ea3-7e3d96ceb41a","caption":"Adress","url":"194.71.132.27/geoserver28/wms?","owner":"Lantmäterienheten","date":"1458044576744","content":"Fastighetsytorna i göteborg","legend":"http://url.till/legend.pngn","layers":["sweco:adress"],"infobox":"Namn: {adress}\nPostnummer: {postnr}\nApa","searchFields":["fnr_fir","fastighet","hippt"],"visibleAtStart":false},{"id":"51d91fd2-0b68-13cb-8b3a-cc67b8993763","caption":"Busslinje","url":"194.71.132.27/geoserver28/wms","owner":"SBK","date":"1458047744162","content":"Busslinjer","legend":"apa","layers":["sweco:busslinje"],"infobox":"","searchFields":["linje_nr","fran"],"visibleAtStart":false}]}
+{
+  "layers": [
+    {
+      "id": "fda4ceb6-b207-48f2-4ea3-7e3d96ceb41a",
+      "caption": "Adress",
+      "url": "194.71.132.27/geoserver28/wms?",
+      "owner": "Lantmäterienheten",
+      "date": "1458044576744",
+      "content": "Fastighetsytorna i göteborg",
+      "legend": "http://url.till/legend.pngn",
+      "layers": [
+        "sweco:adress"
+      ],
+      "infobox": "Namn: {adress}\nPostnummer: {postnr}\nApa",
+      "searchFields": [
+        "fnr_fir",
+        "fastighet",
+        "hippt"
+      ],
+      "visibleAtStart": false
+    },
+    {
+      "id": "51d91fd2-0b68-13cb-8b3a-cc67b8993763",
+      "caption": "Busslinje",
+      "url": "194.71.132.27/geoserver28/wms",
+      "owner": "SBK",
+      "date": "1458133183029",
+      "content": "Busslinjer",
+      "legend": "apa",
+      "layers": [
+        "sweco:busslinje"
+      ],
+      "infobox": "",
+      "searchFields": [
+        "linje_nr",
+        "fran"
+      ],
+      "visibleAtStart": false
+    },
+    {
+      "id": "99bacd81-cbd7-f724-b9fe-ef4747aafcd8",
+      "caption": "Fastighetsyta",
+      "url": "194.71.132.27/geoserver28/wms",
+      "owner": "SBK",
+      "date": "1458049238675",
+      "content": "a",
+      "legend": "a",
+      "layers": [
+        "sweco:fastighetsyta"
+      ],
+      "infobox": "a",
+      "searchFields": [
+        "a"
+      ],
+      "visibleAtStart": false
+    },
+    {
+      "id": "7271fdab-f864-a394-7b8d-3188a99dae60",
+      "caption": "Skolan",
+      "url": "194.71.132.27/geoserver28/wms",
+      "owner": "SBK",
+      "date": "1458200637815",
+      "content": "Skolor i partille.",
+      "legend": "",
+      "layers": [
+        "sweco:skola"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "visibleAtStart": true
+    },
+    {
+      "id": "730a66b0-3503-07fa-acda-1179a85c7c4a",
+      "caption": "Bakgrundskarta",
+      "url": "194.71.132.27/geoserver28/wms",
+      "owner": "SBK",
+      "date": "1458221175882",
+      "content": "a",
+      "legend": "a",
+      "layers": [
+        "sweco:busslinje",
+        "sweco:adress",
+        "sweco:fastighetsyta",
+        "sweco:trafikbuller",
+        "sweco:skola"
+      ],
+      "infobox": "a",
+      "searchFields": [
+        "a"
+      ],
+      "visibleAtStart": true
+    }
+  ]
+}

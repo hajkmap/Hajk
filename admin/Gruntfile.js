@@ -74,7 +74,8 @@ module.exports = function (grunt) {
             "src/js/views/compiled/manager.js": ["src/js/views/manager.jsx"],
             "src/js/views/compiled/menu.js": ["src/js/views/menu.jsx"],
             "src/js/views/compiled/map.js": ["src/js/views/map.jsx"],
-            "src/js/views/compiled/release.js": ["src/js/views/release.jsx"]
+            "src/js/views/compiled/release.js": ["src/js/views/release.jsx"],
+            "src/js/views/compiled/alert.js": ["src/js/views/alert.jsx"]
           }
         }
       },
@@ -102,6 +103,7 @@ module.exports = function (grunt) {
               "views/menu":         "./src/js/views/compiled/menu.js",
               "views/map":          "./src/js/views/compiled/map.js",
               "views/release":      "./src/js/views/compiled/release.js",
+              "views/alert":        "./src/js/views/compiled/alert.js",
               "models/application": "./src/js/models/application.js",
               "models/manager":     "./src/js/models/manager.js",
               "models/menu":        "./src/js/models/menu.js",
@@ -226,19 +228,6 @@ module.exports = function (grunt) {
             options: {
               livereload: true
             }
-          }
-      },
-
-      proxy: {
-          proxy1 : {
-              options : { // start proxy server, listening to the default port 9000
-                  port: 9000,
-                  router : {        // make it forward requests according to this table
-                      'localhost/settings/settings': 'http://192.168.100.78/karta-dev/settings/settings/',
-                      'localhost': 'http://localhost:3000'
-                  },
-                  changeOrigin : true
-              }
           }
       }
 
