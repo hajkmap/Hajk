@@ -96,17 +96,13 @@ module.exports = Backbone.Collection.extend({
   },
 
   toJSON: function () {
-    var json = this.initialConfig;
-    var jsonLayers = this.map((layer) => {
-
-      var jsonLayer = layer.toJSON()
-      ,   jsonLayerInitialConfig = _.find(json, (c) => { return c.options.name === jsonLayer.name;  });
-
-      return {
-            "type": jsonLayerInitialConfig.type,
-            "options": jsonLayer
-      };
+    return this.initialConfig.map(layer => {
+      var found = this.find(collectionLayer => collectionLayer.get('id') === layer.id);
+      if (found) {
+        layer.visibleAtStart = found.get('visible');
+      }
+      return layer;
     });
-    return jsonLayers;
   }
+
 });
