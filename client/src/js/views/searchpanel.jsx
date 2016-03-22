@@ -73,7 +73,7 @@ SearchResultGroup = React.createClass({
             this.props.result.hits.map((hit, i) => {
 
               var hitId = "hit-" + i + "-" + id;
-              var title = hit.getProperties()[this.props.result.propertyName];
+              var title = hit.getProperties()[this.props.result.propertyName] || this.props.result.propertyName;
               var index = i;
 
               return (<div key={hitId} index={i} onClick={this.handleClick.bind(this, hit, i)}>{title}</div>);

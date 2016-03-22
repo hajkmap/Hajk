@@ -222,9 +222,10 @@ module.exports = ToolModel.extend({
     var filter = (layer) => {
       var criteria = this.get('filter');
       var visible  = this.get('filterVisible');
+      var searchable = layer.get('search');
       return criteria === '*' ?
-             (layer.get('search') !== undefined && (visible ? layer.get('visible') : true)) :
-             (layer.get('search') !== undefined && (visible ? layer.get('visible') : true) && layer.get('name') === criteria);
+             (searchable && (visible ? layer.get('visible') : true)) :
+             (searchable && (visible ? layer.get('visible') : true) && layer.get('caption') === criteria);
     };
     return this.get('layerCollection').filter(filter);
   },

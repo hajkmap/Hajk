@@ -39,9 +39,8 @@ function removeFromMap(layer) {
  */
 module.exports = Backbone.Collection.extend({
 
-   model: function (args, event) {
-
-      var layer_config = {
+  model: function (args, event) {
+    var layer_config = {
         type : "wms",
         options: {
           "id": args.id,
@@ -67,11 +66,11 @@ module.exports = Backbone.Collection.extend({
       };
 
       if (args.searchFields && args.searchFields[0] !== "") {
-        layer_config.search = {
+        layer_config.options.search = {
           "url": "/postProxy.aspx?url=http://" + args.url.replace('wms', 'wfs'),
           "featureType": args.layers[0].split(':')[1],
-          "propertyName": args.searchFields,
-          "displayName": args.searchName || "Sökträff",
+          "propertyName": args.searchFields.join(','),
+          "displayName": args.searchFields[0] || "Sökträff",
           "srsName": "EPSG:3006"
         };
       }
