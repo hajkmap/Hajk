@@ -75,8 +75,6 @@ class Manager extends React.Component {
    */
   loadLayer(e, layer) {
 
-    console.log(layer.drawOrder);
-
     this.setState({
       mode: "edit",
       id: layer.id,

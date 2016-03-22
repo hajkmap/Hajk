@@ -59,24 +59,21 @@
       var x = parseFloat(b.x) || a.map.center[0]
       ,   y = parseFloat(b.y) || a.map.center[1]
       ,   z = parseInt(b.z) || a.map.zoom
-      ,   l = b.l
-      ,   t = parseInt(b.t) || ((ls && ls.options) ? ls.options.selectedTheme : 1);
+      ,   l = b.l;
 
       a.map.center[0] = x;
       a.map.center[1] = y;
       a.map.zoom      = z;
 
-      ls.options.selectedTheme = t;
-
       if (l) {
         l = l.split(',');
-        a.layers
-         .filter((layer) =>
-            typeof l.find(str => str === layer.options.name) === "string"
+        a.layers =
+          a.layers.filter(layer =>
+            typeof l.find(str => str === layer.id) === "string"
           )
-         .forEach((layer) => {
-            layer.options.visible = true
-          });
+        a.layers.forEach(layer => {
+          layer.visible = true
+        });
       }
 
       return a;
