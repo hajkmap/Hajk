@@ -41,47 +41,47 @@ module.exports = Backbone.Collection.extend({
 
   model: function (args, event) {
     var layer_config = {
-        type : "wms",
-        options: {
-          "id": args.id,
-          "url": "/util/proxy/geturl/" + args.url,
-          "name": args.id,
-          "caption": args.caption,
-          "visible": args.visibleAtStart,
-          "singleTile" : false,
-          "opacity": 1,
-          "queryable": true,
-          "information": args.infobox,
-          "legend" : [{
-            "Url" : args.legend || `http://${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${args.layers[0]}`,
-            "Description" : "Teckenförklaring"
-          }],
-          "params": {
-            "LAYERS": args.layers.join(','),
-            "FORMAT": "image/png",
-            "VERSION": "1.1.0",
-            "SRS": "EPSG:3006"
-          }
+      type : "wms",
+      options: {
+        "id": args.id,
+        "url": "/util/proxy/geturl/" + args.url,
+        "name": args.id,
+        "caption": args.caption,
+        "visible": args.visibleAtStart,
+        "singleTile" : false,
+        "opacity": 1,
+        "queryable": true,
+        "information": args.infobox,
+        "legend" : [{
+          "Url" : args.legend || `http://${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${args.layers[0]}`,
+          "Description" : "Teckenförklaring"
+        }],
+        "params": {
+          "LAYERS": args.layers.join(','),
+          "FORMAT": "image/png",
+          "VERSION": "1.1.0",
+          "SRS": "EPSG:3006"
         }
+      }
+    };
+
+    if (args.searchFields && args.searchFields[0] !== "") {
+      layer_config.options.search = {
+        "url": "/postProxy.aspx?url=http://" + args.url.replace('wms', 'wfs'),
+        "featureType": args.layers[0].split(':')[1],
+        "propertyName": args.searchFields.join(','),
+        "displayName": args.displayFields ? args.displayFields : (args.searchFields[0] || "Sökträff"),
+        "srsName": "EPSG:3006"
       };
+    }
 
-      if (args.searchFields && args.searchFields[0] !== "") {
-        layer_config.options.search = {
-          "url": "/postProxy.aspx?url=http://" + args.url.replace('wms', 'wfs'),
-          "featureType": args.layers[0].split(':')[1],
-          "propertyName": args.searchFields.join(','),
-          "displayName": args.searchFields[0] || "Sökträff",
-          "srsName": "EPSG:3006"
-        };
-      }
-
-      var Layer = types[layer_config.type];
-      if(Layer) {
-        return new Layer(layer_config.options, layer_config.type);
-      } else {
-        throw "Layer type not supported " + layer_config.type;
-      }
-   },
+    var Layer = types[layer_config.type];
+    if(Layer) {
+      return new Layer(layer_config.options, layer_config.type);
+    } else {
+      throw "Layer type not supported " + layer_config.type;
+    }
+  },
 
   initialize: function (options, args) {
     this.shell = args.shell;

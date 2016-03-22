@@ -13,6 +13,7 @@ const defaultState = {
   legend: "",
   owner: "",
   searchFields: "",
+  displayFields: "",
   url: "194.71.132.27/geoserver28/wms",
   visibleAtStart: false,
   drawOrder: 1
@@ -86,6 +87,7 @@ class Manager extends React.Component {
       legend: layer.legend,
       owner: layer.owner,
       searchFields: layer.searchFields,
+      displayFields: layer.displayFields,
       url: layer.url,
       visibleAtStart: layer.visibleAtStart,
       drawOrder: layer.drawOrder
@@ -96,6 +98,7 @@ class Manager extends React.Component {
       this.validate("caption");
       this.validate("content");
       this.validate("searchFields");
+      this.validate("displayFields");
       this.loadWMSCapabilities(undefined, () => {
         this.setState({
           addedLayers: layer.layers
@@ -328,6 +331,7 @@ class Manager extends React.Component {
     ,   valid = true;
 
     switch (fieldName) {
+      case "displayFields":
       case "searchFields":
         valid = value.every(val => /^\w+$/.test(val));
         if (value.length === 1 && value[0] === "") {
@@ -385,6 +389,7 @@ class Manager extends React.Component {
     if (fieldName === 'layers') value = format_layers(this.state.addedLayers);
     if (fieldName === 'visibleAtStart') value = input.checked;
     if (fieldName === 'searchFields') value = value.split(',');
+    if (fieldName === 'displayFields') value = value.split(',');
 
     return value;
   }
@@ -410,7 +415,8 @@ class Manager extends React.Component {
       this.validate("caption"),
       this.validate("content"),
       this.validate("layers"),
-      this.validate("searchFields")
+      this.validate("searchFields"),
+      this.validate("displayFields")
     ];
 
     if (validations.every(v => v === true)) {
@@ -426,6 +432,7 @@ class Manager extends React.Component {
         layers: this.getValue("layers"),
         infobox: this.getValue("infobox"),
         searchFields: this.getValue("searchFields"),
+        displayFields: this.getValue("displayFields"),
         visibleAtStart: this.getValue("visibleAtStart"),
         drawOrder: this.getValue("drawOrder")
       };
@@ -585,6 +592,16 @@ class Manager extends React.Component {
                   onChange={(e) => this.validate("searchFields", e)}
                   value={this.state.searchFields}
                   className={this.getValidationClass("searchFields")}
+                />
+              </div>
+              <div>
+                <label>Visningsfält</label>
+                <input
+                  type="text"
+                  ref="input_displayFields"
+                  onChange={(e) => this.validate("displayFields", e)}
+                  value={this.state.displayFields}
+                  className={this.getValidationClass("displayFields")}
                 />
               </div>
               <div>

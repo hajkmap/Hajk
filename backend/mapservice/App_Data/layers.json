@@ -17,6 +17,7 @@
         "fastighet",
         "hippt"
       ],
+      "displayFields": null,
       "visibleAtStart": false,
       "drawOrder": 2
     },
@@ -36,6 +37,7 @@
         "linje_nr",
         "fran"
       ],
+      "displayFields": null,
       "visibleAtStart": true,
       "drawOrder": 1
     },
@@ -44,9 +46,9 @@
       "caption": "Fastighetsyta",
       "url": "194.71.132.27/geoserver28/wms",
       "owner": "SBK",
-      "date": "1458649440987",
+      "date": "1458656976369",
       "content": "a",
-      "legend": "a",
+      "legend": "",
       "layers": [
         "sweco:fastighetsyta"
       ],
@@ -54,6 +56,10 @@
       "searchFields": [
         "fastighet",
         "fnr_fir"
+      ],
+      "displayFields": [
+        "fastighet",
+        "omr"
       ],
       "visibleAtStart": true,
       "drawOrder": 0
@@ -73,6 +79,7 @@
       "searchFields": [
         "namn"
       ],
+      "displayFields": null,
       "visibleAtStart": true,
       "drawOrder": 3
     }

@@ -27,6 +27,8 @@ namespace Sweco.Services.DataContracts
         public string infobox { get; set; }
 
         public string[] searchFields { get; set; }
+        
+        public string[] displayFields { get; set; }
 
         public bool visibleAtStart { get; set; }
 

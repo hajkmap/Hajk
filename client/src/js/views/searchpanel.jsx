@@ -71,11 +71,16 @@ SearchResultGroup = React.createClass({
         <div className={groupStyleClass}>
           {
             this.props.result.hits.map((hit, i) => {
-
+              function getTitle(property) {
+                if (Array.isArray(property)) {
+                  return property.map(item => hit.getProperties()[item]).join(', ');
+                } else {
+                  return hit.getProperties()[property] || property
+                }
+              }
               var hitId = "hit-" + i + "-" + id;
-              var title = hit.getProperties()[this.props.result.propertyName] || this.props.result.propertyName;
+              var title = getTitle(this.props.result.displayName);
               var index = i;
-
               return (<div key={hitId} index={i} onClick={this.handleClick.bind(this, hit, i)}>{title}</div>);
             })
           }
@@ -258,7 +263,6 @@ module.exports = React.createClass({
             if (groups && groups.length > 0) {
               return groups.map((item, i) => {
                 var id = "group-" + i;
-                var propertyName = item.propertyName;
                 return (
                   <SearchResultGroup
                         id={id}
@@ -292,7 +296,9 @@ module.exports = React.createClass({
       if (this.state.loading) {
         results = (<h3>Laddar..</h3>);
       } else {
-        if (this.refs.searchInput.value.length > 4 || this.state.force) {
+        if ((this.refs.searchInput &&
+             this.refs.searchInput.value.length > 4) ||
+             this.state.force) {
           results = this.renderResults();
         } else {
           results = (<p className="alert alert-info">Skriv minst fyra tecken för att påbörja automatisk sökning. Tryck på <b>retur</b> för att forcera en sökning.</p>)
