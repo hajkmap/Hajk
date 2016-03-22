@@ -25,7 +25,7 @@
       "caption": "Busslinjer",
       "url": "194.71.132.27/geoserver28/wms",
       "owner": "SBK",
-      "date": "1458632743819",
+      "date": "1458651058565",
       "content": "Busslinjer",
       "legend": "",
       "layers": [
@@ -36,7 +36,7 @@
         "linje_nr",
         "fran"
       ],
-      "visibleAtStart": false,
+      "visibleAtStart": true,
       "drawOrder": 1
     },
     {

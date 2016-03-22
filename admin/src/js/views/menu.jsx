@@ -4,7 +4,7 @@ var defaultState = {
 
 $.fn.editable = function(component) {
 
-  function edit(node) {
+  function edit(node, e) {
 
       function reset() {
         ok.remove();
@@ -87,17 +87,17 @@ $.fn.editable = function(component) {
     var node = $(e.target);
 
     if (node.hasClass("group-name")) {
-      edit(node);
+      edit(node, e);
     }
 
     if (node.hasClass("layer-name")) {
-      edit(node);
+      edit(node, e);
     }
   }
 
   var onClick = (e) => {
-    e.stopPropagation();
     enableEdit(e);
+    e.stopPropagation();
   }
 
   this.off('click');
