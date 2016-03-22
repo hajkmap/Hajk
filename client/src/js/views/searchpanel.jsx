@@ -119,6 +119,11 @@ module.exports = React.createClass({
    */
   handleKeyDown: function (event) {
     if (event.keyCode === 13) {
+      event.preventDefault();
+      this.props.model.set('value', event.target.value);
+      this.setState({
+        force: true
+      });
       this.search();
     }
   },
@@ -287,23 +292,36 @@ module.exports = React.createClass({
       if (this.state.loading) {
         results = (<h3>Laddar..</h3>);
       } else {
-        results = this.renderResults();
+        if (this.refs.searchInput.value.length > 4 || this.state.force) {
+          results = this.renderResults();
+        } else {
+          results = (<p className="alert alert-info">Skriv minst fyra tecken för att påbörja automatisk sökning. Tryck på <b>retur</b> för att forcera en sökning.</p>)
+        }
+
       }
     }
 
     var search_on_input = (event) => {
       this.value = event.target.value;
       this.props.model.set('value', this.value);
-      this.setState({ value: this.value });;
+      this.setState({
+        value: this.value,
+        force: false
+      });
+
       if (this.refs.searchInput.value.length > 4) {
         this.search();
+      } else {
+        this.setState({
+          loading: false
+        });
       }
     };
 
     return (
       <Panel title="Sök i kartan" onCloseClicked={this.props.onCloseClicked}>
         <div className="search-tools">
-          <input ref="searchInput" onChange={search_on_input} onKeyDown={this.handleKeyDown} value={value} type="search" />
+          <input ref="searchInput" onChange={search_on_input} onKeyDown={this.handleKeyDown} value={value} type="text" placeholder="Skriv här för att söka.."/>
           {options}
           <button onClick={this.clear} type="submit" className="btn btn-default">Rensa</button>
           {results}
