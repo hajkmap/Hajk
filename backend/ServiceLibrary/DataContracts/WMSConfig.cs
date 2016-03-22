@@ -29,5 +29,7 @@ namespace Sweco.Services.DataContracts
         public string[] searchFields { get; set; }
 
         public bool visibleAtStart { get; set; }
+
+        public int drawOrder { get; set; }
     }
 }

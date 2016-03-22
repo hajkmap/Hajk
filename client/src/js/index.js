@@ -2,11 +2,12 @@
 
   "use strict";
 
-  var ApplicationView = require('views/application');
-  var configPath = "clientconfig.json";
-  var req;
-  var elem;
-  var that = {};
+  var ApplicationView = require('views/application')
+  ,   configPath      = "/mapservice/settings/config/map_1"
+  ,   layersPath      = "/mapservice/settings/config/layers"
+  ,   req
+  ,   elem
+  ,   that = {};
 
   if (!window.Promise) {
     elem = document.createElement('script');
@@ -80,19 +81,30 @@
 
       return a;
   };
+  /**
+   *
+   *
+   */
+  that.start = function () {
+      $.ajaxSetup({ cache: false });
 
-  $.ajaxSetup({ cache: false });
+      req = $.getJSON(configPath);
 
-  req = $.getJSON(configPath);
+      req.done(config => {
+        var layers = $.getJSON(layersPath);
+        layers.done(data => {
+          data.layers.sort((a, b) =>
+            a.drawOrder === b.drawOrder ? 0 : a.drawOrder > b.drawOrder ? 1 : -1
+          );
+          config.layers = data.layers;
+          that.init(
+            that.mergeConfig(config, that.parseQueryParams())
+          );
+        });
+      });
 
-  req.done(function (config) {
-    that.init(
-      that.mergeConfig(config, that.parseQueryParams())
-    );
-  });
+  }
 
-  req.error(function (e, a) {
-    that.start();
-  });
+  return that;
 
-}());
+}().start());

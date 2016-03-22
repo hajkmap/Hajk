@@ -28,9 +28,7 @@
     {
       "type": "layerswitcher",
       "options": {
-        "baselayers": [
-          "730a66b0-3503-07fa-acda-1179a85c7c4a"
-        ],
+        "baselayers": [],
         "groups": [
           {
             "id": "afa18725-2fb4-ef3a-331d-8fb74a31dc8d",
@@ -38,21 +36,22 @@
             "name": "Grupp 1",
             "toggled": true,
             "layers": [
-              "fda4ceb6-b207-48f2-4ea3-7e3d96ceb41a",
-              "51d91fd2-0b68-13cb-8b3a-cc67b8993763"
+              "99bacd81-cbd7-f724-b9fe-ef4747aafcd8",
+              "642c8d9e-68a7-da67-d7c6-51d9a2b4558c",
+              "fda4ceb6-b207-48f2-4ea3-7e3d96ceb41a"
             ],
-            "groups": []
-          },
-          {
-            "id": "071decba-6670-65b8-22c1-1a72e22cbbc0",
-            "parent": "-1",
-            "name": "Grupp 2",
-            "toggled": true,
-            "layers": [
-              "7271fdab-f864-a394-7b8d-3188a99dae60",
-              "99bacd81-cbd7-f724-b9fe-ef4747aafcd8"
-            ],
-            "groups": []
+            "groups": [
+              {
+                "id": "071decba-6670-65b8-22c1-1a72e22cbbc0",
+                "parent": "afa18725-2fb4-ef3a-331d-8fb74a31dc8d",
+                "name": "Grupp 2",
+                "toggled": true,
+                "layers": [
+                  "51d91fd2-0b68-13cb-8b3a-cc67b8993763"
+                ],
+                "groups": []
+              }
+            ]
           }
         ]
       }

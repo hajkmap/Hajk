@@ -80,7 +80,7 @@ var LayerPanel = React.createClass({
   getLayersForGroup: function(groupId) {
 
     var layers = this.props.model.get("layerCollection")
-    ,   group = this.findGroupInConfig(this.themeGroups, groupId)
+    ,   group = this.findGroupInConfig(this.groups, groupId)
     ,   result;
 
     if (!layers || !group) {
@@ -137,21 +137,19 @@ var LayerPanel = React.createClass({
    *
    */
   updateGroupToggledCheckbox: function recur(layer) {
-
     setTimeout(() => {
+      if (layer && layer.get) {
 
-      var groupId = typeof layer === 'number' ? layer : layer.get('group')
-      ,   group   = this.findGroupInConfig(this.themeGroups, groupId)
-      ,   layers  = this.drillGroupForLayers(group);
+        var groupId = typeof layer === 'number' ? layer : layer.get('group')
+        ,   group   = this.findGroupInConfig(this.groups, groupId)
+        ,   layers  = this.drillGroupForLayers(group);
 
-      if (group.parent) {
-        recur.call(this, group.parent);
+        if (group.parent) {
+          recur.call(this, group.parent);
+        }
+        this.refs["group_" + groupId].checked = layers.every(lyr => lyr.getVisible() === true);
       }
-
-      this.refs["group_" + groupId].checked = layers.every(lyr => lyr.getVisible() === true);
-
     }, 0);
-
   },
   /**
    *
@@ -281,13 +279,9 @@ var LayerPanel = React.createClass({
    */
   render: function () {
 
-    var themes = this.props.model.get('themes')
-    ,   selectedTheme = this.props.model.get('selectedTheme')
-    ,   groups;
+    this.groups = this.props.model.get('groups');
 
-    options = this.renderThemeOptions(themes);
-    this.themeGroups = themes.find(theme => theme.id == selectedTheme).groups;
-    groups = this.renderGroups(this.themeGroups);
+    groups = this.renderGroups(this.props.model.get('groups'));
 
     this.props.model.get('layerCollection').forEach(layer => {
       this.updateGroupToggledCheckbox(layer);
@@ -295,10 +289,6 @@ var LayerPanel = React.createClass({
 
     return (
       <Panel title="Teckenförklaring" onCloseClicked={this.props.onCloseClicked}>
-        <label>Välj kartinnehåll&nbsp;</label>
-        <select onChange={this.selectTheme} defaultValue={this.props.model.get('selectedTheme')}>
-          {options}
-        </select>
         <div className="layer-panel">
           {groups}
         </div>

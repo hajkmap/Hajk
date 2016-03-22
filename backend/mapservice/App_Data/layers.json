@@ -5,28 +5,29 @@
       "caption": "Adress",
       "url": "194.71.132.27/geoserver28/wms?",
       "owner": "Lantmäterienheten",
-      "date": "1458044576744",
+      "date": "1458313524289",
       "content": "Fastighetsytorna i göteborg",
-      "legend": "http://url.till/legend.pngn",
+      "legend": "",
       "layers": [
         "sweco:adress"
       ],
-      "infobox": "Namn: {adress}\nPostnummer: {postnr}\nApa",
+      "infobox": "Namn: {adress}\nPostnummer: {postnr}",
       "searchFields": [
         "fnr_fir",
         "fastighet",
         "hippt"
       ],
-      "visibleAtStart": false
+      "visibleAtStart": false,
+      "drawOrder": 2
     },
     {
       "id": "51d91fd2-0b68-13cb-8b3a-cc67b8993763",
-      "caption": "Busslinje",
+      "caption": "Busslinjer",
       "url": "194.71.132.27/geoserver28/wms",
       "owner": "SBK",
-      "date": "1458133183029",
+      "date": "1458632743819",
       "content": "Busslinjer",
-      "legend": "apa",
+      "legend": "",
       "layers": [
         "sweco:busslinje"
       ],
@@ -35,62 +36,44 @@
         "linje_nr",
         "fran"
       ],
-      "visibleAtStart": false
+      "visibleAtStart": false,
+      "drawOrder": 1
     },
     {
       "id": "99bacd81-cbd7-f724-b9fe-ef4747aafcd8",
       "caption": "Fastighetsyta",
       "url": "194.71.132.27/geoserver28/wms",
       "owner": "SBK",
-      "date": "1458049238675",
+      "date": "1458314079024",
       "content": "a",
       "legend": "a",
       "layers": [
         "sweco:fastighetsyta"
       ],
-      "infobox": "a",
+      "infobox": "Fastighet {fastighet}  \n\nArea {area}  \n\nUrl <a href=\"{url_alla}\" target=\"_blank\">Länk</a>  \n\nUrl [Länk]({url_alla})",
       "searchFields": [
         "a"
       ],
-      "visibleAtStart": false
+      "visibleAtStart": true,
+      "drawOrder": 0
     },
     {
-      "id": "7271fdab-f864-a394-7b8d-3188a99dae60",
-      "caption": "Skolan",
+      "id": "642c8d9e-68a7-da67-d7c6-51d9a2b4558c",
+      "caption": "Skola",
       "url": "194.71.132.27/geoserver28/wms",
       "owner": "SBK",
-      "date": "1458200637815",
-      "content": "Skolor i partille.",
+      "date": "1458313688727",
+      "content": "Skolor",
       "legend": "",
       "layers": [
         "sweco:skola"
       ],
-      "infobox": "",
+      "infobox": "Skola: {namn}",
       "searchFields": [
-        ""
+        "namn"
       ],
-      "visibleAtStart": true
-    },
-    {
-      "id": "730a66b0-3503-07fa-acda-1179a85c7c4a",
-      "caption": "Bakgrundskarta",
-      "url": "194.71.132.27/geoserver28/wms",
-      "owner": "SBK",
-      "date": "1458221175882",
-      "content": "a",
-      "legend": "a",
-      "layers": [
-        "sweco:busslinje",
-        "sweco:adress",
-        "sweco:fastighetsyta",
-        "sweco:trafikbuller",
-        "sweco:skola"
-      ],
-      "infobox": "a",
-      "searchFields": [
-        "a"
-      ],
-      "visibleAtStart": true
+      "visibleAtStart": true,
+      "drawOrder": 3
     }
   ]
 }

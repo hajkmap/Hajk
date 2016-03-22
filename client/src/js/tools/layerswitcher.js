@@ -24,8 +24,8 @@ module.exports = ToolModel.extend({
 
     initialize: function (options) {
       ToolModel.prototype.initialize.call(this);
-      var theme = options.themes.find(theme => theme.id === this.get('selectedTheme'));
-      this.setToggled(theme.groups);
+      //var theme = options.themes.find(theme => theme.id === this.get('selectedTheme'));
+      this.setToggled(options.groups);
     },
 
     configure: function (shell) {

@@ -40,11 +40,47 @@ function removeFromMap(layer) {
 module.exports = Backbone.Collection.extend({
 
    model: function (args, event) {
-      var Layer = types[args.type];
+
+      var layer_config = {
+        type : "wms",
+        options: {
+          "id": args.id,
+          "url": "/util/proxy/geturl/" + args.url,
+          "name": args.id,
+          "caption": args.caption,
+          "visible": args.visibleAtStart,
+          "singleTile" : false,
+          "opacity": 1,
+          "queryable": true,
+          "information": args.infobox,
+          "legend" : [{
+            "Url" : args.legend || `http://${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${args.layers[0]}`,
+            "Description" : "Teckenförklaring"
+          }],
+          "params": {
+            "LAYERS": args.layers.join(','),
+            "FORMAT": "image/png",
+            "VERSION": "1.1.0",
+            "SRS": "EPSG:3006"
+          }
+        }
+      };
+
+      if (args.searchFields && args.searchFields[0] !== "") {
+        layer_config.search = {
+          "url": "/postProxy.aspx?url=http://" + args.url.replace('wms', 'wfs'),
+          "featureType": args.layers[0].split(':')[1],
+          "propertyName": args.searchFields,
+          "displayName": args.searchName || "Sökträff",
+          "srsName": "EPSG:3006"
+        };
+      }
+
+      var Layer = types[layer_config.type];
       if(Layer) {
-        return new Layer(args.options, args.type);
+        return new Layer(layer_config.options, layer_config.type);
       } else {
-        throw "layer type not supported " + args.type;
+        throw "Layer type not supported " + layer_config.type;
       }
    },
 

@@ -14,7 +14,8 @@ const defaultState = {
   owner: "",
   searchFields: "",
   url: "194.71.132.27/geoserver28/wms",
-  visibleAtStart: false
+  visibleAtStart: false,
+  drawOrder: 1
 };
 /**
  *
@@ -73,6 +74,8 @@ class Manager extends React.Component {
    */
   loadLayer(e, layer) {
 
+    console.log(layer.drawOrder);
+
     this.setState({
       mode: "edit",
       id: layer.id,
@@ -84,7 +87,8 @@ class Manager extends React.Component {
       owner: layer.owner,
       searchFields: layer.searchFields,
       url: layer.url,
-      visibleAtStart: layer.visibleAtStart
+      visibleAtStart: layer.visibleAtStart,
+      drawOrder: layer.drawOrder
     });
 
     setTimeout(() => {
@@ -422,7 +426,8 @@ class Manager extends React.Component {
         layers: this.getValue("layers"),
         infobox: this.getValue("infobox"),
         searchFields: this.getValue("searchFields"),
-        visibleAtStart: this.getValue("visibleAtStart")
+        visibleAtStart: this.getValue("visibleAtStart"),
+        drawOrder: this.getValue("drawOrder")
       };
 
       if (this.state.mode === "add") {
@@ -593,6 +598,16 @@ class Manager extends React.Component {
                     }
                   }
                   checked={this.state.visibleAtStart}
+                />
+              </div>
+              <div>
+                <label>Ritordning</label>
+                <input
+                  type="text"
+                  ref="input_drawOrder"
+                  onChange={(e) => this.validate("drawOrder", e)}
+                  value={this.state.drawOrder}
+                  className={this.getValidationClass("drawOrder")}
                 />
               </div>
             </fieldset>
