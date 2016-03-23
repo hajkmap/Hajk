@@ -5,7 +5,7 @@
       "caption": "Adress",
       "url": "194.71.132.27/geoserver28/wms?",
       "owner": "Lantmäterienheten",
-      "date": "1458313524289",
+      "date": "1458736504092",
       "content": "Fastighetsytorna i göteborg",
       "legend": "",
       "layers": [
@@ -17,8 +17,11 @@
         "fastighet",
         "hippt"
       ],
-      "displayFields": null,
+      "displayFields": [
+        ""
+      ],
       "visibleAtStart": false,
+      "queryable": true,
       "drawOrder": 2
     },
     {
@@ -26,7 +29,7 @@
       "caption": "Busslinjer",
       "url": "194.71.132.27/geoserver28/wms",
       "owner": "SBK",
-      "date": "1458662321624",
+      "date": "1458736584485",
       "content": "Busslinjer",
       "legend": "",
       "layers": [
@@ -41,6 +44,7 @@
         ""
       ],
       "visibleAtStart": false,
+      "queryable": true,
       "drawOrder": 1
     },
     {
@@ -48,7 +52,7 @@
       "caption": "Fastighetsyta",
       "url": "194.71.132.27/geoserver28/wms",
       "owner": "SBK",
-      "date": "1458657287095",
+      "date": "1458737571312",
       "content": "a",
       "legend": "",
       "layers": [
@@ -63,7 +67,8 @@
         "fastighet",
         "omr"
       ],
-      "visibleAtStart": true,
+      "visibleAtStart": false,
+      "queryable": true,
       "drawOrder": 0
     },
     {
@@ -71,7 +76,7 @@
       "caption": "Skolor",
       "url": "194.71.132.27/geoserver28/wms",
       "owner": "SBK",
-      "date": "1458661761341",
+      "date": "1458736512087",
       "content": "Skolor",
       "legend": "",
       "layers": [
@@ -85,7 +90,37 @@
         "namn"
       ],
       "visibleAtStart": true,
+      "queryable": true,
       "drawOrder": 3
+    },
+    {
+      "id": "c2328689-5897-546d-02c2-4b4765a068e4",
+      "caption": "Bakgrundskarta WMS",
+      "url": "www.asp-mapservices.com/ravegeo/map2/WMS?name=lm2013",
+      "owner": "SBK",
+      "date": "1458737576489",
+      "content": "Bakgrundskarta",
+      "legend": "",
+      "layers": [
+        "Oversiktskartan_utan_texter",
+        "Oversiktskartan_texter",
+        "Vagkartan_utan_texter",
+        "Terrangkartan_utan_texter",
+        "Tatortskartan_texter",
+        "Terrangkartan_texter",
+        "Vagkartan_texter",
+        "Tatortskartan_utan_texter"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": true,
+      "queryable": false,
+      "drawOrder": -1
     }
   ]
 }

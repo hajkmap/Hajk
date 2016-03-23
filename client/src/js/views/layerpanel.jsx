@@ -1,5 +1,6 @@
 var Panel = require('views/panel');
 var LayerItem = require('views/layeritem');
+var BackgroundSwitcher = require('components/backgroundswitcher');
 
 /**
  *
@@ -297,6 +298,7 @@ var LayerPanel = React.createClass({
     return (
       <Panel title="Teckenförklaring" onCloseClicked={this.props.onCloseClicked}>
         <div className="layer-panel">
+          <BackgroundSwitcher layers={this.props.model.getBaseLayers()}></BackgroundSwitcher>
           {groups}
         </div>
       </Panel>

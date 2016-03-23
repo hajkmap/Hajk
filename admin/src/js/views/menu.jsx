@@ -278,7 +278,7 @@ class Menu extends React.Component {
         this.props.application.setState({
           content: "menu",
           alert: true,
-          alertMessage: "Uppdateringen Lyckades."
+          alertMessage: "Uppdateringen lyckades."
         });
       } else {
         this.props.application.setState({

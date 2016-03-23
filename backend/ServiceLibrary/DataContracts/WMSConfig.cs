@@ -32,6 +32,9 @@ namespace Sweco.Services.DataContracts
 
         public bool visibleAtStart { get; set; }
 
+        public bool queryable { get; set; }
+
         public int drawOrder { get; set; }
+        
     }
 }

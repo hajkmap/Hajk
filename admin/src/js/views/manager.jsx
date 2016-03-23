@@ -16,6 +16,7 @@ const defaultState = {
   displayFields: "",
   url: "194.71.132.27/geoserver28/wms",
   visibleAtStart: false,
+  queryable: true,
   drawOrder: 1
 };
 /**
@@ -88,6 +89,7 @@ class Manager extends React.Component {
       displayFields: layer.displayFields,
       url: layer.url,
       visibleAtStart: layer.visibleAtStart,
+      queryable: layer.queryable,
       drawOrder: layer.drawOrder
     });
 
@@ -386,6 +388,7 @@ class Manager extends React.Component {
     if (fieldName === 'date') value = create_date();
     if (fieldName === 'layers') value = format_layers(this.state.addedLayers);
     if (fieldName === 'visibleAtStart') value = input.checked;
+    if (fieldName === 'queryable') value = input.checked;
     if (fieldName === 'searchFields') value = value.split(',');
     if (fieldName === 'displayFields') value = value.split(',');
 
@@ -432,6 +435,7 @@ class Manager extends React.Component {
         searchFields: this.getValue("searchFields"),
         displayFields: this.getValue("displayFields"),
         visibleAtStart: this.getValue("visibleAtStart"),
+        queryable: this.getValue("queryable"),
         drawOrder: this.getValue("drawOrder")
       };
 
@@ -613,6 +617,19 @@ class Manager extends React.Component {
                     }
                   }
                   checked={this.state.visibleAtStart}
+                />
+              </div>
+              <div>
+                <label>Infoklickbar</label>
+                <input
+                  type="checkbox"
+                  ref="input_queryable"
+                  onChange={
+                    (e) => {
+                      this.setState({queryable: e.target.checked})
+                    }
+                  }
+                  checked={this.state.queryable}
                 />
               </div>
               <div>

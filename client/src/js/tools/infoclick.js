@@ -101,8 +101,8 @@ module.exports = ToolModel.extend({
   onMapPointer: function (event) {
       var wmsLayers = this.layerCollection.filter((layer) => {
             return layer.get("type") === "wms" &&
-                  layer.get("queryable") &&
-                  layer.getVisible();
+                   layer.get("queryable") &&
+                   layer.getVisible();
           }),
           projection = this.map.getView().getProjection().getCode(),
           resolution = this.map.getView().getResolution(),

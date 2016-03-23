@@ -24,8 +24,15 @@ module.exports = ToolModel.extend({
 
     initialize: function (options) {
       ToolModel.prototype.initialize.call(this);
-      //var theme = options.themes.find(theme => theme.id === this.get('selectedTheme'));
       this.setToggled(options.groups);
+    },
+
+    getBaseLayers: function () {
+      return this.get('layerCollection').filter(layer =>
+        this.get('baselayers').find(baselayer =>
+          baselayer === layer.id
+        )
+      )
     },
 
     configure: function (shell) {

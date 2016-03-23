@@ -327,7 +327,22 @@ module.exports = React.createClass({
     return (
       <Panel title="Sök i kartan" onCloseClicked={this.props.onCloseClicked}>
         <div className="search-tools">
-          <input ref="searchInput" onChange={search_on_input} onKeyDown={this.handleKeyDown} value={value} type="text" placeholder="Skriv här för att söka.."/>
+          <div className="form-group">
+            <label>Sök i kartan</label>
+            <div className="input-group">
+              <div className="input-group-addon">
+                <i className="fa fa-search"></i>
+              </div>
+              <input
+                type="text"
+                ref="searchInput"
+                className="form-control"
+                placeholder=""
+                value={value}
+                onKeyDown={this.handleKeyDown}
+                onChange={search_on_input} />
+            </div>
+          </div>
           {options}
           <button onClick={this.clear} type="submit" className="btn btn-default">Rensa</button>
           {results}

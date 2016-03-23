@@ -1,15 +1,3 @@
-.search-tools input[type="text"] {
-	width: 100%;
-	border: none;
-	border: 1px solid #999;
-	padding: 5px;
-	border-radius: 3px;
-}
-
-.search-tools input:focus {
-	outline: none;
-}
-
 .search-tools .hidden {
 	display: none;
 }
@@ -18,14 +6,14 @@
 	margin: 10px 0px;
 }
 
-.search-tools label {
+.search-tools .panel-row label {
 	font-weight: normal;
 	display: inline-block;
 	width: 110px;
 }
 
 .search-tools .label {
-    background: #FFFFFF;
+	background: #FFFFFF;
     color: black;
     border-radius: 50px;
     padding: 5px;
@@ -34,12 +22,15 @@
     text-align: center;
     font-weight: 600;
     margin-left: 5px;
+    top: -2px;
+    position: relative;
 }
 
 .search-tools .group {
 	background: @color-yellow;
     padding: 10px;
     margin: 7px -5px;
+    color: white;
 }
 
 .search-tools .group + div {

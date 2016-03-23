@@ -50,7 +50,7 @@ module.exports = Backbone.Collection.extend({
         "visible": args.visibleAtStart,
         "singleTile" : false,
         "opacity": 1,
-        "queryable": true,
+        "queryable": args.queryable === false ? false : true,
         "information": args.infobox,
         "legend" : [{
           "Url" : args.legend || `http://${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${args.layers[0]}`,
