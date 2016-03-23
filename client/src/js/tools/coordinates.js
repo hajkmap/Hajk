@@ -146,16 +146,18 @@ module.exports = ToolModel.extend({
 		};
 		var transformedCoordinates = {};
 		var transformations = [{
-				code: 'EPSG:4326',
-				title: 'WGS 84'
-			}, {
-				code: 'EPSG:3006',
-				title: 'Sweref 99 TM'
-			}, {
-				code: 'EPSG:3021',
-				title: 'RT 90 2.5 gon V'
-			}
-		];
+			code: 'EPSG:4326',
+			title: 'WGS 84'
+		},  {
+			code: 'EPSG:3007',
+			title: 'Sweref 99 12 00'
+		},	{
+			code: 'EPSG:3006',
+			title: 'Sweref 99 TM'
+		}, {
+			code: 'EPSG:3021',
+			title: 'RT 90 2.5 gon V'
+		}];
 		var coordinates = this.extractXYArray(presentedCoordinates['raw']);
 
 		_.each(transformations, (transformation) => {
