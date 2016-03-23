@@ -470,6 +470,9 @@ var Draw = module.exports = ToolModel.extend({
         let style = JSON.parse(feature.getProperties().style);
         if (style.text) {
           this.setFeaturePropertiesFromText(feature);
+          if (style.pointRadius > 0) {
+            this.setFeaturePropertiesFromGeometry(feature);
+          }
         } else {
           this.setFeaturePropertiesFromGeometry(feature);
         }
