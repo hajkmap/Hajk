@@ -31,14 +31,24 @@
         "baselayers": [],
         "groups": [
           {
+            "id": "c079dfda-129e-e075-8215-507165ae0083",
+            "parent": "-1",
+            "name": "AA",
+            "toggled": true,
+            "layers": [
+              "fda4ceb6-b207-48f2-4ea3-7e3d96ceb41a",
+              "99bacd81-cbd7-f724-b9fe-ef4747aafcd8"
+            ],
+            "groups": []
+          },
+          {
             "id": "afa18725-2fb4-ef3a-331d-8fb74a31dc8d",
             "parent": "-1",
             "name": "Grupp 1",
             "toggled": true,
             "layers": [
-              "99bacd81-cbd7-f724-b9fe-ef4747aafcd8",
-              "642c8d9e-68a7-da67-d7c6-51d9a2b4558c",
-              "fda4ceb6-b207-48f2-4ea3-7e3d96ceb41a"
+              "51d91fd2-0b68-13cb-8b3a-cc67b8993763",
+              "642c8d9e-68a7-da67-d7c6-51d9a2b4558c"
             ],
             "groups": []
           }

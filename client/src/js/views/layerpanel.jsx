@@ -66,7 +66,9 @@ var LayerPanel = React.createClass({
         found = group;
       } else {
         if (group.hasOwnProperty('groups')) {
-          found = recursive(group.groups, id);
+          if (!found) {
+            found = recursive(group.groups, id);
+          }
         }
       }
     });
@@ -75,7 +77,7 @@ var LayerPanel = React.createClass({
   /**
    * Find layers in given group.
    * @param {number} groupId
-   * @return [] layers
+   * @return layers[]
    */
   getLayersForGroup: function(groupId) {
 
@@ -174,9 +176,11 @@ var LayerPanel = React.createClass({
    */
   renderLayers: function (group) {
     var layers = this.getLayersForGroup(group.id);
+
     if (layers.length === 0) {
       return null;
     }
+
     return layers.map((layer, index) => {
       return (<LayerItem key={"layer_" + Math.random()} layer={layer} />);
     });
@@ -186,6 +190,7 @@ var LayerPanel = React.createClass({
    *
    */
   renderGroups: function recursive(groups) {
+
     return groups.map((group, i) => {
 
       var layers = this.renderLayers(group)
