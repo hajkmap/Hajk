@@ -22,7 +22,7 @@ String.prototype.toOpacity = function() {
   return parseFloat(this.match(/\d+(\.\d+)?/g).splice(3, 1)[0]);
 }
 
-module.exports = ToolModel.extend({
+var ExportModel = ToolModel.extend({
   /*
    * @desc Default settings.
    * @property defaults
@@ -30,9 +30,9 @@ module.exports = ToolModel.extend({
   defaults: {
     type: 'export',
     panel: 'exportpanel',
-    title: 'Exportera karta',
+    title: 'Skriv ut',
     toolbar: 'bottom',
-    icon: 'fa fa-download icon',
+    icon: 'fa fa-print icon',
     copyright: "© Lantmäteriverket i2009/00858"
   },
   /*
@@ -46,7 +46,17 @@ module.exports = ToolModel.extend({
 
   addPreviewLayer: function () {
     this.previewLayer = new ol.layer.Vector({
-      source: new ol.source.Vector()
+      source: new ol.source.Vector(),
+      name: "preview-layer",
+      style: new ol.style.Style({
+        stroke: new ol.style.Stroke({
+          color: 'rgba(0, 0, 0, 0.7)',
+          width: 2
+        }),
+        fill: new ol.style.Fill({
+          color: 'rgba(255, 145, 20, 0.4)'
+        })
+      })
     });
     this.get('olMap').addLayer(this.previewLayer);
   },
@@ -405,3 +415,5 @@ module.exports = ToolModel.extend({
     this.set('visible', true);
   }
 });
+
+module.exports = ExportModel;

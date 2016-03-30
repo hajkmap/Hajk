@@ -6,7 +6,7 @@ var ExportSettings = React.createClass({
     return {
       selectFormat: 'A4',
       selectOrientation: 'S',
-      selectScale: '10000',
+      selectScale: '2000',
       selectResolution: '72',
       loading: false
     };

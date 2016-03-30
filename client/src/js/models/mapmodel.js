@@ -26,6 +26,12 @@ var Drag = function() {
   this.feature_ = null;
 
   /**
+   * @type {ol.Layer}
+   * @private
+   */
+  this.layer_ = null;
+
+  /**
    * @type {string|undefined}
    * @private
    */
@@ -39,16 +45,23 @@ ol.inherits(Drag, ol.interaction.Pointer);
  * @return {boolean} `true` to start the drag sequence.
  */
 Drag.prototype.handleDownEvent = function(evt) {
-  var map = evt.map;
+  var map = evt.map
+  ,   feature;
 
-  var feature = map.forEachFeatureAtPixel(evt.pixel,
-      function(feature, layer) {
-        return feature;
-      });
+  this.layer_ = undefined;
+
+  feature = map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
+    this.layer_ = layer;
+    return feature;
+  });
 
   if (feature) {
     this.coordinate_ = evt.coordinate;
     this.feature_ = feature;
+  }
+
+  if (this.layer_ && this.layer_.getProperties().name === 'highlight-wms') {
+    return false;
   }
 
   return !!feature;
@@ -59,22 +72,20 @@ Drag.prototype.handleDownEvent = function(evt) {
  * @param {ol.MapBrowserEvent} evt Map browser event.
  */
 Drag.prototype.handleDragEvent = function(evt) {
-  var map = evt.map;
+  var map = evt.map
+  ,   deltaX = 0
+  ,   deltaY = 0
+  ,   geometry;
 
-  var feature = map.forEachFeatureAtPixel(evt.pixel,
-      function(feature, layer) {
-        return feature;
-      });
-
-  var deltaX = evt.coordinate[0] - this.coordinate_[0];
-  var deltaY = evt.coordinate[1] - this.coordinate_[1];
-
-  var geometry = /** @type {ol.geom.SimpleGeometry} */
-      (this.feature_.getGeometry());
-  geometry.translate(deltaX, deltaY);
+  deltaX = evt.coordinate[0] - this.coordinate_[0];
+  deltaY = evt.coordinate[1] - this.coordinate_[1];
 
   this.coordinate_[0] = evt.coordinate[0];
   this.coordinate_[1] = evt.coordinate[1];
+
+  if (this.layer_ &&  this.layer_.getProperties().name !== 'highlight-wms') {
+    this.feature_.getGeometry().translate(deltaX, deltaY);
+  }
 };
 
 
@@ -82,14 +93,17 @@ Drag.prototype.handleDragEvent = function(evt) {
  * @param {ol.MapBrowserEvent} evt Event.
  */
 Drag.prototype.handleMoveEvent = function(evt) {
+
   if (this.cursor_) {
-    var map = evt.map;
-    var feature = map.forEachFeatureAtPixel(evt.pixel,
-        function(feature, layer) {
-          return feature;
-        });
-    var element = evt.map.getTargetElement();
-    if (feature) {
+    var featureLayer = ""
+    ,   map = evt.map
+    ,   feature = map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
+                    featureLayer = layer;
+                    return feature;
+                  })
+    ,   element = evt.map.getTargetElement();
+
+    if (feature && feature.getProperties().user === true) {
       if (element.style.cursor != this.cursor_) {
         this.previousCursor_ = element.style.cursor;
         element.style.cursor = this.cursor_;
@@ -99,6 +113,7 @@ Drag.prototype.handleMoveEvent = function(evt) {
       this.previousCursor_ = undefined;
     }
   }
+
 };
 
 
