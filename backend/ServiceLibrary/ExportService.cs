@@ -23,10 +23,7 @@ namespace Sweco.Services
 {
     [ServiceContract]
     public interface IExportService
-    {
-        [OperationContract]
-        string Export();
-
+    {        
         [OperationContract]
         string ExportPDF(MapExportItem exportItem);
 
@@ -48,16 +45,13 @@ namespace Sweco.Services
         /// <param name="jpegSamplePath"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        private void drawImage(XGraphics gfx, string jpegSamplePath, int x, int y, PdfPage page)
+        private void drawImage(XGraphics gfx, Image img, int x, int y, PdfPage page)
         {
-            XImage image = XImage.FromFile(jpegSamplePath);            
+            XImage image = XImage.FromGdiPlusImage(img);                 
             
             double horizontal = (page.Width.Millimeter / 25.4) * 72;
             double vertical = (page.Height.Millimeter / 25.4) * 72;
-            gfx.DrawImage(image, x, y, horizontal, vertical);
-            
-            XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "assets", "logo.png"));
-            gfx.DrawImage(logo, gfx.PageSize.Width - 60, 10);
+            gfx.DrawImage(image, x, y, horizontal, vertical);                                 
         }
 
         /// <summary>
@@ -138,127 +132,29 @@ namespace Sweco.Services
         [WebInvoke(Method = "POST", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/pdf")]
         public string ExportPDF(MapExportItem exportItem)
         {
-            string[] fileinfo = this.generateFileInfo("ImageExport", "tiff", "/Temp/Kartexport/");
-            string[] zipFileInfo = this.generateFileInfo("Kartexport", "zip");
-
-            string dir = HttpContext.Current.Server.MapPath("/Temp/Kartexport/");
-            DirectoryInfo directoryInfo = System.IO.Directory.CreateDirectory(dir);
-
-            Image img = MapImageCreator.GetImage(exportItem, fileinfo);
-            img.Save(fileinfo[0], System.Drawing.Imaging.ImageFormat.Tiff);
-
-            string folder = "/Temp/";
-            string path = HttpContext.Current.Server.MapPath(folder);
+            string tempPath = "/Temp";            
+            string path = HttpContext.Current.Server.MapPath(tempPath);
             string filename = Guid.NewGuid() + ".pdf";
-            string localPdf = path + filename;
-
+            string localPdf = path + "\\" + filename;
+            
+            Image img = MapImageCreator.GetImage(exportItem);            
             PdfDocument document = new PdfDocument();
             PdfPage page = document.AddPage();
 
-            page.Size = PdfSharp.PageSize.A4;
-            page.Orientation = PdfSharp.PageOrientation.Portrait;
+            page.Size = exportItem.format == "A4" ? PdfSharp.PageSize.A4 : PdfSharp.PageSize.A3;
+            page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;            
 
             XGraphics gfx = XGraphics.FromPdfPage(page);
-            this.drawImage(gfx, fileinfo[0], 0, 0, page);
+
+            this.drawImage(gfx, img, 0, 0, page);
+            this.drawText(gfx, String.Format("Skala 1:{0}", exportItem.scale), 10, 20);
+            
+            XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "assets", "logo.png"));           
+            gfx.DrawImage(logo, gfx.PageSize.Width - 210, 10, 200, 67);
 
             document.Save(localPdf);
-            
-            //DeleteDirectory(dir);
 
-            return HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + zipFileInfo[1];
-        }        
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        [WebInvoke(Method="POST", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/")]
-        public string Export()
-        {            
-            string source = String.Empty;
-            string type = String.Empty;
-            string body = String.Empty;
-            string format = "A4";
-            PdfSharp.PageSize pageSize = PdfSharp.PageSize.A4;
-            PdfSharp.PageOrientation orientation = PdfSharp.PageOrientation.Landscape;
-            string orient = "L";
-            int x = 0;
-            int y = 0;
-                        
-            using (var stream = OperationContext.Current.RequestContext.RequestMessage.GetBody<Stream>())            
-            {                
-                StreamReader reader = new StreamReader(stream);
-                body = reader.ReadToEnd();
-                string[] content = body.Split(';');
-                type = content[0];
-                if (type == "pdf")
-                {
-                    x = int.Parse(content[1]);
-                    y = int.Parse(content[2]);
-                    format = content[3];
-                    orient = content[4];          
-                    source = content[5];
-                    switch (orient)
-                    {
-                        case ("L"):
-                            orientation = PdfSharp.PageOrientation.Landscape;
-                            break;
-                        case ("P"):
-                            orientation = PdfSharp.PageOrientation.Portrait;
-                            break;
-                    }
-                    switch (format)
-                    {
-                        case ("A4"):
-                            pageSize = PdfSharp.PageSize.A4;
-                            break;
-                        case ("A3"):
-                            pageSize = PdfSharp.PageSize.A3;
-                            break;
-                    }
-                }
-                else
-                {
-                    source = content[1];
-                }
-                
-            }            
-            
-            byte[] image = Convert.FromBase64String(HttpContext.Current.Server.UrlDecode(source));
-            
-            string folder = "/Temp/";
-            string path = HttpContext.Current.Server.MapPath(folder);
-            string filename = "";
-            
-            filename = Guid.NewGuid() + ".png";                
-            string local = path + filename;            
-
-            MemoryStream ms = new MemoryStream(image);
-            Image img = Image.FromStream(ms);            
-            
-            img.Save(local, ImageFormat.Png);
-
-            if (type == "pdf")
-            {
-                filename = Guid.NewGuid() + ".pdf";
-                string localPdf = path + filename;
-
-                PdfDocument document = new PdfDocument();                
-                PdfPage page = document.AddPage();
-                
-                page.Size = pageSize;
-                page.Orientation = orientation;
-                
-                x = -x;
-                y = -y;
-
-                XGraphics gfx = XGraphics.FromPdfPage(page);
-                this.drawImage(gfx, local, x, y, page);
-                this.drawText(gfx, "© Lantmäteriverket i2009/00858", 10, 25);
-
-                document.Save(localPdf);
-            }
-            return HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority) + folder + filename;
-        }        
+            return HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority) + tempPath + "/" + filename;
+        }                 
     }
 }

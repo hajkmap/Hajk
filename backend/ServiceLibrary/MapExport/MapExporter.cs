@@ -1,5 +1,4 @@
-﻿using GeoAPI.Features;
-using GeoAPI.Geometries;
+﻿using GeoAPI.Geometries;
 using NetTopologySuite.Geometries;
 using SharpMap;
 using SharpMap.Data;
@@ -33,12 +32,12 @@ namespace Sweco.Services.MapExport
         /// </summary>
         /// <param name="row"></param>
         /// <returns>IStyle Vector style to use for this feature</returns>
-        private IStyle GetFeatureStyle(IFeature row)
-        {
+        private IStyle GetFeatureStyle(FeatureDataRow row)
+        {                        
             VectorStyle style = new VectorStyle();
-            if (row.Attributes["style"] != null)
+            if (row["style"] != null)
             {
-                Style featureStyle = (Style)row.Attributes["style"];
+                Style featureStyle = (Style)row["style"];
                 style.EnableOutline = true;
 
                 style.Line.Color = ColorTranslator.FromHtml(featureStyle.strokeColor);
@@ -60,7 +59,7 @@ namespace Sweco.Services.MapExport
                        style.Line.DashStyle = DashStyle.DashDot;
                        break;
                     case "longdash":                       
-                       style.Line.DashStyle = DashStyle.DashDot;                       
+                       style.Line.DashStyle = DashStyle.DashDot;
                        style.Line.DashPattern = new float[] { 8, 2 };
                        break;
                     case "longdashdot":                       
@@ -74,18 +73,19 @@ namespace Sweco.Services.MapExport
 
                 style.Outline = style.Line;
 
-                Color color = ColorTranslator.FromHtml(featureStyle.fillColor);                
+                Color color = ColorTranslator.FromHtml(featureStyle.fillColor);
+                Color pointColor = ColorTranslator.FromHtml(featureStyle.pointFillColor); 
+
                 if (featureStyle.fillOpacity != null) {
                     int opac = (int)(255 * featureStyle.fillOpacity);
                     Color transparent = Color.FromArgb(opac, color);
-                    style.Fill = new SolidBrush(transparent);
-                    style.PointColor = new SolidBrush(transparent);
+                    style.Fill = new SolidBrush(transparent);                    
                 } else {
-                    style.Fill = new SolidBrush(color);
-                    style.PointColor = new SolidBrush(color);
+                    style.Fill = new SolidBrush(color);                                      
                 }
-                                
-                style.PointSize = (float)featureStyle.pointRadius * 4;
+
+                style.PointColor = new SolidBrush(pointColor);            
+                style.PointSize = (float)featureStyle.pointRadius * 2;
                 
             }
             return style;
@@ -96,9 +96,9 @@ namespace Sweco.Services.MapExport
         /// </summary>
         /// <param name="row"></param>
         /// <returns>IStyle Vector style to use for this feature</returns>
-        private IStyle GetLabelStyle(IFeature row)
+        private IStyle GetLabelStyle(FeatureDataRow row)
         {
-            Style featureStyle = (Style)row.Attributes["style"];
+            Style featureStyle = (Style)row["style"];
             LabelStyle labelStyle = new SharpMap.Styles.LabelStyle();            
             
             if (featureStyle.fontSize == null)
@@ -107,11 +107,17 @@ namespace Sweco.Services.MapExport
             }
             
             labelStyle.ForeColor = ColorTranslator.FromHtml(featureStyle.fontColor);            
-            labelStyle.Font = new Font(FontFamily.GenericSansSerif, Int32.Parse(featureStyle.fontSize));
+            labelStyle.Font = new Font(FontFamily.GenericSansSerif, Int32.Parse(featureStyle.fontSize), FontStyle.Bold);
+            
             labelStyle.HorizontalAlignment = SharpMap.Styles.LabelStyle.HorizontalAlignmentEnum.Center;
             labelStyle.VerticalAlignment = SharpMap.Styles.LabelStyle.VerticalAlignmentEnum.Middle;
-            labelStyle.Offset = new PointF(0, 0);
-            labelStyle.Halo = new Pen(Color.White, 2);
+            
+            labelStyle.Offset = new PointF(0, -10);
+            labelStyle.Halo = new Pen(Color.Black, 2);
+            labelStyle.VerticalAlignment = LabelStyle.VerticalAlignmentEnum.Bottom;
+            
+            labelStyle.CollisionDetection = false;
+            labelStyle.IgnoreLength = true;            
 
             return labelStyle;
         }
@@ -122,7 +128,7 @@ namespace Sweco.Services.MapExport
         /// <param name="exportItem"></param>
         public MapExporter(MapExportItem exportItem) 
         {
-            this.exportItem = exportItem;
+            this.exportItem = exportItem;            
             this.map = new Map(new Size(exportItem.size[0], exportItem.size[1]));
         }
 
@@ -176,7 +182,7 @@ namespace Sweco.Services.MapExport
         /// /// Add a list of vector layers to the map.
         /// </summary>
         /// <param name="vectorLayers"></param>
-        public void AddVectorLayers (List<FeatureInfo> vectorLayers)
+        public void AddVectorLayers(List<FeatureInfo> vectorLayers)
         {
             int counter = 0;
             if (vectorLayers == null) return;
@@ -207,6 +213,7 @@ namespace Sweco.Services.MapExport
 
                     switch (feature.type)
                     {
+                        case "Text":
                         case "Point":       
                             if (vertices.Count > 0) {                                
                                 var point = factory.CreatePoint(new GeoAPI.Geometries.Coordinate(vertices[0]));                                
@@ -219,14 +226,14 @@ namespace Sweco.Services.MapExport
                             break;
                         case "Polygon":    
                             var polygon = factory.CreatePolygon(vertices.ToArray());                            
-                            dataRow.Geometry = polygon;                                                        
-                            break;
+                            dataRow.Geometry = polygon;
+                            break;                                                   
                     }
 
                     featureData.AddRow(dataRow);                        
                 });
 
-                vectorLayer.DataSource = new SharpMap.Data.Providers.FeatureProvider(featureData);
+                vectorLayer.DataSource = new SharpMap.Data.Providers.GeometryFeatureProvider(featureData);                
                 
                 vectorLayer.Theme = new CustomTheme(GetFeatureStyle);
                 map.Layers.Add(vectorLayer);                               
@@ -238,7 +245,10 @@ namespace Sweco.Services.MapExport
                 labels.Theme = new CustomTheme(GetLabelStyle);                
                 labels.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
                 labels.SmoothingMode = SmoothingMode.AntiAlias;
-                labels.SRID = vectorLayer.SRID;
+                labels.SRID = vectorLayer.SRID;                
+                                
+                labels.Style.CollisionDetection = false;                
+
                 map.Layers.Add(labels);
 
                 counter++;

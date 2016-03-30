@@ -10,6 +10,9 @@ namespace Sweco.Services.MapExport
     {
         public List<FeatureInfo> vectorLayers { get; set; }
         public List<WMSInfo> wmsLayers { get; set; }
+        public string orientation { get; set; }
+        public string format { get; set; }
+        public string scale { get; set; }
         public int resolution { get; set; }
         public int[] size { get; set; }
         public double[] bbox { get; set; }

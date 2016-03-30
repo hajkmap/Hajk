@@ -1,5 +1,27 @@
 var ToolModel = require('tools/tool');
 
+String.prototype.toHex = function() {
+  if (/^#/.test(this)) return this;
+  var hex = (
+    "#" +
+    this.match(/\d+(\.\d+)?/g)
+        .splice(0, 3)
+        .map(i => {
+          var v =  parseInt(i, 10).toString(16);
+          if (parseInt(i) < 16) {
+            v = "0" + v;
+          }
+          return v;
+        })
+        .join("")
+  );
+  return hex;
+}
+
+String.prototype.toOpacity = function() {
+  return parseFloat(this.match(/\d+(\.\d+)?/g).splice(3, 1)[0]);
+}
+
 module.exports = ToolModel.extend({
   /*
    * @desc Default settings.
@@ -30,32 +52,36 @@ module.exports = ToolModel.extend({
   },
 
   removePreview: function () {
+    this.set('previewFeature', undefined);
     this.previewLayer.getSource().clear();
+  },
+
+  getPreviewFeature: function () {
+    return this.get('previewFeature')
   },
 
   addPreview: function (scale, paper, center) {
 
-    var dpi = 25.4 / 0.28;
-    var ipu = 39.37;
-
-    var w = paper.width / dpi / ipu * scale / 2;
-    var y = paper.height / dpi  / ipu * scale / 2;
-
-    var coords = [
-      [
-        [center[0] - w, center[1] - y],
-        [center[0] - w, center[1] + y],
-        [center[0] + w, center[1] + y],
-        [center[0] + w, center[1] - y],
-        [center[0] - w, center[1] - y]
-      ]
-    ];
-
-    var feature = new ol.Feature({
-      geometry: new ol.geom.Polygon(coords)
-    });
+    var dpi = 25.4 / 0.28
+    ,   ipu = 39.37
+    ,   w = paper.width / dpi / ipu * scale / 2
+    ,   y = paper.height / dpi  / ipu * scale / 2
+    ,   coords = [
+          [
+            [center[0] - w, center[1] - y],
+            [center[0] - w, center[1] + y],
+            [center[0] + w, center[1] + y],
+            [center[0] + w, center[1] - y],
+            [center[0] - w, center[1] - y]
+          ]
+        ]
+    ,   feature = new ol.Feature({
+        geometry: new ol.geom.Polygon(coords)
+      })
+    ;
 
     this.removePreview();
+    this.set('previewFeature', feature);
     this.previewLayer.getSource().addFeature(feature);
 
   },
@@ -156,20 +182,68 @@ module.exports = ToolModel.extend({
     var drawLayer = this.get('olMap').getLayers().getArray().find(layer => layer.get('name') === 'draw-layer');
 
     function asObject(style) {
+
+      if (Array.isArray(style)) {
+        if (style.length === 2) {
+          style = style[1];
+        }
+        if (style.length === 1) {
+          style = style[0];
+        }
+      }
+
+      var fillColor = "#FC345C"
+      ,   fillOpacity =  0.5
+      ,   strokeColor = "#FC345C"
+      ,   strokeOpacity = 1
+      ,   strokeWidth = 3
+      ,   strokeLinecap = "round"
+      ,   strokeDashstyle =  "solid"
+      ,   pointRadius =  10
+      ,   pointFillColor = "#FC345C"
+      ,   labelAlign =  "cm"
+      ,   labelOutlineColor = "white"
+      ,   labelOutlineWidth = 3
+      ,   fontSize =  "16"
+      ,   fontColor =  "#FFFFFF";
+
+      if (style.getFill()) {
+        fillColor = style.getFill().getColor().toHex();
+        fillOpacity = style.getFill().getColor().toOpacity();
+      }
+
+      if (style.getStroke()) {
+
+        strokeColor = style.getStroke().getColor().toHex();
+        strokeWidth = style.getStroke().getWidth() || 3;
+        strokeLinecap = style.getStroke().getLineCap() || "round";
+        strokeDashstyle = style.getStroke().getLineDash() ?
+                          style.getStroke().getLineDash()[0] === 12 ?
+                          "dash" : "dot": "solid";
+      }
+
+      if (style.getImage()) {
+        pointRadius = style.getImage().getRadius();
+        if (style.getImage() instanceof ol.style.Circle) {
+          pointFillColor = style.getImage().getFill().getColor().toHex();
+        }
+      }
+
       return {
-        fillColor: "#FC345C",
-        fillOpacity:  0.5,
-        strokeColor: "#FC345C",
-        strokeOpacity: 1,
-        strokeWidth:  3,
-        strokeLinecap: "round",
-        strokeDashstyle:  "solid",
-        pointRadius:  10,
-        labelAlign:  "cm",
-        labelOutlineColor: "white",
-        labelOutlineWidth: 3,
-        fontSize:  "16",
-        fontColor:  "#FFFFFF"
+        fillColor: fillColor,
+        fillOpacity: fillOpacity,
+        strokeColor: strokeColor,
+        strokeOpacity: strokeOpacity,
+        strokeWidth: strokeWidth,
+        strokeLinecap: strokeLinecap,
+        strokeDashstyle: strokeDashstyle,
+        pointRadius: pointRadius,
+        pointFillColor: pointFillColor,
+        labelAlign: labelAlign,
+        labelOutlineColor: labelOutlineColor,
+        labelOutlineWidth: labelOutlineWidth,
+        fontSize: fontSize,
+        fontColor: fontColor
       }
     }
 
@@ -189,16 +263,32 @@ module.exports = ToolModel.extend({
     }
 
     function generate(features) {
-      return features.map((feature) => {
-        return {
-          type: feature.getProperties().type,
-          attributes: {
-            text: feature.getProperties() ? feature.getProperties().description : undefined,
-            style: asObject(feature.getStyle())
-          },
-          coordinates: as2DPairs(feature.getGeometry().getCoordinates())
+
+      function getText(feature) {
+        if (feature.getProperties()) {
+          if (feature.getProperties().type == "Text") {
+            return feature.getProperties().description;
+          }
         }
-      });
+        if (feature.getStyle()[1] &&
+            feature.getStyle()[1].getText() &&
+            feature.getStyle()[1].getText().getText()) {
+          return feature.getStyle()[1].getText().getText();
+        }
+      }
+
+      return [{
+        features: features.map((feature) => {
+          return {
+            type: feature.getProperties().type,
+            attributes: {
+              text: getText(feature),
+              style: asObject(feature.getStyle())
+            },
+            coordinates: as2DPairs(feature.getGeometry().getCoordinates())
+          }
+        })
+      }]
     }
 
     return generate(drawLayer.getSource().getFeatures());
@@ -269,12 +359,12 @@ module.exports = ToolModel.extend({
     ,   bottom = extent[1]
     ,   top    = extent[3]
     ,   scale  = options.scale
-    ,   dpi    = 150
+    ,   dpi    = options.resolution
     ,   data   = {
       wmsLayers: [],
       vectorLayers: [],
       size: null,
-      resolution: dpi,
+      resolution: options.resolution,
       bbox: null
     };
 
@@ -283,41 +373,30 @@ module.exports = ToolModel.extend({
 
     dx = Math.abs(left - right);
     dy = Math.abs(bottom - top);
+
     data.size = [
       parseInt(100 * (dx / scale) * dpi),
       parseInt(100 * (dy / scale) * dpi)
     ];
+
     data.bbox = [left, right, bottom, top];
+    data.orientation = options.orientation;
+    data.format = options.format;
+    data.scale = options.scale;
 
     $.ajax({
       type: "post",
       url: "/mapservice/export/pdf",
       data: JSON.stringify(data),
       contentType: "application/json",
-      success: function (rsp) {
-        console.log(rsp);
+      success: rsp => {
+        callback(rsp);
       },
-      error: function (rsp) {
-        console.error(rsp);
+      error: rsp => {
+        callback(rsp);
       }
     });
 
-    // this.exportMap((href) => {
-    //   $.ajax({
-    //     url: this.get('url'),
-    //     type: 'post',
-    //     contentType: 'text/plain',
-    //     data: `pdf;${options.size.x};${options.size.y};${options.format};${options.orientation};${encodeURIComponent(href)}`,
-    //     success: response => {
-    //       var anchor = $('<a>Hämta</a>').attr({
-    //         href: response,
-    //         target: '_blank',
-    //         download: 'karta.pdf'
-    //       });
-    //       callback(anchor);
-    //     }
-    //   });
-    // }, options.size);
   },
   /*
    * @desc Handle click event on toolbar button.

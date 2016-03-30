@@ -60,7 +60,7 @@ namespace Sweco.Services.MapExport
         /// <param name="exportItem"></param>
         /// <param name="fileinfo"></param>
         /// <returns>Image</returns>
-        public static Image GetImage(MapExportItem exportItem, string[] fileinfo)
+        public static Image GetImage(MapExportItem exportItem)
         {
             MapExporter MapExporter = new MapExporter(exportItem);
             MapExporter.AddWMSLayers(exportItem.wmsLayers);

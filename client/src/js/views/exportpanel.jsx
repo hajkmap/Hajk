@@ -5,7 +5,10 @@ var ExportSettings = React.createClass({
   getInitialState: function() {
     return {
       selectFormat: 'A4',
-      selectOrientation: 'L'
+      selectOrientation: 'S',
+      selectScale: '10000',
+      selectResolution: '72',
+      loading: false
     };
   },
 
@@ -32,38 +35,22 @@ var ExportSettings = React.createClass({
       }
     }
 
-    var dpi    = 72
+    var dpi    = (25.4 / .28)
     ,   width  = pageSize(this.getFormat()).width
     ,   height = pageSize(this.getFormat()).height;
 
     return {
       width: ((width / 25.4) * dpi),
-      height:  ((height / 25.4) * dpi),
-      x: this.exportPreviewFrame ? this.exportPreviewFrame.get(0).offsetLeft : 0,
-      y: this.exportPreviewFrame ? this.exportPreviewFrame.get(0).offsetTop : 0
+      height:  ((height / 25.4) * dpi)
     };
   },
 
-  setScale: function (map, scale) {
-
-    var view  = map.getView()
-    ,   units = map.getView().getProjection().getUnits()
-    ,   dpi   = 25.4 / 0.28
-    ,   mpu   = ol.proj.METERS_PER_UNIT[units];
-
-    res = scale / (mpu * 39.37 * dpi);
-    view.setResolution(res);
+  getScale: function () {
+    return this.state.selectScale;
   },
 
-  getScale: function (map) {
-
-    var view  = map.getView()
-    ,   res   = view.getResolution()
-    ,   units = map.getView().getProjection().getUnits()
-    ,   dpi   = 25.4 / 0.28
-    ,   mpu   = ol.proj.METERS_PER_UNIT[units];
-
-    return res * mpu * 39.37 * dpi;
+  getResolution: function () {
+    return this.state.selectResolution;
   },
 
   getOrientation: function () {
@@ -80,6 +67,18 @@ var ExportSettings = React.createClass({
     });
   },
 
+  setResolution: function(e) {
+    this.setState({
+      selectResolution: e.target.value
+    });
+  },
+
+  setScale: function(e) {
+    this.setState({
+      selectScale: e.target.value
+    });
+  },
+
   setOrientation: function(e) {
     this.setState({
       selectOrientation: e.target.value
@@ -91,30 +90,35 @@ var ExportSettings = React.createClass({
   },
 
   addPreview: function (map) {
-
-    var scale = this.getScale(map);
-    var center = map.getView().getCenter();
-    var paper = {
-      width: 210,
-      height: 297
-    };
+    var scale  = this.getScale()
+    ,   paper  = this.getPaperMeasures()
+    ,   center = this.props.model.getPreviewFeature() ?
+                 ol.extent.getCenter(this.props.model.getPreviewFeature().getGeometry().getExtent()) :
+                 map.getView().getCenter();
 
     this.props.model.addPreview(scale, paper, center);
-
   },
 
   exportPDF: function () {
+    this.setState({
+      loading: true
+    });
     var node = $(ReactDOM.findDOMNode(this)).find('#pdf')
     ,   options = {
           size: this.getPaperMeasures(),
+          format: this.getFormat(),
           orientation: this.getOrientation(),
           format: this.getFormat(),
-          scale: this.getScale(this.props.olMap)
+          scale: this.getScale(),
+          resolution: this.getResolution()
         }
     ;
     node.html('');
     this.props.model.exportPDF(options, (anchor) => {
-      node.html(anchor);
+      this.setState({
+        loading: false
+      });
+      node.html(`<a href="${anchor}" target="_blank">Hämta</a>`);
     });
   },
 
@@ -123,74 +127,74 @@ var ExportSettings = React.createClass({
   },
 
   render: function () {
-    var setScale
-    ,   guess
-    ,   map = this.props.olMap
+    var map = this.props.olMap
     ,   scales = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 250000]
+    ,   resolutions = [72, 96, 150]
     ,   options
-    ,   scale;
+    ,   resolutionOptions
+    ,   loader = null;
+
+    if (this.state.loading) {
+      loader = <i className="fa fa-refresh fa-spin"></i>;
+    }
 
     if (!this.props.visible) return null;
 
-    setScale = (value) => {
-      var scale = 0;
-
-      if (typeof value === 'object') {
-        if (value.target) {
-          scale = parseInt(value.target.value)
-        }
-      }
-
-      if (typeof value === "number") {
-        scale = value;
-      }
-
-      this.setScale(map, scale);
-    };
-
-    guess = () => {
-      var goal = this.getScale(map);
-      return scales.reduce((prev, curr) =>
-        Math.abs(curr - goal) < Math.abs(prev - goal) ? curr : prev
-      );
-    };
-
-    setScale(guess());
-    scale = this.getScale(map)
     options = scales.map((s, i) => <option key={i} value={s}>1:{s}</option>);
+    resolutionOptions = resolutions.map((s, i) => <option key={i} value={s}>{s}</option>);
+
     this.addPreview(map);
 
     return (
       <div className="export-settings">
-        <div>Välj pappersstorlek</div>
-        <select onChange={this.setFormat} defaultValue={this.state.selectFormat}>
-          <option value="A3">A3</option>
-          <option value="A4">A4</option>
-        </select>
-        <div>Välj orientering</div>
-          <select onChange={this.setOrientation} defaultValue={this.state.selectOrientation}>
-            <option value="P">stående</option>
-            <option value="L">liggande</option>
-          </select>
-        <div>Välj skala</div>
-        <select onChange={setScale} defaultValue={scale}>
-          {options}
-        </select>
+        <div className="panel panel-default">
+          <div className="panel-heading">Välj pappersstorlek</div>
+          <div className="panel-body">
+            <select onChange={this.setFormat} defaultValue={this.state.selectFormat}>
+              <option value="A3">A3</option>
+              <option value="A4">A4</option>
+            </select>
+          </div>
+        </div>
+        <div className="panel panel-default">
+          <div className="panel-heading">Välj orientering</div>
+          <div className="panel-body">
+            <select onChange={this.setOrientation} defaultValue={this.state.selectOrientation}>
+              <option value="P">stående</option>
+              <option value="L">liggande</option>
+            </select>
+          </div>
+        </div>
+        <div className="panel panel-default">
+          <div className="panel-heading">Välj skala</div>
+          <div className="panel-body">
+            <select onChange={this.setScale} defaultValue={this.state.selectScale}>
+              {options}
+            </select>
+          </div>
+        </div>
+        <div className="panel panel-default">
+          <div className="panel-heading">Välj upplösning</div>
+          <div className="panel-body">
+            <select onChange={this.setResolution} defaultValue={this.state.selectResolution}>
+              {resolutionOptions}
+            </select>
+          </div>
+        </div>
         <div>
-          <button onClick={this.exportPDF} className="btn btn-default">Exportera</button>
+          <button onClick={this.exportPDF} className="btn btn-default">Skriv ut {loader}</button>
         </div>
         <div id="pdf"></div>
       </div>
     )
   }
-
 });
 
 var ExportPanel = React.createClass({
 
   getInitialState: function() {
     return {
-      showExportSettings: false
+      showExportSettings: true
     };
   },
 
@@ -210,16 +214,8 @@ var ExportPanel = React.createClass({
 
   render: function () {
     return (
-      <Panel title="Exportera karta" onCloseClicked={this.props.onCloseClicked}>
+      <Panel title="Skriv ut karta" onCloseClicked={this.props.onCloseClicked}>
         <div className="export-panel">
-          <div onClick={this.exportImage}>
-            <button className="btn btn-default">Skapa export som bild</button>
-            <div id="image"></div>
-          </div>
-          <br/>
-          <div onClick={() => this.setExportSettings(true)}>
-            <button className="btn btn-default">Skapa export som pdf</button>
-          </div>
           <ExportSettings
             visible={this.state.showExportSettings}
             model={this.props.model}
