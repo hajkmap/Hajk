@@ -9,7 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -84,8 +86,25 @@ namespace Sweco.Services.MapExport
                     style.Fill = new SolidBrush(color);                                      
                 }
 
-                style.PointColor = new SolidBrush(pointColor);            
-                style.PointSize = (float)featureStyle.pointRadius * 2;
+                if (featureStyle.pointSrc != "")
+                {
+                    try
+                    {                        
+                        WebClient wc = new WebClient();
+                        byte[] bytes = wc.DownloadData(featureStyle.pointSrc);
+                        MemoryStream ms = new MemoryStream(bytes);
+                        Image img = Image.FromStream(ms);
+                        style.Symbol = img;
+                    }
+                    catch
+                    {
+                    }
+                }
+                else
+                {
+                    style.PointColor = new SolidBrush(pointColor);
+                    style.PointSize = (float)featureStyle.pointRadius * 2;
+                }
                 
             }
             return style;

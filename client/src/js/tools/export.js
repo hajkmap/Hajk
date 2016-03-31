@@ -211,6 +211,7 @@ var ExportModel = ToolModel.extend({
       ,   strokeDashstyle =  "solid"
       ,   pointRadius =  10
       ,   pointFillColor = "#FC345C"
+      ,   pointSrc = ""
       ,   labelAlign =  "cm"
       ,   labelOutlineColor = "white"
       ,   labelOutlineWidth = 3
@@ -233,8 +234,11 @@ var ExportModel = ToolModel.extend({
       }
 
       if (style.getImage()) {
-        pointRadius = style.getImage().getRadius();
+        if (style.getImage() instanceof ol.style.Icon) {
+          pointSrc = style.getImage().getSrc();
+        }
         if (style.getImage() instanceof ol.style.Circle) {
+          pointRadius = style.getImage().getRadius();
           pointFillColor = style.getImage().getFill().getColor().toHex();
         }
       }
@@ -249,6 +253,7 @@ var ExportModel = ToolModel.extend({
         strokeDashstyle: strokeDashstyle,
         pointRadius: pointRadius,
         pointFillColor: pointFillColor,
+        pointSrc: pointSrc,
         labelAlign: labelAlign,
         labelOutlineColor: labelOutlineColor,
         labelOutlineWidth: labelOutlineWidth,

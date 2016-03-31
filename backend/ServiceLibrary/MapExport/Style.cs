@@ -17,6 +17,7 @@ namespace Sweco.Services.MapExport
         public string strokeDashstyle { get; set; } // "solid",
         public double? pointRadius { get; set; } // 10,        
         public string pointFillColor { get; set; } // "#FC345C",
+        public string pointSrc { get; set; } // ""
         public string labelAlign { get; set; } // "cm",
         public string labelOutlineColor { get; set; } // "white",
         public double? labelOutlineWidth { get; set; } // 3
