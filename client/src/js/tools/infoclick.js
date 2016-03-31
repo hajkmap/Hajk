@@ -156,23 +156,22 @@ module.exports = ToolModel.extend({
       wmsLayer.index = index;
         if (wmsLayer.get('queryable')) {
           promises.push(new Promise((resolve, reject) => {
-              wmsLayer.getFeatureInformation({
-                coordinate: event.coordinate,
-                resolution: resolution,
-                projection: projection,
-                error: (message) => {
-                    console.error(message);
-                    resolve();
-                },
-                success: (features, layer) => {
-                    if (features instanceof Array && features.length > 0) {
-                      this.addInformation(features[0], wmsLayer, (featureInfo) => {
-                          infos[wmsLayer.index + infosLen] = featureInfo;
-                      });
-                    }
+            wmsLayer.getFeatureInformation({
+              coordinate: event.coordinate,
+              resolution: resolution,
+              projection: projection,
+              error: (message) => {
                 resolve();
-                }
-              });
+              },
+              success: (features, layer) => {
+                  if (features instanceof Array && features.length > 0) {
+                    this.addInformation(features[0], wmsLayer, (featureInfo) => {
+                        infos[wmsLayer.index + infosLen] = featureInfo;
+                    });
+                  }
+                  resolve();
+              }
+            });
           }));
         }
     });

@@ -65,30 +65,45 @@ module.exports = LayerModel.extend({
    validInfo: true,
 
    getFeatureInformation: function (params) {
+
+      var url;
+
       try {
+
          this.validInfo = true;
          this.featureInformationCallback = params.success;
-         if (this.get("queryable")) {
-            var url = this.getLayer()
-                          .getSource()
-                          .getGetFeatureInfoUrl(params.coordinate, params.resolution, params.projection, {
-               'INFO_FORMAT': 'text/javascript',
-               'FORMAT_OPTIONS': "callback:" + this.get("wmsCallbackName"),
-               'callback': this.get("wmsCallbackName")
+
+         url = this.getLayer()
+            .getSource()
+            .getGetFeatureInfoUrl(
+               params.coordinate,
+               params.resolution,
+               params.projection,
+               {
+                  'INFO_FORMAT': 'text/javascript',
+                  'FORMAT_OPTIONS': "callback:" + this.get("wmsCallbackName"),
+                  'callback': this.get("wmsCallbackName")
+               }
+            );
+
+         if (url) {
+
+            var request = $.ajax({
+               url: url,
+               dataType: 'jsonp',
+               jsonpCallback: this.get("wmsCallbackName")
             });
 
-            if (url) {
-               $.ajax({
-                  url: url,
-                  dataType: 'jsonp',
-                  jsonpCallback: this.get("wmsCallbackName")
-               });
-               return true;
-            }
+            request.error(params.error);
          }
+
+
       } catch (e) {
+
          params.error(e);
+
       }
+
    },
 
    tileLoadError: function () {
