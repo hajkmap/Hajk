@@ -7,6 +7,7 @@ module.exports = LayerModel.extend({
       projection: "EPSG:3006",
       serverType: 'geoserver',
       opacity: 1,
+      status: "ok",
       params: {}
    },
 
@@ -44,6 +45,20 @@ module.exports = LayerModel.extend({
       this.set("wmsCallbackName", "wmscallback" + Math.floor(Math.random() * 1000) + 1);
       global.window[this.get("wmsCallbackName")] = _.bind(this.getFeatureInformationReponse, this);
 
+      this.layer.getSource().on('tileloaderror', e => {
+         this.tileLoadError();
+      });
+
+      this.layer.getSource().on('tileloadend', e => {
+         this.tileLoadOk();
+      });
+
+      this.layer.on('change:visible', (e) => {
+         if (!this.get('visible')) {
+            this.tileLoadOk();
+         }
+      });
+
       this.set("type", "wms");
    },
 
@@ -74,6 +89,14 @@ module.exports = LayerModel.extend({
       } catch (e) {
          params.error(e);
       }
+   },
+
+   tileLoadError: function () {
+      this.set("status", "loaderror");
+   },
+
+   tileLoadOk: function () {
+      this.set("status", "ok");
    },
 
    getFeatureInformationReponse: function (response, xhr) {

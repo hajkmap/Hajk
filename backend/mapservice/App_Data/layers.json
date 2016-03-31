@@ -121,6 +121,28 @@
       "visibleAtStart": true,
       "queryable": false,
       "drawOrder": -1
+    },
+    {
+      "id": "612d0573-9d3a-da48-28a5-9a5a783d0526",
+      "caption": "Trasigt lager",
+      "url": "194.71.132.27/geoserver29/wms",
+      "owner": "SBK",
+      "date": "1459341306550",
+      "content": "Trasigt",
+      "legend": "",
+      "layers": [
+        "sweco:trafikbuller"
+      ],
+      "infobox": "Trasigt",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "drawOrder": 1
     }
   ]
 }

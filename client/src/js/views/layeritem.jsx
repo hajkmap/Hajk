@@ -11,6 +11,7 @@ var LayerItem = React.createClass({
       name: "",
       legend: [],
       labelFields: [],
+      status: "ok",
       labelVisibility: false
     };
   },
@@ -19,11 +20,13 @@ var LayerItem = React.createClass({
    *
    */
   componentDidMount: function () {
+    this.props.layer.on("change:status", this.onStatusChanged, this);
     this.props.layer.on("change:visible", this.onVisibleChanged, this);
     this.props.layer.on("change:legend", this.onLegendChanged, this);
     this.props.layer.on("change:labelVisibility", this.onLabelVisibility, this);
     this.props.layer.on('change:showLegend', this.onShowLegendChanged, this);
     this.setState({
+      status: this.props.layer.get('status'),
       caption: this.props.layer.getCaption(),
       visible: this.props.layer.getVisible(),
       showLegend: this.props.layer.get('showLegend'),
@@ -31,7 +34,6 @@ var LayerItem = React.createClass({
       legend: this.props.layer.getLegend(),
       labelFields: this.props.layer.getLabelFields()
     });
-
   },
   /**
    *
@@ -42,6 +44,16 @@ var LayerItem = React.createClass({
     this.props.layer.off("change:legend", this.onLegendChanged, this);
     this.props.layer.off("change:labelVisibility", this.onLabelVisibility, this);
     this.props.layer.off('change:showLegend', this.onShowLegendChanged, this);
+    this.props.layer.off("change:status", this.onStatusChanged, this);
+  },
+  /**
+   *
+   *
+   */
+  onStatusChanged: function () {
+    this.setState({
+      status: this.props.layer.get('status')
+    });
   },
   /**
    *
@@ -96,6 +108,18 @@ var LayerItem = React.createClass({
    *
    *
    */
+  renderStatus: function () {
+    return this.state.status === "loaderror" ?
+    (
+      <span href="#" className="tooltip" title="Lagret kunde inte laddas in. Kartservern svarar inte.">
+        <span title="" className="fa fa-exclamation-triangle tile-load-warning"></span>
+      </span>
+    ) : null;
+  },
+  /**
+   *
+   *
+   */
   render: function () {
     var caption       = this.state.caption
     ,   expanded      = this.state.showLegend
@@ -113,12 +137,15 @@ var LayerItem = React.createClass({
 
     var innerBodyClass = expanded && components.legend.legendPanel ? "panel-body" : "hidden";
 
+    var statusClass = this.state.status === "loaderror" ? "fa fa-exclamation-triangle tile-load-warning tooltip" : "";
+
     return (
       <div className="panel panel-default layer-item">
         <div className="panel-heading" onClick={toggleLegend}>
           <span onClick={toggleVisible} className="clickable">
             <i className={visible ? 'fa fa-check-square': 'fa fa-square'}></i>&nbsp;
-            <span className="layer-item-header-text">{caption}</span>
+            <span className="layer-item-header-text">{caption}</span>&nbsp;
+            {this.renderStatus()}
           </span>
           {components.legend.legendButton}
         </div>

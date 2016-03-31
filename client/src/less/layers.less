@@ -47,3 +47,40 @@
 .layer-item-header-text {
    font-size: 14px;
 }
+
+.tile-load-warning {
+  color: #ff5c33;
+  position: relative;
+  left: 5px;
+}
+
+.tooltip {
+  display: inline;
+  position: relative;
+}
+
+.tooltip:hover:before {
+  border: solid;
+  border-color: #333 transparent;
+  border-width: 6px 6px 0 6px;
+  bottom: 20px;
+  content: "";
+  left: 50%;
+  position: absolute;
+  z-index: 99;
+}
+
+.tooltip:hover:after {
+  background: white;
+  border: 1px solid #999;
+  border-radius: 5px;
+  bottom: 26px;
+  color: black;
+  content: attr(title);
+  left: 20%;
+  padding: 5px 15px;
+  position: absolute;
+  z-index: 98;
+  width: 220px;
+  box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.5);
+}
