@@ -72,7 +72,7 @@
             typeof l.find(str => str === layer.id) === "string"
           )
         a.layers.forEach(layer => {
-          layer.visible = true
+          layer.visibleAtStart = true;
         });
       }
 

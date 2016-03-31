@@ -24,8 +24,7 @@ module.exports = function (grunt) {
           files: [
             { cwd: "src/static/assets", src: "**/*", dest: "dist/assets", expand: true },
             { cwd: "node_modules/font-awesome/fonts", src: "*", dest: "dist/fonts", expand: true },
-            { src: "src/static/index.html", dest: "dist/index.html" },
-            { src: "src/static/clientconfig.json", dest: "dist/clientconfig.json" }
+            { src: "src/static/index.html", dest: "dist/index.html" }
           ]
         },
         release: {

@@ -38,10 +38,9 @@ module.exports = ToolModel.extend({
     ,   x = c[0]
     ,   y = c[1]
     ,   l = layers.filter(layer => layer.getVisible() === true)
-                  .map(layer => encodeURIComponent(layer.getName())).join(',')
-    ,   t = this.get('layerswitcher').get('selectedTheme');
+                  .map(layer => encodeURIComponent(layer.getName())).join(',');
 
-    a += `?x=${x}&y=${y}&z=${z}&l=${l}&t=${t}`;
+    a += `?x=${x}&y=${y}&z=${z}&l=${l}`;
     this.set("anchor", a);
 
     return a;

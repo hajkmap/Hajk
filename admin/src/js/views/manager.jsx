@@ -397,14 +397,14 @@ class Manager extends React.Component {
   /**
    *
    */
-  createGuid() {
-    function s4() {
-      return Math
-        .floor((1 + Math.random()) * 0x10000)
-        .toString(16)
-        .substring(1);
-    }
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+  createGuid(layers) {
+    return layers.length === 0 ? "0" : (
+      parseInt(
+        layers.sort((a, b) =>
+          a.id === b.id ? 0 : parseInt(a.id) > parseInt(b.id) ? -1 : 1
+        )[0].id
+      ) + 1
+    ).toString();
   }
   /**
    *
@@ -440,7 +440,9 @@ class Manager extends React.Component {
       };
 
       if (this.state.mode === "add") {
-        layer.id = this.createGuid();
+
+        layer.id = this.createGuid(this.props.model.get('layers'));
+
         this.props.model.addLayer(layer, success => {
           if (success) {
             this.props.model.getConfig('/mapservice/settings/config/layers');

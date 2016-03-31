@@ -2,6 +2,12 @@
 
   "use strict";
 
+  if (!window.Promise) {
+    elem = document.createElement('script');
+    elem.src = "js/es6-polyfill.js";
+    document.body.appendChild(elem);
+  }
+
   function create_routes(routes, application_model) {
     var route_settings = {
       routes: {}

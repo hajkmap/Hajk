@@ -40,8 +40,8 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "c2328689-5897-546d-02c2-4b4765a068e4",
-          "99bacd81-cbd7-f724-b9fe-ef4747aafcd8"
+          "2",
+          "4"
         ],
         "groups": [
           {
@@ -50,8 +50,9 @@
             "name": "Grupp 1",
             "toggled": true,
             "layers": [
-              "612d0573-9d3a-da48-28a5-9a5a783d0526",
-              "fda4ceb6-b207-48f2-4ea3-7e3d96ceb41a"
+              "0",
+              "1",
+              "3"
             ],
             "groups": [
               {
@@ -60,8 +61,8 @@
                 "name": "Undergrupp",
                 "toggled": true,
                 "layers": [
-                  "642c8d9e-68a7-da67-d7c6-51d9a2b4558c",
-                  "51d91fd2-0b68-13cb-8b3a-cc67b8993763"
+                  "6",
+                  "5"
                 ],
                 "groups": []
               }

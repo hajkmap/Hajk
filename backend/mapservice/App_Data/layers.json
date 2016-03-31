@@ -1,11 +1,11 @@
 {
   "layers": [
     {
-      "id": "fda4ceb6-b207-48f2-4ea3-7e3d96ceb41a",
+      "id": "0",
       "caption": "Adress",
       "url": "194.71.132.27/geoserver28/wms?",
       "owner": "Lantmäterienheten",
-      "date": "1458738732264",
+      "date": "1459408432742",
       "content": "Fastighetsytorna i göteborg",
       "legend": "",
       "layers": [
@@ -13,19 +13,17 @@
       ],
       "infobox": "Namn: {adress}  \nPostnummer: {postnr}",
       "searchFields": [
-        "fnr_fir",
-        "fastighet",
-        "hippt"
+        "adress"
       ],
       "displayFields": [
-        ""
+        "adress"
       ],
       "visibleAtStart": false,
       "queryable": true,
       "drawOrder": 2
     },
     {
-      "id": "51d91fd2-0b68-13cb-8b3a-cc67b8993763",
+      "id": "1",
       "caption": "Busslinjer",
       "url": "194.71.132.27/geoserver28/wms",
       "owner": "SBK",
@@ -48,7 +46,7 @@
       "drawOrder": 1
     },
     {
-      "id": "99bacd81-cbd7-f724-b9fe-ef4747aafcd8",
+      "id": "2",
       "caption": "Fastighetsyta",
       "url": "194.71.132.27/geoserver28/wms",
       "owner": "SBK",
@@ -72,7 +70,7 @@
       "drawOrder": 0
     },
     {
-      "id": "642c8d9e-68a7-da67-d7c6-51d9a2b4558c",
+      "id": "3",
       "caption": "Skolor",
       "url": "194.71.132.27/geoserver28/wms",
       "owner": "SBK",
@@ -94,7 +92,7 @@
       "drawOrder": 3
     },
     {
-      "id": "c2328689-5897-546d-02c2-4b4765a068e4",
+      "id": "4",
       "caption": "Bakgrundskarta WMS",
       "url": "www.asp-mapservices.com/ravegeo/map2/WMS?name=lm2013",
       "owner": "SBK",
@@ -123,7 +121,7 @@
       "drawOrder": -1
     },
     {
-      "id": "612d0573-9d3a-da48-28a5-9a5a783d0526",
+      "id": "5",
       "caption": "Trasigt lager",
       "url": "194.71.132.27/geoserver29/wms",
       "owner": "SBK",
@@ -134,6 +132,29 @@
         "sweco:trafikbuller"
       ],
       "infobox": "Trasigt",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "drawOrder": 1
+    },
+    {
+      "id": "6",
+      "caption": "Skola och Buss",
+      "url": "194.71.132.27/geoserver28/wms",
+      "owner": "SBK",
+      "date": "1459408212903",
+      "content": "a",
+      "legend": "",
+      "layers": [
+        "sweco:busslinje",
+        "sweco:skola"
+      ],
+      "infobox": "",
       "searchFields": [
         ""
       ],

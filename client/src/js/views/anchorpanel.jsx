@@ -49,9 +49,13 @@ var AnchorPanel = React.createClass({
     return (
       <Panel title="Länk till karta" onCloseClicked={this.props.onCloseClicked}>
         <div className="panel-content">
-          <div>Skapa en länkt till aktuell kartbild. Du kan spara den som ett eget bokmärke eller dela med en kollega.</div>
           <button onClick={this.generate} className="btn btn-default">Uppdatera länk</button>
-          <div>
+          <p>
+            En direktlänk har genererats som visar aktuell utbretning, zoomnivå och tända/släckta lager.<br/>
+            Tryck på länken nedan för att öppna kartan i ny flik för exempelvis bokmärkning.<br/>
+            Högerklika på länken och välj kopiera genväg för att spara länken i urklipp för inklistring i ett e-mail exempelvis.<br/>
+          </p>
+          <div className="alert alert-success">
             <a target="_blank" href={anchor}>Länk</a>
           </div>
         </div>

@@ -118,7 +118,7 @@ var ExportSettings = React.createClass({
       this.setState({
         loading: false
       });
-      node.html(`<a href="${anchor}" target="_blank">Hämta</a>`);
+      node.html(`<div class="alert alert-success">Din utskrift är klar. Tryck på <a href="${anchor}" target="_blank">Hämta</a> för att ladda ner en PDF-fil med resultatet.</div>`);
     });
   },
 
@@ -184,6 +184,7 @@ var ExportSettings = React.createClass({
         <div>
           <button onClick={this.exportPDF} className="btn btn-default">Skriv ut {loader}</button>
         </div>
+        <br />
         <div id="pdf"></div>
       </div>
     )
