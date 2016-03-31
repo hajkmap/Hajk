@@ -147,7 +147,9 @@ namespace Sweco.Services
             XGraphics gfx = XGraphics.FromPdfPage(page);
 
             this.drawImage(gfx, img, 0, 0, page);
-            this.drawText(gfx, String.Format("Skala 1:{0}", exportItem.scale), 10, 20);
+            this.drawText(gfx, String.Format("© Stadsbyggnadskontoret", exportItem.scale), 10, 20);
+            this.drawText(gfx, String.Format("Skala 1:{0}", exportItem.scale), 10, 40);
+            
             
             XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "assets", "logo.png"));           
             gfx.DrawImage(logo, gfx.PageSize.Width - 210, 10, 200, 67);
