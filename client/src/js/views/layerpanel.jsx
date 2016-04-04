@@ -77,30 +77,27 @@ var LayerPanel = React.createClass({
   },
   /**
    * Find layers in given group.
-   * @param {number} groupId
+   * @param {group} group
    * @return layers[]
    */
-  getLayersForGroup: function(groupId) {
+  getLayersForGroup: function(group) {
 
-    var layers = this.props.model.get("layerCollection")
-    ,   group = this.findGroupInConfig(this.groups, groupId)
-    ,   result;
+    var layersInModel = this.props.model.get("layerCollection")
+    ,   layers = [];
 
-    if (!layers || !group) {
+    if (!layersInModel || !group) {
       return [];
     }
 
-    result = layers.filter(layer =>
-      group.layers.find(v =>
-        v === layer.id
-      )
-    );
-
-    result.forEach(layer => {
-      layer.set('group', groupId);
+    group.layers.forEach(layerId => {
+      var layer = layersInModel.find(layer => layer.id === layerId);
+      if (layer) {
+        layer.set('group', group.id);
+        layers.push(layer);
+      }
     });
 
-    return result;
+    return layers;
   },
   /**
    * Get a flattened list of ALL layers per group.
@@ -110,7 +107,7 @@ var LayerPanel = React.createClass({
   drillGroupForLayers: function recursive(group) {
 
     var groups = group.groups
-    ,   layers = this.getLayersForGroup(group.id);
+    ,   layers = this.getLayersForGroup(group);
 
     if (groups) {
       groups.forEach((subgroup) => {
@@ -176,7 +173,8 @@ var LayerPanel = React.createClass({
    *
    */
   renderLayers: function (group) {
-    var layers = this.getLayersForGroup(group.id);
+
+    var layers = this.getLayersForGroup(group);
 
     if (layers.length === 0) {
       return null;

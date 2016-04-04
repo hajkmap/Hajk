@@ -40,33 +40,30 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "2",
           "4"
         ],
         "groups": [
           {
-            "id": "afa18725-2fb4-ef3a-331d-8fb74a31dc8d",
+            "id": "c079dfda-129e-e075-8215-507165ae0083",
             "parent": "-1",
             "name": "Grupp 1",
             "toggled": true,
             "layers": [
-              "0",
-              "1",
+              "5",
+              "6",
+              "2"
+            ],
+            "groups": []
+          },
+          {
+            "id": "afa18725-2fb4-ef3a-331d-8fb74a31dc8d",
+            "parent": "-1",
+            "name": "Grupp 2",
+            "toggled": true,
+            "layers": [
               "3"
             ],
-            "groups": [
-              {
-                "id": "c079dfda-129e-e075-8215-507165ae0083",
-                "parent": "afa18725-2fb4-ef3a-331d-8fb74a31dc8d",
-                "name": "Undergrupp",
-                "toggled": true,
-                "layers": [
-                  "6",
-                  "5"
-                ],
-                "groups": []
-              }
-            ]
+            "groups": []
           }
         ]
       }
@@ -80,8 +77,8 @@
       "options": {
         "settings": {
           "Alla lager": "*",
-          "Fastigheter": "99bacd81-cbd7-f724-b9fe-ef4747aafcd8",
-          "Skolor": "642c8d9e-68a7-da67-d7c6-51d9a2b4558c"
+          "Fastigheter": "2",
+          "Skolor": "3"
         }
       }
     },

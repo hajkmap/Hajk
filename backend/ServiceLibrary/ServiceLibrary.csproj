@@ -132,7 +132,6 @@
     <Compile Include="MapExport\MapExporter.cs" />
     <Compile Include="MapExport\MapExportItem.cs" />
     <Compile Include="MapExport\MapImageCreator.cs" />
-    <Compile Include="MapExport\MapPdfCreator.cs" />
     <Compile Include="MapExport\Metadata.cs" />
     <Compile Include="MapExport\Style.cs" />
     <Compile Include="MapExport\WMSInfo.cs" />

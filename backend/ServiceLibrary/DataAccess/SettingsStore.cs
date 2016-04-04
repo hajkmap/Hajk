@@ -10,6 +10,7 @@ using System.Web.Hosting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sweco.Services.DataContracts.ToolOptions;
+using System.Collections.Generic;
 
 namespace Sweco.Services.DataAccess
 {      
@@ -96,6 +97,24 @@ namespace Sweco.Services.DataAccess
                 string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.layerFile);
                 string jsonOutput = JsonConvert.SerializeObject(layerConfig, Formatting.Indented);
                 System.IO.File.WriteAllText(file, jsonOutput);
+            }
+            
+            private void removeLayer(string id, List<LayerGroup> groups)
+            {
+                groups.ForEach(group => {
+                    var layer = group.layers.FirstOrDefault(l => l == id);
+                    if (layer != null)
+                    {
+                        group.layers.Remove(layer);                        
+                    }
+                    else
+                    {
+                        if (group.groups != null)
+                        {
+                            this.removeLayer(id, group.groups);
+                        }
+                    }
+                });                
             }
 
             /// <summary>
@@ -212,17 +231,28 @@ namespace Sweco.Services.DataAccess
                     layerConfig.layers[index] = layer;
                 }
                 this.saveLayerConfigToFile(layerConfig);
+            }                       
+
+            private void removeLayerFromConfig(string id) 
+            {
+                MapConfig config = readMapConfigFromFile();
+                var tool = config.tools.Find(t => t.type == "layerswitcher");
+                LayerMenuOptions options = JsonConvert.DeserializeObject<LayerMenuOptions>(tool.options.ToString());
+                this.removeLayer(id, options.groups);                               
+                config.tools.Where(t => t.type == "layerswitcher").FirstOrDefault().options = options;
+                this.saveMapConfigToFile(config);
             }
-            
+
             /// <summary>
             /// 
             /// </summary>
             /// <param name="id"></param>
             public void RemoveWMSLayer(string id)
             {
-                LayerConfig layerConfig = this.readLayerConfigFromFile();
+                LayerConfig layerConfig = this.readLayerConfigFromFile();                
+                this.removeLayerFromConfig(id);
                 var index = layerConfig.layers.FindIndex(item => item.id == id);
-                if (index != -1) 
+                if (index != -1)
                 {
                     layerConfig.layers.RemoveAt(index);
                 }

@@ -45,12 +45,13 @@ namespace Sweco.Services
         /// <param name="jpegSamplePath"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        private void drawImage(XGraphics gfx, Image img, int x, int y, PdfPage page)
+        private void drawImage(XGraphics gfx, Image img, double x, double y, PdfPage page)
         {
             XImage image = XImage.FromGdiPlusImage(img);                 
             
-            double horizontal = (page.Width.Millimeter / 25.4) * 72;
-            double vertical = (page.Height.Millimeter / 25.4) * 72;
+            double horizontal = (page.Width.Millimeter / 25.4) * 72 - (x * 2);
+            double vertical = (page.Height.Millimeter / 25.4) * 72 - (y * 2);
+
             gfx.DrawImage(image, x, y, horizontal, vertical);                                 
         }
 
@@ -142,17 +143,16 @@ namespace Sweco.Services
             PdfPage page = document.AddPage();
 
             page.Size = exportItem.format == "A4" ? PdfSharp.PageSize.A4 : PdfSharp.PageSize.A3;
-            page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;            
+            page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;                        
 
             XGraphics gfx = XGraphics.FromPdfPage(page);
 
-            this.drawImage(gfx, img, 0, 0, page);
-            this.drawText(gfx, String.Format("© Stadsbyggnadskontoret", exportItem.scale), 10, 20);
-            this.drawText(gfx, String.Format("Skala 1:{0}", exportItem.scale), 10, 40);
-            
-            
+            this.drawImage(gfx, img, 10, 10, page);
+            this.drawText(gfx, String.Format("© Stadsbyggnadskontoret", exportItem.scale), 15, 25);
+            this.drawText(gfx, String.Format("Skala 1:{0}", exportItem.scale), 15, 40);
+                        
             XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "assets", "logo.png"));           
-            gfx.DrawImage(logo, gfx.PageSize.Width - 210, 10, 200, 67);
+            gfx.DrawImage(logo, gfx.PageSize.Width - 215, 15, 200, 67);
 
             document.Save(localPdf);
 

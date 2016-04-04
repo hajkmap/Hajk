@@ -60,7 +60,10 @@ Drag.prototype.handleDownEvent = function(evt) {
     this.feature_ = feature;
   }
 
-  if (this.layer_ && this.layer_.getProperties().name === 'highlight-wms') {
+  if (this.layer_ &&
+      (this.layer_.getProperties().name === 'search-vector-layer' ||
+       this.layer_.getProperties().name === 'highlight-wms'
+      )) {
     return false;
   }
 

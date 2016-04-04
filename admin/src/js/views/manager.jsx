@@ -52,20 +52,27 @@ class Manager extends React.Component {
    *
    */
   removeLayer(e, layer) {
-    this.props.model.removeLayer(layer, success => {
-      if (success) {
-        this.props.model.getConfig('/mapservice/settings/config/layers');
-        this.props.application.setState({
-          alert: true,
-          alertMessage: `Lagret ${layer.caption} togs bort!`
-        });
-        if (this.state.id === layer.id) {
-          this.abort();
-        }
-      } else {
-        this.props.application.setState({
-          alert: true,
-          alertMessage: "Lagret kunde inte tas bort. Försök igen senare."
+    this.props.application.setState({
+      alert: true,
+      confirm: true,
+      alertMessage: "Lagret kommer att tas bort. Är detta ok?",
+      confirmAction: () => {
+        this.props.model.removeLayer(layer, success => {
+          if (success) {
+            this.props.model.getConfig('/mapservice/settings/config/layers');
+            this.props.application.setState({
+              alert: true,
+              alertMessage: `Lagret ${layer.caption} togs bort!`
+            });
+            if (this.state.id === layer.id) {
+              this.abort();
+            }
+          } else {
+            this.props.application.setState({
+              alert: true,
+              alertMessage: "Lagret kunde inte tas bort. Försök igen senare."
+            });
+          }
         });
       }
     });
