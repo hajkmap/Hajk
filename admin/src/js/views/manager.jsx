@@ -97,7 +97,8 @@ class Manager extends React.Component {
       url: layer.url,
       visibleAtStart: layer.visibleAtStart,
       queryable: layer.queryable,
-      drawOrder: layer.drawOrder
+      drawOrder: layer.drawOrder,
+      addedLayers: []
     });
 
     setTimeout(() => {
@@ -107,13 +108,23 @@ class Manager extends React.Component {
       this.validate("searchFields");
       this.validate("displayFields");
       this.loadWMSCapabilities(undefined, () => {
+
         this.setState({
           addedLayers: layer.layers
         });
+
         this.validate("layers");
+
+        _.each(this.refs, element => {
+          if (element.dataset.type == "wms-layer") {
+            element.checked = false;
+          }
+        });
+
         layer.layers.forEach(layer => {
           this.refs[layer].checked = true;
         });
+
       });
     }, 0);
   }
@@ -260,7 +271,7 @@ class Manager extends React.Component {
                          "fa fa-info-circle active" : "fa fa-info-circle";
         return (
           <li key={i}>
-            <input ref={layer.Name} id={"layer" + i} type="checkbox" onChange={(e) => { this.appendLayer(e, layer.Name) }}/>&nbsp;
+            <input ref={layer.Name} id={"layer" + i} type="checkbox" data-type="wms-layer" onChange={(e) => { this.appendLayer(e, layer.Name) }}/>&nbsp;
             <label htmlFor={"layer" + i}>{layer.Name}</label>
             <i className={classNames} onClick={(e) => this.describeLayer(e, layer.Name)}></i>
           </li>

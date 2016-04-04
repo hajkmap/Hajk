@@ -26,10 +26,6 @@ var menu = Backbone.Model.extend({
         callback(data);
       }
     });
-  },
-
-  hello: function () {
-    console.log("hello");
   }
 
 });
