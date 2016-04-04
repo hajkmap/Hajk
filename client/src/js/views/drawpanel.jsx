@@ -73,10 +73,15 @@ var ColorPicker = React.createClass({
    * @param {ol.event} event
    */
   setColor: function (event) {
-    this.setState({
-      color: event.target.style.background
-    });
-    this.props.onChange(event.target.style.background);
+    var reg   = /rgb[a]?\(.*\)/
+    ,   value = reg.exec(event.target.style.background)
+
+    if (value && value[0]) {
+      this.setState({
+        color: value[0]
+      });
+      this.props.onChange(value[0]);
+    }
   },
   /*
    * Get current color.
