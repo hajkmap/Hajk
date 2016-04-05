@@ -40,21 +40,10 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "4"
+          "4",
+          "2"
         ],
         "groups": [
-          {
-            "id": "c079dfda-129e-e075-8215-507165ae0083",
-            "parent": "-1",
-            "name": "Grupp 1",
-            "toggled": true,
-            "layers": [
-              "5",
-              "6",
-              "2"
-            ],
-            "groups": []
-          },
           {
             "id": "afa18725-2fb4-ef3a-331d-8fb74a31dc8d",
             "parent": "-1",
@@ -63,7 +52,19 @@
             "layers": [
               "3"
             ],
-            "groups": []
+            "groups": [
+              {
+                "id": "c079dfda-129e-e075-8215-507165ae0083",
+                "parent": "afa18725-2fb4-ef3a-331d-8fb74a31dc8d",
+                "name": "Grupp 1",
+                "toggled": true,
+                "layers": [
+                  "6",
+                  "5"
+                ],
+                "groups": []
+              }
+            ]
           }
         ]
       }

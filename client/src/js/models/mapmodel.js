@@ -142,7 +142,7 @@ var MapModel = Backbone.Model.extend({
     center: [0, 0],
     /** @property {number} zoom - Default: 1 */
     zoom: 1,
-    /** @property {number} maxZoon - Default: 15  */
+    /** @property {number} maxZoom - Default: 15  */
     maxZoom: 15,
     /** @property {number} minZoom - Default: 1  */
     minZoom: 1,

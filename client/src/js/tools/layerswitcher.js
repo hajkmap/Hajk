@@ -28,11 +28,14 @@ module.exports = ToolModel.extend({
     },
 
     getBaseLayers: function () {
-      return this.get('layerCollection').filter(layer =>
-        this.get('baselayers').find(baselayer =>
-          baselayer === layer.id
-        )
-      )
+      var baseLayers = [];
+      this.get('baselayers').forEach(id => {
+        var layer = this.get('layerCollection').find(layer => layer.id === id);
+        if (layer) {
+          baseLayers.push(layer);
+        }
+      });
+      return baseLayers;
     },
 
     configure: function (shell) {
