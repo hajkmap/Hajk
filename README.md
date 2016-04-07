@@ -1,5 +1,5 @@
 # Hajk2
-Uppdaterad: 2/29/2016 2:14:45 PM
+Uppdaterad: 2016-04-07 08:25
 
 Detta är ett projekt som drivs av Stadsbyggnadskontoret Göteborgs Stad.  
 Systemutvecklare är i huvudsak Sweco Position.  
@@ -11,8 +11,8 @@ Klientdelen är programmerad i JavaScript 2015. Kommunikationen mellan klient oc
 
 Klienten innehåller två separata applikationer, en kartvy och en administrationsvy.
 
-JavaScript byggs i applikationen med hjälp av uppgifshanteraren Grunt.  
-För att bygga projetketet så krävs programvarorna Visual Studio och Node js.
+JavaScript byggs i applikationen med hjälp av uppgiftshanteraren Grunt.  
+För att bygga projetketet så krävs programvarorna Visual Studio och Node JS.
 
 ##Installation
 
