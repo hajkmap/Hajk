@@ -472,7 +472,8 @@ class Manager extends React.Component {
 
         this.props.model.addLayer(layer, success => {
           if (success) {
-            this.props.model.getConfig('/mapservice/settings/config/layers');
+            this.props.config.url_layers
+            this.props.model.getConfig(this.props.config.url_layers);
             this.abort();
             this.props.application.setState({
               alert: true,
@@ -490,7 +491,7 @@ class Manager extends React.Component {
       if (this.state.mode === "edit") {
         this.props.model.updateLayer(layer, success => {
           if (success) {
-            this.props.model.getConfig('/mapservice/settings/config/layers');
+            this.props.model.getConfig(this.props.config.url_layers);
             this.props.application.setState({
               alert: true,
               alertMessage: "Uppdateringen lyckades!"
@@ -541,7 +542,7 @@ class Manager extends React.Component {
           </ul>
         </aside>
         <article>
-          <form method="post" action="/mapservice/settings/layer" onSubmit={(e) => { this.submit(e) }}>
+          <form method="post" action="" onSubmit={(e) => { this.submit(e) }}>
             <fieldset>
               <legend>Lägg till WMS-lager</legend>
               <div>

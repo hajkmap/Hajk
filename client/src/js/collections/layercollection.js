@@ -40,11 +40,20 @@ function removeFromMap(layer) {
 module.exports = Backbone.Collection.extend({
 
   model: function (args, event) {
+
+    function getLegendUrl(args) {
+      if (args.legend === "") {
+        args.legend = `${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${args.layers[0]}`
+      }
+      var protocol = /^http/.test(args.legend) ? '' : 'http://';
+      return protocol + args.legend;
+    }
+
     var layer_config = {
       type : "wms",
       options: {
         "id": args.id,
-        "url": "/util/proxy/geturl/" + args.url,
+        "url": (HAJK2.wmsProxy || "") + args.url,
         "name": args.id,
         "caption": args.caption,
         "visible": args.visibleAtStart,
@@ -53,7 +62,7 @@ module.exports = Backbone.Collection.extend({
         "queryable": args.queryable === false ? false : true,
         "information": args.infobox,
         "legend" : [{
-          "Url" : args.legend || `http://${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${args.layers[0]}`,
+          "Url": getLegendUrl(args),
           "Description" : "Teckenförklaring"
         }],
         "params": {
@@ -67,7 +76,7 @@ module.exports = Backbone.Collection.extend({
 
     if (args.searchFields && args.searchFields[0] !== "") {
       layer_config.options.search = {
-        "url": "/postProxy.aspx?url=http://" + args.url.replace('wms', 'wfs'),
+        "url": (HAJK2.searchProxy || "") + args.url.replace('wms', 'wfs'),
         "featureType": args.layers[0].split(':')[1],
         "propertyName": args.searchFields.join(','),
         "displayName": args.displayFields ? args.displayFields : (args.searchFields[0] || "Sökträff"),

@@ -40,7 +40,8 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "4"
+          "4",
+          "2"
         ],
         "groups": [
           {
@@ -50,7 +51,6 @@
             "toggled": true,
             "layers": [
               "6",
-              "2",
               "3"
             ],
             "groups": [

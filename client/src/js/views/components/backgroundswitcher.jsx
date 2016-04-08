@@ -19,16 +19,17 @@ var BackgroundSwitcher = React.createClass({
    *
    */
   getSelected: function (layer) {
-    var visibleLayers;
+
     if (this.state && this.state.selected) {
       if (this.state.selected === layer.get('id')) {
         return true;
       }
     }
-    visibleLayers = this.props.layers.filter(layer => layer.getVisible());
-    if (visibleLayers[0].id === layer.id) {
-      return true;
-    }
+
+    return this.props.layers.filter(l =>
+      l.getVisible() && l.id === layer.id
+    ).length === 1;
+
   },
   /**
    *

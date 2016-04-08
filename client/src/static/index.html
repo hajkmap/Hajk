@@ -11,6 +11,10 @@
   <body>
     {js}
     <script>
+
+      HAJK2.wmsProxy = "/util/proxy/geturl/";
+      HAJK2.searchProxy = "/postProxy.aspx?url=http://";
+
       HAJK2.start({
         configPath: "/mapservice/settings/config/map_1",
         layersPath: "/mapservice/settings/config/layers"
@@ -19,6 +23,7 @@
           document.write(message);
         }
       });
+
     </script>
   </body>
 </html>
