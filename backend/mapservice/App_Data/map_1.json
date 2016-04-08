@@ -50,6 +50,7 @@
             "name": "Grupp 2",
             "toggled": true,
             "layers": [
+              "6",
               "3"
             ],
             "groups": [
@@ -59,7 +60,6 @@
                 "name": "Grupp 1",
                 "toggled": true,
                 "layers": [
-                  "6",
                   "5"
                 ],
                 "groups": []

@@ -33,6 +33,7 @@ var ExportModel = ToolModel.extend({
     title: 'Skriv ut',
     toolbar: 'bottom',
     icon: 'fa fa-print icon',
+    exportUrl: '/mapservice/export/pdf',
     copyright: "© Lantmäteriverket i2009/00858"
   },
   /*
@@ -401,7 +402,7 @@ var ExportModel = ToolModel.extend({
 
     $.ajax({
       type: "post",
-      url: "/mapservice/export/pdf",
+      url: this.get("exportUrl"),
       data: JSON.stringify(data),
       contentType: "application/json",
       success: rsp => {

@@ -20,7 +20,7 @@ var manager = Backbone.Model.extend({
 
   addLayer: function (layer, callback) {
     $.ajax({
-      url: "/mapservice/settings/layer",
+      url: this.get('config').url_layer_settings,
       method: 'POST',
       contentType: 'application/json',
       data: JSON.stringify(layer),
@@ -35,7 +35,7 @@ var manager = Backbone.Model.extend({
 
   updateLayer: function(layer, callback) {
     $.ajax({
-      url: "/mapservice/settings/layer",
+      url: this.get('config').url_layer_settings,
       method: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify(layer),
@@ -50,7 +50,7 @@ var manager = Backbone.Model.extend({
 
   removeLayer: function (layer, callback) {
     $.ajax({
-      url: "/mapservice/settings/layer/" + layer.id,
+      url: this.get('config').url_layer_settings + "/" + layer.id,
       method: 'DELETE',
       contentType: 'application/json',
       success: () => {
@@ -62,8 +62,14 @@ var manager = Backbone.Model.extend({
     });
   },
 
+  prepareProxyUrl: function (url) {
+    return this.get('config').url_proxy ?
+      this.get('config').url_proxy + "/" + url.replace(/http[s]?:\/\//, '') :
+      url;
+  },
+
   getLayerDescription: function(url, layer, callback) {
-    var url = "/util/proxy/geturl/" + url;
+    url = this.prepareProxyUrl(url);
     url = url.replace(/wms/, 'wfs');
     $.ajax(url, {
       data: {
@@ -82,8 +88,7 @@ var manager = Backbone.Model.extend({
   },
 
   getWMSCapabilities: function (url, callback) {
-    var url = "/util/proxy/geturl/" + url;
-    $.ajax(url, {
+    $.ajax(this.prepareProxyUrl(url), {
       data: {
         service: 'WMS',
         request: 'GetCapabilities'

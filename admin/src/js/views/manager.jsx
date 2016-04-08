@@ -14,7 +14,7 @@ const defaultState = {
   owner: "",
   searchFields: "",
   displayFields: "",
-  url: "194.71.132.27/geoserver28/wms",
+  url: "",
   visibleAtStart: false,
   queryable: true,
   drawOrder: 1
@@ -34,12 +34,17 @@ class Manager extends React.Component {
    *
    */
   componentDidMount() {
-    this.props.model.getConfig('/mapservice/settings/config/layers');
+    this.props.model.set('config', this.props.config);
+    this.props.model.getConfig(this.props.config.url_layers);
     this.props.model.on('change:layers', () => {
       this.setState({
         layers: this.props.model.get('layers')
       })
     });
+
+    defaultState.url = this.props.config.url_default_server;
+
+    this.setState(defaultState);
   }
   /**
    *
@@ -59,7 +64,7 @@ class Manager extends React.Component {
       confirmAction: () => {
         this.props.model.removeLayer(layer, success => {
           if (success) {
-            this.props.model.getConfig('/mapservice/settings/config/layers');
+            this.props.model.getConfig(this.props.config.url_layers);
             this.props.application.setState({
               alert: true,
               alertMessage: `Lagret ${layer.caption} togs bort!`
@@ -391,6 +396,10 @@ class Manager extends React.Component {
    *
    */
   getValue(fieldName) {
+
+    function format_url() {
+
+    }
 
     function create_date() {
       return (new Date()).getTime();

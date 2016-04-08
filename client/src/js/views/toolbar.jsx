@@ -1,18 +1,18 @@
 /**
- *
+ * Tooblar component
  *
  */
 var Toolbar = React.createClass({
   /**
-   *
+   * Load initial state
    *
    */
   getInitialState: function() {
     return {};
   },
   /**
-   *
-   *
+   * Render the component
+   * @return {React.Component} component
    */
   render: function () {
     var tools = this.props.model.filter(t => t.get('toolbar')).map((tool, index) => {

@@ -2,10 +2,10 @@
   "name": "hajk2",
   "version": "2.0.0",
   "description": "Common webmap",
-  "homepage": "https://github.com/sweco/6604525000_Geodata-Varmlandstrafik#readme",
+  "homepage": "https://github.com/Johkar/Hajk2#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sweco/6604525000_Geodata-Varmlandstrafik.git"
+    "url": "git+https://github.com/Johkar/Hajk2.git"
   },
   "private": true,
   "devDependencies": {

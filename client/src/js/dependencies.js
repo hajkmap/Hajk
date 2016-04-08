@@ -1,3 +1,7 @@
+/**
+ * Register global variables.
+ * This will reduce build time with browserify.
+ */
 global.window._ = require('underscore');
 global.window.ol = require('openlayers');
 global.window.Backbone = require('backbone');

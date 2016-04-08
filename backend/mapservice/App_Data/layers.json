@@ -100,15 +100,15 @@
     {
       "id": "6",
       "caption": "Buller",
-      "url": "194.71.132.27/geoserver28/wms",
+      "url": "http://194.71.132.27/geoserver28/wms",
       "owner": "SBK",
-      "date": "1459771020401",
-      "content": "Trafikbuller",
+      "date": "1460103719143",
+      "content": "Buller",
       "legend": "",
       "layers": [
         "sweco:trafikbuller"
       ],
-      "infobox": "Bullervärde: {isovalue}",
+      "infobox": "",
       "searchFields": [
         ""
       ],
@@ -117,7 +117,7 @@
       ],
       "visibleAtStart": false,
       "queryable": true,
-      "drawOrder": -1
+      "drawOrder": 1
     }
   ]
 }

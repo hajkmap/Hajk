@@ -51,6 +51,8 @@ För att installera visual studio gå till [https://www.visualstudio.com/post-do
 ---------- 
 ####Driftsättning Klient
 Bygg version för test. (målmapp: **dist**)  
+Öppna kommandopromten och gå till projektets mapp:
+`cd c:\Projekt\Hajk2\client`  
 `grunt build`  
 
 Bygg version för driftsättning. (målmapp: **release**)  
@@ -68,22 +70,22 @@ Starta en lyssnare som lyssnar på ändringar i filsystemet ochg bygger per auto
 
 ###Installera projektet i Internet Information Services (IIS > 7).
 
-IIS kräver att server applikationen körs i en App Pool med .NET version 4.0 integrated.
+IIS kräver att server applikationen körs i en App Pool med .NET version 4.0 integrated.  
+IIS måste ha mime-typen application/vnd.google-earth.kml+xml registrerad för filändelsen .kml.
 
 I en driftsättningsmiljö så lägg förslagsvis applikationerna i två seperata mappar.  
 Mapparna bör placeras i en skrivskyddad mapp; tex C:\data\www\hajk.
 
-Skapa därefter två undermappar för applikationerna:  
+Skapa därefter tre undermappar för applikationerna:  
 C:\data\www\hajk\klient -- innehåller innehållet i **backend**  
-C:\data\www\hajk\server -- innehåller innehållet i **release**
+C:\data\www\hajk\server -- innehåller innehållet i **client\release**
+C:\data\www\hajk\admin -- innehåller innehållet i **admin\release**
 
-Skapa i IIS en två nya applikationer genom att högerklicka på valt side och välja:
+Skapa i IIS tre nya applikationer genom att högerklicka på valt site och välja:
 
 **Lägg till program..**
 
 För serverapplikationen så ange Alias: backend.  
-För klientapplikationen så kan valfritt namn användas, detta bli sökväg till applikationen.
-
-
-
-
+För adminapplikationen så kan valfritt namn användas, detta bli sökväg till adminapplikationen.  
+För klientapplikationen så kan valfritt namn användas, detta bli sökväg till kartapplikationen.  
+Finns behov av HTTP-proxy för anrop till extern kartserver så finns exempel på detta i mappen proxy.
