@@ -7,7 +7,7 @@ var menu = Backbone.Model.extend({
 
   updateConfig: function(config, callback) {
     $.ajax({
-      url: "/mapservice/settings/layermenu",
+      url: this.get('config').url_layermenu_settings,
       method: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify(config),

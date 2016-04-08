@@ -114,7 +114,6 @@ class Menu extends React.Component {
    */
   constructor() {
     super();
-    this.state = defaultState;
   }
   /**
    *
@@ -122,6 +121,8 @@ class Menu extends React.Component {
   componentDidMount() {
     this.load('layers');
     this.load('layermenu');
+
+    this.props.model.set('config', this.props.config);
 
     this.props.model.on('change:layers', () => {
       this.setState({
@@ -145,9 +146,9 @@ class Menu extends React.Component {
 
     $(".tree-view li").editable(this);
     $(".tree-view > ul").sortable();
-    this.setState({
-      layers: this.props.model.get('layers')
-    });
+
+    defaultState.layers = this.props.model.get('layers');
+    this.setState(defaultState);
   }
   /**
    *
@@ -174,7 +175,7 @@ class Menu extends React.Component {
   load(type) {
     switch(type) {
       case "layers":
-          this.props.model.getConfig('/mapservice/settings/config/layers', (data) => {
+          this.props.model.getConfig(this.props.config.url_layers, (data) => {
             data.layers.sort((a, b) => {
               var d1 = parseInt(a.date)
               ,   d2 = parseInt(b.date);
@@ -184,7 +185,7 @@ class Menu extends React.Component {
           });
         break;
       case "layermenu":
-        this.props.model.getConfig('/mapservice/settings/config/map_1', (data) => {
+        this.props.model.getConfig(this.props.config.url_map, (data) => {
           this.props.model.set('layerMenuConfig', data.tools.find(tool => tool.type === "layerswitcher").options);
         });
         break;
@@ -352,7 +353,7 @@ class Menu extends React.Component {
    */
   renderLayersFromConfig(layers) {
 
-    layers = this.state.filter ? this.getLayersWithFilter() : this.props.model.get('layers');
+    layers = (this.state && this.state.filter) ? this.getLayersWithFilter() : this.props.model.get('layers');
 
     return layers.map((layer, i) => {
 

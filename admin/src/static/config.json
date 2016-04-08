@@ -9,6 +9,11 @@
       { "value": "Lantmäterienheten", "title": "Lantmäterienheten" }
     ]
   },
+  "menu": {
+    "url_map": "/mapservice/settings/config/map_1",
+    "url_layers": "/mapservice/settings/config/layers",
+    "url_layermenu_settings": "/mapservice/settings/layermenu"
+  },
   "router": [
     { "name": "manager", "title": "Lagerhanterare", "default": true },
     { "name": "menu",    "title": "Lagermeny" }
