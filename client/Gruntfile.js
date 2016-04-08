@@ -22,17 +22,48 @@ module.exports = function (grunt) {
       copy: {
         debug: {
           files: [
-            { cwd: "src/static/assets", src: "**/*", dest: "dist/assets", expand: true },
-            { cwd: "node_modules/font-awesome/fonts", src: "*", dest: "dist/fonts", expand: true },
-            { src: "src/static/index.html", dest: "dist/index.html" }
+            {
+              cwd: "src/static/assets",
+              src: "**/*",
+              dest: "dist/assets", expand: true
+            },
+            {
+              cwd: "node_modules/font-awesome/fonts",
+              src: "*",
+              dest: "dist/fonts", expand: true
+            },
+            {
+              src: "src/static/index.html",
+              dest: "dist/index.html"
+            },
+            {
+              src: "src/static/es6-polyfill.js",
+              dest: "dist/js/es6-polyfill.js"
+            }
           ]
         },
         release: {
           files: [
-              { cwd: "node_modules/font-awesome/fonts", src: "*", dest: "release/fonts", expand: true },
-              { cwd: "src/static/assets", src: "**/*", dest: "release/assets", expand: true },
-              { src: "src/static/index.html", dest: "release/index.html" },
-              { src: "src/static/productionconfig.json", dest: "release/clientconfig.json" }
+              {
+                cwd: "node_modules/font-awesome/fonts",
+                src: "*",
+                dest: "release/fonts",
+                expand: true
+              },
+              {
+                cwd: "src/static/assets",
+                src: "**/*",
+                dest: "release/assets",
+                expand: true
+              },
+              {
+                src: "src/static/index.html",
+                dest: "release/index.html"
+              },
+              {
+                src: "src/static/es6-polyfill.js",
+                dest: "dist/js/es6-polyfill.js"
+            }
           ]
         }
       },
@@ -41,12 +72,11 @@ module.exports = function (grunt) {
           src: ['<%= cssFiles %>'],
           dest: 'dist/assets/<%= pkg.name %>.css'
         },
-        jsrelease:{
-          src:[
-              'dist/js/dependencies.js',
-              'dist/js/jquery.signalR-2.2.0.min.js',
-              'release/js/<%= pkg.name %>-<%= pkg.version %>.min.js'
-             ],
+        jsrelease: {
+          src: [
+            'dist/js/dependencies.min.js',
+            'dist/js/<%= pkg.name %>-<%= pkg.version %>.min.js'
+          ],
           dest: 'release/js/<%= pkg.name %>-<%= pkg.version %>.min.js'
         }
       },
@@ -111,23 +141,17 @@ module.exports = function (grunt) {
       },
 
       uglify: {
-        options: {
-          banner: '/* <%= pkg.name %> <%= pkg.version %> */',
-          //mangle: {
-            //except: ['jQuery', 'Backbone', '_', 'React', 'proj4', 'openlayers', 'ol', '$', 'goog']
-          //},
-          compress: {
-            drop_console: true
-          },
-          sourceMap: true,
-          sourceMapName: 'release/js/<%= pkg.name %>-<%= pkg.version %>.js.map'
-        },
-        dist: {
+        dependencies: {
+          sourceMap: false,
           files: {
-            'release/js/<%= pkg.name %>-<%= pkg.version %>.min.js': [
-              'dist/js/dependencies.js',
-              'dist/js/<%= pkg.name %>-transpiled.js'
-            ]
+            'dist/js/dependencies.min.js': ['dist/js/dependencies.js']
+          }
+        },
+        application: {
+          banner: '/* <%= pkg.name %> <%= pkg.version %> */',
+          sourceMap: false,
+          files: {
+            'dist/js/<%= pkg.name %>-<%= pkg.version %>.min.js': ['dist/js/<%= pkg.name %>-transpiled.js']
           }
         }
       },
@@ -259,13 +283,13 @@ module.exports = function (grunt) {
       }
     });
 
-    grunt.registerTask('dependencies', ['browserify:dependencies']);
+    grunt.registerTask('dependencies', ['browserify:dependencies', 'uglify:dependencies']);
 
     grunt.registerTask('build', ['copy:debug', 'replace:debughtml', 'less', 'autoprefixer:core', 'concat:css', 'react', 'browserify:app', 'babel', 'replace:bablecleanup']);
 
     grunt.registerTask('debug', ['connect:debug', 'proxy:proxy1', 'watch']);
 
-    grunt.registerTask('release', ['copy:release', 'replace:releasehtml', 'less', 'concat:css', 'cssmin', 'react', 'browserify:app', 'babel', 'replace:bablecleanup', 'uglify' , 'concat:jsrelease' ]);
+    grunt.registerTask('release', ['copy:release', 'replace:releasehtml', 'less', 'concat:css', 'cssmin', 'react', 'browserify:app', 'babel', 'replace:bablecleanup', 'uglify:application', 'concat:jsrelease' ]);
 
     grunt.registerTask('test', ['connect:release']);
 
