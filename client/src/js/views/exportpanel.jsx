@@ -2,6 +2,8 @@ var Panel = require('views/panel');
 
 var ExportSettings = React.createClass({
 
+  resolutions: [72, 96, 150],
+
   getInitialState: function() {
     return {
       selectFormat: 'A4',
@@ -62,6 +64,11 @@ var ExportSettings = React.createClass({
   },
 
   setFormat: function (e) {
+    if (e.target.value === "A3") {
+      this.resolutions = [72];
+    } else {
+      this.resolutions = [72, 96, 150];
+    }
     this.setState({
       selectFormat: e.target.value
     });
@@ -129,7 +136,6 @@ var ExportSettings = React.createClass({
   render: function () {
     var map = this.props.olMap
     ,   scales = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 250000]
-    ,   resolutions = [72, 96, 150]
     ,   options
     ,   resolutionOptions
     ,   loader = null;
@@ -141,7 +147,7 @@ var ExportSettings = React.createClass({
     if (!this.props.visible) return null;
 
     options = scales.map((s, i) => <option key={i} value={s}>1:{s}</option>);
-    resolutionOptions = resolutions.map((s, i) => <option key={i} value={s}>{s}</option>);
+    resolutionOptions = this.resolutions.map((s, i) => <option key={i} value={s}>{s}</option>);
 
     this.addPreview(map);
 
