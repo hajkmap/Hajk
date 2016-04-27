@@ -117,6 +117,15 @@ namespace Sweco.Services.DataAccess
                 });                
             }
 
+            private void removeLayer(string id, List<string> layers)
+            {                
+                var layer = layers.FirstOrDefault(l => l == id);
+                if (layer != null)
+                {
+                    layers.Remove(layer);
+                }
+            }
+
             /// <summary>
             /// Property bookmarks.
             /// </summary>
@@ -236,9 +245,10 @@ namespace Sweco.Services.DataAccess
             private void removeLayerFromConfig(string id) 
             {
                 MapConfig config = readMapConfigFromFile();
-                var tool = config.tools.Find(t => t.type == "layerswitcher");
-                LayerMenuOptions options = JsonConvert.DeserializeObject<LayerMenuOptions>(tool.options.ToString());
-                this.removeLayer(id, options.groups);                               
+                var tool = config.tools.Find(t => t.type == "layerswitcher");                
+                LayerMenuOptions options = JsonConvert.DeserializeObject<LayerMenuOptions>(tool.options.ToString());                                                
+                this.removeLayer(id, options.groups);
+                this.removeLayer(id, options.baselayers);
                 config.tools.Where(t => t.type == "layerswitcher").FirstOrDefault().options = options;
                 this.saveMapConfigToFile(config);
             }

@@ -40,8 +40,8 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "4",
-          "2"
+          "2",
+          "4"
         ],
         "groups": [
           {
