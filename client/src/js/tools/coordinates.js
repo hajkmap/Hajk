@@ -22,7 +22,7 @@ module.exports = ToolModel.extend({
 	initialize: function (options) {
 		ToolModel.prototype.initialize.call(this);
 	},
-  /*
+   /**
 	* Anropas när verktyget har kopplats till applikationen.
 	* @param  {object} shell applikationens modell.
 	*/
@@ -42,7 +42,7 @@ module.exports = ToolModel.extend({
 			this.createInteractions();
 		};
 	},
-	/*
+	/**
 	 * Skapar markören på kartan och gör den
 	 * flyttbar. Skapar även stil för markören.
 	 * Om användaren försöker markera något annat
@@ -83,8 +83,10 @@ module.exports = ToolModel.extend({
 		this.setCoordinates(feature.getGeometry().getCoordinates());
 
 		feature.setStyle(iconStyle);
+		var timer = null;
 		feature.on('change', event => {
-			this.updateCoordinates(event);
+			if (timer) clearTimeout(timer);
+			timer = setTimeout(() => {this.updateCoordinates(event)}, 50)
 		});
 
 		selectedFeatures.push(feature);

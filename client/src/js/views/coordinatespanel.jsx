@@ -128,9 +128,9 @@ module.exports = React.createClass({
       <Panel title="Koordinater" onCloseClicked={this.props.onCloseClicked}>
         <div className="coordinate-display">
           <CoordinatesList coordinates={coordinates} />
-          <button onClick={this.reset} className="btn btn-default">{buttonText} verktyg</button>
         </div>
       </Panel>
     );
   }
+
 });

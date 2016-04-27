@@ -66,10 +66,12 @@ var Draw = module.exports = ToolModel.extend({
    *
    */
   removeSelected: function (event) {
+    var first = true;
     olMap.forEachFeatureAtPixel(event.pixel, (feature) => {
-      if (feature.getProperties().user === true) {
+      if (feature.getProperties().user === true && first) {
         source.removeFeature(feature);
       }
+      first = false;
     });
   },
   /**

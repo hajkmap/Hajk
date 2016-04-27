@@ -95,6 +95,8 @@ module.exports = React.createClass({
   value: undefined,
   /** @property timer {number} */
   timer: undefined,
+  /** @property loading {number} */
+  loading: 0,
   /*
    * @desc: Get default settings.
    * @return: {object} state
@@ -123,7 +125,7 @@ module.exports = React.createClass({
    *
    */
   handleKeyDown: function (event) {
-    if (event.keyCode === 13) {
+    if (event.keyCode === 13 && event.target.value.length < 5) {
       event.preventDefault();
       this.props.model.set('value', event.target.value);
       this.setState({
@@ -148,18 +150,23 @@ module.exports = React.createClass({
     this.setState({
       loading: true
     });
-
+    this.loading = Math.random();
     clearTimeout(this.timer);
     this.timer = setTimeout(() => {
+      var loader = this.loading;
       this.props.model.abort();
       this.props.model.search(result => {
-        this.setState({
+        var state = {
           loading: false,
           showResults: true,
           result: result
-        });
+        };
+        if (loader !== this.loading) {
+          state.loading = true;
+        }
+        this.setState(state);
       });
-    }, 100);
+    }, 200);
   },
   /*
    * @desc
@@ -294,7 +301,12 @@ module.exports = React.createClass({
 
     if (showResults) {
       if (this.state.loading) {
-        results = (<h3>Laddar..</h3>);
+        results = (
+          <p>
+            <span className="sr-only">Laddar...</span>
+            <i className="fa fa-refresh fa-spin fa-3x fa-fw"></i>
+          </p>
+        );
       } else {
         if ((this.refs.searchInput &&
              this.refs.searchInput.value.length > 4) ||

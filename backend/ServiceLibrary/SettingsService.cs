@@ -240,6 +240,8 @@ namespace Sweco.Services
             {
                 string json_data = System.IO.File.ReadAllText(file);
                 WebOperationContext.Current.OutgoingResponse.ContentType = "application/json; charset=utf-8";
+                WebOperationContext.Current.OutgoingResponse.LastModified = DateTime.Now;
+                WebOperationContext.Current.OutgoingResponse.Headers.Add("Cache-Control", "private, no-cache");
                 return new MemoryStream(Encoding.UTF8.GetBytes(json_data));  
             }
             else
