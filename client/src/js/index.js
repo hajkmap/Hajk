@@ -72,11 +72,10 @@
 
       if (l) {
         l = l.split(',');
-        a.layers =
-          a.layers.filter(layer =>
-            typeof l.find(str => str === layer.id) === "string"
-          )
-        a.layers.forEach(layer => {
+        a.layers.filter(layer => {
+          layer.visibleAtStart = false;
+          return typeof l.find(str => str === layer.id) === "string"
+        }).forEach(layer => {
           layer.visibleAtStart = true;
         });
       }
