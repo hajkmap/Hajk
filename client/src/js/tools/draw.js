@@ -591,7 +591,7 @@ var Draw = module.exports = ToolModel.extend({
       });
 
       var dot = new ol.style.Circle({
-        radius: forcedProperties ? forcedProperties.pointRadius : this.get('pointRadius'),
+        radius: type === "Text" ? 0 : forcedProperties ? forcedProperties.pointRadius : this.get('pointRadius'),
         fill: new ol.style.Fill({
           color: forcedProperties ? forcedProperties.pointColor : this.get('pointColor')
         }),
