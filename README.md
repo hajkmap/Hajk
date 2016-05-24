@@ -109,7 +109,7 @@ configPath - Sökväg till tjänstenod som hämtar konfiguration för karta.
 layersPath - Sökväg till tjänstenod som hämtar konfiguration för lager.  
 
 För att konfigurera kartan så hanteras detta manuellt i filen App_Data\map_{x}.json  
-<code>
+<pre>
 "map": {  
 	"target": "map",  				// {string} Målelement (ändra inte)  
 	"center": [410719, 6575675 ],   // {array {number}}centrumkoortinat  
@@ -122,7 +122,7 @@ För att konfigurera kartan så hanteras detta manuellt i filen App_Data\map_{x}
 	"extent": [],  					// {array {number}} Utbredning för tile-grid  
 	"logo": ""  					// {string} URL för sökväg till logo  
 }  
-</code>
+</pre>
 
 ###Administrationsgränssnitt
 ####Applikation
