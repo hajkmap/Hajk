@@ -13,19 +13,30 @@ module.exports = LayerModel.extend({
 
    initialize: function () {
       LayerModel.prototype.initialize.call(this);
-      if (this.get('singleTile')){
+
+      var source = {
+         url: this.get('url'),
+         params: this.get('params'),
+         projection: this.get('projection'),
+         serverType: this.get('serverType')
+      };
+
+      if (this.get('params').TILED) {
+         source.tileGrid = new ol.tilegrid.TileGrid({
+           resolutions: this.get('resolutions'),
+           origin: this.get('origin')
+         }),
+         source.extent = this.get('tiled')
+      }
+
+      if (this.get('singleTile')) {
          this.layer = new ol.layer.Image({
             name: this.get('name'),
             visible: this.get('visible'),
             queryable: this.get('queryable'),
             caption: this.get('caption'),
             opacity: this.get("opacity"),
-            source: new ol.source.ImageWMS({
-               url: this.get('url'),
-               params: this.get('params'),
-               projection: this.get('projection'),
-               serverType: this.get('serverType')
-            })
+            source: new ol.source.ImageWMS(source)
          });
       } else {
          this.layer = new ol.layer.Tile({
@@ -34,14 +45,10 @@ module.exports = LayerModel.extend({
             queryable: this.get('queryable'),
             caption: this.get('caption'),
             opacity: this.get("opacity"),
-            source: new ol.source.TileWMS({
-               url: this.get('url'),
-               params: this.get('params'),
-               projection: this.get('projection'),
-               serverType: this.get('serverType')
-            })
+            source: new ol.source.TileWMS(source)
          });
       }
+
       this.set("wmsCallbackName", "wmscallback" + Math.floor(Math.random() * 1000) + 1);
       global.window[this.get("wmsCallbackName")] = _.bind(this.getFeatureInformationReponse, this);
 
@@ -60,6 +67,7 @@ module.exports = LayerModel.extend({
       });
 
       this.set("type", "wms");
+
    },
 
    validInfo: true,

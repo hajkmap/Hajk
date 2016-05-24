@@ -34,6 +34,8 @@ namespace Sweco.Services.DataContracts
 
         public bool queryable { get; set; }
 
+        public bool tiled { get; set; }
+
         public int drawOrder { get; set; }
         
     }

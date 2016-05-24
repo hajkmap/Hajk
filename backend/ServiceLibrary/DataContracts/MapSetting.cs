@@ -12,5 +12,11 @@ namespace Sweco.Services.DataContracts
         public int[] center { get; set; }
         public string projection { get; set; }
         public int zoom { get; set; }
+        public int maxZoom { get; set; }
+        public int minZoom { get; set; }
+        public double[] resolutions { get; set; }
+        public double[] origin { get; set; }
+        public double[] extent { get; set; }
+        public string logo { get; set; }
     }
 }

@@ -211,8 +211,7 @@ module.exports = ToolModel.extend({
       information = lm.get("information") || "";
 
       if (information) {
-        information.match(/\{.*?\}\s?/g).forEach(function (property) {
-
+        (information.match(/\{.*?\}\s?/g) || []).forEach(property => {
             function lookup(o, s) {
               s = s.replace('{', '')
                    .replace('}', '')
@@ -225,11 +224,8 @@ module.exports = ToolModel.extend({
                 case 3: return o[s[0]][s[1]][s[2]] || "";
               }
             }
-
             information = information.replace(property, lookup(properties, property));
-
         });
-
       }
 
       layerindex = this.layerOrder.hasOwnProperty(lm.getName()) ?

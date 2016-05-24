@@ -15,7 +15,9 @@
     "url_layermenu_settings": "/mapservice/settings/layermenu"
   },
   "router": [
-    { "name": "manager", "title": "Lagerhanterare", "default": true },
-    { "name": "menu",    "title": "Lagermeny" }
+    { "name": "info", "title": "Start", "default": true },
+    { "name": "map", "title": "Demo" },
+    { "name": "manager", "title": "Lagerhanterare" },
+    { "name": "menu", "title": "Lagermeny" }
   ]
 }

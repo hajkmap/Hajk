@@ -76,10 +76,22 @@ var Shell = React.createClass({
    *
    */
   render: function () {
-    var views = this.state.views;
+    var views = this.state.views
+    ,   logo;
+
+    if (views.length === 3) {
+      if (this.model.get('map').get('logo')) {
+        logo = (
+          <div className="map-logo">
+            <img src={this.model.get('map').get('logo')}></img>
+          </div>
+        );
+      }
+    }
+
     return (
       <div className="shell">
-        <div className="map-logo"></div>
+        {logo}
         {views}
       </div>
     );

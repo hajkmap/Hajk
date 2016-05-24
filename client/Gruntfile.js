@@ -62,8 +62,20 @@ module.exports = function (grunt) {
               },
               {
                 src: "src/static/es6-polyfill.js",
-                dest: "dist/js/es6-polyfill.js"
-            }
+                dest: "release/js/es6-polyfill.js"
+              }                        
+          ]
+        },
+        admin: {
+          files: [
+              {
+                src: "release/js/<%= pkg.name %>-<%= pkg.version %>.min.js",
+                dest: "../admin/dist/js/<%= pkg.name %>-<%= pkg.version %>.min.js"
+              },
+              {
+                src: "release/assets/<%= pkg.name %>-<%= pkg.version %>.min.css",
+                dest: "../admin/dist/assets/<%= pkg.name %>-<%= pkg.version %>.min.css"
+              }
           ]
         }
       },
@@ -289,7 +301,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('debug', ['connect:debug', 'proxy:proxy1', 'watch']);
 
-    grunt.registerTask('release', ['copy:release', 'replace:releasehtml', 'less', 'concat:css', 'cssmin', 'react', 'browserify:app', 'babel', 'replace:bablecleanup', 'uglify:application', 'concat:jsrelease' ]);
+    grunt.registerTask('release', ['copy:release', 'replace:releasehtml', 'less', 'concat:css', 'cssmin', 'react', 'browserify:app', 'babel', 'replace:bablecleanup', 'uglify:application', 'concat:jsrelease', 'copy:admin']);
 
     grunt.registerTask('test', ['connect:release']);
 

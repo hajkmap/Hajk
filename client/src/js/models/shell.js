@@ -40,7 +40,8 @@ var Shell = Backbone.Model.extend({
     var config = this.initialConfig;
     if (this.get('canStart')) {
       this.set('map', new MapModel(config.map));
-      this.set('layerCollection', new LayerCollection(config.layers, { shell: this }));
+
+      this.set('layerCollection', new LayerCollection(config.layers, { shell: this, mapConfig: config.map }));
       this.set('toolCollection', new ToolCollection(config.tools, { shell: this }));
 
       var panels = _.chain(this.get('toolCollection').toArray())

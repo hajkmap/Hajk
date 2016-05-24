@@ -5,10 +5,30 @@ class Map extends React.Component {
     super();
   }
 
-  render() {
+  load() {
 
+    if (!HAJK2) return;
+
+    HAJK2.wmsProxy = "/util/proxy/geturl/";
+    HAJK2.searchProxy = "/postProxy.aspx?url=";
+
+    HAJK2.start({
+      configPath: "/mapservice/settings/config/map_1",
+      layersPath: "/mapservice/settings/config/layers"
+    }, function (status, message) {
+      if (!status) {
+        document.write(message);
+      }
+    });
+
+  }
+
+  render() {
     return (
-      <div>Map</div>
+      <div>
+        <div id="map" style={{ position: 'absolute', height: '600px', width: '100%'}}></div>
+        <div> {this.load()} </div>
+      </div>
     );
   }
 

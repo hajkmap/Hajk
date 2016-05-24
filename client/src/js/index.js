@@ -25,14 +25,15 @@
   internal.load = function (config, bookmarks) {
     var application = new ApplicationView(config, bookmarks);
     application.render();
-    //global.window.app = application;
   };
   /**
    * Creates a dom element and render the app into it.
    * @param config
    */
   internal.init = function (config) {
-    $('<div id="application" style="width: 100%; height: 100%;"></div>').prependTo('body');
+
+    //$('<div id="application" style="width: 100%; height: 100%;"></div>').prependTo('body');
+
     internal.load(config);
   };
   /**

@@ -171,7 +171,9 @@ var MapModel = Backbone.Model.extend({
       view: new ol.View({
         zoom: this.get("zoom"),
         center: this.get("center"),
-        projection: this.get("projection")
+        projection: this.get("projection"),
+        minZoom: this.get("minZoom"),
+        maxZoom: this.get("maxZoom")
       })
     });
 

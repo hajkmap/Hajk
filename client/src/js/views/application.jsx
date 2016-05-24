@@ -10,7 +10,7 @@ var Application = Backbone.View.extend({
    *
    *
    */
-  el: "application",
+  el: "map",
   /**
    *
    *

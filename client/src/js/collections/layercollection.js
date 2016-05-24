@@ -39,7 +39,7 @@ function removeFromMap(layer) {
  */
 module.exports = Backbone.Collection.extend({
 
-  model: function (args, event) {
+  model: function (args, properties) {
 
     function getLegendUrl(args) {
       if (args.legend === "") {
@@ -57,10 +57,12 @@ module.exports = Backbone.Collection.extend({
         "name": args.id,
         "caption": args.caption,
         "visible": args.visibleAtStart,
-        "singleTile" : false,
         "opacity": 1,
         "queryable": args.queryable === false ? false : true,
         "information": args.infobox,
+        "resolutions": properties.mapConfig.resolutions,
+        "origin": properties.mapConfig.origin,
+        "extent": properties.mapConfig.extent,
         "legend" : [{
           "Url": getLegendUrl(args),
           "Description" : "Teckenförklaring"
@@ -69,7 +71,8 @@ module.exports = Backbone.Collection.extend({
           "LAYERS": args.layers.join(','),
           "FORMAT": "image/png",
           "VERSION": "1.1.0",
-          "SRS": "EPSG:3006"
+          "SRS": properties.mapConfig.projection || "EPSG:3006",
+          "TILED": args.tiled
         }
       }
     };
@@ -80,12 +83,13 @@ module.exports = Backbone.Collection.extend({
         "featureType": args.layers[0].split(':')[1],
         "propertyName": args.searchFields.join(','),
         "displayName": args.displayFields ? args.displayFields : (args.searchFields[0] || "Sökträff"),
-        "srsName": "EPSG:3006"
+        "srsName": properties.mapConfig.projection || "EPSG:3006"
       };
     }
 
     var Layer = types[layer_config.type];
-    if(Layer) {
+
+    if (Layer) {
       return new Layer(layer_config.options, layer_config.type);
     } else {
       throw "Layer type not supported " + layer_config.type;
@@ -93,11 +97,14 @@ module.exports = Backbone.Collection.extend({
   },
 
   initialize: function (options, args) {
+
     this.shell = args.shell;
     this.initialConfig = options;
 
     _.defer(_.bind(function () {
+
       this.forEach(addToMap, this);
+
     }, this));
 
     this.on("add", addToMap, this);

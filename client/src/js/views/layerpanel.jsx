@@ -138,18 +138,22 @@ var LayerPanel = React.createClass({
    */
   updateGroupToggledCheckbox: function recur(layer) {
     setTimeout(() => {
-      if (layer && layer.get && layer.get('group')) {
 
-        var groupId = typeof layer === 'number' ? layer : layer.get('group')
-        ,   group   = this.findGroupInConfig(this.groups, groupId)
-        ,   layers  = this.drillGroupForLayers(group);
 
-        if (group.parent) {
-          recur.call(this, group.parent);
+      if (layer) {
+        var groupId = typeof layer === 'string' ? layer : (layer.get ? layer.get('group') : undefined)
+        ,   group
+        ,   layers;
+
+        if (groupId) {
+          group  = this.findGroupInConfig(this.groups, groupId);
+          layers = this.drillGroupForLayers(group);
+
+          if (group.parent && group.parent != -1) {
+            recur.call(this, group.parent);
+          }
+          this.refs["group_" + groupId].checked = layers.every(lyr => lyr.getVisible() === true);
         }
-
-        this.refs["group_" + groupId].checked = layers.every(lyr => lyr.getVisible() === true);
-
       }
     }, 0);
   },

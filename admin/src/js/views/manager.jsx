@@ -17,6 +17,7 @@ const defaultState = {
   url: "",
   visibleAtStart: false,
   queryable: true,
+  tiled: false,
   drawOrder: 1
 };
 /**
@@ -102,6 +103,7 @@ class Manager extends React.Component {
       url: layer.url,
       visibleAtStart: layer.visibleAtStart,
       queryable: layer.queryable,
+      tiled: layer.tiled,
       drawOrder: layer.drawOrder,
       addedLayers: []
     });
@@ -416,6 +418,7 @@ class Manager extends React.Component {
     if (fieldName === 'layers') value = format_layers(this.state.addedLayers);
     if (fieldName === 'visibleAtStart') value = input.checked;
     if (fieldName === 'queryable') value = input.checked;
+    if (fieldName === 'tiled') value = input.checked;
     if (fieldName === 'searchFields') value = value.split(',');
     if (fieldName === 'displayFields') value = value.split(',');
 
@@ -463,6 +466,7 @@ class Manager extends React.Component {
         displayFields: this.getValue("displayFields"),
         visibleAtStart: this.getValue("visibleAtStart"),
         queryable: this.getValue("queryable"),
+        tiled: this.getValue("tiled"),
         drawOrder: this.getValue("drawOrder")
       };
 
@@ -670,6 +674,19 @@ class Manager extends React.Component {
                   onChange={(e) => this.validate("drawOrder", e)}
                   value={this.state.drawOrder}
                   className={this.getValidationClass("drawOrder")}
+                />
+              </div>
+              <div>
+                <label>Geowebcache</label>
+                <input
+                  type="checkbox"
+                  ref="input_tiled"
+                  onChange={
+                    (e) => {
+                      this.setState({tiled: e.target.checked})
+                    }
+                  }
+                  checked={this.state.tiled}
                 />
               </div>
             </fieldset>

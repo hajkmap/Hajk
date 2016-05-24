@@ -309,11 +309,15 @@ module.exports = React.createClass({
         );
       } else {
         if ((this.refs.searchInput &&
-             this.refs.searchInput.value.length > 4) ||
+             this.refs.searchInput.value.length > 3) ||
              this.state.force) {
           results = this.renderResults();
         } else {
-          results = (<p className="alert alert-info">Skriv minst fyra tecken för att påbörja automatisk sökning. Tryck på <b>retur</b> för att forcera en sökning.</p>)
+          results = (
+            <p className="alert alert-info">
+              Skriv minst fyra tecken för att påbörja automatisk sökning. Tryck på <b>retur</b> för att forcera en sökning.
+            </p>
+          )
         }
 
       }
@@ -327,7 +331,7 @@ module.exports = React.createClass({
         force: false
       });
 
-      if (this.refs.searchInput.value.length > 4) {
+      if (this.refs.searchInput.value.length > 3) {
         this.search();
       } else {
         this.setState({

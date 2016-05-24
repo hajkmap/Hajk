@@ -1,5 +1,5 @@
 # Hajk2
-Uppdaterad: 2016-04-07 08:25
+Uppdaterad: 2016-05-24 13:39
 
 Detta är ett projekt som drivs av Stadsbyggnadskontoret Göteborgs Stad.  
 Systemutvecklare är i huvudsak Sweco Position.  
@@ -89,3 +89,55 @@ För serverapplikationen så ange Alias: backend.
 För adminapplikationen så kan valfritt namn användas, detta bli sökväg till adminapplikationen.  
 För klientapplikationen så kan valfritt namn användas, detta bli sökväg till kartapplikationen.  
 Finns behov av HTTP-proxy för anrop till extern kartserver så finns exempel på detta i mappen proxy.
+
+##Konfiguration
+
+###Klient
+När scriptet för HAJK2 läggs till i en HTML-fil via en script-tagg så initieras en global variabel med namn HAJK2.  
+Denna variabel innehåller ett objekt som används för att konfigurera och starta applikationen.  
+Applikationen förutsätter att den finns ett element i HTML-filen som heter map.  
+
+Det finns två egenskaper på HAJK2-objektet som används för att konfigurera HTTP-proxy för korsdomänsanrop.  
+{string} wmsProxy - URL: skall ha stöd för get-anrop och används för att hämta WMS-bilder (behövs i regel när det är lösenord på tjänster).  
+{string} searchProxy - URL: skall ha stöd för post-anrop och används vid WFS-sökning.
+
+Det finns en metod som heter start. Denna startar applikationen.  
+start({object} startConfiguration)
+
+startConfiguration  
+configPath - Sökväg till tjänstenod som hämtar konfiguration för karta.  
+layersPath - Sökväg till tjänstenod som hämtar konfiguration för lager.  
+
+För att konfigurera kartan så hanteras detta manuellt i filen App_Data\map_{x}.json
+"map": {  
+	"target": "map",  				// {string} Målelement (ändra inte)  
+	"center": [410719, 6575675 ],   // {array {number}}centrumkoortinat  
+	"projection": "EPSG:3006",  	// {string} projektion  
+	"zoom": 7,  					// {number} startzoom  
+	"maxZoom": 12,  				// {number} Högsta möjliga zoomnivå  
+	"minZoom": 4,  					// {number} Lägsta möjliga zoomnivå  
+	"resolutions": [],  			// {array {number}} Lista med upplösningar för tile-grid (specificeras vid tilecache)  
+	"origin": [],  					// {array {number}} Startkoordinat för tile-grid  
+	"extent": [],  					// {array {number}} Utbredning för tile-grid  
+	"logo": ""  					// {string} URL för sökväg till logo  
+}  
+
+###Administrationsgränssnitt
+####Applikation
+Filen config.json hanterar inställningar för admingränssnittet.  
+Följande egenskaper finns att konfigurera:
+####manager
+{string} url_proxy - Sökväg till HTTP-proxy för korsdomänsanrop.  
+{string} url_layers - REST-sökväg till tjänstenod där lager hanteras.  
+{string} url_layer_settings - REST-sökväg till tjänstenod som hanterar uppdatering av enskilda lager.  
+{string} url_default_server -  Sökväg till den standardserver som skall användas som uppslag för WMS-tjänster.  
+{array { object { value, title }}} owner_options - Lista med namn på tillgängliga dataägare.  
+####menu
+{string} url_map - Sökväg till den fil för kartinställningar som skall uppdateras (notera att .json inte behöver anges).  
+{string} url_layers - Sökväg till den fil för lager som skall uppdateres (notera att .json inte behöver anges).  
+{string} url_layermenu_settings - REST-sökväg till den tjänstenod som hanterar uppdatering av lagermenu.  
+####router
+{array {object {name, title, default (optional) }}} - Lista med flikar i applikationen.
+
+###Tjänst
+Ge läs och skrivrättigheter till mappen App_Data för den avnändare som är registrerad i IIS.

@@ -144,8 +144,8 @@ var LayerItem = React.createClass({
         <div className="panel-heading" onClick={toggleLegend}>
           <span onClick={toggleVisible} className="clickable">
             <i className={visible ? 'fa fa-check-square': 'fa fa-square'}></i>&nbsp;
-            <span className="layer-item-header-text">{caption}</span>&nbsp;
             {this.renderStatus()}
+            <span className="layer-item-header-text">{caption}</span>&nbsp;
           </span>
           {components.legend.legendButton}
         </div>

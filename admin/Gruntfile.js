@@ -75,6 +75,7 @@ module.exports = function (grunt) {
             "src/js/views/compiled/manager.js": ["src/js/views/manager.jsx"],
             "src/js/views/compiled/menu.js": ["src/js/views/menu.jsx"],
             "src/js/views/compiled/map.js": ["src/js/views/map.jsx"],
+            "src/js/views/compiled/info.js": ["src/js/views/info.jsx"],
             "src/js/views/compiled/release.js": ["src/js/views/release.jsx"],
             "src/js/views/compiled/alert.js": ["src/js/views/alert.jsx"]
           }
@@ -103,12 +104,14 @@ module.exports = function (grunt) {
               "views/manager":      "./src/js/views/compiled/manager.js",
               "views/menu":         "./src/js/views/compiled/menu.js",
               "views/map":          "./src/js/views/compiled/map.js",
+              "views/info":          "./src/js/views/compiled/info.js",
               "views/release":      "./src/js/views/compiled/release.js",
               "views/alert":        "./src/js/views/compiled/alert.js",
               "models/application": "./src/js/models/application.js",
               "models/manager":     "./src/js/models/manager.js",
               "models/menu":        "./src/js/models/menu.js",
               "models/map":         "./src/js/models/map.js",
+              "models/info":         "./src/js/models/info.js",
               "models/release":     "./src/js/models/release.js"
             }
           },
@@ -162,7 +165,7 @@ module.exports = function (grunt) {
           dest: 'dist/index.html',
           replacements: [{
             from: '{js}',
-            to: '<script src="js/dependencies.js" charset="utf-8"></script>\r\n    <script src="js/<%= pkg.name %>-transpiled.js" charset="utf-8"></script>'
+            to: '<script src="js/<%= pkg.name %>-transpiled.js" charset="utf-8"></script>'
           }, {
             from: '{css}',
             to: '<link rel="stylesheet" href="assets/<%= pkg.name %>.css" charset="utf-8">'
@@ -232,9 +235,7 @@ module.exports = function (grunt) {
           }
       }
 
-    });
-
-    grunt.registerTask('dependencies', ['browserify:dependencies']);
+    });    
 
     grunt.registerTask('build', ['copy:debug', 'replace:debughtml', 'less', 'autoprefixer:core', 'concat:css', 'react:admin', 'browserify:app', 'babel', 'replace:bablecleanup']);
 

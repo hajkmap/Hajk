@@ -24,6 +24,17 @@
       "units": "m"
     },
     {
+      "code": "urn:ogc:def:crs:EPSG::3006",
+      "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [
+        181896.33,
+        6101648.07,
+        864416.0,
+        7689478.31
+      ],
+      "units": "m"
+    },
+    {
       "code": "EPSG:3007",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
       "extent": [
@@ -40,31 +51,28 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "2",
-          "4"
+          "8"
         ],
         "groups": [
           {
-            "id": "afa18725-2fb4-ef3a-331d-8fb74a31dc8d",
+            "id": "8dae03ba-f419-3bd6-4247-2e0f3a2fdbd3",
             "parent": "-1",
-            "name": "Grupp 2",
+            "name": "Kollektivtrafik",
             "toggled": true,
             "layers": [
-              "6",
-              "3"
+              "9"
             ],
-            "groups": [
-              {
-                "id": "c079dfda-129e-e075-8215-507165ae0083",
-                "parent": "afa18725-2fb4-ef3a-331d-8fb74a31dc8d",
-                "name": "Grupp 1",
-                "toggled": true,
-                "layers": [
-                  "5"
-                ],
-                "groups": []
-              }
-            ]
+            "groups": []
+          },
+          {
+            "id": "3c8a9295-672b-7507-17f7-1080d005e289",
+            "parent": "-1",
+            "name": "Natur",
+            "toggled": true,
+            "layers": [
+              "10"
+            ],
+            "groups": []
           }
         ]
       }
@@ -78,8 +86,7 @@
       "options": {
         "settings": {
           "Alla lager": "*",
-          "Fastigheter": "2",
-          "Skolor": "3"
+          "Hållplatser": "9"
         }
       }
     },
@@ -114,10 +121,37 @@
   "map": {
     "target": "map",
     "center": [
-      328928,
-      6402496
+      410719,
+      6575675
     ],
     "projection": "EPSG:3006",
-    "zoom": 10
+    "zoom": 7,
+    "maxZoom": 12,
+    "minZoom": 4,
+    "resolutions": [
+      3380.0726322344431,
+      1690.0363161172215,
+      845.01815805861077,
+      422.50907902930538,
+      211.25453951465269,
+      105.62726975732635,
+      52.813634878663173,
+      26.406817439331586,
+      13.203408719665793,
+      6.6017043598328966,
+      3.3008521799164483,
+      1.6504260899582242
+    ],
+    "origin": [
+      218128.70314219233,
+      6119620.6758293174
+    ],
+    "extent": [
+      218128.70314219233,
+      6119620.6758293174,
+      1083427.2969942098,
+      7850217.8635333525
+    ],
+    "logo": "assets/logo.png"
   }
 }
