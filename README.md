@@ -129,17 +129,17 @@ För att konfigurera kartan så hanteras detta manuellt i filen App_Data\map_{x}
 Filen config.json hanterar inställningar för admingränssnittet.  
 Följande egenskaper finns att konfigurera:
 ####manager
-{string} url_proxy - Sökväg till HTTP-proxy för korsdomänsanrop.  
-{string} url_layers - REST-sökväg till tjänstenod där lager hanteras.  
-{string} url_layer_settings - REST-sökväg till tjänstenod som hanterar uppdatering av enskilda lager.  
-{string} url_default_server -  Sökväg till den standardserver som skall användas som uppslag för WMS-tjänster.  
-{array { object { value, title }}} owner_options - Lista med namn på tillgängliga dataägare.  
+`{string} url_proxy` - Sökväg till HTTP-proxy för korsdomänsanrop.  
+`{string} url_layers` - REST-sökväg till tjänstenod där lager hanteras.  
+`{string} url_layer_settings` - REST-sökväg till tjänstenod som hanterar uppdatering av enskilda lager.  
+`{string} url_default_server` -  Sökväg till den standardserver som skall användas som uppslag för WMS-tjänster.  
+`{array { object { value, title }}} owner_options` - Lista med namn på tillgängliga dataägare.  
 ####menu
-{string} url_map - Sökväg till den fil för kartinställningar som skall uppdateras (notera att .json inte behöver anges).  
-{string} url_layers - Sökväg till den fil för lager som skall uppdateres (notera att .json inte behöver anges).  
-{string} url_layermenu_settings - REST-sökväg till den tjänstenod som hanterar uppdatering av lagermenu.  
+`{string} url_map` - Sökväg till den fil för kartinställningar som skall uppdateras (notera att .json inte behöver anges).  
+`{string} url_layers` - Sökväg till den fil för lager som skall uppdateres (notera att .json inte behöver anges).  
+`{string} url_layermenu_settings` - REST-sökväg till den tjänstenod som hanterar uppdatering av lagermenu.  
 ####router
-{array {object {name, title, default (optional) }}} - Lista med flikar i applikationen.
+`{array {object {name, title, default (optional) }}}` - Lista med flikar i applikationen.
 
 ###Tjänst
 Ge läs och skrivrättigheter till mappen App_Data för den avnändare som är registrerad i IIS.
