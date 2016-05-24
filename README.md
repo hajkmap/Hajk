@@ -98,15 +98,15 @@ Denna variabel innehåller ett objekt som används för att konfigurera och star
 Applikationen förutsätter att den finns ett element i HTML-filen som heter map.  
 
 Det finns två egenskaper på HAJK2-objektet som används för att konfigurera HTTP-proxy för korsdomänsanrop.  
-{string} wmsProxy - URL: skall ha stöd för get-anrop och används för att hämta WMS-bilder (behövs i regel när det är lösenord på tjänster).  
-{string} searchProxy - URL: skall ha stöd för post-anrop och används vid WFS-sökning.
+`{string} wmsProxy` - URL: skall ha stöd för get-anrop och används för att hämta WMS-bilder (behövs i regel när det är lösenord på tjänster).  
+`{string} searchProxy` - URL: skall ha stöd för post-anrop och används vid WFS-sökning.
 
 Det finns en metod som heter start. Denna startar applikationen.  
-start({object} startConfiguration)
+`start({object} startConfiguration)`
 
 startConfiguration  
-configPath - Sökväg till tjänstenod som hämtar konfiguration för karta.  
-layersPath - Sökväg till tjänstenod som hämtar konfiguration för lager.  
+`cofigPath` - Sökväg till tjänstenod som hämtar konfiguration för karta.  
+`layersPath` - Sökväg till tjänstenod som hämtar konfiguration för lager.  
 
 För att konfigurera kartan så hanteras detta manuellt i filen App_Data\map_{x}.json  
 <pre>
