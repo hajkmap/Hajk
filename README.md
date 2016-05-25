@@ -61,6 +61,12 @@ Bygg version för driftsättning. (målmapp: **release**)
 Starta en lyssnare som lyssnar på ändringar i filsystemet ochg bygger per automatik.  
 `grunt debug` 
 
+####Driftsättning Admin
+Bygg version för driftsättning. (målmapp: **dist**)  
+Detta steg måste föregås av att release-kommando för kartdelen har genomförts.
+`cd c:\Projekt\Hajk2\admin`  
+`grunt build`
+
 ####Driftsättning server
 - Dubbelklicka på **backend.sln**  
 - Välj från menyn `Build > Build Solution`  
@@ -78,7 +84,7 @@ Mapparna bör placeras i en skrivskyddad mapp; tex C:\data\www\hajk.
 
 Skapa därefter tre undermappar för applikationerna:  
 C:\data\www\hajk\klient -- innehåller innehållet i **backend**  
-C:\data\www\hajk\server -- innehåller innehållet i **client\release**
+C:\data\www\hajk\server -- innehåller innehållet i **client\release**  
 C:\data\www\hajk\admin -- innehåller innehållet i **admin\release**
 
 Skapa i IIS tre nya applikationer genom att högerklicka på valt site och välja:
@@ -87,7 +93,7 @@ Skapa i IIS tre nya applikationer genom att högerklicka på valt site och välj
 
 För serverapplikationen så ange Alias: backend.  
 För adminapplikationen så kan valfritt namn användas, detta bli sökväg till adminapplikationen.  
-För klientapplikationen så kan valfritt namn användas, detta bli sökväg till kartapplikationen.  
+För klientapplikationen så kan valfritt namn användas, detta bli sökväg till kartapplikationen (standardnamn är mapservice).  
 Finns behov av HTTP-proxy för anrop till extern kartserver så finns exempel på detta i mappen proxy.
 
 ##Konfiguration

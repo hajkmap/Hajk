@@ -41,6 +41,9 @@ class Info extends React.Component {
 		  	<li><b>Länk till karta</b></li>
 		  	<li><b>Administrationsverktyg</b></li>
 		  </ul>
+		  <p>		  	
+		  	github: <a href="https://github.com/Johkar/Hajk2" target="_blank">https://github.com/Johkar/Hajk2</a>
+		  </p>
 		</div>
     );
   }
