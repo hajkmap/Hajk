@@ -3,10 +3,10 @@ Uppdaterad: 2016-05-24 13:39
 
 Detta är ett projekt som drivs av Stadsbyggnadskontoret Göteborgs Stad.  
 Systemutvecklare är i huvudsak Sweco Position.  
-Projektet drivs som ett samarbetsprojekt och är avsett att kunna återanvändas för generalla GIS-applikationer för webb.   
+Projektet drivs som ett samarbetsprojekt och är avsett att kunna återanvändas för generalla GIS-applikationer för webb.  
 Licensformen bygger på en öppen samarbetslicens. (Creative Common Zero CC0).
 
-Koden består av två delar; en serverdel och en klientdel. Serverdelen är programmerad i Microsoft .NET med tekniken WCF och kodspråket C#.
+Koden består av två delar; en serverdel och en klientdel. Serverdelen är programmerad i Microsoft .NET med tekniken WCF och kodspråket C#.  
 Klientdelen är programmerad i JavaScript 2015. Kommunikationen mellan klient och server sker via HTTP och är RESTful implementerad.
 
 Klienten innehåller två separata applikationer, en kartvy och en administrationsvy.
@@ -24,7 +24,7 @@ Verifiera installationen genom starta kommandopromten och skriva:
 `git --version`
 
 Skriv därefter till exempel:  
-`cd c:\Projekt` 
+`cd c:\Projekt`  
 för att gå till lokal projektmapp.
 
 Ange följande kommando för att ladda hem koden:  
@@ -42,35 +42,35 @@ För att installera visual studio gå till [https://www.visualstudio.com/post-do
 
 ##Driftsättning
 ###Första gången projektet klonas.
-####Installera beroenden    
+####Installera beroenden
 `npm install`
 
-####Installera externa bibiliotek  
-`grunt dependencies`  
+####Installera externa bibiliotek
+`grunt dependencies`
 
 ---------- 
 ####Driftsättning Klient
 Bygg version för test. (målmapp: **dist**)  
-Öppna kommandopromten och gå till projektets mapp:
+Öppna kommandopromten och gå till projektets mapp:  
 `cd c:\Projekt\Hajk2\client`  
-`grunt build`  
+`grunt build`
 
 Bygg version för driftsättning. (målmapp: **release**)  
-`grunt release` 
+`grunt release`
 
 Starta en lyssnare som lyssnar på ändringar i filsystemet ochg bygger per automatik.  
-`grunt debug` 
+`grunt debug`
 
 ####Driftsättning Admin
 Bygg version för driftsättning. (målmapp: **dist**)  
-Detta steg måste föregås av att release-kommando för kartdelen har genomförts.
+Detta steg måste föregås av att release-kommando för kartdelen har genomförts.  
 `cd c:\Projekt\Hajk2\admin`  
 `grunt build`
 
 ####Driftsättning server
 - Dubbelklicka på **backend.sln**  
 - Välj från menyn `Build > Build Solution`  
-- Markera i Solution Explorer projektet **mapservice**.    
+- Markera i Solution Explorer projektet **mapservice**.  
 - Välj från menyn `Build > Publish mapservice`  
 - Ändra sökväg till mappen om så önskas. Standard är c:\install\backend.  
 
