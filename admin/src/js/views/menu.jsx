@@ -7,16 +7,23 @@ $.fn.editable = function(component) {
   function edit(node, e) {
 
       function reset() {
+        
         ok.remove();
         abort.remove();
         remove.remove();
+        toggled.remove();
+        
+        tools.remove();
+
         elem.editing = false;
       }
 
       function store() {
         let name = input.val();
-        node.html(name);
+        let toggled = checkbox.is(':checked');
+        node.html(name);        
         node.parent().attr("data-name", name);
+        node.parent().attr("data-toggled", toggled);
         reset();
       }
 
@@ -25,12 +32,17 @@ $.fn.editable = function(component) {
         position: "relative",
         top: "-1px"
       }
-      ,   prev   = node.html()
-      ,   ok     = $('<span class="btn btn-success">OK</span>')
-      ,   abort  = $('<span class="btn btn-default">Avbryt</span>')
-      ,   remove = $('<span class="fa fa-minus-circle"></span>')
-      ,   input  = $('<input />')
-      ,   elem   = node.get(0) || {}
+      ,   prev     = node.html()
+      ,   id       = Math.floor(Math.random() * 1E5)
+      ,   ok       = $('<span class="btn btn-success">OK</span>')
+      ,   tools    = $('<div></div>') 
+      ,   abort    = $('<span class="btn btn-default">Avbryt</span>')
+      ,   label    = $(`<label for="${id}">Expanderad vid start&nbsp;</label>`)
+      ,   checkbox = $(`<input id="${id}" type="checkbox"/>`)      
+      ,   remove   = $('<span class="fa fa-minus-circle"></span>')
+      ,   input    = $('<input />')
+      ,   toggled  = $('<span></span>')
+      ,   elem     = node.get(0) || {}
 
       ok
         .css(btnCSS)
@@ -41,7 +53,13 @@ $.fn.editable = function(component) {
         .click(e => {
           node.html(prev);
           reset();
-        });
+        });                  
+
+      if (node.parent().attr("data-toggled") === 'true') {
+        checkbox.attr('checked', 'checked');
+      }
+
+      toggled.append(label, checkbox);
 
       remove
         .css({ color: 'red', marginRight: '4px' })
@@ -68,10 +86,23 @@ $.fn.editable = function(component) {
           padding: '4px'
         });
 
+      tools
+        .css({
+          marginLeft: '13px',
+          marginTop: '7px'
+        })
+        .append(
+          ok,
+          abort,
+          toggled
+        );
+
+      tools.append(ok, abort, toggled);
+
       if (node.hasClass('group-name')) {
         node
           .html(input)
-          .after(ok, abort)
+          .after(tools)
           .before(remove);
       }
 
@@ -322,14 +353,14 @@ class Menu extends React.Component {
   /**
    *
    */
-  createGroup(name) {
+  createGroup(name, toggled) {
     var id = this.createGuid();
     var group = $(`
       <li
         class="group-node"
         data-id="${id}"
         data-type="group"
-        data-toggled="true"
+        data-toggled="${toggled}"
         data-name="${name}">
         <span class="group-name">${name}</span>
         <ul></ul>
@@ -448,7 +479,7 @@ class Menu extends React.Component {
         </aside>
         <div className="tree-view">
           <button className="btn btn-primary" onClick={(e) => this.saveSettings(e)}>Spara</button>&nbsp;
-          <button className="btn btn-success" onClick={(e) => this.createGroup("Ny grupp")}>Ny grupp</button>
+          <button className="btn btn-success" onClick={(e) => this.createGroup("Ny grupp", false)}>Ny grupp</button>
           {this.renderLayerMenu()}
         </div>
       </section>

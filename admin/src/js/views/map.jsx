@@ -9,7 +9,7 @@ class Map extends React.Component {
 
     if (!HAJK2) return;
 
-    HAJK2.wmsProxy = "/util/proxy/geturl/";
+    HAJK2.wmsProxy = "";
     HAJK2.searchProxy = "/postProxy.aspx?url=";
 
     HAJK2.start({

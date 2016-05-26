@@ -57,22 +57,41 @@
           {
             "id": "8dae03ba-f419-3bd6-4247-2e0f3a2fdbd3",
             "parent": "-1",
-            "name": "Kollektivtrafik",
-            "toggled": true,
-            "layers": [
-              "9"
-            ],
-            "groups": []
-          },
-          {
-            "id": "3c8a9295-672b-7507-17f7-1080d005e289",
-            "parent": "-1",
-            "name": "Natur",
-            "toggled": true,
-            "layers": [
-              "10"
-            ],
-            "groups": []
+            "name": "Kartdata",
+            "toggled": false,
+            "layers": [],
+            "groups": [
+              {
+                "id": "3c8a9295-672b-7507-17f7-1080d005e289",
+                "parent": "8dae03ba-f419-3bd6-4247-2e0f3a2fdbd3",
+                "name": "Natur",
+                "toggled": true,
+                "layers": [
+                  "10"
+                ],
+                "groups": []
+              },
+              {
+                "id": "362b741b-a41d-2cda-b623-a5d3a71643c7",
+                "parent": "8dae03ba-f419-3bd6-4247-2e0f3a2fdbd3",
+                "name": "Fastigheter",
+                "toggled": true,
+                "layers": [
+                  "11"
+                ],
+                "groups": []
+              },
+              {
+                "id": "58bc4406-69ec-d2d0-3b66-e91754db53be",
+                "parent": "8dae03ba-f419-3bd6-4247-2e0f3a2fdbd3",
+                "name": "Fastighet",
+                "toggled": true,
+                "layers": [
+                  "9"
+                ],
+                "groups": []
+              }
+            ]
           }
         ]
       }
@@ -152,6 +171,6 @@
       1083427.2969942098,
       7850217.8635333525
     ],
-    "logo": "assets/logo.png"
+    "logo": ""
   }
 }

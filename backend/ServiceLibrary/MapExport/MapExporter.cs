@@ -193,7 +193,7 @@ namespace Sweco.Services.MapExport
                 }                
             }
             catch
-            {                
+            {                    
             }
         }
         
