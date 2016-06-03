@@ -84,7 +84,7 @@ module.exports = ToolModel.extend({
     settings: ["Allt"],
     filter: "*",
     filterVisible: false,
-    markerImg: "http://localhost/gbg/assets/icons/marker.png"
+    markerImg: "assets/icons/marker.png"
   },
   /**
    * @property requests {[$AjaxRequest]}
