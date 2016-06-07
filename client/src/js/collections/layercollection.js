@@ -61,6 +61,7 @@ module.exports = Backbone.Collection.extend({
         "queryable": args.queryable === false ? false : true,
         "information": args.infobox,
         "resolutions": properties.mapConfig.resolutions,
+        "projection": args.projection,
         "origin": properties.mapConfig.origin,
         "extent": properties.mapConfig.extent,
         "legend" : [{
@@ -80,7 +81,7 @@ module.exports = Backbone.Collection.extend({
     if (args.searchFields && args.searchFields[0] !== "") {
       layer_config.options.search = {
         "url": (HAJK2.searchProxy || "") + args.url.replace('wms', 'wfs'),
-        "featureType": args.layers[0].split(':')[1],
+        "featureType": args.layers[0].split(':')[1] || args.layers[0].split(':')[0],
         "propertyName": args.searchFields.join(','),
         "displayName": args.displayFields ? args.displayFields : (args.searchFields[0] || "Sökträff"),
         "srsName": properties.mapConfig.projection || "EPSG:3006"
