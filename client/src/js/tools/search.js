@@ -118,7 +118,7 @@ module.exports = ToolModel.extend({
         version="1.1.0"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
-        maxFeatures="1000000">
+        maxFeatures="100">
         <wfs:Query typeName="feature:${props.featureType}" srsName="${props.srsName}">
           <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
             <ogc:Or>
@@ -296,7 +296,7 @@ module.exports = ToolModel.extend({
         "featureType": source.layers[0].split(':')[1],
         "propertyName": source.searchFields.join(','),
         "displayName": source.displayFields ? source.displayFields : (source.searchFields[0] || "Sökträff"),
-        "srsName": "EPSG:3006"
+        "srsName": "EPSG:3007"
       };      
 
       promises.push(new Promise((resolve, reject) => {        

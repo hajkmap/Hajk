@@ -4,7 +4,7 @@ module.exports = LayerModel.extend({
 
    defaults: {
       url: "",
-      projection: "EPSG:3006",
+      projection: "EPSG:3007",
       serverType: 'geoserver',
       opacity: 1,
       status: "ok",
@@ -89,7 +89,7 @@ module.exports = LayerModel.extend({
                   'INFO_FORMAT': 'application/json'                  
                }
             );
-            
+
          if (url) {
             if (HAJK2.searchProxy) {
                url = encodeURIComponent(url);
