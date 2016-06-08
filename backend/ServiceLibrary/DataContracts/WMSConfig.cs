@@ -22,6 +22,8 @@ namespace Sweco.Services.DataContracts
 
         public string legend { get; set; }
 
+        public string projection { get; set; }
+
         public string[] layers { get; set; }
 
         public string infobox { get; set; }

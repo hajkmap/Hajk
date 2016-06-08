@@ -69,8 +69,8 @@ Detta steg måste föregås av att release-kommando för kartdelen har genomför
 
 ####Driftsättning server
 - Dubbelklicka på **backend.sln**  
-- Välj från menyn `Build > Build Solution`  
 - Markera i Solution Explorer projektet **mapservice**.  
+- Välj från menyn `Build > Build Solution`  
 - Välj från menyn `Build > Publish mapservice`  
 - Ändra sökväg till mappen om så önskas. Standard är c:\install\backend.  
 
