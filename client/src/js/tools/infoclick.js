@@ -30,7 +30,7 @@ module.exports = ToolModel.extend({
       selectedFeature: undefined,
       highlightLayer: undefined,
       selectInteraction: undefined,
-      markerImg: "http://localhost/gbg/assets/icons/marker.png"
+      markerImg: "assets/icons/marker.png"
   },
 
   initialize: function (options) {
@@ -163,7 +163,7 @@ module.exports = ToolModel.extend({
               error: (message) => {
                 resolve();
               },
-              success: (features, layer) => {
+              success: (features, layer) => {                                
                   if (features instanceof Array && features.length > 0) {
                     this.addInformation(features[0], wmsLayer, (featureInfo) => {
                         infos[wmsLayer.index + infosLen] = featureInfo;

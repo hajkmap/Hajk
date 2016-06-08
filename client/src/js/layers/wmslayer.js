@@ -4,7 +4,7 @@ module.exports = LayerModel.extend({
 
    defaults: {
       url: "",
-      projection: "EPSG:3007",
+      projection: "EPSG:3006",
       serverType: 'geoserver',
       opacity: 1,
       status: "ok",
@@ -73,9 +73,7 @@ module.exports = LayerModel.extend({
    validInfo: true,
 
    getFeatureInformation: function (params) {
-
       var url;
-
       try {
 
          this.validInfo = true;
@@ -88,28 +86,25 @@ module.exports = LayerModel.extend({
                params.resolution,
                params.projection,
                {
-                  'INFO_FORMAT': 'text/javascript',
-                  'FORMAT_OPTIONS': "callback:" + this.get("wmsCallbackName"),
-                  'callback': this.get("wmsCallbackName")
+                  'INFO_FORMAT': 'application/json'                  
                }
             );
-
+            
          if (url) {
-
+            if (HAJK2.searchProxy) {
+               url = encodeURIComponent(url);
+            }
             var request = $.ajax({
-               url: url,
-               dataType: 'jsonp',
-               jsonpCallback: this.get("wmsCallbackName")
+               url: HAJK2.searchProxy + url,               
+               success: (data) => {                  
+                  var features = new ol.format.GeoJSON().readFeatures(data);
+                  this.featureInformationCallback(features, this.getLayer());
+               }            
             });
-
             request.error(params.error);
          }
-
-
       } catch (e) {
-
          params.error(e);
-
       }
 
    },

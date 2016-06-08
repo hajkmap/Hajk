@@ -77,13 +77,13 @@
       "caption": "Hållplatser",
       "url": "http://194.71.132.27/geoserver28/wms",
       "owner": "SBK",
-      "date": "1465347645549",
+      "date": "1465379631054",
       "content": "Hållplatser",
       "legend": "",
       "layers": [
         "sweco:hpl"
       ],
-      "infobox": "",
+      "infobox": "Namn: {namn}  \nID: {id}",
       "searchFields": [
         ""
       ],
