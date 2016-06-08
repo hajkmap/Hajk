@@ -1,17 +1,17 @@
 {
-  "layers": [
+  "wmslayers": [
     {
-      "id": "8",
+      "id": "0",
       "caption": "Terrängkartan",
       "url": "http://194.71.132.27/geoserver28/wms",
       "owner": "SBK",
-      "date": "1464168386420",
+      "date": "1465340245272",
       "content": "Terrängkartan",
       "legend": "",
       "layers": [
         "sweco:terrangkartan"
       ],
-      "infobox": "Typkod {typkod}",
+      "infobox": "",
       "searchFields": [
         ""
       ],
@@ -21,77 +21,109 @@
       "visibleAtStart": true,
       "queryable": false,
       "tiled": true,
-      "drawOrder": 0
-    },
-    {
-      "id": "9",
-      "caption": "Hållplats",
-      "url": "http://194.71.132.27/geoserver28/wms",
-      "owner": "SBK",
-      "date": "1464160644434",
-      "content": "Hållplats",
-      "legend": "http://194.71.132.27/hajk/assets/icons/hpl.png",
-      "layers": [
-        "sweco:hpl"
-      ],
-      "infobox": "{namn}",
-      "searchFields": [
-        "namn"
-      ],
-      "displayFields": [
-        "namn"
-      ],
-      "visibleAtStart": false,
-      "queryable": true,
-      "tiled": false,
-      "drawOrder": 2
-    },
-    {
-      "id": "10",
-      "caption": "Naturvårdsområden",
-      "url": "http://194.71.132.27/geoserver28/wms",
-      "owner": "SBK",
-      "date": "1464160119670",
-      "content": "Naturvårdsområden",
-      "legend": "",
-      "layers": [
-        "sweco:naturvard"
-      ],
-      "infobox": "{BESKRIVNIN}  \n\n<a href=\"{OBJEKTLANK}\" target=\"_blank\">Länk</a>",
-      "searchFields": [
-        ""
-      ],
-      "displayFields": [
-        ""
-      ],
-      "visibleAtStart": false,
-      "queryable": true,
-      "tiled": true,
       "drawOrder": 1
     },
     {
-      "id": "11",
-      "caption": "Tomter",
+      "id": "1",
+      "caption": "Busslinjer",
       "url": "http://194.71.132.27/geoserver28/wms",
       "owner": "SBK",
-      "date": "1464167530309",
-      "content": "Fastigheter",
+      "date": "1465342376211",
+      "content": "test",
       "legend": "",
       "layers": [
-        "sweco:fastighet"
+        "sweco:busslinje"
       ],
-      "infobox": "{FASTIGHET}  \n\n<a href=\"/fastighetsrapport/lmdirect?fnrs=0{FNR}\" target=\"_blank\">Fastighet direkt</a>",
+      "infobox": "",
       "searchFields": [
-        "FASTIGHET"
+        "fran",
+        "till"
       ],
       "displayFields": [
-        "FASTIGHET",
-        "FNR"
+        "linje_nr",
+        "fran",
+        "till"
       ],
       "visibleAtStart": true,
       "queryable": true,
       "tiled": false,
       "drawOrder": 1
+    },
+    {
+      "id": "2",
+      "caption": "Adress",
+      "url": "http://194.71.132.27/geoserver28/wms",
+      "owner": "SBK",
+      "date": "1465340699314",
+      "content": "Adress",
+      "legend": "",
+      "layers": [
+        "sweco:adress"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "drawOrder": 1
+    },
+    {
+      "id": "3",
+      "caption": "Hållplatser",
+      "url": "http://194.71.132.27/geoserver28/wms",
+      "owner": "SBK",
+      "date": "1465347645549",
+      "content": "Hållplatser",
+      "legend": "",
+      "layers": [
+        "sweco:hpl"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "drawOrder": 1
+    }
+  ],
+  "wfslayers": [
+    {
+      "id": "0",
+      "caption": "Adress",
+      "url": "http://194.71.132.27/geoserver28/wfs",
+      "layers": [
+        "sweco:adress"
+      ],
+      "searchFields": [
+        "adress"
+      ],
+      "displayFields": [
+        "adress"
+      ]
+    },
+    {
+      "id": "1",
+      "caption": "Fastighet",
+      "url": "http://194.71.132.27/geoserver28/wfs",
+      "layers": [
+        "sweco:fastighet"
+      ],
+      "searchFields": [
+        "FASTIGHET"
+      ],
+      "displayFields": [
+        "FNR"
+      ]
     }
   ]
 }

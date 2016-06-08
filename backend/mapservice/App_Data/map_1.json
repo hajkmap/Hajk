@@ -51,43 +51,26 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "8"
+          "0"
         ],
         "groups": [
           {
-            "id": "8dae03ba-f419-3bd6-4247-2e0f3a2fdbd3",
+            "id": "5169cc20-da42-f8d0-683e-d12dde57f254",
             "parent": "-1",
-            "name": "Kartdata",
+            "name": "Testgrupp",
             "toggled": false,
-            "layers": [],
+            "layers": [
+              "3",
+              "2"
+            ],
             "groups": [
               {
-                "id": "3c8a9295-672b-7507-17f7-1080d005e289",
-                "parent": "8dae03ba-f419-3bd6-4247-2e0f3a2fdbd3",
-                "name": "Natur",
-                "toggled": true,
+                "id": "d32cd706-cb1f-1aa0-9376-07df762fe8a7",
+                "parent": "5169cc20-da42-f8d0-683e-d12dde57f254",
+                "name": "Ny grupp",
+                "toggled": false,
                 "layers": [
-                  "10"
-                ],
-                "groups": []
-              },
-              {
-                "id": "362b741b-a41d-2cda-b623-a5d3a71643c7",
-                "parent": "8dae03ba-f419-3bd6-4247-2e0f3a2fdbd3",
-                "name": "Fastigheter",
-                "toggled": true,
-                "layers": [
-                  "11"
-                ],
-                "groups": []
-              },
-              {
-                "id": "58bc4406-69ec-d2d0-3b66-e91754db53be",
-                "parent": "8dae03ba-f419-3bd6-4247-2e0f3a2fdbd3",
-                "name": "Fastighet",
-                "toggled": true,
-                "layers": [
-                  "9"
+                  "1"
                 ],
                 "groups": []
               }

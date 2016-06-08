@@ -31,13 +31,10 @@
    * @param config
    */
   internal.init = function (config) {
-
-    //$('<div id="application" style="width: 100%; height: 100%;"></div>').prependTo('body');
-
     internal.load(config);
   };
   /**
-   * Read marameters from global querystring
+   * Read parameters from global querystring
    * @return {object} parameters
    */
   internal.parseQueryParams = function () {
@@ -83,6 +80,35 @@
 
       return a;
   };
+
+  internal.filterByLayerSwitcher = function (config, layers) {
+
+    function f(groups, layer) {
+      groups.forEach(group => {
+        if (group.layers.includes(layer.id)) {
+          filtered.push(layer);
+        }
+        if (group.hasOwnProperty('groups')) {
+          f(group.groups, layer);
+        }
+      });
+    }
+
+    var filtered = [];    
+
+    layers.forEach(layer => {
+      if (config.baselayers.includes(layer.id)) {
+        filtered.push(layer);
+      }
+    });
+
+    layers.forEach(layer => {      
+      f(config.groups, layer);
+    });
+
+    return filtered;
+  };
+
   /**
    * Load config and start the application.
    * @param {object} config
@@ -94,16 +120,27 @@
 
         var layers = $.getJSON(config.layersPath || layersPath);
 
-        layers.done(data => {
-          data.layers.sort((a, b) =>
+        layers.done(data => {                  
+
+          var layerSwitcherConfig = map_config.tools.find(tool => {
+            return tool.type === 'layerswitcher'
+          }).options;
+
+          var searchConfig = map_config.tools.find(tool => {
+            return tool.type === 'search'
+          }).options;
+
+          map_config.layers = internal.filterByLayerSwitcher(layerSwitcherConfig, data.wmslayers);
+          searchConfig.sources = data.wfslayers;
+
+          data.wmslayers.sort((a, b) =>
             a.drawOrder === b.drawOrder ? 0 : a.drawOrder > b.drawOrder ? 1 : -1
           );
-          map_config.layers = data.layers;
+
           internal.init(
             internal.mergeConfig(map_config, internal.parseQueryParams())
           );
           if (done) done(true);
-
         });
 
         layers.error(() => {

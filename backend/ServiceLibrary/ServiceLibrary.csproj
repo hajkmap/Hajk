@@ -124,6 +124,7 @@
     <Compile Include="DataContracts\MapSetting.cs" />
     <Compile Include="DataContracts\Projection.cs" />
     <Compile Include="DataContracts\Tool.cs" />
+    <Compile Include="DataContracts\WFSConfig.cs" />
     <Compile Include="DataContracts\WMSConfig.cs" />
     <Compile Include="HTTP\MultipartParser.cs" />
     <Compile Include="MapExport\DoubleExtensions.cs" />

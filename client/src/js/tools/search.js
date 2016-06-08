@@ -233,6 +233,16 @@ module.exports = ToolModel.extend({
     return this.get('layerCollection').filter(filter);
   },
   /**
+   *
+   */
+  getSources: function () {  
+    var filter = (source) => {
+      var criteria = this.get('filter');          
+      return criteria === '*' ? true : criteria === source.caption;
+    }
+    return this.get('sources').filter(filter);
+  },
+  /**
    * Lookup searchable layers in loaded LayerCollection.
    * Stacks requests as promises and resolves when all requests are done.
    *
@@ -246,11 +256,14 @@ module.exports = ToolModel.extend({
     var items = [];
     var promises = [];
     var layers;
+    var sources;
 
     if (value === "") return;
 
+    sources= this.getSources();
     layers = this.getLayers();
-    this.set('selectedIndices', []);
+
+    this.set('selectedIndices', []);    
 
     layers.forEach(layer => {
       promises.push(new Promise((resolve, reject) => {
@@ -265,6 +278,38 @@ module.exports = ToolModel.extend({
             if (features.length > 0) {
               items.push({
                 layer: layer.get('caption'),
+                displayName: searchProps.displayName,
+                propertyName: searchProps.propertyName,
+                hits: features
+              });
+            }
+            resolve();
+          }
+        });
+      }));
+    });
+
+    sources.forEach(source => {
+
+      var searchProps = {
+        "url": (HAJK2.searchProxy || "") + source.url,
+        "featureType": source.layers[0].split(':')[1],
+        "propertyName": source.searchFields.join(','),
+        "displayName": source.displayFields ? source.displayFields : (source.searchFields[0] || "Sökträff"),
+        "srsName": "EPSG:3006"
+      };      
+
+      promises.push(new Promise((resolve, reject) => {        
+        this.doWFSSearch({
+          value: value,
+          url: searchProps.url,
+          featureType: searchProps.featureType,
+          propertyName: searchProps.propertyName,
+          srsName: searchProps.srsName,
+          done: features => {
+            if (features.length > 0) {
+              items.push({
+                layer: source.caption,
                 displayName: searchProps.displayName,
                 propertyName: searchProps.propertyName,
                 hits: features

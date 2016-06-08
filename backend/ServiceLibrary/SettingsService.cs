@@ -63,12 +63,28 @@ namespace Sweco.Services
         void RemoveLayer(string id);
 
         /// <summary>
-        /// Radera lager per ID.
+        /// Radera WFS-layer per ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void RemoveWFSLayer(string id);
+
+        /// <summary>
+        /// Uppdatera lager per ID.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         [OperationContract]
         void UpdateLayer(WMSConfig layer);
+
+        /// <summary>
+        /// Uppdatera lager per ID.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void UpdateWFSLayer(WFSConfig layer);
 
         /// <summary>
         /// Lägg till lager.
@@ -79,7 +95,15 @@ namespace Sweco.Services
         void AddLayer(WMSConfig layer);
 
         /// <summary>
-        /// Radera lager per ID.
+        /// Lägg till WFS-lager.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void AddWFSLayer(WFSConfig layer);
+
+        /// <summary>
+        /// Uppdatera lagermeny.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -303,6 +327,21 @@ namespace Sweco.Services
             {
                 Logger.Warn("Uppkoppling mot databas städades ej undan ordentligt.", ex);
             }
+        }
+        [WebInvoke(Method = "DELETE", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/wfslayer/{id}")]
+        public void RemoveWFSLayer(string id)
+        {
+            this.settingsDataContext.RemoveWFSLayer(id);
+        }
+        [WebInvoke(Method = "PUT", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/wfslayer")]
+        public void UpdateWFSLayer(WFSConfig layer)
+        {
+            this.settingsDataContext.UpdateWFSLayer(layer);
+        }
+        [WebInvoke(Method = "POST", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/wfslayer")]
+        public void AddWFSLayer(WFSConfig layer)
+        {
+            this.settingsDataContext.AddWFSLayer(layer);
         }
     }
 }

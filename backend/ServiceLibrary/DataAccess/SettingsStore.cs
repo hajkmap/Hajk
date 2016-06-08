@@ -223,7 +223,7 @@ namespace Sweco.Services.DataAccess
             public void AddWMSLayer(WMSConfig layer) 
             {                                
                 LayerConfig layerConfig = this.readLayerConfigFromFile();
-                layerConfig.layers.Add(layer);  
+                layerConfig.wmslayers.Add(layer);  
                 this.saveLayerConfigToFile(layerConfig);              
             }
 
@@ -234,10 +234,10 @@ namespace Sweco.Services.DataAccess
             public void UpdateWMSLayer(WMSConfig layer)
             {                
                 LayerConfig layerConfig = this.readLayerConfigFromFile();
-                var index = layerConfig.layers.FindIndex(item => item.id == layer.id);
+                var index = layerConfig.wmslayers.FindIndex(item => item.id == layer.id);
                 if (index != -1)
                 {
-                    layerConfig.layers[index] = layer;
+                    layerConfig.wmslayers[index] = layer;
                 }
                 this.saveLayerConfigToFile(layerConfig);
             }                       
@@ -261,10 +261,10 @@ namespace Sweco.Services.DataAccess
             {
                 LayerConfig layerConfig = this.readLayerConfigFromFile();                
                 this.removeLayerFromConfig(id);
-                var index = layerConfig.layers.FindIndex(item => item.id == id);
+                var index = layerConfig.wmslayers.FindIndex(item => item.id == id);
                 if (index != -1)
                 {
-                    layerConfig.layers.RemoveAt(index);
+                    layerConfig.wmslayers.RemoveAt(index);
                 }
                 this.saveLayerConfigToFile(layerConfig);
             }
@@ -276,5 +276,35 @@ namespace Sweco.Services.DataAccess
                 tool.options = layerMenu;
                 this.saveMapConfigToFile(config);
             }
+
+        internal void RemoveWFSLayer(string id)
+        {
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            this.removeLayerFromConfig(id);
+            var index = layerConfig.wfslayers.FindIndex(item => item.id == id);
+            if (index != -1)
+            {
+                layerConfig.wfslayers.RemoveAt(index);
+            }
+            this.saveLayerConfigToFile(layerConfig);
+        }
+
+        internal void UpdateWFSLayer(WFSConfig layer)
+        {
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            var index = layerConfig.wmslayers.FindIndex(item => item.id == layer.id);
+            if (index != -1)
+            {
+                layerConfig.wfslayers[index] = layer;
+            }
+            this.saveLayerConfigToFile(layerConfig);
+        }
+
+        internal void AddWFSLayer(WFSConfig layer)
+        {
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            layerConfig.wfslayers.Add(layer);
+            this.saveLayerConfigToFile(layerConfig); ;
+        }
     }
 }

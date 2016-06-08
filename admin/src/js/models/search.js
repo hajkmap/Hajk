@@ -8,12 +8,12 @@ var manager = Backbone.Model.extend({
   getConfig: function (url) {
     $.ajax(url, {
       success: data => {
-        data.wmslayers.sort((a, b) => {
+        data.wfslayers.sort((a, b) => {
           var d1 = parseInt(a.date)
           ,   d2 = parseInt(b.date);
           return d1 === d2 ? 0 : d1 < d2 ? 1 : -1;
         });
-        this.set('layers', data.wmslayers);
+        this.set('layers', data.wfslayers);
       }
     });
   },
@@ -69,8 +69,7 @@ var manager = Backbone.Model.extend({
   },
 
   getLayerDescription: function(url, layer, callback) {
-    url = this.prepareProxyUrl(url);
-    url = url.replace(/wms/, 'wfs');
+    url = this.prepareProxyUrl(url);    
     $.ajax(url, {
       data: {
         request: 'describeFeatureType',
@@ -87,14 +86,25 @@ var manager = Backbone.Model.extend({
     });
   },
 
+  parseWFSCapabilitesTypes: function (data) {
+    var types = [];
+    $(data).find('FeatureType').each((i, featureType) => {          
+      types.push({
+        name: $(featureType).find('Name').first().html(),
+        title: $(featureType).find('Title').first().html()
+      });
+    });
+    return types;
+  },
+
   getWMSCapabilities: function (url, callback) {
     $.ajax(this.prepareProxyUrl(url), {
       data: {
-        service: 'WMS',
+        service: 'WFS',
         request: 'GetCapabilities'
       },
       success: data => {
-        var response = (new ol.format.WMSCapabilities()).read(data);
+        var response = this.parseWFSCapabilitesTypes(data);    
         callback(response);
       },
       error: data => {

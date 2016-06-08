@@ -207,12 +207,12 @@ class Menu extends React.Component {
     switch(type) {
       case "layers":
           this.props.model.getConfig(this.props.config.url_layers, (data) => {
-            data.layers.sort((a, b) => {
+            data.wmslayers.sort((a, b) => {
               var d1 = parseInt(a.date)
               ,   d2 = parseInt(b.date);
               return d1 === d2 ? 0 : d1 < d2 ? 1 : -1;
             });
-            this.props.model.set('layers', data.layers);
+            this.props.model.set('layers', data.wmslayers);
           });
         break;
       case "layermenu":
@@ -382,7 +382,7 @@ class Menu extends React.Component {
   /**
    *
    */
-  renderLayersFromConfig(layers) {
+  renderLayersFromConfig(layers) {    
 
     layers = (this.state && this.state.filter) ? this.getLayersWithFilter() : this.props.model.get('layers');
 
@@ -416,7 +416,7 @@ class Menu extends React.Component {
       function leafs(group) {
 
         var leafs = []
-        ,   layers = group.layers || group;
+        ,   layers = group.layers || group;        
 
         layers.forEach((layer, i) => {
           leafs.push(
@@ -454,11 +454,11 @@ class Menu extends React.Component {
         });
       }
 
-      return (
-        <ul ref="layerMenu">
-          {leafs(config.baselayers)}
-          {roots(config.groups)}
-        </ul>
+      return (                
+          <ul ref="layerMenu">          
+            {leafs(config.baselayers)}
+            {roots(config.groups)}
+          </ul>        
       );
 
     }
@@ -473,7 +473,7 @@ class Menu extends React.Component {
       <section className="tab-pane active">
         <aside>
           <input placeholder="fitrera" type="text" onChange={(e) => this.filterLayers(e)} />
-          <ul className="config-layer-list">
+          <ul className="config-layer-list">            
             {this.renderLayersFromConfig()}
           </ul>
         </aside>

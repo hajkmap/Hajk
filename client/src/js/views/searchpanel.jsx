@@ -231,23 +231,27 @@ module.exports = React.createClass({
    * @desc Render options component
    */
   renderOptions: function () {
+    
     var settings = this.props.model.get('settings');
+    var sources = this.props.model.get('sources');    
+
     return (
       <div>
         <div className="panel-row">
           <label>Sök efter </label>&nbsp;
           <select value={this.props.model.get('filter')} onChange={this.setFilter.bind(this, "layer")}>
-          {
-            (() => {
-              return Object.keys(settings).map((setting, i) => {
-                return (
-                  <option key={i} value={settings[setting]}>
-                    {setting}
-                  </option>
-                )
-              })
-            })()
-          }
+            <option value="*">Innehåll i kartan</option>
+            {
+              (() => {
+                return sources.map((wfslayer, i) => {
+                  return (
+                    <option key={i} value={wfslayer.caption}>
+                      {wfslayer.caption}
+                    </option>
+                  )
+                })
+              })()
+            }
           </select>
         </div>
         <div className="panel-row">
@@ -341,10 +345,10 @@ module.exports = React.createClass({
     };
 
     return (
-      <Panel title="Sök i kartan" onCloseClicked={this.props.onCloseClicked}>
+      <Panel title="Sök" onCloseClicked={this.props.onCloseClicked}>
         <div className="search-tools">
           <div className="form-group">
-            <label>Sök i kartan</label>
+            <label>Sök</label>
             <div className="input-group">
               <div className="input-group-addon">
                 <i className="fa fa-search"></i>
