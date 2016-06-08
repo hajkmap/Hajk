@@ -147,8 +147,9 @@ namespace Sweco.Services.MapExport
         /// <param name="exportItem"></param>
         public MapExporter(MapExportItem exportItem) 
         {
-            this.exportItem = exportItem;            
-            this.map = new Map(new Size(exportItem.size[0], exportItem.size[1]));            
+            this.exportItem = exportItem;
+            var size = new Size(exportItem.size[0] / 2, exportItem.size[1] / 2);
+            this.map = new Map(size);            
         }
 
         /// <summary>

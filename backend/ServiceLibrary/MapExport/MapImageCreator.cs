@@ -71,19 +71,15 @@ namespace Sweco.Services.MapExport
             double bottom = exportItem.bbox[2];
             double top = exportItem.bbox[3];
 
-            //Left, Right, Bottom, Top
             Envelope envelope = new Envelope(left, right, bottom, top);
-            MapExporter.map.ZoomToBox(envelope);
-            Bitmap bitmap = new Bitmap(exportItem.size[0], exportItem.size[1]);            
-            MapExporter.map.RenderMap(Graphics.FromImage(bitmap));                       
+            MapExporter.map.ZoomToBox(envelope);                  
 
             Image i = MapExporter.map.GetMap(exportItem.resolution);
-            Bitmap src = new Bitmap(i);            
 
+            Bitmap src = new Bitmap(i);            
             src.SetResolution(exportItem.resolution, exportItem.resolution);
 
             Bitmap target = new Bitmap(src.Size.Width, src.Size.Height);
-
             target.SetResolution(exportItem.resolution, exportItem.resolution);
 
             Graphics g = Graphics.FromImage(target);
