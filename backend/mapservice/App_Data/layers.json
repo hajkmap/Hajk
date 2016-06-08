@@ -8,6 +8,7 @@
       "date": "1465340245272",
       "content": "Terrängkartan",
       "legend": "",
+      "projection": null,
       "layers": [
         "sweco:terrangkartan"
       ],
@@ -31,6 +32,7 @@
       "date": "1465342376211",
       "content": "test",
       "legend": "",
+      "projection": null,
       "layers": [
         "sweco:busslinje"
       ],
@@ -57,6 +59,7 @@
       "date": "1465340699314",
       "content": "Adress",
       "legend": "",
+      "projection": null,
       "layers": [
         "sweco:adress"
       ],
@@ -77,18 +80,19 @@
       "caption": "Hållplatser",
       "url": "http://194.71.132.27/geoserver28/wms",
       "owner": "SBK",
-      "date": "1465379631054",
+      "date": "1465418960738",
       "content": "Hållplatser",
       "legend": "",
+      "projection": null,
       "layers": [
         "sweco:hpl"
       ],
       "infobox": "Namn: {namn}  \nID: {id}",
       "searchFields": [
-        ""
+        "namn"
       ],
       "displayFields": [
-        ""
+        "namn"
       ],
       "visibleAtStart": false,
       "queryable": true,

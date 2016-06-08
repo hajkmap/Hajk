@@ -296,8 +296,8 @@ module.exports = ToolModel.extend({
         "featureType": source.layers[0].split(':')[1],
         "propertyName": source.searchFields.join(','),
         "displayName": source.displayFields ? source.displayFields : (source.searchFields[0] || "Sökträff"),
-        "srsName": "EPSG:3007"
-      };      
+        "srsName": this.get('map').getView().getProjection().getCode()
+      };    
 
       promises.push(new Promise((resolve, reject) => {        
         this.doWFSSearch({
