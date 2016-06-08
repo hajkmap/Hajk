@@ -61,7 +61,7 @@ module.exports = Backbone.Collection.extend({
         "queryable": args.queryable === false ? false : true,
         "information": args.infobox,
         "resolutions": properties.mapConfig.resolutions,
-        "projection": args.projection,
+        "projection": properties.mapConfig.projection || "EPSG:3006",
         "origin": properties.mapConfig.origin,
         "extent": properties.mapConfig.extent,
         "legend" : [{
