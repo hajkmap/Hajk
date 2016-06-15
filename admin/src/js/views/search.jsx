@@ -155,6 +155,7 @@ class Search extends React.Component {
    *
    */
   appendLayer(e, checkedLayer) {
+    this.state.addedLayers.splice(0, this.state.addedLayers.length);    
     if (e.target.checked === true) {
       this.state.addedLayers.push(checkedLayer);
     } else {
@@ -446,7 +447,7 @@ class Search extends React.Component {
                          "fa fa-info-circle active" : "fa fa-info-circle";
         return (
           <li key={i}>
-            <input ref={layer.name} id={"layer" + i} type="checkbox" data-type="wms-layer" onChange={(e) => { this.appendLayer(e, layer.name) }}/>&nbsp;
+            <input ref={layer.name} id={"layer" + i} type="radio" name="featureType" data-type="wms-layer" onChange={(e) => { this.appendLayer(e, layer.name) }}/>&nbsp;
             <label htmlFor={"layer" + i}>{layer.name}</label>
             <i className={classNames} onClick={(e) => this.describeLayer(e, layer.name)}></i>
           </li>
@@ -478,7 +479,7 @@ class Search extends React.Component {
     return (
       <section className="tab-pane active">
         <aside>
-          <input placeholder="fitrera" type="text" onChange={(e) => this.filterLayers(e)} />
+          <input placeholder="filtrera" type="text" onChange={(e) => this.filterLayers(e)} />
           <ul className="config-layer-list">
             {this.renderLayersFromConfig()}
           </ul>

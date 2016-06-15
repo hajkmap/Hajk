@@ -2,7 +2,8 @@
 var menu = Backbone.Model.extend({
 
   defaults: {
-    layers: []
+    layers: [],
+    addedLayers: []
   },
 
   updateConfig: function(config, callback) {
@@ -18,6 +19,27 @@ var menu = Backbone.Model.extend({
         callback(false);
       }
     });
+  },
+
+  findLayerInConfig: function (id) {
+
+    var layer = false;
+
+    function findInGroups(groups, layerId) {
+      groups.forEach(group => {
+        var found = group.layers.find(l => l.id === layerId);
+        if (found) {
+          layer = found;
+        }
+        if (group.hasOwnProperty('groups')) {
+          findInGroups(group.groups, layerId)
+        }
+      });
+    }
+
+    findInGroups(this.get('layerMenuConfig').groups, id);
+
+    return layer;
   },
 
   getConfig: function (url, callback) {

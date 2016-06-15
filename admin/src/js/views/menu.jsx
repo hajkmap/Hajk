@@ -7,12 +7,12 @@ $.fn.editable = function(component) {
   function edit(node, e) {
 
       function reset() {
-        
+
         ok.remove();
         abort.remove();
         remove.remove();
         toggled.remove();
-        
+
         tools.remove();
 
         elem.editing = false;
@@ -21,7 +21,7 @@ $.fn.editable = function(component) {
       function store() {
         let name = input.val();
         let toggled = checkbox.is(':checked');
-        node.html(name);        
+        node.html(name);
         node.parent().attr("data-name", name);
         node.parent().attr("data-toggled", toggled);
         reset();
@@ -35,13 +35,13 @@ $.fn.editable = function(component) {
       ,   prev     = node.html()
       ,   id       = Math.floor(Math.random() * 1E5)
       ,   ok       = $('<span class="btn btn-success">OK</span>')
-      ,   tools    = $('<div></div>') 
+      ,   tools    = $('<div></div>')
       ,   abort    = $('<span class="btn btn-default">Avbryt</span>')
       ,   label    = $(`<label for="${id}">Expanderad vid start&nbsp;</label>`)
-      ,   checkbox = $(`<input id="${id}" type="checkbox"/>`)      
+      ,   checkbox = $(`<input id="${id}" type="checkbox"/>`)
       ,   remove   = $('<span class="fa fa-minus-circle"></span>')
       ,   input    = $('<input />')
-      ,   toggled  = $('<span></span>')
+      ,   toggled  = $('<span class="expanded-at-start"></span>')
       ,   elem     = node.get(0) || {}
 
       ok
@@ -53,7 +53,7 @@ $.fn.editable = function(component) {
         .click(e => {
           node.html(prev);
           reset();
-        });                  
+        });
 
       if (node.parent().attr("data-toggled") === 'true') {
         checkbox.attr('checked', 'checked');
@@ -140,16 +140,23 @@ $.fn.editable = function(component) {
  *
  */
 class Menu extends React.Component {
+
   /**
    *
    */
   constructor() {
     super();
+    this.state = {
+      drawOrder: false,
+      layerMenu: true,
+      addedLayers: []
+    };
   }
+
   /**
    *
    */
-  componentDidMount() {
+  init() {
     this.load('layers');
     this.load('layermenu');
 
@@ -181,6 +188,22 @@ class Menu extends React.Component {
     defaultState.layers = this.props.model.get('layers');
     this.setState(defaultState);
   }
+
+  /**
+   *
+   */
+  update() {
+    $(".tree-view li").editable(this);
+    $(".tree-view > ul").sortable();
+  }
+
+  /**
+   *
+   */
+  componentDidMount() {
+    this.init();
+  }
+
   /**
    *
    */
@@ -188,6 +211,7 @@ class Menu extends React.Component {
     this.props.model.off('change:layers');
     this.props.model.off('change:layerMenuConfig');
   }
+
   /**
    *
    */
@@ -200,6 +224,7 @@ class Menu extends React.Component {
     }
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
   }
+
   /**
    *
    */
@@ -222,6 +247,7 @@ class Menu extends React.Component {
         break;
     }
   }
+
   /**
    *
    */
@@ -230,6 +256,7 @@ class Menu extends React.Component {
       filter: e.target.value
     });
   }
+
   /**
    *
    */
@@ -238,6 +265,7 @@ class Menu extends React.Component {
       return (new RegExp(this.state.filter)).test(layer.caption.toLowerCase())
     });
   }
+
   /**
    *
    */
@@ -245,6 +273,7 @@ class Menu extends React.Component {
     var layer = this.props.model.get('layers').find(layer => layer.id === id);
     return layer ? layer.caption : "";
   }
+
   /**
    *
    */
@@ -258,9 +287,12 @@ class Menu extends React.Component {
     var roots = $('.tree-view > ul > li');
 
     function layers(node) {
-      return $(node).find('> ul > li.layer-node').toArray().map(node =>
-        node.dataset.id
-      )
+      return $(node).find('> ul > li.layer-node').toArray().map(node => {
+        return {
+          id: node.dataset.id,
+          drawOrder: node.dataset.draworder
+        }
+      })
     }
 
     function groups(node) {
@@ -301,6 +333,22 @@ class Menu extends React.Component {
   /**
    *
    */
+  parseDrawSettings() {
+    var result = []
+    ,   layers = $('.tree-view > ul > li')
+    ;
+    layers.each((i, layer) => {
+      result.push({
+        drawOrder: i + 1,
+        id: $(layer).data('id').toString()
+      })
+    })
+    return result;
+  }
+
+  /**
+   *
+   */
   save(settings) {
     this.props.model.updateConfig(settings, success => {
       if (success) {
@@ -320,19 +368,54 @@ class Menu extends React.Component {
       }
     });
   }
+
   /**
    *
    */
   saveSettings() {
-    var settings = this.parseSettings();
     this.save(this.parseSettings());
   }
+
+  /**
+   *
+   */
+  saveDrawOrder() {
+    var settings = this.parseDrawSettings();
+
+    settings.forEach(setting => {
+      var layer = this.props.model.findLayerInConfig(setting.id);
+      if (layer) {
+        layer.drawOrder = setting.drawOrder;
+      }
+    });
+
+    var config = this.props.model.get('layerMenuConfig');
+
+    this.props.model.updateConfig(config, success => {
+      if (success) {
+        this.props.application.setState({
+          content: "menu",
+          alert: true,
+          alertMessage: "Uppdateringen lyckades."
+        });
+        this.forceUpdate();
+      } else {
+        this.props.application.setState({
+          alert: true,
+          alertMessage: "Uppdateringen misslyckades."
+        });
+      }
+    });
+
+  }
+
   /**
    *
    */
   isLayerIncludedInConfig(id) {
     return $('.tree-view li.layer-node[data-id="' + id + '"]').length > 0;
   }
+
   /**
    *
    */
@@ -350,6 +433,7 @@ class Menu extends React.Component {
     layer.editable(this);
     this.forceUpdate();
   }
+
   /**
    *
    */
@@ -369,6 +453,7 @@ class Menu extends React.Component {
     $('.tree-view > ul').prepend(group);
     group.editable(this);
   }
+
   /**
    *
    */
@@ -379,10 +464,11 @@ class Menu extends React.Component {
     }
     this.createLayer(id);
   }
+
   /**
    *
    */
-  renderLayersFromConfig(layers) {    
+  renderLayersFromConfig(layers) {
 
     layers = (this.state && this.state.filter) ? this.getLayersWithFilter() : this.props.model.get('layers');
 
@@ -403,6 +489,7 @@ class Menu extends React.Component {
       )
     });
   }
+
   /**
    *
    */
@@ -416,16 +503,17 @@ class Menu extends React.Component {
       function leafs(group) {
 
         var leafs = []
-        ,   layers = group.layers || group;        
+        ,   layers = group.layers || group;
 
         layers.forEach((layer, i) => {
           leafs.push(
             <li
               className="layer-node"
               key={i}
-              data-id={layer}
+              data-id={typeof layer === 'object' ? layer.id : layer}
+              data-draworder={typeof layer === 'object' ? layer.drawOrder : 0}
               data-type="layer">
-              <span className="layer-name">{that.getLayerNameFromId(layer)}</span>
+              <span className="layer-name">{that.getLayerNameFromId(typeof layer === 'object' ? layer.id : layer)}</span>
             </li>
           );
         });
@@ -454,33 +542,130 @@ class Menu extends React.Component {
         });
       }
 
-      return (                
-          <ul ref="layerMenu">          
+      return (
+          <ul ref="layerMenu">
             {leafs(config.baselayers)}
             {roots(config.groups)}
-          </ul>        
+          </ul>
       );
-
     }
 
     return buildTree(layerMenuConfig);
   }
+
+  toggleDrawOrderMenu() {
+
+    this.setState({
+      drawOrder: true,
+      layerMenu: false
+    });
+
+    setTimeout(() => {
+      $(".tree-view > ul").sortable();
+      this.setState({
+        layerMenu: true
+      });
+    }, 0);
+
+  }
+
+  toggleLayerMenu() {
+    this.setState({
+      layerMenu: true,
+      drawOrder: false
+    });
+
+    setTimeout(() => {
+      this.update();
+      this.setState({
+        layerMenu: true
+      });
+    }, 0);
+
+  }
+
+  renderDrawOrder() {
+
+    function flatten(config) {
+      var layerList = [];
+      function fromGroups(groups) {
+        return groups.reduce((list, n, index, array) => {
+          var g = array[index];
+          if (g.hasOwnProperty('groups')) {
+            list = list.concat(fromGroups(g.groups));
+          }
+          return list.concat(g.layers);
+        }, []);
+      }
+      layerList = layerList.concat(fromGroups(config.groups))
+      return layerList;
+    }
+
+    var layers = flatten(this.props.model.get('layerMenuConfig'));
+
+    layers.sort((a, b) => a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1);
+
+    return layers.map((layer, i) => {
+      var name = this.getLayerNameFromId(layer.id);
+      return (
+        <li className="layer-node" key={Math.round(Math.random() * 1000000)} data-id={layer.id}>{name}</li>
+      )
+    });
+  }
+
+  renderArticleContent() {
+    if (this.state.drawOrder) {
+      return (
+        <div>
+          <aside>
+            Drag och släpp lager för att redigera ritordning.
+          </aside>
+          <article>
+            <fieldset className="tree-view">
+              <legend>Hantera ritordning</legend>
+              <button className="btn btn-primary" onClick={(e) => this.saveDrawOrder(e)}>Spara</button>&nbsp;
+              <ul>
+                {this.renderDrawOrder()}
+              </ul>
+            </fieldset>
+          </article>
+        </div>
+      );
+    }
+    if (this.state.layerMenu) {
+      return (
+        <div>
+          <aside>
+            <input placeholder="filtrera" type="text" onChange={(e) => this.filterLayers(e)} />
+            <ul className="config-layer-list">
+              {this.renderLayersFromConfig()}
+            </ul>
+          </aside>
+          <article>
+            <fieldset className="tree-view">
+              <legend>Hantera lagermeny</legend>
+              <button className="btn btn-primary" onClick={(e) => this.saveSettings(e)}>Spara</button>&nbsp;
+              <button className="btn btn-success" onClick={(e) => this.createGroup("Ny grupp", false)}>Ny grupp</button>&nbsp;
+              {this.renderLayerMenu()}
+            </fieldset>
+          </article>
+        </div>
+      )
+    }
+  }
+
   /**
    *
    */
   render() {
     return (
       <section className="tab-pane active">
-        <aside>
-          <input placeholder="fitrera" type="text" onChange={(e) => this.filterLayers(e)} />
-          <ul className="config-layer-list">            
-            {this.renderLayersFromConfig()}
-          </ul>
-        </aside>
-        <div className="tree-view">
-          <button className="btn btn-primary" onClick={(e) => this.saveSettings(e)}>Spara</button>&nbsp;
-          <button className="btn btn-success" onClick={(e) => this.createGroup("Ny grupp", false)}>Ny grupp</button>
-          {this.renderLayerMenu()}
+        <div>
+          <div className="tab-pane-bar">
+            <button className="btn btn-info" onClick={(e) => this.toggleLayerMenu()}>Lagermeny</button>&nbsp;
+            <button className="btn btn-info" onClick={(e) => this.toggleDrawOrderMenu()}>Ritordning</button>
+          </div>
+          {this.renderArticleContent()}
         </div>
       </section>
     );

@@ -33,6 +33,9 @@ namespace Sweco.Services
 
         [OperationContract]
         string ImportKML(Stream Uploading);
+
+        [OperationContract]
+        string ImportImage(Stream Uploading);
     }
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerCall, ConcurrencyMode = ConcurrencyMode.Multiple, IgnoreExtensionDataObject = true)]
@@ -100,6 +103,29 @@ namespace Sweco.Services
             string fileContent = System.Text.Encoding.UTF8.GetString(parser.FileContents);
             return fileContent;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [WebInvoke(Method = "POST", ResponseFormat = WebMessageFormat.Xml, BodyStyle = WebMessageBodyStyle.Bare, UriTemplate = "/importimage")]
+        public string ImportImage(Stream stream)
+        {
+            var guid = Guid.NewGuid();
+            MultipartParser parser = new MultipartParser(stream);
+            using (var ms = new MemoryStream(parser.FileContents))
+            {
+                Image img = Image.FromStream(ms);                
+                string filename = String.Format(HttpContext.Current.Server.MapPath("../upload/{0}.png"), guid);                
+                img.Save(filename, ImageFormat.Png);
+            }
+            return HttpContext.Current.Request.Url.Scheme + "://" +
+                   HttpContext.Current.Request.Url.Host +
+                   HttpContext.Current.Request.ApplicationPath +
+                   "/upload/" +
+                   guid + ".png";
+        }
+
 
         /// <summary>
         /// 

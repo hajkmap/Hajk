@@ -55,26 +55,34 @@
         ],
         "groups": [
           {
-            "id": "5169cc20-da42-f8d0-683e-d12dde57f254",
+            "id": "27034b22-f8fe-0ce6-3977-aadf69671ba6",
             "parent": "-1",
-            "name": "Testgrupp",
+            "name": "Test",
+            "toggled": true,
+            "layers": [
+              {
+                "id": "2",
+                "drawOrder": 2
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "test",
+            "parent": "-1",
+            "name": "Kollektivtrafik",
             "toggled": false,
             "layers": [
-              "3",
-              "2"
-            ],
-            "groups": [
               {
-                "id": "d32cd706-cb1f-1aa0-9376-07df762fe8a7",
-                "parent": "5169cc20-da42-f8d0-683e-d12dde57f254",
-                "name": "Ny grupp",
-                "toggled": false,
-                "layers": [
-                  "1"
-                ],
-                "groups": []
+                "id": "1",
+                "drawOrder": 1
+              },
+              {
+                "id": "3",
+                "drawOrder": 3
               }
-            ]
+            ],
+            "groups": []
           }
         ]
       }
@@ -95,12 +103,6 @@
     {
       "type": "coordinates",
       "options": {}
-    },
-    {
-      "type": "savestate",
-      "options": {
-        "settingsUrl": "/mapservice/settings/"
-      }
     },
     {
       "type": "export",

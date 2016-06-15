@@ -1,5 +1,6 @@
 const defaultState = {
   load: false,
+  imageLoad: false,
   capabilities: false,
   validationErrors: [],
   mode: "add",
@@ -175,6 +176,14 @@ class Manager extends React.Component {
   /**
    *
    */
+  loadLegendImage(e) {    
+    
+    $('#select-image').trigger('click');
+
+  }
+  /**
+   *
+   */
   describeLayer(e, layerName) {
     this.props.model.getLayerDescription(this.refs.input_url.value, layerName, (properties) => {
       this.setState({
@@ -280,7 +289,7 @@ class Manager extends React.Component {
           <li key={i}>
             <input ref={layer.Name} id={"layer" + i} type="checkbox" data-type="wms-layer" onChange={(e) => { this.appendLayer(e, layer.Name) }}/>&nbsp;
             <label htmlFor={"layer" + i}>{layer.Name}</label>
-            <i className={classNames} onClick={(e) => this.describeLayer(e, layer.Name)}></i>
+            <i style={{display:"none"}} className={classNames} onClick={(e) => this.describeLayer(e, layer.Name)}></i>
           </li>
         )
       });
@@ -532,20 +541,57 @@ class Manager extends React.Component {
   /**
    *
    */
+  uploadLegend() {
+    $('#upload-form').submit();
+    
+    console.log("this", this);
+
+    this.refs.uploadIframe.addEventListener("load", () => {      
+      if (this.refs.uploadIframe.contentDocument && 
+        $(this.refs.uploadIframe.contentDocument).find('string').length > 0) {
+        this.setState({
+          legend: $(this.refs.uploadIframe.contentDocument).find('string')[0].innerHTML
+        });
+      }
+    });
+  }
+  /**
+   *
+   */
   render() {
 
-    var loader = this.state.load ? <i className="fa fa-refresh fa-spin"></i> : null;
-    var abort = this.state.mode === "edit" ? <span className="btn btn-danger" onClick={(e) => this.abort(e)}>Avbryt</span> : null;
-
+    var loader = this.state.load ? <i className="fa fa-refresh fa-spin"></i> : null
+    ,   imageLoader = this.state.imageLoad ? <i className="fa fa-refresh fa-spin"></i> : null
+    ,   abort = this.state.mode === "edit" ? <span className="btn btn-danger" onClick={(e) => this.abort(e)}>Avbryt</span> : null
+    ,   url = "/mapservice/export/importimage"
+    ;      
+        
     return (
       <section className="tab-pane active">
         <aside>
-          <input placeholder="fitrera" type="text" onChange={(e) => this.filterLayers(e)} />
+          <input placeholder="filtrera" type="text" onChange={(e) => this.filterLayers(e)} />
           <ul className="config-layer-list">
             {this.renderLayersFromConfig()}
           </ul>
         </aside>
         <article>
+          <form id="upload-form" method="post" action={url} encType="multipart/form-data" target="upload-iframe">
+            <input style={
+                {
+                  opacity: 0,
+                  position: 'absolute',
+                  width: 'auto',
+                  height: '100%'
+                }
+              } 
+              id="select-image" 
+              type="file"                                         
+              multiple="false"
+              name="files[]"
+              onChange={(e) => this.uploadLegend(e)}
+            />                  
+            <iframe id="upload-iframe" name="upload-iframe" ref="uploadIframe" style={{display: 'none'}}></iframe>
+          </form>
           <form method="post" action="" onSubmit={(e) => { this.submit(e) }}>
             <fieldset>
               <legend>Lägg till WMS-lager</legend>
@@ -568,9 +614,9 @@ class Manager extends React.Component {
                   onChange={(e) => this.validate("url", e)}
                   className={this.getValidationClass("url")}
                 />
-                <span onClick={(e) => {this.loadWMSCapabilities(e)}} className="btn btn-default">Ladda lager {loader}</span>
+                <span onClick={(e) => {this.loadWMSCapabilities(e)}} className="btn btn-default">Ladda {loader}</span>
               </div>
-              <div>
+              <div style={{display: "none"}}>
                 <label>Dataägare</label>
                 <select ref="input_owner" value={this.state.owner} onChange={(e) => this.validate("owner", e)}>
                   {this.renderOwnerOptions()}
@@ -597,7 +643,8 @@ class Manager extends React.Component {
                   ref="input_legend"
                   value={this.state.legend}
                   onChange={(e) => this.validate("legend", e)}
-                />
+                />                
+                <span onClick={(e) => {this.loadLegendImage(e)}} className="btn btn-default">Välj fil {imageLoader}</span>
               </div>
               <div>
                 <label>Valda lager*</label>
@@ -620,7 +667,7 @@ class Manager extends React.Component {
                   className={this.getValidationClass("infobox")}
                 />
               </div>
-              <div>
+              <div style={{display: "none"}}>
                 <label>Sökfält</label>
                 <input
                   type="text"
@@ -630,7 +677,7 @@ class Manager extends React.Component {
                   className={this.getValidationClass("searchFields")}
                 />
               </div>
-              <div>
+              <div style={{display: "none"}}>
                 <label>Visningsfält</label>
                 <input
                   type="text"
@@ -666,17 +713,7 @@ class Manager extends React.Component {
                   checked={this.state.queryable}
                 />
               </div>
-              <div>
-                <label>Ritordning</label>
-                <input
-                  type="text"
-                  ref="input_drawOrder"
-                  onChange={(e) => this.validate("drawOrder", e)}
-                  value={this.state.drawOrder}
-                  className={this.getValidationClass("drawOrder")}
-                />
-              </div>
-              <div>
+              <div style={{display: "none"}}>
                 <label>Geowebcache</label>
                 <input
                   type="checkbox"

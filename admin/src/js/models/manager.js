@@ -16,7 +16,7 @@ var manager = Backbone.Model.extend({
         this.set('layers', data.wmslayers);
       }
     });
-  },
+  },  
 
   addLayer: function (layer, callback) {
     $.ajax({

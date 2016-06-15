@@ -21,10 +21,9 @@
     "url_layermenu_settings": "/mapservice/settings/layermenu"
   },
   "router": [
-    { "name": "info", "title": "Start", "default": true },    
+    { "name": "info", "title": "Start", "default": true },
     { "name": "manager", "title": "Visningstjänster" },
     { "name": "search", "title": "Söktjänster" },
-    { "name": "menu", "title": "Konfiguration" },
-    { "name": "map", "title": "Karta" }
+    { "name": "menu", "title": "Konfiguration" }
   ]
 }

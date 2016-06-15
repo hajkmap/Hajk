@@ -144,7 +144,9 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="upload\" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ServiceLibrary\ServiceLibrary.csproj">
       <Project>{a3559294-4f5a-4cdf-9bc9-4a29f77ea8ad}</Project>

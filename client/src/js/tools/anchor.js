@@ -7,7 +7,7 @@ module.exports = ToolModel.extend({
     type: 'anchor',
     panel: 'anchorpanel',
     toolbar: 'bottom',
-    icon: 'fa fa-code icon',
+    icon: 'fa fa-link icon fa-flip-horizontal',
     title: 'Länk',
     visible: false,
     shell: undefined,

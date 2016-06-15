@@ -5,9 +5,9 @@
       "caption": "Terrängkartan",
       "url": "http://194.71.132.27/geoserver28/wms",
       "owner": "SBK",
-      "date": "1465340245272",
+      "date": "1465979602953",
       "content": "Terrängkartan",
-      "legend": "",
+      "legend": "http://localhost/mapservice/upload/0bb2b1af-21b5-4945-9e65-4356be09145c.png",
       "projection": null,
       "layers": [
         "sweco:terrangkartan"
@@ -21,17 +21,16 @@
       ],
       "visibleAtStart": true,
       "queryable": false,
-      "tiled": true,
-      "drawOrder": 1
+      "tiled": true
     },
     {
       "id": "1",
       "caption": "Busslinjer",
       "url": "http://194.71.132.27/geoserver28/wms",
       "owner": "SBK",
-      "date": "1465342376211",
+      "date": "1465885071153",
       "content": "test",
-      "legend": "",
+      "legend": "http://localhost/mapservice/upload/6fc632fe-a131-477f-ab1c-fa3455d13f99.png",
       "projection": null,
       "layers": [
         "sweco:busslinje"
@@ -48,17 +47,16 @@
       ],
       "visibleAtStart": true,
       "queryable": true,
-      "tiled": false,
-      "drawOrder": 1
+      "tiled": false
     },
     {
       "id": "2",
       "caption": "Adress",
       "url": "http://194.71.132.27/geoserver28/wms",
       "owner": "SBK",
-      "date": "1465340699314",
+      "date": "1465979598155",
       "content": "Adress",
-      "legend": "",
+      "legend": "http://localhost/mapservice/upload/3f30917a-f733-43ce-8356-6f4ab08df2ea.png",
       "projection": null,
       "layers": [
         "sweco:adress"
@@ -72,22 +70,21 @@
       ],
       "visibleAtStart": false,
       "queryable": true,
-      "tiled": false,
-      "drawOrder": 1
+      "tiled": false
     },
     {
       "id": "3",
       "caption": "Hållplatser",
       "url": "http://194.71.132.27/geoserver28/wms",
       "owner": "SBK",
-      "date": "1465418960738",
+      "date": "1465971106968",
       "content": "Hållplatser",
-      "legend": "",
+      "legend": "http://localhost/mapservice/upload/9d8f3ba3-c4ce-44c9-8425-90ba51063d69.png",
       "projection": null,
       "layers": [
         "sweco:hpl"
       ],
-      "infobox": "Namn: {namn}  \nID: {id}",
+      "infobox": "",
       "searchFields": [
         "namn"
       ],
@@ -96,8 +93,7 @@
       ],
       "visibleAtStart": false,
       "queryable": true,
-      "tiled": false,
-      "drawOrder": 1
+      "tiled": false
     }
   ],
   "wfslayers": [

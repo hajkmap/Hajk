@@ -90,8 +90,8 @@ var manager = Backbone.Model.extend({
     var types = [];
     $(data).find('FeatureType').each((i, featureType) => {          
       types.push({
-        name: $(featureType).find('Name').first().html(),
-        title: $(featureType).find('Title').first().html()
+        name: $(featureType).find('Name').first().get(0).textContent,
+        title: $(featureType).find('Title').first().get(0).textContent
       });
     });
     return types;

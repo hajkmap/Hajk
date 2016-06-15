@@ -27,7 +27,7 @@ var LayerPanel = React.createClass({
    *
    */
   componentDidMount: function () {
-    this.props.model.on("change:layerCollection", this.onLayerCollectionChanged, this);
+    this.props.model.on('change:layerCollection', this.onLayerCollectionChanged, this);
     this.props.model.get('layerCollection').forEach(layer => {
       layer.on('change:visible', () => {
         this.updateGroupToggledCheckbox(layer);
@@ -89,8 +89,8 @@ var LayerPanel = React.createClass({
       return [];
     }
 
-    group.layers.forEach(layerId => {
-      var layer = layersInModel.find(layer => layer.id === layerId);
+    group.layers.forEach(inLayer => {
+      var layer = layersInModel.find(layer => layer.id === inLayer.id);
       if (layer) {
         layer.set('group', group.id);
         layers.push(layer);
@@ -300,7 +300,7 @@ var LayerPanel = React.createClass({
     return (
       <Panel title="Teckenförklaring" onCloseClicked={this.props.onCloseClicked}>
         <div className="layer-panel">
-          <BackgroundSwitcher layers={this.props.model.getBaseLayers()}></BackgroundSwitcher>
+          <BackgroundSwitcher layers={this.props.model.getBaseLayers()} model={this.props.model}></BackgroundSwitcher>
           {groups}
         </div>
       </Panel>

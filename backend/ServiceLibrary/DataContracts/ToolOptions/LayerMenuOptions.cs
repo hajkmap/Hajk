@@ -12,7 +12,7 @@ namespace Sweco.Services.DataContracts.ToolOptions
         public string parent { get; set; }
         public string name { get; set; }
         public bool toggled { get; set; }
-        public List<string> layers { get; set; }
+        public List<MapWMSLayerInfo> layers { get; set; }
         public List<LayerGroup> groups { get; set; }
     }
 

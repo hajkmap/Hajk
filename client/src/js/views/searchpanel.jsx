@@ -15,18 +15,14 @@ SearchResultGroup = React.createClass({
     });
 
     if (this.props.model.get('selectedIndices') instanceof Array) {
-
       _.each(groups, group => {
-
         var res = this.props.model.get('selectedIndices').filter(item => group.id === item.group);
-
         if (res.length > 0) {
           let nth = res[0].index + 1;
           let elem = $(group).next().find('div:nth-child(' + nth + ')');
           elem.addClass('selected');
         }
       });
-
     }
 
   },
@@ -61,7 +57,8 @@ SearchResultGroup = React.createClass({
   render: function () {
 
     var id = this.props.id
-    var groupStyleClass = this.props.numGroups === 1 ? "" : "hidden";
+    ,   groupStyleClass = this.props.numGroups === 1 ? "" : "hidden"
+    ;
 
     return (
       <div>
@@ -78,9 +75,10 @@ SearchResultGroup = React.createClass({
                   return hit.getProperties()[property] || property
                 }
               }
-              var hitId = "hit-" + i + "-" + id;
-              var title = getTitle(this.props.result.displayName);
-              var index = i;
+              var hitId = "hit-" + i + "-" + id
+              ,   title = getTitle(this.props.result.displayName)
+              ,   index = i
+              ;
               return (<div key={hitId} index={i} onClick={this.handleClick.bind(this, hit, i)}>{title}</div>);
             })
           }
@@ -146,7 +144,6 @@ module.exports = React.createClass({
    * @return: undefined
    */
   search: function (event) {
-
     this.setState({
       loading: true
     });
@@ -173,9 +170,7 @@ module.exports = React.createClass({
    *
    */
   componentDidMount: function () {
-
     this.value = this.props.model.get('value');
-
     if (this.props.model.get('items')) {
       this.setState({
         showResults: true,
@@ -230,17 +225,16 @@ module.exports = React.createClass({
   /*
    * @desc Render options component
    */
-  renderOptions: function () {
-    
-    var settings = this.props.model.get('settings');
-    var sources = this.props.model.get('sources');    
-
+  renderOptions: function () {    
+    var settings = this.props.model.get('settings')
+    ,   sources = this.props.model.get('sources')
+    ;    
     return (
       <div>
-        <div className="panel-row">
-          <label>Sök efter </label>&nbsp;
+        <div>
+          <span>Välj söktyp </span>&nbsp;
           <select value={this.props.model.get('filter')} onChange={this.setFilter.bind(this, "layer")}>
-            <option value="*">Innehåll i kartan</option>
+            <option value="*">Fritext</option>
             {
               (() => {
                 return sources.map((wfslayer, i) => {
@@ -254,7 +248,7 @@ module.exports = React.createClass({
             }
           </select>
         </div>
-        <div className="panel-row">
+        <div style={{ display: 'none' }} className="panel-row">
           <label htmlFor="visible-layers">Sök endast i synliga lager</label>
           <input type="checkbox" checked={this.props.model.get('filterVisible')} onChange={this.setFilter.bind(this, "visible")} id="visible-layers"/>
         </div>
@@ -345,10 +339,9 @@ module.exports = React.createClass({
     };
 
     return (
-      <Panel title="Sök" onCloseClicked={this.props.onCloseClicked}>
+      <Panel title="Sökning" onCloseClicked={this.props.onCloseClicked}>
         <div className="search-tools">
-          <div className="form-group">
-            <label>Sök</label>
+          <div className="form-group">            
             <div className="input-group">
               <div className="input-group-addon">
                 <i className="fa fa-search"></i>
@@ -364,6 +357,7 @@ module.exports = React.createClass({
             </div>
           </div>
           {options}
+          <br />
           <button onClick={this.clear} type="submit" className="btn btn-default">Rensa</button>
           {results}
         </div>

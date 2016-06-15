@@ -196,19 +196,23 @@ module.exports = ToolModel.extend({
     * @param {object} layer   openlayers lager.
     */
   addInformation: function (feature, layer, callback) {
-      var lm = this.layerCollection.findWhere({ name: layer.get("name") });
-      var layerindex = -1;
-      var properties;
-      var information;
-      var iconUrl = feature.get('iconUrl') || '';
-
-      if (!lm) {
-        console.error('Layer ' + layer.get('name') + ' was not found in the layer model.', feature.getProperties(), feature.getGeometryName());
-        return callback(false);
+      
+      if (layer.get('name') === 'draw-layer') {
+        callback(false);
+        return;
       }
 
+      var layerModel = this.layerCollection.findWhere({ name: layer.get("name") })
+      ,   layerindex = -1
+      ,   properties
+      ,   information
+      ,   iconUrl = feature.get('iconUrl') || ''
+      ;      
+
       properties = feature.getProperties();
-      information = lm.get("information") || "";
+      information = layerModel && layerModel.get("information") || "";
+
+
 
       if (information) {
         (information.match(/\{.*?\}\s?/g) || []).forEach(property => {
@@ -226,18 +230,18 @@ module.exports = ToolModel.extend({
             }
             information = information.replace(property, lookup(properties, property));
         });
-      }
 
-      layerindex = this.layerOrder.hasOwnProperty(lm.getName()) ?
-                  this.layerOrder[lm.getName()] : 999;
+        layerindex = this.layerOrder.hasOwnProperty(layerModel.getName()) ? 
+                     this.layerOrder[layerModel.getName()] : 999;
+      }
 
       callback({
         feature: feature,
         layer: layer,
         information: {
-            caption: lm.getCaption(),
+            caption: layerModel && layerModel.getCaption() || "Sökträff",
             layerindex: layerindex,
-            information: information,
+            information: information || properties,
             iconUrl: iconUrl,
         }
       });

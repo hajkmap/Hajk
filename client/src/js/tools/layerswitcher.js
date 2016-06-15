@@ -10,6 +10,7 @@ module.exports = ToolModel.extend({
       title: 'Kartlager',
       visible: false,
       layerCollection: undefined,
+      backgroundSwitcherMode: 'hidden',
       selectedTheme: 2
     },
 
@@ -29,6 +30,7 @@ module.exports = ToolModel.extend({
 
     getBaseLayers: function () {
       var baseLayers = [];
+
       this.get('baselayers').forEach(id => {
         var layer = this.get('layerCollection').find(layer => layer.id === id);
         if (layer) {

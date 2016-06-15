@@ -9,6 +9,7 @@
   ,   elem
   ,   that = {}
   ,   internal = {}
+  ;
 
   if (!window.Promise) {
     elem = document.createElement('script');
@@ -85,24 +86,30 @@
 
     function f(groups, layer) {
       groups.forEach(group => {
-        if (group.layers.includes(layer.id)) {
+
+        var mapLayer = group.layers.find(l => l.id === layer.id)
+
+        if (mapLayer) {
+          layer.drawOrder = mapLayer.drawOrder;
           filtered.push(layer);
         }
+
         if (group.hasOwnProperty('groups')) {
           f(group.groups, layer);
         }
       });
     }
 
-    var filtered = [];    
+    var filtered = [];
 
     layers.forEach(layer => {
       if (config.baselayers.includes(layer.id)) {
+        layer.drawOrder = 0;
         filtered.push(layer);
       }
     });
 
-    layers.forEach(layer => {      
+    layers.forEach(layer => {
       f(config.groups, layer);
     });
 
@@ -117,10 +124,8 @@
   that.start = function (config, done) {
 
       function load_map(map_config) {
-
         var layers = $.getJSON(config.layersPath || layersPath);
-
-        layers.done(data => {                  
+        layers.done(data => {
 
           var layerSwitcherConfig = map_config.tools.find(tool => {
             return tool.type === 'layerswitcher'
@@ -131,15 +136,13 @@
           }).options;
 
           map_config.layers = internal.filterByLayerSwitcher(layerSwitcherConfig, data.wmslayers);
+          map_config.layers.sort((a, b) => a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1);
           searchConfig.sources = data.wfslayers;
-
-          data.wmslayers.sort((a, b) =>
-            a.drawOrder === b.drawOrder ? 0 : a.drawOrder > b.drawOrder ? 1 : -1
-          );
 
           internal.init(
             internal.mergeConfig(map_config, internal.parseQueryParams())
           );
+
           if (done) done(true);
         });
 

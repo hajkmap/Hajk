@@ -481,7 +481,7 @@ var DrawPanel = React.createClass({
     ,   importRes  = this.renderImport(this.state.kmlImport);
 
     return (
-      <Panel title="Rita och Mät" onCloseClicked={this.props.onCloseClicked}>
+      <Panel title="Rita och mät" onCloseClicked={this.props.onCloseClicked}>
         <div className="draw-tools">
           <div id="labels">
             <input id="labels-checkbox" onChange={this.toggleLabels} type="checkbox" checked={showLabels} />
