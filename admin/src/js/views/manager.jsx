@@ -176,8 +176,8 @@ class Manager extends React.Component {
   /**
    *
    */
-  loadLegendImage(e) {    
-    
+  loadLegendImage(e) {
+
     $('#select-image').trigger('click');
 
   }
@@ -543,14 +543,14 @@ class Manager extends React.Component {
    */
   uploadLegend() {
     $('#upload-form').submit();
-    
-    console.log("this", this);
-
-    this.refs.uploadIframe.addEventListener("load", () => {      
-      if (this.refs.uploadIframe.contentDocument && 
+    this.refs.uploadIframe.addEventListener("load", () => {
+      if (this.refs.uploadIframe.contentDocument &&
         $(this.refs.uploadIframe.contentDocument).find('string').length > 0) {
+        let url = $(this.refs.uploadIframe.contentDocument).find('string')[0].innerHTML;
+        let a = $(`<a href="${url}"">temp</a>`);
+        let b = a[0].origin + a[0].pathname;
         this.setState({
-          legend: $(this.refs.uploadIframe.contentDocument).find('string')[0].innerHTML
+          legend: b
         });
       }
     });
@@ -564,8 +564,8 @@ class Manager extends React.Component {
     ,   imageLoader = this.state.imageLoad ? <i className="fa fa-refresh fa-spin"></i> : null
     ,   abort = this.state.mode === "edit" ? <span className="btn btn-danger" onClick={(e) => this.abort(e)}>Avbryt</span> : null
     ,   url = "/mapservice/export/importimage"
-    ;      
-        
+    ;
+
     return (
       <section className="tab-pane active">
         <aside>
@@ -583,13 +583,13 @@ class Manager extends React.Component {
                   width: 'auto',
                   height: '100%'
                 }
-              } 
-              id="select-image" 
-              type="file"                                         
+              }
+              id="select-image"
+              type="file"
               multiple="false"
               name="files[]"
               onChange={(e) => this.uploadLegend(e)}
-            />                  
+            />
             <iframe id="upload-iframe" name="upload-iframe" ref="uploadIframe" style={{display: 'none'}}></iframe>
           </form>
           <form method="post" action="" onSubmit={(e) => { this.submit(e) }}>
@@ -643,7 +643,7 @@ class Manager extends React.Component {
                   ref="input_legend"
                   value={this.state.legend}
                   onChange={(e) => this.validate("legend", e)}
-                />                
+                />
                 <span onClick={(e) => {this.loadLegendImage(e)}} className="btn btn-default">Välj fil {imageLoader}</span>
               </div>
               <div>

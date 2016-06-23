@@ -111,19 +111,19 @@ namespace Sweco.Services
         [WebInvoke(Method = "POST", ResponseFormat = WebMessageFormat.Xml, BodyStyle = WebMessageBodyStyle.Bare, UriTemplate = "/importimage")]
         public string ImportImage(Stream stream)
         {
-            var guid = Guid.NewGuid();
+            string tempPath = "/Temp";
+            string path = HttpContext.Current.Server.MapPath(tempPath);
+            string filename = Guid.NewGuid() + ".png";
+            string localPng = path + "\\" + filename;
+            
             MultipartParser parser = new MultipartParser(stream);
             using (var ms = new MemoryStream(parser.FileContents))
             {
-                Image img = Image.FromStream(ms);                
-                string filename = String.Format(HttpContext.Current.Server.MapPath("../upload/{0}.png"), guid);                
-                img.Save(filename, ImageFormat.Png);
+                Image img = Image.FromStream(ms);                            
+                img.Save(localPng, ImageFormat.Png);
             }
-            return HttpContext.Current.Request.Url.Scheme + "://" +
-                   HttpContext.Current.Request.Url.Host +
-                   HttpContext.Current.Request.ApplicationPath +
-                   "/upload/" +
-                   guid + ".png";
+
+            return tempPath + "/" + filename;
         }
 
 
