@@ -2,96 +2,24 @@
   "wmslayers": [
     {
       "id": "0",
-      "caption": "Terrängkartan",
-      "url": "http://194.71.132.27/geoserver28/wms",
+      "caption": "Busshållplats forshaga",
+      "url": "http://194.71.132.27/geoserver28/forshaga/wms",
       "owner": "SBK",
-      "date": "1465979602953",
-      "content": "Terrängkartan",
-      "legend": "http://localhost/mapservice/upload/0bb2b1af-21b5-4945-9e65-4356be09145c.png",
-      "projection": null,
-      "layers": [
-        "sweco:terrangkartan"
-      ],
-      "infobox": "",
-      "searchFields": [
-        ""
-      ],
-      "displayFields": [
-        ""
-      ],
-      "visibleAtStart": true,
-      "queryable": false,
-      "tiled": true
-    },
-    {
-      "id": "1",
-      "caption": "Busslinjer",
-      "url": "http://194.71.132.27/geoserver28/wms",
-      "owner": "SBK",
-      "date": "1465885071153",
+      "date": "1466517746436",
       "content": "test",
-      "legend": "http://localhost/mapservice/upload/6fc632fe-a131-477f-ab1c-fa3455d13f99.png",
+      "legend": "",
       "projection": null,
       "layers": [
-        "sweco:busslinje"
+        "busshallplats"
       ],
       "infobox": "",
       "searchFields": [
-        "fran",
-        "till"
+        ""
       ],
       "displayFields": [
-        "linje_nr",
-        "fran",
-        "till"
+        ""
       ],
       "visibleAtStart": true,
-      "queryable": true,
-      "tiled": false
-    },
-    {
-      "id": "2",
-      "caption": "Adress",
-      "url": "http://194.71.132.27/geoserver28/wms",
-      "owner": "SBK",
-      "date": "1465979598155",
-      "content": "Adress",
-      "legend": "http://localhost/mapservice/upload/3f30917a-f733-43ce-8356-6f4ab08df2ea.png",
-      "projection": null,
-      "layers": [
-        "sweco:adress"
-      ],
-      "infobox": "",
-      "searchFields": [
-        ""
-      ],
-      "displayFields": [
-        ""
-      ],
-      "visibleAtStart": false,
-      "queryable": true,
-      "tiled": false
-    },
-    {
-      "id": "3",
-      "caption": "Hållplatser",
-      "url": "http://194.71.132.27/geoserver28/wms",
-      "owner": "SBK",
-      "date": "1465971106968",
-      "content": "Hållplatser",
-      "legend": "http://localhost/mapservice/upload/9d8f3ba3-c4ce-44c9-8425-90ba51063d69.png",
-      "projection": null,
-      "layers": [
-        "sweco:hpl"
-      ],
-      "infobox": "",
-      "searchFields": [
-        "namn"
-      ],
-      "displayFields": [
-        "namn"
-      ],
-      "visibleAtStart": false,
       "queryable": true,
       "tiled": false
     }

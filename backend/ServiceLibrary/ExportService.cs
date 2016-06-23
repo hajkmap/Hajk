@@ -229,8 +229,8 @@ namespace Sweco.Services
             gfx.DrawImage(logo, gfx.PageSize.Width - 212, 12, 200, 67);
 
             document.Save(localPdf);
-
-            return HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority) + tempPath + "/" + filename;
+            
+            return tempPath + "/" + filename;
         }                 
     }
 }

@@ -50,36 +50,17 @@
     {
       "type": "layerswitcher",
       "options": {
-        "baselayers": [
-          "0"
-        ],
+        "baselayers": [],
         "groups": [
           {
-            "id": "27034b22-f8fe-0ce6-3977-aadf69671ba6",
-            "parent": "-1",
-            "name": "Test",
-            "toggled": true,
-            "layers": [
-              {
-                "id": "2",
-                "drawOrder": 2
-              }
-            ],
-            "groups": []
-          },
-          {
-            "id": "test",
+            "id": "afe0c79e-f807-0c17-8bcd-4974bf4e9ee6",
             "parent": "-1",
             "name": "Kollektivtrafik",
             "toggled": false,
             "layers": [
               {
-                "id": "1",
-                "drawOrder": 1
-              },
-              {
-                "id": "3",
-                "drawOrder": 3
+                "id": "0",
+                "drawOrder": 0
               }
             ],
             "groups": []
