@@ -111,7 +111,7 @@ namespace Sweco.Services
         [WebInvoke(Method = "POST", ResponseFormat = WebMessageFormat.Xml, BodyStyle = WebMessageBodyStyle.Bare, UriTemplate = "/importimage")]
         public string ImportImage(Stream stream)
         {
-            string tempPath = "/Temp";
+            string tempPath = "/Upload";
             string path = HttpContext.Current.Server.MapPath(tempPath);
             string filename = Guid.NewGuid() + ".png";
             string localPng = path + "\\" + filename;
