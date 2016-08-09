@@ -96,7 +96,7 @@ class Application extends React.Component {
    *
    */
   renderContent() {
-    if (!this.state) return null;
+    if (!this.state || !this.state.content) return null;
 
     var content = null;
     var model = null;
@@ -106,7 +106,8 @@ class Application extends React.Component {
       model = require("models/" + this.state.content);
     }
     catch (e) {
-      return (<div></div>)
+      console.error(e);
+      return (<div>{e.message}</div>);
     }
     return React.createElement(content, {
       model: model,

@@ -125,7 +125,7 @@ module.exports = React.createClass({
     var coordinates = this.state.coordinates.transformed;
     var buttonText  = this.state.interactionVisible ? "Dölj" : "Visa";
     return (
-      <Panel title="Koordinater" onCloseClicked={this.props.onCloseClicked}>
+      <Panel title="Koordinater" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
         <div className="coordinate-display">
           <CoordinatesList coordinates={coordinates} />
         </div>

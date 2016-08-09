@@ -10,6 +10,8 @@ var NavigationModel = Backbone.Model.extend({
     panels: [],
     /** @member {boolean} visible. Default: false */
     visible: false,
+
+    toggled: false,
     /** @member {boolean} activePanel */
     activePanel: undefined
   },
@@ -21,15 +23,15 @@ var NavigationModel = Backbone.Model.extend({
    */
   initialize: function (options) {
 
-    options.panels.forEach(_.bind(function (p) {
-      p.model.on("change:visible", this.onPanelVisibleChanged, this);
-    }, this));
+    options.panels.forEach(panel => {
+      panel.model.on("change:visible", this.onPanelVisibleChanged, this);
+    });
 
-    this.on('change:visible', function (s, visible) {
+    this.on('change:visible', (s, visible) => {
       if (this.get('activePanel') && !visible) {
         this.get('activePanel').model.set('visible', visible);
       }
-    }, this);
+    });
   },
   /**
    * Handler for toggle events of panels.
@@ -43,18 +45,29 @@ var NavigationModel = Backbone.Model.extend({
     var activePanel = this.get("activePanel");
 
     if (visible) {
-        if (activePanel) {
-          activePanel.model.set("visible", false);
-        }
-        if (panelRef) {
-          this.set("activePanelType", type);
-          this.set("activePanel", panelRef);
-          if (!this.get("visible")) {
-            this.set("visible", true);
+
+      if (activePanel) {
+        activePanel.model.set("visible", false);
+        if (activePanel.model.filty) {
+          if (!confirm("Du har en påbörjad redigering, vill du avbryta?")) {
+            if (panelRef) {
+              panelRef.model.set('visible', false);
+            }
+            return;
           }
-        } else {
-          this.set("visible", false);
         }
+      }
+
+      if (panelRef) {
+        this.set("activePanelType", type);
+        this.set("activePanel", panelRef);
+        if (!this.get("visible")) {
+          this.set("visible", true);
+        }
+      } else {
+        this.set("visible", false);
+      }
+
     }
   }
 });

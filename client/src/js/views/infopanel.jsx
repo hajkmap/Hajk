@@ -118,7 +118,7 @@ var InfoPanel = React.createClass({
     info = infos[current];
 
     return (
-      <Panel title="Information" onCloseClicked={this.props.onCloseClicked}>
+      <Panel title="Information" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
         <div className="info-panel panel-content">
           {(function () {
             if (current !== -1) {

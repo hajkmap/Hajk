@@ -135,9 +135,14 @@
             return tool.type === 'search'
           }).options;
 
+          var editConfig = map_config.tools.find(tool => {
+            return tool.type === 'edit'
+          }).options;
+
           map_config.layers = internal.filterByLayerSwitcher(layerSwitcherConfig, data.wmslayers);
           map_config.layers.sort((a, b) => a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1);
           searchConfig.sources = data.wfslayers;
+          editConfig.sources = data.wfstlayers;
 
           internal.init(
             internal.mergeConfig(map_config, internal.parseQueryParams())

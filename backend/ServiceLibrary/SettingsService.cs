@@ -103,6 +103,30 @@ namespace Sweco.Services
         void AddWFSLayer(WFSConfig layer);
 
         /// <summary>
+        /// Lägg till WFST-lager.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void AddWFSTLayer(WFSTConfig layer);
+
+        /// <summary>
+        /// Lägg till WFST-lager.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void RemoveWFSTLayer(string id);
+
+        /// <summary>
+        /// Lägg till WFST-lager.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void UpdateWFSTLayer(WFSTConfig layer);
+
+        /// <summary>
         /// Uppdatera lagermeny.
         /// </summary>
         /// <param name="id"></param>
@@ -316,7 +340,70 @@ namespace Sweco.Services
         {
             this.settingsDataContext.UpdateLayerMenu(config);
         }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        [WebInvoke(Method = "DELETE", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/wfslayer/{id}")]
+        public void RemoveWFSLayer(string id)
+        {
+            this.settingsDataContext.RemoveWFSLayer(id);
+        }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="layer"></param>
+        [WebInvoke(Method = "POST", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/wfslayer")]
+        public void AddWFSLayer(WFSConfig layer)
+        {
+            this.settingsDataContext.AddWFSLayer(layer);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="layer"></param>
+        [WebInvoke(Method = "PUT", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/wfslayer")]
+        public void UpdateWFSLayer(WFSConfig layer)
+        {
+            this.settingsDataContext.UpdateWFSLayer(layer);
+        }        
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="layer"></param>
+        [WebInvoke(Method = "POST", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/wfstlayer")]
+        public void AddWFSTLayer(WFSTConfig layer)
+        {
+            this.settingsDataContext.AddWFSTLayer(layer);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        [WebInvoke(Method = "DELETE", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/wfstlayer/{id}")]
+        public void RemoveWFSTLayer(string id)
+        {
+            this.settingsDataContext.RemoveWFSTLayer(id);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="layer"></param>
+        [WebInvoke(Method = "PUT", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/wfstlayer")]
+        public void UpdateWFSTLayer(WFSTConfig layer)
+        {
+            this.settingsDataContext.UpdateWFSTLayer(layer);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         public void Dispose()
         {
             try
@@ -328,20 +415,6 @@ namespace Sweco.Services
                 Logger.Warn("Uppkoppling mot databas städades ej undan ordentligt.", ex);
             }
         }
-        [WebInvoke(Method = "DELETE", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/wfslayer/{id}")]
-        public void RemoveWFSLayer(string id)
-        {
-            this.settingsDataContext.RemoveWFSLayer(id);
-        }
-        [WebInvoke(Method = "PUT", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/wfslayer")]
-        public void UpdateWFSLayer(WFSConfig layer)
-        {
-            this.settingsDataContext.UpdateWFSLayer(layer);
-        }
-        [WebInvoke(Method = "POST", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/wfslayer")]
-        public void AddWFSLayer(WFSConfig layer)
-        {
-            this.settingsDataContext.AddWFSLayer(layer);
-        }
+
     }
 }

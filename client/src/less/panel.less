@@ -2,7 +2,6 @@
   border-radius: 0;
 }
 
-
 .collapsed-naviation-panel, .navigation-panel .toggle-button-expand {
   position: fixed;
   top: .5em;
@@ -10,7 +9,36 @@
 }
 
 .navigation-panel.folded {
-   left: -100%;
+  left: -100%;
+}
+
+.navigation-panel.minimized {
+  left: .5em;
+  top: .5em;
+  background: #fff;
+  width: 48px;
+  height: 48px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+@font-face {
+  font-family: myFirstFont;
+  src: url(fonts/fontawesome-webfont.woff);
+}
+
+.navigation-panel.minimized:before {
+    content: "\f065";
+    font-family: FontAwesome;
+    position: absolute;
+    font-size: 28px;
+    left: 10px;
+    top: 9px;
+ }
+
+.navigation-panel.minimized .navigation-panel-inner {
+   display: none;
 }
 
 .navigation-panel {

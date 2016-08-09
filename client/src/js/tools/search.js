@@ -235,9 +235,9 @@ module.exports = ToolModel.extend({
   /**
    *
    */
-  getSources: function () {  
+  getSources: function () {
     var filter = (source) => {
-      var criteria = this.get('filter');          
+      var criteria = this.get('filter');
       return criteria === '*' ? true : criteria === source.caption;
     }
     return this.get('sources').filter(filter);
@@ -260,10 +260,10 @@ module.exports = ToolModel.extend({
 
     if (value === "") return;
 
-    sources= this.getSources();
-    layers = this.getLayers();
+    sources = this.getSources();
+    layers  = this.getLayers();
 
-    this.set('selectedIndices', []);    
+    this.set('selectedIndices', []);
 
     layers.forEach(layer => {
       promises.push(new Promise((resolve, reject) => {
@@ -297,9 +297,9 @@ module.exports = ToolModel.extend({
         "propertyName": source.searchFields.join(','),
         "displayName": source.displayFields ? source.displayFields : (source.searchFields[0] || "Sökträff"),
         "srsName": this.get('map').getView().getProjection().getCode()
-      };    
+      };
 
-      promises.push(new Promise((resolve, reject) => {        
+      promises.push(new Promise((resolve, reject) => {
         this.doWFSSearch({
           value: value,
           url: searchProps.url,

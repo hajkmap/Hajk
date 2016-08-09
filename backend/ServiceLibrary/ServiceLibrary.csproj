@@ -118,6 +118,7 @@
   <ItemGroup>
     <Compile Include="DataAccess\SettingsStore.cs" />
     <Compile Include="DataContracts\Bookmark.cs" />
+    <Compile Include="DataContracts\EditableField.cs" />
     <Compile Include="DataContracts\LayerConfig.cs" />
     <Compile Include="DataContracts\ToolOptions\LayerMenuOptions.cs" />
     <Compile Include="DataContracts\MapConfig.cs" />
@@ -126,6 +127,7 @@
     <Compile Include="DataContracts\Tool.cs" />
     <Compile Include="DataContracts\ToolOptions\MapWMSLayerInfo.cs" />
     <Compile Include="DataContracts\WFSConfig.cs" />
+    <Compile Include="DataContracts\WFSTConfig.cs" />
     <Compile Include="DataContracts\WMSConfig.cs" />
     <Compile Include="HTTP\MultipartParser.cs" />
     <Compile Include="MapExport\DoubleExtensions.cs" />

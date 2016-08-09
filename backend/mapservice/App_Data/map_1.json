@@ -50,17 +50,27 @@
     {
       "type": "layerswitcher",
       "options": {
-        "baselayers": [],
+        "baselayers": [
+          "1"
+        ],
         "groups": [
           {
             "id": "afe0c79e-f807-0c17-8bcd-4974bf4e9ee6",
             "parent": "-1",
-            "name": "Kollektivtrafik",
+            "name": "Data",
             "toggled": false,
             "layers": [
               {
-                "id": "0",
-                "drawOrder": 0
+                "id": "4",
+                "drawOrder": 1
+              },
+              {
+                "id": "2",
+                "drawOrder": 2
+              },
+              {
+                "id": "3",
+                "drawOrder": 3
               }
             ],
             "groups": []
@@ -99,6 +109,10 @@
       }
     },
     {
+      "type": "edit",
+      "options": {}
+    },
+    {
       "type": "anchor",
       "options": {}
     }
@@ -106,11 +120,11 @@
   "map": {
     "target": "map",
     "center": [
-      410719,
-      6575675
+      448020,
+      6542064
     ],
     "projection": "EPSG:3006",
-    "zoom": 7,
+    "zoom": 12,
     "maxZoom": 12,
     "minZoom": 4,
     "resolutions": [

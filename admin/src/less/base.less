@@ -29,7 +29,7 @@ article {
 	float: left;
 	margin: 50px;
 	margin-top: -5px;
-	width: 690px;
+	max-width: 1000px;
 }
 
 article textarea {
@@ -267,4 +267,40 @@ body.dragging, body.dragging * {
 .expanded-at-start label {
 	width: auto;
 	margin: 4px;
+}
+
+.edit-fields-table {
+	display: inline-block;
+	max-width: 820px;
+}
+
+.edit-fields-table input[type="text"] {
+	width: 160px !important;
+	margin: 0 !important;
+}
+
+.editable-list {
+	margin: 4px;
+}
+
+.list-value:first-child {
+	margin-left: 0 !important;
+}
+
+.list-value {
+	display: inline-block;
+	padding: 4px;
+	border-radius: 3px;
+	background: #5cb85c;
+	color: white;
+	margin: 2px;
+}
+
+.noselect {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }

@@ -298,7 +298,7 @@ var LayerPanel = React.createClass({
     });
 
     return (
-      <Panel title="Teckenförklaring" onCloseClicked={this.props.onCloseClicked}>
+      <Panel title="Teckenförklaring" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
         <div className="layer-panel">
           <BackgroundSwitcher layers={this.props.model.getBaseLayers()} model={this.props.model}></BackgroundSwitcher>
           {groups}

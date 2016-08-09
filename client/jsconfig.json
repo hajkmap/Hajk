@@ -46,6 +46,7 @@
         "compiled/coordinatespanel.js": ["src/js/views/coordinatespanel.jsx"],
         "compiled/exportpanel.js": ["src/js/views/exportpanel.jsx"],
         "compiled/drawpanel.js": ["src/js/views/drawpanel.jsx"],
+        "compiled/editpanel.js": ["src/js/views/editpanel.jsx"],
         "compiled/anchorpanel.js": ["src/js/views/anchorpanel.jsx"]
       }
     },
@@ -76,6 +77,7 @@
         "tools/coordinates": "./src/js/tools/coordinates.js",
         "tools/export": "./src/js/tools/export.js",
         "tools/draw": "./src/js/tools/draw.js",
+        "tools/edit": "./src/js/tools/edit.js",
         "tools/anchor": "./src/js/tools/anchor.js",
         "layers/layer": "./src/js/layers/layer.js",
         "layers/wmslayer": "./src/js/layers/wmslayer.js",
@@ -98,6 +100,7 @@
         "views/searchpanel": "./compiled/searchpanel.js",
         "views/coordinatespanel": "./compiled/coordinatespanel.js",
         "views/drawpanel": "./compiled/drawpanel.js",
+        "views/editpanel": "./compiled/editpanel.js",
         "views/anchorpanel": "./compiled/anchorpanel.js",
         "views/exportpanel": "./compiled/exportpanel.js",
         "views/panel": "./compiled/panel.js",

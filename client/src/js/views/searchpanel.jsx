@@ -225,10 +225,10 @@ module.exports = React.createClass({
   /*
    * @desc Render options component
    */
-  renderOptions: function () {    
+  renderOptions: function () {
     var settings = this.props.model.get('settings')
     ,   sources = this.props.model.get('sources')
-    ;    
+    ;
     return (
       <div>
         <div>
@@ -339,9 +339,9 @@ module.exports = React.createClass({
     };
 
     return (
-      <Panel title="Sökning" onCloseClicked={this.props.onCloseClicked}>
+      <Panel title="Sökning" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
         <div className="search-tools">
-          <div className="form-group">            
+          <div className="form-group">
             <div className="input-group">
               <div className="input-group-addon">
                 <i className="fa fa-search"></i>

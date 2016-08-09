@@ -1,16 +1,15 @@
 const defaultState = {
   load: false,
-  capabilities: false,
+  capabilities: [],
   validationErrors: [],
   mode: "add",
   layers: [],
   addedLayers: [],
   id: "",
   caption: "",
-  date: "Fylls i per automatik",
-  searchFields: "",
-  displayFields: "",
-  url: ""
+  url: "",
+  projection: "",
+  layerProperties: []
 };
 /**
  *
@@ -80,20 +79,20 @@ class Search extends React.Component {
    */
   loadLayer(e, layer) {
 
+    this.abort();
+
     this.setState({
       mode: "edit",
       id: layer.id,
       caption: layer.caption,
-      searchFields: layer.searchFields,
-      displayFields: layer.displayFields,
       url: layer.url,
+      projection: layer.projection || "EPSG:3006",
       addedLayers: []
     });
 
     setTimeout(() => {
+      this.validate("caption");
       this.validate("url");
-      this.validate("searchFields");
-      this.validate("displayFields");
       this.loadWMSCapabilities(undefined, () => {
 
         this.setState({
@@ -103,7 +102,7 @@ class Search extends React.Component {
         this.validate("layers");
 
         _.each(this.refs, element => {
-          if (element.dataset.type == "wms-layer") {
+          if (element.dataset.type === "wms-layer") {
             element.checked = false;
           }
         });
@@ -112,10 +111,14 @@ class Search extends React.Component {
           this.refs[layer].checked = true;
         });
 
+        this.describeLayer(undefined, layer.layers[0], layer);
+
       });
     }, 0);
   }
-
+  /**
+   *
+   */
   loadWMSCapabilities(e, callback) {
     if (e)
       e.preventDefault();
@@ -150,43 +153,14 @@ class Search extends React.Component {
       }
     });
   }
-
   /**
    *
    */
   appendLayer(e, checkedLayer) {
-    this.state.addedLayers.splice(0, this.state.addedLayers.length);
-    if (e.target.checked === true) {
-      this.state.addedLayers.push(checkedLayer);
-    } else {
-      this.state.addedLayers = this.state.addedLayers.filter(layer =>
-        layer !== checkedLayer
-      );
-    }
+    this.state.addedLayers = [];
+    this.state.addedLayers.push(checkedLayer);
     this.forceUpdate();
     this.validate("layers");
-  }
-  /**
-   *
-   */
-  renderSelectedLayers() {
-    if (!this.state.addedLayers) return null;
-
-    function uncheck(layer) {
-      this.appendLayer({
-        target: {
-          checked: false
-        }
-      }, layer);
-      this.refs[layer].checked = false;
-    }
-
-    return this.state.addedLayers.map((layer, i) =>
-      <li className="layer" key={i}>
-        <span>{layer}</span>&nbsp;
-        <i className="fa fa-times" onClick={uncheck.bind(this, layer)}></i>
-      </li>
-    )
   }
   /**
    *
@@ -207,38 +181,18 @@ class Search extends React.Component {
   /**
    *
    */
-  renderLayersFromConfig(layers) {
-    layers = this.state.filter ? this.getLayersWithFilter() : this.props.model.get('layers');
-    return layers.map((layer, i) =>
-      <li onClick={(e) => this.loadLayer(e, layer)} key={Math.random()}>
-        <span>{layer.caption}</span>
-        <i title="Radera lager" onClick={(e) => this.removeLayer(e, layer)} className="fa fa-trash"></i>
-      </li>
-    );
-  }
-  /**
-   *
-   */
-  abort (e) {
+  abort(e) {
     this.setState(defaultState);
   }
   /**
    *
    */
-  validate (fieldName, e) {
+  validate(fieldName, e) {
 
     var value = this.getValue(fieldName)
     ,   valid = true;
 
     switch (fieldName) {
-      case "displayFields":
-      case "searchFields":
-        valid = value.every(val => /^\w+$/.test(val));
-        if (value.length === 1 && value[0] === "") {
-          valid = true;
-        }
-
-        break;
       case "layers":
         if (value.length === 0) {
           valid = false;
@@ -271,6 +225,32 @@ class Search extends React.Component {
   /**
    *
    */
+  getEditableFields() {
+
+    var filter, mapper;
+
+    mapper = item => {
+      return {
+        index: item.index,
+        name: item.name,
+        dataType: item.localType,
+        textType: item.textType || null,
+        values: item.listValues || null
+      }
+    };
+
+    filter = item => item.checked === true;
+
+    return this
+      .state
+      .layerProperties
+      .filter(filter)
+      .map(mapper);
+  }
+
+  /**
+   *
+   */
   getValue(fieldName) {
 
     function create_date() {
@@ -286,8 +266,7 @@ class Search extends React.Component {
 
     if (fieldName === 'date') value = create_date();
     if (fieldName === 'layers') value = format_layers(this.state.addedLayers);
-    if (fieldName === 'searchFields') value = value.split(',');
-    if (fieldName === 'displayFields') value = value.split(',');
+    if (fieldName === 'editableFields') value = this.getEditableFields();
 
     return value;
   }
@@ -306,13 +285,69 @@ class Search extends React.Component {
   /**
    *
    */
+  parseDate() {
+    var parsed = parseInt(this.state.date);
+    return isNaN(parsed) ?
+      this.state.date :
+      (new Date(parsed)).toLocaleString();
+  }
+  /**
+   *
+   */
+  getValidationClass(inputName) {
+    return valid = this.state.validationErrors.find(v => v === inputName) ? "validation-error" : "";
+  }
+  /**
+   *
+   */
+  describeLayer(e, layerName, layer) {
+    this.props.model.getLayerDescription(this.refs.input_url.value, layerName, (properties) => {
+
+      if (layer && layer.editableFields) {
+        layer.editableFields.forEach((editableField) => {
+          properties[editableField.index].listValues = editableField.values;
+          properties[editableField.index].textType = editableField.textType;
+          properties[editableField.index].checked = true;
+        });
+      }
+
+      this.setState({
+        layerProperties: properties,
+        layerPropertiesName: layerName
+      });
+
+    });
+  }
+  /**
+   *
+   */
+  closeDetails() {
+    this.setState({
+      layerProperties: undefined,
+      layerPropertiesName: undefined
+    });
+  }
+  /**
+   *
+   */
+  addListValue(index, e) {
+    if (this.state.layerProperties[index]) {
+      let props = this.state.layerProperties[index];
+      if (!Array.isArray(props.listValues)) {
+        props.listValues = [];
+      }
+      props.listValues.push(e.target.value);
+    }
+  }
+  /**
+   *
+   */
   submit(e) {
 
     var validations = [
-      this.validate("url"),,
-      this.validate("layers"),
-      this.validate("searchFields"),
-      this.validate("displayFields")
+      this.validate("caption"),
+      this.validate("url"),
+      this.validate("layers")
     ];
 
     if (validations.every(v => v === true)) {
@@ -322,8 +357,8 @@ class Search extends React.Component {
         caption: this.getValue("caption"),
         url: this.getValue("url"),
         layers: this.getValue("layers"),
-        searchFields: this.getValue("searchFields"),
-        displayFields: this.getValue("displayFields")
+        projection: this.getValue("projection"),
+        editableFields: this.getValue("editableFields")
       };
 
       if (this.state.mode === "add") {
@@ -373,35 +408,57 @@ class Search extends React.Component {
   /**
    *
    */
-  parseDate() {
-    var parsed = parseInt(this.state.date);
-    return isNaN(parsed) ?
-      this.state.date :
-      (new Date(parsed)).toLocaleString();
+  renderLayersFromConfig(layers) {
+    layers = this.state.filter ? this.getLayersWithFilter() : this.props.model.get('layers');
+    return layers.map((layer, i) =>
+      <li onClick={(e) => this.loadLayer(e, layer)} key={Math.random()}>
+        <span>{layer.caption}</span>
+        <i title="Radera lager" onClick={(e) => this.removeLayer(e, layer)} className="fa fa-trash"></i>
+      </li>
+    );
   }
   /**
    *
    */
-  getValidationClass(inputName) {
-    return valid = this.state.validationErrors.find(v => v === inputName) ? "validation-error" : "";
-  }
+  renderSelectedLayers() {
+    if (!this.state.addedLayers) return null;
 
-  describeLayer(e, layerName) {
-    this.props.model.getLayerDescription(this.refs.input_url.value, layerName, (properties) => {
-      this.setState({
-        layerProperties: properties,
-        layerPropertiesName: layerName
+    function uncheck(layer) {
+      this.state.addedLayers = [];
+      this.refs[layer].checked = false;
+      this.forceUpdate();
+    }
+
+    return this.state.addedLayers.map((layer, i) =>
+      <li className="layer noselect" key={i}>
+        <span>{layer}</span>&nbsp;
+        <i className="fa fa-times" onClick={uncheck.bind(this, layer)}></i>
+      </li>
+    )
+  }
+  /**
+   *
+   */
+  renderListValues(index) {
+    if (this.state.layerProperties[index] &&
+        this.state.layerProperties[index].listValues) {
+      return this.state.layerProperties[index].listValues.map((value, i) => {
+        return (
+          <span className="list-value noselect" key={i}>
+            {value} <i className="fa fa-times" onClick={() => {
+              this.state.layerProperties[index].listValues.splice(i, 1);
+              this.forceUpdate();
+            }} />
+          </span>
+        );
       });
-    });
+    } else {
+      return null;
+    }
   }
-
-  closeDetails() {
-    this.setState({
-      layerProperties: undefined,
-      layerPropertiesName: undefined
-    });
-  }
-
+  /**
+   *
+   */
   renderLayerProperties() {
     if (this.state.layerProperties === undefined) {
       return null;
@@ -409,47 +466,100 @@ class Search extends React.Component {
     if (this.state.layerProperties === false) {
       return (
         <div>
-          <i className="fa fa-times" onClick={() => this.closeDetails()}></i>
           <div>Information saknas</div>
         </div>
       )
     }
-    var rows = this.state.layerProperties.map((property, i) =>
-      <tr key={i}>
-        <td>{property.name}</td>
-        <td>{property.localType}</td>
-        <td>{property.nillable == true ? "Nej" : "Ja"}</td>
-      </tr>
-    );
+
+    var rows = this.state.layerProperties.map((property, i) => {
+
+      var stringDataTypes = type => {
+        if (type === "string") {
+          if (!property.textType) {
+            property.textType = "fritext";
+          }
+          return (
+            <select defaultValue={property.textType} onChange={(e) => {
+              property.textType = e.target.value;
+            }}>
+              <option value="fritext">Fritext</option>
+              <option value="datum">Datum</option>
+              <option value="lista">Lista</option>
+              <option value="flerval">Flerval</option>
+            </select>
+          )
+        }
+        return null;
+      };
+
+      var listEditor = type => {
+        if (type === "string") {
+          return (
+            <div>
+              <input onKeyDown={(e) => {
+                if (e.keyCode === 13) {
+                  e.preventDefault();
+                  this.addListValue(i, e);
+                  this.forceUpdate();
+                  e.target.value = "";
+                }
+              }} type="text"></input>
+              <div className="editable-list">
+                { this.renderListValues(i) }
+              </div>
+            </div>
+          )
+        }
+        return null;
+      };
+
+      property.index = i;
+
+      return (
+        <tr key={parseInt(Math.random() * 1E8)}>
+          <td>
+            <input type="checkbox" defaultChecked={property.checked} onChange={(e) => {
+              property.checked = e.target.checked;
+            }} />
+          </td>
+          <td>{property.name}</td>
+          <td>{stringDataTypes(property.localType)}</td>
+          <td>{property.localType}</td>
+          <td>{listEditor(property.localType)}</td>
+        </tr>
+      );
+    });
+
     return (
-      <div>
-        <i className="fa fa-times" onClick={() => this.closeDetails()}></i>
-        <table>
-          <thead>
-            <tr>
-              <th>Namn</th>
-              <th>Typ</th>
-              <th>Obligatorisk</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows}
-          </tbody>
-        </table>
-      </div>
+      <table className="edit-fields-table">
+        <thead>
+          <tr>
+            <th>Redigerbar</th>
+            <th>Namn</th>
+            <th>Typ</th>
+            <th>Datatyp</th>
+            <th>Listvärden</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows}
+        </tbody>
+      </table>
     )
   }
-
+  /**
+   *
+   */
   renderLayersFromCapabilites() {
     if (this.state && this.state.capabilities) {
       return this.state.capabilities.map((layer, i) => {
-        var classNames = this.state.layerPropertiesName === layer.name ?
-                         "fa fa-info-circle active" : "fa fa-info-circle";
         return (
           <li key={i}>
-            <input ref={layer.name} id={"layer" + i} type="radio" name="featureType" data-type="wms-layer" onChange={(e) => { this.appendLayer(e, layer.name) }}/>&nbsp;
+            <input ref={layer.name} id={"layer" + i} type="radio" name="featureType" data-type="wfs-layer" onChange={(e) => {
+              this.appendLayer(e, layer.name);
+              this.describeLayer(e, layer.name);
+            }}/>&nbsp;
             <label htmlFor={"layer" + i}>{layer.name}</label>
-            <i className={classNames} onClick={(e) => this.describeLayer(e, layer.name)}></i>
           </li>
         )
       });
@@ -457,7 +567,25 @@ class Search extends React.Component {
       return null;
     }
   }
+  /**
+   *
+   */
+  renderProjections() {
 
+    var render = (projection, i) => <option key={i} value={projection}>{projection}</option>;
+    var options = this.props.config.projections.map(render);
+
+    return (
+      <select ref="input_projection" value={this.state.projection} onChange={(e) => {
+        this.setState({
+          projection: e.target.value
+        });
+      }}>{options}</select>
+    );
+  }
+  /**
+   *
+   */
   renderLayerList() {
     var layers = this.renderLayersFromCapabilites();
     return (
@@ -487,7 +615,7 @@ class Search extends React.Component {
         <article>
           <form method="post" action="" onSubmit={(e) => { this.submit(e) }}>
             <fieldset>
-              <legend>Lägg till WFS-tjänst</legend>
+              <legend>Lägg till WFST-tjänst</legend>
               <div>
                 <label>Visningsnamn*</label>
                 <input
@@ -510,6 +638,10 @@ class Search extends React.Component {
                 <span onClick={(e) => {this.loadWMSCapabilities(e)}} className="btn btn-default">Ladda lager {loader}</span>
               </div>
               <div>
+                <label>Projektion</label>
+                {this.renderProjections()}
+              </div>
+              <div>
                 <label>Valt lager*</label>
                 <div ref="input_layers" className={"layer-list-choosen " + this.getValidationClass("layers")}>
                   <ul>
@@ -522,33 +654,14 @@ class Search extends React.Component {
                 {this.renderLayerList()}
               </div>
               <div>
-                <label>Sökfält</label>
-                <input
-                  type="text"
-                  ref="input_searchFields"
-                  onChange={(e) => this.validate("searchFields", e)}
-                  value={this.state.searchFields}
-                  className={this.getValidationClass("searchFields")}
-                />
-              </div>
-              <div>
-                <label>Visningsfält</label>
-                <input
-                  type="text"
-                  ref="input_displayFields"
-                  onChange={(e) => this.validate("displayFields", e)}
-                  value={this.state.displayFields}
-                  className={this.getValidationClass("displayFields")}
-                />
+                <label>Redigerbara fält</label>
+                {this.renderLayerProperties()}
               </div>
             </fieldset>
             <button className="btn btn-primary">{this.state.mode == "edit" ? "Spara" : "Lägg till"}</button>&nbsp;
             {abort}
           </form>
         </article>
-        <div className="details">
-          {this.renderLayerProperties()}
-        </div>
       </section>
     );
   }

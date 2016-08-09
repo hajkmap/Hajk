@@ -6,6 +6,7 @@ var Tool          = require('tools/tool'),
     Coordinates   = require('tools/coordinates'),
     Export        = require('tools/export'),
     Draw          = require('tools/draw'),
+    Edit          = require('tools/edit'),
     Anchor        = require('tools/anchor');
 
 /**
@@ -29,6 +30,8 @@ module.exports = Backbone.Collection.extend({
             return new Export(args.options);
         case "draw":
             return new Draw(args.options);
+        case "edit":
+            return new Edit(args.options);
         case "anchor":
             return new Anchor(args.options);
         default:

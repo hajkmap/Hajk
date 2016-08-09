@@ -9,6 +9,9 @@ namespace Sweco.Services.DataContracts
     class LayerConfig
     {
         public List<WMSConfig> wmslayers { get; set; }
+
         public List<WFSConfig> wfslayers { get; set; }
+
+        public List<WFSTConfig> wfstlayers { get; set; }
     }
 }

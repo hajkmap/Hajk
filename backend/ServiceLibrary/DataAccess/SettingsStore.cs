@@ -318,7 +318,7 @@ namespace Sweco.Services.DataAccess
         internal void UpdateWFSLayer(WFSConfig layer)
         {
             LayerConfig layerConfig = this.readLayerConfigFromFile();
-            var index = layerConfig.wmslayers.FindIndex(item => item.id == layer.id);
+            var index = layerConfig.wfslayers.FindIndex(item => item.id == layer.id);
             if (index != -1)
             {
                 layerConfig.wfslayers[index] = layer;
@@ -334,6 +334,48 @@ namespace Sweco.Services.DataAccess
         {
             LayerConfig layerConfig = this.readLayerConfigFromFile();
             layerConfig.wfslayers.Add(layer);
+            this.saveLayerConfigToFile(layerConfig); ;
+        }
+
+        /// <summary>
+        /// Remove WFS-layer
+        /// </summary>
+        /// <param name="id"></param>
+        internal void RemoveWFSTLayer(string id)
+        {
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            this.removeLayerFromConfig(id);
+            var index = layerConfig.wfstlayers.FindIndex(item => item.id == id);
+            if (index != -1)
+            {
+                layerConfig.wfstlayers.RemoveAt(index);
+            }
+            this.saveLayerConfigToFile(layerConfig);
+        }
+
+        /// <summary>
+        /// Update WFS-layer
+        /// </summary>
+        /// <param name="layer"></param>
+        internal void UpdateWFSTLayer(WFSTConfig layer)
+        {
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            var index = layerConfig.wfstlayers.FindIndex(item => item.id == layer.id);
+            if (index != -1)
+            {
+                layerConfig.wfstlayers[index] = layer;
+            }
+            this.saveLayerConfigToFile(layerConfig);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="layer"></param>
+        internal void AddWFSTLayer(WFSTConfig layer)
+        {
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            layerConfig.wfstlayers.Add(layer);
             this.saveLayerConfigToFile(layerConfig); ;
         }
     }

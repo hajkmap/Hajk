@@ -221,7 +221,7 @@ var ExportPanel = React.createClass({
 
   render: function () {
     return (
-      <Panel title="Skriv ut karta" onCloseClicked={this.props.onCloseClicked}>
+      <Panel title="Skriv ut karta" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
         <div className="export-panel">
           <ExportSettings
             visible={this.state.showExportSettings}

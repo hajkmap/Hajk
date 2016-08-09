@@ -75,6 +75,7 @@ module.exports = function (grunt) {
             "src/js/views/compiled/manager.js": ["src/js/views/manager.jsx"],
             "src/js/views/compiled/menu.js": ["src/js/views/menu.jsx"],
             "src/js/views/compiled/search.js": ["src/js/views/search.jsx"],
+            "src/js/views/compiled/edit.js": ["src/js/views/edit.jsx"],
             "src/js/views/compiled/map.js": ["src/js/views/map.jsx"],
             "src/js/views/compiled/info.js": ["src/js/views/info.jsx"],
             "src/js/views/compiled/release.js": ["src/js/views/release.jsx"],
@@ -101,18 +102,26 @@ module.exports = function (grunt) {
           options: {
             transform:  [require('grunt-react').browserify],
             alias: {
+
               "views/application":  "./src/js/views/compiled/application.js",
               "views/manager":      "./src/js/views/compiled/manager.js",
               "views/menu":         "./src/js/views/compiled/menu.js",
-              "views/search":       "./src/js/views/compiled/search.js",
+
+              "views/search":         "./src/js/views/compiled/search.js",
+              "views/edit":         "./src/js/views/compiled/edit.js",
+
               "views/map":          "./src/js/views/compiled/map.js",
               "views/info":          "./src/js/views/compiled/info.js",
               "views/release":      "./src/js/views/compiled/release.js",
               "views/alert":        "./src/js/views/compiled/alert.js",
+
               "models/application": "./src/js/models/application.js",
-              "models/menu":      "./src/js/models/menu.js",
+              "models/menu":        "./src/js/models/menu.js",
               "models/manager":     "./src/js/models/manager.js",
+
               "models/search":      "./src/js/models/search.js",
+              "models/edit":      "./src/js/models/edit.js",
+
               "models/map":         "./src/js/models/map.js",
               "models/info":        "./src/js/models/info.js",
               "models/release":     "./src/js/models/release.js"
@@ -238,7 +247,7 @@ module.exports = function (grunt) {
           }
       }
 
-    });    
+    });
 
     grunt.registerTask('build', ['copy:debug', 'replace:debughtml', 'less', 'autoprefixer:core', 'concat:css', 'react:admin', 'browserify:app', 'babel', 'replace:bablecleanup']);
 

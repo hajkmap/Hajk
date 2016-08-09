@@ -61,14 +61,20 @@ module.exports = ToolModel.extend({
       this.set("selectInteraction", this.selectInteraction);
       this.set("highlightLayer", new HighlightLayer());
       this.selectInteraction.setActive(false);
+
       this.get("features").on("add", (feature, collection) => {
         if (collection.length === 1) {
             this.set('selectedFeature', feature);
-            this.set('visible', true);
         }
       });
 
-      this.on("change:selectedFeature", (sender, feature) => { this.highlightFeature(sender, feature) });
+      this.on("change:selectedFeature", (sender, feature) => {
+        setTimeout(() => {
+          if (this.get('visible')) {
+            this.highlightFeature(sender, feature);
+          }
+        }, 0);
+      });
   },
 
   /**
@@ -84,9 +90,11 @@ module.exports = ToolModel.extend({
       this.map = map;
       this.map.on('singleclick', (event) => {
         try {
-          if (!map.get('clickLock')) {
-            this.onMapPointer(event);
-          }
+          setTimeout(a => {
+            if (!map.get('clickLock') && !event.filty) {
+              this.onMapPointer(event);
+            }
+          }, 0);
         } catch (e) {}
       });
       this.set('map', this.map);
@@ -119,24 +127,10 @@ module.exports = ToolModel.extend({
       this.layerOrder[layer.get('name')] = i;
     });
 
-    // Kontrollera om någon vector feature träffades
-    // Lägg till resultat i lista av uppslag.
     this.map.forEachFeatureAtPixel(event.pixel, (feature, layer) => {
-      //Lagret måste ha ett namn. Annars kan man inte välja på nytt inom highlight.
-      if (layer.get('name')) {
+      if (layer && layer.get('name')) {
         promises.push(new Promise((resolve, reject) => {
-
-            if (layer.get('name') === "stoparea2") {
-              var spLayer = this.layerCollection.find(a => a.get('name') === "stoparea" );
-              var spFeatures = spLayer.getSource().getFeatures().filter((spFeature) => {
-                return spFeature.getProperties().spGid === feature.getProperties().gid;
-              });
-              layer = spLayer;
-              features = spFeatures;
-            } else {
-              features = [feature];
-            }
-
+            features = [feature];
             _.each(features, (feature) => {
                 this.addInformation(feature, layer, (featureInfo) => {
                   if (featureInfo) {
@@ -163,7 +157,7 @@ module.exports = ToolModel.extend({
               error: (message) => {
                 resolve();
               },
-              success: (features, layer) => {                                
+              success: (features, layer) => {
                   if (features instanceof Array && features.length > 0) {
                     this.addInformation(features[0], wmsLayer, (featureInfo) => {
                         infos[wmsLayer.index + infosLen] = featureInfo;
@@ -196,7 +190,7 @@ module.exports = ToolModel.extend({
     * @param {object} layer   openlayers lager.
     */
   addInformation: function (feature, layer, callback) {
-      
+
       if (layer.get('name') === 'draw-layer') {
         callback(false);
         return;
@@ -207,7 +201,7 @@ module.exports = ToolModel.extend({
       ,   properties
       ,   information
       ,   iconUrl = feature.get('iconUrl') || ''
-      ;      
+      ;
 
       properties = feature.getProperties();
       information = layerModel && layerModel.get("information") || "";
@@ -231,7 +225,7 @@ module.exports = ToolModel.extend({
             information = information.replace(property, lookup(properties, property));
         });
 
-        layerindex = this.layerOrder.hasOwnProperty(layerModel.getName()) ? 
+        layerindex = this.layerOrder.hasOwnProperty(layerModel.getName()) ?
                      this.layerOrder[layerModel.getName()] : 999;
       }
 

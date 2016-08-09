@@ -8,12 +8,14 @@ var Search = Backbone.Model.extend({
   getConfig: function (url) {
     $.ajax(url, {
       success: data => {
-        data.wfslayers.sort((a, b) => {
-          var d1 = parseInt(a.date)
-          ,   d2 = parseInt(b.date);
-          return d1 === d2 ? 0 : d1 < d2 ? 1 : -1;
-        });
-        this.set('layers', data.wfslayers);
+        if (data.wfstlayers) {
+          data.wfstlayers.sort((a, b) => {
+            var d1 = parseInt(a.date)
+            ,   d2 = parseInt(b.date);
+            return d1 === d2 ? 0 : d1 < d2 ? 1 : -1;
+          });
+        }
+        this.set('layers', data.wfstlayers || []);
       }
     });
   },
