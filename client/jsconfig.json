@@ -59,6 +59,11 @@
       "files": {
         "compiled/application.js": ["src/js/views/application.jsx"]
       }
+    },
+    "alert": {
+      "files": {
+        "compiled/alert.js": ["src/js/views/alert.jsx"]
+      }
     }
   },
   "browserify": {
@@ -108,7 +113,8 @@
         "views/layeritem": "./compiled/layeritem.js",
         "views/navigationpanel": "./compiled/navigationpanel.js",
         "views/shell": "./compiled/shell.js",
-        "views/application": "./compiled/application.js"
+        "views/application": "./compiled/application.js",
+        "alert": "./compiled/alert.js"
     }
   }
 }

@@ -1,5 +1,5 @@
 
-var Search = Backbone.Model.extend({
+var search = Backbone.Model.extend({
 
   defaults: {
     layers: []
@@ -115,4 +115,4 @@ var Search = Backbone.Model.extend({
 
 });
 
-module.exports = new Search();
+module.exports = new search();

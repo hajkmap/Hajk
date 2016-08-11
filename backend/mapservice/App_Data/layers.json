@@ -289,6 +289,50 @@
           "values": null
         }
       ]
+    },
+    {
+      "id": "3",
+      "caption": "Nationalpark",
+      "url": "http://194.71.132.27/geoserver28/wfs",
+      "projection": "EPSG:3006",
+      "layers": [
+        "vrf:vrf_nationalpark"
+      ],
+      "editableFields": [
+        {
+          "index": 0,
+          "name": "NAMN",
+          "dataType": "string",
+          "textType": "fritext",
+          "values": null
+        },
+        {
+          "index": 1,
+          "name": "ORIGINALID",
+          "dataType": "string",
+          "textType": "datum",
+          "values": null
+        },
+        {
+          "index": 2,
+          "name": "LANSKOD",
+          "dataType": "string",
+          "textType": "lista",
+          "values": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ]
+        },
+        {
+          "index": 3,
+          "name": "Shape_Length",
+          "dataType": "number",
+          "textType": null,
+          "values": null
+        }
+      ]
     }
   ]
 }

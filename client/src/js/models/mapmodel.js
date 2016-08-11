@@ -62,7 +62,8 @@ Drag.prototype.handleDownEvent = function(evt) {
 
   if (this.layer_ &&
       (this.layer_.getProperties().name === 'search-vector-layer' ||
-       this.layer_.getProperties().name === 'highlight-wms'
+       this.layer_.getProperties().name === 'highlight-wms' ||
+       this.layer_.dragLocked === true
       )) {
     return false;
   }
@@ -116,7 +117,6 @@ Drag.prototype.handleMoveEvent = function(evt) {
       this.previousCursor_ = undefined;
     }
   }
-
 };
 
 

@@ -5,6 +5,8 @@ global.window.React = require('react');
 global.window.ReactDOM = require('react-dom');
 global.window.proj4 = require('proj4');
 global.window.marked = require('marked');
+global.window.X2JS = require('x2js');
+
 var $ = jQuery = require('jquery');
 require('jquery-sortable');
 global.window.$ = $;

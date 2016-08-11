@@ -53,6 +53,35 @@ var Edit = module.exports = ToolModel.extend({
    *
    *
    */
+  refreshLayer: function (layerName) {
+    var source
+    ,   foundLayer = this.get('layerCollection').find(layer => {
+          if (layer.getLayer().getSource().getParams) {
+            let p = layer.getLayer().getSource().getParams();
+            if (typeof p === 'object') {
+              return layerName === p['LAYERS']
+            }
+          }
+        });
+    if (foundLayer) {
+      source = foundLayer.getLayer().getSource();
+      source.changed();
+      source.updateParams({"time": Date.now()});
+      this.get('map').updateSize();
+    }
+  },
+  /**
+   *
+   *
+   */
+  parseWFSTresponse: function (response) {
+    var str = (new XMLSerializer()).serializeToString(response);
+    return (new X2JS()).xml2js(str);
+  },
+  /**
+   *
+   *
+   */
   transact: function (features, mode, done) {
 
     var node = this.write(mode, features)
@@ -68,23 +97,11 @@ var Edit = module.exports = ToolModel.extend({
         contentType: 'text/xml',
         data: payload
       }).done((data) => {
-
-        console.log("Transaction complete", data);
-
-        var foundLayer = this.get('layerCollection').filter(layer => {
-          if (layer.getLayer().getSource().getParams) {
-            let p = layer.getLayer().getSource().getParams();
-            if (typeof p === 'object') {
-              return src.layers[0] === p['LAYERS']
-            }
-          }
-        });
-
-        //console.log("Found WMS-layer", foundLayer);
-
+        this.refreshLayer(src.layers[0]);
+        var data = this.parseWFSTresponse(data);
         done(data);
-
-      }).error((date) => {
+      }).error((data) => {
+        var data = this.parseWFSTresponse(data);
         done(data);
       });
     }
@@ -113,6 +130,10 @@ var Edit = module.exports = ToolModel.extend({
     if (deleted.length > 0)
       this.transact(deleted, 'delete', done);
 
+    this.get('vectorSource')
+      .getFeatures()
+      .filter(f => f.modification !== undefined)
+      .forEach(f => f.modification = undefined);
   },
   /**
    *
@@ -182,6 +203,9 @@ var Edit = module.exports = ToolModel.extend({
     }).done(rsp => {
       this.get('vectorSource').addFeatures(format.readFeatures(rsp));
       this.get('vectorSource').getFeatures().forEach(feature => {
+        feature.on('propertychange', (e) => {
+          feature.modification = 'updated';
+        });
         feature.on('change', (e) => {
           feature.modification = 'updated';
         });
@@ -256,6 +280,7 @@ var Edit = module.exports = ToolModel.extend({
 
     this.get('select').setActive(true);
     this.get('modify').setActive(true);
+    this.get('layer').dragLocked = true;
   },
   /**
    *

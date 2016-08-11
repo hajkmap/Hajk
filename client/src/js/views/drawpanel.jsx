@@ -492,13 +492,13 @@ var DrawPanel = React.createClass({
               <i className="fa fa-font fa-0"></i> <span>Skriv text</span>
             </li>
             <li id="Point" onClick={this.activateDrawTool.bind(this, "Point")}>
-              <i className="fa fa-map-pin fa-0"></i> <span>Rita punkt</span>
+              <i className="iconmoon-punkt"></i> <span>Rita punkt</span>
             </li>
             <li id="LineString" onClick={this.activateDrawTool.bind(this, "LineString")}>
-              <i className="fa fa-minus fa-0"></i> <span>Rita linje</span>
+              <i className="iconmoon-linje"></i> <span>Rita linje</span>
             </li>
             <li id="Polygon" onClick={this.activateDrawTool.bind(this, "Polygon")}>
-              <i className="fa fa-clone fa-0"></i> <span>Rita yta</span>
+              <i className="iconmoon-yta"></i> <span>Rita yta</span>
             </li>
             <li id="delete" onClick={this.activateRemovalTool}>
               <i className="fa fa-eraser fa-0"></i> <span>Radera</span>

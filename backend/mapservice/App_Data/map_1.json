@@ -61,10 +61,6 @@
             "toggled": false,
             "layers": [
               {
-                "id": "4",
-                "drawOrder": 1
-              },
-              {
                 "id": "2",
                 "drawOrder": 2
               },

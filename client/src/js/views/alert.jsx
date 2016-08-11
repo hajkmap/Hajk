@@ -38,10 +38,10 @@ class Alert extends React.Component {
               </div>
               <div className="modal-body">
                 <p>
-                  {options.message.split('\n').map(function(item) {
+                  {options.message.split('\n').map(function(text, i) {
                     return (
-                      <span>
-                        {item}
+                      <span key={i}>
+                        <span>{text}</span>
                         <br/>
                       </span>
                     )

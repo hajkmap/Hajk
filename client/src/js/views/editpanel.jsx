@@ -1,4 +1,5 @@
 var Panel = require('views/panel');
+var Alert = require('alert');
 
 var AttributeEditor = React.createClass({
   /*
@@ -142,7 +143,6 @@ var Toolbar = React.createClass({
    */
   getInitialState: function() {
     return {
-      disabled: true
     };
   },
   /**
@@ -167,42 +167,194 @@ var Toolbar = React.createClass({
    * Render the component.
    * @return {React.Component} component
    */
+  renderAlert: function () {
+    var options = {
+      visible: this.state.alert,
+      message: this.state.alertMessage,
+      confirm: this.state.confirm,
+      confirmAction: () => {
+        this.state.confirmAction();
+        this.setState({
+          alert: false,
+          confirm: false,
+          alertMessage: ""
+        })
+      },
+      denyAction: () => {
+        this.state.denyAction();
+        this.setState({
+          alert: false,
+          confirm: false,
+          alertMessage: ""
+        })
+      },
+      onClick: () => {
+        this.setState({
+          alert: false,
+          alertMessage: ""
+        })
+      }
+    };
+
+    if (this.state.alert) {
+      return <Alert options={options}/>
+    } else {
+      return null;
+    }
+  },
+
+  onSaveClicked: function () {
+
+    var getMessage = (data) => {
+      if (!data)
+        return `Uppdatateringen lyckades men det upptäcktes inte några ändringar.`;
+      if (data.ExceptionReport) {
+        return `Uppdateringen misslyckades: ${data.ExceptionReport.Exception.ExceptionText.toString()}`;
+      }
+      if (data.TransactionResponse && data.TransactionResponse.TransactionSummary) {
+        return `Uppdateringen lyckades:
+          antal skapade objekt: ${data.TransactionResponse.TransactionSummary.totalInserted}
+          antal borttagna objekt: ${data.TransactionResponse.TransactionSummary.totalDeleted}
+          antal uppdaterade objekt: ${data.TransactionResponse.TransactionSummary.totalUpdated}
+        `
+      } else {
+        return 'Status för uppdateringen kunde inte avläsas av svaret från servern.'
+      }
+    };
+
+    if (!this.props.model.get('editSource'))
+      return;
+
+    this.props.panel.setState({
+      loading: true
+    });
+    this.props.model.save((data) => {
+      this.props.panel.setState({
+        loading: false
+      });
+      this.setState({
+        alert: true,
+        alertMessage: getMessage(data),
+        confirm: false
+      });
+    });
+  },
+
+  onAddPointClicked: function() {
+    this.props.model.get('layer').dragLocked = true;
+    this.setState({activeTool: "point"});
+  },
+
+  onAddLineClicked: function() {
+    this.props.model.get('layer').dragLocked = true;
+    this.setState({activeTool: "line"});
+  },
+
+  onAddPolygonClicked: function() {
+    this.props.model.get('layer').dragLocked = true;
+    this.setState({activeTool: "polygon"});
+  },
+
+  onRemoveClicked: function() {
+    this.props.model.get('layer').dragLocked = true;
+    this.setState({activeTool: "remove"});
+  },
+
+  onMoveClicked: function() {
+    this.setState({activeTool: "move"});
+    this.props.model.get('layer').dragLocked = false;
+  },
+
+  onCancelClicked: function() {
+    this.props.model.get('layer').dragLocked = true;
+    this.props.model.deactivate();
+    this.props.panel.setState({
+      checked: false,
+      enabled: false
+    });
+    this.setState({
+      activeTool: undefined
+    });
+  },
+
   render: function () {
 
     var disabled = !this.props.enabled;
 
+    var isActive = (type) => {
+      return this.state.activeTool === type ? "btn btn-primary" : "btn btn-default";
+    };
+
     return (
-      <div className="btn-group btn-group-lg map-toolbar">
-        <button disabled={disabled} type="button" className="btn btn-default" title="Lägg till punkt">
-          <i className="fa fa-map-pin icon"></i>
-        </button>
-        <button disabled={disabled} type="button" className="btn btn-default" title="Lägg till linje">
-          <i className="fa fa-minus icon"></i>
-        </button>
-        <button disabled={disabled} type="button" className="btn btn-default" title="Lägg till yta">
-          <i className="fa fa-clone icon"></i>
-        </button>
-        <button disabled={disabled} type="button" className="btn btn-default" title="Ta bort geometri">
-          <i className="fa fa-eraser icon"></i>
-        </button>
-        <button disabled={disabled} type="button" className="btn btn-default" title="Spara" onClick={(e) => {
-          this.props.panel.setState({
-            loading: true
-          });
-          this.props.model.save((data) => {
-            this.props.panel.setState({
-              loading: false
-            });
-          });
-        }}>
-          <i className="fa fa-floppy-o icon"></i>
-        </button>
-        <button disabled={disabled} type="button" className="btn btn-default" title="Avbryt" onClick={(e) => {
-          this.props.model.deactivate();
-          this.props.panel.setState({checked: false});
-        }}>
-          <i className="fa fa-ban icon"></i>
-        </button>
+      <div>
+        <div className="edit-toolbar-wrapper">
+          <div className="btn-group btn-group-lg map-toolbar">
+            <button
+              disabled={disabled}
+              onClick={() => {this.onAddPointClicked()}}
+              className={isActive("point")}
+              type="button"
+              title="Lägg till punkt"
+            >
+              <i className="iconmoon-punkt"></i>
+            </button>
+            <button
+              disabled={disabled}
+              onClick={() => {this.onAddLineClicked()}}
+              className={isActive("line")}
+              type="button"
+              title="Lägg till linje"
+            >
+              <i className="iconmoon-linje"></i>
+            </button>
+            <button
+              disabled={disabled}
+              onClick={() => {this.onAddPolygonClicked()}}
+              className={isActive("polygon")}
+              type="button"
+              title="Lägg till yta"
+            >
+              <i className="iconmoon-yta"></i>
+            </button>
+            <button
+              disabled={disabled}
+              onClick={() => {this.onMoveClicked()}}
+              className={isActive("move")}
+              type="button"
+              title="Flytta geometri"
+            >
+              <i className="fa fa-arrows icon"></i>
+            </button>
+            <button
+              disabled={disabled}
+              onClick={() => {this.onRemoveClicked()}}
+              className={isActive("remove")}
+              type="button"
+              title="Ta bort geometri"
+            >
+              <i className="fa fa-eraser icon"></i>
+            </button>
+            <button
+              disabled={disabled}
+              onClick={(e) => {this.onSaveClicked()}}
+              className="btn btn-default"
+              type="button"
+              title="Spara"
+            >
+              <i className="fa fa-floppy-o icon"></i>
+            </button>
+            <button
+              disabled={disabled}
+              onClick={(e) => {this.onCancelClicked()}}
+              className="btn btn-default"
+              type="button"
+              title="Avbryt"
+            >
+              <i className="fa fa-ban icon"></i>
+            </button>
+          </div>
+        </div>
+        {this.renderAlert()}
       </div>
     )
   }

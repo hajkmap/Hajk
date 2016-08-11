@@ -28,6 +28,11 @@ module.exports = function (grunt) {
               dest: "dist/assets", expand: true
             },
             {
+              cwd: "src/static/fonts",
+              src: "**/*",
+              dest: "dist/fonts", expand: true
+            },
+            {
               cwd: "node_modules/font-awesome/fonts",
               src: "*",
               dest: "dist/fonts", expand: true
@@ -63,7 +68,7 @@ module.exports = function (grunt) {
               {
                 src: "src/static/es6-polyfill.js",
                 dest: "release/js/es6-polyfill.js"
-              }                        
+              }
           ]
         },
         admin: {
