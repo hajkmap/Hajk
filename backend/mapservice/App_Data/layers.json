@@ -5,7 +5,7 @@
       "caption": "Bakgrund",
       "url": "http://www.asp-mapservices.com/ravegeo/map2/WMS?name=lm2013",
       "owner": "SBK",
-      "date": "1471505832174",
+      "date": "1471506244300",
       "content": "bakgrundskarta",
       "legend": "",
       "projection": null,
@@ -27,15 +27,15 @@
         ""
       ],
       "visibleAtStart": true,
-      "queryable": true,
+      "queryable": false,
       "tiled": false
     },
     {
       "id": "1",
-      "caption": "WMS 1",
+      "caption": "Höjdpunkter",
       "url": "http://194.71.132.27/geoserver/wms",
       "owner": "SBK",
-      "date": "1471505708908",
+      "date": "1471507739492",
       "content": "höjdpunkter",
       "legend": "",
       "projection": null,
@@ -55,10 +55,10 @@
     },
     {
       "id": "2",
-      "caption": "WMS 2",
+      "caption": "Daro",
       "url": "http://194.71.132.27/geoserver/wms",
       "owner": "SBK",
-      "date": "1471505747589",
+      "date": "1471507746764",
       "content": "daro",
       "legend": "",
       "projection": null,
@@ -80,7 +80,7 @@
   "wfslayers": [
     {
       "id": "0",
-      "caption": "WFS 1",
+      "caption": "Vandringshinder",
       "url": "http://194.71.132.27/geoserver/wfs",
       "layers": [
         "motala:Road_cross"
@@ -96,16 +96,16 @@
   "wfstlayers": [
     {
       "id": "19c0b960-4973-abbf-4123-732bef86f9d4",
-      "caption": "WFS-T 1",
+      "caption": "Daro",
       "url": "http://194.71.132.27/geoserver/wfs",
       "projection": "EPSG:3006",
       "layers": [
-        "motala:Anodonta_anatina"
+        "viskan:Daro"
       ],
       "editableFields": [
         {
-          "index": 0,
-          "name": "kommentar",
+          "index": 5,
+          "name": "namn",
           "dataType": "string",
           "textType": "fritext",
           "values": null
@@ -114,7 +114,7 @@
     },
     {
       "id": "15f3802b-2c66-ebf0-9df1-4e771f22a124",
-      "caption": "WFS-T 2",
+      "caption": "Musslor",
       "url": "http://194.71.132.27/geoserver/wfs",
       "projection": "EPSG:3006",
       "layers": [
