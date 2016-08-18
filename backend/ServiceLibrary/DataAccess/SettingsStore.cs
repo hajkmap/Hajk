@@ -376,7 +376,7 @@ namespace Sweco.Services.DataAccess
         {
             LayerConfig layerConfig = this.readLayerConfigFromFile();
             layerConfig.wfstlayers.Add(layer);
-            this.saveLayerConfigToFile(layerConfig); ;
+            this.saveLayerConfigToFile(layerConfig);
         }
     }
 }

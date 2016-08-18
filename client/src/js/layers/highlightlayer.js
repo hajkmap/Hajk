@@ -1,13 +1,20 @@
 var LayerModel = require('layers/layer');
 
 module.exports = LayerModel.extend({
-
+  /**
+   * @property defualts - Default properties
+   */
   defaults: {
+    /** property {object} source */
     source: undefined,
+    /** property {string} name */
     name: "highlight-wms",
+    /** property {ol.Layer} selectedLayer */
     selectedLayer: undefined
   },
-
+  /**
+   * Constructor method
+   */
   initialize: function () {
     LayerModel.prototype.initialize.call(this);
     var selectInteraction;
@@ -38,12 +45,17 @@ module.exports = LayerModel.extend({
     this.set("visible", true);
     this.set("type", "highlight");
   },
-
+  /**
+   * Clear highlight layer
+   */
   clearHighlight: function () {
     var source = this.get('source');
     source.clear();
   },
-
+  /**
+   * Clear faeture to highlight layer
+   * @param {ol.Feature} feature
+   */
   addHighlight: function (feature) {
     var source = this.get('source');
     this.set('visible', true);
@@ -52,14 +64,21 @@ module.exports = LayerModel.extend({
     }
     source.addFeature(feature);
   },
-
+  /**
+   * Clear faeture to highlight layer
+   * @param {ol.Layer} layer
+   */
   setSelectedLayer: function (layer) {
     this.set('selectedLayer', layer);
     this.get('selectedLayer').on("change:visible", (visibility) => {
       this.selectedLayerChanged();
     });
   },
-
+  /**
+   * Constructor method
+   * @param {object} options
+   * @param {object} args
+   */
   selectedLayerChanged: function () {
     var visible = this.get('selectedLayer').get('visible');
     this.set('visible', visible);

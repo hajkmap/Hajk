@@ -10,6 +10,9 @@ var panels = {
   'editpanel': require('views/editpanel'),
   'anchorpanel': require('views/anchorpanel')
 };
+
+var Alert = require('alert');
+
 /**
  *
  *
@@ -22,7 +25,8 @@ var NavigationPanel = React.createClass({
   getDefaultProps : function () {
     return {
       /** */
-      items: []
+      items: [],
+      alertVisible: false
     };
   },
   /**
@@ -41,13 +45,17 @@ var NavigationPanel = React.createClass({
    *
    */
   componentDidMount: function () {
-
     this.props.model.on("change:activePanel", (sender, panel) => {
        this.setState({
         'activePanel' : panel,
         'minimized': false
       });
-      //this.props.model.set("toggled", false);
+    });
+
+    this.props.model.on('change:alert', (e, value) => {
+      this.setState({
+        alertVisible: value
+      });
     });
 
     this.props.model.on("change:visible", (sender, visible) => {
@@ -57,27 +65,46 @@ var NavigationPanel = React.createClass({
     });
 
     this.props.model.on("change:toggled", (sender, visible) => {
-      this.setState({ 'minimized': true}); //visible });
+      this.setState({ 'minimized': true});
     });
-
   },
   /**
    *
    *
    */
   toggle: function () {
-
     if (this.state.activePanel) {
-      //this.props.model.set("visible", !this.props.model.get("visible"));
       this.props.model.set("toggled", !this.props.model.get("toggled"));
     }
-
   },
+  /**
+   *
+   *
+   */
   maximize: function () {
     if (this.state.minimized) {
       this.setState({
         minimized: false
       });
+    }
+  },
+  /**
+   *
+   *
+   */
+  getAlertOptions: function() {
+    return {
+      visible: this.state.alertVisible,
+      confirm: true,
+      message: "Du har en aktiv redigeringssession startad, vill du avbryta?",
+      denyAction: () => {
+        this.props.model.set('alert', false);
+        this.props.model.deny();
+      },
+      confirmAction: () => {
+        this.props.model.set('alert', false);
+        this.props.model.ok();
+      }
     }
   },
   /**
@@ -107,8 +134,11 @@ var NavigationPanel = React.createClass({
     }
 
     return (
-      <div className={classes} onClick={this.maximize}>
-        {panelInstance}
+      <div>
+        <Alert options={this.getAlertOptions()} />
+        <div className={classes} onClick={this.maximize}>
+          {panelInstance}
+        </div>
       </div>
     );
   }

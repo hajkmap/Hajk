@@ -4,41 +4,38 @@ var types = {
   "wmts": require('layers/wmtslayer')
 }
 
-
-/**
- * Add layer to openlayers map
- * @param {object} layer - Layer model to add
- */
-function addToMap (layer) {
-
-  var map = this.shell.get('map').getMap()
-  ,   olLayer = layer.getLayer();
-
-  layer.set("shell", this.shell);
-  if (olLayer) {
-    map.addLayer(olLayer);
-  }
-}
-
-/**
- * Remove layer from openlayers map
- * @param  {object} layer - Layermodel to remove
- */
-function removeFromMap(layer) {
-
-  var map = this.shell.get('map').getMap()
-  ,   olLayer = layer.getLayer();
-
-  if (olLayer) {
-    map.remvoeLayer(olLayer);
-  }
-}
-
-/**
- * Layer Collection
- */
 module.exports = Backbone.Collection.extend({
+  /**
+   * Add layer to openlayers map
+   * @param {object} layer - Layer model to add
+   */
+  addToMap: function(layer) {
+    var map = this.shell.get('map').getMap()
+    ,   olLayer = layer.getLayer();
 
+    layer.set("shell", this.shell);
+    if (olLayer) {
+      map.addLayer(olLayer);
+    }
+  },
+  /**
+   * Remove layer from openlayers map
+   * @param  {object} layer - Layermodel to remove
+   */
+  removeFromMap: function() {
+    var map = this.shell.get('map').getMap()
+    ,   olLayer = layer.getLayer();
+
+    if (olLayer) {
+      map.removeLayer(olLayer);
+    }
+  },
+  /**
+   * Generates a model for this layer
+   * @param {object} args
+   * @param {object} properties
+   * @return {Layer} layer
+   */
   model: function (args, properties) {
 
     function getLegendUrl(args) {
@@ -96,7 +93,11 @@ module.exports = Backbone.Collection.extend({
       throw "Layer type not supported " + layer_config.type;
     }
   },
-
+  /**
+   * Constructor method
+   * @param {object} options
+   * @param {object} args
+   */
   initialize: function (options, args) {
 
     this.shell = args.shell;
@@ -104,14 +105,17 @@ module.exports = Backbone.Collection.extend({
 
     _.defer(_.bind(function () {
 
-      this.forEach(addToMap, this);
+      this.forEach(this.addToMap, this);
 
     }, this));
 
-    this.on("add", addToMap, this);
-    this.on("remove", removeFromMap, this);
+    this.on("add", this.addToMap, this);
+    this.on("remove", this.removeFromMap, this);
   },
-
+  /**
+   * Get the objects data state as json-friendly representation.
+   * @return {object} state
+   */
   toJSON: function () {
     return this.initialConfig.map(layer => {
       var found = this.find(collectionLayer => collectionLayer.get('id') === layer.id);

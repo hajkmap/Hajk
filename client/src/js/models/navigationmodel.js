@@ -33,6 +33,19 @@ var NavigationModel = Backbone.Model.extend({
       }
     });
   },
+
+  navigate: function(panelRef, type) {
+    if (panelRef) {
+      this.set("activePanelType", type);
+      this.set("activePanel", panelRef);
+      if (!this.get("visible")) {
+        this.set("visible", true);
+      }
+    } else {
+      this.set("visible", false);
+    }
+  },
+
   /**
    * Handler for toggle events of panels.
    *
@@ -49,23 +62,24 @@ var NavigationModel = Backbone.Model.extend({
       if (activePanel) {
         activePanel.model.set("visible", false);
         if (activePanel.model.filty) {
-          if (!confirm("Du har en påbörjad redigering, vill du avbryta?")) {
+
+          this.set('alert', true);
+
+          this.ok = () => {
+            this.navigate(panelRef, type);
+          };
+
+          this.deny = () => {
             if (panelRef) {
               panelRef.model.set('visible', false);
             }
-            return;
           }
+
         }
       }
 
-      if (panelRef) {
-        this.set("activePanelType", type);
-        this.set("activePanel", panelRef);
-        if (!this.get("visible")) {
-          this.set("visible", true);
-        }
-      } else {
-        this.set("visible", false);
+      if (!this.get('alert')) {
+        this.navigate(panelRef, type);
       }
 
     }

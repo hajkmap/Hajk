@@ -93,9 +93,9 @@ module.exports = React.createClass({
   },
 
   componentWillMount: function () {
-    this.setState({
-      coordinates: this.props.model.presentCoordinates()
-    });
+    // this.setState({
+    //   coordinates: this.props.model.presentCoordinates()
+    // });
   },
 
   componentWillUnmount: function () {
@@ -105,6 +105,9 @@ module.exports = React.createClass({
 
   componentDidMount: function () {
     this.props.model.on('change:position', this.writeCoordinates);
+    this.setState({
+      coordinates: this.props.model.presentCoordinates()
+    });
   },
 
   writeCoordinates: function () {
@@ -122,8 +125,15 @@ module.exports = React.createClass({
   },
 
   render: function () {
-    var coordinates = this.state.coordinates.transformed;
-    var buttonText  = this.state.interactionVisible ? "Dölj" : "Visa";
+
+    var coordinates;
+
+    if (this.props.model.get('interactions').length === 0) {
+      this.props.model.createInteractions();
+    }
+
+    coordinates = this.state.coordinates ? this.state.coordinates.transformed : {};
+
     return (
       <Panel title="Koordinater" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
         <div className="coordinate-display">

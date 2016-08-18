@@ -9,12 +9,13 @@ var Tool          = require('tools/tool'),
     Edit          = require('tools/edit'),
     Anchor        = require('tools/anchor');
 
-/**
- * Tool collection
- */
 module.exports = Backbone.Collection.extend({
-
-  model: function (args, event) {
+  /**
+   * Generates a model for this tool.
+   * @param {object} args - arguments
+   * @return {Tool} tool
+   */
+  model: function (args) {
       switch (args.type) {
         case "layerswitcher":
             return new LayerSwitcher(args.options);
@@ -38,14 +39,21 @@ module.exports = Backbone.Collection.extend({
             throw "tool not supported " + args.type;
       }
   },
-
+  /**
+   * Constructor method
+   * @param {object} options
+   * @param {object} args
+   */
   initialize: function (tools, args) {
     this.shell = args.shell;
     _.defer(_.bind(function () {
       this.forEach(function (tool) { tool.set("shell", this.shell); }, this);
     }, this));
   },
-
+  /**
+   * Get the objects data state as json-friendly representation.
+   * @return {object} state
+   */
   toJSON: function () {
     var json = Backbone.Collection.prototype.toJSON.call(this);
     delete json.shell;

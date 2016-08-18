@@ -51,7 +51,7 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "1"
+          "0"
         ],
         "groups": [
           {
@@ -61,12 +61,12 @@
             "toggled": false,
             "layers": [
               {
-                "id": "2",
+                "id": "1",
                 "drawOrder": 2
               },
               {
-                "id": "3",
-                "drawOrder": 3
+                "id": "2",
+                "drawOrder": 1
               }
             ],
             "groups": []
@@ -116,8 +116,8 @@
   "map": {
     "target": "map",
     "center": [
-      448020,
-      6542064
+      326972,
+      6401522
     ],
     "projection": "EPSG:3006",
     "zoom": 12,

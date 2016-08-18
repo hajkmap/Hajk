@@ -277,6 +277,7 @@ var Edit = module.exports = ToolModel.extend({
     }
 
     this.set({editSource: source});
+    this.set({editFeature: null});
 
     this.get('select').setActive(true);
     this.get('modify').setActive(true);

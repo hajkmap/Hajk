@@ -38,9 +38,9 @@ module.exports = ToolModel.extend({
 
 	clicked: function(arg) {
 		this.set('visible', true);
-		if (this.get('interactions').length === 0) {
-			this.createInteractions();
-		};
+		// if (this.get('interactions').length === 0) {
+		// 	this.createInteractions();
+		// }
 	},
 	/**
 	 * Skapar markören på kartan och gör den

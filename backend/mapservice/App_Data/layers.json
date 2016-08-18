@@ -1,23 +1,23 @@
 {
   "wmslayers": [
     {
-      "id": "1",
-      "caption": "Bakgrundskarta",
+      "id": "0",
+      "caption": "Bakgrund",
       "url": "http://www.asp-mapservices.com/ravegeo/map2/WMS?name=lm2013",
       "owner": "SBK",
-      "date": "1470150340787",
-      "content": "Tjena",
+      "date": "1471505832174",
+      "content": "bakgrundskarta",
       "legend": "",
       "projection": null,
       "layers": [
-        "Vagkartan_texter",
-        "Terrangkartan_texter",
-        "Tatortskartan_texter",
-        "Terrangkartan_utan_texter",
-        "Vagkartan_utan_texter",
         "Oversiktskartan_utan_texter",
+        "Oversiktskartan_texter",
+        "Vagkartan_utan_texter",
+        "Terrangkartan_utan_texter",
         "Tatortskartan_utan_texter",
-        "Oversiktskartan_texter"
+        "Tatortskartan_texter",
+        "Terrangkartan_texter",
+        "Vagkartan_texter"
       ],
       "infobox": "",
       "searchFields": [
@@ -27,20 +27,43 @@
         ""
       ],
       "visibleAtStart": true,
-      "queryable": false,
+      "queryable": true,
+      "tiled": false
+    },
+    {
+      "id": "1",
+      "caption": "WMS 1",
+      "url": "http://194.71.132.27/geoserver/wms",
+      "owner": "SBK",
+      "date": "1471505708908",
+      "content": "höjdpunkter",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "viskan:Hojdpunkter"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
       "tiled": false
     },
     {
       "id": "2",
-      "caption": "Elfiskelokaler",
-      "url": "http://194.71.132.27/geoserver28/wms",
+      "caption": "WMS 2",
+      "url": "http://194.71.132.27/geoserver/wms",
       "owner": "SBK",
-      "date": "1470210886509",
-      "content": "Elfiskedata",
+      "date": "1471505747589",
+      "content": "daro",
       "legend": "",
       "projection": null,
       "layers": [
-        "gullspang:gull_elfiske"
+        "viskan:Daro"
       ],
       "infobox": "",
       "searchFields": [
@@ -49,53 +72,7 @@
       "displayFields": [
         ""
       ],
-      "visibleAtStart": true,
-      "queryable": true,
-      "tiled": false
-    },
-    {
-      "id": "3",
-      "caption": "Lekgropar",
-      "url": "http://194.71.132.27/geoserver28/wms",
-      "owner": "SBK",
-      "date": "1470210962922",
-      "content": "Lekgropar gullspång",
-      "legend": "",
-      "projection": null,
-      "layers": [
-        "gullspang:gull_lekgropar"
-      ],
-      "infobox": "",
-      "searchFields": [
-        ""
-      ],
-      "displayFields": [
-        ""
-      ],
-      "visibleAtStart": true,
-      "queryable": true,
-      "tiled": false
-    },
-    {
-      "id": "4",
-      "caption": "Kvalitetsklasszon",
-      "url": "http://194.71.132.27/geoserver28/wms",
-      "owner": "SBK",
-      "date": "1470225881129",
-      "content": "Kvalitetsklasser",
-      "legend": "",
-      "projection": null,
-      "layers": [
-        "gullspang:kvalitetsklasszoner"
-      ],
-      "infobox": "",
-      "searchFields": [
-        ""
-      ],
-      "displayFields": [
-        ""
-      ],
-      "visibleAtStart": true,
+      "visibleAtStart": false,
       "queryable": true,
       "tiled": false
     }
@@ -103,187 +80,32 @@
   "wfslayers": [
     {
       "id": "0",
-      "caption": "Avrinningsområde",
-      "url": "http://194.71.132.27/geoserver28/wfs",
+      "caption": "WFS 1",
+      "url": "http://194.71.132.27/geoserver/wfs",
       "layers": [
-        "motala:Avrinningsomrade"
+        "motala:Road_cross"
       ],
       "searchFields": [
-        "NAMN"
+        "vattendrag"
       ],
       "displayFields": [
-        "NAMN"
-      ]
-    },
-    {
-      "id": "1",
-      "caption": "Artportalen",
-      "url": "http://194.71.132.27/geoserver28/wfs",
-      "layers": [
-        "motala:Artportalen"
-      ],
-      "searchFields": [
-        "metod"
-      ],
-      "displayFields": [
-        "metod"
+        "vattendrag"
       ]
     }
   ],
   "wfstlayers": [
     {
-      "id": "0",
-      "caption": "Elfiskelokal",
-      "url": "http://194.71.132.27/geoserver28/wfs",
+      "id": "19c0b960-4973-abbf-4123-732bef86f9d4",
+      "caption": "WFS-T 1",
+      "url": "http://194.71.132.27/geoserver/wfs",
       "projection": "EPSG:3006",
       "layers": [
-        "gullspang:gull_elfiske"
-      ],
-      "editableFields": [
-        {
-          "index": 5,
-          "name": "vdragnam",
-          "dataType": "string",
-          "textType": "fritext",
-          "values": null
-        },
-        {
-          "index": 6,
-          "name": "lokalnam",
-          "dataType": "string",
-          "textType": "fritext",
-          "values": null
-        },
-        {
-          "index": 7,
-          "name": "lokalnr",
-          "dataType": "string",
-          "textType": "lista",
-          "values": [
-            "1",
-            "2",
-            "3",
-            "4"
-          ]
-        },
-        {
-          "index": 8,
-          "name": "senaste_fiske",
-          "dataType": "string",
-          "textType": "datum",
-          "values": null
-        },
-        {
-          "index": 9,
-          "name": "abborre",
-          "dataType": "number",
-          "textType": null,
-          "values": null
-        },
-        {
-          "index": 10,
-          "name": "benloja",
-          "dataType": "number",
-          "textType": null,
-          "values": null
-        },
-        {
-          "index": 11,
-          "name": "bensimpa",
-          "dataType": "number",
-          "textType": null,
-          "values": null
-        },
-        {
-          "index": 36,
-          "name": "lokalgruppering_sweco",
-          "dataType": "string",
-          "textType": "lista",
-          "values": [
-            "Stora Åråsforsen",
-            "Stora Åråsforsen- Biotopkanalen",
-            "Felaktig",
-            "Lilla Åråsforsen"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "1",
-      "caption": "Lekgropar",
-      "url": "http://194.71.132.27/geoserver28/wfs",
-      "projection": "EPSG:3006",
-      "layers": [
-        "gullspang:gull_lekgropar"
+        "motala:Anodonta_anatina"
       ],
       "editableFields": [
         {
           "index": 0,
-          "name": "vattendrag",
-          "dataType": "string",
-          "textType": "fritext",
-          "values": null
-        },
-        {
-          "index": 1,
-          "name": "nr",
-          "dataType": "number",
-          "textType": null,
-          "values": null
-        },
-        {
-          "index": 2,
-          "name": "storlek",
-          "dataType": "string",
-          "textType": "lista",
-          "values": [
-            "liten",
-            "mellan",
-            "stor"
-          ]
-        }
-      ]
-    },
-    {
-      "id": "2",
-      "caption": "Kvalitetsklasszon",
-      "url": "http://194.71.132.27/geoserver28/wfs",
-      "projection": "EPSG:3006",
-      "layers": [
-        "gullspang:kvalitetsklasszoner"
-      ],
-      "editableFields": [
-        {
-          "index": 0,
-          "name": "id",
-          "dataType": "number",
-          "textType": null,
-          "values": null
-        },
-        {
-          "index": 1,
-          "name": "sone",
-          "dataType": "string",
-          "textType": "fritext",
-          "values": null
-        },
-        {
-          "index": 2,
-          "name": "utseende",
-          "dataType": "string",
-          "textType": "fritext",
-          "values": null
-        },
-        {
-          "index": 3,
-          "name": "elveklass",
-          "dataType": "string",
-          "textType": "fritext",
-          "values": null
-        },
-        {
-          "index": 4,
-          "name": "etikett",
+          "name": "kommentar",
           "dataType": "string",
           "textType": "fritext",
           "values": null
@@ -291,45 +113,19 @@
       ]
     },
     {
-      "id": "3",
-      "caption": "Nationalpark",
-      "url": "http://194.71.132.27/geoserver28/wfs",
+      "id": "15f3802b-2c66-ebf0-9df1-4e771f22a124",
+      "caption": "WFS-T 2",
+      "url": "http://194.71.132.27/geoserver/wfs",
       "projection": "EPSG:3006",
       "layers": [
-        "vrf:vrf_nationalpark"
+        "viskan:Anodonta_anatina"
       ],
       "editableFields": [
         {
           "index": 0,
-          "name": "NAMN",
+          "name": "kommentar",
           "dataType": "string",
           "textType": "fritext",
-          "values": null
-        },
-        {
-          "index": 1,
-          "name": "ORIGINALID",
-          "dataType": "string",
-          "textType": "datum",
-          "values": null
-        },
-        {
-          "index": 2,
-          "name": "LANSKOD",
-          "dataType": "string",
-          "textType": "lista",
-          "values": [
-            "1",
-            "2",
-            "3",
-            "4"
-          ]
-        },
-        {
-          "index": 3,
-          "name": "Shape_Length",
-          "dataType": "number",
-          "textType": null,
           "values": null
         }
       ]
