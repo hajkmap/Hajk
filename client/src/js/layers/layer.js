@@ -1,136 +1,163 @@
-var Legend = require('components/legend');
-var LegendButton = require('components/legendbutton');
-var LabelButton = require('components/labelpanel');
-
 "use strict";
 
-module.exports = Backbone.Model.extend({
-   defaults: {
-      name: "",
-      caption: "",
-      visible: true,
-      layer: null,
-      labelVisibility: false,
-      label: undefined,
-      labelFields: undefined
-   },
+var Legend = require('components/legend')
+,   LegendButton = require('components/legendbutton')
+,   LabelButton = require('components/labelpanel');
 
-   loadJSON: function (url) {
-      var script = document.createElement("script");
-      script.type = "text/javascript";
-      script.src = url;
-      script.async = true;
-      script.onload = () => { document.head.removeChild(script) };
-      document.head.appendChild(script);
-   },
+/**
+ * Layer model properties
+ * @class LayerModelProperties
+ */
+var LayerModelProperties = {
+  /** @property {string} name*/
+  name: "",
+  /** @property {string} caption*/
+  caption: "",
+  /** @property {boolean} visible*/
+  visible: false,
+  /** @property {external:ol.layer} layer*/
+	layer: undefined
+};
 
-   initialize: function () {
-      this.initialState = _.clone(this.attributes);
-      this.on('change:shell', function (sender, shell) {
-         this.set("map", shell.get("map"));
-      }, this);
-   },
+/**
+ * Prototype for creating a layer.
+ * @class Layer
+ * @augments external:"Backbone.Model"
+ */
+var Layer = {
+	/**
+	 * @property {LayerModelPropertied} - default properties
+	 */
+	defaults: LayerModelProperties,
+	/**
+	 * Load JSON data from script tag.
+	 * @param {string} url
+	 * @return {undefined}
+	 */
+	loadJSON: function (url) {
+		var script = document.createElement("script");
+		script.type = "text/javascript";
+		script.src = url;
+		script.async = true;
+		script.onload = () => { document.head.removeChild(script) };
+		document.head.appendChild(script);
+	},
+	/**
+	 * Internal constructor method.
+	 * @private
+	 * @return {undefined}
+	 */
+	initialize: function () {
+		this.initialState = _.clone(this.attributes);
+		this.on('change:shell', function (sender, shell) {
+			this.set("map", shell.get("map"));
+		}, this);
+	},
+	/**
+	 * Get label visibility.
+	 * @return {boolean} visibility
+	 */
+	getLabelVisibility: function () {
+		return this.get('labelVisibility');
+	},
+	/**
+	 * Get label visibility.
+	 * @return {LegendView} legend
+	 */
+	getLegend: function () {
+		return this.get("legend");
+	},
+	/**
+	 * Get name.
+	 * @return {string} name
+	 */
+	getName: function () {
+		return this.get("name");
+	},
+	/**
+	 * Get caption.
+	 * @return {string} caption
+	 */
+	getCaption: function () {
+		return this.get("caption");
+	},
+	/**
+	 * Get visible.
+	 * @return {bool} visible
+	 */
+	getVisible: function () {
+		return this.get("visible");
+	},
+	/**
+	 * Get ol layer.
+	 * @return {external:ol.layer} layer
+	 */
+	getLayer: function () {
+		return this.layer || this.get("layer");
+	},
+	/**
+	 * Set label visibility.
+	 * @param {bool} visibility
+	 * @return {undefined}
+	 */
+	setVisible: function (visible) {
+		this.set("visible", visible);
+	},
+	/**
+	 * Get flat JSON-friendly representation of this instance.
+	 * @return {object} JSON-representation.
+	 */
+	toJSON: function () {
+		var json = _.clone(this.initialState);
+		delete json.options;
+		json.visible = this.get('visible');
+		return json;
+	},
+	/**
+	 * Get legend components
+	 * @return {external:ReactElement} components.
+	 */
+	getLegendComponents: function (settings) {
 
-   setLabelVisibility: function (visibility) {
-      this.set('labelVisibility', visibility);
-   },
+			var legendComponents = {
+				legendButton: null,
+				legendPanel: null
+			};
 
-   getLabelVisibility: function () {
-      return this.get('labelVisibility');
-   },
+			var legendProps = {
+				showLegend: settings.legendExpanded,
+				legends: this.getLegend(),
+				layer: this.getLayer()
+			};
 
-   getLegend: function () {
-      return this.get("legend");
-   },
+			var legendButtonProps = {
+				checked: settings.legendExpanded
+			};
 
-   getLabelFields: function () {
-      return this.get('labelFields');
-   },
+			if (this.getLegend()) {
+				legendComponents.legendPanel = React.createElement(Legend, legendProps);
+				legendComponents.legendButton = React.createElement(LegendButton, legendButtonProps);
+			}
 
-   getName: function () {
-      return this.get("name");
-   },
+			return legendComponents;
+	},
+	/**
+	 * Get extended components
+	 * @deprecated
+	 */
+	getExtendedComponents: function (settings) {
 
-   getCaption: function () {
-      return this.get("caption");
-   },
+			return {
+				legend: this.getLegendComponents(settings)
+			}
 
-   getVisible: function () {
-      return this.get("visible");
-   },
+	}
+};
 
-   setVisible: function (visible) {
-      this.set("visible", visible);
-   },
-
-   getLayer: function () {
-     return this.layer || this.get("layer");
-   },
-
-   refresh: function () {
-   },
-
-   toJSON: function () {
-      var json = _.clone(this.initialState);
-      json.labelVisibility = this.get('labelVisibility');
-      delete json.options;
-      json.visible = this.get('visible');
-      return json;
-   },
-
-   getSource: function () {
-
-   },
-
-   getGroup: function () {
-      return this.get('group');
-   },
-
-   getLabelButton: function (settings) {
-      var labelsVisible = this.getLabelVisibility();
-      var props = {
-         toggleLabels: () => { this.setLabelVisibility(!labelsVisible) },
-         showLabels: labelsVisible,
-         labelFields: this.getLabelFields()
-      };
-      return this.getLabelFields() ? React.createElement(LabelButton, props) : null;
-   },
-
-   getLegendComponents: function (settings) {
-
-      var legendComponents = {
-         legendButton: null,
-         legendPanel: null
-      };
-
-      var legendProps = {
-         showLegend: settings.legendExpanded,
-         legends: this.getLegend(),
-         layer: this.getLayer(),
-         labelFields: this.getLabelFields(),
-         labelVisibility: this.getLabelVisibility()
-      };
-
-      var legendButtonProps = {
-         checked: settings.legendExpanded
-      };
-
-      if (this.getLegend()) {
-         legendComponents.legendPanel = React.createElement(Legend, legendProps);
-         legendComponents.legendButton = React.createElement(LegendButton, legendButtonProps);
-      }
-
-      return legendComponents;
-   },
-
-   getExtendedComponents: function (settings) {
-
-      return {
-         legend: this.getLegendComponents(settings),
-         labelButton: this.getLabelButton(settings)
-      }
-
-   }
-});
-
-
+/**
+ * Layer module.<br>
+ * Use <code>require('layer/layer')</code> for instantiation.
+ * @module Layer-module
+ * @returns {Layer}
+ */
+module.exports = Backbone.Model.extend(Layer);

@@ -1,15 +1,22 @@
-var Tool          = require('tools/tool'),
-    LayerSwitcher = require('tools/layerswitcher'),
-    InfoClick     = require('tools/infoclick'),
-    SaveState     = require('tools/savestate'),
-    Search        = require('tools/search'),
-    Coordinates   = require('tools/coordinates'),
-    Export        = require('tools/export'),
-    Draw          = require('tools/draw'),
-    Edit          = require('tools/edit'),
-    Anchor        = require('tools/anchor');
+"use strict";
 
-module.exports = Backbone.Collection.extend({
+var Tool          = require('tools/tool')
+,   LayerSwitcher = require('tools/layerswitcher')
+,   InfoClick     = require('tools/infoclick')
+,   SaveState     = require('tools/savestate')
+,   Search        = require('tools/search')
+,   Coordinates   = require('tools/coordinates')
+,   Export        = require('tools/export')
+,   Draw          = require('tools/draw')
+,   Edit          = require('tools/edit')
+,   Anchor        = require('tools/anchor');
+
+/**
+ * Prototype for creating a tool collecton.
+ * @class ToolCollection
+ * @augments external:"Backbone.Collection"
+ */
+var ToolCollection = {
   /**
    * Generates a model for this tool.
    * @param {object} args - arguments
@@ -62,4 +69,12 @@ module.exports = Backbone.Collection.extend({
     });
     return json;
   }
-});
+};
+
+/**
+ * Tool collection module.<br>
+ * Use <code>require('collections/toolcollection')</code> for instantiation.
+ * @module ToolCollection-module
+ * @returns {ToolCollection}
+ */
+module.exports = Backbone.Collection.extend(ToolCollection);

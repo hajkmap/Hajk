@@ -116,12 +116,12 @@
   "map": {
     "target": "map",
     "center": [
-      326972,
-      6401522
+      374104.15,
+      6392113.20
     ],
     "projection": "EPSG:3006",
     "zoom": 12,
-    "maxZoom": 12,
+    "maxZoom": 14,
     "minZoom": 4,
     "resolutions": [
       3380.0726322344431,

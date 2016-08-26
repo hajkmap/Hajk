@@ -113,14 +113,6 @@ dd {
   font-weight: bold;
 }
 
-.modal {
-  z-index: 1000;
-}
-
-.modal-dialog {
-  width: 320px;
-}
-
 input {
   padding: 5px;
   border: 1px solid #999;
@@ -128,4 +120,46 @@ input {
 
 input[type="text"]:focus {
   outline: 2px solid @color-yellow;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+}
+
+.modal-dialog {
+  background: rgba(255, 255, 255, 0.9);
+  margin: auto;
+  margin-top: 20px;
+  border-radius: 3px;
+  width: 350px;
+  word-wrap: break-word;
+}
+
+.modal-header, .modal-footer,  .modal-body {
+  padding: 10px;
+}
+
+.modal-header {
+  background: white;
+  border-bottom: 1px solid #CCCCCC;
+}
+
+.modal-foooter {
+}
+
+.modal-body {
+}
+
+.modal-body input {
+  width: 100%;
+}
+
+.modal-title {
+  margin: 0;
 }

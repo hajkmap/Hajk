@@ -1,13 +1,20 @@
+"use strict";
+
 var types = {
   "wms": require('layers/wmslayer'),
   "wfs": require('layers/wfslayer'),
   "wmts": require('layers/wmtslayer')
-}
+};
 
-module.exports = Backbone.Collection.extend({
+/**
+ * Prototype for creating a layer collecton.
+ * @class LayerCollection
+ * @augments external:"Backbone.Collection"
+ */
+var LayerCollection = {
   /**
    * Add layer to openlayers map
-   * @param {object} layer - Layer model to add
+   * @param {Layer} layer - Layer model to add
    */
   addToMap: function(layer) {
     var map = this.shell.get('map').getMap()
@@ -20,9 +27,9 @@ module.exports = Backbone.Collection.extend({
   },
   /**
    * Remove layer from openlayers map
-   * @param  {object} layer - Layermodel to remove
+   * @param {Layer} layer - Layermodel to remove
    */
-  removeFromMap: function() {
+  removeFromMap: function(layer) {
     var map = this.shell.get('map').getMap()
     ,   olLayer = layer.getLayer();
 
@@ -126,4 +133,12 @@ module.exports = Backbone.Collection.extend({
     });
   }
 
-});
+};
+
+/**
+ * Layer collection module.<br>
+ * Use <code>require('collections/layercollection')</code> for instantiation.
+ * @module LayerCollection-module
+ * @returns {LayerCollection}
+ */
+module.exports = Backbone.Collection.extend(LayerCollection);

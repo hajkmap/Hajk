@@ -35,7 +35,7 @@
       "caption": "Höjdpunkter",
       "url": "http://194.71.132.27/geoserver/wms",
       "owner": "SBK",
-      "date": "1471507739492",
+      "date": "1471614572032",
       "content": "höjdpunkter",
       "legend": "",
       "projection": null,
@@ -49,7 +49,7 @@
       "displayFields": [
         ""
       ],
-      "visibleAtStart": false,
+      "visibleAtStart": true,
       "queryable": true,
       "tiled": false
     },
@@ -126,6 +126,24 @@
           "name": "kommentar",
           "dataType": "string",
           "textType": "fritext",
+          "values": null
+        }
+      ]
+    },
+    {
+      "id": "85ccbd37-5d5c-8b59-b0a7-4a24152ad5aa",
+      "caption": "Höjdpunkter",
+      "url": "http://194.71.132.27/geoserver/wfs",
+      "projection": "EPSG:3006",
+      "layers": [
+        "viskan:Hojdpunkter"
+      ],
+      "editableFields": [
+        {
+          "index": 2,
+          "name": "höjd",
+          "dataType": "number",
+          "textType": null,
           "values": null
         }
       ]

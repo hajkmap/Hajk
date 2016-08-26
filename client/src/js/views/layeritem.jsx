@@ -10,9 +10,7 @@ var LayerItem = React.createClass({
       expanded: false,
       name: "",
       legend: [],
-      labelFields: [],
-      status: "ok",
-      labelVisibility: false
+      status: "ok"
     };
   },
   /**
@@ -23,16 +21,13 @@ var LayerItem = React.createClass({
     this.props.layer.on("change:status", this.onStatusChanged, this);
     this.props.layer.on("change:visible", this.onVisibleChanged, this);
     this.props.layer.on("change:legend", this.onLegendChanged, this);
-    this.props.layer.on("change:labelVisibility", this.onLabelVisibility, this);
     this.props.layer.on('change:showLegend', this.onShowLegendChanged, this);
     this.setState({
       status: this.props.layer.get('status'),
       caption: this.props.layer.getCaption(),
       visible: this.props.layer.getVisible(),
       showLegend: this.props.layer.get('showLegend'),
-      labelVisibility: this.props.layer.getLabelVisibility(),
       legend: this.props.layer.getLegend(),
-      labelFields: this.props.layer.getLabelFields()
     });
   },
   /**
@@ -42,7 +37,6 @@ var LayerItem = React.createClass({
   componentWillUnmount: function () {
     this.props.layer.off("change:visible", this.onVisibleChanged, this);
     this.props.layer.off("change:legend", this.onLegendChanged, this);
-    this.props.layer.off("change:labelVisibility", this.onLabelVisibility, this);
     this.props.layer.off('change:showLegend', this.onShowLegendChanged, this);
     this.props.layer.off("change:status", this.onStatusChanged, this);
   },
@@ -73,13 +67,6 @@ var LayerItem = React.createClass({
    */
   onLegendChanged: function () {
     this.setState({ legend: this.props.layer.getLegend() });
-  },
-  /**
-   *
-   *
-   */
-  onLabelVisibility: function () {
-    this.setState({ labelVisibility: this.props.layer.getLabelVisibility() });
   },
   /**
    *
@@ -150,7 +137,6 @@ var LayerItem = React.createClass({
           {components.legend.legendButton}
         </div>
         <div className={innerBodyClass}>
-          {components.labelButton}
           {components.legend.legendPanel}
         </div>
       </div>

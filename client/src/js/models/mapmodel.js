@@ -131,35 +131,42 @@ Drag.prototype.handleUpEvent = function(evt) {
 };
 
 /**
- * Backbone Class Map Model
- * @class
- * @augments Backbone.Model
+ * Map model properties
+ * @class MapModelProperties
  */
-var MapModel = Backbone.Model.extend({
-  /** @property {object} defaults - Default settings */
-  defaults: {
-    /** @property {Array<number>} center - Center of map. Default: [0, 0] */
-    center: [0, 0],
-    /** @property {number} zoom - Default: 1 */
-    zoom: 1,
-    /** @property {number} maxZoom - Default: 15  */
-    maxZoom: 15,
-    /** @property {number} minZoom - Default: 1  */
-    minZoom: 1,
-    /** @property {string} target - Default: map*/
-    target: "map",
-    /** @property {string} projectionCode - Default: EPSG:3006 */
-    projection: "EPSG:3006",
-    /** @property {minZoom} zoom  */
-    ol: undefined,
-    /** @property {minZoom} zoom  */
-    clicked: undefined
-  },
+var MapModelProperties = {
+  /** @property {Array<number>} center - Center of map. Default: [0, 0] */
+  center: [0, 0],
+  /** @property {number} zoom - Default: 1 */
+  zoom: 1,
+  /** @property {number} maxZoom - Default: 15  */
+  maxZoom: 15,
+  /** @property {number} minZoom - Default: 1  */
+  minZoom: 1,
+  /** @property {string} target - Default: map*/
+  target: "map",
+  /** @property {string} projectionCode - Default: EPSG:3006 */
+  projection: "EPSG:3006",
+  /** @property {minZoom} zoom  */
+  ol: undefined,
+  /** @property {minZoom} zoom  */
+  clicked: undefined
+};
+
+/**
+ * Prototype for creating a map.
+ * @class MapModel
+ * @augments external:"Backbone.Model"
+ */
+var MapModel = {
+  /**
+   * These are the default properties, can me augmentet, has default values.
+   * @property {MapModuleProperties} defaults - Default settings
+   */
+  defaults: MapModelProperties,
   /**
    * Creates a map model.
-   *
-   * @constructor
-   * @param {object} options - Default options
+   * @param {MapModuleProperties} options - Default options
    */
   initialize: function (options) {
     this.initialState =  _.clone(this.attributes);
@@ -210,6 +217,12 @@ var MapModel = Backbone.Model.extend({
     json.center = this.getMap().getView().getCenter();
     return json;
   }
-});
+};
 
-module.exports = MapModel;
+/**
+ * Map model module.<br>
+ * Use <code>require('models/map')</code> for instantiation.
+ * @module MapModel-module
+ * @returns {MapModel}
+ */
+module.exports = Backbone.Model.extend(MapModel);

@@ -127,22 +127,30 @@
         var layers = $.getJSON(config.layersPath || layersPath);
         layers.done(data => {
 
-          var layerSwitcherConfig = map_config.tools.find(tool => {
+          var layerSwitcherTool = map_config.tools.find(tool => {
             return tool.type === 'layerswitcher'
-          }).options;
+          });
 
-          var searchConfig = map_config.tools.find(tool => {
+          var searchTool = map_config.tools.find(tool => {
             return tool.type === 'search'
-          }).options;
+          });
 
-          var editConfig = map_config.tools.find(tool => {
+          var editTool = map_config.tools.find(tool => {
             return tool.type === 'edit'
-          }).options;
+          });
 
-          map_config.layers = internal.filterByLayerSwitcher(layerSwitcherConfig, data.wmslayers);
-          map_config.layers.sort((a, b) => a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1);
-          searchConfig.sources = data.wfslayers;
-          editConfig.sources = data.wfstlayers;
+          if (layerSwitcherTool) {
+            map_config.layers = internal.filterByLayerSwitcher(layerSwitcherTool.options, data.wmslayers);
+            map_config.layers.sort((a, b) => a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1);
+          }
+
+          if (searchTool) {
+            searchTool.options.sources = data.wfslayers;
+          }
+
+          if (editTool) {
+            editTool.options.sources = data.wfstlayers;
+          }
 
           internal.init(
             internal.mergeConfig(map_config, internal.parseQueryParams())

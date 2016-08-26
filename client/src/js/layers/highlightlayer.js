@@ -1,17 +1,28 @@
 var LayerModel = require('layers/layer');
 
-module.exports = LayerModel.extend({
+/**
+ * Highlightlayer model properties
+ * @class HighlightLayerProperties
+ */
+var HighlightLayerProperties = {
+  /** property {external:ol.source} source */
+  source: undefined,
+  /** property {string} name */
+  name: "highlight-wms",
+  /** property {external:ol.layer} selectedLayer */
+  selectedLayer: undefined
+};
+
+/**
+ * Prototype for creating a highlightlayer.
+ * @class HighlightLayer
+ * @augments Layer
+ */
+var HighlightLayer = {
   /**
-   * @property defualts - Default properties
+   * @property {HighlightLayerProperties} defualts - Default properties
    */
-  defaults: {
-    /** property {object} source */
-    source: undefined,
-    /** property {string} name */
-    name: "highlight-wms",
-    /** property {ol.Layer} selectedLayer */
-    selectedLayer: undefined
-  },
+  defaults: HighlightLayerProperties,
   /**
    * Constructor method
    */
@@ -46,15 +57,15 @@ module.exports = LayerModel.extend({
     this.set("type", "highlight");
   },
   /**
-   * Clear highlight layer
+   * Remove all features from the highlight layer.
    */
   clearHighlight: function () {
     var source = this.get('source');
     source.clear();
   },
   /**
-   * Clear faeture to highlight layer
-   * @param {ol.Feature} feature
+   * Add a feature to the highlight layer.
+   * @param {external:ol.Feature} feature
    */
   addHighlight: function (feature) {
     var source = this.get('source');
@@ -65,8 +76,8 @@ module.exports = LayerModel.extend({
     source.addFeature(feature);
   },
   /**
-   * Clear faeture to highlight layer
-   * @param {ol.Layer} layer
+   * Set selected layer.
+   * @param {external:ol.layer} layer
    */
   setSelectedLayer: function (layer) {
     this.set('selectedLayer', layer);
@@ -75,7 +86,7 @@ module.exports = LayerModel.extend({
     });
   },
   /**
-   * Constructor method
+   * Event handler, fires when the selected layer changes.
    * @param {object} options
    * @param {object} args
    */
@@ -83,5 +94,12 @@ module.exports = LayerModel.extend({
     var visible = this.get('selectedLayer').get('visible');
     this.set('visible', visible);
   }
+};
 
-});
+/**
+ * HighlightLayer module.<br>
+ * Use <code>require('layer/highlightlayer')</code> for instantiation.
+ * @module HighlightLayer-module
+ * @returns {HighlightLayer}
+ */
+module.exports = LayerModel.extend(HighlightLayer);
