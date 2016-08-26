@@ -44,6 +44,17 @@
         6682784.4276
       ],
       "units": "m"
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3007",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
+      "extent": [
+        60436.5084,
+        6192389.565,
+        217643.4713,
+        6682784.4276
+      ],
+      "units": "m"
     }
   ],
   "tools": [
@@ -60,6 +71,10 @@
             "name": "Data",
             "toggled": false,
             "layers": [
+              {
+                "id": "1f3a75b0-8fee-79cc-76bb-e0863ce9fdba",
+                "drawOrder": 0
+              },
               {
                 "id": "1",
                 "drawOrder": 2
@@ -116,8 +131,8 @@
   "map": {
     "target": "map",
     "center": [
-      374104.15,
-      6392113.20
+      374104,
+      6392113
     ],
     "projection": "EPSG:3006",
     "zoom": 12,

@@ -75,13 +75,36 @@
       "visibleAtStart": false,
       "queryable": true,
       "tiled": false
+    },
+    {
+      "id": "1f3a75b0-8fee-79cc-76bb-e0863ce9fdba",
+      "caption": "test",
+      "url": "http://194.71.132.27/geoserver/wms",
+      "owner": "SBK",
+      "date": "1472204384374",
+      "content": "test",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "gullspang:150ms1330"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false
     }
   ],
   "wfslayers": [
     {
-      "id": "0",
+      "id": "b4bc1755-b066-e214-1b70-a71257c75b57",
       "caption": "Vandringshinder",
-      "url": "http://194.71.132.27/geoserver/wfs",
+      "url": "http://194.71.132.27/geoserver/motala/wfs",
       "layers": [
         "motala:Road_cross"
       ],

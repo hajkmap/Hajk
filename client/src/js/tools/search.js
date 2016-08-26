@@ -129,8 +129,33 @@ module.exports = ToolModel.extend({
       </wfs:GetFeature>
     `;
 
-    var contentType = "text/xml";
-    var data = str;
+    var read = (result) => {
+      var format
+      ,   features = [];
+
+      format = new ol.format.WFS({});
+
+      if (!(result instanceof XMLDocument)) {
+        if (result.responseText) {
+          result = result.responseText;
+        }
+      }
+
+      try {
+        features = format.readFeatures(result);
+      } catch (e) {
+        console.error("Parsningsfel. Koordinatsystem kanske saknas i definitionsfilen? Mer information: ", e);
+      }
+
+      if (features.length === 0) {
+        features = [];
+      }
+
+      props.done(features);
+    };
+
+    var contentType = "text/xml"
+    ,   data = str;
 
     this.requests.push(
       $.ajax({
@@ -140,25 +165,14 @@ module.exports = ToolModel.extend({
         type: 'post',
         data: str,
         success: result => {
-          var format,
-            features = [];
-
-          format = new ol.format.WFS({});
-
-          // The readFeatures method throws if the srsName is not found in the map.
-          try {
-            features = format.readFeatures(result);
-          } catch (e) {
-            console.error("Koordinatsystem saknas i definitionsfilen.");
-          }
-
-          if (features.length === 0) {
-            features = [];
-          }
-          props.done(features);
+          read(result);
         },
         error: result => {
-          props.done([]);
+          if (result.status === 200) {
+            read(result);
+          } else {
+            props.done([]);
+          }
         }
       })
     );
