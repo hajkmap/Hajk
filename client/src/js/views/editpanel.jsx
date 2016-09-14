@@ -33,13 +33,21 @@ var AttributeEditor = React.createClass({
       var valueMap = {}
       ,   feature = this.props.model.get('editFeature')
       ,   source = this.props.model.get('editSource')
-      ,   props;
+      ,   props
+      ,   defaultValue = "";
 
       if (!feature || !source) return;
+
       props = feature.getProperties();
 
       source.editableFields.map(field => {
-        valueMap[field.name] = props[field.name];
+        if (field.dataType === "number" || field.dataType === "int")
+          defaultValue = 0;
+
+        if (field.dataType === "date")
+          defaultValue = new Date().toLocaleString();
+
+        valueMap[field.name] = props[field.name] || defaultValue;
       });
 
       this.state.formValues = valueMap;
@@ -48,10 +56,24 @@ var AttributeEditor = React.createClass({
 
   updateFeature: function () {
     var props = this.props.model.get('editFeature').getProperties();
+
     Object.keys(this.state.formValues).forEach(key => {
       props[key] = this.state.formValues[key];
     });
     this.props.model.get('editFeature').setProperties(props);
+
+    console.log("Set props", props);
+
+  },
+
+  checkInteger: function (name, value) {
+    if (/^\d+$/.test(value) || value === "") {
+      this.state.formValues[name] = value;
+      this.updateFeature();
+      this.setState({
+        formValues: this.state.formValues
+      });
+    }
   },
 
   checkNumber: function (name, value) {
@@ -81,36 +103,81 @@ var AttributeEditor = React.createClass({
     });
   },
 
+  checkDate: function (name, date) {
+    var value = date.format('Y-MM-DD HH:mm:ss');
+    this.state.formValues[name] = value;
+    this.updateFeature();
+    this.setState({
+      formValues: this.state.formValues
+    });
+  },
+
+  setChanged: function() {
+    this.props.model.get('editFeature').modification = 'updated';
+  },
+
   getValueMarkup: function (field) {
 
-      if (field.dataType === "number") {
-        field.textType = "nummer";
-      }
+    if (field.dataType === "int") {
+      field.textType = "heltal";
+    }
 
-      if (field.dataType === "date") {
-        field.textType = "datum";
-      }
+    if (field.dataType === "number") {
+      field.textType = "nummer";
+    }
 
-      var value = this.state.formValues[field.name];
+    if (field.dataType === "date") {
+      field.textType = "datum";
+    }
 
-      switch (field.textType) {
-        case "nummer":
-          return (
-            <input type="text" value={value} onChange={(e) => this.checkNumber(field.name, e.target.value)} />
-          );
-        case "fritext":
-        case "datum":
-          return (
-            <input type="text" value={value} onChange={(e) => this.checkText(field.name, e.target.value)} />
-          );
-        case "lista":
-          let options = field.values.map((val, i) => <option key={i} value={val}>{val}</option>);
-          return (
-            <select value={value} onChange={(e) => this.checkSelect(field.name, e.target.value)}>{options}</select>
-          )
-        case null:
-          return (<span>{value}</span>)
-      }
+    var value = this.state.formValues[field.name];
+    switch (field.textType) {
+      case "heltal":
+        return (
+          <input className="form-control" type="text" value={value} onChange={(e) => {
+            this.setChanged();
+            this.checkInteger(field.name, e.target.value)}}
+          />
+        );
+      case "nummer":
+        return (
+          <input className="form-control" type="text" value={value} onChange={(e) => {
+              this.setChanged();
+              this.checkNumber(field.name, e.target.value)
+            }}
+          />
+        );
+      case "datum":
+        value = value.replace('T', ' ').replace('Z','')
+        return (
+          <Datetime dateFormat="Y-MM-DD" timeFormat="HH:mm:ss" value={value} onChange={(date) => {
+              this.setChanged(); this.
+              checkDate(field.name, date);
+            }}
+          />
+        );
+      case "fritext":
+        return (
+          <input className="form-control" type="text" value={value} onChange={(e) => {
+              this.setChanged();
+              this.checkText(field.name, e.target.value)
+            }}
+          />
+        );
+      case "lista":
+        let options = field.values.map((val, i) => <option key={i} value={val}>{val}</option>);
+        return (
+          <select className="form-control" value={value} onChange={(e) => {
+              this.setChanged();
+              this.checkSelect(field.name, e.target.value)
+            }}
+          >
+          {options}
+          </select>
+        )
+      case null:
+        return (<span>{value}</span>);
+    }
   },
   /**
    * Render the component.
@@ -143,6 +210,7 @@ var Toolbar = React.createClass({
    */
   getInitialState: function() {
     return {
+      activeTool: undefined
     };
   },
   /**
@@ -163,44 +231,61 @@ var Toolbar = React.createClass({
    */
   componentDidMount: function () {
   },
-  /**
-   * Render the component.
-   * @return {React.Component} component
-   */
-  renderAlert: function () {
-    var options = {
-      visible: this.state.alert,
-      message: this.state.alertMessage,
-      confirm: this.state.confirm,
-      confirmAction: () => {
-        this.state.confirmAction();
-        this.setState({
-          alert: false,
-          confirm: false,
-          alertMessage: ""
-        })
-      },
-      denyAction: () => {
-        this.state.denyAction();
-        this.setState({
-          alert: false,
-          confirm: false,
-          alertMessage: ""
-        })
-      },
-      onClick: () => {
-        this.setState({
-          alert: false,
-          alertMessage: ""
-        })
-      }
-    };
 
-    if (this.state.alert) {
-      return <Alert options={options}/>
-    } else {
-      return null;
+  changeTool: function(type) {
+
+    if (this.state.activeTool === type.toLowerCase()) {
+      this.props.model.deactivateDrawTool(true);
+      if (type === 'move') {
+        this.props.model.get('layer').dragLocked = true;
+      }
+
+      return this.setState({
+        activeTool: undefined
+      });
     }
+
+    switch (type) {
+      case "Point":
+      case "LineString":
+      case "Polygon":
+        return this.props.model.activateDrawTool(type);
+      case "remove":
+        return this.props.model.deactivateDrawTool(type);
+      case "move":
+        return this.props.model.deactivateDrawTool(type);
+    }
+  },
+
+  onAddPointClicked: function() {
+    this.props.model.get('layer').dragLocked = true;
+    this.setState({activeTool: "point"});
+    this.changeTool('Point');
+  },
+
+  onAddLineClicked: function() {
+    this.props.model.get('layer').dragLocked = true;
+    this.setState({activeTool: "linestring"});
+    this.changeTool('LineString');
+  },
+
+  onAddPolygonClicked: function() {
+    this.props.model.get('layer').dragLocked = true;
+    this.setState({activeTool: "polygon"});
+    this.changeTool('Polygon');
+  },
+
+  onRemoveClicked: function() {
+    this.props.model.get('layer').dragLocked = true;
+    this.props.model.setRemovalToolMode(this.state.activeTool === "remove" ? "off" : "on");
+    this.setState({activeTool: "remove"});
+    this.changeTool('remove');
+  },
+
+  onMoveClicked: function() {
+    this.props.model.get('layer').dragLocked = false;
+    this.setState({activeTool: "move"});
+    this.changeTool('move');
   },
 
   onSaveClicked: function () {
@@ -218,7 +303,7 @@ var Toolbar = React.createClass({
           antal uppdaterade objekt: ${data.TransactionResponse.TransactionSummary.totalUpdated}
         `
       } else {
-        return 'Status för uppdateringen kunde inte avläsas av svaret från servern.'
+        return 'Status för uppdateringen kunde inte avläsas ur svaret från servern.'
       }
     };
 
@@ -230,39 +315,12 @@ var Toolbar = React.createClass({
     });
     this.props.model.save((data) => {
       this.props.panel.setState({
-        loading: false
-      });
-      this.setState({
         alert: true,
+        loading: false,
         alertMessage: getMessage(data),
         confirm: false
       });
     });
-  },
-
-  onAddPointClicked: function() {
-    this.props.model.get('layer').dragLocked = true;
-    this.setState({activeTool: "point"});
-  },
-
-  onAddLineClicked: function() {
-    this.props.model.get('layer').dragLocked = true;
-    this.setState({activeTool: "line"});
-  },
-
-  onAddPolygonClicked: function() {
-    this.props.model.get('layer').dragLocked = true;
-    this.setState({activeTool: "polygon"});
-  },
-
-  onRemoveClicked: function() {
-    this.props.model.get('layer').dragLocked = true;
-    this.setState({activeTool: "remove"});
-  },
-
-  onMoveClicked: function() {
-    this.setState({activeTool: "move"});
-    this.props.model.get('layer').dragLocked = false;
   },
 
   onCancelClicked: function() {
@@ -280,7 +338,6 @@ var Toolbar = React.createClass({
   render: function () {
 
     var disabled = !this.props.enabled;
-
     var isActive = (type) => {
       return this.state.activeTool === type ? "btn btn-primary" : "btn btn-default";
     };
@@ -301,7 +358,7 @@ var Toolbar = React.createClass({
             <button
               disabled={disabled}
               onClick={() => {this.onAddLineClicked()}}
-              className={isActive("line")}
+              className={isActive("linestring")}
               type="button"
               title="Lägg till linje"
             >
@@ -354,7 +411,6 @@ var Toolbar = React.createClass({
             </button>
           </div>
         </div>
-        {this.renderAlert()}
       </div>
     )
   }
@@ -390,12 +446,37 @@ var EditPanel = React.createClass({
    * @override
    */
   componentDidMount: function () {
+
     this.props.model.on('change:editFeature', (attr) => {
       this.setState({
         editFeature: this.props.model.get('editFeature'),
         editSource: this.props.model.get('editSource')
       });
     });
+
+    this.props.model.on('change:removeFeature', (attr) => {
+      if (this.props.model.get('removeFeature')) {
+        this.setState({
+          alert: true,
+          alertMessage: ` Vill du ta bort markerat obekt?
+
+            Tryck därefter på sparaknappen för definitiv verkan.
+          `,
+          confirm: true,
+          confirmAction: () => {
+            var feature = this.props.model.get('removeFeature')
+            this.props.model.get('select').getFeatures().remove(feature);
+            feature.modification = 'removed';
+            feature.setStyle(this.props.model.getHiddenStyle());
+          },
+          denyAction: () => {
+            this.setState({ alert: false });
+            this.props.model.set('removeFeature', undefined)
+          }
+        });
+      }
+    });
+
   },
 
   setLayer: function (source) {
@@ -412,11 +493,73 @@ var EditPanel = React.createClass({
     };
 
     var timer = new Date().getTime();
-    this.setState({
-      loading: true,
-      enabled: true
-    });
-    this.props.model.setLayer(source, clear);
+
+    var changeActiveLayer = () => {
+      this.setState({
+        checked: source.caption,
+        loading: true,
+        enabled: true
+      });
+      this.props.model.setLayer(source, clear);
+    }
+
+    if (this.props.model.filty) {
+      this.setState({
+        alert: true,
+        alertMessage: `Du har en aktiv redigeringssession startad dina ändringar kommer att gå förlorade.
+
+        Vill du forstätta ändå?`,
+        confirm: true,
+        confirmAction: () => {
+          changeActiveLayer();
+        },
+        denyAction: () => {
+          this.setState({ alert: false });
+        }
+      });
+    } else {
+      changeActiveLayer();
+    }
+
+  },
+  /**
+   * Render the component.
+   * @return {React.Component} component
+   */
+  renderAlert: function () {
+    var options = {
+      visible: this.state.alert,
+      message: this.state.alertMessage,
+      confirm: this.state.confirm,
+      confirmAction: () => {
+        this.state.confirmAction();
+        this.setState({
+          alert: false,
+          confirm: false,
+          alertMessage: ""
+        })
+      },
+      denyAction: () => {
+        this.state.denyAction();
+        this.setState({
+          alert: false,
+          confirm: false,
+          alertMessage: ""
+        })
+      },
+      onClick: () => {
+        this.setState({
+          alert: false,
+          alertMessage: ""
+        })
+      }
+    };
+
+    if (this.state.alert) {
+      return <Alert options={options}/>
+    } else {
+      return null;
+    }
   },
   /**
    * Render the panel component.
@@ -433,9 +576,6 @@ var EditPanel = React.createClass({
           return (
             <div key={i} className="list-item">
               <input id={id} type="radio" name="source" checked={this.state.checked === source.caption} onChange={(e) => {
-                this.setState({
-                  checked: source.caption
-                });
                 this.setLayer(source)
               }} />
               <label htmlFor={id}>{source.caption}</label>
@@ -455,12 +595,13 @@ var EditPanel = React.createClass({
           <div className="loading-bar">
             {loader}
           </div>
-          <Toolbar enabled={this.state.enabled} model={this.props.model} panel={this} />
+          <Toolbar enabled={this.state.enabled} loading={this.state.loading} model={this.props.model} panel={this} />
           <ul className="edit-layers">
             {options()}
           </ul>
-          <AttributeEditor feature={this.state.editFeature} source={this.state.editSource} model={this.props.model} />
+          <AttributeEditor feature={this.state.editFeature} source={this.state.editSource} model={this.props.model} activeTool={this.state.activeTool}/>
         </div>
+        {this.renderAlert()}
       </Panel>
     );
   }

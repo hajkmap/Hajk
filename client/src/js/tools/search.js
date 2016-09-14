@@ -169,6 +169,7 @@ module.exports = ToolModel.extend({
         },
         error: result => {
           if (result.status === 200) {
+            console.log("Error");
             read(result);
           } else {
             props.done([]);

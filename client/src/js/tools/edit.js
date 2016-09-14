@@ -20,6 +20,7 @@ var Edit = module.exports = ToolModel.extend({
     key: undefined,
     editFeature: undefined,
     editSource: undefined,
+    removeFeature: undefined,
     shell: undefined
   },
   /**
@@ -32,6 +33,10 @@ var Edit = module.exports = ToolModel.extend({
    *
    */
   write: function (mode, features) {
+
+    features.forEach(f => {
+      f.set('geom', f.getGeometry());
+    });
 
     var format = new ol.format.WFS()
     ,   lr = this.get('editSource').layers[0].split(':')
@@ -59,10 +64,21 @@ var Edit = module.exports = ToolModel.extend({
           if (layer.getLayer().getSource().getParams) {
             let p = layer.getLayer().getSource().getParams();
             if (typeof p === 'object') {
-              return layerName === p['LAYERS']
+
+              let paramName = p['LAYERS'].split(':');
+              let layerSplit = layerName.split(':');
+
+              if (paramName.length === 2 && layerSplit.length === 2) {
+                return layerName === p['LAYERS'];
+              }
+              if (paramName.length === 1) {
+                return layerSplit[1] === p['LAYERS'];
+              }
+
             }
           }
         });
+
     if (foundLayer) {
       source = foundLayer.getLayer().getSource();
       source.changed();
@@ -154,10 +170,29 @@ var Edit = module.exports = ToolModel.extend({
         }),
         stroke: new ol.style.Stroke({
           color: 'rgba(0, 255, 255, 1)',
-          width: 3
+          width: 2
         }),
-        radius: 5
+        radius: 3
       })
+    }), new ol.style.Style({
+      image: new ol.style.RegularShape({
+        fill: new ol.style.Fill({
+          color: 'rgba(0, 0, 0, 0.2)'
+        }),
+        stroke: new ol.style.Stroke({
+          color: 'rgba(0, 0, 0, 1)',
+          width: 2
+        }),
+        points: 4,
+        radius: 8,
+        angle: Math.PI / 4
+      }),
+      geometry: function(feature) {
+        coordinates = feature.getGeometry() instanceof ol.geom.Polygon ?
+                      feature.getGeometry().getCoordinates()[0] :
+                      feature.getGeometry().getCoordinates();
+        return new ol.geom.MultiPoint(coordinates);
+      }
     })];
   },
   /**
@@ -168,22 +203,74 @@ var Edit = module.exports = ToolModel.extend({
     return [new ol.style.Style({
       stroke: new ol.style.Stroke({
         color: 'rgba(0, 0, 0, 1)',
-        width: 1
+        width: 3
       }),
       fill: new ol.style.Fill({
-        color: 'rgba(50, 50, 50, 0.5)'
+        color: 'rgba(0, 0, 0, 0.5)'
       }),
       image: new ol.style.Circle({
         fill: new ol.style.Fill({
-          color: 'rgba(50, 50, 50, 0.5)'
+          color: 'rgba(0, 0, 0, 0.5)'
         }),
         stroke: new ol.style.Stroke({
           color: 'rgba(0, 0, 0, 1)',
-          width: 1
+          width: 3
         }),
-        radius: 5
+        radius: 4
       })
     })];
+  },
+  /**
+   *
+   *
+   */
+  getHiddenStyle : function (feature) {
+    return [new ol.style.Style({
+      stroke: new ol.style.Stroke({
+        color: 'rgba(0, 0, 0, 0)',
+        width: 0
+      }),
+      fill: new ol.style.Fill({
+        color: 'rgba(1, 2, 3, 0)'
+      }),
+      image: new ol.style.Circle({
+        fill: new ol.style.Fill({
+          color: 'rgba(0, 0, 0, 0)'
+        }),
+        stroke: new ol.style.Stroke({
+          color: 'rgba(0, 0, 0, 0)',
+          width: 0
+        }),
+        radius: 0
+      })
+    })];
+  },
+  /**
+   *
+   *
+   */
+  getScetchStyle: function () {
+    return [
+      new ol.style.Style({
+        fill: new ol.style.Fill({
+          color: 'rgba(255, 255, 255, 0.5)'
+        }),
+        stroke: new ol.style.Stroke({
+          color: 'rgba(0, 0, 0, 0.5)',
+          width: 4
+        }),
+        image: new ol.style.Circle({
+          radius: 6,
+          fill: new ol.style.Fill({
+            color: 'rgba(0, 0, 0, 0.5)'
+          }),
+          stroke: new ol.style.Stroke({
+            color: 'rgba(255, 255, 255, 0.5)',
+            width: 2
+          })
+        })
+      })
+    ]
   },
   /**
    *
@@ -207,7 +294,13 @@ var Edit = module.exports = ToolModel.extend({
           feature.modification = 'updated';
         });
         feature.on('change', (e) => {
-          feature.modification = 'updated';
+          // To prevent the feature modification property to be updated when the feature is hidden (before removal).
+          // We must check if the changing property is the hidden style. If so, do not change the modification attribute.
+          // But we can not compare the style objects solely, we must compare some property inside the style.
+          // Uggly, but true.
+          if (Array.isArray(feature.getStyle()) && feature.getStyle()[0].getFill().getColor() !== "rgba(1, 2, 3, 0)") {
+            feature.modification = 'updated';
+          }
         });
       });
       if (done) done();
@@ -225,6 +318,14 @@ var Edit = module.exports = ToolModel.extend({
    *
    */
   featureSelected: function (event) {
+    var features = event.selected.concat(event.deselected);
+    if (this.get('removalToolMode') === 'on') {
+      features.forEach(feature => {
+        this.set({removeFeature: feature});
+      });
+      return;
+    }
+
     if (event.selected.length === 0) {
       this.editAttributes(null, null);
     }
@@ -242,6 +343,8 @@ var Edit = module.exports = ToolModel.extend({
    */
   setLayer: function (source, done) {
     this.filty = true;
+
+    this.get('map').set('clickLock', true);
 
     if (this.get('layer')) {
       this.get('map').removeLayer(this.get('layer'));
@@ -262,7 +365,11 @@ var Edit = module.exports = ToolModel.extend({
     this.get('map').addLayer(this.get('layer'));
 
     if (!this.get('select')) {
-      this.set('select', new ol.interaction.Select({ style: this.getSelectStyle() }));
+
+      this.set('select', new ol.interaction.Select({
+        style: this.getSelectStyle(),
+        toggleCondition: ol.events.condition.never
+      }));
       this.get('map').addInteraction(this.get('select'));
     } else {
       this.get('select').getFeatures().clear();
@@ -284,6 +391,78 @@ var Edit = module.exports = ToolModel.extend({
     this.get('layer').dragLocked = true;
   },
   /**
+   * Event handler for draw end.
+   * @param {extern: ol.feature} - Drawn feature
+   * @param {string} geometryType - Geometry type of feature
+   */
+  handleDrawEnd: function(feature, geometryType) {
+    feature.modification = 'added';
+  },
+  /**
+   *
+   *
+   */
+  setRemovalToolMode: function (mode) {
+    this.set('removalToolMode', mode);
+  },
+  /**
+   * Create draw interaction and add to map.
+   * @params: {string} type
+   */
+  activateDrawTool: function(geometryType) {
+
+    var add = () => {
+      this.set('drawTool', new ol.interaction.Draw({
+        source: this.get('vectorSource'),
+        style: this.getScetchStyle(),
+        type: geometryType
+      }));
+      this.get("drawTool").on('drawend', (event) => {
+        this.handleDrawEnd(event.feature, geometryType)
+      });
+      this.get('map').addInteraction(this.get('drawTool'));
+    }
+
+    var remove = () => {
+      this.get('map').removeInteraction(this.get('drawTool'));
+      this.set('drawTool', undefined);
+    };
+
+    this.get('map').set('clickLock', true);
+
+    if (this.get('select')) {
+      this.get('select').setActive(false);
+    }
+
+    if (this.get("drawTool")) {
+      this.get('drawTool').setActive(true);
+      if (this.set('geometryType', geometryType) !== geometryType) {
+        remove();
+        add();
+      }
+    } else {
+      add();
+    }
+
+  },
+  /**
+   *
+   *
+   */
+  deactivateDrawTool: function(keepClickLock) {
+    if (!keepClickLock)
+      this.get('map').set('clickLock', false);
+
+    if (this.get('select')) {
+      this.get('select').setActive(true);
+    }
+
+    if (this.get('drawTool')) {
+      this.get('drawTool').setActive(false);
+    }
+
+  },
+  /**
    *
    *
    */
@@ -292,18 +471,29 @@ var Edit = module.exports = ToolModel.extend({
       this.get('select').setActive(false);
       this.get('select').getFeatures().clear();
     }
+
     if (this.get('modify')) {
       this.get('modify').setActive(false);
     }
+
+    if (this.get('drawTool')) {
+      this.get('drawTool').setActive(false);
+    }
+
     if (this.get('layer')) {
       this.get('map').removeLayer(this.get('layer'));
       this.set('layer', undefined);
     }
 
-    this.set({editSource: null});
-    this.set({editFeature: null});
+    this.set({
+      editSource: undefined,
+      editFeature: undefined,
+      removeFeature: undefined,
+      removalToolMode: undefined
+    });
 
     this.filty = false;
+    this.get('map').set('clickLock', false);
   },
   /**
    * Configure the tool before first use.
@@ -311,6 +501,7 @@ var Edit = module.exports = ToolModel.extend({
    */
   configure: function (shell) {
     this.set('map', shell.getMap().getMap());
+
     this.set('layerCollection', shell.getLayerCollection());
     var navigation = shell.getNavigation();
     navigation.on('change:activePanel', (e) => {

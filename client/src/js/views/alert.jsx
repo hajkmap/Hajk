@@ -18,10 +18,19 @@ class Alert extends React.Component {
                 <h4 className="modal-title">Bekräfta</h4>
               </div>
               <div className="modal-body">
-                <p>{options.message}</p>
+                <p>
+                  {options.message.split('\n').map(function(text, i) {
+                    return (
+                      <span key={i}>
+                        <span>{text}</span>
+                        <br/>
+                      </span>
+                    )
+                  })}
+                </p>
               </div>
               <div className="modal-footer">
-                <button type="button" onClick={options.denyAction} className="btn btn-default">Avbryt</button>
+                <button type="button" onClick={options.denyAction} className="btn btn-default">Avbryt</button>&nbsp;
                 <button type="button" onClick={options.confirmAction} className="btn btn-primary">OK</button>
               </div>
             </div>

@@ -98,6 +98,75 @@
       "visibleAtStart": false,
       "queryable": true,
       "tiled": false
+    },
+    {
+      "id": "d8eff0fd-fe48-c06a-8ad8-3ff3814a744a",
+      "caption": "punkt",
+      "url": "http://194.71.132.27/geoserver/demo/wms",
+      "owner": "SBK",
+      "date": "1472212109200",
+      "content": "punkt",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "demo_punkt"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": true,
+      "queryable": true,
+      "tiled": false
+    },
+    {
+      "id": "84a8aa5c-a062-fc32-24fb-30df211427b4",
+      "caption": "yta",
+      "url": "http://194.71.132.27/geoserver/demo/wms",
+      "owner": "SBK",
+      "date": "1472217088723",
+      "content": "yta",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "yta"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": true,
+      "queryable": true,
+      "tiled": false
+    },
+    {
+      "id": "8f036834-00c2-77be-2b6e-423a2162b374",
+      "caption": "Mussla",
+      "url": "http://194.71.132.27/geoserver/wms",
+      "owner": "SBK",
+      "date": "1472476888177",
+      "content": "mussla",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "viskan:Anodonta_anatina"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": true,
+      "queryable": true,
+      "tiled": false
     }
   ],
   "wfslayers": [
@@ -114,57 +183,122 @@
       "displayFields": [
         "vattendrag"
       ]
+    },
+    {
+      "id": "771465f3-4f37-8d1b-8c0f-db5c9c25919c",
+      "caption": "Mussla",
+      "url": "http://194.71.132.27/geoserver/wfs",
+      "layers": [
+        "viskan:Anodonta_anatina"
+      ],
+      "searchFields": [
+        "plats_namn"
+      ],
+      "displayFields": [
+        "plats_namn"
+      ]
     }
   ],
   "wfstlayers": [
     {
-      "id": "19c0b960-4973-abbf-4123-732bef86f9d4",
-      "caption": "Daro",
-      "url": "http://194.71.132.27/geoserver/wfs",
+      "id": "ffae9c4e-66e1-0191-3fac-95ae4a261fdf",
+      "caption": "punkt",
+      "url": "http://194.71.132.27/geoserver/demo/wfs",
       "projection": "EPSG:3006",
       "layers": [
-        "viskan:Daro"
+        "demo:demo_punkt"
       ],
       "editableFields": [
         {
-          "index": 5,
-          "name": "namn",
+          "index": 1,
+          "name": "name",
           "dataType": "string",
           "textType": "fritext",
           "values": null
-        }
-      ]
-    },
-    {
-      "id": "15f3802b-2c66-ebf0-9df1-4e771f22a124",
-      "caption": "Musslor",
-      "url": "http://194.71.132.27/geoserver/wfs",
-      "projection": "EPSG:3006",
-      "layers": [
-        "viskan:Anodonta_anatina"
-      ],
-      "editableFields": [
-        {
-          "index": 0,
-          "name": "kommentar",
-          "dataType": "string",
-          "textType": "fritext",
-          "values": null
-        }
-      ]
-    },
-    {
-      "id": "85ccbd37-5d5c-8b59-b0a7-4a24152ad5aa",
-      "caption": "Höjdpunkter",
-      "url": "http://194.71.132.27/geoserver/wfs",
-      "projection": "EPSG:3006",
-      "layers": [
-        "viskan:Hojdpunkter"
-      ],
-      "editableFields": [
+        },
         {
           "index": 2,
-          "name": "höjd",
+          "name": "date",
+          "dataType": "date",
+          "textType": null,
+          "values": null
+        },
+        {
+          "index": 3,
+          "name": "list",
+          "dataType": "string",
+          "textType": "lista",
+          "values": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "e"
+          ]
+        },
+        {
+          "index": 4,
+          "name": "integer",
+          "dataType": "int",
+          "textType": null,
+          "values": null
+        },
+        {
+          "index": 5,
+          "name": "float",
+          "dataType": "number",
+          "textType": null,
+          "values": null
+        }
+      ]
+    },
+    {
+      "id": "dff37fe8-a5a0-30fe-2663-577e1e684068",
+      "caption": "yta",
+      "url": "http://194.71.132.27/geoserver/demo/wfs",
+      "projection": "EPSG:3006",
+      "layers": [
+        "demo:yta"
+      ],
+      "editableFields": [
+        {
+          "index": 1,
+          "name": "name",
+          "dataType": "string",
+          "textType": "fritext",
+          "values": null
+        },
+        {
+          "index": 2,
+          "name": "date",
+          "dataType": "date",
+          "textType": null,
+          "values": null
+        },
+        {
+          "index": 3,
+          "name": "list",
+          "dataType": "string",
+          "textType": "lista",
+          "values": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "f",
+            "g"
+          ]
+        },
+        {
+          "index": 4,
+          "name": "integer",
+          "dataType": "int",
+          "textType": null,
+          "values": null
+        },
+        {
+          "index": 5,
+          "name": "float",
           "dataType": "number",
           "textType": null,
           "values": null

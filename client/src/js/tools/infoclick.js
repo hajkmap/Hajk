@@ -78,9 +78,9 @@ module.exports = ToolModel.extend({
   },
 
   /**
-    * Anropas när verktyget har kopplats till applikationen.
-    * @param  {object} shell applikationens modell.
-    */
+   * Anropas när verktyget har kopplats till applikationen.
+   * @param  {object} shell applikationens modell.
+   */
   configure: function (shell) {
       var map = shell.getMap().getMap(),
           selectInteraction = this.get('selectInteraction');
@@ -101,11 +101,11 @@ module.exports = ToolModel.extend({
   },
 
   /**
-    * Hantera musklick i karta.
-    * Kontrollerar om en feature träffades i kartan.
-    * Stödjer Vector lager samt WMS.
-    * @param  {object} e Mus event objekt.
-    */
+   * Hantera musklick i karta.
+   * Kontrollerar om en feature träffades i kartan.
+   * Stödjer Vector lager samt WMS.
+   * @param  {object} e Mus event objekt.
+   */
   onMapPointer: function (event) {
       var wmsLayers = this.layerCollection.filter((layer) => {
             return layer.get("type") === "wms" &&
@@ -185,10 +185,10 @@ module.exports = ToolModel.extend({
   },
 
   /**
-    * Lägg till träffad feature i resultatet.
-    * @param {object} feature vector feature.
-    * @param {object} layer   openlayers lager.
-    */
+   * Lägg till träffad feature i resultatet.
+   * @param {object} feature vector feature.
+   * @param {object} layer   openlayers lager.
+   */
   addInformation: function (feature, layer, callback) {
 
       if (layer.get('name') === 'draw-layer') {
@@ -242,7 +242,7 @@ module.exports = ToolModel.extend({
 
   },
 
-  /**
+   /**
     * Visa/dölj panel
     */
   togglePanel: function () {
@@ -253,20 +253,21 @@ module.exports = ToolModel.extend({
       }
   },
 
-  /*
-    * Lägger till den valda featuren i highlight-lagret.
-  */
+  /**
+   * Lägger till den valda featuren i highlight-lagret.
+   */
   createHighlightFeature: function (feature) {
       var layer = this.get('highlightLayer');
       layer.clearHighlight();
       this.reorderLayers(feature);
       layer.addHighlight(feature.get('feature'));
       layer.setSelectedLayer(feature.get('layer'));
+
   },
 
-  /*
-    * Lägger highlightlagret på rätt index i lagerordningen
-  */
+  /**
+   * Lägger highlightlagret på rätt index i lagerordningen
+   */
   reorderLayers: function (feature) {
       var layerCollection = this.get('map').getLayers(),
           featureInfo = feature.get('information'),
@@ -288,10 +289,10 @@ module.exports = ToolModel.extend({
   },
 
   /**
-    * Markera feature i kartan.
-    * @param  {object} sender  infoclick model
-    * @param  {object} feature feature som ska markeras.
-    */
+   * Markera feature i kartan.
+   * @param  {object} sender  infoclick model
+   * @param  {object} feature feature som ska markeras.
+   */
   highlightFeature: function (sender, feature) {
       var highlightLayer = this.get('highlightLayer');
 

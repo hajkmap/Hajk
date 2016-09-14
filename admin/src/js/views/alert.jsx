@@ -21,7 +21,7 @@ class Alert extends React.Component {
                 <p>{options.message}</p>
               </div>
               <div className="modal-footer">
-                <button type="button" onClick={options.denyAction} className="btn btn-default">Avbryt</button>
+                <button type="button" onClick={options.denyAction} className="btn btn-default">Avbryt</button>&nbsp;
                 <button type="button" onClick={options.confirmAction} className="btn btn-primary">OK</button>
               </div>
             </div>
@@ -38,10 +38,10 @@ class Alert extends React.Component {
               </div>
               <div className="modal-body">
                 <p>
-                  {options.message.split('\n').map(function(item) {
+                  {options.message.split('\n').map(function(text, i) {
                     return (
-                      <span>
-                        {item}
+                      <span key={i}>
+                        <span>{text}</span>
                         <br/>
                       </span>
                     )
