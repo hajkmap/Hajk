@@ -34,19 +34,12 @@ var AttributeEditor = React.createClass({
       ,   feature = this.props.model.get('editFeature')
       ,   source = this.props.model.get('editSource')
       ,   props
-      ,   defaultValue = "";
+      ,   defaultValue = null;
 
       if (!feature || !source) return;
 
       props = feature.getProperties();
-
       source.editableFields.map(field => {
-        if (field.dataType === "number" || field.dataType === "int")
-          defaultValue = 0;
-
-        if (field.dataType === "date")
-          defaultValue = new Date().toLocaleString();
-
         valueMap[field.name] = props[field.name] || defaultValue;
       });
 
@@ -56,14 +49,10 @@ var AttributeEditor = React.createClass({
 
   updateFeature: function () {
     var props = this.props.model.get('editFeature').getProperties();
-
     Object.keys(this.state.formValues).forEach(key => {
       props[key] = this.state.formValues[key];
     });
     this.props.model.get('editFeature').setProperties(props);
-
-    console.log("Set props", props);
-
   },
 
   checkInteger: function (name, value) {
@@ -104,7 +93,10 @@ var AttributeEditor = React.createClass({
   },
 
   checkDate: function (name, date) {
-    var value = date.format('Y-MM-DD HH:mm:ss');
+    var value = "";
+    if (date.format) {
+      value = date.format('Y-MM-DD HH:mm:ss');
+    }
     this.state.formValues[name] = value;
     this.updateFeature();
     this.setState({
@@ -113,7 +105,10 @@ var AttributeEditor = React.createClass({
   },
 
   setChanged: function() {
-    this.props.model.get('editFeature').modification = 'updated';
+    if (this.props.model.get('editFeature').modification !== 'added' &&
+        this.props.model.get('editFeature').modification !== 'removed') {
+      this.props.model.get('editFeature').modification = 'updated';
+    }
   },
 
   getValueMarkup: function (field) {
@@ -148,11 +143,13 @@ var AttributeEditor = React.createClass({
           />
         );
       case "datum":
-        value = value.replace('T', ' ').replace('Z','')
+        if (typeof value === "string") {
+          value = value.replace('T', ' ').replace('Z','')
+        }
         return (
           <Datetime dateFormat="Y-MM-DD" timeFormat="HH:mm:ss" value={value} onChange={(date) => {
-              this.setChanged(); this.
-              checkDate(field.name, date);
+              this.setChanged();
+              this.checkDate(field.name, date);
             }}
           />
         );
@@ -172,6 +169,7 @@ var AttributeEditor = React.createClass({
               this.checkSelect(field.name, e.target.value)
             }}
           >
+          <option value="">-Välj värde-</option>
           {options}
           </select>
         )
@@ -204,7 +202,7 @@ var AttributeEditor = React.createClass({
 });
 
 var Toolbar = React.createClass({
-  /*
+  /**
    * Get default state.
    * @return {object} state
    */
@@ -214,17 +212,24 @@ var Toolbar = React.createClass({
     };
   },
   /**
-   * Abort any operation and deselect any tool
-   * when the components unmounts.
    * @override
-   * @param {ol.event} event
    */
   componentWillUnmount: function () {
+    this.props.model.off('change:layer');
   },
   /**
    * @override
    */
   componentWillMount: function () {
+    this.props.model.on('change:layer', () => {
+      if (this.props.model.get('layer')) {
+        this.props.model.get('layer').dragLocked = true;
+        this.props.model.deactivateTools();
+        this.setState({
+          activeTool: undefined
+        });
+      }
+    });
   },
   /**
    * @override
@@ -249,11 +254,16 @@ var Toolbar = React.createClass({
       case "Point":
       case "LineString":
       case "Polygon":
-        return this.props.model.activateDrawTool(type);
+        this.props.model.activateDrawTool(type);
+        this.props.model.setRemovalToolMode('off');
+        break;
       case "remove":
-        return this.props.model.deactivateDrawTool(type);
+        this.props.model.deactivateDrawTool(type);
+        break;
       case "move":
-        return this.props.model.deactivateDrawTool(type);
+        this.props.model.deactivateDrawTool(type);
+        this.props.model.setRemovalToolMode('off');
+        break;
     }
   },
 
@@ -313,6 +323,7 @@ var Toolbar = React.createClass({
     this.props.panel.setState({
       loading: true
     });
+
     this.props.model.save((data) => {
       this.props.panel.setState({
         alert: true,
@@ -320,6 +331,9 @@ var Toolbar = React.createClass({
         alertMessage: getMessage(data),
         confirm: false
       });
+
+      this.props.model.filty = false;
+      this.props.panel.setLayer(this.props.model.get('editSource'));
     });
   },
 
@@ -492,8 +506,6 @@ var EditPanel = React.createClass({
       }
     };
 
-    var timer = new Date().getTime();
-
     var changeActiveLayer = () => {
       this.setState({
         checked: source.caption,
@@ -502,6 +514,8 @@ var EditPanel = React.createClass({
       });
       this.props.model.setLayer(source, clear);
     }
+
+    var timer = new Date().getTime();
 
     if (this.props.model.filty) {
       this.setState({
@@ -520,7 +534,6 @@ var EditPanel = React.createClass({
     } else {
       changeActiveLayer();
     }
-
   },
   /**
    * Render the component.

@@ -32,11 +32,7 @@ var Edit = module.exports = ToolModel.extend({
    *
    *
    */
-  write: function (mode, features) {
-
-    features.forEach(f => {
-      f.set('geom', f.getGeometry());
-    });
+  write: function (features) {
 
     var format = new ol.format.WFS()
     ,   lr = this.get('editSource').layers[0].split(':')
@@ -49,10 +45,7 @@ var Edit = module.exports = ToolModel.extend({
         }
     ,   gml = new ol.format.GML(options);
 
-    return mode === "insert" ? format.writeTransaction(features, null, null, gml) :
-           mode === "update" ? format.writeTransaction(null, features, null, gml) :
-           mode === "delete" ? format.writeTransaction(null, null, features, gml) :
-           undefined;
+    return format.writeTransaction(features.inserts, features.updates, features.deletes, gml);
   },
   /**
    *
@@ -98,11 +91,11 @@ var Edit = module.exports = ToolModel.extend({
    *
    *
    */
-  transact: function (features, mode, done) {
+  transact: function (features, done) {
 
-    var node = this.write(mode, features)
-    ,   src = this.get('editSource')
+    var node = this.write(features)
     ,   serializer = new XMLSerializer()
+    ,   src = this.get('editSource')
     ,   payload    = node ? serializer.serializeToString(node) : undefined;
 
     if (payload) {
@@ -113,9 +106,17 @@ var Edit = module.exports = ToolModel.extend({
         contentType: 'text/xml',
         data: payload
       }).done((data) => {
+
         this.refreshLayer(src.layers[0]);
         var data = this.parseWFSTresponse(data);
+
+        this.get('vectorSource')
+          .getFeatures()
+          .filter(f => f.modification !== undefined)
+          .forEach(f => f.modification = undefined);
+
         done(data);
+
       }).error((data) => {
         var data = this.parseWFSTresponse(data);
         done(data);
@@ -128,28 +129,24 @@ var Edit = module.exports = ToolModel.extend({
    *
    */
   save: function (done) {
-    var updated = this.get('vectorSource').getFeatures().filter(feature => feature.modification === 'updated')
-    ,   added   = this.get('vectorSource').getFeatures().filter(feature => feature.modification === 'added')
-    ,   deleted = this.get('vectorSource').getFeatures().filter(feature => feature.modification === 'removed');
 
-    if (updated.length === 0 &&
-        added.length === 0 &&
-        deleted.length === 0)
+    var find = mode =>
+      this.get('vectorSource').getFeatures().filter(feature =>
+        feature.modification === mode);
+
+    var features = {
+      updates: find('updated'),
+      inserts: find('added'),
+      deletes: find('removed')
+    };
+
+    if (features.updates.length === 0 &&
+        features.inserts.length === 0 &&
+        features.deletes.length === 0) {
       return done();
+    }
 
-    if (updated.length > 0)
-      this.transact(updated, 'update', done);
-
-    if (added.length > 0)
-      this.transact(added, 'insert', done);
-
-    if (deleted.length > 0)
-      this.transact(deleted, 'delete', done);
-
-    this.get('vectorSource')
-      .getFeatures()
-      .filter(f => f.modification !== undefined)
-      .forEach(f => f.modification = undefined);
+    this.transact(features, done);
   },
   /**
    *
@@ -290,17 +287,23 @@ var Edit = module.exports = ToolModel.extend({
     }).done(rsp => {
       this.get('vectorSource').addFeatures(format.readFeatures(rsp));
       this.get('vectorSource').getFeatures().forEach(feature => {
+
+        //Property changed
         feature.on('propertychange', (e) => {
+          if (feature.modification === 'removed')
+            return;
+          if (feature.modification === 'added')
+            return;
           feature.modification = 'updated';
         });
+
+        //Geometry changed.
         feature.on('change', (e) => {
-          // To prevent the feature modification property to be updated when the feature is hidden (before removal).
-          // We must check if the changing property is the hidden style. If so, do not change the modification attribute.
-          // But we can not compare the style objects solely, we must compare some property inside the style.
-          // Uggly, but true.
-          if (Array.isArray(feature.getStyle()) && feature.getStyle()[0].getFill().getColor() !== "rgba(1, 2, 3, 0)") {
-            feature.modification = 'updated';
-          }
+          if (feature.modification === 'removed')
+            return;
+          if (feature.modification === 'added')
+            return;
+          feature.modification = 'updated';
         });
       });
       if (done) done();
@@ -318,9 +321,8 @@ var Edit = module.exports = ToolModel.extend({
    *
    */
   featureSelected: function (event) {
-    var features = event.selected.concat(event.deselected);
     if (this.get('removalToolMode') === 'on') {
-      features.forEach(feature => {
+      event.selected.forEach(feature => {
         this.set({removeFeature: feature});
       });
       return;
@@ -365,7 +367,6 @@ var Edit = module.exports = ToolModel.extend({
     this.get('map').addLayer(this.get('layer'));
 
     if (!this.get('select')) {
-
       this.set('select', new ol.interaction.Select({
         style: this.getSelectStyle(),
         toggleCondition: ol.events.condition.never
@@ -385,7 +386,6 @@ var Edit = module.exports = ToolModel.extend({
 
     this.set({editSource: source});
     this.set({editFeature: null});
-
     this.get('select').setActive(true);
     this.get('modify').setActive(true);
     this.get('layer').dragLocked = true;
@@ -396,7 +396,9 @@ var Edit = module.exports = ToolModel.extend({
    * @param {string} geometryType - Geometry type of feature
    */
   handleDrawEnd: function(feature, geometryType) {
+    feature.setGeometryName('geom');
     feature.modification = 'added';
+    this.editAttributes(feature);
   },
   /**
    *
@@ -415,7 +417,8 @@ var Edit = module.exports = ToolModel.extend({
       this.set('drawTool', new ol.interaction.Draw({
         source: this.get('vectorSource'),
         style: this.getScetchStyle(),
-        type: geometryType
+        type: geometryType,
+        geometryName: 'geom'
       }));
       this.get("drawTool").on('drawend', (event) => {
         this.handleDrawEnd(event.feature, geometryType)
@@ -460,7 +463,24 @@ var Edit = module.exports = ToolModel.extend({
     if (this.get('drawTool')) {
       this.get('drawTool').setActive(false);
     }
+  },
+  /**
+   *
+   *
+   */
+  deactivateTools: function() {
+    if (this.get('select')) {
+      this.get('select').setActive(false);
+      this.get('select').getFeatures().clear();
+    }
 
+    if (this.get('modify')) {
+      this.get('modify').setActive(false);
+    }
+
+    if (this.get('drawTool')) {
+      this.get('drawTool').setActive(false);
+    }
   },
   /**
    *

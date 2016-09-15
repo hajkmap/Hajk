@@ -260,50 +260,7 @@
       "layers": [
         "demo:yta"
       ],
-      "editableFields": [
-        {
-          "index": 1,
-          "name": "name",
-          "dataType": "string",
-          "textType": "fritext",
-          "values": null
-        },
-        {
-          "index": 2,
-          "name": "date",
-          "dataType": "date",
-          "textType": null,
-          "values": null
-        },
-        {
-          "index": 3,
-          "name": "list",
-          "dataType": "string",
-          "textType": "lista",
-          "values": [
-            "a",
-            "b",
-            "c",
-            "d",
-            "f",
-            "g"
-          ]
-        },
-        {
-          "index": 4,
-          "name": "integer",
-          "dataType": "int",
-          "textType": null,
-          "values": null
-        },
-        {
-          "index": 5,
-          "name": "float",
-          "dataType": "number",
-          "textType": null,
-          "values": null
-        }
-      ]
+      "editableFields": []
     }
   ]
 }
