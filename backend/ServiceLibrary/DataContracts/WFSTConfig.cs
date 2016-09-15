@@ -6,6 +6,13 @@ using System.Threading.Tasks;
 
 namespace Sweco.Services.DataContracts
 {
+    public enum EditableGeometryType
+    {
+        Point,
+        LineString,
+        Polygon
+    };
+
     public class WFSTConfig
     {
         public string id { get; set; }
@@ -19,5 +26,11 @@ namespace Sweco.Services.DataContracts
         public List<string> layers { get; set; }
 
         public List<EditableField> editableFields { get; set; }
+
+        public bool editPoint{ get; set; }
+
+        public bool editPolygon { get; set; }
+
+        public bool editLine { get; set; }
     }
 }

@@ -34,13 +34,25 @@ var AttributeEditor = React.createClass({
       ,   feature = this.props.model.get('editFeature')
       ,   source = this.props.model.get('editSource')
       ,   props
-      ,   defaultValue = null;
+      ,   defaultValue = '';
 
       if (!feature || !source) return;
 
       props = feature.getProperties();
       source.editableFields.map(field => {
-        valueMap[field.name] = props[field.name] || defaultValue;
+        if (field.textType === "flerval") {
+          valueMap[field.name] = field.values.map(value => {
+            return {
+              name: value,
+              checked: typeof props[field.name] === "string" ?
+                       props[field.name].split(';').find(v => v === value) !== undefined :
+                       false
+            }
+          });
+        } else {
+          valueMap[field.name] = props[field.name] || defaultValue;
+        }
+
       });
 
       this.state.formValues = valueMap;
@@ -50,7 +62,12 @@ var AttributeEditor = React.createClass({
   updateFeature: function () {
     var props = this.props.model.get('editFeature').getProperties();
     Object.keys(this.state.formValues).forEach(key => {
-      props[key] = this.state.formValues[key];
+      var value = this.state.formValues[key];
+      if (value === '') value = null;
+      if (Array.isArray(value)) {
+        value = value.filter(v => v.checked).map(v => v.name).join(';');
+      }
+      props[key] = value;
     });
     this.props.model.get('editFeature').setProperties(props);
   },
@@ -92,10 +109,20 @@ var AttributeEditor = React.createClass({
     });
   },
 
+  checkMultiple: function (name, checked, value, index) {
+    this.state.formValues[name][index].checked = checked;
+    this.updateFeature();
+    this.setState({
+      formValues: this.state.formValues
+    });
+  },
+
   checkDate: function (name, date) {
     var value = "";
     if (date.format) {
       value = date.format('Y-MM-DD HH:mm:ss');
+    } else {
+      value = date;
     }
     this.state.formValues[name] = value;
     this.updateFeature();
@@ -126,12 +153,14 @@ var AttributeEditor = React.createClass({
     }
 
     var value = this.state.formValues[field.name];
+
     switch (field.textType) {
       case "heltal":
         return (
           <input className="form-control" type="text" value={value} onChange={(e) => {
-            this.setChanged();
-            this.checkInteger(field.name, e.target.value)}}
+              this.setChanged();
+              this.checkInteger(field.name, e.target.value);
+            }}
           />
         );
       case "nummer":
@@ -147,7 +176,7 @@ var AttributeEditor = React.createClass({
           value = value.replace('T', ' ').replace('Z','')
         }
         return (
-          <Datetime dateFormat="Y-MM-DD" timeFormat="HH:mm:ss" value={value} onChange={(date) => {
+          <Datetime closeOnSelect={true} dateFormat="Y-MM-DD" timeFormat="HH:mm:ss" value={value} onChange={(date) => {
               this.setChanged();
               this.checkDate(field.name, date);
             }}
@@ -161,6 +190,25 @@ var AttributeEditor = React.createClass({
             }}
           />
         );
+      case "flerval":
+        let checkboxes = field.values.map(
+          (val, i) => {
+
+            var id = field.name + i
+            ,   item = value.find(item => item.name === val) || {checked: false};
+
+            return (
+              <div key={i}>
+                <input type="checkbox" htmlFor={id} checked={item.checked} onChange={(e) => {
+                  this.setChanged();
+                  this.checkMultiple(field.name, e.target.checked, val, i)
+                }}/>
+                <label id={id}>{val}</label>
+              </div>
+            )
+          }
+        );
+        return <div>{checkboxes}</div>;
       case "lista":
         let options = field.values.map((val, i) => <option key={i} value={val}>{val}</option>);
         return (
@@ -172,7 +220,7 @@ var AttributeEditor = React.createClass({
           <option value="">-Välj värde-</option>
           {options}
           </select>
-        )
+        );
       case null:
         return (<span>{value}</span>);
     }
@@ -182,9 +230,7 @@ var AttributeEditor = React.createClass({
    * @return {React.Component} component
    */
   render: function () {
-
     if (!this.props.feature) return null;
-
     var markup = this.props.source.editableFields.map((field, i) => {
       return (
         <div key={i} className="field">
@@ -193,11 +239,9 @@ var AttributeEditor = React.createClass({
         </div>
       )
     });
-
     return (
       <div>{markup}</div>
     );
-
   }
 });
 
@@ -331,7 +375,7 @@ var Toolbar = React.createClass({
         alertMessage: getMessage(data),
         confirm: false
       });
-
+      this.props.model.setRemovalToolMode('off');
       this.props.model.filty = false;
       this.props.panel.setLayer(this.props.model.get('editSource'));
     });
@@ -356,12 +400,20 @@ var Toolbar = React.createClass({
       return this.state.activeTool === type ? "btn btn-primary" : "btn btn-default";
     };
 
+    var source = this.props.model.get('editSource');
+    var editPoint = editPolygon = editLine = false;
+    if (source) {
+      editPoint = source.editPoint;
+      editLine = source.editLine;
+      editPolygon = source.editPolygon;
+    }
+
     return (
       <div>
         <div className="edit-toolbar-wrapper">
           <div className="btn-group btn-group-lg map-toolbar">
             <button
-              disabled={disabled}
+              disabled={disabled === false ? !editPoint : disabled}
               onClick={() => {this.onAddPointClicked()}}
               className={isActive("point")}
               type="button"
@@ -370,7 +422,7 @@ var Toolbar = React.createClass({
               <i className="iconmoon-punkt"></i>
             </button>
             <button
-              disabled={disabled}
+              disabled={disabled === false ? !editLine : disabled}
               onClick={() => {this.onAddLineClicked()}}
               className={isActive("linestring")}
               type="button"
@@ -379,7 +431,7 @@ var Toolbar = React.createClass({
               <i className="iconmoon-linje"></i>
             </button>
             <button
-              disabled={disabled}
+              disabled={disabled === false ? !editPolygon : disabled}
               onClick={() => {this.onAddPolygonClicked()}}
               className={isActive("polygon")}
               type="button"

@@ -9,6 +9,9 @@ const defaultState = {
   caption: "",
   url: "",
   projection: "",
+  point: false,
+  linestring: false,
+  polygon: false,
   layerProperties: []
 };
 /**
@@ -81,13 +84,18 @@ class Search extends React.Component {
 
     this.abort();
 
+    console.log("Load", layer);
+
     this.setState({
       mode: "edit",
       id: layer.id,
       caption: layer.caption,
       url: layer.url,
       projection: layer.projection || "EPSG:3006",
-      addedLayers: []
+      addedLayers: [],
+      point: layer.editPoint,
+      linestring: layer.editLine,
+      polygon: layer.editPolygon
     });
 
     setTimeout(() => {
@@ -213,8 +221,17 @@ class Search extends React.Component {
     }
 
     if (e) {
+      var value;
+      if (fieldName === "point" ||
+          fieldName === "linestring" ||
+          fieldName === "polygon") {
+        value = e.target.checked;
+      } else {
+        value = e.target.value;
+      }
+
       let state = {};
-      state[fieldName] = e.target.value;
+      state[fieldName] = value;
       this.setState(state);
     } else {
       this.forceUpdate();
@@ -267,6 +284,9 @@ class Search extends React.Component {
     if (fieldName === 'date') value = create_date();
     if (fieldName === 'layers') value = format_layers(this.state.addedLayers);
     if (fieldName === 'editableFields') value = this.getEditableFields();
+    if (fieldName === 'point') value = input.checked;
+    if (fieldName === 'polygon') value = input.checked;
+    if (fieldName === 'linestring') value = input.checked;
 
     return value;
   }
@@ -357,7 +377,10 @@ class Search extends React.Component {
         url: this.getValue("url"),
         layers: this.getValue("layers"),
         projection: this.getValue("projection"),
-        editableFields: this.getValue("editableFields")
+        editableFields: this.getValue("editableFields"),
+        editPoint: this.getValue("point"),
+        editPolygon: this.getValue("polygon"),
+        editLine: this.getValue("linestring")
       };
 
       if (this.state.mode === "add") {
@@ -655,6 +678,37 @@ class Search extends React.Component {
               <div>
                 <label>Redigerbara fält</label>
                 {this.renderLayerProperties()}
+              </div>
+              <div>
+                <label>Geometrityper</label>
+                <div className="geometry-types">
+                  <input
+                    checked={this.state.point}
+                    onChange={(e) => this.validate("point", e)}
+                    ref="input_point"
+                    name="point" id="point"
+                    type="checkbox">
+                  </input>
+                  <label htmlFor="point">&nbsp;Punkter</label><br/>
+                  <input
+                    checked={this.state.linestring}
+                    onChange={(e) => this.validate("linestring", e)}
+                    ref="input_linestring"
+                    name="linestring"
+                    id="linestring"
+                    type="checkbox">
+                  </input>
+                  <label htmlFor="linestring">&nbsp;Linjer</label><br/>
+                  <input
+                    checked={this.state.polygon}
+                    onChange={(e) => this.validate("polygon", e)}
+                    ref="input_polygon"
+                    name="polygon"
+                    id="polygon"
+                    type="checkbox">
+                  </input>
+                  <label htmlFor="polygon">&nbsp;Ytor</label>
+                </div>
               </div>
             </fieldset>
             <button className="btn btn-primary">{this.state.mode == "edit" ? "Spara" : "Lägg till"}</button>&nbsp;

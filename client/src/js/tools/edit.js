@@ -96,7 +96,7 @@ var Edit = module.exports = ToolModel.extend({
     var node = this.write(features)
     ,   serializer = new XMLSerializer()
     ,   src = this.get('editSource')
-    ,   payload    = node ? serializer.serializeToString(node) : undefined;
+    ,   payload = node ? serializer.serializeToString(node) : undefined;
 
     if (payload) {
       $.ajax(HAJK2.searchProxy + src.url, {

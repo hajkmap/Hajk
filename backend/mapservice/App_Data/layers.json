@@ -150,14 +150,15 @@
       "caption": "Mussla",
       "url": "http://194.71.132.27/geoserver/wms",
       "owner": "SBK",
-      "date": "1472476888177",
+      "date": "1473928177088",
       "content": "mussla",
       "legend": "",
       "projection": null,
       "layers": [
-        "viskan:Anodonta_anatina"
+        "viskan:Anodonta_anatina",
+        "motala:Areor_potentiell_nytta"
       ],
-      "infobox": "",
+      "infobox": "This is [an example](http://www.google.se \"Länk\") inline link.\n\n<a href=\"http://www.google.se/\" target=\"_blank\">Länk</a>\n\nhttp://www.google.se",
       "searchFields": [
         ""
       ],
@@ -201,7 +202,7 @@
   ],
   "wfstlayers": [
     {
-      "id": "ffae9c4e-66e1-0191-3fac-95ae4a261fdf",
+      "id": "e05fa46d-4ecb-b854-4855-1991b15fbbf3",
       "caption": "punkt",
       "url": "http://194.71.132.27/geoserver/demo/wfs",
       "projection": "EPSG:3006",
@@ -218,22 +219,66 @@
         },
         {
           "index": 2,
-          "name": "date",
-          "dataType": "date",
-          "textType": null,
-          "values": null
-        },
-        {
-          "index": 3,
           "name": "list",
           "dataType": "string",
           "textType": "lista",
           "values": [
             "a",
             "b",
-            "c",
-            "d",
-            "e"
+            "c"
+          ]
+        },
+        {
+          "index": 3,
+          "name": "integer",
+          "dataType": "int",
+          "textType": null,
+          "values": null
+        },
+        {
+          "index": 4,
+          "name": "float",
+          "dataType": "number",
+          "textType": null,
+          "values": null
+        },
+        {
+          "index": 6,
+          "name": "date",
+          "dataType": "string",
+          "textType": "datum",
+          "values": null
+        }
+      ],
+      "editPoint": true,
+      "editPolygon": false,
+      "editLine": false
+    },
+    {
+      "id": "2c07a6fa-e0ef-0d7d-0826-e60676ca4da5",
+      "caption": "yta",
+      "url": "http://194.71.132.27/geoserver/demo/wfs",
+      "projection": "EPSG:3006",
+      "layers": [
+        "demo:yta"
+      ],
+      "editableFields": [
+        {
+          "index": 1,
+          "name": "name",
+          "dataType": "string",
+          "textType": "fritext",
+          "values": null
+        },
+        {
+          "index": 3,
+          "name": "list",
+          "dataType": "string",
+          "textType": "flerval",
+          "values": [
+            "a",
+            "b",
+            "c"
           ]
         },
         {
@@ -250,17 +295,10 @@
           "textType": null,
           "values": null
         }
-      ]
-    },
-    {
-      "id": "dff37fe8-a5a0-30fe-2663-577e1e684068",
-      "caption": "yta",
-      "url": "http://194.71.132.27/geoserver/demo/wfs",
-      "projection": "EPSG:3006",
-      "layers": [
-        "demo:yta"
       ],
-      "editableFields": []
+      "editPoint": false,
+      "editPolygon": true,
+      "editLine": false
     }
   ]
 }
