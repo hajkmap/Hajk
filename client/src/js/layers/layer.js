@@ -1,8 +1,7 @@
 "use strict";
 
 var Legend = require('components/legend')
-,   LegendButton = require('components/legendbutton')
-,   LabelButton = require('components/labelpanel');
+,   LegendButton = require('components/legendbutton');
 
 /**
  * Layer model properties
