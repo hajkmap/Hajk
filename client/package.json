@@ -37,7 +37,7 @@
     "marked": "^0.3.5",
     "matchdep": "^1.0.1",
     "moment": "^2.15.0",
-    "openlayers": "^3.17.1",
+    "openlayers": "3.17.1",
     "parallel": "^1.0.10",
     "proj4": "^2.3.12",
     "react": "^0.14.7",
