@@ -41,6 +41,8 @@ var CoordinatesList = React.createClass({
 
   processPlanarXY: function(xyObject) {
     return Object.keys(xyObject).map( function(key) {
+      if (key == 'default')
+        return
       return (
         <dd>
           <strong>{ key.toUpperCase() }: </strong>
@@ -50,20 +52,26 @@ var CoordinatesList = React.createClass({
     })
   },
 
-  processTitle: function(title) {
-    return (
-      <dt> { title } </dt>
-    )
+  processTitle: function(title, object) {
+    if (object.hasOwnProperty('default')){
+      return (
+        <dt> { title } (Primärt koordinatsystem) </dt>
+      )
+    } else {
+      return (
+        <dt> { title } </dt>
+      )
+    }
   },
 
   processRow: function(object, title) {
     if (this.isPlanar(title)) {
       return (
-        [this.processTitle(title), this.processPlanarXY(object)]
+        [this.processTitle(title, object), this.processPlanarXY(object)]
       )
     } else {
       return (
-        [this.processTitle(title), this.processSphericalXY(object)]
+        [this.processTitle(title, object), this.processSphericalXY(object)]
       )
     }
   },
@@ -133,7 +141,7 @@ module.exports = React.createClass({
     }
 
     coordinates = this.state.coordinates ? this.state.coordinates.transformed : {};
-
+    console.log('Coordinates: ', coordinates)
     return (
       <Panel title="Koordinater" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
         <div className="coordinate-display">

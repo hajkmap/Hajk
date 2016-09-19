@@ -148,12 +148,13 @@ module.exports = ToolModel.extend({
 		};
 		var transformedCoordinates = {};
 		var transformations = [{
+			code: 'EPSG:3007',
+			title: 'Sweref 99 12 00',
+			default: true
+		},  {
 			code: 'EPSG:4326',
 			title: 'WGS 84'
 		},  {
-			code: 'EPSG:3007',
-			title: 'Sweref 99 12 00'
-		},	{
 			code: 'EPSG:3006',
 			title: 'Sweref 99 TM'
 		}, {
@@ -165,6 +166,8 @@ module.exports = ToolModel.extend({
 		_.each(transformations, (transformation) => {
 			transformedCoordinates[transformation.title] = this.transform(coordinates, transformation.code);
 			transformedCoordinates[transformation.title] = this.extractXYObject(transformedCoordinates[transformation.title]);
+			if (transformation.hasOwnProperty('default'))
+				transformedCoordinates[transformation.title].default = transformation.default
 		});
 
 		presentedCoordinates['transformed'] = transformedCoordinates;
