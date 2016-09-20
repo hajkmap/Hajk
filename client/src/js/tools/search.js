@@ -103,7 +103,6 @@ module.exports = ToolModel.extend({
    *
    */
   doWFSSearch: function (props) {
-
     var filters = props.propertyName.split(',').map((property) =>
       `<ogc:PropertyIsLike matchCase="false" wildCard="*" singleChar="." escapeChar="!">
          <ogc:PropertyName>${property}</ogc:PropertyName>
@@ -116,6 +115,7 @@ module.exports = ToolModel.extend({
         xmlns:wfs="http://www.opengis.net/wfs"
         service="WFS"
         version="1.1.0"
+        outputFormat="${props.outputFormat}"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
         maxFeatures="100">
@@ -131,9 +131,13 @@ module.exports = ToolModel.extend({
 
     var read = (result) => {
       var format
-      ,   features = [];
+      ,   features = []
+      ,   outputFormat = props.outputFormat;
 
-      format = new ol.format.WFS({});
+      if (outputFormat == 'GML2')
+        format = new ol.format.GML2({});
+      else
+        format = new ol.format.WFS({});
 
       if (!(result instanceof XMLDocument)) {
         if (result.responseText) {
@@ -209,7 +213,6 @@ module.exports = ToolModel.extend({
    *
    */
   focus: function (spec) {
-
     var map    = this.get('map')
     ,   exist  = this.get('selectedIndices').find(item => item.group === spec.id)
     ,   extent = spec.hit.getGeometry().getExtent()
@@ -305,13 +308,13 @@ module.exports = ToolModel.extend({
     });
 
     sources.forEach(source => {
-
       var searchProps = {
         "url": (HAJK2.searchProxy || "") + source.url,
         "featureType": source.layers[0].split(':')[1],
         "propertyName": source.searchFields.join(','),
         "displayName": source.displayFields ? source.displayFields : (source.searchFields[0] || "Sökträff"),
-        "srsName": this.get('map').getView().getProjection().getCode()
+        "srsName": this.get('map').getView().getProjection().getCode(),
+        "outputFormat": source.outputFormat
       };
 
       promises.push(new Promise((resolve, reject) => {
@@ -321,6 +324,7 @@ module.exports = ToolModel.extend({
           featureType: searchProps.featureType,
           propertyName: searchProps.propertyName,
           srsName: searchProps.srsName,
+          outputFormat: searchProps.outputFormat,
           done: features => {
             if (features.length > 0) {
               items.push({

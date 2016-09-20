@@ -18,6 +18,8 @@ namespace Sweco.Services.DataContracts
 
         public string[] searchFields { get; set; }
         
-        public string[] displayFields { get; set; }        
+        public string[] displayFields { get; set; }
+
+        public string outputFormat { get; set; }
     }
 }
