@@ -150,15 +150,14 @@
       "caption": "Mussla",
       "url": "http://194.71.132.27/geoserver/wms",
       "owner": "SBK",
-      "date": "1473928177088",
+      "date": "1474020633825",
       "content": "mussla",
       "legend": "",
       "projection": null,
       "layers": [
-        "viskan:Anodonta_anatina",
-        "motala:Areor_potentiell_nytta"
+        "viskan:Anodonta_anatina"
       ],
-      "infobox": "This is [an example](http://www.google.se \"Länk\") inline link.\n\n<a href=\"http://www.google.se/\" target=\"_blank\">Länk</a>\n\nhttp://www.google.se",
+      "infobox": "http://www.google.se\n",
       "searchFields": [
         ""
       ],
