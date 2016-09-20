@@ -5,6 +5,7 @@ using SharpMap.Data;
 using SharpMap.Layers;
 using SharpMap.Rendering.Thematics;
 using SharpMap.Styles;
+using SharpMap.Rendering.Decoration;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -148,7 +149,7 @@ namespace Sweco.Services.MapExport
         public MapExporter(MapExportItem exportItem) 
         {
             this.exportItem = exportItem;
-            var size = new Size(exportItem.size[0] / 2, exportItem.size[1] / 2);
+            var size = new Size(exportItem.size[0], exportItem.size[1]);              
             this.map = new Map(size);            
         }
 
@@ -164,7 +165,7 @@ namespace Sweco.Services.MapExport
                 for (int i = 0; i < wmsLayers.Count; i++)            
                 {                    
                     string layername = "WMSLayer_" + i;                    
-                    WmsLayer layer = new WmsLayer(layername, wmsLayers[i].url);
+                    WmsLayer layer = new WmsLayer(layername, wmsLayers[i].url);                    
                     layer.SetImageFormat("image/png");
                     layer.BgColor = Color.White;
                     layer.Transparent = true;
@@ -190,7 +191,7 @@ namespace Sweco.Services.MapExport
                     }
                 
                     layer.SRID = wmsLayers[i].coordinateSystemId;
-                    map.Layers.Add(layer);                
+                    map.Layers.Add(layer);                    
                 }                
             }
             catch

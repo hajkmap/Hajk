@@ -75,8 +75,10 @@ var ExportModel = ToolModel.extend({
 
     var dpi = 25.4 / 0.28
     ,   ipu = 39.37
-    ,   w = paper.width / dpi / ipu * scale / 2
-    ,   y = paper.height / dpi  / ipu * scale / 2
+    //,   sf  = 0.975
+    ,   sf  = 1
+    ,   w   = (paper.width / dpi / ipu * scale / 2) * sf
+    ,   y   = (paper.height / dpi  / ipu * scale / 2) * sf
     ,   coords = [
           [
             [center[0] - w, center[1] - y],
@@ -391,8 +393,8 @@ var ExportModel = ToolModel.extend({
     dy = Math.abs(bottom - top);
 
     data.size = [
-      parseInt(100 * (dx / scale) * dpi),
-      parseInt(100 * (dy / scale) * dpi)
+      parseInt(49.65 * (dx / scale) * dpi),
+      parseInt(49.65 * (dy / scale) * dpi)
     ];
 
     data.bbox = [left, right, bottom, top];

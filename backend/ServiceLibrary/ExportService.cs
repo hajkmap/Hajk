@@ -19,6 +19,7 @@ using Sweco.Services.HTTP;
 using System.Web.Hosting;
 using Sweco.Services.MapExport;
 using PdfSharp.Drawing.Layout;
+using System.Configuration;
 
 namespace Sweco.Services
 {
@@ -176,7 +177,7 @@ namespace Sweco.Services
                                    
             int scale = int.Parse(exportItem.scale);
             double length = (1.0 / scale);
-            double unitLength = (length * 2.75e3);         
+            double unitLength = (length * 2.82e3);         
 
             Dictionary<int, string> scaleBarTexts = new Dictionary<int, string>() 
             {
@@ -220,8 +221,9 @@ namespace Sweco.Services
             gfx.DrawLine(XPens.Black, new Point(15, 47), new Point(15 + displayLength, 47));
             gfx.DrawLine(XPens.Black, new Point(15, 44), new Point(15, 50));
             gfx.DrawLine(XPens.Black, new Point(15 + displayLength, 44), new Point(15 + displayLength, 50));
-            
-            this.drawText(gfx, String.Format("© Stadsbyggnadskontoret", exportItem.scale), 15, 25);
+
+            string copyright = ConfigurationManager.AppSettings["exportCopyrightText"];
+            this.drawText(gfx, String.Format("© {0}", copyright), 15, 25);
             this.drawText(gfx, String.Format("Skala 1:{0}", exportItem.scale), 15, 40);            
             this.drawText(gfx, displayText, 20 + displayLength, 50);            
 
