@@ -232,9 +232,9 @@ module.exports = React.createClass({
     return (
       <div>
         <div>
-          <span>Välj söktyp </span>&nbsp;
+          <span>Sök: </span>&nbsp;
           <select value={this.props.model.get('filter')} onChange={this.setFilter.bind(this, "layer")}>
-            <option value="*">Fritext</option>
+            <option value="*">--  Alla  --</option>
             {
               (() => {
                 return sources.map((wfslayer, i) => {
@@ -342,6 +342,8 @@ module.exports = React.createClass({
       <Panel title="Sökning" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
         <div className="search-tools">
           <div className="form-group">
+          {options}
+          <br />
             <div className="input-group">
               <div className="input-group-addon">
                 <i className="fa fa-search"></i>
@@ -356,8 +358,6 @@ module.exports = React.createClass({
                 onChange={search_on_input} />
             </div>
           </div>
-          {options}
-          <br />
           <button onClick={this.clear} type="submit" className="btn btn-default">Rensa</button>
           {results}
         </div>

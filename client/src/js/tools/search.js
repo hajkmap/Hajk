@@ -107,7 +107,7 @@ module.exports = ToolModel.extend({
     var filters = props.propertyName.split(',').map((property) =>
       `<ogc:PropertyIsLike matchCase="false" wildCard="*" singleChar="." escapeChar="!">
          <ogc:PropertyName>${property}</ogc:PropertyName>
-         <ogc:Literal>*${props.value}*</ogc:Literal>
+         <ogc:Literal>${props.value}*</ogc:Literal>
        </ogc:PropertyIsLike>`
     ).join('');
 
