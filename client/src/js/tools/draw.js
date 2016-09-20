@@ -494,15 +494,39 @@ var Draw = module.exports = ToolModel.extend({
     ,   features   = parser.readFeatures(kml_string);
 
     features.forEach((feature) => {
+      coordinates = feature.getGeometry().getCoordinates();
+      type = feature.getGeometry().getType()
+      newCoordinates = [];
+      if (type == 'LineString') {
+        coordinates.forEach((c, i) => {
+          pairs = [];
+          c.forEach((digit) => {
+            if (digit!=0)
+              pairs.push(digit) 
+          });
+         newCoordinates.push(pairs)
+        });
+        feature.getGeometry().setCoordinates(newCoordinates);
+      } else if (type == 'Polygon') {
+        newCoordinates[0] = [];
+        coordinates.forEach((polygon, i) => {
+          polygon.forEach((vertex, j) => {
+            pairs = []
+            vertex.forEach((digit) => {
+            if (digit!=0)
+              pairs.push(digit)
+            });
+            newCoordinates[0].push(pairs);
+          });
+        });
+        feature.getGeometry().setCoordinates(newCoordinates);
+      }
       feature.getGeometry().transform(
         "EPSG:4326",
         this.get('olMap').getView().getProjection()
       );
-
       this.setStyleFromProperties(feature);
-
     });
-
     this.get('drawLayer').getSource().addFeatures(features);
   },
   /**
