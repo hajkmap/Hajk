@@ -52,7 +52,7 @@ var LayerCollection = {
       var protocol = /^http/.test(args.legend) ? '' : 'http://';
       return protocol + args.legend;
     }
-    
+
     var layer_config = {
       type : "wms",
       options: {
@@ -68,8 +68,8 @@ var LayerCollection = {
         "projection": properties.mapConfig.projection || "EPSG:3006",
         "origin": properties.mapConfig.origin,
         "extent": properties.mapConfig.extent,
-        "singleTile": args.singleTile,
-        "imageFormat": args.imageFormat,
+        "singleTile": args.singleTile || false,
+        "imageFormat": args.imageFormat || "image/png",
         "legend" : [{
           "Url": getLegendUrl(args),
           "Description" : "Teckenförklaring"
