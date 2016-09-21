@@ -305,7 +305,11 @@ var Edit = module.exports = ToolModel.extend({
             return;
           feature.modification = 'updated';
         });
+
       });
+      if (done) done();
+    }).error(rsp => {
+      alert("Fel: data kan inte hämtas. Försök igen senare.");
       if (done) done();
     });
   },
