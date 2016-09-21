@@ -1,5 +1,4 @@
 var ToolModel = require('tools/tool');
-
 var source;
 var olMap;
 

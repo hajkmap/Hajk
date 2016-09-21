@@ -402,6 +402,7 @@ var Toolbar = React.createClass({
 
     var source = this.props.model.get('editSource');
     var editPoint = editPolygon = editLine = false;
+
     if (source) {
       editPoint = source.editPoint;
       editLine = source.editLine;
@@ -655,19 +656,21 @@ var EditPanel = React.createClass({
     }
 
     return (
-      <Panel title="Editera lager" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
-        <div className="edit-tools">
-          <div className="loading-bar">
-            {loader}
+      <div>
+        <Panel title="Editera lager" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
+          <div className="edit-tools">
+            <div className="loading-bar">
+              {loader}
+            </div>
+            <Toolbar enabled={this.state.enabled} loading={this.state.loading} model={this.props.model} panel={this} />
+            <ul className="edit-layers">
+              {options()}
+            </ul>
+            <AttributeEditor feature={this.state.editFeature} source={this.state.editSource} model={this.props.model} activeTool={this.state.activeTool}/>
           </div>
-          <Toolbar enabled={this.state.enabled} loading={this.state.loading} model={this.props.model} panel={this} />
-          <ul className="edit-layers">
-            {options()}
-          </ul>
-          <AttributeEditor feature={this.state.editFeature} source={this.state.editSource} model={this.props.model} activeTool={this.state.activeTool}/>
-        </div>
+        </Panel>
         {this.renderAlert()}
-      </Panel>
+      </div>
     );
   }
 });

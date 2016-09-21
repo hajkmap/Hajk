@@ -467,7 +467,7 @@ var DrawPanel = React.createClass({
           </div>
         </div>
       </div>
-    )
+    );
   },
   /**
    * Render the panel component.
@@ -481,49 +481,51 @@ var DrawPanel = React.createClass({
     ,   importRes  = this.renderImport(this.state.kmlImport);
 
     return (
-      <Panel title="Rita och mät" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
-        <div className="draw-tools">
-          <div id="labels">
-            <input id="labels-checkbox" onChange={this.toggleLabels} type="checkbox" checked={showLabels} />
-            <label htmlFor="labels-checkbox">Visa areal/längd</label>
+      <div>
+        <Panel title="Rita och mät" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
+          <div className="draw-tools">
+            <div id="labels">
+              <input id="labels-checkbox" onChange={this.toggleLabels} type="checkbox" checked={showLabels} />
+              <label htmlFor="labels-checkbox">Visa areal/längd</label>
+            </div>
+            <ul>
+              <li id="Text" onClick={this.activateDrawTool.bind(this, "Text")}>
+                <i className="fa fa-font fa-0"></i> <span>Skriv text</span>
+              </li>
+              <li id="Point" onClick={this.activateDrawTool.bind(this, "Point")}>
+                <i className="iconmoon-punkt"></i> <span>Rita punkt</span>
+              </li>
+              <li id="LineString" onClick={this.activateDrawTool.bind(this, "LineString")}>
+                <i className="iconmoon-linje"></i> <span>Rita linje</span>
+              </li>
+              <li id="Polygon" onClick={this.activateDrawTool.bind(this, "Polygon")}>
+                <i className="iconmoon-yta"></i> <span>Rita yta</span>
+              </li>
+              <li id="delete" onClick={this.activateRemovalTool}>
+                <i className="fa fa-eraser fa-0"></i> <span>Radera</span>
+              </li>
+              <li id="clear" onClick={this.clear}>
+                <i className="fa fa-trash fa-0"></i> <span>Rensa</span>
+              </li>
+              <li id="clear" onClick={this.import}>
+                <i className="fa fa-file-o fa-0"></i> <span>Importera</span>
+              </li>
+              <li id="clear" onClick={this.export}>
+                <i className="fa fa-save fa-0"></i> <span>Exportera</span>
+              </li>
+              <li id="abort" className="green" onClick={this.abort}>
+                <i className="fa fa-check fa-0"></i> <span>Klar</span>
+              </li>
+            </ul>
           </div>
-          <ul>
-            <li id="Text" onClick={this.activateDrawTool.bind(this, "Text")}>
-              <i className="fa fa-font fa-0"></i> <span>Skriv text</span>
-            </li>
-            <li id="Point" onClick={this.activateDrawTool.bind(this, "Point")}>
-              <i className="iconmoon-punkt"></i> <span>Rita punkt</span>
-            </li>
-            <li id="LineString" onClick={this.activateDrawTool.bind(this, "LineString")}>
-              <i className="iconmoon-linje"></i> <span>Rita linje</span>
-            </li>
-            <li id="Polygon" onClick={this.activateDrawTool.bind(this, "Polygon")}>
-              <i className="iconmoon-yta"></i> <span>Rita yta</span>
-            </li>
-            <li id="delete" onClick={this.activateRemovalTool}>
-              <i className="fa fa-eraser fa-0"></i> <span>Radera</span>
-            </li>
-            <li id="clear" onClick={this.clear}>
-              <i className="fa fa-trash fa-0"></i> <span>Rensa</span>
-            </li>
-            <li id="clear" onClick={this.import}>
-              <i className="fa fa-file-o fa-0"></i> <span>Importera</span>
-            </li>
-            <li id="clear" onClick={this.export}>
-              <i className="fa fa-save fa-0"></i> <span>Exportera</span>
-            </li>
-            <li id="abort" className="green" onClick={this.abort}>
-              <i className="fa fa-check fa-0"></i> <span>Klar</span>
-            </li>
-          </ul>
-        </div>
-        <div className="panel-body">
-          {symbology}
-          {exportRes}
-          {importRes}
-        </div>
+          <div className="panel-body">
+            {symbology}
+            {exportRes}
+            {importRes}
+          </div>
+        </Panel>
         {dialog}
-      </Panel>
+      </div>
     );
   }
 });
