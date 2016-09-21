@@ -61,7 +61,11 @@ var NavigationModel = Backbone.Model.extend({
 
       if (activePanel) {
         activePanel.model.set("visible", false);
-        if (activePanel.model.filty) {
+
+        var a = activePanel.model.get('panel');
+        var b = panel.get('panel').toLowerCase();
+
+        if (activePanel.model.filty && a !== b) {
 
           this.set('alert', true);
 

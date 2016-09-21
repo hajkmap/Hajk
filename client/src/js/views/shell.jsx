@@ -66,7 +66,7 @@ var Shell = React.createClass({
     this.setState({
       views: [
         <MapView key={this.model.cid} id={this.model.cid} />,
-        <Toolbar key="toolbar" model={this.model.get('toolCollection')} />,
+        <Toolbar key="toolbar" model={this.model.get('toolCollection')} navigationModel={this.model.get('navigation')} />,
         <NavigationPanel key="navigation" model={this.model.get('navigation')} />
       ]
     });

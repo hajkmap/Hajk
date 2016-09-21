@@ -55,11 +55,13 @@ var CoordinatesList = React.createClass({
   processTitle: function(title, object) {
     if (object.hasOwnProperty('default')){
       return (
-        <dt> { title } (Primärt koordinatsystem) </dt>
+        <dt>
+          <strong style={{color: 'bisque'}}>{title}</strong> (Primärt koordinatsystem)
+        </dt>
       )
     } else {
       return (
-        <dt> { title } </dt>
+        <dt>{title}</dt>
       )
     }
   },
@@ -101,9 +103,6 @@ module.exports = React.createClass({
   },
 
   componentWillMount: function () {
-    // this.setState({
-    //   coordinates: this.props.model.presentCoordinates()
-    // });
   },
 
   componentWillUnmount: function () {
@@ -133,15 +132,11 @@ module.exports = React.createClass({
   },
 
   render: function () {
-
     var coordinates;
-
     if (this.props.model.get('interactions').length === 0) {
       this.props.model.createInteractions();
     }
-
     coordinates = this.state.coordinates ? this.state.coordinates.transformed : {};
-    console.log('Coordinates: ', coordinates)
     return (
       <Panel title="Koordinater" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
         <div className="coordinate-display">

@@ -183,7 +183,7 @@
       "displayFields": [
         "vattendrag"
       ],
-      "outputFormat": "GML3"
+      "outputFormat": "GML2"
     },
     {
       "id": "771465f3-4f37-8d1b-8c0f-db5c9c25919c",

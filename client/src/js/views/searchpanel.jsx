@@ -1,6 +1,8 @@
 var Panel = require('views/panel');
 var SearchResultGroup;
 
+var isMobile = () => document.body.clientWidth <= 600;
+
 SearchResultGroup = React.createClass({
   /**
    * @desc: Triggered when mounted.
@@ -49,6 +51,10 @@ SearchResultGroup = React.createClass({
       id: group[0].id
     });
 
+    if (isMobile()) {
+      console.log(this.props);
+      this.props.parentView.props.navigationPanel.minimize();
+    }
   },
   /**
    * @desc: Render result group component
@@ -275,6 +281,7 @@ module.exports = React.createClass({
                         result={item}
                         numGroups={groups.length}
                         model={this.props.model}
+                        parentView={this}
                         map={this.props.model.get('map')} />
                 );
               });
