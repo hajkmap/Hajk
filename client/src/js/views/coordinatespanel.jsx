@@ -141,7 +141,6 @@ module.exports = React.createClass({
     }
 
     coordinates = this.state.coordinates ? this.state.coordinates.transformed : {};
-    console.log('Coordinates: ', coordinates)
     return (
       <Panel title="Koordinater" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
         <div className="coordinate-display">

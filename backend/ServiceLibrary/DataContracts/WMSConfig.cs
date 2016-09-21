@@ -22,6 +22,8 @@ namespace Sweco.Services.DataContracts
         public string[] displayFields { get; set; }
         public bool visibleAtStart { get; set; }
         public bool queryable { get; set; }
-        public bool tiled { get; set; }        
+        public bool tiled { get; set; }
+        public bool singleTile { get; set; }
+        public string imageFormat { get; set; }
     }
 }
