@@ -79,7 +79,7 @@ var LayerCollection = {
           "FORMAT": args.imageFormat,
           "VERSION": "1.1.0",
           "SRS": properties.mapConfig.projection || "EPSG:3006",
-          "TILED": !args.singleTile
+          "TILED": args.tiled
         }
       }
     };
