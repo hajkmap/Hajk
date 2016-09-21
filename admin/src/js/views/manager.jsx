@@ -19,6 +19,8 @@ const defaultState = {
   visibleAtStart: false,
   queryable: true,
   tiled: false,
+  singleTile: false,
+  imageFormat: "",
   drawOrder: 1
 };
 /**
@@ -105,6 +107,8 @@ class Manager extends React.Component {
       visibleAtStart: layer.visibleAtStart,
       queryable: layer.queryable,
       tiled: layer.tiled,
+      singleTile: layer.singleTile,
+      imageFormat: layer.imageFormat,
       drawOrder: layer.drawOrder,
       addedLayers: []
     });
@@ -115,6 +119,8 @@ class Manager extends React.Component {
       this.validate("content");
       this.validate("searchFields");
       this.validate("displayFields");
+      this.validate("singleTile");
+      this.validate("imageFormat");
       this.loadWMSCapabilities(undefined, () => {
 
         this.setState({
@@ -426,6 +432,8 @@ class Manager extends React.Component {
     if (fieldName === 'date') value = create_date();
     if (fieldName === 'layers') value = format_layers(this.state.addedLayers);
     if (fieldName === 'visibleAtStart') value = input.checked;
+    if (fieldName === 'singleTile') value = input.checked;
+    if (fieldName === 'imageFormat') value = input.value;
     if (fieldName === 'queryable') value = input.checked;
     if (fieldName === 'tiled') value = input.checked;
     if (fieldName === 'searchFields') value = value.split(',');
@@ -455,7 +463,9 @@ class Manager extends React.Component {
       this.validate("content"),
       this.validate("layers"),
       this.validate("searchFields"),
-      this.validate("displayFields")
+      this.validate("displayFields"),
+      this.validate("singleTile"),
+      this.validate("imageFormat"),
     ];
 
     if (validations.every(v => v === true)) {
@@ -473,6 +483,8 @@ class Manager extends React.Component {
         searchFields: this.getValue("searchFields"),
         displayFields: this.getValue("displayFields"),
         visibleAtStart: this.getValue("visibleAtStart"),
+        singleTile: this.getValue("singleTile"),
+        imageFormat: this.getValue("imageFormat"),
         queryable: this.getValue("queryable"),
         tiled: this.getValue("tiled"),
         drawOrder: this.getValue("drawOrder")
@@ -684,6 +696,26 @@ class Manager extends React.Component {
                   onChange={(e) => this.validate("displayFields", e)}
                   value={this.state.displayFields}
                   className={this.getValidationClass("displayFields")}
+                />
+              </div>
+              <div>
+                <label>Bildformat</label>
+                <select ref="input_imageFormat" value={this.state.imageFormat} onChange={(e) => {this.validate("imageFormat", e)}}>
+                  <option value="image/png">image/png</option>
+                  <option value="image/jpeg">image/jpeg</option>
+                </select>
+              </div>
+              <div>
+                <label>Single tile</label>
+                <input
+                  type="checkbox"
+                  ref="input_singleTile"
+                  onChange={
+                    (e) => {
+                      this.setState({singleTile: e.target.checked})
+                    }
+                  }
+                  checked={this.state.singleTile}
                 />
               </div>
               <div>

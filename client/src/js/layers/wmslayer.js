@@ -18,7 +18,8 @@ module.exports = LayerModel.extend({
          url: this.get('url'),
          params: this.get('params'),
          projection: this.get('projection'),
-         serverType: this.get('serverType')
+         serverType: this.get('serverType'),
+         imageFormat: this.get('imageFormat')
       };
 
       if (this.get('params').TILED) {
