@@ -87,7 +87,7 @@ class Search extends React.Component {
       caption: layer.caption,
       searchFields: layer.searchFields,
       displayFields: layer.displayFields,
-      outputFormat: outputFormat,
+      outputFormat: layer.outputFormat || 'GML3',
       url: layer.url,
       addedLayers: []
     });
