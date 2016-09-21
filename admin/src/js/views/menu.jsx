@@ -336,12 +336,13 @@ class Menu extends React.Component {
   parseDrawSettings() {
     var result = []
     ,   layers = $('.tree-view > ul > li')
-    ;
+    ,   j = layers.length;
     layers.each((i, layer) => {
       result.push({
-        drawOrder: i + 1,
+        drawOrder: j,
         id: $(layer).data('id').toString()
       })
+      j--
     })
     return result;
   }
@@ -504,7 +505,7 @@ class Menu extends React.Component {
 
         var leafs = []
         ,   layers = group.layers || group;
-
+        
         layers.forEach((layer, i) => {
           leafs.push(
             <li
@@ -604,6 +605,7 @@ class Menu extends React.Component {
     var layers = flatten(this.props.model.get('layerMenuConfig'));
 
     layers.sort((a, b) => a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1);
+    layers = layers.reverse();
 
     return layers.map((layer, i) => {
       var name = this.getLayerNameFromId(layer.id);

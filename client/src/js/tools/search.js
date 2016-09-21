@@ -103,6 +103,10 @@ module.exports = ToolModel.extend({
    *
    */
   doWFSSearch: function (props) {
+    outputFormat = props.outputFormat;
+    if (!outputFormat || outputFormat == '')
+      outputFormat = 'GML3'
+
     var filters = props.propertyName.split(',').map((property) =>
       `<ogc:PropertyIsLike matchCase="false" wildCard="*" singleChar="." escapeChar="!">
          <ogc:PropertyName>${property}</ogc:PropertyName>
@@ -115,7 +119,7 @@ module.exports = ToolModel.extend({
         xmlns:wfs="http://www.opengis.net/wfs"
         service="WFS"
         version="1.1.0"
-        outputFormat="${props.outputFormat}"
+        outputFormat="${outputFormat}"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
         maxFeatures="100">

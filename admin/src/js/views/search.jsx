@@ -11,7 +11,7 @@ const defaultState = {
   searchFields: "",
   displayFields: "",
   url: "",
-  outputFormat: ""
+  outputFormat: undefined
 };
 /**
  *
@@ -87,7 +87,7 @@ class Search extends React.Component {
       caption: layer.caption,
       searchFields: layer.searchFields,
       displayFields: layer.displayFields,
-      outputFormat: layer.outputFormat,
+      outputFormat: outputFormat,
       url: layer.url,
       addedLayers: []
     });
