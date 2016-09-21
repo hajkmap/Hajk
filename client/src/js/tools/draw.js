@@ -85,6 +85,15 @@ var Draw = module.exports = ToolModel.extend({
     this.get('olMap').set('clickLock', true);
     this.get('olMap').on('singleclick', this.removeSelected);
   },
+  /**
+   * Remove the last edited feature from soruce.
+   * @params:
+   * @returns: undefined
+   *
+   */
+  removeEditFeature() {
+    this.get('source').removeFeature(this.get('drawFeature'));
+  },
   /*
    * Event handler to excecute after features are drawn.
    *
@@ -501,7 +510,7 @@ var Draw = module.exports = ToolModel.extend({
           pairs = [];
           c.forEach((digit) => {
             if (digit!=0)
-              pairs.push(digit) 
+              pairs.push(digit)
           });
          newCoordinates.push(pairs)
         });

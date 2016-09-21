@@ -67,6 +67,10 @@ var NavigationPanel = React.createClass({
     this.props.model.on("change:toggled", (sender, visible) => {
       this.setState({ 'minimized': true});
     });
+
+    this.props.model.on('change:r', () => {
+      this.maximize();
+    });
   },
   /**
    *
@@ -85,6 +89,17 @@ var NavigationPanel = React.createClass({
     if (this.state.minimized) {
       this.setState({
         minimized: false
+      });
+    }
+  },
+  /**
+   *
+   *
+   */
+  minimize: function () {
+    if (!this.state.minimized) {
+      this.setState({
+        minimized: true
       });
     }
   },
@@ -127,8 +142,9 @@ var NavigationPanel = React.createClass({
       panelInstance = (
         <Panel
           model={this.state.activePanel.model}
-          onCloseClicked={_.bind(this.toggle, this)}
           minimized={this.state.minimized}
+          navigationPanel={this}
+          onCloseClicked={_.bind(this.toggle, this)}
         />
       )
     }

@@ -176,7 +176,7 @@ var AttributeEditor = React.createClass({
           value = value.replace('T', ' ').replace('Z','')
         }
         return (
-          <Datetime closeOnSelect={true} dateFormat="Y-MM-DD" timeFormat="HH:mm:ss" value={value} onChange={(date) => {
+          <Datetime closeOnSelect={true} disableOnClickOutside={true} dateFormat="Y-MM-DD" timeFormat="HH:mm:ss" value={value} onChange={(date) => {
               this.setChanged();
               this.checkDate(field.name, date);
             }}

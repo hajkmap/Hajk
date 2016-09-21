@@ -1,5 +1,7 @@
 var Panel = require('views/panel');
 
+var isMobile = () => document.body.clientWidth <= 600;
+
 var ColorPicker = React.createClass({
   /*
    * @property {Array{string}} colors
@@ -259,6 +261,9 @@ var DrawPanel = React.createClass({
     });
     this.props.model.set("kmlExportUrl", false);
     this.props.model.set("kmlImport", false);
+    if (isMobile()) {
+      this.props.navigationPanel.minimize();
+    }
   },
   /**
    * Render the symbology component.
@@ -446,7 +451,14 @@ var DrawPanel = React.createClass({
       }
     }
 
+    function abort() {
+      this.props.model.set('dialog', false);
+      this.refs.textInput.blur();
+      this.props.model.removeEditFeature();
+    }
+
     function update() {
+      this.refs.textInput.blur();
       this.props.model.set('dialog', false);
       this.props.model.setPointText(this.refs.textInput.value);
     }
@@ -462,7 +474,8 @@ var DrawPanel = React.createClass({
               <input ref="textInput" onKeyDown={enter.bind(this)} />
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-default" data-dismiss="modal" onClick={update.bind(this)}>Spara</button>
+              <button type="button" className="btn btn-default" data-dismiss="modal" onClick={update.bind(this)}>Spara</button>&nbsp;
+              <button type="button" className="btn btn-default" data-dismiss="modal" onClick={abort.bind(this)}>Avbryt</button>
             </div>
           </div>
         </div>
