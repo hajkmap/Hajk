@@ -10,7 +10,8 @@ const defaultState = {
   date: "Fylls i per automatik",
   searchFields: "",
   displayFields: "",
-  url: ""
+  url: "",
+  outputFormat: ""
 };
 /**
  *
@@ -86,6 +87,7 @@ class Search extends React.Component {
       caption: layer.caption,
       searchFields: layer.searchFields,
       displayFields: layer.displayFields,
+      outputFormat: layer.outputFormat,
       url: layer.url,
       addedLayers: []
     });
@@ -94,6 +96,7 @@ class Search extends React.Component {
       this.validate("url");
       this.validate("searchFields");
       this.validate("displayFields");
+      this.validate("outputFormat")
       this.loadWMSCapabilities(undefined, () => {
 
         this.setState({
@@ -250,6 +253,10 @@ class Search extends React.Component {
           valid = false;
         }
         break;
+      case "outputFormat":
+        if (value == "")
+          valid = false;
+        break;
     }
 
     if (!valid) {
@@ -311,7 +318,8 @@ class Search extends React.Component {
       this.validate("url"),,
       this.validate("layers"),
       this.validate("searchFields"),
-      this.validate("displayFields")
+      this.validate("displayFields"),
+      this.validate("outputFormat")
     ];
 
     if (validations.every(v => v === true)) {
@@ -322,7 +330,8 @@ class Search extends React.Component {
         url: this.getValue("url"),
         layers: this.getValue("layers"),
         searchFields: this.getValue("searchFields"),
-        displayFields: this.getValue("displayFields")
+        displayFields: this.getValue("displayFields"),
+        outputFormat: this.getValue("outputFormat")
       };
 
       if (this.state.mode === "add") {
@@ -346,7 +355,6 @@ class Search extends React.Component {
           }
         });
       }
-
       if (this.state.mode === "edit") {
         this.props.model.updateLayer(layer, success => {
           if (success) {
@@ -539,6 +547,13 @@ class Search extends React.Component {
                   value={this.state.displayFields}
                   className={this.getValidationClass("displayFields")}
                 />
+              </div>
+              <div>
+                <label>Responstyp</label>
+                <select ref="input_outputFormat" value={this.state.outputFormat} onChange={(e) => {this.validate("outputFormat", e)}}>
+                  <option value="GML3">GML3</option>
+                  <option value="GML2">GML2</option>
+                </select>
               </div>
             </fieldset>
             <button className="btn btn-primary">{this.state.mode == "edit" ? "Spara" : "Lägg till"}</button>&nbsp;
