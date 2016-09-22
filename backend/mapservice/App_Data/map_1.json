@@ -72,10 +72,6 @@
             "toggled": false,
             "layers": [
               {
-                "id": "8f036834-00c2-77be-2b6e-423a2162b374",
-                "drawOrder": 0
-              },
-              {
                 "id": "84a8aa5c-a062-fc32-24fb-30df211427b4",
                 "drawOrder": 1
               },

@@ -5,7 +5,7 @@
       "caption": "Bakgrund",
       "url": "http://www.asp-mapservices.com/ravegeo/map2/WMS?name=lm2013",
       "owner": "SBK",
-      "date": "1471506244300",
+      "date": "1474459128528",
       "content": "bakgrundskarta",
       "legend": "",
       "projection": null,
@@ -28,83 +28,16 @@
       ],
       "visibleAtStart": true,
       "queryable": false,
-      "tiled": false
-    },
-    {
-      "id": "1",
-      "caption": "Höjdpunkter",
-      "url": "http://194.71.132.27/geoserver/wms",
-      "owner": "SBK",
-      "date": "1471614572032",
-      "content": "höjdpunkter",
-      "legend": "",
-      "projection": null,
-      "layers": [
-        "viskan:Hojdpunkter"
-      ],
-      "infobox": "",
-      "searchFields": [
-        ""
-      ],
-      "displayFields": [
-        ""
-      ],
-      "visibleAtStart": true,
-      "queryable": true,
-      "tiled": false
-    },
-    {
-      "id": "2",
-      "caption": "Daro",
-      "url": "http://194.71.132.27/geoserver/wms",
-      "owner": "SBK",
-      "date": "1471507746764",
-      "content": "daro",
-      "legend": "",
-      "projection": null,
-      "layers": [
-        "viskan:Daro"
-      ],
-      "infobox": "",
-      "searchFields": [
-        ""
-      ],
-      "displayFields": [
-        ""
-      ],
-      "visibleAtStart": false,
-      "queryable": true,
-      "tiled": false
-    },
-    {
-      "id": "1f3a75b0-8fee-79cc-76bb-e0863ce9fdba",
-      "caption": "test",
-      "url": "http://194.71.132.27/geoserver/wms",
-      "owner": "SBK",
-      "date": "1472204384374",
-      "content": "test",
-      "legend": "",
-      "projection": null,
-      "layers": [
-        "gullspang:150ms1330"
-      ],
-      "infobox": "",
-      "searchFields": [
-        ""
-      ],
-      "displayFields": [
-        ""
-      ],
-      "visibleAtStart": false,
-      "queryable": true,
-      "tiled": false
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png"
     },
     {
       "id": "d8eff0fd-fe48-c06a-8ad8-3ff3814a744a",
       "caption": "punkt",
       "url": "http://194.71.132.27/geoserver/demo/wms",
       "owner": "SBK",
-      "date": "1472212109200",
+      "date": "1474459164207",
       "content": "punkt",
       "legend": "",
       "projection": null,
@@ -120,14 +53,16 @@
       ],
       "visibleAtStart": true,
       "queryable": true,
-      "tiled": false
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png"
     },
     {
       "id": "84a8aa5c-a062-fc32-24fb-30df211427b4",
       "caption": "yta",
       "url": "http://194.71.132.27/geoserver/demo/wms",
       "owner": "SBK",
-      "date": "1472217088723",
+      "date": "1474459161533",
       "content": "yta",
       "legend": "",
       "projection": null,
@@ -143,30 +78,9 @@
       ],
       "visibleAtStart": true,
       "queryable": true,
-      "tiled": false
-    },
-    {
-      "id": "8f036834-00c2-77be-2b6e-423a2162b374",
-      "caption": "Mussla",
-      "url": "http://194.71.132.27/geoserver/wms",
-      "owner": "SBK",
-      "date": "1474020633825",
-      "content": "mussla",
-      "legend": "",
-      "projection": null,
-      "layers": [
-        "viskan:Anodonta_anatina"
-      ],
-      "infobox": "http://www.google.se\n",
-      "searchFields": [
-        ""
-      ],
-      "displayFields": [
-        ""
-      ],
-      "visibleAtStart": true,
-      "queryable": true,
-      "tiled": false
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png"
     }
   ],
   "wfslayers": [
