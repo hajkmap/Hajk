@@ -165,7 +165,7 @@ var ExportModel = ToolModel.extend({
   findWMS: function () {
 
     var exportable = layer =>
-      layer instanceof ol.layer.Tile && (
+      (layer instanceof ol.layer.Tile || layer instanceof ol.layer.Image) && (
       layer.getSource() instanceof ol.source.TileWMS ||
       layer.getSource() instanceof ol.source.ImageWMS) &&
       layer.getVisible();
@@ -179,9 +179,15 @@ var ExportModel = ToolModel.extend({
       .getLayers()
       .getArray()
       .filter(exportable)
-      .map((layer, i) => {
+      .map((layer, i) => { 
+        layerUrl = '';
+        if (typeof layer.getSource().getUrls == 'function')
+          layerUrl = formatUrl(layer.getSource().getUrls()[0]);
+        else if (typeof layer.getSource().getUrl == 'function')
+          layerUrl = formatUrl(layer.getSource().getUrl());
+
         return {
-          url: formatUrl(layer.getSource().getUrls()[0]),
+          url: layerUrl,
           layers: layer.getSource().getParams()["LAYERS"].split(','),
           zIndex: i,
           workspacePrefix: null,

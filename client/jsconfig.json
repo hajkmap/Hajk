@@ -7,7 +7,6 @@
         "compiled/legend.js": ["src/js/views/components/legend.jsx"],
         "compiled/legendbutton.js": ["src/js/views/components/legendbutton.jsx"],
         "compiled/featureinfo.js": ["src/js/views/components/featureinfo.jsx"],
-        "compiled/itemlist.js": ["src/js/views/components/itemlist.jsx"],
         "compiled/backgroundswitcher.js": ["src/js/views/components/backgroundswitcher.jsx"]
       }
     },
