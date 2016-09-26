@@ -56,7 +56,7 @@ var CoordinatesList = React.createClass({
     if (object.hasOwnProperty('default')){
       return (
         <dt>
-          <strong style={{color: 'bisque'}}>{title}</strong> (Primärt koordinatsystem)
+          <strong style={{color: 'bisque'}}>{title}</strong> (Standard i Göteborgs Stad)
         </dt>
       )
     } else {

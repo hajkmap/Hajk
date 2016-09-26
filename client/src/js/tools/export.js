@@ -285,7 +285,13 @@ var ExportModel = ToolModel.extend({
       function getText(feature) {
         if (feature.getProperties()) {
           if (feature.getProperties().type == "Text") {
-            return feature.getProperties().description;
+            if (feature.getProperties().description)
+              text = feature.getProperties().description
+            else if (feature.getProperties().name)
+              text = feature.getProperties().name
+            else 
+              text = ''
+            return text
           }
         }
         if (feature.getStyle()[1] &&
@@ -294,6 +300,8 @@ var ExportModel = ToolModel.extend({
           return feature.getStyle()[1].getText().getText();
         }
       }
+
+
 
       return [{
         features: features.map((feature) => {
@@ -308,8 +316,8 @@ var ExportModel = ToolModel.extend({
         })
       }]
     }
-
-    return generate(drawLayer.getSource().getFeatures());
+    f = generate(drawLayer.getSource().getFeatures());
+    return f
   },
   /*
    * @desc Clone map canvas and add copyright.

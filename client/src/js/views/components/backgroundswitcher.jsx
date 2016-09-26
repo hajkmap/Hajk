@@ -50,6 +50,9 @@ var BackgroundSwitcher = React.createClass({
   setBlackBackground: function () {
     this.clear();
     $('#map').css({background: 'black'});
+    this.setState({
+      "selected" : 'black'
+    })
   },
 
   /**
@@ -58,6 +61,9 @@ var BackgroundSwitcher = React.createClass({
   setWhiteBackground: function () {
     this.clear();
     $('#map').css({background: 'white'});
+    this.setState({
+      "selected" : 'white'
+    })
   },
 
   /**
@@ -80,6 +86,9 @@ var BackgroundSwitcher = React.createClass({
       baselayer.setVisible(visible);
       baselayer.getLayer().setVisible(visible);
     });
+    this.setState({
+      "selected" : layer.id
+    })
   },
 
   /**
@@ -112,10 +121,10 @@ var BackgroundSwitcher = React.createClass({
     return (
       this.props.layers.map((layer, i) => {
         var index = "background-layer-" + i
-        ,   checked = this.getSelected(layer);
+        ,   checked = this.getSelected(layer);        
         return (
           <li key={index}>
-            <input id={index} name="background" type="radio" defaultChecked={checked} onChange={() => this.setBackgroundLayer(layer) }></input>
+            <input id={index} name="background" type="radio" checked={checked} onChange={(e) => this.setBackgroundLayer(layer) }></input>
             <label htmlFor={index}>{layer.get('caption')}</label>
           </li>
         );
@@ -127,19 +136,25 @@ var BackgroundSwitcher = React.createClass({
    *
    */
   render: function () {
+    var black = white = false;
+    if (this.state.selected === 'black')
+      black = true;
+    if (this.state.selected === 'white')
+      white = true;
     return (
       <div className="background-switcher">
         <h3 onClick={this.setVisibility} ><span className={this.state.displayModeClass}></span>&nbsp;Bakgrundskartor</h3>
         <ul className={this.state.displayMode}>
+          {this.renderLayers()}
           <li key="-2">
-            <input id="-2" name="background" type="radio" defaultChecked="false" onChange={() => this.setWhiteBackground() }></input>
+            <input id="-2" name="background" type="radio" checked={white} onChange={() => this.setWhiteBackground() }></input>
             <label htmlFor="-2">Vit bakgrund</label>
           </li>
           <li key="-1">
-            <input id="-1" name="background" type="radio" defaultChecked="false" onChange={() => this.setBlackBackground() }></input>
+            <input id="-1" name="background" type="radio" checked={black} onChange={() => this.setBlackBackground() }></input>
             <label htmlFor="-1">Svart bakgrund</label>
           </li>
-          {this.renderLayers()}
+          
         </ul>
       </div>
     );

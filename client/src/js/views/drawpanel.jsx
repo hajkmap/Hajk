@@ -1,4 +1,5 @@
 var Panel = require('views/panel');
+var Alert = require('alert');
 
 var isMobile = () => document.body.clientWidth <= 600;
 
@@ -188,6 +189,42 @@ var DrawPanel = React.createClass({
       });
     });
   },
+
+  renderAlert: function () {
+    var options = {
+      visible: this.state.alert,
+      message: this.state.alertMessage,
+      confirm: this.state.confirm,
+      confirmAction: () => {
+        this.state.confirmAction();
+        this.setState({
+          alert: false,
+          confirm: false,
+          alertMessage: ""
+        })
+      },
+      denyAction: () => {
+        this.state.denyAction();
+        this.setState({
+          alert: false,
+          confirm: false,
+          alertMessage: ""
+        })
+      },
+      onClick: () => {
+        this.setState({
+          alert: false,
+          alertMessage: ""
+        })
+      }
+    };
+
+    if (this.state.alert) {
+      return <Alert options={options}/>
+    } else {
+      return null;
+    }
+  },
   /**
    * Remove all drawings from map.
    */
@@ -195,6 +232,20 @@ var DrawPanel = React.createClass({
     this.props.model.clear();
     this.props.model.set("kmlExportUrl", false);
     this.props.model.set("kmlImport", false);
+  },
+
+  alertClear: function(){
+    this.setState({
+          alert: true,
+          alertMessage: ` Vill du verkligen rensa allt?`,
+          confirm: true,
+          confirmAction: () => {
+            this.clear();
+          },
+          denyAction: () => {
+            this.setState({ alert: false });
+          }
+        });
   },
   /**
    * Abort any operation and deselect any tool.
@@ -517,7 +568,7 @@ var DrawPanel = React.createClass({
               <li id="delete" onClick={this.activateRemovalTool}>
                 <i className="fa fa-eraser fa-0"></i> <span>Radera</span>
               </li>
-              <li id="clear" onClick={this.clear}>
+              <li id="clear" onClick={this.alertClear}>
                 <i className="fa fa-trash fa-0"></i> <span>Rensa</span>
               </li>
               <li id="clear" onClick={this.import}>
@@ -538,6 +589,7 @@ var DrawPanel = React.createClass({
           </div>
         </Panel>
         {dialog}
+        {this.renderAlert()}
       </div>
     );
   }
