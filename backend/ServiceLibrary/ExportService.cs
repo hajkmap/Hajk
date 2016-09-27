@@ -152,7 +152,7 @@ namespace Sweco.Services
             doc.LoadXml(body);
             doc.Save(ms);
             System.IO.File.WriteAllBytes(fileinfo[0], ms.ToArray());
-            return HttpContext.Current.Server.MapPath(tempPath) + fileinfo[1];
+            return tempPath + '/' + fileinfo[1];
         }
 
         /// <summary>

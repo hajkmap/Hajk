@@ -26,6 +26,7 @@
       "displayFields": [
         ""
       ],
+      "imageFormat":  "image/png",
       "visibleAtStart": true,
       "queryable": false,
       "tiled": false
@@ -49,6 +50,7 @@
       "displayFields": [
         ""
       ],
+      "imageFormat":  "image/png",
       "visibleAtStart": true,
       "queryable": true,
       "tiled": false
@@ -72,6 +74,7 @@
       "displayFields": [
         ""
       ],
+      "imageFormat":  "image/png",
       "visibleAtStart": false,
       "queryable": true,
       "tiled": false
@@ -95,6 +98,7 @@
       "displayFields": [
         ""
       ],
+      "imageFormat":  "image/png",
       "visibleAtStart": false,
       "queryable": true,
       "tiled": false
@@ -118,6 +122,7 @@
       "displayFields": [
         ""
       ],
+      "imageFormat":  "image/png",
       "visibleAtStart": true,
       "queryable": true,
       "tiled": false
@@ -141,6 +146,7 @@
       "displayFields": [
         ""
       ],
+      "imageFormat":  "image/png",
       "visibleAtStart": true,
       "queryable": true,
       "tiled": false
@@ -164,6 +170,7 @@
       "displayFields": [
         ""
       ],
+      "imageFormat":  "image/png",
       "visibleAtStart": true,
       "queryable": true,
       "tiled": false
