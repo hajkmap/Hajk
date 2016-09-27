@@ -22,6 +22,9 @@ var BackgroundSwitcher = React.createClass({
     this.props.model.on('change:backgroundSwitcherMode', () => {
       this.backgroundSwitcherModeChanged()
     });
+    this.setState({
+      selected: this.props.model.get('background')
+    })
   },
 
   /**
@@ -52,7 +55,8 @@ var BackgroundSwitcher = React.createClass({
     $('#map').css({background: 'black'});
     this.setState({
       "selected" : 'black'
-    })
+    });
+    this.props.model.set('background', 'black');
   },
 
   /**
@@ -63,7 +67,8 @@ var BackgroundSwitcher = React.createClass({
     $('#map').css({background: 'white'});
     this.setState({
       "selected" : 'white'
-    })
+    });
+    this.props.model.set('background', 'white');
   },
 
   /**
@@ -89,6 +94,7 @@ var BackgroundSwitcher = React.createClass({
     this.setState({
       "selected" : layer.id
     })
+    this.props.model.set('background', layer.id);
   },
 
   /**

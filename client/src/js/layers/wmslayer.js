@@ -22,12 +22,12 @@ module.exports = LayerModel.extend({
          imageFormat: this.get('imageFormat')
       };
 
-      if (this.get('params').TILED) {         
+      if (this.get('resolutions') && this.get('origin')) {     
          source.tileGrid = new ol.tilegrid.TileGrid({
            resolutions: this.get('resolutions'),
            origin: this.get('origin')
          }),
-         source.extent = this.get('tiled')
+         source.extent = this.get('extent')
       }
 
       if (this.get('singleTile')) {

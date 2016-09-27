@@ -177,6 +177,8 @@ var MapModel = {
       controls: [new ol.control.Zoom(),  new ol.control.ScaleLine()],
       view: new ol.View({
         zoom: this.get("zoom"),
+        units: 'm',
+        resolutions: this.get('resolutions'),
         center: this.get("center"),
         projection: this.get("projection"),
         minZoom: this.get("minZoom"),

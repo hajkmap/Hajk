@@ -138,6 +138,7 @@ namespace Sweco.Services
             string source = String.Empty;
             string type = String.Empty;
             string body = String.Empty;
+            string tempPath = "/Temp";
 
             using (var stream = OperationContext.Current.RequestContext.RequestMessage.GetBody<Stream>())
             {
@@ -151,7 +152,7 @@ namespace Sweco.Services
             doc.LoadXml(body);
             doc.Save(ms);
             System.IO.File.WriteAllBytes(fileinfo[0], ms.ToArray());
-            return HttpContext.Current.Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileinfo[1];
+            return tempPath + '/' + fileinfo[1];
         }
 
         /// <summary>

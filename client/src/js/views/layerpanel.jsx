@@ -152,7 +152,7 @@ var LayerPanel = React.createClass({
           if (group.parent && group.parent != -1) {
             recur.call(this, group.parent);
           }
-          this.refs["group_" + groupId].checked = layers.every(lyr => lyr.getVisible() === true);
+          //this.refs["group_" + groupId].checked = layers.every(lyr => lyr.getVisible() === true);
         }
       }
     }, 0);
@@ -226,7 +226,7 @@ var LayerPanel = React.createClass({
         <div className="layer-group" key={i}>
           <div>
             <span className={buttonClassName} onClick={this.toggleGroupVisibility.bind(this, group)}></span>&nbsp;
-            <input type="checkbox" ref={id} onChange={this.toggleGroup.bind(this, group)} id={id} />
+            {/*<input type="checkbox" ref={id} onChange={this.toggleGroup.bind(this, group)} id={id} />*/}
             <label htmlFor={id}>{group.name}</label>
           </div>
           <div className={this.state[id]}>
