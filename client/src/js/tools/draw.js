@@ -496,10 +496,19 @@ var Draw = module.exports = ToolModel.extend({
    * Import draw layer.
    */
   importDrawLayer: function (xmlDoc) {
+    var kml_string = xmlDoc.documentElement.childNodes[0].data;
+    
+    if (!kml_string){
+      try{
+          kml_string = xmlDoc.documentElement.childNodes[1].data;
+      }
+      catch (e){
+          console.error('Could not import features from kml. Check var xmlDoc in draw.js');
+      }
+    }
 
-    var kml_string = xmlDoc.documentElement.childNodes[0].data
-    ,   parser     = new ol.format.KML()
-    ,   features   = parser.readFeatures(kml_string);
+    var parser     = new ol.format.KML();
+    var features   = parser.readFeatures(kml_string);
 
     features.forEach((feature) => {
       coordinates = feature.getGeometry().getCoordinates();
