@@ -498,6 +498,7 @@ var Draw = module.exports = ToolModel.extend({
   importDrawLayer: function (xmlDoc) {
     var kml_string = xmlDoc.documentElement.childNodes[0].data;
     
+    //Chrome stores data in index [1] of the array and explorer in [0]
     if (!kml_string){
       try{
           kml_string = xmlDoc.documentElement.childNodes[1].data;
