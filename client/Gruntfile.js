@@ -50,6 +50,11 @@ module.exports = function (grunt) {
         release: {
           files: [
               {
+                cwd: "src/static/fonts",
+                src: "**/*",
+                dest: "dist/fonts", expand: true
+              },
+              {
                 cwd: "node_modules/font-awesome/fonts",
                 src: "*",
                 dest: "release/fonts",
