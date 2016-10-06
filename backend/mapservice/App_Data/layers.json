@@ -5,7 +5,7 @@
       "caption": "Bakgrund",
       "url": "http://www.asp-mapservices.com/ravegeo/map2/WMS?name=lm2013",
       "owner": "SBK",
-      "date": "1474459128528",
+      "date": "1475706588290",
       "content": "bakgrundskarta",
       "legend": "",
       "projection": null,
@@ -26,18 +26,19 @@
       "displayFields": [
         ""
       ],
-      "imageFormat":  "image/png",
-      "visibleAtStart": true,
+      "visibleAtStart": false,
       "queryable": false,
-      "tiled": false
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png"
     },
     {
       "id": "1",
-      "caption": "Höjdpunkter",
+      "caption": "HÃ¶jdpunkter",
       "url": "http://194.71.132.27/geoserver/wms",
       "owner": "SBK",
       "date": "1471614572032",
-      "content": "höjdpunkter",
+      "content": "hï¿½jdpunkter",
       "legend": "",
       "projection": null,
       "layers": [
@@ -50,10 +51,11 @@
       "displayFields": [
         ""
       ],
-      "imageFormat":  "image/png",
       "visibleAtStart": true,
       "queryable": true,
-      "tiled": false
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png"
     },
     {
       "id": "2",
@@ -74,10 +76,11 @@
       "displayFields": [
         ""
       ],
-      "imageFormat":  "image/png",
       "visibleAtStart": false,
       "queryable": true,
-      "tiled": false
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png"
     },
     {
       "id": "1f3a75b0-8fee-79cc-76bb-e0863ce9fdba",
@@ -98,10 +101,11 @@
       "displayFields": [
         ""
       ],
-      "imageFormat":  "image/png",
       "visibleAtStart": false,
       "queryable": true,
-      "tiled": false
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png"
     },
     {
       "id": "d8eff0fd-fe48-c06a-8ad8-3ff3814a744a",
@@ -122,7 +126,6 @@
       "displayFields": [
         ""
       ],
-      "imageFormat":  "image/png",
       "visibleAtStart": true,
       "queryable": true,
       "tiled": false,
@@ -148,10 +151,11 @@
       "displayFields": [
         ""
       ],
-      "imageFormat":  "image/png",
       "visibleAtStart": true,
       "queryable": true,
-      "tiled": false
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png"
     },
     {
       "id": "8f036834-00c2-77be-2b6e-423a2162b374",
@@ -172,10 +176,109 @@
       "displayFields": [
         ""
       ],
-      "imageFormat":  "image/png",
       "visibleAtStart": true,
       "queryable": true,
-      "tiled": false
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png"
+    },
+    {
+      "id": "5cc603f8-3c61-b4f8-1f92-77df79c15fab",
+      "caption": "Test",
+      "url": "http://gisak.alingsas.se/arcgis/services/Bakgrund/Alingsaskartan_Gul/MapServer/WMSServer",
+      "owner": "SBK",
+      "date": "1475706717372",
+      "content": "test",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": true,
+      "queryable": false,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png"
+    },
+    {
+      "id": "982316d2-0890-6817-32d3-e1a306425df9",
+      "caption": "Lights platser",
+      "url": "http://gisak.alingsas.se/arcgis/services/Lights/Lights_2016/MapServer/WMSServer",
+      "owner": "SBK",
+      "date": "1475712545373",
+      "content": "lights",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "1"
+      ],
+      "infobox": "Design: {Design}  \nNamn: {Namn}  \n\n{Text}\n\n<img src=\"{Image_link}\" />",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": true,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "arcgis"
+    },
+    {
+      "id": "7dca3212-a96f-4818-1df7-41b64d055de6",
+      "caption": "Lights slinga",
+      "url": "http://gisak.alingsas.se/arcgis/services/Lights/Lights_2016/MapServer/WMSServer",
+      "owner": "SBK",
+      "date": "1475712535284",
+      "content": "a",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "0"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": true,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "arcgis"
     }
   ],
   "wfslayers": [

@@ -72,9 +72,9 @@ module.exports = LayerModel.extend({
    },
 
    validInfo: true,
-
-   getFeatureInformation: function (params) {
-      var url;
+      
+   getFeatureInformation: function (params) {         
+      var url = "";
       try {
 
          this.validInfo = true;
@@ -87,7 +87,7 @@ module.exports = LayerModel.extend({
                params.resolution,
                params.projection,
                {
-                  'INFO_FORMAT': 'application/json'                  
+                  'INFO_FORMAT': this.get('serverType') === 'arcgis' ? 'application/geojson' : 'application/json'
                }
             );
 
@@ -97,7 +97,8 @@ module.exports = LayerModel.extend({
             }
             var request = $.ajax({
                url: HAJK2.searchProxy + url,               
-               success: (data) => {                  
+               success: (data) => {   
+                  //console.log(data);               
                   var features = new ol.format.GeoJSON().readFeatures(data);
                   this.featureInformationCallback(features, this.getLayer());
                }            
@@ -107,7 +108,6 @@ module.exports = LayerModel.extend({
       } catch (e) {
          params.error(e);
       }
-
    },
 
    tileLoadError: function () {
