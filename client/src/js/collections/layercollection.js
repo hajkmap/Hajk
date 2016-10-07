@@ -99,6 +99,7 @@ var LayerCollection = {
         "extent": properties.mapConfig.extent,
         "singleTile": args.singleTile || false,
         "imageFormat": args.imageFormat || "image/png",
+        "serverType": args.serverType || "geoserver",
         "legend" : [{
           "Url": getLegendUrl(args),
           "Description" : "Teckenförklaring"

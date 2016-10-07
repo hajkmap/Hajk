@@ -336,18 +336,52 @@ class Manager extends React.Component {
    *
    */
   renderLayersFromCapabilites() {
-    if (this.state && this.state.capabilities) {
-      return this.state.capabilities.Capability.Layer.Layer.map((layer, i) => {
+    if (this.state && this.state.capabilities) {      
+      var layers = [];
+
+      var append = (layer) => {      
+        
         var classNames = this.state.layerPropertiesName === layer.Name ?
-                         "fa fa-info-circle active" : "fa fa-info-circle";
+                         "fa fa-info-circle active" : "fa fa-info-circle";      
+
+        var i = Math.floor(Math.random() * 1E6);
+        var title = /^\d+$/.test(layer.Name) ? <label>&nbsp;{layer.Title}</label> : null;
+        
         return (
           <li key={i}>
-            <input ref={layer.Name} id={"layer" + i} type="checkbox" data-type="wms-layer" onChange={(e) => { this.appendLayer(e, layer.Name) }}/>&nbsp;
-            <label htmlFor={"layer" + i}>{layer.Name}</label>
+            <input 
+              ref={layer.Name} 
+              id={"layer" + i} 
+              type="checkbox" 
+              data-type="wms-layer" 
+              checked={this.state.addedLayers.find(l => l === layer.Name)}
+              onChange={(e) => { 
+                this.appendLayer(e, layer.Name)
+              }} />&nbsp;
+            <label htmlFor={"layer" + i}>{layer.Name}</label>{title}
             <i style={{display:"none"}} className={classNames} onClick={(e) => this.describeLayer(e, layer.Name)}></i>
           </li>
         )
+      };
+
+      this.state.capabilities.Capability.Layer.Layer.map((layer) => {
+        if (layer.Layer) {          
+          layer.Layer.forEach((layer) => {
+            if (layer.Layer) {
+              layer.Layer.forEach((layer) => {
+                layers.push(append(layer));  
+              });
+            } else {
+              layers.push(append(layer));
+            }
+          });
+        } else {
+          layers.push(append(layer));
+        }
       });
+
+      return layers;
+
     } else {
       return null;
     }
