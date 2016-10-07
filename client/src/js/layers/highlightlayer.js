@@ -1,15 +1,15 @@
 var LayerModel = require('layers/layer');
 
 /**
- * Highlightlayer model properties
- * @class HighlightLayerProperties
+ * HighlightLayerProperties object
+ * @typedef {Object} HighlightLayer~HighlightLayerProperties
+ * @property {external:ol.source} source
+ * @property {string} name
+ * @property {external:ol.layer} selectedLayer
  */
 var HighlightLayerProperties = {
-  /** property {external:ol.source} source */
   source: undefined,
-  /** property {string} name */
   name: "highlight-wms",
-  /** property {external:ol.layer} selectedLayer */
   selectedLayer: undefined
 };
 
@@ -17,15 +17,15 @@ var HighlightLayerProperties = {
  * Prototype for creating a highlightlayer.
  * @class HighlightLayer
  * @augments Layer
+ * @param {HighlightLayer~HighlightLayerProperties} options
+ * @param {string} type
  */
 var HighlightLayer = {
   /**
-   * @property {HighlightLayerProperties} defualts - Default properties
+   * @property {HighlightLayer~HighlightLayerProperties} defualts - Default properties
    */
   defaults: HighlightLayerProperties,
-  /**
-   * Constructor method
-   */
+
   initialize: function () {
     LayerModel.prototype.initialize.call(this);
     var selectInteraction;
@@ -56,8 +56,10 @@ var HighlightLayer = {
     this.set("visible", true);
     this.set("type", "highlight");
   },
+
   /**
    * Remove all features from the highlight layer.
+   * @instance
    */
   clearHighlight: function () {
     var source = this.get('source');
@@ -65,12 +67,13 @@ var HighlightLayer = {
   },
   /**
    * Add a feature to the highlight layer.
+   * @instance
    * @param {external:ol.Feature} feature
    */
   addHighlight: function (feature) {
     var source = this.get('source');
     this.set('visible', true);
-    if (source.getFeatures().length>0) {
+    if (source.getFeatures().length > 0) {
       this.clearHighlight();
     }
     source.addFeature(feature);
@@ -78,6 +81,7 @@ var HighlightLayer = {
   /**
    * Set selected layer.
    * @param {external:ol.layer} layer
+   * @instance
    */
   setSelectedLayer: function (layer) {
     this.set('selectedLayer', layer);
@@ -87,6 +91,7 @@ var HighlightLayer = {
   },
   /**
    * Event handler, fires when the selected layer changes.
+   * @instance
    * @param {object} options
    * @param {object} args
    */

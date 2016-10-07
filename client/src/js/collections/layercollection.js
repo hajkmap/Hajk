@@ -1,5 +1,3 @@
-"use strict";
-
 var types = {
   "wms": require('layers/wmslayer'),
   "wfs": require('layers/wfslayer'),
@@ -41,11 +39,42 @@ var LayerCollection = {
    * Generates a model for this layer
    * @param {object} args
    * @param {object} properties
-   * @return {Layer} layer
+   * @return {object} config
    */
-  model: function (args, properties) {
+  mapWMTSConfig: function(args, properties) {
 
-    function getLegendUrl(args) {
+    var config = {
+      type: 'wmts',
+      options: {
+        id: args.id,
+        name: args.id,
+        caption: args.caption,
+        visible: args.visibleAtStart || true,
+        queryable: false,
+        opacity: args.opacity || 1,
+        format: 'image/png',
+        wrapX: false,
+        url: args.url,
+        layer: args.layer,
+        matrixSet: args.matrixSet,
+        style: args.style,
+        projection: args.projection,
+        origin: args.origin,
+        resolutions: args.resolutions,
+        matrixIds: args.matrixIds
+      }
+    };
+    return config;
+  },
+  /**
+   * Generates a model for this layer
+   * @param {object} args
+   * @param {object} properties
+   * @return {object} config
+   */
+  mapWMSConfig: function(args, properties) {
+
+    function getLegendUrl() {
       if (args.legend === "") {
         args.legend = `${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${args.layers[0]}`
       }
@@ -53,7 +82,7 @@ var LayerCollection = {
       return protocol + args.legend;
     }
 
-    var layer_config = {
+    var config = {
       type : "wms",
       options: {
         "id": args.id,
@@ -85,7 +114,7 @@ var LayerCollection = {
     };
 
     if (args.searchFields && args.searchFields[0] !== "") {
-      layer_config.options.search = {
+      config.options.search = {
         "url": (HAJK2.searchProxy || "") + args.url.replace('wms', 'wfs'),
         "featureType": args.layers[0].split(':')[1] || args.layers[0].split(':')[0],
         "propertyName": args.searchFields.join(','),
@@ -94,13 +123,33 @@ var LayerCollection = {
       };
     }
 
-    var Layer = types[layer_config.type];
+    return config;
+  },
+  /**
+   * Generates a model for this layer
+   * @param {object} args
+   * @param {object} properties
+   * @return {Layer} layer
+   */
+  model: function (args, properties) {
+
+    var config = false;
+
+    if (args.type === "wms") {
+      config = LayerCollection.mapWMSConfig(args, properties);
+    }
+    if (args.type === "wmts") {
+      config = LayerCollection.mapWMTSConfig(args, properties);
+    }
+
+    var Layer = types[config.type];
 
     if (Layer) {
-      return new Layer(layer_config.options, layer_config.type);
+      return new Layer(config.options, config.type);
     } else {
-      throw "Layer type not supported " + layer_config.type;
+      throw "Layer type not supported: " + config.type;
     }
+
   },
   /**
    * Constructor method

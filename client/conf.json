@@ -7,7 +7,7 @@
         "includePattern": ".+\\.js(doc)?$",
         "excludePattern": "(^|\\/|\\\\)_",
         "include": ["src/js"],
-        "exclude": ["src/js/dependencies.js", "src/js/index.js"]
+        "exclude": ["src/js/dependencies.js"]
     },
     "plugins": [],
     "templates": {

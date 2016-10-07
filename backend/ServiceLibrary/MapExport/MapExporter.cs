@@ -2,6 +2,7 @@
 using NetTopologySuite.Geometries;
 using SharpMap;
 using SharpMap.Data;
+using SharpMap.Data.Providers;
 using SharpMap.Layers;
 using SharpMap.Rendering.Thematics;
 using SharpMap.Styles;
@@ -15,6 +16,10 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using GeoAPI.Features;
+using BruTile;
+using BruTile.Wmts;
 
 namespace Sweco.Services.MapExport
 {
@@ -28,69 +33,77 @@ namespace Sweco.Services.MapExport
         /// <summary>
         /// Property exportItem
         /// </summary>
-        private MapExportItem exportItem;
+        private MapExportItem exportItem;        
 
         /// <summary>
         /// Delegate to create style per feature based by style attribute.
         /// </summary>
         /// <param name="row"></param>
         /// <returns>IStyle Vector style to use for this feature</returns>
-        private IStyle GetFeatureStyle(FeatureDataRow row)
-        {                        
+        ///        
+
+        private IStyle GetFeatureStyle(IFeature feature)
+        {
+            Feature f = (Feature)feature;
+
             VectorStyle style = new VectorStyle();
-            if (row["style"] != null)
+            if (f.attributes.style != null)
             {
-                Style featureStyle = (Style)row["style"];
+                Style featureStyle = f.attributes.style;
                 style.EnableOutline = true;
 
                 style.Line.Color = ColorTranslator.FromHtml(featureStyle.strokeColor);
                 style.Line.Width = (float)featureStyle.strokeWidth;
                 style.Line.SetLineCap(LineCap.Round, LineCap.Round, DashCap.Round);
 
-                switch (featureStyle.strokeDashstyle) {
+                switch (featureStyle.strokeDashstyle)
+                {
                     case "dot":
                         style.Outline.DashStyle = DashStyle.Dot;
                         style.Line.DashStyle = DashStyle.Dot;
-                       break;
-                    case "solid":                       
-                       style.Line.DashStyle = DashStyle.Solid;
-                       break;
-                    case "dash":                       
-                       style.Line.DashStyle = DashStyle.Dash;
-                       break;
-                    case "dashdot":                       
-                       style.Line.DashStyle = DashStyle.DashDot;
-                       break;
-                    case "longdash":                       
-                       style.Line.DashStyle = DashStyle.DashDot;
-                       style.Line.DashPattern = new float[] { 8, 2 };
-                       break;
-                    case "longdashdot":                       
-                       style.Line.DashStyle = DashStyle.DashDot;                       
-                       style.Line.DashPattern = new float[] { 8, 2 , 1, 2 };
-                       break;
-                    default:                       
-                       style.Line.DashStyle = DashStyle.Solid;
-                       break;
+                        break;
+                    case "solid":
+                        style.Line.DashStyle = DashStyle.Solid;
+                        break;
+                    case "dash":
+                        style.Line.DashStyle = DashStyle.Dash;
+                        break;
+                    case "dashdot":
+                        style.Line.DashStyle = DashStyle.DashDot;
+                        break;
+                    case "longdash":
+                        style.Line.DashStyle = DashStyle.DashDot;
+                        style.Line.DashPattern = new float[] { 8, 2 };
+                        break;
+                    case "longdashdot":
+                        style.Line.DashStyle = DashStyle.DashDot;
+                        style.Line.DashPattern = new float[] { 8, 2, 1, 2 };
+                        break;
+                    default:
+                        style.Line.DashStyle = DashStyle.Solid;
+                        break;
                 }
 
                 style.Outline = style.Line;
 
                 Color color = ColorTranslator.FromHtml(featureStyle.fillColor);
-                Color pointColor = ColorTranslator.FromHtml(featureStyle.pointFillColor); 
+                Color pointColor = ColorTranslator.FromHtml(featureStyle.pointFillColor);
 
-                if (featureStyle.fillOpacity != null) {
+                if (featureStyle.fillOpacity != null)
+                {
                     int opac = (int)(255 * featureStyle.fillOpacity);
                     Color transparent = Color.FromArgb(opac, color);
-                    style.Fill = new SolidBrush(transparent);                    
-                } else {
-                    style.Fill = new SolidBrush(color);                                      
+                    style.Fill = new SolidBrush(transparent);
+                }
+                else
+                {
+                    style.Fill = new SolidBrush(color);
                 }
 
                 if (featureStyle.pointSrc != "")
                 {
                     try
-                    {                        
+                    {
                         WebClient wc = new WebClient();
                         byte[] bytes = wc.DownloadData(featureStyle.pointSrc);
                         MemoryStream ms = new MemoryStream(bytes);
@@ -106,7 +119,7 @@ namespace Sweco.Services.MapExport
                     style.PointColor = new SolidBrush(pointColor);
                     style.PointSize = (float)featureStyle.pointRadius * 2;
                 }
-                
+
             }
             return style;
         }
@@ -116,9 +129,10 @@ namespace Sweco.Services.MapExport
         /// </summary>
         /// <param name="row"></param>
         /// <returns>IStyle Vector style to use for this feature</returns>
-        private IStyle GetLabelStyle(FeatureDataRow row)
+        private IStyle GetLabelStyle(IFeature feature)
         {
-            Style featureStyle = (Style)row["style"];
+            Feature f = (Feature)feature;
+            Style featureStyle = f.attributes.style;
             LabelStyle labelStyle = new SharpMap.Styles.LabelStyle();            
             
             if (featureStyle.fontSize == null)
@@ -141,6 +155,44 @@ namespace Sweco.Services.MapExport
 
             return labelStyle;
         }
+        
+        /// <summary>
+        /// Create tile source
+        /// </summary>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        private ITileSource createTileSource(WMTSInfo config)
+        {
+            Uri uri = new Uri(string.Format("{0}{1}", config.url, "?request=getCapabilities"));
+            var req = WebRequest.Create(uri);
+            var resp = req.GetResponseAsync();
+            ITileSource tileSource;
+
+            BoundingBoxAxisOrderInterpretation axisMode = BoundingBoxAxisOrderInterpretation.Natural;
+            switch (config.axisMode)
+            {
+                case "geographic":
+                    axisMode = BoundingBoxAxisOrderInterpretation.Geographic;
+                    break;
+                case "crs":
+                    axisMode = BoundingBoxAxisOrderInterpretation.CRS;
+                    break;
+                case "natural":
+                    axisMode = BoundingBoxAxisOrderInterpretation.Natural;
+                    break;
+                default:
+                    axisMode = BoundingBoxAxisOrderInterpretation.Natural;
+                    break;
+            }
+
+            
+            using (var stream = resp.Result.GetResponseStream())
+            {
+                IEnumerable<ITileSource> tileSources = WmtsParser.Parse(stream, axisMode);
+                tileSource = tileSources.FirstOrDefault();
+            }
+            return tileSource;
+        }
 
         /// <summary>
         /// Create a new ExportMap object.
@@ -157,15 +209,17 @@ namespace Sweco.Services.MapExport
         /// Add a list of wms layers to the map.
         /// </summary>
         /// <param name="wmsLayers"></param>
-        public void AddWMSLayers (List<WMSInfo> wmsLayers)
+        public void AddWMSLayers(List<WMSInfo> wmsLayers)
         {
             wmsLayers = wmsLayers.OrderBy(layer => layer.zIndex).ToList();
             try
-            {                
+            {  
+                                                  
                 for (int i = 0; i < wmsLayers.Count; i++)            
                 {                    
                     string layername = "WMSLayer_" + i;                    
-                    WmsLayer layer = new WmsLayer(layername, wmsLayers[i].url);                    
+                    WmsLayer layer = new WmsLayer(layername, wmsLayers[i].url);     
+                    
                     layer.SetImageFormat("image/png");
                     layer.BgColor = Color.White;
                     layer.Transparent = true;
@@ -197,8 +251,36 @@ namespace Sweco.Services.MapExport
             catch
             {                    
             }
-        }
-        
+        }        
+
+        public void AddWMTSLayers(List<WMTSInfo> wmtsLayers, Action callback)
+        {            
+            if (wmtsLayers == null || wmtsLayers.Count == 0)
+            {
+                callback.Invoke();
+                return;
+            }
+              
+            var i = 0;
+            List<ModTileAsyncLayer> layers = new List<ModTileAsyncLayer>();
+            wmtsLayers.ForEach((layer) =>
+            {
+                var tileSource = this.createTileSource(layer);
+                ModTileAsyncLayer wmtsLayer = new ModTileAsyncLayer(tileSource, "wmts_layer_" + i);
+                layers.Add(wmtsLayer);
+                map.BackgroundLayer.Add(wmtsLayer);
+
+                wmtsLayer.MapNewTileAvaliable += (TileLayer sender, Envelope bbox, Bitmap bm, int sourceWidth, int sourceHeight, System.Drawing.Imaging.ImageAttributes imageAttributes) =>
+                {                    
+                    if (layers.All(w => w.NumPendingDownloads <= 1))
+                    {
+                        callback.Invoke();
+                    };
+                };
+                i++;
+            });                  
+        }   
+
         /// <summary>        
         /// /// Add a list of vector layers to the map.
         /// </summary>
@@ -253,8 +335,8 @@ namespace Sweco.Services.MapExport
 
                     featureData.AddRow(dataRow);                        
                 });
-
-                vectorLayer.DataSource = new SharpMap.Data.Providers.GeometryFeatureProvider(featureData);                
+                
+                vectorLayer.DataSource = new SharpMap.Data.Providers.FeatureProvider(featureData);                
                 
                 vectorLayer.Theme = new CustomTheme(GetFeatureStyle);
                 map.Layers.Add(vectorLayer);                               

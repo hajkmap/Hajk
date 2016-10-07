@@ -1,11 +1,67 @@
 {
+  "wmtslayers": [
+    {
+      "id": "77676120-1157-b861-706a-908ecd18c258",
+      "caption": "Topowebb",
+      "url": "http://194.71.132.27/lmproxy/wmts",
+      "owner": "SBK",
+      "date": "1475843752129",
+      "content": "topowebbkarta",
+      "legend": "",
+      "projection": "EPSG:3006",
+      "visibleAtStart": true,
+      "layer": "topowebb",
+      "style": "default",
+      "matrixSet": "3006",
+      "origin": [
+        "-1200000",
+        "8500000"
+      ],
+      "resolutions": [
+        "4096",
+        "2048",
+        "1024",
+        "512",
+        "256",
+        "128",
+        "64",
+        "32",
+        "16",
+        "8",
+        "4",
+        "2",
+        "1",
+        "0.5"
+      ],
+      "matrixIds": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17"
+      ]
+    }
+  ],
   "wmslayers": [
     {
       "id": "0",
       "caption": "Bakgrund",
       "url": "http://www.asp-mapservices.com/ravegeo/map2/WMS?name=lm2013",
       "owner": "SBK",
-      "date": "1474459128528",
+      "date": "1475125567085",
       "content": "bakgrundskarta",
       "legend": "",
       "projection": null,
@@ -26,34 +82,12 @@
       "displayFields": [
         ""
       ],
-      "imageFormat":  "image/png",
-      "visibleAtStart": true,
+      "visibleAtStart": false,
       "queryable": false,
-      "tiled": false
-    },
-    {
-      "id": "1",
-      "caption": "Höjdpunkter",
-      "url": "http://194.71.132.27/geoserver/wms",
-      "owner": "SBK",
-      "date": "1471614572032",
-      "content": "höjdpunkter",
-      "legend": "",
-      "projection": null,
-      "layers": [
-        "viskan:Hojdpunkter"
-      ],
-      "infobox": "",
-      "searchFields": [
-        ""
-      ],
-      "displayFields": [
-        ""
-      ],
-      "imageFormat":  "image/png",
-      "visibleAtStart": true,
-      "queryable": true,
-      "tiled": false
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver"
     },
     {
       "id": "2",
@@ -74,10 +108,12 @@
       "displayFields": [
         ""
       ],
-      "imageFormat":  "image/png",
       "visibleAtStart": false,
       "queryable": true,
-      "tiled": false
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": null
     },
     {
       "id": "1f3a75b0-8fee-79cc-76bb-e0863ce9fdba",
@@ -98,17 +134,19 @@
       "displayFields": [
         ""
       ],
-      "imageFormat":  "image/png",
       "visibleAtStart": false,
       "queryable": true,
-      "tiled": false
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": null
     },
     {
       "id": "d8eff0fd-fe48-c06a-8ad8-3ff3814a744a",
       "caption": "punkt",
       "url": "http://194.71.132.27/geoserver/demo/wms",
       "owner": "SBK",
-      "date": "1474459164207",
+      "date": "1475100998219",
       "content": "punkt",
       "legend": "",
       "projection": null,
@@ -122,19 +160,19 @@
       "displayFields": [
         ""
       ],
-      "imageFormat":  "image/png",
       "visibleAtStart": true,
       "queryable": true,
       "tiled": false,
       "singleTile": false,
-      "imageFormat": "image/png"
+      "imageFormat": "image/png",
+      "serverType": null
     },
     {
       "id": "84a8aa5c-a062-fc32-24fb-30df211427b4",
       "caption": "yta",
       "url": "http://194.71.132.27/geoserver/demo/wms",
       "owner": "SBK",
-      "date": "1474459161533",
+      "date": "1475101155945",
       "content": "yta",
       "legend": "",
       "projection": null,
@@ -148,10 +186,12 @@
       "displayFields": [
         ""
       ],
-      "imageFormat":  "image/png",
       "visibleAtStart": true,
       "queryable": true,
-      "tiled": false
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver"
     },
     {
       "id": "8f036834-00c2-77be-2b6e-423a2162b374",
@@ -172,10 +212,121 @@
       "displayFields": [
         ""
       ],
-      "imageFormat":  "image/png",
       "visibleAtStart": true,
       "queryable": true,
-      "tiled": false
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": null
+    },
+    {
+      "id": "5d07b37e-956f-fab1-90f3-03dab07a52d3",
+      "caption": "Dammar 3007",
+      "url": "http://194.71.132.27/geoserver/wms",
+      "owner": "SBK",
+      "date": "1475141933728",
+      "content": "test",
+      "legend": "http://localhost/Upload/c31e9382-b4cc-42ab-9090-1e2641204813.png",
+      "projection": null,
+      "layers": [
+        "demo:dammar3007"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": true,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver"
+    },
+    {
+      "id": "2e5178f3-6240-2f83-0e38-741be1c988a5",
+      "caption": "Fastighetsyta",
+      "url": "http://194.71.132.27/geoserver/demo/wms",
+      "owner": "SBK",
+      "date": "1475142241946",
+      "content": "Fastighetsytor i Karlstad. Kvarteret Merkurius.",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "demo_fastighet"
+      ],
+      "infobox": "De ser nu fastigheten {fastighet}  \nRadbrytning {fnr}",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": true,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver"
+    },
+    {
+      "id": "7bd997d7-8f77-96ef-d33a-804a85f7d9c0",
+      "caption": "blandad",
+      "url": "http://194.71.132.27/geoserver/wms",
+      "owner": "SBK",
+      "date": "1475225245618",
+      "content": "test",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "gullspang:gispro"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver"
+    },
+    {
+      "id": "79d49f23-d811-90aa-1d16-5b890dac16bb",
+      "caption": "Viskan dammdelar",
+      "url": "http://194.71.132.27/geoserver/wms",
+      "owner": "SBK",
+      "date": "1475227578532",
+      "content": "Viskan dammdelar",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "viskan:PL_SS_BYGGNAD",
+        "viskan:PL_SS_TUNNEL",
+        "viskan:PT_SS_DAMM",
+        "viskan:PT_SS_BYGGNAD",
+        "viskan:PT_SS_MATPUNKT",
+        "viskan:PT_SS_UTSKOV"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver"
     }
   ],
   "wfslayers": [
@@ -206,6 +357,22 @@
       ],
       "displayFields": [
         "plats_namn"
+      ],
+      "outputFormat": "GML3"
+    },
+    {
+      "id": "ef94049e-b1ed-87da-3e69-532391c34ea2",
+      "caption": "SÃ¶k fastighet",
+      "url": "http://194.71.132.27/geoserver/demo/wfs",
+      "layers": [
+        "demo:demo_fastighet"
+      ],
+      "searchFields": [
+        "fastighet"
+      ],
+      "displayFields": [
+        "fastighet",
+        "fnr"
       ],
       "outputFormat": "GML3"
     }
@@ -303,6 +470,34 @@
           "name": "float",
           "dataType": "number",
           "textType": null,
+          "values": null
+        }
+      ],
+      "editPoint": false,
+      "editPolygon": true,
+      "editLine": false
+    },
+    {
+      "id": "97ea4285-06e7-3840-ba6c-f758c0673fd6",
+      "caption": "fastighet",
+      "url": "http://194.71.132.27/geoserver/demo/wfs",
+      "projection": "EPSG:3006",
+      "layers": [
+        "demo:demo_fastighet"
+      ],
+      "editableFields": [
+        {
+          "index": 2,
+          "name": "fnr",
+          "dataType": "int",
+          "textType": null,
+          "values": null
+        },
+        {
+          "index": 3,
+          "name": "fastighet",
+          "dataType": "string",
+          "textType": "fritext",
           "values": null
         }
       ],

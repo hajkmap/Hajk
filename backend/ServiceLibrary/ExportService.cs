@@ -20,6 +20,8 @@ using System.Web.Hosting;
 using Sweco.Services.MapExport;
 using PdfSharp.Drawing.Layout;
 using System.Configuration;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Sweco.Services
 {
@@ -155,66 +157,61 @@ namespace Sweco.Services
             return tempPath + '/' + fileinfo[1];
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        [WebInvoke(Method = "POST", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/pdf")]
-        public string ExportPDF(MapExportItem exportItem)
-        {
-            string tempPath = "/Temp";            
-            string path = HttpContext.Current.Server.MapPath(tempPath);
+        AutoResetEvent stopWaitHandle = new AutoResetEvent(false);
+
+        private string createPdf(Image img, string path, MapExportItem exportItem)
+        {            
             string filename = Guid.NewGuid() + ".pdf";
             string localPdf = path + "\\" + filename;
-            
-            Image img = MapImageCreator.GetImage(exportItem);            
+
             PdfDocument document = new PdfDocument();
             PdfPage page = document.AddPage();
 
             page.Size = exportItem.format == "A4" ? PdfSharp.PageSize.A4 : PdfSharp.PageSize.A3;
             page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;
-     
-            XGraphics gfx = XGraphics.FromPdfPage(page);            
-                                   
+
+            XGraphics gfx = XGraphics.FromPdfPage(page);
+
             int scale = int.Parse(exportItem.scale);
             double length = (1.0 / scale);
-            double unitLength = (length * 2.82e3);         
+            double unitLength = (length * 2.82e3);
 
-            Dictionary<int, string> scaleBarTexts = new Dictionary<int, string>() 
-            {
-                {1000, "50 m"},
-                {2000, "100 m"},
-                {5000, "200 m"},
-                {10000, "500 m"},
-                {20000, "1 km"},
-                {50000, "2 km"},
-                {100000, "5 km"},
-                {250000, "10 km"}
-            };
+            Dictionary<int, string> scaleBarTexts = new Dictionary<int, string>()
+                    {
+                        {1000, "50 m"},
+                        {2000, "100 m"},
+                        {5000, "200 m"},
+                        {10000, "500 m"},
+                        {20000, "1 km"},
+                        {50000, "2 km"},
+                        {100000, "5 km"},
+                        {250000, "10 km"}
+                    };
 
-            Dictionary<int, int> scaleBarLengths = new Dictionary<int,int>() 
-            {
-                {1000, 50},
-                {2000, 100},
-                {5000, 200},
-                {10000, 500},
-                {20000, 1000},
-                {50000, 2000},
-                {100000, 5000},
-                {250000, 10000}
-            };
-            
+            Dictionary<int, int> scaleBarLengths = new Dictionary<int, int>()
+                    {
+                        {1000, 50},
+                        {2000, 100},
+                        {5000, 200},
+                        {10000, 500},
+                        {20000, 1000},
+                        {50000, 2000},
+                        {100000, 5000},
+                        {250000, 10000}
+                    };
+
             int displayLength = (int)(unitLength * scaleBarLengths.FirstOrDefault(a => a.Key == scale).Value);
             string displayText = scaleBarTexts.FirstOrDefault(a => a.Key == scale).Value;
 
             this.drawImage(gfx, img, 10, 10, page);
 
-            Point[] points = new Point[] {                
+            Point[] points = new Point[] 
+            {
                 new Point(12, 12),
                 new Point(12, 55),
                 new Point(55 + displayLength, 55),
                 new Point(55 + displayLength, 12),
-                new Point(12, 12) 
+                new Point(12, 12)
             };
 
             gfx.DrawPolygon(XBrushes.White, points, XFillMode.Winding);
@@ -225,15 +222,50 @@ namespace Sweco.Services
 
             string copyright = ConfigurationManager.AppSettings["exportCopyrightText"];
             this.drawText(gfx, String.Format("© {0}", copyright), 15, 25);
-            this.drawText(gfx, String.Format("Skala 1:{0}", exportItem.scale), 15, 40);            
-            this.drawText(gfx, displayText, 20 + displayLength, 50);            
+            this.drawText(gfx, String.Format("Skala 1:{0}", exportItem.scale), 15, 40);
+            this.drawText(gfx, displayText, 20 + displayLength, 50);
 
-            XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "assets", "logo.png"));           
-            gfx.DrawImage(logo, gfx.PageSize.Width - 212, 12, 200, 67);
+            XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "assets", "logo.png"));
+            gfx.DrawImage(logo, (gfx.PageSize.Width - logo.PixelWidth / 2) - 12, 12, logo.PixelWidth / 2, logo.PixelHeight / 2);
 
             document.Save(localPdf);
-            
-            return tempPath + "/" + filename;
-        }                 
+            return filename;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        [WebInvoke(Method = "POST", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/pdf")]
+        public string ExportPDF(MapExportItem exportItem)
+        {
+            string tempPath = "/Temp";
+            string path = HttpContext.Current.Server.MapPath(tempPath);
+            string filePath = "";
+            if (exportItem.wmtsLayers == null || exportItem.wmtsLayers.Count == 0)
+            {
+                Image img = MapImageCreator.GetImage(exportItem);
+                filePath = tempPath + "/" + this.createPdf(img, path, exportItem);                
+            }
+            else
+            {
+                MapImageCreator.GetImageAsync(exportItem, (data) =>
+                {
+                    Image img = (Image)data.image.Clone();
+                    try
+                    {
+                        filePath = tempPath + "/" + this.createPdf(img, path, exportItem);
+                    }
+                    catch (Exception ex)
+                    {
+                    }
+                    finally {
+                        stopWaitHandle.Set();
+                    }                    
+                });
+                stopWaitHandle.WaitOne();
+            }            
+            return filePath;
+        }
     }
 }

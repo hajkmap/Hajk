@@ -5,22 +5,36 @@ var manager = Backbone.Model.extend({
     layers: []
   },
 
+  getUrl: function (layer) {
+    var t = layer['type'];
+    delete layer['type'];
+    return t === 'WMTS'
+      ? this.get('config').url_wmtslayer_settings
+      : this.get('config').url_layer_settings
+  },
+
   getConfig: function (url) {
     $.ajax(url, {
       success: data => {
-        data.wmslayers.sort((a, b) => {
+        var layers = [];
+        data.wmslayers.forEach(l => { l.type = "WMS" });
+        data.wmtslayers.forEach(l => { l.type = "WMTS" });
+        layers = data.wmslayers.concat(data.wmtslayers);
+        layers.sort((a, b) => {
           var d1 = parseInt(a.date)
           ,   d2 = parseInt(b.date);
           return d1 === d2 ? 0 : d1 < d2 ? 1 : -1;
         });
-        this.set('layers', data.wmslayers);
+
+        this.set('layers', layers);
       }
     });
-  },  
+  },
 
   addLayer: function (layer, callback) {
+    var url = this.getUrl(layer);
     $.ajax({
-      url: this.get('config').url_layer_settings,
+      url: url,
       method: 'POST',
       contentType: 'application/json',
       data: JSON.stringify(layer),
@@ -34,8 +48,9 @@ var manager = Backbone.Model.extend({
   },
 
   updateLayer: function(layer, callback) {
+    var url = this.getUrl(layer);
     $.ajax({
-      url: this.get('config').url_layer_settings,
+      url: url,
       method: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify(layer),
@@ -49,8 +64,9 @@ var manager = Backbone.Model.extend({
   },
 
   removeLayer: function (layer, callback) {
+    var url = this.getUrl(layer);
     $.ajax({
-      url: this.get('config').url_layer_settings + "/" + layer.id,
+      url: url + "/" +layer.id,
       method: 'DELETE',
       contentType: 'application/json',
       success: () => {

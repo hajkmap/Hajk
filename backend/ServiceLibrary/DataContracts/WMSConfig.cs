@@ -25,5 +25,6 @@ namespace Sweco.Services.DataContracts
         public bool tiled { get; set; }
         public bool singleTile { get; set; }
         public string imageFormat { get; set; }
+        public string serverType { get; set; }
     }
 }

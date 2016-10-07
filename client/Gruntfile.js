@@ -196,7 +196,7 @@ module.exports = function (grunt) {
           dest: 'dist/index.html',
           replacements: [{
             from: '{js}',
-            to: '<script src="js/dependencies.js" charset="utf-8"></script>\r\n    <script src="js/<%= pkg.name %>-transpiled.js" charset="utf-8"></script>'
+            to: '<script src="js/es6-polyfill.js" charset="utf-8">\r\n    </script><script src="js/dependencies.js" charset="utf-8"></script>\r\n    <script src="js/<%= pkg.name %>-transpiled.js" charset="utf-8"></script>'
           }, {
             from: '{css}',
             to: '<link rel="stylesheet" href="assets/<%= pkg.name %>.css" charset="utf-8">'
@@ -208,7 +208,7 @@ module.exports = function (grunt) {
           dest: 'release/index.html',
           replacements: [{
             from: '{js}',
-            to: '<script src="js/<%= pkg.name %>-<%= pkg.version %>.min.js"></script>'
+            to: '<script src="js/es6-polyfill.js" charset="utf-8"></script>\r\n    <script src="js/<%= pkg.name %>-<%= pkg.version %>.min.js"></script>'
           }, {
             from: '{css}',
             to: '<link rel="stylesheet" href="assets/<%= pkg.name %>-<%= pkg.version %>.min.css" charset="utf-8">'

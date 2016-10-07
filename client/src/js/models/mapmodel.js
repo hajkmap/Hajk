@@ -180,9 +180,7 @@ var MapModel = {
         units: 'm',
         resolutions: this.get('resolutions'),
         center: this.get("center"),
-        projection: this.get("projection"),
-        minZoom: this.get("minZoom"),
-        maxZoom: this.get("maxZoom")
+        projection: this.get("projection")
       })
     });
 

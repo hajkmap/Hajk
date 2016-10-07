@@ -95,6 +95,30 @@ namespace Sweco.Services
         void AddLayer(WMSConfig layer);
 
         /// <summary>
+        /// Lägg till wmts-lager.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void AddWMTSLayer(WMTSConfig layer);
+
+        /// <summary>
+        /// Lägg till wmts-lager.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void UpdateWMTSLayer(WMTSConfig layer);
+
+        /// <summary>
+        /// Lägg till wmts-lager.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void RemoveWMTSLayer(string id);
+
+        /// <summary>
         /// Lägg till WFS-lager.
         /// </summary>
         /// <param name="id"></param>
@@ -329,6 +353,40 @@ namespace Sweco.Services
         public void AddLayer(WMSConfig layer)
         {
             this.settingsDataContext.AddWMSLayer(layer);
+        }
+
+        /// <summary>
+        /// Add layer
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [WebInvoke(Method = "POST", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/wmtslayer")]
+        public void AddWMTSLayer(WMTSConfig layer)
+        {
+            this.settingsDataContext.AddWMTSLayer(layer);
+        }
+
+
+        /// <summary>
+        /// Remove layer
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [WebInvoke(Method = "DELETE", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/wmtslayer/{id}")]
+        public void RemoveWMTSLayer(string id)
+        {
+            this.settingsDataContext.RemoveWMTSLayer(id);
+        }
+
+        /// <summary>
+        /// Update layer
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [WebInvoke(Method = "PUT", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/wmtslayer")]
+        public void UpdateWMTSLayer(WMTSConfig layer)
+        {
+            this.settingsDataContext.UpdateWMTSLayer(layer);
         }
 
         /// <summary>

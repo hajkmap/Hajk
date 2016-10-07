@@ -1,7 +1,6 @@
 var defaultState = {
 };
 
-
 $.fn.editable = function(component) {
 
   function edit(node, e) {
@@ -157,6 +156,7 @@ class Menu extends React.Component {
    *
    */
   init() {
+
     this.load('layers');
     this.load('layermenu');
 
@@ -232,12 +232,19 @@ class Menu extends React.Component {
     switch(type) {
       case "layers":
           this.props.model.getConfig(this.props.config.url_layers, (data) => {
-            data.wmslayers.sort((a, b) => {
+
+            var layers = [];
+
+            data.wmslayers.forEach(l => { l.type = "WMS" });
+            data.wmtslayers.forEach(l => { l.type = "WMTS" });
+
+            layers = data.wmslayers.concat(data.wmtslayers);
+            layers.sort((a, b) => {
               var d1 = parseInt(a.date)
               ,   d2 = parseInt(b.date);
               return d1 === d2 ? 0 : d1 < d2 ? 1 : -1;
             });
-            this.props.model.set('layers', data.wmslayers);
+            this.props.model.set('layers', layers);
           });
         break;
       case "layermenu":
@@ -460,7 +467,13 @@ class Menu extends React.Component {
    */
   addLayerToMenu(id, included) {
     if (included) {
-      alert("Lagret finns redan.");
+      this.props.application.setState({
+        alert: true,
+        confirm: false,
+        alertMessage: "Detta lager är redan tillagt i lagerlistan. Klicka på lagret i lagerlistan och därefter på den röda symbolen för att ta bort det.",
+        confirmAction: () => {
+        }
+      });
       return;
     }
     this.createLayer(id);
@@ -485,7 +498,7 @@ class Menu extends React.Component {
       return (
         <li className="layer-item" onClick={() => this.addLayerToMenu(layer.id, included) } key={i}>
           <span className={cls}></span>&nbsp;
-          <span>{layer.caption}</span>
+          <span>{layer.caption} {layer.type === 'WMTS' ? '(WMTS)' : ''}</span>
         </li>
       )
     });
@@ -505,7 +518,7 @@ class Menu extends React.Component {
 
         var leafs = []
         ,   layers = group.layers || group;
-        
+
         layers.forEach((layer, i) => {
           leafs.push(
             <li

@@ -1,15 +1,46 @@
 var LayerModel = require('layers/layer');
 
-module.exports = LayerModel.extend({
+/**
+ * @typedef {Object} WmsLayer~WmsLayerProperties
+ * @property {string} url
+ * @property {string} projection - Default: EPSG:3007
+ * @property {string} serverType - argis | geoserver. Default: geoserver
+ * @property {number} opacity - Defualt: 1
+ * @property {string} status - Load status for layer. Default: ok
+ * @property {object} params
+ */
+var WmsLayerProperties = {
+   url: "",
+   projection: "EPSG:3007",
+   serverType: 'geoserver',
+   opacity: 1,
+   status: "ok",
+   params: {}
+};
 
-   defaults: {
-      url: "",
-      projection: "EPSG:3007",
-      serverType: 'geoserver',
-      opacity: 1,
-      status: "ok",
-      params: {}
-   },
+/**
+ * @description
+ *
+ *   Layer to be used as a display layer wich loads its content WMS-service.
+ *   Currently this is supported for both geoserver and ArcGIS for Server.
+ *
+ * @class WmsLayer
+ * @param {WmsLayer~WmsLayerProperties} options
+ * @param {string} type
+ */
+var WmsLayer = {
+
+   /**
+    * @property {WmsLayer~WmsLayerProperties} defaults - Default properties
+    * @instance
+    */
+   defaults: WmsLayerProperties,
+
+   /**
+    * @property {bool} validInfo - Default: true
+    * @instance
+    */
+   validInfo: true,
 
    initialize: function () {
       LayerModel.prototype.initialize.call(this);
@@ -22,7 +53,11 @@ module.exports = LayerModel.extend({
          imageFormat: this.get('imageFormat')
       };
 
-      if (this.get('resolutions') && this.get('origin')) {     
+      if (this.get('resolutions') &&
+          this.get('resolutions').length > 0 &&
+          this.get('origin') &&
+          this.get('origin').length > 0) {
+
          source.tileGrid = new ol.tilegrid.TileGrid({
            resolutions: this.get('resolutions'),
            origin: this.get('origin')
@@ -67,12 +102,17 @@ module.exports = LayerModel.extend({
          }
       });
 
-      this.set("type", "wms");
+      this.layer.getSource().set('url', this.get('url'));
 
+      this.set("type", "wms");
    },
 
-   validInfo: true,
-
+   /**
+    * getFeatureInformation - Load feature information.
+    * @instance
+    * @param {external:"ol.feature"} feature
+    * @return {external:"ol.style"} style
+    */
    getFeatureInformation: function (params) {
       var url;
       try {
@@ -87,7 +127,7 @@ module.exports = LayerModel.extend({
                params.resolution,
                params.projection,
                {
-                  'INFO_FORMAT': 'application/json'                  
+                  'INFO_FORMAT': this.get('serverType') === "arcgis" ? 'application/geojson' : 'application/json'
                }
             );
 
@@ -96,29 +136,41 @@ module.exports = LayerModel.extend({
                url = encodeURIComponent(url);
             }
             var request = $.ajax({
-               url: HAJK2.searchProxy + url,               
-               success: (data) => {                  
+               url: HAJK2.searchProxy + url,
+               success: (data) => {
                   var features = new ol.format.GeoJSON().readFeatures(data);
                   this.featureInformationCallback(features, this.getLayer());
-               }            
+               }
             });
             request.error(params.error);
          }
       } catch (e) {
          params.error(e);
       }
-
    },
 
+   /**
+    * tileLoadError - Triggers when a tile fails to load.
+    * @instance
+    */
    tileLoadError: function () {
       this.set("status", "loaderror");
    },
 
+   /**
+    * tileLoadOk - triggers when a tile loads.
+    * @instance
+    */
    tileLoadOk: function () {
       this.set("status", "ok");
    },
 
-   getFeatureInformationReponse: function (response, xhr) {
+   /**
+    * getFeatureInformationReponse - Parse response and trigger registred feature information callback.
+    * @param {XMLDocument} respose
+    * @instance
+    */
+   getFeatureInformationReponse: function (response) {
       try {
          var features = new ol.format.GeoJSON().readFeatures(response);
          this.featureInformationCallback(features, this.getLayer());
@@ -126,5 +178,6 @@ module.exports = LayerModel.extend({
          console.error(e);
       }
    }
+};
 
-});
+module.exports = LayerModel.extend(WmsLayer);

@@ -127,7 +127,7 @@ var BackgroundSwitcher = React.createClass({
     return (
       this.props.layers.map((layer, i) => {
         var index = "background-layer-" + i
-        ,   checked = this.getSelected(layer);        
+        ,   checked = this.getSelected(layer);
         return (
           <li key={index}>
             <input id={index} name="background" type="radio" checked={checked} onChange={(e) => this.setBackgroundLayer(layer) }></input>
@@ -160,7 +160,7 @@ var BackgroundSwitcher = React.createClass({
             <input id="-1" name="background" type="radio" checked={black} onChange={() => this.setBlackBackground() }></input>
             <label htmlFor="-1">Svart bakgrund</label>
           </li>
-          
+
         </ul>
       </div>
     );

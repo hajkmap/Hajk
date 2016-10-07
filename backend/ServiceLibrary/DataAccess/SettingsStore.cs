@@ -238,6 +238,22 @@ namespace Sweco.Services.DataAccess
         }
 
         /// <summary>
+        /// Add wmts layer
+        /// </summary>
+        /// <param name="layer"></param>
+        public void AddWMTSLayer(WMTSConfig layer)
+        {
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            if (layerConfig.wmtslayers == null)
+            {
+                layerConfig.wmtslayers = new List<WMTSConfig>();
+            }
+            layerConfig.wmtslayers.Add(layer);
+
+            this.saveLayerConfigToFile(layerConfig);
+        }
+
+        /// <summary>
         /// Update WMS-layer with new config-options.
         /// </summary>
         /// <param name="layer"></param>
@@ -250,8 +266,23 @@ namespace Sweco.Services.DataAccess
                 layerConfig.wmslayers[index] = layer;
             }
             this.saveLayerConfigToFile(layerConfig);
-        }       
-                        
+        }
+
+        /// <summary>
+        /// Update WMS-layer with new config-options.
+        /// </summary>
+        /// <param name="layer"></param>
+        public void UpdateWMTSLayer(WMTSConfig layer)
+        {
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            var index = layerConfig.wmtslayers.FindIndex(item => item.id == layer.id);
+            if (index != -1)
+            {
+                layerConfig.wmtslayers[index] = layer;
+            }
+            this.saveLayerConfigToFile(layerConfig);
+        }
+
         /// <summary>
         /// Removes WMS-layer from config
         /// </summary>
@@ -279,6 +310,22 @@ namespace Sweco.Services.DataAccess
             if (index != -1)
             {
                 layerConfig.wmslayers.RemoveAt(index);
+            }
+            this.saveLayerConfigToFile(layerConfig);
+        }
+
+        /// <summary>
+        /// Remove WMS-layer
+        /// </summary>
+        /// <param name="id"></param>
+        public void RemoveWMTSLayer(string id)
+        {
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            this.removeLayerFromConfig(id);
+            var index = layerConfig.wmtslayers.FindIndex(item => item.id == id);
+            if (index != -1)
+            {
+                layerConfig.wmtslayers.RemoveAt(index);
             }
             this.saveLayerConfigToFile(layerConfig);
         }

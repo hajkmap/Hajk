@@ -9,7 +9,15 @@ using System.Threading.Tasks;
 
 namespace Sweco.Services.MapExport
 {
-    class MapImageCreator
+
+    public class MapExportCallback
+    {
+        public Image image { get; set; }
+        public string layerName { get; set; }
+    }
+
+
+    public class MapImageCreator
     {
         /// <summary>
         /// Create a worldfile for georeferencing.
@@ -63,8 +71,9 @@ namespace Sweco.Services.MapExport
         public static Image GetImage(MapExportItem exportItem)
         {
             MapExporter MapExporter = new MapExporter(exportItem);
+
             MapExporter.AddWMSLayers(exportItem.wmsLayers);
-            MapExporter.AddVectorLayers(exportItem.vectorLayers);
+            MapExporter.AddVectorLayers(exportItem.vectorLayers);               
 
             double left = exportItem.bbox[0];
             double right = exportItem.bbox[1];
@@ -73,13 +82,13 @@ namespace Sweco.Services.MapExport
 
             Envelope envelope = new Envelope(left, right, bottom, top);
             MapExporter.map.ZoomToBox(envelope);
-            
+
             var width = Math.Abs(left - right);
-            var scale = MapExporter.map.GetMapScale(exportItem.resolution);       
-                 
+            var scale = MapExporter.map.GetMapScale(exportItem.resolution);
+
             Image i = MapExporter.map.GetMap(exportItem.resolution);
 
-            Bitmap src = new Bitmap(i);            
+            Bitmap src = new Bitmap(i);
             src.SetResolution(exportItem.resolution, exportItem.resolution);
 
             Bitmap target = new Bitmap(src.Size.Width, src.Size.Height);
@@ -88,7 +97,47 @@ namespace Sweco.Services.MapExport
             Graphics g = Graphics.FromImage(target);
             g.FillRectangle(new SolidBrush(Color.White), 0, 0, target.Width, target.Height);
             g.DrawImage(src, 0, 0);
-            return target;
+            return target;            
+        }
+
+        public static void GetImageAsync(MapExportItem exportItem, Action<MapExportCallback> callback)
+        {
+            MapExporter mapExporter = new MapExporter(exportItem);
+
+            mapExporter.AddWMSLayers(exportItem.wmsLayers);
+            mapExporter.AddVectorLayers(exportItem.vectorLayers);
+            mapExporter.AddWMTSLayers(exportItem.wmtsLayers, () =>
+            {               
+                Image img = mapExporter.map.GetMap(exportItem.resolution);
+
+                Bitmap src = new Bitmap(img);
+                src.SetResolution(exportItem.resolution, exportItem.resolution);
+
+                Bitmap target = new Bitmap(src.Size.Width, src.Size.Height);
+                target.SetResolution(exportItem.resolution, exportItem.resolution);
+
+                Graphics g = Graphics.FromImage(target);
+                g.FillRectangle(new SolidBrush(Color.White), 0, 0, target.Width, target.Height);
+                g.DrawImage(src, 0, 0);
+                
+                callback.Invoke(new MapExportCallback()
+                {
+                    image = img
+                });
+            });
+
+            double left = exportItem.bbox[0];
+            double right = exportItem.bbox[1];
+            double bottom = exportItem.bbox[2];
+            double top = exportItem.bbox[3];
+
+            Envelope envelope = new Envelope(left, right, bottom, top);
+            mapExporter.map.ZoomToBox(envelope);
+
+            var width = Math.Abs(left - right);
+            var scale = mapExporter.map.GetMapScale(exportItem.resolution);
+
+            mapExporter.map.GetMap(exportItem.resolution);
         }
     }
 }

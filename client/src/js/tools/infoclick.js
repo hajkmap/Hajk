@@ -129,18 +129,23 @@ module.exports = ToolModel.extend({
 
     this.map.forEachFeatureAtPixel(event.pixel, (feature, layer) => {
       if (layer && layer.get('name')) {
-        promises.push(new Promise((resolve, reject) => {
-            features = [feature];
-            _.each(features, (feature) => {
-                this.addInformation(feature, layer, (featureInfo) => {
-                  if (featureInfo) {
-                    infos.push(featureInfo);
-                    infosLen = infos.length;
-                  }
-                  resolve();
-                });
-            });
-        }));
+        if (
+          layer.get('name') !== 'preview-layer' &&
+          layer.get('name') !== 'highlight-wms'
+        ) {
+          promises.push(new Promise((resolve, reject) => {
+              features = [feature];
+              _.each(features, (feature) => {
+                  this.addInformation(feature, layer, (featureInfo) => {
+                    if (featureInfo) {
+                      infos.push(featureInfo);
+                      infosLen = infos.length;
+                    }
+                    resolve();
+                  });
+              });
+          }));
+        }
       }
     });
 
@@ -205,8 +210,6 @@ module.exports = ToolModel.extend({
 
       properties = feature.getProperties();
       information = layerModel && layerModel.get("information") || "";
-
-
 
       if (information) {
         (information.match(/\{.*?\}\s?/g) || []).forEach(property => {

@@ -1,3 +1,9 @@
+/**
+ * Singleton (static) object for the main application.
+ * The variable HAJK2 is registred in the the global scope.
+ * @class HAJK2
+ * @global
+ */
 (global.HAJK2 = function() {
 
   "use strict";
@@ -11,33 +17,15 @@
   ,   internal = {}
   ;
 
-  if (!window.Promise) {
-    elem = document.createElement('script');
-    elem.src = "js/es6-polyfill.js";
-    document.body.appendChild(elem);
-  }
-
-  /**
-   * Initialize the application.
-   * @param config
-   * @param bookmark
-   *
-   */
   internal.load = function (config, bookmarks) {
     var application = new ApplicationView(config, bookmarks);
     application.render();
   };
-  /**
-   * Creates a dom element and render the app into it.
-   * @param config
-   */
+
   internal.init = function (config) {
     internal.load(config);
   };
-  /**
-   * Read parameters from global querystring
-   * @return {object} parameters
-   */
+
   internal.parseQueryParams = function () {
     var o = {};
     document.location
@@ -50,12 +38,7 @@
              });
     return o;
   };
-  /**
-   * Merge two subsets of configs.
-   * @param {object} a - config to merge into
-   * @param {object} b - config to merge with
-   * @return {object} config
-   */
+
   internal.mergeConfig = function(a, b) {
 
       var ls = a.tools.find(tool => tool.type === 'layerswitcher');
@@ -118,8 +101,11 @@
 
   /**
    * Load config and start the application.
-   * @param {object} config
-   * @param {function} done
+   * @memberof HAJK2
+   * @alias start
+   * @instance
+   * @param {object} config - configuration object for the application.
+   * @param {function} done - callback to trigger when the application is loaded.
    */
   that.start = function (config, done) {
 
@@ -140,7 +126,11 @@
           });
 
           if (layerSwitcherTool) {
-            map_config.layers = internal.filterByLayerSwitcher(layerSwitcherTool.options, data.wmslayers);
+            let layers = [];
+            data.wmslayers.forEach(l => l.type = "wms");
+            data.wmtslayers.forEach(l => l.type = "wmts");
+            layers = data.wmslayers.concat(data.wmtslayers);
+            map_config.layers = internal.filterByLayerSwitcher(layerSwitcherTool.options, layers);
             map_config.layers.sort((a, b) => a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1);
           }
 

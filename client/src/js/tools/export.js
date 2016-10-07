@@ -75,7 +75,6 @@ var ExportModel = ToolModel.extend({
 
     var dpi = 25.4 / 0.28
     ,   ipu = 39.37
-    //,   sf  = 0.975
     ,   sf  = 1
     ,   w   = (paper.width / dpi / ipu * scale / 2) * sf
     ,   y   = (paper.height / dpi  / ipu * scale / 2) * sf
@@ -179,15 +178,15 @@ var ExportModel = ToolModel.extend({
       .getLayers()
       .getArray()
       .filter(exportable)
-      .map((layer, i) => { 
-        layerUrl = '';
-        if (typeof layer.getSource().getUrls == 'function')
-          layerUrl = formatUrl(layer.getSource().getUrls()[0]);
-        else if (typeof layer.getSource().getUrl == 'function')
-          layerUrl = formatUrl(layer.getSource().getUrl());
+      .map((layer, i) => {
+        // layerUrl = '';
+        // if (typeof layer.getSource().getUrls == 'function')
+        //   layerUrl = formatUrl(layer.getSource().getUrls()[0]);
+        // else if (typeof layer.getSource().getUrl == 'function')
+        //   layerUrl = formatUrl(layer.getSource().getUrl());
 
         return {
-          url: layerUrl,
+          url: layer.getSource().get('url'),
           layers: layer.getSource().getParams()["LAYERS"].split(','),
           zIndex: i,
           workspacePrefix: null,
@@ -295,7 +294,7 @@ var ExportModel = ToolModel.extend({
               text = feature.getProperties().description
             else if (feature.getProperties().name)
               text = feature.getProperties().name
-            else 
+            else
               text = ''
             return text
           }
@@ -322,8 +321,24 @@ var ExportModel = ToolModel.extend({
         })
       }]
     }
+
     f = generate(drawLayer.getSource().getFeatures());
     return f
+  },
+
+  findWMTS: function() {
+    var layers = this.get('olMap').getLayers().getArray();
+    return layers
+      .filter(layer =>
+        layer.getSource() instanceof ol.source.WMTS && layer.getVisible()
+      )
+      .map(layer => {
+        var s = layer.getSource();
+        return {
+          url: s.get("url"),
+          axisMode: s.get('axisMode')
+        }
+    });
   },
   /*
    * @desc Clone map canvas and add copyright.
@@ -402,6 +417,7 @@ var ExportModel = ToolModel.extend({
 
     data.vectorLayers = this.findVector() || [];
     data.wmsLayers = this.findWMS() || [];
+    data.wmtsLayers = this.findWMTS() || [];
 
     dx = Math.abs(left - right);
     dy = Math.abs(bottom - top);

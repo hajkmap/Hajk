@@ -3,6 +3,7 @@
     "url_proxy": "/util/proxy/geturl",
     "url_layers": "/mapservice/settings/config/layers",
     "url_layer_settings": "/mapservice/settings/layer",
+    "url_wmtslayer_settings": "/mapservice/settings/wmtslayer",
     "url_default_server": "http://194.71.132.27/geoserver/wms",
     "owner_options": [
       { "value": "SBK", "title": "SBK" },

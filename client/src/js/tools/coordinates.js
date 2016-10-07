@@ -147,27 +147,16 @@ module.exports = ToolModel.extend({
 			raw: this.get('position'),
 		};
 		var transformedCoordinates = {};
-		var transformations = [{
-			code: 'EPSG:3007',
-			title: 'Sweref 99 12 00',
-			default: true
-		},  {
-			code: 'EPSG:4326',
-			title: 'WGS 84'
-		},  {
-			code: 'EPSG:3006',
-			title: 'Sweref 99 TM'
-		}, {
-			code: 'EPSG:3021',
-			title: 'RT 90 2.5 gon V'
-		}];
+		var transformations = this.get('transformations');
 		var coordinates = this.extractXYArray(presentedCoordinates['raw']);
 
 		_.each(transformations, (transformation) => {
 			transformedCoordinates[transformation.title] = this.transform(coordinates, transformation.code);
 			transformedCoordinates[transformation.title] = this.extractXYObject(transformedCoordinates[transformation.title]);
-			if (transformation.hasOwnProperty('default'))
-				transformedCoordinates[transformation.title].default = transformation.default
+			if (transformation.hasOwnProperty('default')) {
+				transformedCoordinates[transformation.title].default = transformation.default;
+				transformedCoordinates[transformation.title].hint = transformation.hint || "";
+			}
 		});
 
 		presentedCoordinates['transformed'] = transformedCoordinates;

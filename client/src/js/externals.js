@@ -25,7 +25,13 @@
  /**
  * OpenLayers source base class.
  * @external "ol.feature"
- * @see {@link http://openlayers.org/en/latest/apidoc/ol.Feature.html|OpenLayers feature}
+ * @see {@link http://openlayers.org/en/latest/apidoc/ol.feature.html|OpenLayers feature}
+ */
+
+ /**
+ * OpenLayers source base class.
+ * @external "ol.style"
+ * @see {@link http://openlayers.org/en/latest/apidoc/ol.style.html|OpenLayers Style}
  */
 
  /**

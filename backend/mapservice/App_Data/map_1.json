@@ -62,9 +62,35 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
+          "77676120-1157-b861-706a-908ecd18c258",
           "0"
         ],
         "groups": [
+          {
+            "id": "c0b61bee-b6ce-70c9-e6da-ef5c3da6c341",
+            "parent": "-1",
+            "name": "Redigering",
+            "toggled": true,
+            "layers": [
+              {
+                "id": "79d49f23-d811-90aa-1d16-5b890dac16bb",
+                "drawOrder": 0
+              },
+              {
+                "id": "7bd997d7-8f77-96ef-d33a-804a85f7d9c0",
+                "drawOrder": 0
+              },
+              {
+                "id": "d8eff0fd-fe48-c06a-8ad8-3ff3814a744a",
+                "drawOrder": 4
+              },
+              {
+                "id": "84a8aa5c-a062-fc32-24fb-30df211427b4",
+                "drawOrder": 7
+              }
+            ],
+            "groups": []
+          },
           {
             "id": "afe0c79e-f807-0c17-8bcd-4974bf4e9ee6",
             "parent": "-1",
@@ -72,15 +98,37 @@
             "toggled": false,
             "layers": [
               {
-                "id": "84a8aa5c-a062-fc32-24fb-30df211427b4",
-                "drawOrder": 1
+                "id": "5d07b37e-956f-fab1-90f3-03dab07a52d3",
+                "drawOrder": 3
               },
               {
-                "id": "d8eff0fd-fe48-c06a-8ad8-3ff3814a744a",
-                "drawOrder": 2
+                "id": "8f036834-00c2-77be-2b6e-423a2162b374",
+                "drawOrder": 6
               }
             ],
-            "groups": []
+            "groups": [
+              {
+                "id": "3cb7e88a-ea8f-316d-17b8-652a39a6ce78",
+                "parent": "afe0c79e-f807-0c17-8bcd-4974bf4e9ee6",
+                "name": "Demo",
+                "toggled": true,
+                "layers": [
+                  {
+                    "id": "2e5178f3-6240-2f83-0e38-741be1c988a5",
+                    "drawOrder": 1
+                  },
+                  {
+                    "id": "1f3a75b0-8fee-79cc-76bb-e0863ce9fdba",
+                    "drawOrder": 5
+                  },
+                  {
+                    "id": "2",
+                    "drawOrder": 2
+                  }
+                ],
+                "groups": []
+              }
+            ]
           }
         ]
       }
@@ -100,7 +148,28 @@
     },
     {
       "type": "coordinates",
-      "options": {}
+      "options": {
+        "transformations": [
+          {
+            "code": "EPSG:3007",
+            "title": "Sweref 99 12 00",
+            "default": true,
+            "hint": "(Standard)"
+          },
+          {
+            "code": "EPSG:4326",
+            "title": "WGS 84"
+          },
+          {
+            "code": "EPSG:3006",
+            "title": "Sweref 99 TM"
+          },
+          {
+            "code": "EPSG:3021",
+            "title": "RT 90 2.5 gon V"
+          }
+        ]
+      }
     },
     {
       "type": "export",
@@ -131,19 +200,30 @@
       6358930
     ],
     "projection": "EPSG:3006",
-    "zoom": 2,
+    "zoom": 5,
+    "maxZoom": 9,
+    "minZoom": 3,
     "resolutions": [
-      70.00014000028003,
-      28.00005600011201,
-      14.000028000056005,
-      7.000014000028003,
-      2.800005600011201,
-      1.4000028000056004,
-      0.7000014000028002,
-      0.2800005600011201,
-      0.14000028000056006,
-      0.07000014000028003
+      4096.0,
+      2048.0,
+      1024.0,
+      512.0,
+      256.0,
+      128.0,
+      64.0,
+      32.0,
+      16.0,
+      8.0,
+      4.0,
+      2.0,
+      1.0,
+      0.5
     ],
+    "origin": [
+      0.0,
+      0.0
+    ],
+    "extent": [],
     "logo": ""
   }
 }

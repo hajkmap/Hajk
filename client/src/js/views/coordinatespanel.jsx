@@ -40,8 +40,8 @@ var CoordinatesList = React.createClass({
   },
 
   processPlanarXY: function(xyObject) {
-    return Object.keys(xyObject).map( function(key) {
-      if (key == 'default')
+    return Object.keys(xyObject).map(function (key) {
+      if (key == 'default' || key === 'hint')
         return
       return (
         <dd>
@@ -56,7 +56,7 @@ var CoordinatesList = React.createClass({
     if (object.hasOwnProperty('default')){
       return (
         <dt>
-          <strong style={{color: 'bisque'}}>{title}</strong> (Standard i Göteborgs Stad)
+          <strong style={{color: 'bisque'}}>{title}</strong> {object.hint}
         </dt>
       )
     } else {
