@@ -1,26 +1,33 @@
 /**
- * Backbone Class Navigation Model
- * @class
- * @augments Backbone.Model
+ * @typedef {Object} NavigationModel~NavigationModelProperties
+ * @property {Array<{object}>} panels
+ * @property {boolean} visible
+ * @property {booelan} toggled
+ * @property {string} activePanel
  */
-var NavigationModel = Backbone.Model.extend({
-  /** @member {object} defaults - Default settings */
-  defaults: {
-    /** @member {Array<object>} panels */
-    panels: [],
-    /** @member {boolean} visible. Default: false */
-    visible: false,
+var NavigationModelProperties =  {
+  panels: [],
+  visible: false,
+  toggled: false,
+  activePanel: undefined
+};
 
-    toggled: false,
-    /** @member {boolean} activePanel */
-    activePanel: undefined
-  },
+/**
+ * @desription
+ *
+ *  Prototype for creating a navigation model.
+ *
+ * @class
+ * @augments {external:"Backbone.Model"}
+ * @param {NavigationModel~NavigationModelProperties} options - Default options
+ */
+var NavigationModel = {
   /**
-   * Creates a navigation model.
-   *
-   * @constructor
-   * @param {object} options - Default options
+   * @instance
+   * @property {NavigationModel~NavigationModelProperties} defaults - Default settings
    */
+  defaults: NavigationModelProperties,
+
   initialize: function (options) {
 
     options.panels.forEach(panel => {
@@ -34,6 +41,12 @@ var NavigationModel = Backbone.Model.extend({
     });
   },
 
+  /**
+   * Change active panel
+   * @instance
+   * @property {object} panelRef
+   * @property {string} type
+   */
   navigate: function(panelRef, type) {
     if (panelRef) {
       this.set("activePanelType", type);
@@ -48,7 +61,7 @@ var NavigationModel = Backbone.Model.extend({
 
   /**
    * Handler for toggle events of panels.
-   *
+   * @instance
    * @param {object} panel
    * @param {boolean} visible
    */
@@ -88,6 +101,13 @@ var NavigationModel = Backbone.Model.extend({
 
     }
   }
-});
 
-module.exports = NavigationModel;
+};
+
+/**
+ * Navigation model module.<br>
+ * Use <code>require('models/navigation')</code> for instantiation.
+ * @module NavigationModel-module
+ * @returns {NavigationModel}
+ */
+module.exports = Backbone.Model.extend(NavigationModel);

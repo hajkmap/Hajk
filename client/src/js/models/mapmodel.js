@@ -7,43 +7,19 @@ var Drag = function() {
     handleUpEvent: Drag.prototype.handleUpEvent
   });
 
-  /**
-   * @type {ol.Pixel}
-   * @private
-   */
   this.coordinate_ = null;
 
-  /**
-   * @type {string|undefined}
-   * @private
-   */
   this.cursor_ = 'pointer';
 
-  /**
-   * @type {ol.Feature}
-   * @private
-   */
   this.feature_ = null;
 
-  /**
-   * @type {ol.Layer}
-   * @private
-   */
   this.layer_ = null;
 
-  /**
-   * @type {string|undefined}
-   * @private
-   */
   this.previousCursor_ = undefined;
 };
 
 ol.inherits(Drag, ol.interaction.Pointer);
 
-/**
- * @param {ol.MapBrowserEvent} evt Map browser event.
- * @return {boolean} `true` to start the drag sequence.
- */
 Drag.prototype.handleDownEvent = function(evt) {
   var map = evt.map
   ,   feature;
@@ -71,10 +47,6 @@ Drag.prototype.handleDownEvent = function(evt) {
   return !!feature;
 };
 
-
-/**
- * @param {ol.MapBrowserEvent} evt Map browser event.
- */
 Drag.prototype.handleDragEvent = function(evt) {
   var map = evt.map
   ,   deltaX = 0
@@ -92,10 +64,6 @@ Drag.prototype.handleDragEvent = function(evt) {
   }
 };
 
-
-/**
- * @param {ol.MapBrowserEvent} evt Event.
- */
 Drag.prototype.handleMoveEvent = function(evt) {
 
   if (this.cursor_) {
@@ -119,11 +87,6 @@ Drag.prototype.handleMoveEvent = function(evt) {
   }
 };
 
-
-/**
- * @param {ol.MapBrowserEvent} evt Map browser event.
- * @return {boolean} `false` to stop the drag sequence.
- */
 Drag.prototype.handleUpEvent = function(evt) {
   this.coordinate_ = null;
   this.feature_ = null;
@@ -131,43 +94,40 @@ Drag.prototype.handleUpEvent = function(evt) {
 };
 
 /**
- * Map model properties
- * @class MapModelProperties
+ * @typedef {Object} MapModel~MapModelProperties
+ * @property {Array<{number}>} center - Center of map. Default: [0, 0]
+ * @property {number} zoom - Default: 1
+ * @property {number} minZoom - Default: 15
+ * @property {string} target - Default: map
+ * @property {string} projectionCode - Default: EPSG:3006
+ * @property {object} ol
+ * @property {bool} clicked
  */
 var MapModelProperties = {
-  /** @property {Array<number>} center - Center of map. Default: [0, 0] */
   center: [0, 0],
-  /** @property {number} zoom - Default: 1 */
   zoom: 1,
-  /** @property {number} maxZoom - Default: 15  */
   maxZoom: 15,
-  /** @property {number} minZoom - Default: 1  */
   minZoom: 1,
-  /** @property {string} target - Default: map*/
   target: "map",
-  /** @property {string} projectionCode - Default: EPSG:3006 */
   projection: "EPSG:3006",
-  /** @property {minZoom} zoom  */
   ol: undefined,
-  /** @property {minZoom} zoom  */
   clicked: undefined
 };
 
 /**
  * Prototype for creating a map.
- * @class MapModel
- * @augments external:"Backbone.Model"
+ * @class
+ * @augments {external:"Backbone.Model"}
+ * @param {MapModel~MapModelProperties} options - Default options
  */
 var MapModel = {
   /**
    * These are the default properties, can me augmentet, has default values.
-   * @property {MapModuleProperties} defaults - Default settings
+   * @instance
+   * @property {MapModel~MapModelProperties} defaults - Default settings
    */
   defaults: MapModelProperties,
-  /**
-   * Creates a map model.
-   * @param {MapModuleProperties} options - Default options
-   */
+
   initialize: function (options) {
     this.initialState =  _.clone(this.attributes);
     var map = new ol.Map({
@@ -188,6 +148,7 @@ var MapModel = {
   },
   /**
    * Get openlayers map instance.
+   * @instance
    * @return {object} map
    */
   getMap: function () {
@@ -195,6 +156,7 @@ var MapModel = {
   },
   /**
    * Get current zoom level
+   * @instance
    * @return {number} zoom level
    */
   getZoom: function () {
@@ -202,6 +164,7 @@ var MapModel = {
   },
   /**
    * Get EPSG code.
+   * @instance
    * @return {number} EPSG-code
    */
   getCRS: function () {
@@ -209,6 +172,7 @@ var MapModel = {
   },
   /**
    * Get JSON representation.
+   * @instance
    * @return {string} JSON-representation
    */
   toJSON: function () {

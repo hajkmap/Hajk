@@ -22,29 +22,48 @@ String.prototype.toOpacity = function() {
   return parseFloat(this.match(/\d+(\.\d+)?/g).splice(3, 1)[0]);
 }
 
-var ExportModel = ToolModel.extend({
-  /*
-   * @desc Default settings.
-   * @property defaults
+/**
+ * @typedef {Object} ExportModel~ExportModelProperties
+ * @property {string} type - Default: export
+ * @property {string} panel - Default: exportpanel
+ * @property {string} title - Default: Skriv ut
+ * @property {string} toolbar - Default: bottom
+ * @property {string} icon - Default: fa fa-print icon
+ * @property {string} exportUrl - Default: /mapservice/export/pdf
+ * @property {string} copyright - Default: © Lantmäteriverket i2009/00858
+ */
+var ExportModelProperties = {
+  type: 'export',
+  panel: 'exportpanel',
+  title: 'Skriv ut',
+  toolbar: 'bottom',
+  icon: 'fa fa-print icon',
+  exportUrl: '/mapservice/export/pdf',
+  copyright: "© Lantmäteriverket i2009/00858"
+};
+
+/**
+ * Prototype for creating an draw model.
+ * @class
+ * @augments {external:"Backbone.Model"}
+ * @param {ExportModel~ExportModelProperties} options - Default options
+ */
+var ExportModel = {
+  /**
+   * @instance
+   * @property {ExportModel~ExportModelProperties} defaults - Default settings
    */
-  defaults: {
-    type: 'export',
-    panel: 'exportpanel',
-    title: 'Skriv ut',
-    toolbar: 'bottom',
-    icon: 'fa fa-print icon',
-    exportUrl: '/mapservice/export/pdf',
-    copyright: "© Lantmäteriverket i2009/00858"
-  },
-  /*
-   * @desc Configure the tool before first use.
-   * @param {Backbone.Model} shell
-   */
+  defaults: ExportModelProperties,
+
   configure: function (shell) {
     this.set('olMap', shell.getMap().getMap());
     this.addPreviewLayer();
   },
 
+  /**
+   * Add preview layer to map.
+   * @instance
+   */
   addPreviewLayer: function () {
     this.previewLayer = new ol.layer.Vector({
       source: new ol.source.Vector(),
@@ -62,15 +81,31 @@ var ExportModel = ToolModel.extend({
     this.get('olMap').addLayer(this.previewLayer);
   },
 
+  /**
+   * Remove preview layer from map.
+   * @instance
+   */
   removePreview: function () {
     this.set('previewFeature', undefined);
     this.previewLayer.getSource().clear();
   },
 
+  /**
+   * Get the preview feature.
+   * @instance
+   * @return {external:"ol.feature"} preview feature
+   */
   getPreviewFeature: function () {
     return this.get('previewFeature')
   },
 
+  /**
+   * Add the preview feature to the export layer source.
+   * @instance
+   * @params {number} scale
+   * @params {object} paper
+   * @params {number[]} center
+   */
   addPreview: function (scale, paper, center) {
 
     var dpi = 25.4 / 0.28
@@ -95,13 +130,13 @@ var ExportModel = ToolModel.extend({
     this.removePreview();
     this.set('previewFeature', feature);
     this.previewLayer.getSource().addFeature(feature);
-
   },
 
-  /*
-   * @desc Make a clone of a canvas element.
-   * @param {DOMElement} oldCcanvas
-   * @return {DOMElement} newCanvas
+  /**
+   * Clone map draw canvas.
+   * @instance
+   * @params {HTMLElement} old canvas
+   * @params {number} size
    */
   cloneCanvas: function (oldCanvas, size) {
     var newCanvas = document.createElement('canvas')
@@ -112,10 +147,11 @@ var ExportModel = ToolModel.extend({
     context.drawImage(oldCanvas, 0, 0);
     return newCanvas;
   },
-  /*
-   * @desc Generate scalebar HTML. Clone from map.
-   * @param {DOMElement} oldCcanvas
-   * @return {DOMElement} newCanvas
+
+  /**
+   * Generate scale bar
+   * @instance
+   * @return {string} svg image as string
    */
   generateScaleBar: function() {
 
@@ -161,6 +197,11 @@ var ExportModel = ToolModel.extend({
     return data;
   },
 
+  /**
+   * Find WMS layer to export in the map.
+   * @instance
+   * @return {object[]} wms layers
+   */
   findWMS: function () {
 
     var exportable = layer =>
@@ -195,6 +236,11 @@ var ExportModel = ToolModel.extend({
       });
   },
 
+  /**
+   * Find vector layer to export in the map.
+   * @instance
+   * @return {object[]} vector layers
+   */
   findVector: function () {
 
     var drawLayer = this.get('olMap').getLayers().getArray().find(layer => layer.get('name') === 'draw-layer');
@@ -326,6 +372,11 @@ var ExportModel = ToolModel.extend({
     return f
   },
 
+  /**
+   * Find WMTS layer to export in the map.
+   * @instance
+   * @return {object[]} wmts layers
+   */
   findWMTS: function() {
     var layers = this.get('olMap').getLayers().getArray();
     return layers
@@ -340,11 +391,12 @@ var ExportModel = ToolModel.extend({
         }
     });
   },
-  /*
-   * @desc Clone map canvas and add copyright.
-   *       Call the toDataUrl to produce a Base64-encoded image url.
-   *       Create a download anchor and trigger click to prevent popup.
-   * @param {function} callback
+
+  /**
+   * Export the map
+   * @instance
+   * @params {function} callback
+   * @params {object} size
    */
   exportMap: function(callback, size) {
     var map = this.get('olMap');
@@ -373,9 +425,11 @@ var ExportModel = ToolModel.extend({
     });
     map.renderSync();
   },
-  /*
-   * @desc Send request to export image.
-   * @param {function} callback
+
+  /**
+   * Export the map
+   * @instance
+   * @params {function} callback
    */
   exportImage: function(callback) {
     this.exportMap((href) => {
@@ -395,9 +449,12 @@ var ExportModel = ToolModel.extend({
       });
     }, {});
   },
-  /*
-   * @desc Send request to export image.
-   * @param {function} callback
+
+  /**
+   * Export the map as a PDF-file
+   * @instance
+   * @params {object} options
+   * @params {function} callback
    */
   exportPDF: function(options, callback) {
     var extent = this.previewLayer.getSource().getFeatures()[0].getGeometry().getExtent()
@@ -444,14 +501,29 @@ var ExportModel = ToolModel.extend({
         callback(rsp);
       }
     });
-
   },
-  /*
-   * @desc Handle click event on toolbar button.
+
+  /**
+   * @description
+   *
+   *   Handle click event on toolbar button.
+   *   This handler sets the property visible,
+   *   wich in turn will trigger the change event of navigation model.
+   *   In pracice this will activate corresponding panel as
+   *   "active panel" in the navigation panel.
+   *
+   * @instance
    */
   clicked: function () {
     this.set('visible', true);
   }
-});
 
-module.exports = ExportModel;
+};
+
+/**
+ * Eport model module.<br>
+ * Use <code>require('models/export')</code> for instantiation.
+ * @module ExportModel-module
+ * @returns {ExportModel}
+ */
+module.exports = ToolModel.extend(ExportModel);

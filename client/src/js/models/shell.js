@@ -2,18 +2,21 @@ var MapModel = require('models/map');
 var LayerCollection = require('collections/layers');
 var ToolCollection = require('collections/tools');
 var NavigationPanelModel = require("models/navigation");
+
 /**
- * Backbone model class Shell
+ * @description
+ *
+ *  Prototype for creating a shell model.
+ *  The shell is used as a container for the application environment.
+ *  This intermediate class holds references to other modules. (Map, Tools, Layers, Navigation)
+ *  Any communication between models will be occur through this model.
+ *
  * @class
- * @augments Backbone.Model
+ * @augments {external:"Backbone.Model"}
+ * @param {object} options - Default options
  */
-var Shell = Backbone.Model.extend({
-  /**
-   * Creates a shell.
-   *
-   * @constructor
-   * @param {object} options - Default options
-   */
+var ShellModel = {
+
   initialize: function (config) {
     this.initialConfig = config;
     this.cid += '_map';
@@ -32,10 +35,7 @@ var Shell = Backbone.Model.extend({
       this.set('canStart', false);
     }
   },
-  /**
-   *
-   *
-   */
+
   configure: function () {
     var config = this.initialConfig;
     if (this.get('canStart')) {
@@ -56,43 +56,41 @@ var Shell = Backbone.Model.extend({
     }
   },
   /**
-   *
-   *
+   * Get map property value
+   * @instance
+   * @return {MapModel} map model
    */
   getMap: function () {
     return this.get('map');
   },
   /**
-   *
-   *
-   */
-  getHubConnection: function () {
-    return this.get('hubConnection');
-  },
-  /**
-   *
-   *
+   * Get layer collection property value
+   * @instance
+   * @return {LayerCollection} layer collection
    */
   getLayerCollection: function () {
     return this.get('layerCollection');
   },
   /**
-   *
-   *
+   * Get tool collection property value
+   * @instance
+   * @return {ToolCollection} tool collection
    */
   getToolCollection: function () {
     return this.get('toolCollection');
   },
   /**
-   *
-   *
+   * Get navigation property value
+   * @instance
+   * @return {NavigationModel} navigation model
    */
   getNavigation: function () {
     return this.get('navigation');
   },
   /**
-   *
-   *
+   * Convert model to JSON-string
+   * @instance
+   * @return {string} JSON-string
    */
   toJSON: function () {
     var json = _.clone(this.initialConfig);
@@ -102,34 +100,44 @@ var Shell = Backbone.Model.extend({
     return JSON.stringify(json);
   },
   /**
-   *
-   *
+   * Set bookmark property value
+   * @instance
+   * @param {Array<{object}>} bookmars
    */
   setBookmarks: function (bookmarks) {
     this.set('bookmarks', bookmarks);
   },
   /**
-   *
-   *
+   * Get bookmarks property value
+   * @instance
+   * @return {object} bookmars
    */
   getBookmarks: function () {
     return this.get('bookmarks');
   },
   /**
-   *
-   *
+   * Get configuration property value
+   * @instance
+   * @return {object} configuration
    */
   getConfig: function () {
     return this.get('config');
   },
   /**
-   *
-   *
+   * Set configuration property value
+   * @instance
+   * @param {object} configuration
    */
   setConfig: function (config) {
     this.set('config', config);
     this.set('configUpdated', new Date().getTime());
   }
-});
+};
 
-module.exports = Shell;
+/**
+ * Shell model module.<br>
+ * Use <code>require('models/shell')</code> for instantiation.
+ * @module ShellModel-module
+ * @returns {ShellModel}
+ */
+module.exports = Backbone.Model.extend(ShellModel);

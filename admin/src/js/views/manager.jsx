@@ -336,26 +336,26 @@ class Manager extends React.Component {
    *
    */
   renderLayersFromCapabilites() {
-    if (this.state && this.state.capabilities) {      
+    if (this.state && this.state.capabilities) {
       var layers = [];
 
-      var append = (layer) => {      
-        
+      var append = (layer) => {
+
         var classNames = this.state.layerPropertiesName === layer.Name ?
-                         "fa fa-info-circle active" : "fa fa-info-circle";      
+                         "fa fa-info-circle active" : "fa fa-info-circle";
 
         var i = Math.floor(Math.random() * 1E6);
         var title = /^\d+$/.test(layer.Name) ? <label>&nbsp;{layer.Title}</label> : null;
-        
+
         return (
           <li key={i}>
-            <input 
-              ref={layer.Name} 
-              id={"layer" + i} 
-              type="checkbox" 
-              data-type="wms-layer" 
+            <input
+              ref={layer.Name}
+              id={"layer" + i}
+              type="checkbox"
+              data-type="wms-layer"
               checked={this.state.addedLayers.find(l => l === layer.Name)}
-              onChange={(e) => { 
+              onChange={(e) => {
                 this.appendLayer(e, layer.Name)
               }} />&nbsp;
             <label htmlFor={"layer" + i}>{layer.Name}</label>{title}
@@ -365,11 +365,11 @@ class Manager extends React.Component {
       };
 
       this.state.capabilities.Capability.Layer.Layer.map((layer) => {
-        if (layer.Layer) {          
+        if (layer.Layer) {
           layer.Layer.forEach((layer) => {
             if (layer.Layer) {
               layer.Layer.forEach((layer) => {
-                layers.push(append(layer));  
+                layers.push(append(layer));
               });
             } else {
               layers.push(append(layer));
@@ -682,13 +682,19 @@ class Manager extends React.Component {
     this.refs.uploadIframe.addEventListener("load", () => {
       if (this.refs.uploadIframe.contentDocument &&
         $(this.refs.uploadIframe.contentDocument).find('string').length > 0) {
-        let url = $(this.refs.uploadIframe.contentDocument).find('string')[0].innerHTML;
+
+        if (!window.location.origin) {
+          window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+        }
+
+        let node = $(this.refs.uploadIframe.contentDocument).find('string')[0];
+        let url  = node.textContent ? node.textContent : node.innerHTML;
         let a = $(`<a href="${url}"">temp</a>`);
-        let b = a[0].origin + a[0].pathname;
+        let b = a[0].href;
+
         this.setState({
           legend: b
         });
-
       }
     });
   }

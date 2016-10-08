@@ -162,10 +162,4 @@ var Layer = {
   }
 };
 
-/**
- * Layer module.<br>
- * Use <code>require('layer/layer')</code> for instantiation.
- * @module Layer-module
- * @returns {Layer}
- */
 module.exports = Backbone.Model.extend(Layer);

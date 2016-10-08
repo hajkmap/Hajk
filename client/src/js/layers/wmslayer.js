@@ -5,7 +5,7 @@ var LayerModel = require('layers/layer');
  * @property {string} url
  * @property {string} projection - Default: EPSG:3007
  * @property {string} serverType - argis | geoserver. Default: geoserver
- * @property {number} opacity - Defualt: 1
+ * @property {number} opacity - Default: 1
  * @property {string} status - Load status for layer. Default: ok
  * @property {object} params
  */
@@ -108,7 +108,7 @@ var WmsLayer = {
    },
 
    /**
-    * getFeatureInformation - Load feature information.
+    * Load feature information.
     * @instance
     * @param {external:"ol.feature"} feature
     * @return {external:"ol.style"} style
@@ -150,7 +150,7 @@ var WmsLayer = {
    },
 
    /**
-    * tileLoadError - Triggers when a tile fails to load.
+    * Triggers when a tile fails to load.
     * @instance
     */
    tileLoadError: function () {
@@ -158,7 +158,7 @@ var WmsLayer = {
    },
 
    /**
-    * tileLoadOk - triggers when a tile loads.
+    * Triggers when a tile loads.
     * @instance
     */
    tileLoadOk: function () {
@@ -166,7 +166,7 @@ var WmsLayer = {
    },
 
    /**
-    * getFeatureInformationReponse - Parse response and trigger registred feature information callback.
+    * Parse response and trigger registred feature information callback.
     * @param {XMLDocument} respose
     * @instance
     */
@@ -180,4 +180,10 @@ var WmsLayer = {
    }
 };
 
+/**
+ * WmsLayer module.<br>
+ * Use <code>require('layer/wmslayer')</code> for instantiation.
+ * @module WmsLayer-module
+ * @returns {WmsLayer}
+ */
 module.exports = LayerModel.extend(WmsLayer);

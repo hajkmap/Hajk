@@ -1,36 +1,78 @@
 var ToolModel = require('tools/tool');
 
-var Edit = module.exports = ToolModel.extend({
+/**
+ * @typedef {Object} EditModel~EditModelProperties
+ * @property {string} type - Default: edit
+ * @property {string} panel - Default: editpanel
+ * @property {string} toolbar - Default: bottom
+ * @property {string} icon - Default: fa fa-pencil-square-o icon
+ * @property {string} title - Default: Editera
+ * @property {boolean} visible - Default: false
+ * @property {external:"ol.source"} vectorSource - Default: undefined
+ * @property {external:"ol.source"} imageSource - Default: undefined
+ * @property {external:"ol.layer"} layer - Default: undefined
+ * @property {external:"ol.interaction.Select"} select - Default: undefined
+ * @property {external:"ol.interaction.Modify"} modify - Default: undefined
+ * @property {string} key - Default: undefined
+ * @property {external:"ol.feature"} editFeature - Default: undefined
+ * @property {external:"ol.source"} editSource - Default: undefined
+ * @property {external:"ol.feature"} removeFeature - Default: undefined
+ * @property {ShellModel} shell - Default: undefined
+ */
+var EditModelProperties = {
+  type: 'edit',
+  panel: 'editpanel',
+  toolbar: 'bottom',
+  icon: 'fa fa-pencil-square-o icon',
+  title: 'Editera',
+  visible: false,
+  vectorSource: undefined,
+  imageSource: undefined,
+  layer: undefined,
+  select: undefined,
+  modify: undefined,
+  key: undefined,
+  editFeature: undefined,
+  editSource: undefined,
+  removeFeature: undefined,
+  shell: undefined
+};
+
+/**
+ * Prototype for creating an edit model.
+ * @class
+ * @augments {external:"Backbone.Model"}
+ * @param {EditModel~EditModelProperties} options - Default options
+ */
+var EditModel = {
   /*
-   * Property: default settings
-   *
+   * @instance
+   * @property defaults - Default settings
+   * @{EditModel~EditModelProperties} defaults
    */
-  defaults: {
-    type: 'edit',
-    panel: 'editpanel',
-    toolbar: 'bottom',
-    icon: 'fa fa-pencil-square-o icon',
-    title: 'Editera',
-    visible: false,
-    vectorSource: undefined,
-    imageSource: undefined,
-    layer: undefined,
-    select: undefined,
-    modify: undefined,
-    key: undefined,
-    editFeature: undefined,
-    editSource: undefined,
-    removeFeature: undefined,
-    shell: undefined
-  },
+  defaults: EditModelProperties,
+
   /**
-   *
-   *
+   * @instance
+   * @property {boolean} filty - Default: false
    */
   filty: false,
+
+  configure: function (shell) {
+    this.set('map', shell.getMap().getMap());
+
+    this.set('layerCollection', shell.getLayerCollection());
+    var navigation = shell.getNavigation();
+    navigation.on('change:activePanel', (e) => {
+      this.deactivate();
+    });
+  },
+
   /**
-   *
-   *
+   * Generate transaction XML-string to post
+   * @instance
+   * @param {Array<{external:"ol.feature"}>} features
+   * @return {string} XML-string to post
    */
   write: function (features) {
 
@@ -47,9 +89,12 @@ var Edit = module.exports = ToolModel.extend({
 
     return format.writeTransaction(features.inserts, features.updates, features.deletes, gml);
   },
+
   /**
-   *
-   *
+   * Try to find the corresponding WMS-layer in the map.
+   * If found, refresh that layer.
+   * @instance
+   * @param {string} layerName
    */
   refreshLayer: function (layerName) {
     var source
@@ -80,16 +125,19 @@ var Edit = module.exports = ToolModel.extend({
     }
   },
   /**
-   *
-   *
+   * @instance
+   * @param {XMLDocument} response
+   * @return {object} js-xml-translation-object
    */
   parseWFSTresponse: function (response) {
     var str = (new XMLSerializer()).serializeToString(response);
     return (new X2JS()).xml2js(str);
   },
   /**
-   *
-   *
+   * Make transaction
+   * @instance
+   * @param {Array<{external:"ol.feature"}>} features
+   * @param {function} done - Callback to invoke when the transaction is complete.
    */
   transact: function (features, done) {
 
@@ -122,11 +170,12 @@ var Edit = module.exports = ToolModel.extend({
         done(data);
       });
     }
-
   },
+
   /**
-   *
-   *
+   * Trigger transaction
+   * @instance
+   * @param {function} done - Callback to invoke when the transaction is complete.
    */
   save: function (done) {
 
@@ -148,9 +197,12 @@ var Edit = module.exports = ToolModel.extend({
 
     this.transact(features, done);
   },
+
   /**
-   *
-   *
+   * Generate the select style.
+   * @instance
+   * @param {external:"ol.feature"} feature
+   * @return {Array<{external:"ol.style"}>}
    */
   getSelectStyle: function (feature) {
     return [new ol.style.Style({
@@ -192,9 +244,12 @@ var Edit = module.exports = ToolModel.extend({
       }
     })];
   },
+
   /**
-   *
-   *
+   * Generate the default display style.
+   * @instance
+   * @param {external:"ol.feature"} feature
+   * @return {Array<{external:"ol.style"}>}
    */
   getStyle: function (feature) {
     return [new ol.style.Style({
@@ -217,9 +272,12 @@ var Edit = module.exports = ToolModel.extend({
       })
     })];
   },
+
   /**
-   *
-   *
+   * Generate the hidden style.
+   * @instance
+   * @param {external:"ol.feature"} feature
+   * @return {Array<{external:"ol.style"}>}
    */
   getHiddenStyle : function (feature) {
     return [new ol.style.Style({
@@ -242,9 +300,12 @@ var Edit = module.exports = ToolModel.extend({
       })
     })];
   },
+
   /**
-   *
-   *
+   * Generate the scetch style.
+   * @instance
+   * @param {external:"ol.feature"} feature
+   * @return {Array<{external:"ol.style"}>}
    */
   getScetchStyle: function () {
     return [
@@ -269,9 +330,13 @@ var Edit = module.exports = ToolModel.extend({
       })
     ]
   },
+
   /**
-   *
-   *
+   * Load data from WFS-service and att to the source.
+   * @instance
+   * @param {object} config
+   * @param {number[]} extent
+   * @param {function} done - Callback
    */
   loadData: function (config, extent, done) {
     var format = new ol.format.WFS();
@@ -313,16 +378,20 @@ var Edit = module.exports = ToolModel.extend({
       if (done) done();
     });
   },
+
   /**
-   *
-   *
+   * Trigger edit attribute session.
+   * @instance
+   * @param {external:"ol.feature"} feature
    */
   editAttributes: function(feature) {
     this.set({editFeature: feature});
   },
+
   /**
-   *
-   *
+   * Event handler for feature selection.
+   * @instance
+   * @param {object} event
    */
   featureSelected: function (event) {
     if (this.get('removalToolMode') === 'on') {
@@ -343,9 +412,12 @@ var Edit = module.exports = ToolModel.extend({
       this.editAttributes(feature);
     });
   },
+
   /**
-   *
-   *
+   * Set this models avtive layer.
+   * @instance
+   * @param {external:"ol.source"} source
+   * @param {function} done - Callback
    */
   setLayer: function (source, done) {
     this.filty = true;
@@ -394,9 +466,11 @@ var Edit = module.exports = ToolModel.extend({
     this.get('modify').setActive(true);
     this.get('layer').dragLocked = true;
   },
+
   /**
    * Event handler for draw end.
-   * @param {extern: ol.feature} - Drawn feature
+   * @instance
+   * @param {external:"ol.feature"} - Drawn feature
    * @param {string} geometryType - Geometry type of feature
    */
   handleDrawEnd: function(feature, geometryType) {
@@ -404,16 +478,20 @@ var Edit = module.exports = ToolModel.extend({
     feature.modification = 'added';
     this.editAttributes(feature);
   },
+
   /**
-   *
-   *
+   * Set the mode of the removal tool.
+   * @instance
+   * @param {string} mode
    */
   setRemovalToolMode: function (mode) {
     this.set('removalToolMode', mode);
   },
+
   /**
-   * Create draw interaction and add to map.
-   * @params: {string} type
+   * Activate the draw tool.
+   * @instance
+   * @param {string} geometryType
    */
   activateDrawTool: function(geometryType) {
 
@@ -428,7 +506,7 @@ var Edit = module.exports = ToolModel.extend({
         this.handleDrawEnd(event.feature, geometryType)
       });
       this.get('map').addInteraction(this.get('drawTool'));
-    }
+    };
 
     var remove = () => {
       this.get('map').removeInteraction(this.get('drawTool'));
@@ -450,11 +528,12 @@ var Edit = module.exports = ToolModel.extend({
     } else {
       add();
     }
-
   },
+
   /**
-   *
-   *
+   * Activate the draw tool.
+   * @instance
+   * @param {boolean} keepClickLock - Whether to keep the maps' clicklock or not.
    */
   deactivateDrawTool: function(keepClickLock) {
     if (!keepClickLock)
@@ -468,9 +547,10 @@ var Edit = module.exports = ToolModel.extend({
       this.get('drawTool').setActive(false);
     }
   },
+
   /**
-   *
-   *
+   * Deactivate all edit interactions.
+   * @instance
    */
   deactivateTools: function() {
     if (this.get('select')) {
@@ -486,9 +566,10 @@ var Edit = module.exports = ToolModel.extend({
       this.get('drawTool').setActive(false);
     }
   },
+
   /**
-   *
-   *
+   * Deactivate the edit tool
+   * @instance
    */
   deactivate: function () {
     if (this.get('select')) {
@@ -519,25 +600,27 @@ var Edit = module.exports = ToolModel.extend({
     this.filty = false;
     this.get('map').set('clickLock', false);
   },
-  /**
-   * Configure the tool before first use.
-   * @params {Backbone.Model} shell
-   */
-  configure: function (shell) {
-    this.set('map', shell.getMap().getMap());
 
-    this.set('layerCollection', shell.getLayerCollection());
-    var navigation = shell.getNavigation();
-    navigation.on('change:activePanel', (e) => {
-      this.deactivate();
-    });
-
-  },
   /**
-   * @desc Event handler triggered when the tool is clicked.
-   * @return {undefined}
+   * @description
+   *
+   *   Handle click event on toolbar button.
+   *   This handler sets the property visible,
+   *   wich in turn will trigger the change event of navigation model.
+   *   In pracice this will activate corresponding panel as
+   *   "active panel" in the navigation panel.
+   *
+   * @instance
    */
   clicked: function () {
     this.set('visible', true);
   }
-});
+};
+
+/**
+ * Edit model module.<br>
+ * Use <code>require('models/edit')</code> for instantiation.
+ * @module EditModel-module
+ * @returns {EditModel}
+ */
+module.exports = ToolModel.extend(EditModel);

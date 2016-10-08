@@ -12,6 +12,7 @@ var types = {
 var LayerCollection = {
   /**
    * Add layer to openlayers map
+   * @instance
    * @param {Layer} layer - Layer model to add
    */
   addToMap: function(layer) {
@@ -25,6 +26,7 @@ var LayerCollection = {
   },
   /**
    * Remove layer from openlayers map
+   * @instance
    * @param {Layer} layer - Layermodel to remove
    */
   removeFromMap: function(layer) {
@@ -37,6 +39,7 @@ var LayerCollection = {
   },
   /**
    * Generates a model for this layer
+   * @instance
    * @param {object} args
    * @param {object} properties
    * @return {object} config
@@ -68,6 +71,7 @@ var LayerCollection = {
   },
   /**
    * Generates a model for this layer
+   * @instance
    * @param {object} args
    * @param {object} properties
    * @return {object} config
@@ -128,6 +132,7 @@ var LayerCollection = {
   },
   /**
    * Generates a model for this layer
+   * @instance
    * @param {object} args
    * @param {object} properties
    * @return {Layer} layer
@@ -154,6 +159,7 @@ var LayerCollection = {
   },
   /**
    * Constructor method
+   * @instance
    * @param {object} options
    * @param {object} args
    */
@@ -173,6 +179,7 @@ var LayerCollection = {
   },
   /**
    * Get the objects data state as json-friendly representation.
+   * @instance
    * @return {object} state
    */
   toJSON: function () {

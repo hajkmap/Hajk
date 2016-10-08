@@ -2,67 +2,129 @@ var ToolModel = require('tools/tool');
 var source;
 var olMap;
 
-var Draw = module.exports = ToolModel.extend({
-  /*
-   * Property: default settings
-   *
-   */
-  defaults: {
-    type: 'draw',
-    panel: 'DrawPanel',
-    title: 'Ritverktyg',
-    toolbar: 'bottom',
-    visible: false,
-    icon: 'fa fa-pencil icon',
-    drawLayerName: 'draw-layer',
-    drawLayer: undefined,
-    drawTool: undefined,
-    removeTool: undefined,
-    olMap: undefined,
-    source: undefined,
-    showLabels: false,
-    dialog: false,
-    kmlImport: false,
-    kmlExportUrl: false,
-    pointText: "Text",
-    pointColor: "rgb(15, 175, 255)",
-    pointRadius: 7,
-    pointSymbol: false,
-    markerImg: "http://localhost/gbg/assets/icons/marker.png",
-    lineColor: "rgb(15, 175, 255)",
-    lineWidth: 3,
-    lineStyle: "solid",
-    polygonLineColor: "rgb(15, 175, 255)",
-    polygonLineWidth: 3,
-    polygonLineStyle: "solid",
-    polygonFillColor: "rgb(255, 255, 255)",
-    polygonFillOpacity: 0.5,
-    scetchStyle: [
-      new ol.style.Style({
+/**
+ * @typedef {Object} DrawModel~DrawModelProperties
+ * @property {string} type - Default: 'draw'
+ * @property {string} panel - Default: 'DrawPanel'
+ * @property {string} title - Default: 'Ritverktyg'
+ * @property {string} toolbar - Default: 'bottom'
+ * @property {string} visible - Default: false
+ * @property {string} icon - Default: 'fa fa-pencil icon'
+ * @property {string} drawLayerName - Default: 'draw-layer'
+ * @property {external:"ol.layer"} drawLayer - Default: undefined
+ * @property {object} drawTool - Default: undefined
+ * @property {object} removeTool - Default: undefined
+ * @property {external:"ol.map"} olMap - Default: undefined
+ * @property {external:"ol.source"} source - Default: undefined
+ * @property {boolean} showLabels - Default: false
+ * @property {boolean} dialog - Default: false
+ * @property {boolean} kmlImport - Default: false
+ * @property {boolean} kmlExportUrl - Default: false
+ * @property {string} pointText - Default: "Text"
+ * @property {string} pointColor - Default: "rgb(15, 175, 255)"
+ * @property {number} pointRadius - Default: 7
+ * @property {boolean} pointSymbol - Default: false
+ * @property {string} markerImg - Default: "http://localhost/gbg/assets/icons/marker.png"
+ * @property {string} lineColor - Default: "rgb(15, 175, 255)"
+ * @property {number} lineWidth - Default: 3
+ * @property {string} lineStyle - Default: "solid"
+ * @property {string} polygonLineColor - Default: "rgb(15, 175, 255)"
+ * @property {number} polygonLineWidth - Default: 3
+ * @property {string} polygonLineStyle - Default: "solid"
+ * @property {string} polygonFillColor - Default: "rgb(255, 255, 255)"
+ * @property {number} polygonFillOpacity - Default: 0.5
+ * @property {Array<{external:"ol.Style"}>} scetchStyle
+ */
+var DrawModelProperties = {
+  type: 'draw',
+  panel: 'DrawPanel',
+  title: 'Ritverktyg',
+  toolbar: 'bottom',
+  visible: false,
+  icon: 'fa fa-pencil icon',
+  drawLayerName: 'draw-layer',
+  drawLayer: undefined,
+  drawTool: undefined,
+  removeTool: undefined,
+  olMap: undefined,
+  source: undefined,
+  showLabels: false,
+  dialog: false,
+  kmlImport: false,
+  kmlExportUrl: false,
+  pointText: "Text",
+  pointColor: "rgb(15, 175, 255)",
+  pointRadius: 7,
+  pointSymbol: false,
+  markerImg: "http://localhost/gbg/assets/icons/marker.png",
+  lineColor: "rgb(15, 175, 255)",
+  lineWidth: 3,
+  lineStyle: "solid",
+  polygonLineColor: "rgb(15, 175, 255)",
+  polygonLineWidth: 3,
+  polygonLineStyle: "solid",
+  polygonFillColor: "rgb(255, 255, 255)",
+  polygonFillOpacity: 0.5,
+  scetchStyle: [
+    new ol.style.Style({
+    fill: new ol.style.Fill({
+      color: 'rgba(255, 255, 255, 0.5)'
+    }),
+    stroke: new ol.style.Stroke({
+      color: 'rgba(0, 0, 0, 0.5)',
+      width: 4
+    }),
+    image: new ol.style.Circle({
+      radius: 6,
       fill: new ol.style.Fill({
-        color: 'rgba(255, 255, 255, 0.5)'
+        color: 'rgba(0, 0, 0, 0.5)'
       }),
       stroke: new ol.style.Stroke({
-        color: 'rgba(0, 0, 0, 0.5)',
-        width: 4
-      }),
-      image: new ol.style.Circle({
-        radius: 6,
-        fill: new ol.style.Fill({
-          color: 'rgba(0, 0, 0, 0.5)'
-        }),
-        stroke: new ol.style.Stroke({
-          color: 'rgba(255, 255, 255, 0.5)',
-          width: 2
-        })
+        color: 'rgba(255, 255, 255, 0.5)',
+        width: 2
       })
     })
-  ]
+  })]
+}
+
+/**
+ * Prototype for creating an draw model.
+ * @class
+ * @augments {external:"Backbone.Model"}
+ * @param {DrawModel~DrawModelProperties} options - Default options
+ */
+var DrawModel = {
+  /**
+   * @instance
+   * @property {DrawModel~DrawModelProperties} defaults - Default settings
+   */
+  defaults: DrawModelProperties,
+
+  initialize: function (options) {
+    ToolModel.prototype.initialize.call(this);
   },
+
+  configure: function (shell) {
+    source = new ol.source.Vector({ wrapX: false });
+    olMap = shell.getMap().getMap();
+    this.set('source', source);
+
+    this.set('drawLayer', new ol.layer.Vector({
+      source: this.get('source'),
+      queryable: false,
+      name: this.get('drawLayerName'),
+      style: (feature) => this.getStyle(feature)
+    }));
+
+    this.set('olMap', olMap);
+    this.get('olMap').addLayer(this.get('drawLayer'));
+    this.set('drawLayer', this.get('drawLayer'));
+  },
+
   /**
    * Removes the selected feature from source.
-   * @params {ol.event} event
-   *
+   * @instance
+   * @params {external:"ol.event.Event"} event
    */
   removeSelected: function (event) {
     var first = true;
@@ -73,33 +135,31 @@ var Draw = module.exports = ToolModel.extend({
       first = false;
     });
   },
+
   /**
    * Create select interaction and add to map.
    * Remove any draw interaction from map.
-   * @params:
-   * @returns: undefined
-   *
+   * @instance
    */
   activateRemovalTool: function () {
     this.get('olMap').removeInteraction(this.get("drawTool"));
     this.get('olMap').set('clickLock', true);
     this.get('olMap').on('singleclick', this.removeSelected);
   },
+
   /**
    * Remove the last edited feature from soruce.
-   * @params:
-   * @returns: undefined
-   *
+   * @instance
    */
   removeEditFeature() {
     this.get('source').removeFeature(this.get('drawFeature'));
   },
-  /*
+
+  /**
    * Event handler to excecute after features are drawn.
-   *
-   * @params: {ol.feature} type
-   * @returns: undefined
-   *
+   * @params: {external:"ol.feature"} type
+   * @params: {string} type
+   * @instance
    */
   handleDrawEnd: function (feature, type) {
     if (type === "Text") {
@@ -113,12 +173,11 @@ var Draw = module.exports = ToolModel.extend({
       feature.setStyle(this.getStyle(feature));
     }
   },
-  /*
+
+  /**
    * Create draw interaction and add to map.
-   *
-   * @params: {string} <ol.geom.GeometryType>} type
-   * @returns: undefined
-   *
+   * @param {extern:"ol.geom.GeometryType"} type
+   * @instance
    */
   activateDrawTool: function (type) {
     var style = undefined
@@ -144,29 +203,31 @@ var Draw = module.exports = ToolModel.extend({
     this.get('olMap').addInteraction(this.get('drawTool'));
     this.get('olMap').set('clickLock', true);
   },
-  /*
+
+  /**
    * Remove all interactions from the map.
-   *
-   * @params:
-   * @returns: undefined
-   *
+   * @instance
    */
   abort: function () {
     this.get('olMap').un('singleclick', this.removeSelected);
     this.get('olMap').removeInteraction(this.get('drawTool'));
     this.get('olMap').set('clickLock', false);
   },
+
   /**
    * Clear the source from features.
+   * @instance
    */
   clear: function () {
     this.get('source').clear();
   },
+
   /**
    * Create KML string from features.
-   * @param {[OpenLayers.Features]} features
-   * @param {string} name name of layer
-   * @return {string} xml-document
+   * @instance
+   * @param {Array<{external:"ol.feature"}> features
+   * @param {string} name - name of layer
+   * @return {string} xml
    */
   writeKml: function (features, name) {
 
@@ -206,7 +267,6 @@ var Draw = module.exports = ToolModel.extend({
 
       function toKmlString(str, type) {
 
-          //var str = f.getGeometry().toString()
           var strs = []
           ,   a
           ,   b;
@@ -317,7 +377,6 @@ var Draw = module.exports = ToolModel.extend({
           return string.replace(/<\/?[^>]+(>|$)|&/g, "");
       }
 
-      //var header = '<?xml version="1.0" encoding="UTF-8"?>'
       var header = ''
       ,   parser = new ol.format.WKT()
       ,   doc = ''
@@ -331,7 +390,7 @@ var Draw = module.exports = ToolModel.extend({
       doc += "<name>" + name + "</name>";
       doc += "<open>0</open>";
 
-      _.each(features, function (feature, i) {
+      features.forEach((feature, i) => {
           var style = feature.getStyle()[1];
           doc += '<Style id="' + i + '">';
               if (style.getImage() instanceof ol.style.Icon) {
@@ -359,7 +418,7 @@ var Draw = module.exports = ToolModel.extend({
           doc += '</Style>';
       });
 
-      _.each(features, function (feature, i) {
+      features.forEach((feature, i) => {
 
           var description = feature.getProperties().description || ""
           ,   name = feature.getProperties().name || feature.getStyle()[1].getText().getText() || ""
@@ -409,9 +468,11 @@ var Draw = module.exports = ToolModel.extend({
       header += '</kml>';
       return header
   },
+
   /**
-   * Extract style info from {ol.style.Style} object.
-   * @param {ol.style.Style} style
+   * Extract style info from ol Style object.
+   * @instance
+   * @param {external:"ol.style.Style"} style
    * @return {object} style
    */
   extractStyle: function (style) {
@@ -438,8 +499,10 @@ var Draw = module.exports = ToolModel.extend({
 
     return obj;
   },
+
   /**
-   * Exprort draw layer.
+   * Export draw layer.
+   * @instance
    */
   export: function () {
 
@@ -471,8 +534,11 @@ var Draw = module.exports = ToolModel.extend({
       });
     });
   },
+
   /**
-   *
+   * Set the features style from based upon its properties.
+   * @param {external:"ol.feature"}
+   * @instance
    */
   setStyleFromProperties: function(feature) {
     if (feature.getProperties().style) {
@@ -492,24 +558,27 @@ var Draw = module.exports = ToolModel.extend({
       }
     }
   },
+
   /**
-   * Import draw layer.
+   * Import draw layer and add features to the map.
+   * @instance
+   * @param {XMLDocument} xmlDocument
    */
   importDrawLayer: function (xmlDoc) {
+
     var kml_string = xmlDoc.documentElement.childNodes[0].data;
-    
-    //Chrome stores data in index [1] of the array and explorer in [0]
-    if (!kml_string){
-      try{
+
+    //Chrome stores data at index [1] of the array and explorer at [0]
+    if (!kml_string) {
+      try {
           kml_string = xmlDoc.documentElement.childNodes[1].data;
-      }
-      catch (e){
+      } catch (e) {
           console.error('Could not import features from kml. Check var xmlDoc in draw.js');
       }
     }
 
-    var parser     = new ol.format.KML();
-    var features   = parser.readFeatures(kml_string);
+    var parser = new ol.format.KML()
+    ,   features = parser.readFeatures(kml_string);
 
     features.forEach((feature) => {
       coordinates = feature.getGeometry().getCoordinates();
@@ -545,18 +614,24 @@ var Draw = module.exports = ToolModel.extend({
       );
       this.setStyleFromProperties(feature);
     });
+
     this.get('drawLayer').getSource().addFeatures(features);
   },
+
   /**
-   *
+   * Trigger kml import
+   * @instance
    */
   import: function () {
     this.set("kmlImport", true);
   },
+
   /**
    * Get styles array.
-   * @param {ol.Feature} feature
-   * @return {[ol.Style]} style
+   * @instance
+   * @param {external:"ol.feature"} feature
+   * @param {boolean} forcedProperties - Force certain properties to be taken directy from the feature.
+   * @return {Array<{external:"ol.style"}>} style
    *
    */
   getStyle: function(feature, forcedProperties) {
@@ -676,24 +751,28 @@ var Draw = module.exports = ToolModel.extend({
 
     var type = feature.getProperties().type;
 
-    return [new ol.style.Style({
-      stroke: new ol.style.Stroke({
-        color: 'rgba(255, 255, 255, 0.5)',
-        width: type === 'Polygon' ?
-                 this.get('polygonLineWidth') + 2 :
-                 this.get('lineWidth') + 2
+    return [
+      new ol.style.Style({
+        stroke: new ol.style.Stroke({
+          color: 'rgba(255, 255, 255, 0.5)',
+          width: type === 'Polygon' ?
+                   this.get('polygonLineWidth') + 2 :
+                   this.get('lineWidth') + 2
+        })
+      }),
+      new ol.style.Style({
+        fill: getFill.call(this),
+        stroke: getStroke.call(this),
+        image: getImage.call(this),
+        text: getText.call(this)
       })
-    }),
-    new ol.style.Style({
-      fill: getFill.call(this),
-      stroke: getStroke.call(this),
-      image: getImage.call(this),
-      text: getText.call(this)
-    })]
+    ]
   },
+
   /**
    * Generate feature label text from properties.
-   * @param {ol.Feature} feature
+   * @instance
+   * @param {external:"ol.feature"} feature
    * @return {string} label
    *
    */
@@ -711,18 +790,20 @@ var Draw = module.exports = ToolModel.extend({
       default: return "";
     }
   },
+
   /**
    * Set the property wich will show/hide labels and update the source.
+   * @instance
+   * @return {boolean} showLabels
    */
   toggleLabels: function () {
+
     this.set('showLabels', !this.get('showLabels'));
     this.get('source').changed();
 
     source.forEachFeature(feature => {
-
       if (feature.getProperties().type !== "Text") {
         let style = feature.getStyle();
-
         if (this.get('showLabels')) {
           style[1].getText().setText(this.getLabelText(feature));
         } else {
@@ -733,17 +814,11 @@ var Draw = module.exports = ToolModel.extend({
 
     return this.get('showLabels');
   },
-  /**
-   * Constructor method.
-   * @param {object} options
-   *
-   */
-  initialize: function (options) {
-    ToolModel.prototype.initialize.call(this);
-  },
+
   /**
    * Update any feature with property to identify feature as text feature.
-   * @params {ol.Feature} feature
+   * @instance
+   * @params {external:"ol.feature"} feature
    * @params {string} text
    */
   setFeaturePropertiesFromText: function (feature, text) {
@@ -754,9 +829,11 @@ var Draw = module.exports = ToolModel.extend({
       description: text
     });
   },
+
   /**
    * Update any feature with properties from its own geometry.
-   * @param {ol.Feature} feature
+   * @instance
+   * @params {external:"ol.feature"} feature
    */
   setFeaturePropertiesFromGeometry: function (feature) {
     if (!feature) return;
@@ -795,86 +872,137 @@ var Draw = module.exports = ToolModel.extend({
       position: position
     });
   },
-  /**
-   * Configure the tool before first use.
-   * @params {Backbone.Model} shell
-   */
-  configure: function (shell) {
-    source = new ol.source.Vector({ wrapX: false });
-    olMap = shell.getMap().getMap();
-    this.set('source', source);
 
-    this.set('drawLayer', new ol.layer.Vector({
-      source: this.get('source'),
-      queryable: false,
-      name: this.get('drawLayerName'),
-      style: (feature) => this.getStyle(feature)
-    }));
-
-    this.set('olMap', olMap);
-    this.get('olMap').addLayer(this.get('drawLayer'));
-    this.set('drawLayer', this.get('drawLayer'));
-  },
   /**
-   * Handle click event on toolbar button.
-   * This handler sets the property visible,
-   * wich in turn will trigger the change event of navigation model.
-   * In pracice this will activate corresponding panel as
-   * "active panel" in the navigation panel.
+   * @description
+   *
+   *   Handle click event on toolbar button.
+   *   This handler sets the property visible,
+   *   wich in turn will trigger the change event of navigation model.
+   *   In pracice this will activate corresponding panel as
+   *   "active panel" in the navigation panel.
+   *
+   * @instance
    */
   clicked: function () {
     this.set('visible', true);
   },
 
+  /**
+   * Set the property pointColor
+   * @param {string} color
+   * @instance
+   */
   setPointColor: function (color) {
     this.set("pointColor", color);
   },
-
+  /**
+   * Set the property pointRadius
+   * @param {number} radius
+   * @instance
+   */
   setPointRadius: function (radius) {
     this.set("pointRadius", radius);
   },
 
+  /**
+   * Set the property lineWidth
+   * @param {number} width
+   * @instance
+   */
   setLineWidth: function (width) {
     this.set("lineWidth", width);
   },
 
+  /**
+   * Set the property lineColor
+   * @param {string} color
+   * @instance
+   */
   setLineColor: function (color) {
     this.set("lineColor", color);
   },
 
+  /**
+   * Set the property lineStyle
+   * @param {string} style
+   * @instance
+   */
   setLineStyle: function (style) {
     this.set("lineStyle", style);
   },
 
+  /**
+   * Set the property polygonLineStyle
+   * @param {string} style
+   * @instance
+   */
   setPolygonLineStyle: function (style) {
     this.set("polygonLineStyle", style);
   },
 
+  /**
+   * Set the property polygonFillOpacity
+   * @param {number} opacity
+   * @instance
+   */
   setPolygonFillOpacity: function (opacity) {
     this.set("polygonFillOpacity", opacity);
   },
 
+  /**
+   * Set the property polygonLineWidth
+   * @param {number} width
+   * @instance
+   */
   setPolygonLineWidth: function (width) {
     this.set("polygonLineWidth", width);
   },
 
+  /**
+   * Set the property polygonLineColor
+   * @param {string} color
+   * @instance
+   */
   setPolygonLineColor: function (color) {
     this.set("polygonLineColor", color);
   },
 
+  /**
+   * Set the property polygonFillColor
+   * @param {string} color
+   * @instance
+   */
   setPolygonFillColor: function (color) {
     this.set("polygonFillColor", color);
   },
 
+  /**
+   * Set the property pointSymbol
+   * @param {string} value
+   * @instance
+   */
   setPointSymbol: function(value) {
     this.set('pointSymbol', value);
   },
 
+  /**
+   * Set the point text
+   * @param {string} text
+   * @instance
+   */
   setPointText: function(text) {
     var feature = this.get('drawFeature');
     this.set('pointText', text);
     this.setFeaturePropertiesFromText(feature, text || "");
     feature.setStyle(this.getStyle(feature));
   }
+};
 
-});
+/**
+ * Draw model module.<br>
+ * Use <code>require('models/draw')</code> for instantiation.
+ * @module DrawModel-module
+ * @returns {DrawModel}
+ */
+module.exports = ToolModel.extend(DrawModel);

@@ -1,7 +1,7 @@
 var LayerModel = require('layers/layer');
 
 /**
- * @typedef {Object} WfsLayer~WfsLayerProperties~params
+ * @typedef {Object} WfsLayer~WfsLayerPropertiesParams
  * @property {string} service - Type of service @default WFS.
  * @property {string} version - Version of the WFS-protocol.
  * @property {string} request - Type of request to perform.
@@ -17,24 +17,24 @@ var LayerModel = require('layers/layer');
  * @property {external:"ol.source"} vectorSurce
  * @property {external:"ol.source"} imageSource
  * @property {Array} filterFeatures
- * @property {bool} filterApplied @default false
- * @property {HighlightLayer~HighlightLayerProperties~params} params
+ * @property {bool} filterApplied Default: false
+ * @property {WfsLayer~WfsLayerPropertiesParams} params
  */
 var WfsLayerProperties = {
-	url: "",
-	vectorSource: undefined,
-	imageSource: undefined,
-	filterFeatures: [],
-	filterApplied: false,
-	params: {
-		service: "WFS",
-		version: "",
-		request: "",
-		typename: "",
-		outputFormat: "",
-		srsname: "",
-		bbox: []
-	}
+  url: "",
+  vectorSource: undefined,
+  imageSource: undefined,
+  filterFeatures: [],
+  filterApplied: false,
+  params: {
+    service: "WFS",
+    version: "",
+    request: "",
+    typename: "",
+    outputFormat: "",
+    srsname: "",
+    bbox: []
+  }
 };
 
 /**
@@ -49,211 +49,212 @@ var WfsLayerProperties = {
  * @param {string} type
  */
 var WfsLayer = {
-	/**
-	* @property {WfsLayer~WfsLayerProperties} defaults - Default properties
-	* @instance
-	*/
-	defaults: WfsLayerProperties,
+  /**
+  * @property {WfsLayer~WfsLayerProperties} defaults - Default properties
+  * @instance
+  */
+  defaults: WfsLayerProperties,
 
-	initialize: function () {
-		LayerModel.prototype.initialize.call(this);
-		var format = new ol.format.GeoJSON();
-		this.stdStyle = new ol.style.Style({
-			image: new ol.style.Circle({
-				fill: new ol.style.Fill({
-					color: 'rgba(244, 210, 66, 0.6)'
-				}),
-				stroke: new ol.style.Stroke({
-					color: '#F4D242',
-					width: 2
-				}),
-				radius: 5
-			}),
-			fill: new ol.style.Fill({
-				color: 'rgba(244, 210, 66, 0.6)'
-			}),
-			stroke: new ol.style.Stroke({
-				color: '#F4D242',
-				width: 2
-			})
-		});
+  initialize: function () {
+    LayerModel.prototype.initialize.call(this);
+    var format = new ol.format.GeoJSON();
+    this.stdStyle = new ol.style.Style({
+      image: new ol.style.Circle({
+        fill: new ol.style.Fill({
+          color: 'rgba(244, 210, 66, 0.6)'
+        }),
+        stroke: new ol.style.Stroke({
+          color: '#F4D242',
+          width: 2
+        }),
+        radius: 5
+      }),
+      fill: new ol.style.Fill({
+        color: 'rgba(244, 210, 66, 0.6)'
+      }),
+      stroke: new ol.style.Stroke({
+        color: '#F4D242',
+        width: 2
+      })
+    });
 
-		this.vectorSource = new ol.source.Vector({
-			loader: (extent) => { this.loadJSON(this.createUrl(extent)) },
-			strategy: ol.loadingstrategy.bbox
-		});
+    this.vectorSource = new ol.source.Vector({
+      loader: (extent) => { this.loadJSON(this.createUrl(extent)) },
+      strategy: ol.loadingstrategy.bbox
+    });
 
-		this.imageSource = new ol.source.ImageVector({
-			source: this.vectorSource,
-			style: this.getStyle.bind(this)
-		});
+    this.imageSource = new ol.source.ImageVector({
+      source: this.vectorSource,
+      style: this.getStyle.bind(this)
+    });
 
-		this.on('change:filterApplied', function () {
-			this.refresh();
-		});
+    this.on('change:filterApplied', function () {
+      this.refresh();
+    });
 
-		this.layer = new ol.layer.Image({
-			caption: this.get('caption'),
-			name: this.get('name'),
-			maxResolution: this.get('maxResolution') || 20,
-			minResolution: this.get('minResolution') || 0.5,
-			visible: this.get("visible"),
-			source: this.imageSource
-		});
+    this.layer = new ol.layer.Image({
+      caption: this.get('caption'),
+      name: this.get('name'),
+      maxResolution: this.get('maxResolution') || 20,
+      minResolution: this.get('minResolution') || 0.5,
+      visible: this.get("visible"),
+      source: this.imageSource
+    });
 
-		global.window[this.get('callbackFunction')] = (features) => {this.updateLayer(format.readFeatures(features))};
+    global.window[this.get('callbackFunction')] = (features) => {this.updateLayer(format.readFeatures(features))};
 
-		if (this.get('filterList') && this.get('filterList').length > 0) {
-			this.applyFilter();
-		}
+    if (this.get('filterList') && this.get('filterList').length > 0) {
+      this.applyFilter();
+    }
 
-		this.set("queryable", true);
-		this.set("type", "wfs");
-	},
+    this.set("queryable", true);
+    this.set("type", "wfs");
+  },
 
-	/**
-	* getStyle - Generates a style for given feature in layer.
-	* @instance
-	* @param {external:"ol.feature"} feature
-	* @return {external:"ol.style"} style
-	*/
-	getStyle: function (feature) {
-		var style = this.get('style');
+  /**
+  * getStyle - Generates a style for given feature in layer.
+  * @instance
+  * @param {external:"ol.feature"} feature
+  * @return {external:"ol.style"} style
+  */
+  getStyle: function (feature) {
+    var style = this.get('style');
 
-		var icon = this.get('icon'),
-			filterApplied = this.get('filterApplied'),
-			filterFeatures = this.get('filterFeatures'),
-			showIcon = filterFeatures.length === 0 ||  _.find(filterFeatures, function (filterValue) {
-				return filterValue === '' + feature.getProperties().spGid;
-			}),
-			style;
+    var icon = this.get('icon')
+    ,   filterApplied = this.get('filterApplied')
+    ,   filterFeatures = this.get('filterFeatures')
+    ,   showIcon = filterFeatures.length === 0 ||  _.find(filterFeatures, function (filterValue) {
+          return filterValue === '' + feature.getProperties().spGid;
+        })
+    , style
+    ;
 
-		if (showIcon || !filterApplied) {
+    if (showIcon || !filterApplied) {
 
-			style = style.condition ? this.getConditionStyle(style, feature) :
-											 this.getIconStyle(style.icon);
+      style = style.condition ? this.getConditionStyle(style, feature) :
+                       this.getIconStyle(style.icon);
 
-			if (feature.getProperties().messages) {
-				style = [new ol.style.Style({
-								image: new ol.style.Circle({
-									fill: new ol.style.Fill({
-										color: 'rgba(255, 0, 220, 0.66)'
-									}),
-									radius: z > 10 ? 10 / s : 10
-								})
-							})].concat(style);
-			}
+      if (feature.getProperties().messages) {
+        style = [new ol.style.Style({
+                image: new ol.style.Circle({
+                  fill: new ol.style.Fill({
+                    color: 'rgba(255, 0, 220, 0.66)'
+                  }),
+                  radius: z > 10 ? 10 / s : 10
+                })
+              })].concat(style);
+      }
 
-			return style;
-		}
-	},
+      return style;
+    }
+  },
 
-	/**
-	* getIconStyle - Generates a new icon style for point features
-	* @instance
-	* @param {string} iconSrc
-	* @return {Array<{external:"ol.Style"}>} styles
-	*/
-	getIconStyle: function (iconSrc) {
-		var zoom = this.get("map").getZoom()
-		,		scale = 1;
-		return iconSrc ?
-			[new ol.style.Style({
-				image: new ol.style.Icon({
-					src: iconSrc,
-					scale: scale
-				})
-			})] :
-			[this.stdStyle]
-	},
+  /**
+  * getIconStyle - Generates a new icon style for point features
+  * @instance
+  * @param {string} iconSrc
+  * @return {Array<{external:"ol.Style"}>} styles
+  */
+  getIconStyle: function (iconSrc) {
+    var zoom = this.get("map").getZoom()
+    ,   scale = 1;
+    return iconSrc ?
+      [new ol.style.Style({
+        image: new ol.style.Icon({
+          src: iconSrc,
+          scale: scale
+        })
+      })] :
+      [this.stdStyle]
+  },
 
- /**
-	* getConditionStyle - get conditional style
-	* @instance
-	* @param {object} styleConfig
-	* @param {external:"ol.feature"} feature
-	* @return {external:"ol.Style"} feature
-	*/
-	getConditionStyle: function (styleConfig, feature) {
+    /**
+  * getConditionStyle - get conditional style
+  * @instance
+  * @param {object} styleConfig
+  * @param {external:"ol.feature"} feature
+  * @return {external:"ol.Style"} feature
+  */
+  getConditionStyle: function (styleConfig, feature) {
 
-		var property = feature.getProperties()[styleConfig.condition.property]
-		,	  alternative = _.find(styleConfig.condition.alternatives || [], function (alt) { return property === alt.value; });
+    var property = feature.getProperties()[styleConfig.condition.property]
+    ,   alternative = _.find(styleConfig.condition.alternatives || [], function (alt) { return property === alt.value; });
 
-		if (alternative) {
-			return this.getIconStyle(alternative.icon);
-		} else  if (styleConfig.icon) {
-			return this.getIconStyle(styleConfig.icon);
-		}
+    if (alternative) {
+      return this.getIconStyle(alternative.icon);
+    } else  if (styleConfig.icon) {
+      return this.getIconStyle(styleConfig.icon);
+    }
 
-		return [this.stdStyle];
-	},
-
- /**
-	* getSource - Get the source of this laer
-	* @instance
-	* @return {external:"ol.source"} style
-	*/
-	getSource: function () {
-		return this.vectorSource;
-	},
+    return [this.stdStyle];
+  },
 
  /**
-	* updateLayer - Add features to this layer source
-	* @instance
-	* @param {Array<{external:"ol.feature"}>} feature
-	*/
-	updateLayer: function (features) {
-		this.getSource().addFeatures(features);
-	},
+  * getSource - Get the source of this laer
+  * @instance
+  * @return {external:"ol.source"} style
+  */
+  getSource: function () {
+    return this.vectorSource;
+  },
 
  /**
-	* refresh - redraw the layer
-	* @instance
-	*/
-	refresh: function () {
-		this.imageSource.setStyle(this.imageSource.getStyle());
-	},
+  * updateLayer - Add features to this layer source
+  * @instance
+  * @param {Array<{external:"ol.feature"}>} feature
+  */
+  updateLayer: function (features) {
+    this.getSource().addFeatures(features);
+  },
 
  /**
-	* createUrl - generate url to be used in JSONP requests.
-	* @instance
-	* @param {Array} extent
-	* @return {string} url
-	*/
-	createUrl: function (extent) {
-		var parameters = this.get('params');
-		if (extent) {
-			parameters.bbox = extent.join(',') + "," + parameters['srsname'];
-		} else if (parameters.hasOwnProperty('bbox')) {
-			delete parameters.bbox;
-		}
-		parameters = _.map(parameters, (value, key) => key.concat("=", value));
-		parameters = parameters.join('&');
-		return this.get('url') + '?' + parameters;
-	},
+  * refresh - redraw the layer
+  * @instance
+  */
+  refresh: function () {
+    this.imageSource.setStyle(this.imageSource.getStyle());
+  },
 
  /**
-	* applyFilter - filter the layer.
-	* @instance
-	* @param {external:ol.feature} feature
-	* @return {external.ol.Style} style
-	*/
-	applyFilter: function () {
+  * createUrl - generate url to be used in JSONP requests.
+  * @instance
+  * @param {Array} extent
+  * @return {string} url
+  */
+  createUrl: function (extent) {
+    var parameters = this.get('params');
+    if (extent) {
+      parameters.bbox = extent.join(',') + "," + parameters['srsname'];
+    } else if (parameters.hasOwnProperty('bbox')) {
+      delete parameters.bbox;
+    }
+    parameters = _.map(parameters, (value, key) => key.concat("=", value));
+    parameters = parameters.join('&');
+    return this.get('url') + '?' + parameters;
+  },
 
-		var filterList = this.get('filterList').toArray()
-		,		filterIds = [];
+ /**
+  * applyFilter - filter the layer.
+  * @instance
+  * @param {external:ol.feature} feature
+  * @return {external.ol.Style} style
+  */
+  applyFilter: function () {
 
-		_.each(filterList, (filter) => {
-			_.each(filter.attributes.features.features, (feature) => {
-				filterIds.push(feature.gid);
-			})
-		});
+    var filterList = this.get('filterList').toArray()
+    ,   filterIds = [];
 
-		filterIds = _.uniq(filterIds);
-		this.set('filterFeatures', filterIds);
-		this.refresh();
+    _.each(filterList, (filter) => {
+      _.each(filter.attributes.features.features, (feature) => {
+        filterIds.push(feature.gid);
+      })
+    });
 
-	}
+    filterIds = _.uniq(filterIds);
+    this.set('filterFeatures', filterIds);
+    this.refresh();
+
+  }
 };
 
 /**

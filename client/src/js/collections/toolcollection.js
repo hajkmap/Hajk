@@ -1,5 +1,3 @@
-"use strict";
-
 var Tool          = require('tools/tool')
 ,   LayerSwitcher = require('tools/layerswitcher')
 ,   InfoClick     = require('tools/infoclick')
@@ -12,13 +10,21 @@ var Tool          = require('tools/tool')
 ,   Anchor        = require('tools/anchor');
 
 /**
- * Prototype for creating a tool collecton.
- * @class ToolCollection
+ * @description
+ *
+ *   Prototype for a tool collection object.
+ *   The tool collection holds references to the tool modules used by the application.
+ *   Any communication between tools must occur through this model.
+ *
+ * @class
  * @augments external:"Backbone.Collection"
+ * @param {object} options
+ * @param {object} args
  */
 var ToolCollection = {
   /**
    * Generates a model for this tool.
+   * @instance
    * @param {object} args - arguments
    * @return {Tool} tool
    */
@@ -46,11 +52,7 @@ var ToolCollection = {
             throw "tool not supported " + args.type;
       }
   },
-  /**
-   * Constructor method
-   * @param {object} options
-   * @param {object} args
-   */
+
   initialize: function (tools, args) {
     this.shell = args.shell;
     _.defer(_.bind(function () {
@@ -59,6 +61,7 @@ var ToolCollection = {
   },
   /**
    * Get the objects data state as json-friendly representation.
+   * @instance
    * @return {object} state
    */
   toJSON: function () {
