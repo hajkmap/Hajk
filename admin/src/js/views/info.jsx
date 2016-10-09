@@ -22,6 +22,7 @@ class Info extends React.Component {
 		  <h2>Releaser</h2>
 		  <ul>
 		  	<li><a href="Hajk2-2.0-RC3.zip">Release 2.0-RC3</a></li>
+		  	<li><a href="Hajk2-2.0.0.zip">Release 2.0.0</a></li>
 		  </ul>
 		  <p>Applikationen är skapad med komponenter från följande bibliotek:</p>
 		  <ul>
@@ -41,7 +42,7 @@ class Info extends React.Component {
 		  	<li><b>Länk till karta</b></li>
 		  	<li><b>Administrationsverktyg</b></li>
 		  </ul>
-		  <p>		  	
+		  <p>
 		  	github: <a href="https://github.com/Johkar/Hajk2" target="_blank">https://github.com/Johkar/Hajk2</a>
 		  </p>
 		</div>
