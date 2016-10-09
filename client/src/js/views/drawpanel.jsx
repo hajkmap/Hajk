@@ -129,10 +129,14 @@ var ColorPicker = React.createClass({
   }
 });
 
-var DrawPanel = React.createClass({
-  /*
-   * Get default state.
-   * @return {object} state
+/**
+ * @class
+ */
+var DrawPanelView = {
+  /**
+   * Get initial state.
+   * @instance
+   * @return {object}
    */
   getInitialState: function() {
     return {
@@ -148,11 +152,10 @@ var DrawPanel = React.createClass({
       kmlImport: false
     };
   },
+
   /**
-   * Abort any operation and deselect any tool
-   * when the components unmounts.
-   * @override
-   * @param {ol.event} event
+   * Triggered when component unmounts.
+   * @instance
    */
   componentWillUnmount: function () {
     this.props.model.abort();
@@ -160,16 +163,20 @@ var DrawPanel = React.createClass({
     this.props.model.off('change:kmlExportUrl');
     this.props.model.off('change:kmlImport');
   },
+
   /**
-   * @override
+   * Triggered before the component mounts.
+   * @instance
    */
   componentWillMount: function () {
     this.setState({
       showLabels: this.props.model.get('showLabels')
     });
   },
+
   /**
-   * @override
+   * Triggered when the component is successfully mounted into the DOM.
+   * @instance
    */
   componentDidMount: function () {
     this.props.model.on('change:dialog', () => {
@@ -190,6 +197,11 @@ var DrawPanel = React.createClass({
     });
   },
 
+  /**
+   * Render alert component
+   * @instance
+   * @return {AlertView}
+   */
   renderAlert: function () {
     var options = {
       visible: this.state.alert,
@@ -225,8 +237,10 @@ var DrawPanel = React.createClass({
       return null;
     }
   },
+
   /**
    * Remove all drawings from map.
+   * @instance
    */
   clear: function () {
     this.props.model.clear();
@@ -234,21 +248,27 @@ var DrawPanel = React.createClass({
     this.props.model.set("kmlImport", false);
   },
 
+  /**
+   * Confirm before clear.
+   * @instance
+   */
   alertClear: function(){
     this.setState({
-          alert: true,
-          alertMessage: ` Vill du verkligen rensa allt?`,
-          confirm: true,
-          confirmAction: () => {
-            this.clear();
-          },
-          denyAction: () => {
-            this.setState({ alert: false });
-          }
-        });
+      alert: true,
+      alertMessage: ` Vill du verkligen rensa allt?`,
+      confirm: true,
+      confirmAction: () => {
+        this.clear();
+      },
+      denyAction: () => {
+        this.setState({ alert: false });
+      }
+    });
   },
+
   /**
    * Abort any operation and deselect any tool.
+   * @instance
    */
   abort: function () {
     this.props.model.abort();
@@ -260,32 +280,40 @@ var DrawPanel = React.createClass({
     this.props.model.set("kmlExportUrl", false);
     this.props.model.set("kmlImport", false);
   },
+
   /**
    * Import kml.
+   * @instance
    */
   import: function () {
     this.abort();
     this.props.model.set("kmlExportUrl", false);
     this.props.model.import();
   },
+
   /**
    * Export kml.
+   * @instance
    */
   export: function () {
     this.abort();
     this.props.model.set("kmlImport", false);
     this.props.model.export();
   },
+
   /**
    * Handle change event of the show labels checkbox.
+   * @instance
    */
   toggleLabels: function () {
     this.setState({
       showLabels: this.props.model.toggleLabels()
     });
   },
+
   /**
    * Activate the removal tool and update visuals.
+   * @instance
    */
   activateRemovalTool: function () {
     this.props.model.activateRemovalTool();
@@ -298,8 +326,10 @@ var DrawPanel = React.createClass({
     this.props.model.set("kmlExportUrl", false);
     this.props.model.set("kmlImport", false);
   },
+
   /*
    * Activate given draw tool and update visuals.
+   * @instance
    * @param {string} type
    */
   activateDrawTool: function (type) {
@@ -316,10 +346,12 @@ var DrawPanel = React.createClass({
       this.props.navigationPanel.minimize();
     }
   },
+
   /**
    * Render the symbology component.
+   * @instance
    * @param {string} type
-   * @return {React.Component} component
+   * @return {external:ReactElement} component
    */
   renderSymbology: function (type) {
 
@@ -434,10 +466,12 @@ var DrawPanel = React.createClass({
         return <div></div>;
     }
   },
+
   /**
    * Render the import result component.
+   * @instance
    * @param {string} url
-   * @return {React.Component} component
+   * @return {external:ReactElement} component
    */
   renderImport: function (visible) {
 
@@ -462,10 +496,12 @@ var DrawPanel = React.createClass({
       </div>
     )
   },
+
   /**
    * Render the export result component.
+   * @instance
    * @param {string} url
-   * @return {React.Component} component
+   * @return {external:ReactElement} component
    */
   renderExportResult: function (url) {
     if (!url) return null;
@@ -488,10 +524,12 @@ var DrawPanel = React.createClass({
       )
     }
   },
+
   /**
    * Render the dialog component.
-   * @param {bool} visible
-   * @return {React.Component} component
+   * @instance
+   * @param {boolean} visible
+   * @return {external:ReactElement} component
    */
   renderDialog: function(visible) {
     if (!visible) return null;
@@ -533,9 +571,11 @@ var DrawPanel = React.createClass({
       </div>
     );
   },
+
   /**
-   * Render the panel component.
-   * @return {React.Component} component
+   * Render the view.
+   * @instance
+   * @return {external:ReactElement}
    */
   render: function () {
     var showLabels = this.state.showLabels ? "checked" : ""
@@ -593,6 +633,12 @@ var DrawPanel = React.createClass({
       </div>
     );
   }
-});
+};
 
-module.exports = DrawPanel;
+/**
+ * DrawPanelView module.<br>
+ * Use <code>require('views/drawpanel')</code> for instantiation.
+ * @module DrawPanelView-module
+ * @returns {DrawPanelView}
+ */
+module.exports = React.createClass(DrawPanelView);

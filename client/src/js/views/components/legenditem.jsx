@@ -1,12 +1,4 @@
-/**
- * React Class Legend Item
- * @class
- */
 var LegendItem = React.createClass({
-  /**
-   *
-   *
-   */
   render: function () {
     return (
       <div>

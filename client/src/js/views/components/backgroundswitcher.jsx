@@ -1,11 +1,12 @@
 /**
- * React Class Background Switcher
  * @class
  */
-var BackgroundSwitcher = React.createClass({
+var BackgroundSwitcherView = {
 
   /**
-   *
+   * Get initial state.
+   * @instance
+   * @return {object}
    */
   getInitialState: function () {
     return {
@@ -15,7 +16,8 @@ var BackgroundSwitcher = React.createClass({
   },
 
   /**
-   *
+   * Triggered when the component is successfully mounted into the DOM.
+   * @instance
    */
   componentDidMount: function () {
     this.backgroundSwitcherModeChanged();
@@ -28,14 +30,16 @@ var BackgroundSwitcher = React.createClass({
   },
 
   /**
-   *
+   * Triggered when component unmounts.
+   * @instance
    */
   componentWillUnmount: function () {
     this.props.model.off('change:backgroundSwitcherMode');
   },
 
   /**
-   *
+   * Event handler for background switcher mode changes
+   * @instance
    */
   backgroundSwitcherModeChanged: function () {
     var mode = this.props.model.get('backgroundSwitcherMode')
@@ -48,7 +52,8 @@ var BackgroundSwitcher = React.createClass({
   },
 
   /**
-   *
+   * Set black background
+   * @instance
    */
   setBlackBackground: function () {
     this.clear();
@@ -60,7 +65,8 @@ var BackgroundSwitcher = React.createClass({
   },
 
   /**
-   *
+   * Set white background
+   * @instance
    */
   setWhiteBackground: function () {
     this.clear();
@@ -72,7 +78,8 @@ var BackgroundSwitcher = React.createClass({
   },
 
   /**
-   *
+   * Hide current background layer
+   * @instance
    */
   clear: function() {
     this.props.layers.forEach(baselayer => {
@@ -82,7 +89,9 @@ var BackgroundSwitcher = React.createClass({
   },
 
   /**
-   *
+   * Set background layer
+   * @instance
+   * @param {Layer} layer
    */
   setBackgroundLayer: function (layer) {
     $('#map').css({background: 'white'});
@@ -98,7 +107,8 @@ var BackgroundSwitcher = React.createClass({
   },
 
   /**
-   *
+   * Set visibility of background layer
+   * @instance
    */
   setVisibility: function() {
     this.props.model.set('backgroundSwitcherMode',
@@ -107,7 +117,9 @@ var BackgroundSwitcher = React.createClass({
   },
 
   /**
-   *
+   * Check if given layer is the selected layer
+   * @instance
+   * @param {Layer} layer
    */
   getSelected: function (layer) {
     if (this.state && this.state.selected) {
@@ -121,7 +133,9 @@ var BackgroundSwitcher = React.createClass({
   },
 
   /**
-   *
+   * Render the layers component.
+   * @instance
+   * @return {external:ReactElement}
    */
   renderLayers: function () {
     return (
@@ -139,7 +153,9 @@ var BackgroundSwitcher = React.createClass({
   },
 
   /**
-   *
+   * Render the background switcher component.
+   * @instance
+   * @return {external:ReactElement}
    */
   render: function () {
     var black = white = false;
@@ -165,6 +181,12 @@ var BackgroundSwitcher = React.createClass({
       </div>
     );
   }
-});
+};
 
-module.exports = BackgroundSwitcher;
+/**
+ * BackgroundSwitcherView module.<br>
+ * Use <code>require('views/backgroundswitcher')</code> for instantiation.
+ * @module BackgroundSwitcherView-module
+ * @returns {BackgroundSwitcherView}
+ */
+module.exports = React.createClass(BackgroundSwitcherView);

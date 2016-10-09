@@ -1,31 +1,15 @@
-/**
- * React Class Fa Button
- * @class
- * Obsolite
- */
 var FaButton = React.createClass({
-  /**
-   *
-   *
-   */
+
   getDefaultProps: function () {
     return {
-      /** */
       onClick: function () { },
-      /** */
       customClass: '',
-      /** */
       icon: '',
-      /** */
       right: false
     };
   },
-  /**
-   *
-   *
-   */
-  render: function () {
 
+  render: function () {
     var onClick = this.props.onClick;
     var btnClassName = 'btn';
     var faClassName = 'fa ' + this.props.icon;

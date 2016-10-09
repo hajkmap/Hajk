@@ -65,6 +65,7 @@ var HighlightLayer = {
     var source = this.get('source');
     source.clear();
   },
+
   /**
    * Add a feature to the highlight layer.
    * @instance
@@ -78,6 +79,7 @@ var HighlightLayer = {
     }
     source.addFeature(feature);
   },
+
   /**
    * Set selected layer.
    * @param {external:ol.layer} layer
@@ -89,6 +91,7 @@ var HighlightLayer = {
       this.selectedLayerChanged();
     });
   },
+
   /**
    * Event handler, fires when the selected layer changes.
    * @instance

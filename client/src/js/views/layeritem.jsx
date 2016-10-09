@@ -1,7 +1,11 @@
-var LayerItem = React.createClass({
+/**
+ * @class
+ */
+var LayerItemView = {
   /**
-   *
-   *
+   * Get initial state.
+   * @instance
+   * @return {object}
    */
   getInitialState: function() {
     return {
@@ -13,9 +17,10 @@ var LayerItem = React.createClass({
       status: "ok"
     };
   },
+
   /**
-   *
-   *
+   * Triggered when the component is successfully mounted into the DOM.
+   * @instance
    */
   componentDidMount: function () {
     this.props.layer.on("change:status", this.onStatusChanged, this);
@@ -30,9 +35,10 @@ var LayerItem = React.createClass({
       legend: this.props.layer.getLegend(),
     });
   },
+
   /**
-   *
-   *
+   * Triggered when component unmounts.
+   * @instance
    */
   componentWillUnmount: function () {
     this.props.layer.off("change:visible", this.onVisibleChanged, this);
@@ -40,18 +46,20 @@ var LayerItem = React.createClass({
     this.props.layer.off('change:showLegend', this.onShowLegendChanged, this);
     this.props.layer.off("change:status", this.onStatusChanged, this);
   },
+
   /**
-   *
-   *
+   * On status change event handler.
+   * @instance
    */
   onStatusChanged: function () {
     this.setState({
       status: this.props.layer.get('status')
     });
   },
+
   /**
-   *
-   *
+   * On visible change event handler.
+   * @instance
    */
   onVisibleChanged: function () {
     if (this.props.layer) {
@@ -61,39 +69,45 @@ var LayerItem = React.createClass({
       visible: this.props.layer.getVisible()
     });
   },
+
   /**
-   *
-   *
+   * On legend change event handler.
+   * @instance
    */
   onLegendChanged: function () {
     this.setState({ legend: this.props.layer.getLegend() });
   },
+
   /**
-   *
-   *
+   * On show legend change event handler.
+   * @instance
    */
   onShowLegendChanged: function () {
     this.setState({ showLegend: this.props.layer.get('showLegend') });
   },
+
   /**
-   *
-   *
+   * Toggle visibility of this layer item.
+   * @instance
    */
   toggleVisible: function (e) {
     e.stopPropagation();
     this.props.layer.setVisible(!this.state.visible);
   },
+
   /**
-   *
-   *
+   * Toggle legend visibility
+   * @instance
    */
   toggleLegend: function (e) {
     e.stopPropagation();
     this.props.layer.set('showLegend', !this.state.showLegend);
   },
+
   /**
-   *
-   *
+   * Render the load information component.
+   * @instance
+   * @return {external:ReactElement}
    */
   renderStatus: function () {
     return this.state.status === "loaderror" ?
@@ -103,9 +117,11 @@ var LayerItem = React.createClass({
       </span>
     ) : null;
   },
+
   /**
-   *
-   *
+   * Render the panel component.
+   * @instance
+   * @return {external:ReactElement}
    */
   render: function () {
     var caption       = this.state.caption
@@ -142,6 +158,12 @@ var LayerItem = React.createClass({
       </div>
     );
   }
-});
+};
 
-module.exports = LayerItem;
+/**
+ * LayerItemView module.<br>
+ * Use <code>require('views/layeritem')</code> for instantiation.
+ * @module LayerItemView-module
+ * @returns {LayerItemView}
+ */
+module.exports = React.createClass(LayerItemView);

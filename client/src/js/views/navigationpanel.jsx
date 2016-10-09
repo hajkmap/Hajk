@@ -1,4 +1,3 @@
-/** */
 var panels = {
   'infopanel': require('views/infopanel'),
   'layerpanel': require('views/layerpanel'),
@@ -14,24 +13,25 @@ var panels = {
 var Alert = require('alert');
 
 /**
- *
- *
+ * @class
  */
-var NavigationPanel = React.createClass({
+var NavigationPanelView = {
   /**
-   *
-   *
+   * Get default properties.
+   * @instance
+   * @return {object}
    */
   getDefaultProps : function () {
     return {
-      /** */
       items: [],
       alertVisible: false
     };
   },
+
   /**
-   *
-   *
+   * Get initial state.
+   * @instance
+   * @return {object}
    */
   getInitialState: function () {
     return {
@@ -40,9 +40,10 @@ var NavigationPanel = React.createClass({
       activePanel: undefined
     };
   },
+
   /**
-   *
-   *
+   * Triggered when the component is successfully mounted into the DOM.
+   * @instance
    */
   componentDidMount: function () {
     this.props.model.on("change:activePanel", (sender, panel) => {
@@ -72,18 +73,20 @@ var NavigationPanel = React.createClass({
       this.maximize();
     });
   },
+
   /**
-   *
-   *
+   * Toggle the panel to/from minimized mode.
+   * @instance
    */
   toggle: function () {
     if (this.state.activePanel) {
       this.props.model.set("toggled", !this.props.model.get("toggled"));
     }
   },
+
   /**
-   *
-   *
+   * Maximize the panel.
+   * @instance
    */
   maximize: function () {
     if (this.state.minimized) {
@@ -92,9 +95,10 @@ var NavigationPanel = React.createClass({
       });
     }
   },
+
   /**
-   *
-   *
+   * Minimize the panel.
+   * @instance
    */
   minimize: function () {
     if (!this.state.minimized) {
@@ -103,9 +107,10 @@ var NavigationPanel = React.createClass({
       });
     }
   },
+
   /**
-   *
-   *
+   * Generate specification object for alert panel
+   * @instance
    */
   getAlertOptions: function() {
     return {
@@ -122,9 +127,11 @@ var NavigationPanel = React.createClass({
       }
     }
   },
+
   /**
-   *
-   *
+   * Render the panel component.
+   * @instance
+   * @return {external:ReactElement}
    */
   render: function () {
 
@@ -158,6 +165,12 @@ var NavigationPanel = React.createClass({
       </div>
     );
   }
-});
+};
 
-module.exports = NavigationPanel;
+/**
+ * NavigationPanelView module.<br>
+ * Use <code>require('views/navigationpanel')</code> for instantiation.
+ * @module NavigationPanelView-module
+ * @returns {NavigationPanelView}
+ */
+module.exports = React.createClass(NavigationPanelView);

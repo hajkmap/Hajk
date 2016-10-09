@@ -1,9 +1,13 @@
 /**
- * React Class Feature Info
  * @class
  */
-var FeatureInfo = React.createClass({
-
+var FeatureInfoView = {
+  /**
+   * Convert object to markdown
+   * @instance
+   * @param {object} object to transform
+   * @return {string} markdown
+   */
   objectAsMarkdown: function (o) {
     return Object
       .keys(o)
@@ -14,8 +18,9 @@ var FeatureInfo = React.createClass({
   },
 
   /**
-   *
-   *
+   * Render the feature info component.
+   * @instance
+   * @return {external:ReactElement}
    */
   render: function name() {
     if (!this.props.info) {
@@ -46,7 +51,12 @@ var FeatureInfo = React.createClass({
       </div>
     );
   }
+};
 
-});
-
-module.exports = FeatureInfo;
+/**
+ * BackgroundSwitcherView module.<br>
+ * Use <code>require('views/backgroundswitcher')</code> for instantiation.
+ * @module BackgroundSwitcherView-module
+ * @returns {BackgroundSwitcherView}
+ */
+module.exports = React.createClass(FeatureInfoView);

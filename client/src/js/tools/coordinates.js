@@ -254,7 +254,7 @@ var CoordinatesModel = {
 /**
  * Coordinates model module.<br>
  * Use <code>require('models/coordinates')</code> for instantiation.
- * @module coordinatesModel-module
+ * @module CoordinatesModel-module
  * @returns {CoordinatesModel}
  */
 module.exports = ToolModel.extend(CoordinatesModel);

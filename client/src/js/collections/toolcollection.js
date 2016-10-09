@@ -59,6 +59,7 @@ var ToolCollection = {
       this.forEach(function (tool) { tool.set("shell", this.shell); }, this);
     }, this));
   },
+
   /**
    * Get the objects data state as json-friendly representation.
    * @instance

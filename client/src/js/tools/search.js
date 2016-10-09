@@ -69,37 +69,82 @@ function arraySort(options) {
     return options.array.sort(comparer);
 }
 
-module.exports = ToolModel.extend({
+/**
+ * @typedef {Object} SearchModel~SearchModelProperties
+ * @property {string} type - Default: search
+ * @property {string} panel - Default: searchpanel
+ * @property {string} toolbar - Default: bottom
+ * @property {string} icon - Default: fa fa-search icon
+ * @property {string} title - Default: Sök i kartan
+ * @property {string} visible - Default: false
+ * @property {string} value
+ * @property {string} settings - Default: ["Allt"]
+ * @property {string} filter - Default: "*"
+ * @property {string} filterVisible - Default: false
+ * @property {string} markerImg - Default: "assets/icons/marker.png"
+ */
+var SearchModelProperties = {
+  type: 'search',
+  panel: 'searchpanel',
+  toolbar: 'bottom',
+  icon: 'fa fa-search icon',
+  title: 'Sök i kartan',
+  visible: false,
+  value: "",
+  settings: ["Allt"],
+  filter: "*",
+  filterVisible: false,
+  markerImg: "assets/icons/marker.png"
+};
+
+/**
+ * Prototype for creating a search model.
+ * @class
+ * @augments {external:"Backbone.Model"}
+ * @param {SearchModel~SearchModelProperties} options - Default options
+ */
+var SearchModel = {
   /**
-   * @property defaults {object}
+   * @instance
+   * @property {SearchModel~SearchModelProperties} defaults - Default settings
    */
-  defaults: {
-    type: 'search',
-    panel: 'searchpanel',
-    toolbar: 'bottom',
-    icon: 'fa fa-search icon',
-    title: 'Sök i kartan',
-    visible: false,
-    value: "",
-    settings: ["Allt"],
-    filter: "*",
-    filterVisible: false,
-    markerImg: "assets/icons/marker.png"
+  defaults: SearchModelProperties,
+
+  initialize: function (options) {
+    ToolModel.prototype.initialize.call(this);
   },
+
+  configure: function (shell) {
+    this.set('layerCollection', shell.getLayerCollection());
+    this.set('map', shell.getMap().getMap());
+    this.featureLayer = new ol.layer.Vector({
+      caption: 'Sökträff',
+      name: 'search-vector-layer',
+      source: new ol.source.Vector(),
+      queryable: true,
+      visible: true,
+      style: this.getStyle()
+    });
+
+    this.get('map').addLayer(this.featureLayer);
+  },
+
   /**
-   * @property requests {[$AjaxRequest]}
+   * @instance
+   * @property {XMLHttpRequest[]} requests
    */
   requests: [],
+
   /**
-   * Property: {ol.layer.Vector} featureLayer
-   *
+   * @instance
+   * @property {external:"ol.layer"} featureLayer
    */
   featureLayer: undefined,
+
   /**
    * Perform a WFS-search.
-   *
-   * @params: {object} props
-   * @returns: undefined
+   * @instance
+   * @param {object} props
    *
    */
   doWFSSearch: function (props) {
@@ -186,12 +231,10 @@ module.exports = ToolModel.extend({
       })
     );
   },
+
   /**
    * Abort current requests.
-   *
-   * @params:
-   * @returns: undefined
-   *
+   * @instance
    */
   abort: function () {
     this.requests.forEach((request) => {
@@ -199,21 +242,21 @@ module.exports = ToolModel.extend({
     });
     this.requests = [];
   },
+
   /**
    * Clear result layer.
-   *
-   * @params:
-   * @returns: undefined
+   * @instance
    *
    */
   clear: function() {
     this.featureLayer.getSource().clear();
     this.set('items', []);
   },
+
   /**
-   * @desc: Focus map on feature.
-   * @param: spec {object}
-   * @return: undefined
+   * Focus map on feature.
+   * @instance
+   * @param {object} spec
    *
    */
   focus: function (spec) {
@@ -240,8 +283,11 @@ module.exports = ToolModel.extend({
       });
     }
   },
+
   /**
-   *
+   * Get searchable layers. By design, visible layers and layers set with the property search set.
+   * @isntance
+   * @return {Layer[]} layers
    */
   getLayers: function () {
     var filter = (layer) => {
@@ -254,8 +300,11 @@ module.exports = ToolModel.extend({
     };
     return this.get('layerCollection').filter(filter);
   },
+
   /**
-   *
+   * Get searchable sources.
+   * @instance
+   * @return {Array<{external:"ol.source"}>} searchable/choosen sources
    */
   getSources: function () {
     var filter = (source) => {
@@ -264,21 +313,22 @@ module.exports = ToolModel.extend({
     }
     return this.get('sources').filter(filter);
   },
+
   /**
    * Lookup searchable layers in loaded LayerCollection.
    * Stacks requests as promises and resolves when all requests are done.
-   *
-   * @params: {string} value, {function} done
-   * @returns: undefined
-   *
+   * @instance
+   * @param {string} value
+   * @param {function} done
    */
   search: function (done) {
 
-    var value = this.get('value');
-    var items = [];
-    var promises = [];
-    var layers;
-    var sources;
+    var value = this.get('value')
+    ,   items = []
+    ,   promises = []
+    ,   layers
+    ,   sources
+    ;
 
     if (value === "") return;
 
@@ -366,52 +416,11 @@ module.exports = ToolModel.extend({
 
     });
   },
-  /**
-   * Constructor method.
-   *
-   * @params: <object> options
-   * @returns: undefined
-   *
-   */
-  initialize: function (options) {
-    ToolModel.prototype.initialize.call(this);
-  },
-  /**
-   * Configure the tool before first use.
-   *
-   * @params: {Backbone.Model} shell
-   * @returns: undefined
-   *
-   */
-  configure: function (shell) {
-    this.set('layerCollection', shell.getLayerCollection());
-    this.set('map', shell.getMap().getMap());
-    this.featureLayer = new ol.layer.Vector({
-      caption: 'Sökträff',
-      name: 'search-vector-layer',
-      source: new ol.source.Vector(),
-      queryable: true,
-      visible: true,
-      style: this.getStyle()
-    });
 
-    this.get('map').addLayer(this.featureLayer);
-  },
-  /**
-   * Handle click event on toolbar button.
-   *
-   * @params:
-   * @returns: undefined
-   *
-   */
-  clicked: function () {
-    this.set('visible', true);
-  },
   /**
    * Get style for search hit layer.
-   *
-   * @params:
-   * @returns: undefined
+   * @instance
+   * @return {external:"ol.style"} style
    *
    */
   getStyle: function () {
@@ -431,5 +440,28 @@ module.exports = ToolModel.extend({
         imgSize: [32, 32]
       })
     })
-  }
-});
+  },
+
+  /**
+   * @description
+   *
+   *   Handle click event on toolbar button.
+   *   This handler sets the property visible,
+   *   wich in turn will trigger the change event of navigation model.
+   *   In pracice this will activate corresponding panel as
+   *   "active panel" in the navigation panel.
+   *
+   * @instance
+   */
+  clicked: function () {
+    this.set('visible', true);
+  },
+};
+
+/**
+ * Search model module.<br>
+ * Use <code>require('models/search')</code> for instantiation.
+ * @module SearchModel-module
+ * @returns {SearchModel}
+ */
+module.exports = ToolModel.extend(SearchModel);

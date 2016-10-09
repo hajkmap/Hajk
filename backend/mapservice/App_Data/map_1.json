@@ -67,19 +67,24 @@
         ],
         "groups": [
           {
+            "id": "afe0c79e-f807-0c17-8bcd-4974bf4e9ee6",
+            "parent": "-1",
+            "name": "Data",
+            "toggled": true,
+            "layers": [
+              {
+                "id": "2",
+                "drawOrder": 2
+              }
+            ],
+            "groups": []
+          },
+          {
             "id": "c0b61bee-b6ce-70c9-e6da-ef5c3da6c341",
             "parent": "-1",
             "name": "Redigering",
             "toggled": true,
             "layers": [
-              {
-                "id": "79d49f23-d811-90aa-1d16-5b890dac16bb",
-                "drawOrder": 0
-              },
-              {
-                "id": "7bd997d7-8f77-96ef-d33a-804a85f7d9c0",
-                "drawOrder": 0
-              },
               {
                 "id": "d8eff0fd-fe48-c06a-8ad8-3ff3814a744a",
                 "drawOrder": 4
@@ -90,45 +95,6 @@
               }
             ],
             "groups": []
-          },
-          {
-            "id": "afe0c79e-f807-0c17-8bcd-4974bf4e9ee6",
-            "parent": "-1",
-            "name": "Data",
-            "toggled": false,
-            "layers": [
-              {
-                "id": "5d07b37e-956f-fab1-90f3-03dab07a52d3",
-                "drawOrder": 3
-              },
-              {
-                "id": "8f036834-00c2-77be-2b6e-423a2162b374",
-                "drawOrder": 6
-              }
-            ],
-            "groups": [
-              {
-                "id": "3cb7e88a-ea8f-316d-17b8-652a39a6ce78",
-                "parent": "afe0c79e-f807-0c17-8bcd-4974bf4e9ee6",
-                "name": "Demo",
-                "toggled": true,
-                "layers": [
-                  {
-                    "id": "2e5178f3-6240-2f83-0e38-741be1c988a5",
-                    "drawOrder": 1
-                  },
-                  {
-                    "id": "1f3a75b0-8fee-79cc-76bb-e0863ce9fdba",
-                    "drawOrder": 5
-                  },
-                  {
-                    "id": "2",
-                    "drawOrder": 2
-                  }
-                ],
-                "groups": []
-              }
-            ]
           }
         ]
       }

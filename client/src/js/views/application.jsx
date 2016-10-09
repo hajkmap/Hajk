@@ -2,18 +2,22 @@ var Shell = require('views/shell');
 var ShellModel = require('models/shell');
 
 /**
- * Backbone View Application
+ * Application view
  * @class
+ * @augments {external:"Backbone.View"}
  */
-var Application = Backbone.View.extend({
+var ApplicationView = {
   /**
-   *
-   *
+   * @property {string} el - DOM element to render this app into.
+   * @instance
    */
   el: "map",
   /**
-   *
-   *
+   * Load the application.
+   * @instance
+   * @param {object} config
+   * @param {boolean} isBookmark
+   * @param {object[]} bookmars
    */
   load: function (config, isBookmark, bookmarks) {
     this.shell = new ShellModel(config);
@@ -26,16 +30,14 @@ var Application = Backbone.View.extend({
       this.render(true);
     }
   },
-  /**
-   *
-   *
-   */
+
   initialize: function (config, bookmarks) {
     this.load(config, false, bookmarks);
   },
   /**
-   *
-   *
+   * Render the view
+   * @instance
+   * @param {boolean} force - Force update
    */
   render: function (force) {
 
@@ -64,6 +66,12 @@ var Application = Backbone.View.extend({
       );
     }
   }
-});
+};
 
-module.exports = Application;
+/**
+ * ApplicationView module.<br>
+ * Use <code>require('views/application')</code> for instantiation.
+ * @module ApplicationView-module
+ * @returns {ApplicationView}
+ */
+module.exports = Backbone.View.extend(ApplicationView);

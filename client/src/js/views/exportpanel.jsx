@@ -197,20 +197,36 @@ var ExportSettings = React.createClass({
   }
 });
 
-var ExportPanel = React.createClass({
-
+/**
+ * @class
+ */
+var ExportPanelView = {
+  /**
+   * Get initial state.
+   * @instance
+   * @return {object}
+   */
   getInitialState: function() {
     return {
       showExportSettings: true
     };
   },
 
+  /**
+   * Set the export setting property, this vill trigger set state.
+   * @instance
+   * @param {boolean} value
+   */
   setExportSettings: function (value) {
     this.setState({
       showExportSettings: value
     });
   },
 
+  /**
+   * Export the image.
+   * @instance
+   */
   exportImage: function () {
     var node = $(ReactDOM.findDOMNode(this)).find('#image');
     node.html('');
@@ -219,6 +235,11 @@ var ExportPanel = React.createClass({
     });
   },
 
+  /**
+   * Render the panel component.
+   * @instance
+   * @return {external:ReactElement}
+   */
   render: function () {
     return (
       <Panel title="Skriv ut karta" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
@@ -232,6 +253,12 @@ var ExportPanel = React.createClass({
       </Panel>
     );
   }
-});
+};
 
-module.exports = ExportPanel;
+/**
+ * ExportPanelView module.<br>
+ * Use <code>require('views/exportpanel')</code> for instantiation.
+ * @module ExportPanelView-module
+ * @returns {ExportPanelView}
+ */
+module.exports = React.createClass(ExportPanelView);

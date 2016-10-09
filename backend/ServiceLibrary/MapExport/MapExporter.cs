@@ -33,23 +33,20 @@ namespace Sweco.Services.MapExport
         /// <summary>
         /// Property exportItem
         /// </summary>
-        private MapExportItem exportItem;        
+        private MapExportItem exportItem;
 
         /// <summary>
         /// Delegate to create style per feature based by style attribute.
         /// </summary>
         /// <param name="row"></param>
         /// <returns>IStyle Vector style to use for this feature</returns>
-        ///        
-
         private IStyle GetFeatureStyle(IFeature feature)
         {
-            Feature f = (Feature)feature;
-
+            FeatureDataRow row = (FeatureDataRow)feature;
             VectorStyle style = new VectorStyle();
-            if (f.attributes.style != null)
+            if (row["style"] != null)
             {
-                Style featureStyle = f.attributes.style;
+                Style featureStyle = (Style)row["style"];
                 style.EnableOutline = true;
 
                 style.Line.Color = ColorTranslator.FromHtml(featureStyle.strokeColor);
@@ -131,31 +128,31 @@ namespace Sweco.Services.MapExport
         /// <returns>IStyle Vector style to use for this feature</returns>
         private IStyle GetLabelStyle(IFeature feature)
         {
-            Feature f = (Feature)feature;
-            Style featureStyle = f.attributes.style;
-            LabelStyle labelStyle = new SharpMap.Styles.LabelStyle();            
-            
+            FeatureDataRow row = (FeatureDataRow)feature;
+            Style featureStyle = (Style)row["style"];
+            LabelStyle labelStyle = new SharpMap.Styles.LabelStyle();
+
             if (featureStyle.fontSize == null)
             {
                 return labelStyle;
             }
-            
-            labelStyle.ForeColor = ColorTranslator.FromHtml(featureStyle.fontColor);            
+
+            labelStyle.ForeColor = ColorTranslator.FromHtml(featureStyle.fontColor);
             labelStyle.Font = new Font(FontFamily.GenericSansSerif, Int32.Parse(featureStyle.fontSize), FontStyle.Bold);
-            
+
             labelStyle.HorizontalAlignment = SharpMap.Styles.LabelStyle.HorizontalAlignmentEnum.Center;
             labelStyle.VerticalAlignment = SharpMap.Styles.LabelStyle.VerticalAlignmentEnum.Middle;
-            
+
             labelStyle.Offset = new PointF(0, -10);
             labelStyle.Halo = new Pen(Color.Black, 2);
             labelStyle.VerticalAlignment = LabelStyle.VerticalAlignmentEnum.Bottom;
-            
+
             labelStyle.CollisionDetection = false;
-            labelStyle.IgnoreLength = true;            
+            labelStyle.IgnoreLength = true;
 
             return labelStyle;
         }
-        
+
         /// <summary>
         /// Create tile source
         /// </summary>

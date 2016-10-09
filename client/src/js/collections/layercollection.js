@@ -10,6 +10,7 @@ var types = {
  * @augments external:"Backbone.Collection"
  */
 var LayerCollection = {
+
   /**
    * Add layer to openlayers map
    * @instance
@@ -24,6 +25,7 @@ var LayerCollection = {
       map.addLayer(olLayer);
     }
   },
+
   /**
    * Remove layer from openlayers map
    * @instance
@@ -37,6 +39,7 @@ var LayerCollection = {
       map.removeLayer(olLayer);
     }
   },
+
   /**
    * Generates a model for this layer
    * @instance
@@ -69,6 +72,7 @@ var LayerCollection = {
     };
     return config;
   },
+
   /**
    * Generates a model for this layer
    * @instance
@@ -130,6 +134,7 @@ var LayerCollection = {
 
     return config;
   },
+
   /**
    * Generates a model for this layer
    * @instance
@@ -155,8 +160,8 @@ var LayerCollection = {
     } else {
       throw "Layer type not supported: " + config.type;
     }
-
   },
+
   /**
    * Constructor method
    * @instance
@@ -177,6 +182,7 @@ var LayerCollection = {
     this.on("add", this.addToMap, this);
     this.on("remove", this.removeFromMap, this);
   },
+
   /**
    * Get the objects data state as json-friendly representation.
    * @instance
@@ -191,7 +197,6 @@ var LayerCollection = {
       return layer;
     });
   }
-
 };
 
 /**

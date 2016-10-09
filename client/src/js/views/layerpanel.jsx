@@ -3,28 +3,30 @@ var LayerItem = require('views/layeritem');
 var BackgroundSwitcher = require('components/backgroundswitcher');
 
 /**
- *
- *
+ * @class
  */
-var LayerPanel = React.createClass({
+var LayerPanelView = {
   /**
-   *
-   *
+   * Mounted layers
+   * @property {object}
+   * @instance
    */
   mountedLayers: {},
+
   /**
-   *
-   *
+   * Get initial state.
+   * @instance
+   * @return {object}
    */
   getInitialState: function() {
     return {
-      /** */
       visible: false
     };
   },
+
   /**
-   *
-   *
+   * Triggered when the component is successfully mounted into the DOM.
+   * @instance
    */
   componentDidMount: function () {
     this.props.model.on('change:layerCollection', this.onLayerCollectionChanged, this);
@@ -37,9 +39,10 @@ var LayerPanel = React.createClass({
       layers: this.props.model.get("layerCollection")
     });
   },
+
   /**
-   *
-   *
+   * Triggered when component unmounts.
+   * @instance
    */
   componentWillUnmount: function () {
     this.props.model.off("change:layerCollection", this.onLayerCollectionChanged, this);
@@ -47,16 +50,19 @@ var LayerPanel = React.createClass({
       layer.off('change:visible');
     });
   },
+
   /**
-   *
-   *
+   * On layer collection change event handler.
+   * @instance
    */
   onLayerCollectionChanged: function () {
     this.setState({ layers: this.props.model.get("layerCollection") });
   },
+
   /**
    * Find group in config tree.
-   * @param [{object}] groups
+   * @instance
+   * @param {object[]} groups
    * @param {number} groupId
    * @return {object} group
    */
@@ -75,10 +81,12 @@ var LayerPanel = React.createClass({
     });
     return found;
   },
+
   /**
    * Find layers in given group.
+   * @instance
    * @param {group} group
-   * @return layers[]
+   * @return {Layer[]} layers
    */
   getLayersForGroup: function(group) {
 
@@ -99,10 +107,12 @@ var LayerPanel = React.createClass({
 
     return layers;
   },
+
   /**
    * Get a flattened list of ALL layers per group.
+   * @instance
    * @param {object} group
-   * @return [] layers
+   * @return {Layer[]} layers
    */
   drillGroupForLayers: function recursive(group) {
 
@@ -117,9 +127,13 @@ var LayerPanel = React.createClass({
 
     return layers;
   },
+
   /**
-   *
-   *
+   * Toggle the whole group
+   * @deprecated
+   * @instance
+   * @param {object} group
+   * @param {object} e
    */
   toggleGroup: function (group, e) {
 
@@ -130,11 +144,14 @@ var LayerPanel = React.createClass({
       var groupId = layer.get('group');
       layer.set('visible', checked);
     });
-
   },
+
   /**
-   *
-   *
+   * Update the group checkbox, checked if all the layers are visible.
+   * @deprecated
+   * @instance
+   * @param {object} group
+   * @param {object} e
    */
   updateGroupToggledCheckbox: function recur(layer) {
     setTimeout(() => {
@@ -157,9 +174,13 @@ var LayerPanel = React.createClass({
       }
     }, 0);
   },
+
   /**
-   *
-   *
+   * Toggle the visibility of all layers in given group.
+   * @deprecated
+   * @instance
+   * @param {object} group
+   * @param {object} e
    */
   toggleGroupVisibility: function (group, e) {
 
@@ -172,9 +193,12 @@ var LayerPanel = React.createClass({
     this.props.model.set(id, value);
     this.setState(state);
   },
+
   /**
-   *
-   *
+   * Render layers in group.
+   * @instance
+   * @param {object} group
+   * @return {LayerItemView[]}
    */
   renderLayers: function (group) {
 
@@ -188,9 +212,12 @@ var LayerPanel = React.createClass({
       return (<LayerItem key={"layer_" + Math.random()} layer={layer} />);
     });
   },
+
   /**
-   *
-   *
+   * Render groups.
+   * @instance
+   * @param {object[]} groups
+   * @return {external.ReactElement} groups
    */
   renderGroups: function recursive(groups) {
 
@@ -237,9 +264,12 @@ var LayerPanel = React.createClass({
       )
     })
   },
+
   /**
-   *
-   *
+   * Change layer-list configuration.
+   * @deprecated
+   * @instance
+   * @param {object} e
    */
   selectTheme: function (e) {
 
@@ -274,18 +304,24 @@ var LayerPanel = React.createClass({
 
     }, 0)
   },
+
   /**
-   *
-   *
+   * Render themes select options.
+   * @deprecated
+   * @instance
+   * @param {object[]} themes
+   * @return {external.ReactElement} theme options
    */
   renderThemeOptions: function (themes) {
     return themes.map((theme, i) => (
       <option key={i} value={theme.id}>{theme.name}</option>
     ));
   },
+
   /**
-   *
-   *
+   * Render the panel component.
+   * @instance
+   * @return {external:ReactElement}
    */
   render: function () {
 
@@ -306,7 +342,12 @@ var LayerPanel = React.createClass({
       </Panel>
     );
   }
-});
+};
 
-
-module.exports = LayerPanel;
+/**
+ * LayerPanelView module.<br>
+ * Use <code>require('views/layerpanel')</code> for instantiation.
+ * @module LayerPanelView-module
+ * @returns {LayerPanelView}
+ */
+module.exports = React.createClass(LayerPanelView);

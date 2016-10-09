@@ -1,33 +1,47 @@
 
 var ToolModel = require('tools/tool');
 
-module.exports = ToolModel.extend({
+/**
+ * @typedef {Object} SaveStateModel~SaveStateModelProperties
+ * @property {string} type - Default: export
+ * @property {string} panel - Default: exportpanel
+ * @property {string} title - Default: Skriv ut
+ * @property {string} toolbar - Default: bottom
+ * @property {string} icon - Default: fa fa-bookmark icon
+ * @property {string} title - Default: Kartlager
+ * @property {Shell} shell
+ * @property {string} settingsUrl
+ * @property {object[]} bookmarks
+ */
+var SaveStateProperties = {
+  type: 'savestate',
+  panel: 'bookmarkpanel',
+  toolbar: 'bottom',
+  icon: 'fa fa-bookmark icon',
+  title: 'Bokmärken',
+  visible: false,
+  shell: undefined,
+  settingsUrl: "",
+  bookmarks: []
+};
 
-  defaults: {
-    type: 'savestate',
-    panel: 'bookmarkpanel',
-    toolbar: 'bottom',
-    icon: 'fa fa-bookmark icon',
-    title: 'Bokmärken',
-    visible: false,
-    shell: undefined,
-    settingsUrl: "",
-    bookmarks: []
-  },
+/**
+ * Prototype for creating a layerswitcher model.
+ * @class
+ * @augments {external:"Backbone.Model"}
+ * @param {SaveStateModel~SaveStateModelProperties} options - Default options
+ */
+var SaveStateModel = {
   /**
-   * @desc Create savestate tool.
-   * @constructor
-   * @param {object} options | Options loaded from the configuration.
-   * @return {undefined}
+   * @instance
+   * @property {SaveStateModel~SaveStateModelProperties} defaults - Default settings
    */
+  defaults: SaveStateProperties,
+
   initialize: function (options) {
     ToolModel.prototype.initialize.call(this);
   },
-  /**
-   * @desc Configure the tool when the Applicatiion (shell) is ready.
-   * @param {object} options | Options loaded from the configuration.
-   * @return {undefined}
-   */
+
   configure: function (shell) {
      var url = this.get('settingsUrl'), req;
      this.set('shell', shell);
@@ -44,21 +58,23 @@ module.exports = ToolModel.extend({
         });
      }
   },
+
   /**
-   * @desc Reload the application with given bookmark.
-   * @param {object} bookmark | Bookmark with settings to be loaded.
-   * @return {undefined}
+   * Reload the application with given bookmark.
+   * @instance
+   * @param {object} bookmark - Bookmark with settings to be loaded.
    */
   updateApplication: function (bookmark) {
     var json = atob(bookmark.settings);
     var settings = JSON.parse(json);
     this.get('shell').setConfig(settings);
   },
+
   /**
-   * @desc Add and save a new bookmark.
-   * @param {string} name | Name of the bookmark.
-   * @param {function} callback | Fn to be called when the save is complete.
-   * @return {undefined}
+   * Add and save a new bookmark.
+   * @instance
+   * @param {string} name - Name of the bookmark.
+   * @param {function} callback - Fn to be called when the save is complete.
    */
   addBookmark: function (name, callback) {
     var numBookmarks = this.getBookmarks() &&
@@ -85,10 +101,10 @@ module.exports = ToolModel.extend({
   },
 
   /**
-  * @desc Update an existing bookmark.
-  * @param {object} bookmark | Bookmark to be updated.
-  * @param {function} callback | Fn to be called when the update is complete.
-  * @return {undefined}
+  * Update an existing bookmark.
+  * @instance
+  * @param {object} bookmark - Bookmark to be updated.
+  * @param {function} callback - Fn to be called when the update is complete.
   */
   updateBookmark: function(bookmark, callback) {
     $.ajax({
@@ -105,10 +121,10 @@ module.exports = ToolModel.extend({
   },
 
   /**
-   * @desc Update an existing bookmark.
-   * @param {number} id | ID of bookmark to be removed.
-   * @param {function} callback | Fn to be called when the removal is complete.
-   * @return {undefined}
+   * Update an existing bookmark.
+   * @instance
+   * @param {number} id - ID of bookmark to be removed.
+   * @param {function} callback - Fn to be called when the removal is complete.
    */
   removeBookmark: function(id, callback) {
     $.ajax({
@@ -122,19 +138,36 @@ module.exports = ToolModel.extend({
       }
     });
   },
+
   /**
-   * @desc Get bookmarks from shell.
-   * @return {[object]} bookmarks
+   * Get bookmarks from shell.
+   * @instance
+   * @return {object[]} bookmarks
    */
   getBookmarks: function () {
     return this.get('shell').getBookmarks();
   },
+
   /**
-   * @desc Event handler triggered when the tool is clicked.
-   * @return {undefined}
+   * @description
+   *
+   *   Handle click event on toolbar button.
+   *   This handler sets the property visible,
+   *   wich in turn will trigger the change event of navigation model.
+   *   In pracice this will activate corresponding panel as
+   *   "active panel" in the navigation panel.
+   *
+   * @instance
    */
   clicked: function () {
     this.set('visible', true);
   }
+};
 
-});
+/**
+ * Save state model module.<br>
+ * Use <code>require('models/savestate')</code> for instantiation.
+ * @module SaveStateModel-module
+ * @returns {SaveStateModel}
+ */
+module.exports = ToolModel.extend(SaveStateModel);

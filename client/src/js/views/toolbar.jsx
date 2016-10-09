@@ -1,16 +1,20 @@
 /**
- * Tooblar component
- *
+ * @class
  */
-var Toolbar = React.createClass({
+var ToolbarView = {
   /**
-   * Load initial state
-   *
+   * Get initial state.
+   * @instance
+   * @return {object}
    */
   getInitialState: function() {
     return {};
   },
 
+  /**
+   * Triggered before the component mounts.
+   * @instance
+   */
   componentWillMount: function() {
     this.props.navigationModel.on('change:activePanelType', () => {
       this.setState({
@@ -18,9 +22,11 @@ var Toolbar = React.createClass({
       });
     });
   },
+
   /**
-   * Render the component
-   * @return {React.Component} component
+   * Render the panel component.
+   * @instance
+   * @return {external:ReactElement}
    */
   render: function () {
     var tools = this.props.model.filter(t => t.get('toolbar')).map((tool, index) => {
@@ -56,7 +62,12 @@ var Toolbar = React.createClass({
       </div>
     );
   }
+};
 
-});
-
-module.exports = Toolbar;
+/**
+ * ToolbarView module.<br>
+ * Use <code>require('views/toolbar')</code> for instantiation.
+ * @module ToolbarView-module
+ * @returns {ToolbarView}
+ */
+module.exports = React.createClass(ToolbarView);

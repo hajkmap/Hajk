@@ -102,9 +102,9 @@ var ExportModel = {
   /**
    * Add the preview feature to the export layer source.
    * @instance
-   * @params {number} scale
-   * @params {object} paper
-   * @params {number[]} center
+   * @param {number} scale
+   * @param {object} paper
+   * @param {number[]} center
    */
   addPreview: function (scale, paper, center) {
 
@@ -135,8 +135,8 @@ var ExportModel = {
   /**
    * Clone map draw canvas.
    * @instance
-   * @params {HTMLElement} old canvas
-   * @params {number} size
+   * @param {HTMLElement} old canvas
+   * @param {number} size
    */
   cloneCanvas: function (oldCanvas, size) {
     var newCanvas = document.createElement('canvas')
@@ -395,8 +395,8 @@ var ExportModel = {
   /**
    * Export the map
    * @instance
-   * @params {function} callback
-   * @params {object} size
+   * @param {function} callback
+   * @param {object} size
    */
   exportMap: function(callback, size) {
     var map = this.get('olMap');
@@ -429,7 +429,7 @@ var ExportModel = {
   /**
    * Export the map
    * @instance
-   * @params {function} callback
+   * @param {function} callback
    */
   exportImage: function(callback) {
     this.exportMap((href) => {
@@ -453,8 +453,8 @@ var ExportModel = {
   /**
    * Export the map as a PDF-file
    * @instance
-   * @params {object} options
-   * @params {function} callback
+   * @param {object} options
+   * @param {function} callback
    */
   exportPDF: function(options, callback) {
     var extent = this.previewLayer.getSource().getFeatures()[0].getGeometry().getExtent()

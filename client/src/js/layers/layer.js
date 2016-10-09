@@ -28,6 +28,7 @@ var Layer = {
    * @property {Layer~LayerModelProperties} - default properties
    */
   defaults: LayerModelProperties,
+
   /**
    * Load JSON data from script tag.
    * @instance
@@ -41,18 +42,14 @@ var Layer = {
     script.onload = () => { document.head.removeChild(script) };
     document.head.appendChild(script);
   },
-  /**
-   * Internal constructor method.
-   * @instance
-   * @private
-   * @return {undefined}
-   */
+
   initialize: function () {
     this.initialState = _.clone(this.attributes);
     this.on('change:shell', function (sender, shell) {
       this.set("map", shell.get("map"));
     }, this);
   },
+
   /**
    * Get label visibility.
    * @instance
@@ -61,6 +58,7 @@ var Layer = {
   getLabelVisibility: function () {
     return this.get('labelVisibility');
   },
+
   /**
    * Get label visibility.
    * @instance
@@ -69,6 +67,7 @@ var Layer = {
   getLegend: function () {
     return this.get("legend");
   },
+
   /**
    * Get name.
    * @instance
@@ -77,6 +76,7 @@ var Layer = {
   getName: function () {
     return this.get("name");
   },
+
   /**
    * Get caption.
    * @instance
@@ -85,6 +85,7 @@ var Layer = {
   getCaption: function () {
     return this.get("caption");
   },
+
   /**
    * Get visible.
    * @instance
@@ -93,6 +94,7 @@ var Layer = {
   getVisible: function () {
     return this.get("visible");
   },
+
   /**
    * Get ol layer.
    * @instance
@@ -101,6 +103,7 @@ var Layer = {
   getLayer: function () {
     return this.layer || this.get("layer");
   },
+
   /**
    * Set label visibility.
    * @instance
@@ -110,6 +113,7 @@ var Layer = {
   setVisible: function (visible) {
     this.set("visible", visible);
   },
+
   /**
    * Get flat JSON-friendly representation of this instance.
    * @instance
@@ -121,6 +125,7 @@ var Layer = {
     json.visible = this.get('visible');
     return json;
   },
+
   /**
    * Get legend components
    * @instance
@@ -150,6 +155,7 @@ var Layer = {
 
       return legendComponents;
   },
+
   /**
    * Get extended components
    * @instance

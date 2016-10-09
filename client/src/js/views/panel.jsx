@@ -1,18 +1,20 @@
 /**
- *
- *
+ * @class
  */
-var Panel = React.createClass({
+var PanelView = {
   /**
-   *
-   *
+   * Get initial state.
+   * @instance
+   * @return {object}
    */
   getInitialState: function() {
     return {};
   },
+
   /**
-   *
-   *
+   * Render the panel component.
+   * @instance
+   * @return {external:ReactElement}
    */
   render: function () {
     var toggleIcon = this.props.minimized ? "fa fa-plus" : "fa fa-times";
@@ -29,6 +31,12 @@ var Panel = React.createClass({
       </div>
     );
   }
-});
+};
 
-module.exports = Panel;
+/**
+ * PanelView module.<br>
+ * Use <code>require('views/panel')</code> for instantiation.
+ * @module PanelView-module
+ * @returns {PanelView}
+ */
+module.exports = React.createClass(PanelView);

@@ -1,12 +1,15 @@
 /**
- *
+ * @class
  */
-class Alert extends React.Component {
+class AlertView extends React.Component {
 
   constructor() {
     super();
   }
 
+  /**
+   * Render the View
+   */
   render() {
     var options = this.props.options;
     if (options.confirm) {
@@ -68,4 +71,10 @@ class Alert extends React.Component {
   }
 }
 
-module.exports = Alert;
+/**
+ * AlertView module.<br>
+ * Use <code>require('views/alert')</code> for instantiation.
+ * @module AlertView-module
+ * @returns {AlertView}
+ */
+module.exports = AlertView;

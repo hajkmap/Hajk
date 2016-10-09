@@ -1,38 +1,31 @@
 var LegendItem = require('components/legenditem');
 
 /**
- * React Class Legend
  * @class
  */
-var Legend = React.createClass({
+var LegendView = {
   /**
-   *
-   *
-   */
-  showLabels: false,
-  /**
-   *
-   *
-   */
-  toggleLabels: function () {
-    this.showLabels = !this.showLabels;
-    this.props.layer.setLabelVisibility(this.showLabels);
-  },
-  /**
-   *
-   *
+   * Render the legend item component.
+   * @instance
+   * @return {external:ReactElement}
    */
   render: function () {
     return (
       <div className="legend">
       {
-        _.map(this.props.legends, (legend, index) =>  {
-          return <LegendItem key={"legend_" + index} icon={legend.Url} text={legend.Description} />;
-        })
+        this.props.legends.map((legend, index) =>
+          <LegendItem key={"legend_" + index} icon={legend.Url} text={legend.Description} />
+        )
       }
       </div>
     );
   }
-});
+};
 
-module.exports = Legend;
+/**
+ * LegendView module.<br>
+ * Use <code>require('views/legend')</code> for instantiation.
+ * @module LegendView-module
+ * @returns {LegendView}
+ */
+module.exports = React.createClass(LegendView);

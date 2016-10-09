@@ -55,6 +55,7 @@ var ShellModel = {
       this.set('navigation', new NavigationPanelModel({ panels: panels }));
     }
   },
+
   /**
    * Get map property value
    * @instance
@@ -63,6 +64,7 @@ var ShellModel = {
   getMap: function () {
     return this.get('map');
   },
+
   /**
    * Get layer collection property value
    * @instance
@@ -71,6 +73,7 @@ var ShellModel = {
   getLayerCollection: function () {
     return this.get('layerCollection');
   },
+
   /**
    * Get tool collection property value
    * @instance
@@ -79,6 +82,7 @@ var ShellModel = {
   getToolCollection: function () {
     return this.get('toolCollection');
   },
+
   /**
    * Get navigation property value
    * @instance
@@ -87,6 +91,7 @@ var ShellModel = {
   getNavigation: function () {
     return this.get('navigation');
   },
+
   /**
    * Convert model to JSON-string
    * @instance
@@ -99,6 +104,7 @@ var ShellModel = {
     json.toolCollection = this.getToolCollection().toJSON();
     return JSON.stringify(json);
   },
+
   /**
    * Set bookmark property value
    * @instance
@@ -107,6 +113,7 @@ var ShellModel = {
   setBookmarks: function (bookmarks) {
     this.set('bookmarks', bookmarks);
   },
+
   /**
    * Get bookmarks property value
    * @instance
@@ -115,6 +122,7 @@ var ShellModel = {
   getBookmarks: function () {
     return this.get('bookmarks');
   },
+
   /**
    * Get configuration property value
    * @instance
@@ -123,6 +131,7 @@ var ShellModel = {
   getConfig: function () {
     return this.get('config');
   },
+
   /**
    * Set configuration property value
    * @instance

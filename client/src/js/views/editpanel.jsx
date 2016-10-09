@@ -2,32 +2,20 @@ var Panel = require('views/panel');
 var Alert = require('alert');
 
 var AttributeEditor = React.createClass({
-  /*
-   * Get default state.
-   * @return {object} state
-   */
+
   getInitialState: function() {
     return {
       disabled: true,
       formValues: {}
     };
   },
-  /**
-   * Abort any operation and deselect any tool
-   * when the components unmounts.
-   * @override
-   * @param {ol.event} event
-   */
+
   componentWillUnmount: function () {
   },
-  /**
-   * @override
-   */
+
   componentWillMount: function () {
   },
-  /**
-   * @override
-   */
+
   componentDidMount: function () {
     this.props.model.on('change:editFeature', (attr) => {
       var valueMap = {}
@@ -225,10 +213,7 @@ var AttributeEditor = React.createClass({
         return (<span>{value}</span>);
     }
   },
-  /**
-   * Render the component.
-   * @return {React.Component} component
-   */
+
   render: function () {
     if (!this.props.feature) return null;
     var markup = this.props.source.editableFields.map((field, i) => {
@@ -246,24 +231,17 @@ var AttributeEditor = React.createClass({
 });
 
 var Toolbar = React.createClass({
-  /**
-   * Get default state.
-   * @return {object} state
-   */
+
   getInitialState: function() {
     return {
       activeTool: undefined
     };
   },
-  /**
-   * @override
-   */
+
   componentWillUnmount: function () {
     this.props.model.off('change:layer');
   },
-  /**
-   * @override
-   */
+
   componentWillMount: function () {
     this.props.model.on('change:layer', () => {
       if (this.props.model.get('layer')) {
@@ -275,9 +253,7 @@ var Toolbar = React.createClass({
       }
     });
   },
-  /**
-   * @override
-   */
+
   componentDidMount: function () {
   },
 
@@ -483,10 +459,14 @@ var Toolbar = React.createClass({
   }
 });
 
-var EditPanel = React.createClass({
-  /*
-   * Get default state.
-   * @return {object} state
+/**
+ * @class
+ */
+var EditPanelView = {
+  /**
+   * Get initial state.
+   * @instance
+   * @return {object}
    */
   getInitialState: function() {
     return {
@@ -495,22 +475,25 @@ var EditPanel = React.createClass({
       checked: false
     };
   },
+
   /**
-   * Abort any operation and deselect any tool
-   * when the components unmounts.
-   * @override
-   * @param {ol.event} event
+   * Triggered when component unmounts.
+   * @instance
    */
   componentWillUnmount: function () {
     this.props.model.off('change:editFeature');
   },
+
   /**
-   * @override
+   * Triggered before the component mounts.
+   * @instance
    */
   componentWillMount: function () {
   },
+
   /**
-   * @override
+   * Triggered when the component is successfully mounted into the DOM.
+   * @instance
    */
   componentDidMount: function () {
 
@@ -543,9 +526,14 @@ var EditPanel = React.createClass({
         });
       }
     });
-
   },
 
+  /**
+   * Set active layer to edit
+   * @instance
+   * @param {external:"ol.source"} source
+   *
+   */
   setLayer: function (source) {
 
     var clear = () => {
@@ -588,9 +576,11 @@ var EditPanel = React.createClass({
       changeActiveLayer();
     }
   },
+
   /**
    * Render the component.
-   * @return {React.Component} component
+   * @instance
+   * @return {Alert} component
    */
   renderAlert: function () {
     var options = {
@@ -627,9 +617,11 @@ var EditPanel = React.createClass({
       return null;
     }
   },
+
   /**
    * Render the panel component.
-   * @return {React.Component} component
+   * @instance
+   * @return {external:ReactElement}
    */
   render: function () {
 
@@ -673,6 +665,12 @@ var EditPanel = React.createClass({
       </div>
     );
   }
-});
+};
 
-module.exports = EditPanel;
+/**
+ * EditPanelView module.<br>
+ * Use <code>require('views/editpanel')</code> for instantiation.
+ * @module EditPanelView-module
+ * @returns {EditPanelView}
+ */
+module.exports = React.createClass(EditPanelView);

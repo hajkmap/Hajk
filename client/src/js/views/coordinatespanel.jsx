@@ -93,8 +93,15 @@ var CoordinatesList = React.createClass({
   }
 });
 
-module.exports = React.createClass({
-
+/**
+ * @class
+ */
+var CoordinatesPanelView = {
+  /**
+   * Get initial state.
+   * @instance
+   * @return {object}
+   */
   getInitialState: function() {
     return {
       visible: false,
@@ -102,14 +109,19 @@ module.exports = React.createClass({
     };
   },
 
-  componentWillMount: function () {
-  },
-
+  /**
+   * Triggered when component unmounts.
+   * @instance
+   */
   componentWillUnmount: function () {
     this.props.model.off('change:position', this.writeCoordinates);
     this.props.model.removeInteractions();
   },
 
+  /**
+   * Triggered when the component is successfully mounted into the DOM.
+   * @instance
+   */
   componentDidMount: function () {
     this.props.model.on('change:position', this.writeCoordinates);
     this.setState({
@@ -117,12 +129,20 @@ module.exports = React.createClass({
     });
   },
 
+  /**
+   * Write coordinates, will trigger set state.
+   * @instance
+   */
   writeCoordinates: function () {
     this.setState({
       coordinates: this.props.model.presentCoordinates()
     });
   },
 
+  /**
+   * Reset the application, will trigger set state.
+   * @instance
+   */
   reset: function () {
     this.setState({
       interactionVisible: !this.state.interactionVisible
@@ -131,6 +151,11 @@ module.exports = React.createClass({
                                     this.props.model.createInteractions();
   },
 
+  /**
+   * Render the view.
+   * @instance
+   * @return {external:ReactElement}
+   */
   render: function () {
     var coordinates;
     if (this.props.model.get('interactions').length === 0) {
@@ -145,5 +170,12 @@ module.exports = React.createClass({
       </Panel>
     );
   }
+};
 
-});
+/**
+ * CoordinatesPanelView module.<br>
+ * Use <code>require('views/coordinatespanel')</code> for instantiation.
+ * @module CoordinatesPanelView-module
+ * @returns {CoordinatesPanelView}
+ */
+module.exports = React.createClass(CoordinatesPanelView);

@@ -1,4 +1,10 @@
 /**
+ * Backbone view base class.
+ * @external "Backbone.View"
+ * @see {@link http://backbonejs.org/#View|Backbone view}
+ */
+
+/**
  * Backbone model base class.
  * @external "Backbone.Model"
  * @see {@link http://backbonejs.org/#Model|Backbone model}

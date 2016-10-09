@@ -1,12 +1,12 @@
+
 var Panel = require('views/panel');
 /**
- * React Class Anchor Panel
  * @class
  */
-var AnchorPanel = React.createClass({
+var AnchorPanelView = {
   /**
-   * @desc Get initial state
-   * @override
+   * Get initial state.
+   * @instance
    * @return {object}
    */
   getInitialState: function() {
@@ -14,38 +14,39 @@ var AnchorPanel = React.createClass({
       anchor: ""
     };
   },
+
   /**
-   * @desc Triggered when component updates.
-   * @override
+   * Triggered when component updates.
+   * @instance
    */
   componentDidUpdate: function () {
   },
+
   /**
-   * @descTriggered when the component is successfully mounted into the DOM.
-   * @override
+   * Triggered when the component is successfully mounted into the DOM.
+   * @instance
    */
   componentDidMount: function () {
     this.generate();
   },
+
   /**
-   * @desc Generete anchor to map.
-   * @retur {string} anchor
+   * Generete anchor text.
+   * @instance
    */
   generate: function () {
-
     this.setState({
       anchor: this.props.model.generate()
     });
-
   },
+
   /**
-   * @desc Render anchorpanel.
-   * @return {React.Component}
+   * Render the view
+   * @instance
+   * @return {external:ReactElement}
    */
   render: function () {
-
     var anchor = this.props.model.get('anchor');
-
     return (
       <Panel title="Länk till karta" onCloseClicked={this.props.onCloseClicked}>
         <div className="panel-content">
@@ -62,8 +63,12 @@ var AnchorPanel = React.createClass({
       </Panel>
     );
   }
+};
 
-});
-
-
-module.exports = AnchorPanel;
+/**
+ * AnchorPanelView module.<br>
+ * Use <code>require('views/anchorpanel')</code> for instantiation.
+ * @module AnchorPanelView-module
+ * @returns {AnchorPanelView}
+ */
+module.exports = React.createClass(AnchorPanelView);

@@ -4,10 +4,7 @@ var SearchResultGroup;
 var isMobile = () => document.body.clientWidth <= 600;
 
 SearchResultGroup = React.createClass({
-  /**
-   * @desc: Triggered when mounted.
-   * @return: undefined
-   */
+
   componentDidMount: function () {
 
     var groups = $(ReactDOM.findDOMNode(this)).find('.group');
@@ -26,15 +23,8 @@ SearchResultGroup = React.createClass({
         }
       });
     }
-
   },
-  /**
-   * @desc: Handle click on result element.
-   * @param: hit {olFeature}
-   * @param: index {number}
-   * @param: event {SyntheticEvent}
-   * @return: undefined
-   */
+
   handleClick: function (hit, index, event) {
 
     var element = $(event.target)
@@ -56,10 +46,7 @@ SearchResultGroup = React.createClass({
       this.props.parentView.props.navigationPanel.minimize();
     }
   },
-  /**
-   * @desc: Render result group component
-   * @return: undefined
-   */
+
   render: function () {
 
     var id = this.props.id
@@ -94,26 +81,80 @@ SearchResultGroup = React.createClass({
   }
 });
 
-module.exports = React.createClass({
-  /** @property value {string} */
+/**
+ * @class
+ */
+var SearchPanelView = {
+  /**
+   * @property {string} value
+   * @instance
+   */
   value: undefined,
-  /** @property timer {number} */
+
+  /**
+   * @property {number} timer
+   * @instance
+   */
   timer: undefined,
-  /** @property loading {number} */
+
+  /**
+   * @property {number} loading
+   * @instance
+   */
   loading: 0,
-  /*
-   * @desc: Get default settings.
-   * @return: {object} state
-   *
+
+  /**
+   * Get initial state.
+   * @instance
+   * @return {object}
    */
   getInitialState: function() {
     return {
       visible: false
     };
   },
+
   /**
-   * @desc: Clears the search result.
-   *
+   * Triggered when the component is successfully mounted into the DOM.
+   * @instance
+   */
+  componentDidMount: function () {
+    this.value = this.props.model.get('value');
+    if (this.props.model.get('items')) {
+      this.setState({
+        showResults: true,
+        result: {
+          status: 'success',
+          items: this.props.model.get('items')
+        }
+      });
+    }
+  },
+
+  /**
+   * Triggered before the component mounts.
+   * @instance
+   */
+  componentWillMount: function () {
+    this.props.model.get('layerCollection') ?
+      this.bindLayerVisibilityChange() :
+      this.props.model.on('change:layerCollection', this.bindLayerVisibilityChange);
+  },
+
+  /**
+   * Triggered when component unmounts.
+   * @instance
+   */
+  componentWillUnmount: function () {
+    this.props.model.get('layerCollection').each((layer) => {
+      layer.off("change:visible", this.search);
+    });
+    this.props.model.off('change:layerCollection', this.bindLayerVisibilityChange);
+  },
+
+  /**
+   * Clear the search result.
+   * @instance
    */
   clear: function () {
     this.value = "";
@@ -125,8 +166,11 @@ module.exports = React.createClass({
       result: []
     });
   },
+
   /**
-   *
+   * Handle key down event, this will set state.
+   * @instance
+   * @param {object} event
    */
   handleKeyDown: function (event) {
     if (event.keyCode === 13 && event.target.value.length < 5) {
@@ -138,16 +182,19 @@ module.exports = React.createClass({
       this.search();
     }
   },
+
   /**
-   * @desc: Perform a search in the model to update results.
+   * Perform a search in the model to update results.
+   * @instance
    */
   update: function() {
     this.props.model.search();
   },
+
   /**
-   * @desc: Search the map for requested information.
-   * @param: <ol.event> event
-   * @return: undefined
+   * Search requested information.
+   * @instance
+   * @param {object} event
    */
   search: function (event) {
     this.setState({
@@ -171,24 +218,11 @@ module.exports = React.createClass({
       });
     }, 200);
   },
-  /*
-   * @desc
-   *
-   */
-  componentDidMount: function () {
-    this.value = this.props.model.get('value');
-    if (this.props.model.get('items')) {
-      this.setState({
-        showResults: true,
-        result: {
-          status: 'success',
-          items: this.props.model.get('items')
-        }
-      });
-    }
-  },
-  /*
-   * @desc
+
+  /**
+   * Bind an event handler to layer visibility change.
+   * If a layer changes visibility the result vill update.
+   * @instance
    */
   bindLayerVisibilityChange : function () {
     this.props.model.get('layerCollection').each((layer) => {
@@ -197,25 +231,12 @@ module.exports = React.createClass({
       });
     });
   },
-  /*
-   * @desc
-   */
-  componentWillMount: function () {
-    this.props.model.get('layerCollection') ?
-      this.bindLayerVisibilityChange() :
-      this.props.model.on('change:layerCollection', this.bindLayerVisibilityChange);
-  },
-  /*
-   * @desc
-   */
-  componentWillUnmount: function () {
-    this.props.model.get('layerCollection').each((layer) => {
-      layer.off("change:visible", this.search);
-    });
-    this.props.model.off('change:layerCollection', this.bindLayerVisibilityChange);
-  },
-  /*
-   * @desc
+
+  /**
+   * Set search filter and perform a search.
+   * @instance
+   * @param {string} type
+   * @param {object} event
    */
   setFilter: function (type, event) {
     switch (type) {
@@ -228,8 +249,11 @@ module.exports = React.createClass({
     }
     this.search();
   },
-  /*
-   * @desc Render options component
+
+  /**
+   * Render the search options component.
+   * @instance
+   * @return {external:ReactElement}
    */
   renderOptions: function () {
     var settings = this.props.model.get('settings')
@@ -261,8 +285,11 @@ module.exports = React.createClass({
       </div>
     );
   },
-  /*
-   * @desc Render result component.
+
+  /**
+   * Render the result component.
+   * @instance
+   * @return {external:ReactElement}
    */
   renderResults: function () {
     var groups = this.props.model.get('items')
@@ -294,8 +321,11 @@ module.exports = React.createClass({
 
     );
   },
-  /*
-   * @desc Render the panel
+
+  /**
+   * Render the panel component.
+   * @instance
+   * @return {external:ReactElement}
    */
   render: function () {
 
@@ -371,4 +401,12 @@ module.exports = React.createClass({
       </Panel>
     );
   }
-});
+};
+
+/**
+ * SearchPanelView module.<br>
+ * Use <code>require('views/searchpanel')</code> for instantiation.
+ * @module SearchPanelView-module
+ * @returns {SearchPanelView}
+ */
+module.exports = React.createClass(SearchPanelView);

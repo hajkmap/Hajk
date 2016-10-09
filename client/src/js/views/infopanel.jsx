@@ -1,58 +1,31 @@
 var Panel = require('views/panel');
 var FeatureInfo = require('components/featureinfo');
+
 /**
- *
- *
+ * @class
  */
-var InfoPanel = React.createClass({
+var InfoPanelView = {
   /**
-   *
-   *
+   * @property {Array<{external:"ol.feature"}>}
+   * @instance
+   */
+  features: [],
+
+  /**
+   * Get initial state.
+   * @instance
+   * @return {object}
    */
   getInitialState: function() {
     return {
-      /** */
       featureinfo: [],
-      /** */
       activeIndex: 0
     };
   },
+
   /**
-   *
-   *
-   */
-  features: [],
-  /**
-   *
-   *
-   */
-  handleReset: function() {
-    this.features = [];
-  },
-  /**
-   *
-   *
-   */
-  handleAdd: function (feature, collection) {
-    if (this.props.model.get('loadFishished') === true) {
-      this.features = this.props.model.get("features").map(function (f) { return f.get("information"); });
-      this.setState({
-        featureinfo: this.features
-      });
-    }
-  },
-  /**
-   *
-   *
-   */
-  handleChangeSelectedFeature: function (s, feature) {
-    this.setState({
-      activeIndex: this.props.model.get("features").toArray().indexOf(feature)
-    });
-  },
-  /**
-   *
-   *
+   * Triggered when the component is successfully mounted into the DOM.
+   * @instance
    */
   componentDidMount: function () {
     this.props.model.get("features").on("reset", this.handleReset);
@@ -63,9 +36,10 @@ var InfoPanel = React.createClass({
       featureinfo: this.features
     });
   },
+
   /**
-   *
-   *
+   * Triggered when component unmounts.
+   * @instance
    */
   componentWillUnmount: function () {
     this.props.model.off("change:selectedFeature", this.handleChangeSelectedFeature);
@@ -73,9 +47,44 @@ var InfoPanel = React.createClass({
     this.props.model.get("features").off("reset", this.handleReset);
     this.props.model.clearHighlight();
   },
+
   /**
-   *
-   *
+   * Reset the features of this panel.
+   * @instance
+   */
+  handleReset: function() {
+    this.features = [];
+  },
+
+  /**
+   * Add feature to the info panel view, this will trigger set state.
+   * @instance
+   * @param {external:"ol.feature"}
+   */
+  handleAdd: function (feature, collection) {
+    if (this.props.model.get('loadFishished') === true) {
+      this.features = this.props.model.get("features").map(f => f.get("information"));
+      this.setState({
+        featureinfo: this.features
+      });
+    }
+  },
+
+  /**
+   * Change selected feature.
+   * @instance
+   * @param {object} s
+   * @param {external:"ol.feature"}
+   */
+  handleChangeSelectedFeature: function (s, feature) {
+    this.setState({
+      activeIndex: this.props.model.get("features").toArray().indexOf(feature)
+    });
+  },
+
+  /**
+   * Go to next feature.
+   * @instance
    */
   decreaseIndex: function () {
     var newIndex = this.state.activeIndex > 0 ?
@@ -86,9 +95,10 @@ var InfoPanel = React.createClass({
       this.props.model.set("selectedFeature", feature);
     }
   },
+
   /**
-   *
-   *
+   * Go to the previous feature.
+   * @instance
    */
   increaseIndex: function () {
     var newIndex = this.state.activeIndex < this.state.featureinfo.length - 1 ?
@@ -99,9 +109,11 @@ var InfoPanel = React.createClass({
       this.props.model.set("selectedFeature", feature);
     }
   },
+
   /**
-   *
-   *
+   * Render the panel component.
+   * @instance
+   * @return {external:ReactElement}
    */
   render: function () {
 
@@ -138,6 +150,12 @@ var InfoPanel = React.createClass({
       </Panel>
     );
   }
-});
+};
 
-module.exports = InfoPanel;
+/**
+ * InfoPanelView module.<br>
+ * Use <code>require('views/infopanel')</code> for instantiation.
+ * @module InfoPanelView-module
+ * @returns {InfoPanelView}
+ */
+module.exports = React.createClass(InfoPanelView);

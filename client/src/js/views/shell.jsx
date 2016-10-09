@@ -6,30 +6,28 @@ var Toolcollection = require('collections/tools');
 var NavigationPanel = require('views/navigationpanel');
 var NavigationPanelModel = require("models/navigation");
 /**
- *
- *
+ * @class
  */
-var Shell = React.createClass({
+var ShellView = {
   /**
-   *
-   *
+   * Get default properties.
+   * @instance
+   * @return {object}
    */
   getDefaultProps : function () {
     return {
-      /** */
       config: {
-        /** */
         layers: [],
-        /** */
         tools: [],
-        /** */
         map: {}
       }
     };
   },
+
   /**
-   *
-   *
+   * Get initial state.
+   * @instance
+   * @return {object}
    */
   getInitialState: function () {
     return {
@@ -38,16 +36,14 @@ var Shell = React.createClass({
       navigationModel: undefined
     };
   },
-  /**
-   *
-   *
-   */
+
   shouldComponentUpdate: function () {
     return true;
   },
+
   /**
-   *
-   *
+   * Triggered before the component mounts.
+   * @instance
    */
   componentWillMount: function () {
     this.model = this.props.model;
@@ -57,9 +53,10 @@ var Shell = React.createClass({
       ]
     });
   },
+
   /**
-   *
-   *
+   * Triggered when the component is successfully mounted into the DOM.
+   * @instance
    */
   componentDidMount: function () {
     this.model.configure.call(this.model);
@@ -71,9 +68,11 @@ var Shell = React.createClass({
       ]
     });
   },
+
   /**
-   *
-   *
+   * Render the panel component.
+   * @instance
+   * @return {external:ReactElement}
    */
   render: function () {
     var views = this.state.views
@@ -96,8 +95,12 @@ var Shell = React.createClass({
       </div>
     );
   }
+};
 
-});
-
-
-module.exports = Shell;
+/**
+ * ShellView module.<br>
+ * Use <code>require('views/shell')</code> for instantiation.
+ * @module ShellView-module
+ * @returns {ShellView}
+ */
+module.exports = React.createClass(ShellView);
