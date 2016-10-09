@@ -26,6 +26,7 @@ module.exports = function (grunt) {
           files: [
             { cwd: "src/static/assets", src: "**/*", dest: "dist/assets", expand: true },
             { cwd: "node_modules/font-awesome/fonts", src: "*", dest: "dist/fonts", expand: true },
+            { cwd: "src/static/fonts", src: "*", dest: "dist/fonts", expand: true },
             { src: "src/static/index.html", dest: "dist/index.html" },
             { src: "src/static/config.json", dest: "dist/config.json" },
             { src: "src/static/es6-polyfill.js", dest: "dist/js/es6-polyfill.js" },

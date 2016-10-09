@@ -1,7 +1,7 @@
 {
   "name": "hajk2",
-  "version": "2.1.0",
-  "description": "Common webmap",
+  "version": "2.0.0",
+  "description": "Hajk Map responsiv webbkarta som bygger på Open Layers 3.",
   "homepage": "https://github.com/Johkar/Hajk2#readme",
   "repository": {
     "type": "git",
