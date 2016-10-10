@@ -83,9 +83,6 @@ class Search extends React.Component {
   loadLayer(e, layer) {
 
     this.abort();
-
-    console.log("Load", layer);
-
     this.setState({
       mode: "edit",
       id: layer.id,

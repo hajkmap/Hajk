@@ -21,7 +21,6 @@ class Info extends React.Component {
 		  </p>
 		  <h2>Releaser</h2>
 		  <ul>
-		  	<li><a href="Hajk2-2.0-RC3.zip">Release 2.0-RC3</a></li>
 		  	<li><a href="Hajk2-2.0.0.zip">Release 2.0.0</a></li>
 		  </ul>
 		  <p>Applikationen är skapad med komponenter från följande bibliotek:</p>
