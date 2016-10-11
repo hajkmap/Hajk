@@ -5,11 +5,11 @@
       "caption": "Topowebb",
       "url": "http://194.71.132.27/lmproxy/wmts",
       "owner": "SBK",
-      "date": "1475843752129",
+      "date": "1476167352492",
       "content": "topowebbkarta",
       "legend": "",
       "projection": "EPSG:3006",
-      "visibleAtStart": true,
+      "visibleAtStart": false,
       "layer": "topowebb",
       "style": "default",
       "matrixSet": "3006",
@@ -53,6 +53,44 @@
         "16",
         "17"
       ]
+    },
+    {
+      "id": "c3be4753-5ca1-3f85-eda4-d708dd23ccd0",
+      "caption": "Alingsås WMTS",
+      "url": "http://gisak.alingsas.se/arcgis/rest/services/Bakgrund/Bakgrund_utan_etiketter/MapServer/WMTS",
+      "owner": "SBK",
+      "date": "1476171650336",
+      "content": "alingsås wmts",
+      "legend": "",
+      "projection": "EPSG:3007",
+      "visibleAtStart": true,
+      "layer": "Bakgrund_Bakgrund_utan_etiketter",
+      "style": "default",
+      "matrixSet": "default028mm",
+      "origin": [
+        "-5473200",
+        "10002100"
+      ],
+      "resolutions": [
+        "132.2919312505292",
+        "66.1459656252646",
+        "33.0729828126323",
+        "16.933367200067735",
+        "8.466683600033868",
+        "4.233341800016934",
+        "2.116670900008467",
+        "1.0583354500042335"
+      ],
+      "matrixIds": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7"
+      ]
     }
   ],
   "wmslayers": [
@@ -94,12 +132,12 @@
       "caption": "Delavrinningsområde",
       "url": "http://194.71.132.27/geoserver/wms",
       "owner": "SBK",
-      "date": "1476044493299",
+      "date": "1476166682494",
       "content": "daro",
       "legend": "",
       "projection": null,
       "layers": [
-        "viskan:Daro"
+        "demo:dammar3007"
       ],
       "infobox": "",
       "searchFields": [
@@ -108,7 +146,7 @@
       "displayFields": [
         ""
       ],
-      "visibleAtStart": false,
+      "visibleAtStart": true,
       "queryable": true,
       "tiled": false,
       "singleTile": false,
@@ -166,39 +204,112 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver"
+    },
+    {
+      "id": "7b1a403c-16ce-a05b-dd94-f85d224a8082",
+      "caption": "Platser",
+      "url": "http://gisak.alingsas.se/arcgis/services/Lights/Lights_2016/MapServer/WMSServer",
+      "owner": "SBK",
+      "date": "1476172013421",
+      "content": "lights platser",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "1"
+      ],
+      "infobox": "År {Ar}  \n\nNamn {Namn}  \n\nPlats nummer {Site_Nr}  \n\nDesignad av {Design}  \n\nGlobalt mål {Globalt_mal}  \n\n{Text}  \n<img src=\"{Image_link}\"></img>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": true,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "arcgis"
+    },
+    {
+      "id": "75c2ac36-7507-0fe4-abf8-457f5130c1c3",
+      "caption": "Alingsås WMS",
+      "url": "http://gisak.alingsas.se/arcgis/services/Bakgrund/Bakgrund_utan_etiketter/MapServer/WMSServer",
+      "owner": "SBK",
+      "date": "1476108524486",
+      "content": "test",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20",
+        "21",
+        "22"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "arcgis"
     }
   ],
   "wfslayers": [
     {
-      "id": "b4bc1755-b066-e214-1b70-a71257c75b57",
-      "caption": "Vandringshinder",
-      "url": "http://194.71.132.27/geoserver/motala/wfs",
-      "layers": [
-        "motala:Road_cross"
-      ],
-      "searchFields": [
-        "vattendrag"
-      ],
-      "displayFields": [
-        "vattendrag"
-      ],
-      "outputFormat": "GML2"
-    },
-    {
       "id": "ef94049e-b1ed-87da-3e69-532391c34ea2",
       "caption": "Sök fastighet",
-      "url": "http://194.71.132.27/geoserver/demo/wfs",
+      "url": "http://ksdgis.se/arcgis/services/jaktadm/MapServer/WFSServer",
       "layers": [
-        "demo:demo_fastighet"
+        "jaktadm:fastighetytor"
       ],
       "searchFields": [
         "fastighet"
       ],
       "displayFields": [
-        "fastighet",
-        "fnr"
+        "FASTIGHET",
+        "FNR_FDS"
       ],
       "outputFormat": "GML3"
+    },
+    {
+      "id": "28d67f52-d4d4-4a4a-9e02-25be111df950",
+      "caption": "Lights",
+      "url": "http://gisak.alingsas.se/arcgis/services/Lights/Lights_2016/MapServer/WFSServer",
+      "layers": [
+        "Lights_Lights_2016:Platser_2016"
+      ],
+      "searchFields": [
+        "Namn"
+      ],
+      "displayFields": [
+        "Namn"
+      ],
+      "outputFormat": "GML2"
     }
   ],
   "wfstlayers": [

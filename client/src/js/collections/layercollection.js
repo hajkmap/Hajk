@@ -48,14 +48,13 @@ var LayerCollection = {
    * @return {object} config
    */
   mapWMTSConfig: function(args, properties) {
-
     var config = {
       type: 'wmts',
       options: {
         id: args.id,
         name: args.id,
         caption: args.caption,
-        visible: args.visibleAtStart || true,
+        visible: args.visibleAtStart === false ? false : true,
         queryable: false,
         opacity: args.opacity || 1,
         format: 'image/png',

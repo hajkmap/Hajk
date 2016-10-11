@@ -149,7 +149,7 @@ var SearchModel = {
    */
   doWFSSearch: function (props) {
     outputFormat = props.outputFormat;
-    if (!outputFormat || outputFormat == '')
+    if (!outputFormat || outputFormat === '')
       outputFormat = 'GML3'
 
     var filters = props.propertyName.split(',').map((property) =>
@@ -159,31 +159,54 @@ var SearchModel = {
        </ogc:PropertyIsLike>`
     ).join('');
 
-    var str = `
-      <wfs:GetFeature
-        xmlns:wfs="http://www.opengis.net/wfs"
-        service="WFS"
-        version="1.1.0"
-        outputFormat="${outputFormat}"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
-        maxFeatures="100">
-        <wfs:Query typeName="feature:${props.featureType}" srsName="${props.srsName}">
-          <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
-            <ogc:Or>
+    var str = "";
+
+    if (props.propertyName.split(',').length > 1) {
+      str = `
+        <wfs:GetFeature
+          xmlns:wfs="http://www.opengis.net/wfs"
+          service="WFS"
+          version="1.1.0"
+          outputFormat="${outputFormat}"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
+          maxFeatures="100">
+          <wfs:Query typeName="feature:${props.featureType}" srsName="${props.srsName}">
+            <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
+              <ogc:Or>
+                ${filters}
+              </ogc:Or>
+            </ogc:Filter>
+          </wfs:Query>
+        </wfs:GetFeature>
+      `;
+    } else {
+      str = `
+        <wfs:GetFeature
+          xmlns:wfs="http://www.opengis.net/wfs"
+          service="WFS"
+          version="1.1.0"
+          outputFormat="${outputFormat}"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
+          maxFeatures="100">
+          <wfs:Query typeName="feature:${props.featureType}" srsName="${props.srsName}">
+            <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
               ${filters}
-            </ogc:Or>
-          </ogc:Filter>
-        </wfs:Query>
-      </wfs:GetFeature>
-    `;
+            </ogc:Filter>
+          </wfs:Query>
+        </wfs:GetFeature>
+      `;
+    }
+
+
 
     var read = (result) => {
       var format
       ,   features = []
       ,   outputFormat = props.outputFormat;
 
-      if (outputFormat == 'GML2')
+      if (outputFormat === 'GML2')
         format = new ol.format.GML2({});
       else
         format = new ol.format.WFS({});
@@ -193,17 +216,14 @@ var SearchModel = {
           result = result.responseText;
         }
       }
-
       try {
         features = format.readFeatures(result);
       } catch (e) {
         console.error("Parsningsfel. Koordinatsystem kanske saknas i definitionsfilen? Mer information: ", e);
       }
-
       if (features.length === 0) {
         features = [];
       }
-
       props.done(features);
     };
 

@@ -329,7 +329,8 @@ var InfoClickModel = {
       }
 
       if (feature) {
-        if (feature.get("feature").getGeometry().getType() === "Point") {
+        if (feature.get("feature").getGeometry() &&
+            feature.get("feature").getGeometry().getType() === "Point") {
           highlightLayer.clearHighlight();
           this.selectInteraction.getFeatures().push(feature.get("feature"));
         } else {

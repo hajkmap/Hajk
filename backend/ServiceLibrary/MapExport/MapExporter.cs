@@ -268,7 +268,7 @@ namespace Sweco.Services.MapExport
                 map.BackgroundLayer.Add(wmtsLayer);
 
                 wmtsLayer.MapNewTileAvaliable += (TileLayer sender, Envelope bbox, Bitmap bm, int sourceWidth, int sourceHeight, System.Drawing.Imaging.ImageAttributes imageAttributes) =>
-                {                    
+                {                          
                     if (layers.All(w => w.NumPendingDownloads <= 1))
                     {
                         callback.Invoke();

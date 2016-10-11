@@ -425,7 +425,6 @@ class Search extends React.Component {
       <tr key={i}>
         <td>{property.name}</td>
         <td>{property.localType}</td>
-        <td>{property.nillable == true ? "Nej" : "Ja"}</td>
       </tr>
     );
     return (
@@ -436,7 +435,6 @@ class Search extends React.Component {
             <tr>
               <th>Namn</th>
               <th>Typ</th>
-              <th>Obligatorisk</th>
             </tr>
           </thead>
           <tbody>

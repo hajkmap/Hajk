@@ -31,6 +31,7 @@
     "grunt-react": "^0.12.3",
     "grunt-text-replace": "^0.4.0",
     "load-grunt-tasks": "^3.4.0",
-    "matchdep": "^1.0.1"
+    "matchdep": "^1.0.1",
+    "x2js": "^3.0.1"
   }
 }

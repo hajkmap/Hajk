@@ -62,8 +62,7 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "77676120-1157-b861-706a-908ecd18c258",
-          "0"
+          "c3be4753-5ca1-3f85-eda4-d708dd23ccd0"
         ],
         "groups": [
           {
@@ -73,35 +72,18 @@
             "toggled": true,
             "layers": [
               {
-                "id": "2",
-                "drawOrder": 2
+                "id": "7b1a403c-16ce-a05b-dd94-f85d224a8082",
+                "drawOrder": 0
               }
             ],
-            "groups": []
-          },
-          {
-            "id": "c0b61bee-b6ce-70c9-e6da-ef5c3da6c341",
-            "parent": "-1",
-            "name": "Redigering",
-            "toggled": true,
-            "layers": [
-              {
-                "id": "d8eff0fd-fe48-c06a-8ad8-3ff3814a744a",
-                "drawOrder": 4
-              },
-              {
-                "id": "84a8aa5c-a062-fc32-24fb-30df211427b4",
-                "drawOrder": 7
-              }
-            ],
-            "groups": []
+            "groups": [ ]
           }
         ]
       }
     },
     {
       "type": "infoclick",
-      "options": {}
+      "options": { }
     },
     {
       "type": "search",
@@ -152,20 +134,20 @@
     },
     {
       "type": "edit",
-      "options": {}
+      "options": { }
     },
     {
       "type": "anchor",
-      "options": {}
+      "options": { }
     }
   ],
   "map": {
     "target": "map",
     "center": [
-      351805,
-      6358930
+      181541,
+      6424002
     ],
-    "projection": "EPSG:3006",
+    "projection": "EPSG:3007",
     "zoom": 5,
     "maxZoom": 9,
     "minZoom": 3,
@@ -189,7 +171,12 @@
       0.0,
       0.0
     ],
-    "extent": [],
+    "extent": [      
+      150202.07930000033,
+      6382100.4728999995,
+      209944.16160000023,
+      6471028.509099999
+    ],
     "logo": ""
   }
 }

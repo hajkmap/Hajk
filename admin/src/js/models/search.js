@@ -1,4 +1,6 @@
 
+var X2JS = require('x2js');
+
 var search = Backbone.Model.extend({
 
   defaults: {
@@ -73,13 +75,24 @@ var search = Backbone.Model.extend({
     $.ajax(url, {
       data: {
         request: 'describeFeatureType',
-        outputFormat: 'application/json',
         typename: layer
       },
       success: data => {
-        if (data.featureTypes && data.featureTypes[0]) {
-          callback(data.featureTypes[0].properties)
-        } else {
+        var parser = new X2JS()
+        ,   xmlstr = data.xml ? data.xml : (new XMLSerializer()).serializeToString(data)
+        ,   apa = parser.xml2js(xmlstr);
+        try {
+          var props = apa.schema.complexType.complexContent.extension.sequence.element.map(a => {
+            return {
+              name: a._name,
+              localType: a._type ? a._type.replace(a.__prefix + ':', '') : ''
+            }
+          });
+          if (props)
+            callback(props);
+          else
+            callback(false);
+        } catch (e) {
           callback(false);
         }
       }

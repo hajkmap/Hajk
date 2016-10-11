@@ -140,10 +140,9 @@ var MapModel = {
         units: 'm',
         resolutions: this.get('resolutions'),
         center: this.get("center"),
-        projection: this.get("projection")
+        projection: ol.proj.get(this.get('projection'))
       })
     });
-
     this.set("ol", map);
   },
   /**
