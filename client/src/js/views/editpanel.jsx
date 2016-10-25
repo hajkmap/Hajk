@@ -28,6 +28,7 @@ var AttributeEditor = React.createClass({
 
       props = feature.getProperties();
       source.editableFields.map(field => {
+        field.initialRender = true;
         if (field.textType === "flerval") {
           valueMap[field.name] = field.values.map(value => {
             return {
@@ -79,6 +80,29 @@ var AttributeEditor = React.createClass({
         formValues: this.state.formValues
       });
     }
+  },
+
+  checkUrl: function (name, value) {
+
+    var regex = /^(https?|ftp):\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i
+    var valid = regex.test(value);
+
+    if (valid || value === '') {
+      this.state.formValues[name] = value;
+    } else {
+      this.state.formValues[name] = '';
+      this.props.panel.setState({
+        alert: true,
+        loading: false,
+        alertMessage: `Fältet ${name} är av typen URL, vilken måste följa formatet http://www.google.se.`,
+        confirm: false
+      });
+    }
+
+    this.updateFeature();
+    this.setState({
+      formValues: this.state.formValues
+    });
   },
 
   checkText: function (name, value) {
@@ -142,12 +166,18 @@ var AttributeEditor = React.createClass({
 
     var value = this.state.formValues[field.name];
 
+    if (value === "" && field.initialRender) {
+      value = field.defaultValue;
+      this.state.formValues[field.name] = value;
+    }
+
     switch (field.textType) {
       case "heltal":
         return (
           <input className="form-control" type="text" value={value} onChange={(e) => {
               this.setChanged();
               this.checkInteger(field.name, e.target.value);
+              field.initialRender = false;
             }}
           />
         );
@@ -155,7 +185,8 @@ var AttributeEditor = React.createClass({
         return (
           <input className="form-control" type="text" value={value} onChange={(e) => {
               this.setChanged();
-              this.checkNumber(field.name, e.target.value)
+              this.checkNumber(field.name, e.target.value);
+              field.initialRender = false;
             }}
           />
         );
@@ -167,18 +198,46 @@ var AttributeEditor = React.createClass({
           <Datetime closeOnSelect={true} disableOnClickOutside={true} dateFormat="Y-MM-DD" timeFormat="HH:mm:ss" value={value} onChange={(date) => {
               this.setChanged();
               this.checkDate(field.name, date);
+              field.initialRender = false;
             }}
           />
         );
+      case "url":
       case "fritext":
         return (
-          <input className="form-control" type="text" value={value} onChange={(e) => {
+          <input
+            className="form-control"
+            type="text"
+            value={value}
+            onChange={(e) => {
               this.setChanged();
-              this.checkText(field.name, e.target.value)
+              this.checkText(field.name, e.target.value);
+              field.initialRender = false;
+            }}
+            onBlur={(e) => {
+              this.setChanged();
+              if (field.textType === "url") {
+                this.checkUrl(field.name, e.target.value);
+              }
+              field.initialRender = false;
             }}
           />
         );
       case "flerval":
+        let defaultValues = [];
+        if (typeof field.defaultValue === "string") {
+          defaultValues = field.defaultValue.split(',');
+        }
+        if (field.initialRender) {
+          defaultValues.forEach(defaultValue => {
+            value.forEach(val => {
+              if (defaultValue === val.name) {
+                val.checked = true;
+              }
+            });
+          });
+        }
+
         let checkboxes = field.values.map(
           (val, i) => {
 
@@ -187,43 +246,64 @@ var AttributeEditor = React.createClass({
 
             return (
               <div key={i}>
-                <input type="checkbox" htmlFor={id} checked={item.checked} onChange={(e) => {
+                <input type="checkbox" id={id} checked={item.checked} onChange={(e) => {
                   this.setChanged();
-                  this.checkMultiple(field.name, e.target.checked, val, i)
+                  this.checkMultiple(field.name, e.target.checked, val, i);
+                  field.initialRender = false;
                 }}/>
-                <label id={id}>{val}</label>
+                <label htmlFor={id}>{val}</label>
               </div>
             )
           }
         );
         return <div>{checkboxes}</div>;
       case "lista":
-        let options = field.values.map((val, i) => <option key={i} value={val}>{val}</option>);
+        let options = null;
+        if (Array.isArray(field.values))
+          options = field.values.map((val, i) => <option key={i} value={val}>{val}</option>);
+
         return (
           <select className="form-control" value={value} onChange={(e) => {
               this.setChanged();
-              this.checkSelect(field.name, e.target.value)
+              this.checkSelect(field.name, e.target.value);
+              field.initialRender = false;
             }}
           >
-          <option value="">-Välj värde-</option>
-          {options}
+            <option value="">-Välj värde-</option>
+            {options}
           </select>
         );
       case null:
+        return (<span>{value}</span>);
+      default:
         return (<span>{value}</span>);
     }
   },
 
   render: function () {
+
     if (!this.props.feature) return null;
+
     var markup = this.props.source.editableFields.map((field, i) => {
+
+      var value = this.getValueMarkup(field)
+      ,   className = ''
+      ;
+
+      if (field.hidden) {
+        className = "hidden"
+      }
+
+      this.updateFeature();
+
       return (
-        <div key={i} className="field">
+        <div key={i} ref={field.name} className="field" className={className}>
           <div>{field.name}</div>
-          <div>{this.getValueMarkup(field)}</div>
+          <div>{value}</div>
         </div>
       )
     });
+
     return (
       <div>{markup}</div>
     );
@@ -355,6 +435,7 @@ var Toolbar = React.createClass({
       this.props.model.filty = false;
       this.props.panel.setLayer(this.props.model.get('editSource'));
     });
+
   },
 
   onCancelClicked: function() {
@@ -654,11 +735,11 @@ var EditPanelView = {
             <div className="loading-bar">
               {loader}
             </div>
-            <Toolbar enabled={this.state.enabled} loading={this.state.loading} model={this.props.model} panel={this} />
+            <Toolbar ref="toolbar" enabled={this.state.enabled} loading={this.state.loading} model={this.props.model} panel={this} />
             <ul className="edit-layers">
               {options()}
             </ul>
-            <AttributeEditor feature={this.state.editFeature} source={this.state.editSource} model={this.props.model} activeTool={this.state.activeTool}/>
+            <AttributeEditor ref="attributeEditor" feature={this.state.editFeature} source={this.state.editSource} model={this.props.model} activeTool={this.state.activeTool} panel={this}/>
           </div>
         </Panel>
         {this.renderAlert()}

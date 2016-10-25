@@ -162,9 +162,7 @@ var EditModel = {
           .getFeatures()
           .filter(f => f.modification !== undefined)
           .forEach(f => f.modification = undefined);
-
         done(data);
-
       }).error((data) => {
         var data = this.parseWFSTresponse(data);
         done(data);
@@ -404,6 +402,7 @@ var EditModel = {
     if (event.selected.length === 0) {
       this.editAttributes(null, null);
     }
+
     event.selected.forEach(feature => {
       if (!feature.getId() && feature.getProperties().user) {
         this.get('select').getFeatures().remove(feature);

@@ -17,5 +17,9 @@ namespace Sweco.Services.DataContracts
         public string textType { get; set; }
 
         public string[] values { get; set; }
+
+        public bool hidden { get; set; }
+
+        public string defaultValue { get; set; }
     }
 }

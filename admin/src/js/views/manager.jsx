@@ -272,7 +272,7 @@ class Manager extends React.Component {
       )
     }
     var rows = this.state.layerProperties.map((property, i) =>
-      <tr key={i}>
+      <tr key={"layerProperty_" + i}>
         <td>{property.name}</td>
         <td>{property.localType}</td>
         <td>{property.nillable == true ? "Nej" : "Ja"}</td>
@@ -326,7 +326,7 @@ class Manager extends React.Component {
     }
 
     return this.state.addedLayers.map((layer, i) =>
-      <li className="layer" key={i}>
+      <li className="layer" key={"addedLayer_" + i}>
         <span>{layer}</span>&nbsp;
         <i className="fa fa-times" onClick={uncheck.bind(this, layer)}></i>
       </li>
@@ -348,7 +348,7 @@ class Manager extends React.Component {
         var title = /^\d+$/.test(layer.Name) ? <label>&nbsp;{layer.Title}</label> : null;
 
         return (
-          <li key={i}>
+          <li key={"fromCapability_" + i}>
             <input
               ref={layer.Name}
               id={"layer" + i}
@@ -405,7 +405,7 @@ class Manager extends React.Component {
   renderOwnerOptions() {
     if (this.props.config && this.props.config.owner_options) {
       return this.props.config.owner_options.map((option, i) =>
-        <option value={option.value} key={i}>{option.title}</option>
+        <option value={option.value} key={"owner_" + i}>{option.title}</option>
       );
     } else {
       return null;
@@ -433,7 +433,7 @@ class Manager extends React.Component {
   renderLayersFromConfig(layers) {
     layers = this.state.filter ? this.getLayersWithFilter() : this.props.model.get('layers');
     return layers.map((layer, i) =>
-      <li onClick={(e) => this.loadLayer(e, layer)} key={Math.random()}>
+      <li onClick={(e) => this.loadLayer(e, layer)} key={"layer_" + i}>
         <span>{layer.caption} {layer.type === 'WMTS' ? '(WMTS)' : ''}</span>
         <i title="Radera lager" onClick={(e) => this.removeLayer(e, layer)} className="fa fa-trash"></i>
       </li>

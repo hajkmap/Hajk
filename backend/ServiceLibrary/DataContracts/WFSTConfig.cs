@@ -31,6 +31,6 @@ namespace Sweco.Services.DataContracts
 
         public bool editPolygon { get; set; }
 
-        public bool editLine { get; set; }
+        public bool editLine { get; set; }        
     }
 }

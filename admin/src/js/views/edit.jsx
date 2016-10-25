@@ -244,12 +244,17 @@ class Search extends React.Component {
     var filter, mapper;
 
     mapper = item => {
+
+      console.log("Mapper", item);
+
       return {
         index: item.index,
         name: item.name,
         dataType: item.localType,
         textType: item.textType || null,
-        values: item.listValues || null
+        values: item.listValues || null,
+        hidden: item.hidden,
+        defaultValue: item.defaultValue
       }
     };
 
@@ -324,6 +329,8 @@ class Search extends React.Component {
           properties[editableField.index].listValues = editableField.values;
           properties[editableField.index].textType = editableField.textType;
           properties[editableField.index].checked = true;
+          properties[editableField.index].hidden = editableField.hidden;
+          properties[editableField.index].defaultValue = editableField.defaultValue;
         });
       }
 
@@ -347,7 +354,7 @@ class Search extends React.Component {
    *
    */
   addListValue(index, e) {
-    if (this.state.layerProperties[index]) {
+    if (this.state.layerProperties[index] && e.target.value !== '') {
       let props = this.state.layerProperties[index];
       if (!Array.isArray(props.listValues)) {
         props.listValues = [];
@@ -505,6 +512,7 @@ class Search extends React.Component {
               <option value="datum">Datum</option>
               <option value="lista">Lista</option>
               <option value="flerval">Flerval</option>
+              <option value="url">Url</option>
             </select>
           )
         }
@@ -532,7 +540,25 @@ class Search extends React.Component {
         return null;
       };
 
+      var defaultValueEditor = (type, value) => {
+        return (
+          <div>
+            <input defaultValue={value} type="text" onChange={(e) => {
+              property.defaultValue = e.target.value;
+            }}></input>
+          </div>
+        )
+      };
+
+      if (!property.hasOwnProperty('hidden')) {
+        property.hidden = false;
+      }
+
       property.index = i;
+
+      if (property.localType === "Geometry") {
+        return null;
+      }
 
       return (
         <tr key={parseInt(Math.random() * 1E8)}>
@@ -541,10 +567,16 @@ class Search extends React.Component {
               property.checked = e.target.checked;
             }} />
           </td>
+          <td>
+            <input type="checkbox" defaultChecked={property.hidden} onChange={(e) => {
+              property.hidden = e.target.checked;
+            }} />
+          </td>
           <td>{property.name}</td>
           <td>{stringDataTypes(property.localType)}</td>
           <td>{property.localType}</td>
           <td>{listEditor(property.localType)}</td>
+          <td>{defaultValueEditor(property.localType, property.defaultValue)}</td>
         </tr>
       );
     });
@@ -554,10 +586,12 @@ class Search extends React.Component {
         <thead>
           <tr>
             <th>Redigerbar</th>
+            <th>Dold</th>
             <th>Namn</th>
             <th>Typ</th>
             <th>Datatyp</th>
             <th>Listvärden</th>
+            <th>Standardvärde</th>
           </tr>
         </thead>
         <tbody>

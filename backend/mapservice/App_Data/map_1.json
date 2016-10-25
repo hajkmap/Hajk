@@ -62,7 +62,7 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "c3be4753-5ca1-3f85-eda4-d708dd23ccd0"
+          "77676120-1157-b861-706a-908ecd18c258"
         ],
         "groups": [
           {
@@ -72,18 +72,22 @@
             "toggled": true,
             "layers": [
               {
-                "id": "7b1a403c-16ce-a05b-dd94-f85d224a8082",
+                "id": "84a8aa5c-a062-fc32-24fb-30df211427b4",
+                "drawOrder": 0
+              },
+              {
+                "id": "d8eff0fd-fe48-c06a-8ad8-3ff3814a744a",
                 "drawOrder": 0
               }
             ],
-            "groups": [ ]
+            "groups": []
           }
         ]
       }
     },
     {
       "type": "infoclick",
-      "options": { }
+      "options": {}
     },
     {
       "type": "search",
@@ -99,18 +103,18 @@
       "options": {
         "transformations": [
           {
+            "code": "EPSG:3006",
+            "default": true,
+            "hint": "(Standard)",
+            "title": "Sweref 99 TM"
+          },
+          {
             "code": "EPSG:3007",
             "title": "Sweref 99 12 00",
-            "default": true,
-            "hint": "(Standard)"
           },
           {
             "code": "EPSG:4326",
             "title": "WGS 84"
-          },
-          {
-            "code": "EPSG:3006",
-            "title": "Sweref 99 TM"
           },
           {
             "code": "EPSG:3021",
@@ -134,21 +138,21 @@
     },
     {
       "type": "edit",
-      "options": { }
+      "options": {}
     },
     {
       "type": "anchor",
-      "options": { }
+      "options": {}
     }
   ],
   "map": {
     "target": "map",
     "center": [
-      181541,
-      6424002
+      415024,
+      6583518
     ],
-    "projection": "EPSG:3007",
-    "zoom": 5,
+    "projection": "EPSG:3006",
+    "zoom": 9,
     "maxZoom": 9,
     "minZoom": 3,
     "resolutions": [
@@ -171,11 +175,11 @@
       0.0,
       0.0
     ],
-    "extent": [      
+    "extent": [
       150202.07930000033,
       6382100.4728999995,
       209944.16160000023,
-      6471028.509099999
+      6471028.5090999994
     ],
     "logo": ""
   }
