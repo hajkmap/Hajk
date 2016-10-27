@@ -33,7 +33,8 @@ var ShellView = {
     return {
       mapModel: undefined,
       toolsCollection: undefined,
-      navigationModel: undefined
+      navigationModel: undefined,
+      scale: 1
     };
   },
 
@@ -54,6 +55,11 @@ var ShellView = {
     });
   },
 
+  formatScale: function(number) {
+    var s = Math.round(number).toString();
+    return s.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  },
+
   /**
    * Triggered when the component is successfully mounted into the DOM.
    * @instance
@@ -65,8 +71,19 @@ var ShellView = {
         <MapView key={this.model.cid} id={this.model.cid} />,
         <Toolbar key="toolbar" model={this.model.get('toolCollection')} navigationModel={this.model.get('navigation')} />,
         <NavigationPanel key="navigation" model={this.model.get('navigation')} />
-      ]
+      ],
+      scale: this.formatScale(this.model.getMap().getScale())
     });
+
+    this.model.getMap().getMap().on('change:view', () => {
+      var view = this.model.getMap().getMap().getView();
+      view.on('change:resolution', () => {
+        this.setState({
+          scale: this.formatScale(this.model.getMap().getScale())
+        })
+      });
+    });
+
   },
 
   /**
@@ -76,6 +93,7 @@ var ShellView = {
    */
   render: function () {
     var views = this.state.views
+    ,   scale
     ,   logo;
 
     if (views.length === 3) {
@@ -86,11 +104,16 @@ var ShellView = {
           </div>
         );
       }
+
+      scale = (
+        <div className="map-scale">Skala 1:{this.state.scale}</div>
+      )
     }
 
     return (
       <div className="shell">
         {logo}
+        {scale}
         {views}
       </div>
     );

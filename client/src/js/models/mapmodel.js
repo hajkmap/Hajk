@@ -162,6 +162,21 @@ var MapModel = {
     return this.getMap().getView().getZoom();
   },
   /**
+   * Get current map sclae
+   * @instance
+   * @return {number} map scale
+   */
+  getScale: function () {
+
+    var dpi = 25.4 / 0.28
+    ,   mpu = ol.proj.METERS_PER_UNIT["m"]
+    ,   inchesPerMeter = 39.37
+    ,   res = this.getMap().getView().getResolution()
+    ;
+
+    return res * mpu * inchesPerMeter * dpi;
+  },
+  /**
    * Get EPSG code.
    * @instance
    * @return {number} EPSG-code
