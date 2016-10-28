@@ -204,6 +204,11 @@ var CoordinatesModel = {
     _.each(transformations, (transformation) => {
       transformedCoordinates[transformation.title] = this.transform(coordinates, transformation.code);
       transformedCoordinates[transformation.title] = this.extractXYObject(transformedCoordinates[transformation.title]);
+
+      transformedCoordinates[transformation.title].xtitle = transformation.xtitle || 'X';
+      transformedCoordinates[transformation.title].ytitle = transformation.ytitle || 'Y';
+      transformedCoordinates[transformation.title].inverseAxis = transformation.inverseAxis === undefined ? false : transformation.inverseAxis;
+
       if (transformation.hasOwnProperty('default')) {
         transformedCoordinates[transformation.title].default = transformation.default;
         transformedCoordinates[transformation.title].hint = transformation.hint || "";

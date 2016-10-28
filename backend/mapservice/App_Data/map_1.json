@@ -92,10 +92,7 @@
     {
       "type": "search",
       "options": {
-        "settings": {
-          "Alla lager": "*",
-          "Hållplatser": "9"
-        }
+        "maxZoom": 14
       }
     },
     {
@@ -106,19 +103,31 @@
             "code": "EPSG:3006",
             "default": true,
             "hint": "(Standard)",
-            "title": "Sweref 99 TM"
+            "title": "Sweref 99 TM",
+            "xtitle": "N",
+            "ytitle": "E",
+            "inverseAxis": true
           },
           {
             "code": "EPSG:3007",
-            "title": "Sweref 99 12 00"
-          },
-          {
-            "code": "EPSG:4326",
-            "title": "WGS 84"
+            "title": "Sweref 99 12 00",
+            "xtitle": "N",
+            "ytitle": "E",
+            "inverseAxis": true
           },
           {
             "code": "EPSG:3021",
-            "title": "RT 90 2.5 gon V"
+            "title": "RT 90 2.5 gon V",
+            "xtitle": "Y",
+            "ytitle": "X",
+            "inverseAxis": false
+          },
+          {
+            "code": "EPSG:4326",
+            "title": "WGS 84",
+            "inverseAxis": false,
+            "xtitle": "Lng",
+            "ytitle": "Lat"
           }
         ]
       }

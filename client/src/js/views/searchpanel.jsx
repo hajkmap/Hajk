@@ -42,7 +42,6 @@ SearchResultGroup = React.createClass({
     });
 
     if (isMobile()) {
-      console.log(this.props);
       this.props.parentView.props.navigationPanel.minimize();
     }
   },

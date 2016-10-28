@@ -10,10 +10,10 @@ var CoordinatesList = React.createClass({
 
   convertDDToDMS: function(D, lng){
     return {
-      dir : D<0?lng?'W':'S':lng?'E':'N',
-      deg : Math.floor((D<0?D=-D:D)),
-      min : Math.floor((D*60)%60),
-    sec : ((D*3600)%60).toFixed(5)
+      dir : D < 0 ? lng? 'W' : 'S' :lng ? 'E' : 'N',
+      deg : Math.floor((D < 0 ? D =- D : D)),
+      min : Math.floor((D * 60) % 60),
+      sec : ((D * 3600) % 60).toFixed(5)
     };
   },
 
@@ -23,33 +23,62 @@ var CoordinatesList = React.createClass({
     )
   },
 
+  getLon: function (xyObject) {
+    return (
+      <span>
+        <strong>{ xyObject.xtitle }: </strong> { this.formatDMS(this.convertDDToDMS(xyObject.x, true)) }
+      </span>
+    )
+  },
+
+  getLat: function (xyObject) {
+    return (
+      <span>
+        <strong>{ xyObject.ytitle }: </strong> { this.formatDMS(this.convertDDToDMS(xyObject.y, true)) }
+      </span>
+    )
+  },
+
+  getX: function (xyObject) {
+    return (
+      <span>
+        <strong>{ xyObject.xtitle }: </strong> { xyObject.x.toFixed(2) } m
+      </span>
+    )
+  },
+
+  getY: function (xyObject) {
+    return (
+      <span>
+        <strong>{ xyObject.ytitle }: </strong> { xyObject.y.toFixed(2) } m
+      </span>
+    )
+  },
+
   processSphericalXY: function(xyObject) {
-    var that = this;
-    return Object.keys(xyObject).map( function(key) {
-      return (
+    return (
+      <div>
         <dd>
-          <strong>{ key.toUpperCase() }: </strong>
-          {
-            key === 'x' ?
-            that.formatDMS(that.convertDDToDMS(xyObject[key], true)) :
-            that.formatDMS(that.convertDDToDMS(xyObject[key], false))
-          }
+          {xyObject.inverseAxis ? this.getLat(xyObject) : this.getLon(xyObject)}
         </dd>
-      )
-    })
+        <dd>
+          {xyObject.inverseAxis ? this.getLon(xyObject) : this.getLat(xyObject)}
+        </dd>
+      </div>
+    )
   },
 
   processPlanarXY: function(xyObject) {
-    return Object.keys(xyObject).map(function (key) {
-      if (key == 'default' || key === 'hint')
-        return
-      return (
+    return (
+      <div>
         <dd>
-          <strong>{ key.toUpperCase() }: </strong>
-          { xyObject[key].toFixed(2) } m
+          {xyObject.inverseAxis ? this.getX(xyObject) : this.getY(xyObject)}
         </dd>
-      )
-    })
+        <dd>
+          {xyObject.inverseAxis ? this.getY(xyObject) : this.getX(xyObject)}
+        </dd>
+      </div>
+    )
   },
 
   processTitle: function(title, object) {
@@ -80,14 +109,9 @@ var CoordinatesList = React.createClass({
 
   render: function() {
     var coordinates = this.props.coordinates;
-    var that = this;
     return (
       <dl>
-        { Object.keys(coordinates).map( function(key) {
-          return (
-            that.processRow(coordinates[key], key)
-          );
-        })}
+        { Object.keys(coordinates).map((key) => this.processRow(coordinates[key], key)) }
       </dl>
     )
   }

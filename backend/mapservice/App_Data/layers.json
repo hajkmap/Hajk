@@ -113,33 +113,17 @@
     {
       "id": "ef94049e-b1ed-87da-3e69-532391c34ea2",
       "caption": "Sök fastighet",
-      "url": "http://ksdgis.se/arcgis/services/jaktadm/MapServer/WFSServer",
+      "url": "http://ksdgis.se/geoserver/demo/wfs",
       "layers": [
-        "jaktadm:fastighetytor"
+        "demo:fastighetsyta"
       ],
       "searchFields": [
         "fastighet"
       ],
       "displayFields": [
-        "FASTIGHET",
-        "FNR_FDS"
+        "fastighet"
       ],
       "outputFormat": "GML3"
-    },
-    {
-      "id": "28d67f52-d4d4-4a4a-9e02-25be111df950",
-      "caption": "Lights",
-      "url": "http://gisak.alingsas.se/arcgis/services/Lights/Lights_2016/MapServer/WFSServer",
-      "layers": [
-        "Lights_Lights_2016:Platser_2016"
-      ],
-      "searchFields": [
-        "Namn"
-      ],
-      "displayFields": [
-        "Namn"
-      ],
-      "outputFormat": "GML2"
     }
   ],
   "wfstlayers": [

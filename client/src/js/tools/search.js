@@ -78,10 +78,10 @@ function arraySort(options) {
  * @property {string} title - Default: Sök i kartan
  * @property {string} visible - Default: false
  * @property {string} value
- * @property {string} settings - Default: ["Allt"]
  * @property {string} filter - Default: "*"
  * @property {string} filterVisible - Default: false
  * @property {string} markerImg - Default: "assets/icons/marker.png"
+ * @property {number} maxZoom - Default: 14
  */
 var SearchModelProperties = {
   type: 'search',
@@ -91,10 +91,10 @@ var SearchModelProperties = {
   title: 'Sök i kartan',
   visible: false,
   value: "",
-  settings: ["Allt"],
   filter: "*",
   filterVisible: false,
-  markerImg: "assets/icons/marker.png"
+  markerImg: "assets/icons/marker.png",
+  maxZoom: 14
 };
 
 /**
@@ -285,7 +285,7 @@ var SearchModel = {
     ,   extent = spec.hit.getGeometry().getExtent()
     ,   size   = map.getSize();
 
-    map.getView().fit(extent, size, { maxZoom: 16 });
+    map.getView().fit(extent, size, { maxZoom: this.get('maxZoom') });
 
     this.featureLayer.getSource().clear();
     this.featureLayer.getSource().addFeature(spec.hit);
