@@ -55,9 +55,14 @@ var ShellView = {
     });
   },
 
-  formatScale: function(number) {
-    var s = Math.round(number).toString();
-    return s.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  /**
+   * Format scale
+   * @instance
+   * @param {number} scale
+   * @return {string} formatted
+   */
+  formatScale: function(scale) {
+    return Math.round(scale).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   },
 
   /**
@@ -106,7 +111,10 @@ var ShellView = {
       }
 
       scale = (
-        <div className="map-scale">Skala 1:{this.state.scale}</div>
+        <div id="map-scale" className="map-scale">
+          <div id="map-scale-bar"></div>
+          <div className="map-scale-text">1:{this.state.scale}</div>
+        </div>
       )
     }
 

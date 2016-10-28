@@ -11,7 +11,7 @@ var BackgroundSwitcherView = {
   getInitialState: function () {
     return {
       displayMode: 'hidden',
-      displayModeClass: 'fa fa-plus-circle'
+      displayModeClass: 'fa fa-angle-right arrow'
     }
   },
 
@@ -43,7 +43,7 @@ var BackgroundSwitcherView = {
    */
   backgroundSwitcherModeChanged: function () {
     var mode = this.props.model.get('backgroundSwitcherMode')
-    ,   cls  = (this.props.model.get('backgroundSwitcherMode') === 'hidden') ? 'fa fa-plus-circle' : 'fa fa-minus-circle'
+    ,   cls  = (this.props.model.get('backgroundSwitcherMode') === 'hidden') ? 'fa fa-angle-right arrow' : 'fa fa-angle-down arrow'
     ;
     this.setState({
       displayMode: mode,

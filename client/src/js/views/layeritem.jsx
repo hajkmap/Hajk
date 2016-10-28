@@ -144,11 +144,11 @@ var LayerItemView = {
 
     return (
       <div className="panel panel-default layer-item">
-        <div className="panel-heading" onClick={toggleLegend}>
-          <span onClick={toggleVisible} className="clickable">
-            <i className={visible ? 'fa fa-check-square': 'fa fa-square'}></i>&nbsp;
+        <div className="panel-heading unselectable" onClick={toggleLegend}>
+          <span onClick={toggleVisible} className="clickable" style={{ position: 'relative', top: '3px' }}>
+            <i className={visible ? 'fa fa-check-square-o': 'fa fa-square-o'} style={{ width: '15px'}}></i>&nbsp;
             {this.renderStatus()}
-            <span className="layer-item-header-text">{caption}</span>&nbsp;
+            <label className="layer-item-header-text">{caption}</label>&nbsp;
           </span>
           {components.legend.legendButton}
         </div>

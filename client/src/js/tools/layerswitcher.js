@@ -19,6 +19,7 @@ var LayerSwitcherModelProperties = {
   icon: 'fa fa-bars icon',
   title: 'Kartlager',
   visible: false,
+  visibleAtStart: true,
   layerCollection: undefined,
   backgroundSwitcherMode: 'hidden',
 };
@@ -38,11 +39,13 @@ var LayerSwitcherModel = {
 
   initialize: function (options) {
     ToolModel.prototype.initialize.call(this);
-    this.setToggled(options.groups);
   },
 
   configure: function (shell) {
     this.set('layerCollection', shell.getLayerCollection());
+    if (this.get('visibleAtStart')) {
+      this.set('visible', true);
+    }
   },
 
   /**

@@ -134,7 +134,7 @@ var MapModel = {
       interactions: ol.interaction.defaults().extend([new Drag()]),
       target: this.get("target"),
       layers: [],
-      controls: [new ol.control.Zoom(),  new ol.control.ScaleLine()],
+      controls: [new ol.control.Zoom()],
       view: new ol.View({
         zoom: this.get("zoom"),
         units: 'm',
@@ -144,6 +144,17 @@ var MapModel = {
       })
     });
     this.set("ol", map);
+
+    setTimeout(() => {
+
+      var scaleLine = new ol.control.ScaleLine({
+        target: 'map-scale-bar'
+      })
+
+      map.addControl(scaleLine);
+
+    }, 100);
+
   },
   /**
    * Get openlayers map instance.

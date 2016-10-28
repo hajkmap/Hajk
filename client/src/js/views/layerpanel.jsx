@@ -246,15 +246,15 @@ var LayerPanelView = {
       }
 
       buttonClassName = this.state[id] === "hidden" ?
-        "fa fa-plus-square-o clickable" :
-        "fa fa-minus-square-o clickable";
+        "fa fa-angle-right clickable arrow" :
+        "fa fa-angle-down clickable arrow";
 
       return (
         <div className="layer-group" key={i}>
           <div>
-            <span className={buttonClassName} onClick={this.toggleGroupVisibility.bind(this, group)}></span>&nbsp;
+            <span className={buttonClassName} onClick={this.toggleGroupVisibility.bind(this, group)}></span>
             {/*<input type="checkbox" ref={id} onChange={this.toggleGroup.bind(this, group)} id={id} />*/}
-            <label htmlFor={id}>{group.name}</label>
+            <label style={{cursor: 'pointer', 'marginLeft': '4px'}} htmlFor={id} onClick={this.toggleGroupVisibility.bind(this, group)}>{group.name}</label>
           </div>
           <div className={this.state[id]}>
             {layers}
@@ -334,7 +334,7 @@ var LayerPanelView = {
     });
 
     return (
-      <Panel title="Teckenförklaring" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
+      <Panel title="Lagerhanterare" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
         <div className="layer-panel">
           <BackgroundSwitcher layers={this.props.model.getBaseLayers()} model={this.props.model}></BackgroundSwitcher>
           {groups}
