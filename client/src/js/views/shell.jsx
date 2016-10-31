@@ -1,6 +1,6 @@
 // Copyright (C) 2016 Göteborgs Stad
 //
-// Detta program är fri mjukvara: den är tillåtet att redistribuera och modifeara
+// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
 // under villkoren för licensen CC-BY-NC-ND 4.0.
 //
 // This program is free software: you can redistribute it and/or modify
@@ -10,8 +10,8 @@
 //
 // Det är fritt att dela och anpassa programvaran för valfritt syfte
 // med förbehåll att följande villkor följs:
-// * Cypyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-komersiellt syfte.
+// * Copyright till upphovsmannen inte modifieras.
+// * Programvaran används i icke-kommersiellt syfte.
 // * Licenstypen inte modifieras.
 //
 // Den här programvaran är öppen i syfte att den skall vara till nytta för andra
@@ -19,7 +19,6 @@
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
 // https://github.com/Johkar/Hajk2
-
 
 var MapView = require('views/map');
 var MapModel = require('models/map');

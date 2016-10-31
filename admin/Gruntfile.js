@@ -177,7 +177,7 @@ module.exports = function (grunt) {
           src: ['src/**/*.js', 'src/**/*.jsx'],
           overwrite: true,
           replacements: [{
-            from: '<%= licence_text %>',
+            from: '<%= licence_text %>\n',
             to: ''
           }]
         },
