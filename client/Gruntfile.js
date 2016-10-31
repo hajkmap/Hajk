@@ -1,17 +1,23 @@
-
 var matchdep = require('matchdep');
 
 module.exports = function (grunt) {
 
     require("load-grunt-tasks")(grunt);
+
     matchdep.filterDev('grunt-*', './package.json').forEach(grunt.loadNpmTasks);
 
     var jsconfig = require('./jsconfig.json');
+
     grunt.initConfig({
+
+      licence_text: grunt.file.read('licence_header.txt'),
+
       pkg: grunt.file.readJSON('package.json'),
+
       cssFiles: [
         'compiled/<%= pkg.name %>.css'
       ],
+
       less: {
         development: {
           files: {
@@ -19,6 +25,7 @@ module.exports = function (grunt) {
           }
         }
       },
+
       copy: {
         debug: {
           files: [
@@ -49,46 +56,47 @@ module.exports = function (grunt) {
         },
         release: {
           files: [
-              {
-                cwd: "src/static/fonts",
-                src: "**/*",
-                dest: "release/fonts", expand: true
-              },
-              {
-                cwd: "node_modules/font-awesome/fonts",
-                src: "*",
-                dest: "release/fonts",
-                expand: true
-              },
-              {
-                cwd: "src/static/assets",
-                src: "**/*",
-                dest: "release/assets",
-                expand: true
-              },
-              {
-                src: "src/static/index.html",
-                dest: "release/index.html"
-              },
-              {
-                src: "src/static/es6-polyfill.js",
-                dest: "release/js/es6-polyfill.js"
-              }
+            {
+              cwd: "src/static/fonts",
+              src: "**/*",
+              dest: "release/fonts", expand: true
+            },
+            {
+              cwd: "node_modules/font-awesome/fonts",
+              src: "*",
+              dest: "release/fonts",
+              expand: true
+            },
+            {
+              cwd: "src/static/assets",
+              src: "**/*",
+              dest: "release/assets",
+              expand: true
+            },
+            {
+              src: "src/static/index.html",
+              dest: "release/index.html"
+            },
+            {
+              src: "src/static/es6-polyfill.js",
+              dest: "release/js/es6-polyfill.js"
+            }
           ]
         },
         admin: {
           files: [
-              {
-                src: "release/js/<%= pkg.name %>-<%= pkg.version %>.min.js",
-                dest: "../admin/dist/js/<%= pkg.name %>-<%= pkg.version %>.min.js"
-              },
-              {
-                src: "release/assets/<%= pkg.name %>-<%= pkg.version %>.min.css",
-                dest: "../admin/dist/assets/<%= pkg.name %>-<%= pkg.version %>.min.css"
-              }
+            {
+              src: "release/js/<%= pkg.name %>-<%= pkg.version %>.min.js",
+              dest: "../admin/dist/js/<%= pkg.name %>-<%= pkg.version %>.min.js"
+            },
+            {
+              src: "release/assets/<%= pkg.name %>-<%= pkg.version %>.min.css",
+              dest: "../admin/dist/assets/<%= pkg.name %>-<%= pkg.version %>.min.css"
+            }
           ]
         }
       },
+
       concat: {
         css: {
           src: ['<%= cssFiles %>'],
@@ -102,6 +110,7 @@ module.exports = function (grunt) {
           dest: 'release/js/<%= pkg.name %>-<%= pkg.version %>.min.js'
         }
       },
+
       autoprefixer: {
          options: {
             browsers: [
@@ -122,9 +131,7 @@ module.exports = function (grunt) {
             src: 'compiled/<%= pkg.name %>.css'
          }
       },
-      /*
-      Rendera JSX till JS
-      */
+
       react: jsconfig.react,
 
       babel: {
@@ -140,9 +147,7 @@ module.exports = function (grunt) {
           }
         }
       },
-      /*
-      Definera moduler som skall vara med i applikationen.
-      */
+
       browserify: {
         app: {
           options: {
@@ -191,6 +196,14 @@ module.exports = function (grunt) {
       },
 
       replace: {
+        licence: {
+          src: ['src/**/*.js', 'src/**/*.jsx'],
+          overwrite: true,
+          replacements: [{
+            from: '<%= licence_text %>',
+            to: ''
+          }]
+        },
         debughtml: {
           src: ['dist/index.html'],
           dest: 'dist/index.html',
@@ -202,7 +215,6 @@ module.exports = function (grunt) {
             to: '<link rel="stylesheet" href="assets/<%= pkg.name %>.css" charset="utf-8">'
           }]
         },
-
         releasehtml: {
           src: ['release/index.html'],
           dest: 'release/index.html',
@@ -228,24 +240,21 @@ module.exports = function (grunt) {
         }
       },
 
-      /*
-      Utvecklingsserver
-      */
       connect: {
-         debug: {
-            options: {
-               livereload: true,
-               port: 3000,
-               base: 'dist'
-            }
-         },
-         release: {
-            options: {
-               port: 3000,
-               base: 'release',
-               keepalive: true
-            }
-         }
+        debug: {
+          options: {
+            livereload: true,
+            port: 3000,
+            base: 'dist'
+          }
+        },
+        release: {
+          options: {
+            port: 3000,
+            base: 'release',
+            keepalive: true
+          }
+        }
       },
 
       watch: {
@@ -290,19 +299,38 @@ module.exports = function (grunt) {
           ],
           options: { reload: true }
         }
-     },
-     proxy: {
+      },
+
+      proxy: {
         proxy1 : {
-            options : { // start proxy server, listening to the default port 9000
-                port: 9000,
-                router : {        // make it forward requests according to this table
-                    'localhost/settings/settings': 'http://192.168.100.78/karta-dev/settings/settings/',
-                    'localhost': 'http://localhost:3000'
-                },
-                changeOrigin : true
-            }
+          options : {
+            port: 9000,
+            router : {
+              'localhost/settings/settings': 'http://192.168.100.78/karta-dev/settings/settings/',
+              'localhost': 'http://localhost:3000'
+            },
+            changeOrigin : true
+          }
+        }
+      },
+
+      usebanner: {
+        taskName: {
+          options: {
+            position: 'top',
+            banner: '<%= licence_text %>',
+            linebreak: true
+          },
+          files: {
+            src: [
+              //'src/**/*.js',
+              //'src/**/*.jsx',
+              'release/js/<%= pkg.name %>-<%= pkg.version %>.min.js'
+            ]
+          }
         }
       }
+
     });
 
     grunt.registerTask('dependencies', ['browserify:dependencies', 'uglify:dependencies']);
@@ -311,9 +339,13 @@ module.exports = function (grunt) {
 
     grunt.registerTask('debug', ['connect:debug', 'proxy:proxy1', 'watch']);
 
-    grunt.registerTask('release', ['copy:release', 'replace:releasehtml', 'less', 'concat:css', 'cssmin', 'react', 'browserify:app', 'babel', 'replace:bablecleanup', 'uglify:application', 'concat:jsrelease', 'copy:admin']);
+    grunt.registerTask('release', ['copy:release', 'replace:releasehtml', 'less', 'concat:css', 'cssmin', 'react', 'browserify:app', 'babel', 'replace:bablecleanup', 'uglify:application', 'concat:jsrelease', 'usebanner', 'copy:admin']);
 
     grunt.registerTask('test', ['connect:release']);
 
     grunt.registerTask('default', ['watch']);
+
+    grunt.registerTask('licence', ['usebanner']);
+
+    grunt.registerTask('unlicence', ['replace:licence']);
 };

@@ -168,7 +168,6 @@
     <Compile Include="MapExport\Metadata.cs" />
     <Compile Include="MapExport\ModTileAsyncLayer.cs" />
     <Compile Include="MapExport\Style.cs" />
-    <Compile Include="MapExport\ModTileLayer.cs" />
     <Compile Include="MapExport\WMSInfo.cs" />
     <Compile Include="MapExport\WMTSInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

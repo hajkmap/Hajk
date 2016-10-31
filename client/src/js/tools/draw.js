@@ -1,3 +1,25 @@
+// Copyright (C) 2016 Göteborgs Stad
+//
+// Detta program är fri mjukvara: den är tillåtet att redistribuera och modifeara
+// under villkoren för licensen CC-BY-NC-ND 4.0.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the CC-BY-NC-ND 4.0 licence.
+//
+// http://creativecommons.org/licenses/by-nc-nd/4.0/
+//
+// Det är fritt att dela och anpassa programvaran för valfritt syfte
+// med förbehåll att följande villkor följs:
+// * Cypyright till upphovsmannen inte modifieras.
+// * Programvaran används i icke-komersiellt syfte.
+// * Licenstypen inte modifieras.
+//
+// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
+// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
+// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
+//
+// https://github.com/Johkar/Hajk2
+
 var ToolModel = require('tools/tool');
 var source;
 var olMap;
@@ -38,7 +60,7 @@ var olMap;
 var DrawModelProperties = {
   type: 'draw',
   panel: 'DrawPanel',
-  title: 'Ritverktyg',
+  title: 'Rita och måttsätt',
   toolbar: 'bottom',
   visible: false,
   icon: 'fa fa-pencil icon',
@@ -734,6 +756,19 @@ var DrawModel = {
     }
 
     function getText() {
+
+      var offsetY = () => {
+        var offset = -15;
+
+        if (this.get('pointSymbol'))
+          offset = -40;
+
+        if (type === "Text")
+          offset = 0;
+
+        return offset;
+      }
+
       return new ol.style.Text({
         textAlign: 'center',
         textBaseline: 'middle',
@@ -743,7 +778,7 @@ var DrawModel = {
         stroke: new ol.style.Stroke({color: '#555', width: 3}),
         size: '14px',
         offsetX: type === "Text" ? 0 : 10,
-        offsetY: type === "Text" ? 0 : -15,
+        offsetY: offsetY(),
         rotation: 0,
         scale: 1.4
       });

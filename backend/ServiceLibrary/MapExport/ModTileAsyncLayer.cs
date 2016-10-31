@@ -18,7 +18,7 @@ namespace SharpMap.Layers
     /// Tile layer class that gets and serves tiles asynchonously
     /// </summary>
     [Serializable]
-    public class ModTileAsyncLayer : ModTileLayer, ITileAsyncLayer
+    public class ModTileAsyncLayer : TileLayer, ITileAsyncLayer
     {
         class DownloadTask
         {

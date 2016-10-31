@@ -138,17 +138,11 @@ namespace Sweco.Services.MapExport
             }
 
             labelStyle.ForeColor = ColorTranslator.FromHtml(featureStyle.fontColor);
-            labelStyle.Font = new Font(FontFamily.GenericSansSerif, Int32.Parse(featureStyle.fontSize), FontStyle.Bold);
-
-            labelStyle.HorizontalAlignment = SharpMap.Styles.LabelStyle.HorizontalAlignmentEnum.Center;
-            labelStyle.VerticalAlignment = SharpMap.Styles.LabelStyle.VerticalAlignmentEnum.Middle;
-
-            labelStyle.Offset = new PointF(0, -10);
+            labelStyle.Font = new Font(FontFamily.GenericSansSerif, Int32.Parse(featureStyle.fontSize), FontStyle.Bold);                        
             labelStyle.Halo = new Pen(Color.Black, 2);
-            labelStyle.VerticalAlignment = LabelStyle.VerticalAlignmentEnum.Bottom;
-
+            labelStyle.IsTextOnPath = true;
             labelStyle.CollisionDetection = false;
-            labelStyle.IgnoreLength = true;
+            labelStyle.IgnoreLength = false;            
 
             return labelStyle;
         }
@@ -198,8 +192,8 @@ namespace Sweco.Services.MapExport
         public MapExporter(MapExportItem exportItem) 
         {
             this.exportItem = exportItem;
-            var size = new Size(exportItem.size[0], exportItem.size[1]);              
-            this.map = new Map(size);            
+            var size = new Size(exportItem.size[0], exportItem.size[1]);            
+            this.map = new Map(size);
         }
 
         /// <summary>
@@ -259,11 +253,13 @@ namespace Sweco.Services.MapExport
             }
               
             var i = 0;
-            List<ModTileAsyncLayer> layers = new List<ModTileAsyncLayer>();
+            //List<ModTileAsyncLayer> layers = new List<ModTileAsyncLayer>();
+            List<TileAsyncLayer> layers = new List<TileAsyncLayer>();
             wmtsLayers.ForEach((layer) =>
             {
                 var tileSource = this.createTileSource(layer);
-                ModTileAsyncLayer wmtsLayer = new ModTileAsyncLayer(tileSource, "wmts_layer_" + i);
+                //ModTileAsyncLayer wmtsLayer = new ModTileAsyncLayer(tileSource, "wmts_layer_" + i);
+                TileAsyncLayer wmtsLayer = new TileAsyncLayer(tileSource, "wmts_layer_" + i);
                 layers.Add(wmtsLayer);
                 map.BackgroundLayer.Add(wmtsLayer);
 
@@ -336,21 +332,19 @@ namespace Sweco.Services.MapExport
                 vectorLayer.DataSource = new SharpMap.Data.Providers.FeatureProvider(featureData);                
                 
                 vectorLayer.Theme = new CustomTheme(GetFeatureStyle);
-                map.Layers.Add(vectorLayer);                               
-
+                map.Layers.Add(vectorLayer);
+                
                 LabelLayer labels = new LabelLayer("Labels");                                
+                
                 labels.DataSource = vectorLayer.DataSource;
                 labels.Enabled = true;
                 labels.LabelColumn = "text";
                 labels.Theme = new CustomTheme(GetLabelStyle);                
                 labels.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-                labels.SmoothingMode = SmoothingMode.AntiAlias;
-                labels.SRID = vectorLayer.SRID;                
-                                
-                labels.Style.CollisionDetection = false;                
-
+                labels.SmoothingMode = SmoothingMode.HighQuality;
+                labels.SRID = vectorLayer.SRID;                 
+                                       
                 map.Layers.Add(labels);
-
                 counter++;
             });
             

@@ -19,13 +19,3 @@
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
 // https://github.com/Johkar/Hajk2
-
-var info = Backbone.Model.extend({
-
-  hello: function () {
-    console.log("hello");
-  }
-
-});
-
-module.exports = new info();

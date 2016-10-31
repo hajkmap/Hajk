@@ -9,6 +9,8 @@ module.exports = function (grunt) {
 
     grunt.initConfig({
 
+      licence_text: grunt.file.read('licence_header.txt'),
+
       pkg: grunt.file.readJSON('package.json'),
 
       cssFiles: ['compiled/<%= pkg.name %>.css'],
@@ -88,7 +90,7 @@ module.exports = function (grunt) {
       babel: {
         options: {
           compact: true,
-          sourceMap: true,
+          sourceMap: false,
           presets: ['es2015']
         },
         dist: {
@@ -143,17 +145,15 @@ module.exports = function (grunt) {
 
       uglify: {
         options: {
-          banner: '/* <%= pkg.name %> <%= pkg.version %> */',
           compress: {
             drop_console: true
           },
           sourceMap: true,
-          sourceMapName: 'release/js/<%= pkg.name %>-<%= pkg.version %>.js.map'
+          sourceMapName: 'dist/js/<%= pkg.name %>-<%= pkg.version %>.js.map'
         },
         dist: {
           files: {
-            'release/js/<%= pkg.name %>-<%= pkg.version %>.min.js': [
-              'dist/js/dependencies.js',
+            'dist/js/<%= pkg.name %>-<%= pkg.version %>.min.js': [
               'dist/js/<%= pkg.name %>-transpiled.js'
             ]
           }
@@ -173,12 +173,21 @@ module.exports = function (grunt) {
       },
 
       replace: {
+        licence: {
+          src: ['src/**/*.js', 'src/**/*.jsx'],
+          overwrite: true,
+          replacements: [{
+            from: '<%= licence_text %>',
+            to: ''
+          }]
+        },
+
         debughtml: {
           src: ['dist/index.html'],
           dest: 'dist/index.html',
           replacements: [{
             from: '{js}',
-            to: '<script src="js/<%= pkg.name %>-transpiled.js" charset="utf-8"></script>'
+            to: '<script src="js/<%= pkg.name %>-<%= pkg.version %>.min.js"></script>'
           }, {
             from: '{css}',
             to: '<link rel="stylesheet" href="assets/<%= pkg.name %>.css" charset="utf-8">'
@@ -246,11 +255,37 @@ module.exports = function (grunt) {
               livereload: true
             }
           }
+      },
+
+      usebanner: {
+        taskName: {
+          options: {
+            position: 'top',
+            banner: '<%= licence_text %>',
+            linebreak: true
+          },
+          files: {
+            src: [
+              //'src/**/*.js',
+              //'src/**/*.jsx'
+              'dist/js/<%= pkg.name %>-<%= pkg.version %>.min.js'
+            ]
+          }
+        }
       }
 
     });
 
-    grunt.registerTask('build', ['copy:debug', 'replace:debughtml', 'less', 'autoprefixer:core', 'concat:css', 'react:admin', 'browserify:app', 'babel', 'replace:bablecleanup']);
+    grunt.registerTask('clean', 'Clean dist folder', function() {
+      var pkg = grunt.file.readJSON('package.json');
+      grunt.file.delete(`dist/js/${pkg.name}-transpiled.js`);
+    });
+
+    grunt.registerTask('build', ['copy:debug', 'replace:debughtml', 'less', 'autoprefixer:core', 'concat:css', 'react:admin', 'browserify:app', 'babel', 'replace:bablecleanup', 'uglify', 'usebanner', 'clean']);
+
+    grunt.registerTask('licence', ['usebanner']);
+
+    grunt.registerTask('unlicence', ['replace:licence']);
 
     grunt.registerTask('debug', ['watch']);
 

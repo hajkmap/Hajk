@@ -166,6 +166,7 @@ namespace Sweco.Services
 
             PdfDocument document = new PdfDocument();
             PdfPage page = document.AddPage();
+            
 
             page.Size = exportItem.format == "A4" ? PdfSharp.PageSize.A4 : PdfSharp.PageSize.A3;
             page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;
@@ -178,11 +179,13 @@ namespace Sweco.Services
 
             Dictionary<int, string> scaleBarTexts = new Dictionary<int, string>()
                     {
+                        {250, "25 m"},
+                        {500, "50 m"},
                         {1000, "50 m"},
-                        {2000, "100 m"},
+                        {2500, "100 m"},
                         {5000, "200 m"},
                         {10000, "500 m"},
-                        {20000, "1 km"},
+                        {25000, "1 km"},
                         {50000, "2 km"},
                         {100000, "5 km"},
                         {250000, "10 km"}
@@ -190,11 +193,13 @@ namespace Sweco.Services
 
             Dictionary<int, int> scaleBarLengths = new Dictionary<int, int>()
                     {
+                        {250, 25},
+                        {500, 50},
                         {1000, 50},
-                        {2000, 100},
+                        {2500, 100},
                         {5000, 200},
                         {10000, 500},
-                        {20000, 1000},
+                        {25000, 1000},
                         {50000, 2000},
                         {100000, 5000},
                         {250000, 10000}
@@ -202,8 +207,9 @@ namespace Sweco.Services
 
             int displayLength = (int)(unitLength * scaleBarLengths.FirstOrDefault(a => a.Key == scale).Value);
             string displayText = scaleBarTexts.FirstOrDefault(a => a.Key == scale).Value;
-
-            this.drawImage(gfx, img, 10, 10, page);
+            
+            //this.drawImage(gfx, img, 10, 10, page);
+            this.drawImage(gfx, img, 0, 0, page);
 
             Point[] points = new Point[] 
             {
@@ -258,6 +264,7 @@ namespace Sweco.Services
                     }
                     catch (Exception ex)
                     {
+                        filePath = ex.Message;
                     }
                     finally {
                         stopWaitHandle.Set();

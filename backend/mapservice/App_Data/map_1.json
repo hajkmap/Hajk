@@ -61,6 +61,7 @@
     {
       "type": "layerswitcher",
       "options": {
+        "visibleAtStart": true,
         "baselayers": [
           "77676120-1157-b861-706a-908ecd18c258"
         ],
@@ -135,7 +136,8 @@
     {
       "type": "export",
       "options": {
-        "url": "http://localhost/mapservice/export/"
+        "url": "http://localhost/mapservice/export/",
+        "scales": [250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000]
       }
     },
     {

@@ -1,3 +1,25 @@
+// Copyright (C) 2016 Göteborgs Stad
+//
+// Detta program är fri mjukvara: den är tillåtet att redistribuera och modifeara
+// under villkoren för licensen CC-BY-NC-ND 4.0.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the CC-BY-NC-ND 4.0 licence.
+//
+// http://creativecommons.org/licenses/by-nc-nd/4.0/
+//
+// Det är fritt att dela och anpassa programvaran för valfritt syfte
+// med förbehåll att följande villkor följs:
+// * Cypyright till upphovsmannen inte modifieras.
+// * Programvaran används i icke-komersiellt syfte.
+// * Licenstypen inte modifieras.
+//
+// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
+// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
+// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
+//
+// https://github.com/Johkar/Hajk2
+
 var Panel = require('views/panel');
 
 var ExportSettings = React.createClass({
@@ -8,7 +30,7 @@ var ExportSettings = React.createClass({
     return {
       selectFormat: 'A4',
       selectOrientation: 'S',
-      selectScale: '2000',
+      selectScale: '2500',
       selectResolution: '72',
       loading: false
     };
@@ -135,7 +157,7 @@ var ExportSettings = React.createClass({
 
   render: function () {
     var map = this.props.olMap
-    ,   scales = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 250000]
+    ,   scales = this.props.model.get('scales')
     ,   options
     ,   resolutionOptions
     ,   loader = null;

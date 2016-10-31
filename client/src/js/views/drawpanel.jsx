@@ -1,3 +1,25 @@
+// Copyright (C) 2016 Göteborgs Stad
+//
+// Detta program är fri mjukvara: den är tillåtet att redistribuera och modifeara
+// under villkoren för licensen CC-BY-NC-ND 4.0.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the CC-BY-NC-ND 4.0 licence.
+//
+// http://creativecommons.org/licenses/by-nc-nd/4.0/
+//
+// Det är fritt att dela och anpassa programvaran för valfritt syfte
+// med förbehåll att följande villkor följs:
+// * Cypyright till upphovsmannen inte modifieras.
+// * Programvaran används i icke-komersiellt syfte.
+// * Licenstypen inte modifieras.
+//
+// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
+// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
+// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
+//
+// https://github.com/Johkar/Hajk2
+
 var Panel = require('views/panel');
 var Alert = require('alert');
 
@@ -518,7 +540,11 @@ var DrawPanelView = {
         <div>
           <h4>Export</h4>
           <p>Din export är klar, hämta den genom att klicka på länken nedan.</p>
-          <p>Filen är av typen .kml och är avsedd att öppnas i programvaran Google Earth.</p>
+          <p>
+            Exportfilen är av typen .kml och kan vid ett senare tillfälle importeras i kartan.
+            Detta kan vara användbart om du vill dela med dig av det du ritat eller vill öppna det vid ett senare tillfälle.
+            Filen kan även öppnas i Google Earth.
+          </p>
           <a href={url}>Hämta export</a>
         </div>
       )
@@ -586,11 +612,11 @@ var DrawPanelView = {
 
     return (
       <div>
-        <Panel title="Rita och mät" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
+        <Panel title="Rita och måttsätt" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
           <div className="draw-tools">
             <div id="labels">
               <input id="labels-checkbox" onChange={this.toggleLabels} type="checkbox" checked={showLabels} />
-              <label htmlFor="labels-checkbox">Visa areal/längd</label>
+              <label htmlFor="labels-checkbox">Visa areal/längd på ritade objekt</label>
             </div>
             <ul>
               <li id="Text" onClick={this.activateDrawTool.bind(this, "Text")}>
@@ -606,10 +632,10 @@ var DrawPanelView = {
                 <i className="iconmoon-yta"></i> <span>Rita yta</span>
               </li>
               <li id="delete" onClick={this.activateRemovalTool}>
-                <i className="fa fa-eraser fa-0"></i> <span>Radera</span>
+                <i className="fa fa-eraser fa-0"></i> <span>Radera objekt</span>
               </li>
               <li id="clear" onClick={this.alertClear}>
-                <i className="fa fa-trash fa-0"></i> <span>Rensa</span>
+                <i className="fa fa-trash fa-0"></i> <span>Rensa allt</span>
               </li>
               <li id="clear" onClick={this.import}>
                 <i className="fa fa-file-o fa-0"></i> <span>Importera</span>

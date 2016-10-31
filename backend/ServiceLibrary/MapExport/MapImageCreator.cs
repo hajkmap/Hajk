@@ -80,7 +80,7 @@ namespace Sweco.Services.MapExport
             double bottom = exportItem.bbox[2];
             double top = exportItem.bbox[3];
 
-            Envelope envelope = new Envelope(left, right, bottom, top);
+            Envelope envelope = new Envelope(left, right, bottom, top);            
             MapExporter.map.ZoomToBox(envelope);
 
             var width = Math.Abs(left - right);
@@ -107,7 +107,7 @@ namespace Sweco.Services.MapExport
             mapExporter.AddWMSLayers(exportItem.wmsLayers);
             mapExporter.AddVectorLayers(exportItem.vectorLayers);
             mapExporter.AddWMTSLayers(exportItem.wmtsLayers, () =>
-            {               
+            {                
                 Image img = mapExporter.map.GetMap(exportItem.resolution);
 
                 Bitmap src = new Bitmap(img);
@@ -119,9 +119,17 @@ namespace Sweco.Services.MapExport
                 Graphics g = Graphics.FromImage(target);
                 g.FillRectangle(new SolidBrush(Color.White), 0, 0, target.Width, target.Height);
                 g.DrawImage(src, 0, 0);
-                
-                callback.Invoke(new MapExportCallback()
+
+                try
                 {
+                    img.Save("C:\\temp\\apa.png", System.Drawing.Imaging.ImageFormat.Png);
+                } catch (Exception ex)
+                {
+                    
+                }
+
+                callback.Invoke(new MapExportCallback()
+                {                    
                     image = img
                 });
             });
@@ -129,13 +137,17 @@ namespace Sweco.Services.MapExport
             double left = exportItem.bbox[0];
             double right = exportItem.bbox[1];
             double bottom = exportItem.bbox[2];
-            double top = exportItem.bbox[3];
+            double top = exportItem.bbox[3];            
 
             Envelope envelope = new Envelope(left, right, bottom, top);
+            
             mapExporter.map.ZoomToBox(envelope);
 
+            //var zoom = mapExporter.map.GetMapZoomFromScale(double.Parse(exportItem.scale), exportItem.resolution);
+            //mapExporter.map.Zoom = zoom;
+
             var width = Math.Abs(left - right);
-            var scale = mapExporter.map.GetMapScale(exportItem.resolution);
+            var scale = mapExporter.map.GetMapScale(exportItem.resolution);            
 
             mapExporter.map.GetMap(exportItem.resolution);
         }
