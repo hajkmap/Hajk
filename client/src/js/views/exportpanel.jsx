@@ -24,7 +24,7 @@ var Panel = require('views/panel');
 
 var ExportSettings = React.createClass({
 
-  resolutions: [72, 96, 150],
+  resolutions: [72, 96, 150, 300],
 
   getInitialState: function() {
     return {
@@ -87,9 +87,9 @@ var ExportSettings = React.createClass({
 
   setFormat: function (e) {
     if (e.target.value === "A3") {
-      this.resolutions = [72];
+      this.resolutions = [72, 96, 150, 300];
     } else {
-      this.resolutions = [72, 96, 150];
+      this.resolutions = [72, 96, 150, 300];
     }
     this.setState({
       selectFormat: e.target.value

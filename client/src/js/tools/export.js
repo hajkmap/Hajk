@@ -518,11 +518,9 @@ var ExportModel = {
       data: JSON.stringify(data),
       contentType: "application/json",
       success: rsp => {
-        console.log("Success", rsp);
         callback(rsp);
       },
       error: rsp => {
-        console.log("Fail", rsp);
         callback(rsp);
       }
     });

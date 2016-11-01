@@ -107,6 +107,39 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver"
+    },
+    {
+      "id": "ebd7692d-be18-a1c7-b91d-23f8d5a24f20",
+      "caption": "Ravegeo",
+      "url": "http://www.asp-mapservices.com/ravegeo/map2/WMS?name=lm2013",
+      "owner": "SBK",
+      "date": "1477929192452",
+      "content": "wms sverige",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "Oversiktskartan_texter",
+        "Vagkartan_utan_texter",
+        "Oversiktskartan_utan_texter",
+        "Terrangkartan_utan_texter",
+        "Tatortskartan_utan_texter",
+        "Tatortskartan_texter",
+        "Terrangkartan_texter",
+        "Vagkartan_texter"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver"
     }
   ],
   "wfslayers": [
