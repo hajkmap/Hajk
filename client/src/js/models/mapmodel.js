@@ -156,7 +156,7 @@ var MapModel = {
       interactions: ol.interaction.defaults().extend([new Drag()]),
       target: this.get("target"),
       layers: [],
-      controls: [new ol.control.Zoom()],
+      controls: [new ol.control.Zoom({zoomInTipLabel: 'Zooma in', zoomOutTipLabel: 'Zooma ut'})],
       view: new ol.View({
         zoom: this.get("zoom"),
         units: 'm',
