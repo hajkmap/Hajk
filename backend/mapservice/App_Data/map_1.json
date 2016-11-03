@@ -62,7 +62,6 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "ebd7692d-be18-a1c7-b91d-23f8d5a24f20",
           "77676120-1157-b861-706a-908ecd18c258"
         ],
         "groups": [
@@ -170,10 +169,10 @@
   "map": {
     "target": "map",
     "center": [
-      415024,
-      6583518
+      154500,
+      6374574
     ],
-    "projection": "EPSG:3006",
+    "projection": "EPSG:3007",
     "zoom": 9,
     "maxZoom": 9,
     "minZoom": 3,

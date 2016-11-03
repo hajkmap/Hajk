@@ -5,7 +5,7 @@
       "caption": "Topowebb",
       "url": "http://194.71.132.27/lmproxy/wmts",
       "owner": "SBK",
-      "date": "1476683601858",
+      "date": "1477995757478",
       "content": "topowebbkarta",
       "legend": "",
       "projection": "EPSG:3006",
@@ -113,7 +113,7 @@
       "caption": "Ravegeo",
       "url": "http://www.asp-mapservices.com/ravegeo/map2/WMS?name=lm2013",
       "owner": "SBK",
-      "date": "1477929192452",
+      "date": "1477996001449",
       "content": "wms sverige",
       "legend": "",
       "projection": null,
@@ -134,7 +134,7 @@
       "displayFields": [
         ""
       ],
-      "visibleAtStart": false,
+      "visibleAtStart": true,
       "queryable": false,
       "tiled": false,
       "singleTile": false,

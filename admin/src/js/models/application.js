@@ -1,12 +1,12 @@
 // Copyright (C) 2016 Göteborgs Stad
 //
 // Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-ND 4.0.
+// under villkoren för licensen CC-BY-NC-SA 4.0.
 //
 // This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-ND 4.0 licence.
+// it under the terms of the CC-BY-NC-SA 4.0 licence.
 //
-// http://creativecommons.org/licenses/by-nc-nd/4.0/
+// http://creativecommons.org/licenses/by-nc-sa/4.0/
 //
 // Det är fritt att dela och anpassa programvaran för valfritt syfte
 // med förbehåll att följande villkor följs:
