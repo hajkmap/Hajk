@@ -46,6 +46,10 @@ var LayerPanelView = {
     };
   },
 
+  componentWillMount: function() {
+    this.props.model.setToggled(this.props.model.get('groups'));
+  },
+
   /**
    * Triggered when the component is successfully mounted into the DOM.
    * @instance
@@ -199,7 +203,6 @@ var LayerPanelView = {
 
   /**
    * Toggle the visibility of all layers in given group.
-   * @deprecated
    * @instance
    * @param {object} group
    * @param {object} e
@@ -211,7 +214,6 @@ var LayerPanelView = {
     ,   id = "group_" + group.id;
 
     value = state[id] = this.state[id] === "hidden" ? "visible" : "hidden";
-
     this.props.model.set(id, value);
     this.setState(state);
   },
