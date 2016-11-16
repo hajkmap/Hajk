@@ -23,7 +23,8 @@
 var types = {
   "wms": require('layers/wmslayer'),
   "wfs": require('layers/wfslayer'),
-  "wmts": require('layers/wmtslayer')
+  "wmts": require('layers/wmtslayer'),
+  "data": require('layers/datalayer')
 };
 
 /**
@@ -156,6 +157,24 @@ var LayerCollection = {
     return config;
   },
 
+  mapDataConfig: function(args) {
+
+    var config = {
+      type : "data",
+      options: {
+        "id": args.id,
+        "url": (HAJK2.wfsProxy || "") + args.url,
+        "name": args.id,
+        "caption": args.caption,
+        "visible": args.visibleAtStart,
+        "opacity": 1,
+        "queryable": args.queryable === false ? false : true
+      }
+    };
+
+    return config;
+  },
+
   /**
    * Generates a model for this layer
    * @instance
@@ -172,6 +191,9 @@ var LayerCollection = {
     }
     if (args.type === "wmts") {
       config = LayerCollection.mapWMTSConfig(args, properties);
+    }
+    if (args.type === "data") {
+      config = LayerCollection.mapDataConfig(args);
     }
 
     var Layer = types[config.type];

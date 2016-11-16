@@ -67,8 +67,7 @@ label {
 }
 
 #map-scale-bar {
-  margin: auto;
-  width: auto;
+  display: inline;
   .ol-scale-line-inner {
     border: 1px solid #ccc;
     border-top: none;
@@ -81,39 +80,41 @@ label {
   .ol-scale-line {
     position: static;
     display: inline-block;
-    background: @color-yellow-opac;
-    border-radius: 4px;
-    padding: 2px;
-    border: 1px solid #ccc;
+    background: rgba(27, 120, 204, 0.5);
+    border-radius: 0;
+    padding: 3px;
     bottom: auto;
-    margin-top: 4px;
+    margin-right: 3px;
   }
 }
 
 
 .map-scale {
   position: absolute;
-  top: 8px;
   z-index: 200;
-  text-align: center;
-  width: 100%;
+  right: 12px;
+  display: inherit;
+  background: rgba(255,255,255, 0.4);
+  padding: 4px;
+  border-radius: 6px;
+  bottom: 66px;
   .map-scale-text {
     font-size: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
     display: inline-block;
-    padding: 4px;
-    background: @color-yellow-opac;
+    padding: 5px;
+    background: rgba(27, 120, 204, 0.5);
     color: white;
-    margin-top: 2px;
+    height: 26px;
+    position: relative;
+    top: 1px;
   }
 }
 
 .map-logo {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  height: 79px;
+  top: 8px;
+  right: 60px;
+  height: 48px;
   background: white no-repeat;
   background-size: 100%;
   z-index: 100;

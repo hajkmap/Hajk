@@ -61,7 +61,7 @@
       "caption": "Punkt",
       "url": "http://194.71.132.27/geoserver/demo/wms",
       "owner": "SBK",
-      "date": "1477638241626",
+      "date": "1479127842776",
       "content": "punkt klsfjdslkm",
       "legend": "",
       "projection": null,
@@ -75,7 +75,7 @@
       "displayFields": [
         ""
       ],
-      "visibleAtStart": true,
+      "visibleAtStart": false,
       "queryable": true,
       "tiled": false,
       "singleTile": false,
@@ -87,7 +87,7 @@
       "caption": "Yta",
       "url": "http://194.71.132.27/geoserver/demo/wms",
       "owner": "SBK",
-      "date": "1477316906698",
+      "date": "1479127846768",
       "content": "yta",
       "legend": "",
       "projection": null,
@@ -101,7 +101,7 @@
       "displayFields": [
         ""
       ],
-      "visibleAtStart": true,
+      "visibleAtStart": false,
       "queryable": true,
       "tiled": false,
       "singleTile": false,
@@ -109,33 +109,52 @@
       "serverType": "geoserver"
     },
     {
-      "id": "ebd7692d-be18-a1c7-b91d-23f8d5a24f20",
-      "caption": "Ravegeo",
-      "url": "http://www.asp-mapservices.com/ravegeo/map2/WMS?name=lm2013",
+      "id": "905ac1ce-3ddf-1e47-548a-cb58537050de",
+      "caption": "Fastigheter",
+      "url": "http://194.71.132.27/geoserver/demo/wms",
       "owner": "SBK",
-      "date": "1477996001449",
-      "content": "wms sverige",
+      "date": "1479128817750",
+      "content": "Fastigheter",
       "legend": "",
       "projection": null,
       "layers": [
-        "Oversiktskartan_texter",
-        "Vagkartan_utan_texter",
-        "Oversiktskartan_utan_texter",
-        "Terrangkartan_utan_texter",
-        "Tatortskartan_utan_texter",
-        "Tatortskartan_texter",
-        "Terrangkartan_texter",
-        "Vagkartan_texter"
+        "demo_fastighet"
       ],
-      "infobox": "",
+      "infobox": "{fastighet} {fnr}",
       "searchFields": [
         ""
       ],
       "displayFields": [
         ""
       ],
-      "visibleAtStart": true,
-      "queryable": false,
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver"
+    },
+    {
+      "id": "6dba5577-646e-173a-c2a6-f520fc30ca95",
+      "caption": "Hållplatser",
+      "url": "http://194.71.132.27/geoserver/demo/wms",
+      "owner": "SBK",
+      "date": "1479128763353",
+      "content": "Hållplats",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "stopareas"
+      ],
+      "infobox": "{namn}",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
       "tiled": false,
       "singleTile": false,
       "imageFormat": "image/png",
@@ -144,17 +163,17 @@
   ],
   "wfslayers": [
     {
-      "id": "ef94049e-b1ed-87da-3e69-532391c34ea2",
-      "caption": "Sök fastighet",
-      "url": "http://ksdgis.se/geoserver/demo/wfs",
+      "id": "85739eb6-5581-12fd-a74e-63e1dfd8ca9b",
+      "caption": "Sök hållplats",
+      "url": "http://194.71.132.27/geoserver/demo/wfs",
       "layers": [
-        "demo:fastighetsyta"
+        "demo:stopareas"
       ],
       "searchFields": [
-        "fastighet"
+        "namn"
       ],
       "displayFields": [
-        "fastighet"
+        "namn"
       ],
       "outputFormat": "GML3"
     }
@@ -274,33 +293,14 @@
       "editLine": false
     },
     {
-      "id": "97ea4285-06e7-3840-ba6c-f758c0673fd6",
-      "caption": "fastighet",
+      "id": "33fc769b-f275-4b4a-6c1b-6414d0753c50",
+      "caption": "Fastighet",
       "url": "http://194.71.132.27/geoserver/demo/wfs",
       "projection": "EPSG:3006",
       "layers": [
         "demo:demo_fastighet"
       ],
-      "editableFields": [
-        {
-          "index": 2,
-          "name": "fnr",
-          "dataType": "int",
-          "textType": null,
-          "values": null,
-          "hidden": false,
-          "defaultValue": null
-        },
-        {
-          "index": 3,
-          "name": "fastighet",
-          "dataType": "string",
-          "textType": "fritext",
-          "values": null,
-          "hidden": false,
-          "defaultValue": null
-        }
-      ],
+      "editableFields": [],
       "editPoint": false,
       "editPolygon": true,
       "editLine": false

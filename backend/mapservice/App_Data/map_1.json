@@ -66,9 +66,26 @@
         ],
         "groups": [
           {
+            "id": "00666094-f442-a314-e504-13edb636a68c",
+            "parent": "-1",
+            "name": "Kartlager",
+            "toggled": true,
+            "layers": [
+              {
+                "id": "905ac1ce-3ddf-1e47-548a-cb58537050de",
+                "drawOrder": 0
+              },
+              {
+                "id": "6dba5577-646e-173a-c2a6-f520fc30ca95",
+                "drawOrder": 0
+              }
+            ],
+            "groups": []
+          },
+          {
             "id": "afe0c79e-f807-0c17-8bcd-4974bf4e9ee6",
             "parent": "-1",
-            "name": "Data",
+            "name": "Redigering",
             "toggled": true,
             "layers": [
               {
@@ -169,10 +186,10 @@
   "map": {
     "target": "map",
     "center": [
-      154500,
-      6374574
+      414962,
+      6583005
     ],
-    "projection": "EPSG:3007",
+    "projection": "EPSG:3006",
     "zoom": 9,
     "maxZoom": 9,
     "minZoom": 3,

@@ -2,7 +2,7 @@
   "react": {
     "components": {
       "files": {
-        "compiled/fabutton.js": ["src/js/views/components/fabutton.jsx"],        
+        "compiled/fabutton.js": ["src/js/views/components/fabutton.jsx"],
         "compiled/legenditem.js": ["src/js/views/components/legenditem.jsx"],
         "compiled/legend.js": ["src/js/views/components/legend.jsx"],
         "compiled/legendbutton.js": ["src/js/views/components/legendbutton.jsx"],
@@ -86,10 +86,11 @@
         "layers/wmslayer": "./src/js/layers/wmslayer.js",
         "layers/wmtslayer": "./src/js/layers/wmtslayer.js",
         "layers/wfslayer": "./src/js/layers/wfslayer.js",
+        "layers/datalayer": "./src/js/layers/datalayer.js",
         "layers/highlightlayer" : "./src/js/layers/highlightlayer.js",
         "collections/layers": "./src/js/collections/layercollection.js",
         "collections/tools": "./src/js/collections/toolcollection.js",
-        "components/fabutton": "./compiled/fabutton.js",        
+        "components/fabutton": "./compiled/fabutton.js",
         "components/legenditem": "./compiled/legenditem.js",
         "components/legend": "./compiled/legend.js",
         "components/legendbutton": "./compiled/legendbutton.js",
