@@ -1,10 +1,10 @@
-# Hajk2
-Uppdaterad: 2016-05-24 13:39
+# Hajk
+Uppdaterad: 2016-11-25
 
 Detta är ett projekt som drivs av Stadsbyggnadskontoret Göteborgs Stad.  
-Systemutvecklare är i huvudsak Sweco Position.  
+Systemutvecklare är i huvudsak Sweco Position.
 Projektet drivs som ett samarbetsprojekt och är avsett att kunna återanvändas för generalla GIS-applikationer för webb.  
-Licensformen bygger på en öppen samarbetslicens. (Creative Common Zero CC0).
+Licensformen bygger på en öppen samarbetslicens. (CC BY SA NC).
 
 Koden består av två delar; en serverdel och en klientdel. Serverdelen är programmerad i Microsoft .NET med tekniken WCF och kodspråket C#.  
 Klientdelen är programmerad i JavaScript 2015. Kommunikationen mellan klient och server sker via HTTP och är RESTful implementerad.
@@ -28,7 +28,7 @@ Skriv därefter till exempel:
 för att gå till lokal projektmapp.
 
 Ange följande kommando för att ladda hem koden:  
-`git clone https://github.com/Johkar/Hajk2.git`  
+`git clone https://github.com/hajkmap/hajk.git`  
 
 ### Installera Node JS
 För att installera node gå till [https://nodejs.org/en/](https://nodejs.org/en/ "länk").  
