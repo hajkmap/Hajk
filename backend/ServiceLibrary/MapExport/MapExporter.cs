@@ -17,19 +17,23 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using GeoAPI.Features;
+using GeoAPI;
 using BruTile;
 using BruTile.Wmts;
+using NetTopologySuite.Features;
+using log4net;
 
 namespace Sweco.Services.MapExport
 {
     public class MapExporter
     {
+        private static readonly ILog Logger = LogManager.GetLogger("MapExporter");
+
         /// <summary>
         /// Gets or sets the SharpMap map to export.
         /// </summary>
         public Map map { get; set; }
-        
+
         /// <summary>
         /// Property exportItem
         /// </summary>
@@ -138,11 +142,11 @@ namespace Sweco.Services.MapExport
             }
 
             labelStyle.ForeColor = ColorTranslator.FromHtml(featureStyle.fontColor);
-            labelStyle.Font = new Font(FontFamily.GenericSansSerif, Int32.Parse(featureStyle.fontSize), FontStyle.Bold);                        
+            labelStyle.Font = new Font(FontFamily.GenericSansSerif, Int32.Parse(featureStyle.fontSize), FontStyle.Bold);
             labelStyle.Halo = new Pen(Color.Black, 2);
             labelStyle.IsTextOnPath = true;
             labelStyle.CollisionDetection = false;
-            labelStyle.IgnoreLength = false;            
+            labelStyle.IgnoreLength = false;
 
             return labelStyle;
         }
@@ -158,28 +162,9 @@ namespace Sweco.Services.MapExport
             var req = WebRequest.Create(uri);
             var resp = req.GetResponseAsync();
             ITileSource tileSource;
-
-            BoundingBoxAxisOrderInterpretation axisMode = BoundingBoxAxisOrderInterpretation.Natural;
-            switch (config.axisMode)
-            {
-                case "geographic":
-                    axisMode = BoundingBoxAxisOrderInterpretation.Geographic;
-                    break;
-                case "crs":
-                    axisMode = BoundingBoxAxisOrderInterpretation.CRS;
-                    break;
-                case "natural":
-                    axisMode = BoundingBoxAxisOrderInterpretation.Natural;
-                    break;
-                default:
-                    axisMode = BoundingBoxAxisOrderInterpretation.Natural;
-                    break;
-            }
-
-            
             using (var stream = resp.Result.GetResponseStream())
             {
-                IEnumerable<ITileSource> tileSources = WmtsParser.Parse(stream, axisMode);
+                IEnumerable<ITileSource> tileSources = WmtsParser.Parse(stream);
                 tileSource = tileSources.FirstOrDefault();
             }
             return tileSource;
@@ -189,10 +174,10 @@ namespace Sweco.Services.MapExport
         /// Create a new ExportMap object.
         /// </summary>
         /// <param name="exportItem"></param>
-        public MapExporter(MapExportItem exportItem) 
+        public MapExporter(MapExportItem exportItem)
         {
             this.exportItem = exportItem;
-            var size = new Size(exportItem.size[0], exportItem.size[1]);            
+            var size = new Size(exportItem.size[0], exportItem.size[1]);
             this.map = new Map(size);
         }
 
@@ -204,13 +189,13 @@ namespace Sweco.Services.MapExport
         {
             wmsLayers = wmsLayers.OrderBy(layer => layer.zIndex).ToList();
             try
-            {  
-                                                  
-                for (int i = 0; i < wmsLayers.Count; i++)            
-                {                    
-                    string layername = "WMSLayer_" + i;                    
-                    WmsLayer layer = new WmsLayer(layername, wmsLayers[i].url);     
-                    
+            {
+
+                for (int i = 0; i < wmsLayers.Count; i++)
+                {
+                    string layername = "WMSLayer_" + i;
+                    WmsLayer layer = new WmsLayer(layername, wmsLayers[i].url);
+
                     layer.SetImageFormat("image/png");
                     layer.BgColor = Color.White;
                     layer.Transparent = true;
@@ -221,7 +206,7 @@ namespace Sweco.Services.MapExport
                         string sublayerName = "";
                         try
                         {
-                            sublayerName = wmsLayers[i].workspacePrefix != null ? 
+                            sublayerName = wmsLayers[i].workspacePrefix != null ?
                                            wmsLayers[i].workspacePrefix + ":" + wmsLayers[i].layers[t] :
                                            wmsLayers[i].layers[t];
 
@@ -230,49 +215,54 @@ namespace Sweco.Services.MapExport
                                 layer.AddLayer(sublayerName);
                             }
                         }
-                        catch
-                        {      
+                        catch (Exception ex)
+                        {
+                            Logger.Fatal("WMS sublayer load error " + ex.Message, ex);
                         }
                     }
-                
+
                     layer.SRID = wmsLayers[i].coordinateSystemId;
-                    map.Layers.Add(layer);                    
-                }                
+                    map.Layers.Add(layer);
+                }
             }
-            catch
-            {                    
+            catch (Exception ex)
+            {
+                Logger.Fatal("WMS layer load error " + ex.Message, ex);
             }
-        }        
+        }
 
         public void AddWMTSLayers(List<WMTSInfo> wmtsLayers, Action callback)
-        {            
+        {
             if (wmtsLayers == null || wmtsLayers.Count == 0)
             {
                 callback.Invoke();
                 return;
             }
-              
-            var i = 0;
-            //List<ModTileAsyncLayer> layers = new List<ModTileAsyncLayer>();
+
+            var i = 0;            
             List<TileAsyncLayer> layers = new List<TileAsyncLayer>();
             wmtsLayers.ForEach((layer) =>
             {
-                var tileSource = this.createTileSource(layer);
-                //ModTileAsyncLayer wmtsLayer = new ModTileAsyncLayer(tileSource, "wmts_layer_" + i);
+                var tileSource = this.createTileSource(layer);                
                 TileAsyncLayer wmtsLayer = new TileAsyncLayer(tileSource, "wmts_layer_" + i);
                 layers.Add(wmtsLayer);
                 map.BackgroundLayer.Add(wmtsLayer);
 
-                wmtsLayer.MapNewTileAvaliable += (TileLayer sender, Envelope bbox, Bitmap bm, int sourceWidth, int sourceHeight, System.Drawing.Imaging.ImageAttributes imageAttributes) =>
-                {                          
+                wmtsLayer.MapNewTileAvaliable += (ITileAsyncLayer sender, Envelope bbox, Bitmap bm, int sourceWidth, int sourceHeight, System.Drawing.Imaging.ImageAttributes imageAttributes) =>                
+                {
                     if (layers.All(w => w.NumPendingDownloads <= 1))
                     {
                         callback.Invoke();
                     };
                 };
                 i++;
-            });                  
-        }   
+            });
+        }
+
+        private void WmtsLayer_MapNewTileAvaliable(ITileAsyncLayer sender, Envelope bbox, Bitmap bm, int sourceWidth, int sourceHeight, System.Drawing.Imaging.ImageAttributes imageAttributes)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>        
         /// /// Add a list of vector layers to the map.
@@ -287,20 +277,20 @@ namespace Sweco.Services.MapExport
                 VectorLayer vectorLayer = new VectorLayer("VectorLayer-" + counter);
                 GeometryFactory factory = new GeometryFactory();
                 List<IGeometry> geometries = new List<IGeometry>();
-                
+
                 FeatureDataTable featureData = new FeatureDataTable();
                 featureData.Columns.Add("text", typeof(String));
                 featureData.Columns.Add("style", typeof(MapExport.Style));
- 
+
                 layer.features.ForEach(feature =>
                 {
                     FeatureDataRow dataRow = featureData.NewRow();
                     dataRow["text"] = feature.attributes.text;
-                    dataRow["style"] = feature.attributes.style; 
+                    dataRow["style"] = feature.attributes.style;
 
-                    List<GeoAPI.Geometries.Coordinate> vertices = new List<GeoAPI.Geometries.Coordinate>();  
-      
-                    feature.coordinates.ForEach(coordinate =>                            
+                    List<GeoAPI.Geometries.Coordinate> vertices = new List<GeoAPI.Geometries.Coordinate>();
+
+                    feature.coordinates.ForEach(coordinate =>
                     {
                         double x = coordinate[0];
                         double y = coordinate[1];
@@ -310,44 +300,147 @@ namespace Sweco.Services.MapExport
                     switch (feature.type)
                     {
                         case "Text":
-                        case "Point":       
-                            if (vertices.Count > 0) {                                
-                                var point = factory.CreatePoint(new GeoAPI.Geometries.Coordinate(vertices[0]));                                
-                                dataRow.Geometry = point;                                                                                                            
+                        case "Point":
+                            if (vertices.Count > 0)
+                            {
+                                var point = factory.CreatePoint(new GeoAPI.Geometries.Coordinate(vertices[0]));
+                                dataRow.Geometry = point;
                             }
                             break;
-                        case "LineString":        
-                            var lineString = factory.CreateLineString(vertices.ToArray());                            
-                            dataRow.Geometry = lineString;                                                                           
+                        case "LineString":
+                            var lineString = factory.CreateLineString(vertices.ToArray());
+                            dataRow.Geometry = lineString;
                             break;
-                        case "Polygon":    
-                            var polygon = factory.CreatePolygon(vertices.ToArray());                            
+                        case "Polygon":
+                            var polygon = factory.CreatePolygon(vertices.ToArray());
                             dataRow.Geometry = polygon;
-                            break;                                                   
+                            break;
                     }
 
-                    featureData.AddRow(dataRow);                        
+                    featureData.AddRow(dataRow);
                 });
-                
-                vectorLayer.DataSource = new SharpMap.Data.Providers.FeatureProvider(featureData);                
-                
+
+                vectorLayer.DataSource = new SharpMap.Data.Providers.GeometryFeatureProvider(featureData);
+                //vectorLayer.DataSource = new SharpMap.Data.Providers.FeatureProvider(featureData);                
+
+                //vectorLayer.Theme = new CustomTheme(GetFeatureStyle);
                 vectorLayer.Theme = new CustomTheme(GetFeatureStyle);
                 map.Layers.Add(vectorLayer);
-                
-                LabelLayer labels = new LabelLayer("Labels");                                
-                
+
+                LabelLayer labels = new LabelLayer("Labels");
+
                 labels.DataSource = vectorLayer.DataSource;
                 labels.Enabled = true;
                 labels.LabelColumn = "text";
-                labels.Theme = new CustomTheme(GetLabelStyle);                
+                labels.Theme = new CustomTheme(GetLabelStyle);
                 labels.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
                 labels.SmoothingMode = SmoothingMode.HighQuality;
-                labels.SRID = vectorLayer.SRID;                 
-                                       
+                labels.SRID = vectorLayer.SRID;
+
                 map.Layers.Add(labels);
                 counter++;
             });
-            
+
+        }
+
+        private IStyle GetLabelStyle(FeatureDataRow row)
+        {
+            Style featureStyle = (Style)row["style"];
+            LabelStyle labelStyle = new SharpMap.Styles.LabelStyle();
+
+            if (featureStyle.fontSize == null)
+            {
+                return labelStyle;
+            }
+
+            labelStyle.ForeColor = ColorTranslator.FromHtml(featureStyle.fontColor);
+            labelStyle.Font = new Font(FontFamily.GenericSansSerif, Int32.Parse(featureStyle.fontSize), FontStyle.Bold);
+            labelStyle.Halo = new Pen(Color.Black, 2);
+            labelStyle.IsTextOnPath = true;
+            labelStyle.CollisionDetection = false;
+            labelStyle.IgnoreLength = false;
+
+            return labelStyle;
+        }
+
+        private IStyle GetFeatureStyle(FeatureDataRow row)
+        {
+            VectorStyle style = new VectorStyle();
+            if (row["style"] != null)
+            {
+                Style featureStyle = (Style)row["style"];
+                style.EnableOutline = true;
+
+                style.Line.Color = ColorTranslator.FromHtml(featureStyle.strokeColor);
+                style.Line.Width = (float)featureStyle.strokeWidth;
+                style.Line.SetLineCap(LineCap.Round, LineCap.Round, DashCap.Round);
+
+                switch (featureStyle.strokeDashstyle)
+                {
+                    case "dot":
+                        style.Outline.DashStyle = DashStyle.Dot;
+                        style.Line.DashStyle = DashStyle.Dot;
+                        break;
+                    case "solid":
+                        style.Line.DashStyle = DashStyle.Solid;
+                        break;
+                    case "dash":
+                        style.Line.DashStyle = DashStyle.Dash;
+                        break;
+                    case "dashdot":
+                        style.Line.DashStyle = DashStyle.DashDot;
+                        break;
+                    case "longdash":
+                        style.Line.DashStyle = DashStyle.DashDot;
+                        style.Line.DashPattern = new float[] { 8, 2 };
+                        break;
+                    case "longdashdot":
+                        style.Line.DashStyle = DashStyle.DashDot;
+                        style.Line.DashPattern = new float[] { 8, 2, 1, 2 };
+                        break;
+                    default:
+                        style.Line.DashStyle = DashStyle.Solid;
+                        break;
+                }
+
+                style.Outline = style.Line;
+
+                Color color = ColorTranslator.FromHtml(featureStyle.fillColor);
+                Color pointColor = ColorTranslator.FromHtml(featureStyle.pointFillColor);
+
+                if (featureStyle.fillOpacity != null)
+                {
+                    int opac = (int)(255 * featureStyle.fillOpacity);
+                    Color transparent = Color.FromArgb(opac, color);
+                    style.Fill = new SolidBrush(transparent);
+                }
+                else
+                {
+                    style.Fill = new SolidBrush(color);
+                }
+
+                if (featureStyle.pointSrc != "")
+                {
+                    try
+                    {
+                        WebClient wc = new WebClient();
+                        byte[] bytes = wc.DownloadData(featureStyle.pointSrc);
+                        MemoryStream ms = new MemoryStream(bytes);
+                        Image img = Image.FromStream(ms);
+                        style.Symbol = img;
+                    }
+                    catch
+                    {
+                    }
+                }
+                else
+                {
+                    style.PointColor = new SolidBrush(pointColor);
+                    style.PointSize = (float)featureStyle.pointRadius * 2;
+                }
+
+            }
+            return style;
         }
     }
 }

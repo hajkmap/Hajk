@@ -59,10 +59,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>SharpMap\GeoAPI.dll</HintPath>
     </Reference>
-    <Reference Include="GeoAPI.Extensions, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>SharpMap\GeoAPI.Extensions.dll</HintPath>
-    </Reference>
     <Reference Include="log4net, Version=1.2.14.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.4\lib\net45-full\log4net.dll</HintPath>
       <Private>True</Private>
@@ -85,19 +81,14 @@
       <HintPath>..\packages\PDFsharp.1.32.3057.0\lib\net20\PdfSharp.Charting.dll</HintPath>
     </Reference>
     <Reference Include="PowerCollections">
-      <HintPath>..\SharpMap\PowerCollections.dll</HintPath>
-    </Reference>
-    <Reference Include="ProjNet, Version=1.3.0.3, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>SharpMap\ProjNet.dll</HintPath>
+      <HintPath>SharpMap\PowerCollections.dll</HintPath>
     </Reference>
     <Reference Include="SharpMap, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>SharpMap\SharpMap.dll</HintPath>
     </Reference>
-    <Reference Include="SharpMap.Data, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>SharpMap\SharpMap.Data.dll</HintPath>
+    <Reference Include="SharpMap.Layers.BruTile">
+      <HintPath>SharpMap\SharpMap.Layers.BruTile.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -166,7 +157,6 @@
     <Compile Include="MapExport\MapExportItem.cs" />
     <Compile Include="MapExport\MapImageCreator.cs" />
     <Compile Include="MapExport\Metadata.cs" />
-    <Compile Include="MapExport\ModTileAsyncLayer.cs" />
     <Compile Include="MapExport\Style.cs" />
     <Compile Include="MapExport\WMSInfo.cs" />
     <Compile Include="MapExport\WMTSInfo.cs" />
