@@ -74,7 +74,7 @@ namespace Sweco.Services
             XColor color = XColors.Black;
             XFont font = new XFont("Verdana", 10);
             XBrush brush = new XSolidBrush(color);            
-            gfx.DrawString(text, font, brush, x, y);
+            gfx.DrawString(text, font, brush, x, y);            
         }
 
         /// <summary>
@@ -167,7 +167,6 @@ namespace Sweco.Services
             PdfDocument document = new PdfDocument();
             PdfPage page = document.AddPage();
             
-
             page.Size = exportItem.format == "A4" ? PdfSharp.PageSize.A4 : PdfSharp.PageSize.A3;
             page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;
 
@@ -207,29 +206,45 @@ namespace Sweco.Services
 
             int displayLength = (int)(unitLength * scaleBarLengths.FirstOrDefault(a => a.Key == scale).Value);
             string displayText = scaleBarTexts.FirstOrDefault(a => a.Key == scale).Value;
-            
-            //this.drawImage(gfx, img, 10, 10, page);
+                        
             this.drawImage(gfx, img, 0, 0, page);
-
-            Point[] points = new Point[] 
+            List<string> copyrights = ConfigurationManager.AppSettings["exportCopyrightText"].Split(',').ToList();
+            string infoText = String.Empty;
+            if (ConfigurationManager.AppSettings["exportInfoText"] != null)
             {
+                infoText = ConfigurationManager.AppSettings["exportInfoText"];
+            }            
+
+            int height = 45 + copyrights.Count * 10;
+
+            Point[] points = new Point[]
+            {                
                 new Point(12, 12),
-                new Point(12, 55),
-                new Point(55 + displayLength, 55),
+                new Point(12, height),
+                new Point(55 + displayLength, height),
                 new Point(55 + displayLength, 12),
                 new Point(12, 12)
             };
 
             gfx.DrawPolygon(XBrushes.White, points, XFillMode.Winding);
 
-            gfx.DrawLine(XPens.Black, new Point(15, 47), new Point(15 + displayLength, 47));
-            gfx.DrawLine(XPens.Black, new Point(15, 44), new Point(15, 50));
-            gfx.DrawLine(XPens.Black, new Point(15 + displayLength, 44), new Point(15 + displayLength, 50));
+            this.drawText(gfx, String.Format("Skala 1:{0}", exportItem.scale), 15, 25);
+            gfx.DrawLine(XPens.Black, new Point(15, 32), new Point(15 + displayLength, 32));
+            gfx.DrawLine(XPens.Black, new Point(15, 28), new Point(15, 36));
+            gfx.DrawLine(XPens.Black, new Point(15 + displayLength, 28), new Point(15 + displayLength, 36));
+            this.drawText(gfx, displayText, 20 + displayLength, 35);            
 
-            string copyright = ConfigurationManager.AppSettings["exportCopyrightText"];
-            this.drawText(gfx, String.Format("© {0}", copyright), 15, 25);
-            this.drawText(gfx, String.Format("Skala 1:{0}", exportItem.scale), 15, 40);
-            this.drawText(gfx, displayText, 20 + displayLength, 50);
+            var y = (int)page.Height.Point - 15;
+
+            this.drawText(gfx, infoText, 15, y);
+
+            int i = 0;
+            copyrights.ForEach(copyright =>
+            {
+                int start = 50;
+                this.drawText(gfx, String.Format("© {0}", copyright), 15, start + i * 10);
+                i++;
+            });
 
             XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "assets", "logo.png"));
             gfx.DrawImage(logo, (gfx.PageSize.Width - logo.PixelWidth / 2) - 12, 12, logo.PixelWidth / 2, logo.PixelHeight / 2);
