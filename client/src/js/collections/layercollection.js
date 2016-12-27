@@ -24,7 +24,8 @@ var types = {
   "wms": require('layers/wmslayer'),
   "wfs": require('layers/wfslayer'),
   "wmts": require('layers/wmtslayer'),
-  "data": require('layers/datalayer')
+  "data": require('layers/datalayer'),
+  "arcgis": require('layers/arcgislayer')
 };
 
 /**
@@ -168,7 +169,31 @@ var LayerCollection = {
         "caption": args.caption,
         "visible": args.visibleAtStart,
         "opacity": 1,
-        "queryable": args.queryable === false ? false : true
+        "queryable": args.queryable === false ? false : true,
+        "extent": args.extent,
+        "projection": args.projection
+      }
+    };
+
+    return config;
+  },
+
+  mapArcGISConfig: function(args) {
+
+    var config = {
+      type : "arcgis",
+      options: {
+        "id": args.id,
+        "url": (HAJK2.wfsProxy || "") + args.url,
+        "name": args.id,
+        "caption": args.caption,
+        "visible": args.visibleAtStart,
+        "queryable": args.queryable === false ? false : true,
+        "extent": args.extent,
+        "opacity": args.opacity,
+        "params": {
+          "LAYERS": 'show:' + args.layers.join(',')
+        }
       }
     };
 
@@ -194,6 +219,9 @@ var LayerCollection = {
     }
     if (args.type === "data") {
       config = LayerCollection.mapDataConfig(args);
+    }
+    if (args.type === "arcgis") {
+      config = LayerCollection.mapArcGISConfig(args);
     }
 
     var Layer = types[config.type];

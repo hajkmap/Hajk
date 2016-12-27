@@ -84,6 +84,7 @@
         "tools/anchor": "./src/js/tools/anchor.js",
         "layers/layer": "./src/js/layers/layer.js",
         "layers/wmslayer": "./src/js/layers/wmslayer.js",
+        "layers/arcgislayer": "./src/js/layers/arcgislayer.js",
         "layers/wmtslayer": "./src/js/layers/wmtslayer.js",
         "layers/wfslayer": "./src/js/layers/wfslayer.js",
         "layers/datalayer": "./src/js/layers/datalayer.js",

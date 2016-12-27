@@ -152,14 +152,20 @@
             let _data = {
               wmslayers: data.wmslayers || [],
               wmtslayers: data.wmtslayers || [],
-              datalayers: data.datalayers || []
+              datalayers: data.datalayers || [],
+              arcgislayers: data.arcgislayers || []
             };
 
             _data.wmslayers.forEach(l => l.type = "wms");
             _data.wmtslayers.forEach(l => l.type = "wmts");
             _data.datalayers.forEach(l => l.type = "data");
+            _data.arcgislayers.forEach(l => l.type = "arcgis");
 
-            layers = data.wmslayers.concat(_data.wmtslayers).concat(_data.datalayers);
+            layers = data.wmslayers
+                         .concat(_data.wmtslayers)
+                         .concat(_data.datalayers)
+                         .concat(_data.arcgislayers);
+
             map_config.layers = internal.filterByLayerSwitcher(layerSwitcherTool.options, layers);
             map_config.layers.sort((a, b) => a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1);
           }

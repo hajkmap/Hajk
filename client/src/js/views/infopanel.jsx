@@ -51,7 +51,7 @@ var InfoPanelView = {
    */
   componentDidMount: function () {
     this.props.model.get("features").on("reset", this.handleReset);
-    this.props.model.on("change:loadFishished", this.handleAdd);
+    this.props.model.on("change:loadFinished", this.handleAdd);
     this.props.model.on("change:selectedFeature", this.handleChangeSelectedFeature);
     this.features = this.props.model.get("features").map(function (f) { return f.get("information"); });
     this.setState({
@@ -65,7 +65,7 @@ var InfoPanelView = {
    */
   componentWillUnmount: function () {
     this.props.model.off("change:selectedFeature", this.handleChangeSelectedFeature);
-    this.props.model.off("change:loadFishished", this.handleAdd);
+    this.props.model.off("change:loadFinished", this.handleAdd);
     this.props.model.get("features").off("reset", this.handleReset);
     this.props.model.clearHighlight();
   },
@@ -84,8 +84,8 @@ var InfoPanelView = {
    * @param {external:"ol.feature"}
    */
   handleAdd: function (feature, collection) {
-    if (this.props.model.get('loadFishished') === true) {
-      this.features = this.props.model.get("features").map(f => f.get("information"));
+    if (this.props.model.get('loadFinished') === true) {
+      this.features = this.props.model.get('features').map(f => f.get('information'));
       this.setState({
         featureinfo: this.features
       });
@@ -100,7 +100,7 @@ var InfoPanelView = {
    */
   handleChangeSelectedFeature: function (s, feature) {
     this.setState({
-      activeIndex: this.props.model.get("features").toArray().indexOf(feature)
+      activeIndex: this.props.model.get('features').toArray().indexOf(feature)
     });
   },
 
@@ -112,9 +112,9 @@ var InfoPanelView = {
     var newIndex = this.state.activeIndex > 0 ?
       this.state.activeIndex - 1 :
       this.state.activeIndex;
-    var feature = this.props.model.get("features").at(newIndex);
+    var feature = this.props.model.get('features').at(newIndex);
     if (feature) {
-      this.props.model.set("selectedFeature", feature);
+      this.props.model.set('selectedFeature', feature);
     }
   },
 
@@ -126,9 +126,9 @@ var InfoPanelView = {
     var newIndex = this.state.activeIndex < this.state.featureinfo.length - 1 ?
       this.state.activeIndex + 1 :
       this.state.activeIndex;
-    var feature = this.props.model.get("features").at(newIndex);
+    var feature = this.props.model.get('features').at(newIndex);
     if (feature) {
-      this.props.model.set("selectedFeature", feature);
+      this.props.model.set('selectedFeature', feature);
     }
   },
 

@@ -908,12 +908,19 @@ class Manager extends React.Component {
   }
 
   renderForm() {
+
     if (this.state.layerType === "WMS") {
       return this.renderWMSForm();
     }
+
     if (this.state.layerType === "WMTS") {
       return this.renderWMTSForm();
     }
+
+    if (this.state.layerType === "ArcGIS") {
+      return this.renderWMTSForm();
+    }
+
   }
 
   /**
@@ -961,6 +968,7 @@ class Manager extends React.Component {
                 <select value={this.state.layerType} onChange={(e) => { this.setState({layerType: e.target.value}) }}>
                   <option>WMS</option>
                   <option>WMTS</option>
+                  <option>ArcGIS</option>
                 </select>
               </div>
               <div>

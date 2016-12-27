@@ -15,5 +15,7 @@ namespace Sweco.Services.DataContracts
         public List<WFSConfig> wfslayers { get; set; }
 
         public List<WFSTConfig> wfstlayers { get; set; }
+
+        public List<ArcGISConfig> arcgislayers { get; set; }
     }
 }

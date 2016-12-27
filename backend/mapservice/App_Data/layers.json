@@ -305,5 +305,43 @@
       "editPolygon": true,
       "editLine": false
     }
+  ],
+  "arcgislayers": [
+    {
+      "id": "test",
+      "caption": "Hållplatser MapServer",
+      "url": "http://ksdgis.se/arcgis/rest/services/hpl/MapServer",
+      "owner": "VTAB",
+      "date": "1479127842776",
+      "content": "Hållplatser",
+      "legend": "",
+      "projection": "EPSG:3006",
+      "visibleAtStart": false,
+      "layers": [
+        "hpl"
+      ],
+      "extent": [317849, 6529912, 512033, 6770321],
+      "infobox": "",
+      "opacity": 1,
+      "queryable": true
+    },
+    {
+      "id": "test2",
+      "caption": "Jaktadm",
+      "url": "http://ksdgis.se/arcgis/rest/services/jaktadm/MapServer",
+      "owner": "VTAB",
+      "date": "1479127842776",
+      "content": "Hållplatser",
+      "legend": "",
+      "projection": "EPSG:3006",
+      "visibleAtStart": false,
+      "layers": [
+        "0"
+      ],
+      "extent": [317849, 6529912, 512033, 6770321],
+      "infobox": "",
+      "opacity": 1,
+      "queryable": true
+    }
   ]
 }

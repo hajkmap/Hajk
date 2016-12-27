@@ -77,7 +77,15 @@
               },
               {
                 "id": "6dba5577-646e-173a-c2a6-f520fc30ca95",
-                "drawOrder": 0
+                "drawOrder": 1
+              },
+              {
+                "id": "test",
+                "drawOrder": 2
+              },
+              {
+                "id": "test2",
+                "drawOrder": 3
               }
             ],
             "groups": []
@@ -90,11 +98,11 @@
             "layers": [
               {
                 "id": "84a8aa5c-a062-fc32-24fb-30df211427b4",
-                "drawOrder": 0
+                "drawOrder": 4
               },
               {
                 "id": "d8eff0fd-fe48-c06a-8ad8-3ff3814a744a",
-                "drawOrder": 0
+                "drawOrder": 5
               }
             ],
             "groups": []
