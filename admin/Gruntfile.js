@@ -82,7 +82,10 @@ module.exports = function (grunt) {
             "src/js/views/compiled/map.js": ["src/js/views/map.jsx"],
             "src/js/views/compiled/info.js": ["src/js/views/info.jsx"],
             "src/js/views/compiled/release.js": ["src/js/views/release.jsx"],
-            "src/js/views/compiled/alert.js": ["src/js/views/alert.jsx"]
+            "src/js/views/compiled/wmslayerform.js": ["src/js/views/layer_forms/wmslayerform.jsx"],
+            "src/js/views/compiled/wfslayerform.js": ["src/js/views/layer_forms/wfslayerform.jsx"],
+            "src/js/views/compiled/wmtslayerform.js": ["src/js/views/layer_forms/wmtslayerform.jsx"],
+            "src/js/views/compiled/arcgislayerform.js": ["src/js/views/layer_forms/arcgislayerform.jsx"]
           }
         }
       },
@@ -90,7 +93,7 @@ module.exports = function (grunt) {
       babel: {
         options: {
           compact: true,
-          sourceMap: false,
+          sourceMap: true,
           presets: ['es2015']
         },
         dist: {
@@ -105,29 +108,27 @@ module.exports = function (grunt) {
           options: {
             transform:  [require('grunt-react').browserify],
             alias: {
-
-              "views/application":  "./src/js/views/compiled/application.js",
-              "views/manager":      "./src/js/views/compiled/manager.js",
-              "views/menu":         "./src/js/views/compiled/menu.js",
-
-              "views/search":         "./src/js/views/compiled/search.js",
-              "views/edit":         "./src/js/views/compiled/edit.js",
-
-              "views/map":          "./src/js/views/compiled/map.js",
-              "views/info":          "./src/js/views/compiled/info.js",
-              "views/release":      "./src/js/views/compiled/release.js",
-              "views/alert":        "./src/js/views/compiled/alert.js",
-
+              "views/application": "./src/js/views/compiled/application.js",
+              "views/manager": "./src/js/views/compiled/manager.js",
+              "views/menu": "./src/js/views/compiled/menu.js",
+              "views/search": "./src/js/views/compiled/search.js",
+              "views/edit": "./src/js/views/compiled/edit.js",
+              "views/map": "./src/js/views/compiled/map.js",
+              "views/info": "./src/js/views/compiled/info.js",
+              "views/release": "./src/js/views/compiled/release.js",
+              "views/alert": "./src/js/views/compiled/alert.js",
+              "views/layerforms/wms": "./src/js/views/compiled/wmslayerform.js",
+              "views/layerforms/wfs": "./src/js/views/compiled/wfslayerform.js",
+              "views/layerforms/wmts": "./src/js/views/compiled/wmtslayerform.js",
+              "views/layerforms/arcgis":  "./src/js/views/compiled/arcgislayerform.js",
               "models/application": "./src/js/models/application.js",
-              "models/menu":        "./src/js/models/menu.js",
-              "models/manager":     "./src/js/models/manager.js",
-
-              "models/search":      "./src/js/models/search.js",
-              "models/edit":      "./src/js/models/edit.js",
-
-              "models/map":         "./src/js/models/map.js",
-              "models/info":        "./src/js/models/info.js",
-              "models/release":     "./src/js/models/release.js"
+              "models/menu": "./src/js/models/menu.js",
+              "models/manager": "./src/js/models/manager.js",
+              "models/search": "./src/js/models/search.js",
+              "models/edit": "./src/js/models/edit.js",
+              "models/map": "./src/js/models/map.js",
+              "models/info": "./src/js/models/info.js",
+              "models/release": "./src/js/models/release.js"
             }
           },
           files: {
@@ -185,10 +186,12 @@ module.exports = function (grunt) {
         debughtml: {
           src: ['dist/index.html'],
           dest: 'dist/index.html',
-          replacements: [{
-            from: '{js}',
-            to: '<script src="js/<%= pkg.name %>-<%= pkg.version %>.min.js"></script>'
-          }, {
+          replacements: [
+          // {
+          //   from: '{js}',
+          //   to: '<script src="js/<%= pkg.name %>-<%= pkg.version %>.min.js"></script>'
+          // },
+          {
             from: '{css}',
             to: '<link rel="stylesheet" href="assets/<%= pkg.name %>.css" charset="utf-8">'
           }]
@@ -197,10 +200,12 @@ module.exports = function (grunt) {
         releasehtml: {
           src: ['release/index.html'],
           dest: 'release/index.html',
-          replacements: [{
-            from: '{js}',
-            to: '<script src="js/<%= pkg.name %>-<%= pkg.version %>.min.js"></script>'
-          }, {
+          replacements: [
+          // {
+          //   from: '{js}',
+          //   to: '<script src="js/<%= pkg.name %>-<%= pkg.version %>.min.js"></script>'
+          // },
+          {
             from: '{css}',
             to: '<link rel="stylesheet" href="assets/<%= pkg.name %>-<%= pkg.version %>.min.css" charset="utf-8">'
           }]
@@ -281,7 +286,7 @@ module.exports = function (grunt) {
       grunt.file.delete(`dist/js/${pkg.name}-transpiled.js`);
     });
 
-    grunt.registerTask('build', ['copy:debug', 'replace:debughtml', 'less', 'autoprefixer:core', 'concat:css', 'react:admin', 'browserify:app', 'babel', 'replace:bablecleanup', 'uglify', 'usebanner', 'clean']);
+    grunt.registerTask('build', ['copy:debug', 'replace:debughtml', 'less', 'autoprefixer:core', 'concat:css', 'react:admin', 'browserify:app', 'babel', 'replace:bablecleanup', 'uglify', 'usebanner']);
 
     grunt.registerTask('licence', ['usebanner']);
 

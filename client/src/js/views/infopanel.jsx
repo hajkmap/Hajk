@@ -53,7 +53,7 @@ var InfoPanelView = {
     this.props.model.get("features").on("reset", this.handleReset);
     this.props.model.on("change:loadFinished", this.handleAdd);
     this.props.model.on("change:selectedFeature", this.handleChangeSelectedFeature);
-    this.features = this.props.model.get("features").map(function (f) { return f.get("information"); });
+    this.features = this.props.model.get("features").map(f => f.get("information"));
     this.setState({
       featureinfo: this.features
     });

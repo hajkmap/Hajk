@@ -180,6 +180,17 @@ var LayerCollection = {
 
   mapArcGISConfig: function(args) {
 
+    function getLegendUrl() {
+
+      if (/^data/.test(args.legend)) {
+        args.legend = args.legend.split('#');
+      } else if (!/^http/.test(args.legend)) {
+        args.legend = 'http://' + args.legend;
+      }
+
+      return args.legend;
+    }
+
     var config = {
       type : "arcgis",
       options: {
@@ -190,10 +201,15 @@ var LayerCollection = {
         "visible": args.visibleAtStart,
         "queryable": args.queryable === false ? false : true,
         "extent": args.extent,
+        "information": args.infobox,
         "opacity": args.opacity,
         "params": {
           "LAYERS": 'show:' + args.layers.join(',')
-        }
+        },
+        "legend" : [{
+          "Url": getLegendUrl(args),
+          "Description" : "Teckenförklaring"
+        }],
       }
     };
 

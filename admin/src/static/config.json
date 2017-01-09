@@ -4,6 +4,7 @@
     "url_layers": "/mapservice/settings/config/layers",
     "url_layer_settings": "/mapservice/settings/layer",
     "url_wmtslayer_settings": "/mapservice/settings/wmtslayer",
+    "url_arcgislayer_settings": "/mapservice/settings/arcgislayer",
     "url_default_server": "http://194.71.132.27/geoserver/wms",
     "owner_options": [
       { "value": "SBK", "title": "SBK" },
@@ -29,10 +30,10 @@
     "url_layermenu_settings": "/mapservice/settings/layermenu"
   },
   "router": [
-    { "name": "info", "title": "Start", "default": true },
-    { "name": "manager", "title": "Visningstjänster" },
+    { "name": "manager", "title": "Visningstjänster", "default": true },
     { "name": "search", "title": "Söktjänster" },
     { "name": "edit", "title": "Redigeringstjänster" },
-    { "name": "menu", "title": "Konfiguration" }
+    { "name": "menu", "title": "Konfiguration" },
+    { "name": "map", "title": "Karta" }
   ]
 }

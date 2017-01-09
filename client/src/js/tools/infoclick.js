@@ -25,13 +25,13 @@ var HighlightLayer = require('layers/highlightlayer');
 
 var FeatureModel = Backbone.Model.extend({
   defaults:{
-      feature: undefined,
-      information: undefined,
-      layer: undefined
+    feature: undefined,
+    information: undefined,
+    layer: undefined
   },
 
   initialize: function () {
-      this.id = this.cid;
+    this.id = this.cid;
   }
 });
 

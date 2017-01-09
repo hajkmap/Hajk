@@ -259,13 +259,18 @@ class Menu extends React.Component {
 
             data.wmslayers.forEach(l => { l.type = "WMS" });
             data.wmtslayers.forEach(l => { l.type = "WMTS" });
+            data.arcgislayers.forEach(l => { l.type = "WMTS" });
 
-            layers = data.wmslayers.concat(data.wmtslayers);
+            layers = data.wmslayers
+                      .concat(data.wmtslayers)
+                      .concat(data.arcgislayers);
+
             layers.sort((a, b) => {
               var d1 = parseInt(a.date)
               ,   d2 = parseInt(b.date);
               return d1 === d2 ? 0 : d1 < d2 ? 1 : -1;
             });
+
             this.props.model.set('layers', layers);
           });
         break;

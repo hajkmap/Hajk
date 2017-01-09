@@ -224,15 +224,45 @@ namespace Sweco.Services.DataAccess
                 this.Bookmarks.Remove(bookmark);
                 this.SaveChanges();
             }
+        }              
+
+        private int highest(string id, int high)
+        {
+            int i = 0;
+            int.TryParse(id, out i);
+            if (i > high)
+            {
+                high = i;
+            }
+            return high;
         }
-       
+
+        public int GenerateLayerId(LayerConfig layerConfig)
+        {
+            int high = 0;
+            
+            var a = layerConfig.arcgislayers.OrderByDescending(l => l.id).FirstOrDefault();
+            var b = layerConfig.wfslayers.OrderByDescending(l => l.id).FirstOrDefault();
+            var c = layerConfig.wfstlayers.OrderByDescending(l => l.id).FirstOrDefault();
+            var d = layerConfig.wmslayers.OrderByDescending(l => l.id).FirstOrDefault();
+            var e = layerConfig.wmtslayers.OrderByDescending(l => l.id).FirstOrDefault();            
+
+            if (a != null) high = this.highest(a.id, high);
+            if (b != null) high = this.highest(b.id, high);
+            if (c != null) high = this.highest(c.id, high);
+            if (d != null) high = this.highest(d.id, high);
+
+            return high + 1;
+        }
+
         /// <summary>
         /// Add wms layer
         /// </summary>
         /// <param name="layer"></param>
         public void AddWMSLayer(WMSConfig layer) 
-        {                                
+        {            
             LayerConfig layerConfig = this.readLayerConfigFromFile();
+            layer.id = this.GenerateLayerId(layerConfig).ToString();
             layerConfig.wmslayers.Add(layer);  
             this.saveLayerConfigToFile(layerConfig);              
         }
@@ -242,14 +272,55 @@ namespace Sweco.Services.DataAccess
         /// </summary>
         /// <param name="layer"></param>
         public void AddWMTSLayer(WMTSConfig layer)
-        {
+        {            
             LayerConfig layerConfig = this.readLayerConfigFromFile();
+            layer.id = this.GenerateLayerId(layerConfig).ToString();
             if (layerConfig.wmtslayers == null)
             {
                 layerConfig.wmtslayers = new List<WMTSConfig>();
             }
             layerConfig.wmtslayers.Add(layer);
 
+            this.saveLayerConfigToFile(layerConfig);
+        }
+
+        /// <summary>
+        /// Add arcgis layer
+        /// </summary>
+        /// <param name="layer"></param>
+        public void AddArcGISLayer(ArcGISConfig layer)
+        {            
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            layer.id = this.GenerateLayerId(layerConfig).ToString();
+            if (layerConfig.arcgislayers == null)
+            {
+                layerConfig.arcgislayers = new List<ArcGISConfig>();
+            }
+            layerConfig.arcgislayers.Add(layer);
+
+            this.saveLayerConfigToFile(layerConfig);
+        }
+
+        public void RemoveArcGISLayer(string id)
+        {
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            this.removeLayerFromConfig(id);
+            var index = layerConfig.arcgislayers.FindIndex(item => item.id == id);
+            if (index != -1)
+            {
+                layerConfig.arcgislayers.RemoveAt(index);
+            }
+            this.saveLayerConfigToFile(layerConfig);
+        }
+
+        public void UpdateArcGISLayer(ArcGISConfig layer)
+        {
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            var index = layerConfig.arcgislayers.FindIndex(item => item.id == layer.id);
+            if (index != -1)
+            {
+                layerConfig.arcgislayers[index] = layer;
+            }
             this.saveLayerConfigToFile(layerConfig);
         }
 
@@ -378,8 +449,9 @@ namespace Sweco.Services.DataAccess
         /// </summary>
         /// <param name="layer"></param>
         internal void AddWFSLayer(WFSConfig layer)
-        {
+        {            
             LayerConfig layerConfig = this.readLayerConfigFromFile();
+            layer.id = this.GenerateLayerId(layerConfig).ToString();
             layerConfig.wfslayers.Add(layer);
             this.saveLayerConfigToFile(layerConfig); ;
         }
@@ -422,6 +494,7 @@ namespace Sweco.Services.DataAccess
         internal void AddWFSTLayer(WFSTConfig layer)
         {
             LayerConfig layerConfig = this.readLayerConfigFromFile();
+            layer.id = this.GenerateLayerId(layerConfig).ToString();
             layerConfig.wfstlayers.Add(layer);
             this.saveLayerConfigToFile(layerConfig);
         }
