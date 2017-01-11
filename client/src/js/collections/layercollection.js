@@ -202,6 +202,7 @@ var LayerCollection = {
         "queryable": args.queryable === false ? false : true,
         "extent": args.extent,
         "information": args.infobox,
+        "projection": args.projection,
         "opacity": args.opacity,
         "params": {
           "LAYERS": 'show:' + args.layers.join(',')
