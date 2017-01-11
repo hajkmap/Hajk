@@ -67,6 +67,7 @@ var ArcGISLayer = {
       opacity: this.get('opacity'),
       visible: this.get('visible'),
       name: this.get('name'),
+      projection: this.get('projection'),
       source: new ol.source.TileArcGISRest({
         url: this.get('url'),
         params: this.get('params')

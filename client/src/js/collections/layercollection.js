@@ -195,7 +195,7 @@ var LayerCollection = {
       type : "arcgis",
       options: {
         "id": args.id,
-        "url": (HAJK2.wfsProxy || "") + args.url,
+        "url": args.url,
         "name": args.id,
         "caption": args.caption,
         "visible": args.visibleAtStart,

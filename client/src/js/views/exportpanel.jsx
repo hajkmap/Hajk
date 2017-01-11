@@ -87,9 +87,9 @@ var ExportSettings = React.createClass({
 
   setFormat: function (e) {
     if (e.target.value === "A3") {
-      this.resolutions = [72, 96, 150];
-    } else {
       this.resolutions = [72];
+    } else {
+      this.resolutions = [72, 96, 150];
     }
     this.setState({
       selectFormat: e.target.value
