@@ -72,6 +72,10 @@
             "toggled": false,
             "layers": [
               {
+                "id": "5",
+                "drawOrder": 0
+              },
+              {
                 "id": "4",
                 "drawOrder": 1
               },
@@ -95,7 +99,17 @@
     },
     {
       "type": "infoclick",
-      "options": {}
+      "options": {
+        "anchor": [
+          0.5,
+          0
+        ],
+        "imgSize": [
+          15,
+          15
+        ],
+        "markerImg": "assets/icons/dot_marker.png"
+      }
     },
     {
       "type": "search",

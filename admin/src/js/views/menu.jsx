@@ -259,7 +259,7 @@ class Menu extends React.Component {
 
             data.wmslayers.forEach(l => { l.type = "WMS" });
             data.wmtslayers.forEach(l => { l.type = "WMTS" });
-            data.arcgislayers.forEach(l => { l.type = "WMTS" });
+            data.arcgislayers.forEach(l => { l.type = "ArcGIS" });
 
             layers = data.wmslayers
                       .concat(data.wmtslayers)
@@ -522,10 +522,24 @@ class Menu extends React.Component {
         cls = "fa fa-check-square-o";
       }
 
+      var displayType = "";
+
+      switch(layer.type) {
+        case 'WMS':
+          displayType = "";
+          break;
+        case 'WMTS':
+          displayType = "(WMTS)";
+          break;
+        case 'ArcGIS':
+          displayType = "(ArcGIS)";
+          break;
+      }
+
       return (
         <li className="layer-item" onClick={() => this.addLayerToMenu(layer.id, included) } key={i}>
           <span className={cls}></span>&nbsp;
-          <span>{layer.caption} {layer.type === 'WMTS' ? '(WMTS)' : ''}</span>
+          <span>{layer.caption} {displayType}</span>
         </li>
       )
     });

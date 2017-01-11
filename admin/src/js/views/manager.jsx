@@ -295,13 +295,31 @@ class Manager extends React.Component {
    *
    */
   renderLayersFromConfig(layers) {
+
     layers = this.state.filter ? this.getLayersWithFilter() : this.props.model.get('layers');
-    return layers.map((layer, i) =>
-      <li onClick={(e) => this.loadLayer(e, layer)} key={"layer_" + i}>
-        <span>{layer.caption}</span>
-        <i title="Radera lager" onClick={(e) => this.removeLayer(e, layer)} className="fa fa-trash"></i>
-      </li>
-    );
+
+    return layers.map((layer, i) => {
+
+      var displayType = "";
+      switch(layer.type) {
+        case 'WMS':
+          displayType = "";
+          break;
+        case 'WMTS':
+          displayType = "(WMTS)";
+          break;
+        case 'ArcGIS':
+          displayType = "(ArcGIS)";
+          break;
+      }
+
+      return (
+        <li onClick={(e) => this.loadLayer(e, layer)} key={"layer_" + i}>
+          <span>{layer.caption} {displayType}</span>
+          <i title="Radera lager" onClick={(e) => this.removeLayer(e, layer)} className="fa fa-trash"></i>
+        </li>);
+
+    });
   }
   /**
    *

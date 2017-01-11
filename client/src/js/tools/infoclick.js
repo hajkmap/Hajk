@@ -94,11 +94,11 @@ var InfoClickModel = {
           width: 4
         }),
         image: new ol.style.Icon({
-          anchor: [0.5, 32],
+          anchor: this.get('anchor') || [0.5, 32],
           anchorXUnits: 'fraction',
           anchorYUnits: 'pixels',
           src: this.get('markerImg'),
-          imgSize: [32, 32]
+          imgSize: this.get('imgSize') || [32, 32]
         })
       })
     });
@@ -106,6 +106,7 @@ var InfoClickModel = {
     this.set("selectInteraction", this.selectInteraction);
     this.set("highlightLayer", new HighlightLayer());
     this.selectInteraction.setActive(false);
+
     this.get("features").on("add", (feature, collection) => {
       if (collection.length === 1) {
         this.set('selectedFeature', feature);

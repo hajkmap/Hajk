@@ -151,6 +151,29 @@
       "opacity": 1.0,
       "infobox": "",
       "queryable": true
+    },
+    {
+      "id": "5",
+      "caption": "Sevärdheter",
+      "url": "http://gisak.alingsas.se/arcgis/rest/services/Extern_webbkarta/Kultur_Noje/MapServer?f=json",
+      "owner": null,
+      "date": "1484136351917",
+      "content": "",
+      "legend": "false",
+      "projection": "EPSG:3007",
+      "visibleAtStart": false,
+      "layers": [
+        "9"
+      ],
+      "extent": [
+        "175228.33999999985",
+        "6411039.6347",
+        "187807.1464999998",
+        "6449848.065099999"
+      ],
+      "opacity": 1.0,
+      "infobox": "",
+      "queryable": true
     }
   ]
 }
