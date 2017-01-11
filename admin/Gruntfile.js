@@ -74,6 +74,7 @@ module.exports = function (grunt) {
       react: {
         "admin": {
           "files": {
+            "src/js/views/compiled/alert.js": ["src/js/views/alert.jsx"],
             "src/js/views/compiled/application.js": ["src/js/views/application.jsx"],
             "src/js/views/compiled/manager.js": ["src/js/views/manager.jsx"],
             "src/js/views/compiled/menu.js": ["src/js/views/menu.jsx"],

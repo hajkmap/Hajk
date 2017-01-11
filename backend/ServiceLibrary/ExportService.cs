@@ -48,6 +48,11 @@ namespace Sweco.Services
         /// <summary>
         /// 
         /// </summary>
+        AutoResetEvent stopWaitHandle = new AutoResetEvent(false);
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="gfx"></param>
         /// <param name="jpegSamplePath"></param>
         /// <param name="x"></param>
@@ -156,9 +161,14 @@ namespace Sweco.Services
             System.IO.File.WriteAllBytes(fileinfo[0], ms.ToArray());
             return tempPath + '/' + fileinfo[1];
         }
-
-        AutoResetEvent stopWaitHandle = new AutoResetEvent(false);
-
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="img"></param>
+        /// <param name="path"></param>
+        /// <param name="exportItem"></param>
+        /// <returns></returns>
         private string createPdf(Image img, string path, MapExportItem exportItem)
         {            
             string filename = Guid.NewGuid() + ".pdf";
@@ -274,7 +284,7 @@ namespace Sweco.Services
                 {
                     Image img = (Image)data.image.Clone();
                     try
-                    {
+                    {                       
                         filePath = tempPath + "/" + this.createPdf(img, path, exportItem);
                     }
                     catch (Exception ex)
