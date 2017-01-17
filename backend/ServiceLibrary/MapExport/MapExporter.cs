@@ -20,8 +20,11 @@ using System.Xml.Linq;
 using GeoAPI;
 using BruTile;
 using BruTile.Wmts;
+using BruTile.Web;
 using NetTopologySuite.Features;
 using log4net;
+using Sweco.Services.MapExport.Extensions;
+using System.Threading;
 
 namespace Sweco.Services.MapExport
 {
@@ -159,9 +162,11 @@ namespace Sweco.Services.MapExport
         private ITileSource createTileSource(WMTSInfo config)
         {
             Uri uri = new Uri(string.Format("{0}{1}", config.url, "?request=getCapabilities"));
+
             var req = WebRequest.Create(uri);
             var resp = req.GetResponseAsync();
             ITileSource tileSource;
+
             using (var stream = resp.Result.GetResponseStream())
             {
                 IEnumerable<ITileSource> tileSources = WmtsParser.Parse(stream);
@@ -231,31 +236,43 @@ namespace Sweco.Services.MapExport
             }
         }
 
+        bool invoked = false;
+
         public void AddWMTSLayers(List<WMTSInfo> wmtsLayers, Action callback)
         {
             if (wmtsLayers == null || wmtsLayers.Count == 0)
             {
                 callback.Invoke();
                 return;
-            }
-
+            }            
             var i = 0;            
             List<TileAsyncLayer> layers = new List<TileAsyncLayer>();
             wmtsLayers.ForEach((layer) =>
             {
                 var tileSource = this.createTileSource(layer);                
                 TileAsyncLayer wmtsLayer = new TileAsyncLayer(tileSource, "wmts_layer_" + i);
+                i++;
+
                 layers.Add(wmtsLayer);
                 map.BackgroundLayer.Add(wmtsLayer);
 
                 wmtsLayer.MapNewTileAvaliable += (ITileAsyncLayer sender, Envelope bbox, Bitmap bm, int sourceWidth, int sourceHeight, System.Drawing.Imaging.ImageAttributes imageAttributes) =>                
                 {
-                    if (layers.All(w => w.NumPendingDownloads <= 1))
+                    bool shouldInvoke = false;
+                    bool allTilesDownloaded = layers.All(w => w.NumPendingDownloads <= 1);
+
+                    if (allTilesDownloaded)
                     {
+                        shouldInvoke = true;
+                    }
+
+                    if (shouldInvoke && !this.invoked)
+                    {
+                        this.invoked = true;
                         callback.Invoke();
-                    };
+                    }
                 };
-                i++;
+                
             });
         }
 
@@ -341,6 +358,24 @@ namespace Sweco.Services.MapExport
                 counter++;
             });
 
+        }
+
+        public void AddArcGISLayers(List<ArcGISInfo> argisLayers)
+        {
+            argisLayers.ForEach(layer =>
+            {
+                Envelope envelope = new Envelope(
+                    layer.extent.left, 
+                    layer.extent.right, 
+                    layer.extent.bottom, 
+                    layer.extent.top
+                );
+                if (layer.layers.Length > 0)
+                {
+                    ArcGISLayer arcGisLayer = new ArcGISLayer(envelope, layer.url, layer.layers, layer.spatialReference);
+                    map.Layers.Add(arcGisLayer);
+                }                
+            });
         }
 
         private IStyle GetLabelStyle(FeatureDataRow row)

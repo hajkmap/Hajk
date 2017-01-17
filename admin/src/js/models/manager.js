@@ -26,21 +26,35 @@ var manager = Backbone.Model.extend({
     layers: []
   },
 
+  parseDate(date) {
+    var parsed = parseInt(date);
+    return isNaN(parsed) ? date : (new Date(parsed)).toLocaleString();
+  },
+
   getUrl: function (layer) {
     var t = layer['type'];
     delete layer['type'];
-    return t === 'WMTS'
-      ? this.get('config').url_wmtslayer_settings
-      : this.get('config').url_layer_settings
+
+    switch(t) {
+      case "WMS":
+        return this.get('config').url_layer_settings
+      case "WMTS":
+        return this.get('config').url_wmtslayer_settings
+      case "ArcGIS":
+        return this.get('config').url_arcgislayer_settings
+    }
   },
 
   getConfig: function (url) {
     $.ajax(url, {
       success: data => {
         var layers = [];
+
         data.wmslayers.forEach(l => { l.type = "WMS" });
         data.wmtslayers.forEach(l => { l.type = "WMTS" });
-        layers = data.wmslayers.concat(data.wmtslayers);
+        data.arcgislayers.forEach(l => { l.type = "ArcGIS" });
+
+        layers = data.wmslayers.concat(data.wmtslayers).concat(data.arcgislayers);
         layers.sort((a, b) => {
           var d1 = parseInt(a.date)
           ,   d2 = parseInt(b.date);
@@ -50,6 +64,34 @@ var manager = Backbone.Model.extend({
         this.set('layers', layers);
       }
     });
+  },
+
+  getLegend: function (state, callback) {
+    $.ajax({
+        url: state.url + '/legend',
+        method: 'GET',
+        dataType: 'json',
+        data: {
+          f: 'json'
+        },
+        success: (rsp) => {
+          var legends = []
+          ,   addedLayers = state.addedLayers.map(layer => layer.id);
+
+          rsp.layers.forEach(legendLayer => {
+            if (addedLayers.indexOf(legendLayer.layerId) !== -1) {
+              legendLayer.legend.forEach(legend => {
+                legends.push(`data:${legend.contentType};base64,${legend.imageData}&${legendLayer.layerName}`);
+              });
+            }
+          });
+
+          callback(legends.join('#'));
+        },
+        error: () => {
+          callback(false);
+        }
+      });
   },
 
   addLayer: function (layer, callback) {
@@ -69,6 +111,7 @@ var manager = Backbone.Model.extend({
   },
 
   updateLayer: function(layer, callback) {
+
     var url = this.getUrl(layer);
     $.ajax({
       url: url,
@@ -82,6 +125,7 @@ var manager = Backbone.Model.extend({
         callback(false);
       }
     });
+
   },
 
   removeLayer: function (layer, callback) {
@@ -105,23 +149,37 @@ var manager = Backbone.Model.extend({
       url;
   },
 
-  getLayerDescription: function(url, layer, callback) {
+  getArcGISLayerDescription: function(url, layer, callback) {
+
     url = this.prepareProxyUrl(url);
-    url = url.replace(/wms/, 'wfs');
+    url += "/" + layer.id;
+
     $.ajax(url, {
+      dataType: 'json',
       data: {
-        request: 'describeFeatureType',
-        outputFormat: 'application/json',
-        typename: layer
+        f: 'json'
       },
       success: data => {
-        if (data.featureTypes && data.featureTypes[0]) {
-          callback(data.featureTypes[0].properties)
-        } else {
-          callback(false);
-        }
+        callback(data);
       }
     });
+  },
+
+  getArcGISCapabilities: function (url, callback) {
+
+    $.ajax(this.prepareProxyUrl(url), {
+      dataType: "json",
+      data: {
+        f: "json"
+      },
+      success: data => {
+        callback(data);
+      },
+      error: data => {
+        callback(false);
+      }
+    });
+
   },
 
   getWMSCapabilities: function (url, callback) {

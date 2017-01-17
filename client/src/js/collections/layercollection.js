@@ -24,7 +24,8 @@ var types = {
   "wms": require('layers/wmslayer'),
   "wfs": require('layers/wfslayer'),
   "wmts": require('layers/wmtslayer'),
-  "data": require('layers/datalayer')
+  "data": require('layers/datalayer'),
+  "arcgis": require('layers/arcgislayer')
 };
 
 /**
@@ -168,7 +169,48 @@ var LayerCollection = {
         "caption": args.caption,
         "visible": args.visibleAtStart,
         "opacity": 1,
-        "queryable": args.queryable === false ? false : true
+        "queryable": args.queryable === false ? false : true,
+        "extent": args.extent,
+        "projection": args.projection
+      }
+    };
+
+    return config;
+  },
+
+  mapArcGISConfig: function(args) {
+
+    function getLegendUrl() {
+
+      if (/^data/.test(args.legend)) {
+        args.legend = args.legend.split('#');
+      } else if (!/^http/.test(args.legend)) {
+        args.legend = 'http://' + args.legend;
+      }
+
+      return args.legend;
+    }
+
+    var config = {
+      type : "arcgis",
+      options: {
+        "id": args.id,
+        "url": args.url,
+        "name": args.id,
+        "caption": args.caption,
+        "visible": args.visibleAtStart,
+        "queryable": args.queryable === false ? false : true,
+        "extent": args.extent,
+        "information": args.infobox,
+        "projection": args.projection,
+        "opacity": args.opacity,
+        "params": {
+          "LAYERS": 'show:' + args.layers.join(',')
+        },
+        "legend" : [{
+          "Url": getLegendUrl(args),
+          "Description" : "Teckenförklaring"
+        }],
       }
     };
 
@@ -194,6 +236,9 @@ var LayerCollection = {
     }
     if (args.type === "data") {
       config = LayerCollection.mapDataConfig(args);
+    }
+    if (args.type === "arcgis") {
+      config = LayerCollection.mapArcGISConfig(args);
     }
 
     var Layer = types[config.type];

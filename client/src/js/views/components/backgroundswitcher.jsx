@@ -175,30 +175,57 @@ var BackgroundSwitcherView = {
   },
 
   /**
+   * Render an extra/special layer to the background switcher
+   * Possible values are "black" and "white".
+   * @instance
+   * @return {external:ReactElement}
+   */
+  renderExtraLayer: function(mode) {
+    var shouldRender = true
+    ,   changeMethod = () => {}
+    ,   caption = ""
+    ,   checked = false
+    ;
+
+    if (mode === 'black') {
+      shouldRender = this.props.model.get("backgroundSwitcherBlack");
+      changeMethod = this.setBlackBackground;
+      caption = "Svart bakgrund";
+      checked = this.state.selected === "black";
+    }
+
+    if (mode === 'white') {
+      shouldRender = this.props.model.get("backgroundSwitcherWhite");
+      changeMethod = this.setWhiteBackground;
+      caption = "Vit bakgrund";
+      checked = this.state.selected === "white";
+    }
+
+    if (shouldRender) {
+      let id = Math.round(Math.random() * 1E8);
+      return (
+        <li key={id}>
+          <input id={id} name="background" type="radio" checked={checked} onChange={() => changeMethod.call(this) }></input>
+          <label htmlFor={id}>{caption}</label>
+        </li>
+      )
+    }
+    return null;
+  },
+
+  /**
    * Render the background switcher component.
    * @instance
    * @return {external:ReactElement}
    */
   render: function () {
-    var black = white = false;
-    if (this.state.selected === 'black')
-      black = true;
-    if (this.state.selected === 'white')
-      white = true;
     return (
       <div className="background-switcher">
         <h3 onClick={this.setVisibility} ><span className={this.state.displayModeClass}></span>&nbsp;Bakgrundskartor</h3>
         <ul className={this.state.displayMode}>
           {this.renderLayers()}
-          <li key="-2">
-            <input id="-2" name="background" type="radio" checked={white} onChange={() => this.setWhiteBackground() }></input>
-            <label htmlFor="-2">Vit bakgrund</label>
-          </li>
-          <li key="-1">
-            <input id="-1" name="background" type="radio" checked={black} onChange={() => this.setBlackBackground() }></input>
-            <label htmlFor="-1">Svart bakgrund</label>
-          </li>
-
+          {this.renderExtraLayer("black")}
+          {this.renderExtraLayer("white")}
         </ul>
       </div>
     );

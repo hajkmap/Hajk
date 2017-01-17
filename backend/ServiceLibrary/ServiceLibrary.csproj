@@ -147,10 +147,13 @@
     <Compile Include="DataContracts\ToolOptions\MapWMSLayerInfo.cs" />
     <Compile Include="DataContracts\WFSConfig.cs" />
     <Compile Include="DataContracts\WFSTConfig.cs" />
+    <Compile Include="DataContracts\ArcGISConfig.cs" />
     <Compile Include="DataContracts\WMTSConfig.cs" />
     <Compile Include="DataContracts\WMSConfig.cs" />
     <Compile Include="HTTP\MultipartParser.cs" />
+    <Compile Include="MapExport\ArcGISInfo.cs" />
     <Compile Include="MapExport\DoubleExtensions.cs" />
+    <Compile Include="MapExport\Extensions\ArcGISLayer.cs" />
     <Compile Include="MapExport\Feature.cs" />
     <Compile Include="MapExport\FeatureInfo.cs" />
     <Compile Include="MapExport\MapExporter.cs" />

@@ -22,6 +22,18 @@
 
 var LegendItem = React.createClass({
   render: function () {
+    if (Array.isArray(this.props.icon)) {
+      var images = this.props.icon.map((blob, i) => {
+        var a = blob.split('&');
+        return (
+          <div key={i}>
+            <div>{a[1] || ""}</div>
+            <img className="media-object" src={a[0]} alt="legend" />
+          </div>
+        )
+      });
+      return (<div>{images}</div>);
+    }
     return (
       <div>
         <img className="media-object" src={this.props.icon} alt="legend" />

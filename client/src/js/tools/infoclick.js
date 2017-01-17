@@ -25,13 +25,13 @@ var HighlightLayer = require('layers/highlightlayer');
 
 var FeatureModel = Backbone.Model.extend({
   defaults:{
-      feature: undefined,
-      information: undefined,
-      layer: undefined
+    feature: undefined,
+    information: undefined,
+    layer: undefined
   },
 
   initialize: function () {
-      this.id = this.cid;
+    this.id = this.cid;
   }
 });
 
@@ -94,11 +94,11 @@ var InfoClickModel = {
           width: 4
         }),
         image: new ol.style.Icon({
-          anchor: [0.5, 32],
+          anchor: this.get('anchor') || [0.5, 32],
           anchorXUnits: 'fraction',
           anchorYUnits: 'pixels',
           src: this.get('markerImg'),
-          imgSize: [32, 32]
+          imgSize: this.get('imgSize') || [32, 32]
         })
       })
     });
@@ -109,7 +109,7 @@ var InfoClickModel = {
 
     this.get("features").on("add", (feature, collection) => {
       if (collection.length === 1) {
-          this.set('selectedFeature', feature);
+        this.set('selectedFeature', feature);
       }
     });
 
@@ -149,7 +149,7 @@ var InfoClickModel = {
    */
   onMapPointer: function (event) {
     var wmsLayers = this.layerCollection.filter((layer) => {
-          return layer.get("type") === "wms" &&
+          return (layer.get("type") === "wms" || layer.get("type") === "arcgis") &&
                  layer.get("queryable") &&
                  layer.getVisible();
         })
@@ -157,14 +157,12 @@ var InfoClickModel = {
     ,   resolution = this.map.getView().getResolution()
     ,   infos = []
     ,   promises = []
-    ,   infosLen = 0
     ;
-
-    wmsLayers.reverse();
 
     $('body').css({cursor: 'wait'});
     this.layerOrder = {};
     this.get("features").reset();
+
     this.map.getLayers().forEach((layer, i) => {
       this.layerOrder[layer.get('name')] = i;
     });
@@ -181,7 +179,6 @@ var InfoClickModel = {
                   this.addInformation(feature, layer, (featureInfo) => {
                     if (featureInfo) {
                       infos.push(featureInfo);
-                      infosLen = infos.length;
                     }
                     resolve();
                   });
@@ -191,41 +188,54 @@ var InfoClickModel = {
       }
     });
 
-    _.each(wmsLayers, (wmsLayer, index) => {
+    wmsLayers.forEach((wmsLayer, index) => {
       wmsLayer.index = index;
-        if (wmsLayer.get('queryable')) {
-          promises.push(new Promise((resolve, reject) => {
-            wmsLayer.getFeatureInformation({
-              coordinate: event.coordinate,
-              resolution: resolution,
-              projection: projection,
-              error: (message) => {
-                resolve();
-              },
-              success: (features, layer) => {
-                  if (features instanceof Array && features.length > 0) {
-                    this.addInformation(features[0], wmsLayer, (featureInfo) => {
-                        infos[wmsLayer.index + infosLen] = featureInfo;
-                    });
-                  }
-                  resolve();
-              }
-            });
-          }));
-        }
+      promises.push(new Promise((resolve, reject) => {
+        wmsLayer.getFeatureInformation({
+          coordinate: event.coordinate,
+          resolution: resolution,
+          projection: projection,
+          error: message => {
+            resolve();
+          },
+          success: features => {
+            if (Array.isArray(features) && features.length > 0) {
+
+              features.forEach(feature => {
+                this.addInformation(feature, wmsLayer, (featureInfo) => {
+                  infos.push(featureInfo);
+                });
+              });
+
+            }
+            resolve();
+          }
+        });
+      }));
     });
 
-    this.set('loadFishished', false);
+    this.set('loadFinished', false);
+
     Promise.all(promises).then(() => {
-        $('body').css({cursor: 'default'});
-        _.each(infos, (info) => {
-          this.get("features").add(info);
-        });
-        this.set("loadFishished", true);
-        this.togglePanel();
-        if (infos.length === 0) {
-          this.set("selectedFeature", undefined);
-        }
+      $('body').css({cursor: 'default'});
+
+      infos.sort((a, b) => {
+        var s1 = this.layerOrder[a.layer.id]
+        ,   s2 = this.layerOrder[b.layer.id]
+        ;
+        return s1 === s2 ? 0 : s1 < s2 ? 1 : -1;
+      });
+
+      infos.forEach(info => {
+        this.get('features').add(info);
+      });
+
+      this.set('loadFinished', true);
+      this.togglePanel();
+
+      if (infos.length === 0) {
+        this.set('selectedFeature', undefined);
+      }
     });
   },
 
@@ -269,10 +279,10 @@ var InfoClickModel = {
           }
           information = information.replace(property, lookup(properties, property));
       });
-
-      layerindex = this.layerOrder.hasOwnProperty(layerModel.getName()) ?
-                   this.layerOrder[layerModel.getName()] : 999;
     }
+
+    layerindex = this.layerOrder.hasOwnProperty(layerModel.getName()) ?
+                 this.layerOrder[layerModel.getName()] : 999;
 
     callback({
       feature: feature,
@@ -323,16 +333,18 @@ var InfoClickModel = {
     ,   selectedLayer = feature.get('layer')
     ,   insertIndex;
 
-    _.each(layerCollection.getArray(), (layer, index) => {
-      if (layer.getProperties().name!="highlight-wms") {
-        if (layer.get('name') == selectedLayer.get('name')) {
+    layerCollection.getArray().forEach((layer, index) => {
+      if (layer.getProperties().name !== "highlight-wms") {
+        if (layer.get('name') === selectedLayer.get('name')) {
           insertIndex = index + 1;
         }
       }
       if (insertIndex) {
+
         layerCollection.remove(this.get('highlightLayer').getLayer());
         layerCollection.insertAt(insertIndex, this.get('highlightLayer').getLayer());
         insertIndex = undefined;
+
       }
     });
   },
@@ -372,7 +384,7 @@ var InfoClickModel = {
           highlightLayer = this.get('highlightLayer');
 
       if (features.getLength() > 0) {
-      this.selectInteraction.getFeatures().removeAt(0);
+        this.selectInteraction.getFeatures().removeAt(0);
       }
       highlightLayer.clearHighlight();
   }

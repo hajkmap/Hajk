@@ -2,9 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Sweco.Services.MapExport
@@ -71,8 +73,9 @@ namespace Sweco.Services.MapExport
         public static Image GetImage(MapExportItem exportItem)
         {
             MapExporter MapExporter = new MapExporter(exportItem);
-
+            
             MapExporter.AddWMSLayers(exportItem.wmsLayers);
+            MapExporter.AddArcGISLayers(exportItem.arcgisLayers);
             MapExporter.AddVectorLayers(exportItem.vectorLayers);
 
             double left = exportItem.bbox[0];
@@ -101,15 +104,15 @@ namespace Sweco.Services.MapExport
         }
 
         public static void GetImageAsync(MapExportItem exportItem, Action<MapExportCallback> callback)
-        {
-            MapExporter mapExporter = new MapExporter(exportItem);
-
+        {            
+            MapExporter mapExporter = new MapExporter(exportItem);                        
             mapExporter.AddWMSLayers(exportItem.wmsLayers);
-            mapExporter.AddVectorLayers(exportItem.vectorLayers);
+            mapExporter.AddArcGISLayers(exportItem.arcgisLayers);
+            mapExporter.AddVectorLayers(exportItem.vectorLayers);    
+                    
             mapExporter.AddWMTSLayers(exportItem.wmtsLayers, () =>
             {
-                Image img = mapExporter.map.GetMap(exportItem.resolution);
-
+                Image img = mapExporter.map.GetMap();
                 Bitmap src = new Bitmap(img);
                 src.SetResolution(exportItem.resolution, exportItem.resolution);
 

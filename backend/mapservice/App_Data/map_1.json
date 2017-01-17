@@ -62,39 +62,34 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "77676120-1157-b861-706a-908ecd18c258"
+          "0"
         ],
         "groups": [
           {
-            "id": "00666094-f442-a314-e504-13edb636a68c",
+            "id": "91efa2d2-4e3e-8295-752e-aa87a2dc6806",
             "parent": "-1",
-            "name": "Kartlager",
-            "toggled": true,
+            "name": "Ny grupp",
+            "toggled": false,
             "layers": [
               {
-                "id": "905ac1ce-3ddf-1e47-548a-cb58537050de",
+                "id": "5",
                 "drawOrder": 0
               },
               {
-                "id": "6dba5577-646e-173a-c2a6-f520fc30ca95",
-                "drawOrder": 0
-              }
-            ],
-            "groups": []
-          },
-          {
-            "id": "afe0c79e-f807-0c17-8bcd-4974bf4e9ee6",
-            "parent": "-1",
-            "name": "Redigering",
-            "toggled": true,
-            "layers": [
-              {
-                "id": "84a8aa5c-a062-fc32-24fb-30df211427b4",
-                "drawOrder": 0
+                "id": "4",
+                "drawOrder": 1
               },
               {
-                "id": "d8eff0fd-fe48-c06a-8ad8-3ff3814a744a",
-                "drawOrder": 0
+                "id": "3",
+                "drawOrder": 4
+              },
+              {
+                "id": "1",
+                "drawOrder": 2
+              },
+              {
+                "id": "2",
+                "drawOrder": 3
               }
             ],
             "groups": []
@@ -104,7 +99,17 @@
     },
     {
       "type": "infoclick",
-      "options": {}
+      "options": {
+        "anchor": [
+          0.5,
+          0
+        ],
+        "imgSize": [
+          15,
+          15
+        ],
+        "markerImg": "assets/icons/dot_marker.png"
+      }
     },
     {
       "type": "search",

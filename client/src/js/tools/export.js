@@ -416,6 +416,50 @@ var ExportModel = {
   },
 
   /**
+   * Find ArcGIS layer to export in the map.
+   * @instance
+   * @return {object[]} wmts layers
+   */
+  findArcGIS: function() {
+
+    function getArcGISLayerContract(layer) {
+
+      var url = layer.getSource().get('url')
+      ,   extent = layer.get('extent') || []
+      ,   layers = []
+      ,   projection = layer.get('projection');
+
+      if (typeof layer.getSource().getParams('params')['LAYERS'] === 'string') {
+        layers = layer.getSource().getParams('params')['LAYERS'].replace('show:', '').split(',');
+      }
+
+      if (typeof projection === 'string') {
+        projection = projection.replace('EPSG:', '');
+      }
+
+      return {
+        url: url,
+        layers: layers,
+        spatialReference: projection,
+        extent: {
+          left: extent[0],
+          bottom: extent[1],
+          right: extent[2],
+          top: extent[3]
+        }
+      }
+    }
+
+    function visibleArcGISLayer(layer) {
+      return layer.getSource() instanceof ol.source.TileArcGISRest && layer.getVisible()
+    }
+
+    return this.get('olMap').getLayers().getArray()
+      .filter(visibleArcGISLayer)
+      .map(getArcGISLayerContract);
+  },
+
+  /**
    * Export the map
    * @instance
    * @param {function} callback
@@ -498,6 +542,7 @@ var ExportModel = {
     data.vectorLayers = this.findVector() || [];
     data.wmsLayers = this.findWMS() || [];
     data.wmtsLayers = this.findWMTS() || [];
+    data.arcgisLayers = this.findArcGIS() || [];
 
     dx = Math.abs(left - right);
     dy = Math.abs(bottom - top);

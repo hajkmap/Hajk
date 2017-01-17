@@ -103,6 +103,30 @@ namespace Sweco.Services
         void AddWMTSLayer(WMTSConfig layer);
 
         /// <summary>
+        /// Lägg till arcgis-lager.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void AddArcGISLayer(ArcGISConfig layer);
+
+        /// <summary>
+        /// Uppdatera argis-lager.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void UpdateArcGISLayer(ArcGISConfig layer);
+
+        /// <summary>
+        /// Ta bort arcgis-lager.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void RemoveArcGISLayer(string id);
+
+        /// <summary>
         /// Lägg till wmts-lager.
         /// </summary>
         /// <param name="id"></param>
@@ -111,7 +135,7 @@ namespace Sweco.Services
         void UpdateWMTSLayer(WMTSConfig layer);
 
         /// <summary>
-        /// Lägg till wmts-lager.
+        /// Ta bort wmts-lager.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -360,6 +384,17 @@ namespace Sweco.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        [WebInvoke(Method = "POST", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/arcgislayer")]
+        public void AddArcGISLayer(ArcGISConfig layer)
+        {
+            this.settingsDataContext.AddArcGISLayer(layer);
+        }
+
+        /// <summary>
+        /// Add layer
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [WebInvoke(Method = "POST", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/wmtslayer")]
         public void AddWMTSLayer(WMTSConfig layer)
         {
@@ -377,6 +412,28 @@ namespace Sweco.Services
         {
             this.settingsDataContext.RemoveWMTSLayer(id);
         }
+
+        /// <summary>
+        /// Update layer
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [WebInvoke(Method = "PUT", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/arcgislayer")]
+        public void UpdateArcGISLayer(ArcGISConfig layer)
+        {
+            this.settingsDataContext.UpdateArcGISLayer(layer);
+        }
+
+        /// <summary>
+        /// Remove ArcGIS map service layer
+        /// </summary>
+        /// <param name="id"></param>
+        [WebInvoke(Method = "DELETE", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/arcgislayer/{id}")]
+        public void RemoveArcGISLayer(string id)
+        {
+            this.settingsDataContext.RemoveArcGISLayer(id);
+        }
+
 
         /// <summary>
         /// Update layer

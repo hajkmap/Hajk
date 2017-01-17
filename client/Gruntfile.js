@@ -341,8 +341,6 @@ module.exports = function (grunt) {
 
     grunt.registerTask('release', ['copy:release', 'replace:releasehtml', 'less', 'concat:css', 'cssmin', 'react', 'browserify:app', 'babel', 'replace:bablecleanup', 'uglify:application', 'concat:jsrelease', 'usebanner', 'copy:admin']);
 
-    grunt.registerTask('test', ['connect:release']);
-
     grunt.registerTask('default', ['watch']);
 
     grunt.registerTask('licence', ['usebanner']);

@@ -44,6 +44,8 @@ var LayerSwitcherModelProperties = {
   visibleAtStart: true,
   layerCollection: undefined,
   backgroundSwitcherMode: 'hidden',
+  backgroundSwitcherBlack: true,
+  backgroundSwitcherWhite: true
 };
 
 /**
