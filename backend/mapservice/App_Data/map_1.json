@@ -62,34 +62,22 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "0"
+          "5"
         ],
         "groups": [
           {
             "id": "91efa2d2-4e3e-8295-752e-aa87a2dc6806",
             "parent": "-1",
-            "name": "Ny grupp",
-            "toggled": false,
+            "name": "Test",
+            "toggled": true,
             "layers": [
               {
-                "id": "5",
+                "id": "6",
                 "drawOrder": 0
               },
               {
-                "id": "4",
-                "drawOrder": 1
-              },
-              {
-                "id": "3",
+                "id": "0",
                 "drawOrder": 4
-              },
-              {
-                "id": "1",
-                "drawOrder": 2
-              },
-              {
-                "id": "2",
-                "drawOrder": 3
               }
             ],
             "groups": []
@@ -102,11 +90,11 @@
       "options": {
         "anchor": [
           0.5,
-          0
+          8
         ],
         "imgSize": [
-          15,
-          15
+          16,
+          16
         ],
         "markerImg": "assets/icons/dot_marker.png"
       }

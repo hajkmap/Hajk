@@ -24,7 +24,10 @@ var WMSLayerForm = require("views/layerforms/wms");
 var WMTSLayerForm = require("views/layerforms/wmts");
 var WFSLayerForm = require("views/layerforms/wfs");
 var ArcGISLayerForm = require("views/layerforms/arcgis");
-
+var VectorLayerForm = require("views/layerforms/vector");
+/**
+ *
+ */
 const defaultState = {
   layerType: "WMS",
   validationErrors: [],
@@ -125,6 +128,39 @@ class Manager extends React.Component {
 
         this.refs["ArcGISLayerForm"].loadLayers(layer, () => {
           this.refs["ArcGISLayerForm"].validate();
+        });
+
+      }, 0);
+
+    }
+
+    if (layer.type === "Vector") {
+
+      this.setState({
+        mode: "edit",
+        layerType: "Vector"
+      });
+
+      setTimeout(() => {
+        this.refs["VectorLayerForm"].setState({
+          id: layer.id,
+          caption: layer.caption,
+          content: layer.content,
+          date: layer.date,
+          infobox: layer.infobox,
+          legend: layer.legend,
+          owner: layer.owner,
+          url: layer.url,
+          visibleAtStart: layer.visibleAtStart,
+          queryable: layer.queryable,
+          projection: layer.projection,
+          opacity: layer.opacity,
+          drawOrder: layer.drawOrder,
+          layer: layer.layer
+        });
+
+        this.refs["VectorLayerForm"].loadLayers(layer, () => {
+          this.refs["VectorLayerForm"].validate();
         });
 
       }, 0);
@@ -311,6 +347,9 @@ class Manager extends React.Component {
         case 'ArcGIS':
           displayType = "(ArcGIS)";
           break;
+        case 'Vector':
+            displayType = "(Vektor)";
+            break;
       }
 
       return (
@@ -330,7 +369,9 @@ class Manager extends React.Component {
     }
     this.setState(defaultState);
   }
-
+  /**
+   *
+   */
   whenLayerAdded(success, layer) {
     if (success) {
       this.props.model.getConfig(this.props.config.url_layers);
@@ -346,7 +387,9 @@ class Manager extends React.Component {
       });
     }
   }
-
+  /**
+   *
+   */
   whenLayerUpdated(success, date) {
     if (success) {
       this.props.model.getConfig(this.props.config.url_layers);
@@ -364,7 +407,6 @@ class Manager extends React.Component {
       });
     }
   }
-
   /**
    *
    */
@@ -431,7 +473,9 @@ class Manager extends React.Component {
       }
     });
   }
-
+  /**
+   *
+   */
   renderForm() {
     switch(this.state.layerType) {
       case "WMS":
@@ -461,11 +505,17 @@ class Manager extends React.Component {
           layer={this.state.layer}
           url={this.props.config.url_default_server}
           parent={this} />
+        case "Vector":
+        return <VectorLayerForm
+          ref="VectorLayerForm"
+          model={this.props.model}
+          layer={this.state.layer}
+          url={this.props.config.url_default_server}
+          parent={this} />
       default :
         return <WMSLayerForm model={this.props.model} parent={this} />;
     }
   }
-
   /**
    *
    */
@@ -509,9 +559,9 @@ class Manager extends React.Component {
               <label>Välj lagertyp</label>
               <select disabled={typeSelectorDisabled} value={this.state.layerType} onChange={(e) => { this.setState({layerType: e.target.value}) }}>
                 <option>WMS</option>
-                <option>WFS</option>
                 <option>WMTS</option>
                 <option>ArcGIS</option>
+                <option value="Vector">Vektor</option>
               </select>
             </p>
             {this.renderForm()}

@@ -10,6 +10,7 @@ using System.Text;
 using System.Web;
 using System.Web.Hosting;
 using Sweco.Services.DataContracts.ToolOptions;
+using Sweco.Services.DataContracts.Config;
 
 namespace Sweco.Services
 {
@@ -175,12 +176,44 @@ namespace Sweco.Services
         void UpdateWFSTLayer(WFSTConfig layer);
 
         /// <summary>
+        /// Lägg till vektorlager.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void AddVectorLayer(VectorConfig layer);
+
+        /// <summary>
+        /// Lägg till vektorlager.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void RemoveVectorLayer(string id);
+
+        /// <summary>
+        /// Lägg till vektorlager.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void UpdateVectorLayer(VectorConfig layer);
+
+        /// <summary>
         /// Uppdatera lagermeny.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         [OperationContract]
         void UpdateLayerMenu(LayerMenuOptions config);
+
+        /// <summary>
+        /// Re index layerIDs.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [OperationContract]
+        void IndexLayerMenu();
     }
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerCall, ConcurrencyMode = ConcurrencyMode.Multiple)]
@@ -514,6 +547,30 @@ namespace Sweco.Services
         public void UpdateWFSTLayer(WFSTConfig layer)
         {
             this.settingsDataContext.UpdateWFSTLayer(layer);
+        }
+
+        [WebInvoke(Method = "POST", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/vectorlayer")]
+        public void AddVectorLayer(VectorConfig vectorConfig)
+        {
+            this.settingsDataContext.AddVectorLayer(vectorConfig);
+        }
+
+        [WebInvoke(Method = "DELETE", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/vectorlayer/{id}")]
+        public void RemoveVectorLayer(string id)
+        {
+            this.settingsDataContext.RemoveVectorLayer(id);
+        }
+
+        [WebInvoke(Method = "PUT", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/vectorlayer")]
+        public void UpdateVectorLayer(VectorConfig vectorConfig)
+        {
+            this.settingsDataContext.UpdateVectorLayer(vectorConfig);
+        }
+
+        [WebInvoke(Method = "GET", ResponseFormat = WebMessageFormat.Json, UriTemplate = "/indexlayermenu")]
+        public void IndexLayerMenu()
+        {
+            this.settingsDataContext.IndexLayerMenu();
         }
 
         /// <summary>

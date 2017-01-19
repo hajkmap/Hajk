@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sweco.Services.DataContracts
+namespace Sweco.Services.DataContracts.Config
 {
     public enum EditableGeometryType
     {
@@ -13,7 +13,7 @@ namespace Sweco.Services.DataContracts
         Polygon
     };
 
-    public class WFSTConfig
+    public class WFSTConfig : ILayerConfig
     {
         public string id { get; set; }
 

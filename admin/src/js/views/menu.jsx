@@ -260,10 +260,12 @@ class Menu extends React.Component {
             data.wmslayers.forEach(l => { l.type = "WMS" });
             data.wmtslayers.forEach(l => { l.type = "WMTS" });
             data.arcgislayers.forEach(l => { l.type = "ArcGIS" });
+            data.vectorlayers.forEach(l => { l.type = "Vector" });
 
             layers = data.wmslayers
                       .concat(data.wmtslayers)
-                      .concat(data.arcgislayers);
+                      .concat(data.arcgislayers)
+                      .concat(data.vectorlayers);
 
             layers.sort((a, b) => {
               var d1 = parseInt(a.date)
@@ -533,6 +535,9 @@ class Menu extends React.Component {
           break;
         case 'ArcGIS':
           displayType = "(ArcGIS)";
+          break;
+        case 'Vector':
+            displayType = "(Vektor)";
           break;
       }
 

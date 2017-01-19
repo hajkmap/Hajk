@@ -10,6 +10,7 @@ using System.Web.Hosting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Sweco.Services.DataContracts.ToolOptions;
+using Sweco.Services.DataContracts.Config;
 using System.Collections.Generic;
 
 namespace Sweco.Services.DataAccess
@@ -245,12 +246,15 @@ namespace Sweco.Services.DataAccess
             var b = layerConfig.wfslayers.OrderByDescending(l => l.id).FirstOrDefault();
             var c = layerConfig.wfstlayers.OrderByDescending(l => l.id).FirstOrDefault();
             var d = layerConfig.wmslayers.OrderByDescending(l => l.id).FirstOrDefault();
-            var e = layerConfig.wmtslayers.OrderByDescending(l => l.id).FirstOrDefault();            
+            var e = layerConfig.wmtslayers.OrderByDescending(l => l.id).FirstOrDefault();
+            var f = layerConfig.vectorlayers.OrderByDescending(l => l.id).FirstOrDefault();
 
             if (a != null) high = this.highest(a.id, high);
             if (b != null) high = this.highest(b.id, high);
             if (c != null) high = this.highest(c.id, high);
             if (d != null) high = this.highest(d.id, high);
+            if (e != null) high = this.highest(e.id, high);
+            if (f != null) high = this.highest(f.id, high);
 
             return high + 1;
         }
@@ -497,6 +501,123 @@ namespace Sweco.Services.DataAccess
             layer.id = this.GenerateLayerId(layerConfig).ToString();
             layerConfig.wfstlayers.Add(layer);
             this.saveLayerConfigToFile(layerConfig);
+        }        
+
+        /// <summary>
+        /// Add vector layer to config.
+        /// </summary>
+        /// <param name="vectorConfig"></param>
+        internal void AddVectorLayer(VectorConfig layer)
+        {
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            layer.id = this.GenerateLayerId(layerConfig).ToString();
+            if (layerConfig.vectorlayers == null)
+            {
+                layerConfig.vectorlayers = new List<VectorConfig>();
+            }
+            layerConfig.vectorlayers.Add(layer);
+            this.saveLayerConfigToFile(layerConfig);
+        }
+
+        /// <summary>
+        /// Remove vector layer from config.
+        /// </summary>
+        /// <param name="id"></param>
+        internal void RemoveVectorLayer(string id)
+        {
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            this.removeLayerFromConfig(id);
+            var index = layerConfig.vectorlayers.FindIndex(item => item.id == id);
+            if (index != -1)
+            {
+                layerConfig.vectorlayers.RemoveAt(index);
+            }
+            this.saveLayerConfigToFile(layerConfig);
+        }
+
+        /// <summary>
+        /// Update vector layer in config.
+        /// </summary>
+        /// <param name="vectorConfig"></param>
+        internal void UpdateVectorLayer(VectorConfig layer)
+        {
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            var index = layerConfig.vectorlayers.FindIndex(item => item.id == layer.id);
+            if (index != -1)
+            {
+                layerConfig.vectorlayers[index] = layer;
+            }
+            this.saveLayerConfigToFile(layerConfig);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="groups"></param>
+        /// <param name="oldLayerId"></param>
+        /// <param name="newLayerId"></param>
+        internal void findAndUpdateLayerInGroup(List<LayerGroup> groups, string oldLayerId, string newLayerId)
+        {
+            bool found = false;
+            groups.ForEach(group =>
+            {
+                MapWMSLayerInfo layer = group.layers.Find(l => l.id == oldLayerId);
+                if (layer != null)
+                {
+                    layer.id = newLayerId;
+                    found = true;
+                }
+                if (group.groups == null)
+                {
+                    group.groups = new List<LayerGroup>();
+                }
+                if (!found && group.groups.Count > 0)
+                {
+                    this.findAndUpdateLayerInGroup(group.groups, oldLayerId, newLayerId);
+                }             
+            });            
+        }
+
+        /// <summary>
+        /// Re index the layers in the application.        
+        /// </summary>
+        internal void IndexLayerMenu()
+        {
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            MapConfig mapConfig = this.readMapConfigFromFile();
+
+            Tool layerSwitcher = mapConfig.tools.Find(a => a.type == "layerswitcher");
+            LayerMenuOptions options = JsonConvert.DeserializeObject<LayerMenuOptions>(layerSwitcher.options.ToString());
+
+            List<ILayerConfig> layers = new List<ILayerConfig>();           
+            layerConfig.arcgislayers.ForEach((layer) => layers.Add(layer));
+            layerConfig.wfstlayers.ForEach((layer) => layers.Add(layer));
+            layerConfig.wmslayers.ForEach((layer) => layers.Add(layer));
+            layerConfig.wmtslayers.ForEach((layer) => layers.Add(layer));
+
+            int newLayerId = 0;
+            layers.ForEach(layer =>
+            {
+                string oldLayerId = layer.id;   
+                
+                for (int i = 0; i < options.baselayers.Count; i++)
+                {
+                    if (options.baselayers[i] == oldLayerId)
+                    { 
+                        options.baselayers[i] = newLayerId.ToString();
+                    }
+                }    
+
+                this.findAndUpdateLayerInGroup(options.groups, oldLayerId, newLayerId.ToString());                                
+                layer.id = newLayerId.ToString();
+                newLayerId += 1;
+            });
+
+            layerSwitcher.options = options;            
+            mapConfig.tools[mapConfig.tools.IndexOf(layerSwitcher)] = layerSwitcher;
+
+            this.saveLayerConfigToFile(layerConfig);
+            this.saveMapConfigToFile(mapConfig);
         }
     }
 }

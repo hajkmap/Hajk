@@ -42,6 +42,8 @@ var manager = Backbone.Model.extend({
         return this.get('config').url_wmtslayer_settings
       case "ArcGIS":
         return this.get('config').url_arcgislayer_settings
+      case "Vector":
+        return this.get('config').url_vectorlayer_settings
     }
   },
 
@@ -53,8 +55,13 @@ var manager = Backbone.Model.extend({
         data.wmslayers.forEach(l => { l.type = "WMS" });
         data.wmtslayers.forEach(l => { l.type = "WMTS" });
         data.arcgislayers.forEach(l => { l.type = "ArcGIS" });
+        data.vectorlayers.forEach(l => { l.type = "Vector" });
 
-        layers = data.wmslayers.concat(data.wmtslayers).concat(data.arcgislayers);
+        layers = data.wmslayers
+          .concat(data.wmtslayers)
+          .concat(data.arcgislayers)
+          .concat(data.vectorlayers);
+
         layers.sort((a, b) => {
           var d1 = parseInt(a.date)
           ,   d2 = parseInt(b.date);
