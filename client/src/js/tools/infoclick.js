@@ -279,6 +279,8 @@ var InfoClickModel = {
           }
           information = information.replace(property, lookup(properties, property));
       });
+    } else {
+      console.log("No information found");
     }
 
     layerindex = this.layerOrder.hasOwnProperty(layerModel.getName()) ?

@@ -32,7 +32,8 @@ var LayerModel = require('layers/layer');
 var HighlightLayerProperties = {
   source: undefined,
   name: "highlight-wms",
-  selectedLayer: undefined
+  selectedLayer: undefined,
+  markerImg: 'assets/icons/marker.png'
 };
 
 /**
@@ -51,7 +52,7 @@ var HighlightLayer = {
   initialize: function () {
     LayerModel.prototype.initialize.call(this);
     var selectInteraction;
-    this.set('source', new ol.source.Vector({}));
+    this.set('source', new ol.source.Vector({}));    
     this.layer = new ol.layer.Vector({
       visible: true,
       name: this.get('name'),

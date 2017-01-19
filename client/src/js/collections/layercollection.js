@@ -22,7 +22,7 @@
 
 var types = {
   "wms": require('layers/wmslayer'),
-  "wfs": require('layers/wfslayer'),
+  "vector": require('layers/wfslayer'),
   "wmts": require('layers/wmtslayer'),
   "data": require('layers/datalayer'),
   "arcgis": require('layers/arcgislayer')
@@ -178,6 +178,41 @@ var LayerCollection = {
     return config;
   },
 
+  mapWFSConfig: function(args) {
+
+    var config = {
+      type : "vector",
+      options: {
+        "id": args.id,
+        "name": args.id,
+        "caption": args.caption,
+        "visible": args.visibleAtStart,
+        "opacity": args.opacity,
+        "serverType": "arcgis",
+        "loadType": "ajax",
+        "url": args.url,
+        "queryable": args.queryable,
+        "information": args.infobox,
+        "icon": args.legend,
+        "featureId": "FID",
+        "legend": [{
+          "Url": args.legend,
+          "Description": args.caption
+        }],
+        "params": {
+          "service": "WFS",
+          "version": "1.1.0",
+          "request": "GetFeature",
+          "typename": args.layer,
+          "srsname": args.projection,
+          "bbox": ""
+        }
+      }
+    };
+
+    return config;
+  },
+
   mapArcGISConfig: function(args) {
 
     function getLegendUrl() {
@@ -239,6 +274,10 @@ var LayerCollection = {
     }
     if (args.type === "arcgis") {
       config = LayerCollection.mapArcGISConfig(args);
+    }
+
+    if (args.type === "vector") {
+      config = LayerCollection.mapWFSConfig(args);
     }
 
     var Layer = types[config.type];
