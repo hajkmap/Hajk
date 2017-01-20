@@ -51,9 +51,16 @@ class ArcGISLayerForm extends React.Component {
   componentDidMount() {
     defaultState.url = this.props.url;
     this.setState(defaultState);
+    this.props.model.on('change:legend', () => {
+      this.setState({
+        legend: this.props.model.get('legend')
+      });
+      this.validateField('legend');
+    });
   }
 
   componentWillUnmount() {
+    this.props.model.off('change:legend');
   }
 
   constructor() {

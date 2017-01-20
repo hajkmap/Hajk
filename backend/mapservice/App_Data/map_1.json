@@ -72,6 +72,10 @@
             "toggled": true,
             "layers": [
               {
+                "id": "8",
+                "drawOrder": 0
+              },
+              {
                 "id": "6",
                 "drawOrder": 0
               },

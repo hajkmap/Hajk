@@ -25,6 +25,7 @@ const defaultState = {
   load: false,
   imageLoad: false,
   validationErrors: [],
+  addedLayers: [],
   id: "",
   caption: "",
   content: "",
@@ -49,9 +50,16 @@ class ArcGISLayerForm extends React.Component {
   componentDidMount() {
     defaultState.url = this.props.url;
     this.setState(defaultState);
+    this.props.model.on('change:legend', () => {
+      this.setState({
+        legend: this.props.model.get('legend')
+      });
+      this.validateField('legend');
+    });
   }
 
   componentWillUnmount() {
+    this.props.model.off('change:legend');
   }
 
   constructor() {
@@ -59,8 +67,19 @@ class ArcGISLayerForm extends React.Component {
     this.state = defaultState;
     this.layer = {};
   }
+
   describeLayer(layer) {
-    throw "Not implemented";
+    this.props.model.getWFSLayerDescription(this.state.url, this.state.addedLayers[0], layerDescription => {
+      console.log("Layer description", layerDescription);
+      this.props.parent.setState({
+        layerProperties: layerDescription.map(d => {
+            return {
+              name: d.name,
+              type: d.localType
+            }
+        })
+      });
+    });
   }
 
   getLayer() {
@@ -74,7 +93,7 @@ class ArcGISLayerForm extends React.Component {
       legend: this.getValue("legend"),
       visibleAtStart: this.getValue("visibleAtStart"),
       projection: this.getValue("projection"),
-      layer: this.getValue("layer"),
+      layer: this.state.addedLayers[0],
       opacity: this.getValue("opacity"),
       queryable: this.getValue("queryable"),
       infobox: this.getValue("infobox")
@@ -103,7 +122,7 @@ class ArcGISLayerForm extends React.Component {
 
   validate() {
     var valid = true
-    ,   validationFields = ["url", "caption", "projection", "layer"];
+    ,   validationFields = ["url", "caption", "projection", "layer", "legend"];
 
     validationFields.forEach(field => {
       if (!this.validateField(field)) {
@@ -136,14 +155,21 @@ class ArcGISLayerForm extends React.Component {
     }
 
     switch (fieldName) {
+      case "layer":
+        if (this.state &&
+            this.state.addedLayers &&
+            this.state.addedLayers.length === 0) {
+          valid = false;
+        }
+        break;
       case "opacity":
         if (!number(value) || empty(value)) {
           valid = false;
         }
         break;
       case "url":
-      case "layer":
       case "caption":
+      case "legend":
       case "projection":
         if (empty(value)) {
           valid = false;
@@ -174,15 +200,121 @@ class ArcGISLayerForm extends React.Component {
     return valid = this.state.validationErrors.find(v => v === inputName) ? "validation-error" : "";
   }
 
+  loadWFSCapabilities(e, callback) {
+    if (e)
+      e.preventDefault();
+
+    this.setState({
+      load: true,
+      addedLayers: [],
+      capabilities: false,
+      layerProperties: undefined,
+      layerPropertiesName: undefined
+    });
+
+    if (this.state.capabilities) {
+      this.state.capabilities.forEach((layer, i) => {
+        this.refs[layer.name].checked = false;
+      });
+    }
+
+    this.props.model.getWFSCapabilities(this.state.url, (capabilities) => {
+      this.setState({
+        capabilities: capabilities,
+        load: false
+      });
+      if (capabilities === false) {
+        this.props.application.setState({
+          alert: true,
+          alertMessage: "Servern svarar inte. Försök med en annan URL."
+        })
+      }
+      if (callback) {
+        callback();
+      }
+    });
+  }
+
   loadLegendImage(e) {
     $('#select-image').trigger('click');
   }
 
+  appendLayer(e, checkedLayer) {
+    this.state.addedLayers.splice(0, this.state.addedLayers.length);
+    if (e.target.checked === true) {
+      this.state.addedLayers.push(checkedLayer);
+    } else {
+      this.state.addedLayers = this.state.addedLayers.filter(layer =>
+        layer !== checkedLayer
+      );
+    }
+    this.forceUpdate();
+    this.validate("layers");
+  }
+
   loadLayers(layer, callback) {
+    this.loadWFSCapabilities(undefined, () => {
+      this.setState({
+        addedLayers: [layer.layer]
+      });
+      _.each(this.refs, element => {
+        if (element.dataset.type == "wms-layer") {
+          element.checked = false;
+        }
+      });
+      this.refs[layer.layer].checked = true;
       if (callback) callback();
+    });
   }
 
   renderLayersFromCapabilites() {
+    if (this.state && this.state.capabilities) {
+      return this.state.capabilities.map((layer, i) => {
+        var classNames = this.state.layerPropertiesName === layer.name ?
+                         "fa fa-info-circle active" : "fa fa-info-circle";
+        return (
+          <li key={i}>
+            <input ref={layer.name} id={"layer" + i} type="radio" name="featureType" data-type="wms-layer" onChange={(e) => { this.appendLayer(e, layer.name) }}/>&nbsp;
+            <label htmlFor={"layer" + i}>{layer.name}</label>
+            <i className={classNames} onClick={(e) => this.describeLayer(e, layer.name)}></i>
+          </li>
+        )
+      });
+    } else {
+      return null;
+    }
+  }
+
+  renderSelectedLayers() {
+
+    if (!this.state.addedLayers) return null;
+
+    function uncheck(layer) {
+      this.appendLayer({
+        target: {
+          checked: false
+        }
+      }, layer);
+      this.refs[layer].checked = false;
+    }
+
+    return this.state.addedLayers.map((layer, i) =>
+      <li className="layer" key={i}>
+        <span>{layer}</span>&nbsp;
+        <i className="fa fa-times" onClick={uncheck.bind(this, layer)}></i>
+      </li>
+    )
+  }
+
+  renderLayerList() {
+    var layers = this.renderLayersFromCapabilites();
+    return (
+      <div className="layer-list">
+        <ul>
+          {layers}
+        </ul>
+      </div>
+    )
   }
 
   render() {
@@ -218,7 +350,7 @@ class ArcGISLayerForm extends React.Component {
               this.validateField("url");
             }}
           />
-          <span onClick={(e) => {this.loadWMSCapabilities(e)}} className="btn btn-default">Ladda {loader}</span>
+        <span onClick={(e) => {this.loadWFSCapabilities(e)}} className="btn btn-default">Ladda {loader}</span>
         </div>
         <div>
           <label>Senast ändrad</label>
@@ -231,17 +363,21 @@ class ArcGISLayerForm extends React.Component {
             ref="input_content"
             value={this.state.content}
             onChange={(e) => {
-              this.setState({content: e.target.value})
+              this.setState({content: e.target.value});
             }}
           />
         </div>
         <div>
-          <label>Teckenförklaring</label>
+          <label>Ikon*</label>
           <input
             type="text"
             ref="input_legend"
             value={this.state.legend}
-            onChange={(e) => this.setState({legend: e.target.value})}
+            className={this.getValidationClass("legend")}
+            onChange={(e) => {
+              this.setState({legend: e.target.value})
+              this.validateField("legend");
+            }}
           />
           <span onClick={(e) => {this.loadLegendImage(e)}} className="btn btn-default">Välj fil {imageLoader}</span>
         </div>
@@ -294,17 +430,16 @@ class ArcGISLayerForm extends React.Component {
           />
         </div>
         <div>
-          <label>Lager*</label>
-          <input
-            type="text"
-            ref="input_layer"
-            value={this.state.layer}
-            className={this.getValidationClass("layer")}
-            onChange={(e) => {
-              this.setState({layer: e.target.value});
-              this.validateField("layer");
-            }}
-          />
+          <label>Valt lager*</label>
+          <div ref="input_layer" className={"layer-list-choosen " + this.getValidationClass("layer")}>
+            <ul>
+              {this.renderSelectedLayers()}
+            </ul>
+          </div>
+        </div>
+        <div>
+          <label>Lagerlista</label>
+          {this.renderLayerList()}
         </div>
         <div>
           <label>Inforuta</label>

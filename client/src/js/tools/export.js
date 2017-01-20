@@ -243,12 +243,6 @@ var ExportModel = {
       .getArray()
       .filter(exportable)
       .map((layer, i) => {
-        // layerUrl = '';
-        // if (typeof layer.getSource().getUrls == 'function')
-        //   layerUrl = formatUrl(layer.getSource().getUrls()[0]);
-        // else if (typeof layer.getSource().getUrl == 'function')
-        //   layerUrl = formatUrl(layer.getSource().getUrl());
-
         return {
           url: layer.getSource().get('url'),
           layers: layer.getSource().getParams()["LAYERS"].split(','),
@@ -266,9 +260,9 @@ var ExportModel = {
    */
   findVector: function () {
 
-    var drawLayer = this.get('olMap').getLayers().getArray().find(layer => layer.get('name') === 'draw-layer');
-
     function asObject(style) {
+            
+      if (!style) return null;
 
       if (Array.isArray(style)) {
         if (style.length === 2) {
@@ -295,12 +289,12 @@ var ExportModel = {
       ,   fontSize =  "16"
       ,   fontColor =  "#FFFFFF";
 
-      if (style.getFill()) {
+      if (style.getFill && style.getFill()) {
         fillColor = style.getFill().getColor().toHex();
         fillOpacity = style.getFill().getColor().toOpacity();
       }
 
-      if (style.getStroke()) {
+      if (style.getFill && style.getStroke()) {
 
         strokeColor = style.getStroke().getColor().toHex();
         strokeWidth = style.getStroke().getWidth() || 3;
@@ -310,7 +304,7 @@ var ExportModel = {
                           "dash" : "dot": "solid";
       }
 
-      if (style.getImage()) {
+      if (style.getImage && style.getImage()) {
         if (style.getImage() instanceof ol.style.Icon) {
           pointSrc = style.getImage().getSrc();
         }
@@ -354,11 +348,11 @@ var ExportModel = {
       );
     }
 
-    function generate(features) {
+    function translateVector(features, sourceStyle) {
 
       function getText(feature) {
         if (feature.getProperties()) {
-          if (feature.getProperties().type == "Text") {
+          if (feature.getProperties().type === "Text") {
             if (feature.getProperties().description)
               text = feature.getProperties().description
             else if (feature.getProperties().name)
@@ -368,19 +362,22 @@ var ExportModel = {
             return text
           }
         }
-        if (feature.getStyle()[1] &&
+        if (feature.getStyle &&
+            Array.isArray(feature.getStyle()) &&
+            feature.getStyle()[1] &&
             feature.getStyle()[1].getText() &&
             feature.getStyle()[1].getText().getText()) {
           return feature.getStyle()[1].getText().getText();
         }
       }
 
-
-
-      return [{
-        features: features.map((feature) => {
+      return {
+        features: features.map(feature => {
+          if (!feature.getStyle() && sourceStyle) {
+            feature.setStyle(sourceStyle)
+          }
           return {
-            type: feature.getProperties().type,
+            type: feature.getGeometry().getType(),
             attributes: {
               text: getText(feature),
               style: asObject(feature.getStyle())
@@ -388,11 +385,35 @@ var ExportModel = {
             coordinates: as2DPairs(feature.getGeometry().getCoordinates())
           }
         })
-      }]
+      }
     }
 
-    f = generate(drawLayer.getSource().getFeatures());
-    return f
+    var layers
+    ,   vectorLayers
+    ,   imageVectorLayers
+    ,   extent = this.previewLayer.getSource().getFeatures()[0].getGeometry().getExtent()
+    ;
+
+    layers = this.get('olMap').getLayers().getArray();
+
+    vectorLayers = layers.filter(layer =>
+      layer instanceof ol.layer.Vector && layer.get('name') !== 'preview-layer'
+    );
+
+    imageVectorLayers = layers.filter(layer =>
+      layer instanceof ol.layer.Image &&
+      layer.getSource() instanceof ol.source.ImageVector
+    );
+
+    imageVectorLayers = imageVectorLayers.map(layer =>
+      translateVector(layer.getSource().getSource().getFeaturesInExtent(extent), layer.getSource().getStyle()()[0])
+    ).filter(layer => layer.features.length > 0);
+
+    vectorLayers = vectorLayers.map(layer =>
+      translateVector(layer.getSource().getFeaturesInExtent(extent))
+    ).filter(layer => layer.features.length > 0);
+
+    return vectorLayers.concat(imageVectorLayers);
   },
 
   /**

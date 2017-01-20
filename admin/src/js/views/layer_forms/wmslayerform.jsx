@@ -35,10 +35,10 @@ class WMSLayerForm extends React.Component {
     defaultState.url = this.props.url;
     this.setState(defaultState);
     this.props.model.on('change:legend', () => {
-      console.log("Change from wms");
       this.setState({
         legend: this.props.model.get('legend')
       });
+      this.validateField('legend');
     });
   }
 
@@ -154,9 +154,7 @@ class WMSLayerForm extends React.Component {
           layers.push(append(layer));
         }
       });
-
       return layers;
-
     } else {
       return null;
     }
