@@ -42,7 +42,15 @@ var Drag = function() {
 
 ol.inherits(Drag, ol.interaction.Pointer);
 
-Drag.prototype.handleDownEvent = function(evt) {
+Drag.prototype.isDraggable = function (layer) {
+  var accepted = {
+    'draw-layer': true,
+    'preview-layer': true
+  };
+  return layer ? accepted.hasOwnProperty(layer.getProperties().name) : true;
+};
+
+Drag.prototype.handleDownEvent = function (evt) {
   var map = evt.map
   ,   feature;
 
@@ -53,20 +61,18 @@ Drag.prototype.handleDownEvent = function(evt) {
     return feature;
   });
 
-  if (feature) {
+  if (feature && this.isDraggable(this.layer_)) {
     this.coordinate_ = evt.coordinate;
     this.feature_ = feature;
-  }
-
-  if (this.layer_ &&
-      (this.layer_.getProperties().name === 'search-vector-layer' ||
-       this.layer_.getProperties().name === 'highlight-wms' ||
-       this.layer_.dragLocked === true
-      )) {
-    return false;
+  } else {
+    if (this.layer_)
+      this.layer_.dragLocked = true;
+    feature = false;
+    this.feature_ = false;
   }
 
   return !!feature;
+
 };
 
 Drag.prototype.handleDragEvent = function(evt) {

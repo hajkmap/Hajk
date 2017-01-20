@@ -25,6 +25,7 @@ using NetTopologySuite.Features;
 using log4net;
 using Sweco.Services.MapExport.Extensions;
 using System.Threading;
+using System.Web;
 
 namespace Sweco.Services.MapExport
 {
@@ -337,11 +338,9 @@ namespace Sweco.Services.MapExport
                     featureData.AddRow(dataRow);
                 });
 
-                vectorLayer.DataSource = new SharpMap.Data.Providers.GeometryFeatureProvider(featureData);
-                //vectorLayer.DataSource = new SharpMap.Data.Providers.FeatureProvider(featureData);                
-
-                //vectorLayer.Theme = new CustomTheme(GetFeatureStyle);
+                vectorLayer.DataSource = new SharpMap.Data.Providers.GeometryFeatureProvider(featureData);                                  
                 vectorLayer.Theme = new CustomTheme(GetFeatureStyle);
+
                 map.Layers.Add(vectorLayer);
 
                 LabelLayer labels = new LabelLayer("Labels");
@@ -458,14 +457,14 @@ namespace Sweco.Services.MapExport
                 {
                     try
                     {
-                        WebClient wc = new WebClient();
+                        WebClient wc = new WebClient();                        
                         byte[] bytes = wc.DownloadData(featureStyle.pointSrc);
                         MemoryStream ms = new MemoryStream(bytes);
                         Image img = Image.FromStream(ms);
                         style.Symbol = img;
                     }
-                    catch
-                    {
+                    catch (Exception ex)
+                    {                                              
                     }
                 }
                 else

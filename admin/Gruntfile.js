@@ -74,19 +74,20 @@ module.exports = function (grunt) {
       react: {
         "admin": {
           "files": {
-            "src/js/views/compiled/alert.js": ["src/js/views/alert.jsx"],
-            "src/js/views/compiled/application.js": ["src/js/views/application.jsx"],
-            "src/js/views/compiled/manager.js": ["src/js/views/manager.jsx"],
-            "src/js/views/compiled/menu.js": ["src/js/views/menu.jsx"],
-            "src/js/views/compiled/search.js": ["src/js/views/search.jsx"],
-            "src/js/views/compiled/edit.js": ["src/js/views/edit.jsx"],
-            "src/js/views/compiled/map.js": ["src/js/views/map.jsx"],
-            "src/js/views/compiled/info.js": ["src/js/views/info.jsx"],
-            "src/js/views/compiled/release.js": ["src/js/views/release.jsx"],
-            "src/js/views/compiled/wmslayerform.js": ["src/js/views/layer_forms/wmslayerform.jsx"],
-            "src/js/views/compiled/wfslayerform.js": ["src/js/views/layer_forms/wfslayerform.jsx"],
-            "src/js/views/compiled/wmtslayerform.js": ["src/js/views/layer_forms/wmtslayerform.jsx"],
-            "src/js/views/compiled/arcgislayerform.js": ["src/js/views/layer_forms/arcgislayerform.jsx"]
+            "src/js/views/compiled/alert.js": "src/js/views/alert.jsx",
+            "src/js/views/compiled/application.js": "src/js/views/application.jsx",
+            "src/js/views/compiled/manager.js": "src/js/views/manager.jsx",
+            "src/js/views/compiled/menu.js": "src/js/views/menu.jsx",
+            "src/js/views/compiled/search.js": "src/js/views/search.jsx",
+            "src/js/views/compiled/edit.js": "src/js/views/edit.jsx",
+            "src/js/views/compiled/map.js": "src/js/views/map.jsx",
+            "src/js/views/compiled/info.js": "src/js/views/info.jsx",
+            "src/js/views/compiled/release.js": "src/js/views/release.jsx",
+            "src/js/views/compiled/wmslayerform.js": "src/js/views/layer_forms/wmslayerform.jsx",
+            "src/js/views/compiled/wfslayerform.js": "src/js/views/layer_forms/wfslayerform.jsx",
+            "src/js/views/compiled/wmtslayerform.js": "src/js/views/layer_forms/wmtslayerform.jsx",
+            "src/js/views/compiled/arcgislayerform.js": "src/js/views/layer_forms/arcgislayerform.jsx",
+            "src/js/views/compiled/vectorlayerform.js": "src/js/views/layer_forms/vectorlayerform.jsx"
           }
         }
       },
@@ -118,10 +119,10 @@ module.exports = function (grunt) {
               "views/info": "./src/js/views/compiled/info.js",
               "views/release": "./src/js/views/compiled/release.js",
               "views/alert": "./src/js/views/compiled/alert.js",
-              "views/layerforms/wms": "./src/js/views/compiled/wmslayerform.js",
-              "views/layerforms/wfs": "./src/js/views/compiled/wfslayerform.js",
+              "views/layerforms/wms": "./src/js/views/compiled/wmslayerform.js",              
               "views/layerforms/wmts": "./src/js/views/compiled/wmtslayerform.js",
               "views/layerforms/arcgis":  "./src/js/views/compiled/arcgislayerform.js",
+              "views/layerforms/vector":  "./src/js/views/compiled/vectorlayerform.js",
               "models/application": "./src/js/models/application.js",
               "models/menu": "./src/js/models/menu.js",
               "models/manager": "./src/js/models/manager.js",

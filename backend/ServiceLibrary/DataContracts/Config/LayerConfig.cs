@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sweco.Services.DataContracts
+namespace Sweco.Services.DataContracts.Config
 {
     class LayerConfig
     {
@@ -13,6 +13,8 @@ namespace Sweco.Services.DataContracts
         public List<WMSConfig> wmslayers { get; set; }
 
         public List<WFSConfig> wfslayers { get; set; }
+
+        public List<VectorConfig> vectorlayers { get; set; }
 
         public List<WFSTConfig> wfstlayers { get; set; }
 

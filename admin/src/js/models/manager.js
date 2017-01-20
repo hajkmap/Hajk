@@ -20,6 +20,8 @@
 //
 // https://github.com/Johkar/Hajk2
 
+var X2JS = require('x2js');
+
 var manager = Backbone.Model.extend({
 
   defaults: {
@@ -42,6 +44,8 @@ var manager = Backbone.Model.extend({
         return this.get('config').url_wmtslayer_settings
       case "ArcGIS":
         return this.get('config').url_arcgislayer_settings
+      case "Vector":
+        return this.get('config').url_vectorlayer_settings
     }
   },
 
@@ -53,8 +57,13 @@ var manager = Backbone.Model.extend({
         data.wmslayers.forEach(l => { l.type = "WMS" });
         data.wmtslayers.forEach(l => { l.type = "WMTS" });
         data.arcgislayers.forEach(l => { l.type = "ArcGIS" });
+        data.vectorlayers.forEach(l => { l.type = "Vector" });
 
-        layers = data.wmslayers.concat(data.wmtslayers).concat(data.arcgislayers);
+        layers = data.wmslayers
+          .concat(data.wmtslayers)
+          .concat(data.arcgislayers)
+          .concat(data.vectorlayers);
+
         layers.sort((a, b) => {
           var d1 = parseInt(a.date)
           ,   d2 = parseInt(b.date);
@@ -147,6 +156,62 @@ var manager = Backbone.Model.extend({
     return this.get('config').url_proxy ?
       this.get('config').url_proxy + "/" + url.replace(/http[s]?:\/\//, '') :
       url;
+  },
+
+  getWFSLayerDescription: function(url, layer, callback) {
+    url = this.prepareProxyUrl(url);
+    $.ajax(url, {
+      data: {
+        request: 'describeFeatureType',
+        typename: layer
+      },
+      success: data => {
+        var parser = new X2JS()
+        ,   xmlstr = data.xml ? data.xml : (new XMLSerializer()).serializeToString(data)
+        ,   apa = parser.xml2js(xmlstr);
+        try {
+          var props = apa.schema.complexType.complexContent.extension.sequence.element.map(a => {
+            return {
+              name: a._name,
+              localType: a._type ? a._type.replace(a.__prefix + ':', '') : ''
+            }
+          });
+          if (props)
+            callback(props);
+          else
+            callback(false);
+        } catch (e) {
+          callback(false);
+        }
+      }
+    });
+  },
+
+  parseWFSCapabilitesTypes: function (data) {
+    var types = [];
+    $(data).find('FeatureType').each((i, featureType) => {
+      types.push({
+        name: $(featureType).find('Name').first().get(0).textContent,
+        title: $(featureType).find('Title').first().get(0).textContent
+      });
+    });
+    return types;
+  },
+
+  getWFSCapabilities: function (url, callback) {
+    $.ajax(this.prepareProxyUrl(url), {
+      data: {
+        service: 'WFS',
+        request: 'GetCapabilities'
+      },
+      success: data => {
+        var response = this.parseWFSCapabilitesTypes(data);
+        callback(response);
+      },
+      error: data => {
+        callback(false);
+      }
+    });
   },
 
   getArcGISLayerDescription: function(url, layer, callback) {

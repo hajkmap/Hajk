@@ -1,7 +1,7 @@
 {
   "wmtslayers": [
     {
-      "id": "0",
+      "id": "5",
       "caption": "Topowebben wmts",
       "url": "http://194.71.132.27/lmproxy/wmts",
       "owner": null,
@@ -55,61 +55,81 @@
       ]
     }
   ],
-  "wmslayers": [
+  "wmslayers": [],
+  "wfslayers": [],
+  "vectorlayers": [
     {
-      "id": "1",
-      "caption": "test",
-      "url": "http://194.71.132.27/geoserver/wms",
-      "owner": "",
-      "date": "1483010031132",
-      "content": "test",
-      "legend": "",
-      "projection": null,
-      "layers": [
-        "motala:Biotopkartering2016"
-      ],
-      "infobox": "test",
-      "searchFields": [],
-      "displayFields": [],
+      "id": "6",
+      "caption": "hpl vektor",
+      "url": "http://ksdgis.se/arcgis/services/hpl/MapServer/WFSServer",
+      "layer": "hpl:hpl",
+      "owner": null,
+      "date": "1484916995117",
+      "content": "",
+      "legend": "http://localhost/Upload/1f822c4c-7221-4a0c-9bc8-25c7d836ebc2.png",
+      "projection": "EPSG:3006",
       "visibleAtStart": false,
-      "queryable": true,
-      "tiled": false,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "geoserver"
+      "opacity": 1.0,
+      "infobox": "Hållplats {namn} {id}\n",
+      "queryable": true
     },
     {
-      "id": "2",
-      "caption": "test2",
-      "url": "http://194.71.132.27/geoserver/wms",
-      "owner": "",
-      "date": "1483011651457",
-      "content": "test",
-      "legend": "",
-      "projection": null,
-      "layers": [
-        "gullspang:9ms1330"
-      ],
-      "infobox": "",
-      "searchFields": [],
-      "displayFields": [],
+      "id": "8",
+      "caption": "HPL 2",
+      "url": "http://ksdgis.se/arcgis/services/hpl/MapServer/WFSServer",
+      "layer": "hpl:hpl",
+      "owner": null,
+      "date": "1484918959147",
+      "content": "",
+      "legend": "http://localhost/Upload/e4739e6b-2464-426f-897c-f6b5a2bfb78c.png",
+      "projection": "EPSG:3006",
       "visibleAtStart": false,
-      "queryable": true,
-      "tiled": false,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "geoserver"
+      "opacity": 1.0,
+      "infobox": "{x} {y}",
+      "queryable": true
     }
   ],
-  "wfslayers": [],
-  "wfstlayers": [],
+  "wfstlayers": [
+    {
+      "id": "7",
+      "caption": "Yta",
+      "url": "http://194.71.132.27/geoserver/demo/wfs",
+      "projection": "EPSG:3006",
+      "layers": [
+        "demo:yta"
+      ],
+      "editableFields": [
+        {
+          "index": 1,
+          "name": "name",
+          "dataType": "string",
+          "textType": "fritext",
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 3,
+          "name": "list",
+          "dataType": "string",
+          "textType": "flerval",
+          "values": null,
+          "hidden": false,
+          "defaultValue": "b"
+        }
+      ],
+      "editPoint": false,
+      "editPolygon": true,
+      "editLine": false
+    }
+  ],
   "arcgislayers": [
     {
-      "id": "3",
-      "caption": "arcgis",
+      "id": "0",
+      "caption": "hpl arcgis",
       "url": "http://ksdgis.se/arcgis/rest/services/hpl/MapServer",
       "owner": null,
-      "date": "1483018328151",
+      "date": "1484818945053",
       "content": "test",
       "legend": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAWCAYAAADAQbwGAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAANhJREFUOI21lDEOwyAMRT8iEjtbbsTQ9rBtBm7Exs5A6NAiIWJj0ip/QzYvzwiyQEgBVPbrEwC0Cw8FlFH/whWytwUAdgAKCQCwe7vnb127qKaBFTZK9rZQUNbw1xyAlF016WuUpWjYbtAuKuk4rh/5AqDZgHSrq/GIZhOB2oX7zLWpvROGc4d/6mL/ExY4suTshkAOOoKJwB4qwaaAZ0MCrfn882ICaTSqH4C1uQ03qjUoPZQ05Mz6OvVxdmQJSsFIYExQ1qBwGyhT0bBtXA1ebS0kHN5vmzcaD2ZB4GrZNAAAAABJRU5ErkJggg==&hpl",
       "projection": "EPSG:3006",
@@ -125,54 +145,6 @@
       ],
       "opacity": 1.0,
       "infobox": "Namn: {namn}",
-      "queryable": true
-    },
-    {
-      "id": "4",
-      "caption": "Jaktadm",
-      "url": "http://ksdgis.se/arcgis/rest/services/jaktadm/MapServer",
-      "owner": null,
-      "date": "1483635346677",
-      "content": "Jaktadm",
-      "legend": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAADtJREFUOI1jYaAyYKGZgTk5Of8pNWzKlCmMLOgC5BoGcxDtvDxq4KiBowaOGojTQErKRFjRx4IuQCkAAF4DDg6LpGAXAAAAAElFTkSuQmCC&FASTIGHET#data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAADdJREFUOI1jYaAyYIHS/6lkHiMLYTWkAXQDGck0B+5Dmrtw1MBRA0cNHB4GUlwu0syF5JaDGAAABzUDUfxbIJcAAAAASUVORK5CYII=&LAN#data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAEVJREFUOI1jYaAyYKGZgXPnzv1PqWHJycmMKC5MMntEtmHzTskxMDDQ0sujBo4aOGrgqIE4DYQVQeSA5ORkRhQDYQKUAgCZ7gsrzE8KlQAAAABJRU5ErkJggg==&AJO_ANSOKAN_FASTIGHET",
-      "projection": "EPSG:3006",
-      "visibleAtStart": false,
-      "layers": [
-        "0",
-        "1",
-        "2"
-      ],
-      "extent": [
-        "-2758691.0087",
-        "3048053.186899999",
-        "2693111.4392999997",
-        "7781208.948600002"
-      ],
-      "opacity": 1.0,
-      "infobox": "",
-      "queryable": true
-    },
-    {
-      "id": "5",
-      "caption": "Sevärdheter",
-      "url": "http://gisak.alingsas.se/arcgis/rest/services/Extern_webbkarta/Kultur_Noje/MapServer?f=json",
-      "owner": null,
-      "date": "1484136351917",
-      "content": "",
-      "legend": "false",
-      "projection": "EPSG:3007",
-      "visibleAtStart": false,
-      "layers": [
-        "9"
-      ],
-      "extent": [
-        "175228.33999999985",
-        "6411039.6347",
-        "187807.1464999998",
-        "6449848.065099999"
-      ],
-      "opacity": 1.0,
-      "infobox": "",
       "queryable": true
     }
   ]
