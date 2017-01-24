@@ -66,25 +66,38 @@
         ],
         "groups": [
           {
-            "id": "91efa2d2-4e3e-8295-752e-aa87a2dc6806",
+            "id": "af94804a-2874-fe53-082b-a76b490558c2",
             "parent": "-1",
-            "name": "Test",
-            "toggled": true,
-            "layers": [
+            "name": "Grupp 1",
+            "toggled": false,
+            "layers": [],
+            "groups": [
               {
-                "id": "8",
-                "drawOrder": 0
-              },
-              {
-                "id": "6",
-                "drawOrder": 0
-              },
-              {
-                "id": "0",
-                "drawOrder": 4
+                "id": "91efa2d2-4e3e-8295-752e-aa87a2dc6806",
+                "parent": "af94804a-2874-fe53-082b-a76b490558c2",
+                "name": "Kartlager",
+                "toggled": true,
+                "layers": [
+                  {
+                    "id": "10",
+                    "drawOrder": 0
+                  },
+                  {
+                    "id": "8",
+                    "drawOrder": 0
+                  },
+                  {
+                    "id": "6",
+                    "drawOrder": 0
+                  },
+                  {
+                    "id": "0",
+                    "drawOrder": 4
+                  }
+                ],
+                "groups": []
               }
-            ],
-            "groups": []
+            ]
           }
         ]
       }
@@ -178,6 +191,12 @@
     {
       "type": "anchor",
       "options": {}
+    },
+    {
+      "type": "information",
+      "options": {
+        "visibleAtStart": true
+      }
     }
   ],
   "map": {

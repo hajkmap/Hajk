@@ -81,6 +81,7 @@ var ToolbarView = {
           aria-label="toolbar">
           {tools}
         </div>
+        <div className="information" id="information"></div>
       </div>
     );
   }
