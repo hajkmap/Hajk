@@ -55,8 +55,48 @@
       ]
     }
   ],
-  "wmslayers": [],
-  "wfslayers": [],
+  "wmslayers": [
+    {
+      "id": "10",
+      "caption": "Fastighet",
+      "url": "http://194.71.132.27/geoserver/demo/wms",
+      "owner": "",
+      "date": "1485196093152",
+      "content": "",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "demo_fastighet"
+      ],
+      "infobox": "",
+      "searchFields": [],
+      "displayFields": [],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver"
+    }
+  ],
+  "wfslayers": [
+    {
+      "id": "9",
+      "caption": "Busshållplatser",
+      "url": "http://194.71.132.27/geoserver/demo/wfs",
+      "layers": [
+        "demo:stopareas"
+      ],
+      "searchFields": [
+        "namn"
+      ],
+      "displayFields": [
+        "id",
+        "namn"
+      ],
+      "outputFormat": "GML3"
+    }
+  ],
   "vectorlayers": [
     {
       "id": "6",
@@ -109,13 +149,13 @@
           "defaultValue": null
         },
         {
-          "index": 3,
-          "name": "list",
-          "dataType": "string",
-          "textType": "flerval",
+          "index": 4,
+          "name": "integer",
+          "dataType": "int",
+          "textType": null,
           "values": null,
           "hidden": false,
-          "defaultValue": "b"
+          "defaultValue": null
         }
       ],
       "editPoint": false,

@@ -7,7 +7,8 @@
         "compiled/legend.js": ["src/js/views/components/legend.jsx"],
         "compiled/legendbutton.js": ["src/js/views/components/legendbutton.jsx"],
         "compiled/featureinfo.js": ["src/js/views/components/featureinfo.jsx"],
-        "compiled/backgroundswitcher.js": ["src/js/views/components/backgroundswitcher.jsx"]
+        "compiled/backgroundswitcher.js": ["src/js/views/components/backgroundswitcher.jsx"],
+        "compiled/information.js": ["src/js/views/components/information.jsx"]
       }
     },
     "mapview": {
@@ -82,6 +83,7 @@
         "tools/draw": "./src/js/tools/draw.js",
         "tools/edit": "./src/js/tools/edit.js",
         "tools/anchor": "./src/js/tools/anchor.js",
+        "tools/information": "./src/js/tools/information.js",
         "layers/layer": "./src/js/layers/layer.js",
         "layers/wmslayer": "./src/js/layers/wmslayer.js",
         "layers/arcgislayer": "./src/js/layers/arcgislayer.js",
@@ -97,6 +99,7 @@
         "components/legendbutton": "./compiled/legendbutton.js",
         "components/featureinfo": "./compiled/featureinfo.js",
         "components/backgroundswitcher": "./compiled/backgroundswitcher.js",
+        "components/information": "./compiled/information.js",
         "views/map": "./compiled/mapview.js",
         "views/toolbar": "./compiled/toolbar.js",
         "views/infopanel": "./compiled/infopanel.js",
