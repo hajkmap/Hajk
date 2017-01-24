@@ -59,16 +59,16 @@ var InformationView = {
       return (
         <div id="blanket">
           <div id="container">
-            <div id="header">{this.props.model.get('headerText')}
+            <div key="a" id="header">{this.props.model.get('headerText')}
               <i className="fa fa-times pull-right clickable panel-close" id="close" onClick={this.close}></i>
             </div>
-            <div id="body">
+            <div key="b" id="body">
               {
                 this.props.model.get('text')
                   .split("\n")
-                  .map(function(item) {
+                  .map((item, i) => {
                     return (
-                      <span>
+                      <span key={i}>
                         {item}
                         <br/>
                       </span>
