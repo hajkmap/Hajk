@@ -69,8 +69,21 @@
             "id": "af94804a-2874-fe53-082b-a76b490558c2",
             "parent": "-1",
             "name": "Grupp 1",
-            "toggled": false,
-            "layers": [],
+            "toggled": true,
+            "layers": [
+              {
+                "id": "13",
+                "drawOrder": 0
+              },
+              {
+                "id": "12",
+                "drawOrder": 0
+              },
+              {
+                "id": "11",
+                "drawOrder": 0
+              }
+            ],
             "groups": [
               {
                 "id": "91efa2d2-4e3e-8295-752e-aa87a2dc6806",

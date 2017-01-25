@@ -77,6 +77,28 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver"
+    },
+    {
+      "id": "12",
+      "caption": "Stoparea geoserver wms",
+      "url": "http://194.71.132.27/geoserver/wms",
+      "owner": "",
+      "date": "1485339395704",
+      "content": "",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "demo:stopareas"
+      ],
+      "infobox": "",
+      "searchFields": [],
+      "displayFields": [],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver"
     }
   ],
   "wfslayers": [
@@ -126,6 +148,36 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "{x} {y}",
+      "queryable": true
+    },
+    {
+      "id": "11",
+      "caption": "Stoparea geoserver",
+      "url": "http://194.71.132.27/geoserver/wfs",
+      "layer": "demo:stopareas",
+      "owner": null,
+      "date": "1485339370992",
+      "content": "",
+      "legend": "http://localhost/Upload/f701da81-15f3-4c15-ae2d-c694f1d9c97e.png",
+      "projection": "EPSG:3006",
+      "visibleAtStart": false,
+      "opacity": 1.0,
+      "infobox": "",
+      "queryable": true
+    },
+    {
+      "id": "13",
+      "caption": "yta vektor geoserver",
+      "url": "http://194.71.132.27/geoserver/demo/wfs",
+      "layer": "demo:yta",
+      "owner": null,
+      "date": "1485346964924",
+      "content": "",
+      "legend": "http://localhost/Upload/e2334a7a-e1b6-42c0-bc8b-f82d65d2ad07.png",
+      "projection": "EPSG:3006",
+      "visibleAtStart": false,
+      "opacity": 1.0,
+      "infobox": "",
       "queryable": true
     }
   ],

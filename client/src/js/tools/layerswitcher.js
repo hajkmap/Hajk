@@ -79,9 +79,11 @@ var LayerSwitcherModel = {
    */
   setToggled: function recursive(groups) {
     groups.forEach(group => {
-      this.set("group_" + group.id, group.toggled ? "visible" : "hidden");
-      if (group.hasOwnProperty('groups')) {
-        recursive.call(this, group.groups);
+      if (!this.get("group_" + group.id)) {
+        this.set("group_" + group.id, group.toggled ? "visible" : "hidden");
+        if (group.hasOwnProperty('groups')) {
+          recursive.call(this, group.groups);
+        }
       }
     });
   },
@@ -93,7 +95,6 @@ var LayerSwitcherModel = {
    */
   getBaseLayers: function () {
     var baseLayers = [];
-
     this.get('baselayers').forEach(id => {
       var layer = this.get('layerCollection').find(layer => layer.id === id);
       if (layer) {

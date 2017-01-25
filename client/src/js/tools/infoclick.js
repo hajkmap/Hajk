@@ -263,7 +263,7 @@ var InfoClickModel = {
     properties = feature.getProperties();
     information = layerModel && layerModel.get("information") || "";
 
-    if (information) {
+    if (information && typeof information === "string") {
       (information.match(/\{.*?\}\s?/g) || []).forEach(property => {
           function lookup(o, s) {
             s = s.replace('{', '')
@@ -279,8 +279,6 @@ var InfoClickModel = {
           }
           information = information.replace(property, lookup(properties, property));
       });
-    } else {
-      console.log("No information found");
     }
 
     layerindex = this.layerOrder.hasOwnProperty(layerModel.getName()) ?

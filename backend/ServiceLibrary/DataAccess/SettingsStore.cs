@@ -241,13 +241,13 @@ namespace Sweco.Services.DataAccess
         public int GenerateLayerId(LayerConfig layerConfig)
         {
             int high = 0;
-            
-            var a = layerConfig.arcgislayers.OrderByDescending(l => l.id).FirstOrDefault();
-            var b = layerConfig.wfslayers.OrderByDescending(l => l.id).FirstOrDefault();
-            var c = layerConfig.wfstlayers.OrderByDescending(l => l.id).FirstOrDefault();
-            var d = layerConfig.wmslayers.OrderByDescending(l => l.id).FirstOrDefault();
-            var e = layerConfig.wmtslayers.OrderByDescending(l => l.id).FirstOrDefault();
-            var f = layerConfig.vectorlayers.OrderByDescending(l => l.id).FirstOrDefault();
+
+            var a = layerConfig.arcgislayers.OrderByDescending(l => int.Parse(l.id)).FirstOrDefault();
+            var b = layerConfig.wfslayers.OrderByDescending(l => int.Parse(l.id)).FirstOrDefault();
+            var c = layerConfig.wfstlayers.OrderByDescending(l => int.Parse(l.id)).FirstOrDefault();
+            var d = layerConfig.wmslayers.OrderByDescending(l => int.Parse(l.id)).FirstOrDefault();
+            var e = layerConfig.wmtslayers.OrderByDescending(l => int.Parse(l.id)).FirstOrDefault();
+            var f = layerConfig.vectorlayers.OrderByDescending(l => int.Parse(l.id)).FirstOrDefault();
 
             if (a != null) high = this.highest(a.id, high);
             if (b != null) high = this.highest(b.id, high);

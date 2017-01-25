@@ -261,7 +261,7 @@ var ExportModel = {
   findVector: function () {
 
     function asObject(style) {
-            
+
       if (!style) return null;
 
       if (Array.isArray(style)) {
@@ -339,6 +339,7 @@ var ExportModel = {
         .toString()
         .split(',')
         .map(i => parseFloat(i))
+        .filter(i => i > 2500)
         .reduce((r, n, i, a) => {
           if (i % 2 !== 0) {
             r.push([a[i - 1], a[i]]);
@@ -351,8 +352,8 @@ var ExportModel = {
     function translateVector(features, sourceStyle) {
 
       function getText(feature) {
-        if (feature.getProperties()) {
-          if (feature.getProperties().type === "Text") {
+        if (feature.getProperties() &&
+            feature.getProperties().type === "Text") {
             if (feature.getProperties().description)
               text = feature.getProperties().description
             else if (feature.getProperties().name)
@@ -360,7 +361,6 @@ var ExportModel = {
             else
               text = ''
             return text
-          }
         }
         if (feature.getStyle &&
             Array.isArray(feature.getStyle()) &&

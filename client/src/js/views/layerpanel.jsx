@@ -214,6 +214,9 @@ var LayerPanelView = {
     ,   id = "group_" + group.id;
 
     value = state[id] = this.state[id] === "hidden" ? "visible" : "hidden";
+
+    console.log("Update value in model", id, value);
+
     this.props.model.set(id, value);
     this.setState(state);
   },
@@ -262,6 +265,7 @@ var LayerPanelView = {
       }
 
       if (!this.state.hasOwnProperty(id)) {
+        console.log("Load state from model", id,  this.props.model.get(id));
         this.state[id] = this.props.model.get(id);
       }
 
