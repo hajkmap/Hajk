@@ -73,15 +73,15 @@
             "layers": [
               {
                 "id": "13",
-                "drawOrder": 0
+                "drawOrder": 4
               },
               {
                 "id": "12",
-                "drawOrder": 0
+                "drawOrder": 7
               },
               {
                 "id": "11",
-                "drawOrder": 0
+                "drawOrder": 6
               }
             ],
             "groups": [
@@ -93,19 +93,19 @@
                 "layers": [
                   {
                     "id": "10",
-                    "drawOrder": 0
+                    "drawOrder": 1
                   },
                   {
                     "id": "8",
-                    "drawOrder": 0
+                    "drawOrder": 2
                   },
                   {
                     "id": "6",
-                    "drawOrder": 0
+                    "drawOrder": 3
                   },
                   {
                     "id": "0",
-                    "drawOrder": 4
+                    "drawOrder": 5
                   }
                 ],
                 "groups": []
