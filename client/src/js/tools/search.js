@@ -473,7 +473,7 @@ var SearchModel = {
         displayName: source.displayFields ? source.displayFields : (source.searchFields[0] || "Sökträff"),
         srsName: this.get('map').getView().getProjection().getCode(),
         outputFormat: source.outputFormat,
-        geometryField: /wfsserver/.test(source.url.toLowerCase()) ? "Shape" : "the_geom"
+        geometryField: source.geometryField
       };
       addRequest.call(this, searchProps);
     });

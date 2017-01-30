@@ -20,6 +20,8 @@ namespace Sweco.Services.DataContracts.Config
         
         public string[] displayFields { get; set; }
 
+        public string geometryField { get; set; }
+
         public string outputFormat { get; set; }
     }
 }

@@ -32,6 +32,7 @@ const defaultState = {
   date: "Fylls i per automatik",
   searchFields: "",
   displayFields: "",
+  geometryField: "",
   url: "",
   outputFormat: undefined
 };
@@ -109,6 +110,7 @@ class Search extends React.Component {
       caption: layer.caption,
       searchFields: layer.searchFields,
       displayFields: layer.displayFields,
+      geometryField: layer.geometryField,
       outputFormat: layer.outputFormat || 'GML3',
       url: layer.url,
       addedLayers: []
@@ -118,6 +120,7 @@ class Search extends React.Component {
       this.validate("url");
       this.validate("searchFields");
       this.validate("displayFields");
+      this.validate("geometryField");
       this.validate("outputFormat")
       this.loadWMSCapabilities(undefined, () => {
 
@@ -271,6 +274,7 @@ class Search extends React.Component {
         break;
       case "url":
       case "caption":
+      case "geometryField":
         if (value === "") {
           valid = false;
         }
@@ -341,6 +345,7 @@ class Search extends React.Component {
       this.validate("layers"),
       this.validate("searchFields"),
       this.validate("displayFields"),
+      this.validate("geometryField"),
       this.validate("outputFormat")
     ];
 
@@ -353,6 +358,7 @@ class Search extends React.Component {
         layers: this.getValue("layers"),
         searchFields: this.getValue("searchFields"),
         displayFields: this.getValue("displayFields"),
+        geometryField: this.getValue("geometryField"),
         outputFormat: this.getValue("outputFormat")
       };
 
@@ -566,6 +572,16 @@ class Search extends React.Component {
                   onChange={(e) => this.validate("displayFields", e)}
                   value={this.state.displayFields}
                   className={this.getValidationClass("displayFields")}
+                />
+              </div>
+              <div>
+                <label>Geometrifält</label>
+                <input
+                  type="text"
+                  ref="input_geometryField"
+                  onChange={(e) => this.validate("geometryField", e)}
+                  value={this.state.geometryField}
+                  className={this.getValidationClass("geometryField")}
                 />
               </div>
               <div>

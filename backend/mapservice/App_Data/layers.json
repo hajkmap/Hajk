@@ -116,6 +116,7 @@
         "id",
         "namn"
       ],
+      "geometryField": "the_geom",
       "outputFormat": "GML3"
     },
     {
@@ -131,6 +132,7 @@
       "displayFields": [
         "namn"
       ],
+      "geometryField": "Shape",
       "outputFormat": "GML3"
     }
   ],
