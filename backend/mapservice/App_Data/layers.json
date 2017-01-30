@@ -117,6 +117,21 @@
         "namn"
       ],
       "outputFormat": "GML3"
+    },
+    {
+      "id": "14",
+      "caption": "Hållplats ArcGIS",
+      "url": "http://ksdgis.se/arcgis/services/hpl/MapServer/WFSServer",
+      "layers": [
+        "hpl:hpl"
+      ],
+      "searchFields": [
+        "namn"
+      ],
+      "displayFields": [
+        "namn"
+      ],
+      "outputFormat": "GML3"
     }
   ],
   "vectorlayers": [
