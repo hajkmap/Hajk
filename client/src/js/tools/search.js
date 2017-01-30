@@ -21,6 +21,7 @@
 // https://github.com/Johkar/Hajk2
 
 var ToolModel = require('tools/tool');
+var SelectionModel = require('models/selection')
 
 function arraySort(options) {
 
@@ -100,6 +101,7 @@ function arraySort(options) {
  * @property {string} title - Default: Sök i kartan
  * @property {string} visible - Default: false
  * @property {string} value
+ * @property {boolean} force
  * @property {string} filter - Default: "*"
  * @property {string} filterVisible - Default: false
  * @property {string} markerImg - Default: "assets/icons/marker.png"
@@ -149,6 +151,12 @@ var SearchModel = {
     });
 
     this.get('map').addLayer(this.featureLayer);
+
+    if (this.get('selectionTools')) {
+      this.set('selectionModel', new SelectionModel({
+        map: shell.getMap().getMap()
+      }));
+    }
   },
 
   /**
@@ -163,6 +171,48 @@ var SearchModel = {
    */
   featureLayer: undefined,
 
+  getPropertyFilter: function (props) {
+    var multipleAttributes = props.propertyName.split(',').length > 1;
+    var conditions = props.propertyName.split(',').reduce((condition, property) => {
+      if (props.value) {
+        return condition += `
+          <ogc:PropertyIsLike matchCase="false" wildCard="*" singleChar="." escapeChar="!">
+            <ogc:PropertyName>${property}</ogc:PropertyName>
+            <ogc:Literal>*${props.value}*</ogc:Literal>
+          </ogc:PropertyIsLike>`
+     } else {
+       return condition;
+     }
+   }, "");
+
+   if (multipleAttributes) {
+     return `<ogc:or>${conditions}</ogc:or>`;
+   } else {
+     return conditions;
+   }
+  },
+
+  getFeatureFilter: function (features, props) {
+    if (Array.isArray(features) && features.length > 0) {
+      return features.reduce((str, feature) => {
+        var coords = feature.getGeometry().getCoordinates()[0].map(c => c[0] + " " + c[1]).join(" ");
+        return str += `
+          <ogc:Intersects>
+            <ogc:PropertyName>${props.geometryField}</ogc:PropertyName>
+            <gml:Polygon srsName="${props.srsName}">
+            <gml:exterior>
+              <gml:LinearRing>
+                <gml:posList>${coords}</gml:posList>
+              </gml:LinearRing>
+              </gml:exterior>
+            </gml:Polygon>
+          </ogc:Intersects>
+        `;
+      }, "");
+    } else {
+      return "";
+    }
+  },
   /**
    * Perform a WFS-search.
    * @instance
@@ -170,60 +220,11 @@ var SearchModel = {
    *
    */
   doWFSSearch: function (props) {
-    outputFormat = props.outputFormat;
-    if (!outputFormat || outputFormat === '')
-      outputFormat = 'GML3'
-
-    var filters = props.propertyName.split(',').map((property) =>
-      `<ogc:PropertyIsLike matchCase="false" wildCard="*" singleChar="." escapeChar="!">
-         <ogc:PropertyName>${property}</ogc:PropertyName>
-         <ogc:Literal>${props.value}*</ogc:Literal>
-       </ogc:PropertyIsLike>`
-    ).join('');
-
-    var str = "";
-
-    if (props.propertyName.split(',').length > 1) {
-      str = `
-        <wfs:GetFeature
-          xmlns:wfs="http://www.opengis.net/wfs"
-          service="WFS"
-          version="1.1.0"
-          outputFormat="${outputFormat}"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
-          maxFeatures="100">
-          <wfs:Query typeName="feature:${props.featureType}" srsName="${props.srsName}">
-            <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
-              <ogc:Or>
-                ${filters}
-              </ogc:Or>
-            </ogc:Filter>
-          </wfs:Query>
-        </wfs:GetFeature>
-      `;
-    } else {
-      str = `
-        <wfs:GetFeature
-          xmlns:wfs="http://www.opengis.net/wfs"
-          service="WFS"
-          version="1.1.0"
-          outputFormat="${outputFormat}"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd"
-          maxFeatures="100">
-          <wfs:Query typeName="feature:${props.featureType}" srsName="${props.srsName}">
-            <ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">
-              ${filters}
-            </ogc:Filter>
-          </wfs:Query>
-        </wfs:GetFeature>
-      `;
-    }
-
-
-
-    var read = (result) => {
+    var filters = ""
+    ,   str = ""
+    ,   featureFilter = ""
+    ,   propertyFilter = ""
+    ,   read = (result) => {
       var format
       ,   features = []
       ,   outputFormat = props.outputFormat;
@@ -238,6 +239,7 @@ var SearchModel = {
           result = result.responseText;
         }
       }
+
       try {
         features = format.readFeatures(result);
       } catch (e) {
@@ -248,6 +250,47 @@ var SearchModel = {
       }
       props.done(features);
     };
+
+    outputFormat = props.outputFormat;
+
+    if (!outputFormat || outputFormat === '') {
+      outputFormat = 'GML3'
+    }
+
+    propertyFilter = this.getPropertyFilter(props);
+    featureFilter = this.getFeatureFilter(this.get('features'), props);
+
+    if (featureFilter && propertyFilter) {
+      filters = `
+        <ogc:And>
+          ${propertyFilter}
+          ${featureFilter}
+        </ogc:And>
+      `;
+    } else if (propertyFilter) {
+      filters = propertyFilter;
+    } else if (featureFilter) {
+      filters = featureFilter;
+    } else {
+      filters = "";
+    }
+
+    str = `
+     <wfs:GetFeature
+         service = 'WFS'
+         version = '1.1.0'
+         xmlns:wfs = 'http://www.opengis.net/wfs'
+         xmlns:ogc = 'http://www.opengis.net/ogc'
+         xmlns:gml = 'http://www.opengis.net/gml'
+         xmlns:esri = 'http://www.esri.com'
+         xmlns:xsi = 'http://www.w3.org/2001/XMLSchema-instance'
+         xsi:schemaLocation='http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd'>
+         <wfs:Query typeName='feature:${props.featureType}' srsName='${props.srsName}'>
+          <ogc:Filter>
+            ${filters}
+          </ogc:Filter>
+         </wfs:Query>
+      </wfs:GetFeature>`;
 
     var contentType = "text/xml"
     ,   data = str;
@@ -264,7 +307,6 @@ var SearchModel = {
         },
         error: result => {
           if (result.status === 200) {
-            console.log("Error");
             read(result);
           } else {
             props.done([]);
@@ -272,6 +314,7 @@ var SearchModel = {
         }
       })
     );
+
   },
 
   /**
@@ -291,6 +334,9 @@ var SearchModel = {
    *
    */
   clear: function() {
+    if (this.get('selectionModel')) {
+      this.get('selectionModel').abort();
+    }
     this.featureLayer.getSource().clear();
     this.set('items', []);
   },
@@ -340,6 +386,7 @@ var SearchModel = {
              (searchable && (visible ? layer.get('visible') : true)) :
              (searchable && (visible ? layer.get('visible') : true) && layer.get('id') === criteria);
     };
+
     return this.get('layerCollection').filter(filter);
   },
 
@@ -370,49 +417,10 @@ var SearchModel = {
     ,   promises = []
     ,   layers
     ,   sources
+    ,   features = []
     ;
 
-    if (value === "") return;
-
-    sources = this.getSources();
-    layers  = this.getLayers();
-
-    this.set('selectedIndices', []);
-
-    layers.forEach(layer => {
-      promises.push(new Promise((resolve, reject) => {
-        var searchProps = layer.get('search');
-        this.doWFSSearch({
-          value: value,
-          url: searchProps.url,
-          featureType: searchProps.featureType,
-          propertyName: searchProps.propertyName,
-          srsName: searchProps.srsName,
-          done: features => {
-            if (features.length > 0) {
-              items.push({
-                layer: layer.get('caption'),
-                displayName: searchProps.displayName,
-                propertyName: searchProps.propertyName,
-                hits: features
-              });
-            }
-            resolve();
-          }
-        });
-      }));
-    });
-
-    sources.forEach(source => {
-      var searchProps = {
-        "url": (HAJK2.searchProxy || "") + source.url,
-        "featureType": source.layers[0].split(':')[1],
-        "propertyName": source.searchFields.join(','),
-        "displayName": source.displayFields ? source.displayFields : (source.searchFields[0] || "Sökträff"),
-        "srsName": this.get('map').getView().getProjection().getCode(),
-        "outputFormat": source.outputFormat
-      };
-
+    function addRequest(searchProps) {
       promises.push(new Promise((resolve, reject) => {
         this.doWFSSearch({
           value: value,
@@ -421,10 +429,11 @@ var SearchModel = {
           propertyName: searchProps.propertyName,
           srsName: searchProps.srsName,
           outputFormat: searchProps.outputFormat,
+          geometryField: searchProps.geometryField,
           done: features => {
             if (features.length > 0) {
               items.push({
-                layer: source.caption,
+                layer: searchProps.caption,
                 displayName: searchProps.displayName,
                 propertyName: searchProps.propertyName,
                 hits: features
@@ -434,6 +443,39 @@ var SearchModel = {
           }
         });
       }));
+    }
+
+    if (this.get('selectionTools')) {
+      features = this.get('selectionModel').get('source').getFeatures();
+      this.set('features', features);
+    }
+
+    if (value === "" && features.length === 0) return;
+
+    sources = this.getSources();
+    layers  = this.getLayers();
+
+    this.set('selectedIndices', []);
+
+    layers.forEach(layer => {
+      var searchProps = layer.get('search');
+      searchProps.geometryField = /wfsserver/.test(searchProps.url.toLowerCase()) ? "Shape" : "the_geom";
+      searchProps.caption = layer.get('caption');
+      addRequest.call(this, searchProps);
+    });
+
+    sources.forEach(source => {
+      var searchProps = {
+        url: (HAJK2.searchProxy || "") + source.url,
+        caption: source.caption,
+        featureType: source.layers[0].split(':')[1],
+        propertyName: source.searchFields.join(','),
+        displayName: source.displayFields ? source.displayFields : (source.searchFields[0] || "Sökträff"),
+        srsName: this.get('map').getView().getProjection().getCode(),
+        outputFormat: source.outputFormat,
+        geometryField: /wfsserver/.test(source.url.toLowerCase()) ? "Shape" : "the_geom"
+      };
+      addRequest.call(this, searchProps);
     });
 
     Promise.all(promises).then(() => {
@@ -457,6 +499,16 @@ var SearchModel = {
       }
 
     });
+  },
+
+  shouldRenderResult: function () {
+    return !!(
+      this.get('value') ||
+      (
+        this.get('selectionModel') &&
+        this.get('selectionModel').hasFeatures()
+      )
+    );
   },
 
   /**

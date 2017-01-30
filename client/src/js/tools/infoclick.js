@@ -280,9 +280,14 @@ var InfoClickModel = {
           information = information.replace(property, lookup(properties, property));
       });
     }
-
-    layerindex = this.layerOrder.hasOwnProperty(layerModel.getName()) ?
-                 this.layerOrder[layerModel.getName()] : 999;
+        
+    if (!layerModel) {
+      layerIndex = 999;
+    } else {
+      layerindex = this.layerOrder.hasOwnProperty(layerModel.getName())
+        ? this.layerOrder[layerModel.getName()]
+        : 999;
+    }
 
     callback({
       feature: feature,

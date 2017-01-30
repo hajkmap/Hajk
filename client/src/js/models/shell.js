@@ -63,17 +63,18 @@ var ShellModel = {
     if (this.get('canStart')) {
 
       this.set('map', new MapModel(config.map));
-      this.set('layerCollection', new LayerCollection(config.layers, { shell: this, mapConfig: config.map }));
+      this.set('layerCollection', new LayerCollection(config.layers, { shell: this, mapConfig: config.map }));      
       this.set('toolCollection', new ToolCollection(config.tools, { shell: this }));
 
-      var panels = _.chain(this.get('toolCollection').toArray())
-      .filter(function (tool) { return tool.get('panel'); })
-      .map(function (panel) {
-        return {
-          type: panel.get('panel'),
-          model: panel
-        };
-      }).value();
+      let tools = this.get('toolCollection').toArray();
+      let panels = tools.filter(tool => tool.get('panel'))
+        .map(panel => {
+          return {
+            type: panel.get('panel'),
+            model: panel
+          }
+        });
+
       this.set('navigation', new NavigationPanelModel({ panels: panels }));
     }
   },

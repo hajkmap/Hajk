@@ -51,7 +51,6 @@ var NavigationModel = {
   defaults: NavigationModelProperties,
 
   initialize: function (options) {
-
     options.panels.forEach(panel => {
       panel.model.on("change:visible", this.onPanelVisibleChanged, this);
     });
@@ -93,17 +92,13 @@ var NavigationModel = {
     var activePanel = this.get("activePanel");
 
     if (visible) {
-
       if (activePanel) {
         activePanel.model.set("visible", false);
-
         var a = activePanel.model.get('panel');
         var b = panel.get('panel').toLowerCase();
 
         if (activePanel.model.filty && a !== b) {
-
           this.set('alert', true);
-
           this.ok = () => {
             this.navigate(panelRef, type);
           };
@@ -116,14 +111,11 @@ var NavigationModel = {
 
         }
       }
-
       if (!this.get('alert')) {
         this.navigate(panelRef, type);
       }
-
     }
   }
-
 };
 
 /**

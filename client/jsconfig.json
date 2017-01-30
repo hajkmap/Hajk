@@ -2,66 +2,40 @@
   "react": {
     "components": {
       "files": {
+        "compiled/layeritem.js": ["src/js/views/components/layeritem.jsx"],
         "compiled/fabutton.js": ["src/js/views/components/fabutton.jsx"],
         "compiled/legenditem.js": ["src/js/views/components/legenditem.jsx"],
         "compiled/legend.js": ["src/js/views/components/legend.jsx"],
         "compiled/legendbutton.js": ["src/js/views/components/legendbutton.jsx"],
         "compiled/featureinfo.js": ["src/js/views/components/featureinfo.jsx"],
         "compiled/backgroundswitcher.js": ["src/js/views/components/backgroundswitcher.jsx"],
-        "compiled/information.js": ["src/js/views/components/information.jsx"]
+        "compiled/information.js": ["src/js/views/components/information.jsx"],
+        "compiled/selectiontoolbar.js": ["src/js/views/components/selectiontoolbar.jsx"]
       }
     },
-    "mapview": {
+    "panels": {
       "files": {
-        "compiled/mapview.js": ["src/js/views/mapview.jsx"]
+        "compiled/panel.js": ["src/js/views/panels/panel.jsx"],
+        "compiled/navigationpanel.js": ["src/js/views/panels/navigationpanel.jsx"],
+        "compiled/layerpanel.js": ["src/js/views/panels/layerpanel.jsx"],
+        "compiled/searchpanel.js": ["src/js/views/panels/searchpanel.jsx"],
+        "compiled/coordinatespanel.js": ["src/js/views/panels/coordinatespanel.jsx"],
+        "compiled/exportpanel.js": ["src/js/views/panels/exportpanel.jsx"],
+        "compiled/drawpanel.js": ["src/js/views/panels/drawpanel.jsx"],
+        "compiled/editpanel.js": ["src/js/views/panels/editpanel.jsx"],
+        "compiled/anchorpanel.js": ["src/js/views/panels/anchorpanel.jsx"],
+        "compiled/infopanel.js": ["src/js/views/panels/infopanel.jsx"],
+        "compiled/bookmarkpanel.js": ["src/js/views/panels/bookmarkpanel.jsx"],
+        "compiled/selectionpanel.js": ["src/js/views/panels/selectionpanel.jsx"]
       }
     },
-    "toolbar": {
+    "views": {
       "files": {
-        "compiled/toolbar.js": ["src/js/views/toolbar.jsx"]
-      }
-    },
-    "infopanel": {
-      "files": {
-        "compiled/infopanel.js": ["src/js/views/infopanel.jsx"]
-      }
-    },
-    "bookmarkpanel": {
-      "files": {
-        "compiled/bookmarkpanel.js": ["src/js/views/bookmarkpanel.jsx"]
-      }
-    },
-    "shell": {
-      "files": {
-        "compiled/shell.js": ["src/js/views/shell.jsx"]
-      }
-    },
-    "panel": {
-      "files": {
-        "compiled/panel.js": ["src/js/views/panel.jsx"],
-        "compiled/layerpanel.js": ["src/js/views/layerpanel.jsx"],
-        "compiled/layeritem.js": ["src/js/views/layeritem.jsx"],
-        "compiled/searchpanel.js": ["src/js/views/searchpanel.jsx"],
-        "compiled/coordinatespanel.js": ["src/js/views/coordinatespanel.jsx"],
-        "compiled/exportpanel.js": ["src/js/views/exportpanel.jsx"],
-        "compiled/drawpanel.js": ["src/js/views/drawpanel.jsx"],
-        "compiled/editpanel.js": ["src/js/views/editpanel.jsx"],
-        "compiled/anchorpanel.js": ["src/js/views/anchorpanel.jsx"]
-      }
-    },
-    "navigationpanel": {
-      "files": {
-        "compiled/navigationpanel.js": ["src/js/views/navigationpanel.jsx"]
-      }
-    },
-    "application": {
-      "files": {
+        "compiled/mapview.js": ["src/js/views/mapview.jsx"],
+        "compiled/shell.js": ["src/js/views/shell.jsx"],
+        "compiled/toolbar.js": ["src/js/views/toolbar.jsx"],
+        "compiled/alert.js": ["src/js/views/alert.jsx"],
         "compiled/application.js": ["src/js/views/application.jsx"]
-      }
-    },
-    "alert": {
-      "files": {
-        "compiled/alert.js": ["src/js/views/alert.jsx"]
       }
     }
   },
@@ -73,9 +47,10 @@
         "models/navigation": "./src/js/models/navigationmodel.js",
         "models/map": "./src/js/models/mapmodel.js",
         "models/shell": "./src/js/models/shell.js",
+        "models/selection": "./src/js/models/selection.js",
         "tools/tool": "./src/js/tools/tool.js",
         "tools/layerswitcher": "./src/js/tools/layerswitcher.js",
-        "tools/savestate": "./src/js/tools/savestate.js",
+        "tools/bookmark": "./src/js/tools/bookmark.js",
         "tools/infoclick": "./src/js/tools/infoclick.js",
         "tools/search": "./src/js/tools/search.js",
         "tools/coordinates": "./src/js/tools/coordinates.js",
@@ -100,6 +75,7 @@
         "components/featureinfo": "./compiled/featureinfo.js",
         "components/backgroundswitcher": "./compiled/backgroundswitcher.js",
         "components/information": "./compiled/information.js",
+        "components/selectiontoolbar": "./compiled/selectiontoolbar.js",
         "views/map": "./compiled/mapview.js",
         "views/toolbar": "./compiled/toolbar.js",
         "views/infopanel": "./compiled/infopanel.js",

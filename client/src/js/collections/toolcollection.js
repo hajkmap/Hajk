@@ -23,7 +23,7 @@
 var Tool          = require('tools/tool')
 ,   LayerSwitcher = require('tools/layerswitcher')
 ,   InfoClick     = require('tools/infoclick')
-,   SaveState     = require('tools/savestate')
+,   Bookmark      = require('tools/bookmark')
 ,   Search        = require('tools/search')
 ,   Coordinates   = require('tools/coordinates')
 ,   Export        = require('tools/export')
@@ -57,8 +57,8 @@ var ToolCollection = {
             return new LayerSwitcher(args.options);
         case "infoclick":
             return new InfoClick(args.options);
-        case "savestate":
-            return new SaveState(args.options);
+        case "bookmark":
+            return new Bookmark(args.options);
         case "search":
             return new Search(args.options);
         case "coordinates":
@@ -73,16 +73,24 @@ var ToolCollection = {
             return new Anchor(args.options);
         case "information":
             return new Information(args.options);
+        case "selection":
+            return new Selection(args.options);
         default:
-            throw "tool not supported " + args.type;
+            throw "Tool not supported " + args.type;
       }
   },
 
   initialize: function (tools, args) {
     this.shell = args.shell;
-    _.defer(_.bind(function () {
-      this.forEach(function (tool) { tool.set("shell", this.shell); }, this);
-    }, this));
+    setTimeout(() => {
+      this.configure();
+    }, 0);
+  },
+
+  configure: function() {
+    this.forEach(tool => {
+      tool.set("shell", this.shell)
+    });
   },
 
   /**

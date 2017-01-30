@@ -145,7 +145,7 @@ var LayerCollection = {
       }
     };
 
-    if (args.searchFields && args.searchFields[0] !== "") {
+    if (args.searchFields && args.searchFields[0]) {      
       config.options.search = {
         "url": (HAJK2.searchProxy || "") + args.url.replace('wms', 'wfs'),
         "featureType": args.layers[0].split(':')[1] || args.layers[0].split(':')[0],

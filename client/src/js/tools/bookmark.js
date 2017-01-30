@@ -34,8 +34,8 @@ var ToolModel = require('tools/tool');
  * @property {string} settingsUrl
  * @property {object[]} bookmarks
  */
-var SaveStateProperties = {
-  type: 'savestate',
+var BookmarkProperties = {
+  type: 'bookmark',
   panel: 'bookmarkpanel',
   toolbar: 'bottom',
   icon: 'fa fa-bookmark icon',
@@ -52,12 +52,12 @@ var SaveStateProperties = {
  * @augments {external:"Backbone.Model"}
  * @param {SaveStateModel~SaveStateModelProperties} options - Default options
  */
-var SaveStateModel = {
+var BookmarkModel = {
   /**
    * @instance
    * @property {SaveStateModel~SaveStateModelProperties} defaults - Default settings
    */
-  defaults: SaveStateProperties,
+  defaults: BookmarkProperties,
 
   initialize: function (options) {
     ToolModel.prototype.initialize.call(this);
@@ -186,9 +186,9 @@ var SaveStateModel = {
 };
 
 /**
- * Save state model module.<br>
- * Use <code>require('models/savestate')</code> for instantiation.
- * @module SaveStateModel-module
- * @returns {SaveStateModel}
+ * Bookmark model module.<br>
+ * Use <code>require('models/bookmark')</code> for instantiation.
+ * @module BookmarkModel-module
+ * @returns {BookmarkModel}
  */
-module.exports = ToolModel.extend(SaveStateModel);
+module.exports = ToolModel.extend(BookmarkModel);
