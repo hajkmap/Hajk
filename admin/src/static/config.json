@@ -1,8 +1,8 @@
 {
   "manager": {
     "url_proxy": "/util/proxy/geturl",
-    "url_layers": "/mapservice/settings/config/layers",
-    "url_layer_settings": "/mapservice/settings/layer",
+    "url_layers": "/mapservice/config/layers",
+    "url_layer_settings": "/mapservice/settings/wmslayer",
     "url_wmtslayer_settings": "/mapservice/settings/wmtslayer",
     "url_arcgislayer_settings": "/mapservice/settings/arcgislayer",
     "url_vectorlayer_settings": "/mapservice/settings/vectorlayer",
@@ -14,27 +14,26 @@
   },
   "search": {
     "url_proxy": "/util/proxy/geturl",
-    "url_layers": "/mapservice/settings/config/layers",
+    "url_layers": "/mapservice/config/layers",
     "url_layer_settings": "/mapservice/settings/wfslayer",
     "url_default_server": "http://194.71.132.27/geoserver/wfs"
   },
   "edit": {
     "url_proxy": "/util/proxy/geturl",
-    "url_layers": "/mapservice/settings/config/layers",
+    "url_layers": "/mapservice/config/layers",
     "url_layer_settings": "/mapservice/settings/wfstlayer",
     "url_default_server": "http://194.71.132.27/geoserver/wfs",
     "projections": ["EPSG:3006", "EPSG:3007", "EPSG:3008"]
   },
   "menu": {
-    "url_map": "/mapservice/settings/config/map_1",
-    "url_layers": "/mapservice/settings/config/layers",
+    "url_map": "/mapservice/config/map_1",
+    "url_layers": "/mapservice/config/layers",
     "url_layermenu_settings": "/mapservice/settings/layermenu"
   },
   "router": [
     { "name": "manager", "title": "Visningstjänster", "default": true },
     { "name": "search", "title": "Söktjänster" },
     { "name": "edit", "title": "Redigeringstjänster" },
-    { "name": "menu", "title": "Konfiguration" },
-    { "name": "map", "title": "Karta" }
+    { "name": "menu", "title": "Konfiguration" }
   ]
 }

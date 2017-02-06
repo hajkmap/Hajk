@@ -538,6 +538,8 @@ var ExportModel = {
     }, {});
   },
 
+  exportHitsFormId: 13245,
+
   /**
    * Export the map as a PDF-file
    * @instance
@@ -545,6 +547,7 @@ var ExportModel = {
    * @param {function} callback
    */
   exportPDF: function(options, callback) {
+
     var extent = this.previewLayer.getSource().getFeatures()[0].getGeometry().getExtent()
     ,   left   = extent[0]
     ,   right  = extent[2]
@@ -552,6 +555,9 @@ var ExportModel = {
     ,   top    = extent[3]
     ,   scale  = options.scale
     ,   dpi    = options.resolution
+    ,   form   = document.createElement('form')
+    ,   input  = document.createElement('input')
+    ,   curr   = document.getElementById(this.exportHitsFormId)
     ,   data   = {
       wmsLayers: [],
       vectorLayers: [],
@@ -578,18 +584,22 @@ var ExportModel = {
     data.format = options.format;
     data.scale = options.scale;
 
-    $.ajax({
-      type: "post",
-      url: this.get("exportUrl"),
-      data: JSON.stringify(data),
-      contentType: "application/json",
-      success: rsp => {
-        callback(rsp);
-      },
-      error: rsp => {
-        callback(rsp);
-      }
-    });
+    form.id = this.exportHitsFormId;
+    form.method = "post";
+    form.action = this.get('exportUrl');
+    input.value = JSON.stringify(data);
+    input.name  = "json";
+    input.type  = "hidden";
+    form.appendChild(input);
+
+    if (curr)
+      document.body.replaceChild(form, curr);
+    else
+      document.body.appendChild(form);
+
+    form.submit();
+
+    callback();
   },
 
   /**

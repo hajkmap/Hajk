@@ -3,21 +3,24 @@
 <head>
     <title></title>
 </head>
-<body>
+<body>    
+
     <h1>Export Service</h1>
     <div>[POST] /export</div>
     <div>[POST] /export/kml</div>
     <div>[POST] /export/importkml</div>
     <div>[POST] /export/pdf</div>
+    <div>[POST] /export/excel</div>
     <a href="export/help">Mer info</a>
     <h1>Settings Service</h1>
-
-    <div>[GET] /settings</div>
-    <div>[POST] /settings</div>
-    <div>[PUT] /settings</div>
-    <div>[DELETE] /settings/{id}</div>
+        
+    <div>[GET] settings/bookmark</div>
+    <div>[POST] settings/bookmark</div>
+    <div>[PUT] settings/bookmark</div>
+    <div>[DELETE] /settings/bookmark/{id}</div>
+    <br/>
     <div>[GET] /settings/config/{name}</div>
-    <br />
+    <br/>
     <div>[PUT] /settings/layer</div>
     <div>[POST] /settings/layer</div>
     <div>[DELETE] /settings/layer/{id}</div>

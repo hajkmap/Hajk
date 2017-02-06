@@ -145,7 +145,7 @@ var LayerCollection = {
       }
     };
 
-    if (args.searchFields && args.searchFields[0]) {      
+    if (args.searchFields && args.searchFields[0]) {
       config.options.search = {
         "url": (HAJK2.searchProxy || "") + args.url.replace('wms', 'wfs'),
         "featureType": args.layers[0].split(':')[1] || args.layers[0].split(':')[0],
@@ -216,13 +216,13 @@ var LayerCollection = {
   mapArcGISConfig: function(args) {
 
     function getLegendUrl() {
-
-      if (/^data/.test(args.legend)) {
-        args.legend = args.legend.split('#');
-      } else if (!/^http/.test(args.legend)) {
-        args.legend = 'http://' + args.legend;
+      if (!Array.isArray(args.legend)) {
+        if (/^data/.test(args.legend)) {
+          args.legend = args.legend.split('#');
+        } else if (!/^http/.test(args.legend)) {
+          args.legend = 'http://' + args.legend;
+        }
       }
-
       return args.legend;
     }
 

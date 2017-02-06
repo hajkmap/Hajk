@@ -143,7 +143,9 @@ class Search extends React.Component {
       });
     }, 0);
   }
-
+  /**
+   *
+   */
   loadWMSCapabilities(e, callback) {
     if (e)
       e.preventDefault();
@@ -178,7 +180,6 @@ class Search extends React.Component {
       }
     });
   }
-
   /**
    *
    */
@@ -420,7 +421,9 @@ class Search extends React.Component {
   getValidationClass(inputName) {
     return valid = this.state.validationErrors.find(v => v === inputName) ? "validation-error" : "";
   }
-
+  /**
+   *
+   */
   describeLayer(e, layerName) {
     this.props.model.getLayerDescription(this.refs.input_url.value, layerName, (properties) => {
       this.setState({
@@ -429,14 +432,18 @@ class Search extends React.Component {
       });
     });
   }
-
+  /**
+   *
+   */
   closeDetails() {
     this.setState({
       layerProperties: undefined,
       layerPropertiesName: undefined
     });
   }
-
+  /**
+   *
+   */
   renderLayerProperties() {
     if (this.state.layerProperties === undefined) {
       return null;
@@ -472,7 +479,9 @@ class Search extends React.Component {
       </div>
     )
   }
-
+  /**
+   *
+   */
   renderLayersFromCapabilites() {
     if (this.state && this.state.capabilities) {
       return this.state.capabilities.map((layer, i) => {
@@ -490,7 +499,9 @@ class Search extends React.Component {
       return null;
     }
   }
-
+  /**
+   *
+   */
   renderLayerList() {
     var layers = this.renderLayersFromCapabilites();
     return (

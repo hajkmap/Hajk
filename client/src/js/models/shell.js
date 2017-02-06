@@ -63,7 +63,7 @@ var ShellModel = {
     if (this.get('canStart')) {
 
       this.set('map', new MapModel(config.map));
-      this.set('layerCollection', new LayerCollection(config.layers, { shell: this, mapConfig: config.map }));      
+      this.set('layerCollection', new LayerCollection(config.layers, { shell: this, mapConfig: config.map }));
       this.set('toolCollection', new ToolCollection(config.tools, { shell: this }));
 
       let tools = this.get('toolCollection').toArray();
@@ -163,6 +163,15 @@ var ShellModel = {
   setConfig: function (config) {
     this.set('config', config);
     this.set('configUpdated', new Date().getTime());
+  },
+
+  /**
+   * Set configuration property value
+   * @instance
+   * @param {object} configuration
+   */
+  updateConfig: function () {
+    console.log("Set map state", this.getConfig());
   }
 };
 

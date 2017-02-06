@@ -14,29 +14,29 @@
 
 .search-tools .label {
 	background: #FFFFFF;
-    color: black;
-    border-radius: 50px;
-    padding: 5px;
-    min-width: 23px;
-    display: inline-block;
-    text-align: center;
-    font-weight: 600;
-    margin-left: 5px;
-    top: -2px;
-    position: relative;
+  color: black;
+  border-radius: 50px;
+  padding: 5px;
+  min-width: 23px;
+  display: inline-block;
+  text-align: center;
+  font-weight: 600;
+  margin-left: 5px;
+  top: -2px;
+  position: relative;
 }
 
 .search-tools .group {
 	background: @color-yellow;
-    padding: 10px;
-    margin: 7px -5px;
-    color: white;
+  padding: 10px;
+  margin: 7px -5px;
+  color: white;
 }
 
 .search-tools .group + div {
 	background: #eee;
-    margin: -5px;
-    padding: 5px;
+  margin: -5px;
+  padding: 5px;
 }
 
 .search-tools .group + div > div {
@@ -55,4 +55,25 @@
 
 .search-tools .group + div > div:last-child {
 	border-bottom: none;
+}
+
+.icon-button {
+	position: relative;
+	top: -18px;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-bottom: 5px;
+	padding-top: 10px;
+	i {
+		background-size: 25px 25px;
+		width: 25px;
+		height: 25px;
+		display: inline-block;
+	}
+	i.excel {
+		background-image: url("icons/excel.png");
+	}
+	i.kml {
+		background-image: url("icons/kml.png");
+	}
 }

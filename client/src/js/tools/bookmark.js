@@ -64,20 +64,28 @@ var BookmarkModel = {
   },
 
   configure: function (shell) {
-     var url = this.get('settingsUrl'), req;
-     this.set('shell', shell);
-     if (!shell.getBookmarks()) {
-        req = $.ajax({
-           url: url,
-           type: 'get',
-           crossDomain: true,
-           contentType: 'application/json',
-           dataType: 'json'
-        });
-        req.success((bookmarks) => {
-          shell.setBookmarks(bookmarks);
-        });
-     }
+
+    var url = this.get('settingsUrl')
+    ,   bookmarks;
+
+    this.set('shell', shell);
+
+    if (!shell.getBookmarks()) {
+      bookmarks = localStorage.getItem('bookmarks');
+      if (bookmarks) {
+        try {
+          bookmarks = JSON.parse(bookmarks);
+        } catch (e) {
+          bookmarks = [];
+          console.log("Set item");
+          localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+        }
+      } else {
+        bookmarks = [];
+        localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+      }
+      shell.setBookmarks(bookmarks);
+    }
   },
 
   /**
@@ -103,22 +111,31 @@ var BookmarkModel = {
         this.getBookmarks().length : 0;
     var model = this.get('shell').toJSON();
     var b64 = btoa(model);
-    var data = JSON.stringify({
+    var data = {
       name: name,
       settings: b64,
       favourite: numBookmarks === 0 ? true : false
-    });
-    $.ajax({
-      url: this.get('settingsUrl'),
-      type: 'post',
-      contentType: 'application/json',
-      dataType: 'json',
-      data: data,
-      success: bookmarks => {
-        this.get('shell').setBookmarks(bookmarks);
-        callback();
+    };
+
+    if (!localStorage.getItem('bookmarks')) {
+      localStorage.setItem('bookmarks', JSON.stringify([]));
+    }
+
+    var bookmarks = localStorage.getItem('bookmarks');
+
+    try {
+      bookmarks = JSON.parse(bookmarks);
+      if (!Array.isArray(bookmarks)) {
+        bookmarks = [];
       }
-    });
+    } catch (e) {
+      bookmarks = [];
+    }
+
+    bookmarks.push(data);
+    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+    this.get('shell').setBookmarks(bookmarks);
+    callback();
   },
 
   /**
@@ -128,17 +145,21 @@ var BookmarkModel = {
   * @param {function} callback - Fn to be called when the update is complete.
   */
   updateBookmark: function(bookmark, callback) {
-    $.ajax({
-      url: this.get('settingsUrl'),
-      type: 'put',
-      contentType: 'application/json',
-      data: JSON.stringify(bookmark),
-      dataType: 'json',
-      success:(bookmarks) => {
-        this.get('shell').setBookmarks(bookmarks);
-        callback();
-      }
-    });
+    //
+    //TODO:
+    // Hämta från local storage och uppdatera istället.
+    //
+    // $.ajax({
+    //   url: this.get('settingsUrl'),
+    //   type: 'put',
+    //   contentType: 'application/json',
+    //   data: JSON.stringify(bookmark),
+    //   dataType: 'json',
+    //   success:(bookmarks) => {
+    //     this.get('shell').setBookmarks(bookmarks);
+    //     callback();
+    //   }
+    // });
   },
 
   /**
@@ -148,16 +169,20 @@ var BookmarkModel = {
    * @param {function} callback - Fn to be called when the removal is complete.
    */
   removeBookmark: function(id, callback) {
-    $.ajax({
-      url: this.get('settingsUrl') + id,
-      type: 'delete',
-      contentType: 'application/json',
-      dataType: 'json',
-      success:(bookmarks) => {
-        this.get('shell').setBookmarks(bookmarks);
-        callback();
-      }
-    });
+    //
+    // TODO:
+    // Hämta från local storage och uppdatera istället.
+    //
+    // $.ajax({
+    //   url: this.get('settingsUrl') + id,
+    //   type: 'delete',
+    //   contentType: 'application/json',
+    //   dataType: 'json',
+    //   success:(bookmarks) => {
+    //     this.get('shell').setBookmarks(bookmarks);
+    //     callback();
+    //   }
+    // });
   },
 
   /**

@@ -184,7 +184,6 @@
 
           if (done) done(true);
         });
-
         layers.error(() => {
           if (done)
             done(false, "Kartans lagerkonfiguration kunde inte laddas in.");

@@ -15,8 +15,8 @@
       HAJK2.wfsProxy = "/util/proxy/geturl/";
       HAJK2.searchProxy = "/postProxy.aspx?url=";
       HAJK2.start({
-        configPath: "/mapservice/settings/config/map_1",
-        layersPath: "/mapservice/settings/config/layers"
+        configPath: "/mapservice/config/map_1",
+        layersPath: "/mapservice/config/layers"
       }, function (status, message) {
         if (!status) {
           document.write(message);

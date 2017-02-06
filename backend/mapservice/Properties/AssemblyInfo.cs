@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("WebServices")]
+[assembly: AssemblyTitle("MapService")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Sweco web map services")]
-[assembly: AssemblyCopyright("Copyright ©  2016 Sweco Postion")]
+[assembly: AssemblyCompany("SWECO")]
+[assembly: AssemblyProduct("MapService")]
+[assembly: AssemblyCopyright("Copyright © SWECO 2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("10d33701-77c2-44d0-bf6b-7f1a8f2eb980")]
+[assembly: Guid("cd9f35ea-488d-460d-98c1-628d151bb968")]
 
 // Version information for an assembly consists of the following four values:
 //

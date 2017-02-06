@@ -79,49 +79,60 @@
           {
             "id": "af94804a-2874-fe53-082b-a76b490558c2",
             "parent": "-1",
-            "name": "Grupp 1",
+            "name": "Fastighet",
             "toggled": true,
             "layers": [
               {
                 "id": "13",
-                "drawOrder": 4
+                "drawOrder": 1
               },
               {
-                "id": "12",
+                "id": "2",
+                "drawOrder": 9
+              },
+              {
+                "id": "4",
                 "drawOrder": 7
               },
               {
-                "id": "11",
-                "drawOrder": 6
+                "id": "15",
+                "drawOrder": 8
+              },
+              {
+                "id": "17",
+                "drawOrder": 10
               }
             ],
-            "groups": [
+            "groups": []
+          },
+          {
+            "id": "91efa2d2-4e3e-8295-752e-aa87a2dc6806",
+            "parent": "-1",
+            "name": "HPL",
+            "toggled": true,
+            "layers": [
               {
-                "id": "91efa2d2-4e3e-8295-752e-aa87a2dc6806",
-                "parent": "af94804a-2874-fe53-082b-a76b490558c2",
-                "name": "Kartlager",
-                "toggled": true,
-                "layers": [
-                  {
-                    "id": "10",
-                    "drawOrder": 1
-                  },
-                  {
-                    "id": "8",
-                    "drawOrder": 2
-                  },
-                  {
-                    "id": "6",
-                    "drawOrder": 3
-                  },
-                  {
-                    "id": "0",
-                    "drawOrder": 5
-                  }
-                ],
-                "groups": []
+                "id": "3",
+                "drawOrder": 6
+              },
+              {
+                "id": "11",
+                "drawOrder": 5
+              },
+              {
+                "id": "8",
+                "drawOrder": 2
+              },
+              {
+                "id": "6",
+                "drawOrder": 3
+              },
+              {
+                "id": "0",
+                "drawOrder": 4
               }
-            ]
+            ],
+            "groups": []
           }
         ]
       }
@@ -129,6 +140,15 @@
     {
       "type": "infoclick",
       "options": {
+        "markerImg": "assets/icons/marker.png",
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ]
       }
     },
     {
@@ -136,7 +156,18 @@
       "options": {
         "maxZoom": 14,
         "selectionTools": true,
-        "filterVisible": true
+        "filterVisible": true,
+        "excelExportUrl": "/mapservice/export/excel",
+        "kmlExportUrl": "/mapservice/export/kml",
+        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ]
       }
     },
     {
@@ -218,6 +249,7 @@
     {
       "type": "bookmark",
       "options": {
+        "settingsUrl": "/mapservice/settings/bookmark"
       }
     }
   ],

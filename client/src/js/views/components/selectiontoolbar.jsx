@@ -43,17 +43,22 @@ var SelectionPanelView = {
   componentWillMount: function () {
     this.props.model.on('change:activeTool', () => {
         this.setState({
-            activeTool: this.props.model.get('activeTool')
+          activeTool: this.props.model.get('activeTool')
         });
     });
   },
 
   componentWillUnmount() {
+    this.props.model.setActiveTool('');
     this.props.model.off('change:activeTool');
   },
 
   activateTool: function (name) {
-    this.props.model.setActiveTool(name);
+    if (this.props.model.get('activeTool') === name) {
+      this.props.model.setActiveTool(undefined);
+    } else {
+      this.props.model.setActiveTool(name);
+    }
   },
 
   getClassNames: function (type) {
@@ -82,12 +87,10 @@ var SelectionPanelView = {
             <i className="fa fa-plus icon"></i>
           </button>
         </div>
-        <div>
-          <a onClick={(e) => {
-              e.preventDefault();
-              this.props.model.abort();
-            }}>Rensa markering</a>
-        </div>
+        <div className="btn btn-link" onClick={(e) => {
+            e.preventDefault();
+            this.props.model.abort();
+          }}>Rensa markering</div>
       </div>
     );
   }

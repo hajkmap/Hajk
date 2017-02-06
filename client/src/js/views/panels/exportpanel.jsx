@@ -143,11 +143,10 @@ var ExportSettings = React.createClass({
         }
     ;
     node.html('');
-    this.props.model.exportPDF(options, (anchor) => {
+    this.props.model.exportPDF(options, () => {
       this.setState({
         loading: false
       });
-      node.html(`<div class="alert alert-success">Din utskrift är klar. Tryck på <a href="${anchor}" target="_blank">Hämta</a> för att ladda ner en PDF-fil med resultatet.</div>`);
     });
   },
 

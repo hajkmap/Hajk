@@ -10,7 +10,8 @@
         "compiled/featureinfo.js": ["src/js/views/components/featureinfo.jsx"],
         "compiled/backgroundswitcher.js": ["src/js/views/components/backgroundswitcher.jsx"],
         "compiled/information.js": ["src/js/views/components/information.jsx"],
-        "compiled/selectiontoolbar.js": ["src/js/views/components/selectiontoolbar.jsx"]
+        "compiled/selectiontoolbar.js": ["src/js/views/components/selectiontoolbar.jsx"],
+        "compiled/searchresultgroup.js": ["src/js/views/components/searchresultgroup.jsx"]
       }
     },
     "panels": {
@@ -48,6 +49,9 @@
         "models/map": "./src/js/models/mapmodel.js",
         "models/shell": "./src/js/models/shell.js",
         "models/selection": "./src/js/models/selection.js",
+        "models/drag": "./src/js/models/drag.js",
+        "utils/arraysort": "./src/js/utils/arraysort.js",
+        "utils/kmlwriter": "./src/js/utils/kmlwriter.js",
         "tools/tool": "./src/js/tools/tool.js",
         "tools/layerswitcher": "./src/js/tools/layerswitcher.js",
         "tools/bookmark": "./src/js/tools/bookmark.js",
@@ -76,6 +80,7 @@
         "components/backgroundswitcher": "./compiled/backgroundswitcher.js",
         "components/information": "./compiled/information.js",
         "components/selectiontoolbar": "./compiled/selectiontoolbar.js",
+        "components/searchresultgroup": "./compiled/searchresultgroup.js",
         "views/map": "./compiled/mapview.js",
         "views/toolbar": "./compiled/toolbar.js",
         "views/infopanel": "./compiled/infopanel.js",

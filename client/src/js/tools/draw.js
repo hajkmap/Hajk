@@ -522,6 +522,8 @@ var DrawModel = {
     return obj;
   },
 
+  exportHitsFormId: 12345,
+
   /**
    * Export draw layer.
    * @instance
@@ -530,7 +532,10 @@ var DrawModel = {
 
     var features = this.get('drawLayer').getSource().getFeatures()
     ,   transformed = []
-    ,   xml;
+    ,   xml
+    ,   form = document.createElement('form')
+    ,   input = document.createElement('input')
+    ,   curr = document.getElementById(this.exportHitsFormId);
 
     if (features.length === 0) {
       this.set({
@@ -550,11 +555,20 @@ var DrawModel = {
 
     xml = this.writeKml(transformed, "ritobjekt");
 
-    $.post(this.get('exportUrl'), xml, (rsp) => {
-      this.set({
-        'kmlExportUrl': rsp
-      });
-    });
+    form.id = this.exportHitsFormId;
+    form.method = "post";
+    form.action = this.get('exportUrl');
+    input.value = xml;
+    input.name  = "json";
+    input.type  = "hidden";
+    form.appendChild(input);
+
+    if (curr)
+      document.body.replaceChild(form, curr);
+    else
+      document.body.appendChild(form);
+
+    form.submit();
   },
 
   /**

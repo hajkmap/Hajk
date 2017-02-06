@@ -66,9 +66,9 @@ var BookmarkPanelView = {
    * @param {object} e - Syntetic DOM event.
    */
   onSubmitForm: function (e) {
+    e.preventDefault();
     var name = ReactDOM.findDOMNode(this.refs.name).value;
     this.props.model.addBookmark(name, () => this.forceUpdate());
-    e.preventDefault();
   },
 
   /**

@@ -22,87 +22,7 @@
 
 var Panel = require('views/panel');
 var SelectionToolbar = require('components/selectiontoolbar');
-
-var SearchResultGroup;
-
-var isMobile = () => document.body.clientWidth <= 600;
-
-SearchResultGroup = React.createClass({
-
-  componentDidMount: function () {
-
-    var groups = $(ReactDOM.findDOMNode(this)).find('.group');
-
-    groups.click(function() {
-      $(this).next().toggleClass('hidden');
-    });
-
-    if (this.props.model.get('selectedIndices') instanceof Array) {
-      _.each(groups, group => {
-        var res = this.props.model.get('selectedIndices').filter(item => group.id === item.group);
-        if (res.length > 0) {
-          let nth = res[0].index + 1;
-          let elem = $(group).next().find('div:nth-child(' + nth + ')');
-          elem.addClass('selected');
-        }
-      });
-    }
-  },
-
-  handleClick: function (hit, index, event) {
-
-    var element = $(event.target)
-    ,   parent = $(ReactDOM.findDOMNode(this))
-    ,   group = parent.find('.group');
-
-    parent.find('div').each(function () { $(this).removeClass('selected') });
-    element.addClass('selected');
-
-    this.props.model.focus({
-      index: index,
-      hits: this.props.result.hits,
-      hit: hit,
-      id: group[0].id
-    });
-
-    if (isMobile()) {
-      this.props.parentView.props.navigationPanel.minimize();
-    }
-  },
-
-  render: function () {
-
-    var id = this.props.id
-    ,   groupStyleClass = this.props.numGroups === 1 ? "" : "hidden"
-    ;
-
-    return (
-      <div>
-        <div className="group" id={this.props.id}>{this.props.result.layer}
-          <span className="label">{this.props.result.hits.length}</span>
-        </div>
-        <div className={groupStyleClass}>
-          {
-            this.props.result.hits.map((hit, i) => {
-              function getTitle(property) {
-                if (Array.isArray(property)) {
-                  return property.map(item => hit.getProperties()[item]).join(', ');
-                } else {
-                  return hit.getProperties()[property] || property
-                }
-              }
-              var hitId = "hit-" + i + "-" + id
-              ,   title = getTitle(this.props.result.displayName)
-              ,   index = i
-              ;
-              return (<div key={hitId} index={i} onClick={this.handleClick.bind(this, hit, i)}>{title}</div>);
-            })
-          }
-        </div>
-      </div>
-    );
-  }
-});
+var SearchResultGroup = require('components/searchresultgroup');
 
 /**
  * @class
@@ -133,7 +53,8 @@ var SearchPanelView = {
    */
   getInitialState: function() {
     return {
-      visible: false
+      visible: false,
+      displayPopup: this.props.model.get('displayPopup')
     };
   },
 
@@ -152,6 +73,13 @@ var SearchPanelView = {
         }
       });
     }
+
+    this.props.model.on("change:displayPopup", () => {
+      this.setState({
+        displayPopup: this.props.model.get('displayPopup')
+      });
+    });
+
   },
 
   /**
@@ -173,6 +101,7 @@ var SearchPanelView = {
       layer.off("change:visible", this.search);
     });
     this.props.model.off('change:layerCollection', this.bindLayerVisibilityChange);
+    this.props.model.off("change:displayPopup");
   },
 
   /**
@@ -220,7 +149,7 @@ var SearchPanelView = {
    * @instance
    * @param {object} event
    */
-  search: function (event) {    
+  search: function (event) {
     this.setState({
       loading: true
     });
@@ -262,15 +191,8 @@ var SearchPanelView = {
    * @param {string} type
    * @param {object} event
    */
-  setFilter: function (type, event) {
-    switch (type) {
-      case "layer":
-        this.props.model.set('filter', event.target.value);
-        break;
-      case "visible":
-        this.props.model.set('filterVisible', event.target.checked);
-        break;
-    }
+  setFilter: function (event) {
+    this.props.model.set('filter', event.target.value);
     this.search();
   },
 
@@ -287,7 +209,7 @@ var SearchPanelView = {
       <div>
         <div>
           <span>Sök: </span>&nbsp;
-          <select value={this.props.model.get('filter')} onChange={this.setFilter.bind(this, "layer")}>
+          <select value={this.props.model.get('filter')} onChange={(e) => { this.setFilter(e) }}>
             <option value="*">--  Alla  --</option>
             {
               (() => {
@@ -302,12 +224,16 @@ var SearchPanelView = {
             }
           </select>
         </div>
-        <div style={{ display: 'none' }} className="panel-row">
-          <label htmlFor="visible-layers">Sök endast i synliga lager</label>
-          <input type="checkbox" checked={this.props.model.get('filterVisible')} onChange={this.setFilter.bind(this, "visible")} id="visible-layers"/>
-        </div>
       </div>
     );
+  },
+
+  onChangeDisplayPopup: function (e) {
+    this.props.model.set("displayPopup", e.target.checked);
+  },
+
+  exportSelected: function(type) {
+    this.props.model.export(type);
   },
 
   /**
@@ -316,10 +242,36 @@ var SearchPanelView = {
    * @return {external:ReactElement}
    */
   renderResults: function () {
+
     var groups = this.props.model.get('items')
+    ,   excelButton  = null
+    ,   kmlButton  = null
+    ;
+
+    if (this.props.model.get('excelExportUrl')) {
+      excelButton = (
+        <button className="btn btn-default icon-button" onClick={(e) => this.exportSelected('kml')}>
+          <i className="kml"></i>
+        </button>
+      )
+    }
+
+    if (this.props.model.get('kmlExportUrl')) {
+      kmlButton = (
+        <button className="btn btn-default icon-button" onClick={(e) => this.exportSelected('excel')}>
+          <i className="excel"></i>
+        </button>
+      )
+    }
+
     return (
       <div className="search-results" key="search-results">
         <h3>Sökresultat</h3>
+        <div>
+          <input type="checkbox" id="display-popup" ref="displayPopup" onChange={(e) => {this.onChangeDisplayPopup(e)}} value={this.state.displayPopup}></input>
+          <label htmlFor="display-popup">Visa information</label>
+          <span className="pull-right">{excelButton}&nbsp;{kmlButton}</span>
+        </div>
         {
           (() => {
             if (groups && groups.length > 0) {

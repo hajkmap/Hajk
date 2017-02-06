@@ -20,6 +20,8 @@
 //
 // https://github.com/Johkar/Hajk2
 
+var HighlightLayer = require('layers/highlightlayer');
+
 /**
  * @typedef {Object} SelectionModel~SelectionModelProperties
  * @property {string} type -Default: anchor
@@ -32,7 +34,16 @@
  * @property {string} anchor - Default: ''
  */
 var SelectionModelProperties = {
-  activeTool: ''
+  activeTool: '',
+  markerImg: "assets/icons/marker.png",
+  anchor: [
+    8,
+    8
+  ],
+  imgSize: [
+    16,
+    16
+  ]
 };
 
 /**
@@ -51,9 +62,12 @@ var SelectionModel = {
    */
   defaults: SelectionModelProperties,
 
+  features: {},
+
   initialize: function (options) {
 
     this.set('olMap', options.map);
+    this.set('layerCollection', options.layerCollection);
     this.set('source', new ol.source.Vector({ wrapX: false }));
 
     this.set('drawLayer', new ol.layer.Vector({
@@ -63,7 +77,14 @@ var SelectionModel = {
       style: (feature) => this.getScetchStyle(feature)
     }));
 
+    this.set('highlightLayer', new HighlightLayer({
+      anchor: this.get('anchor'),
+      imgSize: this.get('imgSize'),
+      markerImg: this.get('markerImg')
+    }));
+
     this.get('olMap').addLayer(this.get('drawLayer'));
+    this.get('olMap').addLayer(this.get('highlightLayer').layer);
 
     this.set('drawTool', new ol.interaction.Draw({
       source: this.get('source'),
@@ -74,15 +95,90 @@ var SelectionModel = {
     this.get('drawTool').on('drawend', () => {
       this.get('source').clear();
     });
+  },
+
+  isQueryable: function (layer) {
+    return (
+      (
+        layer.get("type") === "wms" ||
+        layer.get("type") === "arcgis"
+      ) &&
+      layer.get("queryable") &&
+      layer.getVisible()
+    )
+  },
+
+  clear: function() {
+    this.features = {};
+  },
+
+  addFeature: function(f) {
+    const id = f.getId();
+    if (this.features.hasOwnProperty(id)) {
+      delete this.features[id];
+      this.get('highlightLayer').removeHighlight(f);
+    } else {
+      this.features[id] = f;
+      this.get('highlightLayer').addHighlight(f, false);
+    }
+  },
+
+  onMapSingleClick: function (event) {
+
+    var wmsLayers = this.get('layerCollection').filter(layer => this.isQueryable(layer))
+    ,   projection = this.get('olMap').getView().getProjection().getCode()
+    ,   resolution = this.get('olMap').getView().getResolution()
+    ,   promises = []
+    ;
+
+    this.get('olMap').forEachFeatureAtPixel(event.pixel, (feature, layer) => {
+      if (layer && layer.get('name')) {
+        if (
+          layer.get('name') !== 'preview-layer' &&
+          layer.get('name') !== 'highlight-wms'
+        ) {
+          promises.push(new Promise((resolve, reject) => {
+            this.addFeature(feature);
+            resolve();
+          }));
+        }
+      }
+    });
+
+    wmsLayers.forEach((wmsLayer, index) => {
+      wmsLayer.index = index;
+      promises.push(new Promise((resolve, reject) => {
+        wmsLayer.getFeatureInformation({
+          coordinate: event.coordinate,
+          resolution: resolution,
+          projection: projection,
+          error: message => {
+            resolve();
+          },
+          success: features => {
+            if (Array.isArray(features) && features.length > 0) {
+              features.forEach(feature => {
+                this.addFeature(feature);
+              });
+            }
+            resolve();
+          }
+        });
+      }));
+    });
+
+    Promise.all(promises).then(() => {
+      console.log("Selected features", this.features);
+    });
 
   },
 
   getScetchStyle: function () {
-    const color = 'rgba(0, 0, 0, 0.5)';
+    const color = 'rgba(0, 0, 0, 0.6)';
     return [
       new ol.style.Style({
         fill: new ol.style.Fill({
-          color: 'rgba(255, 255, 255, 0.5)'
+          color: 'rgba(0, 0, 0, 0)'
         }),
         stroke: new ol.style.Stroke({
           color: color,
@@ -91,7 +187,7 @@ var SelectionModel = {
         image: new ol.style.Circle({
           radius: 6,
           fill: new ol.style.Fill({
-            color: 'rgba(255, 255, 255, 0.5)'
+            color: 'rgba(255, 255, 255, 0)'
           }),
           stroke: new ol.style.Stroke({
             color: color,
@@ -109,14 +205,27 @@ var SelectionModel = {
   setActiveTool: function(tool) {
     this.get('olMap').removeInteraction(this.get('drawTool'));
     this.set('activeTool', tool);
+
     if (tool === 'drawSelection') {
       this.get('olMap').addInteraction(this.get('drawTool'));
+      this.get('olMap').set('clickLock', true);
+    }
+
+    if (tool === 'multiSelect') {
+      this.get('olMap').on('singleclick', this.onMapSingleClick, this);
+      this.get('olMap').set('clickLock', true);
+    }
+
+    if (!tool) {
+      this.get('olMap').set('clickLock', false);
+      this.get('olMap').un('singleclick', this.onMapSingleClick, this);
     }
   },
 
   abort: function() {
     this.setActiveTool('');
     this.get('source').clear();
+    this.get('olMap').set('clickLock', false);
   }
 
 };

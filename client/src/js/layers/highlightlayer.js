@@ -49,35 +49,40 @@ var HighlightLayer = {
    */
   defaults: HighlightLayerProperties,
 
-  initialize: function () {
+  initialize: function (props) {
     LayerModel.prototype.initialize.call(this);
-    var selectInteraction;
-    this.set('source', new ol.source.Vector({}));    
+
+    this.set({
+      anchor: props.anchor,
+      imgSize: props.imgSize,
+      markerImg: props.markerImg,
+      source: new ol.source.Vector({}),
+      queryable: false,
+      visible: true,
+      type: "highlight"
+    });
+
     this.layer = new ol.layer.Vector({
       visible: true,
       name: this.get('name'),
       source: this.get('source'),
       style: new ol.style.Style({
         fill: new ol.style.Fill({
-          color: 'rgba(255, 255, 255, 0.6)'
+          color: 'rgba(255, 255, 255, 0.5)'
         }),
         stroke: new ol.style.Stroke({
-          color: 'rgba(0, 0, 0, 0.6)',
+          color: 'rgba(20, 20, 255, 0.8)',
           width: 4
         }),
         image: new ol.style.Icon({
-          anchor: [0.5, 32],
-          anchorXUnits: 'fraction',
+          anchor: this.get('anchor'),
+          anchorXUnits: 'pixels',
           anchorYUnits: 'pixels',
           src: this.get('markerImg'),
-          imgSize: [32, 32]
+          imgSize: this.get('imgSize')
         })
       })
     });
-    this.set('selectInteraction', selectInteraction);
-    this.set("queryable", false);
-    this.set("visible", true);
-    this.set("type", "highlight");
   },
 
   /**
@@ -94,13 +99,27 @@ var HighlightLayer = {
    * @instance
    * @param {external:ol.Feature} feature
    */
-  addHighlight: function (feature) {
+  addHighlight: function (feature, clear, style) {
     var source = this.get('source');
     this.set('visible', true);
-    if (source.getFeatures().length > 0) {
+    if (clear && source.getFeatures().length > 0) {
       this.clearHighlight();
     }
+    feature.setStyle(style || this.layer.getStyle());
     source.addFeature(feature);
+  },
+
+  /**
+   * Remove a feature from the highlight layer.
+   * @instance
+   * @param {external:ol.Feature} feature
+   */
+  removeHighlight: function (feature) {
+    console.log("Remove", feature);
+    var f = this.get('source').getFeatures().find(f => f.getId() === feature.getId());
+    if (f) {
+      this.get('source').removeFeature(f);
+    }
   },
 
   /**

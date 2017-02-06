@@ -49,7 +49,6 @@ var FeatureCollection = Backbone.Collection.extend({
  * @property {external:"ol.feature"[]} features
  * @property {external:"ol.feature"} selectedFeature
  * @property {external:"ol.layer"} highlightLayer
- * @property {external:"ol.interaction.Select"} selectInteraction
  * @property {string} markerImg - Default: "assets/icons/marker.png"
  */
 var InfoClickModelProperties = {
@@ -61,8 +60,15 @@ var InfoClickModelProperties = {
   features: undefined,
   selectedFeature: undefined,
   highlightLayer: undefined,
-  selectInteraction: undefined,
-  markerImg: "assets/icons/marker.png"
+  markerImg: "assets/icons/marker.png",
+  anchor: [
+    8,
+    8
+  ],
+  imgSize: [
+    16,
+    16
+  ]
 };
 
 /**
@@ -81,38 +87,18 @@ var InfoClickModel = {
   initialize: function (options) {
     ToolModel.prototype.initialize.call(this);
     this.initialState = options;
+
+    this.set('highlightLayer', new HighlightLayer({
+      anchor: this.get('anchor'),
+      imgSize: this.get('imgSize'),
+      markerImg: this.get('markerImg')
+    }));
     this.set("features", new FeatureCollection());
-    this.selectInteraction = new ol.interaction.Select({
-      multi: false,
-      active: false,
-      style: new ol.style.Style({
-        fill: new ol.style.Fill({
-          color: 'rgba(255, 255, 255, 0.6)'
-        }),
-        stroke: new ol.style.Stroke({
-          color: 'rgba(0, 0, 0, 0.6)',
-          width: 4
-        }),
-        image: new ol.style.Icon({
-          anchor: this.get('anchor') || [0.5, 32],
-          anchorXUnits: 'fraction',
-          anchorYUnits: 'pixels',
-          src: this.get('markerImg'),
-          imgSize: this.get('imgSize') || [32, 32]
-        })
-      })
-    });
-
-    this.set("selectInteraction", this.selectInteraction);
-    this.set("highlightLayer", new HighlightLayer());
-    this.selectInteraction.setActive(false);
-
     this.get("features").on("add", (feature, collection) => {
       if (collection.length === 1) {
         this.set('selectedFeature', feature);
       }
     });
-
     this.on("change:selectedFeature", (sender, feature) => {
       setTimeout(() => {
         if (this.get('visible')) {
@@ -123,10 +109,8 @@ var InfoClickModel = {
   },
 
   configure: function (shell) {
-    var map = shell.getMap().getMap()
-    ,   selectInteraction = this.get('selectInteraction');
+    var map = shell.getMap().getMap();
 
-    map.addInteraction(this.selectInteraction);
     this.layerCollection = shell.getLayerCollection();
     this.map = map;
     this.map.on('singleclick', (event) => {
@@ -139,6 +123,7 @@ var InfoClickModel = {
       } catch (e) {}
     });
     this.set('map', this.map);
+    this.map.addLayer(this.get('highlightLayer').layer);
   },
 
   /**
@@ -159,7 +144,6 @@ var InfoClickModel = {
     ,   promises = []
     ;
 
-    $('body').css({cursor: 'wait'});
     this.layerOrder = {};
     this.get("features").reset();
 
@@ -217,11 +201,10 @@ var InfoClickModel = {
     this.set('loadFinished', false);
 
     Promise.all(promises).then(() => {
-      $('body').css({cursor: 'default'});
 
       infos.sort((a, b) => {
-        var s1 = this.layerOrder[a.layer.id]
-        ,   s2 = this.layerOrder[b.layer.id]
+        var s1 = a.information.layerindex
+        ,   s2 = b.information.layerindex
         ;
         return s1 === s2 ? 0 : s1 < s2 ? 1 : -1;
       });
@@ -280,7 +263,7 @@ var InfoClickModel = {
           information = information.replace(property, lookup(properties, property));
       });
     }
-        
+
     if (!layerModel) {
       layerIndex = 999;
     } else {
@@ -321,7 +304,7 @@ var InfoClickModel = {
   createHighlightFeature: function (feature) {
     var layer = this.get('highlightLayer');
     layer.clearHighlight();
-    this.reorderLayers(feature);
+    this.reorderLayers(feature);    
     layer.addHighlight(feature.get('feature'));
     layer.setSelectedLayer(feature.get('layer'));
   },
@@ -338,20 +321,17 @@ var InfoClickModel = {
     ,   selectedLayer = feature.get('layer')
     ,   insertIndex;
 
-    layerCollection.getArray().forEach((layer, index) => {
-      if (layer.getProperties().name !== "highlight-wms") {
-        if (layer.get('name') === selectedLayer.get('name')) {
-          insertIndex = index + 1;
-        }
-      }
-      if (insertIndex) {
+    if (this.layerOrder.hasOwnProperty(selectedLayer.get('name'))) {
+      insertIndex = this.layerOrder[selectedLayer.get('name')];
+      insertIndex += 1;
+    }
 
-        layerCollection.remove(this.get('highlightLayer').getLayer());
-        layerCollection.insertAt(insertIndex, this.get('highlightLayer').getLayer());
-        insertIndex = undefined;
+    if (insertIndex) {
+      layerCollection.remove(this.get('highlightLayer').getLayer());
+      layerCollection.insertAt(insertIndex, this.get('highlightLayer').getLayer());
+      insertIndex = undefined;
+    }
 
-      }
-    });
   },
 
   /**
@@ -360,23 +340,11 @@ var InfoClickModel = {
    * @param {external:"ol.feature"} feature
    */
   highlightFeature: function (feature) {
-      var highlightLayer = this.get('highlightLayer');
-
-      if (this.selectInteraction.getFeatures().getLength() > 0) {
-        this.selectInteraction.getFeatures().removeAt(0);
-      }
-
-      if (feature) {
-        if (feature.get("feature").getGeometry() &&
-            feature.get("feature").getGeometry().getType() === "Point") {
-          highlightLayer.clearHighlight();
-          this.selectInteraction.getFeatures().push(feature.get("feature"));
-        } else {
-          this.createHighlightFeature(feature);
-        }
-      } else {
-        highlightLayer.clearHighlight();
-      }
+    if (feature) {
+      this.createHighlightFeature(feature);
+    } else {
+      this.get('highlightLayer').clearHighlight();
+    }
   },
 
   /**
@@ -385,13 +353,7 @@ var InfoClickModel = {
    * @param {external:"ol.feature"} feature
    */
   clearHighlight: function () {
-      var features = this.selectInteraction.getFeatures(),
-          highlightLayer = this.get('highlightLayer');
-
-      if (features.getLength() > 0) {
-        this.selectInteraction.getFeatures().removeAt(0);
-      }
-      highlightLayer.clearHighlight();
+     this.get('highlightLayer').clearHighlight();
   }
 
 };
