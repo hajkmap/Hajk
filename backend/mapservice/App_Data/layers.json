@@ -61,7 +61,7 @@
       "caption": "Fastighet",
       "url": "http://194.71.132.27/geoserver/demo/wms",
       "owner": "",
-      "date": "1486023755355",
+      "date": "1486451912152",
       "content": "",
       "legend": "",
       "projection": null,
@@ -71,7 +71,7 @@
       "infobox": "{fnr}  jaskdjakldjakjsld\n{fastighet}",
       "searchFields": null,
       "displayFields": null,
-      "visibleAtStart": false,
+      "visibleAtStart": true,
       "queryable": true,
       "tiled": false,
       "singleTile": false,
@@ -170,6 +170,22 @@
       ],
       "displayFields": [
         "fastighet"
+      ],
+      "geometryField": "geom",
+      "outputFormat": "GML3"
+    },
+    {
+      "id": "20",
+      "caption": "Yta",
+      "url": "http://194.71.132.27/geoserver/demo/wfs",
+      "layers": [
+        "demo:yta"
+      ],
+      "searchFields": [
+        "name"
+      ],
+      "displayFields": [
+        "name"
       ],
       "geometryField": "geom",
       "outputFormat": "GML3"
@@ -298,6 +314,56 @@
       ],
       "editPoint": false,
       "editPolygon": true,
+      "editLine": false
+    },
+    {
+      "id": "19",
+      "caption": "Hållplatser",
+      "url": "http://194.71.132.27/geoserver/demo/wfs",
+      "projection": "EPSG:3006",
+      "layers": [
+        "demo:stopareas"
+      ],
+      "editableFields": [
+        {
+          "index": 1,
+          "name": "id",
+          "dataType": "number",
+          "textType": null,
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 2,
+          "name": "namn",
+          "dataType": "string",
+          "textType": "fritext",
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 3,
+          "name": "x",
+          "dataType": "number",
+          "textType": null,
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 4,
+          "name": "y",
+          "dataType": "number",
+          "textType": null,
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        }
+      ],
+      "editPoint": true,
+      "editPolygon": false,
       "editLine": false
     }
   ],

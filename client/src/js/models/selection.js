@@ -64,6 +64,8 @@ var SelectionModel = {
 
   features: {},
 
+  isDrawActive: false,
+
   initialize: function (options) {
 
     this.set('olMap', options.map);
@@ -80,7 +82,8 @@ var SelectionModel = {
     this.set('highlightLayer', new HighlightLayer({
       anchor: this.get('anchor'),
       imgSize: this.get('imgSize'),
-      markerImg: this.get('markerImg')
+      markerImg: this.get('markerImg'),
+      style: this.getScetchStyle()
     }));
 
     this.get('olMap').addLayer(this.get('drawLayer'));
@@ -94,6 +97,8 @@ var SelectionModel = {
 
     this.get('drawTool').on('drawend', () => {
       this.get('source').clear();
+      this.get('highlightLayer').clearHighlight();
+      this.clear();
     });
   },
 
@@ -114,16 +119,24 @@ var SelectionModel = {
 
   addFeature: function(f) {
     const id = f.getId();
+
+    this.get('source').clear();
+
     if (this.features.hasOwnProperty(id)) {
       delete this.features[id];
       this.get('highlightLayer').removeHighlight(f);
     } else {
       this.features[id] = f;
+      f.operation = "Within";
       this.get('highlightLayer').addHighlight(f, false);
     }
   },
 
   onMapSingleClick: function (event) {
+
+    if (this.get('activeTool') !== "multiSelect") {
+      return;
+    }
 
     var wmsLayers = this.get('layerCollection').filter(layer => this.isQueryable(layer))
     ,   projection = this.get('olMap').getView().getProjection().getCode()
@@ -168,7 +181,7 @@ var SelectionModel = {
     });
 
     Promise.all(promises).then(() => {
-      console.log("Selected features", this.features);
+      // Selection complete
     });
 
   },
@@ -199,7 +212,10 @@ var SelectionModel = {
   },
 
   hasFeatures: function () {
-    return this.get('source').getFeatures().length > 0;
+    return (
+      this.get('source').getFeatures().length > 0 ||
+      Object.keys(this.features).length > 0
+    );
   },
 
   setActiveTool: function(tool) {
@@ -222,12 +238,19 @@ var SelectionModel = {
     }
   },
 
+  getFeatures: function() {
+    return this.get('highlightLayer').getFeatures().concat(
+      this.get('source').getFeatures()
+    );
+  },
+
   abort: function() {
     this.setActiveTool('');
     this.get('source').clear();
     this.get('olMap').set('clickLock', false);
+    this.get('highlightLayer').clearHighlight();
+    this.clear();
   }
-
 };
 
 /**

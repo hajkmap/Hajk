@@ -166,7 +166,7 @@ var SearchPanelView = {
         };
         if (loader !== this.loading) {
           state.loading = true;
-        }
+        }        
         this.setState(state);
       });
     }, 200);

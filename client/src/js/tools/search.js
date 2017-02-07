@@ -154,6 +154,10 @@ var SearchModel = {
    }
   },
 
+  isCoordinate: function (c) {
+    return typeof c[0] === "number" && typeof c[1] === "number";
+  },
+
   /**
    * Create a feature filter
    * @instance
@@ -162,20 +166,48 @@ var SearchModel = {
    */
   getFeatureFilter: function (features, props) {
     if (Array.isArray(features) && features.length > 0) {
+
       return features.reduce((str, feature) => {
-        var coords = feature.getGeometry().getCoordinates()[0].map(c => c[0] + " " + c[1]).join(" ");
-        return str += `
-          <ogc:Intersects>
-            <ogc:PropertyName>${props.geometryField}</ogc:PropertyName>
-            <gml:Polygon srsName="${props.srsName}">
-            <gml:exterior>
-              <gml:LinearRing>
-                <gml:posList>${coords}</gml:posList>
-              </gml:LinearRing>
-              </gml:exterior>
-            </gml:Polygon>
-          </ogc:Intersects>
+
+        var coords = feature.getGeometry().getCoordinates();
+        var posList = "";
+        var operation = "Intersects";
+
+        if (this.isCoordinate(coords[0])) {
+          posList = coords.map(c => c[0] + " " + c[1]).join(" ");
+        }
+
+        if (this.isCoordinate(coords[0][0])) {
+          posList = coords[0].map(c => c[0] + " " + c[1]).join(" ");
+        }
+
+        if (this.isCoordinate(coords[0][0][0])) {
+          posList = coords[0][0].map(c => c[0] + " " + c[1]).join(" ");
+        }
+
+        if (feature.operation === "Within") {
+          operation = feature.operation;
+        }
+
+        str += `
+            <ogc:${operation}>
+              <ogc:PropertyName>${props.geometryField}</ogc:PropertyName>
+              <gml:Polygon srsName="${props.srsName}">
+              <gml:exterior>
+                <gml:LinearRing>
+                  <gml:posList>${posList}</gml:posList>
+                </gml:LinearRing>
+                </gml:exterior>
+              </gml:Polygon>
+            </ogc:${operation}>
         `;
+
+        if (features.length > 1) {
+          str = `<ogc:Or>${str}</ogc:Or>`;
+        }
+
+        return str;
+
       }, "");
     } else {
       return "";
@@ -210,13 +242,25 @@ var SearchModel = {
 
       try {
         features = format.readFeatures(result);
+        features = features.reduce((r, f) => {
+          var found = this.get('features').find(feature =>
+            f.getId() === feature.getId()
+          );
+          if (!found) {
+            r.push(f);
+          }
+          return r;
+        }, []);
       } catch (e) {
         console.error("Parsningsfel. Koordinatsystem kanske saknas i definitionsfilen? Mer information: ", e);
       }
+
       if (features.length === 0) {
         features = [];
       }
+
       props.done(features);
+
     };
 
     outputFormat = props.outputFormat;
@@ -597,7 +641,7 @@ var SearchModel = {
     }
 
     if (this.get('selectionTools')) {
-      features = this.get('selectionModel').get('source').getFeatures();
+      features = this.get('selectionModel').getFeatures();
       this.set('features', features);
     }
 
@@ -616,7 +660,6 @@ var SearchModel = {
       searchProps.caption = layer.get('caption');
       addRequest.call(this, searchProps);
     });
-
     sources.forEach(source => {
       var searchProps = {
         url: (HAJK2.searchProxy || "") + source.url,
@@ -632,25 +675,20 @@ var SearchModel = {
     });
 
     Promise.all(promises).then(() => {
-
       items.forEach(function (item) {
         item.hits = arraySort({
           array: item.hits,
           index: item.displayName
         });
       });
-
       items = items.sort((a, b) => a.layer > b.layer ? 1 : -1);
-
       this.set('items', items);
-
       if (done) {
         done({
           status: "success",
           items: items
         });
       }
-
     });
   },
 

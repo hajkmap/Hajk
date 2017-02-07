@@ -49,6 +49,25 @@ var HighlightLayer = {
    */
   defaults: HighlightLayerProperties,
 
+  getDefaultStyle: function () {
+    return new ol.style.Style({
+      fill: new ol.style.Fill({
+        color: 'rgba(255, 255, 255, 0.5)'
+      }),
+      stroke: new ol.style.Stroke({
+        color: 'rgba(20, 20, 255, 0.8)',
+        width: 4
+      }),
+      image: new ol.style.Icon({
+        anchor: this.get('anchor'),
+        anchorXUnits: 'pixels',
+        anchorYUnits: 'pixels',
+        src: this.get('markerImg'),
+        imgSize: this.get('imgSize')
+      })
+    });
+  },
+
   initialize: function (props) {
     LayerModel.prototype.initialize.call(this);
 
@@ -66,22 +85,7 @@ var HighlightLayer = {
       visible: true,
       name: this.get('name'),
       source: this.get('source'),
-      style: new ol.style.Style({
-        fill: new ol.style.Fill({
-          color: 'rgba(255, 255, 255, 0.5)'
-        }),
-        stroke: new ol.style.Stroke({
-          color: 'rgba(20, 20, 255, 0.8)',
-          width: 4
-        }),
-        image: new ol.style.Icon({
-          anchor: this.get('anchor'),
-          anchorXUnits: 'pixels',
-          anchorYUnits: 'pixels',
-          src: this.get('markerImg'),
-          imgSize: this.get('imgSize')
-        })
-      })
+      style: props.style || this.getDefaultStyle()
     });
   },
 
@@ -115,7 +119,6 @@ var HighlightLayer = {
    * @param {external:ol.Feature} feature
    */
   removeHighlight: function (feature) {
-    console.log("Remove", feature);
     var f = this.get('source').getFeatures().find(f => f.getId() === feature.getId());
     if (f) {
       this.get('source').removeFeature(f);
@@ -143,7 +146,12 @@ var HighlightLayer = {
   selectedLayerChanged: function () {
     var visible = this.get('selectedLayer').get('visible');
     this.set('visible', visible);
+  },
+
+  getFeatures: function() {
+    return this.get('source').getFeatures();
   }
+
 };
 
 /**
