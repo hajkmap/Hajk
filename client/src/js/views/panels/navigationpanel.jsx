@@ -29,7 +29,8 @@ var panels = {
   'exportpanel': require('views/exportpanel'),
   'drawpanel': require('views/drawpanel'),
   'editpanel': require('views/editpanel'),
-  'anchorpanel': require('views/anchorpanel')  
+  'anchorpanel': require('views/anchorpanel'),
+  'streetviewpanel': require('views/streetviewpanel')
 };
 
 var Alert = require('alert');
@@ -166,7 +167,7 @@ var NavigationPanelView = {
     var panelInstance = null;
     var Panel = null;
 
-    if (this.state.activePanel) {
+    if (this.state.activePanel) {      
       Panel = panels[this.state.activePanel.type.toLowerCase()];
       panelInstance = (
         <Panel
