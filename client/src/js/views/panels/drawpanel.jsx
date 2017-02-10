@@ -498,7 +498,7 @@ var DrawPanelView = {
   renderImport: function (visible) {
 
     function upload() {
-      this.refs.uploadIframe.addEventListener("load", () => {
+      this.refs.uploadIframe.addEventListener("load", () => {        
         this.props.model.importDrawLayer(this.refs.uploadIframe.contentDocument);
       });
     }

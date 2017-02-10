@@ -78,7 +78,7 @@ var DrawModelProperties = {
   pointColor: "rgb(15, 175, 255)",
   pointRadius: 7,
   pointSymbol: false,
-  markerImg: "http://localhost/gbg/assets/icons/marker.png",
+  markerImg: "http://localhost/hajk/assets/icons/marker.png",
   lineColor: "rgb(15, 175, 255)",
   lineWidth: 3,
   lineStyle: "solid",
@@ -596,30 +596,58 @@ var DrawModel = {
   },
 
   /**
+   * Calculate extent of given features
+   * @instance
+   * @param {array} features
+   * @return {external:ol.Extent} extent
+   */
+  calculateExtent(features) {
+    var x = [];
+    features.forEach((feature, i) => {
+      var e = feature.getGeometry().getExtent(); // l b r t
+      if (i === 0) {
+        x = e;
+      } else {
+        let t = 0;
+        for (;t < 4; t++) {
+          if (t < 2) {
+            if (x[t] > e[t]) {
+              x[t] = e[t];
+            }
+          } else {
+            if (x[t] < e[t]) {
+              x[t] = e[t];
+            }
+          }
+        }
+      }
+    });
+    return x.every(c => c) ? x : false;
+  },
+
+  /**
    * Import draw layer and add features to the map.
    * @instance
    * @param {XMLDocument} xmlDocument
    */
   importDrawLayer: function (xmlDoc) {
 
-    var kml_string = xmlDoc.documentElement.childNodes[0].data;
-
-    //Chrome stores data at index [1] of the array and explorer at [0]
-    if (!kml_string) {
-      try {
-          kml_string = xmlDoc.documentElement.childNodes[1].data;
-      } catch (e) {
-          console.error('Could not import features from kml. Check var xmlDoc in draw.js');
-      }
+    var kml_string = $(xmlDoc).find('kml')[0].outerHTML;
+    if (typeof kml_string === "string") {
+      kml_string = kml_string.replace('<script/>', '');
     }
 
     var parser = new ol.format.KML()
-    ,   features = parser.readFeatures(kml_string);
+    ,   features = parser.readFeatures(kml_string)
+    ,   extent = false;
 
     features.forEach((feature) => {
       coordinates = feature.getGeometry().getCoordinates();
       type = feature.getGeometry().getType()
       newCoordinates = [];
+      feature.setProperties({
+        user: true
+      });
       if (type == 'LineString') {
         coordinates.forEach((c, i) => {
           pairs = [];
@@ -644,6 +672,7 @@ var DrawModel = {
         });
         feature.getGeometry().setCoordinates(newCoordinates);
       }
+
       feature.getGeometry().transform(
         "EPSG:4326",
         this.get('olMap').getView().getProjection()
@@ -652,6 +681,13 @@ var DrawModel = {
     });
 
     this.get('drawLayer').getSource().addFeatures(features);
+    extent = this.calculateExtent(features);
+
+    if (extent) {
+      let size = this.get('olMap').getSize();
+      this.get('olMap').getView().fit(extent, size);
+    }
+
   },
 
   /**
@@ -735,11 +771,13 @@ var DrawModel = {
 
     function getImage() {
 
+      var iconSrc = forcedProperties ? (forcedProperties.image || this.get('markerImg')) : this.get('markerImg');
+
       var icon = new ol.style.Icon({
         anchor: [0.5, 32],
         anchorXUnits: 'fraction',
         anchorYUnits: 'pixels',
-        src: forcedProperties ? forcedProperties.image : this.get('markerImg'),
+        src: iconSrc,
         imgSize: [32, 32]
       });
 

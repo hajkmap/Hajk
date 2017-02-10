@@ -86,6 +86,12 @@
  * @see {@link http://openlayers.org/en/latest/apidoc/ol.style.Style.html|OpenLayers Style}
  */
 
+ /**
+  * OpenLayers style class.
+  * @external "ol.Extent"
+  * @see {@link http://openlayers.org/en/latest/apidoc/ol.Extent.html|OpenLayers Style}
+  */
+
 /**
  * OpenLayers Event class.
  * @external "ol.events.Event"

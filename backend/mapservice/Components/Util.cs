@@ -20,9 +20,14 @@ namespace MapService.Components
                 DataTable table = new DataTable() { TableName = template.TabName };
                 var index = 0;
                 template.Cols.ForEach(column => {
+                    System.Type type = string.Empty.GetType();
+                    if (template.Rows[0][index] != null)
+                    {
+                        type = template.Rows[0][index].GetType();
+                    }
                     table.Columns.Add(
                         column,
-                        template.Rows[0][index].GetType()
+                        type
                     );
                     index++;
                 });

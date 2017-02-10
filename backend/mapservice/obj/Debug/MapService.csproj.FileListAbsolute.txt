@@ -221,6 +221,6 @@ C:\Projekt\Hajk\backend\MapService\bin\System.Web.Http.xml
 C:\Projekt\Hajk\backend\MapService\bin\System.Web.Http.WebHost.xml
 C:\Projekt\Hajk\backend\MapService\bin\de\PdfSharp.resources.dll
 C:\Projekt\Hajk\backend\MapService\bin\de\PdfSharp.Charting.resources.dll
-C:\Projekt\Hajk\backend\MapService\obj\Debug\MapService.csprojResolveAssemblyReference.cache
 C:\Projekt\Hajk\backend\MapService\obj\Debug\MapService.dll
 C:\Projekt\Hajk\backend\MapService\obj\Debug\MapService.pdb
+C:\Projekt\Hajk\backend\MapService\obj\Debug\MapService.csprojResolveAssemblyReference.cache

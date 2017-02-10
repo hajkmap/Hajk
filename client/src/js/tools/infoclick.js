@@ -184,15 +184,17 @@ var InfoClickModel = {
           },
           success: features => {
             if (Array.isArray(features) && features.length > 0) {
-
               features.forEach(feature => {
                 this.addInformation(feature, wmsLayer, (featureInfo) => {
-                  infos.push(featureInfo);
+                  if (featureInfo) {
+                    infos.push(featureInfo);
+                  }
+                  resolve();
                 });
               });
-
+            } else {
+              resolve();
             }
-            resolve();
           }
         });
       }));
@@ -201,7 +203,6 @@ var InfoClickModel = {
     this.set('loadFinished', false);
 
     Promise.all(promises).then(() => {
-
       infos.sort((a, b) => {
         var s1 = a.information.layerindex
         ,   s2 = b.information.layerindex
@@ -220,6 +221,43 @@ var InfoClickModel = {
         this.set('selectedFeature', undefined);
       }
     });
+  },
+
+  parseNaturaData: function (properties, data) {
+    Object.keys(data).forEach(key => {
+
+      if (key === "arter") {
+        if (Array.isArray(data[key])) {
+          data[key].forEach((art, i) => {
+            properties[key + " " + i] = art.namn;
+          });
+        }
+      }
+      if (key === "naturtyper") {
+        if (Array.isArray(data[key])) {
+          data[key].forEach((naturtyp, i) => {
+            properties[key + " namn " + i] = naturtyp.namn;
+            properties[key + " utbredning " + i] = naturtyp.utbredningHA;
+          });
+        }
+      }
+      if (key === "naturtyperKnas") {
+      }
+      if (key === "omradesTyp") {
+      }
+      if (key === "omradesTypAsText") {
+        return;
+      }
+
+      if (data[key]) {
+        if (!properties.hasOwnProperty(key)) {
+          if (typeof data[key] === "string") {
+            properties[key] = data[key];
+          }
+        }
+      }
+    });
+    return properties;
   },
 
   /**
@@ -272,16 +310,33 @@ var InfoClickModel = {
         : 999;
     }
 
-    callback({
-      feature: feature,
-      layer: layer,
-      information: {
-          caption: layerModel && layerModel.getCaption() || "Sökträff",
-          layerindex: layerindex,
-          information: information || properties,
-          iconUrl: iconUrl,
-      }
-    });
+    if (properties.hasOwnProperty('sitecode')) {
+      let c = properties['sitecode'];
+      $.get(`${HAJK2.wfsProxy}http://skyddadnatur.naturvardsverket.se/rest/detail/${c}%40N2000`, (data) => {
+        properties = this.parseNaturaData(properties, data);
+        callback({
+          feature: feature,
+          layer: layer,
+          information: {
+              caption: layerModel && layerModel.getCaption() || "Sökträff",
+              layerindex: layerindex,
+              information: information || properties,
+              iconUrl: iconUrl,
+          }
+        });
+      });
+    } else {
+      callback({
+        feature: feature,
+        layer: layer,
+        information: {
+            caption: layerModel && layerModel.getCaption() || "Sökträff",
+            layerindex: layerindex,
+            information: information || properties,
+            iconUrl: iconUrl,
+        }
+      });
+    }
   },
 
   /**
@@ -304,7 +359,7 @@ var InfoClickModel = {
   createHighlightFeature: function (feature) {
     var layer = this.get('highlightLayer');
     layer.clearHighlight();
-    this.reorderLayers(feature);    
+    this.reorderLayers(feature);
     layer.addHighlight(feature.get('feature'));
     layer.setSelectedLayer(feature.get('layer'));
   },
