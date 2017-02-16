@@ -47,12 +47,12 @@ var StreetView = {
    */
   componentDidMount: function () {
     $('.ol-viewport').css('cursor', 'crosshair');
-    this.props.model.get('map').set('clickLock', true);
+    this.props.model.activate();
   },
 
   componentWillUnmount: function () {
     $('.ol-viewport').css('cursor', 'default');
-    this.props.model.get('map').set('clickLock', false);
+    this.props.model.deactivate();
   },
 
   /**

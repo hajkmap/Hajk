@@ -181,7 +181,9 @@ namespace MapService.Components.MapExport
         {
             this.exportItem = exportItem;
             var size = new Size(exportItem.size[0], exportItem.size[1]);
-            this.map = new Map(size);
+
+            Map.Configure();
+            this.map = new Map(size);            
         }
 
         /// <summary>
@@ -223,7 +225,6 @@ namespace MapService.Components.MapExport
                             // TODO
                         }
                     }
-
                     layer.SRID = wmsLayers[i].coordinateSystemId;
                     map.Layers.Add(layer);
                 }
@@ -234,53 +235,32 @@ namespace MapService.Components.MapExport
             }
         }
 
-        bool invoked = false;
-
-        public void AddWMTSLayers(List<WMTSInfo> wmtsLayers, Action callback)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="wmtsLayers"></param>
+        public void AddWMTSLayers(List<WMTSInfo> wmtsLayers)
         {
-            if (wmtsLayers == null || wmtsLayers.Count == 0)
+            if (wmtsLayers != null && wmtsLayers.Count > 0)
             {
-                callback.Invoke();
-                return;
-            }            
-            var i = 0;            
-            List<TileAsyncLayer> layers = new List<TileAsyncLayer>();
-            wmtsLayers.ForEach((layer) =>
-            {
-                var tileSource = this.createTileSource(layer);                
-                TileAsyncLayer wmtsLayer = new TileAsyncLayer(tileSource, "wmts_layer_" + i);
-                i++;
-
-                layers.Add(wmtsLayer);
-                map.BackgroundLayer.Add(wmtsLayer);
-
-                wmtsLayer.MapNewTileAvaliable += (ITileAsyncLayer sender, Envelope bbox, Bitmap bm, int sourceWidth, int sourceHeight, System.Drawing.Imaging.ImageAttributes imageAttributes) =>                
+                List<TileLayer2> layers = new List<TileLayer2>();
+                int i = 0;
+                wmtsLayers.ForEach((layer) =>
                 {
-                    bool shouldInvoke = false;
-                    bool allTilesDownloaded = layers.All(w => w.NumPendingDownloads <= 1);
-
-                    if (allTilesDownloaded)
+                    var tileSource = this.createTileSource(layer);                    
+                    TileLayer2 wmtsLayer = new TileLayer2(tileSource, "wmts_layer_" + i)
                     {
-                        shouldInvoke = true;
-                    }
-
-                    if (shouldInvoke && !this.invoked)
-                    {
-                        this.invoked = true;
-                        callback.Invoke();
-                    }
-                };
-                
-            });
-        }
-
-        private void WmtsLayer_MapNewTileAvaliable(ITileAsyncLayer sender, Envelope bbox, Bitmap bm, int sourceWidth, int sourceHeight, System.Drawing.Imaging.ImageAttributes imageAttributes)
-        {
-            throw new NotImplementedException();
+                        Resolution = this.exportItem.resolution
+                    };
+                    layers.Add(wmtsLayer);
+                    map.BackgroundLayer.Add(wmtsLayer);                    
+                    i++;
+                });
+            }
         }
 
         /// <summary>        
-        /// /// Add a list of vector layers to the map.
+        /// Add a list of vector layers to the map.
         /// </summary>
         /// <param name="vectorLayers"></param>
         public void AddVectorLayers(List<FeatureInfo> vectorLayers)
@@ -314,19 +294,22 @@ namespace MapService.Components.MapExport
 
                     switch (feature.type)
                     {
-                        case "Text":
+                        case "Text":                        
                         case "Point":
+                        case "MultiPoint":
                             if (vertices.Count > 0)
                             {
                                 var point = factory.CreatePoint(new GeoAPI.Geometries.Coordinate(vertices[0]));
                                 dataRow.Geometry = point;
                             }
-                            break;
+                            break;                        
                         case "LineString":
+                        case "MultiLineString":
                             var lineString = factory.CreateLineString(vertices.ToArray());
                             dataRow.Geometry = lineString;
-                            break;
+                            break;                                                
                         case "Polygon":
+                        case "MultiPolygon":
                             var polygon = factory.CreatePolygon(vertices.ToArray());
                             dataRow.Geometry = polygon;
                             break;
@@ -356,6 +339,10 @@ namespace MapService.Components.MapExport
 
         }
 
+        /// <summary>
+        /// Add a list of ArcGIS layers to the map.
+        /// </summary>
+        /// <param name="argisLayers"></param>
         public void AddArcGISLayers(List<ArcGISInfo> argisLayers)
         {
             if (argisLayers != null)
@@ -377,6 +364,11 @@ namespace MapService.Components.MapExport
             }
         }
 
+        /// <summary>
+        /// Get label style
+        /// </summary>
+        /// <param name="row"></param>
+        /// <returns></returns>
         private IStyle GetLabelStyle(FeatureDataRow row)
         {
             Style featureStyle = (Style)row["style"];
@@ -397,6 +389,11 @@ namespace MapService.Components.MapExport
             return labelStyle;
         }
 
+        /// <summary>
+        /// Get feature style
+        /// </summary>
+        /// <param name="row"></param>
+        /// <returns></returns>
         private IStyle GetFeatureStyle(FeatureDataRow row)
         {
             VectorStyle style = new VectorStyle();

@@ -16,18 +16,8 @@ using System.Web.Mvc;
 
 namespace MapService.Components
 {
-    public class BytesCallback
-    {
-        public byte[] bytes { get; set; }        
-    }
-
     public class PDFCreator
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        AutoResetEvent stopWaitHandle = new AutoResetEvent(false);
-
         /// <summary>
         /// 
         /// </summary>
@@ -63,12 +53,31 @@ namespace MapService.Components
         }
 
         /// <summary>
+        /// Convert stream to byte array.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        private static byte[] ReadFully(Stream input)
+        {
+            byte[] buffer = new byte[16 * 1024];
+            using (MemoryStream ms = new MemoryStream())
+            {
+                int read;
+                while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    ms.Write(buffer, 0, read);
+                }
+                return ms.ToArray();
+            }
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="img"></param>
         /// <param name="path"></param>
         /// <param name="exportItem"></param>
-        /// <returns></returns>
+        /// <returns>byte[]</returns>
         private byte[] createPdf(Image img, MapExportItem exportItem)
         {            
             PdfDocument document = new PdfDocument();
@@ -167,23 +176,9 @@ namespace MapService.Components
             using (MemoryStream ms = new MemoryStream()) {
                 document.Save(ms);
                 bytes = ReadFully(ms);    
-            }
+            }            
 
             return bytes;
-        }
-
-        public static byte[] ReadFully(Stream input)
-        {
-            byte[] buffer = new byte[16 * 1024];
-            using (MemoryStream ms = new MemoryStream())
-            {
-                int read;
-                while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    ms.Write(buffer, 0, read);
-                }
-                return ms.ToArray();
-            }
         }
 
         /// <summary>
@@ -191,27 +186,9 @@ namespace MapService.Components
         /// </summary>
         /// <param name="dataSet"></param>
         /// <returns></returns>
-        public void Create(MapExportItem exportItem, Action<BytesCallback> callback)
+        public byte[] Create(MapExportItem exportItem)
         {
-            MapImageCreator.GetImageAsync(exportItem, (data) =>
-            {
-                Image img = (Image)data.image.Clone();                
-                try
-                {                    
-                    byte[] bytes = this.createPdf(img, exportItem);
-                    callback.Invoke(new BytesCallback()
-                    {
-                        bytes = bytes
-                    });
-                }
-                catch (Exception ex)
-                {
-                    callback.Invoke(new BytesCallback()
-                    {
-                        bytes = null
-                    });
-                }                
-            });
+            return this.createPdf(MapImageCreator.GetImage(exportItem), exportItem);            
         }            
     }
 }

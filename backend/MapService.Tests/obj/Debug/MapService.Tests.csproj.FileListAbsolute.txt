@@ -91,7 +91,6 @@ C:\Projekt\Hajk\backend\MapService.Tests\bin\Debug\SharpMap.dll
 C:\Projekt\Hajk\backend\MapService.Tests\bin\Debug\NetTopologySuite.dll
 C:\Projekt\Hajk\backend\MapService.Tests\bin\Debug\BruTile.dll
 C:\Projekt\Hajk\backend\MapService.Tests\bin\Debug\GeoAPI.dll
-C:\Projekt\Hajk\backend\MapService.Tests\bin\Debug\SharpMap.Layers.BruTile.dll
 C:\Projekt\Hajk\backend\MapService.Tests\bin\Debug\System.Web.Http.WebHost.dll
 C:\Projekt\Hajk\backend\MapService.Tests\bin\Debug\Newtonsoft.Json.dll
 C:\Projekt\Hajk\backend\MapService.Tests\bin\Debug\System.Net.Http.Formatting.dll
@@ -115,7 +114,6 @@ C:\Projekt\Hajk\backend\MapService.Tests\bin\Debug\SharpMap.pdb
 C:\Projekt\Hajk\backend\MapService.Tests\bin\Debug\SharpMap.xml
 C:\Projekt\Hajk\backend\MapService.Tests\bin\Debug\NetTopologySuite.xml
 C:\Projekt\Hajk\backend\MapService.Tests\bin\Debug\GeoAPI.xml
-C:\Projekt\Hajk\backend\MapService.Tests\bin\Debug\SharpMap.Layers.BruTile.pdb
 C:\Projekt\Hajk\backend\MapService.Tests\bin\Debug\System.Web.Http.WebHost.xml
 C:\Projekt\Hajk\backend\MapService.Tests\bin\Debug\Newtonsoft.Json.xml
 C:\Projekt\Hajk\backend\MapService.Tests\bin\Debug\System.Net.Http.Formatting.xml

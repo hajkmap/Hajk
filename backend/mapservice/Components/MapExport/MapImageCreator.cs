@@ -26,42 +26,46 @@ namespace MapService.Components.MapExport
         /// </summary>
         /// <param name="filename"></param>
         /// <param name="exportItem"></param>
-        public static string createWorldFile(string filename, MapExportItem exportItem)
-        {
-            filename = filename.Replace(".tiff", ".tfw");
-            if (!File.Exists(filename))
-            {
-                double left = exportItem.bbox[0];
-                double right = exportItem.bbox[1];
-                double bottom = exportItem.bbox[2];
-                double top = exportItem.bbox[3];
+        public static byte[] CreateWorldFile(MapExportItem exportItem)
+        {                        
+            double left = exportItem.bbox[0];
+            double right = exportItem.bbox[1];
+            double bottom = exportItem.bbox[2];
+            double top = exportItem.bbox[3];                  
+            /*
+            Line 1: A: pixel size in the x-direction in map units/pixel
+            Line 2: D: rotation about y-axis
+            Line 3: B: rotation about x-axis
+            Line 4: E: pixel size in the y-direction in map units, almost always negative[3]
+            Line 5: C: x-coordinate of the center of the upper left pixel
+            Line 6: F: y-coordinate of the center of the upper left pixel
+            */
+            double mapWidth = Math.Abs(left - right);
+            double mapHeight = Math.Abs(top - bottom);
+            double pixelSizeX = mapWidth / exportItem.size[0];
+            double pixelSizeY = (-1) * (mapHeight / exportItem.size[1]);
+            double x = exportItem.bbox[0];
+            double y = exportItem.bbox[3];
 
-                using (StreamWriter sw = File.CreateText(filename))
-                {
-                    /*
-                    Line 1: A: pixel size in the x-direction in map units/pixel
-                    Line 2: D: rotation about y-axis
-                    Line 3: B: rotation about x-axis
-                    Line 4: E: pixel size in the y-direction in map units, almost always negative[3]
-                    Line 5: C: x-coordinate of the center of the upper left pixel
-                    Line 6: F: y-coordinate of the center of the upper left pixel
-                    */
-                    double mapWidth = Math.Abs(left - right);
-                    double mapHeight = Math.Abs(top - bottom);
-                    double pixelSizeX = mapWidth / exportItem.size[0];
-                    double pixelSizeY = (-1) * (mapHeight / exportItem.size[1]);
-                    double x = exportItem.bbox[0];
-                    double y = exportItem.bbox[3];
+            MemoryStream memoryStream = new MemoryStream();
+            TextWriter textWriter = new StreamWriter(memoryStream);
 
-                    sw.WriteLine(pixelSizeX.ForceDecimalPoint());
-                    sw.WriteLine(0);
-                    sw.WriteLine(0);
-                    sw.WriteLine(pixelSizeY.ForceDecimalPoint());
-                    sw.WriteLine(x.ForceDecimalPoint());
-                    sw.WriteLine(y.ForceDecimalPoint());
-                }
-            }
-            return filename;
+            textWriter.WriteLine(pixelSizeX.ForceDecimalPoint());
+            textWriter.WriteLine(0);
+            textWriter.WriteLine(0);
+            textWriter.WriteLine(pixelSizeY.ForceDecimalPoint());
+            textWriter.WriteLine(x.ForceDecimalPoint());
+            textWriter.WriteLine(y.ForceDecimalPoint());
+
+            textWriter.Flush();
+            memoryStream.Flush();
+
+            byte[] bytes = memoryStream.ToArray();
+
+            memoryStream.Close();
+            textWriter.Close();
+
+            return bytes;
         }
 
         /// <summary>
@@ -72,11 +76,12 @@ namespace MapService.Components.MapExport
         /// <returns>Image</returns>
         public static Image GetImage(MapExportItem exportItem)
         {
-            MapExporter MapExporter = new MapExporter(exportItem);
-            
-            MapExporter.AddWMSLayers(exportItem.wmsLayers);
-            MapExporter.AddArcGISLayers(exportItem.arcgisLayers);
-            MapExporter.AddVectorLayers(exportItem.vectorLayers);
+            MapExporter mapExporter = new MapExporter(exportItem);
+
+            mapExporter.AddWMTSLayers(exportItem.wmtsLayers);
+            mapExporter.AddWMSLayers(exportItem.wmsLayers);
+            mapExporter.AddArcGISLayers(exportItem.arcgisLayers);
+            mapExporter.AddVectorLayers(exportItem.vectorLayers);            
 
             double left = exportItem.bbox[0];
             double right = exportItem.bbox[1];
@@ -84,12 +89,9 @@ namespace MapService.Components.MapExport
             double top = exportItem.bbox[3];
 
             Envelope envelope = new Envelope(left, right, bottom, top);
-            MapExporter.map.ZoomToBox(envelope);
-
-            var width = Math.Abs(left - right);
-            var scale = MapExporter.map.GetMapScale(exportItem.resolution);
-
-            Image i = MapExporter.map.GetMap(exportItem.resolution);
+            mapExporter.map.ZoomToBox(envelope);
+                                    
+            Image i = mapExporter.map.GetMap(exportItem.resolution);            
 
             Bitmap src = new Bitmap(i);
             src.SetResolution(exportItem.resolution, exportItem.resolution);
@@ -101,46 +103,7 @@ namespace MapService.Components.MapExport
             g.FillRectangle(new SolidBrush(Color.White), 0, 0, target.Width, target.Height);
             g.DrawImage(src, 0, 0);
             return target;
-        }
+        }        
 
-        public static void GetImageAsync(MapExportItem exportItem, Action<MapExportCallback> callback)
-        {            
-            MapExporter mapExporter = new MapExporter(exportItem);                        
-            mapExporter.AddWMSLayers(exportItem.wmsLayers);
-            mapExporter.AddArcGISLayers(exportItem.arcgisLayers);
-            mapExporter.AddVectorLayers(exportItem.vectorLayers);    
-                    
-            mapExporter.AddWMTSLayers(exportItem.wmtsLayers, () =>
-            {
-                Image img = mapExporter.map.GetMap();
-                Bitmap src = new Bitmap(img);
-                src.SetResolution(exportItem.resolution, exportItem.resolution);
-
-                Bitmap target = new Bitmap(src.Size.Width, src.Size.Height);
-                target.SetResolution(exportItem.resolution, exportItem.resolution);
-
-                Graphics g = Graphics.FromImage(target);
-                g.FillRectangle(new SolidBrush(Color.White), 0, 0, target.Width, target.Height);
-                g.DrawImage(src, 0, 0);
-
-                callback.Invoke(new MapExportCallback()
-                {
-                    image = img
-                });
-            });
-
-            double left = exportItem.bbox[0];
-            double right = exportItem.bbox[1];
-            double bottom = exportItem.bbox[2];
-            double top = exportItem.bbox[3];
-
-            Envelope envelope = new Envelope(left, right, bottom, top);
-            mapExporter.map.ZoomToBox(envelope);
-
-            var width = Math.Abs(left - right);
-            var scale = mapExporter.map.GetMapScale(exportItem.resolution);
-
-            mapExporter.map.GetMap(exportItem.resolution);
-        }
     }
 }

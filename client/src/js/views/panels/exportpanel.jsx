@@ -22,7 +22,60 @@
 
 var Panel = require('views/panel');
 
-var ExportSettings = React.createClass({
+var ExportTiffSettings = React.createClass({
+
+  getInitialState: function() {
+    return {
+    };
+  },
+
+  removePreview: function () {
+    this.props.model.removeTiffPreview();
+  },
+
+  addPreview: function (map) {
+    var center = this.props.model.getPreviewFeature() ?
+                 ol.extent.getCenter(this.props.model.getPreviewFeature().getGeometry().getExtent()) :
+                 map.getView().getCenter();
+    this.props.model.addTiffPreview(center);
+  },
+
+  exportTIFF: function () {
+    this.props.model.exportTIFF(() => {
+    });
+  },
+
+  componentWillUnmount: function () {
+    this.removePreview();
+  },
+
+  render: function () {
+
+    var map = this.props.olMap
+    ,   loader = null;
+
+    if (this.state.loading) {
+      loader = <i className="fa fa-refresh fa-spin"></i>;
+    }
+
+    this.addPreview(map);
+
+    return (
+      <div className="export-settings">
+        <div>
+          <div>
+            <button onClick={this.exportTIFF} className="btn btn-default">Skapa TIFF {loader}</button>
+          </div>
+          <br />
+          <div id="tiff"></div>
+        </div>
+      </div>
+    );
+
+  }
+});
+
+var ExportPdfSettings = React.createClass({
 
   resolutions: [72, 96, 150],
 
@@ -85,12 +138,7 @@ var ExportSettings = React.createClass({
     return this.state.selectFormat;
   },
 
-  setFormat: function (e) {
-    if (e.target.value === "A3") {
-      this.resolutions = [72];
-    } else {
-      this.resolutions = [72, 96, 150];
-    }
+  setFormat: function (e) {  
     this.setState({
       selectFormat: e.target.value
     });
@@ -137,7 +185,6 @@ var ExportSettings = React.createClass({
           size: this.getPaperMeasures(),
           format: this.getFormat(),
           orientation: this.getOrientation(),
-          format: this.getFormat(),
           scale: this.getScale(),
           resolution: this.getResolution()
         }
@@ -222,6 +269,19 @@ var ExportSettings = React.createClass({
  * @class
  */
 var ExportPanelView = {
+
+  componentDidMount: function () {
+    this.props.model.on('change:activeTool', () => {
+      this.setState({
+        activeTool: this.props.model.get('activeTool')
+      });
+    })
+  },
+
+  componentWillUnmount: function () {
+    this.props.model.off('change:activeTool');
+  },
+
   /**
    * Get initial state.
    * @instance
@@ -229,7 +289,8 @@ var ExportPanelView = {
    */
   getInitialState: function() {
     return {
-      showExportSettings: true
+      showExportSettings: true,
+      activeTool: this.props.model.get('activeTool')
     };
   },
 
@@ -256,20 +317,54 @@ var ExportPanelView = {
     });
   },
 
+  activateTool: function (name) {
+    if (this.props.model.get('activeTool') === name) {
+      this.props.model.setActiveTool(undefined);
+    } else {
+      this.props.model.setActiveTool(name);
+    }
+  },
+
+  getClassNames: function (type) {
+    return this.state.activeTool === type
+      ? "btn btn-primary"
+      : "btn btn-default";
+  },
+
   /**
    * Render the panel component.
    * @instance
    * @return {external:ReactElement}
    */
   render: function () {
+    var activeTool = this.props.model.get('activeTool');
+    if (activeTool === 'pdf') {
+      tool = <ExportPdfSettings
+        visible={this.state.showExportSettings}
+        model={this.props.model}
+        olMap={this.props.model.get('olMap')}/>;
+    }
+    if (activeTool === 'tiff') {
+      tool = <ExportTiffSettings
+        model={this.props.model}
+        olMap={this.props.model.get('olMap')}/>;
+    }
     return (
       <Panel title="Skriv ut karta" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
         <div className="export-panel">
-          <ExportSettings
-            visible={this.state.showExportSettings}
-            model={this.props.model}
-            olMap={this.props.model.get('olMap')}
-          />
+          <div>
+            <div>Välj format</div>
+            <div className="btn-group">
+              <button onClick={() => this.activateTool('pdf')} type="button" className={this.getClassNames('pdf')} >
+                PDF
+              </button>
+              <button onClick={() => this.activateTool('tiff')} type="button" className={this.getClassNames('tiff')} >
+                TIFF
+              </button>
+            </div>
+          </div>
+          <br/>
+          {tool}
         </div>
       </Panel>
     );

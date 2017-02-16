@@ -8,7 +8,7 @@ namespace MapService.Controllers
     public class ImportController : Controller
     {
 
-        public byte[] readFully(Stream input)
+        private byte[] readFully(Stream input)
         {
             byte[] buffer = new byte[16 * 1024];
             using (MemoryStream ms = new MemoryStream())
@@ -28,11 +28,6 @@ namespace MapService.Controllers
             byte[] bytes = this.readFully(file.InputStream);            
             string content = System.Text.Encoding.UTF8.GetString(bytes);
             return this.Content(content, "text/xml");
-        }
-
-        public string Image(Stream uploading)
-        {
-            return "";
         }
     }
 }

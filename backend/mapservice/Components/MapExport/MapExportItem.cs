@@ -17,6 +17,6 @@ namespace MapService.Components.MapExport
         public string scale { get; set; }
         public int resolution { get; set; }
         public int[] size { get; set; }
-        public double[] bbox { get; set; }
+        public double[] bbox { get; set; }        
     }
 }

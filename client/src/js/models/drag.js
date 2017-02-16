@@ -1,10 +1,10 @@
-var Drag = function() {
+ol.interaction.Drag = function() {
 
   ol.interaction.Pointer.call(this, {
-    handleDownEvent: Drag.prototype.handleDownEvent,
-    handleDragEvent: Drag.prototype.handleDragEvent,
-    handleMoveEvent: Drag.prototype.handleMoveEvent,
-    handleUpEvent: Drag.prototype.handleUpEvent
+    handleDownEvent: ol.interaction.Drag.prototype.handleDownEvent,
+    handleDragEvent: ol.interaction.Drag.prototype.handleDragEvent,
+    handleMoveEvent: ol.interaction.Drag.prototype.handleMoveEvent,
+    handleUpEvent: ol.interaction.Drag.prototype.handleUpEvent
   });
 
   this.coordinate_ = null;
@@ -18,9 +18,17 @@ var Drag = function() {
   this.previousCursor_ = undefined;
 };
 
-ol.inherits(Drag, ol.interaction.Pointer);
+ol.inherits(ol.interaction.Drag, ol.interaction.Pointer);
 
-Drag.prototype.isDraggable = function (layer) {
+ol.interaction.Drag.prototype.pause = function() {
+  this.paused = true;
+};
+
+ol.interaction.Drag.prototype.resume = function () {
+  this.paused = false;
+};
+
+ol.interaction.Drag.prototype.isDraggable = function (layer) {
   var accepted = {
     'draw-layer': true,
     'preview-layer': true
@@ -28,7 +36,7 @@ Drag.prototype.isDraggable = function (layer) {
   return layer ? accepted.hasOwnProperty(layer.getProperties().name) : true;
 };
 
-Drag.prototype.handleDownEvent = function (evt) {
+ol.interaction.Drag.prototype.handleDownEvent = function (evt) {
   var map = evt.map
   ,   feature;
 
@@ -53,11 +61,15 @@ Drag.prototype.handleDownEvent = function (evt) {
 
 };
 
-Drag.prototype.handleDragEvent = function(evt) {
+ol.interaction.Drag.prototype.handleDragEvent = function(evt) {
   var map = evt.map
   ,   deltaX = 0
   ,   deltaY = 0
   ,   geometry;
+  
+  if (this.paused) {
+    return;
+  }
 
   deltaX = evt.coordinate[0] - this.coordinate_[0];
   deltaY = evt.coordinate[1] - this.coordinate_[1];
@@ -70,7 +82,7 @@ Drag.prototype.handleDragEvent = function(evt) {
   }
 };
 
-Drag.prototype.handleMoveEvent = function(evt) {
+ol.interaction.Drag.prototype.handleMoveEvent = function(evt) {
 
   if (this.cursor_) {
     var featureLayer = ""
@@ -93,10 +105,10 @@ Drag.prototype.handleMoveEvent = function(evt) {
   }
 };
 
-Drag.prototype.handleUpEvent = function(evt) {
+ol.interaction.Drag.prototype.handleUpEvent = function(evt) {
   this.coordinate_ = null;
   this.feature_ = null;
   return false;
 };
 
-module.exports = Drag;
+module.exports = ol.interaction.Drag;

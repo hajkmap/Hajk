@@ -21,6 +21,7 @@
 // https://github.com/Johkar/Hajk2
 
 var ToolModel = require('tools/tool');
+var transform = require('models/transform');
 
 String.prototype.toHex = function() {
   if (/^#/.test(this)) return this;
@@ -52,6 +53,7 @@ String.prototype.toOpacity = function() {
  * @property {string} toolbar - Default: bottom
  * @property {string} icon - Default: fa fa-print icon
  * @property {string} exportUrl - Default: /mapservice/export/pdf
+ * @property {string} exportTiffUrl - Default: /mapservice/export/tiff
  * @property {string} copyright - Default: © Lantmäteriverket i2009/00858
  */
 var ExportModelProperties = {
@@ -61,7 +63,9 @@ var ExportModelProperties = {
   toolbar: 'bottom',
   icon: 'fa fa-print icon',
   exportUrl: '/mapservice/export/pdf',
+  exportTiffUrl: '/mapservice/export/tiff',
   copyright: "© Lantmäteriverket i2009/00858",
+  activeTool: 'pdf',
   scales: [1000, 2000, 5000, 10000, 20000, 50000, 100000, 250000]
 };
 
@@ -81,6 +85,10 @@ var ExportModel = {
   configure: function (shell) {
     this.set('olMap', shell.getMap().getMap());
     this.addPreviewLayer();
+  },
+
+  setActiveTool: function (tool) {
+    this.set('activeTool', tool);
   },
 
   /**
@@ -113,6 +121,14 @@ var ExportModel = {
     this.previewLayer.getSource().clear();
   },
 
+  removeTiffPreview: function() {
+    this.get('transform').clear();
+    this.get('olMap').removeInteraction(this.get('transform'));
+    this.previewLayer.getSource().clear();
+    this.set('previewFeature', undefined);
+    this.get('olMap').set('clickLock', false);
+  },
+
   /**
    * Get the preview feature.
    * @instance
@@ -120,6 +136,46 @@ var ExportModel = {
    */
   getPreviewFeature: function () {
     return this.get('previewFeature')
+  },
+
+  addTiffPreview: function (center) {
+    var dpi = 25.4 / 0.28
+    ,   ipu = 39.37
+    ,   sf  = 1
+    ,   w   = (210 / dpi / ipu * 10000 / 2) * sf
+    ,   y   = (297 / dpi  / ipu * 10000 / 2) * sf
+    ,   coords = [
+          [
+            [center[0] - w, center[1] - y],
+            [center[0] - w, center[1] + y],
+            [center[0] + w, center[1] + y],
+            [center[0] + w, center[1] - y],
+            [center[0] - w, center[1] - y]
+          ]
+        ]
+    ,   feature = new ol.Feature({
+        geometry: new ol.geom.Polygon(coords)
+      })
+    ;
+
+    this.removePreview();
+    this.set('previewFeature', feature);
+    this.previewLayer.getSource().addFeature(feature);
+
+    var features = new ol.Collection();
+    features.push(feature);
+
+    this.set('transform', new ol.interaction.Transform({
+      translateFeature: true,
+      scale: true,
+      rotate: false,
+      keepAspectRatio: false,
+      translate: true,
+      stretch: false,
+      features: features
+    }));
+    this.get('olMap').addInteraction(this.get('transform'));
+    this.get('olMap').set('clickLock', true);
   },
 
   /**
@@ -397,20 +453,23 @@ var ExportModel = {
     layers = this.get('olMap').getLayers().getArray();
 
     vectorLayers = layers.filter(layer =>
-      layer instanceof ol.layer.Vector && layer.get('name') !== 'preview-layer'
+      layer instanceof ol.layer.Vector &&
+      layer.getVisible() &&
+      layer.get('name') !== 'preview-layer'
     );
 
     imageVectorLayers = layers.filter(layer =>
       layer instanceof ol.layer.Image &&
-      layer.getSource() instanceof ol.source.ImageVector
+      layer.getSource() instanceof ol.source.ImageVector &&
+      layer.getVisible()
     );
-
-    imageVectorLayers = imageVectorLayers.map(layer =>
-      translateVector(layer.getSource().getSource().getFeaturesInExtent(extent), layer.getSource().getStyle()()[0])
-    ).filter(layer => layer.features.length > 0);
 
     vectorLayers = vectorLayers.map(layer =>
       translateVector(layer.getSource().getFeaturesInExtent(extent))
+    ).filter(layer => layer.features.length > 0);
+
+    imageVectorLayers = imageVectorLayers.map(layer =>
+      translateVector(layer.getSource().getSource().getFeaturesInExtent(extent), layer.getSource().getStyle()()[0])
     ).filter(layer => layer.features.length > 0);
 
     return vectorLayers.concat(imageVectorLayers);
@@ -600,6 +659,64 @@ var ExportModel = {
     form.submit();
 
     callback();
+  },
+
+  resolutionToScale: function(dpi, resolution) {
+    var inchesPerMeter = 39.37;
+    return resolution * dpi * inchesPerMeter;
+  },
+
+  exportTIFF: function() {
+    var extent = this.previewLayer.getSource().getFeatures()[0].getGeometry().getExtent()
+    ,   left   = extent[0]
+    ,   right  = extent[2]
+    ,   bottom = extent[1]
+    ,   top    = extent[3]
+    ,   dpi    = (25.4 / 0.28)
+    ,   scale  = this.resolutionToScale(dpi, this.get('olMap').getView().getResolution())
+    ,   form   = document.createElement('form')
+    ,   input  = document.createElement('input')
+    ,   curr   = document.getElementById(this.exportHitsFormId)
+    ,   data   = {
+      wmsLayers: [],
+      vectorLayers: [],
+      size: null,
+      bbox: null
+    };
+
+    data.vectorLayers = this.findVector() || [];
+    data.wmsLayers = this.findWMS() || [];
+    data.wmtsLayers = this.findWMTS() || [];
+    data.arcgisLayers = this.findArcGIS() || [];
+
+    dx = Math.abs(left - right);
+    dy = Math.abs(bottom - top);
+
+    data.size = [
+      parseInt(49.65 * (dx / scale) * dpi),
+      parseInt(49.65 * (dy / scale) * dpi)
+    ];
+
+    data.resolution = 96;
+    data.bbox = [left, right, bottom, top];
+    data.orientation = "";
+    data.format = "";
+    data.scale = scale;
+
+    form.id = this.exportHitsFormId;
+    form.method = "post";
+    form.action = this.get('exportTiffUrl');
+    input.value = JSON.stringify(data);
+    input.name  = "json";
+    input.type  = "hidden";
+    form.appendChild(input);
+
+    if (curr)
+      document.body.replaceChild(form, curr);
+    else
+      document.body.appendChild(form);
+
+    form.submit();
   },
 
   /**

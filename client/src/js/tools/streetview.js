@@ -91,16 +91,16 @@ var StreetViewModel = {
    * @instance
    * @param {array} coordinate
    */
-  showLocation: function (coordinate) {
-
+  showLocation: function (e) {
+        
     var coord  = ol.proj.transform(
-      coordinate,
-			this.get('map').getView().getProjection(),
+      e.coordinate,
+			this.get('olMap').getView().getProjection(),
 			"EPSG:4326"
 		)
 	  ,	location = new google.maps.LatLng(coord[1], coord[0]);
 
-    this.addMarker(coordinate, (panorama && panorama.getPov().heading) || 0);
+    this.addMarker(e.coordinate, (panorama && panorama.getPov().heading) || 0);
     streetViewService = new google.maps.StreetViewService();
  		panorama = new google.maps.StreetViewPanorama(document.getElementById('street-view-window'));
     streetViewService.getPanoramaByLocation(location, 50, this.displayPanorama);
@@ -128,7 +128,7 @@ var StreetViewModel = {
           n = i;
         }
       }
-      return n * w;
+      return (n * w) - w;
     }
 
     const p = position(rotation);
@@ -175,7 +175,7 @@ var StreetViewModel = {
     ,	  y = panorama.getPosition().lat()
     ,	  b = panorama.getPov().heading
     ,	  l = [x, y]
-    ,   p = this.get('map').getView().getProjection()
+    ,   p = this.get('olMap').getView().getProjection()
     ,   c = ol.proj.transform(l, "EPSG:4326", p);
 
     this.addMarker(c, b);
@@ -186,12 +186,10 @@ var StreetViewModel = {
    * @instance
    */
   configure: function (shell) {
-    this.set('map', shell.getMap().getMap());
-    this.get('map').on('click', e => {
-      if (this.get('google')) {
-        this.showLocation(e.coordinate);
-      }
-    });
+
+    this.set('map', shell.getMap());
+    this.set('olMap', shell.getMap().getMap());
+
     googleMapsLoader.KEY = this.get('apiKey');
     googleMapsLoader.load(google => {
       this.set('google', google);
@@ -200,7 +198,18 @@ var StreetViewModel = {
       source: new ol.source.Vector({}),
       name: 'streetViewMarkerLayer'
     }));
-    this.get('map').addLayer(this.get('streetViewMarkerLayer'));
+    this.get('olMap').addLayer(this.get('streetViewMarkerLayer'));
+  },
+
+  activate: function () {
+    this.get('olMap').set('clickLock', true);
+    this.eventKey = this.get('olMap').on('click', this.showLocation.bind(this));
+  },
+
+  deactivate: function () {
+    this.get('olMap').set('clickLock', false);
+    this.get('olMap').unByKey(this.eventKey);
+    this.get('streetViewMarkerLayer').getSource().clear();
   },
 
   /**
