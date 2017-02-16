@@ -166,7 +166,7 @@ var SearchPanelView = {
         };
         if (loader !== this.loading) {
           state.loading = true;
-        }        
+        }
         this.setState(state);
       });
     }, 200);
@@ -228,7 +228,7 @@ var SearchPanelView = {
     );
   },
 
-  onChangeDisplayPopup: function (e) {
+  onChangeDisplayPopup: function (e) {    
     this.props.model.set("displayPopup", e.target.checked);
   },
 
@@ -264,11 +264,13 @@ var SearchPanelView = {
       )
     }
 
+    console.log("Render. Display popup: ", this.state.displayPopup);
+
     return (
       <div className="search-results" key="search-results">
         <h3>Sökresultat</h3>
         <div>
-          <input type="checkbox" id="display-popup" ref="displayPopup" onChange={(e) => {this.onChangeDisplayPopup(e)}} value={this.state.displayPopup}></input>
+          <input type="checkbox" id="display-popup" ref="displayPopup" onChange={(e) => {this.onChangeDisplayPopup(e)}} checked={this.state.displayPopup}></input>
           <label htmlFor="display-popup">Visa information</label>
           <span className="pull-right">{excelButton}&nbsp;{kmlButton}</span>
         </div>

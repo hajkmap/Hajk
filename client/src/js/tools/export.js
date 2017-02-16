@@ -455,7 +455,8 @@ var ExportModel = {
     vectorLayers = layers.filter(layer =>
       layer instanceof ol.layer.Vector &&
       layer.getVisible() &&
-      layer.get('name') !== 'preview-layer'
+      layer.get('name') !== 'preview-layer' &&
+      layer.get('name') !== 'search-selection-layer'
     );
 
     imageVectorLayers = layers.filter(layer =>

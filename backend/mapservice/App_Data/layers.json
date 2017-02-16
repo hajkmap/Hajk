@@ -357,19 +357,23 @@
           "index": 1,
           "name": "name",
           "dataType": "string",
-          "textType": "fritext",
-          "values": null,
+          "textType": "lista",
+          "values": [
+            "a",
+            "b",
+            "c"
+          ],
           "hidden": false,
-          "defaultValue": null
+          "defaultValue": "a"
         },
         {
           "index": 3,
           "name": "list",
           "dataType": "string",
-          "textType": "lista",
-          "values": null,
+          "textType": "flerval",
+          "values": [],
           "hidden": false,
-          "defaultValue": "a"
+          "defaultValue": "4"
         },
         {
           "index": 4,

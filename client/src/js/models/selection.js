@@ -75,7 +75,7 @@ var SelectionModel = {
     this.set('drawLayer', new ol.layer.Vector({
       source: this.get('source'),
       queryable: false,
-      name: this.get('drawLayerName'),
+      name: 'search-selection-layer',
       style: (feature) => this.getScetchStyle(feature)
     }));
 
@@ -217,7 +217,7 @@ var SelectionModel = {
       Object.keys(this.features).length > 0
     );
   },
-  
+
   setActiveTool: function(tool) {
     this.get('olMap').removeInteraction(this.get('drawTool'));
     this.set('activeTool', tool);

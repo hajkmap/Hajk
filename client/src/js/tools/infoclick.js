@@ -360,7 +360,7 @@ var InfoClickModel = {
     var layer = this.get('highlightLayer');
     layer.clearHighlight();
     this.reorderLayers(feature);
-    layer.addHighlight(feature.get('feature'));
+    layer.addHighlight(feature.get('feature').clone());
     layer.setSelectedLayer(feature.get('layer'));
   },
 
