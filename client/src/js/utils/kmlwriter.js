@@ -42,10 +42,14 @@ function toKmlString(str, type) {
       case 'point':
         str = str.replace(/^POINT\(/, '').replace(/\)$/, '');
         str = str.replace(/^POINT Z\(/, '').replace(/\)$/, '');
+        str = str.replace(/^MULTIPOINT\(/, '').replace(/\)$/, '');
+        str = str.replace(/^MULTIPOINT Z\(/, '').replace(/\)$/, '');
         break;
       case 'line':
         str = str.replace(/^LINESTRING\(/, '').replace(/\)$/, '');
         str = str.replace(/^LINESTRING Z\(/, '').replace(/\)$/, '');
+        str = str.replace(/^MULTILINESTRING\(/, '').replace(/\)$/, '');
+        str = str.replace(/^MULTILINESTRING Z\(/, '').replace(/\)$/, '');
         break;
       case 'polygon':
         strs = str.split('),(');
@@ -179,6 +183,18 @@ function extractStyle(style) {
   return obj;
 }
 
+function filterProperties (template, properties) {
+  var props = {};
+  Object.keys(properties).filter(property => {
+    var regExp = new RegExp(`{export:${property}}`);
+    if (regExp.test(template)) {
+      props[property] = properties[property];
+    }
+  });
+  console.log("Apply filter", props);
+  return props;
+}
+
 var kmlWriter = {};
 
 kmlWriter.transform = (features, from, to) => {
@@ -190,6 +206,7 @@ kmlWriter.transform = (features, from, to) => {
     c.getGeometry().transform(from, to);
     c.setStyle(style);
     c.caption = feature.caption;
+    c.infobox = feature.infobox;
     return c;
   });
 };
@@ -257,14 +274,25 @@ kmlWriter.createXML = (features, name) => {
 
     if (!description && feature.getProperties()) {
         description = "<table>";
-        _.each(feature.getProperties(), function (value, attribute) {
-            if (typeof value === "string") {
+        let properties = feature.getProperties();
+
+        console.log("Export to xml", feature);
+
+        if (feature.infobox) {
+          properties = filterProperties(feature.infobox, properties);
+        }
+
+        _.each(properties, function (value, attribute) {
+            if (typeof value === "string" ||
+                typeof value === "number" ||
+                typeof value === "boolean") {
                 description += "<tr>";
                     description += "<td>" + attribute + "</td>";
                     description += "<td>" + safeInject(value) + "</td>";
                 description += "</tr>";
             }
         });
+
         description += "</table>";
     }
 
@@ -276,7 +304,13 @@ kmlWriter.createXML = (features, name) => {
     if (feature.getGeometry() instanceof ol.geom.Point) {
         doc += point(parser.writeFeature(feature));
     }
+    if (feature.getGeometry() instanceof ol.geom.MultiPoint) {
+        doc += point(parser.writeFeature(feature));
+    }
     if (feature.getGeometry() instanceof ol.geom.LineString) {
+        doc += line(parser.writeFeature(feature));
+    }
+    if (feature.getGeometry() instanceof ol.geom.MultiLineString) {
         doc += line(parser.writeFeature(feature));
     }
     if (feature.getGeometry() instanceof ol.geom.Polygon) {

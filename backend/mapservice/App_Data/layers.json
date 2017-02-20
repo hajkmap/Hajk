@@ -1,12 +1,12 @@
 {
   "wmtslayers": [
     {
-      "id": "5",
-      "caption": "Topowebben wmts",
-      "url": "http://194.71.132.27/lmproxy/wmts",
+      "id": "1",
+      "caption": "Topowebb",
+      "url": "http://localhost/lmproxy/wmts?",
       "owner": null,
-      "date": "1482851907328",
-      "content": "topowebbkarta",
+      "date": "1487253110525",
+      "content": "",
       "legend": "",
       "projection": "EPSG:3006",
       "visibleAtStart": true,
@@ -47,28 +47,24 @@
         "10",
         "11",
         "12",
-        "13",
-        "14",
-        "15",
-        "16",
-        "17"
+        "13"
       ]
     }
   ],
   "wmslayers": [
     {
       "id": "2",
-      "caption": "Fastighet",
-      "url": "http://194.71.132.27/geoserver/demo/wms",
+      "caption": "Badplats",
+      "url": "http://localhost/geoserver/wms",
       "owner": "",
-      "date": "1487084114589",
+      "date": "1487254256491",
       "content": "",
       "legend": "",
       "projection": null,
       "layers": [
-        "demo_fastighet"
+        "sweco:badplats"
       ],
-      "infobox": "{fnr}  jaskdjakldjakjsld\n<a href=\"apa.com/?{fastighet}\">Rapport</a>",
+      "infobox": "",
       "searchFields": null,
       "displayFields": null,
       "visibleAtStart": true,
@@ -80,19 +76,19 @@
     },
     {
       "id": "3",
-      "caption": "Stoparea geoserver wms",
-      "url": "http://194.71.132.27/geoserver/wms",
+      "caption": "Vägnät",
+      "url": "http://localhost/geoserver/wms",
       "owner": "",
-      "date": "1485339395704",
+      "date": "1487253404412",
       "content": "",
       "legend": "",
       "projection": null,
       "layers": [
-        "demo:stopareas"
+        "sweco:vagnat"
       ],
       "infobox": "",
-      "searchFields": [],
-      "displayFields": [],
+      "searchFields": null,
+      "displayFields": null,
       "visibleAtStart": false,
       "queryable": true,
       "tiled": false,
@@ -102,59 +98,15 @@
     },
     {
       "id": "4",
-      "caption": "Fastighet WMS 2",
-      "url": "http://194.71.132.27/geoserver/wms",
+      "caption": "Vattenyta",
+      "url": "http://localhost/geoserver/wms",
       "owner": "",
-      "date": "1486023746046",
+      "date": "1487253416145",
       "content": "",
       "legend": "",
       "projection": null,
       "layers": [
-        "demo:demo_fastighet"
-      ],
-      "infobox": "",
-      "searchFields": null,
-      "displayFields": null,
-      "visibleAtStart": false,
-      "queryable": true,
-      "tiled": false,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "geoserver"
-    },
-    {
-      "id": "21",
-      "caption": "Dammar",
-      "url": "http://194.71.132.27/geoserver/viskan/wms",
-      "owner": "",
-      "date": "1486641100460",
-      "content": "dammar",
-      "legend": "",
-      "projection": null,
-      "layers": [
-        "vrf_dammar"
-      ],
-      "infobox": "",
-      "searchFields": null,
-      "displayFields": null,
-      "visibleAtStart": false,
-      "queryable": true,
-      "tiled": false,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "geoserver"
-    },
-    {
-      "id": "22",
-      "caption": "Natura 2000",
-      "url": "http://194.71.132.27/geoserver/viskan/wms",
-      "owner": "",
-      "date": "1486641198526",
-      "content": "Natura 2000",
-      "legend": "",
-      "projection": null,
-      "layers": [
-        "vrf_natura"
+        "sweco:vattenyta"
       ],
       "infobox": "",
       "searchFields": null,
@@ -169,83 +121,35 @@
   ],
   "wfslayers": [
     {
-      "id": "9",
-      "caption": "Busshållplatsers",
-      "url": "http://194.71.132.27/geoserver/demo/wfs",
+      "id": "5",
+      "caption": "Vattenyta",
+      "url": "http://localhost/geoserver/wfs",
       "layers": [
-        "demo:stopareas"
+        "sweco:vattenyta"
       ],
       "searchFields": [
-        "id",
-        "namn"
+        "kategori"
       ],
+      "infobox": "",
       "displayFields": [
-        "id",
-        "namn"
-      ],
-      "geometryField": "the_geom",
-      "outputFormat": "GML3"
-    },
-    {
-      "id": "14",
-      "caption": "Hållplats ArcGIS",
-      "url": "http://ksdgis.se/arcgis/services/hpl/MapServer/WFSServer",
-      "layers": [
-        "hpl:hpl"
-      ],
-      "searchFields": [
-        "namn"
-      ],
-      "displayFields": [
-        "namn"
-      ],
-      "geometryField": "Shape",
-      "outputFormat": "GML3"
-    },
-    {
-      "id": "18",
-      "caption": "Fastighet",
-      "url": "http://194.71.132.27/geoserver/demo/wfs",
-      "layers": [
-        "demo:demo_fastighet"
-      ],
-      "searchFields": [
-        "fastighet"
-      ],
-      "displayFields": [
-        "fastighet"
+        "kategori"
       ],
       "geometryField": "geom",
       "outputFormat": "GML3"
     },
     {
-      "id": "20",
-      "caption": "Yta",
-      "url": "http://194.71.132.27/geoserver/demo/wfs",
+      "id": "6",
+      "caption": "Badplats",
+      "url": "http://localhost/geoserver/wfs",
       "layers": [
-        "demo:yta"
+        "sweco:badplats"
       ],
       "searchFields": [
-        "name"
+        "kategori"
       ],
+      "infobox": "<b>Kkod:</b> {kkod}  \n<b>Kategori:</b> {export:kategori}  \n<b>Text:</b> {export:text}\n\nsdf sdf sd  \nsdfsd fsdfsdfsd\n\n  sdf\ns fsdif sdkfj sdkljf sdklj\n\nsj fklsdjfk lsdjkfl sdjkfl dj\n<img src=\"https://www.w3schools.com/css/img_fjords.jpg\"></img>  \n\n<img src=\"https://www.w3schools.com/css/img_fjords.jpg\"></img>  \n\n<img src=\"https://www.w3schools.com/css/img_fjords.jpg\"></img>  \nhej då",
       "displayFields": [
-        "name"
-      ],
-      "geometryField": "geom",
-      "outputFormat": "GML3"
-    },
-    {
-      "id": "23",
-      "caption": "Natura 2000",
-      "url": "http://194.71.132.27/geoserver/wfs",
-      "layers": [
-        "viskan:vrf_natura"
-      ],
-      "searchFields": [
-        "sitecode"
-      ],
-      "displayFields": [
-        "site_name"
+        "kategori"
       ],
       "geometryField": "geom",
       "outputFormat": "GML3"
@@ -253,248 +157,21 @@
   ],
   "vectorlayers": [
     {
-      "id": "6",
-      "caption": "hpl vektor",
-      "url": "http://ksdgis.se/arcgis/services/hpl/MapServer/WFSServer",
-      "layer": "hpl:hpl",
+      "id": "7",
+      "caption": "Badplats (WFS)",
+      "url": "http://localhost/geoserver/wfs",
+      "layer": "sweco:badplats",
       "owner": null,
-      "date": "1484916995117",
-      "content": "",
-      "legend": "http://localhost/Upload/1f822c4c-7221-4a0c-9bc8-25c7d836ebc2.png",
+      "date": "1487318144663",
+      "content": "Badplats",
+      "legend": "http://localhost/Upload/311b9aac-0511-48e5-b3b7-960f253d9f66.png",
       "projection": "EPSG:3006",
-      "visibleAtStart": false,
+      "visibleAtStart": true,
       "opacity": 1.0,
-      "infobox": "Hållplats {namn} {id}\n",
-      "queryable": true
-    },
-    {
-      "id": "8",
-      "caption": "HPL 2",
-      "url": "http://ksdgis.se/arcgis/services/hpl/MapServer/WFSServer",
-      "layer": "hpl:hpl",
-      "owner": null,
-      "date": "1484918959147",
-      "content": "",
-      "legend": "http://localhost/Upload/e4739e6b-2464-426f-897c-f6b5a2bfb78c.png",
-      "projection": "EPSG:3006",
-      "visibleAtStart": false,
-      "opacity": 1.0,
-      "infobox": "{x} {y}",
-      "queryable": true
-    },
-    {
-      "id": "11",
-      "caption": "Stoparea geoserver",
-      "url": "http://194.71.132.27/geoserver/wfs",
-      "layer": "demo:stopareas",
-      "owner": null,
-      "date": "1485339370992",
-      "content": "",
-      "legend": "http://localhost/Upload/f701da81-15f3-4c15-ae2d-c694f1d9c97e.png",
-      "projection": "EPSG:3006",
-      "visibleAtStart": false,
-      "opacity": 1.0,
-      "infobox": "",
-      "queryable": true
-    },
-    {
-      "id": "13",
-      "caption": "yta vektor geoserver",
-      "url": "http://194.71.132.27/geoserver/demo/wfs",
-      "layer": "demo:yta",
-      "owner": null,
-      "date": "1485346964924",
-      "content": "",
-      "legend": "http://localhost/Upload/e2334a7a-e1b6-42c0-bc8b-f82d65d2ad07.png",
-      "projection": "EPSG:3006",
-      "visibleAtStart": false,
-      "opacity": 1.0,
-      "infobox": "",
-      "queryable": true
-    },
-    {
-      "id": "15",
-      "caption": "Fastighet wfss",
-      "url": "http://194.71.132.27/geoserver/demo/wfs",
-      "layer": "demo:demo_fastighet",
-      "owner": null,
-      "date": "1486023509830",
-      "content": "",
-      "legend": "http://",
-      "projection": "EPSG:3006",
-      "visibleAtStart": false,
-      "opacity": 1.0,
-      "infobox": "",
-      "queryable": true
-    },
-    {
-      "id": "17",
-      "caption": "Fastighet WFS 2",
-      "url": "http://194.71.132.27/geoserver/demo/wfs",
-      "layer": "demo:demo_fastighet",
-      "owner": null,
-      "date": "1486023764103",
-      "content": "",
-      "legend": "http://",
-      "projection": "EPSG:3006",
-      "visibleAtStart": false,
-      "opacity": 1.0,
-      "infobox": "",
+      "infobox": "WFS {kategori}",
       "queryable": true
     }
   ],
-  "wfstlayers": [
-    {
-      "id": "1",
-      "caption": "Yta",
-      "url": "http://194.71.132.27/geoserver/demo/wfs",
-      "projection": "EPSG:3006",
-      "layers": [
-        "demo:yta"
-      ],
-      "editableFields": [
-        {
-          "index": 1,
-          "name": "name",
-          "dataType": "string",
-          "textType": "lista",
-          "values": [
-            "a",
-            "b",
-            "c"
-          ],
-          "hidden": false,
-          "defaultValue": "a"
-        },
-        {
-          "index": 3,
-          "name": "list",
-          "dataType": "string",
-          "textType": "flerval",
-          "values": [],
-          "hidden": false,
-          "defaultValue": "4"
-        },
-        {
-          "index": 4,
-          "name": "integer",
-          "dataType": "int",
-          "textType": null,
-          "values": null,
-          "hidden": false,
-          "defaultValue": null
-        }
-      ],
-      "editPoint": false,
-      "editPolygon": true,
-      "editLine": false
-    },
-    {
-      "id": "19",
-      "caption": "Hållplatser",
-      "url": "http://194.71.132.27/geoserver/demo/wfs",
-      "projection": "EPSG:3006",
-      "layers": [
-        "demo:stopareas"
-      ],
-      "editableFields": [
-        {
-          "index": 1,
-          "name": "id",
-          "dataType": "number",
-          "textType": null,
-          "values": null,
-          "hidden": false,
-          "defaultValue": null
-        },
-        {
-          "index": 2,
-          "name": "namn",
-          "dataType": "string",
-          "textType": "fritext",
-          "values": null,
-          "hidden": false,
-          "defaultValue": null
-        },
-        {
-          "index": 3,
-          "name": "x",
-          "dataType": "number",
-          "textType": null,
-          "values": null,
-          "hidden": false,
-          "defaultValue": null
-        },
-        {
-          "index": 4,
-          "name": "y",
-          "dataType": "number",
-          "textType": null,
-          "values": null,
-          "hidden": false,
-          "defaultValue": null
-        }
-      ],
-      "editPoint": true,
-      "editPolygon": false,
-      "editLine": false
-    },
-    {
-      "id": "24",
-      "caption": "Dammar",
-      "url": "http://194.71.132.27/geoserver/viskan/wfs",
-      "projection": "EPSG:3006",
-      "layers": [
-        "viskan:vrf_dammar"
-      ],
-      "editableFields": [
-        {
-          "index": 1,
-          "name": "information",
-          "dataType": "string",
-          "textType": "fritext",
-          "values": null,
-          "hidden": false,
-          "defaultValue": null
-        },
-        {
-          "index": 2,
-          "name": "vattendrag",
-          "dataType": "string",
-          "textType": "fritext",
-          "values": null,
-          "hidden": false,
-          "defaultValue": null
-        }
-      ],
-      "editPoint": true,
-      "editPolygon": false,
-      "editLine": false
-    }
-  ],
-  "arcgislayers": [
-    {
-      "id": "0",
-      "caption": "hpl arcgis",
-      "url": "http://ksdgis.se/arcgis/rest/services/hpl/MapServer",
-      "owner": null,
-      "date": "1484818945053",
-      "content": "test",
-      "legend": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAWCAYAAADAQbwGAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAANhJREFUOI21lDEOwyAMRT8iEjtbbsTQ9rBtBm7Exs5A6NAiIWJj0ip/QzYvzwiyQEgBVPbrEwC0Cw8FlFH/whWytwUAdgAKCQCwe7vnb127qKaBFTZK9rZQUNbw1xyAlF016WuUpWjYbtAuKuk4rh/5AqDZgHSrq/GIZhOB2oX7zLWpvROGc4d/6mL/ExY4suTshkAOOoKJwB4qwaaAZ0MCrfn882ICaTSqH4C1uQ03qjUoPZQ05Mz6OvVxdmQJSsFIYExQ1qBwGyhT0bBtXA1ebS0kHN5vmzcaD2ZB4GrZNAAAAABJRU5ErkJggg==&hpl",
-      "projection": "EPSG:3006",
-      "visibleAtStart": false,
-      "layers": [
-        "0"
-      ],
-      "extent": [
-        "317849.3461",
-        "6529912.0642",
-        "512033.2538",
-        "6770321.6249"
-      ],
-      "opacity": 1.0,
-      "infobox": "Namn: {namn}",
-      "queryable": true
-    }
-  ]
+  "wfstlayers": [],
+  "arcgislayers": []
 }

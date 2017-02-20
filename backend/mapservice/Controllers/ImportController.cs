@@ -1,4 +1,5 @@
 ﻿using MapService.Components;
+using System;
 using System.IO;
 using System.Web.Mvc;
 using System.Xml;
@@ -28,6 +29,17 @@ namespace MapService.Controllers
             byte[] bytes = this.readFully(file.InputStream);            
             string content = System.Text.Encoding.UTF8.GetString(bytes);
             return this.Content(content, "text/xml");
+        }
+
+        public string Image()
+        {            
+            var file = Request.Files[0];
+            string tempPath = "/Upload";
+            string path = Server.MapPath(tempPath);
+            string filename = Guid.NewGuid() + ".png";
+            string localPng = path + "\\" + filename;            
+            file.SaveAs(localPng);
+            return tempPath + "/" + filename;
         }
     }
 }

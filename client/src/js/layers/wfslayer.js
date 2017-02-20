@@ -41,7 +41,7 @@ module.exports = LayerModel.extend({
   },
 
   loadAJAX: function (url) {
-    url = HAJK2.wfsProxy + url;    
+    url = HAJK2.wfsProxy + url;
     $.get(url, (features) => {
       this.addFeatures(features, "wfs");
     });
@@ -64,6 +64,7 @@ module.exports = LayerModel.extend({
     });
 
     layer = new ol.layer.Image({
+      information: this.get('information'),
       caption: this.get('caption'),
       name: this.get('name'),
       visible: this.get("visible"),

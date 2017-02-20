@@ -282,7 +282,7 @@ class Manager extends React.Component {
         <i className="fa fa-times" onClick={() => this.closeDetails()}></i>
         <table>
           <thead>
-            <tr>              
+            <tr>
               <th>Namn</th>
               <th>Typ</th>
             </tr>
@@ -451,22 +451,17 @@ class Manager extends React.Component {
    *
    */
   uploadLegend(callback) {
-
-    console.log("Upload legend");
-
     $('#upload-form').submit();
     this.refs.uploadIframe.addEventListener("load", () => {
-      if (this.refs.uploadIframe.contentDocument &&
-        $(this.refs.uploadIframe.contentDocument).find('string').length > 0) {
+      if (this.refs.uploadIframe.contentDocument) {
         if (!window.location.origin) {
           window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
         }
-        var node = $(this.refs.uploadIframe.contentDocument).find('string')[0]
-        ,   url  = node.textContent ? node.textContent : node.innerHTML
+        var node = $(this.refs.uploadIframe.contentDocument).find('body')[0]
+        ,   url  = node.innerHTML
         ,   a = $(`<a href="${url}"">temp</a>`)
         ,   b = a[0].href
         ;
-
         this.props.model.set('legend', b);
       }
     });
@@ -520,7 +515,7 @@ class Manager extends React.Component {
   render() {
 
     var abort = this.state.mode === "edit" ? <span className="btn btn-danger" onClick={(e) => this.abort(e)}>Avbryt</span> : null
-    ,   url = "/mapservice/export/importimage"
+    ,   url = this.props.config.url_import //"/mapservice/export/importimage"
     ,   typeSelectorDisabled = this.state.mode === "edit"
     ;
 

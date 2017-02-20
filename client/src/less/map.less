@@ -39,3 +39,26 @@
   font-size: 28px;
   border-radius: 2px 2px 0 0;
 }
+
+@media only screen and (max-device-width : 480px) {
+  .ol-popup {
+    position: fixed;
+    background: white;
+    top: 7px;
+    left: 7px;
+    right: 7px;
+    bottom: 100px;
+    z-index: 1000;
+    #popup-content {
+      overflow: auto;
+      height: 100%;
+      img {
+        width: 100%;
+      }
+    }
+  }
+  .ol-popup:before,
+  .ol-popup:after {
+    border: none;
+  }
+}

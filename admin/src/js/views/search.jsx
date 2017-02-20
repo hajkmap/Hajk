@@ -31,6 +31,7 @@ const defaultState = {
   caption: "",
   date: "Fylls i per automatik",
   searchFields: "",
+  infobox: "",
   displayFields: "",
   geometryField: "",
   url: "",
@@ -109,6 +110,7 @@ class Search extends React.Component {
       id: layer.id,
       caption: layer.caption,
       searchFields: layer.searchFields,
+      infobox: layer.infobox,
       displayFields: layer.displayFields,
       geometryField: layer.geometryField,
       outputFormat: layer.outputFormat || 'GML3',
@@ -358,6 +360,7 @@ class Search extends React.Component {
         url: this.getValue("url"),
         layers: this.getValue("layers"),
         searchFields: this.getValue("searchFields"),
+        infobox: this.getValue("infobox"),
         displayFields: this.getValue("displayFields"),
         geometryField: this.getValue("geometryField"),
         outputFormat: this.getValue("outputFormat")
@@ -564,6 +567,14 @@ class Search extends React.Component {
               <div>
                 <label>Lagerlista</label>
                 {this.renderLayerList()}
+              </div>
+              <div>
+                <label>Inforuta</label>
+                <textarea
+                  ref="input_infobox"
+                  value={this.state.infobox}
+                  onChange={(e) => this.setState({'infobox': e.target.value})}
+                />
               </div>
               <div>
                 <label>Sökfält</label>

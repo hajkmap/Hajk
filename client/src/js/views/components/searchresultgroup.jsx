@@ -78,7 +78,7 @@ SearchResultGroup = {
     };
 
     if (!ctrlIsDown) {
-      parent.find('div').each(function (e) {
+      $('.search-results').find('.selected').each(function (e) {
         $(this).removeClass('selected');
       });
       this.props.model.focus(item);

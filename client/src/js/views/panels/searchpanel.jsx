@@ -228,7 +228,7 @@ var SearchPanelView = {
     );
   },
 
-  onChangeDisplayPopup: function (e) {    
+  onChangeDisplayPopup: function (e) {
     this.props.model.set("displayPopup", e.target.checked);
   },
 
@@ -263,8 +263,6 @@ var SearchPanelView = {
         </button>
       )
     }
-
-    console.log("Render. Display popup: ", this.state.displayPopup);
 
     return (
       <div className="search-results" key="search-results">

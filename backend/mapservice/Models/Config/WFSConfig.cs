@@ -12,12 +12,14 @@ namespace MapService.Models.Config
 
         public string caption { get; set; }
 
-        public string url { get; set; }
-        
+        public string url { get; set; }        
+
         public string[] layers { get; set; }        
 
         public string[] searchFields { get; set; }
-        
+
+        public string infobox { get; set; }
+
         public string[] displayFields { get; set; }
 
         public string geometryField { get; set; }

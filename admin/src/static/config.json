@@ -1,6 +1,7 @@
 {
   "manager": {
     "url_proxy": "/util/proxy/geturl",
+    "url_import": "/mapservice/import/image",    
     "url_layers": "/mapservice/config/layers",
     "url_layer_settings": "/mapservice/settings/wmslayer",
     "url_wmtslayer_settings": "/mapservice/settings/wmtslayer",

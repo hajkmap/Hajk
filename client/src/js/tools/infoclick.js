@@ -68,7 +68,8 @@ var InfoClickModelProperties = {
   imgSize: [
     16,
     16
-  ]
+  ],
+  displayPopup: true
 };
 
 /**
@@ -124,6 +125,9 @@ var InfoClickModel = {
     });
     this.set('map', this.map);
     this.map.addLayer(this.get('highlightLayer').layer);
+    $('#popup-closer').click(() => {      
+      this.clearHighlight();
+    });
   },
 
   /**
@@ -215,11 +219,111 @@ var InfoClickModel = {
       });
 
       this.set('loadFinished', true);
-      this.togglePanel();
+      if (this.get('displayPopup')) {
+        this.togglePopup(infos, event.coordinate);
+      } else {
+        this.togglePanel()
+      }
 
       if (infos.length === 0) {
         this.set('selectedFeature', undefined);
+        this.get('map').getOverlayById('popup-0').setPosition(undefined);
+        this.clearHighlight();
       }
+
+    });
+  },
+
+  /**
+   * Convert object to markdown
+   * @instance
+   * @param {object} object to transform
+   * @return {string} markdown
+   */
+  objectAsMarkdown: function (o) {
+    return Object
+      .keys(o)
+      .reduce((str, next, index, arr) =>
+        /^geom$|^geometry$|^the_geom$/.test(arr[index]) ?
+        str : str + `**${arr[index]}**: ${o[arr[index]]}\r`
+      , "");
+  },
+
+  /**
+   * Toogle popup
+   * @instance
+   * @param {array} infos
+   * @param {array} coordinate
+   */
+  togglePopup: function(infos, coordinate) {
+
+    const ovl = this.get('map').getOverlayById('popup-0');
+
+    function isPoint (coords) {
+      return (
+        coords.length === 1 &&
+        Array.isArray(coords[0]) &&
+        (coords[0].length === 2 ||  coords[0].length === 3) &&
+        typeof coords[0][0] === "number" &&
+        typeof coords[0][1] === "number"
+      );
+    }
+
+    infos.forEach((info, i) => {
+        function display(index, inf) {
+
+          var coords    = inf.feature.getGeometry().getCoordinates()
+          ,   position  = coordinate
+          ,   feature   = new Backbone.Model()
+          ,   infobox   = $('<div></div>')
+          ,   caption   = $(`<div> ${index + 1} av ${infos.length} </div>`)
+          ,   next      = $('<span class="fa fa-btn fa-arrow-circle-o-right"></span>')
+          ,   prev      = $('<span class="fa fa-btn fa-arrow-circle-o-left"></span>')
+          ,   title     = $(`<div>${inf.information.caption}</div>`)
+          ,   content   = $(`<div>${inf.information.information.kategori}</div>`)
+          ,   markdown  = ""
+          ,   html      = "";
+
+          if (typeof inf.information.information === "object") {
+            markdown = this.objectAsMarkdown(inf.information.information);
+          }
+          html = marked(markdown, { sanitize: false, gfm: true, breaks: true });
+          content.html(html);
+
+          if (isPoint(coords)) {
+            position = coords[0];
+          }
+
+          caption.prepend(prev);
+          caption.append(next);
+          if (infos.length > 1) {
+            infobox.append(caption);
+          }
+
+          infobox.append(title, content);
+
+          $('#popup-content').html(infobox);
+          ovl.setPosition(position);
+
+          Object.keys(inf).forEach(key => {
+            feature.set(key, inf[key]);
+          });
+          this.highlightFeature(feature);
+
+          prev.click(() => {
+            if (infos[index - 1]) {
+              display.call(this, index - 1, infos[index - 1]);
+            }
+          });
+          next.click(() => {
+            if (infos[index + 1]) {
+              display.call(this, index + 1, infos[index + 1]);
+            }
+          });
+        }
+        if (i === 0) {
+          display.call(this, i, info);
+        }
     });
   },
 
@@ -376,7 +480,7 @@ var InfoClickModel = {
     ,   selectedLayer = feature.get('layer')
     ,   insertIndex;
 
-    if (this.layerOrder.hasOwnProperty(selectedLayer.get('name'))) {
+    if (selectedLayer && this.layerOrder.hasOwnProperty(selectedLayer.get('name'))) {
       insertIndex = this.layerOrder[selectedLayer.get('name')];
       insertIndex += 1;
     }

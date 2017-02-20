@@ -73,80 +73,30 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "5"
+          "1"
         ],
         "groups": [
           {
-            "id": "d12bf0cc-a8cd-542a-611f-529e28086ea5",
+            "id": "9c8ea66e-9079-293b-17d6-6332ce9abf1f",
             "parent": "-1",
-            "name": "VRF",
+            "name": "Data",
             "toggled": true,
             "layers": [
               {
-                "id": "22",
-                "drawOrder": 0
-              },
-              {
-                "id": "21",
-                "drawOrder": 0
-              }
-            ],
-            "groups": []
-          },
-          {
-            "id": "af94804a-2874-fe53-082b-a76b490558c2",
-            "parent": "-1",
-            "name": "Fastighet",
-            "toggled": false,
-            "layers": [
-              {
-                "id": "13",
-                "drawOrder": 10
-              },
-              {
                 "id": "2",
-                "drawOrder": 8
-              },
-              {
-                "id": "4",
-                "drawOrder": 6
-              },
-              {
-                "id": "15",
-                "drawOrder": 7
-              },
-              {
-                "id": "17",
-                "drawOrder": 9
-              }
-            ],
-            "groups": []
-          },
-          {
-            "id": "91efa2d2-4e3e-8295-752e-aa87a2dc6806",
-            "parent": "-1",
-            "name": "HPL",
-            "toggled": false,
-            "layers": [
-              {
-                "id": "3",
-                "drawOrder": 5
-              },
-              {
-                "id": "11",
                 "drawOrder": 4
               },
               {
-                "id": "8",
-                "drawOrder": 1
+                "id": "7",
+                "drawOrder": 3
               },
               {
-                "id": "6",
+                "id": "3",
                 "drawOrder": 2
               },
               {
-                "id": "0",
-                "drawOrder": 3
+                "id": "4",
+                "drawOrder": 1
               }
             ],
             "groups": []
@@ -157,14 +107,14 @@
     {
       "type": "infoclick",
       "options": {
-        "markerImg": "assets/icons/marker.png",
+        "markerImg": "assets/icons/dot_marker_blue.png",
         "anchor": [
-          16,
-          32
+          8,
+          8
         ],
         "imgSize": [
-          32,
-          32
+          16,
+          16
         ]
       }
     },
@@ -176,14 +126,14 @@
         "filterVisible": true,
         "excelExportUrl": "/mapservice/export/excel",
         "kmlExportUrl": "/mapservice/export/kml",
-        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
+        "markerImg": "http://localhost/hajk/assets/icons/dot_marker_blue.png",
         "anchor": [
-          16,
-          32
+          8,
+          8
         ],
         "imgSize": [
-          32,
-          32
+          16,
+          16
         ]
       }
     },

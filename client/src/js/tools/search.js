@@ -360,19 +360,65 @@ var SearchModel = {
   },
 
   /**
+   * Translate infobox template
+   * @instance
+   * @param {string} information template
+   * @param {object} object to translate
+   * @return {string} markdown
+   */
+  translateInfoboxTemplate: function(information, properties) {
+    (information.match(/\{.*?\}\s?/g) || []).forEach(property => {
+        function lookup(o, s) {
+          s = s.replace('{', '')
+               .replace('}', '')
+               .replace('export:', '')
+               .trim()
+               .split('.');
+
+          switch (s.length) {
+            case 1: return o[s[0]] || "";
+            case 2: return o[s[0]][s[1]] || "";
+            case 3: return o[s[0]][s[1]][s[2]] || "";
+          }
+        }
+        information = information.replace(property, lookup(properties, property));
+    });
+    return information;
+  },
+
+  /**
+   * Convert object to markdown
+   * @instance
+   * @param {object} object to transform
+   * @return {string} markdown
+   */
+  objectAsMarkdown: function (o) {
+    return Object
+      .keys(o)
+      .reduce((str, next, index, arr) =>
+        /^geom$|^geometry$|^the_geom$/.test(arr[index]) ?
+        str : str + `**${arr[index]}**: ${o[arr[index]]}\r`
+      , "");
+  },
+
+  /**
    * Get information
    * @instance
    * @param {extern:ol.feature} feature
    * @return {string} information
    */
   getInformation: function(feature) {
-    var properties = feature.getProperties();
-    return Object.keys(properties)
-      .map(key =>
-        typeof properties[key] === "string"
-        ? `<b>${key}</b>: ${properties[key]}</br>`
-        : '')
-      .join('');
+
+    var info = feature.infobox || feature.getProperties();
+    var content = "";
+
+    if (typeof info === 'object')
+      content = this.objectAsMarkdown(info);
+
+    if (typeof info === 'string')
+      content = this.translateInfoboxTemplate(info, feature.getProperties());
+
+    return marked(content, { sanitize: false, gfm: true, breaks: true });
   },
 
   /**
@@ -523,27 +569,37 @@ var SearchModel = {
   getExcelData: function () {
 
     var groups = {};
-    // Gruppera sökträffar efter rubrik.
-    //
+
     this.get('hits').forEach(hit => {
       if (!groups.hasOwnProperty(hit.caption)) {
         groups[hit.caption] = [];
       }
       groups[hit.caption].push(hit);
     });
-    // Skapa en lista med objekt för att ritas ut i en tabell.
-    // Ta inte med objekt av typen ol.geom.Geometry, de går inte att serialisera.
-    //
+
     return Object.keys(groups).map(group => {
 
       var columns = []
       ,   values = [];
 
       values = groups[group].map((hit) => {
+
         var attributes = hit.getProperties()
         ,   names = Object.keys(attributes);
 
-        names = names.filter(name => !(attributes[name] instanceof ol.geom.Geometry));
+        names = names.filter(name => {
+          if (!hit.626) {
+            return typeof attributes[name] === "string"  ||
+                   typeof attributes[name] === "boolean" ||
+                   typeof attributes[name] === "number";
+          } else {
+            let regExp = new RegExp(`{export:${name}}`);
+            return (
+              regExp.test(hit.infobox)
+            );
+          }
+        });
+
         columns = names;
         return names.map(name => attributes[name]);
       });
@@ -626,6 +682,7 @@ var SearchModel = {
             if (features.length > 0) {
               features.forEach(feature => {
                 feature.caption = searchProps.caption;
+                feature.infobox = searchProps.infobox;
               });
               items.push({
                 layer: searchProps.caption,
@@ -658,12 +715,14 @@ var SearchModel = {
       var searchProps = layer.get('search');
       searchProps.geometryField = /wfsserver/.test(searchProps.url.toLowerCase()) ? "Shape" : "the_geom";
       searchProps.caption = layer.get('caption');
+      searchProps.infobox = layer.get('infobox');
       addRequest.call(this, searchProps);
     });
     sources.forEach(source => {
       var searchProps = {
         url: (HAJK2.searchProxy || "") + source.url,
         caption: source.caption,
+        infobox: source.infobox,
         featureType: source.layers[0].split(':')[1],
         propertyName: source.searchFields.join(','),
         displayName: source.displayFields ? source.displayFields : (source.searchFields[0] || "Sökträff"),
