@@ -30,7 +30,8 @@
 
   "use strict";
 
-  var ApplicationView = require('views/application')
+  var ApplicationView = require("views/application")
+  ,   cssModifier = require("utils/cssmodifier")
   ,   configPath = "/mapservice/settings/config/map_1"
   ,   layersPath = "/mapservice/settings/config/layers"
   ,   req
@@ -41,6 +42,11 @@
 
   internal.load = function (config, bookmarks) {
     var application = new ApplicationView(config, bookmarks);
+
+    if (config && config.map && config.map.colors) {
+      cssModifier.configure(config.map.colors);
+    }
+
     application.render();
   };
 

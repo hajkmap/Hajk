@@ -20,7 +20,9 @@
 //
 // https://github.com/Johkar/Hajk2
 
-var info = Backbone.Model.extend({
+import { Model } from 'backbone';
+
+var info = Model.extend({
 
   hello: function () {
     console.log("hello");
@@ -28,4 +30,4 @@ var info = Backbone.Model.extend({
 
 });
 
-module.exports = new info();
+export default info;

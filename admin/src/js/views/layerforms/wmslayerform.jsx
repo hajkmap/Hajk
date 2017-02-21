@@ -1,3 +1,6 @@
+import React from "react";
+import { Component } from 'react';
+
 const defaultState = {
   load: false,
   imageLoad: false,
@@ -29,7 +32,7 @@ const defaultState = {
 /**
  *
  */
-class WMSLayerForm extends React.Component {
+class WMSLayerForm extends Component {
 
   componentDidMount() {
     defaultState.url = this.props.url;
@@ -165,9 +168,10 @@ class WMSLayerForm extends React.Component {
       this.setState({
         addedLayers: layer.layers
       });
-      _.each(this.refs, element => {
-        if (element.dataset.type == "wms-layer") {
-          element.checked = false;
+      Object.keys(this.refs).forEach(element => {
+        var elem = this.refs[element];
+        if (this.refs[element].dataset.type == "wms-layer") {
+          this.refs[element].checked = false;
         }
       });
       layer.layers.forEach(layer => {
@@ -277,7 +281,7 @@ class WMSLayerForm extends React.Component {
   }
 
   getValidationClass(inputName) {
-    return valid = this.state.validationErrors.find(v => v === inputName) ? "validation-error" : "";
+    return this.state.validationErrors.find(v => v === inputName) ? "validation-error" : "";
   }
 
   validateField (fieldName, e) {
@@ -458,4 +462,4 @@ class WMSLayerForm extends React.Component {
 
 }
 
-module.exports = WMSLayerForm;
+export default WMSLayerForm;

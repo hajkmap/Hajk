@@ -1,3 +1,6 @@
+import React from "react";
+import { Component } from 'react';
+
 const defaultState = {
   load: false,
   imageLoad: false,
@@ -25,7 +28,7 @@ const defaultState = {
 /**
  *
  */
-class WMTSLayerForm extends React.Component {
+class WMTSLayerForm extends Component {
 
   componentDidMount() {
     defaultState.url = this.props.url;
@@ -163,7 +166,7 @@ class WMTSLayerForm extends React.Component {
   }
 
   getValidationClass(inputName) {
-    return valid = this.state.validationErrors.find(v => v === inputName) ? "validation-error" : "";
+    return this.state.validationErrors.find(v => v === inputName) ? "validation-error" : "";
   }
 
   render() {
@@ -336,4 +339,4 @@ class WMTSLayerForm extends React.Component {
 
 }
 
-module.exports = WMTSLayerForm;
+export default WMTSLayerForm;

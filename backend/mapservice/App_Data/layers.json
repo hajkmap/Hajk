@@ -5,7 +5,7 @@
       "caption": "Topowebb",
       "url": "http://localhost/lmproxy/wmts?",
       "owner": null,
-      "date": "1487253110525",
+      "date": "1487672835714",
       "content": "",
       "legend": "",
       "projection": "EPSG:3006",
@@ -122,10 +122,10 @@
   "wfslayers": [
     {
       "id": "5",
-      "caption": "Vattenyta",
+      "caption": "Vattenytan",
       "url": "http://localhost/geoserver/wfs",
       "layers": [
-        "sweco:vattenyta"
+        "sweco:badplats"
       ],
       "searchFields": [
         "kategori"
@@ -172,6 +172,62 @@
       "queryable": true
     }
   ],
-  "wfstlayers": [],
+  "wfstlayers": [
+    {
+      "id": "8",
+      "caption": "Badplats",
+      "url": "http://localhost/geoserver/wfs",
+      "projection": "EPSG:3006",
+      "layers": [
+        "sweco:badplats"
+      ],
+      "editableFields": [
+        {
+          "index": 1,
+          "name": "kkod",
+          "dataType": "int",
+          "textType": null,
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 2,
+          "name": "kategori",
+          "dataType": "string",
+          "textType": "lista",
+          "values": [
+            "a",
+            "b",
+            "c",
+            "d"
+          ],
+          "hidden": false,
+          "defaultValue": "a"
+        },
+        {
+          "index": 3,
+          "name": "srikt",
+          "dataType": "number",
+          "textType": null,
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 4,
+          "name": "text",
+          "dataType": "string",
+          "textType": "url",
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        }
+      ],
+      "editPoint": true,
+      "editPolygon": false,
+      "editLine": false
+    }
+  ],
   "arcgislayers": []
 }

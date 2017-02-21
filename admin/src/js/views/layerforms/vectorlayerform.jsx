@@ -20,11 +20,15 @@
 //
 // https://github.com/Johkar/Hajk2
 
+import React from "react";
+import { Component } from 'react';
+
 const defaultState = {
-  layerType: "ArcGIS",
+  layerType: "Vector",
   load: false,
   imageLoad: false,
   validationErrors: [],
+  addedLayers: [],
   id: "",
   caption: "",
   content: "",
@@ -36,17 +40,15 @@ const defaultState = {
   queryable: true,
   drawOrder: 1,
   projection: "",
-  layers: [],
-  extent: [],
+  layer: "",
   opacity: 1,
-  queryable: true,
-  addedLayers: []
+  queryable: true
 };
 
 /**
  *
  */
-class ArcGISLayerForm extends React.Component {
+class ArcGISLayerForm extends Component {
 
   componentDidMount() {
     defaultState.url = this.props.url;
@@ -69,35 +71,16 @@ class ArcGISLayerForm extends React.Component {
     this.layer = {};
   }
 
-  appendLayer(checked, layer) {
-
-    if (checked === true) {
-      this.state.addedLayers.push({
-        id: layer.id,
-        name: layer.name
-      });
-    } else {
-      this.state.addedLayers = this.state.addedLayers.filter(addedLayer =>
-        !this.layerEqualityCompare(addedLayer, layer)
-      );
-    }
-
-    if (this.state.legend === "" || /^data/.test(this.state.legend)) {
-      this.props.model.getLegend(this.state, (legend) => {
-        this.setState({
-          legend: legend
-        });
-      });
-    }
-
-    this.validateField('layers');
-  }
-
   describeLayer(layer) {
-    this.props.model.getArcGISLayerDescription(this.state.url, layer, (info) => {
+    this.props.model.getWFSLayerDescription(this.state.url, this.state.addedLayers[0], layerDescription => {
+      console.log("Layer description", layerDescription);
       this.props.parent.setState({
-        layerProperties: info.fields,
-        layerPropertiesLayer: layer.name + "_" + layer.id
+        layerProperties: layerDescription.map(d => {
+            return {
+              name: d.name,
+              type: d.localType
+            }
+        })
       });
     });
   }
@@ -113,8 +96,7 @@ class ArcGISLayerForm extends React.Component {
       legend: this.getValue("legend"),
       visibleAtStart: this.getValue("visibleAtStart"),
       projection: this.getValue("projection"),
-      layers: this.getValue("layers"),
-      extent: this.getValue("extent"),
+      layer: this.state.addedLayers[0],
       opacity: this.getValue("opacity"),
       queryable: this.getValue("queryable"),
       infobox: this.getValue("infobox")
@@ -135,17 +117,15 @@ class ArcGISLayerForm extends React.Component {
     ,   value = input ? input.value : "";
 
     if (fieldName === 'date') value = create_date();
-    if (fieldName === 'layers') value = format_layers(this.state.addedLayers);
     if (fieldName === 'queryable') value = input.checked;
     if (fieldName === 'visibleAtStart') value = input.checked;
-    if (fieldName === 'extent') value = value.split(',');
 
     return value;
   }
 
   validate() {
     var valid = true
-    ,   validationFields = ["url", "caption", "projection", "extent", "layers"];
+    ,   validationFields = ["url", "caption", "projection", "layer", "legend"];
 
     validationFields.forEach(field => {
       if (!this.validateField(field)) {
@@ -178,13 +158,10 @@ class ArcGISLayerForm extends React.Component {
     }
 
     switch (fieldName) {
-      case "extent":
-        if (!extent(value)) {
-          valid = false;
-        }
-        break;
-      case "layers":
-        if (!array(value) || empty(value)) {
+      case "layer":
+        if (this.state &&
+            this.state.addedLayers &&
+            this.state.addedLayers.length === 0) {
           valid = false;
         }
         break;
@@ -195,6 +172,7 @@ class ArcGISLayerForm extends React.Component {
         break;
       case "url":
       case "caption":
+      case "legend":
       case "projection":
         if (empty(value)) {
           valid = false;
@@ -222,125 +200,111 @@ class ArcGISLayerForm extends React.Component {
   }
 
   getValidationClass(inputName) {
-    return valid = this.state.validationErrors.find(v => v === inputName) ? "validation-error" : "";
+    return this.state.validationErrors.find(v => v === inputName) ? "validation-error" : "";
+  }
+
+  loadWFSCapabilities(e, callback) {
+    if (e)
+      e.preventDefault();
+
+    this.setState({
+      load: true,
+      addedLayers: [],
+      capabilities: false,
+      layerProperties: undefined,
+      layerPropertiesName: undefined
+    });
+
+    if (this.state.capabilities) {
+      this.state.capabilities.forEach((layer, i) => {
+        this.refs[layer.name].checked = false;
+      });
+    }
+
+    this.props.model.getWFSCapabilities(this.state.url, (capabilities) => {
+      this.setState({
+        capabilities: capabilities,
+        load: false
+      });
+      if (capabilities === false) {
+        this.props.application.setState({
+          alert: true,
+          alertMessage: "Servern svarar inte. Försök med en annan URL."
+        })
+      }
+      if (callback) {
+        callback();
+      }
+    });
   }
 
   loadLegendImage(e) {
     $('#select-image').trigger('click');
   }
 
-  loadWMSCapabilities(callback) {
-    this.props.model.getArcGISCapabilities(this.state.url, (data) => {
-
-      var extent = [
-        data.fullExtent.xmin,
-        data.fullExtent.ymin,
-        data.fullExtent.xmax,
-        data.fullExtent.ymax
-      ];
-
-      this.setState({
-        layers: data.layers,
-        extent: extent.join(','),
-        projection: "EPSG:" + data.fullExtent.spatialReference.wkid
-      });
-
-      if (callback && callback.call) callback(data);
-
-    });
+  appendLayer(e, checkedLayer) {
+    this.state.addedLayers.splice(0, this.state.addedLayers.length);
+    if (e.target.checked === true) {
+      this.state.addedLayers.push(checkedLayer);
+    } else {
+      this.state.addedLayers = this.state.addedLayers.filter(layer =>
+        layer !== checkedLayer
+      );
+    }
+    this.forceUpdate();
+    this.validate("layers");
   }
 
   loadLayers(layer, callback) {
-
-    this.loadWMSCapabilities((data) => {
-
-      var addedLayers = data.layers.filter(
-        dataLayer => layer.layers.find(
-          id => id === dataLayer.id.toString()
-        )
-      );
-
-      addedLayers = addedLayers.map(l => {
-        return {
-          id: l.id,
-          name: l.name
-        }
-      });
-
+    this.loadWFSCapabilities(undefined, () => {
       this.setState({
-        addedLayers: addedLayers
+        addedLayers: [layer.layer]
       });
-
-      _.each(this.refs, element => {
-        if (element.dataset.type === "arcgis-layer") {
-          element.checked = false;
+      Object.keys(this.refs).forEach(element => {
+        var elem = this.refs[element];
+        if (this.refs[element].dataset.type == "wms-layer") {
+          this.refs[element].checked = false;
         }
       });
-
-      this.state.addedLayers.forEach(layer => {
-        this.refs[layer.name + "_" + layer.id].checked = true;
-      });
-
+      this.refs[layer.layer].checked = true;
       if (callback) callback();
-
     });
   }
 
-  layerEqualityCompare(a, b) {
-    return a.name === b.name && a.id === b.id
-  }
-
   renderLayersFromCapabilites() {
-    if (this.state && this.state.layers) {
-      var layers = [];
-
-      var append = (layer) => {
-
-        var classNames = this.props.parent.state.layerPropertiesLayer === layer.name + "_" + layer.id ?
+    if (this.state && this.state.capabilities) {
+      return this.state.capabilities.map((layer, i) => {
+        var classNames = this.state.layerPropertiesName === layer.name ?
                          "fa fa-info-circle active" : "fa fa-info-circle";
-
-        var i = Math.floor(Math.random() * 1E8);
-
         return (
-          <li key={"fromCapability_" + i}>
-            <input
-              ref={layer.name + "_" + layer.id}
-              id={"layer" + i}
-              type="checkbox"
-              data-type="arcgis-layer"
-              checked={this.state.addedLayers.find(addedLayer => this.layerEqualityCompare(addedLayer, layer))}
-              onChange={(e) => {
-                this.appendLayer(e.target.checked, layer)
-              }} />&nbsp;
-            <label htmlFor={"layer" + i}>{layer.id} {layer.name}</label>
-            <i className={classNames} onClick={(e) => this.describeLayer(layer)}></i>
+          <li key={i}>
+            <input ref={layer.name} id={"layer" + i} type="radio" name="featureType" data-type="wms-layer" onChange={(e) => { this.appendLayer(e, layer.name) }}/>&nbsp;
+            <label htmlFor={"layer" + i}>{layer.name}</label>
+            <i className={classNames} onClick={(e) => this.describeLayer(e, layer.name)}></i>
           </li>
         )
-      };
-
-      this.state.layers.forEach((layer) => {
-        layers.push(append(layer));
       });
-
-      return layers;
-
     } else {
       return null;
     }
   }
 
   renderSelectedLayers() {
+
     if (!this.state.addedLayers) return null;
 
     function uncheck(layer) {
-      this.appendLayer(false, layer);
-      this.refs[layer.name + "_" + layer.id].checked = false;
-      this.validateField('layers');
+      this.appendLayer({
+        target: {
+          checked: false
+        }
+      }, layer);
+      this.refs[layer].checked = false;
     }
 
     return this.state.addedLayers.map((layer, i) =>
-      <li className="layer" key={"addedLayer_" + i}>
-        <span>{layer.name}</span>&nbsp;
+      <li className="layer" key={i}>
+        <span>{layer}</span>&nbsp;
         <i className="fa fa-times" onClick={uncheck.bind(this, layer)}></i>
       </li>
     )
@@ -364,7 +328,7 @@ class ArcGISLayerForm extends React.Component {
 
     return (
       <fieldset>
-        <legend>ArcGIS MapServer-lager</legend>
+        <legend>Vektor-lager</legend>
         <div>
           <label>Visningsnamn*</label>
           <input
@@ -390,7 +354,7 @@ class ArcGISLayerForm extends React.Component {
               this.validateField("url");
             }}
           />
-          <span onClick={(e) => {this.loadWMSCapabilities(e)}} className="btn btn-default">Ladda {loader}</span>
+        <span onClick={(e) => {this.loadWFSCapabilities(e)}} className="btn btn-default">Ladda {loader}</span>
         </div>
         <div>
           <label>Senast ändrad</label>
@@ -403,17 +367,21 @@ class ArcGISLayerForm extends React.Component {
             ref="input_content"
             value={this.state.content}
             onChange={(e) => {
-              this.setState({content: e.target.value})
+              this.setState({content: e.target.value});
             }}
           />
         </div>
         <div>
-          <label>Teckenförklaring</label>
+          <label>Ikon*</label>
           <input
             type="text"
             ref="input_legend"
             value={this.state.legend}
-            onChange={(e) => this.setState({legend: e.target.value})}
+            className={this.getValidationClass("legend")}
+            onChange={(e) => {
+              this.setState({legend: e.target.value})
+              this.validateField("legend");
+            }}
           />
           <span onClick={(e) => {this.loadLegendImage(e)}} className="btn btn-default">Välj fil {imageLoader}</span>
         </div>
@@ -427,19 +395,6 @@ class ArcGISLayerForm extends React.Component {
             onChange={(e) => {
               this.setState({projection: e.target.value});
               this.validateField("projection");
-            }}
-          />
-        </div>
-        <div>
-          <label>Utbredning*</label>
-          <input
-            type="text"
-            ref="input_extent"
-            value={this.state.extent}
-            className={this.getValidationClass("extent")}
-            onChange={(e) => {
-              this.setState({extent: e.target.value});
-              this.validateField("extent");
             }}
           />
         </div>
@@ -479,8 +434,8 @@ class ArcGISLayerForm extends React.Component {
           />
         </div>
         <div>
-          <label>Valda lager*</label>
-          <div ref="input_layers" className={this.getValidationClass("layers") + " layer-list-choosen"} >
+          <label>Valt lager*</label>
+          <div ref="input_layer" className={"layer-list-choosen " + this.getValidationClass("layer")}>
             <ul>
               {this.renderSelectedLayers()}
             </ul>
@@ -498,10 +453,9 @@ class ArcGISLayerForm extends React.Component {
             onChange={(e) => this.setState({'infobox': e.target.value})}
           />
         </div>
-
       </fieldset>
     );
   }
 }
 
-module.exports = ArcGISLayerForm;
+export default ArcGISLayerForm;

@@ -20,7 +20,19 @@
 //
 // https://github.com/Johkar/Hajk2
 
+import React from 'react';
+import { Component } from 'react';
+import MapOptions from './mapoptions.jsx';
+import $ from 'jquery';
+import Alert from '../views/alert.jsx';
+
 var defaultState = {
+  alert: false,
+  corfirm: false,
+  alertMessage: "",
+  content: "",
+  confirmAction: () => {},
+  denyAction: () => {}
 };
 
 $.fn.editable = function(component) {
@@ -28,14 +40,11 @@ $.fn.editable = function(component) {
   function edit(node, e) {
 
       function reset() {
-
         ok.remove();
         abort.remove();
         remove.remove();
         toggled.remove();
-
         tools.remove();
-
         elem.editing = false;
       }
 
@@ -85,7 +94,7 @@ $.fn.editable = function(component) {
       remove
         .css({ color: 'red', marginRight: '4px' })
         .click((e) => {
-          component.props.application.setState({
+          component.setState({
             alert: true,
             confirm: true,
             alertMessage: "Objektet kommer att tas bort från lagermenyn, om det är en grupp som innehåller lager kommer alla undergrupper och ingående lager att tas bort. Är detta ok?",
@@ -156,11 +165,10 @@ $.fn.editable = function(component) {
   this.on('click', onClick);
 };
 
-
 /**
  *
  */
-class Menu extends React.Component {
+class Menu extends Component {
 
   /**
    *
@@ -389,16 +397,16 @@ class Menu extends React.Component {
   save(settings) {
     this.props.model.updateConfig(settings, success => {
       if (success) {
-        this.props.application.setState({
+        this.setState({
           content: ""
         });
-        this.props.application.setState({
+        this.setState({
           content: "menu",
           alert: true,
           alertMessage: "Uppdateringen lyckades."
         });
       } else {
-        this.props.application.setState({
+        this.setState({
           alert: true,
           alertMessage: "Uppdateringen misslyckades."
         });
@@ -430,14 +438,14 @@ class Menu extends React.Component {
 
     this.props.model.updateConfig(config, success => {
       if (success) {
-        this.props.application.setState({
+        this.setState({
           content: "menu",
           alert: true,
           alertMessage: "Uppdateringen lyckades."
         });
         this.forceUpdate();
       } else {
-        this.props.application.setState({
+        this.setState({
           alert: true,
           alertMessage: "Uppdateringen misslyckades."
         });
@@ -496,7 +504,7 @@ class Menu extends React.Component {
    */
   addLayerToMenu(id, included) {
     if (included) {
-      this.props.application.setState({
+      this.setState({
         alert: true,
         confirm: false,
         alertMessage: "Detta lager är redan tillagt i lagerlistan. Klicka på lagret i lagerlistan och därefter på den röda symbolen för att ta bort det.",
@@ -613,11 +621,15 @@ class Menu extends React.Component {
     return buildTree(layerMenuConfig);
   }
 
+  /**
+   *
+   */
   toggleDrawOrderMenu() {
 
     this.setState({
       drawOrder: true,
-      layerMenu: false
+      layerMenu: false,
+      mapOptions: false
     });
 
     setTimeout(() => {
@@ -629,6 +641,9 @@ class Menu extends React.Component {
 
   }
 
+  /**
+   *
+   */
   toggleLayerMenu() {
     this.setState({
       layerMenu: true,
@@ -641,9 +656,21 @@ class Menu extends React.Component {
         layerMenu: true
       });
     }, 0);
-
+  }
+  /**
+   *
+   */
+  toggleMapOptionsMenu() {
+    this.setState({
+      drawOrder: false,
+      layerMenu: false,
+      mapOptions: true
+    });
   }
 
+  /**
+   *
+   */
   renderDrawOrder() {
 
     function flatten(config) {
@@ -674,7 +701,15 @@ class Menu extends React.Component {
     });
   }
 
+  /**
+   *
+   */
   renderArticleContent() {
+    if (this.state.mapOptions) {
+      return (
+        <MapOptions></MapOptions>
+      );
+    }
     if (this.state.drawOrder) {
       return (
         <div>
@@ -718,13 +753,48 @@ class Menu extends React.Component {
   /**
    *
    */
+  getAlertOptions() {
+    return {
+      visible: this.state.alert,
+      message: this.state.alertMessage,
+      confirm: this.state.confirm,
+      confirmAction: () => {
+        this.state.confirmAction();
+        this.setState({
+          alert: false,
+          confirm: false,
+          alertMessage: ""
+        })
+      },
+      denyAction: () => {
+        this.state.denyAction();
+        this.setState({
+          alert: false,
+          confirm: false,
+          alertMessage: ""
+        })
+      },
+      onClick: () => {
+        this.setState({
+          alert: false,
+          alertMessage: ""
+        })
+      }
+    };
+  }
+
+  /**
+   *
+   */
   render() {
     return (
       <section className="tab-pane active">
+        <Alert options={this.getAlertOptions()}/>
         <div>
           <div className="tab-pane-bar">
             <button className="btn btn-info" onClick={(e) => this.toggleLayerMenu()}>Lagermeny</button>&nbsp;
-            <button className="btn btn-info" onClick={(e) => this.toggleDrawOrderMenu()}>Ritordning</button>
+            <button className="btn btn-info" onClick={(e) => this.toggleDrawOrderMenu()}>Ritordning</button>&nbsp;
+            <button className="btn btn-info" onClick={(e) => this.toggleMapOptionsMenu()}>Kartinställningar</button>
           </div>
           {this.renderArticleContent()}
         </div>
@@ -733,4 +803,4 @@ class Menu extends React.Component {
   }
 }
 
-module.exports = Menu;
+export default Menu;

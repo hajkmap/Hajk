@@ -588,7 +588,7 @@ var SearchModel = {
         ,   names = Object.keys(attributes);
 
         names = names.filter(name => {
-          if (!hit.626) {
+          if (!hit) {
             return typeof attributes[name] === "string"  ||
                    typeof attributes[name] === "boolean" ||
                    typeof attributes[name] === "number";

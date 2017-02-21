@@ -20,7 +20,9 @@
 //
 // https://github.com/Johkar/Hajk2
 
-var application = Backbone.Model.extend({
+import { Model } from 'backbone';
+
+var application = Model.extend({
 
   hello: function () {
     console.log("hello");
@@ -28,4 +30,4 @@ var application = Backbone.Model.extend({
 
 });
 
-module.exports = new application();
+export default application;

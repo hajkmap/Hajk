@@ -20,7 +20,9 @@
 //
 // https://github.com/Johkar/Hajk2
 
-var release = Backbone.Model.extend({
+import { Model } from 'backbone';
+
+var release = Model.extend({
 
   hello: function () {
     console.log("hello");
@@ -28,4 +30,4 @@ var release = Backbone.Model.extend({
 
 });
 
-module.exports = new release();
+export default release;

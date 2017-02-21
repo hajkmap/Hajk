@@ -20,9 +20,12 @@
 //
 // https://github.com/Johkar/Hajk2
 
-var X2JS = require('x2js');
+import X2JS from 'x2js';
+import { Model } from 'backbone';
+import ol from 'openlayers';
+import $ from 'jquery';
 
-var manager = Backbone.Model.extend({
+var manager = Model.extend({
 
   defaults: {
     layers: []
@@ -265,4 +268,4 @@ var manager = Backbone.Model.extend({
 
 });
 
-module.exports = new manager();
+export default manager;

@@ -19,8 +19,10 @@
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
 // https://github.com/Johkar/Hajk2
+import React from 'react';
+import { Component } from 'react';
 
-class Alert extends React.Component {
+class Alert extends Component {
 
   constructor() {
     super();
@@ -78,4 +80,4 @@ class Alert extends React.Component {
   }
 }
 
-module.exports = Alert;
+export default Alert;

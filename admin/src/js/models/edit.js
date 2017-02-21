@@ -20,7 +20,10 @@
 //
 // https://github.com/Johkar/Hajk2
 
-var edit = Backbone.Model.extend({
+import { Model } from 'backbone';
+import $ from 'jquery';
+
+var edit = Model.extend({
 
   defaults: {
     layers: []
@@ -138,4 +141,4 @@ var edit = Backbone.Model.extend({
 
 });
 
-module.exports = new edit();
+export default edit;

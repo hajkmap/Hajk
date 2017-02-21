@@ -20,7 +20,16 @@
 //
 // https://github.com/Johkar/Hajk2
 
-var menu = Backbone.Model.extend({
+import { Model } from 'backbone';
+
+const $ = require('jquery');
+const jQuery = $;
+
+global.window.jQuery = jQuery;
+
+require('jquery-sortable');
+
+var menu = Model.extend({
 
   defaults: {
     layers: [],
@@ -73,4 +82,4 @@ var menu = Backbone.Model.extend({
 
 });
 
-module.exports = new menu();
+export default menu;

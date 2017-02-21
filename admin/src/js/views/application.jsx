@@ -20,7 +20,25 @@
 //
 // https://github.com/Johkar/Hajk2
 
-const Alert = require('views/alert');
+import React from 'react';
+import { Component } from 'react';
+import Alert from '../views/alert.jsx';
+
+import Edit from '../views/edit.jsx';
+import Manager from '../views/manager.jsx';
+import Map from '../views/map.jsx';
+import Menu from '../views/menu.jsx';
+import Info from '../views/info.jsx';
+import Release from '../views/release.jsx';
+import Search from '../views/search.jsx';
+
+import editModel from '../models/edit.js';
+import managerModel from '../models/manager.js';
+import mapModel from '../models/map.js';
+import menuModel from '../models/menu.js';
+import infoModel from '../models/info.js';
+import releaseModel from '../models/release.js';
+import searchModel from '../models/search.js';
 
 var defaultState = {
   alert: false,
@@ -33,7 +51,7 @@ var defaultState = {
 /**
  *
  */
-class Application extends React.Component {
+class Application extends Component {
   /**
    *
    */
@@ -114,6 +132,45 @@ class Application extends React.Component {
       );
     });
   }
+
+  getView(name) {
+    switch (name) {
+      case 'edit':
+        return Edit;
+      case 'manager':
+        return Manager;
+      case 'map':
+        return Map;
+      case 'menu':
+        return Menu;
+      case 'info':
+        return Info;
+      case 'release':
+        return Release;
+      case 'search':
+        return Search;
+    }
+  }
+
+  getModel(name) {
+    switch (name) {
+      case 'edit':
+        return new editModel();
+      case 'manager':
+        return new managerModel();
+      case 'map':
+        return new mapModel();
+      case 'menu':
+        return new menuModel();
+      case 'info':
+        return new infoModel();
+      case 'release':
+        return new releaseModel();
+      case 'search':
+        return new searchModel();
+    }
+  }
+
   /**
    *
    */
@@ -124,13 +181,14 @@ class Application extends React.Component {
     var model = null;
 
     try {
-      content = require("views/" + this.state.content);
-      model = require("models/" + this.state.content);
+      content = this.getView(this.state.content);
+      model = this.getModel(this.state.content);
     }
     catch (e) {
       console.error(e);
       return (<div>{e.message}</div>);
     }
+
     return React.createElement(content, {
       model: model,
       config: this.props.config[this.state.content],
@@ -160,4 +218,4 @@ class Application extends React.Component {
 
 }
 
-module.exports = Application;
+export default Application;

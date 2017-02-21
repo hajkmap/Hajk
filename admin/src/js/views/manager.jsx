@@ -20,22 +20,32 @@
 //
 // https://github.com/Johkar/Hajk2
 
-var WMSLayerForm = require("views/layerforms/wms");
-var WMTSLayerForm = require("views/layerforms/wmts");
-var ArcGISLayerForm = require("views/layerforms/arcgis");
-var VectorLayerForm = require("views/layerforms/vector");
+import React from "react";
+import { Component } from "react";
+import Alert from '../views/alert.jsx';
+import WMSLayerForm from "./layerforms/wmslayerform.jsx"
+import WMTSLayerForm from "./layerforms/wmtslayerform.jsx"
+import ArcGISLayerForm from "./layerforms/arcgislayerform.jsx"
+import VectorLayerForm from "./layerforms/vectorlayerform.jsx"
+
 /**
  *
  */
 const defaultState = {
   layerType: "WMS",
   validationErrors: [],
-  mode: "add"
+  mode: "add",
+  alert: false,
+  corfirm: false,
+  alertMessage: "",
+  content: "",
+  confirmAction: () => {},
+  denyAction: () => {}  
 };
 /**
  *
  */
-class Manager extends React.Component {
+class Manager extends Component {
   /**
    *
    */
@@ -67,7 +77,7 @@ class Manager extends React.Component {
    *
    */
   removeLayer(e, layer) {
-    this.props.application.setState({
+    this.setState({
       alert: true,
       confirm: true,
       alertMessage: "Lagret kommer att tas bort. Är detta ok?",
@@ -75,7 +85,7 @@ class Manager extends React.Component {
         this.props.model.removeLayer(layer, success => {
           if (success) {
             this.props.model.getConfig(this.props.config.url_layers);
-            this.props.application.setState({
+            this.setState({
               alert: true,
               alertMessage: `Lagret ${layer.caption} togs bort!`
             });
@@ -83,7 +93,7 @@ class Manager extends React.Component {
               this.abort();
             }
           } else {
-            this.props.application.setState({
+            this.setState({
               alert: true,
               alertMessage: "Lagret kunde inte tas bort. Försök igen senare."
             });
@@ -371,12 +381,12 @@ class Manager extends React.Component {
     if (success) {
       this.props.model.getConfig(this.props.config.url_layers);
       this.abort();
-      this.props.application.setState({
+      this.setState({
         alert: true,
         alertMessage: "Lagret har lagts till i listan av tillgängliga lager."
       });
     } else {
-      this.props.application.setState({
+      this.setState({
         alert: true,
         alertMessage: "Lagret kunde inte läggas till. Försök igen senare."
       });
@@ -388,15 +398,15 @@ class Manager extends React.Component {
   whenLayerUpdated(success, date) {
     if (success) {
       this.props.model.getConfig(this.props.config.url_layers);
-      this.props.application.setState({
-        alert: true,
-        alertMessage: "Uppdateringen lyckades!"
-      });
+
       this.setState({
-        date: date,
+        alert: true,
+        alertMessage: "Uppdateringen lyckades!",
+        date: date
       });
+
     } else {
-      this.props.application.setState({
+      this.setState({
         alert: true,
         alertMessage: "Uppdateringen misslyckades."
       });
@@ -509,6 +519,36 @@ class Manager extends React.Component {
         return <WMSLayerForm model={this.props.model} parent={this} />;
     }
   }
+
+  getAlertOptions() {
+    return {
+      visible: this.state.alert,
+      message: this.state.alertMessage,
+      confirm: this.state.confirm,
+      confirmAction: () => {
+        this.state.confirmAction();
+        this.setState({
+          alert: false,
+          confirm: false,
+          alertMessage: ""
+        })
+      },
+      denyAction: () => {
+        this.state.denyAction();
+        this.setState({
+          alert: false,
+          confirm: false,
+          alertMessage: ""
+        })
+      },
+      onClick: () => {
+        this.setState({
+          alert: false,
+          alertMessage: ""
+        })
+      }
+    };
+  }
   /**
    *
    */
@@ -521,6 +561,7 @@ class Manager extends React.Component {
 
     return (
       <section className="tab-pane active">
+        <Alert options={this.getAlertOptions()}/>
         <aside>
           <input placeholder="filtrera" type="text" onChange={(e) => this.filterLayers(e)} />
           <ul className="config-layer-list">
@@ -570,4 +611,4 @@ class Manager extends React.Component {
   }
 }
 
-module.exports = Manager;
+export default Manager;

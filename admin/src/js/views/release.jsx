@@ -20,7 +20,10 @@
 //
 // https://github.com/Johkar/Hajk2
 
-class Release extends React.Component {
+import React from 'react';
+import { Component } from 'react';
+
+class Release extends Component {
 
   constructor() {
     super();
@@ -35,4 +38,4 @@ class Release extends React.Component {
 
 }
 
-module.exports = Release;
+export default Release;

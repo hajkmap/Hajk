@@ -19,6 +19,13 @@
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
 // https://github.com/Johkar/Hajk2
+import React from 'react';
+import ReactDOM from 'react-dom';
+import Backbone from 'backbone';
+import { Router } from 'backbone';
+import ApplicationView from './views/application.jsx';
+import ApplicationModel from './models/application.js';
+import $ from 'jquery';
 
 (function() {
 
@@ -41,14 +48,16 @@
   }
 
   function load(config) {
-    var application_view = require('views/application')
-    ,   application_model = require('models/application')
-    ,   application_element = React.createElement(application_view, {
-          model: application_model,
-          tabs: config.router,
-          config: config
-        })
-    ,   router = Backbone.Router.extend(create_routes(config.router, application_model));
+
+    var application_model = new ApplicationModel();
+
+    var application_element = React.createElement(ApplicationView, {
+      model: application_model,
+      tabs: config.router,
+      config: config
+    });    
+
+    var router = Router.extend(create_routes(config.router, application_model));
 
     new router();
     Backbone.history.start();

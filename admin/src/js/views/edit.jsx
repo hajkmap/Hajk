@@ -19,6 +19,9 @@
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
 // https://github.com/Johkar/Hajk2
+import React from 'react';
+import { Component } from 'react';
+import Alert from '../views/alert.jsx';
 
 const defaultState = {
   load: false,
@@ -34,12 +37,18 @@ const defaultState = {
   point: false,
   linestring: false,
   polygon: false,
-  layerProperties: []
+  layerProperties: [],
+  alert: false,
+  corfirm: false,
+  alertMessage: "",
+  content: "",
+  confirmAction: () => {},
+  denyAction: () => {}
 };
 /**
  *
  */
-class Search extends React.Component {
+class Search extends Component {
   /**
    *
    */
@@ -73,7 +82,7 @@ class Search extends React.Component {
    *
    */
   removeLayer(e, layer) {
-    this.props.application.setState({
+    this.setState({
       alert: true,
       confirm: true,
       alertMessage: "Lagret kommer att tas bort. Är detta ok?",
@@ -81,7 +90,7 @@ class Search extends React.Component {
         this.props.model.removeLayer(layer, success => {
           if (success) {
             this.props.model.getConfig(this.props.config.url_layers);
-            this.props.application.setState({
+            this.setState({
               alert: true,
               alertMessage: `Lagret ${layer.caption} togs bort!`
             });
@@ -89,7 +98,7 @@ class Search extends React.Component {
               this.abort();
             }
           } else {
-            this.props.application.setState({
+            this.setState({
               alert: true,
               alertMessage: "Lagret kunde inte tas bort. Försök igen senare."
             });
@@ -128,9 +137,10 @@ class Search extends React.Component {
 
         this.validate("layers");
 
-        _.each(this.refs, element => {
-          if (element.dataset.type === "wms-layer") {
-            element.checked = false;
+        Object.keys(this.refs).forEach(element => {
+          var elem = this.refs[element];
+          if (this.refs[element].dataset.type == "wms-layer") {
+            this.refs[element].checked = false;
           }
         });
 
@@ -170,7 +180,7 @@ class Search extends React.Component {
         load: false
       });
       if (capabilities === false) {
-        this.props.application.setState({
+        this.setState({
           alert: true,
           alertMessage: "Servern svarar inte. Försök med en annan URL."
         })
@@ -262,13 +272,8 @@ class Search extends React.Component {
    *
    */
   getEditableFields() {
-
     var filter, mapper;
-
     mapper = item => {
-
-      console.log("Mapper", item);
-
       return {
         index: item.index,
         name: item.name,
@@ -338,7 +343,7 @@ class Search extends React.Component {
    *
    */
   getValidationClass(inputName) {
-    return valid = this.state.validationErrors.find(v => v === inputName) ? "validation-error" : "";
+    return this.state.validationErrors.find(v => v === inputName) ? "validation-error" : "";
   }
   /**
    *
@@ -418,12 +423,12 @@ class Search extends React.Component {
             this.props.config.url_layers
             this.props.model.getConfig(this.props.config.url_layers);
             this.abort();
-            this.props.application.setState({
+            this.setState({
               alert: true,
               alertMessage: "Lagret har lagt till i listan av tillgängliga lager."
             });
           } else {
-            this.props.application.setState({
+            this.setState({
               alert: true,
               alertMessage: "Lagret kunde inte läggas till. Försök igen senare."
             });
@@ -435,7 +440,7 @@ class Search extends React.Component {
         this.props.model.updateLayer(layer, success => {
           if (success) {
             this.props.model.getConfig(this.props.config.url_layers);
-            this.props.application.setState({
+            this.setState({
               alert: true,
               alertMessage: "Uppdateringen lyckades!"
             });
@@ -443,7 +448,7 @@ class Search extends React.Component {
               date: layer.date,
             });
           } else {
-            this.props.application.setState({
+            this.setState({
               alert: true,
               alertMessage: "Uppdateringen misslyckades."
             });
@@ -671,6 +676,36 @@ class Search extends React.Component {
       </div>
     )
   }
+
+  getAlertOptions() {
+    return {
+      visible: this.state.alert,
+      message: this.state.alertMessage,
+      confirm: this.state.confirm,
+      confirmAction: () => {
+        this.state.confirmAction();
+        this.setState({
+          alert: false,
+          confirm: false,
+          alertMessage: ""
+        })
+      },
+      denyAction: () => {
+        this.state.denyAction();
+        this.setState({
+          alert: false,
+          confirm: false,
+          alertMessage: ""
+        })
+      },
+      onClick: () => {
+        this.setState({
+          alert: false,
+          alertMessage: ""
+        })
+      }
+    };
+  }
   /**
    *
    */
@@ -681,6 +716,7 @@ class Search extends React.Component {
 
     return (
       <section className="tab-pane active">
+        <Alert options={this.getAlertOptions()}/>
         <aside>
           <input placeholder="filtrera" type="text" onChange={(e) => this.filterLayers(e)} />
           <ul className="config-layer-list">
@@ -773,4 +809,4 @@ class Search extends React.Component {
   }
 }
 
-module.exports = Search;
+export default Search;

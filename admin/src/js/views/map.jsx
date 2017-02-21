@@ -20,7 +20,10 @@
 //
 // https://github.com/Johkar/Hajk2
 
-class Map extends React.Component {
+import React from 'react';
+import { Component } from "react";
+
+class Map extends Component {
 
   constructor() {
     super();
@@ -55,4 +58,4 @@ class Map extends React.Component {
 
 }
 
-module.exports = Map;
+export default Map;

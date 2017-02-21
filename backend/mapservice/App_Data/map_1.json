@@ -83,12 +83,12 @@
             "toggled": true,
             "layers": [
               {
-                "id": "2",
-                "drawOrder": 4
-              },
-              {
                 "id": "7",
                 "drawOrder": 3
+              },
+              {
+                "id": "2",
+                "drawOrder": 4
               },
               {
                 "id": "3",
@@ -227,6 +227,10 @@
     }
   ],
   "map": {
+    "colors": {
+      "primaryColor": "#000",
+      "secondaryColor": "#000"
+    },
     "target": "map",
     "center": [
       414962,

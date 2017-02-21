@@ -20,7 +20,9 @@
 //
 // https://github.com/Johkar/Hajk2
 
-var map = Backbone.Model.extend({
+import { Model } from 'backbone';
+
+var map = Model.extend({
 
   hello: function () {
     console.log("hello");
@@ -28,4 +30,4 @@ var map = Backbone.Model.extend({
 
 });
 
-module.exports = new map();
+export default map;

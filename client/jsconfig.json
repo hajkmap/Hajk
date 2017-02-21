@@ -54,6 +54,7 @@
         "models/transform": "./src/js/models/transforminteraction.js",
         "utils/arraysort": "./src/js/utils/arraysort.js",
         "utils/kmlwriter": "./src/js/utils/kmlwriter.js",
+        "utils/cssmodifier": "./src/js/utils/cssmodifier.js",
         "tools/tool": "./src/js/tools/tool.js",
         "tools/layerswitcher": "./src/js/tools/layerswitcher.js",
         "tools/bookmark": "./src/js/tools/bookmark.js",

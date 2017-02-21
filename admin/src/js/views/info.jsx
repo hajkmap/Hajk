@@ -20,7 +20,10 @@
 //
 // https://github.com/Johkar/Hajk2
 
-class Info extends React.Component {
+import React from 'react';
+import { Component } from 'react';
+
+class Info extends Component {
 
   constructor() {
     super();
@@ -71,4 +74,4 @@ class Info extends React.Component {
 
 }
 
-module.exports = Info;
+export default Info;
