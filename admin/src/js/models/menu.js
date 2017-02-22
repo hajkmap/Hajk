@@ -21,12 +21,9 @@
 // https://github.com/Johkar/Hajk2
 
 import { Model } from 'backbone';
-
 const $ = require('jquery');
 const jQuery = $;
-
 global.window.jQuery = jQuery;
-
 require('jquery-sortable');
 
 var menu = Model.extend({
@@ -34,6 +31,21 @@ var menu = Model.extend({
   defaults: {
     layers: [],
     addedLayers: []
+  },
+
+  updateMapConfig: function(config, callback) {
+    $.ajax({
+      url: this.get('config').url_map_settings,
+      method: 'PUT',
+      contentType: 'application/json',
+      data: JSON.stringify(config),
+      success: () => {
+        callback(true);
+      },
+      error: () => {
+        callback(false);
+      }
+    });
   },
 
   updateConfig: function(config, callback) {

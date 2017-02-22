@@ -286,6 +286,7 @@ class Menu extends Component {
         break;
       case "layermenu":
         this.props.model.getConfig(this.props.config.url_map, (data) => {
+          this.props.model.set('mapConfig', data.map);
           this.props.model.set('layerMenuConfig', data.tools.find(tool => tool.type === "layerswitcher").options);
         });
         break;
@@ -707,7 +708,7 @@ class Menu extends Component {
   renderArticleContent() {
     if (this.state.mapOptions) {
       return (
-        <MapOptions></MapOptions>
+        <MapOptions model={this.props.model}></MapOptions>
       );
     }
     if (this.state.drawOrder) {

@@ -414,6 +414,17 @@ namespace MapService.DataAccess
         }
 
         /// <summary>
+        /// Update map settings
+        /// </summary>
+        /// <param name="mapSettings"></param>
+        public void UpdateMapSettings(MapSetting mapSettings)
+        {
+            MapConfig config = readMapConfigFromFile();
+            config.map = mapSettings;
+            this.saveMapConfigToFile(config);
+        }
+
+        /// <summary>
         /// Remove WFS-layer
         /// </summary>
         /// <param name="id"></param>

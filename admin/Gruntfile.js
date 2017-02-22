@@ -68,6 +68,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-browserify');
 
-  grunt.registerTask('default', ['copy', 'less:production', 'browserify']);
+  grunt.registerTask('build', ['copy', 'less:production', 'browserify']);
 
 };

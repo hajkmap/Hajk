@@ -227,10 +227,6 @@
     }
   ],
   "map": {
-    "colors": {
-      "primaryColor": "#000",
-      "secondaryColor": "#000"
-    },
     "target": "map",
     "center": [
       414962,
@@ -266,6 +262,10 @@
       209944.16160000023,
       6471028.5090999994
     ],
-    "logo": ""
+    "logo": "",
+    "colors": {
+      "primaryColor": "#f1e21c",
+      "secondaryColor": "#03b43b"
+    }
   }
 }

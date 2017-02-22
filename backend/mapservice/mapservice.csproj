@@ -245,6 +245,7 @@
     <Compile Include="Components\TIFFCreator.cs" />
     <Compile Include="Components\Util.cs" />
     <Compile Include="Controllers\LayerMenuController.cs" />
+    <Compile Include="Controllers\MapSettingsController.cs" />
     <Compile Include="DataAccess\SettingsStore.cs" />
     <Compile Include="Models\Bookmark.cs" />
     <Compile Include="Models\Config\ArcGISConfig.cs" />

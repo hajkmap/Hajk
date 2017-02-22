@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace MapService.Models
 {
+    public struct Colors
+    {
+        public string primaryColor { get; set; }
+        public string secondaryColor { get; set; }
+    }
+
     public class MapSetting
     {
         public string target { get; set; }  
@@ -27,5 +33,7 @@ namespace MapService.Models
         public double[] extent { get; set; }
 
         public string logo { get; set; }
+
+        public Colors colors { get; set; }
     }
 }

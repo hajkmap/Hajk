@@ -1,7 +1,7 @@
 {
   "manager": {
     "url_proxy": "/util/proxy/geturl",
-    "url_import": "/mapservice/import/image",    
+    "url_import": "/mapservice/import/image",
     "url_layers": "/mapservice/config/layers",
     "url_layer_settings": "/mapservice/settings/wmslayer",
     "url_wmtslayer_settings": "/mapservice/settings/wmtslayer",
@@ -29,7 +29,8 @@
   "menu": {
     "url_map": "/mapservice/config/map_1",
     "url_layers": "/mapservice/config/layers",
-    "url_layermenu_settings": "/mapservice/settings/layermenu"
+    "url_layermenu_settings": "/mapservice/settings/layermenu",
+    "url_map_settings": "/mapservice/settings/mapsettings"
   },
   "router": [
     { "name": "manager", "title": "Visningstjänster", "default": true },
