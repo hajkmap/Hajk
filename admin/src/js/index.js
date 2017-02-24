@@ -55,7 +55,7 @@ import $ from 'jquery';
       model: application_model,
       tabs: config.router,
       config: config
-    });    
+    });
 
     var router = Router.extend(create_routes(config.router, application_model));
 

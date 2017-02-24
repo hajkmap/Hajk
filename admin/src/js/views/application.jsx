@@ -57,7 +57,7 @@ class Application extends Component {
    */
   constructor() {
     super();
-    this.state = defaultState;
+    this.state = defaultState;    
   }
   /**
    *

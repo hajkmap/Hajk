@@ -8,6 +8,11 @@ namespace MapService.Controllers
     {
         private readonly SettingsDbContext settingsDataContext = new SettingsDbContext();
 
+        public string Get()
+        {
+            return "Hej";
+        }
+
         public void Post(ArcGISConfig config)
         {
             this.settingsDataContext.AddArcGISLayer(config);           

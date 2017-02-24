@@ -69,5 +69,4 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-browserify');
 
   grunt.registerTask('build', ['copy', 'less:production', 'browserify']);
-
 };
