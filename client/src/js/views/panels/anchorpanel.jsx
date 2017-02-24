@@ -69,7 +69,7 @@ var AnchorPanelView = {
   render: function () {
     var anchor = this.props.model.get('anchor');
     return (
-      <Panel title="Länk till karta" onCloseClicked={this.props.onCloseClicked}>
+      <Panel title="Länk till karta" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked}>
         <div className="panel-content">
           <button onClick={this.generate} className="btn btn-default">Uppdatera länk</button>
           <p>

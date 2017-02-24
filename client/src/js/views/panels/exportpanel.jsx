@@ -138,7 +138,7 @@ var ExportPdfSettings = React.createClass({
     return this.state.selectFormat;
   },
 
-  setFormat: function (e) {  
+  setFormat: function (e) {
     this.setState({
       selectFormat: e.target.value
     });
@@ -350,7 +350,7 @@ var ExportPanelView = {
         olMap={this.props.model.get('olMap')}/>;
     }
     return (
-      <Panel title="Skriv ut karta" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
+      <Panel title="Skriv ut karta" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
         <div className="export-panel">
           <div>
             <div>Välj format</div>

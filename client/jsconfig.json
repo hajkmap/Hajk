@@ -11,6 +11,8 @@
         "compiled/backgroundswitcher.js": ["src/js/views/components/backgroundswitcher.jsx"],
         "compiled/information.js": ["src/js/views/components/information.jsx"],
         "compiled/selectiontoolbar.js": ["src/js/views/components/selectiontoolbar.jsx"],
+        "compiled/search.js": ["src/js/views/components/search.jsx"],
+        "compiled/searchbar.js": ["src/js/views/components/searchbar.jsx"],
         "compiled/searchresultgroup.js": ["src/js/views/components/searchresultgroup.jsx"]
       }
     },
@@ -84,6 +86,8 @@
         "components/backgroundswitcher": "./compiled/backgroundswitcher.js",
         "components/information": "./compiled/information.js",
         "components/selectiontoolbar": "./compiled/selectiontoolbar.js",
+        "components/search": "./compiled/search.js",
+        "components/searchbar": "./compiled/searchbar.js",
         "components/searchresultgroup": "./compiled/searchresultgroup.js",
         "views/map": "./compiled/mapview.js",
         "views/toolbar": "./compiled/toolbar.js",

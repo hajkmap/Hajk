@@ -136,7 +136,7 @@ var BookmarkPanelView = {
     }
 
     return (
-      <Panel title="Bokmärken" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
+      <Panel title="Bokmärken" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
         <div className="bookmark-panel panel-content">
           <form onSubmit={this.onSubmitForm}>
             <div className="form-group">

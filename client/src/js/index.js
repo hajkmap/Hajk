@@ -42,11 +42,9 @@
 
   internal.load = function (config, bookmarks) {
     var application = new ApplicationView(config, bookmarks);
-
     if (config && config.map && config.map.colors) {
       cssModifier.configure(config.map.colors);
     }
-
     application.render();
   };
 
@@ -203,7 +201,6 @@
         if (done)
           done(false, "Kartans konfiguration kunde inte laddas in");
       });
-
   }
 
   return that;

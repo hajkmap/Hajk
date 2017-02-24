@@ -63,7 +63,7 @@ var StreetView = {
   render: function () {
     var anchor = this.props.model.get('anchor');
     return (
-      <Panel title="Länk till karta" onCloseClicked={this.props.onCloseClicked}>
+      <Panel title="Street View" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked}>
         <div className="panel-content">
           <h3>Street view</h3>
           <div>Klicka i kartan för att aktivera street view.</div>

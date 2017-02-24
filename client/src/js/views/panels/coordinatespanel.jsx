@@ -209,7 +209,7 @@ var CoordinatesPanelView = {
     }
     coordinates = this.state.coordinates ? this.state.coordinates.transformed : {};
     return (
-      <Panel title="Koordinater" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
+      <Panel title="Koordinater" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
         <div className="coordinate-display">
           <CoordinatesList coordinates={coordinates} />
         </div>

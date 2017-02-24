@@ -39,12 +39,19 @@ var PanelView = {
    * @return {external:ReactElement}
    */
   render: function () {
-    var toggleIcon = this.props.minimized ? "fa fa-plus" : "fa fa-times";
+    var toggleIcon = this.props.minimized ? "fa fa-plus" : "fa fa-minus";
+    var closeIcon = this.props.minimized ? "fa fa-plus" : "fa fa-times";
     toggleIcon += " pull-right clickable panel-close";
+    closeIcon += " pull-right clickable panel-close";
     return (
       <div className="panel navigation-panel-inner">
         <div className="panel-heading">
           <span>{this.props.title}</span>
+          <i className={closeIcon} onClick={ () => {
+            if (this.props.onUnmountClicked) {
+              this.props.onUnmountClicked();
+            }
+          }}></i>
           <i className={toggleIcon} onClick={this.props.onCloseClicked}></i>
         </div>
         <div className="panel-body">

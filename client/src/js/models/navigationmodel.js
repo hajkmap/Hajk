@@ -87,28 +87,28 @@ var NavigationModel = {
    * @param {boolean} visible
    */
   onPanelVisibleChanged: function (panel, visible) {
-    var type = (panel.get('panel') || '').toLowerCase();
-    var panelRef = _.find(this.get("panels"), panel => (panel.type || '').toLowerCase() === type);
-    var activePanel = this.get("activePanel");
+
+    var type = (panel.get('panel') || '').toLowerCase()
+    ,   panelRef = _.find(this.get("panels"), panel => (panel.type || '').toLowerCase() === type)
+    ,   activePanel = this.get("activePanel");
 
     if (visible) {
       if (activePanel) {
+        let a = activePanel.model.get('panel')
+        ,   b = panel.get('panel').toLowerCase();
+
         activePanel.model.set("visible", false);
-        var a = activePanel.model.get('panel');
-        var b = panel.get('panel').toLowerCase();
 
         if (activePanel.model.filty && a !== b) {
           this.set('alert', true);
           this.ok = () => {
             this.navigate(panelRef, type);
           };
-
           this.deny = () => {
             if (panelRef) {
               panelRef.model.set('visible', false);
             }
           }
-
         }
       }
       if (!this.get('alert')) {

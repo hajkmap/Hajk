@@ -4,27 +4,31 @@ function getCSSRule(ruleName) {
     var rule = undefined;
     if (!document || !document.styleSheets) return;
     Array.prototype.find.call(document.styleSheets, styleSheet => {
-        if (!styleSheet.cssRules) return;
-        var mathces = Array.prototype.filter.call(styleSheet.cssRules, cssRule =>
-          cssRule instanceof CSSStyleRule &&
-          cssRule.selectorText.toLowerCase() === ruleName
-        );
-        rule = mathces[mathces.length - 1];
-        if (rule) {
-          rule = rule;
+        try {
+          if (!styleSheet.cssRules) return;
+          var mathces = Array.prototype.filter.call(styleSheet.cssRules, cssRule =>
+            cssRule instanceof CSSStyleRule &&
+            cssRule.selectorText.toLowerCase() === ruleName
+          );
+          rule = mathces[mathces.length - 1];
+          if (rule) {
+            rule = rule;
+          }
+        } catch (e) {
+          // Firefox throws if the css is loaded from external source.
         }
     });
+
     return rule;
 }
 
 module.exports = {
     configure: function (config) {
-
       if (!config.secondaryColor || !config.primaryColor) {
         return;
       }
-
       var panelHeader = getCSSRule('.navigation-panel-inner > .panel-heading')
+
       var panelHeaderItalic = getCSSRule('.navigation-panel-inner > .panel-heading i');
 
       var backgroundSwitcher = getCSSRule('.background-switcher');
@@ -39,8 +43,8 @@ module.exports = {
       var btnPrimaryHover = getCSSRule('.btn-primary:hover');
       var btnPrimaryActive = getCSSRule('.btn-primary:active');
       var btnPrimaryActiveHover = getCSSRule('.btn-primary:active:hover');
+      var btnPrimaryActiveHoverIE = getCSSRule('.btn-primary:hover:active');
 
-      var inputFocus = getCSSRule('input[type="text"]:focus');
       var drawToolsSelected = getCSSRule('.draw-tools li.selected');
       var informationBlanketHeader = getCSSRule('.information #blanket #container #header');
       var informationBlanketContainer = getCSSRule('.information #blanket #container');
@@ -107,12 +111,17 @@ module.exports = {
         btnPrimaryActiveHover.style.borderColor = config.secondaryColor;
         btnPrimaryActiveHover.style.color = config.secondaryColor;
       }
-      if (inputFocus) {
-        inputFocus.style.outline = "2px solid " + config.primaryColor;
+
+      if (btnPrimaryActiveHoverIE) {
+        btnPrimaryActiveHoverIE.style.backgroundColor = config.primaryColor;
+        btnPrimaryActiveHoverIE.style.borderColor = config.secondaryColor;
+        btnPrimaryActiveHoverIE.style.color = config.secondaryColor;
       }
+
       if (drawToolsSelected) {
         drawToolsSelected.style.backgroundColor = config.primaryColor;
       }
+
       if (informationBlanketHeader) {
         informationBlanketHeader.style.backgroundColor = config.primaryColor;
         informationBlanketHeader.style.color = config.secondaryColor;

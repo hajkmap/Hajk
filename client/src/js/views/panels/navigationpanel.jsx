@@ -69,8 +69,8 @@ var NavigationPanelView = {
    * @instance
    */
   componentDidMount: function () {
-    this.props.model.on("change:activePanel", (sender, panel) => {
-       this.setState({
+    this.props.model.on("change:activePanel", (sender, panel) => {      
+      this.setState({
         'activePanel' : panel,
         'minimized': false
       });
@@ -151,6 +151,14 @@ var NavigationPanelView = {
     }
   },
 
+  unmount: function() {
+    var model = this.props.model.get('activePanel').model;
+    model.set({'visible': false});
+    this.props.model.set({'visible': false});
+    this.props.model.set({'activePanelType': undefined});
+    this.props.model.set({'activePanel': undefined});
+  },
+
   /**
    * Render the panel component.
    * @instance
@@ -161,20 +169,21 @@ var NavigationPanelView = {
     var classes = this.state.toggled ? 'navigation-panel' : 'navigation-panel folded';
 
     if (this.state.minimized) {
-      classes += " minimized btn btn-default fa fa-expand";
+      classes += " minimized";
     }
 
     var panelInstance = null;
     var Panel = null;
 
-    if (this.state.activePanel) {      
+    if (this.state.activePanel) {
       Panel = panels[this.state.activePanel.type.toLowerCase()];
       panelInstance = (
         <Panel
           model={this.state.activePanel.model}
           minimized={this.state.minimized}
           navigationPanel={this}
-          onCloseClicked={_.bind(this.toggle, this)}
+          onCloseClicked={() => { this.toggle() }}
+          onUnmountClicked={() => { this.unmount() }}
         />
       )
     }

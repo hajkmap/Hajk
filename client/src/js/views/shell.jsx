@@ -27,6 +27,8 @@ var LayerCollection = require('collections/layers');
 var Toolcollection = require('collections/tools');
 var NavigationPanel = require('views/navigationpanel');
 var NavigationPanelModel = require("models/navigation");
+var SearchBar = require("components/searchbar");
+
 /**
  * @class
  */
@@ -141,6 +143,7 @@ var ShellView = {
     var views = this.state.views
     ,   scale
     ,   popup
+    ,   searchbar
     ,   logo;
 
     if (views.length === 3) {
@@ -165,6 +168,12 @@ var ShellView = {
           <div id="popup-content"></div>
         </div>
       )
+
+      searchbar = (
+        <div className="search-bar-holder">
+          <SearchBar model={this.model.get('toolCollection').find(tool => tool.get('type') === 'search')}></SearchBar>
+        </div>
+      )
     }
 
     return (
@@ -172,6 +181,7 @@ var ShellView = {
         {logo}
         {scale}
         {popup}
+        {searchbar}
         {views}
       </div>
     );

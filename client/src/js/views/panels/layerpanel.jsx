@@ -260,7 +260,7 @@ var LayerPanelView = {
         });
       }
 
-      if (!this.state.hasOwnProperty(id)) {        
+      if (!this.state.hasOwnProperty(id)) {
         this.state[id] = this.props.model.get(id);
       }
 
@@ -357,7 +357,7 @@ var LayerPanelView = {
     });
 
     return (
-      <Panel title="Lagerhanterare" onCloseClicked={this.props.onCloseClicked} minimized={this.props.minimized}>
+      <Panel title="Lagerhanterare" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
         <div className="layer-panel">
           <BackgroundSwitcher layers={this.props.model.getBaseLayers()} model={this.props.model}></BackgroundSwitcher>
           {groups}

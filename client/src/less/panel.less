@@ -13,15 +13,11 @@
 }
 
 .navigation-panel.minimized {
-  left: .5em;
-  top: .5em;
-  background: #fff;
-  width: 48px;
-  height: 48px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  cursor: pointer;
-  z-index: 999;
+  left: 0;
+  top: 0;
+  width: 0px;
+  height: 0px;
+  overflow: hidden; 
 }
 
 @font-face {
@@ -94,7 +90,7 @@
   font-size: 20px;
   border-radius: 0;
   color: @color-green;
-  background-color: @color-yellow;  
+  background-color: @color-yellow;
   border: none;
 }
 

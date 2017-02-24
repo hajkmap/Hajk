@@ -88,7 +88,6 @@ SearchResultGroup = {
       } else {
         this.props.model.append(item);
       }
-
     }
 
     if (element.hasClass('selected'))
@@ -97,7 +96,11 @@ SearchResultGroup = {
       element.addClass('selected');
 
     if (isMobile()) {
-      this.props.parentView.props.navigationPanel.minimize();
+      if (this.props.parentView.props.navigationPanel) {
+        this.props.parentView.props.navigationPanel.minimize();
+      } else {
+        this.props.parentView.minimize();
+      }
     }
 
   },
