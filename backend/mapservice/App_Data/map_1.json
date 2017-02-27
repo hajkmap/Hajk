@@ -228,6 +228,12 @@
       "options": {
         "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4"
       }
+    },
+    {
+      "type": "location",
+      "options": {
+        "placement": "top-right"
+      }
     }
   ],
   "map": {

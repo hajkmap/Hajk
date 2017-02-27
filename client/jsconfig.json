@@ -69,6 +69,7 @@
         "tools/anchor": "./src/js/tools/anchor.js",
         "tools/streetview": "./src/js/tools/streetview.js",
         "tools/information": "./src/js/tools/information.js",
+        "tools/location": "./src/js/tools/location.js",
         "layers/layer": "./src/js/layers/layer.js",
         "layers/wmslayer": "./src/js/layers/wmslayer.js",
         "layers/arcgislayer": "./src/js/layers/arcgislayer.js",
