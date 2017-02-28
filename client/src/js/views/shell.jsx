@@ -169,11 +169,14 @@ var ShellView = {
         </div>
       )
 
-      searchbar = (
-        <div className="search-bar-holder">
-          <SearchBar model={this.model.get('toolCollection').find(tool => tool.get('type') === 'search')}></SearchBar>
-        </div>
-      )
+      var searchTool = this.model.get('toolCollection').find(tool => tool.get('type') === 'search');
+      if (searchTool && searchTool.get('onMap')) {
+        searchbar = (
+          <div className="search-bar-holder">
+            <SearchBar model={this.model.get('toolCollection').find(tool => tool.get('type') === 'search')}></SearchBar>
+          </div>
+        )
+      }
     }
 
     return (

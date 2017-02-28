@@ -206,7 +206,7 @@ var SearchView = {
     ;
     return (
       <div>
-        <div>
+        <p>
           <span>Sök: </span>&nbsp;
           <select value={this.props.model.get('filter')} onChange={(e) => { this.setFilter(e) }}>
             <option value="*">--  Alla  --</option>
@@ -222,7 +222,7 @@ var SearchView = {
               })()
             }
           </select>
-        </div>
+        </p>
       </div>
     );
   },

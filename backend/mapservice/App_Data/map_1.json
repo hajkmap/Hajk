@@ -137,6 +137,8 @@
     {
       "type": "search",
       "options": {
+        "onMap": true,
+        "toolbar": false,
         "maxZoom": 14,
         "selectionTools": true,
         "filterVisible": true,
@@ -245,7 +247,7 @@
     {
       "type": "location",
       "options": {
-        "placement": "top-right"
+        "toolbar": "top-right"
       }
     }
   ],

@@ -283,9 +283,14 @@ var InfoClickModel = {
           ,   next      = $('<span class="fa fa-btn fa-arrow-circle-o-right"></span>')
           ,   prev      = $('<span class="fa fa-btn fa-arrow-circle-o-left"></span>')
           ,   title     = $(`<div>${inf.information.caption}</div>`)
-          ,   content   = $(`<div>${inf.information.information.kategori}</div>`)
+          ,   content   = $(`<div></div>`)
           ,   markdown  = ""
           ,   html      = "";
+
+          inf.layer.once('change:visible', () => {
+            ovl.setPosition(undefined);
+            this.clearHighlight();
+          });
 
           if (typeof inf.information.information === "object") {
             markdown = this.objectAsMarkdown(inf.information.information);
@@ -296,7 +301,7 @@ var InfoClickModel = {
 
           content.html(html);
 
-          if (coords = isPoint(coords)) {            
+          if (coords = isPoint(coords)) {
             position = coords;
           }
 
