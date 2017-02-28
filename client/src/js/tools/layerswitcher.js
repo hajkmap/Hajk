@@ -77,10 +77,10 @@ var LayerSwitcherModel = {
    * @instance
    * @param {object[]} groups
    */
-  setToggled: function recursive(groups) {
+  setExpanded: function recursive(groups) {
     groups.forEach(group => {
       if (!this.get("group_" + group.id)) {
-        this.set("group_" + group.id, group.toggled ? "visible" : "hidden");
+        this.set("group_" + group.id, group.expanded ? "visible" : "hidden");
         if (group.hasOwnProperty('groups')) {
           recursive.call(this, group.groups);
         }

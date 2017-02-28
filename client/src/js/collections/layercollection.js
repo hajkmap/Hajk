@@ -194,6 +194,8 @@ var LayerCollection = {
         "queryable": args.queryable,
         "information": args.infobox,
         "icon": args.legend,
+        "symbolXOffset": args.symbolXOffset,
+        "symbolYOffset": args.symbolYOffset,
         "featureId": "FID",
         "legend": [{
           "Url": args.legend,

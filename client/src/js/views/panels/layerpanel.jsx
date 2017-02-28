@@ -47,7 +47,7 @@ var LayerPanelView = {
   },
 
   componentWillMount: function() {
-    this.props.model.setToggled(this.props.model.get('groups'));
+    this.props.model.setExpanded(this.props.model.get('groups'));
   },
 
   /**
@@ -162,13 +162,15 @@ var LayerPanelView = {
    * @param {object} e
    */
   toggleGroup: function (group, e) {
-
-    var layers = this.drillGroupForLayers(group)
-    ,   checked = e.target.checked;
-
+    var layers = this.drillGroupForLayers(group);
+    if (group.autoChecked !== undefined && group.autoChecked !== group.checked) {
+      group.checked = group.autoChecked
+    }
+    group.checked = !group.checked;
+    this.forceUpdate();
     layers.forEach((layer) => {
       var groupId = layer.get('group');
-      layer.set('visible', checked);
+      layer.set('visible', group.checked);
     });
   },
 
@@ -180,25 +182,37 @@ var LayerPanelView = {
    * @param {object} e
    */
   updateGroupToggledCheckbox: function recur(layer) {
-    setTimeout(() => {
 
+    if (!layer) return;
 
-      if (layer) {
-        var groupId = typeof layer === 'string' ? layer : (layer.get ? layer.get('group') : undefined)
-        ,   group
-        ,   layers;
+    var groupId = typeof layer === 'string' ? layer : (layer.get ? layer.get('group') : undefined)
+    ,   group
+    ,   layers;
 
-        if (groupId) {
-          group  = this.findGroupInConfig(this.groups, groupId);
-          layers = this.drillGroupForLayers(group);
+    if (groupId) {
 
-          if (group.parent && group.parent != -1) {
-            recur.call(this, group.parent);
-          }
-          //this.refs["group_" + groupId].checked = layers.every(lyr => lyr.getVisible() === true);
-        }
+      group  = this.findGroupInConfig(this.groups, groupId);
+      layers = this.drillGroupForLayers(group);
+
+      if (group.parent && group.parent != -1) {
+        recur.call(this, group.parent);
       }
-    }, 0);
+
+      let checked = layers.every(layer => layer.getVisible() === true)
+      ,   $ref = $(this.refs["group_" + group.id])
+      ,   checkedClass = "fa-check-square-o"
+      ,   uncheckedClass = "fa-square-o"
+
+      if (checked) {
+        $ref.removeClass(uncheckedClass);
+        $ref.addClass(checkedClass);
+        group.autoChecked = true;
+      } else  {
+        $ref.removeClass(checkedClass);
+        $ref.addClass(uncheckedClass);
+        group.autoChecked = false;
+      }
+    }
   },
 
   /**
@@ -249,7 +263,9 @@ var LayerPanelView = {
       var layers = this.renderLayers(group)
       ,   subgroups
       ,   id = "group_" + group.id
-      ,   buttonClassName;
+      ,   toggleGroup
+      ,   buttonClassName
+      ,   toggleClassName;
 
       if (layers) {
         layers.forEach(layer => {
@@ -272,12 +288,24 @@ var LayerPanelView = {
         "fa fa-angle-right clickable arrow" :
         "fa fa-angle-down clickable arrow";
 
+      toggleClassName = group.checked ? "fa fa-check-square-o" : "fa fa-square-o";
+
+      toggleGroup = group.toggled
+      ? (<i
+          className={toggleClassName}
+          style={{marginLeft: "4px", width: "14px"}}
+          ref={id}
+          onClick={this.toggleGroup.bind(this, group)}
+          id={id}
+        />)
+      : null;
+
       return (
         <div className="layer-group" key={i}>
           <div>
             <span className={buttonClassName} onClick={this.toggleGroupVisibility.bind(this, group)}></span>
-            {/*<input type="checkbox" ref={id} onChange={this.toggleGroup.bind(this, group)} id={id} />*/}
-            <label style={{cursor: 'pointer', 'marginLeft': '4px'}} htmlFor={id} onClick={this.toggleGroupVisibility.bind(this, group)}>{group.name}</label>
+            {toggleGroup}
+            <label style={{cursor: 'pointer', 'marginLeft': '4px'}} onClick={this.toggleGroupVisibility.bind(this, group)}>{group.name}</label>
           </div>
           <div className={this.state[id]}>
             {layers}

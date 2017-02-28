@@ -123,7 +123,6 @@ var manager = Model.extend({
   },
 
   updateLayer: function(layer, callback) {
-
     var url = this.getUrl(layer);
     $.ajax({
       url: url,

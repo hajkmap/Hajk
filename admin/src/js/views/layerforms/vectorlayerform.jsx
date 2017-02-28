@@ -42,13 +42,15 @@ const defaultState = {
   projection: "",
   layer: "",
   opacity: 1,
+  symbolXOffset: 0,
+  symbolYOffset: 0,
   queryable: true
 };
 
 /**
  *
  */
-class ArcGISLayerForm extends Component {
+class VectorLayerForm extends Component {
 
   componentDidMount() {
     defaultState.url = this.props.url;
@@ -98,6 +100,8 @@ class ArcGISLayerForm extends Component {
       projection: this.getValue("projection"),
       layer: this.state.addedLayers[0],
       opacity: this.getValue("opacity"),
+      symbolXOffset: this.getValue("symbolXOffset"),
+      symbolYOffset: this.getValue("symbolYOffset"),
       queryable: this.getValue("queryable"),
       infobox: this.getValue("infobox")
     }
@@ -165,6 +169,8 @@ class ArcGISLayerForm extends Component {
           valid = false;
         }
         break;
+      case "symbolXOffset":
+      case "symbolYOffset":
       case "opacity":
         if (!number(value) || empty(value)) {
           valid = false;
@@ -412,6 +418,32 @@ class ArcGISLayerForm extends Component {
           />
         </div>
         <div>
+          <label>Ikonförskjutning X</label>
+          <input
+            type="text"
+            ref="input_symbolXOffset"
+            value={this.state.symbolXOffset}
+            className={this.getValidationClass("symbolXOffset")}
+            onChange={(e) => {
+              this.setState({symbolXOffset: e.target.value});
+              this.validateField("symbolXOffset");
+            }}
+          />
+        </div>
+        <div>
+          <label>Ikonförskjutning Y</label>
+          <input
+            type="text"
+            ref="input_symbolYOffset"
+            value={this.state.symbolYOffset}
+            className={this.getValidationClass("symbolYOffset")}
+            onChange={(e) => {
+              this.setState({symbolYOffset: e.target.value});
+              this.validateField("symbolYOffset");
+            }}
+          />
+        </div>
+        <div>
           <label>Infoklickbar</label>
           <input
             type="checkbox"
@@ -458,4 +490,4 @@ class ArcGISLayerForm extends Component {
   }
 }
 
-export default ArcGISLayerForm;
+export default VectorLayerForm;

@@ -68,6 +68,7 @@ module.exports = LayerModel.extend({
       caption: this.get('caption'),
       name: this.get('name'),
       visible: this.get("visible"),
+      opacity: this.get("opacity"),
       source: new ol.source.ImageVector({
         source: source,
         style: (feature) => {
@@ -82,12 +83,20 @@ module.exports = LayerModel.extend({
             }),
             image: new ol.style.Icon({
               src: icon,
-              scale: 1
+              scale: 1,
+              anchorXUnits: 'pixels',
+              anchorYUnits: 'pixels',
+              anchor: [
+                this.get('symbolXOffset'),
+                this.get('symbolYOffset')
+              ]
             })
           })];
         }
       })
     });
+
+    console.log("Add wfs layer", this.get("opacity"), this.get("symbolYOffset"));
 
     if (this.get('loadType') === "jsonp") {
       global.window[this.get('callbackFunction')] = (response) => {

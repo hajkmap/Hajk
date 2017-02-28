@@ -40,7 +40,7 @@ const defaultState = {
   alertMessage: "",
   content: "",
   confirmAction: () => {},
-  denyAction: () => {}  
+  denyAction: () => {}
 };
 /**
  *
@@ -164,6 +164,8 @@ class Manager extends Component {
           queryable: layer.queryable,
           projection: layer.projection,
           opacity: layer.opacity,
+          symbolXOffset: layer.symbolXOffset,
+          symbolYOffset: layer.symbolYOffset,
           drawOrder: layer.drawOrder,
           layer: layer.layer
         });

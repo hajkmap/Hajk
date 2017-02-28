@@ -81,6 +81,7 @@
             "parent": "-1",
             "name": "Data",
             "toggled": true,
+            "expanded": true,
             "layers": [
               {
                 "id": "9",
@@ -93,17 +94,28 @@
               {
                 "id": "2",
                 "drawOrder": 4
-              },
-              {
-                "id": "3",
-                "drawOrder": 2
-              },
-              {
-                "id": "4",
-                "drawOrder": 1
               }
             ],
-            "groups": []
+            "groups": [
+              {
+                "id": "c7c7847e-308c-1f0c-0bb7-4594fcd76833",
+                "parent": "9c8ea66e-9079-293b-17d6-6332ce9abf1f",
+                "name": "Annan",
+                "toggled": true,
+                "expanded": true,
+                "layers": [
+                  {
+                    "id": "3",
+                    "drawOrder": 2
+                  },
+                  {
+                    "id": "4",
+                    "drawOrder": 1
+                  }
+                ],
+                "groups": []
+              }
+            ]
           }
         ]
       }
@@ -274,8 +286,8 @@
     ],
     "logo": "",
     "colors": {
-      "primaryColor": "#bd6d6d",
-      "secondaryColor": "#f0ecec"
+      "primaryColor": "#3e73e4",
+      "secondaryColor": "#ffffff"
     }
   }
 }

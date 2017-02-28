@@ -44,16 +44,19 @@ $.fn.editable = function(component) {
         abort.remove();
         remove.remove();
         toggled.remove();
+        expanded.remove();
         tools.remove();
         elem.editing = false;
       }
 
       function store() {
         let name = input.val();
-        let toggled = checkbox.is(':checked');
+        let toggled = checkbox2.is(':checked');
+        let expanded = checkbox.is(':checked');
         node.html(name);
         node.parent().attr("data-name", name);
         node.parent().attr("data-toggled", toggled);
+        node.parent().attr("data-expanded", expanded);
         reset();
       }
 
@@ -62,17 +65,21 @@ $.fn.editable = function(component) {
         position: "relative",
         top: "-1px"
       }
-      ,   prev     = node.html()
-      ,   id       = Math.floor(Math.random() * 1E5)
-      ,   ok       = $('<span class="btn btn-success">OK</span>')
-      ,   tools    = $('<div></div>')
-      ,   abort    = $('<span class="btn btn-default">Avbryt</span>')
-      ,   label    = $(`<label for="${id}">Expanderad vid start&nbsp;</label>`)
-      ,   checkbox = $(`<input id="${id}" type="checkbox"/>`)
-      ,   remove   = $('<span class="fa fa-minus-circle"></span>')
-      ,   input    = $('<input />')
-      ,   toggled  = $('<span class="expanded-at-start"></span>')
-      ,   elem     = node.get(0) || {}
+      ,   prev      = node.html()
+      ,   id        = Math.floor(Math.random() * 1E5)
+      ,   id2       = Math.floor(Math.random() * 1E5)
+      ,   ok        = $('<span class="btn btn-success">OK</span>')
+      ,   tools     = $('<div></div>')
+      ,   abort     = $('<span class="btn btn-default">Avbryt</span>')
+      ,   label     = $(`<label for="${id}">Expanderad vid start&nbsp;</label>`)
+      ,   label2    = $(`<label for="${id2}">Toggla alla-knapp&nbsp;</label>`)
+      ,   checkbox  = $(`<input id="${id}" type="checkbox"/>`)
+      ,   checkbox2 = $(`<input id="${id2}" type="checkbox"/>`)
+      ,   remove    = $('<span class="fa fa-minus-circle"></span>')
+      ,   input     = $('<input />')
+      ,   expanded  = $('<div class="expanded-at-start"></div>')
+      ,   toggled   = $('<div class="expanded-at-start"></div>')
+      ,   elem      = node.get(0) || {}
 
       ok
         .css(btnCSS)
@@ -85,11 +92,15 @@ $.fn.editable = function(component) {
           reset();
         });
 
-      if (node.parent().attr("data-toggled") === 'true') {
+      if (node.parent().attr("data-expanded") === 'true') {
         checkbox.attr('checked', 'checked');
       }
+      if (node.parent().attr("data-toggled") === 'true') {
+        checkbox2.attr('checked', 'checked');
+      }
 
-      toggled.append(label, checkbox);
+      expanded.append(checkbox, label);
+      toggled.append(checkbox2, label2);
 
       remove
         .css({ color: 'red', marginRight: '4px' })
@@ -116,18 +127,11 @@ $.fn.editable = function(component) {
           padding: '4px'
         });
 
-      tools
-        .css({
-          marginLeft: '13px',
-          marginTop: '7px'
-        })
-        .append(
-          ok,
-          abort,
-          toggled
-        );
-
-      tools.append(ok, abort, toggled);
+      tools.css({
+        marginLeft: '13px',
+        marginTop: '7px'
+      });
+      tools.append(ok, abort, toggled, expanded);
 
       if (node.hasClass('group-name')) {
         node
@@ -361,6 +365,7 @@ class Menu extends Component {
         type: node.dataset.type,
         name: node.dataset.name,
         toggled: node.dataset.toggled,
+        expanded: node.dataset.expanded,
         parent: getParent(node),
         layers: layers(node),
         groups: groups(node)
@@ -483,7 +488,7 @@ class Menu extends Component {
   /**
    *
    */
-  createGroup(name, toggled) {
+  createGroup(name, expanded, toggled) {
     var id = this.createGuid();
     var group = $(`
       <li
@@ -491,6 +496,7 @@ class Menu extends Component {
         data-id="${id}"
         data-type="group"
         data-toggled="${toggled}"
+        data-expanded="${expanded}"
         data-name="${name}">
         <span class="group-name">${name}</span>
         <ul></ul>
@@ -600,6 +606,7 @@ class Menu extends Component {
               key={i}
               data-id={group.id}
               data-type="group"
+              data-expanded={group.expanded}
               data-toggled={group.toggled}
               data-name={group.name}>
               <span className="group-name">{group.name}</span>
@@ -742,7 +749,7 @@ class Menu extends Component {
             <fieldset className="tree-view">
               <legend>Hantera lagermeny</legend>
               <button className="btn btn-primary" onClick={(e) => this.saveSettings(e)}>Spara</button>&nbsp;
-              <button className="btn btn-success" onClick={(e) => this.createGroup("Ny grupp", false)}>Ny grupp</button>&nbsp;
+              <button className="btn btn-success" onClick={(e) => this.createGroup("Ny grupp", false, false)}>Ny grupp</button>&nbsp;
               {this.renderLayerMenu()}
             </fieldset>
           </article>

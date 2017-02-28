@@ -24,6 +24,10 @@ namespace MapService.Models.Config
 
         public string legend { get; set; }
 
+        public double symbolXOffset { get; set; }
+
+        public double symbolYOffset { get; set; }
+
         public string projection { get; set; }
 
         public bool visibleAtStart { get; set; }
