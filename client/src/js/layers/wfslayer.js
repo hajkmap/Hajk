@@ -95,9 +95,7 @@ module.exports = LayerModel.extend({
         }
       })
     });
-
-    console.log("Add wfs layer", this.get("opacity"), this.get("symbolYOffset"));
-
+  
     if (this.get('loadType') === "jsonp") {
       global.window[this.get('callbackFunction')] = (response) => {
         this.addFeatures(response, "geojson");
