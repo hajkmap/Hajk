@@ -280,12 +280,17 @@ class VectorLayerForm extends Component {
   renderLayersFromCapabilites() {
     if (this.state && this.state.capabilities) {
       return this.state.capabilities.map((layer, i) => {
+
+        var name = layer.name.split(':').length === 2
+        ? layer.name.split(':')[1]
+        : layer.name.split(':')[0];
+
         var classNames = this.state.layerPropertiesName === layer.name ?
                          "fa fa-info-circle active" : "fa fa-info-circle";
         return (
           <li key={i}>
             <input ref={layer.name} id={"layer" + i} type="radio" name="featureType" data-type="wms-layer" onChange={(e) => { this.appendLayer(e, layer.name) }}/>&nbsp;
-            <label htmlFor={"layer" + i}>{layer.name}</label>
+            <label htmlFor={"layer" + i}>{name}</label>
             <i className={classNames} onClick={(e) => this.describeLayer(e, layer.name)}></i>
           </li>
         )
