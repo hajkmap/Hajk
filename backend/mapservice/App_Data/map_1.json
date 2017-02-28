@@ -226,7 +226,8 @@
     {
       "type": "information",
       "options": {
-        "visibleAtStart": false
+        "visibleAtStart": true,
+        "text": "Information om kartan <a target='blank' href='http://www.google.se'>Google</a>"
       }
     },
     {

@@ -62,20 +62,7 @@ var InformationView = {
             <div key="a" id="header">{this.props.model.get('headerText')}
               <i className="fa fa-times pull-right clickable panel-close" id="close" onClick={this.close}></i>
             </div>
-            <div key="b" id="body">
-              {
-                this.props.model.get('text')
-                  .split("\n")
-                  .map((item, i) => {
-                    return (
-                      <span key={i}>
-                        {item}
-                        <br/>
-                      </span>
-                    )
-                  })
-              }
-            </div>
+            <div key="b" id="body" dangerouslySetInnerHTML={{__html: this.props.model.get('text')}}></div>
           </div>
         </div>
       );
