@@ -75,7 +75,6 @@ class VectorLayerForm extends Component {
 
   describeLayer(layer) {
     this.props.model.getWFSLayerDescription(this.state.url, this.state.addedLayers[0], layerDescription => {
-      console.log("Layer description", layerDescription);
       this.props.parent.setState({
         layerProperties: layerDescription.map(d => {
             return {
@@ -228,10 +227,21 @@ class VectorLayerForm extends Component {
     }
 
     this.props.model.getWFSCapabilities(this.state.url, (capabilities) => {
+
+      var projection = "";
+      if (Array.isArray(capabilities) && capabilities.length > 0) {
+        projection = capabilities[0].projection;
+      }
+
       this.setState({
         capabilities: capabilities,
+        projection: this.state.projection || (projection || ""),
+        legend: this.state.legend || (capabilities.legend || ""),
         load: false
       });
+
+      this.validate();
+
       if (capabilities === false) {
         this.props.application.setState({
           alert: true,
@@ -281,16 +291,12 @@ class VectorLayerForm extends Component {
     if (this.state && this.state.capabilities) {
       return this.state.capabilities.map((layer, i) => {
 
-        var name = layer.name.split(':').length === 2
-        ? layer.name.split(':')[1]
-        : layer.name.split(':')[0];
-
         var classNames = this.state.layerPropertiesName === layer.name ?
                          "fa fa-info-circle active" : "fa fa-info-circle";
         return (
           <li key={i}>
             <input ref={layer.name} id={"layer" + i} type="radio" name="featureType" data-type="wms-layer" onChange={(e) => { this.appendLayer(e, layer.name) }}/>&nbsp;
-            <label htmlFor={"layer" + i}>{name}</label>
+            <label htmlFor={"layer" + i}>{layer.title}</label>
             <i className={classNames} onClick={(e) => this.describeLayer(e, layer.name)}></i>
           </li>
         )

@@ -85,15 +85,15 @@
             "layers": [
               {
                 "id": "9",
-                "drawOrder": 0
-              },
-              {
-                "id": "7",
                 "drawOrder": 3
               },
               {
-                "id": "2",
+                "id": "7",
                 "drawOrder": 4
+              },
+              {
+                "id": "2",
+                "drawOrder": 5
               }
             ],
             "groups": [

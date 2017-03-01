@@ -192,9 +192,32 @@ var manager = Model.extend({
   parseWFSCapabilitesTypes: function (data) {
     var types = [];
     $(data).find('FeatureType').each((i, featureType) => {
+
+      var projection = ""
+      ,   crs = $(featureType).find('DefaultCRS').first().get(0).textContent;
+
+      if (crs && typeof crs === "string") {
+        crs = crs.split(':');
+      }
+      if (Array.isArray(crs)) {
+        crs.forEach(part => {
+          if (/EPSG/.test(part)) {
+            projection += part + ":";
+          }
+          if (/^\d+$/.test(Number(part))) {
+            projection += part;
+          }
+        });
+      }      
+
+      if (!/^[A-Z]+:\d+$/.test(projection)) {
+        projection = "";
+      }
+
       types.push({
         name: $(featureType).find('Name').first().get(0).textContent,
-        title: $(featureType).find('Title').first().get(0).textContent
+        title: $(featureType).find('Title').first().get(0).textContent,
+        projection: projection
       });
     });
     return types;
@@ -208,7 +231,26 @@ var manager = Model.extend({
       },
       success: data => {
         var response = this.parseWFSCapabilitesTypes(data);
-        callback(response);
+        if (/MapServer\/WFSServer$/.test(url)) {
+          url = url.replace('/services/', '/rest/services/').replace('WFSServer', 'legend?f=pjson');
+          $.ajax(this.prepareProxyUrl(url), {
+            dataType: "json",
+            success: (legend) => {
+              if (legend && legend.layers && legend.layers[0]) {
+                if (legend.layers[0].legend[0]) {
+                  response.legend = "data:image/png;base64," +
+                    legend.layers[0].legend[0].imageData;
+                }
+              }
+              callback(response);
+            },
+            error: () => {
+              callback(false);
+            }
+          });
+        } else {
+          callback(response);
+        }
       },
       error: data => {
         callback(false);
