@@ -11,7 +11,7 @@
     #container {
       background: white;
       width: 500px;
-      top: 200px;
+      top: 100px;
       left: 50%;
       position: absolute;
       margin-left: -250px;
@@ -32,9 +32,20 @@
         font-size: 20px;
         color: @color-white;
       }
-      #body {
-        padding: 15px;
-        white-space: normal;
+      #body-wrapper {
+        overflow: auto;
+        max-height: 500px;
+        @media (max-width: 600px) {
+          max-height: inherit;;
+          position: absolute;
+          bottom: 0;
+          width: 100%;
+          top: 58px;
+        }
+        #body {
+          padding: 15px;
+          white-space: normal;
+        }
       }
       #close {
         margin-top: 2px;

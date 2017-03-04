@@ -274,9 +274,10 @@ class ArcGISLayerForm extends Component {
         addedLayers: addedLayers
       });
 
-      _.each(this.refs, element => {
-        if (element.dataset.type === "arcgis-layer") {
-          element.checked = false;
+      Object.keys(this.refs).forEach(element => {
+        var elem = this.refs[element];
+        if (this.refs[element].dataset.type == "arcgis-layer") {
+          this.refs[element].checked = false;
         }
       });
 

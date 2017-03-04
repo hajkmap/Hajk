@@ -62,12 +62,12 @@ var InfoClickModelProperties = {
   highlightLayer: undefined,
   markerImg: "assets/icons/marker.png",
   anchor: [
-    8,
-    8
-  ],
-  imgSize: [
     16,
     16
+  ],
+  imgSize: [
+    32,
+    32
   ],
   displayPopup: true
 };

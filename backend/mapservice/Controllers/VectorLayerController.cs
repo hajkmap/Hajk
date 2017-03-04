@@ -13,9 +13,9 @@ namespace MapService.Controllers
             this.settingsDataContext.AddVectorLayer(config);
         }
 
-        public void Delete(string id)
+        public void Delete(string id, string mapFile)
         {
-            this.settingsDataContext.RemoveVectorLayer(id);
+            this.settingsDataContext.RemoveVectorLayer(id, mapFile);
         }
 
         public void Put(VectorConfig config)

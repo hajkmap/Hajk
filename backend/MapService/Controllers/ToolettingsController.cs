@@ -9,13 +9,13 @@ using System.Web.Http;
 
 namespace MapService.Controllers
 {
-    public class MapSettingsController : ApiController
+    public class ToolSettingsController : ApiController
     {
         private readonly SettingsDbContext settingsDataContext = new SettingsDbContext();
 
-        public void Put(MapSetting settings, string mapFile)
-        {
-            this.settingsDataContext.UpdateMapSettings(settings, mapFile);
+        public void Put(List<Tool> toolSettings, string mapFile)
+        {            
+            this.settingsDataContext.UpdateToolSettings(toolSettings, mapFile);
         }
     }
 }

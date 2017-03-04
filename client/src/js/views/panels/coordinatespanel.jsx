@@ -104,10 +104,10 @@ var CoordinatesList = React.createClass({
   },
 
   processTitle: function(title, object) {
-    if (object.hasOwnProperty('default')){
+    if (object.hasOwnProperty('default') && object['default'] === true){
       return (
         <dt>
-          <strong style={{color: 'bisque'}}>{title}</strong> {object.hint}
+          <strong style={{fontWeight: 'bold'}}>{title}</strong> {object.hint}
         </dt>
       )
     } else {

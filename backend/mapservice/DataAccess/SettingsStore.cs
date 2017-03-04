@@ -50,7 +50,7 @@ namespace MapService.DataAccess
 
     sealed class SettingsDbContext : DbContext
     {
-        private string mapFile = "map_1.json";
+        //private string mapFile = "map_1.json";
         private string layerFile = "layers.json";
         /// <summary>
         /// Read layer config from JSON-file
@@ -67,9 +67,9 @@ namespace MapService.DataAccess
         /// Read config from JSON-file
         /// </summary>
         /// <returns></returns>
-        private MapConfig readMapConfigFromFile()
+        private MapConfig readMapConfigFromFile(string mapFile)
         {
-            string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.mapFile);
+            string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, mapFile);
             string jsonInput = System.IO.File.ReadAllText(file);
             return JsonConvert.DeserializeObject<MapConfig>(jsonInput);
         }
@@ -78,9 +78,9 @@ namespace MapService.DataAccess
         /// Save config as JSON-file
         /// </summary>
         /// <param name="mapConfig"></param>
-        private void saveMapConfigToFile(MapConfig mapConfig)
+        private void saveMapConfigToFile(MapConfig mapConfig, string mapFile)
         {
-            string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.mapFile);
+            string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, mapFile);
             string jsonOutput = JsonConvert.SerializeObject(mapConfig, Formatting.Indented);
             System.IO.File.WriteAllText(file, jsonOutput);
         }
@@ -301,10 +301,10 @@ namespace MapService.DataAccess
             this.saveLayerConfigToFile(layerConfig);
         }
 
-        public void RemoveArcGISLayer(string id)
+        public void RemoveArcGISLayer(string id, string mapFile)
         {
             LayerConfig layerConfig = this.readLayerConfigFromFile();
-            this.removeLayerFromConfig(id);
+            this.removeLayerFromConfig(id, mapFile);
             var index = layerConfig.arcgislayers.FindIndex(item => item.id == id);
             if (index != -1)
             {
@@ -358,25 +358,25 @@ namespace MapService.DataAccess
         /// Removes WMS-layer from config
         /// </summary>
         /// <param name="id"></param>
-        private void removeLayerFromConfig(string id) 
+        private void removeLayerFromConfig(string id, string mapFile) 
         {
-            MapConfig config = readMapConfigFromFile();
+            MapConfig config = readMapConfigFromFile(mapFile);
             var tool = config.tools.Find(t => t.type == "layerswitcher");                
             LayerMenuOptions options = JsonConvert.DeserializeObject<LayerMenuOptions>(tool.options.ToString());                                                
             this.removeLayer(id, options.groups);
             this.removeLayer(id, options.baselayers);
             config.tools.Where(t => t.type == "layerswitcher").FirstOrDefault().options = options;
-            this.saveMapConfigToFile(config);
+            this.saveMapConfigToFile(config, mapFile);
         }
 
         /// <summary>
         /// Remove WMS-layer
         /// </summary>
         /// <param name="id"></param>
-        public void RemoveWMSLayer(string id)
+        public void RemoveWMSLayer(string id, string mapFile)
         {
             LayerConfig layerConfig = this.readLayerConfigFromFile();                
-            this.removeLayerFromConfig(id);
+            this.removeLayerFromConfig(id, mapFile);
             var index = layerConfig.wmslayers.FindIndex(item => item.id == id);
             if (index != -1)
             {
@@ -389,10 +389,10 @@ namespace MapService.DataAccess
         /// Remove WMS-layer
         /// </summary>
         /// <param name="id"></param>
-        public void RemoveWMTSLayer(string id)
+        public void RemoveWMTSLayer(string id, string mapFile)
         {
             LayerConfig layerConfig = this.readLayerConfigFromFile();
-            this.removeLayerFromConfig(id);
+            this.removeLayerFromConfig(id, mapFile);
             var index = layerConfig.wmtslayers.FindIndex(item => item.id == id);
             if (index != -1)
             {
@@ -405,33 +405,44 @@ namespace MapService.DataAccess
         /// Update layer menu
         /// </summary>
         /// <param name="layerMenu"></param>
-        public void UpdateLayerMenu(LayerMenuOptions layerMenu)
+        public void UpdateLayerMenu(LayerMenuOptions layerMenu, string mapFile)
         {
-            MapConfig config = readMapConfigFromFile();
+            MapConfig config = readMapConfigFromFile(mapFile);
             var tool = config.tools.Find(t => t.type == "layerswitcher");
             tool.options = layerMenu;
-            this.saveMapConfigToFile(config);
+            this.saveMapConfigToFile(config, mapFile);
         }
 
         /// <summary>
         /// Update map settings
         /// </summary>
         /// <param name="mapSettings"></param>
-        public void UpdateMapSettings(MapSetting mapSettings)
+        public void UpdateMapSettings(MapSetting mapSettings, string mapFile)
         {
-            MapConfig config = readMapConfigFromFile();
+            MapConfig config = readMapConfigFromFile(mapFile);
             config.map = mapSettings;
-            this.saveMapConfigToFile(config);
+            this.saveMapConfigToFile(config, mapFile);
+        }
+
+        /// <summary>
+        /// Update map settings
+        /// </summary>
+        /// <param name="mapSettings"></param>
+        public void UpdateToolSettings(List<Tool> toolSettings, string mapFile)
+        {            
+            MapConfig config = readMapConfigFromFile(mapFile);
+            config.tools = toolSettings;                        
+            this.saveMapConfigToFile(config, mapFile);
         }
 
         /// <summary>
         /// Remove WFS-layer
         /// </summary>
         /// <param name="id"></param>
-        internal void RemoveWFSLayer(string id)
+        internal void RemoveWFSLayer(string id, string mapFile)
         {
             LayerConfig layerConfig = this.readLayerConfigFromFile();
-            this.removeLayerFromConfig(id);
+            this.removeLayerFromConfig(id, mapFile);
             var index = layerConfig.wfslayers.FindIndex(item => item.id == id);
             if (index != -1)
             {
@@ -471,10 +482,10 @@ namespace MapService.DataAccess
         /// Remove WFS-layer
         /// </summary>
         /// <param name="id"></param>
-        internal void RemoveWFSTLayer(string id)
+        internal void RemoveWFSTLayer(string id, string mapFile)
         {
             LayerConfig layerConfig = this.readLayerConfigFromFile();
-            this.removeLayerFromConfig(id);
+            this.removeLayerFromConfig(id, mapFile);
             var index = layerConfig.wfstlayers.FindIndex(item => item.id == id);
             if (index != -1)
             {
@@ -530,10 +541,10 @@ namespace MapService.DataAccess
         /// Remove vector layer from config.
         /// </summary>
         /// <param name="id"></param>
-        internal void RemoveVectorLayer(string id)
+        internal void RemoveVectorLayer(string id, string mapFile)
         {
             LayerConfig layerConfig = this.readLayerConfigFromFile();
-            this.removeLayerFromConfig(id);
+            this.removeLayerFromConfig(id, mapFile);
             var index = layerConfig.vectorlayers.FindIndex(item => item.id == id);
             if (index != -1)
             {
@@ -588,10 +599,10 @@ namespace MapService.DataAccess
         /// <summary>
         /// Re index the layers in the application.        
         /// </summary>
-        internal void IndexLayerMenu()
+        internal void IndexLayerMenu(string mapFile)
         {
             LayerConfig layerConfig = this.readLayerConfigFromFile();
-            MapConfig mapConfig = this.readMapConfigFromFile();
+            MapConfig mapConfig = this.readMapConfigFromFile(mapFile);
 
             Tool layerSwitcher = mapConfig.tools.Find(a => a.type == "layerswitcher");
             LayerMenuOptions options = JsonConvert.DeserializeObject<LayerMenuOptions>(layerSwitcher.options.ToString());
@@ -624,7 +635,7 @@ namespace MapService.DataAccess
             mapConfig.tools[mapConfig.tools.IndexOf(layerSwitcher)] = layerSwitcher;
 
             this.saveLayerConfigToFile(layerConfig);
-            this.saveMapConfigToFile(mapConfig);
+            this.saveMapConfigToFile(mapConfig, mapFile);
         }
     }
 }

@@ -73,50 +73,48 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "1"
+          "5"
         ],
         "groups": [
           {
-            "id": "2bc647c5-00ef-a0d5-ac1c-ea1c0b86e9ae",
+            "id": "af94804a-2874-fe53-082b-a76b490558c2",
             "parent": "-1",
-            "name": "Test",
+            "name": "Fastighet",
             "toggled": false,
-            "expanded": false,
             "layers": [
               {
-                "id": "3",
-                "drawOrder": 0
-              },
-              {
-                "id": "9",
-                "drawOrder": 2
-              },
-              {
-                "id": "4",
-                "drawOrder": 1
+                "id": "2",
+                "drawOrder": 8
               }
             ],
             "groups": []
-          }
-        ]
-      }
-    },
-    {
-      "type": "anchor",
-      "options": {}
-    },
-    {
-      "type": "coordinates",
-      "options": {
-        "transformations": [
+          },
           {
-            "code": "EPSG:3006",
-            "default": false,
-            "hint": "",
-            "title": "",
-            "xtitle": "",
-            "ytitle": "",
-            "inverseAxis": false
+            "id": "91efa2d2-4e3e-8295-752e-aa87a2dc6806",
+            "parent": "-1",
+            "name": "HPL",
+            "toggled": true,
+            "layers": [
+              {
+                "id": "6",
+                "drawOrder": 2
+              }
+            ],
+            "groups": [
+              {
+                "id": "c63cd3a3-254f-bd48-9ac4-2cd23889729c",
+                "parent": "91efa2d2-4e3e-8295-752e-aa87a2dc6806",
+                "name": "ArcGIS",
+                "toggled": true,
+                "layers": [
+                  {
+                    "id": "24",
+                    "drawOrder": 0
+                  }
+                ],
+                "groups": []
+              }
+            ]
           }
         ]
       }
@@ -124,11 +122,10 @@
     {
       "type": "infoclick",
       "options": {
-        "displayPopup": 1,
         "markerImg": "assets/icons/marker.png",
         "anchor": [
           16,
-          16
+          32
         ],
         "imgSize": [
           32,
@@ -139,14 +136,12 @@
     {
       "type": "search",
       "options": {
-        "onMap": 0,
-        "toolbar": "bottom",
         "maxZoom": 14,
-        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
-        "kmlExportUrl": "/mapservice-beta/export/kml",
+        "selectionTools": true,
+        "filterVisible": true,
         "excelExportUrl": "/mapservice-beta/export/excel",
-        "displayPopup": 1,
-        "selectionTools": 1,
+        "kmlExportUrl": "/mapservice-beta/export/kml",
+        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
         "anchor": [
           16,
           32
@@ -158,18 +153,47 @@
       }
     },
     {
-      "type": "information",
+      "type": "coordinates",
       "options": {
-        "text": "Information om kartan</br>\n<a href=\"http://www.google.se\">Goolge</a>\n</br>\nd sd  </br>\n</br>\n</br>\n sd sdsd</br>\n</br>\n</br>\n</br>\nds s </br>d\n</br>\n</br>\n</br>\n</br>\nsd sd</br>sd sd  </br>\n</br>\n</br>\n</br>\n</br>\n</br>\nsd sd </br>\n</br>\nhej\n</br>\n</br></br>\n</br>\n</br>\n</br></br></br></br></br></br></br></br>\nhej",
-        "headerText": "Information",
-        "visibleAtStart": false
+        "transformations": [
+          {
+            "code": "EPSG:3006",
+            "default": true,
+            "hint": "(Standard)",
+            "title": "Sweref 99 TM",
+            "xtitle": "N",
+            "ytitle": "E",
+            "inverseAxis": true
+          },
+          {
+            "code": "EPSG:3007",
+            "title": "Sweref 99 12 00",
+            "xtitle": "N",
+            "ytitle": "E",
+            "inverseAxis": true
+          },
+          {
+            "code": "EPSG:3021",
+            "title": "RT 90 2.5 gon V",
+            "xtitle": "Y",
+            "ytitle": "X",
+            "inverseAxis": false
+          },
+          {
+            "code": "EPSG:4326",
+            "title": "WGS 84",
+            "inverseAxis": false,
+            "xtitle": "Lng",
+            "ytitle": "Lat"
+          }
+        ]
       }
     },
     {
       "type": "export",
       "options": {
-        "exportUrl": "/mapservice/export/pdf",
-        "exportTiffUrl": "/mapservice/export/tiff",
+        "exportUrl": "/mapservice-beta/export/pdf",
+        "exportTiffUrl": "/mapservice-beta/export/tiff",
         "scales": [
           250,
           500,
@@ -183,6 +207,39 @@
           250000
         ]
       }
+    },
+    {
+      "type": "draw",
+      "options": {
+        "exportUrl": "/mapservice-beta/export/kml",
+        "importUrl": "/mapservice-beta/import/kml"
+      }
+    },
+    {
+      "type": "edit",
+      "options": {}
+    },
+    {
+      "type": "anchor",
+      "options": {}
+    },
+    {
+      "type": "information",
+      "options": {
+        "visibleAtStart": false
+      }
+    },
+    {
+      "type": "bookmark",
+      "options": {
+        "settingsUrl": "/mapservice-beta/settings/bookmark"
+      }
+    },
+    {
+      "type": "streetview",
+      "options": {
+        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4"
+      }
     }
   ],
   "map": {
@@ -192,9 +249,9 @@
       6583005
     ],
     "projection": "EPSG:3006",
-    "zoom": 6,
-    "maxZoom": 3,
-    "minZoom": 9,
+    "zoom": 9,
+    "maxZoom": 9,
+    "minZoom": 3,
     "resolutions": [
       4096.0,
       2048.0,
@@ -216,15 +273,11 @@
       0.0
     ],
     "extent": [
-      150202.0,
-      6382100.0,
-      209944.0,
-      6471028.0
+      150202.07930000033,
+      6382100.4728999995,
+      209944.16160000023,
+      6471028.5090999994
     ],
-    "logo": "",
-    "colors": {
-      "primaryColor": "#619fd2",
-      "secondaryColor": "#ca2323"
-    }
+    "logo": ""
   }
 }

@@ -25,17 +25,17 @@ import { Component } from 'react';
 import Alert from '../views/alert.jsx';
 
 import Edit from '../views/edit.jsx';
-import Manager from '../views/manager.jsx';
+import LayerManager from '../views/layermanager.jsx';
 import Map from '../views/map.jsx';
-import Menu from '../views/menu.jsx';
+import MapSettings from '../views/mapsettings.jsx';
 import Info from '../views/info.jsx';
 import Release from '../views/release.jsx';
 import Search from '../views/search.jsx';
 
 import editModel from '../models/edit.js';
-import managerModel from '../models/manager.js';
+import layerManagerModel from '../models/layermanager.js';
 import mapModel from '../models/map.js';
-import menuModel from '../models/menu.js';
+import mapSettingsModel from '../models/mapsettings.js';
 import infoModel from '../models/info.js';
 import releaseModel from '../models/release.js';
 import searchModel from '../models/search.js';
@@ -57,7 +57,7 @@ class Application extends Component {
    */
   constructor() {
     super();
-    this.state = defaultState;    
+    this.state = defaultState;
   }
   /**
    *
@@ -137,12 +137,12 @@ class Application extends Component {
     switch (name) {
       case 'edit':
         return Edit;
-      case 'manager':
-        return Manager;
+      case 'layermanager':
+        return LayerManager;
       case 'map':
         return Map;
-      case 'menu':
-        return Menu;
+      case 'mapsettings':
+        return MapSettings;
       case 'info':
         return Info;
       case 'release':
@@ -156,12 +156,12 @@ class Application extends Component {
     switch (name) {
       case 'edit':
         return new editModel();
-      case 'manager':
-        return new managerModel();
+      case 'layermanager':
+        return new layerManagerModel();
       case 'map':
         return new mapModel();
-      case 'menu':
-        return new menuModel();
+      case 'mapsettings':
+        return new mapSettingsModel();
       case 'info':
         return new infoModel();
       case 'release':

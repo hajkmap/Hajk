@@ -13,9 +13,9 @@ namespace MapService.Controllers
             this.settingsDataContext.AddWMTSLayer(config);
         }
 
-        public void Delete(string id)
+        public void Delete(string id, string mapFile)
         {
-            this.settingsDataContext.RemoveWMTSLayer(id);
+            this.settingsDataContext.RemoveWMTSLayer(id, mapFile);
         }
 
         public void Put(WMTSConfig config)

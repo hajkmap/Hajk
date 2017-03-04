@@ -79,14 +79,14 @@
       "caption": "Vägnät",
       "url": "http://localhost/geoserver/wms",
       "owner": "",
-      "date": "1488354117257",
+      "date": "1488372522275",
       "content": "",
       "legend": "",
       "projection": null,
       "layers": [
         "sweco:vagnat"
       ],
-      "infobox": "",
+      "infobox": "Väg {kategori}",
       "searchFields": null,
       "displayFields": null,
       "visibleAtStart": true,
@@ -147,7 +147,7 @@
       "searchFields": [
         "kategori"
       ],
-      "infobox": "<b>Kkod:</b> {kkod}  \n<b>Kategori:</b> {export:kategori}  \n<b>Text:</b> {export:text}\n\nsdf sdf sd  \nsdfsd fsdfsdfsd\n\n  sdf\ns fsdif sdkfj sdkljf sdklj\n\nsj fklsdjfk lsdjkfl sdjkfl dj\n<img src=\"https://www.w3schools.com/css/img_fjords.jpg\"></img>  \n\n<img src=\"https://www.w3schools.com/css/img_fjords.jpg\"></img>  \n\n<img src=\"https://www.w3schools.com/css/img_fjords.jpg\"></img>  \nhej då",
+      "infobox": "<b>Kkod:</b> {kkod}  \n<b>Kategori:</b> {export:kategori}  \n<b>Text:</b> {export:text}",
       "displayFields": [
         "kategori"
       ],
@@ -248,5 +248,29 @@
       "editLine": false
     }
   ],
-  "arcgislayers": []
+  "arcgislayers": [
+    {
+      "id": "10",
+      "caption": "Hållplats (MapService)",
+      "url": "http://ksdgis.se/arcgis/rest/services/hpl/MapServer",
+      "owner": null,
+      "date": "1488463322269",
+      "content": "",
+      "legend": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAWCAYAAADAQbwGAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAANhJREFUOI21lDEOwyAMRT8iEjtbbsTQ9rBtBm7Exs5A6NAiIWJj0ip/QzYvzwiyQEgBVPbrEwC0Cw8FlFH/whWytwUAdgAKCQCwe7vnb127qKaBFTZK9rZQUNbw1xyAlF016WuUpWjYbtAuKuk4rh/5AqDZgHSrq/GIZhOB2oX7zLWpvROGc4d/6mL/ExY4suTshkAOOoKJwB4qwaaAZ0MCrfn882ICaTSqH4C1uQ03qjUoPZQ05Mz6OvVxdmQJSsFIYExQ1qBwGyhT0bBtXA1ebS0kHN5vmzcaD2ZB4GrZNAAAAABJRU5ErkJggg==&hpl",
+      "projection": "EPSG:3006",
+      "visibleAtStart": false,
+      "layers": [
+        "0"
+      ],
+      "extent": [
+        "317849.3461",
+        "6529912.0642",
+        "512033.2538",
+        "6770321.6249"
+      ],
+      "opacity": 1.0,
+      "infobox": "Hållplats  \nID: {id}  \nNamn: {namn}",
+      "queryable": true
+    }
+  ]
 }

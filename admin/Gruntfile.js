@@ -2,14 +2,7 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
 
-    pkg: grunt.file.readJSON('package.json'),
-
-    watch: {
-      browserify: {
-        files: ['src/scripts/**/*.js', 'src/scripts/**/*.jsx'],
-        tasks: ['browserify']
-      }
-    },
+    pkg: grunt.file.readJSON('package.json'),    
 
     browserify: {
       dist: {

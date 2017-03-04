@@ -1,5 +1,5 @@
 {
-  "manager": {
+  "layermanager": {
     "url_proxy": "/util/proxy/geturl",
     "url_import": "/mapservice/import/image",
     "url_layers": "/mapservice/config/layers",
@@ -26,16 +26,20 @@
     "url_default_server": "http://194.71.132.27/geoserver/wfs",
     "projections": ["EPSG:3006", "EPSG:3007", "EPSG:3008"]
   },
-  "menu": {
-    "url_map": "/mapservice/config/map_1",
+  "mapsettings": {
+    "url_map": "/mapservice/config",
+    "url_map_create": "/mapservice/config/create",
+    "url_map_delete": "/mapservice/config/delete",
+    "url_map_list": "/mapservice/config/list",
     "url_layers": "/mapservice/config/layers",
     "url_layermenu_settings": "/mapservice/settings/layermenu",
-    "url_map_settings": "/mapservice/settings/mapsettings"
+    "url_map_settings": "/mapservice/settings/mapsettings",
+    "url_tool_settings": "/mapservice/settings/toolsettings"
   },
   "router": [
-    { "name": "manager", "title": "Visningstjänster", "default": true },
+    { "name": "layermanager", "title": "Visningstjänster", "default": true },
     { "name": "search", "title": "Söktjänster" },
     { "name": "edit", "title": "Redigeringstjänster" },
-    { "name": "menu", "title": "Konfiguration" }
+    { "name": "mapsettings", "title": "Kartinställnignar" }
   ]
 }
