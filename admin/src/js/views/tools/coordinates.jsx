@@ -3,7 +3,8 @@ import { Component } from "react";
 
 var defaultState = {
   validationErrors: [],
-  transformations: []
+  transformations: [],
+  active: false
 };
 
 class ToolOptions extends Component {
@@ -62,7 +63,7 @@ class ToolOptions extends Component {
       if (t.type === this.type) {
         t.options = tool.options;
       }
-    });    
+    });
   }
 
   save() {

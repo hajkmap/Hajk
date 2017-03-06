@@ -330,20 +330,20 @@ var ExportModel = {
       }
 
       var fillColor = "#FC345C"
-      ,   fillOpacity =  0.5
+      ,   fillOpacity = 0.5
       ,   strokeColor = "#FC345C"
       ,   strokeOpacity = 1
       ,   strokeWidth = 3
       ,   strokeLinecap = "round"
-      ,   strokeDashstyle =  "solid"
-      ,   pointRadius =  10
+      ,   strokeDashstyle = "solid"
+      ,   pointRadius = 10
       ,   pointFillColor = "#FC345C"
       ,   pointSrc = ""
-      ,   labelAlign =  "cm"
+      ,   labelAlign = "cm"
       ,   labelOutlineColor = "white"
       ,   labelOutlineWidth = 3
-      ,   fontSize =  "16"
-      ,   fontColor =  "#FFFFFF";
+      ,   fontSize = "16"
+      ,   fontColor = "#FFFFFF";
 
       if (style.getFill && style.getFill()) {
         fillColor = style.getFill().getColor().toHex();

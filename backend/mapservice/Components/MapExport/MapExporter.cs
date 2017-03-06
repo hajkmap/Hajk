@@ -390,6 +390,20 @@ namespace MapService.Components.MapExport
         }
 
         /// <summary>
+        /// Convert byte array to image
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <returns></returns>
+        private Image ImageFromBytes(byte[] bytes)
+        {
+            using (MemoryStream ms = new MemoryStream(bytes))
+            {
+                Image img = Image.FromStream(ms);
+                return img;
+            }            
+        }
+
+        /// <summary>
         /// Get feature style
         /// </summary>
         /// <param name="row"></param>
@@ -452,18 +466,25 @@ namespace MapService.Components.MapExport
 
                 if (featureStyle.pointSrc != "")
                 {
-                    try
+                    if (featureStyle.pointSrc.StartsWith("data:"))
                     {
-                        WebClient wc = new WebClient();                        
-                        byte[] bytes = wc.DownloadData(featureStyle.pointSrc);
-                        MemoryStream ms = new MemoryStream(bytes);
-                        Image img = Image.FromStream(ms);
-                        style.Symbol = img;
+                        string src = featureStyle.pointSrc.Split(',').Last();
+                        byte[] bytes = Convert.FromBase64String(src);
+                        style.Symbol = this.ImageFromBytes(bytes);
                     }
-                    catch
-                    {      
-                        //TODO
-                    }
+                    else
+                    {
+                        try
+                        {
+                            WebClient wc = new WebClient();
+                            byte[] bytes = wc.DownloadData(featureStyle.pointSrc);                            
+                            style.Symbol = this.ImageFromBytes(bytes);                            
+                        }
+                        catch
+                        {
+                            //TODO
+                        }
+                    }                    
                 }
                 else
                 {

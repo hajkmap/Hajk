@@ -2,7 +2,8 @@ import React from "react";
 import { Component } from "react";
 
 var defaultState = {
-  validationErrors: []
+  validationErrors: [],
+  active: false
 };
 
 class ToolOptions extends Component {
@@ -12,13 +13,20 @@ class ToolOptions extends Component {
   constructor() {
     super();
     this.state = defaultState;
+    this.type = "anchor";
   }
 
   componentDidMount() {
-    var infoclick = this.props.model.get("toolConfig").filter(tool => tool.type === "anchor")[0];
-    this.setState({
-      active: !!infoclick
-    });
+    var tool = this.getTool();
+    if (tool) {
+      this.setState({
+        active: true
+      });
+    } else {
+      this.setState({
+        active: false
+      });
+    }
   }
 
   componentWillUnmount() {
@@ -29,35 +37,80 @@ class ToolOptions extends Component {
   componentWillMount() {
   }
 
-  activeChanged(e) {
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
     this.setState({
-      active: e.target.checked
+      [name]: !isNaN(Number(value)) ? Number(value) : value
+    });
+  }
+
+  getTool() {
+    return this.props.model.get('toolConfig').find(tool => tool.type === this.type);
+  }
+
+  add(tool) {
+    this.props.model.get("toolConfig").push(tool);
+  }
+
+  remove(tool) {
+    this.props.model.set({
+      "toolConfig": this.props.model.get("toolConfig").filter(tool => tool.type !== this.type)
+    });
+  }
+
+  replace(tool) {
+    this.props.model.get('toolConfig').forEach(t => {
+      if (t.type === this.type) {
+        t.options = tool.options;
+      }
     });
   }
 
   save() {
 
-    if (this.state.active) {
+    var tool = {
+      "type": this.type,
+      "options": {
+      }
+    };
 
-      this.props.model.get("toolConfig").push({
-        "type": "anchor",
-        "options": {
-        }
-      });
+    var existing = this.getTool();
 
-    } else {
-      this.props.model.set({
-        "toolConfig": this.props.model.get("toolConfig").filter(tool => tool.type !== "anchor")
+    function update() {
+      this.props.model.updateToolConfig(this.props.model.get("toolConfig"), () => {
+        this.props.parent.props.parent.setState({
+          alert: true,
+          alertMessage: "Uppdateringen lyckades"
+        });
       });
     }
 
-    this.props.model.updateToolConfig(this.props.model.get("toolConfig"), () => {
-      this.props.parent.props.parent.setState({
-        alert: true,
-        alertMessage: "Uppdateringen lyckades"
-      });
-    });
-
+    if (!this.state.active) {
+      if (existing) {
+        this.props.parent.props.parent.setState({
+          alert: true,
+          confirm: true,
+          alertMessage: "Verktyget kommer att tas bort. Nuvarande inställningar kommer att gå förlorade. Vill du fortsätta?",
+          confirmAction: () => {
+            this.remove();
+            update.call(this);
+            this.setState(defaultState);
+          }
+        });
+      } else {
+        this.remove();
+        update.call(this);
+      }
+    } else {
+      if (existing) {
+        this.replace(tool);
+      } else {
+        this.add(tool);
+      }
+      update.call(this);
+    }
   }
 
   /**
@@ -66,19 +119,20 @@ class ToolOptions extends Component {
   render() {
     return (
       <div>
-        <p>
-          <button className="btn btn-primary" onClick={() => this.save()}>Spara</button>
-        </p>
-        <div>
-          <input
-            id="active"
-            name="active"
-            type="checkbox"
-            onChange={(e) => {this.activeChanged(e)}}
-            checked={this.state.active}>
-          </input>&nbsp;
-          <label htmlFor="active">Aktiverad</label>
-        </div>
+        <form>
+          <p>
+            <button className="btn btn-primary" onClick={(e) => {e.preventDefault(); this.save()}}>Spara</button>
+          </p>
+          <div>
+            <input
+              id="active"
+              name="active"
+              type="checkbox"
+              onChange={(e) => {this.handleInputChange(e)}}
+              checked={this.state.active}/>&nbsp;
+            <label htmlFor="active">Aktiverad</label>
+          </div>
+        </form>
       </div>
     )
   }

@@ -72,6 +72,84 @@ namespace MapService.Controllers
                         code = "EPSG:3006",
                         definition = "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
                         extent = new double[] { 181896.33, 6101648.07, 864416.0, 7689478.3 }
+                    },
+                    new Projection()
+                    {
+                        code = "EPSG:3007",
+                        definition = "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+                        extent = new double[] { 60436.5084, 6192389.5650, 217643.4713, 6682784.4276 }
+                    },
+                    new Projection()
+                    {
+                        code = "EPSG:3008",
+                        definition = "+proj=tmerc +lat_0=0 +lon_0=13.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
+                        extent = new double[] { 60857.4994, 6120098.8505, 223225.0217, 6906693.7888 }
+                    },
+                    new Projection()
+                    {
+                        code = "EPSG:3009",
+                        definition = "+proj=tmerc +lat_0=0 +lon_0=15 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+                        extent = new double[] { 56294.0365, 6203542.5282, 218719.0581, 6835499.2391 }
+                    },
+                    new Projection()
+                    {
+                        code = "EPSG:3010",
+                        definition = "+proj=tmerc +lat_0=0 +lon_0=16.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+                        extent = new double[] { 97213.6352, 6228930.1419, 225141.8681, 6916524.0785 }
+                    },
+                    new Projection()
+                    {
+                        code = "EPSG:3011",
+                        definition = "+proj=tmerc +lat_0=0 +lon_0=18 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+                        extent = new double[] { 96664.5565, 6509617.2232, 220146.6914, 6727103.5879 }
+                    },
+                    new Projection()
+                    {
+                        code = "EPSG:3012",
+                        definition = "+proj=tmerc +lat_0=0 +lon_0=14.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+                        extent = new double[] { 30462.5263, 6829647.9842, 216416.1584, 7154168.0208 }
+                    },
+                    new Projection()
+                    {
+                        code = "EPSG:3013",
+                        definition = "+proj=tmerc +lat_0=0 +lon_0=15.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
+                        extent = new double[] { 34056.6264, 6710433.2884, 218692.0214, 7224144.7320 }
+                    },
+                    new Projection()
+                    {
+                        code = "EPSG:3014",
+                        definition = "+proj=tmerc +lat_0=0 +lon_0=17.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+                        extent = new double[] { -1420.2800, 6888655.5779, 212669.1333, 7459585.3378 }
+                    },
+                    new Projection()
+                    {
+                        code = "EPSG:3015",
+                        definition = "+proj=tmerc +lat_0=0 +lon_0=18.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+                        extent = new double[] { 58479.4774, 6304213.2147, 241520.5226, 7276832.4419 }
+                    },
+                    new Projection()
+                    {
+                        code = "EPSG:3016",
+                        definition = "+proj=tmerc +lat_0=0 +lon_0=20.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+                        extent = new double[] { -93218.3385, 7034909.8738, 261434.6246, 7676279.8691 }
+                    },
+                    new Projection()
+                    {
+                        code = "EPSG:3016",
+                        definition = "+proj=tmerc +lat_0=0 +lon_0=21.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+                        extent = new double[] { 67451.0699, 7211342.8483, 145349.5699, 7254837.2540 }
+                    },
+                    new Projection()
+                    {
+                        code = "EPSG:3018",
+                        definition = "+proj=tmerc +lat_0=0 +lon_0=23.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+                        extent = new double[] { 38920.7048, 7267405.2323, 193050.2460, 7597992.2419 }
+                    },
+                    new Projection()
+                    {
+                        code = "EPSG:3021",
+                        definition = "+proj=tmerc +lat_0=0 +lon_0=15.80827777777778 +k=1 +x_0=1500000 +y_0=0 +ellps=bessel +units=m +no_defs",
+                        extent = new double[] { 1392811.0743, 6208496.7665, 1570600.8906, 7546077.6984 }
                     }
                 },
                 tools = new List<Tool>()
