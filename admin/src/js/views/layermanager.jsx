@@ -22,6 +22,7 @@
 
 import React from "react";
 import { Component } from "react";
+import $ from 'jquery';
 import Alert from "../views/alert.jsx";
 import WMSLayerForm from "./layerforms/wmslayerform.jsx"
 import WMTSLayerForm from "./layerforms/wmtslayerform.jsx"
@@ -153,6 +154,7 @@ class Manager extends Component {
       setTimeout(() => {
         this.refs["VectorLayerForm"].setState({
           id: layer.id,
+          dataFormat: layer.dataFormat,          
           caption: layer.caption,
           content: layer.content,
           date: layer.date,

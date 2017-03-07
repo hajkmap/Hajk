@@ -13,9 +13,9 @@ namespace MapService.Controllers
             this.settingsDataContext.AddWMSLayer(config);
         }
 
-        public void Delete(string id, string mapFile)
+        public void Delete(string id)
         {
-            this.settingsDataContext.RemoveWMSLayer(id, mapFile);
+            this.settingsDataContext.RemoveWMSLayer(id);
         }
 
         public void Put(WMSConfig config)

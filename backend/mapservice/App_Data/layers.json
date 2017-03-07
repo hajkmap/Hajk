@@ -158,6 +158,7 @@
   "vectorlayers": [
     {
       "id": "7",
+      "dataFormat": null,
       "caption": "Badplats (WFS)",
       "url": "http://localhost/geoserver/wfs",
       "layer": "sweco:badplats",
@@ -175,6 +176,7 @@
     },
     {
       "id": "9",
+      "dataFormat": null,
       "caption": "Hållplats (AGS)",
       "url": "http://ksdgis.se/arcgis/services/hpl/MapServer/WFSServer",
       "layer": "hpl:hpl",
@@ -188,6 +190,42 @@
       "visibleAtStart": true,
       "opacity": 1.0,
       "infobox": "{namn}  \n{x}  \n{y}  ",
+      "queryable": true
+    },
+    {
+      "id": "11",
+      "dataFormat": "GeoJSON",
+      "caption": "test",
+      "url": "http://localhost/mapservice/config/data",
+      "layer": null,
+      "owner": null,
+      "date": "1488804768620",
+      "content": "test",
+      "legend": "http://localhost/hajk/assets/icons/marker.png",
+      "symbolXOffset": 16.0,
+      "symbolYOffset": 16.0,
+      "projection": "EPSG:3007",
+      "visibleAtStart": true,
+      "opacity": 1.0,
+      "infobox": "",
+      "queryable": true
+    },
+    {
+      "id": "12",
+      "dataFormat": "GeoJSON",
+      "caption": "test2",
+      "url": "http://localhost/mapservice/config/data",
+      "layer": null,
+      "owner": null,
+      "date": "1488804966186",
+      "content": "",
+      "legend": "http://localhost/Upload/df173bc2-6fe3-4cae-b51b-25c198b6602f.png",
+      "symbolXOffset": 0.0,
+      "symbolYOffset": 0.0,
+      "projection": "EPSG:3007",
+      "visibleAtStart": false,
+      "opacity": 1.0,
+      "infobox": "",
       "queryable": true
     }
   ],

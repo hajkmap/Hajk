@@ -13,9 +13,9 @@ namespace MapService.Controllers
             this.settingsDataContext.AddWFSTLayer(config);
         }
 
-        public void Delete(string id, string mapFile)
+        public void Delete(string id)
         {
-            this.settingsDataContext.RemoveWFSTLayer(id, mapFile);
+            this.settingsDataContext.RemoveWFSTLayer(id);
         }
 
         public void Put(WFSTConfig config)

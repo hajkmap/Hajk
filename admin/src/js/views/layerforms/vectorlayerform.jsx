@@ -22,6 +22,7 @@
 
 import React from "react";
 import { Component } from 'react';
+import $ from 'jquery';
 
 const defaultState = {
   layerType: "Vector",
@@ -89,6 +90,7 @@ class VectorLayerForm extends Component {
   getLayer() {
     return {
       type: this.state.layerType,
+      dataFormat: this.getValue("dataFormat"),
       id: this.state.id,
       caption: this.getValue("caption"),
       url: this.getValue("url"),
@@ -128,7 +130,11 @@ class VectorLayerForm extends Component {
 
   validate() {
     var valid = true
-    ,   validationFields = ["url", "caption", "projection", "layer", "legend"];
+    ,   validationFields = ["url", "caption", "projection", "legend"];
+
+    if (this.state.dataFormat !== "GeoJSON") {
+      validationFields.push("layer");
+    }
 
     validationFields.forEach(field => {
       if (!this.validateField(field)) {
@@ -272,19 +278,23 @@ class VectorLayerForm extends Component {
   }
 
   loadLayers(layer, callback) {
-    this.loadWFSCapabilities(undefined, () => {
-      this.setState({
-        addedLayers: [layer.layer]
+    if (this.state.dataFormat === "WFS") {
+      this.loadWFSCapabilities(undefined, () => {
+        this.setState({
+          addedLayers: [layer.layer]
+        });
+        Object.keys(this.refs).forEach(element => {
+          var elem = this.refs[element];
+          if (this.refs[element].dataset.type == "wms-layer") {
+            this.refs[element].checked = false;
+          }
+        });
+        this.refs[layer.layer].checked = true;
+        if (callback) callback();
       });
-      Object.keys(this.refs).forEach(element => {
-        var elem = this.refs[element];
-        if (this.refs[element].dataset.type == "wms-layer") {
-          this.refs[element].checked = false;
-        }
-      });
-      this.refs[layer.layer].checked = true;
+    } else {
       if (callback) callback();
-    });
+    }
   }
 
   renderLayersFromCapabilites() {
@@ -346,6 +356,21 @@ class VectorLayerForm extends Component {
     return (
       <fieldset>
         <legend>Vektor-lager</legend>
+        <div>
+          <label>Dataformat*</label>
+          <select
+            ref="input_dataFormat"
+            value={this.state.dataFormat}
+            onChange={(e) => {
+              this.setState({
+                dataFormat: e.target.value
+              })
+            }}
+            >
+            <option>WFS</option>
+            <option>GeoJSON</option>
+          </select>
+        </div>
         <div>
           <label>Visningsnamn*</label>
           <input
