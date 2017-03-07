@@ -175,6 +175,8 @@ namespace MapService.Controllers
 
         public string List(string id)
         {
+            Response.Expires = 0;
+            Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
             Response.ContentType = "application/json; charset=utf-8";
             Response.Headers.Add("Cache-Control", "private, no-cache");
 
@@ -194,8 +196,10 @@ namespace MapService.Controllers
 
         public string GetConfig(string name)
         {
+            Response.Expires = 0;
+            Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
             Response.ContentType = "application/json; charset=utf-8";
-            Response.Headers.Add("Cache-Control", "private, no-cache");
+            Response.Headers.Add("Cache-Control", "private, no-cache");    
 
             if (name == null)
             {

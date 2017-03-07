@@ -84,15 +84,18 @@
             "expanded": false,
             "layers": [
               {
-                "id": "3",
-                "drawOrder": 0
-              },
-              {
                 "id": "9",
+                "visibleAtStart": true,
                 "drawOrder": 2
               },
               {
+                "id": "3",
+                "visibleAtStart": false,
+                "drawOrder": 0
+              },
+              {
                 "id": "4",
+                "visibleAtStart": true,
                 "drawOrder": 1
               }
             ],
@@ -200,7 +203,7 @@
     "target": "map",
     "center": [
       414962,
-      6583005
+      6583006
     ],
     "projection": "EPSG:3006",
     "zoom": 6,

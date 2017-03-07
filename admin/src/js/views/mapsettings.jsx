@@ -48,6 +48,7 @@ $.fn.editable = function(component) {
         toggled.remove();
         expanded.remove();
         tools.remove();
+        layerTools.remove();
         elem.editing = false;
       }
 
@@ -62,6 +63,16 @@ $.fn.editable = function(component) {
         reset();
       }
 
+      function saveLayer() {
+        let visible = checkbox3.is(':checked');
+        node.parent().attr("data-visibleatstart", visible);
+        if (visible)
+          node.parent().addClass("visible");
+        else
+          node.parent().removeClass("visible");
+        reset();
+      }
+
       var btnCSS = {
         marginLeft: "4px",
         position: "relative",
@@ -70,22 +81,32 @@ $.fn.editable = function(component) {
       ,   prev      = node.html()
       ,   id        = Math.floor(Math.random() * 1E5)
       ,   id2       = Math.floor(Math.random() * 1E5)
+      ,   id3       = Math.floor(Math.random() * 1E5)
       ,   ok        = $('<span class="btn btn-success">OK</span>')
+      ,   layerOk   = $('<span class="btn btn-success">OK</span>')
       ,   tools     = $('<div></div>')
+      ,   layerTools= $('<div></div>')
       ,   abort     = $('<span class="btn btn-default">Avbryt</span>')
       ,   label     = $(`<label for="${id}">Expanderad vid start&nbsp;</label>`)
       ,   label2    = $(`<label for="${id2}">Toggla alla-knapp&nbsp;</label>`)
+      ,   label3    = $(`<label for="${id3}">Synlig vid start&nbsp;</label>`)
       ,   checkbox  = $(`<input id="${id}" type="checkbox"/>`)
       ,   checkbox2 = $(`<input id="${id2}" type="checkbox"/>`)
+      ,   checkbox3 = $(`<input id="${id3}" type="checkbox"/>`)
       ,   remove    = $('<span class="fa fa-minus-circle"></span>')
       ,   input     = $('<input />')
       ,   expanded  = $('<div class="expanded-at-start"></div>')
       ,   toggled   = $('<div class="expanded-at-start"></div>')
+      ,   visible   = $('<div class=""></div>')
       ,   elem      = node.get(0) || {}
 
       ok
         .css(btnCSS)
         .click(store)
+
+      layerOk
+        .css(btnCSS)
+        .click(saveLayer)
 
       abort
         .css(btnCSS)
@@ -100,9 +121,13 @@ $.fn.editable = function(component) {
       if (node.parent().attr("data-toggled") === 'true') {
         checkbox2.attr('checked', 'checked');
       }
+      if (node.parent().attr("data-visibleatstart") === 'true') {
+        checkbox3.attr('checked', 'checked');
+      }
 
       expanded.append(checkbox, label);
       toggled.append(checkbox2, label2);
+      visible.append(checkbox3, label3);
 
       remove
         .css({ color: 'red', marginRight: '4px' })
@@ -133,7 +158,9 @@ $.fn.editable = function(component) {
         marginLeft: '13px',
         marginTop: '7px'
       });
+
       tools.append(ok, abort, toggled, expanded);
+      layerTools.append(visible, layerOk, abort);
 
       if (node.hasClass('group-name')) {
         node
@@ -145,8 +172,8 @@ $.fn.editable = function(component) {
       if (node.hasClass('layer-name') && !elem.editing) {
         elem.editing = true;
         node
-          .after(abort)
-          .before(remove);
+          .before(remove)
+          .after(layerTools)
       }
   }
 
@@ -379,14 +406,15 @@ class Menu extends Component {
       backgroundSwitcherBlack: this.state.backgroundSwitcherBlack,
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite
     };
-        
+
     var roots = $('.tree-view > ul > li');
 
     function layers(node) {
       return $(node).find('> ul > li.layer-node').toArray().map(node => {
         return {
           id: node.dataset.id,
-          drawOrder: node.dataset.draworder
+          drawOrder: node.dataset.draworder,
+          visibleAtStart: node.dataset.visibleatstart
         }
       })
     }
@@ -640,12 +668,22 @@ class Menu extends Component {
         ,   layers = group.layers || group;
 
         layers.forEach((layer, i) => {
+          var visible = false;
+          if (typeof layer === 'object') {
+            if (layer.visibleAtStart === "false") {
+              visible = false
+            } else {
+              visible = layer.visibleAtStart;
+            }
+          }          
+          var className = visible ? "layer-node visible" : "layer-node";
           leafs.push(
             <li
-              className="layer-node"
+              className={className}
               key={i}
               data-id={typeof layer === 'object' ? layer.id : layer}
               data-draworder={typeof layer === 'object' ? layer.drawOrder : 0}
+              data-visibleatstart={visible}
               data-type="layer">
               <span className="layer-name">{that.getLayerNameFromId(typeof layer === 'object' ? layer.id : layer)}</span>
             </li>

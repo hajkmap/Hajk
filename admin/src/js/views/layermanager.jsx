@@ -154,7 +154,7 @@ class Manager extends Component {
       setTimeout(() => {
         this.refs["VectorLayerForm"].setState({
           id: layer.id,
-          dataFormat: layer.dataFormat,          
+          dataFormat: layer.dataFormat || "WFS",       
           caption: layer.caption,
           content: layer.content,
           date: layer.date,

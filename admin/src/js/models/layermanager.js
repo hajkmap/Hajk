@@ -194,7 +194,14 @@ var manager = Model.extend({
     $(data).find('FeatureType').each((i, featureType) => {
 
       var projection = ""
-      ,   crs = $(featureType).find('DefaultCRS').first().get(0).textContent;
+      ,   crs = "";
+
+      if ($(featureType).find('DefaultCRS').length > 0) {
+        crs = $(featureType).find('DefaultCRS').first().get(0).textContent;
+      }
+      if ($(featureType).find('DefaultSRS').length > 0) {
+        crs = $(featureType).find('DefaultSRS').first().get(0).textContent;
+      }
 
       if (crs && typeof crs === "string") {
         crs = crs.split(':');
@@ -208,7 +215,7 @@ var manager = Model.extend({
             projection += part;
           }
         });
-      }      
+      }
 
       if (!/^[A-Z]+:\d+$/.test(projection)) {
         projection = "";

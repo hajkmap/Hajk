@@ -10,6 +10,8 @@ namespace MapService.Models.ToolOptions
     {
         public string id { get; set;  }
 
+        public bool visibleAtStart { get; set; }
+
         public int drawOrder { get; set; }
     }
 }
