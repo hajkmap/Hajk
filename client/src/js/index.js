@@ -99,10 +99,7 @@
         var mapLayer = group.layers.find(l => l.id === layer.id)
 
         if (mapLayer) {
-          layer.drawOrder = mapLayer.drawOrder;
-
-          console.log("Visible at start", layer.visibleAtStart, mapLayer);
-
+          layer.drawOrder = mapLayer.drawOrder;          
           if (layer.visibleAtStart !== undefined) {
             layer.visibleAtStart = mapLayer.visibleAtStart;
           }

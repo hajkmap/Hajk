@@ -85,12 +85,12 @@
             "layers": [
               {
                 "id": "9",
-                "visibleAtStart": true,
+                "visibleAtStart": false,
                 "drawOrder": 2
               },
               {
                 "id": "3",
-                "visibleAtStart": false,
+                "visibleAtStart": true,
                 "drawOrder": 0
               },
               {
