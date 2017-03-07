@@ -24,8 +24,9 @@
           .forEach(function(pair) {
             if (pair !== "") {
               var keyValue = pair.split('=');
-              if (keyValue[0] === "config") {
+              if (keyValue[0] === "m") {
                 config = keyValue[1];
+                HAJK2.configFile = config;
               }
             }
           });

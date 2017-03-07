@@ -96,7 +96,7 @@ var AnchorModel = {
     ,   l = layers.filter(layer => layer.getVisible() === true)
                   .map(layer => encodeURIComponent(layer.getName())).join(',');
 
-    a += `?x=${x}&y=${y}&z=${z}&l=${l}`;
+    a += `?m=${HAJK2.configFile}&x=${x}&y=${y}&z=${z}&l=${l}`;
     this.set("anchor", a);
 
     return a;
