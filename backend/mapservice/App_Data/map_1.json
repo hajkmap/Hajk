@@ -98,7 +98,11 @@
             ],
             "groups": []
           }
-        ]
+        ],
+        "active": true,
+        "visibleAtStart": false,
+        "backgroundSwitcherBlack": true,
+        "backgroundSwitcherWhite": true
       }
     },
     {

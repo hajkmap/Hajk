@@ -181,12 +181,17 @@ class Menu extends Component {
    */
   constructor() {
     super();
-    this.state = {
+    var state = {
       drawOrder: false,
       layerMenu: true,
       addedLayers: [],
-      maps: []
+      maps: [],
+      active: true,
+      visibleAtStart: true,
+      backgroundSwitcherBlack: true,
+      backgroundSwitcherWhite: true
     };
+    this.state = state;
   }
 
   /**
@@ -206,8 +211,12 @@ class Menu extends Component {
 
       this.load('layermenu', () => {
         this.setState({
-          reset: false
-        })
+          reset: false,
+          active: this.props.model.get('layerMenuConfig').active,
+          visibleAtStart: this.props.model.get('layerMenuConfig').visibleAtStart,
+          backgroundSwitcherBlack: this.props.model.get('layerMenuConfig').backgroundSwitcherBlack,
+          backgroundSwitcherWhite: this.props.model.get('layerMenuConfig').backgroundSwitcherWhite
+        });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
       });
@@ -364,9 +373,13 @@ class Menu extends Component {
 
     var settings = {
       groups: [],
-      baselayers: []
+      baselayers: [],
+      active: this.state.active,
+      visibleAtStart: this.state.visibleAtStart,
+      backgroundSwitcherBlack: this.state.backgroundSwitcherBlack,
+      backgroundSwitcherWhite: this.state.backgroundSwitcherWhite
     };
-
+        
     var roots = $('.tree-view > ul > li');
 
     function layers(node) {
@@ -783,6 +796,15 @@ class Menu extends Component {
     });
   }
 
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
+    this.setState({
+      [name]: !isNaN(Number(value)) ? Number(value) : value
+    });
+  }
+
   /**
    *
    */
@@ -829,6 +851,42 @@ class Menu extends Component {
               <legend>Hantera lagermeny</legend>
               <button className="btn btn-primary" onClick={(e) => this.saveSettings(e)}>Spara</button>&nbsp;
               <button className="btn btn-success" onClick={(e) => this.createGroup("Ny grupp", false, false)}>Ny grupp</button>&nbsp;
+              <div>
+                <input
+                  id="active"
+                  name="active"
+                  type="checkbox"
+                  onChange={(e) => {this.handleInputChange(e)}}
+                  checked={this.state.active}/>&nbsp;
+                <label htmlFor="active">Aktiverad</label>
+              </div>
+              <div>
+                <input
+                  id="visibleAtStart"
+                  name="visibleAtStart"
+                  type="checkbox"
+                  onChange={(e) => {this.handleInputChange(e)}}
+                  checked={this.state.visibleAtStart}/>&nbsp;
+                <label htmlFor="visibleAtStart">Synlig vid start</label>
+              </div>
+              <div>
+                <input
+                  id="backgroundSwitcherBlack"
+                  name="backgroundSwitcherBlack"
+                  type="checkbox"
+                  onChange={(e) => {this.handleInputChange(e)}}
+                  checked={this.state.backgroundSwitcherBlack}/>&nbsp;
+                <label htmlFor="backgroundSwitcherBlack">Svart bakgrundskarta</label>
+              </div>
+              <div>
+                <input
+                  id="backgroundSwitcherWhite"
+                  name="backgroundSwitcherWhite"
+                  type="checkbox"
+                  onChange={(e) => {this.handleInputChange(e)}}
+                  checked={this.state.backgroundSwitcherWhite}/>&nbsp;
+                <label htmlFor="backgroundSwitcherWhite">Vit bakgrundskarta</label>
+              </div>
               {this.renderLayerMenu()}
             </fieldset>
           </article>

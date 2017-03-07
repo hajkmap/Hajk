@@ -20,8 +20,16 @@
         "baselayers": [
           "1"
         ],
-        "groups": []
+        "groups": [],
+        "active": false,
+        "visibleAtStart": false,
+        "backgroundSwitcherBlack": false,
+        "backgroundSwitcherWhite": false
       }
+    },
+    {
+      "type": "anchor",
+      "options": {}
     }
   ],
   "map": {

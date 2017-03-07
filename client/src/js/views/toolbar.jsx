@@ -58,6 +58,11 @@ var ToolbarView = {
         var a = tool.get('panel').toLowerCase()
         ,   b = this.state.activeTool
         ,   c = a === b ? 'btn btn-primary' : 'btn btn-default';
+
+        if (tool.get('active') === false) {
+          return null;
+        }
+
         return (
           <button
             type="button"

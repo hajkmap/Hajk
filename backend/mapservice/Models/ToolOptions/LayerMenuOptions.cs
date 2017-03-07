@@ -28,5 +28,13 @@ namespace MapService.Models.ToolOptions
         public List<string> baselayers { get; set; }
 
         public List<LayerGroup> groups { get; set; }
+
+        public bool active { get; set; }
+
+        public bool visibleAtStart { get; set; }
+
+        public bool backgroundSwitcherBlack { get; set; }
+
+        public bool backgroundSwitcherWhite { get; set; }
     }
 }

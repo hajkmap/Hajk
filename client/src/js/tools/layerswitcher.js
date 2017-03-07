@@ -41,9 +41,10 @@ var LayerSwitcherModelProperties = {
   icon: 'fa fa-bars icon',
   title: 'Lagerhanterare',
   visible: false,
-  visibleAtStart: true,
   layerCollection: undefined,
   backgroundSwitcherMode: 'hidden',
+  active: true,
+  visibleAtStart: true,
   backgroundSwitcherBlack: true,
   backgroundSwitcherWhite: true
 };

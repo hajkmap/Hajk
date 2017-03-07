@@ -159,7 +159,11 @@ namespace MapService.Controllers
                         type = "layerswitcher",
                         options = new LayerMenuOptions() {
                             baselayers = new List<string>(),
-                            groups = new List<LayerGroup>()
+                            groups = new List<LayerGroup>(),
+                            active = true,
+                            visibleAtStart = true,
+                            backgroundSwitcherBlack = true,
+                            backgroundSwitcherWhite = true
                         }
                     }
                 },
