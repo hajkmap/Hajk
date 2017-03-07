@@ -100,6 +100,12 @@
 
         if (mapLayer) {
           layer.drawOrder = mapLayer.drawOrder;
+
+          console.log("Visible at start", layer.visibleAtStart, mapLayer);
+
+          if (layer.visibleAtStart !== undefined) {
+            layer.visibleAtStart = mapLayer.visibleAtStart;
+          }
           filtered.push(layer);
         }
 
