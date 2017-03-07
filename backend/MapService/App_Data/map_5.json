@@ -160,34 +160,13 @@
     {
       "type": "layerswitcher",
       "options": {
-        "baselayers": [
-          "1"
-        ],
-        "groups": [
-          {
-            "id": "bc26b845-797d-f914-29ee-d8a8922d240e",
-            "parent": "-1",
-            "name": "Ny grupp",
-            "toggled": false,
-            "expanded": false,
-            "layers": [
-              {
-                "id": "12",
-                "drawOrder": 0
-              },
-              {
-                "id": "3",
-                "drawOrder": 0
-              },
-              {
-                "id": "11",
-                "drawOrder": 0
-              }
-            ],
-            "groups": []
-          }
-        ]
+        "baselayers": [],
+        "groups": []
       }
+    },
+    {
+      "type": "edit",
+      "options": {}
     },
     {
       "type": "coordinates",
@@ -197,18 +176,9 @@
             "code": "EPSG:3006",
             "default": true,
             "hint": "",
-            "title": "Sweref99 TM",
-            "xtitle": "N",
-            "ytitle": "E",
-            "inverseAxis": false
-          },
-          {
-            "code": "EPSG:3007",
-            "default": true,
-            "hint": "",
-            "title": "Sweref 1200",
-            "xtitle": "N",
-            "ytitle": "E",
+            "title": "Sweref 99 TM",
+            "xtitle": "E",
+            "ytitle": "N",
             "inverseAxis": false
           }
         ]
@@ -224,7 +194,7 @@
     {
       "type": "search",
       "options": {
-        "onMap": false,
+        "onMap": 0,
         "toolbar": "bottom",
         "maxZoom": 14,
         "markerImg": "http://localhost/hajk/assets/icons/marker.png",
@@ -241,31 +211,16 @@
           32
         ]
       }
-    },
-    {
-      "type": "infoclick",
-      "options": {
-        "displayPopup": false,
-        "markerImg": "assets/icons/marker.png",
-        "anchor": [
-          16,
-          16
-        ],
-        "imgSize": [
-          32,
-          32
-        ]
-      }
     }
   ],
   "map": {
     "target": "map",
     "center": [
-      324268,
-      6376788
+      414962,
+      6583005
     ],
     "projection": "EPSG:3006",
-    "zoom": 8,
+    "zoom": 3,
     "maxZoom": 3,
     "minZoom": 9,
     "resolutions": [
@@ -296,7 +251,7 @@
     ],
     "logo": "",
     "colors": {
-      "primaryColor": "#1B78CC",
+      "primaryColor": "#039f30",
       "secondaryColor": "#FFF"
     }
   }

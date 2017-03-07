@@ -18,9 +18,9 @@ namespace MapService.Controllers
             this.settingsDataContext.AddArcGISLayer(config);           
         }
 
-        public void Delete(string id, string mapFile)
+        public void Delete(string id)
         {
-            this.settingsDataContext.RemoveArcGISLayer(id, mapFile);
+            this.settingsDataContext.RemoveArcGISLayer(id);
         }
 
         public void Put(ArcGISConfig config)

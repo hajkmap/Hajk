@@ -184,6 +184,7 @@ var LayerCollection = {
       type : "vector",
       options: {
         "id": args.id,
+        "dataFormat": args.dataFormat,
         "name": args.id,
         "caption": args.caption,
         "visible": args.visibleAtStart,

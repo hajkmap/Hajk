@@ -141,6 +141,7 @@ var DrawModel = {
     this.set('olMap', olMap);
     this.get('olMap').addLayer(this.get('drawLayer'));
     this.set('drawLayer', this.get('drawLayer'));
+    this.createMeasureTooltip();
   },
 
   /**
@@ -185,15 +186,96 @@ var DrawModel = {
    */
   handleDrawEnd: function (feature, type) {
     if (type === "Text") {
-
       feature.setStyle(this.get('scetchStyle'));
       this.set('dialog', true);
       this.set('drawFeature', feature);
-
     } else {
       this.setFeaturePropertiesFromGeometry(feature);
       feature.setStyle(this.getStyle(feature));
     }
+  },
+
+  measureTooltipElement: undefined,
+
+  createMeasureTooltip: function() {
+    if (this.measureTooltipElement) {
+      this.measureTooltipElement.parentNode.removeChild(measureTooltipElement);
+    }
+    this.measureTooltipElement = document.createElement('div');
+    this.measureTooltipElement.className = 'tooltip tooltip-measure';
+    this.measureTooltip = new ol.Overlay({
+      element: this.measureTooltipElement,
+      offset: [0, -15],
+      positioning: 'bottom-center'
+    });
+    this.get('olMap').addOverlay(this.measureTooltip);
+  },
+
+  formatLabel: function(type, value) {
+
+    if (type === "point") {
+      label ="Nord: " + value[0] + " Öst: " + value[1];
+    }
+
+    if (typeof value === "number") {
+      value = Math.round(value);
+    }
+
+    if (type === "area") {
+      let prefix = " m²";
+      if (value >= 1E6) {
+        prefix = " km²";
+        value = value / 1E6;
+      }
+      label = value + prefix;
+    }
+
+    if (type === "length") {
+      let prefix = " m";
+      if (value >= 1E3) {
+        prefix = " km";
+        value = value / 1E3;
+      }
+      label = value + prefix;
+    }
+
+    return label;
+  },
+
+  handleDrawStart: function(e, geometryType) {
+    var circleRadius = parseFloat(this.get('circleRadius'));
+    if (!isNaN(circleRadius) && geometryType === "Circle") {
+      this.get("drawTool").finishDrawing();
+      let f = new ol.Feature({
+        geometry: new ol.geom.Circle(e.feature.getGeometry().getCenter(), circleRadius)
+      });
+      this.get('source').removeFeature(e.feature);
+      this.get('source').addFeature(f);
+      this.handleDrawEnd(f);
+    }
+
+    e.feature.getGeometry().on('change', e => {
+
+      var toolTip = "";
+      var coord = undefined;
+
+      if (e.target instanceof ol.geom.LineString) {
+        toolTip = this.formatLabel("length", e.target.getLength());
+        coord = e.target.getLastCoordinate()
+      }
+      if (e.target instanceof ol.geom.Polygon) {
+        toolTip = this.formatLabel("area", e.target.getArea());
+        coord = this.get('pointerPosition').coordinate;
+      }
+      if (e.target instanceof ol.geom.Circle) {
+        toolTip = this.formatLabel("length", e.target.getRadius());
+        coord = this.get('pointerPosition').coordinate;
+      }
+
+      this.measureTooltipElement.innerHTML = toolTip;
+      this.measureTooltip.setPosition(coord);
+
+    });
   },
 
   /**
@@ -204,10 +286,11 @@ var DrawModel = {
   activateDrawTool: function (type) {
     var style = undefined
     ,   drawTool = undefined
-    ,   geometryType = undefined;
+    ,   geometryType = undefined
+    ,   olMap = this.get('olMap');
 
-    this.get('olMap').un('singleclick', this.removeSelected);
-    this.get('olMap').removeInteraction(this.get("drawTool"));
+    olMap.un('singleclick', this.removeSelected);
+    olMap.removeInteraction(this.get("drawTool"));
 
     geometryType = type !== "Text" ? type : "Point";
 
@@ -217,13 +300,21 @@ var DrawModel = {
       type: geometryType
     });
 
+    olMap.on('pointermove', e => {
+      this.set('pointerPosition', e);
+    });
+
+    drawTool.on('drawstart', e => {
+      this.handleDrawStart(e, geometryType);
+    });
+
     drawTool.on('drawend', (event) => {
       this.handleDrawEnd(event.feature, type)
     });
 
     this.set('drawTool', drawTool);
-    this.get('olMap').addInteraction(this.get('drawTool'));
-    this.get('olMap').set('clickLock', true);
+    olMap.addInteraction(this.get('drawTool'));
+    olMap.set('clickLock', true);
   },
 
   /**
@@ -870,9 +961,10 @@ var DrawModel = {
     ,   type  = feature.getProperties().type;
 
     switch (type) {
-      case "Point": return show ? "Nord: " + props.position.n + " Öst: " + props.position.e : "";
-      case "LineString": return show ? props.length + " m" : "";
-      case "Polygon": return show ? props.area + " m²" : "";
+      case "Point": return show ? this.formatLabel("point", [props.position.n, props.position.e]) : "";
+      case "LineString": return show ? this.formatLabel("length", props.length): "";
+      case "Polygon": return show ? this.formatLabel("area", props.area) : "";
+      case "Circle": return show ? this.formatLabel("length", props.radius): "";
       case "Text": return props.description;
       default: return "";
     }
@@ -889,7 +981,7 @@ var DrawModel = {
     this.get('source').changed();
 
     source.forEachFeature(feature => {
-      if (feature.getProperties().type !== "Text") {
+      if (feature.getProperties().type !== "Text" && feature.getStyle()) {
         let style = feature.getStyle();
         if (this.get('showLabels')) {
           style[1].getText().setText(this.getLabelText(feature));
@@ -927,6 +1019,7 @@ var DrawModel = {
     var geom
     ,   type = ""
     ,   lenght = 0
+    ,   radius = 0
     ,   area = 0
     ,   position = {
           n: 0,
@@ -948,6 +1041,9 @@ var DrawModel = {
       case "Polygon":
         area = Math.round(geom.getArea());
         break;
+      case "Circle":
+        radius = Math.round(geom.getRadius());
+        break;
       default:
         break;
     }
@@ -956,6 +1052,7 @@ var DrawModel = {
       user: true,
       length: length,
       area: area,
+      radius: radius,
       position: position
     });
   },
@@ -973,6 +1070,15 @@ var DrawModel = {
    */
   clicked: function () {
     this.set('visible', true);
+  },
+
+  /**
+   * Set the property pointColor
+   * @param {string} color
+   * @instance
+   */
+  setCircleRadius: function (radius) {
+    this.set("circleRadius", radius);
   },
 
   /**

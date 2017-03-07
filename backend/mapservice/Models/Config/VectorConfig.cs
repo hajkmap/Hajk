@@ -10,6 +10,8 @@ namespace MapService.Models.Config
     {
         public string id { get; set; }
 
+        public string dataFormat { get; set; }
+
         public string caption { get; set; }
 
         public string url { get; set; }

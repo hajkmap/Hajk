@@ -6,6 +6,7 @@ module.exports = LayerModel.extend({
     url: "",
     featureId: "FID",
     serverType: "geoserver",
+    dataFormat: "WFS",
     params: {
       service: "",
       version: "",
@@ -40,10 +41,10 @@ module.exports = LayerModel.extend({
     this.get("source").addFeatures(features);
   },
 
-  loadAJAX: function (url) {
+  loadAJAX: function (url, format) {
     url = HAJK2.wfsProxy + url;
     $.get(url, (features) => {
-      this.addFeatures(features, "wfs");
+      this.addFeatures(features, format || "wfs");
     });
   },
 
@@ -53,11 +54,15 @@ module.exports = LayerModel.extend({
 
     source = new ol.source.Vector({
       loader: (extent) => {
-        if (this.get('loadType') === 'jsonp') {
-          this.loadJSON(this.createUrl(extent));
-        }
-        if (this.get('loadType') === 'ajax') {
-          this.loadAJAX(this.createUrl(extent, true));
+        if (this.get('dataFormat') === "GeoJSON") {
+          this.loadAJAX(this.get('url'), this.get('dataFormat').toLowerCase());
+        } else {
+          if (this.get('loadType') === 'jsonp') {
+            this.loadJSON(this.createUrl(extent));
+          }
+          if (this.get('loadType') === 'ajax') {
+            this.loadAJAX(this.createUrl(extent, true));
+          }
         }
       },
       strategy: ol.loadingstrategy.all
@@ -95,7 +100,7 @@ module.exports = LayerModel.extend({
         }
       })
     });
-  
+
     if (this.get('loadType') === "jsonp") {
       global.window[this.get('callbackFunction')] = (response) => {
         this.addFeatures(response, "geojson");

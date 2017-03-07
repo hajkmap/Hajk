@@ -356,7 +356,7 @@ var DrawPanelView = {
    */
   activateDrawTool: function (type) {
     this.props.model.activateDrawTool(type);
-    $('#Point, #Text, #Polygon, #LineString, #delete').removeClass('selected');
+    $('#Circle, #Point, #Text, #Polygon, #LineString, #delete').removeClass('selected');
     $('#' + type).addClass('selected');
     $('#abort').show();
     this.setState({
@@ -439,6 +439,47 @@ var DrawPanelView = {
             </select>
             <div>Stil</div>
             <select value={this.state.lineStyle} onChange={update.bind(this, 'setLineStyle', 'lineStyle')}>
+              <option value="solid">Heldragen</option>
+              <option value="dash">Streckad</option>
+              <option value="dot">Punktad</option>
+            </select>
+          </div>
+        );
+      case "Circle":
+        return (
+          <div>
+            <label>Ange radie: </label>&nbsp;
+            <input type="text" name="circle-radius" value={this.state.circleRadius} onChange={update.bind(this, 'setCircleRadius', 'circleRadius')}/>
+            <h2>Ritmanér yta</h2>
+            <div>Linjefärg</div>
+            <ColorPicker
+              model={this.props.model}
+              property="lineColor"
+              onChange={this.props.model.setLineColor.bind(this.props.model)}
+            />
+            <div>Fyllnadsfärg</div>
+            <ColorPicker
+              model={this.props.model}
+              property="polygonFillColor"
+              onChange={this.props.model.setPolygonFillColor.bind(this.props.model)}
+            />
+            <div>Opacitet</div>
+            <select value={this.state.polygonFillOpacity} onChange={update.bind(this, 'setPolygonFillOpacity', 'polygonFillOpacity')}>
+              <option value="0">0% (genomskinlig)</option>
+              <option value="0.25">25%</option>
+              <option value="0.5">50%</option>
+              <option value="0.75">75%</option>
+              <option value="1">100% (fylld)</option>
+            </select>
+            <div>Linjetjocklek</div>
+            <select value={this.state.polygonLineWidth} onChange={update.bind(this, 'setPolygonLineWidth', 'polygonLineWidth')}>
+              <option value="1">Tunn</option>
+              <option value="3">Normal</option>
+              <option value="5">Tjock</option>
+              <option value="8">Tjockare</option>
+            </select>
+            <div>Linjestil</div>
+            <select value={this.state.polygonLineStyle} onChange={update.bind(this, 'setPolygonLineStyle', 'polygonLineStyle')}>
               <option value="solid">Heldragen</option>
               <option value="dash">Streckad</option>
               <option value="dot">Punktad</option>
@@ -624,6 +665,9 @@ var DrawPanelView = {
               </li>
               <li id="Point" onClick={this.activateDrawTool.bind(this, "Point")}>
                 <i className="iconmoon-punkt"></i> <span>Rita punkt</span>
+              </li>
+              <li id="Circle" onClick={this.activateDrawTool.bind(this, "Circle")}>
+                <i className="iconmoon-punkt"></i> <span>Rita cirkel</span>
               </li>
               <li id="LineString" onClick={this.activateDrawTool.bind(this, "LineString")}>
                 <i className="iconmoon-linje"></i> <span>Rita linje</span>
