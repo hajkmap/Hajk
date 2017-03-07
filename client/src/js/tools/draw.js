@@ -122,6 +122,24 @@ var DrawModel = {
    */
   defaults: DrawModelProperties,
 
+  /**
+   * @instance
+   * @property {object} measureTooltipElement
+   */
+  measureTooltipElement: undefined,
+
+  /**
+   * @instance
+   * @property {object} measureTooltip
+   */
+  measureTooltip: undefined,
+
+  /**
+   * @instance
+   * @property {number} exportHitsFormId
+   */
+  exportHitsFormId: 12345,
+
   initialize: function (options) {
     ToolModel.prototype.initialize.call(this);
   },
@@ -193,10 +211,58 @@ var DrawModel = {
       this.setFeaturePropertiesFromGeometry(feature);
       feature.setStyle(this.getStyle(feature));
     }
+    this.measureTooltip.setPosition(undefined);
   },
 
-  measureTooltipElement: undefined,
+  /**
+   * Event handler to excecute when the users starts to draw.
+   * @param {extern:"ol.geom.GeometryType"} type
+   * @instance
+   */
+  handleDrawStart: function(e, geometryType) {
 
+    var circleRadius = parseFloat(this.get('circleRadius'));
+
+    if (!isNaN(circleRadius) && geometryType === "Circle") {
+      this.get("drawTool").finishDrawing();
+      let f = new ol.Feature({
+        geometry: new ol.geom.Circle(e.feature.getGeometry().getCenter(), circleRadius)
+      });
+      this.get('source').removeFeature(e.feature);
+      this.get('source').addFeature(f);
+      this.handleDrawEnd(f);
+    }
+
+    e.feature.getGeometry().on('change', e => {
+
+      var toolTip = ""
+      ,   coord = undefined;
+
+      if (e.target instanceof ol.geom.LineString) {
+        toolTip = this.formatLabel("length", e.target.getLength());
+        coord = e.target.getLastCoordinate()
+      }
+      if (e.target instanceof ol.geom.Polygon) {
+        toolTip = this.formatLabel("area", e.target.getArea());
+        coord = this.get('pointerPosition').coordinate;
+      }
+      if (e.target instanceof ol.geom.Circle) {
+        toolTip = this.formatLabel("length", e.target.getRadius());
+        coord = this.get('pointerPosition').coordinate;
+      }
+      this.measureTooltipElement.innerHTML = toolTip;
+      if (this.get('showLabels')) {
+        this.measureTooltip.setPosition(coord);
+      }
+    });
+
+  },
+
+  /**
+   * Create draw interaction and add to map.
+   * @param {extern:"ol.geom.GeometryType"} type
+   * @instance
+   */
   createMeasureTooltip: function() {
     if (this.measureTooltipElement) {
       this.measureTooltipElement.parentNode.removeChild(measureTooltipElement);
@@ -211,6 +277,11 @@ var DrawModel = {
     this.get('olMap').addOverlay(this.measureTooltip);
   },
 
+  /**
+   * Create draw interaction and add to map.
+   * @param {extern:"ol.geom.GeometryType"} type
+   * @instance
+   */
   formatLabel: function(type, value) {
 
     if (type === "point") {
@@ -225,7 +296,7 @@ var DrawModel = {
       let prefix = " m²";
       if (value >= 1E6) {
         prefix = " km²";
-        value = value / 1E6;
+        value = Math.round((value / 1E6) * 1E3) / 1E3;
       }
       label = value + prefix;
     }
@@ -240,42 +311,6 @@ var DrawModel = {
     }
 
     return label;
-  },
-
-  handleDrawStart: function(e, geometryType) {
-    var circleRadius = parseFloat(this.get('circleRadius'));
-    if (!isNaN(circleRadius) && geometryType === "Circle") {
-      this.get("drawTool").finishDrawing();
-      let f = new ol.Feature({
-        geometry: new ol.geom.Circle(e.feature.getGeometry().getCenter(), circleRadius)
-      });
-      this.get('source').removeFeature(e.feature);
-      this.get('source').addFeature(f);
-      this.handleDrawEnd(f);
-    }
-
-    e.feature.getGeometry().on('change', e => {
-
-      var toolTip = "";
-      var coord = undefined;
-
-      if (e.target instanceof ol.geom.LineString) {
-        toolTip = this.formatLabel("length", e.target.getLength());
-        coord = e.target.getLastCoordinate()
-      }
-      if (e.target instanceof ol.geom.Polygon) {
-        toolTip = this.formatLabel("area", e.target.getArea());
-        coord = this.get('pointerPosition').coordinate;
-      }
-      if (e.target instanceof ol.geom.Circle) {
-        toolTip = this.formatLabel("length", e.target.getRadius());
-        coord = this.get('pointerPosition').coordinate;
-      }
-
-      this.measureTooltipElement.innerHTML = toolTip;
-      this.measureTooltip.setPosition(coord);
-
-    });
   },
 
   /**
@@ -300,9 +335,7 @@ var DrawModel = {
       type: geometryType
     });
 
-    olMap.on('pointermove', e => {
-      this.set('pointerPosition', e);
-    });
+    olMap.on('pointermove', this.setPointerPosition.bind(this));      
 
     drawTool.on('drawstart', e => {
       this.handleDrawStart(e, geometryType);
@@ -323,6 +356,7 @@ var DrawModel = {
    */
   abort: function () {
     this.get('olMap').un('singleclick', this.removeSelected);
+    this.get('olMap').un('pointermove', this.setPointerPosition);
     this.get('olMap').removeInteraction(this.get('drawTool'));
     this.get('olMap').set('clickLock', false);
   },
@@ -612,8 +646,6 @@ var DrawModel = {
 
     return obj;
   },
-
-  exportHitsFormId: 12345,
 
   /**
    * Export draw layer.
@@ -1189,6 +1221,15 @@ var DrawModel = {
     this.set('pointText', text);
     this.setFeaturePropertiesFromText(feature, text || "");
     feature.setStyle(this.getStyle(feature));
+  },
+
+  /**
+   * Set pointer position
+   * @param {object} event
+   * @instance
+   */
+  setPointerPosition: function(e) {
+    this.set('pointerPosition', e);
   }
 };
 

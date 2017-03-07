@@ -429,16 +429,22 @@ var ExportModel = {
 
       return {
         features: features.map(feature => {
+
+          var type = feature.getGeometry().getType();
+
           if (!feature.getStyle() && sourceStyle) {
             feature.setStyle(sourceStyle)
           }
+
           return {
-            type: feature.getGeometry().getType(),
+            type: type,
             attributes: {
               text: getText(feature),
               style: asObject(feature.getStyle())
             },
-            coordinates: as2DPairs(feature.getGeometry().getCoordinates())
+            coordinates: type === "Circle"
+              ? as2DPairs(feature.getGeometry().getCenter()).concat([[feature.getGeometry().getRadius(), 0]]) 
+              : as2DPairs(feature.getGeometry().getCoordinates())
           }
         })
       }

@@ -294,7 +294,7 @@ var DrawPanelView = {
    */
   abort: function () {
     this.props.model.abort();
-    $('#Point, #Text, #Polygon, #LineString, #delete').removeClass('selected');
+    $('#Point, #Circle, #Text, #Polygon, #LineString, #delete').removeClass('selected');
     $('#abort').hide();
     this.setState({
       symbology: ""
@@ -448,9 +448,9 @@ var DrawPanelView = {
       case "Circle":
         return (
           <div>
+            <h2>Ritmanér cirkel</h2>
             <label>Ange radie: </label>&nbsp;
             <input type="text" name="circle-radius" value={this.state.circleRadius} onChange={update.bind(this, 'setCircleRadius', 'circleRadius')}/>
-            <h2>Ritmanér yta</h2>
             <div>Linjefärg</div>
             <ColorPicker
               model={this.props.model}

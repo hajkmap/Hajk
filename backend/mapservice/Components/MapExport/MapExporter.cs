@@ -292,6 +292,8 @@ namespace MapService.Components.MapExport
                         vertices.Add((new GeoAPI.Geometries.Coordinate(x, y)));
                     });
 
+                    bool created = false;
+
                     switch (feature.type)
                     {
                         case "Text":                        
@@ -302,20 +304,30 @@ namespace MapService.Components.MapExport
                                 var point = factory.CreatePoint(new GeoAPI.Geometries.Coordinate(vertices[0]));
                                 dataRow.Geometry = point;
                             }
+                            created = true;
                             break;                        
                         case "LineString":
                         case "MultiLineString":
                             var lineString = factory.CreateLineString(vertices.ToArray());
                             dataRow.Geometry = lineString;
+                            created = true;
                             break;                                                
                         case "Polygon":
                         case "MultiPolygon":
                             var polygon = factory.CreatePolygon(vertices.ToArray());
                             dataRow.Geometry = polygon;
+                            created = true;
+                            break;
+                        case "Circle":
+                            var circle = factory.CreatePoint(new GeoAPI.Geometries.Coordinate(vertices[0]));                            
+                            dataRow.Geometry = circle.Buffer(vertices[1][0]);
+                            created = true;
                             break;
                     }
-
-                    featureData.AddRow(dataRow);
+                    if (created)
+                    {
+                        featureData.AddRow(dataRow);
+                    }                    
                 });
 
                 vectorLayer.DataSource = new SharpMap.Data.Providers.GeometryFeatureProvider(featureData);                                  
