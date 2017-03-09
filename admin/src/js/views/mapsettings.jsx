@@ -413,7 +413,7 @@ class Menu extends Component {
       return $(node).find('> ul > li.layer-node').toArray().map(node => {
         return {
           id: node.dataset.id,
-          drawOrder: node.dataset.draworder,
+          drawOrder: (node.dataset.draworder ? node.dataset.draworder : 1000),
           visibleAtStart: node.dataset.visibleatstart
         }
       })
