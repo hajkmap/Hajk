@@ -110,7 +110,8 @@
         "active": true,
         "visibleAtStart": false,
         "backgroundSwitcherBlack": true,
-        "backgroundSwitcherWhite": true
+        "backgroundSwitcherWhite": true,
+        "toggleAllButton": true
       }
     },
     {

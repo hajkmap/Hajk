@@ -385,6 +385,8 @@ var LayerPanelView = {
    */
   render: function () {
 
+    var groups, toggleAllButton;
+
     this.groups = this.props.model.get('groups');
 
     groups = this.renderGroups(this.props.model.get('groups'));
@@ -393,12 +395,18 @@ var LayerPanelView = {
       this.updateGroupToggledCheckbox(layer);
     });
 
+    if (this.props.model.get('toggleAllButton')) {
+      toggleAllButton = (
+        <div style={{marginBottom: "10px"}}>
+          <button className="btn btn-default btn-inverse" onClick={() => this.toggleAllOff()}>Släck alla lager</button>
+        </div>
+      );
+    }
+
     return (
       <Panel title="Lagerhanterare" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
         <div className="layer-panel">
-          <div style={{marginBottom: "10px"}}>
-            <button className="btn btn-default btn-inverse" onClick={() => this.toggleAllOff()}>Släck alla lager</button>
-          </div>
+          {toggleAllButton}
           <BackgroundSwitcher layers={this.props.model.getBaseLayers()} model={this.props.model}></BackgroundSwitcher>
           {groups}
         </div>

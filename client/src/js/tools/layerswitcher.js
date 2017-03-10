@@ -33,6 +33,11 @@ var ToolModel = require('tools/tool');
  * @property {boolean} visible - Default: false
  * @property {LayerCollection} layerCollection - Default: undefined
  * @property {boolean} backgroundSwitcherMode - Default: hidden
+ * @property {boolean} active - Default: false
+ * @property {boolean} visibleAtStart - Default: true
+ * @property {boolean} backgroundSwitcherBlack - Default: true
+ * @property {boolean} backgroundSwitcherWhite - Default: true
+ * @property {boolean} toggleAllButton - Default: false
  */
 var LayerSwitcherModelProperties = {
   type: 'layerswitcher',
@@ -46,7 +51,8 @@ var LayerSwitcherModelProperties = {
   active: true,
   visibleAtStart: true,
   backgroundSwitcherBlack: true,
-  backgroundSwitcherWhite: true
+  backgroundSwitcherWhite: true,
+  toggleAllButton: true
 };
 
 /**
@@ -94,7 +100,7 @@ var LayerSwitcherModel = {
    * @instance
    */
    toggleAllOff() {
-     this.get('layerCollection').forEach(layer => {       
+     this.get('layerCollection').forEach(layer => {
        layer.setVisible(false);
      });
    },
