@@ -90,6 +90,16 @@ var LayerSwitcherModel = {
   },
 
   /**
+   * Set visibility for all layers to false.
+   * @instance
+   */
+   toggleAllOff() {
+     this.get('layerCollection').forEach(layer => {       
+       layer.setVisible(false);
+     });
+   },
+
+  /**
    * Export the map as a PDF-file
    * @instance
    * @return {Layer[]} base layers

@@ -245,6 +245,42 @@
       "opacity": 1.0,
       "infobox": "",
       "queryable": true
+    },
+    {
+      "id": "14",
+      "dataFormat": "WFS",
+      "caption": "Kraftverk",
+      "url": "http://194.71.132.27/geoserver/fortum/wfs",
+      "layer": "fortum:fortum_kraftverk",
+      "owner": null,
+      "date": "1489067306281",
+      "content": "",
+      "legend": "http://localhost/Upload/f1ce0a7d-bdc2-456d-ac3b-1f805b1793ab.png",
+      "symbolXOffset": 16.0,
+      "symbolYOffset": 16.0,
+      "projection": "EPSG:3006",
+      "visibleAtStart": false,
+      "opacity": 1.0,
+      "infobox": "Hej Hej {namn}",
+      "queryable": true
+    },
+    {
+      "id": "15",
+      "dataFormat": "WFS",
+      "caption": "Badplats",
+      "url": "http://localhost/geoserver/wfs",
+      "layer": "sweco:badplats",
+      "owner": null,
+      "date": "1489070945114",
+      "content": "Badplats",
+      "legend": "http://localhost/Upload/39f6c2e3-6335-4276-86e1-9585580fa5e7.png",
+      "symbolXOffset": 16.0,
+      "symbolYOffset": 16.0,
+      "projection": "EPSG:3006",
+      "visibleAtStart": false,
+      "opacity": 1.0,
+      "infobox": "",
+      "queryable": true
     }
   ],
   "wfstlayers": [

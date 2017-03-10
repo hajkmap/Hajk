@@ -317,6 +317,15 @@ var LayerPanelView = {
   },
 
   /**
+   * Toggle all layers
+   * @instance
+   */
+   toggleAllOff() {
+     this.props.model.toggleAllOff();
+   },
+
+
+  /**
    * Change layer-list configuration.
    * @deprecated
    * @instance
@@ -387,6 +396,9 @@ var LayerPanelView = {
     return (
       <Panel title="Lagerhanterare" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
         <div className="layer-panel">
+          <div style={{marginBottom: "10px"}}>
+            <button className="btn btn-default btn-inverse" onClick={() => this.toggleAllOff()}>Släck alla lager</button>
+          </div>
           <BackgroundSwitcher layers={this.props.model.getBaseLayers()} model={this.props.model}></BackgroundSwitcher>
           {groups}
         </div>

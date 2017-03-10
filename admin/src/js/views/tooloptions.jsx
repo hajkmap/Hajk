@@ -8,6 +8,7 @@ import Edit from "./tools/edit.jsx";
 import Export from "./tools/export.jsx";
 import Infoclick from "./tools/infoclick.jsx";
 import Information from "./tools/information.jsx";
+import Location from "./tools/Location.jsx";
 import Search from "./tools/search.jsx";
 import StreetView from "./tools/streetview.jsx";
 
@@ -42,6 +43,8 @@ class ToolOptions extends Component {
         return <Infoclick parent={this} model={this.props.model}></Infoclick>;
       case "information":
         return <Information parent={this} model={this.props.model}></Information>
+      case "location":
+        return <Location parent={this} model={this.props.model}></Location>
       case "search":
         return <Search parent={this} model={this.props.model}></Search>
       case "streetview":
@@ -81,6 +84,7 @@ class ToolOptions extends Component {
       export: "Utskrift",
       infoclick: "Infoklick",
       information: "Om kartan",
+      location: "Visa min position",
       search: "Sök",
       streetview: "Google Street View"
     };

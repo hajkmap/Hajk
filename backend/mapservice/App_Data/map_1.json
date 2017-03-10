@@ -80,23 +80,28 @@
             "id": "2bc647c5-00ef-a0d5-ac1c-ea1c0b86e9ae",
             "parent": "-1",
             "name": "Test",
-            "toggled": false,
+            "toggled": true,
             "expanded": false,
             "layers": [
               {
+                "id": "15",
+                "visibleAtStart": true,
+                "drawOrder": 4
+              },
+              {
                 "id": "9",
                 "visibleAtStart": false,
-                "drawOrder": 2
+                "drawOrder": 3
               },
               {
                 "id": "3",
                 "visibleAtStart": true,
-                "drawOrder": 0
+                "drawOrder": 1
               },
               {
                 "id": "4",
                 "visibleAtStart": true,
-                "drawOrder": 1
+                "drawOrder": 2
               }
             ],
             "groups": []
@@ -142,8 +147,8 @@
     {
       "type": "search",
       "options": {
-        "onMap": 0,
-        "toolbar": "bottom",
+        "onMap": 1,
+        "toolbar": "",
         "maxZoom": 14,
         "markerImg": "http://localhost/hajk/assets/icons/marker.png",
         "kmlExportUrl": "/mapservice-beta/export/kml",
@@ -196,6 +201,10 @@
     },
     {
       "type": "anchor",
+      "options": {}
+    },
+    {
+      "type": "location",
       "options": {}
     }
   ],
