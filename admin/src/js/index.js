@@ -26,6 +26,9 @@ import { Router } from 'backbone';
 import ApplicationView from './views/application.jsx';
 import ApplicationModel from './models/application.js';
 import $ from 'jquery';
+import find from 'array.prototype.find';
+
+find.shim();
 
 (function() {
 

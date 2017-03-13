@@ -30,6 +30,7 @@ var Tool          = require('tools/tool')
 ,   Draw          = require('tools/draw')
 ,   Edit          = require('tools/edit')
 ,   Anchor        = require('tools/anchor')
+,   Buffer        = require('tools/buffer')
 ,   StreetView    = require('tools/streetview')
 ,   Information   = require('tools/information')
 ,   Location      = require('tools/location');
@@ -73,6 +74,8 @@ var ToolCollection = {
             return new Edit(args.options);
         case "anchor":
             return new Anchor(args.options);
+        case "buffer":            
+            return new Buffer(args.options);
         case "streetview":
             return new StreetView(args.options);
         case "information":

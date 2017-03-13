@@ -20,86 +20,52 @@
 //
 // https://github.com/Johkar/Hajk2
 
-var ToolModel = require('tools/tool');
+const ToolModel = require('tools/tool');
+const SelectionModel = require('models/selection');
 
 /**
- * @typedef {Object} AnchorModel~AnchorModelProperties
- * @property {string} type -Default: anchor
- * @property {string} panel -Default: anchorpanel
+ * @typedef {Object} BufferModel~BufferModelProperties
+ * @property {string} type -Default: Buffer
+ * @property {string} panel -Default: Bufferpanel
  * @property {string} toolbar -Default: bottom
  * @property {string} icon -Default: fa fa-link icon fa-flip-horizontal
  * @property {string} title -Default: Länk
  * @property {boolean} visible - Default: false
  * @property {ShellModel} shell
- * @property {string} anchor - Default: ''
  */
-var AnchorModelProperties = {
-  type: 'anchor',
-  panel: 'anchorpanel',
+var BufferModelProperties = {
+  type: 'buffer',
+  panel: 'bufferpanel',
   toolbar: 'bottom',
-  icon: 'fa fa-link icon fa-flip-horizontal',
-  title: 'Länk till kartan',
+  icon: 'fa fa-bullseye icon',
+  title: 'Skapa buffertzon',
   visible: false,
   shell: undefined,
-  anchor: ""
 }
 
 /**
  * @description
  *
- *  Prototype for creating an anchor model.
+ *  Prototype for creating an Buffer model.
  *
  * @class
  * @augments {external:"Backbone.Model"}
- * @param {AnchorModel~AnchorModelProperties} options - Default options
+ * @param {BufferModel~BufferModelProperties} options - Default options
  */
-var AnchorModel = {
+var BufferModel = {
   /**
    * @instance
-   * @property {AnchorModel~AnchorModelProperties} defaults - Default settings
+   * @property {BufferModel~BufferModelProperties} defaults - Default settings
    */
-  defaults: AnchorModelProperties,
+  defaults: BufferModelProperties,
 
   initialize: function (options) {
     ToolModel.prototype.initialize.call(this);
   },
 
   configure: function (shell) {
-
     this.set('map', shell.getMap());
     this.set('layers', shell.getLayerCollection());
-    this.set(
-      'layerswitcher',
-      shell.getToolCollection()
-           .find(tool =>
-              tool.get('type') === 'layerswitcher'
-            )
-    );
-  },
-
-  /**
-   * Generate an anchor string which represents the current state of the map.
-   * @instance
-   * @return {string} anchor
-   */
-  generate: function () {
-
-    var a = document.location.protocol + "//" + document.location.host + document.location.pathname
-    ,   map = this.get("map")
-    ,   olMap = map.getMap()
-    ,   layers = this.get("layers")
-
-    ,   c = olMap.getView().getCenter()
-    ,   z = olMap.getView().getZoom()
-    ,   x = c[0]
-    ,   y = c[1]
-    ,   l = layers.filter(layer => layer.getVisible() === true)
-                  .map(layer => encodeURIComponent(layer.getName())).join(',');
-
-    a += `?m=${HAJK2.configFile}&x=${x}&y=${y}&z=${z}&l=${l}`;
-    this.set("anchor", a);
-
-    return a;
   },
 
   /**
@@ -119,9 +85,9 @@ var AnchorModel = {
 };
 
 /**
- * Anchor model module.<br>
- * Use <code>require('models/anchor')</code> for instantiation.
- * @module AnchorModel-module
- * @returns {AnchorModel}
+ * Buffer model module.<br>
+ * Use <code>require('models/Buffer')</code> for instantiation.
+ * @module BufferModel-module
+ * @returns {BufferModel}
  */
-module.exports = ToolModel.extend(AnchorModel);
+module.exports = ToolModel.extend(BufferModel);

@@ -19,7 +19,7 @@
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
 // https://github.com/Johkar/Hajk2
-import React from 'react';
+//import React from 'react';
 import { Component } from 'react';
 
 class Alert extends Component {

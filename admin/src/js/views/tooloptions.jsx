@@ -1,6 +1,7 @@
 import React from 'react';
 import { Component } from 'react';
 import Anchor from "./tools/anchor.jsx";
+import Buffer from "./tools/buffer.jsx";
 import Bookmark from "./tools/bookmark.jsx";
 import Coordinates from "./tools/coordinates.jsx";
 import Draw from "./tools/draw.jsx";
@@ -29,6 +30,8 @@ class ToolOptions extends Component {
     switch (tool) {
       case "anchor":
         return <Anchor parent={this} model={this.props.model}></Anchor>
+      case "buffer":
+        return <Buffer parent={this} model={this.props.model}></Buffer>
       case "bookmark":
         return <Bookmark parent={this} model={this.props.model}></Bookmark>
       case "coordinates":
@@ -77,6 +80,7 @@ class ToolOptions extends Component {
   render() {
     var toolTypes = {
       anchor: "Länk till kartan",
+      buffer: "Skapa buffertzon",
       bookmark: "Bokmärken",
       coordinates: "Fånga koordinat",
       draw: "Rita och måttsätt",

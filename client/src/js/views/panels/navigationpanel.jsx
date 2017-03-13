@@ -30,7 +30,8 @@ var panels = {
   'drawpanel': require('views/drawpanel'),
   'editpanel': require('views/editpanel'),
   'anchorpanel': require('views/anchorpanel'),
-  'streetviewpanel': require('views/streetviewpanel')
+  'streetviewpanel': require('views/streetviewpanel'),
+  'bufferpanel': require('views/bufferpanel')
 };
 
 var Alert = require('alert');
@@ -69,7 +70,7 @@ var NavigationPanelView = {
    * @instance
    */
   componentDidMount: function () {
-    this.props.model.on("change:activePanel", (sender, panel) => {      
+    this.props.model.on("change:activePanel", (sender, panel) => {
       this.setState({
         'activePanel' : panel,
         'minimized': false
@@ -176,16 +177,20 @@ var NavigationPanelView = {
     var Panel = null;
 
     if (this.state.activePanel) {
-      Panel = panels[this.state.activePanel.type.toLowerCase()];
-      panelInstance = (
-        <Panel
-          model={this.state.activePanel.model}
-          minimized={this.state.minimized}
-          navigationPanel={this}
-          onCloseClicked={() => { this.toggle() }}
-          onUnmountClicked={() => { this.unmount() }}
-        />
-      )
+      if (panels.hasOwnProperty(this.state.activePanel.type.toLowerCase())) {
+        Panel = panels[this.state.activePanel.type.toLowerCase()];
+        panelInstance = (
+          <Panel
+            model={this.state.activePanel.model}
+            minimized={this.state.minimized}
+            navigationPanel={this}
+            onCloseClicked={() => { this.toggle() }}
+            onUnmountClicked={() => { this.unmount() }}
+          />
+        );
+      } else {
+        console.error("Panel reference is not found. See Navigationpanel.jsx.");
+      }
     }
 
     return (

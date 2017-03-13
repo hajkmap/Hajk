@@ -79,7 +79,7 @@
       "caption": "Vägnät",
       "url": "http://localhost/geoserver/wms",
       "owner": "",
-      "date": "1488893936434",
+      "date": "1489142234024",
       "content": "",
       "legend": "",
       "projection": null,
@@ -125,7 +125,7 @@
       "caption": "Vattenytan",
       "url": "http://localhost/geoserver/wfs",
       "layers": [
-        "sweco:badplats"
+        "sweco:vattenyta"
       ],
       "searchFields": [
         "kategori"
@@ -148,6 +148,23 @@
         "kategori"
       ],
       "infobox": "<b>Kkod:</b> {kkod}  \n<b>Kategori:</b> {export:kategori}  \n<b>Text:</b> {export:text}",
+      "displayFields": [
+        "kategori"
+      ],
+      "geometryField": "geom",
+      "outputFormat": "GML3"
+    },
+    {
+      "id": "16",
+      "caption": "Vägnät",
+      "url": "http://localhost/geoserver/wfs",
+      "layers": [
+        "sweco:vagnat"
+      ],
+      "searchFields": [
+        "kategori"
+      ],
+      "infobox": "",
       "displayFields": [
         "kategori"
       ],

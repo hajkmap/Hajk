@@ -363,6 +363,9 @@ var SearchBarView = {
               onChange={search_on_input} />
           </div>
         </div>
+        <div className="search-options">
+          {options}
+        </div>
         {results}
       </div>
     );

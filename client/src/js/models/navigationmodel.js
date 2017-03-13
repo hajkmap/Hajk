@@ -90,7 +90,7 @@ var NavigationModel = {
 
     var type = (panel.get('panel') || '').toLowerCase()
     ,   panelRef = _.find(this.get("panels"), panel => (panel.type || '').toLowerCase() === type)
-    ,   activePanel = this.get("activePanel");
+    ,   activePanel = this.get("activePanel", panelRef);
 
     if (visible) {
       if (activePanel) {

@@ -148,8 +148,8 @@
     {
       "type": "search",
       "options": {
-        "onMap": 1,
-        "toolbar": "",
+        "onMap": 0,
+        "toolbar": "bottom",
         "maxZoom": 14,
         "markerImg": "http://localhost/hajk/assets/icons/marker.png",
         "kmlExportUrl": "/mapservice-beta/export/kml",
@@ -206,6 +206,10 @@
     },
     {
       "type": "location",
+      "options": {}
+    },
+    {
+      "type": "buffer",
       "options": {}
     }
   ],

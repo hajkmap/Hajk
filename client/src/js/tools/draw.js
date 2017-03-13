@@ -268,7 +268,7 @@ var DrawModel = {
       this.measureTooltipElement.parentNode.removeChild(measureTooltipElement);
     }
     this.measureTooltipElement = document.createElement('div');
-    this.measureTooltipElement.className = 'tooltip tooltip-measure';
+    this.measureTooltipElement.className = 'tooltip-draw tooltip-measure';
     this.measureTooltip = new ol.Overlay({
       element: this.measureTooltipElement,
       offset: [0, -15],
@@ -335,7 +335,7 @@ var DrawModel = {
       type: geometryType
     });
 
-    olMap.on('pointermove', this.setPointerPosition.bind(this));      
+    olMap.on('pointermove', this.setPointerPosition.bind(this));
 
     drawTool.on('drawstart', e => {
       this.handleDrawStart(e, geometryType);
