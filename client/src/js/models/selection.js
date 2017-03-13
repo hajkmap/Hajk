@@ -113,22 +113,31 @@ var SelectionModel = {
     )
   },
 
-  clear: function() {
+  clearSelection: function () {
+    this.get('source').clear();
+    this.get('highlightLayer').clearHighlight();
     this.features = {};
   },
 
-  addFeature: function(f) {
+  clear: function () {
+    this.features = {};
+  },
+
+  addFeature: function (f) {
     const id = f.getId();
+
+    let clone = f.clone();
+    clone.setId(f.getId());
 
     this.get('source').clear();
 
     if (this.features.hasOwnProperty(id)) {
       delete this.features[id];
-      this.get('highlightLayer').removeHighlight(f);
+      this.get('highlightLayer').removeHighlight(clone);
     } else {
       this.features[id] = f;
       f.operation = "Within";
-      this.get('highlightLayer').addHighlight(f, false);
+      this.get('highlightLayer').addHighlight(clone, false);
     }
   },
 
@@ -148,6 +157,7 @@ var SelectionModel = {
       if (layer && layer.get('name')) {
         if (
           layer.get('name') !== 'preview-layer' &&
+          layer.get('name') !== 'buffer-layer' &&
           layer.get('name') !== 'highlight-wms'
         ) {
           promises.push(new Promise((resolve, reject) => {
@@ -218,7 +228,7 @@ var SelectionModel = {
     );
   },
 
-  setActiveTool: function(tool) {
+  setActiveTool: function (tool) {
     this.get('olMap').removeInteraction(this.get('drawTool'));
     this.set('activeTool', tool);
 
@@ -238,13 +248,13 @@ var SelectionModel = {
     }
   },
 
-  getFeatures: function() {
+  getFeatures: function () {
     return this.get('highlightLayer').getFeatures().concat(
       this.get('source').getFeatures()
     );
   },
 
-  abort: function() {
+  abort: function () {
     this.setActiveTool('');
     this.get('source').clear();
     this.get('olMap').set('clickLock', false);

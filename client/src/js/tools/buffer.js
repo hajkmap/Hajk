@@ -41,6 +41,7 @@ var BufferModelProperties = {
   title: 'Skapa buffertzon',
   visible: false,
   shell: undefined,
+  bufferDist: 10
 }
 
 /**
@@ -63,9 +64,126 @@ var BufferModel = {
     ToolModel.prototype.initialize.call(this);
   },
 
+  getDefaultStyle: function () {
+    const color = 'rgba(255, 255, 0, 0.6)';
+    const fill = 'rgba(255, 255, 255, 0.5)';
+    return [
+      new ol.style.Style({
+        fill: new ol.style.Fill({
+          color: fill
+        }),
+        stroke: new ol.style.Stroke({
+          color: color,
+          width: 4
+        }),
+        image: new ol.style.Circle({
+          radius: 6,
+          fill: new ol.style.Fill({
+            color: fill
+          }),
+          stroke: new ol.style.Stroke({
+            color: color,
+            width: 2
+          })
+        })
+      })
+    ];
+  },
+
   configure: function (shell) {
+
     this.set('map', shell.getMap());
+    this.set('olMap', shell.getMap().getMap());
     this.set('layers', shell.getLayerCollection());
+
+    this.set('bufferLayer', new ol.layer.Vector({
+      source: new ol.source.Vector(),
+      name: 'buffer-layer',
+      style: this.getDefaultStyle()
+    }));
+
+    this.get('olMap').addLayer(this.get('bufferLayer'));
+
+    this.set('selectionModel', new SelectionModel({
+      map: this.get('olMap'),
+      layerCollection: shell.getLayerCollection()
+    }));
+
+  },
+  /**
+   * @instance
+   */
+  getActiveTool: function () {
+    return this.get('selectionModel').get('activeTool');
+  },
+  /**
+   * @instance
+   * @property {string} name
+   */
+  setActiveTool: function (name) {
+    if (this.get('selectionModel').get('activeTool') === name) {
+      this.get('selectionModel').setActiveTool(undefined);
+    } else {
+      this.get('selectionModel').setActiveTool(name);
+    }
+  },
+
+  isNumber: function (obj) {
+
+    if (typeof obj === "number") {
+      return true;
+    }
+
+    if (typeof obj !== "string") {
+      return false;
+    }
+
+    if (obj.trim() === "") {
+      return false;
+    }
+
+    if (!isNaN(Number(obj))) {
+      return true;
+    }
+
+    return false;
+  },
+
+  /**
+   * @instance
+   */
+  buffer: function() {
+
+    const parser = new jsts.io.OL3Parser();
+    const features = this.get('selectionModel').features
+    const dist = this.get('bufferDist');
+
+    if (!this.isNumber(dist)) {
+      return false;
+    }
+
+    var buffered = Object.keys(features).map(key => {
+
+      var feature = features[key]
+      ,   geom    = parser.read(feature.getGeometry())
+      ,   olf     = new ol.Feature()
+      ,   buff = geom.buffer(dist);
+
+      olf.setGeometry(parser.write(buff));
+      return olf;
+    });
+
+    this.get('bufferLayer').getSource().addFeatures(buffered);
+
+    return true;
+  },
+
+  clearSelection: function() {
+    this.get('selectionModel').clearSelection();
+  },
+
+  clearBuffer: function() {
+    this.get('bufferLayer').getSource().clear();
   },
 
   /**
