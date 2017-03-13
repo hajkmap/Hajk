@@ -18,7 +18,8 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
+
 import React from 'react';
 import { Component } from 'react';
 import Alert from '../views/alert.jsx';

@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 import React from "react";
 import { Component } from "react";
@@ -154,7 +154,7 @@ class Manager extends Component {
       setTimeout(() => {
         this.refs["VectorLayerForm"].setState({
           id: layer.id,
-          dataFormat: layer.dataFormat || "WFS",       
+          dataFormat: layer.dataFormat || "WFS",
           caption: layer.caption,
           content: layer.content,
           date: layer.date,
