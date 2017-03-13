@@ -35,6 +35,7 @@
     "grunt-text-replace": "^0.4.0",
     "jquery": "^2.2.0",
     "jquery-sortable": "^0.9.13",
+    "jsts": "^1.3.0",
     "load-grunt-tasks": "^3.4.0",
     "marked": "^0.3.5",
     "matchdep": "^1.0.1",

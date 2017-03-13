@@ -102,6 +102,10 @@ module.exports = function (grunt) {
           src: ['<%= cssFiles %>'],
           dest: 'dist/assets/<%= pkg.name %>.css'
         },
+        dependencies: {
+          src: ['dist/js/dependencies.min.js', 'dist/js/dependencies-min.js'],
+          dest: 'dist/js/dependencies.min.js'
+        },
         jsrelease: {
           src: [
             'dist/js/dependencies.min.js',
@@ -162,7 +166,8 @@ module.exports = function (grunt) {
           options: {
           },
           files: {
-            'dist/js/dependencies.js': ['src/js/dependencies.js']
+            'dist/js/dependencies.js': ['src/js/dependencies.js'],
+            'dist/js/dependencies-min.js': ['src/js/dependencies-min.js']
           }
         }
       },
@@ -333,7 +338,7 @@ module.exports = function (grunt) {
 
     });
 
-    grunt.registerTask('dependencies', ['browserify:dependencies', 'uglify:dependencies']);
+    grunt.registerTask('dependencies', ['browserify:dependencies', 'uglify:dependencies', 'concat:dependencies']);
 
     grunt.registerTask('build', ['copy:debug', 'replace:debughtml', 'less', 'autoprefixer:core', 'concat:css', 'react', 'browserify:app', 'babel', 'replace:bablecleanup']);
 
