@@ -84,6 +84,16 @@
             "expanded": false,
             "layers": [
               {
+                "id": "19",
+                "visibleAtStart": false,
+                "drawOrder": 0
+              },
+              {
+                "id": "14",
+                "visibleAtStart": true,
+                "drawOrder": 0
+              },
+              {
                 "id": "17",
                 "visibleAtStart": true,
                 "drawOrder": 0
@@ -167,8 +177,8 @@
         "toolbar": "bottom",
         "maxZoom": 14,
         "markerImg": "http://localhost/hajk/assets/icons/marker.png",
-        "kmlExportUrl": "/mapservice-beta/export/kml",
-        "excelExportUrl": "/mapservice-beta/export/excel",
+        "kmlExportUrl": "/mapservice/export/kml",
+        "excelExportUrl": "/mapservice/export/excel",
         "displayPopup": 1,
         "selectionTools": 1,
         "anchor": [

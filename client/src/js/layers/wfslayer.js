@@ -154,7 +154,7 @@ module.exports = LayerModel.extend({
     }
 
     function getPoint() {
-      new ol.style.Circle({
+      return new ol.style.Circle({
         fill: getFill(),
         stroke: getStroke(),
         radius: 4
@@ -207,6 +207,7 @@ module.exports = LayerModel.extend({
       name: this.get('name'),
       visible: this.get("visible"),
       opacity: this.get("opacity"),
+      queryable: this.get('queryable'),
       source: new ol.source.ImageVector({
         source: source,
         style: this.getStyle.bind(this)
@@ -219,10 +220,11 @@ module.exports = LayerModel.extend({
       };
     }
 
-    this.set("queryable", true);
+    //this.set("queryable", true);
     this.set("source", source);
-    this.set("layer",layer);
+    this.set("layer", layer);
     this.set("type", "wfs");
+
     LayerModel.prototype.initialize.call(this);
   },
 

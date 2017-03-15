@@ -155,8 +155,8 @@ var InfoClickModel = {
       this.layerOrder[layer.get('name')] = i;
     });
 
-    this.map.forEachFeatureAtPixel(event.pixel, (feature, layer) => {
-      if (layer && layer.get('name')) {
+    this.map.forEachFeatureAtPixel(event.pixel, (feature, layer) => {      
+      if (layer && layer.get('name') && (layer.get('queryable') !== false)) {
         if (
           layer.get('name') !== 'preview-layer' &&
           layer.get('name') !== 'highlight-wms'

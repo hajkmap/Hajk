@@ -599,11 +599,18 @@ var SearchModel = {
             );
           }
         });
-
-        columns = names;
-        return names.map(name => attributes[name]);
+        if (names.length > columns.length) {
+          columns = names;
+        }
+        return columns.map(name => attributes[name] || null);
       });
 
+      var e = {
+        TabName: group,
+        Cols: columns,
+        Rows: values
+      };
+            
       return {
         TabName: group,
         Cols: columns,

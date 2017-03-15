@@ -131,7 +131,7 @@ class VectorLayerForm extends Component {
     function rgba_to_string(c) {
       return typeof c === "string"
         ? c
-        : `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})`;      
+        : `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})`;
     }
 
     var input = this.refs["input_" + fieldName]
@@ -463,8 +463,7 @@ class VectorLayerForm extends Component {
             value={this.state.legend}
             className={this.getValidationClass("legend")}
             onChange={(e) => {
-              this.setState({legend: e.target.value})
-              this.validateField("legend");
+              this.setState({legend: e.target.value});              
             }}
           />
           <span onClick={(e) => {this.loadLegendImage(e)}} className="btn btn-default">Välj fil {imageLoader}</span>
