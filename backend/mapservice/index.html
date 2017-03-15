@@ -2,47 +2,58 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <title></title>
+    <link href="assets/style.css" type="text/css" rel="stylesheet" />
 </head>
 <body>    
-    <h1>Wak</h1>
-    <h1>Export Service</h1>
-    <div>[POST] /export</div>
-    <div>[POST] /export/kml</div>
-    <div>[POST] /export/importkml</div>
-    <div>[POST] /export/pdf</div>
-    <div>[POST] /export/excel</div>
-    <a href="export/help">Mer info</a>
-    <h1>Settings Service</h1>
-        
-    <div>[GET] settings/bookmark</div>
-    <div>[POST] settings/bookmark</div>
-    <div>[PUT] settings/bookmark</div>
-    <div>[DELETE] /settings/bookmark/{id}</div>
-    <br/>
-    <div>[GET] /settings/config/{name}</div>
-    <br/>
-    <div>[PUT] /settings/layer</div>
-    <div>[POST] /settings/layer</div>
-    <div>[DELETE] /settings/layer/{id}</div>
-    <br />
-    <div>[PUT] /settings/arcgislayer</div>
-    <div>[POST] /settings/arcgislayer</div>
-    <div>[DELETE] /settings/arcgislayer/{id}</div>
-    <br />
-    <div>[PUT] /settings/vectorlayer</div>
-    <div>[POST] /settings/vectorlayer</div>
-    <div>[DELETE] /settings/vectorlayer/{id}</div>
-    <br />
-    <div>[PUT] /settings/wmtslayer</div>
-    <div>[POST] /settings/wmtslayer</div>
-    <div>[DELETE] /settings/wmtslayer/{id}</div>
-    <br />
-    <div>[PUT] /settings/wfslayer</div>
-    <div>[POST] /settings/wfslayer</div>
-    <div>[DELETE] /settings/wfslayer/{id}</div>
-    <br />
-    <div>[PUT] /settings/layermenu</div>
-    <div>[GET]/settings/indexlayermenu</div>
-    <a href="settings/help">Mer info</a>
+    <h1>Hajk map REST-API</h1>           
+    <h2>settings/ArcGISLayer</h2>      
+    <div>[PUT]</div>
+    <div>[POST]</div>
+    <div>[DELETE]</div>
+    <h2>Config</h2>
+    <div>[GET] Delete/{name}</div>
+    <div>[GET] Create/{name}</div>
+    <div>[GET] List</div>
+    <div>[GET] GetConfig/{name}</div>    
+    <h2>Export</h2>
+    <div>[POST] PDF</div>    
+    <div>[POST] TIFF</div>    
+    <div>[POST] KML</div>    
+    <div>[POST] Excel</div>        
+    <h2>Import</h2>
+    <div>[POST] KML</div>
+    <div>[POST] Image</div>     
+    <h2>LayerMenu</h2>
+    <div>[GET] settings/layermenu/?operation={operation}</div>
+    <p>
+        {operation} = index - genererar nya lager-id för hela applikationen.
+    </p>
+    <div>[PUT]</div>    
+    <h2>MapSettings</h2>
+    <div>[PUT]</div>
+    <div></div>
+    <h2>ToolSettings</h2>
+    <div>[PUT]</div>
+    <div></div>
+    <h2>settings/VectorLayer</h2>
+    <div>[PUT]</div>
+    <div>[POST]</div>
+    <div>[DELETE]</div>
+    <h2>settings/WFSLayer</h2>
+    <div>[PUT]</div>
+    <div>[POST]</div>
+    <div>[DELETE]</div>
+    <h2>settings/WFSTLayer</h2>
+    <div>[PUT]</div>
+    <div>[POST]</div>
+    <div>[DELETE]</div>
+    <h2>settings/WMSLayer</h2>
+    <div>[PUT]</div>
+    <div>[POST]</div>
+    <div>[DELETE]</div>
+    <h2>settings/WMTSLayer</h2>
+    <div>[PUT]</div>
+    <div>[POST]</div>
+    <div>[DELETE]</div>
 </body>
 </html>

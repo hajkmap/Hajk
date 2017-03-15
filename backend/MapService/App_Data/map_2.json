@@ -18,13 +18,14 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "1"
+          "5"
         ],
         "groups": [],
         "active": false,
         "visibleAtStart": false,
         "backgroundSwitcherBlack": false,
-        "backgroundSwitcherWhite": false
+        "backgroundSwitcherWhite": false,
+        "toggleAllButton": false
       }
     },
     {

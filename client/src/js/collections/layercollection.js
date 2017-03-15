@@ -44,7 +44,9 @@ var LayerCollection = {
     var map = this.shell.get('map').getMap()
     ,   olLayer = layer.getLayer();
 
+    layer.set("olMap", map);
     layer.set("shell", this.shell);
+
     if (olLayer) {
       map.addLayer(olLayer);
     }
@@ -191,6 +193,11 @@ var LayerCollection = {
         "opacity": args.opacity,
         "serverType": "arcgis",
         "loadType": "ajax",
+        "projection": args.projection,
+        "fillColor": args.fillColor,
+        "lineColor": args.lineColor,
+        "lineStyle": args.lineStyle,
+        "lineWidth": args.lineWidth,        
         "url": args.url,
         "queryable": args.queryable,
         "information": args.infobox,

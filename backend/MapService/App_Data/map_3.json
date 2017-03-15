@@ -172,21 +172,24 @@
             "expanded": false,
             "layers": [
               {
-                "id": "12",
-                "drawOrder": 0
-              },
-              {
                 "id": "3",
+                "visibleAtStart": false,
                 "drawOrder": 0
               },
               {
                 "id": "11",
+                "visibleAtStart": false,
                 "drawOrder": 0
               }
             ],
             "groups": []
           }
-        ]
+        ],
+        "active": false,
+        "visibleAtStart": false,
+        "backgroundSwitcherBlack": false,
+        "backgroundSwitcherWhite": false,
+        "toggleAllButton": false
       }
     },
     {

@@ -151,7 +151,7 @@ class Manager extends Component {
         layerType: "Vector"
       });
 
-      setTimeout(() => {
+      setTimeout(() => {        
         this.refs["VectorLayerForm"].setState({
           id: layer.id,
           dataFormat: layer.dataFormat || "WFS",
@@ -165,6 +165,10 @@ class Manager extends Component {
           visibleAtStart: layer.visibleAtStart,
           queryable: layer.queryable,
           projection: layer.projection,
+          lineWidth: layer.lineWidth || "3",
+          lineStyle: layer.lineStyle || "solid",
+          lineColor: layer.lineColor || "rgba(0, 0, 0, 0.5)",
+          fillColor: layer.fillColor || "rgba(255, 255, 255, 0.5)",
           opacity: layer.opacity,
           symbolXOffset: layer.symbolXOffset,
           symbolYOffset: layer.symbolYOffset,

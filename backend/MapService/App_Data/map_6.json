@@ -173,6 +173,7 @@
             "layers": [
               {
                 "id": "3",
+                "visibleAtStart": false,
                 "drawOrder": 0
               }
             ],
@@ -182,7 +183,8 @@
         "active": true,
         "visibleAtStart": false,
         "backgroundSwitcherBlack": true,
-        "backgroundSwitcherWhite": true
+        "backgroundSwitcherWhite": true,
+        "toggleAllButton": false
       }
     },
     {

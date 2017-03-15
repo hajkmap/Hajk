@@ -73,7 +73,7 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "1"
+          "5"
         ],
         "groups": [
           {
@@ -84,8 +84,23 @@
             "expanded": false,
             "layers": [
               {
-                "id": "15",
+                "id": "17",
                 "visibleAtStart": true,
+                "drawOrder": 0
+              },
+              {
+                "id": "11",
+                "visibleAtStart": true,
+                "drawOrder": 0
+              },
+              {
+                "id": "18",
+                "visibleAtStart": true,
+                "drawOrder": 0
+              },
+              {
+                "id": "15",
+                "visibleAtStart": false,
                 "drawOrder": 4
               },
               {
@@ -95,12 +110,12 @@
               },
               {
                 "id": "3",
-                "visibleAtStart": true,
+                "visibleAtStart": false,
                 "drawOrder": 1
               },
               {
                 "id": "4",
-                "visibleAtStart": true,
+                "visibleAtStart": false,
                 "drawOrder": 2
               }
             ],
@@ -108,9 +123,9 @@
           }
         ],
         "active": true,
-        "visibleAtStart": false,
-        "backgroundSwitcherBlack": true,
-        "backgroundSwitcherWhite": true,
+        "visibleAtStart": true,
+        "backgroundSwitcherBlack": false,
+        "backgroundSwitcherWhite": false,
         "toggleAllButton": true
       }
     },
@@ -133,11 +148,11 @@
     {
       "type": "infoclick",
       "options": {
-        "displayPopup": 1,
+        "displayPopup": 0,
         "markerImg": "assets/icons/marker.png",
         "anchor": [
           16,
-          16
+          32
         ],
         "imgSize": [
           32,

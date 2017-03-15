@@ -8,12 +8,12 @@ namespace MapService.Controllers
     {
         private readonly SettingsDbContext settingsDataContext = new SettingsDbContext();
 
-        public string Get(string operation, string mapFile)
+        public string Get(string operation)
         {
             string status = "Felaktig operation. Giltiga operationer är 'index' för att indexera lagemenyn.";
             if (operation == "index")
             {
-                this.settingsDataContext.IndexLayerMenu(mapFile);
+                this.settingsDataContext.IndexLayerMenu();
                 status = "Indexering genomförd";
             }
             return status;

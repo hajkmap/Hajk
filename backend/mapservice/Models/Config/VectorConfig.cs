@@ -32,6 +32,14 @@ namespace MapService.Models.Config
 
         public string projection { get; set; }
 
+        public string lineStyle { get; set; }
+
+        public string lineWidth { get; set; }
+
+        public string lineColor { get; set; }
+
+        public string fillColor { get; set; }
+
         public bool visibleAtStart { get; set; }
 
         public double opacity { get; set; }

@@ -23,6 +23,7 @@
 import React from "react";
 import { Component } from 'react';
 import $ from 'jquery';
+import { SketchPicker } from 'react-color';
 
 const defaultState = {
   layerType: "Vector",
@@ -40,6 +41,10 @@ const defaultState = {
   visibleAtStart: false,
   queryable: true,
   drawOrder: 1,
+  lineColor: "rgba(0, 0, 0, 0.5)",
+  lineWidth: "3",
+  lineStyle: "solid",
+  fillColor: "rgba(255, 255, 255, 0.5)",
   projection: "",
   layer: "",
   opacity: 1,
@@ -88,6 +93,7 @@ class VectorLayerForm extends Component {
   }
 
   getLayer() {
+
     return {
       type: this.state.layerType,
       dataFormat: this.getValue("dataFormat"),
@@ -98,6 +104,10 @@ class VectorLayerForm extends Component {
       content: this.getValue("content"),
       legend: this.getValue("legend"),
       visibleAtStart: this.getValue("visibleAtStart"),
+      lineStyle: this.getValue("lineStyle"),
+      lineColor: this.getValue("lineColor"),
+      lineWidth: this.getValue("lineWidth"),
+      fillColor: this.getValue("fillColor"),
       projection: this.getValue("projection"),
       layer: this.state.addedLayers[0],
       opacity: this.getValue("opacity"),
@@ -118,19 +128,27 @@ class VectorLayerForm extends Component {
       return layers.map(layer => layer.id.toString());
     }
 
+    function rgba_to_string(c) {
+      return typeof c === "string"
+        ? c
+        : `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})`;      
+    }
+
     var input = this.refs["input_" + fieldName]
     ,   value = input ? input.value : "";
 
     if (fieldName === 'date') value = create_date();
     if (fieldName === 'queryable') value = input.checked;
     if (fieldName === 'visibleAtStart') value = input.checked;
+    if (fieldName === 'fillColor') value = rgba_to_string(this.state.fillColor);
+    if (fieldName === 'lineColor') value = rgba_to_string(this.state.lineColor);
 
     return value;
   }
 
   validate() {
     var valid = true
-    ,   validationFields = ["url", "caption", "projection", "legend"];
+    ,   validationFields = ["url", "caption", "projection"];
 
     if (this.state.dataFormat !== "GeoJSON") {
       validationFields.push("layer");
@@ -262,6 +280,30 @@ class VectorLayerForm extends Component {
 
   loadLegendImage(e) {
     $('#select-image').trigger('click');
+  }
+
+  setLineWidth(e) {
+    this.setState({
+      lineWidth: e.target.value
+    });
+  }
+
+  setLineStyle(e) {
+    this.setState({
+      lineStyle: e.target.value
+    });
+  }
+
+  setLineColor(color) {
+    this.setState({
+      lineColor: color
+    });
+  }
+
+  setFillColor(color) {
+    this.setState({
+      fillColor: color
+    });
   }
 
   appendLayer(e, checkedLayer) {
@@ -414,7 +456,7 @@ class VectorLayerForm extends Component {
           />
         </div>
         <div>
-          <label>Ikon*</label>
+          <label>Ikon</label>
           <input
             type="text"
             ref="input_legend"
@@ -426,6 +468,43 @@ class VectorLayerForm extends Component {
             }}
           />
           <span onClick={(e) => {this.loadLegendImage(e)}} className="btn btn-default">Välj fil {imageLoader}</span>
+        </div>
+        <div>
+          <label>Linjetjocklek</label>
+          <select
+            ref="input_lineWidth"
+            value={this.state.lineWidth}
+            onChange={(e) => {this.setLineWidth(e)}}>
+            <option value="1">Tunn</option>
+            <option value="3">Normal</option>
+            <option value="5">Tjock</option>
+            <option value="8">Tjockare</option>
+          </select>
+        </div>
+        <div>
+          <label>Linjestil</label>
+          <select
+            ref="input_lineStyle"
+            value={this.state.lineStyle}
+            onChange={(e) => {this.setLineStyle(e)}}>
+            <option value="solid">Heldragen</option>
+            <option value="dash">Streckad</option>
+            <option value="dot">Punktad</option>
+          </select>
+        </div>
+        <div>
+          <label>Linjefärg</label>
+            <SketchPicker
+              color={this.state.lineColor}
+              onChangeComplete={(color) => this.setLineColor(color.rgb)}
+            />
+        </div>
+        <div>
+          <label>Fyllnadsfärg</label>
+          <SketchPicker
+            color={this.state.fillColor}
+            onChangeComplete={(color) => this.setFillColor(color.rgb)}
+          />
         </div>
         <div>
           <label>Projektion*</label>

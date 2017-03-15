@@ -42,9 +42,36 @@ module.exports = LayerModel.extend({
 
   featureMap: {},
 
+  reprojectFeatures: function(features, from, to) {
+    if (Array.isArray(features)) {
+      features.forEach(feature => {
+        if (feature.getGeometry().getCoordinates) {
+          let coords = feature.getGeometry().getCoordinates();
+          try {
+            switch (feature.getGeometry().getType()) {
+              case 'Point':
+                feature.getGeometry().setCoordinates(ol.proj.transform(coords, from, to));
+                break;
+              case 'LineString':
+                feature.getGeometry().setCoordinates(coords.map(coord => ol.proj.transform(coord, from, to)));
+                break;
+              case 'Polygon':
+                feature.getGeometry().setCoordinates([coords[0].map(coord => ol.proj.transform(coord, from, to))]);
+                break;
+            }
+          } catch (e) {
+            console.error("Coordinate transformation error.", e);
+          }
+        }
+      });
+    }
+  },
+
   addFeatures: function (data, format) {
     var features = []
-    ,   parser;
+    ,   parser
+    ,   to = this.get('olMap').getView().getProjection().getCode()
+    ,   from = this.get('projection');
 
     if (format === "wfs") {
       parser = new ol.format.WFS({
@@ -60,6 +87,10 @@ module.exports = LayerModel.extend({
       features = parser.readFeatures(data);
     }
 
+    if (to !== from) {
+      this.reprojectFeatures(features, from, to);
+    }
+
     this.get("source").addFeatures(features);
   },
 
@@ -70,9 +101,89 @@ module.exports = LayerModel.extend({
     });
   },
 
+  getStyle: function (feature) {
+
+    const icon = this.get("icon");
+    const fillColor = this.get("fillColor");
+    const lineColor = this.get("lineColor");
+    const lineStyle = this.get("lineStyle");
+    const lineWidth = this.get("lineWidth");
+    const symbolXOffset = this.get("symbolXOffset");
+    const symbolYOffset = this.get("symbolYOffset");
+
+    function getLineDash() {
+        var scale = (a, f) => a.map(b => f * b)
+        ,   width = lineWidth
+        ,   style = lineStyle
+        ,   dash  = [12, 7]
+        ,   dot   = [2, 7]
+        ;
+        switch (style) {
+          case "dash":
+            return width > 3 ? scale(dash, 2) : dash;
+          case "dot":
+            return width > 3 ? scale(dot, 2) : dot;
+          default :
+            return undefined;
+        }
+    }
+
+    function getFill() {
+      return new ol.style.Fill({
+        color: fillColor
+      });
+    }
+
+    function getImage() {
+      return icon === ""
+      ? getPoint()
+      : getIcon();
+    }
+
+    function getIcon() {
+      return new ol.style.Icon({
+        src: icon,
+        scale: 1,
+        anchorXUnits: 'pixels',
+        anchorYUnits: 'pixels',
+        anchor: [
+          symbolXOffset,
+          symbolYOffset
+        ]
+      });
+    }
+
+    function getPoint() {
+      new ol.style.Circle({
+        fill: getFill(),
+        stroke: getStroke(),
+        radius: 4
+      });
+    }
+
+    function getStroke() {
+      return new ol.style.Stroke({
+        color: lineColor,
+        width: lineWidth,
+        lineDash: getLineDash()
+      })
+    }
+
+    function getStyleObj() {
+      return {
+        fill: getFill(),
+        image: getImage(),
+        stroke: getStroke()
+      };
+    }
+
+    return [new ol.style.Style(getStyleObj())];
+  },
+
   initialize: function () {
-    var source,
-       layer;
+
+    var source
+    ,   layer;
 
     source = new ol.source.Vector({
       loader: (extent) => {
@@ -98,28 +209,7 @@ module.exports = LayerModel.extend({
       opacity: this.get("opacity"),
       source: new ol.source.ImageVector({
         source: source,
-        style: (feature) => {
-          var icon = this.get("icon");
-          return [new ol.style.Style({
-            fill: new ol.style.Fill({
-              color: 'rgba(255, 255, 255, 0.6)'
-            }),
-            stroke: new ol.style.Stroke({
-              color: '#319FD3',
-              width: 1
-            }),
-            image: new ol.style.Icon({
-              src: icon,
-              scale: 1,
-              anchorXUnits: 'pixels',
-              anchorYUnits: 'pixels',
-              anchor: [
-                this.get('symbolXOffset'),
-                this.get('symbolYOffset')
-              ]
-            })
-          })];
-        }
+        style: this.getStyle.bind(this)
       })
     });
 

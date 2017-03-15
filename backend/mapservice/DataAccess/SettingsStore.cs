@@ -2,8 +2,6 @@
 using System.Linq;
 using System.Data;
 using System.Data.Entity;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Web.Hosting;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -15,38 +13,6 @@ using MapService.Models.ToolOptions;
 
 namespace MapService.DataAccess
 {      
-    [Table("Bookmark")]
-    class DataBookmark
-    {
-        [Key]
-        [DatabaseGenerated(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.Identity)]        
-        public int Id { get; set; }
-
-        /// <summary>
-        /// Is the bookmark favourite
-        /// </summary>                    
-        public bool Favourite { get; set; }
-
-        /// <summary>
-        /// User who owns the bookmark
-        /// </summary>
-        [Required(ErrorMessage="Username is required")]        
-        public string Username { get; set; }
-            
-        /// <summary>
-        /// Name of the bookmark
-        /// </summary>
-        [Required(ErrorMessage = "Name is required")]        
-        public string Name { get; set; }
-            
-        /// <summary>
-        /// Blob of settings.
-        /// </summary>
-        [Required(ErrorMessage = "Settings is required")]        
-        [MaxLength]
-        public string Settings { get; set; }
-    }
-
     sealed class SettingsDbContext : DbContext
     {
         //private string mapFile = "map_1.json";
@@ -94,7 +60,46 @@ namespace MapService.DataAccess
             string jsonOutput = JsonConvert.SerializeObject(layerConfig, Formatting.Indented);
             System.IO.File.WriteAllText(file, jsonOutput);
         }
-            
+
+        /// <summary>
+        /// Find all config files in App_Data folder.
+        /// </summary>
+        /// <returns></returns>
+        private List<string> getMapConfigFiles()
+        {
+            string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
+            IEnumerable<string> files = Directory.EnumerateFiles(folder);
+            List<string> fileList = new List<string>();
+            foreach (string file in files)
+            {
+                string fileName = Path.GetFileName(file);
+                if (fileName != "layers.json" && fileName != "data.json")
+                {
+                    fileList.Add(fileName);
+                }
+            }
+            return fileList;
+        }
+
+        /// <summary>
+        /// Removes WMS-layer from config
+        /// </summary>
+        /// <param name="id"></param>
+        private void removeLayerFromConfig(string id)
+        {
+            List<string> configFiles = this.getMapConfigFiles();
+            configFiles.ForEach(mapFile =>
+            {
+                MapConfig config = readMapConfigFromFile(mapFile);
+                var tool = config.tools.Find(t => t.type == "layerswitcher");
+                LayerMenuOptions options = JsonConvert.DeserializeObject<LayerMenuOptions>(tool.options.ToString());
+                this.removeLayer(id, options.groups);
+                this.removeLayer(id, options.baselayers);
+                config.tools.Where(t => t.type == "layerswitcher").FirstOrDefault().options = options;
+                this.saveMapConfigToFile(config, mapFile);
+            });
+        }
+
         /// <summary>
         /// Remove WMS-layer
         /// </summary>
@@ -133,95 +138,11 @@ namespace MapService.DataAccess
         }
 
         /// <summary>
-        /// Property bookmarks.
+        /// Find layer with highest unique id.
         /// </summary>
-        public DbSet<DataBookmark> Bookmarks { get { return Set<DataBookmark>(); } }            
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public SettingsDbContext() 
-            : base("SettingsDatabase")
-        {
-        }
-
-        /// <summary>
-        /// Get bookmars for users by username.
-        /// </summary>
-        /// <param name="username"></param>
+        /// <param name="id"></param>
+        /// <param name="high"></param>
         /// <returns></returns>
-        public Bookmark[] GetBookmarks(string username)
-        {
-            DataBookmark[] dataBookmarks = this.Bookmarks.Where(b => b.Username == username).ToArray();                
-            var bookmarks = dataBookmarks.Select(bookmark => {
-                return new Bookmark()
-                {
-                    id = bookmark.Id,
-                    name = bookmark.Name,
-                    username = bookmark.Username,
-                    settings = bookmark.Settings,
-                    favourite = bookmark.Favourite
-                };
-            });
-            return bookmarks.OrderBy(a => a.name).ToArray();
-        }
-
-        /// <summary>
-        /// Add new bookmark.
-        /// </summary>
-        /// <param name="bookmark"></param>
-        public void SaveBookmark(Bookmark bookmark) 
-        {
-            DataBookmark dataBookmark = new DataBookmark() {
-                Id = bookmark.id,
-                Name = bookmark.name,
-                Username = bookmark.username,
-                Settings = bookmark.settings,
-                Favourite = bookmark.favourite
-            };
-            this.Bookmarks.Add(dataBookmark);
-            this.SaveChanges();
-        }
-
-        /// <summary>
-        /// Update existing bookmark by ID.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="bookmark"></param>
-        public void UpdateBookmark(Bookmark bookmark)
-        {
-            var userBookmarks = this.Bookmarks.Where(b => b.Username == bookmark.username);
-            foreach (var b in userBookmarks)
-            {
-                b.Favourite = false;
-            }
-                
-            DataBookmark dataBookmark = this.Bookmarks.Where(b => b.Id == bookmark.id).FirstOrDefault();
-
-            if (bookmark != null)
-            {
-                dataBookmark.Favourite = bookmark.favourite;                 
-                dataBookmark.Id = bookmark.id;                    
-                dataBookmark.Name = bookmark.name;
-                dataBookmark.Settings = bookmark.settings;
-                dataBookmark.Username = bookmark.username;
-                this.SaveChanges();
-            }
-        }
-
-        /// <summary>
-        /// Remove existing bookmark by ID.
-        /// </summary>
-        /// <param name="id"></param>
-        public void RemoveBookmark(int id) 
-        {                
-            DataBookmark bookmark = this.Bookmarks.Where(b => b.Id == id).FirstOrDefault();
-            if (bookmark != null) {
-                this.Bookmarks.Remove(bookmark);
-                this.SaveChanges();
-            }
-        }              
-
         private int highest(string id, int high)
         {
             int i = 0;
@@ -233,7 +154,12 @@ namespace MapService.DataAccess
             return high;
         }
 
-        public int GenerateLayerId(LayerConfig layerConfig)
+        /// <summary>
+        /// Create unique id for new layer.
+        /// </summary>
+        /// <param name="layerConfig"></param>
+        /// <returns></returns>
+        internal int GenerateLayerId(LayerConfig layerConfig)
         {
             int high = 0;
 
@@ -258,7 +184,7 @@ namespace MapService.DataAccess
         /// Add wms layer
         /// </summary>
         /// <param name="layer"></param>
-        public void AddWMSLayer(WMSConfig layer) 
+        internal void AddWMSLayer(WMSConfig layer) 
         {            
             LayerConfig layerConfig = this.readLayerConfigFromFile();
             layer.id = this.GenerateLayerId(layerConfig).ToString();
@@ -270,7 +196,7 @@ namespace MapService.DataAccess
         /// Add wmts layer
         /// </summary>
         /// <param name="layer"></param>
-        public void AddWMTSLayer(WMTSConfig layer)
+        internal void AddWMTSLayer(WMTSConfig layer)
         {            
             LayerConfig layerConfig = this.readLayerConfigFromFile();
             layer.id = this.GenerateLayerId(layerConfig).ToString();
@@ -287,7 +213,7 @@ namespace MapService.DataAccess
         /// Add arcgis layer
         /// </summary>
         /// <param name="layer"></param>
-        public void AddArcGISLayer(ArcGISConfig layer)
+        internal void AddArcGISLayer(ArcGISConfig layer)
         {            
             LayerConfig layerConfig = this.readLayerConfigFromFile();
             layer.id = this.GenerateLayerId(layerConfig).ToString();
@@ -300,7 +226,11 @@ namespace MapService.DataAccess
             this.saveLayerConfigToFile(layerConfig);
         }
 
-        public void RemoveArcGISLayer(string id)
+        /// <summary>
+        /// Remove ArcGIS layer
+        /// </summary>
+        /// <param name="id"></param>
+        internal void RemoveArcGISLayer(string id)
         {
             LayerConfig layerConfig = this.readLayerConfigFromFile();
             this.removeLayerFromConfig(id);
@@ -312,7 +242,11 @@ namespace MapService.DataAccess
             this.saveLayerConfigToFile(layerConfig);
         }
 
-        public void UpdateArcGISLayer(ArcGISConfig layer)
+        /// <summary>
+        /// Update ArcGIS layer
+        /// </summary>
+        /// <param name="layer"></param>
+        internal void UpdateArcGISLayer(ArcGISConfig layer)
         {
             LayerConfig layerConfig = this.readLayerConfigFromFile();
                 var index = layerConfig.arcgislayers.FindIndex(item => item.id == layer.id);
@@ -323,76 +257,41 @@ namespace MapService.DataAccess
                 this.saveLayerConfigToFile(layerConfig);
             }
 
-            /// <summary>
-            /// Update WMS-layer with new config-options.
-            /// </summary>
-            /// <param name="layer"></param>
-            public void UpdateWMSLayer(WMSConfig layer)
-            {                
-                LayerConfig layerConfig = this.readLayerConfigFromFile();
-                var index = layerConfig.wmslayers.FindIndex(item => item.id == layer.id);
-                if (index != -1)
-                {
-                    layerConfig.wmslayers[index] = layer;
-                }
-                this.saveLayerConfigToFile(layerConfig);
-            }
-
-            /// <summary>
-            /// Update WMS-layer with new config-options.
-            /// </summary>
-            /// <param name="layer"></param>
-            public void UpdateWMTSLayer(WMTSConfig layer)
+        /// <summary>
+        /// Update WMS-layer with new config-options.
+        /// </summary>
+        /// <param name="layer"></param>
+        internal void UpdateWMSLayer(WMSConfig layer)
+        {                
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            var index = layerConfig.wmslayers.FindIndex(item => item.id == layer.id);
+            if (index != -1)
             {
-                LayerConfig layerConfig = this.readLayerConfigFromFile();
-                var index = layerConfig.wmtslayers.FindIndex(item => item.id == layer.id);
-                if (index != -1)
-                {
-                    layerConfig.wmtslayers[index] = layer;
-                }
-                this.saveLayerConfigToFile(layerConfig);
+                layerConfig.wmslayers[index] = layer;
             }
-
-            private List<string> getMapConfigFiles()
-            {            
-                string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
-                IEnumerable<string> files = Directory.EnumerateFiles(folder);
-                List<string> fileList = new List<string>();
-                foreach (string file in files)
-                {
-                    string fileName = Path.GetFileName(file);
-                    if (fileName != "layers.json" && fileName != "data.json")
-                    {                        
-                        fileList.Add(fileName);
-                    }
-                }
-                return fileList;
-            }
+            this.saveLayerConfigToFile(layerConfig);
+        }
 
         /// <summary>
-        /// Removes WMS-layer from config
+        /// Update WMS-layer with new config-options.
         /// </summary>
-        /// <param name="id"></param>
-        private void removeLayerFromConfig(string id)
+        /// <param name="layer"></param>
+        internal void UpdateWMTSLayer(WMTSConfig layer)
         {
-            List<string> configFiles = this.getMapConfigFiles();
-            configFiles.ForEach(mapFile =>
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            var index = layerConfig.wmtslayers.FindIndex(item => item.id == layer.id);
+            if (index != -1)
             {
-                MapConfig config = readMapConfigFromFile(mapFile);
-                var tool = config.tools.Find(t => t.type == "layerswitcher");
-                LayerMenuOptions options = JsonConvert.DeserializeObject<LayerMenuOptions>(tool.options.ToString());
-                this.removeLayer(id, options.groups);
-                this.removeLayer(id, options.baselayers);
-                config.tools.Where(t => t.type == "layerswitcher").FirstOrDefault().options = options;
-                this.saveMapConfigToFile(config, mapFile);
-            });
-        }        
+                layerConfig.wmtslayers[index] = layer;
+            }
+            this.saveLayerConfigToFile(layerConfig);
+        }
 
         /// <summary>
         /// Remove WMS-layer
         /// </summary>
         /// <param name="id"></param>
-        public void RemoveWMSLayer(string id)
+        internal void RemoveWMSLayer(string id)
         {
             LayerConfig layerConfig = this.readLayerConfigFromFile();                
             this.removeLayerFromConfig(id);
@@ -408,7 +307,7 @@ namespace MapService.DataAccess
         /// Remove WMS-layer
         /// </summary>
         /// <param name="id"></param>
-        public void RemoveWMTSLayer(string id)
+        internal void RemoveWMTSLayer(string id)
         {
             LayerConfig layerConfig = this.readLayerConfigFromFile();
             this.removeLayerFromConfig(id);
@@ -424,7 +323,7 @@ namespace MapService.DataAccess
         /// Update layer menu
         /// </summary>
         /// <param name="layerMenu"></param>
-        public void UpdateLayerMenu(LayerMenuOptions layerMenu, string mapFile)
+        internal void UpdateLayerMenu(LayerMenuOptions layerMenu, string mapFile)
         {
             MapConfig config = readMapConfigFromFile(mapFile);
             var tool = config.tools.Find(t => t.type == "layerswitcher");
@@ -436,7 +335,7 @@ namespace MapService.DataAccess
         /// Update map settings
         /// </summary>
         /// <param name="mapSettings"></param>
-        public void UpdateMapSettings(MapSetting mapSettings, string mapFile)
+        internal void UpdateMapSettings(MapSetting mapSettings, string mapFile)
         {
             MapConfig config = readMapConfigFromFile(mapFile);
             config.map = mapSettings;
@@ -447,7 +346,7 @@ namespace MapService.DataAccess
         /// Update map settings
         /// </summary>
         /// <param name="mapSettings"></param>
-        public void UpdateToolSettings(List<Tool> toolSettings, string mapFile)
+        internal void UpdateToolSettings(List<Tool> toolSettings, string mapFile)
         {            
             MapConfig config = readMapConfigFromFile(mapFile);
             config.tools = toolSettings;                        
@@ -588,12 +487,12 @@ namespace MapService.DataAccess
         }
 
         /// <summary>
-        /// 
+        /// Find and update layer in group.
         /// </summary>
         /// <param name="groups"></param>
         /// <param name="oldLayerId"></param>
         /// <param name="newLayerId"></param>
-        internal void findAndUpdateLayerInGroup(List<LayerGroup> groups, string oldLayerId, string newLayerId)
+        internal void FindAndUpdateLayerInGroup(List<LayerGroup> groups, string oldLayerId, string newLayerId)
         {
             bool found = false;
             groups.ForEach(group =>
@@ -610,7 +509,7 @@ namespace MapService.DataAccess
                 }
                 if (!found && group.groups.Count > 0)
                 {
-                    this.findAndUpdateLayerInGroup(group.groups, oldLayerId, newLayerId);
+                    this.FindAndUpdateLayerInGroup(group.groups, oldLayerId, newLayerId);
                 }             
             });            
         }
@@ -618,43 +517,47 @@ namespace MapService.DataAccess
         /// <summary>
         /// Re index the layers in the application.        
         /// </summary>
-        internal void IndexLayerMenu(string mapFile)
+        internal void IndexLayerMenu()
         {
             LayerConfig layerConfig = this.readLayerConfigFromFile();
-            MapConfig mapConfig = this.readMapConfigFromFile(mapFile);
 
-            Tool layerSwitcher = mapConfig.tools.Find(a => a.type == "layerswitcher");
-            LayerMenuOptions options = JsonConvert.DeserializeObject<LayerMenuOptions>(layerSwitcher.options.ToString());
-
-            List<ILayerConfig> layers = new List<ILayerConfig>();           
-            layerConfig.arcgislayers.ForEach((layer) => layers.Add(layer));
-            layerConfig.wfstlayers.ForEach((layer) => layers.Add(layer));
-            layerConfig.wmslayers.ForEach((layer) => layers.Add(layer));
-            layerConfig.wmtslayers.ForEach((layer) => layers.Add(layer));
-
-            int newLayerId = 0;
-            layers.ForEach(layer =>
+            this.getMapConfigFiles().ForEach(mapFile =>
             {
-                string oldLayerId = layer.id;   
-                
-                for (int i = 0; i < options.baselayers.Count; i++)
-                {
-                    if (options.baselayers[i] == oldLayerId)
-                    { 
-                        options.baselayers[i] = newLayerId.ToString();
-                    }
-                }    
+                layerConfig = this.readLayerConfigFromFile();
+                List<ILayerConfig> layers = new List<ILayerConfig>();
+                layerConfig.arcgislayers.ForEach((layer) => layers.Add(layer));
+                layerConfig.wfstlayers.ForEach((layer) => layers.Add(layer));
+                layerConfig.wmslayers.ForEach((layer) => layers.Add(layer));
+                layerConfig.wmtslayers.ForEach((layer) => layers.Add(layer));
 
-                this.findAndUpdateLayerInGroup(options.groups, oldLayerId, newLayerId.ToString());                                
-                layer.id = newLayerId.ToString();
-                newLayerId += 1;
+                MapConfig mapConfig = this.readMapConfigFromFile(mapFile);
+                Tool layerSwitcher = mapConfig.tools.Find(a => a.type == "layerswitcher");
+                LayerMenuOptions options = JsonConvert.DeserializeObject<LayerMenuOptions>(layerSwitcher.options.ToString());
+                
+                int newLayerId = 0;
+                layers.ForEach(layer =>
+                {
+                    string oldLayerId = layer.id;
+
+                    for (int i = 0; i < options.baselayers.Count; i++)
+                    {
+                        if (options.baselayers[i] == oldLayerId)
+                        {
+                            options.baselayers[i] = newLayerId.ToString();
+                        }
+                    }
+
+                    this.FindAndUpdateLayerInGroup(options.groups, oldLayerId, newLayerId.ToString());
+                    layer.id = newLayerId.ToString();
+                    newLayerId += 1;
+                });                
+                
+                layerSwitcher.options = options;
+                mapConfig.tools[mapConfig.tools.IndexOf(layerSwitcher)] = layerSwitcher;
+                this.saveMapConfigToFile(mapConfig, mapFile);
             });
 
-            layerSwitcher.options = options;            
-            mapConfig.tools[mapConfig.tools.IndexOf(layerSwitcher)] = layerSwitcher;
-
             this.saveLayerConfigToFile(layerConfig);
-            this.saveMapConfigToFile(mapConfig, mapFile);
         }
     }
 }

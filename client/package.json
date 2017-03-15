@@ -1,11 +1,11 @@
 {
-  "name": "hajk2",
-  "version": "2.0.0",
+  "name": "hajk",
+  "version": "2.1.0",
   "description": "Hajk Map responsiv webbkarta som bygger på Open Layers 3.",
-  "homepage": "https://github.com/Johkar/Hajk2#readme",
+  "homepage": "https://github.com/hajkmap/Hajk#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Johkar/Hajk2.git"
+    "url": "git+https://github.com/hajkmap/Hajk.git"
   },
   "private": true,
   "devDependencies": {
@@ -40,7 +40,7 @@
     "marked": "^0.3.5",
     "matchdep": "^1.0.1",
     "moment": "^2.15.0",
-    "openlayers": "3.20.1",
+    "openlayers": "4.0.1",
     "parallel": "^1.0.10",
     "proj4": "^2.3.12",
     "react": "^0.14.7",
