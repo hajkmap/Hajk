@@ -1,37 +1,33 @@
 {
   "wmtslayers": [
     {
-      "id": "5",
-      "caption": "Topowebb",
-      "url": "http://localhost/lmproxy/wmts?",
+      "id": "2",
+      "caption": "Alingsåskartan",
+      "url": "http://gisak.alingsas.se/arcgis/rest/services/Bakgrund/Alingsaskartan/MapServer/WMTS",
       "owner": null,
-      "date": "1487672835714",
+      "date": "1489648755961",
       "content": "",
       "legend": "",
-      "projection": "EPSG:3006",
+      "projection": "EPSG:3007",
       "visibleAtStart": true,
-      "layer": "topowebb",
+      "layer": "Bakgrund_Alingsaskartan",
       "style": "default",
-      "matrixSet": "3006",
+      "matrixSet": "3007",
       "origin": [
-        "-1200000",
-        "8500000"
+        "-5473200",
+        "1.00021E7"
       ],
       "resolutions": [
-        "4096",
-        "2048",
-        "1024",
-        "512",
-        "256",
-        "128",
-        "64",
-        "32",
-        "16",
-        "8",
-        "4",
-        "2",
-        "1",
-        "0.5"
+        "132.2919312505292",
+        "66.1459656252646",
+        "33.0729828126323",
+        "16.933367200067735",
+        "8.466683600033868",
+        "4.233341800016934",
+        "2.116670900008467",
+        "1.0583354500042335",
+        "0.5291677250021167",
+        "0.26458386250105836"
       ],
       "matrixIds": [
         "0",
@@ -43,280 +39,47 @@
         "6",
         "7",
         "8",
-        "9",
-        "10",
-        "11",
-        "12",
-        "13"
+        "9"
       ]
     }
   ],
-  "wmslayers": [
+  "wmslayers": [],
+  "wfslayers": [],
+  "vectorlayers": [
     {
-      "id": "2",
-      "caption": "Badplats",
-      "url": "http://localhost/geoserver/wms",
-      "owner": "",
-      "date": "1487254256491",
+      "id": "1",
+      "dataFormat": "WFS",
+      "caption": "Grundskola",
+      "url": "http://gisak.alingsas.se/arcgis/services/Extern_webbkarta/Utbildning_barnomsorg/MapServer/WFSServer",
+      "layer": "Extern_webbkarta_Utbildning_barnomsorg:Grundskola",
+      "owner": null,
+      "date": "1489649665452",
       "content": "",
-      "legend": "",
-      "projection": null,
-      "layers": [
-        "sweco:badplats"
-      ],
+      "legend": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAArCAYAAAAQVipNAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAABoRJREFUWIW1mF9oW9cdxz/X917Jsi1P+UNsCm4U0GrYoFG3WW9bxBh7WbK4sDyUBmIzFpgUTLw19G2u9xZa1hBcwZ7ikBUGLcRd+zTGUB4nN4laWMCbIHLiBCdkjhL9uZHuPTp7uLry1X9Zab9gkM756fw+Pvf3+53fuRp71Hr8+7OSwjHQw2CGQQ80Wpg50NNgphXGbsx89O+1vayv9WOUioWCDLGENGcl5QDotRm9jbUeAKKgRyXl86n44RyKvkaV5Ugik30poFsXogGrdHcJOI/sBNBLegDJHApzqfjhS9rIkeUfvJ/M7RlofSEctkpb10EPNs/5fSqjuoZP0/EMgaba45aAShUMy6RoWuQN0Qx33iptza4vhN+cuZxO9w2UioXmpChcaVhKVTnk1/B7dFSlw3+n2n8jus4Bn47wQ75i8jhvYYo6XFCKwu1ULDQfSWRWewKlYqE5FBpgDo6qHBz1dQTpJFWBgFfH79F5UjR4UnTtmMKVVCxEM1QDUCoWirphNFRe2efD79kbSDuwiTEfIx54+NTAQrihspFEJtkCVAvg607gaqgED/jw9shD7fgy2tHjAFhffYH1xVJHW78Hggd8ZP/nhjKv37oQPeIEet2dZWx96K4pU/t7wHgDeE8nUCand+GOHked+C7lv8Sg3D6RvJq99t2dQm1ED9i+ma8DpWKhKJI550cTfi8jXTJcGZ/Cc+piA0x9bnIa7+kElU/eRT6/3/b3I7rt41G+bA9I5lKx0NVIIpO092CIM3adsbPpYBcaZfJ7eN9OwLC/i8003t9co/xxDLl9p63NwRGdnZIr+4Y4AyQ1O3a25hzDQ/7Oz2notZ/iOfGHrjB1Dfvxvp2g8vkfqf7nn21NDvk1HuRqQJK5Wxeii5pV3Jqlls4aKgFv+91RX/8l+onOAdsJynPqfczPlxFf/61lOuDVeYRVD3CruDWroZgnncwa87VfV/v5O2gzb+0NxiX9xBLK5GtYf/+gZW7MBzmj9kUxT2r2qW1rfLiVyJ3WLyNt5i3w+FvKwviwj5xRz7iwBgSdSZ/auIgyPoUyPIa4d5Mhz1jbrJLbG1Qr9oK9bJThMZTxqYbsa/IZbIhgrQlIPr+P+envbWeHf4Tn9J93J1/kqXz6DgDqT84CUPnkXZR9E3h+9UFD4Jv/+BPVzS9bQNv57KsfaicnpbUf/xb11R8CIPZNUN38kvLHMby/vjbQugMBiXs3O9YXALl9B3HvZh10YCAh6etEl9nbbcf1n/2OaqWA+NdfbZs+gIRsATJzzhlWtuh6ZDhSJkK7C/73BkrwjUbg59sor/+i90I1n7syc5rdkBMFKJkmI3pvInU6ilXLFrl9B/Pa2Ubg8SnU6WhfQCXTdH3T0wMH9bclTUH9TCKiAM8Mq+vB6pbn1MX2bYY3gOfUxb4Bnhm7z0xB/UyTUqyh8CHAC0tQMvuMo8lphs+tYW3cgGfb9uB3JtGmj/V3+AIl0/bpSEqxpkUSmWwqHkpSi6PHRYNgoMOh1qxh/0sdK4+LhvtrMpLIZO0YklxFsYGKZUG+QksfLZ8+Gqi2yO0NqtuZlvF8xfa1a8hVqNWhSCKzmoqHzlDbpYdPDUKHGm8Z8vl9zGtncefEoLKE7cOlpHP7qGeZoo4tSlG4DWAhyO4YBPfv/erTS0LCZs7V5Nd8O5/rQDOX0+n1+PSiRNQD/JuGEhKyO0ZDICuoi+5bbEMdmvlo41LqXOio0/C/sASZxwZT+319ZV43lUy4v9O4MyiszqxsXHLbtRTGyEpmPnUuhANlIbi7U8DvU3ll1NfSLvSSJeBh0Wi95yusRlYy8832bSt1ZCUzvx6f/sp5fAB5Q7BhFBj1qvi9GoHhznd8ISH3wiRfthozqc6iLjbvTFcgsB/f+kI4KcXTK+42t1gWFMsCS1hMdGjCW+7xdZlpRd033+nNR1cgsAMdeKP2AmIJV7v7pCgY8bTWq3yFdjBZJMuRxOYqbHZz2V+DVqsRq+sL4bAUhesOWHO9ErKlvmQVdazju6CBgRzNXE6n1xfCb7rr1YO8wavj9qN7kG+pL3uC2TOQA5U6F1pGsgR2sGer9q40BLDC8l5hBgICiKxk3kvFQ8dg9/xrUjKyknlvkLUHb9Ak8yjm7bavhaXeUl++daBIIpNNxUKLza//kPpiP69/v3GgGtRqKn74JOiz9oi5Zqf24HrpnlobOTJvlbbCzudedaaX/g/LPr55wbMKmQAAAABJRU5ErkJggg==",
+      "symbolXOffset": 18.0,
+      "symbolYOffset": 42.0,
+      "projection": "EPSG:3007",
+      "lineStyle": "solid",
+      "lineWidth": "3",
+      "lineColor": "rgba(0, 0, 0, 0.5)",
+      "fillColor": "rgba(255, 255, 255, 0.5)",
+      "visibleAtStart": false,
+      "opacity": 1.0,
       "infobox": "",
-      "searchFields": null,
-      "displayFields": null,
-      "visibleAtStart": true,
-      "queryable": true,
-      "tiled": false,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "geoserver"
+      "queryable": true
     },
     {
       "id": "3",
-      "caption": "Vägnät",
-      "url": "http://localhost/geoserver/wms",
-      "owner": "",
-      "date": "1489142234024",
-      "content": "",
-      "legend": "",
-      "projection": null,
-      "layers": [
-        "sweco:vagnat"
-      ],
-      "infobox": "Väg {kategori}",
-      "searchFields": null,
-      "displayFields": null,
-      "visibleAtStart": true,
-      "queryable": true,
-      "tiled": false,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "geoserver"
-    },
-    {
-      "id": "4",
-      "caption": "Vattenytan",
-      "url": "http://localhost/geoserver/wms",
-      "owner": "",
-      "date": "1488881585304",
-      "content": "",
-      "legend": "",
-      "projection": null,
-      "layers": [
-        "sweco:vattenyta"
-      ],
-      "infobox": "",
-      "searchFields": null,
-      "displayFields": null,
-      "visibleAtStart": true,
-      "queryable": true,
-      "tiled": false,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "geoserver"
-    }
-  ],
-  "wfslayers": [
-    {
-      "id": "5",
-      "caption": "Vattenytan",
-      "url": "http://localhost/geoserver/wfs",
-      "layers": [
-        "sweco:vattenyta"
-      ],
-      "searchFields": [
-        "kategori"
-      ],
-      "infobox": "",
-      "displayFields": [
-        "kategori"
-      ],
-      "geometryField": "geom",
-      "outputFormat": "GML3"
-    },
-    {
-      "id": "6",
-      "caption": "Badplats",
-      "url": "http://localhost/geoserver/wfs",
-      "layers": [
-        "sweco:badplats"
-      ],
-      "searchFields": [
-        "kategori"
-      ],
-      "infobox": "<b>Kkod:</b> {kkod}  \n<b>Kategori:</b> {export:kategori}  \n<b>Text:</b> {export:text}",
-      "displayFields": [
-        "kategori"
-      ],
-      "geometryField": "geom",
-      "outputFormat": "GML3"
-    },
-    {
-      "id": "16",
-      "caption": "Vägnät",
-      "url": "http://localhost/geoserver/wfs",
-      "layers": [
-        "sweco:vagnat"
-      ],
-      "searchFields": [
-        "kategori"
-      ],
-      "infobox": "",
-      "displayFields": [
-        "kategori"
-      ],
-      "geometryField": "geom",
-      "outputFormat": "GML3"
-    }
-  ],
-  "vectorlayers": [
-    {
-      "id": "7",
-      "dataFormat": null,
-      "caption": "Badplats (WFS)",
-      "url": "http://localhost/geoserver/wfs",
-      "layer": "sweco:badplats",
-      "owner": null,
-      "date": "1488291543046",
-      "content": "Badplats",
-      "legend": "http://localhost/Upload/311b9aac-0511-48e5-b3b7-960f253d9f66.png",
-      "symbolXOffset": 15.0,
-      "symbolYOffset": 15.0,
-      "projection": "EPSG:3006",
-      "lineStyle": null,
-      "lineWidth": null,
-      "lineColor": null,
-      "fillColor": null,
-      "visibleAtStart": true,
-      "opacity": 1.0,
-      "infobox": "WFS {kategori}\n\nappasdkajkldjsalk jsadlk jsakl",
-      "queryable": true
-    },
-    {
-      "id": "9",
       "dataFormat": "WFS",
-      "caption": "Hållplats (AGS)",
-      "url": "http://ksdgis.se/arcgis/services/hpl/MapServer/WFSServer",
-      "layer": "hpl:hpl",
+      "caption": "Förskola",
+      "url": "http://gisak.alingsas.se/arcgis/services/Extern_webbkarta/Utbildning_barnomsorg/MapServer/WFSServer",
+      "layer": "Extern_webbkarta_Utbildning_barnomsorg:Förskola",
       "owner": null,
-      "date": "1488883481575",
-      "content": "hej",
-      "legend": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAWCAYAAADAQbwGAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAANhJREFUOI21lDEOwyAMRT8iEjtbbsTQ9rBtBm7Exs5A6NAiIWJj0ip/QzYvzwiyQEgBVPbrEwC0Cw8FlFH/whWytwUAdgAKCQCwe7vnb127qKaBFTZK9rZQUNbw1xyAlF016WuUpWjYbtAuKuk4rh/5AqDZgHSrq/GIZhOB2oX7zLWpvROGc4d/6mL/ExY4suTshkAOOoKJwB4qwaaAZ0MCrfn882ICaTSqH4C1uQ03qjUoPZQ05Mz6OvVxdmQJSsFIYExQ1qBwGyhT0bBtXA1ebS0kHN5vmzcaD2ZB4GrZNAAAAABJRU5ErkJggg==",
-      "symbolXOffset": 10.0,
-      "symbolYOffset": 15.0,
-      "projection": "EPSG:3006",
-      "lineStyle": null,
-      "lineWidth": null,
-      "lineColor": null,
-      "fillColor": null,
-      "visibleAtStart": true,
-      "opacity": 1.0,
-      "infobox": "{namn}  \n{x}  \n{y}  ",
-      "queryable": true
-    },
-    {
-      "id": "11",
-      "dataFormat": "GeoJSON",
-      "caption": "Line",
-      "url": "http://localhost/mapservice/line.json/",
-      "layer": null,
-      "owner": null,
-      "date": "1489570841598",
-      "content": "test",
-      "legend": "http://localhost/hajk/assets/icons/marker.png",
-      "symbolXOffset": 16.0,
-      "symbolYOffset": 16.0,
-      "projection": "EPSG:4326",
-      "lineStyle": "dash",
-      "lineWidth": "3",
-      "lineColor": "rgba(41, 215, 221, 0.5)",
-      "fillColor": "rgba(99, 6, 124, 0.5)",
-      "visibleAtStart": true,
-      "opacity": 1.0,
-      "infobox": "",
-      "queryable": true
-    },
-    {
-      "id": "13",
-      "dataFormat": "WFS",
-      "caption": "Restaurang",
-      "url": "https://gisak.alingsas.se/arcgis/services/Extern_webbkarta/Kultur_Noje/MapServer/WFSServer",
-      "layer": "Extern_webbkarta_Kultur_Noje:Restaurang",
-      "owner": null,
-      "date": "1488890099493",
+      "date": "1489650476886",
       "content": "",
-      "legend": "data:image/png;base64,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",
-      "symbolXOffset": 0.0,
-      "symbolYOffset": 0.0,
-      "projection": "EPSG:3007",
-      "lineStyle": null,
-      "lineWidth": null,
-      "lineColor": null,
-      "fillColor": null,
-      "visibleAtStart": false,
-      "opacity": 1.0,
-      "infobox": "",
-      "queryable": true
-    },
-    {
-      "id": "14",
-      "dataFormat": "WFS",
-      "caption": "Kraftverk",
-      "url": "http://194.71.132.27/geoserver/fortum/wfs",
-      "layer": "fortum:fortum_kraftverk",
-      "owner": null,
-      "date": "1489581068099",
-      "content": "",
-      "legend": "",
-      "symbolXOffset": 16.0,
-      "symbolYOffset": 16.0,
-      "projection": "EPSG:3006",
-      "lineStyle": "solid",
-      "lineWidth": "1",
-      "lineColor": "rgba(111, 111, 111, 1)",
-      "fillColor": "rgba(0, 252, 54, 1)",
-      "visibleAtStart": false,
-      "opacity": 1.0,
-      "infobox": "Hej Hej {namn}",
-      "queryable": true
-    },
-    {
-      "id": "15",
-      "dataFormat": "WFS",
-      "caption": "Badplats",
-      "url": "http://localhost/geoserver/wfs",
-      "layer": "sweco:badplats",
-      "owner": null,
-      "date": "1489070945114",
-      "content": "Badplats",
-      "legend": "http://localhost/Upload/39f6c2e3-6335-4276-86e1-9585580fa5e7.png",
-      "symbolXOffset": 16.0,
-      "symbolYOffset": 16.0,
-      "projection": "EPSG:3006",
-      "lineStyle": null,
-      "lineWidth": null,
-      "lineColor": null,
-      "fillColor": null,
-      "visibleAtStart": false,
-      "opacity": 1.0,
-      "infobox": "",
-      "queryable": true
-    },
-    {
-      "id": "17",
-      "dataFormat": "GeoJSON",
-      "caption": "Point",
-      "url": "http://localhost/mapservice/point.json/",
-      "layer": null,
-      "owner": null,
-      "date": "1489571933193",
-      "content": "",
-      "legend": "http://localhost/hajk/assets/icons/dot_marker.png",
-      "symbolXOffset": 8.0,
-      "symbolYOffset": 8.0,
+      "legend": "data:image/png;base64,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",
+      "symbolXOffset": 18.0,
+      "symbolYOffset": 42.0,
       "projection": "EPSG:3006",
       "lineStyle": "solid",
       "lineWidth": "3",
@@ -325,133 +88,9 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "",
-      "queryable": false
-    },
-    {
-      "id": "18",
-      "dataFormat": "GeoJSON",
-      "caption": "Polygon",
-      "url": "http://localhost/mapservice/polygon.json/",
-      "layer": null,
-      "owner": null,
-      "date": "1489571846703",
-      "content": "",
-      "legend": "http://localhost/hajk/assets/icons/marker.png",
-      "symbolXOffset": 0.0,
-      "symbolYOffset": 0.0,
-      "projection": "EPSG:3006",
-      "lineStyle": "dot",
-      "lineWidth": "3",
-      "lineColor": "rgba(0, 0, 0, 1)",
-      "fillColor": "rgba(56, 153, 73, 1)",
-      "visibleAtStart": false,
-      "opacity": 0.5,
-      "infobox": "",
-      "queryable": true
-    },
-    {
-      "id": "19",
-      "dataFormat": "WFS",
-      "caption": "Vägnät vektor",
-      "url": "http://localhost/geoserver/wfs",
-      "layer": "sweco:vagnat",
-      "owner": null,
-      "date": "1489581127365",
-      "content": "Vägnäs",
-      "legend": "",
-      "symbolXOffset": 0.0,
-      "symbolYOffset": 0.0,
-      "projection": "EPSG:3006",
-      "lineStyle": "dash",
-      "lineWidth": "1",
-      "lineColor": "rgba(0, 0, 0, 1)",
-      "fillColor": "rgba(0, 0, 0, 1)",
-      "visibleAtStart": false,
-      "opacity": 1.0,
-      "infobox": "",
       "queryable": true
     }
   ],
-  "wfstlayers": [
-    {
-      "id": "1",
-      "caption": "Badplats",
-      "url": "http://localhost/geoserver/wfs",
-      "projection": "EPSG:3006",
-      "layers": [
-        "sweco:badplats"
-      ],
-      "editableFields": [
-        {
-          "index": 1,
-          "name": "kkod",
-          "dataType": "int",
-          "textType": null,
-          "values": null,
-          "hidden": false,
-          "defaultValue": null
-        },
-        {
-          "index": 2,
-          "name": "kategori",
-          "dataType": "string",
-          "textType": "lista",
-          "values": [
-            "a",
-            "b",
-            "c",
-            "d"
-          ],
-          "hidden": false,
-          "defaultValue": "a"
-        },
-        {
-          "index": 3,
-          "name": "srikt",
-          "dataType": "number",
-          "textType": null,
-          "values": null,
-          "hidden": false,
-          "defaultValue": null
-        },
-        {
-          "index": 4,
-          "name": "text",
-          "dataType": "string",
-          "textType": "url",
-          "values": null,
-          "hidden": false,
-          "defaultValue": null
-        }
-      ],
-      "editPoint": true,
-      "editPolygon": false,
-      "editLine": false
-    }
-  ],
-  "arcgislayers": [
-    {
-      "id": "0",
-      "caption": "Hållplats (MapService)",
-      "url": "http://ksdgis.se/arcgis/rest/services/hpl/MapServer",
-      "owner": null,
-      "date": "1488463322269",
-      "content": "",
-      "legend": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAWCAYAAADAQbwGAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAANhJREFUOI21lDEOwyAMRT8iEjtbbsTQ9rBtBm7Exs5A6NAiIWJj0ip/QzYvzwiyQEgBVPbrEwC0Cw8FlFH/whWytwUAdgAKCQCwe7vnb127qKaBFTZK9rZQUNbw1xyAlF016WuUpWjYbtAuKuk4rh/5AqDZgHSrq/GIZhOB2oX7zLWpvROGc4d/6mL/ExY4suTshkAOOoKJwB4qwaaAZ0MCrfn882ICaTSqH4C1uQ03qjUoPZQ05Mz6OvVxdmQJSsFIYExQ1qBwGyhT0bBtXA1ebS0kHN5vmzcaD2ZB4GrZNAAAAABJRU5ErkJggg==&hpl",
-      "projection": "EPSG:3006",
-      "visibleAtStart": false,
-      "layers": [
-        "0"
-      ],
-      "extent": [
-        "317849.3461",
-        "6529912.0642",
-        "512033.2538",
-        "6770321.6249"
-      ],
-      "opacity": 1.0,
-      "infobox": "Hållplats  \nID: {id}  \nNamn: {namn}",
-      "queryable": true
-    }
-  ]
+  "wfstlayers": [],
+  "arcgislayers": []
 }

@@ -161,19 +161,24 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "1"
+          "2"
         ],
         "groups": [
           {
-            "id": "0b4b892f-8802-90ac-9cec-64b696a7927e",
+            "id": "35aee54d-e23c-806b-bcfd-a386d15e3697",
             "parent": "-1",
-            "name": "Coolt",
+            "name": "Skolor",
             "toggled": false,
             "expanded": false,
             "layers": [
               {
                 "id": "3",
-                "visibleAtStart": false,
+                "visibleAtStart": true,
+                "drawOrder": 0
+              },
+              {
+                "id": "1",
+                "visibleAtStart": true,
                 "drawOrder": 0
               }
             ],
@@ -181,25 +186,36 @@
           }
         ],
         "active": true,
-        "visibleAtStart": false,
+        "visibleAtStart": true,
         "backgroundSwitcherBlack": true,
         "backgroundSwitcherWhite": true,
         "toggleAllButton": false
       }
     },
     {
-      "type": "anchor",
-      "options": {}
+      "type": "infoclick",
+      "options": {
+        "displayPopup": false,
+        "markerImg": "assets/icons/shadow_marker.png",
+        "anchor": [
+          7.5,
+          0
+        ],
+        "imgSize": [
+          15,
+          6
+        ]
+      }
     }
   ],
   "map": {
     "target": "map",
     "center": [
-      414962,
-      6583005
+      178826,
+      6422667
     ],
-    "projection": "EPSG:3006",
-    "zoom": 4,
+    "projection": "EPSG:3007",
+    "zoom": 3,
     "maxZoom": 3,
     "minZoom": 9,
     "resolutions": [
