@@ -352,6 +352,23 @@ var EditModel = {
   },
 
   /**
+   * Filter features by hidden default value.
+   * If the the dataset has a hidden field with a default value this will be set as filter.
+   * @instance
+   * @param {external:ol.Feature[]} features
+   */
+  filterByDefaultValue: function(features) {
+    return features.filter(feature => {
+      return this.get('editSource').editableFields.some(field => {
+        var value = feature.getProperties()[field.name];
+        if (field.hidden && value === field.defaultValue) {
+          return true;
+        }
+      });
+    });
+  },
+
+  /**
    * Load data from WFS-service and att to the source.
    * @instance
    * @param {object} config
@@ -370,9 +387,16 @@ var EditModel = {
           srsname: config.projection
         }
     }).done(rsp => {
-      this.get('vectorSource').addFeatures(format.readFeatures(rsp));
-      this.get('vectorSource').getFeatures().forEach(feature => {
+      var features = format.readFeatures(rsp);
+      if (features.length > 0) {
+        this.set("geometryName", features[0].getGeometryName());
 
+      }
+      if (this.get('editSource').editableFields.some(field => field.hidden)) {
+        features = this.filterByDefaultValue(features);
+      }
+      this.get('vectorSource').addFeatures(features);
+      this.get('vectorSource').getFeatures().forEach(feature => {
         //Property changed
         feature.on('propertychange', (e) => {
           if (feature.modification === 'removed')
@@ -381,7 +405,6 @@ var EditModel = {
             return;
           feature.modification = 'updated';
         });
-
         //Geometry changed.
         feature.on('change', (e) => {
           if (feature.modification === 'removed')
@@ -390,7 +413,6 @@ var EditModel = {
             return;
           feature.modification = 'updated';
         });
-
       });
       if (done) done();
     }).error(rsp => {
@@ -495,7 +517,6 @@ var EditModel = {
    * @param {string} geometryType - Geometry type of feature
    */
   handleDrawEnd: function(feature, geometryType) {
-    feature.setGeometryName('geom');
     feature.modification = 'added';
     this.editAttributes(feature);
   },
@@ -521,7 +542,7 @@ var EditModel = {
         source: this.get('vectorSource'),
         style: this.getScetchStyle(),
         type: geometryType,
-        geometryName: 'geom'
+        geometryName: this.get('geometryName')
       }));
       this.get("drawTool").on('drawend', (event) => {
         this.handleDrawEnd(event.feature, geometryType)

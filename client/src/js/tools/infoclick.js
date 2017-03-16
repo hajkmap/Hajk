@@ -155,7 +155,10 @@ var InfoClickModel = {
       this.layerOrder[layer.get('name')] = i;
     });
 
-    this.map.forEachFeatureAtPixel(event.pixel, (feature, layer) => {      
+    this.map.forEachFeatureAtPixel(event.pixel, (feature, layer) => {
+
+      console.log(layer.get('queryable'));
+
       if (layer && layer.get('name') && (layer.get('queryable') !== false)) {
         if (
           layer.get('name') !== 'preview-layer' &&

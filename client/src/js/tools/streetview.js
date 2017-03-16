@@ -34,6 +34,8 @@ var panorama;
  * @property {string} title -Default: Google Street View
  * @property {boolean} visible - Default: false
  * @property {ShellModel} shell
+ * @property {string} imageDate
+ * @property {string} apiKey
  */
 var StreetViewModelProperties = {
   type: 'streetview',
@@ -44,7 +46,8 @@ var StreetViewModelProperties = {
   visible: false,
   shell: undefined,
   google: undefined,
-  apiKey: ''
+  imageDate: '',
+  apiKey: '',
 }
 
 /**
@@ -79,9 +82,12 @@ var StreetViewModel = {
    */
   displayPanorama: function (data, status) {
     if (status === google.maps.StreetViewStatus.OK) {
+      this.set('imageDate', data.imageDate);
       panorama.setPano(data.location.pano);
       panorama.setPov({ heading: 270, pitch: 0 });
       panorama.setVisible(true);
+    } else {
+      this.set('imageDate', '');
     }
   },
 
@@ -92,7 +98,7 @@ var StreetViewModel = {
    * @param {array} coordinate
    */
   showLocation: function (e) {
-        
+
     var coord  = ol.proj.transform(
       e.coordinate,
 			this.get('olMap').getView().getProjection(),
@@ -103,7 +109,7 @@ var StreetViewModel = {
     this.addMarker(e.coordinate, (panorama && panorama.getPov().heading) || 0);
     streetViewService = new google.maps.StreetViewService();
  		panorama = new google.maps.StreetViewPanorama(document.getElementById('street-view-window'));
-    streetViewService.getPanoramaByLocation(location, 50, this.displayPanorama);
+    streetViewService.getPanoramaByLocation(location, 50, this.displayPanorama.bind(this));
 
 	  google.maps.event.addListener(panorama, 'position_changed', () => { this.onPositionChanged() });
 	  google.maps.event.addListener(panorama, 'pov_changed', () => { this.onPositionChanged() });
