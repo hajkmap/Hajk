@@ -156,8 +156,7 @@ var SelectionModel = {
     this.get('olMap').forEachFeatureAtPixel(event.pixel, (feature, layer) => {
       if (layer && layer.get('name')) {
         if (
-          layer.get('name') !== 'preview-layer' &&
-          layer.get('name') !== 'buffer-layer' &&
+          layer.get('name') !== 'preview-layer' &&          
           layer.get('name') !== 'highlight-wms'
         ) {
           promises.push(new Promise((resolve, reject) => {

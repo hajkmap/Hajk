@@ -183,6 +183,11 @@
             "expanded": false,
             "layers": [
               {
+                "id": "11",
+                "visibleAtStart": false,
+                "drawOrder": 0
+              },
+              {
                 "id": "6",
                 "visibleAtStart": false,
                 "drawOrder": 0
@@ -269,6 +274,27 @@
       "type": "coordinates",
       "options": {
         "transformations": []
+      }
+    },
+    {
+      "type": "search",
+      "options": {
+        "onMap": false,
+        "toolbar": "bottom",
+        "maxZoom": 14,
+        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
+        "kmlExportUrl": "/mapservice/export/kml",
+        "excelExportUrl": "/mapservice/export/excel",
+        "displayPopup": true,
+        "selectionTools": true,
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ]
       }
     },
     {

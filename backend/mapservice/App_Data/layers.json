@@ -137,6 +137,28 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver"
+    },
+    {
+      "id": "11",
+      "caption": "Biotopkartering",
+      "url": "https://ksdgis.se/geoserver/wms",
+      "owner": "",
+      "date": "1490103099188",
+      "content": "",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "motala:Biotopkartering2016"
+      ],
+      "infobox": "",
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver"
     }
   ],
   "wfslayers": [],
