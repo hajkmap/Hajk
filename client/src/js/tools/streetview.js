@@ -214,7 +214,7 @@ var StreetViewModel = {
 
   deactivate: function () {
     this.get('olMap').set('clickLock', false);
-    this.get('olMap').unByKey(this.eventKey);
+    this.get('olMap').unset(this.eventKey);
     this.get('streetViewMarkerLayer').getSource().clear();
   },
 
