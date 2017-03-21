@@ -216,7 +216,7 @@
     {
       "type": "infoclick",
       "options": {
-        "displayPopup": false,
+        "displayPopup": 1,
         "markerImg": "assets/icons/marker.png",
         "anchor": [
           16,
