@@ -268,6 +268,9 @@ var DrawPanelView = {
     this.props.model.clear();
     this.props.model.set("kmlExportUrl", false);
     this.props.model.set("kmlImport", false);
+    this.setState({
+      circleRadius: ""
+    });
   },
 
   /**

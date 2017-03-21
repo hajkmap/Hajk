@@ -292,6 +292,19 @@ var DrawModel = {
       value = Math.round(value);
     }
 
+    if (type === "circle") {
+      let prefix = " m";
+      let prefixSq = " m²";
+      if (value >= 1E3) {
+        prefix = " km";
+        value = value / 1E3;
+      }
+      label = (
+        "R = " + value + prefix +
+        "\nA = " + (Math.round((value * value * Math.PI) * 1E3) / 1E3) + prefixSq
+      );
+    }
+
     if (type === "area") {
       let prefix = " m²";
       if (value >= 1E6) {
@@ -996,7 +1009,7 @@ var DrawModel = {
       case "Point": return show ? this.formatLabel("point", [props.position.n, props.position.e]) : "";
       case "LineString": return show ? this.formatLabel("length", props.length): "";
       case "Polygon": return show ? this.formatLabel("area", props.area) : "";
-      case "Circle": return show ? this.formatLabel("length", props.radius): "";
+      case "Circle": return show ? this.formatLabel("circle", props.radius): "";
       case "Text": return props.description;
       default: return "";
     }
