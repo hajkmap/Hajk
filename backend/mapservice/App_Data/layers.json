@@ -41,9 +41,104 @@
         "8",
         "9"
       ]
+    },
+    {
+      "id": "5",
+      "caption": "Lantmäteriet",
+      "url": "http://194.71.132.27/lmproxy/wmts",
+      "owner": null,
+      "date": "1490005710176",
+      "content": "",
+      "legend": "",
+      "projection": "EPSG:3006",
+      "visibleAtStart": true,
+      "layer": "topowebb",
+      "style": "default",
+      "matrixSet": "3006",
+      "origin": [
+        "-1200000",
+        "8500000"
+      ],
+      "resolutions": [
+        "4096",
+        "2048",
+        "1024",
+        "512",
+        "256",
+        "128",
+        "64",
+        "32",
+        "16",
+        "8",
+        "4",
+        "2",
+        "1",
+        "0.5"
+      ],
+      "matrixIds": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13"
+      ]
     }
   ],
-  "wmslayers": [],
+  "wmslayers": [
+    {
+      "id": "4",
+      "caption": "Fastighet",
+      "url": "http://ksdgis.se/geoserver/demo/wms",
+      "owner": "",
+      "date": "1490005585258",
+      "content": "",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "demo_fastighet"
+      ],
+      "infobox": "",
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver"
+    },
+    {
+      "id": "6",
+      "caption": "Testyta WMS",
+      "url": "http://localhost/geoserver/wms",
+      "owner": "",
+      "date": "1490007802343",
+      "content": "",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "sweco:testyta"
+      ],
+      "infobox": "",
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver"
+    }
+  ],
   "wfslayers": [],
   "vectorlayers": [
     {
@@ -89,8 +184,111 @@
       "opacity": 1.0,
       "infobox": "",
       "queryable": true
+    },
+    {
+      "id": "7",
+      "dataFormat": "WFS",
+      "caption": "Testyta",
+      "url": "http://localhost/geoserver/wfs",
+      "layer": "sweco:testyta",
+      "owner": null,
+      "date": "1490007844026",
+      "content": "",
+      "legend": "",
+      "symbolXOffset": 0.0,
+      "symbolYOffset": 0.0,
+      "projection": "EPSG:3006",
+      "lineStyle": "solid",
+      "lineWidth": "5",
+      "lineColor": "rgba(0, 0, 0, 0.85)",
+      "fillColor": "rgba(235, 5, 5, 0.5)",
+      "visibleAtStart": false,
+      "opacity": 1.0,
+      "infobox": "",
+      "queryable": true
+    },
+    {
+      "id": "10",
+      "dataFormat": "WFS",
+      "caption": "Yta",
+      "url": "http://194.71.132.27/geoserver/demo/wfs",
+      "layer": "demo:yta",
+      "owner": null,
+      "date": "1490008117148",
+      "content": "",
+      "legend": "",
+      "symbolXOffset": 0.0,
+      "symbolYOffset": 0.0,
+      "projection": "EPSG:900913",
+      "lineStyle": "solid",
+      "lineWidth": "3",
+      "lineColor": "rgba(0, 0, 0, 0.89)",
+      "fillColor": "rgba(241, 16, 16, 0.62)",
+      "visibleAtStart": false,
+      "opacity": 1.0,
+      "infobox": "",
+      "queryable": true
     }
   ],
-  "wfstlayers": [],
+  "wfstlayers": [
+    {
+      "id": "8",
+      "caption": "Testyta",
+      "url": "http://localhost/geoserver/wfs",
+      "projection": "EPSG:3006",
+      "layers": [
+        "sweco:testyta"
+      ],
+      "editableFields": [
+        {
+          "index": 0,
+          "name": "id",
+          "dataType": "int",
+          "textType": null,
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        }
+      ],
+      "editPoint": false,
+      "editPolygon": true,
+      "editLine": false
+    },
+    {
+      "id": "9",
+      "caption": "Yta",
+      "url": "http://194.71.132.27/geoserver/demo/wfs",
+      "projection": "EPSG:3006",
+      "layers": [
+        "demo:yta"
+      ],
+      "editableFields": [
+        {
+          "index": 1,
+          "name": "name",
+          "dataType": "string",
+          "textType": "fritext",
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 3,
+          "name": "list",
+          "dataType": "string",
+          "textType": "lista",
+          "values": [
+            "a",
+            "b"
+          ],
+          "hidden": false,
+          "defaultValue": ""
+        }
+      ],
+      "editPoint": false,
+      "editPolygon": true,
+      "editLine": false
+    }
+  ],
   "arcgislayers": []
 }

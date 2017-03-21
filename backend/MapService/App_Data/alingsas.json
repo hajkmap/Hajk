@@ -165,6 +165,21 @@
         ],
         "groups": [
           {
+            "id": "a8e56a2d-78b1-a993-6145-d52436f87a5a",
+            "parent": "-1",
+            "name": "Fastigheter",
+            "toggled": false,
+            "expanded": true,
+            "layers": [
+              {
+                "id": "4",
+                "visibleAtStart": true,
+                "drawOrder": 0
+              }
+            ],
+            "groups": []
+          },
+          {
             "id": "35aee54d-e23c-806b-bcfd-a386d15e3697",
             "parent": "-1",
             "name": "Skolor",

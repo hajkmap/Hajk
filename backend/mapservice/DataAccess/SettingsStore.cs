@@ -349,7 +349,13 @@ namespace MapService.DataAccess
         internal void UpdateToolSettings(List<Tool> toolSettings, string mapFile)
         {            
             MapConfig config = readMapConfigFromFile(mapFile);
-            config.tools = toolSettings;                        
+            toolSettings = toolSettings.Where(t => t.type.ToLower() != "layerswitcher").ToList();
+            var layerSwitcher = config.tools.Find(t => t.type.ToLower() == "layerswitcher");            
+            config.tools = toolSettings;
+            if (layerSwitcher != null)
+            {
+                config.tools.Insert(0, layerSwitcher);
+            }
             this.saveMapConfigToFile(config, mapFile);
         }
 
