@@ -301,7 +301,7 @@ var DrawModel = {
       }
       label = (
         "R = " + value + prefix +
-        "\nA = " + (Math.round((value * value * Math.PI) * 1E3) / 1E3) + prefixSq
+        " \nA = " + (Math.round((value * value * Math.PI) * 1E3) / 1E3) + prefixSq
       );
     }
 
@@ -603,13 +603,16 @@ var DrawModel = {
           doc += '<styleUrl>#' + i + '</styleUrl>';
 
           if (feature.getGeometry() instanceof ol.geom.Point) {
-              doc += point(parser.writeFeature(feature));
+            doc += point(parser.writeFeature(feature));
           }
           if (feature.getGeometry() instanceof ol.geom.LineString) {
-              doc += line(parser.writeFeature(feature));
+            doc += line(parser.writeFeature(feature));
           }
           if (feature.getGeometry() instanceof ol.geom.Polygon) {
-              doc += polygon(parser.writeFeature(feature));
+            doc += polygon(parser.writeFeature(feature));
+          }
+          if (feature.getGeometry() instanceof ol.geom.Circle) {
+            doc += polygon(parser.writeFeature(feature));
           }
 
           if (feature.getProperties().style) {
@@ -682,6 +685,10 @@ var DrawModel = {
 
     features.forEach((feature) => {
       var c = feature.clone();
+      if (c.getGeometry() instanceof ol.geom.Circle) {
+        let geom = ol.geom.Polygon.fromCircle(feature.getGeometry(), 96);
+        c.setGeometry(geom);
+      }
       c.getGeometry().transform(this.get('olMap').getView().getProjection(), "EPSG:4326");
       c.setProperties({
         style: JSON.stringify(this.extractStyle(c.getStyle()[1]))

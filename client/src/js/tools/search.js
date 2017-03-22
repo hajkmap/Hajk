@@ -169,9 +169,15 @@ var SearchModel = {
 
       return features.reduce((str, feature) => {
 
-        var coords = feature.getGeometry().getCoordinates();
-        var posList = "";
-        var operation = "Intersects";
+        var posList = ""
+        ,   operation = "Intersects"
+        ,   coords = [];
+
+        if (feature.getGeometry() instanceof ol.geom.Circle) {
+          coords = ol.geom.Polygon.fromCircle(feature.getGeometry(), 96).getCoordinates();
+        } else {
+          coords = feature.getGeometry().getCoordinates();
+        }
 
         if (this.isCoordinate(coords[0])) {
           posList = coords.map(c => c[0] + " " + c[1]).join(" ");
@@ -610,7 +616,7 @@ var SearchModel = {
         Cols: columns,
         Rows: values
       };
-            
+
       return {
         TabName: group,
         Cols: columns,

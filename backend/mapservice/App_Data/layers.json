@@ -161,7 +161,25 @@
       "serverType": "geoserver"
     }
   ],
-  "wfslayers": [],
+  "wfslayers": [
+    {
+      "id": "12",
+      "caption": "Fastighet",
+      "url": "http://194.71.132.27/geoserver/demo/wfs",
+      "layers": [
+        "demo:demo_fastighet"
+      ],
+      "searchFields": [
+        "fastighet"
+      ],
+      "infobox": "Fastighet!  \n{export:fastighet}  \n{export:fnr}",
+      "displayFields": [
+        "fastighet"
+      ],
+      "geometryField": "geom",
+      "outputFormat": "GML3"
+    }
+  ],
   "vectorlayers": [
     {
       "id": "1",
