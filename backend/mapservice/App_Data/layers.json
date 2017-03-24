@@ -41,8 +41,7 @@
         "8",
         "9"
       ]
-    },
-    {
+    }, {
       "id": "5",
       "caption": "Lantmäteriet",
       "url": "http://194.71.132.27/lmproxy/wmts",
@@ -99,14 +98,14 @@
       "caption": "Fastighet",
       "url": "http://ksdgis.se/geoserver/demo/wms",
       "owner": "",
-      "date": "1490005585258",
+      "date": "1490176945938",
       "content": "",
       "legend": "",
       "projection": null,
       "layers": [
         "demo_fastighet"
       ],
-      "infobox": "",
+      "infobox": "{fastighet}  ",
       "searchFields": null,
       "displayFields": null,
       "visibleAtStart": false,
@@ -143,12 +142,14 @@
       "caption": "Biotopkartering",
       "url": "https://ksdgis.se/geoserver/wms",
       "owner": "",
-      "date": "1490103099188",
+      "date": "1490174277481",
       "content": "",
       "legend": "",
       "projection": null,
       "layers": [
-        "motala:Biotopkartering2016"
+        "motala:Biotopkartering2016",
+        "motala:Anodonta_anatina",
+        "motala:Anodonta_cygnea"
       ],
       "infobox": "",
       "searchFields": null,
@@ -177,6 +178,23 @@
         "fastighet"
       ],
       "geometryField": "geom",
+      "outputFormat": "GML3"
+    },
+    {
+      "id": "13",
+      "caption": "HPL",
+      "url": "http://194.71.132.27/geoserver/demo/wfs",
+      "layers": [
+        "demo:stopareas"
+      ],
+      "searchFields": [
+        "namn"
+      ],
+      "infobox": "",
+      "displayFields": [
+        "namn"
+      ],
+      "geometryField": "the_geom",
       "outputFormat": "GML3"
     }
   ],

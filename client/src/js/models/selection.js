@@ -80,6 +80,7 @@ var SelectionModel = {
     }));
 
     this.set('highlightLayer', new HighlightLayer({
+      id: 'selection-highligt',
       anchor: this.get('anchor'),
       imgSize: this.get('imgSize'),
       markerImg: this.get('markerImg'),
@@ -123,6 +124,15 @@ var SelectionModel = {
     this.features = {};
   },
 
+  putHighlightLayerOnTop: function() {
+    let layers = this.get('olMap').getLayers();
+    const topIndex = layers.getLength() - 1;
+    var h = layers.getArray().find(layer => layer.get("id") === "selection-highligt");
+    if (h) {
+      layers.setAt(topIndex, h);
+    }
+  },
+
   addFeature: function (f) {
     const id = f.getId();
 
@@ -130,6 +140,7 @@ var SelectionModel = {
     clone.setId(f.getId());
 
     this.get('source').clear();
+    this.putHighlightLayerOnTop();
 
     if (this.features.hasOwnProperty(id)) {
       delete this.features[id];
@@ -156,7 +167,7 @@ var SelectionModel = {
     this.get('olMap').forEachFeatureAtPixel(event.pixel, (feature, layer) => {
       if (layer && layer.get('name')) {
         if (
-          layer.get('name') !== 'preview-layer' &&          
+          layer.get('name') !== 'preview-layer' &&
           layer.get('name') !== 'highlight-wms'
         ) {
           promises.push(new Promise((resolve, reject) => {

@@ -165,17 +165,29 @@ var BufferModel = {
     var buffered = Object.keys(features).map(key => {
 
       var feature = features[key]
-      ,   geom    = parser.read(feature.getGeometry())
-      ,   olf     = new ol.Feature()
-      ,   buff = geom.buffer(dist);
+      ,   olf = new ol.Feature()
+      ,   olGeom = feature.getGeometry()
+      ,   jstsGeom
+      ,   buff
+      ;
 
+      if (olGeom instanceof ol.geom.Circle) {
+        olGeom = ol.geom.Polygon.fromCircle(olGeom, 0b10000000);
+      }
+
+      jstsGeom = parser.read(olGeom);
+      buff = jstsGeom.buffer(dist);
       olf.setGeometry(parser.write(buff));
+      olf.setStyle(this.getDefaultStyle());
       return olf;
     });
 
-    this.get('bufferLayer').getSource().addFeatures(buffered);
-
-    return true;
+    if (buffered) {
+      this.get('bufferLayer').getSource().addFeatures(buffered);
+      return true;
+    } else {
+      return false;
+    }
   },
 
   clearSelection: function() {

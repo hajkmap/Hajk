@@ -29,7 +29,7 @@ var LayerModel = require('layers/layer');
  * @property {string} name
  * @property {external:ol.layer} selectedLayer
  */
-var HighlightLayerProperties = {
+var HighlightLayerProperties = {  
   source: undefined,
   name: "highlight-wms",
   selectedLayer: undefined,
@@ -82,6 +82,7 @@ var HighlightLayer = {
     });
 
     this.layer = new ol.layer.Vector({
+      id: props.id || "",
       visible: true,
       name: this.get('name'),
       source: this.get('source'),

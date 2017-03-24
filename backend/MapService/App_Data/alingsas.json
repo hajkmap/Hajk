@@ -210,17 +210,21 @@
     {
       "type": "infoclick",
       "options": {
-        "displayPopup": false,
+        "displayPopup": 1,
         "markerImg": "assets/icons/shadow_marker.png",
         "anchor": [
           7.5,
-          0
+          16
         ],
         "imgSize": [
           15,
           6
         ]
       }
+    },
+    {
+      "type": "location",
+      "options": {}
     }
   ],
   "map": {
