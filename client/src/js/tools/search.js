@@ -594,7 +594,7 @@ var SearchModel = {
         ,   names = Object.keys(attributes);
 
         names = names.filter(name => {
-          if (!hit) {
+          if (!hit.infobox) {
             return typeof attributes[name] === "string"  ||
                    typeof attributes[name] === "boolean" ||
                    typeof attributes[name] === "number";
@@ -604,7 +604,8 @@ var SearchModel = {
               regExp.test(hit.infobox)
             );
           }
-        });
+        });        
+
         if (names.length > columns.length) {
           columns = names;
         }

@@ -41,8 +41,9 @@
 
 #popup-content {
   max-height: 250px;
+  margin-right: -9px;
+  margin-top: 7px;
   overflow: auto;
-  margin: 5px;
 }
 
 @media only screen and (max-device-width : 480px) {
@@ -55,6 +56,7 @@
     bottom: 300px;
     z-index: 1000;
     #popup-content {
+      max-height: inherit;
       overflow: auto;
       height: 100%;
       img {

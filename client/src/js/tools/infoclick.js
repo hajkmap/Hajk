@@ -156,9 +156,6 @@ var InfoClickModel = {
     });
 
     this.map.forEachFeatureAtPixel(event.pixel, (feature, layer) => {
-
-      console.log(layer.get('queryable'));
-
       if (layer && layer.get('name') && (layer.get('queryable') !== false)) {
         if (
           layer.get('name') !== 'preview-layer' &&
@@ -315,10 +312,10 @@ var InfoClickModel = {
           }
 
           infobox.append(title, content);
-
-          $('#popup-content').html(infobox);
+          $('#popup-content').show().html(infobox).scrollTop(0);
           ovl.setPosition(position);
-
+          $(ovl.getElement()).hide().fadeIn(0);
+          
           Object.keys(inf).forEach(key => {
             feature.set(key, inf[key]);
           });
