@@ -441,9 +441,11 @@ var SearchModel = {
     ,   size   = map.getSize()
     ,   ovl    = map.getOverlayById('popup-0');
 
-    this.set('hits', [spec.hit]);
-
-    map.getView().fit(extent, size, { maxZoom: this.get('maxZoom') });
+    this.set('hits', [spec.hit]);    
+    map.getView().fit(extent, {
+      size: size,
+      maxZoom: this.get('maxZoom')
+    });
 
     this.featureLayer.getSource().clear();
     this.featureLayer.getSource().addFeature(spec.hit);
@@ -604,7 +606,7 @@ var SearchModel = {
               regExp.test(hit.infobox)
             );
           }
-        });        
+        });
 
         if (names.length > columns.length) {
           columns = names;
