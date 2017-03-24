@@ -238,21 +238,26 @@ var DrawModel = {
       var toolTip = ""
       ,   coord = undefined;
 
-      if (e.target instanceof ol.geom.LineString) {
-        toolTip = this.formatLabel("length", e.target.getLength());
-        coord = e.target.getLastCoordinate()
-      }
-      if (e.target instanceof ol.geom.Polygon) {
-        toolTip = this.formatLabel("area", e.target.getArea());
-        coord = this.get('pointerPosition').coordinate;
-      }
-      if (e.target instanceof ol.geom.Circle) {
-        toolTip = this.formatLabel("length", e.target.getRadius());
-        coord = this.get('pointerPosition').coordinate;
-      }
-      this.measureTooltipElement.innerHTML = toolTip;
-      if (this.get('showLabels')) {
-        this.measureTooltip.setPosition(coord);
+      if (this.get("drawToolActive")) {
+        if (e.target instanceof ol.geom.LineString) {
+          toolTip = this.formatLabel("length", e.target.getLength());
+          coord = e.target.getLastCoordinate()
+        }
+
+        if (e.target instanceof ol.geom.Polygon) {
+          toolTip = this.formatLabel("area", e.target.getArea());
+          coord = this.get('pointerPosition').coordinate;
+        }
+
+        if (e.target instanceof ol.geom.Circle) {
+          toolTip = this.formatLabel("length", e.target.getRadius());
+          coord = this.get('pointerPosition').coordinate;
+        }
+
+        this.measureTooltipElement.innerHTML = toolTip;
+        if (this.get('showLabels')) {
+          this.measureTooltip.setPosition(coord);
+        }
       }
     });
 
@@ -339,6 +344,7 @@ var DrawModel = {
 
     olMap.un('singleclick', this.removeSelected);
     olMap.removeInteraction(this.get("drawTool"));
+    this.measureTooltip.setPosition(undefined);
 
     geometryType = type !== "Text" ? type : "Point";
 
@@ -361,6 +367,7 @@ var DrawModel = {
     this.set('drawTool', drawTool);
     olMap.addInteraction(this.get('drawTool'));
     olMap.set('clickLock', true);
+    this.set('drawToolActive', true);
   },
 
   /**
@@ -372,6 +379,7 @@ var DrawModel = {
     this.get('olMap').un('pointermove', this.setPointerPosition);
     this.get('olMap').removeInteraction(this.get('drawTool'));
     this.get('olMap').set('clickLock', false);
+    this.set('drawToolActive', false);
   },
 
   /**

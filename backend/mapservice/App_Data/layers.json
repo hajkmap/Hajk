@@ -41,16 +41,17 @@
         "8",
         "9"
       ]
-    }, {
+    },
+    {
       "id": "5",
       "caption": "Lantmäteriet",
       "url": "http://194.71.132.27/lmproxy/wmts",
       "owner": null,
-      "date": "1490005710176",
+      "date": "1490351618988",
       "content": "",
       "legend": "",
       "projection": "EPSG:3006",
-      "visibleAtStart": true,
+      "visibleAtStart": false,
       "layer": "topowebb",
       "style": "default",
       "matrixSet": "3006",
@@ -114,13 +115,13 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver"
-    },
+    },   
     {
       "id": "6",
       "caption": "Testyta WMS",
       "url": "http://localhost/geoserver/wms",
       "owner": "",
-      "date": "1490007802343",
+      "date": "1490351612684",
       "content": "",
       "legend": "",
       "projection": null,
@@ -130,7 +131,7 @@
       "infobox": "",
       "searchFields": null,
       "displayFields": null,
-      "visibleAtStart": false,
+      "visibleAtStart": true,
       "queryable": true,
       "tiled": false,
       "singleTile": false,
