@@ -216,7 +216,7 @@ var ExportPdfSettings = React.createClass({
 
     options = scales.map((s, i) => <option key={i} value={s}>1:{s}</option>);
     resolutionOptions = this.resolutions.map((s, i) => <option key={i} value={s}>{s}</option>);
-
+        
     this.addPreview(map);
 
     return (
@@ -331,6 +331,28 @@ var ExportPanelView = {
       : "btn btn-default";
   },
 
+  renderToolbar: function () {
+    const activeFormats = [];
+    if (this.props.model.get('pdfActive')) {
+        activeFormats.push('pdf');
+    }
+    if (this.props.model.get('tiffActive')) {
+        activeFormats.push('tiff');
+    }
+    return (
+      <div>
+        <div>Välj format</div>
+        <div className="btn-group">
+          {activeFormats.map((format, i) =>
+            <button key={i} onClick={() => this.activateTool(format)} type="button" className={this.getClassNames(format)} >
+              {format.toUpperCase()}
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  },
+
   /**
    * Render the panel component.
    * @instance
@@ -338,13 +360,14 @@ var ExportPanelView = {
    */
   render: function () {
     var activeTool = this.props.model.get('activeTool');
-    if (activeTool === 'pdf') {
+    var tool = <div>Välj utdataformat.</div>
+    if (activeTool === 'pdf' && this.props.model.get('olMap')) {
       tool = <ExportPdfSettings
         visible={this.state.showExportSettings}
         model={this.props.model}
         olMap={this.props.model.get('olMap')}/>;
     }
-    if (activeTool === 'tiff') {
+    if (activeTool === 'tiff' && this.props.model.get('olMap')) {
       tool = <ExportTiffSettings
         model={this.props.model}
         olMap={this.props.model.get('olMap')}/>;
@@ -353,15 +376,7 @@ var ExportPanelView = {
       <Panel title="Skriv ut karta" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
         <div className="export-panel">
           <div>
-            <div>Välj format</div>
-            <div className="btn-group">
-              <button onClick={() => this.activateTool('pdf')} type="button" className={this.getClassNames('pdf')} >
-                PDF
-              </button>
-              <button onClick={() => this.activateTool('tiff')} type="button" className={this.getClassNames('tiff')} >
-                TIFF
-              </button>
-            </div>
+            {this.renderToolbar()}
           </div>
           <br/>
           {tool}

@@ -48,6 +48,26 @@ class ToolOptions extends Component {
     this.state = defaultState;
   }
 
+  componentDidMount() {
+    this.props.model.on('change:urlMapConfig', this.onUrlMapConfigChanged.bind(this));
+  }
+
+  componentWillUnmount() {
+    this.props.model.off('change:urlMapConfig', this.onUrlMapConfigChanged.bind(this));
+  }
+
+  onUrlMapConfigChanged() {    
+    const t = this.state.activeTool;
+    this.setState({
+      activeTool: ''
+    });
+    setTimeout(() => {
+      this.setState({
+        activeTool: t
+      })
+    }, 20);
+  }
+
   getActiveTool(tool) {
     switch (tool) {
       case "anchor":

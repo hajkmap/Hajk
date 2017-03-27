@@ -28,6 +28,8 @@ var defaultState = {
   active: false,
   exportUrl: "/mapservice/export/pdf",
   exportTiffUrl: "/mapservice/export/tiff",
+  pdfActive: true,
+  tiffActive: true,
   scales: [
     250,
     500,
@@ -58,7 +60,9 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         exportUrl: tool.options.exportUrl,
-        exportTiffUrl: tool.options.exportTiffUrl
+        exportTiffUrl: tool.options.exportTiffUrl,
+        tiffActive: tool.options.tiffActive,
+        pdfActive: tool.options.pdfActive
       });
     } else {
       this.setState({
@@ -77,10 +81,13 @@ class ToolOptions extends Component {
 
   handleInputChange(event) {
     const target = event.target;
-    const value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
+    var value = target.type === 'checkbox' ? target.checked : target.value;
+    if (typeof value === "string" && value.trim() !== "") {
+      value = !isNaN(Number(value)) ? Number(value) : value
+    }
     this.setState({
-      [name]: !isNaN(Number(value)) ? Number(value) : value
+      [name]: value
     });
   }
 
@@ -113,6 +120,8 @@ class ToolOptions extends Component {
       "options": {
         exportUrl: this.state.exportUrl,
         exportTiffUrl: this.state.exportTiffUrl,
+        pdfActive: this.state.pdfActive,
+        tiffActive: this.state.tiffActive,
         scales: this.state.scales
       }
     };
@@ -180,6 +189,24 @@ class ToolOptions extends Component {
           <div>
             <label htmlFor="exportTiffUrl">URL till TIFF-tjänst</label>
             <input value={this.state.exportTiffUrl} type="text" name="exportTiffUrl" onChange={(e) => {this.handleInputChange(e)}}></input>
+          </div>
+          <div>
+            <input
+              id="pdf-active"
+              name="pdfActive"
+              type="checkbox"
+              onChange={(e) => {this.handleInputChange(e)}}
+              checked={this.state.pdfActive}/>&nbsp;
+            <label htmlFor="pdf-active">PDF aktiverad</label>
+          </div>
+          <div>
+            <input
+              id="tiff-active"
+              name="tiffActive"
+              type="checkbox"
+              onChange={(e) => {this.handleInputChange(e)}}
+              checked={this.state.tiffActive}/>&nbsp;
+            <label htmlFor="tiff-active">TIFF aktiverad</label>
           </div>
         </form>
       </div>

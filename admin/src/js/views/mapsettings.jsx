@@ -274,9 +274,6 @@ class Menu extends Component {
       $(".tree-view > ul").sortable();
     });
 
-    // $(".tree-view li").editable(this);
-    // $(".tree-view > ul").sortable();
-
     defaultState.layers = this.props.model.get('layers');
     this.setState(defaultState);
   }

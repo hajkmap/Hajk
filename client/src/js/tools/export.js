@@ -64,8 +64,10 @@ var ExportModelProperties = {
   icon: 'fa fa-print icon',
   exportUrl: '/mapservice/export/pdf',
   exportTiffUrl: '/mapservice/export/tiff',
+  pdfActive: true,
+  tiffActive: true,
   copyright: "© Lantmäteriverket i2009/00858",
-  activeTool: 'pdf',
+  activeTool: '',
   scales: [1000, 2000, 5000, 10000, 20000, 50000, 100000, 250000]
 };
 
@@ -83,6 +85,19 @@ var ExportModel = {
   defaults: ExportModelProperties,
 
   configure: function (shell) {
+
+    const formats = [];
+
+    if (this.get('pdfActive')) {
+      formats.push('pdf');
+    }
+    if (this.get('tiffActive')) {
+      formats.push('tiff');
+    }
+    if (formats.length > 0) {
+      this.setActiveTool(formats[0]);
+    }
+
     this.set('olMap', shell.getMap().getMap());
     this.addPreviewLayer();
   },
@@ -443,7 +458,7 @@ var ExportModel = {
               style: asObject(feature.getStyle())
             },
             coordinates: type === "Circle"
-              ? as2DPairs(feature.getGeometry().getCenter()).concat([[feature.getGeometry().getRadius(), 0]]) 
+              ? as2DPairs(feature.getGeometry().getCenter()).concat([[feature.getGeometry().getRadius(), 0]])
               : as2DPairs(feature.getGeometry().getCoordinates())
           }
         })

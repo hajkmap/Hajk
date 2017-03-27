@@ -25,7 +25,7 @@ import { Component } from "react";
 
 var defaultState = {
   validationErrors: [],
-  active: false  
+  active: false
 };
 
 class ToolOptions extends Component {
@@ -63,10 +63,13 @@ class ToolOptions extends Component {
 
   handleInputChange(event) {
     const target = event.target;
-    const value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
+    var value = target.type === 'checkbox' ? target.checked : target.value;
+    if (typeof value === "string" && value.trim() !== "") {
+      value = !isNaN(Number(value)) ? Number(value) : value
+    }
     this.setState({
-      [name]: !isNaN(Number(value)) ? Number(value) : value
+      [name]: value
     });
   }
 

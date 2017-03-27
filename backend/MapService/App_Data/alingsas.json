@@ -225,6 +225,33 @@
     {
       "type": "location",
       "options": {}
+    },
+    {
+      "type": "export",
+      "options": {
+        "exportUrl": "/mapservice/export/pdf",
+        "exportTiffUrl": "/mapservice/export/tiff",
+        "pdfActive": true,
+        "tiffActive": false,
+        "scales": [
+          250,
+          500,
+          1000,
+          2500,
+          5000,
+          10000,
+          25000,
+          50000,
+          100000,
+          250000
+        ]
+      }
+    },
+    {
+      "type": "coordinates",
+      "options": {
+        "transformations": []
+      }
     }
   ],
   "map": {
