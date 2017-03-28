@@ -133,7 +133,7 @@ var LayerSwitcherModel = {
    * @instance
    */
   clicked: function (arg) {
-    this.set('visible', true);
+    this.set('visible', true);    
   }
 };
 

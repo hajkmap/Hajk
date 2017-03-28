@@ -49,7 +49,8 @@ const defaultState = {
   imageFormat: "",
   serverType: 'geoserver',
   drawOrder: 1,
-  layerType: "WMS"
+  layerType: "WMS",
+  attribution: ""
 };
 
 /**
@@ -260,7 +261,8 @@ class WMSLayerForm extends Component {
       serverType: this.getValue("serverType"),
       queryable: this.getValue("queryable"),
       tiled: this.getValue("tiled"),
-      drawOrder: this.getValue("drawOrder")
+      drawOrder: this.getValue("drawOrder"),
+      attribution: this.getValue("attribution")
     };
   }
 
@@ -477,6 +479,19 @@ class WMSLayerForm extends Component {
               }
             }
             checked={this.state.tiled}
+          />
+        </div>
+        <div>
+          <label>Upphovsrätt</label>
+          <input
+            type="text"
+            ref="input_attribution"
+            onChange={(e) => {
+              this.setState({attribution: e.target.value});
+              this.validateField("attribution", e);
+            }}
+            value={this.state.attribution}
+            className={this.getValidationClass("attribution")}
           />
         </div>
       </fieldset>

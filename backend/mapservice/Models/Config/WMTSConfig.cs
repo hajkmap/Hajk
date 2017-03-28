@@ -38,5 +38,6 @@ namespace MapService.Models.Config
 
         public string[] matrixIds { get; set; }
 
+        public string attribution { get; set; }
     }
 }

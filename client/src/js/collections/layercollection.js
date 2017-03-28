@@ -92,7 +92,8 @@ var LayerCollection = {
         projection: args.projection,
         origin: args.origin,
         resolutions: args.resolutions,
-        matrixIds: args.matrixIds
+        matrixIds: args.matrixIds,
+        attribution: args.attribution,
       }
     };
     return config;
@@ -133,6 +134,7 @@ var LayerCollection = {
         "singleTile": args.singleTile || false,
         "imageFormat": args.imageFormat || "image/png",
         "serverType": args.serverType || "geoserver",
+        "attribution": args.attribution,
         "legend" : [{
           "Url": getLegendUrl(args),
           "Description" : "Teckenförklaring"
@@ -197,7 +199,7 @@ var LayerCollection = {
         "fillColor": args.fillColor,
         "lineColor": args.lineColor,
         "lineStyle": args.lineStyle,
-        "lineWidth": args.lineWidth,        
+        "lineWidth": args.lineWidth,
         "url": args.url,
         "queryable": args.queryable,
         "information": args.infobox,
@@ -249,6 +251,7 @@ var LayerCollection = {
         "information": args.infobox,
         "projection": args.projection,
         "opacity": args.opacity,
+        "attribution": args.attribution,
         "params": {
           "LAYERS": 'show:' + args.layers.join(',')
         },

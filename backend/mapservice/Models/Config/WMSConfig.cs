@@ -43,5 +43,7 @@ namespace MapService.Models.Config
         public string imageFormat { get; set; }
 
         public string serverType { get; set; }
+
+        public string attribution { get; set; }
     }
 }

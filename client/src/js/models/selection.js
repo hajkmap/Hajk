@@ -129,7 +129,8 @@ var SelectionModel = {
     const topIndex = layers.getLength() - 1;
     var h = layers.getArray().find(layer => layer.get("id") === "selection-highligt");
     if (h) {
-      layers.setAt(topIndex, h);
+      layers.remove(h);
+      layers.push(h);
     }
   },
 

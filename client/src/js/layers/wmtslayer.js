@@ -43,7 +43,8 @@ var WmtsLayerProperties = {
   axisMode: 'natural',
   origin: [-1200000, 8500000],
   resolutions: [4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5],
-  matrixIds: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+  matrixIds: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
+  attribution: ""
 };
 
 /**
@@ -78,6 +79,23 @@ var WmtsLayer = {
     }));
   },
 
+  /**
+   * Create attribution array
+   * @instance
+   * @return {Array<external:"ol.Attribution">} attributions
+   */
+  getAttributions: function() {
+    var attributions = [];
+    if (this.get('attribution')) {
+      attributions.push(
+        new ol.Attribution({
+          html: this.get('attribution')
+        })
+      );
+    }    
+    return attributions;
+  },
+
   initialize: function () {
     LayerModel.prototype.initialize.call(this);
     this.set('resolutions', this.get('resolutions').map(r => Number(r)));
@@ -89,6 +107,7 @@ var WmtsLayer = {
       queryable: this.get('queryable'),
       opacity: this.get('opacity'),
       source: new ol.source.WMTS({
+        attributions: this.getAttributions(),
         format: 'image/png',
         wrapX: false,
         url: this.get('url'),

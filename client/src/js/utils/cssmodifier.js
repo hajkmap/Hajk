@@ -109,34 +109,28 @@ module.exports = {
       }
       if (btnPrimary) {
         btnPrimary.style.backgroundColor = config.primaryColor;
-        btnPrimary.style.borderColor = config.secondaryColor;
         btnPrimary.style.zIndex = 2;
-        btnPrimary.style.color = config.secondaryColor;
+        btnPrimary.style.color = config.secondaryColor;        
       }
       if (btnPrimaryFocus) {
         btnPrimaryFocus.style.backgroundColor = config.primaryColor;
-        btnPrimaryFocus.style.borderColor = config.secondaryColor;
         btnPrimaryFocus.style.color = config.secondaryColor;
       }
       if (btnPrimaryHover) {
         btnPrimaryHover.style.backgroundColor = config.primaryColor;
-        btnPrimaryHover.style.borderColor = config.secondaryColor;
         btnPrimaryHover.style.color = config.secondaryColor;
       }
       if (btnPrimaryActive) {
         btnPrimaryActive.style.backgroundColor = config.primaryColor;
-        btnPrimaryActive.style.borderColor = config.secondaryColor;
         btnPrimaryActive.style.color = config.secondaryColor;
       }
       if (btnPrimaryActiveHover) {
         btnPrimaryActiveHover.style.backgroundColor = config.primaryColor;
-        btnPrimaryActiveHover.style.borderColor = config.secondaryColor;
         btnPrimaryActiveHover.style.color = config.secondaryColor;
       }
 
       if (btnPrimaryActiveHoverIE) {
         btnPrimaryActiveHoverIE.style.backgroundColor = config.primaryColor;
-        btnPrimaryActiveHoverIE.style.borderColor = config.secondaryColor;
         btnPrimaryActiveHoverIE.style.color = config.secondaryColor;
       }
 

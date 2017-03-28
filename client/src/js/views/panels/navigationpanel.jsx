@@ -72,25 +72,21 @@ var NavigationPanelView = {
   componentDidMount: function () {
     this.props.model.on("change:activePanel", (sender, panel) => {
       this.setState({
-        'activePanel' : panel,
-        'minimized': false
+        activePanel : panel,
+        minimized: false
       });
     });
 
     this.props.model.on('change:alert', (e, value) => {
-      this.setState({
-        alertVisible: value
-      });
+      this.setState({alertVisible: value});
     });
 
     this.props.model.on("change:visible", (sender, visible) => {
-      this.setState({
-        'toggled': visible
-      });
+      this.setState({toggled: visible});
     });
 
     this.props.model.on("change:toggled", (sender, visible) => {
-      this.setState({ 'minimized': true});
+      this.setState({minimized: true});
     });
 
     this.props.model.on('change:r', () => {

@@ -35,5 +35,7 @@ namespace MapService.Models.Config
         public string infobox{ get; set; }
 
         public bool queryable { get; set; }
+
+        public string attribution { get; set; }
     }
 }

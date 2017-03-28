@@ -40,18 +40,19 @@
         "7",
         "8",
         "9"
-      ]
+      ],
+      "attribution": null
     },
     {
       "id": "5",
       "caption": "Lantmäteriet",
       "url": "http://194.71.132.27/lmproxy/wmts",
       "owner": null,
-      "date": "1490351618988",
+      "date": "1490680654756",
       "content": "",
       "legend": "",
       "projection": "EPSG:3006",
-      "visibleAtStart": false,
+      "visibleAtStart": true,
       "layer": "topowebb",
       "style": "default",
       "matrixSet": "3006",
@@ -90,7 +91,8 @@
         "11",
         "12",
         "13"
-      ]
+      ],
+      "attribution": "Lantmäteriet"
     }
   ],
   "wmslayers": [
@@ -114,14 +116,15 @@
       "tiled": false,
       "singleTile": false,
       "imageFormat": "image/png",
-      "serverType": "geoserver"
+      "serverType": "geoserver",
+      "attribution": null
     },
     {
       "id": "6",
       "caption": "Testyta WMS",
       "url": "http://localhost/geoserver/wms",
       "owner": "",
-      "date": "1490354176554",
+      "date": "1490680133734",
       "content": "",
       "legend": "",
       "projection": null,
@@ -136,7 +139,8 @@
       "tiled": false,
       "singleTile": false,
       "imageFormat": "image/png",
-      "serverType": "geoserver"
+      "serverType": "geoserver",
+      "attribution": "Sweco"
     },
     {
       "id": "11",
@@ -160,7 +164,8 @@
       "tiled": false,
       "singleTile": false,
       "imageFormat": "image/png",
-      "serverType": "geoserver"
+      "serverType": "geoserver",
+      "attribution": null
     }
   ],
   "wfslayers": [

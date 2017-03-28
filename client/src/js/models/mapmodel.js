@@ -63,7 +63,10 @@ var MapModel = {
       interactions: ol.interaction.defaults().extend([new Drag()]),
       target: this.get("target"),
       layers: [],
-      controls: [new ol.control.Zoom({zoomInTipLabel: 'Zooma in', zoomOutTipLabel: 'Zooma ut'})],
+      controls: [
+        new ol.control.Zoom({ zoomInTipLabel: 'Zooma in', zoomOutTipLabel: 'Zooma ut' }),
+        new ol.control.Attribution({ collapsible: false })
+      ],
       overlays: [],
       view: new ol.View({
         zoom: this.get("zoom"),
@@ -104,7 +107,7 @@ var MapModel = {
     return overlay;
   },
 
-  update: function(config) {    
+  update: function(config) {
     var map = this.get('ol');
     map.getView().setCenter(config.center);
     map.getView().setZoom(config.zoom);

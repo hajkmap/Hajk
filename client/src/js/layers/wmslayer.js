@@ -64,6 +64,23 @@ var WmsLayer = {
    */
   validInfo: true,
 
+  /**
+   * Create attribution array
+   * @instance
+   * @return {Array<external:"ol.Attribution">} attributions
+   */
+  getAttributions: function() {
+    var attributions = [];
+    if (this.get('attribution')) {
+      attributions.push(
+        new ol.Attribution({
+          html: this.get('attribution')
+        })
+      );
+    }
+    return attributions;
+  },
+
   initialize: function () {
     LayerModel.prototype.initialize.call(this);
 
@@ -72,7 +89,8 @@ var WmsLayer = {
       params: this.get('params'),
       projection: this.get('projection'),
       serverType: this.get('serverType'),
-      imageFormat: this.get('imageFormat')
+      imageFormat: this.get('imageFormat'),
+      attributions: this.getAttributions(),
     };
 
     if (this.get('resolutions') &&
