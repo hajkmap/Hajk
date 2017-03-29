@@ -176,7 +176,7 @@ class ToolOptions extends Component {
             <label htmlFor="visibleAtStart">Synlig vid start</label>
           </div>
           <div>
-            <label htmlFor="headerText">Infotext</label>
+            <label htmlFor="headerText">Rubrik</label>
             <input value={this.state.headerText} type="text" name="headerText" onChange={(e) => {this.handleInputChange(e)}}></input>
           </div>
           <div>

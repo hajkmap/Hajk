@@ -293,6 +293,14 @@
         "exportUrl": "/mapservice/export/kml",
         "importUrl": "/mapservice/import/kml"
       }
+    },
+    {
+      "type": "information",
+      "options": {
+        "text": "Information om kartan.",
+        "headerText": "Information",
+        "visibleAtStart": true
+      }
     }
   ],
   "map": {
