@@ -441,7 +441,7 @@ var SearchModel = {
     ,   size   = map.getSize()
     ,   ovl    = map.getOverlayById('popup-0');
 
-    this.set('hits', [spec.hit]);    
+    this.set('hits', [spec.hit]);
     map.getView().fit(extent, {
       size: size,
       maxZoom: this.get('maxZoom')
@@ -815,6 +815,7 @@ var SearchModel = {
    */
   clicked: function () {
     this.set('visible', true);
+    this.set('toggled', !this.get('toggled'));
   },
 };
 

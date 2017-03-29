@@ -252,6 +252,14 @@
       "options": {
         "transformations": []
       }
+    },
+    {
+      "type": "information",
+      "options": {
+        "text": "Detta är en karta från Alingsås Kommun.\n\n<img src=\"https://upload.wikimedia.org/wikipedia/commons/c/c3/Bysten_av_Jonas_Alstr%C3%B6mer_p%C3%A5_Stora_torget_i_Alings%C3%A5s%2C_den_8_maj_2006._Den_uppf%C3%B6rdes_av_Aron_Sandberg_och_invigdes_den_2_juni_1905.JPG\"></img>",
+        "headerText": "Om kartan",
+        "visibleAtStart": true
+      }
     }
   ],
   "map": {

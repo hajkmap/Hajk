@@ -13,10 +13,13 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>02/16/2017 13:21:49</publishTime>
     </File>
     <File Include="App_Data/layers.json">
-      <publishTime>03/10/2017 11:37:14</publishTime>
+      <publishTime>03/28/2017 07:57:34</publishTime>
     </File>
     <File Include="App_Data/map_1.json">
-      <publishTime>03/10/2017 12:08:22</publishTime>
+      <publishTime>03/28/2017 09:31:29</publishTime>
+    </File>
+    <File Include="assets/style.css">
+      <publishTime>03/15/2017 08:09:24</publishTime>
     </File>
     <File Include="bin/amd64/Microsoft.VC90.CRT/Microsoft.VC90.CRT.manifest">
       <publishTime>02/01/2017 11:41:18</publishTime>
@@ -85,7 +88,7 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>02/16/2017 13:21:50</publishTime>
     </File>
     <File Include="bin/MapService.dll">
-      <publishTime>03/13/2017 10:30:27</publishTime>
+      <publishTime>03/28/2017 10:45:17</publishTime>
     </File>
     <File Include="bin/Microsoft.AI.Agent.Intercept.dll">
       <publishTime>02/16/2017 13:21:49</publishTime>
@@ -247,13 +250,13 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>02/16/2017 13:21:49</publishTime>
     </File>
     <File Include="index.html">
-      <publishTime>03/06/2017 09:34:27</publishTime>
+      <publishTime>03/15/2017 08:45:16</publishTime>
     </File>
     <File Include="packages.config">
-      <publishTime>02/16/2017 13:21:49</publishTime>
+      <publishTime>03/15/2017 07:47:38</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>03/13/2017 10:30:27</publishTime>
+      <publishTime>03/28/2017 10:21:35</publishTime>
     </File>
   </ItemGroup>
 </Project>

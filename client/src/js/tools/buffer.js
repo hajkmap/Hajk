@@ -211,6 +211,7 @@ var BufferModel = {
    */
   clicked: function () {
     this.set('visible', true);
+    this.set('toggled', !this.get('toggled'));
   }
 };
 

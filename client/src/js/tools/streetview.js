@@ -231,6 +231,7 @@ var StreetViewModel = {
    */
   clicked: function () {
     this.set('visible', !this.get('visible'));
+    this.set('toggled', !this.get('toggled'));
   }
 };
 

@@ -177,7 +177,6 @@
     <Content Include="Web.config" />
     <Content Include="App_Data\layers.json" />
     <Content Include="App_Data\map_1.json" />
-    <Content Include="App_Data\map_2.json" />
     <None Include="Properties\PublishProfiles\File.pubxml" />
   </ItemGroup>
   <ItemGroup>
