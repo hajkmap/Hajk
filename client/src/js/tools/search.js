@@ -447,7 +447,7 @@ var SearchModel = {
       maxZoom: this.get('maxZoom')
     });
 
-    this.featureLayer.getSource().clear();
+    this.featureLayer.getSource().clear();    
     this.featureLayer.getSource().addFeature(spec.hit);
 
     if (ovl && this.get('displayPopup')) {

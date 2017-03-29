@@ -315,7 +315,7 @@ var InfoClickModel = {
           $('#popup-content').show().html(infobox).scrollTop(0);
           ovl.setPosition(position);
           $(ovl.getElement()).hide().fadeIn(0);
-          
+
           Object.keys(inf).forEach(key => {
             feature.set(key, inf[key]);
           });
@@ -336,43 +336,6 @@ var InfoClickModel = {
           display.call(this, i, info);
         }
     });
-  },
-
-  parseNaturaData: function (properties, data) {
-    Object.keys(data).forEach(key => {
-
-      if (key === "arter") {
-        if (Array.isArray(data[key])) {
-          data[key].forEach((art, i) => {
-            properties[key + " " + i] = art.namn;
-          });
-        }
-      }
-      if (key === "naturtyper") {
-        if (Array.isArray(data[key])) {
-          data[key].forEach((naturtyp, i) => {
-            properties[key + " namn " + i] = naturtyp.namn;
-            properties[key + " utbredning " + i] = naturtyp.utbredningHA;
-          });
-        }
-      }
-      if (key === "naturtyperKnas") {
-      }
-      if (key === "omradesTyp") {
-      }
-      if (key === "omradesTypAsText") {
-        return;
-      }
-
-      if (data[key]) {
-        if (!properties.hasOwnProperty(key)) {
-          if (typeof data[key] === "string") {
-            properties[key] = data[key];
-          }
-        }
-      }
-    });
-    return properties;
   },
 
   /**
@@ -398,6 +361,10 @@ var InfoClickModel = {
 
     properties = feature.getProperties();
     information = layerModel && layerModel.get("information") || "";
+
+    if (feature.infobox) {
+      information = feature.infobox;
+    }
 
     if (information && typeof information === "string") {
       (information.match(/\{.*?\}\s?/g) || []).forEach(property => {
@@ -425,33 +392,16 @@ var InfoClickModel = {
         : 999;
     }
 
-    if (properties.hasOwnProperty('sitecode')) {
-      let c = properties['sitecode'];
-      $.get(`${HAJK2.wfsProxy}http://skyddadnatur.naturvardsverket.se/rest/detail/${c}%40N2000`, (data) => {
-        properties = this.parseNaturaData(properties, data);
-        callback({
-          feature: feature,
-          layer: layer,
-          information: {
-              caption: layerModel && layerModel.getCaption() || "Sökträff",
-              layerindex: layerindex,
-              information: information || properties,
-              iconUrl: iconUrl,
-          }
-        });
-      });
-    } else {
-      callback({
-        feature: feature,
-        layer: layer,
-        information: {
-            caption: layerModel && layerModel.getCaption() || "Sökträff",
-            layerindex: layerindex,
-            information: information || properties,
-            iconUrl: iconUrl,
-        }
-      });
-    }
+    callback({
+      feature: feature,
+      layer: layer,
+      information: {
+          caption: layerModel && layerModel.getCaption() || "Sökträff",
+          layerindex: layerindex,
+          information: information || properties,
+          iconUrl: iconUrl,
+      }
+    });
   },
 
   /**
