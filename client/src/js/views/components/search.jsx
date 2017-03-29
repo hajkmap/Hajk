@@ -247,16 +247,16 @@ var SearchView = {
     ,   kmlButton  = null
     ;
 
-    if (this.props.model.get('excelExportUrl')) {
-      excelButton = (
+    if (this.props.model.get('kmlExportUrl')) {
+      kmlButton = (
         <button className="btn btn-default icon-button" onClick={(e) => this.exportSelected('kml')}>
           <i className="kml"></i>
         </button>
       )
     }
 
-    if (this.props.model.get('kmlExportUrl')) {
-      kmlButton = (
+    if (this.props.model.get('excelExportUrl')) {
+      excelButton = (
         <button className="btn btn-default icon-button" onClick={(e) => this.exportSelected('excel')}>
           <i className="excel"></i>
         </button>

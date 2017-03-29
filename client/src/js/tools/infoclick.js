@@ -364,6 +364,7 @@ var InfoClickModel = {
 
     if (feature.infobox) {
       information = feature.infobox;
+      information = information.replace(/export:/g, '');
     }
 
     if (information && typeof information === "string") {

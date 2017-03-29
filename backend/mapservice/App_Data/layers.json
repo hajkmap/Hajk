@@ -179,7 +179,7 @@
       "searchFields": [
         "fastighet"
       ],
-      "infobox": "Sökträff {fastighet} {fnr} ",
+      "infobox": "Sökträff {export:fastighet} {fnr} ",
       "displayFields": [
         "fastighet"
       ],
