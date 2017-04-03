@@ -18,7 +18,8 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
+
 import React from 'react';
 import { Component } from 'react';
 import Alert from '../views/alert.jsx';
@@ -466,7 +467,7 @@ class Search extends Component {
     layers = this.state.filter ? this.getLayersWithFilter() : this.props.model.get('layers');
     if (filter) {
       layers.sort(function(a,b) { return (a.caption.toLowerCase() > b.caption.toLowerCase()) ? 1 : ((b.caption.toLowerCase() > a.caption.toLowerCase()) ? -1 : 0);});
-      layers.sort(function(x,y) { return (y.caption.toLowerCase().startsWith(filter)) ? 1 : ((x.caption.toLowerCase().startsWith(filter)) ? -1 : 0);});
+      layers.sort(function(x,y) { return (y.caption.toLowerCase().lastIndexOf(filter, 0) === 0) ? 1 : ((x.caption.toLowerCase().lastIndexOf(filter, 0) === 0) ? -1 : 0);});
     }
     return layers.map((layer, i) =>
       <li onClick={(e) => this.loadLayer(e, layer)} key={Math.random()}>

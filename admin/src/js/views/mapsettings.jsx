@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 import React from 'react';
 import { Component } from 'react';
@@ -216,7 +216,8 @@ class Menu extends Component {
       active: true,
       visibleAtStart: true,
       backgroundSwitcherBlack: true,
-      backgroundSwitcherWhite: true
+      backgroundSwitcherWhite: true,
+      toggleAllButton: false
     };
     this.state = state;
   }
@@ -242,7 +243,8 @@ class Menu extends Component {
           active: this.props.model.get('layerMenuConfig').active,
           visibleAtStart: this.props.model.get('layerMenuConfig').visibleAtStart,
           backgroundSwitcherBlack: this.props.model.get('layerMenuConfig').backgroundSwitcherBlack,
-          backgroundSwitcherWhite: this.props.model.get('layerMenuConfig').backgroundSwitcherWhite
+          backgroundSwitcherWhite: this.props.model.get('layerMenuConfig').backgroundSwitcherWhite,
+          toggleAllButton: this.props.model.get('layerMenuConfig').toggleAllButton
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -271,9 +273,6 @@ class Menu extends Component {
       $(".tree-view li").editable(this);
       $(".tree-view > ul").sortable();
     });
-
-    // $(".tree-view li").editable(this);
-    // $(".tree-view > ul").sortable();
 
     defaultState.layers = this.props.model.get('layers');
     this.setState(defaultState);
@@ -404,7 +403,8 @@ class Menu extends Component {
       active: this.state.active,
       visibleAtStart: this.state.visibleAtStart,
       backgroundSwitcherBlack: this.state.backgroundSwitcherBlack,
-      backgroundSwitcherWhite: this.state.backgroundSwitcherWhite
+      backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
+      toggleAllButton: this.state.toggleAllButton
     };
 
     var roots = $('.tree-view > ul > li');
@@ -619,7 +619,7 @@ class Menu extends Component {
     layers = (this.state && this.state.filter) ? this.getLayersWithFilter() : this.props.model.get('layers');
     if (filter) {
       layers.sort(function(a,b) { return (a.caption.toLowerCase() > b.caption.toLowerCase()) ? 1 : ((b.caption.toLowerCase() > a.caption.toLowerCase()) ? -1 : 0);});
-      layers.sort(function(x,y) { return (y.caption.toLowerCase().startsWith(filter)) ? 1 : ((x.caption.toLowerCase().startsWith(filter)) ? -1 : 0);});
+      layers.sort(function(x,y) { return (y.caption.toLowerCase().lastIndexOf(filter, 0) === 0) ? 1 : ((x.caption.toLowerCase().lastIndexOf(filter, 0) === 0) ? -1 : 0);});
     }
 
     return layers.map((layer, i) => {
@@ -680,7 +680,7 @@ class Menu extends Component {
             } else {
               visible = layer.visibleAtStart;
             }
-          }          
+          }
           var className = visible ? "layer-node visible" : "layer-node";
           leafs.push(
             <li
@@ -834,17 +834,22 @@ class Menu extends Component {
     return layers.map((layer, i) => {
       var name = this.getLayerNameFromId(layer.id);
       return (
-        <li className="layer-node" key={Math.round(Math.random() * 1000000)} data-id={layer.id}>{name}</li>
+        <li className="layer-node" key={Math.round(Math.random() * 1E6)} data-id={layer.id}>{name}</li>
       )
     });
   }
 
   handleInputChange(event) {
     const target = event.target;
-    const value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
+    var value = target.type === 'checkbox' ? target.checked : target.value;
+
+    if (typeof value === "string" && /^[\d\.\, ]+$/.test(value)) {
+      value = value.replace(/,/g, '').replace(/ /g, '').Number(value);
+    }
+
     this.setState({
-      [name]: !isNaN(Number(value)) ? Number(value) : value
+      [name]: value
     });
   }
 
@@ -929,6 +934,15 @@ class Menu extends Component {
                   onChange={(e) => {this.handleInputChange(e)}}
                   checked={this.state.backgroundSwitcherWhite}/>&nbsp;
                 <label htmlFor="backgroundSwitcherWhite">Vit bakgrundskarta</label>
+              </div>
+              <div>
+                <input
+                  id="toggleAllButton"
+                  name="toggleAllButton"
+                  type="checkbox"
+                  onChange={(e) => {this.handleInputChange(e)}}
+                  checked={this.state.toggleAllButton}/>&nbsp;
+                <label htmlFor="toggleAllButton">Släck alla lager-knapp</label>
               </div>
               {this.renderLayerMenu()}
             </fieldset>
