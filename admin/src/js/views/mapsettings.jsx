@@ -413,7 +413,7 @@ class Menu extends Component {
       return $(node).find('> ul > li.layer-node').toArray().map(node => {
         return {
           id: node.dataset.id,
-          drawOrder: node.dataset.draworder,
+          drawOrder: (node.dataset.draworder ? node.dataset.draworder : 1000),
           visibleAtStart: node.dataset.visibleatstart
         }
       })
@@ -615,7 +615,12 @@ class Menu extends Component {
    */
   renderLayersFromConfig(layers) {
 
+    var filter = this.state.filter;
     layers = (this.state && this.state.filter) ? this.getLayersWithFilter() : this.props.model.get('layers');
+    if (filter) {
+      layers.sort(function(a,b) { return (a.caption.toLowerCase() > b.caption.toLowerCase()) ? 1 : ((b.caption.toLowerCase() > a.caption.toLowerCase()) ? -1 : 0);});
+      layers.sort(function(x,y) { return (y.caption.toLowerCase().lastIndexOf(filter, 0) === 0) ? 1 : ((x.caption.toLowerCase().lastIndexOf(filter, 0) === 0) ? -1 : 0);});
+    }
 
     return layers.map((layer, i) => {
 

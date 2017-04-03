@@ -440,6 +440,7 @@ class WMSLayerForm extends Component {
           <label>Bildformat</label>
           <select ref="input_imageFormat" value={this.state.imageFormat} onChange={(e) => this.setState({'imageFormat': e.target.value})}>
             <option value="image/png">image/png</option>
+            <option value="image/png8">image/png8</option>
             <option value="image/jpeg">image/jpeg</option>
           </select>
         </div>

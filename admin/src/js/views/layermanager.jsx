@@ -344,8 +344,17 @@ class Manager extends Component {
    *
    */
   renderLayersFromConfig(layers) {
-
+    
+    var filter = JSON.stringify(this.state.filter);
     layers = this.state.filter ? this.getLayersWithFilter() : this.props.model.get('layers');
+
+    if (this.state.filter) {
+      layers.sort(function(a, b) {
+        if(a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
+        if(a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        return 0; 
+      });
+    }
 
     return layers.map((layer, i) => {
 

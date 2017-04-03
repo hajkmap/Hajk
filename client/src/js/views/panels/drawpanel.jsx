@@ -557,7 +557,7 @@ var DrawPanelView = {
         <h4>Importera</h4>
         <p>Välj fil att importera</p>
         <form id="upload-form" method="post" action={url} target="upload-iframe" encType="multipart/form-data">
-          <input onChange={upload.bind(this)} type="file" name="files[]" multiple="false" className="btn btn-default"/><br/>
+          <input onChange={upload.bind(this)} type="file" name="files[]" accept=".kml" multiple="false" className="btn btn-default"/><br/>
           <input type="submit" value="Ladda upp" name="upload-file-form" className="btn btn-default"/><br/>
           <iframe id="upload-iframe" name="upload-iframe" ref="uploadIframe" style={style}></iframe>
         </form>

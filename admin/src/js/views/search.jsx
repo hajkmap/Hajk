@@ -250,7 +250,12 @@ class Search extends Component {
    *
    */
   renderLayersFromConfig(layers) {
+    var filter = this.state.filter;
     layers = this.state.filter ? this.getLayersWithFilter() : this.props.model.get('layers');
+    if (filter) {
+      layers.sort(function(a,b) { return (a.caption.toLowerCase() > b.caption.toLowerCase()) ? 1 : ((b.caption.toLowerCase() > a.caption.toLowerCase()) ? -1 : 0);});
+      layers.sort(function(x,y) { return (y.caption.toLowerCase().lastIndexOf(filter, 0) === 0) ? 1 : ((x.caption.toLowerCase().lastIndexOf(filter, 0) === 0) ? -1 : 0);});
+    }
     return layers.map((layer, i) =>
       <li onClick={(e) => this.loadLayer(e, layer)} key={Math.random()}>
         <span>{layer.caption}</span>
