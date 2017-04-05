@@ -345,15 +345,29 @@ class Manager extends Component {
    */
   renderLayersFromConfig(layers) {
     
-    var filter = JSON.stringify(this.state.filter);
     layers = this.state.filter ? this.getLayersWithFilter() : this.props.model.get('layers');
 
+    var startsWith = [];
+    var alphabetically = [];
+
     if (this.state.filter) {
-      layers.sort(function(a, b) {
+      layers.forEach(layer => {
+        layer.caption.toLowerCase().startsWith(this.state.filter) ? startsWith.push(layer) : alphabetically.push(layer);
+      });
+
+      startsWith.sort(function(a, b) {
         if(a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
         if(a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
         return 0; 
       });
+
+      alphabetically.sort(function(a, b) {
+        if(a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
+        if(a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        return 0; 
+      });
+        
+      layers = startsWith.concat(alphabetically);
     }
 
     return layers.map((layer, i) => {
