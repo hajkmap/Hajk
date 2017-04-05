@@ -31,7 +31,8 @@ var panels = {
   'editpanel': require('views/editpanel'),
   'anchorpanel': require('views/anchorpanel'),
   'streetviewpanel': require('views/streetviewpanel'),
-  'bufferpanel': require('views/bufferpanel')
+  'bufferpanel': require('views/bufferpanel'),
+  'presetpanel': require('views/presetpanel')
 };
 
 var Alert = require('alert');
