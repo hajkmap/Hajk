@@ -33,7 +33,8 @@ var Tool          = require('tools/tool')
 ,   Buffer        = require('tools/buffer')
 ,   StreetView    = require('tools/streetview')
 ,   Information   = require('tools/information')
-,   Location      = require('tools/location');
+,   Location      = require('tools/location')
+,   Preset        = require('tools/preset');
 
 /**
  * @description
@@ -84,6 +85,8 @@ var ToolCollection = {
             return new Selection(args.options);
         case "location":
             return new Location(args.options);
+        case "preset":
+            return new Preset(args.options);
         default:
             throw "Tool not supported " + args.type;
       }
