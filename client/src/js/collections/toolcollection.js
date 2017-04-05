@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var Tool          = require('tools/tool')
 ,   LayerSwitcher = require('tools/layerswitcher')
@@ -30,9 +30,11 @@ var Tool          = require('tools/tool')
 ,   Draw          = require('tools/draw')
 ,   Edit          = require('tools/edit')
 ,   Anchor        = require('tools/anchor')
+,   Buffer        = require('tools/buffer')
 ,   StreetView    = require('tools/streetview')
 ,   Information   = require('tools/information')
-,   Location      = require('tools/location');
+,   Location      = require('tools/location')
+,   Preset        = require('tools/preset');
 
 /**
  * @description
@@ -73,6 +75,8 @@ var ToolCollection = {
             return new Edit(args.options);
         case "anchor":
             return new Anchor(args.options);
+        case "buffer":            
+            return new Buffer(args.options);
         case "streetview":
             return new StreetView(args.options);
         case "information":
@@ -81,6 +85,8 @@ var ToolCollection = {
             return new Selection(args.options);
         case "location":
             return new Location(args.options);
+        case "preset":
+            return new Preset(args.options);
         default:
             throw "Tool not supported " + args.type;
       }
