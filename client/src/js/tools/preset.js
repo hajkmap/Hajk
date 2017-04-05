@@ -102,7 +102,6 @@ var PresetModel = {
     this.set("anchor", a);
     this.set("presetName", this.get('presetList')[0].name);
     this.set("presetUrl", this.get('presetList')[0].presetUrl);
-    console.log("AA: "+a+" "+JSON.stringify(this.get('presetList')));
 
     return a;
   },
@@ -120,8 +119,6 @@ var PresetModel = {
     this.set("presetValue", preset);
 
     this.updatePreset(preset);
-
-    console.log("PRESET: "+preset);
   },
 
   /**
@@ -131,7 +128,6 @@ var PresetModel = {
    *
    */
   updatePreset: function(preset, callback) {
-    console.log("Updating preset!!");
     $.ajax({
       url: `${this.get('config').url_layermenu_settings}?mapFile=${this.get('mapFile')}.json`,
       method: 'PUT',
