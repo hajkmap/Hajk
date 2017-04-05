@@ -463,11 +463,29 @@ class Search extends Component {
    *
    */
   renderLayersFromConfig(layers) {
-    var filter = this.state.filter;
     layers = this.state.filter ? this.getLayersWithFilter() : this.props.model.get('layers');
-    if (filter) {
-      layers.sort(function(a,b) { return (a.caption.toLowerCase() > b.caption.toLowerCase()) ? 1 : ((b.caption.toLowerCase() > a.caption.toLowerCase()) ? -1 : 0);});
-      layers.sort(function(x,y) { return (y.caption.toLowerCase().lastIndexOf(filter, 0) === 0) ? 1 : ((x.caption.toLowerCase().lastIndexOf(filter, 0) === 0) ? -1 : 0);});
+
+    var startsWith = [];
+    var alphabetically = [];
+
+    if (this.state.filter) {
+      layers.forEach(layer => {
+        layer.caption.toLowerCase().startsWith(this.state.filter) ? startsWith.push(layer) : alphabetically.push(layer);
+      });
+
+      startsWith.sort(function(a, b) {
+        if(a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
+        if(a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        return 0; 
+      });
+
+      alphabetically.sort(function(a, b) {
+        if(a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
+        if(a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        return 0; 
+      });
+        
+      layers = startsWith.concat(alphabetically);
     }
     return layers.map((layer, i) =>
       <li onClick={(e) => this.loadLayer(e, layer)} key={Math.random()}>
