@@ -69,7 +69,9 @@ var ToolbarView = {
             className={c}
             onClick={() => {
               tool.clicked();
-              this.props.navigationModel.set('r', Math.random());
+              if (tool.get('type') !== 'information') {
+                this.props.navigationModel.set('r', Math.random());
+              }
             }}
             key={index}
             title={tool.get("title")}>

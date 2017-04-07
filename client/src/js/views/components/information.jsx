@@ -26,18 +26,18 @@
 var InformationView = {
 
   componentDidMount: function() {
-    this.props.model.on('change:visible', () => {
+    this.props.model.on('change:display', () => {
       this.setState({
-        visible: this.props.model.get('visible')
+        display: this.props.model.get('display')
       })
     });
     this.setState({
-      visible: this.props.model.get('visible')
+      display: this.props.model.get('display')
     });
   },
 
   componentWillUnMount: function() {
-    this.props.model.off('change:visible');
+    this.props.model.off('change:display');
   },
 
   /**
@@ -46,7 +46,7 @@ var InformationView = {
    * @return {external:ReactElement}
    */
   close: function () {
-    this.props.model.set('visible', false);
+    this.props.model.set('display', false);
   },
 
   /**
@@ -55,7 +55,7 @@ var InformationView = {
    * @return {external:ReactElement}
    */
   render: function () {
-    if (this.state && this.state.visible) {
+    if (this.state && this.state.display) {
       return (
         <div id="blanket">
           <div id="container">

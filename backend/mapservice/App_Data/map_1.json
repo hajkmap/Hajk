@@ -232,7 +232,7 @@
     {
       "type": "infoclick",
       "options": {
-        "displayPopup": 1,
+        "displayPopup": false,
         "markerImg": "assets/icons/marker.png",
         "anchor": [
           16,

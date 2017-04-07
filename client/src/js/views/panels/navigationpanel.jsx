@@ -66,16 +66,20 @@ var NavigationPanelView = {
     };
   },
 
+  forced: false,
+
   /**
    * Triggered when the component is successfully mounted into the DOM.
    * @instance
    */
   componentDidMount: function () {
     this.props.model.on("change:activePanel", (sender, panel) => {
+      this.forced = true;
       this.setState({
-        activePanel : panel,
+        activePanel: panel,
         minimized: false
       });
+      this.forced = false;
     });
 
     this.props.model.on('change:alert', (e, value) => {
@@ -84,10 +88,21 @@ var NavigationPanelView = {
 
     this.props.model.on("change:visible", (sender, visible) => {
       this.setState({toggled: visible});
+      if (visible) {
+        this.forced = true;
+      }
+      setTimeout(() => {
+        this.forced = false;
+      }, 100);
     });
 
     this.props.model.on("change:toggled", (sender, visible) => {
-      this.setState({minimized: true});
+      var minimized = true;
+      if (this.forced) {
+        minimized = false;
+      }
+      this.setState({minimized: minimized});
+      this.forced = false;
     });
 
     this.props.model.on('change:r', () => {
@@ -164,14 +179,13 @@ var NavigationPanelView = {
    */
   render: function () {
 
-    var classes = this.state.toggled ? 'navigation-panel' : 'navigation-panel folded';
+    var classes = this.state.toggled ? 'navigation-panel' : 'navigation-panel folded'
+    ,   panelInstance = null
+    ,   Panel = null;
 
     if (this.state.minimized) {
       classes += " minimized";
     }
-
-    var panelInstance = null;
-    var Panel = null;
 
     if (this.state.activePanel) {
       if (panels.hasOwnProperty(this.state.activePanel.type.toLowerCase())) {

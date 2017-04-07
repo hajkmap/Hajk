@@ -140,7 +140,7 @@ var SearchModel = {
         return condition += `
           <ogc:PropertyIsLike matchCase="false" wildCard="*" singleChar="." escapeChar="!">
             <ogc:PropertyName>${property}</ogc:PropertyName>
-            <ogc:Literal>*${props.value}*</ogc:Literal>
+            <ogc:Literal>${props.value}*</ogc:Literal>
           </ogc:PropertyIsLike>`
      } else {
        return condition;
@@ -447,7 +447,7 @@ var SearchModel = {
       maxZoom: this.get('maxZoom')
     });
 
-    this.featureLayer.getSource().clear();    
+    this.featureLayer.getSource().clear();
     this.featureLayer.getSource().addFeature(spec.hit);
 
     if (ovl && this.get('displayPopup')) {

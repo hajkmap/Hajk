@@ -381,7 +381,9 @@ var SearchView = {
               onKeyDown={this.handleKeyDown}
               onChange={search_on_input} />
           </div>
-          <span className="info-text">Inled sökningen med * om du vill söka på delar av en text.</span>
+          <div className="clearfix">
+            <span className="info-text clearfix">Inled sökningen med * för att söka på delar av en text.</span>
+          </div>
         </div>
         <button onClick={search_on_click} type="submit" className="btn btn-default">Sök</button>&nbsp;
         <button onClick={this.clear} type="submit" className="btn btn-default">Rensa</button>

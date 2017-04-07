@@ -411,6 +411,8 @@ var InfoClickModel = {
    */
   togglePanel: function () {
     if (this.get("features").length > 0) {
+      this.set('r', Math.round(Math.random() * 1E12));
+      this.set('toggled', true);
       this.set('visible', true);
     } else if (this.get("navigation").get("activePanelType") === this.get("panel")) {
       this.set('visible', false);

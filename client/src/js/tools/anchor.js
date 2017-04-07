@@ -65,7 +65,6 @@ var AnchorModel = {
   },
 
   configure: function (shell) {
-
     this.set('map', shell.getMap());
     this.set('layers', shell.getLayerCollection());
     this.set(
@@ -114,8 +113,9 @@ var AnchorModel = {
    * @instance
    */
   clicked: function () {
-    this.set('visible', true);
+    this.set('visible', true);    
     this.set('toggled', !this.get('toggled'));
+
   }
 };
 

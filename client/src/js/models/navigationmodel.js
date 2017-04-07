@@ -52,17 +52,25 @@ var NavigationModel = {
 
   initialize: function (options) {
     options.panels.forEach(panel => {
+      panel.model.on("change:r", () => {
+        this.set('r', panel.model.get('r'));
+      });
       panel.model.on("change:visible", this.onPanelVisibleChanged, this);
-      panel.model.on("change:toggled", () => {        
-        if (this.get('lastPanel') && this.get('lastPanel').type !== panel.type) {
+      panel.model.on("change:toggled", () => {
+        if (this.get('lastPanel') && this.get('lastPanel').type === "InfoPanel") {
           this.set("lastPanel", panel);
-          this.set('toggled', false);
         } else {
-          this.set("lastPanel", panel);
-          this.set('toggled', !this.get('toggled'));
+          if (this.get('lastPanel') && this.get('lastPanel').type !== panel.type) {
+            this.set("lastPanel", panel);
+            this.set('toggled', false);
+          } else {
+            this.set("lastPanel", panel);
+            this.set('toggled', !this.get('toggled'));
+          }
         }
       });
     });
+
     this.on('change:visible', (s, visible) => {
       if (this.get('activePanel') && !visible) {
         this.get('activePanel').model.set('visible', visible);

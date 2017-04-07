@@ -40,7 +40,7 @@ var InformationModelProperties = {
   toolbar: 'bottom',
   icon: 'fa fa-info-circle icon',
   title: 'Om kartan',
-  visible: false,
+  display: false,
   headerText: 'Information',
   text: 'Information om kartan.'
 };
@@ -82,9 +82,9 @@ var InformationModel = {
    *
    * @instance
    */
-  clicked: function () {
+  clicked: function () {    
     this.set({
-      'visible': !this.get('visible')
+      'display': !this.get('display')
     });
   }
 };
