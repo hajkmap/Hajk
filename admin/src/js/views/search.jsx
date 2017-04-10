@@ -257,7 +257,7 @@ class Search extends Component {
 
     if (this.state.filter) {
       layers.forEach(layer => {
-        layer.caption.toLowerCase().startsWith(this.state.filter) ? startsWith.push(layer) : alphabetically.push(layer);
+        layer.caption.toLowerCase().indexOf(this.state.filter) == 0 ? startsWith.push(layer) : alphabetically.push(layer);
       });
 
       startsWith.sort(function(a, b) {
