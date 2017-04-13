@@ -783,12 +783,10 @@ var DrawModel = {
    */
   importDrawLayer: function (xmlDoc) {
 
-    var kml_string = $(xmlDoc).find('kml')[0].outerHTML;
-    if (typeof kml_string === "string") {
-      kml_string = kml_string.replace('<script/>', '');
-    }
-
-    var parser = new ol.format.KML()
+    var clonedNode = xmlDoc.childNodes[0].cloneNode(true)
+    ,   serializer = new XMLSerializer()
+    ,   kml_string = serializer.serializeToString(clonedNode)
+    ,   parser = new ol.format.KML()
     ,   features = parser.readFeatures(kml_string)
     ,   extent = false;
 
