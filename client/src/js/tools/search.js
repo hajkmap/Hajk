@@ -249,10 +249,14 @@ var SearchModel = {
       try {
         features = format.readFeatures(result);
         features = features.reduce((r, f) => {
-          var found = this.get('features').find(feature =>
-            f.getId() === feature.getId()
-          );
-          if (!found) {
+          if (this.get('selectionTools')) {
+            let found = this.get('features').find(feature =>
+              f.getId() === feature.getId()
+            );
+            if (!found) {
+              r.push(f);
+            }
+          } else {
             r.push(f);
           }
           return r;
