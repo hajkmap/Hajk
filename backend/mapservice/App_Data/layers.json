@@ -122,9 +122,9 @@
     {
       "id": "11",
       "caption": "Biotopkartering",
-      "url": "https://ksdgis.se/geoserver/wms",
+      "url": "http://ksdgis.se/geoserver/wms",
       "owner": "",
-      "date": "1490174277481",
+      "date": "1492618274801",
       "content": "",
       "legend": "",
       "projection": null,
@@ -142,7 +142,7 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": ""
     },
     {
       "id": "12",

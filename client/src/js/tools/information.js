@@ -63,7 +63,7 @@ var InformationModel = {
   },
 
   configure: function (shell) {
-    this.set({'visible': this.get('visibleAtStart')});
+    this.set({'display': this.get('visibleAtStart')});
     const element = <InformationView model={this} />;
     ReactDOM.render(
       element,
