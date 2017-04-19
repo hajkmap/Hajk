@@ -25,22 +25,20 @@ function getCSSRule(ruleName) {
     ruleName = ruleName.toLowerCase();
     var rule = undefined;
     if (!document || !document.styleSheets) return;
-    Array.prototype.find.call(document.styleSheets, styleSheet => {
-        try {
-          if (!styleSheet.cssRules) return;
-          var mathces = Array.prototype.filter.call(styleSheet.cssRules, cssRule =>
-            cssRule instanceof CSSStyleRule &&
-            cssRule.selectorText.toLowerCase() === ruleName
-          );
+    Array.prototype.forEach.call(document.styleSheets, styleSheet => {      
+      try {
+        if (!styleSheet.cssRules) return;
+        var mathces = Array.prototype.filter.call(styleSheet.cssRules, cssRule =>
+          cssRule instanceof CSSStyleRule &&
+          cssRule.selectorText.toLowerCase() === ruleName
+        );          
+        if (mathces[mathces.length - 1]) {
           rule = mathces[mathces.length - 1];
-          if (rule) {
-            rule = rule;
-          }
-        } catch (e) {
-          // Firefox throws if the css is loaded from external source.
         }
-    });
-
+      } catch (e) {
+        // Firefox throws if the css is loaded from external source.          
+      }
+    });    
     return rule;
 }
 
@@ -86,7 +84,11 @@ module.exports = {
         panelHeader.style.backgroundColor = config.primaryColor;
         panelHeader.style.borderColor = config.primaryColor;
         panelHeader.style.color = config.secondaryColor;
+      } else {
+        console.error("Wat");
       }
+
+
       if (panelHeaderItalic) {
         panelHeaderItalic.style.color = config.secondaryColor;
       }
