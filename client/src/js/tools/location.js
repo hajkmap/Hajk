@@ -65,9 +65,9 @@ var LocationModel = {
 
     var style = new ol.style.Style({
       image: new ol.style.Icon({
-        anchor: [0.5, 32],
+        anchor: [0.5, 0.5],
         anchorXUnits: 'fraction',
-        anchorYUnits: 'pixels',
+        anchorYUnits: 'fraction',
         opacity: .8,
         src: 'assets/icons/gps.png',
         scale: (1/2)
