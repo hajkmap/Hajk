@@ -21,6 +21,7 @@
 // https://github.com/hajkmap/Hajk
 
 var ToolModel = require('tools/tool');
+var kmlWriter = require('utils/kmlwriter');
 var source;
 var olMap;
 
@@ -704,7 +705,7 @@ var DrawModel = {
       transformed.push(c);
     });
 
-    xml = this.writeKml(transformed, "ritobjekt");
+    xml = kmlWriter.createXML(transformed, "ritobjekt");
 
     form.id = this.exportHitsFormId;
     form.method = "post";
