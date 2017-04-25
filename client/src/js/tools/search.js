@@ -657,10 +657,7 @@ var SearchModel = {
   export: function (type) {
     var url = ""
     ,   data = {}
-    ,   postData = ""
-    ,   form   = document.createElement('form')
-    ,   input  = document.createElement('input')
-    ,   curr   = document.getElementById(this.exportHitsFormId)
+    ,   postData = "";
 
     switch (type) {
       case 'kml':
@@ -674,21 +671,25 @@ var SearchModel = {
         postData = JSON.stringify(data);
         break;
     }
+    
+    this.set("downloading", true);
 
-    form.id = this.exportHitsFormId;
-    form.method = "post";
-    form.action = url;
-    input.value = postData;
-    input.name  = "json";
-    input.type  = "hidden";
-    form.appendChild(input);
-
-    if (curr)
-      document.body.replaceChild(form, curr);
-    else
-      document.body.appendChild(form);
-          
-    form.submit();
+    $.ajax({
+      url: url,
+      method: "post",
+      data: {
+        json: postData
+      },
+      format: "json",
+      success: (url) => {
+        this.set("downloading", false);
+        this.set("url", url);
+      },
+      error: (err) => {
+        this.set("downloading", false);
+        alert(err);
+      }
+    });
   },
 
   /**

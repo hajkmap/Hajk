@@ -639,6 +639,7 @@ var ExportModel = {
     ,   form   = document.createElement('form')
     ,   input  = document.createElement('input')
     ,   curr   = document.getElementById(this.exportHitsFormId)
+    ,   url    = this.get('exportUrl')
     ,   data   = {
       wmsLayers: [],
       vectorLayers: [],
@@ -664,21 +665,25 @@ var ExportModel = {
     data.orientation = options.orientation;
     data.format = options.format;
     data.scale = options.scale;
+      
+    this.set("downloading", true);
 
-    form.id = this.exportHitsFormId;
-    form.method = "post";
-    form.action = this.get('exportUrl');
-    input.value = JSON.stringify(data);
-    input.name  = "json";
-    input.type  = "hidden";
-    form.appendChild(input);
-
-    if (curr)
-      document.body.replaceChild(form, curr);
-    else
-      document.body.appendChild(form);
-
-    form.submit();
+    $.ajax({
+      url: url,
+      method: "post",
+      data: {
+        json: JSON.stringify(data)
+      },
+      format: "json",
+      success: (url) => {
+        this.set("downloading", false);
+        this.set("url", url);
+      },
+      error: (err) => {
+        this.set(download);
+        alert(err);
+      }
+    });
 
     callback();
   },
@@ -699,6 +704,7 @@ var ExportModel = {
     ,   form   = document.createElement('form')
     ,   input  = document.createElement('input')
     ,   curr   = document.getElementById(this.exportHitsFormId)
+    ,   url    = this.get('exportTiffUrl')
     ,   data   = {
       wmsLayers: [],
       vectorLayers: [],
@@ -725,20 +731,26 @@ var ExportModel = {
     data.format = "";
     data.scale = scale;
 
-    form.id = this.exportHitsFormId;
-    form.method = "post";
-    form.action = this.get('exportTiffUrl');
-    input.value = JSON.stringify(data);
-    input.name  = "json";
-    input.type  = "hidden";
-    form.appendChild(input);
+this.set("downloading", true);
 
-    if (curr)
-      document.body.replaceChild(form, curr);
-    else
-      document.body.appendChild(form);
+    $.ajax({
+      url: url,
+      method: "post",
+      data: {
+        json: JSON.stringify(data)
+      },
+      format: "json",
+      success: (url) => {
+        this.set("downloading", false);
+        this.set("url", url);
+      },
+      error: (err) => {
+        this.set(download);
+        alert(err);
+      }
+    });
+    
 
-    form.submit();
   },
 
   /**

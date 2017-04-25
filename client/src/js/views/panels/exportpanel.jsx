@@ -59,13 +59,24 @@ var ExportTiffSettings = React.createClass({
     }
 
     this.addPreview(map);
-
+    
+    //downloadlänk
+    if (this.props.model.get("downloading")) {
+      downloadLink = <a href="#">Hämtar...</a>
+      
+    } else if (this.props.model.get("url")) {
+      downloadLink = <a href={this.props.model.get("url")}>Hämta sökresultat</a>
+    } else {
+      downloadLink = null;
+    }
+    
     return (
       <div className="export-settings">
         <div>
           <div>
             <button onClick={this.exportTIFF} className="btn btn-default">Skapa TIFF {loader}</button>
           </div>
+          <div>{downloadLink}</div>
           <br />
           <div id="tiff"></div>
         </div>
@@ -206,7 +217,9 @@ var ExportPdfSettings = React.createClass({
     ,   scales = this.props.model.get('scales')
     ,   options
     ,   resolutionOptions
-    ,   loader = null;
+    ,   loader = null
+    ,   downloadLink = null
+    ;
 
     if (this.state.loading) {
       loader = <i className="fa fa-refresh fa-spin"></i>;
@@ -218,6 +231,16 @@ var ExportPdfSettings = React.createClass({
     resolutionOptions = this.resolutions.map((s, i) => <option key={i} value={s}>{s}</option>);
         
     this.addPreview(map);
+
+    //downloadlänk
+    if (this.props.model.get("downloading")) {
+      downloadLink = <a href="#">Hämtar...</a>
+      
+    } else if (this.props.model.get("url")) {
+      downloadLink = <a href={this.props.model.get("url")} target="_blank">Hämta sökresultat</a>
+    } else {
+      downloadLink = null;
+    }
 
     return (
       <div className="export-settings">
@@ -257,6 +280,7 @@ var ExportPdfSettings = React.createClass({
         </div>
         <div>
           <button onClick={this.exportPDF} className="btn btn-default">Skapa PDF {loader}</button>
+          <div>{downloadLink}</div>
         </div>
         <br />
         <div id="pdf"></div>
@@ -275,7 +299,18 @@ var ExportPanelView = {
       this.setState({
         activeTool: this.props.model.get('activeTool')
       });
-    })
+    });
+    this.props.model.on('change:url', () => {
+      this.setState({
+        downloadUrl: this.props.model.get('url')
+      });
+    });
+    this.props.model.on('change:downloading', () => {
+      this.setState({
+        downloading: this.props.model.get('downloading')
+      });
+    });
+
   },
 
   componentWillUnmount: function () {

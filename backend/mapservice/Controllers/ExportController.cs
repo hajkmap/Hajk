@@ -61,13 +61,16 @@ namespace MapService.Controllers
         }
 
         [HttpPost]
-        public ActionResult PDF(string json)
+        public string PDF(string json)
         {
             MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
             AsyncManager.OutstandingOperations.Increment();
             PDFCreator pdfCreator = new PDFCreator();
-            byte[] blob = pdfCreator.Create(exportItem);            
-            return File(blob, "application/pdf", "kartutskrift.pdf");
+            byte[] blob = pdfCreator.Create(exportItem);
+            string[] fileInfo = byteArrayToFileInfo(blob, "pdf");
+
+            return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
+            //return File(blob, "application/pdf", "kartutskrift.pdf");
         }
 
         private byte[] imgToByteArray(Image img)
@@ -82,7 +85,7 @@ namespace MapService.Controllers
         }
 
         [HttpPost]
-        public ActionResult TIFF(string json)
+        public string TIFF(string json)
         {
             MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
                                     
@@ -123,25 +126,49 @@ namespace MapService.Controllers
             zipStream.Close();                  // Must finish the ZipOutputStream before using outputMemStream.
 
             outStream.Position = 0;
-            
-            return File(outStream.ToArray(), "application/octet-stream", "kartexport.zip");                       
+            outStream.ToArray();
+
+            string[] fileInfo = byteArrayToFileInfo(outStream.ToArray(), "zip");
+            return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
         }
+
 
         [HttpPost]
         [ValidateInput(false)]
-        public ActionResult KML(string json)
+        public string KML(string json)
         {
             KMLCreator kmlCreator = new KMLCreator();
-            return File(kmlCreator.Create(json), "application/vnd.google-earth.kml+xml", "kartexport.kml");
+            byte[] bytes = kmlCreator.Create(json);
+            string[] fileInfo = byteArrayToFileInfo(bytes, "kml");
+
+            return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
         }
 
-        [HttpPost]        
-        public ActionResult Excel(string json)
+        private string[] byteArrayToFileInfo(byte[] bytes, string type)
+        {
+            string[] fileInfo = this.generateFileInfo("kartexport", type);
+            System.IO.File.WriteAllBytes(fileInfo[0], bytes);
+
+            return fileInfo;
+        }
+
+        private Stream ByteArrayToStream(byte[] bytes)
+        {            
+            MemoryStream stream = new MemoryStream();
+            stream.Write(bytes, 0, bytes.Length);
+            return stream;
+        }
+
+        [HttpPost]
+        public string Excel(string json)
         {
             List<ExcelTemplate> data = JsonConvert.DeserializeObject<List<ExcelTemplate>>(json);
             DataSet dataSet = Util.ToDataSet(data);
-            ExcelCreator excelCreator = new ExcelCreator();            
-            return File(excelCreator.Create(dataSet), "application/vnd.ms-excel", "kartexport.xls");
+            ExcelCreator excelCreator = new ExcelCreator();
+            byte[] bytes = excelCreator.Create(dataSet);
+            string[] fileInfo = byteArrayToFileInfo(bytes, "xls");
+            
+            return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
         }
     }
 }

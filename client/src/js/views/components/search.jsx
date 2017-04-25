@@ -78,7 +78,16 @@ var SearchView = {
         displayPopup: this.props.model.get('displayPopup')
       });
     });
-
+    this.props.model.on("change:url", () => {  
+      this.setState({
+        downloadUrl: this.props.model.get("url")
+      });
+    });
+    this.props.model.on("change:downloading", () => {  
+      this.setState({
+        downloading: this.props.model.get("downloading")
+      });
+    }); 
   },
 
   /**
@@ -101,6 +110,8 @@ var SearchView = {
     });
     this.props.model.off('change:layerCollection', this.bindLayerVisibilityChange);
     this.props.model.off("change:displayPopup");
+    this.props.model.off("change:url");
+    this.props.model.off("change:downloading");
   },
 
   /**
@@ -245,6 +256,7 @@ var SearchView = {
     var groups = this.props.model.get('items')
     ,   excelButton  = null
     ,   kmlButton  = null
+    ,   downloadLink  = null
     ;
 
     if (this.props.model.get('kmlExportUrl')) {
@@ -263,6 +275,18 @@ var SearchView = {
       )
     }
 
+    //skapar en länk med url till nedladdning av export. Visar Spara
+    //först när url finns.
+    if (this.props.model.get("downloading")) {
+      downloadLink = <a href="#">Hämtar...</a>
+      
+    } else if (this.props.model.get("url")) {
+      downloadLink = <a href={this.props.model.get("url")}>Hämta sökresultat</a>
+    } else {
+      downloadLink = null;
+    }
+    
+
     return (
       <div className="search-results" key="search-results">
         <h3>Sökresultat</h3>
@@ -270,6 +294,7 @@ var SearchView = {
           <input type="checkbox" id="display-popup" ref="displayPopup" onChange={(e) => {this.onChangeDisplayPopup(e)}} checked={this.state.displayPopup}></input>
           <label htmlFor="display-popup">Visa information</label>
           <span className="pull-right">{excelButton}&nbsp;{kmlButton}</span>
+          <div>{downloadLink}</div>
         </div>
         {
           (() => {
