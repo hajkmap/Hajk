@@ -56,7 +56,7 @@ var CoordinatesList = React.createClass({
   getLat: function (xyObject) {
     return (
       <span>
-        <strong>{ xyObject.ytitle }: </strong> { this.formatDMS(this.convertDDToDMS(xyObject.y, true)) }
+        <strong>{ xyObject.ytitle }: </strong> { this.formatDMS(this.convertDDToDMS(xyObject.y, false)) }
       </span>
     )
   },
