@@ -569,9 +569,27 @@ var SearchModel = {
     return this.get('sources').filter(filter);
   },
 
+  getHitsFromItems: function () {
+    var hits = [];
+    if (this.get('hits').length === 0) {
+      this.get('items').map(item => {              
+        item.hits.forEach((hit, i) => {                    
+          hit.setStyle(this.featureLayer.getStyle());
+          hits.push(hit);
+        });                
+      });
+    }
+    return hits;
+  },
+
   getKmlData: function () {
+
+    var exportItems = this.get('hits').length > 0 
+        ? this.get('hits') 
+        : this.getHitsFromItems();
+
     var transformed = kmlWriter.transform(
-      this.get('hits'),
+      exportItems,
       this.get('map').getView().getProjection().getCode(),
       "EPSG:4326"
     );
@@ -581,18 +599,9 @@ var SearchModel = {
   getExcelData: function () {
 
     var groups = {}        
-    ,   hits = []
-    ,   exportItems = this.get('hits').length > 0 
+    ,   exportItems = this.get('hits').length > 0
         ? this.get('hits') 
-        : hits;
-
-    if (this.get('hits').length === 0) {
-      this.get('items').map(item => {
-        item.hits.forEach((hit, i) => {
-          hits.push(hit);
-        });                
-      });
-    }
+        : this.getHitsFromItems();
 
     exportItems.forEach(hit => {      
       if (!groups.hasOwnProperty(hit.caption)) {
