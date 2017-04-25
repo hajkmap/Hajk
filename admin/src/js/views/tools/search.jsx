@@ -130,7 +130,6 @@ class ToolOptions extends Component {
         excelExportUrl: this.state.excelExportUrl,
         displayPopup: this.state.displayPopup,
         selectionTools: this.state.selectionTools,
-        markerImg: this.state.markerImg,
         anchor: [this.state.anchorX, this.state.anchorY],
         imgSize: [this.state.imgSizeX, this.state.imgSizeY]
       }

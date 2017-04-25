@@ -580,15 +580,27 @@ var SearchModel = {
 
   getExcelData: function () {
 
-    var groups = {};
+    var groups = {}        
+    ,   hits = []
+    ,   exportItems = this.get('hits').length > 0 
+        ? this.get('hits') 
+        : hits;
 
-    this.get('hits').forEach(hit => {
+    if (this.get('hits').length === 0) {
+      this.get('items').map(item => {
+        item.hits.forEach((hit, i) => {
+          hits.push(hit);
+        });                
+      });
+    }
+
+    exportItems.forEach(hit => {      
       if (!groups.hasOwnProperty(hit.caption)) {
         groups[hit.caption] = [];
       }
       groups[hit.caption].push(hit);
     });
-
+    
     return Object.keys(groups).map(group => {
 
       var columns = []
@@ -634,7 +646,6 @@ var SearchModel = {
   },
 
   export: function (type) {
-
     var url = ""
     ,   data = {}
     ,   postData = ""
@@ -667,7 +678,7 @@ var SearchModel = {
       document.body.replaceChild(form, curr);
     else
       document.body.appendChild(form);
-
+          
     form.submit();
   },
 

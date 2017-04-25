@@ -24,6 +24,10 @@ namespace MapService.Components
 
                     System.Type type = string.Empty.GetType();
 
+                    template.Rows.Sort((a, b) => {
+                        return a.Count == b.Count ? 0 : a.Count > b.Count ? -1 : 1;
+                    });
+
                     if (template.Rows[0][index] != null)
                     {
                         type = template.Rows[0][index].GetType();
