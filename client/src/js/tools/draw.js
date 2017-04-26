@@ -680,7 +680,7 @@ var DrawModel = {
 
     var features = this.get('drawLayer').getSource().getFeatures()
     ,   transformed = []
-    ,   xml
+    ,   postData
     ,   form = document.createElement('form')
     ,   input = document.createElement('input')
     ,   curr = document.getElementById(this.exportHitsFormId);
@@ -705,22 +705,25 @@ var DrawModel = {
       transformed.push(c);
     });
 
-    xml = kmlWriter.createXML(transformed, "ritobjekt");
+    postData = kmlWriter.createXML(transformed, "ritobjekt");
 
-    form.id = this.exportHitsFormId;
-    form.method = "post";
-    form.action = this.get('exportUrl');
-    input.value = xml;
-    input.name  = "json";
-    input.type  = "hidden";
-    form.appendChild(input);
-
-    if (curr)
-      document.body.replaceChild(form, curr);
-    else
-      document.body.appendChild(form);
-
-    form.submit();
+    this.set("downloadingDrawKml", true);
+    $.ajax({
+      url: this.get('exportUrl'),
+      method: "post",
+      data: {
+        json: postData
+      },
+      format: "json",
+      success: (url) => {
+        this.set("downloadingDrawKml", false);
+        this.set("kmlExportUrl", url);
+      },
+      error: (err) => {
+        this.set("downloadingDrawKml", false);
+        alert(err);
+      }
+    });
   },
 
   /**

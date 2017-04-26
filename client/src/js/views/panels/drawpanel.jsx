@@ -217,6 +217,7 @@ var DrawPanelView = {
         kmlImport: this.props.model.get('kmlImport')
       });
     });
+    this.props.model.on("change:downloadingDrawKml")
   },
 
   /**

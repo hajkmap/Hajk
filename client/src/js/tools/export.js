@@ -680,7 +680,7 @@ var ExportModel = {
         this.set("urlPdf", url);
       },
       error: (err) => {
-        this.set("downloadingPdf");
+        this.set("downloadingPdf", false);
         alert(err);
       }
     });
