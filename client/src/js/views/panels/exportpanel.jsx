@@ -45,6 +45,8 @@ var ExportTiffSettings = React.createClass({
     });
   },
 
+
+
   componentWillUnmount: function () {
     this.removePreview();
   },
@@ -61,11 +63,17 @@ var ExportTiffSettings = React.createClass({
     this.addPreview(map);
     
     //downloadlänk
-    if (this.props.model.get("downloading")) {
-      downloadLink = <a href="#">Hämtar...</a>
-      
-    } else if (this.props.model.get("url")) {
-      downloadLink = <a href={this.props.model.get("url")}>Hämta sökresultat</a>
+    if (this.props.model.get("downloadingTIFF")) {
+      downloadLink = 
+        <div className="alert alert-info alert-auto">
+          <span>Hämtar...</span>
+        </div>
+    } else if (this.props.model.get("urlTIFF")) {
+      downloadLink = 
+        <div className="alert alert-info alert-dismissable alert-auto">
+          <a href="#" className="close" data-dismiss="alert" aria-label="close">&times;</a>
+          <a href={this.props.model.get("urlTIFF")} target="_blank">Ladda ner TIFF</a>
+        </div>
     } else {
       downloadLink = null;
     }
@@ -233,11 +241,17 @@ var ExportPdfSettings = React.createClass({
     this.addPreview(map);
 
     //downloadlänk
-    if (this.props.model.get("downloading")) {
-      downloadLink = <a href="#">Hämtar...</a>
-      
-    } else if (this.props.model.get("url")) {
-      downloadLink = <a href={this.props.model.get("url")} target="_blank">Hämta sökresultat</a>
+    if (this.props.model.get("downloadingPdf")) {
+      downloadLink = 
+        <div className="alert alert-info alert-auto">
+          <span>Hämtar...</span>
+        </div>
+    } else if (this.props.model.get("urlPdf")) {
+      downloadLink = 
+        <div className="alert alert-info alert-dismissable alert-auto">
+          <a href="#" className="close" data-dismiss="alert" aria-label="close">&times;</a>
+          <a href={this.props.model.get("urlPdf")} target="_blank">Ladda ner PDF</a>
+        </div>
     } else {
       downloadLink = null;
     }
@@ -280,7 +294,8 @@ var ExportPdfSettings = React.createClass({
         </div>
         <div>
           <button onClick={this.exportPDF} className="btn btn-default">Skapa PDF {loader}</button>
-          <div>{downloadLink}</div>
+          <br />
+          {downloadLink}
         </div>
         <br />
         <div id="pdf"></div>
@@ -300,14 +315,24 @@ var ExportPanelView = {
         activeTool: this.props.model.get('activeTool')
       });
     });
-    this.props.model.on('change:url', () => {
+    this.props.model.on('change:urlPdf', () => {
       this.setState({
-        downloadUrl: this.props.model.get('url')
+        downloadUrl: this.props.model.get('urlPdf')
       });
     });
-    this.props.model.on('change:downloading', () => {
+    this.props.model.on('change:downloadingPdf', () => {
       this.setState({
-        downloading: this.props.model.get('downloading')
+        downloading: this.props.model.get('downloadingPdf')
+      });
+    });
+    this.props.model.on('change:urlTIFF', () => {
+      this.setState({
+        downloadUrl: this.props.model.get('urlTIFF')
+      });
+    });
+    this.props.model.on('change:downloadingTIFF', () => {
+      this.setState({
+        downloadUrl: this.props.model.get('downloadingTIFF')
       });
     });
 

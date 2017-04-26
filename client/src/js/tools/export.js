@@ -666,7 +666,7 @@ var ExportModel = {
     data.format = options.format;
     data.scale = options.scale;
       
-    this.set("downloading", true);
+    this.set("downloadingPdf", true);
 
     $.ajax({
       url: url,
@@ -676,11 +676,11 @@ var ExportModel = {
       },
       format: "json",
       success: (url) => {
-        this.set("downloading", false);
-        this.set("url", url);
+        this.set("downloadingPdf", false);
+        this.set("urlPdf", url);
       },
       error: (err) => {
-        this.set(download);
+        this.set("downloadingPdf");
         alert(err);
       }
     });
@@ -731,7 +731,7 @@ var ExportModel = {
     data.format = "";
     data.scale = scale;
 
-this.set("downloading", true);
+this.set("downloadingTIFF", true);
 
     $.ajax({
       url: url,
@@ -741,11 +741,11 @@ this.set("downloading", true);
       },
       format: "json",
       success: (url) => {
-        this.set("downloading", false);
-        this.set("url", url);
+        this.set("downloadingTIFF", false);
+        this.set("urlTIFF", url);
       },
       error: (err) => {
-        this.set(download);
+        this.set("downloadingTIFF", false);
         alert(err);
       }
     });
