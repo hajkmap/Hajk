@@ -83,6 +83,7 @@ var DrawModelProperties = {
   lineColor: "rgb(15, 175, 255)",
   lineWidth: 3,
   lineStyle: "solid",
+  circleFillColor: "rgb(15, 175, 255)",
   polygonLineColor: "rgb(15, 175, 255)",
   polygonLineWidth: 3,
   polygonLineStyle: "solid",
@@ -883,9 +884,17 @@ var DrawModel = {
     function getFill() {
 
       function rgba() {
-        return this.get('polygonFillColor')
+        switch(type) {
+          case "Circle":
+            return this.get('circleFillColor')
                    .replace('rgb', 'rgba')
                    .replace(')', `, ${this.get('polygonFillOpacity')})`)
+          
+          case "Polygon":
+            return this.get('polygonFillColor')
+                   .replace('rgb', 'rgba')
+                   .replace(')', `, ${this.get('polygonFillOpacity')})`);
+        }
       }
 
       var color = forcedProperties ? forcedProperties.fillColor : rgba.call(this);
@@ -990,6 +999,8 @@ var DrawModel = {
     }
 
     var type = feature.getProperties().type;
+
+    console.log("Type: ", type);
 
     return [
       new ol.style.Style({
@@ -1230,7 +1241,13 @@ var DrawModel = {
    * @instance
    */
   setPolygonFillColor: function (color) {
+    console.log("color: ", color);
     this.set("polygonFillColor", color);
+  },
+  
+  setCircleFillColor: function (color) {
+    console.log("anoropar setCircleFillColor(): ", color);
+    this.set("circleFillColor", color);
   },
 
   /**

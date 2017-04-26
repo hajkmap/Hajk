@@ -33,7 +33,6 @@ function colorToArray(color, type) {
     var res = []
     var reg = type === "rgb" ? /rgb\((.+)\)/ :
                                /rgba\((.+)\)/;
-
     res = reg.exec(color)[1].split(',').map(a => parseFloat(a));
 
     if (type === "rgb") {
@@ -79,6 +78,7 @@ function toKmlString(str, type) {
         _.each(strs, function (coords, i) {
           if (i === 0) {
             coords = coords.replace(/^POLYGON\(\(/, '').replace(/\)$/, '');
+            coords = coords.replace(/^POLYGON Z\(\(/, '').replace(/\)$/, '');
             str +=   '<outerBoundaryIs>';
             str +=     '<LinearRing>';
             str +=       '<coordinates>' + coords + '</coordinates>';
@@ -297,8 +297,6 @@ kmlWriter.createXML = (features, name) => {
     if (!description && feature.getProperties()) {
         description = "<table>";
         let properties = feature.getProperties();
-
-        console.log("Export to xml", feature);
 
         if (feature.infobox) {
           properties = filterProperties(feature.infobox, properties);

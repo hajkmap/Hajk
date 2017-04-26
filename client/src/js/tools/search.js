@@ -687,7 +687,7 @@ var SearchModel = {
       },
       error: (err) => {
         this.set("downloading", false);
-        alert(err);
+        alert("Datamängden är för stor. Det går inte att exportera så många träffar. Begränsa ditt sökresultat.");
       }
     });
   },

@@ -217,7 +217,7 @@ var DrawPanelView = {
         kmlImport: this.props.model.get('kmlImport')
       });
     });
-    this.props.model.on("change:downloadingDrawKml")
+    this.props.model.on("change:downloadDrawKml")
   },
 
   /**
@@ -466,8 +466,8 @@ var DrawPanelView = {
             <div>Fyllnadsfärg</div>
             <ColorPicker
               model={this.props.model}
-              property="polygonFillColor"
-              onChange={this.props.model.setPolygonFillColor.bind(this.props.model)}
+              property="circleFillColor"
+              onChange={this.props.model.setCircleFillColor.bind(this.props.model)}
             />
             <div>Opacitet</div>
             <select value={this.state.polygonFillOpacity} onChange={update.bind(this, 'setPolygonFillOpacity', 'polygonFillOpacity')}>

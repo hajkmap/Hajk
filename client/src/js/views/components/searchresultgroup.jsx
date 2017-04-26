@@ -76,24 +76,52 @@ SearchResultGroup = {
       hit: hit,
       id: group[0].id
     };
+    
+    if (shiftIsDown) {
 
-    if (!ctrlIsDown) {
-      $('.search-results').find('.selected').each(function (e) {
-        $(this).removeClass('selected');
+      let topIndex = 0;
+      let items = [];
+      let i;
+
+      parent.find('.selected').each(function (e, i) {                
+        topIndex = $(this).attr("data-index");
+      });                
+
+      i = topIndex;
+
+      for (; i <= index; i++) {              
+        items.push({
+          index: i,
+          hits: this.props.result.hits,
+          hit: this.props.result.hits[i],
+          id: group[0].id
+        });        
+      }
+
+      items.forEach(item => {
+        this.props.model.append(item);
+        parent.find(`div[data-index=${item.index}]`).addClass("selected");
       });
-      this.props.model.focus(item);
-    } else {
+
+    } else if (ctrlIsDown) {
       if (element.hasClass('selected')) {
         this.props.model.detach(item);
       } else {
         this.props.model.append(item);
       }
+    } else {
+      $('.search-results').find('.selected').each(function (e) {
+        $(this).removeClass('selected');
+      });
+      this.props.model.focus(item);
     }
 
-    if (element.hasClass('selected'))
-      element.removeClass('selected');
-    else
-      element.addClass('selected');
+    if (!shiftIsDown) {
+      if (element.hasClass('selected'))
+        element.removeClass('selected');
+      else
+        element.addClass('selected');
+    }
 
     if (isMobile()) {
       if (this.props.parentView.props.navigationPanel) {
@@ -130,7 +158,7 @@ SearchResultGroup = {
               ,   title = getTitle(this.props.result.displayName)
               ,   index = i
               ;
-              return (<div key={hitId} index={i} onClick={this.handleClick.bind(this, hit, i)}>{title}</div>);
+              return (<div key={hitId} index={i} data-index={i} onClick={this.handleClick.bind(this, hit, i)}>{title}</div>);
             })
           }
         </div>
