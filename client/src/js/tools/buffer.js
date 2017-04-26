@@ -179,6 +179,8 @@ var BufferModel = {
       buff = jstsGeom.buffer(dist);
       olf.setGeometry(parser.write(buff));
       olf.setStyle(this.getDefaultStyle());
+      olf.setId(Math.random() * 1E20);
+
       return olf;
     });
 

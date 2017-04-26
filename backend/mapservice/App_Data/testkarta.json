@@ -317,7 +317,28 @@
         "baselayers": [
           "5"
         ],
-        "groups": [],
+        "groups": [
+          {
+            "id": "b0fb4c03-7574-274d-4f03-4226b24a8515",
+            "parent": "-1",
+            "name": "Ny grupp",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "10",
+                "visibleAtStart": true,
+                "drawOrder": 1000
+              },
+              {
+                "id": "4",
+                "visibleAtStart": true,
+                "drawOrder": 1000
+              }
+            ],
+            "groups": []
+          }
+        ],
         "active": true,
         "visibleAtStart": true,
         "backgroundSwitcherBlack": true,
@@ -373,6 +394,14 @@
           250000
         ]
       }
+    },
+    {
+      "type": "buffer",
+      "options": {}
+    },
+    {
+      "type": "edit",
+      "options": {}
     }
   ],
   "map": {
