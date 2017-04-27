@@ -407,6 +407,8 @@ var ExportModel = {
 
     function as2DPairs(coordinates, type) {
       
+      console.log("As 2d pairs", coordinates, type);
+
       switch (type) {
         case "Point":
           return [coordinates];
@@ -415,7 +417,9 @@ var ExportModel = {
         case "Polygon":
           return coordinates[0];          
         case "MultiPolygon":    
-          return coordinates[0][0];      
+          return coordinates[0][0];
+        case "Circle":    
+          return coordinates;
       }      
     }
 
@@ -451,7 +455,7 @@ var ExportModel = {
           }          
                     
           var coords = type === "Circle"
-              ? as2DPairs(ol.geom.Polygon.fromCircle(feature.getGeometry(), 0b10000000), "Polygon")
+              ? as2DPairs(feature.getGeometry().getCenter()).concat([[feature.getGeometry().getRadius(), 0]], "Circle")
               : as2DPairs(feature.getGeometry().getCoordinates(), feature.getGeometry().getType());
 
           return {
@@ -682,7 +686,7 @@ var ExportModel = {
       },
       error: (err) => {
         this.set("downloadingPdf", false);
-        alert(err);
+        alert("Det gick inte att skapa PDF. Försök igen senare");
       }
     });
 
