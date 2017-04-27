@@ -315,7 +315,8 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "5"
+          "5",
+          "32"
         ],
         "groups": [
           {
@@ -325,11 +326,6 @@
             "toggled": false,
             "expanded": false,
             "layers": [
-              {
-                "id": "32",
-                "visibleAtStart": false,
-                "drawOrder": 1000
-              },
               {
                 "id": "10",
                 "visibleAtStart": true,
@@ -348,7 +344,7 @@
         "visibleAtStart": true,
         "backgroundSwitcherBlack": true,
         "backgroundSwitcherWhite": true,
-        "toggleAllButton": false
+        "toggleAllButton": true
       }
     },
     {

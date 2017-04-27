@@ -99,14 +99,18 @@ var LayerSwitcherModel = {
    * Set visibility for all layers to false.
    * @instance
    */
-   toggleAllOff() {
-     this.get('layerCollection').forEach(layer => {
-       layer.setVisible(false);
+   toggleAllOff() {     
+     var baseLayers = this.getBaseLayers();
+     this.get('layerCollection').forEach(layer => {       
+       var isBaseLayer = baseLayers.find(l => l.id === layer.id);
+       if (!isBaseLayer) {
+         layer.setVisible(false);
+       }
      });
    },
 
   /**
-   * Export the map as a PDF-file
+   * Get base layers.
    * @instance
    * @return {Layer[]} base layers
    */
