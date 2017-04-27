@@ -21,36 +21,38 @@
 // https://github.com/hajkmap/Hajk
 
 function componentToHex(c) {
-    var hex = c.toString(16);
-    return hex.length == 1 ? "0" + hex : hex;
+  var hex = c.toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
 }
 
 function rgbToHex(r, g, b) {
-    return componentToHex(r) + componentToHex(g) + componentToHex(b);
+  return componentToHex(r) + componentToHex(g) + componentToHex(b);
 }
 
 function colorToArray(color, type) {
-    var res = []
-    var reg = type === "rgb" ? /rgb\((.+)\)/ :
-                               /rgba\((.+)\)/;
-    res = reg.exec(color)[1].split(',').map(a => parseFloat(a));
+  var res = []
+  ,   reg = type === "rgb" 
+  ? /rgb\((.+)\)/ 
+  : /rgba\((.+)\)/;
 
-    if (type === "rgb") {
-      res.push(1);
-    }
-
-    return res;
+  res = reg.exec(color)[1].split(',').map(a => parseFloat(a));
+  if (type === "rgb") {
+    res.push(1);
+  }
+  return res;
 }
 
 function toKmlColor(color) {
-    var s, r, g, b, o;
-    var res = /^rgba/.test(color) ? colorToArray(color, 'rgba') : colorToArray(color, 'rgb');
+  var s, r, g, b, o, res;
+  if (color) {            
+    res = /^rgba/.test(color) ? colorToArray(color, 'rgba') : colorToArray(color, 'rgb');
     s = rgbToHex(res[0], res[1], res[2]);
     r = s.substr(0, 2);
     g = s.substr(2, 2);
     b = s.substr(4, 2);
     o = (Math.floor(res[3] * 255)).toString(16);
     return o + b + g + r;
+  }
 }
 
 function toKmlString(str, type) {

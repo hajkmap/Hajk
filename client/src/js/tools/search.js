@@ -63,7 +63,8 @@ var SearchModelProperties = {
   maxZoom: 14,
   exportUrl: "",
   displayPopup: false,
-  hits: []
+  hits: [],
+  popupOffsetY: 0
 };
 
 /**
@@ -438,12 +439,26 @@ var SearchModel = {
    *
    */
   focus: function (spec) {
+    
+    function isPoint (coord) {
+      if (coord.length === 1) {
+        coord = coord[0];
+      }
+      return (
+        (coord.length === 2 ||  coord.length === 3) &&
+        typeof coord[0] === "number" &&
+        typeof coord[1] === "number"
+      )
+      ? [coord[0], coord[1]]
+      : false;
+    }
 
-    var map    = this.get('map')
-    ,   exist  = this.get('selectedIndices').find(item => item.group === spec.id)
-    ,   extent = spec.hit.getGeometry().getExtent()
-    ,   size   = map.getSize()
-    ,   ovl    = map.getOverlayById('popup-0');
+    var map     = this.get('map')
+    ,   exist   = this.get('selectedIndices').find(item => item.group === spec.id)
+    ,   extent  = spec.hit.getGeometry().getExtent()
+    ,   size    = map.getSize()
+    ,   ovl     = map.getOverlayById('popup-0')
+    ,   offsetY = 0
 
     this.set('hits', [spec.hit]);
     map.getView().fit(extent, {
@@ -456,6 +471,10 @@ var SearchModel = {
 
     if (ovl && this.get('displayPopup')) {
       $('#popup-content').html(this.getInformation(spec.hit));
+      if (isPoint(spec.hit.getGeometry().getCoordinates())) {
+        offsetY = this.get('popupOffsetY');
+      }
+      ovl.setOffset([0, offsetY]);
       ovl.setPosition(map.getView().getCenter());
     }
 

@@ -38,7 +38,8 @@ var defaultState = {
   anchorX: 16,
   anchorY: 32,
   imgSizeX: 32,
-  imgSizeY: 32
+  imgSizeY: 32,
+  popupOffsetY: 0
 };
 
 class ToolOptions extends Component {
@@ -66,7 +67,8 @@ class ToolOptions extends Component {
         imgSizeX: tool.options.imgSize[0] || this.state.imgSizeX,
         imgSizeY: tool.options.imgSize[1] || this.state.imgSizeX,
         anchorX: tool.options.anchor[0] || this.state.anchorX,
-        anchorY: tool.options.anchor[1] || this.state.anchorY
+        anchorY: tool.options.anchor[1] || this.state.anchorY,
+        popupOffsetY: tool.options.popupOffsetY
       });
     } else {
       this.setState({
@@ -131,7 +133,8 @@ class ToolOptions extends Component {
         displayPopup: this.state.displayPopup,
         selectionTools: this.state.selectionTools,
         anchor: [this.state.anchorX, this.state.anchorY],
-        imgSize: [this.state.imgSizeX, this.state.imgSizeY]
+        imgSize: [this.state.imgSizeX, this.state.imgSizeY],
+        popupOffsetY: this.state.popupOffsetY
       }
     };
 
@@ -242,6 +245,10 @@ class ToolOptions extends Component {
           <div>
             <label htmlFor="active">Ikonförskjutning Y</label>
             <input value={this.state.anchorY} type="text" name="anchorY" onChange={(e) => {this.handleInputChange(e)}}></input>
+          </div>
+          <div>
+            <label htmlFor="popupOffsetY">Förskjutning popup-ruta</label>
+            <input value={this.state.popupOffsetY} type="text" name="popupOffsetY" onChange={(e) => {this.handleInputChange(e)}}></input>
           </div>
           <div>
             <label htmlFor="imgSizeX">Bildbredd</label>

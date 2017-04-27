@@ -232,7 +232,7 @@
     {
       "type": "infoclick",
       "options": {
-        "displayPopup": false,
+        "displayPopup": true,
         "markerImg": "assets/icons/marker.png",
         "anchor": [
           16,
@@ -241,7 +241,8 @@
         "imgSize": [
           32,
           32
-        ]
+        ],
+        "popupOffsetY": 32
       }
     },
     {
@@ -300,6 +301,12 @@
         "text": "Information om kartan.",
         "headerText": "Information",
         "visibleAtStart": true
+      }
+    },
+    {
+      "type": "streetview",
+      "options": {
+        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4"
       }
     }
   ],

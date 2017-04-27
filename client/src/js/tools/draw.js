@@ -51,6 +51,9 @@ var olMap;
  * @property {string} lineColor - Default: "rgb(15, 175, 255)"
  * @property {number} lineWidth - Default: 3
  * @property {string} lineStyle - Default: "solid"
+ * @property {string} circleFillColor - Default: "rgb(255, 255, 255)"
+ * @property {number} circleFillOpacity - Default: 0.5
+ * @property {string} circleLineColor - Default: "rgb(15, 175, 255)"
  * @property {string} polygonLineColor - Default: "rgb(15, 175, 255)"
  * @property {number} polygonLineWidth - Default: 3
  * @property {string} polygonLineStyle - Default: "solid"
@@ -83,7 +86,11 @@ var DrawModelProperties = {
   lineColor: "rgb(15, 175, 255)",
   lineWidth: 3,
   lineStyle: "solid",
-  circleFillColor: "rgb(15, 175, 255)",
+  circleFillColor: "rgb(255, 255, 255)",
+  circleLineColor: "rgb(15, 175, 255)",
+  circleFillOpacity: 0.5,
+  circleLineStyle: "solid",
+  circleLineWidth: 3,
   polygonLineColor: "rgb(15, 175, 255)",
   polygonLineWidth: 3,
   polygonLineStyle: "solid",
@@ -722,7 +729,7 @@ var DrawModel = {
       },
       error: (err) => {
         this.set("downloadingDrawKml", false);
-        alert(err);
+        alert("Något gick fel. Försök igen");
       }
     });
   },
@@ -856,18 +863,16 @@ var DrawModel = {
    * Get styles array.
    * @instance
    * @param {external:"ol.feature"} feature
-   * @param {boolean} forcedProperties - Force certain properties to be taken directy from the feature.
+   * @param {boolean} forcedProperties - Force certain properties to be taken directly from the feature.
    * @return {Array<{external:"ol.style"}>} style
    *
    */
   getStyle: function(feature, forcedProperties) {
-
+    
     function getLineDash() {
         var scale = (a, f) => a.map(b => f * b)
-        ,   width = type === 'Polygon' ?
-                    this.get('polygonLineWidth') : this.get('lineWidth')
-        ,   style = type === 'Polygon' ?
-                    this.get('polygonLineStyle') : this.get('lineStyle')
+        ,   width = lookupWidth.call(this)
+        ,   style = lookupStyle.call(this)
         ,   dash  = [12, 7]
         ,   dot   = [2, 7]
         ;
@@ -888,7 +893,7 @@ var DrawModel = {
           case "Circle":
             return this.get('circleFillColor')
                    .replace('rgb', 'rgba')
-                   .replace(')', `, ${this.get('polygonFillOpacity')})`)
+                   .replace(')', `, ${this.get('circleFillOpacity')})`)
           
           case "Polygon":
             return this.get('polygonFillColor')
@@ -905,18 +910,51 @@ var DrawModel = {
       return fill;
     }
 
-    function getStroke() {
-      var color = forcedProperties ?
-                  forcedProperties.strokeColor :
-                  type === 'Polygon' ?
-                    this.get('polygonLineColor') :
-                    this.get('lineColor')
+    function lookupStyle() {      
+      switch (type) {
+        case "Polygon":
+          return this.get('polygonLineStyle');
+        case "Circle":
+          return this.get('circleLineStyle');
+        default:
+          return this.get('lineStyle');
+      } 
+    }
 
+    function lookupWidth() {      
+      switch (type) {
+        case "Polygon":
+          return this.get('polygonLineWidth');
+        case "Circle":
+          return this.get('circleLineWidth');
+        default:
+          return this.get('lineWidth');
+      } 
+    }
+
+    function lookupColor() {
+      if (forcedProperties) {
+        return forcedProperties.strokeColor;
+      }       
+      switch (type) {
+        case "Polygon":
+          return this.get('polygonLineColor');
+        case "Circle":
+          return this.get('circleLineColor');
+        default:
+          return this.get('lineColor');
+      } 
+    }
+
+    function getStroke() {
+      
+      var color = forcedProperties ?
+                  forcedProperties.strokeColor : 
+                  lookupColor.call(this);
+      
       var width = forcedProperties ?
                   forcedProperties.strokeWidth :
-                  type === 'Polygon' ?
-                    this.get('polygonLineWidth') :
-                    this.get('lineWidth')
+                  lookupWidth.call(this);
 
       var lineDash = forcedProperties ?
                      forcedProperties.strokeDash :
@@ -999,8 +1037,6 @@ var DrawModel = {
     }
 
     var type = feature.getProperties().type;
-
-    console.log("Type: ", type);
 
     return [
       new ol.style.Style({
@@ -1241,13 +1277,52 @@ var DrawModel = {
    * @instance
    */
   setPolygonFillColor: function (color) {
-    console.log("color: ", color);
     this.set("polygonFillColor", color);
   },
-  
+
+  /**
+   * Set the property circleFillColor
+   * @param {string} color
+   * @instance
+   */
   setCircleFillColor: function (color) {
-    console.log("anoropar setCircleFillColor(): ", color);
     this.set("circleFillColor", color);
+  },
+
+  /**
+   * Set the property circleFillOpacity
+   * @param {number} opacity
+   * @instance
+   */
+  setCircleFillOpacity: function (opacity) {
+    this.set("circleFillOpacity", opacity);
+  },
+
+  /**
+   * Set the property circleLineColor
+   * @param {string} color
+   * @instance
+   */
+  setCircleLineColor: function (color) {
+    this.set("circleLineColor", color);
+  },
+
+  /**
+   * Set the property circleLineStyle
+   * @param {string} style
+   * @instance
+   */
+  setCircleLineStyle: function (style) {
+    this.set("circleLineStyle", style);
+  },
+
+  /**
+   * Set the property circleLineWidth
+   * @param {number} width
+   * @instance
+   */
+  setCircleLineWidth: function (width) {
+    this.set("circleLineWidth", width);
   },
 
   /**

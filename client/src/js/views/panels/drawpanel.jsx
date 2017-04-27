@@ -167,6 +167,10 @@ var DrawPanelView = {
       pointSymbol: this.props.model.get('pointSymbol'),
       lineWidth: this.props.model.get('lineWidth'),
       lineStyle: this.props.model.get('lineStyle'),
+      circleLineColor: this.props.model.get('circleLineColor'),
+      circleFillColor: this.props.model.get('circleFillColor'),
+      circleLineStyle: this.props.model.get('circleLineStyle'),
+      circleLineWidth: this.props.model.get('circleLineWidth'),
       polygonLineWidth: this.props.model.get('polygonLineWidth'),
       polygonLineStyle: this.props.model.get('polygonLineStyle'),
       polygonFillOpacity: this.props.model.get('polygonFillOpacity'),
@@ -184,6 +188,7 @@ var DrawPanelView = {
     this.props.model.off('change:dialog');
     this.props.model.off('change:kmlExportUrl');
     this.props.model.off('change:kmlImport');
+    this.props.model.off('change:downloadDrawKml');
   },
 
   /**
@@ -460,8 +465,8 @@ var DrawPanelView = {
             <div>Linjefärg</div>
             <ColorPicker
               model={this.props.model}
-              property="lineColor"
-              onChange={this.props.model.setLineColor.bind(this.props.model)}
+              property="circleLineColor"
+              onChange={this.props.model.setCircleLineColor.bind(this.props.model)}
             />
             <div>Fyllnadsfärg</div>
             <ColorPicker
@@ -470,7 +475,7 @@ var DrawPanelView = {
               onChange={this.props.model.setCircleFillColor.bind(this.props.model)}
             />
             <div>Opacitet</div>
-            <select value={this.state.polygonFillOpacity} onChange={update.bind(this, 'setPolygonFillOpacity', 'polygonFillOpacity')}>
+            <select value={this.state.circleFillOpacity} onChange={update.bind(this, 'setCircleFillOpacity', 'circleFillOpacity')}>
               <option value="0">0% (genomskinlig)</option>
               <option value="0.25">25%</option>
               <option value="0.5">50%</option>
@@ -478,14 +483,14 @@ var DrawPanelView = {
               <option value="1">100% (fylld)</option>
             </select>
             <div>Linjetjocklek</div>
-            <select value={this.state.polygonLineWidth} onChange={update.bind(this, 'setPolygonLineWidth', 'polygonLineWidth')}>
+            <select value={this.state.circleLineWidth} onChange={update.bind(this, 'setCircleLineWidth', 'circleLineWidth')}>
               <option value="1">Tunn</option>
               <option value="3">Normal</option>
               <option value="5">Tjock</option>
               <option value="8">Tjockare</option>
             </select>
             <div>Linjestil</div>
-            <select value={this.state.polygonLineStyle} onChange={update.bind(this, 'setPolygonLineStyle', 'polygonLineStyle')}>
+            <select value={this.state.circleLineStyle} onChange={update.bind(this, 'setCircleLineStyle', 'circleLineStyle')}>
               <option value="solid">Heldragen</option>
               <option value="dash">Streckad</option>
               <option value="dot">Punktad</option>

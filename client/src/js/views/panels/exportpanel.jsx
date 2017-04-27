@@ -59,21 +59,16 @@ var ExportTiffSettings = React.createClass({
     if (this.state.loading) {
       loader = <i className="fa fa-refresh fa-spin"></i>;
     }
-
-    this.addPreview(map);
+    
+    if (this.props.model.previewLayer.getSource().getFeatures().length === 0) {
+      this.addPreview(map);    
+    }    
     
     //downloadlänk
     if (this.props.model.get("downloadingTIFF")) {
-      downloadLink = 
-        <div className="alert alert-info alert-auto">
-          <span>Hämtar...</span>
-        </div>
+      downloadLink = <p>Hämtar...</p>
     } else if (this.props.model.get("urlTIFF")) {
-      downloadLink = 
-        <div className="alert alert-info alert-dismissable alert-auto">
-          <a href="#" className="close" data-dismiss="alert" aria-label="close">&times;</a>
-          <a href={this.props.model.get("urlTIFF")} target="_blank">Ladda ner TIFF</a>
-        </div>
+      downloadLink = <a href={this.props.model.get("urlTIFF")} target="_blank"><p>Ladda ner TIFF</p></a>
     } else {
       downloadLink = null;
     }
@@ -242,16 +237,9 @@ var ExportPdfSettings = React.createClass({
 
     //downloadlänk
     if (this.props.model.get("downloadingPdf")) {
-      downloadLink = 
-        <div className="alert alert-info alert-auto">
-          <span>Hämtar...</span>
-        </div>
+      downloadLink = <p>Hämtar...</p>
     } else if (this.props.model.get("urlPdf")) {
-      downloadLink = 
-        <div className="alert alert-info alert-dismissable alert-auto">
-          <a href="#" className="close" data-dismiss="alert" aria-label="close">&times;</a>
-          <a href={this.props.model.get("urlPdf")} target="_blank">Ladda ner PDF</a>
-        </div>
+      downloadLink = <a href={this.props.model.get("urlPdf")} target="_blank"><p>Ladda ner PDF</p></a>
     } else {
       downloadLink = null;
     }
@@ -332,7 +320,7 @@ var ExportPanelView = {
     });
     this.props.model.on('change:downloadingTIFF', () => {
       this.setState({
-        downloadUrl: this.props.model.get('downloadingTIFF')
+        downloadingTIFF: this.props.model.get('downloadingTIFF')
       });
     });
 
@@ -340,6 +328,10 @@ var ExportPanelView = {
 
   componentWillUnmount: function () {
     this.props.model.off('change:activeTool');
+    this.props.model.off('change:urlPdf');
+    this.props.model.off('change:downloadingPdf');
+    this.props.model.off('change:urlTIFF');
+    this.props.model.off('change:downloadingTIFF');
   },
 
   /**

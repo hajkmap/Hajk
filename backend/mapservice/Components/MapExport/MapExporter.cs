@@ -313,7 +313,7 @@ namespace MapService.Components.MapExport
                             created = true;
                             break;                                                
                         case "Polygon":
-                        case "MultiPolygon":
+                        case "MultiPolygon":                            
                             var polygon = factory.CreatePolygon(vertices.ToArray());
                             dataRow.Geometry = polygon;
                             created = true;

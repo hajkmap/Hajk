@@ -326,6 +326,11 @@
             "expanded": false,
             "layers": [
               {
+                "id": "32",
+                "visibleAtStart": false,
+                "drawOrder": 1000
+              },
+              {
                 "id": "10",
                 "visibleAtStart": true,
                 "drawOrder": 1000
@@ -364,7 +369,8 @@
         "imgSize": [
           32,
           32
-        ]
+        ],
+        "popupOffsetY": -32
       }
     },
     {
@@ -402,6 +408,28 @@
     {
       "type": "edit",
       "options": {}
+    },
+    {
+      "type": "streetview",
+      "options": {
+        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4"
+      }
+    },
+    {
+      "type": "infoclick",
+      "options": {
+        "displayPopup": true,
+        "markerImg": "assets/icons/marker.png",
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ],
+        "popupOffsetY": -32
+      }
     }
   ],
   "map": {
@@ -411,7 +439,7 @@
       6583005
     ],
     "projection": "EPSG:3006",
-    "zoom": 3,
+    "zoom": 8,
     "maxZoom": 3,
     "minZoom": 9,
     "resolutions": [

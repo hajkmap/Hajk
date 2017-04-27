@@ -632,6 +632,23 @@
       ],
       "geometryField": "geom",
       "outputFormat": "GML3"
+    },
+    {
+      "id": "38",
+      "caption": "fastighet",
+      "url": "http://194.71.132.27/geoserver/wfs",
+      "layers": [
+        "demo:demo_fastighet"
+      ],
+      "searchFields": [
+        "fastighet"
+      ],
+      "infobox": "",
+      "displayFields": [
+        "fastighet"
+      ],
+      "geometryField": "geom",
+      "outputFormat": "GML3"
     }
   ],
   "vectorlayers": [

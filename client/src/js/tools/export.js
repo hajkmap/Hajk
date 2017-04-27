@@ -153,7 +153,8 @@ var ExportModel = {
     return this.get('previewFeature')
   },
 
-  addTiffPreview: function (center) {
+  addTiffPreview: function (center) {        
+
     var dpi = 25.4 / 0.28
     ,   ipu = 39.37
     ,   sf  = 1
@@ -360,7 +361,7 @@ var ExportModel = {
       ,   fontSize = "16"
       ,   fontColor = "#FFFFFF";
 
-      if (style.getFill && style.getFill()) {
+      if (style.getFill && style.getFill() && style.getFill().getColor()) {
         fillColor = style.getFill().getColor().toHex();
         fillOpacity = style.getFill().getColor().toOpacity();
       }
@@ -404,20 +405,18 @@ var ExportModel = {
       }
     }
 
-    function as2DPairs(coordinates) {
-      return (
-        coordinates
-        .toString()
-        .split(',')
-        .map(i => parseFloat(i))
-        .filter(i => i > 2500)
-        .reduce((r, n, i, a) => {
-          if (i % 2 !== 0) {
-            r.push([a[i - 1], a[i]]);
-          }
-          return r;
-        }, [])
-      );
+    function as2DPairs(coordinates, type) {
+      
+      switch (type) {
+        case "Point":
+          return [coordinates];
+        case "LineString":
+          return coordinates;
+        case "Polygon":
+          return coordinates[0];          
+        case "MultiPolygon":    
+          return coordinates[0][0];      
+      }      
     }
 
     function translateVector(features, sourceStyle) {
@@ -449,7 +448,11 @@ var ExportModel = {
 
           if (!feature.getStyle() && sourceStyle) {
             feature.setStyle(sourceStyle)
-          }
+          }          
+                    
+          var coords = type === "Circle"
+              ? as2DPairs(ol.geom.Polygon.fromCircle(feature.getGeometry(), 0b10000000), "Polygon")
+              : as2DPairs(feature.getGeometry().getCoordinates(), feature.getGeometry().getType());
 
           return {
             type: type,
@@ -457,9 +460,7 @@ var ExportModel = {
               text: getText(feature),
               style: asObject(feature.getStyle())
             },
-            coordinates: type === "Circle"
-              ? as2DPairs(feature.getGeometry().getCenter()).concat([[feature.getGeometry().getRadius(), 0]])
-              : as2DPairs(feature.getGeometry().getCoordinates())
+            coordinates: coords
           }
         })
       }
@@ -729,9 +730,8 @@ var ExportModel = {
     data.bbox = [left, right, bottom, top];
     data.orientation = "";
     data.format = "";
-    data.scale = scale;
-
-this.set("downloadingTIFF", true);
+    data.scale = scale;    
+    this.set("downloadingTIFF", true);
 
     $.ajax({
       url: url,
@@ -746,11 +746,9 @@ this.set("downloadingTIFF", true);
       },
       error: (err) => {
         this.set("downloadingTIFF", false);
-        alert(err);
+        alert("Det gick inte att skapa tiff. Försök igen senare.");
       }
-    });
-    
-
+    });  
   },
 
   /**

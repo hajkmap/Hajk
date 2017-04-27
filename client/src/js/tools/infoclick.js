@@ -69,7 +69,8 @@ var InfoClickModelProperties = {
     32,
     32
   ],
-  displayPopup: true
+  displayPopup: true,
+  popupOffsetY: 0
 };
 
 /**
@@ -285,6 +286,7 @@ var InfoClickModel = {
           ,   title     = $(`<div>${inf.information.caption}</div>`)
           ,   content   = $(`<div></div>`)
           ,   markdown  = ""
+          ,   offsetY   = 0
           ,   html      = "";
 
           inf.layer.once('change:visible', () => {
@@ -313,7 +315,14 @@ var InfoClickModel = {
 
           infobox.append(title, content);
           $('#popup-content').show().html(infobox).scrollTop(0);
+
+          if (isPoint(coords)) {  
+            offsetY = this.get('popupOffsetY');    
+          }
+                    
           ovl.setPosition(position);
+          ovl.setOffset([0, offsetY]);
+
           $(ovl.getElement()).hide().fadeIn(0);
 
           Object.keys(inf).forEach(key => {
