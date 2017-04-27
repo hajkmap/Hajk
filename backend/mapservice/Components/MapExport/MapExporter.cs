@@ -320,7 +320,7 @@ namespace MapService.Components.MapExport
                             break;
                         case "Circle":
                             var circle = factory.CreatePoint(new GeoAPI.Geometries.Coordinate(vertices[0]));                            
-                            dataRow.Geometry = circle.Buffer(vertices[1][0]);
+                            dataRow.Geometry = circle.Buffer(vertices[1][0]);                            
                             created = true;
                             break;
                     }

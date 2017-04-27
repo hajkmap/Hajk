@@ -405,9 +405,9 @@ var ExportModel = {
       }
     }
 
-    function as2DPairs(coordinates, type) {
+    function as2DPairs(coordinates, type) {       
       
-      console.log("As 2d pairs", coordinates, type);
+      console.log(coordinates);
 
       switch (type) {
         case "Point":
@@ -419,7 +419,10 @@ var ExportModel = {
         case "MultiPolygon":    
           return coordinates[0][0];
         case "Circle":    
-          return coordinates;
+          return [
+            [coordinates[0], coordinates[1]], 
+            coordinates[2]
+          ];
       }      
     }
 
@@ -453,11 +456,11 @@ var ExportModel = {
           if (!feature.getStyle() && sourceStyle) {
             feature.setStyle(sourceStyle)
           }          
-                    
+                              
           var coords = type === "Circle"
-              ? as2DPairs(feature.getGeometry().getCenter()).concat([[feature.getGeometry().getRadius(), 0]], "Circle")
+              ? as2DPairs(feature.getGeometry().getCenter().concat([[feature.getGeometry().getRadius(), 0]]), "Circle")
               : as2DPairs(feature.getGeometry().getCoordinates(), feature.getGeometry().getType());
-
+                                    
           return {
             type: type,
             attributes: {
