@@ -243,11 +243,16 @@ var DrawModel = {
     }
 
     e.feature.getGeometry().on('change', e => {
-
       var toolTip = ""
-      ,   coord = undefined;
+      ,   coord = undefined
+      ,   pointerCoord;
 
       if (this.get("drawToolActive")) {
+        
+        if (this.get('pointerPosition')) {
+          pointerCoord = this.get('pointerPosition').coordinate;
+        }
+
         if (e.target instanceof ol.geom.LineString) {
           toolTip = this.formatLabel("length", e.target.getLength());
           coord = e.target.getLastCoordinate()
@@ -255,16 +260,16 @@ var DrawModel = {
 
         if (e.target instanceof ol.geom.Polygon) {
           toolTip = this.formatLabel("area", e.target.getArea());
-          coord = this.get('pointerPosition').coordinate;
+          coord = pointerCoord || e.target.getFirstCoordinate();         
         }
 
         if (e.target instanceof ol.geom.Circle) {
           toolTip = this.formatLabel("length", e.target.getRadius());
-          coord = this.get('pointerPosition').coordinate;
+          coord = pointerCoord;
         }
 
         this.measureTooltipElement.innerHTML = toolTip;
-        if (this.get('showLabels')) {
+        if (this.get('showLabels') && coord) {
           this.measureTooltip.setPosition(coord);
         }
       }

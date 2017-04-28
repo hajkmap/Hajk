@@ -350,7 +350,7 @@ var DrawPanelView = {
    */
   activateRemovalTool: function () {
     this.props.model.activateRemovalTool();
-    $('#Point, #Text, #Polygon, #LineString, #delete').removeClass('selected');
+    $('#Point, #Text, #Polygon, #LineString, #Circle, #delete').removeClass('selected');
     $('#delete').addClass('selected');
     $('#abort').show();
     this.setState({
