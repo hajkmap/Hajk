@@ -405,10 +405,7 @@ var ExportModel = {
       }
     }
 
-    function as2DPairs(coordinates, type) {       
-      
-      console.log(coordinates);
-
+    function as2DPairs(coordinates, type) {          
       switch (type) {
         case "Point":
           return [coordinates];
@@ -419,11 +416,8 @@ var ExportModel = {
         case "MultiPolygon":    
           return coordinates[0][0];
         case "Circle":    
-          return [
-            [coordinates[0], coordinates[1]], 
-            coordinates[2]
-          ];
-      }      
+          return [coordinates[0], coordinates[1]];
+      }   
     }
 
     function translateVector(features, sourceStyle) {
@@ -451,23 +445,31 @@ var ExportModel = {
       return {
         features: features.map(feature => {
 
-          var type = feature.getGeometry().getType();
+          var type = feature.getGeometry().getType()
+          ,   geom = feature.getGeometry()
+          ,   holes = null
+          ,   coords;
 
           if (!feature.getStyle() && sourceStyle) {
             feature.setStyle(sourceStyle)
           }          
                               
-          var coords = type === "Circle"
-              ? as2DPairs(feature.getGeometry().getCenter().concat([[feature.getGeometry().getRadius(), 0]]), "Circle")
-              : as2DPairs(feature.getGeometry().getCoordinates(), feature.getGeometry().getType());
-                                    
+          coords = type === "Circle"
+          ? as2DPairs([geom.getCenter(), [geom.getRadius(), 0]], "Circle")
+          : as2DPairs(geom.getCoordinates(), type);
+          
+          if (type === "MultiPolygon") {   
+            holes = geom.getCoordinates()[0].slice(1, geom.getCoordinates()[0].length);                  
+          }
+
           return {
             type: type,
             attributes: {
               text: getText(feature),
               style: asObject(feature.getStyle())
             },
-            coordinates: coords
+            coordinates: coords,
+            holes: holes
           }
         })
       }

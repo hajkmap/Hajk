@@ -284,6 +284,7 @@ namespace MapService.Components.MapExport
                     dataRow["style"] = feature.attributes.style;
 
                     List<GeoAPI.Geometries.Coordinate> vertices = new List<GeoAPI.Geometries.Coordinate>();
+                    List<List<GeoAPI.Geometries.Coordinate>> holes = new List<List<GeoAPI.Geometries.Coordinate>>();
 
                     feature.coordinates.ForEach(coordinate =>
                     {
@@ -291,6 +292,21 @@ namespace MapService.Components.MapExport
                         double y = coordinate[1];
                         vertices.Add((new GeoAPI.Geometries.Coordinate(x, y)));
                     });
+
+                    if (feature.holes != null)
+                    {
+                        feature.holes.ForEach(hole =>
+                        {
+                            var coords = new List<Coordinate>();
+                            hole.ForEach(coordinate =>
+                            {
+                                double x = coordinate[0];
+                                double y = coordinate[1];
+                                coords.Add((new GeoAPI.Geometries.Coordinate(x, y)));
+                            });
+                            holes.Add(coords);
+                        });
+                    }
 
                     bool created = false;
 
@@ -312,10 +328,19 @@ namespace MapService.Components.MapExport
                             dataRow.Geometry = lineString;
                             created = true;
                             break;                                                
-                        case "Polygon":
-                        case "MultiPolygon":                            
+                        case "Polygon":                                              
                             var polygon = factory.CreatePolygon(vertices.ToArray());
                             dataRow.Geometry = polygon;
+                            created = true;
+                            break;
+                        case "MultiPolygon":
+                            ILinearRing outer = LinearRing.DefaultFactory.CreateLinearRing(vertices.ToArray());
+                            ILinearRing[] inners = holes.Select(h =>
+                            {
+                                return LinearRing.DefaultFactory.CreateLinearRing(h.ToArray());
+                            }).ToArray();
+                            var multiPolygon = factory.CreatePolygon(outer, inners);
+                            dataRow.Geometry = multiPolygon;
                             created = true;
                             break;
                         case "Circle":
