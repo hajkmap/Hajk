@@ -121,6 +121,7 @@ var SearchView = {
   clear: function () {
     this.value = "";
     this.props.model.set('value', "");
+    this.props.model.set('searchTriggered', false);
     this.props.model.clear();
     this.setState({
       loading: true,
@@ -160,6 +161,7 @@ var SearchView = {
    * @param {object} event
    */
   search: function (event) {
+    this.props.model.set('searchTriggered', true);
     this.setState({
       loading: true
     });
@@ -173,11 +175,11 @@ var SearchView = {
           loading: false,
           showResults: true,
           result: result
-        };
+        };        
         if (loader !== this.loading) {
           state.loading = true;
         }
-        this.setState(state);
+        this.setState(state);        
       });
     }, 200);
   },
@@ -329,13 +331,12 @@ var SearchView = {
    */
   render: function () {
 
-    var results = null;
-    var value = this.props.model.get('value');
-    var showResults = this.props.model.shouldRenderResult();
-    var options = this.renderOptions();
-
-    if (showResults) {
-
+    var results = null
+    ,   value = this.props.model.get('value')
+    ,   showResults = this.props.model.shouldRenderResult()
+    ,   options = this.renderOptions();
+    
+    if (showResults) {            
       if (this.state.loading) {
         results = (
           <p>
@@ -355,7 +356,6 @@ var SearchView = {
             </p>
           )
         }
-
       }
     }
 

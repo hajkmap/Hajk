@@ -434,6 +434,36 @@ var SearchModel = {
   },
 
   /**
+   * Check if this device supports touch.
+   * @instance
+   */
+  isTouchDevice: function () {
+    try {
+      document.createEvent("TouchEvent");
+      return true;
+    } catch(e) {
+      return false;
+    }
+  },
+
+  /**
+   * Enable scroll on infowindow
+   * @instance
+   * @param {DOMelement} elm
+   */
+  enableScroll: function (elm) {    
+    if (this.isTouchDevice()){      
+      var scrollStartPos = 0;      
+      elm.addEventListener("touchstart", function(event) {
+        scrollStartPos = this.scrollTop + event.touches[0].pageY;                
+      }, false);      
+      elm.addEventListener("touchmove", function(event) {
+        this.scrollTop = scrollStartPos - event.touches[0].pageY;                    
+      }, false);
+    }
+  },
+
+  /**
    * Focus map on feature.
    * @instance
    * @param {object} spec
@@ -477,6 +507,9 @@ var SearchModel = {
       }
       ovl.setOffset([0, offsetY]);
       ovl.setPosition(map.getView().getCenter());
+      if (this.isTouchDevice()) {
+        this.enableScroll($('#popup-content')[0]);
+      }
     }
 
     if (ovl && !this.get('displayPopup')) {
@@ -844,7 +877,8 @@ var SearchModel = {
       this.get('value') ||
       (
         this.get('selectionModel') &&
-        this.get('selectionModel').hasFeatures()
+        this.get('selectionModel').hasFeatures() &&
+        this.get('searchTriggered')
       )
     );
   },

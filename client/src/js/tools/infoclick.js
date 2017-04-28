@@ -251,6 +251,36 @@ var InfoClickModel = {
   },
 
   /**
+   * Check if this device supports touch.
+   * @instance
+   */
+  isTouchDevice: function () {
+    try {
+      document.createEvent("TouchEvent");
+      return true;
+    } catch(e) {
+      return false;
+    }
+  },
+
+  /**
+   * Enable scroll on infowindow
+   * @instance
+   * @param {DOMelement} elm
+   */
+  enableScroll: function (elm) {    
+    if (this.isTouchDevice()){      
+      var scrollStartPos = 0;      
+      elm.addEventListener("touchstart", function(event) {
+        scrollStartPos = this.scrollTop + event.touches[0].pageY;                
+      }, false);      
+      elm.addEventListener("touchmove", function(event) {
+        this.scrollTop = scrollStartPos - event.touches[0].pageY;                    
+      }, false);
+    }
+  },
+
+  /**
    * Toogle popup
    * @instance
    * @param {array} infos
@@ -315,6 +345,10 @@ var InfoClickModel = {
 
           infobox.append(title, content);
           $('#popup-content').show().html(infobox).scrollTop(0);
+
+          if (this.isTouchDevice()) {
+            this.enableScroll($('#popup-content')[0]);
+          }
 
           if (isPoint(coords)) {  
             offsetY = this.get('popupOffsetY');    

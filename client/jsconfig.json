@@ -54,7 +54,7 @@
         "models/map": "./src/js/models/mapmodel.js",
         "models/shell": "./src/js/models/shell.js",
         "models/selection": "./src/js/models/selection.js",
-        "models/drag": "./src/js/models/drag.js",
+        "models/drag": "./src/js/models/drag.js",        
         "models/transform": "./src/js/models/transforminteraction.js",
         "utils/arraysort": "./src/js/utils/arraysort.js",
         "utils/kmlwriter": "./src/js/utils/kmlwriter.js",
