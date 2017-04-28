@@ -588,7 +588,7 @@
         "namn",
         "eu_cd"
       ],
-      "infobox": "{längd}  \n{export:namn} \n{export:eu_cd}",
+      "infobox": "{längd}  \n{export:namn as name} \n{export:eu_cd}",
       "displayFields": [
         "namn",
         "eu_cd"

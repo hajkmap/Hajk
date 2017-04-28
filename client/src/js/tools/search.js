@@ -383,6 +383,7 @@ var SearchModel = {
           s = s.replace('{', '')
                .replace('}', '')
                .replace('export:', '')
+               .replace(/ as .*/, '')
                .trim()
                .split('.');
 
@@ -588,6 +589,11 @@ var SearchModel = {
     return this.get('sources').filter(filter);
   },
 
+  /**
+   * Get searchable layers. By design, visible layers and layers set with the property search set.
+   * @isntance
+   * @return {Layer[]} layers
+   */
   getHitsFromItems: function () {
     var hits = [];
     if (this.get('hits').length === 0) {
@@ -601,6 +607,11 @@ var SearchModel = {
     return hits;
   },
 
+/**
+   * Get kml data-object for export.
+   * @isntance
+   * @return {string} xml-string
+   */
   getKmlData: function () {
 
     var exportItems = this.get('hits').length > 0 
@@ -615,6 +626,11 @@ var SearchModel = {
     return kmlWriter.createXML(transformed, "Export");
   },
 
+  /**
+   * Get excel data-object for export.
+   * @isntance
+   * @return {Object} excelData
+   */
   getExcelData: function () {
 
     var groups = {}        
@@ -632,7 +648,19 @@ var SearchModel = {
     return Object.keys(groups).map(group => {
 
       var columns = []
+      ,   aliases = []
       ,   values = [];
+
+      var getAlias = (column, infobox) => {        
+        var regExp = new RegExp(`{export:${column}( as .*)?}`)
+        ,   result = regExp.exec(infobox);
+        
+        if (result && result[1]) {
+          result[1] = result[1].replace(" as ", "");
+        }
+
+        return result && result[1] ? result[1] : column;
+      }
 
       values = groups[group].map((hit) => {
 
@@ -644,8 +672,8 @@ var SearchModel = {
             return typeof attributes[name] === "string"  ||
                    typeof attributes[name] === "boolean" ||
                    typeof attributes[name] === "number";
-          } else {
-            let regExp = new RegExp(`{export:${name}}`);
+          } else {                        
+            let regExp = new RegExp(`{export:${name}( as .*)?}`);
             return (
               regExp.test(hit.infobox)
             );
@@ -654,19 +682,19 @@ var SearchModel = {
 
         if (names.length > columns.length) {
           columns = names;
+          aliases = columns.slice();
         }
-        return columns.map(name => attributes[name] || null);
+
+        columns.forEach((column, i) => {
+          aliases[i] = getAlias(column, hit.infobox);
+        });
+
+        return columns.map(column => attributes[column] || null);
       });
-
-      var e = {
-        TabName: group,
-        Cols: columns,
-        Rows: values
-      };
-
+      
       return {
         TabName: group,
-        Cols: columns,
+        Cols: aliases,
         Rows: values
       };
 
