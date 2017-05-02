@@ -13,14 +13,11 @@
 }
 
 .navigation-panel.minimized {
-  left: .5em;
-  top: .5em;
-  background: #fff;
-  width: 48px;
-  height: 48px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  cursor: pointer;
+  left: 0;
+  top: 0;
+  width: 0px;
+  height: 0px;
+  overflow: hidden; 
 }
 
 @font-face {
@@ -94,7 +91,7 @@
   border-radius: 0;
   color: @color-green;
   background-color: @color-yellow;
-  border-color: darken(@color-yellow, 10%);
+  border: none;
 }
 
 .navigation-panel-inner > .panel-heading i {
@@ -106,7 +103,6 @@
   background-color: #f5f5f5;
   padding: 7px 10px;
   border: none;
-  border-bottom: none;
 }
 
 .navigation-panel .panel-close {
@@ -138,4 +134,9 @@
 
 .export-settings .panel {
   margin-bottom: 7pt;
+}
+
+.alert-auto {
+  display:inline-block;
+  margin-top: 7pt;
 }

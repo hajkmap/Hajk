@@ -18,9 +18,12 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
-class Map extends React.Component {
+import React from 'react';
+import { Component } from "react";
+
+class Map extends Component {
 
   constructor() {
     super();
@@ -55,4 +58,4 @@ class Map extends React.Component {
 
 }
 
-module.exports = Map;
+export default Map;

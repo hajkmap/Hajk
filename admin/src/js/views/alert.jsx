@@ -18,9 +18,12 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
-class Alert extends React.Component {
+import React from 'react';
+import { Component } from 'react';
+
+class Alert extends Component {
 
   constructor() {
     super();
@@ -78,4 +81,4 @@ class Alert extends React.Component {
   }
 }
 
-module.exports = Alert;
+export default Alert;

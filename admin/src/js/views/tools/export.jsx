@@ -1,0 +1,218 @@
+// Copyright (C) 2016 Göteborgs Stad
+//
+// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
+// under villkoren för licensen CC-BY-NC-SA 4.0.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the CC-BY-NC-SA 4.0 licence.
+//
+// http://creativecommons.org/licenses/by-nc-sa/4.0/
+//
+// Det är fritt att dela och anpassa programvaran för valfritt syfte
+// med förbehåll att följande villkor följs:
+// * Copyright till upphovsmannen inte modifieras.
+// * Programvaran används i icke-kommersiellt syfte.
+// * Licenstypen inte modifieras.
+//
+// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
+// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
+// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
+//
+// https://github.com/hajkmap/Hajk
+
+import React from "react";
+import { Component } from "react";
+
+var defaultState = {
+  validationErrors: [],
+  active: false,
+  exportUrl: "/mapservice/export/pdf",
+  exportTiffUrl: "/mapservice/export/tiff",
+  pdfActive: true,
+  tiffActive: true,
+  scales: [
+    250,
+    500,
+    1000,
+    2500,
+    5000,
+    10000,
+    25000,
+    50000,
+    100000,
+    250000
+  ]
+};
+
+class ToolOptions extends Component {
+  /**
+   *
+   */
+  constructor() {
+    super();
+    this.state = defaultState;
+    this.type = "export";
+  }
+
+  componentDidMount() {
+    var tool = this.getTool();
+    if (tool) {
+      this.setState({
+        active: true,
+        exportUrl: tool.options.exportUrl,
+        exportTiffUrl: tool.options.exportTiffUrl,
+        tiffActive: tool.options.tiffActive,
+        pdfActive: tool.options.pdfActive
+      });
+    } else {
+      this.setState({
+        active: false
+      });
+    }
+  }
+
+  componentWillUnmount() {
+  }
+  /**
+   *
+   */
+  componentWillMount() {
+  }
+
+  handleInputChange(event) {
+    const target = event.target;
+    const name = target.name;
+    var value = target.type === 'checkbox' ? target.checked : target.value;
+    if (typeof value === "string" && value.trim() !== "") {
+      value = !isNaN(Number(value)) ? Number(value) : value
+    }
+    this.setState({
+      [name]: value
+    });
+  }
+
+  getTool() {
+    return this.props.model.get('toolConfig').find(tool => tool.type === this.type);
+  }
+
+  add(tool) {
+    this.props.model.get("toolConfig").push(tool);
+  }
+
+  remove(tool) {
+    this.props.model.set({
+      "toolConfig": this.props.model.get("toolConfig").filter(tool => tool.type !== this.type)
+    });
+  }
+
+  replace(tool) {
+    this.props.model.get('toolConfig').forEach(t => {
+      if (t.type === this.type) {
+        t.options = tool.options;
+      }
+    });
+  }
+
+  save() {
+
+    var tool = {
+      "type": this.type,
+      "options": {
+        exportUrl: this.state.exportUrl,
+        exportTiffUrl: this.state.exportTiffUrl,
+        pdfActive: this.state.pdfActive,
+        tiffActive: this.state.tiffActive,
+        scales: this.state.scales
+      }
+    };
+
+    var existing = this.getTool();
+
+    function update() {
+      this.props.model.updateToolConfig(this.props.model.get("toolConfig"), () => {
+        this.props.parent.props.parent.setState({
+          alert: true,
+          alertMessage: "Uppdateringen lyckades"
+        });
+      });
+    }
+
+    if (!this.state.active) {
+      if (existing) {
+        this.props.parent.props.parent.setState({
+          alert: true,
+          confirm: true,
+          alertMessage: "Verktyget kommer att tas bort. Nuvarande inställningar kommer att gå förlorade. Vill du fortsätta?",
+          confirmAction: () => {
+            this.remove();
+            update.call(this);
+            this.setState(defaultState);
+          }
+        });
+      } else {
+        this.remove();
+        update.call(this);
+      }
+    } else {
+      if (existing) {
+        this.replace(tool);
+      } else {
+        this.add(tool);
+      }
+      update.call(this);
+    }
+  }
+
+  /**
+   *
+   */
+  render() {
+    return (
+      <div>
+        <form>
+          <p>
+            <button className="btn btn-primary" onClick={(e) => {e.preventDefault(); this.save()}}>Spara</button>
+          </p>
+          <div>
+            <input
+              id="active"
+              name="active"
+              type="checkbox"
+              onChange={(e) => {this.handleInputChange(e)}}
+              checked={this.state.active}/>&nbsp;
+            <label htmlFor="active">Aktiverad</label>
+          </div>
+          <div>
+            <label htmlFor="exportUrl">URL till PDF-tjänst</label>
+            <input value={this.state.exportUrl} type="text" name="exportUrl" onChange={(e) => {this.handleInputChange(e)}}></input>
+          </div>
+          <div>
+            <label htmlFor="exportTiffUrl">URL till TIFF-tjänst</label>
+            <input value={this.state.exportTiffUrl} type="text" name="exportTiffUrl" onChange={(e) => {this.handleInputChange(e)}}></input>
+          </div>
+          <div>
+            <input
+              id="pdf-active"
+              name="pdfActive"
+              type="checkbox"
+              onChange={(e) => {this.handleInputChange(e)}}
+              checked={this.state.pdfActive}/>&nbsp;
+            <label htmlFor="pdf-active">PDF aktiverad</label>
+          </div>
+          <div>
+            <input
+              id="tiff-active"
+              name="tiffActive"
+              type="checkbox"
+              onChange={(e) => {this.handleInputChange(e)}}
+              checked={this.state.tiffActive}/>&nbsp;
+            <label htmlFor="tiff-active">TIFF aktiverad</label>
+          </div>
+        </form>
+      </div>
+    )
+  }
+
+}
+
+export default ToolOptions;

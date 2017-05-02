@@ -18,271 +18,240 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var LayerModel = require('layers/layer');
 
-/**
- * @typedef {Object} WfsLayer~WfsLayerPropertiesParams
- * @property {string} service - Type of service @default WFS.
- * @property {string} version - Version of the WFS-protocol.
- * @property {string} request - Type of request to perform.
- * @property {string} typename - Name of the featureclass to query.
- * @property {string} outputFormat - Version ov the output format eg: GML2, GML3.
- * @property {string} srsname - SRID of the coordinatesystem eg: EPSG:3007.
- * @property {Array} bbox - Bounding box of wich to restrict the query.
- */
+module.exports = LayerModel.extend({
 
-/**
- * @typedef {Object} WfsLayer~WfsLayerProperties
- * @property {string} url
- * @property {external:"ol.source"} vectorSurce
- * @property {external:"ol.source"} imageSource
- * @property {Array} filterFeatures
- * @property {bool} filterApplied Default: false
- * @property {WfsLayer~WfsLayerPropertiesParams} params
- */
-var WfsLayerProperties = {
-  url: "",
-  vectorSource: undefined,
-  imageSource: undefined,
-  filterFeatures: [],
-  filterApplied: false,
-  params: {
-    service: "WFS",
-    version: "",
-    request: "",
-    typename: "",
-    outputFormat: "",
-    srsname: "",
-    bbox: []
-  }
-};
+  defaults: {
+    url: "",
+    featureId: "FID",
+    serverType: "geoserver",
+    dataFormat: "WFS",
+    params: {
+      service: "",
+      version: "",
+      request: "",
+      typename: "",
+      outputFormat: "",
+      srsname: "",
+      bbox: ""
+    }
+  },
 
-/**
- * @description
- *
- *   Layer to be used as a display layer wich loads its features from a WFS-service.
- *   Currently this is supported for both geoserver and ArcGIS for Server.
- *
- * @class WfsLayer
- * @todo Add this layertype in the admintool for creation.
- * @param {WfsLayer~WfsLayerProperties} options
- * @param {string} type
- */
-var WfsLayer = {
-  /**
-  * @property {WfsLayer~WfsLayerProperties} defaults - Default properties
-  * @instance
-  */
-  defaults: WfsLayerProperties,
+  featureMap: {},
+
+  reprojectFeatures: function(features, from, to) {
+    if (Array.isArray(features)) {
+      features.forEach(feature => {
+        if (feature.getGeometry().getCoordinates) {
+          let coords = feature.getGeometry().getCoordinates();
+          try {
+            switch (feature.getGeometry().getType()) {
+              case 'Point':
+                feature.getGeometry().setCoordinates(ol.proj.transform(coords, from, to));
+                break;
+              case 'LineString':
+                feature.getGeometry().setCoordinates(coords.map(coord => ol.proj.transform(coord, from, to)));
+                break;
+              case 'Polygon':
+                feature.getGeometry().setCoordinates([coords[0].map(coord => ol.proj.transform(coord, from, to))]);
+                break;
+            }
+          } catch (e) {
+            console.error("Coordinate transformation error.", e);
+          }
+        }
+      });
+    }
+  },
+
+  addFeatures: function (data, format) {
+    var features = []
+    ,   parser
+    ,   to = this.get('olMap').getView().getProjection().getCode()
+    ,   from = this.get('projection');
+
+    if (format === "wfs") {
+      parser = new ol.format.WFS({
+        gmlFormat: this.get('params').version === "1.0.0" ? new ol.format.GML2() : undefined
+      });
+    }
+
+    if (format === "geojson") {
+      parser = new ol.format.GeoJSON();
+    }
+
+    if (parser) {
+      features = parser.readFeatures(data);
+    }
+
+    if (to !== from) {
+      this.reprojectFeatures(features, from, to);
+    }
+
+    this.get("source").addFeatures(features);
+  },
+
+  loadAJAX: function (url, format) {
+    url = HAJK2.wfsProxy + url;
+    $.get(url, (features) => {
+      this.addFeatures(features, format || "wfs");
+    });
+  },
+
+  getStyle: function (feature) {
+
+    const icon = this.get("icon");
+    const fillColor = this.get("fillColor");
+    const lineColor = this.get("lineColor");
+    const lineStyle = this.get("lineStyle");
+    const lineWidth = this.get("lineWidth");
+    const symbolXOffset = this.get("symbolXOffset");
+    const symbolYOffset = this.get("symbolYOffset");
+
+    function getLineDash() {
+        var scale = (a, f) => a.map(b => f * b)
+        ,   width = lineWidth
+        ,   style = lineStyle
+        ,   dash  = [12, 7]
+        ,   dot   = [2, 7]
+        ;
+        switch (style) {
+          case "dash":
+            return width > 3 ? scale(dash, 2) : dash;
+          case "dot":
+            return width > 3 ? scale(dot, 2) : dot;
+          default :
+            return undefined;
+        }
+    }
+
+    function getFill() {
+      return new ol.style.Fill({
+        color: fillColor
+      });
+    }
+
+    function getImage() {
+      return icon === ""
+      ? getPoint()
+      : getIcon();
+    }
+
+    function getIcon() {
+      return new ol.style.Icon({
+        src: icon,
+        scale: 1,
+        anchorXUnits: 'pixels',
+        anchorYUnits: 'pixels',
+        anchor: [
+          symbolXOffset,
+          symbolYOffset
+        ]
+      });
+    }
+
+    function getPoint() {
+      return new ol.style.Circle({
+        fill: getFill(),
+        stroke: getStroke(),
+        radius: 4
+      });
+    }
+
+    function getStroke() {
+      return new ol.style.Stroke({
+        color: lineColor,
+        width: lineWidth,
+        lineDash: getLineDash()
+      })
+    }
+
+    function getStyleObj() {
+      return {
+        fill: getFill(),
+        image: getImage(),
+        stroke: getStroke()
+      };
+    }
+
+    return [new ol.style.Style(getStyleObj())];
+  },
 
   initialize: function () {
-    LayerModel.prototype.initialize.call(this);
-    var format = new ol.format.GeoJSON();
-    this.stdStyle = new ol.style.Style({
-      image: new ol.style.Circle({
-        fill: new ol.style.Fill({
-          color: 'rgba(244, 210, 66, 0.6)'
-        }),
-        stroke: new ol.style.Stroke({
-          color: '#F4D242',
-          width: 2
-        }),
-        radius: 5
-      }),
-      fill: new ol.style.Fill({
-        color: 'rgba(244, 210, 66, 0.6)'
-      }),
-      stroke: new ol.style.Stroke({
-        color: '#F4D242',
-        width: 2
-      })
+
+    var source
+    ,   layer;
+
+    source = new ol.source.Vector({
+      loader: (extent) => {
+        if (this.get('dataFormat') === "GeoJSON") {
+          this.loadAJAX(this.get('url'), this.get('dataFormat').toLowerCase());
+        } else {
+          if (this.get('loadType') === 'jsonp') {
+            this.loadJSON(this.createUrl(extent));
+          }
+          if (this.get('loadType') === 'ajax') {
+            this.loadAJAX(this.createUrl(extent, true));
+          }
+        }
+      },
+      strategy: ol.loadingstrategy.all
     });
 
-    this.vectorSource = new ol.source.Vector({
-      loader: (extent) => { this.loadJSON(this.createUrl(extent)) },
-      strategy: ol.loadingstrategy.bbox
-    });
-
-    this.imageSource = new ol.source.ImageVector({
-      source: this.vectorSource,
-      style: this.getStyle.bind(this)
-    });
-
-    this.on('change:filterApplied', function () {
-      this.refresh();
-    });
-
-    this.layer = new ol.layer.Image({
+    layer = new ol.layer.Image({
+      information: this.get('information'),
       caption: this.get('caption'),
       name: this.get('name'),
-      maxResolution: this.get('maxResolution') || 20,
-      minResolution: this.get('minResolution') || 0.5,
       visible: this.get("visible"),
-      source: this.imageSource
-    });
-
-    global.window[this.get('callbackFunction')] = (features) => {this.updateLayer(format.readFeatures(features))};
-
-    if (this.get('filterList') && this.get('filterList').length > 0) {
-      this.applyFilter();
-    }
-
-    this.set("queryable", true);
-    this.set("type", "wfs");
-  },
-
-  /**
-  * getStyle - Generates a style for given feature in layer.
-  * @instance
-  * @param {external:"ol.feature"} feature
-  * @return {external:"ol.style"} style
-  */
-  getStyle: function (feature) {
-    var style = this.get('style');
-
-    var icon = this.get('icon')
-    ,   filterApplied = this.get('filterApplied')
-    ,   filterFeatures = this.get('filterFeatures')
-    ,   showIcon = filterFeatures.length === 0 ||  _.find(filterFeatures, function (filterValue) {
-          return filterValue === '' + feature.getProperties().spGid;
-        })
-    , style
-    ;
-
-    if (showIcon || !filterApplied) {
-
-      style = style.condition ? this.getConditionStyle(style, feature) :
-                       this.getIconStyle(style.icon);
-
-      if (feature.getProperties().messages) {
-        style = [new ol.style.Style({
-                image: new ol.style.Circle({
-                  fill: new ol.style.Fill({
-                    color: 'rgba(255, 0, 220, 0.66)'
-                  }),
-                  radius: z > 10 ? 10 / s : 10
-                })
-              })].concat(style);
-      }
-
-      return style;
-    }
-  },
-
-  /**
-  * getIconStyle - Generates a new icon style for point features
-  * @instance
-  * @param {string} iconSrc
-  * @return {Array<{external:"ol.Style"}>} styles
-  */
-  getIconStyle: function (iconSrc) {
-    var zoom = this.get("map").getZoom()
-    ,   scale = 1;
-    return iconSrc ?
-      [new ol.style.Style({
-        image: new ol.style.Icon({
-          src: iconSrc,
-          scale: scale
-        })
-      })] :
-      [this.stdStyle]
-  },
-
-    /**
-  * getConditionStyle - get conditional style
-  * @instance
-  * @param {object} styleConfig
-  * @param {external:"ol.feature"} feature
-  * @return {external:"ol.Style"} feature
-  */
-  getConditionStyle: function (styleConfig, feature) {
-
-    var property = feature.getProperties()[styleConfig.condition.property]
-    ,   alternative = _.find(styleConfig.condition.alternatives || [], function (alt) { return property === alt.value; });
-
-    if (alternative) {
-      return this.getIconStyle(alternative.icon);
-    } else  if (styleConfig.icon) {
-      return this.getIconStyle(styleConfig.icon);
-    }
-
-    return [this.stdStyle];
-  },
-
- /**
-  * getSource - Get the source of this laer
-  * @instance
-  * @return {external:"ol.source"} style
-  */
-  getSource: function () {
-    return this.vectorSource;
-  },
-
- /**
-  * updateLayer - Add features to this layer source
-  * @instance
-  * @param {Array<{external:"ol.feature"}>} feature
-  */
-  updateLayer: function (features) {
-    this.getSource().addFeatures(features);
-  },
-
- /**
-  * refresh - redraw the layer
-  * @instance
-  */
-  refresh: function () {
-    this.imageSource.setStyle(this.imageSource.getStyle());
-  },
-
- /**
-  * createUrl - generate url to be used in JSONP requests.
-  * @instance
-  * @param {Array} extent
-  * @return {string} url
-  */
-  createUrl: function (extent) {
-    var parameters = this.get('params');
-    if (extent) {
-      parameters.bbox = extent.join(',') + "," + parameters['srsname'];
-    } else if (parameters.hasOwnProperty('bbox')) {
-      delete parameters.bbox;
-    }
-    parameters = _.map(parameters, (value, key) => key.concat("=", value));
-    parameters = parameters.join('&');
-    return this.get('url') + '?' + parameters;
-  },
-
- /**
-  * applyFilter - filter the layer.
-  * @instance
-  * @param {external:ol.feature} feature
-  * @return {external.ol.Style} style
-  */
-  applyFilter: function () {
-
-    var filterList = this.get('filterList').toArray()
-    ,   filterIds = [];
-
-    _.each(filterList, (filter) => {
-      _.each(filter.attributes.features.features, (feature) => {
-        filterIds.push(feature.gid);
+      opacity: this.get("opacity"),
+      queryable: this.get('queryable'),
+      source: new ol.source.ImageVector({
+        source: source,
+        style: this.getStyle.bind(this)
       })
     });
 
-    filterIds = _.uniq(filterIds);
-    this.set('filterFeatures', filterIds);
-    this.refresh();
+    if (this.get('loadType') === "jsonp") {
+      global.window[this.get('callbackFunction')] = (response) => {
+        this.addFeatures(response, "geojson");
+      };
+    }
 
+    //this.set("queryable", true);
+    this.set("source", source);
+    this.set("layer", layer);
+    this.set("type", "wfs");
+
+    LayerModel.prototype.initialize.call(this);
+  },
+
+  createUrl: function (extent, ll) {
+    var props = Object.keys(this.get("params"))
+    ,   url = this.get("url") + "?"
+    ,   version = this.get('params')['version'];
+
+    for (let i = 0; i < props.length; i++) {
+      let key   = props[i];
+      let value = "";
+
+      if (key !== "bbox") {
+        value = this.get("params")[key];
+        url += key + '=' + value;
+      } else {
+        // value = extent.join(',');
+        // if (version !== "1.0.0") {
+        //    value += "," + this.get("params")['srsname'];
+        // }
+      }
+
+      if (i !== props.length - 1) {
+        url += "&";
+      }
+    }
+
+    return url;
   }
-};
-
-/**
- * WfsLayer module.<br>
- * Use <code>require('layer/wfslayer')</code> for instantiation.
- * @module WfsLayer-module
- * @returns {WfsLayer}
- */
-module.exports = LayerModel.extend(WfsLayer);
+});

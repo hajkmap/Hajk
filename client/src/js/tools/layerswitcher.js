@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var ToolModel = require('tools/tool');
 
@@ -33,6 +33,11 @@ var ToolModel = require('tools/tool');
  * @property {boolean} visible - Default: false
  * @property {LayerCollection} layerCollection - Default: undefined
  * @property {boolean} backgroundSwitcherMode - Default: hidden
+ * @property {boolean} active - Default: false
+ * @property {boolean} visibleAtStart - Default: true
+ * @property {boolean} backgroundSwitcherBlack - Default: true
+ * @property {boolean} backgroundSwitcherWhite - Default: true
+ * @property {boolean} toggleAllButton - Default: false
  */
 var LayerSwitcherModelProperties = {
   type: 'layerswitcher',
@@ -41,11 +46,13 @@ var LayerSwitcherModelProperties = {
   icon: 'fa fa-bars icon',
   title: 'Lagerhanterare',
   visible: false,
-  visibleAtStart: true,
   layerCollection: undefined,
   backgroundSwitcherMode: 'hidden',
+  active: true,
+  visibleAtStart: true,
   backgroundSwitcherBlack: true,
-  backgroundSwitcherWhite: true
+  backgroundSwitcherWhite: true,
+  toggleAllButton: true
 };
 
 /**
@@ -77,23 +84,38 @@ var LayerSwitcherModel = {
    * @instance
    * @param {object[]} groups
    */
-  setToggled: function recursive(groups) {
+  setExpanded: function recursive(groups) {
     groups.forEach(group => {
-      this.set("group_" + group.id, group.toggled ? "visible" : "hidden");
-      if (group.hasOwnProperty('groups')) {
-        recursive.call(this, group.groups);
+      if (!this.get("group_" + group.id)) {
+        this.set("group_" + group.id, group.expanded ? "visible" : "hidden");
+        if (group.hasOwnProperty('groups')) {
+          recursive.call(this, group.groups);
+        }
       }
     });
   },
 
   /**
-   * Export the map as a PDF-file
+   * Set visibility for all layers to false.
+   * @instance
+   */
+   toggleAllOff() {     
+     var baseLayers = this.getBaseLayers();
+     this.get('layerCollection').forEach(layer => {       
+       var isBaseLayer = baseLayers.find(l => l.id === layer.id);
+       if (!isBaseLayer) {
+         layer.setVisible(false);
+       }
+     });
+   },
+
+  /**
+   * Get base layers.
    * @instance
    * @return {Layer[]} base layers
    */
   getBaseLayers: function () {
     var baseLayers = [];
-
     this.get('baselayers').forEach(id => {
       var layer = this.get('layerCollection').find(layer => layer.id === id);
       if (layer) {
@@ -116,6 +138,7 @@ var LayerSwitcherModel = {
    */
   clicked: function (arg) {
     this.set('visible', true);
+    this.set('toggled', !this.get('toggled'));
   }
 };
 

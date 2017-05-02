@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 function toParamString(obj) {
   return Object.keys(obj).map(k => `${k}=${obj[k]}`).join('&');
@@ -59,6 +59,23 @@ var ArcGISLayer = {
    */
   validInfo: true,
 
+  /**
+   * Create attribution array
+   * @instance
+   * @return {Array<external:"ol.Attribution">} attributions
+   */
+  getAttributions: function() {
+    var attributions = [];
+    if (this.get('attribution')) {
+      attributions.push(
+        new ol.Attribution({
+          html: this.get('attribution')
+        })
+      );
+    }
+    return attributions;
+  },
+
   initialize: function () {
     LayerModel.prototype.initialize.call(this);
 
@@ -69,6 +86,7 @@ var ArcGISLayer = {
       name: this.get('name'),
       projection: this.get('projection'),
       source: new ol.source.TileArcGISRest({
+        attributions: this.getAttributions(),
         url: this.get('url'),
         params: this.get('params')
       })

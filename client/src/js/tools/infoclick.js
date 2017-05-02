@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var ToolModel = require('tools/tool');
 var HighlightLayer = require('layers/highlightlayer');
@@ -49,7 +49,6 @@ var FeatureCollection = Backbone.Collection.extend({
  * @property {external:"ol.feature"[]} features
  * @property {external:"ol.feature"} selectedFeature
  * @property {external:"ol.layer"} highlightLayer
- * @property {external:"ol.interaction.Select"} selectInteraction
  * @property {string} markerImg - Default: "assets/icons/marker.png"
  */
 var InfoClickModelProperties = {
@@ -61,8 +60,17 @@ var InfoClickModelProperties = {
   features: undefined,
   selectedFeature: undefined,
   highlightLayer: undefined,
-  selectInteraction: undefined,
-  markerImg: "assets/icons/marker.png"
+  markerImg: "assets/icons/marker.png",
+  anchor: [
+    16,
+    16
+  ],
+  imgSize: [
+    32,
+    32
+  ],
+  displayPopup: true,
+  popupOffsetY: 0
 };
 
 /**
@@ -81,38 +89,18 @@ var InfoClickModel = {
   initialize: function (options) {
     ToolModel.prototype.initialize.call(this);
     this.initialState = options;
+
+    this.set('highlightLayer', new HighlightLayer({
+      anchor: this.get('anchor'),
+      imgSize: this.get('imgSize'),
+      markerImg: this.get('markerImg')
+    }));
     this.set("features", new FeatureCollection());
-    this.selectInteraction = new ol.interaction.Select({
-      multi: false,
-      active: false,
-      style: new ol.style.Style({
-        fill: new ol.style.Fill({
-          color: 'rgba(255, 255, 255, 0.6)'
-        }),
-        stroke: new ol.style.Stroke({
-          color: 'rgba(0, 0, 0, 0.6)',
-          width: 4
-        }),
-        image: new ol.style.Icon({
-          anchor: this.get('anchor') || [0.5, 32],
-          anchorXUnits: 'fraction',
-          anchorYUnits: 'pixels',
-          src: this.get('markerImg'),
-          imgSize: this.get('imgSize') || [32, 32]
-        })
-      })
-    });
-
-    this.set("selectInteraction", this.selectInteraction);
-    this.set("highlightLayer", new HighlightLayer());
-    this.selectInteraction.setActive(false);
-
     this.get("features").on("add", (feature, collection) => {
       if (collection.length === 1) {
         this.set('selectedFeature', feature);
       }
     });
-
     this.on("change:selectedFeature", (sender, feature) => {
       setTimeout(() => {
         if (this.get('visible')) {
@@ -123,10 +111,8 @@ var InfoClickModel = {
   },
 
   configure: function (shell) {
-    var map = shell.getMap().getMap()
-    ,   selectInteraction = this.get('selectInteraction');
+    var map = shell.getMap().getMap();
 
-    map.addInteraction(this.selectInteraction);
     this.layerCollection = shell.getLayerCollection();
     this.map = map;
     this.map.on('singleclick', (event) => {
@@ -139,6 +125,10 @@ var InfoClickModel = {
       } catch (e) {}
     });
     this.set('map', this.map);
+    this.map.addLayer(this.get('highlightLayer').layer);
+    $('#popup-closer').click(() => {
+      this.clearHighlight();
+    });
   },
 
   /**
@@ -159,7 +149,6 @@ var InfoClickModel = {
     ,   promises = []
     ;
 
-    $('body').css({cursor: 'wait'});
     this.layerOrder = {};
     this.get("features").reset();
 
@@ -168,7 +157,7 @@ var InfoClickModel = {
     });
 
     this.map.forEachFeatureAtPixel(event.pixel, (feature, layer) => {
-      if (layer && layer.get('name')) {
+      if (layer && layer.get('name') && (layer.get('queryable') !== false)) {
         if (
           layer.get('name') !== 'preview-layer' &&
           layer.get('name') !== 'highlight-wms'
@@ -200,15 +189,17 @@ var InfoClickModel = {
           },
           success: features => {
             if (Array.isArray(features) && features.length > 0) {
-
               features.forEach(feature => {
                 this.addInformation(feature, wmsLayer, (featureInfo) => {
-                  infos.push(featureInfo);
+                  if (featureInfo) {
+                    infos.push(featureInfo);
+                  }
+                  resolve();
                 });
               });
-
+            } else {
+              resolve();
             }
-            resolve();
           }
         });
       }));
@@ -217,11 +208,9 @@ var InfoClickModel = {
     this.set('loadFinished', false);
 
     Promise.all(promises).then(() => {
-      $('body').css({cursor: 'default'});
-
       infos.sort((a, b) => {
-        var s1 = this.layerOrder[a.layer.id]
-        ,   s2 = this.layerOrder[b.layer.id]
+        var s1 = a.information.layerindex
+        ,   s2 = b.information.layerindex
         ;
         return s1 === s2 ? 0 : s1 < s2 ? 1 : -1;
       });
@@ -231,11 +220,164 @@ var InfoClickModel = {
       });
 
       this.set('loadFinished', true);
-      this.togglePanel();
+      if (this.get('displayPopup')) {
+        this.togglePopup(infos, event.coordinate);
+      } else {
+        this.togglePanel()
+      }
 
       if (infos.length === 0) {
         this.set('selectedFeature', undefined);
+        this.get('map').getOverlayById('popup-0').setPosition(undefined);
+        this.clearHighlight();
       }
+
+    });
+  },
+
+  /**
+   * Convert object to markdown
+   * @instance
+   * @param {object} object to transform
+   * @return {string} markdown
+   */
+  objectAsMarkdown: function (o) {
+    return Object
+      .keys(o)
+      .reduce((str, next, index, arr) =>
+        /^geom$|^geometry$|^the_geom$/.test(arr[index]) ?
+        str : str + `**${arr[index]}**: ${o[arr[index]]}\r`
+      , "");
+  },
+
+  /**
+   * Check if this device supports touch.
+   * @instance
+   */
+  isTouchDevice: function () {
+    try {
+      document.createEvent("TouchEvent");
+      return true;
+    } catch(e) {
+      return false;
+    }
+  },
+
+  /**
+   * Enable scroll on infowindow
+   * @instance
+   * @param {DOMelement} elm
+   */
+  enableScroll: function (elm) {    
+    if (this.isTouchDevice()){      
+      var scrollStartPos = 0;      
+      elm.addEventListener("touchstart", function(event) {
+        scrollStartPos = this.scrollTop + event.touches[0].pageY;                
+      }, false);      
+      elm.addEventListener("touchmove", function(event) {
+        this.scrollTop = scrollStartPos - event.touches[0].pageY;                    
+      }, false);
+    }
+  },
+
+  /**
+   * Toogle popup
+   * @instance
+   * @param {array} infos
+   * @param {array} coordinate
+   */
+  togglePopup: function(infos, coordinate) {
+
+    const ovl = this.get('map').getOverlayById('popup-0');
+
+    function isPoint (coord) {
+      if (coord.length === 1) {
+        coord = coord[0];
+      }
+      return (
+        (coord.length === 2 ||  coord.length === 3) &&
+        typeof coord[0] === "number" &&
+        typeof coord[1] === "number"
+      )
+      ? [coord[0], coord[1]]
+      : false;
+    }
+
+    infos.forEach((info, i) => {
+        function display(index, inf) {
+
+          var coords    = inf.feature.getGeometry().getCoordinates()
+          ,   position  = coordinate
+          ,   feature   = new Backbone.Model()
+          ,   infobox   = $('<div></div>')
+          ,   caption   = $(`<div> ${index + 1} av ${infos.length} </div>`)
+          ,   next      = $('<span class="fa fa-btn fa-arrow-circle-o-right"></span>')
+          ,   prev      = $('<span class="fa fa-btn fa-arrow-circle-o-left"></span>')
+          ,   title     = $(`<div>${inf.information.caption}</div>`)
+          ,   content   = $(`<div></div>`)
+          ,   markdown  = ""
+          ,   offsetY   = 0
+          ,   html      = "";
+
+          inf.layer.once('change:visible', () => {
+            ovl.setPosition(undefined);
+            this.clearHighlight();
+          });
+
+          if (typeof inf.information.information === "object") {
+            markdown = this.objectAsMarkdown(inf.information.information);
+          } else {
+            markdown = inf.information.information;
+          }
+          html = marked(markdown, { sanitize: false, gfm: true, breaks: true });
+
+          content.html(html);
+
+          if (coords = isPoint(coords)) {
+            position = coords;
+          }
+
+          caption.prepend(prev);
+          caption.append(next);
+          if (infos.length > 1) {
+            infobox.append(caption);
+          }
+
+          infobox.append(title, content);
+          $('#popup-content').show().html(infobox).scrollTop(0);
+
+          if (this.isTouchDevice()) {
+            this.enableScroll($('#popup-content')[0]);
+          }
+
+          if (isPoint(coords)) {  
+            offsetY = this.get('popupOffsetY');    
+          }
+                    
+          ovl.setPosition(position);
+          ovl.setOffset([0, offsetY]);
+
+          $(ovl.getElement()).hide().fadeIn(0);
+
+          Object.keys(inf).forEach(key => {
+            feature.set(key, inf[key]);
+          });
+          this.highlightFeature(feature);
+
+          prev.click(() => {
+            if (infos[index - 1]) {
+              display.call(this, index - 1, infos[index - 1]);
+            }
+          });
+          next.click(() => {
+            if (infos[index + 1]) {
+              display.call(this, index + 1, infos[index + 1]);
+            }
+          });
+        }
+        if (i === 0) {
+          display.call(this, i, info);
+        }
     });
   },
 
@@ -263,7 +405,12 @@ var InfoClickModel = {
     properties = feature.getProperties();
     information = layerModel && layerModel.get("information") || "";
 
-    if (information) {
+    if (feature.infobox) {
+      information = feature.infobox;
+      information = information.replace(/export:/g, '');
+    }
+
+    if (information && typeof information === "string") {
       (information.match(/\{.*?\}\s?/g) || []).forEach(property => {
           function lookup(o, s) {
             s = s.replace('{', '')
@@ -281,8 +428,13 @@ var InfoClickModel = {
       });
     }
 
-    layerindex = this.layerOrder.hasOwnProperty(layerModel.getName()) ?
-                 this.layerOrder[layerModel.getName()] : 999;
+    if (!layerModel) {
+      layerIndex = 999;
+    } else {
+      layerindex = this.layerOrder.hasOwnProperty(layerModel.getName())
+        ? this.layerOrder[layerModel.getName()]
+        : 999;
+    }
 
     callback({
       feature: feature,
@@ -302,6 +454,8 @@ var InfoClickModel = {
    */
   togglePanel: function () {
     if (this.get("features").length > 0) {
+      this.set('r', Math.round(Math.random() * 1E12));
+      this.set('toggled', true);
       this.set('visible', true);
     } else if (this.get("navigation").get("activePanelType") === this.get("panel")) {
       this.set('visible', false);
@@ -317,7 +471,7 @@ var InfoClickModel = {
     var layer = this.get('highlightLayer');
     layer.clearHighlight();
     this.reorderLayers(feature);
-    layer.addHighlight(feature.get('feature'));
+    layer.addHighlight(feature.get('feature').clone());
     layer.setSelectedLayer(feature.get('layer'));
   },
 
@@ -333,20 +487,17 @@ var InfoClickModel = {
     ,   selectedLayer = feature.get('layer')
     ,   insertIndex;
 
-    layerCollection.getArray().forEach((layer, index) => {
-      if (layer.getProperties().name !== "highlight-wms") {
-        if (layer.get('name') === selectedLayer.get('name')) {
-          insertIndex = index + 1;
-        }
-      }
-      if (insertIndex) {
+    if (selectedLayer && this.layerOrder.hasOwnProperty(selectedLayer.get('name'))) {
+      insertIndex = this.layerOrder[selectedLayer.get('name')];
+      insertIndex += 1;
+    }
 
-        layerCollection.remove(this.get('highlightLayer').getLayer());
-        layerCollection.insertAt(insertIndex, this.get('highlightLayer').getLayer());
-        insertIndex = undefined;
+    if (insertIndex) {
+      layerCollection.remove(this.get('highlightLayer').getLayer());
+      layerCollection.insertAt(insertIndex, this.get('highlightLayer').getLayer());
+      insertIndex = undefined;
+    }
 
-      }
-    });
   },
 
   /**
@@ -355,23 +506,11 @@ var InfoClickModel = {
    * @param {external:"ol.feature"} feature
    */
   highlightFeature: function (feature) {
-      var highlightLayer = this.get('highlightLayer');
-
-      if (this.selectInteraction.getFeatures().getLength() > 0) {
-        this.selectInteraction.getFeatures().removeAt(0);
-      }
-
-      if (feature) {
-        if (feature.get("feature").getGeometry() &&
-            feature.get("feature").getGeometry().getType() === "Point") {
-          highlightLayer.clearHighlight();
-          this.selectInteraction.getFeatures().push(feature.get("feature"));
-        } else {
-          this.createHighlightFeature(feature);
-        }
-      } else {
-        highlightLayer.clearHighlight();
-      }
+    if (feature) {
+      this.createHighlightFeature(feature);
+    } else {
+      this.get('highlightLayer').clearHighlight();
+    }
   },
 
   /**
@@ -380,13 +519,7 @@ var InfoClickModel = {
    * @param {external:"ol.feature"} feature
    */
   clearHighlight: function () {
-      var features = this.selectInteraction.getFeatures(),
-          highlightLayer = this.get('highlightLayer');
-
-      if (features.getLength() > 0) {
-        this.selectInteraction.getFeatures().removeAt(0);
-      }
-      highlightLayer.clearHighlight();
+     this.get('highlightLayer').clearHighlight();
   }
 
 };

@@ -18,11 +18,13 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
-var X2JS = require('x2js');
+import X2JS from 'x2js';
+import { Model } from 'backbone';
+import $ from 'jquery';
 
-var search = Backbone.Model.extend({
+var search = Model.extend({
 
   defaults: {
     layers: []
@@ -149,4 +151,4 @@ var search = Backbone.Model.extend({
 
 });
 
-module.exports = new search();
+export default search;

@@ -18,9 +18,12 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
-var edit = Backbone.Model.extend({
+import { Model } from 'backbone';
+import $ from 'jquery';
+
+var edit = Model.extend({
 
   defaults: {
     layers: []
@@ -138,4 +141,4 @@ var edit = Backbone.Model.extend({
 
 });
 
-module.exports = new edit();
+export default edit;

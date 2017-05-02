@@ -29,8 +29,8 @@ html, body,  {
 }
 
 input[type="text"]:focus {
-  outline: none;
-  box-shadow: none;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 button:active, button:focus {
@@ -97,7 +97,7 @@ label {
   background: rgba(255,255,255, 0.4);
   padding: 4px;
   border-radius: 6px;
-  bottom: 66px;
+  bottom: 70px;
   .map-scale-text {
     font-size: 12px;
     display: inline-block;
@@ -188,10 +188,6 @@ dd {
 input {
   padding: 5px;
   border: 1px solid #999;
-}
-
-input[type="text"]:focus {
-  outline: 2px solid @color-yellow;
 }
 
 .modal {

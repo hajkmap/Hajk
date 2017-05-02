@@ -18,9 +18,27 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
-const Alert = require('views/alert');
+import React from 'react';
+import { Component } from 'react';
+import Alert from '../views/alert.jsx';
+
+import Edit from '../views/edit.jsx';
+import LayerManager from '../views/layermanager.jsx';
+import Map from '../views/map.jsx';
+import MapSettings from '../views/mapsettings.jsx';
+import Info from '../views/info.jsx';
+import Release from '../views/release.jsx';
+import Search from '../views/search.jsx';
+
+import editModel from '../models/edit.js';
+import layerManagerModel from '../models/layermanager.js';
+import mapModel from '../models/map.js';
+import mapSettingsModel from '../models/mapsettings.js';
+import infoModel from '../models/info.js';
+import releaseModel from '../models/release.js';
+import searchModel from '../models/search.js';
 
 var defaultState = {
   alert: false,
@@ -33,7 +51,7 @@ var defaultState = {
 /**
  *
  */
-class Application extends React.Component {
+class Application extends Component {
   /**
    *
    */
@@ -114,6 +132,45 @@ class Application extends React.Component {
       );
     });
   }
+
+  getView(name) {
+    switch (name) {
+      case 'edit':
+        return Edit;
+      case 'layermanager':
+        return LayerManager;
+      case 'map':
+        return Map;
+      case 'mapsettings':
+        return MapSettings;
+      case 'info':
+        return Info;
+      case 'release':
+        return Release;
+      case 'search':
+        return Search;
+    }
+  }
+
+  getModel(name) {
+    switch (name) {
+      case 'edit':
+        return new editModel();
+      case 'layermanager':
+        return new layerManagerModel();
+      case 'map':
+        return new mapModel();
+      case 'mapsettings':
+        return new mapSettingsModel();
+      case 'info':
+        return new infoModel();
+      case 'release':
+        return new releaseModel();
+      case 'search':
+        return new searchModel();
+    }
+  }
+
   /**
    *
    */
@@ -124,13 +181,14 @@ class Application extends React.Component {
     var model = null;
 
     try {
-      content = require("views/" + this.state.content);
-      model = require("models/" + this.state.content);
+      content = this.getView(this.state.content);
+      model = this.getModel(this.state.content);
     }
     catch (e) {
       console.error(e);
       return (<div>{e.message}</div>);
     }
+
     return React.createElement(content, {
       model: model,
       config: this.props.config[this.state.content],
@@ -160,4 +218,4 @@ class Application extends React.Component {
 
 }
 
-module.exports = Application;
+export default Application;

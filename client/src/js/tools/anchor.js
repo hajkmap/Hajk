@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var ToolModel = require('tools/tool');
 
@@ -38,7 +38,7 @@ var AnchorModelProperties = {
   panel: 'anchorpanel',
   toolbar: 'bottom',
   icon: 'fa fa-link icon fa-flip-horizontal',
-  title: 'Länk',
+  title: 'Länk till kartan',
   visible: false,
   shell: undefined,
   anchor: ""
@@ -65,7 +65,6 @@ var AnchorModel = {
   },
 
   configure: function (shell) {
-
     this.set('map', shell.getMap());
     this.set('layers', shell.getLayerCollection());
     this.set(
@@ -96,7 +95,7 @@ var AnchorModel = {
     ,   l = layers.filter(layer => layer.getVisible() === true)
                   .map(layer => encodeURIComponent(layer.getName())).join(',');
 
-    a += `?x=${x}&y=${y}&z=${z}&l=${l}`;
+    a += `?m=${HAJK2.configFile}&x=${x}&y=${y}&z=${z}&l=${l}`;
     this.set("anchor", a);
 
     return a;
@@ -114,7 +113,9 @@ var AnchorModel = {
    * @instance
    */
   clicked: function () {
-    this.set('visible', true);
+    this.set('visible', true);    
+    this.set('toggled', !this.get('toggled'));
+
   }
 };
 

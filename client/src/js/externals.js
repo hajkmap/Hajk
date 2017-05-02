@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 /**
  * Backbone view base class.
@@ -85,6 +85,12 @@
  * @external "ol.style.Style"
  * @see {@link http://openlayers.org/en/latest/apidoc/ol.style.Style.html|OpenLayers Style}
  */
+
+ /**
+  * OpenLayers style class.
+  * @external "ol.Extent"
+  * @see {@link http://openlayers.org/en/latest/apidoc/ol.Extent.html|OpenLayers Style}
+  */
 
 /**
  * OpenLayers Event class.

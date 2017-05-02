@@ -18,7 +18,11 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
+
+import React from 'react';
+import { Component } from 'react';
+import Alert from '../views/alert.jsx';
 
 const defaultState = {
   load: false,
@@ -31,14 +35,22 @@ const defaultState = {
   caption: "",
   date: "Fylls i per automatik",
   searchFields: "",
+  infobox: "",
   displayFields: "",
+  geometryField: "",
   url: "",
-  outputFormat: undefined
+  outputFormat: undefined,
+  alert: false,
+  corfirm: false,
+  alertMessage: "",
+  content: "",
+  confirmAction: () => {},
+  denyAction: () => {}
 };
 /**
  *
  */
-class Search extends React.Component {
+class Search extends Component {
   /**
    *
    */
@@ -72,7 +84,7 @@ class Search extends React.Component {
    *
    */
   removeLayer(e, layer) {
-    this.props.application.setState({
+    this.setState({
       alert: true,
       confirm: true,
       alertMessage: "Lagret kommer att tas bort. Är detta ok?",
@@ -80,7 +92,7 @@ class Search extends React.Component {
         this.props.model.removeLayer(layer, success => {
           if (success) {
             this.props.model.getConfig(this.props.config.url_layers);
-            this.props.application.setState({
+            this.setState({
               alert: true,
               alertMessage: `Lagret ${layer.caption} togs bort!`
             });
@@ -88,7 +100,7 @@ class Search extends React.Component {
               this.abort();
             }
           } else {
-            this.props.application.setState({
+            this.setState({
               alert: true,
               alertMessage: "Lagret kunde inte tas bort. Försök igen senare."
             });
@@ -108,7 +120,9 @@ class Search extends React.Component {
       id: layer.id,
       caption: layer.caption,
       searchFields: layer.searchFields,
+      infobox: layer.infobox,
       displayFields: layer.displayFields,
+      geometryField: layer.geometryField,
       outputFormat: layer.outputFormat || 'GML3',
       url: layer.url,
       addedLayers: []
@@ -118,6 +132,7 @@ class Search extends React.Component {
       this.validate("url");
       this.validate("searchFields");
       this.validate("displayFields");
+      this.validate("geometryField");
       this.validate("outputFormat")
       this.loadWMSCapabilities(undefined, () => {
 
@@ -127,9 +142,10 @@ class Search extends React.Component {
 
         this.validate("layers");
 
-        _.each(this.refs, element => {
-          if (element.dataset.type == "wms-layer") {
-            element.checked = false;
+        Object.keys(this.refs).forEach(element => {
+          var elem = this.refs[element];
+          if (this.refs[element].dataset.type == "wms-layer") {
+            this.refs[element].checked = false;
           }
         });
 
@@ -140,7 +156,9 @@ class Search extends React.Component {
       });
     }, 0);
   }
-
+  /**
+   *
+   */
   loadWMSCapabilities(e, callback) {
     if (e)
       e.preventDefault();
@@ -165,7 +183,7 @@ class Search extends React.Component {
         load: false
       });
       if (capabilities === false) {
-        this.props.application.setState({
+        this.setState({
           alert: true,
           alertMessage: "Servern svarar inte. Försök med en annan URL."
         })
@@ -175,7 +193,6 @@ class Search extends React.Component {
       }
     });
   }
-
   /**
    *
    */
@@ -234,6 +251,29 @@ class Search extends React.Component {
    */
   renderLayersFromConfig(layers) {
     layers = this.state.filter ? this.getLayersWithFilter() : this.props.model.get('layers');
+
+    var startsWith = [];
+    var alphabetically = [];
+
+    if (this.state.filter) {
+      layers.forEach(layer => {
+        layer.caption.toLowerCase().indexOf(this.state.filter) == 0 ? startsWith.push(layer) : alphabetically.push(layer);
+      });
+
+      startsWith.sort(function(a, b) {
+        if(a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
+        if(a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        return 0; 
+      });
+
+      alphabetically.sort(function(a, b) {
+        if(a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
+        if(a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        return 0; 
+      });
+        
+      layers = startsWith.concat(alphabetically);
+    }
     return layers.map((layer, i) =>
       <li onClick={(e) => this.loadLayer(e, layer)} key={Math.random()}>
         <span>{layer.caption}</span>
@@ -271,6 +311,7 @@ class Search extends React.Component {
         break;
       case "url":
       case "caption":
+      case "geometryField":
         if (value === "") {
           valid = false;
         }
@@ -341,6 +382,7 @@ class Search extends React.Component {
       this.validate("layers"),
       this.validate("searchFields"),
       this.validate("displayFields"),
+      this.validate("geometryField"),
       this.validate("outputFormat")
     ];
 
@@ -352,7 +394,9 @@ class Search extends React.Component {
         url: this.getValue("url"),
         layers: this.getValue("layers"),
         searchFields: this.getValue("searchFields"),
+        infobox: this.getValue("infobox"),
         displayFields: this.getValue("displayFields"),
+        geometryField: this.getValue("geometryField"),
         outputFormat: this.getValue("outputFormat")
       };
 
@@ -365,12 +409,12 @@ class Search extends React.Component {
             this.props.config.url_layers
             this.props.model.getConfig(this.props.config.url_layers);
             this.abort();
-            this.props.application.setState({
+            this.setState({
               alert: true,
               alertMessage: "Lagret har lagt till i listan av tillgängliga lager."
             });
           } else {
-            this.props.application.setState({
+            this.setState({
               alert: true,
               alertMessage: "Lagret kunde inte läggas till. Försök igen senare."
             });
@@ -381,7 +425,7 @@ class Search extends React.Component {
         this.props.model.updateLayer(layer, success => {
           if (success) {
             this.props.model.getConfig(this.props.config.url_layers);
-            this.props.application.setState({
+            this.setState({
               alert: true,
               alertMessage: "Uppdateringen lyckades!"
             });
@@ -389,7 +433,7 @@ class Search extends React.Component {
               date: layer.date,
             });
           } else {
-            this.props.application.setState({
+            this.setState({
               alert: true,
               alertMessage: "Uppdateringen misslyckades."
             });
@@ -412,9 +456,11 @@ class Search extends React.Component {
    *
    */
   getValidationClass(inputName) {
-    return valid = this.state.validationErrors.find(v => v === inputName) ? "validation-error" : "";
+    return this.state.validationErrors.find(v => v === inputName) ? "validation-error" : "";
   }
-
+  /**
+   *
+   */
   describeLayer(e, layerName) {
     this.props.model.getLayerDescription(this.refs.input_url.value, layerName, (properties) => {
       this.setState({
@@ -423,14 +469,18 @@ class Search extends React.Component {
       });
     });
   }
-
+  /**
+   *
+   */
   closeDetails() {
     this.setState({
       layerProperties: undefined,
       layerPropertiesName: undefined
     });
   }
-
+  /**
+   *
+   */
   renderLayerProperties() {
     if (this.state.layerProperties === undefined) {
       return null;
@@ -466,7 +516,9 @@ class Search extends React.Component {
       </div>
     )
   }
-
+  /**
+   *
+   */
   renderLayersFromCapabilites() {
     if (this.state && this.state.capabilities) {
       return this.state.capabilities.map((layer, i) => {
@@ -484,7 +536,9 @@ class Search extends React.Component {
       return null;
     }
   }
-
+  /**
+   *
+   */
   renderLayerList() {
     var layers = this.renderLayersFromCapabilites();
     return (
@@ -494,6 +548,35 @@ class Search extends React.Component {
         </ul>
       </div>
     )
+  }
+  getAlertOptions() {
+    return {
+      visible: this.state.alert,
+      message: this.state.alertMessage,
+      confirm: this.state.confirm,
+      confirmAction: () => {
+        this.state.confirmAction();
+        this.setState({
+          alert: false,
+          confirm: false,
+          alertMessage: ""
+        })
+      },
+      denyAction: () => {
+        this.state.denyAction();
+        this.setState({
+          alert: false,
+          confirm: false,
+          alertMessage: ""
+        })
+      },
+      onClick: () => {
+        this.setState({
+          alert: false,
+          alertMessage: ""
+        })
+      }
+    };
   }
   /**
    *
@@ -505,6 +588,7 @@ class Search extends React.Component {
 
     return (
       <section className="tab-pane active">
+        <Alert options={this.getAlertOptions()}/>
         <aside>
           <input placeholder="filtrera" type="text" onChange={(e) => this.filterLayers(e)} />
           <ul className="config-layer-list">
@@ -549,6 +633,14 @@ class Search extends React.Component {
                 {this.renderLayerList()}
               </div>
               <div>
+                <label>Inforuta</label>
+                <textarea
+                  ref="input_infobox"
+                  value={this.state.infobox}
+                  onChange={(e) => this.setState({'infobox': e.target.value})}
+                />
+              </div>
+              <div>
                 <label>Sökfält</label>
                 <input
                   type="text"
@@ -566,6 +658,16 @@ class Search extends React.Component {
                   onChange={(e) => this.validate("displayFields", e)}
                   value={this.state.displayFields}
                   className={this.getValidationClass("displayFields")}
+                />
+              </div>
+              <div>
+                <label>Geometrifält</label>
+                <input
+                  type="text"
+                  ref="input_geometryField"
+                  onChange={(e) => this.validate("geometryField", e)}
+                  value={this.state.geometryField}
+                  className={this.getValidationClass("geometryField")}
                 />
               </div>
               <div>
@@ -588,4 +690,4 @@ class Search extends React.Component {
   }
 }
 
-module.exports = Search;
+export default Search;

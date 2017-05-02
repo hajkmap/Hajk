@@ -1,6 +1,6 @@
 {
-  "name": "hajk2-admin",
-  "version": "2.0.0",
+  "name": "hajk-admin",
+  "version": "2.1.0",
   "description": "Common webmap admin interface",
   "homepage": "https://github.com/Johkar/Hajk2/admin",
   "repository": {
@@ -9,7 +9,11 @@
   },
   "private": true,
   "devDependencies": {
+    "array.prototype.find": "^2.0.3",
     "babel-preset-es2015": "^6.5.0",
+    "babel-preset-react": "^6.23.0",
+    "babelify": "^7.3.0",
+    "backbone": "^1.3.3",
     "bootstrap": "^3.3.6",
     "browserify": "^13.0.0",
     "browserify-shim": "^3.8.12",
@@ -26,13 +30,22 @@
     "grunt-contrib-less": "^1.2.0",
     "grunt-contrib-uglify": "^0.11.1",
     "grunt-contrib-watch": "^0.6.1",
+    "grunt-env": "^0.4.4",
     "grunt-express": "^1.4.1",
     "grunt-parallel": "^0.4.1",
     "grunt-proxy": "0.0.3",
     "grunt-react": "^0.12.3",
+    "grunt-replace": "^1.0.1",
     "grunt-text-replace": "^0.4.0",
+    "grunt-usebanner": "^0.3.1",
+    "jquery": "^3.1.1",
+    "jquery-sortable": "^0.9.13",
     "load-grunt-tasks": "^3.4.0",
     "matchdep": "^1.0.1",
+    "openlayers": "^4.0.1",
+    "react": "^15.4.2",
+    "react-color": "^2.11.1",
+    "react-dom": "^15.4.2",
     "x2js": "^3.0.1"
   }
 }

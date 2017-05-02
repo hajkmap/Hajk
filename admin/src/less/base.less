@@ -51,6 +51,7 @@ article input[type="text"] {
 	margin-right: 5px;
 }
 
+form > div,
 article fieldset > div,
 article fieldset > span > div {
 	margin: 7px;
@@ -240,11 +241,15 @@ body.dragging, body.dragging * {
 
 .tree-view .layer-node {
 	border: 1px solid #ccc;
-    background: #f8f8f8;
-    margin-bottom: 5px;
-    padding: 10px;
-    width: 100%;
-    cursor: pointer;
+  background: #f8f8f8;
+  margin-bottom: 5px;
+  padding: 10px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.tree-view .layer-node.visible {
+	font-weight: bold;
 }
 
 .tree-view .group-name {
@@ -262,6 +267,11 @@ body.dragging, body.dragging * {
 
 .tab-pane-bar {
 	margin: 0 0 18px 0;
+}
+
+.tab-pane aside {
+    max-height: 100vh;
+    overflow-y: scroll;
 }
 
 .expanded-at-start {
@@ -315,4 +325,30 @@ body.dragging, body.dragging * {
 
 .geometry-types label {
 	width: auto !important;
+}
+
+.color-box {
+	width: 100px;
+	height: 62px;
+	border: 1px solid black;
+}
+
+.inset-form {
+	padding: 10px;
+	background: #f8f8f8;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	margin-bottom: 10px;
+	display: inline-block;
+	margin-right: 10px;
+}
+
+.layer-item.selected {
+	background: #449d44;
+	border-color: #398439;
+	color: white;
+}
+
+.sketch-picker {
+	display: inline-block
 }

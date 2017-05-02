@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var Shell = require('views/shell');
 var ShellModel = require('models/shell');
@@ -38,23 +38,18 @@ var ApplicationView = {
    * Load the application.
    * @instance
    * @param {object} config
-   * @param {boolean} isBookmark
-   * @param {object[]} bookmars
    */
-  load: function (config, isBookmark, bookmarks) {
+  load: function (config, bookmarks) {
     this.shell = new ShellModel(config);
     this.shell.setBookmarks(bookmarks);
     this.shell.on('change:configUpdated', () => {
-      var currentBookmarks = this.shell.getBookmarks();
-      this.load(this.shell.getConfig(), true, currentBookmarks);
+      this.shell.updateConfig();
+      this.shell.setBookmarks(bookmarks);
     });
-    if (isBookmark) {
-      this.render(true);
-    }
   },
 
   initialize: function (config, bookmarks) {
-    this.load(config, false, bookmarks);
+    this.load(config, bookmarks);
   },
   /**
    * Render the view

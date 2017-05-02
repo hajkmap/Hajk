@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var MapView = require('views/map');
 var MapModel = require('models/map');
@@ -27,6 +27,8 @@ var LayerCollection = require('collections/layers');
 var Toolcollection = require('collections/tools');
 var NavigationPanel = require('views/navigationpanel');
 var NavigationPanelModel = require("models/navigation");
+var SearchBar = require("components/searchbar");
+
 /**
  * @class
  */
@@ -87,11 +89,7 @@ var ShellView = {
     return Math.round(scale).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   },
 
-  /**
-   * Triggered when the component is successfully mounted into the DOM.
-   * @instance
-   */
-  componentDidMount: function () {
+  configure: function() {
     this.model.configure.call(this.model);
     this.setState({
       views: [
@@ -113,6 +111,26 @@ var ShellView = {
 
     bindViewScaleEvents();
     this.model.getMap().getMap().on('change:view', bindViewScaleEvents);
+  },
+
+  /**
+   * Triggered when the component is successfully mounted into the DOM.
+   * @instance
+   */
+  componentDidMount: function () {
+    this.configure();
+
+    this.model.on('change:configUpdated', () => {
+      var config = this.model.getConfig();
+      this.model.get('map').update(config.map);
+      //
+      // TODO:
+      // Implementera inläsning av configobjekt för lager.
+      // this.model.get('layerCollection').update(config.layers);
+      //
+      // Implementera inläsning av configobjekt för verktyg.
+      // this.model.get('toolCollection').update(config.toolCollection);
+    });
 
   },
 
@@ -124,6 +142,8 @@ var ShellView = {
   render: function () {
     var views = this.state.views
     ,   scale
+    ,   popup
+    ,   searchbar
     ,   logo;
 
     if (views.length === 3) {
@@ -141,12 +161,30 @@ var ShellView = {
           <div className="map-scale-text">1:{this.state.scale}</div>
         </div>
       )
+
+      popup = (
+        <div id="popup" className="ol-popup">
+          <a href="#" id="popup-closer" className="ol-popup-closer"></a>
+          <div id="popup-content"></div>
+        </div>
+      )
+
+      var searchTool = this.model.get('toolCollection').find(tool => tool.get('type') === 'search');
+      if (searchTool && searchTool.get('onMap')) {
+        searchbar = (
+          <div className="search-bar-holder">
+            <SearchBar model={this.model.get('toolCollection').find(tool => tool.get('type') === 'search')}></SearchBar>
+          </div>
+        )
+      }
     }
 
     return (
       <div className="shell">
         {logo}
         {scale}
+        {popup}
+        {searchbar}
         {views}
       </div>
     );

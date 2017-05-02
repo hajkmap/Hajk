@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var ToolModel = require('tools/tool');
 
@@ -104,6 +104,7 @@ var CoordinatesModel = {
    */
   clicked: function(arg) {
     this.set('visible', true);
+    this.set('toggled', !this.get('toggled'));
   },
 
   /**

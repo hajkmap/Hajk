@@ -18,18 +18,23 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var Tool          = require('tools/tool')
 ,   LayerSwitcher = require('tools/layerswitcher')
 ,   InfoClick     = require('tools/infoclick')
-,   SaveState     = require('tools/savestate')
+,   Bookmark      = require('tools/bookmark')
 ,   Search        = require('tools/search')
 ,   Coordinates   = require('tools/coordinates')
 ,   Export        = require('tools/export')
 ,   Draw          = require('tools/draw')
 ,   Edit          = require('tools/edit')
-,   Anchor        = require('tools/anchor');
+,   Anchor        = require('tools/anchor')
+,   Buffer        = require('tools/buffer')
+,   StreetView    = require('tools/streetview')
+,   Information   = require('tools/information')
+,   Location      = require('tools/location')
+,   Preset        = require('tools/preset');
 
 /**
  * @description
@@ -56,8 +61,8 @@ var ToolCollection = {
             return new LayerSwitcher(args.options);
         case "infoclick":
             return new InfoClick(args.options);
-        case "savestate":
-            return new SaveState(args.options);
+        case "bookmark":
+            return new Bookmark(args.options);
         case "search":
             return new Search(args.options);
         case "coordinates":
@@ -70,16 +75,34 @@ var ToolCollection = {
             return new Edit(args.options);
         case "anchor":
             return new Anchor(args.options);
+        case "buffer":            
+            return new Buffer(args.options);
+        case "streetview":
+            return new StreetView(args.options);
+        case "information":
+            return new Information(args.options);
+        case "selection":
+            return new Selection(args.options);
+        case "location":
+            return new Location(args.options);
+        case "preset":
+            return new Preset(args.options);
         default:
-            throw "tool not supported " + args.type;
+            throw "Tool not supported " + args.type;
       }
   },
 
   initialize: function (tools, args) {
     this.shell = args.shell;
-    _.defer(_.bind(function () {
-      this.forEach(function (tool) { tool.set("shell", this.shell); }, this);
-    }, this));
+    setTimeout(() => {
+      this.configure();
+    }, 0);
+  },
+
+  configure: function() {
+    this.forEach(tool => {
+      tool.set("shell", this.shell)
+    });
   },
 
   /**

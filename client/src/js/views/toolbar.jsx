@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 /**
  * @class
@@ -51,36 +51,67 @@ var ToolbarView = {
    * @return {external:ReactElement}
    */
   render: function () {
-    var tools = this.props.model.filter(t => t.get('toolbar')).map((tool, index) => {
+    var tools = this.props.model
+      .filter(t => t.get('toolbar'))
+      .filter(tool => tool.get('toolbar') === 'bottom')
+      .map((tool, index) => {
+        var a = tool.get('panel').toLowerCase()
+        ,   b = this.state.activeTool
+        ,   c = a === b ? 'btn btn-primary' : 'btn btn-default';
 
-      var a = tool.get('panel').toLowerCase();
-      var b = this.state.activeTool;
+        if (tool.get('active') === false) {
+          return null;
+        }
 
-      var c = a === b ? 'btn btn-primary' : 'btn btn-default';
+        return (
+          <button
+            type="button"
+            className={c}
+            onClick={() => {
+              tool.clicked();
+              if (tool.get('type') !== 'information') {
+                this.props.navigationModel.set('r', Math.random());
+              }
+            }}
+            key={index}
+            title={tool.get("title")}>
+            <i className={ tool.get("icon") }></i>
+          </button>
+        );
+      });
 
-      return (
-        <button
-          type="button"
-          className={c}
-          onClick={() => {
-            tool.clicked();
-            this.props.navigationModel.set('r', Math.random());
-          }}
-          key={index}
-          title={tool.get("title")}>
-          <i className={ tool.get("icon") }></i>
-        </button>
-      );
-    });
+    var widgets = this.props.model
+      .filter(t => t.get('toolbar'))
+      .filter(tool => tool.get('toolbar') === 'top-right')
+      .map((tool, index) => {
+        var className = tool.get('active') ? 'btn btn-primary' : 'btn btn-default';
+        tool.on('change:active', () => {
+          this.forceUpdate();
+        });
+        return (
+          <button
+            type="button"
+            className={className}
+            onClick={() => {
+              tool.clicked();
+            }}
+            key={index}
+            title={tool.get("title")}>
+            <i className={ tool.get("icon") }></i>
+          </button>
+        );
+      });
 
     return (
       <div className="map-toolbar-wrapper">
         <div
-          className="btn-group btn-group-lg map-toolbar"
+          className="btn-group btn-group-lg map-toolbar bottom-toobar"
           role="group"
           aria-label="toolbar">
           {tools}
         </div>
+        <div className="upper-toolbar">{widgets}</div>
+        <div className="information" id="information"></div>
       </div>
     );
   }

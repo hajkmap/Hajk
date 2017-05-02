@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 /**
  * @typedef {Object} NavigationModel~NavigationModelProperties
@@ -51,9 +51,24 @@ var NavigationModel = {
   defaults: NavigationModelProperties,
 
   initialize: function (options) {
-
     options.panels.forEach(panel => {
+      panel.model.on("change:r", () => {
+        this.set('r', panel.model.get('r'));
+      });
       panel.model.on("change:visible", this.onPanelVisibleChanged, this);
+      panel.model.on("change:toggled", () => {
+        if (this.get('lastPanel') && this.get('lastPanel').type === "InfoPanel") {
+          this.set("lastPanel", panel);
+        } else {
+          if (this.get('lastPanel') && this.get('lastPanel').type !== panel.type) {
+            this.set("lastPanel", panel);
+            this.set('toggled', false);
+          } else {
+            this.set("lastPanel", panel);
+            this.set('toggled', !this.get('toggled'));
+          }
+        }
+      });
     });
 
     this.on('change:visible', (s, visible) => {
@@ -70,6 +85,7 @@ var NavigationModel = {
    * @property {string} type
    */
   navigate: function(panelRef, type) {
+    this.set('lastPanel', this.get("activePanel"));
     if (panelRef) {
       this.set("activePanelType", type);
       this.set("activePanel", panelRef);
@@ -88,42 +104,35 @@ var NavigationModel = {
    * @param {boolean} visible
    */
   onPanelVisibleChanged: function (panel, visible) {
-    var type = (panel.get('panel') || '').toLowerCase();
-    var panelRef = _.find(this.get("panels"), panel => (panel.type || '').toLowerCase() === type);
-    var activePanel = this.get("activePanel");
+
+    var type = (panel.get('panel') || '').toLowerCase()
+    ,   panelRef = _.find(this.get("panels"), panel => (panel.type || '').toLowerCase() === type)
+    ,   activePanel = this.get("activePanel", panelRef);
 
     if (visible) {
-
       if (activePanel) {
+        let a = activePanel.model.get('panel')
+        ,   b = panel.get('panel').toLowerCase();
+
         activePanel.model.set("visible", false);
 
-        var a = activePanel.model.get('panel');
-        var b = panel.get('panel').toLowerCase();
-
         if (activePanel.model.filty && a !== b) {
-
           this.set('alert', true);
-
           this.ok = () => {
             this.navigate(panelRef, type);
           };
-
           this.deny = () => {
             if (panelRef) {
               panelRef.model.set('visible', false);
             }
           }
-
         }
       }
-
       if (!this.get('alert')) {
         this.navigate(panelRef, type);
       }
-
     }
   }
-
 };
 
 /**

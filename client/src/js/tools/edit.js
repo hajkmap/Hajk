@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var ToolModel = require('tools/tool');
 
@@ -352,6 +352,23 @@ var EditModel = {
   },
 
   /**
+   * Filter features by hidden default value.
+   * If the the dataset has a hidden field with a default value this will be set as filter.
+   * @instance
+   * @param {external:ol.Feature[]} features
+   */
+  filterByDefaultValue: function(features) {
+    return features.filter(feature => {
+      return this.get('editSource').editableFields.some(field => {
+        var value = feature.getProperties()[field.name];
+        if (field.hidden && value === field.defaultValue) {
+          return true;
+        }
+      });
+    });
+  },
+
+  /**
    * Load data from WFS-service and att to the source.
    * @instance
    * @param {object} config
@@ -370,9 +387,22 @@ var EditModel = {
           srsname: config.projection
         }
     }).done(rsp => {
-      this.get('vectorSource').addFeatures(format.readFeatures(rsp));
-      this.get('vectorSource').getFeatures().forEach(feature => {
+      var features
+      try {
+        features = format.readFeatures(rsp);
+      } catch (e) {
+        alert("Fel: data kan inte läsas in. Kontrollera koordinatsystem.");
+      }
+      if (features.length > 0) {
+        this.set("geometryName", features[0].getGeometryName());
+      }
 
+      if (this.get('editSource').editableFields.some(field => field.hidden)) {
+        features = this.filterByDefaultValue(features);
+      }
+
+      this.get('vectorSource').addFeatures(features);
+      this.get('vectorSource').getFeatures().forEach(feature => {
         //Property changed
         feature.on('propertychange', (e) => {
           if (feature.modification === 'removed')
@@ -381,7 +411,6 @@ var EditModel = {
             return;
           feature.modification = 'updated';
         });
-
         //Geometry changed.
         feature.on('change', (e) => {
           if (feature.modification === 'removed')
@@ -390,7 +419,6 @@ var EditModel = {
             return;
           feature.modification = 'updated';
         });
-
       });
       if (done) done();
     }).error(rsp => {
@@ -471,7 +499,7 @@ var EditModel = {
       this.get('map').addInteraction(this.get('select'));
     } else {
       this.get('select').getFeatures().clear();
-      this.get('select').unByKey(this.get('key'));
+      this.get('select').unset(this.get('key'));
     }
 
     this.set('key', this.get('select').on('select', (event) => { this.featureSelected(event, source) }));
@@ -495,7 +523,6 @@ var EditModel = {
    * @param {string} geometryType - Geometry type of feature
    */
   handleDrawEnd: function(feature, geometryType) {
-    feature.setGeometryName('geom');
     feature.modification = 'added';
     this.editAttributes(feature);
   },
@@ -521,7 +548,7 @@ var EditModel = {
         source: this.get('vectorSource'),
         style: this.getScetchStyle(),
         type: geometryType,
-        geometryName: 'geom'
+        geometryName: this.get('geometryName')
       }));
       this.get("drawTool").on('drawend', (event) => {
         this.handleDrawEnd(event.feature, geometryType)
@@ -635,6 +662,7 @@ var EditModel = {
    */
   clicked: function () {
     this.set('visible', true);
+    this.set('toggled', !this.get('toggled'));
   }
 };
 

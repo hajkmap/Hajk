@@ -82,25 +82,21 @@ module.exports = function (grunt) {
               dest: "release/js/es6-polyfill.js"
             }
           ]
-        },
-        admin: {
-          files: [
-            {
-              src: "release/js/<%= pkg.name %>-<%= pkg.version %>.min.js",
-              dest: "../admin/dist/js/<%= pkg.name %>-<%= pkg.version %>.min.js"
-            },
-            {
-              src: "release/assets/<%= pkg.name %>-<%= pkg.version %>.min.css",
-              dest: "../admin/dist/assets/<%= pkg.name %>-<%= pkg.version %>.min.css"
-            }
-          ]
         }
       },
 
       concat: {
         css: {
           src: ['<%= cssFiles %>'],
-          dest: 'dist/assets/<%= pkg.name %>.css'
+          dest: 'dist/assets/<%= pkg.name %>-<%= pkg.version %>.css'
+        },
+        dependencies: {
+          src: ['dist/js/dependencies.min.js', 'dist/js/dependencies-min.js'],
+          dest: 'dist/js/dependencies.min.js'
+        },
+        cssrelease: {
+          src: ['<%= cssFiles %>'],
+          dest: 'release/assets/<%= pkg.name %>-<%= pkg.version %>.css'
         },
         jsrelease: {
           src: [
@@ -162,7 +158,8 @@ module.exports = function (grunt) {
           options: {
           },
           files: {
-            'dist/js/dependencies.js': ['src/js/dependencies.js']
+            'dist/js/dependencies.js': ['src/js/dependencies.js'],
+            'dist/js/dependencies-min.js': ['src/js/dependencies-min.js']
           }
         }
       },
@@ -209,10 +206,10 @@ module.exports = function (grunt) {
           dest: 'dist/index.html',
           replacements: [{
             from: '{js}',
-            to: '<script src="js/es6-polyfill.js" charset="utf-8">\r\n    </script><script src="js/dependencies.js" charset="utf-8"></script>\r\n    <script src="js/<%= pkg.name %>-transpiled.js" charset="utf-8"></script>'
+            to: '<script src="js/es6-polyfill.js" charset="utf-8">\r\n    </script><script src="js/dependencies.min.js" charset="utf-8"></script>\r\n    <script src="js/<%= pkg.name %>-transpiled.js" charset="utf-8"></script>'
           }, {
             from: '{css}',
-            to: '<link rel="stylesheet" href="assets/<%= pkg.name %>.css" charset="utf-8">'
+            to: '<link rel="stylesheet" href="assets/<%= pkg.name %>-<%= pkg.version %>.css" charset="utf-8">'
           }]
         },
         releasehtml: {
@@ -223,7 +220,7 @@ module.exports = function (grunt) {
             to: '<script src="js/es6-polyfill.js" charset="utf-8"></script>\r\n    <script src="js/<%= pkg.name %>-<%= pkg.version %>.min.js"></script>'
           }, {
             from: '{css}',
-            to: '<link rel="stylesheet" href="assets/<%= pkg.name %>-<%= pkg.version %>.min.css" charset="utf-8">'
+            to: '<link rel="stylesheet" href="assets/<%= pkg.name %>-<%= pkg.version %>.css" charset="utf-8">'
           }]
         },
 
@@ -324,7 +321,7 @@ module.exports = function (grunt) {
           files: {
             src: [
               //'src/**/*.js',
-              //'src/**/*.jsx',
+              //'src/**/*.jsx'
               'release/js/<%= pkg.name %>-<%= pkg.version %>.min.js'
             ]
           }
@@ -333,13 +330,13 @@ module.exports = function (grunt) {
 
     });
 
-    grunt.registerTask('dependencies', ['browserify:dependencies', 'uglify:dependencies']);
+    grunt.registerTask('dependencies', ['browserify:dependencies', 'uglify:dependencies', 'concat:dependencies']);
 
     grunt.registerTask('build', ['copy:debug', 'replace:debughtml', 'less', 'autoprefixer:core', 'concat:css', 'react', 'browserify:app', 'babel', 'replace:bablecleanup']);
 
     grunt.registerTask('debug', ['connect:debug', 'proxy:proxy1', 'watch']);
 
-    grunt.registerTask('release', ['copy:release', 'replace:releasehtml', 'less', 'concat:css', 'cssmin', 'react', 'browserify:app', 'babel', 'replace:bablecleanup', 'uglify:application', 'concat:jsrelease', 'usebanner', 'copy:admin']);
+    grunt.registerTask('release', ['copy:release', 'replace:releasehtml', 'less', 'concat:cssrelease', 'react', 'browserify:app', 'babel', 'replace:bablecleanup', 'uglify:application', 'concat:jsrelease', 'usebanner']);
 
     grunt.registerTask('default', ['watch']);
 

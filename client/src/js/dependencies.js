@@ -18,10 +18,9 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 global.window._ = require('underscore');
-global.window.ol = require('openlayers');
 global.window.Backbone = require('backbone');
 global.window.moment = require('moment');
 global.window.React = require('react');
@@ -30,8 +29,4 @@ global.window.Datetime = require('react-datetime');
 global.window.proj4 = require('proj4');
 global.window.marked = require('marked');
 global.window.X2JS = require('x2js');
-
-var $ = jQuery = require('jquery');
-require('jquery-sortable');
-global.window.$ = $;
-global.window.jQuery = $;
+global.window.jQuery = global.window.$ = require('jquery');

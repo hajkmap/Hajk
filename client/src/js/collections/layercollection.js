@@ -18,11 +18,11 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var types = {
   "wms": require('layers/wmslayer'),
-  "wfs": require('layers/wfslayer'),
+  "vector": require('layers/wfslayer'),
   "wmts": require('layers/wmtslayer'),
   "data": require('layers/datalayer'),
   "arcgis": require('layers/arcgislayer')
@@ -44,7 +44,9 @@ var LayerCollection = {
     var map = this.shell.get('map').getMap()
     ,   olLayer = layer.getLayer();
 
+    layer.set("olMap", map);
     layer.set("shell", this.shell);
+
     if (olLayer) {
       map.addLayer(olLayer);
     }
@@ -90,7 +92,8 @@ var LayerCollection = {
         projection: args.projection,
         origin: args.origin,
         resolutions: args.resolutions,
-        matrixIds: args.matrixIds
+        matrixIds: args.matrixIds,
+        attribution: args.attribution,
       }
     };
     return config;
@@ -131,6 +134,7 @@ var LayerCollection = {
         "singleTile": args.singleTile || false,
         "imageFormat": args.imageFormat || "image/png",
         "serverType": args.serverType || "geoserver",
+        "attribution": args.attribution,
         "legend" : [{
           "Url": getLegendUrl(args),
           "Description" : "Teckenförklaring"
@@ -145,7 +149,7 @@ var LayerCollection = {
       }
     };
 
-    if (args.searchFields && args.searchFields[0] !== "") {
+    if (args.searchFields && args.searchFields[0]) {
       config.options.search = {
         "url": (HAJK2.searchProxy || "") + args.url.replace('wms', 'wfs'),
         "featureType": args.layers[0].split(':')[1] || args.layers[0].split(':')[0],
@@ -178,16 +182,59 @@ var LayerCollection = {
     return config;
   },
 
+  mapWFSConfig: function(args) {
+
+    var config = {
+      type : "vector",
+      options: {
+        "id": args.id,
+        "dataFormat": args.dataFormat,
+        "name": args.id,
+        "caption": args.caption,
+        "visible": args.visibleAtStart,
+        "opacity": args.opacity,
+        "serverType": "arcgis",
+        "loadType": "ajax",
+        "projection": args.projection,
+        "fillColor": args.fillColor,
+        "lineColor": args.lineColor,
+        "lineStyle": args.lineStyle,
+        "lineWidth": args.lineWidth,
+        "url": args.url,
+        "queryable": args.queryable,
+        "information": args.infobox,
+        "icon": args.legend,
+        "symbolXOffset": args.symbolXOffset,
+        "symbolYOffset": args.symbolYOffset,
+        "featureId": "FID",
+        "legend": [{
+          "Url": args.legend,
+          "Description": args.caption
+        }],
+        "params": {
+          "service": "WFS",
+          "version": "1.1.0",
+          "request": "GetFeature",
+          "typename": args.layer,
+          "srsname": args.projection,
+          "bbox": ""
+        }
+      }
+    };
+
+    return config;
+  },
+
   mapArcGISConfig: function(args) {
 
     function getLegendUrl() {
-
-      if (/^data/.test(args.legend)) {
-        args.legend = args.legend.split('#');
-      } else if (!/^http/.test(args.legend)) {
-        args.legend = 'http://' + args.legend;
+      if (!Array.isArray(args.legend)) {
+        if (/^data/.test(args.legend)) {
+          args.legend = args.legend.split('#');
+        } else if (!/^http/.test(args.legend)) {
+          args.legend = 'http://' + args.legend;
+        }
       }
-
       return args.legend;
     }
 
@@ -204,6 +251,7 @@ var LayerCollection = {
         "information": args.infobox,
         "projection": args.projection,
         "opacity": args.opacity,
+        "attribution": args.attribution,
         "params": {
           "LAYERS": 'show:' + args.layers.join(',')
         },
@@ -239,6 +287,10 @@ var LayerCollection = {
     }
     if (args.type === "arcgis") {
       config = LayerCollection.mapArcGISConfig(args);
+    }
+
+    if (args.type === "vector") {
+      config = LayerCollection.mapWFSConfig(args);
     }
 
     var Layer = types[config.type];

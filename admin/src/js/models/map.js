@@ -18,9 +18,11 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
-var map = Backbone.Model.extend({
+import { Model } from 'backbone';
+
+var map = Model.extend({
 
   hello: function () {
     console.log("hello");
@@ -28,4 +30,4 @@ var map = Backbone.Model.extend({
 
 });
 
-module.exports = new map();
+export default map;

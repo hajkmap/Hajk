@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 /**
  * Singleton (static) object for the main application.
@@ -30,7 +30,8 @@
 
   "use strict";
 
-  var ApplicationView = require('views/application')
+  var ApplicationView = require("views/application")
+  ,   cssModifier = require("utils/cssmodifier")
   ,   configPath = "/mapservice/settings/config/map_1"
   ,   layersPath = "/mapservice/settings/config/layers"
   ,   req
@@ -41,6 +42,9 @@
 
   internal.load = function (config, bookmarks) {
     var application = new ApplicationView(config, bookmarks);
+    if (config && config.map && config.map.colors) {
+      cssModifier.configure(config.map.colors);
+    }
     application.render();
   };
 
@@ -96,6 +100,9 @@
 
         if (mapLayer) {
           layer.drawOrder = mapLayer.drawOrder;
+          if (layer.visibleAtStart !== undefined) {
+            layer.visibleAtStart = mapLayer.visibleAtStart;
+          }
           filtered.push(layer);
         }
 
@@ -152,18 +159,18 @@
             let _data = {
               wmslayers: data.wmslayers || [],
               wmtslayers: data.wmtslayers || [],
-              datalayers: data.datalayers || [],
+              vectorlayers: data.vectorlayers || [],
               arcgislayers: data.arcgislayers || []
             };
 
             _data.wmslayers.forEach(l => l.type = "wms");
             _data.wmtslayers.forEach(l => l.type = "wmts");
-            _data.datalayers.forEach(l => l.type = "data");
+            _data.vectorlayers.forEach(l => l.type = "vector");
             _data.arcgislayers.forEach(l => l.type = "arcgis");
 
             layers = data.wmslayers
                          .concat(_data.wmtslayers)
-                         .concat(_data.datalayers)
+                         .concat(_data.vectorlayers)
                          .concat(_data.arcgislayers);
 
             map_config.layers = internal.filterByLayerSwitcher(layerSwitcherTool.options, layers);
@@ -184,7 +191,6 @@
 
           if (done) done(true);
         });
-
         layers.error(() => {
           if (done)
             done(false, "Kartans lagerkonfiguration kunde inte laddas in.");
@@ -198,7 +204,6 @@
         if (done)
           done(false, "Kartans konfiguration kunde inte laddas in");
       });
-
   }
 
   return that;

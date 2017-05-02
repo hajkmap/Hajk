@@ -1,33 +1,19 @@
 ﻿using System;
-using System.ServiceModel.Activation;
+using System.Collections.Generic;
+using System.Linq;
 using System.Web;
+using System.Web.Http;
+using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace Sweco.Services
+namespace MapService
 {
-    public class Global : System.Web.HttpApplication
-    {        
-        protected void Application_BeginRequest(object sender, EventArgs e)
+    public class WebApiApplication : System.Web.HttpApplication
+    {
+        protected void Application_Start()
         {
-            HttpContext.Current.Response.AddHeader("Access-Control-Allow-Origin", "http://localhost");
-            if (HttpContext.Current.Request.HttpMethod == "OPTIONS")
-            {
-                HttpContext.Current.Response.AddHeader("Access-Control-Allow-Methods", "POST, PUT, DELETE");
-                HttpContext.Current.Response.AddHeader("Access-Control-Allow-Headers", "Content-Type, Accept");
-                HttpContext.Current.Response.AddHeader("Access-Control-Max-Age", "1728000");
-                HttpContext.Current.Response.End();
-            }
-        }
-
-        protected void Application_Start(object sender, EventArgs e)
-        {            
-            RouteTable.Routes.Add(new ServiceRoute("settings", new WebServiceHostFactory(), typeof(SettingsService)));
-            RouteTable.Routes.Add(new ServiceRoute("export", new WebServiceHostFactory(), typeof(ExportService)));
-        }
-
-        protected void Application_End(object sender, EventArgs e)
-        {
-
+            GlobalConfiguration.Configure(WebApiConfig.Register);
+            RouteConfig.RegisterRoutes(RouteTable.Routes);            
         }
     }
 }
