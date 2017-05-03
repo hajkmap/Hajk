@@ -82,7 +82,7 @@ var DrawModelProperties = {
   pointColor: "rgb(15, 175, 255)",
   pointRadius: 7,
   pointSymbol: false,
-  markerImg: "http://localhost/hajk/assets/icons/marker.png",
+  markerImg: "assets/icons/marker.png",
   lineColor: "rgb(15, 175, 255)",
   lineWidth: 3,
   lineStyle: "solid",
