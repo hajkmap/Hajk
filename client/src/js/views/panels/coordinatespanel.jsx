@@ -64,7 +64,7 @@ var CoordinatesList = React.createClass({
   getX: function (xyObject) {
     return (
       <span>
-        <strong>{ xyObject.xtitle }: </strong> { xyObject.x.toFixed(2) } m
+        <strong>{ xyObject.xtitle }: </strong> { xyObject.x.toFixed(2) }
       </span>
     )
   },
@@ -72,7 +72,7 @@ var CoordinatesList = React.createClass({
   getY: function (xyObject) {
     return (
       <span>
-        <strong>{ xyObject.ytitle }: </strong> { xyObject.y.toFixed(2) } m
+        <strong>{ xyObject.ytitle }: </strong> { xyObject.y.toFixed(2) }
       </span>
     )
   },
