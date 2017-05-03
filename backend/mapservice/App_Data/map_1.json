@@ -258,6 +258,7 @@
           2500,
           5000,
           10000,
+          10000,
           25000,
           50000,
           100000,
@@ -272,7 +273,17 @@
     {
       "type": "coordinates",
       "options": {
-        "transformations": []
+        "transformations": [
+          {
+            "code": "EPSG:3007",
+            "default": true,
+            "hint": "(Standard)",
+            "title": "Sweref 99 12 00",
+            "xtitle": "E",
+            "ytitle": "N",
+            "inverseAxis": false
+          }
+        ]
       }
     },
     {
@@ -339,7 +350,7 @@
       209944.0,
       6471028.0
     ],
-    "logo": "",
+    "logo": "assets/logo.png",
     "colors": {
       "primaryColor": "#000000",
       "secondaryColor": "#ffffff"
