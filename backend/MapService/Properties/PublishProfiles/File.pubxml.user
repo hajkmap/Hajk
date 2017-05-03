@@ -1,0 +1,262 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit http://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <_PublishTargetUrl>C:\install\mapservice</_PublishTargetUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <File Include="ApplicationInsights.config">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="App_Data/layers.json">
+      <publishTime>04/27/2017 10:07:29</publishTime>
+    </File>
+    <File Include="App_Data/map_1.json">
+      <publishTime>03/28/2017 09:31:29</publishTime>
+    </File>
+    <File Include="assets/style.css">
+      <publishTime>03/15/2017 08:09:24</publishTime>
+    </File>
+    <File Include="bin/amd64/Microsoft.VC90.CRT/Microsoft.VC90.CRT.manifest">
+      <publishTime>02/01/2017 11:41:18</publishTime>
+    </File>
+    <File Include="bin/amd64/Microsoft.VC90.CRT/msvcr90.dll">
+      <publishTime>02/01/2017 11:41:18</publishTime>
+    </File>
+    <File Include="bin/amd64/Microsoft.VC90.CRT/README_ENU.txt">
+      <publishTime>02/01/2017 11:41:18</publishTime>
+    </File>
+    <File Include="bin/amd64/sqlceca40.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/amd64/sqlcecompact40.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/amd64/sqlceer40EN.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/amd64/sqlceme40.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/amd64/sqlceqp40.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/amd64/sqlcese40.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/ApplicationInsights.config">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/BruTile.Desktop.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/BruTile.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/BruTile.MbTiles.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/Common.Logging.Core.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/Common.Logging.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/de/PdfSharp.Charting.resources.dll">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/de/PdfSharp.resources.dll">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/EntityFramework.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/EntityFramework.SqlServer.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/EntityFramework.SqlServerCompact.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/GeoAPI.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/ICSharpCode.SharpZipLib.dll">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/MapService.dll">
+      <publishTime>04/28/2017 09:24:23</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AI.Agent.Intercept.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AI.DependencyCollector.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AI.PerfCounterCollector.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AI.ServerTelemetryChannel.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AI.Web.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/Microsoft.AI.WindowsServer.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/Microsoft.ApplicationInsights.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/Microsoft.Web.Infrastructure.dll">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/NetTopologySuite.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/Newtonsoft.Json.dll">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/NPOI.dll">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/NPOI.OOXML.dll">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/NPOI.OpenXml4Net.dll">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/NPOI.OpenXmlFormats.dll">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/PdfSharp.Charting.dll">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/PdfSharp.dll">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/PowerCollections.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/roslyn/csc.exe">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.Build.Tasks.CodeAnalysis.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.CodeAnalysis.CSharp.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.CodeAnalysis.dll">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.CodeAnalysis.VisualBasic.dll">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.CSharp.Core.targets">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/roslyn/Microsoft.VisualBasic.Core.targets">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/roslyn/System.Collections.Immutable.dll">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/roslyn/System.Reflection.Metadata.dll">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/roslyn/vbc.exe">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/roslyn/VBCSCompiler.exe">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/roslyn/VBCSCompiler.exe.config">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/SharpMap.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/SharpMap.Layers.BruTile.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/System.Data.SQLite.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/System.Data.SqlServerCe.dll">
+      <publishTime>02/16/2017 13:21:50</publishTime>
+    </File>
+    <File Include="bin/System.Net.Http.Formatting.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/System.Web.Helpers.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/System.Web.Http.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/System.Web.Http.WebHost.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/System.Web.Mvc.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/System.Web.Razor.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/System.Web.WebPages.Deployment.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/System.Web.WebPages.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/System.Web.WebPages.Razor.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/x86/Microsoft.VC90.CRT/Microsoft.VC90.CRT.manifest">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/x86/Microsoft.VC90.CRT/msvcr90.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/x86/Microsoft.VC90.CRT/README_ENU.txt">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/x86/sqlceca40.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/x86/sqlcecompact40.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/x86/sqlceer40EN.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/x86/sqlceme40.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/x86/sqlceqp40.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="bin/x86/sqlcese40.dll">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="Global.asax">
+      <publishTime>02/16/2017 13:21:49</publishTime>
+    </File>
+    <File Include="index.html">
+      <publishTime>03/15/2017 08:45:16</publishTime>
+    </File>
+    <File Include="packages.config">
+      <publishTime>03/15/2017 07:47:38</publishTime>
+    </File>
+    <File Include="Web.config">
+      <publishTime>03/28/2017 10:21:35</publishTime>
+    </File>
+  </ItemGroup>
+</Project>
