@@ -535,6 +535,7 @@ namespace MapService.DataAccess
                 layerConfig.wfstlayers.ForEach((layer) => layers.Add(layer));
                 layerConfig.wmslayers.ForEach((layer) => layers.Add(layer));
                 layerConfig.wmtslayers.ForEach((layer) => layers.Add(layer));
+                layerConfig.vectorlayers.ForEach((layer) => layers.Add(layer));
 
                 MapConfig mapConfig = this.readMapConfigFromFile(mapFile);
                 Tool layerSwitcher = mapConfig.tools.Find(a => a.type == "layerswitcher");
