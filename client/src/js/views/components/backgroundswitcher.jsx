@@ -224,8 +224,6 @@ var BackgroundSwitcherView = {
         <h3 onClick={this.setVisibility} ><span className={this.state.displayModeClass}></span>&nbsp;Bakgrundskartor</h3>
         <ul className={this.state.displayMode}>
           {this.renderLayers()}
-          {this.renderExtraLayer("black")}
-          {this.renderExtraLayer("white")}
         </ul>
       </div>
     );

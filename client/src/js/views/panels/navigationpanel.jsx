@@ -99,14 +99,14 @@ var NavigationPanelView = {
     this.props.model.on("change:toggled", (sender, visible) => {
       var minimized = true;
       if (this.forced) {
-        minimized = false;
-      }
-      this.setState({minimized: minimized});
-      this.forced = false;
+            minimized = false;
+        }
+        this.setState({minimized: minimized});
+        this.forced = false;
     });
 
-    this.props.model.on('change:r', () => {
-      this.maximize();
+      this.props.model.on('change:r', () => {
+          this.maximize();
     });
   },
 

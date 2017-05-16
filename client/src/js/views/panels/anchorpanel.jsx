@@ -73,7 +73,7 @@ var AnchorPanelView = {
         <div className="panel-content">
           <button onClick={this.generate} className="btn btn-default">Uppdatera länk</button>
           <p>
-            En direktlänk har genererats som visar aktuell utbretning, zoomnivå och tända/släckta lager.<br/>
+            En direktlänk har genererats som visar aktuell utbredning, zoomnivå och tända/släckta lager.<br/>
             Tryck på länken nedan för att öppna kartan i ny flik för exempelvis bokmärkning.<br/>
             Högerklika på länken och välj kopiera genväg för att spara länken i urklipp för inklistring i ett e-mail exempelvis.<br/>
           </p>

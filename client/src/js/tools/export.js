@@ -616,6 +616,7 @@ var ExportModel = {
         url: this.get('url'),
         type: 'post',
         contentType: 'text/plain',
+        crossDomain: true,
         data: 'image;' + encodeURIComponent(href),
         success: response => {
           var anchor = $('<a>Hämta</a>').attr({
@@ -681,6 +682,7 @@ var ExportModel = {
     $.ajax({
       url: url,
       method: "post",
+      crossDomain: true,
       data: {
         json: JSON.stringify(data)
       },
@@ -745,6 +747,7 @@ var ExportModel = {
     $.ajax({
       url: url,
       method: "post",
+      crossDomain: true,
       data: {
         json: JSON.stringify(data)
       },

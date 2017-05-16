@@ -29,9 +29,9 @@
         "compiled/anchorpanel.js": ["src/js/views/panels/anchorpanel.jsx"],
         "compiled/bufferpanel.js": ["src/js/views/panels/bufferpanel.jsx"],
         "compiled/streetviewpanel.js": ["src/js/views/panels/streetview.jsx"],
+        "compiled/locationpanel.js": ["src/js/views/panels/locationpanel.jsx"],
         "compiled/infopanel.js": ["src/js/views/panels/infopanel.jsx"],
         "compiled/bookmarkpanel.js": ["src/js/views/panels/bookmarkpanel.jsx"],
-        "compiled/selectionpanel.js": ["src/js/views/panels/selectionpanel.jsx"],
         "compiled/presetpanel.js": ["src/js/views/panels/presetpanel.jsx"]
       }
     },
@@ -105,6 +105,7 @@
         "views/anchorpanel": "./compiled/anchorpanel.js",
         "views/bufferpanel": "./compiled/bufferpanel.js",
         "views/streetviewpanel": "./compiled/streetviewpanel.js",
+        "views/locationpanel": "./compiled/locationpanel.js",
         "views/presetpanel": "./compiled/presetpanel.js",
         "views/exportpanel": "./compiled/exportpanel.js",
         "views/panel": "./compiled/panel.js",

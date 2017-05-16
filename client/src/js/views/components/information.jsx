@@ -49,7 +49,7 @@ var InformationView = {
     this.props.model.set('display', false);
   },
 
-  /**
+  /**lo
    * Render the legend item component.
    * @instance
    * @return {external:ReactElement}
@@ -63,7 +63,7 @@ var InformationView = {
               <i className="fa fa-times pull-right clickable panel-close" id="close" onClick={this.close}></i>
             </div>
             <div id="body-wrapper">
-              <div key="b" id="body" dangerouslySetInnerHTML={{__html: this.props.model.get('text')}}></div>
+              <div key="b" id="body" dangerouslySetInnerHTML={{__html: atob(this.props.model.get('text'))}}></div>
             </div>
           </div>
         </div>

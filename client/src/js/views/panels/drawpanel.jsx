@@ -664,7 +664,7 @@ var DrawPanelView = {
 
     return (
       <div>
-        <Panel title="Rita och måttsätt" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
+        <Panel title="Rita och mäta" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
           <div className="draw-tools">
             <div id="labels">
               <input id="labels-checkbox" onChange={this.toggleLabels} type="checkbox" checked={showLabels} />

@@ -59,7 +59,14 @@ var InformationModel = {
   defaults: InformationModelProperties,
 
   initialize: function (options) {
-    ToolModel.prototype.initialize.call(this);
+    var cookies = document.cookie;
+    if(cookies.length == 0){
+      document.cookie = "seen=true";
+    } else {
+        this.set({'display': false});
+        this.set({'visibleAtStart': false});
+    }
+      ToolModel.prototype.initialize.call(this);
   },
 
   configure: function (shell) {
@@ -76,7 +83,7 @@ var InformationModel = {
    *
    *   Handle click event on toolbar button.
    *   This handler sets the property visible,
-   *   wich in turn will trigger the change event of navigation model.
+   *   which in turn will trigger the change event of navigation model.
    *   In pracice this will activate corresponding panel as
    *   "active panel" in the navigation panel.
    *

@@ -64,7 +64,7 @@ var olMap;
 var DrawModelProperties = {
   type: 'draw',
   panel: 'DrawPanel',
-  title: 'Rita och måttsätt',
+  title: 'Rita och mäta',
   toolbar: 'bottom',
   visible: false,
   icon: 'fa fa-pencil icon',

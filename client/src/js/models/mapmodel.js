@@ -62,7 +62,7 @@ var MapModel = {
     var map = new ol.Map({
       interactions: ol.interaction.defaults().extend([new Drag()]),
       target: this.get("target"),
-      layers: [],
+      layers: [ ],
       controls: [
         new ol.control.Zoom({ zoomInTipLabel: 'Zooma in', zoomOutTipLabel: 'Zooma ut' }),
         new ol.control.Attribution({ collapsible: false })
@@ -77,6 +77,57 @@ var MapModel = {
       })
     });
     this.set("ol", map);
+
+      var currentPositionMarker = new ol.Feature();
+      currentPositionMarker.setStyle(new ol.style.Style({
+          image: new ol.style.Icon({
+              anchor: [0.5, 30],
+              anchorXUnits: 'fraction',
+              anchorYUnits: 'pixels',
+              opacity: 1.0,
+              src: '/assets/icons/currentlocation.png'
+          })
+      }));
+
+
+
+      var accuracyFeature = new ol.Feature();
+      var accuracyBuffer = new ol.layer.Vector({
+          map: map,
+          source: new ol.source.Vector({
+              features: [accuracyFeature, currentPositionMarker]
+          })
+      });
+
+      var geolocation = new ol.Geolocation({
+          projection: map.getView().getProjection(),
+          tracking: true,
+          trackingOptions: {
+              enableHighAccuracy: true
+          }
+      });
+
+
+      function updatePositionMap(){
+          var coordinate = geolocation.getPosition();
+          console.log("Current Location is:" + coordinate);
+
+          var acc = geolocation.getAccuracyGeometry();
+          if(acc != null) {
+              accuracyFeature.setGeometry(geolocation.getAccuracyGeometry());
+          }
+
+          currentPositionMarker.setGeometry(new ol.geom.Point(coordinate));
+      }
+
+      function positionUpdatingError(error){
+          console.log(error);
+      }
+
+      geolocation.on('change:position', updatePositionMap);
+      console.log("Auto Location has been turned on");
+
+      geolocation.on('error', positionUpdatingError);
 
     setTimeout(() => {
       var scaleLine = new ol.control.ScaleLine({

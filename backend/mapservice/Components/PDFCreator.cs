@@ -47,7 +47,7 @@ namespace MapService.Components
         private void drawText(XGraphics gfx, string text, int x, int y)
         {
             XColor color = XColors.Black;
-            XFont font = new XFont("Verdana", 10);
+            XFont font = new XFont("Verdana", 8);
             XBrush brush = new XSolidBrush(color);
             gfx.DrawString(text, font, brush, x, y);
         }
@@ -122,8 +122,8 @@ namespace MapService.Components
 
             int displayLength = (int)(unitLength * scaleBarLengths.FirstOrDefault(a => a.Key == scale).Value);
             string displayText = scaleBarTexts.FirstOrDefault(a => a.Key == scale).Value;
-
-            this.drawImage(gfx, img, 0, 0, page);
+            // x and y 0 0(top left corner?)-> change
+            this.drawImage(gfx, img, 33, 33, page);
 
             List<string> copyrights = new List<string>();
             if (ConfigurationManager.AppSettings["exportCopyrightText"] != null)
@@ -137,7 +137,7 @@ namespace MapService.Components
                 infoText = ConfigurationManager.AppSettings["exportInfoText"];
             }
 
-            int height = 45 + copyrights.Count * 10;
+            int height = 1;
 
             XPoint[] points = new XPoint[]
             {
@@ -149,27 +149,28 @@ namespace MapService.Components
             };
 
             gfx.DrawPolygon(XBrushes.White, points, XFillMode.Winding);
+            // x y
+            this.drawText(gfx, String.Format("Skala 1:{0}", exportItem.scale), 33, (int)page.Height.Point - 23);
+            gfx.DrawLine(XPens.Black, new XPoint(33, (int)page.Height.Point - 18), new XPoint(33 + displayLength, (int)page.Height.Point - 18));
+            gfx.DrawLine(XPens.Black, new XPoint(33, (int)page.Height.Point - 15), new XPoint(33, (int)page.Height.Point - 21));
+            gfx.DrawLine(XPens.Black, new XPoint(33 + displayLength / 2, (int)page.Height.Point - 17), new XPoint(33 + displayLength / 2, (int)page.Height.Point - 19));
+            gfx.DrawLine(XPens.Black, new XPoint(33 + displayLength, (int)page.Height.Point - 15), new XPoint(33 + displayLength, (int)page.Height.Point - 21));
+            this.drawText(gfx, displayText, 38 + displayLength, (int)page.Height.Point - 16);
 
-            this.drawText(gfx, String.Format("Skala 1:{0}", exportItem.scale), 15, 25);
-            gfx.DrawLine(XPens.Black, new XPoint(15, 32), new XPoint(15 + displayLength, 32));
-            gfx.DrawLine(XPens.Black, new XPoint(15, 28), new XPoint(15, 36));
-            gfx.DrawLine(XPens.Black, new XPoint(15 + displayLength, 28), new XPoint(15 + displayLength, 36));
-            this.drawText(gfx, displayText, 20 + displayLength, 35);
+            var y = (int)page.Height.Point - 2;
 
-            var y = (int)page.Height.Point - 15;
-
-            this.drawText(gfx, infoText, 15, y);
+            this.drawText(gfx, infoText, 33, y);
 
             int i = 0;
             copyrights.ForEach(copyright =>
             {
-                int start = 50;
-                this.drawText(gfx, String.Format("© {0}", copyright), 15, start + i * 10);
+                int start = (int)page.Height.Point - 15;
+                this.drawText(gfx, String.Format("© {0}", copyright), (int)page.Width.Point - 100, start + i * 10);
                 i++;
             });
 
             XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "assets", "logo.png"));
-            gfx.DrawImage(logo, (gfx.PageSize.Width - logo.PixelWidth / 2) - 12, 12, logo.PixelWidth / 2, logo.PixelHeight / 2);
+            gfx.DrawImage(logo, (gfx.PageSize.Width - logo.PixelWidth/5) - 33, 3.5, logo.PixelWidth /5, logo.PixelHeight /5);
 
             byte[] bytes;
 

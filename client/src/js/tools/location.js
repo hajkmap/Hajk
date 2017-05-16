@@ -34,10 +34,9 @@ var ToolModel = require('tools/tool');
 var LocationModelProperties = {
   type: 'location',
   panel: '',
-  toolbar: 'top-right',
+  toolbar: 'bottom',
   icon: 'fa fa-location-arrow icon',
-  title: 'Visa min position',
-  active: false,
+  title: 'Location and Navigation',
   visible: false,
   location: {
     lat: undefined,
