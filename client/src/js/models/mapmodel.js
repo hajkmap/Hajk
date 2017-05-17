@@ -59,14 +59,41 @@ var MapModel = {
 
   initialize: function (options) {
     this.initialState =  _.clone(this.attributes);
-    var map = new ol.Map({
+
+
+      var app = window.app;
+      var button = document.createElement('button');
+
+      app.PositioningControl = function(opt_options) {
+          var options = opt_options || {};
+
+          button.innerHTML = '';
+          button.className = 'my-positioning-button';
+          button.id = 'mypositioning';
+          var this_ = this;
+
+          var element = document.createElement('div');
+          element.className = 'my-positioning ol-unselectable ol-control';
+          element.appendChild(button);
+
+          ol.control.Control.call(this, {
+              element: element,
+              target: options.target
+          });
+
+      };
+      ol.inherits(app.PositioningControl, ol.control.Control);
+
+
+      var map = new ol.Map({
       interactions: ol.interaction.defaults().extend([new Drag()]),
       target: this.get("target"),
       layers: [ ],
       controls: [
         new ol.control.Zoom({ zoomInTipLabel: 'Zooma in', zoomOutTipLabel: 'Zooma ut' }),
         new ol.control.Attribution({ collapsible: false }),
-        new ol.control.Rotate({tipLabel: 'Återställ rotation'})
+        new ol.control.Rotate({tipLabel: 'Återställ rotation'}),
+        new app.PositioningControl()
       ],
       overlays: [],
       view: new ol.View({
@@ -99,6 +126,7 @@ var MapModel = {
               features: [accuracyFeature, currentPositionMarker]
           })
       });
+      /*map.addLayer(accuracyBuffer);*/
 
       var geolocation = new ol.Geolocation({
           projection: map.getView().getProjection(),
@@ -130,7 +158,25 @@ var MapModel = {
 
       geolocation.on('error', positionUpdatingError);
 
-    setTimeout(() => {
+      var positionturnedon = true;
+      var togglepositioning = function(e){
+        if(positionturnedon) {
+            map.removeLayer(accuracyBuffer);
+            geolocation.un('error',positionUpdatingError);
+            geolocation.un('change:position', updatePositionMap);
+            console.log('removelayer');
+        }else{
+            geolocation.on('change:position', updatePositionMap);
+            geolocation.on('error',positionUpdatingError);
+            map.addLayer(accuracyBuffer);
+            console.log('addlayer');
+        }
+        positionturnedon = !positionturnedon;
+      };
+      button.addEventListener('click', togglepositioning, false);
+      button.addEventListener('touchstart', togglepositioning, false);
+
+      setTimeout(() => {
       var scaleLine = new ol.control.ScaleLine({
         target: 'map-scale-bar'
       })
