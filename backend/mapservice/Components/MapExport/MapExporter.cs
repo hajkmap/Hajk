@@ -199,7 +199,7 @@ namespace MapService.Components.MapExport
                 for (int i = 0; i < wmsLayers.Count; i++)
                 {
                     string layername = "WMSLayer_" + i;
-                    WmsLayer layer = new WmsLayer(layername, wmsLayers[i].url);
+                    GeoserverWmsLayer layer = new GeoserverWmsLayer(layername, wmsLayers[i].url, exportItem.resolution);
 
                     layer.SetImageFormat("image/png");
                     layer.BgColor = Color.White;
