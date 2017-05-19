@@ -117,6 +117,11 @@ var ExportPdfSettings = React.createClass({
             width:  this.getOrientation() === 'L' ? 420 : 297,
             height: this.getOrientation() === 'L' ? 297 : 420
           }
+        case 'A2':
+          return {
+              width:  this.getOrientation() === 'L' ? 594 : 420,
+              height: this.getOrientation() === 'L' ? 420 : 594
+          }
         default: {
           return {
             width: 0,
@@ -250,6 +255,7 @@ var ExportPdfSettings = React.createClass({
           <div className="panel-heading">Välj pappersstorlek</div>
           <div className="panel-body">
             <select onChange={this.setFormat} defaultValue={this.state.selectFormat}>
+              <option value="A2">A2</option>
               <option value="A3">A3</option>
               <option value="A4">A4</option>
             </select>
