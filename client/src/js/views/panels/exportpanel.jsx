@@ -240,7 +240,6 @@ var ExportPdfSettings = React.createClass({
     options = scales.map((s, i) => <option key={i} value={s}>1:{s}</option>);
     resolutionOptions = this.resolutions.map((s, i) => {
       if (this.state.selectFormat === 'A2') {
-        console.log(s);
         return s !== 300 
           ? <option key={i} value={s}>{s}</option>
           : <option key={i} value={s} disabled>{s}</option>;
@@ -250,7 +249,6 @@ var ExportPdfSettings = React.createClass({
       });
     paperFormatOptions = this.paperFormats.map((s, i) => {
       if (this.state.selectResolution === '300') {
-        console.log(s);
         return s !== 'A2'
           ? <option key={i} value={s}>{s}</option>
           : <option key={i} value={s} disabled>{s}</option>;
