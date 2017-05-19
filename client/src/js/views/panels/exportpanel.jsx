@@ -91,7 +91,7 @@ var ExportTiffSettings = React.createClass({
 
 var ExportPdfSettings = React.createClass({
 
-  resolutions: [72, 96, 150],
+  resolutions: [72, 96, 150, 200, 300],
 
   getInitialState: function() {
     return {
