@@ -91,7 +91,8 @@ var ExportTiffSettings = React.createClass({
 
 var ExportPdfSettings = React.createClass({
 
-  resolutions: [72, 96, 150, 200, 300],
+    resolutions: [72, 96, 150, 200, 300],
+    paperFormats: ["A2", "A3", "A4"],
 
   getInitialState: function() {
     return {
@@ -225,6 +226,7 @@ var ExportPdfSettings = React.createClass({
     ,   scales = this.props.model.get('scales')
     ,   options
     ,   resolutionOptions
+    ,   paperFormatOptions
     ,   loader = null
     ,   downloadLink = null
     ;
@@ -236,7 +238,26 @@ var ExportPdfSettings = React.createClass({
     if (!this.props.visible) return null;
 
     options = scales.map((s, i) => <option key={i} value={s}>1:{s}</option>);
-    resolutionOptions = this.resolutions.map((s, i) => <option key={i} value={s}>{s}</option>);
+    resolutionOptions = this.resolutions.map((s, i) => {
+      if (this.state.selectFormat === 'A2') {
+        console.log(s);
+        return s !== '300' 
+          ? <option key={i} value={s}>{s}</option>
+          : <option key={i} value={s} disabled>{s}</option>;
+        } else {
+          return <option key={i} value={s}>{s}</option>;
+        }
+      });
+    paperFormatOptions = this.paperFormats.map((s, i) => {
+      if (this.state.selectResolution === '300') {
+        console.log(s);
+        return s !== 'A2'
+          ? <option key={i} value={s}>{s}</option>
+          : <option key={i} value={s} disabled>{s}</option>;
+        } else {
+          return <option key={i} value={s}>{s}</option>;
+        }
+    });
         
     this.addPreview(map);
 
@@ -255,9 +276,7 @@ var ExportPdfSettings = React.createClass({
           <div className="panel-heading">Välj pappersstorlek</div>
           <div className="panel-body">
             <select onChange={this.setFormat} defaultValue={this.state.selectFormat}>
-              <option value="A2">A2</option>
-              <option value="A3">A3</option>
-              <option value="A4">A4</option>
+              {paperFormatOptions}
             </select>
           </div>
         </div>
