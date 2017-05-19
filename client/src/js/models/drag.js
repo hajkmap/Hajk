@@ -53,9 +53,10 @@ ol.interaction.Drag.prototype.resume = function () {
 ol.interaction.Drag.prototype.isDraggable = function (layer) {
   var accepted = {
     'draw-layer': true,
-    'preview-layer': true
+    'preview-layer': true    
   };
-  return layer ? accepted.hasOwnProperty(layer.getProperties().name) : true;
+  
+  return layer ? accepted.hasOwnProperty(layer.getProperties().name) || layer.dragLocked === false : true;
 };
 
 ol.interaction.Drag.prototype.handleDownEvent = function (evt) {

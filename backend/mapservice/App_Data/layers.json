@@ -831,17 +831,35 @@
   ],
   "wfstlayers": [
     {
-      "id": "0",
-      "caption": "Yta",
-      "url": "http://194.71.132.27/geoserver/demo/wfs",
+      "id": "39",
+      "caption": "Fortum daro",
+      "url": "http://ksdgis.se/geoserver/wfs",
       "projection": "EPSG:3006",
       "layers": [
-        "demo:yta"
+        "fortum:fortum_daro_merge"
       ],
       "editableFields": [
         {
-          "index": 1,
-          "name": "name",
+          "index": 2,
+          "name": "aroid",
+          "dataType": "string",
+          "textType": "url",
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 3,
+          "name": "ytkod",
+          "dataType": "int",
+          "textType": null,
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 4,
+          "name": "namn",
           "dataType": "string",
           "textType": "fritext",
           "values": null,
@@ -849,21 +867,45 @@
           "defaultValue": null
         },
         {
-          "index": 3,
-          "name": "list",
+          "index": 5,
+          "name": "vdrid",
           "dataType": "string",
           "textType": "lista",
           "values": [
-            "a",
-            "b"
+            "1",
+            "2",
+            "3",
+            "fyra"
           ],
           "hidden": false,
-          "defaultValue": ""
+          "defaultValue": null
+        },
+        {
+          "index": 6,
+          "name": "inobj",
+          "dataType": "string",
+          "textType": "datum",
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 7,
+          "name": "utobj",
+          "dataType": "string",
+          "textType": "flerval",
+          "values": [
+            "a",
+            "b",
+            "c"
+          ],
+          "hidden": false,
+          "defaultValue": null
         }
       ],
-      "editPoint": false,
+      "editPoint": true,
       "editPolygon": true,
-      "editLine": false
+      "editLine": true
     }
   ],
   "arcgislayers": []
