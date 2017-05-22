@@ -45,7 +45,7 @@ För att installera visual studio gå till [https://www.visualstudio.com/post-do
 #### Installera beroenden
 `npm install`
 
-####Installera externa bibiliotek
+#### Installera externa bibiliotek
 `grunt dependencies`
 
 ---------- 
