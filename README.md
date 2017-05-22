@@ -14,9 +14,9 @@ Klienten innehåller två separata applikationer, en kartvy och en administratio
 JavaScript byggs i applikationen med hjälp av uppgiftshanteraren Grunt.  
 För att bygga projetketet så krävs programvarorna Visual Studio och Node JS.
 
-##Installation
+## Installation
 
-###Ladda hem koden
+### Ladda hem koden
 Börja med att Installera GIT om det inte redan är gjort.  
 [https://git-scm.com/download/win](https://git-scm.com/download/win "Länk")  
 Säkerställ under installationen att git installeras globalt för windows och läggs till i PATH.  
@@ -40,16 +40,16 @@ Verifiera installationen genom starta kommandopromten och skriva:
 ### Installera Visual Studio Community Edition
 För att installera visual studio gå till [https://www.visualstudio.com/post-download-vs?sku=community&clcid=0x409](https://www.visualstudio.com/post-download-vs?sku=community&clcid=0x409 "länk.")  
 
-##Driftsättning
-###Första gången projektet klonas.
-####Installera beroenden
+## Driftsättning
+### Första gången projektet klonas.
+#### Installera beroenden
 `npm install`
 
 ####Installera externa bibiliotek
 `grunt dependencies`
 
 ---------- 
-####Driftsättning Klient
+#### Driftsättning Klient
 Bygg version för test. (målmapp: **dist**)  
 Öppna kommandopromten och gå till projektets mapp:  
 `cd c:\Projekt\Hajk2\client`  
@@ -61,20 +61,20 @@ Bygg version för driftsättning. (målmapp: **release**)
 Starta en lyssnare som lyssnar på ändringar i filsystemet ochg bygger per automatik.  
 `grunt debug`
 
-####Driftsättning Admin
+#### Driftsättning Admin
 Bygg version för driftsättning. (målmapp: **dist**)  
 Detta steg måste föregås av att release-kommando för kartdelen har genomförts.  
 `cd c:\Projekt\Hajk2\admin`  
 `grunt build`
 
-####Driftsättning server
+#### Driftsättning server
 - Dubbelklicka på **backend.sln**  
 - Markera i Solution Explorer projektet **mapservice**.  
 - Välj från menyn `Build > Build Solution`  
 - Välj från menyn `Build > Publish mapservice`  
 - Ändra sökväg till mappen om så önskas. Standard är c:\install\backend.  
 
-###Installera projektet i Internet Information Services (IIS > 7).
+### Installera projektet i Internet Information Services (IIS > 7).
 
 IIS kräver att server applikationen körs i en App Pool med .NET version 4.0 integrated.  
 IIS måste ha mime-typen application/vnd.google-earth.kml+xml registrerad för filändelsen .kml.
@@ -96,9 +96,9 @@ För adminapplikationen så kan valfritt namn användas, detta bli sökväg till
 För klientapplikationen så kan valfritt namn användas, detta bli sökväg till kartapplikationen (standardnamn är mapservice).  
 Finns behov av HTTP-proxy för anrop till extern kartserver så finns exempel på detta i mappen proxy.
 
-##Konfiguration
+## Konfiguration
 
-###Klient
+### Klient
 När scriptet för HAJK2 läggs till i en HTML-fil via en script-tagg så initieras en global variabel med namn HAJK2.  
 Denna variabel innehåller ett objekt som används för att konfigurera och starta applikationen.  
 Applikationen förutsätter att den finns ett element i HTML-filen som heter map.  
@@ -130,22 +130,22 @@ För att konfigurera kartan så hanteras detta manuellt i filen App_Data\map_{x}
 }  
 </pre>
 
-###Administrationsgränssnitt
-####Applikation
+### Administrationsgränssnitt
+#### Applikation
 Filen config.json hanterar inställningar för admingränssnittet.  
 Följande egenskaper finns att konfigurera:
-####manager
+#### manager
 `{string} url_proxy` - Sökväg till HTTP-proxy för korsdomänsanrop.  
 `{string} url_layers` - REST-sökväg till tjänstenod där lager hanteras.  
 `{string} url_layer_settings` - REST-sökväg till tjänstenod som hanterar uppdatering av enskilda lager.  
 `{string} url_default_server` -  Sökväg till den standardserver som skall användas som uppslag för WMS-tjänster.  
 `{array { object { value, title }}} owner_options` - Lista med namn på tillgängliga dataägare.  
-####menu
+#### menu
 `{string} url_map` - Sökväg till den fil för kartinställningar som skall uppdateras (notera att .json inte behöver anges).  
 `{string} url_layers` - Sökväg till den fil för lager som skall uppdateres (notera att .json inte behöver anges).  
 `{string} url_layermenu_settings` - REST-sökväg till den tjänstenod som hanterar uppdatering av lagermenu.  
-####router
+#### router
 `{array {object {name, title, default (optional) }}}` - Lista med flikar i applikationen.
 
-###Tjänst
+### Tjänst
 Ge läs och skrivrättigheter till mappen App_Data för den avnändare som är registrerad i IIS.
