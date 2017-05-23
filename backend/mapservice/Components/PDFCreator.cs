@@ -120,8 +120,8 @@ namespace MapService.Components
                         {250000, 10000}
                     };
 
-            int displayLength = (int)(unitLength * scaleBarLengths.FirstOrDefault(a => a.Key == scale).Value);
-            string displayText = scaleBarTexts.FirstOrDefault(a => a.Key == scale).Value;
+            int displayLength = GetDisplayLength(unitLength, scaleBarLengths, scale);
+            string displayText = GetDisplayText(unitLength, scaleBarTexts, scale);
 
             this.drawImage(gfx, img, 0, 0, page);
 
@@ -179,6 +179,38 @@ namespace MapService.Components
             }            
 
             return bytes;
+        }
+
+        private int GetDisplayLength(double unitLength, Dictionary<int, int> scaleBarLengths, int scale)
+        {
+            int scaleBarLength = 0;
+            if (scaleBarLengths.TryGetValue(scale, out scaleBarLength))
+            {
+                return (int) (unitLength * scaleBarLength);
+            }
+            if (scale <= 500)
+            {
+                return (int) (unitLength * (scale / 10));
+            }
+            return (int)(unitLength * (scale * 0.05)); 
+
+        }
+
+        private string GetDisplayText(double unitLength, Dictionary<int, string> scaleBarTexts, int scale)
+        {
+            string scaleBarText = "";
+            if (scaleBarTexts.TryGetValue(scale, out scaleBarText))
+            {
+                return scaleBarText;
+            }
+            if (scale <= 500) {
+                return unitLength * (scale / 10) + " m";
+            }
+            if (scale < 25000)
+            {
+                return Math.Ceiling(scale * 0.05) + " m";
+            }
+            return Math.Ceiling(scale * 0.05 / 1000) + " km";
         }
 
         /// <summary>
