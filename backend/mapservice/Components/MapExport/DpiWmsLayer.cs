@@ -6,7 +6,7 @@ using SharpMap.Layers;
 
 namespace MapService.Components.MapExport {
 
-    public class GeoserverWmsLayer : WmsLayer
+    public class DpiWmsLayer : WmsLayer
     {
 
         // Defined due to internal workings of WmsLayer
@@ -17,7 +17,11 @@ namespace MapService.Components.MapExport {
         private readonly int _ogcStandardDpi = 90;
         private readonly int _requestedDpi;
 
-        public GeoserverWmsLayer(string layername, string url, int dpi = 90) : base(layername, url)
+        private const string GeoserverDpi = "FORMAT_OPTIONS=dpi:";
+        private const string UMNDpi = "MAP_RESOLUTION=";
+        private const string QGISDpi = "DPI=";
+
+        public DpiWmsLayer(string layername, string url, int dpi = 90) : base(layername, url)
         {
             _requestedDpi = dpi;
         }
@@ -26,7 +30,11 @@ namespace MapService.Components.MapExport {
         {
             var requestUrl = base.GetRequestUrl(box, size);
 
-            return requestUrl + string.Format("&format_options=dpi:{0}", _requestedDpi);
+            return requestUrl + string.Format("&{0}{3}&{1}{3}&{2}{3}", 
+                GeoserverDpi,
+                UMNDpi,
+                QGISDpi,
+                _requestedDpi);
         }
 
     }
