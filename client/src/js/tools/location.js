@@ -34,7 +34,7 @@ var ToolModel = require('tools/tool');
 var LocationModelProperties = {
   type: 'location',
   panel: '',
-  toolbar: 'bottom',
+  toolbar: 'top-right',
   icon: 'fa fa-location-arrow icon',
   title: 'Location and Navigation',
   visible: false,
@@ -73,7 +73,9 @@ var LocationModel = {
       })
     });
 
+    // this.set('accuracyFeature', new ol.Feature());
     var source = new ol.source.Vector({});
+    // source.addFeature(this.get('accuracyFeature'));
 
     this.set("layer", new ol.layer.Vector({
       source: source,
@@ -85,7 +87,7 @@ var LocationModel = {
   getOptions: function () {
     return {
       enableHighAccuracy: true,
-      timeout: 5000,
+      timeout: 10000,
       maximumAge: 0
     };
   },
@@ -146,11 +148,26 @@ var LocationModel = {
         lng: e.coords.longitude
       }
     });
+
+
+    /*
+    var acc = window.navigator.geolocation.getAccuracyGeometry();
+    if(acc != null) {
+        this.get('accuracyFeature').setGeometry(acc);
+    }
+    */
   },
 
   onLocationError: function(e) {
-    alert("Din position kan inte fastställas.");
-    this.reset();
+    if(typeof this.get('location').lat == 'undefined') { // quick fix for the reoccuring errors in Firefox
+      alert("Din position kan inte fastställas.");
+      console.log('Positionsfel:');
+      console.log(e);
+      console.error(e);
+      console.warn(e);
+      console.info(e);
+      this.reset();
+    }
   },
 
   /**

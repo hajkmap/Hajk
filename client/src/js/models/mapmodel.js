@@ -62,6 +62,7 @@ var MapModel = {
 
 
       var app = window.app;
+      /*
       var button = document.createElement('button');
 
       app.PositioningControl = function(opt_options) {
@@ -84,6 +85,7 @@ var MapModel = {
       };
       ol.inherits(app.PositioningControl, ol.control.Control);
 
+      */
 
       var map = new ol.Map({
       interactions: ol.interaction.defaults().extend([new Drag()]),
@@ -93,8 +95,9 @@ var MapModel = {
         new ol.control.Zoom({ zoomInTipLabel: 'Zooma in', zoomOutTipLabel: 'Zooma ut' }),
         new ol.control.Attribution({ collapsible: false }),
         new ol.control.Rotate({tipLabel: 'Återställ rotation'}),
-        new app.PositioningControl()
+        //new app.PositioningControl()
       ],
+      pixelRatio: 1,
       overlays: [],
       view: new ol.View({
         zoom: this.get("zoom"),
@@ -106,6 +109,7 @@ var MapModel = {
     });
     this.set("ol", map);
 
+    /*
       var currentPositionMarker = new ol.Feature();
       currentPositionMarker.setStyle(new ol.style.Style({
           image: new ol.style.Icon({
@@ -119,6 +123,7 @@ var MapModel = {
 
 
 
+
       var accuracyFeature = new ol.Feature();
       var accuracyBuffer = new ol.layer.Vector({
           map: map,
@@ -126,7 +131,7 @@ var MapModel = {
               features: [accuracyFeature, currentPositionMarker]
           })
       });
-      /*map.addLayer(accuracyBuffer);*/
+      map.addLayer(accuracyBuffer);
 
       var geolocation = new ol.Geolocation({
           projection: map.getView().getProjection(),
@@ -173,9 +178,9 @@ var MapModel = {
         }
         positionturnedon = !positionturnedon;
       };
-      button.addEventListener('click', togglepositioning, false);
+       button.addEventListener('click', togglepositioning, false);
       button.addEventListener('touchstart', togglepositioning, false);
-
+*/
       setTimeout(() => {
       var scaleLine = new ol.control.ScaleLine({
         target: 'map-scale-bar'
