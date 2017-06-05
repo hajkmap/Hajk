@@ -133,13 +133,23 @@ var ExportPdfSettings = React.createClass({
       }
     }
 
-    var dpi    = (25.4 / .28)
-    ,   width  = pageSize(this.getFormat()).width
+    var width  = pageSize(this.getFormat()).width
     ,   height = pageSize(this.getFormat()).height;
 
     return {
-      width: ((width / 25.4) * dpi),
-      height:  ((height / 25.4) * dpi)
+      width: ((width / 25.4)),
+      height:  ((height / 25.4))
+    };
+  },
+
+  getPreviewPaperMeasures: function() { 
+    var size = this.getPaperMeasures()
+    ,   inchInMillimeter = 25.4
+    ,   defaultPixelSizeInMillimeter = 0.28
+    ,   dpi = (inchInMillimeter / defaultPixelSizeInMillimeter); // ~90
+    return {
+      width: size.width * dpi,
+      height:  size.height * dpi
     };
   },
 
@@ -207,7 +217,7 @@ var ExportPdfSettings = React.createClass({
 
   addPreview: function (map) {
     var scale  = this.getScale()
-    ,   paper  = this.getPaperMeasures()
+    ,   paper  = this.getPreviewPaperMeasures()
     ,   center = this.props.model.getPreviewFeature() ?
                  ol.extent.getCenter(this.props.model.getPreviewFeature().getGeometry().getExtent()) :
                  map.getView().getCenter();

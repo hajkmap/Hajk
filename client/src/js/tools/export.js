@@ -667,10 +667,10 @@ var ExportModel = {
     dy = Math.abs(bottom - top);
 
     data.size = [
-      parseInt(49.65 * (dx / scale) * dpi),
-      parseInt(49.65 * (dy / scale) * dpi)
+      parseInt(options.size.width * dpi),
+      parseInt(options.size.height * dpi)
     ];
-
+    
     data.bbox = [left, right, bottom, top];
     data.orientation = options.orientation;
     data.format = options.format;
