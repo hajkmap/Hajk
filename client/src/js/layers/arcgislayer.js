@@ -36,7 +36,8 @@ var ArcGISLayerProperties = {
   url: "http://ksdgis.se/arcgis/rest/services/hpl/MapServer",
   projection: "EPSG:3006",
   opacity: 0.8,
-  extent: [413888.8487813738, 6581993.154569996, 416840.2595669881, 6584784.713516495]
+  extent: [413888.8487813738, 6581993.154569996, 416840.2595669881, 6584784.713516495],
+  singleTile: false
 };
 
 /**
@@ -77,21 +78,35 @@ var ArcGISLayer = {
   },
 
   initialize: function () {
-    LayerModel.prototype.initialize.call(this);
-
-    this.layer = new ol.layer.Tile({
-      extent: this.get('extent'),
-      opacity: this.get('opacity'),
-      visible: this.get('visible'),
-      name: this.get('name'),
-      projection: this.get('projection'),
-      source: new ol.source.TileArcGISRest({
-        attributions: this.getAttributions(),
-        url: this.get('url'),
-        params: this.get('params')
-      })
-    });
-
+    LayerModel.prototype.initialize.call(this);    
+    if (this.get('singleTile')) {
+      this.layer = new ol.layer.Image({
+        extent: this.get('extent'),
+        opacity: this.get('opacity'),
+        visible: this.get('visible'),
+        name: this.get('name'),
+        projection: this.get('projection'),
+        source: new ol.source.ImageArcGISRest({
+          attributions: this.getAttributions(),
+          url: this.get('url'),
+          params: this.get('params')
+        })
+      });
+    } else {
+      this.layer = new ol.layer.Tile({
+        extent: this.get('extent'),
+        opacity: this.get('opacity'),
+        visible: this.get('visible'),
+        name: this.get('name'),
+        projection: this.get('projection'),
+        source: new ol.source.TileArcGISRest({
+          attributions: this.getAttributions(),
+          url: this.get('url'),
+          params: this.get('params')
+        })
+      });
+    }
+  
     this.layer.getSource().on('tileloaderror', e => {
       this.tileLoadError();
     });
