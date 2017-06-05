@@ -213,6 +213,7 @@ namespace MapService.Components
                 return Math.Ceiling(scale * 0.05) + " m";
             }
             return Math.Ceiling(scale * 0.05 / 1000) + " km";
+        }
           
         private PageSize GetPageSize(MapExportItem exportItem)
         {
