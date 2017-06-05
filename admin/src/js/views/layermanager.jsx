@@ -128,6 +128,7 @@ class Manager extends Component {
           url: layer.url,
           visibleAtStart: layer.visibleAtStart,
           queryable: layer.queryable,
+          singleTile: layer.singleTile,
           projection: layer.projection,
           extent: layer.extent,
           opacity: layer.opacity,

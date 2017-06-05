@@ -38,12 +38,12 @@ const defaultState = {
   url: "",
   visibleAtStart: false,
   queryable: true,
+  singleTile: false,
   drawOrder: 1,
   projection: "",
   layers: [],
   extent: [],
-  opacity: 1,
-  queryable: true,
+  opacity: 1,  
   addedLayers: [],
   attribution: ""
 };
@@ -122,6 +122,7 @@ class ArcGISLayerForm extends Component {
       extent: this.getValue("extent"),
       opacity: this.getValue("opacity"),
       queryable: this.getValue("queryable"),
+      singleTile: this.getValue("singleTile"),
       infobox: this.getValue("infobox"),
       attribution: this.getValue("attribution")
     }
@@ -143,6 +144,7 @@ class ArcGISLayerForm extends Component {
     if (fieldName === 'date') value = create_date();
     if (fieldName === 'layers') value = format_layers(this.state.addedLayers);
     if (fieldName === 'queryable') value = input.checked;
+    if (fieldName === 'singleTile') value = input.checked;
     if (fieldName === 'visibleAtStart') value = input.checked;
     if (fieldName === 'extent') value = value.split(',');
 
@@ -474,6 +476,17 @@ class ArcGISLayerForm extends Component {
             checked={this.state.queryable}
           />
         </div>
+        <div>
+          <label>Single tile</label>
+          <input
+            type="checkbox"
+            ref="input_singleTile"
+            onChange={(e) => {
+              this.setState({singleTile: e.target.checked})
+            }}
+            checked={this.state.singleTile}
+          />
+        </div>        
         <div>
           <label>Synligt vid start</label>
           <input

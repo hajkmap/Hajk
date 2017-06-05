@@ -247,6 +247,7 @@ var LayerCollection = {
         "caption": args.caption,
         "visible": args.visibleAtStart,
         "queryable": args.queryable === false ? false : true,
+        "singleTile": args.singleTile === false ? false : true,
         "extent": args.extent,
         "information": args.infobox,
         "projection": args.projection,
