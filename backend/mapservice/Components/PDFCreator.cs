@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ using System.Web.Hosting;
 using System.Drawing.Imaging;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using PdfSharp;
 
 namespace MapService.Components
 {
@@ -83,7 +85,7 @@ namespace MapService.Components
             PdfDocument document = new PdfDocument();
             PdfPage page = document.AddPage();
 
-            page.Size = exportItem.format == "A4" ? PdfSharp.PageSize.A4 : PdfSharp.PageSize.A3;
+            page.Size = GetPageSize(exportItem);
             page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;
 
             XGraphics gfx = XGraphics.FromPdfPage(page);
@@ -211,6 +213,15 @@ namespace MapService.Components
                 return Math.Ceiling(scale * 0.05) + " m";
             }
             return Math.Ceiling(scale * 0.05 / 1000) + " km";
+          
+        private PageSize GetPageSize(MapExportItem exportItem)
+        {
+            PageSize p;
+            if (Enum.TryParse(exportItem.format, true, out p))
+            {
+                return p;
+            }
+            throw new ApplicationException("Unknown page size");
         }
 
         /// <summary>

@@ -183,6 +183,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Components\MapExport\Extensions\TileLayer2.cs" />
+    <Compile Include="Components\MapExport\DpiWmsLayer.cs" />
     <Compile Include="Components\TIFFCreator.cs" />
     <Compile Include="Components\Util.cs" />
     <Compile Include="Controllers\LayerMenuController.cs" />
