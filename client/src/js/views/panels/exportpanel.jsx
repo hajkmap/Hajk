@@ -99,6 +99,7 @@ var ExportPdfSettings = React.createClass({
       selectFormat: 'A4',
       selectOrientation: 'S',
       selectScale: '2500',
+      manualScale: '2500',
       selectResolution: '72',
       loading: false
     };
@@ -143,7 +144,7 @@ var ExportPdfSettings = React.createClass({
   },
 
   getScale: function () {
-    return this.state.selectScale;
+    return (this.state.selectScale === 'other') ? this.state.manualScale : this.state.selectScale;
   },
 
   getResolution: function () {
@@ -173,6 +174,24 @@ var ExportPdfSettings = React.createClass({
   setScale: function(e) {
     this.setState({
       selectScale: e.target.value
+    });
+  },
+
+  setManualScale: function(e) {
+    if (e.target.value.startsWith('1:')) {
+      e.target.value = e.target.value.split(':')[1];
+    }
+
+    var val = this.getScale();
+    if (e.target.value < 250) {
+      val = 250;
+    } else if (e.target.value > 250000) {
+      val = 250000;
+    } else {
+      val = e.target.value;
+    }
+    this.setState({
+      manualScale: val
     });
   },
 
@@ -238,6 +257,7 @@ var ExportPdfSettings = React.createClass({
     if (!this.props.visible) return null;
 
     options = scales.map((s, i) => <option key={i} value={s}>1:{s}</option>);
+
     resolutionOptions = this.resolutions.map((s, i) => {
       if (this.state.selectFormat === 'A2') {
         return s !== 300 
@@ -292,7 +312,9 @@ var ExportPdfSettings = React.createClass({
           <div className="panel-body">
             <select onChange={this.setScale} defaultValue={this.state.selectScale}>
               {options}
+              <option value="other">Annan skala</option>
             </select>
+            {this.state.selectScale==='other' && <input type="text" onChange={this.setManualScale} defaultValue={this.state.manualScale}></input>}
           </div>
         </div>
         <div className="panel panel-default">
