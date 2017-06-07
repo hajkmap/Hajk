@@ -173,8 +173,20 @@ class Manager extends Component {
           opacity: layer.opacity,
           symbolXOffset: layer.symbolXOffset,
           symbolYOffset: layer.symbolYOffset,
+          labelAlign: layer.labelAlign,
+          labelBaseline: layer.labelBaseline,
+          labelSize: layer.labelSize,
+          labelOffsetX: layer.labelOffsetX,
+          labelOffsetY: layer.labelOffsetY,
+          labelWeight: layer.labelWeight,
+          labelFont: layer.labelFont,
+          labelFillColor: layer.labelFillColor,
+          labelOutlineColor: layer.labelOutlineColor,
+          labelOutlineWidth: layer.labelOutlineWidth,
+          labelAttribute: layer.labelAttribute,
+          showLabels: layer.showLabels,
           drawOrder: layer.drawOrder,
-          layer: layer.layer
+          layer: layer.layer                    
         });
 
         this.refs["VectorLayerForm"].loadLayers(layer, () => {
