@@ -47,5 +47,29 @@ namespace MapService.Models.Config
         public string infobox { get; set; }
 
         public bool queryable { get; set; }
+            
+        public string labelAlign { get; set; }
+
+        public string labelBaseline { get; set; }
+
+        public string labelSize{ get; set; }
+
+        public int labelOffsetX { get; set; }
+
+        public int labelOffsetY { get; set; }
+
+        public string labelWeight { get; set; }
+
+        public string labelFont { get; set; }
+
+        public string labelFillColor { get; set; }
+
+        public string labelOutlineColor { get; set; }
+
+        public int labelOutlineWidth { get; set; }
+
+        public string labelAttribute { get; set; }
+
+        public bool showLabels { get; set; }                
     }
 }
