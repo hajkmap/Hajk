@@ -288,7 +288,7 @@ var LayerPanelView = {
         "fa fa-angle-right clickable arrow" :
         "fa fa-angle-down clickable arrow";
 
-      toggleClassName = group.checked ? "fa fa-check-square-o" : "fa fa-square-o";
+      toggleClassName = group.checked ? "fa fa-check-square-o clickable" : "fa fa-square-o clickable";
 
       toggleGroup = group.toggled
       ? (<i
