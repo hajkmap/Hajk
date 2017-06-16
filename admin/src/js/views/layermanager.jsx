@@ -312,6 +312,7 @@ class Manager extends Component {
    */
   describeLayer(e, layerName) {
     this.props.model.getLayerDescription(this.refs.input_url.value, layerName, (properties) => {
+      console.log("layermanager: " + properties + ", " + layerName);
       this.setState({
         layerProperties: properties,
         layerPropertiesName: layerName
