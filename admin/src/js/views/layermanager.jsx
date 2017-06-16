@@ -25,6 +25,7 @@ import { Component } from "react";
 import $ from 'jquery';
 import Alert from "../views/alert.jsx";
 import WMSLayerForm from "./layerforms/wmslayerform.jsx"
+import WMSLayerFormTest from "./layerforms/wmslayerformtest.jsx"
 import WMTSLayerForm from "./layerforms/wmtslayerform.jsx"
 import ArcGISLayerForm from "./layerforms/arcgislayerform.jsx"
 import VectorLayerForm from "./layerforms/vectorlayerform.jsx"
@@ -199,7 +200,6 @@ class Manager extends Component {
     }
 
     if (layer.type === "WMS") {
-
       this.setState({
         mode: "edit",
         layerType: "WMS"
@@ -220,6 +220,7 @@ class Manager extends Component {
           tiled: layer.tiled,
           singleTile: layer.singleTile,
           imageFormat: layer.imageFormat,
+          version: layer.version,
           serverType: layer.serverType,
           drawOrder: layer.drawOrder,
           addedLayers: [],
@@ -229,6 +230,42 @@ class Manager extends Component {
 
         this.refs["WMSLayerForm"].loadLayers(layer, () => {
           this.refs["WMSLayerForm"].validate();
+        });
+
+      }, 0);
+
+    }
+
+    if (layer.type === "WMSTest") {
+      this.setState({
+        mode: "edit",
+        layerType: "WMSTest"
+      });
+
+      setTimeout(() => {
+        this.refs["WMSLayerFormTest"].setState({
+          id: layer.id,
+          caption: layer.caption,
+          content: layer.content,
+          date: layer.date,
+          infobox: layer.infobox,
+          legend: layer.legend,
+          owner: layer.owner,
+          url: layer.url,
+          visibleAtStart: layer.visibleAtStart,
+          queryable: layer.queryable,
+          tiled: layer.tiled,
+          singleTile: layer.singleTile,
+          imageFormat: layer.imageFormat,
+          version: layer.version,
+          serverType: layer.serverType,
+          drawOrder: layer.drawOrder,
+          addedLayers: [],
+          layerType: layer.type
+        });
+
+        this.refs["WMSLayerFormTest"].loadLayers(layer, () => {
+          this.refs["WMSLayerFormTest"].validate();
         });
 
       }, 0);
@@ -393,6 +430,9 @@ class Manager extends Component {
         case 'WMS':
           displayType = "";
           break;
+        case 'WMSTest':
+        displayType = "(WMSTest)";
+        break;
         case 'WMTS':
           displayType = "(WMTS)";
           break;
@@ -478,7 +518,6 @@ class Manager extends Component {
     layer = form.getLayer();
 
     if (this.state.mode === "add") {
-
       layer.type = this.state.layerType;
       layer.id = null;
 
@@ -536,6 +575,12 @@ class Manager extends Component {
             layer={this.state.layer}
             url={this.props.config.url_default_server} />
         )
+      case "WMS_Test":
+        return <WMSLayerFormTest
+          ref="WMSLayerFormTest"
+          model={this.props.model}
+          layer={this.state.layer}
+          url={this.props.config.url_default_server} />
       case "WFS":
         return <WFSLayerForm
           ref="WFSLayerForm"
@@ -640,6 +685,7 @@ class Manager extends Component {
               <label>Välj lagertyp</label>
               <select disabled={typeSelectorDisabled} value={this.state.layerType} onChange={(e) => { this.setState({layerType: e.target.value}) }}>
                 <option>WMS</option>
+                <option>WMS_Test</option>
                 <option>WMTS</option>
                 <option>ArcGIS</option>
                 <option value="Vector">Vektor</option>

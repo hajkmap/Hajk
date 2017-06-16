@@ -39,7 +39,6 @@ var manager = Model.extend({
   getUrl: function (layer) {
     var t = layer['type'];
     delete layer['type'];
-
     switch(t) {
       case "WMS":
         return this.get('config').url_layer_settings
