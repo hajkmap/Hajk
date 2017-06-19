@@ -92,7 +92,7 @@ var WmtsLayer = {
           html: this.get('attribution')
         })
       );
-    }    
+    }
     return attributions;
   },
 
@@ -119,7 +119,8 @@ var WmtsLayer = {
         tileGrid: new ol.tilegrid.WMTS({
           origin: this.get('origin'),
           resolutions: this.get('resolutions'),
-          matrixIds: this.get('matrixIds')
+          matrixIds: this.get('matrixIds'),
+          extent: this.get('extent')
         })
       })
     });
