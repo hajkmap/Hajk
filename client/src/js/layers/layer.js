@@ -154,7 +154,6 @@ var Layer = {
    * @return {external:ReactElement} components.
    */
   getLegendComponents: function (settings) {
-
       var legendComponents = {
         legendButton: null,
         legendPanel: null
@@ -186,6 +185,21 @@ var Layer = {
   getExtendedComponents: function (settings) {
     return {
       legend: this.getLegendComponents(settings)
+    }
+  },
+
+  /**
+   * Create attribution array
+   * @instance
+   * @return {Array<external:"ol.Attribution">} attributions
+   */
+  getAttributions: function() {
+    if (this.get('attribution')) {
+      return [
+        new ol.Attribution({
+          html: this.get('attribution')
+        })
+      ]
     }
   }
 };

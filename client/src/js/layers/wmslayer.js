@@ -64,23 +64,6 @@ var WmsLayer = {
    */
   validInfo: true,
 
-  /**
-   * Create attribution array
-   * @instance
-   * @return {Array<external:"ol.Attribution">} attributions
-   */
-  getAttributions: function() {
-    var attributions = [];
-    if (this.get('attribution')) {
-      attributions.push(
-        new ol.Attribution({
-          html: this.get('attribution')
-        })
-      );
-    }
-    return attributions;
-  },
-
   initialize: function () {
     LayerModel.prototype.initialize.call(this);
 
