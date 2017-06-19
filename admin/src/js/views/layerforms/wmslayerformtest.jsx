@@ -48,6 +48,7 @@ const defaultState = {
   version: "1.3.0",
   imageFormat: "Välj ett bildformat",
   imageFormats: [],
+  layerStyles:[],
   serverType: 'geoserver',
   drawOrder: 1,
   layerType: "WMSTest",
@@ -90,9 +91,8 @@ class WMSLayerFormTest extends Component {
 
   renderLayerList() {
     var layers = this.renderLayersFromCapabilites();
-    return (      
-      <div className="row">
-        <label className="label-margin">Lagerlista</label>
+    return (
+      <div className="row">        
         <div className="col-md-12 layer-list-test no-padding">
         <ul className="list-group no-padding no-margin-top">
           {layers}
@@ -153,22 +153,33 @@ class WMSLayerFormTest extends Component {
         var i = this.createGuid();
         var title = /^\d+$/.test(layer.Name) ? <label>&nbsp;{layer.Title}</label> : null;
 
+        var queryableIcon = this.state.queryable ? "fa fa-check" : "fa fa-remove";
+
         return (
-          <li key={"fromCapability_" + i} className="list-group-item">
-            <input
-              ref={layer.Name}
-              id={"layer" + i}
-              type="checkbox"
-              data-type="wms-layer"
-              checked={this.state.addedLayers.find(l => l === layer.Name)}
-              onChange={(e) => {
-                this.setState({'caption': layer.Title});
-                this.setState({'content': layer.Abstract});
-                this.appendLayer(e, layer.Name);
-              }} />&nbsp;
-            <label htmlFor={"layer" + i}>{layer.Name}</label>{title}
-            <i style={{display:"none"}} className={classNames} onClick={(e) => this.describeLayer(e, layer.Name)}></i>
-          </li>
+          <div className="row">
+            <li key={"fromCapability_" + i} className="list-item">
+              <div className="col-md-6 overflow-hidden">
+                <input
+                  ref={layer.Name}
+                  id={"layer" + i}
+                  type="checkbox"
+                  data-type="wms-layer"
+                  checked={this.state.addedLayers.find(l => l === layer.Name)}
+                  onChange={(e) => {
+                    this.setState({'caption': layer.Title});
+                    this.setState({'content': layer.Abstract});
+                    this.appendLayer(e, layer.Name);
+                  }} />&nbsp;
+                <label htmlFor={"layer" + i}>{layer.Name}</label>{title}
+              </div>
+              <i style={{display:"none"}} className={classNames} onClick={(e) => this.describeLayer(e, layer.Name)}></i>
+              <span className={queryableIcon + " col-md-1"}/>
+              <select className="col-md-5 form-control layer-list-style-select-test">
+                {this.setLayerListStyles(layer)}
+              </select>
+              
+            </li>
+          </div>
         )
       };
 
@@ -258,6 +269,25 @@ class WMSLayerFormTest extends Component {
     this.setState({
       imageFormats: formats
     });
+  }
+
+  setLayerListStyles(layer) {
+    var styles = [];
+    console.log(layer);
+    if(layer.Style !== undefined) {
+      for (var i = 0; i < layer.Style.length; i++) {
+        styles.push(<option>{layer.Style[i].Name}</option>);
+      }
+
+    }
+    // for (var i = 0; i < styles.length; i++) {
+    //   console.log(styles[i]);
+      
+    // }
+
+    return styles;
+    //var style = layer.Style !== undefined ? console.log(layer.Style[0].Name) : console.log("ingen style");
+    //return layer.Style.Name !== undefined ? <option>{layer.Style.Name}</option> : <option />;
   }
 
   getLayer() {
@@ -412,6 +442,12 @@ class WMSLayerFormTest extends Component {
               <p className="text-display">{this.state.version}</p>
             </div>
           </div>
+        </div>
+        <div className="row">
+          <label className="col-md-5">Lagerlista</label>
+          <label className="col-md-2">Infoklick</label>
+          <label className="col-md-5">Stil</label>
+          
         </div>
         {this.renderLayerList()}
         <div className="row">
