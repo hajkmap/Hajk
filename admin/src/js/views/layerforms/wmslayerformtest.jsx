@@ -164,7 +164,7 @@ class WMSLayerFormTest extends Component {
                   id={"layer" + i}
                   type="checkbox"
                   data-type="wms-layer"
-                  checked={this.state.addedLayers.find(l => l === layer.Name)}
+                  checked ={this.state.addedLayers.find(l => l === layer.Name)}
                   onChange={(e) => {
                     this.setState({'caption': layer.Title});
                     this.setState({'content': layer.Abstract});
@@ -273,21 +273,13 @@ class WMSLayerFormTest extends Component {
 
   setLayerListStyles(layer) {
     var styles = [];
-    console.log(layer);
     if(layer.Style !== undefined) {
-      for (var i = 0; i < layer.Style.length; i++) {
-        styles.push(<option>{layer.Style[i].Name}</option>);
+      for (let i = 0; i < layer.Style.length; i++) {
+        styles.push(<option key={i}>{layer.Style[i].Name}</option>);
       }
-
     }
-    // for (var i = 0; i < styles.length; i++) {
-    //   console.log(styles[i]);
-      
-    // }
-
     return styles;
-    //var style = layer.Style !== undefined ? console.log(layer.Style[0].Name) : console.log("ingen style");
-    //return layer.Style.Name !== undefined ? <option>{layer.Style.Name}</option> : <option />;
+
   }
 
   getLayer() {
@@ -444,10 +436,23 @@ class WMSLayerFormTest extends Component {
           </div>
         </div>
         <div className="row">
+          <div className="col-md-6">
+            <div className="form-group">
+              <label>Koordinatsystem</label>
+              <p className="text-display">CRS</p>
+            </div>
+          </div>
+          <div className="col-md-6">
+            <div className="form-group">
+              <label>Lagertyp</label>
+              <p className="text-display">WMS</p>
+            </div>
+          </div>
+        </div>
+        <div className="row">
           <label className="col-md-5">Lagerlista</label>
           <label className="col-md-2">Infoklick</label>
           <label className="col-md-5">Stil</label>
-          
         </div>
         {this.renderLayerList()}
         <div className="row">
@@ -489,12 +494,6 @@ class WMSLayerFormTest extends Component {
         </div>
         <div className="row">
           <div className="col-md-12">
-            <label>Senast ändrad</label>
-            <span ref="input_date"><i>{this.props.model.parseDate(this.state.date)}</i></span>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-md-12">
             <div className="form-group">
               <label>Teckenförklaring</label>
               <input
@@ -506,6 +505,12 @@ class WMSLayerFormTest extends Component {
               />
               <span onClick={(e) => {this.loadLegendImage(e)}} className="btn btn-default">Välj fil {imageLoader}</span>
             </div>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-md-12">
+            <label>Senast ändrad</label>
+            <span ref="input_date"><i>{this.props.model.parseDate(this.state.date)}</i></span>
           </div>
         </div>
         <div className="row">
