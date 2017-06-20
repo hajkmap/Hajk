@@ -48,7 +48,8 @@ const defaultState = {
   version: "1.3.0",
   imageFormat: "Välj ett bildformat",
   imageFormats: [],
-  layerStyles:[],
+  coordSystem: "",
+  coordSystems:[],
   serverType: 'geoserver',
   drawOrder: 1,
   layerType: "WMSTest",
@@ -174,7 +175,7 @@ class WMSLayerFormTest extends Component {
               </div>
               <i style={{display:"none"}} className={classNames} onClick={(e) => this.describeLayer(e, layer.Name)}></i>
               <span className={queryableIcon + " col-md-1"}/>
-              <select className="col-md-5 form-control layer-list-style-select-test">
+              <select key={"select_" + i} className="col-md-5 form-control layer-list-style-select-test">
                 {this.setLayerListStyles(layer)}
               </select>
               
@@ -251,6 +252,7 @@ class WMSLayerFormTest extends Component {
         })
       }
       this.setImageFormats();
+      this.setCoordSystems();
       if (callback) {
         callback();
       }
@@ -271,17 +273,27 @@ class WMSLayerFormTest extends Component {
     });
   }
 
+  setCoordSystems() {
+    var systems = this.state.capabilities.Capability.Layer.CRS;
+    for (let i = 0; i < systems.length; i++) {
+      systems[i] = <option key={i}>{systems[i]}</option>;
+    }
+    
+    this.setState({
+      coordSystems: systems
+    });
+  }
+
   setLayerListStyles(layer) {
     var styles = [];
-    if(layer.Style !== undefined) {
+    if (layer.Style !== undefined) {
       for (let i = 0; i < layer.Style.length; i++) {
         styles.push(<option key={i}>{layer.Style[i].Name}</option>);
       }
     }
     return styles;
-
   }
-
+  
   getLayer() {
     return {
       type: this.state.layerType,
@@ -402,7 +414,7 @@ class WMSLayerFormTest extends Component {
       <fieldset>
         <legend>Lägg till lager</legend>
         <div className="row">
-          <div className="col-lg-6">
+          <div className="col-md-6">
             <div className="form-group">
               <label>Url*</label>
               <input
@@ -439,7 +451,9 @@ class WMSLayerFormTest extends Component {
           <div className="col-md-6">
             <div className="form-group">
               <label>Koordinatsystem</label>
-              <p className="text-display">CRS</p>
+              <select ref="input_coordSystems" value={this.state.coordSystem} onChange={(e) => this.setState({'coordSystem': e.target.value})} className="form-control">
+                {this.state.coordSystems}
+              </select>
             </div>
           </div>
           <div className="col-md-6">
