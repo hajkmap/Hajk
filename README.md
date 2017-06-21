@@ -2,14 +2,14 @@
 Uppdaterad: 2016-11-25
 
 Detta är ett projekt som drivs av Stadsbyggnadskontoret Göteborgs Stad.  
-Systemutvecklare är i huvudsak Sweco Position.
+Systemutvecklare är i huvudsak Sweco Position.  
 Projektet drivs som ett samarbetsprojekt och är avsett att kunna återanvändas för generalla GIS-applikationer för webb.  
-Licensformen bygger på en öppen samarbetslicens. (CC BY SA NC).
+Licensformen bygger på en öppen samarbetslicens. (CC BY SA NC).  
 
 Koden består av två delar; en serverdel och en klientdel. Serverdelen är programmerad i Microsoft .NET med tekniken WCF och kodspråket C#.  
-Klientdelen är programmerad i JavaScript 2015. Kommunikationen mellan klient och server sker via HTTP och är RESTful implementerad.
+Klientdelen är programmerad i JavaScript 2015. Kommunikationen mellan klient och server sker via HTTP och är RESTful implementerad.  
 
-Klienten innehåller två separata applikationer, en kartvy och en administrationsvy.
+Klienten innehåller två separata applikationer, en kartvy och en administrationsvy.  
 
 JavaScript byggs i applikationen med hjälp av uppgiftshanteraren Grunt.  
 För att bygga projetketet så krävs programvarorna Visual Studio och Node JS.
@@ -25,34 +25,39 @@ Verifiera installationen genom starta kommandopromten och skriva:
 
 Skriv därefter till exempel:  
 `cd c:\Projekt`  
-för att gå till lokal projektmapp.
+för att gå till lokal projektmapp.  
 
 Ange följande kommando för att ladda hem koden:  
 `git clone https://github.com/hajkmap/hajk.git`  
 
 ### Installera Node JS
-För att installera node gå till [https://nodejs.org/en/](https://nodejs.org/en/ "länk").  
+För att installera node gå till [https://nodejs.org/en/](https://nodejs.org/en/ "länk").
 Ladda hem och installera den version som är markerad som Stable.
 
 Verifiera installationen genom starta kommandopromten och skriva:  
 `node --version`
 
 ### Installera Visual Studio Community Edition
-För att installera visual studio gå till [https://www.visualstudio.com/post-download-vs?sku=community&clcid=0x409](https://www.visualstudio.com/post-download-vs?sku=community&clcid=0x409 "länk.")  
+För att installera visual studio gå till [https://www.visualstudio.com/post-download-vs?sku=community&clcid=0x409](https://www.visualstudio.com/post-download-vs?sku=community&clcid=0x409 "länk.")
 
 ## Driftsättning
 ### Första gången projektet klonas.
 #### Installera beroenden
+`cd c:\Projekt\Hajk\client`  
+`npm install`  
+`cd c:\Projekt\Hajk\admin`  
 `npm install`
 
 #### Installera externa bibiliotek
+`cd c:\Projekt\Hajk\client`  
 `grunt dependencies`
 
----------- 
+----------
 #### Driftsättning Klient
-Bygg version för test. (målmapp: **dist**)  
 Öppna kommandopromten och gå till projektets mapp:  
-`cd c:\Projekt\Hajk2\client`  
+`cd c:\Projekt\Hajk\client`
+
+Bygg version för test. (målmapp: **dist**)  
 `grunt build`
 
 Bygg version för driftsättning. (målmapp: **release**)  
@@ -62,10 +67,11 @@ Starta en lyssnare som lyssnar på ändringar i filsystemet ochg bygger per auto
 `grunt debug`
 
 #### Driftsättning Admin
-Bygg version för driftsättning. (målmapp: **dist**)  
-Detta steg måste föregås av att release-kommando för kartdelen har genomförts.  
-`cd c:\Projekt\Hajk2\admin`  
-`grunt build`
+Bygg version för driftsättning/test. (målmapp: **dist**)  
+`cd c:\Projekt\Hajk\admin`  
+`grunt`  
+Detta kommer att skapa en mapp som heter dist. I denna återfinns två html-filer, index.html och debug.html.  
+Kör dessa i lämplig webbserver, debug.html har full sourcemap till jsx. Index.html kör minifierad kod.
 
 #### Driftsättning server
 - Dubbelklicka på **backend.sln**  
@@ -77,44 +83,47 @@ Detta steg måste föregås av att release-kommando för kartdelen har genomför
 ### Installera projektet i Internet Information Services (IIS > 7).
 
 IIS kräver att server applikationen körs i en App Pool med .NET version 4.0 integrated.  
-IIS måste ha mime-typen application/vnd.google-earth.kml+xml registrerad för filändelsen .kml.
+IIS måste ha mime-typen application/vnd.google-earth.kml+xml registrerad för filändelsen .kml.  
+IIS bör även ha mime-typen font/woff2 registrerad för filändelsen .woff2.  
 
 I en driftsättningsmiljö så lägg förslagsvis applikationerna i två seperata mappar.  
 Mapparna bör placeras i en skrivskyddad mapp; tex C:\data\www\hajk.
 
 Skapa därefter tre undermappar för applikationerna:  
-C:\data\www\hajk\klient -- innehåller innehållet i **backend**  
-C:\data\www\hajk\server -- innehåller innehållet i **client\release**  
-C:\data\www\hajk\admin -- innehåller innehållet i **admin\release**
+C:\data\www\hajk -- innehåller innehållet i **client\release**  
+C:\data\www\hajk\backend -- innehåller innehållet i **backend**  
+C:\data\www\hajk\admin -- innehåller innehållet i **admin\release**  
 
 Skapa i IIS tre nya applikationer genom att högerklicka på valt site och välja:
 
 **Lägg till program..**
 
-För serverapplikationen så ange Alias: backend.  
+För klientapplikationen så kan valfritt namn användas, detta bli sökväg till kartapplikationen.  
+För serverapplikationen så ange Alias: mapservice.  
 För adminapplikationen så kan valfritt namn användas, detta bli sökväg till adminapplikationen.  
-För klientapplikationen så kan valfritt namn användas, detta bli sökväg till kartapplikationen (standardnamn är mapservice).  
-Finns behov av HTTP-proxy för anrop till extern kartserver så finns exempel på detta i mappen proxy.
+Finns behov av HTTP-proxy för anrop till extern kartserver så finns exempel på detta i mappen proxy.  
 
 ## Konfiguration
 
 ### Klient
-När scriptet för HAJK2 läggs till i en HTML-fil via en script-tagg så initieras en global variabel med namn HAJK2.  
+När scriptet för HAJK2 läggs till i en HTML-fil via en script-tagg så initieras en global variabel med namn HAJK2.
 Denna variabel innehåller ett objekt som används för att konfigurera och starta applikationen.  
 Applikationen förutsätter att den finns ett element i HTML-filen som heter map.  
 
 Det finns två egenskaper på HAJK2-objektet som används för att konfigurera HTTP-proxy för korsdomänsanrop.  
-`{string} wmsProxy` - URL: skall ha stöd för get-anrop och används för att hämta WMS-bilder (behövs i regel när det är lösenord på tjänster).  
-`{string} searchProxy` - URL: skall ha stöd för post-anrop och används vid WFS-sökning.
+`{string} wmsProxy` - URL: skall ha stöd för GET-anrop och används för att hämta WMS-bilder (behövs i regel när det är lösenord på tjänster).  
+`{string} wfsProxy` - URL: skall ha stöd för GET-anrop och används för att hämta  data via WFS-protokollet.  
+`{string} searchProxy` - URL: skall ha stöd för POST-anrop och används vid WFS-sökning.  
 
 Det finns en metod som heter start. Denna startar applikationen.  
-`start({object} startConfiguration)`
+`start({object} startConfiguration)`  
 
 startConfiguration  
 `cofigPath` - Sökväg till tjänstenod som hämtar konfiguration för karta.  
 `layersPath` - Sökväg till tjänstenod som hämtar konfiguration för lager.  
 
-För att konfigurera kartan så hanteras detta manuellt i filen App_Data\map_{x}.json  
+För att konfigurera kartan så hanteras detta manuellt i filen App_Data\{namn}.json  
+När en 
 <pre>
 "map": {  
 	"target": "map",  				// {string} Målelement (ändra inte)  
@@ -127,7 +136,7 @@ För att konfigurera kartan så hanteras detta manuellt i filen App_Data\map_{x}
 	"origin": [],  					// {array {number}} Startkoordinat för tile-grid  
 	"extent": [],  					// {array {number}} Utbredning för tile-grid  
 	"logo": ""  					// {string} URL för sökväg till logo  
-}  
+}
 </pre>
 
 ### Administrationsgränssnitt
@@ -145,7 +154,7 @@ Följande egenskaper finns att konfigurera:
 `{string} url_layers` - Sökväg till den fil för lager som skall uppdateres (notera att .json inte behöver anges).  
 `{string} url_layermenu_settings` - REST-sökväg till den tjänstenod som hanterar uppdatering av lagermenu.  
 #### router
-`{array {object {name, title, default (optional) }}}` - Lista med flikar i applikationen.
+`{array {object {name, title, default (optional) }}}` - Lista med flikar i applikationen.  
 
 ### Tjänst
 Ge läs och skrivrättigheter till mappen App_Data för den avnändare som är registrerad i IIS.
