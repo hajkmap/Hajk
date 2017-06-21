@@ -62,9 +62,17 @@ var ArcGISLayer = {
 
   initialize: function () {
     LayerModel.prototype.initialize.call(this);
+    var extent = this.get('extent');
+    if (Array.isArray(extent)) {
+      extent = extent.map((c, i) => {
+        const b = 1E5;
+        const v = parseFloat(c);
+        return isNaN(v) ? 0 : i < 2 ? v - b : v + b;
+      });
+    }
     if (this.get('singleTile')) {
       this.layer = new ol.layer.Image({
-        extent: this.get('extent'),
+        extent: extent,
         opacity: this.get('opacity'),
         visible: this.get('visible'),
         name: this.get('name'),
@@ -77,7 +85,7 @@ var ArcGISLayer = {
       });
     } else {
       this.layer = new ol.layer.Tile({
-        extent: this.get('extent'),
+        extent: extent,
         opacity: this.get('opacity'),
         visible: this.get('visible'),
         name: this.get('name'),
