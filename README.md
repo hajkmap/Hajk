@@ -123,19 +123,24 @@ startConfiguration
 `layersPath` - Sökväg till tjänstenod som hämtar konfiguration för lager.  
 
 För att konfigurera kartan så hanteras detta manuellt i filen App_Data\{namn}.json  
-När en 
+Egenskaperna center, projection, zoom, logo och colors nås även via adminapplikationen.  
+Var noggrann med att ställa in rätt extent för kartan då WMTS/WMS används som bakgrundslager.
 <pre>
 "map": {  
-	"target": "map",  				// {string} Målelement (ändra inte)  
-	"center": [410719, 6575675 ],   // {array {number}}centrumkoortinat  
-	"projection": "EPSG:3006",  	// {string} projektion  
-	"zoom": 7,  					// {number} startzoom  
-	"maxZoom": 12,  				// {number} Högsta möjliga zoomnivå  
-	"minZoom": 4,  					// {number} Lägsta möjliga zoomnivå  
-	"resolutions": [],  			// {array {number}} Lista med upplösningar för tile-grid (specificeras vid tilecache)  
-	"origin": [],  					// {array {number}} Startkoordinat för tile-grid  
-	"extent": [],  					// {array {number}} Utbredning för tile-grid  
-	"logo": ""  					// {string} URL för sökväg till logo  
+	"target": "map",				// {string} Målelement (ändra inte)  
+	"center": [410719, 6575675 ],	// {array {number}}centrumkoortinat  
+	"projection": "EPSG:3006",		// {string} projektion  
+	"zoom": 7,	 					// {number} startzoom  
+	"maxZoom": 12,					// {number} Högsta möjliga zoomnivå  
+	"minZoom": 4,					// {number} Lägsta möjliga zoomnivå  
+	"resolutions": [],				// {array {number}} Lista med upplösningar för tile-grid (specificeras vid tilecache)  
+	"origin": [],					// {array {number}} Startkoordinat för tile-grid  
+	"extent": [],					// {array {number}} Utbredning för tile-grid  
+	"logo": ""						// {string} URL för sökväg till logo  
+	"colors": {						// {object} Färgtema  
+		"primaryColor": "#1B78CC",	// {string} Huvudfärg  
+		"secondaryColor": "#FFF"	// {string} Komplementfärg
+	}
 }
 </pre>
 
@@ -143,16 +148,36 @@ När en
 #### Applikation
 Filen config.json hanterar inställningar för admingränssnittet.  
 Följande egenskaper finns att konfigurera:
-#### manager
+#### layermanager
 `{string} url_proxy` - Sökväg till HTTP-proxy för korsdomänsanrop.  
+`{string} url_import` - Sökväg till importtjänst.
 `{string} url_layers` - REST-sökväg till tjänstenod där lager hanteras.  
-`{string} url_layer_settings` - REST-sökväg till tjänstenod som hanterar uppdatering av enskilda lager.  
+`{string} url_layer_settings` - REST-sökväg till tjänstenod som hanterar uppdatering av enskilda wmslager.  
+`{string} url_wmtslayer_settings` - REST-sökväg till tjänstenod som hanterar uppdatering av enskilda wmtslager.  
+`{string} url_arcgislayer_settings` - REST-sökväg till tjänstenod som hanterar uppdatering av enskilda arcgislager.  
+`{string} url_vectorlayer_settings` - REST-sökväg till tjänstenod som hanterar uppdatering av enskilda vektorlager.  
 `{string} url_default_server` -  Sökväg till den standardserver som skall användas som uppslag för WMS-tjänster.  
 `{array { object { value, title }}} owner_options` - Lista med namn på tillgängliga dataägare.  
-#### menu
-`{string} url_map` - Sökväg till den fil för kartinställningar som skall uppdateras (notera att .json inte behöver anges).  
-`{string} url_layers` - Sökväg till den fil för lager som skall uppdateres (notera att .json inte behöver anges).  
-`{string} url_layermenu_settings` - REST-sökväg till den tjänstenod som hanterar uppdatering av lagermenu.  
+#### search
+`{string} url_proxy` - Sökväg till proxy för sökning.  
+`{string} url_layers` - REST-sökväg till funktion för att lista lager.  
+`{string} url_layer_settings` - REST-sökväg till funktion för editera inställningar för sökfunktion.  
+`{string} url_default_server` - Standarssökväg till server för sökning.
+#### edit
+`{string} url_proxy` - Sökväg till proxy för editering.  
+`{string} url_layers` - REST-sökväg till funktion för att lista lager.  
+`{string} url_layer_settings` - REST-sökväg till funktion för editera inställningar för editeringsfunktion.  
+`{string} url_default_server` - Standarssökväg till server för editering.   
+`{array} projections` - Lista med tilgängliga projektioner för editering.
+### mapsettings
+`{string} url_map` - "REST-sökväg till rot för karthantering.  
+`{string} url_map_create` - REST-sökväg till nod för att skapa kartor.  
+`{string} url_map_delete` - REST-sökväg till nod för att ta bort kartor.  
+`{string} url_map_list` - REST-sökväg till nod för att lista kartor.  
+`{string} url_layers` - REST-sökväg till funktion för att lista lager.  
+`{string} url_layermenu_settings` - REST-sökväg till funktion för att lista lager.  
+`{string} url_map_settings` - REST-sökväg till funktion för editera inställningar för kartor.  
+`{string} url_tool_settings` - REST-sökväg till funktion för editera inställningar för verktyg.
 #### router
 `{array {object {name, title, default (optional) }}}` - Lista med flikar i applikationen.  
 
