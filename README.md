@@ -94,7 +94,7 @@ C:\data\www\hajk -- innehåller innehållet i **client\release**
 C:\data\www\hajk\backend -- innehåller innehållet i **backend**  
 C:\data\www\hajk\admin -- innehåller innehållet i **admin\release**  
 
-Skapa i IIS tre nya applikationer genom att högerklicka på valt site och välja:
+Skapa i IIS tre nya applikationer genom att högerklicka på vald site och välja:
 
 **Lägg till program..**
 
