@@ -127,20 +127,20 @@ Egenskaperna center, projection, zoom, logo och colors nås även via adminappli
 Var noggrann med att ställa in rätt extent för kartan då WMTS/WMS används som bakgrundslager.
 <pre>
 "map": {  
-	"target": "map",				// {string} Målelement (ändra inte)  
-	"center": [410719, 6575675 ],	// {array {number}}centrumkoortinat  
-	"projection": "EPSG:3006",		// {string} projektion  
-	"zoom": 7,	 					// {number} startzoom  
-	"maxZoom": 12,					// {number} Högsta möjliga zoomnivå  
-	"minZoom": 4,					// {number} Lägsta möjliga zoomnivå  
-	"resolutions": [],				// {array {number}} Lista med upplösningar för tile-grid (specificeras vid tilecache)  
-	"origin": [],					// {array {number}} Startkoordinat för tile-grid  
-	"extent": [],					// {array {number}} Utbredning för tile-grid  
-	"logo": ""						// {string} URL för sökväg till logo  
-	"colors": {						// {object} Färgtema  
-		"primaryColor": "#1B78CC",	// {string} Huvudfärg  
-		"secondaryColor": "#FFF"	// {string} Komplementfärg
-	}
+  "target": "map",                // {string} Målelement (ändra inte)  
+  "center": [410719, 6575675 ],   // {array {number}}centrumkoortinat  
+  "projection": "EPSG:3006",      // {string} projektion  
+  "zoom": 7,                      // {number} startzoom  
+  "maxZoom": 12,                  // {number} Högsta möjliga zoomnivå  
+  "minZoom": 4,                   // {number} Lägsta möjliga zoomnivå  
+  "resolutions": [],              // {array {number}} Lista med upplösningar för tile-grid (specificeras vid tilecache)  
+  "origin": [],                   // {array {number}} Startkoordinat för tile-grid  
+  "extent": [],                   // {array {number}} Utbredning för tile-grid  
+  "logo": ""                      // {string} URL för sökväg till logo  
+  "colors": {                     // {object} Färgtema  
+    "primaryColor": "#1B78CC",    // {string} Huvudfärg  
+  "secondaryColor": "#FFF"        // {string} Komplementfärg
+  }
 }
 </pre>
 
