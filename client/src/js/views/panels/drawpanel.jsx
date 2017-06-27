@@ -305,7 +305,7 @@ var DrawPanelView = {
    */
   abort: function () {
     this.props.model.abort();
-    $('#Point, #Circle, #Text, #Polygon, #LineString, #delete').removeClass('selected');
+    $('#Point, #Circle, #Text, #Polygon, #LineString, #move, #delete').removeClass('selected');
     $('#abort').hide();
     this.setState({
       symbology: ""
@@ -351,8 +351,24 @@ var DrawPanelView = {
    */
   activateRemovalTool: function () {
     this.props.model.activateRemovalTool();
-    $('#Point, #Text, #Polygon, #LineString, #Circle, #delete').removeClass('selected');
+    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #delete').removeClass('selected');
     $('#delete').addClass('selected');
+    $('#abort').show();
+    this.setState({
+      symbology: ""
+    })
+    this.props.model.set("kmlExportUrl", false);
+    this.props.model.set("kmlImport", false);
+  },
+
+  /**
+   * Activate move tool and update visuals.
+   * @instance
+   */
+  activateMoveTool: function () {
+    this.props.model.activateMoveTool();
+    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #delete').removeClass('selected');
+    $('#move').addClass('selected');
     $('#abort').show();
     this.setState({
       symbology: ""
@@ -368,7 +384,7 @@ var DrawPanelView = {
    */
   activateDrawTool: function (type) {
     this.props.model.activateDrawTool(type);
-    $('#Circle, #Point, #Text, #Polygon, #LineString, #delete').removeClass('selected');
+    $('#Circle, #Point, #Text, #Polygon, #LineString, #move, #delete').removeClass('selected');
     $('#' + type).addClass('selected');
     $('#abort').show();
     this.setState({
@@ -706,6 +722,9 @@ var DrawPanelView = {
               </li>
               <li id="Polygon" onClick={this.activateDrawTool.bind(this, "Polygon")}>
                 <i className="iconmoon-yta"></i> <span>Rita yta</span>
+              </li>
+              <li id="move" onClick={this.activateMoveTool}>
+                <i className="fa fa-arrows fa-0"></i> <span>Flytta objekt</span>
               </li>
               <li id="delete" onClick={this.activateRemovalTool}>
                 <i className="fa fa-eraser fa-0"></i> <span>Radera objekt</span>
