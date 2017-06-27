@@ -165,6 +165,7 @@ var DrawPanelView = {
       visible: false,
       pointRadius: this.props.model.get('pointRadius'),
       pointSymbol: this.props.model.get('pointSymbol'),
+      fontSize: this.props.model.get('fontSize'),
       lineWidth: this.props.model.get('lineWidth'),
       lineStyle: this.props.model.get('lineStyle'),
       circleLineColor: this.props.model.get('circleLineColor'),
@@ -408,6 +409,26 @@ var DrawPanelView = {
     }
 
     switch (type) {
+      case "Text":
+        return (
+          <div>
+            <h2>Ritmanér text</h2>
+            <div>Textstorlek</div>
+            <select value={this.state.fontSize} onChange={update.bind(this, 'setFontSize', 'fontSize')}>
+              <option value="8">8</option>
+              <option value="10">10</option>
+              <option value="12">12</option>
+              <option value="14">14</option>
+              <option value="16">16</option>
+              <option value="18">18</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="60">60</option>
+              <option value="80">100</option>
+            </select>
+          </div>
+        );
       case "Point":
         return (
           <div>
