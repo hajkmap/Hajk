@@ -139,7 +139,7 @@ Var noggrann med att ställa in rätt extent för kartan då WMTS/WMS används s
   "logo": ""                      // {string} URL för sökväg till logo  
   "colors": {                     // {object} Färgtema  
     "primaryColor": "#1B78CC",    // {string} Huvudfärg  
-    "secondaryColor": "#FFF"        // {string} Komplementfärg
+    "secondaryColor": "#FFF"      // {string} Komplementfärg
   }
 }
 </pre>
