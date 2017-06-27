@@ -188,18 +188,44 @@ var DrawModel = {
   },
 
   /**
-   * Create select interaction and add to map.
-   * Remove any draw interaction from map.
+   * Activate tool for feature removal.
    * @instance
    */
   activateRemovalTool: function () {
     var dragInteraction = this.getDragInteraction();
     this.get('olMap').removeInteraction(this.get("drawTool"));
+    this.get('olMap').removeInteraction(this.get("editTool"));
     this.get('olMap').set('clickLock', true);
     this.get('olMap').on('singleclick', this.removeSelected);
     if (dragInteraction) {
       dragInteraction.removeAcceptedLayer('draw-layer');
     }
+  },
+
+  /**
+   * Activate tool for feature edit.
+   * @instance
+   */
+  activateEditTool: function () {
+
+    var dragInteraction = this.getDragInteraction()
+    ,   features = new ol.Collection();
+
+    this.get('olMap').un('singleclick', this.removeSelected);
+    this.get('olMap').removeInteraction(this.get("drawTool"));
+    this.get('olMap').removeInteraction(this.get("editTool"));
+    this.get('olMap').set('clickLock', true);
+
+    if (dragInteraction) {
+      dragInteraction.removeAcceptedLayer('draw-layer');
+    }
+    this.get('source').getFeatures().forEach(f => {
+      features.push(f);
+    });
+    this.set("editTool", new ol.interaction.Modify({
+      features: features
+    }));
+    this.get('olMap').addInteraction(this.get("editTool"));
   },
 
   /**
@@ -221,6 +247,8 @@ var DrawModel = {
    */
   activateMoveTool: function () {
     this.get('olMap').removeInteraction(this.get("drawTool"));
+    this.get('olMap').removeInteraction(this.get("editTool"));
+    this.get('olMap').un('singleclick', this.removeSelected);
     var dragInteraction = this.getDragInteraction();
     if (dragInteraction) {
       dragInteraction.addAcceptedLayer('draw-layer');
@@ -392,6 +420,7 @@ var DrawModel = {
       dragInteraction.removeAcceptedLayer('draw-layer');
     }
     olMap.removeInteraction(this.get("drawTool"));
+    olMap.removeInteraction(this.get("editTool"));
     this.measureTooltip.setPosition(undefined);
 
     geometryType = type !== "Text" ? type : "Point";
@@ -427,6 +456,7 @@ var DrawModel = {
     this.get('olMap').un('singleclick', this.removeSelected);
     this.get('olMap').un('pointermove', this.setPointerPosition);
     this.get('olMap').removeInteraction(this.get('drawTool'));
+    this.get('olMap').removeInteraction(this.get("editTool"));
     this.get('olMap').set('clickLock', false);
     this.set('drawToolActive', false);
     if (dragInteraction) {

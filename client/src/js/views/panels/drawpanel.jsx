@@ -305,7 +305,7 @@ var DrawPanelView = {
    */
   abort: function () {
     this.props.model.abort();
-    $('#Point, #Circle, #Text, #Polygon, #LineString, #move, #delete').removeClass('selected');
+    $('#Point, #Circle, #Text, #Polygon, #LineString, #move, #edit, #delete').removeClass('selected');
     $('#abort').hide();
     this.setState({
       symbology: ""
@@ -351,7 +351,7 @@ var DrawPanelView = {
    */
   activateRemovalTool: function () {
     this.props.model.activateRemovalTool();
-    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #delete').removeClass('selected');
+    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete').removeClass('selected');
     $('#delete').addClass('selected');
     $('#abort').show();
     this.setState({
@@ -367,8 +367,24 @@ var DrawPanelView = {
    */
   activateMoveTool: function () {
     this.props.model.activateMoveTool();
-    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #delete').removeClass('selected');
+    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete').removeClass('selected');
     $('#move').addClass('selected');
+    $('#abort').show();
+    this.setState({
+      symbology: ""
+    })
+    this.props.model.set("kmlExportUrl", false);
+    this.props.model.set("kmlImport", false);
+  },
+
+  /**
+   * Activate move tool and update visuals.
+   * @instance
+   */
+  activateEditTool: function () {
+    this.props.model.activateEditTool();
+    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete').removeClass('selected');
+    $('#edit').addClass('selected');
     $('#abort').show();
     this.setState({
       symbology: ""
@@ -384,7 +400,7 @@ var DrawPanelView = {
    */
   activateDrawTool: function (type) {
     this.props.model.activateDrawTool(type);
-    $('#Circle, #Point, #Text, #Polygon, #LineString, #move, #delete').removeClass('selected');
+    $('#Circle, #Point, #Text, #Polygon, #LineString, #move, #edit, #delete').removeClass('selected');
     $('#' + type).addClass('selected');
     $('#abort').show();
     this.setState({
@@ -725,6 +741,9 @@ var DrawPanelView = {
               </li>
               <li id="move" onClick={this.activateMoveTool}>
                 <i className="fa fa-arrows fa-0"></i> <span>Flytta objekt</span>
+              </li>
+              <li id="edit" onClick={this.activateEditTool}>
+                <i className="fa fa-edit fa-0"></i> <span>Ändra objekt</span>
               </li>
               <li id="delete" onClick={this.activateRemovalTool}>
                 <i className="fa fa-eraser fa-0"></i> <span>Radera objekt</span>
