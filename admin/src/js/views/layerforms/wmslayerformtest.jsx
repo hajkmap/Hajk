@@ -23,6 +23,7 @@
 import React from "react";
 import { Component } from 'react';
 import $ from 'jquery';
+import InfoClick from '../infoclick.jsx';
 
 const defaultState = {
   load: false,
@@ -55,6 +56,7 @@ const defaultState = {
   layerType: "WMSTest",
   attribution: ""
 };
+
 
 /**
  *
@@ -90,15 +92,14 @@ class WMSLayerFormTest extends Component {
     $('#select-image').trigger('click');
   }
 
-  renderLayerList() {
+  renderLayerList() {    
     var layers = this.renderLayersFromCapabilites();
-    return (
-      <div className="row">        
-        <div className="col-md-12 layer-list-test no-padding">
+
+    return (              
+      <div className="col-md-12 layer-list-test no-padding">
         <ul className="list-group no-padding no-margin-top">
           {layers}
         </ul>
-        </div>
       </div>      
     )
   }
@@ -146,18 +147,17 @@ class WMSLayerFormTest extends Component {
     if (this.state && this.state.capabilities) {
       var layers = [];
 
-      var append = (layer) => {
+      var append = (layer, index) => {
 
         var classNames = this.state.layerPropertiesName === layer.Name ?
                          "fa fa-info-circle active" : "fa fa-info-circle";
 
-        var i = this.createGuid();
+        var i = index;
         var title = /^\d+$/.test(layer.Name) ? <label>&nbsp;{layer.Title}</label> : null;
 
         var queryableIcon = this.state.queryable ? "fa fa-check" : "fa fa-remove";
-
-        return (
-          <div className="row">
+        
+        return (      
             <li key={"fromCapability_" + i} className="list-item">
               <div className="col-md-6 overflow-hidden">
                 <input
@@ -175,34 +175,33 @@ class WMSLayerFormTest extends Component {
               </div>
               <i style={{display:"none"}} className={classNames} onClick={(e) => this.describeLayer(e, layer.Name)}></i>
               <span className={queryableIcon + " col-md-1"}/>
-              <select key={"select_" + i} className="col-md-5 form-control layer-list-style-select-test">
+              {<select key={"select_" + i} className="col-md-5 form-control layer-list-style-select-test">
                 {this.setLayerListStyles(layer)}
-              </select>
-              
+              </select>}
             </li>
-          </div>
         )
       };
 
-      this.state.capabilities.Capability.Layer.Layer.map((layer) => {
+      this.state.capabilities.Capability.Layer.Layer.map((layer, index) => {
         if (layer.Layer) {
-          layer.Layer.forEach((layer) => {
+          layer.Layer.forEach((layer, subIndex) => {
             if (layer.Layer) {
-              layer.Layer.forEach((layer) => {
-                layers.push(append(layer));
+              layer.Layer.forEach((layer, subSubIndex) => {
+                layers.push(append(layer, subSubIndex));
               });
             } else {
-              layers.push(append(layer));
+              layers.push(append(layer, subIndex));
             }
           });
         } else {
-          layers.push(append(layer));
+          layers.push(append(layer, index));
         }
       });
       return layers;
     } else {
       return null;
     }
+
   }
 
   loadLayers(layer, callback) {
@@ -397,21 +396,13 @@ class WMSLayerFormTest extends Component {
     return valid;
   }
 
-  handleTitleChange(e) {
-    if(!e.type === "keypress") {
-
-    } else {
-      
-    }
-  }
-
   render() {
 
     var loader = this.state.load ? <i className="fa fa-refresh fa-spin"></i> : null;
     var imageLoader = this.state.imageLoad ? <i className="fa fa-refresh fa-spin"></i> : null
 
     return (
-      <fieldset>
+      <fieldset className="article-wrapper">
         <legend>Lägg till lager</legend>
         <div className="row">
           <div className="col-md-6">
@@ -468,7 +459,9 @@ class WMSLayerFormTest extends Component {
           <label className="col-md-2">Infoklick</label>
           <label className="col-md-5">Stil</label>
         </div>
-        {this.renderLayerList()}
+        <div className="row">
+          {this.renderLayerList()}
+        </div>
         <div className="row">
           <div className="col-md-12">
             <label className="label-block">Valda lager*</label>
@@ -522,9 +515,11 @@ class WMSLayerFormTest extends Component {
           </div>
         </div>
         <div className="row">
-          <div className="col-md-12">
-            <label>Senast ändrad</label>
-            <span ref="input_date"><i>{this.props.model.parseDate(this.state.date)}</i></span>
+          <div className="col-md-6">
+            <div className="form-group">
+              <label>Senast Ändrad</label>
+              <span ref="input_date" className="text-display"><i>{this.props.model.parseDate(this.state.date)}</i></span>
+            </div>
           </div>
         </div>
         <div className="row">
@@ -555,30 +550,40 @@ class WMSLayerFormTest extends Component {
             </div>
           </div>
         </div>
-
-        <div>
-          <label>Inforuta</label>
-          <textarea
-            ref="input_infobox"
-            value={this.state.infobox}
-            onChange={(e) => this.setState({'infobox': e.target.value})}
-          />
+        <legend>Infoklick-konfiguration för valda lager</legend>
+        <InfoClick queryable={this.state.queryable} infobox={this.state.infobox} addedLayers={this.state.addedLayers} />
+        {/*<div className="row">
+          <div className="col-md-6">
+            <div className="form-group">
+              <label>Infoklickbar</label>
+              <input
+                type="checkbox"
+                ref="input_queryable"
+                onChange={(e) => {this.setState({queryable: e.target.checked})}}
+                checked={this.state.queryable}
+              />
+            </div>
+          </div>
         </div>
-        <div>
+        <div className="row">
+          <div className="col-md-12">
+            <div className="form-group">
+              <label>Inforuta</label>
+              <textarea
+                ref="input_infobox"
+                value={this.state.infobox}
+                onChange={(e) => this.setState({'infobox': e.target.value})}
+                className="form-control"
+              />
+            </div>
+          </div>
+        </div>*/}
+        {/*<div>
           <label>Servertyp</label>
           <select ref="input_serverType" value={this.state.serverType} onChange={(e) => this.setState({'serverType': e.target.value})}>
             <option>geoserver</option>
             <option>arcgis</option>
           </select>
-        </div>
-        <div>
-          <label>Infoklickbar</label>
-          <input
-            type="checkbox"
-            ref="input_queryable"
-            onChange={(e) => {this.setState({queryable: e.target.checked})}}
-            checked={this.state.queryable}
-          />
         </div>
         <div style={{display: "none"}}>
           <label>Geowebcache</label>
@@ -605,7 +610,7 @@ class WMSLayerFormTest extends Component {
             value={this.state.attribution}
             className={this.getValidationClass("attribution")}
           />
-        </div>
+        </div>*/}
       </fieldset>
     );
   }
