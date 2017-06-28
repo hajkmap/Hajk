@@ -163,6 +163,7 @@ var DrawPanelView = {
   getInitialState: function() {
     return {
       visible: false,
+      pointSettings: this.props.model.get('pointSettings'),
       pointRadius: this.props.model.get('pointRadius'),
       pointSymbol: this.props.model.get('pointSymbol'),
       fontSize: this.props.model.get('fontSize'),
@@ -414,6 +415,16 @@ var DrawPanelView = {
   },
 
   /**
+   * Set marker image.
+   * @instance
+   * @param {object} e
+   */
+  setMarkerImg: function(e) {
+    this.props.model.set('markerImg', e.target.src);
+    this.forceUpdate();
+  },
+
+  /**
    * Render the symbology component.
    * @instance
    * @param {string} type
@@ -438,6 +449,62 @@ var DrawPanelView = {
       state[state_prop] = value;
       this.setState(state);
       this.props.model[func].call(this.props.model, value);
+    }
+
+    function hasClass(icon) {
+      return this.props.model.get('markerImg') === window.location.href + `assets/icons/${icon}.png`
+        ? "selected"
+        : "" ;
+    }
+
+    function renderIcons() {
+
+      var icons = this.props.model.get('icons').split(',');
+
+      return (
+        icons.map(icon => {
+          icon = icon.trim();
+          if (icon === "br") {
+            return (<br />);
+          } else {
+            var iconSrc = `assets/icons/${icon}.png`;
+            return (
+              <div className={hasClass.call(this, icon)}>
+                <img onClick={this.setMarkerImg} src={iconSrc}></img>
+              </div>
+            )
+          }
+        })
+      );
+    }
+
+    function renderPointSettings() {
+      switch (this.state.pointSettings) {
+        case "point":
+          return (
+            <div>
+              <div>Färg</div>
+              <ColorPicker
+                model={this.props.model}
+                property="pointColor"
+                onChange={this.props.model.setPointColor.bind(this.props.model)}
+              />
+              <div>Storlek</div>
+              <select value={this.state.pointRadius} onChange={update.bind(this, 'setPointRadius', 'pointRadius')}>
+                <option value="4">Liten</option>
+                <option value="7">Normal</option>
+                <option value="14">Stor</option>
+                <option value="20">Större</option>
+              </select>
+            </div>
+          );
+        case "symbol":
+          return (
+            <div className="point-marker-img">
+                {renderIcons.call(this)}
+            </div>
+          );
+      }
     }
 
     switch (type) {
@@ -465,23 +532,23 @@ var DrawPanelView = {
         return (
           <div>
             <h2>Ritmanér punkt</h2>
-            <input type="checkbox" onChange={update.bind(this, 'setPointSymbol', 'pointSymbol')}
-                                   checked={this.state.pointSymbol}
-                                   id="point-symbol"/>
-            <label htmlFor="point-symbol">Använd symbol</label>
-            <div>Färg</div>
-            <ColorPicker
-              model={this.props.model}
-              property="pointColor"
-              onChange={this.props.model.setPointColor.bind(this.props.model)}
-            />
-            <div>Storlek</div>
-            <select value={this.state.pointRadius} onChange={update.bind(this, 'setPointRadius', 'pointRadius')}>
-              <option value="4">Liten</option>
-              <option value="7">Normal</option>
-              <option value="14">Stor</option>
-              <option value="20">Större</option>
-            </select>
+            <label>Välj typ</label>
+            <div>
+              <select value={this.state.pointSettings} onChange={e => {
+                  var value = e.target.value === "symbol" ? true : false;
+                  update.call(this, 'setPointSettings', 'pointSettings', e);
+                  update.call(this, 'setPointSymbol', 'pointSymbol', {
+                    target: {
+                      type: "checkbox",
+                      checked: value
+                    }
+                  });
+                }}>
+                <option key="point" value="point">Punkt</option>
+                <option key="symbol" value="symbol">Symbol</option>
+              </select>
+            </div>
+             {renderPointSettings.call(this)}
           </div>
         );
       case "LineString":

@@ -298,7 +298,8 @@
       "type": "draw",
       "options": {
         "exportUrl": "/mapservice/export/kml",
-        "importUrl": "/mapservice/import/kml"
+        "importUrl": "/mapservice/import/kml",
+        "icons": "marker, marker_black, marker_green, marker_red, marker_yellow, br, pin, pin_black, pin_green, pin_red, pin_yellow"
       }
     },
     {
@@ -314,6 +315,10 @@
       "options": {
         "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4"
       }
+    },
+    {
+      "type": "location",
+      "options": {}
     }
   ],
   "map": {

@@ -81,9 +81,11 @@ var DrawModelProperties = {
   fontSize: "10",
   pointText: "Text",
   pointColor: "rgb(15, 175, 255)",
+  pointSettings: "point",
   pointRadius: 7,
   pointSymbol: false,
-  markerImg: "assets/icons/marker.png",
+  icons: "",
+  markerImg: window.location.href + "assets/icons/marker.png",
   lineColor: "rgb(15, 175, 255)",
   lineWidth: 3,
   lineStyle: "solid",
@@ -169,6 +171,10 @@ var DrawModel = {
     this.set('olMap', olMap);
     this.get('olMap').addLayer(this.get('drawLayer'));
     this.set('drawLayer', this.get('drawLayer'));
+    if (this.get('icons') !== "") {
+      let icon = this.get('icons').split(',')[0];
+      this.set('markerImg', window.location.href + "assets/icons/" + icon + ".png");
+    }
     this.createMeasureTooltip();
   },
 
@@ -794,18 +800,18 @@ var DrawModel = {
 
     function getImage() {
 
+      var radius = type === "Text" ? 0 : forcedProperties ? forcedProperties.pointRadius : this.get('pointRadius');
       var iconSrc = forcedProperties ? (forcedProperties.image || this.get('markerImg')) : this.get('markerImg');
 
       var icon = new ol.style.Icon({
-        anchor: [0.5, 32],
+        anchor: [0.5, 1],
         anchorXUnits: 'fraction',
-        anchorYUnits: 'pixels',
-        src: iconSrc,
-        imgSize: [32, 32]
+        anchorYUnits: 'fraction',
+        src: iconSrc
       });
 
       var dot = new ol.style.Circle({
-        radius: type === "Text" ? 0 : forcedProperties ? forcedProperties.pointRadius : this.get('pointRadius'),
+        radius: radius,
         fill: new ol.style.Fill({
           color: forcedProperties ? forcedProperties.pointColor : this.get('pointColor')
         }),
@@ -1011,6 +1017,15 @@ var DrawModel = {
    */
   setCircleRadius: function (radius) {
     this.set("circleRadius", radius);
+  },
+
+  /**
+   * Set the property pointSettings
+   * @param {string} color
+   * @instance
+   */
+  setPointSettings: function (value) {
+    this.set("pointSettings", value);
   },
 
   /**
