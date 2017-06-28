@@ -124,7 +124,7 @@
       "caption": "Biotopkartering",
       "url": "http://ksdgis.se/geoserver/wms",
       "owner": "",
-      "date": "1492618274801",
+      "date": "1498648722585",
       "content": "",
       "legend": "",
       "projection": null,
@@ -546,6 +546,29 @@
       "projection": null,
       "layers": [
         "uddevalla:koloniomr_p"
+      ],
+      "infobox": "",
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": ""
+    },
+    {
+      "id": "40",
+      "caption": "awdd",
+      "url": "http://194.71.132.27/geoserver/wms",
+      "owner": "",
+      "date": "1498648811520",
+      "content": "awddaa",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "motala:Biotopkartering2016"
       ],
       "infobox": "",
       "searchFields": null,

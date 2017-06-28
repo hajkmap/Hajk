@@ -38,7 +38,7 @@ const defaultState = {
   validationErrors: [],
   mode: "add",
   alert: false,
-  corfirm: false,
+  confirm: false,
   alertMessage: "",
   content: "",
   confirmAction: () => {},
@@ -581,6 +581,7 @@ class Manager extends Component {
           ref="WMSLayerFormTest"
           model={this.props.model}
           layer={this.state.layer}
+          parentView={this}
           url={this.props.config.url_default_server} />
       case "WFS":
         return <WFSLayerForm

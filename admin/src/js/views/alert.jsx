@@ -50,6 +50,79 @@ class Alert extends Component {
           </div>
         </div>
       )
+    } else if (options.settings) {
+      return !options.visible ? false : (
+        <div className="modal">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h4 className="modal-title">Infoklickinställningar - {options.name}</h4>
+              </div>
+              <div className="modal-body">
+                <div className="row">
+                  <div className="col-md-6">
+                    <div className="form-group">
+                      <label htmlFor="infoclickable">Infoklick</label>
+                      <input
+                        id="infoclickable"
+                        type="checkbox"
+                        ref="input_queryable"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-6">
+                    <div className="form-group">
+                      <label>Format</label>
+                      <select 
+                        defaultValue="Välj ett format"
+                        className="form-control"
+                        onChange={(e) => {
+                          this.props.setFormat(e.target.value);
+                        }}>
+                        {options.formats}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="col-md-6">
+                    <div className="form-group">
+                      <label>Stil</label>
+                      <select 
+                        defaultValue="Välj en stil"
+                        className="form-control"
+                        onChange={(e) => {
+                          this.props.setStyle(e.target.value);
+                        }}>
+                        {options.styles}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-12">
+                    <div className="form-group">
+                      <label>Inforuta</label>
+                      <textarea
+                        ref="input_infobox"
+                        defaultValue={this.props.infobox}
+                        onChange={(e) => {
+                          this.props.setInfobox(e.target.value);
+                        }}
+                        className="form-control"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" onClick={options.denyAction} className="btn btn-default">Avbryt</button>&nbsp;
+                <button type="button" onClick={options.confirmAction} className="btn btn-primary">Spara</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
     } else {
       return !options.visible ? false : (
         <div className="modal">
@@ -60,11 +133,11 @@ class Alert extends Component {
               </div>
               <div className="modal-body">
                 <p>
-                  {options.message.split('\n').map(function(text, i) {
+                  {options.message.split('\n').map(function (text, i) {
                     return (
                       <span key={i}>
                         <span>{text}</span>
-                        <br/>
+                        <br />
                       </span>
                     )
                   })}
