@@ -153,7 +153,7 @@ var ExportModel = {
     return this.get('previewFeature')
   },
 
-  addTiffPreview: function (center) {        
+  addTiffPreview: function (center) {
 
     var dpi = 25.4 / 0.28
     ,   ipu = 39.37
@@ -361,6 +361,11 @@ var ExportModel = {
       ,   fontSize = "16"
       ,   fontColor = "#FFFFFF";
 
+      if (style.getText && style.getText()) {
+        let font = style.getText().getFont();
+        fontSize = font.match(/^\d+/)[0];
+      }
+
       if (style.getFill && style.getFill() && style.getFill().getColor()) {
         fillColor = style.getFill().getColor().toHex();
         fillOpacity = style.getFill().getColor().toOpacity();
@@ -405,19 +410,19 @@ var ExportModel = {
       }
     }
 
-    function as2DPairs(coordinates, type) {          
+    function as2DPairs(coordinates, type) {
       switch (type) {
         case "Point":
           return [coordinates];
         case "LineString":
           return coordinates;
         case "Polygon":
-          return coordinates[0];          
-        case "MultiPolygon":    
+          return coordinates[0];
+        case "MultiPolygon":
           return coordinates[0][0];
-        case "Circle":    
+        case "Circle":
           return [coordinates[0], coordinates[1]];
-      }   
+      }
     }
 
     function translateVector(features, sourceStyle) {
@@ -452,14 +457,14 @@ var ExportModel = {
 
           if (!feature.getStyle() && sourceStyle) {
             feature.setStyle(sourceStyle)
-          }          
-                              
+          }
+
           coords = type === "Circle"
           ? as2DPairs([geom.getCenter(), [geom.getRadius(), 0]], "Circle")
           : as2DPairs(geom.getCoordinates(), type);
-          
-          if (type === "MultiPolygon") {   
-            holes = geom.getCoordinates()[0].slice(1, geom.getCoordinates()[0].length);                  
+
+          if (type === "MultiPolygon") {
+            holes = geom.getCoordinates()[0].slice(1, geom.getCoordinates()[0].length);
           }
 
           return {
@@ -675,7 +680,7 @@ var ExportModel = {
     data.orientation = options.orientation;
     data.format = options.format;
     data.scale = options.scale;
-      
+
     this.set("downloadingPdf", true);
 
     $.ajax({
@@ -739,7 +744,7 @@ var ExportModel = {
     data.bbox = [left, right, bottom, top];
     data.orientation = "";
     data.format = "";
-    data.scale = scale;    
+    data.scale = scale;
     this.set("downloadingTIFF", true);
 
     $.ajax({
@@ -757,7 +762,7 @@ var ExportModel = {
         this.set("downloadingTIFF", false);
         alert("Det gick inte att skapa tiff. Försök igen senare.");
       }
-    });  
+    });
   },
 
   /**
