@@ -112,8 +112,8 @@ label {
 
 .map-logo {
   position: absolute;
-  top: 8px;
-  right: 60px;
+  top: 0.5em;
+  left: 0.5em;
   height: 48px;
   background: white no-repeat;
   background-size: 100%;
@@ -121,6 +121,12 @@ label {
   border: 1px solid #CCC;
   border-radius: 6px;
   padding: 5px;
+  @media only screen and (max-device-width : 480px) {
+    bottom: 107px;
+    right: 0.5em;
+    top: inherit;
+    left: inherit;
+  }
 }
 
 .map-logo img {

@@ -172,7 +172,7 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "5"
+          "22"
         ],
         "groups": [
           {
@@ -183,19 +183,9 @@
             "expanded": false,
             "layers": [
               {
-                "id": "6",
+                "id": "7",
                 "visibleAtStart": false,
-                "drawOrder": 0
-              },
-              {
-                "id": "11",
-                "visibleAtStart": true,
-                "drawOrder": 0
-              },
-              {
-                "id": "4",
-                "visibleAtStart": true,
-                "drawOrder": 0
+                "drawOrder": 1000
               }
             ],
             "groups": []
@@ -236,13 +226,13 @@
         "markerImg": "assets/icons/marker.png",
         "anchor": [
           16,
-          16
+          32
         ],
         "imgSize": [
           32,
           32
         ],
-        "popupOffsetY": 32
+        "popupOffsetY": -32
       }
     },
     {
@@ -352,10 +342,10 @@
       0.0
     ],
     "extent": [
-      150202.0,
-      6382100.0,
-      209944.0,
-      6471028.0
+      0,
+      6000000,
+      1000000,
+      9000000
     ],
     "logo": "assets/logo.png",
     "colors": {

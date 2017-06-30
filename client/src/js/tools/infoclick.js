@@ -268,14 +268,14 @@ var InfoClickModel = {
    * @instance
    * @param {DOMelement} elm
    */
-  enableScroll: function (elm) {    
-    if (this.isTouchDevice()){      
-      var scrollStartPos = 0;      
+  enableScroll: function (elm) {
+    if (this.isTouchDevice()){
+      var scrollStartPos = 0;
       elm.addEventListener("touchstart", function(event) {
-        scrollStartPos = this.scrollTop + event.touches[0].pageY;                
-      }, false);      
+        scrollStartPos = this.scrollTop + event.touches[0].pageY;
+      }, false);
       elm.addEventListener("touchmove", function(event) {
-        this.scrollTop = scrollStartPos - event.touches[0].pageY;                    
+        this.scrollTop = scrollStartPos - event.touches[0].pageY;
       }, false);
     }
   },
@@ -306,7 +306,7 @@ var InfoClickModel = {
     infos.forEach((info, i) => {
         function display(index, inf) {
 
-          var coords    = inf.feature.getGeometry().getCoordinates()
+          var coords    = inf.feature.getGeometry() ? inf.feature.getGeometry().getCoordinates() : false
           ,   position  = coordinate
           ,   feature   = new Backbone.Model()
           ,   infobox   = $('<div></div>')
@@ -350,10 +350,10 @@ var InfoClickModel = {
             this.enableScroll($('#popup-content')[0]);
           }
 
-          if (isPoint(coords)) {  
-            offsetY = this.get('popupOffsetY');    
+          if (isPoint(coords)) {
+            offsetY = this.get('popupOffsetY');
           }
-                    
+
           ovl.setPosition(position);
           ovl.setOffset([0, offsetY]);
 

@@ -128,12 +128,14 @@ class Manager extends Component {
           url: layer.url,
           visibleAtStart: layer.visibleAtStart,
           queryable: layer.queryable,
+          singleTile: layer.singleTile,
           projection: layer.projection,
           extent: layer.extent,
           opacity: layer.opacity,
           drawOrder: layer.drawOrder,
           addedLayers: [],
-          layerType: layer.type
+          layerType: layer.type,
+          attribution: layer.attribution
         });
 
         this.refs["ArcGISLayerForm"].loadLayers(layer, () => {
@@ -151,7 +153,7 @@ class Manager extends Component {
         layerType: "Vector"
       });
 
-      setTimeout(() => {        
+      setTimeout(() => {
         this.refs["VectorLayerForm"].setState({
           id: layer.id,
           dataFormat: layer.dataFormat || "WFS",
@@ -172,6 +174,18 @@ class Manager extends Component {
           opacity: layer.opacity,
           symbolXOffset: layer.symbolXOffset,
           symbolYOffset: layer.symbolYOffset,
+          labelAlign: layer.labelAlign,
+          labelBaseline: layer.labelBaseline,
+          labelSize: layer.labelSize,
+          labelOffsetX: layer.labelOffsetX,
+          labelOffsetY: layer.labelOffsetY,
+          labelWeight: layer.labelWeight,
+          labelFont: layer.labelFont,
+          labelFillColor: layer.labelFillColor,
+          labelOutlineColor: layer.labelOutlineColor,
+          labelOutlineWidth: layer.labelOutlineWidth,
+          labelAttribute: layer.labelAttribute,
+          showLabels: layer.showLabels,
           drawOrder: layer.drawOrder,
           layer: layer.layer
         });
@@ -209,7 +223,8 @@ class Manager extends Component {
           serverType: layer.serverType,
           drawOrder: layer.drawOrder,
           addedLayers: [],
-          layerType: layer.type
+          layerType: layer.type,
+          attribution: layer.attribution
         });
 
         this.refs["WMSLayerForm"].loadLayers(layer, () => {
@@ -245,7 +260,8 @@ class Manager extends Component {
           origin: layer.origin,
           resolutions: layer.resolutions,
           matrixIds: layer.matrixIds,
-          layerType: layer.type
+          layerType: layer.type,
+          attribution: layer.attribution
         });
         setTimeout(() => {
           this.refs["WMTSLayerForm"].validate();
@@ -344,7 +360,7 @@ class Manager extends Component {
    *
    */
   renderLayersFromConfig(layers) {
-    
+
     layers = this.state.filter ? this.getLayersWithFilter() : this.props.model.get('layers');
 
     var startsWith = [];
@@ -358,15 +374,15 @@ class Manager extends Component {
       startsWith.sort(function(a, b) {
         if(a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
         if(a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
-        return 0; 
+        return 0;
       });
 
       alphabetically.sort(function(a, b) {
         if(a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
         if(a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
-        return 0; 
+        return 0;
       });
-        
+
       layers = startsWith.concat(alphabetically);
     }
 

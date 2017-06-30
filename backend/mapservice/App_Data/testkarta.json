@@ -315,7 +315,7 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "5"
+          "22"
         ],
         "groups": [
           {
@@ -326,17 +326,17 @@
             "expanded": false,
             "layers": [
               {
-                "id": "32",
+                "id": "17",
                 "visibleAtStart": false,
                 "drawOrder": 0
               },
               {
-                "id": "10",
+                "id": "26",
                 "visibleAtStart": true,
                 "drawOrder": 1000
               },
               {
-                "id": "4",
+                "id": "23",
                 "visibleAtStart": true,
                 "drawOrder": 1000
               }

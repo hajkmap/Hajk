@@ -55,6 +55,9 @@ var StreetView = {
         imageDate: this.props.model.get('imageDate')
       });
     });
+    this.props.model.on('change:location', () => {
+      this.props.navigationPanel.maximize();
+    });
   },
 
   componentWillUnmount: function () {
@@ -63,20 +66,25 @@ var StreetView = {
     this.props.model.off('change:imageDate');
   },
 
+  renderInfoText: function () {
+    if (!this.props.model.get('location')) {
+      return <div>Klicka i kartan för att aktivera street view.</div>;
+    }
+  },
+
   /**
    * Render the view
    * @instance
    * @return {external:ReactElement}
    */
   render: function () {
-    var anchor = this.props.model.get('anchor');
     return (
       <Panel title="Street View" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked}>
         <div className="panel-content">
           <h3>Street view</h3>
-          <div>Klicka i kartan för att aktivera street view.</div>
+          {this.renderInfoText()}
           <div id="street-view-window"></div>
-          <div id="image-date">{this.state.imageDate ? "Bild tagen: " + this.state.imageDate : ""}</div>
+          <div id="image-date">{this.state.imageDate ? this.state.imageDate : ""}</div>
         </div>
       </Panel>
     );
@@ -85,7 +93,7 @@ var StreetView = {
 
 /**
  * StreetViewPanelView module.<br>
- * Use <code>require('views/anchorpanel')</code> for instantiation.
+ * Use <code>require('views/streetviewpanel')</code> for instantiation.
  * @module StreetViewPanel-module
  * @returns {StreetViewPanel}
  */

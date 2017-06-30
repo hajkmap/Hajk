@@ -86,22 +86,30 @@ var AttributeEditor = React.createClass({
   checkInteger: function (name, value) {
     if (/^\d+$/.test(value) || value === "") {
       this.state.formValues[name] = value;
-      this.updateFeature();
-      this.setState({
-        formValues: this.state.formValues
-      });
-    }
+      this.updateFeature();      
+    } else {                  
+      if (!this.state.formValues[name]) {
+        this.state.formValues[name] = "";
+      }               
+    }    
+    this.setState({
+      formValues: this.state.formValues
+    });
   },
 
   checkNumber: function (name, value) {
     if (/^\d+([\.\,](\d+)?)?$/.test(value) || value === "") {
       value = value.replace(',', '.');
       this.state.formValues[name] = value;
-      this.updateFeature();
-      this.setState({
-        formValues: this.state.formValues
-      });
+      this.updateFeature();      
+    } else {                  
+      if (!this.state.formValues[name]) {
+        this.state.formValues[name] = "";
+      }               
     }
+    this.setState({
+      formValues: this.state.formValues
+    });
   },
 
   checkUrl: function (name, value) {
@@ -196,7 +204,7 @@ var AttributeEditor = React.createClass({
     switch (field.textType) {
       case "heltal":
         return (
-          <input className="form-control" type="text" value={value} onChange={(e) => {
+          <input className="form-control" type="text" value={value} onChange={(e) => {                            
               this.setChanged();
               this.checkInteger(field.name, e.target.value);
               field.initialRender = false;
@@ -363,7 +371,7 @@ var Toolbar = React.createClass({
 
     if (this.state.activeTool === type.toLowerCase()) {
       this.props.model.deactivateDrawTool(true);
-      if (type === 'move') {
+      if (type === 'move') {        
         this.props.model.get('layer').dragLocked = true;
       }
 

@@ -40,6 +40,6 @@
     { "name": "layermanager", "title": "Visningstjänster", "default": true },
     { "name": "search", "title": "Söktjänster" },
     { "name": "edit", "title": "Redigeringstjänster" },
-    { "name": "mapsettings", "title": "Kartinställnignar" }
+    { "name": "mapsettings", "title": "Kartinställningar" }
   ]
 }

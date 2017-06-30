@@ -1,7 +1,7 @@
 {
   "wmtslayers": [
     {
-      "id": "2",
+      "id": "21",
       "caption": "Alingsåskartan",
       "url": "http://gisak.alingsas.se/arcgis/rest/services/Bakgrund/Alingsaskartan/MapServer/WMTS",
       "owner": null,
@@ -44,7 +44,7 @@
       "attribution": null
     },
     {
-      "id": "5",
+      "id": "22",
       "caption": "Lantmäteriet",
       "url": "http://ksdgis.se/lmproxy/wmts",
       "owner": null,
@@ -97,7 +97,7 @@
   ],
   "wmslayers": [
     {
-      "id": "4",
+      "id": "1",
       "caption": "Fastighet",
       "url": "http://ksdgis.se/geoserver/demo/wms",
       "owner": "",
@@ -120,7 +120,7 @@
       "attribution": null
     },
     {
-      "id": "11",
+      "id": "2",
       "caption": "Biotopkartering",
       "url": "http://ksdgis.se/geoserver/wms",
       "owner": "",
@@ -145,7 +145,7 @@
       "attribution": ""
     },
     {
-      "id": "12",
+      "id": "3",
       "caption": "Huvudavrinningsområden",
       "url": "http://ksdgis.se/geoserver/fortum/wms",
       "owner": "",
@@ -168,7 +168,7 @@
       "attribution": ""
     },
     {
-      "id": "16",
+      "id": "4",
       "caption": "Vattendrag",
       "url": "http://ksdgis.se/geoserver/fortum/wms",
       "owner": "",
@@ -191,7 +191,7 @@
       "attribution": ""
     },
     {
-      "id": "17",
+      "id": "5",
       "caption": "Vattenförekomster (vattendrag)",
       "url": "http://ksdgis.se/geoserver/fortum/wms",
       "owner": "",
@@ -214,7 +214,7 @@
       "attribution": ""
     },
     {
-      "id": "18",
+      "id": "6",
       "caption": "Vattenyta",
       "url": "http://ksdgis.se/geoserver/fortum/wms",
       "owner": "",
@@ -237,7 +237,7 @@
       "attribution": ""
     },
     {
-      "id": "22",
+      "id": "7",
       "caption": "Dammar SMHI",
       "url": "http://ksdgis.se/geoserver/fortum/wms",
       "owner": "",
@@ -260,7 +260,7 @@
       "attribution": ""
     },
     {
-      "id": "23",
+      "id": "8",
       "caption": "Huvudavrinningsområden",
       "url": "http://ksdgis.se/geoserver/fortum/wms",
       "owner": "",
@@ -283,7 +283,7 @@
       "attribution": ""
     },
     {
-      "id": "24",
+      "id": "9",
       "caption": "Ortofoto",
       "url": "https://karta.uddevalla.se/lmproxy/wms/ortofoto",
       "owner": "",
@@ -306,7 +306,7 @@
       "attribution": "Lantmäteriet"
     },
     {
-      "id": "25",
+      "id": "10",
       "caption": "Vattenförekomster (vattenytor)",
       "url": "http://ksdgis.se/geoserver/fortum/wms",
       "owner": "",
@@ -329,7 +329,7 @@
       "attribution": ""
     },
     {
-      "id": "26",
+      "id": "11",
       "caption": "Badanläggning",
       "url": "https://karta.uddevalla.se/geoserver/wms",
       "owner": "",
@@ -352,7 +352,7 @@
       "attribution": ""
     },
     {
-      "id": "27",
+      "id": "12",
       "caption": "Badplats",
       "url": "https://karta.uddevalla.se/geoserver/wms",
       "owner": "",
@@ -375,7 +375,7 @@
       "attribution": ""
     },
     {
-      "id": "28",
+      "id": "13",
       "caption": "Bibliotek",
       "url": "https://karta.uddevalla.se/geoserver/wms",
       "owner": "",
@@ -398,7 +398,7 @@
       "attribution": ""
     },
     {
-      "id": "29",
+      "id": "14",
       "caption": "Bokbuss",
       "url": "https://karta.uddevalla.se/geoserver/wms",
       "owner": "",
@@ -421,7 +421,7 @@
       "attribution": ""
     },
     {
-      "id": "30",
+      "id": "15",
       "caption": "Cykelrutt",
       "url": "https://karta.uddevalla.se/geoserver/wms",
       "owner": "",
@@ -444,7 +444,7 @@
       "attribution": ""
     },
     {
-      "id": "31",
+      "id": "16",
       "caption": "Bohusleden",
       "url": "https://karta.uddevalla.se/geoserver/wms",
       "owner": "",
@@ -467,7 +467,7 @@
       "attribution": ""
     },
     {
-      "id": "32",
+      "id": "17",
       "caption": "Parkering",
       "url": "https://karta.uddevalla.se/geoserver/wms",
       "owner": "",
@@ -490,7 +490,7 @@
       "attribution": ""
     },
     {
-      "id": "33",
+      "id": "18",
       "caption": "Vandringsled",
       "url": "https://karta.uddevalla.se/geoserver/wms",
       "owner": "",
@@ -513,7 +513,7 @@
       "attribution": ""
     },
     {
-      "id": "34",
+      "id": "19",
       "caption": "Grundskola",
       "url": "https://karta.uddevalla.se/geoserver/wms",
       "owner": "",
@@ -536,7 +536,7 @@
       "attribution": ""
     },
     {
-      "id": "35",
+      "id": "20",
       "caption": "Koloniområde",
       "url": "https://karta.uddevalla.se/geoserver/wms",
       "owner": "",
@@ -653,7 +653,7 @@
   ],
   "vectorlayers": [
     {
-      "id": "1",
+      "id": "23",
       "dataFormat": "WFS",
       "caption": "Grundskola",
       "url": "http://gisak.alingsas.se/arcgis/services/Extern_webbkarta/Utbildning_barnomsorg/MapServer/WFSServer",
@@ -675,7 +675,7 @@
       "queryable": true
     },
     {
-      "id": "3",
+      "id": "24",
       "dataFormat": "WFS",
       "caption": "Förskola",
       "url": "http://gisak.alingsas.se/arcgis/services/Extern_webbkarta/Utbildning_barnomsorg/MapServer/WFSServer",
@@ -697,7 +697,7 @@
       "queryable": true
     },
     {
-      "id": "7",
+      "id": "25",
       "dataFormat": "WFS",
       "caption": "Testyta",
       "url": "http://localhost/geoserver/wfs",
@@ -719,7 +719,7 @@
       "queryable": true
     },
     {
-      "id": "10",
+      "id": "26",
       "dataFormat": "WFS",
       "caption": "Yta",
       "url": "http://194.71.132.27/geoserver/demo/wfs",
@@ -741,7 +741,7 @@
       "queryable": true
     },
     {
-      "id": "14",
+      "id": "27",
       "dataFormat": "WFS",
       "caption": "Dammar",
       "url": "http://ksdgis.se/geoserver/fortum/wfs",
@@ -763,7 +763,7 @@
       "queryable": true
     },
     {
-      "id": "15",
+      "id": "28",
       "dataFormat": "WFS",
       "caption": "Kraftverk",
       "url": "http://194.71.132.27/geoserver/fortum/wfs",
@@ -785,7 +785,7 @@
       "queryable": true
     },
     {
-      "id": "36",
+      "id": "29",
       "dataFormat": "WFS",
       "caption": "Badplats (vektor)",
       "url": "https://karta.uddevalla.se/geoserver/wfs",
@@ -807,7 +807,7 @@
       "queryable": true
     },
     {
-      "id": "37",
+      "id": "30",
       "dataFormat": "WFS",
       "caption": "Parkering (vektor)",
       "url": "https://karta.uddevalla.se/geoserver/wfs",
@@ -831,17 +831,35 @@
   ],
   "wfstlayers": [
     {
-      "id": "9",
-      "caption": "Yta",
-      "url": "http://194.71.132.27/geoserver/demo/wfs",
+      "id": "39",
+      "caption": "Fortum daro",
+      "url": "http://ksdgis.se/geoserver/wfs",
       "projection": "EPSG:3006",
       "layers": [
-        "demo:yta"
+        "fortum:fortum_daro_merge"
       ],
       "editableFields": [
         {
-          "index": 1,
-          "name": "name",
+          "index": 2,
+          "name": "aroid",
+          "dataType": "string",
+          "textType": "url",
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 3,
+          "name": "ytkod",
+          "dataType": "int",
+          "textType": null,
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 4,
+          "name": "namn",
           "dataType": "string",
           "textType": "fritext",
           "values": null,
@@ -849,21 +867,45 @@
           "defaultValue": null
         },
         {
-          "index": 3,
-          "name": "list",
+          "index": 5,
+          "name": "vdrid",
           "dataType": "string",
           "textType": "lista",
           "values": [
-            "a",
-            "b"
+            "1",
+            "2",
+            "3",
+            "fyra"
           ],
           "hidden": false,
-          "defaultValue": ""
+          "defaultValue": null
+        },
+        {
+          "index": 6,
+          "name": "inobj",
+          "dataType": "string",
+          "textType": "datum",
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 7,
+          "name": "utobj",
+          "dataType": "string",
+          "textType": "flerval",
+          "values": [
+            "a",
+            "b",
+            "c"
+          ],
+          "hidden": false,
+          "defaultValue": null
         }
       ],
-      "editPoint": false,
+      "editPoint": true,
       "editPolygon": true,
-      "editLine": false
+      "editLine": true
     }
   ],
   "arcgislayers": []

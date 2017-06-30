@@ -49,8 +49,19 @@ const defaultState = {
   layer: "",
   opacity: 1,
   symbolXOffset: 0,
-  symbolYOffset: 0,
-  queryable: true
+  symbolYOffset: 0,  
+  labelAlign: "center",
+  labelBaseline: "alphabetic",
+  labelSize: "12px",
+  labelOffsetX: 0,
+  labelOffsetY: 0,
+  labelWeight: "normal",
+  labelFont: "Arial",
+  labelFillColor: "#000000",
+  labelOutlineColor: "#FFFFFF",
+  labelOutlineWidth: 3,
+  labelAttribute: "Name",
+  showLabels: false
 };
 
 /**
@@ -114,7 +125,19 @@ class VectorLayerForm extends Component {
       symbolXOffset: this.getValue("symbolXOffset"),
       symbolYOffset: this.getValue("symbolYOffset"),
       queryable: this.getValue("queryable"),
-      infobox: this.getValue("infobox")
+      infobox: this.getValue("infobox"),
+      showLabels: this.getValue("showLabels"),
+      labelAlign: this.getValue("labelAlign"),
+      labelBaseline: this.getValue("labelBaseline"),
+      labelSize: this.getValue("labelSize"),
+      labelOffsetX: this.getValue("labelOffsetX"),
+      labelOffsetY: this.getValue("labelOffsetY"),
+      labelWeight: this.getValue("labelWeight"),
+      labelFont: this.getValue("labelFont"),
+      labelFillColor: this.getValue("labelFillColor"),
+      labelOutlineColor: this.getValue("labelOutlineColor"),
+      labelOutlineWidth: this.getValue("labelOutlineWidth"),
+      labelAttribute: this.getValue("labelAttribute")      
     }
   }
 
@@ -140,8 +163,11 @@ class VectorLayerForm extends Component {
     if (fieldName === 'date') value = create_date();
     if (fieldName === 'queryable') value = input.checked;
     if (fieldName === 'visibleAtStart') value = input.checked;
+    if (fieldName === 'showLabels') value = input.checked;
     if (fieldName === 'fillColor') value = rgba_to_string(this.state.fillColor);
     if (fieldName === 'lineColor') value = rgba_to_string(this.state.lineColor);
+    if (fieldName === 'labelFillColor') value = rgba_to_string(this.state.labelFillColor);
+    if (fieldName === 'labelOutlineColor') value = rgba_to_string(this.state.labelOutlineColor);
 
     return value;
   }
@@ -306,6 +332,42 @@ class VectorLayerForm extends Component {
     });
   }
 
+  setLabelAlign(e) {
+    this.setState({
+      labelAlign: e.target.value
+    });
+  }
+
+  setLabelBaseline(e) {
+    this.setState({
+      labelBaseline: e.target.value
+    });
+  }
+
+  setLabelWeight() {
+    this.setState({
+      labelWeight: e.target.value
+    });
+  }
+
+  setLabelFont() {
+    this.setState({
+      labelFont: e.target.value
+    });
+  }
+
+  setLabelFillColor(color) {
+    this.setState({
+      labelFillColor: color
+    });
+  }
+
+  setLabelOutlineColor(color) {
+    this.setState({
+      labelOutlineColor: color
+    });
+  }
+
   appendLayer(e, checkedLayer) {
     this.state.addedLayers.splice(0, this.state.addedLayers.length);
     if (e.target.checked === true) {
@@ -456,6 +518,26 @@ class VectorLayerForm extends Component {
           />
         </div>
         <div>
+          <label>Valt lager*</label>
+          <div ref="input_layer" className={"layer-list-choosen " + this.getValidationClass("layer")}>
+            <ul>
+              {this.renderSelectedLayers()}
+            </ul>
+          </div>
+        </div>
+        <div>
+          <label>Lagerlista</label>
+          {this.renderLayerList()}
+        </div>
+        <div>
+          <label>Inforuta</label>
+          <textarea
+            ref="input_infobox"
+            value={this.state.infobox}
+            onChange={(e) => this.setState({'infobox': e.target.value})}
+          />
+        </div>        
+        <div>
           <label>Ikon</label>
           <input
             type="text"
@@ -468,6 +550,32 @@ class VectorLayerForm extends Component {
           />
           <span onClick={(e) => {this.loadLegendImage(e)}} className="btn btn-default">Välj fil {imageLoader}</span>
         </div>
+        <div>
+          <label>Ikonförskjutning X</label>
+          <input
+            type="text"
+            ref="input_symbolXOffset"
+            value={this.state.symbolXOffset}
+            className={this.getValidationClass("symbolXOffset")}
+            onChange={(e) => {
+              this.setState({symbolXOffset: e.target.value});
+              this.validateField("symbolXOffset");
+            }}
+          />
+        </div>
+        <div>
+          <label>Ikonförskjutning Y</label>
+          <input
+            type="text"
+            ref="input_symbolYOffset"
+            value={this.state.symbolYOffset}
+            className={this.getValidationClass("symbolYOffset")}
+            onChange={(e) => {
+              this.setState({symbolYOffset: e.target.value});
+              this.validateField("symbolYOffset");
+            }}
+          />
+        </div>        
         <div>
           <label>Linjetjocklek</label>
           <select
@@ -506,6 +614,134 @@ class VectorLayerForm extends Component {
           />
         </div>
         <div>
+          <label>Visa etikett</label>
+          <input
+            type="checkbox"
+            ref="input_showLabels"
+            onChange={(e) => {
+              this.setState({showLabels: e.target.checked})
+            }}
+            checked={this.state.showLabels}
+          />
+        </div>
+        <div>
+          <label>Textjustering</label>
+          <select
+            ref="input_labelAlign"
+            value={this.state.labelAlign}
+            onChange={(e) => {this.setLabelAlign(e)}}>
+            <option value="center">Centrerad</option>
+            <option value="left">Vänster</option>
+            <option value="right">Höger</option>
+            <option value="start">Start</option>
+          </select>
+        </div>
+        <div>
+          <label>Baslinje</label>
+          <select
+            ref="input_labelBaseline"
+            value={this.state.labelBaseline}
+            onChange={(e) => {this.setLabelBaseline(e)}}>                        
+            <option value="bottom">Nederkant</option>
+            <option value="top">Överkant</option>
+            <option value="middle">Mitten</option>
+            <option value="hanging">Hängande</option>
+            <option value="alphabetic">Alfabetisk</option>
+            <option value="ideographic">Ideografisk (för symboler)</option>            
+          </select>
+        </div>
+        <div>
+          <label>Textstorlek</label>
+          <input
+            type="text"
+            ref="input_labelSize"
+            value={this.state.labelSize}
+            onChange={(e) => {
+              this.setState({labelSize: e.target.value});
+            }}
+          />
+        </div>        
+        <div>
+          <label>Textförskjutning X</label>
+          <input
+            type="text"
+            ref="input_labelOffsetX"
+            value={this.state.labelOffsetX}
+            onChange={(e) => {
+              this.setState({labelOffsetX: e.target.value});
+            }}
+          />
+        </div>
+        <div>
+          <label>Textförskjutning Y</label>
+          <input
+            type="text"
+            ref="input_labelOffsetY"
+            value={this.state.labelOffsetY}
+            onChange={(e) => {
+              this.setState({labelOffsetY: e.target.value});
+            }}
+          />
+        </div>
+        <div>
+          <label>Texttjocklek</label>
+          <select
+            ref="input_labelWeight"
+            value={this.state.labelWeight}
+            onChange={(e) => {this.setLabelWeight(e)}}>                        
+            <option value="normal">Normal</option>
+            <option value="bold">Fet</option>
+          </select>
+        </div>
+        <div>
+          <label>Teckensnitt</label>
+          <select
+            ref="input_labelFont"
+            value={this.state.labelFont}
+            onChange={(e) => {this.setLabelFont(e)}}>                        
+            <option value="Arial">Arial</option>
+            <option value="Courier New">Courier New</option>
+            <option value="Quattrocento">Quattrocento</option>
+            <option value="Verdana">Verdana</option>
+          </select>
+        </div>
+        <div>
+          <label>Fyllnadsfärg (text)</label>
+          <SketchPicker
+            color={this.state.labelFillColor}
+            onChangeComplete={(color) => this.setLabelFillColor(color.rgb)}
+          />
+        </div>
+        <div>
+          <label>Kantlinjefärg (text)</label>
+          <SketchPicker
+            color={this.state.labelOutlineColor}
+            onChangeComplete={(color) => this.setLabelOutlineColor(color.rgb)}
+          />
+        </div>
+        <div>
+          <label>Kantlinjebredd (text)</label>
+          <input
+            type="text"
+            ref="input_labelOutlineWidth"
+            value={this.state.labelOutlineWidth}
+            onChange={(e) => {
+              this.setState({labelOutlineWidth: e.target.value});
+            }}
+          />
+        </div>
+        <div>
+          <label>Attribut för text</label>
+          <input
+            type="text"
+            ref="input_labelAttribute"
+            value={this.state.labelAttribute}
+            onChange={(e) => {
+              this.setState({labelAttribute: e.target.value});
+            }}
+          />
+        </div>      
+        <div>
           <label>Projektion*</label>
           <input
             type="text"
@@ -530,33 +766,7 @@ class VectorLayerForm extends Component {
               this.validateField("opacity");
             }}
           />
-        </div>
-        <div>
-          <label>Ikonförskjutning X</label>
-          <input
-            type="text"
-            ref="input_symbolXOffset"
-            value={this.state.symbolXOffset}
-            className={this.getValidationClass("symbolXOffset")}
-            onChange={(e) => {
-              this.setState({symbolXOffset: e.target.value});
-              this.validateField("symbolXOffset");
-            }}
-          />
-        </div>
-        <div>
-          <label>Ikonförskjutning Y</label>
-          <input
-            type="text"
-            ref="input_symbolYOffset"
-            value={this.state.symbolYOffset}
-            className={this.getValidationClass("symbolYOffset")}
-            onChange={(e) => {
-              this.setState({symbolYOffset: e.target.value});
-              this.validateField("symbolYOffset");
-            }}
-          />
-        </div>
+        </div>        
         <div>
           <label>Infoklickbar</label>
           <input
@@ -578,27 +788,7 @@ class VectorLayerForm extends Component {
             }}
             checked={this.state.visibleAtStart}
           />
-        </div>
-        <div>
-          <label>Valt lager*</label>
-          <div ref="input_layer" className={"layer-list-choosen " + this.getValidationClass("layer")}>
-            <ul>
-              {this.renderSelectedLayers()}
-            </ul>
-          </div>
-        </div>
-        <div>
-          <label>Lagerlista</label>
-          {this.renderLayerList()}
-        </div>
-        <div>
-          <label>Inforuta</label>
-          <textarea
-            ref="input_infobox"
-            value={this.state.infobox}
-            onChange={(e) => this.setState({'infobox': e.target.value})}
-          />
-        </div>
+        </div>        
       </fieldset>
     );
   }

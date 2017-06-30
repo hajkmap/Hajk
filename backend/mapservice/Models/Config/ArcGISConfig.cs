@@ -26,15 +26,17 @@ namespace MapService.Models.Config
 
         public bool visibleAtStart { get; set; }
 
-        public string[] layers{ get; set; }
+        public string[] layers { get; set; }
 
         public string[] extent { get; set; }
 
         public double opacity { get; set; }
 
-        public string infobox{ get; set; }
+        public string infobox { get; set; }
 
         public bool queryable { get; set; }
+
+        public bool singleTile { get; set; }
 
         public string attribution { get; set; }
     }
