@@ -332,6 +332,26 @@ var ExportModel = {
    */
   findVector: function () {
 
+    function componentToHex(c) {
+      var hex = c.toString(16);
+      return hex.length == 1 ? "0" + hex : hex;
+    }
+
+    function rgbToHex(rgbString) {
+      const matches = /rgb(a)?\((\d+), (\d+), (\d+)(, \d+)?\)/.exec(rgbString);
+      if (matches !== null) {
+        let r = parseInt(matches[2]);
+        let g = parseInt(matches[3]);
+        let b = parseInt(matches[4]);
+        let a = parseInt(matches[5]);
+        return a
+        ? null
+        : ("#" + componentToHex(r) + componentToHex(g) + componentToHex(b));
+      } else {
+        return null;
+      }
+    }
+
     function asObject(style) {
 
       if (!style) return null;
@@ -359,11 +379,31 @@ var ExportModel = {
       ,   labelOutlineColor = "white"
       ,   labelOutlineWidth = 3
       ,   fontSize = "16"
-      ,   fontColor = "#FFFFFF";
+      ,   fontColor = "#FFFFFF"
+      ,   fontBackColor = "#000000";
 
       if (style.getText && style.getText()) {
-        let font = style.getText().getFont();
-        fontSize = font.match(/^\d+/)[0];
+        fontSize = style.getText().getFont().match(/^\d+/)[0];
+      }
+
+      if (style.getText && style.getText() && style.getFill && style.getFill()) {
+        fontColor = style.getText().getFill().getColor();
+      }
+
+      if (style.getText && style.getText() && style.getStroke && style.getStroke()) {
+        fontBackColor = style.getText().getStroke().getColor();
+      }
+
+      if (fontColor && /^rgb/.test(fontColor)) {
+        fontColor = rgbToHex(fontColor);
+      }
+
+      if (fontBackColor) {
+        if (/^rgb\(/.test(fontBackColor)) {
+          fontBackColor = rgbToHex(fontBackColor);
+        } else {
+          fontBackColor = null;
+        }
       }
 
       if (style.getFill && style.getFill() && style.getFill().getColor()) {
@@ -406,7 +446,8 @@ var ExportModel = {
         labelOutlineColor: labelOutlineColor,
         labelOutlineWidth: labelOutlineWidth,
         fontSize: fontSize,
-        fontColor: fontColor
+        fontColor: fontColor,
+        fontBackColor: fontBackColor
       }
     }
 

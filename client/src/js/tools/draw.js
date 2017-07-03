@@ -43,6 +43,9 @@ var olMap;
  * @property {boolean} dialog - Default: false
  * @property {boolean} kmlImport - Default: false
  * @property {boolean} kmlExportUrl - Default: false
+ * @property {string} fontSize - Default: 10px
+ * @property {string} fontColor - Default: "rgb(255, 255, 255)"
+ * @property {string} fontBackColor - Default: "rgb(0, 0, 0)"
  * @property {string} pointText - Default: "Text"
  * @property {string} pointColor - Default: "rgb(15, 175, 255)"
  * @property {number} pointRadius - Default: 7
@@ -79,6 +82,8 @@ var DrawModelProperties = {
   kmlImport: false,
   kmlExportUrl: false,
   fontSize: "10",
+  fontColor: "rgb(255, 255, 255)",
+  fontBackColor: "rgb(0, 0, 0)",
   pointText: "Text",
   pointColor: "rgb(15, 175, 255)",
   pointSettings: "point",
@@ -855,8 +860,8 @@ var DrawModel = {
         textBaseline: 'middle',
         font: `${this.get('fontSize')}px sans-serif`,
         text: forcedProperties ? forcedProperties.text : this.getLabelText(feature),
-        fill: new ol.style.Fill({color: '#fff'}),
-        stroke: new ol.style.Stroke({color: '#555', width: 3}),
+        fill: new ol.style.Fill({color: this.get('fontColor')}),
+        stroke: new ol.style.Stroke({color: this.get('fontBackColor'), width: 3}),
         offsetX: type === "Text" ? 0 : 10,
         offsetY: offsetY(),
         rotation: 0,
@@ -1178,6 +1183,24 @@ var DrawModel = {
    */
   setFontSize: function(value) {
     this.set('fontSize', value);
+  },
+
+  /**
+   * Set the property fontColor
+   * @param {string} value
+   * @instance
+   */
+  setFontColor: function(value) {
+    this.set('fontColor', value);
+  },
+
+  /**
+   * Set the property fontBackColor
+   * @param {string} value
+   * @instance
+   */
+  setFontBackColor: function(value) {
+    this.set('fontBackColor', value);
   },
 
   /**
