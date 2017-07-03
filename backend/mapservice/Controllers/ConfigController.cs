@@ -242,7 +242,7 @@ namespace MapService.Controllers
                     {
                         type = "layerswitcher",
                         options = new LayerMenuOptions() {
-                            baselayers = new List<string>(),
+                            baselayers = new List<MapWMSLayerInfo>(),
                             groups = new List<LayerGroup>(),
                             active = true,
                             visibleAtStart = true,

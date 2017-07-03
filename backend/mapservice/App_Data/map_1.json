@@ -172,7 +172,16 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "22"
+          {
+            "id": "22",
+            "visibleAtStart": false,
+            "drawOrder": 0
+          },
+          {
+            "id": "7",
+            "visibleAtStart": true,
+            "drawOrder": 0
+          }
         ],
         "groups": [
           {
@@ -184,11 +193,6 @@
             "layers": [
               {
                 "id": "26",
-                "visibleAtStart": false,
-                "drawOrder": 1000
-              },
-              {
-                "id": "7",
                 "visibleAtStart": false,
                 "drawOrder": 1000
               }
