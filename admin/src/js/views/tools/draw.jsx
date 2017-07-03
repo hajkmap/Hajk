@@ -27,7 +27,8 @@ var defaultState = {
   validationErrors: [],
   active: false,
   exportUrl: "/mapservice/export/kml",
-  importUrl: "/mapservice/import/kml"
+  importUrl: "/mapservice/import/kml",
+  icons: ""
 };
 
 class ToolOptions extends Component {
@@ -46,7 +47,8 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         exportUrl: tool.options.exportUrl,
-        importUrl: tool.options.importUrl
+        importUrl: tool.options.importUrl,
+        icons: tool.options.icons
       });
     } else {
       this.setState({
@@ -103,7 +105,8 @@ class ToolOptions extends Component {
       "type": this.type,
       "options": {
         exportUrl: this.state.exportUrl,
-        importUrl: this.state.importUrl
+        importUrl: this.state.importUrl,
+        icons: this.state.icons
       }
     };
 
@@ -170,6 +173,10 @@ class ToolOptions extends Component {
           <div>
             <label htmlFor="importUrl">URL till import-tjänst</label>
             <input value={this.state.importUrl} type="text" name="importUrl" onChange={(e) => {this.handleInputChange(e)}}></input>
+          </div>
+          <div>
+            <label htmlFor="icons">Ikoner</label>
+            <input value={this.state.icons} type="text" name="icons" onChange={(e) => {this.handleInputChange(e)}}></input>
           </div>
         </form>
       </div>

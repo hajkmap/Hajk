@@ -43,6 +43,9 @@ var olMap;
  * @property {boolean} dialog - Default: false
  * @property {boolean} kmlImport - Default: false
  * @property {boolean} kmlExportUrl - Default: false
+ * @property {string} fontSize - Default: 10px
+ * @property {string} fontColor - Default: "rgb(255, 255, 255)"
+ * @property {string} fontBackColor - Default: "rgb(0, 0, 0)"
  * @property {string} pointText - Default: "Text"
  * @property {string} pointColor - Default: "rgb(15, 175, 255)"
  * @property {number} pointRadius - Default: 7
@@ -78,11 +81,16 @@ var DrawModelProperties = {
   dialog: false,
   kmlImport: false,
   kmlExportUrl: false,
+  fontSize: "10",
+  fontColor: "rgb(255, 255, 255)",
+  fontBackColor: "rgb(0, 0, 0)",
   pointText: "Text",
   pointColor: "rgb(15, 175, 255)",
+  pointSettings: "point",
   pointRadius: 7,
   pointSymbol: false,
-  markerImg: "assets/icons/marker.png",
+  icons: "",
+  markerImg: window.location.href + "assets/icons/marker.png",
   lineColor: "rgb(15, 175, 255)",
   lineWidth: 3,
   lineStyle: "solid",
@@ -168,6 +176,10 @@ var DrawModel = {
     this.set('olMap', olMap);
     this.get('olMap').addLayer(this.get('drawLayer'));
     this.set('drawLayer', this.get('drawLayer'));
+    if (this.get('icons') !== "") {
+      let icon = this.get('icons').split(',')[0];
+      this.set('markerImg', window.location.href + "assets/icons/" + icon + ".png");
+    }
     this.createMeasureTooltip();
   },
 
@@ -187,14 +199,71 @@ var DrawModel = {
   },
 
   /**
-   * Create select interaction and add to map.
-   * Remove any draw interaction from map.
+   * Activate tool for feature removal.
    * @instance
    */
   activateRemovalTool: function () {
+    var dragInteraction = this.getDragInteraction();
     this.get('olMap').removeInteraction(this.get("drawTool"));
+    this.get('olMap').removeInteraction(this.get("editTool"));
     this.get('olMap').set('clickLock', true);
     this.get('olMap').on('singleclick', this.removeSelected);
+    if (dragInteraction) {
+      dragInteraction.removeAcceptedLayer('draw-layer');
+    }
+  },
+
+  /**
+   * Activate tool for feature edit.
+   * @instance
+   */
+  activateEditTool: function () {
+
+    var dragInteraction = this.getDragInteraction()
+    ,   features = new ol.Collection();
+
+    this.get('olMap').un('singleclick', this.removeSelected);
+    this.get('olMap').removeInteraction(this.get("drawTool"));
+    this.get('olMap').removeInteraction(this.get("editTool"));
+    this.get('olMap').set('clickLock', true);
+
+    if (dragInteraction) {
+      dragInteraction.removeAcceptedLayer('draw-layer');
+    }
+    this.get('source').getFeatures().forEach(f => {
+      features.push(f);
+    });
+    this.set("editTool", new ol.interaction.Modify({
+      features: features
+    }));
+    this.get('olMap').addInteraction(this.get("editTool"));
+  },
+
+  /**
+   * Get map´s first drag interaction, if any.
+   * @instance
+   */
+  getDragInteraction: function () {
+    return this.get('olMap')
+      .getInteractions()
+      .getArray()
+      .filter(interaction =>
+        interaction instanceof ol.interaction.Drag
+      )[0];
+  },
+
+  /**
+   * Activate drag intecation for draw layer.
+   * @instance
+   */
+  activateMoveTool: function () {
+    this.get('olMap').removeInteraction(this.get("drawTool"));
+    this.get('olMap').removeInteraction(this.get("editTool"));
+    this.get('olMap').un('singleclick', this.removeSelected);
+    var dragInteraction = this.getDragInteraction();
+    if (dragInteraction) {
+      dragInteraction.addAcceptedLayer('draw-layer');
+    }
   },
 
   /**
@@ -248,7 +317,7 @@ var DrawModel = {
       ,   pointerCoord;
 
       if (this.get("drawToolActive")) {
-        
+
         if (this.get('pointerPosition')) {
           pointerCoord = this.get('pointerPosition').coordinate;
         }
@@ -260,7 +329,7 @@ var DrawModel = {
 
         if (e.target instanceof ol.geom.Polygon) {
           toolTip = this.formatLabel("area", e.target.getArea());
-          coord = pointerCoord || e.target.getFirstCoordinate();         
+          coord = pointerCoord || e.target.getFirstCoordinate();
         }
 
         if (e.target instanceof ol.geom.Circle) {
@@ -354,10 +423,15 @@ var DrawModel = {
     var style = undefined
     ,   drawTool = undefined
     ,   geometryType = undefined
+    ,   dragInteraction = this.getDragInteraction()
     ,   olMap = this.get('olMap');
 
     olMap.un('singleclick', this.removeSelected);
+    if (dragInteraction) {
+      dragInteraction.removeAcceptedLayer('draw-layer');
+    }
     olMap.removeInteraction(this.get("drawTool"));
+    olMap.removeInteraction(this.get("editTool"));
     this.measureTooltip.setPosition(undefined);
 
     geometryType = type !== "Text" ? type : "Point";
@@ -389,11 +463,16 @@ var DrawModel = {
    * @instance
    */
   abort: function () {
+    var dragInteraction = this.getDragInteraction();
     this.get('olMap').un('singleclick', this.removeSelected);
     this.get('olMap').un('pointermove', this.setPointerPosition);
     this.get('olMap').removeInteraction(this.get('drawTool'));
+    this.get('olMap').removeInteraction(this.get("editTool"));
     this.get('olMap').set('clickLock', false);
     this.set('drawToolActive', false);
+    if (dragInteraction) {
+      dragInteraction.removeAcceptedLayer('draw-layer');
+    }
   },
 
   /**
@@ -402,256 +481,6 @@ var DrawModel = {
    */
   clear: function () {
     this.get('source').clear();
-  },
-
-  /**
-   * Create KML string from features.
-   * @instance
-   * @param {Array<{external:"ol.feature"}> features
-   * @param {string} name - name of layer
-   * @return {string} xml
-   */
-  writeKml: function (features, name) {
-
-      function componentToHex(c) {
-          var hex = c.toString(16);
-          return hex.length == 1 ? "0" + hex : hex;
-      }
-
-      function rgbToHex(r, g, b) {
-          return componentToHex(r) + componentToHex(g) + componentToHex(b);
-      }
-
-      function colorToArray(color, type) {
-          var res = []
-          var reg = type === "rgb" ? /rgb\((.+)\)/ :
-                                     /rgba\((.+)\)/;
-
-          res = reg.exec(color)[1].split(',').map(a => parseFloat(a));
-
-          if (type === "rgb") {
-            res.push(1);
-          }
-
-          return res;
-      }
-
-      function toKmlColor(color) {
-          var s, r, g, b, o;
-          var res = /^rgba/.test(color) ? colorToArray(color, 'rgba') : colorToArray(color, 'rgb');
-          s = rgbToHex(res[0], res[1], res[2]);
-          r = s.substr(0, 2);
-          g = s.substr(2, 2);
-          b = s.substr(4, 2);
-          o = (Math.floor(res[3] * 255)).toString(16);
-          return o + b + g + r;
-      }
-
-      function toKmlString(str, type) {
-
-          var strs = []
-          ,   a
-          ,   b;
-
-          switch (type) {
-              case 'point':
-                  str = str.replace(/^POINT\(/, '').replace(/\)$/, '');
-                  break;
-              case 'line':
-                  str = str.replace(/^LINESTRING\(/, '').replace(/\)$/, '');
-                  break;
-              case 'polygon':
-                  strs = str.split('),(');
-                  str = "";
-                  _.each(strs, function (coords, i) {
-                      if (i === 0) {
-                          coords = coords.replace(/^POLYGON\(\(/, '').replace(/\)$/, '');
-                          str +=   '<outerBoundaryIs>';
-                          str +=     '<LinearRing>';
-                          str +=       '<coordinates>' + coords + '</coordinates>';
-                          str +=     '</LinearRing>';
-                          str +=   '</outerBoundaryIs>';
-                      } else {
-                          coords = coords.replace(/\)/g, '');
-                          str +=   '<innerBoundaryIs>';
-                          str +=     '<LinearRing>';
-                          str +=       '<coordinates>' + coords + '</coordinates>';
-                          str +=     '</LinearRing>';
-                          str +=   '</innerBoundaryIs>';
-                      }
-                  });
-                  break;
-
-              case 'multiPolygon':
-                  a = str.split(')),((');
-                  str = "";
-                  _.each(a, function (coords, t) {
-
-                      if (t === 0) {
-                          coords = coords.replace(/^MULTIPOLYGON\(\(/, '').replace(/\)$/, '');
-                      }
-
-                      b = coords.split('),(');
-
-                      str += '<Polygon>';
-                          _.each(b, function (coordinates, i) {
-                              coordinates = coordinates.replace(/\)/g, '');
-                              if (i === 0) {
-                                  str +=   '<outerBoundaryIs>';
-                                  str +=     '<LinearRing>';
-                                  str +=       '<coordinates>' + coordinates + '</coordinates>';
-                                  str +=     '</LinearRing>';
-                                  str +=   '</outerBoundaryIs>';
-                              } else {
-                                  str +=   '<innerBoundaryIs>';
-                                  str +=     '<LinearRing>';
-                                  str +=       '<coordinates>' + coordinates + '</coordinates>';
-                                  str +=     '</LinearRing>';
-                                  str +=   '</innerBoundaryIs>';
-                              }
-                          });
-                      str += '</Polygon>';
-                  });
-
-                  break;
-          }
-
-          return str.replace(/ /g, '_')
-                    .replace(/,/g, ' ')
-                    .replace(/_/g, ',')
-                    .replace(/\(/g, '')
-                    .replace(/\)/g, '')
-      }
-
-      function point(f) {
-          var str = "";
-          str += '<Point>';
-          str +=   '<coordinates>' + toKmlString(f, "point") + '</coordinates>';
-          str += '</Point>';
-          return str;
-      }
-
-      function line(f) {
-          var str = "";
-          str += '<LineString>';
-          str +=    '<coordinates>' + toKmlString(f, "line") + '</coordinates>';
-          str += '</LineString>';
-          return str;
-      }
-
-      function polygon(f) {
-          var str = "";
-          str += '<Polygon>';
-              str += toKmlString(f, "polygon");
-          str += '</Polygon>';
-          return str;
-      }
-
-      function multiPolygon(f) {
-          var str = "";
-          str += '<MultiGeometry>';
-          str += toKmlString(f, "multiPolygon");
-          str += '</MultiGeometry>';
-          return str;
-      }
-
-      function safeInject(string) {
-          return string.replace(/<\/?[^>]+(>|$)|&/g, "");
-      }
-
-      var header = ''
-      ,   parser = new ol.format.WKT()
-      ,   doc = ''
-      ;
-
-      header += '<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">';
-      doc += '<Document>';
-      doc += '<name>' + name + '</name>';
-
-      doc += "<Folder>";
-      doc += "<name>" + name + "</name>";
-      doc += "<open>0</open>";
-
-      features.forEach((feature, i) => {
-          var style = feature.getStyle()[1];
-          doc += '<Style id="' + i + '">';
-              if (style.getImage() instanceof ol.style.Icon) {
-                  doc += '<IconStyle>';
-                  doc +=   '<scale>' + (style.getImage().getSize()[0] / 32) + '</scale>';
-                  doc +=     '<Icon>';
-                  doc +=       '<href>' + style.getImage().getSrc() + '</href>';
-                  doc +=     '</Icon>';
-                  doc += '</IconStyle>';
-              }
-
-              if (style.getStroke() instanceof ol.style.Stroke) {
-                  doc += '<LineStyle>';
-                  doc +=   '<color>' + toKmlColor(style.getStroke().getColor()) + '</color>';
-                  doc +=   '<width>' + style.getStroke().getWidth() + '</width>';
-                  doc += '</LineStyle>';
-              }
-
-              if (style.getFill() instanceof ol.style.Fill) {
-                  doc += '<PolyStyle>';
-                  doc +=    '<color>' + toKmlColor(style.getFill().getColor()) + '</color>';
-                  doc += '</PolyStyle>';
-              }
-
-          doc += '</Style>';
-      });
-
-      features.forEach((feature, i) => {
-
-          var description = feature.getProperties().description || ""
-          ,   name = feature.getProperties().name || feature.getStyle()[1].getText().getText() || ""
-          ;
-
-          if (!description && feature.getProperties()) {
-              description = "<table>";
-              _.each(feature.getProperties(), function (value, attribute) {
-                  if (typeof value === "string") {
-                      description += "<tr>";
-                          description += "<td>" + attribute + "</td>";
-                          description += "<td>" + safeInject(value) + "</td>";
-                      description += "</tr>";
-                  }
-              });
-              description += "</table>";
-          }
-
-          doc += '<Placemark>';
-          doc += '<name>' + (name || ('Ritobjekt ' + (i + 1))) + '</name>';
-          doc += '<description>' + (description || ('Ritobjekt ' + (i + 1))) + '</description>';
-          doc += '<styleUrl>#' + i + '</styleUrl>';
-
-          if (feature.getGeometry() instanceof ol.geom.Point) {
-            doc += point(parser.writeFeature(feature));
-          }
-          if (feature.getGeometry() instanceof ol.geom.LineString) {
-            doc += line(parser.writeFeature(feature));
-          }
-          if (feature.getGeometry() instanceof ol.geom.Polygon) {
-            doc += polygon(parser.writeFeature(feature));
-          }
-          if (feature.getGeometry() instanceof ol.geom.Circle) {
-            doc += polygon(parser.writeFeature(feature));
-          }
-
-          if (feature.getProperties().style) {
-              doc += '<ExtendedData>';
-              doc +=    '<Data name="style">';
-              doc +=       '<value>' + feature.getProperties().style + '</value>';
-              doc +=    '</Data>';
-              doc += '</ExtendedData>';
-          }
-          doc += '</Placemark>';
-      });
-
-      doc += "</Folder>";
-      doc += '</Document>';
-      header += doc;
-      header += '</kml>';
-      return header
   },
 
   /**
@@ -873,7 +702,7 @@ var DrawModel = {
    *
    */
   getStyle: function(feature, forcedProperties) {
-    
+
     function getLineDash() {
         var scale = (a, f) => a.map(b => f * b)
         ,   width = lookupWidth.call(this)
@@ -899,7 +728,7 @@ var DrawModel = {
             return this.get('circleFillColor')
                    .replace('rgb', 'rgba')
                    .replace(')', `, ${this.get('circleFillOpacity')})`)
-          
+
           case "Polygon":
             return this.get('polygonFillColor')
                    .replace('rgb', 'rgba')
@@ -915,7 +744,7 @@ var DrawModel = {
       return fill;
     }
 
-    function lookupStyle() {      
+    function lookupStyle() {
       switch (type) {
         case "Polygon":
           return this.get('polygonLineStyle');
@@ -923,10 +752,10 @@ var DrawModel = {
           return this.get('circleLineStyle');
         default:
           return this.get('lineStyle');
-      } 
+      }
     }
 
-    function lookupWidth() {      
+    function lookupWidth() {
       switch (type) {
         case "Polygon":
           return this.get('polygonLineWidth');
@@ -934,13 +763,13 @@ var DrawModel = {
           return this.get('circleLineWidth');
         default:
           return this.get('lineWidth');
-      } 
+      }
     }
 
     function lookupColor() {
       if (forcedProperties) {
         return forcedProperties.strokeColor;
-      }       
+      }
       switch (type) {
         case "Polygon":
           return this.get('polygonLineColor');
@@ -948,15 +777,15 @@ var DrawModel = {
           return this.get('circleLineColor');
         default:
           return this.get('lineColor');
-      } 
+      }
     }
 
     function getStroke() {
-      
+
       var color = forcedProperties ?
-                  forcedProperties.strokeColor : 
+                  forcedProperties.strokeColor :
                   lookupColor.call(this);
-      
+
       var width = forcedProperties ?
                   forcedProperties.strokeWidth :
                   lookupWidth.call(this);
@@ -976,18 +805,18 @@ var DrawModel = {
 
     function getImage() {
 
+      var radius = type === "Text" ? 0 : forcedProperties ? forcedProperties.pointRadius : this.get('pointRadius');
       var iconSrc = forcedProperties ? (forcedProperties.image || this.get('markerImg')) : this.get('markerImg');
 
       var icon = new ol.style.Icon({
-        anchor: [0.5, 32],
+        anchor: [0.5, 1],
         anchorXUnits: 'fraction',
-        anchorYUnits: 'pixels',
-        src: iconSrc,
-        imgSize: [32, 32]
+        anchorYUnits: 'fraction',
+        src: iconSrc
       });
 
       var dot = new ol.style.Circle({
-        radius: type === "Text" ? 0 : forcedProperties ? forcedProperties.pointRadius : this.get('pointRadius'),
+        radius: radius,
         fill: new ol.style.Fill({
           color: forcedProperties ? forcedProperties.pointColor : this.get('pointColor')
         }),
@@ -1029,11 +858,10 @@ var DrawModel = {
       return new ol.style.Text({
         textAlign: 'center',
         textBaseline: 'middle',
-        font: 'Arial',
+        font: `${this.get('fontSize')}px sans-serif`,
         text: forcedProperties ? forcedProperties.text : this.getLabelText(feature),
-        fill: new ol.style.Fill({color: '#fff'}),
-        stroke: new ol.style.Stroke({color: '#555', width: 3}),
-        size: '14px',
+        fill: new ol.style.Fill({color: this.get('fontColor')}),
+        stroke: new ol.style.Stroke({color: this.get('fontBackColor'), width: 3}),
         offsetX: type === "Text" ? 0 : 10,
         offsetY: offsetY(),
         rotation: 0,
@@ -1197,6 +1025,15 @@ var DrawModel = {
   },
 
   /**
+   * Set the property pointSettings
+   * @param {string} color
+   * @instance
+   */
+  setPointSettings: function (value) {
+    this.set("pointSettings", value);
+  },
+
+  /**
    * Set the property pointColor
    * @param {string} color
    * @instance
@@ -1337,6 +1174,33 @@ var DrawModel = {
    */
   setPointSymbol: function(value) {
     this.set('pointSymbol', value);
+  },
+
+  /**
+   * Set the property pointSymbol
+   * @param {string} value
+   * @instance
+   */
+  setFontSize: function(value) {
+    this.set('fontSize', value);
+  },
+
+  /**
+   * Set the property fontColor
+   * @param {string} value
+   * @instance
+   */
+  setFontColor: function(value) {
+    this.set('fontColor', value);
+  },
+
+  /**
+   * Set the property fontBackColor
+   * @param {string} value
+   * @instance
+   */
+  setFontBackColor: function(value) {
+    this.set('fontBackColor', value);
   },
 
   /**

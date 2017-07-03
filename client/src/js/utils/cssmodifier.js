@@ -25,20 +25,20 @@ function getCSSRule(ruleName) {
     ruleName = ruleName.toLowerCase();
     var rule = undefined;
     if (!document || !document.styleSheets) return;
-    Array.prototype.forEach.call(document.styleSheets, styleSheet => {      
+    Array.prototype.forEach.call(document.styleSheets, styleSheet => {
       try {
         if (!styleSheet.cssRules) return;
         var mathces = Array.prototype.filter.call(styleSheet.cssRules, cssRule =>
           cssRule instanceof CSSStyleRule &&
           cssRule.selectorText.toLowerCase() === ruleName
-        );          
+        );
         if (mathces[mathces.length - 1]) {
           rule = mathces[mathces.length - 1];
         }
       } catch (e) {
-        // Firefox throws if the css is loaded from external source.          
+        // Firefox throws if the css is loaded from external source.
       }
-    });    
+    });
     return rule;
 }
 
@@ -51,8 +51,6 @@ module.exports = {
 
       var panelHeaderItalic = getCSSRule('.navigation-panel-inner > .panel-heading i');
 
-      var backgroundSwitcher = getCSSRule('.background-switcher');
-      var backgroundSwitcherHeader = getCSSRule('.background-switcher h3');
       var navigationPanelInner = getCSSRule('.navigation-panel-inner');
 
       var dl = getCSSRule('dl');
@@ -92,13 +90,6 @@ module.exports = {
       if (panelHeaderItalic) {
         panelHeaderItalic.style.color = config.secondaryColor;
       }
-      if (backgroundSwitcher) {
-        backgroundSwitcher.style.border = "1px solid " + config.primaryColor;
-      }
-      if (backgroundSwitcherHeader) {
-        backgroundSwitcherHeader.style.backgroundColor = config.primaryColor;
-        backgroundSwitcherHeader.style.color = config.secondaryColor;
-      }
       if (navigationPanelInner) {
         navigationPanelInner.style.borderRight = "1px solid " + config.primaryColor;
       }
@@ -112,7 +103,7 @@ module.exports = {
       if (btnPrimary) {
         btnPrimary.style.backgroundColor = config.primaryColor;
         btnPrimary.style.zIndex = 2;
-        btnPrimary.style.color = config.secondaryColor;        
+        btnPrimary.style.color = config.secondaryColor;
       }
       if (btnPrimaryFocus) {
         btnPrimaryFocus.style.backgroundColor = config.primaryColor;
