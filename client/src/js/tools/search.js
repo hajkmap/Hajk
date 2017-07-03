@@ -451,14 +451,14 @@ var SearchModel = {
    * @instance
    * @param {DOMelement} elm
    */
-  enableScroll: function (elm) {    
-    if (this.isTouchDevice()){      
-      var scrollStartPos = 0;      
+  enableScroll: function (elm) {
+    if (this.isTouchDevice()){
+      var scrollStartPos = 0;
       elm.addEventListener("touchstart", function(event) {
-        scrollStartPos = this.scrollTop + event.touches[0].pageY;                
-      }, false);      
+        scrollStartPos = this.scrollTop + event.touches[0].pageY;
+      }, false);
       elm.addEventListener("touchmove", function(event) {
-        this.scrollTop = scrollStartPos - event.touches[0].pageY;                    
+        this.scrollTop = scrollStartPos - event.touches[0].pageY;
       }, false);
     }
   },
@@ -470,7 +470,7 @@ var SearchModel = {
    *
    */
   focus: function (spec) {
-    
+
     function isPoint (coord) {
       if (coord.length === 1) {
         coord = coord[0];
@@ -501,7 +501,13 @@ var SearchModel = {
     this.featureLayer.getSource().addFeature(spec.hit);
 
     if (ovl && this.get('displayPopup')) {
-      $('#popup-content').html(this.getInformation(spec.hit));
+
+      let title = $(`<div class="popup-title">${spec.hit.caption}</div>`);
+      let textContent = $('<div id="popup-content-text"></div>');
+
+      textContent.html(this.getInformation(spec.hit));
+      $('#popup-content').empty().append(title, textContent);
+
       if (isPoint(spec.hit.getGeometry().getCoordinates())) {
         offsetY = this.get('popupOffsetY');
       }
@@ -630,11 +636,11 @@ var SearchModel = {
   getHitsFromItems: function () {
     var hits = [];
     if (this.get('hits').length === 0) {
-      this.get('items').map(item => {              
-        item.hits.forEach((hit, i) => {                    
+      this.get('items').map(item => {
+        item.hits.forEach((hit, i) => {
           hit.setStyle(this.featureLayer.getStyle());
           hits.push(hit);
-        });                
+        });
       });
     }
     return hits;
@@ -647,8 +653,8 @@ var SearchModel = {
    */
   getKmlData: function () {
 
-    var exportItems = this.get('hits').length > 0 
-        ? this.get('hits') 
+    var exportItems = this.get('hits').length > 0
+        ? this.get('hits')
         : this.getHitsFromItems();
 
     var transformed = kmlWriter.transform(
@@ -666,28 +672,28 @@ var SearchModel = {
    */
   getExcelData: function () {
 
-    var groups = {}        
+    var groups = {}
     ,   exportItems = this.get('hits').length > 0
-        ? this.get('hits') 
+        ? this.get('hits')
         : this.getHitsFromItems();
 
-    exportItems.forEach(hit => {      
+    exportItems.forEach(hit => {
       if (!groups.hasOwnProperty(hit.caption)) {
         groups[hit.caption] = [];
       }
       groups[hit.caption].push(hit);
     });
-    
+
     return Object.keys(groups).map(group => {
 
       var columns = []
       ,   aliases = []
       ,   values = [];
 
-      var getAlias = (column, infobox) => {        
+      var getAlias = (column, infobox) => {
         var regExp = new RegExp(`{export:${column}( as .*)?}`)
         ,   result = regExp.exec(infobox);
-        
+
         if (result && result[1]) {
           result[1] = result[1].replace(" as ", "");
         }
@@ -705,7 +711,7 @@ var SearchModel = {
             return typeof attributes[name] === "string"  ||
                    typeof attributes[name] === "boolean" ||
                    typeof attributes[name] === "number";
-          } else {                        
+          } else {
             let regExp = new RegExp(`{export:${name}( as .*)?}`);
             return (
               regExp.test(hit.infobox)
@@ -724,7 +730,7 @@ var SearchModel = {
 
         return columns.map(column => attributes[column] || null);
       });
-      
+
       return {
         TabName: group,
         Cols: aliases,
@@ -751,7 +757,7 @@ var SearchModel = {
         postData = JSON.stringify(data);
         break;
     }
-    
+
     this.set("downloading", true);
 
     $.ajax({
