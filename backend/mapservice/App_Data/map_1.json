@@ -183,6 +183,11 @@
             "expanded": false,
             "layers": [
               {
+                "id": "26",
+                "visibleAtStart": false,
+                "drawOrder": 1000
+              },
+              {
                 "id": "7",
                 "visibleAtStart": false,
                 "drawOrder": 1000
@@ -293,7 +298,8 @@
       "type": "draw",
       "options": {
         "exportUrl": "/mapservice/export/kml",
-        "importUrl": "/mapservice/import/kml"
+        "importUrl": "/mapservice/import/kml",
+        "icons": "marker, marker_black, marker_green, marker_red, marker_yellow, br, pin, pin_black, pin_green, pin_red, pin_yellow"
       }
     },
     {
@@ -309,6 +315,10 @@
       "options": {
         "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4"
       }
+    },
+    {
+      "type": "location",
+      "options": {}
     }
   ],
   "map": {
@@ -342,10 +352,10 @@
       0.0
     ],
     "extent": [
-      0,
-      6000000,
-      1000000,
-      9000000
+      0.0,
+      6000000.0,
+      1000000.0,
+      9000000.0
     ],
     "logo": "assets/logo.png",
     "colors": {

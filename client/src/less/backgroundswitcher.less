@@ -1,16 +1,16 @@
 .background-switcher {
-	border: 1px solid @color-yellow;
+	/*
+    border: 1px solid @color-yellow;
 	padding: 5px;
 	margin-bottom: 10px;
+    */
 }
 
 .background-switcher h3 {
-    background: @color-yellow;
     padding: 4px;
     margin: -5px;
-    color: white;
     font-size: 13pt;
-    font-weight: normal;
+    font-weight: bold;
     user-select: none;
     cursor: pointer;
 }
@@ -20,10 +20,25 @@
 	margin: 0;
     margin-top: 10px;
 	list-style: none;
-}
-
-.background-switcher li {
-
+    li {
+        color: #333333;
+        background-color: #f5f5f5;
+        padding: 7px 10px;
+        border: none;
+        border: 1px solid #ddd;
+        margin-bottom: 5px;
+        input {
+            position: relative;
+            top: 2px;
+        }
+        label {
+            position: relative;
+            top: 1px;
+            margin: 0;
+            padding-left: 6px;
+            font-size: 11pt;
+        }
+    }
 }
 
 .background-switcher .hidden {

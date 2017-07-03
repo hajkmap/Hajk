@@ -23,5 +23,6 @@ namespace MapService.Components.MapExport
         public double? labelOutlineWidth { get; set; } // 3
         public string fontSize { get; set; } // "16"
         public string fontColor { get; set; } // #FFFFFF
+        public string fontBackColor { get; set; } // #000000
     }
 }

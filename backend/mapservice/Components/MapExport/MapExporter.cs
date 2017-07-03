@@ -142,8 +142,9 @@ namespace MapService.Components.MapExport
             {
                 return labelStyle;
             }
-
-            labelStyle.ForeColor = ColorTranslator.FromHtml(featureStyle.fontColor);
+            
+            labelStyle.ForeColor = ColorTranslator.FromHtml(featureStyle.fontColor);            
+            labelStyle.BackColor = new SolidBrush(ColorTranslator.FromHtml(featureStyle.fontBackColor));            
             labelStyle.Font = new Font(FontFamily.GenericSansSerif, Int32.Parse(featureStyle.fontSize), FontStyle.Bold);
             labelStyle.Halo = new Pen(Color.Black, 2);
             labelStyle.IsTextOnPath = true;
@@ -418,8 +419,12 @@ namespace MapService.Components.MapExport
             }
 
             labelStyle.ForeColor = ColorTranslator.FromHtml(featureStyle.fontColor);
-            labelStyle.Font = new Font(FontFamily.GenericSansSerif, Int32.Parse(featureStyle.fontSize), FontStyle.Bold);
-            labelStyle.Halo = new Pen(Color.Black, 2);
+            if (featureStyle.fontBackColor != null) {
+                //labelStyle.BackColor = new SolidBrush(ColorTranslator.FromHtml(featureStyle.fontBackColor));                
+                labelStyle.Halo = new Pen(ColorTranslator.FromHtml(featureStyle.fontBackColor), 2);
+            }
+
+            labelStyle.Font = new Font(FontFamily.GenericSansSerif, Int32.Parse(featureStyle.fontSize), FontStyle.Bold);            
             labelStyle.IsTextOnPath = true;
             labelStyle.CollisionDetection = false;
             labelStyle.IgnoreLength = false;

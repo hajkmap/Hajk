@@ -13,7 +13,8 @@
         "compiled/selectiontoolbar.js": ["src/js/views/components/selectiontoolbar.jsx"],
         "compiled/search.js": ["src/js/views/components/search.jsx"],
         "compiled/searchbar.js": ["src/js/views/components/searchbar.jsx"],
-        "compiled/searchresultgroup.js": ["src/js/views/components/searchresultgroup.jsx"]
+        "compiled/searchresultgroup.js": ["src/js/views/components/searchresultgroup.jsx"],
+        "compiled/colorpicker.js": ["src/js/views/components/colorpicker.jsx"]
       }
     },
     "panels": {
@@ -54,7 +55,7 @@
         "models/map": "./src/js/models/mapmodel.js",
         "models/shell": "./src/js/models/shell.js",
         "models/selection": "./src/js/models/selection.js",
-        "models/drag": "./src/js/models/drag.js",        
+        "models/drag": "./src/js/models/drag.js",
         "models/transform": "./src/js/models/transforminteraction.js",
         "utils/arraysort": "./src/js/utils/arraysort.js",
         "utils/kmlwriter": "./src/js/utils/kmlwriter.js",
@@ -94,6 +95,7 @@
         "components/search": "./compiled/search.js",
         "components/searchbar": "./compiled/searchbar.js",
         "components/searchresultgroup": "./compiled/searchresultgroup.js",
+        "components/colorpicker": "./compiled/colorpicker.js",
         "views/map": "./compiled/mapview.js",
         "views/toolbar": "./compiled/toolbar.js",
         "views/infopanel": "./compiled/infopanel.js",
@@ -112,7 +114,6 @@
         "views/layeritem": "./compiled/layeritem.js",
         "views/navigationpanel": "./compiled/navigationpanel.js",
         "views/shell": "./compiled/shell.js",
-        "views/application": "./compiled/application.js",
         "views/application": "./compiled/application.js",
         "alert": "./compiled/alert.js"
     }
