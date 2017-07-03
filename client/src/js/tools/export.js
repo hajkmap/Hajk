@@ -20,6 +20,8 @@
 //
 // https://github.com/hajkmap/Hajk
 
+"use strict";
+
 var ToolModel = require('tools/tool');
 var transform = require('models/transform');
 
@@ -338,7 +340,7 @@ var ExportModel = {
     }
 
     function rgbToHex(rgbString) {
-      const matches = /rgb(a)?\((\d+), (\d+), (\d+)(, \d+)?\)/.exec(rgbString);
+      const matches = /rgb(a)?\((\d+), (\d+), (\d+)(, [\d\.]+)?\)/.exec(rgbString);
       if (matches !== null) {
         let r = parseInt(matches[2]);
         let g = parseInt(matches[3]);
@@ -353,6 +355,12 @@ var ExportModel = {
     }
 
     function asObject(style) {
+
+      function olColorToHex(olColor) {
+        var colorString = olColor.join(', ');
+        var hex = rgbToHex(`rgba(${colorString})`);
+        return hex;
+      }
 
       if (!style) return null;
 
@@ -382,16 +390,24 @@ var ExportModel = {
       ,   fontColor = "#FFFFFF"
       ,   fontBackColor = "#000000";
 
-      if (style.getText && style.getText()) {
-        fontSize = style.getText().getFont().match(/^\d+/)[0];
+      if (style.getText && style.getText() && style.getText().getFont && style.getText().getFont()) {
+        fontSize = style.getText().getFont().match(/\d+/)[0];
       }
 
-      if (style.getText && style.getText() && style.getFill && style.getFill()) {
-        fontColor = style.getText().getFill().getColor();
+      if (style.getText && style.getText() && style.getText().getFill && style.getText().getFill()) {
+        if (typeof style.getText().getFill().getColor() === "string") {
+          fontColor = style.getText().getFill().getColor();
+        } else if (Array.isArray(style.getText().getFill().getColor())) {
+          fontColor = olColorToHex(style.getText().getFill().getColor());
+        }
       }
 
-      if (style.getText && style.getText() && style.getStroke && style.getStroke()) {
-        fontBackColor = style.getText().getStroke().getColor();
+      if (style.getText && style.getText() && style.getText().getStroke && style.getText().getStroke()) {
+        if (typeof style.getText().getFill().getColor() === "string") {
+          fontBackColor = style.getText().getStroke().getColor();
+        } else if (Array.isArray(style.getText().getStroke().getColor())) {
+          fontBackColor = olColorToHex(style.getText().getStroke().getColor());
+        }
       }
 
       if (fontColor && /^rgb/.test(fontColor)) {
@@ -407,13 +423,24 @@ var ExportModel = {
       }
 
       if (style.getFill && style.getFill() && style.getFill().getColor()) {
-        fillColor = style.getFill().getColor().toHex();
-        fillOpacity = style.getFill().getColor().toOpacity();
+
+        if (style.getFill().getColor().toHex) {
+          fillColor = style.getFill().getColor().toHex();
+          fillOpacity = style.getFill().getColor().toOpacity();
+        } else if (Array.isArray(style.getFill().getColor())) {
+          fillColor = olColorToHex(style.getFill().getColor());
+          fillOpacity = style.getFill().getColor()[style.getFill().getColor().length - 1];
+        }
       }
 
       if (style.getFill && style.getStroke()) {
 
-        strokeColor = style.getStroke().getColor().toHex();
+        if (style.getStroke().getColor().toHex) {
+          strokeColor = style.getStroke().getColor().toHex();
+        } else if (Array.isArray(style.getStroke().getColor())) {
+          strokeColor = olColorToHex(style.getStroke().getColor())
+        }
+
         strokeWidth = style.getStroke().getWidth() || 3;
         strokeLinecap = style.getStroke().getLineCap() || "round";
         strokeDashstyle = style.getStroke().getLineDash() ?
@@ -716,7 +743,7 @@ var ExportModel = {
       parseInt(options.size.width * dpi),
       parseInt(options.size.height * dpi)
     ];
-    
+
     data.bbox = [left, right, bottom, top];
     data.orientation = options.orientation;
     data.format = options.format;

@@ -502,7 +502,7 @@ var DrawModel = {
       strokeDash: ""
     };
 
-    obj.text = style.getText().getText();
+    obj.text = style.getText() ? style.getText().getText() : "";
     obj.image = style.getImage() instanceof ol.style.Icon ? style.getImage().getSrc() : "";
     obj.pointRadius = style.getImage() instanceof ol.style.Circle ? style.getImage().getRadius() : "";
     obj.pointColor = style.getImage() instanceof ol.style.Circle ? style.getImage().getFill().getColor() : "";
@@ -541,9 +541,13 @@ var DrawModel = {
         c.setGeometry(geom);
       }
       c.getGeometry().transform(this.get('olMap').getView().getProjection(), "EPSG:4326");
-      c.setProperties({
-        style: JSON.stringify(this.extractStyle(c.getStyle()[1]))
-      });
+
+      if (c.getStyle()[1]) {
+        c.setProperties({
+          style: JSON.stringify(this.extractStyle(c.getStyle()[1] || c.getStyle()[0]))
+        });
+      }
+
       transformed.push(c);
     });
 
@@ -573,7 +577,7 @@ var DrawModel = {
    * @param {external:"ol.feature"}
    * @instance
    */
-  setStyleFromProperties: function(feature) {
+  setStyleFromProperties: function (feature) {
     if (feature.getProperties().style) {
       try {
         let style = JSON.parse(feature.getProperties().style);
@@ -588,6 +592,12 @@ var DrawModel = {
         feature.setStyle(this.getStyle(feature, style));
       } catch (ex) {
         console.error("Style attribute could not be parsed.", ex)
+      }
+    } else {
+      //https://github.com/openlayers/openlayers/issues/3262
+      let func = feature.getStyleFunction();
+      if (func) {
+        feature.setStyle(func.call(feature, this.get('olMap').getView().getResolution()));
       }
     }
   },
