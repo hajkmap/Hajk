@@ -117,7 +117,12 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null
     },
     {
       "id": "2",
@@ -142,7 +147,12 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": ""
+      "attribution": "",
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null
     },
     {
       "id": "3",
@@ -165,7 +175,12 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": ""
+      "attribution": "",
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null
     },
     {
       "id": "4",
@@ -188,7 +203,12 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": ""
+      "attribution": "",
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null
     },
     {
       "id": "5",
@@ -211,7 +231,12 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": ""
+      "attribution": "",
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null
     },
     {
       "id": "6",
@@ -234,14 +259,19 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": ""
+      "attribution": "",
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null
     },
     {
       "id": "7",
       "caption": "Dammar SMHI",
       "url": "http://ksdgis.se/geoserver/fortum/wms",
       "owner": "",
-      "date": "1491476676133",
+      "date": "1499182523502",
       "content": "",
       "legend": "",
       "projection": null,
@@ -257,7 +287,12 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": ""
+      "attribution": "",
+      "searchUrl": "http://ksdgis.se/geoserver/fortum/wfs",
+      "searchPropertyName": "dnamn",
+      "searchDisplayName": "dnamn",
+      "searchOutputFormat": "GML3",
+      "searchGeometryField": "geom"
     },
     {
       "id": "8",
@@ -280,7 +315,12 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": ""
+      "attribution": "",
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null
     },
     {
       "id": "9",
@@ -303,7 +343,12 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": "Lantmäteriet"
+      "attribution": "Lantmäteriet",
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null
     },
     {
       "id": "10",
@@ -326,7 +371,12 @@
       "singleTile": true,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": ""
+      "attribution": "",
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null
     },
     {
       "id": "11",
@@ -349,7 +399,12 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": ""
+      "attribution": "",
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null
     },
     {
       "id": "12",
@@ -372,7 +427,12 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": ""
+      "attribution": "",
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null
     },
     {
       "id": "13",
@@ -395,14 +455,19 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": ""
+      "attribution": "",
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null
     },
     {
       "id": "14",
       "caption": "Bokbuss",
       "url": "https://karta.uddevalla.se/geoserver/wms",
       "owner": "",
-      "date": "1491560304468",
+      "date": "1499179691393",
       "content": "",
       "legend": "",
       "projection": null,
@@ -418,7 +483,12 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": ""
+      "attribution": "",
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null
     },
     {
       "id": "15",
@@ -441,14 +511,19 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": ""
+      "attribution": "",
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null
     },
     {
       "id": "16",
       "caption": "Bohusleden",
       "url": "https://karta.uddevalla.se/geoserver/wms",
       "owner": "",
-      "date": "1491560339510",
+      "date": "1499183569243",
       "content": "",
       "legend": "",
       "projection": null,
@@ -464,14 +539,19 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": ""
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": ""
     },
     {
       "id": "17",
       "caption": "Parkering",
       "url": "https://karta.uddevalla.se/geoserver/wms",
       "owner": "",
-      "date": "1491560355039",
+      "date": "1499183638708",
       "content": "",
       "legend": "",
       "projection": null,
@@ -487,14 +567,19 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": ""
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": ""
     },
     {
       "id": "18",
       "caption": "Vandringsled",
       "url": "https://karta.uddevalla.se/geoserver/wms",
       "owner": "",
-      "date": "1491560376478",
+      "date": "1499183561868",
       "content": "",
       "legend": "",
       "projection": null,
@@ -510,14 +595,19 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": ""
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": ""
     },
     {
       "id": "19",
       "caption": "Grundskola",
       "url": "https://karta.uddevalla.se/geoserver/wms",
       "owner": "",
-      "date": "1491560386813",
+      "date": "1499183675151",
       "content": "",
       "legend": "",
       "projection": null,
@@ -533,7 +623,12 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": ""
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": ""
     },
     {
       "id": "20",
@@ -556,96 +651,28 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": ""
+      "attribution": "",
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null
     }
   ],
   "wfslayers": [
     {
-      "id": "13",
-      "caption": "Dammar",
-      "url": "http://194.71.132.27/geoserver/fortum/wfs",
-      "layers": [
-        "fortum:dams"
-      ],
-      "searchFields": [
-        "name"
-      ],
-      "infobox": "",
-      "displayFields": [
-        "name"
-      ],
-      "geometryField": "geom",
-      "outputFormat": "GML3"
-    },
-    {
-      "id": "19",
-      "caption": "Vattenförekomst",
-      "url": "http://ksdgis.se/geoserver/fortum/wfs",
-      "layers": [
-        "fortum:streams_vf"
-      ],
-      "searchFields": [
-        "namn",
-        "eu_cd"
-      ],
-      "infobox": "{längd}  \n{export:namn as name} \n{export:eu_cd}",
-      "displayFields": [
-        "namn",
-        "eu_cd"
-      ],
-      "geometryField": "geom",
-      "outputFormat": "GML3"
-    },
-    {
-      "id": "20",
-      "caption": "Vattenyta",
-      "url": "http://ksdgis.se/geoserver/fortum/wfs",
-      "layers": [
-        "fortum:waterbodies"
-      ],
-      "searchFields": [
-        "vynamn",
-        "sjonamn",
-        "eu_cd"
-      ],
-      "infobox": "",
-      "displayFields": [
-        "vynamn",
-        "eu_cd"
-      ],
-      "geometryField": "geom",
-      "outputFormat": "GML3"
-    },
-    {
-      "id": "21",
-      "caption": "Kraftverk",
-      "url": "http://ksdgis.se/geoserver/fortum/wfs",
-      "layers": [
-        "fortum:powerplants"
-      ],
-      "searchFields": [
-        "name"
-      ],
-      "infobox": "",
-      "displayFields": [
-        "name"
-      ],
-      "geometryField": "geom",
-      "outputFormat": "GML3"
-    },
-    {
-      "id": "38",
-      "caption": "fastighet",
+      "id": "40",
+      "caption": "Fotrum dammar",
       "url": "http://194.71.132.27/geoserver/wfs",
       "layers": [
-        "demo:demo_fastighet"
+        "fortum:dams_default"
       ],
       "searchFields": [
-        "fastighet"
+        "owner"
       ],
       "infobox": "",
       "displayFields": [
-        "fastighet"
+        "owner"
       ],
       "geometryField": "geom",
       "outputFormat": "GML3"
@@ -672,7 +699,19 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "",
-      "queryable": true
+      "queryable": true,
+      "labelAlign": null,
+      "labelBaseline": null,
+      "labelSize": null,
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWeight": null,
+      "labelFont": null,
+      "labelFillColor": null,
+      "labelOutlineColor": null,
+      "labelOutlineWidth": 0,
+      "labelAttribute": null,
+      "showLabels": false
     },
     {
       "id": "24",
@@ -694,7 +733,19 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "",
-      "queryable": true
+      "queryable": true,
+      "labelAlign": null,
+      "labelBaseline": null,
+      "labelSize": null,
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWeight": null,
+      "labelFont": null,
+      "labelFillColor": null,
+      "labelOutlineColor": null,
+      "labelOutlineWidth": 0,
+      "labelAttribute": null,
+      "showLabels": false
     },
     {
       "id": "25",
@@ -716,7 +767,19 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "",
-      "queryable": true
+      "queryable": true,
+      "labelAlign": null,
+      "labelBaseline": null,
+      "labelSize": null,
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWeight": null,
+      "labelFont": null,
+      "labelFillColor": null,
+      "labelOutlineColor": null,
+      "labelOutlineWidth": 0,
+      "labelAttribute": null,
+      "showLabels": false
     },
     {
       "id": "26",
@@ -738,7 +801,19 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "",
-      "queryable": true
+      "queryable": true,
+      "labelAlign": null,
+      "labelBaseline": null,
+      "labelSize": null,
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWeight": null,
+      "labelFont": null,
+      "labelFillColor": null,
+      "labelOutlineColor": null,
+      "labelOutlineWidth": 0,
+      "labelAttribute": null,
+      "showLabels": false
     },
     {
       "id": "27",
@@ -760,7 +835,19 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "",
-      "queryable": true
+      "queryable": true,
+      "labelAlign": null,
+      "labelBaseline": null,
+      "labelSize": null,
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWeight": null,
+      "labelFont": null,
+      "labelFillColor": null,
+      "labelOutlineColor": null,
+      "labelOutlineWidth": 0,
+      "labelAttribute": null,
+      "showLabels": false
     },
     {
       "id": "28",
@@ -782,7 +869,19 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "",
-      "queryable": true
+      "queryable": true,
+      "labelAlign": null,
+      "labelBaseline": null,
+      "labelSize": null,
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWeight": null,
+      "labelFont": null,
+      "labelFillColor": null,
+      "labelOutlineColor": null,
+      "labelOutlineWidth": 0,
+      "labelAttribute": null,
+      "showLabels": false
     },
     {
       "id": "29",
@@ -791,7 +890,7 @@
       "url": "https://karta.uddevalla.se/geoserver/wfs",
       "layer": "uddevalla:badplats_p",
       "owner": null,
-      "date": "1491561618882",
+      "date": "1499184307890",
       "content": "",
       "legend": "http://ksdgis.se/hajk/assets/icons/marker.png",
       "symbolXOffset": 16.0,
@@ -804,7 +903,19 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "",
-      "queryable": true
+      "queryable": true,
+      "labelAlign": "center",
+      "labelBaseline": "bottom",
+      "labelSize": "0",
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWeight": "normal",
+      "labelFont": "Arial",
+      "labelFillColor": "rgba(0, 0, 0, 1)",
+      "labelOutlineColor": "rgba(255, 255, 255, 1)",
+      "labelOutlineWidth": 3,
+      "labelAttribute": "",
+      "showLabels": true
     },
     {
       "id": "30",
@@ -826,7 +937,19 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "",
-      "queryable": true
+      "queryable": true,
+      "labelAlign": null,
+      "labelBaseline": null,
+      "labelSize": null,
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWeight": null,
+      "labelFont": null,
+      "labelFillColor": null,
+      "labelOutlineColor": null,
+      "labelOutlineWidth": 0,
+      "labelAttribute": null,
+      "showLabels": false
     }
   ],
   "wfstlayers": [

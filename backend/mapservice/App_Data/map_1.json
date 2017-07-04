@@ -187,8 +187,13 @@
             "expanded": false,
             "layers": [
               {
+                "id": "29",
+                "visibleAtStart": true,
+                "drawOrder": 1000
+              },
+              {
                 "id": "7",
-                "visibleAtStart": false,
+                "visibleAtStart": true,
                 "drawOrder": 0
               },
               {
@@ -288,6 +293,15 @@
             "xtitle": "E",
             "ytitle": "N",
             "inverseAxis": false
+          },
+          {
+            "code": "EPSG:3006",
+            "default": false,
+            "hint": "",
+            "title": "SW99TM",
+            "xtitle": "E",
+            "ytitle": "N",
+            "inverseAxis": false
           }
         ]
       },
@@ -317,7 +331,7 @@
       "options": {
         "text": "Information om kartan.",
         "headerText": "Information",
-        "visibleAtStart": true
+        "visibleAtStart": false
       },
       "index": 8
     },
@@ -337,11 +351,11 @@
   "map": {
     "target": "map",
     "center": [
-      414962,
-      6583005
+      418061,
+      6584446
     ],
     "projection": "EPSG:3006",
-    "zoom": 10,
+    "zoom": 13,
     "maxZoom": 3,
     "minZoom": 9,
     "resolutions": [
