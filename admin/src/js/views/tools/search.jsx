@@ -27,6 +27,7 @@ var defaultState = {
   validationErrors: [],
   toolbar: "bottom",
   active: false,
+  index: 0,
   onMap: false,
   selectionTools: true,
   filterVisible: true,
@@ -57,17 +58,19 @@ class ToolOptions extends Component {
     if (tool) {
       this.setState({
         active: true,
+        index: tool.index,
         onMap: tool.options.onMap,
-        maxZoom: tool.options.maxZoom,
-        markerImg: tool.options.markerImg,
-        kmlExportUrl: tool.options.kmlExportUrl,
-        excelExportUrl: tool.options.excelExportUrl,
         selectionTools: tool.options.selectionTools,
+        filterVisible: tool.options.filterVisible,
         displayPopup: tool.options.displayPopup,
-        imgSizeX: tool.options.imgSize[0] || this.state.imgSizeX,
-        imgSizeY: tool.options.imgSize[1] || this.state.imgSizeX,
+        maxZoom: tool.options.maxZoom,
+        excelExportUrl: tool.options.excelExportUrl,
+        kmlExportUrl: tool.options.kmlExportUrl,
+        markerImg: tool.options.markerImg,
         anchorX: tool.options.anchor[0] || this.state.anchorX,
         anchorY: tool.options.anchor[1] || this.state.anchorY,
+        imgSizeX: tool.options.imgSize[0] || this.state.imgSizeX,
+        imgSizeY: tool.options.imgSize[1] || this.state.imgSizeX,
         popupOffsetY: tool.options.popupOffsetY
       });
     } else {
@@ -115,6 +118,7 @@ class ToolOptions extends Component {
     this.props.model.get('toolConfig').forEach(t => {
       if (t.type === this.type) {
         t.options = tool.options;
+        t.index = tool.index;
       }
     });
   }
@@ -123,6 +127,7 @@ class ToolOptions extends Component {
 
     var tool = {
       "type": this.type,
+      "index": this.state.index,
       "options": {
         onMap: this.state.onMap,
         toolbar: this.state.onMap ? '' : 'bottom',
@@ -132,6 +137,7 @@ class ToolOptions extends Component {
         excelExportUrl: this.state.excelExportUrl,
         displayPopup: this.state.displayPopup,
         selectionTools: this.state.selectionTools,
+        filterVisible: this.state.filterVisible,
         anchor: [this.state.anchorX, this.state.anchorY],
         imgSize: [this.state.imgSizeX, this.state.imgSizeY],
         popupOffsetY: this.state.popupOffsetY
@@ -196,6 +202,15 @@ class ToolOptions extends Component {
             <label htmlFor="active">Aktiverad</label>
           </div>
           <div>
+            <label htmlFor="index">Sorteringsordning</label>
+            <input
+              id="index"
+              name="index"
+              type="text"
+              onChange={(e) => {this.handleInputChange(e)}}
+              value={this.state.index}/>
+          </div>
+          <div>
             <input
               id="onMap"
               name="onMap"
@@ -215,6 +230,15 @@ class ToolOptions extends Component {
           </div>
           <div>
             <input
+              id="filterVisible"
+              name="filterVisible"
+              type="checkbox"
+              onChange={(e) => {this.handleInputChange(e)}}
+              checked={this.state.filterVisible}/>&nbsp;
+            <label htmlFor="filterVisible">Sök i synliga lager</label>
+          </div>
+          <div>
+            <input
               id="selectionTools"
               name="selectionTools"
               type="checkbox"
@@ -223,7 +247,7 @@ class ToolOptions extends Component {
             <label htmlFor="selectionTools">Verktyg för ytsökning</label>
           </div>
           <div>
-            <label htmlFor="active">Zoomnivå</label>
+            <label htmlFor="maxZoom">Zoomnivå</label>
             <input value={this.state.maxZoom} type="text" name="maxZoom" onChange={(e) => {this.handleInputChange(e)}}></input>
           </div>
           <div>
@@ -243,7 +267,7 @@ class ToolOptions extends Component {
             <input value={this.state.anchorX} type="text" name="anchorX" onChange={(e) => {this.handleInputChange(e)}}></input>
           </div>
           <div>
-            <label htmlFor="active">Ikonförskjutning Y</label>
+            <label htmlFor="anchorY">Ikonförskjutning Y</label>
             <input value={this.state.anchorY} type="text" name="anchorY" onChange={(e) => {this.handleInputChange(e)}}></input>
           </div>
           <div>

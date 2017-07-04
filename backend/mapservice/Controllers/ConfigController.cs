@@ -248,7 +248,8 @@ namespace MapService.Controllers
                             visibleAtStart = true,
                             backgroundSwitcherBlack = true,
                             backgroundSwitcherWhite = true
-                        }
+                        },
+                        index = 0
                     }
                 },
                 version = "1.0.5"

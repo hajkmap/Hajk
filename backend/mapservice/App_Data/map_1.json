@@ -174,12 +174,12 @@
         "baselayers": [
           {
             "id": "22",
-            "visibleAtStart": false,
+            "visibleAtStart": true,
             "drawOrder": 0
           },
           {
             "id": "7",
-            "visibleAtStart": true,
+            "visibleAtStart": false,
             "drawOrder": 0
           }
         ],
@@ -205,19 +205,21 @@
         "backgroundSwitcherBlack": true,
         "backgroundSwitcherWhite": true,
         "toggleAllButton": true
-      }
+      },
+      "index": 0
     },
     {
       "type": "search",
       "options": {
         "onMap": false,
         "toolbar": "bottom",
-        "maxZoom": 15,
+        "maxZoom": 14,
         "markerImg": "http://localhost/hajk/assets/icons/marker.png",
         "kmlExportUrl": "/mapservice/export/kml",
         "excelExportUrl": "/mapservice/export/excel",
         "displayPopup": true,
         "selectionTools": true,
+        "filterVisible": true,
         "anchor": [
           16,
           32
@@ -225,8 +227,10 @@
         "imgSize": [
           32,
           32
-        ]
-      }
+        ],
+        "popupOffsetY": 0
+      },
+      "index": 4
     },
     {
       "type": "infoclick",
@@ -242,7 +246,8 @@
           32
         ],
         "popupOffsetY": -32
-      }
+      },
+      "index": 0
     },
     {
       "type": "export",
@@ -258,17 +263,18 @@
           2500,
           5000,
           10000,
-          10000,
           25000,
           50000,
           100000,
           250000
         ]
-      }
+      },
+      "index": 3
     },
     {
       "type": "edit",
-      "options": {}
+      "options": {},
+      "index": 2
     },
     {
       "type": "coordinates",
@@ -284,19 +290,18 @@
             "inverseAxis": false
           }
         ]
-      }
-    },
-    {
-      "type": "bookmark",
-      "options": {}
+      },
+      "index": 5
     },
     {
       "type": "buffer",
-      "options": {}
+      "options": {},
+      "index": 9
     },
     {
       "type": "anchor",
-      "options": {}
+      "options": {},
+      "index": 6
     },
     {
       "type": "draw",
@@ -304,7 +309,8 @@
         "exportUrl": "/mapservice/export/kml",
         "importUrl": "/mapservice/import/kml",
         "icons": "marker, marker_black, marker_green, marker_red, marker_yellow, br, pin, pin_black, pin_green, pin_red, pin_yellow"
-      }
+      },
+      "index": 1
     },
     {
       "type": "information",
@@ -312,17 +318,20 @@
         "text": "Information om kartan.",
         "headerText": "Information",
         "visibleAtStart": true
-      }
+      },
+      "index": 8
     },
     {
       "type": "streetview",
       "options": {
         "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4"
-      }
+      },
+      "index": 11
     },
     {
       "type": "location",
-      "options": {}
+      "options": {},
+      "index": 7
     }
   ],
   "map": {

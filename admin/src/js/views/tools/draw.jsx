@@ -26,6 +26,7 @@ import { Component } from "react";
 var defaultState = {
   validationErrors: [],
   active: false,
+  index: 0,
   exportUrl: "/mapservice/export/kml",
   importUrl: "/mapservice/import/kml",
   icons: ""
@@ -46,6 +47,7 @@ class ToolOptions extends Component {
     if (tool) {
       this.setState({
         active: true,
+        index: tool.index,
         exportUrl: tool.options.exportUrl,
         importUrl: tool.options.importUrl,
         icons: tool.options.icons
@@ -95,6 +97,7 @@ class ToolOptions extends Component {
     this.props.model.get('toolConfig').forEach(t => {
       if (t.type === this.type) {
         t.options = tool.options;
+        t.index = tool.index;
       }
     });
   }
@@ -103,6 +106,7 @@ class ToolOptions extends Component {
 
     var tool = {
       "type": this.type,
+      "index": this.state.index,
       "options": {
         exportUrl: this.state.exportUrl,
         importUrl: this.state.importUrl,
@@ -165,6 +169,15 @@ class ToolOptions extends Component {
               onChange={(e) => {this.handleInputChange(e)}}
               checked={this.state.active}/>&nbsp;
             <label htmlFor="active">Aktiverad</label>
+          </div>
+          <div>
+            <label htmlFor="index">Sorteringsordning</label>
+            <input
+              id="index"
+              name="index"
+              type="text"
+              onChange={(e) => {this.handleInputChange(e)}}
+              value={this.state.index}/>
           </div>
           <div>
             <label htmlFor="exportUrl">URL till export-tjänst</label>

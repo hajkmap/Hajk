@@ -42,6 +42,7 @@ class ToolOptions extends Component {
     if (this.getTool()) {
       this.setState({
         active: true,
+        index: tool.index,
         transformations: this.getTool().options.transformations || []
       });
     } else {
@@ -83,6 +84,7 @@ class ToolOptions extends Component {
     this.props.model.get('toolConfig').forEach(t => {
       if (t.type === this.type) {
         t.options = tool.options;
+        t.index = tool.index;
       }
     });
   }
@@ -91,6 +93,7 @@ class ToolOptions extends Component {
 
     var tool = {
       "type": this.type,
+      "index": this.state.index,
       "options": {
         transformations: this.state.transformations
       }
@@ -154,6 +157,15 @@ class ToolOptions extends Component {
             checked={this.state.active}>
           </input>&nbsp;
           <label htmlFor="active">Aktiverad</label>
+        </div>
+        <div>
+          <label htmlFor="index">Sorteringsordning</label>
+          <input
+            id="index"
+            name="index"
+            type="text"
+            onChange={(e) => {this.handleInputChange(e)}}
+            value={this.state.index}/>
         </div>
       </div>
     )
