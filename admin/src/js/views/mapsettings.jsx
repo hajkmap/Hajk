@@ -449,10 +449,13 @@ class Menu extends Component {
 
     roots.toArray().forEach(root => {
       root.dataset.type === "layer" ?
-      settings.baselayers.push(root.dataset.id) :
+      settings.baselayers.push({
+        id: root.dataset.id,
+        visibleAtStart: root.dataset.visibleatstart,
+        drawOrder: 0
+      }) :
       settings.groups.push(groupItem(root))
     });
-
     return settings;
   }
   /**
@@ -628,15 +631,15 @@ class Menu extends Component {
       startsWith.sort(function(a, b) {
         if(a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
         if(a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
-        return 0; 
+        return 0;
       });
 
       alphabetically.sort(function(a, b) {
         if(a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
         if(a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
-        return 0; 
+        return 0;
       });
-        
+
       layers = startsWith.concat(alphabetically);
     }
 

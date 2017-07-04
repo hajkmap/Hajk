@@ -26,6 +26,7 @@ import { Component } from "react";
 var defaultState = {
   validationErrors: [],
   active: false,
+  index: 0,
   apiKey: "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
 };
 
@@ -44,6 +45,7 @@ class ToolOptions extends Component {
     if (tool) {
       this.setState({
         active: true,
+        index: tool.index,
         apiKey: tool.options.apiKey
       });
     } else {
@@ -91,6 +93,7 @@ class ToolOptions extends Component {
     this.props.model.get('toolConfig').forEach(t => {
       if (t.type === this.type) {
         t.options = tool.options;
+        t.index = tool.index;
       }
     });
   }
@@ -99,6 +102,7 @@ class ToolOptions extends Component {
 
     var tool = {
       "type": this.type,
+      "index": this.state.index,
       "options": {
         apiKey: this.state.apiKey,
       }
@@ -159,6 +163,15 @@ class ToolOptions extends Component {
               onChange={(e) => {this.handleInputChange(e)}}
               checked={this.state.active}/>&nbsp;
             <label htmlFor="active">Aktiverad</label>
+          </div>
+          <div>
+            <label htmlFor="index">Sorteringsordning</label>
+            <input
+              id="index"
+              name="index"
+              type="text"
+              onChange={(e) => {this.handleInputChange(e)}}
+              value={this.state.index}/>
           </div>
           <div>
             <label htmlFor="apiKey">API-nyckel</label>

@@ -136,6 +136,11 @@ var LayerCollection = {
         "imageFormat": args.imageFormat || "image/png",
         "serverType": args.serverType || "geoserver",
         "attribution": args.attribution,
+        "searchUrl": args.searchUrl,
+        "searchPropertyName": args.searchPropertyName,
+        "searchDisplayName": args.searchDisplayName,
+        "searchOutputFormat": args.searchOutputFormat,
+        "searchGeometryField": args.searchGeometryField,
         "legend" : [{
           "Url": getLegendUrl(args),
           "Description" : "Teckenförklaring"

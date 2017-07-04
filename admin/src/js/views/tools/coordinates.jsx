@@ -26,7 +26,8 @@ import { Component } from "react";
 var defaultState = {
   validationErrors: [],
   transformations: [],
-  active: false
+  active: false,
+  index: 0
 };
 
 class ToolOptions extends Component {
@@ -40,10 +41,12 @@ class ToolOptions extends Component {
   }
 
   componentDidMount() {
-    if (this.getTool()) {
+    var tool = this.getTool();
+    if (tool) {
       this.setState({
         active: true,
-        transformations: this.getTool().options.transformations || []
+        index: tool.index,
+        transformations: tool.options.transformations || []
       });
     } else {
       this.setState({
@@ -60,9 +63,15 @@ class ToolOptions extends Component {
   componentWillMount() {
   }
 
-  activeChanged(e) {
+  handleInputChange(event) {
+    const target = event.target;
+    const name = target.name;
+    var value = target.type === 'checkbox' ? target.checked : target.value;
+    if (typeof value === "string" && value.trim() !== "") {
+      value = !isNaN(Number(value)) ? Number(value) : value
+    }
     this.setState({
-      active: e.target.checked
+      [name]: value
     });
   }
 
@@ -84,6 +93,7 @@ class ToolOptions extends Component {
     this.props.model.get('toolConfig').forEach(t => {
       if (t.type === this.type) {
         t.options = tool.options;
+        t.index = tool.index;
       }
     });
   }
@@ -92,6 +102,7 @@ class ToolOptions extends Component {
 
     var tool = {
       "type": this.type,
+      "index": this.state.index,
       "options": {
         transformations: this.state.transformations
       }
@@ -192,11 +203,20 @@ class ToolOptions extends Component {
             id="active"
             name="active"
             type="checkbox"
-            onChange={(e) => {this.activeChanged(e)}}
+            onChange={(e) => {this.handleInputChange(e)}}
             checked={this.state.active}>
           </input>&nbsp;
           <label htmlFor="active">Aktiverad</label>
         </div>
+        <div>
+            <label htmlFor="index">Sorteringsordning</label>
+            <input
+              id="index"
+              name="index"
+              type="text"
+              onChange={(e) => {this.handleInputChange(e)}}
+              value={this.state.index}/>
+          </div>
         <div>
           <div>Transformationer</div>
           {this.renderTransformations()}
