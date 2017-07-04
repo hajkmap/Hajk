@@ -176,11 +176,6 @@
             "id": "22",
             "visibleAtStart": true,
             "drawOrder": 0
-          },
-          {
-            "id": "7",
-            "visibleAtStart": false,
-            "drawOrder": 0
           }
         ],
         "groups": [
@@ -191,6 +186,11 @@
             "toggled": false,
             "expanded": false,
             "layers": [
+              {
+                "id": "7",
+                "visibleAtStart": false,
+                "drawOrder": 0
+              },
               {
                 "id": "26",
                 "visibleAtStart": false,

@@ -226,6 +226,7 @@ var DrawModel = {
     this.get('olMap').removeInteraction(this.get("drawTool"));
     this.get('olMap').removeInteraction(this.get("editTool"));
     this.get('olMap').set('clickLock', true);
+    this.set('drawToolActive', true);
 
     if (dragInteraction) {
       dragInteraction.removeAcceptedLayer('draw-layer');
@@ -237,6 +238,13 @@ var DrawModel = {
       features: features
     }));
     this.get('olMap').addInteraction(this.get("editTool"));
+
+    this.get("editTool").on('modifyend', e => {
+      e.features.forEach(feature => {
+        this.handleDrawEnd(feature);
+      })
+    });
+
   },
 
   /**
@@ -260,6 +268,7 @@ var DrawModel = {
     this.get('olMap').removeInteraction(this.get("drawTool"));
     this.get('olMap').removeInteraction(this.get("editTool"));
     this.get('olMap').un('singleclick', this.removeSelected);
+    this.set('drawToolActive', false);
     var dragInteraction = this.getDragInteraction();
     if (dragInteraction) {
       dragInteraction.addAcceptedLayer('draw-layer');
@@ -936,9 +945,17 @@ var DrawModel = {
       if (feature.getProperties().type !== "Text" && feature.getStyle()) {
         let style = feature.getStyle();
         if (this.get('showLabels')) {
-          style[1].getText().setText(this.getLabelText(feature));
+          if (style[1]) {
+            style[1].getText().setText(this.getLabelText(feature));
+          } else if (style[0]) {
+            style[0].getText().setText(this.getLabelText(feature));
+          }
         } else {
-          style[1].getText().setText("");
+          if (style[1]) {
+            style[1].getText().setText("");
+          } else if (style[0]) {
+            style[0].getText().setText("");
+          }
         }
       }
     });
