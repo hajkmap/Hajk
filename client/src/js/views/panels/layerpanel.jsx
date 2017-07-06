@@ -202,6 +202,9 @@ var LayerPanelView = {
       ,   $ref = $(this.refs["group_" + group.id])
       ,   checkedClass = "fa-check-square-o"
       ,   uncheckedClass = "fa-square-o"
+      ,   activeGroup = layers.some(layer => layer.getVisible() === true)
+      ,   $refGroup = $(this.refs[group.id])
+      ,   activeClass = "active-group";
 
       if (checked) {
         $ref.removeClass(uncheckedClass);
@@ -211,6 +214,12 @@ var LayerPanelView = {
         $ref.removeClass(checkedClass);
         $ref.addClass(uncheckedClass);
         group.autoChecked = false;
+      }
+
+      if (activeGroup) {
+        $refGroup.addClass("active-group");
+      } else {
+        $refGroup.removeClass("active-group");
       }
     }
   },
