@@ -217,9 +217,9 @@ var LayerPanelView = {
       }
 
       if (activeGroup) {
-        $refGroup.addClass("active-group");
+        $refGroup.addClass(activeClass);
       } else {
-        $refGroup.removeClass("active-group");
+        $refGroup.removeClass(activeClass);
       }
     }
   },
