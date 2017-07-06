@@ -170,7 +170,7 @@ var LayerItemView = {
           <span onClick={toggleVisible} className="clickable" style={{ position: 'relative', top: '3px' }}>
             <i className={visible ? 'fa fa-check-square-o': 'fa fa-square-o'} style={{ width: '15px'}}></i>&nbsp;
             {this.renderStatus()}
-            <label className={visible ? 'layer-item-header-text active-group' : 'layer-item-header-text'}>{caption}</label>&nbsp;
+            <label className="layer-item-header-text">{caption}</label>&nbsp;
           </span>
           {components.legend.legendButton}
         </div>
