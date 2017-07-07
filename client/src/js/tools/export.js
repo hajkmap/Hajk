@@ -493,9 +493,12 @@ var ExportModel = {
       }
     }
 
-    function translateVector(features, sourceStyle) {
+    function translateVector(features, layer) {
 
       function getText(feature) {
+
+        var text = "";
+
         if (feature.getProperties() &&
             feature.getProperties().type === "Text") {
             if (feature.getProperties().description)
@@ -506,13 +509,23 @@ var ExportModel = {
               text = ''
             return text
         }
+
         if (feature.getStyle &&
             Array.isArray(feature.getStyle()) &&
             feature.getStyle()[1] &&
             feature.getStyle()[1].getText() &&
             feature.getStyle()[1].getText().getText()) {
-          return feature.getStyle()[1].getText().getText();
+          text = feature.getStyle()[1].getText().getText();
         }
+
+        if (feature.getStyle &&
+            feature.getStyle() &&
+            feature.getStyle().getText &&
+            feature.getStyle().getText()) {
+          text = feature.getStyle().getText().getText();
+        }
+
+        return text;
       }
 
       return {
@@ -523,7 +536,8 @@ var ExportModel = {
           ,   holes = null
           ,   coords;
 
-          if (!feature.getStyle() && sourceStyle) {
+          if (!feature.getStyle() && layer) {
+            let sourceStyle = layer.getSource().getStyle()(feature)[0];
             feature.setStyle(sourceStyle)
           }
 
@@ -573,9 +587,11 @@ var ExportModel = {
       translateVector(layer.getSource().getFeaturesInExtent(extent))
     ).filter(layer => layer.features.length > 0);
 
-    imageVectorLayers = imageVectorLayers.map(layer =>
-      translateVector(layer.getSource().getSource().getFeaturesInExtent(extent), layer.getSource().getStyle()()[0])
-    ).filter(layer => layer.features.length > 0);
+    imageVectorLayers = imageVectorLayers.map(layer => {
+
+      return translateVector(layer.getSource().getSource().getFeaturesInExtent(extent), layer)
+
+    }).filter(layer => layer.features.length > 0);
 
     return vectorLayers.concat(imageVectorLayers);
   },

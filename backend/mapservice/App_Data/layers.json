@@ -271,7 +271,7 @@
       "caption": "Dammar SMHI",
       "url": "http://ksdgis.se/geoserver/fortum/wms",
       "owner": "",
-      "date": "1499182523502",
+      "date": "1499340962149",
       "content": "",
       "legend": "",
       "projection": null,
@@ -289,7 +289,7 @@
       "serverType": "geoserver",
       "attribution": "",
       "searchUrl": "http://ksdgis.se/geoserver/fortum/wfs",
-      "searchPropertyName": "dnamn",
+      "searchPropertyName": "",
       "searchDisplayName": "dnamn",
       "searchOutputFormat": "GML3",
       "searchGeometryField": "geom"
@@ -659,25 +659,7 @@
       "searchGeometryField": null
     }
   ],
-  "wfslayers": [
-    {
-      "id": "40",
-      "caption": "Fotrum dammar",
-      "url": "http://194.71.132.27/geoserver/wfs",
-      "layers": [
-        "fortum:dams_default"
-      ],
-      "searchFields": [
-        "owner"
-      ],
-      "infobox": "",
-      "displayFields": [
-        "owner"
-      ],
-      "geometryField": "geom",
-      "outputFormat": "GML3"
-    }
-  ],
+  "wfslayers": [],
   "vectorlayers": [
     {
       "id": "23",
@@ -890,7 +872,7 @@
       "url": "https://karta.uddevalla.se/geoserver/wfs",
       "layer": "uddevalla:badplats_p",
       "owner": null,
-      "date": "1499184307890",
+      "date": "1499409854395",
       "content": "",
       "legend": "http://ksdgis.se/hajk/assets/icons/marker.png",
       "symbolXOffset": 16.0,
@@ -906,7 +888,7 @@
       "queryable": true,
       "labelAlign": "center",
       "labelBaseline": "bottom",
-      "labelSize": "0",
+      "labelSize": "10",
       "labelOffsetX": 0,
       "labelOffsetY": 0,
       "labelWeight": "normal",
@@ -914,7 +896,7 @@
       "labelFillColor": "rgba(0, 0, 0, 1)",
       "labelOutlineColor": "rgba(255, 255, 255, 1)",
       "labelOutlineWidth": 3,
-      "labelAttribute": "",
+      "labelAttribute": "objnamn",
       "showLabels": true
     },
     {

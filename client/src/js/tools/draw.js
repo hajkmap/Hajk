@@ -220,6 +220,7 @@ var DrawModel = {
   activateEditTool: function () {
 
     var dragInteraction = this.getDragInteraction()
+    ,   revision = 1
     ,   features = new ol.Collection();
 
     this.get('olMap').un('singleclick', this.removeSelected);
@@ -240,11 +241,28 @@ var DrawModel = {
     this.get('olMap').addInteraction(this.get("editTool"));
 
     this.get("editTool").on('modifyend', e => {
-      e.features.forEach(feature => {
-        this.handleDrawEnd(feature);
-      })
+      this.measureTooltip.setPosition(undefined);
+      e.features.forEach(this.updateFeatureText.bind(this));
     });
 
+  },
+
+  /**
+   * Update features text.
+   * @instance
+   */
+  updateFeatureText: function (feature) {
+    var labelText
+    ,   style;
+
+    this.setFeaturePropertiesFromGeometry(feature);
+
+    labelText = this.getLabelText(feature);
+    style = feature.getStyle()[1] || feature.getStyle()[0];
+
+    if (style) {
+      style.getText().setText(labelText);
+    }
   },
 
   /**

@@ -102,7 +102,7 @@ module.exports = LayerModel.extend({
     });
   },
 
-  getStyle: function (feature, resolution) {
+  getStyle: function (feature) {
 
     const icon = this.get("icon");
     const fillColor = this.get("fillColor");
@@ -110,7 +110,7 @@ module.exports = LayerModel.extend({
     const lineStyle = this.get("lineStyle");
     const lineWidth = this.get("lineWidth");
     const symbolXOffset = this.get("symbolXOffset");
-    const symbolYOffset = this.get("symbolYOffset");    
+    const symbolYOffset = this.get("symbolYOffset");
     const rotation = 0.0
     const align = this.get("labelAlign") || "center";
     const baseline = this.get("labelBaseline") || "alphabetic";
@@ -146,26 +146,26 @@ module.exports = LayerModel.extend({
       return new ol.style.Fill({
         color: fillColor
       });
-    }    
+    }
 
-    function getText() {      
+    function getText() {
       return new ol.style.Text({
         textAlign: align,
         textBaseline: baseline,
         font: font,
-        text: feature.get(labelAttribute),
+        text: feature ? feature.get(labelAttribute) : "apa",
         fill: new ol.style.Fill({
           color: labelFillColor
         }),
         stroke: new ol.style.Stroke({
-          color: outlineColor, 
+          color: outlineColor,
           width: outlineWidth
         }),
         offsetX: offsetX,
         offsetY: offsetY,
         rotation: rotation
       });
-    };    
+    };
 
     function getImage() {
       return icon === ""
@@ -173,7 +173,7 @@ module.exports = LayerModel.extend({
       : getIcon();
     }
 
-    function getIcon() {                              
+    function getIcon() {
       return new ol.style.Icon({
         src: icon,
         scale: 1,
@@ -186,7 +186,7 @@ module.exports = LayerModel.extend({
       });
     }
 
-    function getPoint() {      
+    function getPoint() {
       return new ol.style.Circle({
         fill: getFill(),
         stroke: getStroke(),
@@ -210,7 +210,7 @@ module.exports = LayerModel.extend({
       };
       if (showLabels) {
         obj.text = getText();
-      }      
+      }
 
       return obj;
     }

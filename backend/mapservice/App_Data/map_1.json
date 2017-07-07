@@ -174,7 +174,7 @@
         "baselayers": [
           {
             "id": "22",
-            "visibleAtStart": true,
+            "visibleAtStart": false,
             "drawOrder": 0
           }
         ],
@@ -184,17 +184,32 @@
             "parent": "-1",
             "name": "Lager",
             "toggled": false,
-            "expanded": false,
+            "expanded": true,
             "layers": [
+              {
+                "id": "7",
+                "visibleAtStart": false,
+                "drawOrder": 0
+              },
               {
                 "id": "29",
                 "visibleAtStart": true,
                 "drawOrder": 1000
               },
               {
-                "id": "7",
-                "visibleAtStart": true,
-                "drawOrder": 0
+                "id": "19",
+                "visibleAtStart": false,
+                "drawOrder": 1000
+              },
+              {
+                "id": "17",
+                "visibleAtStart": false,
+                "drawOrder": 1000
+              },
+              {
+                "id": "16",
+                "visibleAtStart": false,
+                "drawOrder": 1000
               },
               {
                 "id": "26",
@@ -238,23 +253,6 @@
       "index": 4
     },
     {
-      "type": "infoclick",
-      "options": {
-        "displayPopup": true,
-        "markerImg": "assets/icons/marker.png",
-        "anchor": [
-          16,
-          32
-        ],
-        "imgSize": [
-          32,
-          32
-        ],
-        "popupOffsetY": -32
-      },
-      "index": 0
-    },
-    {
       "type": "export",
       "options": {
         "exportUrl": "/mapservice/export/pdf",
@@ -274,7 +272,7 @@
           250000
         ]
       },
-      "index": 3
+      "index": 9
     },
     {
       "type": "edit",
@@ -310,7 +308,7 @@
     {
       "type": "buffer",
       "options": {},
-      "index": 9
+      "index": 3
     },
     {
       "type": "anchor",
@@ -346,6 +344,23 @@
       "type": "location",
       "options": {},
       "index": 7
+    },
+    {
+      "type": "infoclick",
+      "options": {
+        "displayPopup": false,
+        "markerImg": "assets/icons/marker.png",
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ],
+        "popupOffsetY": 0
+      },
+      "index": 0
     }
   ],
   "map": {
