@@ -624,7 +624,13 @@ var DrawModel = {
       //https://github.com/openlayers/openlayers/issues/3262
       let func = feature.getStyleFunction();
       if (func) {
-        feature.setStyle(func.call(feature, this.get('olMap').getView().getResolution()));
+        let style = func.call(feature, this.get('olMap').getView().getResolution());
+        if (style[0] && style[0].getFill && style[0].getFill() === null) {
+          style[0].setFill(new ol.style.Fill({
+            color: [0, 0, 0, 0]
+          }));
+        }
+        feature.setStyle(style);
       }
     }
   },
