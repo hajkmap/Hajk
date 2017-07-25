@@ -23,6 +23,7 @@
 import React from "react";
 import { Component } from 'react';
 import $ from 'jquery';
+var solpop;
 
 const defaultState = {
   load: false,
@@ -50,7 +51,8 @@ const defaultState = {
   serverType: 'geoserver',
   drawOrder: 1,
   layerType: "WMS",
-  attribution: ""
+  attribution: "",
+  solpopup: solpop
 };
 
 /**
@@ -262,7 +264,8 @@ class WMSLayerForm extends Component {
       queryable: this.getValue("queryable"),
       tiled: this.getValue("tiled"),
       drawOrder: this.getValue("drawOrder"),
-      attribution: this.getValue("attribution")
+      attribution: this.getValue("attribution"),
+      solpopup: this.getValue("solpopup")
     };
   }
 

@@ -61,33 +61,33 @@ var MapModel = {
     this.initialState =  _.clone(this.attributes);
 
 
-      var app = window.app;
-      /*
-      var button = document.createElement('button');
+    var app = window.app;
+    /*
+     var button = document.createElement('button');
 
-      app.PositioningControl = function(opt_options) {
-          var options = opt_options || {};
+     app.PositioningControl = function(opt_options) {
+     var options = opt_options || {};
 
-          button.innerHTML = '';
-          button.className = 'my-positioning-button';
-          button.id = 'mypositioning';
-          var this_ = this;
+     button.innerHTML = '';
+     button.className = 'my-positioning-button';
+     button.id = 'mypositioning';
+     var this_ = this;
 
-          var element = document.createElement('div');
-          element.className = 'my-positioning ol-unselectable ol-control';
-          element.appendChild(button);
+     var element = document.createElement('div');
+     element.className = 'my-positioning ol-unselectable ol-control';
+     element.appendChild(button);
 
-          ol.control.Control.call(this, {
-              element: element,
-              target: options.target
-          });
+     ol.control.Control.call(this, {
+     element: element,
+     target: options.target
+     });
 
-      };
-      ol.inherits(app.PositioningControl, ol.control.Control);
+     };
+     ol.inherits(app.PositioningControl, ol.control.Control);
 
-      */
+     */
 
-      var map = new ol.Map({
+    var map = new ol.Map({
       interactions: ol.interaction.defaults().extend([new Drag()]),
       target: this.get("target"),
       layers: [ ],
@@ -110,90 +110,90 @@ var MapModel = {
     this.set("ol", map);
 
     /*
-      var currentPositionMarker = new ol.Feature();
-      currentPositionMarker.setStyle(new ol.style.Style({
-          image: new ol.style.Icon({
-              anchor: [0.5, 30],
-              anchorXUnits: 'fraction',
-              anchorYUnits: 'pixels',
-              opacity: 1.0,
-              src: '/assets/icons/currentlocation.png'
-          })
-      }));
+     var currentPositionMarker = new ol.Feature();
+     currentPositionMarker.setStyle(new ol.style.Style({
+     image: new ol.style.Icon({
+     anchor: [0.5, 30],
+     anchorXUnits: 'fraction',
+     anchorYUnits: 'pixels',
+     opacity: 1.0,
+     src: '/assets/icons/currentlocation.png'
+     })
+     }));
 
 
 
 
-      var accuracyFeature = new ol.Feature();
-      var accuracyBuffer = new ol.layer.Vector({
-          map: map,
-          source: new ol.source.Vector({
-              features: [accuracyFeature, currentPositionMarker]
-          })
-      });
-      map.addLayer(accuracyBuffer);
+     var accuracyFeature = new ol.Feature();
+     var accuracyBuffer = new ol.layer.Vector({
+     map: map,
+     source: new ol.source.Vector({
+     features: [accuracyFeature, currentPositionMarker]
+     })
+     });
+     map.addLayer(accuracyBuffer);
 
-      var geolocation = new ol.Geolocation({
-          projection: map.getView().getProjection(),
-          tracking: true,
-          trackingOptions: {
-              enableHighAccuracy: true
-          }
-      });
+     var geolocation = new ol.Geolocation({
+     projection: map.getView().getProjection(),
+     tracking: true,
+     trackingOptions: {
+     enableHighAccuracy: true
+     }
+     });
 
 
-      function updatePositionMap(){
-          var coordinate = geolocation.getPosition();
-          console.log("Current Location is:" + coordinate);
+     function updatePositionMap(){
+     var coordinate = geolocation.getPosition();
+     console.log("Current Location is:" + coordinate);
 
-          var acc = geolocation.getAccuracyGeometry();
-          if(acc != null) {
-              accuracyFeature.setGeometry(geolocation.getAccuracyGeometry());
-          }
+     var acc = geolocation.getAccuracyGeometry();
+     if(acc != null) {
+     accuracyFeature.setGeometry(geolocation.getAccuracyGeometry());
+     }
 
-          currentPositionMarker.setGeometry(new ol.geom.Point(coordinate));
-      }
+     currentPositionMarker.setGeometry(new ol.geom.Point(coordinate));
+     }
 
-      function positionUpdatingError(error){
-          console.log(error);
-      }
+     function positionUpdatingError(error){
+     console.log(error);
+     }
 
-      geolocation.on('change:position', updatePositionMap);
-      console.log("Auto Location has been turned on");
+     geolocation.on('change:position', updatePositionMap);
+     console.log("Auto Location has been turned on");
 
-      geolocation.on('error', positionUpdatingError);
+     geolocation.on('error', positionUpdatingError);
 
-      var positionturnedon = true;
-      var togglepositioning = function(e){
-        if(positionturnedon) {
-            map.removeLayer(accuracyBuffer);
-            geolocation.un('error',positionUpdatingError);
-            geolocation.un('change:position', updatePositionMap);
-            console.log('removelayer');
-        }else{
-            geolocation.on('change:position', updatePositionMap);
-            geolocation.on('error',positionUpdatingError);
-            map.addLayer(accuracyBuffer);
-            console.log('addlayer');
-        }
-        positionturnedon = !positionturnedon;
-      };
-       button.addEventListener('click', togglepositioning, false);
-      button.addEventListener('touchstart', togglepositioning, false);
-*/
-      setTimeout(() => {
+     var positionturnedon = true;
+     var togglepositioning = function(e){
+     if(positionturnedon) {
+     map.removeLayer(accuracyBuffer);
+     geolocation.un('error',positionUpdatingError);
+     geolocation.un('change:position', updatePositionMap);
+     console.log('removelayer');
+     }else{
+     geolocation.on('change:position', updatePositionMap);
+     geolocation.on('error',positionUpdatingError);
+     map.addLayer(accuracyBuffer);
+     console.log('addlayer');
+     }
+     positionturnedon = !positionturnedon;
+     };
+     button.addEventListener('click', togglepositioning, false);
+     button.addEventListener('touchstart', togglepositioning, false);
+     */
+    setTimeout(() => {
       var scaleLine = new ol.control.ScaleLine({
         target: 'map-scale-bar'
       })
       map.addControl(scaleLine);
-      map.addOverlay(this.createPopupOverlay());
-      $('.ol-popup').show();
-    }, 100);
+    map.addOverlay(this.createPopupOverlay());
+    $('.ol-popup').show();
+  }, 100);
   },
 
   createPopupOverlay: function () {
     var container = document.getElementById('popup')
-    ,   closer = document.getElementById('popup-closer');
+      ,   closer = document.getElementById('popup-closer');
 
     overlay = new ol.Overlay({
       element: container,
@@ -240,9 +240,9 @@ var MapModel = {
   getScale: function () {
 
     var dpi = 25.4 / 0.28
-    ,   mpu = ol.proj.METERS_PER_UNIT["m"]
-    ,   inchesPerMeter = 39.37
-    ,   res = this.getMap().getView().getResolution()
+      ,   mpu = ol.proj.METERS_PER_UNIT["m"]
+      ,   inchesPerMeter = 39.37
+      ,   res = this.getMap().getView().getResolution()
     ;
 
     return res * mpu * inchesPerMeter * dpi;

@@ -28,6 +28,7 @@
         "compiled/editpanel.js": ["src/js/views/panels/editpanel.jsx"],
         "compiled/anchorpanel.js": ["src/js/views/panels/anchorpanel.jsx"],
         "compiled/bufferpanel.js": ["src/js/views/panels/bufferpanel.jsx"],
+        "compiled/routingpanel.js": ["src/js/views/panels/routingpanel.jsx"],
         "compiled/streetviewpanel.js": ["src/js/views/panels/streetview.jsx"],
         "compiled/locationpanel.js": ["src/js/views/panels/locationpanel.jsx"],
         "compiled/infopanel.js": ["src/js/views/panels/infopanel.jsx"],
@@ -70,6 +71,7 @@
         "tools/edit": "./src/js/tools/edit.js",
         "tools/anchor": "./src/js/tools/anchor.js",
         "tools/buffer": "./src/js/tools/buffer.js",
+        "tools/routing": "./src/js/tools/routing.js",
         "tools/streetview": "./src/js/tools/streetview.js",
         "tools/information": "./src/js/tools/information.js",
         "tools/location": "./src/js/tools/location.js",
@@ -106,6 +108,7 @@
         "views/bufferpanel": "./compiled/bufferpanel.js",
         "views/streetviewpanel": "./compiled/streetviewpanel.js",
         "views/locationpanel": "./compiled/locationpanel.js",
+        "views/routingpanel": "./compiled/routingpanel.js",
         "views/presetpanel": "./compiled/presetpanel.js",
         "views/exportpanel": "./compiled/exportpanel.js",
         "views/panel": "./compiled/panel.js",
@@ -113,7 +116,6 @@
         "views/layeritem": "./compiled/layeritem.js",
         "views/navigationpanel": "./compiled/navigationpanel.js",
         "views/shell": "./compiled/shell.js",
-        "views/application": "./compiled/application.js",
         "views/application": "./compiled/application.js",
         "alert": "./compiled/alert.js"
     }

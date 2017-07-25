@@ -103,8 +103,9 @@ var CoordinatesModel = {
    * @instance
    */
   clicked: function(arg) {
-    this.set('visible', true);
+    this.set('visible', !this.get('visible'));
     this.set('toggled', !this.get('toggled'));
+    console.log('visible: ' + this.get('visible') + ' \ttoggled: ' + this.get('toggled'));
   },
 
   /**

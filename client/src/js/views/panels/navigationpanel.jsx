@@ -32,6 +32,7 @@ var panels = {
   'anchorpanel': require('views/anchorpanel'),
   'streetviewpanel': require('views/streetviewpanel'),
   'bufferpanel': require('views/bufferpanel'),
+  'routingpanel': require('views/routingpanel'),
   'presetpanel': require('views/presetpanel')
 };
 

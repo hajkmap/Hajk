@@ -63,6 +63,13 @@ namespace MapService.Controllers
         [HttpPost]
         public string PDF(string json)
         {
+            string path = @"C:\\log.txt";
+            Response.AppendToLog("Test");
+
+            using (StreamWriter sw = new StreamWriter(path, true))
+            {
+                sw.WriteLine("Received JSON. " + json);
+            }
             MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
             AsyncManager.OutstandingOperations.Increment();
             PDFCreator pdfCreator = new PDFCreator();

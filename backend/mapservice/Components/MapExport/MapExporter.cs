@@ -196,11 +196,17 @@ namespace MapService.Components.MapExport
             try
             {
 
+                //string path = @"C:\\log.txt";
+                //StreamWriter file = new StreamWriter(path, true);
+                
+                //file.WriteLine("Starting to add layers");
                 for (int i = 0; i < wmsLayers.Count; i++)
                 {
+                    //file.WriteLine("Found a layer");
                     string layername = "WMSLayer_" + i;
+                    //file.WriteLine("layername: '" + wmsLayers[i].url + "'");
                     WmsLayer layer = new WmsLayer(layername, wmsLayers[i].url);
-
+                    
                     layer.SetImageFormat("image/png");
                     layer.BgColor = Color.White;
                     layer.Transparent = true;
@@ -208,29 +214,44 @@ namespace MapService.Components.MapExport
                     layer.ContinueOnError = true;
                     for (int t = 0; t < wmsLayers[i].layers.Count; t++)
                     {
+                        //file.WriteLine("Found a sublayer");
                         string sublayerName = "";
                         try
                         {
+                            // Do not use workspace prefix, will return error
                             sublayerName = wmsLayers[i].workspacePrefix != null ?
                                            wmsLayers[i].workspacePrefix + ":" + wmsLayers[i].layers[t] :
                                            wmsLayers[i].layers[t];
-
+                            //file.WriteLine("sublayername '" + sublayerName + "'");
                             if (sublayerName != "")
                             {
                                 layer.AddLayer(sublayerName);
                             }
                         }
-                        catch
+                        catch (Exception ex)
                         {
                             // TODO
+                            //file.WriteLine("Error in adding subname.\n" + ex.ToString());
                         }
                     }
                     layer.SRID = wmsLayers[i].coordinateSystemId;
+                    //file.WriteLine("Adding layer");
+                    //file.Close();
                     map.Layers.Add(layer);
+                    //using (StreamWriter sw = new StreamWriter(@"C:\\log.txt", true))
+                    //{
+                    //    sw.WriteLine("Layer added");
+                    //}
                 }
             }
             catch
             {
+                /*
+                using (StreamWriter sw = new StreamWriter(@"C:\\log.txt", true))
+                {
+                    sw.WriteLine("Got an error in add layers");
+                }
+                */
                 // TODO
             }
         }

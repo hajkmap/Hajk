@@ -60,7 +60,8 @@ var InfoClickModelProperties = {
   features: undefined,
   selectedFeature: undefined,
   highlightLayer: undefined,
-  markerImg: "assets/icons/marker.png",
+  markerImg: "assets/ico" +
+  "ns/marker.png",
   anchor: [
     16,
     16
@@ -313,7 +314,7 @@ var InfoClickModel = {
           ,   caption   = $(`<div> ${index + 1} av ${infos.length} </div>`)
           ,   next      = $('<span class="fa fa-btn fa-arrow-circle-o-right"></span>')
           ,   prev      = $('<span class="fa fa-btn fa-arrow-circle-o-left"></span>')
-          ,   title     = $(`<div>${inf.information.caption}</div>`)
+          ,   title     = $(`<div id="popup-title">${inf.information.caption}</div>`)
           ,   content   = $(`<div></div>`)
           ,   markdown  = ""
           ,   offsetY   = 0

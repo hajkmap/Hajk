@@ -33,10 +33,11 @@ var ToolModel = require('tools/tool');
  */
 var LocationModelProperties = {
   type: 'location',
+  id: 'locationBtn',
   panel: '',
   toolbar: 'top-right',
   icon: 'fa fa-location-arrow icon',
-  title: 'Location and Navigation',
+  title: 'Current Location',
   visible: false,
   location: {
     lat: undefined,
@@ -145,7 +146,8 @@ var LocationModel = {
     this.set({
       location: {
         lat: e.coords.latitude,
-        lng: e.coords.longitude
+        lng: e.coords.longitude,
+        acc: e.coords.accuracy
       }
     });
 
@@ -196,3 +198,4 @@ var LocationModel = {
  * @returns {LocationModel}
  */
 module.exports = ToolModel.extend(LocationModel);
+
