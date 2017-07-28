@@ -68,7 +68,7 @@ var ExportModelProperties = {
   tiffActive: true,
   copyright: "© Lantmäteriverket i2009/00858",
   activeTool: '',
-  scales: [1000, 2000, 5000, 10000, 20000, 50000, 100000, 250000]
+  scales: [250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000]
 };
 
 /**

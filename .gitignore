@@ -1,4 +1,6 @@
-﻿/admin.v12.suo
+/admin.v12.suo
 *.suo
 /backend/mapservice/Properties/PublishProfiles/File.pubxml
 .vscode
+Hajk2_mapservice/bin/
+Hajk2_mapservice_pre/bin/

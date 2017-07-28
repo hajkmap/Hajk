@@ -97,7 +97,7 @@ var ExportPdfSettings = React.createClass({
     return {
       selectFormat: 'A4',
       selectOrientation: 'S',
-      selectScale: '2500',
+      selectScale: '500',
       selectResolution: '72',
       loading: false
     };
