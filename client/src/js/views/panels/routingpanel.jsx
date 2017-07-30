@@ -21,22 +21,40 @@
 // https://github.com/hajkmap/Hajk
 
 var Panel = require('views/panel');
-
-
-
 /**
  * @class
  */
-var  Routing = {
+var RoutingPanelView = {
   /**
    * Get initial state.
    * @instance
    * @return {object}
    */
-  /*
- getInitialState: function() {
+  getInitialState: function() {
+    return {};
   },
-  */
+
+  /**
+   * Triggered when component updates.
+   * @instance
+   */
+  componentDidUpdate: function () {
+  },
+
+  /**
+   * Triggered when the component is successfully mounted into the DOM.
+   * @instance
+   */
+  componentDidMount: function () {
+  },
+
+  /**
+   * Generete anchor text.
+   * @instance
+   */
+  generate: function () {
+
+  },
 
   /**
    * Render the view
@@ -52,7 +70,18 @@ var  Routing = {
           <button onClick="currentLocation" className="btn btn-default" id="naviGPS">Turn on GPS</button>
         </div>
       </Panel>
-    )
+    );
+    /*
+    return (
+      <Panel title="Navigation" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked}>
+        <div className="panel-content">
+          <p>
+            Testar navigation
+          </p>
+        </div>
+      </Panel>
+    );
+     */
   }
 };
 
@@ -60,6 +89,6 @@ var  Routing = {
  * RoutingPanelView module.<br>
  * Use <code>require('views/routingpanel')</code> for instantiation.
  * @module RoutingPanel-module
- * @returns {RoutingPanel}
+ * @returns {RoutingPanelView}
  */
-module.exports = React.createClass(Routing);
+module.exports = React.createClass(RoutingPanelView);
