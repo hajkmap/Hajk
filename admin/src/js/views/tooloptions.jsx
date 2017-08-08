@@ -94,6 +94,8 @@ class ToolOptions extends Component {
         return <Search parent={this} model={this.props.model}></Search>
       case "streetview":
         return <StreetView parent={this} model={this.props.model}></StreetView>
+      case "routing":
+        return <Routing parent={this} model={this.props.model}></Routing>
       default:
         return null;
     }
@@ -132,7 +134,8 @@ class ToolOptions extends Component {
       information: "Om kartan",
       search: "Sök",
       streetview: "Google Street View",
-      location: "location och navigation"
+      location: "Current Position",
+      routing: "Navigation"
     };
     return (
       <div>

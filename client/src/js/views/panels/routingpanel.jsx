@@ -21,6 +21,7 @@
 // https://github.com/hajkmap/Hajk
 
 var Panel = require('views/panel');
+
 /**
  * @class
  */
@@ -62,12 +63,17 @@ var RoutingPanelView = {
    * @return {external:ReactElement}
    */
   render: function () {
-    var routing = this.props.model.get('routing');
+    console.log('Start of render');
+    this.props.model.initStartPoint();
+    console.log('After init');
     return(
       <Panel title="Navigation" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked}>
         <div className="panel-content">
-          <p> ①. Choose a start point </p>
-          <button onClick="currentLocation" className="btn btn-default" id="naviGPS">Turn on GPS</button>
+          <div className="panel panel-default">
+            <p> ①. Choose a start point </p>
+            <button onClick={() => this.props.model.turnOnGPSClicked()} className="btn btn-default" id="naviGPS">Use current position</button>
+            <button onClick={() => this.props.model.startPointSelection()} className="btn btn-default" id="startBtn">Choose Position on the map</button>
+          </div>
         </div>
       </Panel>
     );

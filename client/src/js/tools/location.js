@@ -33,7 +33,7 @@ var ToolModel = require('tools/tool');
  */
 var LocationModelProperties = {
   type: 'location',
-  id: 'locationBtn',
+  Id: 'locationBtn',
   panel: '',
   toolbar: 'top-right',
   icon: 'fa fa-location-arrow icon',
@@ -44,6 +44,13 @@ var LocationModelProperties = {
     lng: undefined
   }
 };
+
+/* Global variable */
+positioning = undefined;
+latitude = undefined;
+longitude = undefined;
+accuracy = undefined;
+
 
 /**
  * Prototype for creating a search model.
@@ -150,8 +157,10 @@ var LocationModel = {
         acc: e.coords.accuracy
       }
     });
-
-
+    latitude = e.coords.latitude;
+    longitude = e.coords.longitude;
+    accuracy = e.coords.accuracy;
+    positioning = true;
     /*
     var acc = window.navigator.geolocation.getAccuracyGeometry();
     if(acc != null) {
@@ -170,6 +179,7 @@ var LocationModel = {
       console.info(e);
       this.reset();
     }
+    positioning = false;
   },
 
   /**
@@ -188,6 +198,7 @@ var LocationModel = {
       'visible': !this.get('visible'),
       'active': !this.get('active')
     });
+    console.log(positioning);
   }
 };
 

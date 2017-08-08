@@ -58,6 +58,7 @@ var ToolbarView = {
         var a = tool.get('panel').toLowerCase()
         ,   b = this.state.activeTool
         ,   c = a === b ? 'btn btn-primary' : 'btn btn-default';
+        var id = tool.get('Id');
 
         if (tool.get('active') === false) {
           return null;
@@ -65,6 +66,7 @@ var ToolbarView = {
 
         return (
           <button
+            id={id}
             type="button"
             className={c}
             onClick={() => {
@@ -91,6 +93,7 @@ var ToolbarView = {
         });
         return (
           <button
+            id={tool.get("Id")}
             type="button"
             className={className}
             onClick={() => {
