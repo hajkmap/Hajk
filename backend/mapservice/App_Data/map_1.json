@@ -178,12 +178,261 @@
           "3"
         ],
         "groups": [
-
+          {
+            "id": "1000",
+            "parent": "-1",
+            "name": "Barn & utbildning",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "150",
+                "visibleAtStart": false,
+                "drawOrder": 13
+              },
+              {
+                "id": "160",
+                "visibleAtStart": false,
+                "drawOrder": 2
+              },
+              {
+                "id": "170",
+                "visibleAtStart": false,
+                "drawOrder": 3
+              }
+            ],
+            "groups": []
+          },
+		  {
+            "id": "1060",
+            "parent": "-1",
+            "name": "Omsorg & stöd",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "410",
+                "visibleAtStart": false,
+                "drawOrder": 27
+              },
+              {
+                "id": "420",
+                "visibleAtStart": false,
+                "drawOrder": 28
+              },
+              {
+                "id": "430",
+                "visibleAtStart": false,
+                "drawOrder": 29
+              },
+              {
+                "id": "440",
+                "visibleAtStart": false,
+                "drawOrder": 30
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "1010",
+            "parent": "-1",
+            "name": "Uppleva & göra",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "260",
+                "visibleAtStart": false,
+                "drawOrder": 4
+              },
+              {
+                "id": "310",
+                "visibleAtStart": false,
+                "drawOrder": 5
+              },
+			  {
+                "id": "350",
+                "visibleAtStart": false,
+                "drawOrder": 31
+              },
+              {
+                "id": "360",
+                "visibleAtStart": false,
+                "drawOrder": 32
+              },
+              {
+                "id": "250",
+                "visibleAtStart": false,
+                "drawOrder": 6
+              },
+              {
+                "id": "230",
+                "visibleAtStart": false,
+                "drawOrder": 7
+              },
+              {
+                "id": "340",
+                "visibleAtStart": false,
+                "drawOrder": 8
+              },
+              {
+                "id": "330",
+                "visibleAtStart": false,
+                "drawOrder": 9
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "1020",
+            "parent": "-1",
+            "name": "Bygga, bo & miljö",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "320",
+                "visibleAtStart": false,
+                "drawOrder": 10
+              },
+			  {
+                "id": "325",
+                "visibleAtStart": false,
+                "drawOrder": 31
+              },
+              {
+                "id": "300",
+                "visibleAtStart": false,
+                "drawOrder": 11
+              },
+              {
+                "id": "190",
+                "visibleAtStart": false,
+                "drawOrder": 12
+              },
+              {
+                "id": "200",
+                "visibleAtStart": false,
+                "drawOrder": 26
+              },
+              {
+                "id": "270",
+                "visibleAtStart": false,
+                "drawOrder": 14
+              },
+              {
+                "id": "500",
+                "visibleAtStart": false,
+                "drawOrder": 15
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "1030",
+            "parent": "-1",
+            "name": "Trafik & infrastruktur",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "140",
+                "visibleAtStart": false,
+                "drawOrder": 17
+              },
+              {
+                "id": "130",
+                "visibleAtStart": false,
+                "drawOrder": 18
+              },
+              {
+                "id": "290",
+                "visibleAtStart": false,
+                "drawOrder": 19
+              },
+              {
+                "id": "220",
+                "visibleAtStart": false,
+                "drawOrder": 20
+              },
+              {
+                "id": "210",
+                "visibleAtStart": false,
+                "drawOrder": 21
+              }
+            ],
+            "groups": []
+          },
+		  {
+            "id": "1040",
+            "parent": "-1",
+            "name": "Kommun & politik",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "370",
+                "visibleAtStart": false,
+                "drawOrder": 33
+              },
+              {
+                "id": "380",
+                "visibleAtStart": false,
+                "drawOrder": 33
+              },
+              {
+                "id": "390",
+                "visibleAtStart": false,
+                "drawOrder": 34
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "1050",
+            "parent": "-1",
+            "name": "Övrigt",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "180",
+                "visibleAtStart": false,
+                "drawOrder": 22
+              },
+              {
+                "id": "100",
+                "visibleAtStart": false,
+                "drawOrder": 23
+              },
+              {
+                "id": "280",
+                "visibleAtStart": false,
+                "drawOrder": 24
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "1070",
+            "parent": "-1",
+            "name": "Aktuellt",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "240",
+                "visibleAtStart": false,
+                "drawOrder": 25
+              }
+            ],
+            "groups": []
+          }
         ],
         "active": true,
-        "visibleAtStart": false,
-        "backgroundSwitcherBlack": true,
-        "backgroundSwitcherWhite": true,
+        "visibleAtStart": true,
+        "backgroundSwitcherBlack": false,
+        "backgroundSwitcherWhite": false,
         "toggleAllButton": true
       }
     },
@@ -205,25 +454,25 @@
     {
       "type": "information",
       "options": {
-        "text": "Hej, Välkommen till Varbergs karta. <br> aaa <br> bbb",
+        "text": "PGNlbnRlcj48Zm9udCBzaXplPSI1Ij5W5Gxrb21tZW4gdGlsbCBEaWdpdGFsYSBWYXJiZXJnc2thcnRhbiE8L2ZvbnQ+PGJyPjxicj4KSORyIGthbiBkdSBoaXR0YSBzYW1o5Gxsc2luZm9ybWF0aW9uIHPlIHNvbSBwYXJrZXJpbmdhciwgc2tvbG9yLCBvZmZlbnRsaWdhIHRvYWxldHRlciBvY2ggZGV0YWxqcGxhbmVyIGVsbGVyIHP2a2EgZGlyZWt0IHDlIGZhc3RpZ2hldHNiZXRlY2tuaW5nIGVsbGVyIGFkcmVzcy4gPGJyPgpVcHBlIGkgaPZncmEgaPZybmV0IGZpbm5zIGtuYXBwYXIgbWVkIHBsdXMgb2NoIG1pbnVzIGb2ciBhdHQgem9vbWEgaW4gb2NoIHV0IGkga2FydGFuLiBOZXJlIHRpbGwgaPZnZXIgZmlubnMgZmxlcmEga25hcHBhciBtZWQgb2xpa2EgZnVua3Rpb25lciBzb20gZvZya2xhcmFzIG5lZGFuLjwvY2VudGVyPgo8YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLWJhcnMiIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5MYWdlcmhhbnRlcmFyZTwvYj48YnI+ClbkbGogdmlsa2V0IGJha2dydW5kc2xhZ2VyIG9jaCBha3RpdmEgbGFnZXIgc29tIGR1IHZpbGwgc2UgaSBrYXJ0YW4uIEtsaWNrYSBw5SBwaWxhcm5hID4gdGlsbCB25G5zdGVyIG9tIHJ1YnJpa2VuIGb2ciBhdHQgc2UgdW5kZXJydWJyaWtlci48YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLWluZm8tY2lyY2xlIGljb24iIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5PbSBrYXJ0YW48L2I+PGJyPgpWaXNhciBkZW5uYSBpbmZvcm1hdGlvbnN0ZXh0Ljxicj48YnI+Cgo8aSBjbGFzcz0iZmEgZmEtYnVsbHNleWUgaWNvbiIgYXJpYS1oaWRkZW49InRydWUiPjwvaT4gJm5ic3A7IDxiPkJ1ZmZlcnR2ZXJrdHlnPC9iPjxicj4KRGV0dGEgdmVya3R5ZyBza2FwYXIgZW4gem9uIG1lZCBhbmdpdmV0IGF2c3TlbmQgcnVudCB2YWxkYSBvYmpla3QgaSBrYXJ0YW4uPGJyPjxicj4KCjxpIGNsYXNzPSJmYSBmYS1wZW5jaWwgaWNvbiIgYXJpYS1oaWRkZW49InRydWUiPjwvaT4gJm5ic3A7IDxiPlJpdGEgb2NoIG3ldHRz5HR0PC9iPjxicj4KTORnZyB0aWxsIGVuIHRleHQgZWxsZXIgcml0YSB1dCBvbGlrYSBzeW1ib2xlciBw5SBrYXJ0YW4uPGJyPjxicj4KCjxpIGNsYXNzPSJmYSBmYS1wZW5jaWwtc3F1YXJlLW8gaWNvbiIgYXJpYS1oaWRkZW49InRydWUiPjwvaT4gJm5ic3A7IDxiPkVkaXRlcmEgbGFnZXI8L2I+PGJyPgo8YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLXNlYXJjaCBpY29uIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PC9pPiAmbmJzcDsgPGI+U/ZrbmluZzwvYj48YnI+ClP2ayBw5SBmYXN0aWdoZXQgZWxsZXIgYWRyZXNzIGkga2FydGFuIGVsbGVyIGkgdXR2YWx0IG9tcuVkZSBw5SBrYXJ0YW4uPGJyPjxicj4KCjxpIGNsYXNzPSJmYSBmYS1jcm9zc2hhaXJzIGljb24iIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5Lb29yZGluYXRlcjwvYj48YnI+ClbkbGogZW4gcGxhdHMgaSBrYXJ0YW4gZ2Vub20gYXR0IGRyYSBpIHNpa3RldCBvY2ggc2Uga29vcmRpbmF0ZXJuYSBm9nIgcGxhdHNlbi48YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLXByaW50IGljb24iIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5Ta3JpdmEgdXQ8L2I+PGJyPgpTa2FwYSBlbiBQREYgZORyIGR1IHNq5Gx2IHbkbGplciBwYXBwZXJzc3Rvcmxlaywgb3JpZW50ZXJpbmcsIHNrYWxhIG9jaCB1cHBs9nNuaW5nIGVsbGVyIHNrYXBhIGVuIGVsbGVyIFRJRkYgKGJpbGQpLiBW5GxqIG9tcuVkZSBpIGthcnRhbiBnZW5vbSBhdHQgZHJhIGkgcnV0YW4gcOUga2FydGFuLjxicj48YnI+Cgo8aSBjbGFzcz0iZmEgZmEtbGluayBpY29uIGZhLWZsaXAtaG9yaXpvbnRhbCIgYXJpYS1oaWRkZW49InRydWUiPjwvaT4gJm5ic3A7IDxiPkzkbmsgdGlsbCBrYXJ0YTwvYj48YnI+CkjkciBza2FwYXIgZHUgZW4gbORuayB0aWxsIGthcnRhbiBzb20gdmlzYXIgYWt0dWVsbCB1dGJyZWRuaW5nLCB6b29tbml25SBzYW10IHTkbmRhL3Ns5GNrdGEgbGFnZXIuIER1IGthbiBrb3BpZXJhIGzkbmthZHJlc3NlbiBnZW5vbSBhdHQgaPZnZXJrbGlja2EgcOUgbORua2VuLjxicj48YnI+Cgo8aSBjbGFzcz0iZmEgZmEtYm9va21hcmsgaWNvbiIgYXJpYS1oaWRkZW49InRydWUiPjwvaT4gJm5ic3A7IDxiPkJva23kcmtlbjwvYj48YnI+ClNrYXBhIGJva23kcmtlbiD2dmVyIG9tcuVkZW4gc29tIGR1IHZpbGwga3VubmEgaGl0dGEgdGlsbGJha2EgdGlsbCBzbmFiYnQuIEL2cmphIG1lZCBhdHQgem9vbWEgaW4gcOUgZXR0IG9tcuVkZSBkdSB0eWNrZXIg5HIgaW50cmVzc2FudCBvY2ggc2thcGEgc2VkYW4gZXR0IGJva23kcmtlIG1lZCBldHQgbmFtbiBkdSBzauRsdiB25GxqZXIuPGJyPjxicj4KCjxpIGNsYXNzPSJmYSBmYS1zdHJlZXQtdmlldyBpY29uIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PC9pPiAmbmJzcDsgPGI+U3RyZWV0IFZpZXc8L2I+PGJyPgpLbGlja2EgbuVnb25zdGFucyBpIGthcnRhbiBm9nIgYXR0IGblIHVwcCBldHQgbWluZHJlIGb2bnN0ZXIgdGlsbCB25G5zdGVyIG9tIGthcnRhbiBtZWQgZ2F0dXZ5IGZy5W4gR29vZ2xlIG1hcHMuIER1IGthbiBzZWRhbiBm9nJzdG9yYSBm9m5zdHJldCBnZW5vbSBhdHQgdHJ5Y2thIHDlIHN5bWJvbGVuIHVwcGUgaSBo9mdyYSBo9nJuZXQuPGJyPjxicj4K",
         "headerText": "Information",
         "visibleAtStart": true
       }
     },
     {
       "type": "buffer",
-      "options": { }
+      "options": {}
     },
     {
       "type": "draw",
       "options": {
-        "exportUrl": "http://localhost:84/export/kml",
-        "importUrl": "http://localhost:84/import/kml"
+        "exportUrl": "http://karta2.varberg.se/export/kml",
+        "importUrl": "http://karta2.varberg.se/import/kml"
       }
     },
     {
       "type": "edit",
-      "options": { }
+      "options": {}
     },
     {
       "type": "search",
@@ -231,9 +480,9 @@
         "onMap": false,
         "toolbar": "bottom",
         "maxZoom": 15,
-        "markerImg": "http://localhost:84/assets/icons/marker.png",
-        "kmlExportUrl": "http://localhost:84/export/kml",
-        "excelExportUrl": "http://localhost:84/export/excel",
+        "markerImg": "/assets/icons/marker.png",
+        "kmlExportUrl": "http://karta2.verberg.se/export/kml",
+        "excelExportUrl": "http://karta2.varberg.se/export/excel",
         "displayPopup": true,
         "selectionTools": true,
         "anchor": [
@@ -286,31 +535,38 @@
     {
       "type": "export",
       "options": {
-        "exportUrl": "http://localhost:84/mapservice/export/pdf",
-        "exportTiffUrl": "http://localhost:84/mapservice/export/tiff",
+        "exportUrl": "/mapservice/export/pdf",
+        "exportTiffUrl": "/mapservice/export/tiff",
         "pdfActive": true,
         "tiffActive": true,
         "scales": [
-          250,
           500,
           1000,
-          2500,
+          2000,
           5000,
           10000,
-          25000,
+          20000,
           50000,
           100000,
-          250000
+          200000
         ]
       }
     },
     {
       "type": "anchor",
-      "options": { }
+      "options": {}
     },
     {
       "type": "bookmark",
-      "options": { }
+      "options": {}
+    },
+    {
+      "type": "location",
+      "options": {}
+    },
+    {
+      "type": "routing",
+      "options": {}
     },
     {
       "type": "streetview",
@@ -327,17 +583,15 @@
     ],
     "projection": "EPSG:3007",
     "zoom": 4,
-    "maxZoom": 10,
+    "maxZoom": 8,
     "minZoom": 0,
     "resolutions": [
       56.0,
       28.0,
       14.0,
-      8.4,
+      5.6,
       2.8,
       1.4,
-      1.12,
-      0.84,
       0.56,
       0.28,
       0.14
@@ -352,9 +606,9 @@
       200000.0,
       6360000.0
     ],
-    "logo": "http://localhost:84/assets/logo.png",
+    "logo": "http://karta2.varberg.se/assets/logo.png",
     "colors": {
-      "primaryColor": "#77aee0",
+      "primaryColor": "#1ea5cd",
       "secondaryColor": "#ffffff"
     }
   }

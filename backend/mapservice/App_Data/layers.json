@@ -1,9 +1,1110 @@
-{
+﻿{
   "wmtslayers": [],
   "wmslayers": [
-
+    {
+      "id": "0",
+      "caption": "Topografisk Karta",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485161963365",
+      "content": "Topografisk Karta",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "topowebbkartan"
+      ],
+      "infobox": "Topografisk Karta",
+      "searchFields": [],
+      "displayFields": [],
+      "visibleAtStart": true,
+      "queryable": false,
+      "tiled": true,
+      "singleTile": false,
+      "imageFormat": "image/jpeg",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "1",
+      "caption": "Topografisk karta, gråskala",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485161963365",
+      "content": "Topografisk karta, gråskala",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "varberg:topowebbkartan_nedtonad"
+      ],
+      "infobox": "",
+      "searchFields": [],
+      "displayFields": [],
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": true,
+      "singleTile": false,
+      "imageFormat": "image/jpeg",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "2",
+      "caption": "Ortofoto 2012",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485163940360",
+      "content": "Ortofoto 2012",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "orto_2012"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": true,
+      "singleTile": false,
+      "imageFormat": "image/jpeg",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "3",
+      "caption": "Ortofoto 2016",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485163940360",
+      "content": "Ortofoto 2016",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "orto_2016"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": true,
+      "singleTile": false,
+      "imageFormat": "image/jpeg",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "100",
+      "caption": "Terrängskuggning",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485520647357",
+      "content": "Hillshade",
+      "legend": "http://karta2.varberg.se/legend/hillshade.png",
+      "projection": null,
+      "layers": [
+        "hillshade"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": true,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "110",
+      "caption": "Solenergi",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485520647357",
+      "content": "Solenergi",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "solenergi"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": true,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "120",
+      "caption": "Solkartan",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485520647357",
+      "content": "Solkartan",
+      "legend": "http://karta2.varberg.se/legend/solkarta.png",
+      "projection": null,
+      "layers": [
+        "solkarta"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": true,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "500",
+      "caption": "Solkartan",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485520647357",
+      "content": "Solkartan",
+      "legend": "http://karta2.varberg.se/legend/solkarta.png",
+      "projection": null,
+	        "layers": [
+        "solkarta_grakarta"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:10px\"><tbody><tr><td><strong>Total takyta för solenergi (m²) :</strong></td><td class=\"text-right\">815</td></tr><tr><td><strong>Total inkommande solenergi kWh/år) :</strong></td><td class=\"text-right\">752 000</td></tr></tbody></table><table class=\"table table-condensed\" style=\"font-size:10px\"><thead><tr><th>Energiklass<br>(kWh/m²/år)</th><th>Takyta<br>(m²)</th><th>Takyta<br>(%)</th><th>Inkommande solenergi<br>(kWh/år)</th><th>Värde elproduktion<br>(kr/år)</th></tr></thead><tbody><tr><td background=\"legend/solkarta_legend_gt1000.png\">&gt; 1 000</td><td>43</td><td>5</td><td>44 000</td><td>6 600</td></tr><tr><td background=\"legend/solkarta_legend_950-1000.png\">950 - 1 000</td><td>48</td><td>6</td><td>46 000</td><td>6 900</td></tr><tr><td background=\"legend/solkarta_legend_lt950.png\">&lt; 950</td><td>724</td><td>89</td><td>661 000</td><td>99 150</td></tr></tbody></table><a href=\"http://www.varberg.se/4.7b944fd01540ef79df87c655.html\" target=\"_blank\">Läs mer om Solkartan</a>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": true,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "130",
+      "caption": "Cykelvägar",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485520801535",
+      "content": "Cykelvägar",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=5000&LAYER=cykelvagnat",
+      "projection": null,
+      "layers": [
+        "cykelvagnat"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "140",
+      "caption": "Cykelservice",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Cykelservice",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=cykelservicestallen",
+      "projection": null,
+      "layers": [
+        "cykelservicestallen"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {Namn} </td></tr><tr><td> <strong>Typ</strong> </td><td> {Typ} </td></tr></tbody></table>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "150",
+      "caption": "Förskolor",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Förskolor",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=forskolor",
+      "projection": null,
+      "layers": [
+        "forskolor"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {adress} </td></tr><tr><td> <strong>Typ</strong> </td><td> {typ} </td></tr></tbody></table>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "160",
+      "caption": "Grundskolor",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Grundskolor",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=grundskolor",
+      "projection": null,
+      "layers": [
+        "grundskolor"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {adress} </td></tr><tr><td> <strong>Typ</strong> </td><td> {typ} </td></tr></tbody></table>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "170",
+      "caption": "Gymnasieskolor",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Gymnasieskolor",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=gymnasieskolor",
+      "projection": null,
+      "layers": [
+        "gymnasieskolor"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {adress} </td></tr><tr><td> <strong>Typ</strong> </td><td> {typ} </td></tr></tbody></table>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "180",
+      "caption": "Kommungräns",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Kommungräns",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&LAYER=kommungrans",
+      "projection": null,
+      "layers": [
+        "kommungrans"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "190",
+      "caption": "Fastigheter, gräns",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Fastigheter, gräns",
+      "legend": "http://karta2.varberg.se/legend/lm_fastighet_grans.png",
+      "projection": null,
+      "layers": [
+        "fastighetsgranser"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": false,
+      "singleTile": true,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "200",
+      "caption": "Fastigheter, text",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Fastigheter, text",
+      "legend": "http://karta2.varberg.se/legend/lm_fastighet_text.png",
+      "projection": null,
+      "layers": [
+        "fastighetstexter"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": false,
+      "singleTile": true,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "210",
+      "caption": "Parkeringsplatser",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Parkeringsplatser",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=parkering_punkt",
+      "projection": null,
+      "layers": [
+        "parkering_punkt"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {pltasnamn} </td></tr><tr><td> <strong>P-skiva används</strong> </td><td> {p_skiva} </td></tr><tr><td> <strong>Tidsbegränsning</strong> </td><td> {tidsbegran} </td></tr></tbody></table>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "220",
+      "caption": "Laddplatser",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "",
+      "date": "1497268770544",
+      "content": "Laddplatser",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=laddplatser",
+      "projection": null,
+      "layers": [
+        "laddplatser"
+      ],
+      "infobox": "",
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": ""
+    },
+    {
+      "id": "230",
+      "caption": "Offentliga toaletter",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Offentliga toaletter",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=offentliga_toaletter",
+      "projection": null,
+      "layers": [
+        "offentliga_toaletter"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {plats} </td></tr><tr><td> <strong>Öppet</strong> </td><td> {oppet} </td></tr><tr><td> <strong>Öppettider</strong> </td><td> {oppettider} </td></tr></tbody></table>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "240",
+      "caption": "Grävarbeten",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Grävarbeten",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=har_graver_vi_i_gatan",
+      "projection": null,
+      "layers": [
+        "har_graver_vi_i_gatan"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "250",
+      "caption": "Lekplatser",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Lekplatser",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=lekplatser",
+      "projection": null,
+      "layers": [
+        "lekplatser"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr></tbody></table>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "260",
+      "caption": "Badplatser",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Badplatser",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=badplatser",
+      "projection": null,
+      "layers": [
+        "badplatser"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {badplats} </td></tr><tr><td> <strong>Anmärkning</strong> </td><td> {anmarkning} </td></tr></tbody></table><table class=\"table table-condensed\" style=\"font-size:10px\"><tbody><tr><td> <strong>Parkering</strong> </td><td> <strong>Toalett</strong> </td><td> <strong>Dusch</strong> </td><td> <strong>Kiosk</strong> </td></tr><tr><td> {pakering} </td><td> {toaletter} </td><td> {dusch} </td><td> {kiosk} </td></tr></tbody></table><table class=\"table table-condensed\" style=\"font-size:10px\"><tbody><tr><td> <strong>Restaurang</strong> </td><td> <strong>Lekplats</strong> </td><td> <strong>Vindsurfin</strong> </td></tr><td> {restaurang} </td><td> {lekplats} </td><td> {vindsurfin} </td></tr></tbody></table>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "270",
+      "caption": "Förnybar energi",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Förnybar energi",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=fornybar_energi",
+      "projection": null,
+      "layers": [
+        "fornybar_energi"
+      ],
+      "infobox": false,
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "280",
+      "caption": "Polisstationer",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Polisstationer",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=polisstationer",
+      "projection": null,
+      "layers": [
+        "polisstationer"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Adress</strong> </td><td> {besöksadre} </td></tr></tbody></table><a href=\" {Hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "290",
+      "caption": "Fiberföreningar",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Fiberföreningar",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&LAYER=fiber",
+      "projection": null,
+      "layers": [
+        "fiber"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {forening} </td></tr><tr><td> <strong>Inlagd år</strong> </td><td> {digitalise} </td></tr><tr><td> <strong>Status</strong> </td><td> {status} </td></tr></tbody></table>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "300",
+      "caption": "Detaljplaner",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Detaljplaner",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=detaljplaner",
+      "projection": null,
+      "layers": [
+        "detaljplaner"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Beteckning</strong> </td><td> {beteckning} </td></tr><tr><td> <strong>PDF-dokument</strong> </td><td> <a href=\" {url} \" target=\"_blank\">Öppnas i nytt fönster</a> </td></tr></tbody></table>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "310",
+      "caption": "Bibliotek",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Bibliotek",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=bibliotek",
+      "projection": null,
+      "layers": [
+        "bibliotek"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {bibliotek} </td></tr><tr><td> <strong>Adress</strong> </td><td> {adress} </td></tr></tbody></table><a href=\" {Hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "320",
+      "caption": "Återvinningsstationer",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Återvinningsstationer",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=atervinningsstationer",
+      "projection": null,
+      "layers": [
+        "atervinningsstationer"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Ort</strong> </td><td> {ort} </td></tr><tr><td> <strong>Adress</strong> </td><td> {adress} </td></tr></tbody></table> \n <table class=\"table table-condensed\" style=\"font-size:10px\"><tbody><tr><td> <strong>glas</strong> </td><td> <strong>kartong</strong> </td><td> <strong>metall</strong> </td><td> <strong>blandplast</strong> </td><td> <strong>tidningar</strong> </td></tr><tr><td> {glas} </td><td> {kartong} </td><td> {metall} </td><td> {blandplast} </td><td> {tidningar} </td></tr></tbody></table>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+	{
+      "id": "325",
+      "caption": "Återvinningscentraler",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "Återvinningscentraler",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=atervinningsstationer",
+      "projection": null,
+      "layers": [
+        "atervinningscentraler"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {adress} </td></tr></tbody></table> \n <a href=\" {hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "330",
+      "caption": "Turistbyrå",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Turistbyrå",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=turistbyran",
+      "projection": null,
+      "layers": [
+        "turistbyran"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Adress</strong> </td><td> {adress} </td></tr></tbody></table><a href=\" {hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+    {
+      "id": "340",
+      "caption": "Offentliga konstverk",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "1485521015386",
+      "content": "Offentliga konstverk",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=off_konst",
+      "projection": null,
+      "layers": [
+        "off_konst"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Titel</strong> </td><td> {titel} </td></tr><tr><td> <strong>Konstnär</strong> </td><td> {konstnar} </td></tr><tr><td> <strong>Placering</strong> </td><td> {placering} </td></tr></tbody></table>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+	{
+      "id": "350",
+      "caption": "Hållplatser bokbussen",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "Hållplatser bokbussen",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=off_konst",
+      "projection": null,
+      "layers": [
+        "hallplatser_for_bokbussen"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Hållplats</strong> </td><td> {hallplats} </td></tr></tbody></table><a href=\" {hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+	{
+      "id": "360",
+      "caption": "Kultur",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "Kultur",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=off_konst",
+      "projection": null,
+      "layers": [
+        "kultur_utf_8"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {Namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {Adress} </td></tr></tbody></table> <a href=\" {Hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+	{
+      "id": "370",
+      "caption": "Fördjupad översiktplan \"Norra Kusten\" ",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "Fördjupad översiktplan \"Norra Kusten\" ",
+      "legend": "http://karta2.varberg.se/legend/Teckenforklaring_FOP_Norra_kusten_stor.PNG",
+      "projection": null,
+      "layers": [
+        "FOP_NorraKusten"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+	{
+      "id": "380",
+      "caption": "Fördjupad översiktplan \"Stadsområdet\" ",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "Fördjupad översiktplan \"Stadsområdet\" ",
+      "legend": "http://karta2.varberg.se/legend/Teckenforklaring_FOP_Stadsomradet_stor.png",
+      "projection": null,
+      "layers": [
+        "FOP_Stadsomradet"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+	{
+      "id": "390",
+      "caption": "Översiktplan",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "Översiktplan",
+      "legend": "http://karta2.varberg.se/legend/Teckenforklaring_Oversiktsplan_stor.png",
+      "projection": null,
+      "layers": [
+        "Oversiktplan"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+	{
+      "id": "410",
+      "caption": "Vårdcentral",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "Vårdcentral",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=off_konst",
+      "projection": null,
+      "layers": [
+        "vardcentral"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr></tbody></table><a href=\" {hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+	{
+      "id": "420",
+      "caption": "Privat vårdcentral",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "Privat vårdcentral",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=off_konst",
+      "projection": null,
+      "layers": [
+        "vardcentral_privat"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr></tbody></table><a href=\" {hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+	{
+      "id": "430",
+      "caption": "Sjukhus",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "Sjukhus",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=off_konst",
+      "projection": null,
+      "layers": [
+        "sjukhus"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr></tbody></table><a href=\" {hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+	{
+      "id": "440",
+      "caption": "Folktandvård",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "Folktandvård",
+      "legend": "http://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=off_konst",
+      "projection": null,
+      "layers": [
+        "folktandvard"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr></tbody></table><a href=\" {hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null
+    }
   ],
   "wfslayers": [
+    {
+      "id": "05ad62ff-8ea3-546c-bb8d-539755456659",
+      "caption": "Adress",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "layers": [
+        "varberg:adresspunkter"
+      ],
+      "searchFields": [
+        "sok"
+      ],
+      "infobox": "",
+      "displayFields": [
+        "sok"
+      ],
+      "geometryField": "geom",
+      "outputFormat": "GML2"
+    },
+    {
+      "id": "100",
+      "caption": "Fastighet",
+      "url": "http://karta2.varberg.se/geoserver/varberg/wms",
+      "layers": [
+        "varberg:fastighetsytor"
+      ],
+      "searchFields": [
+        "text"
+      ],
+      "infobox": "",
+      "displayFields": [
+        "text"
+      ],
+      "geometryField": "geom",
+      "outputFormat": "GML2"
+    }
   ],
   "vectorlayers": [],
   "wfstlayers": [],

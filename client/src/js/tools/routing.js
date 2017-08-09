@@ -45,7 +45,7 @@ var RoutingModelProperties = {
   title: 'Navigation',
   visible: false,
   Id: 'LocationB',
-  location: {
+  position: {
     latitude: undefined,
     longitude: undefined
   }
@@ -57,6 +57,8 @@ var RoutingModelProperties = {
  * @augments {external:"Backbone.Model"}
  * @param {LocationModel~LocationModelProperties} options - Default options
  */
+startPoint = undefined;
+
 var RoutingModel = {
 
   defaults: RoutingModelProperties,
@@ -68,80 +70,60 @@ var RoutingModel = {
 
   /* Starting Point */
   /* Get a current position from GPS(button right top)*/
-  turnOnGPSClicked: function(){
+  turnOnGPSClicked: function() {
+
 
     if (positioning == undefined) {
-      $('#locationBtn').trigger('click');
+      this.getLocation();
+    /*} else if(positioning){
+      this.setPosition();*/
     }else{
-      this.successPositioning();
-    }/*else{
-        alert('kan inte få position. Skriv startposition i rutan eller tryck position på kartan.')
+      this.set({
+        position:{
+          latitude: latitude,
+          longitude: longitude
+        }
+      });
+      this.setPosition();
     }
-*/
-    this.gettingPosition();
 
   },
 
-  gettingPosition: function(){
-    if(positioning == true) {
-      this.successPositioning();
+  getLocation: function(){
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(this.setPositionEvent.bind(this));
+      positioning = true;
     }else{
-      this.failedPositioning();
+      alert("kan inte få position. Skriv startposition i rutan eller tryck position på kartan.");
+      positioning = false;
     }
-  },
-
-  successPositioning: function(){
-    thisSetPosition();
 
   },
 
-  failedPositioning: function(){
-    alert('kan inte få position. Skriv startposition i rutan eller tryck position på kartan.')
+
+  positionError: function(error){
+    /* reset this location setting */
+    this.set({
+      position: {
+        latitude: undefined,
+        longitude: undefined
+      }
+    });
+    positioning = undefined;
   },
-/*
+
   /* Choose a starting location on the map manually. and drop a pin */
   startPointSelection: function(event){
     console.log('running startPointSelection');
     console.log(event.coordinate);
     var startPoint = new ol.Feature(); /* startPoint and point(below) must be the same l.134*/
     startPoint.setGeometry(new ol.geom.Point(event.coordinate));
-    /* Convert Geometry to Coordinate */
+  /* Convert Geometry to Coordinate */
 
-    // this is not the same this as in initStartPoint. Probably since it is an event handler. How to get the layer, make global variable
+  /* this is not the same this as in initStartPoint. Probably since it is an event handler. How to get the layer, make global variable*/
     this.get('layer').getSource().addFeature(startPoint);
-  },
+   },
 
-  ConvertAddressToCoord: function(){
-    /* need to create a box with suggestion */
-   /* var searchStringStart = "<wfs:GetFeature\
-    service = 'WFS'\
-    version = '1.1.0'\
-    xmlns:wfs = 'http://www.opengis.net/wfs'\
-    xmlns:ogc = 'http://www.opengis.net/ogc'\
-    xmlns:gml = 'http://www.opengis.net/gml'\
-    xmlns:esri = 'http://www.esri.com'\
-    xmlns:xsi = 'http://www.w3.org/2001/XMLSchema-instance'\
-    xsi:schemaLocation='http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd'\
-    outputFormat="GML2"\
-    maxFeatures="1000">\
-      <wfs:Query typeName='feature:fastighetsytor' srsName='EPSG:3007'>\
-      <ogc:Filter>\
-\
-    <ogc:PropertyIsLike matchCase="false" wildCard="*" singleChar="." escapeChar="!">\
-      <ogc:PropertyName>text</ogc:PropertyName>\
-    <ogc:Literal>";
-    var searchStringEnd = "</ogc:Literal>\
-    </ogc:PropertyIsLike>\
-    </ogc:Filter>\
-    </wfs:Query>\
-    </wfs:GetFeature>";
-
-    var value = ''; // TODO get value from box
-    var forAjax = searchStringStart + value + '*' + searchStringEnd;
-*/
-
-
-  },
 
   initStartPoint: function() {
     console.log('Inside initStartPoint');
@@ -172,22 +154,27 @@ var RoutingModel = {
     this.get('map').addLayer(this.get('layer'));
   },
 
-  SetPosition: function(coord){
+  setPositionEvent: function(event){
+    this.set("position", event.coords);
+    this.setPosition();
+  },
 
-    this.get('routing').getSource().clear();
-    if (this.get('routing').longitude && this.get('routing').latitude) {
-      let point = new ol.geom.Point([
-        this.get('routing').longitude,
-        this.get('routing').latitude
+  setPosition: function(){
+
+    this.get('layer').getSource().clear();
+    if (this.get('position').longitude && this.get('position').latitude) {
+      var point = new ol.geom.Point([
+        this.get('position').longitude,
+        this.get('position').latitude
       ]);
-      let transformed = ol.proj.transform(point.getCoordinates(), "EPSG:4326", this.get('olMap').getView().getProjection());
+      var transformed = ol.proj.transform(point.getCoordinates(), "EPSG:4326", this.get('map').getView().getProjection());
       point.setCoordinates(transformed);
-      this.get('routing').getSource().addFeature(
+      this.get('layer').getSource().addFeature(
         new ol.Feature({
           geometry: point
         })
       );
-      this.get('olMap').getView().setCenter(point.getCoordinates());
+      this.get('map').getView().setCenter(point.getCoordinates());
     }
   },
 
@@ -201,22 +188,48 @@ var RoutingModel = {
   },
 
   reset: function() {
-  },
-
-
-  /* Do I need this onLocation things? */
-  onLocationSucess: function() {
-  },
-
-  onLocationError: function() {
 
   },
 
+  removeLayer: function () {
+    /*remove event listner from the map ne. the click event(map.un)*/
 
-
-  setLocation: function () {
 
   },
+
+  ConvertAddressToCoord: function(){
+    /* need to create a box with suggestion */
+    /* var searchStringStart = "<wfs:GetFeature\
+     service = 'WFS'\
+     version = '1.1.0'\
+     xmlns:wfs = 'http://www.opengis.net/wfs'\
+     xmlns:ogc = 'http://www.opengis.net/ogc'\
+     xmlns:gml = 'http://www.opengis.net/gml'\
+     xmlns:esri = 'http://www.esri.com'\
+     xmlns:xsi = 'http://www.w3.org/2001/XMLSchema-instance'\
+     xsi:schemaLocation='http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd'\
+     outputFormat="GML2"\
+     maxFeatures="1000">\
+     <wfs:Query typeName='feature:fastighetsytor' srsName='EPSG:3007'>\
+     <ogc:Filter>\
+     \
+     <ogc:PropertyIsLike matchCase="false" wildCard="*" singleChar="." escapeChar="!">\
+     <ogc:PropertyName>text</ogc:PropertyName>\
+     <ogc:Literal>";
+     var searchStringEnd = "</ogc:Literal>\
+     </ogc:PropertyIsLike>\
+     </ogc:Filter>\
+     </wfs:Query>\
+     </wfs:GetFeature>";
+
+     var value = ''; // TODO get value from box
+     var forAjax = searchStringStart + value + '*' + searchStringEnd;
+     */
+
+
+  },
+
+
 
   /**
    * @description
@@ -230,7 +243,7 @@ var RoutingModel = {
    * @instance
    */
   clicked: function () {
-    this.set('visible', !this.get('visible'));
+    this.set('visible', true);
     this.set('toggled', !this.get('toggled'));
   },
 };

@@ -70,9 +70,23 @@ var RoutingPanelView = {
       <Panel title="Navigation" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked}>
         <div className="panel-content">
           <div className="panel panel-default">
-            <p> ①. Choose a start point </p>
-            <button onClick={() => this.props.model.turnOnGPSClicked()} className="btn btn-default" id="naviGPS">Use current position</button>
-            <button onClick={() => this.props.model.startPointSelection()} className="btn btn-default" id="startBtn">Choose Position on the map</button>
+              <div className="panel-heading"> ①. Choose a start point </div>
+                <div className="panel-body">
+                  <button onClick={() => this.props.model.turnOnGPSClicked()} className="btn btn-default" id="naviGPS">Use current position</button>
+                  <button onClick={() => this.props.model.startPointSelection()} className="btn btn-default" id="startBtn">Choose Position on the map</button>
+                </div>
+          </div>
+          <div className="panel panel-default">
+             <div className="panel-heading"> ②. Choose an end point </div>
+               <div className="panel-body">
+                 <button onClick={() => this.props.model.endPointSelection()} className="btn btn-default" id="startBtn">Choose Position on the map</button>
+             </div>
+          </div>
+          <div className="panel panel-default">
+             <div className="panel-heading"> ③. Choose a travel mode </div>
+          </div>
+          <div className="panel panel-default">
+             <div className="panel-heading"> Result </div>
           </div>
         </div>
       </Panel>
