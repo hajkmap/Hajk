@@ -45,9 +45,12 @@ var RoutingModelProperties = {
   title: 'Navigation',
   visible: false,
   Id: 'LocationB',
+  state: 'choose_start', // will change to choose_end and choose_mode
   position: {
     latitude: undefined,
-    longitude: undefined
+    longitude: undefined,
+    latitudeEnd: undefined,
+    longitudeEnd: undefined
   }
 };
 
@@ -73,11 +76,9 @@ var RoutingModel = {
   turnOnGPSClicked: function() {
 
 
-    if (positioning == undefined) {
+    if (positioning == undefined || !positioning) {
       this.getLocation();
-    /*} else if(positioning){
-      this.setPosition();*/
-    }else{
+    } else{
       this.set({
         position:{
           latitude: latitude,
@@ -114,6 +115,9 @@ var RoutingModel = {
 
   /* Choose a starting location on the map manually. and drop a pin */
   startPointSelection: function(event){
+
+    // Only update position if state is choose_start, otherwise nothing
+    // if (this.get('state') == 'choose_start')....
     console.log('running startPointSelection');
     console.log(event.coordinate);
     var startPoint = new ol.Feature(); /* startPoint and point(below) must be the same l.134*/
@@ -121,14 +125,45 @@ var RoutingModel = {
   /* Convert Geometry to Coordinate */
 
   /* this is not the same this as in initStartPoint. Probably since it is an event handler. How to get the layer, make global variable*/
+    console.log('Clearing the source');
+    this.get('layer').getSource().clear();
+    console.log('Source should be cleared');
     this.get('layer').getSource().addFeature(startPoint);
    },
 
 
+  endPointSelection: function(event){
+    var endPoint = new ol.Feature();
+    endPoint.setGeometry(new ol.geom.Point(event.coordinate));
+
+    this.get('layer').getSource().clear();
+    this.get('layer').getSource().addFeature(endPoint);
+
+  },
+
+
+  activateStartMode: function(){
+    this.set('state', 'choose_start');
+
+  },
+
+  activateEndMode: function(){
+    this.set('state', 'choose_end');
+  },
+
+  activateTravelMode: function(){
+    this.set('state', 'choose_mode');
+  },
+
   initStartPoint: function() {
     console.log('Inside initStartPoint');
     console.log(this.get('map'));
-    this.get('map').on('click', this.startPointSelection.bind(this));
+    if(this.get('state') == 'choose_start'){
+      this.get('map').on('singleclick', this.startPointSelection.bind(this));
+    }else{
+      this.get('map').on('singleclick', this.endPointSelection.bind(this));
+    }
+
 
     var style = new ol.style.Style({
       image: new ol.style.Icon({
@@ -137,7 +172,18 @@ var RoutingModel = {
         anchorYUnits: 'fraction',
         opacity: .8,
         src: 'assets/icons/flagpin_start.png',
-        scale: (1/2)
+        scale: (1)
+      })
+    });
+
+    var style_end = new ol.style.Style({
+      image: new ol.style.Icon({
+        anchor: [0.5, 0.5],
+        anchorXUnits: 'fraction',
+        anchorYUnits: 'fraction',
+        opacity: .8,
+        src: 'assets/icons/flagpin_end.png',
+        scale: (1)
       })
     });
 
@@ -145,11 +191,19 @@ var RoutingModel = {
     var source = new ol.source.Vector({});
     // source.addFeature(this.get('accuracyFeature'));
 
-    this.set("layer", new ol.layer.Vector({
-      source: source,
-      name: "routing",
-      style: style
-    }));
+    if(this.get('state') == 'choose_start'){
+      this.set("layer", new ol.layer.Vector({
+        source: source,
+        name: "routing",
+        style: style
+      }))
+    }else{
+      this.set("layer", new ol.layer.Vector({
+        source: source,
+        name: "routing",
+        style: style_end
+      }))
+    }
 
     this.get('map').addLayer(this.get('layer'));
   },
@@ -161,7 +215,10 @@ var RoutingModel = {
 
   setPosition: function(){
 
+    console.log('Clearing the source');
+
     this.get('layer').getSource().clear();
+    console.log('Source should be cleared');
     if (this.get('position').longitude && this.get('position').latitude) {
       var point = new ol.geom.Point([
         this.get('position').longitude,

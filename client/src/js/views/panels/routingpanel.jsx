@@ -73,7 +73,7 @@ var RoutingPanelView = {
               <div className="panel-heading"> ①. Choose a start point </div>
                 <div className="panel-body">
                   <button onClick={() => this.props.model.turnOnGPSClicked()} className="btn btn-default" id="naviGPS">Use current position</button>
-                  <button onClick={() => this.props.model.startPointSelection()} className="btn btn-default" id="startBtn">Choose Position on the map</button>
+                  <button onClick={() => this.props.model.activateStartMode()} className="btn btn-default" id="startBtn">Choose Position on the map</button>
                 </div>
           </div>
           <div className="panel panel-default">
