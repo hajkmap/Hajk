@@ -46,6 +46,8 @@ var RoutingModelProperties = {
   visible: false,
   Id: 'LocationB',
   state: 'choose_start', // will change to choose_end and choose_mode
+  onStartKey: undefined,
+  onEndKey: undefined,
   position: {
     latitude: undefined,
     longitude: undefined,
@@ -115,57 +117,58 @@ var RoutingModel = {
 
   /* Choose a starting location on the map manually. and drop a pin */
   startPointSelection: function(event){
-
-    // Only update position if state is choose_start, otherwise nothing
-    // if (this.get('state') == 'choose_start')....
-    console.log('running startPointSelection');
-    console.log(event.coordinate);
+    console.log('Running startPointSelection');
     var startPoint = new ol.Feature(); /* startPoint and point(below) must be the same l.134*/
     startPoint.setGeometry(new ol.geom.Point(event.coordinate));
   /* Convert Geometry to Coordinate */
 
-  /* this is not the same this as in initStartPoint. Probably since it is an event handler. How to get the layer, make global variable*/
-    console.log('Clearing the source');
-    this.get('layer').getSource().clear();
-    console.log('Source should be cleared');
-    this.get('layer').getSource().addFeature(startPoint);
+    this.get('layer_start').getSource().clear();
+    this.get('layer_start').getSource().addFeature(startPoint);
    },
 
 
   endPointSelection: function(event){
+    console.log('Running endPointSelection');
     var endPoint = new ol.Feature();
     endPoint.setGeometry(new ol.geom.Point(event.coordinate));
 
-    this.get('layer').getSource().clear();
-    this.get('layer').getSource().addFeature(endPoint);
-
+    this.get('layer_end').getSource().clear();
+    this.get('layer_end').getSource().addFeature(endPoint);
   },
 
 
   activateStartMode: function(){
+    console.log('activating start mode');
     this.set('state', 'choose_start');
-
+    if(this.get('onEndKey') !== undefined) {
+      ol.Observable.unByKey(this.get('onEndKey'));
+      this.set('onEndKey', undefined);
+    }
+    if(this.get('onStartKey') === undefined) {
+      this.set('onStartKey', this.get('map').on('singleclick', this.startPointSelection.bind(this)));
+    }
   },
 
   activateEndMode: function(){
+    console.log('activating end mode');
     this.set('state', 'choose_end');
+    if(this.get('onStartKey') !== undefined) {
+      ol.Observable.unByKey(this.get('onStartKey'));
+      this.set('onStartKey', undefined);
+    }
+    if(this.get('onEndKey') === undefined) {
+      this.set('onEndKey', this.get('map').on('singleclick', this.endPointSelection.bind(this)));
+    }
+
   },
 
   activateTravelMode: function(){
     this.set('state', 'choose_mode');
   },
 
+  // Executed once when the panel is loaded
   initStartPoint: function() {
-    console.log('Inside initStartPoint');
-    console.log(this.get('map'));
-    if(this.get('state') == 'choose_start'){
-      this.get('map').on('singleclick', this.startPointSelection.bind(this));
-    }else{
-      this.get('map').on('singleclick', this.endPointSelection.bind(this));
-    }
-
-
-    var style = new ol.style.Style({
+    var style_start = new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 0.5],
         anchorXUnits: 'fraction',
@@ -187,25 +190,25 @@ var RoutingModel = {
       })
     });
 
-    // this.set('accuracyFeature', new ol.Feature());
-    var source = new ol.source.Vector({});
-    // source.addFeature(this.get('accuracyFeature'));
+    var source_start = new ol.source.Vector({});
+    var source_end = new ol.source.Vector({});
 
-    if(this.get('state') == 'choose_start'){
-      this.set("layer", new ol.layer.Vector({
-        source: source,
-        name: "routing",
-        style: style
-      }))
-    }else{
-      this.set("layer", new ol.layer.Vector({
-        source: source,
-        name: "routing",
-        style: style_end
-      }))
-    }
+    this.set("layer_start", new ol.layer.Vector({
+      source: source_start,
+      name: "routing",
+      queryable: false,
+      style: style_start
+    }));
 
-    this.get('map').addLayer(this.get('layer'));
+    this.set("layer_end", new ol.layer.Vector({
+      source: source_end,
+      name: "routing",
+      queryable: false,
+      style: style_end
+    }));
+
+    this.get('map').addLayer(this.get('layer_start'));
+    this.get('map').addLayer(this.get('layer_end'));
   },
 
   setPositionEvent: function(event){
@@ -217,8 +220,7 @@ var RoutingModel = {
 
     console.log('Clearing the source');
 
-    this.get('layer').getSource().clear();
-    console.log('Source should be cleared');
+    this.get('layer_start').getSource().clear();
     if (this.get('position').longitude && this.get('position').latitude) {
       var point = new ol.geom.Point([
         this.get('position').longitude,
@@ -226,7 +228,7 @@ var RoutingModel = {
       ]);
       var transformed = ol.proj.transform(point.getCoordinates(), "EPSG:4326", this.get('map').getView().getProjection());
       point.setCoordinates(transformed);
-      this.get('layer').getSource().addFeature(
+      this.get('layer_start').getSource().addFeature(
         new ol.Feature({
           geometry: point
         })

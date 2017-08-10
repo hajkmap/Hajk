@@ -79,7 +79,7 @@ var RoutingPanelView = {
           <div className="panel panel-default">
              <div className="panel-heading"> ②. Choose an end point </div>
                <div className="panel-body">
-                 <button onClick={() => this.props.model.endPointSelection()} className="btn btn-default" id="startBtn">Choose Position on the map</button>
+                 <button onClick={() => this.props.model.activateEndMode()} className="btn btn-default" id="startBtn">Choose Position on the map</button>
              </div>
           </div>
           <div className="panel panel-default">
