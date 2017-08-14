@@ -32,7 +32,9 @@ var RoutingPanelView = {
    * @return {object}
    */
   getInitialState: function() {
-    return {};
+    return {
+      selectTravelMode: "walk"
+    };
   },
 
   /**
@@ -57,6 +59,16 @@ var RoutingPanelView = {
 
   },
 
+  getTravelMode: function () {
+    return this.state.selectTravelMode;
+  },
+
+  setTravelMode: function(e) {
+    this.setState({
+      selectTravelMode: e.target.value
+    });
+  },
+
   /**
    * Render the view
    * @instance
@@ -67,7 +79,7 @@ var RoutingPanelView = {
     this.props.model.initStartPoint();
     console.log('After init');
     return(
-      <Panel title="Navigation" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked}>
+      <Panel title="Navigation"  onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
         <div className="panel-content">
           <div className="panel panel-default">
               <div className="panel-heading"> ①. Choose a start point </div>
@@ -84,8 +96,17 @@ var RoutingPanelView = {
           </div>
           <div className="panel panel-default">
              <div className="panel-heading"> ③. Choose a travel mode </div>
+             <div className="panel-body">
+               <select id="travel_mode_id" onChange={this.setTravelMode} defaultValue={this.state.selectTravelMode}>
+                 <option value="walking">Gå</option>
+                 <option value="cycling">Cykla</option>
+                 <option value="driving">Bil</option>
+                 <option value="transit">Kollektivtrafik</option>
+               </select>
+             </div>
           </div>
           <div className="panel panel-default">
+            <button onClick={() => this.props.model.searchTrip()} className="btn btn-default" id="startBtn">Sök resa</button>
              <div className="panel-heading"> Result </div>
           </div>
         </div>

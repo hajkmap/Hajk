@@ -46,6 +46,7 @@ var RoutingModelProperties = {
   visible: false,
   Id: 'LocationB',
   state: 'choose_start', // will change to choose_end and choose_mode
+  apiKey: "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
   onStartKey: undefined,
   onEndKey: undefined,
   position: {
@@ -122,8 +123,22 @@ var RoutingModel = {
     startPoint.setGeometry(new ol.geom.Point(event.coordinate));
   /* Convert Geometry to Coordinate */
 
+    //var test = ol.proj.transform(startPoint.getGeometry().getCoordinates(), 'EPSG:3007', 'EPSG:4326');
+    //console.log(test);
+    //var lonlat = startPoint.getGeometry().getCoordinates();
+    var lonlat = ol.proj.transform(startPoint.getGeometry().getCoordinates(), 'EPSG:3007', 'EPSG:4326');
+    console.log(lonlat);
+    var lon = lonlat[0];
+    var lat = lonlat[1];
+
     this.get('layer_start').getSource().clear();
     this.get('layer_start').getSource().addFeature(startPoint);
+
+    var pos = this.get('position');
+    pos.latitude = lat;
+    pos.longitude = lon;
+    this.set('position', pos);
+    console.log('position is now, ' + this.get('position'));
    },
 
 
@@ -132,8 +147,17 @@ var RoutingModel = {
     var endPoint = new ol.Feature();
     endPoint.setGeometry(new ol.geom.Point(event.coordinate));
 
+    var lonlat = ol.proj.transform(endPoint.getGeometry().getCoordinates(), 'EPSG:3007', 'EPSG:4326');
+    var lon = lonlat[0];
+    var lat = lonlat[1];
+
     this.get('layer_end').getSource().clear();
     this.get('layer_end').getSource().addFeature(endPoint);
+
+    var pos = this.get('position');
+    pos.latitudeEnd = lat;
+    pos.longitudeEnd = lon;
+    this.set('position', pos);
   },
 
 
@@ -193,25 +217,30 @@ var RoutingModel = {
     var source_start = new ol.source.Vector({});
     var source_end = new ol.source.Vector({});
 
-    this.set("layer_start", new ol.layer.Vector({
-      source: source_start,
-      name: "routing",
-      queryable: false,
-      style: style_start
-    }));
+    if (this.get('layer_start') === undefined) {
+      console.log('creating start layer');
+      this.set("layer_start", new ol.layer.Vector({
+        source: source_start,
+        name: "routing",
+        queryable: false,
+        style: style_start
+      }));
 
-    this.set("layer_end", new ol.layer.Vector({
-      source: source_end,
-      name: "routing",
-      queryable: false,
-      style: style_end
-    }));
+      this.set("layer_end", new ol.layer.Vector({
+        source: source_end,
+        name: "routing",
+        queryable: false,
+        style: style_end
+      }));
 
-    this.get('map').addLayer(this.get('layer_start'));
-    this.get('map').addLayer(this.get('layer_end'));
+      this.get('map').addLayer(this.get('layer_start'));
+      this.get('map').addLayer(this.get('layer_end'));
+    }
+
   },
 
   setPositionEvent: function(event){
+    console.log('setPositionEvent');
     this.set("position", event.coords);
     this.setPosition();
   },
@@ -240,6 +269,33 @@ var RoutingModel = {
   configure: function (shell) {
     console.log('Running configure for routing');
     this.set('map', shell.getMap().getMap());
+  },
+
+  searchTrip: function(){
+    console.log('running searchtrip');
+    var pos = this.get('position');
+    if(pos.latitude === undefined || pos.longitude === undefined ||
+  pos.latitudeEnd === undefined || pos.longitudeEnd === undefined){
+      console.log(pos, pos.latitude + ',' + pos.longitude + ',' + pos.latitudeEnd + ',' + pos.longitudeEnd);
+      alert('Välj start och slut');
+    } else {
+      console.log('Will search for trip');
+      var mode_select = document.getElementById('travel_mode_id');
+      var mode = mode_select.options[mode_select.selectedIndex].value;
+      console.log('mode is:' + mode);
+      var url = 'https://maps.googleapis.com/maps/api/directions/json?origin=' + pos.latitude + ',' + pos.longitude + '&destination=' + pos.latitudeEnd + ',' + pos.longitudeEnd +'&key=' + this.get('apiKey');
+      console.log('url is: ' + url);
+      var request = $.ajax({
+        url: url,
+        type: "POST",
+        crossDomain: true,
+        cache: false
+      });
+
+      request.done(function(msg) {
+        console.log(msg);
+      });
+    }
   },
 
 
