@@ -228,7 +228,7 @@ var RoutingModel = {
     var style_drawing = new ol.style.Style({
       stroke: new ol.style.Stroke({
         width: 4,
-        color: [255, 0, 0, 0.9]
+        color: [255, 0, 0, 0.8]
       })
     });
 
@@ -371,19 +371,29 @@ this.get('map').getView().setCenter(point.getCoordinates()); */
       console.log('4');
       layer.getSource().addFeature(tmpFeature);
       console.log('5');
-
-      /*
-      var routePath = new ol.format.Polyline({
-      }).readGeometry(steps);
-
-      layer_drawing.getSource().addFeature(
-        new ol.Feature({
-          type: 'routing',
-          geometry: routePath
-        })
-      );
-      */
     }
+
+    console.log('6');
+    var routePath = new ol.format.Polyline({
+    }).readGeometry(res.routes[0].overview_polyline.points);
+
+    routePath = (new ol.format.Polyline({
+    }).readGeometry(res.routes[0].overview_polyline.points, {
+      dataProjection: 'EPSG:4326',
+      featureProjection: 'EPSG:3007'
+    }));
+
+
+    console.log('7');
+    layer_drawing.getSource().clear();
+    layer_drawing.getSource().addFeature(
+      new ol.Feature({
+        type: 'routing',
+        geometry: routePath
+      })
+    );
+    console.log('8');
+    map.getView().fit(layer_drawing.getSource().getExtent(), map.getSize());
   },
 
   drawRoute: function(steps){
