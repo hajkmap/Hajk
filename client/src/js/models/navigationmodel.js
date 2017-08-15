@@ -63,11 +63,9 @@ var NavigationModel = {
           if (this.get('lastPanel') && this.get('lastPanel').type !== panel.type) {
             this.set("lastPanel", panel);
             this.set('toggled', false);
-            console.log('toggled set to false');
           } else {
             this.set("lastPanel", panel);
             this.set('toggled', !this.get('toggled'));
-            console.log('navimodel toggled: ' + this.get('toggled'));
           }
         }
       });
@@ -77,7 +75,6 @@ var NavigationModel = {
       if (this.get('activePanel') && !visible) {
         this.get('activePanel').model.set('visible', visible);
       }
-      console.log('activepanel: visible ' + this.get('activePanel').model.get('visible'));
     });
   },
 
@@ -90,15 +87,12 @@ var NavigationModel = {
   navigate: function(panelRef, type) {
     this.set('lastPanel', this.get("activePanel"));
     if (panelRef) {
-      console.log('activetype: ' + this.get('activePanelType') + '\t paneltype: ' + type);
       this.set("activePanelType", type);
       this.set("activePanel", panelRef);
       if (!this.get("visible")) {
         this.set("visible", true);
-        console.log('there is a panelref');
       }
     } else {
-      console.log('no panelref');
       this.set("visible", false);
     }
   },
@@ -110,7 +104,6 @@ var NavigationModel = {
    * @param {boolean} visible
    */
   onPanelVisibleChanged: function (panel, visible) {
-    console.log("Visible changed");
     var type = (panel.get('panel') || '').toLowerCase()
     ,   panelRef = _.find(this.get("panels"), panel => (panel.type || '').toLowerCase() === type)
     ,   activePanel = this.get("activePanel", panelRef);

@@ -383,7 +383,6 @@ this.get('map').getView().setCenter(point.getCoordinates()); */
       featureProjection: 'EPSG:3007'
     }));
 
-
     console.log('7');
     layer_drawing.getSource().clear();
     layer_drawing.getSource().addFeature(

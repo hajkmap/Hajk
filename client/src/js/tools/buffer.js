@@ -162,6 +162,11 @@ var BufferModel = {
       return false;
     }
 
+    // map.getLayersByClass("OpenLayers.Layer.Vector")
+    // get all features
+    // for loop, find features within distance
+    // http://openlayers.org/en/master/examples/measure.html
+
     var buffered = Object.keys(features).map(key => {
 
       var feature = features[key]
@@ -170,7 +175,7 @@ var BufferModel = {
       ,   jstsGeom
       ,   buff
       ;
-
+      console.log(feature);
       if (olGeom instanceof ol.geom.Circle) {
         olGeom = ol.geom.Polygon.fromCircle(olGeom, 0b10000000);
       }
@@ -185,7 +190,10 @@ var BufferModel = {
     });
 
     if (buffered) {
+      console.log('Discovered ' + buffered.length);
+      console.log(buffered);
       this.get('bufferLayer').getSource().addFeatures(buffered);
+
       return true;
     } else {
       return false;
