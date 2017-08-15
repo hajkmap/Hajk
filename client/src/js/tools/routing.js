@@ -214,8 +214,28 @@ var RoutingModel = {
       })
     });
 
+    var style_route = new ol.style.Style({
+      image: new ol.style.Icon({
+        anchor: [0.5, 0.5],
+        anchorXUnits: 'fraction',
+        anchorYUnits: 'fraction',
+        opacity: .8,
+        src: 'assets/icons/routeguide.png',
+        scale: (1)
+      })
+    });
+
+    var style_drawing = new ol.style.Style({
+      stroke: new ol.style.Stroke({
+        width: 4,
+        color: [255, 0, 0, 0.9]
+      })
+    });
+
     var source_start = new ol.source.Vector({});
     var source_end = new ol.source.Vector({});
+    var source_route = new ol.source.Vector({});
+    var source_drawing = new ol.source.Vector({});
 
     if (this.get('layer_start') === undefined) {
       console.log('creating start layer');
@@ -233,8 +253,24 @@ var RoutingModel = {
         style: style_end
       }));
 
+      this.set("layer_route", new ol.layer.Vector({
+        source: source_route,
+        name: "routing",
+        queryable: false,
+        style: style_route
+      }));
+
+      this.set("layer_drawing", new ol.layer.Vector({
+        source: source_drawing,
+        name: "routing",
+        queryable: false,
+        style: style_drawing
+      }));
+
       this.get('map').addLayer(this.get('layer_start'));
       this.get('map').addLayer(this.get('layer_end'));
+      this.get('map').addLayer(this.get('layer_route'));
+      this.get('map').addLayer(this.get('layer_drawing'));
     }
 
   },
@@ -273,6 +309,7 @@ var RoutingModel = {
 
   searchTrip: function(){
     console.log('running searchtrip');
+    this.set({'state': undefined});
     var pos = this.get('position');
     if(pos.latitude === undefined || pos.longitude === undefined ||
   pos.latitudeEnd === undefined || pos.longitudeEnd === undefined){
@@ -283,21 +320,86 @@ var RoutingModel = {
       var mode_select = document.getElementById('travel_mode_id');
       var mode = mode_select.options[mode_select.selectedIndex].value;
       console.log('mode is:' + mode);
-      var url = 'https://maps.googleapis.com/maps/api/directions/json?origin=' + pos.latitude + ',' + pos.longitude + '&destination=' + pos.latitudeEnd + ',' + pos.longitudeEnd +'&key=' + this.get('apiKey');
+      var url = 'https://karta2.varberg.se/maps/api/directions/json?mode=' + mode + '&origin=' + pos.latitude + ',' + pos.longitude + '&destination=' + pos.latitudeEnd + ',' + pos.longitudeEnd +'&key=' + this.get('apiKey');
       console.log('url is: ' + url);
-      var request = $.ajax({
+    var request =$.ajax({
         url: url,
-        type: "POST",
-        crossDomain: true,
-        cache: false
-      });
+        type: "post",
+        contentType: 'text/plain',
+        xhrFields: {
+          withCredentials: false
+        },
+        cache: false,
+        success: (res) => { this.plotRoute(res, this.get('map'), this.get('layer_route'), this.get('layer_drawing'))},
+        error: (err) => {
+          alert("Det gick inte att navigera dig. Försök igen senare");
+        },
+    });
+  }
+  },
+/*
+  var transformed = ol.proj.transform(point.getCoordinates(), "EPSG:4326", this.get('map').getView().getProjection());
+point.setCoordinates(transformed);
+this.get('layer_start').getSource().addFeature(
+  new ol.Feature({
+    geometry: point
+  })
+);
+this.get('map').getView().setCenter(point.getCoordinates()); */
 
-      request.done(function(msg) {
-        console.log(msg);
-      });
+  plotRoute: function(res, map, layer, layer_drawing) {
+    console.log(res);
+
+    layer.getSource().clear();
+    var steps = res.routes[0].legs[0].steps;
+    for(var i = 0; i < steps.length; i++){
+      var lat = steps[i].start_location.lat;
+      var lng = steps[i].start_location.lng;
+
+      var point = new ol.geom.Point([
+        lng,
+        lat
+      ]);
+      console.log('1 ' + lat + ', ' + lng);
+      var transformed = ol.proj.transform(point.getCoordinates(), "EPSG:4326", "EPSG:3007");
+      console.log('2');
+      point.setCoordinates(transformed);
+      console.log('3 ' + transformed);
+
+
+      var tmpFeature = new ol.Feature({geometry: point});
+      console.log('4');
+      layer.getSource().addFeature(tmpFeature);
+      console.log('5');
+
+      /*
+      var routePath = new ol.format.Polyline({
+      }).readGeometry(steps);
+
+      layer_drawing.getSource().addFeature(
+        new ol.Feature({
+          type: 'routing',
+          geometry: routePath
+        })
+      );
+      */
     }
   },
 
+  drawRoute: function(steps){
+
+    var routePath = new ol.format.Polyline({
+    }).readGeometry(steps);
+
+    this.get('layer_drawing').getSource().addFeature(
+      new ol.Feature({
+        type: 'routing',
+        geometry: routePath
+      })
+    );
+
+
+  },
 
   getOptions: function () {
   },
