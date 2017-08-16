@@ -78,6 +78,7 @@ var RoutingPanelView = {
     console.log('Start of render');
     this.props.model.initStartPoint();
     console.log('After init');
+
     return(
       <Panel title="Navigation"  onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
         <div className="panel-content">
@@ -105,9 +106,14 @@ var RoutingPanelView = {
                </select>
              </div>
           </div>
+          <div className="panel panel-default-transparent">
+             <button onClick={() => this.props.model.activateRoutingMode()} className="btn btn-default" id="startBtn">Sök resa</button>
+             <button onClick={() => this.props.model.deleteLayers()} className="btn btn-default" id="startBtn">Rensa</button>
+          </div>
           <div className="panel panel-default">
-            <button onClick={() => this.props.model.searchTrip()} className="btn btn-default" id="startBtn">Sök resa</button>
              <div className="panel-heading"> Result </div>
+                 <div className="panel-body">
+                 </div>
           </div>
         </div>
       </Panel>

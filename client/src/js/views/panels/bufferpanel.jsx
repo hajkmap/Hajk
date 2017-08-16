@@ -153,6 +153,14 @@ var BufferPanelView = {
               </button>
             </div>
           </div>
+          <div className="panel panel-default">
+            <div className="panel-heading">Buffrade objekt</div>
+            <div className="panel-body">
+              <table id="buffer-results-table">
+
+              </table>
+            </div>
+          </div>
         </div>
       </Panel>
     );

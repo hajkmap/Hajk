@@ -49,6 +49,8 @@ var RoutingModelProperties = {
   apiKey: "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
   onStartKey: undefined,
   onEndKey: undefined,
+  onRoutingKey: undefined,
+  routingFinished: undefined,
   position: {
     latitude: undefined,
     longitude: undefined,
@@ -168,6 +170,10 @@ var RoutingModel = {
       ol.Observable.unByKey(this.get('onEndKey'));
       this.set('onEndKey', undefined);
     }
+    if(this.get('onRoutingKey') !== undefined) {
+      ol.Observable.unByKey(this.get('onRoutingKey'));
+      this.set('onRoutingKey', undefined);
+    }
     if(this.get('onStartKey') === undefined) {
       this.set('onStartKey', this.get('map').on('singleclick', this.startPointSelection.bind(this)));
     }
@@ -180,8 +186,17 @@ var RoutingModel = {
       ol.Observable.unByKey(this.get('onStartKey'));
       this.set('onStartKey', undefined);
     }
+    if(this.get('onRoutingKey') !== undefined) {
+      ol.Observable.unByKey(this.get('onRoutingKey'));
+      this.set('onRoutingKey', undefined);
+    }
     if(this.get('onEndKey') === undefined) {
       this.set('onEndKey', this.get('map').on('singleclick', this.endPointSelection.bind(this)));
+    }
+    if(this.get('onEndKey') !== undefined && this.get('routingFinished')) {
+      this.set('onEndKey', this.get('map').on('singleclick', this.endPointSelection.bind(this)));
+      // TODO modify if and clear route
+      this.set('routeFinished', false);
     }
 
   },
@@ -189,6 +204,25 @@ var RoutingModel = {
   activateTravelMode: function(){
     this.set('state', 'choose_mode');
   },
+
+  activateRoutingMode: function(){
+    console.log('activating routing mode');
+    this.set('state', 'show_route');
+    if(this.get('onStartKey') !== undefined) {
+      ol.Observable.unByKey(this.get('onStartKey'));
+      this.set('onStartKey', undefined);
+    }
+    if(this.get('onEndKey') !== undefined) {
+      ol.Observable.unByKey(this.get('onEndKey'));
+      this.set('onEndKey', undefined);
+    }
+
+    if(this.get('onRoutingKey') === undefined) {
+      this.set('onRoutingKey', this.get('map').on('singleclick', this.showRoutingInfoPopup.bind(this)));
+    }
+    this.searchTrip();
+  },
+
 
   // Executed once when the panel is loaded
   initStartPoint: function() {
@@ -271,8 +305,71 @@ var RoutingModel = {
       this.get('map').addLayer(this.get('layer_end'));
       this.get('map').addLayer(this.get('layer_route'));
       this.get('map').addLayer(this.get('layer_drawing'));
-    }
 
+      console.log('Starting to init popup');
+      /*
+      var closer = document.getElementById('popup-closer');
+      var container = document.getElementById('popup');
+      var content = document.getElementById('popup-content');
+
+      console.log('Creating overlay');
+      var overlay = new ol.Overlay( ({
+        element: container,
+        autoPan: true,
+        autoPanAnimation: {
+          duration: 250
+        }
+      }));
+      */
+
+      this.set('overlay', overlay);
+
+      closer.onclick = function() {
+        overlay.setPosition(undefined);
+        closer.blur();
+        return false;
+      };
+
+      console.log('Adding to map');
+      this.get('map').addOverlay(overlay);
+    }
+  },
+
+  showRoutingInfoPopup: function(event){
+    console.log('Running showRoutingInfoPopup');
+    var overlay = this.get('map').getOverlayById('popup-0');
+    this.get('map').forEachFeatureAtPixel(event.pixel, function (feature, layer) {
+      console.log('Found feature and layer');
+      console.log(feature);
+      console.log(layer);
+      console.log(layer.get('name'));
+
+      if(layer.get('name') === 'routing'){
+        console.log('Correct layer');
+
+        var closer = document.getElementById('popup-closer');
+        var container = document.getElementById('popup');
+        var content = document.getElementById('popup-content');
+
+        console.log('got elements');
+        console.log(closer);
+        console.log(container);
+        console.log(content);
+
+        var coordinate = event.coordinate;
+        console.log('transforming');
+        console.log(coordinate);
+        var hdms = ol.coordinate.toStringHDMS(ol.proj.transform(
+          coordinate, 'EPSG:3857', 'EPSG:4326'));
+        console.log('transformed');
+        content.innerHTML = '<p>You clicked here:</p><code>' + hdms +
+          '</code>';
+        console.log('setting position of overlay');
+        console.log(overlay);
+        overlay.setPosition(coordinate);
+        console.log('finished');
+      }
+    })
   },
 
   setPositionEvent: function(event){
@@ -313,9 +410,10 @@ var RoutingModel = {
     var pos = this.get('position');
     if(pos.latitude === undefined || pos.longitude === undefined ||
   pos.latitudeEnd === undefined || pos.longitudeEnd === undefined){
-      console.log(pos, pos.latitude + ',' + pos.longitude + ',' + pos.latitudeEnd + ',' + pos.longitudeEnd);
+      console.log(pos, pos.latitude + ',' + pos.longi<tude + ',' + pos.latitudeEnd + ',' + pos.longitudeEnd);
       alert('Välj start och slut');
     } else {
+      ol.Observable.unByKey(this.get('onEndKey'));
       console.log('Will search for trip');
       var mode_select = document.getElementById('travel_mode_id');
       var mode = mode_select.options[mode_select.selectedIndex].value;
@@ -337,15 +435,6 @@ var RoutingModel = {
     });
   }
   },
-/*
-  var transformed = ol.proj.transform(point.getCoordinates(), "EPSG:4326", this.get('map').getView().getProjection());
-point.setCoordinates(transformed);
-this.get('layer_start').getSource().addFeature(
-  new ol.Feature({
-    geometry: point
-  })
-);
-this.get('map').getView().setCenter(point.getCoordinates()); */
 
   plotRoute: function(res, map, layer, layer_drawing) {
     console.log(res);
@@ -407,14 +496,27 @@ this.get('map').getView().setCenter(point.getCoordinates()); */
       })
     );
 
+    this.set('routingFinished', true);
 
   },
 
   getOptions: function () {
   },
 
-  reset: function() {
+  deleteLayers: function() {
+    this.get('layer_start').getSource().clear();
+    this.get('layer_end').getSource().clear();
+    this.get('layer_route').getSource().clear();
+    this.get('layer_drawing').getSource().clear();
 
+    this.set({
+      position:{
+        latitude: undefined,
+        longitude: undefined,
+        latitudeEnd: undefined,
+        longitudeEnd: undefined
+      }
+    });
   },
 
   removeLayer: function () {
@@ -468,6 +570,23 @@ this.get('map').getView().setCenter(point.getCoordinates()); */
    *
    * @instance
    */
+
+  onCloseTab: function() {
+    this.get('layer_start').getSource().clear();
+    this.get('layer_end').getSource().clear();
+    this.get('layer_route').getSource().clear();
+    this.get('layer_drawing').getSource().clear();
+
+    this.set({
+      position:{
+        latitude: undefined,
+        longitude: undefined,
+        latitudeEnd: undefined,
+        longitudeEnd: undefined
+      }
+    });
+  },
+
   clicked: function () {
     this.set('visible', true);
     this.set('toggled', !this.get('toggled'));

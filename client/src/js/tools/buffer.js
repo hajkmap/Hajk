@@ -162,7 +162,30 @@ var BufferModel = {
       return false;
     }
 
-    // map.getLayersByClass("OpenLayers.Layer.Vector")
+    var layers = map.getLayersByClass("OpenLayers.Layer.Vector");
+    console.log('found ' + layers.length + ' layers');
+    for (var i = 0; i < layers.length; i++){
+      var features = layers[i].getSource().getFeatures();
+      console.log('found ' + features.length + ' features in layer ' + layers[i].name);
+      for (var j = 0; j < features.length; j++){
+          var line = new ol.geom.LineString([latlng1, feature.getCoordinates()]);
+          var length = 0;
+          var coordinates = line.getCoordinates();
+          var sourceProj = map.getView().getProjection();
+
+          for (var i = 0, ii = coordinates.length - 1; i < ii; ++i) {
+            var c1 = ol.proj.transform(coordinates[i], sourceProj, 'EPSG:4326');
+            var c2 = ol.proj.transform(coordinates[i + 1], sourceProj, 'EPSG:4326');
+            length +=  ol.sphere.WGS84.haversineDistance(c1, c2);
+          }
+
+          // check if in length
+        if(length <= dist) {
+          // TODO add to remove from map
+        }
+        };
+      }
+    }
     // get all features
     // for loop, find features within distance
     // http://openlayers.org/en/master/examples/measure.html
