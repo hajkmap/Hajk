@@ -46,7 +46,7 @@ namespace MapService.Controllers
             }
         }
 
-        // PUT: api/ExtendedWMSLayer/5
+        // PUT: api/ExtendedWMSLayer/
         public void Delete(string id)
         {
             this._settingsDataContext.RemoveExtendedWMSLayer(id);

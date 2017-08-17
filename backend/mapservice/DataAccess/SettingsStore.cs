@@ -213,7 +213,14 @@ namespace MapService.DataAccess
 
         internal void RemoveExtendedWMSLayer(string layerId)
         {
-
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            this.removeLayerFromConfig(layerId);
+            var index = layerConfig.extendedwmslayers.FindIndex(item => item.id == layerId);
+            if (index != -1)
+            {
+                layerConfig.extendedwmslayers.RemoveAt(index);
+            }
+            this.saveLayerConfigToFile(layerConfig);
         }
 
         /// <summary>

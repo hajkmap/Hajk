@@ -432,7 +432,6 @@ class Manager extends Component {
           displayType = "";
           break;
         case 'WMS_Test':
-        console.log("wmstestlol");
         displayType = "(extended WMS)";
         break;
         case 'WMTS':

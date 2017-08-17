@@ -557,29 +557,6 @@
       "imageFormat": "image/png",
       "serverType": "geoserver",
       "attribution": ""
-    },
-    {
-      "id": "40",
-      "caption": "TEst",
-      "url": "http://localhost/geoserver/wms",
-      "owner": "",
-      "date": "1500025720174",
-      "content": "Innehåll",
-      "legend": "",
-      "projection": null,
-      "layers": [
-        "demo:badplatser"
-      ],
-      "infobox": "Info",
-      "searchFields": null,
-      "displayFields": null,
-      "visibleAtStart": true,
-      "queryable": true,
-      "tiled": false,
-      "singleTile": true,
-      "imageFormat": "image/png",
-      "serverType": "geoserver",
-      "attribution": ""
     }
   ],
   "wfslayers": [
@@ -695,7 +672,19 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "",
-      "queryable": true
+      "queryable": true,
+      "labelAlign": null,
+      "labelBaseline": null,
+      "labelSize": null,
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWeight": null,
+      "labelFont": null,
+      "labelFillColor": null,
+      "labelOutlineColor": null,
+      "labelOutlineWidth": 0,
+      "labelAttribute": null,
+      "showLabels": false
     },
     {
       "id": "24",
@@ -717,7 +706,19 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "",
-      "queryable": true
+      "queryable": true,
+      "labelAlign": null,
+      "labelBaseline": null,
+      "labelSize": null,
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWeight": null,
+      "labelFont": null,
+      "labelFillColor": null,
+      "labelOutlineColor": null,
+      "labelOutlineWidth": 0,
+      "labelAttribute": null,
+      "showLabels": false
     },
     {
       "id": "25",
@@ -739,7 +740,19 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "",
-      "queryable": true
+      "queryable": true,
+      "labelAlign": null,
+      "labelBaseline": null,
+      "labelSize": null,
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWeight": null,
+      "labelFont": null,
+      "labelFillColor": null,
+      "labelOutlineColor": null,
+      "labelOutlineWidth": 0,
+      "labelAttribute": null,
+      "showLabels": false
     },
     {
       "id": "26",
@@ -761,7 +774,19 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "",
-      "queryable": true
+      "queryable": true,
+      "labelAlign": null,
+      "labelBaseline": null,
+      "labelSize": null,
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWeight": null,
+      "labelFont": null,
+      "labelFillColor": null,
+      "labelOutlineColor": null,
+      "labelOutlineWidth": 0,
+      "labelAttribute": null,
+      "showLabels": false
     },
     {
       "id": "27",
@@ -783,7 +808,19 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "",
-      "queryable": true
+      "queryable": true,
+      "labelAlign": null,
+      "labelBaseline": null,
+      "labelSize": null,
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWeight": null,
+      "labelFont": null,
+      "labelFillColor": null,
+      "labelOutlineColor": null,
+      "labelOutlineWidth": 0,
+      "labelAttribute": null,
+      "showLabels": false
     },
     {
       "id": "28",
@@ -805,7 +842,19 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "",
-      "queryable": true
+      "queryable": true,
+      "labelAlign": null,
+      "labelBaseline": null,
+      "labelSize": null,
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWeight": null,
+      "labelFont": null,
+      "labelFillColor": null,
+      "labelOutlineColor": null,
+      "labelOutlineWidth": 0,
+      "labelAttribute": null,
+      "showLabels": false
     },
     {
       "id": "29",
@@ -827,7 +876,19 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "",
-      "queryable": true
+      "queryable": true,
+      "labelAlign": null,
+      "labelBaseline": null,
+      "labelSize": null,
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWeight": null,
+      "labelFont": null,
+      "labelFillColor": null,
+      "labelOutlineColor": null,
+      "labelOutlineWidth": 0,
+      "labelAttribute": null,
+      "showLabels": false
     },
     {
       "id": "30",
@@ -849,7 +910,19 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "",
-      "queryable": true
+      "queryable": true,
+      "labelAlign": null,
+      "labelBaseline": null,
+      "labelSize": null,
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWeight": null,
+      "labelFont": null,
+      "labelFillColor": null,
+      "labelOutlineColor": null,
+      "labelOutlineWidth": 0,
+      "labelAttribute": null,
+      "showLabels": false
     }
   ],
   "wfstlayers": [
@@ -932,141 +1005,5 @@
     }
   ],
   "arcgislayers": [],
-  "extendedwmslayers": [
-    {
-      "id": "40",
-      "caption": "badplatser",
-      "url": "http://localhost/geoserver/wms",
-      "owner": "",
-      "date": "1500025346318",
-      "content": "aw",
-      "projection": null,
-      "infoFormat": "",
-      "layers": [
-        {
-          "infobox": "awdawda",
-          "style": "point_green",
-          "queryable": true,
-          "legend": null,
-          "name": "demo:badplatser"
-        }
-      ],
-      "searchFields": null,
-      "displayFields": null,
-      "visibleAtStart": false,
-      "tiled": true,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "geoserver",
-      "attribution": ""
-    },
-    {
-      "id": "40",
-      "caption": "badplatser",
-      "url": "http://localhost/geoserver/wms",
-      "owner": "",
-      "date": "1500025369065",
-      "content": "awdada",
-      "projection": null,
-      "infoFormat": "",
-      "layers": [
-        {
-          "infobox": "awdawd",
-          "style": "point_green",
-          "queryable": true,
-          "legend": null,
-          "name": "demo:badplatser"
-        }
-      ],
-      "searchFields": null,
-      "displayFields": null,
-      "visibleAtStart": false,
-      "tiled": true,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "geoserver",
-      "attribution": ""
-    },
-    {
-      "id": "40",
-      "caption": "badplatser",
-      "url": "http://localhost/geoserver/wms",
-      "owner": "",
-      "date": "1500025394200",
-      "content": "aawd",
-      "projection": null,
-      "infoFormat": "",
-      "layers": [
-        {
-          "infobox": "aadadwda",
-          "style": "point_green",
-          "queryable": true,
-          "legend": "",
-          "name": "demo:badplatser"
-        }
-      ],
-      "searchFields": null,
-      "displayFields": null,
-      "visibleAtStart": false,
-      "tiled": true,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "geoserver",
-      "attribution": ""
-    },
-    {
-      "id": "40",
-      "caption": "Test",
-      "url": "http://localhost/geoserver/wms",
-      "owner": "",
-      "date": "1500025461340",
-      "content": "awd",
-      "projection": null,
-      "infoFormat": "",
-      "layers": [
-        {
-          "infobox": "awwawadwad",
-          "style": "point_green",
-          "queryable": true,
-          "legend": null,
-          "name": "demo:badplatser"
-        }
-      ],
-      "searchFields": null,
-      "displayFields": null,
-      "visibleAtStart": true,
-      "tiled": true,
-      "singleTile": true,
-      "imageFormat": "image/jpeg",
-      "serverType": "geoserver",
-      "attribution": ""
-    },
-    {
-      "id": "41",
-      "caption": "TEstbadplatese",
-      "url": "http://localhost/geoserver/wms",
-      "owner": "",
-      "date": "1500025795493",
-      "content": "",
-      "projection": null,
-      "infoFormat": "",
-      "layers": [
-        {
-          "infobox": "asf",
-          "style": "point_green",
-          "queryable": true,
-          "legend": null,
-          "name": "demo:badplatser"
-        }
-      ],
-      "searchFields": null,
-      "displayFields": null,
-      "visibleAtStart": false,
-      "tiled": true,
-      "singleTile": false,
-      "imageFormat": "image/geotiff8",
-      "serverType": "geoserver",
-      "attribution": ""
-    }
-  ]
+  "extendedwmslayers": []
 }
