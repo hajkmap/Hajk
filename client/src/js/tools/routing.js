@@ -218,7 +218,8 @@ var RoutingModel = {
     }
 
     if(this.get('onRoutingKey') === undefined) {
-      this.set('onRoutingKey', this.get('map').on('singleclick', this.showRoutingInfoPopup.bind(this)));
+      console.log('initing routingKey');
+      //this.set('onRoutingKey', this.get('map').on('singleclick', this.showRoutingInfoPopup.bind(this)));
     }
     this.searchTrip();
   },
@@ -290,7 +291,7 @@ var RoutingModel = {
       this.set("layer_route", new ol.layer.Vector({
         source: source_route,
         name: "routing",
-        queryable: false,
+        queryable: true,
         style: style_route
       }));
 
@@ -307,8 +308,8 @@ var RoutingModel = {
       this.get('map').addLayer(this.get('layer_drawing'));
 
       console.log('Starting to init popup');
-      /*
-      var closer = document.getElementById('popup-closer');
+
+      /*var closer = document.getElementById('popup-closer');
       var container = document.getElementById('popup');
       var content = document.getElementById('popup-content');
 
@@ -322,7 +323,7 @@ var RoutingModel = {
       }));
       */
 
-      this.set('overlay', overlay);
+      /*this.set('overlay', overlay);
 
       closer.onclick = function() {
         overlay.setPosition(undefined);
@@ -331,10 +332,10 @@ var RoutingModel = {
       };
 
       console.log('Adding to map');
-      this.get('map').addOverlay(overlay);
+      this.get('map').addOverlay(overlay);*/
     }
   },
-
+/*
   showRoutingInfoPopup: function(event){
     console.log('Running showRoutingInfoPopup');
     var overlay = this.get('map').getOverlayById('popup-0');
@@ -370,7 +371,7 @@ var RoutingModel = {
         console.log('finished');
       }
     })
-  },
+  },*/
 
   setPositionEvent: function(event){
     console.log('setPositionEvent');
@@ -456,7 +457,7 @@ var RoutingModel = {
       console.log('3 ' + transformed);
 
 
-      var tmpFeature = new ol.Feature({geometry: point});
+      var tmpFeature = new ol.Feature({geometry: point, information: steps[i].html_instructions});
       console.log('4');
       layer.getSource().addFeature(tmpFeature);
       console.log('5');
@@ -517,12 +518,19 @@ var RoutingModel = {
         longitudeEnd: undefined
       }
     });
-  },
 
-  removeLayer: function () {
-    /*remove event listner from the map ne. the click event(map.un)*/
-
-
+    if(this.get('onStartKey') !== undefined) {
+      ol.Observable.unByKey(this.get('onStartKey'));
+      this.set('onStartKey', undefined);
+    }
+    if(this.get('onRoutingKey') !== undefined) {
+      ol.Observable.unByKey(this.get('onRoutingKey'));
+      this.set('onRoutingKey', undefined);
+    }
+    if(this.get('onEndKey') !== undefined) {
+      ol.Observable.unByKey(this.get('onEndKey'));
+      this.set('onEndKey', undefined);
+    }
   },
 
   ConvertAddressToCoord: function(){
@@ -572,6 +580,7 @@ var RoutingModel = {
    */
 
   onCloseTab: function() {
+    console.log('Cleaning up');
     this.get('layer_start').getSource().clear();
     this.get('layer_end').getSource().clear();
     this.get('layer_route').getSource().clear();
@@ -585,6 +594,20 @@ var RoutingModel = {
         longitudeEnd: undefined
       }
     });
+
+    if(this.get('onStartKey') !== undefined) {
+      ol.Observable.unByKey(this.get('onStartKey'));
+      this.set('onStartKey', undefined);
+    }
+    if(this.get('onRoutingKey') !== undefined) {
+      ol.Observable.unByKey(this.get('onRoutingKey'));
+      this.set('onRoutingKey', undefined);
+    }
+    if(this.get('onEndKey') !== undefined) {
+      ol.Observable.unByKey(this.get('onEndKey'));
+      this.set('onEndKey', undefined);
+    }
+
   },
 
   clicked: function () {

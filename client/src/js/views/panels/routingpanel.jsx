@@ -118,17 +118,6 @@ var RoutingPanelView = {
         </div>
       </Panel>
     );
-    /*
-    return (
-      <Panel title="Navigation" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked}>
-        <div className="panel-content">
-          <p>
-            Testar navigation
-          </p>
-        </div>
-      </Panel>
-    );
-     */
   }
 };
 
