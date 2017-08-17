@@ -31,6 +31,7 @@ class Alert extends Component {
 
   render() {
     var options = this.props.options;
+    var imageLoader = this.props.imageLoader;
     if (options.confirm) {
       return !options.visible ? false : (
         <div className="modal">
@@ -74,22 +75,9 @@ class Alert extends Component {
                 <div className="row">
                   <div className="col-md-6">
                     <div className="form-group">
-                      <label>Format</label>
-                      <select 
-                        defaultValue="Välj ett format"
-                        className="form-control"
-                        onChange={(e) => {
-                          this.props.setFormat(e.target.value);
-                        }}>
-                        {options.formats}
-                      </select>
-                    </div>
-                  </div>
-                  <div className="col-md-6">
-                    <div className="form-group">
                       <label>Stil</label>
-                      <select 
-                        defaultValue="Välj en stil"
+                      <select
+                        defaultValue=""
                         className="form-control"
                         onChange={(e) => {
                           this.props.setStyle(e.target.value);
@@ -98,7 +86,21 @@ class Alert extends Component {
                       </select>
                     </div>
                   </div>
+                  <div className="col-md-6">
+                    <div className="form-group">
+                      <label>Teckenförklaring</label>
+                      <input
+                        type="text"
+                        ref="input_legend"
+                        defaultValue=""
+                        onChange={(e) => { this.props.setLegend(e.target.value) }}
+                        className="form-control"
+                      />
+                      <span onClick={(e) => { this.props.setNewLegend(e) }} className="btn btn-default">Välj fil {imageLoader}</span>
+                    </div>
+                  </div>
                 </div>
+
                 <div className="row">
                   <div className="col-md-12">
                     <div className="form-group">

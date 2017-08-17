@@ -4,6 +4,7 @@
     "url_import": "/mapservice/import/image",
     "url_layers": "/mapservice/config/layers",
     "url_layer_settings": "/mapservice/settings/wmslayer",
+    "url_layer_settings_extended": "/mapservice/settings/extendedwmslayer",
     "url_wmtslayer_settings": "/mapservice/settings/wmtslayer",
     "url_arcgislayer_settings": "/mapservice/settings/arcgislayer",
     "url_vectorlayer_settings": "/mapservice/settings/vectorlayer",

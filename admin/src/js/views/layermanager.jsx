@@ -236,10 +236,10 @@ class Manager extends Component {
 
     }
 
-    if (layer.type === "WMSTest") {
+    if (layer.type === "WMS_Test") {
       this.setState({
         mode: "edit",
-        layerType: "WMSTest"
+        layerType: "WMS_Test"
       });
 
       setTimeout(() => {
@@ -312,7 +312,7 @@ class Manager extends Component {
    */
   describeLayer(e, layerName) {
     this.props.model.getLayerDescription(this.refs.input_url.value, layerName, (properties) => {
-      console.log("layermanager: " + properties + ", " + layerName);
+      //console.log("layermanager: " + properties + ", " + layerName);
       this.setState({
         layerProperties: properties,
         layerPropertiesName: layerName
@@ -431,8 +431,9 @@ class Manager extends Component {
         case 'WMS':
           displayType = "";
           break;
-        case 'WMSTest':
-        displayType = "(WMSTest)";
+        case 'WMS_Test':
+        console.log("wmstestlol");
+        displayType = "(extended WMS)";
         break;
         case 'WMTS':
           displayType = "(WMTS)";
@@ -507,6 +508,7 @@ class Manager extends Component {
 
     e.preventDefault();
 
+    //console.log("Test", this.state.layerType + "LayerForm");
     var form = this.refs[this.state.layerType + "LayerForm"]
     ,   valid = form.validate()
     ,   layer = {}
@@ -517,11 +519,11 @@ class Manager extends Component {
     }
 
     layer = form.getLayer();
-
     if (this.state.mode === "add") {
       layer.type = this.state.layerType;
       layer.id = null;
-
+      // console.log(layer);
+      // debugger;
       this.props.model.addLayer(layer, success => {
         this.whenLayerAdded(success,  layer.date);
       });
@@ -578,7 +580,7 @@ class Manager extends Component {
         )
       case "WMS_Test":
         return <WMSLayerFormTest
-          ref="WMSLayerFormTest"
+          ref="WMS_TestLayerForm"
           model={this.props.model}
           layer={this.state.layer}
           parentView={this}

@@ -37,7 +37,7 @@ const defaultState = {
   content: "",
   date: "Fylls i per automatik",
   infobox: "",
-  legend: "",
+  infoFormat: "",
   owner: "",
   url: "",
   searchFields: "",
@@ -46,8 +46,8 @@ const defaultState = {
   queryable: true,
   tiled: false,
   singleTile: false,
-  version: "1.3.0",
-  imageFormat: "Välj ett bildformat",
+  version: "",
+  imageFormat: "",
   imageFormats: [],
   coordSystem: "",
   coordSystems: [],
@@ -57,17 +57,19 @@ const defaultState = {
   attribution: "",
   selectedFormat: "",
   selctedStyle: "",
+  selectedLegend: "",
+  selectedFormat: "",
+  infoclickFormats: [],
   layerSettings: {
     settings: true,
     visible: false,
     infobox: "",
-    formats: [],
     styles: [],
-    confirmAction: () => {}
+    legend: "",
+    confirmAction: () => { }
   },
   savedLayers: []
 };
-
 
 /**
  *
@@ -115,13 +117,18 @@ class WMSLayerFormTest extends Component {
     )
   }
 
-  appendLayer(e, checkedLayer) {
+  yer(e, checkedLayer) {
     if (e.target.checked === true) {
-      this.state.addedLayers.push(checkedLayer);
+      this.state.addedLayers.push({
+        name: checkedLayer
+      });
     } else {
-      this.state.addedLayers = this.state.addedLayers.filter(layer =>
-        layer !== checkedLayer
-      );
+      this.state.addedLayers = this.state.addedLayers.filter(layer => {
+        layer.name !== checkedLayer;
+      });
+      this.state.savedLayers = this.state.savedLayers.filter(layer => {
+        layer.name !== checkedLayer;
+      });
     }
     this.validateField('layers');
     this.forceUpdate();
@@ -131,7 +138,7 @@ class WMSLayerFormTest extends Component {
     if (!this.state.addedLayers) return null;
 
     function uncheck(layer) {
-      this.appendLayer({
+      this.yer({
         target: {
           checked: false
         }
@@ -139,19 +146,11 @@ class WMSLayerFormTest extends Component {
       this.refs[layer].checked = false;
       this.validateField('layers');
     }
-
-    function displayLayerSettings(layer) {
-      // this.props.parentView.setState({
-      //   alert: true,
-      //   alertMessage: <p>hej</p>
-      // });
-    }
-
     return this.state.addedLayers.map((layer, i) =>
       <li className="layer" key={"addedLayer_" + i}>
         <span>
           <i className="fa fa-list" onClick={this.setLayerSettings.bind(this, layer)}></i>&nbsp;
-          <span>{layer}</span>
+          <span>{layer.name}</span>
         </span>&nbsp;
         <i className="fa fa-times" onClick={uncheck.bind(this, layer)}></i>
       </li>
@@ -190,7 +189,7 @@ class WMSLayerFormTest extends Component {
                 onChange={(e) => {
                   this.setState({ 'caption': layer.Title });
                   this.setState({ 'content': layer.Abstract });
-                  this.appendLayer(e, layer.Name);
+                  this.yer(e, layer.Name);
                 }} />&nbsp;
                 <label htmlFor={"layer" + i}>{layer.Name}</label>{title}
             </div>
@@ -268,40 +267,64 @@ class WMSLayerFormTest extends Component {
           alertMessage: "Servern svarar inte. Försök med en annan URL."
         })
       }
+
       this.setImageFormats();
       this.setCoordSystems();
+      this.setVersion();
+      this.setFormats();
+
       if (callback) {
         callback();
       }
     });
   }
 
-  /**
-   * gets image format tags from capabilities document and builds option tags
-   * which can populate a <select>. Stores these tags in this.state.imageFormats
-   */
+  setLegend(value) {
+    this.setState({ legend: value });
+  }
+
+  setVersion() {
+    var currentVersion = this.state.capabilities.version;
+    this.setState({
+      version: currentVersion
+    })
+  }
+
   setImageFormats() {
     var formats = this.state.capabilities.Capability.Request.GetMap.Format;
-    for (let i = 0; i < formats.length; i++) {
-      formats[i] = <option key={i}>{formats[i]}</option>;
-    }
+    var formatElements = formats ? formats.map((format, i) => {
+      return <option key={i}>{format}</option>;
+    }) : null;
+
     this.setState({
-      imageFormats: formats
+      imageFormats: formatElements
+    });
+  }
+
+  setFormats() {
+    var formats = this.state.capabilities.Capability.Request.GetFeatureInfo.Format;
+    var formatElements = formats ? formats.map((format, i) => {
+      return <option key={i}>{format}</option>;
+    }) : null;
+
+    this.setState({
+      infoclickFormats: formatElements
     });
   }
 
   setCoordSystems() {
     var systems = this.state.capabilities.Capability.Layer.CRS;
-    for (let i = 0; i < systems.length; i++) {
-      systems[i] = <option key={i}>{systems[i]}</option>;
-    }
+    var coordElements = systems ? systems.map((system, i) => {
+      return <option key={i}>{system}</option>;
+    }) : null;
 
     this.setState({
-      coordSystems: systems
+      coordSystems: coordElements
     });
   }
 
   getLayer() {
+
     return {
       type: this.state.layerType,
       id: this.state.id,
@@ -310,19 +333,19 @@ class WMSLayerFormTest extends Component {
       owner: this.getValue("owner"),
       date: this.getValue("date"),
       content: this.getValue("content"),
-      legend: this.getValue("legend"),
       layers: this.getValue("layers"),
-      infobox: this.getValue("infobox"),
       searchFields: this.getValue("searchFields"),
       displayFields: this.getValue("displayFields"),
       visibleAtStart: this.getValue("visibleAtStart"),
+      infoFormat: this.getValue("infoFormat"),
       singleTile: this.getValue("singleTile"),
       imageFormat: this.getValue("imageFormat"),
-      serverType: this.getValue("serverType"),
-      queryable: this.getValue("queryable"),
-      tiled: this.getValue("tiled"),
+      //serverType: this.getValue("serverType"),
+      serverType: "geoserver",
+      //tiled: this.getValue("tiled"),
+      tiled: true,
       drawOrder: this.getValue("drawOrder"),
-      attribution: this.getValue("attribution"),
+      attribution: this.getValue("attribution")
     };
   }
 
@@ -330,20 +353,17 @@ class WMSLayerFormTest extends Component {
     function create_date() {
       return (new Date()).getTime();
     }
-
-    function format_layers(layers) {
-      return layers.map(layer => layer);
-    }
-
     var input = this.refs["input_" + fieldName]
       , value = input ? input.value : "";
+    
 
     if (fieldName === 'date') value = create_date();
     if (fieldName === 'visibleAtStart') value = input.checked;
     if (fieldName === 'singleTile') value = input.checked;
-    if (fieldName === 'tiled') value = input.checked;
+    //if (fieldName === 'tiled') value = input.checked;
     if (fieldName === 'queryable') value = input.checked;
-    if (fieldName === 'layers') value = format_layers(this.state.addedLayers);
+    //if (fieldName === 'layers') value = this.state.addedLayers;
+    if (fieldName === 'layers') value = this.state.savedLayers;
 
     return value;
   }
@@ -415,20 +435,19 @@ class WMSLayerFormTest extends Component {
   }
 
   setLayerSettings(layer) {
-
     var allFormats = this.state.capabilities.Capability.Request.GetFeatureInfo.Format;
     var layerFormats = allFormats ? allFormats.map((format, i) => {
       return <option key={i}>{format}</option>;
     }) : null;
 
     var currentLayer = this.state.capabilities.Capability.Layer.Layer.find((l) => {
-      return l.Name === layer;
+      return l.Name === layer.name;
     });
 
     var layerStyles = currentLayer.Style ? currentLayer.Style.map((style, i) => {
       return <option key={i}>{style.Name}</option>;
     }) : null;
-    
+
     this.setState({
       selectedFormat: "",
       selectedStyle: "",
@@ -436,54 +455,57 @@ class WMSLayerFormTest extends Component {
       layerSettings: {
         settings: true,
         visible: true,
-        name: layer,
+        name: layer.name,
         infobox: this.state.infobox,
-        formats: [layerFormats],
         styles: [layerStyles],
+        legend: this.state.legend,
         confirmAction: () => {
+          this.saveLayerSettings();
           this.setState({
             layerSettings: {
               visible: false,
               settings: false
             }
           });
-          this.saveLayerSettings();
-          
         }
-        
       }
     });
   }
 
+  /**
+   * save infoclick-settings from modal to this.state.savedLayers. If layer name already exists,
+   * overwrite with new values
+   */
   saveLayerSettings() {
     var layers = this.state.savedLayers;
-    layers.push({
-        name: this.state.layerSettings.name, 
-        format: this.state.selectedFormat, 
+    let layerExists = false;
+    layers.forEach((item) => {
+      if (item.name === this.state.layerSettings.name) {
+          item.style = this.state.selectedStyle,
+          item.infobox = this.state.infobox,
+          item.legend = this.state.legend
+        layerExists = true;
+      }
+    });
+    if (!layerExists) {
+      layers.push({
+        infobox: this.state.infobox,
         style: this.state.selectedStyle,
-        infobox: this.state.infobox
+        queryable: true,
+        legend: this.state.legend,
+        name: this.state.layerSettings.name
       });
+    }
 
     this.setState({
       savedLayers: layers
-    });
-
-    this.state.savedLayers.forEach((layer) => {
-      console.log(layer);
     });
   }
 
   setLayerStyle(s) {
     var style = s ? s : "";
     this.setState({
-      selectedStyle: s
-    })
-  }
-
-  setLayerFormat(f) {
-    var format = f ? f : "";
-    this.setState({
-      selectedFormat: format
+      selectedStyle: style
     })
   }
 
@@ -500,7 +522,14 @@ class WMSLayerFormTest extends Component {
 
     return (
       <fieldset className="article-wrapper">
-        <Alert options={this.state.layerSettings} setInfobox={this.setInfobox.bind(this)} setFormat={this.setLayerFormat.bind(this)} setStyle={this.setLayerStyle.bind(this)} />
+        <Alert
+          options={this.state.layerSettings}
+          imageLoad={this.state.imageLoader}
+          setInfobox={this.setInfobox.bind(this)}
+          setStyle={this.setLayerStyle.bind(this)}
+          setNewLegend={this.loadLegendImage.bind(this)}
+          setLegend={this.setLegend.bind(this)}
+        />
         <legend>Lägg till lager</legend>
         <div className="row">
           <div className="col-md-6">
@@ -519,12 +548,22 @@ class WMSLayerFormTest extends Component {
               <span onClick={(e) => { this.loadWMSCapabilities(e) }} className="btn btn-default btn-sm">Ladda {loader}</span>
             </div>
           </div>
+          <div className="col-md-6">
+            <div className="form-group">
+              <label>Infoklick-format</label>
+              <select
+                className="form-control"
+                onChange={(e) => this.setState({selectedFormat: e.target.value })}>
+                {this.state.infoclickFormats}
+              </select>
+            </div>
+          </div>
         </div>
         <div className="row">
           <div className="col-md-6">
             <div className="form-group">
               <label>Bildformat</label>
-              <select ref="input_imageFormat" value={this.state.imageFormat} onChange={(e) => this.setState({ imageFormat: e.target.value })} className="form-control">
+              <select ref="input_imageFormat" onChange={(e) => this.setState({ imageFormat: e.target.value })} className="form-control">
                 {this.state.imageFormats}
               </select>
             </div>
@@ -555,7 +594,6 @@ class WMSLayerFormTest extends Component {
         <div className="row">
           <label className="col-md-5">Lagerlista</label>
           <label className="col-md-2">Infoklick</label>
-          <label className="col-md-5">Stil</label>
         </div>
         <div className="row">
           {this.renderLayerList()}
@@ -595,21 +633,6 @@ class WMSLayerFormTest extends Component {
                 this.setState({ 'content': e.target.value });
               }}
               className="form-control" />
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-md-12">
-            <div className="form-group">
-              <label>Teckenförklaring</label>
-              <input
-                type="text"
-                ref="input_legend"
-                value={this.state.legend}
-                onChange={(e) => this.setState({ 'legend': e.target.value })}
-                className="form-control"
-              />
-              <span onClick={(e) => { this.loadLegendImage(e) }} className="btn btn-default">Välj fil {imageLoader}</span>
-            </div>
           </div>
         </div>
         <div className="row">

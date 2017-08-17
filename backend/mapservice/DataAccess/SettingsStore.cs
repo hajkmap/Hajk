@@ -25,7 +25,11 @@ namespace MapService.DataAccess
         {
             string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.layerFile);
             string jsonInput = System.IO.File.ReadAllText(file);
-            return JsonConvert.DeserializeObject<LayerConfig>(jsonInput);
+            var config = JsonConvert.DeserializeObject<LayerConfig>(jsonInput);
+            //New wms config
+            if (config != null && config.extendedwmslayers == null)
+                config.extendedwmslayers = new List<ExtendedWmsConfig>();
+            return config;
         }
 
         /// <summary>
@@ -190,6 +194,26 @@ namespace MapService.DataAccess
             layer.id = this.GenerateLayerId(layerConfig).ToString();
             layerConfig.wmslayers.Add(layer);  
             this.saveLayerConfigToFile(layerConfig);              
+        }
+
+        internal void AddExtendedWMSLayer(ExtendedWmsConfig layer)
+        {
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+            layer.id = this.GenerateLayerId(layerConfig).ToString();
+            layerConfig.extendedwmslayers.Add(layer);
+            this.saveLayerConfigToFile(layerConfig);
+        }
+
+
+        internal void UpdateExtendedWMSLayer(ExtendedWmsConfig layer)
+        {
+            LayerConfig layerConfig = this.readLayerConfigFromFile();
+        }
+
+
+        internal void RemoveExtendedWMSLayer(string layerId)
+        {
+
         }
 
         /// <summary>

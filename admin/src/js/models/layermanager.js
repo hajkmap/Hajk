@@ -40,6 +40,8 @@ var manager = Model.extend({
     var t = layer['type'];
     delete layer['type'];
     switch(t) {
+      case "WMS_Test":
+        return this.get('config').url_layer_settings_extended
       case "WMS":
         return this.get('config').url_layer_settings
       case "WMTS":
@@ -56,12 +58,14 @@ var manager = Model.extend({
       success: data => {
         var layers = [];
 
+        data.extendedwmslayers.forEach(l => { l.type = "WMS_Test"});
         data.wmslayers.forEach(l => { l.type = "WMS" });
         data.wmtslayers.forEach(l => { l.type = "WMTS" });
         data.arcgislayers.forEach(l => { l.type = "ArcGIS" });
         data.vectorlayers.forEach(l => { l.type = "Vector" });
 
         layers = data.wmslayers
+          .concat(data.extendedwmslayers)
           .concat(data.wmtslayers)
           .concat(data.arcgislayers)
           .concat(data.vectorlayers);
@@ -71,7 +75,6 @@ var manager = Model.extend({
           ,   d2 = parseInt(b.date);
           return d1 === d2 ? 0 : d1 < d2 ? 1 : -1;
         });
-
         this.set('layers', layers);
       }
     });
