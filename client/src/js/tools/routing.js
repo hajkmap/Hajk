@@ -260,6 +260,21 @@ var RoutingModel = {
       })
     });
 
+    this.set('style_route_normal', style_route);
+
+    var style_route_highlight = new ol.style.Style({
+      image: new ol.style.Icon({
+        anchor: [0.5, 0.5],
+        anchorXUnits: 'fraction',
+        anchorYUnits: 'fraction',
+        opacity: .8,
+        src: 'assets/icons/routeguide_highlight.png',
+        scale: (2)
+      })
+    });
+
+    this.set('style_route_highlight', style_route_highlight);
+
     var style_drawing = new ol.style.Style({
       stroke: new ol.style.Stroke({
         width: 4,
@@ -306,83 +321,15 @@ var RoutingModel = {
       this.get('map').addLayer(this.get('layer_end'));
       this.get('map').addLayer(this.get('layer_route'));
       this.get('map').addLayer(this.get('layer_drawing'));
-
-      console.log('Starting to init popup');
-
-      /*var closer = document.getElementById('popup-closer');
-      var container = document.getElementById('popup');
-      var content = document.getElementById('popup-content');
-
-      console.log('Creating overlay');
-      var overlay = new ol.Overlay( ({
-        element: container,
-        autoPan: true,
-        autoPanAnimation: {
-          duration: 250
-        }
-      }));
-      */
-
-      /*this.set('overlay', overlay);
-
-      closer.onclick = function() {
-        overlay.setPosition(undefined);
-        closer.blur();
-        return false;
-      };
-
-      console.log('Adding to map');
-      this.get('map').addOverlay(overlay);*/
     }
   },
-/*
-  showRoutingInfoPopup: function(event){
-    console.log('Running showRoutingInfoPopup');
-    var overlay = this.get('map').getOverlayById('popup-0');
-    this.get('map').forEachFeatureAtPixel(event.pixel, function (feature, layer) {
-      console.log('Found feature and layer');
-      console.log(feature);
-      console.log(layer);
-      console.log(layer.get('name'));
-
-      if(layer.get('name') === 'routing'){
-        console.log('Correct layer');
-
-        var closer = document.getElementById('popup-closer');
-        var container = document.getElementById('popup');
-        var content = document.getElementById('popup-content');
-
-        console.log('got elements');
-        console.log(closer);
-        console.log(container);
-        console.log(content);
-
-        var coordinate = event.coordinate;
-        console.log('transforming');
-        console.log(coordinate);
-        var hdms = ol.coordinate.toStringHDMS(ol.proj.transform(
-          coordinate, 'EPSG:3857', 'EPSG:4326'));
-        console.log('transformed');
-        content.innerHTML = '<p>You clicked here:</p><code>' + hdms +
-          '</code>';
-        console.log('setting position of overlay');
-        console.log(overlay);
-        overlay.setPosition(coordinate);
-        console.log('finished');
-      }
-    })
-  },*/
 
   setPositionEvent: function(event){
-    console.log('setPositionEvent');
     this.set("position", event.coords);
     this.setPosition();
   },
 
   setPosition: function(){
-
-    console.log('Clearing the source');
-
     this.get('layer_start').getSource().clear();
     if (this.get('position').longitude && this.get('position').latitude) {
       var point = new ol.geom.Point([
@@ -440,8 +387,14 @@ var RoutingModel = {
   plotRoute: function(res, map, layer, layer_drawing) {
     console.log(res);
 
+
+    var routeResult = "";
     layer.getSource().clear();
     var steps = res.routes[0].legs[0].steps;
+    var routeDiv = document.createElement('div');
+    var p = document.createElement('p');
+    p.innerHTML = 'blalala';
+    routeDiv.appendChild(p);
     for(var i = 0; i < steps.length; i++){
       var lat = steps[i].start_location.lat;
       var lng = steps[i].start_location.lng;
@@ -459,9 +412,28 @@ var RoutingModel = {
 
       var tmpFeature = new ol.Feature({geometry: point, information: steps[i].html_instructions});
       console.log('4');
+      tmpFeature.number = "" + n;
       layer.getSource().addFeature(tmpFeature);
       console.log('5');
+      var n = i + 1;
+      // route features
+      var tmpLi = document.createElement('li');
+      tmpLi.onclick = this.highlightFeature.bind(this);
+      tmpLi.id = 'step_number' + n;
+      tmpLi.innerHTML = n + "," + steps[i].html_instructions;
+      var tmpI = document.createElement('i');
+      tmpI.class = 'fa fa-arrow-down';
+      var tmpBr = document.createElement('br');
+      routeDiv.appendChild(tmpLi);
+      routeDiv.appendChild(tmpI);
+      routeDiv.appendChild(tmpBr);
     }
+
+    var resList = document.getElementById('resultList');
+    while (resList.firstChild) {
+      resList.removeChild(resList.firstChild);
+    }
+    document.getElementById('resultList').appendChild(routeDiv);
 
     console.log('6');
     var routePath = new ol.format.Polyline({
@@ -483,6 +455,27 @@ var RoutingModel = {
     );
     console.log('8');
     map.getView().fit(layer_drawing.getSource().getExtent(), map.getSize());
+
+  },
+
+  highlightFeature: function(event){
+    var feature_number = -1;
+    if (event.target.nodeName === 'B'){
+      feature_number = event.target.parentNode.id.substring('step_number'.length);
+    } else {
+      feature_number = event.target.id.substring('step_number'.length);
+    }
+
+    var layer = this.get('layer_route');
+
+    var features = layer.getSource().getFeatures();
+    for (var i= 0; i < features.length; i++){
+      if(features[i].number === feature_number){
+        features[i].setStyle(this.get('style_route_highlight'));
+      } else {
+        features[i].setStyle(this.get('style_route_normal'));
+      }
+    }
   },
 
   drawRoute: function(steps){
@@ -497,7 +490,6 @@ var RoutingModel = {
       })
     );
 
-    this.set('routingFinished', true);
 
   },
 

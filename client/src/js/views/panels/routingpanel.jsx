@@ -69,6 +69,10 @@ var RoutingPanelView = {
     });
   },
 
+  showResult: function(routeResult) {
+    console.log(this.props.model.plotRoute(res));
+  },
+
   /**
    * Render the view
    * @instance
@@ -113,6 +117,10 @@ var RoutingPanelView = {
           <div className="panel panel-default">
              <div className="panel-heading"> Result </div>
                  <div className="panel-body">
+                   <div>this.showResult()</div>
+                   Here comes result!
+                   <div id="resultList"></div>
+                   Nu är du framme　☆
                  </div>
           </div>
         </div>
