@@ -6,6 +6,7 @@ using System.Web.Hosting;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
+using log4net;
 
 using MapService.Models;
 using MapService.Models.Config;
@@ -17,6 +18,8 @@ namespace MapService.DataAccess
     {
         //private string mapFile = "map_1.json";
         private string layerFile = "layers.json";
+
+        ILog _log = LogManager.GetLogger(typeof(SettingsDbContext));
         /// <summary>
         /// Read layer config from JSON-file
         /// </summary>

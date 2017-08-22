@@ -8,11 +8,14 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using MapService.Models;
 using MapService.Models.ToolOptions;
+using log4net;
 
 namespace MapService.Controllers
 {
     public class ConfigController : Controller
     {
+        ILog _log = LogManager.GetLogger(typeof(ConfigController));
+
         public void Delete(string id)
         {
             string file = String.Format("{0}App_Data\\{1}.json", HostingEnvironment.ApplicationPhysicalPath, id);
@@ -22,6 +25,7 @@ namespace MapService.Controllers
             }
             else
             {
+                _log.WarnFormat("File not found: {0}", file);
                 throw new HttpException(404, "File not found");
             }
         }
@@ -30,6 +34,8 @@ namespace MapService.Controllers
         {
             string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
             string file = String.Format("{0}\\{1}.json", folder, id);
+
+            _log.DebugFormat("{0}\\{1}.json", folder, id);
             MapConfig mapConfig = new MapConfig()
             {
                 map = new MapSetting()
@@ -280,29 +286,39 @@ namespace MapService.Controllers
 
         public string GetConfig(string name)
         {
-            Response.Expires = 0;
-            Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
-            Response.ContentType = "application/json; charset=utf-8";
-            Response.Headers.Add("Cache-Control", "private, no-cache");    
-
-            if (name == null)
+            try
             {
-                throw new HttpException(500, "File name is not present");
-            }            
+                Response.Expires = 0;
+                Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
+                Response.ContentType = "application/json; charset=utf-8";
+                Response.Headers.Add("Cache-Control", "private, no-cache");
 
-            if (name.ToLower() == "list")
-            {
-                return List("all");
-            }            
+                if (name == null)
+                {
+                    throw new HttpException(500, "File name is not present");
+                }
 
-            string file = String.Format("{0}App_Data\\{1}.json", HostingEnvironment.ApplicationPhysicalPath, name);
+                if (name.ToLower() == "list")
+                {
+                    return List("all");
+                }
 
-            if (System.IO.File.Exists(file))
+                string file = String.Format("{0}App_Data\\{1}.json", HostingEnvironment.ApplicationPhysicalPath, name);
+
+                if (System.IO.File.Exists(file))
+                {
+                    return System.IO.File.ReadAllText(file);
+                }
+                else
+                {
+                    throw new HttpException(404, "File not found");
+                }
+
+            }
+            catch (Exception e)
             {
-                return System.IO.File.ReadAllText(file);
-            } else
-            {
-                throw new HttpException(404, "File not found");                
+                _log.Fatal(e);
+                throw e;
             }
         }
     }
