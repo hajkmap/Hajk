@@ -203,7 +203,7 @@
             ],
             "groups": []
           },
-		  {
+          {
             "id": "1060",
             "parent": "-1",
             "name": "Omsorg & stöd",
@@ -250,7 +250,7 @@
                 "visibleAtStart": false,
                 "drawOrder": 5
               },
-			  {
+              {
                 "id": "350",
                 "visibleAtStart": false,
                 "drawOrder": 31
@@ -295,7 +295,7 @@
                 "visibleAtStart": false,
                 "drawOrder": 10
               },
-			  {
+              {
                 "id": "325",
                 "visibleAtStart": false,
                 "drawOrder": 31
@@ -363,7 +363,7 @@
             ],
             "groups": []
           },
-		  {
+          {
             "id": "1040",
             "parent": "-1",
             "name": "Kommun & politik",
@@ -378,12 +378,12 @@
               {
                 "id": "380",
                 "visibleAtStart": false,
-                "drawOrder": 33
+                "drawOrder": 34
               },
               {
                 "id": "390",
                 "visibleAtStart": false,
-                "drawOrder": 34
+                "drawOrder": 35
               }
             ],
             "groups": []
@@ -466,8 +466,8 @@
     {
       "type": "draw",
       "options": {
-        "exportUrl": "http://karta2.varberg.se/export/kml",
-        "importUrl": "http://karta2.varberg.se/import/kml"
+        "exportUrl": "https://karta2.varberg.se/export/kml",
+        "importUrl": "https://karta2.varberg.se/import/kml"
       }
     },
     {
@@ -481,8 +481,8 @@
         "toolbar": "bottom",
         "maxZoom": 15,
         "markerImg": "/assets/icons/marker.png",
-        "kmlExportUrl": "http://karta2.verberg.se/export/kml",
-        "excelExportUrl": "http://karta2.varberg.se/export/excel",
+        "kmlExportUrl": "https://karta2.verberg.se/export/kml",
+        "excelExportUrl": "https://karta2.varberg.se/export/excel",
         "displayPopup": true,
         "selectionTools": true,
         "anchor": [
@@ -606,7 +606,7 @@
       200000.0,
       6360000.0
     ],
-    "logo": "http://karta2.varberg.se/assets/logo.png",
+    "logo": "https://karta2.varberg.se/assets/logo.png",
     "colors": {
       "primaryColor": "#1ea5cd",
       "secondaryColor": "#ffffff"
