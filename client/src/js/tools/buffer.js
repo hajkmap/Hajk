@@ -99,6 +99,7 @@ var BufferModel = {
     this.set('bufferLayer', new ol.layer.Vector({
       source: new ol.source.Vector(),
       name: 'buffer-layer',
+      queryable: false,
       style: this.getDefaultStyle()
     }));
 
@@ -162,60 +163,74 @@ var BufferModel = {
       return false;
     }
 
-    var layers = map.getLayersByClass("OpenLayers.Layer.Vector");
-    console.log('found ' + layers.length + ' layers');
-    for (var i = 0; i < layers.length; i++){
-      var features = layers[i].getSource().getFeatures();
-      console.log('found ' + features.length + ' features in layer ' + layers[i].name);
-      for (var j = 0; j < features.length; j++){
-          var line = new ol.geom.LineString([latlng1, feature.getCoordinates()]);
-          var length = 0;
-          var coordinates = line.getCoordinates();
-          var sourceProj = map.getView().getProjection();
-
-          for (var i = 0, ii = coordinates.length - 1; i < ii; ++i) {
-            var c1 = ol.proj.transform(coordinates[i], sourceProj, 'EPSG:4326');
-            var c2 = ol.proj.transform(coordinates[i + 1], sourceProj, 'EPSG:4326');
-            length +=  ol.sphere.WGS84.haversineDistance(c1, c2);
-          }
-
-          // check if in length
-        if(length <= dist) {
-          // TODO add to remove from map
-        }
-        };
-      }
-    }
+    // map.getLayersByClass("OpenLayers.Layer.Vector")
     // get all features
     // for loop, find features within distance
     // http://openlayers.org/en/master/examples/measure.html
 
     var buffered = Object.keys(features).map(key => {
 
-      var feature = features[key]
-      ,   olf = new ol.Feature()
-      ,   olGeom = feature.getGeometry()
-      ,   jstsGeom
-      ,   buff
-      ;
-      console.log(feature);
-      if (olGeom instanceof ol.geom.Circle) {
-        olGeom = ol.geom.Polygon.fromCircle(olGeom, 0b10000000);
-      }
+        var feature = features[key]
+        ,   olf = new ol.Feature()
+        ,   olGeom = feature.getGeometry()
+        ,   jstsGeom
+        ,   buff
+    ;
 
-      jstsGeom = parser.read(olGeom);
-      buff = jstsGeom.buffer(dist);
-      olf.setGeometry(parser.write(buff));
-      olf.setStyle(this.getDefaultStyle());
-      olf.setId(Math.random() * 1E20);
+    if (olGeom instanceof ol.geom.Circle) {
+      olGeom = ol.geom.Polygon.fromCircle(olGeom, 0b10000000);
+    }
 
-      return olf;
-    });
+    jstsGeom = parser.read(olGeom);
+    buff = jstsGeom.buffer(dist);
+    olf.setGeometry(parser.write(buff));
+    olf.setStyle(this.getDefaultStyle());
+    olf.setId(Math.random() * 1E20);
+
+    return olf;
+  });
 
     if (buffered) {
-      console.log('Discovered ' + buffered.length);
-      console.log(buffered);
       this.get('bufferLayer').getSource().addFeatures(buffered);
+
+      console.log(buffered);
+      console.log('Creating variables and getting extent');
+      var extent = buffered[0].getGeometry().getExtent();
+
+      console.log('Getting layers');
+      var layers = this.get('olMap').getLayers().getArray();
+
+      console.log('filtering to vector layers');
+      var vectorLayers = layers.filter(layer =>
+        layer instanceof ol.layer.Vector &&
+        layer.getVisible() &&
+        layer.get('name') !== 'preview-layer' &&
+        layer.get('name') !== 'search-selection-layer'
+    );
+    console.log('have ' + vectorLayers.length + ' vector layers');
+      /*
+      vectorLayers = vectorLayers.map(layer =>
+        translateVector(layer.getSource().getFeaturesInExtent(extent))
+    ).filter(layer => layer.features.length > 0);
+    */
+
+      console.log('found following layers');
+      console.log(vectorLayers);
+
+      console.log('getting features');
+      var foundFeatures = [];
+      for(var i = 0; i < vectorLayers.length; i++){
+        console.log('trying to get from extent');
+        console.log(extent);
+        console.log(vectorLayers[i]);
+//        var f = vectorLayers[i].getSource().getFeaturesInExtent(extent);
+        var f = vectorLayers[i].getSource().getFeaturesInExtent(extent);
+        console.log('before concat');
+        foundFeatures.concat(f);
+      }
+
+      console.log(foundFeatures);
+      console.log('Found ' + foundFeatures.length + ' features in extent');
 
       return true;
     } else {
