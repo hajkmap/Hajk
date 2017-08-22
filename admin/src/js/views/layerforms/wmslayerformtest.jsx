@@ -117,17 +117,19 @@ class WMSLayerFormTest extends Component {
     )
   }
 
-  yer(e, checkedLayer) {
+  appendLayer(e, checkedLayer) {
     if (e.target.checked === true) {
       this.state.addedLayers.push({
         name: checkedLayer
       });
     } else {
       this.state.addedLayers = this.state.addedLayers.filter(layer => {
-        layer.name !== checkedLayer;
+        console.log("checkedLayer: ", checkedLayer.name);
+        console.log("layer.name: ", layer.name);
+        layer.name !== checkedLayer.name;
       });
       this.state.savedLayers = this.state.savedLayers.filter(layer => {
-        layer.name !== checkedLayer;
+        layer.name !== checkedLayer.name;
       });
     }
     this.validateField('layers');
@@ -136,14 +138,13 @@ class WMSLayerFormTest extends Component {
 
   renderSelectedLayers() {
     if (!this.state.addedLayers) return null;
-
     function uncheck(layer) {
       this.appendLayer({
         target: {
           checked: false
         }
       }, layer);
-      this.refs[layer].checked = false;
+      this.refs[layer.name].checked = false;
       this.validateField('layers');
     }
     return this.state.addedLayers.map((layer, i) =>
@@ -189,7 +190,7 @@ class WMSLayerFormTest extends Component {
                 onChange={(e) => {
                   this.setState({ 'caption': layer.Title });
                   this.setState({ 'content': layer.Abstract });
-                  this.yer(e, layer.Name);
+                  this.appendLayer(e, layer.Name);
                 }} />&nbsp;
                 <label htmlFor={"layer" + i}>{layer.Name}</label>{title}
             </div>
