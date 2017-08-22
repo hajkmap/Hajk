@@ -87,20 +87,20 @@ var RoutingPanelView = {
       <Panel title="Navigation"  onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
         <div className="panel-content">
           <div className="panel panel-default">
-              <div className="panel-heading"> ①. Choose a start point </div>
+              <div className="panel-heading"> ①. Välj startpunkt </div>
                 <div className="panel-body">
-                  <button onClick={() => this.props.model.turnOnGPSClicked()} className="btn btn-default" id="naviGPS">Use current position</button>
-                  <button onClick={() => this.props.model.activateStartMode()} className="btn btn-default" id="startBtn">Choose Position on the map</button>
+                  <button onClick={() => this.props.model.turnOnGPSClicked()} className="btn btn-default" id="naviGPS">Välj befintlig position</button>
+                  <button onClick={() => this.props.model.activateStartMode()} className="btn btn-default" id="startBtn">Välj position på kartan</button>
                 </div>
           </div>
           <div className="panel panel-default">
-             <div className="panel-heading"> ②. Choose an end point </div>
+             <div className="panel-heading"> ②. Välj destination </div>
                <div className="panel-body">
-                 <button onClick={() => this.props.model.activateEndMode()} className="btn btn-default" id="startBtn">Choose Position on the map</button>
+                 <button onClick={() => this.props.model.activateEndMode()} className="btn btn-default" id="startBtn">Välj position på kartan</button>
              </div>
           </div>
           <div className="panel panel-default">
-             <div className="panel-heading"> ③. Choose a travel mode </div>
+             <div className="panel-heading"> ③. Välj färdsätt </div>
              <div className="panel-body">
                <select id="travel_mode_id" onChange={this.setTravelMode} defaultValue={this.state.selectTravelMode}>
                  <option value="walking">Gå</option>
@@ -115,12 +115,9 @@ var RoutingPanelView = {
              <button onClick={() => this.props.model.deleteLayers()} className="btn btn-default" id="startBtn">Rensa</button>
           </div>
           <div className="panel panel-default">
-             <div className="panel-heading"> Result </div>
+             <div className="panel-heading"> Resultat </div>
                  <div className="panel-body">
-                   <div>this.showResult()</div>
-                   Here comes result!
                    <div id="resultList"></div>
-                   Nu är du framme　☆
                  </div>
           </div>
         </div>

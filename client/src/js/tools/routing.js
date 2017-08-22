@@ -387,13 +387,13 @@ var RoutingModel = {
   plotRoute: function(res, map, layer, layer_drawing) {
     console.log(res);
 
-
     var routeResult = "";
     layer.getSource().clear();
     var steps = res.routes[0].legs[0].steps;
     var routeDiv = document.createElement('div');
     var p = document.createElement('p');
-    p.innerHTML = 'blalala';
+    console.log(res.routes[0].legs[0].distance.text);
+    p.innerHTML = '<b>Avstånd:</b> ' + res.routes[0].legs[0].distance.text +'('+res.routes[0].legs[0].distance.value+'m)' + '<br>' + '<b>Tid:</b> ' + res.routes[0].legs[0].duration.text + '<br>' + '<b>Startadress:</b> ' + res.routes[0].legs[0].start_address + '<br>' + '<b>Slutadress:</b> ' + res.routes[0].legs[0].end_address;
     routeDiv.appendChild(p);
     for(var i = 0; i < steps.length; i++){
       var lat = steps[i].start_location.lat;
@@ -429,10 +429,13 @@ var RoutingModel = {
       routeDiv.appendChild(tmpBr);
     }
 
+
     var resList = document.getElementById('resultList');
     while (resList.firstChild) {
       resList.removeChild(resList.firstChild);
     }
+
+    // put result into the table
     document.getElementById('resultList').appendChild(routeDiv);
 
     console.log('6');
@@ -454,6 +457,11 @@ var RoutingModel = {
       })
     );
     console.log('8');
+    var centerLat = (this.get('position').latitude + this.get('position').latitudeEnd) / 2;
+    var centerLon = (this.get('position').longitude + this.get('position').longitudeEnd) / 2;
+    console.log(centerLat);
+    console.log(centerLon);
+    map.getView().setCenter(ol.proj.transform([centerLon, centerLat], 'EPSG:4326', 'EPSG:3007'));
     map.getView().fit(layer_drawing.getSource().getExtent(), map.getSize());
 
   },
