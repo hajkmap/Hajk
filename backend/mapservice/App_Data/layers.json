@@ -557,6 +557,30 @@
       "imageFormat": "image/png",
       "serverType": "geoserver",
       "attribution": ""
+    },
+    {
+      "id": "41",
+      "caption": "tet",
+      "url": "http://194.71.132.27/geoserver/wms",
+      "owner": "",
+      "date": "1503490803972",
+      "content": "ets",
+      "legend": "estst",
+      "projection": null,
+      "layers": [
+        "motala:Areor_potentiell_nytta",
+        "motala:Artportalen"
+      ],
+      "infobox": "setstst",
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": ""
     }
   ],
   "wfslayers": [
@@ -1008,20 +1032,27 @@
   "extendedwmslayers": [
     {
       "id": "40",
-      "caption": "Manhattan (NY) roads",
+      "caption": "Spearfish archeological sites",
       "url": "http://localhost/geoserver/wms",
       "owner": "",
-      "date": "1503402675416",
-      "content": "Highly simplified road layout of Manhattan in New York..",
+      "date": "1503490780917",
+      "content": "Sample data from GRASS, archeological sites location, Spearfish, South Dakota, USA",
       "projection": null,
       "infoFormat": "",
       "layers": [
         {
-          "infobox": "inforuta",
-          "style": "line",
+          "infobox": "asf",
+          "style": "",
           "queryable": true,
-          "legend": "tecken",
-          "name": "tiger:tiger_roads"
+          "legend": "w4t",
+          "name": "nurc:Pk50095"
+        },
+        {
+          "infobox": "sef",
+          "style": "burg",
+          "queryable": true,
+          "legend": "sef",
+          "name": "sf:archsites"
         }
       ],
       "searchFields": null,
@@ -1029,7 +1060,7 @@
       "visibleAtStart": false,
       "tiled": true,
       "singleTile": false,
-      "imageFormat": "image/png",
+      "imageFormat": "application/json;type=utfgrid",
       "serverType": "geoserver",
       "attribution": ""
     }

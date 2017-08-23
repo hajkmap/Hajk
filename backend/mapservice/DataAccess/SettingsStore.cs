@@ -173,6 +173,7 @@ namespace MapService.DataAccess
             var d = layerConfig.wmslayers.OrderByDescending(l => int.Parse(l.id)).FirstOrDefault();
             var e = layerConfig.wmtslayers.OrderByDescending(l => int.Parse(l.id)).FirstOrDefault();
             var f = layerConfig.vectorlayers.OrderByDescending(l => int.Parse(l.id)).FirstOrDefault();
+            var g = layerConfig.extendedwmslayers.OrderByDescending(l => int.Parse(l.id)).FirstOrDefault();
 
             if (a != null) high = this.highest(a.id, high);
             if (b != null) high = this.highest(b.id, high);
@@ -180,6 +181,7 @@ namespace MapService.DataAccess
             if (d != null) high = this.highest(d.id, high);
             if (e != null) high = this.highest(e.id, high);
             if (f != null) high = this.highest(f.id, high);
+            if (g != null) high = this.highest(g.id, high);
 
             return high + 1;
         }
