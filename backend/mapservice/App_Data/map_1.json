@@ -172,7 +172,11 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "22"
+          {
+            "id": "22",
+            "visibleAtStart": false,
+            "drawOrder": 0
+          }
         ],
         "groups": [
           {
@@ -180,15 +184,35 @@
             "parent": "-1",
             "name": "Lager",
             "toggled": false,
-            "expanded": false,
+            "expanded": true,
             "layers": [
               {
-                "id": "26",
+                "id": "7",
                 "visibleAtStart": false,
                 "drawOrder": 1000
               },
               {
-                "id": "7",
+                "id": "29",
+                "visibleAtStart": true,
+                "drawOrder": 1000
+              },
+              {
+                "id": "19",
+                "visibleAtStart": false,
+                "drawOrder": 1000
+              },
+              {
+                "id": "17",
+                "visibleAtStart": false,
+                "drawOrder": 1000
+              },
+              {
+                "id": "16",
+                "visibleAtStart": false,
+                "drawOrder": 1000
+              },
+              {
+                "id": "26",
                 "visibleAtStart": false,
                 "drawOrder": 1000
               }
@@ -201,34 +225,21 @@
         "backgroundSwitcherBlack": true,
         "backgroundSwitcherWhite": true,
         "toggleAllButton": true
-      }
+      },
+      "index": 0
     },
     {
       "type": "search",
       "options": {
         "onMap": false,
         "toolbar": "bottom",
-        "maxZoom": 15,
+        "maxZoom": 14,
         "markerImg": "http://localhost/hajk/assets/icons/marker.png",
         "kmlExportUrl": "/mapservice/export/kml",
         "excelExportUrl": "/mapservice/export/excel",
         "displayPopup": true,
         "selectionTools": true,
-        "anchor": [
-          16,
-          32
-        ],
-        "imgSize": [
-          32,
-          32
-        ]
-      }
-    },
-    {
-      "type": "infoclick",
-      "options": {
-        "displayPopup": true,
-        "markerImg": "assets/icons/marker.png",
+        "filterVisible": true,
         "anchor": [
           16,
           32
@@ -237,8 +248,9 @@
           32,
           32
         ],
-        "popupOffsetY": -32
-      }
+        "popupOffsetY": 0
+      },
+      "index": 4
     },
     {
       "type": "export",
@@ -254,17 +266,18 @@
           2500,
           5000,
           10000,
-          10000,
           25000,
           50000,
           100000,
           250000
         ]
-      }
+      },
+      "index": 9
     },
     {
       "type": "edit",
-      "options": {}
+      "options": {},
+      "index": 2
     },
     {
       "type": "coordinates",
@@ -278,21 +291,29 @@
             "xtitle": "E",
             "ytitle": "N",
             "inverseAxis": false
+          },
+          {
+            "code": "EPSG:3006",
+            "default": false,
+            "hint": "",
+            "title": "SW99TM",
+            "xtitle": "E",
+            "ytitle": "N",
+            "inverseAxis": false
           }
         ]
-      }
-    },
-    {
-      "type": "bookmark",
-      "options": {}
+      },
+      "index": 5
     },
     {
       "type": "buffer",
-      "options": {}
+      "options": {},
+      "index": 3
     },
     {
       "type": "anchor",
-      "options": {}
+      "options": {},
+      "index": 6
     },
     {
       "type": "draw",
@@ -300,35 +321,56 @@
         "exportUrl": "/mapservice/export/kml",
         "importUrl": "/mapservice/import/kml",
         "icons": "marker, marker_black, marker_green, marker_red, marker_yellow, br, pin, pin_black, pin_green, pin_red, pin_yellow"
-      }
+      },
+      "index": 1
     },
     {
       "type": "information",
       "options": {
         "text": "Information om kartan.",
         "headerText": "Information",
-        "visibleAtStart": true
-      }
+        "visibleAtStart": false
+      },
+      "index": 8
     },
     {
       "type": "streetview",
       "options": {
         "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4"
-      }
+      },
+      "index": 11
     },
     {
       "type": "location",
-      "options": {}
+      "options": {},
+      "index": 7
+    },
+    {
+      "type": "infoclick",
+      "options": {
+        "displayPopup": false,
+        "markerImg": "assets/icons/marker.png",
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ],
+        "popupOffsetY": 0
+      },
+      "index": 0
     }
   ],
   "map": {
     "target": "map",
     "center": [
-      414962,
-      6583005
+      418061,
+      6584446
     ],
     "projection": "EPSG:3006",
-    "zoom": 10,
+    "zoom": 13,
     "maxZoom": 3,
     "minZoom": 9,
     "resolutions": [

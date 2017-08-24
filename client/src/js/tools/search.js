@@ -36,7 +36,7 @@ var kmlWriter = require('utils/kmlwriter');
  * @property {string} value
  * @property {boolean} force
  * @property {string} filter - Default: "*"
- * @property {string} filterVisible - Default: false
+ * @property {string} filterVisibleActive - Default: false
  * @property {string} markerImg - Default: "assets/icons/marker.png"
  * @property {number} maxZoom - Default: 14
  * @property {string} exportUrl
@@ -50,7 +50,7 @@ var SearchModelProperties = {
   visible: false,
   value: "",
   filter: "*",
-  filterVisible: false,
+  filterVisibleActive: false,
   markerImg: "assets/icons/marker.png",
   anchor: [
     16,
@@ -232,6 +232,7 @@ var SearchModel = {
     ,   featureFilter = ""
     ,   propertyFilter = ""
     ,   read = (result) => {
+
       var format
       ,   features = []
       ,   outputFormat = props.outputFormat;
@@ -265,13 +266,10 @@ var SearchModel = {
       } catch (e) {
         console.error("Parsningsfel. Koordinatsystem kanske saknas i definitionsfilen? Mer information: ", e);
       }
-
       if (features.length === 0) {
         features = [];
       }
-
       props.done(features);
-
     };
 
     outputFormat = props.outputFormat;
@@ -451,14 +449,14 @@ var SearchModel = {
    * @instance
    * @param {DOMelement} elm
    */
-  enableScroll: function (elm) {    
-    if (this.isTouchDevice()){      
-      var scrollStartPos = 0;      
+  enableScroll: function (elm) {
+    if (this.isTouchDevice()){
+      var scrollStartPos = 0;
       elm.addEventListener("touchstart", function(event) {
-        scrollStartPos = this.scrollTop + event.touches[0].pageY;                
-      }, false);      
+        scrollStartPos = this.scrollTop + event.touches[0].pageY;
+      }, false);
       elm.addEventListener("touchmove", function(event) {
-        this.scrollTop = scrollStartPos - event.touches[0].pageY;                    
+        this.scrollTop = scrollStartPos - event.touches[0].pageY;
       }, false);
     }
   },
@@ -470,7 +468,7 @@ var SearchModel = {
    *
    */
   focus: function (spec) {
-    
+
     function isPoint (coord) {
       if (coord.length === 1) {
         coord = coord[0];
@@ -501,7 +499,13 @@ var SearchModel = {
     this.featureLayer.getSource().addFeature(spec.hit);
 
     if (ovl && this.get('displayPopup')) {
-      $('#popup-content').html(this.getInformation(spec.hit));
+
+      let title = $(`<div class="popup-title">${spec.hit.caption}</div>`);
+      let textContent = $('<div id="popup-content-text"></div>');
+
+      textContent.html(this.getInformation(spec.hit));
+      $('#popup-content').empty().append(title, textContent);
+
       if (isPoint(spec.hit.getGeometry().getCoordinates())) {
         offsetY = this.get('popupOffsetY');
       }
@@ -592,18 +596,17 @@ var SearchModel = {
   },
 
   /**
-   * Get searchable layers. By design, visible layers and layers set with the property search set.
+   * Get searchable layers.
    * @isntance
    * @return {Layer[]} layers
    */
   getLayers: function () {
+
     var filter = (layer) => {
       var criteria = this.get('filter');
-      var visible  = this.get('filterVisible');
-      var searchable = layer.get('search');
-      return criteria === '*' ?
-             (searchable && (visible ? layer.get('visible') : true)) :
-             (searchable && (visible ? layer.get('visible') : true) && layer.get('id') === criteria);
+      var visible  = this.get('filterVisibleActive');
+      var searchable = layer.get('searchUrl');
+      return (searchable && (visible ? layer.get('visible') : false) || layer.get('id') === criteria);
     };
 
     return this.get('layerCollection').filter(filter);
@@ -630,11 +633,11 @@ var SearchModel = {
   getHitsFromItems: function () {
     var hits = [];
     if (this.get('hits').length === 0) {
-      this.get('items').map(item => {              
-        item.hits.forEach((hit, i) => {                    
+      this.get('items').map(item => {
+        item.hits.forEach((hit, i) => {
           hit.setStyle(this.featureLayer.getStyle());
           hits.push(hit);
-        });                
+        });
       });
     }
     return hits;
@@ -647,8 +650,8 @@ var SearchModel = {
    */
   getKmlData: function () {
 
-    var exportItems = this.get('hits').length > 0 
-        ? this.get('hits') 
+    var exportItems = this.get('hits').length > 0
+        ? this.get('hits')
         : this.getHitsFromItems();
 
     var transformed = kmlWriter.transform(
@@ -666,28 +669,28 @@ var SearchModel = {
    */
   getExcelData: function () {
 
-    var groups = {}        
+    var groups = {}
     ,   exportItems = this.get('hits').length > 0
-        ? this.get('hits') 
+        ? this.get('hits')
         : this.getHitsFromItems();
 
-    exportItems.forEach(hit => {      
+    exportItems.forEach(hit => {
       if (!groups.hasOwnProperty(hit.caption)) {
         groups[hit.caption] = [];
       }
       groups[hit.caption].push(hit);
     });
-    
+
     return Object.keys(groups).map(group => {
 
       var columns = []
       ,   aliases = []
       ,   values = [];
 
-      var getAlias = (column, infobox) => {        
+      var getAlias = (column, infobox) => {
         var regExp = new RegExp(`{export:${column}( as .*)?}`)
         ,   result = regExp.exec(infobox);
-        
+
         if (result && result[1]) {
           result[1] = result[1].replace(" as ", "");
         }
@@ -705,7 +708,7 @@ var SearchModel = {
             return typeof attributes[name] === "string"  ||
                    typeof attributes[name] === "boolean" ||
                    typeof attributes[name] === "number";
-          } else {                        
+          } else {
             let regExp = new RegExp(`{export:${name}( as .*)?}`);
             return (
               regExp.test(hit.infobox)
@@ -724,7 +727,7 @@ var SearchModel = {
 
         return columns.map(column => attributes[column] || null);
       });
-      
+
       return {
         TabName: group,
         Cols: aliases,
@@ -751,7 +754,7 @@ var SearchModel = {
         postData = JSON.stringify(data);
         break;
     }
-    
+
     this.set("downloading", true);
 
     $.ajax({
@@ -833,12 +836,26 @@ var SearchModel = {
     this.featureLayer.getSource().clear();
 
     layers.forEach(layer => {
-      var searchProps = layer.get('search');
-      searchProps.geometryField = /wfsserver/.test(searchProps.url.toLowerCase()) ? "Shape" : "the_geom";
-      searchProps.caption = layer.get('caption');
-      searchProps.infobox = layer.get('infobox');
-      addRequest.call(this, searchProps);
+
+      layer.get('params').LAYERS.split(',').forEach(featureType => {
+
+        var searchProps = {
+          url: (HAJK2.searchProxy || "") + layer.get('searchUrl'),
+          caption: layer.get('caption'),
+          infobox: layer.get('infobox'),
+          featureType: featureType,
+          propertyName: layer.get('searchPropertyName'),
+          displayName: layer.get('searchDisplayName'),
+          srsName: this.get('map').getView().getProjection().getCode(),
+          outputFormat: layer.get('searchOutputFormat'),
+          geometryField: layer.get('searchGeometryField')
+        };
+
+        addRequest.call(this, searchProps);
+      });
+
     });
+
     sources.forEach(source => {
       var searchProps = {
         url: (HAJK2.searchProxy || "") + source.url,

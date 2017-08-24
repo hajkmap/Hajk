@@ -172,20 +172,20 @@ class Manager extends Component {
           lineColor: layer.lineColor || "rgba(0, 0, 0, 0.5)",
           fillColor: layer.fillColor || "rgba(255, 255, 255, 0.5)",
           opacity: layer.opacity,
-          symbolXOffset: layer.symbolXOffset,
-          symbolYOffset: layer.symbolYOffset,
-          labelAlign: layer.labelAlign,
-          labelBaseline: layer.labelBaseline,
-          labelSize: layer.labelSize,
-          labelOffsetX: layer.labelOffsetX,
-          labelOffsetY: layer.labelOffsetY,
-          labelWeight: layer.labelWeight,
-          labelFont: layer.labelFont,
-          labelFillColor: layer.labelFillColor,
-          labelOutlineColor: layer.labelOutlineColor,
-          labelOutlineWidth: layer.labelOutlineWidth,
-          labelAttribute: layer.labelAttribute,
-          showLabels: layer.showLabels,
+          symbolXOffset: layer.symbolXOffset || 0,
+          symbolYOffset: layer.symbolYOffset || 0,
+          labelAlign: layer.labelAlign || "",
+          labelBaseline: layer.labelBaseline || "",
+          labelSize: layer.labelSize || 0,
+          labelOffsetX: layer.labelOffsetX || 0,
+          labelOffsetY: layer.labelOffsetY || 0,
+          labelWeight: layer.labelWeight || "",
+          labelFont: layer.labelFont || "",
+          labelFillColor: layer.labelFillColor || "rgba(0, 0, 0, 1)",
+          labelOutlineColor: layer.labelOutlineColor || "rgba(255, 255, 255, 1)",
+          labelOutlineWidth: layer.labelOutlineWidth || 3,
+          labelAttribute: layer.labelAttribute || "",
+          showLabels: layer.showLabels || true,
           drawOrder: layer.drawOrder,
           layer: layer.layer
         });
@@ -224,7 +224,12 @@ class Manager extends Component {
           drawOrder: layer.drawOrder,
           addedLayers: [],
           layerType: layer.type,
-          attribution: layer.attribution
+          attribution: layer.attribution,
+          searchUrl: layer.searchUrl || "",
+          searchPropertyName: layer.searchPropertyName || "",
+          searchDisplayName: layer.searchDisplayName || "",
+          searchOutputFormat: layer.searchOutputFormat || "",
+          searchGeometryField: layer.searchGeometryField || ""
         });
 
         this.refs["WMSLayerForm"].loadLayers(layer, () => {

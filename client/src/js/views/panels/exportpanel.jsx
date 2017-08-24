@@ -91,13 +91,15 @@ var ExportTiffSettings = React.createClass({
 
 var ExportPdfSettings = React.createClass({
 
-  resolutions: [72, 96, 150],
+  resolutions: [72, 96, 150, 200, 300],
+  paperFormats: ["A2", "A3", "A4"],
 
   getInitialState: function() {
     return {
       selectFormat: 'A4',
       selectOrientation: 'S',
       selectScale: '2500',
+      manualScale: '2500',
       selectResolution: '72',
       loading: false
     };
@@ -117,6 +119,11 @@ var ExportPdfSettings = React.createClass({
             width:  this.getOrientation() === 'L' ? 420 : 297,
             height: this.getOrientation() === 'L' ? 297 : 420
           }
+        case 'A2':
+          return {
+              width:  this.getOrientation() === 'L' ? 594 : 420,
+              height: this.getOrientation() === 'L' ? 420 : 594
+          }
         default: {
           return {
             width: 0,
@@ -126,18 +133,28 @@ var ExportPdfSettings = React.createClass({
       }
     }
 
-    var dpi    = (25.4 / .28)
-    ,   width  = pageSize(this.getFormat()).width
+    var width  = pageSize(this.getFormat()).width
     ,   height = pageSize(this.getFormat()).height;
 
     return {
-      width: ((width / 25.4) * dpi),
-      height:  ((height / 25.4) * dpi)
+      width: ((width / 25.4)),
+      height:  ((height / 25.4))
+    };
+  },
+
+  getPreviewPaperMeasures: function() { 
+    var size = this.getPaperMeasures()
+    ,   inchInMillimeter = 25.4
+    ,   defaultPixelSizeInMillimeter = 0.28
+    ,   dpi = (inchInMillimeter / defaultPixelSizeInMillimeter); // ~90
+    return {
+      width: size.width * dpi,
+      height:  size.height * dpi
     };
   },
 
   getScale: function () {
-    return this.state.selectScale;
+    return (this.state.selectScale === 'other') ? this.state.manualScale : this.state.selectScale;
   },
 
   getResolution: function () {
@@ -170,6 +187,24 @@ var ExportPdfSettings = React.createClass({
     });
   },
 
+  setManualScale: function(e) {
+    if (e.target.value.startsWith('1:')) {
+      e.target.value = e.target.value.split(':')[1];
+    }
+
+    var val = this.getScale();
+    if (e.target.value < 250) {
+      val = 250;
+    } else if (e.target.value > 250000) {
+      val = 250000;
+    } else {
+      val = e.target.value;
+    }
+    this.setState({
+      manualScale: val
+    });
+  },
+
   setOrientation: function(e) {
     this.setState({
       selectOrientation: e.target.value
@@ -182,7 +217,7 @@ var ExportPdfSettings = React.createClass({
 
   addPreview: function (map) {
     var scale  = this.getScale()
-    ,   paper  = this.getPaperMeasures()
+    ,   paper  = this.getPreviewPaperMeasures()
     ,   center = this.props.model.getPreviewFeature() ?
                  ol.extent.getCenter(this.props.model.getPreviewFeature().getGeometry().getExtent()) :
                  map.getView().getCenter();
@@ -220,6 +255,7 @@ var ExportPdfSettings = React.createClass({
     ,   scales = this.props.model.get('scales')
     ,   options
     ,   resolutionOptions
+    ,   paperFormatOptions
     ,   loader = null
     ,   downloadLink = null
     ;
@@ -231,7 +267,25 @@ var ExportPdfSettings = React.createClass({
     if (!this.props.visible) return null;
 
     options = scales.map((s, i) => <option key={i} value={s}>1:{s}</option>);
-    resolutionOptions = this.resolutions.map((s, i) => <option key={i} value={s}>{s}</option>);
+
+    resolutionOptions = this.resolutions.map((s, i) => {
+      if (this.state.selectFormat === 'A2') {
+        return s !== 300 
+          ? <option key={i} value={s}>{s}</option>
+          : <option key={i} value={s} disabled>{s}</option>;
+        } else {
+          return <option key={i} value={s}>{s}</option>;
+        }
+      });
+    paperFormatOptions = this.paperFormats.map((s, i) => {
+      if (this.state.selectResolution === '300') {
+        return s !== 'A2'
+          ? <option key={i} value={s}>{s}</option>
+          : <option key={i} value={s} disabled>{s}</option>;
+        } else {
+          return <option key={i} value={s}>{s}</option>;
+        }
+    });
         
     this.addPreview(map);
 
@@ -250,8 +304,7 @@ var ExportPdfSettings = React.createClass({
           <div className="panel-heading">Välj pappersstorlek</div>
           <div className="panel-body">
             <select onChange={this.setFormat} defaultValue={this.state.selectFormat}>
-              <option value="A3">A3</option>
-              <option value="A4">A4</option>
+              {paperFormatOptions}
             </select>
           </div>
         </div>
@@ -269,7 +322,9 @@ var ExportPdfSettings = React.createClass({
           <div className="panel-body">
             <select onChange={this.setScale} defaultValue={this.state.selectScale}>
               {options}
+              <option value="other">Annan skala</option>
             </select>
+            {this.state.selectScale==='other' && <input type="text" onChange={this.setManualScale} defaultValue={this.state.manualScale}></input>}
           </div>
         </div>
         <div className="panel panel-default">
