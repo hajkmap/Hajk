@@ -189,7 +189,7 @@
               {
                 "id": "7",
                 "visibleAtStart": false,
-                "drawOrder": 0
+                "drawOrder": 1000
               },
               {
                 "id": "29",

@@ -102,7 +102,7 @@ module.exports = LayerModel.extend({
     });
   },
 
-  getStyle: function (feature) {
+  getStyle: function (feature, resolution) {
 
     const icon = this.get("icon");
     const fillColor = this.get("fillColor");
@@ -146,7 +146,26 @@ module.exports = LayerModel.extend({
       return new ol.style.Fill({
         color: fillColor
       });
-    }
+    }    
+
+    function getText() {      
+      return new ol.style.Text({
+        textAlign: align,
+        textBaseline: baseline,
+        font: font,
+        text: feature.get(labelAttribute),
+        fill: new ol.style.Fill({
+          color: labelFillColor
+        }),
+        stroke: new ol.style.Stroke({
+          color: outlineColor, 
+          width: outlineWidth
+        }),
+        offsetX: offsetX,
+        offsetY: offsetY,
+        rotation: rotation
+      });
+    };    
 
     function getText() {
       return new ol.style.Text({
@@ -173,7 +192,7 @@ module.exports = LayerModel.extend({
       : getIcon();
     }
 
-    function getIcon() {
+    function getIcon() {                              
       return new ol.style.Icon({
         src: icon,
         scale: 1,
