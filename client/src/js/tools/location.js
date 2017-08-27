@@ -37,7 +37,8 @@ var LocationModelProperties = {
   panel: '',
   toolbar: 'top-right',
   icon: 'fa fa-location-arrow icon',
-  title: 'Current Location',
+  title: 'Visa min position',
+  active: false,
   visible: false,
   location: {
     lat: undefined,
@@ -198,7 +199,7 @@ var LocationModel = {
       'visible': !this.get('visible'),
       'active': !this.get('active')
     });
-    console.log(positioning);
+    console.log('positioning is' + positioning);
   }
 };
 

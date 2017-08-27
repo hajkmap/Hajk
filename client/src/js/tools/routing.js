@@ -292,6 +292,7 @@ var RoutingModel = {
       this.set("layer_start", new ol.layer.Vector({
         source: source_start,
         name: "routing",
+        content: "Punkt",
         queryable: false,
         style: style_start
       }));
@@ -299,6 +300,7 @@ var RoutingModel = {
       this.set("layer_end", new ol.layer.Vector({
         source: source_end,
         name: "routing",
+        content: "Punkt",
         queryable: false,
         style: style_end
       }));
@@ -306,6 +308,7 @@ var RoutingModel = {
       this.set("layer_route", new ol.layer.Vector({
         source: source_route,
         name: "routing",
+        content: "Punkt",
         queryable: true,
         style: style_route
       }));
@@ -313,6 +316,7 @@ var RoutingModel = {
       this.set("layer_drawing", new ol.layer.Vector({
         source: source_drawing,
         name: "routing",
+        content: "Punkt",
         queryable: false,
         style: style_drawing
       }));

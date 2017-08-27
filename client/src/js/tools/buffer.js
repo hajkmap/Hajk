@@ -41,7 +41,9 @@ var BufferModelProperties = {
   title: 'Skapa buffertzon',
   visible: false,
   shell: undefined,
-  bufferDist: 10
+  bufferDist: 1000,
+  marker: undefined,
+  markerPos: undefined,
 }
 
 /**
@@ -62,6 +64,8 @@ var BufferModel = {
 
   initialize: function (options) {
     ToolModel.prototype.initialize.call(this);
+
+
   },
 
   getDefaultStyle: function () {
@@ -103,13 +107,36 @@ var BufferModel = {
       style: this.getDefaultStyle()
     }));
 
+    var style_marker = new ol.style.Style({
+      image: new ol.style.Icon({
+        anchor: [0.5, 0.5],
+        anchorXUnits: 'fraction',
+        anchorYUnits: 'fraction',
+        opacity: .8,
+        src: 'assets/icons/routeguide_highlight.png',
+        scale: (2)
+      })
+    });
+
+    this.set('markerlayer', new ol.layer.Vector({
+      source: new ol.source.Vector(),
+      name: 'bufferMarkerLayer',
+      queryable: false,
+      style: style_marker
+    }));
+
     this.get('olMap').addLayer(this.get('bufferLayer'));
+    this.get('olMap').addLayer(this.get('markerlayer'));
 
     this.set('selectionModel', new SelectionModel({
       map: this.get('olMap'),
       layerCollection: shell.getLayerCollection()
     }));
 
+    // Move to onclick on the + button should be in .jsx
+    console.log('adding on klick');
+    this.set('bufferMarkKey', this.get('olMap').on('singleclick', this.placeMarker.bind(this)));
+    console.log('onclick added');
   },
   /**
    * @instance
@@ -127,6 +154,26 @@ var BufferModel = {
     } else {
       this.get('selectionModel').setActiveTool(name);
     }
+  },
+
+  placeMarker: function(event){
+
+    console.log('Running placeMarker');
+
+    if (this.get('marker') === undefined){
+      this.set('marker', new ol.Feature());
+      this.get('markerlayer').getSource().addFeature(this.get('marker'));
+    }
+
+    this.get('marker').setGeometry(new ol.geom.Point(event.coordinate));
+
+
+    //var test = ol.proj.transform(startPoint.getGeometry().getCoordinates(), 'EPSG:3007', 'EPSG:4326');
+    //console.log(test);
+    //var lonlat = startPoint.getGeometry().getCoordinates();
+    console.log('correct pos?');
+    console.log(this.get('marker').getGeometry().getCoordinates());
+    var lonlat = ol.proj.transform(this.get('marker').getGeometry().getCoordinates(), 'EPSG:3007', 'EPSG:4326');
   },
 
   isNumber: function (obj) {
@@ -155,6 +202,32 @@ var BufferModel = {
    */
   buffer: function() {
 
+    console.log('buffering');
+    if (this.get('marker') === undefined){
+      return false;
+    }
+
+    console.log('buffering2');
+    var lonlat = ol.proj.transform(this.get('marker').getGeometry().getCoordinates(), 'EPSG:3007', 'EPSG:4326');
+    console.log(lonlat);
+    var lon = lonlat[0];
+    var lat = lonlat[1];
+
+    console.log(this.get('bufferDist'));
+    var circle = new ol.geom.Circle(this.get('marker').getGeometry().getCoordinates(), Number(this.get('bufferDist')));
+
+    console.log('buffering3');
+    var circleFeature = new ol.Feature(circle);
+
+    console.log('buffering4');
+    this.get('bufferLayer').getSource().clear();
+    console.log('buffering5');
+    this.get('bufferLayer').getSource().addFeature(circleFeature);
+
+
+    console.log('buffering6');
+    return true;
+    /*
     const parser = new jsts.io.OL3Parser();
     const features = this.get('selectionModel').features
     const dist = this.get('bufferDist');
@@ -190,52 +263,66 @@ var BufferModel = {
     return olf;
   });
 
+    olGeom = ol.geom.Polygon.fromCircle(olGeom, 0b10000000);
+
     if (buffered) {
       this.get('bufferLayer').getSource().addFeatures(buffered);
-
-      console.log(buffered);
-      console.log('Creating variables and getting extent');
-      var extent = buffered[0].getGeometry().getExtent();
-
-      console.log('Getting layers');
-      var layers = this.get('olMap').getLayers().getArray();
-
-      console.log('filtering to vector layers');
-      var vectorLayers = layers.filter(layer =>
-        layer instanceof ol.layer.Vector &&
-        layer.getVisible() &&
-        layer.get('name') !== 'preview-layer' &&
-        layer.get('name') !== 'search-selection-layer'
-    );
-    console.log('have ' + vectorLayers.length + ' vector layers');
-      /*
-      vectorLayers = vectorLayers.map(layer =>
-        translateVector(layer.getSource().getFeaturesInExtent(extent))
-    ).filter(layer => layer.features.length > 0);
-    */
-
-      console.log('found following layers');
-      console.log(vectorLayers);
-
-      console.log('getting features');
-      var foundFeatures = [];
-      for(var i = 0; i < vectorLayers.length; i++){
-        console.log('trying to get from extent');
-        console.log(extent);
-        console.log(vectorLayers[i]);
-//        var f = vectorLayers[i].getSource().getFeaturesInExtent(extent);
-        var f = vectorLayers[i].getSource().getFeaturesInExtent(extent);
-        console.log('before concat');
-        foundFeatures.concat(f);
-      }
-
-      console.log(foundFeatures);
-      console.log('Found ' + foundFeatures.length + ' features in extent');
 
       return true;
     } else {
       return false;
     }
+    */
+  },
+
+  createWFSQuery: function(typeName, radius, coordStr){
+    var query = '<wfs:Query typeName=\'feature:' + typeName + '\' srsName=\'EPSG:3007\'>\n' +
+      '          <ogc:Filter>\n' +
+      '        \n' +
+      '        \n' +
+      '\t<ogc:DWithin>\n' +
+      '                <ogc:PropertyName>geom</ogc:PropertyName>\n' +
+      '                <gml:Point srsName="http://www.opengis.net/gml/srs/epsg.xml#3007"\n' +
+      '                    xmlns:gml="http://www.opengis.net/gml">\n' +
+      '                            <gml:coordinates decimal="." cs="," ts=" "> ' + coordStr + '</gml:coordinates>\n' +
+      '                </gml:Point>\n' +
+      '                <ogc:Distance units="meter">' + radius + '</ogc:Distance>\n' +
+      '            </ogc:DWithin>\n' +
+      '\n' +
+      '      \n' +
+      '          </ogc:Filter>\n' +
+      '         </wfs:Query>';
+    console.log(query);
+    return query;
+  },
+
+  getFeaturesWithinRadius: function(layers){
+
+    var requestPrefix = '<wfs:GetFeature\n' +
+    '         service = \'WFS\'\n' +
+    '         version = \'1.1.0\'\n' +
+    '         xmlns:wfs = \'http://www.opengis.net/wfs\'\n' +
+    '         xmlns:ogc = \'http://www.opengis.net/ogc\'\n' +
+    '         xmlns:gml = \'http://www.opengis.net/gml\'\n' +
+    '         xmlns:esri = \'http://www.esri.com\'\n' +
+    '         xmlns:xsi = \'http://www.w3.org/2001/XMLSchema-instance\'\n' +
+    '         xsi:schemaLocation=\'http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd\'\n' +
+    '         outputFormat="GML2"\n' +
+    '         maxFeatures="1000">\n';
+
+
+    var requestSuffix = '\n      </wfs:GetFeature>'
+
+    var queries = '';
+
+    for (var i = 0; i < layers.length; i++){
+      queries += this.createWFSQuery(layers[i], this.get('bufferDist'), coords);
+    }
+
+    var wfsRequset = requestPrefix + queries + requestSuffix;
+
+
+    // Do Ajax call
   },
 
   clearSelection: function() {
