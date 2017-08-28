@@ -80,10 +80,11 @@ var RoutingModel = {
   /* Get a current position from GPS(button right top)*/
   turnOnGPSClicked: function() {
 
-
-    if (positioning == undefined || !positioning) {
+    console.log('positioning is ' + (positioning ? 'true': 'false'));
+    if (positioning === undefined || !positioning) {
       this.getLocation();
-    } else{
+    }
+    else{
       this.set({
         position:{
           latitude: latitude,
@@ -121,6 +122,7 @@ var RoutingModel = {
   /* Choose a starting location on the map manually. and drop a pin */
   startPointSelection: function(event){
     console.log('Running startPointSelection');
+    positioning = false;
     var startPoint = new ol.Feature(); /* startPoint and point(below) must be the same l.134*/
     startPoint.setGeometry(new ol.geom.Point(event.coordinate));
   /* Convert Geometry to Coordinate */
@@ -329,7 +331,11 @@ var RoutingModel = {
   },
 
   setPositionEvent: function(event){
-    this.set("position", event.coords);
+    var pos = this.get('position');
+    pos.latitude = event.coords.latitude;
+    pos.longitude = event.coords.longitude;
+    this.set('position', pos);
+    console.log('position is now, ' + this.get('position'));
     this.setPosition();
   },
 
@@ -362,7 +368,7 @@ var RoutingModel = {
     var pos = this.get('position');
     if(pos.latitude === undefined || pos.longitude === undefined ||
   pos.latitudeEnd === undefined || pos.longitudeEnd === undefined){
-      console.log(pos, pos.latitude + ',' + pos.longi<tude + ',' + pos.latitudeEnd + ',' + pos.longitudeEnd);
+      console.log(pos, pos.latitude + ',' + pos.longitude + ',' + pos.latitudeEnd + ',' + pos.longitudeEnd);
       alert('Välj start och slut');
     } else {
       ol.Observable.unByKey(this.get('onEndKey'));

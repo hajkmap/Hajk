@@ -73,6 +73,8 @@ namespace MapService.Controllers
             //{
             //    sw.WriteLine("Received JSON. " + json);
             //}
+            byte[] data = Convert.FromBase64String(json);
+            json = System.Text.Encoding.UTF8.GetString(data);
             _log.DebugFormat("Received JSON: {0}" + json);
 
             MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);

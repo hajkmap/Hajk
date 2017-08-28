@@ -102,22 +102,24 @@ var LocationModel = {
   },
 
   configure: function (shell) {
-
     this.set('olMap', shell.getMap().getMap());
     this.get('olMap').addLayer(this.get('layer'));
 
     this.on('change:active', (e) => {
-      if (!this.get('active') && this.watchId) {
-        window.navigator.geolocation.clearWatch(this.watchId);
+      if (!this.get('active') || this.get('watchId') !== undefined) {
+        if (this.get('watchId') !== undefined) {
+          window.navigator.geolocation.clearWatch(this.get('watchId'));
+        }
+        this.set('watchId', undefined);
         this.reset();
-      } else {
-        this.watchId = window.navigator.geolocation.watchPosition(
-          (e) => { this.onLocationSucess(e) },
-          (e) => { this.onLocationError(e) },
-          this.getOptions()
-        );
-      }
-    });
+    } else {
+      this.set('watchId', window.navigator.geolocation.watchPosition(
+        (e) => { this.onLocationSucess(e) },
+      (e) => { this.onLocationError(e) },
+      this.getOptions()
+    ));
+    }
+  });
 
     this.on('change:location', () => { this.setLocation() });
 
@@ -171,6 +173,7 @@ var LocationModel = {
   },
 
   onLocationError: function(e) {
+    this.get('layer').getSource().clear();
     if(typeof this.get('location').lat == 'undefined') { // quick fix for the reoccuring errors in Firefox
       alert("Din position kan inte fastställas.");
       console.log('Positionsfel:');
@@ -199,7 +202,6 @@ var LocationModel = {
       'visible': !this.get('visible'),
       'active': !this.get('active')
     });
-    console.log('positioning is' + positioning);
   }
 };
 
