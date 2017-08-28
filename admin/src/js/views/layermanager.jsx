@@ -507,7 +507,6 @@ class Manager extends Component {
 
     e.preventDefault();
 
-    //console.log("Test", this.state.layerType + "LayerForm");
     var form = this.refs[this.state.layerType + "LayerForm"]
     ,   valid = form.validate()
     ,   layer = {}
@@ -521,8 +520,6 @@ class Manager extends Component {
     if (this.state.mode === "add") {
       layer.type = this.state.layerType;
       layer.id = null;
-      // console.log(layer);
-      // debugger;
       this.props.model.addLayer(layer, success => {
         this.whenLayerAdded(success,  layer.date);
       });
