@@ -650,7 +650,7 @@ class Menu extends Component {
       }
 
       var displayType = "";
-
+      
       switch(layer.type) {
         case 'WMS':
           displayType = "";
@@ -662,7 +662,10 @@ class Menu extends Component {
           displayType = "(ArcGIS)";
           break;
         case 'Vector':
-            displayType = "(Vektor)";
+          displayType = "(Vektor)";
+          break;
+        case 'WMS_Test':
+          displayType = "(Extended WMS)";
           break;
       }
 
