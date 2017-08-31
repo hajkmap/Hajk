@@ -556,25 +556,61 @@ class Menu extends Component {
   }
 
   /**
-   * skapar lager om l.type != "WMS_Test", annars skapas en grupp med layer.layer
+   * skapar ny grupp som populeras av layer.layer-noder om layers är truthy, annars skapas en lagernod.
    */
-  createLayer(l) {
-    if (l.type === "WMS_Test") {
-      //skapa grupp med lager här... på nåt sätt.
+  createLayer(id, layer) {
+    if (layer) {
+      if(layer.type === "WMS_Test") {
+        let layerName = this.getLayerNameFromId(layer.id);
+        let layerlayers = this.createLayerLayers(layer);
+        this.createLayerLayerGroup(layerName, true, false, layerlayers);
+      }
     } else {
-      var layerName = this.getLayerNameFromId(l.name);
-      var layer = $(`
-        <li
+      let layerName = this.getLayerNameFromId(id);
+      let layer = $(`<li
           class="layer-node"
           data-id=${id}
           data-type="layer">
           <span class="layer-name">${layerName}</span>
-        </li>
-      `);
+        </li>`);
+			$('.tree-view > ul').prepend(layer);
+			layer.editable(this);
     }
-    $('.tree-view > ul').prepend(layer);
-    layer.editable(this);
     this.forceUpdate();
+  }
+
+  createLayerLayers(layer) {
+    return layer.layers.map((layer) => {
+      return $(`<li class="layer-node not-sortable"
+                  data-id=${Math.round(Math.random() * 1E6)}
+                  data-type="layerlayer">
+                  <span class="layer-name">${layer.name}</span>        
+              </li>`);
+    });
+  }
+
+  createLayerLayerGroup(name, expanded, toggled, layerlayer) {
+    let id = this.createGuid();
+    //Huvudnode för grupplager
+    let group = $(`<li class="group-node"
+      data-id="${id}"
+      data-type="customgroup"
+      data-toggled="${toggled}"
+      data-expanded="${expanded}"
+      data-name="${name}">
+      <span class="group-name">${name}</span>
+    </li>`);
+    //grupplagerlista
+    let groupList = $(`<ul></ul>`);
+    //lägg till layers i grupplager listan
+    groupList.append(layerlayer);
+    //layerlayer.forEach((layer) => groupList.append(layer));
+
+    //Lägg till grupplagerlistan i gruppen
+    group.append(groupList);
+    //prepend:a grupp till listan av lager.
+    $('.tree-view > ul').prepend(group);
+    group.editable(this);
   }
 
   /**
@@ -592,8 +628,8 @@ class Menu extends Component {
         data-name="${name}">
         <span class="group-name">${name}</span>
         <ul></ul>
-      </li>`
-    );
+      </li>
+      `);
     $('.tree-view > ul').prepend(group);
     group.editable(this);
   }
@@ -602,7 +638,6 @@ class Menu extends Component {
    *
    */
   addLayerToMenu(id, layer, included) {
-    console.log(layer);
     if (included) {
       this.setState({
         alert: true,
@@ -614,10 +649,11 @@ class Menu extends Component {
       return;
     }
     if (layer.type === "WMS_Test") {
-      //do stuffz
-      this.createLayer(layer);
-    }
-    this.createLayer(id);
+      this.createLayer(id, layer);
+		}
+		else {
+			this.createLayer(id);
+		}
   }
 
   /**
@@ -683,7 +719,7 @@ class Menu extends Component {
           <span className={cls}></span>&nbsp;
           <span>{layer.caption} {displayType}</span>
         </li>
-      )
+      );
     });
   }
 
