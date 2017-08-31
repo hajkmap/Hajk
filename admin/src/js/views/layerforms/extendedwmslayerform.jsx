@@ -118,19 +118,19 @@ class ExtendedWMSLayerForm extends Component {
   }
 
   appendLayer(e, checkedLayer) {
+    console.log(e.target.checked);
     if (e.target.checked === true) {
       this.state.addedLayers.push({
         name: checkedLayer
       });
     } else {
       this.state.addedLayers = this.state.addedLayers.filter(layer => {
-        console.log("checkedLayer: ", checkedLayer.name);
-        console.log("layer.name: ", layer.name);
-        layer.name !== checkedLayer.name;
+        return layer.name !== checkedLayer;
       });
-      this.state.savedLayers = this.state.savedLayers.filter(layer => {
-        layer.name !== checkedLayer.name;
-      });
+      
+      // this.state.savedLayers = this.state.savedLayers.filter(layer => {
+      //   return layer.name !== checkedLayer;
+      // });
     }
     this.validateField('layers');
     this.forceUpdate();
@@ -143,7 +143,7 @@ class ExtendedWMSLayerForm extends Component {
         target: {
           checked: false
         }
-      }, layer);
+      }, layer.name);
       this.refs[layer.name].checked = false;
       this.validateField('layers');
     }
@@ -361,8 +361,7 @@ class ExtendedWMSLayerForm extends Component {
     if (fieldName === 'singleTile') value = input.checked;
     //if (fieldName === 'tiled') value = input.checked;
     if (fieldName === 'queryable') value = input.checked;
-    //if (fieldName === 'layers') value = this.state.addedLayers;
-    if (fieldName === 'layers') value = this.state.savedLayers;
+    if (fieldName === 'layers') value = this.state.addedLayers;
 
     return value;
   }
