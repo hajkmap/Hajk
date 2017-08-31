@@ -23,6 +23,7 @@
 const ToolModel = require('tools/tool');
 const SelectionModel = require('models/selection');
 
+
 /**
  * @typedef {Object} BufferModel~BufferModelProperties
  * @property {string} type -Default: Buffer
@@ -98,7 +99,10 @@ var BufferModel = {
 
     this.set('map', shell.getMap());
     this.set('olMap', shell.getMap().getMap());
-    this.set('layers', shell.getLayerCollection());
+    this.set('layersWithNames', shell.attributes.layers);
+    this.set('layersCollection', shell.getLayerCollection());
+    console.log('#################################### shell');
+    console.log(shell);
 
     this.set('bufferLayer', new ol.layer.Vector({
       source: new ol.source.Vector(),
@@ -135,9 +139,14 @@ var BufferModel = {
 
     // Move to onclick on the + button should be in .jsx
     console.log('adding on klick');
-    this.set('bufferMarkKey', this.get('olMap').on('singleclick', this.placeMarker.bind(this)));
+    //this.set('bufferMarkKey', this.get('olMap').on('singleclick', this.placeMarker.bind(this)));
     console.log('onclick added');
   },
+
+  activateBufferMarker: function(){
+    this.set('bufferMarkKey', this.get('olMap').on('singleclick', this.placeMarker.bind(this)));
+  },
+
   /**
    * @instance
    */
@@ -207,6 +216,40 @@ var BufferModel = {
       return false;
     }
 
+    ol.Observable.unByKey(this.get('bufferMarkKey'));
+
+    var notFeatureLayers = ['0', '1', '2', '3'];
+    var activeLayers = [];
+    console.log(this.get('layersCollection'));
+    console.log(this.get('layersCollection').length);
+    for(var i = 0; i < this.get('layersCollection').length; i++){
+      console.log('start of loop');
+      console.log(this.get('layersCollection'));
+      console.log(this.get('layersCollection').models[i]);
+      console.log(this.get('layersCollection').models[i].getVisible());
+      console.log('id');
+      console.log(this.get('layersCollection').models[i].id);
+      console.log(notFeatureLayers.indexOf(this.get('layersCollection').models[i].id));
+      if(this.get('layersCollection').models[i].getVisible() && notFeatureLayers.indexOf(this.get('layersCollection').models[i].id) == -1){
+        console.log('visible, real layer');
+        activeLayers.push(this.get('layersCollection').models[i]);
+      }
+    }
+    console.log(activeLayers);
+    var activeNames = [];
+    console.log('getting layer names');
+    for(var i = 0; i < activeLayers.length; i++){
+      console.log('for i');
+      for(var j = 0; j < this.get('layersWithNames').length; j++){
+        if(activeLayers[i].id == this.get('layersWithNames')[j].id){
+          activeNames.push(this.get('layersWithNames')[j].layers[0]);
+        }
+      }
+    }
+
+    console.log('activeNames');
+    console.log(activeNames);
+
     console.log('buffering2');
     var lonlat = ol.proj.transform(this.get('marker').getGeometry().getCoordinates(), 'EPSG:3007', 'EPSG:4326');
     console.log(lonlat);
@@ -226,53 +269,11 @@ var BufferModel = {
 
 
     console.log('buffering6');
+    // TODO: do return if activeNames is empty (length 0)
+
+    this.getFeaturesWithinRadius(activeNames);
+
     return true;
-    /*
-    const parser = new jsts.io.OL3Parser();
-    const features = this.get('selectionModel').features
-    const dist = this.get('bufferDist');
-
-    if (!this.isNumber(dist)) {
-      return false;
-    }
-
-    // map.getLayersByClass("OpenLayers.Layer.Vector")
-    // get all features
-    // for loop, find features within distance
-    // http://openlayers.org/en/master/examples/measure.html
-
-    var buffered = Object.keys(features).map(key => {
-
-        var feature = features[key]
-        ,   olf = new ol.Feature()
-        ,   olGeom = feature.getGeometry()
-        ,   jstsGeom
-        ,   buff
-    ;
-
-    if (olGeom instanceof ol.geom.Circle) {
-      olGeom = ol.geom.Polygon.fromCircle(olGeom, 0b10000000);
-    }
-
-    jstsGeom = parser.read(olGeom);
-    buff = jstsGeom.buffer(dist);
-    olf.setGeometry(parser.write(buff));
-    olf.setStyle(this.getDefaultStyle());
-    olf.setId(Math.random() * 1E20);
-
-    return olf;
-  });
-
-    olGeom = ol.geom.Polygon.fromCircle(olGeom, 0b10000000);
-
-    if (buffered) {
-      this.get('bufferLayer').getSource().addFeatures(buffered);
-
-      return true;
-    } else {
-      return false;
-    }
-    */
   },
 
   createWFSQuery: function(typeName, radius, coordStr){
@@ -292,7 +293,6 @@ var BufferModel = {
       '      \n' +
       '          </ogc:Filter>\n' +
       '         </wfs:Query>';
-    console.log(query);
     return query;
   },
 
@@ -315,14 +315,48 @@ var BufferModel = {
 
     var queries = '';
 
+    // One query per layer
     for (var i = 0; i < layers.length; i++){
-      queries += this.createWFSQuery(layers[i], this.get('bufferDist'), coords);
+      queries += this.createWFSQuery(layers[i], this.get('bufferDist'), this.get('marker').getGeometry().getCoordinates());
     }
 
     var wfsRequset = requestPrefix + queries + requestSuffix;
-
+    //console.log(wfsRequset);
 
     // Do Ajax call
+    $.ajax({
+      url: '/geoserver/varberg/wms',
+      contentType: 'text/xml',
+      crossDomain: true,
+      type: 'post',
+      data: wfsRequset,
+      success: result => {
+      this.putFeaturesInResult(result);
+      },
+      error: result => {
+        alert('Något gick fel');
+    }
+  })
+  },
+
+  putFeaturesInResult: function(res){
+    console.log('Inside putFeatuers');
+    console.log(res);
+
+    var featureMembers = res.getElementsByTagName('gml:featureMember');
+    console.log(featureMembers);
+
+    var foundFeatures = [];
+    var str = '';
+    for(var i = 0; i < featureMembers.length; i++){
+      var name = featureMembers[i].getElementsByTagName('varberg:namn')[0].innerHTML;
+      var coordinate = featureMembers[i].getElementsByTagName('gml:coordinates')[0].innerHTML;
+      foundFeatures.push([name, coordinate]);
+      str += name + '<br>';
+    }
+
+    document.getElementById('visibleLayerList').innerHTML = str;
+    this.set('foundFeatures', foundFeatures);
   },
 
   clearSelection: function() {

@@ -88,7 +88,7 @@ var BufferPanelView = {
           <div className="panel panel-default">
             <div className="panel-heading">Välj objekt</div>
             <div className="panel-body">
-              <button onClick={() => this.activateTool('multiSelect')} type="button" className={this.getClassNames('multiSelect')} title="Markera flera objekt">
+              <button onClick={() => this.props.model.activateBufferMarker()} type="button" className={this.getClassNames('multiSelect')} title="Markera flera objekt">
                 <i className="fa fa-plus icon"></i>
               </button>
               &nbsp;
@@ -141,6 +141,12 @@ var BufferPanelView = {
                 className="btn btn-primary">
                 Buffra
               </button>
+            </div>
+          </div>
+          <div className="panel panel-default">
+            <div className="panel-heading">WFS List</div>
+            <div className="panel-body">
+              <div id="visibleLayerList"></div>
             </div>
           </div>
           <div className="panel panel-default">
