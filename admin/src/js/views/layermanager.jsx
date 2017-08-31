@@ -25,7 +25,7 @@ import { Component } from "react";
 import $ from 'jquery';
 import Alert from "../views/alert.jsx";
 import WMSLayerForm from "./layerforms/wmslayerform.jsx"
-import WMSLayerFormTest from "./layerforms/wmslayerformtest.jsx"
+import ExtendedWMSLayerForm from "./layerforms/extendedwmslayerform.jsx"
 import WMTSLayerForm from "./layerforms/wmtslayerform.jsx"
 import ArcGISLayerForm from "./layerforms/arcgislayerform.jsx"
 import VectorLayerForm from "./layerforms/vectorlayerform.jsx"
@@ -236,14 +236,14 @@ class Manager extends Component {
 
     }
 
-    if (layer.type === "WMS_Test") {
+    if (layer.type === "ExtendedWMS") {
       this.setState({
         mode: "edit",
-        layerType: "WMS_Test"
+        layerType: "ExtendedWMS"
       });
 
       setTimeout(() => {
-        this.refs["WMSLayerFormTest"].setState({
+        this.refs["ExtendedWMSLayerForm"].setState({
           id: layer.id,
           caption: layer.caption,
           content: layer.content,
@@ -264,8 +264,8 @@ class Manager extends Component {
           layerType: layer.type
         });
 
-        this.refs["WMSLayerFormTest"].loadLayers(layer, () => {
-          this.refs["WMSLayerFormTest"].validate();
+        this.refs["ExtendedWMSLayerForm"].loadLayers(layer, () => {
+          this.refs["ExtendedWMSLayerForm"].validate();
         });
 
       }, 0);
@@ -431,8 +431,8 @@ class Manager extends Component {
         case 'WMS':
           displayType = "";
           break;
-        case 'WMS_Test':
-        displayType = "(extended WMS)";
+        case 'ExtendedWMS':
+        displayType = "(Extended WMS)";
         break;
         case 'WMTS':
           displayType = "(WMTS)";
@@ -574,9 +574,9 @@ class Manager extends Component {
             layer={this.state.layer}
             url={this.props.config.url_default_server} />
         )
-      case "WMS_Test":
-        return <WMSLayerFormTest
-          ref="WMS_TestLayerForm"
+      case "ExtendedWMS":
+        return <ExtendedWMSLayerForm
+          ref="ExtendedWMSLayerForm"
           model={this.props.model}
           layer={this.state.layer}
           parentView={this}
@@ -685,7 +685,7 @@ class Manager extends Component {
               <label>Välj lagertyp</label>
               <select disabled={typeSelectorDisabled} value={this.state.layerType} onChange={(e) => { this.setState({layerType: e.target.value}) }}>
                 <option>WMS</option>
-                <option>WMS_Test</option>
+                <option value="ExtendedWMS">Extended WMS</option>
                 <option>WMTS</option>
                 <option>ArcGIS</option>
                 <option value="Vector">Vektor</option>

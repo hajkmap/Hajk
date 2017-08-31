@@ -341,7 +341,7 @@ class Menu extends Component {
             data.wmtslayers.forEach(l => { l.type = "WMTS" });
             data.arcgislayers.forEach(l => { l.type = "ArcGIS" });
             data.vectorlayers.forEach(l => { l.type = "Vector" });
-            data.extendedwmslayers.forEach(l => { l.type = "WMS_Test"});
+            data.extendedwmslayers.forEach(l => { l.type = "ExtendedWMS"});
             layers = data.wmslayers
                       .concat(data.wmtslayers)
                       .concat(data.arcgislayers)
@@ -560,7 +560,7 @@ class Menu extends Component {
    */
   createLayer(id, layer) {
     if (layer) {
-      if(layer.type === "WMS_Test") {
+      if(layer.type === "ExtendedWMS") {
         let layerName = this.getLayerNameFromId(layer.id);
         let layerlayers = this.createLayerLayers(layer);
         this.createLayerLayerGroup(layerName, true, false, layerlayers);
@@ -648,7 +648,7 @@ class Menu extends Component {
       });
       return;
     }
-    if (layer.type === "WMS_Test") {
+    if (layer.type === "ExtendedWMS") {
       this.createLayer(id, layer);
 		}
 		else {
@@ -709,7 +709,7 @@ class Menu extends Component {
         case 'Vector':
           displayType = "(Vektor)";
           break;
-        case 'WMS_Test':
+        case 'ExtendedWMS':
           displayType = "(Extended WMS)";
           break;
       }
