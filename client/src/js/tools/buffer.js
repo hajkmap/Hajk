@@ -70,7 +70,7 @@ var BufferModel = {
   },
 
   getDefaultStyle: function () {
-    const color = 'rgba(255, 255, 0, 0.6)';
+    const color = 'rgba(90, 100, 115, 1.5)';
     const fill = 'rgba(255, 255, 255, 0.5)';
     return [
       new ol.style.Style({
@@ -144,7 +144,19 @@ var BufferModel = {
   },
 
   activateBufferMarker: function(){
-    this.set('bufferMarkKey', this.get('olMap').on('singleclick', this.placeMarker.bind(this)));
+    if (this.get('bufferMarkKey') == undefined) {
+      console.log('activating');
+      this.set('bufferMarkKey', this.get('olMap').on('singleclick', this.placeMarker.bind(this)));
+    }
+  },
+
+  deActivateBufferMarker: function(){
+    console.log('trying to deactivagte');
+    if(this.get('bufferMarkKey') !== undefined) {
+      console.log('deactivating');
+      ol.Observable.unByKey(this.get('bufferMarkKey'));
+      this.set('bufferMarkKey', undefined);
+    }
   },
 
   /**
@@ -216,30 +228,28 @@ var BufferModel = {
       return false;
     }
 
-    ol.Observable.unByKey(this.get('bufferMarkKey'));
+    this.deActivateBufferMarker();
 
-    var notFeatureLayers = ['0', '1', '2', '3'];
+    var notFeatureLayers = ['150', '160', '170', '410', '420', '430', '440', '260', '310', '350', '360', '250', '230', '340', '330'];
     var activeLayers = [];
     console.log(this.get('layersCollection'));
     console.log(this.get('layersCollection').length);
     for(var i = 0; i < this.get('layersCollection').length; i++){
-      console.log('start of loop');
+      /*console.log('start of loop');
       console.log(this.get('layersCollection'));
       console.log(this.get('layersCollection').models[i]);
       console.log(this.get('layersCollection').models[i].getVisible());
       console.log('id');
       console.log(this.get('layersCollection').models[i].id);
-      console.log(notFeatureLayers.indexOf(this.get('layersCollection').models[i].id));
-      if(this.get('layersCollection').models[i].getVisible() && notFeatureLayers.indexOf(this.get('layersCollection').models[i].id) == -1){
+      console.log(notFeatureLayers.indexOf(this.get('layersCollection').models[i].id)); */
+      if(this.get('layersCollection').models[i].getVisible() && notFeatureLayers.indexOf(this.get('layersCollection').models[i].id) != -1){
         console.log('visible, real layer');
         activeLayers.push(this.get('layersCollection').models[i]);
       }
     }
-    console.log(activeLayers);
+
     var activeNames = [];
-    console.log('getting layer names');
     for(var i = 0; i < activeLayers.length; i++){
-      console.log('for i');
       for(var j = 0; j < this.get('layersWithNames').length; j++){
         if(activeLayers[i].id == this.get('layersWithNames')[j].id){
           activeNames.push(this.get('layersWithNames')[j].layers[0]);
@@ -269,7 +279,12 @@ var BufferModel = {
 
 
     console.log('buffering6');
-    // TODO: do return if activeNames is empty (length 0)
+
+    document.getElementById('visibleLayerList').innerHTML = '';
+    if(activeNames.length == 0){
+      return true;
+    }
+
 
     this.getFeaturesWithinRadius(activeNames);
 
@@ -336,7 +351,7 @@ var BufferModel = {
       error: result => {
         alert('Något gick fel');
     }
-  })
+  });
   },
 
   putFeaturesInResult: function(res){
@@ -346,25 +361,62 @@ var BufferModel = {
     var featureMembers = res.getElementsByTagName('gml:featureMember');
     console.log(featureMembers);
 
-    var foundFeatures = [];
+    var foundFeatures = {};
     var str = '';
+    console.log('tags');
     for(var i = 0; i < featureMembers.length; i++){
-      var name = featureMembers[i].getElementsByTagName('varberg:namn')[0].innerHTML;
+      var nameTag = featureMembers[i].getElementsByTagName('varberg:namn')[0];
+      console.log(nameTag);
+      var name = nameTag.innerHTML;
+      console.log('1');
+      var categoryName = nameTag.parentElement.localName;
+
+      console.log('2');
       var coordinate = featureMembers[i].getElementsByTagName('gml:coordinates')[0].innerHTML;
-      foundFeatures.push([name, coordinate]);
-      str += name + '<br>';
+      if (!(categoryName in foundFeatures)){
+        foundFeatures[categoryName] = [];
+      }
+      foundFeatures[categoryName].push([name, coordinate]);
+    }
+    console.log('3');
+    var categories = Object.keys(foundFeatures);
+    categories.sort();
+
+    console.log('4');
+    var categoryPrefix = '<div class="panel panel-default layer-item"><div class="panel-heading unselectable"><label class="layer-item-header-text">';
+    var endCategoryToStartLayers = '</label></div><div class="panel-body"><div class="legend"><div>';
+    var categorySuffix = '</div></div></div></div>';
+
+    var geoserverNameToCategoryName = {
+      'forskolor': 'Förskola',
+      'grundskolor': 'Grundskola',
+    };
+
+    for(var i = 0; i < categories.length; i++){
+      str += categoryPrefix;
+      str += categories[i];
+      str += endCategoryToStartLayers;
+      var features = foundFeatures[categories[i]];
+      console.log('5');
+      features.sort();
+      for(var j=0; j < features.length; j++){
+console.log('6');
+        str += features[j][0] + '<br>';
+      }
+      str += categorySuffix;
     }
 
+    console.log('7');
     document.getElementById('visibleLayerList').innerHTML = str;
     this.set('foundFeatures', foundFeatures);
   },
 
-  clearSelection: function() {
-    this.get('selectionModel').clearSelection();
-  },
-
   clearBuffer: function() {
+    this.deActivateBufferMarker();
     this.get('bufferLayer').getSource().clear();
+    this.get('markerlayer').getSource().clear();
+    this.set('marker', undefined);
+    document.getElementById('visibleLayerList').innerHTML = '';
   },
 
   /**

@@ -86,23 +86,15 @@ var BufferPanelView = {
             Detta verktyg skapar en zon med angivet avstånd runt valda objekt i kartan.
           </p>
           <div className="panel panel-default">
-            <div className="panel-heading">Välj objekt</div>
+            <div className="panel-heading">Sätt ut mittpunkt</div>
             <div className="panel-body">
               <button onClick={() => this.props.model.activateBufferMarker()} type="button" className={this.getClassNames('multiSelect')} title="Markera flera objekt">
                 <i className="fa fa-plus icon"></i>
               </button>
-              &nbsp;
-              <span
-                onClick={() => {
-                  this.props.model.clearSelection();
-                }}
-                className="btn btn-link">
-                Rensa selektering
-              </span>
             </div>
           </div>
           <div className="panel panel-default">
-            <div className="panel-heading">Ange buffertavstånd</div>
+            <div className="panel-heading">Ange avstånd från mittpunkt</div>
             <div className="panel-body">
               <input
                 id="buff-dist"
@@ -144,13 +136,13 @@ var BufferPanelView = {
             </div>
           </div>
           <div className="panel panel-default">
-            <div className="panel-heading">WFS List</div>
+            <div className="panel-heading">Objekt inom buffert</div>
             <div className="panel-body">
               <div id="visibleLayerList"></div>
             </div>
           </div>
           <div className="panel panel-default">
-            <div className="panel-heading">Rensa kartan från buffrade objekt</div>
+            <div className="panel-heading">Rensa kartan från buffert</div>
             <div className="panel-body">
               <button
                 onClick={() => this.props.model.clearBuffer()}
