@@ -20,6 +20,8 @@
 //
 // https://github.com/hajkmap/Hajk
 
+"use strict";
+
 var ToolModel = require('tools/tool');
 var transform = require('models/transform');
 
@@ -338,21 +340,27 @@ var ExportModel = {
     }
 
     function rgbToHex(rgbString) {
-      const matches = /rgb(a)?\((\d+), (\d+), (\d+)(, \d+)?\)/.exec(rgbString);
+      const matches = /rgb(a)?\((\d+), (\d+), (\d+)(, [\d\.]+)?\)/.exec(rgbString);
       if (matches !== null) {
         let r = parseInt(matches[2]);
         let g = parseInt(matches[3]);
         let b = parseInt(matches[4]);
         let a = parseInt(matches[5]);
         return a
-          ? null
-          : ("#" + componentToHex(r) + componentToHex(g) + componentToHex(b));
+        ? null
+        : ("#" + componentToHex(r) + componentToHex(g) + componentToHex(b));
       } else {
         return null;
       }
     }
 
     function asObject(style) {
+
+      function olColorToHex(olColor) {
+        var colorString = olColor.join(', ');
+        var hex = rgbToHex(`rgba(${colorString})`);
+        return hex;
+      }
 
       if (!style) return null;
 
@@ -366,32 +374,40 @@ var ExportModel = {
       }
 
       var fillColor = "#FC345C"
-        ,   fillOpacity = 0.5
-        ,   strokeColor = "#FC345C"
-        ,   strokeOpacity = 1
-        ,   strokeWidth = 3
-        ,   strokeLinecap = "round"
-        ,   strokeDashstyle = "solid"
-        ,   pointRadius = 10
-        ,   pointFillColor = "#FC345C"
-        ,   pointSrc = ""
-        ,   labelAlign = "cm"
-        ,   labelOutlineColor = "white"
-        ,   labelOutlineWidth = 3
-        ,   fontSize = "16"
-        ,   fontColor = "#FFFFFF"
-        ,   fontBackColor = "#000000";
+      ,   fillOpacity = 0.5
+      ,   strokeColor = "#FC345C"
+      ,   strokeOpacity = 1
+      ,   strokeWidth = 3
+      ,   strokeLinecap = "round"
+      ,   strokeDashstyle = "solid"
+      ,   pointRadius = 10
+      ,   pointFillColor = "#FC345C"
+      ,   pointSrc = ""
+      ,   labelAlign = "cm"
+      ,   labelOutlineColor = "white"
+      ,   labelOutlineWidth = 3
+      ,   fontSize = "16"
+      ,   fontColor = "#FFFFFF"
+      ,   fontBackColor = "#000000";
 
-      if (style.getText && style.getText()) {
-        fontSize = style.getText().getFont().match(/^\d+/)[0];
+      if (style.getText && style.getText() && style.getText().getFont && style.getText().getFont()) {
+        fontSize = style.getText().getFont().match(/\d+/)[0];
       }
 
-      if (style.getText && style.getText() && style.getFill && style.getFill()) {
-        fontColor = style.getText().getFill().getColor();
+      if (style.getText && style.getText() && style.getText().getFill && style.getText().getFill()) {
+        if (typeof style.getText().getFill().getColor() === "string") {
+          fontColor = style.getText().getFill().getColor();
+        } else if (Array.isArray(style.getText().getFill().getColor())) {
+          fontColor = olColorToHex(style.getText().getFill().getColor());
+        }
       }
 
-      if (style.getText && style.getText() && style.getStroke && style.getStroke()) {
-        fontBackColor = style.getText().getStroke().getColor();
+      if (style.getText && style.getText() && style.getText().getStroke && style.getText().getStroke()) {
+        if (typeof style.getText().getFill().getColor() === "string") {
+          fontBackColor = style.getText().getStroke().getColor();
+        } else if (Array.isArray(style.getText().getStroke().getColor())) {
+          fontBackColor = olColorToHex(style.getText().getStroke().getColor());
+        }
       }
 
       if (fontColor && /^rgb/.test(fontColor)) {
@@ -407,13 +423,24 @@ var ExportModel = {
       }
 
       if (style.getFill && style.getFill() && style.getFill().getColor()) {
-        fillColor = style.getFill().getColor().toHex();
-        fillOpacity = style.getFill().getColor().toOpacity();
+
+        if (style.getFill().getColor().toHex) {
+          fillColor = style.getFill().getColor().toHex();
+          fillOpacity = style.getFill().getColor().toOpacity();
+        } else if (Array.isArray(style.getFill().getColor())) {
+          fillColor = olColorToHex(style.getFill().getColor());
+          fillOpacity = style.getFill().getColor()[style.getFill().getColor().length - 1];
+        }
       }
 
       if (style.getFill && style.getStroke()) {
 
-        strokeColor = style.getStroke().getColor().toHex();
+        if (style.getStroke().getColor().toHex) {
+          strokeColor = style.getStroke().getColor().toHex();
+        } else if (Array.isArray(style.getStroke().getColor())) {
+          strokeColor = olColorToHex(style.getStroke().getColor())
+        }
+
         strokeWidth = style.getStroke().getWidth() || 3;
         strokeLinecap = style.getStroke().getLineCap() || "round";
         strokeDashstyle = style.getStroke().getLineDash() ?
@@ -466,9 +493,12 @@ var ExportModel = {
       }
     }
 
-    function translateVector(features, sourceStyle) {
+    function translateVector(features, layer) {
 
       function getText(feature) {
+
+        var text = "";
+
         if (feature.getProperties() &&
           feature.getProperties().type === "Text") {
           if (feature.getProperties().description)
@@ -479,13 +509,23 @@ var ExportModel = {
             text = ''
           return text
         }
+
         if (feature.getStyle &&
           Array.isArray(feature.getStyle()) &&
           feature.getStyle()[1] &&
           feature.getStyle()[1].getText() &&
           feature.getStyle()[1].getText().getText()) {
-          return feature.getStyle()[1].getText().getText();
+          text = feature.getStyle()[1].getText().getText();
         }
+
+        if (feature.getStyle &&
+            feature.getStyle() &&
+            feature.getStyle().getText &&
+            feature.getStyle().getText()) {
+          text = feature.getStyle().getText().getText();
+        }
+
+        return text;
       }
 
       return {
@@ -496,9 +536,18 @@ var ExportModel = {
           ,   holes = null
           ,   coords;
 
-      if (!feature.getStyle() && sourceStyle) {
-        feature.setStyle(sourceStyle)
-      }
+          if (!feature.getStyle() && layer) {
+            let sourceStyle = layer.getSource().getStyle()(feature)[0];
+            feature.setStyle(sourceStyle)
+          }
+
+          coords = type === "Circle"
+          ? as2DPairs([geom.getCenter(), [geom.getRadius(), 0]], "Circle")
+          : as2DPairs(geom.getCoordinates(), type);
+
+          if (type === "MultiPolygon") {
+            holes = geom.getCoordinates()[0].slice(1, geom.getCoordinates()[0].length);
+          }
 
       coords = type === "Circle"
         ? as2DPairs([geom.getCenter(), [geom.getRadius(), 0]], "Circle")
@@ -546,9 +595,11 @@ var ExportModel = {
       translateVector(layer.getSource().getFeaturesInExtent(extent))
     ).filter(layer => layer.features.length > 0);
 
-    imageVectorLayers = imageVectorLayers.map(layer =>
-      translateVector(layer.getSource().getSource().getFeaturesInExtent(extent), layer.getSource().getStyle()()[0])
-    ).filter(layer => layer.features.length > 0);
+    imageVectorLayers = imageVectorLayers.map(layer => {
+
+      return translateVector(layer.getSource().getSource().getFeaturesInExtent(extent), layer)
+
+    }).filter(layer => layer.features.length > 0);
 
     return vectorLayers.concat(imageVectorLayers);
   },
@@ -713,8 +764,8 @@ var ExportModel = {
     dy = Math.abs(bottom - top);
 
     data.size = [
-      parseInt(49.65 * (dx / scale) * dpi),
-      parseInt(49.65 * (dy / scale) * dpi)
+      parseInt(options.size.width * dpi),
+      parseInt(options.size.height * dpi)
     ];
 
     data.bbox = [left, right, bottom, top];
@@ -797,7 +848,13 @@ var ExportModel = {
         format: "json",
         success: (url) => {
         this.set("downloadingTIFF", false);
-    this.set("urlTIFF", url);
+        this.set("urlTIFF", url);
+      },
+      error: (err) => {
+        this.set("downloadingTIFF", false);
+        alert("Det gick inte att skapa tiff. Försök igen senare.");
+      }
+    });
   },
     error: (err) => {
       this.set("downloadingTIFF", false);

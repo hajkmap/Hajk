@@ -115,6 +115,7 @@ var StreetViewModel = {
     google.maps.event.addListener(panorama, 'position_changed', () => { this.onPositionChanged() });
     google.maps.event.addListener(panorama, 'pov_changed', () => { this.onPositionChanged() });
     this.set('location', location);
+    this.set('location', location);
   },
 
   /**
@@ -180,11 +181,11 @@ var StreetViewModel = {
       return;
 
     var x = panorama.getPosition().lng()
-      ,	  y = panorama.getPosition().lat()
-      ,	  b = panorama.getPov().heading
-      ,	  l = [x, y]
-      ,   p = this.get('olMap').getView().getProjection()
-      ,   c = ol.proj.transform(l, "EPSG:4326", p);
+    ,	  y = panorama.getPosition().lat()
+    ,	  b = panorama.getPov().heading
+    ,	  l = [x, y]
+    ,   p = this.get('olMap').getView().getProjection()
+    ,   c = ol.proj.transform(l, "EPSG:4326", p);
 
     this.addMarker(c, b);
   },

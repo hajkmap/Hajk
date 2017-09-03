@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,7 @@ using System.Web.Hosting;
 using System.Drawing.Imaging;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using PdfSharp;
 
 namespace MapService.Components
 {
@@ -83,7 +85,7 @@ namespace MapService.Components
             PdfDocument document = new PdfDocument();
             PdfPage page = document.AddPage();
 
-            page.Size = exportItem.format == "A4" ? PdfSharp.PageSize.A4 : PdfSharp.PageSize.A3;
+            page.Size = GetPageSize(exportItem);
             page.Orientation = exportItem.orientation == "L" ? PdfSharp.PageOrientation.Landscape : PdfSharp.PageOrientation.Portrait;
 
             XGraphics gfx = XGraphics.FromPdfPage(page);
@@ -120,8 +122,8 @@ namespace MapService.Components
                         {250000, 10000}
                     };
 
-            int displayLength = (int)(unitLength * scaleBarLengths.FirstOrDefault(a => a.Key == scale).Value);
-            string displayText = scaleBarTexts.FirstOrDefault(a => a.Key == scale).Value;
+            int displayLength = GetDisplayLength(unitLength, scaleBarLengths, scale);
+            string displayText = GetDisplayText(unitLength, scaleBarTexts, scale);
 
             // adding support for different layouts
             int layout = ConfigurationManager.AppSettings["exportLayout"] != null ? int.Parse(ConfigurationManager.AppSettings["exportLayout"]) : 1;
@@ -206,6 +208,48 @@ namespace MapService.Components
             }
 
             return null;
+        }
+
+        private int GetDisplayLength(double unitLength, Dictionary<int, int> scaleBarLengths, int scale)
+        {
+            int scaleBarLength = 0;
+            if (scaleBarLengths.TryGetValue(scale, out scaleBarLength))
+            {
+                return (int) (unitLength * scaleBarLength);
+            }
+            if (scale <= 500)
+            {
+                return (int) (unitLength * (scale / 10));
+            }
+            return (int)(unitLength * (scale * 0.05)); 
+
+        }
+
+        private string GetDisplayText(double unitLength, Dictionary<int, string> scaleBarTexts, int scale)
+        {
+            string scaleBarText = "";
+            if (scaleBarTexts.TryGetValue(scale, out scaleBarText))
+            {
+                return scaleBarText;
+            }
+            if (scale <= 500) {
+                return unitLength * (scale / 10) + " m";
+            }
+            if (scale < 25000)
+            {
+                return Math.Ceiling(scale * 0.05) + " m";
+            }
+            return Math.Ceiling(scale * 0.05 / 1000) + " km";
+        }
+          
+        private PageSize GetPageSize(MapExportItem exportItem)
+        {
+            PageSize p;
+            if (Enum.TryParse(exportItem.format, true, out p))
+            {
+                return p;
+            }
+            throw new ApplicationException("Unknown page size");
         }
 
         /// <summary>

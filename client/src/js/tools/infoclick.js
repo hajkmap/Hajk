@@ -269,14 +269,14 @@ var InfoClickModel = {
    * @instance
    * @param {DOMelement} elm
    */
-  enableScroll: function (elm) {    
-    if (this.isTouchDevice()){      
-      var scrollStartPos = 0;      
+  enableScroll: function (elm) {
+    if (this.isTouchDevice()){
+      var scrollStartPos = 0;
       elm.addEventListener("touchstart", function(event) {
-        scrollStartPos = this.scrollTop + event.touches[0].pageY;                
-      }, false);      
+        scrollStartPos = this.scrollTop + event.touches[0].pageY;
+      }, false);
       elm.addEventListener("touchmove", function(event) {
-        this.scrollTop = scrollStartPos - event.touches[0].pageY;                    
+        this.scrollTop = scrollStartPos - event.touches[0].pageY;
       }, false);
     }
   },
@@ -307,15 +307,15 @@ var InfoClickModel = {
     infos.forEach((info, i) => {
         function display(index, inf) {
 
-          var coords    = inf.feature.getGeometry().getCoordinates()
+          var coords    = inf.feature.getGeometry() ? inf.feature.getGeometry().getCoordinates() : false
           ,   position  = coordinate
           ,   feature   = new Backbone.Model()
           ,   infobox   = $('<div></div>')
-          ,   caption   = $(`<div> ${index + 1} av ${infos.length} </div>`)
+          ,   caption   = $(`<div class="popup-navigation"> ${index + 1} av ${infos.length} </div>`)
           ,   next      = $('<span class="fa fa-btn fa-arrow-circle-o-right"></span>')
           ,   prev      = $('<span class="fa fa-btn fa-arrow-circle-o-left"></span>')
-          ,   title     = $(`<div id="popup-title">${inf.information.caption}</div>`)
-          ,   content   = $(`<div></div>`)
+          ,   title     = $(`<div class="popup-title">${inf.information.caption}</div>`)
+          ,   content   = $(`<div id="popup-content-text"></div>`)
           ,   markdown  = ""
           ,   offsetY   = 0
           ,   html      = "";
@@ -331,7 +331,6 @@ var InfoClickModel = {
             markdown = inf.information.information;
           }
           html = marked(markdown, { sanitize: false, gfm: true, breaks: true });
-
           content.html(html);
 
           if (coords = isPoint(coords)) {
@@ -345,16 +344,17 @@ var InfoClickModel = {
           }
 
           infobox.append(title, content);
-          $('#popup-content').show().html(infobox).scrollTop(0);
+          $('#popup-content').show().html(infobox);
 
           if (this.isTouchDevice()) {
-            this.enableScroll($('#popup-content')[0]);
+            this.enableScroll($('#popup-content-text')[0]);
+            $('#popup-content-text').scrollTop(0);
           }
 
-          if (isPoint(coords)) {  
-            offsetY = this.get('popupOffsetY');    
+          if (isPoint(coords)) {
+            offsetY = this.get('popupOffsetY');
           }
-                    
+
           ovl.setPosition(position);
           ovl.setOffset([0, offsetY]);
 

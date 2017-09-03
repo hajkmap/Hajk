@@ -131,9 +131,9 @@ namespace MapService.DataAccess
         /// </summary>
         /// <param name="id"></param>
         /// <param name="layers"></param>
-        private void removeLayer(string id, List<string> layers)
+        private void removeLayer(string id, List<MapWMSLayerInfo> layers)
         {                
-            var layer = layers.FirstOrDefault(l => l == id);
+            var layer = layers.FirstOrDefault(l => l.id == id);
             if (layer != null)
             {
                 layers.Remove(layer);
@@ -538,6 +538,7 @@ namespace MapService.DataAccess
                 layerConfig.wfstlayers.ForEach((layer) => layers.Add(layer));
                 layerConfig.wmslayers.ForEach((layer) => layers.Add(layer));
                 layerConfig.wmtslayers.ForEach((layer) => layers.Add(layer));
+                layerConfig.vectorlayers.ForEach((layer) => layers.Add(layer));
 
                 MapConfig mapConfig = this.readMapConfigFromFile(mapFile);
                 Tool layerSwitcher = mapConfig.tools.Find(a => a.type == "layerswitcher");
@@ -550,9 +551,9 @@ namespace MapService.DataAccess
 
                     for (int i = 0; i < options.baselayers.Count; i++)
                     {
-                        if (options.baselayers[i] == oldLayerId)
+                        if (options.baselayers[i].id == oldLayerId)
                         {
-                            options.baselayers[i] = newLayerId.ToString();
+                            options.baselayers[i].id = newLayerId.ToString();
                         }
                     }
 

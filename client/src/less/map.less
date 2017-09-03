@@ -56,12 +56,20 @@
   border-radius: 2px 2px 0 0;
 }
 
-#popup-content {
+.popup-title {
+  font-weight: bold;
+  font-size: 12pt;
+  border-bottom: 1px solid #DEDEDE;
+}
+
+#popup-content-text {
   max-height: 250px;
-  margin-right: -9px;
+  margin-right: 0px;
   margin-top: 7px;
   overflow: auto;
   font-size: 14px;
+  box-shadow: inset 0px 0px 3px 2px rgba(0, 0, 0, 0.1);
+  padding: 0 5px;
 }
 #popup-title {
   background-color: #1ea5cd;
@@ -71,6 +79,10 @@
   text-align: center;
 }
 
+.popup-navigation {
+  font-size: 14pt;
+}
+
 @media only screen and (max-device-width : 680px) {
   .ol-popup {
     position: fixed;
@@ -78,16 +90,19 @@
     top: 7px;
     left: 7px;
     right: 7px;
-    bottom: 50%;
+    max-height: 364px;
     z-index: 1000;
     #popup-content {
       max-height: inherit;
-      height: 100%;      
-      overflow: auto;      
+      height: 100%;
+      overflow: auto;
+      #popup-content-text {
+        max-height: 300px;
+      }
       img {
         width: 100%;
       }
-    }    
+    }
   }
   .ol-popup:before,
   .ol-popup:after {

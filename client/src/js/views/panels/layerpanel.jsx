@@ -305,7 +305,7 @@ var LayerPanelView = {
           <div>
             <span className={buttonClassName} onClick={this.toggleGroupVisibility.bind(this, group)}></span>
             {toggleGroup}
-            <label style={{cursor: 'pointer', 'marginLeft': '4px'}} onClick={this.toggleGroupVisibility.bind(this, group)}>{group.name}</label>
+            <label style={{cursor: 'pointer', 'marginLeft': '4px'}} ref={group.id} onClick={this.toggleGroupVisibility.bind(this, group)} id={group.id}>{group.name}</label>
           </div>
           <div className={this.state[id]}>
             {layers}

@@ -79,23 +79,6 @@ var WmtsLayer = {
     }));
   },
 
-  /**
-   * Create attribution array
-   * @instance
-   * @return {Array<external:"ol.Attribution">} attributions
-   */
-  getAttributions: function() {
-    var attributions = [];
-    if (this.get('attribution')) {
-      attributions.push(
-        new ol.Attribution({
-          html: this.get('attribution')
-        })
-      );
-    }    
-    return attributions;
-  },
-
   initialize: function () {
     LayerModel.prototype.initialize.call(this);
     this.set('resolutions', this.get('resolutions').map(r => Number(r)));
@@ -119,7 +102,8 @@ var WmtsLayer = {
         tileGrid: new ol.tilegrid.WMTS({
           origin: this.get('origin'),
           resolutions: this.get('resolutions'),
-          matrixIds: this.get('matrixIds')
+          matrixIds: this.get('matrixIds'),
+          extent: this.get('extent')
         })
       })
     });

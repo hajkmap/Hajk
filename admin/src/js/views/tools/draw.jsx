@@ -26,8 +26,10 @@ import { Component } from "react";
 var defaultState = {
   validationErrors: [],
   active: false,
+  index: 0,
   exportUrl: "/mapservice/export/kml",
-  importUrl: "/mapservice/import/kml"
+  importUrl: "/mapservice/import/kml",
+  icons: ""
 };
 
 class ToolOptions extends Component {
@@ -45,8 +47,10 @@ class ToolOptions extends Component {
     if (tool) {
       this.setState({
         active: true,
+        index: tool.index,
         exportUrl: tool.options.exportUrl,
-        importUrl: tool.options.importUrl
+        importUrl: tool.options.importUrl,
+        icons: tool.options.icons
       });
     } else {
       this.setState({
@@ -93,6 +97,7 @@ class ToolOptions extends Component {
     this.props.model.get('toolConfig').forEach(t => {
       if (t.type === this.type) {
         t.options = tool.options;
+        t.index = tool.index;
       }
     });
   }
@@ -101,9 +106,11 @@ class ToolOptions extends Component {
 
     var tool = {
       "type": this.type,
+      "index": this.state.index,
       "options": {
         exportUrl: this.state.exportUrl,
-        importUrl: this.state.importUrl
+        importUrl: this.state.importUrl,
+        icons: this.state.icons
       }
     };
 
@@ -164,12 +171,25 @@ class ToolOptions extends Component {
             <label htmlFor="active">Aktiverad</label>
           </div>
           <div>
+            <label htmlFor="index">Sorteringsordning</label>
+            <input
+              id="index"
+              name="index"
+              type="text"
+              onChange={(e) => {this.handleInputChange(e)}}
+              value={this.state.index}/>
+          </div>
+          <div>
             <label htmlFor="exportUrl">URL till export-tjänst</label>
             <input value={this.state.exportUrl} type="text" name="exportUrl" onChange={(e) => {this.handleInputChange(e)}}></input>
           </div>
           <div>
             <label htmlFor="importUrl">URL till import-tjänst</label>
             <input value={this.state.importUrl} type="text" name="importUrl" onChange={(e) => {this.handleInputChange(e)}}></input>
+          </div>
+          <div>
+            <label htmlFor="icons">Ikoner</label>
+            <input value={this.state.icons} type="text" name="icons" onChange={(e) => {this.handleInputChange(e)}}></input>
           </div>
         </form>
       </div>

@@ -91,6 +91,7 @@ var MapModel = {
       interactions: ol.interaction.defaults().extend([new Drag()]),
       target: this.get("target"),
       layers: [ ],
+      logo: false,
       controls: [
         new ol.control.Zoom({ zoomInTipLabel: 'Zooma in', zoomOutTipLabel: 'Zooma ut' }),
         new ol.control.Attribution({ collapsible: false }),

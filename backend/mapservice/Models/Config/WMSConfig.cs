@@ -45,5 +45,15 @@ namespace MapService.Models.Config
         public string serverType { get; set; }
 
         public string attribution { get; set; }
+
+        public string searchUrl { get; set; }
+
+        public string searchPropertyName { get; set; }
+
+        public string searchDisplayName { get; set; }
+
+        public string searchOutputFormat { get; set; }
+
+        public string searchGeometryField { get; set; }
     }
 }

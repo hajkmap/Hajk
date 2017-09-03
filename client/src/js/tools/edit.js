@@ -488,7 +488,10 @@ var EditModel = {
        style: this.getStyle()
     }));
 
-    this.set('layer', new ol.layer.Image({source: this.get('imageSource')}));
+    this.set('layer', new ol.layer.Image({
+      source: this.get('imageSource'),
+      name: "edit-layer"    
+    }));
     this.get('map').addLayer(this.get('layer'));
 
     if (!this.get('select')) {

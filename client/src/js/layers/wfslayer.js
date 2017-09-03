@@ -37,7 +37,8 @@ module.exports = LayerModel.extend({
       outputFormat: "",
       srsname: "",
       bbox: ""
-    }
+    },
+    showLabels: true
   },
 
   featureMap: {},
@@ -101,7 +102,7 @@ module.exports = LayerModel.extend({
     });
   },
 
-  getStyle: function (feature) {
+  getStyle: function (feature, resolution) {
 
     const icon = this.get("icon");
     const fillColor = this.get("fillColor");
@@ -110,6 +111,19 @@ module.exports = LayerModel.extend({
     const lineWidth = this.get("lineWidth");
     const symbolXOffset = this.get("symbolXOffset");
     const symbolYOffset = this.get("symbolYOffset");
+    const rotation = 0.0
+    const align = this.get("labelAlign") || "center";
+    const baseline = this.get("labelBaseline") || "alphabetic";
+    const size = this.get("labelSize") || "12px";
+    const offsetX = this.get("labelOffsetX") || 0;
+    const offsetY = this.get("labelOffsetY") || 0;
+    const weight = this.get("labelWeight") || "normal";
+    const font = weight + ' ' + size + ' ' + (this.get('labelFont') || "Arial");
+    const labelFillColor = this.get("labelFillColor") || "#000000";
+    const outlineColor = this.get("labelOutlineColor") || "#FFFFFF";
+    const outlineWidth = this.get("labelOutlineWidth") || 3;
+    const labelAttribute = this.get("labelAttribute") || "Name";
+    const showLabels = this.get('showLabels');
 
     function getLineDash() {
         var scale = (a, f) => a.map(b => f * b)
@@ -132,7 +146,45 @@ module.exports = LayerModel.extend({
       return new ol.style.Fill({
         color: fillColor
       });
-    }
+    }    
+
+    function getText() {      
+      return new ol.style.Text({
+        textAlign: align,
+        textBaseline: baseline,
+        font: font,
+        text: feature.get(labelAttribute),
+        fill: new ol.style.Fill({
+          color: labelFillColor
+        }),
+        stroke: new ol.style.Stroke({
+          color: outlineColor, 
+          width: outlineWidth
+        }),
+        offsetX: offsetX,
+        offsetY: offsetY,
+        rotation: rotation
+      });
+    };    
+
+    function getText() {
+      return new ol.style.Text({
+        textAlign: align,
+        textBaseline: baseline,
+        font: font,
+        text: feature ? feature.get(labelAttribute) : "apa",
+        fill: new ol.style.Fill({
+          color: labelFillColor
+        }),
+        stroke: new ol.style.Stroke({
+          color: outlineColor,
+          width: outlineWidth
+        }),
+        offsetX: offsetX,
+        offsetY: offsetY,
+        rotation: rotation
+      });
+    };
 
     function getImage() {
       return icon === ""
@@ -140,7 +192,7 @@ module.exports = LayerModel.extend({
       : getIcon();
     }
 
-    function getIcon() {
+    function getIcon() {                              
       return new ol.style.Icon({
         src: icon,
         scale: 1,
@@ -170,11 +222,16 @@ module.exports = LayerModel.extend({
     }
 
     function getStyleObj() {
-      return {
+      var obj = {
         fill: getFill(),
         image: getImage(),
         stroke: getStroke()
       };
+      if (showLabels) {
+        obj.text = getText();
+      }
+
+      return obj;
     }
 
     return [new ol.style.Style(getStyleObj())];

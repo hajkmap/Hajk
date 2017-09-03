@@ -56,7 +56,7 @@ class ToolOptions extends Component {
     this.props.model.off('change:urlMapConfig', this.onUrlMapConfigChanged.bind(this));
   }
 
-  onUrlMapConfigChanged() {    
+  onUrlMapConfigChanged() {
     const t = this.state.activeTool;
     this.setState({
       activeTool: ''
@@ -107,6 +107,21 @@ class ToolOptions extends Component {
     });
   }
 
+  getIndexForTool(tool) {
+    var found = false;
+    if (Array.isArray(this.props.model.get('toolConfig'))) {
+      found = this.props.model
+        .get('toolConfig')
+        .filter(t => t.type === tool);
+    }
+
+    if (found[0]) {
+      return found[0].index;
+    } else {
+      return -1;
+    }
+  }
+
   getClassNamesForActive(tool) {
     var found = false;
     if (Array.isArray(this.props.model.get('toolConfig'))) {
@@ -137,21 +152,27 @@ class ToolOptions extends Component {
       location: "Current Position",
       routing: "Navigation"
     };
+
     return (
       <div>
         <aside>
           <ul className="config-layer-list">
             {
-              Object.keys(toolTypes).map((key, i) => {
-                return <li
-                  key={i}
-                  className={this.getClassNamesForSelected(key)}
-                  onClick={() => this.toggleTool(key)}>
-                    <span className={this.getClassNamesForActive(key)}></span>
-                    &nbsp;
-                    <span>{toolTypes[key]}</span>
-                </li>
-              })
+              Object
+                .keys(toolTypes)
+                .sort(
+                  (a, b) => this.getIndexForTool(a) === this.getIndexForTool(b) ? 0 : this.getIndexForTool(a) > this.getIndexForTool(b) ? 1 : -1)
+                .map((key, i) => {
+                  var index = this.getIndexForTool(key);
+                  return <li
+                    key={i}
+                    className={this.getClassNamesForSelected(key)}
+                    onClick={() => this.toggleTool(key)}>
+                      <span className={this.getClassNamesForActive(key)}></span>
+                      &nbsp;
+                      <span>{toolTypes[key]} ({index})</span>
+                  </li>
+                })
             }
           </ul>
         </aside>

@@ -30,21 +30,27 @@ function rgbToHex(r, g, b) {
 }
 
 function colorToArray(color, type) {
+
   var res = []
-  ,   reg = type === "rgb" 
-  ? /rgb\((.+)\)/ 
+  ,   reg = type === "rgb"
+  ? /rgb\((.+)\)/
   : /rgba\((.+)\)/;
 
-  res = reg.exec(color)[1].split(',').map(a => parseFloat(a));
-  if (type === "rgb") {
-    res.push(1);
+  if (Array.isArray(color)) {
+    res = color;
+  } else {
+    res = reg.exec(color)[1].split(',').map(a => parseFloat(a));
+    if (type === "rgb") {
+      res.push(1);
+    }
   }
+
   return res;
 }
 
 function toKmlColor(color) {
   var s, r, g, b, o, res;
-  if (color) {            
+  if (color) {
     res = /^rgba/.test(color) ? colorToArray(color, 'rgba') : colorToArray(color, 'rgb');
     s = rgbToHex(res[0], res[1], res[2]);
     r = s.substr(0, 2);
@@ -179,6 +185,7 @@ function multiPolygon(f) {
 }
 
 function safeInject(string) {
+  string = string.toString();
   return string.replace(/<\/?[^>]+(>|$)|&/g, "");
 }
 
@@ -215,7 +222,6 @@ function filterProperties (template, properties) {
       props[property] = properties[property];
     }
   });
-  console.log("Apply filter", props);
   return props;
 }
 
@@ -253,7 +259,7 @@ kmlWriter.createXML = (features, name) => {
   features.forEach((feature, i) => {
 
     var style = Array.isArray(feature.getStyle())
-    ? feature.getStyle()[1]
+    ? (feature.getStyle()[1] || feature.getStyle()[0])
     : feature.getStyle();
 
     doc += '<Style id="' + i + '">';
@@ -285,7 +291,7 @@ kmlWriter.createXML = (features, name) => {
   features.forEach((feature, i) => {
 
     var style = Array.isArray(feature.getStyle())
-    ? feature.getStyle()[1]
+    ? (feature.getStyle()[1] || feature.getStyle()[0])
     : feature.getStyle();
 
     var text = style.getText()

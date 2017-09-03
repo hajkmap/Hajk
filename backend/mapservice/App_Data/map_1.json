@@ -206,7 +206,7 @@
           {
             "id": "1060",
             "parent": "-1",
-            "name": "Omsorg & stÃ¶d",
+            "name": "Omsorg & stöd",
             "toggled": false,
             "expanded": false,
             "layers": [
@@ -236,7 +236,7 @@
           {
             "id": "1010",
             "parent": "-1",
-            "name": "Uppleva & gÃ¶ra",
+            "name": "Uppleva & göra",
             "toggled": false,
             "expanded": false,
             "layers": [
@@ -286,7 +286,7 @@
           {
             "id": "1020",
             "parent": "-1",
-            "name": "Bygga, bo & miljÃ¶",
+            "name": "Bygga, bo & miljö",
             "toggled": false,
             "expanded": false,
             "layers": [
@@ -391,7 +391,7 @@
           {
             "id": "1050",
             "parent": "-1",
-            "name": "Ã–vrigt",
+            "name": "Övrigt",
             "toggled": false,
             "expanded": false,
             "layers": [

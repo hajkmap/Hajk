@@ -50,12 +50,20 @@ ol.interaction.Drag.prototype.resume = function () {
   this.paused = false;
 };
 
+var acceptedLayers = {
+  'preview-layer': true
+};
+
+ol.interaction.Drag.prototype.addAcceptedLayer = function (layerName) {
+  acceptedLayers[layerName] = layerName;
+}
+
+ol.interaction.Drag.prototype.removeAcceptedLayer = function (layerName) {
+  delete acceptedLayers[layerName];
+}
+
 ol.interaction.Drag.prototype.isDraggable = function (layer) {
-  var accepted = {
-    'draw-layer': true,
-    'preview-layer': true
-  };
-  return layer ? accepted.hasOwnProperty(layer.getProperties().name) : true;
+  return layer ? acceptedLayers.hasOwnProperty(layer.getProperties().name) || layer.dragLocked === false : true;
 };
 
 ol.interaction.Drag.prototype.handleDownEvent = function (evt) {
@@ -88,7 +96,7 @@ ol.interaction.Drag.prototype.handleDragEvent = function(evt) {
   ,   deltaX = 0
   ,   deltaY = 0
   ,   geometry;
-  
+
   if (this.paused) {
     return;
   }

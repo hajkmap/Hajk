@@ -36,7 +36,8 @@ var ArcGISLayerProperties = {
   url: "http://ksdgis.se/arcgis/rest/services/hpl/MapServer",
   projection: "EPSG:3006",
   opacity: 0.8,
-  extent: [413888.8487813738, 6581993.154569996, 416840.2595669881, 6584784.713516495]
+  extent: [413888.8487813738, 6581993.154569996, 416840.2595669881, 6584784.713516495],
+  singleTile: false
 };
 
 /**
@@ -59,38 +60,43 @@ var ArcGISLayer = {
    */
   validInfo: true,
 
-  /**
-   * Create attribution array
-   * @instance
-   * @return {Array<external:"ol.Attribution">} attributions
-   */
-  getAttributions: function() {
-    var attributions = [];
-    if (this.get('attribution')) {
-      attributions.push(
-        new ol.Attribution({
-          html: this.get('attribution')
-        })
-      );
-    }
-    return attributions;
-  },
-
   initialize: function () {
     LayerModel.prototype.initialize.call(this);
-
-    this.layer = new ol.layer.Tile({
-      extent: this.get('extent'),
-      opacity: this.get('opacity'),
-      visible: this.get('visible'),
-      name: this.get('name'),
-      projection: this.get('projection'),
-      source: new ol.source.TileArcGISRest({
-        attributions: this.getAttributions(),
-        url: this.get('url'),
-        params: this.get('params')
-      })
-    });
+    var extent = this.get('extent');
+    if (Array.isArray(extent)) {
+      extent = extent.map((c, i) => {
+        const b = 1E5;
+        const v = parseFloat(c);
+        return isNaN(v) ? 0 : i < 2 ? v - b : v + b;
+      });
+    }
+    if (this.get('singleTile')) {
+      this.layer = new ol.layer.Image({
+        extent: extent,
+        opacity: this.get('opacity'),
+        visible: this.get('visible'),
+        name: this.get('name'),
+        projection: this.get('projection'),
+        source: new ol.source.ImageArcGISRest({
+          attributions: this.getAttributions(),
+          url: this.get('url'),
+          params: this.get('params')
+        })
+      });
+    } else {
+      this.layer = new ol.layer.Tile({
+        extent: extent,
+        opacity: this.get('opacity'),
+        visible: this.get('visible'),
+        name: this.get('name'),
+        projection: this.get('projection'),
+        source: new ol.source.TileArcGISRest({
+          attributions: this.getAttributions(),
+          url: this.get('url'),
+          params: this.get('params')
+        })
+      });
+    }
 
     this.layer.getSource().on('tileloaderror', e => {
       this.tileLoadError();

@@ -22,134 +22,9 @@
 
 var Panel = require('views/panel');
 var Alert = require('alert');
+var ColorPicker = require('components/colorpicker');
 
 var isMobile = () => document.body.clientWidth <= 600;
-
-var ColorPicker = React.createClass({
-  /*
-   * @property {Array{string}} colors
-   */
-  colors: [
-    "rgb(77, 77, 77)",
-    "rgb(153, 153, 153)",
-    "rgb(255, 255, 255)",
-    "rgb(244, 78, 59)",
-    "rgb(254, 146, 0)",
-    "rgb(252, 220, 0)",
-    "rgb(219, 223, 0)",
-    "rgb(164, 221, 0)",
-    "rgb(104, 204, 202)",
-    "rgb(15, 175, 255)",
-    "rgb(174, 161, 255)",
-    "rgb(253, 161, 255)",
-    "rgb(51, 51, 51)",
-    "rgb(128, 128, 128)",
-    "rgb(204, 204, 204)",
-    "rgb(211, 49, 21)",
-    "rgb(226, 115, 0)",
-    "rgb(252, 196, 0)",
-    "rgb(176, 188, 0)",
-    "rgb(104, 188, 0)",
-    "rgb(22, 165, 165)",
-    "rgb(0, 156, 224)",
-    "rgb(123, 100, 255)",
-    "rgb(250, 40, 255)",
-    "rgb(0, 0, 0)",
-    "rgb(102, 102, 102)",
-    "rgb(179, 179, 179)",
-    "rgb(159, 5, 0)",
-    "rgb(196, 81, 0)",
-    "rgb(251, 158, 0)",
-    "rgb(128, 137, 0)",
-    "rgb(25, 77, 51)",
-    "rgb(12, 121, 125)",
-    "rgb(0, 98, 177)",
-    "rgb(101, 50, 148)",
-    "rgb(171, 20, 158)"
-  ],
-  /*
-   * Abort any operation and deselect any tool
-   * when the components unmounts.
-   * @return {objct} state
-   */
-  getInitialState: function() {
-    return {
-      color: this.props.model.get(this.props.property)
-    };
-  },
-  /*
-   * @override
-   */
-  componentWillReceiveProps: function () {
-    // TODO:
-    // The stack trace seems messed up here.
-    // The value in the model is not correct at the time of render,
-    // the model switches the values and keeps the last set value.
-    // This is solved by setTimeout 0, to put the call
-    // at the bottom of the stack. But anyway, its considered a bug.
-    setTimeout(() => {
-      this.setState({
-        color: this.props.model.get(this.props.property)
-      });
-    }, 0);
-  },
-  /*
-   * Set the current color of the component.
-   * @param {ol.event} event
-   */
-  setColor: function (event) {
-    var reg   = /rgb[a]?\(.*\)/
-    ,   value = reg.exec(event.target.style.background)
-
-    if (value && value[0]) {
-      this.setState({
-        color: value[0]
-      });
-      this.props.onChange(value[0]);
-    }
-  },
-  /*
-   * Get current color.
-   * @return {string} color
-   */
-  getColor: function () {
-    return this.state.color;
-  },
-  /*
-   * Render the color map component.
-   * @return {React.Component} component
-   */
-  renderColorMap: function () {
-    return this.colors.map((color, i) => {
-      var black = "rgb(0, 0, 0)"
-      ,   gray  = "rgb(150, 150, 150)"
-      ,   white = "rgb(255, 255, 255)"
-      ,   style = {
-        width:        "22px",
-        height:       "22px",
-        display:      "inline-block",
-        margin:       "2px",
-        background:   color,
-        border:       color === this.state.color ?
-                      color === black ? "2px solid " + gray : "2px solid " + black :
-                      color === white ? "2px solid " + gray : "2px solid " + color
-      };
-      return <div onClick={this.setColor} key={i} style={style}></div>
-    });
-  },
-  /*
-   * Render the colorpicker tool.
-   * @return {React.Component} component
-   */
-  render: function () {
-    var colorMap = this.renderColorMap();
-    return (
-      <div className="swatch">
-        {colorMap}
-      </div>
-    )
-  }
-});
 
 /**
  * @class
@@ -163,8 +38,10 @@ var DrawPanelView = {
   getInitialState: function() {
     return {
       visible: false,
+      pointSettings: this.props.model.get('pointSettings'),
       pointRadius: this.props.model.get('pointRadius'),
       pointSymbol: this.props.model.get('pointSymbol'),
+      fontSize: this.props.model.get('fontSize'),
       lineWidth: this.props.model.get('lineWidth'),
       lineStyle: this.props.model.get('lineStyle'),
       circleLineColor: this.props.model.get('circleLineColor'),
@@ -304,7 +181,7 @@ var DrawPanelView = {
    */
   abort: function () {
     this.props.model.abort();
-    $('#Point, #Circle, #Text, #Polygon, #LineString, #delete').removeClass('selected');
+    $('#Point, #Circle, #Text, #Polygon, #LineString, #move, #edit, #delete').removeClass('selected');
     $('#abort').hide();
     this.setState({
       symbology: ""
@@ -350,8 +227,40 @@ var DrawPanelView = {
    */
   activateRemovalTool: function () {
     this.props.model.activateRemovalTool();
-    $('#Point, #Text, #Polygon, #LineString, #Circle, #delete').removeClass('selected');
+    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete').removeClass('selected');
     $('#delete').addClass('selected');
+    $('#abort').show();
+    this.setState({
+      symbology: ""
+    })
+    this.props.model.set("kmlExportUrl", false);
+    this.props.model.set("kmlImport", false);
+  },
+
+  /**
+   * Activate move tool and update visuals.
+   * @instance
+   */
+  activateMoveTool: function () {
+    this.props.model.activateMoveTool();
+    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete').removeClass('selected');
+    $('#move').addClass('selected');
+    $('#abort').show();
+    this.setState({
+      symbology: ""
+    })
+    this.props.model.set("kmlExportUrl", false);
+    this.props.model.set("kmlImport", false);
+  },
+
+  /**
+   * Activate move tool and update visuals.
+   * @instance
+   */
+  activateEditTool: function () {
+    this.props.model.activateEditTool();
+    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete').removeClass('selected');
+    $('#edit').addClass('selected');
     $('#abort').show();
     this.setState({
       symbology: ""
@@ -367,7 +276,7 @@ var DrawPanelView = {
    */
   activateDrawTool: function (type) {
     this.props.model.activateDrawTool(type);
-    $('#Circle, #Point, #Text, #Polygon, #LineString, #delete').removeClass('selected');
+    $('#Circle, #Point, #Text, #Polygon, #LineString, #move, #edit, #delete').removeClass('selected');
     $('#' + type).addClass('selected');
     $('#abort').show();
     this.setState({
@@ -378,6 +287,16 @@ var DrawPanelView = {
     if (isMobile()) {
       this.props.navigationPanel.minimize();
     }
+  },
+
+  /**
+   * Set marker image.
+   * @instance
+   * @param {object} e
+   */
+  setMarkerImg: function(e) {
+    this.props.model.set('markerImg', e.target.src);
+    this.forceUpdate();
   },
 
   /**
@@ -407,28 +326,117 @@ var DrawPanelView = {
       this.props.model[func].call(this.props.model, value);
     }
 
+    function hasClass(icon) {
+      return this.props.model.get('markerImg') === window.location.href + `assets/icons/${icon}.png`
+        ? "selected"
+        : "" ;
+    }
+
+    function renderIcons() {
+
+      var icons = this.props.model.get('icons').split(',');
+
+      return (
+        icons.map((icon, i) => {
+          icon = icon.trim();
+          if (icon === "br") {
+            return (<br key={i} />);
+          } else {
+            var iconSrc = `assets/icons/${icon}.png`;
+            return (
+              <div key={i} className={hasClass.call(this, icon)}>
+                <img onClick={this.setMarkerImg} src={iconSrc}></img>
+              </div>
+            )
+          }
+        })
+      );
+    }
+
+    function renderPointSettings() {
+      switch (this.state.pointSettings) {
+        case "point":
+          return (
+            <div>
+              <div>Färg</div>
+              <ColorPicker
+                model={this.props.model}
+                property="pointColor"
+                onChange={this.props.model.setPointColor.bind(this.props.model)}
+              />
+              <div>Storlek</div>
+              <select value={this.state.pointRadius} onChange={update.bind(this, 'setPointRadius', 'pointRadius')}>
+                <option value="4">Liten</option>
+                <option value="7">Normal</option>
+                <option value="14">Stor</option>
+                <option value="20">Större</option>
+              </select>
+            </div>
+          );
+        case "symbol":
+          return (
+            <div className="point-marker-img">
+                {renderIcons.call(this)}
+            </div>
+          );
+      }
+    }
+
     switch (type) {
+      case "Text":
+        return (
+          <div>
+            <h2>Ritmanér text</h2>
+            <div>Textstorlek</div>
+            <select value={this.state.fontSize} onChange={update.bind(this, 'setFontSize', 'fontSize')}>
+              <option value="8">8</option>
+              <option value="10">10</option>
+              <option value="12">12</option>
+              <option value="14">14</option>
+              <option value="16">16</option>
+              <option value="18">18</option>
+              <option value="20">20</option>
+              <option value="30">30</option>
+              <option value="40">40</option>
+              <option value="60">60</option>
+              <option value="80">100</option>
+            </select>
+            <div>Textfärg</div>
+            <ColorPicker
+              model={this.props.model}
+              property="fontColor"
+              onChange={this.props.model.setFontColor.bind(this.props.model)}
+            />
+            <div>Bakgrundsfärg text</div>
+            <ColorPicker
+              model={this.props.model}
+              noColor="true"
+              property="fontBackColor"
+              onChange={this.props.model.setFontBackColor.bind(this.props.model)}
+            />
+          </div>
+        );
       case "Point":
         return (
           <div>
             <h2>Ritmanér punkt</h2>
-            <input type="checkbox" onChange={update.bind(this, 'setPointSymbol', 'pointSymbol')}
-                                   checked={this.state.pointSymbol}
-                                   id="point-symbol"/>
-            <label htmlFor="point-symbol">Använd symbol</label>
-            <div>Färg</div>
-            <ColorPicker
-              model={this.props.model}
-              property="pointColor"
-              onChange={this.props.model.setPointColor.bind(this.props.model)}
-            />
-            <div>Storlek</div>
-            <select value={this.state.pointRadius} onChange={update.bind(this, 'setPointRadius', 'pointRadius')}>
-              <option value="4">Liten</option>
-              <option value="7">Normal</option>
-              <option value="14">Stor</option>
-              <option value="20">Större</option>
-            </select>
+            <label>Välj typ</label>
+            <div>
+              <select value={this.state.pointSettings} onChange={e => {
+                  var value = e.target.value === "symbol" ? true : false;
+                  update.call(this, 'setPointSettings', 'pointSettings', e);
+                  update.call(this, 'setPointSymbol', 'pointSymbol', {
+                    target: {
+                      type: "checkbox",
+                      checked: value
+                    }
+                  });
+                }}>
+                <option key="point" value="point">Punkt</option>
+                <option key="symbol" value="symbol">Symbol</option>
+              </select>
+            </div>
+             {renderPointSettings.call(this)}
           </div>
         );
       case "LineString":
@@ -685,6 +693,12 @@ var DrawPanelView = {
               </li>
               <li id="Polygon" onClick={this.activateDrawTool.bind(this, "Polygon")}>
                 <i className="iconmoon-yta"></i> <span>Rita yta</span>
+              </li>
+              <li id="move" onClick={this.activateMoveTool}>
+                <i className="fa fa-arrows fa-0"></i> <span>Flytta objekt</span>
+              </li>
+              <li id="edit" onClick={this.activateEditTool}>
+                <i className="fa fa-edit fa-0"></i> <span>Ändra objekt</span>
               </li>
               <li id="delete" onClick={this.activateRemovalTool}>
                 <i className="fa fa-eraser fa-0"></i> <span>Radera objekt</span>

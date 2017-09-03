@@ -115,7 +115,8 @@
     var filtered = [];
 
     layers.forEach(layer => {
-      if (config.baselayers.includes(layer.id)) {
+      var baseLayer = config.baselayers.find(l => l.id === layer.id);
+      if (baseLayer) {
         layer.drawOrder = 0;
         filtered.push(layer);
       }

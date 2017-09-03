@@ -25,6 +25,7 @@ using NetTopologySuite.Features;
 using System.Threading;
 using System.Web;
 using MapService.Components.MapExport.Extentions;
+using MapService.Components.MapExport.SharpMapExtensions;
 
 namespace MapService.Components.MapExport
 {
@@ -33,7 +34,7 @@ namespace MapService.Components.MapExport
         /// <summary>
         /// Gets or sets the SharpMap map to export.
         /// </summary>
-        public Map map { get; set; }
+        public MapThrowsException map { get; set; }
 
         /// <summary>
         /// Property exportItem
@@ -141,8 +142,9 @@ namespace MapService.Components.MapExport
             {
                 return labelStyle;
             }
-
-            labelStyle.ForeColor = ColorTranslator.FromHtml(featureStyle.fontColor);
+            
+            labelStyle.ForeColor = ColorTranslator.FromHtml(featureStyle.fontColor);            
+            labelStyle.BackColor = new SolidBrush(ColorTranslator.FromHtml(featureStyle.fontBackColor));            
             labelStyle.Font = new Font(FontFamily.GenericSansSerif, Int32.Parse(featureStyle.fontSize), FontStyle.Bold);
             labelStyle.Halo = new Pen(Color.Black, 2);
             labelStyle.IsTextOnPath = true;
@@ -183,7 +185,7 @@ namespace MapService.Components.MapExport
             var size = new Size(exportItem.size[0], exportItem.size[1]);
 
             Map.Configure();
-            this.map = new Map(size);            
+            this.map = new MapThrowsException(size);            
         }
 
         /// <summary>
@@ -204,14 +206,13 @@ namespace MapService.Components.MapExport
                 {
                     //file.WriteLine("Found a layer");
                     string layername = "WMSLayer_" + i;
-                    //file.WriteLine("layername: '" + wmsLayers[i].url + "'");
-                    WmsLayer layer = new WmsLayer(layername, wmsLayers[i].url);
+                    DpiWmsLayer layer = new DpiWmsLayer(layername, wmsLayers[i].url, exportItem.resolution);
                     
                     layer.SetImageFormat("image/png");
                     layer.BgColor = Color.White;
                     layer.Transparent = true;
                     layer.Version = "1.1.0";
-                    layer.ContinueOnError = true;
+                    layer.ContinueOnError = false;
                     for (int t = 0; t < wmsLayers[i].layers.Count; t++)
                     {
                         //file.WriteLine("Found a sublayer");
@@ -438,8 +439,12 @@ namespace MapService.Components.MapExport
             }
 
             labelStyle.ForeColor = ColorTranslator.FromHtml(featureStyle.fontColor);
-            labelStyle.Font = new Font(FontFamily.GenericSansSerif, Int32.Parse(featureStyle.fontSize), FontStyle.Bold);
-            labelStyle.Halo = new Pen(Color.Black, 2);
+            if (featureStyle.fontBackColor != null) {
+                //labelStyle.BackColor = new SolidBrush(ColorTranslator.FromHtml(featureStyle.fontBackColor));                
+                labelStyle.Halo = new Pen(ColorTranslator.FromHtml(featureStyle.fontBackColor), 2);
+            }
+
+            labelStyle.Font = new Font(FontFamily.GenericSansSerif, Int32.Parse(featureStyle.fontSize), FontStyle.Bold);            
             labelStyle.IsTextOnPath = true;
             labelStyle.CollisionDetection = false;
             labelStyle.IgnoreLength = false;

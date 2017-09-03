@@ -315,7 +315,11 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "5"
+          {
+            "id": "22",
+            "visibleAtStart": false,
+            "drawOrder": 0
+          }
         ],
         "groups": [
           {
@@ -326,17 +330,17 @@
             "expanded": false,
             "layers": [
               {
-                "id": "32",
+                "id": "17",
                 "visibleAtStart": false,
                 "drawOrder": 0
               },
               {
-                "id": "10",
+                "id": "26",
                 "visibleAtStart": true,
                 "drawOrder": 1000
               },
               {
-                "id": "4",
+                "id": "23",
                 "visibleAtStart": true,
                 "drawOrder": 1000
               }
@@ -349,7 +353,8 @@
         "backgroundSwitcherBlack": true,
         "backgroundSwitcherWhite": true,
         "toggleAllButton": true
-      }
+      },
+      "index": 0
     },
     {
       "type": "search",
@@ -371,14 +376,16 @@
           32
         ],
         "popupOffsetY": -32
-      }
+      },
+      "index": 1
     },
     {
       "type": "draw",
       "options": {
         "exportUrl": "/mapservice/export/kml",
         "importUrl": "/mapservice/import/kml"
-      }
+      },
+      "index": 3
     },
     {
       "type": "export",
@@ -399,21 +406,25 @@
           100000,
           250000
         ]
-      }
+      },
+      "index": 4
     },
     {
       "type": "buffer",
-      "options": {}
+      "options": {},
+      "index": 5
     },
     {
       "type": "edit",
-      "options": {}
+      "options": {},
+      "index": 0
     },
     {
       "type": "streetview",
       "options": {
         "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4"
-      }
+      },
+      "index": 6
     },
     {
       "type": "infoclick",
@@ -429,7 +440,8 @@
           32
         ],
         "popupOffsetY": -32
-      }
+      },
+      "index": 2
     }
   ],
   "map": {
