@@ -856,12 +856,6 @@ var ExportModel = {
       }
     });
   },
-    error: (err) => {
-      this.set("downloadingTIFF", false);
-      alert("Det gick inte att skapa tiff. Försök igen senare.");
-    }
-  });
-  },
 
   /**
    * @description
