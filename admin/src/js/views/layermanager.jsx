@@ -135,12 +135,7 @@ class Manager extends Component {
           drawOrder: layer.drawOrder,
           addedLayers: [],
           layerType: layer.type,
-          attribution: layer.attribution,
-          infoVisible: layer.infoVisible,
-          infoTitle: layer.infoTitle,
-          infoText: layer.infoText,
-          infoUrl: layer.infoUrl,
-          infoOwner: layer.infoOwner
+          attribution: layer.attribution
         });
 
         this.refs["ArcGISLayerForm"].loadLayers(layer, () => {
@@ -192,12 +187,7 @@ class Manager extends Component {
           labelAttribute: layer.labelAttribute || "",
           showLabels: layer.showLabels || true,
           drawOrder: layer.drawOrder,
-          layer: layer.layer,
-          infoVisible: layer.infoVisible,
-          infoTitle: layer.infoTitle,
-          infoText: layer.infoText,
-          infoUrl: layer.infoUrl,
-          infoOwner: layer.infoOwner
+          layer: layer.layer
         });
 
         this.refs["VectorLayerForm"].loadLayers(layer, () => {
@@ -239,12 +229,7 @@ class Manager extends Component {
           searchPropertyName: layer.searchPropertyName || "",
           searchDisplayName: layer.searchDisplayName || "",
           searchOutputFormat: layer.searchOutputFormat || "",
-          searchGeometryField: layer.searchGeometryField || "",
-          infoVisible: layer.infoVisible,
-          infoTitle: layer.infoTitle,
-          infoText: layer.infoText,
-          infoUrl: layer.infoUrl,
-          infoOwner: layer.infoOwner
+          searchGeometryField: layer.searchGeometryField || ""
         });
 
         this.refs["WMSLayerForm"].loadLayers(layer, () => {
@@ -281,12 +266,7 @@ class Manager extends Component {
           resolutions: layer.resolutions,
           matrixIds: layer.matrixIds,
           layerType: layer.type,
-          attribution: layer.attribution,
-          infoVisible: layer.infoVisible,
-          infoTitle: layer.infoTitle,
-          infoText: layer.infoText,
-          infoUrl: layer.infoUrl,
-          infoOwner: layer.infoOwner
+          attribution: layer.attribution
         });
         setTimeout(() => {
           this.refs["WMTSLayerForm"].validate();

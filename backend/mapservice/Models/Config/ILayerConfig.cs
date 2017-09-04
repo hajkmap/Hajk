@@ -11,15 +11,5 @@ namespace MapService.Models.Config
         string id { get; set; }
 
         string caption { get; set; }
-        
-        bool infoVisible { get; set; }
-
-        string infoTitle { get; set; }
-
-        string infoText { get; set; }
-
-        string infoUrl { get; set; }
-
-        string infoOwner { get; set; }
     }
 }
