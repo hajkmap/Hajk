@@ -14,8 +14,7 @@
         "compiled/search.js": ["src/js/views/components/search.jsx"],
         "compiled/searchbar.js": ["src/js/views/components/searchbar.jsx"],
         "compiled/searchresultgroup.js": ["src/js/views/components/searchresultgroup.jsx"],
-        "compiled/colorpicker.js": ["src/js/views/components/colorpicker.jsx"],
-        "compiled/infobutton.js": ["src/js/views/components/infobutton.jsx"]
+        "compiled/colorpicker.js": ["src/js/views/components/colorpicker.jsx"]
       }
     },
     "panels": {
@@ -97,7 +96,6 @@
         "components/searchbar": "./compiled/searchbar.js",
         "components/searchresultgroup": "./compiled/searchresultgroup.js",
         "components/colorpicker": "./compiled/colorpicker.js",
-        "components/infobutton": "./compiled/infobutton.js",
         "views/map": "./compiled/mapview.js",
         "views/toolbar": "./compiled/toolbar.js",
         "views/infopanel": "./compiled/infopanel.js",

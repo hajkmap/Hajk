@@ -39,15 +39,5 @@ namespace MapService.Models.Config
         public string[] matrixIds { get; set; }
 
         public string attribution { get; set; }
-        
-        public bool infoVisible { get; set; }
-
-        public string infoTitle { get; set; }
-
-        public string infoText { get; set; }
-
-        public string infoUrl { get; set; }
-
-        public string infoOwner { get; set; }
     }
 }
