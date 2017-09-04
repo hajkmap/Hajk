@@ -21,7 +21,8 @@
 // https://github.com/hajkmap/Hajk
 
 var Legend = require('components/legend')
-,   LegendButton = require('components/legendbutton');
+,   LegendButton = require('components/legendbutton')
+,   InfoButton = require('components/infobutton');
 
 /**
  * HighlightLayerProperties object
@@ -127,6 +128,51 @@ var Layer = {
   },
 
   /**
+   * Get info visibility.
+   * @instance
+   * @return {boolean} infoVisible
+   */
+  getInfoVisible: function () {
+    return this.get("infoVisible");
+  },
+
+  /**
+   * Get info title.
+   * @instance
+   * @return {string} infoTitle
+   */
+  getInfoTitle: function () {
+    return this.get("infoTitle");
+  },
+
+  /**
+   * Get info text.
+   * @instance
+   * @return {string} infoText
+   */
+  getInfoText: function () {
+    return this.get("infoText");
+  },
+
+  /**
+   * Get info url.
+   * @instance
+   * @return {string} infoUrl
+   */
+  getInfoUrl: function () {
+    return this.get("infoUrl");
+  },
+
+  /**
+   * Get info owner.
+   * @instance
+   * @return {string} infoOwner
+   */
+  getInfoOwner: function () {
+    return this.get("infoOwner");
+  },
+
+  /**
    * Set label visibility.
    * @instance
    * @param {bool} visibility
@@ -156,7 +202,8 @@ var Layer = {
   getLegendComponents: function (settings) {
       var legendComponents = {
         legendButton: null,
-        legendPanel: null
+        legendPanel: null,
+        infoButton: null
       };
 
       var legendProps = {
@@ -169,9 +216,14 @@ var Layer = {
         checked: settings.legendExpanded
       };
 
+      var infoButtonProps = {
+        checked: settings.infoExpanded
+      };
+
       if (this.getLegend()) {
         legendComponents.legendPanel = React.createElement(Legend, legendProps);
         legendComponents.legendButton = React.createElement(LegendButton, legendButtonProps);
+        legendComponents.infoButton = React.createElement(InfoButton, infoButtonProps);
       }
 
       return legendComponents;
