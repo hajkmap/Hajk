@@ -55,10 +55,6 @@ const defaultState = {
   drawOrder: 1,
   layerType: "ExtendedWMS",
   attribution: "",
-  selectedFormat: "",
-  selctedStyle: "",
-  selectedLegend: "",
-  selectedFormat: "",
   infoclickFormats: [],
   layerSettings: {
     settings: true,
@@ -66,9 +62,9 @@ const defaultState = {
     infobox: "",
     styles: [],
     legend: "",
-    confirmAction: () => { }
+    confirmAction: () => { },
+    denyAction: () => { }
   },
-  savedLayers: []
 };
 
 /**
@@ -118,19 +114,16 @@ class ExtendedWMSLayerForm extends Component {
   }
 
   appendLayer(e, checkedLayer) {
-    console.log(e.target.checked);
     if (e.target.checked === true) {
       this.state.addedLayers.push({
-        name: checkedLayer
+        name: checkedLayer,
+        queryable: true,
+        style: ""
       });
     } else {
       this.state.addedLayers = this.state.addedLayers.filter(layer => {
         return layer.name !== checkedLayer;
       });
-      
-      // this.state.savedLayers = this.state.savedLayers.filter(layer => {
-      //   return layer.name !== checkedLayer;
-      // });
     }
     this.validateField('layers');
     this.forceUpdate();
@@ -266,11 +259,7 @@ class ExtendedWMSLayerForm extends Component {
           alertMessage: "Servern svarar inte. Försök med en annan URL."
         })
       }
-
-      this.setImageFormats();
-      this.setCoordSystems();
       this.setVersion();
-      this.setFormats();
 
       if (callback) {
         callback();
@@ -278,52 +267,50 @@ class ExtendedWMSLayerForm extends Component {
     });
   }
 
-  setLegend(value) {
-    this.setState({ legend: value });
-  }
+  setLegend(value) { this.setState({ legend: value }); }
 
-  setVersion() {
-    var currentVersion = this.state.capabilities.version;
-    this.setState({
-      version: currentVersion
-    })
-  }
+  setVersion() { this.setState({ version: this.state.capabilities.version }); }
 
   setImageFormats() {
-    var formats = this.state.capabilities.Capability.Request.GetMap.Format;
-    var formatElements = formats ? formats.map((format, i) => {
-      return <option key={i}>{format}</option>;
-    }) : null;
+    let capabilities = null;
+    if(this.state.capabilities) {
+      capabilities = this.state.capabilities.Capability.Request.GetMap.Format;
+    }
 
-    this.setState({
-      imageFormats: formatElements
-    });
+    let imgFormats = capabilities !== null ? capabilities.map((imgFormat, i) => {
+      return <option key={i}>{imgFormat}</option>;
+    }) : "";
+
+    return imgFormats;
   }
 
   setFormats() {
-    var formats = this.state.capabilities.Capability.Request.GetFeatureInfo.Format;
-    var formatElements = formats ? formats.map((format, i) => {
-      return <option key={i}>{format}</option>;
-    }) : null;
+    let capabilities = null;
+    if(this.state.capabilities) {
+      capabilities = this.state.capabilities.Capability.Request.GetFeatureInfo.Format;
+    }
 
-    this.setState({
-      infoclickFormats: formatElements
-    });
+    let formats = capabilities !== null ? capabilities.map((format, i) => {
+      return <option key={i}>{format}</option>;
+    }) : "";
+
+    return formats;
   }
 
   setCoordSystems() {
-    var systems = this.state.capabilities.Capability.Layer.CRS;
-    var coordElements = systems ? systems.map((system, i) => {
-      return <option key={i}>{system}</option>;
-    }) : null;
+    let systems = null;
+    if(this.state.capabilities) {
+      systems = this.state.capabilities.Capability.Layer.CRS;
+    }
 
-    this.setState({
-      coordSystems: coordElements
-    });
+    let coordElements = systems ? systems.map((system, i) => {
+      return <option key={i}>{system}</option>;
+    }) : "";
+
+    return coordElements;
   }
 
   getLayer() {
-
     return {
       type: this.state.layerType,
       id: this.state.id,
@@ -340,11 +327,11 @@ class ExtendedWMSLayerForm extends Component {
       singleTile: this.getValue("singleTile"),
       imageFormat: this.getValue("imageFormat"),
       //serverType: this.getValue("serverType"),
-      serverType: "geoserver",
-      //tiled: this.getValue("tiled"),
-      tiled: true,
+      serverType: "geoserver", //TODO: Ej hårdkodat
+      tiled: this.getValue("tiled"),
       drawOrder: this.getValue("drawOrder"),
       attribution: this.getValue("attribution")
+      
     };
   }
 
@@ -359,7 +346,7 @@ class ExtendedWMSLayerForm extends Component {
     if (fieldName === 'date') value = create_date();
     if (fieldName === 'visibleAtStart') value = input.checked;
     if (fieldName === 'singleTile') value = input.checked;
-    //if (fieldName === 'tiled') value = input.checked;
+    if (fieldName === 'tiled') value = input.checked;
     if (fieldName === 'queryable') value = input.checked;
     if (fieldName === 'layers') value = this.state.addedLayers;
 
@@ -422,97 +409,64 @@ class ExtendedWMSLayerForm extends Component {
     return valid;
   }
 
-  fetchLayerStyles(layer) {
-    var styles = [];
-    if (layer.Style !== undefined) {
-      for (let i = 0; i < layer.Style.length; i++) {
-        styles.push(<option key={i}>{layer.Style[i].Name}</option>);
-      }
-    }
-    return styles;
-  }
-
+  /**
+   * Populerar de fält som finns i modal för lagerinställningar layer.layer
+   * @param {*} layer 
+   */
   setLayerSettings(layer) {
-    var allFormats = this.state.capabilities.Capability.Request.GetFeatureInfo.Format;
-    var layerFormats = allFormats ? allFormats.map((format, i) => {
-      return <option key={i}>{format}</option>;
-    }) : null;
-
-    var currentLayer = this.state.capabilities.Capability.Layer.Layer.find((l) => {
+    //Hämta från capabilities det layer.layer som matchar namnet
+    let currentLayer = this.state.capabilities.Capability.Layer.Layer.find(l => {
       return l.Name === layer.name;
     });
+    
+    //om lagret har styles, hämta dessa, annars, returnera meddelande
+    let layerStyles = currentLayer.Style ? currentLayer.Style.map((style) => {
+      return <option key={this.createGuid()}>{style.Name}</option>;
+    }) : <option key={this.createGuid()} value="">{"Inga styles hittades"}</option>;
 
-    var layerStyles = currentLayer.Style ? currentLayer.Style.map((style, i) => {
-      return <option key={i}>{style.Name}</option>;
-    }) : null;
-
+    //Sätt det state som behövs för att modalen skall populeras och knapparna skall fungera
     this.setState({
-      selectedFormat: "",
-      selectedStyle: "",
-      infobox: "",
       layerSettings: {
         settings: true,
         visible: true,
+        styles: currentLayer.Style || [],
         name: layer.name,
-        infobox: this.state.infobox,
-        styles: [layerStyles],
-        legend: this.state.legend,
-        confirmAction: () => {
-          this.saveLayerSettings();
+        //confirmAction anropas från LayerAlert- komponenten och result är alertens state  
+        confirmAction: (result) => {
+          this.saveLayerSettings(result, layer.name);
           this.setState({
             layerSettings: {
-              visible: false,
-              settings: false
+              settings: false,
+              visible: false
+            }
+          });
+        },
+        denyAction: () => {
+          this.setState({
+            layerSettings: {
+              settings: false,
+              visible: false
             }
           });
         }
       }
-    });
-  }
-
-  /**
-   * save infoclick-settings from modal to this.state.savedLayers. If layer name already exists,
-   * overwrite with new values
-   */
-  saveLayerSettings() {
-    var layers = this.state.savedLayers;
-    let layerExists = false;
-    layers.forEach((item) => {
-      if (item.name === this.state.layerSettings.name) {
-          item.style = this.state.selectedStyle,
-          item.infobox = this.state.infobox,
-          item.legend = this.state.legend
-        layerExists = true;
-      }
-    });
-    if (!layerExists) {
-      layers.push({
-        infobox: this.state.infobox,
-        style: this.state.selectedStyle,
-        queryable: true,
-        legend: this.state.legend,
-        name: this.state.layerSettings.name
-      });
-    }
-
-    this.setState({
-      savedLayers: layers
-    });
-  }
-
-  setLayerStyle(s) {
-    var style = s ? s : "";
-    this.setState({
-      selectedStyle: style
     })
   }
 
-  setInfobox(ib) {
-    var ibox = ib ? ib : "";
-    this.setState({
-      infobox: ibox
+  /**
+   * Sparar värden från <Alert>-komponenten till state
+   * 
+   */
+  saveLayerSettings(layerSettings, layerName) {
+    //Hämta lagret från state.addedLayers och uppdatera lager i layers-arrayen
+    this.state.addedLayers.forEach(layer => {
+      if(layer.name === layerName) {
+        layer.style = layerSettings.style,
+        layer.queryable = layerSettings.queryable
+      }
     });
   }
+
   render() {
 
     var loader = this.state.load ? <i className="fa fa-refresh fa-spin"></i> : null;
@@ -523,10 +477,6 @@ class ExtendedWMSLayerForm extends Component {
         <Alert
           options={this.state.layerSettings}
           imageLoad={this.state.imageLoader}
-          setInfobox={this.setInfobox.bind(this)}
-          setStyle={this.setLayerStyle.bind(this)}
-          setNewLegend={this.loadLegendImage.bind(this)}
-          setLegend={this.setLegend.bind(this)}
         />
         <legend>Lägg till lager</legend>
         <div className="row">
@@ -552,7 +502,7 @@ class ExtendedWMSLayerForm extends Component {
               <select
                 className="form-control"
                 onChange={(e) => this.setState({selectedFormat: e.target.value })}>
-                {this.state.infoclickFormats}
+                {this.setFormats()}
               </select>
             </div>
           </div>
@@ -562,7 +512,7 @@ class ExtendedWMSLayerForm extends Component {
             <div className="form-group">
               <label>Bildformat</label>
               <select ref="input_imageFormat" onChange={(e) => this.setState({ imageFormat: e.target.value })} className="form-control">
-                {this.state.imageFormats}
+                {this.setImageFormats()}
               </select>
             </div>
           </div>
@@ -578,7 +528,7 @@ class ExtendedWMSLayerForm extends Component {
             <div className="form-group">
               <label>Koordinatsystem</label>
               <select ref="input_coordSystems" value={this.state.coordSystem} onChange={(e) => this.setState({ coordSystem: e.target.value })} className="form-control">
-                {this.state.coordSystems}
+                {this.setCoordSystems()}
               </select>
             </div>
           </div>
@@ -634,6 +584,19 @@ class ExtendedWMSLayerForm extends Component {
           </div>
         </div>
         <div className="row">
+          <div className="col-md-12">
+            <div className="form-group">
+              <label>Inforuta</label>
+              <textarea
+                ref="input_infobox"
+                value={this.state.infobox}
+                onChange={(e) => this.setState({'infobox': e.target.value})}
+                className="form-control"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="row">
           <div className="col-md-6">
             <div className="form-group">
               <label>Senast Ändrad</label>
@@ -667,7 +630,32 @@ class ExtendedWMSLayerForm extends Component {
                 checked={this.state.singleTile}
               />
             </div>
+            <div className="col-md-6">
+              <div className="form-group">
+                <label>Teckenförklaring</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={this.state.legend}
+                  onChange={(e) => this.setState({'legend': e.target.value})}
+                />
+                <span onClick={(e) => { this.props.setNewLegend(e) }} className="btn btn-default">Välj fil {imageLoader}</span>
+              </div>
+            </div>
           </div>
+          <div style={{display: "none"}}>
+          <label>Geowebcache</label>
+          <input
+            type="checkbox"
+            ref="input_tiled"
+            onChange={
+              (e) => {
+                this.setState({tiled: e.target.checked})
+              }
+            }
+            checked={this.state.tiled}
+          />
+        </div>
         </div>
       </fieldset>
     );

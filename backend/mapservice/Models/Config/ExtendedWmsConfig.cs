@@ -22,6 +22,10 @@ namespace MapService.Models.Config
         public string projection { get; set; }
 
         public string infoFormat { get; set; }
+   
+        public string infobox { get; set; }
+
+        public string legend { get; set; }
 
         public WMSLayerLayer[] layers { get; set; }
 
