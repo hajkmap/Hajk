@@ -76,7 +76,7 @@
     },
     {
       "id": "3",
-      "caption": "Ortofoto 2016",
+      "caption": "Ortofoto 2016 (Västra sida)",
       "url": "https://karta2.varberg.se/geoserver/varberg/wms",
       "owner": "SBK",
       "date": "1485163940360",
@@ -85,6 +85,33 @@
       "projection": null,
       "layers": [
         "orto_2016"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": true,
+      "singleTile": false,
+      "imageFormat": "image/jpeg",
+      "serverType": "geoserver",
+      "attribution": null
+    },
+	{
+      "id": "4",
+      "caption": "Ortofoto 2015",
+      "url": "https://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "Ortofoto 2015",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "ortoLM_2015"
       ],
       "infobox": "",
       "searchFields": [
@@ -111,7 +138,7 @@
       "legend": "https://karta2.varberg.se/legend/hillshade.png",
       "projection": null,
       "layers": [
-        "hillshade"
+        "hillshade_tiff"
       ],
       "infobox": "",
       "searchFields": [
@@ -248,7 +275,7 @@
       "layers": [
         "cykelservicestallen"
       ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {Namn} </td></tr><tr><td> <strong>Typ</strong> </td><td> {Typ} </td></tr></tbody></table>",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Typ</strong> </td><td> {Typ} </td></tr></tbody></table>",
       "searchFields": [
         ""
       ],
@@ -275,7 +302,7 @@
       "layers": [
         "forskolor"
       ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {adress} </td></tr><tr><td> <strong>Typ</strong> </td><td> {typ} </td></tr></tbody></table>",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {adress} </td></tr><tr><td> <strong>Typ</strong> </td><td> {typ} </td></tr></tbody></table> <a href=\" {url} \" target=\"_blank\">Länken till hemsidan</a>",
       "searchFields": [
         ""
       ],
@@ -302,7 +329,7 @@
       "layers": [
         "grundskolor"
       ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {adress} </td></tr><tr><td> <strong>Typ</strong> </td><td> {typ} </td></tr></tbody></table>",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {adress} </td></tr><tr><td> <strong>Typ</strong> </td><td> {typ} </td></tr></tbody></table> <a href=\" {url} \" target=\"_blank\">Länken till hemsidan</a>",
       "searchFields": [
         ""
       ],
@@ -329,7 +356,7 @@
       "layers": [
         "gymnasieskolor"
       ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {adress} </td></tr><tr><td> <strong>Typ</strong> </td><td> {typ} </td></tr></tbody></table>",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {adress} </td></tr><tr><td> <strong>Typ</strong> </td><td> {typ} </td></tr></tbody></table> <a href=\" {url} \" target=\"_blank\">Länken till hemsidan</a>",
       "searchFields": [
         ""
       ],
@@ -437,7 +464,7 @@
       "layers": [
         "parkering_punkt"
       ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {pltasnamn} </td></tr><tr><td> <strong>P-skiva används</strong> </td><td> {p_skiva} </td></tr><tr><td> <strong>Tidsbegränsning</strong> </td><td> {tidsbegran} </td></tr></tbody></table>",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {platsnamn} </td></tr><tr><td> <strong>P-skiva används</strong> </td><td> {p_skiva} </td></tr><tr><td> <strong>Tidsbegränsning</strong> </td><td> {tidsbegran} </td></tr></tbody></table>",
       "searchFields": [
         ""
       ],
@@ -487,7 +514,7 @@
       "layers": [
         "offentliga_toaletter"
       ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {plats} </td></tr><tr><td> <strong>Öppet</strong> </td><td> {oppet} </td></tr><tr><td> <strong>Öppettider</strong> </td><td> {oppettider} </td></tr></tbody></table>",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {plats} </td></tr><tr><td> <strong>Öppet</strong> </td><td> {oppet} </td></tr><tr><td> <strong>Öppettider</strong> </td><td> {oppettider} </td></tr><tr><td> <strong>Typ</strong> </td><td> {typ} </td></tr></tbody></table>",
       "searchFields": [
         ""
       ],
@@ -568,7 +595,7 @@
       "layers": [
         "badplatser"
       ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {badplats} </td></tr><tr><td> <strong>Anmärkning</strong> </td><td> {anmarkning} </td></tr></tbody></table><table class=\"table table-condensed\" style=\"font-size:10px\"><tbody><tr><td> <strong>Parkering</strong> </td><td> <strong>Toalett</strong> </td><td> <strong>Dusch</strong> </td><td> <strong>Kiosk</strong> </td></tr><tr><td> {pakering} </td><td> {toaletter} </td><td> {dusch} </td><td> {kiosk} </td></tr></tbody></table><table class=\"table table-condensed\" style=\"font-size:10px\"><tbody><tr><td> <strong>Restaurang</strong> </td><td> <strong>Lekplats</strong> </td><td> <strong>Vindsurfin</strong> </td></tr><td> {restaurang} </td><td> {lekplats} </td><td> {vindsurfin} </td></tr></tbody></table>",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Information</strong> </td><td> {anmarkning} </td></tr></tbody></table><table class=\"table table-condensed\" style=\"font-size:10px\"><tbody><tr><td> <strong>Parkering</strong> </td><td> <strong>Toalett</strong> </td><td> <strong>Dusch</strong> </td><td> <strong>Kiosk</strong> </td></tr><tr><td> {pakering} </td><td> {toaletter} </td><td> {dusch} </td><td> {kiosk} </td></tr></tbody></table><table class=\"table table-condensed\" style=\"font-size:10px\"><tbody><tr><td> <strong>Restaurang</strong> </td><td> <strong>Lekplats</strong> </td><td> <strong>Vindsurfing</strong> </td></tr><td> {restaurang} </td><td> {lekplats} </td><td> {vindsurfin} </td></tr></tbody></table>",
       "searchFields": [
         ""
       ],
@@ -622,7 +649,7 @@
       "layers": [
         "polisstationer"
       ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Adress</strong> </td><td> {besöksadre} </td></tr></tbody></table><a href=\" {Hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Adress</strong> </td><td> {besöksadre}&#44;{postadress}&#44;{postnummer} </td></tr></tbody></table><a href=\" https://polisen.se/Kontakta-oss/Polisstationer/Halland/Varberg/ \" target=\"_blank\">Länken till hemsidan</a>",
       "searchFields": [
         ""
       ],
@@ -674,7 +701,7 @@
       "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=detaljplaner",
       "projection": null,
       "layers": [
-        "detaljplaner"
+        "detaljplaner_0829"
       ],
       "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Beteckning</strong> </td><td> {beteckning} </td></tr><tr><td> <strong>PDF-dokument</strong> </td><td> <a href=\" {url} \" target=\"_blank\">Öppnas i nytt fönster</a> </td></tr></tbody></table>",
       "searchFields": [
@@ -703,7 +730,7 @@
       "layers": [
         "bibliotek"
       ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {bibliotek} </td></tr><tr><td> <strong>Adress</strong> </td><td> {adress} </td></tr></tbody></table><a href=\" {Hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {adress} &#44;{Postadress} &#44;{Ort} </td></tr></tbody></table><a href=\" {Hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
       "searchFields": [
         ""
       ],
@@ -757,7 +784,7 @@
       "layers": [
         "atervinningscentraler"
       ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {adress} </td></tr></tbody></table> \n <a href=\" {hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {adress} &#44; {postadress} &#44;{ort} </td></tr></tbody></table> \n <a href=\" {hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
       "searchFields": [
         ""
       ],
@@ -855,11 +882,11 @@
     },
     {
       "id": "360",
-      "caption": "Kultur",
+      "caption": "Kultur och teater",
       "url": "https://karta2.varberg.se/geoserver/varberg/wms",
       "owner": "SBK",
       "date": "",
-      "content": "Kultur",
+      "content": "Kultur och teater",
       "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=off_konst",
       "projection": null,
       "layers": [
@@ -973,7 +1000,7 @@
       "layers": [
         "vardcentral"
       ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr></tbody></table><a href=\" {hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {besoksadress} </td></tr></tbody></table><a href=\" {hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
       "searchFields": [
         ""
       ],
@@ -1000,7 +1027,7 @@
       "layers": [
         "vardcentral_privat"
       ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr></tbody></table><a href=\" {hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {besoksadress} </td></tr></tbody></table><a href=\" {hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
       "searchFields": [
         ""
       ],
@@ -1027,7 +1054,7 @@
       "layers": [
         "sjukhus"
       ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr></tbody></table><a href=\" {hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {besoksadress} </td></tr></tbody></table><a href=\" {hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
       "searchFields": [
         ""
       ],
@@ -1054,7 +1081,7 @@
       "layers": [
         "folktandvard"
       ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr></tbody></table><a href=\" {hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {besoksadress} </td></tr></tbody></table><a href=\" {hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
       "searchFields": [
         ""
       ],
@@ -1086,7 +1113,7 @@
         "sok"
       ],
       "geometryField": "geom",
-      "outputFormat": "GML2"
+      "outputFormat": "GML3"
     },
     {
       "id": "100",
@@ -1103,7 +1130,7 @@
         "text"
       ],
       "geometryField": "geom",
-      "outputFormat": "GML2"
+      "outputFormat": "GML3"
     }
   ],
   "vectorlayers": [],

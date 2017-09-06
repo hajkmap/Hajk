@@ -51,6 +51,7 @@ var RoutingModelProperties = {
   onEndKey: undefined,
   onRoutingKey: undefined,
   routingFinished: undefined,
+  travelMode: 'walking',
   position: {
     latitude: undefined,
     longitude: undefined,
@@ -145,6 +146,10 @@ var RoutingModel = {
     console.log('position is now, ' + this.get('position'));
    },
 
+  setTravelMode: function(travelmode){
+    console.log('Travelmode is now ' + travelmode);
+    this.set('travelMode', travelmode);
+  },
 
   endPointSelection: function(event){
     console.log('Running endPointSelection');
@@ -203,10 +208,6 @@ var RoutingModel = {
 
   },
 
-  activateTravelMode: function(){
-    this.set('state', 'choose_mode');
-  },
-
   activateRoutingMode: function(){
     console.log('activating routing mode');
     this.set('state', 'show_route');
@@ -234,8 +235,8 @@ var RoutingModel = {
         anchor: [0.5, 0.5],
         anchorXUnits: 'fraction',
         anchorYUnits: 'fraction',
-        opacity: .8,
-        src: 'assets/icons/flagpin_start.png',
+        opacity: 1.0,
+        src: 'assets/icons/startRouting_40.png',
         scale: (1)
       })
     });
@@ -245,8 +246,8 @@ var RoutingModel = {
         anchor: [0.5, 0.5],
         anchorXUnits: 'fraction',
         anchorYUnits: 'fraction',
-        opacity: .8,
-        src: 'assets/icons/flagpin_end.png',
+        opacity: 1.0,
+        src: 'assets/icons/malRouting_40.png',
         scale: (1)
       })
     });
@@ -256,8 +257,8 @@ var RoutingModel = {
         anchor: [0.5, 0.5],
         anchorXUnits: 'fraction',
         anchorYUnits: 'fraction',
-        opacity: .8,
-        src: 'assets/icons/routeguide.png',
+        opacity: 1.0,
+        src: 'assets/icons/markering_A_liten.png',
         scale: (1)
       })
     });
@@ -269,9 +270,9 @@ var RoutingModel = {
         anchor: [0.5, 0.5],
         anchorXUnits: 'fraction',
         anchorYUnits: 'fraction',
-        opacity: .8,
-        src: 'assets/icons/routeguide_highlight.png',
-        scale: (2)
+        opacity: 1.0,
+        src: 'assets/icons/Markering_A_stor.png',
+        scale: (1.5)
       })
     });
 
@@ -373,8 +374,7 @@ var RoutingModel = {
     } else {
       ol.Observable.unByKey(this.get('onEndKey'));
       console.log('Will search for trip');
-      var mode_select = document.getElementById('travel_mode_id');
-      var mode = mode_select.options[mode_select.selectedIndex].value;
+      var mode = this.get('travelMode');
       console.log('mode is:' + mode);
       var url = 'https://karta2.varberg.se/maps/api/directions/json?mode=' + mode + '&origin=' + pos.latitude + ',' + pos.longitude + '&destination=' + pos.latitudeEnd + ',' + pos.longitudeEnd +'&key=' + this.get('apiKey');
       console.log('url is: ' + url);
@@ -403,7 +403,7 @@ var RoutingModel = {
     var routeDiv = document.createElement('div');
     var p = document.createElement('p');
     console.log(res.routes[0].legs[0].distance.text);
-    p.innerHTML = '<b>Avstånd:</b> ' + res.routes[0].legs[0].distance.text +'('+res.routes[0].legs[0].distance.value+'m)' + '<br>' + '<b>Tid:</b> ' + res.routes[0].legs[0].duration.text + '<br>' + '<b>Startadress:</b> ' + res.routes[0].legs[0].start_address + '<br>' + '<b>Slutadress:</b> ' + res.routes[0].legs[0].end_address;
+    p.innerHTML = '<b>Färdsätt:</b>' + res.routes[0].legs[0].steps[0].travel_mode + '<br>' + '<b>Avstånd:</b> ' + res.routes[0].legs[0].distance.text +'('+res.routes[0].legs[0].distance.value+'m)' + '<br>' + '<b>Tid:</b> ' + res.routes[0].legs[0].duration.text + '<br>' + '<b>Startadress:</b> ' + res.routes[0].legs[0].start_address + '<br>' + '<b>Slutadress:</b> ' + res.routes[0].legs[0].end_address;
     routeDiv.appendChild(p);
     for(var i = 0; i < steps.length; i++){
       var lat = steps[i].start_location.lat;

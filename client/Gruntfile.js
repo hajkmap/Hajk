@@ -343,4 +343,6 @@ module.exports = function (grunt) {
     grunt.registerTask('licence', ['usebanner']);
 
     grunt.registerTask('unlicence', ['replace:licence']);
+
+    grunt.registerTask('bandr', ['build', 'release']);
 };

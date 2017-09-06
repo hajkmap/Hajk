@@ -107,11 +107,11 @@ var LocationModel = {
 
     this.on('change:active', (e) => {
       if (!this.get('active') || this.get('watchId') !== undefined) {
-        if (this.get('watchId') !== undefined) {
-          window.navigator.geolocation.clearWatch(this.get('watchId'));
-        }
-        this.set('watchId', undefined);
-        this.reset();
+      if (this.get('watchId') !== undefined) {
+        window.navigator.geolocation.clearWatch(this.get('watchId'));
+      }
+      this.set('watchId', undefined);
+      this.reset();
     } else {
       this.set('watchId', window.navigator.geolocation.watchPosition(
         (e) => { this.onLocationSucess(e) },

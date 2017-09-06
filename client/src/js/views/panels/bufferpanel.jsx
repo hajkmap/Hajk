@@ -80,7 +80,7 @@ var BufferPanelView = {
    */
   render: function () {
     return (
-      <Panel title="Buffertverktyg" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked}>
+      <Panel title="Ulvalsområde" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked}>
         <div className="panel-content">
           <p>
             Detta verktyg skapar en zon med angivet avstånd runt valda objekt i kartan.

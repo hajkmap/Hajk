@@ -73,6 +73,13 @@ var RoutingPanelView = {
     console.log(this.props.model.plotRoute(res));
   },
 
+  showImage: function(src, id) {
+    var img = document.createElement("img");
+    img.src = src;
+    img.id = id;
+
+    docunebt.body.appendChild(img);
+  },
   /**
    * Render the view
    * @instance
@@ -102,12 +109,10 @@ var RoutingPanelView = {
           <div className="panel panel-default">
              <div className="panel-heading"> ③. Välj färdsätt </div>
              <div className="panel-body">
-               <select id="travel_mode_id" onChange={this.setTravelMode} defaultValue={this.state.selectTravelMode}>
-                 <option value="walking">Gå</option>
-                 <option value="cycling">Cykla</option>
-                 <option value="driving">Bil</option>
-                 <option value="transit">Kollektivtrafik</option>
-               </select>
+               <button className="btn btn-default" onClick={() => this.props.model.setTravelMode('walking')}><img src="/assets/icons/gaRouting.png"/></button>
+               <button className="btn btn-default" onClick={() => this.props.model.setTravelMode('driving')}><img src="/assets/icons/koraRouting.png"/></button>
+               <button className="btn btn-default" onClick={() => this.props.model.setTravelMode('cycling')}><img src="/assets/icons/cyklaRouting.png"/></button>
+               <button className="btn btn-default" onClick={() => this.props.model.setTravelMode('transit')}><img src="/assets/icons/kollektivRouting.png"/></button>
              </div>
           </div>
           <div className="panel panel-default-transparent">

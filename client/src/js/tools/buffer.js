@@ -117,8 +117,8 @@ var BufferModel = {
         anchorXUnits: 'fraction',
         anchorYUnits: 'fraction',
         opacity: .8,
-        src: 'assets/icons/routeguide_highlight.png',
-        scale: (2)
+        src: 'assets/icons/dot_marker_blue.png',
+        scale: (0.5)
       })
     });
 
@@ -230,7 +230,7 @@ var BufferModel = {
 
     this.deActivateBufferMarker();
 
-    var notFeatureLayers = ['150', '160', '170', '410', '420', '430', '440', '260', '310', '350', '360', '250', '230', '340', '330'];
+    var notFeatureLayers = ['150', '160', '170', '410', '420', '430', '440', '260', '310', '350', '360', '250', '230', '340', '330', '270', '280', '320', '325', '140', '220', '210'];
     var activeLayers = [];
     console.log(this.get('layersCollection'));
     console.log(this.get('layersCollection').length);

@@ -172,10 +172,26 @@
       "type": "layerswitcher",
       "options": {
         "baselayers": [
-          "0",
-          "1",
-          "2",
-          "3"
+          {
+            "id": "0",
+            "visibleAtStart": true,
+            "drawOrder": 0
+          },
+          {
+            "id": "1",
+            "visibleAtStart": false,
+            "drawOrder": 0
+          },
+          {
+            "id": "4",
+            "visibleAtStart": false,
+            "drawOrder": 0
+          },
+          {
+            "id": "3",
+            "visibleAtStart": false,
+            "drawOrder": 0
+          }
         ],
         "groups": [
           {
@@ -206,7 +222,7 @@
           {
             "id": "1060",
             "parent": "-1",
-            "name": "Omsorg & stöd",
+            "name": "Omsorg & stÃ¶d",
             "toggled": false,
             "expanded": false,
             "layers": [
@@ -236,7 +252,7 @@
           {
             "id": "1010",
             "parent": "-1",
-            "name": "Uppleva & göra",
+            "name": "Uppleva & gÃ¶ra",
             "toggled": false,
             "expanded": false,
             "layers": [
@@ -286,7 +302,7 @@
           {
             "id": "1020",
             "parent": "-1",
-            "name": "Bygga, bo & miljö",
+            "name": "Bygga, bo & miljÃ¶",
             "toggled": false,
             "expanded": false,
             "layers": [
@@ -346,11 +362,6 @@
                 "drawOrder": 18
               },
               {
-                "id": "290",
-                "visibleAtStart": false,
-                "drawOrder": 19
-              },
-              {
                 "id": "220",
                 "visibleAtStart": false,
                 "drawOrder": 20
@@ -391,7 +402,7 @@
           {
             "id": "1050",
             "parent": "-1",
-            "name": "Övrigt",
+            "name": "Ã–vrigt",
             "toggled": false,
             "expanded": false,
             "layers": [
@@ -413,18 +424,14 @@
             ],
             "groups": []
           },
-          {
+		  {
             "id": "1070",
             "parent": "-1",
             "name": "Aktuellt",
             "toggled": false,
             "expanded": false,
             "layers": [
-              {
-                "id": "240",
-                "visibleAtStart": false,
-                "drawOrder": 25
-              }
+              
             ],
             "groups": []
           }
@@ -439,22 +446,23 @@
     {
       "type": "infoclick",
       "options": {
+        "displayPopup": false,
+        "markerImg": "assets/icons/marker.png",
         "anchor": [
-          0.5,
-          0
+          16,
+          32
         ],
-        "displayPopup": true,
         "imgSize": [
-          15,
-          15
+          32,
+          32
         ],
-        "markerImg": "assets/icons/dot_marker.png"
+        "popupOffsetY": 0
       }
     },
     {
       "type": "information",
       "options": {
-        "text": "PGNlbnRlcj48Zm9udCBzaXplPSI1Ij5W5Gxrb21tZW4gdGlsbCBEaWdpdGFsYSBWYXJiZXJnc2thcnRhbiE8L2ZvbnQ+PGJyPjxicj4KSORyIGthbiBkdSBoaXR0YSBzYW1o5Gxsc2luZm9ybWF0aW9uIHPlIHNvbSBwYXJrZXJpbmdhciwgc2tvbG9yLCBvZmZlbnRsaWdhIHRvYWxldHRlciBvY2ggZGV0YWxqcGxhbmVyIGVsbGVyIHP2a2EgZGlyZWt0IHDlIGZhc3RpZ2hldHNiZXRlY2tuaW5nIGVsbGVyIGFkcmVzcy4gPGJyPgpVcHBlIGkgaPZncmEgaPZybmV0IGZpbm5zIGtuYXBwYXIgbWVkIHBsdXMgb2NoIG1pbnVzIGb2ciBhdHQgem9vbWEgaW4gb2NoIHV0IGkga2FydGFuLiBOZXJlIHRpbGwgaPZnZXIgZmlubnMgZmxlcmEga25hcHBhciBtZWQgb2xpa2EgZnVua3Rpb25lciBzb20gZvZya2xhcmFzIG5lZGFuLjwvY2VudGVyPgo8YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLWJhcnMiIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5MYWdlcmhhbnRlcmFyZTwvYj48YnI+ClbkbGogdmlsa2V0IGJha2dydW5kc2xhZ2VyIG9jaCBha3RpdmEgbGFnZXIgc29tIGR1IHZpbGwgc2UgaSBrYXJ0YW4uIEtsaWNrYSBw5SBwaWxhcm5hID4gdGlsbCB25G5zdGVyIG9tIHJ1YnJpa2VuIGb2ciBhdHQgc2UgdW5kZXJydWJyaWtlci48YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLWluZm8tY2lyY2xlIGljb24iIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5PbSBrYXJ0YW48L2I+PGJyPgpWaXNhciBkZW5uYSBpbmZvcm1hdGlvbnN0ZXh0Ljxicj48YnI+Cgo8aSBjbGFzcz0iZmEgZmEtYnVsbHNleWUgaWNvbiIgYXJpYS1oaWRkZW49InRydWUiPjwvaT4gJm5ic3A7IDxiPkJ1ZmZlcnR2ZXJrdHlnPC9iPjxicj4KRGV0dGEgdmVya3R5ZyBza2FwYXIgZW4gem9uIG1lZCBhbmdpdmV0IGF2c3TlbmQgcnVudCB2YWxkYSBvYmpla3QgaSBrYXJ0YW4uPGJyPjxicj4KCjxpIGNsYXNzPSJmYSBmYS1wZW5jaWwgaWNvbiIgYXJpYS1oaWRkZW49InRydWUiPjwvaT4gJm5ic3A7IDxiPlJpdGEgb2NoIG3ldHRz5HR0PC9iPjxicj4KTORnZyB0aWxsIGVuIHRleHQgZWxsZXIgcml0YSB1dCBvbGlrYSBzeW1ib2xlciBw5SBrYXJ0YW4uPGJyPjxicj4KCjxpIGNsYXNzPSJmYSBmYS1wZW5jaWwtc3F1YXJlLW8gaWNvbiIgYXJpYS1oaWRkZW49InRydWUiPjwvaT4gJm5ic3A7IDxiPkVkaXRlcmEgbGFnZXI8L2I+PGJyPgo8YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLXNlYXJjaCBpY29uIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PC9pPiAmbmJzcDsgPGI+U/ZrbmluZzwvYj48YnI+ClP2ayBw5SBmYXN0aWdoZXQgZWxsZXIgYWRyZXNzIGkga2FydGFuIGVsbGVyIGkgdXR2YWx0IG9tcuVkZSBw5SBrYXJ0YW4uPGJyPjxicj4KCjxpIGNsYXNzPSJmYSBmYS1jcm9zc2hhaXJzIGljb24iIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5Lb29yZGluYXRlcjwvYj48YnI+ClbkbGogZW4gcGxhdHMgaSBrYXJ0YW4gZ2Vub20gYXR0IGRyYSBpIHNpa3RldCBvY2ggc2Uga29vcmRpbmF0ZXJuYSBm9nIgcGxhdHNlbi48YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLXByaW50IGljb24iIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5Ta3JpdmEgdXQ8L2I+PGJyPgpTa2FwYSBlbiBQREYgZORyIGR1IHNq5Gx2IHbkbGplciBwYXBwZXJzc3Rvcmxlaywgb3JpZW50ZXJpbmcsIHNrYWxhIG9jaCB1cHBs9nNuaW5nIGVsbGVyIHNrYXBhIGVuIGVsbGVyIFRJRkYgKGJpbGQpLiBW5GxqIG9tcuVkZSBpIGthcnRhbiBnZW5vbSBhdHQgZHJhIGkgcnV0YW4gcOUga2FydGFuLjxicj48YnI+Cgo8aSBjbGFzcz0iZmEgZmEtbGluayBpY29uIGZhLWZsaXAtaG9yaXpvbnRhbCIgYXJpYS1oaWRkZW49InRydWUiPjwvaT4gJm5ic3A7IDxiPkzkbmsgdGlsbCBrYXJ0YTwvYj48YnI+CkjkciBza2FwYXIgZHUgZW4gbORuayB0aWxsIGthcnRhbiBzb20gdmlzYXIgYWt0dWVsbCB1dGJyZWRuaW5nLCB6b29tbml25SBzYW10IHTkbmRhL3Ns5GNrdGEgbGFnZXIuIER1IGthbiBrb3BpZXJhIGzkbmthZHJlc3NlbiBnZW5vbSBhdHQgaPZnZXJrbGlja2EgcOUgbORua2VuLjxicj48YnI+Cgo8aSBjbGFzcz0iZmEgZmEtYm9va21hcmsgaWNvbiIgYXJpYS1oaWRkZW49InRydWUiPjwvaT4gJm5ic3A7IDxiPkJva23kcmtlbjwvYj48YnI+ClNrYXBhIGJva23kcmtlbiD2dmVyIG9tcuVkZW4gc29tIGR1IHZpbGwga3VubmEgaGl0dGEgdGlsbGJha2EgdGlsbCBzbmFiYnQuIEL2cmphIG1lZCBhdHQgem9vbWEgaW4gcOUgZXR0IG9tcuVkZSBkdSB0eWNrZXIg5HIgaW50cmVzc2FudCBvY2ggc2thcGEgc2VkYW4gZXR0IGJva23kcmtlIG1lZCBldHQgbmFtbiBkdSBzauRsdiB25GxqZXIuPGJyPjxicj4KCjxpIGNsYXNzPSJmYSBmYS1zdHJlZXQtdmlldyBpY29uIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PC9pPiAmbmJzcDsgPGI+U3RyZWV0IFZpZXc8L2I+PGJyPgpLbGlja2EgbuVnb25zdGFucyBpIGthcnRhbiBm9nIgYXR0IGblIHVwcCBldHQgbWluZHJlIGb2bnN0ZXIgdGlsbCB25G5zdGVyIG9tIGthcnRhbiBtZWQgZ2F0dXZ5IGZy5W4gR29vZ2xlIG1hcHMuIER1IGthbiBzZWRhbiBm9nJzdG9yYSBm9m5zdHJldCBnZW5vbSBhdHQgdHJ5Y2thIHDlIHN5bWJvbGVuIHVwcGUgaSBo9mdyYSBo9nJuZXQuPGJyPjxicj4K",
+        "text": "PGNlbnRlcj48Zm9udCBzaXplPSI1Ij5W5Gxrb21tZW4gdGlsbCBEaWdpdGFsYSBWYXJiZXJnc2thcnRhbiE8L2ZvbnQ+PGJyPjxicj4KSORyIGthbiBkdSBoaXR0YSBzYW1o5Gxsc2luZm9ybWF0aW9uIHPlIHNvbSBwYXJrZXJpbmdhciwgc2tvbG9yLCBvZmZlbnRsaWdhIHRvYWxldHRlciBvY2ggZGV0YWxqcGxhbmVyIGVsbGVyIHP2a2EgZGlyZWt0IHDlIGZhc3RpZ2hldHNiZXRlY2tuaW5nIGVsbGVyIGFkcmVzcy4gPGJyPjxicj4KVXBwZSBpIGj2Z3JhIGj2cm5ldCBmaW5ucyBrbmFwcGFyIG1lZCBwbHVzIG9jaCBtaW51cyBm9nIgYXR0IHpvb21hIGluIG9jaCB1dCBpIGthcnRhbi4gTmVyZSB0aWxsIGj2Z2VyIGZpbm5zIGZsZXJhIGtuYXBwYXIgbWVkIG9saWthIGZ1bmt0aW9uZXIgc29tIGb2cmtsYXJhcyBuZWRhbi4gPGJyPjxicj4KRvZyIG1lciBpbmZvcm1hdGlvbiBlbGxlciBzeW5wdW5rdGVyLCBrb250YWt0YSA8YSBocmVmPSJtYWlsdG86IGdpc0B2YXJiZXJnLnNlP1N1YmplY3Q9SGVqJTIwR0lTYXJlIEItKSAiPmdpc0B2YXJiZXJnLnNlPC9hPjwvY2VudGVyPgo8YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLWJhcnMiIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5MYWdlcmhhbnRlcmFyZTwvYj48YnI+ClbkbGogYmFrZ3J1bmRzbGFnZXIgb2NoIGFrdGl2YSBsYWdlciBzb20gZHUgdmlsbCBzZSBpIGthcnRhbi4gS2xpY2thIHDlIHBpbHN5bWJvbGVuID4gZvZyIGF0dCBzZSBhbGxhIGxhZ2VyIHVuZGVyIHZhcmplIHJ1YnJpay48YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLWluZm8tY2lyY2xlIGljb24iIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5PbSBrYXJ0YW48L2I+PGJyPgpWaXNhciBkZW5uYSBpbmZvcm1hdGlvbnN0ZXh0Ljxicj48YnI+Cgo8aSBjbGFzcz0iZmEgZmEtYnVsbHNleWUgaWNvbiIgYXJpYS1oaWRkZW49InRydWUiPjwvaT4gJm5ic3A7IDxiPkJ1ZmZlcnR2ZXJrdHlnPC9iPjxicj4KRGV0dGEgdmVya3R5ZyBza2FwYXIgZW4gYnVmZmVydHpvbiAoY2lya2VsKSBtZWQgdmFsYmFydCBhdnN05W5kIHJ1bnQgZXR0IHZhbHQgb2JqZWt0IGVsbGVyIHB1bmt0IGkga2FydGFuLiBEdSBm5XIgc2FtdGlkaWd0IGVuIGxpc3RhIHDlIGRlIG9iamVrdCBzb20gZmlubnMgaW5vbSBidWZmZXJ0em9uZW4gZnLlbiBkZSBsYWdlciBzb20g5HIgdORuZGEgaSBrYXJ0YW4uIDxicj48YnI+Cgo8aSBjbGFzcz0iZmEgZmEtcGVuY2lsIGljb24iIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5SaXRhIG9jaCBt5HRhPC9iPjxicj4KTORnZyB0aWxsIGVuIHRleHQgZWxsZXIgcml0YSB1dCBvbGlrYSBzeW1ib2xlciBw5SBrYXJ0YW4uIDxicj48YnI+Cgo8aSBjbGFzcz0iZmEgZmEtc2VhcmNoIGljb24iIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5T9mtuaW5nPC9iPjxicj4KU/ZrIHDlIGZhc3RpZ2hldCBlbGxlciBhZHJlc3MgaSBrYXJ0YW4gZWxsZXIgaSB1dHZhbHQgb21y5WRlIHDlIGthcnRhbi4gPGJyPjxicj4KCjxpIGNsYXNzPSJmYSBmYS1jcm9zc2hhaXJzIGljb24iIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5Lb29yZGluYXRlcjwvYj48YnI+ClbkbGogZW4gcGxhdHMgaSBrYXJ0YW4gZ2Vub20gYXR0IGRyYSBpIHNpa3RldCBvY2ggc2Uga29vcmRpbmF0ZXJuYSBm9nIgcGxhdHNlbi48YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLXByaW50IGljb24iIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5Ta3JpdmEgdXQ8L2I+PGJyPgpTa2FwYSBlbiBQREYgZORyIGR1IHNq5Gx2IHbkbGplciBwYXBwZXJzc3Rvcmxlaywgb3JpZW50ZXJpbmcsIHNrYWxhIG9jaCB1cHBs9nNuaW5nIGVsbGVyIHNrYXBhIGVuIGVsbGVyIFRJRkYgKGJpbGQpLiBW5GxqIG9tcuVkZSBpIGthcnRhbiBnZW5vbSBhdHQgZHJhIGkgcnV0YW4gcOUga2FydGFuLjxicj48YnI+Cgo8aSBjbGFzcz0iZmEgZmEtbGluayBpY29uIGZhLWZsaXAtaG9yaXpvbnRhbCIgYXJpYS1oaWRkZW49InRydWUiPjwvaT4gJm5ic3A7IDxiPkzkbmsgdGlsbCBrYXJ0YTwvYj48YnI+CkjkciBza2FwYXIgZHUgZW4gbORuayB0aWxsIGthcnRhbiBzb20gdmlzYXIgYWt0dWVsbCB1dGJyZWRuaW5nLCB6b29tbml25SBzYW10IHTkbmRhL3Ns5GNrdGEgbGFnZXIuIER1IGthbiBrb3BpZXJhIGzkbmthZHJlc3NlbiBnZW5vbSBhdHQgaPZnZXJrbGlja2EgcOUgbORua2VuLjxicj48YnI+Cgo8aSBjbGFzcz0iZmEgZmEtYm9va21hcmsgaWNvbiIgYXJpYS1oaWRkZW49InRydWUiPjwvaT4gJm5ic3A7IDxiPkJva23kcmtlbjwvYj48YnI+ClNrYXBhIGJva23kcmtlbiD2dmVyIG9tcuVkZW4gc29tIGR1IHZpbGwga3VubmEgaGl0dGEgdGlsbGJha2EgdGlsbCBzbmFiYnQuIEL2cmphIG1lZCBhdHQgem9vbWEgaW4gcOUgZXR0IG9tcuVkZSBkdSB0eWNrZXIg5HIgaW50cmVzc2FudCBvY2ggc2thcGEgc2VkYW4gZXR0IGJva23kcmtlIG1lZCBldHQgbmFtbiBkdSBzauRsdiB25GxqZXIuIDxicj48YnI+Cgo8aSBjbGFzcz0iZmEgZmEtbGV2ZWwtdXAiIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyAgPGI+VuRnYmVza3Jpdm5pbmc8L2I+PGJyPgpW5GxqIHN0YXJ0IG9jaCBt5Wwgc2FtdCBm5HJkc+R0dCBz5SBm5XIgZHUgZW4gduRnYmVza3Jpdm5pbmcgbWVkIGluc3RydWt0aW9uZXIuIEZ1bmt0aW9uZW4gYW525G5kZXIgcmVzdWx0YXQgZnLlbiBHb29nbGVzIHbkZ2Jlc2tyaXZuaW5nLiA8YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLXN0cmVldC12aWV3IGljb24iIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5TdHJlZXQgVmlldzwvYj48YnI+CktsaWNrYSBu5WdvbnN0YW5zIGkga2FydGFuIGb2ciBhdHQgZuUgdXBwIGV0dCBtaW5kcmUgZvZuc3RlciB0aWxsIHbkbnN0ZXIgb20ga2FydGFuIG1lZCBnYXR1dnkgZnLlbiBHb29nbGUgbWFwcy4gRHUga2FuIHNlZGFuIGb2cnN0b3JhIGb2bnN0cmV0IGdlbm9tIGF0dCB0cnlja2EgcOUgc3ltYm9sZW4gdXBwZSBpIGj2Z3JhIGj2cm5ldC48YnI+PGJyPgo=",
         "headerText": "Information",
         "visibleAtStart": true
       }
@@ -467,7 +475,8 @@
       "type": "draw",
       "options": {
         "exportUrl": "https://karta2.varberg.se/export/kml",
-        "importUrl": "https://karta2.varberg.se/import/kml"
+        "importUrl": "https://karta2.varberg.se/import/kml",
+        "icons": "marker, marker_black, marker_green, marker_red, marker_yellow, br, pin, pin_black, pin_green, pin_red, pin_yellow"
       }
     },
     {
@@ -492,7 +501,8 @@
         "imgSize": [
           32,
           32
-        ]
+        ],
+        "popupOffsetY": 0
       }
     },
     {
@@ -500,34 +510,31 @@
       "options": {
         "transformations": [
           {
-            "code": "EPSG:3006",
+            "code": "EPSG:3007",
             "default": true,
             "hint": "(Standard)",
-            "title": "Sweref 99 TM",
-            "xtitle": "N",
-            "ytitle": "E",
-            "inverseAxis": true
-          },
-          {
-            "code": "EPSG:3007",
             "title": "Sweref 99 12 00",
-            "xtitle": "N",
-            "ytitle": "E",
-            "inverseAxis": true
+            "xtitle": "E",
+            "ytitle": "N",
+            "inverseAxis": false
           },
           {
-            "code": "EPSG:3021",
-            "title": "RT 90 2.5 gon V",
-            "xtitle": "Y",
-            "ytitle": "X",
+            "code": "EPSG:3006",
+            "default": false,
+            "hint": "",
+            "title": "SW99TM",
+            "xtitle": "E",
+            "ytitle": "N",
             "inverseAxis": false
           },
           {
             "code": "EPSG:4326",
+            "default": false,
+            "hint": "",
             "title": "WGS 84",
-            "inverseAxis": false,
             "xtitle": "Lng",
-            "ytitle": "Lat"
+            "ytitle": "Lat",
+            "inverseAxis": false
           }
         ]
       }
@@ -540,15 +547,16 @@
         "pdfActive": true,
         "tiffActive": true,
         "scales": [
+          250,
           500,
           1000,
-          2000,
+          2500,
           5000,
           10000,
-          20000,
+          25000,
           50000,
           100000,
-          200000
+          250000
         ]
       }
     },
