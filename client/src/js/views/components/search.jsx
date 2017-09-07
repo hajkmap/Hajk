@@ -78,16 +78,16 @@ var SearchView = {
         displayPopup: this.props.model.get('displayPopup')
       });
     });
-    this.props.model.on("change:url", () => {  
+    this.props.model.on("change:url", () => {
       this.setState({
         downloadUrl: this.props.model.get("url")
       });
     });
-    this.props.model.on("change:downloading", () => {  
+    this.props.model.on("change:downloading", () => {
       this.setState({
         downloading: this.props.model.get("downloading")
       });
-    }); 
+    });
   },
 
   /**
@@ -175,11 +175,11 @@ var SearchView = {
           loading: false,
           showResults: true,
           result: result
-        };        
+        };
         if (loader !== this.loading) {
           state.loading = true;
         }
-        this.setState(state);        
+        this.setState(state);
       });
     }, 200);
   },
@@ -216,7 +216,27 @@ var SearchView = {
   renderOptions: function () {
     var settings = this.props.model.get('settings')
     ,   sources = this.props.model.get('sources')
+    ,   filterVisible = this.props.model.get('filterVisible')
+    ,   filterVisibleBtn = null
     ;
+    if (filterVisible) {
+      filterVisibleBtn = (
+        <div>
+          <input
+            id="filter-visible"
+            type="checkbox"
+            checked={this.props.model.get('filterVisibleActive')}
+            onChange={(e) => {
+              this.props.model.set('filterVisibleActive', e.target.checked);
+              this.setState({
+                filterVisibleActive: e.target.checked
+              });
+            }}
+          />&nbsp;
+          <label htmlFor="filter-visible">Sök i alla synliga lager</label>
+        </div>
+      );
+    }
     return (
       <div>
         <p>
@@ -236,6 +256,7 @@ var SearchView = {
             }
           </select>
         </p>
+        {filterVisibleBtn}
       </div>
     );
   },
@@ -281,13 +302,13 @@ var SearchView = {
     //först när url finns.
     if (this.props.model.get("downloading")) {
       downloadLink = <a href="#">Hämtar...</a>
-      
+
     } else if (this.props.model.get("url")) {
       downloadLink = <a href={this.props.model.get("url")}>Hämta sökresultat</a>
     } else {
       downloadLink = null;
     }
-    
+
 
     return (
       <div className="search-results" key="search-results">
@@ -335,8 +356,8 @@ var SearchView = {
     ,   value = this.props.model.get('value')
     ,   showResults = this.props.model.shouldRenderResult()
     ,   options = this.renderOptions();
-    
-    if (showResults) {            
+
+    if (showResults) {
       if (this.state.loading) {
         results = (
           <p>

@@ -137,6 +137,11 @@ var LayerCollection = {
         "imageFormat": args.imageFormat || "image/png",
         "serverType": args.serverType || "geoserver",
         "attribution": args.attribution,
+        "searchUrl": args.searchUrl,
+        "searchPropertyName": args.searchPropertyName,
+        "searchDisplayName": args.searchDisplayName,
+        "searchOutputFormat": args.searchOutputFormat,
+        "searchGeometryField": args.searchGeometryField,
         "legend" : [{
           "Url": getLegendUrl(args),
           "Description" : "Teckenförklaring"
@@ -147,7 +152,12 @@ var LayerCollection = {
           "VERSION": "1.1.0",
           "SRS": properties.mapConfig.projection || "EPSG:3006",
           "TILED": args.tiled
-        }
+        },
+        "infoVisible": args.infoVisible || false,
+        "infoTitle": args.infoTitle,
+        "infoText": args.infoText,
+        "infoUrl": args.infoUrl,
+        "infoOwner": args.infoOwner
       }
     };
 

@@ -61,7 +61,7 @@ var ShellModel = {
   configure: function () {
     var config = this.initialConfig;
     if (this.get('canStart')) {
-
+      config.tools.sort((a, b) => a === b ? 0 : a.index > b.index ? 1 : -1);
       this.set('map', new MapModel(config.map));
       this.set('layerCollection', new LayerCollection(config.layers, { shell: this, mapConfig: config.map }));
       this.set('toolCollection', new ToolCollection(config.tools, { shell: this }));

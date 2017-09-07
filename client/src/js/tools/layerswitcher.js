@@ -99,9 +99,9 @@ var LayerSwitcherModel = {
    * Set visibility for all layers to false.
    * @instance
    */
-   toggleAllOff() {     
+   toggleAllOff() {
      var baseLayers = this.getBaseLayers();
-     this.get('layerCollection').forEach(layer => {       
+     this.get('layerCollection').forEach(layer => {
        var isBaseLayer = baseLayers.find(l => l.id === layer.id);
        if (!isBaseLayer) {
          layer.setVisible(false);
@@ -116,9 +116,11 @@ var LayerSwitcherModel = {
    */
   getBaseLayers: function () {
     var baseLayers = [];
-    this.get('baselayers').forEach(id => {
-      var layer = this.get('layerCollection').find(layer => layer.id === id);
+    this.get('baselayers').forEach(baseLayer => {
+      var layer = this.get('layerCollection').find(layer => layer.id === baseLayer.id);
       if (layer) {
+        layer.setVisible(baseLayer.visibleAtStart);
+        layer.getLayer().setVisible(layer.getVisible());
         baseLayers.push(layer);
       }
     });

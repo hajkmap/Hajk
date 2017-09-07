@@ -337,14 +337,14 @@ var DrawPanelView = {
       var icons = this.props.model.get('icons').split(',');
 
       return (
-        icons.map(icon => {
+        icons.map((icon, i) => {
           icon = icon.trim();
           if (icon === "br") {
-            return (<br />);
+            return (<br key={i} />);
           } else {
             var iconSrc = `assets/icons/${icon}.png`;
             return (
-              <div className={hasClass.call(this, icon)}>
+              <div key={i} className={hasClass.call(this, icon)}>
                 <img onClick={this.setMarkerImg} src={iconSrc}></img>
               </div>
             )
