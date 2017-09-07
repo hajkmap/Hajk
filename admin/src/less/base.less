@@ -2,10 +2,11 @@ body {
 	margin: 20px;
 	width: 1400px;
 	font-size: 12pt !important;
+	color: #373D3F;
 }
 
 input[type="text"] {
-	border: 1px solid #999;
+	border: 1px solid #ccc;
 	padding: 5px;
 	border-radius: 3px;
 }
@@ -29,7 +30,7 @@ article {
 	float: left;
 	margin: 50px;
 	margin-top: -5px;
-	max-width: 1000px;
+	max-width: 580px;
 }
 
 article textarea {
@@ -47,8 +48,8 @@ article label {
 }
 
 article input[type="text"] {
-	width: 400px;
 	margin-right: 5px;
+	margin-bottom: 5px;
 }
 
 form > div,
@@ -108,6 +109,38 @@ article fieldset > span > div {
 	overflow: auto;
 	padding: 5px;
 	cursor: pointer;
+}
+.layer-list-test {
+	display: block;
+    width: 95%;
+    height: 34px;
+    font-size: 14px;
+    line-height: 34px;
+    color: #555555;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+	overflow: auto;
+	cursor: pointer;
+	min-height: 250px;
+	max-height: 350px;
+	margin-left: 15px;
+}
+
+.label-block {
+	display: block;
+}
+
+.no-padding {
+	padding: 0 !important;
+}
+
+.no-margin-top {
+	margin-top: 0;
+}
+
+.label-margin {
+	margin-left: 15px;
 }
 
 .layer-list label {
@@ -226,7 +259,7 @@ body.dragging, body.dragging * {
 .tree-view {
 	float: left;
 	margin-left: 20px;
-	width: auto !import;
+	width: auto !important;
 }
 
 .tree-view ul {
@@ -241,11 +274,11 @@ body.dragging, body.dragging * {
 
 .tree-view .layer-node {
 	border: 1px solid #ccc;
-  background: #f8f8f8;
-  margin-bottom: 5px;
-  padding: 10px;
-  width: 100%;
-  cursor: pointer;
+  	background: #f8f8f8;
+ 	margin-bottom: 5px;
+	padding: 10px;
+	width: 100%;
+	cursor: pointer;
 }
 
 .tree-view .layer-node.visible {
@@ -352,6 +385,88 @@ body.dragging, body.dragging * {
 .sketch-picker {
 	display: inline-block
 }
+
+.text-display {
+	border: 1px solid #ccc;
+	padding: 6px 12px;
+	border-radius: 4px;
+	display: block;
+	width: 100%;
+	height: 34px;
+	font-size: 14px;
+	color: #a0a0a0;
+	margin: 0;
+
+}
+
+.layer-list-choosen-test {
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	display: block;
+	width: 100%;
+	min-height: 80px;
+	max-height: 350px;
+	overflow: auto;
+	cursor: pointer;
+}
+
+.layer-list-choosen-test ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.layer-list-choosen-test li {
+	padding: 5px;
+	margin: 5px;
+}
+
+.layer-list-choosen-test .layer {
+	display: inline-block;
+	padding: 4px;
+	border-radius: 3px;
+	background: #5cb85c;
+	color: white;
+	margin-right: 4px;
+	margin-bottom: 4px;
+}
+
+.layer-list-style-select-test {
+	display: inline-block;
+	width: 200px;
+	margin-left: 20px;
+	margin-top: auto;
+	margin-bottom: auto;
+}
+
+.list-item:first {
+	margin-top: 0;
+}
+.list-item {
+	padding: 7px;
+	width: 100%;
+	overflow: hidden;
+}
+.list-item li:hover {
+	background-color: #dedede; 
+}
+
+.overflow-hidden {
+	overflow: hidden;
+}
+
+.article-wrapper {
+	width: 580px;
+}
+
+.infoclick-heading {
+	padding-left: 15px;
+}
+
+.infoclick-box {
+	border: 1px solid #ccc;
+	margin-bottom: 5px;
+	border-radius: 4px;
 
 .tooltip-info {
   padding-left: 8px;
