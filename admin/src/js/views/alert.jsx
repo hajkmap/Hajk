@@ -26,9 +26,9 @@ import { Component } from 'react';
 class LayerAlert extends Component {
   constructor(props) {
     super(props);
-    this.state ={
-      queryable: false,
-      style: props.options.styles.length > 0 ? props.options.styles[0].Name: "",
+    this.state = {
+      queryable: props.options.queryable || false,
+      style: props.options.style  || (props.options.styles.length > 0 ? props.options.styles[0].Name: ""),
     };
   }
 
@@ -51,6 +51,7 @@ class LayerAlert extends Component {
                             id="infoclickable"
                             type="checkbox"
                             ref="input_queryable"
+                            checked={this.state.queryable}
                             onChange={ (e) => this._onQueryableChange(e) }
                           />
                         </div>

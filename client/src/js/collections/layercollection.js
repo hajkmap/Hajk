@@ -25,7 +25,8 @@ var types = {
   "vector": require('layers/wfslayer'),
   "wmts": require('layers/wmtslayer'),
   "data": require('layers/datalayer'),
-  "arcgis": require('layers/arcgislayer')
+  "arcgis": require('layers/arcgislayer'),
+  "extended_wms": require('layers/extendedwmslayer')
 };
 
 /**
@@ -145,6 +146,55 @@ var LayerCollection = {
           "FORMAT": args.imageFormat,
           "VERSION": "1.1.0",
           "SRS": properties.mapConfig.projection || "EPSG:3006",
+          "TILED": args.tiled
+        }
+      }
+    };
+
+    if (args.searchFields && args.searchFields[0]) {
+      config.options.search = {
+        "url": (HAJK2.searchProxy || "") + args.url.replace('wms', 'wfs'),
+        "featureType": args.layers[0].split(':')[1] || args.layers[0].split(':')[0],
+        "propertyName": args.searchFields.join(','),
+        "displayName": args.displayFields ? args.displayFields : (args.searchFields[0] || "Sökträff"),
+        "srsName": properties.mapConfig.projection || "EPSG:3006"
+      };
+    }
+
+    return config;
+  },
+
+  mapExtendedWMSConfig: function (args, properties) {
+    console.log("Extended wms args", args);
+    var config = {
+      type : args.type,
+      options: {
+        "id": args.id,
+        "url": (HAJK2.wmsProxy || "") + args.url,
+        "name": args.id,
+        "caption": args.caption,
+        "visible": args.visibleAtStart,
+        "opacity": 1,
+        "queryable": args.queryable === false ? false : true,
+        "information": args.infobox,
+        "resolutions": properties.mapConfig.resolutions,
+        "projection": args.projection || properties.mapConfig.projection || "EPSG:3006",
+        "origin": properties.mapConfig.origin,
+        "extent": properties.mapConfig.extent,
+        "singleTile": args.singleTile || false,
+        "imageFormat": args.imageFormat || "image/png",
+        "serverType": args.serverType || "geoserver",
+        "attribution": args.attribution,
+        "legend" : [/*{
+          "Url": getLegendUrl(args),
+          "Description" : "Teckenförklaring"
+        }*/],
+        "layersconfig": args.layers,
+        "params": {
+          "LAYERS": args.layers.map(function (l) { return l.name; }).join(','),
+          "STYLES": args.layers.map(function (l) { return l.style || ""; }).join(','),
+          "FORMAT": args.imageFormat,
+          "VERSION": "1.1.0",
           "TILED": args.tiled
         }
       }
@@ -287,12 +337,16 @@ var LayerCollection = {
    * @return {Layer} layer
    */
   model: function (args, properties) {
-
     var config = false;
 
     if (args.type === "wms") {
       config = LayerCollection.mapWMSConfig(args, properties);
     }
+
+    if(args.type === "extended_wms") {
+      config = LayerCollection.mapExtendedWMSConfig(args, properties);
+    }
+
     if (args.type === "wmts") {
       config = LayerCollection.mapWMTSConfig(args, properties);
     }
@@ -306,9 +360,7 @@ var LayerCollection = {
     if (args.type === "vector") {
       config = LayerCollection.mapWFSConfig(args);
     }
-
     var Layer = types[config.type];
-
     if (Layer) {
       return new Layer(config.options, config.type);
     } else {

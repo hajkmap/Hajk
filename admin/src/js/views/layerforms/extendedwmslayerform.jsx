@@ -38,6 +38,7 @@ const defaultState = {
   date: "Fylls i per automatik",
   infobox: "",
   infoFormat: "",
+  legend: "",
   owner: "",
   url: "",
   searchFields: "",
@@ -48,24 +49,39 @@ const defaultState = {
   singleTile: false,
   version: "",
   imageFormat: "",
-  imageFormats: [],
-  coordSystem: "",
-  coordSystems: [],
-  serverType: 'geoserver',
+  projection: "",
+  serverType: "geoserver",
   drawOrder: 1,
   layerType: "ExtendedWMS",
   attribution: "",
-  infoclickFormats: [],
   layerSettings: {
     settings: true,
     visible: false,
-    infobox: "",
     styles: [],
-    legend: "",
+    queryable: false,
     confirmAction: () => { },
     denyAction: () => { }
   },
 };
+
+const supportedProjections = [
+  "EPSG:3006",
+  "EPSG:3007",
+  "EPSG:3008",
+  "EPSG:3009",
+  "EPSG:3010",
+  "EPSG:3011",
+  "EPSG:3012",
+  "EPSG:3013",
+  "EPSG:3014",
+  "EPSG:3015",
+  "EPSG:3016",
+  "EPSG:3017",
+  "EPSG:3018",
+  "EPSG:3021",
+  "EPSG:4326",
+  "EPSG:3857"
+];
 
 /**
  *
@@ -117,7 +133,7 @@ class ExtendedWMSLayerForm extends Component {
     if (e.target.checked === true) {
       this.state.addedLayers.push({
         name: checkedLayer,
-        queryable: true,
+        queryable: false,
         style: ""
       });
     } else {
@@ -132,6 +148,7 @@ class ExtendedWMSLayerForm extends Component {
   renderSelectedLayers() {
     if (!this.state.addedLayers) return null;
     function uncheck(layer) {
+      
       this.appendLayer({
         target: {
           checked: false
@@ -226,7 +243,7 @@ class ExtendedWMSLayerForm extends Component {
         }
       });
       layer.layers.forEach(layer => {
-        this.refs[layer].checked = true;
+        this.refs[layer.name].checked = true;
       });
       if (callback) callback();
     });
@@ -297,17 +314,21 @@ class ExtendedWMSLayerForm extends Component {
     return formats;
   }
 
-  setCoordSystems() {
-    let systems = null;
+  setProjections() {
+    let projections = null;
     if(this.state.capabilities) {
-      systems = this.state.capabilities.Capability.Layer.CRS;
+      projections = this.state.capabilities.Capability.Layer.CRS;
     }
 
-    let coordElements = systems ? systems.map((system, i) => {
-      return <option key={i}>{system}</option>;
+    let projEles = projections ? projections.map((proj, i) => {
+      if(supportedProjections.includes(proj)) {
+        return <option key={i}>{proj}</option>;
+      } else {
+        return "";
+      }
     }) : "";
 
-    return coordElements;
+    return projEles;
   }
 
   getLayer() {
@@ -319,19 +340,22 @@ class ExtendedWMSLayerForm extends Component {
       owner: this.getValue("owner"),
       date: this.getValue("date"),
       content: this.getValue("content"),
+      legend: this.getValue("legend"),
       layers: this.getValue("layers"),
       searchFields: this.getValue("searchFields"),
       displayFields: this.getValue("displayFields"),
       visibleAtStart: this.getValue("visibleAtStart"),
       infoFormat: this.getValue("infoFormat"),
+      infobox: this.getValue("infobox"),
       singleTile: this.getValue("singleTile"),
       imageFormat: this.getValue("imageFormat"),
-      //serverType: this.getValue("serverType"),
-      serverType: "geoserver", //TODO: Ej hårdkodat
+      serverType: this.getValue("serverType"),
       tiled: this.getValue("tiled"),
       drawOrder: this.getValue("drawOrder"),
-      attribution: this.getValue("attribution")
-      
+      attribution: this.getValue("attribution"),
+      projection: this.getValue("projection")
+
+
     };
   }
 
@@ -342,7 +366,6 @@ class ExtendedWMSLayerForm extends Component {
     var input = this.refs["input_" + fieldName]
       , value = input ? input.value : "";
     
-
     if (fieldName === 'date') value = create_date();
     if (fieldName === 'visibleAtStart') value = input.checked;
     if (fieldName === 'singleTile') value = input.checked;
@@ -414,15 +437,15 @@ class ExtendedWMSLayerForm extends Component {
    * @param {*} layer 
    */
   setLayerSettings(layer) {
+
     //Hämta från capabilities det layer.layer som matchar namnet
     let currentLayer = this.state.capabilities.Capability.Layer.Layer.find(l => {
       return l.Name === layer.name;
     });
-    
     //om lagret har styles, hämta dessa, annars, returnera meddelande
-    let layerStyles = currentLayer.Style ? currentLayer.Style.map((style) => {
-      return <option key={this.createGuid()}>{style.Name}</option>;
-    }) : <option key={this.createGuid()} value="">{"Inga styles hittades"}</option>;
+    let layerStyles = currentLayer.Style ? currentLayer.Style.map((style, index) => {
+      return <option key={index}>{style.Name}</option>;
+    }) : <option key={index} value=""></option>;
 
     //Sätt det state som behövs för att modalen skall populeras och knapparna skall fungera
     this.setState({
@@ -430,7 +453,9 @@ class ExtendedWMSLayerForm extends Component {
         settings: true,
         visible: true,
         styles: currentLayer.Style || [],
+        style: layer.style,
         name: layer.name,
+        queryable: layer.queryable,
         //confirmAction anropas från LayerAlert- komponenten och result är alertens state  
         confirmAction: (result) => {
           this.saveLayerSettings(result, layer.name);
@@ -496,22 +521,12 @@ class ExtendedWMSLayerForm extends Component {
               <span onClick={(e) => { this.loadWMSCapabilities(e) }} className="btn btn-default btn-sm">Ladda {loader}</span>
             </div>
           </div>
-          <div className="col-md-6">
-            <div className="form-group">
-              <label>Infoklick-format</label>
-              <select
-                className="form-control"
-                onChange={(e) => this.setState({selectedFormat: e.target.value })}>
-                {this.setFormats()}
-              </select>
-            </div>
-          </div>
         </div>
         <div className="row">
           <div className="col-md-6">
             <div className="form-group">
               <label>Bildformat</label>
-              <select ref="input_imageFormat" onChange={(e) => this.setState({ imageFormat: e.target.value })} className="form-control">
+              <select ref="input_imageFormat" value={this.state.imageFormat} onChange={(e) => this.setState({ imageFormat: e.target.value })} className="form-control">
                 {this.setImageFormats()}
               </select>
             </div>
@@ -527,8 +542,8 @@ class ExtendedWMSLayerForm extends Component {
           <div className="col-md-6">
             <div className="form-group">
               <label>Koordinatsystem</label>
-              <select ref="input_coordSystems" value={this.state.coordSystem} onChange={(e) => this.setState({ coordSystem: e.target.value })} className="form-control">
-                {this.setCoordSystems()}
+              <select ref="input_projection" value={this.state.projection} onChange={(e) => this.setState({ projection: e.target.value })} className="form-control">
+                {this.setProjections()}
               </select>
             </div>
           </div>
@@ -603,6 +618,49 @@ class ExtendedWMSLayerForm extends Component {
               <span ref="input_date" className="text-display"><i>{this.props.model.parseDate(this.state.date)}</i></span>
             </div>
           </div>
+          <div className="col-md-6">
+          <div className="form-group">
+            <label>Upphovsrätt</label>
+            <input
+              type="text"
+              ref="input_attribution"
+              onChange={(e) => {
+                this.setState({attribution: e.target.value});
+                this.validateField("attribution", e);
+              }}              
+              value={this.state.attribution}
+              className={"form-control " + this.getValidationClass("attribution")}
+            />
+          </div>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-md-6">
+            <div className="form-group">
+              <label>Teckenförklaring</label>
+              <input
+                type="text"
+                ref="input_legend"
+                className="form-control"
+                value={this.state.legend}
+                onChange={(e) => this.setState({'legend': e.target.value})}
+              />
+              <span onClick={(e) => { this.props.setNewLegend(e) }} className="btn btn-default">Välj fil {imageLoader}</span>
+            </div>
+          </div>
+          <div className="col-md-6">
+            <div>
+              <label>Servertyp</label>
+              <select 
+                className="form-control"
+                ref="input_serverType" 
+                value={this.state.serverType} 
+                onChange={(e) => this.setState({'serverType': e.target.value})}>
+                <option>geoserver</option>
+                <option>arcgis</option>
+              </select>
+            </div>
+          </div>
         </div>
         <div className="row">
           <div className="col-md-6">
@@ -630,19 +688,17 @@ class ExtendedWMSLayerForm extends Component {
                 checked={this.state.singleTile}
               />
             </div>
-            <div className="col-md-6">
-              <div className="form-group">
-                <label>Teckenförklaring</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={this.state.legend}
-                  onChange={(e) => this.setState({'legend': e.target.value})}
-                />
-                <span onClick={(e) => { this.props.setNewLegend(e) }} className="btn btn-default">Välj fil {imageLoader}</span>
-              </div>
-            </div>
           </div>
+          <div style={{display: "none"}}>
+              <label>Infoklick-format</label>
+              <select
+                className="form-control"
+                ref="input_infoFormat"
+                value={this.state.infoFormat}
+                onChange={(e) => this.setState({selectedFormat: e.target.value })}>
+                {this.setFormats()}
+              </select>
+            </div>
           <div style={{display: "none"}}>
           <label>Geowebcache</label>
           <input

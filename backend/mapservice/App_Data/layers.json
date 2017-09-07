@@ -563,15 +563,39 @@
       "caption": "tet",
       "url": "http://194.71.132.27/geoserver/wms",
       "owner": "",
-      "date": "1503490803972",
+      "date": "1504768640390",
       "content": "ets",
-      "legend": "estst",
+      "legend": "",
       "projection": null,
       "layers": [
         "motala:Areor_potentiell_nytta",
         "motala:Artportalen"
       ],
       "infobox": "setstst",
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": ""
+    },
+    {
+      "id": "45",
+      "caption": "Testlager",
+      "url": "http://localhost/geoserver/demo/wms",
+      "owner": "",
+      "date": "1504769684430",
+      "content": "",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "adresser",
+        "fastighetsyta"
+      ],
+      "infobox": "",
       "searchFields": null,
       "displayFields": null,
       "visibleAtStart": false,
@@ -1031,36 +1055,71 @@
   "arcgislayers": [],
   "extendedwmslayers": [
     {
-      "id": "40",
-      "caption": "Spearfish archeological sites",
-      "url": "http://localhost/geoserver/wms",
+      "id": "43",
+      "caption": "Kommuner",
+      "url": "http://194.71.132.27/geoserver/wms",
       "owner": "",
-      "date": "1503490780917",
-      "content": "Sample data from GRASS, archeological sites location, Spearfish, South Dakota, USA",
-      "projection": null,
-      "infoFormat": "",
+      "date": "1504768811212",
+      "content": "",
+      "projection": "EPSG:3011",
+      "infoFormat": "text/plain",
+      "infobox": "Inforuta",
+      "legend": "",
       "layers": [
         {
-          "infobox": "asf",
-          "style": "",
+          "style": "Mynningspunkt",
           "queryable": true,
-          "legend": "w4t",
-          "name": "nurc:Pk50095"
+          "name": "vattenfall:MYNNINGSPUNKTER"
         },
         {
-          "infobox": "sef",
-          "style": "burg",
+          "style": "viskan_kommun",
           "queryable": true,
-          "legend": "sef",
-          "name": "sf:archsites"
+          "name": "viskan:Kommun"
+        },
+        {
+          "style": "motala_kommun",
+          "queryable": true,
+          "name": "motala:Kommuner"
         }
       ],
       "searchFields": null,
       "displayFields": null,
       "visibleAtStart": false,
-      "tiled": true,
+      "tiled": false,
       "singleTile": false,
-      "imageFormat": "application/json;type=utfgrid",
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": ""
+    },
+    {
+      "id": "46",
+      "caption": "Adresser",
+      "url": "http://localhost/geoserver/demo/wms",
+      "owner": "",
+      "date": "1504771222623",
+      "content": "",
+      "projection": "EPSG:3006",
+      "infoFormat": "text/plain",
+      "infobox": "",
+      "legend": "",
+      "layers": [
+        {
+          "style": "polygon2",
+          "queryable": true,
+          "name": "fastighetsyta"
+        },
+        {
+          "style": "point",
+          "queryable": false,
+          "name": "adresser"
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
       "serverType": "geoserver",
       "attribution": ""
     }

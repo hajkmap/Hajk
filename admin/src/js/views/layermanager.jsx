@@ -241,7 +241,6 @@ class Manager extends Component {
         mode: "edit",
         layerType: "ExtendedWMS"
       });
-
       setTimeout(() => {
         this.refs["ExtendedWMSLayerForm"].setState({
           id: layer.id,
@@ -261,7 +260,9 @@ class Manager extends Component {
           serverType: layer.serverType,
           drawOrder: layer.drawOrder,
           addedLayers: [],
-          layerType: layer.type
+          layerType: layer.type,
+          projection: layer.projection,
+          infoFormat: layer.infoFormat
         });
 
         this.refs["ExtendedWMSLayerForm"].loadLayers(layer, () => {
@@ -312,7 +313,6 @@ class Manager extends Component {
    */
   describeLayer(e, layerName) {
     this.props.model.getLayerDescription(this.refs.input_url.value, layerName, (properties) => {
-      //console.log("layermanager: " + properties + ", " + layerName);
       this.setState({
         layerProperties: properties,
         layerPropertiesName: layerName
@@ -432,8 +432,8 @@ class Manager extends Component {
           displayType = "";
           break;
         case 'ExtendedWMS':
-        displayType = "(Extended WMS)";
-        break;
+          displayType = "(Extended WMS)";
+          break;
         case 'WMTS':
           displayType = "(WMTS)";
           break;
@@ -521,9 +521,8 @@ class Manager extends Component {
       layer.type = this.state.layerType;
       layer.id = null;
       this.props.model.addLayer(layer, success => {
-        this.whenLayerAdded(success,  layer.date);
+        this.whenLayerAdded(success, layer.date);
       });
-
     }
 
     if (this.state.mode === "edit") {

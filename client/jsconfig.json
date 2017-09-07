@@ -77,6 +77,7 @@
         "tools/preset": "./src/js/tools/preset.js",
         "layers/layer": "./src/js/layers/layer.js",
         "layers/wmslayer": "./src/js/layers/wmslayer.js",
+        "layers/extendedwmslayer": "./src/js/layers/extendedwmslayer.js",
         "layers/arcgislayer": "./src/js/layers/arcgislayer.js",
         "layers/wmtslayer": "./src/js/layers/wmtslayer.js",
         "layers/wfslayer": "./src/js/layers/wfslayer.js",

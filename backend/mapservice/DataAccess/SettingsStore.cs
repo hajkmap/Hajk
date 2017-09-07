@@ -206,10 +206,16 @@ namespace MapService.DataAccess
             this.saveLayerConfigToFile(layerConfig);
         }
 
-
         internal void UpdateExtendedWMSLayer(ExtendedWmsConfig layer)
         {
             LayerConfig layerConfig = this.readLayerConfigFromFile();
+
+            var index = layerConfig.extendedwmslayers.FindIndex(item => item.id == layer.id);
+            if (index != -1)
+            {
+                layerConfig.extendedwmslayers[index] = layer;
+            }
+            this.saveLayerConfigToFile(layerConfig);
         }
 
 

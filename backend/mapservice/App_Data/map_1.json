@@ -183,12 +183,7 @@
             "expanded": false,
             "layers": [
               {
-                "id": "26",
-                "visibleAtStart": false,
-                "drawOrder": 1000
-              },
-              {
-                "id": "7",
+                "id": "46",
                 "visibleAtStart": false,
                 "drawOrder": 1000
               }
@@ -307,7 +302,7 @@
       "options": {
         "text": "Information om kartan.",
         "headerText": "Information",
-        "visibleAtStart": true
+        "visibleAtStart": false
       }
     },
     {
