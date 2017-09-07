@@ -86,6 +86,9 @@ var LayerItemView = {
   onVisibleChanged: function () {
     if (this.props.layer) {
       this.props.layer.getLayer().setVisible(this.props.layer.getVisible());
+      if (this.props.layer.getLayer().getVisible() && this.props.layer.id == '500'){
+        this.props.layer.attributes.map.getMap().getView().setCenter([165296.31, 6331683.28])
+      }
     }
     this.setState({
       visible: this.props.layer.getVisible()
