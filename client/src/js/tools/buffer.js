@@ -110,7 +110,7 @@ var BufferModel = {
       style: this.getDefaultStyle()
     }));
 
-    var style_marker = new ol.style.Style({
+    this.set('style_marker', new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 0.5],
         anchorXUnits: 'fraction',
@@ -119,17 +119,17 @@ var BufferModel = {
         src: 'assets/icons/dot_marker_blue.png',
         scale: (0.5)
       })
-    });
+    }));
 
     this.set('markerlayer', new ol.layer.Vector({
       source: new ol.source.Vector(),
       name: 'bufferMarkerLayer',
       queryable: false,
-      style: style_marker
+      style: this.get('style_marker')
     }));
 
     // popupHighlight style
-    var style_popup = new ol.style.Style({
+    this.set('style_popup', new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 0.5],
         anchorXUnits: 'fraction',
@@ -138,13 +138,13 @@ var BufferModel = {
         src: 'assets/icons/Markering_A_stor.png',
         scale: (1.5)
       })
-    });
+    }));
 
     this.set("layer_popup", new ol.layer.Vector({
         source: new ol.source.Vector(),
         name: "popupHighlight",
         queryable: false,
-        style: style_popup
+        style: this.get('style_popup')
       })
     );
 
@@ -193,8 +193,10 @@ var BufferModel = {
   placeMarker: function(event){
 
     if (this.get('marker') === undefined){
-      this.set('marker', new ol.Feature());
+      var ft =  new ol.Feature();
+      this.set('marker', ft);
       this.get('markerlayer').getSource().addFeature(this.get('marker'));
+      ft.setStyle(this.get('style_marker'));
     }
 
     this.get('marker').setGeometry(new ol.geom.Point(event.coordinate));
@@ -266,6 +268,7 @@ var BufferModel = {
 
     this.get('bufferLayer').getSource().clear();
     this.get('bufferLayer').getSource().addFeature(circleFeature);
+    circleFeature.setStyle(this.getDefaultStyle());
 
 
 
@@ -414,7 +417,7 @@ var BufferModel = {
     this.set('foundFeatures', foundFeatures);
   },
 
-  popupIcons: function(event){
+  popupIcons: function(event) {
     var coord = event.target.attributes.coord.value.split(',');
     coord = [parseFloat(coord[1]), parseFloat(coord[0])];
     var point = new ol.geom.Point([
@@ -425,11 +428,10 @@ var BufferModel = {
     this.get('layer_popup').getSource().clear();
 
     // create feature
-    this.get('layer_popup').getSource().addFeature(
-      new ol.Feature({
-        geometry: point
-      })
-    );
+    var ft = new ol.Feature({geometry: point});
+    this.get('layer_popup').getSource().addFeature(ft);
+    ft.setStyle(this.get('style_popup'));
+
   },
 
 

@@ -135,6 +135,7 @@ var RoutingModel = {
 
     this.get('layer_start').getSource().clear();
     this.get('layer_start').getSource().addFeature(startPoint);
+    startPoint.setStyle(style_start);
 
     var pos = this.get('position');
     pos.latitude = lat;
@@ -156,6 +157,7 @@ var RoutingModel = {
 
     this.get('layer_end').getSource().clear();
     this.get('layer_end').getSource().addFeature(endPoint);
+    endPoint.setStyle(style_end);
 
     var pos = this.get('position');
     pos.latitudeEnd = lat;
@@ -220,7 +222,7 @@ var RoutingModel = {
 
   // Executed once when the panel is loaded
   initStartPoint: function() {
-    var style_start = new ol.style.Style({
+    style_start = new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 0.5],
         anchorXUnits: 'fraction',
@@ -231,7 +233,7 @@ var RoutingModel = {
       })
     });
 
-    var style_end = new ol.style.Style({
+    style_end = new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 0.5],
         anchorXUnits: 'fraction',
@@ -242,7 +244,7 @@ var RoutingModel = {
       })
     });
 
-    var style_route = new ol.style.Style({
+    style_route = new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 0.5],
         anchorXUnits: 'fraction',
@@ -255,7 +257,7 @@ var RoutingModel = {
 
     this.set('style_route_normal', style_route);
 
-    var style_route_highlight = new ol.style.Style({
+    style_route_highlight = new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 0.5],
         anchorXUnits: 'fraction',
@@ -268,12 +270,24 @@ var RoutingModel = {
 
     this.set('style_route_highlight', style_route_highlight);
 
-    var style_drawing = new ol.style.Style({
+    layer_drawing_style =  new ol.style.Style({
+      fill: new ol.style.Fill({
+        color: 'rgba(255, 255, 255, 0.5)'
+      }),
       stroke: new ol.style.Stroke({
-        width: 4,
-        color: [255, 0, 0, 0.8]
-      })
-    });
+        color: 'rgba(0, 0, 255, 0.5)',
+        width: 4
+      }),
+      image: new ol.style.Circle({
+        radius: 6,
+        fill: new ol.style.Fill({
+          color: 'rgba(0, 0, 0, 0.5)'
+        }),
+        stroke: new ol.style.Stroke({
+          color: 'rgba(255, 255, 255, 0.5)',
+          width: 2
+        })
+      })});
 
     var source_start = new ol.source.Vector({});
     var source_end = new ol.source.Vector({});
@@ -308,9 +322,9 @@ var RoutingModel = {
       this.set("layer_drawing", new ol.layer.Vector({
         source: source_drawing,
         name: "routing",
-        content: "Punkt",
+        content: "linje",
         queryable: false,
-        style: style_drawing
+        style: layer_drawing_style
       }));
 
       this.get('map').addLayer(this.get('layer_start'));
@@ -337,11 +351,9 @@ var RoutingModel = {
       ]);
       var transformed = ol.proj.transform(point.getCoordinates(), "EPSG:4326", this.get('map').getView().getProjection());
       point.setCoordinates(transformed);
-      this.get('layer_start').getSource().addFeature(
-        new ol.Feature({
-          geometry: point
-        })
-      );
+      var ft = new ol.Feature({geometry: point});
+      ft.setStyle(style_start);
+      this.get('layer_start').getSource().addFeature(ft);
       this.get('map').getView().setCenter(point.getCoordinates());
     }
   },
@@ -399,6 +411,7 @@ var RoutingModel = {
 
       var tmpFeature = new ol.Feature({geometry: point, information: steps[i].html_instructions});
       tmpFeature.number = "" + n;
+      tmpFeature.setStyle(style_route);
       layer.getSource().addFeature(tmpFeature);
       var n = i + 1;
       // route features
@@ -433,12 +446,13 @@ var RoutingModel = {
     }));
 
     layer_drawing.getSource().clear();
-    layer_drawing.getSource().addFeature(
-      new ol.Feature({
-        type: 'routing',
-        geometry: routePath
-      })
-    );
+    var ft = new ol.Feature({
+      type: 'routing',
+      geometry: routePath
+    });
+    ft.setStyle(layer_drawing_style);
+
+    layer_drawing.getSource().addFeature(ft);
     var centerLat = (this.get('position').latitude + this.get('position').latitudeEnd) / 2;
     var centerLon = (this.get('position').longitude + this.get('position').longitudeEnd) / 2;
     map.getView().setCenter(ol.proj.transform([centerLon, centerLat], 'EPSG:4326', 'EPSG:3007'));
@@ -471,12 +485,9 @@ var RoutingModel = {
     var routePath = new ol.format.Polyline({
     }).readGeometry(steps);
 
-    this.get('layer_drawing').getSource().addFeature(
-      new ol.Feature({
-        type: 'routing',
-        geometry: routePath
-      })
-    );
+    var ft = new ol.Feature({type: 'routing', geometry: routePath});
+    ft.setStyle(style_route);
+    this.get('layer_drawing').getSource().addFeature(ft);
 
 
   },
