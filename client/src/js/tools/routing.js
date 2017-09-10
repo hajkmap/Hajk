@@ -81,7 +81,6 @@ var RoutingModel = {
   /* Get a current position from GPS(button right top)*/
   turnOnGPSClicked: function() {
 
-    console.log('positioning is ' + (positioning ? 'true': 'false'));
     if (positioning === undefined || !positioning) {
       this.getLocation();
     }
@@ -122,7 +121,6 @@ var RoutingModel = {
 
   /* Choose a starting location on the map manually. and drop a pin */
   startPointSelection: function(event){
-    console.log('Running startPointSelection');
     positioning = false;
     var startPoint = new ol.Feature(); /* startPoint and point(below) must be the same l.134*/
     startPoint.setGeometry(new ol.geom.Point(event.coordinate));
@@ -132,7 +130,6 @@ var RoutingModel = {
     //console.log(test);
     //var lonlat = startPoint.getGeometry().getCoordinates();
     var lonlat = ol.proj.transform(startPoint.getGeometry().getCoordinates(), 'EPSG:3007', 'EPSG:4326');
-    console.log(lonlat);
     var lon = lonlat[0];
     var lat = lonlat[1];
 
@@ -143,16 +140,13 @@ var RoutingModel = {
     pos.latitude = lat;
     pos.longitude = lon;
     this.set('position', pos);
-    console.log('position is now, ' + this.get('position'));
    },
 
   setTravelMode: function(travelmode){
-    console.log('Travelmode is now ' + travelmode);
     this.set('travelMode', travelmode);
   },
 
   endPointSelection: function(event){
-    console.log('Running endPointSelection');
     var endPoint = new ol.Feature();
     endPoint.setGeometry(new ol.geom.Point(event.coordinate));
 
@@ -171,7 +165,6 @@ var RoutingModel = {
 
 
   activateStartMode: function(){
-    console.log('activating start mode');
     this.set('state', 'choose_start');
     if(this.get('onEndKey') !== undefined) {
       ol.Observable.unByKey(this.get('onEndKey'));
@@ -187,7 +180,6 @@ var RoutingModel = {
   },
 
   activateEndMode: function(){
-    console.log('activating end mode');
     this.set('state', 'choose_end');
     if(this.get('onStartKey') !== undefined) {
       ol.Observable.unByKey(this.get('onStartKey'));
@@ -209,7 +201,6 @@ var RoutingModel = {
   },
 
   activateRoutingMode: function(){
-    console.log('activating routing mode');
     this.set('state', 'show_route');
     if(this.get('onStartKey') !== undefined) {
       ol.Observable.unByKey(this.get('onStartKey'));
@@ -221,7 +212,6 @@ var RoutingModel = {
     }
 
     if(this.get('onRoutingKey') === undefined) {
-      console.log('initing routingKey');
       //this.set('onRoutingKey', this.get('map').on('singleclick', this.showRoutingInfoPopup.bind(this)));
     }
     this.searchTrip();
@@ -291,7 +281,6 @@ var RoutingModel = {
     var source_drawing = new ol.source.Vector({});
 
     if (this.get('layer_start') === undefined) {
-      console.log('creating start layer');
       this.set("layer_start", new ol.layer.Vector({
         source: source_start,
         name: "routing",
@@ -336,7 +325,6 @@ var RoutingModel = {
     pos.latitude = event.coords.latitude;
     pos.longitude = event.coords.longitude;
     this.set('position', pos);
-    console.log('position is now, ' + this.get('position'));
     this.setPosition();
   },
 
@@ -359,25 +347,19 @@ var RoutingModel = {
   },
 
   configure: function (shell) {
-    console.log('Running configure for routing');
     this.set('map', shell.getMap().getMap());
   },
 
   searchTrip: function(){
-    console.log('running searchtrip');
     this.set({'state': undefined});
     var pos = this.get('position');
     if(pos.latitude === undefined || pos.longitude === undefined ||
   pos.latitudeEnd === undefined || pos.longitudeEnd === undefined){
-      console.log(pos, pos.latitude + ',' + pos.longitude + ',' + pos.latitudeEnd + ',' + pos.longitudeEnd);
       alert('Välj start och slut');
     } else {
       ol.Observable.unByKey(this.get('onEndKey'));
-      console.log('Will search for trip');
       var mode = this.get('travelMode');
-      console.log('mode is:' + mode);
       var url = 'https://karta2.varberg.se/maps/api/directions/json?mode=' + mode + '&origin=' + pos.latitude + ',' + pos.longitude + '&destination=' + pos.latitudeEnd + ',' + pos.longitudeEnd +'&key=' + this.get('apiKey');
-      console.log('url is: ' + url);
     var request =$.ajax({
         url: url,
         type: "post",
@@ -395,14 +377,12 @@ var RoutingModel = {
   },
 
   plotRoute: function(res, map, layer, layer_drawing) {
-    console.log(res);
 
     var routeResult = "";
     layer.getSource().clear();
     var steps = res.routes[0].legs[0].steps;
     var routeDiv = document.createElement('div');
     var p = document.createElement('p');
-    console.log(res.routes[0].legs[0].distance.text);
     p.innerHTML = '<b>Färdsätt:</b>' + res.routes[0].legs[0].steps[0].travel_mode + '<br>' + '<b>Avstånd:</b> ' + res.routes[0].legs[0].distance.text +'('+res.routes[0].legs[0].distance.value+'m)' + '<br>' + '<b>Tid:</b> ' + res.routes[0].legs[0].duration.text + '<br>' + '<b>Startadress:</b> ' + res.routes[0].legs[0].start_address + '<br>' + '<b>Slutadress:</b> ' + res.routes[0].legs[0].end_address;
     routeDiv.appendChild(p);
     for(var i = 0; i < steps.length; i++){
@@ -413,18 +393,13 @@ var RoutingModel = {
         lng,
         lat
       ]);
-      console.log('1 ' + lat + ', ' + lng);
       var transformed = ol.proj.transform(point.getCoordinates(), "EPSG:4326", "EPSG:3007");
-      console.log('2');
       point.setCoordinates(transformed);
-      console.log('3 ' + transformed);
 
 
       var tmpFeature = new ol.Feature({geometry: point, information: steps[i].html_instructions});
-      console.log('4');
       tmpFeature.number = "" + n;
       layer.getSource().addFeature(tmpFeature);
-      console.log('5');
       var n = i + 1;
       // route features
       var tmpLi = document.createElement('li');
@@ -448,7 +423,6 @@ var RoutingModel = {
     // put result into the table
     document.getElementById('resultList').appendChild(routeDiv);
 
-    console.log('6');
     var routePath = new ol.format.Polyline({
     }).readGeometry(res.routes[0].overview_polyline.points);
 
@@ -458,7 +432,6 @@ var RoutingModel = {
       featureProjection: 'EPSG:3007'
     }));
 
-    console.log('7');
     layer_drawing.getSource().clear();
     layer_drawing.getSource().addFeature(
       new ol.Feature({
@@ -466,11 +439,8 @@ var RoutingModel = {
         geometry: routePath
       })
     );
-    console.log('8');
     var centerLat = (this.get('position').latitude + this.get('position').latitudeEnd) / 2;
     var centerLon = (this.get('position').longitude + this.get('position').longitudeEnd) / 2;
-    console.log(centerLat);
-    console.log(centerLon);
     map.getView().setCenter(ol.proj.transform([centerLon, centerLat], 'EPSG:4326', 'EPSG:3007'));
     map.getView().fit(layer_drawing.getSource().getExtent(), map.getSize());
 
@@ -590,7 +560,6 @@ var RoutingModel = {
    */
 
   onCloseTab: function() {
-    console.log('Cleaning up');
     this.get('layer_start').getSource().clear();
     this.get('layer_end').getSource().clear();
     this.get('layer_route').getSource().clear();

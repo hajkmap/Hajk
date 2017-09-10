@@ -86,9 +86,7 @@ var RoutingPanelView = {
    * @return {external:ReactElement}
    */
   render: function () {
-    console.log('Start of render');
     this.props.model.initStartPoint();
-    console.log('After init');
 
     return(
       <Panel title="Navigation"  onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>

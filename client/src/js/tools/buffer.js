@@ -102,8 +102,6 @@ var BufferModel = {
     this.set('olMap', shell.getMap().getMap());
     this.set('layersWithNames', shell.attributes.layers);
     this.set('layersCollection', shell.getLayerCollection());
-    console.log('#################################### shell');
-    console.log(shell);
 
     this.set('bufferLayer', new ol.layer.Vector({
       source: new ol.source.Vector(),
@@ -234,7 +232,6 @@ var BufferModel = {
    */
   buffer: function() {
 
-    console.log('buffering');
     if (this.get('marker') === undefined){
       return false;
     }
@@ -260,7 +257,6 @@ var BufferModel = {
 
 
     var lonlat = ol.proj.transform(this.get('marker').getGeometry().getCoordinates(), 'EPSG:3007', 'EPSG:4326');
-    console.log(lonlat);
     var lon = lonlat[0];
     var lat = lonlat[1];
 
@@ -272,7 +268,6 @@ var BufferModel = {
     this.get('bufferLayer').getSource().addFeature(circleFeature);
 
 
-    console.log('buffering6');
 
     document.getElementById('visibleLayerList').innerHTML = '';
     if(activeNames.length == 0){
@@ -351,13 +346,11 @@ var BufferModel = {
   putFeaturesInResult: function(res){
 
     var featureMembers = res.getElementsByTagName('gml:featureMember');
-    console.log(featureMembers);
 
     var foundFeatures = {};
     var str = '';
     for(var i = 0; i < featureMembers.length; i++){
       var nameTag = featureMembers[i].getElementsByTagName('varberg:namn')[0];
-      console.log(nameTag);
       var name = nameTag.innerHTML;
       var categoryName = nameTag.parentElement.localName;
 
