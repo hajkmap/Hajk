@@ -549,14 +549,6 @@ var ExportModel = {
             holes = geom.getCoordinates()[0].slice(1, geom.getCoordinates()[0].length);
           }
 
-      coords = type === "Circle"
-        ? as2DPairs([geom.getCenter(), [geom.getRadius(), 0]], "Circle")
-        : as2DPairs(geom.getCoordinates(), type);
-
-      if (type === "MultiPolygon") {
-        holes = geom.getCoordinates()[0].slice(1, geom.getCoordinates()[0].length);
-      }
-
       return {
         type: type,
         attributes: {

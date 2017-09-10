@@ -80,10 +80,13 @@ var BufferPanelView = {
    */
   render: function () {
     return (
-      <Panel title="Ulvalsområde" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked}>
+      <Panel title="Urvalsområde" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked}>
         <div className="panel-content">
           <p>
-            Detta verktyg skapar en zon med angivet avstånd runt valda objekt i kartan.
+            Tryck på plusknappen för att sätta ut en mittpunkt på kartan.
+            Ange önskat avstånd från mittpunkt (radie)
+            Tryck på ”Skapa buffertzon”
+            Under rubriken ”Objekt inom buffertzon” skapas en lista på de objekt som finns inom buffertzonen utifrån de lager som du valt att visa i kartan.
           </p>
           <div className="panel panel-default">
             <div className="panel-heading">Sätt ut mittpunkt</div>

@@ -406,6 +406,7 @@ var LayerPanelView = {
     return (
       <Panel title="Lagerhanterare" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
         <div className="layer-panel">
+          <p>Klicka på en rubrik för att se respektive lagerlista. Bocka för de lager du vill visa i kartan. Klicka på <i class="fa fa-bars" aria-hidden="true"></i> för att se teckenförklaring</p>
           {toggleAllButton}
           <BackgroundSwitcher layers={this.props.model.getBaseLayers()} model={this.props.model}></BackgroundSwitcher>
           {groups}

@@ -45,6 +45,7 @@ var BufferModelProperties = {
   bufferDist: 1000,
   marker: undefined,
   markerPos: undefined,
+  popupHighlight: undefined
 }
 
 /**
@@ -129,31 +130,45 @@ var BufferModel = {
       style: style_marker
     }));
 
+    // popupHighlight style
+    var style_popup = new ol.style.Style({
+      image: new ol.style.Icon({
+        anchor: [0.5, 0.5],
+        anchorXUnits: 'fraction',
+        anchorYUnits: 'fraction',
+        opacity: 1.0,
+        src: 'assets/icons/Markering_A_stor.png',
+        scale: (1.5)
+      })
+    });
+
+    this.set("layer_popup", new ol.layer.Vector({
+        source: new ol.source.Vector(),
+        name: "popupHighlight",
+        queryable: false,
+        style: style_popup
+      })
+    );
+
     this.get('olMap').addLayer(this.get('bufferLayer'));
     this.get('olMap').addLayer(this.get('markerlayer'));
+    this.get('olMap').addLayer(this.get('layer_popup'));
+
 
     this.set('selectionModel', new SelectionModel({
       map: this.get('olMap'),
       layerCollection: shell.getLayerCollection()
     }));
-
-    // Move to onclick on the + button should be in .jsx
-    console.log('adding on klick');
-    //this.set('bufferMarkKey', this.get('olMap').on('singleclick', this.placeMarker.bind(this)));
-    console.log('onclick added');
   },
 
   activateBufferMarker: function(){
     if (this.get('bufferMarkKey') == undefined) {
-      console.log('activating');
       this.set('bufferMarkKey', this.get('olMap').on('singleclick', this.placeMarker.bind(this)));
     }
   },
 
   deActivateBufferMarker: function(){
-    console.log('trying to deactivagte');
     if(this.get('bufferMarkKey') !== undefined) {
-      console.log('deactivating');
       ol.Observable.unByKey(this.get('bufferMarkKey'));
       this.set('bufferMarkKey', undefined);
     }
@@ -179,8 +194,6 @@ var BufferModel = {
 
   placeMarker: function(event){
 
-    console.log('Running placeMarker');
-
     if (this.get('marker') === undefined){
       this.set('marker', new ol.Feature());
       this.get('markerlayer').getSource().addFeature(this.get('marker'));
@@ -192,8 +205,6 @@ var BufferModel = {
     //var test = ol.proj.transform(startPoint.getGeometry().getCoordinates(), 'EPSG:3007', 'EPSG:4326');
     //console.log(test);
     //var lonlat = startPoint.getGeometry().getCoordinates();
-    console.log('correct pos?');
-    console.log(this.get('marker').getGeometry().getCoordinates());
     var lonlat = ol.proj.transform(this.get('marker').getGeometry().getCoordinates(), 'EPSG:3007', 'EPSG:4326');
   },
 
@@ -232,18 +243,8 @@ var BufferModel = {
 
     var notFeatureLayers = ['150', '160', '170', '410', '420', '430', '440', '260', '310', '350', '360', '250', '230', '340', '330', '270', '280', '320', '325', '140', '220', '210'];
     var activeLayers = [];
-    console.log(this.get('layersCollection'));
-    console.log(this.get('layersCollection').length);
     for(var i = 0; i < this.get('layersCollection').length; i++){
-      /*console.log('start of loop');
-      console.log(this.get('layersCollection'));
-      console.log(this.get('layersCollection').models[i]);
-      console.log(this.get('layersCollection').models[i].getVisible());
-      console.log('id');
-      console.log(this.get('layersCollection').models[i].id);
-      console.log(notFeatureLayers.indexOf(this.get('layersCollection').models[i].id)); */
       if(this.get('layersCollection').models[i].getVisible() && notFeatureLayers.indexOf(this.get('layersCollection').models[i].id) != -1){
-        console.log('visible, real layer');
         activeLayers.push(this.get('layersCollection').models[i]);
       }
     }
@@ -257,24 +258,17 @@ var BufferModel = {
       }
     }
 
-    console.log('activeNames');
-    console.log(activeNames);
 
-    console.log('buffering2');
     var lonlat = ol.proj.transform(this.get('marker').getGeometry().getCoordinates(), 'EPSG:3007', 'EPSG:4326');
     console.log(lonlat);
     var lon = lonlat[0];
     var lat = lonlat[1];
 
-    console.log(this.get('bufferDist'));
     var circle = new ol.geom.Circle(this.get('marker').getGeometry().getCoordinates(), Number(this.get('bufferDist')));
 
-    console.log('buffering3');
     var circleFeature = new ol.Feature(circle);
 
-    console.log('buffering4');
     this.get('bufferLayer').getSource().clear();
-    console.log('buffering5');
     this.get('bufferLayer').getSource().addFeature(circleFeature);
 
 
@@ -355,34 +349,27 @@ var BufferModel = {
   },
 
   putFeaturesInResult: function(res){
-    console.log('Inside putFeatuers');
-    console.log(res);
 
     var featureMembers = res.getElementsByTagName('gml:featureMember');
     console.log(featureMembers);
 
     var foundFeatures = {};
     var str = '';
-    console.log('tags');
     for(var i = 0; i < featureMembers.length; i++){
       var nameTag = featureMembers[i].getElementsByTagName('varberg:namn')[0];
       console.log(nameTag);
       var name = nameTag.innerHTML;
-      console.log('1');
       var categoryName = nameTag.parentElement.localName;
 
-      console.log('2');
       var coordinate = featureMembers[i].getElementsByTagName('gml:coordinates')[0].innerHTML;
       if (!(categoryName in foundFeatures)){
         foundFeatures[categoryName] = [];
       }
       foundFeatures[categoryName].push([name, coordinate]);
     }
-    console.log('3');
     var categories = Object.keys(foundFeatures);
     categories.sort();
 
-    console.log('4');
     var categoryPrefix = '<div class="panel panel-default layer-item"><div class="panel-heading unselectable"><label class="layer-item-header-text">';
     var endCategoryToStartLayers = '</label></div><div class="panel-body"><div class="legend"><div>';
     var categorySuffix = '</div></div></div></div>';
@@ -392,31 +379,76 @@ var BufferModel = {
       'grundskolor': 'Grundskola',
     };
 
+
+    var div = document.createElement('div');
+
     for(var i = 0; i < categories.length; i++){
-      str += categoryPrefix;
-      str += categories[i];
-      str += endCategoryToStartLayers;
+      var outerDiv = document.createElement('div');
+      outerDiv.className = 'panel panel-default layer-item';
+      var headingDiv = document.createElement('div');
+      headingDiv.className = 'panel-heading unselectable';
+      outerDiv.appendChild(headingDiv);
+      var label = document.createElement('label');
+      label.className = 'layer-item-header-text';
+      headingDiv.appendChild(label);
+
+      label.innerHTML = geoserverNameToCategoryName[categories[i]];
+
+      var bodyDiv = document.createElement('div');
+      bodyDiv.className = 'panel-body';
+      var legendDiv = document.createElement('div');
+      legendDiv.className = 'legend';
+      var tomten = document.createElement('div');
+      outerDiv.appendChild(bodyDiv);
+      bodyDiv.appendChild(legendDiv);
+      legendDiv.appendChild(tomten);
+
       var features = foundFeatures[categories[i]];
-      console.log('5');
       features.sort();
-      for(var j=0; j < features.length; j++){
-console.log('6');
-        str += features[j][0] + '<br>';
+      var layer = this.get('layer_popup');
+      for(var j = 0; j < features.length; j++){
+        var tag = document.createElement('p'); // remember to convert coordinate to list of float
+        tag.setAttribute('coord', features[j][1]);
+        tag.onclick = this.popupIcons.bind(this);
+        tag.innerHTML = features[j][0];
+        tomten.appendChild(tag);
       }
-      str += categorySuffix;
+
+      div.appendChild(outerDiv);
     }
 
-    console.log('7');
-    document.getElementById('visibleLayerList').innerHTML = str;
+    document.getElementById('visibleLayerList').appendChild(div);
     this.set('foundFeatures', foundFeatures);
   },
+
+  popupIcons: function(event){
+    var coord = event.target.attributes.coord.value.split(',');
+    coord = [parseFloat(coord[1]), parseFloat(coord[0])];
+    var point = new ol.geom.Point([
+      coord[1],
+      coord[0]
+    ]);
+    // clear layer
+    this.get('layer_popup').getSource().clear();
+
+    // create feature
+    this.get('layer_popup').getSource().addFeature(
+      new ol.Feature({
+        geometry: point
+      })
+    );
+  },
+
 
   clearBuffer: function() {
     this.deActivateBufferMarker();
     this.get('bufferLayer').getSource().clear();
     this.get('markerlayer').getSource().clear();
+    this.get('popup_layer').getSource().clear();
     this.set('marker', undefined);
+    this.set('popupHighlight', undefined);
     document.getElementById('visibleLayerList').innerHTML = '';
+
   },
 
   /**

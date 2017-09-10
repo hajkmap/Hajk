@@ -111,7 +111,7 @@ var RoutingPanelView = {
              <div className="panel-body">
                <button className="btn btn-default" onClick={() => this.props.model.setTravelMode('walking')}><img src="/assets/icons/gaRouting.png"/></button>
                <button className="btn btn-default" onClick={() => this.props.model.setTravelMode('driving')}><img src="/assets/icons/koraRouting.png"/></button>
-               <button className="btn btn-default" onClick={() => this.props.model.setTravelMode('cycling')}><img src="/assets/icons/cyklaRouting.png"/></button>
+               <button className="btn btn-default" onClick={() => this.props.model.setTravelMode('bicycling')}><img src="/assets/icons/cyklaRouting.png"/></button>
                <button className="btn btn-default" onClick={() => this.props.model.setTravelMode('transit')}><img src="/assets/icons/kollektivRouting.png"/></button>
              </div>
           </div>

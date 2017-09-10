@@ -53,7 +53,7 @@ const defaultState = {
   searchPropertyName: "",
   searchDisplayName: "",
   searchOutputFormat: "",
-  searchGeometryField: ""
+  searchGeometryField: "",
   attribution: "",
   solpopup: solpop
 };
@@ -270,7 +270,7 @@ class WMSLayerForm extends Component {
       searchPropertyName: this.getValue("searchPropertyName"),
       searchDisplayName: this.getValue("searchDisplayName"),
       searchOutputFormat: this.getValue("searchOutputFormat"),
-      searchGeometryField: this.getValue("searchGeometryField")
+      searchGeometryField: this.getValue("searchGeometryField"),
       attribution: this.getValue("attribution"),
       solpopup: this.getValue("solpopup")
     };
