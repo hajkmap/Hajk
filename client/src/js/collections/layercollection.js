@@ -160,7 +160,7 @@ var LayerCollection = {
         "infoOwner": args.infoOwner
       }
     };
-
+    
     if (args.searchFields && args.searchFields[0]) {
       config.options.search = {
         "url": (HAJK2.searchProxy || "") + args.url.replace('wms', 'wfs'),
@@ -175,7 +175,6 @@ var LayerCollection = {
   },
 
   mapExtendedWMSConfig: function (args, properties) {
-    console.log("Extended wms args", args);
     var config = {
       type : args.type,
       options: {
@@ -185,7 +184,7 @@ var LayerCollection = {
         "caption": args.caption,
         "visible": args.visibleAtStart,
         "opacity": 1,
-        "queryable": args.queryable === false ? false : true,
+        "queryable": true,
         "information": args.infobox,
         "resolutions": properties.mapConfig.resolutions,
         "projection": args.projection || properties.mapConfig.projection || "EPSG:3006",
@@ -204,7 +203,9 @@ var LayerCollection = {
           "LAYERS": args.layers.map(function (l) { return l.name; }).join(','),
           "STYLES": args.layers.map(function (l) { return l.style || ""; }).join(','),
           "FORMAT": args.imageFormat,
-          "VERSION": "1.1.0",
+          //Openlayers stödjer ej SWEREF 99  i wms verion 1.3.0
+          //Vi har överlagring av funktion för tile men inte för single tile
+          "VERSION": args.singleTile || false ? '1.1.0': args.version, 
           "TILED": args.tiled
         }
       }
