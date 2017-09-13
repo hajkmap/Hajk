@@ -116,6 +116,7 @@
         "views/navigationpanel": "./compiled/navigationpanel.js",
         "views/shell": "./compiled/shell.js",
         "views/application": "./compiled/application.js",
+        "oloverrides/wmsurl": "./src/js/oloverrides/wmsurl.js",
         "alert": "./compiled/alert.js"
     }
   }

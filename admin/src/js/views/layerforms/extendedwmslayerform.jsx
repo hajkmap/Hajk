@@ -353,9 +353,8 @@ class ExtendedWMSLayerForm extends Component {
       tiled: this.getValue("tiled"),
       drawOrder: this.getValue("drawOrder"),
       attribution: this.getValue("attribution"),
-      projection: this.getValue("projection")
-
-
+      projection: this.getValue("projection"),
+      version: this.state.version
     };
   }
 
@@ -534,7 +533,7 @@ class ExtendedWMSLayerForm extends Component {
           <div className="col-md-6">
             <div className="form-group">
               <label>Version</label>
-              <p className="text-display">{this.state.version}</p>
+              <p ref="input_version" className="text-display">{this.state.version}</p>
             </div>
           </div>
         </div>

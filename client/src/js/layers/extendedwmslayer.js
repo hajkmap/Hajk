@@ -21,7 +21,7 @@
 // https://github.com/hajkmap/Hajk
 
 var LayerModel = require('layers/layer');
-
+var {customGetTileUrl, customGetFeatureInformationUrl} = require('oloverrides/wmsurl');
 /**
  * @typedef {Object} WmsLayer~WmsLayerProperties
  * @property {string} url
@@ -68,7 +68,7 @@ var WmsLayer = {
     LayerModel.prototype.initialize.call(this);
 
     let parmas  = this.get('params');
-
+    
     var source = {
       url: this.get('url'),
       params: parmas,
@@ -86,8 +86,9 @@ var WmsLayer = {
       imageFormat: this.get('imageFormat'),
       attributions: this.getAttributions()
     };
-    infoClickSource.params.LAYERS = this.get('layersconfig').filter((l) => l.queryable).map((l) => l.name).join(',');
-    console.log("LAYERS", infoClickSource.params.LAYERS);
+
+    this.queryableLayerNames =  this.get('layersconfig').filter((l) => l.queryable).map((l) => l.name).join(',');
+    this.set('queryable', this.queryableLayerNames.length > 0);
     
     if (this.get('resolutions') &&
       this.get('resolutions').length > 0 &&
@@ -104,24 +105,25 @@ var WmsLayer = {
       this.layer = new ol.layer.Image({
         name: this.get('name'),
         visible: this.get('visible'),
-        queryable:  infoClickSource.params.LAYERS.length > 0,//this.get('queryable'),
+        queryable:  this.get('queryable'),
         caption: this.get('caption'),
         opacity: this.get("opacity"),
         source: new ol.source.ImageWMS(source)
       });
-      console.log(this.layer);
-      this.infoClickSource = new ol.source.ImageWMS(infoClickSource);
     } else {
       this.layer = new ol.layer.Tile({
         name: this.get('name'),
         visible: this.get('visible'),
-        queryable: infoClickSource.params.LAYERS.length > 0,//this.get('queryable'),
+        queryable: this.get('queryable'),
         caption: this.get('caption'),
         opacity: this.get("opacity"),
         source: new ol.source.TileWMS(source)
       });
-
-      this.infoClickSource = new ol.source.TileWMS(infoClickSource);
+      if (source.params.VERSION == "1.3.0") {
+        //Openlayers stöder ej sweref 99 TM när wms version 1.3.0 används
+        //För att komma runt detta har vi skapat en egen getTileUrl funktion.
+        this.layer.getSource().setTileUrlFunction(customGetTileUrl.bind(this.layer.getSource()));
+      }
     }
 
     this.set("wmsCallbackName", "wmscallback" + Math.floor(Math.random() * 1000) + 1);
@@ -142,6 +144,7 @@ var WmsLayer = {
     });
 
     this.layer.getSource().set('url', this.get('url'));
+    this.set("type", "wms");
   },
 
   /**
@@ -151,45 +154,81 @@ var WmsLayer = {
    * @return {external:"ol.style"} style
    */
   getFeatureInformation: function (params) {
-    console.log("getFeatureInformation extended", params);
-    var url;
-    try {
-
-      this.validInfo = true;
-      this.featureInformationCallback = params.success;
-
-      url = this.infoClickSource
-      //  this.getLayer()
-      // .getSource()
-      .getGetFeatureInfoUrl(
-        params.coordinate,
+    /*
+     let url = this.layer.getSource().getGetFeatureInfoUrl(params.coordinate,
         params.resolution,
         params.projection,
         {
           'INFO_FORMAT': this.get('serverType') === "arcgis" ? 'application/geojson' : 'application/json',
           'feature_count': 100
-        }
-      );
-
-      if (url) {
-
-        if (HAJK2.searchProxy) {
-          url = encodeURIComponent(url);
-        }
-
-        var request = $.ajax({
-          url: HAJK2.searchProxy + url,
-          success: (data) => {
-            var features = new ol.format.GeoJSON().readFeatures(data);
-            this.featureInformationCallback(features, this.getLayer());
-          }
         });
-
-        request.error(params.error);
+     */
+    let url = customGetFeatureInformationUrl({
+      source: this.layer.getSource(),
+      layers: this.queryableLayerNames,
+      coordinate: params.coordinate,
+      resolution:  params.resolution,
+      projection: params.projection,
+      isSingleTile: this.get('singleTile'),
+      params: {
+        'INFO_FORMAT': this.get('serverType') === "arcgis" ? 'application/geojson' : 'application/json',
+        'feature_count': 100
+      } 
+    });
+    if (url) {
+      this.featureInformationCallback = params.success;
+      if (HAJK2.searchProxy) {
+        url = encodeURIComponent(url);
       }
-    } catch (e) {
-      params.error(e);
+
+      var request = $.ajax({
+        url: HAJK2.searchProxy + url,
+        success: (data) => {
+          var features = new ol.format.GeoJSON().readFeatures(data);
+          this.featureInformationCallback(features, this.getLayer());
+        }
+      });
+      request.error(params.error);
     }
+
+    // var url;
+    // try {
+
+    //   this.validInfo = true;
+   
+
+    //   url = this.infoClickSource
+    //   //  this.getLayer()
+    //   // .getSource()
+    //   .getGetFeatureInfoUrl(
+    //     params.coordinate,
+    //     params.resolution,
+    //     params.projection,
+    //     {
+    //       'INFO_FORMAT': this.get('serverType') === "arcgis" ? 'application/geojson' : 'application/json',
+    //       'feature_count': 100
+    //     }
+    //   );
+
+    //   if (url) {
+
+    //     if (HAJK2.searchProxy) {
+    //       url = encodeURIComponent(url);
+    //     }
+
+    //     var request = $.ajax({
+    //       url: HAJK2.searchProxy + url,
+    //       success: (data) => {
+    //         var features = new ol.format.GeoJSON().readFeatures(data);
+    //         this.featureInformationCallback(features, this.getLayer());
+    //       }
+    //     });
+
+    //     request.error(params.error);
+    //   }
+    // } catch (e) {
+    //   params.error(e);
+    // }
   },
 
   /**

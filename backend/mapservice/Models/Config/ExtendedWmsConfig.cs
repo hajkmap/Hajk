@@ -44,5 +44,7 @@ namespace MapService.Models.Config
         public string serverType { get; set; }
 
         public string attribution { get; set; }
+
+        public string version { get; set; }
     }
 }
