@@ -25,7 +25,8 @@ import { Component } from "react";
 
 var defaultState = {
   validationErrors: [],
-  active: false
+  active: false,
+  index: 0
 };
 
 class ToolOptions extends Component {
@@ -43,8 +44,7 @@ class ToolOptions extends Component {
     if (tool) {
       this.setState({
         active: true,
-        exportUrl: tool.options.exportUrl,
-        importUrl: tool.options.importUrl
+        index: tool.index
       });
     } else {
       this.setState({
@@ -91,6 +91,7 @@ class ToolOptions extends Component {
     this.props.model.get('toolConfig').forEach(t => {
       if (t.type === this.type) {
         t.options = tool.options;
+        t.index = tool.index;
       }
     });
   }
@@ -99,9 +100,8 @@ class ToolOptions extends Component {
 
     var tool = {
       "type": this.type,
+      "index": this.state.index,
       "options": {
-        exportUrl: this.state.exportUrl,
-        importUrl: this.state.importUrl
       }
     };
 
@@ -160,6 +160,15 @@ class ToolOptions extends Component {
               onChange={(e) => {this.handleInputChange(e)}}
               checked={this.state.active}/>&nbsp;
             <label htmlFor="active">Aktiverad</label>
+          </div>
+          <div>
+            <label htmlFor="index">Sorteringsordning</label>
+            <input
+              id="index"
+              name="index"
+              type="text"
+              onChange={(e) => {this.handleInputChange(e)}}
+              value={this.state.index}/>
           </div>
         </form>
       </div>

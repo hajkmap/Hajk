@@ -220,12 +220,14 @@ var DrawModel = {
   activateEditTool: function () {
 
     var dragInteraction = this.getDragInteraction()
+    ,   revision = 1
     ,   features = new ol.Collection();
 
     this.get('olMap').un('singleclick', this.removeSelected);
     this.get('olMap').removeInteraction(this.get("drawTool"));
     this.get('olMap').removeInteraction(this.get("editTool"));
     this.get('olMap').set('clickLock', true);
+    this.set('drawToolActive', true);
 
     if (dragInteraction) {
       dragInteraction.removeAcceptedLayer('draw-layer');
@@ -237,6 +239,30 @@ var DrawModel = {
       features: features
     }));
     this.get('olMap').addInteraction(this.get("editTool"));
+
+    this.get("editTool").on('modifyend', e => {
+      this.measureTooltip.setPosition(undefined);
+      e.features.forEach(this.updateFeatureText.bind(this));
+    });
+
+  },
+
+  /**
+   * Update features text.
+   * @instance
+   */
+  updateFeatureText: function (feature) {
+    var labelText
+    ,   style;
+
+    this.setFeaturePropertiesFromGeometry(feature);
+
+    labelText = this.getLabelText(feature);
+    style = feature.getStyle()[1] || feature.getStyle()[0];
+
+    if (style) {
+      style.getText().setText(labelText);
+    }
   },
 
   /**
@@ -260,6 +286,7 @@ var DrawModel = {
     this.get('olMap').removeInteraction(this.get("drawTool"));
     this.get('olMap').removeInteraction(this.get("editTool"));
     this.get('olMap').un('singleclick', this.removeSelected);
+    this.set('drawToolActive', false);
     var dragInteraction = this.getDragInteraction();
     if (dragInteraction) {
       dragInteraction.addAcceptedLayer('draw-layer');
@@ -502,7 +529,7 @@ var DrawModel = {
       strokeDash: ""
     };
 
-    obj.text = style.getText().getText();
+    obj.text = style.getText() ? style.getText().getText() : "";
     obj.image = style.getImage() instanceof ol.style.Icon ? style.getImage().getSrc() : "";
     obj.pointRadius = style.getImage() instanceof ol.style.Circle ? style.getImage().getRadius() : "";
     obj.pointColor = style.getImage() instanceof ol.style.Circle ? style.getImage().getFill().getColor() : "";
@@ -541,9 +568,13 @@ var DrawModel = {
         c.setGeometry(geom);
       }
       c.getGeometry().transform(this.get('olMap').getView().getProjection(), "EPSG:4326");
-      c.setProperties({
-        style: JSON.stringify(this.extractStyle(c.getStyle()[1]))
-      });
+
+      if (c.getStyle()[1]) {
+        c.setProperties({
+          style: JSON.stringify(this.extractStyle(c.getStyle()[1] || c.getStyle()[0]))
+        });
+      }
+
       transformed.push(c);
     });
 
@@ -573,7 +604,7 @@ var DrawModel = {
    * @param {external:"ol.feature"}
    * @instance
    */
-  setStyleFromProperties: function(feature) {
+  setStyleFromProperties: function (feature) {
     if (feature.getProperties().style) {
       try {
         let style = JSON.parse(feature.getProperties().style);
@@ -588,6 +619,18 @@ var DrawModel = {
         feature.setStyle(this.getStyle(feature, style));
       } catch (ex) {
         console.error("Style attribute could not be parsed.", ex)
+      }
+    } else {
+      //https://github.com/openlayers/openlayers/issues/3262
+      let func = feature.getStyleFunction();
+      if (func) {
+        let style = func.call(feature, this.get('olMap').getView().getResolution());
+        if (style[0] && style[0].getFill && style[0].getFill() === null) {
+          style[0].setFill(new ol.style.Fill({
+            color: [0, 0, 0, 0]
+          }));
+        }
+        feature.setStyle(style);
       }
     }
   },
@@ -926,9 +969,17 @@ var DrawModel = {
       if (feature.getProperties().type !== "Text" && feature.getStyle()) {
         let style = feature.getStyle();
         if (this.get('showLabels')) {
-          style[1].getText().setText(this.getLabelText(feature));
+          if (style[1]) {
+            style[1].getText().setText(this.getLabelText(feature));
+          } else if (style[0]) {
+            style[0].getText().setText(this.getLabelText(feature));
+          }
         } else {
-          style[1].getText().setText("");
+          if (style[1]) {
+            style[1].getText().setText("");
+          } else if (style[0]) {
+            style[0].getText().setText("");
+          }
         }
       }
     });

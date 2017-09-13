@@ -25,7 +25,7 @@ namespace MapService.Models.ToolOptions
 
     public class LayerMenuOptions
     {
-        public List<string> baselayers { get; set; }
+        public List<MapWMSLayerInfo> baselayers { get; set; }
 
         public List<LayerGroup> groups { get; set; }
 

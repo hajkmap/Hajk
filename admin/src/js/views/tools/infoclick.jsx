@@ -26,6 +26,7 @@ import { Component } from "react";
 var defaultState = {
   validationErrors: [],
   active: false,
+  index: 0,
   markerImg: "assets/icons/marker.png",
   displayPopup: false,
   imgSizeX: 32,
@@ -50,6 +51,7 @@ class ToolOptions extends Component {
     if (tool) {
       this.setState({
         active: true,
+        index: tool.index,
         markerImg: tool.options.markerImg,
         displayPopup: tool.options.displayPopup,
         imgSizeX: tool.options.imgSize[0] || this.state.imgSizeX,
@@ -103,6 +105,7 @@ class ToolOptions extends Component {
     this.props.model.get('toolConfig').forEach(t => {
       if (t.type === this.type) {
         t.options = tool.options;
+        t.index = tool.index;
       }
     });
   }
@@ -111,6 +114,7 @@ class ToolOptions extends Component {
 
     var tool = {
       "type": this.type,
+      "index": this.state.index,
       "options": {
         displayPopup: this.state.displayPopup,
         markerImg: this.state.markerImg,
@@ -175,6 +179,15 @@ class ToolOptions extends Component {
               onChange={(e) => {this.handleInputChange(e)}}
               checked={this.state.active}/>&nbsp;
             <label htmlFor="active">Aktiverad</label>
+          </div>
+          <div>
+            <label htmlFor="index">Sorteringsordning</label>
+            <input
+              id="index"
+              name="index"
+              type="text"
+              onChange={(e) => {this.handleInputChange(e)}}
+              value={this.state.index}/>
           </div>
           <div>
             <label htmlFor="markerImg">Bild för markering</label>

@@ -39,9 +39,6 @@ const defaultState = {
   legend: "",
   owner: "",
   url: "",
-  searchFields: "",
-  displayFields: "",
-  url: "",
   visibleAtStart: false,
   queryable: true,
   tiled: false,
@@ -50,7 +47,17 @@ const defaultState = {
   serverType: 'geoserver',
   drawOrder: 1,
   layerType: "WMS",
-  attribution: ""
+  attribution: "",
+  searchUrl: "",
+  searchPropertyName: "",
+  searchDisplayName: "",
+  searchOutputFormat: "",
+  searchGeometryField: "",
+  infoVisible: false,
+  infoTitle: "",
+  infoText: "",
+  infoUrl: "",
+  infoOwner: ""
 };
 
 /**
@@ -253,8 +260,6 @@ class WMSLayerForm extends Component {
       legend: this.getValue("legend"),
       layers: this.getValue("layers"),
       infobox: this.getValue("infobox"),
-      searchFields: this.getValue("searchFields"),
-      displayFields: this.getValue("displayFields"),
       visibleAtStart: this.getValue("visibleAtStart"),
       singleTile: this.getValue("singleTile"),
       imageFormat: this.getValue("imageFormat"),
@@ -262,7 +267,17 @@ class WMSLayerForm extends Component {
       queryable: this.getValue("queryable"),
       tiled: this.getValue("tiled"),
       drawOrder: this.getValue("drawOrder"),
-      attribution: this.getValue("attribution")
+      attribution: this.getValue("attribution"),
+      searchUrl: this.getValue("searchUrl"),
+      searchPropertyName: this.getValue("searchPropertyName"),
+      searchDisplayName: this.getValue("searchDisplayName"),
+      searchOutputFormat: this.getValue("searchOutputFormat"),
+      searchGeometryField: this.getValue("searchGeometryField"),
+      infoVisible: this.getValue("infoVisible"),
+      infoTitle: this.getValue("infoTitle"),
+      infoText: this.getValue("infoText"),
+      infoUrl: this.getValue("infoUrl"),
+      infoOwner: this.getValue("infoOwner")
     };
   }
 
@@ -285,6 +300,7 @@ class WMSLayerForm extends Component {
     if (fieldName === 'tiled') value = input.checked;
     if (fieldName === 'queryable') value = input.checked;
     if (fieldName === 'layers') value = format_layers(this.state.addedLayers);
+    if (fieldName === 'infoVisible') value = input.checked;
 
     return value;
   }
@@ -348,7 +364,8 @@ class WMSLayerForm extends Component {
   render() {
 
     var loader = this.state.load ? <i className="fa fa-refresh fa-spin"></i> : null;
-    var imageLoader = this.state.imageLoad ? <i className="fa fa-refresh fa-spin"></i> : null
+    var imageLoader = this.state.imageLoad ? <i className="fa fa-refresh fa-spin"></i> : null;
+    var infoClass = this.state.infoVisible ? "tooltip-info" : "hidden";
 
     return (
       <fieldset>
@@ -493,6 +510,135 @@ class WMSLayerForm extends Component {
             }}
             value={this.state.attribution}
             className={this.getValidationClass("attribution")}
+          />
+        </div>
+        <div className="info-container">
+          <div>
+            <label>Infodokument</label>
+            <input
+              type="checkbox"
+              ref="input_infoVisible"
+              onChange={(e) => { this.setState({infoVisible: e.target.checked})}}
+              checked={this.state.infoVisible}
+            />
+          </div>
+          <div className={infoClass}>
+            <label>Rubrik</label>
+            <input 
+              type="text"
+              ref="input_infoTitle"
+                onChange={(e) => {
+                  this.setState({infoTitle: e.target.value});
+                  this.validateField("infoTitle", e);
+                }}
+                value={this.state.infoTitle ? this.state.infotitle : this.state.caption}
+                className={this.getValidationClass("infoTitle")}
+            />
+          </div>
+          <div className={infoClass}>
+            <label>Text</label>
+            <textarea 
+              type="text"
+              ref="input_infoText"
+                onChange={(e) => {
+                  this.setState({infoText: e.target.value});
+                  this.validateField("infoText", e);
+                }}
+                value={this.state.infoText}
+                className={this.getValidationClass("infoText")}
+            />
+          </div>
+          <div className={infoClass}>
+            <label>Länk (ex. till PDF)</label>
+            <input 
+              type="text"
+              ref="input_infoUrl"
+                onChange={(e) => {
+                  this.setState({infoUrl: e.target.value});
+                  this.validateField("infoUrl", e);
+                }}
+                value={this.state.infoUrl}
+                className={this.getValidationClass("infoUrl")}
+            />
+          </div>
+          <div className={infoClass}>
+            <label>Ägare</label>
+            <input 
+              type="text"
+              ref="input_infoOwner"
+                onChange={(e) => {
+                  this.setState({infoOwner: e.target.value});
+                  this.validateField("infoOwner", e);
+                }}
+                value={this.state.infoOwner ? this.state.infoOwner : this.state.owner}
+                className={this.getValidationClass("infoOwner")}
+            />
+          </div>
+        </div>
+        <h2>Sökning</h2>
+        <div>
+          <label>Url</label>
+          <input
+            type="text"
+            ref="input_searchUrl"
+            onChange={(e) => {
+              this.setState({searchUrl: e.target.value});
+              this.validateField("searchUrl", e);
+            }}
+            value={this.state.searchUrl}
+            className={this.getValidationClass("searchUrl")}
+          />
+        </div>
+        <div>
+          <label>Sökfält</label>
+          <input
+            type="text"
+            ref="input_searchPropertyName"
+            onChange={(e) => {
+              this.setState({searchPropertyName: e.target.value});
+              this.validateField("searchPropertyName", e);
+            }}
+            value={this.state.searchPropertyName}
+            className={this.getValidationClass("searchPropertyName")}
+          />
+        </div>
+        <div>
+          <label>Visningsfält</label>
+          <input
+            type="text"
+            ref="input_searchDisplayName"
+            onChange={(e) => {
+              this.setState({searchDisplayName: e.target.value});
+              this.validateField("searchDisplayName", e);
+            }}
+            value={this.state.searchDisplayName}
+            className={this.getValidationClass("searchDisplayName")}
+          />
+        </div>
+        <div>
+          <label>Utdataformat</label>
+          <input
+            type="text"
+            ref="input_searchOutputFormat"
+            onChange={(e) => {
+              this.setState({searchOutputFormat: e.target.value});
+              this.validateField("searchOutputFormat", e);
+            }}
+            value={this.state.searchOutputFormat}
+            className={this.getValidationClass("searchOutputFormat")}
+          />
+        </div>
+        <div>
+          <label>Geometrifält</label>
+          <input
+            type="text"
+            ref="input_searchGeometryField"
+            onChange={(e) => {
+              this.setState({searchGeometryField: e.target.value});
+              this.validateField("searchGeometryField", e);
+            }}
+            value={this.state.searchGeometryField}
+            className={this.getValidationClass("searchGeometryField")}
           />
         </div>
       </fieldset>
