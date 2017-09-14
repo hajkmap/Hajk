@@ -41,7 +41,12 @@
         "8",
         "9"
       ],
-      "attribution": null
+      "attribution": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "22",
@@ -92,7 +97,12 @@
         "12",
         "13"
       ],
-      "attribution": "Lantmäteriet"
+      "attribution": "Lantmäteriet",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     }
   ],
   "wmslayers": [
@@ -122,7 +132,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "2",
@@ -152,7 +167,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "3",
@@ -180,7 +200,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "4",
@@ -208,7 +233,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "5",
@@ -236,7 +266,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "6",
@@ -264,7 +299,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "7",
@@ -288,11 +328,16 @@
       "imageFormat": "image/png",
       "serverType": "geoserver",
       "attribution": "",
-      "searchUrl": "http://ksdgis.se/geoserver/fortum/wfs",
-      "searchPropertyName": "",
-      "searchDisplayName": "dnamn",
-      "searchOutputFormat": "GML3",
-      "searchGeometryField": "geom"
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "8",
@@ -320,7 +365,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "9",
@@ -348,7 +398,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "10",
@@ -376,7 +431,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "11",
@@ -404,7 +464,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "12",
@@ -432,7 +497,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "13",
@@ -460,7 +530,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "14",
@@ -488,7 +563,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "15",
@@ -516,7 +596,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "16",
@@ -540,11 +625,16 @@
       "imageFormat": "image/png",
       "serverType": "geoserver",
       "attribution": "",
-      "searchUrl": "",
-      "searchPropertyName": "",
-      "searchDisplayName": "",
-      "searchOutputFormat": "",
-      "searchGeometryField": ""
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "17",
@@ -568,11 +658,16 @@
       "imageFormat": "image/png",
       "serverType": "geoserver",
       "attribution": "",
-      "searchUrl": "",
-      "searchPropertyName": "",
-      "searchDisplayName": "",
-      "searchOutputFormat": "",
-      "searchGeometryField": ""
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "18",
@@ -596,11 +691,16 @@
       "imageFormat": "image/png",
       "serverType": "geoserver",
       "attribution": "",
-      "searchUrl": "",
-      "searchPropertyName": "",
-      "searchDisplayName": "",
-      "searchOutputFormat": "",
-      "searchGeometryField": ""
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "19",
@@ -624,11 +724,16 @@
       "imageFormat": "image/png",
       "serverType": "geoserver",
       "attribution": "",
-      "searchUrl": "",
-      "searchPropertyName": "",
-      "searchDisplayName": "",
-      "searchOutputFormat": "",
-      "searchGeometryField": ""
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "20",
@@ -656,7 +761,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     }
   ],
   "wfslayers": [],
@@ -693,7 +803,12 @@
       "labelOutlineColor": null,
       "labelOutlineWidth": 0,
       "labelAttribute": null,
-      "showLabels": false
+      "showLabels": false,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "24",
@@ -727,7 +842,12 @@
       "labelOutlineColor": null,
       "labelOutlineWidth": 0,
       "labelAttribute": null,
-      "showLabels": false
+      "showLabels": false,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "25",
@@ -761,7 +881,12 @@
       "labelOutlineColor": null,
       "labelOutlineWidth": 0,
       "labelAttribute": null,
-      "showLabels": false
+      "showLabels": false,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "26",
@@ -795,7 +920,12 @@
       "labelOutlineColor": null,
       "labelOutlineWidth": 0,
       "labelAttribute": null,
-      "showLabels": false
+      "showLabels": false,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "27",
@@ -829,7 +959,12 @@
       "labelOutlineColor": null,
       "labelOutlineWidth": 0,
       "labelAttribute": null,
-      "showLabels": false
+      "showLabels": false,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "28",
@@ -863,7 +998,12 @@
       "labelOutlineColor": null,
       "labelOutlineWidth": 0,
       "labelAttribute": null,
-      "showLabels": false
+      "showLabels": false,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "29",
@@ -897,7 +1037,12 @@
       "labelOutlineColor": "rgba(255, 255, 255, 1)",
       "labelOutlineWidth": 3,
       "labelAttribute": "objnamn",
-      "showLabels": true
+      "showLabels": true,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "30",
@@ -931,7 +1076,12 @@
       "labelOutlineColor": null,
       "labelOutlineWidth": 0,
       "labelAttribute": null,
-      "showLabels": false
+      "showLabels": false,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     }
   ],
   "wfstlayers": [
@@ -1010,9 +1160,86 @@
       ],
       "editPoint": true,
       "editPolygon": true,
-      "editLine": true
+      "editLine": true,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     }
   ],
   "arcgislayers": [],
-  "extendedwmslayers": []
+  "extendedwmslayers": [
+    {
+      "id": "40",
+      "caption": "byggnad",
+      "url": "http://194.71.132.27/geoserver/demo/wms",
+      "owner": "",
+      "date": "1505371302997",
+      "content": "",
+      "projection": "EPSG:3006",
+      "infoFormat": "text/plain",
+      "infobox": "",
+      "legend": "",
+      "layers": [
+        {
+          "style": "byggnad",
+          "queryable": true,
+          "name": "byggnad"
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "version": "1.3.0",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
+    },
+    {
+      "id": "41",
+      "caption": "byggnadlol",
+      "url": "http://194.71.132.27/geoserver/demo/wms",
+      "owner": "",
+      "date": "1505373160631",
+      "content": "",
+      "projection": "EPSG:3857",
+      "infoFormat": "text/plain",
+      "infobox": "",
+      "legend": "",
+      "layers": [
+        {
+          "style": "point_white_border",
+          "queryable": true,
+          "name": "adress"
+        },
+        {
+          "style": "byggnad",
+          "queryable": true,
+          "name": "byggnad"
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "version": "1.3.0",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
+    }
+  ]
 }

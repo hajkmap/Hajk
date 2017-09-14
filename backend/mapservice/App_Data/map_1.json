@@ -187,6 +187,11 @@
             "expanded": true,
             "layers": [
               {
+                "id": "41",
+                "visibleAtStart": false,
+                "drawOrder": 1000
+              },
+              {
                 "id": "7",
                 "visibleAtStart": false,
                 "drawOrder": 1000
@@ -250,7 +255,7 @@
         ],
         "popupOffsetY": 0
       },
-      "index": 4
+      "index": 0
     },
     {
       "type": "export",
@@ -272,12 +277,12 @@
           250000
         ]
       },
-      "index": 9
+      "index": 0
     },
     {
       "type": "edit",
       "options": {},
-      "index": 2
+      "index": 0
     },
     {
       "type": "coordinates",
@@ -303,17 +308,17 @@
           }
         ]
       },
-      "index": 5
+      "index": 0
     },
     {
       "type": "buffer",
       "options": {},
-      "index": 3
+      "index": 0
     },
     {
       "type": "anchor",
       "options": {},
-      "index": 6
+      "index": 0
     },
     {
       "type": "draw",
@@ -322,7 +327,7 @@
         "importUrl": "/mapservice/import/kml",
         "icons": "marker, marker_black, marker_green, marker_red, marker_yellow, br, pin, pin_black, pin_green, pin_red, pin_yellow"
       },
-      "index": 1
+      "index": 0
     },
     {
       "type": "information",
@@ -331,19 +336,19 @@
         "headerText": "Information",
         "visibleAtStart": false
       },
-      "index": 8
+      "index": 0
     },
     {
       "type": "streetview",
       "options": {
         "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4"
       },
-      "index": 11
+      "index": 0
     },
     {
       "type": "location",
       "options": {},
-      "index": 7
+      "index": 0
     },
     {
       "type": "infoclick",
