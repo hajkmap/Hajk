@@ -20,6 +20,8 @@
 //
 // https://github.com/hajkmap/Hajk
 
+var LocalStorageMixin = require('react-localstorage');
+
 var Panel = require('views/panel');
 
 var ExportTiffSettings = React.createClass({
@@ -90,6 +92,7 @@ var ExportTiffSettings = React.createClass({
 });
 
 var ExportPdfSettings = React.createClass({
+  mixins: [LocalStorageMixin],
 
   resolutions: [72, 96, 150, 200, 300],
   paperFormats: ["A2", "A3", "A4"],
@@ -101,6 +104,9 @@ var ExportPdfSettings = React.createClass({
       selectScale: '2500',
       manualScale: '2500',
       selectResolution: '72',
+      center: this.props.model.getPreviewFeature() ?
+        this.props.model.getPreviewCenter() :
+        this.props.olMap.getView().getCenter(),
       loading: false
     };
   },
@@ -187,6 +193,12 @@ var ExportPdfSettings = React.createClass({
     });
   },
 
+  setCenter: function(val) {
+    this.setState({
+      center: val
+    });
+  },
+
   setManualScale: function(e) {
     if (e.target.value.startsWith('1:')) {
       e.target.value = e.target.value.split(':')[1];
@@ -218,9 +230,7 @@ var ExportPdfSettings = React.createClass({
   addPreview: function (map) {
     var scale  = this.getScale()
     ,   paper  = this.getPreviewPaperMeasures()
-    ,   center = this.props.model.getPreviewFeature() ?
-                 ol.extent.getCenter(this.props.model.getPreviewFeature().getGeometry().getExtent()) :
-                 map.getView().getCenter();
+    ,   center = this.state.center;
 
     this.props.model.addPreview(scale, paper, center);
   },
@@ -247,7 +257,14 @@ var ExportPdfSettings = React.createClass({
   },
 
   componentWillUnmount: function () {
+    this.savePreviewCenterToLocalStorage(this.props.model.getPreviewCenter());
     this.removePreview();
+  },
+
+  savePreviewCenterToLocalStorage: function(center) {
+    var _ExportPdfSettings = JSON.parse(localStorage.ExportPdfSettings);
+    _ExportPdfSettings.center = this.props.model.getPreviewCenter();
+    localStorage.ExportPdfSettings = JSON.stringify(_ExportPdfSettings);
   },
 
   render: function () {
@@ -303,7 +320,7 @@ var ExportPdfSettings = React.createClass({
         <div className="panel panel-default">
           <div className="panel-heading">Välj pappersstorlek</div>
           <div className="panel-body">
-            <select onChange={this.setFormat} defaultValue={this.state.selectFormat}>
+            <select onChange={this.setFormat} value={this.state.selectFormat}>
               {paperFormatOptions}
             </select>
           </div>
@@ -311,7 +328,7 @@ var ExportPdfSettings = React.createClass({
         <div className="panel panel-default">
           <div className="panel-heading">Välj orientering</div>
           <div className="panel-body">
-            <select onChange={this.setOrientation} defaultValue={this.state.selectOrientation}>
+            <select onChange={this.setOrientation} value={this.state.selectOrientation}>
               <option value="P">stående</option>
               <option value="L">liggande</option>
             </select>
@@ -320,17 +337,17 @@ var ExportPdfSettings = React.createClass({
         <div className="panel panel-default">
           <div className="panel-heading">Välj skala</div>
           <div className="panel-body">
-            <select onChange={this.setScale} defaultValue={this.state.selectScale}>
+            <select onChange={this.setScale} value={this.state.selectScale}>
               {options}
               <option value="other">Annan skala</option>
             </select>
-            {this.state.selectScale==='other' && <input type="text" onChange={this.setManualScale} defaultValue={this.state.manualScale}></input>}
+            {this.state.selectScale==='other' && <input type="text" onChange={this.setManualScale} value={this.state.manualScale}></input>}
           </div>
         </div>
         <div className="panel panel-default">
           <div className="panel-heading">Välj upplösning</div>
           <div className="panel-body">
-            <select onChange={this.setResolution} defaultValue={this.state.selectResolution}>
+            <select onChange={this.setResolution} value={this.state.selectResolution}>
               {resolutionOptions}
             </select>
           </div>

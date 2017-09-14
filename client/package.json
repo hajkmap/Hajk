@@ -50,5 +50,8 @@
     "react-dom": "^0.14.7",
     "underscore": "^1.8.3",
     "x2js": "^2.0.1"
+  },
+  "dependencies": {
+    "react-localstorage": "^0.3.1"
   }
 }
