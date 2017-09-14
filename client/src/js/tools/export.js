@@ -773,6 +773,7 @@ var ExportModel = {
     data.orientation = options.orientation;
     data.format = options.format;
     data.scale = options.scale;
+    data.proxyUrl = this.get('proxyUrl');
 
     this.set("downloadingPdf", true);
 
@@ -838,6 +839,7 @@ var ExportModel = {
     data.orientation = "";
     data.format = "";
     data.scale = scale;
+    data.proxyUrl = this.get('proxyUrl');
     this.set("downloadingTIFF", true);
 
     $.ajax({
