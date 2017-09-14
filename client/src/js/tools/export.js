@@ -155,6 +155,15 @@ var ExportModel = {
     return this.get('previewFeature')
   },
 
+  /**
+   * Get center coordinate of the preview feature.
+   * @return {external:"ol.coordinate"} center coordinate
+   */
+  getPreviewCenter: function () {
+    var extent = this.getPreviewFeature().getGeometry().getExtent();
+    return ol.extent.getCenter(extent);
+  },
+
   addTiffPreview: function (center) {
 
     var dpi = 25.4 / 0.28
