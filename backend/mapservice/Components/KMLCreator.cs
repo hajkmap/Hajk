@@ -15,6 +15,7 @@ namespace MapService.Components
 {
     public class KMLCreator
     {
+        public string proxyUrl { get; set; }  
         /// <summary>
         /// 
         /// </summary>
