@@ -206,7 +206,7 @@ var LayerItemView = {
       infoExpanded: infoExpanded
     });
 
-    var innerInfoBodyClass = infoExpanded && componentsInfo.legend.legendPanel ? "dropdown centerBottom" : "hidden";
+    var innerInfoBodyClass = infoExpanded && componentsInfo.legend.legendPanel ? "dropdown" : "hidden";
     
     return (
       <div className="panel panel-default layer-item">
@@ -214,7 +214,7 @@ var LayerItemView = {
           <span onClick={toggleVisible} className="clickable" style={{ position: 'relative', top: '3px' }}>
             <i className={visible ? 'fa fa-check-square-o': 'fa fa-square-o'} style={{ width: '15px'}}></i>&nbsp;
             {this.renderStatus()}
-            <label className="layer-item-header-text">{caption}</label>&nbsp;
+            <label className={visible ? 'layer-item-header-text active-group' : 'layer-item-header-text'}>{caption}</label>&nbsp;
           </span>
           {components.legend.legendButton}
 
@@ -224,10 +224,10 @@ var LayerItemView = {
 
         </div>
         <div className={innerInfoBodyClass}>
-          <h3 className="info-title">{this.state.infoTitle}</h3>
+          <p className="info-title">{this.state.infoTitle}</p>
           <p className="info-text">{this.state.infoText}</p>
-          <a href={this.state.infoUrl} target="_blank">{this.state.infoUrl}</a><br/>
-          <i>{this.state.infoOwner ? "Ägare: " + this.state.infoOwner : ""}</i>
+          <a className="info-text" href={this.state.infoUrl} target="_blank">{this.state.infoUrl}</a><br/>
+          <i className="info-text">{this.state.infoOwner ? "Ägare: " + this.state.infoOwner : ""}</i>
         </div>
 
         <div className={innerBodyClass}>

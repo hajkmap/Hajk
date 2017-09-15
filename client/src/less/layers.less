@@ -93,6 +93,10 @@
   max-width: 100%;
 }
 
+.active-group {
+  font-weight: bold;
+}
+
 .dropdown {
   display: inline-block;
   width: 100%;
@@ -116,7 +120,7 @@
   margin-left: -6px; 
 }
 
-.dropdown.centerBottom:before {
+.dropdown:before {
   content: ' ';
   position: absolute;
   width: 0;
@@ -129,7 +133,7 @@
   border-left: 12px solid transparent;
 }
 
-.dropdown.centerBottom:after {
+.dropdown:after {
   content: ' ';
   position: absolute;
   width: 0;
@@ -143,10 +147,12 @@
 }
 
 .info-title {
+  font-weight: bold;
   margin-bottom: 0px;
 }
 
 .info-text {
+  font-size: 13px;
   margin-top: 4px;
   margin-bottom: 4px;
 }

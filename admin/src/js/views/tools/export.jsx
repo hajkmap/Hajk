@@ -42,7 +42,8 @@ var defaultState = {
     50000,
     100000,
     250000
-  ]
+  ],
+  proxyUrl: ""
 };
 
 class ToolOptions extends Component {
@@ -64,7 +65,8 @@ class ToolOptions extends Component {
         exportUrl: tool.options.exportUrl,
         exportTiffUrl: tool.options.exportTiffUrl,
         tiffActive: tool.options.tiffActive,
-        pdfActive: tool.options.pdfActive
+        pdfActive: tool.options.pdfActive,
+        proxyUrl: tool.options.proxyUrl
       });
     } else {
       this.setState({
