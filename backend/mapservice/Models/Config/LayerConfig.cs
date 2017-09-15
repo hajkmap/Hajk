@@ -19,5 +19,7 @@ namespace MapService.Models.Config
         public List<WFSTConfig> wfstlayers { get; set; }
 
         public List<ArcGISConfig> arcgislayers { get; set; }
+
+        public List<ExtendedWmsConfig> extendedwmslayers { get; set; }
     }
 }

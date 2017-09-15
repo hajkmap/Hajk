@@ -365,10 +365,12 @@ class Menu extends Component {
             data.wmtslayers.forEach(l => { l.type = "WMTS" });
             data.arcgislayers.forEach(l => { l.type = "ArcGIS" });
             data.vectorlayers.forEach(l => { l.type = "Vector" });
+            data.extendedwmslayers.forEach(l => { l.type = "ExtendedWMS"});
             layers = data.wmslayers
                       .concat(data.wmtslayers)
                       .concat(data.arcgislayers)
-                      .concat(data.vectorlayers);
+                      .concat(data.vectorlayers)
+                      .concat(data.extendedwmslayers);
             layers.sort((a, b) => {
               var d1 = parseInt(a.date)
               ,   d2 = parseInt(b.date);
@@ -581,9 +583,6 @@ class Menu extends Component {
     return $('.tree-view li.layer-node[data-id="' + id + '"]').length > 0;
   }
 
-  /**
-   *
-   */
   createLayer(id) {
     var layerName = this.getLayerNameFromId(id);
     var layer = $(`
@@ -599,6 +598,7 @@ class Menu extends Component {
     this.forceUpdate();
   }
 
+  
   /**
    *
    */
@@ -614,8 +614,8 @@ class Menu extends Component {
         data-name="${name}">
         <span class="group-name">${name}</span>
         <ul></ul>
-      </li>`
-    );
+      </li>
+      `);
     $('.tree-view > ul').prepend(group);
     group.editable(this);
   }
@@ -623,7 +623,7 @@ class Menu extends Component {
   /**
    *
    */
-  addLayerToMenu(id, included) {
+  addLayerToMenu(id, layer, included) {
     if (included) {
       this.setState({
         alert: true,
@@ -634,14 +634,13 @@ class Menu extends Component {
       });
       return;
     }
-    this.createLayer(id);
+		this.createLayer(id);
   }
 
   /**
    *
    */
   renderLayersFromConfig(layers) {
-
     layers = this.state.filter ? this.getLayersWithFilter() : this.props.model.get('layers');
 
     var startsWith = [];
@@ -689,16 +688,19 @@ class Menu extends Component {
           displayType = "(ArcGIS)";
           break;
         case 'Vector':
-            displayType = "(Vektor)";
+          displayType = "(Vektor)";
+          break;
+        case 'ExtendedWMS':
+          displayType = "(Extended WMS)";
           break;
       }
 
       return (
-        <li className="layer-item" onClick={() => this.addLayerToMenu(layer.id, included) } key={i}>
+        <li className="layer-item" onClick={() => this.addLayerToMenu(layer.id, layer, included) } key={i}>
           <span className={cls}></span>&nbsp;
           <span>{layer.caption} {displayType}</span>
         </li>
-      )
+      );
     });
   }
 

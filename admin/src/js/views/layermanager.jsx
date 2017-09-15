@@ -25,6 +25,7 @@ import { Component } from "react";
 import $ from 'jquery';
 import Alert from "../views/alert.jsx";
 import WMSLayerForm from "./layerforms/wmslayerform.jsx"
+import ExtendedWMSLayerForm from "./layerforms/extendedwmslayerform.jsx"
 import WMTSLayerForm from "./layerforms/wmtslayerform.jsx"
 import ArcGISLayerForm from "./layerforms/arcgislayerform.jsx"
 import VectorLayerForm from "./layerforms/vectorlayerform.jsx"
@@ -37,7 +38,7 @@ const defaultState = {
   validationErrors: [],
   mode: "add",
   alert: false,
-  corfirm: false,
+  confirm: false,
   alertMessage: "",
   content: "",
   confirmAction: () => {},
@@ -209,7 +210,6 @@ class Manager extends Component {
     }
 
     if (layer.type === "WMS") {
-
       this.setState({
         mode: "edit",
         layerType: "WMS"
@@ -230,6 +230,7 @@ class Manager extends Component {
           tiled: layer.tiled,
           singleTile: layer.singleTile,
           imageFormat: layer.imageFormat,
+          version: layer.version,
           serverType: layer.serverType,
           drawOrder: layer.drawOrder,
           addedLayers: [],
@@ -249,6 +250,43 @@ class Manager extends Component {
 
         this.refs["WMSLayerForm"].loadLayers(layer, () => {
           this.refs["WMSLayerForm"].validate();
+        });
+
+      }, 0);
+
+    }
+
+    if (layer.type === "ExtendedWMS") {
+      this.setState({
+        mode: "edit",
+        layerType: "ExtendedWMS"
+      });
+      setTimeout(() => {
+        this.refs["ExtendedWMSLayerForm"].setState({
+          id: layer.id,
+          caption: layer.caption,
+          content: layer.content,
+          date: layer.date,
+          infobox: layer.infobox,
+          legend: layer.legend,
+          owner: layer.owner,
+          url: layer.url,
+          visibleAtStart: layer.visibleAtStart,
+          queryable: layer.queryable,
+          tiled: layer.tiled,
+          singleTile: layer.singleTile,
+          imageFormat: layer.imageFormat,
+          version: layer.version,
+          serverType: layer.serverType,
+          drawOrder: layer.drawOrder,
+          addedLayers: [],
+          layerType: layer.type,
+          projection: layer.projection,
+          infoFormat: layer.infoFormat
+        });
+
+        this.refs["ExtendedWMSLayerForm"].loadLayers(layer, () => {
+          this.refs["ExtendedWMSLayerForm"].validate();
         });
 
       }, 0);
@@ -418,6 +456,9 @@ class Manager extends Component {
         case 'WMS':
           displayType = "";
           break;
+        case 'ExtendedWMS':
+          displayType = "(Extended WMS)";
+          break;
         case 'WMTS':
           displayType = "(WMTS)";
           break;
@@ -501,16 +542,12 @@ class Manager extends Component {
     }
 
     layer = form.getLayer();
-
     if (this.state.mode === "add") {
-
       layer.type = this.state.layerType;
       layer.id = null;
-
       this.props.model.addLayer(layer, success => {
-        this.whenLayerAdded(success,  layer.date);
+        this.whenLayerAdded(success, layer.date);
       });
-
     }
 
     if (this.state.mode === "edit") {
@@ -561,6 +598,13 @@ class Manager extends Component {
             layer={this.state.layer}
             url={this.props.config.url_default_server} />
         )
+      case "ExtendedWMS":
+        return <ExtendedWMSLayerForm
+          ref="ExtendedWMSLayerForm"
+          model={this.props.model}
+          layer={this.state.layer}
+          parentView={this}
+          url={this.props.config.url_default_server} />
       case "WFS":
         return <WFSLayerForm
           ref="WFSLayerForm"
@@ -665,6 +709,7 @@ class Manager extends Component {
               <label>Välj lagertyp</label>
               <select disabled={typeSelectorDisabled} value={this.state.layerType} onChange={(e) => { this.setState({layerType: e.target.value}) }}>
                 <option>WMS</option>
+                <option value="ExtendedWMS">Extended WMS</option>
                 <option>WMTS</option>
                 <option>ArcGIS</option>
                 <option value="Vector">Vektor</option>
