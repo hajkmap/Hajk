@@ -49,6 +49,7 @@ $.fn.editable = function(component) {
         expanded.remove();
         tools.remove();
         layerTools.remove();
+        presetTools.remove();
         elem.editing = false;
       }
 
@@ -82,22 +83,29 @@ $.fn.editable = function(component) {
       ,   id        = Math.floor(Math.random() * 1E5)
       ,   id2       = Math.floor(Math.random() * 1E5)
       ,   id3       = Math.floor(Math.random() * 1E5)
+      ,   id4       = Math.floor(Math.random() * 1E5)
+      ,   id5       = Math.floor(Math.random() * 1E5)
       ,   ok        = $('<span class="btn btn-success">OK</span>')
       ,   layerOk   = $('<span class="btn btn-success">OK</span>')
+      ,   presetTools= $('<div></div>')
       ,   tools     = $('<div></div>')
       ,   layerTools= $('<div></div>')
       ,   abort     = $('<span class="btn btn-default">Avbryt</span>')
       ,   label     = $(`<label for="${id}">Expanderad vid start&nbsp;</label>`)
       ,   label2    = $(`<label for="${id2}">Toggla alla-knapp&nbsp;</label>`)
       ,   label3    = $(`<label for="${id3}">Synlig vid start&nbsp;</label>`)
+      ,   label4    = $(`<label for="${id4}">Redigera snabbval&nbsp;</label><br />`)
       ,   checkbox  = $(`<input id="${id}" type="checkbox"/>`)
       ,   checkbox2 = $(`<input id="${id2}" type="checkbox"/>`)
       ,   checkbox3 = $(`<input id="${id3}" type="checkbox"/>`)
+      ,   checkbox4 = $(`<input id="${id4}" type="text" value="Nytt namn"/><br />`)
       ,   remove    = $('<span class="fa fa-minus-circle"></span>')
       ,   input     = $('<input />')
+      ,   input2    = $(`<input id="${id5}" type="text" placeholder="Ny länk"/><br />`)
       ,   expanded  = $('<div class="expanded-at-start"></div>')
       ,   toggled   = $('<div class="expanded-at-start"></div>')
       ,   visible   = $('<div class=""></div>')
+      ,   editPreset= $('<div class=""></div>')
       ,   elem      = node.get(0) || {}
 
       ok
@@ -125,9 +133,13 @@ $.fn.editable = function(component) {
         checkbox3.attr('checked', 'checked');
       }
 
-      expanded.append(checkbox, label);
-      toggled.append(checkbox2, label2);
+      if (node.parent().attr("data-expanded") !== undefined && node.parent().attr("data-toggled") !== undefined) {
+        expanded.append(checkbox, label);
+        toggled.append(checkbox2, label2);
+      }
       visible.append(checkbox3, label3);
+
+      editPreset.append(label4, checkbox4, input2);
 
       remove
         .css({ color: 'red', marginRight: '4px' })
@@ -161,6 +173,7 @@ $.fn.editable = function(component) {
 
       tools.append(ok, abort, toggled, expanded);
       layerTools.append(visible, layerOk, abort);
+      presetTools.append(editPreset, layerOk, abort);
 
       if (node.hasClass('group-name')) {
         node
@@ -175,6 +188,13 @@ $.fn.editable = function(component) {
           .before(remove)
           .after(layerTools)
       }
+
+      if (node.hasClass('preset-name') && !elem.editing) {
+        elem.editing = true;
+        node
+          .before(remove)
+          .after(presetTools)
+      }
   }
 
   var enableEdit = (e) => {
@@ -185,6 +205,10 @@ $.fn.editable = function(component) {
     }
 
     if (node.hasClass("layer-name")) {
+      edit(node, e);
+    }
+
+    if (node.hasClass("preset-name")) {
       edit(node, e);
     }
   }
