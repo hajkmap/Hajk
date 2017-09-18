@@ -27,7 +27,8 @@ import $ from 'jquery'; //Används ej?
 var defaultState = {
   validationErrors: [],
   presetList: [],
-  active: false
+  active: false,
+  index: 0
 };
 
 class ToolOptions extends Component {
@@ -48,10 +49,12 @@ class ToolOptions extends Component {
   }
 
   componentDidMount() {
-    if (this.getTool()) {
+    var tool = this.getTool();
+    if (tool) {
       this.setState({
         active: true,
-        presetList: this.getTool().options.presetList || []
+        index: tool.index,
+        presetList: tool.options.presetList || []
       });
     } else {
       this.setState({
@@ -98,6 +101,7 @@ class ToolOptions extends Component {
     this.props.model.get('toolConfig').forEach(t => {
       if (t.type === this.type) {
         t.options = tool.options;
+        t.index = tool.index;
       }
     });
   }
@@ -106,6 +110,7 @@ class ToolOptions extends Component {
 
     var tool = {
       "type": this.type,
+      "index": this.state.index,
       "options": {
         presetList: this.state.presetList
       }
@@ -342,6 +347,17 @@ createGuid() {
               onChange={(e) => {this.handleInputChange(e)}}
               checked={this.state.active}/>&nbsp;
             <label htmlFor="active">Aktiverad</label>
+          </div>
+          <div>
+            <label htmlFor="index">Sorteringsordning</label>
+            <input
+              id="index"
+              name="index"
+              type="text"
+              onChange={(e) => {this.handleInputChange(e)}}
+              value={this.state.index}/>
+          </div>
+          <div>
             <form ref="presetForm" onSubmit={(e) => { e.preventDefault(); this.addPreset(e) }}>
               <h4>Lägg till snabbval</h4>
               <div>
