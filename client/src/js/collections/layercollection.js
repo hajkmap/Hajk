@@ -109,7 +109,6 @@ var LayerCollection = {
    * @return {object} config
    */
   mapWMSConfig: function(args, properties) {
-
     function getLegendUrl() {
       if (args.legend === "") {
         args.legend = `${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${args.layers[0]}`
@@ -175,6 +174,17 @@ var LayerCollection = {
   },
 
   mapExtendedWMSConfig: function (args, properties) {
+    const createLegendConfig = (url, layer) => {
+      let strippedUrl = url.split("?")[0];
+      let legendUrl = `${strippedUrl}?REQUEST=GetLegendGraphic&${args.version}&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${layer.name}`;
+      let protocol = /^http/.test(legendUrl) ? '' : 'http://';
+
+      return {
+        Url: protocol + legendUrl,
+        Description: layer.name
+      };
+    };
+
     var config = {
       type : args.type,
       options: {
@@ -194,10 +204,7 @@ var LayerCollection = {
         "imageFormat": args.imageFormat || "image/png",
         "serverType": args.serverType || "geoserver",
         "attribution": args.attribution,
-        "legend" : [/*{
-          "Url": getLegendUrl(args),
-          "Description" : "Teckenförklaring"
-        }*/],
+        "legend": args.layers.map((l) => createLegendConfig(args.url, l)),
         "layersconfig": args.layers,
         "params": {
           "LAYERS": args.layers.map(function (l) { return l.name; }).join(','),
@@ -206,7 +213,8 @@ var LayerCollection = {
           //Openlayers stödjer ej SWEREF 99  i wms verion 1.3.0
           //Vi har överlagring av funktion för tile men inte för single tile
           "VERSION": args.singleTile || false ? '1.1.0': args.version, 
-          "TILED": args.tiled
+          "TILED": args.tiled,
+          "INFO_FORMAT": args.infoFormat
         }
       }
     };
@@ -220,7 +228,6 @@ var LayerCollection = {
         "srsName": properties.mapConfig.projection || "EPSG:3006"
       };
     }
-
     return config;
   },
 

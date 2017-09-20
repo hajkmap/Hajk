@@ -143,7 +143,6 @@ var InfoPanelView = {
     var current = this.state.activeIndex;
     var that = this;
     var info;
-
     infos.sort((a, b) =>
       a.layerindex === b.layerindex ? 0 :
         a.layerindex > b.layerindex ? -1 : 1

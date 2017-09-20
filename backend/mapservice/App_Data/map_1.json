@@ -174,7 +174,7 @@
         "baselayers": [
           {
             "id": "22",
-            "visibleAtStart": false,
+            "visibleAtStart": true,
             "drawOrder": 0
           }
         ],
@@ -187,39 +187,19 @@
             "expanded": true,
             "layers": [
               {
-                "id": "41",
+                "id": "47",
                 "visibleAtStart": false,
                 "drawOrder": 1000
               },
               {
-                "id": "7",
+                "id": "46",
                 "visibleAtStart": false,
                 "drawOrder": 1000
               },
               {
-                "id": "29",
-                "visibleAtStart": true,
-                "drawOrder": 1000
-              },
-              {
-                "id": "19",
+                "id": "45",
                 "visibleAtStart": false,
-                "drawOrder": 1000
-              },
-              {
-                "id": "17",
-                "visibleAtStart": false,
-                "drawOrder": 1000
-              },
-              {
-                "id": "16",
-                "visibleAtStart": false,
-                "drawOrder": 1000
-              },
-              {
-                "id": "26",
-                "visibleAtStart": false,
-                "drawOrder": 1000
+                "drawOrder": 0
               }
             ],
             "groups": []
@@ -375,7 +355,7 @@
       6584446
     ],
     "projection": "EPSG:3006",
-    "zoom": 13,
+    "zoom": 3,
     "maxZoom": 3,
     "minZoom": 9,
     "resolutions": [

@@ -44,7 +44,6 @@ const defaultState = {
   searchFields: "",
   displayFields: "",
   visibleAtStart: false,
-  queryable: true,
   tiled: false,
   singleTile: false,
   version: "",
@@ -80,7 +79,16 @@ const supportedProjections = [
   "EPSG:3018",
   "EPSG:3021",
   "EPSG:4326",
-  "EPSG:3857"
+  "EPSG:3857",
+  "CRS:84"
+];
+
+const supportedInfoFormats = [
+  "application/json",
+  "text/plain",
+  "text/xml",
+  "text/html",
+  "application/geojson"
 ];
 
 /**
@@ -179,14 +187,13 @@ class ExtendedWMSLayerForm extends Component {
       var layers = [];
 
       var append = (layer, index) => {
-
+        
         var classNames = this.state.layerPropertiesName === layer.Name ?
           "fa fa-info-circle active" : "fa fa-info-circle";
 
         var i = index;
         var title = /^\d+$/.test(layer.Name) ? <label>&nbsp;{layer.Title}</label> : null;
-
-        var queryableIcon = this.state.queryable ? "fa fa-check" : "fa fa-remove";
+        var queryableIcon = layer.queryable ? "fa fa-check" : "fa fa-remove";
 
         return (
           <li key={"fromCapability_" + i} className="list-item">
@@ -301,27 +308,31 @@ class ExtendedWMSLayerForm extends Component {
     return imgFormats;
   }
 
-  setFormats() {
-    let capabilities = null;
+  setInfoFormats() {
+    let formats;
     if(this.state.capabilities) {
-      capabilities = this.state.capabilities.Capability.Request.GetFeatureInfo.Format;
+      formats = this.state.capabilities.Capability.Request.GetFeatureInfo.Format;
     }
 
-    let formats = capabilities !== null ? capabilities.map((format, i) => {
-      return <option key={i}>{format}</option>;
+    let formatEles = formats ? supportedInfoFormats.map((format, i) => {
+      if(formats.indexOf(format) > -1) {
+        return <option key={i}>{format}</option>;
+      } else {
+        return "";
+      }
     }) : "";
 
-    return formats;
+    return formatEles;
   }
 
   setProjections() {
-    let projections = null;
+    let projections;
     if(this.state.capabilities) {
       projections = this.state.capabilities.Capability.Layer.CRS;
     }
 
-    let projEles = projections ? projections.map((proj, i) => {
-      if(supportedProjections.includes(proj)) {
+    let projEles = projections ? supportedProjections.map((proj, i) => {
+      if(projections.indexOf(proj) > -1) {
         return <option key={i}>{proj}</option>;
       } else {
         return "";
@@ -525,8 +536,12 @@ class ExtendedWMSLayerForm extends Component {
           <div className="col-md-6">
             <div className="form-group">
               <label>Bildformat</label>
-              <select ref="input_imageFormat" value={this.state.imageFormat} onChange={(e) => this.setState({ imageFormat: e.target.value })} className="form-control">
-                {this.setImageFormats()}
+              <select 
+                ref="input_imageFormat" 
+                value={this.state.imageFormat} 
+                onChange={(e) => this.setState({ imageFormat: e.target.value })} 
+                className="form-control">
+                  {this.setImageFormats()}
               </select>
             </div>
           </div>
@@ -644,22 +659,33 @@ class ExtendedWMSLayerForm extends Component {
                 value={this.state.legend}
                 onChange={(e) => this.setState({'legend': e.target.value})}
               />
-              <span onClick={(e) => { this.props.setNewLegend(e) }} className="btn btn-default">Välj fil {imageLoader}</span>
+              <span onClick={(e) => {this.loadLegendImage(e)}} className="btn btn-default">Välj fil {imageLoader}</span>
             </div>
           </div>
           <div className="col-md-6">
-            <div>
-              <label>Servertyp</label>
-              <select 
-                className="form-control"
-                ref="input_serverType" 
-                value={this.state.serverType} 
-                onChange={(e) => this.setState({'serverType': e.target.value})}>
-                <option>geoserver</option>
-                <option>arcgis</option>
+            <div className="form-group">
+              <label>Infoklick-format</label>
+              <select
+                ref="input_infoFormat"
+                value={this.state.infoFormat}
+                onChange={(e) => this.setState({ infoFormat: e.target.value })}
+                className="form-control">
+                  {this.setInfoFormats()}
               </select>
             </div>
           </div>
+          {/* <div className="col-md-6">
+            <div className="form-group">
+              <label>Bildformat</label>
+              <select 
+                ref="input_imageFormat" 
+                value={this.state.imageFormat} 
+                onChange={(e) => this.setState({ imageFormat: e.target.value })} 
+                className="form-control">
+                  {this.setImageFormats()}
+              </select>
+            </div>
+          </div> */}
         </div>
         <div className="row">
           <div className="col-md-6">
@@ -688,16 +714,6 @@ class ExtendedWMSLayerForm extends Component {
               />
             </div>
           </div>
-          <div style={{display: "none"}}>
-              <label>Infoklick-format</label>
-              <select
-                className="form-control"
-                ref="input_infoFormat"
-                value={this.state.infoFormat}
-                onChange={(e) => this.setState({selectedFormat: e.target.value })}>
-                {this.setFormats()}
-              </select>
-            </div>
           <div style={{display: "none"}}>
           <label>Geowebcache</label>
           <input
