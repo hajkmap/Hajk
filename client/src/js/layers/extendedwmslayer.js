@@ -68,7 +68,7 @@ var WmsLayer = {
     LayerModel.prototype.initialize.call(this);
 
     let parmas  = this.get('params');
-    
+
     var source = {
       url: this.get('url'),
       params: parmas,
@@ -197,7 +197,7 @@ var WmsLayer = {
             }
             case 'application/geojson':
             case 'application/json': {
-              let features = new ol.format.GML().readFeatures(data);
+              let features = new ol.format.GeoJSON().readFeatures(data);
               this.featureInformationCallback(features, this.getLayer());
               break;
             }
@@ -219,44 +219,6 @@ var WmsLayer = {
       request.error(args.error);
     }
 
-    // var url;
-    // try {
-
-    //   this.validInfo = true;
-   
-
-    //   url = this.infoClickSource
-    //   //  this.getLayer()
-    //   // .getSource()
-    //   .getGetFeatureInfoUrl(
-    //     params.coordinate,
-    //     params.resolution,
-    //     params.projection,
-    //     {
-    //       'INFO_FORMAT': this.get('serverType') === "arcgis" ? 'application/geojson' : 'application/json',
-    //       'feature_count': 100
-    //     }
-    //   );
-
-    //   if (url) {
-
-    //     if (HAJK2.searchProxy) {
-    //       url = encodeURIComponent(url);
-    //     }
-
-    //     var request = $.ajax({
-    //       url: HAJK2.searchProxy + url,
-    //       success: (data) => {
-    //         var features = new ol.format.GeoJSON().readFeatures(data);
-    //         this.featureInformationCallback(features, this.getLayer());
-    //       }
-    //     });
-
-    //     request.error(params.error);
-    //   }
-    // } catch (e) {
-    //   params.error(e);
-    // }
   },
 
   /**

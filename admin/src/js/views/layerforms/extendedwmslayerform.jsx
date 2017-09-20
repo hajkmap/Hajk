@@ -87,8 +87,13 @@ const supportedInfoFormats = [
   "application/json",
   "text/plain",
   "text/xml",
-  "text/html",
   "application/geojson"
+];
+
+const supportedImageFormats = [
+  "image/png",
+  "image/jpeg",
+  "image/png; mode=8bit"
 ];
 
 /**
@@ -284,6 +289,7 @@ class ExtendedWMSLayerForm extends Component {
         })
       }
       this.setVersion();
+      this.setServerType();
 
       if (callback) {
         callback();
@@ -296,13 +302,17 @@ class ExtendedWMSLayerForm extends Component {
   setVersion() { this.setState({ version: this.state.capabilities.version }); }
 
   setImageFormats() {
-    let capabilities = null;
+    let imgs;
     if(this.state.capabilities) {
-      capabilities = this.state.capabilities.Capability.Request.GetMap.Format;
+      imgs = this.state.capabilities.Capability.Request.GetMap.Format;
     }
 
-    let imgFormats = capabilities !== null ? capabilities.map((imgFormat, i) => {
-      return <option key={i}>{imgFormat}</option>;
+    let imgFormats = imgs ? supportedImageFormats.map((imgFormat, i) => {
+      if(imgs.indexOf(imgFormat) > -1) {
+        return <option key={i}>{imgFormat}</option>;
+      } else {
+        return "";
+      }
     }) : "";
 
     return imgFormats;
@@ -314,6 +324,7 @@ class ExtendedWMSLayerForm extends Component {
       formats = this.state.capabilities.Capability.Request.GetFeatureInfo.Format;
     }
 
+    
     let formatEles = formats ? supportedInfoFormats.map((format, i) => {
       if(formats.indexOf(format) > -1) {
         return <option key={i}>{format}</option>;
@@ -324,6 +335,19 @@ class ExtendedWMSLayerForm extends Component {
 
     return formatEles;
   }
+
+  setServerType() {
+    let formats;
+    if(this.state.capabilities) {
+      formats = this.state.capabilities.Capability.Request.GetFeatureInfo.Format;
+    }
+    if (formats.indexOf("application/geojson") > -1) {
+      this.setState({ serverType: "arcgis" });
+    } else {
+      this.setState({ serverType: "geoserver" });
+    }
+  }
+
 
   setProjections() {
     let projections;
@@ -360,7 +384,7 @@ class ExtendedWMSLayerForm extends Component {
       infobox: this.getValue("infobox"),
       singleTile: this.getValue("singleTile"),
       imageFormat: this.getValue("imageFormat"),
-      serverType: this.getValue("serverType"),
+      serverType: this.state.serverType,
       tiled: this.getValue("tiled"),
       drawOrder: this.getValue("drawOrder"),
       attribution: this.getValue("attribution"),
@@ -674,18 +698,6 @@ class ExtendedWMSLayerForm extends Component {
               </select>
             </div>
           </div>
-          {/* <div className="col-md-6">
-            <div className="form-group">
-              <label>Bildformat</label>
-              <select 
-                ref="input_imageFormat" 
-                value={this.state.imageFormat} 
-                onChange={(e) => this.setState({ imageFormat: e.target.value })} 
-                className="form-control">
-                  {this.setImageFormats()}
-              </select>
-            </div>
-          </div> */}
         </div>
         <div className="row">
           <div className="col-md-6">

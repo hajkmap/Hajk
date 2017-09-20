@@ -18,7 +18,7 @@ function getRequestUrl(tileCoord, tileSize, tileExtent, pixelRatio, projection, 
 	if (!params.hasOwnProperty('STYLES')) {
 		params['STYLES'] = '';
 	}
-
+	
 	if (pixelRatio != 1) {
 		switch (this.get('serverType').toLowerCase()) {
 			case 'geoserver':
@@ -79,7 +79,8 @@ module.exports = {
 		let layerNames = options.layers;
 		let resolution = options.resolution;
 		let coordinate = options.coordinate;
-		let params = options.params;		
+		let params = options.params;
+		
 		if (options.isSingleTile || version != "1.3.0") {
 			return source.getGetFeatureInfoUrl(coordinate,
 				resolution,

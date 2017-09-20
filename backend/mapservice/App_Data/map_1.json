@@ -184,24 +184,8 @@
             "parent": "-1",
             "name": "Lager",
             "toggled": false,
-            "expanded": true,
-            "layers": [
-              {
-                "id": "47",
-                "visibleAtStart": false,
-                "drawOrder": 1000
-              },
-              {
-                "id": "46",
-                "visibleAtStart": false,
-                "drawOrder": 1000
-              },
-              {
-                "id": "45",
-                "visibleAtStart": false,
-                "drawOrder": 0
-              }
-            ],
+            "expanded": false,
+            "layers": [],
             "groups": []
           }
         ],
@@ -218,13 +202,28 @@
       "options": {
         "onMap": false,
         "toolbar": "bottom",
-        "maxZoom": 14,
+        "maxZoom": 15,
         "markerImg": "http://localhost/hajk/assets/icons/marker.png",
         "kmlExportUrl": "/mapservice/export/kml",
         "excelExportUrl": "/mapservice/export/excel",
         "displayPopup": true,
         "selectionTools": true,
-        "filterVisible": true,
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ]
+      },
+      "index": 0
+    },
+    {
+      "type": "infoclick",
+      "options": {
+        "displayPopup": true,
+        "markerImg": "assets/icons/marker.png",
         "anchor": [
           16,
           32
@@ -233,7 +232,7 @@
           32,
           32
         ],
-        "popupOffsetY": 0
+        "popupOffsetY": -32
       },
       "index": 0
     },
@@ -250,6 +249,7 @@
           1000,
           2500,
           5000,
+          10000,
           10000,
           25000,
           50000,
@@ -273,15 +273,6 @@
             "default": true,
             "hint": "(Standard)",
             "title": "Sweref 99 12 00",
-            "xtitle": "E",
-            "ytitle": "N",
-            "inverseAxis": false
-          },
-          {
-            "code": "EPSG:3006",
-            "default": false,
-            "hint": "",
-            "title": "SW99TM",
             "xtitle": "E",
             "ytitle": "N",
             "inverseAxis": false
@@ -310,49 +301,16 @@
       "index": 0
     },
     {
-      "type": "information",
-      "options": {
-        "text": "Information om kartan.",
-        "headerText": "Information",
-        "visibleAtStart": false
-      },
-      "index": 0
-    },
-    {
-      "type": "streetview",
-      "options": {
-        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4"
-      },
-      "index": 0
-    },
-    {
       "type": "location",
       "options": {},
-      "index": 0
-    },
-    {
-      "type": "infoclick",
-      "options": {
-        "displayPopup": false,
-        "markerImg": "assets/icons/marker.png",
-        "anchor": [
-          16,
-          32
-        ],
-        "imgSize": [
-          32,
-          32
-        ],
-        "popupOffsetY": 0
-      },
       "index": 0
     }
   ],
   "map": {
     "target": "map",
     "center": [
-      418061,
-      6584446
+      414962,
+      6583005
     ],
     "projection": "EPSG:3006",
     "zoom": 3,
