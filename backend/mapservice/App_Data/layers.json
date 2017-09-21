@@ -208,39 +208,6 @@
       "infoOwner": null
     },
     {
-      "id": "4",
-      "caption": "Vattendrag",
-      "url": "http://ksdgis.se/geoserver/fortum/wms",
-      "owner": "",
-      "date": "1491475994157",
-      "content": "",
-      "legend": "",
-      "projection": null,
-      "layers": [
-        "streams"
-      ],
-      "infobox": "",
-      "searchFields": null,
-      "displayFields": null,
-      "visibleAtStart": false,
-      "queryable": true,
-      "tiled": false,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "geoserver",
-      "attribution": "",
-      "searchUrl": null,
-      "searchPropertyName": null,
-      "searchDisplayName": null,
-      "searchOutputFormat": null,
-      "searchGeometryField": null,
-      "infoVisible": false,
-      "infoTitle": null,
-      "infoText": null,
-      "infoUrl": null,
-      "infoOwner": null
-    },
-    {
       "id": "5",
       "caption": "Vattenförekomster (vattendrag)",
       "url": "http://ksdgis.se/geoserver/fortum/wms",
@@ -1169,77 +1136,5 @@
     }
   ],
   "arcgislayers": [],
-  "extendedwmslayers": [
-    {
-      "id": "40",
-      "caption": "byggnad",
-      "url": "http://194.71.132.27/geoserver/demo/wms",
-      "owner": "",
-      "date": "1505371302997",
-      "content": "",
-      "projection": "EPSG:3006",
-      "infoFormat": "text/plain",
-      "infobox": "",
-      "legend": "",
-      "layers": [
-        {
-          "style": "byggnad",
-          "queryable": true,
-          "name": "byggnad"
-        }
-      ],
-      "searchFields": null,
-      "displayFields": null,
-      "visibleAtStart": false,
-      "tiled": false,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "geoserver",
-      "attribution": "",
-      "version": "1.3.0",
-      "infoVisible": false,
-      "infoTitle": null,
-      "infoText": null,
-      "infoUrl": null,
-      "infoOwner": null
-    },
-    {
-      "id": "41",
-      "caption": "byggnadlol",
-      "url": "http://194.71.132.27/geoserver/demo/wms",
-      "owner": "",
-      "date": "1505373160631",
-      "content": "",
-      "projection": "EPSG:3857",
-      "infoFormat": "text/plain",
-      "infobox": "",
-      "legend": "",
-      "layers": [
-        {
-          "style": "point_white_border",
-          "queryable": true,
-          "name": "adress"
-        },
-        {
-          "style": "byggnad",
-          "queryable": true,
-          "name": "byggnad"
-        }
-      ],
-      "searchFields": null,
-      "displayFields": null,
-      "visibleAtStart": false,
-      "tiled": false,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "geoserver",
-      "attribution": "",
-      "version": "1.3.0",
-      "infoVisible": false,
-      "infoTitle": null,
-      "infoText": null,
-      "infoUrl": null,
-      "infoOwner": null
-    }
-  ]
+  "extendedwmslayers": []
 }

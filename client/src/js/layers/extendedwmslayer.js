@@ -68,7 +68,7 @@ var WmsLayer = {
     LayerModel.prototype.initialize.call(this);
 
     let parmas  = this.get('params');
-    
+
     var source = {
       url: this.get('url'),
       params: parmas,
@@ -153,7 +153,7 @@ var WmsLayer = {
    * @param {external:"ol.feature"} feature
    * @return {external:"ol.style"} style
    */
-  getFeatureInformation: function (params) {
+  getFeatureInformation: function (args) {
     /*
      let url = this.layer.getSource().getGetFeatureInfoUrl(params.coordinate,
         params.resolution,
@@ -163,72 +163,62 @@ var WmsLayer = {
           'feature_count': 100
         });
      */
+    let sourceConfig = this.get('params');
     let url = customGetFeatureInformationUrl({
       source: this.layer.getSource(),
       layers: this.queryableLayerNames,
-      coordinate: params.coordinate,
-      resolution:  params.resolution,
-      projection: params.projection,
+      coordinate: args.coordinate,
+      resolution:  args.resolution,
+      projection: args.projection,
       isSingleTile: this.get('singleTile'),
       params: {
-        'INFO_FORMAT': this.get('serverType') === "arcgis" ? 'application/geojson' : 'application/json',
+        'INFO_FORMAT': sourceConfig.INFO_FORMAT,
         'feature_count': 100
-      } 
+      }
     });
+    //GML
+    //Plain text
     if (url) {
-      this.featureInformationCallback = params.success;
+      this.featureInformationCallback = args.success;
       if (HAJK2.searchProxy) {
         url = encodeURIComponent(url);
       }
 
       var request = $.ajax({
         url: HAJK2.searchProxy + url,
-        success: (data) => {
-          var features = new ol.format.GeoJSON().readFeatures(data);
-          this.featureInformationCallback(features, this.getLayer());
+        success: (data, status, xhr) => {
+          let type = xhr.getResponseHeader("Content-Type").split(';')[0]
+          switch(type.toLowerCase()) {
+            case 'text/xml':
+            case 'application/vnd.ogc.gml':{
+              let features = new ol.format.GML().readFeatures(data);
+              this.featureInformationCallback(features, this.getLayer());
+              break;
+            }
+            case 'application/geojson':
+            case 'application/json': {
+              let features = new ol.format.GeoJSON().readFeatures(data);
+              this.featureInformationCallback(features, this.getLayer());
+              break;
+            }
+            case 'text/plain':
+              let fakeFeature = new ol.Feature({
+                 geometry:new ol.geom.Point(args.coordinate)
+              });
+              fakeFeature.setProperties({
+                text: data
+              });
+              this.featureInformationCallback([fakeFeature], this.getLayer());
+              break;
+            default:
+              console.log("Unsupported response type:", type, data);
+              break;
+          }
         }
       });
-      request.error(params.error);
+      request.error(args.error);
     }
 
-    // var url;
-    // try {
-
-    //   this.validInfo = true;
-   
-
-    //   url = this.infoClickSource
-    //   //  this.getLayer()
-    //   // .getSource()
-    //   .getGetFeatureInfoUrl(
-    //     params.coordinate,
-    //     params.resolution,
-    //     params.projection,
-    //     {
-    //       'INFO_FORMAT': this.get('serverType') === "arcgis" ? 'application/geojson' : 'application/json',
-    //       'feature_count': 100
-    //     }
-    //   );
-
-    //   if (url) {
-
-    //     if (HAJK2.searchProxy) {
-    //       url = encodeURIComponent(url);
-    //     }
-
-    //     var request = $.ajax({
-    //       url: HAJK2.searchProxy + url,
-    //       success: (data) => {
-    //         var features = new ol.format.GeoJSON().readFeatures(data);
-    //         this.featureInformationCallback(features, this.getLayer());
-    //       }
-    //     });
-
-    //     request.error(params.error);
-    //   }
-    // } catch (e) {
-    //   params.error(e);
-    // }
   },
 
   /**
