@@ -119,8 +119,8 @@ var LayerSwitcherModel = {
     this.get('baselayers').forEach(baseLayer => {
       var layer = this.get('layerCollection').find(layer => layer.id === baseLayer.id);
       if (layer) {
-        layer.setVisible(baseLayer.visibleAtStart);
-        layer.getLayer().setVisible(layer.getVisible());
+        //layer.setVisible(baseLayer.visibleAtStart);
+        //layer.getLayer().setVisible(layer.getVisible());
         baseLayers.push(layer);
       }
     });
