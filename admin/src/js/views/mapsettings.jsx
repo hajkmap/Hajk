@@ -87,10 +87,12 @@ $.fn.editable = function(component) {
       ,   id5       = Math.floor(Math.random() * 1E5)
       ,   ok        = $('<span class="btn btn-success">OK</span>')
       ,   layerOk   = $('<span class="btn btn-success">OK</span>')
+      ,   layerOk2   = $('<span class="btn btn-success">OK</span>')
       ,   presetTools= $('<div></div>')
       ,   tools     = $('<div></div>')
       ,   layerTools= $('<div></div>')
       ,   abort     = $('<span class="btn btn-default">Avbryt</span>')
+      ,   abort2     = $('<span class="btn btn-default">Avbryt</span>')
       ,   label     = $(`<label for="${id}">Expanderad vid start&nbsp;</label>`)
       ,   label2    = $(`<label for="${id2}">Toggla alla-knapp&nbsp;</label>`)
       ,   label3    = $(`<label for="${id3}">Synlig vid start&nbsp;</label>`)
@@ -116,7 +118,18 @@ $.fn.editable = function(component) {
         .css(btnCSS)
         .click(saveLayer)
 
+      layerOk2
+        .css(btnCSS)
+        .click(saveLayer)
+
       abort
+        .css(btnCSS)
+        .click(e => {
+          node.html(prev);
+          reset();
+        });
+
+      abort2
         .css(btnCSS)
         .click(e => {
           node.html(prev);
@@ -173,7 +186,7 @@ $.fn.editable = function(component) {
 
       tools.append(ok, abort, toggled, expanded);
       layerTools.append(visible, layerOk, abort);
-      presetTools.append(editPreset, layerOk, abort);
+      presetTools.append(editPreset, layerOk2, abort2);
 
       if (node.hasClass('group-name')) {
         node
