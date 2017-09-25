@@ -211,6 +211,9 @@ var CoordinatesPanelView = {
     return (
       <Panel title="Koordinater" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
         <div className="coordinate-display">
+          <p>
+            Välj en plats i kartan genom att dra i siktet. <br/>
+          </p>
           <CoordinatesList coordinates={coordinates} />
         </div>
       </Panel>

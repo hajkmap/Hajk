@@ -4,28 +4,6 @@
 /**
  * Created by hiwe001 on 2017-05-24.
  */
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 var ToolModel = require('tools/tool');
 
 /**
@@ -80,29 +58,15 @@ var RoutingModel = {
   /* Starting Point */
   /* Get a current position from GPS(button right top)*/
   turnOnGPSClicked: function() {
-
-    if (positioning === undefined || !positioning) {
       this.getLocation();
-    }
-    else{
-      this.set({
-        position:{
-          latitude: latitude,
-          longitude: longitude
-        }
-      });
-      this.setPosition();
-    }
-
   },
 
   getLocation: function(){
     if(navigator.geolocation){
+      console.log('getCurrentPosition');
       navigator.geolocation.getCurrentPosition(this.setPositionEvent.bind(this));
-      positioning = true;
     }else{
       alert("kan inte få position. Skriv startposition i rutan eller tryck position på kartan.");
-      positioning = false;
     }
 
   },
@@ -116,12 +80,10 @@ var RoutingModel = {
         longitude: undefined
       }
     });
-    positioning = undefined;
   },
 
   /* Choose a starting location on the map manually. and drop a pin */
   startPointSelection: function(event){
-    positioning = false;
     var startPoint = new ol.Feature(); /* startPoint and point(below) must be the same l.134*/
     startPoint.setGeometry(new ol.geom.Point(event.coordinate));
   /* Convert Geometry to Coordinate */
@@ -141,6 +103,8 @@ var RoutingModel = {
     pos.latitude = lat;
     pos.longitude = lon;
     this.set('position', pos);
+
+   // this.state.activePanel(true);
    },
 
   setTravelMode: function(travelmode){
@@ -179,6 +143,10 @@ var RoutingModel = {
     if(this.get('onStartKey') === undefined) {
       this.set('onStartKey', this.get('map').on('singleclick', this.startPointSelection.bind(this)));
     }
+
+    if (isMobile()) {
+      this.props.navigationPanel.minimize();
+    }
   },
 
   activateEndMode: function(){
@@ -200,6 +168,9 @@ var RoutingModel = {
       this.set('routeFinished', false);
     }
 
+    if (isMobile()) {
+      this.props.navigationPanel.minimize();
+    }
   },
 
   activateRoutingMode: function(){
@@ -335,6 +306,7 @@ var RoutingModel = {
   },
 
   setPositionEvent: function(event){
+    console.log('got position');
     var pos = this.get('position');
     pos.latitude = event.coords.latitude;
     pos.longitude = event.coords.longitude;
@@ -343,6 +315,7 @@ var RoutingModel = {
   },
 
   setPosition: function(){
+    console.log('setPosition');
     this.get('layer_start').getSource().clear();
     if (this.get('position').longitude && this.get('position').latitude) {
       var point = new ol.geom.Point([
@@ -409,17 +382,17 @@ var RoutingModel = {
       point.setCoordinates(transformed);
 
 
+      var n = i + 1;
       var tmpFeature = new ol.Feature({geometry: point, information: steps[i].html_instructions});
       tmpFeature.number = "" + n;
       tmpFeature.setStyle(style_route);
       layer.getSource().addFeature(tmpFeature);
-      var n = i + 1;
       // route features
       var tmpLi = document.createElement('li');
       tmpLi.onclick = this.highlightFeature.bind(this);
       tmpLi.id = 'step_number' + n;
       tmpLi.innerHTML = n + "," + steps[i].html_instructions;
-      var tmpI = document.createElement('i');
+      var tmpI = document.createElement('n');
       tmpI.class = 'fa fa-arrow-down';
       var tmpBr = document.createElement('br');
       routeDiv.appendChild(tmpLi);
@@ -468,11 +441,17 @@ var RoutingModel = {
       feature_number = event.target.id.substring('step_number'.length);
     }
 
+    //feature_number = feature_number - 1;
+    console.log(feature_number);
     var layer = this.get('layer_route');
 
     var features = layer.getSource().getFeatures();
-    for (var i= 0; i < features.length; i++){
+    var featuresLength = features.length + 1;
+
+    for (var i= 0; i < features.length ; i++){
       if(features[i].number === feature_number){
+        console.log(features[i].number);
+        console.log(feature_number);
         features[i].setStyle(this.get('style_route_highlight'));
       } else {
         features[i].setStyle(this.get('style_route_normal'));

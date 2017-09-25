@@ -68,7 +68,9 @@ var StreetView = {
 
   renderInfoText: function () {
     if (!this.props.model.get('location')) {
-      return <div>Klicka i kartan för att aktivera street view.</div>;
+      return <div>Klicka i kartan för att aktivera street view. <br/>
+        Förstora fönstret genom att trycka på symbolen i övre högra hörnet. <br/>
+      </div>;
     }
   },
 

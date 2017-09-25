@@ -398,7 +398,7 @@ var LayerPanelView = {
     if (this.props.model.get('toggleAllButton')) {
       toggleAllButton = (
         <div style={{marginBottom: "10px"}}>
-          <button className="btn btn-default btn-inverse" onClick={() => this.toggleAllOff()}>Släck alla lager</button>
+          <button className="btn btn-main btn-inverse" onClick={() => this.toggleAllOff()}>Släck alla lager</button>
         </div>
       );
     }
@@ -406,9 +406,14 @@ var LayerPanelView = {
     return (
       <Panel title="Lagerhanterare" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
         <div className="layer-panel">
-          <p>Klicka på en rubrik för att se respektive lagerlista. Bocka för de lager du vill visa i kartan. Klicka på <i className="fa fa-bars" aria-hidden="false"></i> för att se teckenförklaring</p>
+          <p>Klicka på en rubrik för att se respektive lagerlista.<br/>
+             Bocka för de lager du vill visa i kartan.<br/>
+             Klicka på symbolen: <i className="fa fa-list" aria-hidden="false"></i> för att se teckenförklaring.<br/>
+             De flesta ikoner går att klicka på för att se mer information.<br/>
+          </p>
           {toggleAllButton}
           <BackgroundSwitcher layers={this.props.model.getBaseLayers()} model={this.props.model}></BackgroundSwitcher>
+          <br/>
           {groups}
         </div>
       </Panel>

@@ -126,7 +126,7 @@ var ShellView = {
       //
       // TODO:
       // Implementera inläsning av configobjekt för lager.
-      // this.model.get('layerCollection').update(config.layers);
+      this.model.get('layerCollection').update(config.layers);
       //
       // Implementera inläsning av configobjekt för verktyg.
       // this.model.get('toolCollection').update(config.toolCollection);

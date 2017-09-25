@@ -77,7 +77,7 @@ var ExportTiffSettings = React.createClass({
       <div className="export-settings">
         <div>
           <div>
-            <button onClick={this.exportTIFF} className="btn btn-default">Skapa TIFF {loader}</button>
+            <button onClick={this.exportTIFF} className="btn btn-primary">Skapa TIFF {loader}</button>
           </div>
           <div>{downloadLink}</div>
           <br />
@@ -336,7 +336,7 @@ var ExportPdfSettings = React.createClass({
           </div>
         </div>
         <div>
-          <button onClick={this.exportPDF} className="btn btn-default">Skapa PDF {loader}</button>
+          <button onClick={this.exportPDF} className="btn btn-main">Skapa PDF {loader}</button>
           <br />
           {downloadLink}
         </div>

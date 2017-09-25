@@ -21,15 +21,41 @@ div.btn-right {
 }
 
 .btn-primary:focus {
-  background-color: @color-yellow;
+  background-color: @color-yellow-orig;
   color: @color-green;
+  z-index: 2;
 }
 
 .btn-primary:hover {
-  background-color: @color-yellow;
+  background-color: @color-yellow-orig !important;
   border-color: #333;
+  z-index: 2;
 }
 
 .btn-primary:active:hover {
-  background-color: @color-yellow;
+  background-color: @color-yellow-orig;
 }
+
+.btn-main{
+    color: #fff;
+    background-color: #1ea5cd;
+    border-color: #666;
+  }
+.btn-main:active {
+    background-color: @color-yellow-orig;
+    border-color: #666;
+    color: @color-green;
+  }
+.btn-main:focus {
+    background-color: @color-yellow-orig;
+    color: @color-green;
+    z-index: 2;
+  }
+.btn-main:hover{
+    background-color: @color-yellow-orig;
+    color: @color-green;
+    z-index: 2;
+  }
+.btn-main:active:hover {
+    background-color: @color-yellow;
+  }

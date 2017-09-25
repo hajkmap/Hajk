@@ -83,18 +83,15 @@ var BufferPanelView = {
       <Panel title="Urvalsområde" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked}>
         <div className="panel-content">
           <p>
-            Tryck på plusknappen för att sätta ut en mittpunkt på kartan.
-            Ange önskat avstånd från mittpunkt (radie)
-            Tryck på ”Skapa buffertzon”
-            Under rubriken ”Objekt inom buffertzon” skapas en lista på de objekt som finns inom buffertzonen utifrån de lager som du valt att visa i kartan.
+            ①. Tryck på "Sätt ut mittpunkt" och klicka i kartan.<br/><br/>
+            ②. Ange önskat avstånd från mittpunkt (radie)<br/><br/>
+            ③. Tryck på "Skapa buffertzon"<br/><br/>
+            Under rubriken "Resultat: Objekt inom buffertzon" skapas en lista på de objekt som finns inom buffertzonen utifrån de lager som du valt att visa i kartan.<br/>
           </p>
-          <div className="panel panel-default">
-            <div className="panel-heading">Sätt ut mittpunkt</div>
-            <div className="panel-body">
-              <button onClick={() => this.props.model.activateBufferMarker()} type="button" className={this.getClassNames('multiSelect')} title="Markera flera objekt">
-                <i className="fa fa-plus icon"></i>
+          <div className="panel panel-default-transparent">
+              <button onClick={() => this.props.model.activateBufferMarker()} type="button" className="btn btn-main" title="Markera flera objekt">
+                Sätt ut mittpunkt
               </button>
-            </div>
           </div>
           <div className="panel panel-default">
             <div className="panel-heading">Ange avstånd från mittpunkt</div>
@@ -121,8 +118,7 @@ var BufferPanelView = {
               </input> m
             </div>
           </div>
-          <div className="panel panel-default">
-            <div className="panel-heading">Skapa buffert</div>
+          <div className="panel panel-default-transparent">
             <div className="panel-body">
               <button
                 onClick={() => {
@@ -133,25 +129,20 @@ var BufferPanelView = {
                     });
                   }
                 }}
-                className="btn btn-primary">
-                Buffra
-              </button>
-            </div>
-          </div>
-          <div className="panel panel-default">
-            <div className="panel-heading">Objekt inom buffert</div>
-            <div className="panel-body">
-              <div id="visibleLayerList"></div>
-            </div>
-          </div>
-          <div className="panel panel-default">
-            <div className="panel-heading">Rensa kartan från buffert</div>
-            <div className="panel-body">
+                className="btn btn-main">
+                Skapa buffertzon
+              </button>&nbsp;
               <button
                 onClick={() => this.props.model.clearBuffer()}
-                className="btn btn-primary">
+                className="btn btn-main">
                 Rensa
               </button>
+            </div>
+          </div>
+          <div className="panel panel-default">
+            <div className="panel-heading">Resultat: Objekt inom buffertzon</div>
+            <div className="panel-body">
+              <div id="visibleLayerList"></div>
             </div>
           </div>
         </div>

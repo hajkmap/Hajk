@@ -1,26 +1,5 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 var Panel = require('views/panel');
+var isMobile = () => document.body.clientWidth <= 600;
 
 /**
  * @class
@@ -69,6 +48,21 @@ var RoutingPanelView = {
     });
   },
 
+  activateStartMode: function(){
+    if (isMobile()) {
+      this.props.navigationPanel.minimize();
+    }
+
+    this.props.model.activateStartMode(); // working
+  },
+  activateEndMode: function(){
+    if (isMobile()) {
+      this.props.navigationPanel.minimize();
+    }
+
+    this.props.model.activateEndMode(); // working
+  },
+
   showResult: function(routeResult) {
     console.log(this.props.model.plotRoute(res));
   },
@@ -78,7 +72,7 @@ var RoutingPanelView = {
     img.src = src;
     img.id = id;
 
-    docunebt.body.appendChild(img);
+    document.body.appendChild(img);
   },
   /**
    * Render the view
@@ -91,17 +85,23 @@ var RoutingPanelView = {
     return(
       <Panel title="Navigation"  onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
         <div className="panel-content">
+          <p>
+            ① Välj startpunkt genom att trycka på någon av knapparna under "Välj startpunkt". <br/>
+            ② Välj mål genom att trycka på knappen "Välj position på kartan" och klicka sedan i kartan. <br/>
+            ③ Välj färdsätt genom att trycka på någon av knapparna. <br/>
+            ④ Tryck på "Sök resa". <br/>
+          </p>
           <div className="panel panel-default">
               <div className="panel-heading"> ①. Välj startpunkt </div>
                 <div className="panel-body">
-                  <button onClick={() => this.props.model.turnOnGPSClicked()} className="btn btn-default" id="naviGPS">Välj befintlig position</button>
-                  <button onClick={() => this.props.model.activateStartMode()} className="btn btn-default" id="startBtn">Välj position på kartan</button>
+                  <button onClick={() => this.props.model.turnOnGPSClicked()} className="btn btn-main" id="naviGPS">Välj befintlig position</button>&nbsp;
+                  <button onClick={() => this.activateStartMode()} className="btn btn-main" id="startBtn">Välj position på kartan</button>
                 </div>
           </div>
           <div className="panel panel-default">
              <div className="panel-heading"> ②. Välj destination </div>
                <div className="panel-body">
-                 <button onClick={() => this.props.model.activateEndMode()} className="btn btn-default" id="startBtn">Välj position på kartan</button>
+                 <button onClick={() => this.activateEndMode()} className="btn btn-main" id="startBtn">Välj position på kartan</button>
              </div>
           </div>
           <div className="panel panel-default">
@@ -114,8 +114,8 @@ var RoutingPanelView = {
              </div>
           </div>
           <div className="panel panel-default-transparent">
-             <button onClick={() => this.props.model.activateRoutingMode()} className="btn btn-default" id="startBtn">Sök resa</button>
-             <button onClick={() => this.props.model.deleteLayers()} className="btn btn-default" id="startBtn">Rensa</button>
+             <button onClick={() => this.props.model.activateRoutingMode()} className="btn btn-main" id="startBtn">Sök resa</button>&nbsp;
+             <button onClick={() => this.props.model.deleteLayers()} className="btn btn-main" id="startBtn">Rensa</button>
           </div>
           <div className="panel panel-default">
              <div className="panel-heading"> Resultat </div>

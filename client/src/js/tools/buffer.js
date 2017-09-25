@@ -373,6 +373,27 @@ var BufferModel = {
     var geoserverNameToCategoryName = {
       'forskolor': 'Förskola',
       'grundskolor': 'Grundskola',
+      'gymnasieskolor': 'Gymnasieskolor',
+      'vardcentral': 'Vårdcentral',
+      'vardcentral_privat': 'Privat vårdcentral',
+      'sjukhus': 'Sjukhus',
+      'folktandvard': 'Folktandvård',
+      'badplatser': 'Badplatser',
+      'bibliotek': 'Bibliotek',
+      'hallplatser_for_bokbussen': 'Hållplatser bokbussen',
+      'kultur_utf_8': 'Kultur och teater',
+      'lekplatser': 'Lekplatser',
+      'offentliga_toaletter': 'Offentliga toaletter',
+      'off_konst': 'Offentliga konstverk',
+      'turistbyran': 'Turistbyrå',
+      'atervinningsstationer': 'Återvinningsstationer',
+      'atervinningscentraler': 'Återvinningscentraler',
+      'detaljplaner': 'Detljplaner',
+      'fornybar_energi': 'Förnybar energi',
+      'cykelservicestallen': 'Cykelservice',
+      'laddplatser': 'Laddplatser',
+      'parkering_punkt': 'Parkeringsplatser',
+      'polisstationer': 'Polisstation'
     };
 
 
@@ -439,7 +460,7 @@ var BufferModel = {
     this.deActivateBufferMarker();
     this.get('bufferLayer').getSource().clear();
     this.get('markerlayer').getSource().clear();
-    this.get('popup_layer').getSource().clear();
+    this.get('layer_popup').getSource().clear();
     this.set('marker', undefined);
     this.set('popupHighlight', undefined);
     document.getElementById('visibleLayerList').innerHTML = '';

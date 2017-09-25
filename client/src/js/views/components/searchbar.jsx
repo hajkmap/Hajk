@@ -357,20 +357,24 @@ var SearchBarView = {
               type="text"
               ref="searchInput"
               className="form-control"
-              placeholder="Ange söktext.."
+              placeholder="Ange adress eller fastighetsbeteckning.."
               value={value}
               onKeyDown={this.handleKeyDown}
               onChange={search_on_input} />
           </div>
-        </div>
-        <div className="search-options">
-          {options}
         </div>
         {results}
       </div>
     );
   }
 };
+/**
+ *
+ * Ta bort sök alternative ovanför {results} above
+ *         <div className="search-options">{options}</div>
+ */
+
+
 
 /**
  * SearchBarView module.<br>

@@ -71,11 +71,14 @@ var AnchorPanelView = {
     return (
       <Panel title="Länk till karta" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked}>
         <div className="panel-content">
-          <button onClick={this.generate} className="btn btn-default">Uppdatera länk</button>
           <p>
-            En direktlänk har genererats som visar aktuell utbredning, zoomnivå och tända/släckta lager.<br/>
-            Tryck på länken nedan för att öppna kartan i ny flik för exempelvis bokmärkning.<br/>
-            Högerklika på länken och välj kopiera genväg för att spara länken i urklipp för inklistring i ett e-mail exempelvis.<br/>
+            Zooma till önskad skala och tänd de lager du vill visa.<br/>
+            Tryck på "Skapa länk" nedan.<br/>
+          </p>
+          <button onClick={this.generate} className="btn btn-main">Skapa länk</button><br/><br/>
+          <p>
+            En länkadress till kartan med aktuell zoomnivå samt tända/släckta lager har skapats.<br/>
+            Du kan kopiera länkadressen genom att högerklicka på "Länk" nedan.<br/>
           </p>
           <div className="alert alert-success">
             <a target="_blank" href={anchor}>Länk</a>

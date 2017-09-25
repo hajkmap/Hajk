@@ -118,6 +118,7 @@ var BookmarkPanelView = {
   render: function () {
 
     var bookmarks = this.props.model.getBookmarks();
+    console.log(bookmarks);
     var items = null;
 
     if (bookmarks) {
@@ -129,7 +130,7 @@ var BookmarkPanelView = {
           <li key={i} onClick={this.loadBookmark.bind(this, bookmark)}>
             <i className={iconClass} onClick={this.updateBookmark.bind(this, bookmark.id)}></i>
             {bookmark.name}
-            <i className="delete fa icon fa-remove" onClick={this.removeBookmark.bind(this, bookmark.id)}></i>
+            <i className="delete fa icon fa-remove" onClick={this.removeBookmark.bind(this, bookmark.name)}></i>
           </li>
         );
       });
@@ -140,6 +141,11 @@ var BookmarkPanelView = {
         <div className="bookmark-panel panel-content">
           <form onSubmit={this.onSubmitForm}>
             <div className="form-group">
+              <p>
+                ①. Zooma in till önskad skala.<br/><br/>
+                ②. Skriv önskat namn i fältet nedan.<br/><br/>
+                ③. Tryck på Enter-knappen.<br/><br/>
+              </p>
               <label>Lägg till bokmärke</label>
               <div className="input-group">
                 <div className="input-group-addon">

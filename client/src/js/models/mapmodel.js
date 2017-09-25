@@ -90,7 +90,7 @@ var MapModel = {
     var map = new ol.Map({
       interactions: ol.interaction.defaults().extend([new Drag()]),
       target: this.get("target"),
-      layers: [ ],
+      layers: [],
       logo: false,
       controls: [
         new ol.control.Zoom({ zoomInTipLabel: 'Zooma in', zoomOutTipLabel: 'Zooma ut' }),
@@ -215,6 +215,7 @@ var MapModel = {
     var map = this.get('ol');
     map.getView().setCenter(config.center);
     map.getView().setZoom(config.zoom);
+    console.log(config);
   },
 
   /**

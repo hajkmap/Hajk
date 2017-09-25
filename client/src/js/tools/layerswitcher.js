@@ -52,7 +52,8 @@ var LayerSwitcherModelProperties = {
   visibleAtStart: true,
   backgroundSwitcherBlack: true,
   backgroundSwitcherWhite: true,
-  toggleAllButton: true
+  toggleAllButton: true,
+  haveInitializedBaseLayers: false,
 };
 
 /**
@@ -115,12 +116,10 @@ var LayerSwitcherModel = {
    * @return {Layer[]} base layers
    */
   getBaseLayers: function () {
-    var baseLayers = [];
+    var baseLayers = []
     this.get('baselayers').forEach(baseLayer => {
       var layer = this.get('layerCollection').find(layer => layer.id === baseLayer.id);
       if (layer) {
-        layer.setVisible(baseLayer.visibleAtStart);
-        layer.getLayer().setVisible(layer.getVisible());
         baseLayers.push(layer);
       }
     });

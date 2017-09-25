@@ -145,6 +145,19 @@ var BookmarkModel = {
   * @param {function} callback - Fn to be called when the update is complete.
   */
   updateBookmark: function(bookmark, callback) {
+    /*var visibleLayers = []
+    this.get('layerCollection').forEach(layer => {
+      // if visible add to list
+      if(layer.getVisible()){
+        visibleLayers.push(layer.name);
+    }
+
+    });
+
+    // store list and location in bookmark
+    bookmark.layers = visibleLayers
+
+  });
     //
     //TODO:
     // Hämta från local storage och uppdatera istället.
@@ -160,6 +173,7 @@ var BookmarkModel = {
     //     callback();
     //   }
     // });
+*/
   },
 
   /**
@@ -168,21 +182,13 @@ var BookmarkModel = {
    * @param {number} id - ID of bookmark to be removed.
    * @param {function} callback - Fn to be called when the removal is complete.
    */
-  removeBookmark: function(id, callback) {
-    //
-    // TODO:
-    // Hämta från local storage och uppdatera istället.
-    //
-    // $.ajax({
-    //   url: this.get('settingsUrl') + id,
-    //   type: 'delete',
-    //   contentType: 'application/json',
-    //   dataType: 'json',
-    //   success:(bookmarks) => {
-    //     this.get('shell').setBookmarks(bookmarks);
-    //     callback();
-    //   }
-    // });
+  removeBookmark: function(name, callback) {
+    console.log(name);
+      var bookmarks = this.getBookmarks();
+
+      bookmarks = bookmarks.filter(bookmark => bookmark.name !== name);
+      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+    callback();
   },
 
   /**
@@ -191,7 +197,11 @@ var BookmarkModel = {
    * @return {object[]} bookmarks
    */
   getBookmarks: function () {
-    return this.get('shell').getBookmarks();
+    var json = localStorage.getItem('bookmarks');
+    if (json !== undefined) {
+      return JSON.parse(json);
+    }
+    return [];
   },
 
   /**

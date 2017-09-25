@@ -835,7 +835,7 @@ var ExportModel = {
         url: url,
         method: "post",
         data: {
-          json: JSON.stringify(data)
+          json: btoa(JSON.stringify(data))
         },
         format: "json",
         success: (url) => {
