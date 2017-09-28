@@ -302,7 +302,7 @@ var LayerPanelView = {
       toggleGroup = group.toggled
       ? (<i
           className={toggleClassName}
-          style={{marginLeft: "4px", width: "14px"}}
+          style={{cursor: 'pointer', marginLeft: "4px", width: "14px"}}
           ref={id}
           onClick={this.toggleGroup.bind(this, group)}
           id={id}
