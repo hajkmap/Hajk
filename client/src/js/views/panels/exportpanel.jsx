@@ -205,13 +205,13 @@ var ExportPdfSettings = React.createClass({
     }
 
     var val = this.getScale();
-    if (e.target.value < 250) {
-      val = 250;
-    } else if (e.target.value > 250000) {
-      val = 250000;
-    } else {
+    //if (e.target.value < 250) {
+    //  val = 250;
+    //} else if (e.target.value > 250000) {
+    //  val = 250000;
+    //} else {
       val = e.target.value;
-    }
+    //}
     this.setState({
       manualScale: val
     });
