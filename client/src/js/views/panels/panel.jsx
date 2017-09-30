@@ -39,7 +39,7 @@ var PanelView = {
    * @return {external:ReactElement}
    */
   render: function () {
-    if(document.body.clientWidth > 600) {
+    /*if(document.body.clientWidth > 600) {
       var toggleIcon = this.props.minimized ? "fa fa-plus" : "fa fa-minus";
       var closeIcon = this.props.minimized ? "fa fa-plus" : "fa fa-times";
       toggleIcon += " pull-right clickable panel-close";
@@ -60,23 +60,53 @@ var PanelView = {
           </div>
         </div>
       );
-    } else {
+    } else { */
       // mobile
-      alert('this is mobil');
+
+      $(document).ready(function() {
+        $("[data-toggle]").click(function() {
+          var toggle_el = $(this).data("toggle");
+          $(toggle_el).toggleClass("open-sidebar-swipe");
+        });
+
+      });
+
+      $(".swipe-area").swipe({
+        swipeStatus:function(event, phase, direction, distance, duration, fingers)
+        {
+          console.log('swiping');
+          if (phase=="move" && direction =="right") {
+            $(".container-swipe-menu").addClass("open-sidebar");
+            return false;
+          }
+          if (phase=="move" && direction =="left") {
+            $(".container-swipe-menu").removeClass("open-sidebar");
+            return false;
+          }
+        }
+      });
+
+
       return(
-        <div>
-      <nav id="menu">
-        <header>
-          <h2>Menu</h2>
-        </header>
-      </nav>
-      <main id="panel">
-        <header>
-        <h2>Panel</h2>
-    </header>
-    </main>
+        <div className="container-swipe-menu">
+          <div id="sidebar-swipe">
+            <ul>
+              <li><a href="#">Home</a></li>
+              <li><a href="#">Explore</a></li>
+              <li><a href="#">Users</a></li>
+              <li><a href="#">Sign Out</a></li>
+            </ul>
+          </div>
+          <div className="main-content-swipe">
+            <div className="swipe-area"></div>
+            <a href="#" data-toggle=".container-swipe-menu" id="sidebar-toggle-swipe">
+              <span className="bar-swipe"></span>
+              <span className="bar-swipe"></span>
+              <span className="bar-swipe"></span>
+            </a>
+          </div>
         </div>);
-    }
+    //}
 
 
   }

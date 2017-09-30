@@ -141,40 +141,104 @@
   margin-top: 7pt;
 }
 
-.slideout-menu {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  width: 256px;
-  min-height: 100vh;
-  overflow-y: scroll;
-  -webkit-overflow-scrolling: touch;
-  z-index: 0;
-  display: none;
-}
-
-.slideout-menu-left {
-  left: 0;
-}
-
-.slideout-menu-right {
-  right: 0;
-}
-
-.slideout-panel {
+//+ ---------------------- Swipe sidemenu style
+.container-swipe-menu {
   position: relative;
-  z-index: 1;
-  will-change: transform;
-  background-color: #FFF; /* A background-color is required */
-  min-height: 100vh;
+  height: 100%;
+  width: 100%;
+  left: 0;
+  -webkit-transition:  left 0.4s ease-in-out;
+  -moz-transition:  left 0.4s ease-in-out;
+  -ms-transition:  left 0.4s ease-in-out;
+  -o-transition:  left 0.4s ease-in-out;
+  transition:  left 0.4s ease-in-out;
+}
+.container-swipe-menu.open-sidebar {
+  left: 240px;
 }
 
-.slideout-open,
-.slideout-open body,
-.slideout-open .slideout-panel {
-  overflow: hidden;
+.swipe-area {
+  position: absolute;
+  width: 50px;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: #f3f3f3;
+  z-index: 0;
 }
-
-.slideout-open .slideout-menu {
+#sidebar-swipe {
+  background: #DF314D;
+  position: absolute;
+  width: 240px;
+  height: 100%;
+  left: -240px;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+}
+#sidebar-swipe ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+#sidebar-swipe ul li {
+  margin: 0;
+}
+#sidebar-swipe ul li a {
+  padding: 15px 20px;
+  font-size: 16px;
+  font-weight: 100;
+  color: white;
+  text-decoration: none;
   display: block;
+  border-bottom: 1px solid #C9223D;
+  -webkit-transition:  background 0.3s ease-in-out;
+  -moz-transition:  background 0.3s ease-in-out;
+  -ms-transition:  background 0.3s ease-in-out;
+  -o-transition:  background 0.3s ease-in-out;
+  transition:  background 0.3s ease-in-out;
 }
+#sidebar-swipe ul li:hover a {
+  background: #C9223D;
+}
+.main-content-swipe {
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  position: relative;
+}
+.main-content-swipe .content-swipe{
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  padding-left: 60px;
+  width: 100%;
+}
+.main-content-swipe .content-swipe{
+   font-weight: 100;
+ }
+.main-content-swipe .content-swipe{
+  width: 100%;
+  line-height: 160%;
+}
+.main-content-swipe #sidebar-toggle-swipe {
+  background: #DF314D;
+  border-radius: 3px;
+  display: block;
+  position: relative;
+  padding: 10px 7px;
+  float: left;
+}
+.main-content-swipe #sidebar-toggle-swipe .bar-swipe{
+  display: block;
+  width: 18px;
+  margin-bottom: 3px;
+  height: 2px;
+  background-color: #fff;
+  border-radius: 1px;
+}
+.main-content-swipe #sidebar-toggle-swipe .bar-swipe:last-child{
+  margin-bottom: 0;
+}
+
+// +-------------------------- Swipe sidemenu style
