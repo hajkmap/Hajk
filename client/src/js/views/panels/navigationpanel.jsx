@@ -208,7 +208,7 @@ var NavigationPanelView = {
     return (
       <div>
         <Alert options={this.getAlertOptions()} />
-        <div className={classes} onClick={this.maximize}>
+        <div id="navigation-panel" className={classes} onClick={this.maximize}>
           {panelInstance}
         </div>
       </div>

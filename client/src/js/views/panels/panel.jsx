@@ -39,7 +39,13 @@ var PanelView = {
    * @return {external:ReactElement}
    */
   render: function () {
-    /*if(document.body.clientWidth > 600) {
+    if (document.body.clientWidth > 600) {
+
+
+      var navPanel = document.getElementById("navigation-panel");
+      navPanel.style.width = "417px";
+
+
       var toggleIcon = this.props.minimized ? "fa fa-plus" : "fa fa-minus";
       var closeIcon = this.props.minimized ? "fa fa-plus" : "fa fa-times";
       toggleIcon += " pull-right clickable panel-close";
@@ -60,11 +66,14 @@ var PanelView = {
           </div>
         </div>
       );
-    } else { */
+    } else {
       // mobile
 
-      $(document).ready(function() {
-        $("[data-toggle]").click(function() {
+    var navPanel = document.getElementById("navigation-panel");
+    navPanel.style.width = "50px";
+
+      $(document).ready(function () {
+        $("[data-toggle]").click(function () {
           var toggle_el = $(this).data("toggle");
           $(toggle_el).toggleClass("open-sidebar-swipe");
         });
@@ -72,14 +81,13 @@ var PanelView = {
       });
 
       $(".swipe-area").swipe({
-        swipeStatus:function(event, phase, direction, distance, duration, fingers)
-        {
+        swipeStatus: function (event, phase, direction, distance, duration, fingers) {
           console.log('swiping');
-          if (phase=="move" && direction =="right") {
+          if (phase == "move" && direction == "right") {
             $(".container-swipe-menu").addClass("open-sidebar");
             return false;
           }
-          if (phase=="move" && direction =="left") {
+          if (phase == "move" && direction == "left") {
             $(".container-swipe-menu").removeClass("open-sidebar");
             return false;
           }
@@ -87,15 +95,28 @@ var PanelView = {
       });
 
 
-      return(
+    var toggleIcon = this.props.minimized ? "fa fa-plus" : "fa fa-minus";
+    var closeIcon = this.props.minimized ? "fa fa-plus" : "fa fa-times";
+    toggleIcon += " pull-right clickable panel-close";
+    closeIcon += " pull-right clickable panel-close";
+
+      return (
         <div className="container-swipe-menu">
           <div id="sidebar-swipe">
-            <ul>
-              <li><a href="#">Home</a></li>
-              <li><a href="#">Explore</a></li>
-              <li><a href="#">Users</a></li>
-              <li><a href="#">Sign Out</a></li>
-            </ul>
+            <div className="panel navigation-panel-inner">
+              <div className="panel-heading">
+                <span>{this.props.title}</span>
+                <i className={closeIcon} onClick={() => {
+                  if (this.props.onUnmountClicked) {
+                    this.props.onUnmountClicked();
+                  }
+                }}></i>
+                <i className={toggleIcon} onClick={this.props.onCloseClicked}></i>
+              </div>
+              <div className="panel-body">
+                {this.props.children}
+              </div>
+            </div>
           </div>
           <div className="main-content-swipe">
             <div className="swipe-area"></div>
@@ -106,11 +127,11 @@ var PanelView = {
             </a>
           </div>
         </div>);
-    //}
+      }
 
 
-  }
-};
+    }
+  };
 
 /**
  * PanelView module.<br>
