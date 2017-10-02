@@ -61,6 +61,11 @@ const defaultState = {
     confirmAction: () => { },
     denyAction: () => { }
   },
+  infoVisible: false,
+  infoTitle: "",
+  infoText: "",
+  infoUrl: "",
+  infoOwner: ""
 };
 
 const supportedProjections = [
@@ -389,7 +394,12 @@ class ExtendedWMSLayerForm extends Component {
       drawOrder: this.getValue("drawOrder"),
       attribution: this.getValue("attribution"),
       projection: this.getValue("projection"),
-      version: this.state.version
+      version: this.state.version,
+      infoVisible: this.getValue("infoVisible"),
+      infoTitle: this.getValue("infoTitle"),
+      infoText: this.getValue("infoText"),
+      infoUrl: this.getValue("infoUrl"),
+      infoOwner: this.getValue("infoOwner")
     };
   }
 
@@ -406,6 +416,7 @@ class ExtendedWMSLayerForm extends Component {
     if (fieldName === 'tiled') value = input.checked;
     if (fieldName === 'queryable') value = input.checked;
     if (fieldName === 'layers') value = this.state.addedLayers;
+    if (fieldName === 'infoVisible') value = input.checked;
 
     return value;
   }
@@ -529,7 +540,8 @@ class ExtendedWMSLayerForm extends Component {
   render() {
 
     var loader = this.state.load ? <i className="fa fa-refresh fa-spin"></i> : null;
-    var imageLoader = this.state.imageLoad ? <i className="fa fa-refresh fa-spin"></i> : null
+    var imageLoader = this.state.imageLoad ? <i className="fa fa-refresh fa-spin"></i> : null;
+    var infoClass = this.state.infoVisible ? "tooltip-info" : "hidden";
 
     return (
       <fieldset className="article-wrapper">
@@ -739,6 +751,69 @@ class ExtendedWMSLayerForm extends Component {
             checked={this.state.tiled}
           />
         </div>
+        </div>
+        <div className="info-container" style={{margin: "unset"}}>
+          <div>
+            <label>Infodokument</label>
+            <input
+              type="checkbox"
+              ref="input_infoVisible"
+              onChange={(e) => { this.setState({infoVisible: e.target.checked})}}
+              checked={this.state.infoVisible}
+            />
+          </div>
+          <div className={infoClass}>
+            <label>Rubrik</label>
+            <input 
+              type="text"
+              ref="input_infoTitle"
+                onChange={(e) => {
+                  this.setState({infoTitle: e.target.value});
+                  this.validateField("infoTitle", e);
+                }}
+                value={this.state.infoTitle ? this.state.infotitle : this.state.caption}
+                className={this.getValidationClass("infoTitle")}
+            />
+          </div>
+          <div className={infoClass}>
+            <label>Text</label>
+            <textarea 
+              type="text"
+              ref="input_infoText"
+                onChange={(e) => {
+                  this.setState({infoText: e.target.value});
+                  this.validateField("infoText", e);
+                }}
+                value={this.state.infoText}
+                className={this.getValidationClass("infoText")}
+            />
+          </div>
+          <div className={infoClass}>
+            <label>Länk (ex. till PDF)</label>
+            <input 
+              type="text"
+              ref="input_infoUrl"
+                onChange={(e) => {
+                  this.setState({infoUrl: e.target.value});
+                  this.validateField("infoUrl", e);
+                }}
+                value={this.state.infoUrl}
+                className={this.getValidationClass("infoUrl")}
+            />
+          </div>
+          <div className={infoClass}>
+            <label>Ägare</label>
+            <input 
+              type="text"
+              ref="input_infoOwner"
+                onChange={(e) => {
+                  this.setState({infoOwner: e.target.value});
+                  this.validateField("infoOwner", e);
+                }}
+                value={this.state.infoOwner ? this.state.infoOwner : this.state.owner}
+                className={this.getValidationClass("infoOwner")}
+            />
+          </div>
         </div>
       </fieldset>
     );
