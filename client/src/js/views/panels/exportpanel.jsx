@@ -92,7 +92,7 @@ var ExportTiffSettings = React.createClass({
 });
 
 var ExportPdfSettings = React.createClass({
-  mixins: [LocalStorageMixin],
+  //mixins: [LocalStorageMixin], //lagrar skala, pappersformat etc. i LocalStorage
 
   resolutions: [72, 96, 150, 200, 300],
   paperFormats: ["A2", "A3", "A4"],
