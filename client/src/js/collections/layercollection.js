@@ -178,7 +178,7 @@ var LayerCollection = {
       let strippedUrl = url.split("?")[0];
       let legendUrl = `${strippedUrl}?REQUEST=GetLegendGraphic&${args.version}&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${layer.name}`;
       let protocol = /^http/.test(legendUrl) ? '' : 'http://';
-
+      
       return {
         Url: protocol + legendUrl,
         Description: layer.name
@@ -204,7 +204,7 @@ var LayerCollection = {
         "imageFormat": args.imageFormat || "image/png",
         "serverType": args.serverType || "geoserver",
         "attribution": args.attribution,
-        "legend": args.layers.map((l) => createLegendConfig(args.url, l)),
+        "legend": args.layers.map((l) => createLegendConfig(args.legend, l)),
         "layersconfig": args.layers,
         "params": {
           "LAYERS": args.layers.map(function (l) { return l.name; }).join(','),

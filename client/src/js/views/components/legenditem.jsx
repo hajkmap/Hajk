@@ -36,12 +36,7 @@ var LegendItem = React.createClass({
     }
       return (
         <div className="media">
-          <div className="media-left">
-            <img className="media-object" src={this.props.icon} alt="legend" />
-          </div>
-          <div className="media-right">
-            <span className="media-heading">{this.props.text}</span>
-          </div>
+          <img className="media-object" src={this.props.icon} alt="legend" />
         </div>
       );
 
