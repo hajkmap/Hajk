@@ -278,9 +278,9 @@
       "caption": "Dammar SMHI",
       "url": "http://ksdgis.se/geoserver/fortum/wms",
       "owner": "",
-      "date": "1499340962149",
+      "date": "1507116797956",
       "content": "",
-      "legend": "",
+      "legend": "https://my.ilstu.edu/~jabraun/students/mathis/legend4.gif",
       "projection": null,
       "layers": [
         "smhi_dams"
@@ -295,16 +295,16 @@
       "imageFormat": "image/png",
       "serverType": "geoserver",
       "attribution": "",
-      "searchUrl": null,
-      "searchPropertyName": null,
-      "searchDisplayName": null,
-      "searchOutputFormat": null,
-      "searchGeometryField": null,
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
       "infoVisible": false,
-      "infoTitle": null,
-      "infoText": null,
-      "infoUrl": null,
-      "infoOwner": null
+      "infoTitle": "Dammar SMHI",
+      "infoText": "",
+      "infoUrl": "",
+      "infoOwner": ""
     },
     {
       "id": "8",
@@ -734,6 +734,39 @@
       "infoText": null,
       "infoUrl": null,
       "infoOwner": null
+    },
+    {
+      "id": "42",
+      "caption": "Daro wms",
+      "url": "http://194.71.132.27/geoserver/wms",
+      "owner": "",
+      "date": "1507117795045",
+      "content": "",
+      "legend": "https://cdn4.iconfinder.com/data/icons/ionicons/512/icon-image-128.png",
+      "projection": null,
+      "layers": [
+        "viskan:Daro"
+      ],
+      "infobox": "",
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": false,
+      "infoTitle": "Daro wms",
+      "infoText": "",
+      "infoUrl": "",
+      "infoOwner": ""
     }
   ],
   "wfslayers": [],
@@ -1136,5 +1169,72 @@
     }
   ],
   "arcgislayers": [],
-  "extendedwmslayers": []
+  "extendedwmslayers": [
+    {
+      "id": "40",
+      "caption": "Biotopkartering2016",
+      "url": "http://194.71.132.27/geoserver/wms",
+      "owner": "",
+      "date": "1507116767380",
+      "content": "Layer-Group type layer: motala:Biotopkartering2016",
+      "projection": "EPSG:3006",
+      "infoFormat": "application/json",
+      "infobox": "",
+      "legend": "https://my.ilstu.edu/~jabraun/students/mathis/legend4.gif",
+      "layers": [
+        {
+          "style": "",
+          "queryable": false,
+          "name": "motala:Biotopkartering2016"
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "version": "1.3.0",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
+    },
+    {
+      "id": "41",
+      "caption": "Daro Extended",
+      "url": "http://194.71.132.27/geoserver/wms",
+      "owner": "",
+      "date": "1507117721442",
+      "content": "",
+      "projection": "EPSG:3006",
+      "infoFormat": "application/json",
+      "infobox": "",
+      "legend": "https://cdn4.iconfinder.com/data/icons/ionicons/512/icon-image-128.png",
+      "layers": [
+        {
+          "style": "",
+          "queryable": false,
+          "name": "viskan:Daro"
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "version": "1.3.0",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
+    }
+  ]
 }

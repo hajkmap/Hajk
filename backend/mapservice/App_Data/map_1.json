@@ -185,7 +185,18 @@
             "name": "Lager",
             "toggled": false,
             "expanded": false,
-            "layers": [],
+            "layers": [
+              {
+                "id": "41",
+                "visibleAtStart": false,
+                "drawOrder": 1000
+              },
+              {
+                "id": "42",
+                "visibleAtStart": false,
+                "drawOrder": 1000
+              }
+            ],
             "groups": []
           }
         ],
@@ -302,6 +313,27 @@
     },
     {
       "type": "location",
+      "options": {},
+      "index": 0
+    },
+    {
+      "type": "streetview",
+      "options": {
+        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4"
+      },
+      "index": 0
+    },
+    {
+      "type": "information",
+      "options": {
+        "text": "",
+        "headerText": "",
+        "visibleAtStart": false
+      },
+      "index": 0
+    },
+    {
+      "type": "bookmark",
       "options": {},
       "index": 0
     }
