@@ -230,7 +230,10 @@ var ExportPdfSettings = React.createClass({
   addPreview: function (map) {
     var scale  = this.getScale()
     ,   paper  = this.getPreviewPaperMeasures()
-    ,   center = this.state.center;
+    //,   center = this.state.center;
+    ,   center = this.props.model.getPreviewFeature() ?
+                 ol.extent.getCenter(this.props.model.getPreviewFeature().getGeometry().getExtent()) :
+                 map.getView().getCenter();
 
     this.props.model.addPreview(scale, paper, center);
   },
