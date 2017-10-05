@@ -175,8 +175,8 @@ var LayerCollection = {
 
   mapExtendedWMSConfig: function (args, properties) {
     const createLegendConfig = (url, layer) => {
-      let strippedUrl = url.split("?")[0];
-      let legendUrl = `${strippedUrl}?REQUEST=GetLegendGraphic&${args.version}&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${layer.name}`;
+      let strippedUrl = url ? url.split("?")[0] : args.url;
+      let legendUrl = `${strippedUrl}?REQUEST=GetLegendGraphic&VERSION=${args.version}&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${layer.name}`;
       let protocol = /^http/.test(legendUrl) ? '' : 'http://';
       
       return {
