@@ -20,27 +20,17 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var LegendItem = React.createClass({
+var InfoButton = React.createClass({
   render: function () {
-    if (Array.isArray(this.props.icon)) {
-      var images = this.props.icon.map((blob, i) => {
-        var a = blob.split('&');
-        return (
-          <div key={i}>
-            <div>{a[1] || ""}</div>
-            <img className="media-object" src={a[0]} alt="legend" />
-          </div>
-        )
-      });
-      return (<div>{images}</div>);
-    }
-      return (
-        <div className="media">
-          <img className="media-object" src={this.props.icon} alt="legend" />
-        </div>
-      );
-
+    var title = this.props.checked ? "Dölj tooltip" : "Visa lagerinformation";
+    var className = this.props.checked ? "fa fa-info-circle" : "fa fa-info-circle";
+    var fontSize = this.props.checked ? "18px" : "18px";
+    return (
+       <span className="clickable pull-right" title={title} style={{ position: 'relative', top: '3px', marginRight: '14px' }}>
+          <i className={className} style={{ fontSize: fontSize }}></i>
+       </span>
+    );
   }
 });
 
-module.exports = LegendItem;
+module.exports = InfoButton;

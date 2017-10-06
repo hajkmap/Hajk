@@ -174,7 +174,7 @@
         "baselayers": [
           {
             "id": "22",
-            "visibleAtStart": false,
+            "visibleAtStart": true,
             "drawOrder": 0
           }
         ],
@@ -184,35 +184,15 @@
             "parent": "-1",
             "name": "Lager",
             "toggled": false,
-            "expanded": true,
+            "expanded": false,
             "layers": [
               {
-                "id": "7",
+                "id": "41",
                 "visibleAtStart": false,
                 "drawOrder": 1000
               },
               {
-                "id": "29",
-                "visibleAtStart": true,
-                "drawOrder": 1000
-              },
-              {
-                "id": "19",
-                "visibleAtStart": false,
-                "drawOrder": 1000
-              },
-              {
-                "id": "17",
-                "visibleAtStart": false,
-                "drawOrder": 1000
-              },
-              {
-                "id": "16",
-                "visibleAtStart": false,
-                "drawOrder": 1000
-              },
-              {
-                "id": "26",
+                "id": "42",
                 "visibleAtStart": false,
                 "drawOrder": 1000
               }
@@ -233,13 +213,28 @@
       "options": {
         "onMap": false,
         "toolbar": "bottom",
-        "maxZoom": 14,
+        "maxZoom": 15,
         "markerImg": "http://localhost/hajk/assets/icons/marker.png",
         "kmlExportUrl": "/mapservice/export/kml",
         "excelExportUrl": "/mapservice/export/excel",
         "displayPopup": true,
         "selectionTools": true,
-        "filterVisible": true,
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ]
+      },
+      "index": 0
+    },
+    {
+      "type": "infoclick",
+      "options": {
+        "displayPopup": true,
+        "markerImg": "assets/icons/marker.png",
         "anchor": [
           16,
           32
@@ -248,9 +243,9 @@
           32,
           32
         ],
-        "popupOffsetY": 0
+        "popupOffsetY": -32
       },
-      "index": 4
+      "index": 0
     },
     {
       "type": "export",
@@ -266,18 +261,19 @@
           2500,
           5000,
           10000,
+          10000,
           25000,
           50000,
           100000,
           250000
         ]
       },
-      "index": 9
+      "index": 0
     },
     {
       "type": "edit",
       "options": {},
-      "index": 2
+      "index": 0
     },
     {
       "type": "coordinates",
@@ -291,29 +287,20 @@
             "xtitle": "E",
             "ytitle": "N",
             "inverseAxis": false
-          },
-          {
-            "code": "EPSG:3006",
-            "default": false,
-            "hint": "",
-            "title": "SW99TM",
-            "xtitle": "E",
-            "ytitle": "N",
-            "inverseAxis": false
           }
         ]
       },
-      "index": 5
+      "index": 0
     },
     {
       "type": "buffer",
       "options": {},
-      "index": 3
+      "index": 0
     },
     {
       "type": "anchor",
       "options": {},
-      "index": 6
+      "index": 0
     },
     {
       "type": "draw",
@@ -322,55 +309,43 @@
         "importUrl": "/mapservice/import/kml",
         "icons": "marker, marker_black, marker_green, marker_red, marker_yellow, br, pin, pin_black, pin_green, pin_red, pin_yellow"
       },
-      "index": 1
+      "index": 0
     },
     {
-      "type": "information",
-      "options": {
-        "text": "Information om kartan.",
-        "headerText": "Information",
-        "visibleAtStart": false
-      },
-      "index": 8
+      "type": "location",
+      "options": {},
+      "index": 0
     },
     {
       "type": "streetview",
       "options": {
         "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4"
       },
-      "index": 11
+      "index": 0
     },
     {
-      "type": "location",
-      "options": {},
-      "index": 7
-    },
-    {
-      "type": "infoclick",
+      "type": "information",
       "options": {
-        "displayPopup": false,
-        "markerImg": "assets/icons/marker.png",
-        "anchor": [
-          16,
-          32
-        ],
-        "imgSize": [
-          32,
-          32
-        ],
-        "popupOffsetY": 0
+        "text": "",
+        "headerText": "",
+        "visibleAtStart": false
       },
+      "index": 0
+    },
+    {
+      "type": "bookmark",
+      "options": {},
       "index": 0
     }
   ],
   "map": {
     "target": "map",
     "center": [
-      418061,
-      6584446
+      414962,
+      6583005
     ],
     "projection": "EPSG:3006",
-    "zoom": 13,
+    "zoom": 3,
     "maxZoom": 3,
     "minZoom": 9,
     "resolutions": [

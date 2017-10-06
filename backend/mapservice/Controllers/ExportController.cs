@@ -69,7 +69,11 @@ namespace MapService.Controllers
             byte[] blob = pdfCreator.Create(exportItem);
             string[] fileInfo = byteArrayToFileInfo(blob, "pdf");
 
-            return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
+            if (exportItem.proxyUrl != "") {
+                return exportItem.proxyUrl + "/Temp/" + fileInfo[1];
+            } else {
+                return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
+            }
             //return File(blob, "application/pdf", "kartutskrift.pdf");
         }
 
@@ -129,7 +133,11 @@ namespace MapService.Controllers
             outStream.ToArray();
 
             string[] fileInfo = byteArrayToFileInfo(outStream.ToArray(), "zip");
-            return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
+            if (exportItem.proxyUrl != "") {
+                return exportItem.proxyUrl + "/Temp/" + fileInfo[1];
+            } else {
+                return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
+            }
         }
 
 

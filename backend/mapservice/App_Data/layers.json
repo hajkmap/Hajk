@@ -41,7 +41,12 @@
         "8",
         "9"
       ],
-      "attribution": null
+      "attribution": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "22",
@@ -92,7 +97,12 @@
         "12",
         "13"
       ],
-      "attribution": "Lantmäteriet"
+      "attribution": "Lantmäteriet",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     }
   ],
   "wmslayers": [
@@ -122,14 +132,19 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "2",
       "caption": "Biotopkartering",
       "url": "http://ksdgis.se/geoserver/wms",
       "owner": "",
-      "date": "1492618274801",
+      "date": "1498648722585",
       "content": "",
       "legend": "",
       "projection": null,
@@ -152,7 +167,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "3",
@@ -180,35 +200,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
-    },
-    {
-      "id": "4",
-      "caption": "Vattendrag",
-      "url": "http://ksdgis.se/geoserver/fortum/wms",
-      "owner": "",
-      "date": "1491475994157",
-      "content": "",
-      "legend": "",
-      "projection": null,
-      "layers": [
-        "streams"
-      ],
-      "infobox": "",
-      "searchFields": null,
-      "displayFields": null,
-      "visibleAtStart": false,
-      "queryable": true,
-      "tiled": false,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "geoserver",
-      "attribution": "",
-      "searchUrl": null,
-      "searchPropertyName": null,
-      "searchDisplayName": null,
-      "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "5",
@@ -236,7 +233,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "6",
@@ -264,16 +266,21 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "7",
       "caption": "Dammar SMHI",
       "url": "http://ksdgis.se/geoserver/fortum/wms",
       "owner": "",
-      "date": "1499340962149",
+      "date": "1507116797956",
       "content": "",
-      "legend": "",
+      "legend": "https://my.ilstu.edu/~jabraun/students/mathis/legend4.gif",
       "projection": null,
       "layers": [
         "smhi_dams"
@@ -288,11 +295,16 @@
       "imageFormat": "image/png",
       "serverType": "geoserver",
       "attribution": "",
-      "searchUrl": "http://ksdgis.se/geoserver/fortum/wfs",
+      "searchUrl": "",
       "searchPropertyName": "",
-      "searchDisplayName": "dnamn",
-      "searchOutputFormat": "GML3",
-      "searchGeometryField": "geom"
+      "searchDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": false,
+      "infoTitle": "Dammar SMHI",
+      "infoText": "",
+      "infoUrl": "",
+      "infoOwner": ""
     },
     {
       "id": "8",
@@ -320,7 +332,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "9",
@@ -348,7 +365,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "10",
@@ -376,7 +398,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "11",
@@ -404,7 +431,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "12",
@@ -432,7 +464,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "13",
@@ -460,7 +497,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "14",
@@ -488,7 +530,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "15",
@@ -516,7 +563,12 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "16",
@@ -540,11 +592,16 @@
       "imageFormat": "image/png",
       "serverType": "geoserver",
       "attribution": "",
-      "searchUrl": "",
-      "searchPropertyName": "",
-      "searchDisplayName": "",
-      "searchOutputFormat": "",
-      "searchGeometryField": ""
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "17",
@@ -568,11 +625,16 @@
       "imageFormat": "image/png",
       "serverType": "geoserver",
       "attribution": "",
-      "searchUrl": "",
-      "searchPropertyName": "",
-      "searchDisplayName": "",
-      "searchOutputFormat": "",
-      "searchGeometryField": ""
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "18",
@@ -596,11 +658,16 @@
       "imageFormat": "image/png",
       "serverType": "geoserver",
       "attribution": "",
-      "searchUrl": "",
-      "searchPropertyName": "",
-      "searchDisplayName": "",
-      "searchOutputFormat": "",
-      "searchGeometryField": ""
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "19",
@@ -624,11 +691,16 @@
       "imageFormat": "image/png",
       "serverType": "geoserver",
       "attribution": "",
-      "searchUrl": "",
-      "searchPropertyName": "",
-      "searchDisplayName": "",
-      "searchOutputFormat": "",
-      "searchGeometryField": ""
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "20",
@@ -656,7 +728,45 @@
       "searchPropertyName": null,
       "searchDisplayName": null,
       "searchOutputFormat": null,
-      "searchGeometryField": null
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
+    },
+    {
+      "id": "42",
+      "caption": "Daro wms",
+      "url": "http://194.71.132.27/geoserver/wms",
+      "owner": "",
+      "date": "1507117795045",
+      "content": "",
+      "legend": "https://cdn4.iconfinder.com/data/icons/ionicons/512/icon-image-128.png",
+      "projection": null,
+      "layers": [
+        "viskan:Daro"
+      ],
+      "infobox": "",
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": false,
+      "infoTitle": "Daro wms",
+      "infoText": "",
+      "infoUrl": "",
+      "infoOwner": ""
     }
   ],
   "wfslayers": [],
@@ -668,7 +778,7 @@
       "url": "http://gisak.alingsas.se/arcgis/services/Extern_webbkarta/Utbildning_barnomsorg/MapServer/WFSServer",
       "layer": "Extern_webbkarta_Utbildning_barnomsorg:Grundskola",
       "owner": null,
-      "date": "1489649665452",
+      "date": "1503324201082",
       "content": "",
       "legend": "data:image/png;base64,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",
       "symbolXOffset": 18.0,
@@ -693,7 +803,12 @@
       "labelOutlineColor": null,
       "labelOutlineWidth": 0,
       "labelAttribute": null,
-      "showLabels": false
+      "showLabels": false,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "24",
@@ -727,7 +842,12 @@
       "labelOutlineColor": null,
       "labelOutlineWidth": 0,
       "labelAttribute": null,
-      "showLabels": false
+      "showLabels": false,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "25",
@@ -761,7 +881,12 @@
       "labelOutlineColor": null,
       "labelOutlineWidth": 0,
       "labelAttribute": null,
-      "showLabels": false
+      "showLabels": false,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "26",
@@ -795,7 +920,12 @@
       "labelOutlineColor": null,
       "labelOutlineWidth": 0,
       "labelAttribute": null,
-      "showLabels": false
+      "showLabels": false,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "27",
@@ -829,7 +959,12 @@
       "labelOutlineColor": null,
       "labelOutlineWidth": 0,
       "labelAttribute": null,
-      "showLabels": false
+      "showLabels": false,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "28",
@@ -863,7 +998,12 @@
       "labelOutlineColor": null,
       "labelOutlineWidth": 0,
       "labelAttribute": null,
-      "showLabels": false
+      "showLabels": false,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "29",
@@ -897,7 +1037,12 @@
       "labelOutlineColor": "rgba(255, 255, 255, 1)",
       "labelOutlineWidth": 3,
       "labelAttribute": "objnamn",
-      "showLabels": true
+      "showLabels": true,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "30",
@@ -931,7 +1076,12 @@
       "labelOutlineColor": null,
       "labelOutlineWidth": 0,
       "labelAttribute": null,
-      "showLabels": false
+      "showLabels": false,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     }
   ],
   "wfstlayers": [
@@ -1010,8 +1160,81 @@
       ],
       "editPoint": true,
       "editPolygon": true,
-      "editLine": true
+      "editLine": true,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     }
   ],
-  "arcgislayers": []
+  "arcgislayers": [],
+  "extendedwmslayers": [
+    {
+      "id": "40",
+      "caption": "Biotopkartering2016",
+      "url": "http://194.71.132.27/geoserver/wms",
+      "owner": "",
+      "date": "1507116767380",
+      "content": "Layer-Group type layer: motala:Biotopkartering2016",
+      "projection": "EPSG:3006",
+      "infoFormat": "application/json",
+      "infobox": "",
+      "legend": "https://my.ilstu.edu/~jabraun/students/mathis/legend4.gif",
+      "layers": [
+        {
+          "style": "",
+          "queryable": false,
+          "name": "motala:Biotopkartering2016"
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "version": "1.3.0",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
+    },
+    {
+      "id": "41",
+      "caption": "Daro Extended",
+      "url": "http://194.71.132.27/geoserver/wms",
+      "owner": "",
+      "date": "1507117721442",
+      "content": "",
+      "projection": "EPSG:3006",
+      "infoFormat": "application/json",
+      "infobox": "",
+      "legend": "https://cdn4.iconfinder.com/data/icons/ionicons/512/icon-image-128.png",
+      "layers": [
+        {
+          "style": "",
+          "queryable": false,
+          "name": "viskan:Daro"
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "version": "1.3.0",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
+    }
+  ]
 }

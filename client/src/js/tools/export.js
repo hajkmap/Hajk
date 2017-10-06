@@ -155,6 +155,15 @@ var ExportModel = {
     return this.get('previewFeature')
   },
 
+  /**
+   * Get center coordinate of the preview feature.
+   * @return {external:"ol.coordinate"} center coordinate
+   */
+  getPreviewCenter: function () {
+    var extent = this.getPreviewFeature().getGeometry().getExtent();
+    return ol.extent.getCenter(extent);
+  },
+
   addTiffPreview: function (center) {
 
     var dpi = 25.4 / 0.28
@@ -764,6 +773,7 @@ var ExportModel = {
     data.orientation = options.orientation;
     data.format = options.format;
     data.scale = options.scale;
+    data.proxyUrl = this.get('proxyUrl');
 
     this.set("downloadingPdf", true);
 
@@ -780,7 +790,7 @@ var ExportModel = {
       },
       error: (err) => {
         this.set("downloadingPdf", false);
-        alert("Det gick inte att skapa PDF. Försök igen senare");
+        alert("Ett eller flera av lagren du försöker skriva ut klarar inte de angivna inställningarna. Prova med en mindre pappersstorlek eller lägre upplösning.");
       }
     });
 
@@ -829,6 +839,7 @@ var ExportModel = {
     data.orientation = "";
     data.format = "";
     data.scale = scale;
+    data.proxyUrl = this.get('proxyUrl');
     this.set("downloadingTIFF", true);
 
     $.ajax({
@@ -844,7 +855,7 @@ var ExportModel = {
       },
       error: (err) => {
         this.set("downloadingTIFF", false);
-        alert("Det gick inte att skapa tiff. Försök igen senare.");
+        alert("Ett eller flera av lagren du försöker skriva ut klarar inte de angivna inställningarna. Prova med en mindre pappersstorlek eller lägre upplösning.");
       }
     });
   },

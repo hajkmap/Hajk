@@ -42,7 +42,8 @@ var defaultState = {
     50000,
     100000,
     250000
-  ]
+  ],
+  proxyUrl: ""
 };
 
 class ToolOptions extends Component {
@@ -64,7 +65,8 @@ class ToolOptions extends Component {
         exportUrl: tool.options.exportUrl,
         exportTiffUrl: tool.options.exportTiffUrl,
         tiffActive: tool.options.tiffActive,
-        pdfActive: tool.options.pdfActive
+        pdfActive: tool.options.pdfActive,
+        proxyUrl: tool.options.proxyUrl
       });
     } else {
       this.setState({
@@ -126,7 +128,8 @@ class ToolOptions extends Component {
         exportTiffUrl: this.state.exportTiffUrl,
         pdfActive: this.state.pdfActive,
         tiffActive: this.state.tiffActive,
-        scales: this.state.scales
+        scales: this.state.scales,
+        proxyUrl: this.state.proxyUrl
       }
     };
 
@@ -220,6 +223,10 @@ class ToolOptions extends Component {
               onChange={(e) => {this.handleInputChange(e)}}
               checked={this.state.tiffActive}/>&nbsp;
             <label htmlFor="tiff-active">TIFF aktiverad</label>
+          </div>
+          <div>
+            <label htmlFor="proxyUrl">Proxy URL till utskrift och export</label>
+            <input value={this.state.proxyUrl} type="text" name="proxyUrl" onChange={(e) => {this.handleInputChange(e)}}></input>
           </div>
         </form>
       </div>

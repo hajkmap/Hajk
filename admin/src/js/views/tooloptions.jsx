@@ -34,6 +34,7 @@ import Information from "./tools/information.jsx";
 import Location from "./tools/Location.jsx";
 import Search from "./tools/search.jsx";
 import StreetView from "./tools/streetview.jsx";
+import Preset from "./tools/preset.jsx";
 
 var defaultState = {
   activeTool: undefined,
@@ -94,6 +95,8 @@ class ToolOptions extends Component {
         return <Search parent={this} model={this.props.model}></Search>
       case "streetview":
         return <StreetView parent={this} model={this.props.model}></StreetView>
+      case "preset":
+        return <Preset parent={this} model={this.props.model}></Preset>
       default:
         return null;
     }
@@ -147,7 +150,8 @@ class ToolOptions extends Component {
       information: "Om kartan",
       location: "Visa min position",
       search: "Sök",
-      streetview: "Google Street View"
+      streetview: "Google Street View",
+      preset: "Snabbval"
     };
 
     return (

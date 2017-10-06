@@ -161,15 +161,17 @@
               wmslayers: data.wmslayers || [],
               wmtslayers: data.wmtslayers || [],
               vectorlayers: data.vectorlayers || [],
-              arcgislayers: data.arcgislayers || []
+              arcgislayers: data.arcgislayers || [],
+              extendedwmslayers: data.extendedwmslayers || []
             };
 
             _data.wmslayers.forEach(l => l.type = "wms");
             _data.wmtslayers.forEach(l => l.type = "wmts");
             _data.vectorlayers.forEach(l => l.type = "vector");
             _data.arcgislayers.forEach(l => l.type = "arcgis");
-
+            _data.extendedwmslayers.forEach(l => l.type = "extended_wms");
             layers = data.wmslayers
+                         .concat(_data.extendedwmslayers)
                          .concat(_data.wmtslayers)
                          .concat(_data.vectorlayers)
                          .concat(_data.arcgislayers);
