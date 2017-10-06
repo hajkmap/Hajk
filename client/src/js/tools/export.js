@@ -790,7 +790,7 @@ var ExportModel = {
       },
       error: (err) => {
         this.set("downloadingPdf", false);
-        alert("Det gick inte att skapa PDF. Försök igen senare");
+        alert("Ett eller flera av lagren du försöker skriva ut klarar inte de angivna inställningarna. Prova med en mindre pappersstorlek eller lägre upplösning.");
       }
     });
 
@@ -855,7 +855,7 @@ var ExportModel = {
       },
       error: (err) => {
         this.set("downloadingTIFF", false);
-        alert("Det gick inte att skapa tiff. Försök igen senare.");
+        alert("Ett eller flera av lagren du försöker skriva ut klarar inte de angivna inställningarna. Prova med en mindre pappersstorlek eller lägre upplösning.");
       }
     });
   },
