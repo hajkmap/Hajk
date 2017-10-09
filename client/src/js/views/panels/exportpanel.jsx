@@ -260,7 +260,7 @@ var ExportPdfSettings = React.createClass({
   },
 
   componentWillUnmount: function () {
-    this.savePreviewCenterToLocalStorage(this.props.model.getPreviewCenter());
+    //this.savePreviewCenterToLocalStorage(this.props.model.getPreviewCenter());
     this.removePreview();
   },
 
