@@ -15,10 +15,13 @@ using System;
 using ICSharpCode.SharpZipLib.Zip;
 using ICSharpCode.SharpZipLib.Core;
 
+using log4net;
+
 namespace MapService.Controllers
 {
     public class ExportController : AsyncController
     {
+        ILog _log = LogManager.GetLogger(typeof(ExportController));
         /// <summary>
         /// Create filename with unique timestamp and guid.
         /// </summary>
@@ -63,6 +66,8 @@ namespace MapService.Controllers
         [HttpPost]
         public string PDF(string json)
         {
+            _log.DebugFormat("Received json: {0}" + json);
+
             MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
             AsyncManager.OutstandingOperations.Increment();
             PDFCreator pdfCreator = new PDFCreator();
