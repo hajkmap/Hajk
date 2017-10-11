@@ -23,6 +23,9 @@
 /**
  * @class
  */
+
+var panelIs = undefined;
+
 var PanelView = {
   /**
    * Get initial state.
@@ -33,13 +36,56 @@ var PanelView = {
     return {};
   },
 
+  clickSwipeBtn: function(){
+
+    if ($("#sidebar-toggle-swipe")[0].classList.contains("sidebar-open-after")) {
+      $(".container-swipe-menu").removeClass("open-sidebar");
+      $("#sidebar-toggle-swipe").removeClass("sidebar-open-after");
+      $("#sidebar-toggle-swipe").addClass("sidebar-close-after");
+    } else {
+      $(".container-swipe-menu").addClass("open-sidebar");
+      $("#sidebar-toggle-swipe").removeClass("sidebar-close-after");
+      $("#sidebar-toggle-swipe").addClass("sidebar-open-after");
+    }
+
+  },
+
+  /**
+   * Triggered when the component is successfully mounted into the DOM.
+   * @instance
+   */
+  componentDidMount: function () {
+    console.log('mounted');
+
+    $(".swipe-area").swipe({
+        swipeStatus: function (event, phase, direction, distance, duration, fingers) {
+          if (phase == "move" && direction == "right") {
+            console.log('open');
+            panelIs = true;
+            $(".container-swipe-menu").addClass("open-sidebar");
+            $("#sidebar-toggle-swipe").removeClass("sidebar-close-after");
+            $("#sidebar-toggle-swipe").addClass("sidebar-open-after");
+          }
+          if (phase == "move" && direction == "left") {
+            console.log('close');
+            panelIs = false;
+            $(".container-swipe-menu").removeClass("open-sidebar");
+            $("#sidebar-toggle-swipe").removeClass("sidebar-open-after");
+            $("#sidebar-toggle-swipe").addClass("sidebar-close-after");
+          }
+        }
+  });
+    console.log("mounted2");
+  },
+
   /**
    * Render the panel component.
    * @instance
    * @return {external:ReactElement}
    */
   render: function () {
-    if (document.body.clientWidth > 600) {
+    console.log("running render1");
+    /*if (document.body.clientWidth > 600) {
 
 
       var navPanel = document.getElementById("navigation-panel");
@@ -66,39 +112,113 @@ var PanelView = {
           </div>
         </div>
       );
-    } else {
+    } else {*/
       // mobile
 
+
+
+
+
     var navPanel = document.getElementById("navigation-panel");
+    console.log("running render2");
     navPanel.style.width = "50px";
-
+    console.log("running render3");
+/*
+    $("#sidebar-toggle-swipe").off("click");
+    $("#sidebar-toggle-swipe").on("click", function () {
+      if ($("#sidebar-toggle-swipe")[0].classList.contains("sidebar-open-after")) {
+        $(".container-swipe-menu").removeClass("open-sidebar");
+        $("#sidebar-toggle-swipe").removeClass("sidebar-open-after");
+        $("#sidebar-toggle-swipe").addClass("sidebar-close-after");
+      } else {
+        $(".container-swipe-menu").addClass("open-sidebar");
+        $("#sidebar-toggle-swipe").removeClass("sidebar-close-after");
+        $("#sidebar-toggle-swipe").addClass("sidebar-open-after");
+      }
+    });
       $(document).ready(function () {
-        $("[data-toggle]").click(function () {
-          var toggle_el = $(this).data("toggle");
-          $(toggle_el).toggleClass("open-sidebar-swipe");
-        });
+*/
+        /*
+        $("#sidebar-toggle-swipe").unbind().click(function () {
+          if(panelIs){
+          panelIs = false;
+            $(".container-swipe-menu").removeClass("open-sidebar");
+            $("#sidebar-toggle-swipe").removeClass("sidebar-open-after");
+            $("#sidebar-toggle-swipe").addClass("sidebar-close-after");
+            console.log(panelIs);
+            return false;
+        }else{
+            panelIs = true;
+            $(".container-swipe-menu").addClass("open-sidebar");
+            $("#sidebar-toggle-swipe").removeClass("sidebar-close-after");
+            $("#sidebar-toggle-swipe").addClass("sidebar-open-after");
+            console.log(panelIs);
+            return false;
+        }
+        });*/
+//      });
 
-      });
 
-      $(".swipe-area").swipe({
+     /*$(".swipe-area").swipe({
         swipeStatus: function (event, phase, direction, distance, duration, fingers) {
           console.log('swiping');
           if (phase == "move" && direction == "right") {
+            panelIs = true;
             $(".container-swipe-menu").addClass("open-sidebar");
+            $("#sidebar-toggle-swipe").removeClass("sidebar-close-after");
+            $("#sidebar-toggle-swipe").addClass("sidebar-open-after");
             return false;
           }
           if (phase == "move" && direction == "left") {
+            panelIs = false;
             $(".container-swipe-menu").removeClass("open-sidebar");
+            $("#sidebar-toggle-swipe").removeClass("sidebar-open-after");
+            $("#sidebar-toggle-swipe").addClass("sidebar-close-after");
             return false;
           }
+
         }
       });
+*/
+/*
+      //Original ver
+      $(document).ready(function () {
+        $("[data-toggle]").click(function () {
+          var pil = $(this).data("toggle"); //pil = .container-swipe-menu
+          $(pil).toggleClass("open-sidebar");
+        });
+      });
 
+      // old ver
+    $(".sidebar-close-after").on('click', function(e) {
+      e.stopPropagation();
+      console.log(e);
+      console.log(e.preventDefault());
+      console.log("1");
+      $(".container-swipe-menu").addClass("open-sidebar");
+      $("#sidebar-toggle-swipe").removeClass("sidebar-close-after");
+      $("#sidebar-toggle-swipe").addClass("sidebar-open-after");
+      return false;
+    });
+
+    $(".sidebar-open-after").on('click', function(e) {
+      console.log("2");
+      e.preventDefault();
+      $(".container-swipe-menu").removeClass("open-sidebar");
+      $("#sidebar-toggle-swipe").removeClass("sidebar-open-after");
+      $("#sidebar-toggle-swipe").addClass("sidebar-close-after");
+      return false;
+    });
+*/
 
     var toggleIcon = this.props.minimized ? "fa fa-plus" : "fa fa-minus";
+    console.log("running render4");
     var closeIcon = this.props.minimized ? "fa fa-plus" : "fa fa-times";
+    console.log("running render5");
     toggleIcon += " pull-right clickable panel-close";
+    console.log("running render6");
     closeIcon += " pull-right clickable panel-close";
+    console.log("running render7");
 
       return (
         <div className="container-swipe-menu">
@@ -120,14 +240,12 @@ var PanelView = {
           </div>
           <div className="main-content-swipe">
             <div className="swipe-area"></div>
-            <a href="#" data-toggle=".container-swipe-menu" id="sidebar-toggle-swipe">
-              <span className="bar-swipe"></span>
-              <span className="bar-swipe"></span>
+            <a data-toggle=".container-swipe-menu" id="sidebar-toggle-swipe" className="sidebar-close-after" onClick={() => {this.clickSwipeBtn()}}>
               <span className="bar-swipe"></span>
             </a>
           </div>
         </div>);
-      }
+     // }
 
 
     }

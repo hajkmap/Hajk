@@ -61,6 +61,12 @@ var AnchorPanelView = {
     });
   },
 
+  openInstruction: function (){
+    console.log('Clicked');
+    var element = $("#instructionText");
+    element.toggle();
+  },
+
   /**
    * Render the view
    * @instance
@@ -71,10 +77,14 @@ var AnchorPanelView = {
     return (
       <Panel title="Länk till karta" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked}>
         <div className="panel-content">
-          <p>
-            Zooma till önskad skala och tänd de lager du vill visa.<br/>
-            Tryck på "Skapa länk" nedan.<br/>
-          </p>
+          <button onClick={() => this.openInstruction()} className="btn-transparent" id="instructionBox"><img src="/assets/icons/infoknapp.png"/></button>
+          <div className="panel-body" id="instructionText">
+            <p>
+              Zooma till önskad skala och tänd de lager du vill visa.<br/>
+              Tryck på "Skapa länk" nedan.<br/>
+            </p>
+          </div>
+          <br/><br/>
           <button onClick={this.generate} className="btn btn-main">Skapa länk</button><br/><br/>
           <p>
             En länkadress till kartan med aktuell zoomnivå samt tända/släckta lager har skapats.<br/>

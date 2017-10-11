@@ -234,7 +234,7 @@ var StreetViewModel = {
    *
    * @instance
    */
-  clicked: function () {
+  clicked: function (arg) {
     this.set('visible', !this.get('visible'));
     this.set('toggled', !this.get('toggled'));
   }

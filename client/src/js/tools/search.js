@@ -914,10 +914,10 @@ var SearchModel = {
    *
    * @instance
    */
-  clicked: function () {
+  clicked: function (arg) {
     this.set('visible', true);
     this.set('toggled', !this.get('toggled'));
-  },
+  }
 };
 
 /**

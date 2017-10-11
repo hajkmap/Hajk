@@ -74,6 +74,13 @@ var RoutingPanelView = {
 
     document.body.appendChild(img);
   },
+
+  openInstruction: function (){
+    console.log('Clicked');
+    var element = $("#instructionText");
+    element.toggle();
+  },
+
   /**
    * Render the view
    * @instance
@@ -85,12 +92,16 @@ var RoutingPanelView = {
     return(
       <Panel title="Navigation"  onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
         <div className="panel-content">
-          <p>
-            ① Välj startpunkt genom att trycka på någon av knapparna under "Välj startpunkt". <br/>
-            ② Välj mål genom att trycka på knappen "Välj position på kartan" och klicka sedan i kartan. <br/>
-            ③ Välj färdsätt genom att trycka på någon av knapparna. <br/>
-            ④ Tryck på "Sök resa". <br/>
-          </p>
+          <button onClick={() => this.openInstruction()} className="btn-transparent" id="instructionBox"><img src="/assets/icons/infoknapp.png"/></button>
+          <div className="panel-body" id="instructionText">
+            <p>
+              ① Välj startpunkt genom att trycka på någon av knapparna under "Välj startpunkt". <br/>
+              ② Välj mål genom att trycka på knappen "Välj position på kartan" och klicka sedan i kartan. <br/>
+              ③ Välj färdsätt genom att trycka på någon av knapparna. <br/>
+              ④ Tryck på "Sök resa". <br/>
+            </p>
+          </div>
+          <br/><br/>
           <div className="panel panel-default">
               <div className="panel-heading"> ①. Välj startpunkt </div>
                 <div className="panel-body">

@@ -110,6 +110,12 @@ var BookmarkPanelView = {
     this.props.model.updateApplication(bookmark);
   },
 
+  openInstruction: function (){
+    console.log('Clicked');
+    var element = $("#instructionText");
+    element.toggle();
+  },
+
   /**
    * Render the view.
    * @instance
@@ -141,11 +147,15 @@ var BookmarkPanelView = {
         <div className="bookmark-panel panel-content">
           <form onSubmit={this.onSubmitForm}>
             <div className="form-group">
-              <p>
-                ①. Zooma in till önskad skala.<br/><br/>
-                ②. Skriv önskat namn i fältet nedan.<br/><br/>
-                ③. Tryck på Enter-knappen.<br/><br/>
-              </p>
+              <button onClick={() => this.openInstruction()} className="btn-transparent" id="instructionBox"><img src="/assets/icons/infoknapp.png"/></button>
+              <div className="panel-body" id="instructionText">
+                <p>
+                  ①. Zooma in till önskad skala.<br/><br/>
+                  ②. Skriv önskat namn i fältet nedan.<br/><br/>
+                  ③. Tryck på Enter-knappen.<br/><br/>
+                </p>
+              </div>
+              <br/><br/>
               <label>Lägg till bokmärke</label>
               <div className="input-group">
                 <div className="input-group-addon">

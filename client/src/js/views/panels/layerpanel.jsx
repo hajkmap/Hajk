@@ -365,6 +365,11 @@ var LayerPanelView = {
     }, 0)
   },
 
+  openInstruction: function (){
+    console.log('Clicked');
+    var element = $("#instructionText");
+    element.toggle();
+  },
   /**
    * Render themes select options.
    * @deprecated
@@ -405,12 +410,16 @@ var LayerPanelView = {
 
     return (
       <Panel title="Lagerhanterare" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
+          <button onClick={() => this.openInstruction()} className="btn-transparent" id="instructionBox"><img src="/assets/icons/infoknapp.png"/></button>
+          <div className="panel-body" id="instructionText">
+            <p>Klicka på en rubrik för att se respektive lagerlista.<br/>
+              Bocka för de lager du vill visa i kartan.<br/>
+              Klicka på symbolen: <i className="fa fa-list" aria-hidden="false"></i> för att se teckenförklaring.<br/>
+              De flesta ikoner går att klicka på för att se mer information.<br/>
+            </p>
+          </div>
+        <br/><br/>
         <div className="layer-panel">
-          <p>Klicka på en rubrik för att se respektive lagerlista.<br/>
-             Bocka för de lager du vill visa i kartan.<br/>
-             Klicka på symbolen: <i className="fa fa-list" aria-hidden="false"></i> för att se teckenförklaring.<br/>
-             De flesta ikoner går att klicka på för att se mer information.<br/>
-          </p>
           {toggleAllButton}
           <BackgroundSwitcher layers={this.props.model.getBaseLayers()} model={this.props.model}></BackgroundSwitcher>
           <br/>

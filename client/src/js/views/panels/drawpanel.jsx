@@ -671,7 +671,6 @@ var DrawPanelView = {
     ,   importRes  = this.renderImport(this.state.kmlImport);
 
     return (
-      <div>
         <Panel title="Rita och mäta" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
           <div className="draw-tools">
             <div id="labels">
@@ -722,10 +721,11 @@ var DrawPanelView = {
             {exportRes}
             {importRes}
           </div>
+          <div>{dialog}
+            {this.renderAlert()}
+          </div>
         </Panel>
-        {dialog}
-        {this.renderAlert()}
-      </div>
+
     );
   }
 };

@@ -135,7 +135,7 @@ var BufferModel = {
         anchorXUnits: 'fraction',
         anchorYUnits: 'fraction',
         opacity: 1.0,
-        src: 'assets/icons/Markering_A_stor.png',
+        src: 'assets/icons/Ikon_på_buffert.png',
         scale: (1.5)
       })
     }));
@@ -478,7 +478,7 @@ var BufferModel = {
    *
    * @instance
    */
-  clicked: function () {
+  clicked: function (arg) {
     this.set('visible', true);
     this.set('toggled', !this.get('toggled'));
   }

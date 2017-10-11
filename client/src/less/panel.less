@@ -17,7 +17,7 @@
   top: 0;
   width: 0px;
   height: 0px;
-  overflow: hidden; 
+  overflow: hidden;
 }
 
 @font-face {
@@ -26,36 +26,38 @@
 }
 
 .navigation-panel.minimized:before {
-    content: "\f065";
-    font-family: FontAwesome;
-    position: absolute;
-    font-size: 28px;
-    left: 10px;
-    top: 9px;
- }
+  content: "\f065";
+  font-family: FontAwesome;
+  position: absolute;
+  font-size: 28px;
+  left: 10px;
+  top: 9px;
+}
 
 .navigation-panel.minimized .navigation-panel-inner {
-   display: none;
+  display: none;
 }
 
 .navigation-panel {
-   position: absolute;
-   z-index: 1000;
-   bottom: 0;
-   top: 0;
-   margin-left: 0;
-   width: 417px;
+  position: absolute;
+  z-index: 1000;
+  bottom: 0;
+  top: 0;
+  margin-left: 0;
+  width: 417px;
 }
 
 @media only screen and (max-device-width: 736px) {
   .navigation-panel {
     width: 60%;
+    height: 85%;
   }
 }
 
 .navigation-panel-inner {
   position: absolute;
   width: 100%;
+  hight: 100%;
   bottom: 0;
   top: 0px;
   margin: 0;
@@ -204,7 +206,7 @@
 .main-content-swipe {
   width: 15%;
   height: 100%;
-  padding: 10px;
+  padding: 0px;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   position: relative;
@@ -216,30 +218,54 @@
   width: 15%;
 }
 .main-content-swipe .content-swipe{
-   font-weight: 100;
- }
+  font-weight: 100;
+}
 .main-content-swipe .content-swipe{
   width: 15%;
   line-height: 160%;
 }
 .main-content-swipe #sidebar-toggle-swipe {
-  background: #DF314D;
+  //background: #DF314D;
   border-radius: 3px;
   display: block;
   position: relative;
+  top: 50%;
+  transform: translateY(-50%);
   padding: 10px 7px;
   float: left;
 }
-.main-content-swipe #sidebar-toggle-swipe .bar-swipe{
+
+.main-content-swipe #sidebar-toggle-swipe{
   display: block;
-  width: 18px;
   margin-bottom: 3px;
-  height: 2px;
-  background-color: #fff;
+  height: 60px;
+  width: 32px;
+  background-image: url("/assets/icons/Högerpil.png");
+  //background-color: #fff;
   border-radius: 1px;
 }
+
+#sidebar-toggle-swipe.sidebar-open-after {
+  background-image: url("/assets/icons/Vänsterpil.png");
+  height: 60px;
+  width: 32px;
+}
+
+#sidebar-toggle-swipe.sidebar-close-after {
+  background-image: url("/assets/icons/Högerpil.png");
+  height: 60px;
+  width: 32px;
+}
+
 .main-content-swipe #sidebar-toggle-swipe .bar-swipe:last-child{
   margin-bottom: 0;
 }
 
+// Pilar
+
 // +-------------------------- Swipe sidemenu style
+
+
+#instructionText {
+  display: none;
+}
