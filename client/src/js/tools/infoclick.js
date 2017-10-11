@@ -188,7 +188,7 @@ var InfoClickModel = {
           error: message => {
             resolve();
           },
-          success: features => {
+          success: (features, layer) => {
             if (Array.isArray(features) && features.length > 0) {
               features.forEach(feature => {
                 this.addInformation(feature, wmsLayer, (featureInfo) => {
@@ -402,7 +402,7 @@ var InfoClickModel = {
     ,   information
     ,   iconUrl = feature.get('iconUrl') || ''
     ;
-
+   
     properties = feature.getProperties();
     information = layerModel && layerModel.get("information") || "";
 

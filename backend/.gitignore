@@ -86,6 +86,7 @@ $tf/
 *.gpState
 
 .vs/config/applicationhost.config
+.vs
 
 # ReSharper is a .NET coding add-in
 _ReSharper*/

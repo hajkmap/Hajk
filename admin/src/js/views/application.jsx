@@ -179,7 +179,6 @@ class Application extends Component {
 
     var content = null;
     var model = null;
-
     try {
       content = this.getView(this.state.content);
       model = this.getModel(this.state.content);
@@ -201,6 +200,7 @@ class Application extends Component {
   render() {
     var content = this.renderContent();
     var tabs = this.renderTabs();
+
     return (
       <main>
         <Alert options={this.getAlertOptions()}/>

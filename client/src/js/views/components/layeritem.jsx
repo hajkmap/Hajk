@@ -36,7 +36,13 @@ var LayerItemView = {
       expanded: false,
       name: "",
       legend: [],
-      status: "ok"
+      status: "ok",
+      infoVisible: false,
+      infoTitle: "",
+      infoText: "",
+      infoUrl: "",
+      infoOwner: "",
+      infoExpanded: false
     };
   },
 
@@ -49,12 +55,19 @@ var LayerItemView = {
     this.props.layer.on("change:visible", this.onVisibleChanged, this);
     this.props.layer.on("change:legend", this.onLegendChanged, this);
     this.props.layer.on('change:showLegend', this.onShowLegendChanged, this);
+    this.props.layer.on('change:showInfo', this.onShowInfoChanged, this);
     this.setState({
       status: this.props.layer.get('status'),
       caption: this.props.layer.getCaption(),
       visible: this.props.layer.getVisible(),
       showLegend: this.props.layer.get('showLegend'),
       legend: this.props.layer.getLegend(),
+      infoVisible: this.props.layer.getInfoVisible(),
+      infoTitle: this.props.layer.getInfoTitle(),
+      infoText: this.props.layer.getInfoText(),
+      infoUrl: this.props.layer.getInfoUrl(),
+      infoOwner: this.props.layer.getInfoOwner(),
+      showInfo: this.props.layer.get('showInfo')
     });
   },
 
@@ -67,6 +80,7 @@ var LayerItemView = {
     this.props.layer.off("change:legend", this.onLegendChanged, this);
     this.props.layer.off('change:showLegend', this.onShowLegendChanged, this);
     this.props.layer.off("change:status", this.onStatusChanged, this);
+    this.props.layer.off('change:showInfo', this.onShowInfoChanged, this);
   },
 
   /**
@@ -112,6 +126,14 @@ var LayerItemView = {
   },
 
   /**
+   * On show info change event handler.
+   * @instance
+   */
+  onShowInfoChanged: function () {
+    this.setState({ showInfo: this.props.layer.get('showInfo') });
+  },
+
+  /**
    * Toggle visibility of this layer item.
    * @instance
    */
@@ -127,6 +149,15 @@ var LayerItemView = {
   toggleLegend: function (e) {
     e.stopPropagation();
     this.props.layer.set('showLegend', !this.state.showLegend);
+  },
+
+  /**
+   * Toggle info visibility
+   * @instance
+   */
+  toggleInfo: function (e) {
+    e.stopPropagation();
+    this.props.layer.set('showInfo', !this.state.showInfo);
   },
 
   /**
@@ -153,7 +184,14 @@ var LayerItemView = {
     ,   expanded      = this.state.showLegend
     ,   visible       = this.state.visible
     ,   toggleLegend  = (e) => { this.toggleLegend(e) }
-    ,   toggleVisible = (e) => { this.toggleVisible(e) };
+    ,   toggleVisible = (e) => { this.toggleVisible(e) }
+    ,   toggleInfo  = (e) => { this.toggleInfo(e) }
+    ,   infoVisible   = this.state.infoVisible
+    ,   infoTitle     = this.state.infoTitle
+    ,   infoText      = this.state.infoText
+    ,   infoUrl       = this.state.infoUrl
+    ,   infoOwner     = this.state.infoOwner
+    ,   infoExpanded  = this.state.showInfo;
 
     if (!caption) {
       return null;
@@ -167,16 +205,34 @@ var LayerItemView = {
 
     var statusClass = this.state.status === "loaderror" ? "fa fa-exclamation-triangle tile-load-warning tooltip" : "";
 
+    var componentsInfo = this.props.layer.getExtendedComponents({
+      infoExpanded: infoExpanded
+    });
+
+    var innerInfoBodyClass = infoExpanded && componentsInfo.legend.legendPanel ? "dropdown" : "hidden";
+    
     return (
       <div className="panel panel-default layer-item">
         <div className="panel-heading unselectable" onClick={toggleLegend}>
           <span onClick={toggleVisible} className="clickable" style={{ position: 'relative', top: '3px' }}>
             <i className={visible ? 'fa fa-check-square-o': 'fa fa-square-o'} style={{ width: '15px'}}></i>&nbsp;
             {this.renderStatus()}
-            <label className="layer-item-header-text">{caption}</label>&nbsp;
+            <label className={visible ? 'layer-item-header-text active-group' : 'layer-item-header-text'}>{caption}</label>&nbsp;
           </span>
           {components.legend.legendButton}
+
+          <span onClick={this.state.infoVisible ? toggleInfo : ""}>
+            {this.state.infoVisible ? components.legend.infoButton : ""}
+          </span>
+
         </div>
+        <div className={innerInfoBodyClass}>
+          <p className="info-title">{this.state.infoTitle}</p>
+          <p className="info-text">{this.state.infoText}</p>
+          <a className="info-text" href={this.state.infoUrl} target="_blank">{this.state.infoUrl}</a><br/>
+          <i className="info-text">{this.state.infoOwner ? "Ägare: " + this.state.infoOwner : ""}</i>
+        </div>
+
         <div className={innerBodyClass}>
           {components.legend.legendPanel}
         </div>
