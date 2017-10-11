@@ -66,23 +66,34 @@ namespace MapService.Controllers
         [HttpPost]
         public string PDF(string json)
         {
-            _log.DebugFormat("Received json: {0}" + json);
+            _log.DebugFormat("Received json: {0}", json);
 
-            MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
-            AsyncManager.OutstandingOperations.Increment();
-            PDFCreator pdfCreator = new PDFCreator();
-            _log.DebugFormat("Inited pdfcreator");
-            byte[] blob = pdfCreator.Create(exportItem);
-            _log.DebugFormat("created blob in pdfcreator");
-            string[] fileInfo = byteArrayToFileInfo(blob, "pdf");
-            _log.DebugFormat("Created fileinfo: " + fileInfo[1]);
+            try
+            {
+                MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
+                AsyncManager.OutstandingOperations.Increment();
+                PDFCreator pdfCreator = new PDFCreator();
+                _log.Debug("Inited pdfcreator");
+                byte[] blob = pdfCreator.Create(exportItem);
+                _log.Debug("created blob in pdfcreator");
+                string[] fileInfo = byteArrayToFileInfo(blob, "pdf");
+                _log.DebugFormat("Created fileinfo: {0}", fileInfo[1]);
 
-            if (exportItem.proxyUrl != "") {
-                return exportItem.proxyUrl + "/Temp/" + fileInfo[1];
-            } else {
-                return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
+                if (exportItem.proxyUrl != "")
+                {
+                    return exportItem.proxyUrl + "/Temp/" + fileInfo[1];
+                }
+                else
+                {
+                    return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
+                }
+                //return File(blob, "application/pdf", "kartutskrift.pdf");
             }
-            //return File(blob, "application/pdf", "kartutskrift.pdf");
+            catch (Exception e)
+            {
+                _log.Fatal(e.Message);
+                throw;
+            }
         }
 
         private byte[] imgToByteArray(Image img)
@@ -99,6 +110,8 @@ namespace MapService.Controllers
         [HttpPost]
         public string TIFF(string json)
         {
+            _log.DebugFormat("Received json: {0}", json);
+
             MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
                                     
             TIFFCreator tiffCreator = new TIFFCreator();
@@ -153,6 +166,8 @@ namespace MapService.Controllers
         [ValidateInput(false)]
         public string KML(string json)
         {
+            _log.DebugFormat("Received json: {0}", json);
+
             KMLCreator kmlCreator = new KMLCreator();
             byte[] bytes = kmlCreator.Create(json);
             string[] fileInfo = byteArrayToFileInfo(bytes, "kml");
@@ -178,6 +193,8 @@ namespace MapService.Controllers
         [HttpPost]
         public string Excel(string json)
         {
+            _log.DebugFormat("Received json: {0}", json);
+
             List<ExcelTemplate> data = JsonConvert.DeserializeObject<List<ExcelTemplate>>(json);
             DataSet dataSet = Util.ToDataSet(data);
             ExcelCreator excelCreator = new ExcelCreator();

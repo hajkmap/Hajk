@@ -18,7 +18,7 @@ namespace MapService.Controllers
             }
             catch(System.Exception e)
             {
-                _log.Fatal(e);
+                _log.Fatal(e.Message);
                 throw;
             }
             

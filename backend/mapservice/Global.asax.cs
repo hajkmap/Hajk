@@ -15,9 +15,6 @@ namespace MapService
         {
             log4net.Config.XmlConfigurator.Configure();
 
-            ILog _log = LogManager.GetLogger(typeof(WebApiApplication));
-            _log.Debug("test för att log4net fungerar");
-
             GlobalConfiguration.Configure(WebApiConfig.Register);
             RouteConfig.RegisterRoutes(RouteTable.Routes);            
         }
