@@ -71,8 +71,11 @@ namespace MapService.Controllers
             MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
             AsyncManager.OutstandingOperations.Increment();
             PDFCreator pdfCreator = new PDFCreator();
+            _log.DebugFormat("Inited pdfcreator");
             byte[] blob = pdfCreator.Create(exportItem);
+            _log.DebugFormat("created blob in pdfcreator");
             string[] fileInfo = byteArrayToFileInfo(blob, "pdf");
+            _log.DebugFormat("Created fileinfo: " + fileInfo[1]);
 
             if (exportItem.proxyUrl != "") {
                 return exportItem.proxyUrl + "/Temp/" + fileInfo[1];
