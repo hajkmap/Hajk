@@ -100,7 +100,7 @@ var LayerSwitcherModel = {
    * @instance
    */
    toggleAllOff() {
-     var baseLayers = this.getBaseLayers();
+     var baseLayers = this.getBaseLayersList();
      this.get('layerCollection').forEach(layer => {
        var isBaseLayer = baseLayers.find(l => l.id === layer.id);
        if (!isBaseLayer) {
@@ -108,6 +108,22 @@ var LayerSwitcherModel = {
        }
      });
    },
+
+  /**
+   * Get base layer list
+   * @instance
+   * @return {Layer[]} base layers
+   */
+  getBaseLayersList: function () {
+    var baseLayers = [];
+    this.get('baselayers').forEach(baseLayer => {
+      var layer = this.get('layerCollection').find(layer => layer.id === baseLayer.id);
+      if (layer) {
+        baseLayers.push(layer);
+      }
+    });
+    return baseLayers;
+  },
 
   /**
    * Get base layers.
@@ -119,8 +135,10 @@ var LayerSwitcherModel = {
     this.get('baselayers').forEach(baseLayer => {
       var layer = this.get('layerCollection').find(layer => layer.id === baseLayer.id);
       if (layer) {
-        //layer.setVisible(baseLayer.visibleAtStart);
-        //layer.getLayer().setVisible(layer.getVisible());
+		if( !layer.getVisible()) {
+			layer.setVisible(baseLayer.visibleAtStart);
+		}
+        layer.getLayer().setVisible(layer.getVisible());
         baseLayers.push(layer);
       }
     });
