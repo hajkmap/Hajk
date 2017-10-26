@@ -26,14 +26,14 @@ Starta en kommandoprompt, exempelvis cmd, Windows Powershell eller Git Bash. Ver
 git --version
 ```
 
->Tips: du kan med fördel använda den kommandopromot som installerades med Git. Sök i Windows startmeny efter `Git Bash`, starta den, och verifiera installationen genom att skriva kommandot ovan. 
+>Tips: du kan med fördel använda den kommandoprompt som installerades med Git. Sök i Windows startmeny efter `Git Bash`, starta den, och verifiera installationen genom att skriva kommandot ovan. 
 >
 >Fördelen med Git Bash är att du har tillgång till vanliga Unix-kommandon som `ls`, `pwd`, med flera, samt en fungerande auto-komplettering (börja skriva en sökväg och tryck på `TAB` för att testa). Dessutom finns Git med all säkerhet i `$PATH` när du använder Git Bash.
 
 ### Installera Node.js
 Gå till https://nodejs.org och ladda ner och installera den aktuella versionen (i skrivande stund Node 8).
 
-Verifiera installationen genom starta kommandopromten och skriva:  
+Verifiera installationen genom starta kommandoprompten och skriva:  
 ```bash
 node --version
 ```
@@ -50,7 +50,7 @@ npm i -g grunt-cli
 >Info: Kommandot `i` ovan är förkortning av `install`. Du kan således även skriva `npm install -g grunt-cli`, men det kan vara bra att känna till detta kortkommando. 
 
 ### Installera Visual Studio Community Edition
-För att installera visual studio gå till https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15, ladda ner och installera programmet. Det finns många val som kan göras här med det som är nödvändigt för Hajk är att ASP.NET-komponenterna installeras.
+För att installera Visual Studio gå till https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15, ladda ner och installera programmet. Det finns många val som kan göras här med det som är nödvändigt för Hajk är att ASP.NET-komponenterna installeras.
 
 ### Ladda ner koden
 När alla nödvändiga programmen är på plats kan du ladda ner själva källkoden för projektet och börja arbeta med den. 
@@ -91,7 +91,7 @@ grunt dependencies
 #### Bygg klientdelen
 Grunt bygger två versioner av källkoden: en som är lite större men lättare att felsöka, och en som är mer komprimerad och används för skarp drift. Nedan visas hur båda delarna byggs: 
 ```bash
-# Öppna kommandopromten och gå till projektets mapp
+# Öppna kommandoprompten och gå till projektets mapp
 cd c:\Projekt\Hajk\client
 
 # Bygg version för test (målmapp "dist")
