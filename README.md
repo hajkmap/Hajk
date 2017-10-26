@@ -1,79 +1,120 @@
 # Hajk
-Uppdaterad: 2016-11-25
+Uppdaterad: 2017-10-26
 
-Detta är ett projekt som drivs av Stadsbyggnadskontoret Göteborgs Stad.  
+Hajk är ett projekt som drivs av Stadsbyggnadskontoret Göteborgs Stad.  
 Systemutvecklare är i huvudsak Sweco Position.  
-Projektet drivs som ett samarbetsprojekt och är avsett att kunna återanvändas för generalla GIS-applikationer för webb.  
-Licensformen bygger på en öppen samarbetslicens. (CC BY SA NC).  
 
-Koden består av två delar; en serverdel och en klientdel. Serverdelen är programmerad i Microsoft .NET med tekniken WCF och kodspråket C#.  
-Klientdelen är programmerad i JavaScript 2015. Kommunikationen mellan klient och server sker via HTTP och är RESTful implementerad.  
+Projektet drivs som ett samarbetsprojekt och är avsett att kunna användas för generalla GIS-applikationer för webb.
 
-Klienten innehåller två separata applikationer, en kartvy och en administrationsvy.  
+Licensformen bygger på en öppen samarbetslicens. (CC BY SA NC).
 
-JavaScript byggs i applikationen med hjälp av uppgiftshanteraren Grunt.  
-För att bygga projetketet så krävs programvarorna Visual Studio och Node JS.
+Applikationen består av två delar: en serverdel och en klientdel. Serverdelen är programmerad i .NET med tekniken WCF och kodspråket C#. Klientdelen är skriven i JavaScript (ES2015). Kommunikationen mellan klient och server sker via HTTP enligt REST.
+
+Klienten innehåller två separata webbapplikationer: en kartvy och en administrationsvy.
+
+Serverdelen byggs i Visual Studio och driftsätts i IIS. Klientdelen (med de två vyerna, karta och administation) bygger på Node.js och nyttjar ett flertal NPM-paket (exempelvis React och Babel) samt byggs med hjälp av uppgiftshanteraren Grunt. Källkoden versionshanteras i Git och finns tillgänglig på Github.
+
+Härefter redogörs tillvägagångssättet för att installera Hajk, inklusive installation av de nödvändiga programmen (Visual Studio Community Edition och Node.js).
 
 ## Installation
 
-### Ladda hem koden
-Börja med att Installera GIT om det inte redan är gjort.  
-[https://git-scm.com/download/win](https://git-scm.com/download/win "Länk")  
-Säkerställ under installationen att git installeras globalt för windows och läggs till i PATH.  
-Verifiera installationen genom starta kommandopromten och skriva:  
-`git --version`
+### Installera Git
+Börja med att installera Git om det inte redan är gjort. Ladda ner en version för ditt operativsystem från https://git-scm.com/download/win. Installera med default-inställningar. Därmed bör Git installeras globalt för Windows och läggas till i `$PATH` .
 
-Skriv därefter till exempel:  
-`cd c:\Projekt`  
-för att gå till lokal projektmapp.  
+Starta en kommandoprompt, exempelvis cmd, Windows Powershell eller Git Bash. Verifiera installationen genom kontrollera vilken version av Git som har installerats:  
+```bash
+git --version
+```
 
-Ange följande kommando för att ladda hem koden:  
-`git clone https://github.com/hajkmap/hajk.git`  
+>Tips: du kan med fördel använda den kommandopromot som installerades med Git. Sök i Windows startmeny efter `Git Bash`, starta den, och verifiera installationen genom att skriva kommandot ovan. 
+>
+>Fördelen med Git Bash är att du har tillgång till vanliga Unix-kommandon som `ls`, `pwd`, med flera, samt en fungerande auto-komplettering (börja skriva en sökväg och tryck på `TAB` för att testa). Dessutom finns Git med all säkerhet i `$PATH` när du använder Git Bash.
 
-### Installera Node JS
-För att installera node gå till [https://nodejs.org/en/](https://nodejs.org/en/ "länk").
-Ladda hem och installera den version som är markerad som Stable.
+### Installera Node.js
+Gå till https://nodejs.org och ladda ner och installera den aktuella versionen (i skrivande stund Node 8).
 
 Verifiera installationen genom starta kommandopromten och skriva:  
-`node --version`
+```bash
+node --version
+```
+
+### Installera Grunt
+Grunt är en NPM-modul som används till att "bygga" klient- och admindelen av källkoden. Därför måste Grunt installeras nu, för att kunna användas senare:
+
+```bash
+npm i -g grunt-cli
+```
+
+>Tips: Flaggan `-g` i kommandot ovan anger att NPM ska installera paketet globalt, istället för enbart i nuvarande projekt (vilket är default). 
+
+>Info: Kommandot `i` ovan är förkortning av `install`. Du kan således även skriva `npm install -g grunt-cli`, men det kan vara bra att känna till detta kortkommando. 
 
 ### Installera Visual Studio Community Edition
-För att installera visual studio gå till [https://www.visualstudio.com/post-download-vs?sku=community&clcid=0x409](https://www.visualstudio.com/post-download-vs?sku=community&clcid=0x409 "länk.")
+För att installera visual studio gå till https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15, ladda ner och installera programmet. Det finns många val som kan göras här med det som är nödvändigt för Hajk är att ASP.NET-komponenterna installeras.
+
+### Ladda ner koden
+När alla nödvändiga programmen är på plats kan du ladda ner själva källkoden för projektet och börja arbeta med den. 
+
+Skapa en mapp där du kommer arbeta med Hajk, exempelvis `C:\projekt`. 
+```bash
+cd C:
+mkdir projekt
+cd projekt
+```
+Nu är du inne i den nyskapade mappen. Nästa steg är att ladda ner aktuell version av källkoden från Github:
+
+```bash
+git clone https://github.com/hajkmap/Hajk.git
+```
+När kommandot är färdigt har du en ny mapp, `C:\projekt\Hajk` där du hittar den aktuella källkoden.
 
 ## Driftsättning
-### Första gången projektet klonas.
+### Första gången projektet klonas
+Efter den första kloningen (`git clone`-kommandot ovan) behöver nödvändiga paket som Hajk är beroende av att installeras av NPM (Node Package Manager). Därefter måste beroendena paketeras med hjälp av Grunt.
+
 #### Installera beroenden
-`cd c:\Projekt\Hajk\client`  
-`npm install`  
-`cd c:\Projekt\Hajk\admin`  
-`npm install`
+```bash
+cd C:\projekt\Hajk\client
+npm install
+cd ..\admin
+npm install
+```
+>Info: Kommandot `npm install` läser filen `package.json` och installerar de paketen som definieras där som beroenden. Paketen läggs i mappen `node_modules` under respektive del av koden (klient- respektive admindelen).
 
-#### Installera externa bibiliotek
-`cd c:\Projekt\Hajk\client`  
-`grunt dependencies`
-
+#### Paketera externa bibiliotek
+```bash
+cd c:\Projekt\Hajk\client
+grunt dependencies
+```
+>Info: Kommandot `grunt dependencies` bygger ihop ett flertal hjälpbibliotek och paketerar dem till en fil, `dist/js/dependencies.min.js`. 
 ----------
-#### Driftsättning Klient
-Öppna kommandopromten och gå till projektets mapp:  
-`cd c:\Projekt\Hajk\client`
+#### Bygg klientdelen
+Grunt bygger två versioner av källkoden: en som är lite större men lättare att felsöka, och en som är mer komprimerad och används för skarp drift. Nedan visas hur båda delarna byggs: 
+```bash
+# Öppna kommandopromten och gå till projektets mapp
+cd c:\Projekt\Hajk\client
 
-Bygg version för test. (målmapp: **dist**)  
-`grunt build`
+# Bygg version för test (målmapp "dist")
+grunt build
 
-Bygg version för driftsättning. (målmapp: **release**)  
-`grunt release`
+# Bygg version för driftsättning. (målmapp "release")  
+grunt release
+```
 
-Starta en lyssnare som lyssnar på ändringar i filsystemet ochg bygger per automatik.  
-`grunt debug`
+#### Bygg admindelen
+När admindelen byggs skapas också två versioner: en för test och en för driftsättning. Skillnaden mot klientdelen är att istället för att skapa separata mappar så skapas endast en mapp, `dist`, men den innehåller två filer: `index.html` och `debug.html`. 
 
-#### Driftsättning Admin
-Bygg version för driftsättning/test. (målmapp: **dist**)  
-`cd c:\Projekt\Hajk\admin`  
-`grunt`  
+```bash
+# Öppna kommandopromten och gå till projektets mapp
+cd c:\Projekt\Hajk\admin
+
+# Bygg de två versionerna av admindelen (målmapp "dist")
+grunt
+```
+
 Detta kommer att skapa en mapp som heter dist. I denna återfinns två html-filer, index.html och debug.html.  
-Kör dessa i lämplig webbserver, debug.html har full sourcemap till jsx. Index.html kör minifierad kod.
 
-#### Driftsättning server
+#### Bygg backend-delen (servern)
 - Dubbelklicka på **backend.sln**  
 - Markera i Solution Explorer projektet **mapservice**.  
 - Välj från menyn `Build > Build Solution`  
