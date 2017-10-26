@@ -87,7 +87,7 @@ cd c:\Projekt\Hajk\client
 grunt dependencies
 ```
 >Info: Kommandot `grunt dependencies` bygger ihop ett flertal hjälpbibliotek och paketerar dem till en fil, `dist/js/dependencies.min.js`. 
-----------
+---
 #### Bygg klientdelen
 Grunt bygger två versioner av källkoden: en som är lite större men lättare att felsöka, och en som är mer komprimerad och används för skarp drift. Nedan visas hur båda delarna byggs: 
 ```bash
@@ -112,14 +112,17 @@ cd c:\Projekt\Hajk\admin
 grunt
 ```
 
-Detta kommer att skapa en mapp som heter dist. I denna återfinns två html-filer, index.html och debug.html.  
-
 #### Bygg backend-delen (servern)
-- Dubbelklicka på **backend.sln**  
-- Markera i Solution Explorer projektet **mapservice**.  
-- Välj från menyn `Build > Build Solution`  
-- Välj från menyn `Build > Publish mapservice`  
-- Ändra sökväg till mappen om så önskas. Standard är c:\install\backend.  
+- Öppna Utforskaren och navigera till mappen som innehåller backend-kod (i det här exemplet, `C:\projekt\Hajk\backend`
+- Dubbelklicka på `MapService.sln`
+- Visual Studio öppnas
+- I `Solution Explorer` markera projektet `MapService`
+- I huvudmenyn, välj  `Build > Build Solution`  
+- Invänta tills kompileringen är klar (du ser status i `Output`-fönstret längst ner, när det står något i stil med `Build: 2 succeeded, 0 failed, 0 up-to-date, 0 skipped` så är det klart)
+- I huvudmenyn, välj  `Build > Publish MapService`  
+- I fönstret som visas nu finns möjlighet att ändra `Target Location`, alltså stället dit backend-applikationen kommer att publiceras. Default-värde är `C:\install\mapservice\`. Du kan låta det vara kvar eller ändra till något annat. Huvudsaken är att du **vet var filerna läggs** för de kommer behövas senare när vi sätter upp webbservern.
+
+--- 
 
 ### Installera projektet i Internet Information Services (IIS > 7).
 
