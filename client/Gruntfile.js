@@ -134,7 +134,7 @@ module.exports = function (grunt) {
         options: {
           compact: true,
           sourceMap: true,
-          presets: ['es2015']
+          presets: ['env']
         },
         dist: {
           files: {
@@ -299,14 +299,14 @@ module.exports = function (grunt) {
       },
 
       proxy: {
-        proxy1 : {
-          options : {
-            port: 9000,
-            router : {
-              'localhost/settings/settings': 'http://192.168.100.78/karta-dev/settings/settings/',
-              'localhost': 'http://localhost:3000'
+        proxy1: {
+          options: {
+            port: 9000, // We will access debug environment through localhost:9000
+            router: {
+              'localhost/mapservice': 'http://localhost:80/mapservice/', // Create a virtual route on 9000 that redirects to IIS' /mapservice. NB: Make sure to have IIS running! //localhost/mapservice must be available.
+              'localhost': 'http://localhost:3000' // Redirect all request from 9000 to 3000, since /mapservice is not available on 3000 but only via the virtual route on 9000.
             },
-            changeOrigin : true
+            changeOrigin: true
           }
         }
       },
