@@ -531,7 +531,7 @@ class WMSLayerForm extends Component {
                   this.setState({infoTitle: e.target.value});
                   this.validateField("infoTitle", e);
                 }}
-                value={this.state.infoTitle === null ? this.state.caption : this.state.infotitle}
+                value={this.state.infoTitle}
                 className={this.getValidationClass("infoTitle")}
             />
           </div>
