@@ -172,6 +172,7 @@ grunt
 ## Driftsättning
 
 Om du har följt anvisningarna så lång har du de tre *kompilerade* delarna som applikationen utgörs av på följande ställen:
+
 | Del     | Plats                           |
 | ------- | ------------------------------- |
 | backend | `C:/install/mapservice`         |
@@ -190,11 +191,12 @@ Nu kommer vi gå vidare med att sätta upp projektet i IIS. Huvudmappen som IIS 
 
 #### Flytta och skapa mappar och filer
 Flytta hela mappar enligt tabell nedan:
-| Från                                                | Till |
-| --------------------------------------------------- | ---- |
-| `C:/install/mapservice`|`C:/wwwroot/mapservice`     |
-| `C:/projekt/Hajk/admin/dist`|`C:/wwwroot/admin`     |
-| `C:/projekt/Hajk/admin/release`|`C:/wwwroot/client` |
+
+| Från                            | Till                    |
+| ------------------------------- | ----------------------- |
+| `C:/install/mapservice`         | `C:/wwwroot/mapservice` |
+| `C:/projekt/Hajk/admin/dist`    | `C:/wwwroot/admin`      |
+| `C:/projekt/Hajk/admin/release` | `C:/wwwroot/client`     |
 
 Nu har `C:/wwwroot` tre undermappar. Men vi ska göra ett till ingrepp. 
 
@@ -209,6 +211,7 @@ Det finns även en POST-proxy som kan användas av klienten. Flytta filerna `pos
 
 #### Kontrollera att allt kom med
 Nu bör `C:/wwwroot` innehålla följande filer och mappar:
+
 | Innehåll i `wwwroot` |
 | -------------------- |
 | `admin/`             |
@@ -227,6 +230,7 @@ Nu bör `C:/wwwroot` innehålla följande filer och mappar:
 För att webbservern ska kunna skriva till vissa mappar i vår huvudmapp behöver rätt behörighet sättas.
 
 Specifikt är det den användaren som IIS App Pool körs på (mer om det i nästa avsnitt) som ska ha skrivbehörighet till mapparna:
+
 | Mappnamn              |
 | --------------------- |
 | `mapservice/App_Data` |
