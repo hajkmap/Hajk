@@ -16,6 +16,8 @@ Serverdelen byggs i Visual Studio och driftsätts i IIS. Klientdelen (med de tv�
 
 Härefter redogörs tillvägagångssättet för att installera Hajk, inklusive installation av de nödvändiga programmen (Visual Studio Community Edition och Node.js).
 
+---
+
 ## Installation
 
 ### Installera Git
@@ -68,9 +70,12 @@ git clone https://github.com/hajkmap/Hajk.git
 ```
 När kommandot är färdigt har du en ny mapp, `C:\projekt\Hajk` där du hittar den aktuella källkoden.
 
-## Driftsättning
+---
+
+## Kompilering
+
 ### Första gången projektet klonas
-Efter den första kloningen (`git clone`-kommandot ovan) behöver nödvändiga paket som Hajk är beroende av att installeras av NPM (Node Package Manager). Därefter måste beroendena paketeras med hjälp av Grunt.
+>Info: efter den första kloningen (`git clone`-kommandot ovan) behöver nödvändiga paket som Hajk är beroende av att installeras av NPM (Node Package Manager). Därefter måste beroendena paketeras med hjälp av Grunt. Följ därför instruktioner under rubrikerna *Installera beroenden* och *Paketera externa bibliotek*. Därefter, fortsätt till *Vanligt byggförfarande*.
 
 #### Installera beroenden
 ```bash
@@ -81,18 +86,22 @@ npm install
 ```
 >Info: Kommandot `npm install` läser filen `package.json` och installerar de paketen som definieras där som beroenden. Paketen läggs i mappen `node_modules` under respektive del av koden (klient- respektive admindelen).
 
-#### Paketera externa bibiliotek
+#### Paketera externa bibliotek
 ```bash
 cd c:\Projekt\Hajk\client
 grunt dependencies
 ```
 >Info: Kommandot `grunt dependencies` bygger ihop ett flertal hjälpbibliotek och paketerar dem till en fil, `dist/js/dependencies.min.js`. 
+
 ---
+
+### Vanligt byggförfarande
+
 #### Bygg klientdelen
 Grunt bygger två versioner av källkoden: en som är lite större men lättare att felsöka, och en som är mer komprimerad och används för skarp drift. Nedan visas hur båda delarna byggs: 
 ```bash
 # Öppna kommandoprompten och gå till projektets mapp
-cd c:\Projekt\Hajk\client
+cd c:\projekt\Hajk\client
 
 # Bygg version för test (målmapp "dist")
 grunt build
@@ -106,7 +115,7 @@ När admindelen byggs skapas också två versioner: en för test och en för dri
 
 ```bash
 # Öppna kommandopromten och gå till projektets mapp
-cd c:\Projekt\Hajk\admin
+cd c:\projekt\Hajk\admin
 
 # Bygg de två versionerna av admindelen (målmapp "dist")
 grunt
@@ -123,29 +132,91 @@ grunt
 - I fönstret som visas nu finns möjlighet att ändra `Target Location`, alltså stället dit backend-applikationen kommer att publiceras. Default-värde är `C:\install\mapservice\`. Du kan låta det vara kvar eller ändra till något annat. Huvudsaken är att du **vet var filerna läggs** för de kommer behövas senare när vi sätter upp webbservern.
 
 --- 
+## Driftsättning
 
-### Installera projektet i Internet Information Services (IIS > 7).
+Om du har följt anvisningarna så lång har du de tre *kompilerade* delarna som applikationen utgörs av på följande ställen:
+| Del | Plats |
+|---|---|
+|backend|`C:/install/mapservice`|
+|admin|`C:/projekt/Hajk/admin/dist`|
+|client|`C:/projekt/Hajk/admin/release`|
 
-IIS kräver att server applikationen körs i en App Pool med .NET version 4.0 integrated.  
-IIS måste ha mime-typen application/vnd.google-earth.kml+xml registrerad för filändelsen .kml.  
-IIS bör även ha mime-typen font/woff2 registrerad för filändelsen .woff2.  
+>Observera: som det nämndes tidigare i avsnittet om klientdelen så byggdes den i en drift- och en testversion. För driftsättning nu kommer vi använda den skarpa driftversionen, som alltså ligger i `release`. Men kom ihåg att även testversionen finns, i mappen `dist`, och instruktionerna här fungerar även för den. Byt bara ut mapparna mot varann.
 
-I en driftsättningsmiljö så lägg förslagsvis applikationerna i två seperata mappar.  
-Mapparna bör placeras i en skrivskyddad mapp; tex C:\data\www\hajk.
+>Info: Projektets backend-del är en .NET-applikation som i Windowsmiljö enklast körs i IIS (version 7 eller senare). Applikationen körs i en App Pool med `.NET version 4.0 integrated`.  
 
-Skapa därefter tre undermappar för applikationerna:  
-C:\data\www\hajk -- innehåller innehållet i **client\release**  
-C:\data\www\hajk\backend -- innehåller innehållet i **backend**  
-C:\data\www\hajk\admin -- innehåller innehållet i **admin\release**  
 
-Skapa i IIS tre nya applikationer genom att högerklicka på vald site och välja:
+### Förberedelser
 
-**Lägg till program..**
+#### Skapa huvudmapp för applikationen
+Nu kommer vi gå vidare med att sätta upp projektet i IIS. Huvudmappen som IIS kommer gå mot i det här exemplet är `C:/wwwroot`. Om du vill följa anvisningarna exakt, skapa en sådan mapp på den datorn du avser sätta upp Hajk på.
 
-För klientapplikationen så kan valfritt namn användas, detta bli sökväg till kartapplikationen.  
-För serverapplikationen så ange Alias: mapservice.  
-För adminapplikationen så kan valfritt namn användas, detta bli sökväg till adminapplikationen.  
-Finns behov av HTTP-proxy för anrop till extern kartserver så finns exempel på detta i mappen proxy.  
+#### Flytta och skapa mappar och filer
+Flytta hela mappar enligt tabell nedan:
+| Från | Till |
+|---|---|
+|`C:/install/mapservice`|`C:/wwwroot/mapservice`|
+|`C:/projekt/Hajk/admin/dist`|`C:/wwwroot/admin`|
+|`C:/projekt/Hajk/admin/release`|`C:/wwwroot/client`|
+
+Nu har `C:/wwwroot` tre undermappar. Men vi ska göra ett till ingrepp. 
+
+Gå in i mappen `C:/wwwroot/client`. Markera alla mappar och filer inuti (förslagsvis genom att trycka `Ctrl+A` i Windows utforskare) och klipp ut markeringen (`Ctrl+X`). Gå upp en nivå (så du nu står i `C:/wwwroot`) och klistra in (`Ctrl+V`). När flytten är klar kan du radera den nu tomma mappen `client`. 
+
+Därefter, skapa tre till mappar i `C:/wwwroot` och döp dem till `util`, `Temp` och `Upload` (var noga med stora och små bokstäver).
+
+#### Flytta proxy-filer
+En GET-proxy som kan användas av klienten ska läggas i den nyligen skapade mappen `util`. Ta innehållet från `C:/projekt/Hajk/proxy/mvc` och flytta till mappen `C:/wwwroot/util`.
+
+Det finns även en POST-proxy som kan användas av klienten. Flytta filerna `postproxy.aspx` och `postproxy.aspx.cs` från `C:/projekt/Hajk/proxy/aspnet` direkt till huvudmappen `C:/wwwroot`.
+
+#### Kontrollera att allt kom med
+Nu bör `C:/wwwroot` innehålla följande filer och mappar:
+| Innehåll i `wwwroot`|
+---
+|`admin/`|
+|`assets/`|
+|`fonts/`|
+|`js/`|
+|`mapservice/`|
+|`Temp/`|
+|`Upload/`|
+|`util/`|
+|`index.html`|
+|`postproxy.aspx`|
+|`postproxy.aspx.cs`|
+
+#### Sätt rätt behörigheter på filer och mappar
+För att webbservern ska kunna skriva till vissa mappar i vår huvudmapp behöver rätt behörighet sättas.
+
+Specifikt är det den användaren som IIS App Pool körs på (mer om det i nästa avsnitt) som ska ha skrivbehörighet till mapparna:
+|Mappnamn|
+---
+|`mapservice/App_Data`|
+|`Temp/`|
+|`Upload/`|
+
+Som standard heter IIS användare *IIS_IUSRS*. Ge därför *skrivbehörighet* för de tre ovanstående mappar till IIS_IUSRS.
+
+### Uppsättning i IIS
+1. Öppna Internet Information Services (IIS)-hanteraren 
+1. I vänsterpanelen, högerklicka på Webbplatser och välj Lägg till webbplats
+1. Ange ett namn (t ex "Hajk"). Välj en programpool vars egenskaper är *.NET 4.0 - Pipeline: Integrated*
+1. Som fysisk sökväg ska du peka ut vår huvudmapp, dvs `C:/wwwroot`
+1. Skapa en bindning från exempelvis `localhost` på port 80. För fler inställningar och uppsättning så att tjänsten är åtkomlig "utifrån" rekommenderas att ta kontakt med en it-administatör i din organisation. De kan vara behjälpliga med diverse andra inställningar som är viktiga vid skarp drift, som till exempel säkra anslutningar över HTTPS.
+
+När detta steg är utfört visas mappstrukturen i IIS. Expandera den nyaskapade webbplatsen så du ser alla mappar som ligger i den. Nu måste även mapparna admin, mapservice och util registreras som .NET-applikationer. Det görs enkelt genom att högerklicka på respektive mapp och välja `Konvertera till program`. 
+
+#### Mime-typer
+För att Hajk ska fungera korrekt bör du säkerställa att följande MIME-typer finns registrerade i IIS:
+
+| Mime-typ | Filändelse |
+|---|---:|
+|`application/x-font-woff`| `.woff` |
+|`application/x-font-woff2`| `.woff2` |
+|`application/vnd.google-earth.kml+xml`| `.kml` |
+
+MIME-typerna registreras också i IIS-hanteraren. Markera webbplatsen i vänsterpanelen och titta efter *MIME-typer* i huvudfönstret i programmet.
 
 ## Konfiguration
 
