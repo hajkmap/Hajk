@@ -1,6 +1,43 @@
 # Hajk
 Uppdaterad: 2017-10-26
 
+## Innehåll
+- [Hajk](#hajk)
+  - [Innehåll](#inneh%C3%A5ll)
+  - [Installation](#installation)
+    - [Installera Git](#installera-git)
+    - [Installera Node.js](#installera-nodejs)
+    - [Installera Grunt](#installera-grunt)
+    - [Installera Visual Studio Community Edition](#installera-visual-studio-community-edition)
+    - [Ladda ner koden](#ladda-ner-koden)
+  - [Kompilering](#kompilering)
+    - [Första gången projektet klonas](#f%C3%B6rsta-g%C3%A5ngen-projektet-klonas)
+      - [Installera beroenden](#installera-beroenden)
+      - [Paketera externa bibliotek](#paketera-externa-bibliotek)
+    - [Vanligt byggförfarande](#vanligt-byggf%C3%B6rfarande)
+      - [Bygg klientdelen](#bygg-klientdelen)
+      - [Bygg admindelen](#bygg-admindelen)
+      - [Bygg backend-delen (servern)](#bygg-backend-delen-servern)
+  - [Driftsättning](#drifts%C3%A4ttning)
+    - [Förberedelser](#f%C3%B6rberedelser)
+      - [Skapa huvudmapp för applikationen](#skapa-huvudmapp-f%C3%B6r-applikationen)
+      - [Flytta och skapa mappar och filer](#flytta-och-skapa-mappar-och-filer)
+      - [Flytta proxy-filer](#flytta-proxy-filer)
+      - [Kontrollera att allt kom med](#kontrollera-att-allt-kom-med)
+      - [Sätt rätt behörigheter på filer och mappar](#s%C3%A4tt-r%C3%A4tt-beh%C3%B6righeter-p%C3%A5-filer-och-mappar)
+    - [Uppsättning i IIS](#upps%C3%A4ttning-i-iis)
+      - [Mime-typer](#mime-typer)
+  - [Konfiguration](#konfiguration)
+    - [Klient](#klient)
+    - [Administrationsgränssnitt](#administrationsgr%C3%A4nssnitt)
+      - [Applikation](#applikation)
+      - [layermanager](#layermanager)
+      - [search](#search)
+      - [edit](#edit)
+    - [mapsettings](#mapsettings)
+      - [router](#router)
+    - [Tjänst](#tj%C3%A4nst)
+
 Hajk är ett projekt som drivs av Stadsbyggnadskontoret Göteborgs Stad.  
 Systemutvecklare är i huvudsak Sweco Position.  
 
@@ -135,11 +172,11 @@ grunt
 ## Driftsättning
 
 Om du har följt anvisningarna så lång har du de tre *kompilerade* delarna som applikationen utgörs av på följande ställen:
-| Del | Plats |
-|---|---|
-|backend|`C:/install/mapservice`|
-|admin|`C:/projekt/Hajk/admin/dist`|
-|client|`C:/projekt/Hajk/admin/release`|
+| Del     | Plats                           |
+| ------- | ------------------------------- |
+| backend | `C:/install/mapservice`         |
+| admin   | `C:/projekt/Hajk/admin/dist`    |
+| client  | `C:/projekt/Hajk/admin/release` |
 
 >Observera: som det nämndes tidigare i avsnittet om klientdelen så byggdes den i en drift- och en testversion. För driftsättning nu kommer vi använda den skarpa driftversionen, som alltså ligger i `release`. Men kom ihåg att även testversionen finns, i mappen `dist`, och instruktionerna här fungerar även för den. Byt bara ut mapparna mot varann.
 
@@ -153,11 +190,11 @@ Nu kommer vi gå vidare med att sätta upp projektet i IIS. Huvudmappen som IIS 
 
 #### Flytta och skapa mappar och filer
 Flytta hela mappar enligt tabell nedan:
-| Från | Till |
-|---|---|
-|`C:/install/mapservice`|`C:/wwwroot/mapservice`|
-|`C:/projekt/Hajk/admin/dist`|`C:/wwwroot/admin`|
-|`C:/projekt/Hajk/admin/release`|`C:/wwwroot/client`|
+| Från                                                | Till |
+| --------------------------------------------------- | ---- |
+| `C:/install/mapservice`|`C:/wwwroot/mapservice`     |
+| `C:/projekt/Hajk/admin/dist`|`C:/wwwroot/admin`     |
+| `C:/projekt/Hajk/admin/release`|`C:/wwwroot/client` |
 
 Nu har `C:/wwwroot` tre undermappar. Men vi ska göra ett till ingrepp. 
 
@@ -172,29 +209,29 @@ Det finns även en POST-proxy som kan användas av klienten. Flytta filerna `pos
 
 #### Kontrollera att allt kom med
 Nu bör `C:/wwwroot` innehålla följande filer och mappar:
-| Innehåll i `wwwroot`|
----
-|`admin/`|
-|`assets/`|
-|`fonts/`|
-|`js/`|
-|`mapservice/`|
-|`Temp/`|
-|`Upload/`|
-|`util/`|
-|`index.html`|
-|`postproxy.aspx`|
-|`postproxy.aspx.cs`|
+| Innehåll i `wwwroot` |
+| -------------------- |
+| `admin/`             |
+| `assets/`            |
+| `fonts/`             |
+| `js/`                |
+| `mapservice/`        |
+| `Temp/`              |
+| `Upload/`            |
+| `util/`              |
+| `index.html`         |
+| `postproxy.aspx`     |
+| `postproxy.aspx.cs`  |
 
 #### Sätt rätt behörigheter på filer och mappar
 För att webbservern ska kunna skriva till vissa mappar i vår huvudmapp behöver rätt behörighet sättas.
 
 Specifikt är det den användaren som IIS App Pool körs på (mer om det i nästa avsnitt) som ska ha skrivbehörighet till mapparna:
-|Mappnamn|
----
-|`mapservice/App_Data`|
-|`Temp/`|
-|`Upload/`|
+| Mappnamn              |
+| --------------------- |
+| `mapservice/App_Data` |
+| `Temp/`               |
+| `Upload/`             |
 
 Som standard heter IIS användare *IIS_IUSRS*. Ge därför *skrivbehörighet* för de tre ovanstående mappar till IIS_IUSRS.
 
@@ -210,11 +247,11 @@ När detta steg är utfört visas mappstrukturen i IIS. Expandera den nyaskapade
 #### Mime-typer
 För att Hajk ska fungera korrekt bör du säkerställa att följande MIME-typer finns registrerade i IIS:
 
-| Mime-typ | Filändelse |
-|---|---:|
-|`application/x-font-woff`| `.woff` |
-|`application/x-font-woff2`| `.woff2` |
-|`application/vnd.google-earth.kml+xml`| `.kml` |
+| Mime-typ                               | Filändelse |
+| -------------------------------------- | ---------: |
+| `application/x-font-woff`              | `.woff`    |
+| `application/x-font-woff2`             | `.woff2`   |
+| `application/vnd.google-earth.kml+xml` | `.kml`     |
 
 MIME-typerna registreras också i IIS-hanteraren. Markera webbplatsen i vänsterpanelen och titta efter *MIME-typer* i huvudfönstret i programmet.
 
