@@ -74,6 +74,10 @@
       ,   z = parseInt(b.z) || a.map.zoom
       ,   l = b.l;
 
+	  
+	  // parametrar s och v kan också anges på url. Dessa avkodas och används serchbar.jsx
+	
+	
       a.map.center[0] = x;
       a.map.center[1] = y;
       a.map.zoom      = z;

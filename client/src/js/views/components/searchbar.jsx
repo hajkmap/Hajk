@@ -53,7 +53,9 @@ var SearchBarView = {
   getInitialState: function() {
     return {
       visible: false,
-      displayPopup: this.props.model.get('displayPopup')
+      displayPopup: this.props.model.get('displayPopup'),
+      haveUrlSearched: false,
+      updateCtr: 2,
     };
   },
 
@@ -79,6 +81,86 @@ var SearchBarView = {
       });
     });
 
+    var str
+      , result
+      , typeName;
+
+    // get s and v
+    var paramGet = function (name) {
+      var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+      return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+    };
+
+    var s = paramGet('s');
+    var v = paramGet('v');
+
+    console.log(s);
+    console.log(v);
+/*
+    if (s == 'adress') {
+      this.props.model.set('filter', 'Adress');
+    }else if (s == 'fastighet'){
+      this.props.model.set('filter', 'Fastighet');
+    } else {
+      this.props.model.set('filter', '*');
+    }
+*/
+    if(s == null){
+      this.props.model.set('filter', '*');
+    }else{
+      var filterName = '*';
+      console.log('trying to find filter, ' + s);
+      this.props.model.get('sources').map((wfslayer, i) => {
+      if(s.toUpperCase() == wfslayer.caption.toUpperCase()){
+        filterName = wfslayer.caption;
+      }
+      });
+      this.props.model.set('filter', filterName);
+    }
+
+    console.log(this.state.haveUrlSearched);
+    console.log(v);
+    if((!this.state.haveUrlSearched) && typeof v !== 'undefined') {
+      console.log('will url search');
+      var field = document.getElementById("searchbar-input-field");
+      field.value = v;
+      console.log(this);
+
+      this.value = v;
+      this.props.model.set('value', this.value);
+      this.setState({
+        value: this.value,
+        minimized: false,
+        force: true
+      });
+      this.props.model.set('force', true);
+      if (this.refs.searchInput.value.length > 3) {
+        this.search();
+      } else {
+        this.setState({
+          loading: false
+        });
+      }
+    }
+  },
+
+  componentDidUpdate: function(){
+    console.log('update');
+
+    var hit = document.getElementById('hit-0-group-0');
+    if (!this.state.haveUrlSearched){
+      try {
+        hit.click();
+      } catch (err){
+
+      }
+    }
+
+    if (this.state.updateCtr > 1){
+      this.state.updateCtr -= 1;
+    } else {
+      this.state.haveUrlSearched = true;
+    }
   },
 
   /**
@@ -124,6 +206,7 @@ var SearchBarView = {
    * @param {object} event
    */
   handleKeyDown: function (event) {
+    this.props.model.set('filter', '*');
     if (event.keyCode === 13 && event.target.value.length < 5) {
       event.preventDefault();
       this.props.model.set('value', event.target.value);
@@ -329,6 +412,7 @@ var SearchBarView = {
     }
 
     var search_on_input = (event) => {
+      this.props.model.set('filter', '*');
       this.value = event.target.value;
       this.props.model.set('value', this.value);
       this.setState({
@@ -354,6 +438,7 @@ var SearchBarView = {
               <i className="fa fa-search"></i>
             </div>
             <input
+			  id="searchbar-input-field"
               type="text"
               ref="searchInput"
               className="form-control"
