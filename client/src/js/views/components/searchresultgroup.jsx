@@ -158,7 +158,7 @@ SearchResultGroup = {
               ,   title = getTitle(this.props.result.displayName)
               ,   index = i
               ;
-              return (<div key={hitId} index={i} data-index={i} onClick={this.handleClick.bind(this, hit, i)}>{title}</div>);
+              return (<div id={hitId} key={hitId} index={i} data-index={i} onClick={this.handleClick.bind(this, hit, i)}>{title}</div>);
             })
           }
         </div>

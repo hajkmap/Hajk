@@ -144,13 +144,22 @@ var ShellView = {
     ,   scale
     ,   popup
     ,   searchbar
-    ,   logo;
+    ,   logo
+    ,   pil;
 
     if (views.length === 3) {
       if (this.model.get('map').get('logo')) {
         logo = (
           <div className="map-logo">
             <img src={this.model.get('map').get('logo')}></img>
+          </div>
+        );
+      }
+
+      if (this.model.get('map').get('pil') && document.body.clientWidth < 600) {
+        pil = (
+          <div className="map-pil">
+            <img src={this.model.get('map').get('pil')}></img>
           </div>
         );
       }
@@ -182,6 +191,7 @@ var ShellView = {
     return (
       <div className="shell">
         {logo}
+        {pil}
         {scale}
         {popup}
         {searchbar}

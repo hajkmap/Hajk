@@ -55,9 +55,8 @@ var PanelView = {
    * @instance
    */
   componentDidMount: function () {
-    console.log('mounted');
-
-    $(".swipe-area").swipe({
+    if(document.body.clientWidth <= 600) {
+      $(".swipe-area").swipe({
         swipeStatus: function (event, phase, direction, distance, duration, fingers) {
           if (phase == "move" && direction == "right") {
             console.log('open');
@@ -74,8 +73,8 @@ var PanelView = {
             $("#sidebar-toggle-swipe").addClass("sidebar-close-after");
           }
         }
-  });
-    console.log("mounted2");
+      });
+    }
   },
 
   /**
@@ -84,8 +83,7 @@ var PanelView = {
    * @return {external:ReactElement}
    */
   render: function () {
-    console.log("running render1");
-    /*if (document.body.clientWidth > 600) {
+    if (document.body.clientWidth > 600) {
 
 
       var navPanel = document.getElementById("navigation-panel");
@@ -112,116 +110,31 @@ var PanelView = {
           </div>
         </div>
       );
-    } else {*/
+    } else {
       // mobile
 
+      var navPanel = document.getElementById("navigation-panel");
+      navPanel.style.width = "50px";
 
+      var toggleIcon = this.props.minimized ? "fa fa-plus" : "fa fa-minus";
+      var closeIcon = this.props.minimized ? "fa fa-plus" : "fa fa-times";
+      toggleIcon += " pull-right clickable panel-close";
+      closeIcon += " pull-right clickable panel-close";
 
-
-
-    var navPanel = document.getElementById("navigation-panel");
-    console.log("running render2");
-    navPanel.style.width = "50px";
-    console.log("running render3");
-/*
-    $("#sidebar-toggle-swipe").off("click");
-    $("#sidebar-toggle-swipe").on("click", function () {
-      if ($("#sidebar-toggle-swipe")[0].classList.contains("sidebar-open-after")) {
-        $(".container-swipe-menu").removeClass("open-sidebar");
-        $("#sidebar-toggle-swipe").removeClass("sidebar-open-after");
-        $("#sidebar-toggle-swipe").addClass("sidebar-close-after");
-      } else {
-        $(".container-swipe-menu").addClass("open-sidebar");
-        $("#sidebar-toggle-swipe").removeClass("sidebar-close-after");
-        $("#sidebar-toggle-swipe").addClass("sidebar-open-after");
+      var containerClass = "container-swipe-menu open-sidebar";
+      var sidebarClass = "sidebar-open-after";
+      if (typeof firstTimeOpenedPanelMobile == "undefined" || firstTimeOpenedPanelMobile < 2) {
+        if (typeof firstTimeOpenedPanelMobile == "undefined"){
+          firstTimeOpenedPanelMobile = 0;
+        } else {
+          firstTimeOpenedPanelMobile += 1;
+        }
+        containerClass = "container-swipe-menu";
+        sidebarClass = "sidebar-close-after";
       }
-    });
-      $(document).ready(function () {
-*/
-        /*
-        $("#sidebar-toggle-swipe").unbind().click(function () {
-          if(panelIs){
-          panelIs = false;
-            $(".container-swipe-menu").removeClass("open-sidebar");
-            $("#sidebar-toggle-swipe").removeClass("sidebar-open-after");
-            $("#sidebar-toggle-swipe").addClass("sidebar-close-after");
-            console.log(panelIs);
-            return false;
-        }else{
-            panelIs = true;
-            $(".container-swipe-menu").addClass("open-sidebar");
-            $("#sidebar-toggle-swipe").removeClass("sidebar-close-after");
-            $("#sidebar-toggle-swipe").addClass("sidebar-open-after");
-            console.log(panelIs);
-            return false;
-        }
-        });*/
-//      });
-
-
-     /*$(".swipe-area").swipe({
-        swipeStatus: function (event, phase, direction, distance, duration, fingers) {
-          console.log('swiping');
-          if (phase == "move" && direction == "right") {
-            panelIs = true;
-            $(".container-swipe-menu").addClass("open-sidebar");
-            $("#sidebar-toggle-swipe").removeClass("sidebar-close-after");
-            $("#sidebar-toggle-swipe").addClass("sidebar-open-after");
-            return false;
-          }
-          if (phase == "move" && direction == "left") {
-            panelIs = false;
-            $(".container-swipe-menu").removeClass("open-sidebar");
-            $("#sidebar-toggle-swipe").removeClass("sidebar-open-after");
-            $("#sidebar-toggle-swipe").addClass("sidebar-close-after");
-            return false;
-          }
-
-        }
-      });
-*/
-/*
-      //Original ver
-      $(document).ready(function () {
-        $("[data-toggle]").click(function () {
-          var pil = $(this).data("toggle"); //pil = .container-swipe-menu
-          $(pil).toggleClass("open-sidebar");
-        });
-      });
-
-      // old ver
-    $(".sidebar-close-after").on('click', function(e) {
-      e.stopPropagation();
-      console.log(e);
-      console.log(e.preventDefault());
-      console.log("1");
-      $(".container-swipe-menu").addClass("open-sidebar");
-      $("#sidebar-toggle-swipe").removeClass("sidebar-close-after");
-      $("#sidebar-toggle-swipe").addClass("sidebar-open-after");
-      return false;
-    });
-
-    $(".sidebar-open-after").on('click', function(e) {
-      console.log("2");
-      e.preventDefault();
-      $(".container-swipe-menu").removeClass("open-sidebar");
-      $("#sidebar-toggle-swipe").removeClass("sidebar-open-after");
-      $("#sidebar-toggle-swipe").addClass("sidebar-close-after");
-      return false;
-    });
-*/
-
-    var toggleIcon = this.props.minimized ? "fa fa-plus" : "fa fa-minus";
-    console.log("running render4");
-    var closeIcon = this.props.minimized ? "fa fa-plus" : "fa fa-times";
-    console.log("running render5");
-    toggleIcon += " pull-right clickable panel-close";
-    console.log("running render6");
-    closeIcon += " pull-right clickable panel-close";
-    console.log("running render7");
 
       return (
-        <div className="container-swipe-menu">
+        <div className={containerClass}>
           <div id="sidebar-swipe">
             <div className="panel navigation-panel-inner">
               <div className="panel-heading">
@@ -240,16 +153,16 @@ var PanelView = {
           </div>
           <div className="main-content-swipe">
             <div className="swipe-area"></div>
-            <a data-toggle=".container-swipe-menu" id="sidebar-toggle-swipe" className="sidebar-close-after" onClick={() => {this.clickSwipeBtn()}}>
+            <a data-toggle=".container-swipe-menu" id="sidebar-toggle-swipe" className={sidebarClass} onClick={() => {this.clickSwipeBtn()}}>
               <span className="bar-swipe"></span>
             </a>
           </div>
         </div>);
-     // }
-
-
     }
-  };
+
+
+  }
+};
 
 /**
  * PanelView module.<br>

@@ -66,35 +66,47 @@ namespace MapService.Controllers
         [HttpPost]
         public string PDF(string json)
         {
-            _log.DebugFormat("Received Base64: {0}" + json);
-            string path = @"C:\\log.txt";
-            Response.AppendToLog("Test");
+            _log.DebugFormat("Received Base64: " + json);
+            // string path = @"C:\\log.txt";
+            // Response.AppendToLog("Test");
 
-            using (StreamWriter sw = new StreamWriter(path, true))
+            // using (StreamWriter sw = new StreamWriter(path, true))
+            // {
+            //     sw.WriteLine("Received JSON. " + json);
+            // }
+
+            try
             {
-                sw.WriteLine("Received JSON. " + json);
-            }
-            _log.DebugFormat("Parsing the Base64 string");
-            byte[] data = Convert.FromBase64String(json);
-            json = System.Text.Encoding.UTF8.GetString(data);
-            _log.DebugFormat("Received JSON: {0}" + json);
+                _log.DebugFormat("Parsing the Base64 string");
+                byte[] data = Convert.FromBase64String(json);
+                json = System.Text.Encoding.UTF8.GetString(data);
+                _log.DebugFormat("Received JSON: " + json.ToString());
 
-            MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
-            _log.DebugFormat("deserialized the json");
-            AsyncManager.OutstandingOperations.Increment();
-            PDFCreator pdfCreator = new PDFCreator();
-            _log.DebugFormat("Inited pdfcreator");
-            byte[] blob = pdfCreator.Create(exportItem);
-            _log.DebugFormat("created blob in pdfcreator");
-            string[] fileInfo = byteArrayToFileInfo(blob, "pdf");
-            _log.DebugFormat("Created fileinfo: " + fileInfo[1]);
+                MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
+                _log.DebugFormat("deserialized the json");
+                AsyncManager.OutstandingOperations.Increment();
+                PDFCreator pdfCreator = new PDFCreator();
+                _log.DebugFormat("Inited pdfcreator");
+                byte[] blob = pdfCreator.Create(exportItem);
+                _log.DebugFormat("created blob in pdfcreator");
+                string[] fileInfo = byteArrayToFileInfo(blob, "pdf");
+                _log.DebugFormat("Created fileinfo: " + fileInfo[1]);
 
-            if (exportItem.proxyUrl != "") {
-                return exportItem.proxyUrl + "/Temp/" + fileInfo[1];
-            } else {
-                return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
+                //if (exportItem.proxyUrl != "")
+                //{
+                //    return exportItem.proxyUrl + "/Temp/" + fileInfo[1];
+                //}
+                //else
+                //{
+                    return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
+                //}
+                //return File(blob, "application/pdf", "kartutskrift.pdf");
             }
-            //return File(blob, "application/pdf", "kartutskrift.pdf");
+            catch (Exception e)
+            {
+                _log.Fatal(e.Message);
+                throw;
+            }
         }
 
         private byte[] imgToByteArray(Image img)

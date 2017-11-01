@@ -647,27 +647,35 @@ var SearchModel = {
    */
   getExcelData: function () {
 
+    console.log('getExcelData');
+    console.log(this.get('hits').length);
+    console.log(this.get('hits'));
+    console.log(this.getHitsFromItems());
     var groups = {}
     ,   exportItems = this.get('hits').length > 0
         ? this.get('hits')
         : this.getHitsFromItems();
 
     exportItems.forEach(hit => {
+      console.log(groups.hasOwnProperty(hit.caption));
+      console.log(hit);
       if (!groups.hasOwnProperty(hit.caption)) {
         groups[hit.caption] = [];
       }
       groups[hit.caption].push(hit);
     });
 
+    console.log("groups");
+    console.log(groups);
     return Object.keys(groups).map(group => {
 
       var columns = []
       ,   aliases = []
       ,   values = [];
 
-      var getAlias = (column, infobox) => {
+      var getAlias = (column, exportText) => {
         var regExp = new RegExp(`{export:${column}( as .*)?}`)
-        ,   result = regExp.exec(infobox);
+        ,   result = regExp.exec(exportText);
 
         if (result && result[1]) {
           result[1] = result[1].replace(" as ", "");
@@ -680,27 +688,35 @@ var SearchModel = {
 
         var attributes = hit.getProperties()
         ,   names = Object.keys(attributes);
-
+        console.log('attr then names');
+        console.log(attributes);
+        console.log(names);
         names = names.filter(name => {
-          if (!hit.infobox) {
+          console.log(hit.exportText);
+          if (!hit.exportText) {
             return typeof attributes[name] === "string"  ||
                    typeof attributes[name] === "boolean" ||
                    typeof attributes[name] === "number";
           } else {
             let regExp = new RegExp(`{export:${name}( as .*)?}`);
             return (
-              regExp.test(hit.infobox)
+              regExp.test(hit.exportText)
             );
           }
         });
+        console.log('names after filter');
+        console.log(names);
+        console.log(columns);
 
         if (names.length > columns.length) {
           columns = names;
           aliases = columns.slice();
         }
 
+        console.log('columns');
+        console.log(columns);
         columns.forEach((column, i) => {
-          aliases[i] = getAlias(column, hit.infobox);
+          aliases[i] = getAlias(column, hit.exportText);
         });
 
         return columns.map(column => attributes[column] || null);
@@ -728,8 +744,11 @@ var SearchModel = {
         break;
       case 'excel':
         url = this.get('excelExportUrl');
+        console.log('url' + url);
         data = this.getExcelData();
+        console.log(data);
         postData = JSON.stringify(data);
+        console.log(postData);
         break;
     }
 
@@ -761,7 +780,6 @@ var SearchModel = {
    * @param {function} done
    */
   search: function (done) {
-
     var value = this.get('value')
     ,   items = []
     ,   promises = []
@@ -785,6 +803,7 @@ var SearchModel = {
               features.forEach(feature => {
                 feature.caption = searchProps.caption;
                 feature.infobox = searchProps.infobox;
+                feature.exportText = searchProps.exportText;
               });
               items.push({
                 layer: searchProps.caption,
@@ -821,6 +840,7 @@ var SearchModel = {
           url: (HAJK2.searchProxy || "") + layer.get('searchUrl'),
           caption: layer.get('caption'),
           infobox: layer.get('infobox'),
+          exportText: "",
           featureType: featureType,
           propertyName: layer.get('searchPropertyName'),
           displayName: layer.get('searchDisplayName'),

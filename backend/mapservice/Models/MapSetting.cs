@@ -34,6 +34,8 @@ namespace MapService.Models
 
         public string logo { get; set; }
 
+        public string pil { get; set; }
+
         public Colors colors { get; set; }
     }
 }

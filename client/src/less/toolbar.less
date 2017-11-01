@@ -14,6 +14,7 @@
   .btn {
     float: left;
   }
+
 }
 
 @media only screen and (max-width: 600px) {
@@ -24,15 +25,74 @@
   }
 
   .map-toolbar-wrapper {
+    position: absolute;
     overflow-y: hidden;
     white-space: nowrap;
     height: 55px;
+    left: 70px;
+    bottom: 15px;
+  }
+
+  .stable-toolbar{
+    position: fixed;
     left: 10px;
     bottom: 15px;
+    height: 55px;
+    white-space: nowrap;
   }
 
   .map-toolbar button {
     float: none !important;
   }
+
+  // Start toolbar arrows
+  /*.toolbar-menu-wrapper {
+    position: relative;
+    max-width: 500px;
+    height: 100px; // hide the scroll bar
+    margin: 1em auto;
+    border: 1px solid black;
+    overflow-x: hidden;
+    overflow-y: hidden;
+  }
+
+  .toolbar-menu	{
+    height: 120px; // hide the scroll bar
+    background: #f3f3f3;
+    box-sizing: border-box;
+
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+
+    .toolbar-item {
+      display: inline-block;
+      width: 100px;
+      height: 100%;
+      outline: 1px dotted gray;
+      padding: 1em;
+      box-sizing: border-box;
+    }
+  }
+
+  .toolbar-paddles {
+  }
+  .toolbar-paddle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 3em;
+  }
+  .toolbar-left-paddle {
+    left: 0;
+  }
+  .toolbar-right-paddle {
+    right: 0;
+  }
+  .toolbar-hidden {
+    display: none;
+  }*/
+  // end toolbar arrow
 
 }

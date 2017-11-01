@@ -229,7 +229,7 @@ var LayerItemView = {
         <div className={innerInfoBodyClass}>
           <p className="info-title">{this.state.infoTitle}</p>
           <p className="info-text">{this.state.infoText}</p>
-          <a className="info-text" href={this.state.infoUrl} target="_blank">{this.state.infoUrl}</a><br/>
+          <a className="info-text" href={this.state.infoUrl} target="_blank">Öppna Länken</a><br/>
           <i className="info-text">{this.state.infoOwner ? "Ägare: " + this.state.infoOwner : ""}</i>
         </div>
 

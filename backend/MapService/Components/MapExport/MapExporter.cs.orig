@@ -26,14 +26,11 @@ using System.Threading;
 using System.Web;
 using MapService.Components.MapExport.Extentions;
 using MapService.Components.MapExport.SharpMapExtensions;
-using log4net;
 
 namespace MapService.Components.MapExport
 {
     public class MapExporter
-    {
-        ILog _log = LogManager.GetLogger(typeof(MapExporter));
-
+    {        
         /// <summary>
         /// Gets or sets the SharpMap map to export.
         /// </summary>
@@ -106,26 +103,18 @@ namespace MapService.Components.MapExport
                     style.Fill = new SolidBrush(color);
                 }
 
-                _log.Debug("Feature pointSrc = " + featureStyle.pointSrc);
                 if (featureStyle.pointSrc != "")
                 {
                     try
                     {
-                        _log.Debug("start download");
                         WebClient wc = new WebClient();
-                        _log.Debug("start download1");
                         byte[] bytes = wc.DownloadData(featureStyle.pointSrc);
-                        _log.Debug("start download2");
                         MemoryStream ms = new MemoryStream(bytes);
-                        _log.Debug("start download3");
                         Image img = Image.FromStream(ms);
-                        _log.Debug("start download4");
                         style.Symbol = img;
-                        _log.Debug("start download5");
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        _log.Debug("Could not get icon. " + ex.ToString());
                     }
                 }
                 else
@@ -217,8 +206,14 @@ namespace MapService.Components.MapExport
                 {
                     //file.WriteLine("Found a layer");
                     string layername = "WMSLayer_" + i;
-                    DpiWmsLayer layer = new DpiWmsLayer(layername, wmsLayers[i].url, exportItem.resolution);
+<<<<<<< HEAD
+                    //file.WriteLine("layername: '" + wmsLayers[i].url + "'");
+                    WmsLayer layer = new WmsLayer(layername, wmsLayers[i].url);
                     
+=======
+                    DpiWmsLayer layer = new DpiWmsLayer(layername, wmsLayers[i].url, exportItem.resolution);
+
+>>>>>>> master
                     layer.SetImageFormat("image/png");
                     layer.BgColor = Color.White;
                     layer.Transparent = true;
@@ -484,7 +479,6 @@ namespace MapService.Components.MapExport
         /// <returns></returns>
         private IStyle GetFeatureStyle(FeatureDataRow row)
         {
-            _log.Debug("GetFeatureStyle");
             VectorStyle style = new VectorStyle();
             if (row["style"] != null)
             {
@@ -539,7 +533,6 @@ namespace MapService.Components.MapExport
                     style.Fill = new SolidBrush(color);
                 }
 
-                _log.Debug("Featurestyle.pointSrc = " + featureStyle.pointSrc);
                 if (featureStyle.pointSrc != "")
                 {
                     if (featureStyle.pointSrc.StartsWith("data:"))
@@ -553,13 +546,12 @@ namespace MapService.Components.MapExport
                         try
                         {
                             WebClient wc = new WebClient();
-                            byte[] bytes = wc.DownloadData("https://karta2.varberg.se/" + featureStyle.pointSrc);                            
+                            byte[] bytes = wc.DownloadData(featureStyle.pointSrc);                            
                             style.Symbol = this.ImageFromBytes(bytes);                            
                         }
-                        catch (Exception ex)
+                        catch
                         {
                             //TODO
-                            _log.Error("Exception when trying to get icon. " + ex.ToString());
                         }
                     }                    
                 }

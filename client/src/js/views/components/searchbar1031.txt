@@ -96,26 +96,13 @@ var SearchBarView = {
 
     console.log(s);
     console.log(v);
-/*
+
     if (s == 'adress') {
       this.props.model.set('filter', 'Adress');
     }else if (s == 'fastighet'){
       this.props.model.set('filter', 'Fastighet');
     } else {
       this.props.model.set('filter', '*');
-    }
-*/
-    if(s == null){
-      this.props.model.set('filter', '*');
-    }else{
-      var filterName = '*';
-      console.log('trying to find filter, ' + s);
-      this.props.model.get('sources').map((wfslayer, i) => {
-      if(s.toUpperCase() == wfslayer.caption.toUpperCase()){
-        filterName = wfslayer.caption;
-      }
-      });
-      this.props.model.set('filter', filterName);
     }
 
     console.log(this.state.haveUrlSearched);

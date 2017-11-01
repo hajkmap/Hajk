@@ -45,6 +45,7 @@ namespace MapService.Controllers
                     zoom = 3,
                     projection = "EPSG:3006",
                     target = "map",
+                    pil = "",
                     logo = "",
                     colors = new Colors()
                     {

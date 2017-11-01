@@ -27,12 +27,17 @@ namespace MapService.DataAccess
         private LayerConfig readLayerConfigFromFile()
         {
             string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.layerFile);
+<<<<<<< HEAD
+            string jsonInput = System.IO.File.ReadAllText(file);
+            return JsonConvert.DeserializeObject<LayerConfig>(jsonInput);
+=======
             string jsonInput = System.IO.File.ReadAllText(file);
             var config = JsonConvert.DeserializeObject<LayerConfig>(jsonInput);
             //New wms config
             if (config != null && config.extendedwmslayers == null)
                 config.extendedwmslayers = new List<ExtendedWmsConfig>();
             return config;
+>>>>>>> master
         }
 
         /// <summary>
