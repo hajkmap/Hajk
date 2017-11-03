@@ -94,8 +94,6 @@ var SearchBarView = {
     var s = paramGet('s');
     var v = paramGet('v');
 
-    console.log(s);
-    console.log(v);
 /*
     if (s == 'adress') {
       this.props.model.set('filter', 'Adress');
@@ -109,7 +107,6 @@ var SearchBarView = {
       this.props.model.set('filter', '*');
     }else{
       var filterName = '*';
-      console.log('trying to find filter, ' + s);
       this.props.model.get('sources').map((wfslayer, i) => {
       if(s.toUpperCase() == wfslayer.caption.toUpperCase()){
         filterName = wfslayer.caption;
@@ -118,13 +115,9 @@ var SearchBarView = {
       this.props.model.set('filter', filterName);
     }
 
-    console.log(this.state.haveUrlSearched);
-    console.log(v);
     if((!this.state.haveUrlSearched) && typeof v !== 'undefined') {
-      console.log('will url search');
       var field = document.getElementById("searchbar-input-field");
       field.value = v;
-      console.log(this);
 
       this.value = v;
       this.props.model.set('value', this.value);
@@ -145,7 +138,6 @@ var SearchBarView = {
   },
 
   componentDidUpdate: function(){
-    console.log('update');
 
     var hit = document.getElementById('hit-0-group-0');
     if (!this.state.haveUrlSearched){
@@ -430,6 +422,7 @@ var SearchBarView = {
       }
     };
 
+
     return (
       <div className="search-tools">
         <div className="form-group">
@@ -438,7 +431,7 @@ var SearchBarView = {
               <i className="fa fa-search"></i>
             </div>
             <input
-			  id="searchbar-input-field"
+			        id="searchbar-input-field"
               type="text"
               ref="searchInput"
               className="form-control"
