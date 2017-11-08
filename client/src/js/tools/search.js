@@ -137,6 +137,9 @@ var SearchModel = {
   getPropertyFilter: function (props) {
     var multipleAttributes = props.propertyName.split(',').length > 1;
     var conditions = props.propertyName.split(',').reduce((condition, property) => {
+
+      props.value.indexOf("\\") >= 0 ? props.value = props.value.replace(/\\/g, "\\\\") : props.value;
+      
       if (props.value) {
         return condition += `
           <ogc:PropertyIsLike matchCase="false" wildCard="*" singleChar="." escapeChar="!">
