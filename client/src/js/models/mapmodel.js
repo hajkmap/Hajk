@@ -38,7 +38,7 @@ var MapModelProperties = {
   maxZoom: 15,
   minZoom: 1,
   target: "map",
-  projection: "EPSG:3006",
+  projection: "EPSG:3007",
   ol: undefined,
   clicked: undefined
 };

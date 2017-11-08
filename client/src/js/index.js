@@ -77,144 +77,143 @@
       , l = b.l
 
     // parametrar s och v kan också anges på url. Dessa avkodas och används serchbar.jsx
-
     a.map.center[0] = x;
     a.map.center[1] = y;
     a.map.zoom = z;
 
-  if (l) {
-    l = l.split(',');
-    a.layers.filter(layer => {
-      layer.visibleAtStart = false;
-    return typeof l.find(str => str === layer.id) === "string"
-  }).forEach(layer => {
-      layer.visibleAtStart = true;
-  });
-  }
+    if (l) {
+      l = l.split(',');
+      a.layers.filter(layer => {
+        layer.visibleAtStart = false;
+      return typeof l.find(str => str === layer.id) === "string"
+    }).forEach(layer => {
+        layer.visibleAtStart = true;
+    });
+    }
 
-  return a;
-};
+    return a;
+  };
 
-internal.filterByLayerSwitcher = function (config, layers) {
+  internal.filterByLayerSwitcher = function (config, layers) {
 
-  function f(groups, layer) {
-    groups.forEach(group => {
+    function f(groups, layer) {
+      groups.forEach(group => {
 
-      var mapLayer = group.layers.find(l => l.id === layer.id)
+        var mapLayer = group.layers.find(l => l.id === layer.id)
 
-    if (mapLayer) {
-      layer.drawOrder = mapLayer.drawOrder;
-      if (layer.visibleAtStart !== undefined) {
-        layer.visibleAtStart = mapLayer.visibleAtStart;
+      if (mapLayer) {
+        layer.drawOrder = mapLayer.drawOrder;
+        if (layer.visibleAtStart !== undefined) {
+          layer.visibleAtStart = mapLayer.visibleAtStart;
+        }
+        filtered.push(layer);
       }
+
+      if (group.hasOwnProperty('groups')) {
+        f(group.groups, layer);
+      }
+    });
+    }
+
+    var filtered = [];
+
+    layers.forEach(layer => {
+      var baseLayer = config.baselayers.find(l => l.id === layer.id);
+    if (baseLayer) {
+      layer.drawOrder = 0;
       filtered.push(layer);
     }
-
-    if (group.hasOwnProperty('groups')) {
-      f(group.groups, layer);
-    }
   });
-  }
 
-  var filtered = [];
+    layers.forEach(layer => {
+      f(config.groups, layer);
+  });
 
-  layers.forEach(layer => {
-    var baseLayer = config.baselayers.find(l => l.id === layer.id);
-  if (baseLayer) {
-    layer.drawOrder = 0;
-    filtered.push(layer);
-  }
-});
+    return filtered;
+  };
 
-  layers.forEach(layer => {
-    f(config.groups, layer);
-});
+  /**
+   * Load config and start the application.
+   * @memberof HAJK2
+   * @alias start
+   * @instance
+   * @param {object} config - configuration object for the application.
+   * @param {function} done - callback to trigger when the application is loaded.
+   */
+  that.start = function (config, done) {
 
-  return filtered;
-};
+    function load_map(map_config) {
+      var layers = $.getJSON(config.layersPath || layersPath);
+      layers.done(data => {
 
-/**
- * Load config and start the application.
- * @memberof HAJK2
- * @alias start
- * @instance
- * @param {object} config - configuration object for the application.
- * @param {function} done - callback to trigger when the application is loaded.
- */
-that.start = function (config, done) {
+        var layerSwitcherTool = map_config.tools.find(tool => {
+          return tool.type === 'layerswitcher'
+        });
 
-  function load_map(map_config) {
-    var layers = $.getJSON(config.layersPath || layersPath);
-    layers.done(data => {
-
-      var layerSwitcherTool = map_config.tools.find(tool => {
-        return tool.type === 'layerswitcher'
+      var searchTool = map_config.tools.find(tool => {
+        return tool.type === 'search'
       });
 
-    var searchTool = map_config.tools.find(tool => {
-      return tool.type === 'search'
+      var editTool = map_config.tools.find(tool => {
+        return tool.type === 'edit'
+      });
+
+      if (layerSwitcherTool) {
+        let layers = [];
+        let _data = {
+          wmslayers: data.wmslayers || [],
+          wmtslayers: data.wmtslayers || [],
+          vectorlayers: data.vectorlayers || [],
+          arcgislayers: data.arcgislayers || [],
+          extendedwmslayers: data.extendedwmslayers || []
+        };
+
+        _data.wmslayers.forEach(l => l.type = "wms");
+        _data.wmtslayers.forEach(l => l.type = "wmts");
+        _data.vectorlayers.forEach(l => l.type = "vector");
+        _data.arcgislayers.forEach(l => l.type = "arcgis");
+        _data.extendedwmslayers.forEach(l => l.type = "extended_wms");
+        layers = data.wmslayers
+          .concat(_data.extendedwmslayers)
+          .concat(_data.wmtslayers)
+          .concat(_data.vectorlayers)
+          .concat(_data.arcgislayers);
+
+        map_config.layers = internal.filterByLayerSwitcher(layerSwitcherTool.options, layers);
+        map_config.layers.sort((a, b) => a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1);
+      }
+
+      if (searchTool) {
+        searchTool.options.sources = data.wfslayers;
+      }
+
+      if (editTool) {
+        editTool.options.sources = data.wfstlayers;
+      }
+
+      internal.init(
+        internal.mergeConfig(map_config, internal.parseQueryParams())
+      );
+
+
+
+      if (done) done(true);
     });
-
-    var editTool = map_config.tools.find(tool => {
-      return tool.type === 'edit'
+      layers.error(() => {
+        if (done)
+        done(false, "Kartans lagerkonfiguration kunde inte laddas in.");
     });
-
-    if (layerSwitcherTool) {
-      let layers = [];
-      let _data = {
-        wmslayers: data.wmslayers || [],
-        wmtslayers: data.wmtslayers || [],
-        vectorlayers: data.vectorlayers || [],
-        arcgislayers: data.arcgislayers || [],
-        extendedwmslayers: data.extendedwmslayers || []
-      };
-
-      _data.wmslayers.forEach(l => l.type = "wms");
-      _data.wmtslayers.forEach(l => l.type = "wmts");
-      _data.vectorlayers.forEach(l => l.type = "vector");
-      _data.arcgislayers.forEach(l => l.type = "arcgis");
-      _data.extendedwmslayers.forEach(l => l.type = "extended_wms");
-      layers = data.wmslayers
-        .concat(_data.extendedwmslayers)
-        .concat(_data.wmtslayers)
-        .concat(_data.vectorlayers)
-        .concat(_data.arcgislayers);
-
-      map_config.layers = internal.filterByLayerSwitcher(layerSwitcherTool.options, layers);
-      map_config.layers.sort((a, b) => a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1);
     }
 
-    if (searchTool) {
-      searchTool.options.sources = data.wfslayers;
-    }
-
-    if (editTool) {
-      editTool.options.sources = data.wfstlayers;
-    }
-
-    internal.init(
-      internal.mergeConfig(map_config, internal.parseQueryParams())
-    );
-
-
-
-    if (done) done(true);
-  });
-    layers.error(() => {
+    config = config || {};
+    app = $.getJSON(config.configPath || configPath);
+    app.done(load_map);
+    app.error(() => {
       if (done)
-      done(false, "Kartans lagerkonfiguration kunde inte laddas in.");
+      done(false, "Kartans konfiguration kunde inte laddas in");
   });
   }
 
-  config = config || {};
-  app = $.getJSON(config.configPath || configPath);
-  app.done(load_map);
-  app.error(() => {
-    if (done)
-    done(false, "Kartans konfiguration kunde inte laddas in");
-});
-}
-
-return that;
+  return that;
 
 }());

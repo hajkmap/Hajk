@@ -21,6 +21,7 @@ var kmlWriter = require('utils/kmlwriter');
  */
 var SearchModelProperties = {
   type: 'search',
+  Id: 'searchPanelB',
   panel: 'searchpanel',
   toolbar: 'bottom',
   icon: 'fa fa-search icon',

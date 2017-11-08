@@ -64,6 +64,8 @@ var LayerPanelView = {
     this.setState({
       layers: this.props.model.get("layerCollection")
     });
+
+
   },
 
   /**

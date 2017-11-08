@@ -34,7 +34,7 @@ var ToolbarView = {
   },
 
   componentDidMount: function(){
-    //alert(1);
+
   },
 
   /**
@@ -55,6 +55,7 @@ var ToolbarView = {
    * @return {external:ReactElement}
    */
   render: function () {
+    console.log('render toolbar');
     var tools = this.props.model
       .filter(t => t.get('toolbar'))
       .filter(tool => tool.get('toolbar') === 'bottom')

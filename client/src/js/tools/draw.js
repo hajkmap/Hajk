@@ -585,7 +585,7 @@ var DrawModel = {
       url: this.get('exportUrl'),
       method: "post",
       data: {
-        json: postData
+        json: btoa(postData)
       },
       format: "json",
       success: (url) => {

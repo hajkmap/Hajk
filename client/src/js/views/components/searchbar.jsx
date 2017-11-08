@@ -81,7 +81,7 @@ var SearchBarView = {
       });
     });
 
-    var str
+	    var str
       , result
       , typeName;
 

@@ -236,6 +236,50 @@ var ExportPdfSettings = React.createClass({
                  map.getView().getCenter();
 
     this.props.model.addPreview(scale, paper, center);
+
+    console.log(scale);
+
+    var preScale = undefined;
+
+    switch(scale){
+      case "250":
+        preScale = 6;
+        break;
+      case "500":
+        preScale = 6;
+        break;
+      case "1000":
+        preScale = 5;
+        break;
+      case "2500":
+        preScale = 4;
+        break;
+      case "5000":
+        preScale = 3;
+        break;
+      case "10000":
+        preScale = 2;
+        break;
+      case "25000":
+        preScale = 1;
+        break;
+      case "50000":
+        preScale = 1;
+        break;
+      case "100000":
+        preScale = 0;
+        break;
+      case "250000":
+        preScale = 0;
+        break;
+      default:
+        preScale = map.getView().getZoom();
+        break;
+    }
+    if(preScale < map.getView().getZoom()){
+      map.getView().setZoom(preScale);
+    }
+    console.log(map);
   },
 
   exportPDF: function () {

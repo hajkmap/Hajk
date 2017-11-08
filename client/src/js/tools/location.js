@@ -107,18 +107,10 @@ var LocationModel = {
 
     this.on('change:active', (e) => {
       if (!this.get('active') || this.get('watchId') !== undefined) {
-      if (this.get('watchId') !== undefined) {
-        window.navigator.geolocation.clearWatch(this.get('watchId'));
-      }
-      this.set('watchId', undefined);
       this.reset();
-    } else {
-      this.set('watchId', window.navigator.geolocation.watchPosition(
-        (e) => { this.onLocationSucess(e) },
-      (e) => { this.onLocationError(e) },
-      this.getOptions()
-    ));
-    }
+      } else {
+        navigator.geolocation.getCurrentPosition(this.onLocationSucess.bind(this), this.onLocationError.bind(this));
+      }
   });
 
     this.on('change:location', () => { this.setLocation() });

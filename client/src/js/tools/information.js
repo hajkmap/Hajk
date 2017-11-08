@@ -61,9 +61,13 @@ var InformationModel = {
   initialize: function (options) {
     var cookies = document.cookie;
     if(cookies.length == 0){
+      // TODO: Titta efter om vi ska använda cookie för att visa informationsrutan endast en gång
+      // OBS! json.showInfoOnce kan vara undefined, då ska det fungera som innan cookie användes
+      //if( json.showInfoOnce) {
       document.cookie = "seen=true";
+      // }
     } else {
-        this.set({'display': false});
+      this.set({'display': false});
         this.set({'visibleAtStart': false});
     }
       ToolModel.prototype.initialize.call(this);

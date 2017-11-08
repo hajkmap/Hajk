@@ -68,7 +68,10 @@ var BookmarkPanelView = {
   onSubmitForm: function (e) {
     e.preventDefault();
     var name = ReactDOM.findDOMNode(this.refs.name).value;
-    this.props.model.addBookmark(name, () => this.forceUpdate());
+    console.log('submit');
+    if(name.length > 0) {
+      this.props.model.addBookmark(name, () => this.forceUpdate());
+    }
   },
 
   /**
@@ -145,9 +148,9 @@ var BookmarkPanelView = {
     return (
       <Panel title="Bokmärken" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
         <div className="bookmark-panel panel-content">
+          <button onClick={() => this.openInstruction()} className="btn-transparent" id="instructionBox"><img src="/assets/icons/infoknapp.png"/></button>
           <form onSubmit={this.onSubmitForm}>
             <div className="form-group">
-              <button onClick={() => this.openInstruction()} className="btn-transparent" id="instructionBox"><img src="/assets/icons/infoknapp.png"/></button>
               <div className="panel-body" id="instructionText">
                 <p>
                   ①. Zooma in till önskad skala.<br/><br/>

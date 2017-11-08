@@ -33,6 +33,7 @@ var SearchPanelView = {
    * @return {object}
    */
   getInitialState: function() {
+    console.log("init searchpanel");
     return {
       visible: false
     };
@@ -43,6 +44,7 @@ var SearchPanelView = {
    * @instance
    */
   componentDidMount: function () {
+    console.log("searchpanel mounted");
   },
 
   /**

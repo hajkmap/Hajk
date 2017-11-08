@@ -100,6 +100,7 @@ var ExportModel = {
       this.setActiveTool(formats[0]);
     }
 
+    // change scale on the map here?
     this.set('olMap', shell.getMap().getMap());
     this.addPreviewLayer();
   },
@@ -191,6 +192,7 @@ var ExportModel = {
 
     var features = new ol.Collection();
     features.push(feature);
+
 
     this.set('transform', new ol.interaction.Transform({
       translateFeature: true,
