@@ -81,9 +81,6 @@ var SearchBarView = {
       });
     });
 
-    var str
-      , result
-      , typeName;
 
     // get s and v
     var paramGet = function (name) {
@@ -91,18 +88,12 @@ var SearchBarView = {
       return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
     };
 
+    // Hämtar s och v från URL:en som angetts för att starta Hajk.
+    // Eventuellt kan man hämta dessa i index.js och lägga dem till global konfig
     var s = paramGet('s');
     var v = paramGet('v');
 
-/*
-    if (s == 'adress') {
-      this.props.model.set('filter', 'Adress');
-    }else if (s == 'fastighet'){
-      this.props.model.set('filter', 'Fastighet');
-    } else {
-      this.props.model.set('filter', '*');
-    }
-*/
+
     if(s == null){
       this.props.model.set('filter', '*');
     }else{
