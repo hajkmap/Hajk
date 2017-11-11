@@ -1,5 +1,4 @@
 var Panel = require('views/panel');
-var isMobile = () => document.body.clientWidth <= 600;
 
 /**
  * @class
@@ -90,18 +89,8 @@ var RoutingPanelView = {
     this.props.model.initStartPoint();
 
     return(
-      <Panel title="Navigation"  onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
+      <Panel title="Navigation"  onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
         <div className="panel-content">
-          <button onClick={() => this.openInstruction()} className="btn-transparent" id="instructionBox"><img src="/assets/icons/infoknapp.png"/></button>
-          <div className="panel-body" id="instructionText">
-            <p>
-              ① Välj startpunkt genom att trycka på någon av knapparna under "Välj startpunkt". <br/>
-              ② Välj mål genom att trycka på knappen "Välj position på kartan" och klicka sedan i kartan. <br/>
-              ③ Välj färdsätt genom att trycka på någon av knapparna. <br/>
-              ④ Tryck på "Sök resa". <br/>
-            </p>
-          </div>
-          <br/><br/>
           <div className="panel panel-default">
               <div className="panel-heading"> ①. Välj startpunkt </div>
                 <div className="panel-body">

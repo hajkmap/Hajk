@@ -56,9 +56,18 @@ var ToolbarView = {
    */
   render: function () {
     console.log('render toolbar');
+    var layerSwitcherTool = this.props.model
+      .filter(t => t.get('toolbar'))
+      .filter(tool => tool.get('type') === 'layerswitcher')
+      .map((tool, index) => {
+        console.log('tool');
+        tool.set('toolbar', isMobile ? 'stable' : 'bottom');
+      });
+
+
     var tools = this.props.model
       .filter(t => t.get('toolbar'))
-      .filter(tool => tool.get('toolbar') === 'bottom')
+      .filter(tool => tool.get('toolbar') === 'bottom' || (tool.get('toolbar') === 'stable' && !mobilAnpassningEnabled))
       .map((tool, index) => {
         var a = tool.get('panel').toLowerCase()
           ,   b = this.state.activeTool
@@ -90,7 +99,7 @@ var ToolbarView = {
     // stable button
     var stableButton = this.props.model
       .filter(t => t.get('toolbar'))
-      .filter(tool => tool.get('toolbar') === 'stable')
+      .filter(tool => tool.get('toolbar') === 'stable' && mobilAnpassningEnabled)
       .map((tool, index) => {
         var a = tool.get('panel').toLowerCase()
           ,   b = this.state.activeTool

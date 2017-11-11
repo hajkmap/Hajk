@@ -35,7 +35,8 @@ var RoutingModelProperties = {
     longitude: undefined,
     latitudeEnd: undefined,
     longitudeEnd: undefined
-  }
+  },
+  instruction: ''
 };
 
 /**

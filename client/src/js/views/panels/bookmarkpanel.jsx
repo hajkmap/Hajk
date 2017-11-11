@@ -146,19 +146,10 @@ var BookmarkPanelView = {
     }
 
     return (
-      <Panel title="Bokmärken" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
+      <Panel title="Bokmärken" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
         <div className="bookmark-panel panel-content">
-          <button onClick={() => this.openInstruction()} className="btn-transparent" id="instructionBox"><img src="/assets/icons/infoknapp.png"/></button>
           <form onSubmit={this.onSubmitForm}>
             <div className="form-group">
-              <div className="panel-body" id="instructionText">
-                <p>
-                  ①. Zooma in till önskad skala.<br/><br/>
-                  ②. Skriv önskat namn i fältet nedan.<br/><br/>
-                  ③. Tryck på Enter-knappen.<br/><br/>
-                </p>
-              </div>
-              <br/><br/>
               <label>Lägg till bokmärke</label>
               <div className="input-group">
                 <div className="input-group-addon">

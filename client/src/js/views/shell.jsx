@@ -156,7 +156,7 @@ var ShellView = {
         );
       }
 
-      if (this.model.get('map').get('pil') && document.body.clientWidth < 600) {
+      if (this.model.get('map').get('pil') && isMobile) {
         pil = (
           <div className="map-pil">
             <img src={this.model.get('map').get('pil')}></img>

@@ -23,8 +23,6 @@
 var shiftIsDown = false;
 var ctrlIsDown = false;
 
-var isMobile = () => document.body.clientWidth <= 600;
-
 window.onkeydown = (e) => {
   shiftIsDown = e.shiftKey;
   ctrlIsDown = e.ctrlKey;

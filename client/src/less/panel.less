@@ -52,6 +52,14 @@
     width: 60%;
     height: 85%;
   }
+  .navigation-panel-inner > .panel-heading {
+    font-size: 18px;
+    border-radius: 0;
+    color: @color-green;
+    background-color: @color-yellow;
+    border: none;
+    width: 100%;
+  }
 }
 
 .navigation-panel-inner {
@@ -70,11 +78,11 @@
   overflow: auto;
 }
 
+// ta bort top and position should be relative
 .navigation-panel-inner > .panel-body {
   padding: 13px;
   bottom: 0;
-  position: absolute;
-  top: 50px;
+  position: relative;
   width: 100%;
 }
 
@@ -94,6 +102,7 @@
   color: @color-green;
   background-color: @color-yellow;
   border: none;
+  position: relative;
 }
 
 .navigation-panel-inner > .panel-heading i {
@@ -266,6 +275,18 @@
 // +-------------------------- Swipe sidemenu style
 
 
-#instructionText {
+#instructionsText {
   display: none;
+}
+
+#instructionsText.panel-body-instruction{
+  font-size: 15px;
+  color: #FFFFFF;
+}
+
+@media only screen and (max-device-width: 736px) {
+  #instructionsText.panel-body-instruction{
+    font-size: 12px;
+    color: #FFFFFF;
+  }
 }

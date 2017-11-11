@@ -33,7 +33,9 @@ var PanelView = {
    * @return {object}
    */
   getInitialState: function() {
-    return {};
+    return {
+      instruction: ""
+    };
   },
 
   clickSwipeBtn: function(){
@@ -55,7 +57,7 @@ var PanelView = {
    * @instance
    */
   componentDidMount: function () {
-    if(document.body.clientWidth <= 600) {
+    if(isMobile && mobilAnpassningEnabled) {
       $(".swipe-area").swipe({
         swipeStatus: function (event, phase, direction, distance, duration, fingers) {
           if (phase == "move" && direction == "right") {
@@ -75,6 +77,13 @@ var PanelView = {
         }
       });
     }
+    $("#instructionsText").hide();
+  },
+
+  openInstruction: function (){
+    console.log('Clicked');
+    var element = $("#instructionsText");
+    element.toggle();
   },
 
   /**
@@ -83,12 +92,11 @@ var PanelView = {
    * @return {external:ReactElement}
    */
   render: function () {
-    if (document.body.clientWidth > 600) {
-
-
+    console.log('thisPanel');
+    console.log(this);
+    if (!isMobile || !mobilAnpassningEnabled) {
       var navPanel = document.getElementById("navigation-panel");
       navPanel.style.width = "417px";
-
 
       var toggleIcon = this.props.minimized ? "fa fa-plus" : "fa fa-minus";
       var closeIcon = this.props.minimized ? "fa fa-plus" : "fa fa-times";
@@ -98,12 +106,14 @@ var PanelView = {
         <div className="panel navigation-panel-inner">
           <div className="panel-heading">
             <span>{this.props.title}</span>
+            <button onClick={() => this.openInstruction()} className="btn-info" id="instructionBox1" ><img src="/assets/icons/hjalpknapp.png"/></button>
             <i className={closeIcon} onClick={() => {
               if (this.props.onUnmountClicked) {
                 this.props.onUnmountClicked();
               }
             }}></i>
             <i className={toggleIcon} onClick={this.props.onCloseClicked}></i>
+            <div className="panel-body-instruction" id="instructionsText" dangerouslySetInnerHTML={{__html: this.props.instruction}}></div>
           </div>
           <div className="panel-body">
             {this.props.children}
@@ -139,12 +149,13 @@ var PanelView = {
             <div className="panel navigation-panel-inner">
               <div className="panel-heading">
                 <span>{this.props.title}</span>
+                <button onClick={() => this.openInstruction()} className="btn-info" id="instructionBox" ><img src="/assets/icons/hjalpknapp.png"/></button>
                 <i className={closeIcon} onClick={() => {
                   if (this.props.onUnmountClicked) {
                     this.props.onUnmountClicked();
                   }
                 }}></i>
-                <i className={toggleIcon} onClick={this.props.onCloseClicked}></i>
+                <div className="panel-body-instruction" id="instructionsText" dangerouslySetInnerHTML={{__html: this.props.instruction}}></div>
               </div>
               <div className="panel-body">
                 {this.props.children}

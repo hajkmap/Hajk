@@ -41,7 +41,8 @@ var AnchorModelProperties = {
   title: 'Länk till kartan',
   visible: false,
   shell: undefined,
-  anchor: ""
+  anchor: "",
+  instruction: ''
 }
 
 /**

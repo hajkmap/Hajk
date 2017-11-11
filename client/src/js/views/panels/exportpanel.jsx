@@ -276,7 +276,7 @@ var ExportPdfSettings = React.createClass({
         preScale = map.getView().getZoom();
         break;
     }
-    if(preScale < map.getView().getZoom()){
+    if(isMobile && mobilAnpassningEnabled && preScale < map.getView().getZoom()){
       map.getView().setZoom(preScale);
     }
     console.log(map);

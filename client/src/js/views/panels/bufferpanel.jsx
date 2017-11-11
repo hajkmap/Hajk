@@ -86,17 +86,8 @@ var BufferPanelView = {
    */
   render: function () {
     return (
-      <Panel title="Urvalsområde" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked}>
+      <Panel title="Urvalsområde" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked} instruction={atob(this.props.model.get('instruction'))}>
         <div className="panel-content">
-          <button onClick={() => this.openInstruction()} className="btn-transparent" id="instructionBox"><img src="/assets/icons/infoknapp.png"/></button>
-          <div className="panel-body" id="instructionText">
-            <p>
-              ①. Tryck på "Sätt ut mittpunkt" och klicka i kartan.<br/><br/>
-              ②. Ange önskat avstånd från mittpunkt (radie)<br/><br/>
-              ③. Tryck på "Skapa buffertzon"<br/><br/>
-              Under rubriken "Resultat: Objekt inom buffertzon" skapas en lista på de objekt som finns inom buffertzonen utifrån de lager som du valt att visa i kartan.<br/>
-            </p>
-          </div>
           <br/><br/>
           <div className="panel panel-default-transparent">
               <button onClick={() => this.props.model.activateBufferMarker()} type="button" className="btn btn-main" title="Markera flera objekt">

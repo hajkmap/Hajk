@@ -45,7 +45,8 @@ var BufferModelProperties = {
   bufferDist: 1000,
   marker: undefined,
   markerPos: undefined,
-  popupHighlight: undefined
+  popupHighlight: undefined,
+  instruction: ''
 }
 
 /**
@@ -64,10 +65,8 @@ var BufferModel = {
    */
   defaults: BufferModelProperties,
 
-  initialize: function (options) {
+  initialize: function () {
     ToolModel.prototype.initialize.call(this);
-
-
   },
 
   getDefaultStyle: function () {

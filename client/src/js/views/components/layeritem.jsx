@@ -42,7 +42,8 @@ var LayerItemView = {
       infoText: "",
       infoUrl: "",
       infoOwner: "",
-      infoExpanded: false
+      infoExpanded: false,
+      instruction: ""
     };
   },
 

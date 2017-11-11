@@ -43,7 +43,8 @@ var BookmarkProperties = {
   visible: false,
   shell: undefined,
   settingsUrl: "",
-  bookmarks: []
+  bookmarks: [],
+  instruction: ''
 };
 
 /**

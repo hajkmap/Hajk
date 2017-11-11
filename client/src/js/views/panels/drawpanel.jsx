@@ -24,8 +24,6 @@ var Panel = require('views/panel');
 var Alert = require('alert');
 var ColorPicker = require('components/colorpicker');
 
-var isMobile = () => document.body.clientWidth <= 600;
-
 /**
  * @class
  */
