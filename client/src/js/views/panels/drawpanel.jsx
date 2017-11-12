@@ -282,7 +282,7 @@ var DrawPanelView = {
     });
     this.props.model.set("kmlExportUrl", false);
     this.props.model.set("kmlImport", false);
-    if (isMobile()) {
+    if (isMobile) {
       this.props.navigationPanel.minimize();
     }
   },

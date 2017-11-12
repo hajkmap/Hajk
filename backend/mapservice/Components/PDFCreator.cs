@@ -130,11 +130,67 @@ namespace MapService.Components
             if (layout == 1)//original layout
             {
                 //origina code from github
+
+                this.drawImage(gfx, img, 0, 0, page);
+
+                List<string> copyrights = new List<string>();
+                if (ConfigurationManager.AppSettings["exportCopyrightText"] != null)
+                {
+                    copyrights = ConfigurationManager.AppSettings["exportCopyrightText"].Split(',').ToList();
+                }
+
+                string infoText = String.Empty;
+                if (ConfigurationManager.AppSettings["exportInfoText"] != null)
+                {
+                    infoText = ConfigurationManager.AppSettings["exportInfoText"];
+                }
+
+                int height = 45 + copyrights.Count * 10;
+
+                XPoint[] points = new XPoint[]
+                {
+                new XPoint(12, 12),
+                new XPoint(12, height),
+                new XPoint(55 + displayLength, height),
+                new XPoint(55 + displayLength, 12),
+                new XPoint(12, 12)
+                };
+
+                gfx.DrawPolygon(XBrushes.White, points, XFillMode.Winding);
+
+                this.drawText(gfx, String.Format("Skala 1:{0}", exportItem.scale), 15, 25);
+                gfx.DrawLine(XPens.Black, new XPoint(15, 32), new XPoint(15 + displayLength, 32));
+                gfx.DrawLine(XPens.Black, new XPoint(15, 28), new XPoint(15, 36));
+                gfx.DrawLine(XPens.Black, new XPoint(15 + displayLength, 28), new XPoint(15 + displayLength, 36));
+                this.drawText(gfx, displayText, 20 + displayLength, 35);
+
+                var y = (int)page.Height.Point - 15;
+
+                this.drawText(gfx, infoText, 15, y);
+
+                int i = 0;
+                copyrights.ForEach(copyright =>
+                {
+                    int start = 50;
+                    this.drawText(gfx, String.Format("© {0}", copyright), 15, start + i * 10);
+                    i++;
+                });
+
+                XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "assets", "logo.png"));
+                gfx.DrawImage(logo, (gfx.PageSize.Width - logo.PixelWidth / 2) - 12, 12, logo.PixelWidth / 2, logo.PixelHeight / 2);
+
+                byte[] bytes;
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    document.Save(ms);
+                    bytes = ReadFully(ms);
+                }
+
+                return bytes;
             }
             else if (layout == 2)//new layout
             {
-
-
                 // x and y 0 0(top left corner?)-> change
                 this.drawImage(gfx, img, 33, 33, page);
 
@@ -169,21 +225,10 @@ namespace MapService.Components
                 gfx.DrawLine(XPens.Black, new XPoint(33 + displayLength / 2, (int)page.Height.Point - 17), new XPoint(33 + displayLength / 2, (int)page.Height.Point - 19));
                 gfx.DrawLine(XPens.Black, new XPoint(33 + displayLength, (int)page.Height.Point - 15), new XPoint(33 + displayLength, (int)page.Height.Point - 21));
                 this.drawText(gfx, displayText, 38 + displayLength, (int)page.Height.Point - 16, 8);
-
-
-
-
-
-
+                
                 var y = (int)page.Height.Point - 2;
 
                 this.drawText(gfx, infoText, 33, y, 8);
-
-
-
-
-
-
 
                 int i = 0;
                 copyrights.ForEach(copyright =>

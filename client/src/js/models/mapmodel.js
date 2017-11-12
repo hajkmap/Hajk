@@ -71,6 +71,12 @@ var MapModel = {
     } else {
       isMobile = document.body.clientWidth <= 600;
     }
+
+    infologo = null;
+    if(typeof options.infologo !== 'undefined') {
+      infologo = options.infologo;
+    }
+
     var app = window.app;
     var map = new ol.Map({
       interactions: ol.interaction.defaults().extend([new Drag()]),

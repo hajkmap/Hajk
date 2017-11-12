@@ -30,6 +30,7 @@ var defaultState = {
   index: 0,
   onMap: false,
   selectionTools: true,
+  base64Encode: false,
   filterVisible: true,
   displayPopup: true,
   maxZoom: 14,
@@ -61,6 +62,7 @@ class ToolOptions extends Component {
         index: tool.index,
         onMap: tool.options.onMap,
         selectionTools: tool.options.selectionTools,
+        base64Encode: tool.options.base64Encode,
         filterVisible: tool.options.filterVisible,
         displayPopup: tool.options.displayPopup,
         maxZoom: tool.options.maxZoom,
@@ -137,6 +139,7 @@ class ToolOptions extends Component {
         excelExportUrl: this.state.excelExportUrl,
         displayPopup: this.state.displayPopup,
         selectionTools: this.state.selectionTools,
+        base64Encode: this.state.base64Encode,
         filterVisible: this.state.filterVisible,
         anchor: [this.state.anchorX, this.state.anchorY],
         imgSize: [this.state.imgSizeX, this.state.imgSizeY],
@@ -245,6 +248,15 @@ class ToolOptions extends Component {
               onChange={(e) => {this.handleInputChange(e)}}
               checked={this.state.selectionTools}/>&nbsp;
             <label htmlFor="selectionTools">Verktyg för ytsökning</label>
+          </div>
+          <div>
+            <input
+              id="Base64-active"
+              name="base64Encode"
+              type="checkbox"
+              onChange={(e) => {this.handleInputChange(e)}}
+              checked={this.state.base64Encode}/>&nbsp;
+            <label htmlFor="Base64-active">Base64-encoding aktiverad</label>
           </div>
           <div>
             <label htmlFor="maxZoom">Zoomnivå</label>

@@ -58,7 +58,7 @@ const defaultState = {
   infoTitle: "",
   infoText: "",
   infoUrl: "",
-  infoOwner: ""
+  infoOwner: "",
   searchGeometryField: "",
   attribution: "",
   solpopup: solpop
@@ -281,7 +281,7 @@ class WMSLayerForm extends Component {
       infoTitle: this.getValue("infoTitle"),
       infoText: this.getValue("infoText"),
       infoUrl: this.getValue("infoUrl"),
-      infoOwner: this.getValue("infoOwner")
+      infoOwner: this.getValue("infoOwner"),
       searchGeometryField: this.getValue("searchGeometryField"),
       attribution: this.getValue("attribution"),
       solpopup: this.getValue("solpopup")

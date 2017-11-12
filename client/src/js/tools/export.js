@@ -70,6 +70,8 @@ var ExportModelProperties = {
   tiffActive: true,
   copyright: "© Lantmäteriverket i2009/00858",
   activeTool: '',
+  base64Encode: false,
+  autoScale: false,
   scales: [250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000]
 };
 
@@ -778,12 +780,17 @@ var ExportModel = {
     data.proxyUrl = this.get('proxyUrl');
 
     this.set("downloadingPdf", true);
-
+    var dataString = '';
+    if (this.get('base64Encode')){
+      dataString = btoa(JSON.stringify(data));
+    } else {
+      dataString = JSON.stringify(data);
+    }
     $.ajax({
         url: url,
         method: "post",
         data: {
-          json: btoa(JSON.stringify(data))
+          json: dataString
         },
         format: "json",
         success: (url) => {
@@ -843,12 +850,17 @@ var ExportModel = {
     data.scale = scale;
     data.proxyUrl = this.get('proxyUrl');
     this.set("downloadingTIFF", true);
-
+    var dataString = '';
+    if (this.get('base64Encode')){
+      dataString = btoa(JSON.stringify(data));
+    } else {
+      dataString = JSON.stringify(data);
+    }
     $.ajax({
         url: url,
         method: "post",
         data: {
-          json: btoa(JSON.stringify(data))
+          json: dataString
         },
         format: "json",
         success: (url) => {

@@ -145,7 +145,7 @@ var RoutingModel = {
       this.set('onStartKey', this.get('map').on('singleclick', this.startPointSelection.bind(this)));
     }
 
-    if (isMobile()) {
+    if (isMobile) {
       this.props.navigationPanel.minimize();
     }
   },
@@ -169,7 +169,7 @@ var RoutingModel = {
       this.set('routeFinished', false);
     }
 
-    if (isMobile()) {
+    if (isMobile) {
       this.props.navigationPanel.minimize();
     }
   },

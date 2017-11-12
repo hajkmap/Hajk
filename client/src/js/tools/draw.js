@@ -104,6 +104,7 @@ var DrawModelProperties = {
   polygonLineStyle: "solid",
   polygonFillColor: "rgb(255, 255, 255)",
   polygonFillOpacity: 0.5,
+  base64Encode: false,
   scetchStyle: [
     new ol.style.Style({
     fill: new ol.style.Fill({
@@ -579,13 +580,16 @@ var DrawModel = {
     });
 
     postData = kmlWriter.createXML(transformed, "ritobjekt");
+    if(this.get('base64Encode')){
+      postData = btoa(postData);
+    }
 
     this.set("downloadingDrawKml", true);
     $.ajax({
       url: this.get('exportUrl'),
       method: "post",
       data: {
-        json: btoa(postData)
+        json: postData
       },
       format: "json",
       success: (url) => {

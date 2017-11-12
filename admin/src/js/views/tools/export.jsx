@@ -31,6 +31,7 @@ var defaultState = {
   exportTiffUrl: "/mapservice/export/tiff",
   pdfActive: true,
   tiffActive: true,
+  base64Encode: false,
   scales: [
     250,
     500,
@@ -66,6 +67,7 @@ class ToolOptions extends Component {
         exportTiffUrl: tool.options.exportTiffUrl,
         tiffActive: tool.options.tiffActive,
         pdfActive: tool.options.pdfActive,
+        base64Encode: tool.options.base64Encode,
         proxyUrl: tool.options.proxyUrl
       });
     } else {
@@ -128,6 +130,7 @@ class ToolOptions extends Component {
         exportTiffUrl: this.state.exportTiffUrl,
         pdfActive: this.state.pdfActive,
         tiffActive: this.state.tiffActive,
+        base64Encode: this.state.base64Encode,
         scales: this.state.scales,
         proxyUrl: this.state.proxyUrl
       }
@@ -223,6 +226,15 @@ class ToolOptions extends Component {
               onChange={(e) => {this.handleInputChange(e)}}
               checked={this.state.tiffActive}/>&nbsp;
             <label htmlFor="tiff-active">TIFF aktiverad</label>
+          </div>
+          <div>
+            <input
+              id="Base64-active"
+              name="base64Encode"
+              type="checkbox"
+              onChange={(e) => {this.handleInputChange(e)}}
+              checked={this.state.base64Encode}/>&nbsp;
+            <label htmlFor="Base64-active">Base64-encoding aktiverad</label>
           </div>
           <div>
             <label htmlFor="proxyUrl">Proxy URL till utskrift och export</label>

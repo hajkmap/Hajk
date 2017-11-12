@@ -29,6 +29,7 @@ var defaultState = {
   index: 0,
   exportUrl: "/mapservice/export/kml",
   importUrl: "/mapservice/import/kml",
+  base64Encode: false,
   icons: ""
 };
 
@@ -50,6 +51,7 @@ class ToolOptions extends Component {
         index: tool.index,
         exportUrl: tool.options.exportUrl,
         importUrl: tool.options.importUrl,
+        base64Encode: tool.options.base64Encode,
         icons: tool.options.icons
       });
     } else {
@@ -110,6 +112,7 @@ class ToolOptions extends Component {
       "options": {
         exportUrl: this.state.exportUrl,
         importUrl: this.state.importUrl,
+        base64Encode: this.state.base64Encode,
         icons: this.state.icons
       }
     };
@@ -186,6 +189,15 @@ class ToolOptions extends Component {
           <div>
             <label htmlFor="importUrl">URL till import-tjänst</label>
             <input value={this.state.importUrl} type="text" name="importUrl" onChange={(e) => {this.handleInputChange(e)}}></input>
+          </div>
+          <div>
+            <input
+              id="Base64-active"
+              name="base64Encode"
+              type="checkbox"
+              onChange={(e) => {this.handleInputChange(e)}}
+              checked={this.state.base64Encode}/>&nbsp;
+            <label htmlFor="Base64-active">Base64-encoding aktiverad</label>
           </div>
           <div>
             <label htmlFor="icons">Ikoner</label>

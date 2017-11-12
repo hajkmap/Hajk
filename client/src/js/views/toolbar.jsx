@@ -55,12 +55,10 @@ var ToolbarView = {
    * @return {external:ReactElement}
    */
   render: function () {
-    console.log('render toolbar');
     var layerSwitcherTool = this.props.model
       .filter(t => t.get('toolbar'))
       .filter(tool => tool.get('type') === 'layerswitcher')
       .map((tool, index) => {
-        console.log('tool');
         tool.set('toolbar', isMobile ? 'stable' : 'bottom');
       });
 

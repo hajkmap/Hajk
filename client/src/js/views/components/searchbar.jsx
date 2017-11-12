@@ -94,22 +94,10 @@ var SearchBarView = {
     var s = paramGet('s');
     var v = paramGet('v');
 
-    console.log(s);
-    console.log(v);
-/*
-    if (s == 'adress') {
-      this.props.model.set('filter', 'Adress');
-    }else if (s == 'fastighet'){
-      this.props.model.set('filter', 'Fastighet');
-    } else {
-      this.props.model.set('filter', '*');
-    }
-*/
     if(s == null){
       this.props.model.set('filter', '*');
     }else{
       var filterName = '*';
-      console.log('trying to find filter, ' + s);
       this.props.model.get('sources').map((wfslayer, i) => {
       if(s.toUpperCase() == wfslayer.caption.toUpperCase()){
         filterName = wfslayer.caption;
@@ -118,13 +106,9 @@ var SearchBarView = {
       this.props.model.set('filter', filterName);
     }
 
-    console.log(this.state.haveUrlSearched);
-    console.log(v);
     if((!this.state.haveUrlSearched) && typeof v !== 'undefined') {
-      console.log('will url search');
       var field = document.getElementById("searchbar-input-field");
       field.value = v;
-      console.log(this);
 
       this.value = v;
       this.props.model.set('value', this.value);
@@ -145,7 +129,6 @@ var SearchBarView = {
   },
 
   componentDidUpdate: function(){
-    console.log('update');
 
     var hit = document.getElementById('hit-0-group-0');
     if (!this.state.haveUrlSearched){
@@ -268,7 +251,7 @@ var SearchBarView = {
   bindLayerVisibilityChange : function () {
     this.props.model.get('layerCollection').each((layer) => {
       layer.on("change:visible", () => {
-        this.update();
+        //this.update(); // causes a search to be done everytime a layer's visibility changes. Then it only searches in adresser and fastighet
       });
     });
   },
@@ -278,6 +261,7 @@ var SearchBarView = {
    * @instance
    * @param {string} type
    * @param {object} event
+   *
    */
   setFilter: function (event) {
     this.props.model.set('filter', event.target.value);

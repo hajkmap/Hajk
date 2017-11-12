@@ -34,7 +34,15 @@ namespace MapService.Models
 
         public string logo { get; set; }
 
+        public string infologo { get; set; }
+
+        public string mobileleft { get; set; }
+
+        public string mobileright { get; set; }
+
         public string pil { get; set; }
+
+        public bool mobile { get; set; }
 
         public Colors colors { get; set; }
     }

@@ -152,7 +152,7 @@ class ToolOptions extends Component {
       information: "Om kartan",
       search: "Sök",
       streetview: "Google Street View",
-      preset: "Snabbval"
+      preset: "Snabbval",
       location: "Visa min position",
       routing: "Navigation"
     };

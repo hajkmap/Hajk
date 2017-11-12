@@ -78,7 +78,6 @@ var BookmarkModel = {
           bookmarks = JSON.parse(bookmarks);
         } catch (e) {
           bookmarks = [];
-          console.log("Set item");
           localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
         }
       } else {
@@ -184,7 +183,6 @@ var BookmarkModel = {
    * @param {function} callback - Fn to be called when the removal is complete.
    */
   removeBookmark: function(name, callback) {
-    console.log(name);
       var bookmarks = this.getBookmarks();
 
       bookmarks = bookmarks.filter(bookmark => bookmark.name !== name);

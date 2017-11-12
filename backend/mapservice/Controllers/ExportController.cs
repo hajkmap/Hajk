@@ -66,31 +66,24 @@ namespace MapService.Controllers
         [HttpPost]
         public string PDF(string json)
         {
-            _log.DebugFormat("Received Base64: " + json);
-            // string path = @"C:\\log.txt";
-            // Response.AppendToLog("Test");
-
-            // using (StreamWriter sw = new StreamWriter(path, true))
-            // {
-            //     sw.WriteLine("Received JSON. " + json);
-            // }
-
+            
             try
             {
-                _log.DebugFormat("Parsing the Base64 string");
-                byte[] data = Convert.FromBase64String(json);
-                json = System.Text.Encoding.UTF8.GetString(data);
-                _log.DebugFormat("Received JSON: " + json.ToString());
+                _log.DebugFormat("Received json: " + json);
+                try
+                {
+                    byte[] decoded = Convert.FromBase64String(json);
+                    json = System.Text.Encoding.UTF8.GetString(decoded);
+                    _log.DebugFormat("json after decode: " + json);
+                }
+                catch (Exception e)
+                { }
 
                 MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
-                _log.DebugFormat("deserialized the json");
                 AsyncManager.OutstandingOperations.Increment();
                 PDFCreator pdfCreator = new PDFCreator();
-                _log.DebugFormat("Inited pdfcreator");
                 byte[] blob = pdfCreator.Create(exportItem);
-                _log.DebugFormat("created blob in pdfcreator");
                 string[] fileInfo = byteArrayToFileInfo(blob, "pdf");
-                _log.DebugFormat("Created fileinfo: " + fileInfo[1]);
 
                 //if (exportItem.proxyUrl != "")
                 //{
@@ -123,8 +116,15 @@ namespace MapService.Controllers
         [HttpPost]
         public string TIFF(string json)
         {
-            byte[] data = Convert.FromBase64String(json);
-            json = System.Text.Encoding.UTF8.GetString(data);
+            _log.DebugFormat("Received json: " + json);
+            try
+            {
+                byte[] decoded = Convert.FromBase64String(json);
+                json = System.Text.Encoding.UTF8.GetString(decoded);
+                _log.DebugFormat("json after decode: " + json);
+            }
+            catch (Exception e)
+            { }
             MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
                                     
             TIFFCreator tiffCreator = new TIFFCreator();
@@ -179,8 +179,15 @@ namespace MapService.Controllers
         [ValidateInput(false)]
         public string KML(string json)
         {
-            byte[] data = Convert.FromBase64String(json);
-            json = System.Text.Encoding.UTF8.GetString(data);
+            _log.DebugFormat("Received json: " + json);
+            try
+            {
+                byte[] decoded = Convert.FromBase64String(json);
+                json = System.Text.Encoding.UTF8.GetString(decoded);
+                _log.DebugFormat("json after decode: " + json);
+            } catch(Exception e)
+            { }
+            
             KMLCreator kmlCreator = new KMLCreator();
             byte[] bytes = kmlCreator.Create(json);
             string[] fileInfo = byteArrayToFileInfo(bytes, "kml");
@@ -206,8 +213,15 @@ namespace MapService.Controllers
         [HttpPost]
         public string Excel(string json)
         {
-            byte[] dataJson = Convert.FromBase64String(json);
-            json = System.Text.Encoding.UTF8.GetString(dataJson);
+            _log.DebugFormat("Received json: " + json);
+            try
+            {
+                byte[] decoded = Convert.FromBase64String(json);
+                json = System.Text.Encoding.UTF8.GetString(decoded);
+                _log.DebugFormat("json after decode: " + json);
+            }
+            catch (Exception e)
+            { }
             List<ExcelTemplate> data = JsonConvert.DeserializeObject<List<ExcelTemplate>>(json);
             DataSet dataSet = Util.ToDataSet(data);
             ExcelCreator excelCreator = new ExcelCreator();

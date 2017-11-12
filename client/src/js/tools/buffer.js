@@ -200,10 +200,6 @@ var BufferModel = {
 
     this.get('marker').setGeometry(new ol.geom.Point(event.coordinate));
 
-
-    //var test = ol.proj.transform(startPoint.getGeometry().getCoordinates(), 'EPSG:3007', 'EPSG:4326');
-    //console.log(test);
-    //var lonlat = startPoint.getGeometry().getCoordinates();
     var lonlat = ol.proj.transform(this.get('marker').getGeometry().getCoordinates(), 'EPSG:3007', 'EPSG:4326');
   },
 
@@ -303,7 +299,6 @@ var BufferModel = {
   },
 
   getFeaturesWithinRadius: function(layers){
-
     var requestPrefix = '<wfs:GetFeature\n' +
     '         service = \'WFS\'\n' +
     '         version = \'1.1.0\'\n' +
@@ -327,7 +322,6 @@ var BufferModel = {
     }
 
     var wfsRequset = requestPrefix + queries + requestSuffix;
-    //console.log(wfsRequset);
 
     // Do Ajax call
     $.ajax({

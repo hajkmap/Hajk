@@ -237,7 +237,6 @@ var ExportPdfSettings = React.createClass({
 
     this.props.model.addPreview(scale, paper, center);
 
-    console.log(scale);
 
     var preScale = undefined;
 
@@ -276,10 +275,9 @@ var ExportPdfSettings = React.createClass({
         preScale = map.getView().getZoom();
         break;
     }
-    if(isMobile && mobilAnpassningEnabled && preScale < map.getView().getZoom()){
+    if(this.props.model.get('autoScale') && isMobile && mobilAnpassningEnabled && preScale < map.getView().getZoom()){
       map.getView().setZoom(preScale);
     }
-    console.log(map);
   },
 
   exportPDF: function () {
