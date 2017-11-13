@@ -48,7 +48,8 @@ class MapOptions extends Component {
         projection: config.projection,
         zoom: config.zoom,
         center: config.center,
-        logo: config.logo
+        logo: config.logo,
+        extent: config.extent
       });
     });
     this.validate();
@@ -75,6 +76,7 @@ class MapOptions extends Component {
     this.state.zoom = mapConfig.zoom;
     this.state.center = mapConfig.center;
     this.state.logo = mapConfig.logo;
+    this.state.extent = mapConfig.extent;
   }
 
   getValue(fieldName) {
@@ -91,6 +93,7 @@ class MapOptions extends Component {
     ,   value = input ? input.value : "";
 
     if (fieldName === 'center') value = value.split(',');
+    if (fieldName === 'extent') value = value.split(',');
 
     return value;
   }
@@ -185,6 +188,7 @@ class MapOptions extends Component {
       config.zoom = this.getValue('zoom');
       config.center = this.getValue('center');
       config.logo = this.getValue('logo');
+      config.extent = this.getValue('extent');
       this.props.model.updateMapConfig(config, success => {
         var msg = success
         ? "Uppdateringen lyckades."
@@ -284,6 +288,18 @@ class MapOptions extends Component {
                 onChange={(e) => {
                   this.setState({logo: e.target.value});
                   this.validateField("logo");
+                }}
+              />
+            </div>
+            <div>
+              <label>Extent (bounding box)</label>
+              <input
+                type="text"
+                ref="input_extent"
+                value={this.state.extent}
+                className={this.getValidationClass("extent")}
+                onChange={(e) => {
+                  this.setState({extent: e.target.value});
                 }}
               />
             </div>
