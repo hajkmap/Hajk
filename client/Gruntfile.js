@@ -241,6 +241,7 @@ module.exports = function (grunt) {
         debug: {
           options: {
             livereload: true,
+            hostname: 'localhost',
             port: 3000,
             base: 'dist'
           }
