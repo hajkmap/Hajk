@@ -562,7 +562,7 @@ class ArcGISLayerForm extends Component {
                   this.setState({infoTitle: e.target.value});
                   this.validateField("infoTitle", e);
                 }}
-                value={this.state.infoTitle ? this.state.infotitle : this.state.caption}
+                value={this.state.infoTitle}
                 className={this.getValidationClass("infoTitle")}
             />
           </div>

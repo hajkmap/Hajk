@@ -40,7 +40,8 @@ var MapModelProperties = {
   target: "map",
   projection: "EPSG:3006",
   ol: undefined,
-  clicked: undefined
+  clicked: undefined,
+  extent: undefined
 };
 
 /**
@@ -74,7 +75,8 @@ var MapModel = {
         units: 'm',
         resolutions: this.get('resolutions'),
         center: this.get("center"),
-        projection: ol.proj.get(this.get('projection'))
+        projection: ol.proj.get(this.get('projection')),
+        extent: this.get('extent').length != 0 ? this.get('extent') : undefined
       })
     });
     this.set("ol", map);

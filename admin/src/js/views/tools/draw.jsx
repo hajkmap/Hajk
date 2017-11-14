@@ -29,7 +29,8 @@ var defaultState = {
   index: 0,
   exportUrl: "/mapservice/export/kml",
   importUrl: "/mapservice/import/kml",
-  icons: ""
+  icons: "",
+  proxyUrl: ""
 };
 
 class ToolOptions extends Component {
@@ -50,7 +51,8 @@ class ToolOptions extends Component {
         index: tool.index,
         exportUrl: tool.options.exportUrl,
         importUrl: tool.options.importUrl,
-        icons: tool.options.icons
+        icons: tool.options.icons,
+        proxyUrl: tool.options.proxyUrl
       });
     } else {
       this.setState({
@@ -110,7 +112,8 @@ class ToolOptions extends Component {
       "options": {
         exportUrl: this.state.exportUrl,
         importUrl: this.state.importUrl,
-        icons: this.state.icons
+        icons: this.state.icons,
+        proxyUrl: this.state.proxyUrl
       }
     };
 
@@ -190,6 +193,10 @@ class ToolOptions extends Component {
           <div>
             <label htmlFor="icons">Ikoner</label>
             <input value={this.state.icons} type="text" name="icons" onChange={(e) => {this.handleInputChange(e)}}></input>
+          </div>
+          <div>
+            <label htmlFor="proxyUrl">Proxy URL till utskrift och export</label>
+            <input value={this.state.proxyUrl} type="text" name="proxyUrl" onChange={(e) => {this.handleInputChange(e)}}></input>
           </div>
         </form>
       </div>
