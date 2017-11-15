@@ -1,107 +1,263 @@
 # Hajk
-Uppdaterad: 2016-11-25
+Uppdaterad: 2017-10-26
 
-Detta är ett projekt som drivs av Stadsbyggnadskontoret Göteborgs Stad.  
+## Innehåll
+- [Hajk](#hajk)
+  - [Innehåll](#inneh%C3%A5ll)
+  - [Installation](#installation)
+    - [Installera Git](#installera-git)
+    - [Installera Node.js](#installera-nodejs)
+    - [Installera Grunt](#installera-grunt)
+    - [Installera Visual Studio Community Edition](#installera-visual-studio-community-edition)
+    - [Ladda ner koden](#ladda-ner-koden)
+  - [Kompilering](#kompilering)
+    - [Första gången projektet klonas](#f%C3%B6rsta-g%C3%A5ngen-projektet-klonas)
+      - [Installera beroenden](#installera-beroenden)
+      - [Paketera externa bibliotek](#paketera-externa-bibliotek)
+    - [Vanligt byggförfarande](#vanligt-byggf%C3%B6rfarande)
+      - [Bygg klientdelen](#bygg-klientdelen)
+      - [Bygg admindelen](#bygg-admindelen)
+      - [Bygg backend-delen (servern)](#bygg-backend-delen-servern)
+  - [Driftsättning](#drifts%C3%A4ttning)
+    - [Förberedelser](#f%C3%B6rberedelser)
+      - [Skapa huvudmapp för applikationen](#skapa-huvudmapp-f%C3%B6r-applikationen)
+      - [Flytta och skapa mappar och filer](#flytta-och-skapa-mappar-och-filer)
+      - [Flytta proxy-filer](#flytta-proxy-filer)
+      - [Kontrollera att allt kom med](#kontrollera-att-allt-kom-med)
+      - [Sätt rätt behörigheter på filer och mappar](#s%C3%A4tt-r%C3%A4tt-beh%C3%B6righeter-p%C3%A5-filer-och-mappar)
+    - [Uppsättning i IIS](#upps%C3%A4ttning-i-iis)
+      - [Mime-typer](#mime-typer)
+  - [Konfiguration](#konfiguration)
+    - [Klient](#klient)
+    - [Administrationsgränssnitt](#administrationsgr%C3%A4nssnitt)
+      - [Applikation](#applikation)
+      - [layermanager](#layermanager)
+      - [search](#search)
+      - [edit](#edit)
+    - [mapsettings](#mapsettings)
+      - [router](#router)
+    - [Tjänst](#tj%C3%A4nst)
+
+Hajk är ett projekt som drivs av Stadsbyggnadskontoret Göteborgs Stad.  
 Systemutvecklare är i huvudsak Sweco Position.  
-Projektet drivs som ett samarbetsprojekt och är avsett att kunna återanvändas för generalla GIS-applikationer för webb.  
-Licensformen bygger på en öppen samarbetslicens. (CC BY SA NC).  
 
-Koden består av två delar; en serverdel och en klientdel. Serverdelen är programmerad i Microsoft .NET med tekniken WCF och kodspråket C#.  
-Klientdelen är programmerad i JavaScript 2015. Kommunikationen mellan klient och server sker via HTTP och är RESTful implementerad.  
+Projektet drivs som ett samarbetsprojekt och är avsett att kunna användas för generalla GIS-applikationer för webb.
 
-Klienten innehåller två separata applikationer, en kartvy och en administrationsvy.  
+Licensformen bygger på en öppen samarbetslicens. (CC BY SA NC).
 
-JavaScript byggs i applikationen med hjälp av uppgiftshanteraren Grunt.  
-För att bygga projetketet så krävs programvarorna Visual Studio och Node JS.
+Applikationen består av två delar: en serverdel och en klientdel. Serverdelen är programmerad i .NET med tekniken WCF och kodspråket C#. Klientdelen är skriven i JavaScript (ES2015). Kommunikationen mellan klient och server sker via HTTP enligt REST.
+
+Klienten innehåller två separata webbapplikationer: en kartvy och en administrationsvy.
+
+Serverdelen byggs i Visual Studio och driftsätts i IIS. Klientdelen (med de två vyerna, karta och administation) bygger på Node.js och nyttjar ett flertal NPM-paket (exempelvis React och Babel) samt byggs med hjälp av uppgiftshanteraren Grunt. Källkoden versionshanteras i Git och finns tillgänglig på Github.
+
+Härefter redogörs tillvägagångssättet för att installera Hajk, inklusive installation av de nödvändiga programmen (Visual Studio Community Edition och Node.js).
+
+---
 
 ## Installation
 
-### Ladda hem koden
-Börja med att Installera GIT om det inte redan är gjort.  
-[https://git-scm.com/download/win](https://git-scm.com/download/win "Länk")  
-Säkerställ under installationen att git installeras globalt för windows och läggs till i PATH.  
-Verifiera installationen genom starta kommandopromten och skriva:  
-`git --version`
+### Installera Git
+Börja med att installera Git om det inte redan är gjort. Ladda ner en version för ditt operativsystem från https://git-scm.com/download/win. Installera med default-inställningar. Därmed bör Git installeras globalt för Windows och läggas till i `$PATH` .
 
-Skriv därefter till exempel:  
-`cd c:\Projekt`  
-för att gå till lokal projektmapp.  
+Starta en kommandoprompt, exempelvis cmd, Windows Powershell eller Git Bash. Verifiera installationen genom kontrollera vilken version av Git som har installerats:  
+```bash
+git --version
+```
 
-Ange följande kommando för att ladda hem koden:  
-`git clone https://github.com/hajkmap/hajk.git`  
+>Tips: du kan med fördel använda den kommandoprompt som installerades med Git. Sök i Windows startmeny efter `Git Bash`, starta den, och verifiera installationen genom att skriva kommandot ovan. 
+>
+>Fördelen med Git Bash är att du har tillgång till vanliga Unix-kommandon som `ls`, `pwd`, med flera, samt en fungerande auto-komplettering (börja skriva en sökväg och tryck på `TAB` för att testa). Dessutom finns Git med all säkerhet i `$PATH` när du använder Git Bash.
 
-### Installera Node JS
-För att installera node gå till [https://nodejs.org/en/](https://nodejs.org/en/ "länk").
-Ladda hem och installera den version som är markerad som Stable.
+### Installera Node.js
+Gå till https://nodejs.org och ladda ner och installera den aktuella versionen (i skrivande stund Node 8).
 
-Verifiera installationen genom starta kommandopromten och skriva:  
-`node --version`
+Verifiera installationen genom starta kommandoprompten och skriva:  
+```bash
+node --version
+```
+
+### Installera Grunt
+Grunt är en NPM-modul som används till att "bygga" klient- och admindelen av källkoden. Därför måste Grunt installeras nu, för att kunna användas senare:
+
+```bash
+npm i -g grunt-cli
+```
+
+>Tips: Flaggan `-g` i kommandot ovan anger att NPM ska installera paketet globalt, istället för enbart i nuvarande projekt (vilket är default). 
+
+>Info: Kommandot `i` ovan är förkortning av `install`. Du kan således även skriva `npm install -g grunt-cli`, men det kan vara bra att känna till detta kortkommando. 
 
 ### Installera Visual Studio Community Edition
-För att installera visual studio gå till [https://www.visualstudio.com/post-download-vs?sku=community&clcid=0x409](https://www.visualstudio.com/post-download-vs?sku=community&clcid=0x409 "länk.")
+För att installera Visual Studio gå till https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15, ladda ner och installera programmet. Det finns många val som kan göras här med det som är nödvändigt för Hajk är att ASP.NET-komponenterna installeras.
 
-## Driftsättning
-### Första gången projektet klonas.
+### Ladda ner koden
+När alla nödvändiga programmen är på plats kan du ladda ner själva källkoden för projektet och börja arbeta med den. 
+
+Skapa en mapp där du kommer arbeta med Hajk, exempelvis `C:\projekt`. 
+```bash
+cd C:
+mkdir projekt
+cd projekt
+```
+Nu är du inne i den nyskapade mappen. Nästa steg är att ladda ner aktuell version av källkoden från Github:
+
+```bash
+git clone https://github.com/hajkmap/Hajk.git
+```
+När kommandot är färdigt har du en ny mapp, `C:\projekt\Hajk` där du hittar den aktuella källkoden.
+
+---
+
+## Kompilering
+
+### Första gången projektet klonas
+>Info: efter den första kloningen (`git clone`-kommandot ovan) behöver nödvändiga paket som Hajk är beroende av att installeras av NPM (Node Package Manager). Därefter måste beroendena paketeras med hjälp av Grunt. Följ därför instruktioner under rubrikerna *Installera beroenden* och *Paketera externa bibliotek*. Därefter, fortsätt till *Vanligt byggförfarande*.
+
 #### Installera beroenden
-`cd c:\Projekt\Hajk\client`  
-`npm install`  
-`cd c:\Projekt\Hajk\admin`  
-`npm install`
+```bash
+cd C:\projekt\Hajk\client
+npm install
+cd ..\admin
+npm install
+```
+>Info: Kommandot `npm install` läser filen `package.json` och installerar de paketen som definieras där som beroenden. Paketen läggs i mappen `node_modules` under respektive del av koden (klient- respektive admindelen).
 
-#### Installera externa bibiliotek
-`cd c:\Projekt\Hajk\client`  
-`grunt dependencies`
+#### Paketera externa bibliotek
+```bash
+cd c:\Projekt\Hajk\client
+grunt dependencies
+```
+>Info: Kommandot `grunt dependencies` bygger ihop ett flertal hjälpbibliotek och paketerar dem till en fil, `dist/js/dependencies.min.js`. 
 
-----------
-#### Driftsättning Klient
-Öppna kommandopromten och gå till projektets mapp:  
-`cd c:\Projekt\Hajk\client`
+---
 
-Bygg version för test. (målmapp: **dist**)  
-`grunt build`
+### Vanligt byggförfarande
 
-Bygg version för driftsättning. (målmapp: **release**)  
-`grunt release`
+#### Bygg klientdelen
+Grunt bygger två versioner av källkoden: en som är lite större men lättare att felsöka, och en som är mer komprimerad och används för skarp drift. Nedan visas hur båda delarna byggs: 
+```bash
+# Öppna kommandoprompten och gå till projektets mapp
+cd c:\projekt\Hajk\client
 
-Starta en lyssnare som lyssnar på ändringar i filsystemet ochg bygger per automatik.  
-`grunt debug`
+# Bygg version för test (målmapp "dist")
+grunt build
 
-#### Driftsättning Admin
-Bygg version för driftsättning/test. (målmapp: **dist**)  
-`cd c:\Projekt\Hajk\admin`  
-`grunt`  
-Detta kommer att skapa en mapp som heter dist. I denna återfinns två html-filer, index.html och debug.html.  
-Kör dessa i lämplig webbserver, debug.html har full sourcemap till jsx. Index.html kör minifierad kod.
+# Bygg version för driftsättning. (målmapp "release")  
+grunt release
+```
 
-#### Driftsättning server
-- Dubbelklicka på **backend.sln**  
-- Markera i Solution Explorer projektet **mapservice**.  
-- Välj från menyn `Build > Build Solution`  
-- Välj från menyn `Build > Publish mapservice`  
-- Ändra sökväg till mappen om så önskas. Standard är c:\install\backend.  
+#### Bygg admindelen
+När admindelen byggs skapas också två versioner: en för test och en för driftsättning. Skillnaden mot klientdelen är att istället för att skapa separata mappar så skapas endast en mapp, `dist`, men den innehåller två filer: `index.html` och `debug.html`. 
 
-### Installera projektet i Internet Information Services (IIS > 7).
+```bash
+# Öppna kommandopromten och gå till projektets mapp
+cd c:\projekt\Hajk\admin
 
-IIS kräver att server applikationen körs i en App Pool med .NET version 4.0 integrated.  
-IIS måste ha mime-typen application/vnd.google-earth.kml+xml registrerad för filändelsen .kml.  
-IIS bör även ha mime-typen font/woff2 registrerad för filändelsen .woff2.  
+# Bygg de två versionerna av admindelen (målmapp "dist")
+grunt
+```
 
-I en driftsättningsmiljö så lägg förslagsvis applikationerna i två seperata mappar.  
-Mapparna bör placeras i en skrivskyddad mapp; tex C:\data\www\hajk.
+#### Bygg backend-delen (servern)
+- Öppna Utforskaren och navigera till mappen som innehåller backend-kod (i det här exemplet, `C:\projekt\Hajk\backend`
+- Dubbelklicka på `MapService.sln`
+- Visual Studio öppnas
+- I `Solution Explorer` markera projektet `MapService`
+- I huvudmenyn, välj  `Build > Build Solution`  
+- Invänta tills kompileringen är klar (du ser status i `Output`-fönstret längst ner, när det står något i stil med `Build: 2 succeeded, 0 failed, 0 up-to-date, 0 skipped` så är det klart)
+- I huvudmenyn, välj  `Build > Publish MapService`  
+- I fönstret som visas nu finns möjlighet att ändra `Target Location`, alltså stället dit backend-applikationen kommer att publiceras. Default-värde är `C:\install\mapservice\`. Du kan låta det vara kvar eller ändra till något annat. Huvudsaken är att du **vet var filerna läggs** för de kommer behövas senare när vi sätter upp webbservern.
 
-Skapa därefter tre undermappar för applikationerna:  
-C:\data\www\hajk -- innehåller innehållet i **client\release**  
-C:\data\www\hajk\backend -- innehåller innehållet i **backend**  
-C:\data\www\hajk\admin -- innehåller innehållet i **admin\release**  
+--- 
+## Driftsättning
 
-Skapa i IIS tre nya applikationer genom att högerklicka på vald site och välja:
+Om du har följt anvisningarna så lång har du de tre *kompilerade* delarna som applikationen utgörs av på följande ställen:
 
-**Lägg till program..**
+| Del     | Plats                           |
+| ------- | ------------------------------- |
+| backend | `C:/install/mapservice`         |
+| admin   | `C:/projekt/Hajk/admin/dist`    |
+| client  | `C:/projekt/Hajk/admin/release` |
 
-För klientapplikationen så kan valfritt namn användas, detta bli sökväg till kartapplikationen.  
-För serverapplikationen så ange Alias: mapservice.  
-För adminapplikationen så kan valfritt namn användas, detta bli sökväg till adminapplikationen.  
-Finns behov av HTTP-proxy för anrop till extern kartserver så finns exempel på detta i mappen proxy.  
+>Observera: som det nämndes tidigare i avsnittet om klientdelen så byggdes den i en drift- och en testversion. För driftsättning nu kommer vi använda den skarpa driftversionen, som alltså ligger i `release`. Men kom ihåg att även testversionen finns, i mappen `dist`, och instruktionerna här fungerar även för den. Byt bara ut mapparna mot varann.
+
+>Info: Projektets backend-del är en .NET-applikation som i Windowsmiljö enklast körs i IIS (version 7 eller senare). Applikationen körs i en App Pool med `.NET version 4.0 integrated`.  
+
+
+### Förberedelser
+
+#### Skapa huvudmapp för applikationen
+Nu kommer vi gå vidare med att sätta upp projektet i IIS. Huvudmappen som IIS kommer gå mot i det här exemplet är `C:/wwwroot`. Om du vill följa anvisningarna exakt, skapa en sådan mapp på den datorn du avser sätta upp Hajk på.
+
+#### Flytta och skapa mappar och filer
+Flytta hela mappar enligt tabell nedan:
+
+| Från                            | Till                    |
+| ------------------------------- | ----------------------- |
+| `C:/install/mapservice`         | `C:/wwwroot/mapservice` |
+| `C:/projekt/Hajk/admin/dist`    | `C:/wwwroot/admin`      |
+| `C:/projekt/Hajk/admin/release` | `C:/wwwroot/client`     |
+
+Nu har `C:/wwwroot` tre undermappar. Men vi ska göra ett till ingrepp. 
+
+Gå in i mappen `C:/wwwroot/client`. Markera alla mappar och filer inuti (förslagsvis genom att trycka `Ctrl+A` i Windows utforskare) och klipp ut markeringen (`Ctrl+X`). Gå upp en nivå (så du nu står i `C:/wwwroot`) och klistra in (`Ctrl+V`). När flytten är klar kan du radera den nu tomma mappen `client`. 
+
+Därefter, skapa tre till mappar i `C:/wwwroot` och döp dem till `util`, `Temp` och `Upload` (var noga med stora och små bokstäver).
+
+#### Flytta proxy-filer
+En GET-proxy som kan användas av klienten ska läggas i den nyligen skapade mappen `util`. Ta innehållet från `C:/projekt/Hajk/proxy/mvc` och flytta till mappen `C:/wwwroot/util`.
+
+Det finns även en POST-proxy som kan användas av klienten. Flytta filerna `postproxy.aspx` och `postproxy.aspx.cs` från `C:/projekt/Hajk/proxy/aspnet` direkt till huvudmappen `C:/wwwroot`.
+
+#### Kontrollera att allt kom med
+Nu bör `C:/wwwroot` innehålla följande filer och mappar:
+
+| Innehåll i `wwwroot` |
+| -------------------- |
+| `admin/`             |
+| `assets/`            |
+| `fonts/`             |
+| `js/`                |
+| `mapservice/`        |
+| `Temp/`              |
+| `Upload/`            |
+| `util/`              |
+| `index.html`         |
+| `postproxy.aspx`     |
+| `postproxy.aspx.cs`  |
+
+#### Sätt rätt behörigheter på filer och mappar
+För att webbservern ska kunna skriva till vissa mappar i vår huvudmapp behöver rätt behörighet sättas.
+
+Specifikt är det den användaren som IIS App Pool körs på (mer om det i nästa avsnitt) som ska ha skrivbehörighet till mapparna:
+
+| Mappnamn              |
+| --------------------- |
+| `mapservice/App_Data` |
+| `Temp/`               |
+| `Upload/`             |
+
+Som standard heter IIS användare *IIS_IUSRS*. Ge därför *skrivbehörighet* för de tre ovanstående mappar till IIS_IUSRS.
+
+### Uppsättning i IIS
+1. Öppna Internet Information Services (IIS)-hanteraren 
+1. I vänsterpanelen, högerklicka på Webbplatser och välj Lägg till webbplats
+1. Ange ett namn (t ex "Hajk"). Välj en programpool vars egenskaper är *.NET 4.0 - Pipeline: Integrated*
+1. Som fysisk sökväg ska du peka ut vår huvudmapp, dvs `C:/wwwroot`
+1. Skapa en bindning från exempelvis `localhost` på port 80. För fler inställningar och uppsättning så att tjänsten är åtkomlig "utifrån" rekommenderas att ta kontakt med en it-administatör i din organisation. De kan vara behjälpliga med diverse andra inställningar som är viktiga vid skarp drift, som till exempel säkra anslutningar över HTTPS.
+
+När detta steg är utfört visas mappstrukturen i IIS. Expandera den nyaskapade webbplatsen så du ser alla mappar som ligger i den. Nu måste även mapparna admin, mapservice och util registreras som .NET-applikationer. Det görs enkelt genom att högerklicka på respektive mapp och välja `Konvertera till program`. 
+
+#### Mime-typer
+För att Hajk ska fungera korrekt bör du säkerställa att följande MIME-typer finns registrerade i IIS:
+
+| Mime-typ                               | Filändelse |
+| -------------------------------------- | ---------: |
+| `application/x-font-woff`              | `.woff`    |
+| `application/x-font-woff2`             | `.woff2`   |
+| `application/vnd.google-earth.kml+xml` | `.kml`     |
+
+MIME-typerna registreras också i IIS-hanteraren. Markera webbplatsen i vänsterpanelen och titta efter *MIME-typer* i huvudfönstret i programmet.
 
 ## Konfiguration
 
