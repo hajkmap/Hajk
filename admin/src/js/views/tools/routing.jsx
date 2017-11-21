@@ -27,7 +27,8 @@ var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
-  instruction: ""
+  apiKey: "",
+  instruction: ''
 };
 
 class ToolOptions extends Component {
@@ -37,7 +38,7 @@ class ToolOptions extends Component {
   constructor() {
     super();
     this.state = defaultState;
-    this.type = "bookmark";
+    this.type = "routing";
   }
 
   componentDidMount() {
@@ -46,6 +47,7 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
+        apiKey: tool.options.apiKey,
         instruction: tool.options.instruction
       });
     } else {
@@ -94,7 +96,6 @@ class ToolOptions extends Component {
       if (t.type === this.type) {
         t.options = tool.options;
         t.index = tool.index;
-        t.instruction = tool.instruction;
       }
     });
   }
@@ -105,7 +106,8 @@ class ToolOptions extends Component {
       "type": this.type,
       "index": this.state.index,
       "options": {
-        "instruction": this.state.instruction
+        apiKey: this.state.apiKey,
+        instruction: this.state.instruction
       }
     };
 
@@ -175,13 +177,12 @@ class ToolOptions extends Component {
               value={this.state.index}/>
           </div>
           <div>
-            <label htmlFor="instruction">Instruktioner</label>
-            <input
-              id="instruction"
-              name="instruction"
-              type="text"
-              onChange={(e) => {this.handleInputChange(e)}}
-              value={this.state.instruction}/>
+            <label htmlFor="apiKey">API-nyckel</label>
+            <input id="apiKey" value={this.state.apiKey} type="text" name="apiKey" onChange={(e) => {this.handleInputChange(e)}}></input>
+          </div>
+          <div>
+            <label htmlFor="instruction">Instruktion</label>
+            <input id="instruction" value={this.state.instruction} type="text" name="instruction" onChange={(e) => {this.handleInputChange(e)}}></input>
           </div>
         </form>
       </div>

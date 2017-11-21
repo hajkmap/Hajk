@@ -27,7 +27,8 @@ var defaultState = {
   validationErrors: [],
   transformations: [],
   active: false,
-  index: 0
+  index: 0,
+  instruction: ""
 };
 
 class ToolOptions extends Component {
@@ -46,6 +47,7 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
+        instruction: tool.options.instruction,
         transformations: tool.options.transformations || []
       });
     } else {
@@ -94,6 +96,7 @@ class ToolOptions extends Component {
       if (t.type === this.type) {
         t.options = tool.options;
         t.index = tool.index;
+        t.instruction = tool.instruction;
       }
     });
   }
@@ -104,6 +107,7 @@ class ToolOptions extends Component {
       "type": this.type,
       "index": this.state.index,
       "options": {
+        "instruction": this.state.instruction,
         transformations: this.state.transformations
       }
     };
@@ -217,6 +221,15 @@ class ToolOptions extends Component {
               onChange={(e) => {this.handleInputChange(e)}}
               value={this.state.index}/>
           </div>
+        <div>
+          <label htmlFor="instruction">Instruktioner</label>
+          <input
+            id="instruction"
+            name="instruction"
+            type="text"
+            onChange={(e) => {this.handleInputChange(e)}}
+            value={this.state.instruction}/>
+        </div>
         <div>
           <div>Transformationer</div>
           {this.renderTransformations()}

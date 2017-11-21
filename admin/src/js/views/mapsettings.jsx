@@ -254,7 +254,8 @@ class Menu extends Component {
       visibleAtStart: true,
       backgroundSwitcherBlack: true,
       backgroundSwitcherWhite: true,
-      toggleAllButton: false
+      toggleAllButton: false,
+      instruction: '',
     };
     this.state = state;
   }
@@ -281,7 +282,8 @@ class Menu extends Component {
           visibleAtStart: this.props.model.get('layerMenuConfig').visibleAtStart,
           backgroundSwitcherBlack: this.props.model.get('layerMenuConfig').backgroundSwitcherBlack,
           backgroundSwitcherWhite: this.props.model.get('layerMenuConfig').backgroundSwitcherWhite,
-          toggleAllButton: this.props.model.get('layerMenuConfig').toggleAllButton
+          toggleAllButton: this.props.model.get('layerMenuConfig').toggleAllButton,
+          instruction: this.props.model.get('layerMenuConfig').instruction
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -443,7 +445,8 @@ class Menu extends Component {
       visibleAtStart: this.state.visibleAtStart,
       backgroundSwitcherBlack: this.state.backgroundSwitcherBlack,
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
-      toggleAllButton: this.state.toggleAllButton
+      toggleAllButton: this.state.toggleAllButton,
+      instruction: this.state.instruction,
     };
 
     var roots = $('.tree-view > ul > li');
@@ -554,6 +557,7 @@ class Menu extends Component {
    */
   saveSettings() {
     this.save(this.parseSettings());
+    console.log(this.parseSettings());
   }
 
   /**
@@ -976,6 +980,15 @@ class Menu extends Component {
                   onChange={(e) => {this.handleInputChange(e)}}
                   checked={this.state.visibleAtStart}/>&nbsp;
                 <label htmlFor="visibleAtStart">Synlig vid start</label>
+              </div>
+              <div>
+                <label htmlFor="instruction">Instruktion</label>
+                <input
+                  id="instruction"
+                  name="instruction"
+                  type="text"
+                  onChange={(e) => {this.handleInputChange(e)}}
+                  value={this.state.instruction}/>
               </div>
               <div>
                 <input

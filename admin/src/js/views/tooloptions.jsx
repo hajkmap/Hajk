@@ -35,6 +35,7 @@ import Location from "./tools/location.jsx";
 import Search from "./tools/search.jsx";
 import StreetView from "./tools/streetview.jsx";
 import Preset from "./tools/preset.jsx";
+import Routing from "./tools/routing.jsx";
 
 var defaultState = {
   activeTool: undefined,

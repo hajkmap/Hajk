@@ -30,7 +30,8 @@ var defaultState = {
   exportUrl: "/mapservice/export/kml",
   importUrl: "/mapservice/import/kml",
   base64Encode: false,
-  icons: ""
+  icons: "",
+  instruction: "",
 };
 
 class ToolOptions extends Component {
@@ -52,7 +53,8 @@ class ToolOptions extends Component {
         exportUrl: tool.options.exportUrl,
         importUrl: tool.options.importUrl,
         base64Encode: tool.options.base64Encode,
-        icons: tool.options.icons
+        icons: tool.options.icons,
+        instruction: tool.options.instruction
       });
     } else {
       this.setState({
@@ -100,6 +102,7 @@ class ToolOptions extends Component {
       if (t.type === this.type) {
         t.options = tool.options;
         t.index = tool.index;
+        t.instruction = tool.instruction;
       }
     });
   }
@@ -113,7 +116,8 @@ class ToolOptions extends Component {
         exportUrl: this.state.exportUrl,
         importUrl: this.state.importUrl,
         base64Encode: this.state.base64Encode,
-        icons: this.state.icons
+        icons: this.state.icons,
+        instruction: this.state.instruction
       }
     };
 
@@ -202,6 +206,15 @@ class ToolOptions extends Component {
           <div>
             <label htmlFor="icons">Ikoner</label>
             <input value={this.state.icons} type="text" name="icons" onChange={(e) => {this.handleInputChange(e)}}></input>
+          </div>
+          <div>
+            <label htmlFor="instruction">Instruktioner</label>
+            <input
+              id="instruction"
+              name="instruction"
+              type="text"
+              onChange={(e) => {this.handleInputChange(e)}}
+              value={this.state.instruction}/>
           </div>
         </form>
       </div>

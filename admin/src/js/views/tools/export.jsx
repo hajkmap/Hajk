@@ -32,6 +32,8 @@ var defaultState = {
   pdfActive: true,
   tiffActive: true,
   base64Encode: false,
+  autoScale: false,
+  instruction: "",
   scales: [
     250,
     500,
@@ -68,7 +70,9 @@ class ToolOptions extends Component {
         tiffActive: tool.options.tiffActive,
         pdfActive: tool.options.pdfActive,
         base64Encode: tool.options.base64Encode,
-        proxyUrl: tool.options.proxyUrl
+        autoScale: tool.options.autoScale,
+        proxyUrl: tool.options.proxyUrl,
+        instruction: tool.options.instruction
       });
     } else {
       this.setState({
@@ -116,6 +120,7 @@ class ToolOptions extends Component {
       if (t.type === this.type) {
         t.options = tool.options;
         t.index = tool.index;
+        t.instruction = tool.instruction;
       }
     });
   }
@@ -131,8 +136,10 @@ class ToolOptions extends Component {
         pdfActive: this.state.pdfActive,
         tiffActive: this.state.tiffActive,
         base64Encode: this.state.base64Encode,
+        autoScale: this.state.autoScale,
         scales: this.state.scales,
-        proxyUrl: this.state.proxyUrl
+        proxyUrl: this.state.proxyUrl,
+        instruction: this.state.instruction
       }
     };
 
@@ -235,6 +242,24 @@ class ToolOptions extends Component {
               onChange={(e) => {this.handleInputChange(e)}}
               checked={this.state.base64Encode}/>&nbsp;
             <label htmlFor="Base64-active">Base64-encoding aktiverad</label>
+          </div>
+          <div>
+            <input
+              id="autoScale-active"
+              name="autoScale"
+              type="checkbox"
+              onChange={(e) => {this.handleInputChange(e)}}
+              checked={this.state.autoScale}/>&nbsp;
+            <label htmlFor="autoScale-active">autoScale av previewLayer för mobil aktiverad</label>
+          </div>
+          <div>
+            <label htmlFor="instruction">Instruktioner</label>
+            <input
+              id="instruction"
+              name="instruction"
+              type="text"
+              onChange={(e) => {this.handleInputChange(e)}}
+              value={this.state.instruction}/>
           </div>
           <div>
             <label htmlFor="proxyUrl">Proxy URL till utskrift och export</label>

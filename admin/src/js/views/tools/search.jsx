@@ -29,8 +29,10 @@ var defaultState = {
   active: false,
   index: 0,
   onMap: false,
+  bothSynlig: false,
   selectionTools: true,
   base64Encode: false,
+  instruction: "",
   filterVisible: true,
   displayPopup: true,
   maxZoom: 14,
@@ -61,8 +63,10 @@ class ToolOptions extends Component {
         active: true,
         index: tool.index,
         onMap: tool.options.onMap,
+        bothSynlig: tool.options.bothSynlig,
         selectionTools: tool.options.selectionTools,
         base64Encode: tool.options.base64Encode,
+        instruction: tool.options.instruction,
         filterVisible: tool.options.filterVisible,
         displayPopup: tool.options.displayPopup,
         maxZoom: tool.options.maxZoom,
@@ -127,12 +131,22 @@ class ToolOptions extends Component {
 
   save() {
 
+    var toolbar = 'bottom';
+    var onMap = this.state.onMap;
+    if(this.state.bothSynlig){
+      toolbar = 'bottom';
+      onMap = true;
+    } else if (onMap){
+      toolbar = '';
+    }
+
     var tool = {
       "type": this.type,
       "index": this.state.index,
       "options": {
-        onMap: this.state.onMap,
-        toolbar: this.state.onMap ? '' : 'bottom',
+        onMap: onMap,
+        bothSynlig: this.state.bothSynlig,
+        toolbar: toolbar,
         maxZoom: this.state.maxZoom,
         markerImg: this.state.markerImg,
         kmlExportUrl: this.state.kmlExportUrl,
@@ -140,6 +154,7 @@ class ToolOptions extends Component {
         displayPopup: this.state.displayPopup,
         selectionTools: this.state.selectionTools,
         base64Encode: this.state.base64Encode,
+        instruction: this.state.instruction,
         filterVisible: this.state.filterVisible,
         anchor: [this.state.anchorX, this.state.anchorY],
         imgSize: [this.state.imgSizeX, this.state.imgSizeY],
@@ -224,6 +239,15 @@ class ToolOptions extends Component {
           </div>
           <div>
             <input
+              id="bothSynlig"
+              name="bothSynlig"
+              type="checkbox"
+              onChange={(e) => {this.handleInputChange(e)}}
+              checked={this.state.bothSynlig}/>&nbsp;
+            <label htmlFor="bothSynlig">Båda snabbsök och sökPanel synlig</label>
+          </div>
+          <div>
+            <input
               id="displayPopup"
               name="displayPopup"
               type="checkbox"
@@ -257,6 +281,15 @@ class ToolOptions extends Component {
               onChange={(e) => {this.handleInputChange(e)}}
               checked={this.state.base64Encode}/>&nbsp;
             <label htmlFor="Base64-active">Base64-encoding aktiverad</label>
+          </div>
+          <div>
+            <label htmlFor="instruction">Instruktioner</label>
+            <input
+              id="instruction"
+              name="instruction"
+              type="text"
+              onChange={(e) => {this.handleInputChange(e)}}
+              value={this.state.instruction}/>
           </div>
           <div>
             <label htmlFor="maxZoom">Zoomnivå</label>
