@@ -32,6 +32,7 @@ var SearchModelProperties = {
   filterVisibleActive: false,
   markerImg: "assets/icons/marker.png",
   base64Encode: false,
+  instruction: "",
   anchor: [
     16,
     32

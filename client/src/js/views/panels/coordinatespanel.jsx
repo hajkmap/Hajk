@@ -209,7 +209,7 @@ var CoordinatesPanelView = {
     }
     coordinates = this.state.coordinates ? this.state.coordinates.transformed : {};
     return (
-      <Panel title="Koordinater" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
+      <Panel title="Koordinater" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
         <div className="coordinate-display">
           <p>
             Välj en plats i kartan genom att dra i siktet. <br/>

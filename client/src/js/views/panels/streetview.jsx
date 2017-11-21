@@ -81,7 +81,7 @@ var StreetView = {
    */
   render: function () {
     return (
-      <Panel title="Street View" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked}>
+      <Panel title="Street View" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} instruction={atob(this.props.model.get('instruction'))}>
         <div className="panel-content">
           <h3>Street view</h3>
           {this.renderInfoText()}

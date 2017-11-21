@@ -208,10 +208,22 @@ var DrawModel = {
     this.get('olMap').removeInteraction(this.get("drawTool"));
     this.get('olMap').removeInteraction(this.get("editTool"));
     this.get('olMap').set('clickLock', true);
+    this.get('olMap').un('singleclick', this.editOpenDialog);
     this.get('olMap').on('singleclick', this.removeSelected);
     if (dragInteraction) {
       dragInteraction.removeAcceptedLayer('draw-layer');
     }
+  },
+
+  editOpenDialog: function(event){
+    this.get('olMap').forEachFeatureAtPixel(event.pixel, (feature) => {
+      if (typeof feature.getProperties().description !== 'undefined'){
+      feature.setStyle(this.get('scetchStyle'));
+      this.set('dialog', true);
+      this.set('drawFeature', feature);
+      this.set('editing', true);
+    }
+  });
   },
 
   /**
@@ -230,22 +242,26 @@ var DrawModel = {
     this.get('olMap').set('clickLock', true);
     this.set('drawToolActive', true);
 
+    this.get('olMap').on('singleclick', this.editOpenDialog.bind(this));
+
     if (dragInteraction) {
       dragInteraction.removeAcceptedLayer('draw-layer');
     }
     this.get('source').getFeatures().forEach(f => {
       features.push(f);
     });
+
     this.set("editTool", new ol.interaction.Modify({
       features: features
     }));
+
     this.get('olMap').addInteraction(this.get("editTool"));
 
     this.get("editTool").on('modifyend', e => {
-      this.measureTooltip.setPosition(undefined);
-      e.features.forEach(this.updateFeatureText.bind(this));
-    });
 
+      this.measureTooltip.setPosition(undefined);
+    e.features.forEach(this.updateFeatureText.bind(this));
+  });
   },
 
   /**
@@ -255,13 +271,12 @@ var DrawModel = {
   updateFeatureText: function (feature) {
     var labelText
     ,   style;
-
     this.setFeaturePropertiesFromGeometry(feature);
 
     labelText = this.getLabelText(feature);
     style = feature.getStyle()[1] || feature.getStyle()[0];
 
-    if (style) {
+    if (style && style.getText() !== null) {
       style.getText().setText(labelText);
     }
   },
@@ -287,6 +302,7 @@ var DrawModel = {
     this.get('olMap').removeInteraction(this.get("drawTool"));
     this.get('olMap').removeInteraction(this.get("editTool"));
     this.get('olMap').un('singleclick', this.removeSelected);
+    this.get('olMap').un('singleclick', this.editOpenDialog);
     this.set('drawToolActive', false);
     var dragInteraction = this.getDragInteraction();
     if (dragInteraction) {
@@ -298,8 +314,16 @@ var DrawModel = {
    * Remove the last edited feature from soruce.
    * @instance
    */
-  removeEditFeature() {
-    this.get('source').removeFeature(this.get('drawFeature'));
+  removeEditFeature: function() {
+    if (!this.get('editing') && this.get("drawFeature") && (typeof this.get("drawFeature").getProperties().description === "undefined"
+    || this.get("drawFeature").getProperties().description === "")) {
+      this.get('source').removeFeature(this.get('drawFeature'));
+    } else if(this.get('editing')){
+      var feature = this.get("drawFeature");
+      this.set('pointText', feature.getProperties().description);
+      this.setFeaturePropertiesFromText(feature, feature.getProperties().description || "");
+      feature.setStyle(this.getStyle(feature));
+    }
   },
 
   /**
@@ -312,6 +336,7 @@ var DrawModel = {
     if (type === "Text") {
       feature.setStyle(this.get('scetchStyle'));
       this.set('dialog', true);
+      this.set('editing', false);
       this.set('drawFeature', feature);
     } else {
       this.setFeaturePropertiesFromGeometry(feature);
@@ -455,6 +480,7 @@ var DrawModel = {
     ,   olMap = this.get('olMap');
 
     olMap.un('singleclick', this.removeSelected);
+    this.get('olMap').un('singleclick', this.editOpenDialog);
     if (dragInteraction) {
       dragInteraction.removeAcceptedLayer('draw-layer');
     }
@@ -493,6 +519,7 @@ var DrawModel = {
   abort: function () {
     var dragInteraction = this.getDragInteraction();
     this.get('olMap').un('singleclick', this.removeSelected);
+    this.get('olMap').un('singleclick', this.editOpenDialog);
     this.get('olMap').un('pointermove', this.setPointerPosition);
     this.get('olMap').removeInteraction(this.get('drawTool'));
     this.get('olMap').removeInteraction(this.get("editTool"));
@@ -944,10 +971,13 @@ var DrawModel = {
    *
    */
   getLabelText: function (feature) {
-
     var show  = this.get('showLabels')
     ,   props = feature.getProperties()
     ,   type  = feature.getProperties().type;
+
+    if (typeof props.description !== 'undefined'){
+      type = "Text";
+    }
 
     switch (type) {
       case "Point": return show ? this.formatLabel("point", [props.position.n, props.position.e]) : "";
@@ -970,7 +1000,7 @@ var DrawModel = {
     this.get('source').changed();
 
     source.forEachFeature(feature => {
-      if (feature.getProperties().type !== "Text" && feature.getStyle()) {
+      if (feature.getProperties().type !== "Text" && typeof feature.getProperties().description === "undefined" && feature.getStyle()) {
         let style = feature.getStyle();
         if (this.get('showLabels')) {
           if (style[1]) {
@@ -984,6 +1014,13 @@ var DrawModel = {
           } else if (style[0]) {
             style[0].getText().setText("");
           }
+        }
+      } else if (feature.getProperties().type === "Text" || typeof feature.getProperties().description !== "undefined"){
+        let style = feature.getStyle();
+        if (style[1]) {
+          style[1].getText().setText(this.getLabelText(feature));
+        } else if (style[0]) {
+          style[0].getText().setText(this.getLabelText(feature));
         }
       }
     });

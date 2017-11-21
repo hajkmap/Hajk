@@ -24,7 +24,6 @@ var RoutingModelProperties = {
   visible: false,
   Id: 'LocationB',
   state: 'choose_start', // will change to choose_end and choose_mode
-  apiKey: "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
   onStartKey: undefined,
   onEndKey: undefined,
   onRoutingKey: undefined,
@@ -55,6 +54,9 @@ var RoutingModel = {
    * @property {RoutingModel~RoutingModelProperties} defaults - Default settings
    */
 
+  initialize: function (options) {
+    ToolModel.prototype.initialize.call(this);
+  },
 
   /* Starting Point */
   /* Get a current position from GPS(button right top)*/

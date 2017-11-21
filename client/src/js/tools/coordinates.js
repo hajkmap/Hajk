@@ -35,6 +35,7 @@ var CoordinatesModelProperties = {
   features: undefined,
   interactionLayer: undefined,
   interactions: [],
+  instruction: '',
   position: {
     x: undefined,
     y: undefined

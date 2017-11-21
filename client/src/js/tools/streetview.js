@@ -48,6 +48,7 @@ var StreetViewModelProperties = {
   google: undefined,
   imageDate: '',
   apiKey: '',
+  instruction: ''
 }
 
 /**

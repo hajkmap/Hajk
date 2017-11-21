@@ -43,7 +43,8 @@ var PresetModelProperties = {
   visible: false,
   shell: undefined,
   anchor: "",
-  presetValue: ""
+  presetValue: "",
+  instruction: ""
 }
 
 /**

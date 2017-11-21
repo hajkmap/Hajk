@@ -542,7 +542,7 @@ var ExportPanelView = {
         olMap={this.props.model.get('olMap')}/>;
     }
     return (
-      <Panel title="Skriv ut karta" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
+      <Panel title="Skriv ut karta" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
         <div className="export-panel">
           <div>
             {this.renderToolbar()}

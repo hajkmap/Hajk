@@ -99,7 +99,7 @@ var PresetPanelView = {
     }
     
     return (
-      <Panel title="Snabbval" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked}>
+      <Panel title="Snabbval" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked} instruction={atob(this.props.model.get('instruction'))}>
         <div className="bookmark-panel panel-content">
           <label>Tillgängliga snabbval</label>
             <ul>

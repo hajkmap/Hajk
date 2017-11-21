@@ -282,9 +282,6 @@ var DrawPanelView = {
     });
     this.props.model.set("kmlExportUrl", false);
     this.props.model.set("kmlImport", false);
-    if (isMobile) {
-      this.props.navigationPanel.minimize();
-    }
   },
 
   /**
@@ -567,7 +564,7 @@ var DrawPanelView = {
     return (
       <div>
         <h4>Importera</h4>
-        <p>Välj fil att importera</p>
+        <p>Välj KML-fil att importera</p>
         <form id="upload-form" method="post" action={url} target="upload-iframe" encType="multipart/form-data">
           <input onChange={upload.bind(this)} type="file" name="files[]" accept=".kml" multiple="false" className="btn btn-default"/><br/>
           <input type="submit" value="Ladda upp" name="upload-file-form" className="btn btn-default"/><br/>
@@ -669,18 +666,18 @@ var DrawPanelView = {
     ,   importRes  = this.renderImport(this.state.kmlImport);
 
     return (
-        <Panel title="Rita och mäta" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
+        <Panel title="Rita och mäta" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
           <div className="draw-tools">
             <div id="labels">
               <input id="labels-checkbox" onChange={this.toggleLabels} type="checkbox" checked={showLabels} />
-              <label htmlFor="labels-checkbox">Visa areal/längd på ritade objekt</label>
+              <label htmlFor="labels-checkbox">Visa areal/längd/koordinater på ritade objekt</label>
             </div>
             <ul>
               <li id="Text" onClick={this.activateDrawTool.bind(this, "Text")}>
                 <i className="fa fa-font fa-0"></i> <span>Skriv text</span>
               </li>
               <li id="Point" onClick={this.activateDrawTool.bind(this, "Point")}>
-                <i className="iconmoon-punkt"></i> <span>Rita punkt</span>
+                <i className="fa fa-circle fa-0"></i> <span>Rita punkt</span>
               </li>
               <li id="Circle" onClick={this.activateDrawTool.bind(this, "Circle")}>
                 <i className="iconmoon-punkt"></i> <span>Rita cirkel</span>

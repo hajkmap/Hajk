@@ -60,7 +60,7 @@ var InformationModel = {
 
   initialize: function (options) {
     var cookies = document.cookie;
-    if(cookies.length == 0){
+    if(cookies.length == 0 || !options.showInfoOnce){
       // TODO: Titta efter om vi ska använda cookie för att visa informationsrutan endast en gång
       // OBS! json.showInfoOnce kan vara undefined, då ska det fungera som innan cookie användes
       if(options.showInfoOnce) {

@@ -128,6 +128,10 @@ var SearchView = {
       showResults: true,
       result: []
     });
+
+    if ($('#searchbar-input-field').length != 0){
+      $('#searchbar-input-field')[0].value = ""
+    }
   },
 
   /**

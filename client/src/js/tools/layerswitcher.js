@@ -44,7 +44,7 @@ var LayerSwitcherModelProperties = {
   panel: 'LayerPanel',
   //toolbar: 'bottom',
   icon: 'fa fa-bars icon',
-  title: 'Lagerhanterare',
+  title: 'Kartlager',
   visible: false,
   layerCollection: undefined,
   backgroundSwitcherMode: 'hidden',

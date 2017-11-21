@@ -420,7 +420,7 @@ var LayerPanelView = {
     }
 
     return (
-      <Panel title="Lagerhanterare" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
+      <Panel title="Kartlager" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
         <div className="layer-panel">
           {toggleAllButton}
           <BackgroundSwitcher layers={this.props.model.getBaseLayers()} model={this.props.model}></BackgroundSwitcher>
