@@ -28,6 +28,8 @@ var RoutingModelProperties = {
   onEndKey: undefined,
   onRoutingKey: undefined,
   routingFinished: undefined,
+  adress: '',
+  apiKey: '',
   travelMode: 'walking',
   position: {
     latitude: undefined,
@@ -66,7 +68,6 @@ var RoutingModel = {
 
   getLocation: function(){
     if(navigator.geolocation){
-      console.log('getCurrentPosition');
       navigator.geolocation.getCurrentPosition(this.setPositionEvent.bind(this));
     }else{
       alert("kan inte få position. Skriv startposition i rutan eller tryck position på kartan.");
@@ -309,7 +310,6 @@ var RoutingModel = {
   },
 
   setPositionEvent: function(event){
-    console.log('got position');
     var pos = this.get('position');
     pos.latitude = event.coords.latitude;
     pos.longitude = event.coords.longitude;
@@ -318,7 +318,6 @@ var RoutingModel = {
   },
 
   setPosition: function(){
-    console.log('setPosition');
     this.get('layer_start').getSource().clear();
     if (this.get('position').longitude && this.get('position').latitude) {
       var point = new ol.geom.Point([
@@ -347,7 +346,7 @@ var RoutingModel = {
     } else {
       ol.Observable.unByKey(this.get('onEndKey'));
       var mode = this.get('travelMode');
-      var url = 'https://karta2.varberg.se/maps/api/directions/json?mode=' + mode + '&origin=' + pos.latitude + ',' + pos.longitude + '&destination=' + pos.latitudeEnd + ',' + pos.longitudeEnd +'&key=' + this.get('apiKey');
+      var url = this.get('adress') + 'maps/api/directions/json?mode=' + mode + '&origin=' + pos.latitude + ',' + pos.longitude + '&destination=' + pos.latitudeEnd + ',' + pos.longitudeEnd +'&key=' + this.get('apiKey');
     var request =$.ajax({
         url: url,
         type: "post",
@@ -445,7 +444,6 @@ var RoutingModel = {
     }
 
     //feature_number = feature_number - 1;
-    console.log(feature_number);
     var layer = this.get('layer_route');
 
     var features = layer.getSource().getFeatures();
@@ -453,8 +451,6 @@ var RoutingModel = {
 
     for (var i= 0; i < features.length ; i++){
       if(features[i].number === feature_number){
-        console.log(features[i].number);
-        console.log(feature_number);
         features[i].setStyle(this.get('style_route_highlight'));
       } else {
         features[i].setStyle(this.get('style_route_normal'));

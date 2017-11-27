@@ -28,6 +28,7 @@ using MapService.Components.MapExport.Extentions;
 using MapService.Components.MapExport.SharpMapExtensions;
 using log4net;
 
+
 namespace MapService.Components.MapExport
 {
     public class MapExporter
@@ -552,8 +553,10 @@ namespace MapService.Components.MapExport
                     {
                         try
                         {
+                            string url = HttpContext.Current.Request.Url.Authority;
+                            _log.DebugFormat("url." + url);
                             WebClient wc = new WebClient();
-                            byte[] bytes = wc.DownloadData("https://karta2.varberg.se/" + featureStyle.pointSrc);                            
+                            byte[] bytes = wc.DownloadData("https://" + url + "/" + featureStyle.pointSrc);                            
                             style.Symbol = this.ImageFromBytes(bytes);                            
                         }
                         catch (Exception ex)

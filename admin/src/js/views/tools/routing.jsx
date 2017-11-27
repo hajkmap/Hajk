@@ -28,6 +28,7 @@ var defaultState = {
   active: false,
   index: 0,
   apiKey: "",
+  adress: "",
   instruction: ''
 };
 
@@ -48,6 +49,7 @@ class ToolOptions extends Component {
         active: true,
         index: tool.index,
         apiKey: tool.options.apiKey,
+        adress: tool.options.apiKey,
         instruction: tool.options.instruction
       });
     } else {
@@ -107,7 +109,8 @@ class ToolOptions extends Component {
       "index": this.state.index,
       "options": {
         apiKey: this.state.apiKey,
-        instruction: this.state.instruction
+        "adress": this.stats.adress,
+        "instruction": this.state.instruction
       }
     };
 
@@ -179,6 +182,10 @@ class ToolOptions extends Component {
           <div>
             <label htmlFor="apiKey">API-nyckel</label>
             <input id="apiKey" value={this.state.apiKey} type="text" name="apiKey" onChange={(e) => {this.handleInputChange(e)}}></input>
+          </div>
+          <div>
+            <label htmlFor="adress">Adress av hemsidan</label>
+            <input id="adress" value={this.state.adress} type="text" name="adress" onChange={(e) => {this.handleInputChange(e)}}></input>
           </div>
           <div>
             <label htmlFor="instruction">Instruktion</label>
