@@ -62,7 +62,6 @@ var AnchorPanelView = {
   },
 
   openInstruction: function (){
-    console.log('Clicked');
     var element = $("#instructionText");
     element.toggle();
   },
@@ -79,8 +78,7 @@ var AnchorPanelView = {
         <div className="panel-content">
           <button onClick={this.generate} className="btn btn-main">Skapa länk</button><br/><br/>
           <p>
-            En länkadress till kartan med aktuell zoomnivå samt tända/släckta lager har skapats.<br/>
-            Du kan kopiera länkadressen genom att högerklicka på "Länk" nedan.<br/>
+            När du har skapat en länk kan du kopiera länkadressen genom att högerklicka på "Länk" nedan.<br/>
           </p>
           <div className="alert alert-success">
             <a target="_blank" href={anchor}>Länk</a>

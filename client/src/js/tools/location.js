@@ -76,7 +76,7 @@ var LocationModel = {
         anchor: [0.5, 0.5],
         anchorXUnits: 'fraction',
         anchorYUnits: 'fraction',
-        opacity: .8,
+        opacity: 0.8,
         src: 'assets/icons/gps.png',
         scale: (1/2)
       })
@@ -168,8 +168,6 @@ var LocationModel = {
     this.get('layer').getSource().clear();
     if(typeof this.get('location').lat == 'undefined') { // quick fix for the reoccuring errors in Firefox
       alert("Din position kan inte fastställas.");
-      console.log('Positionsfel:');
-      console.log(e);
       console.error(e);
       console.warn(e);
       console.info(e);

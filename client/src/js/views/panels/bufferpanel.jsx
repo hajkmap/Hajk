@@ -74,7 +74,6 @@ var BufferPanelView = {
   },
 
   openInstruction: function (){
-    console.log('Clicked');
     var element = $("#instructionText");
     element.toggle();
   },

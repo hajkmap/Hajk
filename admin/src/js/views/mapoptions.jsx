@@ -319,8 +319,6 @@ class MapOptions extends Component {
                 type="checkbox"
                 ref="input_mobile"
                 onChange={(e) => {
-                  console.log(e);
-                  console.log(e.target.checked);
                   this.setState({mobile: e.target.checked});
                 }}
                 checked={this.state.mobile}/>&nbsp;

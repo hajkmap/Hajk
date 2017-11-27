@@ -68,7 +68,6 @@ var BookmarkPanelView = {
   onSubmitForm: function (e) {
     e.preventDefault();
     var name = ReactDOM.findDOMNode(this.refs.name).value;
-    console.log('submit');
     if(name.length > 0) {
       this.props.model.addBookmark(name, () => this.forceUpdate());
     }
@@ -114,7 +113,6 @@ var BookmarkPanelView = {
   },
 
   openInstruction: function (){
-    console.log('Clicked');
     var element = $("#instructionText");
     element.toggle();
   },
@@ -127,7 +125,6 @@ var BookmarkPanelView = {
   render: function () {
 
     var bookmarks = this.props.model.getBookmarks();
-    console.log(bookmarks);
     var items = null;
 
     if (bookmarks) {

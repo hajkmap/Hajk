@@ -134,7 +134,6 @@ var MapModel = {
     var map = this.get('ol');
     map.getView().setCenter(config.center);
     map.getView().setZoom(config.zoom);
-    console.log(config);
   },
 
   /**

@@ -63,7 +63,6 @@ var RoutingPanelView = {
   },
 
   showResult: function(routeResult) {
-    console.log(this.props.model.plotRoute(res));
   },
 
   showImage: function(src, id) {
@@ -75,7 +74,6 @@ var RoutingPanelView = {
   },
 
   openInstruction: function (){
-    console.log('Clicked');
     var element = $("#instructionText");
     element.toggle();
   },

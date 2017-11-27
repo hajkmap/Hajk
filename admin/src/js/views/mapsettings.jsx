@@ -557,7 +557,6 @@ class Menu extends Component {
    */
   saveSettings() {
     this.save(this.parseSettings());
-    console.log(this.parseSettings());
   }
 
   /**
