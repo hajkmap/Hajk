@@ -41,7 +41,7 @@ var InformationModelProperties = {
   icon: 'fa fa-info-circle icon',
   title: 'Om kartan',
   display: false,
-  headerText: 'Information',
+  headerText: 'Om kartan',
   text: 'Information om kartan.'
 };
 

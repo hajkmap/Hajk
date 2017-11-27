@@ -84,7 +84,6 @@ var CoordinatesModel = {
   clicked: function(arg) {
     this.set('visible', !this.get('visible'));
     this.set('toggled', !this.get('toggled'));
-    console.log('visible: ' + this.get('visible') + ' \ttoggled: ' + this.get('toggled'));
   },
 
   /**
