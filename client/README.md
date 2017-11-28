@@ -36,8 +36,8 @@ En vy har i regel en modell kopplad till sig som har hand om att sköta logik oc
   * index.js - applikationens startmodul
 
 ## Bygga
-  * <code>grunt dependencies<code> - skapar upp dist katalog med dependencies.js. (Kör en gång)
-  * <code>grunt build<code> - bygger js-, css-, html-filer samt kopierar statiska filer.
+  * <code>grunt dependencies</code> - skapar upp dist katalog med dependencies.js. (Kör en gång)
+  * <code>grunt build</code> - bygger js-, css-, html-filer samt kopierar statiska filer.
 
 ## Debug
   * <code>grunt debug</code> - Lyssnar på förändringar i projektet, bygger vid behov.
