@@ -218,16 +218,16 @@ var LayerItemView = {
           </span>
           {components.legend.legendButton}
 
-          <span onClick={this.state.infoVisible ? toggleInfo : ""}>
-            {this.state.infoVisible ? components.legend.infoButton : ""}
+          <span onClick={infoVisible ? toggleInfo : null}>
+            {infoVisible ? components.legend.infoButton : null}
           </span>
 
         </div>
         <div className={innerInfoBodyClass}>
-          <p className="info-title">{this.state.infoTitle}</p>
-          <p className="info-text">{this.state.infoText}</p>
-          <a className="info-text" href={this.state.infoUrl} target="_blank">{this.state.infoUrl}</a><br/>
-          <i className="info-text">{this.state.infoOwner ? "Ägare: " + this.state.infoOwner : ""}</i>
+          <p className="info-title">{infoTitle}</p>
+          <p className="info-text">{infoText}</p>
+          <a className="info-text" href={infoUrl} target="_blank">{infoUrl}</a><br/>
+          <i className="info-text">{infoOwner ? "Ägare: " + infoOwner : ""}</i>
         </div>
 
         <div className={innerBodyClass}>
