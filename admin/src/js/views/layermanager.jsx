@@ -282,7 +282,12 @@ class Manager extends Component {
           addedLayers: [],
           layerType: layer.type,
           projection: layer.projection,
-          infoFormat: layer.infoFormat
+          infoFormat: layer.infoFormat,
+          infoVisible: layer.infoVisible,
+          infoTitle: layer.infoTitle,
+          infoText: layer.infoText,
+          infoUrl: layer.infoUrl,
+          infoOwner: layer.infoOwner
         });
 
         this.refs["ExtendedWMSLayerForm"].loadLayers(layer, () => {
