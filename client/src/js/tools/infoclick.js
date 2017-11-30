@@ -192,6 +192,12 @@ var InfoClickModel = {
             if (Array.isArray(features) && features.length > 0) {
               features.forEach(feature => {
                 this.addInformation(feature, wmsLayer, (featureInfo) => {
+                  try{ // TODO: solkarta
+                    if (wmsLayer.attributes.caption === "Solkartan" && featureInfo.feature.get('geometry') === null){
+                      return;
+                    }
+                  } catch (e){
+                  }
                   if (featureInfo) {
                     infos.push(featureInfo);
                   }

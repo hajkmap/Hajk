@@ -173,6 +173,7 @@ var SearchBarView = {
    * @instance
    */
   clear: function () {
+    $("#sokRensa").click();
     this.value = "";
     this.props.model.set('value', "");
     this.props.model.clear();
@@ -317,7 +318,7 @@ var SearchBarView = {
     var groups = this.props.model.get('items');
     return (
       <div className="search-results" key="search-results">
-        <h3>Sökresultat <span className="pull-right btn btn-default" onClick={() => {this.clear()}}>Rensa</span></h3>
+        <h3>Sökresultat <span className="pull-right btn btn-default" onClick={() => {this.clear()}} id="snabbsokRensa">Rensa</span></h3>
         <div>
           <input type="checkbox" id="display-popup" ref="displayPopup" onChange={(e) => {this.onChangeDisplayPopup(e)}} checked={this.state.displayPopup}></input>
           <label htmlFor="display-popup">Visa information</label>
@@ -386,7 +387,7 @@ var SearchBarView = {
                results = this.renderResults();
         } else {
           results = (
-            <p className="alert alert-info">
+            <p className="alert alert-info" id="alertSearchbar">
               Skriv minst fyra tecken för att påbörja automatisk sökning. Tryck på <b>retur</b> för att forcera en sökning.
             </p>
           )

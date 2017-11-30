@@ -123,6 +123,12 @@ var SearchView = {
     this.props.model.set('value', "");
     this.props.model.set('searchTriggered', false);
     this.props.model.clear();
+    $("#snabbsokRensa").click();
+
+    if(document.getElementById("alertSearchbar") != null) {
+      document.getElementById("alertSearchbar").remove();
+    }
+
     this.setState({
       loading: true,
       showResults: true,
@@ -436,7 +442,7 @@ var SearchView = {
           </div>
         </div>
         <button onClick={search_on_click} type="submit" className="btn btn-main">Sök</button>&nbsp;
-        <button onClick={this.clear} type="submit" className="btn btn-main">Rensa</button>
+        <button onClick={this.clear} type="submit" className="btn btn-main" id="sokRensa">Rensa</button>
         {results}
       </div>
     );

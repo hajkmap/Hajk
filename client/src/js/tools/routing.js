@@ -28,9 +28,9 @@ var RoutingModelProperties = {
   onEndKey: undefined,
   onRoutingKey: undefined,
   routingFinished: undefined,
-  adress: '',
   apiKey: '',
   travelMode: 'walking',
+  travelModeSwe: 'Gå',
   position: {
     latitude: undefined,
     longitude: undefined,
@@ -112,7 +112,23 @@ var RoutingModel = {
    },
 
   setTravelMode: function(travelmode){
+    switch(travelmode){
+      case "walking":
+        travelModeSwe = "Gå";
+        break;
+      case "driving":
+        travelModeSwe = "Köra";
+        break;
+      case "bicycling":
+        travelModeSwe = "Cykla";
+        break;
+      case "transit":
+        travelModeSwe = "Åka kollektivt";
+        break;
+    }
+
     this.set('travelMode', travelmode);
+
   },
 
   endPointSelection: function(event){
@@ -346,7 +362,7 @@ var RoutingModel = {
     } else {
       ol.Observable.unByKey(this.get('onEndKey'));
       var mode = this.get('travelMode');
-      var url = this.get('adress') + 'maps/api/directions/json?mode=' + mode + '&origin=' + pos.latitude + ',' + pos.longitude + '&destination=' + pos.latitudeEnd + ',' + pos.longitudeEnd +'&key=' + this.get('apiKey');
+      var url = 'https://' + document.location.hostname + '/maps/api/directions/json?mode=' + mode + '&origin=' + pos.latitude + ',' + pos.longitude + '&destination=' + pos.latitudeEnd + ',' + pos.longitudeEnd +'&key=' + this.get('apiKey');
     var request =$.ajax({
         url: url,
         type: "post",
@@ -370,7 +386,7 @@ var RoutingModel = {
     var steps = res.routes[0].legs[0].steps;
     var routeDiv = document.createElement('div');
     var p = document.createElement('p');
-    p.innerHTML = '<b>Färdsätt:</b>' + res.routes[0].legs[0].steps[0].travel_mode + '<br>' + '<b>Avstånd:</b> ' + res.routes[0].legs[0].distance.text +'('+res.routes[0].legs[0].distance.value+'m)' + '<br>' + '<b>Tid:</b> ' + res.routes[0].legs[0].duration.text + '<br>' + '<b>Startadress:</b> ' + res.routes[0].legs[0].start_address + '<br>' + '<b>Slutadress:</b> ' + res.routes[0].legs[0].end_address;
+    p.innerHTML = '<b>Färdsätt:</b>' + travelModeSwe + '<br>' + '<b>Avstånd:</b> ' + res.routes[0].legs[0].distance.text +'('+res.routes[0].legs[0].distance.value+'m)' + '<br>' + '<b>Tid:</b> ' + res.routes[0].legs[0].duration.text + '<br>' + '<b>Startadress:</b> ' + res.routes[0].legs[0].start_address + '<br>' + '<b>Slutadress:</b> ' + res.routes[0].legs[0].end_address;
     routeDiv.appendChild(p);
     for(var i = 0; i < steps.length; i++){
       var lat = steps[i].start_location.lat;

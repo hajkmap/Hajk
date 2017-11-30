@@ -160,6 +160,8 @@ var DrawModel = {
 
   initialize: function (options) {
     ToolModel.prototype.initialize.call(this);
+
+    this.set('editOpenDialogBinded', null);
   },
 
   configure: function (shell) {
@@ -182,6 +184,18 @@ var DrawModel = {
       this.set('markerImg', window.location.href + "assets/icons/" + icon + ".png");
     }
     this.createMeasureTooltip();
+  },
+
+
+  editOpenDialog: function(event){
+    this.get('olMap').forEachFeatureAtPixel(event.pixel, (feature) => {
+      if (typeof feature.getProperties().description !== 'undefined'){
+      feature.setStyle(this.get('scetchStyle'));
+      this.set('dialog', true);
+      this.set('drawFeature', feature);
+      this.set('editing', true);
+    }
+  });
   },
 
   /**
@@ -208,23 +222,13 @@ var DrawModel = {
     this.get('olMap').removeInteraction(this.get("drawTool"));
     this.get('olMap').removeInteraction(this.get("editTool"));
     this.get('olMap').set('clickLock', true);
-    this.get('olMap').un('singleclick', this.editOpenDialog);
+    this.get('olMap').un('singleclick', this.get('editOpenDialogBinded'));
     this.get('olMap').on('singleclick', this.removeSelected);
     if (dragInteraction) {
       dragInteraction.removeAcceptedLayer('draw-layer');
     }
   },
 
-  editOpenDialog: function(event){
-    this.get('olMap').forEachFeatureAtPixel(event.pixel, (feature) => {
-      if (typeof feature.getProperties().description !== 'undefined'){
-      feature.setStyle(this.get('scetchStyle'));
-      this.set('dialog', true);
-      this.set('drawFeature', feature);
-      this.set('editing', true);
-    }
-  });
-  },
 
   /**
    * Activate tool for feature edit.
@@ -237,12 +241,15 @@ var DrawModel = {
     ,   features = new ol.Collection();
 
     this.get('olMap').un('singleclick', this.removeSelected);
+    this.get('olMap').un('singleclick', this.get('editOpenDialogBinded'));
     this.get('olMap').removeInteraction(this.get("drawTool"));
     this.get('olMap').removeInteraction(this.get("editTool"));
     this.get('olMap').set('clickLock', true);
     this.set('drawToolActive', true);
 
-    this.get('olMap').on('singleclick', this.editOpenDialog.bind(this));
+    this.set('editOpenDialogBinded', this.editOpenDialog.bind(this));
+
+    this.get('olMap').on('singleclick', this.get('editOpenDialogBinded'));
 
     if (dragInteraction) {
       dragInteraction.removeAcceptedLayer('draw-layer');
@@ -302,7 +309,7 @@ var DrawModel = {
     this.get('olMap').removeInteraction(this.get("drawTool"));
     this.get('olMap').removeInteraction(this.get("editTool"));
     this.get('olMap').un('singleclick', this.removeSelected);
-    this.get('olMap').un('singleclick', this.editOpenDialog);
+    this.get('olMap').un('singleclick', this.get('editOpenDialogBinded'));
     this.set('drawToolActive', false);
     var dragInteraction = this.getDragInteraction();
     if (dragInteraction) {
@@ -480,7 +487,7 @@ var DrawModel = {
     ,   olMap = this.get('olMap');
 
     olMap.un('singleclick', this.removeSelected);
-    this.get('olMap').un('singleclick', this.editOpenDialog);
+    olMap.un('singleclick', this.get('editOpenDialogBinded'));
     if (dragInteraction) {
       dragInteraction.removeAcceptedLayer('draw-layer');
     }
@@ -519,7 +526,7 @@ var DrawModel = {
   abort: function () {
     var dragInteraction = this.getDragInteraction();
     this.get('olMap').un('singleclick', this.removeSelected);
-    this.get('olMap').un('singleclick', this.editOpenDialog);
+    this.get('olMap').un('singleclick', this.get('editOpenDialogBinded'));
     this.get('olMap').un('pointermove', this.setPointerPosition);
     this.get('olMap').removeInteraction(this.get('drawTool'));
     this.get('olMap').removeInteraction(this.get("editTool"));
