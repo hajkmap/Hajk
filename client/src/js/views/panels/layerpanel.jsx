@@ -297,7 +297,7 @@ var LayerPanelView = {
 
       buttonClassName = this.state[id] === "hidden" ?
         "fa fa-angle-right clickable arrow" :
-        "fa fa-angle-down clickable arrow";
+        "fa fa-angle-up clickable arrow";
 
       toggleClassName = group.checked ? "fa fa-check-square-o" : "fa fa-square-o";
 

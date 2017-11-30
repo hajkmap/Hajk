@@ -670,7 +670,7 @@ var DrawPanelView = {
           <div className="draw-tools">
             <div id="labels">
               <input id="labels-checkbox" onChange={this.toggleLabels} type="checkbox" checked={showLabels} />
-              <label htmlFor="labels-checkbox">Visa areal, längd eller koordinater på ritade objekt</label>
+              <label htmlFor="labels-checkbox" id="drawLabel">Visa areal, längd eller koordinater på ritade objekt</label>
             </div>
             <ul>
               <li id="Text" onClick={this.activateDrawTool.bind(this, "Text")}>

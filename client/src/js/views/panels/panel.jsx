@@ -154,7 +154,7 @@ var PanelView = {
       var instructionTxt;
       if(typeof this.props.instruction !== 'undefined' && this.props.instruction !== null && this.props.instruction.length > 0){
         instructionBtn = (
-          <button onClick={() => this.openInstruction()} className="btn-info" id="instructionBox1" ><img src={infologo}/></button>
+          <i onClick={() => this.openInstruction()} className="btn-info" id="instructionBox1" ><img src={infologo}/></i>
         );
         instructionTxt = (
           <div className="panel-body-instruction" id="instructionsText" dangerouslySetInnerHTML={{__html: this.props.instruction}}></div>
