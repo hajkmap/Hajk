@@ -5,8 +5,8 @@
       "id": "0",
       "caption": "Topografisk Karta",
       "url": "https://karta2.varberg.se/geoserver/varberg/wms",
-      "owner": "SBK",
-      "date": "1485161963365",
+      "owner": "",
+      "date": "1505902283182",
       "content": "Topografisk Karta",
       "legend": "",
       "projection": null,
@@ -14,15 +14,25 @@
         "topowebbkartan"
       ],
       "infobox": "Topografisk Karta",
-      "searchFields": [],
-      "displayFields": [],
+      "searchFields": null,
+      "displayFields": null,
       "visibleAtStart": true,
       "queryable": false,
       "tiled": true,
       "singleTile": false,
       "imageFormat": "image/jpeg",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.lantmateriet.se/sv/Kartor-och-geografisk-information/Geodatatjanster/Visningstjanster/#faq:Topografisk-webbkarta-Visning \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Lantmäteriet)"
     },
     {
       "id": "1",
@@ -45,7 +55,17 @@
       "singleTile": false,
       "imageFormat": "image/jpeg",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.lantmateriet.se/sv/Kartor-och-geografisk-information/Geodatatjanster/Visningstjanster/#faq:Topografisk-webbkarta-Visning \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Lantmäteriet)"
     },
     {
       "id": "2",
@@ -72,7 +92,17 @@
       "singleTile": false,
       "imageFormat": "image/jpeg",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "3",
@@ -99,9 +129,19 @@
       "singleTile": false,
       "imageFormat": "image/jpeg",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
-	{
+    {
       "id": "4",
       "caption": "Ortofoto 2015",
       "url": "https://karta2.varberg.se/geoserver/varberg/wms",
@@ -111,7 +151,7 @@
       "legend": "",
       "projection": null,
       "layers": [
-        "ortoLM_2015"
+        "orto_2015"
       ],
       "infobox": "",
       "searchFields": [
@@ -126,7 +166,54 @@
       "singleTile": false,
       "imageFormat": "image/jpeg",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
+    },
+    {
+      "id": "6",
+      "caption": "Ortofoto 2017",
+      "url": "https://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "Ortofoto 2017",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "orto2017_LM"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": true,
+      "singleTile": false,
+      "imageFormat": "image/jpeg",
+      "serverType": "geoserver",
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.lantmateriet.se/sv/Kartor-och-geografisk-information/Geodatatjanster/Visningstjanster/#faq:Ortofoto-Visning \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Lantmäteriet)"
     },
     {
       "id": "100",
@@ -138,7 +225,7 @@
       "legend": "https://karta2.varberg.se/legend/hillshade.png",
       "projection": null,
       "layers": [
-        "hillshade_tiff"
+        "hillshade"
       ],
       "infobox": "",
       "searchFields": [
@@ -153,7 +240,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": "Terränskuggning ger en bild av landskapets topografi. ",
+      "infoUrl": null,
+      "infoOwner": "(Stadsbyggnadskontoret)"
     },
     {
       "id": "110",
@@ -175,12 +272,22 @@
         ""
       ],
       "visibleAtStart": false,
-      "queryable": true,
+      "queryable": false,
       "tiled": true,
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "120",
@@ -207,7 +314,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/byggabomiljo/fastigheterlantmateriochkartor/kartor/saanvanderdusolkartanforvarberg.4.7b944fd01540ef79df87c655.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Stadsbyggnadskontoret)"
     },
     {
       "id": "500",
@@ -216,12 +333,12 @@
       "owner": "SBK",
       "date": "1485520647357",
       "content": "Solkartan",
-      "legend": "https://karta2.varberg.se/legend/solkarta.png",
+      "legend": "https://karta2.varberg.se/legend/solkarta_legend.png",
       "projection": null,
       "layers": [
         "solkarta_grakarta"
       ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:10px\"><tbody><tr><td><strong>Total takyta för solenergi (m²) :</strong></td><td class=\"text-right\">815</td></tr><tr><td><strong>Total inkommande solenergi kWh/år) :</strong></td><td class=\"text-right\">752 000</td></tr></tbody></table><table class=\"table table-condensed\" style=\"font-size:10px\"><thead><tr><th>Energiklass<br>(kWh/m²/år)</th><th>Takyta<br>(m²)</th><th>Takyta<br>(%)</th><th>Inkommande solenergi<br>(kWh/år)</th><th>Värde elproduktion<br>(kr/år)</th></tr></thead><tbody><tr><td background=\"legend/solkarta_legend_gt1000.png\">&gt; 1 000</td><td>43</td><td>5</td><td>44 000</td><td>6 600</td></tr><tr><td background=\"legend/solkarta_legend_950-1000.png\">950 - 1 000</td><td>48</td><td>6</td><td>46 000</td><td>6 900</td></tr><tr><td background=\"legend/solkarta_legend_lt950.png\">&lt; 950</td><td>724</td><td>89</td><td>661 000</td><td>99 150</td></tr></tbody></table><a href=\"https://www.varberg.se/4.7b944fd01540ef79df87c655.html\" target=\"_blank\">Läs mer om Solkartan</a>",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:10px\"><tbody><tr><td><strong>Total takyta för solenergi (m²) :</strong></td><td class=\"text-right\">{takyta}</td></tr><tr><td><strong>Total inkommande solenergi kWh/år) :</strong></td><td class=\"text-right\">{energi}</td></tr></tbody></table><table class=\"table table-condensed\" style=\"font-size:10px\"><thead><tr><th>Energiklass<br>(kWh/m²/år)</th><th>Takyta<br>(m²)</th><th>Takyta<br>(%)</th><th>Inkommande solenergi<br>(kWh/år)</th><th>Värde elproduktion<br>(kr/år)</th></tr></thead><tbody><tr><td background=\"legend/solkarta_legend_gt1000.png\">&gt; 1 000</td><td>{c3_ty}</td><td>{c3_ty_proc}</td><td>{c3_energi}</td><td>{c3_val}</td></tr><tr><td background=\"legend/solkarta_legend_950-1000.png\">950 - 1 000</td><td>{c2_ty}</td><td>{c2_ty_proc}</td><td>{c2_energi}</td><td>{c2_val}</td></tr><tr><td background=\"legend/solkarta_legend_lt950.png\">&lt; 950</td><td>{c1_ty}</td><td>{c1_ty_proc}</td><td>{c1_energi}</td><td>{c1_val}</td></tr></tbody></table><a href=\"https://www.varberg.se/4.7b944fd01540ef79df87c655.html\" target=\"_blank\">Läs mer om Solkartan</a>",
       "searchFields": [
         ""
       ],
@@ -234,7 +351,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/byggabomiljo/fastigheterlantmateriochkartor/kartor/saanvanderdusolkartanforvarberg.4.7b944fd01540ef79df87c655.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Stadsbyggnadskontoret)"
     },
     {
       "id": "130",
@@ -261,7 +388,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/upplevagora/idrottmotionochfriluftsliv/cyklingochcykelvagar.106.4a2ced49142b85dd4d41bfb.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Hamn- & Gatuförvaltningen)"
     },
     {
       "id": "140",
@@ -288,7 +425,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/upplevagora/idrottmotionochfriluftsliv/cyklingochcykelvagar.106.4a2ced49142b85dd4d41bfb.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Hamn- & Gatuförvaltningen)"
     },
     {
       "id": "150",
@@ -315,7 +462,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/barnutbildning.4.2a34b64613d491274525e2.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Barn- & utbildningsförvaltningen)"
     },
     {
       "id": "160",
@@ -342,7 +499,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/barnutbildning.4.2a34b64613d491274525e2.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Barn- & utbildningsförvaltningen)"
     },
     {
       "id": "170",
@@ -369,7 +536,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/barnutbildning.4.2a34b64613d491274525e2.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Barn- & utbildningsförvaltningen)"
     },
     {
       "id": "180",
@@ -392,11 +569,21 @@
       ],
       "visibleAtStart": false,
       "queryable": false,
-      "tiled": false,
+      "tiled": true,
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
       "id": "190",
@@ -423,7 +610,17 @@
       "singleTile": true,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.lantmateriet.se/sv/Kartor-och-geografisk-information/Geodatatjanster/Visningstjanster/#faq:Fastighetsindelning-Visning \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Lantmäteriet)"
     },
     {
       "id": "200",
@@ -450,7 +647,17 @@
       "singleTile": true,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.lantmateriet.se/sv/Kartor-och-geografisk-information/Geodatatjanster/Visningstjanster/#faq:Fastighetsindelning-Visning \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Lantmäteriet)"
     },
     {
       "id": "210",
@@ -477,15 +684,25 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/trafikinfrastruktur/trafikochgator/parkering.4.e6cd67914102d101304b9e.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Hamn- & Gatuförvaltningen)"
     },
     {
       "id": "220",
-      "caption": "Laddplatser",
+      "caption": "Laddplatser för elbil",
       "url": "https://karta2.varberg.se/geoserver/varberg/wms",
       "owner": "",
       "date": "1497268770544",
-      "content": "Laddplatser",
+      "content": "Laddplatser för elbil",
       "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=laddplatser",
       "projection": null,
       "layers": [
@@ -500,7 +717,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": ""
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/trafikinfrastruktur/trafikochgator/parkering.4.e6cd67914102d101304b9e.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Hamn- & Gatuförvaltningen)"
     },
     {
       "id": "230",
@@ -527,34 +754,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
-    },
-    {
-      "id": "240",
-      "caption": "Grävarbeten",
-      "url": "https://karta2.varberg.se/geoserver/varberg/wms",
-      "owner": "SBK",
-      "date": "1485521015386",
-      "content": "Grävarbeten",
-      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=har_graver_vi_i_gatan",
-      "projection": null,
-      "layers": [
-        "har_graver_vi_i_gatan"
-      ],
-      "infobox": "",
-      "searchFields": [
-        ""
-      ],
-      "displayFields": [
-        ""
-      ],
-      "visibleAtStart": false,
-      "queryable": true,
-      "tiled": false,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/trafikinfrastruktur/torgochallmannaplatser/offentligatoaletter.4.c80344142b80f57941988.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Hamn- & Gatuförvaltningen)"
     },
     {
       "id": "250",
@@ -568,7 +778,7 @@
       "layers": [
         "lekplatser"
       ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr></tbody></table>",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr></tbody></table> \n  <center><img src=\" {url} \" height=\"200\" width=\"200\"></center>",
       "searchFields": [
         ""
       ],
@@ -581,7 +791,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/upplevagora/idrottmotionochfriluftsliv/lekplatser.4.cd2d5fa14102cb73ad6b5.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Hamn- & Gatuförvaltningen)"
     },
     {
       "id": "260",
@@ -608,42 +828,25 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
-    },
-    {
-      "id": "270",
-      "caption": "Förnybar energi",
-      "url": "https://karta2.varberg.se/geoserver/varberg/wms",
-      "owner": "SBK",
-      "date": "1485521015386",
-      "content": "Förnybar energi",
-      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=fornybar_energi",
-      "projection": null,
-      "layers": [
-        "fornybar_energi"
-      ],
-      "infobox": "False",
-      "searchFields": [
-        ""
-      ],
-      "displayFields": [
-        ""
-      ],
-      "visibleAtStart": false,
-      "queryable": false,
-      "tiled": false,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/trafikinfrastruktur/torgochallmannaplatser/stranderochbadplatser.106.12865bcd14300d30ed92228.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Hamn- & Gatuförvaltningen)"
     },
     {
       "id": "280",
-      "caption": "Polisstationer",
+      "caption": "Polisstation",
       "url": "https://karta2.varberg.se/geoserver/varberg/wms",
       "owner": "SBK",
       "date": "1485521015386",
-      "content": "Polisstationer",
+      "content": "Polisstation",
       "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=polisstationer",
       "projection": null,
       "layers": [
@@ -662,34 +865,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
-    },
-    {
-      "id": "290",
-      "caption": "Fiberföreningar",
-      "url": "https://karta2.varberg.se/geoserver/varberg/wms",
-      "owner": "SBK",
-      "date": "1485521015386",
-      "content": "Fiberföreningar",
-      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&LAYER=fiber",
-      "projection": null,
-      "layers": [
-        "fiber"
-      ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {forening} </td></tr><tr><td> <strong>Inlagd år</strong> </td><td> {digitalise} </td></tr><tr><td> <strong>Status</strong> </td><td> {status} </td></tr></tbody></table>",
-      "searchFields": [
-        ""
-      ],
-      "displayFields": [
-        ""
-      ],
-      "visibleAtStart": false,
-      "queryable": true,
-      "tiled": false,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://polisen.se/Kontakta-oss/Polisstationer/Halland/Varberg/ \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": null
     },
     {
       "id": "300",
@@ -698,7 +884,7 @@
       "owner": "SBK",
       "date": "1485521015386",
       "content": "Detaljplaner",
-      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=detaljplaner",
+      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=detaljplaner_0829",
       "projection": null,
       "layers": [
         "detaljplaner_0829"
@@ -716,7 +902,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/trafikinfrastruktur/samhallsutvecklingochplanering/detaljplanerochomradesbestammelser.106.12865bcd14300d30ed96267.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Stadsbyggnadskontoret)"
     },
     {
       "id": "310",
@@ -743,7 +939,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/upplevagora/bibliotek.4.2fd3f9113e650a5ee41757.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Kultur- och fritidsförvaltningen)"
     },
     {
       "id": "320",
@@ -770,7 +976,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/byggabomiljo/avfallochatervinning/kallsorteringochatervinning/atervinningsstationer.4.a581a5614c5137da1e29e01.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Förpacknings- och tidningsinsamlingen)"
     },
     {
       "id": "325",
@@ -779,12 +995,12 @@
       "owner": "SBK",
       "date": "",
       "content": "Återvinningscentraler",
-      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=atervinningsstationer",
+      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=atervinningscentraler",
       "projection": null,
       "layers": [
         "atervinningscentraler"
       ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {adress} &#44; {postadress} &#44;{ort} </td></tr></tbody></table> \n <a href=\" {hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {adress} &#44; {postadress} &#44;{ort} </td></tr></tbody></table> \n <iframe src=\" http://www.vivab.info/oppettider-varberg#%C3%96stra%20Hamnv%C3%A4gen \" target=\"_blank\"></iframe> \n <a href=\" {hemsida} \" target=\"_blank\">Länken till hemsidan</a>",
       "searchFields": [
         ""
       ],
@@ -797,7 +1013,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/byggabomiljo/avfallochatervinning/kallsorteringochatervinning/atervinningscentraler.4.cd2d5fa14102cb73ad8f.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(VIVAB)"
     },
     {
       "id": "330",
@@ -824,7 +1050,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://visitvarberg.se/ \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Marknad Varberg)"
     },
     {
       "id": "340",
@@ -851,7 +1087,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/upplevagora/kultur/konst/konstnarliggestaltning.4.12d3b98d13f7ba71e5a209.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Kultur- & fritidsförvaltningen)"
     },
     {
       "id": "350",
@@ -860,7 +1106,7 @@
       "owner": "SBK",
       "date": "",
       "content": "Hållplatser bokbussen",
-      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=off_konst",
+      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=hallplatser_for_bokbussen",
       "projection": null,
       "layers": [
         "hallplatser_for_bokbussen"
@@ -878,7 +1124,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/upplevagora/bibliotek/bokbussen.4.670680ba143d85606be26e.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Kultur- och fritidsförvaltningen)"
     },
     {
       "id": "360",
@@ -887,7 +1143,7 @@
       "owner": "SBK",
       "date": "",
       "content": "Kultur och teater",
-      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=off_konst",
+      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=kultur_utf_8",
       "projection": null,
       "layers": [
         "kultur_utf_8"
@@ -905,7 +1161,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/upplevagora/kultur.4.2fd3f9113e650a5ee4177b.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Kultur- och fritidsförvaltningen)"
     },
     {
       "id": "370",
@@ -914,7 +1180,7 @@
       "owner": "SBK",
       "date": "",
       "content": "Fördjupad översiktplan \"Norra Kusten\" ",
-      "legend": "https://karta2.varberg.se/legend/Teckenforklaring_FOP_Norra_kusten_stor.PNG",
+      "legend": "https://karta2.varberg.se/legend/teckenforklaring_FOP_NorraKusten.png",
       "projection": null,
       "layers": [
         "FOP_NorraKusten"
@@ -927,12 +1193,22 @@
         ""
       ],
       "visibleAtStart": false,
-      "queryable": true,
+      "queryable": false,
       "tiled": false,
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": "<a href=\" https://varberg.se/download/18.3e7c301615a26cf26d997f54/1487332290274/F%C3%96P%20Norra%20kusten%20ANTAGEN.pdf \" target=\"_blank\">Öppna fördjupade översiktsplanen som PDF</a>",
+      "infoUrl": "<a href=\" https://www.varberg.se/byggabomiljo/kommunensplanarbete/oversiktsplan.4.2fd3f9113e650a5ee4195a.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Samhällsutvecklingskontoret)"
     },
     {
       "id": "380",
@@ -941,10 +1217,10 @@
       "owner": "SBK",
       "date": "",
       "content": "Fördjupad översiktplan \"Stadsområdet\" ",
-      "legend": "https://karta2.varberg.se/legend/Teckenforklaring_FOP_Stadsomradet_stor.png",
+      "legend": "https://karta2.varberg.se/legend/teckenforklaring_FOP_Stadsomradet.png",
       "projection": null,
       "layers": [
-        "FOP_Stadsomradet"
+        "FOP_Stadsomradet_pre"
       ],
       "infobox": "",
       "searchFields": [
@@ -954,24 +1230,34 @@
         ""
       ],
       "visibleAtStart": false,
-      "queryable": true,
+      "queryable": false,
       "tiled": false,
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": "<a href=\" https://varberg.se/download/18.670680ba143d85606be195a/1391771543118/FOP_stadsomradetAntagen100615_web.pdf  \" target=\"_blank\">Öppna fördjupade översiktsplanen som PDF</a>",
+      "infoUrl": "<a href=\" https://www.varberg.se/byggabomiljo/kommunensplanarbete/oversiktsplan.4.2fd3f9113e650a5ee4195a.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Samhällsutvecklingskontoret)"
     },
     {
       "id": "390",
-      "caption": "Översiktplan",
+      "caption": "Översiktsplan",
       "url": "https://karta2.varberg.se/geoserver/varberg/wms",
       "owner": "SBK",
       "date": "",
-      "content": "Översiktplan",
-      "legend": "https://karta2.varberg.se/legend/Teckenforklaring_Oversiktsplan_stor.png",
+      "content": "Översikstplan",
+      "legend": "https://karta2.varberg.se/legend/teckenforklaring_Oversiktsplan.png",
       "projection": null,
       "layers": [
-        "Oversiktplan"
+        "Oversiktsplan"
       ],
       "infobox": "",
       "searchFields": [
@@ -981,12 +1267,22 @@
         ""
       ],
       "visibleAtStart": false,
-      "queryable": true,
+      "queryable": false,
       "tiled": false,
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": "<a href=\" https://varberg.se/download/18.42e2e0a7143003c9eed68e3/1391705173520/OP_kommunen_antagen_100615.pdf  \" target=\"_blank\">Öppna översiktsplanen som PDF</a>",
+      "infoUrl": "<a href=\" https://www.varberg.se/byggabomiljo/kommunensplanarbete/oversiktsplan.4.2fd3f9113e650a5ee4195a.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Samhällsutvecklingskontoret)"
     },
     {
       "id": "410",
@@ -995,7 +1291,7 @@
       "owner": "SBK",
       "date": "",
       "content": "Vårdcentral",
-      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=off_konst",
+      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=vardcentral",
       "projection": null,
       "layers": [
         "vardcentral"
@@ -1013,7 +1309,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" http://www.regionhalland.se/vard-halsa/hitta-din-vard/vardcentralen-halland1/ \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Region Halland)"
     },
     {
       "id": "420",
@@ -1022,7 +1328,7 @@
       "owner": "SBK",
       "date": "",
       "content": "Privat vårdcentral",
-      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=off_konst",
+      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=vardcentral_privat",
       "projection": null,
       "layers": [
         "vardcentral_privat"
@@ -1040,7 +1346,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" http://www.regionhalland.se/vard-halsa/hitta-din-vard/vardcentralen-halland1/ \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Region Halland)"
     },
     {
       "id": "430",
@@ -1049,7 +1365,7 @@
       "owner": "SBK",
       "date": "",
       "content": "Sjukhus",
-      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=off_konst",
+      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=sjukhus",
       "projection": null,
       "layers": [
         "sjukhus"
@@ -1067,7 +1383,17 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" http://www.regionhalland.se/vard-halsa/hitta-din-vard/sjukhuset-i-varberg/ \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Region Halland)"
     },
     {
       "id": "440",
@@ -1076,7 +1402,7 @@
       "owner": "SBK",
       "date": "",
       "content": "Folktandvård",
-      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=off_konst",
+      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=folktandvard",
       "projection": null,
       "layers": [
         "folktandvard"
@@ -1094,7 +1420,346 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": null
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" http://www.regionhalland.se/folktandvard \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Region Halland)"
+    },
+    {
+      "id": "450",
+      "caption": "--- Upptagningområden: årskurs F-3",
+      "url": "https://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "Upptagningområden: årskurs F-3",
+      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&SCALE=500000&LAYER=dissolved_omrade_arskurs_F_3",
+      "projection": null,
+      "layers": [
+        "dissolved_omrade_arskurs_F_3"
+      ],
+      "infobox": "",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": false,
+      "singleTile": true,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/barnutbildning.4.2a34b64613d491274525e2.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Barn- & utbildningsförvaltningen)"
+    },
+    {
+      "id": "460",
+      "caption": "--- Upptagningområden: årskurs 4-5",
+      "url": "https://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "Upptagningområden: årskurs 4-5",
+      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&SCALE=500000&LAYER=dissolved_omrade_arskurs_4_5",
+      "projection": null,
+      "layers": [
+        "dissolved_omrade_arskurs_4_5"
+      ],
+      "infobox": "False",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": false,
+      "singleTile": true,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/barnutbildning.4.2a34b64613d491274525e2.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Barn- & utbildningsförvaltningen)"
+    },
+    {
+      "id": "470",
+      "caption": "--- Upptagningområden: årskurs 6",
+      "url": "https://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "Upptagningområden: årskurs 6",
+      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&SCALE=500000&LAYER=dissolved_omrade_arskurs_6",
+      "projection": null,
+      "layers": [
+        "dissolved_omrade_arskurs_6"
+      ],
+      "infobox": "False",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": false,
+      "singleTile": true,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/barnutbildning.4.2a34b64613d491274525e2.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Barn- & utbildningsförvaltningen)"
+    },
+    {
+      "id": "480",
+      "caption": "--- Upptagningområden: årskurs 7-9",
+      "url": "https://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "Upptagningområden: årskurs 7-9",
+      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&SCALE=500000&LAYER=dissolved_omrade_arskurs_7_9",
+      "projection": null,
+      "layers": [
+        "dissolved_omrade_arskurs_7_9"
+      ],
+      "infobox": "Flase",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": false,
+      "singleTile": true,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/barnutbildning.4.2a34b64613d491274525e2.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Barn- & utbildningsförvaltningen)"
+    },
+    {
+      "id": "510",
+      "caption": "Ungdomsgårdar",
+      "url": "https://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "ungdomsgårdar",
+      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=30&HEIGHT=30&SCALE=500000&LAYER=ungdomsgardar",
+      "projection": null,
+      "layers": [
+        "ungdomsgardar"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Adress</strong> </td><td> {adress} </td></tr></tbody></table><a href=\" {url} \" target=\"_blank\">Länken till Facebooksidan</a>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": true,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/upplevagora/ungikommunen/ungdomsgardar.4.12d3b98d13f7ba71e5a457.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Barn- & utbildningsförvaltningen)"
+    },
+    {
+      "id": "530",
+      "caption": "Stadens karaktärer",
+      "url": "https://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "Stadens karaktärer",
+      "legend": "https://karta2.varberg.se/legend/teckenforklaring_stadens_karaktarer.png",
+      "projection": null,
+      "layers": [
+        "stadens_karaktarer_externkartan"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {omrade} </td></tr><tr><td> <strong>Tidsepok</strong> </td><td> {tidsepok} </td></tr></tbody></table>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": true,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": "<a href=\" https://www.varberg.se/download/18.670680ba143d85606be1bd0/1392014779074/Hela_stadens_karakt%C3%A4rer.pdf  \" target=\"_blank\">Öppna stadens karaktärer som PDF</a>",
+      "infoUrl": "<a href=\" https://www.varberg.se/byggabomiljo/bygganyttandraellerriva/kulturhistoriskabyggnader.4.7e579538141efd9723d3870.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Stadsbyggnadskontoret)"
+    },
+    {
+      "id": "540",
+      "caption": "Motionsspår",
+      "url": "https://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "Motionsspår",
+      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&SCALE=500000&LAYER=motionsspar",
+      "projection": null,
+      "layers": [
+        "motionsspar"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {namn} </td></tr><tr><td> <strong>Typ</strong> </td><td> {beskrivnin} </td></tr></tbody></table>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": true,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": "<a href=\" https://www.varberg.se/upplevagora/idrottmotionochfriluftsliv/elljussparochmotionsspar.4.cd2d5fa14102cb73ad69b.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Hamn- & Gatuförvaltningen)"
+    },
+    {
+      "id": "550",
+      "caption": "Kulturmiljöprogram för landsbyggden",
+      "url": "https://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "SBK",
+      "date": "",
+      "content": "Kulturmiljöprogram för landsbyggden",
+      "legend": "https://karta2.varberg.se/geoserver/varberg/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&SCALE=500000&LAYER=kulturmiljoprogram_externkartan",
+      "projection": null,
+      "layers": [
+        "kulturmiljoprogram_externkartan"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Namn</strong> </td><td> {omrade} </td></tr></tbody></table>",
+      "searchFields": [
+        ""
+      ],
+      "displayFields": [
+        ""
+      ],
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": true,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": null,
+      "searchUrl": null,
+      "searchPropertyName": null,
+      "searchDisplayName": null,
+      "searchOutputFormat": null,
+      "searchGeometryField": null,
+      "infoVisible": true,
+      "infoTitle": null,
+      "infoText": "<a href=\" https://varberg.se/download/18.5f09b55c15afb4c548e11fd/1490282559123/Kulturmilj%C3%B6programmet%20del%201.pdf  \" target=\"_blank\">Öppna kulturmiljöprogrammet som PDF, del 1</a></br><a href=\" https://varberg.se/download/18.5f09b55c15afb4c548e11ff/1490282591614/Kulturmilj%C3%B6programmet%20del%202.pdf  \" target=\"_blank\">Öppna kulturmiljöprogrammet som PDF, del 2</a>",
+      "infoUrl": "<a href=\" https://varberg.se/byggabomiljo/bygganyttandraellerriva/kulturhistoriskabyggnader.4.7e579538141efd9723d3870.html \" target=\"_blank\">Länk till webbplats med mer information</a>",
+      "infoOwner": "(Stadsbyggnadskontoret)"
+    },
+    {
+      "id": "1211",
+      "caption": "Fastigheter",
+      "url": "https://karta2.varberg.se/geoserver/varberg/wms",
+      "owner": "",
+      "date": "1509634080129",
+      "content": "",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "fastighetsytor"
+      ],
+      "infobox": "",
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     }
   ],
   "wfslayers": [
@@ -1103,20 +1768,25 @@
       "caption": "Adress",
       "url": "https://karta2.varberg.se/geoserver/varberg/wms",
       "layers": [
-        "varberg:adresspunkter"
+        "varberg:adresspunkter_2"
       ],
       "searchFields": [
         "sok"
       ],
-      "infobox": "",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong>Adress</strong> </td><td> {streetname_adr_place} &#44; {postcode_city} </td></tr></tbody></table>",
       "displayFields": [
         "sok"
       ],
       "geometryField": "geom",
-      "outputFormat": "GML3"
+      "outputFormat": "GML2",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     },
     {
-      "id": "100",
+      "id": "1100",
       "caption": "Fastighet",
       "url": "https://karta2.varberg.se/geoserver/varberg/wms",
       "layers": [
@@ -1125,15 +1795,21 @@
       "searchFields": [
         "text"
       ],
-      "infobox": "",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong></strong> </td><td> {text} </td></tr></tbody></table>",
       "displayFields": [
         "text"
       ],
       "geometryField": "geom",
-      "outputFormat": "GML3"
+      "outputFormat": "GML2",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     }
   ],
   "vectorlayers": [],
   "wfstlayers": [],
-  "arcgislayers": []
+  "arcgislayers": [],
+  "extendedwmslayers": []
 }

@@ -95,7 +95,7 @@ var ExportPdfSettings = React.createClass({
   //mixins: [LocalStorageMixin], //lagrar skala, pappersformat etc. i LocalStorage
 
   resolutions: [72, 96, 150, 200, 300],
-  paperFormats: ["A2", "A3", "A4"],
+  paperFormats: ["A3", "A4"],
 
   getInitialState: function() {
     return {
@@ -331,7 +331,7 @@ var ExportPdfSettings = React.createClass({
     options = scales.map((s, i) => <option key={i} value={s}>1:{s}</option>);
 
     resolutionOptions = this.resolutions.map((s, i) => {
-      if (this.state.selectFormat === 'A2') {
+      if (this.state.selectFormat === 'A3') {
         return s !== 300 
           ? <option key={i} value={s}>{s}</option>
           : <option key={i} value={s} disabled>{s}</option>;
@@ -341,7 +341,7 @@ var ExportPdfSettings = React.createClass({
       });
     paperFormatOptions = this.paperFormats.map((s, i) => {
       if (this.state.selectResolution === '300') {
-        return s !== 'A2'
+        return s !== 'A3'
           ? <option key={i} value={s}>{s}</option>
           : <option key={i} value={s} disabled>{s}</option>;
         } else {
