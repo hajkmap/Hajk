@@ -38,7 +38,7 @@ var MapModelProperties = {
   maxZoom: 15,
   minZoom: 1,
   target: "map",
-  projection: "EPSG:3006",
+  projection: "EPSG:3007",
   ol: undefined,
   clicked: undefined,
   extent: undefined
@@ -59,16 +59,39 @@ var MapModel = {
   defaults: MapModelProperties,
 
   initialize: function (options) {
+
     this.initialState =  _.clone(this.attributes);
+    if (typeof options.mobile !== 'undefined'){
+      mobilAnpassningEnabled = options.mobile;
+    } else {
+      mobilAnpassningEnabled = false;
+    }
+
+    if(typeof options.maxMobileWidth !== 'undefined') {
+      isMobile = document.body.clientWidth <= options.maxMobileWidth;
+    } else {
+      isMobile = document.body.clientWidth <= 600;
+    }
+
+    infologo = null;
+    if(typeof options.infologo !== 'undefined') {
+      infologo = options.infologo;
+    }
+
+    var app = window.app;
     var map = new ol.Map({
       interactions: ol.interaction.defaults().extend([new Drag()]),
       target: this.get("target"),
       layers: [],
       logo: false,
+      pil: false,
       controls: [
         new ol.control.Zoom({ zoomInTipLabel: 'Zooma in', zoomOutTipLabel: 'Zooma ut' }),
-        new ol.control.Attribution({ collapsible: false })
+        new ol.control.Attribution({ collapsible: false }),
+        new ol.control.Rotate({tipLabel: 'Återställ rotation'}),
+        //new app.PositioningControl()
       ],
+      pixelRatio: 1,
       overlays: [],
       view: new ol.View({
         zoom: this.get("zoom"),
@@ -80,20 +103,19 @@ var MapModel = {
       })
     });
     this.set("ol", map);
-
     setTimeout(() => {
       var scaleLine = new ol.control.ScaleLine({
         target: 'map-scale-bar'
       })
       map.addControl(scaleLine);
-      map.addOverlay(this.createPopupOverlay());
-      $('.ol-popup').show();
-    }, 100);
+    map.addOverlay(this.createPopupOverlay());
+    $('.ol-popup').show();
+  }, 100);
   },
 
   createPopupOverlay: function () {
     var container = document.getElementById('popup')
-    ,   closer = document.getElementById('popup-closer');
+      ,   closer = document.getElementById('popup-closer');
 
     overlay = new ol.Overlay({
       element: container,
@@ -140,9 +162,9 @@ var MapModel = {
   getScale: function () {
 
     var dpi = 25.4 / 0.28
-    ,   mpu = ol.proj.METERS_PER_UNIT["m"]
-    ,   inchesPerMeter = 39.37
-    ,   res = this.getMap().getView().getResolution()
+      ,   mpu = ol.proj.METERS_PER_UNIT["m"]
+      ,   inchesPerMeter = 39.37
+      ,   res = this.getMap().getView().getResolution()
     ;
 
     return res * mpu * inchesPerMeter * dpi;

@@ -26,11 +26,15 @@ using System.Threading;
 using System.Web;
 using MapService.Components.MapExport.Extentions;
 using MapService.Components.MapExport.SharpMapExtensions;
+using log4net;
+
 
 namespace MapService.Components.MapExport
 {
     public class MapExporter
-    {        
+    {
+        ILog _log = LogManager.GetLogger(typeof(MapExporter));
+
         /// <summary>
         /// Gets or sets the SharpMap map to export.
         /// </summary>
@@ -103,18 +107,26 @@ namespace MapService.Components.MapExport
                     style.Fill = new SolidBrush(color);
                 }
 
+                _log.Debug("Feature pointSrc = " + featureStyle.pointSrc);
                 if (featureStyle.pointSrc != "")
                 {
                     try
                     {
+                        _log.Debug("start download");
                         WebClient wc = new WebClient();
+                        _log.Debug("start download1");
                         byte[] bytes = wc.DownloadData(featureStyle.pointSrc);
+                        _log.Debug("start download2");
                         MemoryStream ms = new MemoryStream(bytes);
+                        _log.Debug("start download3");
                         Image img = Image.FromStream(ms);
+                        _log.Debug("start download4");
                         style.Symbol = img;
+                        _log.Debug("start download5");
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        _log.Debug("Could not get icon. " + ex.ToString());
                     }
                 }
                 else
@@ -198,11 +210,16 @@ namespace MapService.Components.MapExport
             try
             {
 
+                //string path = @"C:\\log.txt";
+                //StreamWriter file = new StreamWriter(path, true);
+                
+                //file.WriteLine("Starting to add layers");
                 for (int i = 0; i < wmsLayers.Count; i++)
                 {
+                    //file.WriteLine("Found a layer");
                     string layername = "WMSLayer_" + i;
                     DpiWmsLayer layer = new DpiWmsLayer(layername, wmsLayers[i].url, exportItem.resolution);
-
+                    
                     layer.SetImageFormat("image/png");
                     layer.BgColor = Color.White;
                     layer.Transparent = true;
@@ -210,29 +227,44 @@ namespace MapService.Components.MapExport
                     layer.ContinueOnError = false;
                     for (int t = 0; t < wmsLayers[i].layers.Count; t++)
                     {
+                        //file.WriteLine("Found a sublayer");
                         string sublayerName = "";
                         try
                         {
+                            // Do not use workspace prefix, will return error
                             sublayerName = wmsLayers[i].workspacePrefix != null ?
                                            wmsLayers[i].workspacePrefix + ":" + wmsLayers[i].layers[t] :
                                            wmsLayers[i].layers[t];
-
+                            //file.WriteLine("sublayername '" + sublayerName + "'");
                             if (sublayerName != "")
                             {
                                 layer.AddLayer(sublayerName);
                             }
                         }
-                        catch
+                        catch (Exception ex)
                         {
                             // TODO
+                            //file.WriteLine("Error in adding subname.\n" + ex.ToString());
                         }
                     }
                     layer.SRID = wmsLayers[i].coordinateSystemId;
+                    //file.WriteLine("Adding layer");
+                    //file.Close();
                     map.Layers.Add(layer);
+                    //using (StreamWriter sw = new StreamWriter(@"C:\\log.txt", true))
+                    //{
+                    //    sw.WriteLine("Layer added");
+                    //}
                 }
             }
             catch
             {
+                /*
+                using (StreamWriter sw = new StreamWriter(@"C:\\log.txt", true))
+                {
+                    sw.WriteLine("Got an error in add layers");
+                }
+                */
                 // TODO
             }
         }
@@ -453,6 +485,7 @@ namespace MapService.Components.MapExport
         /// <returns></returns>
         private IStyle GetFeatureStyle(FeatureDataRow row)
         {
+            _log.Debug("GetFeatureStyle");
             VectorStyle style = new VectorStyle();
             if (row["style"] != null)
             {
@@ -507,6 +540,7 @@ namespace MapService.Components.MapExport
                     style.Fill = new SolidBrush(color);
                 }
 
+                _log.Debug("Featurestyle.pointSrc = " + featureStyle.pointSrc);
                 if (featureStyle.pointSrc != "")
                 {
                     if (featureStyle.pointSrc.StartsWith("data:"))
@@ -519,13 +553,16 @@ namespace MapService.Components.MapExport
                     {
                         try
                         {
+                            string url = HttpContext.Current.Request.Url.Authority;
+                            _log.DebugFormat("url." + url);
                             WebClient wc = new WebClient();
-                            byte[] bytes = wc.DownloadData(featureStyle.pointSrc);                            
+                            byte[] bytes = wc.DownloadData("https://" + url + "/" + featureStyle.pointSrc);                            
                             style.Symbol = this.ImageFromBytes(bytes);                            
                         }
-                        catch
+                        catch (Exception ex)
                         {
                             //TODO
+                            _log.Error("Exception when trying to get icon. " + ex.ToString());
                         }
                     }                    
                 }

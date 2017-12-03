@@ -33,6 +33,10 @@ var ToolbarView = {
     return {};
   },
 
+  componentDidMount: function(){
+
+  },
+
   /**
    * Triggered before the component mounts.
    * @instance
@@ -51,13 +55,22 @@ var ToolbarView = {
    * @return {external:ReactElement}
    */
   render: function () {
+    var layerSwitcherTool = this.props.model
+      .filter(t => t.get('toolbar'))
+      .filter(tool => tool.get('type') === 'layerswitcher')
+      .map((tool, index) => {
+        tool.set('toolbar', isMobile ? 'stable' : 'bottom');
+      });
+
+
     var tools = this.props.model
       .filter(t => t.get('toolbar'))
-      .filter(tool => tool.get('toolbar') === 'bottom')
+      .filter(tool => tool.get('toolbar') === 'bottom' || (tool.get('toolbar') === 'stable' && !mobilAnpassningEnabled))
       .map((tool, index) => {
         var a = tool.get('panel').toLowerCase()
-        ,   b = this.state.activeTool
-        ,   c = a === b ? 'btn btn-primary' : 'btn btn-default';
+          ,   b = this.state.activeTool
+          ,   c = a === b ? 'btn btn-primary' : 'btn btn-default';
+        var id = tool.get('Id');
 
         if (tool.get('active') === false) {
           return null;
@@ -65,6 +78,39 @@ var ToolbarView = {
 
         return (
           <button
+            id={id}
+            type="button"
+            className={c}
+            onClick={() => {
+              tool.clicked();
+              if (tool.get('type') !== 'information') {
+                this.props.navigationModel.set('r', Math.random());
+              }
+            }}
+            key={index}
+            title={tool.get("title")}>
+            <i className={ tool.get("icon") }></i>
+          </button>
+        );
+      });
+
+    // stable button
+    var stableButton = this.props.model
+      .filter(t => t.get('toolbar'))
+      .filter(tool => tool.get('toolbar') === 'stable' && mobilAnpassningEnabled)
+      .map((tool, index) => {
+        var a = tool.get('panel').toLowerCase()
+          ,   b = this.state.activeTool
+          ,   c = a === b ? 'btn btn-primary' : 'btn btn-default';
+        var id = tool.get('Id');
+
+        if (tool.get('active') === false) {
+          return null;
+        }
+
+        return (
+          <button
+            id={id}
             type="button"
             className={c}
             onClick={() => {
@@ -90,6 +136,7 @@ var ToolbarView = {
         });
         return (
           <button
+            id={tool.get("Id")}
             type="button"
             className={className}
             onClick={() => {
@@ -103,15 +150,21 @@ var ToolbarView = {
       });
 
     return (
-      <div className="map-toolbar-wrapper">
-        <div
-          className="btn-group btn-group-lg map-toolbar bottom-toobar"
-          role="group"
-          aria-label="toolbar">
-          {tools}
+      <div id="toolbar-">
+        <div className="map-toolbar-wrapper">
+          <div className="map-toolbar">
+            <div className="btn-group btn-group-lg stable-toolbar">{stableButton}</div>
+              <div
+                className="btn-group btn-group-lg bottom-toolbar"
+                role="group"
+                id="arrow"
+                aria-label="toolbar">
+                {tools}
+              </div>
+          </div>
+          <div className="upper-toolbar">{widgets}</div>
+          <div className="information" id="information"></div>
         </div>
-        <div className="upper-toolbar">{widgets}</div>
-        <div className="information" id="information"></div>
       </div>
     );
   }

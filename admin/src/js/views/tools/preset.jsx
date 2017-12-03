@@ -28,7 +28,8 @@ var defaultState = {
   validationErrors: [],
   presetList: [],
   active: false,
-  index: 0
+  index: 0,
+  instruction: ""
 };
 
 class ToolOptions extends Component {
@@ -54,6 +55,7 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
+        instruction: tool.options.instruction,
         presetList: tool.options.presetList || []
       });
     } else {
@@ -102,6 +104,7 @@ class ToolOptions extends Component {
       if (t.type === this.type) {
         t.options = tool.options;
         t.index = tool.index;
+        t.instruction = tool.instruction;
       }
     });
   }
@@ -112,7 +115,8 @@ class ToolOptions extends Component {
       "type": this.type,
       "index": this.state.index,
       "options": {
-        presetList: this.state.presetList
+        presetList: this.state.presetList,
+        "instruction": this.state.instruction,
       }
     };
 
@@ -356,6 +360,15 @@ createGuid() {
               type="text"
               onChange={(e) => {this.handleInputChange(e)}}
               value={this.state.index}/>
+          </div>
+          <div>
+            <label htmlFor="instruction">Instruktioner</label>
+            <input
+              id="instruction"
+              name="instruction"
+              type="text"
+              onChange={(e) => {this.handleInputChange(e)}}
+              value={this.state.instruction}/>
           </div>
           <div>
             <form ref="presetForm" onSubmit={(e) => { e.preventDefault(); this.addPreset(e) }}>

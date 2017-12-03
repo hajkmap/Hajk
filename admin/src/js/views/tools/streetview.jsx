@@ -27,6 +27,7 @@ var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
+  instruction: "",
   apiKey: "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
 };
 
@@ -46,6 +47,7 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
+        instruction: tool.options.instruction,
         apiKey: tool.options.apiKey
       });
     } else {
@@ -94,6 +96,7 @@ class ToolOptions extends Component {
       if (t.type === this.type) {
         t.options = tool.options;
         t.index = tool.index;
+        t.instruction = tool.instruction;
       }
     });
   }
@@ -105,6 +108,7 @@ class ToolOptions extends Component {
       "index": this.state.index,
       "options": {
         apiKey: this.state.apiKey,
+        "instruction": this.state.instruction,
       }
     };
 
@@ -172,6 +176,15 @@ class ToolOptions extends Component {
               type="text"
               onChange={(e) => {this.handleInputChange(e)}}
               value={this.state.index}/>
+          </div>
+          <div>
+            <label htmlFor="instruction">Instruktioner</label>
+            <input
+              id="instruction"
+              name="instruction"
+              type="text"
+              onChange={(e) => {this.handleInputChange(e)}}
+              value={this.state.instruction}/>
           </div>
           <div>
             <label htmlFor="apiKey">API-nyckel</label>

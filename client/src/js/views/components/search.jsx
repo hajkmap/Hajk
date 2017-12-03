@@ -123,11 +123,21 @@ var SearchView = {
     this.props.model.set('value', "");
     this.props.model.set('searchTriggered', false);
     this.props.model.clear();
+    $("#snabbsokRensa").click();
+
+    if(document.getElementById("alertSearchbar") != null) {
+      document.getElementById("alertSearchbar").remove();
+    }
+
     this.setState({
       loading: true,
       showResults: true,
       result: []
     });
+
+    if ($('#searchbar-input-field').length != 0){
+      $('#searchbar-input-field')[0].value = ""
+    }
   },
 
   /**
@@ -431,8 +441,8 @@ var SearchView = {
             <span className="info-text clearfix">Inled sökningen med * för att söka på delar av en text.</span>
           </div>
         </div>
-        <button onClick={search_on_click} type="submit" className="btn btn-default">Sök</button>&nbsp;
-        <button onClick={this.clear} type="submit" className="btn btn-default">Rensa</button>
+        <button onClick={search_on_click} type="submit" className="btn btn-main">Sök</button>&nbsp;
+        <button onClick={this.clear} type="submit" className="btn btn-main" id="sokRensa">Rensa</button>
         {results}
       </div>
     );

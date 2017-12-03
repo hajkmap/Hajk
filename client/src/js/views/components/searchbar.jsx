@@ -53,7 +53,9 @@ var SearchBarView = {
   getInitialState: function() {
     return {
       visible: false,
-      displayPopup: this.props.model.get('displayPopup')
+      displayPopup: this.props.model.get('displayPopup'),
+      haveUrlSearched: false,
+      updateCtr: 2,
     };
   },
 
@@ -79,6 +81,69 @@ var SearchBarView = {
       });
     });
 
+	    var str
+      , result
+      , typeName;
+
+    // get s and v
+    var paramGet = function (name) {
+      var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+      return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+    };
+
+    var s = paramGet('s');
+    var v = paramGet('v');
+
+    if(s == null){
+      this.props.model.set('filter', '*');
+    }else{
+      var filterName = '*';
+      this.props.model.get('sources').map((wfslayer, i) => {
+      if(s.toUpperCase() == wfslayer.caption.toUpperCase()){
+        filterName = wfslayer.caption;
+      }
+      });
+      this.props.model.set('filter', filterName);
+    }
+
+    if((!this.state.haveUrlSearched) && typeof v !== 'undefined') {
+      var field = document.getElementById("searchbar-input-field");
+      field.value = v;
+
+      this.value = v;
+      this.props.model.set('value', this.value);
+      this.setState({
+        value: this.value,
+        minimized: false,
+        force: true
+      });
+      this.props.model.set('force', true);
+      if (this.refs.searchInput.value.length > 3) {
+        this.search();
+      } else {
+        this.setState({
+          loading: false
+        });
+      }
+    }
+  },
+
+  componentDidUpdate: function(){
+
+    var hit = document.getElementById('hit-0-group-0');
+    if (!this.state.haveUrlSearched){
+      try {
+        hit.click();
+      } catch (err){
+
+      }
+    }
+
+    if (this.state.updateCtr > 1){
+      this.state.updateCtr -= 1;
+    } else {
+      this.state.haveUrlSearched = true;
+    }
   },
 
   /**
@@ -108,6 +173,7 @@ var SearchBarView = {
    * @instance
    */
   clear: function () {
+    $("#sokRensa").click();
     this.value = "";
     this.props.model.set('value', "");
     this.props.model.clear();
@@ -124,6 +190,7 @@ var SearchBarView = {
    * @param {object} event
    */
   handleKeyDown: function (event) {
+    this.props.model.set('filter', '*');
     if (event.keyCode === 13 && event.target.value.length < 5) {
       event.preventDefault();
       this.props.model.set('value', event.target.value);
@@ -185,7 +252,7 @@ var SearchBarView = {
   bindLayerVisibilityChange : function () {
     this.props.model.get('layerCollection').each((layer) => {
       layer.on("change:visible", () => {
-        this.update();
+        //this.update(); // causes a search to be done everytime a layer's visibility changes. Then it only searches in adresser and fastighet
       });
     });
   },
@@ -195,6 +262,7 @@ var SearchBarView = {
    * @instance
    * @param {string} type
    * @param {object} event
+   *
    */
   setFilter: function (event) {
     this.props.model.set('filter', event.target.value);
@@ -250,7 +318,7 @@ var SearchBarView = {
     var groups = this.props.model.get('items');
     return (
       <div className="search-results" key="search-results">
-        <h3>Sökresultat <span className="pull-right btn btn-default" onClick={() => {this.clear()}}>Rensa</span></h3>
+        <h3>Sökresultat <span className="pull-right btn btn-default" onClick={() => {this.clear()}} id="snabbsokRensa">Rensa</span></h3>
         <div>
           <input type="checkbox" id="display-popup" ref="displayPopup" onChange={(e) => {this.onChangeDisplayPopup(e)}} checked={this.state.displayPopup}></input>
           <label htmlFor="display-popup">Visa information</label>
@@ -319,7 +387,7 @@ var SearchBarView = {
                results = this.renderResults();
         } else {
           results = (
-            <p className="alert alert-info">
+            <p className="alert alert-info" id="alertSearchbar">
               Skriv minst fyra tecken för att påbörja automatisk sökning. Tryck på <b>retur</b> för att forcera en sökning.
             </p>
           )
@@ -329,6 +397,7 @@ var SearchBarView = {
     }
 
     var search_on_input = (event) => {
+      this.props.model.set('filter', '*');
       this.value = event.target.value;
       this.props.model.set('value', this.value);
       this.setState({
@@ -354,23 +423,28 @@ var SearchBarView = {
               <i className="fa fa-search"></i>
             </div>
             <input
+              id="searchbar-input-field"
               type="text"
               ref="searchInput"
               className="form-control"
-              placeholder="Ange söktext.."
+              placeholder="Ange adress eller fastighetsbeteckning.."
               value={value}
               onKeyDown={this.handleKeyDown}
               onChange={search_on_input} />
           </div>
-        </div>
-        <div className="search-options">
-          {options}
         </div>
         {results}
       </div>
     );
   }
 };
+/**
+ *
+ * Ta bort sök alternative ovanför {results} above
+ *         <div className="search-options">{options}</div>
+ */
+
+
 
 /**
  * SearchBarView module.<br>

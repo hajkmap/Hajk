@@ -41,7 +41,8 @@ var AnchorModelProperties = {
   title: 'Länk till kartan',
   visible: false,
   shell: undefined,
-  anchor: ""
+  anchor: "",
+  instruction: ''
 }
 
 /**
@@ -112,7 +113,7 @@ var AnchorModel = {
    *
    * @instance
    */
-  clicked: function () {
+  clicked: function (arg) {
     this.set('visible', true);    
     this.set('toggled', !this.get('toggled'));
 

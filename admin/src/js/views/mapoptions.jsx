@@ -49,7 +49,11 @@ class MapOptions extends Component {
         zoom: config.zoom,
         center: config.center,
         logo: config.logo,
-        extent: config.extent
+        extent: config.extent,
+        infologo: config.infologo,
+        mobileleft: config.mobileleft,
+        mobileright: config.mobileright,
+        mobile: config.mobile
       });
     });
     this.validate();
@@ -77,6 +81,8 @@ class MapOptions extends Component {
     this.state.center = mapConfig.center;
     this.state.logo = mapConfig.logo;
     this.state.extent = mapConfig.extent;
+    this.state.infologo = mapConfig.infologo;
+    this.state.mobile = mapConfig.mobile;
   }
 
   getValue(fieldName) {
@@ -157,6 +163,11 @@ class MapOptions extends Component {
           valid = false;
         }
         break;
+      case "mobile":
+        if (value !== true && value !== false){
+          valid = false;
+        }
+        break;
       default:
         break;
     }
@@ -189,6 +200,8 @@ class MapOptions extends Component {
       config.center = this.getValue('center');
       config.logo = this.getValue('logo');
       config.extent = this.getValue('extent');
+      config.infologo = this.getValue("infologo");
+      config.mobile = this.state.mobile;
       this.props.model.updateMapConfig(config, success => {
         var msg = success
         ? "Uppdateringen lyckades."
@@ -302,6 +315,29 @@ class MapOptions extends Component {
                   this.setState({extent: e.target.value});
                 }}
               />
+            </div>
+            <div>
+              <label>Logo infoknapp</label>
+              <input
+                type="text"
+                ref="input_infologo"
+                value={this.state.infologo}
+                className={this.getValidationClass("logo")}
+                onChange={(e) => {
+                  this.setState({infologo: e.target.value});
+                  this.validateField("infologo");
+                }}
+              />
+            </div>
+            <div>
+              <label>Mobilanpassning</label>
+              <input
+                type="checkbox"
+                ref="input_mobile"
+                onChange={(e) => {
+                  this.setState({mobile: e.target.checked});
+                }}
+                checked={this.state.mobile}/>&nbsp;
             </div>
             <div className="col-md-12">
               <span className="pull-left">

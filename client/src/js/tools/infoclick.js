@@ -60,7 +60,8 @@ var InfoClickModelProperties = {
   features: undefined,
   selectedFeature: undefined,
   highlightLayer: undefined,
-  markerImg: "assets/icons/marker.png",
+  markerImg: "assets/ico" +
+  "ns/marker.png",
   anchor: [
     16,
     16
@@ -191,6 +192,12 @@ var InfoClickModel = {
             if (Array.isArray(features) && features.length > 0) {
               features.forEach(feature => {
                 this.addInformation(feature, wmsLayer, (featureInfo) => {
+                  try{ // TODO: solkarta
+                    if (wmsLayer.attributes.caption === "Solkartan" && featureInfo.feature.get('geometry') === null){
+                      return;
+                    }
+                  } catch (e){
+                  }
                   if (featureInfo) {
                     infos.push(featureInfo);
                   }

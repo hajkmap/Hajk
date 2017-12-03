@@ -26,7 +26,8 @@ import { Component } from "react";
 var defaultState = {
   validationErrors: [],
   active: false,
-  index: 0
+  index: 0,
+  instruction: ""
 };
 
 class ToolOptions extends Component {
@@ -44,7 +45,8 @@ class ToolOptions extends Component {
     if (tool) {
       this.setState({
         active: true,
-        index: tool.index
+        index: tool.index,
+        instruction: tool.options.instruction
       });
     } else {
       this.setState({
@@ -92,6 +94,7 @@ class ToolOptions extends Component {
       if (t.type === this.type) {
         t.options = tool.options;
         t.index = tool.index;
+        t.instruction = tool.instruction;
       }
     });
   }
@@ -102,6 +105,7 @@ class ToolOptions extends Component {
       "type": this.type,
       "index": this.state.index,
       "options": {
+        "instruction": this.state.instruction
       }
     };
 
@@ -169,6 +173,15 @@ class ToolOptions extends Component {
               type="text"
               onChange={(e) => {this.handleInputChange(e)}}
               value={this.state.index}/>
+          </div>
+          <div>
+            <label htmlFor="instruction">Instruktioner</label>
+            <input
+              id="instruction"
+              name="instruction"
+              type="text"
+              onChange={(e) => {this.handleInputChange(e)}}
+              value={this.state.instruction}/>
           </div>
         </form>
       </div>

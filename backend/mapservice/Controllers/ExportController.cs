@@ -14,6 +14,7 @@ using System.IO.Compression;
 using System;
 using ICSharpCode.SharpZipLib.Zip;
 using ICSharpCode.SharpZipLib.Core;
+using log4net;
 
 using log4net;
 
@@ -66,7 +67,18 @@ namespace MapService.Controllers
         [HttpPost]
         public string PDF(string json)
         {
-            _log.DebugFormat("Received json: {0}", json);
+            
+            try
+            {
+                _log.DebugFormat("Received json: " + json);
+                try
+                {
+                    byte[] decoded = Convert.FromBase64String(json);
+                    json = System.Text.Encoding.UTF8.GetString(decoded);
+                    _log.DebugFormat("json after decode: " + json);
+                }
+                catch (Exception e)
+                { }
 
             try
             {
@@ -110,8 +122,15 @@ namespace MapService.Controllers
         [HttpPost]
         public string TIFF(string json)
         {
-            _log.DebugFormat("Received json: {0}", json);
-
+            _log.DebugFormat("Received json: " + json);
+            try
+            {
+                byte[] decoded = Convert.FromBase64String(json);
+                json = System.Text.Encoding.UTF8.GetString(decoded);
+                _log.DebugFormat("json after decode: " + json);
+            }
+            catch (Exception e)
+            { }
             MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
                                     
             TIFFCreator tiffCreator = new TIFFCreator();
@@ -166,8 +185,15 @@ namespace MapService.Controllers
         [ValidateInput(false)]
         public string KML(string json)
         {
-            _log.DebugFormat("Received json: {0}", json);
-
+            _log.DebugFormat("Received json: " + json);
+            try
+            {
+                byte[] decoded = Convert.FromBase64String(json);
+                json = System.Text.Encoding.UTF8.GetString(decoded);
+                _log.DebugFormat("json after decode: " + json);
+            } catch(Exception e)
+            { }
+            
             KMLCreator kmlCreator = new KMLCreator();
             byte[] bytes = kmlCreator.Create(json);
             string[] fileInfo = byteArrayToFileInfo(bytes, "kml");
@@ -193,8 +219,15 @@ namespace MapService.Controllers
         [HttpPost]
         public string Excel(string json)
         {
-            _log.DebugFormat("Received json: {0}", json);
-
+            _log.DebugFormat("Received json: " + json);
+            try
+            {
+                byte[] decoded = Convert.FromBase64String(json);
+                json = System.Text.Encoding.UTF8.GetString(decoded);
+                _log.DebugFormat("json after decode: " + json);
+            }
+            catch (Exception e)
+            { }
             List<ExcelTemplate> data = JsonConvert.DeserializeObject<List<ExcelTemplate>>(json);
             DataSet dataSet = Util.ToDataSet(data);
             ExcelCreator excelCreator = new ExcelCreator();

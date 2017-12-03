@@ -309,7 +309,7 @@ window.matchMedia = window.matchMedia || (function(doc, undefined){
 		},
 		//define ajax obj 
 		xmlHttp = (function() {
-			var xmlhttpmethod = false;	
+			var xmlhttpmethod = false;
 			try {
 				xmlhttpmethod = new XMLHttpRequest();
 			}

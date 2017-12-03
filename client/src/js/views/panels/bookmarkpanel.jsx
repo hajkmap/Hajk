@@ -68,7 +68,9 @@ var BookmarkPanelView = {
   onSubmitForm: function (e) {
     e.preventDefault();
     var name = ReactDOM.findDOMNode(this.refs.name).value;
-    this.props.model.addBookmark(name, () => this.forceUpdate());
+    if(name.length > 0) {
+      this.props.model.addBookmark(name, () => this.forceUpdate());
+    }
   },
 
   /**
@@ -110,6 +112,11 @@ var BookmarkPanelView = {
     this.props.model.updateApplication(bookmark);
   },
 
+  openInstruction: function (){
+    var element = $("#instructionText");
+    element.toggle();
+  },
+
   /**
    * Render the view.
    * @instance
@@ -129,14 +136,14 @@ var BookmarkPanelView = {
           <li key={i} onClick={this.loadBookmark.bind(this, bookmark)}>
             <i className={iconClass} onClick={this.updateBookmark.bind(this, bookmark.id)}></i>
             {bookmark.name}
-            <i className="delete fa icon fa-remove" onClick={this.removeBookmark.bind(this, bookmark.id)}></i>
+            <i className="delete fa icon fa-remove" onClick={this.removeBookmark.bind(this, bookmark.name)}></i>
           </li>
         );
       });
     }
 
     return (
-      <Panel title="Bokmärken" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
+      <Panel title="Bokmärken" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
         <div className="bookmark-panel panel-content">
           <form onSubmit={this.onSubmitForm}>
             <div className="form-group">

@@ -23,8 +23,6 @@
 var shiftIsDown = false;
 var ctrlIsDown = false;
 
-var isMobile = () => document.body.clientWidth <= 600;
-
 window.onkeydown = (e) => {
   shiftIsDown = e.shiftKey;
   ctrlIsDown = e.ctrlKey;
@@ -123,7 +121,7 @@ SearchResultGroup = {
         element.addClass('selected');
     }
 
-    if (isMobile()) {      
+    if (isMobile) {
       if (this.props.parentView) {
         if (this.props.parentView.props.navigationPanel) {
           this.props.parentView.props.navigationPanel.minimize();
@@ -158,7 +156,7 @@ SearchResultGroup = {
               ,   title = getTitle(this.props.result.displayName)
               ,   index = i
               ;
-              return (<div key={hitId} index={i} data-index={i} onClick={this.handleClick.bind(this, hit, i)}>{title}</div>);
+              return (<div id={hitId} key={hitId} index={i} data-index={i} onClick={this.handleClick.bind(this, hit, i)}>{title}</div>);
             })
           }
         </div>

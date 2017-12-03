@@ -49,13 +49,18 @@ var InformationView = {
     this.props.model.set('display', false);
   },
 
-  /**
+  /**lo
    * Render the legend item component.
    * @instance
    * @return {external:ReactElement}
    */
   render: function () {
     if (this.state && this.state.display) {
+      var infoContent = this.props.model.get('text');
+      if(this.props.model.get('base64EncodeForInfotext')){
+        infoContent = atob(infoContent);
+      }
+
       return (
         <div id="blanket">
           <div id="container">
@@ -63,7 +68,7 @@ var InformationView = {
               <i className="fa fa-times pull-right clickable panel-close" id="close" onClick={this.close}></i>
             </div>
             <div id="body-wrapper">
-              <div key="b" id="body" dangerouslySetInnerHTML={{__html: this.props.model.get('text')}}></div>
+              <div key="b" id="body" dangerouslySetInnerHTML={{__html: infoContent}}></div>
             </div>
           </div>
         </div>
