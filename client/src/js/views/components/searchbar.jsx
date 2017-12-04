@@ -173,7 +173,9 @@ var SearchBarView = {
    * @instance
    */
   clear: function () {
-    $("#sokRensa").click();
+    if (typeof $("#sokRensa") !== "undefined") {
+      $("#sokRensa").click();
+    }
     this.value = "";
     this.props.model.set('value', "");
     this.props.model.clear();
