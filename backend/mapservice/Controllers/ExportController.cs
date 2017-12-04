@@ -16,8 +16,6 @@ using ICSharpCode.SharpZipLib.Zip;
 using ICSharpCode.SharpZipLib.Core;
 using log4net;
 
-using log4net;
-
 namespace MapService.Controllers
 {
     public class ExportController : AsyncController
@@ -40,7 +38,7 @@ namespace MapService.Controllers
         }
 
         /// <summary>
-        /// Depth-first recursive delete, with handling for descendant 
+        /// Depth-first recursive delete, with handling for descendant
         /// directories open in Windows Explorer.
         /// </summary>
         private static void DeleteDirectory(string path)
@@ -67,7 +65,7 @@ namespace MapService.Controllers
         [HttpPost]
         public string PDF(string json)
         {
-            
+
             try
             {
                 _log.DebugFormat("Received json: " + json);
@@ -80,8 +78,6 @@ namespace MapService.Controllers
                 catch (Exception e)
                 { }
 
-            try
-            {
                 MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
                 AsyncManager.OutstandingOperations.Increment();
                 PDFCreator pdfCreator = new PDFCreator();

@@ -30,9 +30,9 @@ var defaultState = {
   exportUrl: "/mapservice/export/kml",
   importUrl: "/mapservice/import/kml",
   icons: "",
-  proxyUrl: ""
+  proxyUrl: "",
   base64Encode: false,
-  instruction: "",
+  instruction: ""
 };
 
 class ToolOptions extends Component {
@@ -54,7 +54,7 @@ class ToolOptions extends Component {
         exportUrl: tool.options.exportUrl,
         importUrl: tool.options.importUrl,
         icons: tool.options.icons,
-        proxyUrl: tool.options.proxyUrl
+        proxyUrl: tool.options.proxyUrl,
         base64Encode: tool.options.base64Encode,
         instruction: tool.options.instruction
       });
@@ -118,7 +118,7 @@ class ToolOptions extends Component {
         exportUrl: this.state.exportUrl,
         importUrl: this.state.importUrl,
         base64Encode: this.state.base64Encode,
-        instruction: this.state.instruction
+        instruction: this.state.instruction,
         icons: this.state.icons,
         proxyUrl: this.state.proxyUrl
       }
