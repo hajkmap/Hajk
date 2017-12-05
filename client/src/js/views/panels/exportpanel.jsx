@@ -79,7 +79,7 @@ var ExportTiffSettings = React.createClass({
       <div className="export-settings">
         <div>
           <div>
-            <button onClick={this.exportTIFF} className="btn btn-default">Skapa TIFF {loader}</button>
+            <button onClick={this.exportTIFF} className="btn btn-primary">Skapa TIFF {loader}</button>
           </div>
           <div>{downloadLink}</div>
           <br />
@@ -101,7 +101,7 @@ var ExportPdfSettings = React.createClass({
     return {
       selectFormat: 'A4',
       selectOrientation: 'S',
-      selectScale: '2500',
+      selectScale: '500',
       manualScale: '2500',
       selectResolution: '72',
       center: this.props.model.getPreviewFeature() ?
@@ -236,6 +236,48 @@ var ExportPdfSettings = React.createClass({
                  map.getView().getCenter();
 
     this.props.model.addPreview(scale, paper, center);
+
+
+    var preScale = undefined;
+
+    switch(scale){
+      case "250":
+        preScale = 6;
+        break;
+      case "500":
+        preScale = 6;
+        break;
+      case "1000":
+        preScale = 5;
+        break;
+      case "2500":
+        preScale = 4;
+        break;
+      case "5000":
+        preScale = 3;
+        break;
+      case "10000":
+        preScale = 2;
+        break;
+      case "25000":
+        preScale = 1;
+        break;
+      case "50000":
+        preScale = 1;
+        break;
+      case "100000":
+        preScale = 0;
+        break;
+      case "250000":
+        preScale = 0;
+        break;
+      default:
+        preScale = map.getView().getZoom();
+        break;
+    }
+    if(this.props.model.get('autoScale') && isMobile && mobilAnpassningEnabled && preScale < map.getView().getZoom()){
+      map.getView().setZoom(preScale);
+    }
   },
 
   exportPDF: function () {
@@ -356,7 +398,7 @@ var ExportPdfSettings = React.createClass({
           </div>
         </div>
         <div>
-          <button onClick={this.exportPDF} className="btn btn-default">Skapa PDF {loader}</button>
+          <button onClick={this.exportPDF} className="btn btn-main">Skapa PDF {loader}</button>
           <br />
           {downloadLink}
         </div>
@@ -500,7 +542,7 @@ var ExportPanelView = {
         olMap={this.props.model.get('olMap')}/>;
     }
     return (
-      <Panel title="Skriv ut karta" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
+      <Panel title="Skriv ut karta" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
         <div className="export-panel">
           <div>
             {this.renderToolbar()}

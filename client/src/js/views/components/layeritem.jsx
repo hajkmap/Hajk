@@ -42,7 +42,8 @@ var LayerItemView = {
       infoText: "",
       infoUrl: "",
       infoOwner: "",
-      infoExpanded: false
+      infoExpanded: false,
+      instruction: ""
     };
   },
 
@@ -100,6 +101,9 @@ var LayerItemView = {
   onVisibleChanged: function () {
     if (this.props.layer) {
       this.props.layer.getLayer().setVisible(this.props.layer.getVisible());
+      if (this.props.layer.getLayer().getVisible() && this.props.layer.id == '500'){
+        this.props.layer.attributes.map.getMap().getView().setCenter([165296.31, 6331683.28])
+      }
     }
     this.setState({
       visible: this.props.layer.getVisible()
@@ -224,10 +228,10 @@ var LayerItemView = {
 
         </div>
         <div className={innerInfoBodyClass}>
-          <p className="info-title">{infoTitle}</p>
-          <p className="info-text">{infoText}</p>
-          <a className="info-text" href={infoUrl} target="_blank">{infoUrl}</a><br/>
-          <i className="info-text">{infoOwner ? "Ägare: " + infoOwner : ""}</i>
+          <p className="info-title" dangerouslySetInnerHTML={{__html: this.state.infoTitle}}></p>
+          <p className="info-text" dangerouslySetInnerHTML={{__html: this.state.infoText}}></p>
+          <p className="info-text" dangerouslySetInnerHTML={{__html: this.state.infoUrl}}></p>
+          <p className="info-text" dangerouslySetInnerHTML={{__html: this.state.infoOwner}}></p>
         </div>
 
         <div className={innerBodyClass}>

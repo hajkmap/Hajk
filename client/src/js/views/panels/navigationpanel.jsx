@@ -32,6 +32,7 @@ var panels = {
   'anchorpanel': require('views/anchorpanel'),
   'streetviewpanel': require('views/streetviewpanel'),
   'bufferpanel': require('views/bufferpanel'),
+  'routingpanel': require('views/routingpanel'),
   'presetpanel': require('views/presetpanel')
 };
 
@@ -99,14 +100,14 @@ var NavigationPanelView = {
     this.props.model.on("change:toggled", (sender, visible) => {
       var minimized = true;
       if (this.forced) {
-        minimized = false;
-      }
-      this.setState({minimized: minimized});
-      this.forced = false;
+            minimized = false;
+        }
+        this.setState({minimized: minimized});
+        this.forced = false;
     });
 
-    this.props.model.on('change:r', () => {
-      this.maximize();
+      this.props.model.on('change:r', () => {
+          this.maximize();
     });
   },
 
@@ -207,7 +208,7 @@ var NavigationPanelView = {
     return (
       <div>
         <Alert options={this.getAlertOptions()} />
-        <div className={classes} onClick={this.maximize}>
+        <div id="navigation-panel" className={classes} onClick={this.maximize}>
           {panelInstance}
         </div>
       </div>

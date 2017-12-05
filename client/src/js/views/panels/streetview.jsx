@@ -68,7 +68,9 @@ var StreetView = {
 
   renderInfoText: function () {
     if (!this.props.model.get('location')) {
-      return <div>Klicka i kartan för att aktivera street view.</div>;
+      return <div>Klicka i kartan för att aktivera street view. <br/>
+        Förstora fönstret genom att trycka på symbolen i övre högra hörnet. <br/>
+      </div>;
     }
   },
 
@@ -79,7 +81,7 @@ var StreetView = {
    */
   render: function () {
     return (
-      <Panel title="Street View" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked}>
+      <Panel title="Street View" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} instruction={atob(this.props.model.get('instruction'))}>
         <div className="panel-content">
           <h3>Street view</h3>
           {this.renderInfoText()}

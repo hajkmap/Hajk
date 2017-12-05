@@ -42,18 +42,21 @@ var ToolModel = require('tools/tool');
 var LayerSwitcherModelProperties = {
   type: 'layerswitcher',
   panel: 'LayerPanel',
-  toolbar: 'bottom',
+  //toolbar: 'bottom',
   icon: 'fa fa-bars icon',
-  title: 'Lagerhanterare',
+  title: 'Kartlager',
   visible: false,
   layerCollection: undefined,
   backgroundSwitcherMode: 'hidden',
-  active: true,
-  visibleAtStart: true,
+//  active: true,
+//  visibleAtStart: true,
   backgroundSwitcherBlack: true,
   backgroundSwitcherWhite: true,
-  toggleAllButton: true
+  toggleAllButton: true,
+  haveInitializedBaseLayers: false,
+  toolbar: 'bottom' // this is updated in shell.jsx in terms of mobile
 };
+
 
 /**
  * Prototype for creating a layerswitcher model.
@@ -74,7 +77,7 @@ var LayerSwitcherModel = {
 
   configure: function (shell) {
     this.set('layerCollection', shell.getLayerCollection());
-    if (this.get('visibleAtStart') && document.body.scrollWidth >= 600) {
+    if (this.get('visibleAtStart') /* && document.body.scrollWidth >= 600 */) {
       this.set('visible', true);
     }
   },
@@ -131,7 +134,7 @@ var LayerSwitcherModel = {
    * @return {Layer[]} base layers
    */
   getBaseLayers: function () {
-    var baseLayers = [];
+    var baseLayers = []
     this.get('baselayers').forEach(baseLayer => {
       var layer = this.get('layerCollection').find(layer => layer.id === baseLayer.id);
       if (layer) {

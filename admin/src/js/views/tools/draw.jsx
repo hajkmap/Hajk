@@ -30,7 +30,9 @@ var defaultState = {
   exportUrl: "/mapservice/export/kml",
   importUrl: "/mapservice/import/kml",
   icons: "",
-  proxyUrl: ""
+  proxyUrl: "",
+  base64Encode: false,
+  instruction: ""
 };
 
 class ToolOptions extends Component {
@@ -52,7 +54,9 @@ class ToolOptions extends Component {
         exportUrl: tool.options.exportUrl,
         importUrl: tool.options.importUrl,
         icons: tool.options.icons,
-        proxyUrl: tool.options.proxyUrl
+        proxyUrl: tool.options.proxyUrl,
+        base64Encode: tool.options.base64Encode,
+        instruction: tool.options.instruction
       });
     } else {
       this.setState({
@@ -100,6 +104,7 @@ class ToolOptions extends Component {
       if (t.type === this.type) {
         t.options = tool.options;
         t.index = tool.index;
+        t.instruction = tool.instruction;
       }
     });
   }
@@ -112,6 +117,8 @@ class ToolOptions extends Component {
       "options": {
         exportUrl: this.state.exportUrl,
         importUrl: this.state.importUrl,
+        base64Encode: this.state.base64Encode,
+        instruction: this.state.instruction,
         icons: this.state.icons,
         proxyUrl: this.state.proxyUrl
       }
@@ -191,8 +198,26 @@ class ToolOptions extends Component {
             <input value={this.state.importUrl} type="text" name="importUrl" onChange={(e) => {this.handleInputChange(e)}}></input>
           </div>
           <div>
+            <input
+              id="Base64-active"
+              name="base64Encode"
+              type="checkbox"
+              onChange={(e) => {this.handleInputChange(e)}}
+              checked={this.state.base64Encode}/>&nbsp;
+            <label htmlFor="Base64-active">Base64-encoding aktiverad</label>
+          </div>
+          <div>
             <label htmlFor="icons">Ikoner</label>
             <input value={this.state.icons} type="text" name="icons" onChange={(e) => {this.handleInputChange(e)}}></input>
+          </div>
+          <div>
+            <label htmlFor="instruction">Instruktioner</label>
+            <input
+              id="instruction"
+              name="instruction"
+              type="text"
+              onChange={(e) => {this.handleInputChange(e)}}
+              value={this.state.instruction}/>
           </div>
           <div>
             <label htmlFor="proxyUrl">Proxy URL till utskrift och export</label>

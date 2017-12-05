@@ -171,7 +171,6 @@ var ShellModel = {
    * @param {object} configuration
    */
   updateConfig: function () {
-    console.log("Set map state", this.getConfig());
   }
 };
 

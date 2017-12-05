@@ -29,7 +29,9 @@ var defaultState = {
   index: 0,
   visibleAtStart: false,
   text: "",
-  headerText: ""
+  headerText: "",
+  showInfoOnce: false,
+  base64EncodeForInfotext: false
 };
 
 class ToolOptions extends Component {
@@ -50,7 +52,9 @@ class ToolOptions extends Component {
         index: tool.index,
         visibleAtStart: tool.options.visibleAtStart || false,
         text: tool.options.text || "",
-        headerText: tool.options.headerText || ""
+        headerText: tool.options.headerText || "",
+        showInfoOnce: tool.options.showInfoOnce,
+        base64EncodeForInfotext: tool.options.base64EncodeForInfotext
       });
     } else {
       this.setState({
@@ -110,7 +114,9 @@ class ToolOptions extends Component {
       "options": {
         text: this.state.text,
         headerText: this.state.headerText,
-        visibleAtStart: this.state.visibleAtStart
+        visibleAtStart: this.state.visibleAtStart,
+        showInfoOnce: this.state.showInfoOnce,
+        base64EncodeForInfotext: this.state.base64EncodeForInfotext
       }
     };
 
@@ -195,6 +201,24 @@ class ToolOptions extends Component {
           <div>
             <label htmlFor="text">Infotext</label>
             <textarea value={this.state.text} type="text" name="text" onChange={(e) => {this.handleInputChange(e)}}></textarea>
+          </div>
+          <div>
+            <input
+              id="showInfoOnce"
+              name="showInfoOnce"
+              type="checkbox"
+              onChange={(e) => {this.handleInputChange(e)}}
+              checked={this.state.showInfoOnce}/>&nbsp;
+            <label htmlFor="showInfoOnce">Visa Information endast en gång</label>
+          </div>
+          <div>
+            <input
+              id="base64EncodeForInfotext"
+              name="base64EncodeForInfotext"
+              type="checkbox"
+              onChange={(e) => {this.handleInputChange(e)}}
+              checked={this.state.base64EncodeForInfotext}/>&nbsp;
+            <label htmlFor="base64EncodeForInfotext">Använd Base64 för Infotext</label>
           </div>
         </form>
       </div>

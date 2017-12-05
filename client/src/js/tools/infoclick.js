@@ -60,7 +60,8 @@ var InfoClickModelProperties = {
   features: undefined,
   selectedFeature: undefined,
   highlightLayer: undefined,
-  markerImg: "assets/icons/marker.png",
+  markerImg: "assets/ico" +
+  "ns/marker.png",
   anchor: [
     16,
     16

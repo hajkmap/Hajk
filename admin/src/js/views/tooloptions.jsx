@@ -31,10 +31,11 @@ import Edit from "./tools/edit.jsx";
 import Export from "./tools/export.jsx";
 import Infoclick from "./tools/infoclick.jsx";
 import Information from "./tools/information.jsx";
-import Location from "./tools/Location.jsx";
+import Location from "./tools/location.jsx";
 import Search from "./tools/search.jsx";
 import StreetView from "./tools/streetview.jsx";
 import Preset from "./tools/preset.jsx";
+import Routing from "./tools/routing.jsx";
 
 var defaultState = {
   activeTool: undefined,
@@ -97,6 +98,8 @@ class ToolOptions extends Component {
         return <StreetView parent={this} model={this.props.model}></StreetView>
       case "preset":
         return <Preset parent={this} model={this.props.model}></Preset>
+      case "routing":
+        return <Routing parent={this} model={this.props.model}></Routing>
       default:
         return null;
     }
@@ -143,15 +146,16 @@ class ToolOptions extends Component {
       buffer: "Skapa buffertzon",
       bookmark: "Bokmärken",
       coordinates: "Fånga koordinat",
-      draw: "Rita och måttsätt",
+      draw: "Rita och mäta",
       edit: "Editering",
       export: "Utskrift",
       infoclick: "Infoklick",
       information: "Om kartan",
-      location: "Visa min position",
       search: "Sök",
       streetview: "Google Street View",
-      preset: "Snabbval"
+      preset: "Snabbval",
+      location: "Visa min position",
+      routing: "Navigation"
     };
 
     return (

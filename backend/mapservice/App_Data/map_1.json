@@ -8,7 +8,7 @@
         181896.33,
         6101648.07,
         864416.0,
-        7689478.3
+        7689478.31
       ],
       "units": null
     },
@@ -19,12 +19,23 @@
         181896.33,
         6101648.07,
         864416.0,
-        7689478.3
+        7689478.31
       ],
       "units": null
     },
     {
       "code": "EPSG:3007",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [
+        60436.5084,
+        6192389.565,
+        217643.4713,
+        6682784.4276
+      ],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3007",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
       "extent": [
         60436.5084,
@@ -173,28 +184,293 @@
       "options": {
         "baselayers": [
           {
-            "id": "22",
+            "id": "0",
             "visibleAtStart": true,
+            "drawOrder": 0
+          },
+          {
+            "id": "1",
+            "visibleAtStart": false,
+            "drawOrder": 0
+          },
+          {
+            "id": "4",
+            "visibleAtStart": false,
+            "drawOrder": 0
+          },
+          {
+            "id": "3",
+            "visibleAtStart": false,
+            "drawOrder": 0
+          },
+          {
+            "id": "6",
+            "visibleAtStart": false,
             "drawOrder": 0
           }
         ],
         "groups": [
           {
-            "id": "0c74918b-ee7a-0cd5-f062-a8284f826367",
+            "id": "1000",
             "parent": "-1",
-            "name": "Lager",
+            "name": "Barn & utbildning",
             "toggled": false,
             "expanded": false,
             "layers": [
               {
-                "id": "41",
+                "id": "150",
                 "visibleAtStart": false,
-                "drawOrder": 1000
+                "drawOrder": 23
               },
               {
-                "id": "42",
+                "id": "160",
                 "visibleAtStart": false,
-                "drawOrder": 1000
+                "drawOrder": 15
+              },
+              {
+                "id": "170",
+                "visibleAtStart": false,
+                "drawOrder": 36
+              },
+              {
+                "id": "450",
+                "visibleAtStart": false,
+                "drawOrder": 9
+              },
+              {
+                "id": "460",
+                "visibleAtStart": false,
+                "drawOrder": 8
+              },
+              {
+                "id": "470",
+                "visibleAtStart": false,
+                "drawOrder": 7
+              },
+              {
+                "id": "480",
+                "visibleAtStart": false,
+                "drawOrder": 6
+              },
+              {
+                "id": "510",
+                "visibleAtStart": false,
+                "drawOrder": 6
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "1060",
+            "parent": "-1",
+            "name": "Omsorg & stöd",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "410",
+                "visibleAtStart": false,
+                "drawOrder": 29
+              },
+              {
+                "id": "420",
+                "visibleAtStart": false,
+                "drawOrder": 30
+              },
+              {
+                "id": "430",
+                "visibleAtStart": false,
+                "drawOrder": 31
+              },
+              {
+                "id": "440",
+                "visibleAtStart": false,
+                "drawOrder": 32
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "1010",
+            "parent": "-1",
+            "name": "Uppleva & göra",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "260",
+                "visibleAtStart": false,
+                "drawOrder": 16
+              },
+              {
+                "id": "310",
+                "visibleAtStart": false,
+                "drawOrder": 17
+              },
+              {
+                "id": "350",
+                "visibleAtStart": false,
+                "drawOrder": 33
+              },
+              {
+                "id": "360",
+                "visibleAtStart": false,
+                "drawOrder": 35
+              },
+              {
+                "id": "250",
+                "visibleAtStart": false,
+                "drawOrder": 18
+              },
+              {
+                "id": "230",
+                "visibleAtStart": false,
+                "drawOrder": 19
+              },
+              {
+                "id": "340",
+                "visibleAtStart": false,
+                "drawOrder": 20
+              },
+              {
+                "id": "330",
+                "visibleAtStart": false,
+                "drawOrder": 21
+              },
+              {
+                "id": "540",
+                "visibleAtStart": false,
+                "drawOrder": 21
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "1020",
+            "parent": "-1",
+            "name": "Bygga, bo & miljö",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "320",
+                "visibleAtStart": false,
+                "drawOrder": 22
+              },
+              {
+                "id": "325",
+                "visibleAtStart": false,
+                "drawOrder": 34
+              },
+              {
+                "id": "300",
+                "visibleAtStart": false,
+                "drawOrder": 5
+              },
+              {
+                "id": "190",
+                "visibleAtStart": false,
+                "drawOrder": 12
+              },
+              {
+                "id": "200",
+                "visibleAtStart": false,
+                "drawOrder": 11
+              },
+              {
+                "id": "500",
+                "visibleAtStart": false,
+                "drawOrder": 10
+              },
+              {
+                "id": "530",
+                "visibleAtStart": false,
+                "drawOrder": 10
+              },
+              {
+                "id": "550",
+                "visibleAtStart": false,
+                "drawOrder": 10
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "1030",
+            "parent": "-1",
+            "name": "Trafik & infrastruktur",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "140",
+                "visibleAtStart": false,
+                "drawOrder": 25
+              },
+              {
+                "id": "130",
+                "visibleAtStart": false,
+                "drawOrder": 14
+              },
+              {
+                "id": "220",
+                "visibleAtStart": false,
+                "drawOrder": 26
+              },
+              {
+                "id": "210",
+                "visibleAtStart": false,
+                "drawOrder": 27
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "1040",
+            "parent": "-1",
+            "name": "Kommun & politik",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "370",
+                "visibleAtStart": false,
+                "drawOrder": 3
+              },
+              {
+                "id": "380",
+                "visibleAtStart": false,
+                "drawOrder": 2
+              },
+              {
+                "id": "390",
+                "visibleAtStart": false,
+                "drawOrder": 1
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "1050",
+            "parent": "-1",
+            "name": "Övrigt",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "180",
+                "visibleAtStart": true,
+                "drawOrder": 13
+              },
+              {
+                "id": "100",
+                "visibleAtStart": false,
+                "drawOrder": 4
+              },
+              {
+                "id": "280",
+                "visibleAtStart": false,
+                "drawOrder": 28
               }
             ],
             "groups": []
@@ -202,31 +478,10 @@
         ],
         "active": true,
         "visibleAtStart": true,
-        "backgroundSwitcherBlack": true,
-        "backgroundSwitcherWhite": true,
-        "toggleAllButton": true
-      },
-      "index": 0
-    },
-    {
-      "type": "search",
-      "options": {
-        "onMap": false,
-        "toolbar": "bottom",
-        "maxZoom": 15,
-        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
-        "kmlExportUrl": "/mapservice/export/kml",
-        "excelExportUrl": "/mapservice/export/excel",
-        "displayPopup": true,
-        "selectionTools": true,
-        "anchor": [
-          16,
-          32
-        ],
-        "imgSize": [
-          32,
-          32
-        ]
+        "backgroundSwitcherBlack": false,
+        "backgroundSwitcherWhite": false,
+        "toggleAllButton": true,
+        "instruction": "PHA+S2xpY2thIHDlIGVuIHJ1YnJpayBm9nIgYXR0IHNlIHJlc3Bla3RpdmUgbGFnZXJsaXN0YS48YnIvPgogIEJvY2thIGb2ciBkZSBsYWdlciBkdSB2aWxsIHZpc2EgaSBrYXJ0YW4uPGJyLz4KICBLbGlja2EgcOUgc3ltYm9sZW46IDxpIGNsYXNzTmFtZT0iZmEgZmEtbGlzdCIgYXJpYS1oaWRkZW49ImZhbHNlIj48L2k+IGb2ciBhdHQgc2UgdGVja2VuZvZya2xhcmluZy48YnIvPgogIERlIGZsZXN0YSBpa29uZXIgZ+VyIGF0dCBrbGlja2EgcOUgZvZyIGF0dCBzZSBtZXIgaW5mb3JtYXRpb24uPGJyLz4KPC9wPgo="
       },
       "index": 0
     },
@@ -243,41 +498,70 @@
           32,
           32
         ],
-        "popupOffsetY": -32
+        "popupOffsetY": 0
       },
-      "index": 0
+      "index": 1
     },
     {
-      "type": "export",
+      "type": "information",
       "options": {
-        "exportUrl": "/mapservice/export/pdf",
-        "exportTiffUrl": "/mapservice/export/tiff",
-        "pdfActive": true,
-        "tiffActive": true,
-        "scales": [
-          250,
-          500,
-          1000,
-          2500,
-          5000,
-          10000,
-          10000,
-          25000,
-          50000,
-          100000,
-          250000
-        ]
+        "text": "PGNlbnRlcj48Zm9udCBzaXplPSI1Ij5W5Gxrb21tZW4gdGlsbCBEaWdpdGFsYSBWYXJiZXJnc2thcnRhbiE8L2ZvbnQ+PGJyPjxicj4KSORyIGthbiBkdSBoaXR0YSBzYW1o5Gxsc2luZm9ybWF0aW9uIHPlIHNvbSBwYXJrZXJpbmdhciwgc2tvbG9yLCBvZmZlbnRsaWdhIHRvYWxldHRlciBvY2ggZGV0YWxqcGxhbmVyIGVsbGVyIHP2a2EgZGlyZWt0IHDlIGZhc3RpZ2hldHNiZXRlY2tuaW5nIGVsbGVyIGFkcmVzcy4gPGJyPjxicj4KVXBwZSBpIGj2Z3JhIGj2cm5ldCBmaW5ucyBrbmFwcGFyIG1lZCBwbHVzIG9jaCBtaW51cyBm9nIgYXR0IHpvb21hIGluIG9jaCB1dCBpIGthcnRhbi4gTmVyZSB0aWxsIGj2Z2VyIGZpbm5zIGZsZXJhIGtuYXBwYXIgbWVkIG9saWthIGZ1bmt0aW9uZXIgc29tIGb2cmtsYXJhcyBuZWRhbi4gPGJyPjxicj4KRvZyIG1lciBpbmZvcm1hdGlvbiBlbGxlciBzeW5wdW5rdGVyLCBrb250YWt0YSA8YSBocmVmPSJtYWlsdG86IGdpc0B2YXJiZXJnLnNlP1N1YmplY3Q9SGVqJTIwR0lTYXJlIEItKSAiPmdpc0B2YXJiZXJnLnNlPC9hPjwvY2VudGVyPgo8YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLWJhcnMiIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5MYWdlcmhhbnRlcmFyZTwvYj48YnI+ClbkbGogYmFrZ3J1bmRzbGFnZXIgb2NoIGFrdGl2YSBsYWdlciBzb20gZHUgdmlsbCB2aXNhIGkga2FydGFuLiBLbGlja2EgcOUgZW4gcnVicmlrIGb2ciBhdHQgc2UgcmVzcGVrdGl2ZSBsYWdlcmxpc3RhLiA8YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLWluZm8tY2lyY2xlIGljb24iIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5PbSBrYXJ0YW48L2I+PGJyPgpWaXNhciBkZW5uYSBpbmZvcm1hdGlvbnN0ZXh0Ljxicj48YnI+Cgo8aSBjbGFzcz0iZmEgZmEtYnVsbHNleWUgaWNvbiIgYXJpYS1oaWRkZW49InRydWUiPjwvaT4gJm5ic3A7IDxiPlVydmFsc29tcuVkZTwvYj48YnI+CkRldHRhIHZlcmt0eWcgc2thcGFyIGV0dCB1cnZhbHNvbXLlZGUgKGJ1ZmZlcnR6b24pIG1lZCB2YWxiYXJ0IGF2c3TlbmQgcnVudCBldHQgdmFsdCBvYmpla3QgZWxsZXIgcHVua3QgaSBrYXJ0YW4uIER1IGblciBzYW10aWRpZ3QgZW4gbGlzdGEgcOUgZGUgb2JqZWt0IHNvbSBmaW5ucyBpbm9tIGJ1ZmZlcnR6b25lbiB1dGlmcuVuIGRlIGxhZ2VyIHNvbSBkdSB2YWx0IGF0dCB2aXNhIGkga2FydGFuLiA8YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLXBlbmNpbCBpY29uIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PC9pPiAmbmJzcDsgPGI+Uml0YSBvY2ggbeR0YTwvYj48YnI+CkzkZ2cgdGlsbCBlbiB0ZXh0IGVsbGVyIHJpdGEgdXQgb2xpa2Egc3ltYm9sZXIgcOUga2FydGFuLiA8YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLXNlYXJjaCBpY29uIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PC9pPiAmbmJzcDsgPGI+U/ZrbmluZzwvYj48YnI+ClP2ayBw5SBmYXN0aWdoZXQgZWxsZXIgYWRyZXNzIGkga2FydGFuIGVsbGVyIGkgdXR2YWx0IG9tcuVkZSBw5SBrYXJ0YW4uIDxicj48YnI+Cgo8aSBjbGFzcz0iZmEgZmEtY3Jvc3NoYWlycyBpY29uIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PC9pPiAmbmJzcDsgPGI+S29vcmRpbmF0ZXI8L2I+PGJyPgpW5GxqIGVuIHBsYXRzIGkga2FydGFuIGdlbm9tIGF0dCBkcmEgaSBzaWt0ZXQgb2NoIHNlIGtvb3JkaW5hdGVybmEgZvZyIHBsYXRzZW4uPGJyPjxicj4KCjxpIGNsYXNzPSJmYSBmYS1wcmludCBpY29uIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PC9pPiAmbmJzcDsgPGI+U2tyaXZhIHV0PC9iPjxicj4KU2thcGEgZW4gUERGIGTkciBkdSBzauRsdiB25GxqZXIgcGFwcGVyc3N0b3JsZWssIG9yaWVudGVyaW5nLCBza2FsYSBvY2ggdXBwbPZzbmluZyBlbGxlciBza2FwYSBlbiBlbGxlciBUSUZGIChiaWxkKS4gVuRsaiBvbXLlZGUgaSBrYXJ0YW4gZ2Vub20gYXR0IGRyYSBpIHJ1dGFuIHDlIGthcnRhbi48YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLWxpbmsgaWNvbiBmYS1mbGlwLWhvcml6b250YWwiIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5M5G5rIHRpbGwga2FydGE8L2I+PGJyPgpI5HIgc2thcGFyIGR1IGVuIGzkbmsgdGlsbCBrYXJ0YW4gc29tIHZpc2FyIGFrdHVlbGwgdXRicmVkbmluZywgem9vbW5pduUgc2FtdCB05G5kYS9zbORja3RhIGxhZ2VyLiBEdSBrYW4ga29waWVyYSBs5G5rYWRyZXNzZW4gZ2Vub20gYXR0IGj2Z2Vya2xpY2thIHDlIGzkbmtlbi48YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLWJvb2ttYXJrIGljb24iIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5Cb2tt5HJrZW48L2I+PGJyPgpTa2FwYSBib2tt5HJrZW4g9nZlciBvbXLlZGVuIHNvbSBkdSB2aWxsIGt1bm5hIGhpdHRhIHRpbGxiYWthIHRpbGwgc25hYmJ0LiBC9nJqYSBtZWQgYXR0IHpvb21hIGluIHDlIGV0dCBvbXLlZGUgZHUgdHlja2VyIORyIGludHJlc3NhbnQgb2NoIHNrYXBhIHNlZGFuIGV0dCBib2tt5HJrZSBtZWQgZXR0IG5hbW4gZHUgc2rkbHYgduRsamVyLiA8YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLWxldmVsLXVwIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PC9pPiAmbmJzcDsgIDxiPk5hdmlnYXRpb248L2I+PGJyPgpW5GxqIHN0YXJ0IG9jaCBt5Wwgc2FtdCBm5HJkc+R0dCBz5SBm5XIgZHUgZW4gduRnYmVza3Jpdm5pbmcgbWVkIGluc3RydWt0aW9uZXIuIEZ1bmt0aW9uZW4gYW525G5kZXIgcmVzdWx0YXQgZnLlbiBHb29nbGVzIHbkZ2Jlc2tyaXZuaW5nLiA8YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLXN0cmVldC12aWV3IGljb24iIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5TdHJlZXQgVmlldzwvYj48YnI+CktsaWNrYSBu5WdvbnN0YW5zIGkga2FydGFuIGb2ciBhdHQgZuUgdXBwIGV0dCBtaW5kcmUgZvZuc3RlciB0aWxsIHbkbnN0ZXIgb20ga2FydGFuIG1lZCBzdHJlZXQgdmlldyBmcuVuIEdvb2dsZSBtYXBzLiBEdSBrYW4gc2VkYW4gZvZyc3RvcmEgZvZuc3RyZXQgZ2Vub20gYXR0IHRyeWNrYSBw5SBzeW1ib2xlbiB1cHBlIGkgaPZncmEgaPZybmV0Ljxicj48YnI+Cg==",
+        "headerText": "Information",
+        "visibleAtStart": true,
+        "showInfoOnce": true,
+        "base64EncodeForInfotext": true
       },
-      "index": 0
+      "index": 2
     },
     {
-      "type": "edit",
-      "options": {},
-      "index": 0
+      "type": "buffer",
+      "options": {
+        "instruction": "PHA+CiAgMS4gVHJ5Y2sgcOUgIlPkdHQgdXQgbWl0dHB1bmt0IiBvY2gga2xpY2thIGkga2FydGFuLjxici8+PGJyLz4KICAyLiBBbmdlIPZuc2thdCBhdnN05W5kIGZy5W4gbWl0dHB1bmt0IChyYWRpZSk8YnIvPjxici8+CiAgMy4gVHJ5Y2sgcOUgIlNrYXBhIGJ1ZmZlcnR6b24iPGJyLz48YnIvPgogIFVuZGVyIHJ1YnJpa2VuICJSZXN1bHRhdDogT2JqZWt0IGlub20gYnVmZmVydHpvbiIgc2thcGFzIGVuIGxpc3RhIHDlIGRlIG9iamVrdCBzb20gZmlubnMgaW5vbSBidWZmZXJ0em9uZW4gdXRpZnLlbiBkZSBsYWdlciBzb20gZHUgdmFsdCBhdHQgdmlzYSBpIGthcnRhbi48YnIvPgo8L3A+Cg=="
+      },
+      "index": 3
+    },
+    {
+      "type": "draw",
+      "options": {
+        "exportUrl": "https://karta2.varberg.se/mapservice/export/kml",
+        "importUrl": "https://karta2.varberg.se/mapservice/import/kml",
+        "base64Encode": false,
+        "icons": "marker, marker_black, marker_green, marker_red, marker_yellow, br, pin, pin_black, pin_green, pin_red, pin_yellow",
+        "instruction": "SGVqIQ=="
+      },
+      "index": 4
+    },
+    {
+      "type": "search",
+      "options": {
+        "onMap": true,
+        "bothSynlig": true,
+        "toolbar": "bottom",
+        "maxZoom": 15,
+        "markerImg": "/assets/icons/marker.png",
+        "kmlExportUrl": "/mapservice/export/kml",
+        "excelExportUrl": "/mapservice/export/excel",
+        "displayPopup": true,
+        "selectionTools": true,
+        "base64Encode": false,
+        "instruction": "c/Zr",
+        "filterVisible": true,
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ],
+        "popupOffsetY": 0
+      },
+      "index": 5
     },
     {
       "type": "coordinates",
       "options": {
+        "instruction": "S29vcmRpbmF0ZXI=",
         "transformations": [
           {
             "code": "EPSG:3007",
@@ -287,96 +571,149 @@
             "xtitle": "E",
             "ytitle": "N",
             "inverseAxis": false
+          },
+          {
+            "code": "EPSG:3006",
+            "default": false,
+            "hint": "",
+            "title": "SW99TM",
+            "xtitle": "E",
+            "ytitle": "N",
+            "inverseAxis": false
+          },
+          {
+            "code": "EPSG:4326",
+            "default": false,
+            "hint": "",
+            "title": "WGS 84",
+            "xtitle": "Lng",
+            "ytitle": "Lat",
+            "inverseAxis": false
           }
         ]
       },
-      "index": 0
+      "index": 6
     },
     {
-      "type": "buffer",
-      "options": {},
-      "index": 0
+      "type": "export",
+      "options": {
+        "exportUrl": "/mapservice/export/pdf",
+        "exportTiffUrl": "/mapservice/export/tiff",
+        "pdfActive": true,
+        "tiffActive": true,
+        "base64Encode": false,
+        "autoScale": true,
+        "scales": [
+          250,
+          500,
+          1000,
+          2500,
+          5000,
+          10000,
+          25000,
+          50000,
+          100000,
+          250000
+        ],
+        "instruction": "RXhwb3J0"
+      },
+      "index": 7
     },
     {
       "type": "anchor",
-      "options": {},
-      "index": 0
+      "options": {
+        "instruction": "PHA+CiAgWm9vbWEgdGlsbCD2bnNrYWQgc2thbGEgb2NoIHTkbmQgZGUgbGFnZXIgZHUgdmlsbCB2aXNhLjxici8+CiAgVHJ5Y2sgcOUgIlNrYXBhIGzkbmsiIG5lZGFuLjxici8+CjwvcD4K"
+      },
+      "index": 8
     },
     {
-      "type": "draw",
+      "type": "bookmark",
       "options": {
-        "exportUrl": "/mapservice/export/kml",
-        "importUrl": "/mapservice/import/kml",
-        "icons": "marker, marker_black, marker_green, marker_red, marker_yellow, br, pin, pin_black, pin_green, pin_red, pin_yellow"
+        "instruction": "PHA+CiAgMS4gWm9vbWEgaW4gdGlsbCD2bnNrYWQgc2thbGEuPGJyLz48YnIvPgogIDIuIFNrcml2IPZuc2thdCBuYW1uIGkgZuRsdGV0IG5lZGFuLjxici8+PGJyLz4KICAzLiBUcnljayBw5SBFbnRlci1rbmFwcGVuLjxici8+PGJyLz4KPC9wPgo="
       },
-      "index": 0
+      "index": 9
     },
     {
       "type": "location",
       "options": {},
-      "index": 0
+      "index": 10
+    },
+    {
+      "type": "routing",
+      "options": {
+        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
+        "instruction": "PHA+CiAgMS4gVuRsaiBzdGFydHB1bmt0IGdlbm9tIGF0dCB0cnlja2EgcOUgbuVnb24gYXYga25hcHBhcm5hIHVuZGVyICJW5GxqIHN0YXJ0cHVua3QiLiA8YnIvPgogIDIuIFbkbGogbeVsIGdlbm9tIGF0dCB0cnlja2EgcOUga25hcHBlbiAiVuRsaiBwb3NpdGlvbiBw5SBrYXJ0YW4iIG9jaCBrbGlja2Egc2VkYW4gaSBrYXJ0YW4uIDxici8+CiAgMy4gVuRsaiBm5HJkc+R0dCBnZW5vbSBhdHQgdHJ5Y2thIHDlIG7lZ29uIGF2IGtuYXBwYXJuYS4gPGJyLz4KICA0LiBUcnljayBw5SAiU/ZrIHJlc2EiLiA8YnIvPgo8L3A+Cg=="
+      },
+      "index": 11
     },
     {
       "type": "streetview",
       "options": {
+        "instruction": "R29vZ2xlIFN0cmVldCBWaWV3",
         "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4"
       },
-      "index": 0
+      "index": 12
     },
     {
-      "type": "information",
+      "type": "edit",
       "options": {
-        "text": "",
-        "headerText": "",
-        "visibleAtStart": false
+        "instruction": "RWRpdGVyYSBldHQgbGFnZXI="
       },
-      "index": 0
+      "index": 13
     },
     {
-      "type": "bookmark",
-      "options": {},
-      "index": 0
+      "type": "preset",
+      "options": {
+        "presetList": [
+          {
+            "name": "Testkarta",
+            "presetUrl": "https://karta2.varberg.se/?m=map_1&x=166000&y=6332000&z=4&l=0,180,320"
+          }
+        ],
+        "instruction": "U25hYmJ2YWw="
+      },
+      "index": 14
     }
   ],
   "map": {
     "target": "map",
     "center": [
-      414962,
-      6583005
+      166000,
+      6332000
     ],
-    "projection": "EPSG:3006",
-    "zoom": 3,
-    "maxZoom": 3,
-    "minZoom": 9,
+    "projection": "EPSG:3007",
+    "zoom": 4,
+    "maxZoom": 8,
+    "minZoom": 0,
     "resolutions": [
-      4096.0,
-      2048.0,
-      1024.0,
-      512.0,
-      256.0,
-      128.0,
-      64.0,
-      32.0,
-      16.0,
-      8.0,
-      4.0,
-      2.0,
-      1.0,
-      0.5
+      56.0,
+      28.0,
+      14.0,
+      5.6,
+      2.8,
+      1.4,
+      0.56,
+      0.28,
+      0.14
     ],
     "origin": [
-      0.0,
-      0.0
+      150000.0,
+      6315000.0
     ],
     "extent": [
-      0.0,
-      6000000.0,
-      1000000.0,
-      9000000.0
+      150000.0,
+      6315000.0,
+      200000.0,
+      6360000.0
     ],
-    "logo": "assets/logo.png",
+    "logo": "https://karta2.varberg.se/assets/logo.png",
+    "infologo": "https://karta2.varberg.se/assets/icons/hjalpknapp.png",
+    "mobileleft": "",
+    "mobileright": "",
+    "pil": "https://karta2.varberg.se/assets/icons/pil.png",
+    "mobile": true,
     "colors": {
-      "primaryColor": "#0affc2",
+      "primaryColor": "#1ea5cd",
       "secondaryColor": "#ffffff"
     }
   }

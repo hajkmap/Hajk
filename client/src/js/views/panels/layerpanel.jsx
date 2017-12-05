@@ -64,6 +64,8 @@ var LayerPanelView = {
     this.setState({
       layers: this.props.model.get("layerCollection")
     });
+
+
   },
 
   /**
@@ -295,7 +297,7 @@ var LayerPanelView = {
 
       buttonClassName = this.state[id] === "hidden" ?
         "fa fa-angle-right clickable arrow" :
-        "fa fa-angle-down clickable arrow";
+        "fa fa-angle-up clickable arrow";
 
       toggleClassName = group.checked ? "fa fa-check-square-o" : "fa fa-square-o";
 
@@ -374,6 +376,10 @@ var LayerPanelView = {
     }, 0)
   },
 
+  openInstruction: function (){
+    var element = $("#instructionText");
+    element.toggle();
+  },
   /**
    * Render themes select options.
    * @deprecated
@@ -407,16 +413,17 @@ var LayerPanelView = {
     if (this.props.model.get('toggleAllButton')) {
       toggleAllButton = (
         <div style={{marginBottom: "10px"}}>
-          <button className="btn btn-default btn-inverse" onClick={() => this.toggleAllOff()}>Släck alla lager</button>
+          <button className="btn btn-main btn-inverse" onClick={() => this.toggleAllOff()}>Släck alla lager</button>
         </div>
       );
     }
 
     return (
-      <Panel title="Lagerhanterare" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
+      <Panel title="Kartlager" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
         <div className="layer-panel">
           {toggleAllButton}
           <BackgroundSwitcher layers={this.props.model.getBaseLayers()} model={this.props.model}></BackgroundSwitcher>
+          <br/>
           {groups}
         </div>
       </Panel>

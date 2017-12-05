@@ -57,7 +57,8 @@ var EditModelProperties = {
   editFeature: undefined,
   editSource: undefined,
   removeFeature: undefined,
-  shell: undefined
+  shell: undefined,
+  instruction: ""
 };
 
 /**

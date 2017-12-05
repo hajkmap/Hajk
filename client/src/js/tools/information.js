@@ -41,7 +41,7 @@ var InformationModelProperties = {
   icon: 'fa fa-info-circle icon',
   title: 'Om kartan',
   display: false,
-  headerText: 'Information',
+  headerText: 'Om kartan',
   text: 'Information om kartan.'
 };
 
@@ -59,7 +59,18 @@ var InformationModel = {
   defaults: InformationModelProperties,
 
   initialize: function (options) {
-    ToolModel.prototype.initialize.call(this);
+    var cookies = document.cookie;
+    if(cookies.length == 0 || !options.showInfoOnce){
+      // TODO: Titta efter om vi ska använda cookie för att visa informationsrutan endast en gång
+      // OBS! json.showInfoOnce kan vara undefined, då ska det fungera som innan cookie användes
+      if(options.showInfoOnce) {
+        document.cookie = "seen=true";
+      }
+    } else {
+      this.set({'display': false});
+        this.set({'visibleAtStart': false});
+    }
+      ToolModel.prototype.initialize.call(this);
   },
 
   configure: function (shell) {
@@ -76,7 +87,7 @@ var InformationModel = {
    *
    *   Handle click event on toolbar button.
    *   This handler sets the property visible,
-   *   wich in turn will trigger the change event of navigation model.
+   *   which in turn will trigger the change event of navigation model.
    *   In pracice this will activate corresponding panel as
    *   "active panel" in the navigation panel.
    *
