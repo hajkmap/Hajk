@@ -38,7 +38,8 @@ var ToolModelProperties = {
   title: '',
   icon: '',
   collection: undefined,
-  navigation: undefined
+  navigation: undefined,
+  instruction: ""
 };
 
 /**

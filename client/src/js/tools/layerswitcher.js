@@ -54,7 +54,8 @@ var LayerSwitcherModelProperties = {
   backgroundSwitcherWhite: true,
   toggleAllButton: true,
   haveInitializedBaseLayers: false,
-  toolbar: 'bottom' // this is updated in shell.jsx in terms of mobile
+  toolbar: 'bottom', // this is updated in shell.jsx in terms of mobile
+  instructions: ""
 };
 
 
