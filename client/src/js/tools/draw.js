@@ -90,6 +90,7 @@ var DrawModelProperties = {
   pointRadius: 7,
   pointSymbol: false,
   icons: "",
+  instruction: "",
   markerImg: window.location.href + "assets/icons/marker.png",
   lineColor: "rgb(15, 175, 255)",
   lineWidth: 3,
