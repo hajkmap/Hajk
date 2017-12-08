@@ -861,6 +861,75 @@ var ExportModel = {
   },
 
   /**
+   * Send the map as a PDF-file by email
+   * @instance
+   * @param {object} options
+   * @param {function} callback
+   */
+  sendPDF: function(options, callback) {
+
+    var extent = this.previewLayer.getSource().getFeatures()[0].getGeometry().getExtent()
+    ,   left   = extent[0]
+    ,   right  = extent[2]
+    ,   bottom = extent[1]
+    ,   top    = extent[3]
+    ,   scale  = options.scale
+    ,   dpi    = options.resolution
+    ,   form   = document.createElement('form')
+    ,   input  = document.createElement('input')
+    ,   curr   = document.getElementById(this.exportHitsFormId)
+    ,   url    = this.get('exportUrl')
+    ,   data   = {
+      wmsLayers: [],
+      vectorLayers: [],
+      size: null,
+      resolution: options.resolution,
+      bbox: null
+    };
+
+    data.vectorLayers = this.findVector() || [];
+    data.wmsLayers = this.findWMS() || [];
+    data.wmtsLayers = this.findWMTS() || [];
+    data.arcgisLayers = this.findArcGIS() || [];
+
+    dx = Math.abs(left - right);
+    dy = Math.abs(bottom - top);
+
+    data.size = [
+      parseInt(options.size.width * dpi),
+      parseInt(options.size.height * dpi)
+    ];
+
+    data.bbox = [left, right, bottom, top];
+    data.orientation = options.orientation;
+    data.format = options.format;
+    data.scale = options.scale;
+    data.proxyUrl = this.get('proxyUrl');
+    data.emailAddress = "";
+
+    this.set("sendingMessage", true);
+
+    $.ajax({
+      url: url,
+      method: "post",
+      data: {
+        json: JSON.stringify(data)
+      },
+      format: "json",
+      success: (url) => {
+        this.set("sendingMessage", false);
+        this.set("messageSent", "Ditt epost-meddelande har skickats!");
+      },
+      error: (err) => {
+        this.set("sendingMessage", false);
+        alert("Ett eller flera av lagren du försöker skriva ut klarar inte de angivna inställningarna. Prova med en mindre pappersstorlek eller lägre upplösning.");
+      }
+    });
+
+    callback();
+  },
+
+  /**
    * @description
    *
    *   Handle click event on toolbar button.

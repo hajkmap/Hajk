@@ -259,6 +259,34 @@ var ExportPdfSettings = React.createClass({
     });
   },
 
+  //Send PDF by email
+  sendPDF: function () {
+    //this.setState({
+    //  loadingMail: true
+    //});
+    if (this.state.isValid) {
+      
+      var node = $(ReactDOM.findDOMNode(this)).find('#send-pdf')
+      ,   options = {
+            size: this.getPaperMeasures(),
+            format: this.getFormat(),
+            orientation: this.getOrientation(),
+            scale: this.getScale(),
+            resolution: this.getResolution()
+          }
+      ;
+      node.html('');
+      this.props.model.sendPDF(options, () => {
+        this.setState({
+          loading: false
+        });
+      });
+
+    } else {
+      this.props.model.set('messageSent', "Ogiltig epost-adress!");
+    }
+  },
+
   componentWillUnmount: function () {
     //this.savePreviewCenterToLocalStorage(this.props.model.getPreviewCenter());
     this.removePreview();
@@ -278,6 +306,8 @@ var ExportPdfSettings = React.createClass({
     ,   paperFormatOptions
     ,   loader = null
     ,   downloadLink = null
+    ,   mailSent = null
+    ,   emailAddress
     ;
 
     if (this.state.loading) {
@@ -317,6 +347,32 @@ var ExportPdfSettings = React.createClass({
     } else {
       downloadLink = null;
     }
+
+    //Meddelande skickat
+    if (this.props.model.get("sendingMessage")) {
+      mailSent = <p>Skickar...</p>
+    } else if (this.props.model.get("messageSent")) {
+      mailSent = <p>{this.props.model.get("messageSent")}</p>
+    } else {
+      mailSent = null;
+    }
+
+    var validate_input = (event) => {
+      var validateEmail = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      this.emailAddress = event.target.value;
+      this.props.model.set('emailAddress', this.emailAddress);
+      
+      if (this.emailAddress.length > 0 && validateEmail.test(this.emailAddress)) {
+        this.setState({
+          isValid: true
+        });
+      } else {
+        this.setState({
+          isValid: false
+        });
+      }
+
+    };
 
     return (
       <div className="export-settings">
@@ -360,8 +416,21 @@ var ExportPdfSettings = React.createClass({
           <br />
           {downloadLink}
         </div>
-        <br />
         <div id="pdf"></div>
+        <div>
+          <br />
+          <input
+              type="email"
+              ref="validateEmail"
+              placeholder="Ange epost-adress..."
+              value={emailAddress}
+              onChange={validate_input} />
+          <button onClick={this.sendPDF} className="btn btn-default">Skicka PDF {loader}</button>
+          <br />
+          {mailSent}
+        </div>
+        <div id="send-pdf"></div>
+        <br />
       </div>
     )
   }
@@ -398,6 +467,16 @@ var ExportPanelView = {
         downloadingTIFF: this.props.model.get('downloadingTIFF')
       });
     });
+    this.props.model.on('change:sendingMessage', () => {
+      this.setState({
+        sending: this.props.model.get('sendingMessage')
+      });
+    });
+    this.props.model.on('change:messageSent', () => {
+      this.setState({
+        downloadUrl: this.props.model.get('messageSent')
+      });
+    });
 
   },
 
@@ -407,6 +486,8 @@ var ExportPanelView = {
     this.props.model.off('change:downloadingPdf');
     this.props.model.off('change:urlTIFF');
     this.props.model.off('change:downloadingTIFF');
+    this.props.model.off('change:sendingMessage');
+    this.props.model.off('change:messageSent');
   },
 
   /**
