@@ -217,7 +217,7 @@ module.exports = function (grunt) {
           dest: 'release/index.html',
           replacements: [{
             from: '{js}',
-            to: '<script src="js/es6-polyfill.js" charset="utf-8"></script>\r\n    <script src="js/<%= pkg.name %>-<%= pkg.version %>.min.js"></script>\r\n   <script src="js/touchswipe.min.js"></script>'
+            to: '<script src="js/es6-polyfill.js" charset="utf-8"></script>\r\n    <script src="js/<%= pkg.name %>-<%= pkg.version %>.min.js"></script>\r\n'
           }, {
             from: '{css}',
             to: '<link rel="stylesheet" href="assets/<%= pkg.name %>-<%= pkg.version %>.css" charset="utf-8">'
