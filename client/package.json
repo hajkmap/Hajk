@@ -1,7 +1,7 @@
 {
   "name": "hajk",
   "version": "2.2.0",
-  "description": "Hajk Map responsiv webbkarta som bygger på Open Layers 3.",
+  "description": "HajkMap - responsiv webbkarta som bygger på Open Layers 4.",
   "homepage": "https://github.com/hajkmap/Hajk#readme",
   "repository": {
     "type": "git",
@@ -49,11 +49,8 @@
     "react-datetime": "^2.6.0",
     "react-dom": "^0.14.7",
     "underscore": "^1.8.3",
+    "jquery-touchswipe": "^1.6.15",
     "x2js": "^2.0.1",
-    "jquery-touchswipe": "^1.6.15"
-  },
-  "dependencies": {
-    "react-localstorage": "^0.3.1",
-    "x2js": "^2.0.1"
+    "react-localstorage": "^0.3.1"    
   }
 }
