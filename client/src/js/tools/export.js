@@ -56,6 +56,7 @@ String.prototype.toOpacity = function() {
  * @property {string} icon - Default: fa fa-print icon
  * @property {string} exportUrl - Default: /mapservice/export/pdf
  * @property {string} exportTiffUrl - Default: /mapservice/export/tiff
+ * @property {string} exportMailUrl - Default: /mapservice/export/email
  * @property {string} copyright - Default: © Lantmäteriverket i2009/00858
  */
 var ExportModelProperties = {
@@ -66,6 +67,7 @@ var ExportModelProperties = {
   icon: 'fa fa-print icon',
   exportUrl: '/mapservice/export/pdf',
   exportTiffUrl: '/mapservice/export/tiff',
+  exportMailUrl: '/mapservice/export/email', //FORTSÄTT HÄR
   pdfActive: true,
   tiffActive: true,
   copyright: "© Lantmäteriverket i2009/00858",
@@ -878,7 +880,7 @@ var ExportModel = {
     ,   form   = document.createElement('form')
     ,   input  = document.createElement('input')
     ,   curr   = document.getElementById(this.exportHitsFormId)
-    ,   url    = this.get('exportUrl')
+    ,   url    = this.get('exportMailUrl') //FORTSÄTT HÄR
     ,   data   = {
       wmsLayers: [],
       vectorLayers: [],
@@ -905,7 +907,7 @@ var ExportModel = {
     data.format = options.format;
     data.scale = options.scale;
     data.proxyUrl = this.get('proxyUrl');
-    data.emailAddress = "";
+    data.emailAddress = options.emailAddress;
 
     this.set("sendingMessage", true);
 
@@ -913,12 +915,13 @@ var ExportModel = {
       url: url,
       method: "post",
       data: {
-        json: JSON.stringify(data)
+        json: JSON.stringify(data),
+        emailAddress: data.emailAddress
       },
       format: "json",
       success: (url) => {
         this.set("sendingMessage", false);
-        this.set("messageSent", "Ditt epost-meddelande har skickats!");
+        this.set("messageSent", url);
       },
       error: (err) => {
         this.set("sendingMessage", false);

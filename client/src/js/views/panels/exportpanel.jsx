@@ -175,6 +175,10 @@ var ExportPdfSettings = React.createClass({
     return this.state.selectFormat;
   },
 
+  getEmailAddress: function () {
+    return this.state.emailAddress;
+  },
+
   setFormat: function (e) {
     this.setState({
       selectFormat: e.target.value
@@ -261,9 +265,6 @@ var ExportPdfSettings = React.createClass({
 
   //Send PDF by email
   sendPDF: function () {
-    //this.setState({
-    //  loadingMail: true
-    //});
     if (this.state.isValid) {
       
       var node = $(ReactDOM.findDOMNode(this)).find('#send-pdf')
@@ -272,7 +273,8 @@ var ExportPdfSettings = React.createClass({
             format: this.getFormat(),
             orientation: this.getOrientation(),
             scale: this.getScale(),
-            resolution: this.getResolution()
+            resolution: this.getResolution(),
+            emailAddress: this.getEmailAddress()
           }
       ;
       node.html('');
@@ -364,14 +366,14 @@ var ExportPdfSettings = React.createClass({
       
       if (this.emailAddress.length > 0 && validateEmail.test(this.emailAddress)) {
         this.setState({
-          isValid: true
+          isValid: true,
+          emailAddress: event.target.value
         });
       } else {
         this.setState({
           isValid: false
         });
       }
-
     };
 
     return (

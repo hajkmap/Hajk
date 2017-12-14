@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using System.Web.Mvc;
 using System.Collections.Generic;
 
@@ -15,10 +15,19 @@ using System;
 using ICSharpCode.SharpZipLib.Zip;
 using ICSharpCode.SharpZipLib.Core;
 
+using log4net;
+
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Net.Mail;
+using System.Net;
+
 namespace MapService.Controllers
 {
     public class ExportController : AsyncController
     {
+        ILog _log = LogManager.GetLogger(typeof(ExportController));
         /// <summary>
         /// Create filename with unique timestamp and guid.
         /// </summary>
@@ -63,18 +72,34 @@ namespace MapService.Controllers
         [HttpPost]
         public string PDF(string json)
         {
-            MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
-            AsyncManager.OutstandingOperations.Increment();
-            PDFCreator pdfCreator = new PDFCreator();
-            byte[] blob = pdfCreator.Create(exportItem);
-            string[] fileInfo = byteArrayToFileInfo(blob, "pdf");
+            _log.DebugFormat("Received json: {0}", json);
 
-            if (exportItem.proxyUrl != "") {
-                return exportItem.proxyUrl + "/Temp/" + fileInfo[1];
-            } else {
-                return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
+            try
+            {
+                MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
+                AsyncManager.OutstandingOperations.Increment();
+                PDFCreator pdfCreator = new PDFCreator();
+                _log.Debug("Inited pdfcreator");
+                byte[] blob = pdfCreator.Create(exportItem);
+                _log.Debug("created blob in pdfcreator");
+                string[] fileInfo = byteArrayToFileInfo(blob, "pdf");
+                _log.DebugFormat("Created fileinfo: {0}", fileInfo[1]);
+
+                if (exportItem.proxyUrl != "")
+                {
+                    return exportItem.proxyUrl + "/Temp/" + fileInfo[1];
+                }
+                else
+                {
+                    return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
+                }
+                //return File(blob, "application/pdf", "kartutskrift.pdf");
             }
-            //return File(blob, "application/pdf", "kartutskrift.pdf");
+            catch (Exception e)
+            {
+                _log.Fatal(e.Message);
+                throw;
+            }
         }
 
         private byte[] imgToByteArray(Image img)
@@ -91,6 +116,8 @@ namespace MapService.Controllers
         [HttpPost]
         public string TIFF(string json)
         {
+            _log.DebugFormat("Received json: {0}", json);
+
             MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
                                     
             TIFFCreator tiffCreator = new TIFFCreator();
@@ -145,6 +172,8 @@ namespace MapService.Controllers
         [ValidateInput(false)]
         public string KML(string json)
         {
+            _log.DebugFormat("Received json: {0}", json);
+
             KMLCreator kmlCreator = new KMLCreator();
             byte[] bytes = kmlCreator.Create(json);
             string[] fileInfo = byteArrayToFileInfo(bytes, "kml");
@@ -170,6 +199,8 @@ namespace MapService.Controllers
         [HttpPost]
         public string Excel(string json)
         {
+            _log.DebugFormat("Received json: {0}", json);
+
             List<ExcelTemplate> data = JsonConvert.DeserializeObject<List<ExcelTemplate>>(json);
             DataSet dataSet = Util.ToDataSet(data);
             ExcelCreator excelCreator = new ExcelCreator();
@@ -177,6 +208,39 @@ namespace MapService.Controllers
             string[] fileInfo = byteArrayToFileInfo(bytes, "xls");
             
             return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
+        }
+
+        [HttpPost]
+        public string Email(string json, string emailAddress)  
+        {
+            MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
+            AsyncManager.OutstandingOperations.Increment();
+            PDFCreator pdfCreator = new PDFCreator();
+            _log.Debug("Inited pdfcreator");
+            byte[] blob = pdfCreator.Create(exportItem);
+
+            MailAddress toAddress = new MailAddress(emailAddress);
+    
+            var client = new SmtpClient()
+            {
+                EnableSsl = true
+            };
+
+            MailMessage message = new MailMessage(fromAddress, toAddress);
+            message.Subject = "Din kartexport";
+            message.IsBodyHtml = true;
+            message.Body = "Här kommer din kartexport.";
+            message.Attachments.Add(new Attachment(new MemoryStream(blob), "kartexport.pdf"));
+            try
+            {
+                client.Send(message);
+                return "Ditt epost-meddelande har skickats!";
+            }
+            catch (Exception e)
+            {
+                _log.Fatal(e.Message);
+                throw;
+            }
         }
     }
 }
