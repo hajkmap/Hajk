@@ -27,7 +27,8 @@ var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
-  instruction: ""
+  instruction: "",
+  varbergVer: false
 };
 
 class ToolOptions extends Component {
@@ -46,7 +47,8 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
-        instruction: tool.options.instruction
+        instruction: tool.options.instruction,
+        varbergVer: tool.options.varbergVer
       });
     } else {
       this.setState({
@@ -105,7 +107,8 @@ class ToolOptions extends Component {
       "type": this.type,
       "index": this.state.index,
       "options": {
-        "instruction": this.state.instruction
+        "instruction": this.state.instruction,
+        "varbergVer": this.state.varbergVer
       }
     };
 
@@ -182,6 +185,15 @@ class ToolOptions extends Component {
               type="text"
               onChange={(e) => {this.handleInputChange(e)}}
               value={this.state.instruction}/>
+          </div>
+          <div>
+            <input
+              id="varbergVer"
+              name="varbergVer"
+              type="checkbox"
+              onChange={(e) => {this.handleInputChange(e)}}
+              checked={this.state.varbergVer}/>&nbsp;
+            <label htmlFor="varbergVer">Varbergs version</label>
           </div>
         </form>
       </div>

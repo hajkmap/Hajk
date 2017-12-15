@@ -34,6 +34,7 @@
     "grunt-text-replace": "^0.4.x",
     "jquery": "^2.2.0",
     "jquery-touchswipe": "^1.6.x",
+    "jsts": "^1.5.0",
     "load-grunt-tasks": "^3.5.x",
     "marked": "^0.3.x",
     "matchdep": "^2.0.x",

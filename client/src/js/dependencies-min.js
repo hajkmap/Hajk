@@ -21,3 +21,4 @@
 // https://github.com/hajkmap/Hajk
 
 global.window.ol = require('openlayers');
+global.window.jsts = require('jsts');
