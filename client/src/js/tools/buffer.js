@@ -242,9 +242,8 @@ var BufferModel = {
    */
   buffer: function() {
     if (!this.get('varbergVer')) {
-      console.log('buffering');
       const parser = new jsts.io.OL3Parser();
-      const features = this.get('selectionModel').features
+      const features = this.get('selectionModel').features;
       const dist = this.get('bufferDist');
 
       if (!this.isNumber(dist)) {
