@@ -12,7 +12,6 @@
     "owner_options": [
       { "value": "SBK", "title": "SBK" },
       { "value": "Lantmäterienheten", "title": "Lantmäterienheten" }
-      /*change the title&value ?*/
     ]
   },
   "search": {
