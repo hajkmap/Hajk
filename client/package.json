@@ -34,7 +34,6 @@
     "grunt-react": "^0.12.x",
     "grunt-text-replace": "^0.4.x",
     "jquery": "^2.2.0",
-    "jquery-sortable": "^0.9.13",
     "jquery-touchswipe": "^1.6.x",
     "load-grunt-tasks": "^3.5.x",
     "marked": "^0.3.x",
