@@ -42,7 +42,8 @@ var LayerPanelView = {
    */
   getInitialState: function() {
     return {
-      visible: false
+      visible: false,
+      mapConfigurations : []
     };
   },
 
@@ -55,6 +56,7 @@ var LayerPanelView = {
    * @instance
    */
   componentDidMount: function () {
+    this.populateThemeMaps()
     this.props.model.on('change:layerCollection', this.onLayerCollectionChanged, this);
     this.props.model.get('layerCollection').forEach(layer => {
       layer.on('change:visible', () => {
@@ -335,6 +337,16 @@ var LayerPanelView = {
      this.props.model.toggleAllOff();
    },
 
+   populateThemeMaps() {
+     console.log("hej")
+    this.props.model.loadThemeMaps(mapConfigurations => {
+      console.log(mapConfigurations,"mapConfiguratuoins")
+      this.setState({
+        mapConfigurations: mapConfigurations
+      })
+    });
+   },
+
 
   /**
    * Change layer-list configuration.
@@ -399,8 +411,9 @@ var LayerPanelView = {
    * @return {external:ReactElement}
    */
   render: function () {
-
-    var groups, toggleAllButton;
+    console.log(this.state,"thisstate")
+    var mapConfigurations = this.state.mapConfigurations.map((map, i) => <option key={i}>{map}</option>);
+    var groups, toggleAllButton,dropdownThemeMaps ;
 
     this.groups = this.props.model.get('groups');
 
@@ -418,9 +431,21 @@ var LayerPanelView = {
       );
     }
 
+    if(this.props.model.get('dropdownThemeMaps')){
+      dropdownThemeMaps = (
+        <div>
+        <span style={{marginRight: "10px"}}>{this.props.model.get("themeMapHeaderCaption")}</span>
+        <select style={{marginBottom: "10px", width : "100%"}}>
+        {mapConfigurations}
+        </select>
+        </div>
+        );
+    };
+
     return (
       <Panel title="Kartlager" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
         <div className="layer-panel">
+          {dropdownThemeMaps}
           {toggleAllButton}
           <BackgroundSwitcher layers={this.props.model.getBaseLayers()} model={this.props.model}></BackgroundSwitcher>
           <br/>
