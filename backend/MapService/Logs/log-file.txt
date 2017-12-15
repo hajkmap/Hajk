@@ -1,1 +1,33 @@
 DEBUG 2017-10-10 13:24:19 test för att log4net fungerar 
+FATAL 2017-12-15 15:34:50 System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 316 
+FATAL 2017-12-15 15:34:54 System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 316 
+FATAL 2017-12-15 15:36:16 System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 337 
+FATAL 2017-12-15 15:36:35 System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 337 
+FATAL 2017-12-15 15:36:45 System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 337 
+FATAL 2017-12-15 15:37:28 System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 337 
+FATAL 2017-12-15 15:37:42 System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 337 
+FATAL 2017-12-15 15:43:44 System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 337 
+FATAL 2017-12-15 15:43:59 System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 337 
+FATAL 2017-12-15 15:44:52 System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 337 
+FATAL 2017-12-15 15:45:00 System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 337 
+FATAL 2017-12-15 15:45:51 System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 337 
+FATAL 2017-12-15 15:46:44 System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 337 
+FATAL 2017-12-15 16:03:05 System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 342 
+FATAL 2017-12-15 16:04:57 System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 342 
+FATAL 2017-12-15 16:06:28 System.Web.HttpException (0x80004005): File not found
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 342 

@@ -265,6 +265,30 @@ namespace MapService.Controllers
             System.IO.File.WriteAllText(file, jsonOutput);
         }
 
+        public string UserSpecificMaps()
+        {
+            var user = System.Security.Principal.WindowsIdentity.GetCurrent();
+
+
+            Response.Expires = 0;
+            Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
+            Response.ContentType = "application/json; charset=utf-8";
+            Response.Headers.Add("Cache-Control", "private, no-cache");
+
+            string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
+            IEnumerable<string> files = Directory.EnumerateFiles(folder);
+            List<string> fileList = new List<string>();
+            foreach (string file in files)
+            {
+                string fileName = Path.GetFileNameWithoutExtension(file);
+                if (fileName != "layers")
+                {
+                    fileList.Add(fileName);
+                }
+            }
+            return JsonConvert.SerializeObject(fileList);
+        }
+
         public string List(string id)
         {
             Response.Expires = 0;
@@ -303,6 +327,11 @@ namespace MapService.Controllers
                 if (name.ToLower() == "list")
                 {
                     return List("all");
+                }
+
+                if (name.ToLower() == "userspecificmaps")
+                {
+                    return UserSpecificMaps();
                 }
 
                 string file = String.Format("{0}App_Data\\{1}.json", HostingEnvironment.ApplicationPhysicalPath, name);
