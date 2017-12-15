@@ -277,12 +277,16 @@ namespace MapService.Controllers
             List<string> fileList = new List<string>();
             foreach (string file in files)
             {
-                string fileName = Path.GetFileNameWithoutExtension(file);
-                if (fileName != "layers")
+                string fileName = String.Empty;
+                if (Path.GetExtension(file) == ".json")
                 {
-                    fileList.Add(fileName);
+                    fileName = Path.GetFileNameWithoutExtension(file);
+                    if (fileName != "layers")
+                    {
+                        fileList.Add(fileName);
+                    }
                 }
-            }            
+            }
             return JsonConvert.SerializeObject(fileList);
         }
 

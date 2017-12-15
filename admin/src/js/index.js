@@ -32,7 +32,7 @@ import find from 'array.prototype.find';
 find.shim();
 
 (function() {
-
+	
   "use strict";
 
   function create_routes(routes, application_model) {
@@ -47,7 +47,7 @@ find.shim();
       route_settings[route.name] = () => {
         application_model.set('content', route.name)
       };
-    });
+	});
     return route_settings;
   }
 
@@ -68,8 +68,14 @@ find.shim();
     ReactDOM.render(application_element, document.getElementById('app'));
   }
 
-  $.get('config.json', function (config) {
-    load(config);
-  });
+  $.getJSON('config.json').done((config) => {
+	try {
+		load(config);
 
+	} catch (error) {
+		console.log("error", error);
+	}
+  }).fail((xhr) => {
+	  console.log("xhr fail", xhr);
+  });
 }());

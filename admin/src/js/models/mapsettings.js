@@ -46,7 +46,7 @@ var menu = Model.extend({
         this.set({
           urlMapConfig: this.get('config').url_map + "/" + name,
           mapFile: name
-        });
+		});	
         callback(data);
       },
       error: (message) => {

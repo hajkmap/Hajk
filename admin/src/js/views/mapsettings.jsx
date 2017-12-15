@@ -255,7 +255,9 @@ class Menu extends Component {
       backgroundSwitcherBlack: true,
       backgroundSwitcherWhite: true,
       toggleAllButton: false,
-      instruction: '',
+	  instruction: '',
+	  configswitcher: false,
+	  configSwitcherDefaultText: "Temakartor"
     };
     this.state = state;
   }
@@ -971,6 +973,27 @@ class Menu extends Component {
                   checked={this.state.active}/>&nbsp;
                 <label htmlFor="active">Aktiverad</label>
               </div>
+			  <div>
+				<input
+					id="configswitcher"
+					name="configswitcher"
+					type="checkbox"
+					onChange={(e) => {this.handleInputChange(e)}}
+					checked={this.state.configswitcher} />&nbsp;
+				<label htmlFor="configswitcher">Visa lista över temakartor</label>
+			  </div>
+			  <div>
+			  	<label htmlFor="configSwitcherDefaultText">Rubriktext temakartor</label>
+				<input 
+					id="configSwitcherDefaultText"
+					name="configSwitcherDefaultText"
+					type="text"
+					value={this.state.configSwitcherDefaultText}
+					onChange={(e) => {
+					  this.setState({ 'configSwitcherDefaultText': e.target.value });
+					}}
+				/>
+			  </div>
               <div>
                 <input
                   id="visibleAtStart"
