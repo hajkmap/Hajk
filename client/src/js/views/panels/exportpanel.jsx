@@ -20,8 +20,6 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var LocalStorageMixin = require('react-localstorage');
-
 var Panel = require('views/panel');
 
 var ExportTiffSettings = React.createClass({
@@ -92,8 +90,6 @@ var ExportTiffSettings = React.createClass({
 });
 
 var ExportPdfSettings = React.createClass({
-  //mixins: [LocalStorageMixin], //lagrar skala, pappersformat etc. i LocalStorage
-
   resolutions: [72, 96, 150, 200, 300],
   paperFormats: ["A2", "A3", "A4"],
 
@@ -302,14 +298,7 @@ var ExportPdfSettings = React.createClass({
   },
 
   componentWillUnmount: function () {
-    //this.savePreviewCenterToLocalStorage(this.props.model.getPreviewCenter());
     this.removePreview();
-  },
-
-  savePreviewCenterToLocalStorage: function(center) {
-    var _ExportPdfSettings = JSON.parse(localStorage.ExportPdfSettings);
-    _ExportPdfSettings.center = this.props.model.getPreviewCenter();
-    localStorage.ExportPdfSettings = JSON.stringify(_ExportPdfSettings);
   },
 
   render: function () {
