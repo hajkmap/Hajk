@@ -195,11 +195,14 @@
             "groups": []
           }
         ],
+        "instruction": "las instructiónes",
         "active": true,
         "visibleAtStart": true,
         "backgroundSwitcherBlack": true,
         "backgroundSwitcherWhite": true,
-        "toggleAllButton": true
+        "toggleAllButton": true,
+        "dropdownThemeMaps": true,
+        "themeMapHeaderCaption": "Temakartor hehe"
       },
       "index": 0
     },
@@ -370,6 +373,11 @@
       9000000.0
     ],
     "logo": "assets/logo.png",
+    "infologo": null,
+    "mobileleft": null,
+    "mobileright": null,
+    "pil": null,
+    "mobile": false,
     "colors": {
       "primaryColor": "#0affc2",
       "secondaryColor": "#ffffff"

@@ -255,9 +255,9 @@ class Menu extends Component {
       backgroundSwitcherBlack: true,
       backgroundSwitcherWhite: true,
       toggleAllButton: false,
-	  instruction: '',
-	  configswitcher: false,
-	  configSwitcherDefaultText: "Temakartor"
+	  instruction: "",
+	  dropdownThemeMaps: false,
+	  themeMapHeaderCaption: "Temakartor"
     };
     this.state = state;
   }
@@ -285,7 +285,9 @@ class Menu extends Component {
           backgroundSwitcherBlack: this.props.model.get('layerMenuConfig').backgroundSwitcherBlack,
           backgroundSwitcherWhite: this.props.model.get('layerMenuConfig').backgroundSwitcherWhite,
           toggleAllButton: this.props.model.get('layerMenuConfig').toggleAllButton,
-          instruction: this.props.model.get('layerMenuConfig').instruction
+		  instruction: this.props.model.get('layerMenuConfig').instruction,
+		  dropdownThemeMaps: this.props.model.get('layerMenuConfig').dropdownThemeMaps,
+		  themeMapHeaderCaption: this.props.model.get('layerMenuConfig').themeMapHeaderCaption
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -448,7 +450,10 @@ class Menu extends Component {
       backgroundSwitcherBlack: this.state.backgroundSwitcherBlack,
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
       toggleAllButton: this.state.toggleAllButton,
-      instruction: this.state.instruction,
+	  instruction: this.state.instruction,
+	  dropdownThemeMaps: this.state.dropdownThemeMaps,
+	  themeMapHeaderCaption: this.state.themeMapHeaderCaption
+	  
     };
 
     var roots = $('.tree-view > ul > li');
@@ -499,7 +504,8 @@ class Menu extends Component {
         drawOrder: 0
       }) :
       settings.groups.push(groupItem(root))
-    });
+	});
+	console.log("settings", settings);
     return settings;
   }
   /**
@@ -975,22 +981,22 @@ class Menu extends Component {
               </div>
 			  <div>
 				<input
-					id="configswitcher"
-					name="configswitcher"
+					id="dropdownThemeMaps"
+					name="dropdownThemeMaps"
 					type="checkbox"
 					onChange={(e) => {this.handleInputChange(e)}}
-					checked={this.state.configswitcher} />&nbsp;
-				<label htmlFor="configswitcher">Visa lista över temakartor</label>
+					checked={this.state.dropdownThemeMaps} />&nbsp;
+				<label htmlFor="dropdownThemeMaps">Visa lista över temakartor</label>
 			  </div>
 			  <div>
-			  	<label htmlFor="configSwitcherDefaultText">Rubriktext temakartor</label>
+			  	<label htmlFor="themeMapHeaderCaption">Rubriktext temakartor</label>
 				<input 
-					id="configSwitcherDefaultText"
-					name="configSwitcherDefaultText"
+					id="themeMapHeaderCaption"
+					name="themeMapHeaderCaption"
 					type="text"
-					value={this.state.configSwitcherDefaultText}
+					value={this.state.themeMapHeaderCaption}
 					onChange={(e) => {
-					  this.setState({ 'configSwitcherDefaultText': e.target.value });
+					  this.setState({ 'themeMapHeaderCaption': e.target.value });
 					}}
 				/>
 			  </div>
