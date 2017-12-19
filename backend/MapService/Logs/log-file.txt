@@ -31,3 +31,270 @@ FATAL 2017-12-15 16:04:57 System.Web.HttpException (0x80004005): File not found
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 342 
 FATAL 2017-12-15 16:06:28 System.Web.HttpException (0x80004005): File not found
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 342 
+FATAL 2017-12-19 08:46:29 System.NotImplementedException: Metoden eller åtgärden har inte implementerats.
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 18
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 274
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 344 
+FATAL 2017-12-19 08:47:49 System.NotImplementedException: Metoden eller åtgärden har inte implementerats.
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 18
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 274
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 344 
+FATAL 2017-12-19 08:48:45 System.NotImplementedException: Metoden eller åtgärden har inte implementerats.
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 18
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 274
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 344 
+FATAL 2017-12-19 08:50:30 System.DirectoryServices.AccountManagement.PrincipalOperationException: An invalid dn syntax has been specified.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: An invalid dn syntax has been specified.
+
+   vid System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   vid System.DirectoryServices.DirectoryEntry.Bind()
+   vid System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- Slut på stackspårning för interna undantag ---
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   vid MapService.Models.Config.ActiveDirectoryLookup..ctor() i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 15
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 271
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 344 
+FATAL 2017-12-19 08:57:40 System.NotImplementedException: Metoden eller åtgärden har inte implementerats.
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 19
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 274
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 344 
+FATAL 2017-12-19 09:23:15 System.ArgumentNullException: Värde får inte vara null.
+Parameternamn: context
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 23
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 274
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 344 
+FATAL 2017-12-19 09:24:14 System.ArgumentNullException: Värde får inte vara null.
+Parameternamn: context
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 23
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 273
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 346 
+FATAL 2017-12-19 09:24:47 System.ArgumentNullException: Värde får inte vara null.
+Parameternamn: context
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 23
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 273
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 346 
+FATAL 2017-12-19 09:25:51 System.ArgumentNullException: Värde får inte vara null.
+Parameternamn: context
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 23
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 273
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 346 
+FATAL 2017-12-19 09:27:01 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid försök att hämta behörighetsgrupperna.
+   vid System.DirectoryServices.AccountManagement.AuthZSet..ctor(Byte[] userSid, NetCred credentials, ContextOptions contextOptions, String flatUserAuthority, StoreCtx userStoreCtx, Object userCtxBase)
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.GetGroupsMemberOfAZ(Principal p)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroupsHelper()
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroups()
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 24
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 273
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 346 
+FATAL 2017-12-19 09:30:25 System.AppDomainUnloadedException: Det gjordes ett försök att komma åt en inaktiverad AppDomain. (Undantag från HRESULT: 0x80131014)
+   vid System.StubHelpers.StubHelpers.InternalGetCOMHRExceptionObject(Int32 hr, IntPtr pCPCMD, Object pThis, Boolean fForWinRT)
+   vid System.StubHelpers.StubHelpers.GetCOMHRExceptionObject(Int32 hr, IntPtr pCPCMD, Object pThis)
+   vid System.DirectoryServices.AccountManagement.UnsafeNativeMethods.IADsPathname.Retrieve(Int32 lnFormatType)
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.LoadDomainInfo()
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.get_DnsDomainName()
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.GetGroupsMemberOfAZ(Principal p)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroupsHelper()
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroups()
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 24
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 273
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 346 
+FATAL 2017-12-19 09:31:32 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid försök att hämta behörighetsgrupperna.
+   vid System.DirectoryServices.AccountManagement.AuthZSet..ctor(Byte[] userSid, NetCred credentials, ContextOptions contextOptions, String flatUserAuthority, StoreCtx userStoreCtx, Object userCtxBase)
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.GetGroupsMemberOfAZ(Principal p)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroupsHelper()
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroups()
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 24
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 273
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 346 
+FATAL 2017-12-19 09:35:13 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid försök att hämta behörighetsgrupperna.
+   vid System.DirectoryServices.AccountManagement.AuthZSet..ctor(Byte[] userSid, NetCred credentials, ContextOptions contextOptions, String flatUserAuthority, StoreCtx userStoreCtx, Object userCtxBase)
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.GetGroupsMemberOfAZ(Principal p)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroupsHelper()
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroups()
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 24
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 273
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 346 
+FATAL 2017-12-19 09:35:13 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid försök att hämta behörighetsgrupperna.
+   vid System.DirectoryServices.AccountManagement.AuthZSet..ctor(Byte[] userSid, NetCred credentials, ContextOptions contextOptions, String flatUserAuthority, StoreCtx userStoreCtx, Object userCtxBase)
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.GetGroupsMemberOfAZ(Principal p)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroupsHelper()
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroups()
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 24
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 273
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 346 
+FATAL 2017-12-19 09:35:40 System.DirectoryServices.AccountManagement.PrincipalOperationException: An invalid dn syntax has been specified.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: An invalid dn syntax has been specified.
+
+   vid System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   vid System.DirectoryServices.DirectoryEntry.Bind()
+   vid System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- Slut på stackspårning för interna undantag ---
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 23
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 273
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 346 
+FATAL 2017-12-19 09:56:44 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid försök att hämta behörighetsgrupperna.
+   vid System.DirectoryServices.AccountManagement.AuthZSet..ctor(Byte[] userSid, NetCred credentials, ContextOptions contextOptions, String flatUserAuthority, StoreCtx userStoreCtx, Object userCtxBase)
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.GetGroupsMemberOfAZ(Principal p)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroupsHelper()
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroups()
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 24
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 273
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 346 
+FATAL 2017-12-19 11:06:59 Newtonsoft.Json.JsonReaderException: After parsing a value an unexpected character was encountered: >. Path 'extendedwmslayers', line 1240, position 1.
+   vid Newtonsoft.Json.JsonTextReader.ParsePostValue()
+   vid Newtonsoft.Json.JsonTextReader.ReadInternal()
+   vid Newtonsoft.Json.JsonTextReader.Read()
+   vid Newtonsoft.Json.Serialization.JsonSerializerInternalReader.CreateJObject(JsonReader reader)
+   vid Newtonsoft.Json.Serialization.JsonSerializerInternalReader.CreateObject(JsonReader reader, Type objectType, JsonContract contract, JsonProperty member, JsonContainerContract containerContract, JsonProperty containerMember, Object existingValue)
+   vid Newtonsoft.Json.Serialization.JsonSerializerInternalReader.Deserialize(JsonReader reader, Type objectType, Boolean checkAdditionalContent)
+   vid Newtonsoft.Json.JsonSerializer.DeserializeInternal(JsonReader reader, Type objectType)
+   vid Newtonsoft.Json.JsonConvert.DeserializeObject(String value, Type type, JsonSerializerSettings settings)
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 300
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 369 
+FATAL 2017-12-19 11:08:57 System.IO.FileNotFoundException: Det gick inte att hitta filen c:\windows\system32\inetsrv\layers.json.
+Filnamn: c:\windows\system32\inetsrv\layers.json
+   vid System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   vid System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.StreamReader..ctor(String path, Encoding encoding, Boolean detectEncodingFromByteOrderMarks, Int32 bufferSize, Boolean checkHost)
+   vid System.IO.File.InternalReadAllText(String path, Encoding encoding, Boolean checkHost)
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 313
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 367 
+FATAL 2017-12-19 11:09:06 System.IO.FileNotFoundException: Det gick inte att hitta filen c:\windows\system32\inetsrv\layers.json.
+Filnamn: c:\windows\system32\inetsrv\layers.json
+   vid System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   vid System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.StreamReader..ctor(String path, Encoding encoding, Boolean detectEncodingFromByteOrderMarks, Int32 bufferSize, Boolean checkHost)
+   vid System.IO.File.InternalReadAllText(String path, Encoding encoding, Boolean checkHost)
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 313
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 367 
+FATAL 2017-12-19 11:09:56 System.IO.FileNotFoundException: Det gick inte att hitta filen c:\windows\system32\inetsrv\layers.json.
+Filnamn: c:\windows\system32\inetsrv\layers.json
+   vid System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   vid System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.StreamReader..ctor(String path, Encoding encoding, Boolean detectEncodingFromByteOrderMarks, Int32 bufferSize, Boolean checkHost)
+   vid System.IO.File.InternalReadAllText(String path, Encoding encoding, Boolean checkHost)
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 313
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 367 
+FATAL 2017-12-19 11:11:17 System.IO.FileNotFoundException: Det gick inte att hitta filen c:\windows\system32\inetsrv\layers.json.
+Filnamn: c:\windows\system32\inetsrv\layers.json
+   vid System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   vid System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.StreamReader..ctor(String path, Encoding encoding, Boolean detectEncodingFromByteOrderMarks, Int32 bufferSize, Boolean checkHost)
+   vid System.IO.File.InternalReadAllText(String path, Encoding encoding, Boolean checkHost)
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 315
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 369 
+FATAL 2017-12-19 11:11:21 System.IO.FileNotFoundException: Det gick inte att hitta filen c:\windows\system32\inetsrv\map_1.
+Filnamn: c:\windows\system32\inetsrv\map_1
+   vid System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   vid System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.StreamReader..ctor(String path, Encoding encoding, Boolean detectEncodingFromByteOrderMarks, Int32 bufferSize, Boolean checkHost)
+   vid System.IO.File.InternalReadAllText(String path, Encoding encoding, Boolean checkHost)
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 315
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 369 
+FATAL 2017-12-19 11:12:25 System.IO.FileNotFoundException: Det gick inte att hitta filen c:\windows\system32\inetsrv\map_1.
+Filnamn: c:\windows\system32\inetsrv\map_1
+   vid System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   vid System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.StreamReader..ctor(String path, Encoding encoding, Boolean detectEncodingFromByteOrderMarks, Int32 bufferSize, Boolean checkHost)
+   vid System.IO.File.InternalReadAllText(String path, Encoding encoding, Boolean checkHost)
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 315
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 369 
+FATAL 2017-12-19 11:22:06 System.IO.FileNotFoundException: Det gick inte att hitta filen c:\windows\system32\inetsrv\map_1.
+Filnamn: c:\windows\system32\inetsrv\map_1
+   vid System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   vid System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.StreamReader..ctor(String path, Encoding encoding, Boolean detectEncodingFromByteOrderMarks, Int32 bufferSize, Boolean checkHost)
+   vid System.IO.File.InternalReadAllText(String path, Encoding encoding, Boolean checkHost)
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 315
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 369 
+FATAL 2017-12-19 11:24:37 System.IO.FileNotFoundException: Det gick inte att hitta filen c:\windows\system32\inetsrv\map_1.json.
+Filnamn: c:\windows\system32\inetsrv\map_1.json
+   vid System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   vid System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.StreamReader..ctor(String path, Encoding encoding, Boolean detectEncodingFromByteOrderMarks, Int32 bufferSize, Boolean checkHost)
+   vid System.IO.File.InternalReadAllText(String path, Encoding encoding, Boolean checkHost)
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 314
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 368 
+FATAL 2017-12-19 11:26:21 System.IO.FileNotFoundException: Det gick inte att hitta filen c:\windows\system32\inetsrv\map_1.json.
+Filnamn: c:\windows\system32\inetsrv\map_1.json
+   vid System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   vid System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.StreamReader..ctor(String path, Encoding encoding, Boolean detectEncodingFromByteOrderMarks, Int32 bufferSize, Boolean checkHost)
+   vid System.IO.File.InternalReadAllText(String path, Encoding encoding, Boolean checkHost)
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 314
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 368 
+FATAL 2017-12-19 11:27:41 System.IO.DirectoryNotFoundException: Det gick inte att hitta en del av sökvägen C:\SWECO\Projekt\Hajk\backend\MapService\App_Data\.
+   vid System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   vid System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.StreamReader..ctor(String path, Encoding encoding, Boolean detectEncodingFromByteOrderMarks, Int32 bufferSize, Boolean checkHost)
+   vid System.IO.File.InternalReadAllText(String path, Encoding encoding, Boolean checkHost)
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 314
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 368 
+FATAL 2017-12-19 12:30:35 System.IO.DirectoryNotFoundException: Det gick inte att hitta en del av sökvägen C:\SWECO\Projekt\Hajk\backend\MapService\App_Data\.
+   vid System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   vid System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
+   vid System.IO.StreamReader..ctor(String path, Encoding encoding, Boolean detectEncodingFromByteOrderMarks, Int32 bufferSize, Boolean checkHost)
+   vid System.IO.File.InternalReadAllText(String path, Encoding encoding, Boolean checkHost)
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 314
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 368 
+FATAL 2017-12-19 12:45:03 System.NullReferenceException: Objektreferensen har inte angetts till en instans av ett objekt.
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 307
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 366 
+FATAL 2017-12-19 12:46:17 System.NullReferenceException: Objektreferensen har inte angetts till en instans av ett objekt.
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 307
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 366 
+FATAL 2017-12-19 12:53:34 System.NullReferenceException: Objektreferensen har inte angetts till en instans av ett objekt.
+   vid MapService.Controllers.ConfigController.UserSpecificMaps()
+   vid MapService.Controllers.ConfigController.GetConfig(String name) 
+FATAL 2017-12-19 12:54:09 Microsoft.CSharp.RuntimeBinder.RuntimeBinderException: Det går inte att implicit konvertera typen Newtonsoft.Json.Linq.JArray till bool. Det finns en explicit konvertering (saknas en omvandling?)
+   vid CallSite.Target(Closure , CallSite , Object )
+   vid System.Dynamic.UpdateDelegates.UpdateAndExecute1[T0,TRet](CallSite site, T0 arg0)
+   vid MapService.Controllers.ConfigController.UserSpecificMaps()
+   vid MapService.Controllers.ConfigController.GetConfig(String name) 
+FATAL 2017-12-19 12:56:07 Microsoft.CSharp.RuntimeBinder.RuntimeBinderException: Det går inte att implicit konvertera typen Newtonsoft.Json.Linq.JArray till bool. Det finns en explicit konvertering (saknas en omvandling?)
+   vid CallSite.Target(Closure , CallSite , Object )
+   vid MapService.Controllers.ConfigController.UserSpecificMaps()
+   vid MapService.Controllers.ConfigController.GetConfig(String name) 
+FATAL 2017-12-19 12:59:43 System.Web.HttpException (0x80004005): Bad Request
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 315
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 370 

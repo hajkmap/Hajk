@@ -1,5 +1,6 @@
 {
   "version": "1.0.5",
+  "visibleForGroups" : ["Office-SEGOT01", "MammaMia"],
   "projections": [
     {
       "code": "EPSG:3006",
