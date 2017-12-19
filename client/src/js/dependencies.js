@@ -30,3 +30,4 @@ global.window.proj4 = require('proj4');
 global.window.marked = require('marked');
 global.window.X2JS = require('x2js');
 global.window.jQuery = global.window.$ = require('jquery');
+global.window.jqueryTouchSwipe = require('jquery-touchswipe');
