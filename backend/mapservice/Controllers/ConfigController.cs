@@ -9,6 +9,9 @@ using Newtonsoft.Json;
 using MapService.Models;
 using MapService.Models.ToolOptions;
 using log4net;
+using MapService.Models.Config;
+using System.Configuration;
+using Newtonsoft.Json.Linq;
 
 namespace MapService.Controllers
 {
@@ -21,7 +24,7 @@ namespace MapService.Controllers
             string file = String.Format("{0}App_Data\\{1}.json", HostingEnvironment.ApplicationPhysicalPath, id);
             if (System.IO.File.Exists(file))
             {
-                System.IO.File.Delete(file);                
+                System.IO.File.Delete(file);
             }
             else
             {
@@ -260,33 +263,63 @@ namespace MapService.Controllers
                     }
                 },
                 version = "1.0.5"
-            };            
-            string jsonOutput = JsonConvert.SerializeObject(mapConfig, Formatting.Indented);                            
+            };
+            string jsonOutput = JsonConvert.SerializeObject(mapConfig, Formatting.Indented);
             System.IO.File.WriteAllText(file, jsonOutput);
+        }
+
+        private List<string> GetAllowedMapConfigurations(string[] userGroups)
+        {
+            string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
+            IEnumerable<string> files = Directory.EnumerateFiles(folder);
+            List<string> mapConfigurationsList = new List<string>();
+
+            foreach (string mapConfigurationFile in files)
+            {
+                string fileName = Path.GetFileNameWithoutExtension(mapConfigurationFile);
+
+                if (fileName != "layers")
+                {
+                    var json = System.IO.File.ReadAllText(mapConfigurationFile);
+                    dynamic mapConfiguration = JsonConvert.DeserializeObject(json);
+                    var visibleForGroups = mapConfiguration["visibleForGroups"];
+
+                    if (!(visibleForGroups == null))
+                    {
+                        foreach (string group in visibleForGroups)
+                        {
+                            if (Array.Exists(userGroups, g => g.Equals(group)))
+                            {
+                                mapConfigurationsList.Add(fileName);
+                            }
+                        }
+                    }
+                }
+            }
+            return mapConfigurationsList;
         }
 
         public string UserSpecificMaps()
         {
-            var user = System.Security.Principal.WindowsIdentity.GetCurrent();
+            var appsettings = ConfigurationManager.AppSettings;
+            var ADdomain = appsettings["ActiveDirectoryDomain"];
+            var ADuser = appsettings["ActiveDirectoryUser"];
+            var ADpassword = appsettings["ActiveDirectoryUserPassword"];
+            var adLookup = new ActiveDirectoryLookup(ADdomain, ADuser, ADpassword);
 
+            var activeUser = adLookup.GetActiveUser();
+
+            //TODO Change this to GetAuthorizationGroups(). The user sent to ActiveDirectoryLookup needs access to use 
+            //all functionality in AD
+            var allowedUserGroups = adLookup.GetGroups(activeUser);
+            var allowedMapConfigurations = GetAllowedMapConfigurations(allowedUserGroups);
 
             Response.Expires = 0;
             Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
             Response.ContentType = "application/json; charset=utf-8";
             Response.Headers.Add("Cache-Control", "private, no-cache");
 
-            string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
-            IEnumerable<string> files = Directory.EnumerateFiles(folder);
-            List<string> fileList = new List<string>();
-            foreach (string file in files)
-            {
-                string fileName = Path.GetFileNameWithoutExtension(file);
-                if (fileName != "layers")
-                {
-                    fileList.Add(fileName);
-                }
-            }
-            return JsonConvert.SerializeObject(fileList);
+            return JsonConvert.SerializeObject(allowedMapConfigurations);
         }
 
         public string List(string id)
