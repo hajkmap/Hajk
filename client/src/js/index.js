@@ -28,7 +28,6 @@
  */
 (global.HAJK2 = (function () {
   'use strict';
-
   var ApplicationView = require('views/application'),
     cssModifier = require('utils/cssmodifier'),
     configPath = '/mapservice/settings/config/map_1',
@@ -44,7 +43,8 @@
     if (config && config.map && config.map.colors) {
       cssModifier.configure(config.map.colors);
     }
-    application.render();
+    //Thememap selection need to force a rerender of rootnode
+    application.render(true);
   };
 
   internal.init = function (config) {
@@ -86,7 +86,6 @@
         layer.visibleAtStart = true;
       });
     }
-
     return a;
   };
 
