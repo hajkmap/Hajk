@@ -171,23 +171,22 @@
     {
       "type": "layerswitcher",
       "options": {
-        "baselayers": [
-          {
-            "id": "22",
-            "visibleAtStart": true,
-            "drawOrder": 0
-          }
-        ],
+        "baselayers": [],
         "groups": [
           {
-            "id": "0c74918b-ee7a-0cd5-f062-a8284f826367",
+            "id": "96638717-9cf2-61f7-75a8-3a4859140cf7",
             "parent": "-1",
-            "name": "Lager",
+            "name": "Grupp 1",
             "toggled": false,
             "expanded": false,
             "layers": [
               {
-                "id": "42",
+                "id": "47",
+                "visibleAtStart": false,
+                "drawOrder": 1000
+              },
+              {
+                "id": "48",
                 "visibleAtStart": false,
                 "drawOrder": 1000
               }
@@ -195,14 +194,21 @@
             "groups": []
           }
         ],
-        "instruction": "las instructiónes",
+        "instruction": "instruktion",
         "active": true,
         "visibleAtStart": true,
         "backgroundSwitcherBlack": true,
         "backgroundSwitcherWhite": true,
-        "toggleAllButton": true,
-        "dropdownThemeMaps": true,
-        "themeMapHeaderCaption": "Temakartor hehe"
+        "toggleAllButton": false,
+        "dropdownThemeMaps": false,
+        "themeMapHeaderCaption": "Temakartor",
+        "visibleForGroups": [
+          "grupp 1",
+          "grupp 2",
+          "grupp 3",
+          "grupp4",
+          "gr  upp45"
+        ]
       },
       "index": 0
     },

@@ -257,7 +257,8 @@ class Menu extends Component {
       toggleAllButton: false,
 	  instruction: "",
 	  dropdownThemeMaps: false,
-	  themeMapHeaderCaption: "Temakartor"
+    themeMapHeaderCaption: "Temakartor",
+    visibleForGroups: []
     };
     this.state = state;
   }
@@ -285,9 +286,10 @@ class Menu extends Component {
           backgroundSwitcherBlack: this.props.model.get('layerMenuConfig').backgroundSwitcherBlack,
           backgroundSwitcherWhite: this.props.model.get('layerMenuConfig').backgroundSwitcherWhite,
           toggleAllButton: this.props.model.get('layerMenuConfig').toggleAllButton,
-		  instruction: this.props.model.get('layerMenuConfig').instruction,
-		  dropdownThemeMaps: this.props.model.get('layerMenuConfig').dropdownThemeMaps,
-		  themeMapHeaderCaption: this.props.model.get('layerMenuConfig').themeMapHeaderCaption
+          instruction: this.props.model.get('layerMenuConfig').instruction,
+          dropdownThemeMaps: this.props.model.get('layerMenuConfig').dropdownThemeMaps,
+          themeMapHeaderCaption: this.props.model.get('layerMenuConfig').themeMapHeaderCaption,
+          visibleForGroups: this.props.model.get('layerMenuConfig').visibleForGroups
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -450,10 +452,10 @@ class Menu extends Component {
       backgroundSwitcherBlack: this.state.backgroundSwitcherBlack,
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
       toggleAllButton: this.state.toggleAllButton,
-	  instruction: this.state.instruction,
-	  dropdownThemeMaps: this.state.dropdownThemeMaps,
-	  themeMapHeaderCaption: this.state.themeMapHeaderCaption
-	  
+      instruction: this.state.instruction,
+      dropdownThemeMaps: this.state.dropdownThemeMaps,
+      themeMapHeaderCaption: this.state.themeMapHeaderCaption,
+      visibleForGroups: this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
     };
 
     var roots = $('.tree-view > ul > li');
@@ -925,16 +927,19 @@ class Menu extends Component {
   }
 
   handleAuthGrpsChange(event) {
-	const target = event.target;
-	const value = target.value;
-	let groups = [];
-	
-	try {
-		groups = value.split(",");
-	} catch (error) {
-		console.log(`Någonting gick fel: ${error}`);
-	}
-	console.log("groups", groups);
+    const target = event.target;
+    const value = target.value;
+    let groups = [];
+    
+    try {
+      groups = value.split(",");
+    } catch (error) {
+      console.log(`Någonting gick fel: ${error}`);
+    }
+
+    this.setState({
+      visibleForGroups: groups
+    });  
   }
   /**
    *
@@ -1080,7 +1085,8 @@ class Menu extends Component {
 						id="authGroups"
 						name="authGroups"
 						type="text"
-						onChange={(e) => {this.handleAuthGrpsChange(e)}}
+            onChange={(e) => {this.handleAuthGrpsChange(e)}}
+            value={this.state.visibleForGroups}
 					/>
 				</div>
 			  </div>
