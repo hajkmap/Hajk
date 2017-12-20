@@ -44,5 +44,7 @@ namespace MapService.Models.ToolOptions
         public bool dropdownThemeMaps { get; set; }
 
         public string themeMapHeaderCaption { get; set; }
+		
+		public string[] visibleForGroups { get; set; }
     }
 }
