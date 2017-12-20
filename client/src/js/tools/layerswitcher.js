@@ -71,8 +71,6 @@ var LayerSwitcherModel = {
   defaults: LayerSwitcherModelProperties,
 
   initialize: function (options) {
-console.log(this,"this");
-
     ToolModel.prototype.initialize.call(this);
   },
 
@@ -99,6 +97,17 @@ console.log(this,"this");
     });
   },
 
+  setThemeMap : function (configurationName) {
+    HAJK2.start({
+      configPath: "/mapservice/config/" + configurationName,
+      layersPath: "/mapservice/config/layers"
+    }, function (status, message) {
+      if (!status) {
+        document.write(message);
+      }
+    });
+  },
+
 
   loadThemeMaps: function (callback) {
     $.ajax({
@@ -106,7 +115,6 @@ console.log(this,"this");
       method: 'GET',
       contentType: 'application/json',
       success: (data) => {
-        console.log(data,"data")
         // var name = data[0];
         // if (name === undefined) {
         //   name = "";
@@ -144,7 +152,6 @@ console.log(this,"this");
    */
   getBaseLayers: function () {
     var baseLayers = [];
-console.log(this,"this");
     this.get('baselayers').forEach(baseLayer => {
       var layer = this.get('layerCollection').find(layer => layer.id === baseLayer.id);
       if (layer) {
