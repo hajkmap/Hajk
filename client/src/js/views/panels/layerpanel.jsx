@@ -41,11 +41,12 @@ var LayerPanelView = {
    * @return {object}
    */
   getInitialState: function() {
+
     return {
       visible: false,
       mapConfigurations : [],
-      dropDownValue : this.props.model.get("themeMapHeaderCaption")
-    };
+      dropDownValue : HAJK2.configFile
+    }
   },
 
   componentWillMount: function() {
@@ -57,7 +58,6 @@ var LayerPanelView = {
    * @instance
    */
   componentDidMount: function () {
-
     if(this.props.model.get('dropdownThemeMaps')){
       this.populateThemeMaps()
     }
@@ -344,14 +344,16 @@ var LayerPanelView = {
 
    setThemeMap(e) {
     var configurationName = e.target.value; 
-    this.setState({dropDownValue : configurationName})
-    this.props.model.setThemeMap(configurationName);
+    var index = e.nativeEvent.target.selectedIndex;
+    var configurationTitle = e.nativeEvent.target[index].text;
+    this.props.model.setThemeMap(configurationName, configurationTitle);
    },
 
    populateThemeMaps() {
-    this.props.model.loadThemeMaps(mapConfigurations => {
+     this.props.model.loadThemeMaps(mapConfigurations => {
       this.setState({
-        mapConfigurations: mapConfigurations
+        mapConfigurations: mapConfigurations,
+        dropDownValue : HAJK2.configFile
       })
     });
    },
@@ -420,7 +422,7 @@ var LayerPanelView = {
    * @return {external:ReactElement}
    */
   render: function () {
-    var mapConfigurations = this.state.mapConfigurations.map((map, i) => <option value={map} key={i}>{map}</option>);
+    var mapConfigurations = this.state.mapConfigurations.map((map, i) => <option value={map.MapConfigurationName} key={i}>{map.MapConfigurationTitle}</option>);
     var groups, toggleAllButton,dropdownThemeMaps ;
 
     this.groups = this.props.model.get('groups');
@@ -444,7 +446,6 @@ var LayerPanelView = {
         <div>
         <span style={{marginRight: "10px"}}>{this.props.model.get("themeMapHeaderCaption")}</span>
         <select onChange={this.setThemeMap} style={{marginBottom: "10px", width : "100%"}} value={this.state.dropDownValue}>
-        <option value={this.props.model.get("themeMapHeaderCaption")}>Välj : {this.props.model.get("themeMapHeaderCaption")}</option>
         {mapConfigurations}
         </select>
         </div>

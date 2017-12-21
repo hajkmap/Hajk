@@ -97,7 +97,9 @@ var LayerSwitcherModel = {
     });
   },
 
-  setThemeMap : function (configurationName) {
+  setThemeMap : function (configurationName, configurationTitle) {
+    HAJK2.configFile = configurationName;
+    HAJK2.configTitle = configurationTitle;
     HAJK2.start({
       configPath: "/mapservice/config/" + configurationName,
       layersPath: "/mapservice/config/layers"
@@ -115,6 +117,7 @@ var LayerSwitcherModel = {
       method: 'GET',
       contentType: 'application/json',
       success: (data) => {
+        console.log(data,"data")
         // var name = data[0];
         // if (name === undefined) {
         //   name = "";
