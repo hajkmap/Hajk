@@ -67,7 +67,7 @@ var ExportModelProperties = {
   icon: 'fa fa-print icon',
   exportUrl: '/mapservice/export/pdf',
   exportTiffUrl: '/mapservice/export/tiff',
-  exportMailUrl: '/mapservice/export/email', //FORTSÄTT HÄR
+  exportMailUrl: '/mapservice/export/email',
   pdfActive: true,
   tiffActive: true,
   copyright: "© Lantmäteriverket i2009/00858",
@@ -880,7 +880,7 @@ var ExportModel = {
     ,   form   = document.createElement('form')
     ,   input  = document.createElement('input')
     ,   curr   = document.getElementById(this.exportHitsFormId)
-    ,   url    = this.get('exportMailUrl') //FORTSÄTT HÄR
+    ,   url    = this.get('exportMailUrl')
     ,   data   = {
       wmsLayers: [],
       vectorLayers: [],
