@@ -219,18 +219,17 @@ namespace MapService.Controllers
             _log.Debug("Inited pdfcreator");
             byte[] blob = pdfCreator.Create(exportItem);
 
+            MailAddress fromAddress = new MailAddress("example@mail.com", "");
             MailAddress toAddress = new MailAddress(emailAddress);
     
-            var client = new SmtpClient()
-            {
-                EnableSsl = true
-            };
+            var client = new SmtpClient();
 
             MailMessage message = new MailMessage(fromAddress, toAddress);
             message.Subject = "Din kartexport";
             message.IsBodyHtml = true;
             message.Body = "Här kommer din kartexport.";
             message.Attachments.Add(new Attachment(new MemoryStream(blob), "kartexport.pdf"));
+
             try
             {
                 client.Send(message);
