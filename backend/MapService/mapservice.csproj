@@ -200,6 +200,7 @@
     <Compile Include="Controllers\MapSettingsController.cs" />
     <Compile Include="DataAccess\SettingsStore.cs" />
     <Compile Include="Models\Bookmark.cs" />
+    <Compile Include="Models\ThemeMap.cs" />
     <Compile Include="Models\Config\ArcGISConfig.cs" />
     <Compile Include="Models\Config\ActiveDirectoryLookup.cs" />
     <Compile Include="Models\Config\ExtendedWmsConfig.cs" />

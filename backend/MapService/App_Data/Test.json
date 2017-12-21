@@ -320,6 +320,7 @@
         "instruction": null,
         "active": true,
         "visibleAtStart": true,
+        "visibleForGroups" : ["Office-SEGOT01", "MammaMia"],
         "backgroundSwitcherBlack": true,
         "backgroundSwitcherWhite": true,
         "toggleAllButton": false
@@ -367,6 +368,7 @@
     "infologo": null,
     "mobileleft": null,
     "mobileright": null,
+    "title" : "MIN KARTA",
     "pil": "",
     "mobile": false,
     "colors": {

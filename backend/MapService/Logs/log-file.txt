@@ -298,3 +298,399 @@ FATAL 2017-12-19 12:56:07 Microsoft.CSharp.RuntimeBinder.RuntimeBinderException:
 FATAL 2017-12-19 12:59:43 System.Web.HttpException (0x80004005): Bad Request
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 315
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 370 
+FATAL 2017-12-21 09:04:53 System.DirectoryServices.DirectoryServicesCOMException (0x8007052E): The user name or password is incorrect.
+
+   vid System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   vid System.DirectoryServices.DirectoryEntry.Bind()
+   vid System.DirectoryServices.DirectoryEntry.get_AdsObject()
+   vid System.DirectoryServices.PropertyValueCollection.PopulateList()
+   vid System.DirectoryServices.PropertyValueCollection..ctor(DirectoryEntry entry, String propertyName)
+   vid System.DirectoryServices.PropertyCollection.get_Item(String propertyName)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInitNoContainer()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 28
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 314
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 371 
+FATAL 2017-12-21 11:36:16 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid försök att hämta behörighetsgrupperna.
+   vid System.DirectoryServices.AccountManagement.AuthZSet..ctor(Byte[] userSid, NetCred credentials, ContextOptions contextOptions, String flatUserAuthority, StoreCtx userStoreCtx, Object userCtxBase)
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.GetGroupsMemberOfAZ(Principal p)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroupsHelper()
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroups()
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 38
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+FATAL 2017-12-21 11:36:55 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid försök att hämta behörighetsgrupperna.
+   vid System.DirectoryServices.AccountManagement.AuthZSet..ctor(Byte[] userSid, NetCred credentials, ContextOptions contextOptions, String flatUserAuthority, StoreCtx userStoreCtx, Object userCtxBase)
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.GetGroupsMemberOfAZ(Principal p)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroupsHelper()
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroups()
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 38
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+FATAL 2017-12-21 11:38:59 System.DirectoryServices.AccountManagement.PrincipalOperationException: An operations error occurred.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: An operations error occurred.
+
+   vid System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   vid System.DirectoryServices.DirectoryEntry.Bind()
+   vid System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- Slut på stackspårning för interna undantag ---
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 33
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+FATAL 2017-12-21 11:39:56 System.DirectoryServices.AccountManagement.PrincipalOperationException: An operations error occurred.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: An operations error occurred.
+
+   vid System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   vid System.DirectoryServices.DirectoryEntry.Bind()
+   vid System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- Slut på stackspårning för interna undantag ---
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 33
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+FATAL 2017-12-21 11:40:33 System.DirectoryServices.AccountManagement.PrincipalOperationException: An operations error occurred.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: An operations error occurred.
+
+   vid System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   vid System.DirectoryServices.DirectoryEntry.Bind()
+   vid System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- Slut på stackspårning för interna undantag ---
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 33
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+FATAL 2017-12-21 12:18:20 System.DirectoryServices.AccountManagement.PrincipalOperationException: An operations error occurred.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: An operations error occurred.
+
+   vid System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   vid System.DirectoryServices.DirectoryEntry.Bind()
+   vid System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- Slut på stackspårning för interna undantag ---
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 33
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+FATAL 2017-12-21 12:26:22 System.DirectoryServices.AccountManagement.PrincipalServerDownException: Det gick inte att kontakta servern. ---> System.DirectoryServices.Protocols.LdapException: LDAP-servern är inte tillgänglig.
+   vid System.DirectoryServices.Protocols.LdapConnection.Connect()
+   vid System.DirectoryServices.Protocols.LdapConnection.SendRequestHelper(DirectoryRequest request, Int32& messageID)
+   vid System.DirectoryServices.Protocols.LdapConnection.SendRequest(DirectoryRequest request, TimeSpan requestTimeout)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.ReadServerConfig(String serverName, ServerProperties& properties)
+   --- Slut på stackspårning för interna undantag ---
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.ReadServerConfig(String serverName, ServerProperties& properties)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoServerVerifyAndPropRetrieval()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext..ctor(ContextType contextType, String name, String container, ContextOptions options, String userName, String password)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext..ctor(ContextType contextType, String name, String userName, String password)
+   vid MapService.Models.Config.ActiveDirectoryLookup..ctor(String domain, String container, String user, String password) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 16
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 316
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+FATAL 2017-12-21 12:27:54 System.DirectoryServices.AccountManagement.PrincipalOperationException: An operations error occurred.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: An operations error occurred.
+
+   vid System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   vid System.DirectoryServices.DirectoryEntry.Bind()
+   vid System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- Slut på stackspårning för interna undantag ---
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 33
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+FATAL 2017-12-21 12:28:43 System.NullReferenceException: Objektreferensen har inte angetts till en instans av ett objekt.
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 42
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+FATAL 2017-12-21 12:32:13 System.NullReferenceException: Objektreferensen har inte angetts till en instans av ett objekt.
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 42
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+FATAL 2017-12-21 12:33:27 System.NullReferenceException: Objektreferensen har inte angetts till en instans av ett objekt.
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 42
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+FATAL 2017-12-21 12:37:17 System.Web.HttpException (0x80004005): User not found
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 44
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+FATAL 2017-12-21 12:38:08 System.Web.HttpException (0x80004005): User not found
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 44
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+ERROR 2017-12-21 12:40:49 Test av log4net av Hitomi 
+FATAL 2017-12-21 12:46:23 System.Web.HttpException (0x80004005): User not found
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 44
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+ERROR 2017-12-21 12:47:29 Test av log4net av Hitomi 
+FATAL 2017-12-21 12:47:40 System.Web.HttpException (0x80004005): User not found
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 44
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+FATAL 2017-12-21 12:52:53 System.Web.HttpException (0x80004005): User not found
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 44
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+ERROR 2017-12-21 12:54:46 Test av log4net av Hitomi 
+FATAL 2017-12-21 12:55:02 System.Web.HttpException (0x80004005): User not found
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 44
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+ERROR 2017-12-21 12:58:58 Test av log4net av Hitomi 
+FATAL 2017-12-21 12:59:10 System.Web.HttpException (0x80004005): User not found
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 46
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+ERROR 2017-12-21 13:00:08 Test av log4net av Hitomi 
+FATAL 2017-12-21 13:00:19 System.Web.HttpException (0x80004005): User not found
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 47
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+ERROR 2017-12-21 13:02:20 Test av log4net av Hitomi 
+FATAL 2017-12-21 13:06:37 System.Web.HttpException (0x80004005): User not found
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 45
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+ERROR 2017-12-21 13:06:45 Test av log4net av Hitomi 
+ERROR 2017-12-21 13:06:58 Test av log4net av Hitomi 
+ERROR 2017-12-21 13:06:58 User is not present in the AD-container specified in Web.config 
+FATAL 2017-12-21 13:06:58 System.Web.HttpException (0x80004005): User not found
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 45
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+ERROR 2017-12-21 13:12:41 Test av log4net av Hitomi 
+ERROR 2017-12-21 13:13:16 User is not present in the AD-container specified in Web.config 
+FATAL 2017-12-21 13:13:16 System.Web.HttpException (0x80004005): User not found
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 43
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 322
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 379 
+ERROR 2017-12-21 13:14:23 User is not present in the AD-container specified in Web.config 
+FATAL 2017-12-21 13:14:23 System.Web.HttpException (0x80004005): User not found
+   vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 43
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 322
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 379 
+ERROR 2017-12-21 13:14:30 Test av log4net av Hitomi 
+ERROR 2017-12-21 13:16:59 Test av log4net av Hitomi 
+FATAL 2017-12-21 13:18:02 System.ArgumentException: Accessed JArray values with invalid key value: "visibleForGroups". Array position index expected.
+   vid Newtonsoft.Json.Linq.JArray.get_Item(Object key)
+   vid System.Dynamic.UpdateDelegates.UpdateAndExecute2[T0,T1,TRet](CallSite site, T0 arg0, T1 arg1)
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 285
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 379 
+ERROR 2017-12-21 13:18:09 Test av log4net av Hitomi 
+FATAL 2017-12-21 13:19:17 System.ArgumentException: Can not convert Object to String.
+   vid Newtonsoft.Json.Linq.JToken.op_Explicit(JToken value)
+   vid System.Dynamic.UpdateDelegates.UpdateAndExecute1[T0,TRet](CallSite site, T0 arg0)
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 294
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 379 
+ERROR 2017-12-21 13:20:26 Test av log4net av Hitomi 
+FATAL 2017-12-21 13:21:25 System.ArgumentException: Can not convert Object to String.
+   vid Newtonsoft.Json.Linq.JToken.op_Explicit(JToken value)
+   vid System.Dynamic.UpdateDelegates.UpdateAndExecute1[T0,TRet](CallSite site, T0 arg0)
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 295
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 324
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+ERROR 2017-12-21 13:21:51 Test av log4net av Hitomi 
+FATAL 2017-12-21 13:24:01 Microsoft.CSharp.RuntimeBinder.RuntimeBinderException: Det går inte att använda operatorn == i operander av typerna Newtonsoft.Json.Linq.JEnumerable<Newtonsoft.Json.Linq.JToken> och <null>
+   vid CallSite.Target(Closure , CallSite , Object , Object )
+   vid System.Dynamic.UpdateDelegates.UpdateAndExecute2[T0,T1,TRet](CallSite site, T0 arg0, T1 arg1)
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 288
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 324
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+ERROR 2017-12-21 13:24:23 Test av log4net av Hitomi 
+FATAL 2017-12-21 13:28:33 Microsoft.CSharp.RuntimeBinder.RuntimeBinderException: Det går inte att använda operatorn == i operander av typerna Newtonsoft.Json.Linq.JEnumerable<Newtonsoft.Json.Linq.JToken> och <null>
+   vid CallSite.Target(Closure , CallSite , Object , Object )
+   vid System.Dynamic.UpdateDelegates.UpdateAndExecute2[T0,T1,TRet](CallSite site, T0 arg0, T1 arg1)
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 288
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 324
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
+ERROR 2017-12-21 13:42:43 Test av log4net av Hitomi 
+ERROR 2017-12-21 13:43:42 Test av log4net av Hitomi 
+ERROR 2017-12-21 13:44:48 Test av log4net av Hitomi 
+ERROR 2017-12-21 13:46:33 Test av log4net av Hitomi 
+ERROR 2017-12-21 13:49:03 Test av log4net av Hitomi 
+ERROR 2017-12-21 13:53:02 Test av log4net av Hitomi 
+ERROR 2017-12-21 14:01:37 Test av log4net av Hitomi 
+ERROR 2017-12-21 14:04:40 Test av log4net av Hitomi 
+ERROR 2017-12-21 14:07:18 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\map_1.jsonis missing the 'visibleForGroups' object 
+ERROR 2017-12-21 14:07:18 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.jsonis missing the 'visibleForGroups' object 
+ERROR 2017-12-21 14:08:11 Test av log4net av Hitomi 
+FATAL 2017-12-21 14:09:15 System.InvalidOperationException: Cannot access child value on Newtonsoft.Json.Linq.JProperty.
+   vid Newtonsoft.Json.Linq.JToken.get_Item(Object key)
+   vid Newtonsoft.Json.Linq.Extensions.<Values>d__4`2.MoveNext()
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 296
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 325
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 381 
+ERROR 2017-12-21 14:11:41 Test av log4net av Hitomi 
+FATAL 2017-12-21 14:12:34 System.InvalidOperationException: Cannot access child value on Newtonsoft.Json.Linq.JProperty.
+   vid Newtonsoft.Json.Linq.JToken.get_Item(Object key)
+   vid Newtonsoft.Json.Linq.Extensions.<Values>d__4`2.MoveNext()
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 298
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 327
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 383 
+ERROR 2017-12-21 14:12:51 Test av log4net av Hitomi 
+FATAL 2017-12-21 14:13:25 System.InvalidOperationException: Cannot access child value on Newtonsoft.Json.Linq.JProperty.
+   vid Newtonsoft.Json.Linq.JToken.get_Item(Object key)
+   vid Newtonsoft.Json.Linq.Extensions.<Values>d__4`2.MoveNext()
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 296
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 325
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 381 
+FATAL 2017-12-21 14:15:00 System.InvalidOperationException: Cannot access child value on Newtonsoft.Json.Linq.JProperty.
+   vid Newtonsoft.Json.Linq.JToken.get_Item(Object key)
+   vid Newtonsoft.Json.Linq.Extensions.<Values>d__4`2.MoveNext()
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 296
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 325
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 381 
+ERROR 2017-12-21 14:15:18 Test av log4net av Hitomi 
+ERROR 2017-12-21 14:19:25 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\map_1.jsonis missing the 'visibleForGroups' object 
+ERROR 2017-12-21 14:19:25 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.jsonis missing the 'visibleForGroups' object 
+ERROR 2017-12-21 14:19:51 Test av log4net av Hitomi 
+FATAL 2017-12-21 14:22:13 Newtonsoft.Json.JsonException: Unexpected character while parsing path indexer: @
+   vid Newtonsoft.Json.Linq.JsonPath.JPath.ParseArrayIndexer(Char indexerCloseChar)
+   vid Newtonsoft.Json.Linq.JsonPath.JPath.ParsePath(List`1 filters, Int32 currentPartStartIndex, Boolean query)
+   vid Newtonsoft.Json.Linq.JsonPath.JPath.ParseMain()
+   vid Newtonsoft.Json.Linq.JToken.SelectToken(String path, Boolean errorWhenNoMatch)
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 287
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 325
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 381 
+ERROR 2017-12-21 14:22:25 Test av log4net av Hitomi 
+ERROR 2017-12-21 14:30:24 Test av log4net av Hitomi 
+ERROR 2017-12-21 15:33:03 Test av log4net av Hitomi 
+ERROR 2017-12-21 16:07:36 Test av log4net av Hitomi 
+FATAL 2017-12-21 16:08:23 System.NullReferenceException: Objektreferensen har inte angetts till en instans av ett objekt.
+   vid MapService.Controllers.ConfigController.GetMapConfigurationTitle(String mapConfigurationFile) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 279
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 308
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 348
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 405 
+FATAL 2017-12-21 16:09:24 System.NullReferenceException: Objektreferensen har inte angetts till en instans av ett objekt.
+   vid MapService.Controllers.ConfigController.GetMapConfigurationTitle(String mapConfigurationFile) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 279
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 308
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 348
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 405 
+FATAL 2017-12-21 16:10:08 System.NullReferenceException: Objektreferensen har inte angetts till en instans av ett objekt.
+   vid MapService.Controllers.ConfigController.GetMapConfigurationTitle(String mapConfigurationFile) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 279
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 308
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 348
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 405 
+ERROR 2017-12-21 16:11:14 Test av log4net av Hitomi 
+FATAL 2017-12-21 16:12:07 System.NullReferenceException: Objektreferensen har inte angetts till en instans av ett objekt.
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 307
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 347
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 404 
+ERROR 2017-12-21 16:12:32 Test av log4net av Hitomi 
+FATAL 2017-12-21 16:12:46 System.NullReferenceException: Objektreferensen har inte angetts till en instans av ett objekt.
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 307
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 347
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 404 
+FATAL 2017-12-21 16:14:27 System.NullReferenceException: Objektreferensen har inte angetts till en instans av ett objekt.
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 307
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 347
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 404 
+FATAL 2017-12-21 16:15:35 System.NullReferenceException: Objektreferensen har inte angetts till en instans av ett objekt.
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 307
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 347
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 404 
+ERROR 2017-12-21 16:16:51 Test av log4net av Hitomi 
+FATAL 2017-12-21 16:16:53 System.NullReferenceException: Objektreferensen har inte angetts till en instans av ett objekt.
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 307
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 347
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 404 
+FATAL 2017-12-21 16:17:17 System.NullReferenceException: Objektreferensen har inte angetts till en instans av ett objekt.
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 307
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 347
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 404 
+FATAL 2017-12-21 16:17:50 System.NullReferenceException: Objektreferensen har inte angetts till en instans av ett objekt.
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 307
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 347
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 404 
+ERROR 2017-12-21 16:17:59 Test av log4net av Hitomi 
+FATAL 2017-12-21 16:18:35 System.NullReferenceException: Objektreferensen har inte angetts till en instans av ett objekt.
+   vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 307
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 347
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 404 
+ERROR 2017-12-21 16:21:04 Test av log4net av Hitomi 
+ERROR 2017-12-21 16:22:02 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\map_1.jsonis missing the 'visibleForGroups' object 
+ERROR 2017-12-21 16:22:02 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\map_1.jsonis missing the 'title' object 
+ERROR 2017-12-21 16:22:03 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.jsonis missing the 'title' object 
+ERROR 2017-12-21 16:23:44 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\map_1.jsonis missing the 'visibleForGroups' object 
+ERROR 2017-12-21 16:23:44 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\map_1.jsonis missing the 'title' object 
+ERROR 2017-12-21 16:23:44 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.jsonis missing the 'title' object 
+ERROR 2017-12-21 16:23:52 Test av log4net av Hitomi 
+ERROR 2017-12-21 16:24:07 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\map_1.json is missing the 'visibleForGroups' object 
+ERROR 2017-12-21 16:24:07 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\map_1.json is missing the 'title' object 
+ERROR 2017-12-21 16:24:07 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+ERROR 2017-12-21 16:24:15 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\map_1.json is missing the 'visibleForGroups' object 
+ERROR 2017-12-21 16:24:15 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\map_1.json is missing the 'title' object 
+ERROR 2017-12-21 16:24:15 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+ERROR 2017-12-21 16:24:56 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\map_1.json is missing the 'visibleForGroups' object 
+ERROR 2017-12-21 16:24:56 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\map_1.json is missing the 'title' object 
+ERROR 2017-12-21 16:24:56 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+ERROR 2017-12-21 16:25:27 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+ERROR 2017-12-21 16:26:53 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+ERROR 2017-12-21 16:28:06 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+ERROR 2017-12-21 16:29:24 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+ERROR 2017-12-21 16:29:49 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+ERROR 2017-12-21 16:31:28 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+ERROR 2017-12-21 16:32:28 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+ERROR 2017-12-21 16:33:07 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+ERROR 2017-12-21 16:33:10 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+ERROR 2017-12-21 16:33:42 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+ERROR 2017-12-21 16:35:01 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+ERROR 2017-12-21 16:35:03 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+ERROR 2017-12-21 16:35:06 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+ERROR 2017-12-21 16:35:20 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+ERROR 2017-12-21 16:36:03 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
