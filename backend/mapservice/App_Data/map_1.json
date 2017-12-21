@@ -1,6 +1,5 @@
 {
   "version": "1.0.5",
-  "visibleForGroups" : ["Office-SEGOT01", "MammaMia"],
   "projections": [
     {
       "code": "EPSG:3006",
@@ -479,6 +478,7 @@
         ],
         "active": true,
         "visibleAtStart": true,
+        "visibleForGroups" : ["Office-SEGOT01", "MammaMia"],
         "backgroundSwitcherBlack": false,
         "backgroundSwitcherWhite": false,
         "toggleAllButton": true,
@@ -713,6 +713,7 @@
     "mobileright": "",
     "pil": "https://karta2.varberg.se/assets/icons/pil.png",
     "mobile": true,
+    "title" : "hejsan",
     "colors": {
       "primaryColor": "#1ea5cd",
       "secondaryColor": "#ffffff"

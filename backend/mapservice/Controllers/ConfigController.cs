@@ -12,12 +12,15 @@ using log4net;
 using MapService.Models.Config;
 using System.Configuration;
 using Newtonsoft.Json.Linq;
+using MapService.DataAccess;
+using System.Collections;
 
 namespace MapService.Controllers
 {
     public class ConfigController : Controller
     {
         ILog _log = LogManager.GetLogger(typeof(ConfigController));
+        private readonly SettingsDbContext settingsDataContext = new SettingsDbContext();
 
         public void Delete(string id)
         {
@@ -268,11 +271,31 @@ namespace MapService.Controllers
             System.IO.File.WriteAllText(file, jsonOutput);
         }
 
-        private List<string> GetAllowedMapConfigurations(string[] userGroups)
+        private JToken GetMapConfigurationTitle(string mapConfigurationFile)
+        {
+            var json = System.IO.File.ReadAllText(mapConfigurationFile);
+            JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(json);
+            var title = mapConfiguration.SelectToken("$.map.title");
+
+            return title;
+        }
+
+        private JToken GetVisibleForGroups (string mapConfigurationFile)
+        {    
+
+            var json = System.IO.File.ReadAllText(mapConfigurationFile);
+            JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(json);
+            var layerSwitcher = mapConfiguration.SelectToken("$.tools[?(@.type == 'layerswitcher')]");
+            var visibleForGroups = layerSwitcher.SelectToken("$.options.visibleForGroups");
+
+            return visibleForGroups;
+        }
+
+        private List<ThemeMap> GetAllowedMapConfigurations(string[] userGroups)
         {
             string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
             IEnumerable<string> files = Directory.EnumerateFiles(folder);
-            List<string> mapConfigurationsList = new List<string>();
+            List<ThemeMap> mapConfigurationsList = new List<ThemeMap>();
 
             foreach (string mapConfigurationFile in files)
             {
@@ -280,39 +303,53 @@ namespace MapService.Controllers
 
                 if (fileName != "layers")
                 {
-                    var json = System.IO.File.ReadAllText(mapConfigurationFile);
-                    dynamic mapConfiguration = JsonConvert.DeserializeObject(json);
-                    var visibleForGroups = mapConfiguration["visibleForGroups"];
+                    var visibleForGroups = GetVisibleForGroups(mapConfigurationFile);
+                    var mapTitle = GetMapConfigurationTitle(mapConfigurationFile);
 
-                    if (!(visibleForGroups == null))
+                    if (visibleForGroups == null)
                     {
-                        foreach (string group in visibleForGroups)
+                        _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " is missing the 'visibleForGroups' object");
+                    }
+
+                    if(mapTitle == null)
+                    {
+                        _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " is missing the 'title' object");
+                    }
+
+                    if (visibleForGroups != null && mapTitle != null)
+                    {
+                        foreach (JToken group in visibleForGroups)
                         {
-                            if (Array.Exists(userGroups, g => g.Equals(group)))
+                            if (Array.Exists(userGroups, g => g.Equals(group.ToString())))
                             {
-                                mapConfigurationsList.Add(fileName);
+                                mapConfigurationsList.Add(new ThemeMap
+                                {
+                                    MapConfigurationName = fileName,
+                                    MapConfigurationTitle = mapTitle.ToString()
+                                });
                             }
                         }
                     }
                 }
             }
+
             return mapConfigurationsList;
         }
 
         public string UserSpecificMaps()
         {
+            //Active Directory connection settings
             var appsettings = ConfigurationManager.AppSettings;
             var ADdomain = appsettings["ActiveDirectoryDomain"];
             var ADuser = appsettings["ActiveDirectoryUser"];
             var ADpassword = appsettings["ActiveDirectoryUserPassword"];
-            var adLookup = new ActiveDirectoryLookup(ADdomain, ADuser, ADpassword);
+            var ADContainer = appsettings["ActiveDirectoryContainer"];
 
+            var adLookup = new ActiveDirectoryLookup(ADdomain, ADContainer, ADuser, ADpassword);
             var activeUser = adLookup.GetActiveUser();
-
-            //TODO Change this to GetAuthorizationGroups(). The user sent to ActiveDirectoryLookup needs access to use 
-            //all functionality in AD
             var allowedUserGroups = adLookup.GetGroups(activeUser);
             var allowedMapConfigurations = GetAllowedMapConfigurations(allowedUserGroups);
+
 
             Response.Expires = 0;
             Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
