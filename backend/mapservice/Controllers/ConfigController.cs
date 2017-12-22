@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 using MapService.Models;
 using MapService.Models.ToolOptions;
 using log4net;
-using MapService.Models.Config;
+using MapService.Components;
 using System.Configuration;
 using Newtonsoft.Json.Linq;
 using MapService.DataAccess;
@@ -324,8 +324,8 @@ namespace MapService.Controllers
                             {
                                 mapConfigurationsList.Add(new ThemeMap
                                 {
-                                    MapConfigurationName = fileName,
-                                    MapConfigurationTitle = mapTitle.ToString()
+                                    mapConfigurationName = fileName,
+                                    mapConfigurationTitle = mapTitle.ToString()
                                 });
                             }
                         }
