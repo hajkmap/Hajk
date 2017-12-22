@@ -694,3 +694,100 @@ ERROR 2017-12-21 16:35:03 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapS
 ERROR 2017-12-21 16:35:06 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
 ERROR 2017-12-21 16:35:20 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
 ERROR 2017-12-21 16:36:03 MapConfigurationFileC:\SWECO\Projekt\Hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+FATAL 2017-12-22 10:39:16 System.Security.Authentication.AuthenticationException: The user name or password is incorrect.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: The user name or password is incorrect.
+
+   vid System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   vid System.DirectoryServices.DirectoryEntry.Bind()
+   vid System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- Slut på stackspårning för interna undantag ---
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   vid MapService.Components.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Components\ActiveDirectoryLookup.cs:rad 41
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 350
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 408 
+FATAL 2017-12-22 10:39:25 System.Security.Authentication.AuthenticationException: The user name or password is incorrect.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: The user name or password is incorrect.
+
+   vid System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   vid System.DirectoryServices.DirectoryEntry.Bind()
+   vid System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- Slut på stackspårning för interna undantag ---
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   vid MapService.Components.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Components\ActiveDirectoryLookup.cs:rad 41
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 350
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 408 
+FATAL 2017-12-22 10:40:14 System.Security.Authentication.AuthenticationException: The user name or password is incorrect.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: The user name or password is incorrect.
+
+   vid System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   vid System.DirectoryServices.DirectoryEntry.Bind()
+   vid System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   vid System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- Slut på stackspårning för interna undantag ---
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   vid System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   vid MapService.Components.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Components\ActiveDirectoryLookup.cs:rad 41
+   vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 350
+   vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 408 
+INFO 2017-12-22 10:40:56 Non-recursive AD-search used 
+INFO 2017-12-22 10:41:01 Non-recursive AD-search used 
+INFO 2017-12-22 10:41:03 Non-recursive AD-search used 
+INFO 2017-12-22 10:41:06 Non-recursive AD-search used 
+INFO 2017-12-22 10:41:34 Non-recursive AD-search used 
+INFO 2017-12-22 10:41:35 Non-recursive AD-search used 
+INFO 2017-12-22 10:41:36 Non-recursive AD-search used 
+INFO 2017-12-22 10:41:44 Non-recursive AD-search used 
+INFO 2017-12-22 10:44:21 Non-recursive AD-search used 
+INFO 2017-12-22 10:44:29 Non-recursive AD-search used 
+INFO 2017-12-22 10:44:33 Non-recursive AD-search used 
+INFO 2017-12-22 10:44:47 Non-recursive AD-search used 
+INFO 2017-12-22 10:44:54 Non-recursive AD-search used 
+INFO 2017-12-22 10:45:17 Non-recursive AD-search used 
+INFO 2017-12-22 10:48:45 Non-recursive AD-search used 
+INFO 2017-12-22 10:48:46 Non-recursive AD-search used 
+INFO 2017-12-22 10:48:49 Non-recursive AD-search used 
+INFO 2017-12-22 10:48:50 Non-recursive AD-search used 
+INFO 2017-12-22 10:48:53 Non-recursive AD-search used 
+INFO 2017-12-22 10:48:56 Non-recursive AD-search used 
+INFO 2017-12-22 10:49:02 Non-recursive AD-search used 
+INFO 2017-12-22 10:49:03 Non-recursive AD-search used 
+INFO 2017-12-22 10:49:05 Non-recursive AD-search used 
+INFO 2017-12-22 10:49:06 Non-recursive AD-search used 
+INFO 2017-12-22 10:49:28 Non-recursive AD-search used 
+INFO 2017-12-22 10:49:29 Non-recursive AD-search used 
+INFO 2017-12-22 10:51:06 Non-recursive AD-search used 
+INFO 2017-12-22 10:51:08 Non-recursive AD-search used 
+DEBUG 2017-12-22 10:51:16 <log4net.Error>Exception during StringFormat: Indatasträngen hade ett felaktigt format. <format>Received json: <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom"><Document><name>ritobjekt</name><Folder><name>ritobjekt</name><open>0</open><Style id="0"><LineStyle><color>ffffaf0f</color><width>3</width></LineStyle><PolyStyle><color>undefined</color></PolyStyle></Style><Style id="1"><LineStyle><color>ffffaf0f</color><width>3</width></LineStyle><PolyStyle><color>undefined</color></PolyStyle></Style><Style id="2"><LineStyle><color>ffffaf0f</color><width>3</width></LineStyle><PolyStyle><color>undefined</color></PolyStyle></Style><Style id="3"><LineStyle><color>ffffaf0f</color><width>3</width></LineStyle><PolyStyle><color>undefined</color></PolyStyle></Style><Style id="4"><LineStyle><color>ffffaf0f</color><width>3</width></LineStyle><PolyStyle><color>undefined</color></PolyStyle></Style><Style id="5"><LineStyle><color>ffffaf0f</color><width>3</width></LineStyle><PolyStyle><color>undefined</color></PolyStyle></Style><Placemark><name>Ritobjekt 1</name><description><table></table></description><styleUrl>#0</styleUrl><Point><coordinates>11.123751614662874,60.00239872273052</coordinates></Point><ExtendedData><Data name="style"><value>{"text":"","image":"","pointRadius":7,"pointColor":"rgb(15, 175, 255)","fillColor":null,"strokeColor":"rgb(15, 175, 255)","strokeWidth":3,"strokeDash":null}</value></Data></ExtendedData></Placemark><Placemark><name>Ritobjekt 2</name><description><table></table></description><styleUrl>#1</styleUrl><Point><coordinates>12.548144102713614,59.24999206699759</coordinates></Point><ExtendedData><Data name="style"><value>{"text":"","image":"","pointRadius":7,"pointColor":"rgb(15, 175, 255)","fillColor":null,"strokeColor":"rgb(15, 175, 255)","strokeWidth":3,"strokeDash":null}</value></Data></ExtendedData></Placemark><Placemark><name>Ritobjekt 3</name><description><table></table></description><styleUrl>#2</styleUrl><Point><coordinates>13.472192439844672,60.266563217883224</coordinates></Point><ExtendedData><Data name="style"><value>{"text":"","image":"","pointRadius":7,"pointColor":"rgb(15, 175, 255)","fillColor":null,"strokeColor":"rgb(15, 175, 255)","strokeWidth":3,"strokeDash":null}</value></Data></ExtendedData></Placemark><Placemark><name>Ritobjekt 4</name><description><table></table></description><styleUrl>#3</styleUrl><Point><coordinates>10.435182138620357,58.56962181678107</coordinates></Point><ExtendedData><Data name="style"><value>{"text":"","image":"","pointRadius":7,"pointColor":"rgb(15, 175, 255)","fillColor":null,"strokeColor":"rgb(15, 175, 255)","strokeWidth":3,"strokeDash":null}</value></Data></ExtendedData></Placemark><Placemark><name>Ritobjekt 5</name><description><table></table></description><styleUrl>#4</styleUrl><Point><coordinates>10.435182138620357,58.56962181678107</coordinates></Point><ExtendedData><Data name="style"><value>{"text":"","image":"","pointRadius":7,"pointColor":"rgb(15, 175, 255)","fillColor":null,"strokeColor":"rgb(15, 175, 255)","strokeWidth":3,"strokeDash":null}</value></Data></ExtendedData></Placemark><Placemark><name>Ritobjekt 6</name><description><table></table></description><styleUrl>#5</styleUrl><Point><coordinates>11.410258896900174,59.02389232484874</coordinates></Point><ExtendedData><Data name="style"><value>{"text":"","image":"","pointRadius":7,"pointColor":"rgb(15, 175, 255)","fillColor":null,"strokeColor":"rgb(15, 175, 255)","strokeWidth":3,"strokeDash":null}</value></Data></ExtendedData></Placemark></Folder></Document></kml></format><args>{}</args></log4net.Error> 
+DEBUG 2017-12-22 10:51:25 <log4net.Error>Exception during StringFormat: Indatasträngen hade ett felaktigt format. <format>Received json: <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom"><Document><name>ritobjekt</name><Folder><name>ritobjekt</name><open>0</open><Style id="0"><LineStyle><color>ffffaf0f</color><width>3</width></LineStyle><PolyStyle><color>undefined</color></PolyStyle></Style><Style id="1"><LineStyle><color>ffffaf0f</color><width>3</width></LineStyle><PolyStyle><color>undefined</color></PolyStyle></Style><Style id="2"><LineStyle><color>ffffaf0f</color><width>3</width></LineStyle><PolyStyle><color>undefined</color></PolyStyle></Style><Style id="3"><LineStyle><color>ffffaf0f</color><width>3</width></LineStyle><PolyStyle><color>undefined</color></PolyStyle></Style><Style id="4"><LineStyle><color>ffffaf0f</color><width>3</width></LineStyle><PolyStyle><color>undefined</color></PolyStyle></Style><Style id="5"><LineStyle><color>ffffaf0f</color><width>3</width></LineStyle><PolyStyle><color>undefined</color></PolyStyle></Style><Placemark><name>Ritobjekt 1</name><description><table></table></description><styleUrl>#0</styleUrl><Point><coordinates>11.123751614662874,60.00239872273052</coordinates></Point><ExtendedData><Data name="style"><value>{"text":"","image":"","pointRadius":7,"pointColor":"rgb(15, 175, 255)","fillColor":null,"strokeColor":"rgb(15, 175, 255)","strokeWidth":3,"strokeDash":null}</value></Data></ExtendedData></Placemark><Placemark><name>Ritobjekt 2</name><description><table></table></description><styleUrl>#1</styleUrl><Point><coordinates>12.548144102713614,59.24999206699759</coordinates></Point><ExtendedData><Data name="style"><value>{"text":"","image":"","pointRadius":7,"pointColor":"rgb(15, 175, 255)","fillColor":null,"strokeColor":"rgb(15, 175, 255)","strokeWidth":3,"strokeDash":null}</value></Data></ExtendedData></Placemark><Placemark><name>Ritobjekt 3</name><description><table></table></description><styleUrl>#2</styleUrl><Point><coordinates>13.472192439844672,60.266563217883224</coordinates></Point><ExtendedData><Data name="style"><value>{"text":"","image":"","pointRadius":7,"pointColor":"rgb(15, 175, 255)","fillColor":null,"strokeColor":"rgb(15, 175, 255)","strokeWidth":3,"strokeDash":null}</value></Data></ExtendedData></Placemark><Placemark><name>Ritobjekt 4</name><description><table></table></description><styleUrl>#3</styleUrl><Point><coordinates>10.435182138620357,58.56962181678107</coordinates></Point><ExtendedData><Data name="style"><value>{"text":"","image":"","pointRadius":7,"pointColor":"rgb(15, 175, 255)","fillColor":null,"strokeColor":"rgb(15, 175, 255)","strokeWidth":3,"strokeDash":null}</value></Data></ExtendedData></Placemark><Placemark><name>Ritobjekt 5</name><description><table></table></description><styleUrl>#4</styleUrl><Point><coordinates>10.435182138620357,58.56962181678107</coordinates></Point><ExtendedData><Data name="style"><value>{"text":"","image":"","pointRadius":7,"pointColor":"rgb(15, 175, 255)","fillColor":null,"strokeColor":"rgb(15, 175, 255)","strokeWidth":3,"strokeDash":null}</value></Data></ExtendedData></Placemark><Placemark><name>Ritobjekt 6</name><description><table></table></description><styleUrl>#5</styleUrl><Point><coordinates>11.410258896900174,59.02389232484874</coordinates></Point><ExtendedData><Data name="style"><value>{"text":"","image":"","pointRadius":7,"pointColor":"rgb(15, 175, 255)","fillColor":null,"strokeColor":"rgb(15, 175, 255)","strokeWidth":3,"strokeDash":null}</value></Data></ExtendedData></Placemark></Folder></Document></kml></format><args>{}</args></log4net.Error> 
+INFO 2017-12-22 10:51:50 Non-recursive AD-search used 
+INFO 2017-12-22 10:51:58 Non-recursive AD-search used 
+INFO 2017-12-22 10:52:00 Non-recursive AD-search used 
+INFO 2017-12-22 10:52:02 Non-recursive AD-search used 

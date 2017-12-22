@@ -171,7 +171,13 @@
     {
       "type": "layerswitcher",
       "options": {
-        "baselayers": [],
+        "baselayers": [
+          {
+            "id": "46",
+            "visibleAtStart": false,
+            "drawOrder": 0
+          }
+        ],
         "groups": [
           {
             "id": "96638717-9cf2-61f7-75a8-3a4859140cf7",
@@ -197,11 +203,12 @@
         "instruction": "instruktion",
         "active": true,
         "visibleAtStart": true,
-        "visibleForGroups" : ["Office-SEGOT01", "MammaMia"],
-        "backgroundSwitcherBlack": false,
-        "backgroundSwitcherWhite": false,
-        "toggleAllButton": true,
-        "instruction": "PHA+S2xpY2thIHDlIGVuIHJ1YnJpayBm9nIgYXR0IHNlIHJlc3Bla3RpdmUgbGFnZXJsaXN0YS48YnIvPgogIEJvY2thIGb2ciBkZSBsYWdlciBkdSB2aWxsIHZpc2EgaSBrYXJ0YW4uPGJyLz4KICBLbGlja2EgcOUgc3ltYm9sZW46IDxpIGNsYXNzTmFtZT0iZmEgZmEtbGlzdCIgYXJpYS1oaWRkZW49ImZhbHNlIj48L2k+IGb2ciBhdHQgc2UgdGVja2VuZvZya2xhcmluZy48YnIvPgogIERlIGZsZXN0YSBpa29uZXIgZ+VyIGF0dCBrbGlja2EgcOUgZvZyIGF0dCBzZSBtZXIgaW5mb3JtYXRpb24uPGJyLz4KPC9wPgo="
+        "backgroundSwitcherBlack": true,
+        "backgroundSwitcherWhite": true,
+        "toggleAllButton": false,
+        "dropdownThemeMaps": true,
+        "themeMapHeaderCaption": null,
+        "visibleForGroups" : ["Office-SEGOT01", "MammaMia"]
       },
       "index": 0
     },
@@ -371,22 +378,13 @@
       1000000.0,
       9000000.0
     ],
-<<<<<<< HEAD
-    "logo": "https://karta2.varberg.se/assets/logo.png",
-    "infologo": "https://karta2.varberg.se/assets/icons/hjalpknapp.png",
-    "mobileleft": "",
-    "mobileright": "",
-    "pil": "https://karta2.varberg.se/assets/icons/pil.png",
-    "mobile": true,
-    "title" : "hejsan",
-=======
     "logo": "assets/logo.png",
     "infologo": null,
     "mobileleft": null,
     "mobileright": null,
     "pil": null,
+    "title" : "MINKARTA",
     "mobile": false,
->>>>>>> admin_mapchooser/vbg
     "colors": {
       "primaryColor": "#0affc2",
       "secondaryColor": "#ffffff"

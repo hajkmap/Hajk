@@ -1,6 +1,5 @@
 {
   "version": "1.0.5",
-  "visibleForGroups" : ["Office-SEGOT01"],
   "projections": [
     {
       "code": "EPSG:3006",
@@ -320,10 +319,70 @@
         "instruction": null,
         "active": true,
         "visibleAtStart": true,
-        "visibleForGroups" : ["Office-SEGOT01", "MammaMia"],
+        "visibleForGroups": [
+          "Office-SEGOT01",
+          "MammaMia"
+        ],
         "backgroundSwitcherBlack": true,
         "backgroundSwitcherWhite": true,
         "toggleAllButton": false
+      },
+      "index": 0
+    },
+    {
+      "type": "bookmark",
+      "options": {
+        "instruction": ""
+      },
+      "index": 0
+    },
+    {
+      "type": "draw",
+      "options": {
+        "exportUrl": "/mapservice/export/kml",
+        "importUrl": "/mapservice/import/kml",
+        "base64Encode": false,
+        "instruction": "",
+        "icons": "",
+        "proxyUrl": ""
+      },
+      "index": 0
+    },
+    {
+      "type": "information",
+      "options": {
+        "text": "",
+        "headerText": "",
+        "visibleAtStart": false,
+        "showInfoOnce": false,
+        "base64EncodeForInfotext": false
+      },
+      "index": 0
+    },
+    {
+      "type": "search",
+      "options": {
+        "onMap": false,
+        "bothSynlig": false,
+        "toolbar": "bottom",
+        "maxZoom": 14,
+        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
+        "kmlExportUrl": "/mapservice/export/kml",
+        "excelExportUrl": "/mapservice/export/excel",
+        "displayPopup": true,
+        "selectionTools": true,
+        "base64Encode": false,
+        "instruction": "",
+        "filterVisible": true,
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ],
+        "popupOffsetY": 0
       },
       "index": 0
     }
@@ -368,8 +427,8 @@
     "infologo": null,
     "mobileleft": null,
     "mobileright": null,
-    "title" : "MIN KARTA",
     "pil": "",
+    "title" : "TESTKARTA",
     "mobile": false,
     "colors": {
       "primaryColor": "#1B78CC",
