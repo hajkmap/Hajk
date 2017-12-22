@@ -11,8 +11,8 @@ namespace MapService
         public static void Register(HttpConfiguration config)
         {
             // Test av log4net
-            ILog _log = LogManager.GetLogger(typeof(WebApiConfig));
-            _log.ErrorFormat("Test av log4net av {0}", "Hitomi");
+            //ILog _log = LogManager.GetLogger(typeof(WebApiConfig));
+            //_log.ErrorFormat("Test av log4net av {0}", "Hitomi");
 
 
             // Web API configuration and services
