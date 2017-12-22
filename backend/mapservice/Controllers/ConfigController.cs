@@ -380,7 +380,7 @@ namespace MapService.Controllers
                         fileList.Add(fileName);
                     }
                 }
-            }            
+            }
             return JsonConvert.SerializeObject(fileList);
         }
 

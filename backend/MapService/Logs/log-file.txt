@@ -1,4 +1,4 @@
-DEBUG 2017-10-10 13:24:19 test för att log4net fungerar 
+DEBUG 2017-10-10 13:24:19 test fï¿½r att log4net fungerar 
 FATAL 2017-12-15 15:34:50 System.Web.HttpException (0x80004005): File not found
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 316 
 FATAL 2017-12-15 15:34:54 System.Web.HttpException (0x80004005): File not found
@@ -31,15 +31,15 @@ FATAL 2017-12-15 16:04:57 System.Web.HttpException (0x80004005): File not found
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 342 
 FATAL 2017-12-15 16:06:28 System.Web.HttpException (0x80004005): File not found
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 342 
-FATAL 2017-12-19 08:46:29 System.NotImplementedException: Metoden eller åtgärden har inte implementerats.
+FATAL 2017-12-19 08:46:29 System.NotImplementedException: Metoden eller ï¿½tgï¿½rden har inte implementerats.
    vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 18
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 274
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 344 
-FATAL 2017-12-19 08:47:49 System.NotImplementedException: Metoden eller åtgärden har inte implementerats.
+FATAL 2017-12-19 08:47:49 System.NotImplementedException: Metoden eller ï¿½tgï¿½rden har inte implementerats.
    vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 18
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 274
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 344 
-FATAL 2017-12-19 08:48:45 System.NotImplementedException: Metoden eller åtgärden har inte implementerats.
+FATAL 2017-12-19 08:48:45 System.NotImplementedException: Metoden eller ï¿½tgï¿½rden har inte implementerats.
    vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 18
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 274
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 344 
@@ -53,7 +53,7 @@ FATAL 2017-12-19 08:50:30 System.DirectoryServices.AccountManagement.PrincipalOp
    vid System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
    vid System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
-   --- Slut på stackspårning för interna undantag ---
+   --- Slut pï¿½ stackspï¿½rning fï¿½r interna undantag ---
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
    vid System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
@@ -64,39 +64,39 @@ FATAL 2017-12-19 08:50:30 System.DirectoryServices.AccountManagement.PrincipalOp
    vid MapService.Models.Config.ActiveDirectoryLookup..ctor() i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 15
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 271
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 344 
-FATAL 2017-12-19 08:57:40 System.NotImplementedException: Metoden eller åtgärden har inte implementerats.
+FATAL 2017-12-19 08:57:40 System.NotImplementedException: Metoden eller ï¿½tgï¿½rden har inte implementerats.
    vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 19
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 274
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 344 
-FATAL 2017-12-19 09:23:15 System.ArgumentNullException: Värde får inte vara null.
+FATAL 2017-12-19 09:23:15 System.ArgumentNullException: Vï¿½rde fï¿½r inte vara null.
 Parameternamn: context
    vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
    vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
    vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 23
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 274
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 344 
-FATAL 2017-12-19 09:24:14 System.ArgumentNullException: Värde får inte vara null.
+FATAL 2017-12-19 09:24:14 System.ArgumentNullException: Vï¿½rde fï¿½r inte vara null.
 Parameternamn: context
    vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
    vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
    vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 23
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 273
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 346 
-FATAL 2017-12-19 09:24:47 System.ArgumentNullException: Värde får inte vara null.
+FATAL 2017-12-19 09:24:47 System.ArgumentNullException: Vï¿½rde fï¿½r inte vara null.
 Parameternamn: context
    vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
    vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
    vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 23
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 273
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 346 
-FATAL 2017-12-19 09:25:51 System.ArgumentNullException: Värde får inte vara null.
+FATAL 2017-12-19 09:25:51 System.ArgumentNullException: Vï¿½rde fï¿½r inte vara null.
 Parameternamn: context
    vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
    vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
    vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 23
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 273
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 346 
-FATAL 2017-12-19 09:27:01 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid försök att hämta behörighetsgrupperna.
+FATAL 2017-12-19 09:27:01 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid fï¿½rsï¿½k att hï¿½mta behï¿½righetsgrupperna.
    vid System.DirectoryServices.AccountManagement.AuthZSet..ctor(Byte[] userSid, NetCred credentials, ContextOptions contextOptions, String flatUserAuthority, StoreCtx userStoreCtx, Object userCtxBase)
    vid System.DirectoryServices.AccountManagement.ADStoreCtx.GetGroupsMemberOfAZ(Principal p)
    vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroupsHelper()
@@ -104,7 +104,7 @@ FATAL 2017-12-19 09:27:01 System.DirectoryServices.AccountManagement.PrincipalOp
    vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 24
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 273
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 346 
-FATAL 2017-12-19 09:30:25 System.AppDomainUnloadedException: Det gjordes ett försök att komma åt en inaktiverad AppDomain. (Undantag från HRESULT: 0x80131014)
+FATAL 2017-12-19 09:30:25 System.AppDomainUnloadedException: Det gjordes ett fï¿½rsï¿½k att komma ï¿½t en inaktiverad AppDomain. (Undantag frï¿½n HRESULT: 0x80131014)
    vid System.StubHelpers.StubHelpers.InternalGetCOMHRExceptionObject(Int32 hr, IntPtr pCPCMD, Object pThis, Boolean fForWinRT)
    vid System.StubHelpers.StubHelpers.GetCOMHRExceptionObject(Int32 hr, IntPtr pCPCMD, Object pThis)
    vid System.DirectoryServices.AccountManagement.UnsafeNativeMethods.IADsPathname.Retrieve(Int32 lnFormatType)
@@ -116,7 +116,7 @@ FATAL 2017-12-19 09:30:25 System.AppDomainUnloadedException: Det gjordes ett för
    vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 24
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 273
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 346 
-FATAL 2017-12-19 09:31:32 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid försök att hämta behörighetsgrupperna.
+FATAL 2017-12-19 09:31:32 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid fï¿½rsï¿½k att hï¿½mta behï¿½righetsgrupperna.
    vid System.DirectoryServices.AccountManagement.AuthZSet..ctor(Byte[] userSid, NetCred credentials, ContextOptions contextOptions, String flatUserAuthority, StoreCtx userStoreCtx, Object userCtxBase)
    vid System.DirectoryServices.AccountManagement.ADStoreCtx.GetGroupsMemberOfAZ(Principal p)
    vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroupsHelper()
@@ -124,7 +124,7 @@ FATAL 2017-12-19 09:31:32 System.DirectoryServices.AccountManagement.PrincipalOp
    vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 24
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 273
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 346 
-FATAL 2017-12-19 09:35:13 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid försök att hämta behörighetsgrupperna.
+FATAL 2017-12-19 09:35:13 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid fï¿½rsï¿½k att hï¿½mta behï¿½righetsgrupperna.
    vid System.DirectoryServices.AccountManagement.AuthZSet..ctor(Byte[] userSid, NetCred credentials, ContextOptions contextOptions, String flatUserAuthority, StoreCtx userStoreCtx, Object userCtxBase)
    vid System.DirectoryServices.AccountManagement.ADStoreCtx.GetGroupsMemberOfAZ(Principal p)
    vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroupsHelper()
@@ -132,7 +132,7 @@ FATAL 2017-12-19 09:35:13 System.DirectoryServices.AccountManagement.PrincipalOp
    vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 24
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 273
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 346 
-FATAL 2017-12-19 09:35:13 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid försök att hämta behörighetsgrupperna.
+FATAL 2017-12-19 09:35:13 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid fï¿½rsï¿½k att hï¿½mta behï¿½righetsgrupperna.
    vid System.DirectoryServices.AccountManagement.AuthZSet..ctor(Byte[] userSid, NetCred credentials, ContextOptions contextOptions, String flatUserAuthority, StoreCtx userStoreCtx, Object userCtxBase)
    vid System.DirectoryServices.AccountManagement.ADStoreCtx.GetGroupsMemberOfAZ(Principal p)
    vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroupsHelper()
@@ -150,7 +150,7 @@ FATAL 2017-12-19 09:35:40 System.DirectoryServices.AccountManagement.PrincipalOp
    vid System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
    vid System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
-   --- Slut på stackspårning för interna undantag ---
+   --- Slut pï¿½ stackspï¿½rning fï¿½r interna undantag ---
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
    vid System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
@@ -161,7 +161,7 @@ FATAL 2017-12-19 09:35:40 System.DirectoryServices.AccountManagement.PrincipalOp
    vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 23
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 273
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 346 
-FATAL 2017-12-19 09:56:44 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid försök att hämta behörighetsgrupperna.
+FATAL 2017-12-19 09:56:44 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid fï¿½rsï¿½k att hï¿½mta behï¿½righetsgrupperna.
    vid System.DirectoryServices.AccountManagement.AuthZSet..ctor(Byte[] userSid, NetCred credentials, ContextOptions contextOptions, String flatUserAuthority, StoreCtx userStoreCtx, Object userCtxBase)
    vid System.DirectoryServices.AccountManagement.ADStoreCtx.GetGroupsMemberOfAZ(Principal p)
    vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroupsHelper()
@@ -261,7 +261,7 @@ Filnamn: c:\windows\system32\inetsrv\map_1.json
    vid System.IO.File.InternalReadAllText(String path, Encoding encoding, Boolean checkHost)
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 314
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 368 
-FATAL 2017-12-19 11:27:41 System.IO.DirectoryNotFoundException: Det gick inte att hitta en del av sökvägen C:\SWECO\Projekt\Hajk\backend\MapService\App_Data\.
+FATAL 2017-12-19 11:27:41 System.IO.DirectoryNotFoundException: Det gick inte att hitta en del av sï¿½kvï¿½gen C:\SWECO\Projekt\Hajk\backend\MapService\App_Data\.
    vid System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
    vid System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
    vid System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
@@ -269,7 +269,7 @@ FATAL 2017-12-19 11:27:41 System.IO.DirectoryNotFoundException: Det gick inte at
    vid System.IO.File.InternalReadAllText(String path, Encoding encoding, Boolean checkHost)
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 314
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 368 
-FATAL 2017-12-19 12:30:35 System.IO.DirectoryNotFoundException: Det gick inte att hitta en del av sökvägen C:\SWECO\Projekt\Hajk\backend\MapService\App_Data\.
+FATAL 2017-12-19 12:30:35 System.IO.DirectoryNotFoundException: Det gick inte att hitta en del av sï¿½kvï¿½gen C:\SWECO\Projekt\Hajk\backend\MapService\App_Data\.
    vid System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
    vid System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
    vid System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options, String msgPath, Boolean bFromProxy, Boolean useLongPath, Boolean checkHost)
@@ -286,12 +286,12 @@ FATAL 2017-12-19 12:46:17 System.NullReferenceException: Objektreferensen har in
 FATAL 2017-12-19 12:53:34 System.NullReferenceException: Objektreferensen har inte angetts till en instans av ett objekt.
    vid MapService.Controllers.ConfigController.UserSpecificMaps()
    vid MapService.Controllers.ConfigController.GetConfig(String name) 
-FATAL 2017-12-19 12:54:09 Microsoft.CSharp.RuntimeBinder.RuntimeBinderException: Det går inte att implicit konvertera typen Newtonsoft.Json.Linq.JArray till bool. Det finns en explicit konvertering (saknas en omvandling?)
+FATAL 2017-12-19 12:54:09 Microsoft.CSharp.RuntimeBinder.RuntimeBinderException: Det gï¿½r inte att implicit konvertera typen Newtonsoft.Json.Linq.JArray till bool. Det finns en explicit konvertering (saknas en omvandling?)
    vid CallSite.Target(Closure , CallSite , Object )
    vid System.Dynamic.UpdateDelegates.UpdateAndExecute1[T0,TRet](CallSite site, T0 arg0)
    vid MapService.Controllers.ConfigController.UserSpecificMaps()
    vid MapService.Controllers.ConfigController.GetConfig(String name) 
-FATAL 2017-12-19 12:56:07 Microsoft.CSharp.RuntimeBinder.RuntimeBinderException: Det går inte att implicit konvertera typen Newtonsoft.Json.Linq.JArray till bool. Det finns en explicit konvertering (saknas en omvandling?)
+FATAL 2017-12-19 12:56:07 Microsoft.CSharp.RuntimeBinder.RuntimeBinderException: Det gï¿½r inte att implicit konvertera typen Newtonsoft.Json.Linq.JArray till bool. Det finns en explicit konvertering (saknas en omvandling?)
    vid CallSite.Target(Closure , CallSite , Object )
    vid MapService.Controllers.ConfigController.UserSpecificMaps()
    vid MapService.Controllers.ConfigController.GetConfig(String name) 
@@ -316,7 +316,7 @@ FATAL 2017-12-21 09:04:53 System.DirectoryServices.DirectoryServicesCOMException
    vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 28
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 314
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 371 
-FATAL 2017-12-21 11:36:16 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid försök att hämta behörighetsgrupperna.
+FATAL 2017-12-21 11:36:16 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid fï¿½rsï¿½k att hï¿½mta behï¿½righetsgrupperna.
    vid System.DirectoryServices.AccountManagement.AuthZSet..ctor(Byte[] userSid, NetCred credentials, ContextOptions contextOptions, String flatUserAuthority, StoreCtx userStoreCtx, Object userCtxBase)
    vid System.DirectoryServices.AccountManagement.ADStoreCtx.GetGroupsMemberOfAZ(Principal p)
    vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroupsHelper()
@@ -324,7 +324,7 @@ FATAL 2017-12-21 11:36:16 System.DirectoryServices.AccountManagement.PrincipalOp
    vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 38
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
-FATAL 2017-12-21 11:36:55 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid försök att hämta behörighetsgrupperna.
+FATAL 2017-12-21 11:36:55 System.DirectoryServices.AccountManagement.PrincipalOperationException: Det uppstod ett fel (5) vid fï¿½rsï¿½k att hï¿½mta behï¿½righetsgrupperna.
    vid System.DirectoryServices.AccountManagement.AuthZSet..ctor(Byte[] userSid, NetCred credentials, ContextOptions contextOptions, String flatUserAuthority, StoreCtx userStoreCtx, Object userCtxBase)
    vid System.DirectoryServices.AccountManagement.ADStoreCtx.GetGroupsMemberOfAZ(Principal p)
    vid System.DirectoryServices.AccountManagement.UserPrincipal.GetAuthorizationGroupsHelper()
@@ -342,7 +342,7 @@ FATAL 2017-12-21 11:38:59 System.DirectoryServices.AccountManagement.PrincipalOp
    vid System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
    vid System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
-   --- Slut på stackspårning för interna undantag ---
+   --- Slut pï¿½ stackspï¿½rning fï¿½r interna undantag ---
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
    vid System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
@@ -363,7 +363,7 @@ FATAL 2017-12-21 11:39:56 System.DirectoryServices.AccountManagement.PrincipalOp
    vid System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
    vid System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
-   --- Slut på stackspårning för interna undantag ---
+   --- Slut pï¿½ stackspï¿½rning fï¿½r interna undantag ---
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
    vid System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
@@ -384,7 +384,7 @@ FATAL 2017-12-21 11:40:33 System.DirectoryServices.AccountManagement.PrincipalOp
    vid System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
    vid System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
-   --- Slut på stackspårning för interna undantag ---
+   --- Slut pï¿½ stackspï¿½rning fï¿½r interna undantag ---
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
    vid System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
@@ -405,7 +405,7 @@ FATAL 2017-12-21 12:18:20 System.DirectoryServices.AccountManagement.PrincipalOp
    vid System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
    vid System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
-   --- Slut på stackspårning för interna undantag ---
+   --- Slut pï¿½ stackspï¿½rning fï¿½r interna undantag ---
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
    vid System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
@@ -416,12 +416,12 @@ FATAL 2017-12-21 12:18:20 System.DirectoryServices.AccountManagement.PrincipalOp
    vid MapService.Models.Config.ActiveDirectoryLookup.GetGroups(String user) i C:\SWECO\Projekt\Hajk\backend\MapService\Models\Config\ActiveDirectoryLookup.cs:rad 33
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 323
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
-FATAL 2017-12-21 12:26:22 System.DirectoryServices.AccountManagement.PrincipalServerDownException: Det gick inte att kontakta servern. ---> System.DirectoryServices.Protocols.LdapException: LDAP-servern är inte tillgänglig.
+FATAL 2017-12-21 12:26:22 System.DirectoryServices.AccountManagement.PrincipalServerDownException: Det gick inte att kontakta servern. ---> System.DirectoryServices.Protocols.LdapException: LDAP-servern ï¿½r inte tillgï¿½nglig.
    vid System.DirectoryServices.Protocols.LdapConnection.Connect()
    vid System.DirectoryServices.Protocols.LdapConnection.SendRequestHelper(DirectoryRequest request, Int32& messageID)
    vid System.DirectoryServices.Protocols.LdapConnection.SendRequest(DirectoryRequest request, TimeSpan requestTimeout)
    vid System.DirectoryServices.AccountManagement.PrincipalContext.ReadServerConfig(String serverName, ServerProperties& properties)
-   --- Slut på stackspårning för interna undantag ---
+   --- Slut pï¿½ stackspï¿½rning fï¿½r interna undantag ---
    vid System.DirectoryServices.AccountManagement.PrincipalContext.ReadServerConfig(String serverName, ServerProperties& properties)
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoServerVerifyAndPropRetrieval()
    vid System.DirectoryServices.AccountManagement.PrincipalContext..ctor(ContextType contextType, String name, String container, ContextOptions options, String userName, String password)
@@ -439,7 +439,7 @@ FATAL 2017-12-21 12:27:54 System.DirectoryServices.AccountManagement.PrincipalOp
    vid System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
    vid System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
-   --- Slut på stackspårning för interna undantag ---
+   --- Slut pï¿½ stackspï¿½rning fï¿½r interna undantag ---
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
    vid System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
    vid System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
@@ -545,14 +545,14 @@ FATAL 2017-12-21 13:21:25 System.ArgumentException: Can not convert Object to St
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 324
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
 ERROR 2017-12-21 13:21:51 Test av log4net av Hitomi 
-FATAL 2017-12-21 13:24:01 Microsoft.CSharp.RuntimeBinder.RuntimeBinderException: Det går inte att använda operatorn == i operander av typerna Newtonsoft.Json.Linq.JEnumerable<Newtonsoft.Json.Linq.JToken> och <null>
+FATAL 2017-12-21 13:24:01 Microsoft.CSharp.RuntimeBinder.RuntimeBinderException: Det gï¿½r inte att anvï¿½nda operatorn == i operander av typerna Newtonsoft.Json.Linq.JEnumerable<Newtonsoft.Json.Linq.JToken> och <null>
    vid CallSite.Target(Closure , CallSite , Object , Object )
    vid System.Dynamic.UpdateDelegates.UpdateAndExecute2[T0,T1,TRet](CallSite site, T0 arg0, T1 arg1)
    vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 288
    vid MapService.Controllers.ConfigController.UserSpecificMaps() i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 324
    vid MapService.Controllers.ConfigController.GetConfig(String name) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 380 
 ERROR 2017-12-21 13:24:23 Test av log4net av Hitomi 
-FATAL 2017-12-21 13:28:33 Microsoft.CSharp.RuntimeBinder.RuntimeBinderException: Det går inte att använda operatorn == i operander av typerna Newtonsoft.Json.Linq.JEnumerable<Newtonsoft.Json.Linq.JToken> och <null>
+FATAL 2017-12-21 13:28:33 Microsoft.CSharp.RuntimeBinder.RuntimeBinderException: Det gï¿½r inte att anvï¿½nda operatorn == i operander av typerna Newtonsoft.Json.Linq.JEnumerable<Newtonsoft.Json.Linq.JToken> och <null>
    vid CallSite.Target(Closure , CallSite , Object , Object )
    vid System.Dynamic.UpdateDelegates.UpdateAndExecute2[T0,T1,TRet](CallSite site, T0 arg0, T1 arg1)
    vid MapService.Controllers.ConfigController.GetAllowedMapConfigurations(String[] userGroups) i C:\SWECO\Projekt\Hajk\backend\MapService\Controllers\ConfigController.cs:rad 288

@@ -255,7 +255,10 @@ class Menu extends Component {
       backgroundSwitcherBlack: true,
       backgroundSwitcherWhite: true,
       toggleAllButton: false,
-      instruction: '',
+	  instruction: "",
+	  dropdownThemeMaps: false,
+    themeMapHeaderCaption: "Temakartor",
+    visibleForGroups: []
     };
     this.state = state;
   }
@@ -268,7 +271,7 @@ class Menu extends Component {
     this.props.model.set('config', this.props.config);
     this.load('maps');
     this.load('layers');
-
+	
     this.props.model.on('change:urlMapConfig', () => {
 
       this.setState({
@@ -283,7 +286,10 @@ class Menu extends Component {
           backgroundSwitcherBlack: this.props.model.get('layerMenuConfig').backgroundSwitcherBlack,
           backgroundSwitcherWhite: this.props.model.get('layerMenuConfig').backgroundSwitcherWhite,
           toggleAllButton: this.props.model.get('layerMenuConfig').toggleAllButton,
-          instruction: this.props.model.get('layerMenuConfig').instruction
+          instruction: this.props.model.get('layerMenuConfig').instruction,
+          dropdownThemeMaps: this.props.model.get('layerMenuConfig').dropdownThemeMaps,
+          themeMapHeaderCaption: this.props.model.get('layerMenuConfig').themeMapHeaderCaption,
+          visibleForGroups: this.props.model.get('layerMenuConfig').visibleForGroups
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -329,7 +335,7 @@ class Menu extends Component {
    *
    */
   componentDidMount() {
-    this.init();
+	this.init();
   }
 
   /**
@@ -447,6 +453,9 @@ class Menu extends Component {
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
       toggleAllButton: this.state.toggleAllButton,
       instruction: this.state.instruction,
+      dropdownThemeMaps: this.state.dropdownThemeMaps,
+      themeMapHeaderCaption: this.state.themeMapHeaderCaption,
+      visibleForGroups: this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
     };
 
     var roots = $('.tree-view > ul > li');
@@ -497,7 +506,8 @@ class Menu extends Component {
         drawOrder: 0
       }) :
       settings.groups.push(groupItem(root))
-    });
+	});
+	console.log("settings", settings);
     return settings;
   }
   /**
@@ -916,6 +926,21 @@ class Menu extends Component {
     });
   }
 
+  handleAuthGrpsChange(event) {
+    const target = event.target;
+    const value = target.value;
+    let groups = [];
+    
+    try {
+      groups = value.split(",");
+    } catch (error) {
+      console.log(`Någonting gick fel: ${error}`);
+    }
+
+    this.setState({
+      visibleForGroups: groups
+    });  
+  }
   /**
    *
    */
@@ -962,60 +987,109 @@ class Menu extends Component {
               <legend>Hantera lagermeny</legend>
               <button className="btn btn-primary" onClick={(e) => this.saveSettings(e)}>Spara</button>&nbsp;
               <button className="btn btn-success" onClick={(e) => this.createGroup("Ny grupp", false, false)}>Ny grupp</button>&nbsp;
-              <div>
-                <input
-                  id="active"
-                  name="active"
-                  type="checkbox"
-                  onChange={(e) => {this.handleInputChange(e)}}
-                  checked={this.state.active}/>&nbsp;
-                <label htmlFor="active">Aktiverad</label>
+              <div className="row">
+				<div className="col-sm-1">
+					<input
+					id="active"
+					name="active"
+					type="checkbox"
+					onChange={(e) => {this.handleInputChange(e)}}
+					checked={this.state.active}/>&nbsp;
+				</div>
+				<label className="layer-menu-label-checkbox" htmlFor="active">Aktiverad</label>
               </div>
-              <div>
-                <input
-                  id="visibleAtStart"
-                  name="visibleAtStart"
-                  type="checkbox"
-                  onChange={(e) => {this.handleInputChange(e)}}
-                  checked={this.state.visibleAtStart}/>&nbsp;
-                <label htmlFor="visibleAtStart">Synlig vid start</label>
+			  <div className="row">
+			  	<div className="col-sm-1">
+					<input
+					id="visibleAtStart"
+					name="visibleAtStart"
+					type="checkbox"
+					onChange={(e) => {this.handleInputChange(e)}}
+					checked={this.state.visibleAtStart}/>&nbsp;
+				</div>
+                <label className="layer-menu-label-checkbox" htmlFor="visibleAtStart">Synlig vid start</label>
               </div>
-              <div>
-                <label htmlFor="instruction">Instruktion</label>
-                <input
-                  id="instruction"
-                  name="instruction"
-                  type="text"
-                  onChange={(e) => {this.handleInputChange(e)}}
-                  value={this.state.instruction}/>
+			  <div className="row">
+			  	<div className="col-sm-1">
+					<input
+					id="backgroundSwitcherBlack"
+					name="backgroundSwitcherBlack"
+					type="checkbox"
+					onChange={(e) => {this.handleInputChange(e)}}
+					checked={this.state.backgroundSwitcherBlack}/>&nbsp;
+				</div>
+				<label className="layer-menu-label-checkbox" htmlFor="backgroundSwitcherBlack">Svart bakgrundskarta</label>
               </div>
-              <div>
-                <input
-                  id="backgroundSwitcherBlack"
-                  name="backgroundSwitcherBlack"
-                  type="checkbox"
-                  onChange={(e) => {this.handleInputChange(e)}}
-                  checked={this.state.backgroundSwitcherBlack}/>&nbsp;
-                <label htmlFor="backgroundSwitcherBlack">Svart bakgrundskarta</label>
-              </div>
-              <div>
-                <input
-                  id="backgroundSwitcherWhite"
-                  name="backgroundSwitcherWhite"
-                  type="checkbox"
-                  onChange={(e) => {this.handleInputChange(e)}}
-                  checked={this.state.backgroundSwitcherWhite}/>&nbsp;
+              <div className="row">
+			  	<div className="col-sm-1">
+					<input
+					id="backgroundSwitcherWhite"
+					name="backgroundSwitcherWhite"
+					type="checkbox"
+					onChange={(e) => {this.handleInputChange(e)}}
+					checked={this.state.backgroundSwitcherWhite}/>&nbsp;
+				</div>
                 <label htmlFor="backgroundSwitcherWhite">Vit bakgrundskarta</label>
               </div>
-              <div>
-                <input
-                  id="toggleAllButton"
-                  name="toggleAllButton"
-                  type="checkbox"
-                  onChange={(e) => {this.handleInputChange(e)}}
-                  checked={this.state.toggleAllButton}/>&nbsp;
-                <label htmlFor="toggleAllButton">Släck alla lager-knapp</label>
+              <div className="row">
+			  	<div className="col-sm-1">
+					<input
+					id="toggleAllButton"
+					name="toggleAllButton"
+					type="checkbox"
+					onChange={(e) => {this.handleInputChange(e)}}
+					checked={this.state.toggleAllButton}/>&nbsp;
+				</div>
+                <label className="layer-menu-label-checkbox" htmlFor="toggleAllButton">Släck alla lager-knapp</label>
               </div>
+			  <div className="row">
+			  	<div className="col-sm-1">
+					<input
+						id="dropdownThemeMaps"
+						name="dropdownThemeMaps"
+						type="checkbox"
+						onChange={(e) => {this.handleInputChange(e)}}
+						checked={this.state.dropdownThemeMaps} />&nbsp;
+			    </div>
+				<label className="layer-menu-label-checkbox" htmlFor="dropdownThemeMaps">Visa lista över temakartor</label>
+			  </div>
+			  <div className="row">
+				<div className="col-sm-12">
+					<label htmlFor="themeMapHeaderCaption">Rubriktext temakartor</label>
+					<input 
+						id="themeMapHeaderCaption"
+						name="themeMapHeaderCaption"
+						type="text"
+						value={this.state.themeMapHeaderCaption}
+						onChange={(e) => {
+							this.setState({ 'themeMapHeaderCaption': e.target.value });
+						}}
+					/>
+				</div>
+			  </div>
+              <div className="row">
+				<div className="col-sm-12">
+					<label htmlFor="instruction">Instruktion</label>
+					<input
+					id="instruction"
+					name="instruction"
+					type="text"
+					onChange={(e) => {this.handleInputChange(e)}}
+					value={this.state.instruction}/>
+				</div>
+              </div>
+			  <div className="row">
+				<div className="col-sm-12">
+					<label htmlFor="authGroups">Tillträde  <i className="fa fa-question-circle" data-toggle="tooltip" title="Ange AD-grupper separerade med kommatecken"></i></label>
+					<input 
+						id="authGroups"
+						name="authGroups"
+						type="text"
+            onChange={(e) => {this.handleAuthGrpsChange(e)}}
+            value={this.state.visibleForGroups}
+					/>
+				</div>
+			  </div>
               {this.renderLayerMenu()}
             </fieldset>
           </article>

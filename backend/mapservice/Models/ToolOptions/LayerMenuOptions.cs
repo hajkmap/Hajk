@@ -40,5 +40,11 @@ namespace MapService.Models.ToolOptions
         public bool backgroundSwitcherWhite { get; set; }
 
         public bool toggleAllButton { get; set; }
+
+        public bool dropdownThemeMaps { get; set; }
+
+        public string themeMapHeaderCaption { get; set; }
+		
+		public string[] visibleForGroups { get; set; }
     }
 }
