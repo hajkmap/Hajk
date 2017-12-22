@@ -180,7 +180,9 @@
     <Content Include="assets\style.css" />
     <Content Include="Global.asax" />
     <Content Include="index.html" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="App_Data\layers.json" />
     <Content Include="App_Data\map_1.json" />
     <None Include="Properties\PublishProfiles\File.pubxml" />
@@ -202,7 +204,7 @@
     <Compile Include="Models\Bookmark.cs" />
     <Compile Include="Models\ThemeMap.cs" />
     <Compile Include="Models\Config\ArcGISConfig.cs" />
-    <Compile Include="Models\Config\ActiveDirectoryLookup.cs" />
+    <Compile Include="Components\ActiveDirectoryLookup.cs" />
     <Compile Include="Models\Config\ExtendedWmsConfig.cs" />
     <Compile Include="Models\Config\ILayerConfig.cs" />
     <Compile Include="Models\Config\IUserLookup.cs" />

@@ -7,7 +7,7 @@ namespace MapService.Models
 {
     public class ThemeMap
     {
-        public string MapConfigurationName { get; set; }
-        public string MapConfigurationTitle { get; set; }
+        public string mapConfigurationName { get; set; }
+        public string mapConfigurationTitle { get; set; }
     }
 }
