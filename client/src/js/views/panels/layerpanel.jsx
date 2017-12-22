@@ -342,14 +342,20 @@ var LayerPanelView = {
      this.props.model.toggleAllOff();
    },
 
-   setThemeMap(e) {
+   /**
+   * Loads new config into HAJK2
+   * @instance
+   * @param {event} e
+   */
+
+   setThemeMap : function(e) {
     var configurationName = e.target.value; 
     var index = e.nativeEvent.target.selectedIndex;
     var configurationTitle = e.nativeEvent.target[index].text;
     this.props.model.setThemeMap(configurationName, configurationTitle);
    },
 
-   populateThemeMaps() {
+   populateThemeMaps : function() {
      this.props.model.loadThemeMaps(mapConfigurations => {
       this.setState({
         mapConfigurations: mapConfigurations,
@@ -422,7 +428,7 @@ var LayerPanelView = {
    * @return {external:ReactElement}
    */
   render: function () {
-    var mapConfigurations = this.state.mapConfigurations.map((map, i) => <option value={map.MapConfigurationName} key={i}>{map.MapConfigurationTitle}</option>);
+    var mapConfigurations = this.state.mapConfigurations.map((map, i) => <option value={map.mapConfigurationName} key={i}>{map.mapConfigurationTitle}</option>);
     var groups, toggleAllButton,dropdownThemeMaps ;
 
     this.groups = this.props.model.get('groups');

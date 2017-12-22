@@ -117,15 +117,6 @@ var LayerSwitcherModel = {
       method: 'GET',
       contentType: 'application/json',
       success: (data) => {
-        console.log(data,"data")
-        // var name = data[0];
-        // if (name === undefined) {
-        //   name = "";
-        // }
-        // this.set({
-        //   urlMapConfig: this.get('config').url_map + "/" + name,
-        //   mapFile: name
-        // });
          callback(data);
       },
       error: (message) => {
