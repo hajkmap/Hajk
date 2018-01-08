@@ -277,29 +277,6 @@ namespace MapService.Controllers
             System.IO.File.WriteAllText(file, jsonOutput);
         }
 
-<<<<<<< HEAD
-        private JToken GetMapConfigurationTitle(string mapConfigurationFile)
-        {
-            var json = System.IO.File.ReadAllText(mapConfigurationFile);
-            JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(json);
-            var title = mapConfiguration.SelectToken("$.map.title");
-
-            return title;
-        }
-
-        private JToken GetVisibleForGroups (string mapConfigurationFile)
-        {    
-
-            var json = System.IO.File.ReadAllText(mapConfigurationFile);
-            JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(json);
-            var layerSwitcher = mapConfiguration.SelectToken("$.tools[?(@.type == 'layerswitcher')]");
-            var visibleForGroups = layerSwitcher.SelectToken("$.options.visibleForGroups");
-
-            return visibleForGroups;
-        }
-
-        private List<ThemeMap> GetAllowedMapConfigurations(string[] userGroups)
-=======
         private JToken GetMapConfigurationTitle(string mapConfigurationFile)
         {
             var json = System.IO.File.ReadAllText(mapConfigurationFile);
@@ -357,7 +334,6 @@ namespace MapService.Controllers
         }
 
         private List<ThemeMap> GetAllowedMapConfigurations(string[] userGroups)
->>>>>>> clientThemeMaps/vbg
         {
             string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
             IEnumerable<string> files = Directory.EnumerateFiles(folder);
@@ -368,36 +344,6 @@ namespace MapService.Controllers
                 string fileName = Path.GetFileNameWithoutExtension(mapConfigurationFile);
 
                 if (fileName != "layers")
-<<<<<<< HEAD
-                {
-                    var visibleForGroups = GetVisibleForGroups(mapConfigurationFile);
-                    var mapTitle = GetMapConfigurationTitle(mapConfigurationFile);
-
-                    if (visibleForGroups == null)
-                    {
-                        _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " is missing the 'visibleForGroups' object");
-                    }
-
-                    if(mapTitle == null)
-                    {
-                        _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " is missing the 'title' object");
-                    }
-
-                    if (visibleForGroups != null && mapTitle != null)
-                    {
-                        foreach (JToken group in visibleForGroups)
-                        {
-                            if (Array.Exists(userGroups, g => g.Equals(group.ToString())))
-                            {
-                                mapConfigurationsList.Add(new ThemeMap
-                                {
-                                    mapConfigurationName = fileName,
-                                    mapConfigurationTitle = mapTitle.ToString()
-                                });
-                            }
-                        }
-                    }
-=======
                 {
                     if (HasActiveDropDownThemeMap(mapConfigurationFile))
                     {
@@ -419,7 +365,6 @@ namespace MapService.Controllers
                             }
                         }
                     }
->>>>>>> clientThemeMaps/vbg
                 }
             }
 
