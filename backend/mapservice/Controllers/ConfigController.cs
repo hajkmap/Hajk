@@ -277,16 +277,52 @@ namespace MapService.Controllers
             JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(json);
             var title = mapConfiguration.SelectToken("$.map.title");
 
+            if (title == null)
+            {
+                _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " is missing the 'title' object");
+            }
+
             return title;
         }
 
-        private JToken GetVisibleForGroups (string mapConfigurationFile)
-        {    
-
+        private JToken GetJSONKeyValueFromLayerSwitcher(string mapConfigurationFile, string searchKey)
+        {
             var json = System.IO.File.ReadAllText(mapConfigurationFile);
             JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(json);
             var layerSwitcher = mapConfiguration.SelectToken("$.tools[?(@.type == 'layerswitcher')]");
-            var visibleForGroups = layerSwitcher.SelectToken("$.options.visibleForGroups");
+            var keyValue = layerSwitcher.SelectToken("$.options."+searchKey);
+
+            return keyValue;
+        }
+        
+         private Boolean HasActiveDropDownThemeMap(string mapConfigurationFile)
+        {
+            var dropdownThemeMaps = GetJSONKeyValueFromLayerSwitcher(mapConfigurationFile, "dropdownThemeMaps");
+
+            if(dropdownThemeMaps == null)
+            {
+                _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " is missing the object 'dropDownThemeMap'");
+                return false;
+            }  
+
+            if(dropdownThemeMaps.Value<Boolean>() == false)
+            {
+                _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " has the 'dropDownThemeMap' key set to 'false' ");
+                return false;
+            }
+
+            return true;
+
+        }
+
+        private JToken GetVisibleForGroups (string mapConfigurationFile)
+        {
+            var visibleForGroups = GetJSONKeyValueFromLayerSwitcher(mapConfigurationFile, "visibleForGroups");
+
+            if (visibleForGroups == null)
+            {
+                _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " is missing the 'visibleForGroups' object");
+            }
 
             return visibleForGroups;
         }
@@ -303,30 +339,23 @@ namespace MapService.Controllers
 
                 if (fileName != "layers")
                 {
-                    var visibleForGroups = GetVisibleForGroups(mapConfigurationFile);
-                    var mapTitle = GetMapConfigurationTitle(mapConfigurationFile);
-
-                    if (visibleForGroups == null)
+                    if (HasActiveDropDownThemeMap(mapConfigurationFile))
                     {
-                        _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " is missing the 'visibleForGroups' object");
-                    }
+                        var visibleForGroups = GetVisibleForGroups(mapConfigurationFile);
+                        var mapTitle = GetMapConfigurationTitle(mapConfigurationFile);
 
-                    if(mapTitle == null)
-                    {
-                        _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " is missing the 'title' object");
-                    }
-
-                    if (visibleForGroups != null && mapTitle != null)
-                    {
-                        foreach (JToken group in visibleForGroups)
+                        if (visibleForGroups != null && mapTitle != null)
                         {
-                            if (Array.Exists(userGroups, g => g.Equals(group.ToString())))
+                            foreach (JToken group in visibleForGroups)
                             {
-                                mapConfigurationsList.Add(new ThemeMap
+                                if (Array.Exists(userGroups, g => g.Equals(group.ToString())))
                                 {
-                                    mapConfigurationName = fileName,
-                                    mapConfigurationTitle = mapTitle.ToString()
-                                });
+                                    mapConfigurationsList.Add(new ThemeMap
+                                    {
+                                        mapConfigurationName = fileName,
+                                        mapConfigurationTitle = mapTitle.ToString()
+                                    });
+                                }
                             }
                         }
                     }
