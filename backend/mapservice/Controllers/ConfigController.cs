@@ -277,6 +277,7 @@ namespace MapService.Controllers
             System.IO.File.WriteAllText(file, jsonOutput);
         }
 
+<<<<<<< HEAD
         private JToken GetMapConfigurationTitle(string mapConfigurationFile)
         {
             var json = System.IO.File.ReadAllText(mapConfigurationFile);
@@ -298,6 +299,65 @@ namespace MapService.Controllers
         }
 
         private List<ThemeMap> GetAllowedMapConfigurations(string[] userGroups)
+=======
+        private JToken GetMapConfigurationTitle(string mapConfigurationFile)
+        {
+            var json = System.IO.File.ReadAllText(mapConfigurationFile);
+            JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(json);
+            var title = mapConfiguration.SelectToken("$.map.title");
+
+            if (title == null)
+            {
+                _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " is missing the 'title' object");
+            }
+
+            return title;
+        }
+
+        private JToken GetJSONKeyValueFromLayerSwitcher(string mapConfigurationFile, string searchKey)
+        {
+            var json = System.IO.File.ReadAllText(mapConfigurationFile);
+            JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(json);
+            var layerSwitcher = mapConfiguration.SelectToken("$.tools[?(@.type == 'layerswitcher')]");
+            var keyValue = layerSwitcher.SelectToken("$.options."+searchKey);
+
+            return keyValue;
+        }
+        
+         private Boolean HasActiveDropDownThemeMap(string mapConfigurationFile)
+        {
+            var dropdownThemeMaps = GetJSONKeyValueFromLayerSwitcher(mapConfigurationFile, "dropdownThemeMaps");
+
+            if(dropdownThemeMaps == null)
+            {
+                _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " is missing the object 'dropDownThemeMap'");
+                return false;
+            }  
+
+            if(dropdownThemeMaps.Value<Boolean>() == false)
+            {
+                _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " has the 'dropDownThemeMap' key set to 'false' ");
+                return false;
+            }
+
+            return true;
+
+        }
+
+        private JToken GetVisibleForGroups (string mapConfigurationFile)
+        {
+            var visibleForGroups = GetJSONKeyValueFromLayerSwitcher(mapConfigurationFile, "visibleForGroups");
+
+            if (visibleForGroups == null)
+            {
+                _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " is missing the 'visibleForGroups' object");
+            }
+
+            return visibleForGroups;
+        }
+
+        private List<ThemeMap> GetAllowedMapConfigurations(string[] userGroups)
+>>>>>>> clientThemeMaps/vbg
         {
             string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
             IEnumerable<string> files = Directory.EnumerateFiles(folder);
@@ -308,6 +368,7 @@ namespace MapService.Controllers
                 string fileName = Path.GetFileNameWithoutExtension(mapConfigurationFile);
 
                 if (fileName != "layers")
+<<<<<<< HEAD
                 {
                     var visibleForGroups = GetVisibleForGroups(mapConfigurationFile);
                     var mapTitle = GetMapConfigurationTitle(mapConfigurationFile);
@@ -336,6 +397,29 @@ namespace MapService.Controllers
                             }
                         }
                     }
+=======
+                {
+                    if (HasActiveDropDownThemeMap(mapConfigurationFile))
+                    {
+                        var visibleForGroups = GetVisibleForGroups(mapConfigurationFile);
+                        var mapTitle = GetMapConfigurationTitle(mapConfigurationFile);
+
+                        if (visibleForGroups != null && mapTitle != null)
+                        {
+                            foreach (JToken group in visibleForGroups)
+                            {
+                                if (Array.Exists(userGroups, g => g.Equals(group.ToString())))
+                                {
+                                    mapConfigurationsList.Add(new ThemeMap
+                                    {
+                                        mapConfigurationName = fileName,
+                                        mapConfigurationTitle = mapTitle.ToString()
+                                    });
+                                }
+                            }
+                        }
+                    }
+>>>>>>> clientThemeMaps/vbg
                 }
             }
 
