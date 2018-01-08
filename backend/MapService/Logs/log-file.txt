@@ -791,3 +791,233 @@ INFO 2017-12-22 10:51:50 Non-recursive AD-search used
 INFO 2017-12-22 10:51:58 Non-recursive AD-search used 
 INFO 2017-12-22 10:52:00 Non-recursive AD-search used 
 INFO 2017-12-22 10:52:02 Non-recursive AD-search used 
+FATAL 2018-01-02 10:42:14 System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 320 
+FATAL 2018-01-02 10:43:16 System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 320 
+FATAL 2018-01-02 11:00:38 System.Security.Authentication.AuthenticationException: Inloggningsfel: Okänt användarnamn eller felaktigt lösenord.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: Inloggningsfel: Okänt användarnamn eller felaktigt lösenord.
+
+   at System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   at System.DirectoryServices.DirectoryEntry.Bind()
+   at System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   at System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   at System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- End of inner exception stack trace ---
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   at System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   at MapService.Components.ActiveDirectoryLookup.GetGroups(String user) in C:\Projekt\varberg-hajk\backend\MapService\Components\ActiveDirectoryLookup.cs:line 41
+   at MapService.Controllers.ConfigController.UserSpecificMaps() in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 350
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 408 
+FATAL 2018-01-02 11:00:50 System.Security.Authentication.AuthenticationException: Inloggningsfel: Okänt användarnamn eller felaktigt lösenord.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: Inloggningsfel: Okänt användarnamn eller felaktigt lösenord.
+
+   at System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   at System.DirectoryServices.DirectoryEntry.Bind()
+   at System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   at System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   at System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- End of inner exception stack trace ---
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   at System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   at MapService.Components.ActiveDirectoryLookup.GetGroups(String user) in C:\Projekt\varberg-hajk\backend\MapService\Components\ActiveDirectoryLookup.cs:line 41
+   at MapService.Controllers.ConfigController.UserSpecificMaps() in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 350
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 408 
+FATAL 2018-01-02 11:04:34 System.Security.Authentication.AuthenticationException: Inloggningsfel: Okänt användarnamn eller felaktigt lösenord.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: Inloggningsfel: Okänt användarnamn eller felaktigt lösenord.
+
+   at System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   at System.DirectoryServices.DirectoryEntry.Bind()
+   at System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   at System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   at System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- End of inner exception stack trace ---
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   at System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   at MapService.Components.ActiveDirectoryLookup.GetGroups(String user) in C:\Projekt\varberg-hajk\backend\MapService\Components\ActiveDirectoryLookup.cs:line 41
+   at MapService.Controllers.ConfigController.UserSpecificMaps() in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 350
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 408 
+FATAL 2018-01-02 12:44:51 System.Security.Authentication.AuthenticationException: Inloggningsfel: Okänt användarnamn eller felaktigt lösenord.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: Inloggningsfel: Okänt användarnamn eller felaktigt lösenord.
+
+   at System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   at System.DirectoryServices.DirectoryEntry.Bind()
+   at System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   at System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   at System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- End of inner exception stack trace ---
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   at System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   at MapService.Components.ActiveDirectoryLookup.GetGroups(String user) in C:\Projekt\varberg-hajk\backend\MapService\Components\ActiveDirectoryLookup.cs:line 41
+   at MapService.Controllers.ConfigController.UserSpecificMaps() in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 350
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 408 
+FATAL 2018-01-02 12:46:14 System.Security.Authentication.AuthenticationException: Inloggningsfel: Okänt användarnamn eller felaktigt lösenord.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: Inloggningsfel: Okänt användarnamn eller felaktigt lösenord.
+
+   at System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   at System.DirectoryServices.DirectoryEntry.Bind()
+   at System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   at System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   at System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- End of inner exception stack trace ---
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   at System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   at MapService.Components.ActiveDirectoryLookup.GetGroups(String user) in C:\Projekt\varberg-hajk\backend\MapService\Components\ActiveDirectoryLookup.cs:line 41
+   at MapService.Controllers.ConfigController.UserSpecificMaps() in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 350
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 408 
+FATAL 2018-01-02 14:32:16 System.Security.Authentication.AuthenticationException: Inloggningsfel: Okänt användarnamn eller felaktigt lösenord.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: Inloggningsfel: Okänt användarnamn eller felaktigt lösenord.
+
+   at System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   at System.DirectoryServices.DirectoryEntry.Bind()
+   at System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   at System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   at System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- End of inner exception stack trace ---
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   at System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   at MapService.Components.ActiveDirectoryLookup.GetGroups(String user) in C:\Projekt\varberg-hajk\backend\MapService\Components\ActiveDirectoryLookup.cs:line 41
+   at MapService.Controllers.ConfigController.UserSpecificMaps() in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 350
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 408 
+FATAL 2018-01-03 08:21:33 System.Security.Authentication.AuthenticationException: Inloggningsfel: Okänt användarnamn eller felaktigt lösenord.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: Inloggningsfel: Okänt användarnamn eller felaktigt lösenord.
+
+   at System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   at System.DirectoryServices.DirectoryEntry.Bind()
+   at System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   at System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   at System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- End of inner exception stack trace ---
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   at System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   at MapService.Components.ActiveDirectoryLookup.GetGroups(String user) in C:\Projekt\varberg-hajk\backend\MapService\Components\ActiveDirectoryLookup.cs:line 41
+   at MapService.Controllers.ConfigController.UserSpecificMaps() in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 350
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 408 
+INFO 2018-01-03 08:34:28 Non-recursive AD-search used 
+INFO 2018-01-03 08:36:33 Non-recursive AD-search used 
+DEBUG 2018-01-03 08:42:59 C:\Projekt\varberg-hajk\backend\MapService\App_Data\Test1.json 
+INFO 2018-01-03 08:44:53 Non-recursive AD-search used 
+ERROR 2018-01-03 08:44:53 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\map_1.json is missing the 'title' object 
+ERROR 2018-01-03 08:44:53 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+INFO 2018-01-03 08:46:20 Non-recursive AD-search used 
+ERROR 2018-01-03 08:46:20 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+INFO 2018-01-03 08:48:01 Non-recursive AD-search used 
+ERROR 2018-01-03 08:48:01 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+INFO 2018-01-03 08:48:03 Non-recursive AD-search used 
+ERROR 2018-01-03 08:48:03 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+INFO 2018-01-03 08:48:07 Non-recursive AD-search used 
+ERROR 2018-01-03 08:48:07 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+INFO 2018-01-03 08:48:09 Non-recursive AD-search used 
+ERROR 2018-01-03 08:48:09 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+INFO 2018-01-03 08:48:13 Non-recursive AD-search used 
+ERROR 2018-01-03 08:48:13 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+INFO 2018-01-03 08:48:15 Non-recursive AD-search used 
+ERROR 2018-01-03 08:48:15 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+INFO 2018-01-03 08:48:17 Non-recursive AD-search used 
+ERROR 2018-01-03 08:48:17 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+INFO 2018-01-03 08:48:21 Non-recursive AD-search used 
+ERROR 2018-01-03 08:48:21 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+INFO 2018-01-03 08:48:27 Non-recursive AD-search used 
+ERROR 2018-01-03 08:48:27 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+INFO 2018-01-03 08:48:31 Non-recursive AD-search used 
+ERROR 2018-01-03 08:48:31 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+INFO 2018-01-03 08:48:44 Non-recursive AD-search used 
+ERROR 2018-01-03 08:48:44 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+INFO 2018-01-03 08:48:49 Non-recursive AD-search used 
+ERROR 2018-01-03 08:48:49 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+INFO 2018-01-03 08:49:02 Non-recursive AD-search used 
+ERROR 2018-01-03 08:49:02 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+INFO 2018-01-03 08:49:04 Non-recursive AD-search used 
+ERROR 2018-01-03 08:49:04 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+INFO 2018-01-03 08:50:25 Non-recursive AD-search used 
+ERROR 2018-01-03 08:50:25 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Test.json is missing the 'title' object 
+DEBUG 2018-01-03 09:05:10 C:\Projekt\varberg-hajk\backend\MapService\App_Data\Test2.json 
+DEBUG 2018-01-03 09:27:32 C:\Projekt\varberg-hajk\backend\MapService\App_Data\Test4.json 
+DEBUG 2018-01-03 09:28:53 C:\Projekt\varberg-hajk\backend\MapService\App_Data\Test5.json 
+DEBUG 2018-01-03 09:30:13 C:\Projekt\varberg-hajk\backend\MapService\App_Data\Testmapps.json 
+INFO 2018-01-08 09:25:50 Non-recursive AD-search used 
+ERROR 2018-01-08 09:25:50 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\map_1.json is missing the 'title' object 
+ERROR 2018-01-08 09:25:50 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Testmapps.json is missing the 'title' object 
+INFO 2018-01-08 09:26:46 Non-recursive AD-search used 
+ERROR 2018-01-08 09:26:46 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\map_1.json is missing the 'title' object 
+ERROR 2018-01-08 09:26:46 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Testmapps.json is missing the 'title' object 
+INFO 2018-01-08 09:27:52 Non-recursive AD-search used 
+ERROR 2018-01-08 09:27:52 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\map_1.json is missing the 'title' object 
+ERROR 2018-01-08 09:27:52 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Testmapps.json is missing the 'title' object 
+INFO 2018-01-08 09:29:57 Non-recursive AD-search used 
+ERROR 2018-01-08 09:29:57 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\map_1.json is missing the 'title' object 
+ERROR 2018-01-08 09:29:57 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Testmapps.json is missing the 'title' object 
+INFO 2018-01-08 09:30:16 Non-recursive AD-search used 
+ERROR 2018-01-08 09:30:16 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\map_1.json is missing the 'title' object 
+ERROR 2018-01-08 09:30:16 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Testmapps.json is missing the 'title' object 
+INFO 2018-01-08 09:31:13 Non-recursive AD-search used 
+ERROR 2018-01-08 09:31:13 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\map_1.json is missing the 'title' object 
+ERROR 2018-01-08 09:31:13 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Testmapps.json is missing the 'title' object 
+INFO 2018-01-08 09:32:00 Non-recursive AD-search used 
+ERROR 2018-01-08 09:32:00 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\map_1.json is missing the 'title' object 
+ERROR 2018-01-08 09:32:00 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Testmapps.json is missing the 'title' object 
+INFO 2018-01-08 10:00:58 Non-recursive AD-search used 
+ERROR 2018-01-08 10:00:59 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\map_1.json is missing the 'title' object 
+ERROR 2018-01-08 10:00:59 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Testmapps.json is missing the 'title' object 
+INFO 2018-01-08 10:20:27 Non-recursive AD-search used 
+ERROR 2018-01-08 10:20:27 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\map_1.json is missing the 'title' object 
+ERROR 2018-01-08 10:20:27 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Testmapps.json is missing the 'title' object 
+INFO 2018-01-08 13:12:28 Non-recursive AD-search used 
+ERROR 2018-01-08 13:12:29 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\map_1.json is missing the 'title' object 
+ERROR 2018-01-08 13:12:29 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\Testmapps.json is missing the 'title' object 
+INFO 2018-01-08 13:13:06 Non-recursive AD-search used 
+ERROR 2018-01-08 13:13:06 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\map_1.json is missing the 'title' object 
+INFO 2018-01-08 13:13:21 Non-recursive AD-search used 
+INFO 2018-01-08 13:13:25 Non-recursive AD-search used 
+INFO 2018-01-08 13:13:27 Non-recursive AD-search used 
+INFO 2018-01-08 13:13:30 Non-recursive AD-search used 
+DEBUG 2018-01-08 13:42:29 C:\Projekt\varberg-hajk\backend\MapService\App_Data\TEsthowdyho.json 

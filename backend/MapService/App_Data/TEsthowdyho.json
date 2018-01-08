@@ -316,73 +316,15 @@
       "options": {
         "baselayers": [],
         "groups": [],
-        "instruction": null,
+        "instruction": "",
         "active": true,
         "visibleAtStart": true,
-        "visibleForGroups": [
-          "Office-SEGOT01",
-          "MammaMia"
-        ],
         "backgroundSwitcherBlack": true,
         "backgroundSwitcherWhite": true,
-        "toggleAllButton": false
-      },
-      "index": 0
-    },
-    {
-      "type": "bookmark",
-      "options": {
-        "instruction": ""
-      },
-      "index": 0
-    },
-    {
-      "type": "draw",
-      "options": {
-        "exportUrl": "/mapservice/export/kml",
-        "importUrl": "/mapservice/import/kml",
-        "base64Encode": false,
-        "instruction": "",
-        "icons": "",
-        "proxyUrl": ""
-      },
-      "index": 0
-    },
-    {
-      "type": "information",
-      "options": {
-        "text": "",
-        "headerText": "",
-        "visibleAtStart": false,
-        "showInfoOnce": false,
-        "base64EncodeForInfotext": false
-      },
-      "index": 0
-    },
-    {
-      "type": "search",
-      "options": {
-        "onMap": false,
-        "bothSynlig": false,
-        "toolbar": "bottom",
-        "maxZoom": 14,
-        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
-        "kmlExportUrl": "/mapservice/export/kml",
-        "excelExportUrl": "/mapservice/export/excel",
-        "displayPopup": true,
-        "selectionTools": true,
-        "base64Encode": false,
-        "instruction": "",
-        "filterVisible": true,
-        "anchor": [
-          16,
-          32
-        ],
-        "imgSize": [
-          32,
-          32
-        ],
-        "popupOffsetY": 0
+        "toggleAllButton": false,
+        "dropdownThemeMaps": false,
+        "themeMapHeaderCaption": "",
+        "visibleForGroups": []
       },
       "index": 0
     }
@@ -393,6 +335,7 @@
       414962,
       6583005
     ],
+    "title": "TEsthowdyho",
     "projection": "EPSG:3006",
     "zoom": 3,
     "maxZoom": 3,
@@ -424,11 +367,10 @@
       6471028.0
     ],
     "logo": "",
-    "infologo": null,
+    "infologo": "",
     "mobileleft": null,
     "mobileright": null,
     "pil": "",
-    "title" : "TESTKARTA",
     "mobile": false,
     "colors": {
       "primaryColor": "#1B78CC",

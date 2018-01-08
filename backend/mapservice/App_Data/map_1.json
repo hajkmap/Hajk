@@ -207,8 +207,12 @@
         "backgroundSwitcherWhite": true,
         "toggleAllButton": false,
         "dropdownThemeMaps": true,
-        "themeMapHeaderCaption": null,
-        "visibleForGroups" : ["Office-SEGOT01", "MammaMia"]
+        "themeMapHeaderCaption": "Rubrik temakarta",
+        "visibleForGroups": [
+          "Office-SEKSD01",
+          "Grupphaha",
+          "Grupp3"
+        ]
       },
       "index": 0
     },
@@ -379,12 +383,12 @@
       9000000.0
     ],
     "logo": "assets/logo.png",
-    "infologo": null,
+    "infologo": "",
     "mobileleft": null,
     "mobileright": null,
     "pil": null,
-    "title" : "MINKARTA",
-    "mobile": false,
+	"mobile": false,
+	"title": "hohokarata",
     "colors": {
       "primaryColor": "#0affc2",
       "secondaryColor": "#ffffff"

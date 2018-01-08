@@ -255,10 +255,10 @@ class Menu extends Component {
       backgroundSwitcherBlack: true,
       backgroundSwitcherWhite: true,
       toggleAllButton: false,
-	  instruction: "",
-	  dropdownThemeMaps: false,
-    themeMapHeaderCaption: "Temakartor",
-    visibleForGroups: []
+	  	instruction: "",
+	  	dropdownThemeMaps: false,
+			themeMapHeaderCaption: "Temakartor",
+    	visibleForGroups: []
     };
     this.state = state;
   }
@@ -1085,8 +1085,8 @@ class Menu extends Component {
 						id="authGroups"
 						name="authGroups"
 						type="text"
-            onChange={(e) => {this.handleAuthGrpsChange(e)}}
-            value={this.state.visibleForGroups}
+						onChange={(e) => {this.handleAuthGrpsChange(e)}}
+						value={this.state.visibleForGroups}
 					/>
 				</div>
 			  </div>

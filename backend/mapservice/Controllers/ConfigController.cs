@@ -40,17 +40,20 @@ namespace MapService.Controllers
         {
             string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
             string file = String.Format("{0}\\{1}.json", folder, id);
+			string fileName = Path.GetFileNameWithoutExtension(file);
 
             _log.DebugFormat("{0}\\{1}.json", folder, id);
             MapConfig mapConfig = new MapConfig()
             {
                 map = new MapSetting()
                 {
+					title = fileName,
                     maxZoom = 3,
                     minZoom = 9,
                     zoom = 3,
                     projection = "EPSG:3006",
                     target = "map",
+                    infologo = "",
                     pil = "",
                     logo = "",
                     colors = new Colors()
@@ -260,7 +263,10 @@ namespace MapService.Controllers
                             active = true,
                             visibleAtStart = true,
                             backgroundSwitcherBlack = true,
-                            backgroundSwitcherWhite = true
+                            backgroundSwitcherWhite = true,
+                            instruction = String.Empty,
+                            themeMapHeaderCaption = String.Empty,
+                            visibleForGroups = new string[0]
                         },
                         index = 0
                     }
