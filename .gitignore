@@ -11,3 +11,5 @@ Hajk2_mapservice_pre/
 admin/package-lock.json
 .idea/
 client.zip
+lmproxy
+proxy/HTTPProxy/Proxy/Properties/PublishProfiles

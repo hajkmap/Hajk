@@ -173,8 +173,8 @@
       "options": {
         "baselayers": [
           {
-            "id": "46",
-            "visibleAtStart": false,
+            "id": "50",
+            "visibleAtStart": true,
             "drawOrder": 0
           }
         ],
@@ -186,6 +186,11 @@
             "toggled": false,
             "expanded": false,
             "layers": [
+              {
+                "id": "46",
+                "visibleAtStart": false,
+                "drawOrder": 0
+              },
               {
                 "id": "47",
                 "visibleAtStart": false,
@@ -352,6 +357,7 @@
       414962,
       6583005
     ],
+    "title": "hohokarata",
     "projection": "EPSG:3006",
     "zoom": 3,
     "maxZoom": 3,
@@ -387,8 +393,7 @@
     "mobileleft": null,
     "mobileright": null,
     "pil": null,
-	"mobile": false,
-	"title": "hohokarata",
+    "mobile": false,
     "colors": {
       "primaryColor": "#0affc2",
       "secondaryColor": "#ffffff"
