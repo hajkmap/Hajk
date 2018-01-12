@@ -89,6 +89,11 @@
     return a;
   };
 
+  internal.overrideGlobalInfoBox = function (layer, mapLayer){
+    layer.infobox = mapLayer.infoBox;
+    return layer;
+  }
+
   internal.filterByLayerSwitcher = function (config, layers) {
     function f (groups, layer) {
       groups.forEach(group => {
@@ -96,6 +101,11 @@
 
         if (mapLayer) {
           layer.drawOrder = mapLayer.drawOrder;
+          
+          if(mapLayer.infoBox && mapLayer.infoBox.length != 0){
+            layer = internal.overrideGlobalInfoBox(layer, mapLayer);
+          }
+          
           if (layer.visibleAtStart !== undefined) {
             layer.visibleAtStart = mapLayer.visibleAtStart;
           }
@@ -122,6 +132,7 @@
       f(config.groups, layer);
     });
 
+    console.log(filtered,"filtered")
     return filtered;
   };
 
@@ -136,11 +147,12 @@
   that.start = function (config, done) {
     function load_map (map_config) {
       var layers = $.getJSON(config.layersPath || layersPath);
+
       layers.done(data => {
         var layerSwitcherTool = map_config.tools.find(tool => {
           return tool.type === 'layerswitcher';
         });
-
+        console.log(map_config,"map_config")
         var searchTool = map_config.tools.find(tool => {
           return tool.type === 'search';
         });
@@ -170,7 +182,19 @@
           .concat(_data.vectorlayers)
           .concat(_data.arcgislayers);
 
+          console.log(layers,"layers")
+
           map_config.layers = internal.filterByLayerSwitcher(layerSwitcherTool.options, layers);
+/*
+          var layers = layers.map(data => {
+            var localConfig = map_config.layers.find(layer => layer.id == x.id);
+            console.log(localConfig,"localConfig");
+          });
+
+*/
+
+
+          console.log(map_config.layers,"map_config.layers")
           map_config.layers.sort((a, b) => a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1);
         }
 
