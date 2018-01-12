@@ -20,7 +20,9 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import { Model } from 'backbone';
+import {
+	Model
+} from 'backbone';
 const $ = require('jquery');
 const jQuery = $;
 global.window.jQuery = jQuery;
@@ -28,134 +30,138 @@ require('jquery-sortable');
 
 var menu = Model.extend({
 
-  defaults: {
-    layers: [],
-    addedLayers: []
-  },
+	defaults: {
+		layers: [],
+		addedLayers: []
+	},
 
-  loadMaps: function (callback) {
-    $.ajax({
-      url: this.get('config').url_map_list,
-      method: 'GET',
-      contentType: 'application/json',
-      success: (data) => {
-        var name = data[0];
-        if (name === undefined) {
-          name = "";
-        }
-        this.set({
-          urlMapConfig: this.get('config').url_map + "/" + name,
-          mapFile: name
-		});	
-        callback(data);
-      },
-      error: (message) => {
-        callback(message);
-      }
-    });
-  },
+	loadMaps: function (callback) {
+		$.ajax({
+			url: this.get('config').url_map_list,
+			method: 'GET',
+			contentType: 'application/json',
+			success: (data) => {
+				var name = data[0];
+				if (name === undefined) {
+					name = "";
+				}
+				this.set({
+					urlMapConfig: this.get('config').url_map + "/" + name,
+					mapFile: name
+				});
+				callback(data);
+			},
+			error: (message) => {
+				callback(message);
+			}
+		});
+	},
 
-  createMap: function(name, callback) {
-    $.ajax({
-      url: this.get('config').url_map_create + "/" + name,
-      method: 'GET',
-      contentType: 'application/json',
-      success: (data) => {
-        callback(data);
-      },
-      error: (message) => {
-        callback(message);
-      }
-    });
-  },
+	createMap: function (name, callback) {
+		$.ajax({
+			url: this.get('config').url_map_create + "/" + name,
+			method: 'GET',
+			contentType: 'application/json',
+			success: (data) => {
+				callback(data);
+			},
+			error: (message) => {
+				callback(message);
+			}
+		});
+	},
 
-  deleteMap: function(callback) {
-    $.ajax({
-      url: this.get('config').url_map_delete + "/" + this.get('mapFile'),
-      method: 'GET',
-      contentType: 'application/json',
-      success: () => {
-        callback();
-      },
-      error: (message) => {
-        callback("Kartan kunde inte tas bort. Försök igen senare.");
-      }
-    });
-  },
+	deleteMap: function (callback) {
+		$.ajax({
+			url: this.get('config').url_map_delete + "/" + this.get('mapFile'),
+			method: 'GET',
+			contentType: 'application/json',
+			success: () => {
+				callback();
+			},
+			error: (message) => {
+				callback("Kartan kunde inte tas bort. Försök igen senare.");
+			}
+		});
+	},
 
-  updateToolConfig: function(config, callback) {
-    $.ajax({
-      url: `${this.get('config').url_tool_settings}?mapFile=${this.get('mapFile')}.json`,
-      method: 'PUT',
-      contentType: 'application/json',
-      data: JSON.stringify(config),
-      success: () => {
-        callback(true);
-      },
-      error: () => {
-        callback(false);
-      }
-    });
-  },
+	updateToolConfig: function (config, callback) {
+		$.ajax({
+			url: `${this.get('config').url_tool_settings}?mapFile=${this.get('mapFile')}.json`,
+			method: 'PUT',
+			contentType: 'application/json',
+			data: JSON.stringify(config),
+			success: () => {
+				callback(true);
+			},
+			error: () => {
+				callback(false);
+			}
+		});
+	},
 
-  updateMapConfig: function(config, callback) {
-    $.ajax({
-      url: `${this.get('config').url_map_settings}?mapFile=${this.get('mapFile')}.json`,
-      method: 'PUT',
-      contentType: 'application/json',
-      data: JSON.stringify(config),
-      success: () => {
-        callback(true);
-      },
-      error: () => {
-        callback(false);
-      }
-    });
-  },
+	updateMapConfig: function (config, callback) {
+		$.ajax({
+			url: `${this.get('config').url_map_settings}?mapFile=${this.get('mapFile')}.json`,
+			method: 'PUT',
+			contentType: 'application/json',
+			data: JSON.stringify(config),
+			success: () => {
+				callback(true);
+			},
+			error: () => {
+				callback(false);
+			}
+		});
+	},
 
-  updateConfig: function(config, callback) {
-    $.ajax({
-      url: `${this.get('config').url_layermenu_settings}?mapFile=${this.get('mapFile')}.json`,
-      method: 'PUT',
-      contentType: 'application/json',
-      data: JSON.stringify(config),
-      success: () => {
-        callback(true);
-      },
-      error: () => {
-        callback(false);
-      }
-    });
-  },
+	fetchADGroups: function () {
+		return ["Grupp 1", "Grupp 2"];
+	},
 
-  findLayerInConfig: function (id) {
+	updateConfig: function (config, callback) {
+		$.ajax({
+			url: `${this.get('config').url_layermenu_settings}?mapFile=${this.get('mapFile')}.json`,
+			method: 'PUT',
+			contentType: 'application/json',
+			data: JSON.stringify(config),
+			success: () => {
+				callback(true);
+			},
+			error: () => {
+				callback(false);
+			}
+		});
+	},
 
-    var layer = false;
+	findLayerInConfig: function (id) {
 
-    function findInGroups(groups, layerId) {
-      groups.forEach(group => {
-        var found = group.layers.find(l => l.id === layerId);
-        if (found) {
-          layer = found;
-        }
-        if (group.hasOwnProperty('groups')) {
-          findInGroups(group.groups, layerId)
-        }
-      });
-    }
+		var layer = false;
 
-    findInGroups(this.get('layerMenuConfig').groups, id);
+		function findInGroups(groups, layerId) {
+			groups.forEach(group => {
+				var found = group.layers.find(l => l.id === layerId);
+				if (found) {
+					layer = found;
+				}
+				if (group.hasOwnProperty('groups')) {
+					findInGroups(group.groups, layerId)
+				}
+			});
+		}
 
-    return layer;
-  },
+		findInGroups(this.get('layerMenuConfig').groups, id);
 
-  getConfig: function (url, callback) {
-    $.ajax(url, {
-      success: data => {
-        callback(data);
-      }
-    });
-  }
+		return layer;
+	},
+
+	getConfig: function (url, callback) {
+		$.ajax(url, {
+			success: data => {
+				callback(data);
+			}
+		});
+	}
 
 });
 
