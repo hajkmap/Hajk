@@ -371,19 +371,37 @@ namespace MapService.Controllers
             return mapConfigurationsList;
         }
 
+        public string[] GetUserGroups()
+        {
+            var parameters = GetLookupParameters();
+            var adLookup = new ActiveDirectoryLookup(parameters["ADdomain"], parameters["ADcontainer"], parameters["ADuser"], parameters["ADpassword"]);
+
+            var activeUser = adLookup.GetActiveUser();
+            var userGroups = adLookup.GetGroups(activeUser);
+
+            return userGroups;
+        }
+        /// <summary>
+        /// Set required parameters for AD lookup to dictionary.
+        /// </summary>
+        /// <returns>Dictionary with required values to be passed to AD lookup</returns>
+        public Dictionary<string, string> GetLookupParameters()
+        {
+            var appsettings = ConfigurationManager.AppSettings;
+            var parameters = new Dictionary<string, string>()
+            {
+                { "ADdomain", appsettings["ActiveDirectoryDomain"] },
+                { "ADuser", appsettings["ActiveDirectoryUser"] },
+                { "ADpassword", appsettings["ActiveDirectoryUserPassword"] },
+                { "ADcontainer", appsettings["ActiveDirectoryContainer"] }
+            };
+            return parameters;
+        }
+
         public string UserSpecificMaps()
         {
-            //Active Directory connection settings
-            var appsettings = ConfigurationManager.AppSettings;
-            var ADdomain = appsettings["ActiveDirectoryDomain"];
-            var ADuser = appsettings["ActiveDirectoryUser"];
-            var ADpassword = appsettings["ActiveDirectoryUserPassword"];
-            var ADContainer = appsettings["ActiveDirectoryContainer"];
-
-            var adLookup = new ActiveDirectoryLookup(ADdomain, ADContainer, ADuser, ADpassword);
-            var activeUser = adLookup.GetActiveUser();
-            var allowedUserGroups = adLookup.GetGroups(activeUser);
-            var allowedMapConfigurations = GetAllowedMapConfigurations(allowedUserGroups);
+            var userGroups = GetUserGroups();
+            var allowedMapConfigurations = GetAllowedMapConfigurations(userGroups);
 
 
             Response.Expires = 0;

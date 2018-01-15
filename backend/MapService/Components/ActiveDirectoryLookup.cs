@@ -40,7 +40,7 @@ namespace MapService.Components
             var recursiveSearch = Convert.ToBoolean(appsettings["recursiveADsearch"]);
             var userPrincipal = UserPrincipal.FindByIdentity(_domain, user);
 
-            if(userPrincipal == null)
+            if (userPrincipal == null)
             {
                 _log.ErrorFormat("User is not present in the AD-container specified in Web.config");
                 throw new HttpException(404, "User not found");

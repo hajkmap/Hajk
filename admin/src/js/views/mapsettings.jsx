@@ -26,6 +26,7 @@ import MapOptions from './mapoptions.jsx';
 import ToolOptions from './tooloptions.jsx';
 import $ from 'jquery';
 import Alert from '../views/alert.jsx';
+import ListProperties from '../views/listproperties.jsx';
 
 var defaultState = {
   alert: false,
@@ -246,6 +247,8 @@ class Menu extends Component {
   constructor() {
     super();
     var state = {
+	  adGroups: [],
+	  isHidden: true,
       drawOrder: false,
       layerMenu: true,
       addedLayers: [],
@@ -270,7 +273,12 @@ class Menu extends Component {
 
     this.props.model.set('config', this.props.config);
     this.load('maps');
-    this.load('layers');
+	this.load('layers');
+	// TODO: kontroll för installationer som ej aktiverat
+	// autentisering
+	if (true) {
+		this.fetchADGroups();
+	}
 	
     this.props.model.on('change:urlMapConfig', () => {
 
@@ -941,6 +949,31 @@ class Menu extends Component {
       visibleForGroups: groups
     });  
   }
+
+  /**
+   * Hantering för att visa tillgängliga 
+   * användargrupper då inmatningsfältet får focus
+   */
+  handleGroups () {
+    this.isHidden();
+  }
+
+  /**
+   * ber backenden om en lista över tillgängliga ad-grupper
+   */
+  fetchADGroups () {
+	console.log("anrop", this.props.model.fetchADGroups());
+	let groups = this.props.model.fetchADGroups();
+	
+	this.setState({adGroups: groups});
+  }
+
+  toggleHidden () {
+    this.setState({
+      isHidden: !this.state.isHidden
+    })
+  }
+
   /**
    *
    */
@@ -977,7 +1010,7 @@ class Menu extends Component {
       return (
         <div>
           <aside>
-            <input placeholder="filtrera" type="text" onChange={(e) => this.filterLayers(e)} />
+            <input placeholder="filtrera" type="text" onChange={(e)=> this.filterLayers(e)} />
             <ul className="config-layer-list">
               {this.renderLayersFromConfig()}
             </ul>
@@ -985,114 +1018,100 @@ class Menu extends Component {
           <article>
             <fieldset className="tree-view">
               <legend>Hantera lagermeny</legend>
-              <button className="btn btn-primary" onClick={(e) => this.saveSettings(e)}>Spara</button>&nbsp;
-              <button className="btn btn-success" onClick={(e) => this.createGroup("Ny grupp", false, false)}>Ny grupp</button>&nbsp;
+              <button className="btn btn-primary" onClick={(e)=> this.saveSettings(e)}>Spara</button>&nbsp;
+              <button className="btn btn-success" onClick={(e)=> this.createGroup("Ny grupp", false, false)}>Ny grupp</button>&nbsp;
               <div className="row">
-				<div className="col-sm-1">
-					<input
-					id="active"
-					name="active"
-					type="checkbox"
-					onChange={(e) => {this.handleInputChange(e)}}
-					checked={this.state.active}/>&nbsp;
-				</div>
-				<label className="layer-menu-label-checkbox" htmlFor="active">Aktiverad</label>
+                <div className="col-sm-1">
+                  <input id="active" name="active" type="checkbox" onChange={(e)=> {this.handleInputChange(e)}} checked={this.state.active}/>&nbsp;
+                </div>
+                <label className="layer-menu-label-checkbox" htmlFor="active">Aktiverad</label>
               </div>
-			  <div className="row">
-			  	<div className="col-sm-1">
-					<input
-					id="visibleAtStart"
-					name="visibleAtStart"
-					type="checkbox"
-					onChange={(e) => {this.handleInputChange(e)}}
-					checked={this.state.visibleAtStart}/>&nbsp;
-				</div>
+              <div className="row">
+                <div className="col-sm-1">
+                  <input id="visibleAtStart" 
+                         name="visibleAtStart" 
+                         type="checkbox" 
+                         onChange={(e)=> {this.handleInputChange(e)}} 
+                         checked={this.state.visibleAtStart}/>&nbsp;
+                </div>
                 <label className="layer-menu-label-checkbox" htmlFor="visibleAtStart">Synlig vid start</label>
               </div>
-			  <div className="row">
-			  	<div className="col-sm-1">
-					<input
-					id="backgroundSwitcherBlack"
-					name="backgroundSwitcherBlack"
-					type="checkbox"
-					onChange={(e) => {this.handleInputChange(e)}}
-					checked={this.state.backgroundSwitcherBlack}/>&nbsp;
-				</div>
-				<label className="layer-menu-label-checkbox" htmlFor="backgroundSwitcherBlack">Svart bakgrundskarta</label>
+              <div className="row">
+                <div className="col-sm-1">
+                  <input id="backgroundSwitcherBlack" 
+                         name="backgroundSwitcherBlack" 
+                         type="checkbox" 
+                         onChange={(e)=> {this.handleInputChange(e)}} 
+                         checked={this.state.backgroundSwitcherBlack}/>&nbsp;
+                </div>
+                <label className="layer-menu-label-checkbox" htmlFor="backgroundSwitcherBlack">Svart bakgrundskarta</label>
               </div>
               <div className="row">
-			  	<div className="col-sm-1">
-					<input
-					id="backgroundSwitcherWhite"
-					name="backgroundSwitcherWhite"
-					type="checkbox"
-					onChange={(e) => {this.handleInputChange(e)}}
-					checked={this.state.backgroundSwitcherWhite}/>&nbsp;
-				</div>
+                <div className="col-sm-1">
+                  <input id="backgroundSwitcherWhite" 
+                         name="backgroundSwitcherWhite" 
+                         type="checkbox" 
+                         onChange={(e)=> {this.handleInputChange(e)}} 
+                         checked={this.state.backgroundSwitcherWhite}/>&nbsp;
+                </div>
                 <label htmlFor="backgroundSwitcherWhite">Vit bakgrundskarta</label>
               </div>
               <div className="row">
-			  	<div className="col-sm-1">
-					<input
-					id="toggleAllButton"
-					name="toggleAllButton"
-					type="checkbox"
-					onChange={(e) => {this.handleInputChange(e)}}
-					checked={this.state.toggleAllButton}/>&nbsp;
-				</div>
+                <div className="col-sm-1">
+                  <input id="toggleAllButton" 
+                         name="toggleAllButton" 
+                         type="checkbox" 
+                         onChange={(e)=> {this.handleInputChange(e)}} 
+                         checked={this.state.toggleAllButton}/>&nbsp;
+                </div>
                 <label className="layer-menu-label-checkbox" htmlFor="toggleAllButton">Släck alla lager-knapp</label>
               </div>
-			  <div className="row">
-			  	<div className="col-sm-1">
-					<input
-						id="dropdownThemeMaps"
-						name="dropdownThemeMaps"
-						type="checkbox"
-						onChange={(e) => {this.handleInputChange(e)}}
-						checked={this.state.dropdownThemeMaps} />&nbsp;
-			    </div>
-				<label className="layer-menu-label-checkbox" htmlFor="dropdownThemeMaps">Visa lista över temakartor</label>
-			  </div>
-			  <div className="row">
-				<div className="col-sm-12">
-					<label htmlFor="themeMapHeaderCaption">Rubriktext temakartor</label>
-					<input 
-						id="themeMapHeaderCaption"
-						name="themeMapHeaderCaption"
-						type="text"
-						value={this.state.themeMapHeaderCaption}
-						onChange={(e) => {
-							this.setState({ 'themeMapHeaderCaption': e.target.value });
-						}}
-					/>
-				</div>
-			  </div>
               <div className="row">
-				<div className="col-sm-12">
-					<label htmlFor="instruction">Instruktion</label>
-					<input
-					id="instruction"
-					name="instruction"
-					type="text"
-					onChange={(e) => {this.handleInputChange(e)}}
-					value={this.state.instruction}/>
-				</div>
+                <div className="col-sm-1">
+                  <input id="dropdownThemeMaps" 
+                         name="dropdownThemeMaps" 
+                         type="checkbox" 
+                         onChange={(e)=> {this.handleInputChange(e)}} 
+                         checked={this.state.dropdownThemeMaps} />&nbsp;
+                </div>
+                <label className="layer-menu-label-checkbox" htmlFor="dropdownThemeMaps">Visa lista över temakartor</label>
               </div>
-			  <div className="row">
-				<div className="col-sm-12">
-					<label htmlFor="authGroups">Tillträde  <i className="fa fa-question-circle" data-toggle="tooltip" title="Ange AD-grupper separerade med kommatecken"></i></label>
-					<input 
-						id="authGroups"
-						name="authGroups"
-						type="text"
-						onChange={(e) => {this.handleAuthGrpsChange(e)}}
-						value={this.state.visibleForGroups}
-					/>
-				</div>
-			  </div>
+              <div className="row">
+                <div className="col-sm-12">
+                  <label htmlFor="themeMapHeaderCaption">Rubriktext temakartor</label>
+                  <input id="themeMapHeaderCaption" 
+                         name="themeMapHeaderCaption" 
+                         type="text" value={this.state.themeMapHeaderCaption} 
+                         onChange={(e)=> { this.setState({ 'themeMapHeaderCaption': e.target.value }); }} />
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-sm-12">
+                  <label htmlFor="instruction">Instruktion</label>
+                  <input id="instruction" 
+                         name="instruction" 
+                         type="text"  
+                         onChange={(e) => {this.handleInputChange(e)}}
+                         value={this.state.instruction}/>
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-sm-12">
+                  <label htmlFor="authGroups">Tillträde &nbsp;
+                    <i className="fa fa-question-circle" data-toggle="tooltip" title="Ange AD-grupper separerade med kommatecken"></i>
+                  </label>
+                  <input id="authGroups" 
+                         name="authGroups" 
+						 type="text" 
+                         onChange={(e)=> {this.handleAuthGrpsChange(e)}} 
+                          value={this.state.visibleForGroups} />
+				   <i className="fa fa-bars" data-toggle="tooltip" title="Visa tillgängliga AD-grupper" onClick={() => {this.toggleHidden()}}></i>
+                </div>
+              </div>
               {this.renderLayerMenu()}
             </fieldset>
           </article>
+		  <ListProperties properties={this.state.adGroups} show={this.state.isHidden} />
         </div>
       )
     }
