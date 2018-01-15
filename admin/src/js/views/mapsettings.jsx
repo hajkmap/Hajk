@@ -247,7 +247,8 @@ class Menu extends Component {
   constructor() {
     super();
     var state = {
-      propertiesList: false,
+	  adGroups: [],
+	  isHidden: true,
       drawOrder: false,
       layerMenu: true,
       addedLayers: [],
@@ -272,7 +273,12 @@ class Menu extends Component {
 
     this.props.model.set('config', this.props.config);
     this.load('maps');
-    this.load('layers');
+	this.load('layers');
+	// TODO: kontroll för installationer som ej aktiverat
+	// autentisering
+	if (true) {
+		this.fetchADGroups();
+	}
 	
     this.props.model.on('change:urlMapConfig', () => {
 
@@ -948,36 +954,25 @@ class Menu extends Component {
    * Hantering för att visa tillgängliga 
    * användargrupper då inmatningsfältet får focus
    */
-  handleGroupsFocus () {
-    // Använd backbone-modellen för att göra anrop
-    // till karttjänst och plocka ut användargrupper
-
-    // lista dessa grupper vid sidan om inmatningsdelen i layermanager
-    console.log("får focus");
-    this.setState({
-      propertiesList: true
-    });
-  }
-
-  /**
-   * Hantering för att dölja tillgängliga användar-
-   * grupper då inmatningsfältet får focus
-   */
-  handleGroupsBlur () {
-    this.setState({
-      propertiesList: false
-    });
-    console.log("tappar focus");
+  handleGroups () {
+    this.isHidden();
   }
 
   /**
    * ber backenden om en lista över tillgängliga ad-grupper
    */
   fetchADGroups () {
-    let groups = this.props.model.fetchADGroups()
-    console.log(groups);
+	console.log("anrop", this.props.model.fetchADGroups());
+	let groups = this.props.model.fetchADGroups();
+	
+	this.setState({adGroups: groups});
   }
 
+  toggleHidden () {
+    this.setState({
+      isHidden: !this.state.isHidden
+    })
+  }
 
   /**
    *
@@ -1095,29 +1090,28 @@ class Menu extends Component {
                   <label htmlFor="instruction">Instruktion</label>
                   <input id="instruction" 
                          name="instruction" 
-                         type="text" 
-                         onFocus={()=> {this.handleGroupsFocus()}} 
-                         onBlur={() => {this.handleGroupsBlur()}} 
+                         type="text"  
                          onChange={(e) => {this.handleInputChange(e)}}
                          value={this.state.instruction}/>
                 </div>
               </div>
               <div className="row">
                 <div className="col-sm-12">
-                  <label htmlFor="authGroups">Tillträde
+                  <label htmlFor="authGroups">Tillträde &nbsp;
                     <i className="fa fa-question-circle" data-toggle="tooltip" title="Ange AD-grupper separerade med kommatecken"></i>
                   </label>
                   <input id="authGroups" 
                          name="authGroups" 
-                         type="text" 
+						 type="text" 
                          onChange={(e)=> {this.handleAuthGrpsChange(e)}} 
-                         value={this.state.visibleForGroups} />
+                          value={this.state.visibleForGroups} />
+				   <i className="fa fa-bars" data-toggle="tooltip" title="Visa tillgängliga AD-grupper" onClick={() => {this.toggleHidden()}}></i>
                 </div>
               </div>
               {this.renderLayerMenu()}
-              <ListProperties properties={this.fetchADGroups()} show={this.state.propertiesList} />
             </fieldset>
           </article>
+		  <ListProperties properties={this.state.adGroups} show={this.state.isHidden} />
         </div>
       )
     }

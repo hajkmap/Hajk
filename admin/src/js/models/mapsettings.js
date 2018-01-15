@@ -115,8 +115,18 @@ var menu = Model.extend({
 		});
 	},
 
-	fetchADGroups: function () {
-		return ["Grupp 1", "Grupp 2"];
+	fetchADGroups: function (callback) {
+		// $.ajax({
+		// 	url: "",
+		// 	method: 'GET',
+		// 	success: (groups) => {
+		// 		callback(groups);
+		// 	},
+		// 	error: () => {
+				
+		// 	}
+		// })
+		return ["Grupp 1", "Grupp 2", "Grupp 3", "Grupp 4", "Grupp 5"];
 	},
 
 	updateConfig: function (config, callback) {

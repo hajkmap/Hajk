@@ -1021,3 +1021,47 @@ INFO 2018-01-08 13:13:25 Non-recursive AD-search used
 INFO 2018-01-08 13:13:27 Non-recursive AD-search used 
 INFO 2018-01-08 13:13:30 Non-recursive AD-search used 
 DEBUG 2018-01-08 13:42:29 C:\Projekt\varberg-hajk\backend\MapService\App_Data\TEsthowdyho.json 
+FATAL 2018-01-12 14:42:37 System.DirectoryServices.AccountManagement.PrincipalOperationException: Ett åtgärdsfel inträffade.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: Ett åtgärdsfel inträffade.
+
+   at System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   at System.DirectoryServices.DirectoryEntry.Bind()
+   at System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   at System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   at System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- End of inner exception stack trace ---
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   at System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   at MapService.Components.ActiveDirectoryLookup.GetGroups(String user) in C:\Projekt\varberg-hajk\backend\MapService\Components\ActiveDirectoryLookup.cs:line 41
+   at MapService.Controllers.ConfigController.GetUserGroups() in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 380
+   at MapService.Controllers.ConfigController.UserSpecificMaps() in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 403
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 461 
+FATAL 2018-01-15 08:22:23 System.DirectoryServices.AccountManagement.PrincipalOperationException: Ett åtgärdsfel inträffade.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: Ett åtgärdsfel inträffade.
+
+   at System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   at System.DirectoryServices.DirectoryEntry.Bind()
+   at System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   at System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   at System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- End of inner exception stack trace ---
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   at System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   at MapService.Components.ActiveDirectoryLookup.GetGroups(String user) in C:\Projekt\varberg-hajk\backend\MapService\Components\ActiveDirectoryLookup.cs:line 41
+   at MapService.Controllers.ConfigController.GetUserGroups() in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 380
+   at MapService.Controllers.ConfigController.UserSpecificMaps() in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 403
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 461 

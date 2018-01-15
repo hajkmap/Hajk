@@ -18,19 +18,21 @@ export default class ListProperties extends Component {
 	 * @param {*} properties 
 	 */
 	renderProperties(properties) {
+		console.log("props", this.props);
 		return (
 			properties.map((name) => {
-				return <li>{name}</li>
+				return <li key={name}>{name}</li>
 			})
 		);
 	}
 
 	render() {
-		if (this.props.show) {
+		if (!this.props.show) {
 			return (
 				<div>
-					<ul className="properties-list"> 
-						{this.renderProperties()}
+					<legend className="header-side">Tillgängliga AD-grupper</legend>
+					<ul className="details properties-list"> 
+						{this.renderProperties(this.props.properties)}
 					</ul>
 				</div>
 				
