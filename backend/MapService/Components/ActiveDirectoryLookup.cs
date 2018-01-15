@@ -27,8 +27,14 @@ namespace MapService.Components
 
         public string GetActiveUser()
         {
+            
             var activeUser = System.Security.Principal.WindowsIdentity.GetCurrent();
-            return activeUser.Name;
+            if (activeUser.ImpersonationLevel == System.Security.Principal.TokenImpersonationLevel.Impersonation)
+            {
+                return activeUser.Name;
+            }
+            else return String.Empty;
+            
         }
 
         //This method returns only the groups of which the principal is directly a member; no recursive searches are performed.

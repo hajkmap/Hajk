@@ -333,8 +333,20 @@ namespace MapService.Controllers
             return visibleForGroups;
         }
 
-        private List<ThemeMap> GetAllowedMapConfigurations(string[] userGroups)
+        private ThemeMap AddNewThemeMap (string fileName, string mapTitle)
         {
+            return new ThemeMap
+            {
+                mapConfigurationName = fileName,
+                mapConfigurationTitle = mapTitle.ToString()
+            };
+        }
+
+        private List<ThemeMap> GetAllowedMapConfigurations()
+        {
+            var parameters = GetLookupParameters();
+            var adLookup = new ActiveDirectoryLookup(parameters["ADdomain"], parameters["ADcontainer"], parameters["ADuser"], parameters["ADpassword"]);
+
             string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
             IEnumerable<string> files = Directory.EnumerateFiles(folder);
             List<ThemeMap> mapConfigurationsList = new List<ThemeMap>();
@@ -352,35 +364,37 @@ namespace MapService.Controllers
 
                         if (visibleForGroups != null && mapTitle != null)
                         {
-                            foreach (JToken group in visibleForGroups)
+                            if (visibleForGroups.First == null)
                             {
-                                if (Array.Exists(userGroups, g => g.Equals(group.ToString())))
+                                mapConfigurationsList.Add(AddNewThemeMap(fileName, mapTitle.ToString()));
+                            }
+                            else
+                            {
+                                var activeUser = adLookup.GetActiveUser();
+                                var userGroups = adLookup.GetGroups(activeUser);
+
+                                if (visibleForGroups.First.ToString() == "*")
                                 {
-                                    mapConfigurationsList.Add(new ThemeMap
+                                    mapConfigurationsList.Add(AddNewThemeMap(fileName, mapTitle.ToString()));
+                                }
+                                else
+                                {
+                                    foreach (JToken group in visibleForGroups)
                                     {
-                                        mapConfigurationName = fileName,
-                                        mapConfigurationTitle = mapTitle.ToString()
-                                    });
+                                        if (Array.Exists(userGroups, g => g.Equals(group.ToString())))
+                                        {
+                                            mapConfigurationsList.Add(AddNewThemeMap(fileName, mapTitle.ToString()));
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-
             return mapConfigurationsList;
         }
 
-        public string[] GetUserGroups()
-        {
-            var parameters = GetLookupParameters();
-            var adLookup = new ActiveDirectoryLookup(parameters["ADdomain"], parameters["ADcontainer"], parameters["ADuser"], parameters["ADpassword"]);
-
-            var activeUser = adLookup.GetActiveUser();
-            var userGroups = adLookup.GetGroups(activeUser);
-
-            return userGroups;
-        }
         /// <summary>
         /// Set required parameters for AD lookup to dictionary.
         /// </summary>
@@ -400,8 +414,7 @@ namespace MapService.Controllers
 
         public string UserSpecificMaps()
         {
-            var userGroups = GetUserGroups();
-            var allowedMapConfigurations = GetAllowedMapConfigurations(userGroups);
+            var allowedMapConfigurations = GetAllowedMapConfigurations();
 
 
             Response.Expires = 0;
