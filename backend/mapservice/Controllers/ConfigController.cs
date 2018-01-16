@@ -346,6 +346,8 @@ namespace MapService.Controllers
         {
             var parameters = GetLookupParameters();
             var adLookup = new ActiveDirectoryLookup(parameters["ADdomain"], parameters["ADcontainer"], parameters["ADuser"], parameters["ADpassword"]);
+            var activeUser = adLookup.GetActiveUser();
+            var userGroups = adLookup.GetGroups(activeUser);
 
             string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
             IEnumerable<string> files = Directory.EnumerateFiles(folder);
@@ -368,11 +370,9 @@ namespace MapService.Controllers
                             {
                                 mapConfigurationsList.Add(AddNewThemeMap(fileName, mapTitle.ToString()));
                             }
-                            else
-                            {
-                                var activeUser = adLookup.GetActiveUser();
-                                var userGroups = adLookup.GetGroups(activeUser);
 
+                            if(activeUser.Length != 0 && visibleForGroups.First != null)
+                            {
                                 if (visibleForGroups.First.ToString() == "*")
                                 {
                                     mapConfigurationsList.Add(AddNewThemeMap(fileName, mapTitle.ToString()));
