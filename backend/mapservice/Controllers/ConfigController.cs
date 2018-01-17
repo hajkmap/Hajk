@@ -291,19 +291,19 @@ namespace MapService.Controllers
             return title;
         }
 
-        private JToken GetJSONKeyValueFromLayerSwitcher(string mapConfigurationFile, string searchKey)
+        private JToken GetJSONKeyValueFromTool(string mapConfigurationFile, string searchKey, string tool)
         {
             var json = System.IO.File.ReadAllText(mapConfigurationFile);
             JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(json);
-            var layerSwitcher = mapConfiguration.SelectToken("$.tools[?(@.type == 'layerswitcher')]");
+            var layerSwitcher = mapConfiguration.SelectToken("$.tools[?(@.type == '" + tool +"')]");
             var keyValue = layerSwitcher.SelectToken("$.options."+searchKey);
 
             return keyValue;
         }
-        
-         private Boolean HasActiveDropDownThemeMap(string mapConfigurationFile)
+
+        private Boolean HasActiveDropDownThemeMap(string mapConfigurationFile)
         {
-            var dropdownThemeMaps = GetJSONKeyValueFromLayerSwitcher(mapConfigurationFile, "dropdownThemeMaps");
+            var dropdownThemeMaps = GetJSONKeyValueFromTool(mapConfigurationFile, "dropdownThemeMaps", "layerswitcher");
 
             if(dropdownThemeMaps == null)
             {
@@ -323,7 +323,7 @@ namespace MapService.Controllers
 
         private JToken GetVisibleForGroups (string mapConfigurationFile)
         {
-            var visibleForGroups = GetJSONKeyValueFromLayerSwitcher(mapConfigurationFile, "visibleForGroups");
+            var visibleForGroups = GetJSONKeyValueFromTool(mapConfigurationFile, "visibleForGroups", "layerswitcher");
 
             if (visibleForGroups == null)
             {
@@ -412,6 +412,7 @@ namespace MapService.Controllers
             return parameters;
         }
 
+
         public string UserSpecificMaps()
         {
             var allowedMapConfigurations = GetAllowedMapConfigurations();
@@ -468,7 +469,7 @@ namespace MapService.Controllers
                 {
                     return List("all");
                 }
-
+                
                 if (name.ToLower() == "userspecificmaps")
                 {
                     return UserSpecificMaps();
@@ -476,8 +477,54 @@ namespace MapService.Controllers
 
                 string file = String.Format("{0}App_Data\\{1}.json", HostingEnvironment.ApplicationPhysicalPath, name);
 
+
+
+
                 if (System.IO.File.Exists(file))
                 {
+                    
+                    var parameters = GetLookupParameters();
+                    var adLookup = new ActiveDirectoryLookup(parameters["ADdomain"], parameters["ADcontainer"], parameters["ADuser"], parameters["ADpassword"]);
+                    var activeUser = adLookup.GetActiveUser();
+                    if (activeUser.Length != 0 && name != "layers")
+                    {
+                        var json = System.IO.File.ReadAllText(file);
+
+                        var childrenToRemove = new List<string>();
+                        JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(json);
+                        var searchTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'search')]");
+                        var layersInSearchTool = searchTool.SelectToken("$.options.layers");
+
+
+                        
+                        foreach (JToken child in layersInSearchTool.Children())
+                        {
+                            var visibleForGroups = child.SelectToken("$.visibleForGroups");
+                            var userGroups = adLookup.GetGroups(activeUser);
+                            if (!Array.Exists(userGroups, g => g.Equals(visibleForGroups.ToString())))
+                            {
+                            childrenToRemove.Add(child.SelectToken("$.id").ToString());
+                            }
+                        }
+                        
+                        foreach (string id in childrenToRemove)
+                        {
+                            layersInSearchTool.SelectToken("$.[?(@.id=='" + id + "')]").Remove();
+                        }
+
+                        var stringedJson = mapConfiguration.ToString();
+
+                        return stringedJson;
+
+
+                    }
+                    var hej = 0;
+
+                    Response.Expires = 0;
+                    Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
+                    Response.ContentType = "application/json; charset=utf-8";
+                    Response.Headers.Add("Cache-Control", "private, no-cache");
+
                     return System.IO.File.ReadAllText(file);
                 }
                 else
