@@ -101,7 +101,7 @@
 
         if (mapLayer) {
           layer.drawOrder = mapLayer.drawOrder;
-          
+
           if(mapLayer.infoBox && mapLayer.infoBox.length != 0){
             layer = internal.overrideGlobalInfoBox(layer, mapLayer);
           }
@@ -136,6 +136,34 @@
     return filtered;
   };
 
+  internal.getADSpecificSearchLayers = function(){
+    $.ajax({
+      url: "/mapservice/config/ADspecificSearch",
+      method: 'GET',
+      contentType: 'application/json',
+      success: (data) => {
+  
+      },
+      error: (message) => {
+        callback(message);
+      }
+    });
+  }
+
+ /**
+   * Overrides global search configuration and uses layers specified in mapconfiguration to do a search
+   */
+  internal.overrideGlobalSearchConfig = function(searchTool, data) {
+
+    var configSpecificSearchLayers = searchTool.options.layers;
+    var searchLayers = data.wfslayers.map(layer => {
+      if(configSpecificSearchLayers.find(x => x.id == layer.id)){
+        return layer;
+      }
+    });
+
+    return searchLayers
+  };
   /**
    * Load config and start the application.
    * @memberof HAJK2
@@ -146,20 +174,28 @@
    */
   that.start = function (config, done) {
     function load_map (map_config) {
+      console.log(map_config,"MAPPP")
       var layers = $.getJSON(config.layersPath || layersPath);
 
       layers.done(data => {
+       console.log(data,"data")
         var layerSwitcherTool = map_config.tools.find(tool => {
           return tool.type === 'layerswitcher';
         });
-        console.log(map_config,"map_config")
+
         var searchTool = map_config.tools.find(tool => {
           return tool.type === 'search';
         });
-
+        console.log(searchTool.options.layers.length)
+        //internal.getADSpecificSearchLayers()
+        
+        if(searchTool.options.layers.length != 0 || searchTool.options.layers != null){
+          //data.wfslayers = internal.overrideGlobalSearchConfig(searchTool, data);
+        }
+      
         var editTool = map_config.tools.find(tool => {
           return tool.type === 'edit';
-        });
+        });   
 
         if (layerSwitcherTool) {
           let layers = [];
@@ -176,25 +212,17 @@
           _data.vectorlayers.forEach(l => l.type = 'vector');
           _data.arcgislayers.forEach(l => l.type = 'arcgis');
           _data.extendedwmslayers.forEach(l => l.type = 'extended_wms');
+          
           layers = data.wmslayers
           .concat(_data.extendedwmslayers)
           .concat(_data.wmtslayers)
           .concat(_data.vectorlayers)
           .concat(_data.arcgislayers);
 
-          console.log(layers,"layers")
+          
 
           map_config.layers = internal.filterByLayerSwitcher(layerSwitcherTool.options, layers);
-/*
-          var layers = layers.map(data => {
-            var localConfig = map_config.layers.find(layer => layer.id == x.id);
-            console.log(localConfig,"localConfig");
-          });
 
-*/
-
-
-          console.log(map_config.layers,"map_config.layers")
           map_config.layers.sort((a, b) => a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1);
         }
 
@@ -208,8 +236,8 @@
 
         internal.init(
         internal.mergeConfig(map_config, internal.parseQueryParams())
-      );
-
+        );
+        console.log(data,"data")
         if (done) done(true);
       })
       .fail(() => {
@@ -227,3 +255,11 @@
 
   return that;
 }()));
+
+/*
+          var layers = layers.map(data => {
+            var localConfig = map_config.layers.find(layer => layer.id == x.id);
+            console.log(localConfig,"localConfig");
+          });
+
+*/

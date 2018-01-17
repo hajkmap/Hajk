@@ -63,9 +63,11 @@ var SearchModel = {
 
   initialize: function (options) {
     ToolModel.prototype.initialize.call(this);
+    console.log("WASSAS")
   },
 
   configure: function (shell) {
+    
     this.set('layerCollection', shell.getLayerCollection());
     this.set('map', shell.getMap().getMap());
     this.featureLayer = new ol.layer.Vector({
@@ -300,6 +302,9 @@ var SearchModel = {
 
     var contentType = "text/xml"
     ,   data = str;
+
+
+    console.log(props.url,"propsUrl")
 
     this.requests.push(
       $.ajax({
@@ -584,8 +589,9 @@ var SearchModel = {
    * @return {Layer[]} layers
    */
   getLayers: function () {
-
+    
     var filter = (layer) => {
+      console.log(layer,"SearchLAYER")
       var criteria = this.get('filter');
       var visible  = this.get('filterVisibleActive');
       var searchable = layer.get('searchUrl');
@@ -778,6 +784,7 @@ var SearchModel = {
     ;
 
     function addRequest(searchProps) {
+      console.log(HAJK2.searchProxy,"hajkSearchProxy")
       promises.push(new Promise((resolve, reject) => {
         this.doWFSSearch({
           value: value,
@@ -824,6 +831,7 @@ var SearchModel = {
     layers.forEach(layer => {
 
       layer.get('params').LAYERS.split(',').forEach(featureType => {
+        
 
         var searchProps = {
           url: (HAJK2.searchProxy || "") + layer.get('searchUrl'),
