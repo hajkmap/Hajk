@@ -43,7 +43,8 @@ var defaultState = {
   anchorY: 32,
   imgSizeX: 32,
   imgSizeY: 32,
-  popupOffsetY: 0
+  popupOffsetY: 0,
+  searchableLayers: []
 };
 
 class ToolOptions extends Component {
@@ -92,6 +93,7 @@ class ToolOptions extends Component {
    *
    */
   componentWillMount() {
+	  
   }
 
   handleInputChange(event) {
@@ -326,6 +328,10 @@ class ToolOptions extends Component {
           <div>
             <label htmlFor="imgSizeY">Bildhöjd</label>
             <input value={this.state.imgSizeY} type="text" name="imgSizeY" onChange={(e) => {this.handleInputChange(e)}}></input>
+          </div>
+		  <div>
+            <label htmlFor="imgSizeY">Sökbara lager</label>
+            <input value={this.state.searchableLayers} type="text" name="imgSizeY" onChange={(e) => {this.handleInputChange(e)}}></input>
           </div>
         </form>
       </div>

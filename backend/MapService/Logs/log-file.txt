@@ -1065,3 +1065,66 @@ FATAL 2018-01-15 08:22:23 System.DirectoryServices.AccountManagement.PrincipalOp
    at MapService.Controllers.ConfigController.GetUserGroups() in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 380
    at MapService.Controllers.ConfigController.UserSpecificMaps() in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 403
    at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 461 
+FATAL 2018-01-17 12:55:04 System.DirectoryServices.AccountManagement.PrincipalOperationException: Ett åtgärdsfel inträffade.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: Ett åtgärdsfel inträffade.
+
+   at System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   at System.DirectoryServices.DirectoryEntry.Bind()
+   at System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   at System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   at System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- End of inner exception stack trace ---
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   at System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   at MapService.Components.ActiveDirectoryLookup.GetGroups(String user) in C:\Projekt\varberg-hajk\backend\MapService\Components\ActiveDirectoryLookup.cs:line 41
+   at MapService.Controllers.ConfigController.GetUserGroups() in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 380
+   at MapService.Controllers.ConfigController.UserSpecificMaps() in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 403
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 461 
+FATAL 2018-01-17 15:35:48 System.DirectoryServices.AccountManagement.PrincipalOperationException: Ett åtgärdsfel inträffade.
+ ---> System.DirectoryServices.DirectoryServicesCOMException: Ett åtgärdsfel inträffade.
+
+   at System.DirectoryServices.DirectoryEntry.Bind(Boolean throwIfFail)
+   at System.DirectoryServices.DirectoryEntry.Bind()
+   at System.DirectoryServices.DirectoryEntry.get_SchemaEntry()
+   at System.DirectoryServices.AccountManagement.ADStoreCtx.IsContainer(DirectoryEntry de)
+   at System.DirectoryServices.AccountManagement.ADStoreCtx..ctor(DirectoryEntry ctxBase, Boolean ownCtxBase, String username, String password, ContextOptions options)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.CreateContextFromDirectoryEntry(DirectoryEntry entry)
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   --- End of inner exception stack trace ---
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoLDAPDirectoryInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.DoDomainInit()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.Initialize()
+   at System.DirectoryServices.AccountManagement.PrincipalContext.get_QueryCtx()
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithTypeHelper(PrincipalContext context, Type principalType, Nullable`1 identityType, String identityValue, DateTime refDate)
+   at System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   at System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   at MapService.Components.ActiveDirectoryLookup.GetGroups(String user) in C:\Projekt\varberg-hajk\backend\MapService\Components\ActiveDirectoryLookup.cs:line 41
+   at MapService.Controllers.ConfigController.GetUserGroups() in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 380
+   at MapService.Controllers.ConfigController.UserSpecificMaps() in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 403
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 461 
+INFO 2018-01-17 15:38:26 Non-recursive AD-search used 
+ERROR 2018-01-17 15:38:27 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\TEsthowdyho.json has the 'dropDownThemeMap' key set to 'false'  
+FATAL 2018-01-18 14:16:04 System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 473 
+FATAL 2018-01-18 14:20:17 System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\varberg-hajk\backend\MapService\Controllers\ConfigController.cs:line 477 
+INFO 2018-01-18 14:21:56 Non-recursive AD-search used 
+INFO 2018-01-18 14:23:17 Non-recursive AD-search used 
+INFO 2018-01-18 14:27:37 Non-recursive AD-search used 
+INFO 2018-01-18 14:30:58 Non-recursive AD-search used 
+INFO 2018-01-18 14:33:40 Non-recursive AD-search used 
+INFO 2018-01-18 14:36:11 Non-recursive AD-search used 
+INFO 2018-01-18 14:36:24 Non-recursive AD-search used 
+INFO 2018-01-18 14:39:23 Non-recursive AD-search used 
+INFO 2018-01-18 14:47:47 Non-recursive AD-search used 
+INFO 2018-01-18 14:55:55 Non-recursive AD-search used 
+INFO 2018-01-18 14:56:10 Non-recursive AD-search used 
+INFO 2018-01-18 14:57:45 Non-recursive AD-search used 
+INFO 2018-01-18 15:00:28 Non-recursive AD-search used 

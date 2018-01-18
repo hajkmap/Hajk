@@ -247,21 +247,22 @@ class Menu extends Component {
   constructor() {
     super();
     var state = {
-	  adGroups: [],
-	  isHidden: true,
-      drawOrder: false,
-      layerMenu: true,
-      addedLayers: [],
-      maps: [],
-      active: true,
-      visibleAtStart: true,
-      backgroundSwitcherBlack: true,
-      backgroundSwitcherWhite: true,
-      toggleAllButton: false,
-	  	instruction: "",
-	  	dropdownThemeMaps: false,
-			themeMapHeaderCaption: "Temakartor",
-    	visibleForGroups: []
+		adGroups: [],
+		isHidden: false,
+		drawOrder: false,
+		layerMenu: true,
+		addedLayers: [],
+		maps: [],
+		active: true,
+		visibleAtStart: true,
+		backgroundSwitcherBlack: true,
+		backgroundSwitcherWhite: true,
+		toggleAllButton: false,
+		instruction: "",
+		dropdownThemeMaps: false,
+		themeMapHeaderCaption: "Temakartor",
+		visibleForGroups: [],
+		adList: null
     };
     this.state = state;
   }
@@ -270,21 +271,19 @@ class Menu extends Component {
    *
    */
   init() {
-
     this.props.model.set('config', this.props.config);
     this.load('maps');
 	this.load('layers');
-	// TODO: kontroll för installationer som ej aktiverat
-	// autentisering
-	if (true) {
-		this.fetchADGroups();
-	}
+	this.load('auth');
 	
-    this.props.model.on('change:urlMapConfig', () => {
+	
 
+    this.props.model.on('change:urlMapConfig', () => {
+	
       this.setState({
         reset: true
-      })
+	  })
+	  
 
       this.load('layermenu', () => {
         this.setState({
@@ -297,7 +296,7 @@ class Menu extends Component {
           instruction: this.props.model.get('layerMenuConfig').instruction,
           dropdownThemeMaps: this.props.model.get('layerMenuConfig').dropdownThemeMaps,
           themeMapHeaderCaption: this.props.model.get('layerMenuConfig').themeMapHeaderCaption,
-          visibleForGroups: this.props.model.get('layerMenuConfig').visibleForGroups
+		  visibleForGroups: this.props.model.get('layerMenuConfig').visibleForGroups
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -328,7 +327,10 @@ class Menu extends Component {
     });
 
     defaultState.layers = this.props.model.get('layers');
-    this.setState(defaultState);
+	this.setState(defaultState);
+	
+	
+
   }
 
   /**
@@ -379,6 +381,11 @@ class Menu extends Component {
    */
   load(type, callback) {
     switch(type) {
+	  case "auth":
+	  	this.props.model.getAuthSetting((auth) => {
+			this.fetchADGroups(auth);
+			this.setState({authActive: auth});
+		});
       case "maps":
         this.props.model.loadMaps(maps => {
           this.setState({
@@ -515,7 +522,6 @@ class Menu extends Component {
       }) :
       settings.groups.push(groupItem(root))
 	});
-	console.log("settings", settings);
     return settings;
   }
   /**
@@ -934,47 +940,106 @@ class Menu extends Component {
     });
   }
 
-  handleAuthGrpsChange(event) {
-    const target = event.target;
-    const value = target.value;
-    let groups = [];
-    
-    try {
-      groups = value.split(",");
-    } catch (error) {
-      console.log(`Någonting gick fel: ${error}`);
-    }
+	handleAuthGrpsChange(event) {
+		const target = event.target;
+		const value = target.value;
+		let groups = [];
 
-    this.setState({
-      visibleForGroups: groups
-    });  
-  }
+		try {
+			groups = value.split(",");
+		} catch (error) {
+			console.log(`Någonting gick fel: ${error}`);
+		}
 
-  /**
-   * Hantering för att visa tillgängliga 
-   * användargrupper då inmatningsfältet får focus
-   */
-  handleGroups () {
-    this.isHidden();
-  }
+		this.setState({
+			visibleForGroups: groups
+		});  
+	}
 
-  /**
-   * ber backenden om en lista över tillgängliga ad-grupper
-   */
-  fetchADGroups () {
-	console.log("anrop", this.props.model.fetchADGroups());
-	let groups = this.props.model.fetchADGroups();
-	
-	this.setState({adGroups: groups});
-  }
+	/**
+	 * ber backenden om en lista över tillgängliga ad-grupper
+	 */
+	fetchADGroups (auth) {
+		if (auth) {
+			this.props.model.fetchADGroups((grps) => {
+				console.log("grps: ", grps);
+				this.setState({adGroups: grps});
+			});
+		}
+	}
 
-  toggleHidden () {
-    this.setState({
-      isHidden: !this.state.isHidden
-    })
-  }
+	toggleHidden () {
+		this.setState({
+			isHidden: !this.state.isHidden
+		});
 
-  /**
+		this.setState({adList: <ListProperties properties={this.state.adGroups} show={this.state.isHidden} />});
+
+	}
+
+	// renderAdList() {
+	// 	if (this.state.authActive) {
+	// 		this.setState({propertiesList: <ListProperties properties={this.state.adGroups} show={this.state.isHidden} />}) ;
+	// 	} else {
+	// 	return null;
+	// 	}
+	// }
+  
+	renderAuthGrps () {
+		if (this.state.authActive) { 
+			return (
+				<div className="col-sm-12">
+					<label htmlFor="authGroups">Tillträde &nbsp;
+						<i className="fa fa-question-circle" data-toggle="tooltip" title="Ange AD-grupper separerade med kommatecken"></i>
+					</label>
+					<input id="authGroups" name="authGroups" type="text" onChange={(e)=> {this.handleAuthGrpsChange(e)}} value={this.state.visibleForGroups} />
+					<i className="fa fa-bars" data-toggle="tooltip" title="Visa tillgängliga AD-grupper" onClick={()=> {this.toggleHidden()}}></i>
+				</div>
+			);
+		} else {
+			return null;
+		}
+	}
+
+	renderThemeMapCheckbox () {
+		if (this.state.authActive) {
+			return (
+				<div className="row">
+					<div className="col-sm-1">
+					<input id="dropdownThemeMaps" 
+							name="dropdownThemeMaps" 
+							type="checkbox" 
+							onChange={(e)=> {this.handleInputChange(e)}} 
+							checked={this.state.dropdownThemeMaps} />&nbsp;
+					</div>
+					<label className="layer-menu-label-checkbox" htmlFor="dropdownThemeMaps">Visa lista över temakartor</label>
+				  </div>
+			);
+		} else {
+			return null;
+		}
+	}
+
+	renderThemeMapHeaderInput () {
+		if (this.state.authActive) {
+			return (
+				<div className="row">
+					<div className="col-sm-12">
+					  <label htmlFor="themeMapHeaderCaption">Rubriktext temakartor</label>
+					  <input id="themeMapHeaderCaption" 
+							 name="themeMapHeaderCaption" 
+							 type="text" value={this.state.themeMapHeaderCaption} 
+							 onChange={(e)=> { this.setState({ 'themeMapHeaderCaption': e.target.value }); }} />
+					</div>
+				</div>
+			);
+		} else {
+			return null;
+		}
+		
+	}
+  
+  /** 
    *
    */
   renderArticleContent() {
@@ -1066,25 +1131,8 @@ class Menu extends Component {
                 </div>
                 <label className="layer-menu-label-checkbox" htmlFor="toggleAllButton">Släck alla lager-knapp</label>
               </div>
-              <div className="row">
-                <div className="col-sm-1">
-                  <input id="dropdownThemeMaps" 
-                         name="dropdownThemeMaps" 
-                         type="checkbox" 
-                         onChange={(e)=> {this.handleInputChange(e)}} 
-                         checked={this.state.dropdownThemeMaps} />&nbsp;
-                </div>
-                <label className="layer-menu-label-checkbox" htmlFor="dropdownThemeMaps">Visa lista över temakartor</label>
-              </div>
-              <div className="row">
-                <div className="col-sm-12">
-                  <label htmlFor="themeMapHeaderCaption">Rubriktext temakartor</label>
-                  <input id="themeMapHeaderCaption" 
-                         name="themeMapHeaderCaption" 
-                         type="text" value={this.state.themeMapHeaderCaption} 
-                         onChange={(e)=> { this.setState({ 'themeMapHeaderCaption': e.target.value }); }} />
-                </div>
-              </div>
+             	{this.renderThemeMapCheckbox()}
+				{this.renderThemeMapHeaderInput()}
               <div className="row">
                 <div className="col-sm-12">
                   <label htmlFor="instruction">Instruktion</label>
@@ -1096,26 +1144,19 @@ class Menu extends Component {
                 </div>
               </div>
               <div className="row">
-                <div className="col-sm-12">
-                  <label htmlFor="authGroups">Tillträde &nbsp;
-                    <i className="fa fa-question-circle" data-toggle="tooltip" title="Ange AD-grupper separerade med kommatecken"></i>
-                  </label>
-                  <input id="authGroups" 
-                         name="authGroups" 
-						 type="text" 
-                         onChange={(e)=> {this.handleAuthGrpsChange(e)}} 
-                          value={this.state.visibleForGroups} />
-				   <i className="fa fa-bars" data-toggle="tooltip" title="Visa tillgängliga AD-grupper" onClick={() => {this.toggleHidden()}}></i>
-                </div>
+                {this.renderAuthGrps()}
               </div>
               {this.renderLayerMenu()}
             </fieldset>
           </article>
-		  <ListProperties properties={this.state.adGroups} show={this.state.isHidden} />
+		  {this.state.adList}
         </div>
       )
     }
   }
+
+
+
 
   /**
    *

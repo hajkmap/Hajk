@@ -12,15 +12,17 @@ export default class ListProperties extends Component {
 		this.state = defaultState;
 	}
 
+	componentDidMount () {
+		this.setState({properties: this.props.properties});
+	}
 	/**
 	 * Kräver en string-array och returnerar list
 	 * items för varje plats i arrayen
 	 * @param {*} properties 
 	 */
-	renderProperties(properties) {
-		console.log("props", this.props);
+	renderProperties() {
 		return (
-			properties.map((name) => {
+			this.state.properties.map((name) => {
 				return <li key={name}>{name}</li>
 			})
 		);
@@ -35,7 +37,6 @@ export default class ListProperties extends Component {
 						{this.renderProperties(this.props.properties)}
 					</ul>
 				</div>
-				
 			);
 		} else {
 			return (

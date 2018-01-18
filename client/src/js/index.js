@@ -135,7 +135,8 @@
    */
   that.start = function (config, done) {
     function load_map (map_config) {
-      var layers = $.getJSON(config.layersPath || layersPath);
+	  var layers = $.getJSON(config.layersPath || layersPath);
+	  console.log(layers);
       layers.done(data => {
         var layerSwitcherTool = map_config.tools.find(tool => {
           return tool.type === 'layerswitcher';

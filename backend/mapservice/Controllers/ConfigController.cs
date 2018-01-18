@@ -379,8 +379,14 @@ namespace MapService.Controllers
             var activeUser = adLookup.GetActiveUser();
             var userGroups = adLookup.GetGroups(activeUser);
 
+			Response.Expires = 0;
+            Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
+            Response.ContentType = "text/html; charset=utf-8";
+            Response.Headers.Add("Cache-Control", "private, no-cache");
+
             return userGroups;
         }
+		
         /// <summary>
         /// Set required parameters for AD lookup to dictionary.
         /// </summary>
@@ -402,7 +408,6 @@ namespace MapService.Controllers
         {
             var userGroups = GetUserGroups();
             var allowedMapConfigurations = GetAllowedMapConfigurations(userGroups);
-
 
             Response.Expires = 0;
             Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
@@ -459,6 +464,13 @@ namespace MapService.Controllers
                 if (name.ToLower() == "userspecificmaps")
                 {
                     return UserSpecificMaps();
+                }
+
+                if (name.ToLower() == "getusergroups")
+                {
+                    var groups = GetUserGroups();
+                    
+                    return string.Join(", ", groups);
                 }
 
                 string file = String.Format("{0}App_Data\\{1}.json", HostingEnvironment.ApplicationPhysicalPath, name);

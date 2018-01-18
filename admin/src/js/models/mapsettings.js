@@ -116,17 +116,35 @@ var menu = Model.extend({
 	},
 
 	fetchADGroups: function (callback) {
-		// $.ajax({
-		// 	url: "",
+
+		// loadThemeMaps: function (callback) {
+		// 	$.ajax({
+		// 	url: "/mapservice/config/userspecificmaps",
 		// 	method: 'GET',
-		// 	success: (groups) => {
-		// 		callback(groups);
+		// 	contentType: 'application/json',
+		// 	success: (data) => {
+		// 	callback(data);
 		// 	},
-		// 	error: () => {
-				
+		// 	error: (message) => {
+		// 	callback(message);
 		// 	}
-		// })
-		return ["Grupp 1", "Grupp 2", "Grupp 3", "Grupp 4", "Grupp 5"];
+		// 	});
+		// 	}, 
+			
+		$.ajax({
+			url: "/mapservice/config/getusergroups",
+			method: 'GET',
+			success: (data) => {
+				let g = data.split(",");
+				let array = g.map(Function.prototype.call, String.prototype.trim)
+				console.log("array:", array);
+				return array;
+			},
+			error: (err) => {
+				console.log("Fel: ", err);
+			}
+		})
+		//return ;
 	},
 
 	updateConfig: function (config, callback) {
@@ -163,6 +181,10 @@ var menu = Model.extend({
 		findInGroups(this.get('layerMenuConfig').groups, id);
 
 		return layer;
+	},
+
+	getAuthSetting: function (callback) {
+		callback(this.get('config').authentication_active);
 	},
 
 	getConfig: function (url, callback) {

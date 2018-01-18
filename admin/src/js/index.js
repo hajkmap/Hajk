@@ -58,7 +58,7 @@ find.shim();
     var application_element = React.createElement(ApplicationView, {
       model: application_model,
       tabs: config.router,
-      config: config
+	  config: config
     });
 
     var router = Router.extend(create_routes(config.router, application_model));
