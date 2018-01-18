@@ -28,6 +28,7 @@
  */
 (global.HAJK2 = (function () {
   'use strict';
+  
   var ApplicationView = require('views/application'),
     cssModifier = require('utils/cssmodifier'),
     configPath = '/mapservice/settings/config/map_1',
@@ -132,7 +133,6 @@
       f(config.groups, layer);
     });
 
-    console.log(filtered,"filtered")
     return filtered;
   };
 
@@ -161,8 +161,7 @@
         return layer;
       }
     });
-
-    return searchLayers
+      return searchLayers  
   };
   /**
    * Load config and start the application.
@@ -174,11 +173,10 @@
    */
   that.start = function (config, done) {
     function load_map (map_config) {
-      console.log(map_config,"MAPPP")
+
       var layers = $.getJSON(config.layersPath || layersPath);
 
       layers.done(data => {
-       console.log(data,"data")
         var layerSwitcherTool = map_config.tools.find(tool => {
           return tool.type === 'layerswitcher';
         });
@@ -186,12 +184,6 @@
         var searchTool = map_config.tools.find(tool => {
           return tool.type === 'search';
         });
-        console.log(searchTool.options.layers.length)
-        //internal.getADSpecificSearchLayers()
-        
-        if(searchTool.options.layers.length != 0 || searchTool.options.layers != null){
-          //data.wfslayers = internal.overrideGlobalSearchConfig(searchTool, data);
-        }
       
         var editTool = map_config.tools.find(tool => {
           return tool.type === 'edit';
@@ -218,9 +210,8 @@
           .concat(_data.wmtslayers)
           .concat(_data.vectorlayers)
           .concat(_data.arcgislayers);
-
-          
-
+ 
+         
           map_config.layers = internal.filterByLayerSwitcher(layerSwitcherTool.options, layers);
 
           map_config.layers.sort((a, b) => a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1);
@@ -228,6 +219,18 @@
 
         if (searchTool) {
           searchTool.options.sources = data.wfslayers;
+
+          if(searchTool.options.layers == null){
+            data.wfslayers = [];
+            searchTool.options.sources = [];
+          }
+          else {
+            if(searchTool.options.layers.length != 0 ){ 
+              var wfslayers = internal.overrideGlobalSearchConfig(searchTool, data);
+              searchTool.options.sources = wfslayers;
+              data.wfslayers = wfslayers;
+            }
+          }
         }
 
         if (editTool) {
@@ -237,7 +240,6 @@
         internal.init(
         internal.mergeConfig(map_config, internal.parseQueryParams())
         );
-        console.log(data,"data")
         if (done) done(true);
       })
       .fail(() => {
@@ -256,10 +258,3 @@
   return that;
 }()));
 
-/*
-          var layers = layers.map(data => {
-            var localConfig = map_config.layers.find(layer => layer.id == x.id);
-            console.log(localConfig,"localConfig");
-          });
-
-*/

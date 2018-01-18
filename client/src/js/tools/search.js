@@ -63,7 +63,6 @@ var SearchModel = {
 
   initialize: function (options) {
     ToolModel.prototype.initialize.call(this);
-    console.log("WASSAS")
   },
 
   configure: function (shell) {
@@ -591,7 +590,6 @@ var SearchModel = {
   getLayers: function () {
     
     var filter = (layer) => {
-      console.log(layer,"SearchLAYER")
       var criteria = this.get('filter');
       var visible  = this.get('filterVisibleActive');
       var searchable = layer.get('searchUrl');
@@ -784,7 +782,6 @@ var SearchModel = {
     ;
 
     function addRequest(searchProps) {
-      console.log(HAJK2.searchProxy,"hajkSearchProxy")
       promises.push(new Promise((resolve, reject) => {
         this.doWFSSearch({
           value: value,
