@@ -413,10 +413,9 @@ namespace MapService.Controllers
         }
 
 
-        public string UserSpecificMaps()
+        private string UserSpecificMaps()
         {
             var allowedMapConfigurations = GetAllowedMapConfigurations();
-
 
             Response.Expires = 0;
             Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
@@ -451,6 +450,48 @@ namespace MapService.Controllers
             return JsonConvert.SerializeObject(fileList);
         }
 
+        private string FilterSearchLayersByAD (ActiveDirectoryLookup adLookup, JToken mapConfiguration, string activeUser)
+        {
+                var childrenToRemove = new List<string>();  
+                var searchTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'search')]");
+                var layersInSearchTool = searchTool.SelectToken("$.options.layers");
+                var userGroups = adLookup.GetGroups(activeUser);
+
+                foreach (JToken child in layersInSearchTool.Children())
+                {
+                    var visibleForGroups = child.SelectToken("$.visibleForGroups");
+                    bool removeChild = true;
+                    foreach(string user in userGroups)
+                    {
+                        foreach(string group in visibleForGroups)
+                        {
+                            if (user.Equals(group))
+                            {
+                            removeChild = false;
+                            }
+                        }    
+                    }
+                    if (removeChild)
+                    {
+                        childrenToRemove.Add(child.SelectToken("$.id").ToString());
+                    }
+                
+                }
+
+                foreach (string id in childrenToRemove)
+                {
+                    layersInSearchTool.SelectToken("$.[?(@.id=='" + id + "')]").Remove();
+                }
+
+            //NULL if User is not allowed to any searchlayer because empty array means use of global searchconfig
+            if (!layersInSearchTool.HasValues)
+            {
+                layersInSearchTool.Replace(null);
+            }
+                
+                return mapConfiguration.ToString();
+            }
+
         public string GetConfig(string name)
         {
             try
@@ -477,55 +518,30 @@ namespace MapService.Controllers
 
                 string file = String.Format("{0}App_Data\\{1}.json", HostingEnvironment.ApplicationPhysicalPath, name);
 
-
-
-
                 if (System.IO.File.Exists(file))
                 {
-                    
                     var parameters = GetLookupParameters();
                     var adLookup = new ActiveDirectoryLookup(parameters["ADdomain"], parameters["ADcontainer"], parameters["ADuser"], parameters["ADpassword"]);
                     var activeUser = adLookup.GetActiveUser();
+
                     if (activeUser.Length != 0 && name != "layers")
                     {
-                        var json = System.IO.File.ReadAllText(file);
-
-                        var childrenToRemove = new List<string>();
-                        JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(json);
+                        JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(System.IO.File.ReadAllText(file));
                         var searchTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'search')]");
-                        var layersInSearchTool = searchTool.SelectToken("$.options.layers");
 
-
-                        
-                        foreach (JToken child in layersInSearchTool.Children())
+                        if(searchTool != null)
                         {
-                            var visibleForGroups = child.SelectToken("$.visibleForGroups");
-                            var userGroups = adLookup.GetGroups(activeUser);
-                            if (!Array.Exists(userGroups, g => g.Equals(visibleForGroups.ToString())))
-                            {
-                            childrenToRemove.Add(child.SelectToken("$.id").ToString());
-                            }
+                            return FilterSearchLayersByAD(adLookup, mapConfiguration, activeUser);
                         }
-                        
-                        foreach (string id in childrenToRemove)
+                        else
                         {
-                            layersInSearchTool.SelectToken("$.[?(@.id=='" + id + "')]").Remove();
-                        }
-
-                        var stringedJson = mapConfiguration.ToString();
-
-                        return stringedJson;
-
-
+                            return System.IO.File.ReadAllText(file);
+                        }                     
                     }
-                    var hej = 0;
-
-                    Response.Expires = 0;
-                    Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
-                    Response.ContentType = "application/json; charset=utf-8";
-                    Response.Headers.Add("Cache-Control", "private, no-cache");
-
-                    return System.IO.File.ReadAllText(file);
+                    else
+                    {
+                        return System.IO.File.ReadAllText(file);
+                    }                 
                 }
                 else
                 {
