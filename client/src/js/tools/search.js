@@ -66,6 +66,7 @@ var SearchModel = {
   },
 
   configure: function (shell) {
+    
     this.set('layerCollection', shell.getLayerCollection());
     this.set('map', shell.getMap().getMap());
     this.featureLayer = new ol.layer.Vector({
@@ -300,6 +301,9 @@ var SearchModel = {
 
     var contentType = "text/xml"
     ,   data = str;
+
+
+    console.log(props.url,"propsUrl")
 
     this.requests.push(
       $.ajax({
@@ -584,7 +588,7 @@ var SearchModel = {
    * @return {Layer[]} layers
    */
   getLayers: function () {
-
+    
     var filter = (layer) => {
       var criteria = this.get('filter');
       var visible  = this.get('filterVisibleActive');
@@ -824,6 +828,7 @@ var SearchModel = {
     layers.forEach(layer => {
 
       layer.get('params').LAYERS.split(',').forEach(featureType => {
+        
 
         var searchProps = {
           url: (HAJK2.searchProxy || "") + layer.get('searchUrl'),

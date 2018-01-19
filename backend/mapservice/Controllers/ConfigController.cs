@@ -291,19 +291,19 @@ namespace MapService.Controllers
             return title;
         }
 
-        private JToken GetJSONKeyValueFromLayerSwitcher(string mapConfigurationFile, string searchKey)
+        private JToken GetJSONKeyValueFromTool(string mapConfigurationFile, string searchKey, string tool)
         {
             var json = System.IO.File.ReadAllText(mapConfigurationFile);
             JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(json);
-            var layerSwitcher = mapConfiguration.SelectToken("$.tools[?(@.type == 'layerswitcher')]");
+            var layerSwitcher = mapConfiguration.SelectToken("$.tools[?(@.type == '" + tool +"')]");
             var keyValue = layerSwitcher.SelectToken("$.options."+searchKey);
 
             return keyValue;
         }
-        
-         private Boolean HasActiveDropDownThemeMap(string mapConfigurationFile)
+
+        private Boolean HasActiveDropDownThemeMap(string mapConfigurationFile)
         {
-            var dropdownThemeMaps = GetJSONKeyValueFromLayerSwitcher(mapConfigurationFile, "dropdownThemeMaps");
+            var dropdownThemeMaps = GetJSONKeyValueFromTool(mapConfigurationFile, "dropdownThemeMaps", "layerswitcher");
 
             if(dropdownThemeMaps == null)
             {
@@ -323,7 +323,7 @@ namespace MapService.Controllers
 
         private JToken GetVisibleForGroups (string mapConfigurationFile)
         {
-            var visibleForGroups = GetJSONKeyValueFromLayerSwitcher(mapConfigurationFile, "visibleForGroups");
+            var visibleForGroups = GetJSONKeyValueFromTool(mapConfigurationFile, "visibleForGroups", "layerswitcher");
 
             if (visibleForGroups == null)
             {
@@ -333,8 +333,22 @@ namespace MapService.Controllers
             return visibleForGroups;
         }
 
-        private List<ThemeMap> GetAllowedMapConfigurations(string[] userGroups)
+        private ThemeMap AddNewThemeMap (string fileName, string mapTitle)
         {
+            return new ThemeMap
+            {
+                mapConfigurationName = fileName,
+                mapConfigurationTitle = mapTitle.ToString()
+            };
+        }
+
+        private List<ThemeMap> GetAllowedMapConfigurations()
+        {
+            var parameters = GetLookupParameters();
+            var adLookup = new ActiveDirectoryLookup(parameters["ADdomain"], parameters["ADcontainer"], parameters["ADuser"], parameters["ADpassword"]);
+            var activeUser = adLookup.GetActiveUser();
+            var userGroups = adLookup.GetGroups(activeUser);
+
             string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
             IEnumerable<string> files = Directory.EnumerateFiles(folder);
             List<ThemeMap> mapConfigurationsList = new List<ThemeMap>();
@@ -352,22 +366,32 @@ namespace MapService.Controllers
 
                         if (visibleForGroups != null && mapTitle != null)
                         {
-                            foreach (JToken group in visibleForGroups)
+                            if (visibleForGroups.First == null)
                             {
-                                if (Array.Exists(userGroups, g => g.Equals(group.ToString())))
+                                mapConfigurationsList.Add(AddNewThemeMap(fileName, mapTitle.ToString()));
+                            }
+
+                            if(activeUser.Length != 0 && visibleForGroups.First != null)
+                            {
+                                if (visibleForGroups.First.ToString() == "*")
                                 {
-                                    mapConfigurationsList.Add(new ThemeMap
+                                    mapConfigurationsList.Add(AddNewThemeMap(fileName, mapTitle.ToString()));
+                                }
+                                else
+                                {
+                                    foreach (JToken group in visibleForGroups)
                                     {
-                                        mapConfigurationName = fileName,
-                                        mapConfigurationTitle = mapTitle.ToString()
-                                    });
+                                        if (Array.Exists(userGroups, g => g.Equals(group.ToString())))
+                                        {
+                                            mapConfigurationsList.Add(AddNewThemeMap(fileName, mapTitle.ToString()));
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-
             return mapConfigurationsList;
         }
 
@@ -404,10 +428,10 @@ namespace MapService.Controllers
             return parameters;
         }
 
-        public string UserSpecificMaps()
+
+        private string UserSpecificMaps()
         {
-            var userGroups = GetUserGroups();
-            var allowedMapConfigurations = GetAllowedMapConfigurations(userGroups);
+            var allowedMapConfigurations = GetAllowedMapConfigurations();
 
             Response.Expires = 0;
             Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
@@ -442,6 +466,48 @@ namespace MapService.Controllers
             return JsonConvert.SerializeObject(fileList);
         }
 
+        private string FilterSearchLayersByAD (ActiveDirectoryLookup adLookup, JToken mapConfiguration, string activeUser)
+        {
+                var childrenToRemove = new List<string>();  
+                var searchTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'search')]");
+                var layersInSearchTool = searchTool.SelectToken("$.options.layers");
+                var userGroups = adLookup.GetGroups(activeUser);
+
+                foreach (JToken child in layersInSearchTool.Children())
+                {
+                    var visibleForGroups = child.SelectToken("$.visibleForGroups");
+                    bool removeChild = true;
+                    foreach(string user in userGroups)
+                    {
+                        foreach(string group in visibleForGroups)
+                        {
+                            if (user.Equals(group))
+                            {
+                            removeChild = false;
+                            }
+                        }    
+                    }
+                    if (removeChild)
+                    {
+                        childrenToRemove.Add(child.SelectToken("$.id").ToString());
+                    }
+                
+                }
+
+                foreach (string id in childrenToRemove)
+                {
+                    layersInSearchTool.SelectToken("$.[?(@.id=='" + id + "')]").Remove();
+                }
+
+            //NULL if User is not allowed to any searchlayer because empty array means use of global searchconfig
+            if (!layersInSearchTool.HasValues)
+            {
+                layersInSearchTool.Replace(null);
+            }
+                
+                return mapConfiguration.ToString();
+            }
+
         public string GetConfig(string name)
         {
             try
@@ -460,7 +526,7 @@ namespace MapService.Controllers
                 {
                     return List("all");
                 }
-
+                
                 if (name.ToLower() == "userspecificmaps")
                 {
                     return UserSpecificMaps();
@@ -477,7 +543,28 @@ namespace MapService.Controllers
 
                 if (System.IO.File.Exists(file))
                 {
-                    return System.IO.File.ReadAllText(file);
+                    var parameters = GetLookupParameters();
+                    var adLookup = new ActiveDirectoryLookup(parameters["ADdomain"], parameters["ADcontainer"], parameters["ADuser"], parameters["ADpassword"]);
+                    var activeUser = adLookup.GetActiveUser();
+
+                    if (activeUser.Length != 0 && name != "layers")
+                    {
+                        JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(System.IO.File.ReadAllText(file));
+                        var searchTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'search')]");
+
+                        if(searchTool != null)
+                        {
+                            return FilterSearchLayersByAD(adLookup, mapConfiguration, activeUser);
+                        }
+                        else
+                        {
+                            return System.IO.File.ReadAllText(file);
+                        }                     
+                    }
+                    else
+                    {
+                        return System.IO.File.ReadAllText(file);
+                    }                 
                 }
                 else
                 {

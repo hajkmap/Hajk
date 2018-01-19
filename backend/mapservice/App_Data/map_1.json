@@ -214,7 +214,7 @@
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Rubrik temakarta",
         "visibleForGroups": [
-          "Office-SEKSD01",
+          "Office-SEGOT01",
           "Grupphaha",
           "Grupp3"
         ]
@@ -224,14 +224,20 @@
     {
       "type": "search",
       "options": {
-        "onMap": false,
-        "toolbar": "bottom",
+        "onMap": true,
+        "toolbar": "",
         "maxZoom": 15,
         "markerImg": "http://localhost/hajk/assets/icons/marker.png",
         "kmlExportUrl": "/mapservice/export/kml",
         "excelExportUrl": "/mapservice/export/excel",
         "displayPopup": true,
         "selectionTools": true,
+        "layers" : [
+          {
+            "id" : "46",
+            "visibleForGroups" : []
+          }
+        ],
         "anchor": [
           16,
           32

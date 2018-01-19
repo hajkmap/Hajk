@@ -28,6 +28,7 @@
  */
 (global.HAJK2 = (function () {
   'use strict';
+  
   var ApplicationView = require('views/application'),
     cssModifier = require('utils/cssmodifier'),
     configPath = '/mapservice/settings/config/map_1',
@@ -89,6 +90,11 @@
     return a;
   };
 
+  internal.overrideGlobalInfoBox = function (layer, mapLayer){
+    layer.infobox = mapLayer.infoBox;
+    return layer;
+  }
+
   internal.filterByLayerSwitcher = function (config, layers) {
     function f (groups, layer) {
       groups.forEach(group => {
@@ -96,6 +102,11 @@
 
         if (mapLayer) {
           layer.drawOrder = mapLayer.drawOrder;
+
+          if(mapLayer.infoBox && mapLayer.infoBox.length != 0){
+            layer = internal.overrideGlobalInfoBox(layer, mapLayer);
+          }
+          
           if (layer.visibleAtStart !== undefined) {
             layer.visibleAtStart = mapLayer.visibleAtStart;
           }
@@ -125,6 +136,33 @@
     return filtered;
   };
 
+  internal.getADSpecificSearchLayers = function(){
+    $.ajax({
+      url: "/mapservice/config/ADspecificSearch",
+      method: 'GET',
+      contentType: 'application/json',
+      success: (data) => {
+  
+      },
+      error: (message) => {
+        callback(message);
+      }
+    });
+  }
+
+ /**
+   * Overrides global search configuration and uses layers specified in mapconfiguration to do a search
+   */
+  internal.overrideGlobalSearchConfig = function(searchTool, data) {
+
+    var configSpecificSearchLayers = searchTool.options.layers;
+    var searchLayers = data.wfslayers.map(layer => {
+      if(configSpecificSearchLayers.find(x => x.id == layer.id)){
+        return layer;
+      }
+    });
+      return searchLayers  
+  };
   /**
    * Load config and start the application.
    * @memberof HAJK2
@@ -135,8 +173,9 @@
    */
   that.start = function (config, done) {
     function load_map (map_config) {
-	  var layers = $.getJSON(config.layersPath || layersPath);
-	  console.log(layers);
+
+      var layers = $.getJSON(config.layersPath || layersPath);
+
       layers.done(data => {
         var layerSwitcherTool = map_config.tools.find(tool => {
           return tool.type === 'layerswitcher';
@@ -145,10 +184,10 @@
         var searchTool = map_config.tools.find(tool => {
           return tool.type === 'search';
         });
-
+      
         var editTool = map_config.tools.find(tool => {
           return tool.type === 'edit';
-        });
+        });   
 
         if (layerSwitcherTool) {
           let layers = [];
@@ -165,18 +204,31 @@
           _data.vectorlayers.forEach(l => l.type = 'vector');
           _data.arcgislayers.forEach(l => l.type = 'arcgis');
           _data.extendedwmslayers.forEach(l => l.type = 'extended_wms');
+          
           layers = data.wmslayers
           .concat(_data.extendedwmslayers)
           .concat(_data.wmtslayers)
           .concat(_data.vectorlayers)
           .concat(_data.arcgislayers);
-
           map_config.layers = internal.filterByLayerSwitcher(layerSwitcherTool.options, layers);
+
           map_config.layers.sort((a, b) => a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1);
         }
 
         if (searchTool) {
           searchTool.options.sources = data.wfslayers;
+
+          if(searchTool.options.layers == null){
+            data.wfslayers = [];
+            searchTool.options.sources = [];
+          }
+          else {
+            if(searchTool.options.layers.length != 0 ){ 
+              var wfslayers = internal.overrideGlobalSearchConfig(searchTool, data);
+              searchTool.options.sources = wfslayers;
+              data.wfslayers = wfslayers;
+            }
+          }
         }
 
         if (editTool) {
@@ -185,8 +237,7 @@
 
         internal.init(
         internal.mergeConfig(map_config, internal.parseQueryParams())
-      );
-
+        );
         if (done) done(true);
       })
       .fail(() => {
@@ -204,3 +255,4 @@
 
   return that;
 }()));
+
