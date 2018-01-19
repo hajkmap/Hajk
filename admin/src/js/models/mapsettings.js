@@ -115,22 +115,7 @@ var menu = Model.extend({
 		});
 	},
 
-	fetchADGroups: function (callback) {
-
-		// loadThemeMaps: function (callback) {
-		// 	$.ajax({
-		// 	url: "/mapservice/config/userspecificmaps",
-		// 	method: 'GET',
-		// 	contentType: 'application/json',
-		// 	success: (data) => {
-		// 	callback(data);
-		// 	},
-		// 	error: (message) => {
-		// 	callback(message);
-		// 	}
-		// 	});
-		// 	}, 
-			
+	fetchADGroups: function (callback) {		
 		$.ajax({
 			url: "/mapservice/config/getusergroups",
 			method: 'GET',
@@ -138,13 +123,12 @@ var menu = Model.extend({
 				let g = data.split(",");
 				let array = g.map(Function.prototype.call, String.prototype.trim)
 				console.log("array:", array);
-				return array;
+				callback(array);
 			},
 			error: (err) => {
 				console.log("Fel: ", err);
 			}
 		})
-		//return ;
 	},
 
 	updateConfig: function (config, callback) {
@@ -184,6 +168,7 @@ var menu = Model.extend({
 	},
 
 	getAuthSetting: function (callback) {
+		console.log("run plz");
 		callback(this.get('config').authentication_active);
 	},
 

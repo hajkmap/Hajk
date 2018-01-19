@@ -248,7 +248,7 @@ class Menu extends Component {
     super();
     var state = {
 		adGroups: [],
-		isHidden: false,
+		isHidden: true,
 		drawOrder: false,
 		layerMenu: true,
 		addedLayers: [],
@@ -273,8 +273,8 @@ class Menu extends Component {
   init() {
     this.props.model.set('config', this.props.config);
     this.load('maps');
-	this.load('layers');
-	this.load('auth');
+	  this.load('layers');
+	  this.load('auth');
 	
 	
 
@@ -381,9 +381,11 @@ class Menu extends Component {
    */
   load(type, callback) {
     switch(type) {
-	  case "auth":
+    case "auth":
+    console.log("getAuthSetting??", this.props.model);
 	  	this.props.model.getAuthSetting((auth) => {
-			this.fetchADGroups(auth);
+        console.log("auth", auth);
+			//this.fetchADGroups(auth);
 			this.setState({authActive: auth});
 		});
       case "maps":
@@ -971,19 +973,20 @@ class Menu extends Component {
 	toggleHidden () {
 		this.setState({
 			isHidden: !this.state.isHidden
-		});
-
-		this.setState({adList: <ListProperties properties={this.state.adGroups} show={this.state.isHidden} />});
-
+    });
+    this.renderAdList();
 	}
 
-	// renderAdList() {
-	// 	if (this.state.authActive) {
-	// 		this.setState({propertiesList: <ListProperties properties={this.state.adGroups} show={this.state.isHidden} />}) ;
-	// 	} else {
-	// 	return null;
-	// 	}
-	// }
+	renderAdList() {
+    if (this.state.authActive) {
+      this.props.model.fetchADGroups((grps) => {
+        this.setState({adGroups: grps});
+        console.log("grps callbakc", this.state.adGroups);
+
+        this.setState({adList: <ListProperties properties={this.state.adGroups} show={this.state.isHidden} />})
+      });
+    }
+	}
   
 	renderAuthGrps () {
 		if (this.state.authActive) { 
@@ -1131,8 +1134,8 @@ class Menu extends Component {
                 </div>
                 <label className="layer-menu-label-checkbox" htmlFor="toggleAllButton">Släck alla lager-knapp</label>
               </div>
-             	{this.renderThemeMapCheckbox()}
-				{this.renderThemeMapHeaderInput()}
+              {this.renderThemeMapCheckbox()}
+              {this.renderThemeMapHeaderInput()}
               <div className="row">
                 <div className="col-sm-12">
                   <label htmlFor="instruction">Instruktion</label>
@@ -1149,7 +1152,7 @@ class Menu extends Component {
               {this.renderLayerMenu()}
             </fieldset>
           </article>
-		  {this.state.adList}
+		      {this.state.adList}
         </div>
       )
     }
