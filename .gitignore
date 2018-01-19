@@ -13,3 +13,4 @@ admin/package-lock.json
 client.zip
 lmproxy
 proxy/HTTPProxy/Proxy/Properties/PublishProfiles
+backend/mapservice/Web.config
