@@ -214,9 +214,8 @@
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Rubrik temakarta",
         "visibleForGroups": [
-          "Office-SEGOT01",
-          "Grupphaha",
-          "Grupp3"
+          "Office-SEKSD01",
+          "All-SE129"
         ]
       },
       "index": 0
@@ -232,10 +231,10 @@
         "excelExportUrl": "/mapservice/export/excel",
         "displayPopup": true,
         "selectionTools": true,
-        "layers" : [
+        "layers": [
           {
-            "id" : "46",
-            "visibleForGroups" : []
+            "id": "46",
+            "visibleForGroups": []
           }
         ],
         "anchor": [

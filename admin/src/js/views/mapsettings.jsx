@@ -966,7 +966,8 @@ class Menu extends Component {
 		this.setState({
 			isHidden: !this.state.isHidden
     });
-    this.renderAdList();
+
+    this.state.isHidden ? this.renderAdList() : this.setState({adList: null})
 	}
 
   /**
