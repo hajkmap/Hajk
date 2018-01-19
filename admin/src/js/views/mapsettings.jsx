@@ -382,10 +382,7 @@ class Menu extends Component {
   load(type, callback) {
     switch(type) {
     case "auth":
-    console.log("getAuthSetting??", this.props.model);
 	  	this.props.model.getAuthSetting((auth) => {
-        console.log("auth", auth);
-			//this.fetchADGroups(auth);
 			this.setState({authActive: auth});
 		});
       case "maps":
@@ -964,7 +961,6 @@ class Menu extends Component {
 	fetchADGroups (auth) {
 		if (auth) {
 			this.props.model.fetchADGroups((grps) => {
-				console.log("grps: ", grps);
 				this.setState({adGroups: grps});
 			});
 		}
@@ -981,7 +977,6 @@ class Menu extends Component {
     if (this.state.authActive) {
       this.props.model.fetchADGroups((grps) => {
         this.setState({adGroups: grps});
-        console.log("grps callbakc", this.state.adGroups);
 
         this.setState({adList: <ListProperties properties={this.state.adGroups} show={this.state.isHidden} />})
       });

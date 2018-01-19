@@ -122,7 +122,7 @@ var menu = Model.extend({
 			success: (data) => {
 				let g = data.split(",");
 				let array = g.map(Function.prototype.call, String.prototype.trim)
-				console.log("array:", array);
+
 				callback(array);
 			},
 			error: (err) => {
@@ -168,7 +168,6 @@ var menu = Model.extend({
 	},
 
 	getAuthSetting: function (callback) {
-		console.log("run plz");
 		callback(this.get('config').authentication_active);
 	},
 
