@@ -115,6 +115,9 @@ var menu = Model.extend({
 		});
 	},
 
+	/**
+	 * Hämtar sträng med tillgängliga ad-grupper och konverterar till string[]
+	 */
 	fetchADGroups: function (callback) {		
 		$.ajax({
 			url: "/mapservice/config/getusergroups",
@@ -167,6 +170,9 @@ var menu = Model.extend({
 		return layer;
 	},
 
+	/**
+	 * Tittar i config.json på attributet authentication_active om autentisering skall vara aktiverat eller ej
+	 */
 	getAuthSetting: function (callback) {
 		callback(this.get('config').authentication_active);
 	},

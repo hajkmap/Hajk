@@ -939,6 +939,10 @@ class Menu extends Component {
     });
   }
 
+  /**
+   * Hanterar event för inmatningsfält för Active Directory-grupper
+   * @param {*} event 
+   */
 	handleAuthGrpsChange(event) {
 		const target = event.target;
 		const value = target.value;
@@ -955,17 +959,9 @@ class Menu extends Component {
 		});  
 	}
 
-	/**
-	 * ber backenden om en lista över tillgängliga ad-grupper
-	 */
-	fetchADGroups (auth) {
-		if (auth) {
-			this.props.model.fetchADGroups((grps) => {
-				this.setState({adGroups: grps});
-			});
-		}
-	}
-
+  /**
+   * Visar / döljer lista över tillgängliga AD-grupper
+   */
 	toggleHidden () {
 		this.setState({
 			isHidden: !this.state.isHidden
@@ -973,6 +969,9 @@ class Menu extends Component {
     this.renderAdList();
 	}
 
+  /**
+   * Renderar lista över tillgängliga AD-grupper då modellen fått dessa från backend
+   */
 	renderAdList() {
     if (this.state.authActive) {
       this.props.model.fetchADGroups((grps) => {
@@ -983,6 +982,9 @@ class Menu extends Component {
     }
 	}
   
+  /**
+   * Renderar inmatningsfält för AD-grupper
+   */
 	renderAuthGrps () {
 		if (this.state.authActive) { 
 			return (
@@ -999,6 +1001,9 @@ class Menu extends Component {
 		}
 	}
 
+  /**
+   * Renderar konfigurationsmöjlighet för temakartor-dropdown
+   */
 	renderThemeMapCheckbox () {
 		if (this.state.authActive) {
 			return (
@@ -1018,6 +1023,9 @@ class Menu extends Component {
 		}
 	}
 
+  /**
+   * Renderar inmatningsfält för rubriksättning till temakartor
+   */
 	renderThemeMapHeaderInput () {
 		if (this.state.authActive) {
 			return (
@@ -1034,11 +1042,10 @@ class Menu extends Component {
 		} else {
 			return null;
 		}
-		
 	}
   
   /** 
-   *
+   * 
    */
   renderArticleContent() {
     if (this.state.mapOptions) {
