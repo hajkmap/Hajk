@@ -276,7 +276,6 @@ namespace MapService.Controllers
             string jsonOutput = JsonConvert.SerializeObject(mapConfig, Formatting.Indented);
             System.IO.File.WriteAllText(file, jsonOutput);
         }
-
         private JToken GetMapConfigurationTitle(JToken mapConfiguration, string mapConfigurationFile)
         {
 
@@ -288,9 +287,7 @@ namespace MapService.Controllers
             }
 
             return title;
-        }
-
-
+        } 
         private JToken GetOptionsObjectFromTool(JToken mapConfiguration, string searchKey, string tool)
         {
             var layerSwitcher = mapConfiguration.SelectToken("$.tools[?(@.type == '" + tool + "')]");
@@ -298,7 +295,6 @@ namespace MapService.Controllers
 
             return keyValue;
         }
-
         private Boolean HasActiveDropDownThemeMap(JToken mapConfiguration, string mapConfigurationFile)
         {
             var dropdownThemeMaps = GetOptionsObjectFromTool(mapConfiguration, "dropdownThemeMaps", "layerswitcher");
@@ -318,7 +314,6 @@ namespace MapService.Controllers
             return true;
 
         }
-
         private ThemeMap AddNewThemeMap(string fileName, string mapTitle)
         {
             return new ThemeMap
@@ -327,7 +322,6 @@ namespace MapService.Controllers
                 mapConfigurationTitle = mapTitle.ToString()
             };
         }
-
         private List<ThemeMap> GetAllowedMapConfigurations()
         {
             var parameters = GetLookupParameters();
@@ -507,6 +501,12 @@ namespace MapService.Controllers
             var layersInSearchTool = searchTool.SelectToken("$.options.layers");
             var userGroups = adLookup.GetGroups(activeUser);
 
+            if(layersInSearchTool == null)
+            {
+                _log.ErrorFormat("SearchTool is missing the layersobject");
+                throw new HttpException(500, "SearchTool is missing the layersobject"); 
+            }
+
             foreach (JToken child in layersInSearchTool.Children())
             {
                 var visibleForGroups = child.SelectToken("$.visibleForGroups");
@@ -553,6 +553,54 @@ namespace MapService.Controllers
             }
                 
         return mapConfiguration.ToString();
+        }
+        private JToken FilterToolsByAD(ActiveDirectoryLookup adLookup, JToken mapConfiguration, string activeUser)
+        {
+            var childrenToRemove = new List<string>();
+            var userGroups = adLookup.GetGroups(activeUser);
+            var tools = mapConfiguration.SelectToken("$.tools");
+
+            foreach(JToken tool in tools)
+            {
+                bool removeChild = true;
+                var visibleForGroups = tool.SelectToken("$.options.visibleForGroups");
+
+                if (visibleForGroups != null)
+                {
+                    if (visibleForGroups.First != null)
+                    {
+                        if (visibleForGroups.First.ToString().Equals("*"))
+                        {
+                            removeChild = false;
+                        }
+                        else
+                        {
+                            foreach (string group in userGroups)
+                            {
+                                foreach (string ADgroup in visibleForGroups)
+                                {
+                                    if (group.Equals(ADgroup))
+                                    {
+                                        removeChild = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (removeChild)
+                {
+                    childrenToRemove.Add(tool.SelectToken("$.type").ToString());
+                }
+
+            }
+
+            foreach (string type in childrenToRemove)
+            {
+                tools.SelectToken("$.[?(@.type=='" + type + "')]").Remove();
+            }
+
+            return mapConfiguration;
         }
         private string UserSpecificMaps()
         {
@@ -633,6 +681,9 @@ namespace MapService.Controllers
                         JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(System.IO.File.ReadAllText(file));
 
                         var filteredMapConfiguration = FilterLayersByAD(adLookup, mapConfiguration, activeUser);
+                        
+
+                        filteredMapConfiguration = FilterToolsByAD(adLookup, filteredMapConfiguration, activeUser);
                         var searchTool = filteredMapConfiguration.SelectToken("$.tools[?(@.type == 'search')]");
 
                         if (searchTool != null)
