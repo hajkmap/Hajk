@@ -296,7 +296,7 @@ class Menu extends Component {
           instruction: this.props.model.get('layerMenuConfig').instruction,
           dropdownThemeMaps: this.props.model.get('layerMenuConfig').dropdownThemeMaps,
           themeMapHeaderCaption: this.props.model.get('layerMenuConfig').themeMapHeaderCaption,
-		  visibleForGroups: this.props.model.get('layerMenuConfig').visibleForGroups
+		  		visibleForGroups: this.props.model.get('layerMenuConfig').visibleForGroups ? this.props.model.get('layerMenuConfig').visibleForGroups : []
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -777,6 +777,7 @@ class Menu extends Component {
               data-visibleatstart={visible}
               data-type="layer">
               <span className="layer-name">{that.getLayerNameFromId(typeof layer === 'object' ? layer.id : layer)}</span>
+							<input className="layer-searchable" type="text" placeholder />
             </li>
           );
         });

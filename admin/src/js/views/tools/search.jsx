@@ -44,7 +44,7 @@ var defaultState = {
   imgSizeX: 32,
   imgSizeY: 32,
   popupOffsetY: 0,
-  searchableLayers: []
+  visibleForGroups: []
 };
 
 class ToolOptions extends Component {
@@ -78,7 +78,8 @@ class ToolOptions extends Component {
         anchorY: tool.options.anchor[1] || this.state.anchorY,
         imgSizeX: tool.options.imgSize[0] || this.state.imgSizeX,
         imgSizeY: tool.options.imgSize[1] || this.state.imgSizeX,
-        popupOffsetY: tool.options.popupOffsetY
+        popupOffsetY: tool.options.popupOffsetY,
+        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
       });
     } else {
       this.setState({
@@ -160,7 +161,8 @@ class ToolOptions extends Component {
         filterVisible: this.state.filterVisible,
         anchor: [this.state.anchorX, this.state.anchorY],
         imgSize: [this.state.imgSizeX, this.state.imgSizeY],
-        popupOffsetY: this.state.popupOffsetY
+        popupOffsetY: this.state.popupOffsetY,
+        visibleForGroups: this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
       }
     };
 
@@ -200,6 +202,35 @@ class ToolOptions extends Component {
       update.call(this);
     }
 
+  }
+
+  handleAuthGrpsChange(event) {
+		const target = event.target;
+		const value = target.value;
+		let groups = [];
+
+		try {
+			groups = value.split(",");
+		} catch (error) {
+			console.log(`Någonting gick fel: ${error}`);
+		}
+
+		this.setState({
+			visibleForGroups: groups
+		});  
+  }
+  
+  renderVisibleForGroups () {
+    if (this.props.parent.props.parent.state.authActive) {
+      return ( 
+        <div>
+          <label htmlFor="visibleForGroups">Tillträde</label>
+          <input id="visibleForGroups" value={this.state.visibleForGroups} type="text" name="visibleForGroups" onChange={(e) => {this.handleAuthGrpsChange(e)}}></input>
+        </div>
+      );
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -293,6 +324,7 @@ class ToolOptions extends Component {
               onChange={(e) => {this.handleInputChange(e)}}
               value={this.state.instruction}/>
           </div>
+          {this.renderVisibleForGroups()}
           <div>
             <label htmlFor="maxZoom">Zoomnivå</label>
             <input value={this.state.maxZoom} type="text" name="maxZoom" onChange={(e) => {this.handleInputChange(e)}}></input>
@@ -328,10 +360,6 @@ class ToolOptions extends Component {
           <div>
             <label htmlFor="imgSizeY">Bildhöjd</label>
             <input value={this.state.imgSizeY} type="text" name="imgSizeY" onChange={(e) => {this.handleInputChange(e)}}></input>
-          </div>
-		  <div>
-            <label htmlFor="imgSizeY">Sökbara lager</label>
-            <input value={this.state.searchableLayers} type="text" name="imgSizeY" onChange={(e) => {this.handleInputChange(e)}}></input>
           </div>
         </form>
       </div>
