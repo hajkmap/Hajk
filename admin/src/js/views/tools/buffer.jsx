@@ -28,7 +28,8 @@ var defaultState = {
   active: false,
   index: 0,
   instruction: "",
-  varbergVer: false
+  varbergVer: false,
+  visibleForGroups: []
 };
 
 class ToolOptions extends Component {
@@ -48,7 +49,8 @@ class ToolOptions extends Component {
         active: true,
         index: tool.index,
         instruction: tool.options.instruction,
-        varbergVer: tool.options.varbergVer
+        varbergVer: tool.options.varbergVer,
+        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
       });
     } else {
       this.setState({
@@ -108,7 +110,8 @@ class ToolOptions extends Component {
       "index": this.state.index,
       "options": {
         "instruction": this.state.instruction,
-        "varbergVer": this.state.varbergVer
+        "varbergVer": this.state.varbergVer,
+        "visibleForGroups": this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
       }
     };
 
@@ -149,6 +152,35 @@ class ToolOptions extends Component {
     }
   }
 
+  handleAuthGrpsChange(event) {
+		const target = event.target;
+		const value = target.value;
+		let groups = [];
+
+		try {
+			groups = value.split(",");
+		} catch (error) {
+			console.log(`Någonting gick fel: ${error}`);
+		}
+
+		this.setState({
+			visibleForGroups: groups
+		});  
+  }
+  
+  renderVisibleForGroups () {
+    if (this.props.parent.props.parent.state.authActive) {
+      return ( 
+        <div>
+          <label htmlFor="visibleForGroups">Tillträde</label>
+          <input id="visibleForGroups" value={this.state.visibleForGroups} type="text" name="visibleForGroups" onChange={(e) => {this.handleAuthGrpsChange(e)}}></input>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
+
   /**
    *
    */
@@ -186,6 +218,7 @@ class ToolOptions extends Component {
               onChange={(e) => {this.handleInputChange(e)}}
               value={this.state.instruction}/>
           </div>
+          {this.renderVisibleForGroups()}
           <div>
             <input
               id="varbergVer"

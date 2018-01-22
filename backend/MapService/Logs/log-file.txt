@@ -1178,3 +1178,41 @@ INFO 2018-01-19 11:56:06 Non-recursive AD-search used
 INFO 2018-01-19 11:56:11 Non-recursive AD-search used 
 INFO 2018-01-19 11:56:44 Non-recursive AD-search used 
 INFO 2018-01-19 11:57:07 Non-recursive AD-search used 
+INFO 2018-01-19 13:02:53 Non-recursive AD-search used 
+INFO 2018-01-19 13:03:03 Non-recursive AD-search used 
+INFO 2018-01-19 13:03:08 Non-recursive AD-search used 
+ERROR 2018-01-19 15:59:50 Kunde inte koppla upp mot Active Directory, kontrollera inloggningsuppgifter 
+FATAL 2018-01-19 15:59:50 System.ArgumentNullException: Värde får inte vara null.
+Parameternamn: context
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   vid MapService.Components.ActiveDirectoryLookup.GetGroups(String user)
+   vid MapService.Controllers.ConfigController.GetUserGroups()
+   vid MapService.Controllers.ConfigController.UserSpecificMaps()
+   vid MapService.Controllers.ConfigController.GetConfig(String name) 
+ERROR 2018-01-19 16:13:15 Kunde inte koppla upp mot Active Directory, kontrollera inloggningsuppgifter 
+FATAL 2018-01-19 16:13:15 System.ArgumentNullException: Värde får inte vara null.
+Parameternamn: context
+   vid System.DirectoryServices.AccountManagement.Principal.FindByIdentityWithType(PrincipalContext context, Type principalType, String identityValue)
+   vid System.DirectoryServices.AccountManagement.UserPrincipal.FindByIdentity(PrincipalContext context, String identityValue)
+   vid MapService.Components.ActiveDirectoryLookup.GetGroups(String user)
+   vid MapService.Controllers.ConfigController.GetUserGroups()
+   vid MapService.Controllers.ConfigController.GetConfig(String name) 
+INFO 2018-01-19 16:15:14 Non-recursive AD-search used 
+INFO 2018-01-19 16:15:33 Non-recursive AD-search used 
+INFO 2018-01-19 16:15:48 Non-recursive AD-search used 
+INFO 2018-01-19 16:16:07 Non-recursive AD-search used 
+INFO 2018-01-22 06:45:51 Non-recursive AD-search used 
+INFO 2018-01-22 07:05:57 Non-recursive AD-search used 
+INFO 2018-01-22 07:06:10 Non-recursive AD-search used 
+INFO 2018-01-22 07:06:11 Non-recursive AD-search used 
+INFO 2018-01-22 07:06:11 Non-recursive AD-search used 
+INFO 2018-01-22 07:06:12 Non-recursive AD-search used 
+INFO 2018-01-22 07:06:12 Non-recursive AD-search used 
+INFO 2018-01-22 07:06:13 Non-recursive AD-search used 
+INFO 2018-01-22 07:06:45 Non-recursive AD-search used 
+INFO 2018-01-22 07:08:11 Non-recursive AD-search used 
+INFO 2018-01-22 07:54:21 Non-recursive AD-search used 
+ERROR 2018-01-22 07:54:21 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\TEsthowdyho.json has the 'dropDownThemeMap' key set to 'false'  
+INFO 2018-01-22 08:05:07 Non-recursive AD-search used 
+ERROR 2018-01-22 08:05:07 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\TEsthowdyho.json has the 'dropDownThemeMap' key set to 'false'  

@@ -32,7 +32,8 @@ var defaultState = {
   icons: "",
   proxyUrl: "",
   base64Encode: false,
-  instruction: ""
+  instruction: "",
+  visibleForGroups: []
 };
 
 class ToolOptions extends Component {
@@ -56,7 +57,8 @@ class ToolOptions extends Component {
         icons: tool.options.icons,
         proxyUrl: tool.options.proxyUrl,
         base64Encode: tool.options.base64Encode,
-        instruction: tool.options.instruction
+        instruction: tool.options.instruction,
+        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
       });
     } else {
       this.setState({
@@ -115,12 +117,13 @@ class ToolOptions extends Component {
       "type": this.type,
       "index": this.state.index,
       "options": {
-        exportUrl: this.state.exportUrl,
-        importUrl: this.state.importUrl,
-        base64Encode: this.state.base64Encode,
-        instruction: this.state.instruction,
-        icons: this.state.icons,
-        proxyUrl: this.state.proxyUrl
+        "exportUrl": this.state.exportUrl,
+        "importUrl": this.state.importUrl,
+        "base64Encode": this.state.base64Encode,
+        "instruction": this.state.instruction,
+        "icons": this.state.icons,
+        "proxyUrl": this.state.proxyUrl,
+        "visibleForGroups": this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
       }
     };
 
@@ -161,6 +164,34 @@ class ToolOptions extends Component {
     }
   }
 
+  handleAuthGrpsChange(event) {
+		const target = event.target;
+		const value = target.value;
+		let groups = [];
+
+		try {
+			groups = value.split(",");
+		} catch (error) {
+			console.log(`Någonting gick fel: ${error}`);
+		}
+
+		this.setState({
+			visibleForGroups: groups
+		});  
+  }
+  
+  renderVisibleForGroups () {
+    if (this.props.parent.props.parent.state.authActive) {
+      return ( 
+        <div>
+          <label htmlFor="visibleForGroups">Tillträde</label>
+          <input id="visibleForGroups" value={this.state.visibleForGroups} type="text" name="visibleForGroups" onChange={(e) => {this.handleAuthGrpsChange(e)}}></input>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
   /**
    *
    */
@@ -219,6 +250,7 @@ class ToolOptions extends Component {
               onChange={(e) => {this.handleInputChange(e)}}
               value={this.state.instruction}/>
           </div>
+          {this.renderVisibleForGroups()}
           <div>
             <label htmlFor="proxyUrl">Proxy URL till utskrift och export</label>
             <input value={this.state.proxyUrl} type="text" name="proxyUrl" onChange={(e) => {this.handleInputChange(e)}}></input>

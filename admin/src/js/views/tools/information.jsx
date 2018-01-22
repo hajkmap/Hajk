@@ -31,7 +31,8 @@ var defaultState = {
   text: "",
   headerText: "",
   showInfoOnce: false,
-  base64EncodeForInfotext: false
+  base64EncodeForInfotext: false,
+  visibleForGroups: []
 };
 
 class ToolOptions extends Component {
@@ -54,7 +55,8 @@ class ToolOptions extends Component {
         text: tool.options.text || "",
         headerText: tool.options.headerText || "",
         showInfoOnce: tool.options.showInfoOnce,
-        base64EncodeForInfotext: tool.options.base64EncodeForInfotext
+        base64EncodeForInfotext: tool.options.base64EncodeForInfotext,
+        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
       });
     } else {
       this.setState({
@@ -116,7 +118,9 @@ class ToolOptions extends Component {
         headerText: this.state.headerText,
         visibleAtStart: this.state.visibleAtStart,
         showInfoOnce: this.state.showInfoOnce,
-        base64EncodeForInfotext: this.state.base64EncodeForInfotext
+        base64EncodeForInfotext: this.state.base64EncodeForInfotext,
+        visibleForGroups: this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
+
       }
     };
 
@@ -154,6 +158,35 @@ class ToolOptions extends Component {
         this.add(tool);
       }
       update.call(this);
+    }
+  }
+
+  handleAuthGrpsChange(event) {
+		const target = event.target;
+		const value = target.value;
+		let groups = [];
+
+		try {
+			groups = value.split(",");
+		} catch (error) {
+			console.log(`Någonting gick fel: ${error}`);
+		}
+
+		this.setState({
+			visibleForGroups: groups
+		});  
+  }
+  
+  renderVisibleForGroups () {
+    if (this.props.parent.props.parent.state.authActive) {
+      return ( 
+        <div>
+          <label htmlFor="visibleForGroups">Tillträde</label>
+          <input id="visibleForGroups" value={this.state.visibleForGroups} type="text" name="visibleForGroups" onChange={(e) => {this.handleAuthGrpsChange(e)}}></input>
+        </div>
+      );
+    } else {
+      return null;
     }
   }
 
@@ -202,6 +235,7 @@ class ToolOptions extends Component {
             <label htmlFor="text">Infotext</label>
             <textarea value={this.state.text} type="text" name="text" onChange={(e) => {this.handleInputChange(e)}}></textarea>
           </div>
+          {this.renderVisibleForGroups()}
           <div>
             <input
               id="showInfoOnce"

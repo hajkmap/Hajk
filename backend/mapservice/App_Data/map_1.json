@@ -231,12 +231,6 @@
         "excelExportUrl": "/mapservice/export/excel",
         "displayPopup": true,
         "selectionTools": true,
-        "layers": [
-          {
-            "id": "46",
-            "visibleForGroups": []
-          }
-        ],
         "anchor": [
           16,
           32
@@ -244,6 +238,10 @@
         "imgSize": [
           32,
           32
+        ],
+        "visibleForGroups": [
+          "Grupp1",
+          "Grupp2"
         ]
       },
       "index": 0

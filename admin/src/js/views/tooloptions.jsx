@@ -38,7 +38,7 @@ import Preset from "./tools/preset.jsx";
 import Routing from "./tools/routing.jsx";
 
 var defaultState = {
-  activeTool: undefined,
+  activeTool: '',
 };
 
 class ToolOptions extends Component {
