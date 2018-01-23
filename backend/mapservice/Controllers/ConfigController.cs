@@ -448,33 +448,26 @@ namespace MapService.Controllers
             var childrenToRemove = new List<string>();
             foreach (JToken layer in layers)
             {
-                bool removeChild = true;
+                bool allowed = false;
                 var visibleForGroups = layer.SelectToken("$.visibleForGroups");
 
-                if (visibleForGroups != null)
+                if (HasValidVisibleForGroups(visibleForGroups))
                 {
-                    if (visibleForGroups.First != null)
+                    if (!visibleForGroups.HasValues)
                     {
-                        if (visibleForGroups.First.ToString().Equals("*"))
-                        {
-                            removeChild = false;
-                        }
-                        else
-                        {
-                            foreach (string user in userGroups)
-                            {
-                                foreach (string ADgroup in visibleForGroups)
-                                {
-                                    if (user.Equals(ADgroup))
-                                    {
-                                        removeChild = false;
-                                    }
-                                }
-                            }
-                        }
-                    }  
+                        allowed = true;
+                    }
+                    else
+                    {
+                        allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
+                    }
                 }
-                if (removeChild)
+                else
+                {
+                    allowed = false;
+                    _log.ErrorFormat("Can't filter tools because" + layer + " is missing the key 'VisibleForGroups'");
+                }
+                if (!allowed)
                 {
                     childrenToRemove.Add(layer.SelectToken("$.id").ToString());
                 }
@@ -510,32 +503,26 @@ namespace MapService.Controllers
             foreach (JToken child in layersInSearchTool.Children())
             {
                 var visibleForGroups = child.SelectToken("$.visibleForGroups");
-                bool removeChild = true;
-                    
-                if(visibleForGroups != null)
+                bool allowed = false;
+
+                if (HasValidVisibleForGroups(visibleForGroups))
                 {
-                    if(visibleForGroups.First != null)
+                    if (!visibleForGroups.HasValues)
                     {
-                        if (visibleForGroups.First.ToString().Equals("*"))
-                        {
-                            removeChild = false;
-                        }
-                        else
-                        {
-                            foreach (string user in userGroups)
-                            {
-                                foreach (string group in visibleForGroups)
-                                {
-                                    if (user.Equals(group))
-                                    {
-                                        removeChild = false;
-                                    }
-                                }
-                            }
-                        } 
+                        allowed = true;
+                    }
+                    else
+                    {
+                        allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
                     }
                 }
-                if (removeChild)
+                else
+                {
+                    allowed = false;
+                    _log.ErrorFormat("Can't filter search layers because search tool because the key 'VisibleForGroups' is missing or incorrect"); 
+                }
+
+                if (!allowed)
                 {
                     childrenToRemove.Add(child.SelectToken("$.id").ToString());
                 }
@@ -554,6 +541,20 @@ namespace MapService.Controllers
                 
         return mapConfiguration.ToString();
         }
+        private bool IsGroupAllowedAccess (string [] userGroups, JToken visibleForGroups)
+        {
+            foreach (string group in userGroups)
+            {
+                foreach (string ADgroup in visibleForGroups)
+                {
+                    if (group.Equals(ADgroup))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
         private JToken FilterToolsByAD(ActiveDirectoryLookup adLookup, JToken mapConfiguration, string activeUser)
         {
             var childrenToRemove = new List<string>();
@@ -562,33 +563,27 @@ namespace MapService.Controllers
 
             foreach(JToken tool in tools)
             {
-                bool removeChild = true;
+                bool allowed = false;
                 var visibleForGroups = tool.SelectToken("$.options.visibleForGroups");
 
-                if (visibleForGroups != null)
+                if (HasValidVisibleForGroups(visibleForGroups))
                 {
-                    if (visibleForGroups.First != null)
+                    if (!visibleForGroups.HasValues)
                     {
-                        if (visibleForGroups.First.ToString().Equals("*"))
-                        {
-                            removeChild = false;
-                        }
-                        else
-                        {
-                            foreach (string group in userGroups)
-                            {
-                                foreach (string ADgroup in visibleForGroups)
-                                {
-                                    if (group.Equals(ADgroup))
-                                    {
-                                        removeChild = false;
-                                    }
-                                }
-                            }
-                        }
+                        allowed = true;
+                    }
+                    else
+                    {
+                        allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
                     }
                 }
-                if (removeChild)
+                else
+                {
+                    allowed = false;
+                    _log.ErrorFormat("Can't filter tools because" + tool +" is missing the key 'VisibleForGroups'");
+                }
+ 
+                if (!allowed)
                 {
                     childrenToRemove.Add(tool.SelectToken("$.type").ToString());
                 }
@@ -601,6 +596,17 @@ namespace MapService.Controllers
             }
 
             return mapConfiguration;
+        }
+        private bool HasValidVisibleForGroups(JToken visibleForGroups)
+        {
+            if (visibleForGroups != null)
+            {
+                if (visibleForGroups.First != null)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
         private string UserSpecificMaps()
         {
@@ -692,7 +698,7 @@ namespace MapService.Controllers
                         }
                         else
                         {
-                            return System.IO.File.ReadAllText(file);
+                            return filteredMapConfiguration.ToString();
                         }
 
                     }
