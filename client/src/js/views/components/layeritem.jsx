@@ -235,7 +235,7 @@ var LayerItemView = {
         </div>
 
         <div className={innerBodyClass}>
-          {components.legend.legendPanel}
+          {expanded ? components.legend.legendPanel : null}
         </div>
       </div>
     );
