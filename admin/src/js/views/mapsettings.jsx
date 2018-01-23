@@ -777,7 +777,6 @@ class Menu extends Component {
               data-visibleatstart={visible}
               data-type="layer">
               <span className="layer-name">{that.getLayerNameFromId(typeof layer === 'object' ? layer.id : layer)}</span>
-							<input className="layer-searchable" type="text" placeholder />
             </li>
           );
         });

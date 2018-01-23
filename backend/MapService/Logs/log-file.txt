@@ -1216,3 +1216,8 @@ INFO 2018-01-22 07:54:21 Non-recursive AD-search used
 ERROR 2018-01-22 07:54:21 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\TEsthowdyho.json has the 'dropDownThemeMap' key set to 'false'  
 INFO 2018-01-22 08:05:07 Non-recursive AD-search used 
 ERROR 2018-01-22 08:05:07 MapConfigurationFileC:\Projekt\varberg-hajk\backend\MapService\App_Data\TEsthowdyho.json has the 'dropDownThemeMap' key set to 'false'  
+INFO 2018-01-22 13:44:19 Non-recursive AD-search used 
+INFO 2018-01-22 13:46:50 Non-recursive AD-search used 
+INFO 2018-01-22 13:47:30 Non-recursive AD-search used 
+INFO 2018-01-22 13:48:14 Non-recursive AD-search used 
+INFO 2018-01-22 15:49:35 Non-recursive AD-search used 

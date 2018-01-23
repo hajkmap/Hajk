@@ -22,6 +22,7 @@
 
 import React from "react";
 import { Component } from "react";
+import Tree from '../tree.jsx';
 
 var defaultState = {
   validationErrors: [],
@@ -44,7 +45,10 @@ var defaultState = {
   imgSizeX: 32,
   imgSizeY: 32,
   popupOffsetY: 0,
-  visibleForGroups: []
+  visibleForGroups: [],
+  searchableLayers: {},
+  tree: "",
+  layers:[]
 };
 
 class ToolOptions extends Component {
@@ -55,9 +59,12 @@ class ToolOptions extends Component {
     super();
     this.state = defaultState;
     this.type = "search";
+
+    this.handleAddSearchable = this.handleAddSearchable.bind(this);
   }
 
   componentDidMount() {
+    this.loadSearchableLayers();
     var tool = this.getTool();
     if (tool) {
       this.setState({
@@ -108,6 +115,19 @@ class ToolOptions extends Component {
       [name]: value
     });
   }
+
+  loadSearchableLayers() {
+    let layers = this.props.model.getConfig(this.props.model.get('config').url_layers, (layers) => {
+      this.setState({ 
+        searchableLayers: layers.wfslayers,
+      });
+
+      this.setState({
+        tree: <Tree model={this} layers={this.state.searchableLayers} handleAddSearchable={this.handleAddSearchable}/>
+      });
+    });
+  }
+  
 
   getTool() {
     return this.props.model.get('toolConfig').find(tool => tool.type === this.type);
@@ -230,6 +250,44 @@ class ToolOptions extends Component {
       );
     } else {
       return null;
+    }
+  }
+  /**
+   * anropas från tree.jsx som eventhandler. Hantering för checkboxar och 
+   * inmatning av AD-grupper för wfs:er
+   * @param {*} e 
+   * @param {*} layer 
+   */
+  handleAddSearchable(e, layer) {
+    if (e.target.type.toLowerCase() === "checkbox") {
+      if (e.target.checked) {
+        let toAdd = {
+          id: layer.id.toString(),
+          visibleForGroups: []
+        };
+        this.setState({
+          layers: [...this.state.layers, toAdd]
+        });
+      } else {
+        let newArray = this.state.layers.filter((o) => o.id != layer.id.toString());
+
+        this.setState({
+          layers: newArray
+        });
+      }
+    }
+    if (e.target.type.toLowerCase() === "text") {
+      let obj = this.state.layers.find((o) => o.id === layer.id.toString());
+      let newArray = this.state.layers.filter((o) => o.id !== layer.id.toString())
+      
+      if (typeof obj != "undefined") {
+        obj.visibleForGroups = e.target.value.split(",");
+      }
+
+      newArray.push(obj);
+      this.setState({
+        layers: newArray
+      });
     }
   }
 
@@ -362,6 +420,7 @@ class ToolOptions extends Component {
             <input value={this.state.imgSizeY} type="text" name="imgSizeY" onChange={(e) => {this.handleInputChange(e)}}></input>
           </div>
         </form>
+        {this.state.tree}
       </div>
     )
   }

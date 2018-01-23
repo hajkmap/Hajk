@@ -34,7 +34,7 @@ export default class ListProperties extends Component {
 				<div>
 					<legend className="header-side">Tillgängliga AD-grupper</legend>
 					<ul className="details properties-list"> 
-						{this.renderProperties(this.props.properties)}
+						{this.renderProperties()}
 					</ul>
 				</div>
 			);

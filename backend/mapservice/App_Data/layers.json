@@ -1012,6 +1012,50 @@
       "infoText": null,
       "infoUrl": null,
       "infoOwner": null
+    },
+    {
+      "id": "51",
+      "caption": "Testwfs2",
+      "url": "http://karta.uddevalla.se/geoserver/wfs",
+      "layers": [
+        "uddevalla:atervinning_p"
+      ],
+      "searchFields": [
+        ""
+      ],
+      "infobox": "",
+      "displayFields": [
+        ""
+      ],
+      "geometryField": "geom",
+      "outputFormat": "GML3",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
+    },
+    {
+      "id": "52",
+      "caption": "testwfs3",
+      "url": "http://karta.uddevalla.se/geoserver/wfs",
+      "layers": [
+        "uddevalla:etapp_bohusl_p"
+      ],
+      "searchFields": [
+        ""
+      ],
+      "infobox": "",
+      "displayFields": [
+        ""
+      ],
+      "geometryField": "geom",
+      "outputFormat": "GML3",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
     }
   ],
   "vectorlayers": [
