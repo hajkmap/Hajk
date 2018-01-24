@@ -4,10 +4,15 @@ export default class Tree extends Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			searchableLayers: []
+			searchableLayers: [],
+			checked: false
 		};
 		this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
 		
+	}
+
+	componentDidMount () {
+		this.props.loadLayers(this.refs);
 	}
 
 	handleCheckboxChange(event, layer) {
@@ -15,30 +20,45 @@ export default class Tree extends Component {
 		console.log("layer", layer);
 	}
 
+	toggleHide (layerId) {
+		//this.setState({ checked: !this.state.checked });
+		if (this.refs.hasOwnProperty(layerId)) {
+			let layer = this.refs[layerId];
+		
+			if (!layer.hidden) {
+				layer.hidden = true;
+				layer.value = "";
+			} else {
+				layer.hidden = false;
+			}
+		} 
+	}
+
 	buildList () {
+		
+
         return (
 					<div>
 						<label>Tillgängliga söktjänster</label>
             <div className="layer-list">
-                <ul>
-                    {this.props.layers.map((layer) => {
-                        return (
-												<li key={ layer.id } className="">
-													<input type="checkbox" 
-																 className={"checkbox_" + layer.id} 
-																 onChange={(e) => this.props.handleAddSearchable(e, layer)}
-													/>&nbsp;
-													<label>{ layer.caption }</label>
-													<input className={ "input_" + layer.id } type="text" onChange={(e) => {
-														this.props.handleAddSearchable(e, layer)
-														if (e.target.checked === false ) {
-															// TODO: rensa inmatning
-														}
-													}} />
-												</li>
-											);
-                    })}
-                </ul>
+							<ul>
+								{ this.props.layers.map((layer) => {
+									return (
+										<li key={ layer.id } className="">
+											<input 
+												type="checkbox"
+												ref={ "cb_" + layer.id }
+												className={ "checkbox_" + layer.id } 
+												onChange={ (e) => { 
+													this.props.handleAddSearchable(e, layer);
+													this.toggleHide(layer.id)
+												}} />&nbsp;
+											<label>{ layer.caption }</label>
+											<input ref={layer.id} type="text" hidden="true" placeholder="Tillträde" onChange={ (e) => { this.props.handleAddSearchable(e, layer) } } />
+										</li>
+									);
+								})}
+							</ul>
             </div>
 					</div>
         );

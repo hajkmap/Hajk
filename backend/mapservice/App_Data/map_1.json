@@ -242,6 +242,15 @@
         "visibleForGroups": [
           "Grupp1",
           "Grupp2"
+        ],
+        "layers": [
+          {
+            "id": "51",
+            "visibleForGroups": [
+              "Grupp X",
+              " Grupp Z"
+            ]
+          }
         ]
       },
       "index": 0

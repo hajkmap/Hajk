@@ -18,7 +18,7 @@ export default class ListProperties extends Component {
 	/**
 	 * Kräver en string-array och returnerar list
 	 * items för varje plats i arrayen
-	 * @param {*} properties 
+	 * @param {*} properties
 	 */
 	renderProperties() {
 		return (

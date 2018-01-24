@@ -61,10 +61,13 @@ class ToolOptions extends Component {
     this.type = "search";
 
     this.handleAddSearchable = this.handleAddSearchable.bind(this);
+    this.loadLayers = this.loadLayers.bind(this);
   }
 
   componentDidMount() {
-    this.loadSearchableLayers();
+    if (this.props.parent.props.parent.state.authActive) {
+      this.loadSearchableLayers();
+    }
     var tool = this.getTool();
     if (tool) {
       this.setState({
@@ -86,13 +89,15 @@ class ToolOptions extends Component {
         imgSizeX: tool.options.imgSize[0] || this.state.imgSizeX,
         imgSizeY: tool.options.imgSize[1] || this.state.imgSizeX,
         popupOffsetY: tool.options.popupOffsetY,
-        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
-      });
+        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : [],
+        layers: tool.options.layers ? tool.options.layers : []
+      }, () => {this.loadLayers()});
     } else {
       this.setState({
         active: false
       });
     }
+    console.log()
   }
 
   componentWillUnmount() {
@@ -102,6 +107,29 @@ class ToolOptions extends Component {
    */
   componentWillMount() {
 	  
+  }
+
+  /**
+   * Anropas från tree.jsx i componentDidMount och passar med refs.
+   * Sätter checkboxar och inputfält för söklager.
+   * @param {*} childRefs 
+   */
+  loadLayers (childRefs) {
+    // checka checkboxar, visa textfält
+    // och sätt text från kartkonfig.json  
+    let ids = [];
+
+    for (let id of this.state.layers) {
+      ids.push(id);
+    }
+
+    if (typeof childRefs != "undefined") {
+      for (let i of ids) {
+        childRefs["cb_" + i.id].checked = true;
+        childRefs[i.id].hidden = false;
+        childRefs[i.id].value = i.visibleForGroups.join();
+      }
+    }
   }
 
   handleInputChange(event) {
@@ -123,7 +151,7 @@ class ToolOptions extends Component {
       });
 
       this.setState({
-        tree: <Tree model={this} layers={this.state.searchableLayers} handleAddSearchable={this.handleAddSearchable}/>
+        tree: <Tree model={this} layers={this.state.searchableLayers} handleAddSearchable={this.handleAddSearchable} loadLayers={this.loadLayers}/>
       });
     });
   }
@@ -182,7 +210,8 @@ class ToolOptions extends Component {
         anchor: [this.state.anchorX, this.state.anchorY],
         imgSize: [this.state.imgSizeX, this.state.imgSizeY],
         popupOffsetY: this.state.popupOffsetY,
-        visibleForGroups: this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
+        visibleForGroups: this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim),
+        layers: this.state.layers ? this.state.layers : []
       }
     };
 
@@ -282,6 +311,7 @@ class ToolOptions extends Component {
       
       if (typeof obj != "undefined") {
         obj.visibleForGroups = e.target.value.split(",");
+        obj.visibleForGroups.map(Function.prototype.call, String.prototype.trim);
       }
 
       newArray.push(obj);

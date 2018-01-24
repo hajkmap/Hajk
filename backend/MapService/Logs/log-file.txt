@@ -1221,3 +1221,4 @@ INFO 2018-01-22 13:46:50 Non-recursive AD-search used
 INFO 2018-01-22 13:47:30 Non-recursive AD-search used 
 INFO 2018-01-22 13:48:14 Non-recursive AD-search used 
 INFO 2018-01-22 15:49:35 Non-recursive AD-search used 
+INFO 2018-01-24 10:07:02 Non-recursive AD-search used 
