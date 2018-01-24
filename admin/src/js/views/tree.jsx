@@ -35,8 +35,6 @@ export default class Tree extends Component {
 	}
 
 	buildList () {
-		
-
         return (
 					<div>
 						<label>Tillgängliga söktjänster</label>
