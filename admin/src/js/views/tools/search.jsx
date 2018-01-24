@@ -48,7 +48,7 @@ var defaultState = {
   visibleForGroups: [],
   searchableLayers: {},
   tree: "",
-  layers:[]
+  layers: []
 };
 
 class ToolOptions extends Component {
@@ -91,7 +91,7 @@ class ToolOptions extends Component {
         popupOffsetY: tool.options.popupOffsetY,
         visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : [],
         layers: tool.options.layers ? tool.options.layers : []
-      }, () => {this.loadLayers()});
+      }, () => { this.loadLayers() });
     } else {
       this.setState({
         active: false
@@ -105,7 +105,7 @@ class ToolOptions extends Component {
    *
    */
   componentWillMount() {
-	  
+
   }
 
   /**
@@ -113,7 +113,7 @@ class ToolOptions extends Component {
    * Sätter checkboxar och inputfält för söklager.
    * @param {*} childRefs 
    */
-  loadLayers (childRefs) {
+  loadLayers(childRefs) {
     // checka checkboxar, visa textfält
     // och sätt text från kartkonfig.json  
     let ids = [];
@@ -145,16 +145,16 @@ class ToolOptions extends Component {
 
   loadSearchableLayers() {
     let layers = this.props.model.getConfig(this.props.model.get('config').url_layers, (layers) => {
-      this.setState({ 
+      this.setState({
         searchableLayers: layers.wfslayers,
       });
 
       this.setState({
-        tree: <Tree model={this} layers={this.state.searchableLayers} handleAddSearchable={this.handleAddSearchable} loadLayers={this.loadLayers}/>
+        tree: <Tree model={this} layers={this.state.searchableLayers} handleAddSearchable={this.handleAddSearchable} loadLayers={this.loadLayers} />
       });
     });
   }
-  
+
 
   getTool() {
     return this.props.model.get('toolConfig').find(tool => tool.type === this.type);
@@ -183,10 +183,10 @@ class ToolOptions extends Component {
 
     var toolbar = 'bottom';
     var onMap = this.state.onMap;
-    if(this.state.bothSynlig){
+    if (this.state.bothSynlig) {
       toolbar = 'bottom';
       onMap = true;
-    } else if (onMap){
+    } else if (onMap) {
       toolbar = '';
     }
 
@@ -253,27 +253,27 @@ class ToolOptions extends Component {
   }
 
   handleAuthGrpsChange(event) {
-		const target = event.target;
-		const value = target.value;
-		let groups = [];
+    const target = event.target;
+    const value = target.value;
+    let groups = [];
 
-		try {
-			groups = value.split(",");
-		} catch (error) {
-			console.log(`Någonting gick fel: ${error}`);
-		}
+    try {
+      groups = value.split(",");
+    } catch (error) {
+      console.log(`Någonting gick fel: ${error}`);
+    }
 
-		this.setState({
-			visibleForGroups: groups
-		});  
+    this.setState({
+      visibleForGroups: groups
+    });
   }
-  
-  renderVisibleForGroups () {
+
+  renderVisibleForGroups() {
     if (this.props.parent.props.parent.state.authActive) {
-      return ( 
+      return (
         <div>
           <label htmlFor="visibleForGroups">Tillträde</label>
-          <input id="visibleForGroups" value={this.state.visibleForGroups} type="text" name="visibleForGroups" onChange={(e) => {this.handleAuthGrpsChange(e)}}></input>
+          <input id="visibleForGroups" value={this.state.visibleForGroups} type="text" name="visibleForGroups" onChange={(e) => { this.handleAuthGrpsChange(e) }}></input>
         </div>
       );
     } else {
@@ -307,7 +307,7 @@ class ToolOptions extends Component {
     if (e.target.type.toLowerCase() === "text") {
       let obj = this.state.layers.find((o) => o.id === layer.id.toString());
       let newArray = this.state.layers.filter((o) => o.id !== layer.id.toString())
-      
+
       if (typeof obj != "undefined") {
         obj.visibleForGroups = e.target.value.split(",");
         obj.visibleForGroups.map(Function.prototype.call, String.prototype.trim);
@@ -328,15 +328,15 @@ class ToolOptions extends Component {
       <div>
         <form>
           <p>
-            <button className="btn btn-primary" onClick={(e) => {e.preventDefault(); this.save()}}>Spara</button>
+            <button className="btn btn-primary" onClick={(e) => { e.preventDefault(); this.save() }}>Spara</button>
           </p>
           <div>
             <input
               id="active"
               name="active"
               type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.active}/>&nbsp;
+              onChange={(e) => { this.handleInputChange(e) }}
+              checked={this.state.active} />&nbsp;
             <label htmlFor="active">Aktiverad</label>
           </div>
           <div>
@@ -345,16 +345,16 @@ class ToolOptions extends Component {
               id="index"
               name="index"
               type="text"
-              onChange={(e) => {this.handleInputChange(e)}}
-              value={this.state.index}/>
+              onChange={(e) => { this.handleInputChange(e) }}
+              value={this.state.index} />
           </div>
           <div>
             <input
               id="onMap"
               name="onMap"
               type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.onMap}/>&nbsp;
+              onChange={(e) => { this.handleInputChange(e) }}
+              checked={this.state.onMap} />&nbsp;
             <label htmlFor="onMap">Alltid synlig</label>
           </div>
           <div>
@@ -362,8 +362,8 @@ class ToolOptions extends Component {
               id="bothSynlig"
               name="bothSynlig"
               type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.bothSynlig}/>&nbsp;
+              onChange={(e) => { this.handleInputChange(e) }}
+              checked={this.state.bothSynlig} />&nbsp;
             <label htmlFor="bothSynlig">Båda snabbsök och sökPanel synlig</label>
           </div>
           <div>
@@ -371,8 +371,8 @@ class ToolOptions extends Component {
               id="displayPopup"
               name="displayPopup"
               type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.displayPopup}/>&nbsp;
+              onChange={(e) => { this.handleInputChange(e) }}
+              checked={this.state.displayPopup} />&nbsp;
             <label htmlFor="displayPopup">Visa popup</label>
           </div>
           <div>
@@ -380,8 +380,8 @@ class ToolOptions extends Component {
               id="filterVisible"
               name="filterVisible"
               type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.filterVisible}/>&nbsp;
+              onChange={(e) => { this.handleInputChange(e) }}
+              checked={this.state.filterVisible} />&nbsp;
             <label htmlFor="filterVisible">Sök i synliga lager</label>
           </div>
           <div>
@@ -389,8 +389,8 @@ class ToolOptions extends Component {
               id="selectionTools"
               name="selectionTools"
               type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.selectionTools}/>&nbsp;
+              onChange={(e) => { this.handleInputChange(e) }}
+              checked={this.state.selectionTools} />&nbsp;
             <label htmlFor="selectionTools">Verktyg för ytsökning</label>
           </div>
           <div>
@@ -398,8 +398,8 @@ class ToolOptions extends Component {
               id="Base64-active"
               name="base64Encode"
               type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.base64Encode}/>&nbsp;
+              onChange={(e) => { this.handleInputChange(e) }}
+              checked={this.state.base64Encode} />&nbsp;
             <label htmlFor="Base64-active">Base64-encoding aktiverad</label>
           </div>
           <div>
@@ -408,45 +408,45 @@ class ToolOptions extends Component {
               id="instruction"
               name="instruction"
               type="text"
-              onChange={(e) => {this.handleInputChange(e)}}
-              value={this.state.instruction}/>
+              onChange={(e) => { this.handleInputChange(e) }}
+              value={this.state.instruction} />
           </div>
           {this.renderVisibleForGroups()}
           <div>
             <label htmlFor="maxZoom">Zoomnivå</label>
-            <input value={this.state.maxZoom} type="text" name="maxZoom" onChange={(e) => {this.handleInputChange(e)}}></input>
+            <input value={this.state.maxZoom} type="text" name="maxZoom" onChange={(e) => { this.handleInputChange(e) }}></input>
           </div>
           <div>
             <label htmlFor="excelExportUrl">URL Excel-tjänst</label>
-            <input value={this.state.excelExportUrl} type="text" name="excelExportUrl" onChange={(e) => {this.handleInputChange(e)}}></input>
+            <input value={this.state.excelExportUrl} type="text" name="excelExportUrl" onChange={(e) => { this.handleInputChange(e) }}></input>
           </div>
           <div>
             <label htmlFor="kmlExportUrl">URL KML-tjänst</label>
-            <input value={this.state.kmlExportUrl} type="text" name="kmlExportUrl" onChange={(e) => {this.handleInputChange(e)}}></input>
+            <input value={this.state.kmlExportUrl} type="text" name="kmlExportUrl" onChange={(e) => { this.handleInputChange(e) }}></input>
           </div>
           <div>
             <label htmlFor="markerImg">Ikon för sökträff</label>
-            <input value={this.state.markerImg} type="text" name="markerImg" onChange={(e) => {this.handleInputChange(e)}}></input>
+            <input value={this.state.markerImg} type="text" name="markerImg" onChange={(e) => { this.handleInputChange(e) }}></input>
           </div>
           <div>
             <label htmlFor="anchorX">Ikonförskjutning X</label>
-            <input value={this.state.anchorX} type="text" name="anchorX" onChange={(e) => {this.handleInputChange(e)}}></input>
+            <input value={this.state.anchorX} type="text" name="anchorX" onChange={(e) => { this.handleInputChange(e) }}></input>
           </div>
           <div>
             <label htmlFor="anchorY">Ikonförskjutning Y</label>
-            <input value={this.state.anchorY} type="text" name="anchorY" onChange={(e) => {this.handleInputChange(e)}}></input>
+            <input value={this.state.anchorY} type="text" name="anchorY" onChange={(e) => { this.handleInputChange(e) }}></input>
           </div>
           <div>
             <label htmlFor="popupOffsetY">Förskjutning popup-ruta</label>
-            <input value={this.state.popupOffsetY} type="text" name="popupOffsetY" onChange={(e) => {this.handleInputChange(e)}}></input>
+            <input value={this.state.popupOffsetY} type="text" name="popupOffsetY" onChange={(e) => { this.handleInputChange(e) }}></input>
           </div>
           <div>
             <label htmlFor="imgSizeX">Bildbredd</label>
-            <input value={this.state.imgSizeX} type="text" name="imgSizeX" onChange={(e) => {this.handleInputChange(e)}}></input>
+            <input value={this.state.imgSizeX} type="text" name="imgSizeX" onChange={(e) => { this.handleInputChange(e) }}></input>
           </div>
           <div>
             <label htmlFor="imgSizeY">Bildhöjd</label>
-            <input value={this.state.imgSizeY} type="text" name="imgSizeY" onChange={(e) => {this.handleInputChange(e)}}></input>
+            <input value={this.state.imgSizeY} type="text" name="imgSizeY" onChange={(e) => { this.handleInputChange(e) }}></input>
           </div>
         </form>
         {this.state.tree}
