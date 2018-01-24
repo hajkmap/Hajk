@@ -110,7 +110,7 @@ class ToolOptions extends Component {
   }
 
   /**
-   * Anropas från tree.jsx i componentDidMount och passar med refs.
+   * Anropas från tree.jsx i componentDidMount som passar med refs.
    * Sätter checkboxar och inputfält för söklager.
    * @param {*} childRefs 
    */
