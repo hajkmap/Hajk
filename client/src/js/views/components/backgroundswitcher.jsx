@@ -20,6 +20,8 @@
 //
 // https://github.com/hajkmap/Hajk
 
+var InfoButton = require('components/infobutton');
+
 /**
  * @class
  */
@@ -46,8 +48,10 @@ var BackgroundSwitcherView = {
     this.props.model.on('change:backgroundSwitcherMode', () => {
       this.backgroundSwitcherModeChanged()
     });
+    this.props.model.on('change:showInfo', this.onShowInfoChanged, this);
     this.setState({
-      selected: this.props.model.get('background')
+      selected: this.props.model.get('background'),
+      showInfo: this.props.model.get('showInfo')
     })
   },
 
@@ -57,6 +61,7 @@ var BackgroundSwitcherView = {
    */
   componentWillUnmount: function () {
     this.props.model.off('change:backgroundSwitcherMode');
+    this.props.model.off('change:showInfo', this.onShowInfoChanged, this);
   },
 
   /**
@@ -65,7 +70,7 @@ var BackgroundSwitcherView = {
    */
   backgroundSwitcherModeChanged: function () {
     var mode = this.props.model.get('backgroundSwitcherMode')
-    ,   cls  = (this.props.model.get('backgroundSwitcherMode') === 'hidden') ? 'fa fa-angle-right arrow' : 'fa fa-angle-down arrow'
+    ,   cls  = (this.props.model.get('backgroundSwitcherMode') === 'hidden') ? 'fa fa-angle-right arrow' : 'fa fa-angle-up arrow'
     ;
     this.setState({
       displayMode: mode,
@@ -155,6 +160,23 @@ var BackgroundSwitcherView = {
   },
 
   /**
+   * On show info change event handler.
+   * @instance
+   */
+  onShowInfoChanged: function () {
+    this.setState({ showInfo: this.props.model.get('showInfo') });
+  },
+
+  /**
+   * Toggle info visibility
+   * @instance
+   */
+  toggleInfo: function (e, index) {
+    e.stopPropagation();
+    this.state.showInfo != index ? this.props.model.set('showInfo', index) : this.props.model.set('showInfo', undefined);
+  },
+
+  /**
    * Render the layers component.
    * @instance
    * @return {external:ReactElement}
@@ -163,11 +185,25 @@ var BackgroundSwitcherView = {
     return (
       this.props.layers.map((layer, i) => {
         var index = "background-layer-" + i
-        ,   checked = this.getSelected(layer);
+        ,   checked = this.getSelected(layer)
+        ,   infoIndex = i
+        ,   infoExpanded  = this.state.showInfo
+        ,   infoVisible = layer.get('infoVisible');
         return (
           <li key={index}>
             <input id={index} name="background" type="radio" checked={checked} onChange={(e) => this.setBackgroundLayer(layer) }></input>
             <label htmlFor={index}>{layer.get('caption')}</label>
+
+            <span className={infoVisible ? "visible" : "hidden"} onClick={(e) => this.toggleInfo(e, i)}>
+              <InfoButton key={index} index={index} />
+            </span>
+          
+            <div className={infoExpanded === infoIndex ? "dropdown" : "hidden"}>
+              <p className="info-title">{layer.get('infoTitle')}</p>
+              <p className="info-text">{layer.get('infoText')}</p>
+              <a className="info-text" href={layer.get('infoUrl')} target="_blank">{layer.get('infoUrl')}</a><br/>
+              <i className="info-text">{layer.get('infoOwner') ? "Ägare: " + layer.get('infoOwner') : ""}</i>
+            </div>
           </li>
         );
       })

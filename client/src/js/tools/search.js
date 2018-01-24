@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 var ToolModel = require('tools/tool');
 var SelectionModel = require('models/selection');
 var arraySort = require('utils/arraysort');
@@ -43,6 +21,7 @@ var kmlWriter = require('utils/kmlwriter');
  */
 var SearchModelProperties = {
   type: 'search',
+  Id: 'searchPanelB',
   panel: 'searchpanel',
   toolbar: 'bottom',
   icon: 'fa fa-search icon',
@@ -52,6 +31,8 @@ var SearchModelProperties = {
   filter: "*",
   filterVisibleActive: false,
   markerImg: "assets/icons/marker.png",
+  base64Encode: false,
+  instruction: "",
   anchor: [
     16,
     32
@@ -137,6 +118,9 @@ var SearchModel = {
   getPropertyFilter: function (props) {
     var multipleAttributes = props.propertyName.split(',').length > 1;
     var conditions = props.propertyName.split(',').reduce((condition, property) => {
+
+      props.value.indexOf("\\") >= 0 ? props.value = props.value.replace(/\\/g, "\\\\") : props.value;
+      
       if (props.value) {
         return condition += `
           <ogc:PropertyIsLike matchCase="false" wildCard="*" singleChar="." escapeChar="!">
@@ -295,7 +279,6 @@ var SearchModel = {
     } else {
       filters = "";
     }
-
     str = `
      <wfs:GetFeature
          service = 'WFS'
@@ -687,9 +670,9 @@ var SearchModel = {
       ,   aliases = []
       ,   values = [];
 
-      var getAlias = (column, infobox) => {
+      var getAlias = (column, exportText) => {
         var regExp = new RegExp(`{export:${column}( as .*)?}`)
-        ,   result = regExp.exec(infobox);
+        ,   result = regExp.exec(exportText);
 
         if (result && result[1]) {
           result[1] = result[1].replace(" as ", "");
@@ -702,16 +685,15 @@ var SearchModel = {
 
         var attributes = hit.getProperties()
         ,   names = Object.keys(attributes);
-
         names = names.filter(name => {
-          if (!hit.infobox) {
+          if (!hit.exportText) {
             return typeof attributes[name] === "string"  ||
                    typeof attributes[name] === "boolean" ||
                    typeof attributes[name] === "number";
           } else {
             let regExp = new RegExp(`{export:${name}( as .*)?}`);
             return (
-              regExp.test(hit.infobox)
+              regExp.test(hit.exportText)
             );
           }
         });
@@ -722,7 +704,7 @@ var SearchModel = {
         }
 
         columns.forEach((column, i) => {
-          aliases[i] = getAlias(column, hit.infobox);
+          aliases[i] = getAlias(column, hit.exportText);
         });
 
         return columns.map(column => attributes[column] || null);
@@ -757,6 +739,10 @@ var SearchModel = {
 
     this.set("downloading", true);
 
+    if (this.get('base64Encode')){
+      postData = btoa(postData);
+    }
+
     $.ajax({
       url: url,
       method: "post",
@@ -783,7 +769,6 @@ var SearchModel = {
    * @param {function} done
    */
   search: function (done) {
-
     var value = this.get('value')
     ,   items = []
     ,   promises = []
@@ -807,6 +792,7 @@ var SearchModel = {
               features.forEach(feature => {
                 feature.caption = searchProps.caption;
                 feature.infobox = searchProps.infobox;
+                feature.exportText = searchProps.exportText;
               });
               items.push({
                 layer: searchProps.caption,
@@ -843,6 +829,7 @@ var SearchModel = {
           url: (HAJK2.searchProxy || "") + layer.get('searchUrl'),
           caption: layer.get('caption'),
           infobox: layer.get('infobox'),
+          exportText: "",
           featureType: featureType,
           propertyName: layer.get('searchPropertyName'),
           displayName: layer.get('searchDisplayName'),
@@ -936,10 +923,10 @@ var SearchModel = {
    *
    * @instance
    */
-  clicked: function () {
+  clicked: function (arg) {
     this.set('visible', true);
     this.set('toggled', !this.get('toggled'));
-  },
+  }
 };
 
 /**

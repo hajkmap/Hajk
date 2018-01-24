@@ -1,0 +1,64 @@
+{
+  "name": "hajk",
+  "version": "2.1.0",
+  "description": "Hajk Map responsiv webbkarta som bygger på Open Layers 3.",
+  "homepage": "https://github.com/hajkmap/Hajk#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hajkmap/Hajk.git"
+  },
+  "private": true,
+  "devDependencies": {
+    "babel-preset-es2015": "^6.5.0",
+    "backbone": "^1.2.3",
+    "bootstrap": "^3.3.6",
+    "browserify": "^13.0.0",
+    "browserify-shim": "^3.8.12",
+    "font-awesome": "^4.5.0",
+    "google-maps": "^3.2.1",
+    "grunt": "^0.4.5",
+    "grunt-autoprefixer": "^3.0.3",
+    "grunt-babel": "^6.0.0",
+    "grunt-banner": "^0.6.0",
+    "grunt-browserify": "^4.0.1",
+    "grunt-contrib-concat": "^0.5.1",
+    "grunt-contrib-connect": "^0.11.2",
+    "grunt-contrib-copy": "^0.8.2",
+    "grunt-contrib-cssmin": "^0.14.0",
+    "grunt-contrib-less": "^1.2.0",
+    "grunt-contrib-uglify": "^0.11.1",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-express": "^1.4.1",
+    "grunt-parallel": "^0.4.1",
+    "grunt-proxy": "0.0.3",
+    "grunt-react": "^0.12.3",
+    "grunt-text-replace": "^0.4.0",
+    "jquery": "^2.2.0",
+    "jquery-sortable": "^0.9.13",
+    "jsts": "^1.3.0",
+    "load-grunt-tasks": "^3.4.0",
+    "marked": "^0.3.5",
+    "matchdep": "^1.0.1",
+    "moment": "^2.15.0",
+    "openlayers": "4.2.0",
+    "parallel": "^1.0.10",
+    "proj4": "^2.3.12",
+    "react": "^0.14.7",
+    "react-color": "^1.3.6",
+    "react-color-picker": "^3.1.0",
+    "react-datetime": "^2.6.0",
+    "react-dom": "^0.14.7",
+    "underscore": "^1.8.3",
+<<<<<<< HEAD
+    "x2js": "^2.0.1",
+    "jquery-touchswipe": "^1.6.15"
+  },
+  "dependencies": {
+=======
+    "x2js": "^2.0.1"
+  },
+  "dependencies": {
+    "react-localstorage": "^0.3.1"
+>>>>>>> master
+  }
+}

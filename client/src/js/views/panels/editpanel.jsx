@@ -760,7 +760,7 @@ var EditPanelView = {
 
     return (
       <div>
-        <Panel title="Editera lager" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
+        <Panel title="Editera lager" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
           <div className="edit-tools">
             <div className="loading-bar">
               {loader}

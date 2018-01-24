@@ -42,18 +42,22 @@ var ToolModel = require('tools/tool');
 var LayerSwitcherModelProperties = {
   type: 'layerswitcher',
   panel: 'LayerPanel',
-  toolbar: 'bottom',
+  //toolbar: 'bottom',
   icon: 'fa fa-bars icon',
-  title: 'Lagerhanterare',
+  title: 'Kartlager',
   visible: false,
   layerCollection: undefined,
   backgroundSwitcherMode: 'hidden',
-  active: true,
-  visibleAtStart: true,
+//  active: true,
+//  visibleAtStart: true,
   backgroundSwitcherBlack: true,
   backgroundSwitcherWhite: true,
-  toggleAllButton: true
+  toggleAllButton: true,
+  haveInitializedBaseLayers: false,
+  toolbar: 'bottom', // this is updated in shell.jsx in terms of mobile
+  instruction: ""
 };
+
 
 /**
  * Prototype for creating a layerswitcher model.
@@ -74,7 +78,7 @@ var LayerSwitcherModel = {
 
   configure: function (shell) {
     this.set('layerCollection', shell.getLayerCollection());
-    if (this.get('visibleAtStart') && document.body.scrollWidth >= 600) {
+    if (this.get('visibleAtStart') /* && document.body.scrollWidth >= 600 */) {
       this.set('visible', true);
     }
   },
@@ -100,7 +104,7 @@ var LayerSwitcherModel = {
    * @instance
    */
    toggleAllOff() {
-     var baseLayers = this.getBaseLayers();
+     var baseLayers = this.getBaseLayersList();
      this.get('layerCollection').forEach(layer => {
        var isBaseLayer = baseLayers.find(l => l.id === layer.id);
        if (!isBaseLayer) {
@@ -110,17 +114,35 @@ var LayerSwitcherModel = {
    },
 
   /**
+   * Get base layer list
+   * @instance
+   * @return {Layer[]} base layers
+   */
+  getBaseLayersList: function () {
+    var baseLayers = [];
+    this.get('baselayers').forEach(baseLayer => {
+      var layer = this.get('layerCollection').find(layer => layer.id === baseLayer.id);
+      if (layer) {
+        baseLayers.push(layer);
+      }
+    });
+    return baseLayers;
+  },
+
+  /**
    * Get base layers.
    * @instance
    * @return {Layer[]} base layers
    */
   getBaseLayers: function () {
-    var baseLayers = [];
+    var baseLayers = []
     this.get('baselayers').forEach(baseLayer => {
       var layer = this.get('layerCollection').find(layer => layer.id === baseLayer.id);
       if (layer) {
-        //layer.setVisible(baseLayer.visibleAtStart);
-        //layer.getLayer().setVisible(layer.getVisible());
+		if( !layer.getVisible()) {
+			layer.setVisible(baseLayer.visibleAtStart);
+		}
+        layer.getLayer().setVisible(layer.getVisible());
         baseLayers.push(layer);
       }
     });

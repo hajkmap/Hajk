@@ -24,8 +24,6 @@ var Panel = require('views/panel');
 var Alert = require('alert');
 var ColorPicker = require('components/colorpicker');
 
-var isMobile = () => document.body.clientWidth <= 600;
-
 /**
  * @class
  */
@@ -52,7 +50,11 @@ var DrawPanelView = {
       polygonLineStyle: this.props.model.get('polygonLineStyle'),
       polygonFillOpacity: this.props.model.get('polygonFillOpacity'),
       exportUrl: false,
-      kmlImport: false
+      kmlImport: false,
+      boxLineColor: this.props.model.get('boxLineColor'),
+      boxFillColor: this.props.model.get('boxFillColor'),
+      boxLineStyle: this.props.model.get('boxLineStyle'),
+      boxLineWidth: this.props.model.get('boxLineWidth')
     };
   },
 
@@ -181,7 +183,7 @@ var DrawPanelView = {
    */
   abort: function () {
     this.props.model.abort();
-    $('#Point, #Circle, #Text, #Polygon, #LineString, #move, #edit, #delete').removeClass('selected');
+    $('#Point, #Circle, #Text, #Polygon, #LineString, #move, #edit, #delete, #Box').removeClass('selected');
     $('#abort').hide();
     this.setState({
       symbology: ""
@@ -227,7 +229,7 @@ var DrawPanelView = {
    */
   activateRemovalTool: function () {
     this.props.model.activateRemovalTool();
-    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete').removeClass('selected');
+    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete, #Box').removeClass('selected');
     $('#delete').addClass('selected');
     $('#abort').show();
     this.setState({
@@ -243,7 +245,7 @@ var DrawPanelView = {
    */
   activateMoveTool: function () {
     this.props.model.activateMoveTool();
-    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete').removeClass('selected');
+    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete, #Box').removeClass('selected');
     $('#move').addClass('selected');
     $('#abort').show();
     this.setState({
@@ -259,7 +261,7 @@ var DrawPanelView = {
    */
   activateEditTool: function () {
     this.props.model.activateEditTool();
-    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete').removeClass('selected');
+    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete, #Box').removeClass('selected');
     $('#edit').addClass('selected');
     $('#abort').show();
     this.setState({
@@ -276,7 +278,7 @@ var DrawPanelView = {
    */
   activateDrawTool: function (type) {
     this.props.model.activateDrawTool(type);
-    $('#Circle, #Point, #Text, #Polygon, #LineString, #move, #edit, #delete').removeClass('selected');
+    $('#Circle, #Point, #Text, #Polygon, #LineString, #move, #edit, #delete, #Box').removeClass('selected');
     $('#' + type).addClass('selected');
     $('#abort').show();
     this.setState({
@@ -284,9 +286,6 @@ var DrawPanelView = {
     });
     this.props.model.set("kmlExportUrl", false);
     this.props.model.set("kmlImport", false);
-    if (isMobile()) {
-      this.props.navigationPanel.minimize();
-    }
   },
 
   /**
@@ -544,6 +543,45 @@ var DrawPanelView = {
             </select>
           </div>
         );
+      case "Box":
+        return (
+          <div>
+            <h2>Ritmanér yta</h2>
+            <div>Linjefärg</div>
+            <ColorPicker
+              model={this.props.model}
+              property="boxLineColor"
+              onChange={this.props.model.setBoxLineColor.bind(this.props.model)}
+            />
+            <div>Fyllnadsfärg</div>
+            <ColorPicker
+              model={this.props.model}
+              property="boxFillColor"
+              onChange={this.props.model.setBoxFillColor.bind(this.props.model)}
+            />
+            <div>Opacitet</div>
+            <select value={this.state.boxFillOpacity} onChange={update.bind(this, 'setBoxFillOpacity', 'boxFillOpacity')}>
+              <option value="0">0% (genomskinlig)</option>
+              <option value="0.25">25%</option>
+              <option value="0.5">50%</option>
+              <option value="0.75">75%</option>
+              <option value="1">100% (fylld)</option>
+            </select>
+            <div>Linjetjocklek</div>
+            <select value={this.state.boxLineWidth} onChange={update.bind(this, 'setBoxLineWidth', 'boxLineWidth')}>
+              <option value="1">Tunn</option>
+              <option value="3">Normal</option>
+              <option value="5">Tjock</option>
+              <option value="8">Tjockare</option>
+            </select>
+            <div>Linjestil</div>
+            <select value={this.state.boxLineStyle} onChange={update.bind(this, 'setBoxLineStyle', 'boxLineStyle')}>
+              <option value="solid">Heldragen</option>
+              <option value="dash">Streckad</option>
+              <option value="dot">Punktad</option>
+            </select>
+          </div>
+        );
       default:
         return <div></div>;
     }
@@ -569,7 +607,7 @@ var DrawPanelView = {
     return (
       <div>
         <h4>Importera</h4>
-        <p>Välj fil att importera</p>
+        <p>Välj KML-fil att importera</p>
         <form id="upload-form" method="post" action={url} target="upload-iframe" encType="multipart/form-data">
           <input onChange={upload.bind(this)} type="file" name="files[]" accept=".kml" multiple="false" className="btn btn-default"/><br/>
           <input type="submit" value="Ladda upp" name="upload-file-form" className="btn btn-default"/><br/>
@@ -671,19 +709,18 @@ var DrawPanelView = {
     ,   importRes  = this.renderImport(this.state.kmlImport);
 
     return (
-      <div>
-        <Panel title="Rita och måttsätt" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
+        <Panel title="Rita och mäta" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
           <div className="draw-tools">
             <div id="labels">
               <input id="labels-checkbox" onChange={this.toggleLabels} type="checkbox" checked={showLabels} />
-              <label htmlFor="labels-checkbox">Visa areal/längd på ritade objekt</label>
+              <label htmlFor="labels-checkbox" id="drawLabel">Visa areal, längd eller koordinater på ritade objekt</label>
             </div>
             <ul>
               <li id="Text" onClick={this.activateDrawTool.bind(this, "Text")}>
                 <i className="fa fa-font fa-0"></i> <span>Skriv text</span>
               </li>
               <li id="Point" onClick={this.activateDrawTool.bind(this, "Point")}>
-                <i className="iconmoon-punkt"></i> <span>Rita punkt</span>
+                <i className="fa fa-circle fa-0"></i> <span>Rita punkt</span>
               </li>
               <li id="Circle" onClick={this.activateDrawTool.bind(this, "Circle")}>
                 <i className="iconmoon-punkt"></i> <span>Rita cirkel</span>
@@ -693,6 +730,9 @@ var DrawPanelView = {
               </li>
               <li id="Polygon" onClick={this.activateDrawTool.bind(this, "Polygon")}>
                 <i className="iconmoon-yta"></i> <span>Rita yta</span>
+              </li>
+              <li id="Box" onClick={this.activateDrawTool.bind(this, "Box")}>
+                <i className="fa fa-crop fa-0"></i> <span>Rita ruta</span>
               </li>
               <li id="move" onClick={this.activateMoveTool}>
                 <i className="fa fa-arrows fa-0"></i> <span>Flytta objekt</span>
@@ -722,10 +762,11 @@ var DrawPanelView = {
             {exportRes}
             {importRes}
           </div>
+          <div>{dialog}
+            {this.renderAlert()}
+          </div>
         </Panel>
-        {dialog}
-        {this.renderAlert()}
-      </div>
+
     );
   }
 };

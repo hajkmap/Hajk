@@ -104,7 +104,6 @@ var NavigationModel = {
    * @param {boolean} visible
    */
   onPanelVisibleChanged: function (panel, visible) {
-
     var type = (panel.get('panel') || '').toLowerCase()
     ,   panelRef = _.find(this.get("panels"), panel => (panel.type || '').toLowerCase() === type)
     ,   activePanel = this.get("activePanel", panelRef);

@@ -48,6 +48,7 @@ var StreetViewModelProperties = {
   google: undefined,
   imageDate: '',
   apiKey: '',
+  instruction: ''
 }
 
 /**
@@ -103,17 +104,18 @@ var StreetViewModel = {
 
     var coord  = ol.proj.transform(
       e.coordinate,
-			this.get('olMap').getView().getProjection(),
-			"EPSG:4326"
-		)
-	  ,	location = new google.maps.LatLng(coord[1], coord[0]);
+      this.get('olMap').getView().getProjection(),
+      "EPSG:4326"
+    )
+      ,	location = new google.maps.LatLng(coord[1], coord[0]);
 
     this.addMarker(e.coordinate, (panorama && panorama.getPov().heading) || 0);
     streetViewService = new google.maps.StreetViewService();
- 		panorama = new google.maps.StreetViewPanorama(document.getElementById('street-view-window'));
+    panorama = new google.maps.StreetViewPanorama(document.getElementById('street-view-window'));
     streetViewService.getPanoramaByLocation(location, 50, this.displayPanorama.bind(this));
-	  google.maps.event.addListener(panorama, 'position_changed', () => { this.onPositionChanged() });
-	  google.maps.event.addListener(panorama, 'pov_changed', () => { this.onPositionChanged() });
+    google.maps.event.addListener(panorama, 'position_changed', () => { this.onPositionChanged() });
+    google.maps.event.addListener(panorama, 'pov_changed', () => { this.onPositionChanged() });
+    this.set('location', location);
     this.set('location', location);
   },
 
@@ -200,7 +202,7 @@ var StreetViewModel = {
     googleMapsLoader.KEY = this.get('apiKey');
     googleMapsLoader.load(google => {
       this.set('google', google);
-    });
+  });
     this.set('streetViewMarkerLayer', new ol.layer.Vector({
       source: new ol.source.Vector({}),
       name: 'streetViewMarkerLayer'
@@ -233,7 +235,7 @@ var StreetViewModel = {
    *
    * @instance
    */
-  clicked: function () {
+  clicked: function (arg) {
     this.set('visible', !this.get('visible'));
     this.set('toggled', !this.get('toggled'));
   }

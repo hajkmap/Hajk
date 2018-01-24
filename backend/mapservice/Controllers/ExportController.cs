@@ -14,11 +14,13 @@ using System.IO.Compression;
 using System;
 using ICSharpCode.SharpZipLib.Zip;
 using ICSharpCode.SharpZipLib.Core;
+using log4net;
 
 namespace MapService.Controllers
 {
     public class ExportController : AsyncController
     {
+        ILog _log = LogManager.GetLogger(typeof(ExportController));
         /// <summary>
         /// Create filename with unique timestamp and guid.
         /// </summary>
@@ -36,7 +38,7 @@ namespace MapService.Controllers
         }
 
         /// <summary>
-        /// Depth-first recursive delete, with handling for descendant 
+        /// Depth-first recursive delete, with handling for descendant
         /// directories open in Windows Explorer.
         /// </summary>
         private static void DeleteDirectory(string path)
@@ -63,18 +65,43 @@ namespace MapService.Controllers
         [HttpPost]
         public string PDF(string json)
         {
-            MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
-            AsyncManager.OutstandingOperations.Increment();
-            PDFCreator pdfCreator = new PDFCreator();
-            byte[] blob = pdfCreator.Create(exportItem);
-            string[] fileInfo = byteArrayToFileInfo(blob, "pdf");
 
-            if (exportItem.proxyUrl != "") {
-                return exportItem.proxyUrl + "/Temp/" + fileInfo[1];
-            } else {
-                return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
+            try
+            {
+                _log.DebugFormat("Received json: " + json);
+                try
+                {
+                    byte[] decoded = Convert.FromBase64String(json);
+                    json = System.Text.Encoding.UTF8.GetString(decoded);
+                    _log.DebugFormat("json after decode: " + json);
+                }
+                catch (Exception e)
+                { }
+
+                MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
+                AsyncManager.OutstandingOperations.Increment();
+                PDFCreator pdfCreator = new PDFCreator();
+                _log.Debug("Inited pdfcreator");
+                byte[] blob = pdfCreator.Create(exportItem);
+                _log.Debug("created blob in pdfcreator");
+                string[] fileInfo = byteArrayToFileInfo(blob, "pdf");
+                _log.DebugFormat("Created fileinfo: {0}", fileInfo[1]);
+
+                if (exportItem.proxyUrl != "")
+                {
+                    return exportItem.proxyUrl + "/Temp/" + fileInfo[1];
+                }
+                else
+                {
+                    return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
+                }
+                //return File(blob, "application/pdf", "kartutskrift.pdf");
             }
-            //return File(blob, "application/pdf", "kartutskrift.pdf");
+            catch (Exception e)
+            {
+                _log.Fatal(e.Message);
+                throw;
+            }
         }
 
         private byte[] imgToByteArray(Image img)
@@ -91,6 +118,15 @@ namespace MapService.Controllers
         [HttpPost]
         public string TIFF(string json)
         {
+            _log.DebugFormat("Received json: " + json);
+            try
+            {
+                byte[] decoded = Convert.FromBase64String(json);
+                json = System.Text.Encoding.UTF8.GetString(decoded);
+                _log.DebugFormat("json after decode: " + json);
+            }
+            catch (Exception e)
+            { }
             MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
                                     
             TIFFCreator tiffCreator = new TIFFCreator();
@@ -145,6 +181,15 @@ namespace MapService.Controllers
         [ValidateInput(false)]
         public string KML(string json)
         {
+            _log.DebugFormat("Received json: " + json);
+            try
+            {
+                byte[] decoded = Convert.FromBase64String(json);
+                json = System.Text.Encoding.UTF8.GetString(decoded);
+                _log.DebugFormat("json after decode: " + json);
+            } catch(Exception e)
+            { }
+            
             KMLCreator kmlCreator = new KMLCreator();
             byte[] bytes = kmlCreator.Create(json);
             string[] fileInfo = byteArrayToFileInfo(bytes, "kml");
@@ -170,6 +215,15 @@ namespace MapService.Controllers
         [HttpPost]
         public string Excel(string json)
         {
+            _log.DebugFormat("Received json: " + json);
+            try
+            {
+                byte[] decoded = Convert.FromBase64String(json);
+                json = System.Text.Encoding.UTF8.GetString(decoded);
+                _log.DebugFormat("json after decode: " + json);
+            }
+            catch (Exception e)
+            { }
             List<ExcelTemplate> data = JsonConvert.DeserializeObject<List<ExcelTemplate>>(json);
             DataSet dataSet = Util.ToDataSet(data);
             ExcelCreator excelCreator = new ExcelCreator();

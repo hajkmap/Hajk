@@ -33,6 +33,7 @@ var ToolModel = require('tools/tool');
  */
 var LocationModelProperties = {
   type: 'location',
+  Id: 'locationBtn',
   panel: '',
   toolbar: 'top-right',
   icon: 'fa fa-location-arrow icon',
@@ -44,6 +45,13 @@ var LocationModelProperties = {
     lng: undefined
   }
 };
+
+/* Global variable */
+positioning = undefined;
+latitude = undefined;
+longitude = undefined;
+accuracy = undefined;
+
 
 /**
  * Prototype for creating a search model.
@@ -68,13 +76,15 @@ var LocationModel = {
         anchor: [0.5, 0.5],
         anchorXUnits: 'fraction',
         anchorYUnits: 'fraction',
-        opacity: .8,
+        opacity: 0.8,
         src: 'assets/icons/gps.png',
         scale: (1/2)
       })
     });
 
+    // this.set('accuracyFeature', new ol.Feature());
     var source = new ol.source.Vector({});
+    // source.addFeature(this.get('accuracyFeature'));
 
     this.set("layer", new ol.layer.Vector({
       source: source,
@@ -86,28 +96,22 @@ var LocationModel = {
   getOptions: function () {
     return {
       enableHighAccuracy: true,
-      timeout: 5000,
+      timeout: 10000,
       maximumAge: 0
     };
   },
 
   configure: function (shell) {
-
     this.set('olMap', shell.getMap().getMap());
     this.get('olMap').addLayer(this.get('layer'));
 
     this.on('change:active', (e) => {
-      if (!this.get('active') && this.watchId) {
-        window.navigator.geolocation.clearWatch(this.watchId);
-        this.reset();
+      if (!this.get('active') || this.get('watchId') !== undefined) {
+      this.reset();
       } else {
-        this.watchId = window.navigator.geolocation.watchPosition(
-          (e) => { this.onLocationSucess(e) },
-          (e) => { this.onLocationError(e) },
-          this.getOptions()
-        );
+        navigator.geolocation.getCurrentPosition(this.onLocationSucess.bind(this), this.onLocationError.bind(this));
       }
-    });
+  });
 
     this.on('change:location', () => { this.setLocation() });
 
@@ -144,14 +148,32 @@ var LocationModel = {
     this.set({
       location: {
         lat: e.coords.latitude,
-        lng: e.coords.longitude
+        lng: e.coords.longitude,
+        acc: e.coords.accuracy
       }
     });
+    latitude = e.coords.latitude;
+    longitude = e.coords.longitude;
+    accuracy = e.coords.accuracy;
+    positioning = true;
+    /*
+    var acc = window.navigator.geolocation.getAccuracyGeometry();
+    if(acc != null) {
+        this.get('accuracyFeature').setGeometry(acc);
+    }
+    */
   },
 
   onLocationError: function(e) {
-    alert("Din position kan inte fastställas.");
-    this.reset();
+    this.get('layer').getSource().clear();
+    if(typeof this.get('location').lat == 'undefined') { // quick fix for the reoccuring errors in Firefox
+      alert("Din position kan inte fastställas.");
+      console.error(e);
+      console.warn(e);
+      console.info(e);
+      this.reset();
+    }
+    positioning = false;
   },
 
   /**
@@ -180,3 +202,4 @@ var LocationModel = {
  * @returns {LocationModel}
  */
 module.exports = ToolModel.extend(LocationModel);
+

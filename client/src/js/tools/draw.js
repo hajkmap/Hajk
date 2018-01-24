@@ -63,11 +63,16 @@ var olMap;
  * @property {string} polygonFillColor - Default: "rgb(255, 255, 255)"
  * @property {number} polygonFillOpacity - Default: 0.5
  * @property {Array<{external:"ol.Style"}>} scetchStyle
+ * @property {string} boxLineColor - Default: "rgb(15, 175, 255)"
+ * @property {number} boxLineWidth - Default: 3
+ * @property {string} boxLineStyle - Default: "solid"
+ * @property {string} boxFillColor - Default: "rgb(255, 255, 255)"
+ * @property {number} boxFillOpacity - Default: 0.5
  */
 var DrawModelProperties = {
   type: 'draw',
   panel: 'DrawPanel',
-  title: 'Rita och måttsätt',
+  title: 'Rita och mäta',
   toolbar: 'bottom',
   visible: false,
   icon: 'fa fa-pencil icon',
@@ -90,6 +95,7 @@ var DrawModelProperties = {
   pointRadius: 7,
   pointSymbol: false,
   icons: "",
+  instruction: "",
   markerImg: window.location.href + "assets/icons/marker.png",
   lineColor: "rgb(15, 175, 255)",
   lineWidth: 3,
@@ -104,6 +110,12 @@ var DrawModelProperties = {
   polygonLineStyle: "solid",
   polygonFillColor: "rgb(255, 255, 255)",
   polygonFillOpacity: 0.5,
+  base64Encode: false,
+  boxFillColor: "rgb(255, 255, 255)",
+  boxLineColor: "rgb(15, 175, 255)",
+  boxFillOpacity: 0.5,
+  boxLineStyle: "solid",
+  boxLineWidth: 3,
   scetchStyle: [
     new ol.style.Style({
     fill: new ol.style.Fill({
@@ -159,6 +171,8 @@ var DrawModel = {
 
   initialize: function (options) {
     ToolModel.prototype.initialize.call(this);
+
+    this.set('editOpenDialogBinded', null);
   },
 
   configure: function (shell) {
@@ -181,6 +195,18 @@ var DrawModel = {
       this.set('markerImg', window.location.href + "assets/icons/" + icon + ".png");
     }
     this.createMeasureTooltip();
+  },
+
+
+  editOpenDialog: function(event){
+    this.get('olMap').forEachFeatureAtPixel(event.pixel, (feature) => {
+      if (typeof feature.getProperties().description !== 'undefined'){
+      feature.setStyle(this.get('scetchStyle'));
+      this.set('dialog', true);
+      this.set('drawFeature', feature);
+      this.set('editing', true);
+    }
+  });
   },
 
   /**
@@ -207,11 +233,13 @@ var DrawModel = {
     this.get('olMap').removeInteraction(this.get("drawTool"));
     this.get('olMap').removeInteraction(this.get("editTool"));
     this.get('olMap').set('clickLock', true);
+    this.get('olMap').un('singleclick', this.get('editOpenDialogBinded'));
     this.get('olMap').on('singleclick', this.removeSelected);
     if (dragInteraction) {
       dragInteraction.removeAcceptedLayer('draw-layer');
     }
   },
+
 
   /**
    * Activate tool for feature edit.
@@ -224,10 +252,15 @@ var DrawModel = {
     ,   features = new ol.Collection();
 
     this.get('olMap').un('singleclick', this.removeSelected);
+    this.get('olMap').un('singleclick', this.get('editOpenDialogBinded'));
     this.get('olMap').removeInteraction(this.get("drawTool"));
     this.get('olMap').removeInteraction(this.get("editTool"));
     this.get('olMap').set('clickLock', true);
     this.set('drawToolActive', true);
+
+    this.set('editOpenDialogBinded', this.editOpenDialog.bind(this));
+
+    this.get('olMap').on('singleclick', this.get('editOpenDialogBinded'));
 
     if (dragInteraction) {
       dragInteraction.removeAcceptedLayer('draw-layer');
@@ -235,16 +268,18 @@ var DrawModel = {
     this.get('source').getFeatures().forEach(f => {
       features.push(f);
     });
+
     this.set("editTool", new ol.interaction.Modify({
       features: features
     }));
+
     this.get('olMap').addInteraction(this.get("editTool"));
 
     this.get("editTool").on('modifyend', e => {
-      this.measureTooltip.setPosition(undefined);
-      e.features.forEach(this.updateFeatureText.bind(this));
-    });
 
+      this.measureTooltip.setPosition(undefined);
+    e.features.forEach(this.updateFeatureText.bind(this));
+  });
   },
 
   /**
@@ -254,13 +289,12 @@ var DrawModel = {
   updateFeatureText: function (feature) {
     var labelText
     ,   style;
-
     this.setFeaturePropertiesFromGeometry(feature);
 
     labelText = this.getLabelText(feature);
     style = feature.getStyle()[1] || feature.getStyle()[0];
 
-    if (style) {
+    if (style && style.getText() !== null) {
       style.getText().setText(labelText);
     }
   },
@@ -286,6 +320,7 @@ var DrawModel = {
     this.get('olMap').removeInteraction(this.get("drawTool"));
     this.get('olMap').removeInteraction(this.get("editTool"));
     this.get('olMap').un('singleclick', this.removeSelected);
+    this.get('olMap').un('singleclick', this.get('editOpenDialogBinded'));
     this.set('drawToolActive', false);
     var dragInteraction = this.getDragInteraction();
     if (dragInteraction) {
@@ -297,8 +332,16 @@ var DrawModel = {
    * Remove the last edited feature from soruce.
    * @instance
    */
-  removeEditFeature() {
-    this.get('source').removeFeature(this.get('drawFeature'));
+  removeEditFeature: function() {
+    if (!this.get('editing') && this.get("drawFeature") && (typeof this.get("drawFeature").getProperties().description === "undefined"
+    || this.get("drawFeature").getProperties().description === "")) {
+      this.get('source').removeFeature(this.get('drawFeature'));
+    } else if(this.get('editing')){
+      var feature = this.get("drawFeature");
+      this.set('pointText', feature.getProperties().description);
+      this.setFeaturePropertiesFromText(feature, feature.getProperties().description || "");
+      feature.setStyle(this.getStyle(feature));
+    }
   },
 
   /**
@@ -311,6 +354,7 @@ var DrawModel = {
     if (type === "Text") {
       feature.setStyle(this.get('scetchStyle'));
       this.set('dialog', true);
+      this.set('editing', false);
       this.set('drawFeature', feature);
     } else {
       this.setFeaturePropertiesFromGeometry(feature);
@@ -451,9 +495,12 @@ var DrawModel = {
     ,   drawTool = undefined
     ,   geometryType = undefined
     ,   dragInteraction = this.getDragInteraction()
-    ,   olMap = this.get('olMap');
+    ,   olMap = this.get('olMap')
+    ,   geometryFunction = undefined
+    ,   geometryName = undefined;
 
     olMap.un('singleclick', this.removeSelected);
+    olMap.un('singleclick', this.get('editOpenDialogBinded'));
     if (dragInteraction) {
       dragInteraction.removeAcceptedLayer('draw-layer');
     }
@@ -461,12 +508,22 @@ var DrawModel = {
     olMap.removeInteraction(this.get("editTool"));
     this.measureTooltip.setPosition(undefined);
 
+    if (type === "Box") {
+      type = "Circle";
+      geometryName = "Box";
+      geometryFunction = ol.interaction.Draw.createBox();
+    } else {
+      geometryName = type;
+    }
+
     geometryType = type !== "Text" ? type : "Point";
 
     drawTool = new ol.interaction.Draw({
       source: this.get('source'),
       style: this.get('scetchStyle'),
-      type: geometryType
+      type: geometryType,
+      geometryFunction: geometryFunction,
+      geometryName: geometryName
     });
 
     olMap.on('pointermove', this.setPointerPosition.bind(this));
@@ -492,6 +549,7 @@ var DrawModel = {
   abort: function () {
     var dragInteraction = this.getDragInteraction();
     this.get('olMap').un('singleclick', this.removeSelected);
+    this.get('olMap').un('singleclick', this.get('editOpenDialogBinded'));
     this.get('olMap').un('pointermove', this.setPointerPosition);
     this.get('olMap').removeInteraction(this.get('drawTool'));
     this.get('olMap').removeInteraction(this.get("editTool"));
@@ -542,6 +600,20 @@ var DrawModel = {
   },
 
   /**
+   * Checks if a proxy url is set.
+   * @instance
+   * @param {string} url
+   * @return {string} url
+   */
+  validateProxyUrl: function (url) {
+    if (this.get('proxyUrl')) {
+      return this.get('proxyUrl') + url.substr(url.indexOf("/Temp/"));
+    } else {
+      return url;
+    }
+  },
+
+  /**
    * Export draw layer.
    * @instance
    */
@@ -579,6 +651,9 @@ var DrawModel = {
     });
 
     postData = kmlWriter.createXML(transformed, "ritobjekt");
+    if(this.get('base64Encode')){
+      postData = btoa(postData);
+    }
 
     this.set("downloadingDrawKml", true);
     $.ajax({
@@ -590,7 +665,7 @@ var DrawModel = {
       format: "json",
       success: (url) => {
         this.set("downloadingDrawKml", false);
-        this.set("kmlExportUrl", url);
+        this.set("kmlExportUrl", this.validateProxyUrl(url));
       },
       error: (err) => {
         this.set("downloadingDrawKml", false);
@@ -745,6 +820,7 @@ var DrawModel = {
    *
    */
   getStyle: function(feature, forcedProperties) {
+    var geometryName = feature.getGeometryName();
 
     function getLineDash() {
         var scale = (a, f) => a.map(b => f * b)
@@ -766,7 +842,7 @@ var DrawModel = {
     function getFill() {
 
       function rgba() {
-        switch(type) {
+        switch(geometryName) {
           case "Circle":
             return this.get('circleFillColor')
                    .replace('rgb', 'rgba')
@@ -775,7 +851,12 @@ var DrawModel = {
           case "Polygon":
             return this.get('polygonFillColor')
                    .replace('rgb', 'rgba')
-                   .replace(')', `, ${this.get('polygonFillOpacity')})`);
+                   .replace(')', `, ${this.get('polygonFillOpacity')})`)
+
+          case "Box":
+            return this.get('boxFillColor')
+                   .replace('rgb', 'rgba')
+                   .replace(')', `, ${this.get('boxFillOpacity')})`);
         }
       }
 
@@ -788,22 +869,26 @@ var DrawModel = {
     }
 
     function lookupStyle() {
-      switch (type) {
+      switch (geometryName) {
         case "Polygon":
           return this.get('polygonLineStyle');
         case "Circle":
           return this.get('circleLineStyle');
+        case "Box":
+          return this.get('boxLineStyle');
         default:
           return this.get('lineStyle');
       }
     }
 
     function lookupWidth() {
-      switch (type) {
+      switch (geometryName) {
         case "Polygon":
           return this.get('polygonLineWidth');
         case "Circle":
           return this.get('circleLineWidth');
+        case "Box":
+          return this.get('boxLineWidth');
         default:
           return this.get('lineWidth');
       }
@@ -813,11 +898,13 @@ var DrawModel = {
       if (forcedProperties) {
         return forcedProperties.strokeColor;
       }
-      switch (type) {
+      switch (geometryName) {
         case "Polygon":
           return this.get('polygonLineColor');
         case "Circle":
           return this.get('circleLineColor');
+        case "Box":
+          return this.get('boxLineColor');
         default:
           return this.get('lineColor');
       }
@@ -940,10 +1027,13 @@ var DrawModel = {
    *
    */
   getLabelText: function (feature) {
-
     var show  = this.get('showLabels')
     ,   props = feature.getProperties()
     ,   type  = feature.getProperties().type;
+
+    if (typeof props.description !== 'undefined'){
+      type = "Text";
+    }
 
     switch (type) {
       case "Point": return show ? this.formatLabel("point", [props.position.n, props.position.e]) : "";
@@ -951,6 +1041,7 @@ var DrawModel = {
       case "Polygon": return show ? this.formatLabel("area", props.area) : "";
       case "Circle": return show ? this.formatLabel("circle", props.radius): "";
       case "Text": return props.description;
+      case "Box": return show ? this.formatLabel("area", props.area) : "";
       default: return "";
     }
   },
@@ -966,7 +1057,7 @@ var DrawModel = {
     this.get('source').changed();
 
     source.forEachFeature(feature => {
-      if (feature.getProperties().type !== "Text" && feature.getStyle()) {
+      if (feature.getProperties().type !== "Text" && typeof feature.getProperties().description === "undefined" && feature.getStyle()) {
         let style = feature.getStyle();
         if (this.get('showLabels')) {
           if (style[1]) {
@@ -980,6 +1071,13 @@ var DrawModel = {
           } else if (style[0]) {
             style[0].getText().setText("");
           }
+        }
+      } else if (feature.getProperties().type === "Text" || typeof feature.getProperties().description !== "undefined"){
+        let style = feature.getStyle();
+        if (style[1]) {
+          style[1].getText().setText(this.getLabelText(feature));
+        } else if (style[0]) {
+          style[0].getText().setText(this.getLabelText(feature));
         }
       }
     });
@@ -1061,7 +1159,7 @@ var DrawModel = {
    *
    * @instance
    */
-  clicked: function () {
+  clicked: function (arg) {
     this.set('visible', true);
     this.set('toggled', !this.get('toggled'));
   },
@@ -1216,6 +1314,51 @@ var DrawModel = {
    */
   setCircleLineWidth: function (width) {
     this.set("circleLineWidth", width);
+  },
+
+  /**
+   * Set the property boxFillColor
+   * @param {string} color
+   * @instance
+   */
+  setBoxFillColor: function (color) {
+    this.set("boxFillColor", color);
+  },
+
+  /**
+   * Set the property boxFillOpacity
+   * @param {number} opacity
+   * @instance
+   */
+  setBoxFillOpacity: function (opacity) {
+    this.set("boxFillOpacity", opacity);
+  },
+
+  /**
+   * Set the property boxLineColor
+   * @param {string} color
+   * @instance
+   */
+  setBoxLineColor: function (color) {
+    this.set("boxLineColor", color);
+  },
+
+  /**
+   * Set the property boxLineStyle
+   * @param {string} style
+   * @instance
+   */
+  setBoxLineStyle: function (style) {
+    this.set("boxLineStyle", style);
+  },
+
+  /**
+   * Set the property boxLineWidth
+   * @param {number} width
+   * @instance
+   */
+  setBoxLineWidth: function (width) {
+    this.set("boxLineWidth", width);
   },
 
   /**

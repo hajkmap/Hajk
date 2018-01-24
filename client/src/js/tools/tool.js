@@ -34,10 +34,12 @@ var ToolModelProperties = {
   type: 'tool',
   toolbar: undefined,
   panel: undefined,
+  Id: '',
   title: '',
   icon: '',
   collection: undefined,
-  navigation: undefined
+  navigation: undefined,
+  instruction: ""
 };
 
 /**
