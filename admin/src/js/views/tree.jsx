@@ -7,17 +7,10 @@ export default class Tree extends Component {
 			searchableLayers: [],
 			checked: false
 		};
-		this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
-		
 	}
 
 	componentDidMount () {
 		this.props.loadLayers(this.refs);
-	}
-
-	handleCheckboxChange(event, layer) {
-		console.log("e", event);
-		console.log("layer", layer);
 	}
 
 	toggleHide (layerId) {

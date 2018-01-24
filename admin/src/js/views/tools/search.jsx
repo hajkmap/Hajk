@@ -97,7 +97,6 @@ class ToolOptions extends Component {
         active: false
       });
     }
-    console.log()
   }
 
   componentWillUnmount() {
