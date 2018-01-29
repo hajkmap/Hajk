@@ -100,6 +100,10 @@ var LayerCollection = {
   mapWMSConfig: function(args, properties) {
     function getLegendUrl() {
       if (args.legend === "") {
+  
+          
+          args.legend = `${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${args.layers[0]}`
+       
         args.legend = `${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${args.layers[0]}`
       }
       var protocol = /^http/.test(args.legend) ? '' : 'http://';
@@ -131,7 +135,7 @@ var LayerCollection = {
         "searchOutputFormat": args.searchOutputFormat,
         "searchGeometryField": args.searchGeometryField,
         "legend" : [{
-          "Url": getLegendUrl(args),
+          "Url":  (HAJK2.wmsProxy || "") + getLegendUrl(args),
           "Description" : "Teckenförklaring"
         }],
         "params": {
@@ -337,7 +341,7 @@ var LayerCollection = {
           "LAYERS": 'show:' + args.layers.join(',')
         },
         "legend" : [{
-          "Url": getLegendUrl(args),
+          "Url":  (HAJK2.wmsProxy || "") + getLegendUrl(args),
           "Description" : "Teckenförklaring"
         }],
         "infoVisible": args.infoVisible || false,
