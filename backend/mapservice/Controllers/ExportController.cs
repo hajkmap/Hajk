@@ -69,6 +69,8 @@ namespace MapService.Controllers
             try
             {
                 _log.DebugFormat("Received json: " + json);
+
+                // try to decode input string to see if it is base64 encoded
                 try
                 {
                     byte[] decoded = Convert.FromBase64String(json);
@@ -76,7 +78,9 @@ namespace MapService.Controllers
                     _log.DebugFormat("json after decode: " + json);
                 }
                 catch (Exception e)
-                { }
+                {
+                    _log.Debug("Could not decode base64. Will treat as non-base64 encoded");
+                }
 
                 MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
                 AsyncManager.OutstandingOperations.Increment();
@@ -119,6 +123,8 @@ namespace MapService.Controllers
         public string TIFF(string json)
         {
             _log.DebugFormat("Received json: " + json);
+
+            // try to decode input string to see if it is base64 encoded
             try
             {
                 byte[] decoded = Convert.FromBase64String(json);
@@ -126,7 +132,9 @@ namespace MapService.Controllers
                 _log.DebugFormat("json after decode: " + json);
             }
             catch (Exception e)
-            { }
+            {
+                _log.Debug("Could not decode base64. Will treat as non-base64 encoded");
+            }
             MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
                                     
             TIFFCreator tiffCreator = new TIFFCreator();
@@ -182,13 +190,17 @@ namespace MapService.Controllers
         public string KML(string json)
         {
             _log.DebugFormat("Received json: " + json);
+
+            // try to decode input string to see if it is base64 encoded
             try
             {
                 byte[] decoded = Convert.FromBase64String(json);
                 json = System.Text.Encoding.UTF8.GetString(decoded);
                 _log.DebugFormat("json after decode: " + json);
             } catch(Exception e)
-            { }
+            {
+                _log.Debug("Could not decode base64. Will treat as non-base64 encoded");
+            }
             
             KMLCreator kmlCreator = new KMLCreator();
             byte[] bytes = kmlCreator.Create(json);
@@ -216,6 +228,7 @@ namespace MapService.Controllers
         public string Excel(string json)
         {
             _log.DebugFormat("Received json: " + json);
+            // try to decode input string to see if it is base64 encoded
             try
             {
                 byte[] decoded = Convert.FromBase64String(json);
@@ -223,7 +236,9 @@ namespace MapService.Controllers
                 _log.DebugFormat("json after decode: " + json);
             }
             catch (Exception e)
-            { }
+            {
+                _log.Debug("Could not decode base64. Will treat as non-base64 encoded");
+            }
             List<ExcelTemplate> data = JsonConvert.DeserializeObject<List<ExcelTemplate>>(json);
             DataSet dataSet = Util.ToDataSet(data);
             ExcelCreator excelCreator = new ExcelCreator();

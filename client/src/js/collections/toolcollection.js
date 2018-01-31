@@ -65,7 +65,7 @@ var ToolCollection = {
         case "bookmark":
             return new Bookmark(args.options);
         case "search":
-            return new Search(args.options);
+          return new Search(args.options);
         case "coordinates":
             return new Coordinates(args.options);
         case "export":
