@@ -167,18 +167,6 @@ var ArcGISLayer = {
     };
   },
 
-  removeProxyFromURLIfPresent : function(url){
-    var re = new RegExp("http://");
-    var index = url.search(re);
-    
-    if(index != -1){
-      return url.substr(index);
-    }
-    else {
-      return url;
-    }
-  },
-
   /**
    * Load feature information.
    * @instance
@@ -188,7 +176,6 @@ var ArcGISLayer = {
   getFeatureInformation: function (params) {
 
     var url = this.get('url');
-    url = this.removeProxyFromURLIfPresent(url);
     url += "/identify?";
     url += toParamString(this.getQueryParams(params.coordinate));
 
