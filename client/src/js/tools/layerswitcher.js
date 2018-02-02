@@ -53,7 +53,7 @@ var LayerSwitcherModelProperties = {
   backgroundSwitcherBlack: true,
   backgroundSwitcherWhite: true,
   toggleAllButton: true,
-  dropdownThemeMaps : true,
+  dropdownThemeMaps : false,
   themeMapHeaderCaption : 'Temakarta'
 };
 
