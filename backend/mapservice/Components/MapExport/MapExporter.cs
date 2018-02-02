@@ -27,7 +27,7 @@ using System.Web;
 using MapService.Components.MapExport.Extentions;
 using MapService.Components.MapExport.SharpMapExtensions;
 using log4net;
-
+using System.Configuration;
 
 namespace MapService.Components.MapExport
 {
@@ -218,7 +218,8 @@ namespace MapService.Components.MapExport
                 {
                     //file.WriteLine("Found a layer");
                     string layername = "WMSLayer_" + i;
-                    DpiWmsLayer layer = new DpiWmsLayer(layername, wmsLayers[i].url, exportItem.resolution);
+
+                    DpiWmsLayer layer = new DpiWmsLayer(layername, wmsLayers[i].url , exportItem.resolution);
                     
                     layer.SetImageFormat("image/png");
                     layer.BgColor = Color.White;
@@ -257,8 +258,10 @@ namespace MapService.Components.MapExport
                     //}
                 }
             }
-            catch
+            catch (Exception e)
             {
+
+                _log.ErrorFormat(e.Message);
                 /*
                 using (StreamWriter sw = new StreamWriter(@"C:\\log.txt", true))
                 {

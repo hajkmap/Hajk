@@ -21,6 +21,12 @@ public partial class postProxy : System.Web.UI.Page
         req.UserAgent = Request.UserAgent;
         req.PreAuthenticate = true;
         req.Headers["Remote-User"] = HttpContext.Current.User.Identity.Name;
+
+        if(HttpContext.Current.User.Identity.Name != null)
+        {
+            req.Headers.Add("X-Control-Header", HttpContext.Current.User.Identity.Name);
+        }
+
         foreach (string each in Request.Headers)
             if (!WebHeaderCollection.IsRestricted(each) && each != "Remote-User")
                 req.Headers.Add(each, Request.Headers.Get(each));
