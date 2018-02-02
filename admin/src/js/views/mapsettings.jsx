@@ -65,8 +65,13 @@ $.fn.editable = function(component) {
         reset();
       }
 
-      function saveLayer() {
+      function saveLayer() {      
         let visible = checkbox3.is(':checked');
+
+        if (component.state.authActive) {
+          node.parent().attr("data-visibleforgroups", input3.val());
+        }
+
         node.parent().attr("data-visibleatstart", visible);
         if (visible)
           node.parent().addClass("visible");
@@ -86,6 +91,7 @@ $.fn.editable = function(component) {
       ,   id3       = Math.floor(Math.random() * 1E5)
       ,   id4       = Math.floor(Math.random() * 1E5)
       ,   id5       = Math.floor(Math.random() * 1E5)
+      ,   id6       = Math.floor(Math.random() * 1E5)
       ,   ok        = $('<span class="btn btn-success">OK</span>')
       ,   layerOk   = $('<span class="btn btn-success">OK</span>')
       ,   layerOk2   = $('<span class="btn btn-success">OK</span>')
@@ -96,8 +102,9 @@ $.fn.editable = function(component) {
       ,   abort2     = $('<span class="btn btn-default">Avbryt</span>')
       ,   label     = $(`<label for="${id}">Expanderad vid start&nbsp;</label>`)
       ,   label2    = $(`<label for="${id2}">Toggla alla-knapp&nbsp;</label>`)
-      ,   label3    = $(`<label for="${id3}">Synlig vid start&nbsp;</label>`)
+      ,   label3    = $(`<label for="${id3}">Synlig vid start&nbsp;</label><br />`)
       ,   label4    = $(`<label for="${id4}">Redigera snabbval&nbsp;</label><br />`)
+      ,   label5    = $(`<br /><label for="${id5}">Tillträde</label><br />`)
       ,   checkbox  = $(`<input id="${id}" type="checkbox"/>`)
       ,   checkbox2 = $(`<input id="${id2}" type="checkbox"/>`)
       ,   checkbox3 = $(`<input id="${id3}" type="checkbox"/>`)
@@ -105,6 +112,7 @@ $.fn.editable = function(component) {
       ,   remove    = $('<span class="fa fa-minus-circle"></span>')
       ,   input     = $('<input />')
       ,   input2    = $(`<input id="${id5}" type="text" placeholder="Ny länk"/><br />`)
+      ,   input3    = $(`<input id="${id6}" type="text" /><br /><br />`)
       ,   expanded  = $('<div class="expanded-at-start"></div>')
       ,   toggled   = $('<div class="expanded-at-start"></div>')
       ,   visible   = $('<div class=""></div>')
@@ -136,7 +144,7 @@ $.fn.editable = function(component) {
           node.html(prev);
           reset();
         });
-
+      
       if (node.parent().attr("data-expanded") === 'true') {
         checkbox.attr('checked', 'checked');
       }
@@ -146,12 +154,19 @@ $.fn.editable = function(component) {
       if (node.parent().attr("data-visibleatstart") === 'true') {
         checkbox3.attr('checked', 'checked');
       }
+      if (node.parent().attr("data-visibleforgroups")) {
+        input3.val(node.parent().attr("data-visibleforgroups"))
+      }
 
       if (node.parent().attr("data-expanded") !== undefined && node.parent().attr("data-toggled") !== undefined) {
         expanded.append(checkbox, label);
         toggled.append(checkbox2, label2);
       }
       visible.append(checkbox3, label3);
+
+      if(component.state.authActive) {
+        visible.append(label5, input3);
+      }
 
       editPreset.append(label4, checkbox4, input2);
 
@@ -457,7 +472,6 @@ class Menu extends Component {
    *
    */
   parseSettings() {
-
     var settings = {
       groups: [],
       baselayers: [],
@@ -476,12 +490,29 @@ class Menu extends Component {
 
     function layers(node) {
       return $(node).find('> ul > li.layer-node').toArray().map(node => {
-        return {
-          id: node.dataset.id,
-          drawOrder: (node.dataset.draworder ? node.dataset.draworder : 1000),
-          visibleAtStart: node.dataset.visibleatstart
+        
+        if (this.state.authActive) {
+          let visibleForGroups = node.dataset.visibleforgroups ? node.dataset.visibleforgroups.split(",") : [];
+          if (Array.isArray(visibleForGroups)) {
+            visibleForGroups = visibleForGroups.map(Function.prototype.call, String.prototype.trim);
+          } else {
+            visibleForGroups = String.prototype.trim(visibleForGroups);
+          }
+
+          return {
+            id: node.dataset.id,
+            drawOrder: (node.dataset.draworder ? node.dataset.draworder : 1000),
+            visibleAtStart: node.dataset.visibleatstart,
+            visibleForGroups: visibleForGroups ? visibleForGroups : []
+          }  
+        } else {
+          return {
+            id: node.dataset.id,
+            drawOrder: (node.dataset.draworder ? node.dataset.draworder : 1000),
+            visibleAtStart: node.dataset.visibleatstart
+          }  
         }
-      })
+      });
     }
 
     function groups(node) {
@@ -546,7 +577,6 @@ class Menu extends Component {
   save(settings) {
     this.props.model.updateConfig(settings, success => {
       if (success) {
-
         this.setState({
           reset: true
         });
@@ -624,6 +654,7 @@ class Menu extends Component {
 
   createLayer(id) {
     var layerName = this.getLayerNameFromId(id);
+      
     var layer = $(`
       <li
         class="layer-node"
@@ -632,11 +663,11 @@ class Menu extends Component {
         <span class="layer-name">${layerName}</span>
       </li>
     `);
+    
     $('.tree-view > ul').prepend(layer);
     layer.editable(this);
     this.forceUpdate();
   }
-
   
   /**
    *
@@ -768,17 +799,34 @@ class Menu extends Component {
             }
           }
           var className = visible ? "layer-node visible" : "layer-node";
-          leafs.push(
-            <li
-              className={className}
-              key={i}
-              data-id={typeof layer === 'object' ? layer.id : layer}
-              data-draworder={typeof layer === 'object' ? layer.drawOrder : 0}
-              data-visibleatstart={visible}
-              data-type="layer">
-              <span className="layer-name">{that.getLayerNameFromId(typeof layer === 'object' ? layer.id : layer)}</span>
-            </li>
-          );
+          if (that.state.authActive) {
+            let visibleForGroups = layer.visibleForGroups ? layer.visibleForGroups : []
+
+            leafs.push(
+              <li
+                className={className}
+                key={i}
+                data-id={typeof layer === 'object' ? layer.id : layer}
+                data-draworder={typeof layer === 'object' ? layer.drawOrder : 0}
+                data-visibleatstart={visible}
+                data-type="layer"
+                data-visibleforgroups={Array.isArray(visibleForGroups) ? visibleForGroups.join(",") : visibleForGroups}>
+                <span className="layer-name">{that.getLayerNameFromId(typeof layer === 'object' ? layer.id : layer)}</span>
+              </li>
+            );
+          } else {
+            leafs.push(
+              <li
+                className={className}
+                key={i}
+                data-id={typeof layer === 'object' ? layer.id : layer}
+                data-draworder={typeof layer === 'object' ? layer.drawOrder : 0}
+                data-visibleatstart={visible}
+                data-type="layer">
+                <span className="layer-name">{that.getLayerNameFromId(typeof layer === 'object' ? layer.id : layer)}</span>
+              </li>
+            );
+          }
         });
         if (group.hasOwnProperty('groups')) {
           leafs.push(roots(group.groups));
@@ -963,11 +1011,14 @@ class Menu extends Component {
    * Visar / döljer lista över tillgängliga AD-grupper
    */
 	toggleHidden () {
-		this.setState({
-			isHidden: !this.state.isHidden
-    });
-
-    this.state.isHidden ? this.renderAdList() : this.setState({adList: null})
+    if (this.state.authActive) {
+      this.setState({
+        isHidden: !this.state.isHidden
+      });
+  
+      this.state.isHidden ? this.renderAdList() : this.setState({adList: null})
+    }
+		
 	}
 
   /**

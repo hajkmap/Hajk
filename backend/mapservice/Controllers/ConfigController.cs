@@ -472,7 +472,7 @@ namespace MapService.Controllers
                 var searchTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'search')]");
                 var layersInSearchTool = searchTool.SelectToken("$.options.layers");
                 var userGroups = adLookup.GetGroups(activeUser);
-
+                if (layersInSearchTool == null) { return ""; }
                 foreach (JToken child in layersInSearchTool.Children())
                 {
                     var visibleForGroups = child.SelectToken("$.visibleForGroups");

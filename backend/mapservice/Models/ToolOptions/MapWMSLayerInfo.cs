@@ -13,5 +13,7 @@ namespace MapService.Models.ToolOptions
         public bool visibleAtStart { get; set; }
 
         public int drawOrder { get; set; }
+
+        public string[] visibleForGroups { get; set; }
     }
 }

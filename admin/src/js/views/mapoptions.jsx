@@ -53,8 +53,8 @@ class MapOptions extends Component {
         infologo: config.infologo,
         mobileleft: config.mobileleft,
         mobileright: config.mobileright,
-		mobile: config.mobile,
-		title: config.title
+		    mobile: config.mobile,
+		    title: config.title ? config.title : ""
       });
     });
     this.validate();
@@ -84,7 +84,6 @@ class MapOptions extends Component {
     this.state.extent = mapConfig.extent;
     this.state.infologo = mapConfig.infologo;
     this.state.mobile = mapConfig.mobile;
-	console.log("mapConfig", this.state.title);
   }
 
   getValue(fieldName) {

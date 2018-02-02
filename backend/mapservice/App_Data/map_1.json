@@ -173,14 +173,16 @@
       "options": {
         "baselayers": [
           {
-            "id": "50",
-            "visibleAtStart": true,
-            "drawOrder": 0
+            "id": "7",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null
           },
           {
-            "id": "46",
-            "visibleAtStart": false,
-            "drawOrder": 0
+            "id": "50",
+            "visibleAtStart": true,
+            "drawOrder": 0,
+            "visibleForGroups": null
           }
         ],
         "groups": [
@@ -192,17 +194,63 @@
             "expanded": false,
             "layers": [
               {
-                "id": "47",
+                "id": "46",
                 "visibleAtStart": false,
-                "drawOrder": 1000
-              },
-              {
-                "id": "48",
-                "visibleAtStart": false,
-                "drawOrder": 1000
+                "drawOrder": 0,
+                "visibleForGroups": []
               }
             ],
-            "groups": []
+            "groups": [
+              {
+                "id": "1bb6fbcb-9b16-d657-af9b-154a3ebc52aa",
+                "parent": "96638717-9cf2-61f7-75a8-3a4859140cf7",
+                "name": "Grupp 1.1",
+                "toggled": false,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "47",
+                    "visibleAtStart": true,
+                    "drawOrder": 1000,
+                    "visibleForGroups": []
+                  }
+                ],
+                "groups": []
+              }
+            ]
+          },
+          {
+            "id": "cae3b092-b58e-7fa8-83bd-39b179696975",
+            "parent": "-1",
+            "name": "Grupp 2",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "43",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": []
+              }
+            ],
+            "groups": [
+              {
+                "id": "12bd24f5-be7f-a022-4304-70e3353d3023",
+                "parent": "cae3b092-b58e-7fa8-83bd-39b179696975",
+                "name": "Grupp 2.1",
+                "toggled": false,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "23",
+                    "visibleAtStart": false,
+                    "drawOrder": 1000,
+                    "visibleForGroups": []
+                  }
+                ],
+                "groups": []
+              }
+            ]
           }
         ],
         "instruction": "instruktion",
