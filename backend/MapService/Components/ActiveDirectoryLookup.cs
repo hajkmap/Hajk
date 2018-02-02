@@ -29,6 +29,7 @@ namespace MapService.Components
         {
             
             var activeUser = System.Security.Principal.WindowsIdentity.GetCurrent();
+            _log.InfoFormat("Active user" + activeUser);
             if (activeUser.ImpersonationLevel == System.Security.Principal.TokenImpersonationLevel.Impersonation)
             {
                 return activeUser.Name;
