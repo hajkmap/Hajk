@@ -40,14 +40,14 @@ namespace MapService.Controllers
         {
             string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
             string file = String.Format("{0}\\{1}.json", folder, id);
-			string fileName = Path.GetFileNameWithoutExtension(file);
+            string fileName = Path.GetFileNameWithoutExtension(file);
 
             _log.DebugFormat("{0}\\{1}.json", folder, id);
             MapConfig mapConfig = new MapConfig()
             {
                 map = new MapSetting()
                 {
-					title = fileName,
+                    title = fileName,
                     maxZoom = 3,
                     minZoom = 9,
                     zoom = 3,
@@ -276,11 +276,9 @@ namespace MapService.Controllers
             string jsonOutput = JsonConvert.SerializeObject(mapConfig, Formatting.Indented);
             System.IO.File.WriteAllText(file, jsonOutput);
         }
-
-        private JToken GetMapConfigurationTitle(string mapConfigurationFile)
+        private JToken GetMapConfigurationTitle(JToken mapConfiguration, string mapConfigurationFile)
         {
-            var json = System.IO.File.ReadAllText(mapConfigurationFile);
-            JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(json);
+
             var title = mapConfiguration.SelectToken("$.map.title");
 
             if (title == null)
@@ -289,29 +287,25 @@ namespace MapService.Controllers
             }
 
             return title;
-        }
-
-        private JToken GetJSONKeyValueFromTool(string mapConfigurationFile, string searchKey, string tool)
+        } 
+        private JToken GetOptionsObjectFromTool(JToken mapConfiguration, string searchKey, string tool)
         {
-            var json = System.IO.File.ReadAllText(mapConfigurationFile);
-            JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(json);
-            var layerSwitcher = mapConfiguration.SelectToken("$.tools[?(@.type == '" + tool +"')]");
-            var keyValue = layerSwitcher.SelectToken("$.options."+searchKey);
+            var layerSwitcher = mapConfiguration.SelectToken("$.tools[?(@.type == '" + tool + "')]");
+            var keyValue = layerSwitcher.SelectToken("$.options." + searchKey);
 
             return keyValue;
         }
-
-        private Boolean HasActiveDropDownThemeMap(string mapConfigurationFile)
+        private Boolean HasActiveDropDownThemeMap(JToken mapConfiguration, string mapConfigurationFile)
         {
-            var dropdownThemeMaps = GetJSONKeyValueFromTool(mapConfigurationFile, "dropdownThemeMaps", "layerswitcher");
+            var dropdownThemeMaps = GetOptionsObjectFromTool(mapConfiguration, "dropdownThemeMaps", "layerswitcher");
 
-            if(dropdownThemeMaps == null)
+            if (dropdownThemeMaps == null)
             {
                 _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " is missing the object 'dropDownThemeMap'");
                 return false;
-            }  
+            }
 
-            if(dropdownThemeMaps.Value<Boolean>() == false)
+            if (dropdownThemeMaps.Value<Boolean>() == false)
             {
                 _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " has the 'dropDownThemeMap' key set to 'false' ");
                 return false;
@@ -320,20 +314,7 @@ namespace MapService.Controllers
             return true;
 
         }
-
-        private JToken GetVisibleForGroups (string mapConfigurationFile)
-        {
-            var visibleForGroups = GetJSONKeyValueFromTool(mapConfigurationFile, "visibleForGroups", "layerswitcher");
-
-            if (visibleForGroups == null)
-            {
-                _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " is missing the 'visibleForGroups' object");
-            }
-
-            return visibleForGroups;
-        }
-
-        private ThemeMap AddNewThemeMap (string fileName, string mapTitle)
+        private ThemeMap AddNewThemeMap(string fileName, string mapTitle)
         {
             return new ThemeMap
             {
@@ -341,7 +322,6 @@ namespace MapService.Controllers
                 mapConfigurationTitle = mapTitle.ToString()
             };
         }
-
         private List<ThemeMap> GetAllowedMapConfigurations()
         {
             var parameters = GetLookupParameters();
@@ -359,10 +339,20 @@ namespace MapService.Controllers
 
                 if (fileName != "layers")
                 {
-                    if (HasActiveDropDownThemeMap(mapConfigurationFile))
+                    var json = System.IO.File.ReadAllText(mapConfigurationFile);
+                    JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(json);
+
+
+                    if (HasActiveDropDownThemeMap(mapConfiguration, mapConfigurationFile))
                     {
-                        var visibleForGroups = GetVisibleForGroups(mapConfigurationFile);
-                        var mapTitle = GetMapConfigurationTitle(mapConfigurationFile);
+                        var visibleForGroups = GetOptionsObjectFromTool(mapConfiguration, "visibleForGroups", "layerswitcher");
+
+                        if (visibleForGroups == null)
+                        {
+                            _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " is missing the 'visibleForGroups' object");
+                        }
+
+                        var mapTitle = GetMapConfigurationTitle(mapConfiguration, mapConfigurationFile);
 
                         if (visibleForGroups != null && mapTitle != null)
                         {
@@ -371,7 +361,7 @@ namespace MapService.Controllers
                                 mapConfigurationsList.Add(AddNewThemeMap(fileName, mapTitle.ToString()));
                             }
 
-                            if(activeUser.Length != 0 && visibleForGroups.First != null)
+                            if (activeUser.Length != 0 && visibleForGroups.First != null)
                             {
                                 if (visibleForGroups.First.ToString() == "*")
                                 {
@@ -394,7 +384,6 @@ namespace MapService.Controllers
             }
             return mapConfigurationsList;
         }
-
         public string[] GetUserGroups()
         {
             var parameters = GetLookupParameters();
@@ -403,14 +392,13 @@ namespace MapService.Controllers
             var activeUser = adLookup.GetActiveUser();
             var userGroups = adLookup.GetGroups(activeUser);
 
-			Response.Expires = 0;
+            Response.Expires = 0;
             Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
             Response.ContentType = "text/html; charset=utf-8";
             Response.Headers.Add("Cache-Control", "private, no-cache");
 
             return userGroups;
         }
-		
         /// <summary>
         /// Set required parameters for AD lookup to dictionary.
         /// </summary>
@@ -427,8 +415,199 @@ namespace MapService.Controllers
             };
             return parameters;
         }
+        private void GetUserAllowedBaseLayers(ref JToken baseLayersInLayerSwitcher, string[] userGroups)
+        {
+            var layerObjectsToRemove = GetLayerObjectsToRemove(baseLayersInLayerSwitcher, userGroups);
 
+            foreach (string id in layerObjectsToRemove)
+            {
+                baseLayersInLayerSwitcher.SelectToken("$.[?(@.id=='" + id + "')]").Remove();
+            }
+        }
+        private void GetUserAllowedLayers(ref JToken groups, string[] userGroups)
+        {
+            foreach (JToken group in groups)
+            {
+                if (group.SelectToken("$.groups") != null)
+                {
+                    var groups2 = group.SelectToken("$.groups");
+                    GetUserAllowedLayers(ref groups2, userGroups);
+                }
 
+                var layers = group.SelectToken("$.layers");
+                var layerObjectsToRemove = GetLayerObjectsToRemove(layers, userGroups);
+
+                foreach (string id in layerObjectsToRemove)
+                {
+                    layers.SelectToken("$.[?(@.id=='" + id + "')]").Remove();
+                }
+            }
+        }
+        private List<string> GetLayerObjectsToRemove(JToken layers, string[] userGroups)
+        {
+            var childrenToRemove = new List<string>();
+            foreach (JToken layer in layers)
+            {
+                bool allowed = false;
+                var visibleForGroups = layer.SelectToken("$.visibleForGroups");
+
+                if (HasValidVisibleForGroups(visibleForGroups))
+                {
+                    if (!visibleForGroups.HasValues)
+                    {
+                        allowed = true;
+                    }
+                    else
+                    {
+                        allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
+                    }
+                }
+                else
+                {
+                    allowed = false;
+                    _log.ErrorFormat("Can't filter tools because" + layer + " is missing the key 'VisibleForGroups'");
+                }
+                if (!allowed)
+                {
+                    childrenToRemove.Add(layer.SelectToken("$.id").ToString());
+                }
+            }
+            return childrenToRemove;
+        }
+        private JToken FilterLayersByAD(ActiveDirectoryLookup adLookup, JToken mapConfiguration, string activeUser)
+        {
+
+            var layerSwitcher = mapConfiguration.SelectToken("$.tools[?(@.type == 'layerswitcher')]");
+            var baseLayersInLayerSwitcher = layerSwitcher.SelectToken("$.options.baselayers");
+            var groupsInLayerSwitcher = layerSwitcher.SelectToken("$.options.groups");
+            var userGroups = adLookup.GetGroups(activeUser);
+
+            GetUserAllowedLayers(ref groupsInLayerSwitcher, userGroups);
+            GetUserAllowedBaseLayers(ref baseLayersInLayerSwitcher, userGroups);
+
+            return mapConfiguration;
+        }
+        private string FilterSearchLayersByAD (ActiveDirectoryLookup adLookup, JToken mapConfiguration, string activeUser)
+        {
+            var childrenToRemove = new List<string>();  
+            var searchTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'search')]");
+            var layersInSearchTool = searchTool.SelectToken("$.options.layers");
+            var userGroups = adLookup.GetGroups(activeUser);
+
+            if(layersInSearchTool == null)
+            {
+                _log.ErrorFormat("SearchTool is missing the layersobject");
+                throw new HttpException(500, "SearchTool is missing the layersobject"); 
+            }
+
+            foreach (JToken child in layersInSearchTool.Children())
+            {
+                var visibleForGroups = child.SelectToken("$.visibleForGroups");
+                bool allowed = false;
+
+                if (HasValidVisibleForGroups(visibleForGroups))
+                {
+                    if (!visibleForGroups.HasValues)
+                    {
+                        allowed = true;
+                    }
+                    else
+                    {
+                        allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
+                    }
+                }
+                else
+                {
+                    allowed = false;
+                    _log.ErrorFormat("Can't filter search layers because search tool because the key 'VisibleForGroups' is missing or incorrect"); 
+                }
+
+                if (!allowed)
+                {
+                    childrenToRemove.Add(child.SelectToken("$.id").ToString());
+                }
+            }
+
+            foreach (string id in childrenToRemove)
+            {
+                layersInSearchTool.SelectToken("$.[?(@.id=='" + id + "')]").Remove();
+            }
+
+            //NULL if User is not allowed to any searchlayer because empty array means use of global searchconfig
+            if (!layersInSearchTool.HasValues)
+            {
+                layersInSearchTool.Replace(null);
+            }
+                
+        return mapConfiguration.ToString();
+        }
+        private bool IsGroupAllowedAccess (string [] userGroups, JToken visibleForGroups)
+        {
+            foreach (string group in userGroups)
+            {
+                foreach (string ADgroup in visibleForGroups)
+                {
+                    if (group.Equals(ADgroup))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        private JToken FilterToolsByAD(ActiveDirectoryLookup adLookup, JToken mapConfiguration, string activeUser)
+        {
+            var childrenToRemove = new List<string>();
+            var userGroups = adLookup.GetGroups(activeUser);
+            var tools = mapConfiguration.SelectToken("$.tools");
+
+            foreach(JToken tool in tools)
+            {
+                bool allowed = false;
+                var visibleForGroups = tool.SelectToken("$.options.visibleForGroups");
+
+                if (HasValidVisibleForGroups(visibleForGroups))
+                {
+                    if (!visibleForGroups.HasValues)
+                    {
+                        allowed = true;
+                    }
+                    else
+                    {
+                        allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
+                    }
+                }
+                else
+                {
+                    allowed = false;
+                    _log.ErrorFormat("Can't filter tools because" + tool +" is missing the key 'VisibleForGroups'");
+                }
+ 
+                if (!allowed)
+                {
+                    childrenToRemove.Add(tool.SelectToken("$.type").ToString());
+                }
+
+            }
+
+            foreach (string type in childrenToRemove)
+            {
+                tools.SelectToken("$.[?(@.type=='" + type + "')]").Remove();
+            }
+
+            return mapConfiguration;
+        }
+        private bool HasValidVisibleForGroups(JToken visibleForGroups)
+        {
+            if (visibleForGroups != null)
+            {
+                if (visibleForGroups.First != null)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         private string UserSpecificMaps()
         {
             var allowedMapConfigurations = GetAllowedMapConfigurations();
@@ -440,7 +619,6 @@ namespace MapService.Controllers
 
             return JsonConvert.SerializeObject(allowedMapConfigurations);
         }
-
         public string List(string id)
         {
             Response.Expires = 0;
@@ -465,49 +643,6 @@ namespace MapService.Controllers
             }
             return JsonConvert.SerializeObject(fileList);
         }
-
-        private string FilterSearchLayersByAD (ActiveDirectoryLookup adLookup, JToken mapConfiguration, string activeUser)
-        {
-                var childrenToRemove = new List<string>();  
-                var searchTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'search')]");
-                var layersInSearchTool = searchTool.SelectToken("$.options.layers");
-                var userGroups = adLookup.GetGroups(activeUser);
-                if (layersInSearchTool == null) { return ""; }
-                foreach (JToken child in layersInSearchTool.Children())
-                {
-                    var visibleForGroups = child.SelectToken("$.visibleForGroups");
-                    bool removeChild = true;
-                    foreach(string user in userGroups)
-                    {
-                        foreach(string group in visibleForGroups)
-                        {
-                            if (user.Equals(group))
-                            {
-                            removeChild = false;
-                            }
-                        }    
-                    }
-                    if (removeChild)
-                    {
-                        childrenToRemove.Add(child.SelectToken("$.id").ToString());
-                    }
-                
-                }
-
-                foreach (string id in childrenToRemove)
-                {
-                    layersInSearchTool.SelectToken("$.[?(@.id=='" + id + "')]").Remove();
-                }
-
-            //NULL if User is not allowed to any searchlayer because empty array means use of global searchconfig
-            if (!layersInSearchTool.HasValues)
-            {
-                layersInSearchTool.Replace(null);
-            }
-                
-                return mapConfiguration.ToString();
-            }
-
         public string GetConfig(string name)
         {
             try
@@ -550,16 +685,22 @@ namespace MapService.Controllers
                     if (activeUser.Length != 0 && name != "layers")
                     {
                         JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(System.IO.File.ReadAllText(file));
-                        var searchTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'search')]");
 
-                        if(searchTool != null)
+                        var filteredMapConfiguration = FilterLayersByAD(adLookup, mapConfiguration, activeUser);
+                        
+
+                        filteredMapConfiguration = FilterToolsByAD(adLookup, filteredMapConfiguration, activeUser);
+                        var searchTool = filteredMapConfiguration.SelectToken("$.tools[?(@.type == 'search')]");
+
+                        if (searchTool != null)
                         {
-                            return FilterSearchLayersByAD(adLookup, mapConfiguration, activeUser);
+                            return FilterSearchLayersByAD(adLookup, filteredMapConfiguration, activeUser);
                         }
                         else
                         {
-                            return System.IO.File.ReadAllText(file);
-                        }                     
+                            return filteredMapConfiguration.ToString();
+                        }
+
                     }
                     else
                     {

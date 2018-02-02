@@ -156,7 +156,7 @@
   internal.overrideGlobalSearchConfig = function(searchTool, data) {
 
     var configSpecificSearchLayers = searchTool.options.layers;
-    var searchLayers = data.wfslayers.map(layer => {
+    var searchLayers = data.wfslayers.filter(layer => {
       if(configSpecificSearchLayers.find(x => x.id == layer.id)){
         return layer;
       }
@@ -230,6 +230,7 @@
             }
           }
         }
+        console.log(wfslayers,"wfslayers")
 
         if (editTool) {
           editTool.options.sources = data.wfstlayers;
