@@ -92,6 +92,7 @@ $.fn.editable = function(component) {
       ,   id4       = Math.floor(Math.random() * 1E5)
       ,   id5       = Math.floor(Math.random() * 1E5)
       ,   id6       = Math.floor(Math.random() * 1E5)
+      ,   id7       = Math.floor(Math.random() * 1E5)
       ,   ok        = $('<span class="btn btn-success">OK</span>')
       ,   layerOk   = $('<span class="btn btn-success">OK</span>')
       ,   layerOk2   = $('<span class="btn btn-success">OK</span>')
@@ -104,7 +105,8 @@ $.fn.editable = function(component) {
       ,   label2    = $(`<label for="${id2}">Toggla alla-knapp&nbsp;</label>`)
       ,   label3    = $(`<label for="${id3}">Synlig vid start&nbsp;</label><br />`)
       ,   label4    = $(`<label for="${id4}">Redigera snabbval&nbsp;</label><br />`)
-      ,   label5    = $(`<br /><label for="${id5}">Tillträde</label><br />`)
+      ,   label5    = $(`<br /><label for="${id6}">Tillträde</label><br />`)
+      ,   label6    = $(`<label for="${id7}">Infobox</label><br />`)
       ,   checkbox  = $(`<input id="${id}" type="checkbox"/>`)
       ,   checkbox2 = $(`<input id="${id2}" type="checkbox"/>`)
       ,   checkbox3 = $(`<input id="${id3}" type="checkbox"/>`)
@@ -112,7 +114,8 @@ $.fn.editable = function(component) {
       ,   remove    = $('<span class="fa fa-minus-circle"></span>')
       ,   input     = $('<input />')
       ,   input2    = $(`<input id="${id5}" type="text" placeholder="Ny länk"/><br />`)
-      ,   input3    = $(`<input id="${id6}" type="text" /><br /><br />`)
+      ,   input3    = $(`<input id="${id6}" type="text" /><br />`)
+      ,   input4    = $(`<input id="${id7}" type="text" /><br /><br />`)
       ,   expanded  = $('<div class="expanded-at-start"></div>')
       ,   toggled   = $('<div class="expanded-at-start"></div>')
       ,   visible   = $('<div class=""></div>')
@@ -165,7 +168,10 @@ $.fn.editable = function(component) {
       visible.append(checkbox3, label3);
 
       if(component.state.authActive) {
+        console.log("label5", label5, "input3", input3);
+        console.log("label6", label6, "input4", input4);
         visible.append(label5, input3);
+        visible.append(label6, input4);
       }
 
       editPreset.append(label4, checkbox4, input2);
