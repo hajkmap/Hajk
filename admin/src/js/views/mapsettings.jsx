@@ -70,6 +70,7 @@ $.fn.editable = function(component) {
 
         if (component.state.authActive) {
           node.parent().attr("data-visibleforgroups", input3.val());
+          node.parent().attr("data-infobox", input4.val());
         }
 
         node.parent().attr("data-visibleatstart", visible);
@@ -158,7 +159,10 @@ $.fn.editable = function(component) {
         checkbox3.attr('checked', 'checked');
       }
       if (node.parent().attr("data-visibleforgroups")) {
-        input3.val(node.parent().attr("data-visibleforgroups"))
+        input3.val(node.parent().attr("data-visibleforgroups"));
+      }
+      if (node.parent().attr("data-infobox")) {
+        input4.val(node.parent().attr("data-infobox"));
       }
 
       if (node.parent().attr("data-expanded") !== undefined && node.parent().attr("data-toggled") !== undefined) {
@@ -168,8 +172,6 @@ $.fn.editable = function(component) {
       visible.append(checkbox3, label3);
 
       if(component.state.authActive) {
-        console.log("label5", label5, "input3", input3);
-        console.log("label6", label6, "input4", input4);
         visible.append(label5, input3);
         visible.append(label6, input4);
       }
@@ -493,23 +495,26 @@ class Menu extends Component {
     };
 
     var roots = $('.tree-view > ul > li');
-
+    let that = this;
     function layers(node) {
       return $(node).find('> ul > li.layer-node').toArray().map(node => {
         
-        if (this.state.authActive) {
+        if (that.state.authActive) {
           let visibleForGroups = node.dataset.visibleforgroups ? node.dataset.visibleforgroups.split(",") : [];
+          let infobox = node.dataset.infobox ? node.dataset.infobox : "";
           if (Array.isArray(visibleForGroups)) {
             visibleForGroups = visibleForGroups.map(Function.prototype.call, String.prototype.trim);
           } else {
             visibleForGroups = String.prototype.trim(visibleForGroups);
           }
 
+
           return {
             id: node.dataset.id,
             drawOrder: (node.dataset.draworder ? node.dataset.draworder : 1000),
             visibleAtStart: node.dataset.visibleatstart,
-            visibleForGroups: visibleForGroups ? visibleForGroups : []
+            visibleForGroups: visibleForGroups ? visibleForGroups : [],
+            infobox: infobox ? infobox : ""
           }  
         } else {
           return {
@@ -806,7 +811,8 @@ class Menu extends Component {
           }
           var className = visible ? "layer-node visible" : "layer-node";
           if (that.state.authActive) {
-            let visibleForGroups = layer.visibleForGroups ? layer.visibleForGroups : []
+            let visibleForGroups = layer.visibleForGroups ? layer.visibleForGroups : [];
+            let infobox = layer.infobox ? layer.infobox: "";
 
             leafs.push(
               <li
@@ -816,7 +822,8 @@ class Menu extends Component {
                 data-draworder={typeof layer === 'object' ? layer.drawOrder : 0}
                 data-visibleatstart={visible}
                 data-type="layer"
-                data-visibleforgroups={Array.isArray(visibleForGroups) ? visibleForGroups.join(",") : visibleForGroups}>
+                data-visibleforgroups={Array.isArray(visibleForGroups) ? visibleForGroups.join(",") : visibleForGroups}
+                data-infobox={infobox}>
                 <span className="layer-name">{that.getLayerNameFromId(typeof layer === 'object' ? layer.id : layer)}</span>
               </li>
             );

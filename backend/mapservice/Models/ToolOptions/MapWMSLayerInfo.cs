@@ -15,5 +15,7 @@ namespace MapService.Models.ToolOptions
         public int drawOrder { get; set; }
 
         public string[] visibleForGroups { get; set; }
+
+        public string infobox { get; set; }
     }
 }
