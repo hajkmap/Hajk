@@ -555,13 +555,32 @@ class Menu extends Component {
     }
 
     roots.toArray().forEach(root => {
-      root.dataset.type === "layer" ?
+      let visibleForGroups = root.dataset.visibleforgroups ? root.dataset.visibleforgroups.split(",") : [];
+      if (Array.isArray(visibleForGroups)) {
+        visibleForGroups = visibleForGroups.map(Function.prototype.call, String.prototype.trim);
+      } else {
+        visibleForGroups = String.prototype.trim(visibleForGroups);
+      }
+      
+      if (this.state.authActive) {
+        root.dataset.type === "layer" ?
       settings.baselayers.push({
         id: root.dataset.id,
         visibleAtStart: root.dataset.visibleatstart,
-        drawOrder: 0
+        drawOrder: 0,
+        visibleForGroups: visibleForGroups ? visibleForGroups : [],
+        infobox: ""
       }) :
-      settings.groups.push(groupItem(root))
+      settings.groups.push(groupItem(root));    
+      } else {
+        root.dataset.type === "layer" ?
+        settings.baselayers.push({
+          id: root.dataset.id,
+          visibleAtStart: root.dataset.visibleatstart,
+          drawOrder: 0
+        }) :
+        settings.groups.push(groupItem(root));
+      }
 	});
     return settings;
   }
