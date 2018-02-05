@@ -683,7 +683,7 @@ namespace MapService.Controllers
                     var activeUser = adLookup.GetActiveUser();
                     var isRequestFromAdmin = true;
 
-                    if (Request.UrlReferrer.ToString().IndexOf("admin") == -1)
+                    if (Request.UrlReferrer.ToString().IndexOf("/admin") == -1)
                     {
                         isRequestFromAdmin = false;
                     }
