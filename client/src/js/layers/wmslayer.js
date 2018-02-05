@@ -107,9 +107,9 @@ var WmsLayer = {
   },
 
   removeProxyFromURLIfPresent : function(url){
+
     var re = new RegExp("http://");
-    var index = url.search(re);
-    
+    var index = url.lastIndexOf("http://");
     if(index != -1){
       return url.substr(index);
     }
