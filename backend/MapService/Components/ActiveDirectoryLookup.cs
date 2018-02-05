@@ -29,7 +29,7 @@ namespace MapService.Components
         {
             
             var activeUser = System.Security.Principal.WindowsIdentity.GetCurrent();
-            _log.InfoFormat("Active user" + activeUser);
+            _log.InfoFormat("Active user " + activeUser.Name);
             if (activeUser.ImpersonationLevel == System.Security.Principal.TokenImpersonationLevel.Impersonation)
             {
                 return activeUser.Name;
@@ -63,6 +63,13 @@ namespace MapService.Components
                 groups = userPrincipal.GetGroups();
                 _log.InfoFormat("Non-recursive AD-search used");
             }
+
+            _log.InfoFormat("The active user is a member of the following groups:");
+            foreach (string group in groups.Select(g => g.Name).ToArray())
+            {
+                _log.InfoFormat(group);
+            }
+            
 
             return groups.Select(g => g.Name).ToArray();
         }

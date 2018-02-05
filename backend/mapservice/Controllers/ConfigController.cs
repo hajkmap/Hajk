@@ -465,7 +465,7 @@ namespace MapService.Controllers
                 else
                 {
                     allowed = false;
-                    _log.ErrorFormat("Can't filter tools because" + layer + " is missing the key 'VisibleForGroups'");
+                    _log.ErrorFormat("Can't filter tools because layer with id " + layer.SelectToken("$.id") + " is missing the key 'VisibleForGroups'");
                 }
                 if (!allowed)
                 {
@@ -580,7 +580,7 @@ namespace MapService.Controllers
                 else
                 {
                     allowed = false;
-                    _log.ErrorFormat("Can't filter tools because" + tool +" is missing the key 'VisibleForGroups'");
+                    _log.ErrorFormat("Can't filter tools because " + tool.SelectToken("$.type") + " is missing the key 'VisibleForGroups'");
                 }
  
                 if (!allowed)
