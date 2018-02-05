@@ -681,8 +681,14 @@ namespace MapService.Controllers
                     var parameters = GetLookupParameters();
                     var adLookup = new ActiveDirectoryLookup(parameters["ADdomain"], parameters["ADcontainer"], parameters["ADuser"], parameters["ADpassword"]);
                     var activeUser = adLookup.GetActiveUser();
+                    var isRequestFromAdmin = true;
 
-                    if (activeUser.Length != 0 && name != "layers")
+                    if (Request.UrlReferrer.ToString().IndexOf("admin") == -1)
+                    {
+                        isRequestFromAdmin = false;
+                    }
+
+                    if (activeUser.Length != 0 && name != "layers" && !isRequestFromAdmin)
                     {
                         JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(System.IO.File.ReadAllText(file));
 
