@@ -70,12 +70,19 @@
     var x = parseFloat(b.x) || a.map.center[0],
       y = parseFloat(b.y) || a.map.center[1],
       z = parseInt(b.z) || a.map.zoom,
-      l = b.l;
+      l = b.l,
+      pin = b.pin === "true";
+
 
     // parametrar s och v kan också anges på url. Dessa avkodas och används serchbar.jsx
     a.map.center[0] = x;
     a.map.center[1] = y;
     a.map.zoom = z;
+
+    if (pin){
+      // Add pin to a.map
+      // TODO
+    }
 
     if (l) {
       l = l.split(',');
