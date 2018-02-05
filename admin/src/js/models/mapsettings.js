@@ -118,20 +118,25 @@ var menu = Model.extend({
 	/**
 	 * Hämtar sträng med tillgängliga ad-grupper och konverterar till string[]
 	 */
-	fetchADGroups: function (callback) {		
-		$.ajax({
-			url: "/mapservice/config/getusergroups",
-			method: 'GET',
-			success: (data) => {
-				let g = data.split(",");
-				let array = g.map(Function.prototype.call, String.prototype.trim)
+	fetchADGroups: function (callback) {
+		if (this.get('config').authentication_active) {
+			$.ajax({
+				url: "/mapservice/config/getusergroups",
+				method: 'GET',
+				success: (data) => {
+					let g = data.split(",");
+					let array = g.map(Function.prototype.call, String.prototype.trim)
+	
+					callback(array);
+				},
+				error: (err) => {
+					console.log("Fel: ", err);
+				}
+			})
 
-				callback(array);
-			},
-			error: (err) => {
-				console.log("Fel: ", err);
-			}
-		})
+		} else {
+			return [];
+		}
 	},
 
 	updateConfig: function (config, callback) {

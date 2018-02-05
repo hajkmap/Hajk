@@ -35,8 +35,8 @@
     "url_layers": "/mapservice/config/layers",
     "url_layermenu_settings": "/mapservice/settings/layermenu",
     "url_map_settings": "/mapservice/settings/mapsettings",
-	"url_tool_settings": "/mapservice/settings/toolsettings",
-	"authentication_active": true
+	  "url_tool_settings": "/mapservice/settings/toolsettings",
+	  "authentication_active": false
   },
   "router": [
     { "name": "layermanager", "title": "Visningstjänster", "default": true },
