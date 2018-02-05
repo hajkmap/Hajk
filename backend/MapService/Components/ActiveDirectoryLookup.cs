@@ -21,7 +21,7 @@ namespace MapService.Components
             }
             catch
             {
-                _log.ErrorFormat("Kunde inte koppla upp mot Active Directory, kontrollera inloggningsuppgifter");
+                _log.Error("Kunde inte koppla upp mot Active Directory, kontrollera inloggningsuppgifter");
             }
           }
 
@@ -49,7 +49,7 @@ namespace MapService.Components
 
             if (userPrincipal == null)
             {
-                _log.ErrorFormat("User is not present in the AD-container specified in Web.config");
+                _log.Error("User is not present in the AD-container specified in Web.config");
                 throw new HttpException(404, "User not found");
             }
 

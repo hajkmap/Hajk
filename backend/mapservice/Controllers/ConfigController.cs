@@ -283,7 +283,7 @@ namespace MapService.Controllers
 
             if (title == null)
             {
-                _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " is missing the 'title' object");
+                _log.Error("MapConfigurationFile" + mapConfigurationFile + " is missing the 'title' object");
             }
 
             return title;
@@ -301,13 +301,13 @@ namespace MapService.Controllers
 
             if (dropdownThemeMaps == null)
             {
-                _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " is missing the object 'dropDownThemeMap'");
+                _log.Error("MapConfigurationFile" + mapConfigurationFile + " is missing the object 'dropDownThemeMap'");
                 return false;
             }
 
             if (dropdownThemeMaps.Value<Boolean>() == false)
             {
-                _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " has the 'dropDownThemeMap' key set to 'false' ");
+                _log.Error("MapConfigurationFile" + mapConfigurationFile + " has the 'dropDownThemeMap' key set to 'false' ");
                 return false;
             }
 
@@ -349,7 +349,7 @@ namespace MapService.Controllers
 
                         if (visibleForGroups == null)
                         {
-                            _log.ErrorFormat("MapConfigurationFile" + mapConfigurationFile + " is missing the 'visibleForGroups' object");
+                            _log.Error("MapConfigurationFile" + mapConfigurationFile + " is missing the 'visibleForGroups' object");
                         }
 
                         var mapTitle = GetMapConfigurationTitle(mapConfiguration, mapConfigurationFile);
@@ -452,20 +452,13 @@ namespace MapService.Controllers
                 var visibleForGroups = layer.SelectToken("$.visibleForGroups");
 
                 if (HasValidVisibleForGroups(visibleForGroups))
-                {
-                    if (!visibleForGroups.HasValues)
-                    {
-                        allowed = true;
-                    }
-                    else
-                    {
+                {            
                         allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
-                    }
                 }
                 else
                 {
-                    allowed = false;
-                    _log.ErrorFormat("Can't filter tools because layer with id " + layer.SelectToken("$.id") + " is missing the key 'VisibleForGroups'");
+                    allowed = true;
+                    _log.Error("Can't filter tools because layer with id " + layer.SelectToken("$.id") + " is missing the key 'VisibleForGroups'");
                 }
                 if (!allowed)
                 {
@@ -496,7 +489,7 @@ namespace MapService.Controllers
 
             if(layersInSearchTool == null)
             {
-                _log.ErrorFormat("SearchTool is missing the layersobject");
+                _log.Error("SearchTool is missing the layersobject");
                 throw new HttpException(500, "SearchTool is missing the layersobject"); 
             }
 
@@ -507,19 +500,12 @@ namespace MapService.Controllers
 
                 if (HasValidVisibleForGroups(visibleForGroups))
                 {
-                    if (!visibleForGroups.HasValues)
-                    {
-                        allowed = true;
-                    }
-                    else
-                    {
-                        allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
-                    }
+                    allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
                 }
                 else
                 {
-                    allowed = false;
-                    _log.ErrorFormat("Can't filter search layers because search tool because the key 'VisibleForGroups' is missing or incorrect"); 
+                    allowed = true;
+                    _log.Error("Can't filter search layers because search tool because the key 'VisibleForGroups' is missing or incorrect"); 
                 }
 
                 if (!allowed)
@@ -568,19 +554,12 @@ namespace MapService.Controllers
 
                 if (HasValidVisibleForGroups(visibleForGroups))
                 {
-                    if (!visibleForGroups.HasValues)
-                    {
-                        allowed = true;
-                    }
-                    else
-                    {
-                        allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
-                    }
+                    allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
                 }
                 else
                 {
-                    allowed = false;
-                    _log.ErrorFormat("Can't filter tools because " + tool.SelectToken("$.type") + " is missing the key 'VisibleForGroups'");
+                    allowed = true;
+                    _log.Error("Can't filter tools because " + tool.SelectToken("$.type") + " is missing the key 'VisibleForGroups'");
                 }
  
                 if (!allowed)
@@ -601,7 +580,7 @@ namespace MapService.Controllers
         {
             if (visibleForGroups != null)
             {
-                if (visibleForGroups.First != null)
+                if (visibleForGroups.HasValues && visibleForGroups.First != null)
                 {
                     return true;
                 }
