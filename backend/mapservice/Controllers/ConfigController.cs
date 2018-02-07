@@ -490,42 +490,43 @@ namespace MapService.Controllers
             if(layersInSearchTool == null)
             {
                 _log.Error("SearchTool is missing the layersobject");
-                throw new HttpException(500, "SearchTool is missing the layersobject"); 
+                return mapConfiguration.ToString();
             }
-
-            foreach (JToken child in layersInSearchTool.Children())
+            else
             {
-                var visibleForGroups = child.SelectToken("$.visibleForGroups");
-                bool allowed = false;
-
-                if (HasValidVisibleForGroups(visibleForGroups))
+                foreach (JToken child in layersInSearchTool.Children())
                 {
-                    allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
+                    var visibleForGroups = child.SelectToken("$.visibleForGroups");
+                    bool allowed = false;
+
+                    if (HasValidVisibleForGroups(visibleForGroups))
+                    {
+                        allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
+                    }
+                    else
+                    {
+                        allowed = true;
+                        _log.Error("Can't filter search layers because search tool because the key 'VisibleForGroups' is missing or incorrect");
+                    }
+
+                    if (!allowed)
+                    {
+                        childrenToRemove.Add(child.SelectToken("$.id").ToString());
+                    }
                 }
-                else
+
+                foreach (string id in childrenToRemove)
                 {
-                    allowed = true;
-                    _log.Error("Can't filter search layers because search tool because the key 'VisibleForGroups' is missing or incorrect"); 
+                    layersInSearchTool.SelectToken("$.[?(@.id=='" + id + "')]").Remove();
                 }
 
-                if (!allowed)
-                {
-                    childrenToRemove.Add(child.SelectToken("$.id").ToString());
-                }
-            }
-
-            foreach (string id in childrenToRemove)
-            {
-                layersInSearchTool.SelectToken("$.[?(@.id=='" + id + "')]").Remove();
-            }
-
-            //NULL if User is not allowed to any searchlayer because empty array means use of global searchconfig
-            if (!layersInSearchTool.HasValues)
-            {
-                layersInSearchTool.Replace(null);
-            }
-                
-        return mapConfiguration.ToString();
+                //NULL if User is not allowed to any searchlayer because empty array means use of global searchconfig
+                //if (!layersInSearchTool.HasValues)
+                //{
+                //    layersInSearchTool.Replace(null);
+                //}
+                return mapConfiguration.ToString();
+            }        
         }
         private bool IsGroupAllowedAccess (string [] userGroups, JToken visibleForGroups)
         {
