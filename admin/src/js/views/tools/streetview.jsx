@@ -68,11 +68,15 @@ class ToolOptions extends Component {
   }
 
   handleInputChange(event) {
-    const target = event.target;
-    const name = target.name;
+    var target = event.target;
+    var name = target.name;
     var value = target.type === 'checkbox' ? target.checked : target.value;
     if (typeof value === "string" && value.trim() !== "") {
       value = !isNaN(Number(value)) ? Number(value) : value
+    }
+
+    if (name == "instruction"){
+      value = btoa(value);
     }
     this.setState({
       [name]: value
@@ -210,13 +214,14 @@ class ToolOptions extends Component {
               value={this.state.index}/>
           </div>
           <div>
-            <label htmlFor="instruction">Instruktioner</label>
-            <input
+            <label htmlFor="instruction">Instruktion</label>
+            <textarea
+              type="text"
               id="instruction"
               name="instruction"
-              type="text"
               onChange={(e) => {this.handleInputChange(e)}}
-              value={this.state.instruction}/>
+              value={atob(this.state.instruction)}
+            />
           </div>
           {this.renderVisibleForGroups()}
           <div>

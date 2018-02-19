@@ -63,6 +63,11 @@ var olMap;
  * @property {string} polygonFillColor - Default: "rgb(255, 255, 255)"
  * @property {number} polygonFillOpacity - Default: 0.5
  * @property {Array<{external:"ol.Style"}>} scetchStyle
+ * @property {string} boxLineColor - Default: "rgb(15, 175, 255)"
+ * @property {number} boxLineWidth - Default: 3
+ * @property {string} boxLineStyle - Default: "solid"
+ * @property {string} boxFillColor - Default: "rgb(255, 255, 255)"
+ * @property {number} boxFillOpacity - Default: 0.5
  */
 var DrawModelProperties = {
   type: 'draw',
@@ -106,6 +111,11 @@ var DrawModelProperties = {
   polygonFillColor: "rgb(255, 255, 255)",
   polygonFillOpacity: 0.5,
   base64Encode: false,
+  boxFillColor: "rgb(255, 255, 255)",
+  boxLineColor: "rgb(15, 175, 255)",
+  boxFillOpacity: 0.5,
+  boxLineStyle: "solid",
+  boxLineWidth: 3,
   scetchStyle: [
     new ol.style.Style({
     fill: new ol.style.Fill({
@@ -485,7 +495,9 @@ var DrawModel = {
     ,   drawTool = undefined
     ,   geometryType = undefined
     ,   dragInteraction = this.getDragInteraction()
-    ,   olMap = this.get('olMap');
+    ,   olMap = this.get('olMap')
+    ,   geometryFunction = undefined
+    ,   geometryName = undefined;
 
     olMap.un('singleclick', this.removeSelected);
     olMap.un('singleclick', this.get('editOpenDialogBinded'));
@@ -496,12 +508,22 @@ var DrawModel = {
     olMap.removeInteraction(this.get("editTool"));
     this.measureTooltip.setPosition(undefined);
 
+    if (type === "Box") {
+      type = "Circle";
+      geometryName = "Box";
+      geometryFunction = ol.interaction.Draw.createBox();
+    } else {
+      geometryName = type;
+    }
+
     geometryType = type !== "Text" ? type : "Point";
 
     drawTool = new ol.interaction.Draw({
       source: this.get('source'),
       style: this.get('scetchStyle'),
-      type: geometryType
+      type: geometryType,
+      geometryFunction: geometryFunction,
+      geometryName: geometryName
     });
 
     olMap.on('pointermove', this.setPointerPosition.bind(this));
@@ -798,6 +820,7 @@ var DrawModel = {
    *
    */
   getStyle: function(feature, forcedProperties) {
+    var geometryName = feature.getGeometryName();
 
     function getLineDash() {
         var scale = (a, f) => a.map(b => f * b)
@@ -819,7 +842,7 @@ var DrawModel = {
     function getFill() {
 
       function rgba() {
-        switch(type) {
+        switch(geometryName) {
           case "Circle":
             return this.get('circleFillColor')
                    .replace('rgb', 'rgba')
@@ -828,7 +851,12 @@ var DrawModel = {
           case "Polygon":
             return this.get('polygonFillColor')
                    .replace('rgb', 'rgba')
-                   .replace(')', `, ${this.get('polygonFillOpacity')})`);
+                   .replace(')', `, ${this.get('polygonFillOpacity')})`)
+
+          case "Box":
+            return this.get('boxFillColor')
+                   .replace('rgb', 'rgba')
+                   .replace(')', `, ${this.get('boxFillOpacity')})`);
         }
       }
 
@@ -841,22 +869,26 @@ var DrawModel = {
     }
 
     function lookupStyle() {
-      switch (type) {
+      switch (geometryName) {
         case "Polygon":
           return this.get('polygonLineStyle');
         case "Circle":
           return this.get('circleLineStyle');
+        case "Box":
+          return this.get('boxLineStyle');
         default:
           return this.get('lineStyle');
       }
     }
 
     function lookupWidth() {
-      switch (type) {
+      switch (geometryName) {
         case "Polygon":
           return this.get('polygonLineWidth');
         case "Circle":
           return this.get('circleLineWidth');
+        case "Box":
+          return this.get('boxLineWidth');
         default:
           return this.get('lineWidth');
       }
@@ -866,11 +898,13 @@ var DrawModel = {
       if (forcedProperties) {
         return forcedProperties.strokeColor;
       }
-      switch (type) {
+      switch (geometryName) {
         case "Polygon":
           return this.get('polygonLineColor');
         case "Circle":
           return this.get('circleLineColor');
+        case "Box":
+          return this.get('boxLineColor');
         default:
           return this.get('lineColor');
       }
@@ -1007,6 +1041,7 @@ var DrawModel = {
       case "Polygon": return show ? this.formatLabel("area", props.area) : "";
       case "Circle": return show ? this.formatLabel("circle", props.radius): "";
       case "Text": return props.description;
+      case "Box": return show ? this.formatLabel("area", props.area) : "";
       default: return "";
     }
   },
@@ -1279,6 +1314,51 @@ var DrawModel = {
    */
   setCircleLineWidth: function (width) {
     this.set("circleLineWidth", width);
+  },
+
+  /**
+   * Set the property boxFillColor
+   * @param {string} color
+   * @instance
+   */
+  setBoxFillColor: function (color) {
+    this.set("boxFillColor", color);
+  },
+
+  /**
+   * Set the property boxFillOpacity
+   * @param {number} opacity
+   * @instance
+   */
+  setBoxFillOpacity: function (opacity) {
+    this.set("boxFillOpacity", opacity);
+  },
+
+  /**
+   * Set the property boxLineColor
+   * @param {string} color
+   * @instance
+   */
+  setBoxLineColor: function (color) {
+    this.set("boxLineColor", color);
+  },
+
+  /**
+   * Set the property boxLineStyle
+   * @param {string} style
+   * @instance
+   */
+  setBoxLineStyle: function (style) {
+    this.set("boxLineStyle", style);
+  },
+
+  /**
+   * Set the property boxLineWidth
+   * @param {number} width
+   * @instance
+   */
+  setBoxLineWidth: function (width) {
+    this.set("boxLineWidth", width);
   },
 
   /**

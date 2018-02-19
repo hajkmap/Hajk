@@ -230,7 +230,7 @@ var WmsLayer = {
           }
         }
       });
-      request.error(args.error);
+      request.fail(args.error);
     }
 
   },

@@ -34,6 +34,7 @@ var LayerPanelView = {
    * @instance
    */
   mountedLayers: {},
+  renderedLayerGroups: {},
 
   /**
    * Get initial state.
@@ -278,7 +279,11 @@ var LayerPanelView = {
 
     return groups.map((group, i) => {
 
-      var layers = this.renderLayers(group)
+      if (!this.renderedLayerGroups.hasOwnProperty(group.id)) {
+        this.renderedLayerGroups[group.id] = this.renderLayers(group);        
+      }
+      
+      var layers = this.renderedLayerGroups[group.id]
       ,   subgroups
       ,   id = "group_" + group.id
       ,   toggleGroup
