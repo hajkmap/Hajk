@@ -409,12 +409,10 @@ class ToolOptions extends Component {
           <div>
             <label htmlFor="instruction">Instruktion</label>
             <textarea
-              type="text"
               id="instruction"
               name="instruction"
-              type="text"
               onChange={(e) => { this.handleInputChange(e) }}
-              value={atob(this.state.instruction)} />
+              value={this.state.instruction ? atob(this.state.instruction) : ""} />
           </div>
           {this.renderVisibleForGroups()}
           <div>

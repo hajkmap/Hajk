@@ -220,7 +220,7 @@ class ToolOptions extends Component {
               id="instruction"
               name="instruction"
               onChange={(e) => {this.handleInputChange(e)}}
-              value={atob(this.state.instruction)}
+              value={this.state.instruction ? atob(this.state.instruction) : ""}
             />
           </div>
           {this.renderVisibleForGroups()}
