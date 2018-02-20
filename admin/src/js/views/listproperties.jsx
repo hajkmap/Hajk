@@ -31,9 +31,9 @@ export default class ListProperties extends Component {
 	render() {
 		if (!this.props.show) {
 			return (
-				<div>
+				<div className="details">
 					<legend className="header-side">Tillgängliga AD-grupper</legend>
-					<ul className="details properties-list"> 
+					<ul className="properties-list"> 
 						{this.renderProperties()}
 					</ul>
 				</div>
