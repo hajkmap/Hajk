@@ -123,7 +123,9 @@
 
     layers.forEach(layer => {
       var baseLayer = config.baselayers.find(l => l.id === layer.id);
+      console.log(baseLayer,"baseLayer")
       if (baseLayer) {
+        console.log(layer,"baseLayer")
         layer.drawOrder = 0;
         filtered.push(layer);
       }
@@ -132,7 +134,7 @@
     layers.forEach(layer => {
       f(config.groups, layer);
     });
-
+    console.log(filtered,"filtered")
     return filtered;
   };
 
@@ -181,6 +183,7 @@
           return tool.type === 'layerswitcher';
         });
 
+
         var searchTool = map_config.tools.find(tool => {
           return tool.type === 'search';
         });
@@ -211,16 +214,14 @@
           .concat(_data.vectorlayers)
           .concat(_data.arcgislayers);
           map_config.layers = internal.filterByLayerSwitcher(layerSwitcherTool.options, layers);
-
+          
           map_config.layers.sort((a, b) => a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1);
         }
 
         if (searchTool) {
-          searchTool.options.sources = data.wfslayers;
-
           if(searchTool.options.layers == null){
-            data.wfslayers = [];
-            searchTool.options.sources = [];
+            data.wfslayers = data.wfslayers;
+            searchTool.options.sources = data.wfslayers;
           }
           else {
             if(searchTool.options.layers.length != 0 ){ 
@@ -228,9 +229,12 @@
               searchTool.options.sources = wfslayers;
               data.wfslayers = wfslayers;
             }
+            else {
+              searchTool.options.sources = data.wfslayers;
+            }
           }
         }
-        console.log(wfslayers,"wfslayers")
+        
 
         if (editTool) {
           editTool.options.sources = data.wfstlayers;

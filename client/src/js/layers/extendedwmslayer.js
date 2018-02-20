@@ -148,17 +148,24 @@ var WmsLayer = {
   },
   
   removeProxyFromURLIfPresent : function(url){
-
-    var re = new RegExp("http://");
-    var index = url.lastIndexOf("http://");
-
-    if(index != -1){
-      return url.substr(index);
-    }
-    else {
-      return url;
-    }
-  },
+    
+        var http = url.lastIndexOf("http://");
+        var https = url.lastIndexOf("https://");
+    
+        if(http > https){
+          index = http;
+        }
+        else {
+          index = https;
+        }
+       
+        if(index != -1){
+          return url.substr(index);
+        }
+        else {
+          return url;
+        }
+      },
 
   /**
    * Load feature information.
