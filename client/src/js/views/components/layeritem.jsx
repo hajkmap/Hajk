@@ -230,7 +230,7 @@ var LayerItemView = {
         <div className={innerInfoBodyClass}>
           <p className="info-title" dangerouslySetInnerHTML={{__html: this.state.infoTitle}}></p>
           <p className="info-text" dangerouslySetInnerHTML={{__html: this.state.infoText}}></p>
-          <p className="info-text" dangerouslySetInnerHTML={{__html: this.state.infoUrl}}></p>
+          <a className="info-text" href={this.state.infoUrl} target="_blank" dangerouslySetInnerHTML={{__html: this.state.infoUrl}}></a>
           <p className="info-text" dangerouslySetInnerHTML={{__html: this.state.infoOwner}}></p>
         </div>
 
