@@ -493,8 +493,8 @@ class WMSLayerForm extends Component {
             checked={this.state.queryable}
           />
         </div>
-        <div style={{display: "none"}}>
-          <label>Geowebcache</label>
+        <div>
+          <label>GeoWebCache</label>
           <input
             type="checkbox"
             ref="input_tiled"

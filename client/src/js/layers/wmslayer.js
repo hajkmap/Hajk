@@ -144,8 +144,8 @@ var WmsLayer = {
             this.featureInformationCallback(features, this.getLayer());
           }
         });
-
-        request.error(params.error);
+        
+        request.fail(params.error);
       }
     } catch (e) {
       params.error(e);

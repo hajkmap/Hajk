@@ -28,6 +28,7 @@ var SearchModelProperties = {
   title: 'Sök i kartan',
   visible: false,
   value: "",
+  valueBar: "",
   filter: "*",
   filterVisibleActive: false,
   markerImg: "assets/icons/marker.png",
@@ -44,6 +45,7 @@ var SearchModelProperties = {
   maxZoom: 14,
   exportUrl: "",
   displayPopup: false,
+  displayPopupBar: false,
   hits: [],
   popupOffsetY: 0
 };
@@ -66,6 +68,7 @@ var SearchModel = {
   },
 
   configure: function (shell) {
+    this.set('displayPopupBar', this.get('displayPopup'));
     this.set('layerCollection', shell.getLayerCollection());
     this.set('map', shell.getMap().getMap());
     this.featureLayer = new ol.layer.Vector({
@@ -346,6 +349,7 @@ var SearchModel = {
     }
     this.featureLayer.getSource().clear();
     this.set('items', []);
+    this.set('barItems', []);
     if (ovl) {
       ovl.setPosition(undefined);
     }
@@ -450,7 +454,7 @@ var SearchModel = {
    * @param {object} spec
    *
    */
-  focus: function (spec) {
+  focus: function (spec, isBar) {
 
     function isPoint (coord) {
       if (coord.length === 1) {
@@ -480,8 +484,8 @@ var SearchModel = {
 
     this.featureLayer.getSource().clear();
     this.featureLayer.getSource().addFeature(spec.hit);
-
-    if (ovl && this.get('displayPopup')) {
+    var displayPopup = isBar ? this.get("displayPopupBar"): this.get("displayPopup");
+    if (ovl && displayPopup) {
 
       let title = $(`<div class="popup-title">${spec.hit.caption}</div>`);
       let textContent = $('<div id="popup-content-text"></div>');
@@ -768,8 +772,8 @@ var SearchModel = {
    * @param {string} value
    * @param {function} done
    */
-  search: function (done) {
-    var value = this.get('value')
+  search: function (done, isBar) {
+    var value = isBar ? this.get('valueBar') : this.get('value')
     ,   items = []
     ,   promises = []
     ,   layers
@@ -859,26 +863,34 @@ var SearchModel = {
     });
 
     Promise.all(promises).then(() => {
-      items.forEach(function (item) {
+
+        items.forEach(function (item) {
         item.hits = arraySort({
           array: item.hits,
           index: item.displayName
         });
       });
-      items = items.sort((a, b) => a.layer > b.layer ? 1 : -1);
+    items = items.sort((a, b) => a.layer > b.layer ? 1 : -1
+  )
+    ;
+    if(isBar){
+      this.set('barItems', items);
+    } else {
       this.set('items', items);
-      if (done) {
-        done({
-          status: "success",
-          items: items
-        });
-      }
+    }
+    if (done) {
+      done({
+        status: "success",
+        items: items
+      });
+    }
+
     });
   },
 
-  shouldRenderResult: function () {
+  shouldRenderResult: function (isBar) {
     return !!(
-      this.get('value') ||
+      (isBar ? this.get('valueBar') : this.get('value')) ||
       (
         this.get('selectionModel') &&
         this.get('selectionModel').hasFeatures() &&
@@ -896,7 +908,7 @@ var SearchModel = {
   getStyle: function () {
     return new ol.style.Style({
       fill: new ol.style.Fill({
-        color: 'rgba(255, 255, 255, 0.6)'
+        color: 'rgba(255, 255, 255, 0.2)'
       }),
       stroke: new ol.style.Stroke({
         color: 'rgba(0, 0, 0, 0.6)',
