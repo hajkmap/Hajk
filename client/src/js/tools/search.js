@@ -908,7 +908,7 @@ var SearchModel = {
   getStyle: function () {
     return new ol.style.Style({
       fill: new ol.style.Fill({
-        color: 'rgba(255, 255, 255, 0.6)'
+        color: 'rgba(255, 255, 255, 0.2)'
       }),
       stroke: new ol.style.Stroke({
         color: 'rgba(0, 0, 0, 0.6)',
