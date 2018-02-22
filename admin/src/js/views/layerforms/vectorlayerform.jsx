@@ -789,18 +789,7 @@ class VectorLayerForm extends Component {
             }}
             checked={this.state.queryable}
           />
-        </div>
-        <div>
-          <label>Synligt vid start</label>
-          <input
-            type="checkbox"
-            ref="input_visibleAtStart"
-            onChange={(e) => {
-              this.setState({visibleAtStart: e.target.checked})
-            }}
-            checked={this.state.visibleAtStart}
-          />
-        </div>        
+        </div>       
         <div className="info-container">
           <div>
             <label>Infodokument</label>

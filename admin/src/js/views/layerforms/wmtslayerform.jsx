@@ -266,20 +266,6 @@ class WMTSLayerForm extends Component {
           <span onClick={(e) => {this.props.parent.loadLegendImage(e)}} className="btn btn-default">Välj fil {imageLoader}</span>
         </div>
         <div>
-          <label>Synligt vid start</label>
-          <input
-            type="checkbox"
-            ref="input_visibleAtStart"
-            onChange={
-              (e) => {
-                this.setState({visibleAtStart: e.target.checked})
-              }
-            }
-            checked={this.state.visibleAtStart}
-
-          />
-        </div>
-        <div>
           <label>Lager*</label>
           <input
             type="text"
