@@ -282,6 +282,12 @@ var SearchModel = {
     } else {
       filters = "";
     }
+
+    var typeName = `'${props.featureType}'`;
+    if(!typeName.includes(':')) { // If no namespace, add "feature:"
+      typeName = `'feature:${props.featureType}'`;
+    } 
+  
     str = `
      <wfs:GetFeature
          service = 'WFS'
@@ -294,7 +300,7 @@ var SearchModel = {
          xsi:schemaLocation='http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd'
          outputFormat="${outputFormat}"
          maxFeatures="1000">
-         <wfs:Query typeName='feature:${props.featureType}' srsName='${props.srsName}'>
+         <wfs:Query typeName=` + typeName + ` srsName='${props.srsName}'>
           <ogc:Filter>
             ${filters}
           </ogc:Filter>
