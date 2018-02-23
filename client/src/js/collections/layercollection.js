@@ -107,7 +107,7 @@ var LayerCollection = {
         args.legend =  `${proxy}${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${args.layers[0]}`
       }
 
-      //If legend is a GetLegendGraphic call use proxy otherwise not
+      //If legend is a GetLegendGraphic call, use proxy otherwise not
       if(args.legend.indexOf("GetLegendGraphic") != -1){
         args.legend = proxy + args.legend;
       }

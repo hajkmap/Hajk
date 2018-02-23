@@ -304,9 +304,6 @@ var SearchModel = {
     var contentType = "text/xml"
     ,   data = str;
 
-
-    console.log(props.url,"propsUrl")
-
     this.requests.push(
       $.ajax({
         url: props.url,
