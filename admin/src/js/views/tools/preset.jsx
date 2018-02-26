@@ -353,7 +353,7 @@ createGuid() {
 		}
 
 		this.setState({
-			visibleForGroups: groups
+			visibleForGroups: value !== "" ? groups : []
 		});  
   }
   
