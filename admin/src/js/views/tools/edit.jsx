@@ -165,7 +165,7 @@ class ToolOptions extends Component {
 		}
 
 		this.setState({
-			visibleForGroups: groups
+			visibleForGroups: value !== "" ? groups : []
 		});  
   }
   

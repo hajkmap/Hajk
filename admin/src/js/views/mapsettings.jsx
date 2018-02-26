@@ -1035,7 +1035,7 @@ class Menu extends Component {
 		}
 
 		this.setState({
-			visibleForGroups: groups
+			visibleForGroups: value !== "" ? groups : []
 		});  
 	}
 
