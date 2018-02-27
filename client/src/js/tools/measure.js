@@ -74,7 +74,7 @@ var MeasureModelProperties = {
   title: 'Mät',
   toolbar: 'bottom',
   visible: false,
-  icon: 'fa fa-arrows-h icon',
+  icon: 'custom-ruler icon',
   drawLayerName: 'measure-layer',
   drawLayer: undefined,
   drawTool: undefined,

@@ -297,14 +297,14 @@ var MeasurePanelView = {
     var dialog     = this.renderDialog(this.state.dialog);
 
     return (
-        <Panel title="Rita och mäta" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
+        <Panel title="Mät" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
           <div className="draw-tools">
             <ul>
               <li id="LineString" onClick={this.activateDrawTool.bind(this, "LineString")}>
-                <i className="iconmoon-linje"></i> <span>Rita linje</span>
+                <i className="iconmoon-linje"></i> <span>Mät linje</span>
               </li>
               <li id="Polygon" onClick={this.activateDrawTool.bind(this, "Polygon")}>
-                <i className="iconmoon-yta"></i> <span>Rita yta</span>
+                <i className="iconmoon-yta"></i> <span>Mät yta</span>
               </li>
               <li id="clear" onClick={this.alertClear}>
                 <i className="fa fa-trash fa-0"></i> <span>Rensa allt</span>
