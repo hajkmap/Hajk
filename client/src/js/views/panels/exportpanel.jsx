@@ -175,6 +175,10 @@ var ExportPdfSettings = React.createClass({
     return this.state.selectFormat;
   },
 
+  getDocumentUrl: function () {
+    return this.props.model.get("urlPdf");
+  },
+
   getEmailAddress: function () {
     return this.state.emailAddress;
   },
@@ -274,6 +278,7 @@ var ExportPdfSettings = React.createClass({
             orientation: this.getOrientation(),
             scale: this.getScale(),
             resolution: this.getResolution(),
+            documentUrl: this.getDocumentUrl(),
             emailAddress: this.getEmailAddress()
           }
       ;
@@ -345,7 +350,15 @@ var ExportPdfSettings = React.createClass({
     if (this.props.model.get("downloadingPdf")) {
       downloadLink = <p>Hämtar...</p>
     } else if (this.props.model.get("urlPdf")) {
-      downloadLink = <a href={this.props.model.get("urlPdf")} target="_blank"><p>Ladda ner PDF</p></a>
+      <iframe
+          src={this.props.model.get("urlPdf")}
+          id="pdfDocument"
+          width="380px"
+          height="600px" />
+
+      this.props.model.set('documentUrl', this.props.model.get("urlPdf"));
+
+      showExportOptions = "section visible";
     } else {
       downloadLink = null;
     }
