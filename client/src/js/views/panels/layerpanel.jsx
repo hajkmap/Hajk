@@ -42,7 +42,7 @@ var LayerPanelView = {
    * @return {object}
    */
   getInitialState: function() {
-
+    this.renderedLayerGroups = {};
     return {
       visible: false,
       mapConfigurations : [],
@@ -276,9 +276,7 @@ var LayerPanelView = {
    * @return {external.ReactElement} groups
    */
   renderGroups: function recursive(groups) {
-
     return groups.map((group, i) => {
-
       if (!this.renderedLayerGroups.hasOwnProperty(group.id)) {
         this.renderedLayerGroups[group.id] = this.renderLayers(group);        
       }

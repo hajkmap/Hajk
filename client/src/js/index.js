@@ -102,7 +102,7 @@
 
         if (mapLayer) {
           layer.drawOrder = mapLayer.drawOrder;
-          
+
           if(mapLayer.infobox && mapLayer.infobox.length != 0){
             layer = internal.overrideGlobalInfoBox(layer, mapLayer);
           }
@@ -123,9 +123,7 @@
 
     layers.forEach(layer => {
       var baseLayer = config.baselayers.find(l => l.id === layer.id);
-      console.log(baseLayer,"baseLayer")
       if (baseLayer) {
-        console.log(layer,"baseLayer")
         layer.drawOrder = 0;
         filtered.push(layer);
       }
@@ -134,7 +132,6 @@
     layers.forEach(layer => {
       f(config.groups, layer);
     });
-    console.log(filtered,"filtered")
     return filtered;
   };
 
