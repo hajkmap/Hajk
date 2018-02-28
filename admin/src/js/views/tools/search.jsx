@@ -312,12 +312,21 @@ class ToolOptions extends Component {
       let obj = this.state.layers.find((o) => o.id === layer.id.toString());
       let newArray = this.state.layers.filter((o) => o.id !== layer.id.toString())
 
+      // Skapar array och trimmar whitespace från start och slut av varje cell
       if (typeof obj != "undefined") {
         obj.visibleForGroups = e.target.value.split(",");
-        obj.visibleForGroups.map(Function.prototype.call, String.prototype.trim);
+        obj.visibleForGroups = obj.visibleForGroups.map(el => el.trim());
       }
-
+      
       newArray.push(obj);
+      
+      //Sätter visibleForGroups till [] istället för [""] om inputfältet är tomt.
+      if (newArray.length === 1) {
+        if (newArray[0].visibleForGroups.length === 1 && newArray[0].visibleForGroups[0] === "") {
+          newArray[0].visibleForGroups = [];
+        }
+      }
+      
       this.setState({
         layers: newArray
       });
