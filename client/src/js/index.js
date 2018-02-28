@@ -91,7 +91,7 @@
   };
 
   internal.overrideGlobalInfoBox = function (layer, mapLayer){
-    layer.infobox = mapLayer.infoBox;
+    layer.infobox = mapLayer.infobox;
     return layer;
   }
 
@@ -102,8 +102,8 @@
 
         if (mapLayer) {
           layer.drawOrder = mapLayer.drawOrder;
-
-          if(mapLayer.infoBox && mapLayer.infoBox.length != 0){
+          
+          if(mapLayer.infobox && mapLayer.infobox.length != 0){
             layer = internal.overrideGlobalInfoBox(layer, mapLayer);
           }
           
