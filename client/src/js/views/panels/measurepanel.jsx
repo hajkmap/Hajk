@@ -36,23 +36,12 @@ var MeasurePanelView = {
   getInitialState: function() {
     return {
       visible: false,
-      pointSettings: this.props.model.get('pointSettings'),
-      pointRadius: this.props.model.get('pointRadius'),
-      pointSymbol: this.props.model.get('pointSymbol'),
-      fontSize: this.props.model.get('fontSize'),
       lineWidth: this.props.model.get('lineWidth'),
       lineStyle: this.props.model.get('lineStyle'),
-      circleLineColor: this.props.model.get('circleLineColor'),
-      circleFillColor: this.props.model.get('circleFillColor'),
-      circleLineStyle: this.props.model.get('circleLineStyle'),
-      circleLineWidth: this.props.model.get('circleLineWidth'),
       polygonLineWidth: this.props.model.get('polygonLineWidth'),
       polygonLineStyle: this.props.model.get('polygonLineStyle'),
       polygonFillOpacity: this.props.model.get('polygonFillOpacity'),
-      boxLineColor: this.props.model.get('boxLineColor'),
-      boxFillColor: this.props.model.get('boxFillColor'),
-      boxLineStyle: this.props.model.get('boxLineStyle'),
-      boxLineWidth: this.props.model.get('boxLineWidth')
+      buttonDisabled: true
     };
   },
 
@@ -135,10 +124,6 @@ var MeasurePanelView = {
    */
   clear: function () {
     this.props.model.clear();
-/*     this.props.model.set("circleRadius", "");
-    this.setState({
-      circleRadius: ""
-    }); */
   },
 
   /**
@@ -166,9 +151,9 @@ var MeasurePanelView = {
   abort: function () {
     this.props.model.abort();
     $('#Point, #Circle, #Text, #Polygon, #LineString, #move, #edit, #delete, #Box').removeClass('selected');
-    $('#abort').hide();
     this.setState({
-      symbology: ""
+      symbology: "",
+      buttonDisabled: true
     })
     this.props.model.set("kmlExportUrl", false);
     this.props.model.set("kmlImport", false);
@@ -194,7 +179,7 @@ var MeasurePanelView = {
     this.props.model.activateRemovalTool();
     $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete, #Box').removeClass('selected');
     $('#delete').addClass('selected');
-    $('#abort').show();
+    this.setState({ buttonDisabled: false });
   },
 
   /**
@@ -205,7 +190,7 @@ var MeasurePanelView = {
     this.props.model.activateMoveTool();
     $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete, #Box').removeClass('selected');
     $('#move').addClass('selected');
-    $('#abort').show();
+    this.setState({ buttonDisabled: false });
   },
 
   /**
@@ -216,7 +201,7 @@ var MeasurePanelView = {
     this.props.model.activateEditTool();
     $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete, #Box').removeClass('selected');
     $('#edit').addClass('selected');
-    $('#abort').show();
+    this.setState({ buttonDisabled: false });
   },
 
   /*
@@ -228,7 +213,7 @@ var MeasurePanelView = {
     this.props.model.activateDrawTool(type);
     $('#Circle, #Point, #Text, #Polygon, #LineString, #move, #edit, #delete, #Box').removeClass('selected');
     $('#' + type).addClass('selected');
-    $('#abort').show();
+    this.setState({ buttonDisabled: false });
   },
 
   /**
@@ -294,11 +279,11 @@ var MeasurePanelView = {
    * @return {external:ReactElement}
    */
   render: function () {
-    var dialog     = this.renderDialog(this.state.dialog);
+    var dialog = this.renderDialog(this.state.dialog);
 
     return (
         <Panel title="Mät" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
-          <div className="draw-tools">
+          <div className="draw-tools measure-tools">
             <ul>
               <li id="LineString" onClick={this.activateDrawTool.bind(this, "LineString")}>
                 <i className="iconmoon-linje"></i> <span>Mät linje</span>
@@ -309,9 +294,7 @@ var MeasurePanelView = {
               <li id="clear" onClick={this.alertClear}>
                 <i className="fa fa-trash fa-0"></i> <span>Rensa allt</span>
               </li>
-              <li id="abort" className="green" onClick={this.abort}>
-                <i className="fa fa-check fa-0"></i> <span>Klar</span>
-              </li>
+              <button id="abort" className="btn btn-primary" disabled={this.state.buttonDisabled} onClick={this.abort}>Slutför</button>
             </ul>
           </div>
           <div>
