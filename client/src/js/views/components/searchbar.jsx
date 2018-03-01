@@ -388,7 +388,7 @@ var SearchBarView = {
               }
             </div>
           ) : (
-            <div>Sökningen gav inget resultat.</div>
+            <div className="searchbar-results-no-results">Sökningen gav inget resultat.</div>
           )
         }
         <div onClick={this.toggleMinimize} className="search-results-toggle-minimze">
