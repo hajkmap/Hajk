@@ -352,42 +352,43 @@ var SearchBarView = {
     /* <span className="pull-right btn btn-default" onClick={() => {this.clear()}} id="snabbsokRensa">Rensa</span> */
     
     return (
-      <div>
+      <div className="searchbar-area" key="searchbar-results">
         {
-          this.state.minimized
-          ? null
-          : (
-            <div className="searchbar-results" key="searchbar-results">
+          groups && groups.length > 0
+          ? (
+            <div className="searchbar-results">
               <h3 id="searchbar-results-title">
                 Sökresultat 
                 {resultsCount > 0 ? <span className="search-results-total-count">({resultsCount})</span> : null }
               </h3>
-              { enable_checkbox ? checkbox : null }
               {
-                groups && groups.length > 0
-                ? (
-                    <div id="searchbar-results-list">
-                        {
-                          groups.map((item, i) => {
-                            var id = "group-" + i;
-                          return (
-                            <SearchResultGroup
-                                  isBar="yes"
-                                  id={id}
-                                  key={id}
-                                  result={item}
-                                  numGroups={groups.length}
-                                  model={this.props.model}
-                                  parentView={this}
-                                  map={this.props.model.get('map')} />
-                                );
-                              })
-                        }
-                      </div>
-                )
-                : <div>Sökningen gav inget resultat.</div>
+                this.state.minimized
+                ? null
+                : (
+                  <div id="searchbar-results-list">
+                    { enable_checkbox ? checkbox : null }
+                    {
+                      groups.map((item, i) => {
+                        var id = "group-" + i;
+                      return (
+                        <SearchResultGroup
+                              isBar="yes"
+                              id={id}
+                              key={id}
+                              result={item}
+                              numGroups={groups.length}
+                              model={this.props.model}
+                              parentView={this}
+                              map={this.props.model.get('map')} />
+                            );
+                          })
+                    }
+                  </div>
+                )  
               }
             </div>
+          ) : (
+            <div>Sökningen gav inget resultat.</div>
           )
         }
         <div onClick={this.toggleMinimize} className="search-results-toggle-minimze">
