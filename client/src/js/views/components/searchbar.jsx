@@ -128,20 +128,13 @@ var SearchBarView = {
   },
 
   componentDidUpdate: function(){
-
     var hit = document.getElementById('hit-0-group-0');
-    if (!this.state.haveUrlSearched){
+    if (!this.state.haveUrlSearched && hit != null){
       try {
         hit.click();
+        this.state.haveUrlSearched = true;
       } catch (err){
-
       }
-    }
-
-    if (this.state.updateCtr > 1){
-      this.state.updateCtr -= 1;
-    } else {
-      this.state.haveUrlSearched = true;
     }
   },
 
