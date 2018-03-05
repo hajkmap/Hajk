@@ -341,6 +341,13 @@ var MeasureModel = {
     }
   },
 
+
+  controlDoubleClickZoom: function(active){
+      var interactions = this.get('olMap').getInteractions().getArray();
+      var dblClickZoom = interactions.find(interaction => interaction instanceof ol.interaction.DoubleClickZoom);
+      dblClickZoom.setActive(active);
+  },
+
   /**
    * Event handler to excecute after features are drawn.
    * @params: {external:"ol.feature"} type
@@ -357,7 +364,12 @@ var MeasureModel = {
       this.setFeaturePropertiesFromGeometry(feature);
       feature.setStyle(this.getStyle(feature));
     }
+    this.controlDoubleClickZoom(false);
+
+    this.abort();
     this.measureTooltip.setPosition(undefined);
+
+    setTimeout(() => this.controlDoubleClickZoom(true),251); 
   },
 
   /**
@@ -544,6 +556,7 @@ var MeasureModel = {
    * @instance
    */
   abort: function () {
+    console.log('Abort');
     var dragInteraction = this.getDragInteraction();
     this.get('olMap').un('singleclick', this.removeSelected);
     this.get('olMap').un('singleclick', this.get('editOpenDialogBinded'));
