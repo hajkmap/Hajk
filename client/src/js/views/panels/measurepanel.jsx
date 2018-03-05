@@ -286,7 +286,7 @@ var MeasurePanelView = {
           <div className="draw-tools measure-tools">
             <ul>
               <li id="LineString" onClick={this.activateDrawTool.bind(this, "LineString")}>
-                <i className="iconmoon-linje"></i> <span>Mät avstånd</span>
+                <i className="iconmoon-linje"></i> <span>Mät linje</span>
               </li>
               <li id="Polygon" onClick={this.activateDrawTool.bind(this, "Polygon")}>
                 <i className="iconmoon-yta"></i> <span>Mät yta</span>
@@ -294,7 +294,6 @@ var MeasurePanelView = {
               <li id="clear" onClick={this.alertClear}>
                 <i className="fa fa-trash fa-0"></i> <span>Rensa allt</span>
               </li>
-              <button id="abort" className="btn btn-primary" disabled={this.state.buttonDisabled} onClick={this.abort}>Slutför</button>
             </ul>
           </div>
           <div>
