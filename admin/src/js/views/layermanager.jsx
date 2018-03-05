@@ -141,6 +141,7 @@ class Manager extends Component {
           infoTitle: layer.infoTitle,
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
+          infoUrlText: layer.infoUrlText,
           infoOwner: layer.infoOwner
         });
 
@@ -198,6 +199,7 @@ class Manager extends Component {
           infoTitle: layer.infoTitle,
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
+          infoUrlText: layer.infoUrlText,
           infoOwner: layer.infoOwner
         });
 
@@ -245,6 +247,7 @@ class Manager extends Component {
           infoTitle: layer.infoTitle,
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
+          infoUrlText: layer.infoUrlText,
           infoOwner: layer.infoOwner
         });
 
@@ -287,6 +290,7 @@ class Manager extends Component {
           infoTitle: layer.infoTitle,
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
+          infoUrlText: layer.infoUrlText,
           infoOwner: layer.infoOwner
         });
 
@@ -329,6 +333,7 @@ class Manager extends Component {
           infoTitle: layer.infoTitle,
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
+          infoUrlText: layer.infoUrlText,
           infoOwner: layer.infoOwner
         });
         setTimeout(() => {

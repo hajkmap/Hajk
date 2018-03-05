@@ -58,6 +58,7 @@ const defaultState = {
   infoTitle: "",
   infoText: "",
   infoUrl: "",
+  infoUrlText: "",
   infoOwner: "",
   searchGeometryField: "",
   attribution: "",
@@ -281,6 +282,7 @@ class WMSLayerForm extends Component {
       infoTitle: this.getValue("infoTitle"),
       infoText: this.getValue("infoText"),
       infoUrl: this.getValue("infoUrl"),
+      infoUrlText: this.getValue("infoUrlText"),
       infoOwner: this.getValue("infoOwner"),
       searchGeometryField: this.getValue("searchGeometryField"),
       attribution: this.getValue("attribution"),
@@ -566,6 +568,19 @@ class WMSLayerForm extends Component {
                 }}
                 value={this.state.infoUrl}
                 className={this.getValidationClass("infoUrl")}
+            />
+          </div>
+          <div className={infoClass}>
+            <label>Länktext</label>
+            <input 
+              type="text"
+              ref="input_infoUrlText"
+                onChange={(e) => {
+                  this.setState({infoUrlText: e.target.value});
+                  this.validateField("infoUrlText", e);
+                }}
+                value={this.state.infoUrlText}
+                className={this.getValidationClass("infoUrlText")}
             />
           </div>
           <div className={infoClass}>
