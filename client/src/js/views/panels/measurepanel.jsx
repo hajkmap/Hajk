@@ -286,7 +286,7 @@ var MeasurePanelView = {
           <div className="draw-tools measure-tools">
             <ul>
               <li id="LineString" onClick={this.activateDrawTool.bind(this, "LineString")}>
-                <i className="iconmoon-linje"></i> <span>Mät linje</span>
+                <i className="iconmoon-linje"></i> <span>Mät avstånd</span>
               </li>
               <li id="Polygon" onClick={this.activateDrawTool.bind(this, "Polygon")}>
                 <i className="iconmoon-yta"></i> <span>Mät yta</span>
