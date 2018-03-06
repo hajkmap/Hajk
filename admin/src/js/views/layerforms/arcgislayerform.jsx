@@ -500,17 +500,6 @@ class ArcGISLayerForm extends Component {
           />
         </div>        
         <div>
-          <label>Synligt vid start</label>
-          <input
-            type="checkbox"
-            ref="input_visibleAtStart"
-            onChange={(e) => {
-              this.setState({visibleAtStart: e.target.checked})
-            }}
-            checked={this.state.visibleAtStart}
-          />
-        </div>
-        <div>
           <label>Valda lager*</label>
           <div ref="input_layers" className={this.getValidationClass("layers") + " layer-list-choosen"} >
             <ul>

@@ -714,21 +714,6 @@ class ExtendedWMSLayerForm extends Component {
         <div className="row">
           <div className="col-md-6">
             <div className="form-group">
-              <label>Synligt vid start</label>
-              <input
-                type="checkbox"
-                ref="input_visibleAtStart"
-                onChange={
-                  (e) => {
-                    this.setState({ visibleAtStart: e.target.checked })
-                  }
-                }
-                checked={this.state.visibleAtStart}
-              />
-            </div>
-          </div>
-          <div className="col-md-6">
-            <div className="form-group">
               <label>Single tile</label>
               <input
                 type="checkbox"

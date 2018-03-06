@@ -33,7 +33,8 @@ var panels = {
   'streetviewpanel': require('views/streetviewpanel'),
   'bufferpanel': require('views/bufferpanel'),
   'routingpanel': require('views/routingpanel'),
-  'presetpanel': require('views/presetpanel')
+  'presetpanel': require('views/presetpanel'),
+  'measurepanel': require('views/measurepanel')
 };
 
 var Alert = require('alert');
