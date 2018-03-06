@@ -347,56 +347,52 @@ var SearchBarView = {
         </div>
     );
 
-    //const minimizeClassName = this.state.minimized ? 'search-results-toggle-minimze search-results-toggle-minimze-minimized' : 'search-results-toggle-minimze';
-    //const resultListClassName = this.state.minimized ? 'search-results-total-count search-results-total-count-minimized' : 'search-results-total-count';
-    /* <span className="pull-right btn btn-default" onClick={() => {this.clear()}} id="snabbsokRensa">Rensa</span> */
-    
+    const resultStyle = {
+      display: this.state.minimized ? 'none' : 'block'
+    }
+
     return (
       <div className="searchbar-area" key="searchbar-results">
         {
           groups && groups.length > 0
           ? (
-            <div className="searchbar-results">
-              <h3 id="searchbar-results-title">
-                Sökresultat 
-                {resultsCount > 0 ? <span className="search-results-total-count">({resultsCount})</span> : null }
-              </h3>
-              {
-                this.state.minimized
-                ? null
-                : (
-                  <div id="searchbar-results-list">
-                    { enable_checkbox ? checkbox : null }
-                    {
-                      groups.map((item, i) => {
-                        var id = "group-" + i;
-                      return (
-                        <SearchResultGroup
-                              isBar="yes"
-                              id={id}
-                              key={id}
-                              result={item}
-                              numGroups={groups.length}
-                              model={this.props.model}
-                              parentView={this}
-                              map={this.props.model.get('map')} />
-                            );
-                          })
-                    }
-                  </div>
-                )  
-              }
+            <div>
+              <div className="searchbar-results">
+                <h3 id="searchbar-results-title">
+                  Sökresultat 
+                  {resultsCount > 0 ? <span className="search-results-total-count">({resultsCount})</span> : null }
+                </h3>
+                <div id="searchbar-results-list" style={resultStyle}>
+                  { enable_checkbox ? checkbox : null }
+                  {
+                    groups.map((item, i) => {
+                      var id = "group-" + i;
+                    return (
+                      <SearchResultGroup
+                            isBar="yes"
+                            id={id}
+                            key={id}
+                            result={item}
+                            numGroups={groups.length}
+                            model={this.props.model}
+                            parentView={this}
+                            map={this.props.model.get('map')} />
+                          );
+                        })
+                  }
+                </div>
+              </div>
+              <div onClick={this.toggleMinimize} className="search-results-toggle-minimze">
+                { this.state.minimized 
+                  ? <span>Visa <span className="fa fa-angle-down clickable arrow"></span></span> 
+                  : <span>Dölj <span className="fa fa-angle-up clickable arrow"></span></span> 
+                }
+              </div>
             </div>
           ) : (
             <div className="searchbar-results-no-results">Sökningen gav inget resultat.</div>
           )
         }
-        <div onClick={this.toggleMinimize} className="search-results-toggle-minimze">
-          { this.state.minimized 
-            ? <span>Visa <span className="fa fa-angle-down clickable arrow"></span></span> 
-            : <span>Dölj <span className="fa fa-angle-up clickable arrow"></span></span> 
-          }
-        </div>
       </div>
     );
   },

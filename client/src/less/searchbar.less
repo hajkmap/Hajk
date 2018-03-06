@@ -31,20 +31,22 @@
   margin: 0;
 }
 
-.searchbar-results, .searchbar-results-no-results {
+.searchbar-results {
   border: 1px solid #CCC;
   border-top: 0;
   border-bottom: 0;
-  padding: 10px 0 0 10px;
+  padding: 10px;
 }
 
 .searchbar-results-no-results {
-  padding-bottom: 10px;
+  border: 1px solid #CCC;
+  border-top: 0;
+  padding: 10px;
+  border-radius: 0 0 5px 5px;
 }
 
 #searchbar-results-title {
   margin: 0;
-  padding-bottom: 10px;
   font-size: 1.1em;
   font-weight: 500;
   color: #555;
@@ -60,8 +62,8 @@
 #searchbar-results-list {
   max-height: 500px;
   overflow-y: scroll;
-  padding: 0 10px 10px 0;
-
+  margin-top: 10px;
+  
   > div > div {
     margin: 0 !important;
   }
