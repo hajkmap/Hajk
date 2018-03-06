@@ -1,0 +1,134 @@
+#searchbar-search-area {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+#searchbar-input-field {
+  border-color: @brand-primary;
+  border-radius: 5px 0 0 5px;
+
+  /* Removes cross (x) from input field in Edge */
+  &::-ms-clear {
+    display: none;
+  }
+}
+
+#searchbar-input-field.searchbar-input-field-active {
+  border-radius: 5px 0 0 0;
+}
+
+#searchbar-search-button {
+  background: @brand-primary;
+  color: #FFF;
+  border: none;
+}
+
+#searchbar-search-button.searchbar-search-button-active {
+  border-radius: 0 5px 0 0;
+}
+
+.searchbar-area {
+  background: #FFF;
+  margin: 0;
+}
+
+.searchbar-results {
+  border: 1px solid #CCC;
+  border-top: 0;
+  border-bottom: 0;
+  padding: 10px;
+}
+
+.searchbar-results-no-results {
+  border: 1px solid #CCC;
+  border-top: 0;
+  padding: 10px;
+  border-radius: 0 0 5px 5px;
+}
+
+#searchbar-results-title {
+  margin: 0;
+  font-size: 1.1em;
+  font-weight: 500;
+  color: #555;
+}
+
+.search-results-total-count {
+  font-weight: 700;
+  color: #111;
+  font-size: 0.9em;
+  margin-left: 5px;
+}
+
+#searchbar-results-list {
+  max-height: 500px;
+  overflow-y: scroll;
+  margin-top: 10px;
+  
+  > div > div {
+    margin: 0 !important;
+  }
+  
+  > div:not(:last-of-type) {
+    margin-bottom: 10px !important;
+  }
+}
+
+#searchbar-input-field-clear {
+  position: absolute;
+  z-index: 4;
+  right: 40px;
+  height: 100%;
+  width: 40px;
+  cursor: pointer;
+  
+  &::before, &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background: #CCC;
+    width: 2px;
+    height: 16px;
+    transition: 0.2s ease-in-out;
+  }
+  
+  &::before {
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+  
+  &::after {
+    transform: translate(-50%, -50%) rotate(-45deg);
+  }
+  
+  &:hover {
+    &::before, &::after {
+      background: @brand-danger;
+      transition: 0.2s ease-in-out;
+    }
+  } 
+}
+
+.search-results-toggle-minimze {
+  text-align: center;
+  color: @brand-primary;
+  font-weight: 600;
+  padding: 5px;
+  background: #FFF;
+  border: 1px solid #CCC;
+  border-radius: 0 0 5px 5px;
+  box-shadow: 0 -2px 4px rgba(0,0,0,0.08);
+  cursor: pointer;
+
+  .arrow {
+    margin-left: 5px;
+  }
+}
+
+#searchbar-loading-spinner {
+  margin: 0;
+  text-align: center;
+  padding: 20px;
+  background: #FFF;
+  border-radius: 0 0 5px 5px;
+  border: 1px solid #CCC;
+}

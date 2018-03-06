@@ -30,6 +30,7 @@ var defaultState = {
   index: 0,
   onMap: false,
   bothSynlig: false,
+  enableViewTogglePopupInSnabbsok: true, 
   selectionTools: true,
   base64Encode: false,
   instruction: "",
@@ -64,6 +65,7 @@ class ToolOptions extends Component {
         index: tool.index,
         onMap: tool.options.onMap,
         bothSynlig: tool.options.bothSynlig,
+        enableViewTogglePopupInSnabbsok: tool.options.enableViewTogglePopupInSnabbsok,
         selectionTools: tool.options.selectionTools,
         base64Encode: tool.options.base64Encode,
         instruction: tool.options.instruction,
@@ -150,6 +152,7 @@ class ToolOptions extends Component {
       "options": {
         onMap: onMap,
         bothSynlig: this.state.bothSynlig,
+        enableViewTogglePopupInSnabbsok: this.state.enableViewTogglePopupInSnabbsok,
         toolbar: toolbar,
         maxZoom: this.state.maxZoom,
         markerImg: this.state.markerImg,
@@ -240,6 +243,15 @@ class ToolOptions extends Component {
               onChange={(e) => {this.handleInputChange(e)}}
               checked={this.state.onMap}/>&nbsp;
             <label htmlFor="onMap">Alltid synlig</label>
+          </div>
+          <div>
+            <input
+              id="enableViewTogglePopupInSnabbsok"
+              name="enableViewTogglePopupInSnabbsok"
+              type="checkbox"
+              onChange={(e) => {this.handleInputChange(e)}}
+              checked={this.state.enableViewTogglePopupInSnabbsok}/>&nbsp;
+            <label htmlFor="enableViewTogglePopupInSnabbsok">Aktivera visning av "Visa information" i snabbsök</label>
           </div>
           <div>
             <input
