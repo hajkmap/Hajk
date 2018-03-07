@@ -190,5 +190,5 @@ module.exports = function(grunt) {
   grunt.registerTask('debug', ['copy', 'less:production', 'browserify:debug']);
   grunt.registerTask('release', ['copy', 'less:production', 'env', 'browserify:dist', 'uglify', 'licence']);
   grunt.registerTask('licence', ['usebanner']);
-  grunt.registerTask('debug', ['connect:debug', 'proxy:proxy1', 'watch']);
+  grunt.registerTask('livedebug', ['connect:debug', 'proxy:proxy1', 'watch']);
 };
