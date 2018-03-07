@@ -566,6 +566,7 @@ var MeasureModel = {
     if (dragInteraction) {
       dragInteraction.removeAcceptedLayer('measure-layer');
     }
+    $('.measure-tool-item').removeClass('selected');
   },
 
   /**
