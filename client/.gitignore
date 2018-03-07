@@ -36,4 +36,5 @@ compiled
 documentation
 
 # custom.less is commited in a "clean" state, ignoring it here will preseve its clean state in Git
+src/less/custom.less
 custom.less

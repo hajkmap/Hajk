@@ -162,6 +162,15 @@ var Layer = {
   getInfoUrl: function () {
     return this.get("infoUrl");
   },
+ 
+  /**
+   * Get info url text.
+   * @instance
+   * @return {string} infoUrlText
+   */
+  getInfoUrlText: function () {
+    return this.get("infoUrlText");
+  },
 
   /**
    * Get info owner.

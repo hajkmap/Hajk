@@ -903,14 +903,17 @@ class Menu extends Component {
   }
 
   handleInputChange(event) {
-    const target = event.target;
-    const name = target.name;
+    var target = event.target;
+    var name = target.name;
     var value = target.type === 'checkbox' ? target.checked : target.value;
 
     if (typeof value === "string" && /^[\d\.\, ]+$/.test(value)) {
       value = value.replace(/,/g, '').replace(/ /g, '').Number(value);
     }
 
+    if (name == "instruction"){
+      value = btoa(value);
+    }
     this.setState({
       [name]: value
     });
@@ -982,12 +985,13 @@ class Menu extends Component {
               </div>
               <div>
                 <label htmlFor="instruction">Instruktion</label>
-                <input
+                <textarea
+                  type="text"
                   id="instruction"
                   name="instruction"
-                  type="text"
                   onChange={(e) => {this.handleInputChange(e)}}
-                  value={this.state.instruction}/>
+                  value={atob(this.state.instruction)}
+                />
               </div>
               <div>
                 <input

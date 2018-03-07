@@ -84,6 +84,10 @@ var SelectionPanelView = {
           <button onClick={() => this.activateTool('drawSelection')} type="button" className={this.getClassNames('drawSelection')} title="Markera efter polygon" >
             <i className="fa iconmoon-yta icon"></i>
           </button>
+          <button onClick={() => this.activateTool('multiSelect')} type="button" className={this.getClassNames('multiSelect')} title="Markera flera objekt" >
+            <i className="fa fa-plus icon"></i>
+          </button>
+
         </div>
         <div className="btn btn-link" onClick={(e) => {
             e.preventDefault();
