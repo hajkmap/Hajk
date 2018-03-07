@@ -40,7 +40,6 @@ const defaultState = {
   legend: "",
   owner: "",
   url: "",
-  visibleAtStart: false,
   queryable: true,
   tiled: false,
   singleTile: false,
@@ -265,7 +264,6 @@ class WMSLayerForm extends Component {
       legend: this.getValue("legend"),
       layers: this.getValue("layers"),
       infobox: this.getValue("infobox"),
-      visibleAtStart: this.getValue("visibleAtStart"),
       singleTile: this.getValue("singleTile"),
       imageFormat: this.getValue("imageFormat"),
       serverType: this.getValue("serverType"),
@@ -304,7 +302,6 @@ class WMSLayerForm extends Component {
     ,   value = input ? input.value : "";
 
     if (fieldName === 'date') value = create_date();
-    if (fieldName === 'visibleAtStart') value = input.checked;
     if (fieldName === 'singleTile') value = input.checked;
     if (fieldName === 'tiled') value = input.checked;
     if (fieldName === 'queryable') value = input.checked;

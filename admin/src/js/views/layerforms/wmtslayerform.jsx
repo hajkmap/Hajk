@@ -35,7 +35,6 @@ const defaultState = {
   infobox: "",
   legend: "",
   url: "",
-  visibleAtStart: false,
   queryable: true,
   drawOrder: 1,
   layer: 'topowebb',
@@ -93,7 +92,6 @@ class WMTSLayerForm extends Component {
       date: this.getValue("date"),
       content: this.getValue("content"),
       legend: this.getValue("legend"),
-      visibleAtStart: this.getValue("visibleAtStart"),
       layer: this.getValue("layer"),
       matrixSet: this.getValue("matrixSet"),
       style: this.getValue("style"),
@@ -130,7 +128,6 @@ class WMTSLayerForm extends Component {
 
     if (fieldName === 'date') value = create_date();
     if (fieldName === 'layers') value = format_layers(this.state.addedLayers);
-    if (fieldName === 'visibleAtStart') value = input.checked;
     if (fieldName === 'singleTile') value = input.checked;
     if (fieldName === 'imageFormat') value = input.value;
     if (fieldName === 'queryable') value = input.checked;

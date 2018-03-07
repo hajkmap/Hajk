@@ -43,7 +43,6 @@ const defaultState = {
   url: "",
   searchFields: "",
   displayFields: "",
-  visibleAtStart: false,
   tiled: false,
   singleTile: false,
   version: "",
@@ -385,7 +384,6 @@ class ExtendedWMSLayerForm extends Component {
       layers: this.getValue("layers"),
       searchFields: this.getValue("searchFields"),
       displayFields: this.getValue("displayFields"),
-      visibleAtStart: this.getValue("visibleAtStart"),
       infoFormat: this.getValue("infoFormat"),
       infobox: this.getValue("infobox"),
       singleTile: this.getValue("singleTile"),
@@ -413,7 +411,6 @@ class ExtendedWMSLayerForm extends Component {
       , value = input ? input.value : "";
     
     if (fieldName === 'date') value = create_date();
-    if (fieldName === 'visibleAtStart') value = input.checked;
     if (fieldName === 'singleTile') value = input.checked;
     if (fieldName === 'tiled') value = input.checked;
     if (fieldName === 'queryable') value = input.checked;

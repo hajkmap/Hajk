@@ -150,13 +150,11 @@ var MeasurePanelView = {
    */
   abort: function () {
     this.props.model.abort();
-    $('#Point, #Circle, #Text, #Polygon, #LineString, #move, #edit, #delete, #Box').removeClass('selected');
+    $('.measure-tool-item').removeClass('selected');
     this.setState({
       symbology: "",
       buttonDisabled: true
     })
-    this.props.model.set("kmlExportUrl", false);
-    this.props.model.set("kmlImport", false);
     this.props.model.measureTooltip.setPosition(null);
   },
 
@@ -177,7 +175,7 @@ var MeasurePanelView = {
    */
   activateRemovalTool: function () {
     this.props.model.activateRemovalTool();
-    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete, #Box').removeClass('selected');
+    $('.measure-tool-item').removeClass('selected');
     $('#delete').addClass('selected');
     this.setState({ buttonDisabled: false });
   },
@@ -188,7 +186,7 @@ var MeasurePanelView = {
    */
   activateMoveTool: function () {
     this.props.model.activateMoveTool();
-    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete, #Box').removeClass('selected');
+    $('.measure-tool-item').removeClass('selected');
     $('#move').addClass('selected');
     this.setState({ buttonDisabled: false });
   },
@@ -199,7 +197,7 @@ var MeasurePanelView = {
    */
   activateEditTool: function () {
     this.props.model.activateEditTool();
-    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete, #Box').removeClass('selected');
+    $('.measure-tool-item').removeClass('selected');
     $('#edit').addClass('selected');
     this.setState({ buttonDisabled: false });
   },
@@ -211,7 +209,7 @@ var MeasurePanelView = {
    */
   activateDrawTool: function (type) {
     this.props.model.activateDrawTool(type);
-    $('#Circle, #Point, #Text, #Polygon, #LineString, #move, #edit, #delete, #Box').removeClass('selected');
+    $('.measure-tool-item').removeClass('selected');
     $('#' + type).addClass('selected');
     this.setState({ buttonDisabled: false });
   },
@@ -285,13 +283,13 @@ var MeasurePanelView = {
         <Panel title="Mät" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
           <div className="draw-tools measure-tools">
             <ul>
-              <li id="LineString" onClick={this.activateDrawTool.bind(this, "LineString")}>
+              <li className="measure-tool-item" id="LineString" onClick={this.activateDrawTool.bind(this, "LineString")}>
                 <i className="iconmoon-linje"></i> <span>Mät avstånd</span>
               </li>
-              <li id="Polygon" onClick={this.activateDrawTool.bind(this, "Polygon")}>
+              <li className="measure-tool-item" id="Polygon" onClick={this.activateDrawTool.bind(this, "Polygon")}>
                 <i className="iconmoon-yta"></i> <span>Mät yta</span>
               </li>
-              <li id="clear" onClick={this.alertClear}>
+              <li className="measure-tool-item" id="clear" onClick={this.alertClear}>
                 <i className="fa fa-trash fa-0"></i> <span>Rensa allt</span>
               </li>
             </ul>

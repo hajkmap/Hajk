@@ -38,7 +38,6 @@ const defaultState = {
   infobox: "",
   legend: "",
   url: "",
-  visibleAtStart: false,
   queryable: true,
   drawOrder: 1,
   lineColor: "rgba(0, 0, 0, 0.5)",
@@ -120,7 +119,6 @@ class VectorLayerForm extends Component {
       date: this.getValue("date"),
       content: this.getValue("content"),
       legend: this.getValue("legend"),
-      visibleAtStart: this.getValue("visibleAtStart"),
       lineStyle: this.getValue("lineStyle"),
       lineColor: this.getValue("lineColor"),
       lineWidth: this.getValue("lineWidth"),
@@ -174,7 +172,6 @@ class VectorLayerForm extends Component {
 
     if (fieldName === 'date') value = create_date();
     if (fieldName === 'queryable') value = input.checked;
-    if (fieldName === 'visibleAtStart') value = input.checked;
     if (fieldName === 'showLabels') value = input.checked;
     if (fieldName === 'fillColor') value = rgba_to_string(this.state.fillColor);
     if (fieldName === 'lineColor') value = rgba_to_string(this.state.lineColor);

@@ -36,7 +36,6 @@ const defaultState = {
   infobox: "",
   legend: "",
   url: "",
-  visibleAtStart: false,
   queryable: true,
   singleTile: false,
   drawOrder: 1,
@@ -122,7 +121,6 @@ class ArcGISLayerForm extends Component {
       date: this.getValue("date"),
       content: this.getValue("content"),
       legend: this.getValue("legend"),
-      visibleAtStart: this.getValue("visibleAtStart"),
       projection: this.getValue("projection"),
       layers: this.getValue("layers"),
       extent: this.getValue("extent"),
@@ -157,7 +155,6 @@ class ArcGISLayerForm extends Component {
     if (fieldName === 'layers') value = format_layers(this.state.addedLayers);
     if (fieldName === 'queryable') value = input.checked;
     if (fieldName === 'singleTile') value = input.checked;
-    if (fieldName === 'visibleAtStart') value = input.checked;
     if (fieldName === 'extent') value = value.split(',');
     if (fieldName === 'infoVisible') value = input.checked;
 
