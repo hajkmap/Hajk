@@ -118,10 +118,10 @@
     },
     {
       "id": "234",
-      "caption": "Topowebbkartan (LM)",
+      "caption": "Topowebbkartan (WMS)",
       "url": "https://karta.kungsbacka.se/geoserver/wms",
       "owner": "",
-      "date": "1519919161268",
+      "date": "1520500694055",
       "content": "",
       "legend": "",
       "projection": null,
@@ -137,7 +137,7 @@
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
-      "attribution": "",
+      "attribution": "Lantmäteriet",
       "searchUrl": "",
       "searchPropertyName": "",
       "searchDisplayName": "",
@@ -153,7 +153,7 @@
   "wfslayers": [
     {
       "id": "76",
-      "caption": "Adress",
+      "caption": "Adress Alingsås",
       "url": "https://gisak.alingsas.se/arcgis/services/Administrativt/Adresser/MapServer/WFSServer",
       "layers": [
         "Administrativt_Adresser:Adress"
@@ -174,42 +174,20 @@
       "infoOwner": null
     },
     {
-      "id": "176",
-      "caption": "Fastighet",
-      "url": "https://gisak.alingsas.se/arcgis/services/Administrativt/Fastighetsgranser/MapServer/WFSServer",
+      "id": "235",
+      "caption": "Adress Kungsbacka",
+      "url": "https://karta.kungsbacka.se/geoserver/wfs",
       "layers": [
-        "Administrativt_Fastighetsgranser:Fastighetsgränser"
+        "ikba:sokadresser_p"
       ],
       "searchFields": [
-        "FASTIGHET"
+        "namn"
       ],
-      "infobox": "<div>{FASTIGHET}\n</div>",
+      "infobox": "{namn}  \n{postnr}  \n{ort}  \n",
       "displayFields": [
-        "FASTIGHET"
+        "namn"
       ],
-      "geometryField": "Shape",
-      "outputFormat": "GML3",
-      "infoVisible": false,
-      "infoTitle": null,
-      "infoText": null,
-      "infoUrl": null,
-      "infoOwner": null
-    },
-    {
-      "id": "193",
-      "caption": "Skolor",
-      "url": "https://gisak.alingsas.se/arcgis/services/Extern_webbkarta/SokPaSkolor/MapServer/WFSServer",
-      "layers": [
-        "Extern_webbkarta_SokPaSkolor:Alla_Skolor"
-      ],
-      "searchFields": [
-        "Name"
-      ],
-      "infobox": "<div><b style=\"font-size:120%;\">{Name}</b>\n{Gatuadress}\n</div>\n<div>{Category}\n</div>",
-      "displayFields": [
-        "Name"
-      ],
-      "geometryField": "Shape",
+      "geometryField": "geom",
       "outputFormat": "GML3",
       "infoVisible": false,
       "infoTitle": null,
