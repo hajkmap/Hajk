@@ -339,7 +339,9 @@ Följande egenskaper finns att konfigurera:
 `{string} url_layermenu_settings` - REST-sökväg till funktion för att lista lager.  
 `{string} url_map_settings` - REST-sökväg till funktion för editera inställningar för kartor.  
 `{string} url_tool_settings` - REST-sökväg till funktion för editera inställningar för verktyg.
+
 `{string} authentication_active` - Property som styr om autentisering-, och rollstyrningskonfiguration skall visas i gränssnittet.
+
 #### router
 `{array {object {name, title, default (optional) }}}` - Lista med flikar i applikationen.  
 
