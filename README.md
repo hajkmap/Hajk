@@ -227,7 +227,7 @@ Nu bör `C:/wwwroot` innehålla följande filer och mappar:
 | `postproxy.aspx.cs`  |
 
 #### Autentisering och rollstyrning
-Om autentisering och rollstyrning skall användas måste postproxy.aspx och postproxy.aspx.cs flyttas in i util-mappen. Dessutom skall `C:/projekt/Hajk/proxy/HTTPProxy` användas istället `C:/projekt/Hajk/proxy/mvc`.
+Om autentisering och rollstyrning skall användas måste postproxy.aspx och postproxy.aspx.cs flyttas in i util-mappen. Dessutom skall `C:/projekt/Hajk/proxy/HTTPProxy` användas istället för `C:/projekt/Hajk/proxy/mvc`.
 
 Denna funktionalitet innefattar även specifika inställningar till IIS och kräver att Windows Authentication är aktiverat. Se separat dokumentation för ytterligare detaljer.
 
