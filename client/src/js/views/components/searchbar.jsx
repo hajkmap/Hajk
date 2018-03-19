@@ -56,6 +56,7 @@ var SearchBarView = {
       displayPopup: this.props.model.get('displayPopupBar'),
       haveUrlSearched: false,
       updateCtr: 2,
+      sAndVSearch: false
     };
   },
 
@@ -114,7 +115,8 @@ var SearchBarView = {
       this.setState({
         valueBar: this.valueBar,
         minimized: false,
-        force: true
+        force: true,
+        sAndVSearch: true
       });
       this.props.model.set('force', true);
       if (this.refs.searchInput.value.length > 3) {
@@ -129,10 +131,11 @@ var SearchBarView = {
 
   componentDidUpdate: function(){
     var hit = document.getElementById('hit-0-group-0');
-    if (!this.state.haveUrlSearched && hit != null){
+    if (!this.state.haveUrlSearched && hit != null && this.state.sAndVSearch){
       try {
         hit.click();
         this.state.haveUrlSearched = true;
+        this.state.sAndVSearch = false;
       } catch (err){
       }
     }
@@ -192,6 +195,7 @@ var SearchBarView = {
         force: true
       });
       this.props.model.set('force', true);
+      this.state.sAndVSearch = false;
       this.search();
     }
   },
@@ -397,7 +401,8 @@ var SearchBarView = {
       this.setState({
         valueBar: this.valueBar,
         minimized: false,
-        force: false
+        force: false,
+        sAndVSearch: false
       });
       this.props.model.set('force', false);
       if (this.refs.searchInput.value.length > 3) {
