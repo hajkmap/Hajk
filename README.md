@@ -226,6 +226,11 @@ Nu bör `C:/wwwroot` innehålla följande filer och mappar:
 | `postproxy.aspx`     |
 | `postproxy.aspx.cs`  |
 
+#### Autentisering och rollstyrning
+Om autentisering och rollstyrning skall användas måste postproxy.aspx och postproxy.aspx.cs flyttas in i util-mappen. Dessutom skall `C:/projekt/Hajk/proxy/HTTPProxy` användas istället för `C:/projekt/Hajk/proxy/mvc`.
+
+Denna funktionalitet innefattar även specifika inställningar till IIS och kräver att Windows Authentication är aktiverat. Se separat dokumentation för ytterligare detaljer.
+
 #### Sätt rätt behörigheter på filer och mappar
 För att webbservern ska kunna skriva till vissa mappar i vår huvudmapp behöver rätt behörighet sättas.
 
@@ -334,6 +339,9 @@ Följande egenskaper finns att konfigurera:
 `{string} url_layermenu_settings` - REST-sökväg till funktion för att lista lager.  
 `{string} url_map_settings` - REST-sökväg till funktion för editera inställningar för kartor.  
 `{string} url_tool_settings` - REST-sökväg till funktion för editera inställningar för verktyg.
+
+`{string} authentication_active` - Property som styr om autentisering-, och rollstyrningskonfiguration skall visas i gränssnittet.
+
 #### router
 `{array {object {name, title, default (optional) }}}` - Lista med flikar i applikationen.  
 
