@@ -35,7 +35,6 @@ const defaultState = {
   infobox: "",
   legend: "",
   url: "",
-  visibleAtStart: false,
   queryable: true,
   drawOrder: 1,
   layer: 'topowebb',
@@ -51,6 +50,7 @@ const defaultState = {
   infoTitle: "",
   infoText: "",
   infoUrl: "",
+  infoUrlText: "",
   infoOwner: ""
 };
 
@@ -92,7 +92,6 @@ class WMTSLayerForm extends Component {
       date: this.getValue("date"),
       content: this.getValue("content"),
       legend: this.getValue("legend"),
-      visibleAtStart: this.getValue("visibleAtStart"),
       layer: this.getValue("layer"),
       matrixSet: this.getValue("matrixSet"),
       style: this.getValue("style"),
@@ -105,6 +104,7 @@ class WMTSLayerForm extends Component {
       infoTitle: this.getValue("infoTitle"),
       infoText: this.getValue("infoText"),
       infoUrl: this.getValue("infoUrl"),
+      infoUrlText: this.getValue("infoUrlText"),
       infoOwner: this.getValue("infoOwner")
     }
   }
@@ -128,7 +128,6 @@ class WMTSLayerForm extends Component {
 
     if (fieldName === 'date') value = create_date();
     if (fieldName === 'layers') value = format_layers(this.state.addedLayers);
-    if (fieldName === 'visibleAtStart') value = input.checked;
     if (fieldName === 'singleTile') value = input.checked;
     if (fieldName === 'imageFormat') value = input.value;
     if (fieldName === 'queryable') value = input.checked;
@@ -264,20 +263,6 @@ class WMTSLayerForm extends Component {
             onChange={(e) => this.setState({legend: e.target.value})}
           />
           <span onClick={(e) => {this.props.parent.loadLegendImage(e)}} className="btn btn-default">Välj fil {imageLoader}</span>
-        </div>
-        <div>
-          <label>Synligt vid start</label>
-          <input
-            type="checkbox"
-            ref="input_visibleAtStart"
-            onChange={
-              (e) => {
-                this.setState({visibleAtStart: e.target.checked})
-              }
-            }
-            checked={this.state.visibleAtStart}
-
-          />
         </div>
         <div>
           <label>Lager*</label>
@@ -430,6 +415,19 @@ class WMTSLayerForm extends Component {
                 }}
                 value={this.state.infoUrl}
                 className={this.getValidationClass("infoUrl")}
+            />
+          </div>
+          <div className={infoClass}>
+            <label>Länktext</label>
+            <input 
+              type="text"
+              ref="input_infoUrlText"
+                onChange={(e) => {
+                  this.setState({infoUrlText: e.target.value});
+                  this.validateField("infoUrlText", e);
+                }}
+                value={this.state.infoUrlText}
+                className={this.getValidationClass("infoUrlText")}
             />
           </div>
           <div className={infoClass}>

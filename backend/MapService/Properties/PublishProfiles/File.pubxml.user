@@ -6,20 +6,20 @@ by editing this MSBuild file. In order to learn more about this please visit htt
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <TimeStampOfAssociatedLegacyPublishXmlFile />
-    <_PublishTargetUrl>C:\Hajk_Sweco_Slutleverans\publish\mapservice</_PublishTargetUrl>
+    <_PublishTargetUrl>C:\mapservice</_PublishTargetUrl>
   </PropertyGroup>
   <ItemGroup>
     <File Include="ApplicationInsights.config">
-      <publishTime>03/20/2018 09:41:25</publishTime>
+      <publishTime>02/22/2018 16:22:47</publishTime>
     </File>
     <File Include="App_Data/layers.json">
-      <publishTime>03/20/2018 09:41:25</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="App_Data/map_1.json">
-      <publishTime>03/20/2018 09:41:25</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="assets/style.css">
-      <publishTime>03/20/2018 09:41:25</publishTime>
+      <publishTime>02/22/2018 16:22:47</publishTime>
     </File>
     <File Include="bin/amd64/Microsoft.VC90.CRT/Microsoft.VC90.CRT.manifest">
       <publishTime>02/01/2017 11:41:18</publishTime>
@@ -49,37 +49,37 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>02/16/2017 13:21:49</publishTime>
     </File>
     <File Include="bin/ApplicationInsights.config">
-      <publishTime>03/20/2018 09:41:25</publishTime>
+      <publishTime>02/22/2018 16:22:47</publishTime>
     </File>
     <File Include="bin/BruTile.Desktop.dll">
-      <publishTime>03/20/2018 09:41:25</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/BruTile.dll">
-      <publishTime>03/20/2018 09:41:25</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/BruTile.MbTiles.dll">
-      <publishTime>03/20/2018 09:41:25</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/Common.Logging.Core.dll">
-      <publishTime>03/20/2018 09:41:25</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/Common.Logging.Core.pdb">
-      <publishTime>11/28/2017 13:35:28</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/Common.Logging.dll">
-      <publishTime>03/20/2018 09:41:25</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/Common.Logging.pdb">
-      <publishTime>11/28/2017 13:35:28</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/de/PdfSharp.Charting.resources.dll">
-      <publishTime>03/20/2018 09:41:31</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/de/PdfSharp.resources.dll">
-      <publishTime>03/20/2018 09:41:31</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/EntityFramework.dll">
-      <publishTime>03/20/2018 09:41:26</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/EntityFramework.SqlServer.dll">
       <publishTime>02/16/2017 13:21:49</publishTime>
@@ -88,19 +88,19 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>02/16/2017 13:21:49</publishTime>
     </File>
     <File Include="bin/GeoAPI.dll">
-      <publishTime>03/20/2018 09:41:25</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/ICSharpCode.SharpZipLib.dll">
-      <publishTime>03/20/2018 09:41:31</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/log4net.dll">
       <publishTime>03/08/2017 19:26:22</publishTime>
     </File>
     <File Include="bin/MapService.dll">
-      <publishTime>03/20/2018 09:52:33</publishTime>
+      <publishTime>03/05/2018 13:45:01</publishTime>
     </File>
     <File Include="bin/MapService.pdb">
-      <publishTime>12/11/2017 10:26:00</publishTime>
+      <publishTime>03/05/2018 13:45:01</publishTime>
     </File>
     <File Include="bin/Microsoft.AI.Agent.Intercept.dll">
       <publishTime>02/16/2017 13:21:49</publishTime>
@@ -124,121 +124,121 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>02/16/2017 13:21:49</publishTime>
     </File>
     <File Include="bin/Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll">
-      <publishTime>03/20/2018 09:41:28</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/Microsoft.Web.Infrastructure.dll">
-      <publishTime>03/20/2018 09:41:30</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/NetTopologySuite.dll">
-      <publishTime>03/20/2018 09:41:25</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/Newtonsoft.Json.dll">
-      <publishTime>03/20/2018 09:41:31</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/NPOI.dll">
-      <publishTime>03/20/2018 09:41:30</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/NPOI.OOXML.dll">
-      <publishTime>03/20/2018 09:41:30</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/NPOI.OpenXml4Net.dll">
-      <publishTime>03/20/2018 09:41:30</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/NPOI.OpenXmlFormats.dll">
-      <publishTime>03/20/2018 09:41:30</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/PdfSharp.Charting.dll">
-      <publishTime>03/20/2018 09:41:31</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/PdfSharp.dll">
-      <publishTime>03/20/2018 09:41:31</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/PowerCollections.dll">
-      <publishTime>03/20/2018 09:41:25</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/roslyn/csc.exe">
-      <publishTime>03/20/2018 09:41:29</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/roslyn/Microsoft.Build.Tasks.CodeAnalysis.dll">
-      <publishTime>03/20/2018 09:41:28</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/roslyn/Microsoft.CodeAnalysis.CSharp.dll">
-      <publishTime>03/20/2018 09:41:29</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/roslyn/Microsoft.CodeAnalysis.dll">
-      <publishTime>03/20/2018 09:41:29</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/roslyn/Microsoft.CodeAnalysis.VisualBasic.dll">
-      <publishTime>03/20/2018 09:41:29</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/roslyn/Microsoft.CSharp.Core.targets">
-      <publishTime>03/20/2018 09:41:28</publishTime>
+      <publishTime>02/22/2018 16:22:49</publishTime>
     </File>
     <File Include="bin/roslyn/Microsoft.VisualBasic.Core.targets">
-      <publishTime>03/20/2018 09:41:29</publishTime>
+      <publishTime>02/22/2018 16:22:49</publishTime>
     </File>
     <File Include="bin/roslyn/System.Collections.Immutable.dll">
-      <publishTime>03/20/2018 09:41:29</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/roslyn/System.Reflection.Metadata.dll">
-      <publishTime>03/20/2018 09:41:29</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/roslyn/vbc.exe">
-      <publishTime>03/20/2018 09:41:29</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/roslyn/VBCSCompiler.exe">
-      <publishTime>03/20/2018 09:41:29</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/roslyn/VBCSCompiler.exe.config">
-      <publishTime>03/20/2018 09:41:29</publishTime>
+      <publishTime>02/22/2018 16:22:49</publishTime>
     </File>
     <File Include="bin/SharpMap.dll">
-      <publishTime>03/20/2018 09:41:25</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/SharpMap.Layers.BruTile.dll">
-      <publishTime>03/20/2018 09:41:25</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/SharpMap.Layers.BruTile.dll.config">
-      <publishTime>11/28/2017 13:35:28</publishTime>
+      <publishTime>02/22/2018 16:22:48</publishTime>
     </File>
     <File Include="bin/SharpMap.Layers.BruTile.pdb">
-      <publishTime>11/28/2017 13:35:28</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/SharpMap.pdb">
-      <publishTime>11/28/2017 13:35:28</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/System.Data.SQLite.dll">
-      <publishTime>03/20/2018 09:41:26</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/System.Data.SqlServerCe.dll">
       <publishTime>02/16/2017 13:21:50</publishTime>
     </File>
     <File Include="bin/System.Net.Http.Formatting.dll">
-      <publishTime>03/20/2018 09:41:28</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/System.Web.Helpers.dll">
-      <publishTime>03/20/2018 09:41:28</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/System.Web.Http.dll">
-      <publishTime>03/20/2018 09:41:28</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/System.Web.Http.WebHost.dll">
-      <publishTime>03/20/2018 09:41:28</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/System.Web.Mvc.dll">
-      <publishTime>03/20/2018 09:41:28</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/System.Web.Razor.dll">
-      <publishTime>03/20/2018 09:41:28</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/System.Web.WebPages.Deployment.dll">
-      <publishTime>03/20/2018 09:41:28</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/System.Web.WebPages.dll">
-      <publishTime>03/20/2018 09:41:28</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/System.Web.WebPages.Razor.dll">
-      <publishTime>03/20/2018 09:41:28</publishTime>
+      <publishTime>01/25/2018 05:26:36</publishTime>
     </File>
     <File Include="bin/x86/Microsoft.VC90.CRT/Microsoft.VC90.CRT.manifest">
       <publishTime>02/16/2017 13:21:49</publishTime>
@@ -268,16 +268,16 @@ by editing this MSBuild file. In order to learn more about this please visit htt
       <publishTime>02/16/2017 13:21:49</publishTime>
     </File>
     <File Include="Global.asax">
-      <publishTime>03/20/2018 09:41:25</publishTime>
+      <publishTime>02/22/2018 16:22:47</publishTime>
     </File>
     <File Include="index.html">
-      <publishTime>03/20/2018 09:41:26</publishTime>
+      <publishTime>02/22/2018 16:22:48</publishTime>
     </File>
     <File Include="packages.config">
-      <publishTime>03/20/2018 09:41:26</publishTime>
+      <publishTime>02/22/2018 16:22:48</publishTime>
     </File>
     <File Include="Web.config">
-      <publishTime>03/20/2018 09:52:34</publishTime>
+      <publishTime>03/05/2018 13:45:02</publishTime>
     </File>
   </ItemGroup>
 </Project>
