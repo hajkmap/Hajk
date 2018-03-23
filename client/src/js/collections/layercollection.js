@@ -155,6 +155,7 @@ var LayerCollection = {
         "infoTitle": args.infoTitle,
         "infoText": args.infoText,
         "infoUrl": args.infoUrl,
+        "infoUrlText": args.infoUrlText,
         "infoOwner": args.infoOwner
       }
     };
@@ -219,6 +220,7 @@ var LayerCollection = {
         "infoTitle": args.infoTitle,
         "infoText": args.infoText,
         "infoUrl": args.infoUrl,
+        "infoUrlText": args.infoUrlText,
         "infoOwner": args.infoOwner
       }
     };
@@ -308,6 +310,7 @@ var LayerCollection = {
         "infoTitle": args.infoTitle,
         "infoText": args.infoText,
         "infoUrl": args.infoUrl,
+        "infoUrlText": args.infoUrlText,
         "infoOwner": args.infoOwner
       }
     };
@@ -354,6 +357,7 @@ var LayerCollection = {
         "infoTitle": args.infoTitle,
         "infoText": args.infoText,
         "infoUrl": args.infoUrl,
+        "infoUrlText": args.infoUrlText,
         "infoOwner": args.infoOwner
       }
     };

@@ -36,7 +36,6 @@ const defaultState = {
   infobox: "",
   legend: "",
   url: "",
-  visibleAtStart: false,
   queryable: true,
   singleTile: false,
   drawOrder: 1,
@@ -50,6 +49,7 @@ const defaultState = {
   infoTitle: "",
   infoText: "",
   infoUrl: "",
+  infoUrlText: "",
   infoOwner: ""
 };
 
@@ -121,7 +121,6 @@ class ArcGISLayerForm extends Component {
       date: this.getValue("date"),
       content: this.getValue("content"),
       legend: this.getValue("legend"),
-      visibleAtStart: this.getValue("visibleAtStart"),
       projection: this.getValue("projection"),
       layers: this.getValue("layers"),
       extent: this.getValue("extent"),
@@ -134,6 +133,7 @@ class ArcGISLayerForm extends Component {
       infoTitle: this.getValue("infoTitle"),
       infoText: this.getValue("infoText"),
       infoUrl: this.getValue("infoUrl"),
+      infoUrlText: this.getValue("infoUrlText"),
       infoOwner: this.getValue("infoOwner")
     }
   }
@@ -155,7 +155,6 @@ class ArcGISLayerForm extends Component {
     if (fieldName === 'layers') value = format_layers(this.state.addedLayers);
     if (fieldName === 'queryable') value = input.checked;
     if (fieldName === 'singleTile') value = input.checked;
-    if (fieldName === 'visibleAtStart') value = input.checked;
     if (fieldName === 'extent') value = value.split(',');
     if (fieldName === 'infoVisible') value = input.checked;
 
@@ -500,17 +499,6 @@ class ArcGISLayerForm extends Component {
           />
         </div>        
         <div>
-          <label>Synligt vid start</label>
-          <input
-            type="checkbox"
-            ref="input_visibleAtStart"
-            onChange={(e) => {
-              this.setState({visibleAtStart: e.target.checked})
-            }}
-            checked={this.state.visibleAtStart}
-          />
-        </div>
-        <div>
           <label>Valda lager*</label>
           <div ref="input_layers" className={this.getValidationClass("layers") + " layer-list-choosen"} >
             <ul>
@@ -590,6 +578,19 @@ class ArcGISLayerForm extends Component {
                 }}
                 value={this.state.infoUrl}
                 className={this.getValidationClass("infoUrl")}
+            />
+          </div>
+          <div className={infoClass}>
+            <label>Länktext</label>
+            <input 
+              type="text"
+              ref="input_infoUrlText"
+                onChange={(e) => {
+                  this.setState({infoUrlText: e.target.value});
+                  this.validateField("infoUrlText", e);
+                }}
+                value={this.state.infoUrlText}
+                className={this.getValidationClass("infoUrlText")}
             />
           </div>
           <div className={infoClass}>
