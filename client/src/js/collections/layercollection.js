@@ -26,6 +26,20 @@ var LayerCollection = {
     layer.set("olMap", map);
     layer.set("shell", this.shell);
 
+
+    var visibleAtStart = false;
+    for(var i=0; i < this.mapGroups.length; i++){
+      for (var j=0; j < this.mapGroups[i].layers.length; j++){
+        if (layer.get("id") == this.mapGroups[i].layers[j].id){
+          visibleAtStart = this.mapGroups[i].layers[j].visibleAtStart;
+          break;
+        }
+      }
+    }
+
+    layer.setVisible(visibleAtStart);
+    layer.getLayer().setVisible(visibleAtStart);
+
     if (olLayer) {
       map.addLayer(olLayer);
     }
@@ -374,7 +388,6 @@ var LayerCollection = {
    */
   model: function (args, properties) {
     var config = false;
-
     if (args.type === "wms") {
       config = LayerCollection.mapWMSConfig(args, properties);
     }
@@ -414,6 +427,10 @@ var LayerCollection = {
 
     this.shell = args.shell;
     this.initialConfig = options;
+    var toolConfig = args.tools;
+
+    var layerSwitcherTool = args.tools.find(tool => tool.type === "layerswitcher");
+    this.mapGroups = layerSwitcherTool.options.groups;
 
     _.defer(_.bind(function () {
 
