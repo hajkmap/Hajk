@@ -327,6 +327,22 @@
         "instruction": ""
       },
       "index": 8
+    },
+    {
+      "type": "streetview",
+      "options": {
+        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
+        "instruction": ""
+      },
+      "index": 6
+    },
+    {
+      "type": "routing",
+      "options": {
+        "apiKey": "",
+        "instruction": ""
+      },
+      "index": 7
     }
   ],
   "map": {

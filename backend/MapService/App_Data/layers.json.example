@@ -200,11 +200,11 @@
     {
       "id": "105",
       "dataFormat": "WFS",
-      "caption": "Kommunala grundskolor",
+      "caption": "Kommunala grundskolor Alingsås (WFS)",
       "url": "https://gisak.alingsas.se/arcgis/services/Extern_webbkarta/Utbildning_barnomsorg/MapServer/WFSServer",
       "layer": "Extern_webbkarta_Utbildning_barnomsorg:Kommunala_grundskolor",
       "owner": null,
-      "date": "1506089458725",
+      "date": "1522152292282",
       "content": "",
       "legend": "https://karta.alingsas.se/bilder/icons/Utbildning_barnomsorg/kommunalgrundskola.png",
       "symbolXOffset": 22.0,
@@ -231,10 +231,10 @@
       "labelAttribute": "Name",
       "showLabels": true,
       "infoVisible": false,
-      "infoTitle": null,
-      "infoText": null,
-      "infoUrl": null,
-      "infoOwner": null
+      "infoTitle": "",
+      "infoText": "",
+      "infoUrl": "",
+      "infoOwner": ""
     },
     {
       "id": "233",
@@ -243,7 +243,7 @@
       "url": "https://karta.kungsbacka.se/publik/hajk2_medlemmar.json",
       "layer": null,
       "owner": null,
-      "date": "1519994082948",
+      "date": "1520519859443",
       "content": "",
       "legend": "https://karta.kungsbacka.se/publik/assets/icons/pin.png",
       "symbolXOffset": 0.0,
@@ -313,10 +313,10 @@
     },
     {
       "id": "221",
-      "caption": "Gatuvybilder 2015",
+      "caption": "Gatuvybilder 2015 Alingsås (ArcGIS)",
       "url": "https://gisak.alingsas.se/arcgis/rest/services/Bilder/Gatuvybilder_2015/MapServer",
       "owner": null,
-      "date": "1508168471288",
+      "date": "1522152173166",
       "content": "",
       "legend": "https://karta.alingsas.se/bilder/icons/Bilder/Gatuvybilder_2015.png",
       "projection": "EPSG:3007",
@@ -325,10 +325,10 @@
         "0"
       ],
       "extent": [
-        "177008.16779999994",
-        "6414132.472200001",
-        "184029.5142000001",
-        "6425725.4888"
+        "177008.16425983657",
+        "6414132.343917351",
+        "184029.51788059037",
+        "6425725.61731451"
       ],
       "opacity": 1.0,
       "infobox": "<div id=\"mydiv\"><a href=\"{mly_url}\" target=\" blank\"><img src=\"{image_url}\" alt=\"Thumbnail gatuvybild\" style=\"width:256px;height:128px;\"></a>\n </div>\n<div><a href=\"{mly_url}\" target=\" blank\">Visa bild</a> i Mapillary.\n</div>\n\n<script>\nvar links = document.querySelectorAll('#mydiv a'),\ni, href;\n\nfor(i = 0; i < links.length; i++) {\n  href = links[i].getAttribute('href');\n  if(href.length < 9 || href === ' ') {\n    links[i].style.display = 'none';\n    \n\n  }\n}\n\t  </script>\n",
@@ -336,10 +336,10 @@
       "singleTile": false,
       "attribution": "",
       "infoVisible": false,
-      "infoTitle": null,
-      "infoText": null,
-      "infoUrl": null,
-      "infoOwner": null
+      "infoTitle": "",
+      "infoText": "",
+      "infoUrl": "",
+      "infoOwner": ""
     },
     {
       "id": "224",
@@ -433,10 +433,10 @@
     },
     {
       "id": "229",
-      "caption": "Flygfoto (ArcGIS)",
+      "caption": "Flygfoto Alingsås (ArcGIS)",
       "url": "https://gisak.alingsas.se/arcgis/rest/services/Ortofoto/Ortofoto/MapServer",
       "owner": null,
-      "date": "1519994456745",
+      "date": "1522152111431",
       "content": "",
       "legend": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAADZJREFUOI1jYaAyYKGlgf+pYB4jigspMZERStPUy6MGjho4auCogdgNZMSlijjAiG4gheZBAAALgAJUXqzQHAAAAABJRU5ErkJggg==&Image#data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAADRJREFUOI1jYaAyYKGlgf+pYB4jqgspMZIRQtHUy6MGjho4auCogTgMZKTILEZ0AykzDgoACn8CVEWKLv4AAAAASUVORK5CYII=&Image#data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IB2cksfwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAADZJREFUOI1jYaAyYKGlgf+pYB4jmgspMZORgYGBxl4eNXDUwFEDRw3EZSAjJWYxohtIkWkwAAAJfgJUuOB5RwAAAABJRU5ErkJggg==&Image",
       "projection": "EPSG:3007",
