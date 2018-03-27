@@ -148,39 +148,6 @@
       "infoText": "",
       "infoUrl": "",
       "infoOwner": ""
-    },
-    {
-      "id": "236",
-      "caption": "Topowebbkartan ikarta",
-      "url": "https://ikarta.kungsbacka.se/geoserver/wms",
-      "owner": "",
-      "date": "1521469788645",
-      "content": "",
-      "legend": "",
-      "projection": null,
-      "layers": [
-        "ikba:topowebbkartan"
-      ],
-      "infobox": "",
-      "searchFields": null,
-      "displayFields": null,
-      "visibleAtStart": false,
-      "queryable": false,
-      "tiled": false,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "geoserver",
-      "attribution": "",
-      "searchUrl": "",
-      "searchPropertyName": "",
-      "searchDisplayName": "",
-      "searchOutputFormat": "",
-      "searchGeometryField": "",
-      "infoVisible": false,
-      "infoTitle": "",
-      "infoText": "",
-      "infoUrl": "",
-      "infoOwner": ""
     }
   ],
   "wfslayers": [
