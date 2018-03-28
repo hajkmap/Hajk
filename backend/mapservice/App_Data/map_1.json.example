@@ -343,6 +343,13 @@
         "instruction": ""
       },
       "index": 7
+    },
+    {
+      "type": "edit",
+      "options": {
+        "instruction": ""
+      },
+      "index": 3
     }
   ],
   "map": {

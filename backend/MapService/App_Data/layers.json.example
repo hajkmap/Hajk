@@ -276,7 +276,45 @@
       "infoOwner": ""
     }
   ],
-  "wfstlayers": [],
+  "wfstlayers": [
+    {
+      "id": "236",
+      "caption": "Lekplatser",
+      "url": "https://test.kungsbacka.se/geoserver/wfs",
+      "projection": "EPSG:3007",
+      "layers": [
+        "kba:lekplatser"
+      ],
+      "editableFields": [
+        {
+          "index": 1,
+          "name": "name",
+          "dataType": "string",
+          "textType": "fritext",
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 5,
+          "name": "descr",
+          "dataType": "string",
+          "textType": "fritext",
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        }
+      ],
+      "editPoint": true,
+      "editPolygon": false,
+      "editLine": false,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoOwner": null
+    }
+  ],
   "arcgislayers": [
     {
       "id": "83",
