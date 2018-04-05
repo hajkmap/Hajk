@@ -1,0 +1,402 @@
+{
+  "version": "1.0.5",
+  "projections": [
+    {
+      "code": "EPSG:3006",
+      "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [
+        181896.33,
+        6101648.07,
+        864416.0,
+        7689478.31
+      ],
+      "units": "m"
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3006",
+      "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [
+        181896.33,
+        6101648.07,
+        864416.0,
+        7689478.31
+      ],
+      "units": "m"
+    },
+    {
+      "code": "urn:ogc:def:crs:EPSG::3006",
+      "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [
+        181896.33,
+        6101648.07,
+        864416.0,
+        7689478.31
+      ],
+      "units": "m"
+    },
+    {
+      "code": "EPSG:3007",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
+      "extent": [
+        60436.5084,
+        6192389.565,
+        217643.4713,
+        6682784.4276
+      ],
+      "units": "m"
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3007",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
+      "extent": [
+        60436.5084,
+        6192389.565,
+        217643.4713,
+        6682784.4276
+      ],
+      "units": "m"
+    }
+  ],
+  "tools": [
+    {
+      "type": "layerswitcher",
+      "options": {
+        "baselayers": [
+          {
+            "id": "234",
+            "visibleAtStart": true,
+            "drawOrder": 0
+          },
+          {
+            "id": "222",
+            "visibleAtStart": false,
+            "drawOrder": 0
+          },
+          {
+            "id": "229",
+            "visibleAtStart": false,
+            "drawOrder": 0
+          }
+        ],
+        "groups": [
+          {
+            "id": "407f3b89-6bb2-992c-331e-99e6c8291f68",
+            "parent": "-1",
+            "name": "Hajk",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "233",
+                "visibleAtStart": false,
+                "drawOrder": 1000
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "f4f42e57-d0bf-ad87-c4bd-39b2a0274a49",
+            "parent": "-1",
+            "name": "Utbildning & barnomsorg",
+            "toggled": false,
+            "expanded": false,
+            "layers": [],
+            "groups": [
+              {
+                "id": "8c69832a-94a8-3727-a096-020eaea718d1",
+                "parent": "f4f42e57-d0bf-ad87-c4bd-39b2a0274a49",
+                "name": "Grundskolor",
+                "toggled": true,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "105",
+                    "visibleAtStart": false,
+                    "drawOrder": 73
+                  }
+                ],
+                "groups": []
+              }
+            ]
+          },
+          {
+            "id": "b235ff36-95f5-c70c-5c65-b9f7a474529f",
+            "parent": "-1",
+            "name": "Kultur & nöje",
+            "toggled": false,
+            "expanded": false,
+            "layers": [],
+            "groups": [
+              {
+                "id": "02735894-6383-4f51-c835-1b9fcc34fd7f",
+                "parent": "b235ff36-95f5-c70c-5c65-b9f7a474529f",
+                "name": "Lights in Alingsås 2017",
+                "toggled": true,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "224",
+                    "visibleAtStart": false,
+                    "drawOrder": 99
+                  },
+                  {
+                    "id": "225",
+                    "visibleAtStart": false,
+                    "drawOrder": 98
+                  },
+                  {
+                    "id": "226",
+                    "visibleAtStart": false,
+                    "drawOrder": 97
+                  }
+                ],
+                "groups": []
+              }
+            ]
+          },
+          {
+            "id": "1dd1784f-a4db-a3cc-9b26-f9ee239b610a",
+            "parent": "-1",
+            "name": "Riksintressen",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "232",
+                "visibleAtStart": false,
+                "drawOrder": 1000
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "e05222b9-70ee-6fb4-91cc-ca227e173709",
+            "parent": "-1",
+            "name": "Gatuvy",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "221",
+                "visibleAtStart": false,
+                "drawOrder": 54
+              }
+            ],
+            "groups": []
+          }
+        ],
+        "instruction": null,
+        "active": true,
+        "visibleAtStart": true,
+        "backgroundSwitcherBlack": false,
+        "backgroundSwitcherWhite": false,
+        "toggleAllButton": true
+      },
+      "index": 0
+    },
+    {
+      "type": "infoclick",
+      "options": {
+        "displayPopup": 1,
+        "markerImg": "/bilder/icons/felmapp/marker.png",
+        "anchor": [
+          24,
+          48
+        ],
+        "imgSize": [
+          41,
+          50
+        ],
+        "popupOffsetY": -50
+      },
+      "index": 0
+    },
+    {
+      "type": "search",
+      "options": {
+        "onMap": true,
+        "bothSynlig": true,
+        "toolbar": "bottom",
+        "maxZoom": 14,
+        "markerImg": "/bilder/icons/marker.png",
+        "kmlExportUrl": "/mapservice/export/kml",
+        "excelExportUrl": "/mapservice/export/excel",
+        "displayPopup": true,
+        "selectionTools": true,
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ],
+        "popupOffsetY": -32
+      },
+      "index": 1
+    },
+    {
+      "type": "export",
+      "options": {
+        "tiffActive": true,
+        "scales": [
+          250,
+          500,
+          1000,
+          2500,
+          5000,
+          10000,
+          25000,
+          50000,
+          100000,
+          250000
+        ]
+      },
+      "index": 2
+    },
+    {
+      "type": "draw",
+      "options": {
+        "exportUrl": "/mapservice/export/kml",
+        "importUrl": "/mapservice/import/kml"
+      },
+      "index": 3
+    },
+    {
+      "type": "anchor",
+      "options": {},
+      "index": 10
+    },
+    {
+      "type": "information",
+      "options": {
+        "text": "Alingsås kommuns webbkarta är interaktiv och erbjuder många olika funktioner och visningsalternativ, beroende på vad just du är intresserad av att se. \n<br><br>\nDet finns ett antal tänd- och släckbara lager med information om till exempel kommunens förskolor, fritidsanläggningar, återvinningsstationer, gällande detaljplaner och parkeringsplatser.  \n<br><br>\nOm du har önskemål om ytterligare funktioner eller visningar som du skulle vilja se i webbkartan, skriv gärna till oss på <a href=\"mailto:gis@alingsas.se?Subject=Synpunkt%20Alingsaskartan\" target=\"_top\">gis@alingsas.se</a>.\n<br><br>\nOm du vill veta mer om hur kartan fungerar kan du läsa manualen genom att <a href=\"https://karta.alingsas.se/docs/Alingsaskartan/Manualwebbkarta.pdf\" target=\"_blank\">klicka här</a>.\n\n",
+        "headerText": "Om Alingsåskartan",
+        "visibleAtStart": false
+      },
+      "index": 99
+    },
+    {
+      "type": "location",
+      "options": {},
+      "index": 5
+    },
+    {
+      "type": "coordinates",
+      "options": {
+        "instruction": "",
+        "transformations": [
+          {
+            "code": "EPSG:3007",
+            "default": false,
+            "hint": "SWEREF 99 12 00",
+            "title": "SWEREF 99 12 00",
+            "xtitle": "E",
+            "ytitle": "N",
+            "inverseAxis": false
+          },
+          {
+            "code": "EPSG:3006",
+            "default": false,
+            "hint": "SWEREF 99 TM",
+            "title": "SWEREF 99 TM",
+            "xtitle": "E",
+            "ytitle": "N",
+            "inverseAxis": false
+          }
+        ]
+      },
+      "index": 4
+    },
+    {
+      "type": "preset",
+      "options": {
+        "presetList": [
+          {
+            "name": "Västra Bodarna",
+            "presetUrl": "?m=map_1&x=177735.77315877783&y=6419314.45342246&z=6&l=222,105"
+          }
+        ],
+        "instruction": ""
+      },
+      "index": 0
+    },
+    {
+      "type": "bookmark",
+      "options": {
+        "instruction": ""
+      },
+      "index": 8
+    },
+    {
+      "type": "streetview",
+      "options": {
+        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
+        "instruction": ""
+      },
+      "index": 6
+    },
+    {
+      "type": "routing",
+      "options": {
+        "apiKey": "",
+        "instruction": ""
+      },
+      "index": 7
+    },
+    {
+      "type": "edit",
+      "options": {
+        "instruction": ""
+      },
+      "index": 3
+    }
+  ],
+  "map": {
+    "target": "map",
+    "center": [
+      161570,
+      6394344
+    ],
+    "projection": "EPSG:3007",
+    "zoom": 0,
+    "maxZoom": 9,
+    "minZoom": 3,
+    "resolutions": [
+      4096.0,
+      2048.0,
+      1024.0,
+      512.0,
+      256.0,
+      128.0,
+      64.0,
+      32.0,
+      16.0,
+      8.0,
+      4.0,
+      2.0,
+      1.0,
+      0.5
+    ],
+    "origin": [
+      0.0,
+      0.0
+    ],
+    "extent": [
+      150202.07930000033,
+      6382100.4728999995,
+      209944.16160000023,
+      6471028.5090999994
+    ],
+    "logo": "",
+    "infologo": "",
+    "mobileleft": null,
+    "mobileright": null,
+    "pil": null,
+    "mobile": false,
+    "colors": {
+      "primaryColor": "#007c72",
+      "secondaryColor": "#ffffff"
+    }
+  }
+}
