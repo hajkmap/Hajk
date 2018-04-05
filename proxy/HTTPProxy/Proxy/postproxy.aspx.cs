@@ -6,12 +6,12 @@ using System.Web.UI.WebControls;
 using System.Net;
 using System.IO;
 using System.Text;
+using System.Configuration;
 
 public partial class postProxy : System.Web.UI.Page
 {
     protected void Page_Load(object sender, EventArgs e)
-    {
-        
+    {        
         var remoteUrl = Request.QueryString["url"];
 
         var req = (HttpWebRequest)WebRequest.Create(remoteUrl);
@@ -24,7 +24,13 @@ public partial class postProxy : System.Web.UI.Page
 
         if(HttpContext.Current.User.Identity.Name != null)
         {
-            req.Headers.Add("X-Control-Header", HttpContext.Current.User.Identity.Name);
+            if (IsAuthorizedInternetDomain(remoteUrl)) // Only add header for authorized domains (TODO: Maybe not do any call at all if the internet domain isn't valid?)
+            {
+                string userName = GetUserNameForHeader(HttpContext.Current.User.Identity.Name);
+                string headerAttributeName = GetHeaderAttributeName();
+
+                req.Headers.Add(headerAttributeName, userName);
+            }
         }
 
         foreach (string each in Request.Headers)
@@ -71,6 +77,34 @@ public partial class postProxy : System.Web.UI.Page
         CopyStream(response.GetResponseStream(), Response.OutputStream);
         response.Close();
         Response.End();
+    }
+
+    private bool IsAuthorizedInternetDomain(string url)
+    {
+        string confSetting = ConfigurationManager.AppSettings["authorizedInternetDomains"] == null ? "" : ConfigurationManager.AppSettings["authorizedInternetDomains"];
+        List<string> authorizedInternetDomains = new List<string>(confSetting.Split(','));
+        Uri uriUrl = new Uri(url);
+
+        return authorizedInternetDomains.Contains(uriUrl.Authority);
+    }
+
+    private string GetUserNameForHeader(string userName)
+    {
+        int removeDomainFromUserName = ConfigurationManager.AppSettings["removeDomainNameFromUser"] == null ? 0 : int.Parse(ConfigurationManager.AppSettings["removeDomainNameFromUser"]);
+        if (removeDomainFromUserName == 1)
+        {
+            int n = userName.IndexOf("\\");
+            userName = userName.Substring(n < 0 ? 0 : n + 1);
+        }
+        return userName;
+    }
+
+    private string GetHeaderAttributeName()
+    {
+        string headerAttributeName = ConfigurationManager.AppSettings["headerAttributeName"];
+        if (headerAttributeName == null)
+            headerAttributeName = "X-Control-Header";
+        return headerAttributeName;
     }
 
     static public void CopyStream(Stream input, Stream output)
