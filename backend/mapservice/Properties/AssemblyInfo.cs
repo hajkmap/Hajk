@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("MapService")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("SWECO")]
+[assembly: AssemblyCompany("Hajk")]
 [assembly: AssemblyProduct("MapService")]
-[assembly: AssemblyCopyright("Copyright © SWECO 2017")]
+[assembly: AssemblyCopyright("Copyright © Hajk 2017-2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
