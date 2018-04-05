@@ -118,7 +118,6 @@
     <Fakes Include="Fakes\System.Web.Mvc.fakes" />
     <Content Include="packages.config" />
     <None Include="Properties\PublishProfiles\File system.pubxml" />
-    <None Include="Properties\PublishProfiles\filesystem.pubxml" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
