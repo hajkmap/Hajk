@@ -16,8 +16,8 @@ namespace MapService.Components
 
         public ActiveDirectoryLookup(string domain, string container, string user, string password)
         {
-            try { 
-            _domain = new PrincipalContext(ContextType.Domain, domain,container, user, password);
+            try {
+                _domain = new PrincipalContext(ContextType.Domain, domain, container, user, password);
             }
             catch
             {
@@ -27,15 +27,13 @@ namespace MapService.Components
 
         public string GetActiveUser()
         {
-            
             var activeUser = System.Security.Principal.WindowsIdentity.GetCurrent();
-            _log.InfoFormat("Active user " + activeUser.Name);
+            _log.InfoFormat("Active user {0}", activeUser.Name);
             if (activeUser.ImpersonationLevel == System.Security.Principal.TokenImpersonationLevel.Impersonation)
             {
                 return activeUser.Name;
             }
-            else return String.Empty;
-            
+            else return String.Empty;            
         }
 
         //This method returns only the groups of which the principal is directly a member; no recursive searches are performed.
@@ -49,27 +47,26 @@ namespace MapService.Components
 
             if (userPrincipal == null)
             {
-                _log.Error("User is not present in the AD-container specified in Web.config");
+                _log.ErrorFormat("User '{0}' is not present in the AD-container specified in Web.config", user);
                 throw new HttpException(404, "User not found");
             }
 
             if (recursiveSearch)
             {
                 groups = userPrincipal.GetAuthorizationGroups();
-                _log.InfoFormat("RecursiveSearch AD-search used");
+                _log.Info("RecursiveSearch AD-search used");
             }
             else
             {
                 groups = userPrincipal.GetGroups();
-                _log.InfoFormat("Non-recursive AD-search used");
+                _log.Info("Non-recursive AD-search used");
             }
 
-            _log.InfoFormat("The active user is a member of the following groups:");
+            _log.Info("The active user is a member of the following groups:");
             foreach (string group in groups.Select(g => g.Name).ToArray())
             {
-                _log.InfoFormat(group);
-            }
-            
+                _log.Info(group);
+            }            
 
             return groups.Select(g => g.Name).ToArray();
         }

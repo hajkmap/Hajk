@@ -18,7 +18,7 @@ namespace MapService.Controllers
             }
             catch(System.Exception e)
             {
-                _log.Fatal(e.Message);
+                _log.ErrorFormat("Exception in WMSLayerController.Post", e.Message);
                 throw;
             }
             

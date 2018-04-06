@@ -32,7 +32,7 @@ namespace MapService.Components.MapExport {
 
         public DpiWmsLayer(string layername, string url, int dpi = 90) : base(layername, url)
         {
-            _log = LogManager.GetLogger(typeof(ConfigController));
+            _log = LogManager.GetLogger(typeof(DpiWmsLayer));
             _requestedDpi = dpi;
         }
 
@@ -43,7 +43,7 @@ namespace MapService.Components.MapExport {
 
             if(proxy == "" || proxy == null)
             {
-                _log.InfoFormat("Proxy for export is not set in backend, check ExportProxy in Web.config");
+                _log.Info("Proxy for export is not set in backend, check ExportProxy in Web.config");
             }
 
             var requestUrl = base.GetRequestUrl(box, size);

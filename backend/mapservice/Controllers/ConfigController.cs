@@ -31,7 +31,7 @@ namespace MapService.Controllers
             }
             else
             {
-                _log.WarnFormat("File not found: {0}", file);
+                _log.ErrorFormat("File not found: {0}", file);
                 throw new HttpException(404, "File not found");
             }
         }
@@ -42,7 +42,7 @@ namespace MapService.Controllers
             string file = String.Format("{0}\\{1}.json", folder, id);
             string fileName = Path.GetFileNameWithoutExtension(file);
 
-            _log.DebugFormat("{0}\\{1}.json", folder, id);
+            _log.DebugFormat("Creating file: {0}\\{1}.json", folder, id);
             MapConfig mapConfig = new MapConfig()
             {
                 map = new MapSetting()
@@ -278,12 +278,11 @@ namespace MapService.Controllers
         }
         private JToken GetMapConfigurationTitle(JToken mapConfiguration, string mapConfigurationFile)
         {
-
             var title = mapConfiguration.SelectToken("$.map.title");
 
             if (title == null)
             {
-                _log.Error("MapConfigurationFile" + mapConfigurationFile + " is missing the 'title' object");
+                _log.Warn("MapConfigurationFile " + mapConfigurationFile + " is missing the 'title' object");
             }
 
             return title;
@@ -301,13 +300,13 @@ namespace MapService.Controllers
 
             if (dropdownThemeMaps == null)
             {
-                _log.Error("MapConfigurationFile" + mapConfigurationFile + " is missing the object 'dropDownThemeMap'");
+                _log.Warn("MapConfigurationFile " + mapConfigurationFile + " is missing the object 'dropDownThemeMap'");
                 return false;
             }
 
             if (dropdownThemeMaps.Value<Boolean>() == false)
             {
-                _log.Error("MapConfigurationFile" + mapConfigurationFile + " has the 'dropDownThemeMap' key set to 'false' ");
+                _log.Warn("MapConfigurationFile " + mapConfigurationFile + " has the 'dropDownThemeMap' key set to 'false' ");
                 return false;
             }
 
@@ -349,7 +348,7 @@ namespace MapService.Controllers
 
                         if (visibleForGroups == null)
                         {
-                            _log.Error("MapConfigurationFile" + mapConfigurationFile + " is missing the 'visibleForGroups' object");
+                            _log.Warn("MapConfigurationFile " + mapConfigurationFile + ", Layerswitcher tool is missing 'visibleForGroups' (or it may be empty)");
                         }
 
                         var mapTitle = GetMapConfigurationTitle(mapConfiguration, mapConfigurationFile);
@@ -453,12 +452,12 @@ namespace MapService.Controllers
 
                 if (HasValidVisibleForGroups(visibleForGroups))
                 {            
-                        allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
+                    allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
                 }
                 else
                 {
                     allowed = true;
-                    _log.Error("Can't filter tools because layer with id " + layer.SelectToken("$.id") + " is missing the key 'VisibleForGroups'");
+                    _log.WarnFormat("Can't filter layers because layer with id {0} is missing the key 'visibleForGroups' (or it may be empty)", layer.SelectToken("$.id"));
                 }
                 if (!allowed)
                 {
@@ -489,7 +488,7 @@ namespace MapService.Controllers
 
             if(layersInSearchTool == null)
             {
-                _log.Error("SearchTool is missing the layersobject");
+                _log.Warn("SearchTool is missing the layersobject");
                 return mapConfiguration.ToString();
             }
             else
@@ -506,7 +505,7 @@ namespace MapService.Controllers
                     else
                     {
                         allowed = true;
-                        _log.Error("Can't filter search layers because search tool because the key 'VisibleForGroups' is missing or incorrect");
+                        _log.Warn("Can't filter search layers because the key 'visibleForGroups' is missing, incorrect or empty");
                     }
 
                     if (!allowed)
@@ -560,7 +559,7 @@ namespace MapService.Controllers
                 else
                 {
                     allowed = true;
-                    _log.Error("Can't filter tools because " + tool.SelectToken("$.type") + " is missing the key 'VisibleForGroups'");
+                    _log.Error("Can't filter tools because " + tool.SelectToken("$.type") + " is missing the key 'VisibleForGroups' (or it may be empty)");
                 }
  
                 if (!allowed)
@@ -701,7 +700,7 @@ namespace MapService.Controllers
             }
             catch (Exception e)
             {
-                _log.Fatal(e);
+                _log.FatalFormat("Can't get configuration file: {0}", e);
                 throw e;
             }
         }
