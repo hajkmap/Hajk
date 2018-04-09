@@ -306,7 +306,7 @@ namespace MapService.Controllers
 
             if (dropdownThemeMaps.Value<Boolean>() == false)
             {
-                _log.Warn("MapConfigurationFile " + mapConfigurationFile + " has the 'dropDownThemeMap' key set to 'false' ");
+                _log.Info("MapConfigurationFile " + mapConfigurationFile + " has the 'dropDownThemeMap' key set to 'false' ");
                 return false;
             }
 
@@ -348,7 +348,7 @@ namespace MapService.Controllers
 
                         if (visibleForGroups == null)
                         {
-                            _log.Warn("MapConfigurationFile " + mapConfigurationFile + ", Layerswitcher tool is missing 'visibleForGroups' (or it may be empty)");
+                            _log.Info("MapConfigurationFile " + mapConfigurationFile + ", Layerswitcher tool is missing 'visibleForGroups' (or it may be empty)");
                         }
 
                         var mapTitle = GetMapConfigurationTitle(mapConfiguration, mapConfigurationFile);
@@ -457,7 +457,7 @@ namespace MapService.Controllers
                 else
                 {
                     allowed = true;
-                    _log.WarnFormat("Can't filter layers because layer with id {0} is missing the key 'visibleForGroups' (or it may be empty)", layer.SelectToken("$.id"));
+                    _log.InfoFormat("Can't filter layers because layer with id {0} is missing the key 'visibleForGroups' (or it may be empty)", layer.SelectToken("$.id"));
                 }
                 if (!allowed)
                 {
@@ -505,7 +505,7 @@ namespace MapService.Controllers
                     else
                     {
                         allowed = true;
-                        _log.Warn("Can't filter search layers because the key 'visibleForGroups' is missing, incorrect or empty");
+                        _log.Info("Can't filter search layers because the key 'visibleForGroups' is missing, incorrect or empty");
                     }
 
                     if (!allowed)
@@ -559,7 +559,7 @@ namespace MapService.Controllers
                 else
                 {
                     allowed = true;
-                    _log.Error("Can't filter tools because " + tool.SelectToken("$.type") + " is missing the key 'VisibleForGroups' (or it may be empty)");
+                    _log.Info("Can't filter tools because " + tool.SelectToken("$.type") + " is missing the key 'visibleForGroups' (or it may be empty)");
                 }
  
                 if (!allowed)
