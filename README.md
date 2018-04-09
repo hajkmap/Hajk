@@ -1,5 +1,5 @@
 # Hajk
-Uppdaterad: 2017-10-26
+Uppdaterad: 2018-04-09
 
 ## Innehåll
 - [Hajk](#hajk)
@@ -177,7 +177,7 @@ Om du har följt anvisningarna så lång har du de tre *kompilerade* delarna som
 | ------- | ------------------------------- |
 | backend | `C:/install/mapservice`         |
 | admin   | `C:/projekt/Hajk/admin/dist`    |
-| client  | `C:/projekt/Hajk/admin/release` |
+| client  | `C:/projekt/Hajk/client/release` |
 
 >Observera: som det nämndes tidigare i avsnittet om klientdelen så byggdes den i en drift- och en testversion. För driftsättning nu kommer vi använda den skarpa driftversionen, som alltså ligger i `release`. Men kom ihåg att även testversionen finns, i mappen `dist`, och instruktionerna här fungerar även för den. Byt bara ut mapparna mot varann.
 
@@ -196,7 +196,7 @@ Flytta hela mappar enligt tabell nedan:
 | ------------------------------- | ----------------------- |
 | `C:/install/mapservice`         | `C:/wwwroot/mapservice` |
 | `C:/projekt/Hajk/admin/dist`    | `C:/wwwroot/admin`      |
-| `C:/projekt/Hajk/admin/release` | `C:/wwwroot/client`     |
+| `C:/projekt/Hajk/client/release` | `C:/wwwroot/client`     |
 
 Nu har `C:/wwwroot` tre undermappar. Men vi ska göra ett till ingrepp. 
 
@@ -227,7 +227,12 @@ Nu bör `C:/wwwroot` innehålla följande filer och mappar:
 | `postproxy.aspx.cs`  |
 
 #### Autentisering och rollstyrning
-Om autentisering och rollstyrning skall användas måste postproxy.aspx och postproxy.aspx.cs flyttas in i util-mappen. Dessutom skall `C:/projekt/Hajk/proxy/HTTPProxy` användas istället för `C:/projekt/Hajk/proxy/mvc`.
+Om autentisering och rollstyrning skall användas ska den nya proxyn som finns i mappen HTTPProxy användas.
+Denna proxy ska kunna användas även om autentisering och rollstyrning inte används.
+
+I mappen HTTPProxy finns projektet Proxy som innehåller nya versioner av både GET- och POST-proxyn.
+För att bygga ihop dessa i Visual Studio finns en publiceringsprofil man kan använda under Build->Publish.
+Både POST- och GET-proxyn kommer då att publiceras till mappen 'C:\Projects\Hajk\Publish\util' (mappen kan enkelt ändras). 
 
 Denna funktionalitet innefattar även specifika inställningar till IIS och kräver att Windows Authentication är aktiverat. Se separat dokumentation för ytterligare detaljer.
 
@@ -243,6 +248,8 @@ Specifikt är det den användaren som IIS App Pool körs på (mer om det i näst
 | `Upload/`             |
 
 Som standard heter IIS användare *IIS_IUSRS*. Ge därför *skrivbehörighet* för de tre ovanstående mappar till IIS_IUSRS.
+
+Om autentisering och rollstyrning används ska rättigheter sättas enligt separat dokument.
 
 ### Uppsättning i IIS
 1. Öppna Internet Information Services (IIS)-hanteraren 
