@@ -245,6 +245,7 @@ namespace MapService.Components.MapExport
                         {
                             // TODO
                             //file.WriteLine("Error in adding subname.\n" + ex.ToString());
+                            throw ex;
                         }
                     }
                     layer.SRID = wmsLayers[i].coordinateSystemId;

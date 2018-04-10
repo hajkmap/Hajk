@@ -79,7 +79,8 @@ namespace MapService.Controllers
                 }
                 catch (Exception e)
                 {
-                    _log.Debug("Could not decode base64. Will treat as non-base64 encoded");
+                    _log.Debug("Could not decode base64. Will treat as non-base64 encoded.");
+                    _log.Debug(e);
                 }
 
                 MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
@@ -133,7 +134,8 @@ namespace MapService.Controllers
             }
             catch (Exception e)
             {
-                _log.Debug("Could not decode base64. Will treat as non-base64 encoded");
+                _log.Debug("Could not decode base64. Will treat as non-base64 encoded.");
+                _log.Debug(e);
             }
             MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
                                     
@@ -200,6 +202,7 @@ namespace MapService.Controllers
             } catch(Exception e)
             {
                 _log.Debug("Could not decode base64. Will treat as non-base64 encoded");
+                _log.Debug(e);
             }
             
             KMLCreator kmlCreator = new KMLCreator();
@@ -238,6 +241,7 @@ namespace MapService.Controllers
             catch (Exception e)
             {
                 _log.Debug("Could not decode base64. Will treat as non-base64 encoded");
+                _log.Debug(e);
             }
             List<ExcelTemplate> data = JsonConvert.DeserializeObject<List<ExcelTemplate>>(json);
             DataSet dataSet = Util.ToDataSet(data);
