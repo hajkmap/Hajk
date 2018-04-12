@@ -321,16 +321,41 @@ namespace MapService.Controllers
                 mapConfigurationTitle = mapTitle.ToString()
             };
         }
-        private List<ThemeMap> GetAllowedMapConfigurations()
+        private bool UseAdLookup()
         {
             var parameters = GetLookupParameters();
-            var adLookup = new ActiveDirectoryLookup(parameters["ADdomain"], parameters["ADcontainer"], parameters["ADuser"], parameters["ADpassword"]);
-            var activeUser = adLookup.GetActiveUser();
-            var userGroups = adLookup.GetGroups(activeUser);
+            if (string.IsNullOrEmpty(parameters["ADuser"]) || string.IsNullOrEmpty(parameters["ADpassword"]))
+                return false;
+            return true;
+        }
+        private ActiveDirectoryLookup GetAdLookup()
+        {
+            if(!UseAdLookup())
+            {
+                _log.Error("No AD-information found in Web.config. Not possible to query AD");
+                return null;
+            }
 
+            _log.Debug("AD-information found in Web.config and will be used.");
+            var parameters = GetLookupParameters();
+            return new ActiveDirectoryLookup(parameters["ADdomain"], parameters["ADcontainer"], parameters["ADuser"], parameters["ADpassword"]);
+        }
+        private List<ThemeMap> GetAllowedMapConfigurations()
+        {
             string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
             IEnumerable<string> files = Directory.EnumerateFiles(folder);
             List<ThemeMap> mapConfigurationsList = new List<ThemeMap>();
+
+            var activeUser = "";
+            var userGroups = new string [0];
+            if (UseAdLookup()) // Should we use AD-lookup?
+            {
+                var parameters = GetLookupParameters();
+
+                var adLookup = GetAdLookup();
+                activeUser = adLookup.GetActiveUser();
+                userGroups = adLookup.GetGroups(activeUser);
+            }
 
             foreach (string mapConfigurationFile in files)
             {
@@ -341,38 +366,45 @@ namespace MapService.Controllers
                     var json = System.IO.File.ReadAllText(mapConfigurationFile);
                     JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(json);
 
-
                     if (HasActiveDropDownThemeMap(mapConfiguration, mapConfigurationFile))
                     {
                         var visibleForGroups = GetOptionsObjectFromTool(mapConfiguration, "visibleForGroups", "layerswitcher");
-
-                        if (visibleForGroups == null)
-                        {
-                            _log.Info("MapConfigurationFile " + mapConfigurationFile + ", Layerswitcher tool is missing 'visibleForGroups' (or it may be empty)");
-                        }
-
                         var mapTitle = GetMapConfigurationTitle(mapConfiguration, mapConfigurationFile);
 
-                        if (visibleForGroups != null && mapTitle != null)
+                        if (!UseAdLookup()) // Tillåt att man använder dropdownbox utan inloggning och validering mot AD
                         {
-                            if (visibleForGroups.First == null)
-                            {
-                                mapConfigurationsList.Add(AddNewThemeMap(fileName, mapTitle.ToString()));
-                            }
+                            if (mapTitle == null)
+                                _log.Warn("MapConfigurationFile " + mapConfigurationFile + ", map object is missing 'title'");
+                            mapConfigurationsList.Add(AddNewThemeMap(fileName, mapTitle == null ? fileName + ": Add title to this map" : mapTitle.ToString()));
+                        }
+                        else
+                        {
+                            if (visibleForGroups == null)
+                                _log.Info("MapConfigurationFile " + mapConfigurationFile + ", Layerswitcher tool is missing 'visibleForGroups' (or it may be empty)");
+                            if (mapTitle == null)
+                                _log.Info("MapConfigurationFile " + mapConfigurationFile + ", map object is missing 'title'");
 
-                            if (activeUser.Length != 0 && visibleForGroups.First != null)
+                            if (visibleForGroups != null && mapTitle != null)
                             {
-                                if (visibleForGroups.First.ToString() == "*")
+                                if (visibleForGroups.First == null)
                                 {
                                     mapConfigurationsList.Add(AddNewThemeMap(fileName, mapTitle.ToString()));
                                 }
-                                else
+
+                                if (activeUser.Length != 0 && visibleForGroups.First != null)
                                 {
-                                    foreach (JToken group in visibleForGroups)
+                                    if (visibleForGroups.First.ToString() == "*")
                                     {
-                                        if (Array.Exists(userGroups, g => g.Equals(group.ToString())))
+                                        mapConfigurationsList.Add(AddNewThemeMap(fileName, mapTitle.ToString()));
+                                    }
+                                    else
+                                    {
+                                        foreach (JToken group in visibleForGroups)
                                         {
-                                            mapConfigurationsList.Add(AddNewThemeMap(fileName, mapTitle.ToString()));
+                                            if (Array.Exists(userGroups, g => g.Equals(group.ToString())))
+                                            {
+                                                mapConfigurationsList.Add(AddNewThemeMap(fileName, mapTitle.ToString()));
+                                            }
                                         }
                                     }
                                 }
@@ -383,20 +415,16 @@ namespace MapService.Controllers
             }
             return mapConfigurationsList;
         }
-        public string[] GetUserGroups()
+        public string GetUserGroups()
         {
             var parameters = GetLookupParameters();
-            var adLookup = new ActiveDirectoryLookup(parameters["ADdomain"], parameters["ADcontainer"], parameters["ADuser"], parameters["ADpassword"]);
-
-            var activeUser = adLookup.GetActiveUser();
-            var userGroups = adLookup.GetGroups(activeUser);
 
             Response.Expires = 0;
             Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
             Response.ContentType = "text/html; charset=utf-8";
             Response.Headers.Add("Cache-Control", "private, no-cache");
 
-            return userGroups;
+            return parameters["defaultADGroupsForAdmin"];
         }
         /// <summary>
         /// Set required parameters for AD lookup to dictionary.
@@ -407,10 +435,11 @@ namespace MapService.Controllers
             var appsettings = ConfigurationManager.AppSettings;
             var parameters = new Dictionary<string, string>()
             {
-                { "ADdomain", appsettings["ActiveDirectoryDomain"] },
-                { "ADuser", appsettings["ActiveDirectoryUser"] },
-                { "ADpassword", appsettings["ActiveDirectoryUserPassword"] },
-                { "ADcontainer", appsettings["ActiveDirectoryContainer"] }
+                { "ADdomain", appsettings["ActiveDirectoryDomain"] == null ? "" : appsettings["ActiveDirectoryDomain"] },
+                { "ADuser", appsettings["ActiveDirectoryUser"] == null ? "" : appsettings["ActiveDirectoryUser"] },
+                { "ADpassword", appsettings["ActiveDirectoryUserPassword"] == null ? "" : appsettings["ActiveDirectoryUserPassword"] },
+                { "ADcontainer", appsettings["ActiveDirectoryContainer"] == null ? "" : appsettings["ActiveDirectoryContainer"] },
+                { "defaultADGroupsForAdmin", appsettings["defaultADGroupsForAdmin"] == null ? "" : appsettings["defaultADGroupsForAdmin"] }
             };
             return parameters;
         }
@@ -648,17 +677,18 @@ namespace MapService.Controllers
 
                 if (name.ToLower() == "getusergroups")
                 {
-                    var groups = GetUserGroups();
-                    
-                    return string.Join(", ", groups);
+                    return GetUserGroups();
                 }
 
                 string file = String.Format("{0}App_Data\\{1}.json", HostingEnvironment.ApplicationPhysicalPath, name);
 
                 if (System.IO.File.Exists(file))
                 {
+                    if (!UseAdLookup()) // Ingen filtrering ska göras om AD-koppling inte ska användas
+                        return System.IO.File.ReadAllText(file);
+
                     var parameters = GetLookupParameters();
-                    var adLookup = new ActiveDirectoryLookup(parameters["ADdomain"], parameters["ADcontainer"], parameters["ADuser"], parameters["ADpassword"]);
+                    var adLookup = GetAdLookup();
                     var activeUser = adLookup.GetActiveUser();
                     var isRequestFromAdmin = true;
 
@@ -669,6 +699,8 @@ namespace MapService.Controllers
 
                     if (activeUser.Length != 0 && name != "layers" && !isRequestFromAdmin)
                     {
+                        _log.DebugFormat("Filtering map configuration '{0}' for user '{1}'.", name, activeUser);
+
                         JToken mapConfiguration = JsonConvert.DeserializeObject<JToken>(System.IO.File.ReadAllText(file));
 
                         var filteredMapConfiguration = FilterLayersByAD(adLookup, mapConfiguration, activeUser);
