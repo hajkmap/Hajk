@@ -56,6 +56,7 @@ var SearchBarView = {
       displayPopup: this.props.model.get('displayPopupBar'),
       haveUrlSearched: false,
       updateCtr: 2,
+      sAndVSearch: false
     };
   },
 
@@ -114,26 +115,22 @@ var SearchBarView = {
       this.setState({
         valueBar: this.valueBar,
         minimized: false,
-        force: true
+        force: true,
+        sAndVSearch: true
       });
       this.props.model.set('force', true);
-      if (this.refs.searchInput.value.length > 3) {
-        this.search();
-      } else {
-        this.setState({
-          loading: false
-        });
-      }
+      this.search() // always search on url-query
     }
   },
 
   componentDidUpdate: function(){
     var hit = document.getElementById('hit-0-group-0');
-    if (!this.state.haveUrlSearched && hit != null){
+    if (!this.state.haveUrlSearched && hit != null && this.state.sAndVSearch) {
       try {
         hit.click();
         this.state.haveUrlSearched = true;
-      } catch (err){
+        this.state.sAndVSearch = false;
+      } catch (err) {
       }
     }
   },
@@ -185,6 +182,8 @@ var SearchBarView = {
    */
   handleKeyDown: function (event) {
     this.props.model.set('filter', '*');
+    this.state.sAndVSearch = false;
+    this.state.haveUrlSearched = true;
     if (event.keyCode === 13 && event.target.value.length < 5) {
       event.preventDefault();
       this.props.model.set('valueBar', event.target.value);
@@ -304,6 +303,10 @@ var SearchBarView = {
   },
 
   searchOnInput: function(event) {
+    if(this.state.sAndVSearch){
+      return; // Internet Explorer calls this function before the sAndVSearch can finish. We therefore have to return
+      // until the sAndVSearch is finished.
+    }
     this.props.model.set('filter', '*');
     this.valueBar = event.target.value;
     this.props.model.set('valueBar', this.valueBar);
