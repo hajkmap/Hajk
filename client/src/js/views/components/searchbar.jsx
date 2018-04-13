@@ -119,13 +119,7 @@ var SearchBarView = {
         sAndVSearch: true
       });
       this.props.model.set('force', true);
-      if (this.refs.searchInput.value.length > 3) {
-        this.search();
-      } else {
-        this.setState({
-          loading: false
-        });
-      }
+      this.search() // always search on url-query
     }
   },
 
@@ -188,6 +182,8 @@ var SearchBarView = {
    */
   handleKeyDown: function (event) {
     this.props.model.set('filter', '*');
+    this.state.sAndVSearch = false;
+    this.state.haveUrlSearched = true;
     if (event.keyCode === 13 && event.target.value.length < 5) {
       event.preventDefault();
       this.props.model.set('valueBar', event.target.value);
@@ -309,15 +305,18 @@ var SearchBarView = {
     this.props.model.export(type);
   },
 
-  searchOnInput: function (event) {
+  searchOnInput: function(event) {
+    if(this.state.sAndVSearch){
+      return; // Internet Explorer calls this function before the sAndVSearch can finish. We therefore have to return
+      // until the sAndVSearch is finished.
+    }
     this.props.model.set('filter', '*');
     this.valueBar = event.target.value;
     this.props.model.set('valueBar', this.valueBar);
     this.setState({
       valueBar: this.valueBar,
       minimized: false,
-      force: false,
-      sAndVSearch: false
+      force: false
     });
     this.props.model.set('force', false);
     if (this.refs.searchInput.value.length > 3) {

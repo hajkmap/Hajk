@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MapService", "MapService\MapService.csproj", "{CD9F35EA-488D-460D-98C1-628D151BB968}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mapservice", "mapservice\mapservice.csproj", "{CD9F35EA-488D-460D-98C1-628D151BB968}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MapService.Tests", "MapService.Tests\MapService.Tests.csproj", "{CF069C98-4998-4329-8904-01D12EB81A38}"
 EndProject

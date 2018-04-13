@@ -39,7 +39,7 @@ namespace MapService.Components.MapExport.SharpMapExtensions {
                 }
                 else
                 {
-                    throw;
+                    throw ex;
                 }
             }
         }
