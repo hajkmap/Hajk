@@ -38,14 +38,14 @@
     "grunt-replace": "^1.0.1",
     "grunt-text-replace": "^0.4.0",
     "grunt-usebanner": "^0.3.1",
-    "jquery": "^3.1.1",
+    "jquery": "^3.3.1",
     "jquery-sortable": "^0.9.13",
     "load-grunt-tasks": "^3.4.0",
     "matchdep": "^1.0.1",
     "openlayers": "4.2.0",
     "react": "^15.4.2",
-    "react-color": "^2.11.1",
+    "react-color": "^2.14.1",
     "react-dom": "^15.4.2",
-    "x2js": "^3.0.1"
+    "x2js": "^3.2.1"
   }
 }
