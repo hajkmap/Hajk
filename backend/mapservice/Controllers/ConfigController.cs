@@ -14,6 +14,7 @@ using System.Configuration;
 using Newtonsoft.Json.Linq;
 using MapService.DataAccess;
 using System.Collections;
+using System.Security.Principal;
 
 namespace MapService.Controllers
 {
@@ -323,9 +324,15 @@ namespace MapService.Controllers
         }
         private bool UseAdLookup()
         {
+            var identity = WindowsIdentity.GetCurrent();
+            _log.Debug(identity.ImpersonationLevel);
             var parameters = GetLookupParameters();
-            if (string.IsNullOrEmpty(parameters["ADuser"]) || string.IsNullOrEmpty(parameters["ADpassword"]))
+            if (identity.ImpersonationLevel != TokenImpersonationLevel.Impersonation || string.IsNullOrEmpty(parameters["ADuser"]) || string.IsNullOrEmpty(parameters["ADpassword"]))
+            {
+                _log.Debug("Will not use AD lookup");
                 return false;
+            }
+            _log.Debug("Using AD lookup");
             return true;
         }
         private ActiveDirectoryLookup GetAdLookup()

@@ -107,7 +107,7 @@ var SearchBarView = {
       this.props.model.set('filter', filterName);
     }
 
-    if ((!this.state.haveUrlSearched) && typeof v !== 'undefined') {
+    if ((!this.state.haveUrlSearched) && typeof v !== 'undefined' && v != null) {
       var field = document.getElementById("searchbar-input-field");
       field.value = v;
       this.valueBar = v;

@@ -431,7 +431,10 @@ var LayerPanelView = {
    * @return {external:ReactElement}
    */
   render: function () {
-    var mapConfigurations = this.state.mapConfigurations.map((map, i) => <option value={map.mapConfigurationName} key={i}>{map.mapConfigurationTitle}</option>);
+    var mapConfigurations = [];
+    if (typeof this.state.mapConfigurations !== "undefined" && this.state.mapConfigurations != null){
+      mapConfigurations = this.state.mapConfigurations.map((map, i) => <option value={map.mapConfigurationName} key={i}>{map.mapConfigurationTitle}</option>);
+    }
     var groups, toggleAllButton,dropdownThemeMaps ;
 
     this.groups = this.props.model.get('groups');

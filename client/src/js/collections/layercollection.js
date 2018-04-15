@@ -138,7 +138,7 @@ var LayerCollection = {
         "name": args.id,
         "caption": args.caption,
         "visible": args.visibleAtStart,
-        "opacity": 1,
+        "opacity": args.opacity || 1,
         "queryable": args.queryable === false ? false : true,
         "information": args.infobox,
         "resolutions": properties.mapConfig.resolutions,

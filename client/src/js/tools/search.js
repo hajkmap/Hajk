@@ -121,7 +121,9 @@ var SearchModel = {
   getPropertyFilter: function (props) {
     var multipleAttributes = props.propertyName.split(',').length > 1;
     var conditions = props.propertyName.split(',').reduce((condition, property) => {
-
+    /*  if (props.value == null){
+        return condition;
+    }*/
       props.value.indexOf("\\") >= 0 ? props.value = props.value.replace(/\\/g, "\\\\") : props.value;
       
       if (props.value) {
