@@ -350,7 +350,7 @@ namespace MapService.Controllers
         private List<ThemeMap> GetAllowedMapConfigurations()
         {
             string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
-            IEnumerable<string> files = Directory.EnumerateFiles(folder);
+            IEnumerable<string> files = Directory.EnumerateFiles(folder, "*.json");
             List<ThemeMap> mapConfigurationsList = new List<ThemeMap>();
 
             var activeUser = "";
