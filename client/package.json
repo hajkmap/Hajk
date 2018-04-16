@@ -7,6 +7,11 @@
     "type": "git",
     "url": "git+https://github.com/hajkmap/Hajk.git"
   },
+  "scripts": {
+    "clean:node_modules": "rm -rf node_modules",
+    "clean:build": "rm -rf compiled dist release",
+    "clean": "npm run clean:node_modules && npm run clean:build"
+  },
   "private": true,
   "devDependencies": {
     "babel-core": "^6.26.x",
