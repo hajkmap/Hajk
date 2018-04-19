@@ -13,6 +13,13 @@ module.exports = function (grunt) {
 
     pkg: grunt.file.readJSON('package.json'),
 
+    clean: [
+      'compiled',
+      'dist',
+      'release',
+      'node_modules'
+    ],
+
     cssFiles: [
       'compiled/<%= pkg.name %>.css'
     ],

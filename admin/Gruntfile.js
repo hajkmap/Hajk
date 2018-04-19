@@ -5,7 +5,12 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
 
     licence_text: grunt.file.read('licence_header.txt'),
-
+    
+    clean: [
+      'dist',
+      'node_modules'
+    ],
+    
     browserify: {
       debug: {
         options: {
@@ -179,6 +184,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-proxy');
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-browserify');

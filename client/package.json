@@ -8,9 +8,7 @@
     "url": "git+https://github.com/hajkmap/Hajk.git"
   },
   "scripts": {
-    "clean:node_modules": "rm -rf node_modules",
-    "clean:build": "rm -rf compiled dist release",
-    "clean": "npm run clean:node_modules && npm run clean:build"
+    "rebuild": "npm install && grunt dependencies && grunt build && grunt release"
   },
   "private": true,
   "devDependencies": {
@@ -27,6 +25,7 @@
     "grunt-babel": "^7.0.x",
     "grunt-banner": "^0.6.x",
     "grunt-browserify": "^5.3.0",
+    "grunt-contrib-clean": "^1.1.0",
     "grunt-contrib-concat": "^1.0.x",
     "grunt-contrib-connect": "^1.0.x",
     "grunt-contrib-copy": "^1.0.x",
