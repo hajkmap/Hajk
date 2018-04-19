@@ -187,6 +187,11 @@
       var layers = $.getJSON(config.layersPath || layersPath);
 
       layers.done(data => {
+        // Set <title> in HTML if map has a title property in JSON config
+        if (map_config.hasOwnProperty('map') && map_config.map.hasOwnProperty('title')) {
+          document.title = map_config.map.title;
+        }
+
         var layerSwitcherTool = map_config.tools.find(tool => {
           return tool.type === 'layerswitcher';
         });
