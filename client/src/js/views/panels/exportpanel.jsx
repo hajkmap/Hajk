@@ -59,11 +59,11 @@ var ExportTiffSettings = React.createClass({
     if (this.state.loading) {
       loader = <i className="fa fa-refresh fa-spin"></i>;
     }
-    
+
     if (this.props.model.previewLayer.getSource().getFeatures().length === 0) {
-      this.addPreview(map);    
-    }    
-    
+      this.addPreview(map);
+    }
+
     //downloadlänk
     if (this.props.model.get("downloadingTIFF")) {
       downloadLink = <p>Hämtar...</p>
@@ -72,7 +72,7 @@ var ExportTiffSettings = React.createClass({
     } else {
       downloadLink = null;
     }
-    
+
     return (
       <div className="export-settings">
         <div>
@@ -99,7 +99,7 @@ var ExportPdfSettings = React.createClass({
       selectOrientation: 'S',
       selectScale: '500',
       manualScale: '2500',
-      selectResolution: '72',
+      selectResolution: this.resolutions[0],
       center: this.props.model.getPreviewFeature() ?
         this.props.model.getPreviewCenter() :
         this.props.olMap.getView().getCenter(),
@@ -144,7 +144,7 @@ var ExportPdfSettings = React.createClass({
     };
   },
 
-  getPreviewPaperMeasures: function() { 
+  getPreviewPaperMeasures: function() {
     var size = this.getPaperMeasures()
     ,   inchInMillimeter = 25.4
     ,   defaultPixelSizeInMillimeter = 0.28
@@ -321,7 +321,7 @@ var ExportPdfSettings = React.createClass({
 
     resolutionOptions = this.resolutions.map((s, i) => {
       if (this.state.selectFormat === 'A2') {
-        return s !== 300 
+        return s !== 300
           ? <option key={i} value={s}>{s}</option>
           : <option key={i} value={s} disabled>{s}</option>;
         } else {
@@ -337,7 +337,7 @@ var ExportPdfSettings = React.createClass({
           return <option key={i} value={s}>{s}</option>;
         }
     });
-        
+
     this.addPreview(map);
 
     //downloadlänk
