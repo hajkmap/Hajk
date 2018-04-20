@@ -20,33 +20,14 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import React from "react";
-import { Component } from "react";
+import React, { Component } from "react";
 
 var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
-  exportUrl: "/mapservice/export/pdf",
-  exportTiffUrl: "/mapservice/export/tiff",
-  pdfActive: true,
-  tiffActive: true,
-  base64Encode: false,
-  autoScale: false,
-  instruction: "",
-  scales: [
-    250,
-    500,
-    1000,
-    2500,
-    5000,
-    10000,
-    25000,
-    50000,
-    100000,
-    250000
-  ],
-  proxyUrl: ""
+  icons: "",
+  instruction: ""
 };
 
 class ToolOptions extends Component {
@@ -56,7 +37,7 @@ class ToolOptions extends Component {
   constructor() {
     super();
     this.state = defaultState;
-    this.type = "export";
+    this.type = "measure";
   }
 
   componentDidMount() {
@@ -65,13 +46,7 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
-        exportUrl: tool.options.exportUrl,
-        exportTiffUrl: tool.options.exportTiffUrl,
-        tiffActive: tool.options.tiffActive,
-        pdfActive: tool.options.pdfActive,
-        base64Encode: tool.options.base64Encode,
-        autoScale: tool.options.autoScale,
-        proxyUrl: tool.options.proxyUrl,
+        icons: tool.options.icons,
         instruction: tool.options.instruction
       });
     } else {
@@ -136,14 +111,11 @@ class ToolOptions extends Component {
       "index": this.state.index,
       "options": {
         exportUrl: this.state.exportUrl,
-        exportTiffUrl: this.state.exportTiffUrl,
-        pdfActive: this.state.pdfActive,
-        tiffActive: this.state.tiffActive,
+        importUrl: this.state.importUrl,
         base64Encode: this.state.base64Encode,
-        autoScale: this.state.autoScale,
-        scales: this.state.scales,
-        proxyUrl: this.state.proxyUrl,
-        instruction: this.state.instruction
+        instruction: this.state.instruction,
+        icons: this.state.icons,
+        proxyUrl: this.state.proxyUrl
       }
     };
 
@@ -213,50 +185,6 @@ class ToolOptions extends Component {
               value={this.state.index}/>
           </div>
           <div>
-            <label htmlFor="exportUrl">URL till PDF-tjänst</label>
-            <input value={this.state.exportUrl} type="text" name="exportUrl" onChange={(e) => {this.handleInputChange(e)}}></input>
-          </div>
-          <div>
-            <label htmlFor="exportTiffUrl">URL till TIFF-tjänst</label>
-            <input value={this.state.exportTiffUrl} type="text" name="exportTiffUrl" onChange={(e) => {this.handleInputChange(e)}}></input>
-          </div>
-          <div>
-            <input
-              id="pdf-active"
-              name="pdfActive"
-              type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.pdfActive}/>&nbsp;
-            <label htmlFor="pdf-active">PDF aktiverad</label>
-          </div>
-          <div>
-            <input
-              id="tiff-active"
-              name="tiffActive"
-              type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.tiffActive}/>&nbsp;
-            <label htmlFor="tiff-active">TIFF aktiverad</label>
-          </div>
-          <div>
-            <input
-              id="Base64-active"
-              name="base64Encode"
-              type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.base64Encode}/>&nbsp;
-            <label htmlFor="Base64-active">Base64-encoding aktiverad</label>
-          </div>
-          <div>
-            <input
-              id="autoScale-active"
-              name="autoScale"
-              type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.autoScale}/>&nbsp;
-            <label htmlFor="autoScale-active">autoScale av previewLayer för mobil aktiverad</label>
-          </div>
-          <div>
             <label htmlFor="instruction">Instruktion</label>
             <textarea
               type="text"
@@ -265,10 +193,6 @@ class ToolOptions extends Component {
               onChange={(e) => {this.handleInputChange(e)}}
               value={atob(this.state.instruction)}
             />
-          </div>
-          <div>
-            <label htmlFor="proxyUrl">Proxy URL till utskrift och export</label>
-            <input value={this.state.proxyUrl} type="text" name="proxyUrl" onChange={(e) => {this.handleInputChange(e)}}></input>
           </div>
         </form>
       </div>

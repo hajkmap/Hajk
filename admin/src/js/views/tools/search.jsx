@@ -30,6 +30,7 @@ var defaultState = {
   index: 0,
   onMap: false,
   bothSynlig: false,
+  enableViewTogglePopupInSnabbsok: true, 
   selectionTools: true,
   base64Encode: false,
   instruction: "",
@@ -64,6 +65,7 @@ class ToolOptions extends Component {
         index: tool.index,
         onMap: tool.options.onMap,
         bothSynlig: tool.options.bothSynlig,
+        enableViewTogglePopupInSnabbsok: tool.options.enableViewTogglePopupInSnabbsok,
         selectionTools: tool.options.selectionTools,
         base64Encode: tool.options.base64Encode,
         instruction: tool.options.instruction,
@@ -95,11 +97,15 @@ class ToolOptions extends Component {
   }
 
   handleInputChange(event) {
-    const target = event.target;
-    const name = target.name;
+    var target = event.target;
+    var name = target.name;
     var value = target.type === 'checkbox' ? target.checked : target.value;
     if (typeof value === "string" && value.trim() !== "") {
       value = !isNaN(Number(value)) ? Number(value) : value
+    }
+
+    if (name == "instruction"){
+      value = btoa(value);
     }
     this.setState({
       [name]: value
@@ -146,6 +152,7 @@ class ToolOptions extends Component {
       "options": {
         onMap: onMap,
         bothSynlig: this.state.bothSynlig,
+        enableViewTogglePopupInSnabbsok: this.state.enableViewTogglePopupInSnabbsok,
         toolbar: toolbar,
         maxZoom: this.state.maxZoom,
         markerImg: this.state.markerImg,
@@ -239,6 +246,15 @@ class ToolOptions extends Component {
           </div>
           <div>
             <input
+              id="enableViewTogglePopupInSnabbsok"
+              name="enableViewTogglePopupInSnabbsok"
+              type="checkbox"
+              onChange={(e) => {this.handleInputChange(e)}}
+              checked={this.state.enableViewTogglePopupInSnabbsok}/>&nbsp;
+            <label htmlFor="enableViewTogglePopupInSnabbsok">Aktivera visning av "Visa information" i snabbsök</label>
+          </div>
+          <div>
+            <input
               id="bothSynlig"
               name="bothSynlig"
               type="checkbox"
@@ -283,13 +299,14 @@ class ToolOptions extends Component {
             <label htmlFor="Base64-active">Base64-encoding aktiverad</label>
           </div>
           <div>
-            <label htmlFor="instruction">Instruktioner</label>
-            <input
+            <label htmlFor="instruction">Instruktion</label>
+            <textarea
+              type="text"
               id="instruction"
               name="instruction"
-              type="text"
               onChange={(e) => {this.handleInputChange(e)}}
-              value={this.state.instruction}/>
+              value={atob(this.state.instruction)}
+            />
           </div>
           <div>
             <label htmlFor="maxZoom">Zoomnivå</label>

@@ -35,7 +35,8 @@ var Tool          = require('tools/tool')
 ,   Information   = require('tools/information')
 ,   Location      = require('tools/location')
 ,   Routing       = require('tools/routing')
-,   Preset        = require('tools/preset');
+,   Preset        = require('tools/preset')
+,   Measure        = require('tools/measure');
 
 /**
  * @description
@@ -65,7 +66,7 @@ var ToolCollection = {
         case "bookmark":
             return new Bookmark(args.options);
         case "search":
-            return new Search(args.options);
+          return new Search(args.options);
         case "coordinates":
             return new Coordinates(args.options);
         case "export":
@@ -90,6 +91,8 @@ var ToolCollection = {
             return new Location(args.options);
         case "preset":
             return new Preset(args.options);
+        case "measure":
+            return new Measure(args.options);
         default:
             throw "Tool not supported " + args.type;
       }
