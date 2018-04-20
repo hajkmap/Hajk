@@ -94,7 +94,7 @@ var PanelView = {
       var instructionTxt;
       if(typeof this.props.instruction !== 'undefined' && this.props.instruction !== null && this.props.instruction.length > 0){
         instructionBtn = (
-          <button onClick={() => this.openInstruction()} className="btn-info" id="instructionBox1" ><img src={infologo}/></button>
+          <i onClick={() => this.openInstruction()} className="fa fa-question-circle clickable btn-info" id="instructionBox1"></i>
         );
         instructionTxt = (
           <div className="panel-body-instruction" id="instructionsText" dangerouslySetInnerHTML={{__html: this.props.instruction}}></div>
@@ -114,12 +114,17 @@ var PanelView = {
           <div className="panel-heading">
             <span>{this.props.title}</span>
             {instructionBtn}
-            <i className={closeIcon} onClick={() => {
+            <i  className={closeIcon} 
+                title="Stäng panelen"
+                onClick={() => {
               if (this.props.onUnmountClicked) {
                 this.props.onUnmountClicked();
               }
             }}></i>
-            <i className={toggleIcon} onClick={this.props.onCloseClicked}></i>
+            <i  className={toggleIcon} 
+                title="Minimera panelen"
+                onClick={this.props.onCloseClicked}></i>
+            {this.props.toggleAllButton}
             {instructionTxt}
           </div>
           <div className="panel-body">
