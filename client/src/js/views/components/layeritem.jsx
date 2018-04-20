@@ -41,7 +41,6 @@ var LayerItemView = {
       infoTitle: "",
       infoText: "",
       infoUrl: "",
-      infoUrlText: "",
       infoOwner: "",
       infoExpanded: false,
       instruction: ""
@@ -68,7 +67,6 @@ var LayerItemView = {
       infoTitle: this.props.layer.getInfoTitle(),
       infoText: this.props.layer.getInfoText(),
       infoUrl: this.props.layer.getInfoUrl(),
-      infoUrlText: this.props.layer.getInfoUrlText(),
       infoOwner: this.props.layer.getInfoOwner(),
       showInfo: this.props.layer.get('showInfo')
     });
@@ -193,7 +191,6 @@ var LayerItemView = {
     ,   infoTitle     = this.state.infoTitle
     ,   infoText      = this.state.infoText
     ,   infoUrl       = this.state.infoUrl
-    ,   infoUrlText       = this.state.infoUrlText
     ,   infoOwner     = this.state.infoOwner
     ,   infoExpanded  = this.state.showInfo;
 
@@ -215,8 +212,6 @@ var LayerItemView = {
 
     var innerInfoBodyClass = infoExpanded && componentsInfo.legend.legendPanel ? "dropdown" : "hidden";
     
-    var infoUrlText =  this.state.infoUrlText && this.state.infoUrlText.length ? this.state.infoUrlText : this.state.infoUrl;
-
     return (
       <div className="panel panel-default layer-item">
         <div className="panel-heading unselectable" onClick={toggleLegend}>
@@ -235,7 +230,7 @@ var LayerItemView = {
         <div className={innerInfoBodyClass}>
           <p className="info-title" dangerouslySetInnerHTML={{__html: this.state.infoTitle}}></p>
           <p className="info-text" dangerouslySetInnerHTML={{__html: this.state.infoText}}></p>
-          <a className="info-text" href={this.state.infoUrl} target="_blank" dangerouslySetInnerHTML={{__html: infoUrlText}}></a>
+          <p className="info-text" dangerouslySetInnerHTML={{__html: this.state.infoUrl}}></p>
           <p className="info-text" dangerouslySetInnerHTML={{__html: this.state.infoOwner}}></p>
         </div>
 

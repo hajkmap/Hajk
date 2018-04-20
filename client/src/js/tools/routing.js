@@ -92,6 +92,9 @@ var RoutingModel = {
     startPoint.setGeometry(new ol.geom.Point(event.coordinate));
   /* Convert Geometry to Coordinate */
 
+    //var test = ol.proj.transform(startPoint.getGeometry().getCoordinates(), 'EPSG:3007', 'EPSG:4326');
+    //console.log(test);
+    //var lonlat = startPoint.getGeometry().getCoordinates();
     var lonlat = ol.proj.transform(startPoint.getGeometry().getCoordinates(), 'EPSG:3007', 'EPSG:4326');
     var lon = lonlat[0];
     var lat = lonlat[1];
@@ -105,6 +108,7 @@ var RoutingModel = {
     pos.longitude = lon;
     this.set('position', pos);
 
+   // this.state.activePanel(true);
    },
 
   setTravelMode: function(travelmode){

@@ -278,7 +278,7 @@ namespace MapService.Components
                 return scaleBarText;
             }
             if (scale <= 500) {
-                return (scale / 10) + " m";
+                return unitLength * (scale / 10) + " m";
             }
             if (scale < 25000)
             {

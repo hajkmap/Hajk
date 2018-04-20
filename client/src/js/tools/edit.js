@@ -186,7 +186,7 @@ var EditModel = {
           .filter(f => f.modification !== undefined)
           .forEach(f => f.modification = undefined);
         done(data);
-      }).fail((data) => {
+      }).error((data) => {
         var data = this.parseWFSTresponse(data);
         done(data);
       });
@@ -422,7 +422,7 @@ var EditModel = {
         });
       });
       if (done) done();
-    }).fail(rsp => {
+    }).error(rsp => {
       alert("Fel: data kan inte hämtas. Försök igen senare.");
       if (done) done();
     });

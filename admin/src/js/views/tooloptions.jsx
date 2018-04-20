@@ -35,7 +35,6 @@ import Location from "./tools/location.jsx";
 import Search from "./tools/search.jsx";
 import StreetView from "./tools/streetview.jsx";
 import Preset from "./tools/preset.jsx";
-import Measure from "./tools/measure.jsx";
 import Routing from "./tools/routing.jsx";
 
 var defaultState = {
@@ -99,8 +98,6 @@ class ToolOptions extends Component {
         return <StreetView parent={this} model={this.props.model}></StreetView>
       case "preset":
         return <Preset parent={this} model={this.props.model}></Preset>
-      case "measure":
-        return <Measure parent={this} model={this.props.model}></Measure>
       case "routing":
         return <Routing parent={this} model={this.props.model}></Routing>
       default:
@@ -157,7 +154,6 @@ class ToolOptions extends Component {
       search: "Sök",
       streetview: "Google Street View",
       preset: "Snabbval",
-      measure: "Mät",
       location: "Visa min position",
       routing: "Navigation"
     };

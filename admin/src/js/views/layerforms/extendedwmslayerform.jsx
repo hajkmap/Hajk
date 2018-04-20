@@ -43,6 +43,7 @@ const defaultState = {
   url: "",
   searchFields: "",
   displayFields: "",
+  visibleAtStart: false,
   tiled: false,
   singleTile: false,
   version: "",
@@ -64,7 +65,6 @@ const defaultState = {
   infoTitle: "",
   infoText: "",
   infoUrl: "",
-  infoUrlText: "",
   infoOwner: ""
 };
 
@@ -384,6 +384,7 @@ class ExtendedWMSLayerForm extends Component {
       layers: this.getValue("layers"),
       searchFields: this.getValue("searchFields"),
       displayFields: this.getValue("displayFields"),
+      visibleAtStart: this.getValue("visibleAtStart"),
       infoFormat: this.getValue("infoFormat"),
       infobox: this.getValue("infobox"),
       singleTile: this.getValue("singleTile"),
@@ -398,7 +399,6 @@ class ExtendedWMSLayerForm extends Component {
       infoTitle: this.getValue("infoTitle"),
       infoText: this.getValue("infoText"),
       infoUrl: this.getValue("infoUrl"),
-      infoUrlText: this.getValue("infoUrlText"),
       infoOwner: this.getValue("infoOwner")
     };
   }
@@ -411,6 +411,7 @@ class ExtendedWMSLayerForm extends Component {
       , value = input ? input.value : "";
     
     if (fieldName === 'date') value = create_date();
+    if (fieldName === 'visibleAtStart') value = input.checked;
     if (fieldName === 'singleTile') value = input.checked;
     if (fieldName === 'tiled') value = input.checked;
     if (fieldName === 'queryable') value = input.checked;
@@ -713,6 +714,21 @@ class ExtendedWMSLayerForm extends Component {
         <div className="row">
           <div className="col-md-6">
             <div className="form-group">
+              <label>Synligt vid start</label>
+              <input
+                type="checkbox"
+                ref="input_visibleAtStart"
+                onChange={
+                  (e) => {
+                    this.setState({ visibleAtStart: e.target.checked })
+                  }
+                }
+                checked={this.state.visibleAtStart}
+              />
+            </div>
+          </div>
+          <div className="col-md-6">
+            <div className="form-group">
               <label>Single tile</label>
               <input
                 type="checkbox"
@@ -785,19 +801,6 @@ class ExtendedWMSLayerForm extends Component {
                 }}
                 value={this.state.infoUrl}
                 className={this.getValidationClass("infoUrl")}
-            />
-          </div>
-          <div className={infoClass}>
-            <label>Länktext</label>
-            <input 
-              type="text"
-              ref="input_infoUrlText"
-                onChange={(e) => {
-                  this.setState({infoUrlText: e.target.value});
-                  this.validateField("infoUrlText", e);
-                }}
-                value={this.state.infoUrlText}
-                className={this.getValidationClass("infoUrlText")}
             />
           </div>
           <div className={infoClass}>
