@@ -33,6 +33,7 @@ var ApplicationView = {
    * @property {string} el - DOM element to render this app into.
    * @instance
    */
+  el: "map",
   /**
    * Load the application.
    * @instance
@@ -56,9 +57,8 @@ var ApplicationView = {
    * @param {boolean} force - Force update
    */
   render: function (force) {
-    // TODO: get ID from config instead
-    var el = document.getElementById('map');
-    
+
+    var el = document.getElementById(this.$el.selector);
     var errorStyle = { 'margin-top': '50px', 'text-align': 'center' };
 
     if (!el) {

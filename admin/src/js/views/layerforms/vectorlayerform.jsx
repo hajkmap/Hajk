@@ -38,6 +38,7 @@ const defaultState = {
   infobox: "",
   legend: "",
   url: "",
+  visibleAtStart: false,
   queryable: true,
   drawOrder: 1,
   lineColor: "rgba(0, 0, 0, 0.5)",
@@ -65,7 +66,6 @@ const defaultState = {
   infoTitle: "",
   infoText: "",
   infoUrl: "",
-  infoUrlText: "",
   infoOwner: ""
 };
 
@@ -119,6 +119,7 @@ class VectorLayerForm extends Component {
       date: this.getValue("date"),
       content: this.getValue("content"),
       legend: this.getValue("legend"),
+      visibleAtStart: this.getValue("visibleAtStart"),
       lineStyle: this.getValue("lineStyle"),
       lineColor: this.getValue("lineColor"),
       lineWidth: this.getValue("lineWidth"),
@@ -146,7 +147,6 @@ class VectorLayerForm extends Component {
       infoTitle: this.getValue("infoTitle"),
       infoText: this.getValue("infoText"),
       infoUrl: this.getValue("infoUrl"),
-      infoUrlText: this.getValue("infoUrlText"),
       infoOwner: this.getValue("infoOwner")
     }
   }
@@ -172,6 +172,7 @@ class VectorLayerForm extends Component {
 
     if (fieldName === 'date') value = create_date();
     if (fieldName === 'queryable') value = input.checked;
+    if (fieldName === 'visibleAtStart') value = input.checked;
     if (fieldName === 'showLabels') value = input.checked;
     if (fieldName === 'fillColor') value = rgba_to_string(this.state.fillColor);
     if (fieldName === 'lineColor') value = rgba_to_string(this.state.lineColor);
@@ -788,7 +789,18 @@ class VectorLayerForm extends Component {
             }}
             checked={this.state.queryable}
           />
-        </div>       
+        </div>
+        <div>
+          <label>Synligt vid start</label>
+          <input
+            type="checkbox"
+            ref="input_visibleAtStart"
+            onChange={(e) => {
+              this.setState({visibleAtStart: e.target.checked})
+            }}
+            checked={this.state.visibleAtStart}
+          />
+        </div>        
         <div className="info-container">
           <div>
             <label>Infodokument</label>
@@ -836,19 +848,6 @@ class VectorLayerForm extends Component {
                 }}
                 value={this.state.infoUrl}
                 className={this.getValidationClass("infoUrl")}
-            />
-          </div>
-          <div className={infoClass}>
-            <label>Länktext</label>
-            <input 
-              type="text"
-              ref="input_infoUrlText"
-                onChange={(e) => {
-                  this.setState({infoUrlText: e.target.value});
-                  this.validateField("infoUrlText", e);
-                }}
-                value={this.state.infoUrlText}
-                className={this.getValidationClass("infoUrlText")}
             />
           </div>
           <div className={infoClass}>

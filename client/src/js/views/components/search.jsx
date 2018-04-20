@@ -123,7 +123,7 @@ var SearchView = {
     this.props.model.set('value', "");
     this.props.model.set('searchTriggered', false);
     this.props.model.clear();
-    if(!isMobile && typeof $("#snabbsokRensa") !== "undefined") {
+    if(typeof $("#snabbsokRensa") !== "undefined") {
       $("#snabbsokRensa").click();
     }
 
@@ -137,7 +137,7 @@ var SearchView = {
       result: []
     });
 
-    if (!isMobile && $('#searchbar-input-field').length != 0){
+    if ($('#searchbar-input-field').length != 0){
       $('#searchbar-input-field')[0].value = ""
     }
   },
@@ -192,7 +192,7 @@ var SearchView = {
           state.loading = true;
         }
         this.setState(state);
-      }, false);
+      });
     }, 200);
   },
 
@@ -338,7 +338,6 @@ var SearchView = {
                 var id = "group-" + i;
                 return (
                   <SearchResultGroup
-                        isBar="no"
                         id={id}
                         key={id}
                         result={item}
@@ -364,9 +363,10 @@ var SearchView = {
    * @return {external:ReactElement}
    */
   render: function () {
+
     var results = null
     ,   value = this.props.model.get('value')
-    ,   showResults = this.props.model.shouldRenderResult(false)
+    ,   showResults = this.props.model.shouldRenderResult()
     ,   options = this.renderOptions();
 
     if (showResults) {

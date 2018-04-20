@@ -127,6 +127,7 @@ class Manager extends Component {
           legend: layer.legend,
           owner: layer.owner,
           url: layer.url,
+          visibleAtStart: layer.visibleAtStart,
           queryable: layer.queryable,
           singleTile: layer.singleTile,
           projection: layer.projection,
@@ -140,7 +141,6 @@ class Manager extends Component {
           infoTitle: layer.infoTitle,
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
-          infoUrlText: layer.infoUrlText,
           infoOwner: layer.infoOwner
         });
 
@@ -170,6 +170,7 @@ class Manager extends Component {
           legend: layer.legend,
           owner: layer.owner,
           url: layer.url,
+          visibleAtStart: layer.visibleAtStart,
           queryable: layer.queryable,
           projection: layer.projection,
           lineWidth: layer.lineWidth || "3",
@@ -197,7 +198,6 @@ class Manager extends Component {
           infoTitle: layer.infoTitle,
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
-          infoUrlText: layer.infoUrlText,
           infoOwner: layer.infoOwner
         });
 
@@ -225,6 +225,7 @@ class Manager extends Component {
           legend: layer.legend,
           owner: layer.owner,
           url: layer.url,
+          visibleAtStart: layer.visibleAtStart,
           queryable: layer.queryable,
           tiled: layer.tiled,
           singleTile: layer.singleTile,
@@ -244,7 +245,6 @@ class Manager extends Component {
           infoTitle: layer.infoTitle,
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
-          infoUrlText: layer.infoUrlText,
           infoOwner: layer.infoOwner
         });
 
@@ -271,6 +271,7 @@ class Manager extends Component {
           legend: layer.legend,
           owner: layer.owner,
           url: layer.url,
+          visibleAtStart: layer.visibleAtStart,
           queryable: layer.queryable,
           tiled: layer.tiled,
           singleTile: layer.singleTile,
@@ -286,7 +287,6 @@ class Manager extends Component {
           infoTitle: layer.infoTitle,
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
-          infoUrlText: layer.infoUrlText,
           infoOwner: layer.infoOwner
         });
 
@@ -315,6 +315,7 @@ class Manager extends Component {
           legend: layer.legend,
           owner: layer.owner,
           url: layer.url,
+          visibleAtStart: layer.visibleAtStart,
           layer: layer.layer,
           matrixSet: layer.matrixSet,
           style: layer.style,
@@ -328,7 +329,6 @@ class Manager extends Component {
           infoTitle: layer.infoTitle,
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
-          infoUrlText: layer.infoUrlText,
           infoOwner: layer.infoOwner
         });
         setTimeout(() => {

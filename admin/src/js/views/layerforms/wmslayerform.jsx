@@ -40,6 +40,7 @@ const defaultState = {
   legend: "",
   owner: "",
   url: "",
+  visibleAtStart: false,
   queryable: true,
   tiled: false,
   singleTile: false,
@@ -57,7 +58,6 @@ const defaultState = {
   infoTitle: "",
   infoText: "",
   infoUrl: "",
-  infoUrlText: "",
   infoOwner: "",
   searchGeometryField: "",
   attribution: "",
@@ -264,6 +264,7 @@ class WMSLayerForm extends Component {
       legend: this.getValue("legend"),
       layers: this.getValue("layers"),
       infobox: this.getValue("infobox"),
+      visibleAtStart: this.getValue("visibleAtStart"),
       singleTile: this.getValue("singleTile"),
       imageFormat: this.getValue("imageFormat"),
       serverType: this.getValue("serverType"),
@@ -280,7 +281,6 @@ class WMSLayerForm extends Component {
       infoTitle: this.getValue("infoTitle"),
       infoText: this.getValue("infoText"),
       infoUrl: this.getValue("infoUrl"),
-      infoUrlText: this.getValue("infoUrlText"),
       infoOwner: this.getValue("infoOwner"),
       searchGeometryField: this.getValue("searchGeometryField"),
       attribution: this.getValue("attribution"),
@@ -302,6 +302,7 @@ class WMSLayerForm extends Component {
     ,   value = input ? input.value : "";
 
     if (fieldName === 'date') value = create_date();
+    if (fieldName === 'visibleAtStart') value = input.checked;
     if (fieldName === 'singleTile') value = input.checked;
     if (fieldName === 'tiled') value = input.checked;
     if (fieldName === 'queryable') value = input.checked;
@@ -427,6 +428,19 @@ class WMSLayerForm extends Component {
           <span onClick={(e) => {this.loadLegendImage(e)}} className="btn btn-default">Välj fil {imageLoader}</span>
         </div>
         <div>
+          <label>Synligt vid start</label>
+          <input
+            type="checkbox"
+            ref="input_visibleAtStart"
+            onChange={
+              (e) => {
+                this.setState({visibleAtStart: e.target.checked})
+              }
+            }
+            checked={this.state.visibleAtStart}
+          />
+        </div>
+        <div>
           <label>Valda lager*</label>
           <div ref="input_layers" className={this.getValidationClass("layers") + " layer-list-choosen"} >
             <ul>
@@ -479,8 +493,8 @@ class WMSLayerForm extends Component {
             checked={this.state.queryable}
           />
         </div>
-        <div>
-          <label>GeoWebCache</label>
+        <div style={{display: "none"}}>
+          <label>Geowebcache</label>
           <input
             type="checkbox"
             ref="input_tiled"
@@ -552,19 +566,6 @@ class WMSLayerForm extends Component {
                 }}
                 value={this.state.infoUrl}
                 className={this.getValidationClass("infoUrl")}
-            />
-          </div>
-          <div className={infoClass}>
-            <label>Länktext</label>
-            <input 
-              type="text"
-              ref="input_infoUrlText"
-                onChange={(e) => {
-                  this.setState({infoUrlText: e.target.value});
-                  this.validateField("infoUrlText", e);
-                }}
-                value={this.state.infoUrlText}
-                className={this.getValidationClass("infoUrlText")}
             />
           </div>
           <div className={infoClass}>

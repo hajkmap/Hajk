@@ -111,7 +111,7 @@ SearchResultGroup = {
       $('.search-results').find('.selected').each(function (e) {
         $(this).removeClass('selected');
       });
-      this.props.model.focus(item, this.props.isBar == "yes");
+      this.props.model.focus(item);
     }
 
     if (!shiftIsDown) {

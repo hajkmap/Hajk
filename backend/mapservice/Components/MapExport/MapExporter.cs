@@ -245,7 +245,6 @@ namespace MapService.Components.MapExport
                         {
                             // TODO
                             //file.WriteLine("Error in adding subname.\n" + ex.ToString());
-                            throw ex;
                         }
                     }
                     layer.SRID = wmsLayers[i].coordinateSystemId;
@@ -555,20 +554,9 @@ namespace MapService.Components.MapExport
                         try
                         {
                             string url = HttpContext.Current.Request.Url.Authority;
-                            string protocol = "";
-
-                            if (HttpContext.Current.Request.IsSecureConnection)
-                            {
-                                 protocol = "https://";
-                            }
-                            else
-                            {
-                                 protocol = "http://";
-                            }
-                            
                             _log.DebugFormat("url." + url);
                             WebClient wc = new WebClient();
-                            byte[] bytes = wc.DownloadData(protocol + url + "/" + featureStyle.pointSrc);                            
+                            byte[] bytes = wc.DownloadData("https://" + url + "/" + featureStyle.pointSrc);                            
                             style.Symbol = this.ImageFromBytes(bytes);                            
                         }
                         catch (Exception ex)

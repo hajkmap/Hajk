@@ -48,8 +48,6 @@ namespace MapService.Models.Config
 
         public string infoUrl { get; set; }
 
-        public string infoUrlText { get; set; }
-
         public string infoOwner { get; set; }
     }
 }

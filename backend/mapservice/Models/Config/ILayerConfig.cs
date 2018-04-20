@@ -20,8 +20,6 @@ namespace MapService.Models.Config
 
         string infoUrl { get; set; }
 
-        string infoUrlText { get; set; }
-
         string infoOwner { get; set; }
     }
 }

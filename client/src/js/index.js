@@ -67,23 +67,12 @@
   internal.mergeConfig = function (a, b) {
     var ls = a.tools.find(tool => tool.type === 'layerswitcher');
 
-    var x = parseFloat(b.x),
-      y = parseFloat(b.y),
-      z = parseInt(b.z),
+    var x = parseFloat(b.x) || a.map.center[0],
+      y = parseFloat(b.y) || a.map.center[1],
+      z = parseInt(b.z) || a.map.zoom,
       l = b.l;
 
-    if (isNaN(x)){
-      x = a.map.center[0];
-    }
-    if (isNaN(y)){
-      y = a.map.center[1];
-    }
-    if (isNaN(z)){
-      z = a.map.zoom;
-    }
-
-    // The parameters s and v can also be specified through the url. These are decoded and used in searchbar.jsx
-    // for snabbsok.
+    // parametrar s och v kan också anges på url. Dessa avkodas och används serchbar.jsx
     a.map.center[0] = x;
     a.map.center[1] = y;
     a.map.zoom = z;
