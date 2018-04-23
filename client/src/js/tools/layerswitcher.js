@@ -135,13 +135,13 @@ var LayerSwitcherModel = {
    * @return {Layer[]} base layers
    */
   getBaseLayers: function () {
-    var baseLayers = []
+    var baseLayers = [];
     this.get('baselayers').forEach(baseLayer => {
       var layer = this.get('layerCollection').find(layer => layer.id === baseLayer.id);
       if (layer) {
-		if( !layer.getVisible()) {
-			layer.setVisible(baseLayer.visibleAtStart);
-		}
+        if (!layer.getVisible()) {
+          layer.setVisible(baseLayer.visibleAtStart);
+        }
         layer.getLayer().setVisible(layer.getVisible());
         baseLayers.push(layer);
       }
