@@ -109,7 +109,7 @@ class WMSLayerForm extends Component {
     )
   }
 
-  appendLayer(e, checkedLayer) {
+  appendLayer(e, checkedLayer, opts = {}) {
     if (e.target.checked === true) {
       this.state.addedLayers.push(checkedLayer);
     } else {
@@ -117,6 +117,20 @@ class WMSLayerForm extends Component {
         layer !== checkedLayer
       );
     }
+
+    // If only one layer is selected, use title and abstract to populate some fields here
+    if (this.state.addedLayers.length === 1 && this.state.caption.length === 0) {
+      this.setState({
+        caption: opts.title,
+        infoText: opts.abstract
+      });
+    } else if (this.state.addedLayers.length === 0) {
+      this.setState({
+        caption: '',
+        infoText: ''
+      });
+    }
+
     this.validateField('layers');
     this.forceUpdate();
   }
@@ -160,6 +174,14 @@ class WMSLayerForm extends Component {
         var i = this.createGuid();
         var title = /^\d+$/.test(layer.Name) ? <label>&nbsp;{layer.Title}</label> : null;
 
+        let trueTitle = layer.hasOwnProperty('Title') ? layer.Title : '';
+        let abstract = layer.hasOwnProperty('Abstract') ? layer.Abstract : '';
+
+        let opts = {
+          title: trueTitle,
+          abstract: abstract
+        };
+
         return (
           <li key={"fromCapability_" + i}>
             <input
@@ -169,7 +191,7 @@ class WMSLayerForm extends Component {
               data-type="wms-layer"
               checked={this.state.addedLayers.find(l => l === layer.Name)}
               onChange={(e) => {
-                this.appendLayer(e, layer.Name)
+                this.appendLayer(e, layer.Name, opts)
               }} />&nbsp;
             <label htmlFor={"layer" + i}>{layer.Name}</label>{title}
             <i style={{display:"none"}} className={classNames} onClick={(e) => this.describeLayer(e, layer.Name)}></i>
