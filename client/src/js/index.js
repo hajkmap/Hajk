@@ -66,8 +66,6 @@
   };
 
   internal.mergeConfig = function (a, b) {
-    var ls = a.tools.find(tool => tool.type === 'layerswitcher');
-
     var x = parseFloat(b.x),
       y = parseFloat(b.y),
       z = parseInt(b.z),

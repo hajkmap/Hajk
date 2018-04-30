@@ -26,12 +26,23 @@ var LayerCollection = {
     layer.set("olMap", map);
     layer.set("shell", this.shell);
 
-
     var visibleAtStart = false;
+    var found = false;
     for(var i=0; i < this.mapGroups.length; i++){
       for (var j=0; j < this.mapGroups[i].layers.length; j++){
         if (layer.get("id") == this.mapGroups[i].layers[j].id){
           visibleAtStart = this.mapGroups[i].layers[j].visibleAtStart;
+          found = true;
+          break;
+        }
+      }
+    }
+
+    if(!found) {
+      for (var i = 0; i < this.baseLayers.length; i++) {
+        if (layer.get("id") == this.baseLayers[i].id){
+          visibleAtStart = this.baseLayers[i].visibleAtStart;
+          found = true;
           break;
         }
       }
@@ -431,6 +442,7 @@ var LayerCollection = {
 
     var layerSwitcherTool = args.tools.find(tool => tool.type === "layerswitcher");
     this.mapGroups = layerSwitcherTool.options.groups;
+    this.baseLayers = layerSwitcherTool.options.baselayers;
 
     _.defer(_.bind(function () {
 

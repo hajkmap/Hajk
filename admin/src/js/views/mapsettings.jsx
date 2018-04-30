@@ -1014,6 +1014,10 @@ class Menu extends Component {
       value = value.replace(/,/g, '').replace(/ /g, '').Number(value);
     }
 
+    if (name == "instruction"){
+      value = btoa(value);
+    }
+
     this.setState({
       [name]: value
     });
@@ -1225,11 +1229,11 @@ class Menu extends Component {
               <div className="row">
                 <div className="col-sm-12">
                   <label htmlFor="instruction">Instruktion</label>
-                  <input id="instruction" 
+                  <textarea id="instruction"
                          name="instruction" 
                          type="text"  
                          onChange={(e) => {this.handleInputChange(e)}}
-                         value={this.state.instruction}/>
+                         value={this.state.instruction ? atob(this.state.instruction) : ""}/>
                 </div>
               </div>
               <div className="row">
