@@ -456,7 +456,9 @@ var LayerPanelView = {
     if(this.props.model.get('dropdownThemeMaps')){
       dropdownThemeMaps = (
         <div>
-        <span style={{marginRight: "10px"}}>{this.props.model.get("themeMapHeaderCaption")}</span>
+        {this.props.model.get('themeMapHeaderCaption') !== null &&
+          <span style={{marginRight: "10px"}}>{this.props.model.get('themeMapHeaderCaption')}</span>
+        }        
         <select onChange={this.setThemeMap} style={{marginBottom: "10px", width : "100%"}} value={this.state.dropDownValue}>
         {mapConfigurations}
         </select>
