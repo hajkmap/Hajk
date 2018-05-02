@@ -38,6 +38,8 @@ namespace MapService.Models.Config
 
         public bool tiled { get; set; }
 
+        public bool opacity { get; set; }
+
         public bool singleTile { get; set; }
 
         public string imageFormat { get; set; }
