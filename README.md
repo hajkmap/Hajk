@@ -4,7 +4,7 @@ Uppdaterad: 2018-05-03
 ## Innehåll
 - [Hajk](#hajk)
   - [Innehåll](#inneh%C3%A5ll)
-  - [Installation](#installation)
+  - [Installation verktyg](#installation-verktyg)
     - [Installera Git](#installera-git)
     - [Installera Node.js](#installera-nodejs)
     - [Installera Grunt](#installera-grunt)
@@ -17,13 +17,12 @@ Uppdaterad: 2018-05-03
 	- [Bygg klientdelen](#bygg-klientdelen)
 	- [Bygg admindelen](#bygg-admindelen)
 	- [Bygg backend-delen (servern)](#bygg-backend-delen-servern)
+	- [Bygg proxy-applikation (HTTPProxy)](#bygg-proxy-applikation-httpproxy)
   - [Sätta ihop Hajk](#s%C3%A4tta-ihop-hajk)
       - [Skapa huvudmapp för applikationen](#skapa-huvudmapp-f%C3%B6r-applikationen)
       - [Flytta och skapa mappar och filer](#flytta-och-skapa-mappar-och-filer)
       - [Flytta proxy-filer](#flytta-proxy-filer)
       - [Kontrollera att allt kom med](#kontrollera-att-allt-kom-med)
-      - [Sätt rätt behörigheter på filer och mappar](#s%C3%A4tt-r%C3%A4tt-beh%C3%B6righeter-p%C3%A5-filer-och-mappar)
-	  - [Autentisering och rollstyrning](#autentisering-och-rollstyrning)
   - [Installation och konfiguration](#installation-och-konfiguration)
 
 Hajk är ett projekt som drivs av flera organisationer i Västsverige, bl a Stadsbyggnadskontoret Göteborgs Stad, Kungsbacka kommun, 
@@ -45,7 +44,7 @@ För installation och konfiguration i IIS hänvisas till Systemdokumentationen s
 
 ---
 
-## Installation
+## Installation verktyg
 
 ### Installera Git
 Börja med att installera Git om det inte redan är gjort. Ladda ner en version för ditt operativsystem från https://git-scm.com/download/win. Installera med default-inställningar. Därmed bör Git installeras globalt för Windows och läggas till i `$PATH` .
@@ -147,19 +146,29 @@ grunt
 ```
 
 ### Bygg backend-delen (servern)
-- Öppna Utforskaren och navigera till mappen som innehåller backend-kod (i det här exemplet, `C:\projekt\Hajk\backend`
+- Öppna Utforskaren och navigera till mappen som innehåller backend-koden (i det här exemplet, `C:\projekt\Hajk\backend`
 - Dubbelklicka på `MapService.sln`
 - Visual Studio öppnas
 - I `Solution Explorer` markera projektet `MapService`
 - I huvudmenyn, välj  `Build > Build Solution`  
 - Invänta tills kompileringen är klar (du ser status i `Output`-fönstret längst ner, när det står något i stil med `Build: 2 succeeded, 0 failed, 0 up-to-date, 0 skipped` så är det klart)
 - I huvudmenyn, välj  `Build > Publish MapService`  
-- I fönstret som visas nu finns möjlighet att ändra `Target Location`, alltså stället dit backend-applikationen kommer att publiceras. Default-värde är `C:\install\mapservice\`. Du kan låta det vara kvar eller ändra till något annat. Huvudsaken är att du **vet var filerna läggs** för de kommer behövas senare när vi sätter upp webbservern.
+- I fönstret som visas nu finns möjlighet att ändra `Target Location`, alltså stället dit backend-applikationen kommer att publiceras. Default-värde är `C:\install\mapservice\`. Du kan låta det vara kvar eller ändra till något annat. Huvudsaken är att du **vet var filerna läggs** för de kommer behövas senare när vi sätter ihop Hajk.
+
+### Bygg proxy-applikation (HTTPProxy)
+- Öppna Utforskaren och navigera till mappen som innehåller proxy-koden (i det här exemplet, `C:\projekt\Hajk\proxy\HTTPProxy`
+- Dubbelklicka på `Proxy.sln`
+- Visual Studio öppnas
+- I `Solution Explorer` markera projektet `Proxy`
+- I huvudmenyn, välj  `Build > Build Solution`  
+- Invänta tills kompileringen är klar (du ser status i `Output`-fönstret längst ner, när det står något i stil med `Build: 1 succeeded, 0 failed, 0 up-to-date, 0 skipped` så är det klart)
+- I huvudmenyn, välj  `Build > Publish Proxy`  
+- I fönstret som visas nu finns möjlighet att ändra `Target Location`, alltså stället dit backend-applikationen kommer att publiceras. Default-värde är `C:\install\proxy\`. Du kan låta det vara kvar eller ändra till något annat. Huvudsaken är att du **vet var filerna läggs** för de kommer behövas senare när vi sätter ihop Hajk.
 
 --- 
 ## Sätta ihop Hajk 
 
-Om du har följt anvisningarna så lång har du de tre *kompilerade* delarna som applikationen utgörs av på följande ställen:
+Om du har följt anvisningarna så långt har du de tre *kompilerade* delarna som applikationen utgörs av på följande ställen:
 
 | Del     | Plats                           |
 | ------- | ------------------------------- |
@@ -191,36 +200,37 @@ Gå in i mappen `C:/wwwroot/client`. Markera alla mappar och filer inuti (försl
 Därefter, skapa tre till mappar i `C:/wwwroot` och döp dem till `util`, `Temp` och `Upload` (var noga med stora och små bokstäver).
 
 #### Flytta proxy-filer
+Det finns en ny och en äldre proxy man kan välja på.
+
+##### Ny proxy
+Om autentisering och rollstyrning skall användas ska den nya proxyn som finns i mappen HTTPProxy användas. Se ovan hur man bygger ihop den.
+Denna proxy ska kunna användas även om autentisering och rollstyrning inte används.
+
+Ta innehållet från `C:/install/proxy` och flytta till mappen `C:/wwwroot/util`.
+
+##### Äldre proxy
 En GET-proxy som kan användas av klienten ska läggas i den nyligen skapade mappen `util`. Ta innehållet från `C:/projekt/Hajk/proxy/mvc` och flytta till mappen `C:/wwwroot/util`.
 
 Det finns även en POST-proxy som kan användas av klienten. Flytta filerna `postproxy.aspx` och `postproxy.aspx.cs` från `C:/projekt/Hajk/proxy/aspnet` direkt till huvudmappen `C:/wwwroot`.
 
+Den nya proxyn bör fungera lika bra som den gamla proxyn.
+
 #### Kontrollera att allt kom med
 Nu bör `C:/wwwroot` innehålla följande filer och mappar:
 
-| Innehåll i `wwwroot` |
-| -------------------- |
-| `admin/`             |
-| `assets/`            |
-| `fonts/`             |
-| `js/`                |
-| `mapservice/`        |
-| `Temp/`              |
-| `Upload/`            |
-| `util/`              |
-| `index.html`         |
-| `postproxy.aspx`     |
-| `postproxy.aspx.cs`  |
-
-#### Autentisering och rollstyrning
-Om autentisering och rollstyrning skall användas ska den nya proxyn som finns i mappen HTTPProxy användas.
-Denna proxy ska kunna användas även om autentisering och rollstyrning inte används.
-
-I mappen HTTPProxy finns projektet Proxy som innehåller nya versioner av både GET- och POST-proxyn.
-För att bygga ihop dessa i Visual Studio finns en publiceringsprofil man kan använda under Build->Publish.
-Både POST- och GET-proxyn kommer då att publiceras till mappen 'C:\Projects\Hajk\Publish\util' (mappen kan enkelt ändras). 
-
-Denna funktionalitet innefattar även specifika inställningar till IIS och kräver att Windows Authentication är aktiverat. Se separat dokumentation för ytterligare detaljer.
+| Innehåll i `wwwroot` |  |
+| -------------------- |--|
+| `admin/`             |  |
+| `assets/`            |  |
+| `fonts/`             |  |
+| `js/`                |  |
+| `mapservice/`        |  |
+| `Temp/`              |  |
+| `Upload/`            |  |
+| `util/`              |  |
+| `index.html`         |  |
+| `postproxy.aspx`     |(endast om äldre proxy används)|
+| `postproxy.aspx.cs`  |(endast om äldre proxy används)|
 
 
 ## Installation och konfiguration
