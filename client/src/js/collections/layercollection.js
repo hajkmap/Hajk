@@ -122,21 +122,20 @@ var LayerCollection = {
    * @param {object} properties
    * @return {object} config
    */
-  mapWMSConfig: function(args, properties) {
-    
-    function getLegendUrl() {
+  mapWMSConfig: function (args, properties) {
+    function getLegendUrl () {
+      var proxy =  HAJK2.wmsProxy || '';
 
-      var proxy =  HAJK2.wmsProxy || "";
-
-      if (args.legend === "") { 
-        args.legend =  `${proxy}${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${args.layers[0]}`
+      // If property exists in map settings, use specified legend options (font, color, size, etc)
+      let geoseverLegendOptions = '';
+      if (properties.mapConfig.hasOwnProperty('geoseverLegendOptions')) {
+        geoseverLegendOptions = 'legend_options=' + properties.mapConfig.geoseverLegendOptions;
       }
 
-      //If legend is a GetLegendGraphic call, use proxy otherwise not
-      if(args.legend.indexOf("GetLegendGraphic") != -1){
-        args.legend = proxy + args.legend;
+      if (args.legend === '') {
+        args.legend = `${proxy}${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${args.layers[0]}&${geoseverLegendOptions}`;
       }
-    
+
       var protocol = /^http/.test(args.legend) ? '' : 'http://';
       return protocol + args.legend;
     }

@@ -38,6 +38,8 @@ namespace MapService.Models
 
         public string infologo { get; set; }
 
+        public string geoserverLegendOptions { get; set; }
+
         public string mobileleft { get; set; }
 
         public string mobileright { get; set; }

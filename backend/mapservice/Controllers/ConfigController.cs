@@ -55,6 +55,7 @@ namespace MapService.Controllers
                     projection = "EPSG:3006",
                     target = "map",
                     infologo = "",
+                    geoserverLegendOptions = "",
                     pil = "",
                     logo = "",
                     colors = new Colors()
