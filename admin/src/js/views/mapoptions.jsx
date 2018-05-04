@@ -55,7 +55,7 @@ class MapOptions extends Component {
         mobileright: config.mobileright,
         mobile: config.mobile,
         title: config.title ? config.title : '',
-        geoserverLegendOptions: config.geoserverLegendOptions
+        geoserverLegendOptions: config.geoserverLegendOptions ? config.geoserverLegendOptions : ''
       });
     });
     this.validate();
