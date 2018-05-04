@@ -404,6 +404,7 @@
     "colors": {
       "primaryColor": "#1B78CC",
       "secondaryColor": "#FFF"
-    }
+    },
+    "geoserverLegendOptions": ""
   }
 }

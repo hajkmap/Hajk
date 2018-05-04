@@ -53,8 +53,9 @@ class MapOptions extends Component {
         infologo: config.infologo,
         mobileleft: config.mobileleft,
         mobileright: config.mobileright,
-		    mobile: config.mobile,
-		    title: config.title ? config.title : ''
+        mobile: config.mobile,
+        title: config.title ? config.title : '',
+        geoserverLegendOptions: config.geoserverLegendOptions ? config.geoserverLegendOptions : ''
       });
     });
     this.validate();
@@ -76,7 +77,7 @@ class MapOptions extends Component {
     this.state.secondaryColor = mapConfig.colors && mapConfig.colors.secondaryColor
       ? mapConfig.colors.secondaryColor
       : '#000';
-    this.state.title = mapConfig.title,
+    this.state.title = mapConfig.title;
     this.state.projection = mapConfig.projection;
     this.state.zoom = mapConfig.zoom;
     this.state.center = mapConfig.center;
@@ -84,6 +85,7 @@ class MapOptions extends Component {
     this.state.extent = mapConfig.extent;
     this.state.infologo = mapConfig.infologo;
     this.state.mobile = mapConfig.mobile;
+    this.state.geoserverLegendOptions = mapConfig.geoserverLegendOptions;
   }
 
   getValue (fieldName) {
@@ -202,6 +204,7 @@ class MapOptions extends Component {
       config.extent = this.getValue('extent');
       config.infologo = this.getValue('infologo');
       config.mobile = this.state.mobile;
+      config.geoserverLegendOptions = this.getValue('geoserverLegendOptions');
       this.props.model.updateMapConfig(config, success => {
         var msg = success
           ? 'Uppdateringen lyckades.'
@@ -351,6 +354,18 @@ class MapOptions extends Component {
                   this.setState({mobile: e.target.checked});
                 }}
                 checked={this.state.mobile} />&nbsp;
+            </div>
+            <div>
+              <label>Legend options <a href='http://docs.geoserver.org/stable/en/user/services/wms/get_legend_graphic/index.html#controlling-legend-appearance-with-legend-options' target='_blank'><i className='fa fa-question-circle' data-toggle='tooltip' title='Klicka för mer info om formatering' /></a></label>
+              <input
+                type='text'
+                ref='input_geoserverLegendOptions'
+                value={this.state.geoserverLegendOptions}
+                className={this.getValidationClass('geoserverLegendOptions')}
+                onChange={(e) => {
+                  this.setState({geoserverLegendOptions: e.target.value});
+                }}
+              />
             </div>
             <div className='col-md-12'>
               <span className='pull-left'>
