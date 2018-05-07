@@ -47,7 +47,10 @@ var BufferModelProperties = {
   markerPos: undefined,
   popupHighlight: undefined,
   instruction: '',
-  varbergVer: false
+  varbergVer: false,
+  geoserverUrl: '',
+  notFeatureLayers: [],
+  geoserverNameToCategoryName: {}
 }
 
 /**
@@ -169,6 +172,14 @@ var BufferModel = {
       map: this.get('olMap'),
       layerCollection: shell.getLayerCollection()
     }));
+
+    if(typeof this.get("geoserverNameToCategoryName") === "string"){
+      try {
+        this.set("geoserverNameToCategoryName", JSON.parse(this.get("geoserverNameToCategoryName")));
+      } catch (e){
+        this.set("geoserverNameToCategoryName", {});
+      }
+    }
   },
 
   activateBufferMarker: function(){
@@ -286,10 +297,10 @@ var BufferModel = {
 
       this.deActivateBufferMarker();
 // JSON?
-      var notFeatureLayers = ['150', '160', '170', '410', '420', '430', '440', '260', '310', '350', '360', '250', '230', '340', '330', '270', '280', '320', '325', '140', '220', '210'];
+      //var notFeatureLayers = ['150', '160', '170', '410', '420', '430', '440', '260', '310', '350', '360', '250', '230', '340', '330', '270', '280', '320', '325', '140', '220', '210'];
       var activeLayers = [];
       for (var i = 0; i < this.get('layersCollection').length; i++) {
-        if (this.get('layersCollection').models[i].getVisible() && notFeatureLayers.indexOf(this.get('layersCollection').models[i].id) != -1) {
+        if (this.get('layersCollection').models[i].getVisible() && this.get("notFeatureLayers").indexOf(this.get('layersCollection').models[i].id) != -1) {
           activeLayers.push(this.get('layersCollection').models[i]);
         }
       }
@@ -351,16 +362,16 @@ var BufferModel = {
 
   getFeaturesWithinRadius: function(layers){
     var requestPrefix = '<wfs:GetFeature\n' +
-    '         service = \'WFS\'\n' +
-    '         version = \'1.1.0\'\n' +
-    '         xmlns:wfs = \'http://www.opengis.net/wfs\'\n' +
-    '         xmlns:ogc = \'http://www.opengis.net/ogc\'\n' +
-    '         xmlns:gml = \'http://www.opengis.net/gml\'\n' +
-    '         xmlns:esri = \'http://www.esri.com\'\n' +
-    '         xmlns:xsi = \'http://www.w3.org/2001/XMLSchema-instance\'\n' +
-    '         xsi:schemaLocation=\'http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd\'\n' +
-    '         outputFormat="GML2"\n' +
-    '         maxFeatures="1000">\n';
+      '         service = \'WFS\'\n' +
+      '         version = \'1.1.0\'\n' +
+      '         xmlns:wfs = \'http://www.opengis.net/wfs\'\n' +
+      '         xmlns:ogc = \'http://www.opengis.net/ogc\'\n' +
+      '         xmlns:gml = \'http://www.opengis.net/gml\'\n' +
+      '         xmlns:esri = \'http://www.esri.com\'\n' +
+      '         xmlns:xsi = \'http://www.w3.org/2001/XMLSchema-instance\'\n' +
+      '         xsi:schemaLocation=\'http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd\'\n' +
+      '         outputFormat="GML2"\n' +
+      '         maxFeatures="1000">\n';
 
 
     var requestSuffix = '\n      </wfs:GetFeature>'
@@ -376,16 +387,16 @@ var BufferModel = {
 
     // Do Ajax call
     $.ajax({
-      url: '/geoserver/varberg/wms',
+      url: this.get("geoserverUrl"),
       contentType: 'text/xml',
       crossDomain: true,
       type: 'post',
       data: wfsRequset,
       success: result => {
       this.putFeaturesInResult(result);
-      },
-      error: result => {
-        alert('Något gick fel');
+  },
+    error: result => {
+      alert('Något gick fel');
     }
   });
   },
@@ -414,7 +425,8 @@ var BufferModel = {
     var endCategoryToStartLayers = '</label></div><div class="panel-body"><div class="legend"><div>';
     var categorySuffix = '</div></div></div></div>';
 
-    var geoserverNameToCategoryName = {
+    /*
+      var geoserverNameToCategoryName = {
       'forskolor': 'Förskola',
       'grundskolor': 'Grundskola',
       'gymnasieskolor': 'Gymnasieskolor',
@@ -432,13 +444,14 @@ var BufferModel = {
       'turistbyran': 'Turistbyrå',
       'atervinningsstationer': 'Återvinningsstationer',
       'atervinningscentraler': 'Återvinningscentraler',
-      'detaljplaner': 'Detljplaner',
+      'detaljplaner': 'Detaljplaner',
       'fornybar_energi': 'Förnybar energi',
       'cykelservicestallen': 'Cykelservice',
       'laddplatser': 'Laddplatser',
       'parkering_punkt': 'Parkeringsplatser',
       'polisstationer': 'Polisstation'
     };
+    */
 
 
     var div = document.createElement('div');
@@ -453,7 +466,7 @@ var BufferModel = {
       label.className = 'layer-item-header-text';
       headingDiv.appendChild(label);
 
-      label.innerHTML = geoserverNameToCategoryName[categories[i]];
+      label.innerHTML = this.get("geoserverNameToCategoryName")[categories[i]];
 
       var bodyDiv = document.createElement('div');
       bodyDiv.className = 'panel-body';
@@ -500,7 +513,7 @@ var BufferModel = {
   },
 
   clearSelection: function() {
-   this.get('selectionModel').clearSelection();
+    this.get('selectionModel').clearSelection();
   },
 
   clearBuffer: function() {
