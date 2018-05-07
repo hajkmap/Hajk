@@ -178,8 +178,6 @@ var BufferModel = {
         this.set("geoserverNameToCategoryName", JSON.parse(this.get("geoserverNameToCategoryName")));
       } catch (e){
         this.set("geoserverNameToCategoryName", {});
-        console.log("Got error in parsing geoserverNameToCategoryName");
-        console.log(e);
       }
     }
   },

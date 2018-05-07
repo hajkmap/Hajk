@@ -685,18 +685,14 @@ var SearchModel = {
       var getAlias = (column, aliasDict) => {
        var keys = Object.keys(aliasDict);
        if (keys.indexOf(column) >= 0){
-         console.log("Found the alias for " + column);
          return aliasDict[column];
        } else {
-         console.log("Did not find alias for " + column);
          return column;
        }
       }
 
-      console.log("getAlias");
 
       values = groups[group].map((hit) => {
-        console.log(hit);
 
         var attributes = hit.getProperties()
         ,   names = Object.keys(attributes),
@@ -712,8 +708,6 @@ var SearchModel = {
 
         columns.forEach((column, i) => {
           aliases[i] = getAlias(column, hit.aliasDict);
-          console.log("aliases");
-          console.log(aliases[i]);
         });
 
         return columns.map(column => attributes[column] || null);
@@ -801,7 +795,6 @@ var SearchModel = {
               features.forEach(feature => {
                 feature.caption = searchProps.caption;
                 feature.infobox = searchProps.infobox;
-                console.log(searchProps.aliasDict);
                 feature.aliasDict = JSON.parse(searchProps.aliasDict);
               });
               items.push({
