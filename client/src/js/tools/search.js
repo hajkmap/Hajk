@@ -682,32 +682,23 @@ var SearchModel = {
       ,   aliases = []
       ,   values = [];
 
-      var getAlias = (column, exportText) => {
-        var regExp = new RegExp(`{export:${column}( as .*)?}`)
-        ,   result = regExp.exec(exportText);
-
-        if (result && result[1]) {
-          result[1] = result[1].replace(" as ", "");
-        }
-
-        return result && result[1] ? result[1] : column;
+      var getAlias = (column, aliasDict) => {
+       var keys = Object.keys(aliasDict);
+       if (keys.indexOf(column) >= 0){
+         return aliasDict[column];
+       } else {
+         return column;
+       }
       }
+
 
       values = groups[group].map((hit) => {
 
         var attributes = hit.getProperties()
-        ,   names = Object.keys(attributes);
+        ,   names = Object.keys(attributes),
+            aliasKeys = Object.keys(hit.aliasDict);
         names = names.filter(name => {
-          if (!hit.exportText) {
-            return typeof attributes[name] === "string"  ||
-                   typeof attributes[name] === "boolean" ||
-                   typeof attributes[name] === "number";
-          } else {
-            let regExp = new RegExp(`{export:${name}( as .*)?}`);
-            return (
-              regExp.test(hit.exportText)
-            );
-          }
+          return aliasKeys.indexOf(name) >= 0;
         });
 
         if (names.length > columns.length) {
@@ -716,7 +707,7 @@ var SearchModel = {
         }
 
         columns.forEach((column, i) => {
-          aliases[i] = getAlias(column, hit.exportText);
+          aliases[i] = getAlias(column, hit.aliasDict);
         });
 
         return columns.map(column => attributes[column] || null);
@@ -804,7 +795,7 @@ var SearchModel = {
               features.forEach(feature => {
                 feature.caption = searchProps.caption;
                 feature.infobox = searchProps.infobox;
-                feature.exportText = searchProps.exportText;
+                feature.aliasDict = JSON.parse(searchProps.aliasDict);
               });
               items.push({
                 layer: searchProps.caption,
@@ -836,13 +827,11 @@ var SearchModel = {
     layers.forEach(layer => {
 
       layer.get('params').LAYERS.split(',').forEach(featureType => {
-        
-
         var searchProps = {
           url: (HAJK2.searchProxy || "") + layer.get('searchUrl'),
           caption: layer.get('caption'),
           infobox: layer.get('infobox'),
-          exportText: "",
+          aliasDict: layer.get("aliasDict"),
           featureType: featureType,
           propertyName: layer.get('searchPropertyName'),
           displayName: layer.get('searchDisplayName'),
@@ -861,6 +850,7 @@ var SearchModel = {
         url: (HAJK2.searchProxy || "") + source.url,
         caption: source.caption,
         infobox: source.infobox,
+        aliasDict: source.aliasDict,
         featureType: source.layers[0].split(':')[1],
         propertyName: source.searchFields.join(','),
         displayName: source.displayFields ? source.displayFields : (source.searchFields[0] || "Sökträff"),

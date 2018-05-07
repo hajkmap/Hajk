@@ -66,8 +66,6 @@
   };
 
   internal.mergeConfig = function (a, b) {
-    var ls = a.tools.find(tool => tool.type === 'layerswitcher');
-
     var x = parseFloat(b.x),
       y = parseFloat(b.y),
       z = parseInt(b.z),
@@ -187,6 +185,11 @@
       var layers = $.getJSON(config.layersPath || layersPath);
 
       layers.done(data => {
+        // Set <title> in HTML if map has a title property in JSON config
+        if (map_config.hasOwnProperty('map') && map_config.map.hasOwnProperty('title')) {
+          document.title = map_config.map.title;
+        }
+
         var layerSwitcherTool = map_config.tools.find(tool => {
           return tool.type === 'layerswitcher';
         });

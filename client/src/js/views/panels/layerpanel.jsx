@@ -435,7 +435,7 @@ var LayerPanelView = {
     if (typeof this.state.mapConfigurations !== "undefined" && this.state.mapConfigurations != null){
       mapConfigurations = this.state.mapConfigurations.map((map, i) => <option value={map.mapConfigurationName} key={i}>{map.mapConfigurationTitle}</option>);
     }
-    var groups, toggleAllButton,dropdownThemeMaps ;
+    var groups, toggleAllButton, dropdownThemeMaps, themeMapHeaderCaption;
 
     this.groups = this.props.model.get('groups');
 
@@ -453,15 +453,22 @@ var LayerPanelView = {
       );
     }
 
-    if(this.props.model.get('dropdownThemeMaps')){
+    if (this.props.model.get('themeMapHeaderCaption') !== null && 
+        this.props.model.get('themeMapHeaderCaption').length > 0) {
+      themeMapHeaderCaption = (
+        <span style={{marginRight: "10px"}}>{this.props.model.get('themeMapHeaderCaption')}</span>
+      );
+    }
+
+    if (this.props.model.get('dropdownThemeMaps')){
       dropdownThemeMaps = (
         <div>
-        <span style={{marginRight: "10px"}}>{this.props.model.get("themeMapHeaderCaption")}</span>
+        {themeMapHeaderCaption}
         <select onChange={this.setThemeMap} style={{marginBottom: "10px", width : "100%"}} value={this.state.dropDownValue}>
         {mapConfigurations}
         </select>
         </div>
-        );
+      );
     };
 
     return (
