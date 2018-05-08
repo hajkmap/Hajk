@@ -648,6 +648,7 @@ class Search extends Component {
               <div>
                 <label>alias dictionary</label>
                 <textarea
+                  type="text"
                   ref="input_aliasDict"
                   value={this.state.aliasDict}
                   onChange={(e) => {
