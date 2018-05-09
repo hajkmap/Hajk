@@ -226,6 +226,7 @@ class Manager extends Component {
           owner: layer.owner,
           url: layer.url,
           queryable: layer.queryable,
+          opacity: layer.opacity,
           tiled: layer.tiled,
           singleTile: layer.singleTile,
           imageFormat: layer.imageFormat,

@@ -41,6 +41,7 @@ const defaultState = {
   owner: "",
   url: "",
   queryable: true,
+  opacity: 1.0,
   tiled: false,
   singleTile: false,
   imageFormat: "",
@@ -268,6 +269,7 @@ class WMSLayerForm extends Component {
       imageFormat: this.getValue("imageFormat"),
       serverType: this.getValue("serverType"),
       queryable: this.getValue("queryable"),
+      opacity: this.getValue("opacity"),
       tiled: this.getValue("tiled"),
       drawOrder: this.getValue("drawOrder"),
       attribution: this.getValue("attribution"),
@@ -339,6 +341,13 @@ class WMSLayerForm extends Component {
     switch (fieldName) {
       case "layers":
         if (value.length === 0) {
+          valid = false;
+        }
+        break;
+      case "opacity":
+        console.log(value);
+        console.log(typeof value);
+        if (!/^-?\d+.\d+$/.test(value)) {
           valid = false;
         }
         break;
@@ -460,6 +469,21 @@ class WMSLayerForm extends Component {
             <option>geoserver</option>
             <option>arcgis</option>
           </select>
+        </div>
+        <div>
+          <label>Opacitet*</label>
+          <input
+            type="number"
+            step="0.01"
+            ref="input_opacity"
+            value={this.state.opacity}
+            className={this.getValidationClass("opacity")}
+            onChange={(e) => {
+              console.log(e.target.value);
+              this.setState({opacity: e.target.value});
+              this.validateField("opacity");
+            }}
+          />
         </div>
         <div>
           <label>Single tile</label>
