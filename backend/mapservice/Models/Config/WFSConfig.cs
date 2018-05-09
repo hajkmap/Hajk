@@ -20,8 +20,6 @@ namespace MapService.Models.Config
 
         public string infobox { get; set; }
 
-        public string aliasDict { get; set; }
-
         public string[] displayFields { get; set; }
 
         public string geometryField { get; set; }

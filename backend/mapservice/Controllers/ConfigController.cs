@@ -326,11 +326,16 @@ namespace MapService.Controllers
         private bool UseAdLookup()
         {
             var identity = WindowsIdentity.GetCurrent();
-            _log.Debug(identity.ImpersonationLevel);
+            if(identity == null)
+            {
+                _log.Info("No username found indicating Windows authentication not used. AD lookup will not be used.");
+                return false;
+            }
+            _log.DebugFormat("UseAdLookup: user {0}, Impersonation level: {1}", identity.Name, identity.ImpersonationLevel.ToString());
             var parameters = GetLookupParameters();
             if (identity.ImpersonationLevel != TokenImpersonationLevel.Impersonation || string.IsNullOrEmpty(parameters["ADuser"]) || string.IsNullOrEmpty(parameters["ADpassword"]))
             {
-                _log.Debug("Will not use AD lookup");
+                _log.Debug("Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config.");
                 return false;
             }
             _log.Debug("Using AD lookup");
@@ -358,8 +363,6 @@ namespace MapService.Controllers
             var userGroups = new string [0];
             if (UseAdLookup()) // Should we use AD-lookup?
             {
-                var parameters = GetLookupParameters();
-
                 var adLookup = GetAdLookup();
                 activeUser = adLookup.GetActiveUser();
                 userGroups = adLookup.GetGroups(activeUser);
@@ -411,7 +414,9 @@ namespace MapService.Controllers
                                         {
                                             if (Array.Exists(userGroups, g => g.Equals(group.ToString())))
                                             {
-                                                mapConfigurationsList.Add(AddNewThemeMap(fileName, mapTitle.ToString()));
+                                                // Kontrollera att denna kartdefinition inte redan lagts till
+                                                if (!mapConfigurationsList.Exists(x => x.mapConfigurationName == fileName))
+                                                    mapConfigurationsList.Add(AddNewThemeMap(fileName, mapTitle.ToString()));
                                             }
                                         }
                                     }
@@ -663,6 +668,8 @@ namespace MapService.Controllers
         {
             try
             {
+                _log.DebugFormat("Executing GetConfig, name='{0}'", name);
+
                 Response.Expires = 0;
                 Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
                 Response.ContentType = "application/json; charset=utf-8";
