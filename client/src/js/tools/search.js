@@ -670,6 +670,11 @@ var SearchModel = {
         ? this.get('hits')
         : this.getHitsFromItems();
 
+    if (exportItems.length>1 && _.isEqual(exportItems[0], exportItems[1])) {
+      // Ensure we don't have duplicate first items (happens when user selects items to export manually)
+      exportItems.shift();
+    }
+
     exportItems.forEach(hit => {
       if (!groups.hasOwnProperty(hit.caption)) {
         groups[hit.caption] = [];
@@ -929,6 +934,7 @@ var SearchModel = {
     return !!(
       (isBar ? this.get('valueBar') : this.get('value')) ||
       (
+        !isBar &&
         this.get('selectionModel') &&
         this.get('selectionModel').hasFeatures() &&
         this.get('searchTriggered')
