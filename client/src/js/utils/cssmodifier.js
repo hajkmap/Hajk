@@ -76,7 +76,8 @@ module.exports = {
       var mapScaleBarInner = getCSSRule('#map-scale-bar .ol-scale-line-inner');
       var mapScaleText = getCSSRule('.map-scale .map-scale-text');
 
-      var searchToolGroup = getCSSRule('.search-tools .group');
+      var searchbarInputField = getCSSRule('#searchbar-input-field');
+      var searchbarSearchButton = getCSSRule('#searchbar-search-button');
 
       if (panelHeader) {
         panelHeader.style.backgroundColor = config.primaryColor;
@@ -164,9 +165,12 @@ module.exports = {
         mapScaleText.style.backgroundColor = config.primaryColor;
         mapScaleText.style.color = config.secondaryColor;
       }
-      if (searchToolGroup) {
-        searchToolGroup.style.backgroundColor = config.primaryColor;
-        searchToolGroup.style.color = config.secondaryColor;
+      if (searchbarInputField) {
+        searchbarInputField.style.borderColor = config.primaryColor;
+      }
+      if (searchbarSearchButton) {
+        searchbarSearchButton.style.backgroundColor = config.primaryColor;
+        searchbarSearchButton.style.color = config.color;
       }
     }
 };
