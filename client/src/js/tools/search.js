@@ -711,7 +711,8 @@ var SearchModel = {
 
       values = groups[group].map((hit) => {
 
-        if(typeof hit.aliasDict !== "undefined"){
+
+        if(typeof hit.aliasDict !== "undefined" && hit.aliasDict !== null){
         var attributes = hit.getProperties()
         ,   names = Object.keys(attributes),
             aliasKeys = Object.keys(hit.aliasDict);
@@ -741,7 +742,7 @@ var SearchModel = {
         }
 
         columns.forEach((column, i) => {
-          if(typeof hit.aliasDict !== "undefined"){
+          if(typeof hit.aliasDict !== "undefined" && hit.aliasDict !== null){
             aliases[i] = getAliasWithDict(column, hit.aliasDict);
           } else {
             aliases[i] = getAlias(column, hit.infobox);
