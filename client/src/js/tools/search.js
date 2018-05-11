@@ -929,6 +929,7 @@ var SearchModel = {
     return !!(
       (isBar ? this.get('valueBar') : this.get('value')) ||
       (
+        !isBar &&
         this.get('selectionModel') &&
         this.get('selectionModel').hasFeatures() &&
         this.get('searchTriggered')
