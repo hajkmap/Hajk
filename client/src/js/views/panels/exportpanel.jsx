@@ -387,7 +387,7 @@ var ExportPdfSettings = React.createClass({
           </div>
         </div>
         <div>
-          <button onClick={this.exportPDF} className="btn btn-main">Skapa PDF {loader}</button>
+          <button onClick={this.exportPDF} className="btn btn-primary">Skapa PDF {loader}</button>
           <br />
           {downloadLink}
         </div>

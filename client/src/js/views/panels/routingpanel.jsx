@@ -92,14 +92,14 @@ var RoutingPanelView = {
           <div className="panel panel-default">
               <div className="panel-heading"> ①. Välj startpunkt </div>
                 <div className="panel-body">
-                  <button onClick={() => this.props.model.turnOnGPSClicked()} className="btn btn-main" id="naviGPS">Välj befintlig position</button>&nbsp;
-                  <button onClick={() => this.activateStartMode()} className="btn btn-main" id="startBtn">Välj position på kartan</button>
+                  <button onClick={() => this.props.model.turnOnGPSClicked()} className="btn btn-primary" id="naviGPS">Välj befintlig position</button>&nbsp;
+                  <button onClick={() => this.activateStartMode()} className="btn btn-primary" id="startBtn">Välj position på kartan</button>
                 </div>
           </div>
           <div className="panel panel-default">
              <div className="panel-heading"> ②. Välj destination </div>
                <div className="panel-body">
-                 <button onClick={() => this.activateEndMode()} className="btn btn-main" id="startBtn">Välj position på kartan</button>
+                 <button onClick={() => this.activateEndMode()} className="btn btn-primary" id="startBtn">Välj position på kartan</button>
              </div>
           </div>
           <div className="panel panel-default">
@@ -112,8 +112,8 @@ var RoutingPanelView = {
              </div>
           </div>
           <div className="panel panel-default-transparent">
-             <button onClick={() => this.props.model.activateRoutingMode()} className="btn btn-main" id="startBtn">Sök resa</button>&nbsp;
-             <button onClick={() => this.props.model.deleteLayers()} className="btn btn-main" id="startBtn">Rensa</button>
+             <button onClick={() => this.props.model.activateRoutingMode()} className="btn btn-primary" id="startBtn">Sök resa</button>&nbsp;
+             <button onClick={() => this.props.model.deleteLayers()} className="btn btn-primary" id="startBtn">Rensa</button>
           </div>
           <div className="panel panel-default">
              <div className="panel-heading"> Resultat </div>
