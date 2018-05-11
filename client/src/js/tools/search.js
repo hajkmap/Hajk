@@ -47,7 +47,8 @@ var SearchModelProperties = {
   displayPopup: false,
   displayPopupBar: false,
   hits: [],
-  popupOffsetY: 0
+  popupOffsetY: 0,
+  aliasDict: {}
 };
 
 /**
@@ -682,7 +683,7 @@ var SearchModel = {
       ,   aliases = []
       ,   values = [];
 
-      var getAlias = (column, aliasDict) => {
+     var getAliasWithDict = (column, aliasDict) => {
        var keys = Object.keys(aliasDict);
        if (keys.indexOf(column) >= 0){
          return aliasDict[column];
@@ -691,15 +692,43 @@ var SearchModel = {
        }
       }
 
+      var getAlias = (column, infobox) => {
+        var regExp = new RegExp(`{export:${column}( as .*)?}`)
+          ,   result = regExp.exec(infobox);
+
+        if (result && result[1]) {
+          result[1] = result[1].replace(" as ", "");
+        }
+
+        return result && result[1] ? result[1] : column;
+      }
+
 
       values = groups[group].map((hit) => {
 
+        if(typeof hit.aliasDict !== "undefined"){
         var attributes = hit.getProperties()
         ,   names = Object.keys(attributes),
             aliasKeys = Object.keys(hit.aliasDict);
         names = names.filter(name => {
           return aliasKeys.indexOf(name) >= 0;
         });
+        } else {
+          var attributes = hit.getProperties()
+            ,   names = Object.keys(attributes);
+          names = names.filter(name => {
+            if (!hit.infobox) {
+            return typeof attributes[name] === "string"  ||
+              typeof attributes[name] === "boolean" ||
+              typeof attributes[name] === "number";
+          } else {
+            let regExp = new RegExp(`{export:${name}( as .*)?}`);
+            return (
+              regExp.test(hit.infobox)
+            );
+          }
+        });
+        }
 
         if (names.length > columns.length) {
           columns = names;
@@ -707,10 +736,15 @@ var SearchModel = {
         }
 
         columns.forEach((column, i) => {
-          aliases[i] = getAlias(column, hit.aliasDict);
+          if(typeof hit.aliasDict !== "undefined"){
+            aliases[i] = getAliasWithDict(column, hit.aliasDict);
+          } else {
+            aliases[i] = getAlias(column, hit.infobox);
+          }
         });
 
         return columns.map(column => attributes[column] || null);
+
       });
 
       return {
@@ -795,7 +829,11 @@ var SearchModel = {
               features.forEach(feature => {
                 feature.caption = searchProps.caption;
                 feature.infobox = searchProps.infobox;
-                feature.aliasDict = JSON.parse(searchProps.aliasDict);
+                try{
+                  feature.aliasDict = JSON.parse(searchProps.aliasDict);
+                } catch(e){
+                  feature.aliasDict = undefined;
+                }
               });
               items.push({
                 layer: searchProps.caption,

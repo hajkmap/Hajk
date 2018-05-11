@@ -407,6 +407,8 @@ var SearchView = {
           loading: false
         });
       }
+      this.props.model.set("downloading", null);
+      this.props.model.set("url", null);
     };
 
     var search_on_click = (event) => {
@@ -415,6 +417,9 @@ var SearchView = {
       });
       this.props.model.set('force', true);
       this.search();
+
+      this.props.model.set("downloading", null);
+      this.props.model.set("url", null);
     };
 
     var selectionToolbar = this.props.model.get('selectionTools')
