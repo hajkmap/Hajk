@@ -91,7 +91,7 @@ var BufferPanelView = {
           <div className="panel-content">
             <br/><br/>
             <div className="panel panel-default-transparent">
-              <button onClick={() => this.props.model.activateBufferMarker()} type="button" className="btn btn-main"
+              <button onClick={() => this.props.model.activateBufferMarker()} type="button" className="btn btn-primary"
                       title="Markera flera objekt">
                 Sätt ut mittpunkt
               </button>
@@ -132,13 +132,13 @@ var BufferPanelView = {
                       });
                     }
                   }}
-                  className="btn btn-main">
+                  className="btn btn-primary">
                   Skapa buffertzon
                 </button>
                 &nbsp;
                 <button
                   onClick={() => this.props.model.clearBuffer()}
-                  className="btn btn-main">
+                  className="btn btn-primary">
                   Rensa
                 </button>
               </div>
