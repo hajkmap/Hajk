@@ -351,6 +351,8 @@ var DrawModel = {
    * @instance
    */
   handleDrawEnd: function (feature, type) {
+    if (type === undefined)
+      return;
     if (type === "Text") {
       feature.setStyle(this.get('scetchStyle'));
       this.set('dialog', true);
@@ -374,12 +376,7 @@ var DrawModel = {
 
     if (!isNaN(circleRadius) && geometryType === "Circle") {
       this.get("drawTool").finishDrawing();
-      let f = new ol.Feature({
-        geometry: new ol.geom.Circle(e.feature.getGeometry().getCenter(), circleRadius)
-      });
-      this.get('source').removeFeature(e.feature);
-      this.get('source').addFeature(f);
-      this.handleDrawEnd(f);
+      e.feature.getGeometry().setRadius(circleRadius);
     }
 
     e.feature.getGeometry().on('change', e => {
@@ -498,8 +495,7 @@ var DrawModel = {
     ,   olMap = this.get('olMap')
     ,   geometryFunction = undefined
     ,   geometryName = undefined;
-
-    olMap.un('singleclick', this.removeSelected);
+        olMap.un('singleclick', this.removeSelected);
     olMap.un('singleclick', this.get('editOpenDialogBinded'));
     if (dragInteraction) {
       dragInteraction.removeAcceptedLayer('draw-layer');
@@ -513,6 +509,7 @@ var DrawModel = {
       geometryName = "Box";
       geometryFunction = ol.interaction.Draw.createBox();
       this.set('circleRadius', undefined);
+      this.setCircleRadius('');
     } else {
       geometryName = type;
     }
@@ -822,7 +819,6 @@ var DrawModel = {
    */
   getStyle: function(feature, forcedProperties) {
     var geometryName = feature.getGeometryName();
-
     function getLineDash() {
         var scale = (a, f) => a.map(b => f * b)
         ,   width = lookupWidth.call(this)
@@ -841,7 +837,6 @@ var DrawModel = {
     }
 
     function getFill() {
-
       function rgba() {
         switch(geometryName) {
           case "Circle":
