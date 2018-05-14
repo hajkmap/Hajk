@@ -415,7 +415,12 @@ var SearchBarView = {
       </div>
     )
 
-    const shouldRenderSearchResults = (this.refs.searchInput && this.refs.searchInput.value.length > 3) || this.props.model.get('force');
+    const shouldRenderSearchResults = this.refs.searchInput && (this.refs.searchInput.value.length > 3 || this.props.model.get('force') && this.refs.searchInput.value.length > 0);
+
+    if(this.refs.searchInput) {
+    } else {
+    }
+
 
     const AlertSearchBar = (
       <p className="alert alert-info" id="alertSearchbar">

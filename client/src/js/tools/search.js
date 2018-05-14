@@ -670,6 +670,11 @@ var SearchModel = {
         ? this.get('hits')
         : this.getHitsFromItems();
 
+    if (exportItems.length>1 && _.isEqual(exportItems[0], exportItems[1])) {
+      // Ensure we don't have duplicate first items (happens when user selects items to export manually)
+      exportItems.shift();
+    }
+
     exportItems.forEach(hit => {
       if (!groups.hasOwnProperty(hit.caption)) {
         groups[hit.caption] = [];
@@ -706,7 +711,8 @@ var SearchModel = {
 
       values = groups[group].map((hit) => {
 
-        if(typeof hit.aliasDict !== "undefined"){
+
+        if(typeof hit.aliasDict !== "undefined" && hit.aliasDict !== null){
         var attributes = hit.getProperties()
         ,   names = Object.keys(attributes),
             aliasKeys = Object.keys(hit.aliasDict);
@@ -736,7 +742,7 @@ var SearchModel = {
         }
 
         columns.forEach((column, i) => {
-          if(typeof hit.aliasDict !== "undefined"){
+          if(typeof hit.aliasDict !== "undefined" && hit.aliasDict !== null){
             aliases[i] = getAliasWithDict(column, hit.aliasDict);
           } else {
             aliases[i] = getAlias(column, hit.infobox);
@@ -929,6 +935,7 @@ var SearchModel = {
     return !!(
       (isBar ? this.get('valueBar') : this.get('value')) ||
       (
+        !isBar &&
         this.get('selectionModel') &&
         this.get('selectionModel').hasFeatures() &&
         this.get('searchTriggered')
