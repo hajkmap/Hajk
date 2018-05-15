@@ -87,36 +87,38 @@ var RoutingPanelView = {
     this.props.model.initStartPoint();
 
     return (
-      <Panel title='Navigation' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
+      <Panel title='Navigation' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={window.atob(this.props.model.get('instruction'))}>
         <div className='panel-content'>
           <div className='panel panel-default'>
-            <div className='panel-heading'> ①. Välj startpunkt </div>
+            <div className='panel-heading'>① Välj startpunkt</div>
             <div className='panel-body'>
               <button onClick={() => this.props.model.turnOnGPSClicked()} className='btn btn-primary' id='naviGPS'>Välj befintlig position</button>&nbsp;
-              <button onClick={() => this.activateStartMode()} className='btn btn-primary' id='startBtn'>Välj position på kartan</button>
+              <button onClick={() => this.activateStartMode()} className='btn btn-default' id='startBtn'>Välj position på kartan</button>
             </div>
           </div>
           <div className='panel panel-default'>
-            <div className='panel-heading'> ②. Välj destination </div>
+            <div className='panel-heading'>② Välj destination</div>
             <div className='panel-body'>
               <button onClick={() => this.activateEndMode()} className='btn btn-primary' id='startBtn'>Välj position på kartan</button>
             </div>
           </div>
           <div className='panel panel-default'>
-            <div className='panel-heading'> ③. Välj färdsätt </div>
+            <div className='panel-heading'>③ Välj färdsätt</div>
             <div className='panel-body'>
-              <button className='btn btn-default' onClick={() => this.props.model.setTravelMode('walking')}><img src='/assets/icons/gaRouting.png' /></button>
-              <button className='btn btn-default' onClick={() => this.props.model.setTravelMode('driving')}><img src='/assets/icons/koraRouting.png' /></button>
-              <button className='btn btn-default' onClick={() => this.props.model.setTravelMode('bicycling')}><img src='/assets/icons/cyklaRouting.png' /></button>
-              <button className='btn btn-default' onClick={() => this.props.model.setTravelMode('transit')}><img src='/assets/icons/kollektivRouting.png' /></button>
+              <div className='btn-group'>
+                <button className='btn btn-default' onClick={() => this.props.model.setTravelMode('walking')}><img src='/assets/icons/gaRouting.png' /></button>
+                <button className='btn btn-default' onClick={() => this.props.model.setTravelMode('driving')}><img src='/assets/icons/koraRouting.png' /></button>
+                <button className='btn btn-default' onClick={() => this.props.model.setTravelMode('bicycling')}><img src='/assets/icons/cyklaRouting.png' /></button>
+                <button className='btn btn-default' onClick={() => this.props.model.setTravelMode('transit')}><img src='/assets/icons/kollektivRouting.png' /></button>
+              </div>
             </div>
           </div>
           <div className='panel panel-default-transparent'>
             <button onClick={() => this.props.model.activateRoutingMode()} className='btn btn-primary' id='startBtn'>Sök resa</button>&nbsp;
-            <button onClick={() => this.props.model.deleteLayers()} className='btn btn-primary' id='startBtn'>Rensa</button>
+            <button onClick={() => this.props.model.deleteLayers()} className='btn btn-default' id='startBtn'>Rensa</button>
           </div>
           <div className='panel panel-default'>
-            <div className='panel-heading'> Resultat </div>
+            <div className='panel-heading'>Resultat</div>
             <div className='panel-body'>
               <div id='resultList' />
             </div>
