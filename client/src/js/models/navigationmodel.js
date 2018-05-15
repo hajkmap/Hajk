@@ -27,7 +27,7 @@
  * @property {booelan} toggled
  * @property {string} activePanel
  */
-var NavigationModelProperties =  {
+var NavigationModelProperties = {
   panels: [],
   visible: false,
   toggled: false,
@@ -52,19 +52,19 @@ var NavigationModel = {
 
   initialize: function (options) {
     options.panels.forEach(panel => {
-      panel.model.on("change:r", () => {
+      panel.model.on('change:r', () => {
         this.set('r', panel.model.get('r'));
       });
-      panel.model.on("change:visible", this.onPanelVisibleChanged, this);
-      panel.model.on("change:toggled", () => {
-        if (this.get('lastPanel') && this.get('lastPanel').type === "InfoPanel") {
-          this.set("lastPanel", panel);
+      panel.model.on('change:visible', this.onPanelVisibleChanged, this);
+      panel.model.on('change:toggled', () => {
+        if (this.get('lastPanel') && this.get('lastPanel').type === 'InfoPanel') {
+          this.set('lastPanel', panel);
         } else {
           if (this.get('lastPanel') && this.get('lastPanel').type !== panel.type) {
-            this.set("lastPanel", panel);
+            this.set('lastPanel', panel);
             this.set('toggled', false);
           } else {
-            this.set("lastPanel", panel);
+            this.set('lastPanel', panel);
             this.set('toggled', !this.get('toggled'));
           }
         }
@@ -84,16 +84,16 @@ var NavigationModel = {
    * @property {object} panelRef
    * @property {string} type
    */
-  navigate: function(panelRef, type) {
-    this.set('lastPanel', this.get("activePanel"));
+  navigate: function (panelRef, type) {
+    this.set('lastPanel', this.get('activePanel'));
     if (panelRef) {
-      this.set("activePanelType", type);
-      this.set("activePanel", panelRef);
-      if (!this.get("visible")) {
-        this.set("visible", true);
+      this.set('activePanelType', type);
+      this.set('activePanel', panelRef);
+      if (!this.get('visible')) {
+        this.set('visible', true);
       }
     } else {
-      this.set("visible", false);
+      this.set('visible', false);
     }
   },
 
@@ -104,16 +104,16 @@ var NavigationModel = {
    * @param {boolean} visible
    */
   onPanelVisibleChanged: function (panel, visible) {
-    var type = (panel.get('panel') || '').toLowerCase()
-    ,   panelRef = _.find(this.get("panels"), panel => (panel.type || '').toLowerCase() === type)
-    ,   activePanel = this.get("activePanel", panelRef);
+    var type = (panel.get('panel') || '').toLowerCase(),
+      panelRef = _.find(this.get('panels'), panel => (panel.type || '').toLowerCase() === type),
+      activePanel = this.get('activePanel', panelRef);
 
     if (visible) {
       if (activePanel) {
-        let a = activePanel.model.get('panel')
-        ,   b = panel.get('panel').toLowerCase();
+        let a = activePanel.model.get('panel'),
+          b = panel.get('panel').toLowerCase();
 
-        activePanel.model.set("visible", false);
+        activePanel.model.set('visible', false);
 
         if (activePanel.model.filty && a !== b) {
           this.set('alert', true);
@@ -124,7 +124,7 @@ var NavigationModel = {
             if (panelRef) {
               panelRef.model.set('visible', false);
             }
-          }
+          };
         }
       }
       if (!this.get('alert')) {

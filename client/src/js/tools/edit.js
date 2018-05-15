@@ -58,7 +58,7 @@ var EditModelProperties = {
   editSource: undefined,
   removeFeature: undefined,
   shell: undefined,
-  instruction: ""
+  instruction: ''
 };
 
 /**
@@ -98,17 +98,16 @@ var EditModel = {
    * @return {string} XML-string to post
    */
   write: function (features) {
-
-    var format = new ol.format.WFS()
-    ,   lr = this.get('editSource').layers[0].split(':')
-    ,   ns = lr.length === 2 ? lr[0] : ""
-    ,   ft = lr.length === 2 ? lr[1] : lr[0]
-    ,   options = {
-          featureNS: ns,
-          featureType: ft,
-          srsName: this.get('editSource').projection
-        }
-    ,   gml = new ol.format.GML(options);
+    var format = new ol.format.WFS(),
+      lr = this.get('editSource').layers[0].split(':'),
+      ns = lr.length === 2 ? lr[0] : '',
+      ft = lr.length === 2 ? lr[1] : lr[0],
+      options = {
+        featureNS: ns,
+        featureType: ft,
+        srsName: this.get('editSource').projection
+      },
+      gml = new ol.format.GML(options);
 
     return format.writeTransaction(features.inserts, features.updates, features.deletes, gml);
   },
@@ -120,30 +119,28 @@ var EditModel = {
    * @param {string} layerName
    */
   refreshLayer: function (layerName) {
-    var source
-    ,   foundLayer = this.get('layerCollection').find(layer => {
-          if (layer.getLayer().getSource().getParams) {
-            let p = layer.getLayer().getSource().getParams();
-            if (typeof p === 'object') {
+    var source,
+      foundLayer = this.get('layerCollection').find(layer => {
+        if (layer.getLayer().getSource().getParams) {
+          let p = layer.getLayer().getSource().getParams();
+          if (typeof p === 'object') {
+            let paramName = p['LAYERS'].split(':');
+            let layerSplit = layerName.split(':');
 
-              let paramName = p['LAYERS'].split(':');
-              let layerSplit = layerName.split(':');
-
-              if (paramName.length === 2 && layerSplit.length === 2) {
-                return layerName === p['LAYERS'];
-              }
-              if (paramName.length === 1) {
-                return layerSplit[1] === p['LAYERS'];
-              }
-
+            if (paramName.length === 2 && layerSplit.length === 2) {
+              return layerName === p['LAYERS'];
+            }
+            if (paramName.length === 1) {
+              return layerSplit[1] === p['LAYERS'];
             }
           }
-        });
+        }
+      });
 
     if (foundLayer) {
       source = foundLayer.getLayer().getSource();
       source.changed();
-      source.updateParams({"time": Date.now()});
+      source.updateParams({'time': Date.now()});
       this.get('map').updateSize();
     }
   },
@@ -163,11 +160,10 @@ var EditModel = {
    * @param {function} done - Callback to invoke when the transaction is complete.
    */
   transact: function (features, done) {
-
-    var node = this.write(features)
-    ,   serializer = new XMLSerializer()
-    ,   src = this.get('editSource')
-    ,   payload = node ? serializer.serializeToString(node) : undefined;
+    var node = this.write(features),
+      serializer = new XMLSerializer(),
+      src = this.get('editSource'),
+      payload = node ? serializer.serializeToString(node) : undefined;
 
     if (payload) {
       $.ajax(HAJK2.searchProxy + src.url, {
@@ -177,7 +173,6 @@ var EditModel = {
         contentType: 'text/xml',
         data: payload
       }).done((data) => {
-
         this.refreshLayer(src.layers[0]);
         var data = this.parseWFSTresponse(data);
 
@@ -199,7 +194,6 @@ var EditModel = {
    * @param {function} done - Callback to invoke when the transaction is complete.
    */
   save: function (done) {
-
     var find = mode =>
       this.get('vectorSource').getFeatures().filter(feature =>
         feature.modification === mode);
@@ -257,10 +251,10 @@ var EditModel = {
         radius: 8,
         angle: Math.PI / 4
       }),
-      geometry: function(feature) {
-        coordinates = feature.getGeometry() instanceof ol.geom.Polygon ?
-                      feature.getGeometry().getCoordinates()[0] :
-                      feature.getGeometry().getCoordinates();
+      geometry: function (feature) {
+        coordinates = feature.getGeometry() instanceof ol.geom.Polygon
+          ? feature.getGeometry().getCoordinates()[0]
+          : feature.getGeometry().getCoordinates();
         return new ol.geom.MultiPoint(coordinates);
       }
     })];
@@ -300,7 +294,7 @@ var EditModel = {
    * @param {external:"ol.feature"} feature
    * @return {Array<{external:"ol.style"}>}
    */
-  getHiddenStyle : function (feature) {
+  getHiddenStyle: function (feature) {
     return [new ol.style.Style({
       stroke: new ol.style.Stroke({
         color: 'rgba(0, 0, 0, 0)',
@@ -349,7 +343,7 @@ var EditModel = {
           })
         })
       })
-    ]
+    ];
   },
 
   /**
@@ -358,7 +352,7 @@ var EditModel = {
    * @instance
    * @param {external:ol.Feature[]} features
    */
-  filterByDefaultValue: function(features) {
+  filterByDefaultValue: function (features) {
     return features.filter(feature => {
       return this.get('editSource').editableFields.some(field => {
         var value = feature.getProperties()[field.name];
@@ -379,23 +373,23 @@ var EditModel = {
   loadData: function (config, extent, done) {
     var format = new ol.format.WFS();
     $.ajax(HAJK2.wfsProxy + config.url, {
-        type: 'GET',
-        data: {
-          service: 'WFS',
-          version: '1.1.0',
-          request: 'GetFeature',
-          typename: config.layers[0],
-          srsname: config.projection
-        }
+      type: 'GET',
+      data: {
+        service: 'WFS',
+        version: '1.1.0',
+        request: 'GetFeature',
+        typename: config.layers[0],
+        srsname: config.projection
+      }
     }).done(rsp => {
-      var features
+      var features;
       try {
         features = format.readFeatures(rsp);
       } catch (e) {
-        alert("Fel: data kan inte läsas in. Kontrollera koordinatsystem.");
+        alert('Fel: data kan inte läsas in. Kontrollera koordinatsystem.');
       }
       if (features.length > 0) {
-        this.set("geometryName", features[0].getGeometryName());
+        this.set('geometryName', features[0].getGeometryName());
       }
 
       if (this.get('editSource').editableFields.some(field => field.hidden)) {
@@ -404,26 +398,22 @@ var EditModel = {
 
       this.get('vectorSource').addFeatures(features);
       this.get('vectorSource').getFeatures().forEach(feature => {
-        //Property changed
+        // Property changed
         feature.on('propertychange', (e) => {
-          if (feature.modification === 'removed')
-            return;
-          if (feature.modification === 'added')
-            return;
+          if (feature.modification === 'removed') { return; }
+          if (feature.modification === 'added') { return; }
           feature.modification = 'updated';
         });
-        //Geometry changed.
+        // Geometry changed.
         feature.on('change', (e) => {
-          if (feature.modification === 'removed')
-            return;
-          if (feature.modification === 'added')
-            return;
+          if (feature.modification === 'removed') { return; }
+          if (feature.modification === 'added') { return; }
           feature.modification = 'updated';
         });
       });
       if (done) done();
     }).fail(rsp => {
-      alert("Fel: data kan inte hämtas. Försök igen senare.");
+      alert('Fel: data kan inte hämtas. Försök igen senare.');
       if (done) done();
     });
   },
@@ -433,7 +423,7 @@ var EditModel = {
    * @instance
    * @param {external:"ol.feature"} feature
    */
-  editAttributes: function(feature) {
+  editAttributes: function (feature) {
     this.set({editFeature: feature});
   },
 
@@ -485,13 +475,13 @@ var EditModel = {
     }));
 
     this.set('imageSource', new ol.source.ImageVector({
-       source: this.get('vectorSource'),
-       style: this.getStyle()
+      source: this.get('vectorSource'),
+      style: this.getStyle()
     }));
 
     this.set('layer', new ol.layer.Image({
       source: this.get('imageSource'),
-      name: "edit-layer"    
+      name: 'edit-layer'
     }));
     this.get('map').addLayer(this.get('layer'));
 
@@ -506,7 +496,7 @@ var EditModel = {
       this.get('select').unset(this.get('key'));
     }
 
-    this.set('key', this.get('select').on('select', (event) => { this.featureSelected(event, source) }));
+    this.set('key', this.get('select').on('select', (event) => { this.featureSelected(event, source); }));
 
     if (!this.get('modify')) {
       this.set('modify', new ol.interaction.Modify({ features: this.get('select').getFeatures() }));
@@ -526,7 +516,7 @@ var EditModel = {
    * @param {external:"ol.feature"} - Drawn feature
    * @param {string} geometryType - Geometry type of feature
    */
-  handleDrawEnd: function(feature, geometryType) {
+  handleDrawEnd: function (feature, geometryType) {
     feature.modification = 'added';
     this.editAttributes(feature);
   },
@@ -545,8 +535,7 @@ var EditModel = {
    * @instance
    * @param {string} geometryType
    */
-  activateDrawTool: function(geometryType) {
-
+  activateDrawTool: function (geometryType) {
     var add = () => {
       this.set('drawTool', new ol.interaction.Draw({
         source: this.get('vectorSource'),
@@ -554,8 +543,8 @@ var EditModel = {
         type: geometryType,
         geometryName: this.get('geometryName')
       }));
-      this.get("drawTool").on('drawend', (event) => {
-        this.handleDrawEnd(event.feature, geometryType)
+      this.get('drawTool').on('drawend', (event) => {
+        this.handleDrawEnd(event.feature, geometryType);
       });
       this.get('map').addInteraction(this.get('drawTool'));
     };
@@ -571,7 +560,7 @@ var EditModel = {
       this.get('select').setActive(false);
     }
 
-    if (this.get("drawTool")) {
+    if (this.get('drawTool')) {
       this.get('drawTool').setActive(true);
       if (this.set('geometryType', geometryType) !== geometryType) {
         remove();
@@ -587,9 +576,8 @@ var EditModel = {
    * @instance
    * @param {boolean} keepClickLock - Whether to keep the maps' clicklock or not.
    */
-  deactivateDrawTool: function(keepClickLock) {
-    if (!keepClickLock)
-      this.get('map').set('clickLock', false);
+  deactivateDrawTool: function (keepClickLock) {
+    if (!keepClickLock) { this.get('map').set('clickLock', false); }
 
     if (this.get('select')) {
       this.get('select').setActive(true);
@@ -604,7 +592,7 @@ var EditModel = {
    * Deactivate all edit interactions.
    * @instance
    */
-  deactivateTools: function() {
+  deactivateTools: function () {
     if (this.get('select')) {
       this.get('select').setActive(false);
       this.get('select').getFeatures().clear();

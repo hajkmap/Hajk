@@ -49,7 +49,7 @@ var StreetViewModelProperties = {
   imageDate: '',
   apiKey: '',
   instruction: ''
-}
+};
 
 /**
  * @description
@@ -99,22 +99,21 @@ var StreetViewModel = {
    * @param {array} coordinate
    */
   showLocation: function (e) {
-
     if (!this.get('activated')) return;
 
-    var coord  = ol.proj.transform(
-      e.coordinate,
-      this.get('olMap').getView().getProjection(),
-      "EPSG:4326"
-    )
-      ,	location = new google.maps.LatLng(coord[1], coord[0]);
+    var coord = ol.proj.transform(
+        e.coordinate,
+        this.get('olMap').getView().getProjection(),
+        'EPSG:4326'
+      ),
+      	location = new google.maps.LatLng(coord[1], coord[0]);
 
     this.addMarker(e.coordinate, (panorama && panorama.getPov().heading) || 0);
     streetViewService = new google.maps.StreetViewService();
     panorama = new google.maps.StreetViewPanorama(document.getElementById('street-view-window'));
     streetViewService.getPanoramaByLocation(location, 50, this.displayPanorama.bind(this));
-    google.maps.event.addListener(panorama, 'position_changed', () => { this.onPositionChanged() });
-    google.maps.event.addListener(panorama, 'pov_changed', () => { this.onPositionChanged() });
+    google.maps.event.addListener(panorama, 'position_changed', () => { this.onPositionChanged(); });
+    google.maps.event.addListener(panorama, 'pov_changed', () => { this.onPositionChanged(); });
     this.set('location', location);
     this.set('location', location);
   },
@@ -123,11 +122,11 @@ var StreetViewModel = {
    * Create icon style based on rotation.
    * @instance
    */
-  getIconStyle: function(rotation) {
+  getIconStyle: function (rotation) {
     //
     // Find location in sprite of given rotation.
     //
-    function position(r) {
+    function position (r) {
       const w = 49;
       var i = 1;
       var n = 1;
@@ -177,16 +176,14 @@ var StreetViewModel = {
    * @instance
    */
   onPositionChanged: function () {
+    if (!panorama.getPosition() || this.get('activated') === false) { return; }
 
-    if (!panorama.getPosition() || this.get('activated') === false)
-      return;
-
-    var x = panorama.getPosition().lng()
-    ,	  y = panorama.getPosition().lat()
-    ,	  b = panorama.getPov().heading
-    ,	  l = [x, y]
-    ,   p = this.get('olMap').getView().getProjection()
-    ,   c = ol.proj.transform(l, "EPSG:4326", p);
+    var x = panorama.getPosition().lng(),
+    	  y = panorama.getPosition().lat(),
+    	  b = panorama.getPov().heading,
+    	  l = [x, y],
+      p = this.get('olMap').getView().getProjection(),
+      c = ol.proj.transform(l, 'EPSG:4326', p);
 
     this.addMarker(c, b);
   },
@@ -202,7 +199,7 @@ var StreetViewModel = {
     googleMapsLoader.KEY = this.get('apiKey');
     googleMapsLoader.load(google => {
       this.set('google', google);
-  });
+    });
     this.set('streetViewMarkerLayer', new ol.layer.Vector({
       source: new ol.source.Vector({}),
       name: 'streetViewMarkerLayer'

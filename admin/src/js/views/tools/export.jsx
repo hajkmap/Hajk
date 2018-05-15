@@ -20,20 +20,20 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import React from "react";
-import { Component } from "react";
+import React from 'react';
+import { Component } from 'react';
 
 var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
-  exportUrl: "/mapservice/export/pdf",
-  exportTiffUrl: "/mapservice/export/tiff",
+  exportUrl: '/mapservice/export/pdf',
+  exportTiffUrl: '/mapservice/export/tiff',
   pdfActive: true,
   tiffActive: true,
   base64Encode: false,
   autoScale: false,
-  instruction: "",
+  instruction: '',
   scales: [
     250,
     500,
@@ -46,7 +46,7 @@ var defaultState = {
     100000,
     250000
   ],
-  proxyUrl: "",
+  proxyUrl: '',
   visibleForGroups: []
 };
 
@@ -54,13 +54,13 @@ class ToolOptions extends Component {
   /**
    *
    */
-  constructor() {
+  constructor () {
     super();
     this.state = defaultState;
-    this.type = "export";
+    this.type = 'export';
   }
 
-  componentDidMount() {
+  componentDidMount () {
     var tool = this.getTool();
     if (tool) {
       this.setState({
@@ -83,23 +83,23 @@ class ToolOptions extends Component {
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
   }
   /**
    *
    */
-  componentWillMount() {
+  componentWillMount () {
   }
 
-  handleInputChange(event) {
+  handleInputChange (event) {
     var target = event.target;
     var name = target.name;
     var value = target.type === 'checkbox' ? target.checked : target.value;
-    if (typeof value === "string" && value.trim() !== "") {
-      value = !isNaN(Number(value)) ? Number(value) : value
+    if (typeof value === 'string' && value.trim() !== '') {
+      value = !isNaN(Number(value)) ? Number(value) : value;
     }
 
-    if (name == "instruction"){
+    if (name == 'instruction') {
       value = btoa(value);
     }
     this.setState({
@@ -107,21 +107,21 @@ class ToolOptions extends Component {
     });
   }
 
-  getTool() {
+  getTool () {
     return this.props.model.get('toolConfig').find(tool => tool.type === this.type);
   }
 
-  add(tool) {
-    this.props.model.get("toolConfig").push(tool);
+  add (tool) {
+    this.props.model.get('toolConfig').push(tool);
   }
 
-  remove(tool) {
+  remove (tool) {
     this.props.model.set({
-      "toolConfig": this.props.model.get("toolConfig").filter(tool => tool.type !== this.type)
+      'toolConfig': this.props.model.get('toolConfig').filter(tool => tool.type !== this.type)
     });
   }
 
-  replace(tool) {
+  replace (tool) {
     this.props.model.get('toolConfig').forEach(t => {
       if (t.type === this.type) {
         t.options = tool.options;
@@ -131,12 +131,11 @@ class ToolOptions extends Component {
     });
   }
 
-  save() {
-
+  save () {
     var tool = {
-      "type": this.type,
-      "index": this.state.index,
-      "options": {
+      'type': this.type,
+      'index': this.state.index,
+      'options': {
         exportUrl: this.state.exportUrl,
         exportTiffUrl: this.state.exportTiffUrl,
         pdfActive: this.state.pdfActive,
@@ -153,11 +152,11 @@ class ToolOptions extends Component {
 
     var existing = this.getTool();
 
-    function update() {
-      this.props.model.updateToolConfig(this.props.model.get("toolConfig"), () => {
+    function update () {
+      this.props.model.updateToolConfig(this.props.model.get('toolConfig'), () => {
         this.props.parent.props.parent.setState({
           alert: true,
-          alertMessage: "Uppdateringen lyckades"
+          alertMessage: 'Uppdateringen lyckades'
         });
       });
     }
@@ -167,7 +166,7 @@ class ToolOptions extends Component {
         this.props.parent.props.parent.setState({
           alert: true,
           confirm: true,
-          alertMessage: "Verktyget kommer att tas bort. Nuvarande inställningar kommer att gå förlorade. Vill du fortsätta?",
+          alertMessage: 'Verktyget kommer att tas bort. Nuvarande inställningar kommer att gå förlorade. Vill du fortsätta?',
           confirmAction: () => {
             this.remove();
             update.call(this);
@@ -188,28 +187,28 @@ class ToolOptions extends Component {
     }
   }
 
-  handleAuthGrpsChange(event) {
-		const target = event.target;
-		const value = target.value;
-		let groups = [];
+  handleAuthGrpsChange (event) {
+    const target = event.target;
+    const value = target.value;
+    let groups = [];
 
-		try {
-			groups = value.split(",");
-		} catch (error) {
-			console.log(`Någonting gick fel: ${error}`);
-		}
+    try {
+      groups = value.split(',');
+    } catch (error) {
+      console.log(`Någonting gick fel: ${error}`);
+    }
 
-		this.setState({
-			visibleForGroups: value !== "" ? groups : []
-		});  
+    this.setState({
+      visibleForGroups: value !== '' ? groups : []
+    });
   }
-  
+
   renderVisibleForGroups () {
     if (this.props.parent.props.parent.state.authActive) {
-      return ( 
+      return (
         <div>
-          <label htmlFor="visibleForGroups">Tillträde</label>
-          <input id="visibleForGroups" value={this.state.visibleForGroups} type="text" name="visibleForGroups" onChange={(e) => {this.handleAuthGrpsChange(e)}}></input>
+          <label htmlFor='visibleForGroups'>Tillträde</label>
+          <input id='visibleForGroups' value={this.state.visibleForGroups} type='text' name='visibleForGroups' onChange={(e) => { this.handleAuthGrpsChange(e); }} />
         </div>
       );
     } else {
@@ -220,95 +219,94 @@ class ToolOptions extends Component {
   /**
    *
    */
-  render() {
+  render () {
     return (
       <div>
         <form>
           <p>
-            <button className="btn btn-primary" onClick={(e) => {e.preventDefault(); this.save()}}>Spara</button>
+            <button className='btn btn-primary' onClick={(e) => { e.preventDefault(); this.save(); }}>Spara</button>
           </p>
           <div>
             <input
-              id="active"
-              name="active"
-              type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.active}/>&nbsp;
-            <label htmlFor="active">Aktiverad</label>
+              id='active'
+              name='active'
+              type='checkbox'
+              onChange={(e) => { this.handleInputChange(e); }}
+              checked={this.state.active} />&nbsp;
+            <label htmlFor='active'>Aktiverad</label>
           </div>
           <div>
-            <label htmlFor="index">Sorteringsordning</label>
+            <label htmlFor='index'>Sorteringsordning</label>
             <input
-              id="index"
-              name="index"
-              type="text"
-              onChange={(e) => {this.handleInputChange(e)}}
-              value={this.state.index}/>
+              id='index'
+              name='index'
+              type='text'
+              onChange={(e) => { this.handleInputChange(e); }}
+              value={this.state.index} />
           </div>
           <div>
-            <label htmlFor="exportUrl">URL till PDF-tjänst</label>
-            <input value={this.state.exportUrl} type="text" name="exportUrl" onChange={(e) => {this.handleInputChange(e)}}></input>
+            <label htmlFor='exportUrl'>URL till PDF-tjänst</label>
+            <input value={this.state.exportUrl} type='text' name='exportUrl' onChange={(e) => { this.handleInputChange(e); }} />
           </div>
           <div>
-            <label htmlFor="exportTiffUrl">URL till TIFF-tjänst</label>
-            <input value={this.state.exportTiffUrl} type="text" name="exportTiffUrl" onChange={(e) => {this.handleInputChange(e)}}></input>
-          </div>
-          <div>
-            <input
-              id="pdf-active"
-              name="pdfActive"
-              type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.pdfActive}/>&nbsp;
-            <label htmlFor="pdf-active">PDF aktiverad</label>
+            <label htmlFor='exportTiffUrl'>URL till TIFF-tjänst</label>
+            <input value={this.state.exportTiffUrl} type='text' name='exportTiffUrl' onChange={(e) => { this.handleInputChange(e); }} />
           </div>
           <div>
             <input
-              id="tiff-active"
-              name="tiffActive"
-              type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.tiffActive}/>&nbsp;
-            <label htmlFor="tiff-active">TIFF aktiverad</label>
+              id='pdf-active'
+              name='pdfActive'
+              type='checkbox'
+              onChange={(e) => { this.handleInputChange(e); }}
+              checked={this.state.pdfActive} />&nbsp;
+            <label htmlFor='pdf-active'>PDF aktiverad</label>
           </div>
           <div>
             <input
-              id="Base64-active"
-              name="base64Encode"
-              type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.base64Encode}/>&nbsp;
-            <label htmlFor="Base64-active">Base64-encoding aktiverad</label>
+              id='tiff-active'
+              name='tiffActive'
+              type='checkbox'
+              onChange={(e) => { this.handleInputChange(e); }}
+              checked={this.state.tiffActive} />&nbsp;
+            <label htmlFor='tiff-active'>TIFF aktiverad</label>
           </div>
           <div>
             <input
-              id="autoScale-active"
-              name="autoScale"
-              type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.autoScale}/>&nbsp;
-            <label htmlFor="autoScale-active">autoScale av previewLayer för mobil aktiverad</label>
+              id='Base64-active'
+              name='base64Encode'
+              type='checkbox'
+              onChange={(e) => { this.handleInputChange(e); }}
+              checked={this.state.base64Encode} />&nbsp;
+            <label htmlFor='Base64-active'>Base64-encoding aktiverad</label>
           </div>
           <div>
-            <label htmlFor="instruction">Instruktion</label>
+            <input
+              id='autoScale-active'
+              name='autoScale'
+              type='checkbox'
+              onChange={(e) => { this.handleInputChange(e); }}
+              checked={this.state.autoScale} />&nbsp;
+            <label htmlFor='autoScale-active'>autoScale av previewLayer för mobil aktiverad</label>
+          </div>
+          <div>
+            <label htmlFor='instruction'>Instruktion</label>
             <textarea
-              type="text"
-              id="instruction"
-              name="instruction"
-              onChange={(e) => {this.handleInputChange(e)}}
-              value={this.state.instruction ? atob(this.state.instruction) : ""}
+              type='text'
+              id='instruction'
+              name='instruction'
+              onChange={(e) => { this.handleInputChange(e); }}
+              value={this.state.instruction ? atob(this.state.instruction) : ''}
             />
           </div>
           {this.renderVisibleForGroups()}
           <div>
-            <label htmlFor="proxyUrl">Proxy URL till utskrift och export</label>
-            <input value={this.state.proxyUrl} type="text" name="proxyUrl" onChange={(e) => {this.handleInputChange(e)}}></input>
+            <label htmlFor='proxyUrl'>Proxy URL till utskrift och export</label>
+            <input value={this.state.proxyUrl} type='text' name='proxyUrl' onChange={(e) => { this.handleInputChange(e); }} />
           </div>
         </form>
       </div>
-    )
+    );
   }
-
 }
 
 export default ToolOptions;

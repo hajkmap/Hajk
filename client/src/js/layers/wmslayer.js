@@ -10,11 +10,11 @@ var LayerModel = require('layers/layer');
  * @property {object} params
  */
 var WmsLayerProperties = {
-  url: "",
-  projection: "EPSG:3007",
+  url: '',
+  projection: 'EPSG:3007',
   serverType: 'geoserver',
   opacity: 1,
-  status: "ok",
+  status: 'ok',
   params: {}
 };
 
@@ -51,18 +51,18 @@ var WmsLayer = {
       projection: this.get('projection'),
       serverType: this.get('serverType'),
       imageFormat: this.get('imageFormat'),
-      attributions: this.getAttributions(),
+      attributions: this.getAttributions()
     };
 
     if (this.get('resolutions') &&
       this.get('resolutions').length > 0 &&
       this.get('origin') &&
       this.get('origin').length > 0) {
-        source.tileGrid = new ol.tilegrid.TileGrid({
-          resolutions: this.get('resolutions'),
-          origin: this.get('origin')
-        });
-        source.extent = this.get('extent')
+      source.tileGrid = new ol.tilegrid.TileGrid({
+        resolutions: this.get('resolutions'),
+        origin: this.get('origin')
+      });
+      source.extent = this.get('extent');
     }
 
     if (this.get('singleTile')) {
@@ -71,7 +71,7 @@ var WmsLayer = {
         visible: this.get('visible'),
         queryable: this.get('queryable'),
         caption: this.get('caption'),
-        opacity: this.get("opacity"),
+        opacity: this.get('opacity'),
         source: new ol.source.ImageWMS(source)
       });
     } else {
@@ -80,13 +80,13 @@ var WmsLayer = {
         visible: this.get('visible'),
         queryable: this.get('queryable'),
         caption: this.get('caption'),
-        opacity: this.get("opacity"),
+        opacity: this.get('opacity'),
         source: new ol.source.TileWMS(source)
       });
     }
 
-    this.set("wmsCallbackName", "wmscallback" + Math.floor(Math.random() * 1000) + 1);
-    global.window[this.get("wmsCallbackName")] = _.bind(this.getFeatureInformationReponse, this);
+    this.set('wmsCallbackName', 'wmscallback' + Math.floor(Math.random() * 1000) + 1);
+    global.window[this.get('wmsCallbackName')] = _.bind(this.getFeatureInformationReponse, this);
 
     this.layer.getSource().on('tileloaderror', e => {
       this.tileLoadError();
@@ -103,25 +103,22 @@ var WmsLayer = {
     });
 
     this.layer.getSource().set('url', this.get('url'));
-    this.set("type", "wms");
+    this.set('type', 'wms');
   },
 
-  removeProxyFromURLIfPresent : function(url){
+  removeProxyFromURLIfPresent: function (url) {
+    var http = url.lastIndexOf('http://');
+    var https = url.lastIndexOf('https://');
 
-    var http = url.lastIndexOf("http://");
-    var https = url.lastIndexOf("https://");
-
-    if(http > https){
+    if (http > https) {
       index = http;
-    }
-    else {
+    } else {
       index = https;
     }
-   
-    if(index != -1){
+
+    if (index != -1) {
       return url.substr(index);
-    }
-    else {
+    } else {
       return url;
     }
   },
@@ -135,21 +132,20 @@ var WmsLayer = {
   getFeatureInformation: function (params) {
     var url;
     try {
-
       this.validInfo = true;
       this.featureInformationCallback = params.success;
 
       url = this.getLayer()
-      .getSource()
-      .getGetFeatureInfoUrl(
-        params.coordinate,
-        params.resolution,
-        params.projection,
-        {
-          'INFO_FORMAT': this.get('serverType') === "arcgis" ? 'application/geojson' : 'application/json',
-          'feature_count': 100
-        }
-      );
+        .getSource()
+        .getGetFeatureInfoUrl(
+          params.coordinate,
+          params.resolution,
+          params.projection,
+          {
+            'INFO_FORMAT': this.get('serverType') === 'arcgis' ? 'application/geojson' : 'application/json',
+            'feature_count': 100
+          }
+        );
 
       if (url) {
         url = this.removeProxyFromURLIfPresent(url);
@@ -165,7 +161,7 @@ var WmsLayer = {
             this.featureInformationCallback(features, this.getLayer());
           }
         });
-        
+
         request.fail(params.error);
       }
     } catch (e) {
@@ -178,7 +174,7 @@ var WmsLayer = {
    * @instance
    */
   tileLoadError: function () {
-    this.set("status", "loaderror");
+    this.set('status', 'loaderror');
   },
 
   /**
@@ -186,7 +182,7 @@ var WmsLayer = {
    * @instance
    */
   tileLoadOk: function () {
-    this.set("status", "ok");
+    this.set('status', 'ok');
   },
 
   /**
@@ -196,10 +192,10 @@ var WmsLayer = {
    */
   getFeatureInformationReponse: function (response) {
     try {
-        var features = new ol.format.GeoJSON().readFeatures(response);
+      var features = new ol.format.GeoJSON().readFeatures(response);
       this.featureInformationCallback(features, this.getLayer());
-      } catch (e) {
-        console.error(e);
+    } catch (e) {
+      console.error(e);
     }
   }
 };

@@ -20,16 +20,16 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import React from "react";
-import { Component } from "react";
+import React from 'react';
+import { Component } from 'react';
 
 var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
   visibleAtStart: false,
-  text: "",
-  headerText: "",
+  text: '',
+  headerText: '',
   showInfoOnce: false,
   base64EncodeForInfotext: false,
   visibleForGroups: []
@@ -39,21 +39,21 @@ class ToolOptions extends Component {
   /**
    *
    */
-  constructor() {
+  constructor () {
     super();
     this.state = defaultState;
-    this.type = "information";
+    this.type = 'information';
   }
 
-  componentDidMount() {
+  componentDidMount () {
     var tool = this.getTool();
     if (tool) {
       this.setState({
         active: true,
         index: tool.index,
         visibleAtStart: tool.options.visibleAtStart || false,
-        text: tool.options.text || "",
-        headerText: tool.options.headerText || "",
+        text: tool.options.text || '',
+        headerText: tool.options.headerText || '',
         showInfoOnce: tool.options.showInfoOnce,
         base64EncodeForInfotext: tool.options.base64EncodeForInfotext,
         visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
@@ -65,41 +65,41 @@ class ToolOptions extends Component {
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
   }
   /**
    *
    */
-  componentWillMount() {
+  componentWillMount () {
   }
 
-  handleInputChange(event) {
+  handleInputChange (event) {
     const target = event.target;
     const name = target.name;
     var value = target.type === 'checkbox' ? target.checked : target.value;
-    if (typeof value === "string" && value.trim() !== "") {
-      value = !isNaN(Number(value)) ? Number(value) : value
+    if (typeof value === 'string' && value.trim() !== '') {
+      value = !isNaN(Number(value)) ? Number(value) : value;
     }
     this.setState({
       [name]: value
     });
   }
 
-  getTool() {
+  getTool () {
     return this.props.model.get('toolConfig').find(tool => tool.type === this.type);
   }
 
-  add(tool) {
-    this.props.model.get("toolConfig").push(tool);
+  add (tool) {
+    this.props.model.get('toolConfig').push(tool);
   }
 
-  remove(tool) {
+  remove (tool) {
     this.props.model.set({
-      "toolConfig": this.props.model.get("toolConfig").filter(tool => tool.type !== this.type)
+      'toolConfig': this.props.model.get('toolConfig').filter(tool => tool.type !== this.type)
     });
   }
 
-  replace(tool) {
+  replace (tool) {
     this.props.model.get('toolConfig').forEach(t => {
       if (t.type === this.type) {
         t.options = tool.options;
@@ -108,12 +108,11 @@ class ToolOptions extends Component {
     });
   }
 
-  save() {
-
+  save () {
     var tool = {
-      "type": this.type,
-      "index": this.state.index,
-      "options": {
+      'type': this.type,
+      'index': this.state.index,
+      'options': {
         text: this.state.text,
         headerText: this.state.headerText,
         visibleAtStart: this.state.visibleAtStart,
@@ -126,11 +125,11 @@ class ToolOptions extends Component {
 
     var existing = this.getTool();
 
-    function update() {
-      this.props.model.updateToolConfig(this.props.model.get("toolConfig"), () => {
+    function update () {
+      this.props.model.updateToolConfig(this.props.model.get('toolConfig'), () => {
         this.props.parent.props.parent.setState({
           alert: true,
-          alertMessage: "Uppdateringen lyckades"
+          alertMessage: 'Uppdateringen lyckades'
         });
       });
     }
@@ -140,7 +139,7 @@ class ToolOptions extends Component {
         this.props.parent.props.parent.setState({
           alert: true,
           confirm: true,
-          alertMessage: "Verktyget kommer att tas bort. Nuvarande inställningar kommer att gå förlorade. Vill du fortsätta?",
+          alertMessage: 'Verktyget kommer att tas bort. Nuvarande inställningar kommer att gå förlorade. Vill du fortsätta?',
           confirmAction: () => {
             this.remove();
             update.call(this);
@@ -161,28 +160,28 @@ class ToolOptions extends Component {
     }
   }
 
-  handleAuthGrpsChange(event) {
-		const target = event.target;
-		const value = target.value;
-		let groups = [];
+  handleAuthGrpsChange (event) {
+    const target = event.target;
+    const value = target.value;
+    let groups = [];
 
-		try {
-			groups = value.split(",");
-		} catch (error) {
-			console.log(`Någonting gick fel: ${error}`);
-		}
+    try {
+      groups = value.split(',');
+    } catch (error) {
+      console.log(`Någonting gick fel: ${error}`);
+    }
 
-		this.setState({
-			visibleForGroups: value !== "" ? groups : []
-		});  
+    this.setState({
+      visibleForGroups: value !== '' ? groups : []
+    });
   }
-  
+
   renderVisibleForGroups () {
     if (this.props.parent.props.parent.state.authActive) {
-      return ( 
+      return (
         <div>
-          <label htmlFor="visibleForGroups">Tillträde</label>
-          <input id="visibleForGroups" value={this.state.visibleForGroups} type="text" name="visibleForGroups" onChange={(e) => {this.handleAuthGrpsChange(e)}}></input>
+          <label htmlFor='visibleForGroups'>Tillträde</label>
+          <input id='visibleForGroups' value={this.state.visibleForGroups} type='text' name='visibleForGroups' onChange={(e) => { this.handleAuthGrpsChange(e); }} />
         </div>
       );
     } else {
@@ -193,72 +192,71 @@ class ToolOptions extends Component {
   /**
    *
    */
-  render() {
+  render () {
     return (
       <div>
         <form>
           <p>
-            <button className="btn btn-primary" onClick={(e) => {e.preventDefault(); this.save()}}>Spara</button>
+            <button className='btn btn-primary' onClick={(e) => { e.preventDefault(); this.save(); }}>Spara</button>
           </p>
           <div>
             <input
-              id="active"
-              name="active"
-              type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.active}/>&nbsp;
-            <label htmlFor="active">Aktiverad</label>
+              id='active'
+              name='active'
+              type='checkbox'
+              onChange={(e) => { this.handleInputChange(e); }}
+              checked={this.state.active} />&nbsp;
+            <label htmlFor='active'>Aktiverad</label>
           </div>
           <div>
-            <label htmlFor="index">Sorteringsordning</label>
+            <label htmlFor='index'>Sorteringsordning</label>
             <input
-              id="index"
-              name="index"
-              type="text"
-              onChange={(e) => {this.handleInputChange(e)}}
-              value={this.state.index}/>
+              id='index'
+              name='index'
+              type='text'
+              onChange={(e) => { this.handleInputChange(e); }}
+              value={this.state.index} />
           </div>
           <div>
             <input
-              id="visibleAtStart"
-              name="visibleAtStart"
-              type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.visibleAtStart}/>&nbsp;
-            <label htmlFor="visibleAtStart">Synlig vid start</label>
+              id='visibleAtStart'
+              name='visibleAtStart'
+              type='checkbox'
+              onChange={(e) => { this.handleInputChange(e); }}
+              checked={this.state.visibleAtStart} />&nbsp;
+            <label htmlFor='visibleAtStart'>Synlig vid start</label>
           </div>
           <div>
-            <label htmlFor="headerText">Rubrik</label>
-            <input value={this.state.headerText} type="text" name="headerText" onChange={(e) => {this.handleInputChange(e)}}></input>
+            <label htmlFor='headerText'>Rubrik</label>
+            <input value={this.state.headerText} type='text' name='headerText' onChange={(e) => { this.handleInputChange(e); }} />
           </div>
           <div>
-            <label htmlFor="text">Infotext</label>
-            <textarea value={this.state.text} type="text" name="text" onChange={(e) => {this.handleInputChange(e)}}></textarea>
+            <label htmlFor='text'>Infotext</label>
+            <textarea value={this.state.text} type='text' name='text' onChange={(e) => { this.handleInputChange(e); }} />
           </div>
           {this.renderVisibleForGroups()}
           <div>
             <input
-              id="showInfoOnce"
-              name="showInfoOnce"
-              type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.showInfoOnce}/>&nbsp;
-            <label htmlFor="showInfoOnce">Visa Information endast en gång</label>
+              id='showInfoOnce'
+              name='showInfoOnce'
+              type='checkbox'
+              onChange={(e) => { this.handleInputChange(e); }}
+              checked={this.state.showInfoOnce} />&nbsp;
+            <label htmlFor='showInfoOnce'>Visa Information endast en gång</label>
           </div>
           <div>
             <input
-              id="base64EncodeForInfotext"
-              name="base64EncodeForInfotext"
-              type="checkbox"
-              onChange={(e) => {this.handleInputChange(e)}}
-              checked={this.state.base64EncodeForInfotext}/>&nbsp;
-            <label htmlFor="base64EncodeForInfotext">Använd Base64 för Infotext</label>
+              id='base64EncodeForInfotext'
+              name='base64EncodeForInfotext'
+              type='checkbox'
+              onChange={(e) => { this.handleInputChange(e); }}
+              checked={this.state.base64EncodeForInfotext} />&nbsp;
+            <label htmlFor='base64EncodeForInfotext'>Använd Base64 för Infotext</label>
           </div>
         </form>
       </div>
-    )
+    );
   }
-
 }
 
 export default ToolOptions;

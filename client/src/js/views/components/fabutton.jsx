@@ -37,14 +37,14 @@ var FaButton = React.createClass({
     var faClassName = 'fa ' + this.props.icon;
 
     if (this.props.right) {
-       btnClassName += ' btn-right';
+      btnClassName += ' btn-right';
     }
     if (this.props.customClass) {
       btnClassName += ' ' + this.props.customClass;
     }
     return (
       <div className={btnClassName} title={this.props.title} onClick={onClick}>
-        <i className={faClassName}></i>
+        <i className={faClassName} />
       </div>
     );
   }

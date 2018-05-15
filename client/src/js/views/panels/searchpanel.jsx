@@ -32,7 +32,7 @@ var SearchPanelView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function() {
+  getInitialState: function () {
     return {
       visible: false
     };
@@ -66,8 +66,8 @@ var SearchPanelView = {
    */
   render: function () {
     return (
-      <Panel title="Sökning" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
-        <Search model={this.props.model} navigationPanel={this.props.navigationPanel}></Search>
+      <Panel title='Sökning' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
+        <Search model={this.props.model} navigationPanel={this.props.navigationPanel} />
       </Panel>
     );
   }

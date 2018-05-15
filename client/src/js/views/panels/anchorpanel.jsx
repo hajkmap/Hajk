@@ -30,9 +30,9 @@ var AnchorPanelView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function() {
+  getInitialState: function () {
     return {
-      anchor: ""
+      anchor: ''
     };
   },
 
@@ -61,8 +61,8 @@ var AnchorPanelView = {
     });
   },
 
-  openInstruction: function (){
-    var element = $("#instructionText");
+  openInstruction: function () {
+    var element = $('#instructionText');
     element.toggle();
   },
 
@@ -74,14 +74,14 @@ var AnchorPanelView = {
   render: function () {
     var anchor = this.props.model.get('anchor');
     return (
-      <Panel title="Länk till karta" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked} instruction={atob(this.props.model.get('instruction'))}>
-        <div className="panel-content">
-          <button onClick={this.generate} className="btn btn-primary">Skapa länk</button><br/><br/>
+      <Panel title='Länk till karta' onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked} instruction={atob(this.props.model.get('instruction'))}>
+        <div className='panel-content'>
+          <button onClick={this.generate} className='btn btn-primary'>Skapa länk</button><br /><br />
           <p>
-            När du har skapat en länk kan du kopiera länkadressen genom att högerklicka på "Länk" nedan.<br/>
+            När du har skapat en länk kan du kopiera länkadressen genom att högerklicka på "Länk" nedan.<br />
           </p>
-          <div className="alert alert-success">
-            <a target="_blank" href={anchor}>Länk</a>
+          <div className='alert alert-success'>
+            <a target='_blank' href={anchor}>Länk</a>
           </div>
         </div>
       </Panel>
