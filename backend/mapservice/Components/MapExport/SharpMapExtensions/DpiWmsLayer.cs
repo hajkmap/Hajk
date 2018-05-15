@@ -8,6 +8,9 @@ using SharpMap;
 using SharpMap.Layers;
 using SharpMap.Rendering.Exceptions;
 using SharpMap.Web.Wms;
+using System.Configuration;
+using MapService.Controllers;
+using log4net;
 
 namespace MapService.Components.MapExport {
 
@@ -21,6 +24,7 @@ namespace MapService.Components.MapExport {
         private readonly Color _bgColor = Color.White;
         private readonly int _ogcStandardDpi = 90;
         private readonly int _requestedDpi;
+        private readonly ILog _log;
 
         private const string GeoserverDpi = "FORMAT_OPTIONS=dpi:";
         private const string UMNDpi = "MAP_RESOLUTION=";
@@ -28,14 +32,23 @@ namespace MapService.Components.MapExport {
 
         public DpiWmsLayer(string layername, string url, int dpi = 90) : base(layername, url)
         {
+            _log = LogManager.GetLogger(typeof(DpiWmsLayer));
             _requestedDpi = dpi;
         }
 
         public override string GetRequestUrl(Envelope box, Size size)
         {
+            var appsettings = ConfigurationManager.AppSettings;
+            string proxy = appsettings["ExportProxy"];
+
+            if(proxy == "" || proxy == null)
+            {
+                _log.Info("Proxy for export is not set in backend, check ExportProxy in Web.config");
+            }
+
             var requestUrl = base.GetRequestUrl(box, size);
 
-            return requestUrl + string.Format("&{0}{3}&{1}{3}&{2}{3}", 
+            return proxy + requestUrl + string.Format("&{0}{3}&{1}{3}&{2}{3}", 
                 GeoserverDpi,
                 UMNDpi,
                 QGISDpi,

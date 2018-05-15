@@ -47,7 +47,8 @@ var SearchModelProperties = {
   displayPopup: false,
   displayPopupBar: false,
   hits: [],
-  popupOffsetY: 0
+  popupOffsetY: 0,
+  aliasDict: {}
 };
 
 /**
@@ -121,7 +122,9 @@ var SearchModel = {
   getPropertyFilter: function (props) {
     var multipleAttributes = props.propertyName.split(',').length > 1;
     var conditions = props.propertyName.split(',').reduce((condition, property) => {
-
+    /*  if (props.value == null){
+        return condition;
+    }*/
       props.value.indexOf("\\") >= 0 ? props.value = props.value.replace(/\\/g, "\\\\") : props.value;
       
       if (props.value) {
@@ -594,7 +597,7 @@ var SearchModel = {
    * @return {Layer[]} layers
    */
   getLayers: function () {
-
+    
     var filter = (layer) => {
       var criteria = this.get('filter');
       var visible  = this.get('filterVisibleActive');
@@ -667,6 +670,11 @@ var SearchModel = {
         ? this.get('hits')
         : this.getHitsFromItems();
 
+    if (exportItems.length>1 && _.isEqual(exportItems[0], exportItems[1])) {
+      // Ensure we don't have duplicate first items (happens when user selects items to export manually)
+      exportItems.shift();
+    }
+
     exportItems.forEach(hit => {
       if (!groups.hasOwnProperty(hit.caption)) {
         groups[hit.caption] = [];
@@ -680,9 +688,18 @@ var SearchModel = {
       ,   aliases = []
       ,   values = [];
 
-      var getAlias = (column, exportText) => {
+     var getAliasWithDict = (column, aliasDict) => {
+       var keys = Object.keys(aliasDict);
+       if (keys.indexOf(column) >= 0){
+         return aliasDict[column];
+       } else {
+         return column;
+       }
+      }
+
+      var getAlias = (column, infobox) => {
         var regExp = new RegExp(`{export:${column}( as .*)?}`)
-        ,   result = regExp.exec(exportText);
+          ,   result = regExp.exec(infobox);
 
         if (result && result[1]) {
           result[1] = result[1].replace(" as ", "");
@@ -691,22 +708,33 @@ var SearchModel = {
         return result && result[1] ? result[1] : column;
       }
 
+
       values = groups[group].map((hit) => {
 
+
+        if(typeof hit.aliasDict !== "undefined" && hit.aliasDict !== null){
         var attributes = hit.getProperties()
-        ,   names = Object.keys(attributes);
+        ,   names = Object.keys(attributes),
+            aliasKeys = Object.keys(hit.aliasDict);
         names = names.filter(name => {
-          if (!hit.exportText) {
+          return aliasKeys.indexOf(name) >= 0;
+        });
+        } else {
+          var attributes = hit.getProperties()
+            ,   names = Object.keys(attributes);
+          names = names.filter(name => {
+            if (!hit.infobox) {
             return typeof attributes[name] === "string"  ||
-                   typeof attributes[name] === "boolean" ||
-                   typeof attributes[name] === "number";
+              typeof attributes[name] === "boolean" ||
+              typeof attributes[name] === "number";
           } else {
             let regExp = new RegExp(`{export:${name}( as .*)?}`);
             return (
-              regExp.test(hit.exportText)
+              regExp.test(hit.infobox)
             );
           }
         });
+        }
 
         if (names.length > columns.length) {
           columns = names;
@@ -714,10 +742,15 @@ var SearchModel = {
         }
 
         columns.forEach((column, i) => {
-          aliases[i] = getAlias(column, hit.exportText);
+          if(typeof hit.aliasDict !== "undefined" && hit.aliasDict !== null){
+            aliases[i] = getAliasWithDict(column, hit.aliasDict);
+          } else {
+            aliases[i] = getAlias(column, hit.infobox);
+          }
         });
 
         return columns.map(column => attributes[column] || null);
+
       });
 
       return {
@@ -802,7 +835,11 @@ var SearchModel = {
               features.forEach(feature => {
                 feature.caption = searchProps.caption;
                 feature.infobox = searchProps.infobox;
-                feature.exportText = searchProps.exportText;
+                try{
+                  feature.aliasDict = JSON.parse(searchProps.aliasDict);
+                } catch(e){
+                  feature.aliasDict = undefined;
+                }
               });
               items.push({
                 layer: searchProps.caption,
@@ -834,12 +871,11 @@ var SearchModel = {
     layers.forEach(layer => {
 
       layer.get('params').LAYERS.split(',').forEach(featureType => {
-
         var searchProps = {
           url: (HAJK2.searchProxy || "") + layer.get('searchUrl'),
           caption: layer.get('caption'),
           infobox: layer.get('infobox'),
-          exportText: "",
+          aliasDict: layer.get("aliasDict"),
           featureType: featureType,
           propertyName: layer.get('searchPropertyName'),
           displayName: layer.get('searchDisplayName'),
@@ -858,6 +894,7 @@ var SearchModel = {
         url: (HAJK2.searchProxy || "") + source.url,
         caption: source.caption,
         infobox: source.infobox,
+        aliasDict: source.aliasDict,
         featureType: source.layers[0].split(':')[1],
         propertyName: source.searchFields.join(','),
         displayName: source.displayFields ? source.displayFields : (source.searchFields[0] || "Sökträff"),
@@ -898,6 +935,7 @@ var SearchModel = {
     return !!(
       (isBar ? this.get('valueBar') : this.get('value')) ||
       (
+        !isBar &&
         this.get('selectionModel') &&
         this.get('selectionModel').hasFeatures() &&
         this.get('searchTriggered')

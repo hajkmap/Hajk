@@ -53,7 +53,8 @@ class MapOptions extends Component {
         infologo: config.infologo,
         mobileleft: config.mobileleft,
         mobileright: config.mobileright,
-        mobile: config.mobile
+		    mobile: config.mobile,
+		    title: config.title ? config.title : ""
       });
     });
     this.validate();
@@ -75,7 +76,7 @@ class MapOptions extends Component {
     this.state.secondaryColor = mapConfig.colors && mapConfig.colors.secondaryColor
     ? mapConfig.colors.secondaryColor
     : "#000";
-
+	this.state.title = mapConfig.title,
     this.state.projection = mapConfig.projection;
     this.state.zoom = mapConfig.zoom;
     this.state.center = mapConfig.center;
@@ -195,6 +196,7 @@ class MapOptions extends Component {
   save() {
     var config = this.props.model.get('mapConfig');
     if (this.validate()) {
+	  config.title = this.getValue("title");	
       config.projection = this.getValue('projection');
       config.zoom = this.getValue('zoom');
       config.center = this.getValue('center');
@@ -252,6 +254,19 @@ class MapOptions extends Component {
             <legend>Kartinställningar</legend>
             <button className="btn btn-primary" onClick={(e) => this.save(e)}>Spara</button>
             <br />
+			<div>
+              <label>Kartans titel <i className="fa fa-question-circle" data-toggle="tooltip" title="Om inget anges blir titel kartans filnamn"></i></label>
+              <input
+                type="text"
+                ref="input_title"
+                value={this.state.title}
+                className={this.getValidationClass("title")}
+                onChange={(e) => {
+                  this.setState({title: e.target.value});
+                  this.validateField("title");
+                }}
+              />
+            </div>
             <div>
               <label>Projektion*</label>
               <input

@@ -27,7 +27,7 @@ using System.Web;
 using MapService.Components.MapExport.Extentions;
 using MapService.Components.MapExport.SharpMapExtensions;
 using log4net;
-
+using System.Configuration;
 
 namespace MapService.Components.MapExport
 {
@@ -107,7 +107,7 @@ namespace MapService.Components.MapExport
                     style.Fill = new SolidBrush(color);
                 }
 
-                _log.Debug("Feature pointSrc = " + featureStyle.pointSrc);
+                _log.DebugFormat("Feature pointSrc = {0}", featureStyle.pointSrc);
                 if (featureStyle.pointSrc != "")
                 {
                     try
@@ -126,7 +126,7 @@ namespace MapService.Components.MapExport
                     }
                     catch (Exception ex)
                     {
-                        _log.Debug("Could not get icon. " + ex.ToString());
+                        _log.DebugFormat("Could not get icon: {0}", ex.ToString());
                     }
                 }
                 else
@@ -218,7 +218,8 @@ namespace MapService.Components.MapExport
                 {
                     //file.WriteLine("Found a layer");
                     string layername = "WMSLayer_" + i;
-                    DpiWmsLayer layer = new DpiWmsLayer(layername, wmsLayers[i].url, exportItem.resolution);
+
+                    DpiWmsLayer layer = new DpiWmsLayer(layername, wmsLayers[i].url , exportItem.resolution);
                     
                     layer.SetImageFormat("image/png");
                     layer.BgColor = Color.White;
@@ -245,7 +246,7 @@ namespace MapService.Components.MapExport
                         {
                             // TODO
                             //file.WriteLine("Error in adding subname.\n" + ex.ToString());
-                            throw ex;
+                            _log.ErrorFormat("Error in AddWMSLayers: {0}", ex.Message);
                         }
                     }
                     layer.SRID = wmsLayers[i].coordinateSystemId;
@@ -258,8 +259,10 @@ namespace MapService.Components.MapExport
                     //}
                 }
             }
-            catch
+            catch (Exception e)
             {
+
+                _log.ErrorFormat("Error2 in AddWMSLayers: {0}", e.Message);
                 /*
                 using (StreamWriter sw = new StreamWriter(@"C:\\log.txt", true))
                 {
@@ -541,7 +544,7 @@ namespace MapService.Components.MapExport
                     style.Fill = new SolidBrush(color);
                 }
 
-                _log.Debug("Featurestyle.pointSrc = " + featureStyle.pointSrc);
+                _log.DebugFormat("Featurestyle.pointSrc = {0}", featureStyle.pointSrc);
                 if (featureStyle.pointSrc != "")
                 {
                     if (featureStyle.pointSrc.StartsWith("data:"))
@@ -566,7 +569,7 @@ namespace MapService.Components.MapExport
                                  protocol = "http://";
                             }
                             
-                            _log.DebugFormat("url." + url);
+                            _log.DebugFormat("url: {0}", url);
                             WebClient wc = new WebClient();
                             byte[] bytes = wc.DownloadData(protocol + url + "/" + featureStyle.pointSrc);                            
                             style.Symbol = this.ImageFromBytes(bytes);                            
@@ -574,9 +577,9 @@ namespace MapService.Components.MapExport
                         catch (Exception ex)
                         {
                             //TODO
-                            _log.Error("Exception when trying to get icon. " + ex.ToString());
+                            _log.ErrorFormat("Exception when trying to get icon: {0}", ex.ToString());
                         }
-                    }                    
+                    }
                 }
                 else
                 {

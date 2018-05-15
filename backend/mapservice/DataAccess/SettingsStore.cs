@@ -26,13 +26,22 @@ namespace MapService.DataAccess
         /// <returns></returns>
         private LayerConfig readLayerConfigFromFile()
         {
-            string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.layerFile);
-            string jsonInput = System.IO.File.ReadAllText(file);
-            var config = JsonConvert.DeserializeObject<LayerConfig>(jsonInput);
-            //New wms config
-            if (config != null && config.extendedwmslayers == null)
-                config.extendedwmslayers = new List<ExtendedWmsConfig>();
-            return config;
+            try
+            {
+                string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.layerFile);
+                string jsonInput = System.IO.File.ReadAllText(file);
+                var config = JsonConvert.DeserializeObject<LayerConfig>(jsonInput);
+                //New wms config
+                if (config != null && config.extendedwmslayers == null)
+                    config.extendedwmslayers = new List<ExtendedWmsConfig>();
+                return config;
+
+            }
+            catch (Exception e)
+            {
+                _log.ErrorFormat("Exception in readLayerConfigFromFile: {0}", e.Message);
+                throw e;
+            }
         }
 
         /// <summary>
@@ -41,9 +50,18 @@ namespace MapService.DataAccess
         /// <returns></returns>
         private MapConfig readMapConfigFromFile(string mapFile)
         {
-            string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, mapFile);
-            string jsonInput = System.IO.File.ReadAllText(file);
-            return JsonConvert.DeserializeObject<MapConfig>(jsonInput);
+            try
+            {
+                string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, mapFile);
+                string jsonInput = System.IO.File.ReadAllText(file);
+                return JsonConvert.DeserializeObject<MapConfig>(jsonInput);
+
+            }
+            catch (Exception e)
+            {
+                _log.ErrorFormat("Exception in readMapConfigFromFile: {0}", e.Message);
+                throw e;
+            }
         }
 
         /// <summary>
@@ -52,9 +70,18 @@ namespace MapService.DataAccess
         /// <param name="mapConfig"></param>
         private void saveMapConfigToFile(MapConfig mapConfig, string mapFile)
         {
-            string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, mapFile);
-            string jsonOutput = JsonConvert.SerializeObject(mapConfig, Formatting.Indented);
-            System.IO.File.WriteAllText(file, jsonOutput);
+            try
+            {
+                string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, mapFile);
+                string jsonOutput = JsonConvert.SerializeObject(mapConfig, Formatting.Indented);
+                System.IO.File.WriteAllText(file, jsonOutput);
+
+            }
+            catch (Exception e)
+            {
+                _log.ErrorFormat("Exception in saveMapConfigToFile: {0}", e.Message);
+                throw e;
+            }
         }
 
         /// <summary>
@@ -63,9 +90,18 @@ namespace MapService.DataAccess
         /// <param name="layerConfig"></param>
         private void saveLayerConfigToFile(LayerConfig layerConfig) 
         {
-            string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.layerFile);
-            string jsonOutput = JsonConvert.SerializeObject(layerConfig, Formatting.Indented);
-            System.IO.File.WriteAllText(file, jsonOutput);
+            try
+            {
+                string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.layerFile);
+                string jsonOutput = JsonConvert.SerializeObject(layerConfig, Formatting.Indented);
+                System.IO.File.WriteAllText(file, jsonOutput);
+
+            }
+            catch (Exception e)
+            {
+                _log.ErrorFormat("Exception in saveLayerConfigToFile: {0}", e.Message);
+                throw e;
+            }
         }
 
         /// <summary>
@@ -74,18 +110,27 @@ namespace MapService.DataAccess
         /// <returns></returns>
         private List<string> getMapConfigFiles()
         {
-            string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
-            IEnumerable<string> files = Directory.EnumerateFiles(folder);
-            List<string> fileList = new List<string>();
-            foreach (string file in files)
+            try
             {
-                string fileName = Path.GetFileName(file);
-                if (fileName != "layers.json" && fileName != "data.json")
+                string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
+                IEnumerable<string> files = Directory.EnumerateFiles(folder);
+                List<string> fileList = new List<string>();
+                foreach (string file in files)
                 {
-                    fileList.Add(fileName);
+                    string fileName = Path.GetFileName(file);
+                    if (fileName != "layers.json" && fileName != "data.json")
+                    {
+                        fileList.Add(fileName);
+                    }
                 }
+                return fileList;
+
             }
-            return fileList;
+            catch (Exception e)
+            {
+                _log.ErrorFormat("Exception in getMapConfigFiles: {0}", e.Message);
+                throw e;
+            }
         }
 
         /// <summary>
@@ -94,17 +139,26 @@ namespace MapService.DataAccess
         /// <param name="id"></param>
         private void removeLayerFromConfig(string id)
         {
-            List<string> configFiles = this.getMapConfigFiles();
-            configFiles.ForEach(mapFile =>
+            try
             {
-                MapConfig config = readMapConfigFromFile(mapFile);
-                var tool = config.tools.Find(t => t.type == "layerswitcher");
-                LayerMenuOptions options = JsonConvert.DeserializeObject<LayerMenuOptions>(tool.options.ToString());
-                this.removeLayer(id, options.groups);
-                this.removeLayer(id, options.baselayers);
-                config.tools.Where(t => t.type == "layerswitcher").FirstOrDefault().options = options;
-                this.saveMapConfigToFile(config, mapFile);
-            });
+                List<string> configFiles = this.getMapConfigFiles();
+                configFiles.ForEach(mapFile =>
+                {
+                    MapConfig config = readMapConfigFromFile(mapFile);
+                    var tool = config.tools.Find(t => t.type == "layerswitcher");
+                    LayerMenuOptions options = JsonConvert.DeserializeObject<LayerMenuOptions>(tool.options.ToString());
+                    this.removeLayer(id, options.groups);
+                    this.removeLayer(id, options.baselayers);
+                    config.tools.Where(t => t.type == "layerswitcher").FirstOrDefault().options = options;
+                    this.saveMapConfigToFile(config, mapFile);
+                });
+
+            }
+            catch (Exception e)
+            {
+                _log.ErrorFormat("Exception in removeLayerFromConfig: {0}", e.Message);
+                throw e;
+            }
         }
 
         /// <summary>

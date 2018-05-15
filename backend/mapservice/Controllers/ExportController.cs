@@ -68,19 +68,18 @@ namespace MapService.Controllers
 
             try
             {
-                _log.DebugFormat("Received json: " + json);
+                _log.DebugFormat("Received json: {0}", json);
 
                 // try to decode input string to see if it is base64 encoded
                 try
                 {
                     byte[] decoded = Convert.FromBase64String(json);
                     json = System.Text.Encoding.UTF8.GetString(decoded);
-                    _log.DebugFormat("json after decode: " + json);
+                    _log.DebugFormat("json after decode: {0}", json);
                 }
                 catch (Exception e)
                 {
-                    _log.Debug("Could not decode base64. Will treat as non-base64 encoded.");
-                    _log.Debug(e);
+                    _log.DebugFormat("Could not decode base64. Will treat as non-base64 encoded: {0}", e.Message);
                 }
 
                 MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
@@ -104,8 +103,8 @@ namespace MapService.Controllers
             }
             catch (Exception e)
             {
-                _log.Fatal(e.Message);
-                throw;
+                _log.ErrorFormat("Unable to create PDF: {0}", e.Message);
+                throw e;
             }
         }
 
@@ -123,19 +122,18 @@ namespace MapService.Controllers
         [HttpPost]
         public string TIFF(string json)
         {
-            _log.DebugFormat("Received json: " + json);
+            _log.DebugFormat("Received json: {0}", json);
 
             // try to decode input string to see if it is base64 encoded
             try
             {
                 byte[] decoded = Convert.FromBase64String(json);
                 json = System.Text.Encoding.UTF8.GetString(decoded);
-                _log.DebugFormat("json after decode: " + json);
+                _log.DebugFormat("json after decode: {0}", json);
             }
             catch (Exception e)
             {
-                _log.Debug("Could not decode base64. Will treat as non-base64 encoded.");
-                _log.Debug(e);
+                _log.DebugFormat("Could not decode base64. Will treat as non-base64 encoded: {0}", e.Message);
             }
             MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
                                     
@@ -191,18 +189,17 @@ namespace MapService.Controllers
         [ValidateInput(false)]
         public string KML(string json)
         {
-            _log.DebugFormat("Received json: " + json);
+            _log.DebugFormat("Received json: {0}", json);
 
             // try to decode input string to see if it is base64 encoded
             try
             {
                 byte[] decoded = Convert.FromBase64String(json);
                 json = System.Text.Encoding.UTF8.GetString(decoded);
-                _log.DebugFormat("json after decode: " + json);
+                _log.DebugFormat("json after decode: {0}", json);
             } catch(Exception e)
             {
-                _log.Debug("Could not decode base64. Will treat as non-base64 encoded");
-                _log.Debug(e);
+                _log.DebugFormat("Could not decode base64. Will treat as non-base64 encoded: {0}", e.Message);
             }
             
             KMLCreator kmlCreator = new KMLCreator();
@@ -230,18 +227,17 @@ namespace MapService.Controllers
         [HttpPost]
         public string Excel(string json)
         {
-            _log.DebugFormat("Received json: " + json);
+            _log.DebugFormat("Received json: {0}", json);
             // try to decode input string to see if it is base64 encoded
             try
             {
                 byte[] decoded = Convert.FromBase64String(json);
                 json = System.Text.Encoding.UTF8.GetString(decoded);
-                _log.DebugFormat("json after decode: " + json);
+                _log.DebugFormat("json after decode: {0}", json);
             }
             catch (Exception e)
             {
-                _log.Debug("Could not decode base64. Will treat as non-base64 encoded");
-                _log.Debug(e);
+                _log.DebugFormat("Could not decode base64. Will treat as non-base64 encoded: {0}", e.Message);
             }
             List<ExcelTemplate> data = JsonConvert.DeserializeObject<List<ExcelTemplate>>(json);
             DataSet dataSet = Util.ToDataSet(data);

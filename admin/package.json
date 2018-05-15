@@ -1,11 +1,14 @@
 {
   "name": "hajk-admin",
-  "version": "2.2.0",
+  "version": "2.4.0",
   "description": "Common webmap admin interface",
   "homepage": "https://github.com/Johkar/Hajk2/admin",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Johkar/Hajk2.git"
+  },
+  "scripts": {
+    "rebuild": "npm install && grunt"
   },
   "private": true,
   "devDependencies": {
@@ -23,6 +26,7 @@
     "grunt-babel": "^6.0.0",
     "grunt-banner": "^0.6.0",
     "grunt-browserify": "^4.0.1",
+    "grunt-contrib-clean": "^1.1.0",
     "grunt-contrib-concat": "^0.5.1",
     "grunt-contrib-connect": "^0.11.2",
     "grunt-contrib-copy": "^0.8.2",
@@ -38,14 +42,14 @@
     "grunt-replace": "^1.0.1",
     "grunt-text-replace": "^0.4.0",
     "grunt-usebanner": "^0.3.1",
-    "jquery": "^3.1.1",
+    "jquery": "^3.3.1",
     "jquery-sortable": "^0.9.13",
     "load-grunt-tasks": "^3.4.0",
     "matchdep": "^1.0.1",
     "openlayers": "4.2.0",
     "react": "^15.4.2",
-    "react-color": "^2.11.1",
+    "react-color": "^2.14.1",
     "react-dom": "^15.4.2",
-    "x2js": "^3.0.1"
+    "x2js": "^3.2.1"
   }
 }

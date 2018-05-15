@@ -26,6 +26,7 @@ import MapOptions from './mapoptions.jsx';
 import ToolOptions from './tooloptions.jsx';
 import $ from 'jquery';
 import Alert from '../views/alert.jsx';
+import ListProperties from '../views/listproperties.jsx';
 
 var defaultState = {
   alert: false,
@@ -64,8 +65,14 @@ $.fn.editable = function(component) {
         reset();
       }
 
-      function saveLayer() {
+      function saveLayer() {      
         let visible = checkbox3.is(':checked');
+
+        if (component.state.authActive) {
+          node.parent().attr("data-visibleforgroups", input3.val());
+          node.parent().attr("data-infobox", input4.val());
+        }
+
         node.parent().attr("data-visibleatstart", visible);
         if (visible)
           node.parent().addClass("visible");
@@ -85,6 +92,8 @@ $.fn.editable = function(component) {
       ,   id3       = Math.floor(Math.random() * 1E5)
       ,   id4       = Math.floor(Math.random() * 1E5)
       ,   id5       = Math.floor(Math.random() * 1E5)
+      ,   id6       = Math.floor(Math.random() * 1E5)
+      ,   id7       = Math.floor(Math.random() * 1E5)
       ,   ok        = $('<span class="btn btn-success">OK</span>')
       ,   layerOk   = $('<span class="btn btn-success">OK</span>')
       ,   layerOk2   = $('<span class="btn btn-success">OK</span>')
@@ -95,8 +104,10 @@ $.fn.editable = function(component) {
       ,   abort2     = $('<span class="btn btn-default">Avbryt</span>')
       ,   label     = $(`<label for="${id}">Expanderad vid start&nbsp;</label>`)
       ,   label2    = $(`<label for="${id2}">Toggla alla-knapp&nbsp;</label>`)
-      ,   label3    = $(`<label for="${id3}">Synlig vid start&nbsp;</label>`)
+      ,   label3    = $(`<label for="${id3}">Synlig vid start&nbsp;</label><br />`)
       ,   label4    = $(`<label for="${id4}">Redigera snabbval&nbsp;</label><br />`)
+      ,   label5    = $(`<br /><label for="${id6}">Tillträde</label><br />`)
+      ,   label6    = $(`<label for="${id7}">Infobox</label><br />`)
       ,   checkbox  = $(`<input id="${id}" type="checkbox"/>`)
       ,   checkbox2 = $(`<input id="${id2}" type="checkbox"/>`)
       ,   checkbox3 = $(`<input id="${id3}" type="checkbox"/>`)
@@ -104,6 +115,8 @@ $.fn.editable = function(component) {
       ,   remove    = $('<span class="fa fa-minus-circle"></span>')
       ,   input     = $('<input />')
       ,   input2    = $(`<input id="${id5}" type="text" placeholder="Ny länk"/><br />`)
+      ,   input3    = $(`<input id="${id6}" type="text" /><br />`)
+      ,   input4    = $(`<input id="${id7}" type="text" /><br /><br />`)
       ,   expanded  = $('<div class="expanded-at-start"></div>')
       ,   toggled   = $('<div class="expanded-at-start"></div>')
       ,   visible   = $('<div class=""></div>')
@@ -135,7 +148,7 @@ $.fn.editable = function(component) {
           node.html(prev);
           reset();
         });
-
+      
       if (node.parent().attr("data-expanded") === 'true') {
         checkbox.attr('checked', 'checked');
       }
@@ -145,12 +158,23 @@ $.fn.editable = function(component) {
       if (node.parent().attr("data-visibleatstart") === 'true') {
         checkbox3.attr('checked', 'checked');
       }
+      if (node.parent().attr("data-visibleforgroups")) {
+        input3.val(node.parent().attr("data-visibleforgroups"));
+      }
+      if (node.parent().attr("data-infobox")) {
+        input4.val(node.parent().attr("data-infobox"));
+      }
 
       if (node.parent().attr("data-expanded") !== undefined && node.parent().attr("data-toggled") !== undefined) {
         expanded.append(checkbox, label);
         toggled.append(checkbox2, label2);
       }
       visible.append(checkbox3, label3);
+
+      if(component.state.authActive) {
+        visible.append(label5, input3);
+        visible.append(label6, input4);
+      }
 
       editPreset.append(label4, checkbox4, input2);
 
@@ -246,16 +270,22 @@ class Menu extends Component {
   constructor() {
     super();
     var state = {
-      drawOrder: false,
-      layerMenu: true,
-      addedLayers: [],
-      maps: [],
-      active: true,
-      visibleAtStart: true,
-      backgroundSwitcherBlack: true,
-      backgroundSwitcherWhite: true,
-      toggleAllButton: false,
-      instruction: '',
+		adGroups: [],
+		isHidden: true,
+		drawOrder: false,
+		layerMenu: true,
+		addedLayers: [],
+		maps: [],
+		active: true,
+		visibleAtStart: true,
+		backgroundSwitcherBlack: true,
+		backgroundSwitcherWhite: true,
+		toggleAllButton: false,
+		instruction: "",
+		dropdownThemeMaps: false,
+		themeMapHeaderCaption: "Temakartor",
+		visibleForGroups: [],
+		adList: null
     };
     this.state = state;
   }
@@ -264,16 +294,19 @@ class Menu extends Component {
    *
    */
   init() {
-
     this.props.model.set('config', this.props.config);
     this.load('maps');
-    this.load('layers');
+	  this.load('layers');
+	  this.load('auth');
+	
+	
 
     this.props.model.on('change:urlMapConfig', () => {
-
+	
       this.setState({
         reset: true
-      })
+	  })
+	  
 
       this.load('layermenu', () => {
         this.setState({
@@ -283,7 +316,10 @@ class Menu extends Component {
           backgroundSwitcherBlack: this.props.model.get('layerMenuConfig').backgroundSwitcherBlack,
           backgroundSwitcherWhite: this.props.model.get('layerMenuConfig').backgroundSwitcherWhite,
           toggleAllButton: this.props.model.get('layerMenuConfig').toggleAllButton,
-          instruction: this.props.model.get('layerMenuConfig').instruction
+          instruction: this.props.model.get('layerMenuConfig').instruction,
+          dropdownThemeMaps: this.props.model.get('layerMenuConfig').dropdownThemeMaps,
+          themeMapHeaderCaption: this.props.model.get('layerMenuConfig').themeMapHeaderCaption,
+		  		visibleForGroups: this.props.model.get('layerMenuConfig').visibleForGroups ? this.props.model.get('layerMenuConfig').visibleForGroups : []
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -314,7 +350,10 @@ class Menu extends Component {
     });
 
     defaultState.layers = this.props.model.get('layers');
-    this.setState(defaultState);
+	this.setState(defaultState);
+	
+	
+
   }
 
   /**
@@ -329,7 +368,7 @@ class Menu extends Component {
    *
    */
   componentDidMount() {
-    this.init();
+	this.init();
   }
 
   /**
@@ -365,6 +404,10 @@ class Menu extends Component {
    */
   load(type, callback) {
     switch(type) {
+    case "auth":
+	  	this.props.model.getAuthSetting((auth) => {
+			this.setState({authActive: auth});
+		});
       case "maps":
         this.props.model.loadMaps(maps => {
           this.setState({
@@ -437,7 +480,6 @@ class Menu extends Component {
    *
    */
   parseSettings() {
-
     var settings = {
       groups: [],
       baselayers: [],
@@ -447,18 +489,41 @@ class Menu extends Component {
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
       toggleAllButton: this.state.toggleAllButton,
       instruction: this.state.instruction,
+      dropdownThemeMaps: this.state.dropdownThemeMaps,
+      themeMapHeaderCaption: this.state.themeMapHeaderCaption,
+      visibleForGroups: this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
     };
 
     var roots = $('.tree-view > ul > li');
-
+    let that = this;
     function layers(node) {
       return $(node).find('> ul > li.layer-node').toArray().map(node => {
-        return {
-          id: node.dataset.id,
-          drawOrder: (node.dataset.draworder ? node.dataset.draworder : 1000),
-          visibleAtStart: node.dataset.visibleatstart
+        
+        if (that.state.authActive) {
+          let visibleForGroups = node.dataset.visibleforgroups ? node.dataset.visibleforgroups.split(",") : [];
+          let infobox = node.dataset.infobox ? node.dataset.infobox : "";
+          if (Array.isArray(visibleForGroups)) {
+            visibleForGroups = visibleForGroups.map(Function.prototype.call, String.prototype.trim);
+          } else {
+            visibleForGroups = String.prototype.trim(visibleForGroups);
+          }
+
+
+          return {
+            id: node.dataset.id,
+            drawOrder: (node.dataset.draworder ? node.dataset.draworder : 1000),
+            visibleAtStart: node.dataset.visibleatstart,
+            visibleForGroups: visibleForGroups ? visibleForGroups : [],
+            infobox: infobox ? infobox : ""
+          }  
+        } else {
+          return {
+            id: node.dataset.id,
+            drawOrder: (node.dataset.draworder ? node.dataset.draworder : 1000),
+            visibleAtStart: node.dataset.visibleatstart
+          }  
         }
-      })
+      });
     }
 
     function groups(node) {
@@ -490,14 +555,33 @@ class Menu extends Component {
     }
 
     roots.toArray().forEach(root => {
-      root.dataset.type === "layer" ?
+      let visibleForGroups = root.dataset.visibleforgroups ? root.dataset.visibleforgroups.split(",") : [];
+      if (Array.isArray(visibleForGroups)) {
+        visibleForGroups = visibleForGroups.map(Function.prototype.call, String.prototype.trim);
+      } else {
+        visibleForGroups = String.prototype.trim(visibleForGroups);
+      }
+      
+      if (this.state.authActive) {
+        root.dataset.type === "layer" ?
       settings.baselayers.push({
         id: root.dataset.id,
         visibleAtStart: root.dataset.visibleatstart,
-        drawOrder: 0
+        drawOrder: 0,
+        visibleForGroups: visibleForGroups ? visibleForGroups : [],
+        infobox: ""
       }) :
-      settings.groups.push(groupItem(root))
-    });
+      settings.groups.push(groupItem(root));    
+      } else {
+        root.dataset.type === "layer" ?
+        settings.baselayers.push({
+          id: root.dataset.id,
+          visibleAtStart: root.dataset.visibleatstart,
+          drawOrder: 0
+        }) :
+        settings.groups.push(groupItem(root));
+      }
+	});
     return settings;
   }
   /**
@@ -523,7 +607,6 @@ class Menu extends Component {
   save(settings) {
     this.props.model.updateConfig(settings, success => {
       if (success) {
-
         this.setState({
           reset: true
         });
@@ -601,6 +684,7 @@ class Menu extends Component {
 
   createLayer(id) {
     var layerName = this.getLayerNameFromId(id);
+      
     var layer = $(`
       <li
         class="layer-node"
@@ -609,11 +693,11 @@ class Menu extends Component {
         <span class="layer-name">${layerName}</span>
       </li>
     `);
+    
     $('.tree-view > ul').prepend(layer);
     layer.editable(this);
     this.forceUpdate();
   }
-
   
   /**
    *
@@ -745,17 +829,36 @@ class Menu extends Component {
             }
           }
           var className = visible ? "layer-node visible" : "layer-node";
-          leafs.push(
-            <li
-              className={className}
-              key={i}
-              data-id={typeof layer === 'object' ? layer.id : layer}
-              data-draworder={typeof layer === 'object' ? layer.drawOrder : 0}
-              data-visibleatstart={visible}
-              data-type="layer">
-              <span className="layer-name">{that.getLayerNameFromId(typeof layer === 'object' ? layer.id : layer)}</span>
-            </li>
-          );
+          if (that.state.authActive) {
+            let visibleForGroups = layer.visibleForGroups ? layer.visibleForGroups : [];
+            let infobox = layer.infobox ? layer.infobox: "";
+
+            leafs.push(
+              <li
+                className={className}
+                key={i}
+                data-id={typeof layer === 'object' ? layer.id : layer}
+                data-draworder={typeof layer === 'object' ? layer.drawOrder : 0}
+                data-visibleatstart={visible}
+                data-type="layer"
+                data-visibleforgroups={Array.isArray(visibleForGroups) ? visibleForGroups.join(",") : visibleForGroups}
+                data-infobox={infobox}>
+                <span className="layer-name">{that.getLayerNameFromId(typeof layer === 'object' ? layer.id : layer)}</span>
+              </li>
+            );
+          } else {
+            leafs.push(
+              <li
+                className={className}
+                key={i}
+                data-id={typeof layer === 'object' ? layer.id : layer}
+                data-draworder={typeof layer === 'object' ? layer.drawOrder : 0}
+                data-visibleatstart={visible}
+                data-type="layer">
+                <span className="layer-name">{that.getLayerNameFromId(typeof layer === 'object' ? layer.id : layer)}</span>
+              </li>
+            );
+          }
         });
         if (group.hasOwnProperty('groups')) {
           leafs.push(roots(group.groups));
@@ -903,8 +1006,8 @@ class Menu extends Component {
   }
 
   handleInputChange(event) {
-    var target = event.target;
-    var name = target.name;
+    const target = event.target;
+    const name = target.name;
     var value = target.type === 'checkbox' ? target.checked : target.value;
 
     if (typeof value === "string" && /^[\d\.\, ]+$/.test(value)) {
@@ -914,13 +1017,123 @@ class Menu extends Component {
     if (name == "instruction"){
       value = btoa(value);
     }
+
     this.setState({
       [name]: value
     });
   }
 
   /**
-   *
+   * Hanterar event för inmatningsfält för Active Directory-grupper
+   * @param {*} event 
+   */
+	handleAuthGrpsChange(event) {
+		const target = event.target;
+		const value = target.value;
+		let groups = [];
+
+		try {
+			groups = value.split(",");
+		} catch (error) {
+			console.log(`Någonting gick fel: ${error}`);
+		}
+
+		this.setState({
+			visibleForGroups: value !== "" ? groups : []
+		});  
+	}
+
+  /**
+   * Visar / döljer lista över tillgängliga AD-grupper
+   */
+	toggleHidden () {
+    if (this.state.authActive) {
+      this.setState({
+        isHidden: !this.state.isHidden
+      });
+  
+      this.state.isHidden ? this.renderAdList() : this.setState({adList: null})
+    }
+		
+	}
+
+  /**
+   * Renderar lista över tillgängliga AD-grupper då modellen fått dessa från backend
+   */
+	renderAdList() {
+    if (this.state.authActive) {
+      this.props.model.fetchADGroups((grps) => {
+        this.setState({adGroups: grps});
+
+        this.setState({adList: <ListProperties properties={this.state.adGroups} show={this.state.isHidden} />})
+      });
+    }
+	}
+  
+  /**
+   * Renderar inmatningsfält för AD-grupper
+   */
+	renderAuthGrps () {
+		if (this.state.authActive) { 
+			return (
+				<div className="col-sm-12">
+					<label htmlFor="authGroups">Tillträde &nbsp;
+						<i className="fa fa-question-circle" data-toggle="tooltip" title="Ange AD-grupper separerade med kommatecken"></i>
+					</label>
+					<input id="authGroups" name="authGroups" type="text" onChange={(e)=> {this.handleAuthGrpsChange(e)}} value={this.state.visibleForGroups} />
+					<i className="fa fa-bars" data-toggle="tooltip" title="Visa tillgängliga AD-grupper" onClick={()=> {this.toggleHidden()}}></i>
+				</div>
+			);
+		} else {
+			return null;
+		}
+	}
+
+  /**
+   * Renderar konfigurationsmöjlighet för temakartor-dropdown
+   */
+	renderThemeMapCheckbox () {
+		if (this.state.authActive) {
+			return (
+				<div className="row">
+					<div className="col-sm-1">
+					<input id="dropdownThemeMaps" 
+							name="dropdownThemeMaps" 
+							type="checkbox" 
+							onChange={(e)=> {this.handleInputChange(e)}} 
+							checked={this.state.dropdownThemeMaps} />&nbsp;
+					</div>
+					<label className="layer-menu-label-checkbox" htmlFor="dropdownThemeMaps">Visa lista över temakartor</label>
+				  </div>
+			);
+		} else {
+			return null;
+		}
+	}
+
+  /**
+   * Renderar inmatningsfält för rubriksättning till temakartor
+   */
+	renderThemeMapHeaderInput () {
+		if (this.state.authActive) {
+			return (
+				<div className="row">
+					<div className="col-sm-12">
+					  <label htmlFor="themeMapHeaderCaption">Rubriktext temakartor</label>
+					  <input id="themeMapHeaderCaption" 
+							 name="themeMapHeaderCaption" 
+							 type="text" value={this.state.themeMapHeaderCaption} 
+							 onChange={(e)=> { this.setState({ 'themeMapHeaderCaption': e.target.value }); }} />
+					</div>
+				</div>
+			);
+		} else {
+			return null;
+		}
+	}
+  
+  /** 
+   * 
    */
   renderArticleContent() {
     if (this.state.mapOptions) {
@@ -955,7 +1168,7 @@ class Menu extends Component {
       return (
         <div>
           <aside>
-            <input placeholder="filtrera" type="text" onChange={(e) => this.filterLayers(e)} />
+            <input placeholder="filtrera" type="text" onChange={(e)=> this.filterLayers(e)} />
             <ul className="config-layer-list">
               {this.renderLayersFromConfig()}
             </ul>
@@ -963,70 +1176,80 @@ class Menu extends Component {
           <article>
             <fieldset className="tree-view">
               <legend>Hantera lagermeny</legend>
-              <button className="btn btn-primary" onClick={(e) => this.saveSettings(e)}>Spara</button>&nbsp;
-              <button className="btn btn-success" onClick={(e) => this.createGroup("Ny grupp", false, false)}>Ny grupp</button>&nbsp;
-              <div>
-                <input
-                  id="active"
-                  name="active"
-                  type="checkbox"
-                  onChange={(e) => {this.handleInputChange(e)}}
-                  checked={this.state.active}/>&nbsp;
-                <label htmlFor="active">Aktiverad</label>
+              <button className="btn btn-primary" onClick={(e)=> this.saveSettings(e)}>Spara</button>&nbsp;
+              <button className="btn btn-success" onClick={(e)=> this.createGroup("Ny grupp", false, false)}>Ny grupp</button>&nbsp;
+              <div className="row">
+                <div className="col-sm-1">
+                  <input id="active" name="active" type="checkbox" onChange={(e)=> {this.handleInputChange(e)}} checked={this.state.active}/>&nbsp;
+                </div>
+                <label className="layer-menu-label-checkbox" htmlFor="active">Aktiverad</label>
               </div>
-              <div>
-                <input
-                  id="visibleAtStart"
-                  name="visibleAtStart"
-                  type="checkbox"
-                  onChange={(e) => {this.handleInputChange(e)}}
-                  checked={this.state.visibleAtStart}/>&nbsp;
-                <label htmlFor="visibleAtStart">Synlig vid start</label>
+              <div className="row">
+                <div className="col-sm-1">
+                  <input id="visibleAtStart" 
+                         name="visibleAtStart" 
+                         type="checkbox" 
+                         onChange={(e)=> {this.handleInputChange(e)}} 
+                         checked={this.state.visibleAtStart}/>&nbsp;
+                </div>
+                <label className="layer-menu-label-checkbox" htmlFor="visibleAtStart">Synlig vid start</label>
               </div>
-              <div>
-                <label htmlFor="instruction">Instruktion</label>
-                <textarea
-                  type="text"
-                  id="instruction"
-                  name="instruction"
-                  onChange={(e) => {this.handleInputChange(e)}}
-                  value={atob(this.state.instruction)}
-                />
+              <div className="row">
+                <div className="col-sm-1">
+                  <input id="backgroundSwitcherBlack" 
+                         name="backgroundSwitcherBlack" 
+                         type="checkbox" 
+                         onChange={(e)=> {this.handleInputChange(e)}} 
+                         checked={this.state.backgroundSwitcherBlack}/>&nbsp;
+                </div>
+                <label className="layer-menu-label-checkbox" htmlFor="backgroundSwitcherBlack">Svart bakgrundskarta</label>
               </div>
-              <div>
-                <input
-                  id="backgroundSwitcherBlack"
-                  name="backgroundSwitcherBlack"
-                  type="checkbox"
-                  onChange={(e) => {this.handleInputChange(e)}}
-                  checked={this.state.backgroundSwitcherBlack}/>&nbsp;
-                <label htmlFor="backgroundSwitcherBlack">Svart bakgrundskarta</label>
-              </div>
-              <div>
-                <input
-                  id="backgroundSwitcherWhite"
-                  name="backgroundSwitcherWhite"
-                  type="checkbox"
-                  onChange={(e) => {this.handleInputChange(e)}}
-                  checked={this.state.backgroundSwitcherWhite}/>&nbsp;
+              <div className="row">
+                <div className="col-sm-1">
+                  <input id="backgroundSwitcherWhite" 
+                         name="backgroundSwitcherWhite" 
+                         type="checkbox" 
+                         onChange={(e)=> {this.handleInputChange(e)}} 
+                         checked={this.state.backgroundSwitcherWhite}/>&nbsp;
+                </div>
                 <label htmlFor="backgroundSwitcherWhite">Vit bakgrundskarta</label>
               </div>
-              <div>
-                <input
-                  id="toggleAllButton"
-                  name="toggleAllButton"
-                  type="checkbox"
-                  onChange={(e) => {this.handleInputChange(e)}}
-                  checked={this.state.toggleAllButton}/>&nbsp;
-                <label htmlFor="toggleAllButton">Släck alla lager-knapp</label>
+              <div className="row">
+                <div className="col-sm-1">
+                  <input id="toggleAllButton" 
+                         name="toggleAllButton" 
+                         type="checkbox" 
+                         onChange={(e)=> {this.handleInputChange(e)}} 
+                         checked={this.state.toggleAllButton}/>&nbsp;
+                </div>
+                <label className="layer-menu-label-checkbox" htmlFor="toggleAllButton">Släck alla lager-knapp</label>
+              </div>
+              {this.renderThemeMapCheckbox()}
+              {this.renderThemeMapHeaderInput()}
+              <div className="row">
+                <div className="col-sm-12">
+                  <label htmlFor="instruction">Instruktion</label>
+                  <textarea id="instruction"
+                         name="instruction" 
+                         type="text"  
+                         onChange={(e) => {this.handleInputChange(e)}}
+                         value={this.state.instruction ? atob(this.state.instruction) : ""}/>
+                </div>
+              </div>
+              <div className="row">
+                {this.renderAuthGrps()}
               </div>
               {this.renderLayerMenu()}
             </fieldset>
           </article>
+		      {this.state.adList}
         </div>
       )
     }
   }
+
+
+
 
   /**
    *

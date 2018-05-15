@@ -28,7 +28,11 @@ var defaultState = {
   active: false,
   index: 0,
   instruction: "",
-  varbergVer: false
+  varbergVer: false,
+  geoserverUrl: "",
+  notFeatureLayers: [],
+  geoserverNameToCategoryName: {},
+  visibleForGroups: []
 };
 
 class ToolOptions extends Component {
@@ -48,7 +52,11 @@ class ToolOptions extends Component {
         active: true,
         index: tool.index,
         instruction: tool.options.instruction,
-        varbergVer: tool.options.varbergVer
+        varbergVer: tool.options.varbergVer,
+        geoserverUrl: tool.options.geoserverUrl,
+        notFeatureLayers: tool.options.notFeatureLayers ? tool.options.notFeatureLayers : [],
+        geoserverNameToCategoryName: tool.options.geoserverNameToCategoryName,
+        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
       });
     } else {
       this.setState({
@@ -112,7 +120,10 @@ class ToolOptions extends Component {
       "index": this.state.index,
       "options": {
         "instruction": this.state.instruction,
-        "varbergVer": this.state.varbergVer
+        "varbergVer": this.state.varbergVer,
+        "geoserverUrl": this.state.geoserverUrl,
+        "notFeatureLayers": this.state.notFeatureLayers,
+        "visibleForGroups": this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
       }
     };
 
@@ -153,6 +164,46 @@ class ToolOptions extends Component {
     }
   }
 
+  handleAuthGrpsChange(event) {
+		const target = event.target;
+		const value = target.value;
+		let groups = [];
+
+		try {
+			groups = value.split(",");
+		} catch (error) {
+			console.log(`Någonting gick fel: ${error}`);
+		}
+
+
+      switch(target.id){
+        case 'visibleForGroups':
+          this.setState({
+            visibleForGroups: value !== "" ? groups : []
+          });
+          break;
+        case 'notFeatureLayers':
+          this.setState({
+            notFeatureLayers: value !== "" ? groups : []
+          });
+          break;
+    }
+
+  }
+  
+  renderVisibleForGroups () {
+    if (this.props.parent.props.parent.state.authActive) {
+      return ( 
+        <div>
+          <label htmlFor="visibleForGroups">Tillträde</label>
+          <input id="visibleForGroups" value={this.state.visibleForGroups} type="text" name="visibleForGroups" onChange={(e) => {this.handleAuthGrpsChange(e)}}></input>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
+
   /**
    *
    */
@@ -188,9 +239,10 @@ class ToolOptions extends Component {
               id="instruction"
               name="instruction"
               onChange={(e) => {this.handleInputChange(e)}}
-              value={atob(this.state.instruction)}
+              value={this.state.instruction ? atob(this.state.instruction) : ""}
             />
           </div>
+          {this.renderVisibleForGroups()}
           <div>
             <input
               id="varbergVer"
@@ -199,6 +251,34 @@ class ToolOptions extends Component {
               onChange={(e) => {this.handleInputChange(e)}}
               checked={this.state.varbergVer}/>&nbsp;
             <label htmlFor="varbergVer">Varbergs version</label>
+          </div>
+          <div>
+            <label htmlFor="geoserverUrl">geoserverUrl</label>
+            <input
+              type="text"
+              id="geoserverUrl"
+              name="geoserverUrl"
+              onChange={(e) => {this.handleInputChange(e)}}
+              value={this.state.geoserverUrl}
+            />
+          </div>
+          <div>
+            <label htmlFor="notFeatureLayers">notFeatureLayers</label>
+            <textarea id="notFeatureLayers"
+                   value={this.state.notFeatureLayers}
+                   type="text"
+                   name="notFeatureLayers"
+                   onChange={(e) => {this.handleAuthGrpsChange(e)}}>
+            </textarea>
+          </div>
+          <div>
+            <label htmlFor="geoserverNameToCategoryName">geoserverNameToCategoryName</label>
+            <textarea id="geoserverNameToCategoryName"
+                      value={this.state.geoserverNameToCategoryName}
+                      type="text"
+                      name="geoserverNameToCategoryName"
+                      onChange={(e) => {this.handleInputChange(e)}}>
+            </textarea>
           </div>
         </form>
       </div>

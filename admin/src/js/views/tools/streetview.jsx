@@ -29,6 +29,7 @@ var defaultState = {
   index: 0,
   instruction: "",
   apiKey: "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
+  visibleForGroups: []
 };
 
 class ToolOptions extends Component {
@@ -48,7 +49,8 @@ class ToolOptions extends Component {
         active: true,
         index: tool.index,
         instruction: tool.options.instruction,
-        apiKey: tool.options.apiKey
+        apiKey: tool.options.apiKey,
+        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
       });
     } else {
       this.setState({
@@ -111,8 +113,9 @@ class ToolOptions extends Component {
       "type": this.type,
       "index": this.state.index,
       "options": {
-        apiKey: this.state.apiKey,
+        "apiKey": this.state.apiKey,
         "instruction": this.state.instruction,
+        "visibleForGroups": this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
       }
     };
 
@@ -153,6 +156,35 @@ class ToolOptions extends Component {
     }
   }
 
+  handleAuthGrpsChange(event) {
+		const target = event.target;
+		const value = target.value;
+		let groups = [];
+
+		try {
+			groups = value.split(",");
+		} catch (error) {
+			console.log(`Någonting gick fel: ${error}`);
+		}
+
+		this.setState({
+			visibleForGroups: value !== "" ? groups : []
+		});  
+  }
+  
+  renderVisibleForGroups () {
+    if (this.props.parent.props.parent.state.authActive) {
+      return ( 
+        <div>
+          <label htmlFor="visibleForGroups">Tillträde</label>
+          <input id="visibleForGroups" value={this.state.visibleForGroups} type="text" name="visibleForGroups" onChange={(e) => {this.handleAuthGrpsChange(e)}}></input>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
+
   /**
    *
    */
@@ -188,9 +220,10 @@ class ToolOptions extends Component {
               id="instruction"
               name="instruction"
               onChange={(e) => {this.handleInputChange(e)}}
-              value={atob(this.state.instruction)}
+              value={this.state.instruction ? atob(this.state.instruction) : ""}
             />
           </div>
+          {this.renderVisibleForGroups()}
           <div>
             <label htmlFor="apiKey">API-nyckel</label>
             <input value={this.state.apiKey} type="text" name="apiKey" onChange={(e) => {this.handleInputChange(e)}}></input>

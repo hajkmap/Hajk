@@ -153,10 +153,11 @@ var BackgroundSwitcherView = {
       if (this.state.selected === layer.get('id')) {
         return true;
       }
+    } else {
+      return this.props.layers.filter(l =>
+        l.getVisible() && l.id === layer.id
+      ).length === 1;
     }
-    return this.props.layers.filter(l =>
-      l.getVisible() && l.id === layer.id
-    ).length === 1;
   },
 
   /**

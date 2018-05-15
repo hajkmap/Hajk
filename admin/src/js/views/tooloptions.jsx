@@ -39,7 +39,7 @@ import Measure from "./tools/measure.jsx";
 import Routing from "./tools/routing.jsx";
 
 var defaultState = {
-  activeTool: undefined,
+  activeTool: '',
 };
 
 class ToolOptions extends Component {

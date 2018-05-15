@@ -147,7 +147,16 @@ var search = Model.extend({
         callback(false);
       }
     });
-  }
+  },
+
+  /**
+   * Hämtar sökbara lager från backend
+   */
+  // getWFSLayers: function (url, callback) {
+  //   $.ajax(url), {
+  //     data: 
+  //   }
+  // }
 
 });
 

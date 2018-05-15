@@ -1,1 +1,0 @@
-DEBUG 2017-10-10 13:24:19 test för att log4net fungerar 

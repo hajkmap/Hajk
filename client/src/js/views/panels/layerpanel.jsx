@@ -42,9 +42,12 @@ var LayerPanelView = {
    * @return {object}
    */
   getInitialState: function() {
+    this.renderedLayerGroups = {};
     return {
-      visible: false
-    };
+      visible: false,
+      mapConfigurations : [],
+      dropDownValue : HAJK2.configFile
+    }
   },
 
   componentWillMount: function() {
@@ -56,6 +59,10 @@ var LayerPanelView = {
    * @instance
    */
   componentDidMount: function () {
+    if(this.props.model.get('dropdownThemeMaps')){
+      this.populateThemeMaps()
+    }
+
     this.props.model.on('change:layerCollection', this.onLayerCollectionChanged, this);
     this.props.model.get('layerCollection').forEach(layer => {
       layer.on('change:visible', () => {
@@ -269,9 +276,7 @@ var LayerPanelView = {
    * @return {external.ReactElement} groups
    */
   renderGroups: function recursive(groups) {
-
     return groups.map((group, i) => {
-
       if (!this.renderedLayerGroups.hasOwnProperty(group.id)) {
         this.renderedLayerGroups[group.id] = this.renderLayers(group);        
       }
@@ -340,6 +345,28 @@ var LayerPanelView = {
      this.props.model.toggleAllOff();
    },
 
+   /**
+   * Loads new config into HAJK2
+   * @instance
+   * @param {event} e
+   */
+
+   setThemeMap : function(e) {
+    var configurationName = e.target.value; 
+    var index = e.nativeEvent.target.selectedIndex;
+    var configurationTitle = e.nativeEvent.target[index].text;
+    this.props.model.setThemeMap(configurationName, configurationTitle);
+   },
+
+   populateThemeMaps : function() {
+     this.props.model.loadThemeMaps(mapConfigurations => {
+      this.setState({
+        mapConfigurations: mapConfigurations,
+        dropDownValue : HAJK2.configFile
+      })
+    });
+   },
+
 
   /**
    * Change layer-list configuration.
@@ -404,8 +431,11 @@ var LayerPanelView = {
    * @return {external:ReactElement}
    */
   render: function () {
-
-    var groups, toggleAllButton;
+    var mapConfigurations = [];
+    if (typeof this.state.mapConfigurations !== "undefined" && this.state.mapConfigurations != null){
+      mapConfigurations = this.state.mapConfigurations.map((map, i) => <option value={map.mapConfigurationName} key={i}>{map.mapConfigurationTitle}</option>);
+    }
+    var groups, toggleAllButton, dropdownThemeMaps, themeMapHeaderCaption;
 
     this.groups = this.props.model.get('groups');
 
@@ -423,9 +453,28 @@ var LayerPanelView = {
       );
     }
 
+    if (this.props.model.get('themeMapHeaderCaption') !== null && 
+        this.props.model.get('themeMapHeaderCaption').length > 0) {
+      themeMapHeaderCaption = (
+        <span style={{marginRight: "10px"}}>{this.props.model.get('themeMapHeaderCaption')}</span>
+      );
+    }
+
+    if (this.props.model.get('dropdownThemeMaps')){
+      dropdownThemeMaps = (
+        <div>
+        {themeMapHeaderCaption}
+        <select onChange={this.setThemeMap} style={{marginBottom: "10px", width : "100%"}} value={this.state.dropDownValue}>
+        {mapConfigurations}
+        </select>
+        </div>
+      );
+    };
+
     return (
       <Panel title="Kartlager" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
         <div className="layer-panel">
+          {dropdownThemeMaps}
           {toggleAllButton}
           <BackgroundSwitcher layers={this.props.model.getBaseLayers()} model={this.props.model}></BackgroundSwitcher>
           <br/>

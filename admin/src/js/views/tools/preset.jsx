@@ -29,7 +29,8 @@ var defaultState = {
   presetList: [],
   active: false,
   index: 0,
-  instruction: ""
+  instruction: "",
+  visibleForGroups: []
 };
 
 class ToolOptions extends Component {
@@ -54,9 +55,11 @@ class ToolOptions extends Component {
     if (tool) {
       this.setState({
         active: true,
+        authActive: this.props.parent.props.parent.state.authActive,
         index: tool.index,
         instruction: tool.options.instruction,
-        presetList: tool.options.presetList || []
+        presetList: tool.options.presetList || [],
+        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
       });
     } else {
       this.setState({
@@ -119,8 +122,9 @@ class ToolOptions extends Component {
       "type": this.type,
       "index": this.state.index,
       "options": {
-        presetList: this.state.presetList,
+        "presetList": this.state.presetList,
         "instruction": this.state.instruction,
+        "visibleForGroups": this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
       }
     };
 
@@ -337,6 +341,40 @@ createGuid() {
       ));
   }
 
+  handleAuthGrpsChange(event) {
+		const target = event.target;
+		const value = target.value;
+		let groups = [];
+
+		try {
+			groups = value.split(",");
+		} catch (error) {
+			console.log(`Någonting gick fel: ${error}`);
+		}
+
+		this.setState({
+			visibleForGroups: value !== "" ? groups : []
+		});  
+  }
+  
+  renderVisibleForGroups () {
+    if (this.props.parent.props.parent.state.authActive) {
+      return ( 
+        <div>
+            <label htmlFor="visibleForGroups">Tillträde</label>
+            <input
+              id="visibleForGroups"
+              name="visibleForGroups"
+              type="text"
+              onChange={(e) => {this.handleAuthGrpsChange(e)}}
+              value={this.state.visibleForGroups}/>
+          </div>
+      );
+    } else {
+      return null;
+    }
+  }
+
   /**
    *
    */
@@ -372,9 +410,10 @@ createGuid() {
               id="instruction"
               name="instruction"
               onChange={(e) => {this.handleInputChange(e)}}
-              value={atob(this.state.instruction)}
+              value={this.state.instruction ? atob(this.state.instruction) : ""}
             />
           </div>
+          {this.renderVisibleForGroups()}
           <div>
             <form ref="presetForm" onSubmit={(e) => { e.preventDefault(); this.addPreset(e) }}>
               <h4>Lägg till snabbval</h4>

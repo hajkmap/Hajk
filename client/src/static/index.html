@@ -5,15 +5,15 @@
     <title>HAJK2 - Karta</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
     {css}
   </head>
   <body>
     {js}
     <script>
-      HAJK2.wmsProxy = "";
-      HAJK2.wfsProxy = "/util/proxy/geturl/";
-      HAJK2.searchProxy = "/postProxy.aspx?url=";
+      HAJK2.wmsProxy = "http://localhost/util/proxy/geturl/";
+      HAJK2.wfsProxy = "http://localhost/util/proxy/geturl/";
+      HAJK2.searchProxy = "http://localhost/util/postproxy.aspx?url=";
       (function () {
         var config = "map_1";
         window.location.search

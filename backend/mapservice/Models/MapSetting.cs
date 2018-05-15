@@ -17,6 +17,8 @@ namespace MapService.Models
         public string target { get; set; }  
               
         public int[] center { get; set; }
+		
+		public string title { get; set; }
 
         public string projection { get; set; }
 

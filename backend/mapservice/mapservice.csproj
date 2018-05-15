@@ -118,6 +118,8 @@
     <Reference Include="SharpMap.Layers.BruTile">
       <HintPath>SharpMap\SharpMap.Layers.BruTile.dll</HintPath>
     </Reference>
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
@@ -178,7 +180,9 @@
     <Content Include="assets\style.css" />
     <Content Include="Global.asax" />
     <Content Include="index.html" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="App_Data\layers.json" />
     <Content Include="App_Data\map_1.json" />
     <None Include="Properties\PublishProfiles\File.pubxml" />
@@ -198,9 +202,12 @@
     <Compile Include="Controllers\MapSettingsController.cs" />
     <Compile Include="DataAccess\SettingsStore.cs" />
     <Compile Include="Models\Bookmark.cs" />
+    <Compile Include="Models\ThemeMap.cs" />
     <Compile Include="Models\Config\ArcGISConfig.cs" />
+    <Compile Include="Components\ActiveDirectoryLookup.cs" />
     <Compile Include="Models\Config\ExtendedWmsConfig.cs" />
     <Compile Include="Models\Config\ILayerConfig.cs" />
+    <Compile Include="Models\Config\IUserLookup.cs" />
     <Compile Include="Models\Config\LayerConfig.cs" />
     <Compile Include="Models\Config\VectorConfig.cs" />
     <Compile Include="Models\Config\WFSConfig.cs" />

@@ -36,6 +36,7 @@ const defaultState = {
   date: "Fylls i per automatik",
   searchFields: "",
   infobox: "",
+  aliasDict: "",
   displayFields: "",
   geometryField: "",
   url: "",
@@ -121,6 +122,7 @@ class Search extends Component {
       caption: layer.caption,
       searchFields: layer.searchFields,
       infobox: layer.infobox,
+      aliasDict: layer.aliasDict,
       displayFields: layer.displayFields,
       geometryField: layer.geometryField,
       outputFormat: layer.outputFormat || 'GML3',
@@ -388,6 +390,8 @@ class Search extends Component {
 
     if (validations.every(v => v === true)) {
 
+      console.log("getvalue: " + this.getValue("aliasDict"));
+
       let layer = {
         id: this.state.id,
         caption: this.getValue("caption"),
@@ -395,6 +399,7 @@ class Search extends Component {
         layers: this.getValue("layers"),
         searchFields: this.getValue("searchFields"),
         infobox: this.getValue("infobox"),
+        aliasDict: this.getValue("aliasDict"),
         displayFields: this.getValue("displayFields"),
         geometryField: this.getValue("geometryField"),
         outputFormat: this.getValue("outputFormat")
@@ -638,6 +643,15 @@ class Search extends Component {
                   ref="input_infobox"
                   value={this.state.infobox}
                   onChange={(e) => this.setState({'infobox': e.target.value})}
+                />
+              </div>
+              <div>
+                <label>alias dictionary</label>
+                <textarea
+                  ref="input_aliasDict"
+                  value={this.state.aliasDict}
+                  onChange={(e) => {this.setState({'aliasDict': e.target.value})
+                  }}
                 />
               </div>
               <div>

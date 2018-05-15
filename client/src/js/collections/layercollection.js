@@ -26,6 +26,31 @@ var LayerCollection = {
     layer.set("olMap", map);
     layer.set("shell", this.shell);
 
+    var visibleAtStart = false;
+    var found = false;
+    for(var i=0; i < this.mapGroups.length; i++){
+      for (var j=0; j < this.mapGroups[i].layers.length; j++){
+        if (layer.get("id") == this.mapGroups[i].layers[j].id){
+          visibleAtStart = this.mapGroups[i].layers[j].visibleAtStart;
+          found = true;
+          break;
+        }
+      }
+    }
+
+    if(!found) {
+      for (var i = 0; i < this.baseLayers.length; i++) {
+        if (layer.get("id") == this.baseLayers[i].id){
+          visibleAtStart = this.baseLayers[i].visibleAtStart;
+          found = true;
+          break;
+        }
+      }
+    }
+
+    layer.setVisible(visibleAtStart);
+    layer.getLayer().setVisible(visibleAtStart);
+
     if (olLayer) {
       map.addLayer(olLayer);
     }
@@ -98,10 +123,20 @@ var LayerCollection = {
    * @return {object} config
    */
   mapWMSConfig: function(args, properties) {
+    
     function getLegendUrl() {
-      if (args.legend === "") {
-        args.legend = `${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${args.layers[0]}`
+
+      var proxy =  HAJK2.wmsProxy || "";
+
+      if (args.legend === "") { 
+        args.legend =  `${proxy}${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${args.layers[0]}`
       }
+
+      //If legend is a GetLegendGraphic call, use proxy otherwise not
+      if(args.legend.indexOf("GetLegendGraphic") != -1){
+        args.legend = proxy + args.legend;
+      }
+    
       var protocol = /^http/.test(args.legend) ? '' : 'http://';
       return protocol + args.legend;
     }
@@ -114,7 +149,7 @@ var LayerCollection = {
         "name": args.id,
         "caption": args.caption,
         "visible": args.visibleAtStart,
-        "opacity": 1,
+        "opacity": args.opacity || 1,
         "queryable": args.queryable === false ? false : true,
         "information": args.infobox,
         "resolutions": properties.mapConfig.resolutions,
@@ -340,7 +375,7 @@ var LayerCollection = {
           "LAYERS": 'show:' + args.layers.join(',')
         },
         "legend" : [{
-          "Url": getLegendUrl(args),
+          "Url":  getLegendUrl(args),
           "Description" : "Teckenförklaring"
         }],
         "infoVisible": args.infoVisible || false,
@@ -364,7 +399,6 @@ var LayerCollection = {
    */
   model: function (args, properties) {
     var config = false;
-
     if (args.type === "wms") {
       config = LayerCollection.mapWMSConfig(args, properties);
     }
@@ -404,6 +438,11 @@ var LayerCollection = {
 
     this.shell = args.shell;
     this.initialConfig = options;
+    var toolConfig = args.tools;
+
+    var layerSwitcherTool = args.tools.find(tool => tool.type === "layerswitcher");
+    this.mapGroups = layerSwitcherTool.options.groups;
+    this.baseLayers = layerSwitcherTool.options.baselayers;
 
     _.defer(_.bind(function () {
 

@@ -106,6 +106,26 @@ var WmsLayer = {
     this.set("type", "wms");
   },
 
+  removeProxyFromURLIfPresent : function(url){
+
+    var http = url.lastIndexOf("http://");
+    var https = url.lastIndexOf("https://");
+
+    if(http > https){
+      index = http;
+    }
+    else {
+      index = https;
+    }
+   
+    if(index != -1){
+      return url.substr(index);
+    }
+    else {
+      return url;
+    }
+  },
+
   /**
    * Load feature information.
    * @instance
@@ -132,6 +152,7 @@ var WmsLayer = {
       );
 
       if (url) {
+        url = this.removeProxyFromURLIfPresent(url);
 
         if (HAJK2.searchProxy) {
           url = encodeURIComponent(url);

@@ -42,22 +42,20 @@ var ToolModel = require('tools/tool');
 var LayerSwitcherModelProperties = {
   type: 'layerswitcher',
   panel: 'LayerPanel',
-  //toolbar: 'bottom',
+  toolbar: 'bottom',
   icon: 'fa fa-bars icon',
-  title: 'Kartlager',
+  title: 'Lagerhanterare',
   visible: false,
   layerCollection: undefined,
   backgroundSwitcherMode: 'hidden',
-//  active: true,
-//  visibleAtStart: true,
+  active: true,
+  visibleAtStart: true,
   backgroundSwitcherBlack: true,
   backgroundSwitcherWhite: true,
   toggleAllButton: true,
-  haveInitializedBaseLayers: false,
-  toolbar: 'bottom', // this is updated in shell.jsx in terms of mobile
-  instruction: ""
+  dropdownThemeMaps : false,
+  themeMapHeaderCaption : 'Temakarta'
 };
-
 
 /**
  * Prototype for creating a layerswitcher model.
@@ -78,7 +76,7 @@ var LayerSwitcherModel = {
 
   configure: function (shell) {
     this.set('layerCollection', shell.getLayerCollection());
-    if (this.get('visibleAtStart') /* && document.body.scrollWidth >= 600 */) {
+    if (this.get('visibleAtStart') && document.body.scrollWidth >= 600) {
       this.set('visible', true);
     }
   },
@@ -99,12 +97,40 @@ var LayerSwitcherModel = {
     });
   },
 
+  setThemeMap : function (configurationName, configurationTitle) {
+    HAJK2.configFile = configurationName;
+    HAJK2.configTitle = configurationTitle;
+    HAJK2.start({
+      configPath: "/mapservice/config/" + configurationName,
+      layersPath: "/mapservice/config/layers"
+    }, function (status, message) {
+      if (!status) {
+        document.write(message);
+      }
+    });
+  },
+
+
+  loadThemeMaps: function (callback) {
+    $.ajax({
+      url: "/mapservice/config/userspecificmaps",
+      method: 'GET',
+      contentType: 'application/json',
+      success: (data) => {
+         callback(data);
+      },
+      error: (message) => {
+        callback(message);
+      }
+    });
+  },
+
   /**
    * Set visibility for all layers to false.
    * @instance
    */
    toggleAllOff() {
-     var baseLayers = this.getBaseLayersList();
+     var baseLayers = this.getBaseLayers();
      this.get('layerCollection').forEach(layer => {
        var isBaseLayer = baseLayers.find(l => l.id === layer.id);
        if (!isBaseLayer) {
@@ -112,22 +138,6 @@ var LayerSwitcherModel = {
        }
      });
    },
-
-  /**
-   * Get base layer list
-   * @instance
-   * @return {Layer[]} base layers
-   */
-  getBaseLayersList: function () {
-    var baseLayers = [];
-    this.get('baselayers').forEach(baseLayer => {
-      var layer = this.get('layerCollection').find(layer => layer.id === baseLayer.id);
-      if (layer) {
-        baseLayers.push(layer);
-      }
-    });
-    return baseLayers;
-  },
 
   /**
    * Get base layers.
@@ -139,10 +149,6 @@ var LayerSwitcherModel = {
     this.get('baselayers').forEach(baseLayer => {
       var layer = this.get('layerCollection').find(layer => layer.id === baseLayer.id);
       if (layer) {
-        if (!layer.getVisible()) {
-          layer.setVisible(baseLayer.visibleAtStart);
-        }
-        layer.getLayer().setVisible(layer.getVisible());
         baseLayers.push(layer);
       }
     });
