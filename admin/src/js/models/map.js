@@ -25,7 +25,7 @@ import { Model } from 'backbone';
 var map = Model.extend({
 
   hello: function () {
-    console.log("hello");
+    console.log('hello');
   }
 
 });

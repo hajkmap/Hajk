@@ -29,11 +29,11 @@ var ToolbarView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function() {
+  getInitialState: function () {
     return {};
   },
 
-  componentDidMount: function(){
+  componentDidMount: function () {
 
   },
 
@@ -41,7 +41,7 @@ var ToolbarView = {
    * Triggered before the component mounts.
    * @instance
    */
-  componentWillMount: function() {
+  componentWillMount: function () {
     this.props.navigationModel.on('change:activePanelType', () => {
       this.setState({
         activeTool: this.props.navigationModel.get('activePanelType')
@@ -62,14 +62,13 @@ var ToolbarView = {
         tool.set('toolbar', isMobile ? 'stable' : 'bottom');
       });
 
-
     var tools = this.props.model
       .filter(t => t.get('toolbar'))
       .filter(tool => tool.get('toolbar') === 'bottom' || (tool.get('toolbar') === 'stable' && !mobilAnpassningEnabled))
       .map((tool, index) => {
-        var a = tool.get('panel').toLowerCase()
-          ,   b = this.state.activeTool
-          ,   c = a === b ? 'btn btn-primary' : 'btn btn-default';
+        var a = tool.get('panel').toLowerCase(),
+          b = this.state.activeTool,
+          c = a === b ? 'btn btn-primary' : 'btn btn-default';
         var id = tool.get('Id');
 
         if (tool.get('active') === false) {
@@ -79,7 +78,7 @@ var ToolbarView = {
         return (
           <button
             id={id}
-            type="button"
+            type='button'
             className={c}
             onClick={() => {
               tool.clicked();
@@ -88,8 +87,8 @@ var ToolbarView = {
               }
             }}
             key={index}
-            title={tool.get("title")}>
-            <i className={ tool.get("icon") }></i>
+            title={tool.get('title')}>
+            <i className={tool.get('icon')} />
           </button>
         );
       });
@@ -99,9 +98,9 @@ var ToolbarView = {
       .filter(t => t.get('toolbar'))
       .filter(tool => tool.get('toolbar') === 'stable' && mobilAnpassningEnabled)
       .map((tool, index) => {
-        var a = tool.get('panel').toLowerCase()
-          ,   b = this.state.activeTool
-          ,   c = a === b ? 'btn btn-primary' : 'btn btn-default';
+        var a = tool.get('panel').toLowerCase(),
+          b = this.state.activeTool,
+          c = a === b ? 'btn btn-primary' : 'btn btn-default';
         var id = tool.get('Id');
 
         if (tool.get('active') === false) {
@@ -111,7 +110,7 @@ var ToolbarView = {
         return (
           <button
             id={id}
-            type="button"
+            type='button'
             className={c}
             onClick={() => {
               tool.clicked();
@@ -120,8 +119,8 @@ var ToolbarView = {
               }
             }}
             key={index}
-            title={tool.get("title")}>
-            <i className={ tool.get("icon") }></i>
+            title={tool.get('title')}>
+            <i className={tool.get('icon')} />
           </button>
         );
       });
@@ -136,34 +135,34 @@ var ToolbarView = {
         });
         return (
           <button
-            id={tool.get("Id")}
-            type="button"
+            id={tool.get('Id')}
+            type='button'
             className={className}
             onClick={() => {
               tool.clicked();
             }}
             key={index}
-            title={tool.get("title")}>
-            <i className={ tool.get("icon") }></i>
+            title={tool.get('title')}>
+            <i className={tool.get('icon')} />
           </button>
         );
       });
 
     return (
-      <div id="toolbar-">
-        <div className="map-toolbar-wrapper">
-          <div className="map-toolbar">
-            <div className="btn-group btn-group-lg stable-toolbar">{stableButton}</div>
-              <div
-                className="btn-group btn-group-lg bottom-toolbar"
-                role="group"
-                id="arrow"
-                aria-label="toolbar">
-                {tools}
-              </div>
+      <div id='toolbar-'>
+        <div className='map-toolbar-wrapper'>
+          <div className='map-toolbar'>
+            <div className='btn-group btn-group-lg stable-toolbar'>{stableButton}</div>
+            <div
+              className='btn-group btn-group-lg bottom-toolbar'
+              role='group'
+              id='arrow'
+              aria-label='toolbar'>
+              {tools}
+            </div>
           </div>
-          <div className="upper-toolbar">{widgets}</div>
-          <div className="information" id="information"></div>
+          <div className='upper-toolbar'>{widgets}</div>
+          <div className='information' id='information' />
         </div>
       </div>
     );

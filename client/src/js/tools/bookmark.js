@@ -42,7 +42,7 @@ var BookmarkProperties = {
   title: 'Bokmärken',
   visible: false,
   shell: undefined,
-  settingsUrl: "",
+  settingsUrl: '',
   bookmarks: [],
   instruction: ''
 };
@@ -65,9 +65,8 @@ var BookmarkModel = {
   },
 
   configure: function (shell) {
-
-    var url = this.get('settingsUrl')
-    ,   bookmarks;
+    var url = this.get('settingsUrl'),
+      bookmarks;
 
     this.set('shell', shell);
 
@@ -107,14 +106,14 @@ var BookmarkModel = {
    */
   addBookmark: function (name, callback) {
     var numBookmarks = this.getBookmarks() &&
-        this.getBookmarks().length ?
-        this.getBookmarks().length : 0;
+        this.getBookmarks().length
+      ? this.getBookmarks().length : 0;
     var model = this.get('shell').toJSON();
     var b64 = btoa(model);
     var data = {
       name: name,
       settings: b64,
-      favourite: numBookmarks === 0 ? true : false
+      favourite: numBookmarks === 0
     };
 
     if (!localStorage.getItem('bookmarks')) {
@@ -144,8 +143,8 @@ var BookmarkModel = {
   * @param {object} bookmark - Bookmark to be updated.
   * @param {function} callback - Fn to be called when the update is complete.
   */
-  updateBookmark: function(bookmark, callback) {
-    /*var visibleLayers = []
+  updateBookmark: function (bookmark, callback) {
+    /* var visibleLayers = []
     this.get('layerCollection').forEach(layer => {
       // if visible add to list
       if(layer.getVisible()){
@@ -182,11 +181,11 @@ var BookmarkModel = {
    * @param {number} id - ID of bookmark to be removed.
    * @param {function} callback - Fn to be called when the removal is complete.
    */
-  removeBookmark: function(name, callback) {
-      var bookmarks = this.getBookmarks();
+  removeBookmark: function (name, callback) {
+    var bookmarks = this.getBookmarks();
 
-      bookmarks = bookmarks.filter(bookmark => bookmark.name !== name);
-      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+    bookmarks = bookmarks.filter(bookmark => bookmark.name !== name);
+    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
     callback();
   },
 

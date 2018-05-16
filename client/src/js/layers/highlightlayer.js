@@ -29,9 +29,9 @@ var LayerModel = require('layers/layer');
  * @property {string} name
  * @property {external:ol.layer} selectedLayer
  */
-var HighlightLayerProperties = {  
+var HighlightLayerProperties = {
   source: undefined,
-  name: "highlight-wms",
+  name: 'highlight-wms',
   selectedLayer: undefined,
   markerImg: 'assets/icons/marker.png'
 };
@@ -78,11 +78,11 @@ var HighlightLayer = {
       source: new ol.source.Vector({}),
       queryable: false,
       visible: true,
-      type: "highlight"
+      type: 'highlight'
     });
 
     this.layer = new ol.layer.Vector({
-      id: props.id || "",
+      id: props.id || '',
       visible: true,
       name: this.get('name'),
       source: this.get('source'),
@@ -133,7 +133,7 @@ var HighlightLayer = {
    */
   setSelectedLayer: function (layer) {
     this.set('selectedLayer', layer);
-    this.get('selectedLayer').on("change:visible", (visibility) => {
+    this.get('selectedLayer').on('change:visible', (visibility) => {
       this.selectedLayerChanged();
     });
   },
@@ -149,7 +149,7 @@ var HighlightLayer = {
     this.set('visible', visible);
   },
 
-  getFeatures: function() {
+  getFeatures: function () {
     return this.get('source').getFeatures();
   }
 

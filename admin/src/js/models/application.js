@@ -25,7 +25,7 @@ import { Model } from 'backbone';
 var application = Model.extend({
 
   hello: function () {
-    console.log("hello");
+    console.log('hello');
   }
 
 });
