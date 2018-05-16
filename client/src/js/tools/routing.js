@@ -365,7 +365,8 @@ var RoutingModel = {
         cache: false,
         success: (res) => { this.plotRoute(res, this.get('map'), this.get('layer_route'), this.get('layer_drawing')); },
         error: (err) => {
-          alert('Det gick inte att navigera dig. Försök igen senare');
+          alert('Det gick inte att navigera. Försök igen senare.');
+          throw new Error(err);
         }
       });
     }
@@ -376,6 +377,7 @@ var RoutingModel = {
     var steps = res.routes[0].legs[0].steps;
     const routeDiv = document.createElement('div');
     const p = document.createElement('p');
+    const ul = document.createElement('ol');
     p.innerHTML = `
                     <table class="table table-condensed">
                       <tbody>
@@ -400,7 +402,7 @@ var RoutingModel = {
       point.setCoordinates(transformed);
 
       var n = i + 1;
-      var tmpFeature = new ol.Feature({geometry: point, information: steps[i].html_instructions});
+      var tmpFeature = new ol.Feature({geometry: point, info: steps[i].html_instructions});
       tmpFeature.number = '' + n;
       tmpFeature.setStyle(style_route);
       layer.getSource().addFeature(tmpFeature);
@@ -408,14 +410,15 @@ var RoutingModel = {
       var tmpLi = document.createElement('li');
       tmpLi.onclick = this.highlightFeature.bind(this);
       tmpLi.id = 'step_number' + n;
-      tmpLi.innerHTML = n + ',' + steps[i].html_instructions;
-      var tmpI = document.createElement('i');
-      tmpI.class = 'fa fa-arrow-down';
-      var tmpBr = document.createElement('br');
-      routeDiv.appendChild(tmpLi);
-      routeDiv.appendChild(tmpI);
-      routeDiv.appendChild(tmpBr);
+      tmpLi.innerHTML = steps[i].html_instructions;
+      //var tmpI = document.createElement('i');
+      //tmpI.class = 'fa fa-arrow-down';
+      //var tmpBr = document.createElement('br');
+      ul.appendChild(tmpLi);
+      //routeDiv.appendChild(tmpI);
+      //routeDiv.appendChild(tmpBr);
     }
+    routeDiv.appendChild(ul);
 
     var resList = document.getElementById('resultList');
     while (resList.firstChild) {
