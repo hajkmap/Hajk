@@ -10,6 +10,14 @@
   "scripts": {
     "rebuild": "npm install && grunt dependencies && grunt build && grunt release"
   },
+  "semistandard": {
+    "ignore": [
+      "/compiled/",
+      "/dist/",
+      "/release/",
+      "/src/static/"
+    ]
+  },
   "private": true,
   "devDependencies": {
     "babel-core": "^6.26.x",

@@ -10,6 +10,11 @@
   "scripts": {
     "rebuild": "npm install && grunt"
   },
+  "semistandard": {
+    "ignore": [
+      "/dist/"
+    ]
+  },
   "private": true,
   "devDependencies": {
     "array.prototype.find": "^2.0.3",
