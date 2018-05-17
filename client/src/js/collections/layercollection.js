@@ -127,13 +127,13 @@ var LayerCollection = {
       var proxy = HAJK2.wmsProxy || '';
 
       // If property exists in map settings, use specified legend options (font, color, size, etc)
-      let geoseverLegendOptions = '';
-      if (properties.mapConfig.hasOwnProperty('geoseverLegendOptions')) {
-        geoseverLegendOptions = 'legend_options=' + properties.mapConfig.geoseverLegendOptions;
+      let geoserverLegendOptions = '';
+      if (properties.mapConfig.hasOwnProperty('geoserverLegendOptions')) {
+        geoserverLegendOptions = 'legend_options=' + properties.mapConfig.geoserverLegendOptions;
       }
 
       if (args.legend === '') {
-        args.legend = `${proxy}${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${args.layers[0]}&${geoseverLegendOptions}`;
+        args.legend = `${proxy}${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${args.layers[0]}&${geoserverLegendOptions}`;
       }
 
       var protocol = /^http/.test(args.legend) ? '' : 'http://';
