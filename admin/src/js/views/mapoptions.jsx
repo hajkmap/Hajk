@@ -77,7 +77,7 @@ class MapOptions extends Component {
     this.state.secondaryColor = mapConfig.colors && mapConfig.colors.secondaryColor
       ? mapConfig.colors.secondaryColor
       : '#000';
-    this.state.title = mapConfig.title,
+    this.state.title = mapConfig.title;
     this.state.projection = mapConfig.projection;
     this.state.zoom = mapConfig.zoom;
     this.state.center = mapConfig.center;
