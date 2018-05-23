@@ -107,7 +107,7 @@ class WMSLayerForm extends Component {
     );
   }
 
-  appendLayer(e, checkedLayer, opts = {}) {
+  appendLayer (e, checkedLayer, opts = {}) {
     if (e.target.checked === true) {
       this.state.addedLayers.push(checkedLayer);
     } else {
@@ -188,7 +188,7 @@ class WMSLayerForm extends Component {
               data-type='wms-layer'
               checked={this.state.addedLayers.find(l => l === layer.Name)}
               onChange={(e) => {
-                this.appendLayer(e, layer.Name, opts)
+                this.appendLayer(e, layer.Name, opts);
               }} />&nbsp;
             <label htmlFor={'layer' + i}>{layer.Name}</label>{title}
             <i style={{display: 'none'}} className={classNames} onClick={(e) => this.describeLayer(e, layer.Name)} />

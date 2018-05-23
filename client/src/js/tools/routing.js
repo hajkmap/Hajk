@@ -411,12 +411,12 @@ var RoutingModel = {
       tmpLi.onclick = this.highlightFeature.bind(this);
       tmpLi.id = 'step_number' + n;
       tmpLi.innerHTML = steps[i].html_instructions;
-      //var tmpI = document.createElement('i');
-      //tmpI.class = 'fa fa-arrow-down';
-      //var tmpBr = document.createElement('br');
+      // var tmpI = document.createElement('i');
+      // tmpI.class = 'fa fa-arrow-down';
+      // var tmpBr = document.createElement('br');
       ul.appendChild(tmpLi);
-      //routeDiv.appendChild(tmpI);
-      //routeDiv.appendChild(tmpBr);
+      // routeDiv.appendChild(tmpI);
+      // routeDiv.appendChild(tmpBr);
     }
     routeDiv.appendChild(ul);
 

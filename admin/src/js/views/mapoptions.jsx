@@ -196,7 +196,7 @@ class MapOptions extends Component {
   save () {
     var config = this.props.model.get('mapConfig');
     if (this.validate()) {
-	  config.title = this.getValue('title');
+      config.title = this.getValue('title');
       config.projection = this.getValue('projection');
       config.zoom = this.getValue('zoom');
       config.center = this.getValue('center');
