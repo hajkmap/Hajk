@@ -33,12 +33,12 @@ var LegendView = {
    */
   render: function () {
     return (
-      <div className="legend">
-      {
-        this.props.legends.map((legend, index) =>
-          <LegendItem key={"legend_" + index} icon={legend.Url} text={legend.Description} />
-        )
-      }
+      <div className='legend'>
+        {
+          this.props.legends.map((legend, index) =>
+            <LegendItem key={'legend_' + index} icon={legend.Url} text={legend.Description} />
+          )
+        }
       </div>
     );
   }

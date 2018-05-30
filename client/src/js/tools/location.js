@@ -52,7 +52,6 @@ latitude = undefined;
 longitude = undefined;
 accuracy = undefined;
 
-
 /**
  * Prototype for creating a search model.
  * @class
@@ -78,7 +77,7 @@ var LocationModel = {
         anchorYUnits: 'fraction',
         opacity: 0.8,
         src: 'assets/icons/gps.png',
-        scale: (1/2)
+        scale: (1 / 2)
       })
     });
 
@@ -86,9 +85,9 @@ var LocationModel = {
     var source = new ol.source.Vector({});
     // source.addFeature(this.get('accuracyFeature'));
 
-    this.set("layer", new ol.layer.Vector({
+    this.set('layer', new ol.layer.Vector({
       source: source,
-      name: "location",
+      name: 'location',
       style: style
     }));
   },
@@ -107,14 +106,13 @@ var LocationModel = {
 
     this.on('change:active', (e) => {
       if (!this.get('active') || this.get('watchId') !== undefined) {
-      this.reset();
+        this.reset();
       } else {
         navigator.geolocation.getCurrentPosition(this.onLocationSucess.bind(this), this.onLocationError.bind(this));
       }
-  });
+    });
 
-    this.on('change:location', () => { this.setLocation() });
-
+    this.on('change:location', () => { this.setLocation(); });
   },
 
   setLocation: function (coord) {
@@ -124,7 +122,7 @@ var LocationModel = {
         this.get('location').lng,
         this.get('location').lat
       ]);
-      let transformed = ol.proj.transform(point.getCoordinates(), "EPSG:4326", this.get('olMap').getView().getProjection());
+      let transformed = ol.proj.transform(point.getCoordinates(), 'EPSG:4326', this.get('olMap').getView().getProjection());
       point.setCoordinates(transformed);
       this.get('layer').getSource().addFeature(
         new ol.Feature({
@@ -135,7 +133,7 @@ var LocationModel = {
     }
   },
 
-  reset: function() {
+  reset: function () {
     this.set({
       location: {
         lat: undefined,
@@ -144,7 +142,7 @@ var LocationModel = {
     });
   },
 
-  onLocationSucess: function(e) {
+  onLocationSucess: function (e) {
     this.set({
       location: {
         lat: e.coords.latitude,
@@ -164,10 +162,10 @@ var LocationModel = {
     */
   },
 
-  onLocationError: function(e) {
+  onLocationError: function (e) {
     this.get('layer').getSource().clear();
-    if(typeof this.get('location').lat == 'undefined') { // quick fix for the reoccuring errors in Firefox
-      alert("Din position kan inte fastställas.");
+    if (typeof this.get('location').lat === 'undefined') { // quick fix for the reoccuring errors in Firefox
+      alert('Din position kan inte fastställas.');
       console.error(e);
       console.warn(e);
       console.info(e);
@@ -202,4 +200,3 @@ var LocationModel = {
  * @returns {LocationModel}
  */
 module.exports = ToolModel.extend(LocationModel);
-

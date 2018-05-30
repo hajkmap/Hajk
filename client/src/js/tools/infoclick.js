@@ -24,7 +24,7 @@ var ToolModel = require('tools/tool');
 var HighlightLayer = require('layers/highlightlayer');
 
 var FeatureModel = Backbone.Model.extend({
-  defaults:{
+  defaults: {
     feature: undefined,
     information: undefined,
     layer: undefined
@@ -56,12 +56,12 @@ var InfoClickModelProperties = {
   panel: 'InfoPanel',
   visible: false,
   map: undefined,
-  wmsCallbackName: "LoadWmsFeatureInfo",
+  wmsCallbackName: 'LoadWmsFeatureInfo',
   features: undefined,
   selectedFeature: undefined,
   highlightLayer: undefined,
-  markerImg: "assets/ico" +
-  "ns/marker.png",
+  markerImg: 'assets/ico' +
+  'ns/marker.png',
   anchor: [
     16,
     16
@@ -96,13 +96,13 @@ var InfoClickModel = {
       imgSize: this.get('imgSize'),
       markerImg: this.get('markerImg')
     }));
-    this.set("features", new FeatureCollection());
-    this.get("features").on("add", (feature, collection) => {
+    this.set('features', new FeatureCollection());
+    this.get('features').on('add', (feature, collection) => {
       if (collection.length === 1) {
         this.set('selectedFeature', feature);
       }
     });
-    this.on("change:selectedFeature", (sender, feature) => {
+    this.on('change:selectedFeature', (sender, feature) => {
       setTimeout(() => {
         if (this.get('visible')) {
           this.highlightFeature(feature);
@@ -140,18 +140,18 @@ var InfoClickModel = {
    */
   onMapPointer: function (event) {
     var wmsLayers = this.layerCollection.filter((layer) => {
-          return (layer.get("type") === "wms" || layer.get("type") === "arcgis") &&
-                 layer.get("queryable") &&
+        return (layer.get('type') === 'wms' || layer.get('type') === 'arcgis') &&
+                 layer.get('queryable') &&
                  layer.getVisible();
-        })
-    ,   projection = this.map.getView().getProjection().getCode()
-    ,   resolution = this.map.getView().getResolution()
-    ,   infos = []
-    ,   promises = []
+      }),
+      projection = this.map.getView().getProjection().getCode(),
+      resolution = this.map.getView().getResolution(),
+      infos = [],
+      promises = []
     ;
 
     this.layerOrder = {};
-    this.get("features").reset();
+    this.get('features').reset();
 
     this.map.getLayers().forEach((layer, i) => {
       this.layerOrder[layer.get('name')] = i;
@@ -164,15 +164,15 @@ var InfoClickModel = {
           layer.get('name') !== 'highlight-wms'
         ) {
           promises.push(new Promise((resolve, reject) => {
-              features = [feature];
-              _.each(features, (feature) => {
-                  this.addInformation(feature, layer, (featureInfo) => {
-                    if (featureInfo) {
-                      infos.push(featureInfo);
-                    }
-                    resolve();
-                  });
+            features = [feature];
+            _.each(features, (feature) => {
+              this.addInformation(feature, layer, (featureInfo) => {
+                if (featureInfo) {
+                  infos.push(featureInfo);
+                }
+                resolve();
               });
+            });
           }));
         }
       }
@@ -210,8 +210,8 @@ var InfoClickModel = {
 
     Promise.all(promises).then(() => {
       infos.sort((a, b) => {
-        var s1 = a.information.layerindex
-        ,   s2 = b.information.layerindex
+        var s1 = a.information.layerindex,
+          s2 = b.information.layerindex
         ;
         return s1 === s2 ? 0 : s1 < s2 ? 1 : -1;
       });
@@ -224,7 +224,7 @@ var InfoClickModel = {
       if (this.get('displayPopup')) {
         this.togglePopup(infos, event.coordinate);
       } else {
-        this.togglePanel()
+        this.togglePanel();
       }
 
       if (infos.length === 0) {
@@ -232,7 +232,6 @@ var InfoClickModel = {
         this.get('map').getOverlayById('popup-0').setPosition(undefined);
         this.clearHighlight();
       }
-
     });
   },
 
@@ -246,9 +245,9 @@ var InfoClickModel = {
     return Object
       .keys(o)
       .reduce((str, next, index, arr) =>
-        /^geom$|^geometry$|^the_geom$/.test(arr[index]) ?
-        str : str + `**${arr[index]}**: ${o[arr[index]]}\r`
-      , "");
+        /^geom$|^geometry$|^the_geom$/.test(arr[index])
+          ? str : str + `**${arr[index]}**: ${o[arr[index]]}\r`
+        , '');
   },
 
   /**
@@ -257,9 +256,9 @@ var InfoClickModel = {
    */
   isTouchDevice: function () {
     try {
-      document.createEvent("TouchEvent");
+      document.createEvent('TouchEvent');
       return true;
-    } catch(e) {
+    } catch (e) {
       return false;
     }
   },
@@ -270,12 +269,12 @@ var InfoClickModel = {
    * @param {DOMelement} elm
    */
   enableScroll: function (elm) {
-    if (this.isTouchDevice()){
+    if (this.isTouchDevice()) {
       var scrollStartPos = 0;
-      elm.addEventListener("touchstart", function(event) {
+      elm.addEventListener('touchstart', function (event) {
         scrollStartPos = this.scrollTop + event.touches[0].pageY;
       }, false);
-      elm.addEventListener("touchmove", function(event) {
+      elm.addEventListener('touchmove', function (event) {
         this.scrollTop = scrollStartPos - event.touches[0].pageY;
       }, false);
     }
@@ -287,8 +286,7 @@ var InfoClickModel = {
    * @param {array} infos
    * @param {array} coordinate
    */
-  togglePopup: function(infos, coordinate) {
-
+  togglePopup: function (infos, coordinate) {
     const ovl = this.get('map').getOverlayById('popup-0');
 
     function isPoint (coord) {
@@ -296,89 +294,88 @@ var InfoClickModel = {
         coord = coord[0];
       }
       return (
-        (coord.length === 2 ||  coord.length === 3) &&
-        typeof coord[0] === "number" &&
-        typeof coord[1] === "number"
+        (coord.length === 2 || coord.length === 3) &&
+        typeof coord[0] === 'number' &&
+        typeof coord[1] === 'number'
       )
-      ? [coord[0], coord[1]]
-      : false;
+        ? [coord[0], coord[1]]
+        : false;
     }
 
     infos.forEach((info, i) => {
-        function display(index, inf) {
+      function display (index, inf) {
+        var coords = inf.feature.getGeometry() ? inf.feature.getGeometry().getCoordinates() : false,
+          position = coordinate,
+          feature = new Backbone.Model(),
+          infobox = $('<div></div>'),
+          caption = $(`<div class="popup-navigation"> ${index + 1} av ${infos.length} </div>`),
+          next = $('<span class="fa fa-btn fa-arrow-circle-o-right"></span>'),
+          prev = $('<span class="fa fa-btn fa-arrow-circle-o-left"></span>'),
+          title = $(`<div class="popup-title">${inf.information.caption}</div>`),
+          content = $(`<div id="popup-content-text"></div>`),
+          markdown = '',
+          offsetY = 0,
+          html = '';
 
-          var coords    = inf.feature.getGeometry() ? inf.feature.getGeometry().getCoordinates() : false
-          ,   position  = coordinate
-          ,   feature   = new Backbone.Model()
-          ,   infobox   = $('<div></div>')
-          ,   caption   = $(`<div class="popup-navigation"> ${index + 1} av ${infos.length} </div>`)
-          ,   next      = $('<span class="fa fa-btn fa-arrow-circle-o-right"></span>')
-          ,   prev      = $('<span class="fa fa-btn fa-arrow-circle-o-left"></span>')
-          ,   title     = $(`<div class="popup-title">${inf.information.caption}</div>`)
-          ,   content   = $(`<div id="popup-content-text"></div>`)
-          ,   markdown  = ""
-          ,   offsetY   = 0
-          ,   html      = "";
+        inf.layer.once('change:visible', () => {
+          ovl.setPosition(undefined);
+          this.clearHighlight();
+        });
 
-          inf.layer.once('change:visible', () => {
-            ovl.setPosition(undefined);
-            this.clearHighlight();
-          });
-
-          if (typeof inf.information.information === "object") {
-            markdown = this.objectAsMarkdown(inf.information.information);
-          } else {
-            markdown = inf.information.information;
-          }
-          html = marked(markdown, { sanitize: false, gfm: true, breaks: true });
-          content.html(html);
-
-          if (coords = isPoint(coords)) {
-            position = coords;
-          }
-
-          caption.prepend(prev);
-          caption.append(next);
-          if (infos.length > 1) {
-            infobox.append(caption);
-          }
-
-          infobox.append(title, content);
-          $('#popup-content').show().html(infobox);
-
-          if (this.isTouchDevice()) {
-            this.enableScroll($('#popup-content-text')[0]);
-            $('#popup-content-text').scrollTop(0);
-          }
-
-          if (isPoint(coords)) {
-            offsetY = this.get('popupOffsetY');
-          }
-
-          ovl.setPosition(position);
-          ovl.setOffset([0, offsetY]);
-
-          $(ovl.getElement()).hide().fadeIn(0);
-
-          Object.keys(inf).forEach(key => {
-            feature.set(key, inf[key]);
-          });
-          this.highlightFeature(feature);
-
-          prev.click(() => {
-            if (infos[index - 1]) {
-              display.call(this, index - 1, infos[index - 1]);
-            }
-          });
-          next.click(() => {
-            if (infos[index + 1]) {
-              display.call(this, index + 1, infos[index + 1]);
-            }
-          });
+        if (typeof inf.information.information === 'object') {
+          markdown = this.objectAsMarkdown(inf.information.information);
+        } else {
+          markdown = inf.information.information;
         }
-        if (i === 0) {
-          display.call(this, i, info);
+        html = marked(markdown, { sanitize: false, gfm: true, breaks: true });
+        content.html(html);
+
+        if (coords = isPoint(coords)) {
+          position = coords;
         }
+
+        caption.prepend(prev);
+        caption.append(next);
+        if (infos.length > 1) {
+          infobox.append(caption);
+        }
+
+        infobox.append(title, content);
+        $('#popup-content').show().html(infobox);
+
+        if (this.isTouchDevice()) {
+          this.enableScroll($('#popup-content-text')[0]);
+          $('#popup-content-text').scrollTop(0);
+        }
+
+        if (isPoint(coords)) {
+          offsetY = this.get('popupOffsetY');
+        }
+
+        ovl.setPosition(position);
+        ovl.setOffset([0, offsetY]);
+
+        $(ovl.getElement()).hide().fadeIn(0);
+
+        Object.keys(inf).forEach(key => {
+          feature.set(key, inf[key]);
+        });
+        this.highlightFeature(feature);
+
+        prev.click(() => {
+          if (infos[index - 1]) {
+            display.call(this, index - 1, infos[index - 1]);
+          }
+        });
+        next.click(() => {
+          if (infos[index + 1]) {
+            display.call(this, index + 1, infos[index + 1]);
+          }
+        });
+      }
+      if (i === 0) {
+        display.call(this, i, info);
+      }
     });
   },
 
@@ -390,42 +387,41 @@ var InfoClickModel = {
    * @param {function} callback to invoke when information is added
    */
   addInformation: function (feature, layer, callback) {
-
     if (layer.get('name') === 'draw-layer') {
       callback(false);
       return;
     }
 
-    var layerModel = this.layerCollection.findWhere({ name: layer.get("name") })
-    ,   layerindex = -1
-    ,   properties
-    ,   information
-    ,   iconUrl = feature.get('iconUrl') || ''
+    var layerModel = this.layerCollection.findWhere({ name: layer.get('name') }),
+      layerindex = -1,
+      properties,
+      information,
+      iconUrl = feature.get('iconUrl') || ''
     ;
-   
+
     properties = feature.getProperties();
-    information = layerModel && layerModel.get("information") || "";
+    information = layerModel && layerModel.get('information') || '';
 
     if (feature.infobox) {
       information = feature.infobox;
       information = information.replace(/export:/g, '');
     }
 
-    if (information && typeof information === "string") {
+    if (information && typeof information === 'string') {
       (information.match(/\{.*?\}\s?/g) || []).forEach(property => {
-          function lookup(o, s) {
-            s = s.replace('{', '')
-                 .replace('}', '')
-                 .trim()
-                 .split('.');
+        function lookup (o, s) {
+          s = s.replace('{', '')
+            .replace('}', '')
+            .trim()
+            .split('.');
 
-            switch (s.length) {
-              case 1: return o[s[0]] || "";
-              case 2: return o[s[0]][s[1]] || "";
-              case 3: return o[s[0]][s[1]][s[2]] || "";
-            }
+          switch (s.length) {
+            case 1: return o[s[0]] || '';
+            case 2: return o[s[0]][s[1]] || '';
+            case 3: return o[s[0]][s[1]][s[2]] || '';
           }
-          information = information.replace(property, lookup(properties, property));
+        }
+        information = information.replace(property, lookup(properties, property));
       });
     }
 
@@ -441,10 +437,10 @@ var InfoClickModel = {
       feature: feature,
       layer: layer,
       information: {
-          caption: layerModel && layerModel.getCaption() || "Sökträff",
-          layerindex: layerindex,
-          information: information || properties,
-          iconUrl: iconUrl,
+        caption: layerModel && layerModel.getCaption() || 'Sökträff',
+        layerindex: layerindex,
+        information: information || properties,
+        iconUrl: iconUrl
       }
     });
   },
@@ -454,11 +450,11 @@ var InfoClickModel = {
    * @instance
    */
   togglePanel: function () {
-    if (this.get("features").length > 0) {
+    if (this.get('features').length > 0) {
       this.set('r', Math.round(Math.random() * 1E12));
       this.set('toggled', true);
       this.set('visible', true);
-    } else if (this.get("navigation").get("activePanelType") === this.get("panel")) {
+    } else if (this.get('navigation').get('activePanelType') === this.get('panel')) {
       this.set('visible', false);
     }
   },
@@ -482,11 +478,10 @@ var InfoClickModel = {
    * @param {external:"ol.feature"}
    */
   reorderLayers: function (feature) {
-
-    var layerCollection = this.get('map').getLayers()
-    ,   featureInfo = feature.get('information')
-    ,   selectedLayer = feature.get('layer')
-    ,   insertIndex;
+    var layerCollection = this.get('map').getLayers(),
+      featureInfo = feature.get('information'),
+      selectedLayer = feature.get('layer'),
+      insertIndex;
 
     if (selectedLayer && this.layerOrder.hasOwnProperty(selectedLayer.get('name'))) {
       insertIndex = this.layerOrder[selectedLayer.get('name')];
@@ -498,7 +493,6 @@ var InfoClickModel = {
       layerCollection.insertAt(insertIndex, this.get('highlightLayer').getLayer());
       insertIndex = undefined;
     }
-
   },
 
   /**
@@ -520,7 +514,7 @@ var InfoClickModel = {
    * @param {external:"ol.feature"} feature
    */
   clearHighlight: function () {
-     this.get('highlightLayer').clearHighlight();
+    this.get('highlightLayer').clearHighlight();
   }
 
 };

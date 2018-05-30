@@ -60,17 +60,17 @@ var InformationModel = {
 
   initialize: function (options) {
     var cookies = document.cookie;
-    if(cookies.length == 0 || !options.showInfoOnce){
+    if (cookies.length == 0 || !options.showInfoOnce) {
       // TODO: Titta efter om vi ska använda cookie för att visa informationsrutan endast en gång
       // OBS! json.showInfoOnce kan vara undefined, då ska det fungera som innan cookie användes
-      if(options.showInfoOnce) {
-        document.cookie = "seen=true";
+      if (options.showInfoOnce) {
+        document.cookie = 'seen=true';
       }
     } else {
       this.set({'display': false});
-        this.set({'visibleAtStart': false});
+      this.set({'visibleAtStart': false});
     }
-      ToolModel.prototype.initialize.call(this);
+    ToolModel.prototype.initialize.call(this);
   },
 
   configure: function (shell) {
@@ -80,7 +80,6 @@ var InformationModel = {
       element,
       document.getElementById('information')
     );
-
   },
   /**
    * @description
@@ -93,7 +92,7 @@ var InformationModel = {
    *
    * @instance
    */
-  clicked: function () {    
+  clicked: function () {
     this.set({
       'display': !this.get('display')
     });

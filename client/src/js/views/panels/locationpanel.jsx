@@ -30,7 +30,7 @@ var Location = {
    * @instance
    * @return {object}
    */
-  getInitialState: function() {
+  getInitialState: function () {
     return {
 
     };

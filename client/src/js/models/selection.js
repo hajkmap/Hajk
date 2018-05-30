@@ -35,7 +35,7 @@ var HighlightLayer = require('layers/highlightlayer');
  */
 var SelectionModelProperties = {
   activeTool: '',
-  markerImg: "assets/icons/marker.png",
+  markerImg: 'assets/icons/marker.png',
   anchor: [
     8,
     8
@@ -67,7 +67,6 @@ var SelectionModel = {
   isDrawActive: false,
 
   initialize: function (options) {
-
     this.set('olMap', options.map);
     this.set('layerCollection', options.layerCollection);
     this.set('source', new ol.source.Vector({ wrapX: false }));
@@ -106,12 +105,12 @@ var SelectionModel = {
   isQueryable: function (layer) {
     return (
       (
-        layer.get("type") === "wms" ||
-        layer.get("type") === "arcgis"
+        layer.get('type') === 'wms' ||
+        layer.get('type') === 'arcgis'
       ) &&
-      layer.get("queryable") &&
+      layer.get('queryable') &&
       layer.getVisible()
-    )
+    );
   },
 
   clearSelection: function () {
@@ -124,10 +123,10 @@ var SelectionModel = {
     this.features = {};
   },
 
-  putHighlightLayerOnTop: function() {
+  putHighlightLayerOnTop: function () {
     let layers = this.get('olMap').getLayers();
     const topIndex = layers.getLength() - 1;
-    var h = layers.getArray().find(layer => layer.get("id") === "selection-highligt");
+    var h = layers.getArray().find(layer => layer.get('id') === 'selection-highligt');
     if (h) {
       layers.remove(h);
       layers.push(h);
@@ -148,21 +147,20 @@ var SelectionModel = {
       this.get('highlightLayer').removeHighlight(clone);
     } else {
       this.features[id] = f;
-      f.operation = "Within";
+      f.operation = 'Within';
       this.get('highlightLayer').addHighlight(clone, false);
     }
   },
 
   onMapSingleClick: function (event) {
-
-    if (this.get('activeTool') !== "multiSelect") {
+    if (this.get('activeTool') !== 'multiSelect') {
       return;
     }
 
-    var wmsLayers = this.get('layerCollection').filter(layer => this.isQueryable(layer))
-    ,   projection = this.get('olMap').getView().getProjection().getCode()
-    ,   resolution = this.get('olMap').getView().getResolution()
-    ,   promises = []
+    var wmsLayers = this.get('layerCollection').filter(layer => this.isQueryable(layer)),
+      projection = this.get('olMap').getView().getProjection().getCode(),
+      resolution = this.get('olMap').getView().getResolution(),
+      promises = []
     ;
 
     this.get('olMap').forEachFeatureAtPixel(event.pixel, (feature, layer) => {
@@ -204,7 +202,6 @@ var SelectionModel = {
     Promise.all(promises).then(() => {
       // Selection complete
     });
-
   },
 
   getScetchStyle: function () {

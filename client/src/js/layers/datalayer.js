@@ -25,7 +25,7 @@ var helper = (function () {
     featureArrayToObject: function (a, k) {
       var o = {};
       _.each(a, (i) => {
-        o[i.getProperties()[k]] = i
+        o[i.getProperties()[k]] = i;
       });
       return o;
     },
@@ -65,19 +65,19 @@ var LayerModel = require('layers/layer');
  * @property {WfsLayer~WfsLayerPropertiesParams} params
  */
 var DataLayerProperties = {
-  url: "",
-  caption: "",
+  url: '',
+  caption: '',
   vectorSource: undefined,
   imageSource: undefined,
   filterFeatures: [],
   filterApplied: false,
   params: {
-    service: "WFS",
-    version: "",
-    request: "",
-    typename: "",
-    outputFormat: "",
-    srsname: "",
+    service: 'WFS',
+    version: '',
+    request: '',
+    typename: '',
+    outputFormat: '',
+    srsname: '',
     bbox: []
   }
 };
@@ -105,19 +105,17 @@ var DataLayer = {
 
     this.vectorSource = new ol.source.Vector({
       loader: (extent) => {
-
         setInterval(() => {
           $.ajax({
             url: this.get('url'),
             success: (vehicleFeatureCollection) => {
-
-              var source = this.getLayer().getSource().getSource()
-              ,   format = new ol.format.GeoJSON()
-              ,   projection = this.get('map').getCRS();
+              var source = this.getLayer().getSource().getSource(),
+                format = new ol.format.GeoJSON(),
+                projection = this.get('map').getCRS();
 
               vehicleFeatureCollection = JSON.stringify(vehicleFeatureCollection);
               vehicleFeatureCollection = format.readFeatures(vehicleFeatureCollection, {
-                dataProjection: "EPSG:4326",
+                dataProjection: 'EPSG:4326',
                 featureProjection: projection
               });
 
@@ -125,7 +123,7 @@ var DataLayer = {
                 var f = false;
                 var p = feature.getProperties();
 
-                if (p.destination !== "" || p.transportMode === 3) {
+                if (p.destination !== '' || p.transportMode === 3) {
                   f = true;
                 }
 
@@ -138,11 +136,9 @@ var DataLayer = {
                 source.addFeatures(vehicleFeatureCollection);
                 this.initiallyLoaded = true;
               }
-
             }
           });
-        }, 1000)
-
+        }, 1000);
       },
       strategy: ol.loadingstrategy.fixed
     });
@@ -152,9 +148,9 @@ var DataLayer = {
       style: feature => {
         var icon = mode => {
           switch (mode) {
-            case 2: return "http://karta.varmlandstrafik.se/icons/bus-icon.png";
-            case 3: return "assets/icons/taxi.png";
-            case 5: return "http://karta.varmlandstrafik.se/icons/train-icon.png";
+            case 2: return 'http://karta.varmlandstrafik.se/icons/bus-icon.png';
+            case 3: return 'assets/icons/taxi.png';
+            case 5: return 'http://karta.varmlandstrafik.se/icons/train-icon.png';
           }
         };
         return [
@@ -163,18 +159,18 @@ var DataLayer = {
               src: icon(feature.getProperties().transportMode)
             })
           })
-        ]
+        ];
       }
     });
 
     this.layer = new ol.layer.Image({
       caption: this.get('caption'),
       name: this.get('name'),
-      visible: this.get("visible"),
+      visible: this.get('visible'),
       source: this.imageSource
     });
 
-    this.set("type", "data");
+    this.set('type', 'data');
   },
 
   /**
@@ -188,7 +184,7 @@ var DataLayer = {
     // If the vechicle is not found in the source, add it.
     // If the vechicle is found in the source but is not present collection, remove it.
     var features = source.getFeatures();
-    var updates  = helper.featureArrayToObject(vehicleFeatureCollection, 'vehicleRef');
+    var updates = helper.featureArrayToObject(vehicleFeatureCollection, 'vehicleRef');
     var presents = helper.featureArrayToObject(features, 'vehicleRef');
 
     _.each(vehicleFeatureCollection, function (fromService) {
@@ -209,7 +205,7 @@ var DataLayer = {
     });
   },
 
- /**
+  /**
   * getSource - Get the source of this laer
   * @instance
   * @return {external:"ol.source"} style
@@ -218,7 +214,7 @@ var DataLayer = {
     return this.vectorSource;
   },
 
- /**
+  /**
   * updateLayer - Add features to this layer source
   * @instance
   * @param {Array<{external:"ol.feature"}>} feature
@@ -227,7 +223,7 @@ var DataLayer = {
     this.getSource().addFeatures(features);
   },
 
- /**
+  /**
   * refresh - redraw the layer
   * @instance
   */

@@ -70,7 +70,7 @@ var RoutingModel = {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(this.setPositionEvent.bind(this));
     } else {
-      alert('kan inte få position. Skriv startposition i rutan eller tryck position på kartan.');
+      window.alert('Kan inte få position. Skriv startposition i rutan eller tryck position på kartan.');
     }
   },
 
@@ -365,19 +365,30 @@ var RoutingModel = {
         cache: false,
         success: (res) => { this.plotRoute(res, this.get('map'), this.get('layer_route'), this.get('layer_drawing')); },
         error: (err) => {
-          alert('Det gick inte att navigera dig. Försök igen senare');
+          alert('Det gick inte att navigera. Försök igen senare.');
+          throw new Error(err);
         }
       });
     }
   },
 
   plotRoute: function (res, map, layer, layer_drawing) {
-    var routeResult = '';
     layer.getSource().clear();
     var steps = res.routes[0].legs[0].steps;
-    var routeDiv = document.createElement('div');
-    var p = document.createElement('p');
-    p.innerHTML = '<b>Färdsätt:</b>' + travelModeSwe + '<br>' + '<b>Avstånd:</b> ' + res.routes[0].legs[0].distance.text + '(' + res.routes[0].legs[0].distance.value + 'm)' + '<br>' + '<b>Tid:</b> ' + res.routes[0].legs[0].duration.text + '<br>' + '<b>Startadress:</b> ' + res.routes[0].legs[0].start_address + '<br>' + '<b>Slutadress:</b> ' + res.routes[0].legs[0].end_address;
+    const routeDiv = document.createElement('div');
+    const p = document.createElement('p');
+    const ul = document.createElement('ol');
+    p.innerHTML = `
+                    <table class="table table-condensed">
+                      <tbody>
+                        <tr><td><b>Färdsätt</b></td><td>${travelModeSwe}</td></tr>
+                        <tr><td><b>Avstånd</b></td><td>${res.routes[0].legs[0].distance.text} (${res.routes[0].legs[0].distance.value} m)</td></tr>
+                        <tr><td><b>Tid</b></td><td>${res.routes[0].legs[0].duration.text}</td></tr>
+                        <tr><td><b>Startadress</b></td><td>${res.routes[0].legs[0].start_address}</td></tr>
+                        <tr><td><b>Slutadress</b></td><td>${res.routes[0].legs[0].end_address}</td></tr>
+                      </tbody>
+                    </table>
+                    `;
     routeDiv.appendChild(p);
     for (var i = 0; i < steps.length; i++) {
       var lat = steps[i].start_location.lat;
@@ -391,7 +402,7 @@ var RoutingModel = {
       point.setCoordinates(transformed);
 
       var n = i + 1;
-      var tmpFeature = new ol.Feature({geometry: point, information: steps[i].html_instructions});
+      var tmpFeature = new ol.Feature({geometry: point, info: steps[i].html_instructions});
       tmpFeature.number = '' + n;
       tmpFeature.setStyle(style_route);
       layer.getSource().addFeature(tmpFeature);
@@ -399,14 +410,15 @@ var RoutingModel = {
       var tmpLi = document.createElement('li');
       tmpLi.onclick = this.highlightFeature.bind(this);
       tmpLi.id = 'step_number' + n;
-      tmpLi.innerHTML = n + ',' + steps[i].html_instructions;
-      var tmpI = document.createElement('n');
-      tmpI.class = 'fa fa-arrow-down';
-      var tmpBr = document.createElement('br');
-      routeDiv.appendChild(tmpLi);
-      routeDiv.appendChild(tmpI);
-      routeDiv.appendChild(tmpBr);
+      tmpLi.innerHTML = steps[i].html_instructions;
+      // var tmpI = document.createElement('i');
+      // tmpI.class = 'fa fa-arrow-down';
+      // var tmpBr = document.createElement('br');
+      ul.appendChild(tmpLi);
+      // routeDiv.appendChild(tmpI);
+      // routeDiv.appendChild(tmpBr);
     }
+    routeDiv.appendChild(ul);
 
     var resList = document.getElementById('resultList');
     while (resList.firstChild) {

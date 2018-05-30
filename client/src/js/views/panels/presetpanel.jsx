@@ -30,9 +30,9 @@ var PresetPanelView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function() {
+  getInitialState: function () {
     return {
-      anchor: ""
+      anchor: ''
     };
   },
 
@@ -91,20 +91,20 @@ var PresetPanelView = {
         return (
           <a key={i} href={getUrl + preset.presetUrl}>
             <li>
-              {preset.name} <i className="fa fa-bookmark preset-icon"></i>
+              {preset.name} <i className='fa fa-bookmark preset-icon' />
             </li>
           </a>
         );
       });
     }
-    
+
     return (
-      <Panel title="Snabbval" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked} instruction={atob(this.props.model.get('instruction'))}>
-        <div className="bookmark-panel panel-content">
+      <Panel title='Snabbval' onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked} instruction={atob(this.props.model.get('instruction'))}>
+        <div className='bookmark-panel panel-content'>
           <label>Tillgängliga snabbval</label>
-            <ul>
-              {items}
-            </ul>
+          <ul>
+            {items}
+          </ul>
         </div>
       </Panel>
     );

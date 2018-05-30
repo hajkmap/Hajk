@@ -39,7 +39,7 @@ var ToolModelProperties = {
   icon: '',
   collection: undefined,
   navigation: undefined,
-  instruction: ""
+  instruction: ''
 };
 
 /**
@@ -55,8 +55,8 @@ var ToolModel = {
   defaults: ToolModelProperties,
 
   initialize: function () {
-    this.initialState =  _.clone(this.attributes);
-    this.on("change:shell", (sender, shell) => {
+    this.initialState = _.clone(this.attributes);
+    this.on('change:shell', (sender, shell) => {
       this.set('navigation', shell.get('navigation'));
       this.configure(shell);
     });

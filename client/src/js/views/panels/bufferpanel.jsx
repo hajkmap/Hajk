@@ -31,7 +31,7 @@ var BufferPanelView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function() {
+  getInitialState: function () {
     return {
       activeTool: this.props.model.get('activeTool'),
       validBufferDist: this.props.model.isNumber(this.props.model.get('bufferDist'))
@@ -69,12 +69,12 @@ var BufferPanelView = {
 
   getClassNames: function (type) {
     return this.state.activeTool === type
-      ? "btn btn-primary"
-      : "btn btn-default";
+      ? 'btn btn-primary'
+      : 'btn btn-default';
   },
 
-  openInstruction: function (){
-    var element = $("#instructionText");
+  openInstruction: function () {
+    var element = $('#instructionText');
     element.toggle();
   },
 
@@ -84,25 +84,24 @@ var BufferPanelView = {
    * @return {external:ReactElement}
    */
   render: function () {
-
-    if(this.props.model.get('varbergVer')){
+    if (this.props.model.get('varbergVer')) {
       return (
-        <Panel title="Urvalsområde" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked} instruction={atob(this.props.model.get('instruction'))}>
-          <div className="panel-content">
-            <br/><br/>
-            <div className="panel panel-default-transparent">
-              <button onClick={() => this.props.model.activateBufferMarker()} type="button" className="btn btn-primary"
-                      title="Markera flera objekt">
+        <Panel title='Urvalsområde' onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked} instruction={atob(this.props.model.get('instruction'))}>
+          <div className='panel-content'>
+            <br /><br />
+            <div className='panel panel-default-transparent'>
+              <button onClick={() => this.props.model.activateBufferMarker()} type='button' className='btn btn-primary'
+                title='Markera flera objekt'>
                 Sätt ut mittpunkt
               </button>
             </div>
-            <div className="panel panel-default">
-              <div className="panel-heading">Ange avstånd från mittpunkt</div>
-              <div className="panel-body">
+            <div className='panel panel-default'>
+              <div className='panel-heading'>Ange avstånd från mittpunkt</div>
+              <div className='panel-body'>
                 <input
-                  id="buff-dist"
-                  type="text"
-                  name="buff-dist"
+                  id='buff-dist'
+                  type='text'
+                  name='buff-dist'
                   style={{
                     background: this.state.validBufferDist ? '#FFF' : '#F33'
                   }}
@@ -117,12 +116,11 @@ var BufferPanelView = {
                     this.setState({
                       bufferDist: e.target.value
                     });
-                  }}>
-                </input> m
+                  }} /> m
               </div>
             </div>
-            <div className="panel panel-default-transparent">
-              <div className="panel-body">
+            <div className='panel panel-default-transparent'>
+              <div className='panel-body'>
                 <button
                   onClick={() => {
                     var status = this.props.model.buffer();
@@ -132,56 +130,56 @@ var BufferPanelView = {
                       });
                     }
                   }}
-                  className="btn btn-primary">
+                  className='btn btn-primary'>
                   Skapa buffertzon
                 </button>
                 &nbsp;
                 <button
                   onClick={() => this.props.model.clearBuffer()}
-                  className="btn btn-primary">
+                  className='btn btn-primary'>
                   Rensa
                 </button>
               </div>
             </div>
-            <div className="panel panel-default">
-              <div className="panel-heading">Resultat: Objekt inom buffertzon</div>
-              <div className="panel-body">
-                <div id="visibleLayerList"></div>
+            <div className='panel panel-default'>
+              <div className='panel-heading'>Resultat: Objekt inom buffertzon</div>
+              <div className='panel-body'>
+                <div id='visibleLayerList' />
               </div>
             </div>
           </div>
         </Panel>
       );
-    }else{
+    } else {
       return (
-        <Panel title="Buffertverktyg" onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked} instruction={atob(this.props.model.get('instruction'))}>
-          <div className="panel-content">
+        <Panel title='Buffertverktyg' onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked} instruction={atob(this.props.model.get('instruction'))}>
+          <div className='panel-content'>
             <p>
               Detta verktyg skapar en zon med angivet avstånd runt valda objekt i kartan.
             </p>
-            <div className="panel panel-default">
-              <div className="panel-heading">Välj objekt</div>
-              <div className="panel-body">
-                <button onClick={() => this.activateTool('multiSelect')} type="button" className={this.getClassNames('multiSelect')} title="Markera flera objekt">
-                  <i className="fa fa-plus icon"></i>
+            <div className='panel panel-default'>
+              <div className='panel-heading'>Välj objekt</div>
+              <div className='panel-body'>
+                <button onClick={() => this.activateTool('multiSelect')} type='button' className={this.getClassNames('multiSelect')} title='Markera flera objekt'>
+                  <i className='fa fa-plus icon' />
                 </button>
                 &nbsp;
                 <span
                   onClick={() => {
                     this.props.model.clearSelection();
                   }}
-                  className="btn btn-link">
+                  className='btn btn-link'>
                 Rensa selektering
-              </span>
+                </span>
               </div>
             </div>
-            <div className="panel panel-default">
-              <div className="panel-heading">Ange buffertavstånd</div>
-              <div className="panel-body">
+            <div className='panel panel-default'>
+              <div className='panel-heading'>Ange buffertavstånd</div>
+              <div className='panel-body'>
                 <input
-                  id="buff-dist"
-                  type="text"
-                  name="buff-dist"
+                  id='buff-dist'
+                  type='text'
+                  name='buff-dist'
                   style={{
                     background: this.state.validBufferDist ? '#FFF' : '#F33'
                   }}
@@ -196,13 +194,12 @@ var BufferPanelView = {
                     this.setState({
                       bufferDist: e.target.value
                     });
-                  }}>
-                </input> m
+                  }} /> m
               </div>
             </div>
-            <div className="panel panel-default">
-              <div className="panel-heading">Skapa buffert</div>
-              <div className="panel-body">
+            <div className='panel panel-default'>
+              <div className='panel-heading'>Skapa buffert</div>
+              <div className='panel-body'>
                 <button
                   onClick={() => {
                     var status = this.props.model.buffer();
@@ -212,17 +209,17 @@ var BufferPanelView = {
                       });
                     }
                   }}
-                  className="btn btn-primary">
+                  className='btn btn-primary'>
                   Buffra
                 </button>
               </div>
             </div>
-            <div className="panel panel-default">
-              <div className="panel-heading">Rensa kartan från buffrade objekt</div>
-              <div className="panel-body">
+            <div className='panel panel-default'>
+              <div className='panel-heading'>Rensa kartan från buffrade objekt</div>
+              <div className='panel-body'>
                 <button
                   onClick={() => this.props.model.clearBuffer()}
-                  className="btn btn-primary">
+                  className='btn btn-primary'>
                   Rensa
                 </button>
               </div>
@@ -230,9 +227,7 @@ var BufferPanelView = {
           </div>
         </Panel>
       );
-
     }
-
   }
 };
 

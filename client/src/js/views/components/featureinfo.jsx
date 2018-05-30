@@ -34,9 +34,9 @@ var FeatureInfoView = {
     return Object
       .keys(o)
       .reduce((str, next, index, arr) =>
-        /^geom$|^geometry$|^the_geom$/.test(arr[index]) ?
-        str : str + `**${arr[index]}**: ${o[arr[index]]}\r`
-      , "");
+        /^geom$|^geometry$|^the_geom$/.test(arr[index])
+          ? str : str + `**${arr[index]}**: ${o[arr[index]]}\r`
+        , '');
   },
 
   /**
@@ -44,14 +44,14 @@ var FeatureInfoView = {
    * @instance
    * @return {external:ReactElement}
    */
-  render: function name() {
+  render: function name () {
     if (!this.props.info) {
       return false;
     }
 
-    var html = ""
-    ,   icon = ''
-    ,   info = this.props.info.information
+    var html = '',
+      icon = '',
+      info = this.props.info.information
     ;
 
     if (typeof info === 'object') {
@@ -61,13 +61,13 @@ var FeatureInfoView = {
     html = marked(info, { sanitize: false, gfm: true, breaks: true });
 
     if (this.props.info.iconUrl != '') {
-      icon = <img src={this.props.info.iconUrl}></img>;
+      icon = <img src={this.props.info.iconUrl} />;
     }
 
     return (
       <div>
-        <div className="header">{icon}<h1>{this.props.info.caption}</h1></div>
-        <div className="information">
+        <div className='header'>{icon}<h1>{this.props.info.caption}</h1></div>
+        <div className='information'>
           <span dangerouslySetInnerHTML={{__html: html}} />
         </div>
       </div>

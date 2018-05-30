@@ -76,15 +76,15 @@ var SearchBarView = {
       });
     }
 
-    this.props.model.on("change:displayPopupBar", () => {
+    this.props.model.on('change:displayPopupBar', () => {
       this.setState({
         displayPopup: this.props.model.get('displayPopupBar')
       });
     });
 
-    var str
-      , result
-      , typeName;
+    var str,
+      result,
+      typeName;
 
     // get s and v
     var paramGet = function (name) {
@@ -108,7 +108,7 @@ var SearchBarView = {
     }
 
     if ((!this.state.haveUrlSearched) && typeof v !== 'undefined' && v != null) {
-      var field = document.getElementById("searchbar-input-field");
+      var field = document.getElementById('searchbar-input-field');
       field.value = v;
       this.valueBar = v;
       this.props.model.set('valueBar', this.valueBar);
@@ -119,7 +119,7 @@ var SearchBarView = {
         sAndVSearch: true
       });
       this.props.model.set('force', true);
-      this.search() // always search on url-query
+      this.search(); // always search on url-query
     }
   },
 
@@ -140,9 +140,9 @@ var SearchBarView = {
    * @instance
    */
   componentWillMount: function () {
-    this.props.model.get('layerCollection') ?
-      this.bindLayerVisibilityChange() :
-      this.props.model.on('change:layerCollection', this.bindLayerVisibilityChange);
+    this.props.model.get('layerCollection')
+      ? this.bindLayerVisibilityChange()
+      : this.props.model.on('change:layerCollection', this.bindLayerVisibilityChange);
   },
 
   /**
@@ -151,10 +151,10 @@ var SearchBarView = {
    */
   componentWillUnmount: function () {
     this.props.model.get('layerCollection').each((layer) => {
-      layer.off("change:visible", this.search);
+      layer.off('change:visible', this.search);
     });
     this.props.model.off('change:layerCollection', this.bindLayerVisibilityChange);
-    this.props.model.off("change:displayPopupBar");
+    this.props.model.off('change:displayPopupBar');
   },
 
   /**
@@ -162,11 +162,11 @@ var SearchBarView = {
    * @instance
    */
   clear: function () {
-    if (typeof $("#sokRensa") !== "undefined") {
-      $("#sokRensa").click();
+    if (typeof $('#sokRensa') !== 'undefined') {
+      $('#sokRensa').click();
     }
-    this.valueBar = "";
-    this.props.model.set('valueBar', "");
+    this.valueBar = '';
+    this.props.model.set('valueBar', '');
     this.props.model.clear();
     this.setState({
       loading: false,
@@ -245,8 +245,8 @@ var SearchBarView = {
    */
   bindLayerVisibilityChange: function () {
     this.props.model.get('layerCollection').each((layer) => {
-      layer.on("change:visible", () => {
-        //this.update(); // causes a search to be done everytime a layer's visibility changes. Then it only searches in adresser and fastighet
+      layer.on('change:visible', () => {
+        // this.update(); // causes a search to be done everytime a layer's visibility changes. Then it only searches in adresser and fastighet
       });
     });
   },
@@ -269,17 +269,17 @@ var SearchBarView = {
    * @return {external:ReactElement}
    */
   renderOptions: function () {
-    var settings = this.props.model.get('settings')
-      , sources = this.props.model.get('sources')
+    var settings = this.props.model.get('settings'),
+      sources = this.props.model.get('sources')
     ;
     return (
       <div>
         <div>
           <span>Sök: </span>&nbsp;
           <select value={this.props.model.get('filter')} onChange={(e) => {
-            this.setFilter(e)
+            this.setFilter(e);
           }}>
-            <option value="*">-- Alla --</option>
+            <option value='*'>-- Alla --</option>
             {
               (() => {
                 return sources.map((wfslayer, i) => {
@@ -287,8 +287,8 @@ var SearchBarView = {
                     <option key={i} value={wfslayer.caption}>
                       {wfslayer.caption}
                     </option>
-                  )
-                })
+                  );
+                });
               })()
             }
           </select>
@@ -298,15 +298,15 @@ var SearchBarView = {
   },
 
   onChangeDisplayPopup: function (e) {
-    this.props.model.set("displayPopupBar", e.target.checked);
+    this.props.model.set('displayPopupBar', e.target.checked);
   },
 
   exportSelected: function (type) {
     this.props.model.export(type);
   },
 
-  searchOnInput: function(event) {
-    if(this.state.sAndVSearch){
+  searchOnInput: function (event) {
+    if (this.state.sAndVSearch) {
       return; // Internet Explorer calls this function before the sAndVSearch can finish. We therefore have to return
       // until the sAndVSearch is finished.
     }
@@ -341,57 +341,57 @@ var SearchBarView = {
     const enable_checkbox = this.props.model.get('enableViewTogglePopupInSnabbsok');
     const checkbox = (
       <div>
-        <input type="checkbox" id="display-popup" ref="displayPopup" onChange={(e) => {
-          this.onChangeDisplayPopup(e)
-        }} checked={this.state.displayPopup}></input>
-        <label htmlFor="display-popup">Visa information</label>
+        <input type='checkbox' id='display-popup' ref='displayPopup' onChange={(e) => {
+          this.onChangeDisplayPopup(e);
+        }} checked={this.state.displayPopup} />
+        <label htmlFor='display-popup'>Visa information</label>
       </div>
     );
 
     const resultStyle = {
       display: this.state.minimized ? 'none' : 'block'
-    }
+    };
 
     return (
-      <div className="searchbar-area" key="searchbar-results">
+      <div className='searchbar-area' key='searchbar-results'>
         {
           groups && groups.length > 0
             ? (
               <div>
-                <div className="searchbar-results">
-                  <h3 id="searchbar-results-title">
+                <div className='searchbar-results'>
+                  <h3 id='searchbar-results-title'>
                     Sökresultat
-                    {resultsCount > 0 ? <span className="search-results-total-count">({resultsCount})</span> : null}
+                    {resultsCount > 0 ? <span className='search-results-total-count'>({resultsCount})</span> : null}
                   </h3>
-                  <div id="searchbar-results-list" style={resultStyle}>
+                  <div id='searchbar-results-list' style={resultStyle}>
                     {enable_checkbox ? checkbox : null}
                     {
                       groups.map((item, i) => {
-                        var id = "group-" + i;
+                        var id = 'group-' + i;
                         return (
                           <SearchResultGroup
-                            isBar="yes"
+                            isBar='yes'
                             id={id}
                             key={id}
                             result={item}
                             numGroups={groups.length}
                             model={this.props.model}
                             parentView={this}
-                            map={this.props.model.get('map')}/>
+                            map={this.props.model.get('map')} />
                         );
                       })
                     }
                   </div>
                 </div>
-                <div onClick={this.toggleMinimize} className="search-results-toggle-minimze">
+                <div onClick={this.toggleMinimize} className='search-results-toggle-minimze'>
                   {this.state.minimized
-                    ? <span>Visa <span className="fa fa-angle-down clickable arrow"></span></span>
-                    : <span>Dölj <span className="fa fa-angle-up clickable arrow"></span></span>
+                    ? <span>Visa <span className='fa fa-angle-down clickable arrow' /></span>
+                    : <span>Dölj <span className='fa fa-angle-up clickable arrow' /></span>
                   }
                 </div>
               </div>
             ) : (
-              <div className="searchbar-results-no-results">Sökningen gav inget resultat.</div>
+              <div className='searchbar-results-no-results'>Sökningen gav inget resultat.</div>
             )
         }
       </div>
@@ -404,59 +404,58 @@ var SearchBarView = {
    * @return {external:ReactElement}
    */
   render: function () {
-    var valueBar = this.props.model.get('valueBar')
-      , showResults = this.props.model.shouldRenderResult(true)
-      , options = this.renderOptions();
+    var valueBar = this.props.model.get('valueBar'),
+      showResults = this.props.model.shouldRenderResult(true),
+      options = this.renderOptions();
 
     const Loading = (
-      <div id="searchbar-loading-spinner">
-        <span className="sr-only">Laddar...</span>
-        <i className="fa fa-refresh fa-spin fa-2x fa-fw"></i>
+      <div id='searchbar-loading-spinner'>
+        <span className='sr-only'>Laddar...</span>
+        <i className='fa fa-refresh fa-spin fa-2x fa-fw' />
       </div>
-    )
+    );
 
     const shouldRenderSearchResults = this.refs.searchInput && (this.refs.searchInput.value.length > 3 || this.props.model.get('force') && this.refs.searchInput.value.length > 0);
 
-    if(this.refs.searchInput) {
+    if (this.refs.searchInput) {
     } else {
     }
 
-
     const AlertSearchBar = (
-      <p className="alert alert-info" id="alertSearchbar">
+      <p className='alert alert-info' id='alertSearchbar'>
         Skriv minst fyra tecken för att påbörja automatisk sökning. Tryck på <b>retur</b> för att forcera en sökning.
       </p>
-    )
+    );
 
     const inputClassName = this.state.loading || (showResults && !this.state.loading && shouldRenderSearchResults) ? 'form-control searchbar-input-field-active' : 'form-control';
     const buttonClassName = this.state.loading || (showResults && !this.state.loading && shouldRenderSearchResults) ? 'input-group-addon searchbar-search-button-active' : 'input-group-addon';
 
     return (
-      <div className="search-tools">
-        <div className="input-group" id="searchbar-search-area">
-          {valueBar ? <div id="searchbar-input-field-clear" onClick={() => {
-            this.clear()
-          }}></div> : null}
+      <div className='search-tools'>
+        <div className='input-group' id='searchbar-search-area'>
+          {valueBar ? <div id='searchbar-input-field-clear' onClick={() => {
+            this.clear();
+          }} /> : null}
           <input
-            id="searchbar-input-field"
-            type="text"
-            ref="searchInput"
+            id='searchbar-input-field'
+            type='text'
+            ref='searchInput'
             className={inputClassName}
-            placeholder="Sök i kartan..."
+            placeholder='Sök i kartan...'
             value={valueBar}
             onKeyDown={this.handleKeyDown}
-            onChange={this.searchOnInput}/>
-          <div id="searchbar-search-button" className={buttonClassName}>
-            <i className="fa fa-search"></i>
+            onChange={this.searchOnInput} />
+          <div id='searchbar-search-button' className={buttonClassName}>
+            <i className='fa fa-search' />
           </div>
         </div>
         {
           showResults
             ? this.state.loading
-            ? Loading
-            : shouldRenderSearchResults
-              ? this.renderResults()
-              : AlertSearchBar
+              ? Loading
+              : shouldRenderSearchResults
+                ? this.renderResults()
+                : AlertSearchBar
             : null
         }
       </div>
@@ -468,8 +467,6 @@ var SearchBarView = {
  * Ta bort sök alternative ovanför {results} above
  *         <div className="search-options">{options}</div>
  */
-
-
 
 /**
  * SearchBarView module.<br>

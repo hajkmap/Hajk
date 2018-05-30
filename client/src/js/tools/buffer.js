@@ -23,7 +23,6 @@
 const ToolModel = require('tools/tool');
 const SelectionModel = require('models/selection');
 
-
 /**
  * @typedef {Object} BufferModel~BufferModelProperties
  * @property {string} type -Default: Buffer
@@ -51,7 +50,7 @@ var BufferModelProperties = {
   geoserverUrl: '',
   notFeatureLayers: [],
   geoserverNameToCategoryName: {}
-}
+};
 
 /**
  * @description
@@ -100,11 +99,10 @@ var BufferModel = {
   },
 
   configure: function (shell) {
-
     this.set('map', shell.getMap());
     this.set('olMap', shell.getMap().getMap());
 
-    if(!this.get('varbergVer')){
+    if (!this.get('varbergVer')) {
       this.set('layers', shell.getLayerCollection());
 
       this.set('bufferLayer', new ol.layer.Vector({
@@ -114,7 +112,7 @@ var BufferModel = {
       }));
 
       this.get('olMap').addLayer(this.get('bufferLayer'));
-    }else {
+    } else {
       this.set('layersWithNames', shell.attributes.layers);
       this.set('layersCollection', shell.getLayerCollection());
 
@@ -130,7 +128,7 @@ var BufferModel = {
           anchor: [0.5, 0.5],
           anchorXUnits: 'fraction',
           anchorYUnits: 'fraction',
-          opacity: .8,
+          opacity: 0.8,
           src: 'assets/icons/dot_marker_blue.png',
           scale: (0.5)
         })
@@ -155,12 +153,12 @@ var BufferModel = {
         })
       }));
 
-      this.set("layer_popup", new ol.layer.Vector({
-          source: new ol.source.Vector(),
-          name: "popupHighlight",
-          queryable: false,
-          style: this.get('style_popup')
-        })
+      this.set('layer_popup', new ol.layer.Vector({
+        source: new ol.source.Vector(),
+        name: 'popupHighlight',
+        queryable: false,
+        style: this.get('style_popup')
+      })
       );
 
       this.get('olMap').addLayer(this.get('bufferLayer'));
@@ -173,23 +171,23 @@ var BufferModel = {
       layerCollection: shell.getLayerCollection()
     }));
 
-    if(typeof this.get("geoserverNameToCategoryName") === "string"){
+    if (typeof this.get('geoserverNameToCategoryName') === 'string') {
       try {
-        this.set("geoserverNameToCategoryName", JSON.parse(this.get("geoserverNameToCategoryName")));
-      } catch (e){
-        this.set("geoserverNameToCategoryName", {});
+        this.set('geoserverNameToCategoryName', JSON.parse(this.get('geoserverNameToCategoryName')));
+      } catch (e) {
+        this.set('geoserverNameToCategoryName', {});
       }
     }
   },
 
-  activateBufferMarker: function(){
+  activateBufferMarker: function () {
     if (this.get('bufferMarkKey') == undefined) {
       this.set('bufferMarkKey', this.get('olMap').on('singleclick', this.placeMarker.bind(this)));
     }
   },
 
-  deActivateBufferMarker: function(){
-    if(this.get('bufferMarkKey') !== undefined) {
+  deActivateBufferMarker: function () {
+    if (this.get('bufferMarkKey') !== undefined) {
       ol.Observable.unByKey(this.get('bufferMarkKey'));
       this.set('bufferMarkKey', undefined);
     }
@@ -213,10 +211,9 @@ var BufferModel = {
     }
   },
 
-  placeMarker: function(event){
-
-    if (this.get('marker') === undefined){
-      var ft =  new ol.Feature();
+  placeMarker: function (event) {
+    if (this.get('marker') === undefined) {
+      var ft = new ol.Feature();
       this.set('marker', ft);
       this.get('markerlayer').getSource().addFeature(this.get('marker'));
       ft.setStyle(this.get('style_marker'));
@@ -228,16 +225,15 @@ var BufferModel = {
   },
 
   isNumber: function (obj) {
-
-    if (typeof obj === "number") {
+    if (typeof obj === 'number') {
       return true;
     }
 
-    if (typeof obj !== "string") {
+    if (typeof obj !== 'string') {
       return false;
     }
 
-    if (obj.trim() === "") {
+    if (obj.trim() === '') {
       return false;
     }
 
@@ -251,7 +247,7 @@ var BufferModel = {
   /**
    * @instance
    */
-  buffer: function() {
+  buffer: function () {
     if (!this.get('varbergVer')) {
       const parser = new jsts.io.OL3Parser();
       const features = this.get('selectionModel').features;
@@ -262,26 +258,25 @@ var BufferModel = {
       }
 
       var buffered = Object.keys(features).map(key => {
-
-        var feature = features[key]
-        , olf = new ol.Feature()
-        , olGeom = feature.getGeometry()
-        , jstsGeom
-        , buff
+        var feature = features[key],
+          olf = new ol.Feature(),
+          olGeom = feature.getGeometry(),
+          jstsGeom,
+          buff
       ;
 
-      if (olGeom instanceof ol.geom.Circle) {
-        olGeom = ol.geom.Polygon.fromCircle(olGeom, 0b10000000);
-      }
+        if (olGeom instanceof ol.geom.Circle) {
+          olGeom = ol.geom.Polygon.fromCircle(olGeom, 0b10000000);
+        }
 
-      jstsGeom = parser.read(olGeom);
-      buff = jstsGeom.buffer(dist);
-      olf.setGeometry(parser.write(buff));
-      olf.setStyle(this.getDefaultStyle());
-      olf.setId(Math.random() * 1E20);
+        jstsGeom = parser.read(olGeom);
+        buff = jstsGeom.buffer(dist);
+        olf.setGeometry(parser.write(buff));
+        olf.setStyle(this.getDefaultStyle());
+        olf.setId(Math.random() * 1E20);
 
-      return olf;
-    })
+        return olf;
+      })
       ;
 
       if (buffered) {
@@ -296,11 +291,11 @@ var BufferModel = {
       }
 
       this.deActivateBufferMarker();
-// JSON?
-      //var notFeatureLayers = ['150', '160', '170', '410', '420', '430', '440', '260', '310', '350', '360', '250', '230', '340', '330', '270', '280', '320', '325', '140', '220', '210'];
+      // JSON?
+      // var notFeatureLayers = ['150', '160', '170', '410', '420', '430', '440', '260', '310', '350', '360', '250', '230', '340', '330', '270', '280', '320', '325', '140', '220', '210'];
       var activeLayers = [];
       for (var i = 0; i < this.get('layersCollection').length; i++) {
-        if (this.get('layersCollection').models[i].getVisible() && this.get("notFeatureLayers").indexOf(this.get('layersCollection').models[i].id) != -1) {
+        if (this.get('layersCollection').models[i].getVisible() && this.get('notFeatureLayers').indexOf(this.get('layersCollection').models[i].id) != -1) {
           activeLayers.push(this.get('layersCollection').models[i]);
         }
       }
@@ -314,7 +309,6 @@ var BufferModel = {
         }
       }
 
-
       var lonlat = ol.proj.transform(this.get('marker').getGeometry().getCoordinates(), 'EPSG:3007', 'EPSG:4326');
       var lon = lonlat[0];
       var lat = lonlat[1];
@@ -327,12 +321,10 @@ var BufferModel = {
       this.get('bufferLayer').getSource().addFeature(circleFeature);
       circleFeature.setStyle(this.getDefaultStyle());
 
-
       document.getElementById('visibleLayerList').innerHTML = '';
       if (activeNames.length == 0) {
         return true;
       }
-
 
       this.getFeaturesWithinRadius(activeNames);
 
@@ -340,7 +332,7 @@ var BufferModel = {
     }
   },
 
-  createWFSQuery: function(typeName, radius, coordStr){
+  createWFSQuery: function (typeName, radius, coordStr) {
     var query = '<wfs:Query typeName=\'feature:' + typeName + '\' srsName=\'EPSG:3007\'>\n' +
       '          <ogc:Filter>\n' +
       '        \n' +
@@ -360,7 +352,7 @@ var BufferModel = {
     return query;
   },
 
-  getFeaturesWithinRadius: function(layers){
+  getFeaturesWithinRadius: function (layers) {
     var requestPrefix = '<wfs:GetFeature\n' +
       '         service = \'WFS\'\n' +
       '         version = \'1.1.0\'\n' +
@@ -373,13 +365,12 @@ var BufferModel = {
       '         outputFormat="GML2"\n' +
       '         maxFeatures="1000">\n';
 
-
-    var requestSuffix = '\n      </wfs:GetFeature>'
+    var requestSuffix = '\n      </wfs:GetFeature>';
 
     var queries = '';
 
     // One query per layer
-    for (var i = 0; i < layers.length; i++){
+    for (var i = 0; i < layers.length; i++) {
       queries += this.createWFSQuery(layers[i], this.get('bufferDist'), this.get('marker').getGeometry().getCoordinates());
     }
 
@@ -387,33 +378,32 @@ var BufferModel = {
 
     // Do Ajax call
     $.ajax({
-      url: this.get("geoserverUrl"),
+      url: this.get('geoserverUrl'),
       contentType: 'text/xml',
       crossDomain: true,
       type: 'post',
       data: wfsRequset,
       success: result => {
-      this.putFeaturesInResult(result);
-  },
-    error: result => {
-      alert('Något gick fel');
-    }
-  });
+        this.putFeaturesInResult(result);
+      },
+      error: result => {
+        alert('Något gick fel');
+      }
+    });
   },
 
-  putFeaturesInResult: function(res){
-
+  putFeaturesInResult: function (res) {
     var featureMembers = res.getElementsByTagName('gml:featureMember');
 
     var foundFeatures = {};
     var str = '';
-    for(var i = 0; i < featureMembers.length; i++){
+    for (var i = 0; i < featureMembers.length; i++) {
       var nameTag = featureMembers[i].getElementsByTagName('varberg:namn')[0];
       var name = nameTag.innerHTML;
       var categoryName = nameTag.parentElement.localName;
 
       var coordinate = featureMembers[i].getElementsByTagName('gml:coordinates')[0].innerHTML;
-      if (!(categoryName in foundFeatures)){
+      if (!(categoryName in foundFeatures)) {
         foundFeatures[categoryName] = [];
       }
       foundFeatures[categoryName].push([name, coordinate]);
@@ -453,10 +443,9 @@ var BufferModel = {
     };
     */
 
-
     var div = document.createElement('div');
 
-    for(var i = 0; i < categories.length; i++){
+    for (var i = 0; i < categories.length; i++) {
       var outerDiv = document.createElement('div');
       outerDiv.className = 'panel panel-default layer-item';
       var headingDiv = document.createElement('div');
@@ -466,7 +455,7 @@ var BufferModel = {
       label.className = 'layer-item-header-text';
       headingDiv.appendChild(label);
 
-      label.innerHTML = this.get("geoserverNameToCategoryName")[categories[i]];
+      label.innerHTML = this.get('geoserverNameToCategoryName')[categories[i]];
 
       var bodyDiv = document.createElement('div');
       bodyDiv.className = 'panel-body';
@@ -480,7 +469,7 @@ var BufferModel = {
       var features = foundFeatures[categories[i]];
       features.sort();
       var layer = this.get('layer_popup');
-      for(var j = 0; j < features.length; j++){
+      for (var j = 0; j < features.length; j++) {
         var tag = document.createElement('p'); // remember to convert coordinate to list of float
         tag.setAttribute('coord', features[j][1]);
         tag.onclick = this.popupIcons.bind(this);
@@ -495,7 +484,7 @@ var BufferModel = {
     this.set('foundFeatures', foundFeatures);
   },
 
-  popupIcons: function(event) {
+  popupIcons: function (event) {
     var coord = event.target.attributes.coord.value.split(',');
     coord = [parseFloat(coord[1]), parseFloat(coord[0])];
     var point = new ol.geom.Point([
@@ -509,17 +498,16 @@ var BufferModel = {
     var ft = new ol.Feature({geometry: point});
     this.get('layer_popup').getSource().addFeature(ft);
     ft.setStyle(this.get('style_popup'));
-
   },
 
-  clearSelection: function() {
+  clearSelection: function () {
     this.get('selectionModel').clearSelection();
   },
 
-  clearBuffer: function() {
+  clearBuffer: function () {
     this.get('bufferLayer').getSource().clear();
 
-    if(this.get('varbergVer')) {
+    if (this.get('varbergVer')) {
       this.deActivateBufferMarker();
       this.get('markerlayer').getSource().clear();
       this.get('layer_popup').getSource().clear();
