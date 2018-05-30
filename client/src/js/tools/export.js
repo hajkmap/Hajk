@@ -766,8 +766,8 @@ var ExportModel = {
     data.wmtsLayers = this.findWMTS() || [];
     data.arcgisLayers = this.findArcGIS() || [];
 
-    dx = Math.abs(left - right);
-    dy = Math.abs(bottom - top);
+    var dx = Math.abs(left - right);
+    var dy = Math.abs(bottom - top);
 
     data.size = [
       parseInt(options.size.width * dpi),
@@ -836,8 +836,8 @@ var ExportModel = {
     data.wmtsLayers = this.findWMTS() || [];
     data.arcgisLayers = this.findArcGIS() || [];
 
-    dx = Math.abs(left - right);
-    dy = Math.abs(bottom - top);
+    var dx = Math.abs(left - right);
+    var dy = Math.abs(bottom - top);
 
     data.size = [
       parseInt(49.65 * (dx / scale) * dpi),

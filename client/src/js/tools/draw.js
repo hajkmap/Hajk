@@ -1129,6 +1129,8 @@ var DrawModel = {
         break;
       case "Circle":
         radius = Math.round(geom.getRadius());
+        if (radius === 0) 
+          radius = parseFloat(this.get('circleRadius'));
         break;
       default:
         break;
