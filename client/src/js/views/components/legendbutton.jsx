@@ -22,13 +22,13 @@
 
 var LegendButton = React.createClass({
   render: function () {
-    var title = this.props.checked ? "Dölj teckenförklaring" : "Visa teckenförklaring";
-    var className = this.props.checked ? "fa fa-angle-up" : "fa fa-list";
-    var fontSize = this.props.checked ? "26px" : "16px";
+    var title = this.props.checked ? 'Dölj teckenförklaring' : 'Visa teckenförklaring';
+    var className = this.props.checked ? 'fa fa-angle-up' : 'fa fa-list';
+    var fontSize = this.props.checked ? '26px' : '16px';
     return (
-       <span className="clickable pull-right" title={title} style={{ position: 'relative', top: '3px' }}>
-          <i className={className} style={{ fontSize: fontSize }}></i>
-       </span>
+      <span className='clickable pull-right' title={title} style={{ position: 'relative', top: '3px' }}>
+        <i className={className} style={{ fontSize: fontSize }} />
+      </span>
     );
   }
 });

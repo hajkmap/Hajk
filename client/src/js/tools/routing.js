@@ -61,22 +61,20 @@ var RoutingModel = {
   },
 
   /* Starting Point */
-  /* Get a current position from GPS(button right top)*/
-  turnOnGPSClicked: function() {
-      this.getLocation();
+  /* Get a current position from GPS(button right top) */
+  turnOnGPSClicked: function () {
+    this.getLocation();
   },
 
-  getLocation: function(){
-    if(navigator.geolocation){
+  getLocation: function () {
+    if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(this.setPositionEvent.bind(this));
-    }else{
-      alert("kan inte få position. Skriv startposition i rutan eller tryck position på kartan.");
+    } else {
+      window.alert('Kan inte få position. Skriv startposition i rutan eller tryck position på kartan.');
     }
-
   },
 
-
-  positionError: function(error){
+  positionError: function (error) {
     /* reset this location setting */
     this.set({
       position: {
@@ -87,12 +85,13 @@ var RoutingModel = {
   },
 
   /* Choose a starting location on the map manually. and drop a pin */
-  startPointSelection: function(event){
-    var startPoint = new ol.Feature(); /* startPoint and point(below) must be the same l.134*/
+  startPointSelection: function (event) {
+    var startPoint = new ol.Feature(); /* startPoint and point(below) must be the same l.134 */
     startPoint.setGeometry(new ol.geom.Point(event.coordinate));
-  /* Convert Geometry to Coordinate */
+    /* Convert Geometry to Coordinate */
 
-    var lonlat = ol.proj.transform(startPoint.getGeometry().getCoordinates(), 'EPSG:3007', 'EPSG:4326');
+    console.log(this.props);
+    var lonlat = ol.proj.transform(startPoint.getGeometry().getCoordinates(), this.get('projection'), 'EPSG:4326');
     var lon = lonlat[0];
     var lat = lonlat[1];
 
@@ -104,34 +103,32 @@ var RoutingModel = {
     pos.latitude = lat;
     pos.longitude = lon;
     this.set('position', pos);
+  },
 
-   },
-
-  setTravelMode: function(travelmode){
-    switch(travelmode){
-      case "walking":
-        travelModeSwe = "Gå";
+  setTravelMode: function (travelmode) {
+    switch (travelmode) {
+      case 'walking':
+        travelModeSwe = 'Gå';
         break;
-      case "driving":
-        travelModeSwe = "Köra";
+      case 'driving':
+        travelModeSwe = 'Köra';
         break;
-      case "bicycling":
-        travelModeSwe = "Cykla";
+      case 'bicycling':
+        travelModeSwe = 'Cykla';
         break;
-      case "transit":
-        travelModeSwe = "Åka kollektivt";
+      case 'transit':
+        travelModeSwe = 'Åka kollektivt';
         break;
     }
 
     this.set('travelMode', travelmode);
-
   },
 
-  endPointSelection: function(event){
+  endPointSelection: function (event) {
     var endPoint = new ol.Feature();
     endPoint.setGeometry(new ol.geom.Point(event.coordinate));
 
-    var lonlat = ol.proj.transform(endPoint.getGeometry().getCoordinates(), 'EPSG:3007', 'EPSG:4326');
+    var lonlat = ol.proj.transform(endPoint.getGeometry().getCoordinates(), this.get('projection'), 'EPSG:4326');
     var lon = lonlat[0];
     var lat = lonlat[1];
 
@@ -145,18 +142,17 @@ var RoutingModel = {
     this.set('position', pos);
   },
 
-
-  activateStartMode: function(){
+  activateStartMode: function () {
     this.set('state', 'choose_start');
-    if(this.get('onEndKey') !== undefined) {
+    if (this.get('onEndKey') !== undefined) {
       ol.Observable.unByKey(this.get('onEndKey'));
       this.set('onEndKey', undefined);
     }
-    if(this.get('onRoutingKey') !== undefined) {
+    if (this.get('onRoutingKey') !== undefined) {
       ol.Observable.unByKey(this.get('onRoutingKey'));
       this.set('onRoutingKey', undefined);
     }
-    if(this.get('onStartKey') === undefined) {
+    if (this.get('onStartKey') === undefined) {
       this.set('onStartKey', this.get('map').on('singleclick', this.startPointSelection.bind(this)));
     }
 
@@ -165,20 +161,20 @@ var RoutingModel = {
     }
   },
 
-  activateEndMode: function(){
+  activateEndMode: function () {
     this.set('state', 'choose_end');
-    if(this.get('onStartKey') !== undefined) {
+    if (this.get('onStartKey') !== undefined) {
       ol.Observable.unByKey(this.get('onStartKey'));
       this.set('onStartKey', undefined);
     }
-    if(this.get('onRoutingKey') !== undefined) {
+    if (this.get('onRoutingKey') !== undefined) {
       ol.Observable.unByKey(this.get('onRoutingKey'));
       this.set('onRoutingKey', undefined);
     }
-    if(this.get('onEndKey') === undefined) {
+    if (this.get('onEndKey') === undefined) {
       this.set('onEndKey', this.get('map').on('singleclick', this.endPointSelection.bind(this)));
     }
-    if(this.get('onEndKey') !== undefined && this.get('routingFinished')) {
+    if (this.get('onEndKey') !== undefined && this.get('routingFinished')) {
       this.set('onEndKey', this.get('map').on('singleclick', this.endPointSelection.bind(this)));
       // TODO modify if and clear route
       this.set('routeFinished', false);
@@ -189,26 +185,25 @@ var RoutingModel = {
     }
   },
 
-  activateRoutingMode: function(){
+  activateRoutingMode: function () {
     this.set('state', 'show_route');
-    if(this.get('onStartKey') !== undefined) {
+    if (this.get('onStartKey') !== undefined) {
       ol.Observable.unByKey(this.get('onStartKey'));
       this.set('onStartKey', undefined);
     }
-    if(this.get('onEndKey') !== undefined) {
+    if (this.get('onEndKey') !== undefined) {
       ol.Observable.unByKey(this.get('onEndKey'));
       this.set('onEndKey', undefined);
     }
 
-    if(this.get('onRoutingKey') === undefined) {
-      //this.set('onRoutingKey', this.get('map').on('singleclick', this.showRoutingInfoPopup.bind(this)));
+    if (this.get('onRoutingKey') === undefined) {
+      // this.set('onRoutingKey', this.get('map').on('singleclick', this.showRoutingInfoPopup.bind(this)));
     }
     this.searchTrip();
   },
 
-
   // Executed once when the panel is loaded
-  initStartPoint: function() {
+  initStartPoint: function () {
     style_start = new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 0.5],
@@ -257,7 +252,7 @@ var RoutingModel = {
 
     this.set('style_route_highlight', style_route_highlight);
 
-    layer_drawing_style =  new ol.style.Style({
+    layer_drawing_style = new ol.style.Style({
       fill: new ol.style.Fill({
         color: 'rgba(255, 255, 255, 0.5)'
       }),
@@ -282,34 +277,34 @@ var RoutingModel = {
     var source_drawing = new ol.source.Vector({});
 
     if (this.get('layer_start') === undefined) {
-      this.set("layer_start", new ol.layer.Vector({
+      this.set('layer_start', new ol.layer.Vector({
         source: source_start,
-        name: "routing",
-        content: "Punkt",
+        name: 'routing',
+        content: 'Punkt',
         queryable: false,
         style: style_start
       }));
 
-      this.set("layer_end", new ol.layer.Vector({
+      this.set('layer_end', new ol.layer.Vector({
         source: source_end,
-        name: "routing",
-        content: "Punkt",
+        name: 'routing',
+        content: 'Punkt',
         queryable: false,
         style: style_end
       }));
 
-      this.set("layer_route", new ol.layer.Vector({
+      this.set('layer_route', new ol.layer.Vector({
         source: source_route,
-        name: "routing",
-        content: "Punkt",
+        name: 'routing',
+        content: 'Punkt',
         queryable: true,
         style: style_route
       }));
 
-      this.set("layer_drawing", new ol.layer.Vector({
+      this.set('layer_drawing', new ol.layer.Vector({
         source: source_drawing,
-        name: "routing",
-        content: "linje",
+        name: 'routing',
+        content: 'linje',
         queryable: false,
         style: layer_drawing_style
       }));
@@ -321,7 +316,7 @@ var RoutingModel = {
     }
   },
 
-  setPositionEvent: function(event){
+  setPositionEvent: function (event) {
     var pos = this.get('position');
     pos.latitude = event.coords.latitude;
     pos.longitude = event.coords.longitude;
@@ -329,14 +324,14 @@ var RoutingModel = {
     this.setPosition();
   },
 
-  setPosition: function(){
+  setPosition: function () {
     this.get('layer_start').getSource().clear();
     if (this.get('position').longitude && this.get('position').latitude) {
       var point = new ol.geom.Point([
         this.get('position').longitude,
         this.get('position').latitude
       ]);
-      var transformed = ol.proj.transform(point.getCoordinates(), "EPSG:4326", this.get('map').getView().getProjection());
+      var transformed = ol.proj.transform(point.getCoordinates(), 'EPSG:4326', this.get('map').getView().getProjection());
       point.setCoordinates(transformed);
       var ft = new ol.Feature({geometry: point});
       ft.setStyle(style_start);
@@ -347,44 +342,55 @@ var RoutingModel = {
 
   configure: function (shell) {
     this.set('map', shell.getMap().getMap());
+    this.set('projection', shell.getMap().attributes.projection);
   },
 
-  searchTrip: function(){
+  searchTrip: function () {
     this.set({'state': undefined});
     var pos = this.get('position');
-    if(pos.latitude === undefined || pos.longitude === undefined ||
-  pos.latitudeEnd === undefined || pos.longitudeEnd === undefined){
+    if (pos.latitude === undefined || pos.longitude === undefined ||
+  pos.latitudeEnd === undefined || pos.longitudeEnd === undefined) {
       alert('Välj start och slut');
     } else {
       ol.Observable.unByKey(this.get('onEndKey'));
       var mode = this.get('travelMode');
-      var url = 'https://' + document.location.hostname + '/maps/api/directions/json?mode=' + mode + '&origin=' + pos.latitude + ',' + pos.longitude + '&destination=' + pos.latitudeEnd + ',' + pos.longitudeEnd +'&key=' + this.get('apiKey');
-    var request =$.ajax({
+      var url = 'https://' + document.location.hostname + '/maps/api/directions/json?mode=' + mode + '&origin=' + pos.latitude + ',' + pos.longitude + '&destination=' + pos.latitudeEnd + ',' + pos.longitudeEnd + '&key=' + this.get('apiKey');
+      var request = $.ajax({
         url: url,
-        type: "post",
+        type: 'post',
         contentType: 'text/plain',
         xhrFields: {
           withCredentials: false
         },
         cache: false,
-        success: (res) => { this.plotRoute(res, this.get('map'), this.get('layer_route'), this.get('layer_drawing'))},
+        success: (res) => { this.plotRoute(res, this.get('map'), this.get('layer_route'), this.get('layer_drawing')); },
         error: (err) => {
-          alert("Det gick inte att navigera dig. Försök igen senare");
-        },
-    });
-  }
+          alert('Det gick inte att navigera. Försök igen senare.');
+          throw new Error(err);
+        }
+      });
+    }
   },
 
-  plotRoute: function(res, map, layer, layer_drawing) {
-
-    var routeResult = "";
+  plotRoute: function (res, map, layer, layer_drawing) {
     layer.getSource().clear();
     var steps = res.routes[0].legs[0].steps;
-    var routeDiv = document.createElement('div');
-    var p = document.createElement('p');
-    p.innerHTML = '<b>Färdsätt:</b>' + travelModeSwe + '<br>' + '<b>Avstånd:</b> ' + res.routes[0].legs[0].distance.text +'('+res.routes[0].legs[0].distance.value+'m)' + '<br>' + '<b>Tid:</b> ' + res.routes[0].legs[0].duration.text + '<br>' + '<b>Startadress:</b> ' + res.routes[0].legs[0].start_address + '<br>' + '<b>Slutadress:</b> ' + res.routes[0].legs[0].end_address;
+    const routeDiv = document.createElement('div');
+    const p = document.createElement('p');
+    const ul = document.createElement('ol');
+    p.innerHTML = `
+                    <table class="table table-condensed">
+                      <tbody>
+                        <tr><td><b>Färdsätt</b></td><td>${travelModeSwe}</td></tr>
+                        <tr><td><b>Avstånd</b></td><td>${res.routes[0].legs[0].distance.text} (${res.routes[0].legs[0].distance.value} m)</td></tr>
+                        <tr><td><b>Tid</b></td><td>${res.routes[0].legs[0].duration.text}</td></tr>
+                        <tr><td><b>Startadress</b></td><td>${res.routes[0].legs[0].start_address}</td></tr>
+                        <tr><td><b>Slutadress</b></td><td>${res.routes[0].legs[0].end_address}</td></tr>
+                      </tbody>
+                    </table>
+                    `;
     routeDiv.appendChild(p);
-    for(var i = 0; i < steps.length; i++){
+    for (var i = 0; i < steps.length; i++) {
       var lat = steps[i].start_location.lat;
       var lng = steps[i].start_location.lng;
 
@@ -392,28 +398,27 @@ var RoutingModel = {
         lng,
         lat
       ]);
-      var transformed = ol.proj.transform(point.getCoordinates(), "EPSG:4326", "EPSG:3007");
+      var transformed = ol.proj.transform(point.getCoordinates(), 'EPSG:4326', this.get('projection'));
       point.setCoordinates(transformed);
 
-
       var n = i + 1;
-      var tmpFeature = new ol.Feature({geometry: point, information: steps[i].html_instructions});
-      tmpFeature.number = "" + n;
+      var tmpFeature = new ol.Feature({geometry: point, info: steps[i].html_instructions});
+      tmpFeature.number = '' + n;
       tmpFeature.setStyle(style_route);
       layer.getSource().addFeature(tmpFeature);
       // route features
       var tmpLi = document.createElement('li');
       tmpLi.onclick = this.highlightFeature.bind(this);
       tmpLi.id = 'step_number' + n;
-      tmpLi.innerHTML = n + "," + steps[i].html_instructions;
-      var tmpI = document.createElement('n');
-      tmpI.class = 'fa fa-arrow-down';
-      var tmpBr = document.createElement('br');
-      routeDiv.appendChild(tmpLi);
-      routeDiv.appendChild(tmpI);
-      routeDiv.appendChild(tmpBr);
+      tmpLi.innerHTML = steps[i].html_instructions;
+      // var tmpI = document.createElement('i');
+      // tmpI.class = 'fa fa-arrow-down';
+      // var tmpBr = document.createElement('br');
+      ul.appendChild(tmpLi);
+      // routeDiv.appendChild(tmpI);
+      // routeDiv.appendChild(tmpBr);
     }
-
+    routeDiv.appendChild(ul);
 
     var resList = document.getElementById('resultList');
     while (resList.firstChild) {
@@ -429,7 +434,7 @@ var RoutingModel = {
     routePath = (new ol.format.Polyline({
     }).readGeometry(res.routes[0].overview_polyline.points, {
       dataProjection: 'EPSG:4326',
-      featureProjection: 'EPSG:3007'
+      featureProjection: this.get('projection')
     }));
 
     layer_drawing.getSource().clear();
@@ -442,27 +447,26 @@ var RoutingModel = {
     layer_drawing.getSource().addFeature(ft);
     var centerLat = (this.get('position').latitude + this.get('position').latitudeEnd) / 2;
     var centerLon = (this.get('position').longitude + this.get('position').longitudeEnd) / 2;
-    map.getView().setCenter(ol.proj.transform([centerLon, centerLat], 'EPSG:4326', 'EPSG:3007'));
+    map.getView().setCenter(ol.proj.transform([centerLon, centerLat], 'EPSG:4326', this.get('projection')));
     map.getView().fit(layer_drawing.getSource().getExtent(), map.getSize());
-
   },
 
-  highlightFeature: function(event){
+  highlightFeature: function (event) {
     var feature_number = -1;
-    if (event.target.nodeName === 'B'){
+    if (event.target.nodeName === 'B') {
       feature_number = event.target.parentNode.id.substring('step_number'.length);
     } else {
       feature_number = event.target.id.substring('step_number'.length);
     }
 
-    //feature_number = feature_number - 1;
+    // feature_number = feature_number - 1;
     var layer = this.get('layer_route');
 
     var features = layer.getSource().getFeatures();
     var featuresLength = features.length + 1;
 
-    for (var i= 0; i < features.length ; i++){
-      if(features[i].number === feature_number){
+    for (var i = 0; i < features.length; i++) {
+      if (features[i].number === feature_number) {
         features[i].setStyle(this.get('style_route_highlight'));
       } else {
         features[i].setStyle(this.get('style_route_normal'));
@@ -470,29 +474,26 @@ var RoutingModel = {
     }
   },
 
-  drawRoute: function(steps){
-
+  drawRoute: function (steps) {
     var routePath = new ol.format.Polyline({
     }).readGeometry(steps);
 
     var ft = new ol.Feature({type: 'routing', geometry: routePath});
     ft.setStyle(style_route);
     this.get('layer_drawing').getSource().addFeature(ft);
-
-
   },
 
   getOptions: function () {
   },
 
-  deleteLayers: function() {
+  deleteLayers: function () {
     this.get('layer_start').getSource().clear();
     this.get('layer_end').getSource().clear();
     this.get('layer_route').getSource().clear();
     this.get('layer_drawing').getSource().clear();
 
     this.set({
-      position:{
+      position: {
         latitude: undefined,
         longitude: undefined,
         latitudeEnd: undefined,
@@ -500,21 +501,21 @@ var RoutingModel = {
       }
     });
 
-    if(this.get('onStartKey') !== undefined) {
+    if (this.get('onStartKey') !== undefined) {
       ol.Observable.unByKey(this.get('onStartKey'));
       this.set('onStartKey', undefined);
     }
-    if(this.get('onRoutingKey') !== undefined) {
+    if (this.get('onRoutingKey') !== undefined) {
       ol.Observable.unByKey(this.get('onRoutingKey'));
       this.set('onRoutingKey', undefined);
     }
-    if(this.get('onEndKey') !== undefined) {
+    if (this.get('onEndKey') !== undefined) {
       ol.Observable.unByKey(this.get('onEndKey'));
       this.set('onEndKey', undefined);
     }
   },
 
-  ConvertAddressToCoord: function(){
+  ConvertAddressToCoord: function () {
     /* need to create a box with suggestion */
     /* var searchStringStart = "<wfs:GetFeature\
      service = 'WFS'\
@@ -543,10 +544,7 @@ var RoutingModel = {
      var forAjax = searchStringStart + value + '*' + searchStringEnd;
      */
 
-
   },
-
-
 
   /**
    * @description
@@ -560,14 +558,14 @@ var RoutingModel = {
    * @instance
    */
 
-  onCloseTab: function() {
+  onCloseTab: function () {
     this.get('layer_start').getSource().clear();
     this.get('layer_end').getSource().clear();
     this.get('layer_route').getSource().clear();
     this.get('layer_drawing').getSource().clear();
 
     this.set({
-      position:{
+      position: {
         latitude: undefined,
         longitude: undefined,
         latitudeEnd: undefined,
@@ -575,25 +573,24 @@ var RoutingModel = {
       }
     });
 
-    if(this.get('onStartKey') !== undefined) {
+    if (this.get('onStartKey') !== undefined) {
       ol.Observable.unByKey(this.get('onStartKey'));
       this.set('onStartKey', undefined);
     }
-    if(this.get('onRoutingKey') !== undefined) {
+    if (this.get('onRoutingKey') !== undefined) {
       ol.Observable.unByKey(this.get('onRoutingKey'));
       this.set('onRoutingKey', undefined);
     }
-    if(this.get('onEndKey') !== undefined) {
+    if (this.get('onEndKey') !== undefined) {
       ol.Observable.unByKey(this.get('onEndKey'));
       this.set('onEndKey', undefined);
     }
-
   },
 
   clicked: function (arg) {
     this.set('visible', true);
     this.set('toggled', !this.get('toggled'));
-  },
+  }
 };
 
 /**

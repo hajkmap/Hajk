@@ -9,9 +9,9 @@ var RoutingPanelView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function() {
+  getInitialState: function () {
     return {
-      selectTravelMode: "walk"
+      selectTravelMode: 'walk'
     };
   },
 
@@ -41,20 +41,20 @@ var RoutingPanelView = {
     return this.state.selectTravelMode;
   },
 
-  setTravelMode: function(e) {
+  setTravelMode: function (e) {
     this.setState({
       selectTravelMode: e.target.value
     });
   },
 
-  activateStartMode: function(){
+  activateStartMode: function () {
     if (isMobile) {
       this.props.navigationPanel.minimize();
     }
 
     this.props.model.activateStartMode(); // working
   },
-  activateEndMode: function(){
+  activateEndMode: function () {
     if (isMobile) {
       this.props.navigationPanel.minimize();
     }
@@ -62,19 +62,19 @@ var RoutingPanelView = {
     this.props.model.activateEndMode(); // working
   },
 
-  showResult: function(routeResult) {
+  showResult: function (routeResult) {
   },
 
-  showImage: function(src, id) {
-    var img = document.createElement("img");
+  showImage: function (src, id) {
+    var img = document.createElement('img');
     img.src = src;
     img.id = id;
 
     document.body.appendChild(img);
   },
 
-  openInstruction: function (){
-    var element = $("#instructionText");
+  openInstruction: function () {
+    var element = $('#instructionText');
     element.toggle();
   },
 
@@ -86,40 +86,42 @@ var RoutingPanelView = {
   render: function () {
     this.props.model.initStartPoint();
 
-    return(
-      <Panel title="Navigation"  onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
-        <div className="panel-content">
-          <div className="panel panel-default">
-              <div className="panel-heading"> ①. Välj startpunkt </div>
-                <div className="panel-body">
-                  <button onClick={() => this.props.model.turnOnGPSClicked()} className="btn btn-main" id="naviGPS">Välj befintlig position</button>&nbsp;
-                  <button onClick={() => this.activateStartMode()} className="btn btn-main" id="startBtn">Välj position på kartan</button>
-                </div>
+    return (
+      <Panel title='Navigation' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={window.atob(this.props.model.get('instruction'))}>
+        <div className='panel-content'>
+          <div className='panel panel-default'>
+            <div className='panel-heading'>① Välj startpunkt</div>
+            <div className='panel-body'>
+              <button onClick={() => this.props.model.turnOnGPSClicked()} className='btn btn-primary' id='naviGPS'>Välj befintlig position</button>&nbsp;
+              <button onClick={() => this.activateStartMode()} className='btn btn-default' id='startBtn'>Välj position på kartan</button>
+            </div>
           </div>
-          <div className="panel panel-default">
-             <div className="panel-heading"> ②. Välj destination </div>
-               <div className="panel-body">
-                 <button onClick={() => this.activateEndMode()} className="btn btn-main" id="startBtn">Välj position på kartan</button>
-             </div>
+          <div className='panel panel-default'>
+            <div className='panel-heading'>② Välj destination</div>
+            <div className='panel-body'>
+              <button onClick={() => this.activateEndMode()} className='btn btn-primary' id='startBtn'>Välj position på kartan</button>
+            </div>
           </div>
-          <div className="panel panel-default">
-             <div className="panel-heading"> ③. Välj färdsätt </div>
-             <div className="panel-body">
-               <button className="btn btn-default" onClick={() => this.props.model.setTravelMode('walking')}><img src="/assets/icons/gaRouting.png"/></button>
-               <button className="btn btn-default" onClick={() => this.props.model.setTravelMode('driving')}><img src="/assets/icons/koraRouting.png"/></button>
-               <button className="btn btn-default" onClick={() => this.props.model.setTravelMode('bicycling')}><img src="/assets/icons/cyklaRouting.png"/></button>
-               <button className="btn btn-default" onClick={() => this.props.model.setTravelMode('transit')}><img src="/assets/icons/kollektivRouting.png"/></button>
-             </div>
+          <div className='panel panel-default'>
+            <div className='panel-heading'>③ Välj färdsätt</div>
+            <div className='panel-body'>
+              <div className='btn-group'>
+                <button className='btn btn-default' onClick={() => this.props.model.setTravelMode('walking')}><img src='/assets/icons/gaRouting.png' /></button>
+                <button className='btn btn-default' onClick={() => this.props.model.setTravelMode('driving')}><img src='/assets/icons/koraRouting.png' /></button>
+                <button className='btn btn-default' onClick={() => this.props.model.setTravelMode('bicycling')}><img src='/assets/icons/cyklaRouting.png' /></button>
+                <button className='btn btn-default' onClick={() => this.props.model.setTravelMode('transit')}><img src='/assets/icons/kollektivRouting.png' /></button>
+              </div>
+            </div>
           </div>
-          <div className="panel panel-default-transparent">
-             <button onClick={() => this.props.model.activateRoutingMode()} className="btn btn-main" id="startBtn">Sök resa</button>&nbsp;
-             <button onClick={() => this.props.model.deleteLayers()} className="btn btn-main" id="startBtn">Rensa</button>
+          <div className='panel panel-default-transparent'>
+            <button onClick={() => this.props.model.activateRoutingMode()} className='btn btn-primary' id='startBtn'>Sök resa</button>&nbsp;
+            <button onClick={() => this.props.model.deleteLayers()} className='btn btn-default' id='startBtn'>Rensa</button>
           </div>
-          <div className="panel panel-default">
-             <div className="panel-heading"> Resultat </div>
-                 <div className="panel-body">
-                   <div id="resultList"></div>
-                 </div>
+          <div className='panel panel-default'>
+            <div className='panel-heading'>Resultat</div>
+            <div className='panel-body'>
+              <div id='resultList' />
+            </div>
           </div>
         </div>
       </Panel>

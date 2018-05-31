@@ -22,7 +22,7 @@
 
 var Panel = require('views/panel');
 var Alert = require('alert');
-//var ColorPicker = require('components/colorpicker');
+// var ColorPicker = require('components/colorpicker');
 
 /**
  * @class
@@ -33,7 +33,7 @@ var MeasurePanelView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function() {
+  getInitialState: function () {
     return {
       visible: false,
       lineWidth: this.props.model.get('lineWidth'),
@@ -92,27 +92,27 @@ var MeasurePanelView = {
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ""
-        })
+          alertMessage: ''
+        });
       },
       denyAction: () => {
         this.state.denyAction();
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ""
-        })
+          alertMessage: ''
+        });
       },
       onClick: () => {
         this.setState({
           alert: false,
-          alertMessage: ""
-        })
+          alertMessage: ''
+        });
       }
     };
 
     if (this.state.alert) {
-      return <Alert options={options}/>
+      return <Alert options={options} />;
     } else {
       return null;
     }
@@ -130,7 +130,7 @@ var MeasurePanelView = {
    * Confirm before clear.
    * @instance
    */
-  alertClear: function(){
+  alertClear: function () {
     this.setState({
       alert: true,
       alertMessage: ` Vill du verkligen rensa allt?`,
@@ -152,12 +152,11 @@ var MeasurePanelView = {
     this.props.model.abort();
     $('.measure-tool-item').removeClass('selected');
     this.setState({
-      symbology: "",
+      symbology: '',
       buttonDisabled: true
-    })
+    });
     this.props.model.measureTooltip.setPosition(null);
   },
-
 
   /**
    * Handle change event of the show labels checkbox.
@@ -219,7 +218,7 @@ var MeasurePanelView = {
    * @instance
    * @param {object} e
    */
-  setMarkerImg: function(e) {
+  setMarkerImg: function (e) {
     this.props.model.set('markerImg', e.target.src);
     this.forceUpdate();
   },
@@ -230,40 +229,40 @@ var MeasurePanelView = {
    * @param {boolean} visible
    * @return {external:ReactElement} component
    */
-  renderDialog: function(visible) {
+  renderDialog: function (visible) {
     if (!visible) return null;
 
-    function enter(e) {
+    function enter (e) {
       if (e.keyCode == 13) {
         update.call(this);
       }
     }
 
-    function abort() {
+    function abort () {
       this.props.model.set('dialog', false);
       this.refs.textInput.blur();
       this.props.model.removeEditFeature();
     }
 
-    function update() {
+    function update () {
       this.refs.textInput.blur();
       this.props.model.set('dialog', false);
       this.props.model.setPointText(this.refs.textInput.value);
     }
 
     return (
-      <div className="modal">
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h4 className="modal-title">Ange text</h4>
+      <div className='modal'>
+        <div className='modal-dialog'>
+          <div className='modal-content'>
+            <div className='modal-header'>
+              <h4 className='modal-title'>Ange text</h4>
             </div>
-            <div className="modal-body">
-              <input ref="textInput" onKeyDown={enter.bind(this)} />
+            <div className='modal-body'>
+              <input ref='textInput' onKeyDown={enter.bind(this)} />
             </div>
-            <div className="modal-footer">
-              <button type="button" className="btn btn-default" data-dismiss="modal" onClick={update.bind(this)}>Spara</button>&nbsp;
-              <button type="button" className="btn btn-default" data-dismiss="modal" onClick={abort.bind(this)}>Avbryt</button>
+            <div className='modal-footer'>
+              <button type='button' className='btn btn-default' data-dismiss='modal' onClick={update.bind(this)}>Spara</button>&nbsp;
+              <button type='button' className='btn btn-default' data-dismiss='modal' onClick={abort.bind(this)}>Avbryt</button>
             </div>
           </div>
         </div>
@@ -280,25 +279,25 @@ var MeasurePanelView = {
     var dialog = this.renderDialog(this.state.dialog);
 
     return (
-        <Panel title="Mät" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
-          <div className="draw-tools measure-tools">
-            <ul>
-              <li className="measure-tool-item" id="LineString" onClick={this.activateDrawTool.bind(this, "LineString")}>
-                <i className="iconmoon-linje"></i> <span>Mät avstånd</span>
-              </li>
-              <li className="measure-tool-item" id="Polygon" onClick={this.activateDrawTool.bind(this, "Polygon")}>
-                <i className="iconmoon-yta"></i> <span>Mät yta</span>
-              </li>
-              <li className="measure-tool-item" id="clear" onClick={this.alertClear}>
-                <i className="fa fa-trash fa-0"></i> <span>Rensa allt</span>
-              </li>
-            </ul>
-          </div>
-          <div>
-            {dialog}
-            {this.renderAlert()}
-          </div>
-        </Panel>
+      <Panel title='Mät' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
+        <div className='draw-tools measure-tools'>
+          <ul>
+            <li className='measure-tool-item' id='LineString' onClick={this.activateDrawTool.bind(this, 'LineString')}>
+              <i className='iconmoon-linje' /> <span>Mät avstånd</span>
+            </li>
+            <li className='measure-tool-item' id='Polygon' onClick={this.activateDrawTool.bind(this, 'Polygon')}>
+              <i className='iconmoon-yta' /> <span>Mät yta</span>
+            </li>
+            <li className='measure-tool-item' id='clear' onClick={this.alertClear}>
+              <i className='fa fa-trash fa-0' /> <span>Rensa allt</span>
+            </li>
+          </ul>
+        </div>
+        <div>
+          {dialog}
+          {this.renderAlert()}
+        </div>
+      </Panel>
 
     );
   }

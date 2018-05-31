@@ -10,6 +10,11 @@
   "scripts": {
     "rebuild": "npm install && grunt"
   },
+  "semistandard": {
+    "ignore": [
+      "/dist/"
+    ]
+  },
   "private": true,
   "devDependencies": {
     "array.prototype.find": "^2.0.3",
@@ -50,6 +55,7 @@
     "react": "^15.4.2",
     "react-color": "^2.14.1",
     "react-dom": "^15.4.2",
+    "semistandard": "*",
     "x2js": "^3.2.1"
   }
 }
