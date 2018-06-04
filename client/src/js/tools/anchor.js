@@ -68,6 +68,7 @@ var AnchorModel = {
   configure: function (shell) {
     this.set('map', shell.getMap());
     this.set('layers', shell.getLayerCollection());
+
     this.set(
       'layerswitcher',
       shell.getToolCollection()
@@ -94,6 +95,7 @@ var AnchorModel = {
       y = c[1],
       l = layers.filter(layer => layer.getVisible() === true)
         .map(layer => encodeURIComponent(layer.getName())).join(',');
+
 
     a += `?m=${HAJK2.configFile}&x=${x}&y=${y}&z=${z}&l=${l}`;
     this.set('anchor', a);

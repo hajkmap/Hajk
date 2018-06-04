@@ -68,8 +68,7 @@
   internal.mergeConfig = function (a, b) {
     var x = parseFloat(b.x),
       y = parseFloat(b.y),
-      z = parseInt(b.z),
-      l = b.l;
+      z = parseInt(b.z);
 
     if (isNaN(x)) {
       x = a.map.center[0];
@@ -87,15 +86,6 @@
     a.map.center[1] = y;
     a.map.zoom = z;
 
-    if (l) {
-      l = l.split(',');
-      a.layers.filter(layer => {
-        layer.visibleAtStart = false;
-        return typeof l.find(str => str === layer.id) === 'string';
-      }).forEach(layer => {
-        layer.visibleAtStart = true;
-      });
-    }
     return a;
   };
 

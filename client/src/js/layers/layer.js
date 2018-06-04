@@ -36,7 +36,8 @@ var LayerModelProperties = {
   name: '',
   caption: '',
   visible: false,
-  layer: undefined
+  layer: undefined,
+  visibleInLink: false
 };
 
 /**

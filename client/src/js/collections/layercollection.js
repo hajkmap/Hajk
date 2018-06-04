@@ -48,6 +48,11 @@ var LayerCollection = {
       }
     }
 
+    if (this.linkLayers.length > 0){
+        var isLayerInUrl = typeof this.linkLayers.find(str => str === layer.get("id")) === 'string';
+        visibleAtStart = isLayerInUrl;
+    }
+
     layer.setVisible(visibleAtStart);
     layer.getLayer().setVisible(visibleAtStart);
 
@@ -438,6 +443,18 @@ var LayerCollection = {
     var layerSwitcherTool = args.tools.find(tool => tool.type === 'layerswitcher');
     this.mapGroups = layerSwitcherTool.options.groups;
     this.baseLayers = layerSwitcherTool.options.baselayers;
+
+    // Parse the URL-parameters for link parsing of visible layers
+    var urlParams = {};
+    document.location.search.replace(/(^\?)/, '').split('&')
+        .forEach(param => {var a = param.split('=');
+      urlParams[a[0]] = a[1];});
+    try {
+        this.linkLayers = urlParams["l"].split(',');
+    } catch (e) {
+      this.linkLayers = [];
+    }
+
 
     _.defer(_.bind(function () {
       this.forEach(this.addToMap, this);
