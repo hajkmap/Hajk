@@ -15,6 +15,7 @@ using System;
 using ICSharpCode.SharpZipLib.Zip;
 using ICSharpCode.SharpZipLib.Core;
 using log4net;
+using System.Configuration;
 
 namespace MapService.Controllers
 {
@@ -70,6 +71,8 @@ namespace MapService.Controllers
             {
                 _log.DebugFormat("Received json: {0}", json);
 
+                string fontName = string.IsNullOrEmpty(ConfigurationManager.AppSettings["exportFontName"]) ? "Verdana" : ConfigurationManager.AppSettings["exportFontName"];
+
                 // try to decode input string to see if it is base64 encoded
                 try
                 {
@@ -86,7 +89,7 @@ namespace MapService.Controllers
                 AsyncManager.OutstandingOperations.Increment();
                 PDFCreator pdfCreator = new PDFCreator();
                 _log.Debug("Inited pdfcreator");
-                byte[] blob = pdfCreator.Create(exportItem);
+                byte[] blob = pdfCreator.Create(exportItem, fontName);
                 _log.Debug("created blob in pdfcreator");
                 string[] fileInfo = byteArrayToFileInfo(blob, "pdf");
                 _log.DebugFormat("Created fileinfo: {0}", fileInfo[1]);
