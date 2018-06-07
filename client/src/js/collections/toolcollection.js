@@ -35,6 +35,7 @@ var Tool = require('tools/tool'),
   Information = require('tools/information'),
   Location = require('tools/location'),
   Routing = require('tools/routing'),
+  Fir = require('tools/fir'),
   Preset = require('tools/preset'),
   Measure = require('tools/measure');
 
@@ -83,6 +84,8 @@ var ToolCollection = {
         return new Routing(args.options);
       case 'streetview':
         return new StreetView(args.options);
+      case 'fir':
+        return new Fir(args.options);
       case 'information':
         return new Information(args.options);
       case 'selection':
