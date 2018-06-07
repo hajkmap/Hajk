@@ -31,13 +31,12 @@ namespace MapService.Controllers
             {
                 Response.Expires = 0;
                 Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
-                //Response.ContentType = "application/json; charset=utf-8";
                 Response.Headers.Add("Cache-Control", "private, no-cache");
 
                 CookieContainer myContainer = new CookieContainer();
-                string url = string.Format("http://services-ver.lantmateriet.se/distribution/produkter/fastighet/v2.1/{0}?includeData=basinformation&srid=3007", id);
+                string url = string.Format(ConfigurationManager.AppSettings["firLMUrlServiceFastighet"] +"{0}?includeData=basinformation&srid=3007", id);
                 var request = (HttpWebRequest)WebRequest.Create(url);
-                request.Credentials = new NetworkCredential("varb0002", "PAIp2XdF28t45U");
+                request.Credentials = new NetworkCredential(ConfigurationManager.AppSettings["firLMServiceUser"], ConfigurationManager.AppSettings["firLMServicePassword"]);
                 request.CookieContainer = myContainer;
                 request.PreAuthenticate = true;
                 request.Method = "GET";
@@ -52,7 +51,7 @@ namespace MapService.Controllers
 
                         if (uuid != null)
                         {
-                            Response.Redirect(string.Format("http://karta2.varberg.se:82/Report/Fastighet/pdf/{0}", uuid.ToString()), true);
+                            Response.Redirect(string.Format(ConfigurationManager.AppSettings["firUrlServicePropertyDoc"], uuid.ToString()), true);
                         }
 
                         return string.Format("Kan inte visa fastighetsrapport för {0}", id);
