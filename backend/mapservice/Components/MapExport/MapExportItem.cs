@@ -13,6 +13,8 @@ namespace MapService.Components.MapExport
         public List<WMTSInfo> wmtsLayers { get; set; }
         public List<ArcGISInfo> arcgisLayers { get; set; }
         public string orientation { get; set; }
+        public string comments { get; set; }
+        public string pdftitle { get; set; }
         public string format { get; set; }
         public string scale { get; set; }
         public int resolution { get; set; }

@@ -725,6 +725,8 @@ var ExportModel = {
       bottom = extent[1],
       top = extent[3],
       scale = options.scale,
+      comments = options.comments,
+      pdftitle = options.pdftitle,
       dpi = options.resolution,
       form = document.createElement('form'),
       input = document.createElement('input'),
@@ -755,6 +757,8 @@ var ExportModel = {
     data.orientation = options.orientation;
     data.format = options.format;
     data.scale = options.scale;
+    data.comments = options.comments;
+    data.pdftitle = options.pdftitle;
     data.proxyUrl = this.get('proxyUrl');
 
     this.set('downloadingPdf', true);
