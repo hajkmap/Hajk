@@ -55,6 +55,22 @@ namespace MapService.Components
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="gfx"></param>
+        /// <param name="fontName"></param>
+        /// <param name="text"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        private void drawTextTitle(XGraphics gfx, string fontName, string text, int x, int y, int height = 20)
+        {
+            XColor color = XColors.Black;
+            XFont font = new XFont(fontName, height, XFontStyle.Bold);
+            XBrush brush = new XSolidBrush(color);
+            gfx.DrawString(text, font, brush, x, y);
+        }
+
+        /// <summary>
         /// Convert stream to byte array.
         /// </summary>
         /// <param name="input"></param>
@@ -124,6 +140,21 @@ namespace MapService.Components
 
             int displayLength = GetDisplayLength(unitLength, scaleBarLengths, scale);
             string displayText = GetDisplayText(unitLength, scaleBarTexts, scale);
+            string commentText = String.Empty;
+            if (exportItem.comments != null)
+            {
+                commentText = exportItem.comments;
+            }
+
+            string titleText = String.Empty;
+            if (exportItem.pdftitle != null)
+            {
+                titleText = exportItem.pdftitle;
+                titleText = titleText.ToUpper();
+            }
+            DateTime thisDay = DateTime.Today;
+            string pdfDate = thisDay.ToString("d");
+            // Display date using short date string.
 
             // adding support for different layouts
             int layout = ConfigurationManager.AppSettings["exportLayout"] != null ? int.Parse(ConfigurationManager.AppSettings["exportLayout"]) : 1;
@@ -145,33 +176,36 @@ namespace MapService.Components
                     infoText = ConfigurationManager.AppSettings["exportInfoText"];
                 }
 
-                int height = 45 + copyrights.Count * 10;
+                int height = 65 + copyrights.Count * 10;
+                this.drawTextTitle(gfx, fontName, titleText, 15, 25);
 
                 XPoint[] points = new XPoint[]
                 {
-                new XPoint(12, 12),
-                new XPoint(12, height),
-                new XPoint(55 + displayLength, height),
-                new XPoint(55 + displayLength, 12),
-                new XPoint(12, 12)
-                };
+                    new XPoint(15, 35),
+                    new XPoint(15, height),
+                    new XPoint(70 + displayLength, height),
+                    new XPoint(70 + displayLength, 35),
+                    new XPoint(15, 35)
+                 };
 
                 gfx.DrawPolygon(XBrushes.White, points, XFillMode.Winding);
 
-                this.drawText(gfx, fontName, String.Format("Skala 1:{0}", exportItem.scale), 15, 25);
-                gfx.DrawLine(XPens.Black, new XPoint(15, 32), new XPoint(15 + displayLength, 32));
-                gfx.DrawLine(XPens.Black, new XPoint(15, 28), new XPoint(15, 36));
-                gfx.DrawLine(XPens.Black, new XPoint(15 + displayLength, 28), new XPoint(15 + displayLength, 36));
-                this.drawText(gfx, fontName, displayText, 20 + displayLength, 35);
+                this.drawText(gfx, String.Format("Skala 1:{0}", exportItem.scale), 15, 45);
+                gfx.DrawLine(XPens.Black, new XPoint(15, 52), new XPoint(15 + displayLength, 52));
+                gfx.DrawLine(XPens.Black, new XPoint(15, 48), new XPoint(15, 56));
+                gfx.DrawLine(XPens.Black, new XPoint(15 + displayLength, 48), new XPoint(15 + displayLength, 56));
+                this.drawText(gfx, displayText, 20 + displayLength, 55);
 
                 var y = (int)page.Height.Point - 15;
-
-                this.drawText(gfx, fontName, infoText, 15, y);
+                var printText = commentText + "   " + pdfDate;
+                this.drawText(gfx, fontName, printText, 15, y - 20);
+                
+                this.drawText(gfx, fontname, infoText, 15, y);
 
                 int i = 0;
                 copyrights.ForEach(copyright =>
                 {
-                    int start = 50;
+                    int start = 70;
                     this.drawText(gfx, fontName, String.Format("© {0}", copyright), 15, start + i * 10);
                     i++;
                 });
