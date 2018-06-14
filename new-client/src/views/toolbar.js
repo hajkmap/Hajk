@@ -9,7 +9,7 @@ class Toolbar extends Component {
   renderTools() {
     return this.props.tools.map((tool, i) => {
       return (
-        <tool.component key={i} />
+        <tool.component key={i} tool={tool} />
       );
     });
   }

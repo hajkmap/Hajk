@@ -2,3 +2,41 @@ body {
   margin: 0;
   padding: 0;
 }
+
+.tool-toggle-button {
+  width: 50px;
+  height: 50px;
+  border: 1px solid;
+  cursor: pointer;
+  float: left;
+  margin: 10px
+}
+
+.tool-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 500px;
+  background: pink;
+}
+
+.tool-panel.hidden {
+  display: none;
+}
+
+.tool-toggle-button.active {
+  background: red;
+}
+
+.modal {
+  position: fixed;
+  top: 500px;
+  left: 500px;
+  height: 500px;
+  width: 500px;
+  background: white;
+}
+
+.modal.hidden {
+  display: none;
+}
