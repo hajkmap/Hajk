@@ -436,9 +436,9 @@ var DrawModel = {
     }
 
     if (typeof value === 'number') {
-      value = Math.round(value);
+      //value = Math.round(value);
+      value = Math.round(value * 10) / 10;    
     }
-
     if (type === 'circle') {
       let prefix = ' m';
       let prefixSq = ' m²';
@@ -467,6 +467,7 @@ var DrawModel = {
         prefix = ' km';
         value = value / 1E3;
       }
+      value = Math.round(value * 10) / 10;
       label = value + prefix;
     }
 
@@ -1101,7 +1102,7 @@ var DrawModel = {
         };
         break;
       case 'LineString' :
-        length = Math.round(geom.getLength());
+        length = Math.round(geom.getLength() * 10)/10;
         break;
       case 'Polygon':
         area = Math.round(geom.getArea());
