@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import Observer from 'react-event-observer';
-import DrawModel from './model.js';
-import {createPortal} from 'react-dom';
+import EditModel from './model.js';
 
 class Draw extends Component {
 
@@ -18,7 +17,7 @@ class Draw extends Component {
     this.observer.subscribe('myEvent', message => {
       console.log(message);
     });
-    this.drawModel = new DrawModel({
+    this.editModel = new EditModel({
       map: this.props.tool.map,
       app: this.props.tool.app,
       observer: this.observer
@@ -27,6 +26,7 @@ class Draw extends Component {
   }
 
   open() {
+    console.log("Open edit tool");
     this.setState({
       toggled: true
     })
@@ -48,7 +48,7 @@ class Draw extends Component {
     this.setState({
       toggled: !this.state.toggled
     });
-    this.props.tool.app.togglePlugin("draw");
+    this.props.tool.app.togglePlugin("edit");
   }
 
   getActiveClass() {
@@ -62,11 +62,11 @@ class Draw extends Component {
   render() {
     return (
       <div>
-        <div className={this.getActiveClass()} onClick={this.toggle}>Draw tool</div>
+        <div className={this.getActiveClass()} onClick={this.toggle}>Edit tool</div>
         <div className={this.getVisibilityClass()}>
-          <div>Rita linje</div>
-          <div>Rita yte</div>
-          <div>Rita text</div>
+          <div>Redigera linje</div>
+          <div>Redigera yte</div>
+          <div>Redigera text</div>
         </div>
       </div>
     );
