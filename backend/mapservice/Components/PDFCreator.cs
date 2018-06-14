@@ -43,6 +43,7 @@ namespace MapService.Components
         /// 
         /// </summary>
         /// <param name="gfx"></param>
+        /// <param name="fontName"></param>
         /// <param name="text"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
