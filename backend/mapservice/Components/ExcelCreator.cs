@@ -49,8 +49,26 @@ namespace MapService.Components
                 // Append sheet to workbook and fill with table
                 HSSFSheet sheet = (HSSFSheet)workbook.CreateSheet(table.TableName);
 
+                string tabelName = table.TableName.ToString();
+                if (tabelName == "Fastighetsinfo till BR")
+                {
+
+
+                    string[] MetriaFIR1 = { "MetriaFIRÄgare", "1" };
+
+                    HSSFRow captionRow1 = (HSSFRow)sheet.CreateRow(0);
+                    for (int i = 0; i < 2; i++)
+                    {
+                        HSSFCell cell = (HSSFCell)captionRow1.CreateCell(0);
+                        cell.SetCellValue(MetriaFIR1[0]);
+
+                        HSSFCell cell1 = (HSSFCell)captionRow1.CreateCell(1);
+                        cell1.SetCellValue(MetriaFIR1[1]);
+                        i += 1;
+                    }
+                }
                 // Set captions   
-                int rowCount = 0;
+                int rowCount = 1;
                 HSSFRow captionRow = (HSSFRow)sheet.CreateRow(rowCount);
                 foreach (DataColumn column in table.Columns)
                 {
