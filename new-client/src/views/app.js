@@ -1,22 +1,25 @@
-import React, { Component } from 'react';
-import AppModel from './../models/app.js';
-import Toolbar from './toolbar.js';
-import './app.css';
+import React, { Component } from "react";
+import AppModel from "./../models/app.js";
+import Toolbar from "./toolbar.js";
+import "./app.css";
 
 class App extends Component {
-
   constructor() {
     super();
     this.state = {};
-    this.appModel = new AppModel();
   }
 
   toggleTool(name) {
     this.appModel.togglePlugin(name);
   }
 
+  componentWillMount() {
+    this.appModel = new AppModel(this.props.config);
+  }
+
   componentDidMount() {
-    this.appModel.createMap('map');
+    this.appModel.configureApplication();
+    this.appModel.createMap("map");
     this.appModel.loadPlugins(this.props.activeTools, () => {
       this.setState({
         tools: this.appModel.getPlugins()
@@ -28,7 +31,7 @@ class App extends Component {
     return (
       <div>
         <div className="map" id="map">
-          <Toolbar tools={this.appModel.getToolbarPlugins()}></Toolbar>
+          <Toolbar tools={this.appModel.getToolbarPlugins()} />
         </div>
       </div>
     );

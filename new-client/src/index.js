@@ -11,11 +11,11 @@ fetch("appConfig.json")
     appConfigResponse.json().then(appConfig => {
       let defaultMap = appConfig.defaultMap;
       window.location.search
-        .replace('?', '')
-        .split('&')
+        .replace("?", "")
+        .split("&")
         .forEach(pair => {
           if (pair !== "") {
-            let keyValue = pair.split('=');
+            let keyValue = pair.split("=");
             if (keyValue[0] === "m") {
               defaultMap = keyValue[1];
             }
@@ -25,15 +25,16 @@ fetch("appConfig.json")
         fetch(`${appConfig.mapserviceBase}/config/layers`),
         fetch(`${appConfig.mapserviceBase}/config/${defaultMap}`)
       ])
-        .then(([layersResponse, mapConfigResponse]) => {
-          Promise.all([layersResponse.json(), mapConfigResponse.json()])
-            .then(([layers, mapConfig]) => {
-              console.log(layers, mapConfig);
+        .then(([layersConfigResponse, mapConfigResponse]) => {
+          Promise.all([layersConfigResponse.json(), mapConfigResponse.json()])
+            .then(([layersConfig, mapConfig]) => {
+              var config = {
+                appConfig: appConfig,
+                layersConfig: layersConfig,
+                mapConfig: mapConfig
+              };
               ReactDOM.render(
-                <App
-                  activeTools={buildConfig.activeTools}
-                  config={appConfig}
-                />,
+                <App activeTools={buildConfig.activeTools} config={config} />,
                 document.getElementById("root")
               );
               registerServiceWorker();
@@ -41,7 +42,6 @@ fetch("appConfig.json")
             .catch(err => {
               console.error("Parse error: ", err);
               ReactDOM.render(<div>Fel</div>, document.getElementById("root"));
-              registerServiceWorker();
             });
         })
         .catch(err => {

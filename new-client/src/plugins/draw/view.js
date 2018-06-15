@@ -1,10 +1,9 @@
-import React, { Component } from 'react';
-import Observer from 'react-event-observer';
-import DrawModel from './model.js';
-import {createPortal} from 'react-dom';
+import React, { Component } from "react";
+import Observer from "react-event-observer";
+import DrawModel from "./model.js";
+//import {createPortal} from 'react-dom';
 
 class Draw extends Component {
-
   constructor() {
     super();
     this.toggle = this.toggle.bind(this);
@@ -15,7 +14,7 @@ class Draw extends Component {
 
   componentDidMount() {
     this.observer = Observer();
-    this.observer.subscribe('myEvent', message => {
+    this.observer.subscribe("myEvent", message => {
       console.log(message);
     });
     this.drawModel = new DrawModel({
@@ -29,19 +28,19 @@ class Draw extends Component {
   open() {
     this.setState({
       toggled: true
-    })
+    });
   }
 
   close() {
     this.setState({
       toggled: false
-    })
+    });
   }
 
   minimize() {
     this.setState({
       toggled: false
-    })
+    });
   }
 
   toggle() {
@@ -52,17 +51,21 @@ class Draw extends Component {
   }
 
   getActiveClass() {
-    return this.state.toggled ? 'tool-toggle-button active' : 'tool-toggle-button';
+    return this.state.toggled
+      ? "tool-toggle-button active"
+      : "tool-toggle-button";
   }
 
   getVisibilityClass() {
-    return this.state.toggled ? 'tool-panel' : 'tool-panel hidden';
+    return this.state.toggled ? "tool-panel" : "tool-panel hidden";
   }
 
   render() {
     return (
       <div>
-        <div className={this.getActiveClass()} onClick={this.toggle}>Draw tool</div>
+        <div className={this.getActiveClass()} onClick={this.toggle}>
+          Draw tool
+        </div>
         <div className={this.getVisibilityClass()}>
           <div>Rita linje</div>
           <div>Rita yte</div>

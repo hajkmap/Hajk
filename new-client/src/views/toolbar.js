@@ -1,16 +1,12 @@
-import React, { Component } from 'react';
-import './toolbar.css';
+import React, { Component } from "react";
+import "./toolbar.css";
 
 class Toolbar extends Component {
-
-  componentDidMount() {
-  }
+  componentDidMount() {}
 
   renderTools() {
     return this.props.tools.map((tool, i) => {
-      return (
-        <tool.component key={i} tool={tool} />
-      );
+      return <tool.component key={i} tool={tool} />;
     });
   }
 

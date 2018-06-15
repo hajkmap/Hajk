@@ -1,34 +1,14 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
-function getCSSRule (ruleName) {
+function getCSSRule(ruleName) {
   ruleName = ruleName.toLowerCase();
   var rule = undefined;
   if (!document || !document.styleSheets) return;
   Array.prototype.forEach.call(document.styleSheets, styleSheet => {
     try {
       if (!styleSheet.cssRules) return;
-      var mathces = Array.prototype.filter.call(styleSheet.cssRules, cssRule =>
-        cssRule instanceof CSSStyleRule &&
+      var mathces = Array.prototype.filter.call(
+        styleSheet.cssRules,
+        cssRule =>
+          cssRule instanceof CSSStyleRule &&
           cssRule.selectorText.toLowerCase() === ruleName
       );
       if (mathces[mathces.length - 1]) {
@@ -41,59 +21,66 @@ function getCSSRule (ruleName) {
   return rule;
 }
 
-module.exports = {
-  configure: function (config) {
+export default {
+  configure: function(config) {
     if (!config.secondaryColor || !config.primaryColor) {
       return;
     }
-    var panelHeader = getCSSRule('.navigation-panel-inner > .panel-heading');
+    var panelHeader = getCSSRule(".navigation-panel-inner > .panel-heading");
 
-    var panelHeaderItalic = getCSSRule('.navigation-panel-inner > .panel-heading i');
+    var panelHeaderItalic = getCSSRule(
+      ".navigation-panel-inner > .panel-heading i"
+    );
 
-    var navigationPanelInner = getCSSRule('.navigation-panel-inner');
+    var navigationPanelInner = getCSSRule(".navigation-panel-inner");
 
-    var dl = getCSSRule('dl');
-    var dt = getCSSRule('dt');
+    var dl = getCSSRule("dl");
+    var dt = getCSSRule("dt");
 
-    var btnPrimary = getCSSRule('.btn-primary');
-    var btnPrimaryFocus = getCSSRule('.btn-primary:focus');
-    var btnPrimaryHover = getCSSRule('.btn-primary:hover');
-    var btnPrimaryActive = getCSSRule('.btn-primary:active');
-    var btnPrimaryActiveHover = getCSSRule('.btn-primary:active:hover');
-    var btnPrimaryActiveHoverIE = getCSSRule('.btn-primary:hover:active');
+    var btnPrimary = getCSSRule(".btn-primary");
+    var btnPrimaryFocus = getCSSRule(".btn-primary:focus");
+    var btnPrimaryHover = getCSSRule(".btn-primary:hover");
+    var btnPrimaryActive = getCSSRule(".btn-primary:active");
+    var btnPrimaryActiveHover = getCSSRule(".btn-primary:active:hover");
+    var btnPrimaryActiveHoverIE = getCSSRule(".btn-primary:hover:active");
 
-    var drawToolsSelected = getCSSRule('.draw-tools li.selected');
-    var informationBlanketHeader = getCSSRule('.information #blanket #container #header');
-    var informationBlanketContainer = getCSSRule('.information #blanket #container');
+    var drawToolsSelected = getCSSRule(".draw-tools li.selected");
+    var informationBlanketHeader = getCSSRule(
+      ".information #blanket #container #header"
+    );
+    var informationBlanketContainer = getCSSRule(
+      ".information #blanket #container"
+    );
 
-    var olControlButton = getCSSRule('.ol-control button');
-    var olControlButtonHover = getCSSRule('.ol-control button:hover');
-    var olControlButtonFocus = getCSSRule('.ol-control button:focus');
-    var olControlButtonActive = getCSSRule('.ol-control button:active');
+    var olControlButton = getCSSRule(".ol-control button");
+    var olControlButtonHover = getCSSRule(".ol-control button:hover");
+    var olControlButtonFocus = getCSSRule(".ol-control button:focus");
+    var olControlButtonActive = getCSSRule(".ol-control button:active");
 
-    var mapScaleBar = getCSSRule('#map-scale-bar .ol-scale-line');
-    var mapScaleBarInner = getCSSRule('#map-scale-bar .ol-scale-line-inner');
-    var mapScaleText = getCSSRule('.map-scale .map-scale-text');
+    var mapScaleBar = getCSSRule("#map-scale-bar .ol-scale-line");
+    var mapScaleBarInner = getCSSRule("#map-scale-bar .ol-scale-line-inner");
+    var mapScaleText = getCSSRule(".map-scale .map-scale-text");
 
-    var searchbarInputField = getCSSRule('#searchbar-input-field');
-    var searchbarSearchButton = getCSSRule('#searchbar-search-button');
+    var searchbarInputField = getCSSRule("#searchbar-input-field");
+    var searchbarSearchButton = getCSSRule("#searchbar-search-button");
 
     if (panelHeader) {
       panelHeader.style.backgroundColor = config.primaryColor;
       panelHeader.style.borderColor = config.primaryColor;
       panelHeader.style.color = config.secondaryColor;
     } else {
-      console.error('Wat');
+      console.error("Wat");
     }
 
     if (panelHeaderItalic) {
       panelHeaderItalic.style.color = config.secondaryColor;
     }
     if (navigationPanelInner) {
-      navigationPanelInner.style.borderRight = '1px solid ' + config.primaryColor;
+      navigationPanelInner.style.borderRight =
+        "1px solid " + config.primaryColor;
     }
     if (dl) {
-      dl.style.border = '1px solid ' + config.primaryColor;
+      dl.style.border = "1px solid " + config.primaryColor;
     }
     if (dt) {
       dt.style.backgroundColor = config.primaryColor;
