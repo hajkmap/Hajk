@@ -9,10 +9,21 @@ import buildConfig from "./buildConfig.json";
 fetch("appConfig.json")
   .then(appConfigResponse => {
     appConfigResponse.json().then(appConfig => {
-      console.log(appConfig);
+      let defaultMap = appConfig.defaultMap;
+      window.location.search
+        .replace('?', '')
+        .split('&')
+        .forEach(pair => {
+          if (pair !== "") {
+            let keyValue = pair.split('=');
+            if (keyValue[0] === "m") {
+              defaultMap = keyValue[1];
+            }
+          }
+        });
       Promise.all([
         fetch(`${appConfig.mapserviceBase}/config/layers`),
-        fetch(`${appConfig.mapserviceBase}/config/op`)
+        fetch(`${appConfig.mapserviceBase}/config/${defaultMap}`)
       ])
         .then(([layersResponse, mapConfigResponse]) => {
           Promise.all([layersResponse.json(), mapConfigResponse.json()])
