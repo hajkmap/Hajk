@@ -3,13 +3,14 @@ import Plugin from "./plugin.js";
 import Drag from "./drag.js";
 import ConfigMapper from "./configmapper.js";
 import { configureCss } from "./../utils/cssmodifier.js";
+import proj4 from "proj4";
 
-import ArcGISLayer from "./layers/arcgislayer.js";
-import DataLayer from "./layers/datalayer.js";
-import ExtendedWMSLayer from "./layers/extendedwmslayer.js";
-import WFSLayer from "./layers/wfslayer.js";
+// import ArcGISLayer from "./layers/arcgislayer.js";
+// import DataLayer from "./layers/datalayer.js";
+// import ExtendedWMSLayer from "./layers/extendedwmslayer.js";
+// import WFSLayer from "./layers/wfslayer.js";
 import WMSLayer from "./layers/wmslayer.js";
-import WMTSLayer from "./layers/wmtslayer.js";
+//import WMTSLayer from "./layers/wmtslayer.js";
 
 import interaction from "ol/interaction";
 import proj from "ol/proj";
@@ -29,6 +30,11 @@ class AppModel {
     this.plugins = {};
     this.activeTool = undefined;
     this.config = config;
+    proj.setProj4(proj4);
+    proj4.defs(
+      "EPSG:3007",
+      "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+    );
   }
 
   addPlugin(plugin) {
@@ -116,7 +122,10 @@ class AppModel {
           zoomOutTipLabel: "Zooma ut"
         }),
         new Attribution({ collapsible: false }),
-        new Rotate({ tipLabel: "Återställ rotation" })
+        new Rotate({ tipLabel: "Återställ rotation" }),
+        new ScaleLine({
+          target: "map-scale-bar"
+        })
       ],
       overlays: [],
       view: new View({
@@ -128,16 +137,8 @@ class AppModel {
         extent: config.map.length !== 0 ? config.map.extent : undefined
       })
     });
-
-    setTimeout(() => {
-      var scaleLine = new ScaleLine({
-        target: "map-scale-bar"
-      });
-      map.addControl(scaleLine);
-      map.addOverlay(this.createPopupOverlay());
-      //var el = document.querySelector(".ol-popup");
-    }, 100);
-
+    //TODO: Fix better popups.
+    //map.addOverlay(this.createPopupOverlay());
     return this;
   }
 
@@ -145,41 +146,38 @@ class AppModel {
     return map;
   }
 
-  addBaseLayer(layer) {
-    console.log("Add base layer", layer.layer.type);
-  }
-
-  addOverlay(layer) {
-    console.log("Add overlay", layer.layer.type);
-
-    var layer;
-    var layerConfig;
-    let configMapper = new ConfigMapper();
-
+  addMapLayer(layer) {
+    const configMapper = new ConfigMapper(this.config.appConfig.proxy);
     switch (layer.layer.type) {
-      case "arcgis":
-        layerConfig = configMapper.mapArcGISConfig(layer.layer);
-        layer = new WMSLayer(layerConfig);
-        break;
-      case "data":
-        layerConfig = configMapper.mapDataConfig(layer.layer);
-        layer = new WMTSLayer(layerConfig);
-        break;
-      case "extendedwms":
-        layerConfig = configMapper.mapExtendedWMSConfig(layer.layer);
-        layer = new WFSLayer(layerConfig);
-        break;
-      case "wfs":
-        layerConfig = configMapper.mapWFSConfig(layer.layer);
-        layer = new WMSLayer(layerConfig);
-        break;
+      // case "arcgis":
+      //   layerConfig = configMapper.mapArcGISConfig(layer.layer);
+      //   layer = new ArcGISLayer(layerConfig);
+      //   break;
+      // case "data":
+      //   layerConfig = configMapper.mapDataConfig(layer.layer);
+      //   layer = new DataLayer(layerConfig);
+      //   break;
+      // case "extendedwms":
+      //   layerConfig = configMapper.mapExtendedWMSConfig(layer.layer);
+      //   layer = new ExtendedWMSLayer(layerConfig);
+      //   break;
+      // case "wfs":
+      //   layerConfig = configMapper.mapWFSConfig(layer.layer);
+      //   layer = new WFSLayer(layerConfig);
+      //   break;
       case "wms":
-        layerConfig = configMapper.mapWMSConfig(layer.layer);
-        layer = new WMSLayer(layerConfig);
+        let layerConfig = configMapper.mapWMSConfig(layer.layer, this.config);
+        let layerItem = new WMSLayer(
+          layerConfig.options,
+          this.config.appConfig.proxy
+        );
+        map.addLayer(layerItem.layer);
         break;
-      case "wmts":
-        layerConfig = configMapper.mapWMTSConfig(layer.layer);
-        layer = new WMSLayer(layerConfig);
+      // case "wmts":
+      //   layerConfig = configMapper.mapWMTSConfig(layer.layer);
+      //   layer = new WMTSLayer(layerConfig);
+      //   break;
+      default:
         break;
     }
   }
@@ -222,11 +220,14 @@ class AppModel {
     let layers = flattern(layerSwitcherConfig);
 
     layers.baseLayers.forEach(layer => {
-      this.addBaseLayer(layer);
+      if (layer.id === "0") {
+        layer.layer.visibleAtStart = true;
+      }
+      this.addMapLayer(layer);
     });
 
     layers.layers.forEach(layer => {
-      this.addOverlay(layer);
+      this.addMapLayer(layer);
     });
 
     return this;

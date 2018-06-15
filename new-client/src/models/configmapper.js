@@ -1,4 +1,8 @@
 export default class ConfigMapper {
+  constructor(proxy) {
+    this.proxy = proxy;
+  }
+
   mapWMTSConfig(args, properties) {
     var config = {
       type: "wmts",
@@ -28,8 +32,6 @@ export default class ConfigMapper {
 
   mapWMSConfig(args, properties) {
     function getLegendUrl() {
-      var proxy = HAJK2.wmsProxy || "";
-
       // If property exists in map settings, use specified legend options (font, color, size, etc)
       let geoserverLegendOptions = "";
       if (properties.mapConfig.hasOwnProperty("geoserverLegendOptions")) {
@@ -49,11 +51,12 @@ export default class ConfigMapper {
       return protocol + args.legend;
     }
 
+    var proxy = this.proxy || "";
     var config = {
       type: "wms",
       options: {
         id: args.id,
-        url: (HAJK2.wmsProxy || "") + args.url,
+        url: (this.proxy || "") + args.url,
         name: args.id,
         caption: args.caption,
         visible: args.visibleAtStart,
@@ -97,7 +100,7 @@ export default class ConfigMapper {
 
     if (args.searchFields && args.searchFields[0]) {
       config.options.search = {
-        url: (HAJK2.searchProxy || "") + args.url.replace("wms", "wfs"),
+        url: (this.proxy || "") + args.url.replace("wms", "wfs"),
         featureType:
           args.layers[0].split(":")[1] || args.layers[0].split(":")[0],
         propertyName: args.searchFields.join(","),
@@ -131,7 +134,7 @@ export default class ConfigMapper {
       type: args.type,
       options: {
         id: args.id,
-        url: (HAJK2.wmsProxy || "") + args.url,
+        url: (this.proxy || "") + args.url,
         name: args.id,
         caption: args.caption,
         visible: args.visibleAtStart,
@@ -178,7 +181,7 @@ export default class ConfigMapper {
 
     if (args.searchFields && args.searchFields[0]) {
       config.options.search = {
-        url: (HAJK2.searchProxy || "") + args.url.replace("wms", "wfs"),
+        url: (this.proxy || "") + args.url.replace("wms", "wfs"),
         featureType:
           args.layers[0].split(":")[1] || args.layers[0].split(":")[0],
         propertyName: args.searchFields.join(","),
@@ -196,7 +199,7 @@ export default class ConfigMapper {
       type: "data",
       options: {
         id: args.id,
-        url: (HAJK2.wfsProxy || "") + args.url,
+        url: (this.proxy || "") + args.url,
         name: args.id,
         caption: args.caption,
         visible: args.visibleAtStart,

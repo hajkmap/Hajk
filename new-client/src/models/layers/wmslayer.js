@@ -1,4 +1,10 @@
-var LayerModel = require('layers/layer');
+import TileGrid from "ol/tilegrid/tilegrid";
+import ImageLayer from "ol/layer/image";
+import TileLayer from "ol/layer/tile";
+import ImageWMSSource from "ol/source/imagewms";
+import TileWMSSource from "ol/source/tilewms";
+import GeoJSON from "ol/format/geojson";
+import Attribution from "ol/attribution";
 
 /**
  * @typedef {Object} WmsLayer~WmsLayerProperties
@@ -12,7 +18,7 @@ var LayerModel = require('layers/layer');
 var WmsLayerProperties = {
   url: "",
   projection: "EPSG:3007",
-  serverType: 'geoserver',
+  serverType: "geoserver",
   opacity: 1,
   status: "ok",
   params: {}
@@ -21,94 +27,91 @@ var WmsLayerProperties = {
 /**
  * @description
  *
- * Layer to be used as a display layer wich loads its content WMS-service.
+ * Layer to be used as a display layer wich loads its content from a WMS-service source.
  * This layer type is supported for both geoserver and ArcGIS for Server.
  *
  * @class WmsLayer
  * @param {WmsLayer~WmsLayerProperties} options
  * @param {string} type
  */
-var WmsLayer = {
-
-  /**
-   * @property {WmsLayer~WmsLayerProperties} defaults - Default properties
-   * @instance
-   */
-  defaults: WmsLayerProperties,
-
-  /**
-   * @property {bool} validInfo - Default: true
-   * @instance
-   */
-  validInfo: true,
-
-  initialize: function () {
-    LayerModel.prototype.initialize.call(this);
-
+class WMSLayer {
+  constructor(config, proxyUrl) {
+    this.proxyUrl = proxyUrl;
+    this.validInfo = true;
+    this.defaultProperties = WmsLayerProperties;
+    this.legend = config.legend;
+    this.attribution = config.attribution;
     var source = {
-      url: this.get('url'),
-      params: this.get('params'),
-      projection: this.get('projection'),
-      serverType: this.get('serverType'),
-      imageFormat: this.get('imageFormat'),
-      attributions: this.getAttributions(),
+      url: config.url,
+      params: config.params,
+      projection: config.projection,
+      serverType: config.serverType,
+      imageFormat: config.imageFormat,
+      attributions: this.getAttributions()
     };
 
-    if (this.get('resolutions') &&
-      this.get('resolutions').length > 0 &&
-      this.get('origin') &&
-      this.get('origin').length > 0) {
-        source.tileGrid = new ol.tilegrid.TileGrid({
-          resolutions: this.get('resolutions'),
-          origin: this.get('origin')
-        });
-        source.extent = this.get('extent')
+    if (
+      config.resolutions &&
+      config.resolutions.length > 0 &&
+      config.origin &&
+      config.origin.length > 0
+    ) {
+      source.tileGrid = new TileGrid({
+        resolutions: config.resolutions,
+        origin: config.origin
+      });
+      source.extent = config.extent;
     }
 
-    if (this.get('singleTile')) {
-      this.layer = new ol.layer.Image({
-        name: this.get('name'),
-        visible: this.get('visible'),
-        queryable: this.get('queryable'),
-        caption: this.get('caption'),
-        opacity: this.get("opacity"),
-        source: new ol.source.ImageWMS(source)
+    if (config.singleTile) {
+      this.layer = new ImageLayer({
+        name: config.name,
+        visible: config.visible,
+        queryable: config.queryable,
+        caption: config.caption,
+        opacity: config.opacity,
+        source: new ImageWMSSource(source)
       });
     } else {
-
-      this.layer = new ol.layer.Tile({
-        name: this.get('name'),
-        visible: this.get('visible'),
-        queryable: this.get('queryable'),
-        caption: this.get('caption'),
-        opacity: this.get("opacity"),
-        source: new ol.source.TileWMS(source)
-	    });
-
+      this.layer = new TileLayer({
+        name: config.name,
+        visible: config.visible,
+        queryable: config.queryable,
+        caption: config.caption,
+        opacity: config.opacity,
+        source: new TileWMSSource(source)
+      });
     }
-    
-    this.set('subLayers', this.get('params')['LAYERS'].split(','));
 
-    this.set("wmsCallbackName", "wmscallback" + Math.floor(Math.random() * 1000) + 1);
-    global.window[this.get("wmsCallbackName")] = _.bind(this.getFeatureInformationReponse, this);
+    this.subLayers = config.params["LAYERS"].split(",");
 
-    this.layer.getSource().on('tileloaderror', e => {
+    this.layer.getSource().on("tileloaderror", e => {
       this.tileLoadError();
     });
 
-    this.layer.getSource().on('tileloadend', e => {
+    this.layer.getSource().on("tileloadend", e => {
       this.tileLoadOk();
     });
 
-    this.layer.on('change:visible', (e) => {
-      if (!this.get('visible')) {
+    this.layer.on("change:visible", e => {
+      if (!this.get("visible")) {
         this.tileLoadOk();
       }
     });
 
-    this.layer.getSource().set('url', this.get('url'));
-    this.set("type", "wms");
-  },
+    this.layer.getSource().set("url", config.url);
+    this.type = "wms";
+  }
+
+  getAttributions() {
+    if (this.attribution) {
+      return [
+        new Attribution({
+          html: this.attribution
+        })
+      ];
+    }
+  }
 
   /**
    * Load feature information.
@@ -116,93 +119,95 @@ var WmsLayer = {
    * @param {external:"ol.feature"} feature
    * @return {external:"ol.style"} style
    */
-  getFeatureInformation: function (params) {
+  getFeatureInformation(params) {
     var url;
     try {
-
       this.validInfo = true;
       this.featureInformationCallback = params.success;
 
       url = this.getLayer()
-      .getSource()
-      .getGetFeatureInfoUrl(
-        params.coordinate,
-        params.resolution,
-        params.projection,
-        {
-          'INFO_FORMAT': this.get('serverType') === "arcgis" ? 'application/geojson' : 'application/json',
-          'feature_count': 100
-        }
-      );
+        .getSource()
+        .getGetFeatureInfoUrl(
+          params.coordinate,
+          params.resolution,
+          params.projection,
+          {
+            INFO_FORMAT:
+              this.get("serverType") === "arcgis"
+                ? "application/geojson"
+                : "application/json",
+            feature_count: 100
+          }
+        );
 
       if (url) {
-
-        if (HAJK2.searchProxy) {
+        if (this.proxyUrl) {
           url = encodeURIComponent(url);
         }
 
-        var request = $.ajax({
-          url: HAJK2.searchProxy + url,
-          success: (data) => {
-            var features = new ol.format.GeoJSON().readFeatures(data);            
-            this.featureInformationCallback(features, this.getLayer());
-          }
-        });
-
-        request.error(params.error);
+        fetch(this.proxyUrl + url)
+          .then(response => {
+            response.json().then(data => {
+              var features = new GeoJSON().readFeatures(data);
+              this.featureInformationCallback(features, this.getLayer());
+            });
+          })
+          .catch(err => {
+            params.error(err);
+          });
       }
     } catch (e) {
       params.error(e);
     }
-  },
+  }
 
-   /**
+  /**
    * Get legend url.
    * @instance
    * @param {string} layerName
    * @return {object} legend
    */
-  getLegendUrl: function (layerName) {    
-    var legend = Object.assign({}, this.get('legend'));
+  getLegendUrl(layerName) {
+    var legend = Object.assign({}, this.legend);
     legend[0].Url = legend[0].Url.replace(/LAYER=.*/, "LAYER=" + layerName);
-    return legend;    
-  },
+    return legend;
+  }
 
   /**
    * Triggers when a tile fails to load.
    * @instance
    */
-  tileLoadError: function () {
-    this.set("status", "loaderror");
-  },
+  tileLoadError() {
+    this.status = "loaderror";
+  }
 
   /**
    * Triggers when a tile loads.
    * @instance
    */
-  tileLoadOk: function () {
-    this.set("status", "ok");
-  },
+  tileLoadOk() {
+    this.status = "ok";
+  }
 
   /**
    * Parse response and trigger registred feature information callback.
    * @param {XMLDocument} respose
    * @instance
    */
-  getFeatureInformationReponse: function (response) {
+  getFeatureInformationReponse(response) {
     try {
-        var features = new ol.format.GeoJSON().readFeatures(response);
-        this.featureInformationCallback(features, this.getLayer());
-      } catch (e) {
-        console.error(e);
+      var features = new GeoJSON().readFeatures(response);
+      this.featureInformationCallback(features, this.getLayer());
+    } catch (e) {
+      console.error(e);
     }
   }
-};
+}
 
 /**
  * WmsLayer module.<br>
  * Use <code>require('layer/wmslayer')</code> for instantiation.
- * @module WmsLayer-module
- * @returns {WmsLayer}
+ * @module WMSLayer-module
+ * @returns {WMSLayer}
  */
-module.exports = LayerModel.extend(WmsLayer);
+export default WMSLayer;
