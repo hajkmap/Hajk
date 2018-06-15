@@ -1,7 +1,15 @@
 import Error from "./error.js";
 import Plugin from "./plugin.js";
 import Drag from "./drag.js";
+import ConfigMapper from "./configmapper.js";
 import { configureCss } from "./../utils/cssmodifier.js";
+
+import ArcGISLayer from "./layers/arcgislayer.js";
+import DataLayer from "./layers/datalayer.js";
+import ExtendedWMSLayer from "./layers/extendedwmslayer.js";
+import WFSLayer from "./layers/wfslayer.js";
+import WMSLayer from "./layers/wmslayer.js";
+import WMTSLayer from "./layers/wmtslayer.js";
 
 import interaction from "ol/interaction";
 import proj from "ol/proj";
@@ -86,6 +94,7 @@ class AppModel {
    */
   configureApplication() {
     configureCss(this.config.mapConfig);
+    return this;
   }
 
   /**
@@ -129,11 +138,98 @@ class AppModel {
       //var el = document.querySelector(".ol-popup");
     }, 100);
 
-    return map;
+    return this;
   }
 
   getMap() {
     return map;
+  }
+
+  addBaseLayer(layer) {
+    console.log("Add base layer", layer.layer.type);
+  }
+
+  addOverlay(layer) {
+    console.log("Add overlay", layer.layer.type);
+
+    var layer;
+    var layerConfig;
+    let configMapper = new ConfigMapper();
+
+    switch (layer.layer.type) {
+      case "arcgis":
+        layerConfig = configMapper.mapArcGISConfig(layer.layer);
+        layer = new WMSLayer(layerConfig);
+        break;
+      case "data":
+        layerConfig = configMapper.mapDataConfig(layer.layer);
+        layer = new WMTSLayer(layerConfig);
+        break;
+      case "extendedwms":
+        layerConfig = configMapper.mapExtendedWMSConfig(layer.layer);
+        layer = new WFSLayer(layerConfig);
+        break;
+      case "wfs":
+        layerConfig = configMapper.mapWFSConfig(layer.layer);
+        layer = new WMSLayer(layerConfig);
+        break;
+      case "wms":
+        layerConfig = configMapper.mapWMSConfig(layer.layer);
+        layer = new WMSLayer(layerConfig);
+        break;
+      case "wmts":
+        layerConfig = configMapper.mapWMTSConfig(layer.layer);
+        layer = new WMSLayer(layerConfig);
+        break;
+    }
+  }
+
+  addLayers() {
+    function lookup(layers) {
+      layers.forEach(layer => {
+        layer.layer = mapConfigLayers.find(
+          lookupLayer => lookupLayer.id === layer.id
+        );
+      });
+      return layers;
+    }
+
+    function expand(groups) {
+      var result = [];
+      groups.forEach(group => {
+        result = [...result, ...group.layers];
+        if (group.groups) {
+          return expand(group.groups);
+        }
+      });
+      return result;
+    }
+
+    function flattern(c) {
+      return {
+        baseLayers: [...lookup(c.options.baselayers)],
+        layers: [...lookup(expand(c.options.groups))].sort(
+          (a, b) =>
+            a.drawOrder === b.drawOrder ? 0 : a.drawOrder > b.drawOrder ? 1 : -1
+        )
+      };
+    }
+
+    let mapConfigLayers = [...this.config.mapConfig.layers];
+    let layerSwitcherConfig = this.config.mapConfig.tools.find(
+      tool => tool.type === "layerswitcher"
+    );
+    let layers = flattern(layerSwitcherConfig);
+
+    layers.baseLayers.forEach(layer => {
+      this.addBaseLayer(layer);
+    });
+
+    layers.layers.forEach(layer => {
+      this.addOverlay(layer);
+    });
+
+    return this;
   }
 
   createPopupOverlay() {

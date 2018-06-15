@@ -18,13 +18,15 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.appModel.configureApplication();
-    this.appModel.createMap("map");
-    this.appModel.loadPlugins(this.props.activeTools, () => {
-      this.setState({
-        tools: this.appModel.getPlugins()
+    this.appModel
+      .configureApplication()
+      .createMap()
+      .addLayers()
+      .loadPlugins(this.props.activeTools, () => {
+        this.setState({
+          tools: this.appModel.getPlugins()
+        });
       });
-    });
   }
 
   render() {
