@@ -3,13 +3,14 @@ import Plugin from "./plugin.js";
 import Drag from "./drag.js";
 import ConfigMapper from "./configmapper.js";
 import { configureCss } from "./../utils/cssmodifier.js";
-import proj4 from "proj4";
+import CoordinateSystemLoader from "./../utils/coordinateSystemLoader.js";
 
 // import ArcGISLayer from "./layers/arcgislayer.js";
 // import DataLayer from "./layers/datalayer.js";
 // import ExtendedWMSLayer from "./layers/extendedwmslayer.js";
 // import WFSLayer from "./layers/wfslayer.js";
 import WMSLayer from "./layers/wmslayer.js";
+
 //import WMTSLayer from "./layers/wmtslayer.js";
 
 import interaction from "ol/interaction";
@@ -30,11 +31,10 @@ class AppModel {
     this.plugins = {};
     this.activeTool = undefined;
     this.config = config;
-    proj.setProj4(proj4);
-    proj4.defs(
-      "EPSG:3007",
-      "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+    this.coordinateSystemLoader = new CoordinateSystemLoader(
+      config.mapConfig.projections
     );
+    proj.setProj4(this.coordinateSystemLoader.getProj4());
   }
 
   addPlugin(plugin) {
@@ -194,9 +194,9 @@ class AppModel {
   addLayers() {
     function lookup(layers) {
       layers.forEach(layer => {
-        layer.layer = mapConfigLayers.find(
-          lookupLayer => lookupLayer.id === layer.id
-        );
+        layer.layer =
+          mapConfigLayers.find(lookupLayer => lookupLayer.id === layer.id) ||
+          {};
       });
       return layers;
     }
@@ -229,9 +229,6 @@ class AppModel {
     let layers = flattern(layerSwitcherConfig);
 
     layers.baseLayers.forEach(layer => {
-      if (layer.id === "0") {
-        layer.layer.visibleAtStart = true;
-      }
       this.addMapLayer(layer);
     });
 
@@ -314,7 +311,6 @@ class AppModel {
           if (mapLayer.infobox && mapLayer.infobox.length !== 0) {
             layer = this.overrideGlobalInfoBox(layer, mapLayer);
           }
-
           if (layer.visibleAtStart !== undefined) {
             layer.visibleAtStart = mapLayer.visibleAtStart;
           }
