@@ -157,7 +157,6 @@ class AppModel {
 
   addMapLayer(layer) {
     const configMapper = new ConfigMapper(this.config.appConfig.proxy);
-    console.log(layer);
     switch (layer.type) {
       // case "arcgis":
       //   layerConfig = configMapper.mapArcGISConfig(layer);
