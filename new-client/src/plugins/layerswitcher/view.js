@@ -9,14 +9,17 @@ class LayersSwitcher extends Component {
     super();
     this.toggle = this.toggle.bind(this);
     this.state = {
-      toggled: false
+      toggled: false,
+      layers: []
     };
   }
 
   componentDidMount() {
     this.observer = Observer();
-    this.observer.subscribe("myEvent", message => {
-      console.log(message);
+    this.observer.subscribe("layerAdded", layer => {
+      this.setState({
+        layers: [...this.state.layers, layer]
+      });
     });
     this.layerSwitcherModel = new LayerSwitcherModel({
       map: this.props.tool.map,
@@ -61,10 +64,16 @@ class LayersSwitcher extends Component {
     return this.state.toggled ? "tool-panel" : "tool-panel hidden";
   }
 
+  renderLayers() {
+    return this.state.layers.map((layer, i) => {
+      return <div key={i}>{layer.get("caption")}</div>;
+    });
+  }
+
   renderPanel() {
     return createPortal(
       <div className={this.getVisibilityClass()}>
-        <div>Layer switcher</div>
+        <div>{this.renderLayers()}</div>
       </div>,
       document.getElementById("map")
     );

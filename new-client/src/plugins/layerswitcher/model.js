@@ -4,7 +4,7 @@ class LayerSwitcherModel {
     this.observer = settings.observer;
     var layerCollection = this.olMap.getLayers();
     layerCollection.on("add", layer => {
-      console.log("Add layer");
+      this.observer.publish("layerAdded", layer.element);
     });
   }
 }

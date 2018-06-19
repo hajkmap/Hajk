@@ -10,6 +10,7 @@ body {
   cursor: pointer;
   float: left;
   margin: 10px;
+  word-break: break-all;
 }
 
 .tool-panel {
@@ -17,7 +18,9 @@ body {
   top: 0;
   left: 0;
   width: 500px;
-  background: pink;
+  background: white;
+  border-right: 1px solid;
+  padding: 10px;
 }
 
 .tool-panel.hidden {
@@ -26,17 +29,4 @@ body {
 
 .tool-toggle-button.active {
   background: red;
-}
-
-.modal {
-  position: fixed;
-  top: 500px;
-  left: 500px;
-  height: 500px;
-  width: 500px;
-  background: white;
-}
-
-.modal.hidden {
-  display: none;
 }
