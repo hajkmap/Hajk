@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import Observer from "react-event-observer";
-import DrawModel from "./model.js";
+import LayerSwitcherModel from "./model.js";
 import { createPortal } from "react-dom";
+import "./style.css";
 
 class LayersSwitcher extends Component {
   constructor() {
@@ -17,7 +18,7 @@ class LayersSwitcher extends Component {
     this.observer.subscribe("myEvent", message => {
       console.log(message);
     });
-    this.drawModel = new DrawModel({
+    this.layerSwitcherModel = new LayerSwitcherModel({
       map: this.props.tool.map,
       app: this.props.tool.app,
       observer: this.observer
@@ -47,7 +48,7 @@ class LayersSwitcher extends Component {
     this.setState({
       toggled: !this.state.toggled
     });
-    this.props.tool.app.togglePlugin("draw");
+    this.props.tool.app.togglePlugin("layerswitcher");
   }
 
   getActiveClass() {

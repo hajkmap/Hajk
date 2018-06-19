@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import Observer from "react-event-observer";
 import DrawModel from "./model.js";
-//import {createPortal} from 'react-dom';
+import { createPortal } from "react-dom";
+import "./style.css";
 
 class Draw extends Component {
   constructor() {
@@ -60,17 +61,22 @@ class Draw extends Component {
     return this.state.toggled ? "tool-panel" : "tool-panel hidden";
   }
 
+  renderPanel() {
+    return createPortal(
+      <div className={this.getVisibilityClass()}>
+        <div>Layer switcher</div>
+      </div>,
+      document.getElementById("map")
+    );
+  }
+
   render() {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
           Draw tool
         </div>
-        <div className={this.getVisibilityClass()}>
-          <div>Rita linje</div>
-          <div>Rita yte</div>
-          <div>Rita text</div>
-        </div>
+        {this.renderPanel()}
       </div>
     );
   }

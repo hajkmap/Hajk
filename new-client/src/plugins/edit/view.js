@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import Observer from "react-event-observer";
 import EditModel from "./model.js";
 import { createPortal } from "react-dom";
+import "./style.css";
 
 class Draw extends Component {
   constructor() {
