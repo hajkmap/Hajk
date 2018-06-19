@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Observer from "react-event-observer";
 import LayerSwitcherModel from "./model.js";
+import LayerItem from "./components/LayerItem.js";
 import { createPortal } from "react-dom";
 import "./style.css";
 
@@ -66,7 +67,7 @@ class LayersSwitcher extends Component {
 
   renderLayers() {
     return this.state.layers.map((layer, i) => {
-      return <div key={i}>{layer.get("caption")}</div>;
+      return <LayerItem key={i} caption={layer.get("caption")} />;
     });
   }
 

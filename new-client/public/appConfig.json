@@ -1,7 +1,7 @@
 {
   "appName": "Hajk",
   "version": "3.0.0",
-  "mapserviceBase": "https://karta.varberg.se/mapservice",
+  "mapserviceBase": "http://demo.giscloud.se/mapservice",
   "defaultMap": "map_1",
   "proxy": ""
 }

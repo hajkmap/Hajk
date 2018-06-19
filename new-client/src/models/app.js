@@ -348,7 +348,7 @@ class AppModel {
 
     if (layerSwitcherTool) {
       layers.wmslayers = this.config.layersConfig.wmslayers || [];
-      layers.wmslayers = this.config.layersConfig.wmslayers || [];
+      layers.wfslayers = this.config.layersConfig.wfslayers || [];
       layers.wmtslayers = this.config.layersConfig.wmtslayers || [];
       layers.vectorlayers = this.config.layersConfig.vectorlayers || [];
       layers.arcgislayers = this.config.layersConfig.arcgislayers || [];
@@ -373,6 +373,8 @@ class AppModel {
     }
 
     if (searchTool) {
+      console.log(searchTool.options.layers);
+
       if (searchTool.options.layers === null) {
         searchTool.options.sources = layers.wfslayers;
       } else {
