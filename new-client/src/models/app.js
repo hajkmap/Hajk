@@ -75,24 +75,29 @@ class AppModel {
 
   loadPlugins(plugins, callback) {
     if (undefined !== map) {
+      let promises = [];
       plugins.forEach(plugin => {
-        import(`../${pluginsFolder}/${plugin}/view.js`)
-          .then(module => {
-            this.addPlugin(
-              new Plugin({
-                map: map,
-                app: this,
-                type: plugin,
-                target: "toolbar",
-                component: module.default
-              })
-            );
-            callback();
-          })
-          .catch(err => {
-            console.error(err);
-          });
+        promises = [
+          ...promises,
+          import(`../${pluginsFolder}/${plugin}/view.js`)
+            .then(module => {
+              this.addPlugin(
+                new Plugin({
+                  map: map,
+                  app: this,
+                  type: plugin,
+                  target: "toolbar",
+                  component: module.default
+                })
+              );
+              callback();
+            })
+            .catch(err => {
+              console.error(err);
+            })
+        ];
       });
+      return promises;
     } else {
       throw new Error("Initialize map before loading plugins.");
     }

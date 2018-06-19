@@ -18,15 +18,18 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.appModel
+    var promises = this.appModel
       .configureApplication()
       .createMap()
-      .addLayers()
       .loadPlugins(this.props.activeTools, () => {
         this.setState({
           tools: this.appModel.getPlugins()
         });
       });
+
+    Promise.all(promises).then(([...plugins]) => {
+      this.appModel.addLayers();
+    });
   }
 
   render() {
