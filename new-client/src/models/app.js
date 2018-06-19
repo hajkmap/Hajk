@@ -157,25 +157,26 @@ class AppModel {
 
   addMapLayer(layer) {
     const configMapper = new ConfigMapper(this.config.appConfig.proxy);
-    switch (layer.layer.type) {
+    console.log(layer);
+    switch (layer.type) {
       // case "arcgis":
-      //   layerConfig = configMapper.mapArcGISConfig(layer.layer);
+      //   layerConfig = configMapper.mapArcGISConfig(layer);
       //   layer = new ArcGISLayer(layerConfig);
       //   break;
       // case "data":
-      //   layerConfig = configMapper.mapDataConfig(layer.layer);
+      //   layerConfig = configMapper.mapDataConfig(layer);
       //   layer = new DataLayer(layerConfig);
       //   break;
       // case "extendedwms":
-      //   layerConfig = configMapper.mapExtendedWMSConfig(layer.layer);
+      //   layerConfig = configMapper.mapExtendedWMSConfig(layer);
       //   layer = new ExtendedWMSLayer(layerConfig);
       //   break;
       // case "wfs":
-      //   layerConfig = configMapper.mapWFSConfig(layer.layer);
+      //   layerConfig = configMapper.mapWFSConfig(layer);
       //   layer = new WFSLayer(layerConfig);
       //   break;
       case "wms":
-        let layerConfig = configMapper.mapWMSConfig(layer.layer, this.config);
+        let layerConfig = configMapper.mapWMSConfig(layer, this.config);
         let layerItem = new WMSLayer(
           layerConfig.options,
           this.config.appConfig.proxy
@@ -183,7 +184,7 @@ class AppModel {
         map.addLayer(layerItem.layer);
         break;
       // case "wmts":
-      //   layerConfig = configMapper.mapWMTSConfig(layer.layer);
+      //   layerConfig = configMapper.mapWMTSConfig(layer);
       //   layer = new WMTSLayer(layerConfig);
       //   break;
       default:
@@ -191,51 +192,56 @@ class AppModel {
     }
   }
 
+  lookup(layers) {
+    var matchedLayers = [];
+    layers.forEach(layer => {
+      var layerConfig = this.config.layersConfig.find(
+        lookupLayer => lookupLayer.id === layer.id
+      );
+      matchedLayers.push({
+        ...layerConfig,
+        ...layer
+      });
+    });
+    return matchedLayers;
+  }
+
+  expand(groups) {
+    var result = [];
+    groups.forEach(group => {
+      result = [...result, ...group.layers];
+      if (group.groups) {
+        return this.expand(group.groups);
+      }
+    });
+    return result;
+  }
+
+  flattern(layerSwitcherConfig) {
+    return {
+      baseLayers: [
+        ...this.lookup(layerSwitcherConfig.options.baselayers, this)
+      ],
+      layers: [
+        ...this.lookup(this.expand(layerSwitcherConfig.options.groups))
+      ].sort(
+        (a, b) =>
+          a.drawOrder === b.drawOrder ? 0 : a.drawOrder > b.drawOrder ? 1 : -1
+      )
+    };
+  }
+
   addLayers() {
-    function lookup(layers) {
-      layers.forEach(layer => {
-        layer.layer =
-          mapConfigLayers.find(lookupLayer => lookupLayer.id === layer.id) ||
-          {};
-      });
-      return layers;
-    }
-
-    function expand(groups) {
-      var result = [];
-      groups.forEach(group => {
-        result = [...result, ...group.layers];
-        if (group.groups) {
-          return expand(group.groups);
-        }
-      });
-      return result;
-    }
-
-    function flattern(c) {
-      return {
-        baseLayers: [...lookup(c.options.baselayers)],
-        layers: [...lookup(expand(c.options.groups))].sort(
-          (a, b) =>
-            a.drawOrder === b.drawOrder ? 0 : a.drawOrder > b.drawOrder ? 1 : -1
-        )
-      };
-    }
-
-    let mapConfigLayers = [...this.config.mapConfig.layers];
     let layerSwitcherConfig = this.config.mapConfig.tools.find(
       tool => tool.type === "layerswitcher"
     );
-    let layers = flattern(layerSwitcherConfig);
-
+    let layers = this.flattern(layerSwitcherConfig);
     layers.baseLayers.forEach(layer => {
       this.addMapLayer(layer);
     });
-
     layers.layers.forEach(layer => {
       this.addMapLayer(layer);
     });
-
     return this;
   }
 
@@ -293,50 +299,6 @@ class AppModel {
     a.map.zoom = z;
 
     return a;
-  }
-
-  overrideGlobalInfoBox(layer, mapLayer) {
-    layer.infobox = mapLayer.infobox;
-    return layer;
-  }
-
-  filterByLayerSwitcher(config, layers) {
-    function f(groups, layer) {
-      groups.forEach(group => {
-        var mapLayer = group.layers.find(l => l.id === layer.id);
-
-        if (mapLayer) {
-          layer.drawOrder = mapLayer.drawOrder;
-
-          if (mapLayer.infobox && mapLayer.infobox.length !== 0) {
-            layer = this.overrideGlobalInfoBox(layer, mapLayer);
-          }
-          if (layer.visibleAtStart !== undefined) {
-            layer.visibleAtStart = mapLayer.visibleAtStart;
-          }
-          filtered.push(layer);
-        }
-
-        if (group.hasOwnProperty("groups")) {
-          f(group.groups, layer);
-        }
-      });
-    }
-
-    var filtered = [];
-
-    layers.forEach(layer => {
-      var baseLayer = config.baselayers.find(l => l.id === layer.id);
-      if (baseLayer) {
-        layer.drawOrder = 0;
-        filtered.push(layer);
-      }
-    });
-
-    layers.forEach(layer => {
-      f(config.groups, layer);
-    });
-    return filtered;
   }
 
   getADSpecificSearchLayers() {
@@ -408,15 +370,7 @@ class AppModel {
         ...layers.arcgislayers
       ];
 
-      this.config.mapConfig.layers = this.filterByLayerSwitcher(
-        layerSwitcherTool.options,
-        allLayers
-      );
-
-      this.config.mapConfig.layers.sort(
-        (a, b) =>
-          a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1
-      );
+      this.config.layersConfig = allLayers;
     }
 
     if (searchTool) {
