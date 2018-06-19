@@ -1,9 +1,9 @@
 import React, { Component } from "react";
 import Observer from "react-event-observer";
-import EditModel from "./model.js";
+import DrawModel from "./model.js";
 import { createPortal } from "react-dom";
 
-class Draw extends Component {
+class LayersSwitcher extends Component {
   constructor() {
     super();
     this.toggle = this.toggle.bind(this);
@@ -17,7 +17,7 @@ class Draw extends Component {
     this.observer.subscribe("myEvent", message => {
       console.log(message);
     });
-    this.editModel = new EditModel({
+    this.drawModel = new DrawModel({
       map: this.props.tool.map,
       app: this.props.tool.app,
       observer: this.observer
@@ -47,7 +47,7 @@ class Draw extends Component {
     this.setState({
       toggled: !this.state.toggled
     });
-    this.props.tool.app.togglePlugin("information");
+    this.props.tool.app.togglePlugin("draw");
   }
 
   getActiveClass() {
@@ -57,26 +57,28 @@ class Draw extends Component {
   }
 
   getVisibilityClass() {
-    return this.state.toggled ? "modal" : "modal hidden";
+    return this.state.toggled ? "tool-panel" : "tool-panel hidden";
   }
 
-  getOpen() {
-    return this.state.toggled ? "open" : "";
+  renderPanel() {
+    return createPortal(
+      <div className={this.getVisibilityClass()}>
+        <div>Layer switcher</div>
+      </div>,
+      document.getElementById("map")
+    );
   }
 
   render() {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
-          Info
+          Lagermeny
         </div>
-        {createPortal(
-          <dialog open={this.getOpen()}>Information</dialog>,
-          document.getElementById("map")
-        )}
+        {this.renderPanel()}
       </div>
     );
   }
 }
 
-export default Draw;
+export default LayersSwitcher;
