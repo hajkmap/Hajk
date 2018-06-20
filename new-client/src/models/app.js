@@ -8,9 +8,9 @@ import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
 // import ArcGISLayer from "./layers/ArcGISLayer.js";
 // import DataLayer from "./layers/DataLayer.js";
 // import ExtendedWMSLayer from "./layers/ExtendedWMSLayer.js";
-// import WFSLayer from "./layers/WFSLayer.js";
 import WMSLayer from "./layers/WMSLayer.js";
-//import WMTSLayer from "./layers/WMTSlayer.js";
+import WMTSLayer from "./layers/WMTSLayer.js";
+import WFSLayer from "./layers/WFSLayer.js";
 
 import interaction from "ol/interaction";
 import proj from "ol/proj";
@@ -155,8 +155,37 @@ class AppModel {
   }
 
   addMapLayer(layer) {
+    console.info(layer.type);
+    console.table(layer);
     const configMapper = new ConfigMapper(this.config.appConfig.proxy);
+    let layerItem, layerConfig;
     switch (layer.type) {
+      case "wms":
+        layerConfig = configMapper.mapWMSConfig(layer, this.config);
+        layerItem = new WMSLayer(
+          layerConfig.options,
+          this.config.appConfig.proxy
+        );
+        map.addLayer(layerItem.layer);
+        break;
+      // case "wmts":
+      //   layerConfig = configMapper.mapWMTSConfig(layer, this.config);
+      //   layerItem = new WMTSLayer(
+      //     layerConfig.options,
+      //     this.config.appConfig.proxy
+      //   );
+      //   map.addLayer(layerItem.layer);
+      //   break;
+      // case "wfs":
+      //   layerConfig = configMapper.mapWFSConfig(layer);
+      //   console.info("WFS", layerConfig);
+      //   layerItem = new WFSLayer(
+      //     layerConfig.options,
+      //     this.config.appConfig.proxy
+      //   );
+      //   map.addLayer(layerItem.layer);
+      //   console.info("layerItem", layerItem);
+      //   break;
       // case "arcgis":
       //   layerConfig = configMapper.mapArcGISConfig(layer);
       //   layer = new ArcGISLayer(layerConfig);
@@ -168,22 +197,6 @@ class AppModel {
       // case "extendedwms":
       //   layerConfig = configMapper.mapExtendedWMSConfig(layer);
       //   layer = new ExtendedWMSLayer(layerConfig);
-      //   break;
-      // case "wfs":
-      //   layerConfig = configMapper.mapWFSConfig(layer);
-      //   layer = new WFSLayer(layerConfig);
-      //   break;
-      case "wms":
-        let layerConfig = configMapper.mapWMSConfig(layer, this.config);
-        let layerItem = new WMSLayer(
-          layerConfig.options,
-          this.config.appConfig.proxy
-        );
-        map.addLayer(layerItem.layer);
-        break;
-      // case "wmts":
-      //   layerConfig = configMapper.mapWMTSConfig(layer);
-      //   layer = new WMTSLayer(layerConfig);
       //   break;
       default:
         break;

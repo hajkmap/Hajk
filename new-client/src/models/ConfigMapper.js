@@ -3,33 +3,6 @@ export default class ConfigMapper {
     this.proxy = proxy;
   }
 
-  mapWMTSConfig(args, properties) {
-    var config = {
-      type: "wmts",
-      options: {
-        id: args.id,
-        name: args.id,
-        caption: args.caption,
-        visible: args.visibleAtStart !== false,
-        extent: properties.mapConfig.extent,
-        queryable: false,
-        opacity: args.opacity || 1,
-        format: "image/png",
-        wrapX: false,
-        url: args.url,
-        layer: args.layer,
-        matrixSet: args.matrixSet,
-        style: args.style,
-        projection: args.projection,
-        origin: args.origin,
-        resolutions: args.resolutions,
-        matrixIds: args.matrixIds,
-        attribution: args.attribution
-      }
-    };
-    return config;
-  }
-
   mapWMSConfig(args, properties) {
     function getLegendUrl() {
       // If property exists in map settings, use specified legend options (font, color, size, etc)
@@ -191,6 +164,33 @@ export default class ConfigMapper {
         srsName: properties.mapConfig.projection || "EPSG:3006"
       };
     }
+    return config;
+  }
+
+  mapWMTSConfig(args, properties) {
+    var config = {
+      type: "wmts",
+      options: {
+        id: args.id,
+        name: args.id,
+        caption: args.caption,
+        visible: args.visibleAtStart !== false,
+        extent: properties.mapConfig.extent,
+        queryable: false,
+        opacity: args.opacity || 1,
+        format: "image/png",
+        wrapX: false,
+        url: args.url,
+        layer: args.layer,
+        matrixSet: args.matrixSet,
+        style: args.style,
+        projection: args.projection,
+        origin: args.origin,
+        resolutions: args.resolutions,
+        matrixIds: args.matrixIds,
+        attribution: args.attribution
+      }
+    };
     return config;
   }
 

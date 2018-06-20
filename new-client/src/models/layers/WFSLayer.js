@@ -1,24 +1,82 @@
-var LayerModel = require('layers/layer');
+import TileGrid from "ol/tilegrid/tilegrid";
+import ImageLayer from "ol/layer/image";
+import TileLayer from "ol/layer/tile";
+import Vector from "ol/source/vector";
+import TileWMSSource from "ol/source/tilewms";
+import GeoJSON from "ol/format/geojson";
+import Attribution from "ol/attribution";
+import LayerInfo from "./LayerInfo.js";
+import loadingstrategy from "ol/loadingstrategy";
 
-module.exports = LayerModel.extend({
-
-  defaults: {
-    url: "",
-    featureId: "FID",
-    serverType: "geoserver",
-    dataFormat: "WFS",
-    params: {
-      service: "",
-      version: "",
-      request: "",
-      typename: "",
-      outputFormat: "",
-      srsname: "",
-      bbox: ""
-    },
-    showLabels: true
+var WfsLayerProperties = {
+  url: "",
+  featureId: "FID",
+  serverType: "geoserver",
+  dataFormat: "WFS",
+  params: {
+    service: "",
+    version: "",
+    request: "",
+    typename: "",
+    outputFormat: "",
+    srsname: "",
+    bbox: ""
   },
+  showLabels: true
+};
 
+class WFSLayer {
+  constructor(config, proxyUrl) {
+    this.proxyUrl = proxyUrl;
+    this.validInfo = true;
+    this.defaultProperties = WfsLayerProperties;
+    this.legend = config.legend;
+    this.attribution = config.attribution;
+    this.layerInfo = new LayerInfo(config);
+
+    var source = new Vector({
+      loader: extent => {
+        if (config.dataFormat === "GeoJSON") {
+          this.loadAJAX(config.url, config.dataFormat.toLowerCase());
+        } else {
+          if (config.loadType === "jsonp") {
+            this.loadJSON(this.createUrl(extent));
+          }
+          if (config.loadType === "ajax") {
+            this.loadAJAX(this.createUrl(extent, true));
+          }
+        }
+      },
+      strategy: loadingstrategy.all
+    });
+
+    this.layer = ImageLayer({
+      information: config.information,
+      caption: config.caption,
+      name: config.name,
+      visible: config.visible,
+      opacity: config.opacity,
+      queryable: config.queryable,
+      source: Vector({
+        source: source,
+        style: this.getStyle.bind(this)
+      })
+    });
+
+    if (this.get("loadType") === "jsonp") {
+      global.window[this.get("callbackFunction")] = response => {
+        this.addFeatures(response, "geojson");
+      };
+    }
+
+    //this.set("queryable", true);
+    this.set("source", source);
+    this.set("layer", this.layer);
+    this.set("type", "wfs");
+  }
+}
+
+/*
   featureMap: {},
 
   reprojectFeatures: function(features, from, to) {
@@ -28,14 +86,24 @@ module.exports = LayerModel.extend({
           let coords = feature.getGeometry().getCoordinates();
           try {
             switch (feature.getGeometry().getType()) {
-              case 'Point':
-                feature.getGeometry().setCoordinates(ol.proj.transform(coords, from, to));
+              case "Point":
+                feature
+                  .getGeometry()
+                  .setCoordinates(ol.proj.transform(coords, from, to));
                 break;
-              case 'LineString':
-                feature.getGeometry().setCoordinates(coords.map(coord => ol.proj.transform(coord, from, to)));
+              case "LineString":
+                feature
+                  .getGeometry()
+                  .setCoordinates(
+                    coords.map(coord => ol.proj.transform(coord, from, to))
+                  );
                 break;
-              case 'Polygon':
-                feature.getGeometry().setCoordinates([coords[0].map(coord => ol.proj.transform(coord, from, to))]);
+              case "Polygon":
+                feature
+                  .getGeometry()
+                  .setCoordinates([
+                    coords[0].map(coord => ol.proj.transform(coord, from, to))
+                  ]);
                 break;
             }
           } catch (e) {
@@ -46,15 +114,21 @@ module.exports = LayerModel.extend({
     }
   },
 
-  addFeatures: function (data, format) {
-    var features = []
-    ,   parser
-    ,   to = this.get('olMap').getView().getProjection().getCode()
-    ,   from = this.get('projection');
+  addFeatures: function(data, format) {
+    var features = [],
+      parser,
+      to = this.get("olMap")
+        .getView()
+        .getProjection()
+        .getCode(),
+      from = this.get("projection");
 
     if (format === "wfs") {
       parser = new ol.format.WFS({
-        gmlFormat: this.get('params').version === "1.0.0" ? new ol.format.GML2() : undefined
+        gmlFormat:
+          this.get("params").version === "1.0.0"
+            ? new ol.format.GML2()
+            : undefined
       });
     }
 
@@ -73,15 +147,14 @@ module.exports = LayerModel.extend({
     this.get("source").addFeatures(features);
   },
 
-  loadAJAX: function (url, format) {
+  loadAJAX: function(url, format) {
     url = HAJK2.wfsProxy + url;
-    $.get(url, (features) => {
+    $.get(url, features => {
       this.addFeatures(features, format || "wfs");
     });
   },
 
-  getStyle: function (feature, resolution) {
-
+  getStyle: function(feature, resolution) {
     const icon = this.get("icon");
     const fillColor = this.get("fillColor");
     const lineColor = this.get("lineColor");
@@ -89,44 +162,43 @@ module.exports = LayerModel.extend({
     const lineWidth = this.get("lineWidth");
     const symbolXOffset = this.get("symbolXOffset");
     const symbolYOffset = this.get("symbolYOffset");
-    const rotation = 0.0
+    const rotation = 0.0;
     const align = this.get("labelAlign") || "center";
     const baseline = this.get("labelBaseline") || "alphabetic";
     const size = this.get("labelSize") || "12px";
     const offsetX = this.get("labelOffsetX") || 0;
     const offsetY = this.get("labelOffsetY") || 0;
     const weight = this.get("labelWeight") || "normal";
-    const font = weight + ' ' + size + ' ' + (this.get('labelFont') || "Arial");
+    const font = weight + " " + size + " " + (this.get("labelFont") || "Arial");
     const labelFillColor = this.get("labelFillColor") || "#000000";
     const outlineColor = this.get("labelOutlineColor") || "#FFFFFF";
     const outlineWidth = this.get("labelOutlineWidth") || 3;
     const labelAttribute = this.get("labelAttribute") || "Name";
-    const showLabels = this.get('showLabels');
+    const showLabels = this.get("showLabels");
 
     function getLineDash() {
-        var scale = (a, f) => a.map(b => f * b)
-        ,   width = lineWidth
-        ,   style = lineStyle
-        ,   dash  = [12, 7]
-        ,   dot   = [2, 7]
-        ;
-        switch (style) {
-          case "dash":
-            return width > 3 ? scale(dash, 2) : dash;
-          case "dot":
-            return width > 3 ? scale(dot, 2) : dot;
-          default :
-            return undefined;
-        }
+      var scale = (a, f) => a.map(b => f * b),
+        width = lineWidth,
+        style = lineStyle,
+        dash = [12, 7],
+        dot = [2, 7];
+      switch (style) {
+        case "dash":
+          return width > 3 ? scale(dash, 2) : dash;
+        case "dot":
+          return width > 3 ? scale(dot, 2) : dot;
+        default:
+          return undefined;
+      }
     }
 
     function getFill() {
       return new ol.style.Fill({
         color: fillColor
       });
-    }    
+    }
 
-    function getText() {      
+    function getText() {
       return new ol.style.Text({
         textAlign: align,
         textBaseline: baseline,
@@ -136,14 +208,14 @@ module.exports = LayerModel.extend({
           color: labelFillColor
         }),
         stroke: new ol.style.Stroke({
-          color: outlineColor, 
+          color: outlineColor,
           width: outlineWidth
         }),
         offsetX: offsetX,
         offsetY: offsetY,
         rotation: rotation
       });
-    };    
+    }
 
     function getText() {
       return new ol.style.Text({
@@ -162,24 +234,19 @@ module.exports = LayerModel.extend({
         offsetY: offsetY,
         rotation: rotation
       });
-    };
-
-    function getImage() {
-      return icon === ""
-      ? getPoint()
-      : getIcon();
     }
 
-    function getIcon() {                              
+    function getImage() {
+      return icon === "" ? getPoint() : getIcon();
+    }
+
+    function getIcon() {
       return new ol.style.Icon({
         src: icon,
         scale: 1,
-        anchorXUnits: 'pixels',
-        anchorYUnits: 'pixels',
-        anchor: [
-          symbolXOffset,
-          symbolYOffset
-        ]
+        anchorXUnits: "pixels",
+        anchorYUnits: "pixels",
+        anchor: [symbolXOffset, symbolYOffset]
       });
     }
 
@@ -196,7 +263,7 @@ module.exports = LayerModel.extend({
         color: lineColor,
         width: lineWidth,
         lineDash: getLineDash()
-      })
+      });
     }
 
     function getStyleObj() {
@@ -215,66 +282,20 @@ module.exports = LayerModel.extend({
     return [new ol.style.Style(getStyleObj())];
   },
 
-  initialize: function () {
 
-    var source
-    ,   layer;
 
-    source = new ol.source.Vector({
-      loader: (extent) => {
-        if (this.get('dataFormat') === "GeoJSON") {
-          this.loadAJAX(this.get('url'), this.get('dataFormat').toLowerCase());
-        } else {
-          if (this.get('loadType') === 'jsonp') {
-            this.loadJSON(this.createUrl(extent));
-          }
-          if (this.get('loadType') === 'ajax') {
-            this.loadAJAX(this.createUrl(extent, true));
-          }
-        }
-      },
-      strategy: ol.loadingstrategy.all
-    });
-
-    layer = new ol.layer.Image({
-      information: this.get('information'),
-      caption: this.get('caption'),
-      name: this.get('name'),
-      visible: this.get("visible"),
-      opacity: this.get("opacity"),
-      queryable: this.get('queryable'),
-      source: new ol.source.ImageVector({
-        source: source,
-        style: this.getStyle.bind(this)
-      })
-    });
-
-    if (this.get('loadType') === "jsonp") {
-      global.window[this.get('callbackFunction')] = (response) => {
-        this.addFeatures(response, "geojson");
-      };
-    }
-
-    //this.set("queryable", true);
-    this.set("source", source);
-    this.set("layer", layer);
-    this.set("type", "wfs");
-
-    LayerModel.prototype.initialize.call(this);
-  },
-
-  createUrl: function (extent, ll) {
-    var props = Object.keys(this.get("params"))
-    ,   url = this.get("url") + "?"
-    ,   version = this.get('params')['version'];
+  createUrl: function(extent, ll) {
+    var props = Object.keys(this.get("params")),
+      url = this.get("url") + "?",
+      version = this.get("params")["version"];
 
     for (let i = 0; i < props.length; i++) {
-      let key   = props[i];
+      let key = props[i];
       let value = "";
 
       if (key !== "bbox") {
         value = this.get("params")[key];
-        url += key + '=' + value;
+        url += key + "=" + value;
       } else {
         // value = extent.join(',');
         // if (version !== "1.0.0") {
@@ -289,4 +310,6 @@ module.exports = LayerModel.extend({
 
     return url;
   }
-});
+
+  */
+export default WFSLayer;

@@ -7,15 +7,6 @@ import GeoJSON from "ol/format/geojson";
 import Attribution from "ol/attribution";
 import LayerInfo from "./LayerInfo.js";
 
-/**
- * @typedef {Object} WmsLayer~WmsLayerProperties
- * @property {string} url
- * @property {string} projection - Default: EPSG:3007
- * @property {string} serverType - argis | geoserver. Default: geoserver
- * @property {number} opacity - Default: 1
- * @property {string} status - Load status for layer. Default: ok
- * @property {object} params
- */
 var WmsLayerProperties = {
   url: "",
   projection: "EPSG:3007",
@@ -25,16 +16,6 @@ var WmsLayerProperties = {
   params: {}
 };
 
-/**
- * @description
- *
- * Layer to be used as a display layer wich loads its content from a WMS-service source.
- * This layer type is supported for both geoserver and ArcGIS for Server.
- *
- * @class WmsLayer
- * @param {WmsLayer~WmsLayerProperties} options
- * @param {string} type
- */
 class WMSLayer {
   constructor(config, proxyUrl) {
     this.proxyUrl = proxyUrl;
