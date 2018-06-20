@@ -1,17 +1,16 @@
-import Error from "./error.js";
-import Plugin from "./plugin.js";
-import Drag from "./drag.js";
-import ConfigMapper from "./configmapper.js";
-import { configureCss } from "./../utils/cssmodifier.js";
-import CoordinateSystemLoader from "./../utils/coordinateSystemLoader.js";
+import Error from "./Error.js";
+import Plugin from "./Plugin.js";
+import Drag from "./Drag.js";
+import ConfigMapper from "./ConfigMapper.js";
+import { configureCss } from "./../utils/CSSModifier.js";
+import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
 
-// import ArcGISLayer from "./layers/arcgislayer.js";
-// import DataLayer from "./layers/datalayer.js";
-// import ExtendedWMSLayer from "./layers/extendedwmslayer.js";
-// import WFSLayer from "./layers/wfslayer.js";
-import WMSLayer from "./layers/wmslayer.js";
-
-//import WMTSLayer from "./layers/wmtslayer.js";
+// import ArcGISLayer from "./layers/ArcGISLayer.js";
+// import DataLayer from "./layers/DataLayer.js";
+// import ExtendedWMSLayer from "./layers/ExtendedWMSLayer.js";
+// import WFSLayer from "./layers/WFSLayer.js";
+import WMSLayer from "./layers/WMSLayer.js";
+//import WMTSLayer from "./layers/WMTSlayer.js";
 
 import interaction from "ol/interaction";
 import proj from "ol/proj";
@@ -373,8 +372,6 @@ class AppModel {
     }
 
     if (searchTool) {
-      console.log(searchTool.options.layers);
-
       if (searchTool.options.layers === null) {
         searchTool.options.sources = layers.wfslayers;
       } else {

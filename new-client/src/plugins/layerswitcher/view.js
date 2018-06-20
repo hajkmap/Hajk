@@ -67,7 +67,7 @@ class LayersSwitcher extends Component {
 
   renderLayers() {
     return this.state.layers.map((layer, i) => {
-      return <LayerItem key={i} caption={layer.get("caption")} />;
+      return <LayerItem key={i} layer={layer} />;
     });
   }
 

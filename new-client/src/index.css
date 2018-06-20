@@ -30,3 +30,11 @@ body {
 .tool-toggle-button.active {
   background: red;
 }
+
+.hidden {
+  display: none;
+}
+
+panel {
+  background: #ccc;
+}

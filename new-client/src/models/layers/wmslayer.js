@@ -5,6 +5,7 @@ import ImageWMSSource from "ol/source/imagewms";
 import TileWMSSource from "ol/source/tilewms";
 import GeoJSON from "ol/format/geojson";
 import Attribution from "ol/attribution";
+import LayerInfo from "./LayerInfo.js";
 
 /**
  * @typedef {Object} WmsLayer~WmsLayerProperties
@@ -41,6 +42,8 @@ class WMSLayer {
     this.defaultProperties = WmsLayerProperties;
     this.legend = config.legend;
     this.attribution = config.attribution;
+    this.layerInfo = new LayerInfo(config);
+
     var source = {
       url: config.url,
       params: config.params,
@@ -70,7 +73,8 @@ class WMSLayer {
         queryable: config.queryable,
         caption: config.caption,
         opacity: config.opacity,
-        source: new ImageWMSSource(source)
+        source: new ImageWMSSource(source),
+        layerInfo: this.layerInfo
       });
     } else {
       this.layer = new TileLayer({
@@ -79,7 +83,8 @@ class WMSLayer {
         queryable: config.queryable,
         caption: config.caption,
         opacity: config.opacity,
-        source: new TileWMSSource(source)
+        source: new TileWMSSource(source),
+        layerInfo: this.layerInfo
       });
     }
 
@@ -94,7 +99,7 @@ class WMSLayer {
     });
 
     this.layer.on("change:visible", e => {
-      if (!this.get("visible")) {
+      if (this.layer.get("visible")) {
         this.tileLoadOk();
       }
     });
