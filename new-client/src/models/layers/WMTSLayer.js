@@ -6,7 +6,7 @@ import LayerInfo from "./LayerInfo.js";
 import View from "ol/view";
 import proj from "ol/proj";
 
-var WmtsLayerProperties = {
+var wmtsLayerProperties = {
   url: "",
   projection: "EPSG:3006",
   layer: "",
@@ -35,25 +35,24 @@ var WmtsLayerProperties = {
 };
 
 class WMTSLayer {
-  constructor(config, proxyUrl) {
+  constructor(config, proxyUrl, map) {
+    config = {
+      ...wmtsLayerProperties,
+      ...config
+    };
     this.proxyUrl = proxyUrl;
-    this.validInfo = true;
-    this.defaultProperties = WmtsLayerProperties;
-    this.legend = config.legend;
-    this.attribution = config.attribution;
-    this.layerInfo = new LayerInfo(config);
-
-    this.resolutions = config.resolutions.map(r => Number(r));
-    this.origin = config.origin.map(o => Number(o));
-
+    this.map = map;
+    this.resolutions = this.resolutions = config.resolutions.map(r =>
+      Number(r)
+    );
+    this.projection = config.projection;
     this.layer = new TileLayer({
       name: config.name,
-      caption: config.caption,
       visible: config.visible,
       queryable: config.queryable,
       opacity: config.opacity,
       source: new WMTSSource({
-        attributions: this.getAttributions(),
+        attributions: this.getAttributions(config.attribution),
         format: "image/png",
         wrapX: false,
         url: config.url,
@@ -61,47 +60,33 @@ class WMTSLayer {
         layer: config.layer,
         matrixSet: config.matrixSet,
         style: config.style,
-        projection: config.projection,
+        projection: this.projection,
         tileGrid: new WMTSTileGrid({
-          origin: config.origin,
-          resolutions: config.resolutions,
+          origin: config.origin.map(o => Number(o)),
+          resolutions: this.resolutions,
           matrixIds: config.matrixIds,
           extent: config.extent
         })
-      })
+      }),
+      layerInfo: new LayerInfo(config)
     });
-
-    this.layer.getSource().set("url", config.url);
-    this.layer.getSource().set("axisMode", config.axisMode);
-
-    // FIXME: Shell is gone, so let's do it some other way
-    // this.on(
-    //   "change:shell",
-    //   function(sender, shell) {
-    //     this.updateMapViewResolutions();
-    //   },
-    //   this
-    // );
-
-    // this.set("type", "wmts");
+    this.updateMapViewResolutions();
+    this.type = "wmts";
   }
 
-  getAttributions() {
-    if (this.attribution) {
+  getAttributions(attribution) {
+    if (attribution) {
       return [
         new Attribution({
-          html: this.attribution
+          html: attribution
         })
       ];
     }
   }
 
   updateMapViewResolutions() {
-    var map = this.get("shell")
-        .getMap()
-        .getMap(),
-      view = map.getView();
-    map.setView(
+    var view = this.map.getView();
+    this.map.setView(
       new View({
         zoom: view.getZoom(),
         center: view.getCenter(),

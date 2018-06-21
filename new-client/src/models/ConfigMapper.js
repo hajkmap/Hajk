@@ -188,7 +188,14 @@ export default class ConfigMapper {
         origin: args.origin,
         resolutions: args.resolutions,
         matrixIds: args.matrixIds,
-        attribution: args.attribution
+        attribution: args.attribution,
+        legend: args.legend,
+        infoVisible: args.infoVisible || false,
+        infoTitle: args.infoTitle,
+        infoText: args.infoText,
+        infoUrl: args.infoUrl,
+        infoUrlText: args.infoUrlText,
+        infoOwner: args.infoOwner
       }
     };
     return config;

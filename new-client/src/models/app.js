@@ -155,8 +155,6 @@ class AppModel {
   }
 
   addMapLayer(layer) {
-    console.info(layer.type);
-    console.table(layer);
     const configMapper = new ConfigMapper(this.config.appConfig.proxy);
     let layerItem, layerConfig;
     switch (layer.type) {
@@ -168,14 +166,17 @@ class AppModel {
         );
         map.addLayer(layerItem.layer);
         break;
-      // case "wmts":
-      //   layerConfig = configMapper.mapWMTSConfig(layer, this.config);
-      //   layerItem = new WMTSLayer(
-      //     layerConfig.options,
-      //     this.config.appConfig.proxy
-      //   );
-      //   map.addLayer(layerItem.layer);
-      //   break;
+
+      case "wmts":
+        layerConfig = configMapper.mapWMTSConfig(layer, this.config);
+        layerItem = new WMTSLayer(
+          layerConfig.options,
+          this.config.appConfig.proxy,
+          map
+        );
+        map.addLayer(layerItem.layer);
+        break;
+
       // case "wfs":
       //   layerConfig = configMapper.mapWFSConfig(layer);
       //   console.info("WFS", layerConfig);

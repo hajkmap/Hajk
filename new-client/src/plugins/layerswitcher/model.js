@@ -6,6 +6,8 @@ class LayerSwitcherModel {
     layerCollection.on("add", layer => {
       this.observer.publish("layerAdded", layer.element);
     });
+
+    console.log("Layer switcher", settings.app);
   }
 }
 
