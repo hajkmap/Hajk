@@ -709,8 +709,6 @@ var MailExportModel = {
       bbox: null
     };
 
-    console.log("URL i exporten: "+url);
-
     data.vectorLayers = this.findVector() || [];
     data.wmsLayers = this.findWMS() || [];
     data.wmtsLayers = this.findWMTS() || [];
@@ -789,9 +787,6 @@ var MailExportModel = {
         bbox: null
       };
 
-
-          console.log("URL i SENDPDF: "+url);
-
       data.vectorLayers = this.findVector() || [];
       data.wmsLayers = this.findWMS() || [];
       data.wmtsLayers = this.findWMTS() || [];
@@ -815,10 +810,6 @@ var MailExportModel = {
 
       this.set("sendingMessage", true);
 
-      console.log("documentUrl: "+data.documentUrl);
-      console.log("paperSize "+data.format);
-      console.log("emailAddress "+data.emailAddress);
-
       $.ajax({
         url: url,
         method: "post",
@@ -834,7 +825,6 @@ var MailExportModel = {
         },
         error: (err) => {
           this.set("sendingMessage", false);
-          console.log("Errorr yo "+JSON.stringify(err));
           alert("Ett eller flera av lagren du försöker skriva ut klarar inte de angivna inställningarna. Prova med en mindre pappersstorlek eller lägre upplösning.");
         }
       });

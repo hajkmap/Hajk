@@ -85,9 +85,6 @@ class ToolOptions extends Component {
     if (name == "instruction"){
       value = btoa(value);
     }
-    if (name == "scales"){
-      console.log("SCALES!!!"+value);
-    }
     this.setState({
       [name]: value
     });
@@ -98,7 +95,6 @@ class ToolOptions extends Component {
   }
 
   add(tool) {
-    console.log("ADD");
     this.props.model.get("toolConfig").push(tool);
   }
 
@@ -109,7 +105,6 @@ class ToolOptions extends Component {
   }
 
   replace(tool) {
-    console.log("REPLACE");
     this.props.model.get('toolConfig').forEach(t => {
       if (t.type === this.type) {
         t.options = tool.options;
@@ -120,23 +115,6 @@ class ToolOptions extends Component {
   }
 
   save() {
-    /*
-    if (this.state.scales) {
-
-      var scales = this.state.scales.split(',',this.state.scales.length);
-      var result=scales.map(Number);
-    }
-    */
-    console.log("Scales: "+this.state.scales);
-    var aaa = [100,200,300,5000];
-    console.log("Log: "+aaa);
-
-    //this.state.scales.split(',',this.state.scales.length);
-
-    var asd = this.state.scales;
-    console.log(asd);
-    //asd.split(',');
-
     var tool = {
       "type": this.type,
       "index": this.state.index,
@@ -241,14 +219,6 @@ class ToolOptions extends Component {
             <label htmlFor="proxyUrl">Proxy URL till utskrift och export</label>
             <input value={this.state.proxyUrl} type="text" name="proxyUrl" onChange={(e) => {this.handleInputChange(e)}}></input>
           </div>
-
-          {/*
-          <div>
-            <label htmlFor="scales">Valbara skalor</label>
-            <input value={this.state.scales} type="text" name="scales" placeholder="Ex. 400,500,2000" onChange={(e) => {this.handleInputChange(e)}}></input>
-          </div>
-          */}
-
         </form>
       </div>
     )

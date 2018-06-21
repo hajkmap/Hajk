@@ -232,7 +232,6 @@ var MailExportPdfSettings = React.createClass({
   //Send PDF by email
   sendPDF: function () {
     if (this.state.isValid) {
-      console.log("Is validated");
       document.getElementById("email-input").value = "";
       var node = $(ReactDOM.findDOMNode(this)).find('#send-pdf')
       ,   options = {
@@ -414,7 +413,6 @@ var MailExportPdfSettings = React.createClass({
           height="415px" />
 
       if (this.state.exportOption === "email") {
-        console.log("Export: "+this.state.exportOption);
         previewOption = [
           <div>
             <input
@@ -434,7 +432,6 @@ var MailExportPdfSettings = React.createClass({
           </div>
         ]
       } else if (this.state.exportOption === "print") {
-        console.log("Export: "+this.state.exportOption);
         previewOption = [
           <div>
             <button onClick={this.printDialog} className="btn btn-success btn-lg">
