@@ -9,27 +9,31 @@ import "./style.css";
 class LayersSwitcher extends Component {
   constructor() {
     super();
+    this.options = {
+      baselayers: [],
+      groups: []
+    };
     this.toggle = this.toggle.bind(this);
     this.state = {
-      toggled: false,
-      layers: []
+      toggled: false
     };
   }
 
-  componentDidMount() {
+  componentWillMount() {
     this.observer = Observer();
-    this.observer.subscribe("layerAdded", layer => {
-      this.setState({
-        layers: [...this.state.layers, layer]
-      });
-    });
+    this.observer.subscribe("layerAdded", layer => {});
     this.layerSwitcherModel = new LayerSwitcherModel({
       map: this.props.tool.map,
       app: this.props.tool.app,
       observer: this.observer
     });
     this.props.tool.instance = this;
+    this.options = this.props.tool.app.config.mapConfig.tools.find(
+      t => t.type === "layerswitcher"
+    ).options;
   }
+
+  componentDidMount() {}
 
   open() {
     this.setState({
@@ -66,18 +70,21 @@ class LayersSwitcher extends Component {
     return this.state.toggled ? "tool-panel" : "tool-panel hidden";
   }
 
-  renderLayers() {
-    console.log("Render layers", this.state);
+  renderGroups(groups) {
+    //console.log(groups);
+    //this.layerSwitcherModel.layerMap
 
-    return this.state.layers.map((layer, i) => {
-      return <LayerItem key={i} layer={layer} />;
-    });
+    return <div>Kartlager</div>;
   }
 
   renderPanel() {
     return createPortal(
       <div className={this.getVisibilityClass()}>
-        <div>{this.renderLayers()}</div>
+        <BackgroundSwitcher
+          layers={this.options.baselayers}
+          layerMap={this.layerSwitcherModel.layerMap}
+        />
+        {this.renderGroups(this.options.groups)}
       </div>,
       document.getElementById("map")
     );

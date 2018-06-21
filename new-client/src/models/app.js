@@ -204,12 +204,13 @@ class AppModel {
     }
   }
 
-  lookup(layers) {
+  lookup(layers, type) {
     var matchedLayers = [];
     layers.forEach(layer => {
       var layerConfig = this.config.layersConfig.find(
         lookupLayer => lookupLayer.id === layer.id
       );
+      layer.layerType = type;
       matchedLayers.push({
         ...layerConfig,
         ...layer
@@ -230,30 +231,29 @@ class AppModel {
   }
 
   flattern(layerSwitcherConfig) {
-    return {
-      baseLayers: [
-        ...this.lookup(layerSwitcherConfig.options.baselayers, this)
-      ],
-      layers: [
-        ...this.lookup(this.expand(layerSwitcherConfig.options.groups))
-      ].sort(
+    var layers = [
+      ...this.lookup(layerSwitcherConfig.options.baselayers, "base"),
+      ...this.lookup(this.expand(layerSwitcherConfig.options.groups), "layer")
+    ];
+    return layers
+      .sort(
         (a, b) =>
           a.drawOrder === b.drawOrder ? 0 : a.drawOrder > b.drawOrder ? 1 : -1
       )
-    };
+      .reduce((a, b) => {
+        a[b["id"]] = b;
+        return a;
+      }, {});
   }
 
   addLayers() {
     let layerSwitcherConfig = this.config.mapConfig.tools.find(
       tool => tool.type === "layerswitcher"
     );
-    let layers = this.flattern(layerSwitcherConfig);
-    layers.baseLayers.forEach(layer => {
-      this.addMapLayer(layer);
-    });
-    layers.layers.forEach(layer => {
-      this.addMapLayer(layer);
-    });
+    this.layers = this.flattern(layerSwitcherConfig);
+    for (var key in this.layers) {
+      this.addMapLayer(this.layers[key]);
+    }
     return this;
   }
 
