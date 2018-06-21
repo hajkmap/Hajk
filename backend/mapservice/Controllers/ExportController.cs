@@ -17,6 +17,12 @@ using ICSharpCode.SharpZipLib.Core;
 using log4net;
 using System.Configuration;
 
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Net.Mail;
+using System.Net;
+
 namespace MapService.Controllers
 {
     public class ExportController : AsyncController
@@ -118,7 +124,7 @@ namespace MapService.Controllers
             {
                 img.Save(stream, System.Drawing.Imaging.ImageFormat.Tiff);
                 bytes = stream.ToArray();
-            }            
+            }
             return bytes;
         }
 
@@ -139,34 +145,34 @@ namespace MapService.Controllers
                 _log.DebugFormat("Could not decode base64. Will treat as non-base64 encoded: {0}", e.Message);
             }
             MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(json);
-                                    
+
             TIFFCreator tiffCreator = new TIFFCreator();
             Image img = tiffCreator.Create(exportItem);
-            
+
             MemoryStream outStream = new MemoryStream();
 
             ZipOutputStream zipStream = new ZipOutputStream(outStream);
             zipStream.SetLevel(3);
-            
+
             ZipEntry imageEntry = new ZipEntry(ZipEntry.CleanName("kartexport.tiff"));
             imageEntry.DateTime = DateTime.Now;
 
             zipStream.PutNextEntry(imageEntry);
 
-            MemoryStream imageStream = new MemoryStream(imgToByteArray(img));       
-            byte[] buffer = new byte[4096];                       
+            MemoryStream imageStream = new MemoryStream(imgToByteArray(img));
+            byte[] buffer = new byte[4096];
 
             StreamUtils.Copy(imageStream, zipStream, buffer);
 
             imageStream.Close();
             zipStream.CloseEntry();
-            
+
             ZipEntry worldFileEntry = new ZipEntry(ZipEntry.CleanName("kartexport.tfw"));
             worldFileEntry.DateTime = DateTime.Now;
 
             zipStream.PutNextEntry(worldFileEntry);
             MemoryStream worldFileStream = new MemoryStream(MapImageCreator.CreateWorldFile(exportItem));
-            
+
             byte[] buffer2 = new byte[4096];
             StreamUtils.Copy(worldFileStream, zipStream, buffer2);
 
@@ -204,7 +210,7 @@ namespace MapService.Controllers
             {
                 _log.DebugFormat("Could not decode base64. Will treat as non-base64 encoded: {0}", e.Message);
             }
-            
+
             KMLCreator kmlCreator = new KMLCreator();
             byte[] bytes = kmlCreator.Create(json);
             string[] fileInfo = byteArrayToFileInfo(bytes, "kml");
@@ -221,7 +227,7 @@ namespace MapService.Controllers
         }
 
         private Stream ByteArrayToStream(byte[] bytes)
-        {            
+        {
             MemoryStream stream = new MemoryStream();
             stream.Write(bytes, 0, bytes.Length);
             return stream;
@@ -247,8 +253,41 @@ namespace MapService.Controllers
             ExcelCreator excelCreator = new ExcelCreator();
             byte[] bytes = excelCreator.Create(dataSet);
             string[] fileInfo = byteArrayToFileInfo(bytes, "xls");
-            
+
             return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
+        }
+
+        [HttpPost]
+        public string Email(string documentUrl, string paperSize, string emailAddress)
+        {
+            AsyncManager.OutstandingOperations.Increment();
+            using (WebClient webClient = new WebClient())
+            {
+                byte[] blob = webClient.DownloadData(documentUrl);
+                string timestamp = DateTime.Now.ToString("yyyy-MM-dd");
+
+                MailAddress fromAddress = new MailAddress("noreply@sbk.goteborg.se", "");
+                MailAddress toAddress = new MailAddress(emailAddress);
+
+                var client = new SmtpClient();
+
+                MailMessage message = new MailMessage(fromAddress, toAddress);
+                message.Subject = "Skapad karta i format " + paperSize + " " + timestamp;
+                message.IsBodyHtml = true;
+                message.Body = "OBS! viktigt vid utskrift.<br />För att få rätt kartskala måste dokumentet skrivas ut 100%, dvs själva dokumentet får inte anpassas till pappret.<br />För att åstadkomma detta i Adobe Reader sätter man sidskalan till alternativet ”ingen” på utskriftsformuläret.";
+                message.Attachments.Add(new Attachment(new MemoryStream(blob), "kartexport.pdf"));
+
+                try
+                {
+                    client.Send(message);
+                    return "Ditt e-postmeddelande har skickats!";
+                }
+                catch (Exception e)
+                {
+                    _log.Fatal(e.Message);
+                    throw;
+                }
+            }
         }
     }
 }
