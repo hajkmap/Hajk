@@ -2,14 +2,28 @@ import React, { Component } from "react";
 import "./BackgroundSwitcher.css";
 
 class BackgroundSwitcher extends Component {
-  render() {
-    return this.props.layers.map((layer, i) => {
-      var mapLayer = {
-        ...layer,
-        ...this.props.layerMap[Number(layer.id)]
-      };
-      return <div key={i}>{mapLayer.caption}</div>;
+  
+  renderBaseLayerComponents() {
+    return this.props.layers.map((layerConfig, i) => {      
+      var mapLayer = this.props.layerMap[Number(layerConfig.id)];
+      if (mapLayer) {
+        let caption = mapLayer.get('layerInfo').caption;
+        return (
+          <div key={i}>{caption}</div>
+        );
+      } else {
+        return null;
+      }
     });
+  }
+
+  render() {
+  	return (
+      <div>
+    		<h1>Bakgrundskartor</h1>
+        {this.renderBaseLayerComponents()}
+      </div>
+    );
   }
 }
 

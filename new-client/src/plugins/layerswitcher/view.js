@@ -70,13 +70,6 @@ class LayersSwitcher extends Component {
     return this.state.toggled ? "tool-panel" : "tool-panel hidden";
   }
 
-  renderGroups(groups) {
-    //console.log(groups);
-    //this.layerSwitcherModel.layerMap
-
-    return <div>Kartlager</div>;
-  }
-
   renderPanel() {
     return createPortal(
       <div className={this.getVisibilityClass()}>
@@ -84,7 +77,9 @@ class LayersSwitcher extends Component {
           layers={this.options.baselayers}
           layerMap={this.layerSwitcherModel.layerMap}
         />
-        {this.renderGroups(this.options.groups)}
+        {this.options.groups.map(group, i) => {
+          return <LayerGroup group={group} />
+        })        
       </div>,
       document.getElementById("map")
     );

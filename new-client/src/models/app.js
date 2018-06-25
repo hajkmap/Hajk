@@ -240,7 +240,7 @@ class AppModel {
         (a, b) =>
           a.drawOrder === b.drawOrder ? 0 : a.drawOrder > b.drawOrder ? 1 : -1
       )
-      .reduce((a, b) => {
+      .reduce((a, b) => {        
         a[b["id"]] = b;
         return a;
       }, {});
