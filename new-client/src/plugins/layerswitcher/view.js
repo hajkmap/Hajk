@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import Observer from "react-event-observer";
 import LayerSwitcherModel from "./model.js";
-import LayerItem from "./components/LayerItem.js";
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
+import LayerGroup from "./components/LayerGroup.js";
 import { createPortal } from "react-dom";
 import "./style.css";
 
@@ -70,6 +70,14 @@ class LayersSwitcher extends Component {
     return this.state.toggled ? "tool-panel" : "tool-panel hidden";
   }
 
+  renderLayerGroups() {
+    return this.options.groups.map((group, i) => {
+      return (
+        <LayerGroup key={i} group={group} model={this.layerSwitcherModel} />
+      );
+    });
+  }
+
   renderPanel() {
     return createPortal(
       <div className={this.getVisibilityClass()}>
@@ -77,9 +85,7 @@ class LayersSwitcher extends Component {
           layers={this.options.baselayers}
           layerMap={this.layerSwitcherModel.layerMap}
         />
-        {this.options.groups.map(group, i) => {
-          return <LayerGroup group={group} />
-        })        
+        {this.renderLayerGroups()}
       </div>,
       document.getElementById("map")
     );

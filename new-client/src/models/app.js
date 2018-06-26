@@ -10,7 +10,7 @@ import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
 // import ExtendedWMSLayer from "./layers/ExtendedWMSLayer.js";
 import WMSLayer from "./layers/WMSLayer.js";
 import WMTSLayer from "./layers/WMTSLayer.js";
-import WFSLayer from "./layers/WFSLayer.js";
+//import WFSLayer from "./layers/WFSLayer.js";
 
 import interaction from "ol/interaction";
 import proj from "ol/proj";
@@ -224,7 +224,7 @@ class AppModel {
     groups.forEach(group => {
       result = [...result, ...group.layers];
       if (group.groups) {
-        return this.expand(group.groups);
+        result = [...result, ...this.expand(group.groups)]
       }
     });
     return result;
@@ -240,7 +240,7 @@ class AppModel {
         (a, b) =>
           a.drawOrder === b.drawOrder ? 0 : a.drawOrder > b.drawOrder ? 1 : -1
       )
-      .reduce((a, b) => {        
+      .reduce((a, b) => {
         a[b["id"]] = b;
         return a;
       }, {});

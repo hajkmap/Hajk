@@ -151,6 +151,13 @@ class LayerItem extends Component {
         ? this.state.infoUrlText
         : this.state.infoUrl;
 
+    /*
+    <i
+      className={visible ? "fa fa-check-square-o" : "fa fa-square-o"}
+      style={{ width: "15px" }}
+    />&nbsp;
+    */
+
     return (
       <div className="panel panel-default layer-item">
         <div className="panel-heading unselectable" onClick={toggleLegend}>
@@ -171,7 +178,7 @@ class LayerItem extends Component {
                   : "layer-item-header-text"
               }
             >
-              {caption}
+            {caption}
             </label>&nbsp;
           </span>
           {components.legend.legendButton}
