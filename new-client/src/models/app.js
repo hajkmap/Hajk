@@ -1,7 +1,7 @@
 import Error from "./Error.js";
 import Plugin from "./Plugin.js";
 import Drag from "./Drag.js";
-import ConfigMapper from "./ConfigMapper.js";
+import ConfigMapper from "./../utils/ConfigMapper.js";
 import { configureCss } from "./../utils/CSSModifier.js";
 import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
 
@@ -10,8 +10,7 @@ import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
 // import ExtendedWMSLayer from "./layers/ExtendedWMSLayer.js";
 import WMSLayer from "./layers/WMSLayer.js";
 import WMTSLayer from "./layers/WMTSLayer.js";
-
-// import WFSLayer from "./layers/WFSLayer.js";
+import VectorLayer from "./layers/VectorLayer.js";
 
 import interaction from "ol/interaction";
 import proj from "ol/proj";
@@ -156,9 +155,10 @@ class AppModel {
   }
 
   addMapLayer(layer) {
+
     const configMapper = new ConfigMapper(this.config.appConfig.proxy);
     let layerItem, layerConfig;
-    console.info("addMapLayer called for ", layer.type, layer);
+
     switch (layer.type) {
       case "wms":
         layerConfig = configMapper.mapWMSConfig(layer, this.config);
@@ -179,15 +179,15 @@ class AppModel {
         map.addLayer(layerItem.layer);
         break;
 
-      // case "vector":
-      //   layerConfig = configMapper.mapWFSConfig(layer);
-      //   console.info("WFS layerConfig is", layerConfig);
-      //   layerItem = new WFSLayer(
-      //     layerConfig.options,
-      //     this.config.appConfig.proxy
-      //   );
-      //   map.addLayer(layerItem.layer);
-      //   break;
+      case "vector":
+        layerConfig = configMapper.mapVectorConfig(layer);
+        layerItem = new VectorLayer(
+          layerConfig.options,
+          this.config.appConfig.proxy,
+          map
+        );
+        map.addLayer(layerItem.layer);
+        break;
 
       // case "arcgis":
       //   layerConfig = configMapper.mapArcGISConfig(layer);
