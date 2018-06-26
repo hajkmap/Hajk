@@ -220,7 +220,7 @@ export default class ConfigMapper {
     return config;
   }
 
-  mapWFSConfig(args) {
+  mapWFSConfig(args, properties) {
     var config = {
       type: "vector",
       options: {

@@ -8,7 +8,7 @@ import Attribution from "ol/attribution";
 import LayerInfo from "./LayerInfo.js";
 import loadingstrategy from "ol/loadingstrategy";
 
-var WfsLayerProperties = {
+let wfsLayerProperties = {
   url: "",
   featureId: "FID",
   serverType: "geoserver",
@@ -26,16 +26,23 @@ var WfsLayerProperties = {
 };
 
 class WFSLayer {
-  constructor(config, proxyUrl) {
+  constructor(config, proxyUrl, map) {
+    config = {
+      ...wfsLayerProperties,
+      ...config
+    };
+
+    console.log("in constructor, got config", config);
+
     this.proxyUrl = proxyUrl;
     this.validInfo = true;
-    this.defaultProperties = WfsLayerProperties;
     this.legend = config.legend;
     this.attribution = config.attribution;
     this.layerInfo = new LayerInfo(config);
 
     var source = new Vector({
       loader: extent => {
+        console.log("in source.loader");
         if (config.dataFormat === "GeoJSON") {
           this.loadAJAX(config.url, config.dataFormat.toLowerCase());
         } else {
@@ -50,6 +57,8 @@ class WFSLayer {
       strategy: loadingstrategy.all
     });
 
+    console.log("got this far", this.layer, source);
+
     this.layer = ImageLayer({
       information: config.information,
       caption: config.caption,
@@ -59,102 +68,24 @@ class WFSLayer {
       queryable: config.queryable,
       source: Vector({
         source: source,
+        // FIXME: Should we do getStyle(config) instead? config contains all params needed by getStyle.
         style: this.getStyle.bind(this)
       })
     });
 
-    if (this.get("loadType") === "jsonp") {
-      global.window[this.get("callbackFunction")] = response => {
+    if (config.loadType === "jsonp") {
+      global.window[config.callbackFunction] = response => {
         this.addFeatures(response, "geojson");
       };
     }
 
     //this.set("queryable", true);
-    this.set("source", source);
-    this.set("layer", this.layer);
-    this.set("type", "wfs");
+    this.source = source;
+    this.type = "wfs";
   }
-}
 
-/*
-  featureMap: {},
-
-  reprojectFeatures: function(features, from, to) {
-    if (Array.isArray(features)) {
-      features.forEach(feature => {
-        if (feature.getGeometry().getCoordinates) {
-          let coords = feature.getGeometry().getCoordinates();
-          try {
-            switch (feature.getGeometry().getType()) {
-              case "Point":
-                feature
-                  .getGeometry()
-                  .setCoordinates(ol.proj.transform(coords, from, to));
-                break;
-              case "LineString":
-                feature
-                  .getGeometry()
-                  .setCoordinates(
-                    coords.map(coord => ol.proj.transform(coord, from, to))
-                  );
-                break;
-              case "Polygon":
-                feature
-                  .getGeometry()
-                  .setCoordinates([
-                    coords[0].map(coord => ol.proj.transform(coord, from, to))
-                  ]);
-                break;
-            }
-          } catch (e) {
-            console.error("Coordinate transformation error.", e);
-          }
-        }
-      });
-    }
-  },
-
-  addFeatures: function(data, format) {
-    var features = [],
-      parser,
-      to = this.get("olMap")
-        .getView()
-        .getProjection()
-        .getCode(),
-      from = this.get("projection");
-
-    if (format === "wfs") {
-      parser = new ol.format.WFS({
-        gmlFormat:
-          this.get("params").version === "1.0.0"
-            ? new ol.format.GML2()
-            : undefined
-      });
-    }
-
-    if (format === "geojson") {
-      parser = new ol.format.GeoJSON();
-    }
-
-    if (parser) {
-      features = parser.readFeatures(data);
-    }
-
-    if (to !== from) {
-      this.reprojectFeatures(features, from, to);
-    }
-
-    this.get("source").addFeatures(features);
-  },
-
-  loadAJAX: function(url, format) {
-    url = HAJK2.wfsProxy + url;
-    $.get(url, features => {
-      this.addFeatures(features, format || "wfs");
-    });
-  },
-
-  getStyle: function(feature, resolution) {
+  getStyle(feature, resolution) {
+    console.info("In getStyle, this is:", this);
     const icon = this.get("icon");
     const fillColor = this.get("fillColor");
     const lineColor = this.get("lineColor");
@@ -280,7 +211,88 @@ class WFSLayer {
     }
 
     return [new ol.style.Style(getStyleObj())];
+  }
+}
+/*
+
+  featureMap: {},
+
+  reprojectFeatures: function(features, from, to) {
+    if (Array.isArray(features)) {
+      features.forEach(feature => {
+        if (feature.getGeometry().getCoordinates) {
+          let coords = feature.getGeometry().getCoordinates();
+          try {
+            switch (feature.getGeometry().getType()) {
+              case "Point":
+                feature
+                  .getGeometry()
+                  .setCoordinates(ol.proj.transform(coords, from, to));
+                break;
+              case "LineString":
+                feature
+                  .getGeometry()
+                  .setCoordinates(
+                    coords.map(coord => ol.proj.transform(coord, from, to))
+                  );
+                break;
+              case "Polygon":
+                feature
+                  .getGeometry()
+                  .setCoordinates([
+                    coords[0].map(coord => ol.proj.transform(coord, from, to))
+                  ]);
+                break;
+            }
+          } catch (e) {
+            console.error("Coordinate transformation error.", e);
+          }
+        }
+      });
+    }
   },
+
+  addFeatures: function(data, format) {
+    var features = [],
+      parser,
+      to = this.get("olMap")
+        .getView()
+        .getProjection()
+        .getCode(),
+      from = this.get("projection");
+
+    if (format === "wfs") {
+      parser = new ol.format.WFS({
+        gmlFormat:
+          this.get("params").version === "1.0.0"
+            ? new ol.format.GML2()
+            : undefined
+      });
+    }
+
+    if (format === "geojson") {
+      parser = new ol.format.GeoJSON();
+    }
+
+    if (parser) {
+      features = parser.readFeatures(data);
+    }
+
+    if (to !== from) {
+      this.reprojectFeatures(features, from, to);
+    }
+
+    this.get("source").addFeatures(features);
+  },
+
+  loadAJAX: function(url, format) {
+    url = HAJK2.wfsProxy + url;
+    $.get(url, features => {
+      this.addFeatures(features, format || "wfs");
+    });
+  },
+
+  
 
 
 
@@ -310,6 +322,5 @@ class WFSLayer {
 
     return url;
   }
-
-  */
+*/
 export default WFSLayer;
