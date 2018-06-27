@@ -1,10 +1,6 @@
-import TileGrid from "ol/tilegrid/tilegrid";
 import ImageLayer from "ol/layer/image";
-import TileLayer from "ol/layer/tile";
 import VectorSource from "ol/source/vector";
 import ImageVectorSource from "ol/source/imagevector";
-import TileWMSSource from "ol/source/tilewms";
-import GeoJSON from "ol/format/geojson";
 
 import Fill from "ol/style/fill";
 import Text from "ol/style/text";
@@ -37,8 +33,6 @@ let vectorLayerProperties = {
   },
   showLabels: true
 };
-
-var featureMap = {};
 
 class VectorLayer {
 
@@ -207,6 +201,8 @@ class VectorLayer {
               case 'Polygon':
                 feature.getGeometry().setCoordinates([coords[0].map(coord => proj.transform(coord, from, to))]);
                 break;
+              default:
+                break;
             }
           } catch (e) {
             console.error('Coordinate transformation error.', e);
@@ -245,8 +241,7 @@ class VectorLayer {
 
   createUrl(extent, ll) {
     var props = Object.keys(this.config.params),
-      url = this.config.url + '?',
-      version = this.config.params.version;
+      url = this.config.url + '?';
 
     for (let i = 0; i < props.length; i++) {
       let key = props[i];
@@ -255,11 +250,6 @@ class VectorLayer {
       if (key !== 'bbox') {
         value = this.config.params[key];
         url += key + '=' + value;
-      } else {
-        // value = extent.join(',');
-        // if (version !== "1.0.0") {
-        //    value += "," + this.get("params")['srsname'];
-        // }
       }
 
       if (i !== props.length - 1) {

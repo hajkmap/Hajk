@@ -13,8 +13,8 @@ class BackgroundSwitcher extends Component {
   }
 
   componentWillMount() {
-    var checkedLayer = -1;
-    console.log("Layers", this.props.layers);
+    //var checkedLayer = -1;
+    //console.log("Layers", this.props.layers);
     //var visibleLayers = this.props.layers.filter(layer => layer.get('visible'));
     //console.log("Visible layers", visibleLayers);
   }

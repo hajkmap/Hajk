@@ -15,12 +15,14 @@ body {
 
 .tool-panel {
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 5px;
+  left: 5px;
   width: 500px;
   background: white;
-  border-right: 1px solid;
   padding: 10px;
+  bottom: 84px;
+  overflow-y: auto;
+  border: 2px solid;
 }
 
 .tool-panel.hidden {

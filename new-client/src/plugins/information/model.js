@@ -1,7 +1,7 @@
-class EditModel {
+class InformationModel {
   constructor(settings) {
     this.olMap = settings.map;
   }
 }
 
-export default EditModel;
+export default InformationModel;
