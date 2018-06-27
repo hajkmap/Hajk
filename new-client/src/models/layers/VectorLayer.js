@@ -1,25 +1,16 @@
-import TileGrid from "ol/tilegrid/tilegrid";
-import ImageLayer from "ol/layer/image";
-import TileLayer from "ol/layer/tile";
-import VectorSource from "ol/source/vector";
-import ImageVectorSource from "ol/source/imagevector";
-import TileWMSSource from "ol/source/tilewms";
-import GeoJSON from "ol/format/geojson";
+import ImageLayer from "ol/layer/Image";
+import VectorLayer from "ol/layer/Vector";
 
-import Fill from "ol/style/fill";
-import Text from "ol/style/text";
-import Stroke from "ol/style/stroke";
-import Icon from "ol/style/icon";
-import Circle from "ol/style/circle";
-import Style from "ol/style/style";
+import Vector from "ol/source/Vector";
 
-import proj from "ol/proj";
-import WFSParser from "ol/format/wfs";
-import GMLParser from "ol/format/gml2";
-import GeoJSONParser from "ol/format/geojson";
+import { Fill, Text, Stroke, Icon, Circle, Style } from "ol/style";
+import Projection from "ol/proj/Projection";
+import WFS from "ol/format/WFS";
+import GeoJSON from "ol/format/GeoJSON";
+import GML2 from "ol/format/GML2";
 
 import LayerInfo from "./LayerInfo.js";
-import loadingstrategy from "ol/loadingstrategy";
+import { all as loadingStrategyAll } from "ol/loadingstrategy";
 
 let vectorLayerProperties = {
   url: "",
@@ -40,8 +31,7 @@ let vectorLayerProperties = {
 
 var featureMap = {};
 
-class VectorLayer {
-
+class WFSVectorLayer {
   constructor(config, proxyUrl, map) {
     config = {
       ...vectorLayerProperties,
@@ -51,7 +41,7 @@ class VectorLayer {
     this.proxyUrl = proxyUrl;
     this.map = map;
 
-    this.vectorSource = new VectorSource({
+    this.vectorSource = new Vector({
       loader: extent => {
         if (config.dataFormat === "GeoJSON") {
           this.loadData(config.url, config.dataFormat.toLowerCase());
@@ -61,7 +51,7 @@ class VectorLayer {
           }
         }
       },
-      strategy: loadingstrategy.all
+      strategy: loadingStrategyAll
     });
 
     this.layer = new ImageLayer({
@@ -72,7 +62,7 @@ class VectorLayer {
       opacity: config.opacity,
       queryable: config.queryable,
       layerInfo: new LayerInfo(config),
-      source: new ImageVectorSource({
+      source: new VectorLayer({
         source: this.vectorSource,
         style: this.getStyle.bind(this)
       })
@@ -82,7 +72,6 @@ class VectorLayer {
   }
 
   getStyle(feature, resolution) {
-
     const icon = this.config.icon;
     const fillColor = this.config.fillColor;
     const lineColor = this.config.lineColor;
@@ -191,45 +180,61 @@ class VectorLayer {
     return [new Style(getStyleObj())];
   }
 
-  reprojectFeatures (features, from, to) {
+  reprojectFeatures(features, from, to) {
     if (Array.isArray(features)) {
       features.forEach(feature => {
         if (feature.getGeometry().getCoordinates) {
           let coords = feature.getGeometry().getCoordinates();
           try {
             switch (feature.getGeometry().getType()) {
-              case 'Point':
-                feature.getGeometry().setCoordinates(proj.transform(coords, from, to));
+              case "Point":
+                feature
+                  .getGeometry()
+                  .setCoordinates(Projection.transform(coords, from, to));
                 break;
-              case 'LineString':
-                feature.getGeometry().setCoordinates(coords.map(coord => proj.transform(coord, from, to)));
+              case "LineString":
+                feature
+                  .getGeometry()
+                  .setCoordinates(
+                    coords.map(coord => Projection.transform(coord, from, to))
+                  );
                 break;
-              case 'Polygon':
-                feature.getGeometry().setCoordinates([coords[0].map(coord => proj.transform(coord, from, to))]);
+              case "Polygon":
+                feature
+                  .getGeometry()
+                  .setCoordinates([
+                    coords[0].map(coord =>
+                      Projection.transform(coord, from, to)
+                    )
+                  ]);
                 break;
             }
           } catch (e) {
-            console.error('Coordinate transformation error.', e);
+            console.error("Coordinate transformation error.", e);
           }
         }
       });
     }
   }
 
-  addFeatures (data, format) {
+  addFeatures(data, format) {
     var features = [],
       parser,
-      to = this.map.getView().getProjection().getCode(),
+      to = this.map
+        .getView()
+        .getProjection()
+        .getCode(),
       from = this.config.projection;
 
-    if (format === 'wfs') {
-      parser = new WFSParser({
-        gmlFormat: this.config.params.version === '1.0.0' ? new GMLParser() : undefined
+    if (format === "wfs") {
+      parser = new WFS({
+        gmlFormat:
+          this.config.params.version === "1.0.0" ? new GML2() : undefined
       });
     }
 
-    if (format === 'geojson') {
-      parser = new GeoJSONParser();
+    if (format === "geojson") {
+      parser = new GeoJSON();
     }
 
     if (parser) {
@@ -245,16 +250,16 @@ class VectorLayer {
 
   createUrl(extent, ll) {
     var props = Object.keys(this.config.params),
-      url = this.config.url + '?',
+      url = this.config.url + "?",
       version = this.config.params.version;
 
     for (let i = 0; i < props.length; i++) {
       let key = props[i];
-      let value = '';
+      let value = "";
 
-      if (key !== 'bbox') {
+      if (key !== "bbox") {
         value = this.config.params[key];
-        url += key + '=' + value;
+        url += key + "=" + value;
       } else {
         // value = extent.join(',');
         // if (version !== "1.0.0") {
@@ -263,21 +268,21 @@ class VectorLayer {
       }
 
       if (i !== props.length - 1) {
-        url += '&';
+        url += "&";
       }
     }
 
     return url;
   }
 
-  loadData (url, format) {
+  loadData(url, format) {
     url = this.proxyUrl + url;
     fetch(url).then(response => {
       response.text().then(features => {
-        this.addFeatures(features, format || 'wfs');
-      })
-    })
+        this.addFeatures(features, format || "wfs");
+      });
+    });
   }
 }
 
-export default VectorLayer;
+export default WFSVectorLayer;

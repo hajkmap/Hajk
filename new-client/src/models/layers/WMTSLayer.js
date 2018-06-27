@@ -1,10 +1,10 @@
-import TileLayer from "ol/layer/tile";
-import WMTSSource from "ol/source/wmts";
-import WMTSTileGrid from "ol/tilegrid/wmts";
-import Attribution from "ol/attribution";
+import TileLayer from "ol/layer/Tile";
+import WMTS from "ol/source/WMTS";
+import WMTSTileGrid from "ol/tilegrid/WMTS";
+import Attribution from "ol/control/Attribution";
 import LayerInfo from "./LayerInfo.js";
-import View from "ol/view";
-import proj from "ol/proj";
+import View from "ol/View";
+import proj4 from "proj4";
 
 var wmtsLayerProperties = {
   url: "",
@@ -51,7 +51,7 @@ class WMTSLayer {
       visible: config.visible,
       queryable: config.queryable,
       opacity: config.opacity,
-      source: new WMTSSource({
+      source: new WMTS({
         attributions: this.getAttributions(config.attribution),
         format: "image/png",
         wrapX: false,
@@ -78,7 +78,7 @@ class WMTSLayer {
     if (attribution) {
       return [
         new Attribution({
-          html: attribution
+          label: attribution
         })
       ];
     }
@@ -91,7 +91,8 @@ class WMTSLayer {
         zoom: view.getZoom(),
         center: view.getCenter(),
         resolutions: this.resolutions,
-        projection: proj.get(this.projection)
+        projection: proj4.get(this.projection)
+        projection: this.projection
       })
     );
   }

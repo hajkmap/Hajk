@@ -6,6 +6,7 @@ function add(projection) {
 
 export default class CoordinateSystemLoader {
   constructor(config) {
+    console.info(config);
     if (Array.isArray(config)) {
       config.forEach(projection => {
         add(projection);

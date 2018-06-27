@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "less-watch-compiler": "^1.11.3",
-    "ol": "^4.6.5",
+    "ol": "^5.0.0",
     "proj4": "^2.4.4",
     "react-event-observer": "^0.5.11"
   }
