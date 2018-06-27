@@ -1,10 +1,10 @@
-import TileGrid from "ol/tilegrid/tilegrid";
-import ImageLayer from "ol/layer/image";
-import TileLayer from "ol/layer/tile";
-import ImageWMSSource from "ol/source/imagewms";
-import TileWMSSource from "ol/source/tilewms";
-import GeoJSON from "ol/format/geojson";
-import Attribution from "ol/attribution";
+import TileGrid from "ol/tilegrid/TileGrid";
+import ImageLayer from "ol/layer/Image";
+import TileLayer from "ol/layer/Tile";
+import ImageWMS from "ol/source/ImageWMS";
+import TileWMS from "ol/source/TileWMS";
+import GeoJSON from "ol/format/GeoJSON";
+import Attribution from "ol/control/Attribution";
 import LayerInfo from "./LayerInfo.js";
 
 var WmsLayerProperties = {
@@ -54,7 +54,7 @@ class WMSLayer {
         queryable: config.queryable,
         caption: config.caption,
         opacity: config.opacity,
-        source: new ImageWMSSource(source),
+        source: new ImageWMS(source),
         layerInfo: this.layerInfo
       });
     } else {
@@ -64,7 +64,7 @@ class WMSLayer {
         queryable: config.queryable,
         caption: config.caption,
         opacity: config.opacity,
-        source: new TileWMSSource(source),
+        source: new TileWMS(source),
         layerInfo: this.layerInfo
       });
     }
@@ -93,7 +93,7 @@ class WMSLayer {
     if (this.attribution) {
       return [
         new Attribution({
-          html: this.attribution
+          label: this.attribution
         })
       ];
     }

@@ -1,6 +1,7 @@
 import Error from "./Error.js";
 import Plugin from "./Plugin.js";
-import Drag from "./Drag.js";
+// FIXME: Is this custom interaction needed, when Drag and Rotate is loaded by default?
+// import Drag from "./Drag.js";
 import ConfigMapper from "./../utils/ConfigMapper.js";
 import { configureCss } from "./../utils/CSSModifier.js";
 import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
@@ -9,18 +10,18 @@ import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
 // import DataLayer from "./layers/DataLayer.js";
 // import ExtendedWMSLayer from "./layers/ExtendedWMSLayer.js";
 import WMSLayer from "./layers/WMSLayer.js";
-import WMTSLayer from "./layers/WMTSLayer.js";
-import VectorLayer from "./layers/VectorLayer.js";
+// import WMTSLayer from "./layers/WMTSLayer.js";
+// import WFSVectorLayer from "./layers/VectorLayer.js";
 
-import interaction from "ol/interaction";
+// import interaction from "ol/Interaction";
 import proj from "ol/proj";
-import Map from "ol/map";
-import View from "ol/view";
-import Zoom from "ol/control/zoom";
-import Attribution from "ol/control/attribution";
-import Rotate from "ol/control/rotate";
-import ScaleLine from "ol/control/scaleline";
-import Overlay from "ol/overlay";
+import Map from "ol/Map";
+import View from "ol/View";
+import Zoom from "ol/control/Zoom";
+import Rotate from "ol/control/Rotate";
+import ScaleLine from "ol/control/ScaleLine";
+import Overlay from "ol/Overlay";
+import Attribution from "ol/control/Attribution";
 
 const pluginsFolder = "plugins";
 var map;
@@ -33,6 +34,7 @@ class AppModel {
     this.coordinateSystemLoader = new CoordinateSystemLoader(
       config.mapConfig.projections
     );
+    // FIXME: This is supposed to work, accordning to https://openlayers.org/en/latest/apidoc/ol.proj.html#.setProj4
     proj.setProj4(this.coordinateSystemLoader.getProj4());
   }
 
@@ -91,9 +93,7 @@ class AppModel {
               );
               callback();
             })
-            .catch(err => {
-              console.error(err);
-            })
+            .catch(err => {})
         ];
       });
       return promises;
@@ -119,7 +119,7 @@ class AppModel {
   createMap(target) {
     var config = this.translateConfig();
     map = new Map({
-      interactions: interaction.defaults().extend([new Drag()]),
+      //interactions: interaction.defaults().extend([new Drag()]),
       target: config.map.target,
       layers: [],
       logo: false,
@@ -141,7 +141,8 @@ class AppModel {
         units: "m",
         resolutions: config.map.resolutions,
         center: config.map.center,
-        projection: proj.get(config.map.projection),
+        //projection: proj4.get(config.map.projection),
+        projection: config.map.projection,
         extent: config.map.length !== 0 ? config.map.extent : undefined
       })
     });
@@ -155,7 +156,6 @@ class AppModel {
   }
 
   addMapLayer(layer) {
-
     const configMapper = new ConfigMapper(this.config.appConfig.proxy);
     let layerItem, layerConfig;
 
@@ -169,25 +169,25 @@ class AppModel {
         map.addLayer(layerItem.layer);
         break;
 
-      case "wmts":
-        layerConfig = configMapper.mapWMTSConfig(layer, this.config);
-        layerItem = new WMTSLayer(
-          layerConfig.options,
-          this.config.appConfig.proxy,
-          map
-        );
-        map.addLayer(layerItem.layer);
-        break;
+      // case "wmts":
+      //   layerConfig = configMapper.mapWMTSConfig(layer, this.config);
+      //   layerItem = new WMTSLayer(
+      //     layerConfig.options,
+      //     this.config.appConfig.proxy,
+      //     map
+      //   );
+      //   map.addLayer(layerItem.layer);
+      //   break;
 
-      case "vector":
-        layerConfig = configMapper.mapVectorConfig(layer);
-        layerItem = new VectorLayer(
-          layerConfig.options,
-          this.config.appConfig.proxy,
-          map
-        );
-        map.addLayer(layerItem.layer);
-        break;
+      // case "vector":
+      //   layerConfig = configMapper.mapVectorConfig(layer);
+      //   layerItem = new WFSVectorLayer(
+      //     layerConfig.options,
+      //     this.config.appConfig.proxy,
+      //     map
+      //   );
+      //   map.addLayer(layerItem.layer);
+      //   break;
 
       // case "arcgis":
       //   layerConfig = configMapper.mapArcGISConfig(layer);

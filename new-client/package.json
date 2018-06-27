@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "font-awesome": "^4.7.0",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
     "react-scripts": "1.1.4"
@@ -15,8 +16,7 @@
   },
   "devDependencies": {
     "less-watch-compiler": "^1.11.3",
-    "marked": "^0.4.0",
-    "ol": "^4.6.5",
+    "ol": "^5.0.0",
     "proj4": "^2.4.4",
     "react-event-observer": "^0.5.11"
   }
