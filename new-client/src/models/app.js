@@ -14,7 +14,8 @@ import WMSLayer from "./layers/WMSLayer.js";
 // import WFSVectorLayer from "./layers/VectorLayer.js";
 
 // import interaction from "ol/Interaction";
-import proj from "ol/proj";
+import {register} from "ol/proj/proj4";
+
 import Map from "ol/Map";
 import View from "ol/View";
 import Zoom from "ol/control/Zoom";
@@ -34,8 +35,9 @@ class AppModel {
     this.coordinateSystemLoader = new CoordinateSystemLoader(
       config.mapConfig.projections
     );
+
     // FIXME: This is supposed to work, accordning to https://openlayers.org/en/latest/apidoc/ol.proj.html#.setProj4
-    proj.setProj4(this.coordinateSystemLoader.getProj4());
+    register(this.coordinateSystemLoader.getProj4());
   }
 
   addPlugin(plugin) {
