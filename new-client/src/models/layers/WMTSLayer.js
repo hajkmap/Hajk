@@ -1,10 +1,9 @@
+import View from "ol/View";
 import TileLayer from "ol/layer/Tile";
 import WMTS from "ol/source/WMTS";
 import WMTSTileGrid from "ol/tilegrid/WMTS";
 import Attribution from "ol/control/Attribution";
 import LayerInfo from "./LayerInfo.js";
-import View from "ol/View";
-import proj4 from "proj4";
 
 var wmtsLayerProperties = {
   url: "",
@@ -91,7 +90,6 @@ class WMTSLayer {
         zoom: view.getZoom(),
         center: view.getCenter(),
         resolutions: this.resolutions,
-        projection: proj4.get(this.projection)
         projection: this.projection
       })
     );
