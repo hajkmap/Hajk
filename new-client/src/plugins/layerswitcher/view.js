@@ -85,7 +85,9 @@ class LayersSwitcher extends Component {
           layers={this.options.baselayers}
           layerMap={this.layerSwitcherModel.layerMap}
         />
-        {this.renderLayerGroups()}
+        <div className="layer-groups">
+          {this.renderLayerGroups()}
+        </div>
       </div>,
       document.getElementById("map")
     );

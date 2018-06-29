@@ -1,0 +1,7 @@
+.layer-group {
+  margin-left: 10px;
+}
+
+.layer-groups > .layer-group {
+  margin-left: 0;
+} 

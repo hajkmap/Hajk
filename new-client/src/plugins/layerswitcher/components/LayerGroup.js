@@ -34,7 +34,7 @@ class LayerGroup extends Component {
 
   render() {
     return (
-      <div>
+      <div className="layer-group">
         <h1>{this.state.name}</h1>
         {this.state.layers.map((layer, i) => {
           var mapLayer = this.model.layerMap[Number(layer.id)];

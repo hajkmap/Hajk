@@ -6,44 +6,104 @@ class BackgroundSwitcher extends Component {
   constructor() {
     super();
     this.onChange = this.onChange.bind(this);
+    this.state = {
+      selectedLayer: -1
+    }
   }
 
-  onChange(e) {
-    console.log("Change", e, this);
+  onChange(e) {      
+    if (Number(this.state.selectedLayer) > 0) {
+      this.props.layerMap[Number(this.state.selectedLayer)].setVisible(false);            
+    }
+    if (Number(e.target.value) > 0) {
+      this.props.layerMap[Number(e.target.value)].setVisible(true);
+    }
+    
+    if (e.target.value === "-2")  {
+      document.getElementById("map").style.backgroundColor = "#000";
+    } else {
+      document.getElementById("map").style.backgroundColor = "#FFF";
+    } 
+
+    this.setState({
+      selectedLayer: e.target.value
+    });    
   }
 
-  componentWillMount() {
-    //var checkedLayer = -1;
-    //console.log("Layers", this.props.layers);
-    //var visibleLayers = this.props.layers.filter(layer => layer.get('visible'));
-    //console.log("Visible layers", visibleLayers);
+  componentWillMount() {    
+    this.props.layers
+      .filter(layer => layer.visibleAtStart)
+      .forEach((layer, i) => {
+        if (i !== 0) {
+          this.props.layerMap[Number(layer.id)].setVisible(false);      
+        } else {
+          this.setState({
+            selectedLayer: layer.id
+          });
+        }
+      });
   }
 
-  renderBaseLayerComponents() {
-    return this.props.layers.map((layerConfig, i) => {
-      var mapLayer = this.props.layerMap[Number(layerConfig.id)];
-      if (mapLayer) {
-        let caption = mapLayer.get('layerInfo').caption;
-        return (
-          <div key={i}>
-            <input onChange={this.onChange} id={caption + "_" + i} type="radio" name="background"></input>
-            <label htmlFor={caption + "_" + i}>{caption}</label>
-          </div>
-        );
-      } else {
-        return null;
-      }
-    });
+  renderRadioButton(config, index) {
+        
+    var caption
+      , checked
+      , mapLayer = this.props.layerMap[Number(config.id)];
+            
+    if (mapLayer) {
+      caption = mapLayer.get('layerInfo').caption;
+    } else {
+      caption = config.caption;
+    }
+    checked = this.state.selectedLayer === config.id;  
+    
+    return (
+      <div key={index}>
+        <input 
+          onChange={this.onChange.bind(this)} 
+          checked={checked} 
+          value={config.id || config}
+          id={caption + "_" + index} 
+          type="radio" 
+          name="background">
+        </input>
+        <label htmlFor={caption + "_" + index}>{caption}</label>
+      </div>
+    )
+
+  }
+
+  renderBaseLayerComponents() {    
+    var radioButtons = []
+    
+    radioButtons = [
+      ...radioButtons,
+      ...[
+        this.renderRadioButton({
+          id: "-1",
+          caption: "Vit"
+        }, -1),
+        this.renderRadioButton({
+          id: "-2",
+          caption: "Svart"
+        }, -2)
+      ]
+    ];
+
+    radioButtons = [
+      ...radioButtons, 
+      ...this.props.layers.map((layerConfig, i) => 
+        this.renderRadioButton(layerConfig, i)
+      )
+    ];
+
+    return radioButtons;
   }
 
   render() {
   	return (
       <div>
     		<h1>Bakgrundskartor</h1>
-        <div>
-          <input checked onChange={this.onChange} id="layer_-1" type="radio" name="background"></input>
-          <label htmlFor="layer_-1">Ingen bakgrundkarta</label>
-        </div>
         {this.renderBaseLayerComponents()}
       </div>
     );
