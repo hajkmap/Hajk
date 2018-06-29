@@ -69,7 +69,7 @@ class Draw extends Component {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
-          Info
+          <i className="fa fa-icon fa-info icon"></i>
         </div>
         {createPortal(
           <dialog open={this.getOpen()}>Information</dialog>,

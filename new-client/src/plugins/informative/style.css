@@ -1,0 +1,17 @@
+.informative img {
+  width: 50%;
+  cursor: pointer;
+}
+
+.informative h1 {
+  font-size: 15pt;
+  cursor: pointer;
+}
+
+.informative h1:hover {
+  color: #00F;
+}
+
+.informative h2 {
+
+}

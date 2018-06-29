@@ -95,7 +95,7 @@ class LayersSwitcher extends Component {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
-          Lagermeny
+          <i className="fa fa-icon fa-list-alt icon"></i>
         </div>
         {this.renderPanel()}
       </div>

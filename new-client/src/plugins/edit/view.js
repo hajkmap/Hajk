@@ -74,7 +74,7 @@ class Draw extends Component {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
-          Redigera
+          <i className="fa fa-icon fa-edit icon"></i>
         </div>
         {this.renderPanel()}
       </div>

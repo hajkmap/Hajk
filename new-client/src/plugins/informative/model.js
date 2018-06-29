@@ -3,39 +3,42 @@ import marked from 'marked';
 class InformativeModel {
 
   constructor(settings) {
-    this.olMap = settings.map;
+    this.olMap = settings.map;    
+    this.chapter = -1;
+    this.level = 0;
+  }
+
+  asHtml(item) {
+    switch (item.type) {
+      case "heading":
+        return `<h${item.depth}>${item.text}</h${item.depth}>`
+      case "paragraph":
+        return marked(item.text)
+      default:
+        return item.text
+    } 
+  }
+
+  createLevels(current) {        
+    if (current.type === "heading") {
+      this.level++;
+    }
+    if (current.depth === 1) {
+      this.level = 0;    
+      this.chapter++;
+    }
+    return {
+      chapter: this.chapter,
+      level: this.level,      
+      html: this.asHtml(current)
+    };    
   }
 
   load(callback) {
     fetch('op.md').then(response => {
       response.text().then(text => {
-        var currentIndex = -1;
-        var currentLevel = -1;
-        callback(
-          marked.lexer(text).reduce((iterator, current, index) => {
-            if (current.type === "heading") {
-              if (current.depth < 2) {
-                currentIndex++;
-                currentLevel = -1;
-                iterator[currentIndex] = {
-                  name: current.text,
-                  children: []
-                }
-              } else {
-                iterator[currentIndex].children.push({
-                  name: current.text,
-                  elements: []
-                });
-                currentLevel++;
-              }
-            } else {
-              iterator[currentIndex].children[currentLevel].elements.push({
-                value: current.text
-              })
-            }
-            return iterator;
-          }, {})
-        );
+        var info = marked.lexer(text).map(this.createLevels.bind(this));
+        callback(marked(text));
       })
     });
   }

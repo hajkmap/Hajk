@@ -3,16 +3,6 @@ body {
   padding: 0;
 }
 
-.tool-toggle-button {
-  width: 50px;
-  height: 50px;
-  border: 1px solid;
-  cursor: pointer;
-  float: left;
-  margin: 10px;
-  word-break: break-all;
-}
-
 .tool-panel {
   position: fixed;
   top: 5px;
@@ -29,14 +19,45 @@ body {
   display: none;
 }
 
-.tool-toggle-button.active {
-  background: red;
-}
-
 .hidden {
   display: none;
 }
 
-panel {
+.panel {
   background: #ccc;
+}
+
+.ol-zoom {
+  top: 5px;
+  left: 5px;
+}
+
+.ol-control button {
+  background: rgba(255, 255, 255, 1);
+  font-size: 20pt;
+  color: black;
+  border-radius: 0 !important;
+  cursor: pointer;
+  margin: 0;
+}
+
+.ol-control {
+  border: 2px solid black;
+  border-radius: 0;
+  background: inherit;
+  padding: 0;
+}
+
+.ol-control:hover {
+  background: inherit;
+}
+
+.ol-control button:focus {
+  background: rgba(255,255,255, 1);
+  outline: inherit;
+}
+
+.ol-control button:hover {
+  background: rgba(255,255,255, 0.5);
+  outline: inherit;
 }

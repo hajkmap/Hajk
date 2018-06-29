@@ -1,3 +1,26 @@
+.tool-toggle-button {
+  width: 50px;
+  height: 50px;
+  border: 1px solid;
+  cursor: pointer;
+  float: left;
+  margin: 10px;
+  word-break: break-all;
+  font-size: 25pt;
+  line-height: 25pt;
+  text-align: center;
+  border-radius: 3px;
+}
+
+.tool-toggle-button:hover {
+}
+
+.tool-toggle-button.active {
+  background: #00F;
+  box-shadow: 1px 1px 4px #999;
+  color: white;
+}
+
 .toolbar {
   position: absolute;
   bottom: 5px;
@@ -6,4 +29,10 @@
   background: white;
   border: 2px solid;
   z-index: 1000;
+}
+
+.toolbar .icon {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;
 }

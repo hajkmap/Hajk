@@ -4,7 +4,7 @@ import InformativeModel from "./model.js";
 import { createPortal } from "react-dom";
 import "./style.css";
 
-class Draw extends Component {
+class Informative extends Component {
   constructor() {
     super();
     this.toggle = this.toggle.bind(this);
@@ -27,19 +27,11 @@ class Draw extends Component {
     this.props.tool.instance = this;
     this.informativeModel.load(data => {
       this.setState({
-        text: this.translateMd(data)
+        text: data
       });
     });
   }
 
-  translateMd(nodes) {
-    console.log(nodes);
-    return Object.keys(nodes).map(key => {
-      return (
-        <h2>{nodes[key].name}</h2>
-      )
-    });
-  }
 
   open() {
     this.setState({
@@ -80,11 +72,15 @@ class Draw extends Component {
     return this.state.toggled ? "open" : "";
   }
 
+  createMarkup() {
+    return {__html: this.state.text};
+  }
+
   renderPanel() {
     return createPortal(
       <div className={this.getVisibilityClass()}>
         <h1>Översiktsplan</h1>
-        <div>{this.state.text}</div>
+        <div className="informative" dangerouslySetInnerHTML={this.createMarkup()}></div>
       </div>,
       document.getElementById("map")
     );
@@ -94,7 +90,7 @@ class Draw extends Component {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
-          ÖP
+          <i className="fa fa-icon fa-tree icon"></i>
         </div>
         {this.renderPanel()}
       </div>
@@ -102,4 +98,4 @@ class Draw extends Component {
   }
 }
 
-export default Draw;
+export default Informative;

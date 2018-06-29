@@ -64,7 +64,7 @@ class Draw extends Component {
   renderPanel() {
     return createPortal(
       <div className={this.getVisibilityClass()}>
-        <div>Layer switcher</div>
+        <div>Draw</div>
       </div>,
       document.getElementById("map")
     );
@@ -74,7 +74,7 @@ class Draw extends Component {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
-          Draw tool
+          <i className="fa fa-icon fa-pencil icon"></i>
         </div>
         {this.renderPanel()}
       </div>
