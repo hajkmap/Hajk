@@ -1,20 +1,22 @@
 import Error from "./Error.js";
 import Plugin from "./Plugin.js";
-// FIXME: Is this custom interaction needed, when Drag and Rotate is loaded by default?
-// import Drag from "./Drag.js";
+
 import ConfigMapper from "./../utils/ConfigMapper.js";
 import { configureCss } from "./../utils/CSSModifier.js";
 import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
 
 // import ArcGISLayer from "./layers/ArcGISLayer.js";
 // import DataLayer from "./layers/DataLayer.js";
-// import ExtendedWMSLayer from "./layers/ExtendedWMSLayer.js";
 import WMSLayer from "./layers/WMSLayer.js";
-// import WMTSLayer from "./layers/WMTSLayer.js";
-// import WFSVectorLayer from "./layers/VectorLayer.js";
+// import ExtendedWMSLayer from "./layers/ExtendedWMSLayer.js";
+import WMTSLayer from "./layers/WMTSLayer.js";
+import WFSVectorLayer from "./layers/VectorLayer.js";
 
+// FIXME: Is this custom interaction needed, when Drag and Rotate is loaded by default?
+// import Drag from "./Drag.js";
 // import interaction from "ol/Interaction";
-import {register} from "ol/proj/proj4";
+
+import { register } from "ol/proj/proj4";
 
 import Map from "ol/Map";
 import View from "ol/View";
@@ -36,7 +38,6 @@ class AppModel {
       config.mapConfig.projections
     );
 
-    // FIXME: This is supposed to work, accordning to https://openlayers.org/en/latest/apidoc/ol.proj.html#.setProj4
     register(this.coordinateSystemLoader.getProj4());
   }
 
@@ -95,7 +96,9 @@ class AppModel {
               );
               callback();
             })
-            .catch(err => {})
+            .catch(err => {
+              console.error(err);
+            })
         ];
       });
       return promises;
@@ -171,25 +174,34 @@ class AppModel {
         map.addLayer(layerItem.layer);
         break;
 
-      // case "wmts":
-      //   layerConfig = configMapper.mapWMTSConfig(layer, this.config);
-      //   layerItem = new WMTSLayer(
-      //     layerConfig.options,
-      //     this.config.appConfig.proxy,
-      //     map
-      //   );
-      //   map.addLayer(layerItem.layer);
+      // case "extendedwms":
+      //   layerConfig = configMapper.mapExtendedWMSConfig(layer);
+      //   layer = new ExtendedWMSLayer(layerConfig);
       //   break;
 
-      // case "vector":
-      //   layerConfig = configMapper.mapVectorConfig(layer);
-      //   layerItem = new WFSVectorLayer(
-      //     layerConfig.options,
-      //     this.config.appConfig.proxy,
-      //     map
-      //   );
-      //   map.addLayer(layerItem.layer);
-      //   break;
+      case "wmts":
+        layerConfig = configMapper.mapWMTSConfig(layer, this.config);
+        layerItem = new WMTSLayer(
+          layerConfig.options,
+          this.config.appConfig.proxy,
+          map
+        );
+        map.addLayer(layerItem.layer);
+        break;
+
+      case "vector":
+        layerConfig = configMapper.mapVectorConfig(layer);
+        layerItem = new WFSVectorLayer(
+          layerConfig.options,
+          this.config.appConfig.proxy,
+          map
+        );
+        console.log("app.js WFS -> layerItem: ", layerItem);
+        /* FIXME: the next line, which calls OL's addLayer(), stops rendering
+           and gives some errors. Uncomment to break your map... */
+        // map.addLayer(layerItem.layer);
+        console.log("app.js after WFS -> addLayer. map is:", map);
+        break;
 
       // case "arcgis":
       //   layerConfig = configMapper.mapArcGISConfig(layer);
@@ -198,10 +210,6 @@ class AppModel {
       // case "data":
       //   layerConfig = configMapper.mapDataConfig(layer);
       //   layer = new DataLayer(layerConfig);
-      //   break;
-      // case "extendedwms":
-      //   layerConfig = configMapper.mapExtendedWMSConfig(layer);
-      //   layer = new ExtendedWMSLayer(layerConfig);
       //   break;
       default:
         break;
@@ -256,6 +264,7 @@ class AppModel {
     );
     this.layers = this.flattern(layerSwitcherConfig);
     for (var key in this.layers) {
+      console.log(this.layers[key].type, this.layers[key]);
       this.addMapLayer(this.layers[key]);
     }
     return this;
