@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import AppModel from "./../models/app.js";
-import Toolbar from "./../components/toolbar.js";
-import "./app.css";
+import AppModel from "./../models/AppModel.js";
+import Toolbar from "./Toolbar.js";
+import "./App.css";
 
 class App extends Component {
   constructor() {

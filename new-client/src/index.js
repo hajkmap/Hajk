@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import "./../node_modules/ol/ol.css";
 import "./index.css";
-import App from "./views/app.js";
+import App from "./components/App.js";
 import registerServiceWorker from "./registerServiceWorker";
 import buildConfig from "./buildConfig.json";
 

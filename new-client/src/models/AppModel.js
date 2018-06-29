@@ -246,27 +246,30 @@ class AppModel {
     var layers = [
       ...this.lookup(layerSwitcherConfig.options.baselayers, "base"),
       ...this.lookup(this.expand(layerSwitcherConfig.options.groups), "layer")
-    ];
-    return layers
-      .sort(
-        (a, b) =>
-          a.drawOrder === b.drawOrder ? 0 : a.drawOrder > b.drawOrder ? 1 : -1
-      )
-      .reduce((a, b) => {
-        a[b["id"]] = b;
-        return a;
-      }, {});
+    ];          
+    layers = layers.reduce((a, b) => {
+      a[b["id"]] = b;
+      return a;
+    },  {});
+    return layers;
   }
 
   addLayers() {
     let layerSwitcherConfig = this.config.mapConfig.tools.find(
       tool => tool.type === "layerswitcher"
-    );
-    this.layers = this.flattern(layerSwitcherConfig);
-    for (var key in this.layers) {
-      console.log(this.layers[key].type, this.layers[key]);
-      this.addMapLayer(this.layers[key]);
-    }
+    );    
+    this.layers = this.flattern(layerSwitcherConfig);      
+
+    Object
+      .keys(this.layers)
+      .sort((a, b) => 
+        this.layers[a].drawOrder - this.layers[b].drawOrder)
+      .map(sortedKey => 
+        this.layers[sortedKey])
+      .forEach(layer => {
+        this.addMapLayer(layer);
+      });
+                
     return this;
   }
 

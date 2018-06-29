@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import "./toolbar.css";
+import "./Toolbar.css";
 
 class Toolbar extends Component {
   componentDidMount() {}
