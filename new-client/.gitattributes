@@ -2,3 +2,8 @@
 *.sln text eol=crlf
 *.png binary
 *.jpg binary
+*.eot binary
+*.otf binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
