@@ -60,7 +60,6 @@ class WFSVectorLayer {
       },
       strategy: strategyAll
     });
-    // console.log("constructor(), this.vectorSource: ", this.vectorSource);
 
     this.layer = new ImageLayer({
       information: config.information,

@@ -194,17 +194,17 @@ class AppModel {
         break;
 
       case "vector":
-        layerConfig = configMapper.mapVectorConfig(layer);
+        layerConfig = configMapper.mapVectorConfig(layer, this.config);
         layerItem = new WFSVectorLayer(
           layerConfig.options,
           this.config.appConfig.proxy,
           map
         );
-        // console.log("app.js WFS -> layerItem: ", layerItem);
+        // console.log("WFS/Vector layer: ", layerItem);
+        // console.log("WFS/Vector layer config: ", layerConfig);
         /* FIXME: the next line, which calls OL's addLayer(), stops rendering
            and gives some errors. Uncomment to break your map... */
         // map.addLayer(layerItem.layer);
-        // console.log("app.js after WFS -> addLayer. map is:", map);
         break;
 
       // case "arcgis":
