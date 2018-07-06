@@ -7,9 +7,9 @@ export default class ConfigMapper {
     function getLegendUrl() {
       // If property exists in map settings, use specified legend options (font, color, size, etc)
       let geoserverLegendOptions = "";
-      if (properties.mapConfig.hasOwnProperty("geoserverLegendOptions")) {
+      if (properties.mapConfig.map.hasOwnProperty("geoserverLegendOptions")) {
         geoserverLegendOptions =
-          "legend_options=" + properties.mapConfig.geoserverLegendOptions;
+          "legend_options=" + properties.mapConfig.map.geoserverLegendOptions;
       }
 
       if (args.legend === "") {
@@ -30,16 +30,16 @@ export default class ConfigMapper {
       options: {
         id: args.id,
         url: (this.proxy || "") + args.url,
-        name: args.id,
+        name: args.id, // FIXME: Should this be "args.caption"?
         caption: args.caption,
         visible: args.visibleAtStart,
         opacity: args.opacity || 1,
         queryable: args.queryable !== false,
         information: args.infobox,
-        resolutions: properties.mapConfig.resolutions,
-        projection: properties.mapConfig.projection || "EPSG:3006",
-        origin: properties.mapConfig.origin,
-        extent: properties.mapConfig.extent,
+        resolutions: properties.mapConfig.map.resolutions,
+        projection: properties.mapConfig.map.projection || "EPSG:3006",
+        origin: properties.mapConfig.map.origin,
+        extent: properties.mapConfig.map.extent,
         singleTile: args.singleTile || false,
         imageFormat: args.imageFormat || "image/png",
         serverType: args.serverType || "geoserver",
@@ -59,7 +59,7 @@ export default class ConfigMapper {
           LAYERS: args.layers.join(","),
           FORMAT: args.imageFormat,
           VERSION: "1.1.0",
-          SRS: properties.mapConfig.projection || "EPSG:3006",
+          SRS: properties.mapConfig.map.projection || "EPSG:3006",
           TILED: args.tiled
         },
         infoVisible: args.infoVisible || false,
@@ -80,7 +80,7 @@ export default class ConfigMapper {
         displayName: args.displayFields
           ? args.displayFields
           : args.searchFields[0] || "Sökträff",
-        srsName: properties.mapConfig.projection || "EPSG:3006"
+        srsName: properties.mapConfig.map.projection || "EPSG:3006"
       };
     }
 
@@ -114,11 +114,11 @@ export default class ConfigMapper {
         opacity: 1,
         queryable: true,
         information: args.infobox,
-        resolutions: properties.mapConfig.resolutions,
+        resolutions: properties.mapConfig.map.resolutions,
         projection:
-          args.projection || properties.mapConfig.projection || "EPSG:3006",
-        origin: properties.mapConfig.origin,
-        extent: properties.mapConfig.extent,
+          args.projection || properties.mapConfig.map.projection || "EPSG:3006",
+        origin: properties.mapConfig.map.origin,
+        extent: properties.mapConfig.map.extent,
         singleTile: args.singleTile || false,
         imageFormat: args.imageFormat || "image/png",
         serverType: args.serverType || "geoserver",
@@ -161,7 +161,7 @@ export default class ConfigMapper {
         displayName: args.displayFields
           ? args.displayFields
           : args.searchFields[0] || "Sökträff",
-        srsName: properties.mapConfig.projection || "EPSG:3006"
+        srsName: properties.mapConfig.map.projection || "EPSG:3006"
       };
     }
     return config;
@@ -175,7 +175,7 @@ export default class ConfigMapper {
         name: args.id,
         caption: args.caption,
         visible: args.visibleAtStart !== false,
-        extent: properties.mapConfig.extent,
+        extent: properties.mapConfig.map.extent,
         queryable: false,
         opacity: args.opacity || 1,
         format: "image/png",
