@@ -64,7 +64,7 @@ class WFSVectorLayer {
       },
       strategy: all
     });
-    console.log("constructor(), this.vectorSource: ", this.vectorSource);
+    // console.log("constructor(), this.vectorSource: ", this.vectorSource);
 
     this.layer = new ImageLayer({
       information: config.information,
@@ -80,7 +80,7 @@ class WFSVectorLayer {
         style: this.getStyle.bind(this)
       })
     });
-    console.log("constructor(), this.layer: ", this.layer);
+    // console.log("constructor(), this.layer: ", this.layer);
     this.type = "vector";
   }
 
