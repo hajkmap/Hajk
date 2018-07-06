@@ -1,9 +1,10 @@
+import "ol/ol.css";
+import "./index.css";
+import registerServiceWorker from "./registerServiceWorker";
+
 import React from "react";
 import ReactDOM from "react-dom";
-import "./../node_modules/ol/ol.css";
-import "./index.css";
 import App from "./components/App.js";
-import registerServiceWorker from "./registerServiceWorker";
 import buildConfig from "./buildConfig.json";
 
 fetch("appConfig.json")

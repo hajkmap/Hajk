@@ -16,15 +16,9 @@ import WFSVectorLayer from "./layers/VectorLayer.js";
 // import Drag from "./Drag.js";
 // import interaction from "ol/Interaction";
 
+import { Map, View, Overlay } from "ol";
+import { Zoom, Rotate, ScaleLine, Attribution } from "ol/control";
 import { register } from "ol/proj/proj4";
-
-import Map from "ol/Map";
-import View from "ol/View";
-import Zoom from "ol/control/Zoom";
-import Rotate from "ol/control/Rotate";
-import ScaleLine from "ol/control/ScaleLine";
-import Overlay from "ol/Overlay";
-import Attribution from "ol/control/Attribution";
 
 const pluginsFolder = "plugins";
 var map;
