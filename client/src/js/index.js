@@ -186,6 +186,10 @@
           return tool.type === 'search';
         });
 
+        var firTool = map_config.tools.find(tool => {
+            return tool.type === 'fir';
+        });
+
         var editTool = map_config.tools.find(tool => {
           return tool.type === 'edit';
         });
@@ -229,6 +233,21 @@
               searchTool.options.sources = data.wfslayers;
             }
           }
+        }
+
+        if (firTool) {
+            if (firTool.options.layers == null) {
+                data.wfslayers = data.wfslayers;
+                firTool.options.sources = data.wfslayers;
+            } else {
+                if (firTool.options.layers.length != 0) {
+                    var wfslayers = internal.overrideGlobalSearchConfig(firTool, data);
+                    firTool.options.sources = wfslayers;
+                    data.wfslayers = wfslayers;
+                } else {
+                    firTool.options.sources = data.wfslayers;
+                }
+            }
         }
 
         if (editTool) {

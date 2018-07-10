@@ -1,4 +1,4 @@
-{
+﻿{
   "version": "1.0.5",
   "projections": [
     {
@@ -8,7 +8,7 @@
         181896.33,
         6101648.07,
         864416.0,
-        7689478.3
+        7689478.31
       ],
       "units": null
     },
@@ -19,12 +19,23 @@
         181896.33,
         6101648.07,
         864416.0,
-        7689478.3
+        7689478.31
       ],
       "units": null
     },
     {
       "code": "EPSG:3007",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [
+        60436.5084,
+        6192389.565,
+        217643.4713,
+        6682784.4276
+      ],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3007",
       "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
       "extent": [
         60436.5084,
@@ -173,133 +184,385 @@
       "options": {
         "baselayers": [
           {
-            "id": "7",
-            "visibleAtStart": false,
-            "drawOrder": 0,
-            "visibleForGroups": null
-          },
-          {
-            "id": "50",
+            "id": "0",
             "visibleAtStart": true,
             "drawOrder": 0,
-            "visibleForGroups": null
+            "visibleForGroups": [],
+            "infobox": ""
+          },
+          {
+            "id": "1",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": [],
+            "infobox": ""
+          },
+          {
+            "id": "2",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": [],
+            "infobox": ""
           }
         ],
         "groups": [
           {
-            "id": "96638717-9cf2-61f7-75a8-3a4859140cf7",
+            "id": "1000",
             "parent": "-1",
-            "name": "Grupp 1",
+            "name": "Barn & utbildning",
             "toggled": false,
             "expanded": false,
             "layers": [
               {
-                "id": "46",
+                "id": "150",
                 "visibleAtStart": false,
-                "drawOrder": 0,
-                "visibleForGroups": []
+                "drawOrder": 23,
+                "visibleForGroups": ["AR_FOR_HAMN_OCH_GATUFORVALTNING_ALL","AR_FOR_STADSBYGGNADSKONTOR_ALL_FIM","Func_ArcGisAdmin"],
+                "infobox": ""
+              },
+              {
+                "id": "160",
+                "visibleAtStart": false,
+                "drawOrder": 15,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "170",
+                "visibleAtStart": false,
+                "drawOrder": 36,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "450",
+                "visibleAtStart": false,
+                "drawOrder": 9,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "460",
+                "visibleAtStart": false,
+                "drawOrder": 8,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "470",
+                "visibleAtStart": false,
+                "drawOrder": 7,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "480",
+                "visibleAtStart": false,
+                "drawOrder": 6,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "510",
+                "visibleAtStart": false,
+                "drawOrder": 6,
+                "visibleForGroups": [],
+                "infobox": ""
               }
             ],
-            "groups": [
-              {
-                "id": "1bb6fbcb-9b16-d657-af9b-154a3ebc52aa",
-                "parent": "96638717-9cf2-61f7-75a8-3a4859140cf7",
-                "name": "Grupp 1.1",
-                "toggled": false,
-                "expanded": false,
-                "layers": [
-                  {
-                    "id": "47",
-                    "visibleAtStart": true,
-                    "drawOrder": 1000,
-                    "visibleForGroups": []
-                  }
-                ],
-                "groups": []
-              }
-            ]
+            "groups": []
           },
           {
-            "id": "cae3b092-b58e-7fa8-83bd-39b179696975",
+            "id": "1060",
             "parent": "-1",
-            "name": "Grupp 2",
+            "name": "Omsorg & stöd",
             "toggled": false,
             "expanded": false,
             "layers": [
               {
-                "id": "43",
+                "id": "440",
                 "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": []
+                "drawOrder": 29,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "420",
+                "visibleAtStart": false,
+                "drawOrder": 30,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "430",
+                "visibleAtStart": false,
+                "drawOrder": 31,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "410",
+                "visibleAtStart": false,
+                "drawOrder": 32,
+                "visibleForGroups": [],
+                "infobox": ""
               }
             ],
-            "groups": [
+            "groups": []
+          },
+          {
+            "id": "1010",
+            "parent": "-1",
+            "name": "Uppleva & göra",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
               {
-                "id": "12bd24f5-be7f-a022-4304-70e3353d3023",
-                "parent": "cae3b092-b58e-7fa8-83bd-39b179696975",
-                "name": "Grupp 2.1",
-                "toggled": false,
-                "expanded": false,
-                "layers": [
-                  {
-                    "id": "23",
-                    "visibleAtStart": false,
-                    "drawOrder": 1000,
-                    "visibleForGroups": []
-                  }
-                ],
-                "groups": []
+                "id": "260",
+                "visibleAtStart": false,
+                "drawOrder": 16,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "310",
+                "visibleAtStart": false,
+                "drawOrder": 17,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "350",
+                "visibleAtStart": false,
+                "drawOrder": 33,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "360",
+                "visibleAtStart": false,
+                "drawOrder": 35,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "250",
+                "visibleAtStart": false,
+                "drawOrder": 18,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "540",
+                "visibleAtStart": false,
+                "drawOrder": 21,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "230",
+                "visibleAtStart": false,
+                "drawOrder": 19,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "340",
+                "visibleAtStart": false,
+                "drawOrder": 20,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "330",
+                "visibleAtStart": false,
+                "drawOrder": 21,
+                "visibleForGroups": [],
+                "infobox": ""
               }
-            ]
+            ],
+            "groups": []
+          },
+          {
+            "id": "1020",
+            "parent": "-1",
+            "name": "Bygga, bo & miljö",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "300",
+                "visibleAtStart": false,
+                "drawOrder": 5,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "1212",
+                "visibleAtStart": false,
+                "drawOrder": 12,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "600",
+                "visibleAtStart": false,
+                "drawOrder": 10,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "550",
+                "visibleAtStart": false,
+                "drawOrder": 10,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "500",
+                "visibleAtStart": false,
+                "drawOrder": 10,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "530",
+                "visibleAtStart": false,
+                "drawOrder": 10,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "325",
+                "visibleAtStart": false,
+                "drawOrder": 22,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "320",
+                "visibleAtStart": false,
+                "drawOrder": 34,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "390",
+                "visibleAtStart": false,
+                "drawOrder": 4,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "400",
+                "visibleAtStart": false,
+                "drawOrder": 3,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "370",
+                "visibleAtStart": false,
+                "drawOrder": 2,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "380",
+                "visibleAtStart": false,
+                "drawOrder": 1,
+                "visibleForGroups": [],
+                "infobox": ""
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "1030",
+            "parent": "-1",
+            "name": "Trafik & infrastruktur",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "140",
+                "visibleAtStart": false,
+                "drawOrder": 25,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "130",
+                "visibleAtStart": false,
+                "drawOrder": 14,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "220",
+                "visibleAtStart": false,
+                "drawOrder": 26,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "210",
+                "visibleAtStart": false,
+                "drawOrder": 27,
+                "visibleForGroups": [],
+                "infobox": ""
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "1050",
+            "parent": "-1",
+            "name": "Övrigt",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "180",
+                "visibleAtStart": true,
+                "drawOrder": 13,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "280",
+                "visibleAtStart": false,
+                "drawOrder": 4,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "100",
+                "visibleAtStart": false,
+                "drawOrder": 28,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "601",
+                "visibleAtStart": false,
+                "drawOrder": 50,
+                "visibleForGroups": [],
+                "infobox": ""
+              }
+            ],
+            "groups": []
           }
         ],
-        "instruction": "instruktion",
+        "instruction": "PHA+VW5kZXIgdmFyamUgcnVicmlrIGZpbm5zIGVuIGVuIGxpc3RhIG1lZCBsYWdlciBzb20gZHUga2FuIGJvY2thIGkgZvZyIGF0dCB2aXNhIGkga2FydGFuLiA8YnIvPiBLbGlja2EgcOUgPGkgY2xhc3M9IiBmYSBmYS1pbmZvLWNpcmNsZSAiIGFyaWEtaGlkZGVuPSJmYWxzZSI+PC9pPiBm9nIgYXR0IHNlIGluZm9ybWF0aW9uIG9tIGxhZ3JldCBvY2ggPGkgY2xhc3M9ImZhIGZhLWxpc3QiIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+IGb2ciBhdHQgc2UgdGVja2VuZvZya2xhcmluZ2VuLiA8YnIvPjxici8+CkR1IGthbiBrbGlja2EgcOUgaWtvbmVybmEgaSBrYXJ0YW4gZvZyIGF0dCBzZSBpbmZvcm1hdGlvbiBvbSByZXNwZWt0aXZlIG9iamVrdC4gPC9wPgo=",
         "active": true,
         "visibleAtStart": true,
-        "backgroundSwitcherBlack": true,
-        "backgroundSwitcherWhite": true,
-        "toggleAllButton": false,
+        "backgroundSwitcherBlack": false,
+        "backgroundSwitcherWhite": false,
+        "toggleAllButton": true,
         "dropdownThemeMaps": true,
-        "themeMapHeaderCaption": "Rubrik temakarta",
-        "visibleForGroups": [
-          "Office-SEKSD01",
-          "All-SE129"
-        ]
-      },
-      "index": 0
-    },
-    {
-      "type": "search",
-      "options": {
-        "onMap": true,
-        "toolbar": "",
-        "maxZoom": 15,
-        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
-        "kmlExportUrl": "/mapservice/export/kml",
-        "excelExportUrl": "/mapservice/export/excel",
-        "displayPopup": true,
-        "selectionTools": true,
-        "anchor": [
-          16,
-          32
-        ],
-        "imgSize": [
-          32,
-          32
-        ],
-        "visibleForGroups": [
-          "Grupp1",
-          "Grupp2"
-        ],
-        "layers": [
-          {
-            "id": "51",
-            "visibleForGroups": [
-              "Grupp X",
-              " Grupp Z"
-            ]
-          }
-        ]
+        "themeMapHeaderCaption": "Kartor0",
+        "visibleForGroups": []
       },
       "index": 0
     },
@@ -316,9 +579,71 @@
           32,
           32
         ],
-        "popupOffsetY": -32
+        "popupOffsetY": 0,
+        "visibleForGroups": []
       },
-      "index": 0
+      "index": 1
+    },
+    {
+      "type": "information",
+      "options": {
+        "text": "PGZvbnQgc2l6ZT0iNSI+VuRsa29tbWVuIHRpbGwgbnlhIFZhcmJlcmdza2FydGFuPC9mb250Pjxicj48YnI+CgpG9nIgYXR0IHpvb21hIGkga2FydGFuIGthbiBkdSBhbnbkbmRhIHBsdXMtIG9jaCBtaW51c2tuYXBwYXJuYSB1cHBlIHRpbGwgaPZnZXIuIE1lZCBwaWxrbmFwcGVuIGthbiBkdSB2aXNhIGRpbiBwb3NpdGlvbi4gQmVyb2VuZGUgYmxhbmQgYW5uYXQgb2NoIHVwcGtvcHBsaW5nc21ldG9kIG9jaCBpbnN05GxsbmluZyBw5SBkaW4gZW5oZXQgdmFyaWVyYXIgbm9nZ3Jhbm5oZXRlbiBw5SBwb3NpdGlvbnNhbmdpdmVsc2VuLiA8YnI+PGJyPgoKTmVyZSB0aWxsIGj2Z2VyIGZpbm5zIGtuYXBwYXIgZvZyIG9saWthIHZlcmt0eWcgc29tIGtvcnRmYXR0YXQgYmVza3JpdnMgbORuZ3JlIG5lciBw5SBkZW5uYSBzaWRhLiBWYXJqZSB2ZXJrdHlnIGhhciBlbiBoauRscGtuYXBwIDxpbWcgc3JjPSIvYXNzZXRzL2ljb25zL2hqYWxwa25hcHAucG5nIiBzdHlsZT0id2lkdGg6MjVweDtoZWlnaHQ6MzBweDsiPiBzb20gc3lucyBu5HIgZHUg9nBwbmFyIHZlcmt0eWdldC4gTuRyIGR1IGtsaWNrYXIgcOUgZGVubmEsIGblciBkdSBlbiBm9nJrbGFyaW5nIHDlIGh1ciB2ZXJrdHlnZXQgYW525G5kcy4gIDxicj48YnI+PGJyPiAKCjxpIGNsYXNzPSJmYSBmYS1iYXJzIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PC9pPiAmbmJzcDsgPGI+S2FydGxhZ2VyPC9iPjxicj4KSORyIGthbiBkdSBzauRsdiB25GxqYSBiYWtncnVuZHNrYXJ0YSBvY2ggbGFnZXIgc29tIGR1IHZpbGwgdmlzYSBpIGthcnRhbi4gClVuZGVyIHZhcmplIHJ1YnJpayBmaW5ucyBlbiBsaXN0YSBtZWQgbGFnZXIgc29tIGR1IGthbiB05G5kYS4gRvZyIHZhcmplIGxhZ2VyIGZpbm5zIGVuIHRlY2tlbmb2cmtsYXJpbmcgb2NoIGluZm9ybWF0aW9uIG1lZCBs5G5rIHRpbGwgd2ViYnBsYXRzIGTkciBkdSBrYW4gbORzYSBtZXIgb2NoIGblIGtvbnRha3RpbmZvcm1hdGlvbi4gPGJyPjxicj4KCjxpIGNsYXNzPSJmYSBmYS1pbmZvLWNpcmNsZSBpY29uIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PC9pPiAmbmJzcDsgPGI+T20ga2FydGFuPC9iPjxicj4KSORyIGthbiBkdSD2cHBuYSBkZW5uYSBpbmZvcm1hdGlvbnNydXRhIGlnZW4uIDxicj48YnI+Cgo8aSBjbGFzcz0iZmEgZmEtcGVuY2lsIGljb24iIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5SaXRhIG9jaCBt5HRhPC9iPjxicj4KTWVkIGRldHRhIHZlcmt0eWcga2FuIGR1IHJpdGEgdXQgc3ltYm9sZXIgb2NoIHNrcml2YSBw5SBrYXJ0YW4uIER1IGthbiB25GxqYSBhdHQgdmlzYSBhcmVhbCwgbORuZ2QgZWxsZXIga29vcmRpbmF0IHDlIHJpdGFkZSBvYmpla3QuIERldCBkdSBza2FwYXQgc3lucyBw5SB1dHNrcmlmdGVyIGF2IGthcnRhbiwgbWVuIHNwYXJhcyBpbnRlIG9tIGR1IHN05G5nZXIgbmVyIGthcnRhbi4gPGJyPjxicj4KCjxpIGNsYXNzPSJmYSBmYS1zZWFyY2ggaWNvbiIgYXJpYS1oaWRkZW49InRydWUiPjwvaT4gJm5ic3A7IDxiPlP2a25pbmc8L2I+PGJyPgpI5HIga2FuIGR1IHP2a2EgcOUgZmFzdGlnaGV0c2JldGVja25pbmdhciBlbGxlciBhZHJlc3Nlci4gRHUga2FuIG9ja3PlIHP2a2EgaSBldHQgc3BlY2lmaWt0IG9tcuVkZSBpIGthcnRhbi4gU/ZrcmVzdWx0YXRldCBrYW4gc2VkYW4gZXhwb3J0ZXJhcyB0aWxsIEV4Y2VsLSBlbGxlciBLTUwtZmlsLiAoS01MIORyIGV0dCBmb3JtYXQgc29tIGJsYW5kIGFubmF0IGthbiBs5HNhcyBpbiBpIEdvb2dsZSBFYXJ0aCkuIDxicj48YnI+Cgo8aSBjbGFzcz0iZmEgZmEtY3Jvc3NoYWlycyBpY29uIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PC9pPiAmbmJzcDsgPGI+S29vcmRpbmF0ZXI8L2I+PGJyPgpEdSBrYW4gc2Uga29vcmRpbmF0ZW4gZvZyIGVuIHBsYXRzIGkga2FydGFuIGdlbm9tIGF0dCBkcmEgaSA8aW1nIHNyYz0iL2Fzc2V0cy9pY29ucy9jcm9zc2hhaXJzLTY0eDY0LnBuZyIgc3R5bGU9IndpZHRoOjI1cHg7aGVpZ2h0OjI1cHg7Ij4uIER1IGthbiBzZSBrb29yZGluYXRlbiBpIGZsZXJhIGtvb3JkaW5hdHN5c3RlbS4gPGJyPjxicj4KCjxpIGNsYXNzPSJmYSBmYS1wcmludCBpY29uIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PC9pPiAmbmJzcDsgPGI+U2tyaXZhIHV0PC9iPjxicj4KSORyIGthbiBkdSBza2FwYSBlbiBQREYg9nZlciD2bnNrYXQgb21y5WRlIGkga2FydGFuLiBEdSBrYW4gc2rkbHYgc3TkbGxhIGluIHBhcHBlcnNzdG9ybGVrLCBvcmllbnRlcmluZywgc2thbGEgb2NoIHVwcGz2c25pbmcuIDxicj48YnI+Cgo8aSBjbGFzcz0iZmEgZmEtbGluayBpY29uIGZhLWZsaXAtaG9yaXpvbnRhbCIgYXJpYS1oaWRkZW49InRydWUiPjwvaT4gJm5ic3A7IDxiPkzkbmsgdGlsbCBrYXJ0YTwvYj48YnI+CkjkciBza2FwYXIgZHUgZW4gbORuayB0aWxsIGthcnRhbiBzb20gdmlzYXIgYWt0dWVsbCB6b29tbml25SBzYW10IHTkbmRhIGxhZ2VyLiBEdSBrYW4gc2VkYW4gc3BhcmEgZWxsZXIgZGVsYSBs5G5rZW4gdGlsbCBhbmRyYS4gPGJyPjxicj4KCjxpIGNsYXNzPSJmYSBmYS1ib29rbWFyayBpY29uIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PC9pPiAmbmJzcDsgPGI+Qm9rbeRya2VuPC9iPjxicj4KSORyIGthbiBkdSBza2FwYSBib2tt5HJrZW4g9nZlciBvbXLlZGVuIHNvbSBkdSB2aWxsIGhpdHRhIHRpbGxiYWthIHRpbGwgc25hYmJ0LiBNZWQgZXR0IGJva23kcmtlIHNwYXJhcyBha3R1ZWxsIHpvb21uaXblIHNhbXQgdORuZGEgbGFnZXIuIER1IHbkbGplciBzauRsdiBuYW1uIHDlIGRpbmEgYm9rbeRya2VuLiA8YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLWxldmVsLXVwIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PC9pPiAmbmJzcDsgPGI+VuRnYmVza3Jpdm5pbmc8L2I+PGJyPgpEdSBrYW4gduRsamEgc3RhcnQgb2NoIG3lbCBzYW10IGbkcmRz5HR0LCBz5SBm5XIgZHUgZW4gduRnYmVza3Jpdm5pbmcgbWVkIGluc3RydWt0aW9uZXIuIEZ1bmt0aW9uZW4gYW525G5kZXIgcmVzdWx0YXQgZnLlbiBHb29nbGVzIHbkZ2Jlc2tyaXZuaW5nLiA8YnI+PGJyPgoKPGkgY2xhc3M9ImZhIGZhLXN0cmVldC12aWV3IGljb24iIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+ICZuYnNwOyA8Yj5TdHJlZXQgVmlldzwvYj48YnI+CktsaWNrYSBu5WdvbnN0YW5zIGkga2FydGFuIGb2ciBhdHQgZuUgdXBwIGV0dCBtaW5kcmUgZvZuc3RlciB0aWxsIHbkbnN0ZXIgb20ga2FydGFuIG1lZCBTdHJlZXQgVmlldyBmcuVuIEdvb2dsZSBtYXBzLiA8YnI+PGJyPgoKCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18gPGJyPjxicj4KCk9tIGR1IGhhciBmcuVnb3IsIHN5bnB1bmt0ZXIgZWxsZXIgdmlsbCBoYSBtZXIgaW5mb3JtYXRpb24gb20gaW5uZWjlbGxldCBiZXIgdmkgZGlnIGtvbnRha3RhIGJlcvZyZCBm9nJ2YWx0bmluZy4gRHUgaGl0dGFyIGzkbmsgdGlsbCB3ZWJicGxhdHMgbWVkIGtvbnRha3RpbmZvcm1hdGlvbiBm9nIgdmFyamUgbGFnZXIgb20gZHUgdHJ5Y2tlciBw5SA8aSBjbGFzcz0iZmEgZmEtaW5mby1jaXJjbGUiIGFyaWEtaGlkZGVuPSJ0cnVlIj48L2k+IGJyZWR2aWQgbGFnZXJuYW1uZXQuIEhhciBkdSBmcuVnb3IgZWxsZXIgc3lucHVua3RlciBw5SBrYXJ0dGrkbnN0ZW4ga2FuIGR1IG1haWxhIHRpbGwgPGEgaHJlZj0ibWFpbHRvOiBnaXNAdmFyYmVyZy5zZSI+Z2lzQHZhcmJlcmcuc2U8L2E+Cg==",
+        "headerText": "Om kartan",
+        "visibleAtStart": true,
+        "showInfoOnce": true,
+        "base64EncodeForInfotext": true,
+        "visibleForGroups": []
+      },
+      "index": 2
+    },
+    {
+      "type": "draw",
+      "options": {
+        "exportUrl": "/mapservice/export/kml",
+        "importUrl": "/mapservice/import/kml",
+        "base64Encode": true,
+        "instruction": "PHA+VuRsaiBm9nJzdCBpIGxpc3RhbiBvbSBkdSB2aWxsIHNrcml2YSBlbGxlciByaXRhIGVuIGZpZ3VyLiBVbmRlcnN0IGkgbGlzdGFuIGblciBkdSBvbGlrYSBhbHRlcm5hdGl2IGb2ciBhdHQgYnl0YSBm5HJnIG9jaCBzdGlsLiBLbGlja2EgaSBrYXJ0YW4gZvZyIGF0dCBi9nJqYSBza3JpdmEgZWxsZXIgcml0YS4gT20gZHUgcml0YXIgZW4gbGluamUgZWxsZXIgeXRhIHPlIG3lc3RlIGR1IGR1YmJlbGtsaWNrYSBm9nIgYXR0IGF2c2x1dGEgZmlndXJlbi4gPGJyLz48YnIvPgpEdSBrYW4gduRsamEgYXR0IHZpc2EgYXJlYWwvbORuZ2Qva29vcmRpbmF0IHDlIHJpdGFkZSBvYmpla3QgZ2Vub20gYXR0IGJvY2thIGkgcnV0YW4uIEtvb3JkaW5hdGVyIHZpc2FzIGb2ciBwdW5rdGVyIGkga29vcmRpbmF0c3lzdGVtZXQgU3dlcmVmIDk5IDEyIDAwLiA8YnIvPjxici8+CkRldCBkdSBza2FwYXQgc3lucyBw5SB1dHNrcmlmdGVyIGF2IGthcnRhbiwgbWVuIHNwYXJhcyBpbnRlIG9tIGR1IHN05G5nZXIgbmVyIGthcnRhbi48L3A+Cg==",
+        "icons": "marker, marker_black, marker_green, marker_red, marker_yellow, br, pin, pin_black, pin_green, pin_red, pin_yellow",
+        "visibleForGroups": []
+      },
+      "index": 4
+    },
+    {
+      "type": "coordinates",
+      "options": {
+        "instruction": "PHA+VuRsaiBlbiBwbGF0cyBpIGthcnRhbiBnZW5vbSBhdHQgZHJhIGkgc2lrdGV0LiBLb29yZGluYXRlciBm9nIgcGxhdHNlbiB2aXNhcyBpIHRyZSBvbGlrYSBrb29yZGluYXRzeXN0ZW0uPC9wPiA=",
+        "transformations": [
+          {
+            "code": "EPSG:3007",
+            "default": true,
+            "hint": "(Standard)",
+            "title": "SWEREF 99 12 00",
+            "xtitle": "E",
+            "ytitle": "N",
+            "inverseAxis": false
+          },
+          {
+            "code": "EPSG:3006",
+            "default": false,
+            "hint": "",
+            "title": "SWEREF 99 TM",
+            "xtitle": "E",
+            "ytitle": "N",
+            "inverseAxis": false
+          },
+          {
+            "code": "EPSG:4326",
+            "default": false,
+            "hint": "",
+            "title": "WGS 84",
+            "xtitle": "Longitude",
+            "ytitle": "Latitude",
+            "inverseAxis": false
+          }
+        ],
+        "visibleForGroups": []
+      },
+      "index": 5
     },
     {
       "type": "export",
@@ -326,7 +651,9 @@
         "exportUrl": "/mapservice/export/pdf",
         "exportTiffUrl": "/mapservice/export/tiff",
         "pdfActive": true,
-        "tiffActive": true,
+        "tiffActive": false,
+        "base64Encode": false,
+        "autoScale": true,
         "scales": [
           250,
           500,
@@ -334,130 +661,181 @@
           2500,
           5000,
           10000,
-          10000,
           25000,
           50000,
           100000,
           250000
-        ]
+        ],
+        "instruction": "PHA+TuRyIGR1IHNrcml2ZXIgdXQgc2thcGFyIGR1IGVuIFBERi4gUOUga2FydGFuIHN5bnMgZW4gb3JhbmdlIHJ1dGEgc29tIHZpc2FyIHl0YW4gc29tIGtvbW1lciBhdHQgc2tyaXZhcyB1dC4gRHUgZmx5dHRhciBw5SBydXRhbiBnZW5vbSBhdHQgZHJhIGkgZGVuLiA8YnIvPjxici8+ClN0b3JsZWtlbiBw5SBydXRhbiDkbmRyYXMgZ2Vub20gYXR0IORuZHJhIHNrYWxhbi4gRW4gc2thbGEgbWVkIGV0dCBs5Wd0IG51bW1lciBnZXIgZW4gbGl0ZW4gcnV0YSBvY2ggZW4gc2thbGEgbWVkIGV0dCBo9md0IG51bW1lciBnZXIgZW4gc3RvciBydXRhLiA8YnIvPjxici8+Ck9tIGR1IORuZHJhciB0aWxsIGj2Z3JlIHVwcHVwcGz2c25pbmcga29tbWVyIGZpbGVuIGF0dCBibGkgc3T2cnJlLiA8L3A+Cg==",
+        "visibleForGroups": []
       },
-      "index": 0
-    },
-    {
-      "type": "edit",
-      "options": {},
-      "index": 0
-    },
-    {
-      "type": "coordinates",
-      "options": {
-        "transformations": [
-          {
-            "code": "EPSG:3007",
-            "default": true,
-            "hint": "(Standard)",
-            "title": "Sweref 99 12 00",
-            "xtitle": "E",
-            "ytitle": "N",
-            "inverseAxis": false
-          }
-        ]
-      },
-      "index": 0
-    },
-    {
-      "type": "buffer",
-      "options": {},
-      "index": 0
+      "index": 6
     },
     {
       "type": "anchor",
-      "options": {},
-      "index": 0
+      "options": {
+        "instruction": "PHA+SORyIHNrYXBhciBkdSBlbiBs5G5rIHRpbGwga2FydGFuIG1lZCBha3R1ZWxsIHpvb21uaW5nIG9jaCB05G5kYSBsYWdlci4gPGJyLz48YnIvPgoxLglab29tYSBpbiB0aWxsIPZuc2thZCBza2FsYSBvY2ggdORuZCBkZSBsYWdlciBkdSB2aWxsIHZpc2EuIDxici8+PGJyLz4KMi4JVHJ5Y2sgcOUgJnF1b3Q7U2thcGEgbORuayZxdW90Oy4gRW4gbORua2FkcmVzcyB0aWxsIGthcnRhbiBtZWQgYWt0dWVsbCB6b29tbml25SBzYW10IHTkbmRhIGVsbGVyIHNs5GNrdGEgbGFnZXIgaGFyIHNrYXBhdHMuIDxici8+PGJyLz4KMy4JRHUga2FuIGtvcGllcmEgbORua2FkcmVzc2VuIGdlbm9tIGF0dCBo9mdlcmtsaWNrYSBw5SAmcXVvdDtM5G5rJnF1b3Q7IG5lZGFuLjwvcD4K",
+        "visibleForGroups": []
+      },
+      "index": 7
     },
     {
-      "type": "draw",
+      "type": "bookmark",
       "options": {
-        "exportUrl": "/mapservice/export/kml",
-        "importUrl": "/mapservice/import/kml",
-        "icons": "marker, marker_black, marker_green, marker_red, marker_yellow, br, pin, pin_black, pin_green, pin_red, pin_yellow"
+        "instruction": "PHA+SORyIHNrYXBhciBkdSBib2tt5HJrZW4gdGlsbCBrYXJ0YW4gbWVkIGFrdHVlbGwgem9vbW5pbmcgb2NoIHTkbmRhIGxhZ2VyLiBEdSBrYW4gc2thcGEgZmxlcmEgYm9rbeRya2VuIG9jaCB25GxqYSBhdHQgdGEgYm9ydCBib2tt5HJrZW4gZ2Vub20gYXR0IHRyeWNrYSBw5SBrcnlzc2V0IHRpbGwgaPZnZXIgb20gbmFtbmV0LiA8YnIvPjxici8+CjEuCVpvb21hIGluIHRpbGwg9m5za2FkIHNrYWxhLiA8YnIvPjxici8+CjIuCVNrcml2IPZuc2thdCBuYW1uIGkgZuRsdGV0IG5lZGFuLiA8YnIvPjxici8+CjMuCVRyeWNrIHDlIEVudGVyLWtuYXBwZW4uPC9wPgo=",
+        "visibleForGroups": []
       },
-      "index": 0
+      "index": 8
     },
     {
       "type": "location",
-      "options": {},
-      "index": 0
+      "options": {
+        "visibleForGroups": []
+      },
+      "index": 9
+    },
+    {
+      "type": "routing",
+      "options": {
+        "apiKey": "AIzaSyAen26Yaacga-Z3j0GE0qTknK3Wqnyqjtc",
+        "instruction": "PHA+TWVkIGRldHRhIHZlcmt0eWcga2FuIGR1IHRhIGZyYW0gZW4gduRnYmVza3Jpdm5pbmcgbWVsbGFuIHR25SBwbGF0c2VyLiA8YnIvPjxici8+CjEuCVZpbGwgZHUgduRsamEgZW4gc3RhcnRwdW5rdCBpIGthcnRhbiB0cnlja2VyIGR1IGb2cnN0IHDlICZxdW90O1bkbGogcG9zaXRpb24gcOUga2FydGFuJnF1b3Q7IG9jaCBzZWRhbiBrbGlja2FyIGR1IHDlIPZuc2thZCBwbGF0cyBpIGthcnRhbi4gVmlsbCBkdSBmbHl0dGEgcHVua3RlbiBrbGlja2FyIGR1IHDlIGV0dCBueXR0IHN05GxsZSBpIGthcnRhbi4gPGJyLz48YnIvPgoyLglW5GxqIG3lbCBnZW5vbSBhdHQgdHJ5Y2thIHDlIGtuYXBwZW4gJnF1b3Q7VuRsaiBwb3NpdGlvbiBw5SBrYXJ0YW4mcXVvdDsgb2NoIGtsaWNrYSBzZWRhbiBpIGthcnRhbi4gPGJyLz48YnIvPgozLglW5GxqIGbkcmRz5HR0IGdlbm9tIGF0dCB0cnlja2EgcOUgbuVnb24gYXYga25hcHBhcm5hLiA8YnIvPjxici8+CjQuCVRyeWNrIHDlICZxdW90O1P2ayByZXNhJnF1b3Q7IDxici8+PGJyLz4KKFZlcmt0eWdldCBhbnbkbmRlciBHb29nbGUgTWFwcyBuYXZpZ2VyaW5nc2Z1bmt0aW9uKSA8L3A+Cg==",
+        "visibleForGroups": []
+      },
+      "index": 10
     },
     {
       "type": "streetview",
       "options": {
-        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4"
+        "apiKey": "AIzaSyAen26Yaacga-Z3j0GE0qTknK3Wqnyqjtc",
+        "instruction": "PHA+S2xpY2thIHDlIGVuIHbkZyBpIGthcnRhbiBm9nIgYXR0IGFrdGl2ZXJhIHZlcmt0eWdldC4gUGxhdHNlbiBtYXJrZXJhcyBk5SBtZWQgZW4gJnF1b3Q7Z3ViYmUmcXVvdDsuIEb2ciBhdHQgZmx5dHRhIHDlIGd1YmJlbiBrbGlja2FyIGR1IHDlIGVuIG55IHbkZy4gRHUga2FuIG9ja3PlIGb2cmZseXR0YSBkaWcgaSBiaWxkZW4gZ2Vub20gYXR0IHRyeWNrYSBw5SBwaWxhcm5hLiBG9nJzdG9yYSBiaWxkZW4gZ2Vub20gYXR0IHRyeWNrYSBw5SBzeW1ib2xlbiBpIPZ2cmUgaPZncmEgaPZybmV0LiA8YnIvPjxici8+CihWZXJrdHlnZXQgYW525G5kZXIgR29vZ2xlIE1hcHMgU3RyZWV0IFZpZXcpIDwvcD4K",
+        "visibleForGroups": ["AR_FOR_HAMN_OCH_GATUFORVALTNING_ALL","AR_FOR_STADSBYGGNADSKONTOR_ALL_FIM","Func_ArcGisAdmin"]
       },
-      "index": 0
+      "index": 11
     },
     {
-      "type": "information",
+      "type": "search",
       "options": {
-        "text": "",
-        "headerText": "",
-        "visibleAtStart": false
+        "onMap": true,
+        "bothSynlig": false,
+        "toolbar": "bottom",
+        "maxZoom": 14,
+        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
+        "kmlExportUrl": "/mapservice/export/kml",
+        "excelExportUrl": "/mapservice/export/excel",
+        "displayPopup": true,
+        "selectionTools": true,
+        "base64Encode": false,
+        "instruction": "",
+        "filterVisible": true,
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ],
+        "popupOffsetY": 0,
+        "visibleForGroups": [],
+        "layers": [
+          {
+            "id": "1209",
+            "visibleForGroups": []
+          },
+          {
+            "id": "1100",
+            "visibleForGroups": ["AR_FOR_HAMN_OCH_GATUFORVALTNING_ALL","AR_FOR_STADSBYGGNADSKONTOR_ALL_FIM","Func_ArcGisAdmin"]
+          }
+        ]
       },
-      "index": 0
+      "index": 3
     },
     {
-      "type": "bookmark",
-      "options": {},
-      "index": 0
+      "type": "edit",
+      "options": {
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 12
+    },
+    {
+      "type": "fir",
+      "options": {
+        "toolbar": "bottom",
+        "maxZoom": 14,
+        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
+        "kmlExportUrl": "/mapservice/export/kml",
+        "excelExportUrl": "/mapservice/fir/propertyownerlist",
+        "displayPopup": true,
+        "firSelectionTools": true,
+        "base64Encode": false,
+        "instruction": "",
+        "filterVisible": false,
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ],
+        "popupOffsetY": 0,
+        "visibleForGroups": [],
+        "layers": [
+          {
+            "id": "1209",
+            "visibleForGroups": []
+          },
+          {
+            "id": "1100",
+            "visibleForGroups": []
+          }
+        ]
+      },
+      "index": 13
     }
   ],
   "map": {
     "target": "map",
     "center": [
-      414962,
-      6583005
+      166000,
+      6332000
     ],
-    "title": "hohokarata",
-    "projection": "EPSG:3006",
-    "zoom": 3,
-    "maxZoom": 3,
-    "minZoom": 9,
+    "title": "Varbergskartan",
+    "projection": "EPSG:3007",
+    "zoom": 1,
+    "maxZoom": 8,
+    "minZoom": 0,
     "resolutions": [
-      4096.0,
-      2048.0,
-      1024.0,
-      512.0,
-      256.0,
-      128.0,
-      64.0,
-      32.0,
-      16.0,
-      8.0,
-      4.0,
-      2.0,
-      1.0,
-      0.5
+      56.0,
+      28.0,
+      14.0,
+      5.6,
+      2.8,
+      1.4,
+      0.56,
+      0.28,
+      0.14
     ],
     "origin": [
-      0.0,
-      0.0
+      150000.0,
+      6315000.0
     ],
     "extent": [
-      0.0,
-      6000000.0,
-      1000000.0,
-      9000000.0
+      150000.0,
+      6315000.0,
+      200000.0,
+      6360000.0
     ],
-    "logo": "assets/logo.png",
-    "infologo": "",
-    "mobileleft": null,
-    "mobileright": null,
-    "pil": null,
-    "mobile": false,
+    "logo": "/assets/logo.png",
+    "infologo": "/assets/icons/hjalpknapp.png",
+    "mobileleft": "",
+    "mobileright": "",
+    "pil": "/assets/icons/pil.png",
+    "mobile": true,
     "colors": {
-      "primaryColor": "#0affc2",
+      "primaryColor": "#1ea5cd",
       "secondaryColor": "#ffffff"
-    },
-    "geoserverLegendOptions": ""
+    }
   }
 }

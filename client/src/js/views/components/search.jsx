@@ -226,6 +226,13 @@ var SearchView = {
    * @return {external:ReactElement}
    */
   renderOptions: function () {
+
+      console.log("render options in search");
+      console.log("this.props.model in search");
+      console.log(this.props.model);
+      console.log("sources in search");
+      console.log(this.props.model.get("sources"));
+
     var settings = this.props.model.get('settings'),
       sources = this.props.model.get('sources'),
       filterVisible = this.props.model.get('filterVisible'),

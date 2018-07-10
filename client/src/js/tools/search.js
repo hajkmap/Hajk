@@ -44,6 +44,7 @@ var SearchModelProperties = {
   ],
   maxZoom: 14,
   exportUrl: '',
+  selectionTools: false,
   displayPopup: false,
   displayPopupBar: false,
   hits: [],

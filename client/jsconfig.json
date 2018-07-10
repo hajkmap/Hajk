@@ -14,6 +14,9 @@
         "compiled/search.js": ["src/js/views/components/search.jsx"],
         "compiled/searchbar.js": ["src/js/views/components/searchbar.jsx"],
         "compiled/searchresultgroup.js": ["src/js/views/components/searchresultgroup.jsx"],
+        "compiled/firsearch.js": ["src/js/views/components/firsearch.jsx"],
+        "compiled/firselectiontoolbar.js": ["src/js/views/components/firselectiontoolbar.jsx"],
+        "compiled/firsearchresultgroup.js": ["src/js/views/components/firsearchresultgroup.jsx"],
         "compiled/colorpicker.js": ["src/js/views/components/colorpicker.jsx"],
         "compiled/infobutton.js": ["src/js/views/components/infobutton.jsx"]
       }
@@ -59,6 +62,7 @@
         "models/map": "./src/js/models/mapmodel.js",
         "models/shell": "./src/js/models/shell.js",
         "models/selection": "./src/js/models/selection.js",
+        "models/firselection": "./src/js/models/firselection.js",
         "models/drag": "./src/js/models/drag.js",
         "models/transform": "./src/js/models/transforminteraction.js",
         "utils/arraysort": "./src/js/utils/arraysort.js",
@@ -103,6 +107,9 @@
         "components/search": "./compiled/search.js",
         "components/searchbar": "./compiled/searchbar.js",
         "components/searchresultgroup": "./compiled/searchresultgroup.js",
+        "components/firsearch": "./compiled/firsearch.js",
+        "components/firselectiontoolbar": "./compiled/firselectiontoolbar.js",
+        "components/firsearchresultgroup": "./compiled/firsearchresultgroup.js",
         "components/colorpicker": "./compiled/colorpicker.js",
         "components/infobutton": "./compiled/infobutton.js",
         "views/map": "./compiled/mapview.js",
