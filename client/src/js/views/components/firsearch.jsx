@@ -156,6 +156,15 @@ var FirSearchView = {
             var loader = this.loading;
             this.props.model.abort();
             this.props.model.search(result => {
+                if (result.status === "success") {
+                    this.props.model.highlightResultLayer.getSource().clear();
+                    result.items.map(item => {
+                        var groupName = item.layer;
+                        item.hits.map(hit => {
+                            this.props.model.highlightResultLayer.getSource().addFeature(hit);
+                        });
+                    });
+                }
                 var state = {
                     loading: false,
                     showResults: true,
@@ -301,12 +310,6 @@ var FirSearchView = {
         return (
             <div className='search-results' key='search-results'>
                 <h3>Sökresultat</h3>
-                <div>
-                    <input type='checkbox' id='display-popup' ref='displayPopup' onChange={(e) => { this.onChangeDisplayPopup(e); }} checked={this.state.displayPopup} />
-                    <label htmlFor='display-popup'>Visa information</label>
-                    <span className='pull-right'>{excelButton}&nbsp;{kmlButton}</span>
-                    <div>{downloadLink}</div>
-                </div>
                 {
                     (() => {
                         if (groups && groups.length > 0) {

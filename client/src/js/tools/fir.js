@@ -36,7 +36,8 @@ var FirModelProperties = {
     hits: [],
     popupOffsetY: 0,
     aliasDict: {},
-    chosenColumns: []
+    chosenColumns: [],
+    firLayerCaption: "Fastighetsytor FIR2"
 };
 
 var FirModel = {
@@ -65,6 +66,23 @@ var FirModel = {
         });
 
         this.get('map').addLayer(this.featureLayer);
+        console.log("MAP");
+        console.log(this.get("map"));
+
+        this.highlightResultLayer = new ol.layer.Vector({
+                caption: 'FIRSökresltat',
+            name: 'fir-highlight-vector-layer',
+            source: new ol.source.Vector(),
+            queryable: true,
+            visible: true,
+            style: this.getHighlightStyle()
+        });
+
+            this.highlightResultLayer.getSource().on('addfeature', evt => {
+            evt.feature.setStyle(this.highlightResultLayer.getStyle());
+        });
+
+        this.get('map').addLayer(this.highlightResultLayer);
 
         if (this.get('firSelectionTools')) {
             this.set('firSelectionModel', new FirSelectionModel({
@@ -85,6 +103,12 @@ var FirModel = {
      * @property {external:"ol.layer"} featureLayer
      */
     featureLayer: undefined,
+
+    /**
+     * @instance
+     * @property {external:"ol.layer"} highlightResultLayer
+     */
+    highlightResultLayer: undefined,
 
     /**
      * @instance
@@ -328,6 +352,7 @@ var FirModel = {
             this.get('firSelectionModel').abort();
         }
         this.featureLayer.getSource().clear();
+        this.highlightResultLayer.getSource().clear();
         this.set('items', []);
         this.set('barItems', []);
         if (ovl) {
@@ -645,7 +670,7 @@ var FirModel = {
             var columns = [],
                 aliases = [],
                 values = [],
-                chosenColumns = this.get("chosenColumns");
+                chosenColumns = ["nyckel"];
 
             var getAliasWithDict = (column, aliasDict) => {
                 var keys = Object.keys(aliasDict);
@@ -708,21 +733,36 @@ var FirModel = {
                     }
                 });
 
-                return columns.map(column => attributes[column] || null);
+                console.log("before return");
+                return columns.map(column => {
+                    console.log("here");
+                    console.log(column);
+                    if (column == "nyckel") {
+                        console.log("Nyckel");
+                        console.log('"' + Number(attributes[column]) + '"');
+                        return '"' + Number(attributes[column]) + '"';
+                    } else {
+                        console.log("other attr");
+                        console.log(attributes[column]);
+                        return attributes[column] || null;
+                    }
+                });
             });
 
-            return {
+            return values;
+            /*return {
                 TabName: group,
                 Cols: aliases,
                 Rows: values
-            };
+            };*/
         });
     },
 
     export: function (type) {
         var url = '',
             data = {},
-            postData = '';
+            postData = ''
+            postData = [];
 
         switch (type) {
             case 'kml':
@@ -734,6 +774,11 @@ var FirModel = {
                 url = this.get('excelExportUrl');
                 data = this.getExcelData();
                 postData = JSON.stringify(data);
+                console.log("data");
+                console.log(data);
+                console.log("postDataPre");
+                console.log('{ "fnr": [' + data +'] }');
+                console.log(postData);
                 break;
         }
 
@@ -747,7 +792,7 @@ var FirModel = {
             url: url,
             method: 'post',
             data: {
-                json:  { "fnr": ["130121064","130129850","130132945","130139213"] }//postData
+                json: '{ "fnr": ["130136787","130129850","130132945","130139213"] }'  //'{ "fnr": [' + data +'] }' //'{ "fnr": ["130136787","130129850","130132945","130139213"] }' //postData
             },
             format: 'json',
             success: (url) => {
@@ -902,6 +947,31 @@ var FirModel = {
         return new ol.style.Style({
             fill: new ol.style.Fill({
                 color: 'rgba(255, 255, 255, 0.2)'
+            }),
+            stroke: new ol.style.Stroke({
+                color: 'rgba(0, 0, 0, 0.6)',
+                width: 4
+            }),
+            image: new ol.style.Icon({
+                anchor: this.get('anchor'),
+                anchorXUnits: 'pixels',
+                anchorYUnits: 'pixels',
+                src: this.get('markerImg'),
+                imgSize: this.get('imgSize')
+            })
+        });
+    },
+
+    /**
+     * Get style for marked search result and manual click
+     * @instance
+     * @return {external:"ol.style"} style
+     *
+     */
+    getHighlightStyle: function () {
+        return new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: 'rgba(0, 0, 255, 0.5)'
             }),
             stroke: new ol.style.Stroke({
                 color: 'rgba(0, 0, 0, 0.6)',

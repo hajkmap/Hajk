@@ -2045,8 +2045,8 @@
       "searchFields": [
         "text"
       ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td> <strong></strong> </td><td> {text} </td></tr></tbody></table>\n\n <a href=\"http://censrv313/mapservice/fir/propertydoc/130139213\" target=\"_blank\">Fastighetsrapport</a>\n\n",
-      "aliasDict": "{\"traktnamn\":\"Trakt\", \"text\":\"Namn\", \"typ\":\"Typ\", \"nyckel\":\"Nyckel\", \"enhet\":\"Enhet\", \"omrade\":\"Område\"}",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td><strong>Namn</strong></td><td>{text}</td></tr><tr><td><strong>Nyckel</strong></td><td>{nyckel}</td></tr></tbody></table><br/><br/><a href=\"http://censrv313:83/mapservice/fir/propertydoc/130139213\" target=\"_blank\">Fastighetsrapport</a>",
+      "aliasDict": "{\"nyckel\":\"Nyckel\"}",
       "displayFields": [
         "text"
       ],

@@ -726,9 +726,19 @@ var SearchModel = {
           }
         });
 
-        return columns.map(column => attributes[column] || null);
+          return columns.map(column => {
+              console.log("here");
+              console.log(column);
+                  if (column == "nyckel") {
+                      return Number(attributes[column]);
+                  } else {
+                      return attributes[column] || null;
+                  }
+              });
+
       });
 
+        console.log("return");
       return {
         TabName: group,
         Cols: aliases,
@@ -742,6 +752,7 @@ var SearchModel = {
       data = {},
       postData = '';
 
+
     switch (type) {
       case 'kml':
         url = this.get('kmlExportUrl');
@@ -752,6 +763,11 @@ var SearchModel = {
         url = this.get('excelExportUrl');
         data = this.getExcelData();
         postData = JSON.stringify(data);
+          console.log("data");
+          console.log(data);
+          console.log("postData");
+          console.log(postData);
+
         break;
     }
 

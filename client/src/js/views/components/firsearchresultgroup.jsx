@@ -100,16 +100,58 @@ FirSearchResultGroup = {
         }
     },
 
+    plusLayer: function (layername,e) {
+        var map = this.props.model.get("map");
+        console.log("getting layers");
+        console.log(map);
+        console.log("e");
+        console.log(e);
+        map.getLayers().forEach(layer => {
+           if(layer.get("caption") == this.props.model.get("firLayerCaption") && this.props.result.layer == "Fastighet"){
+               console.log("caption");
+               console.log(layer.get("caption"));
+               console.log("thisPropsResultLayer");
+               console.log(this.props.result.layer);
+               layer.setVisible(true);
+           }
+        });
+    },
+
+    minusLayer: function(layername,e){
+        var map = this.props.model.get("map");
+        console.log("getting layers");
+        console.log(map);
+        console.log("e");
+        console.log(e);
+        map.getLayers().forEach(layer => {
+            if(layer.get("caption") == this.props.model.get("firLayerCaption") && this.props.result.layer == "Fastighet"){
+                layer.setVisible(true);
+            }
+        });
+    },
+
     render: function () {
         var id = this.props.id,
             groupStyleClass = this.props.numGroups === 1 ? '' : 'hidden'
         ;
 
+        console.log("this.props");
+        console.log(this.props);
+        console.log("render the result");
+        console.log("this.props.result");
+        console.log(this.props.result);
+        console.log("this.props.id");
+        console.log(this.props.id);
         return (
             <div>
                 <div className='group' id={this.props.id}>{this.props.result.layer}
                     <span className='label'>{this.props.result.hits.length}</span>
-
+                    <button className='btn btn-default pull-right plusMinus' onClick={(e) => this.minusLayer(this.props.result.layer,e)}>
+                        <i className='fa fa-minus plusMinusIkon' />
+                    </button>
+                    <button className='btn btn-default pull-right plusMinus' onClick={(e) => this.plusLayer(this.props.result.layer,e)}>
+                        <i className='fa fa-plus plusMinusIkon' />
+                    </button>
                 </div>
                 <div className={groupStyleClass}>
                     {

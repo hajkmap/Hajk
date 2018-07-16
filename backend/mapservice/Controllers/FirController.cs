@@ -106,6 +106,7 @@ namespace MapService.Controllers
         {
             try
             {
+                string a = Request.ContentType;
                 Response.Expires = 0;
                 Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
                 Response.ContentType = "text/html; charset=utf-8";
