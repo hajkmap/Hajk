@@ -178,30 +178,39 @@ namespace MapService.Components
                 }
 
                 int height = 65 + copyrights.Count * 10;
-                this.drawTextTitle(gfx, fontName, titleText, 15, 25);
-
                 XPoint[] points = new XPoint[]
                 {
-                    new XPoint(15, 35),
-                    new XPoint(15, height),
-                    new XPoint(70 + displayLength, height),
-                    new XPoint(70 + displayLength, 35),
-                    new XPoint(15, 35)
+                    new XPoint(0, 0),
+                    new XPoint(0, height),
+                    new XPoint((int)page.Width.Point, height),
+                    new XPoint((int)page.Width.Point, 0),
+                    new XPoint(0, 0)
                  };
-
                 gfx.DrawPolygon(XBrushes.White, points, XFillMode.Winding);
 
-                this.drawText(gfx, String.Format("Skala 1:{0}", exportItem.scale), 15, 45);
+                this.drawTextTitle(gfx, fontName, titleText, 15, 25);
+
+                this.drawText(gfx, fontName, String.Format("Skala 1:{0}", exportItem.scale), 15, 45);
                 gfx.DrawLine(XPens.Black, new XPoint(15, 52), new XPoint(15 + displayLength, 52));
                 gfx.DrawLine(XPens.Black, new XPoint(15, 48), new XPoint(15, 56));
                 gfx.DrawLine(XPens.Black, new XPoint(15 + displayLength, 48), new XPoint(15 + displayLength, 56));
-                this.drawText(gfx, displayText, 20 + displayLength, 55);
+                this.drawText(gfx, fontName, displayText, 20 + displayLength, 55);
 
                 var y = (int)page.Height.Point - 15;
+                XPoint[] points2 = new XPoint[]
+                {
+                    new XPoint(0, (int)page.Height.Point -50),
+                    new XPoint(0, (int)page.Height.Point),
+                    new XPoint((int)page.Width.Point, (int)page.Height.Point),
+                    new XPoint((int)page.Width.Point, (int)page.Height.Point -50),
+                    new XPoint(0, (int)page.Height.Point -50)
+                 };
+                gfx.DrawPolygon(XBrushes.White, points2, XFillMode.Winding);
+
                 var printText = commentText + "   " + pdfDate;
                 this.drawText(gfx, fontName, printText, 15, y - 20);
                 
-                this.drawText(gfx, fontname, infoText, 15, y);
+                this.drawText(gfx, fontName, infoText, 15, y);
 
                 int i = 0;
                 copyrights.ForEach(copyright =>
