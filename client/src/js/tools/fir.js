@@ -90,6 +90,47 @@ var FirModel = {
                 layerCollection:shell.getLayerCollection()
             }));
         }
+
+        this.map.on('singleclick', (event) => {
+            try {
+                setTimeout(a => {
+                    if (!map.get('clickLock') && !event.filty) {
+                        this.clickedOnMap(event);
+                    }
+                }, 0);
+            } catch (e) {}
+        });
+    },
+
+    clickedOnMap: function(event){
+        // check if tool is active
+        // add the clicked element to results
+        this.map.forEachFeatureAtPixel(event.pixel, (feature, layer) => {
+            if (layer && layer.get('name') && (layer.get('queryable') !== false) && layer.get("name") === "<firname>") {
+                /*promises.push(new Promise((resolve, reject) => {
+                    features = [feature];
+                    _.each(features, (feature) => {
+                        console.log("feature");
+                        console.log(feature);
+                        this.addInformation(feature, layer, (featureInfo) => {
+                            if (featureInfo) {
+                                infos.push(featureInfo);
+                            }
+                            resolve();
+                        });
+                    });
+                }));
+                */
+                // add to results
+                this.get("items").map(group => {
+                    if(group.layer === "Fastighet<check>"){
+                        group.hits.push(feature);
+                    }
+                });
+            }
+        });
+
+
     },
 
     /**
@@ -358,6 +399,14 @@ var FirModel = {
         if (ovl) {
             ovl.setPosition(undefined);
         }
+
+        //plusminusLayer
+        var map = this.get("map");
+        map.getLayers().forEach(layer => {
+            if(layer.get("caption") == this.get("firLayerCaption")){
+                layer.setVisible(false);
+            }
+        });
     },
 
     /**
@@ -986,6 +1035,8 @@ var FirModel = {
             })
         });
     },
+
+
 
     /**
      * @description

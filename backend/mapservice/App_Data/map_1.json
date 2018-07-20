@@ -549,6 +549,13 @@
                 "drawOrder": 50,
                 "visibleForGroups": [],
                 "infobox": ""
+              },
+              {
+                "id": "1225",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": [],
+                "infobox": ""
               }
             ],
             "groups": []

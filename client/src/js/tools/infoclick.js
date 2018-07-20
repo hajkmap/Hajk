@@ -166,6 +166,8 @@ var InfoClickModel = {
           promises.push(new Promise((resolve, reject) => {
             features = [feature];
             _.each(features, (feature) => {
+              console.log("feature");
+              console.log(feature);
               this.addInformation(feature, layer, (featureInfo) => {
                 if (featureInfo) {
                   infos.push(featureInfo);
@@ -191,6 +193,9 @@ var InfoClickModel = {
           success: (features, layer) => {
             if (Array.isArray(features) && features.length > 0) {
               features.forEach(feature => {
+                  console.log("feature");
+                  console.log(feature);
+                  // if in highfir layer and fir tool do nothing
                 this.addInformation(feature, wmsLayer, (featureInfo) => {
                   if (featureInfo) {
                     infos.push(featureInfo);

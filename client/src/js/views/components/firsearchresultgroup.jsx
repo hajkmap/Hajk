@@ -1,3 +1,6 @@
+var InfoButton = require('components/infobutton');
+
+
 var shiftIsDown = false;
 var ctrlIsDown = false;
 
@@ -100,29 +103,10 @@ FirSearchResultGroup = {
         }
     },
 
+    // plus minus button in firsearchresultgroup
     plusLayer: function (layername,e) {
         var map = this.props.model.get("map");
-        console.log("getting layers");
-        console.log(map);
-        console.log("e");
-        console.log(e);
-        map.getLayers().forEach(layer => {
-           if(layer.get("caption") == this.props.model.get("firLayerCaption") && this.props.result.layer == "Fastighet"){
-               console.log("caption");
-               console.log(layer.get("caption"));
-               console.log("thisPropsResultLayer");
-               console.log(this.props.result.layer);
-               layer.setVisible(true);
-           }
-        });
-    },
 
-    minusLayer: function(layername,e){
-        var map = this.props.model.get("map");
-        console.log("getting layers");
-        console.log(map);
-        console.log("e");
-        console.log(e);
         map.getLayers().forEach(layer => {
             if(layer.get("caption") == this.props.model.get("firLayerCaption") && this.props.result.layer == "Fastighet"){
                 layer.setVisible(true);
@@ -130,18 +114,71 @@ FirSearchResultGroup = {
         });
     },
 
-    render: function () {
-        var id = this.props.id,
-            groupStyleClass = this.props.numGroups === 1 ? '' : 'hidden'
-        ;
+    minusLayer: function(layername,e){
+        var map = this.props.model.get("map");
 
-        console.log("this.props");
-        console.log(this.props);
-        console.log("render the result");
-        console.log("this.props.result");
-        console.log(this.props.result);
-        console.log("this.props.id");
-        console.log(this.props.id);
+        map.getLayers().forEach(layer => {
+            if(layer.get("caption") == this.props.model.get("firLayerCaption") && this.props.result.layer == "Fastighet"){
+                layer.setVisible(true);
+            }
+        });
+    },
+
+    informationForEachResult: function(hit) {
+        console.log("hit");
+        console.log(hit);
+
+            return (
+                hit.infobox
+            );
+    },
+
+
+    resultBox: function(id) {
+        console.log("resultBox");
+
+        return (
+
+        this.props.result.hits.map((hit, i) => {
+
+
+            function getTitle(property) {
+
+                if (Array.isArray(property)) {
+                    return property.map(item => hit.getProperties()[item]).join(', ');
+
+                } else {
+                    return hit.getProperties()[property] || property;
+
+                }
+            }
+
+            var hitId = 'hit-' + i + '-' + id;
+                title = getTitle(this.props.result.displayName); // + <div dangerouslySetInnerHTML={this.informationForEachResult(hit)}></div>,
+                index = i,
+                information = this.informationForEachResult(hit)
+            ;
+
+                return(
+                    <div id={hitId} key={hitId} index={i} data-index={i}
+                         onClick={this.handleClick.bind(this, hit, i)}>{title}{information}</div>
+                );
+
+
+        })
+    );
+    },
+
+    render: function () {
+        console.log("render");
+        var id = this.props.id,
+            groupStyleClass = this.props.numGroups === 1 ? '' : 'hidden',
+            resultBox = this.resultBox(id)
+        ;
+        console.log("groupStyleClass");
+        console.log(groupStyleClass);
+
+
         return (
             <div>
                 <div className='group' id={this.props.id}>{this.props.result.layer}
@@ -154,22 +191,7 @@ FirSearchResultGroup = {
                     </button>
                 </div>
                 <div className={groupStyleClass}>
-                    {
-                        this.props.result.hits.map((hit, i) => {
-                            function getTitle (property) {
-                                if (Array.isArray(property)) {
-                                    return property.map(item => hit.getProperties()[item]).join(', ');
-                                } else {
-                                    return hit.getProperties()[property] || property;
-                                }
-                            }
-                            var hitId = 'hit-' + i + '-' + id,
-                                title = getTitle(this.props.result.displayName),
-                                index = i
-                            ;
-                            return (<div id={hitId} key={hitId} index={i} data-index={i} onClick={this.handleClick.bind(this, hit, i)}>{title}</div>);
-                        })
-                    }
+                    {resultBox}
                 </div>
             </div>
         );
