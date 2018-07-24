@@ -224,7 +224,7 @@ namespace MapService.Components.MapExport
                     layer.SetImageFormat("image/png");
                     layer.BgColor = Color.White;
                     layer.Transparent = true;
-                    layer.Version = "1.1.0";
+                    layer.Version = wmsLayers[i].version;
                     layer.ContinueOnError = false;
                     for (int t = 0; t < wmsLayers[i].layers.Count; t++)
                     {

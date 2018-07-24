@@ -331,9 +331,12 @@ var ExportModel = {
         .getArray()
         .filter(exportable)
         .map((layer, i) => {
+        window.layer = layer;
         return {
           url: layer.getSource().get('url'),
           layers: layer.getSource().getParams()["LAYERS"].split(','),
+          styles: layer.getSource().getParams()["STYLES"] || null,
+          version: layer.getSource().getParams()["VERSION"],
           zIndex: i,
           workspacePrefix: null,
           coordinateSystemId: this.get('olMap').getView().getProjection().getCode().split(':')[1]
@@ -787,6 +790,9 @@ var ExportModel = {
     } else {
       dataString = JSON.stringify(data);
     }
+
+    console.log('data: ', data);
+
     $.ajax({
         url: url,
         method: "post",
