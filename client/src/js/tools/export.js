@@ -331,7 +331,6 @@ var ExportModel = {
         .getArray()
         .filter(exportable)
         .map((layer, i) => {
-        window.layer = layer;
         return {
           url: layer.getSource().get('url'),
           layers: layer.getSource().getParams()["LAYERS"].split(','),
@@ -790,8 +789,6 @@ var ExportModel = {
     } else {
       dataString = JSON.stringify(data);
     }
-
-    console.log('data: ', data);
 
     $.ajax({
         url: url,
