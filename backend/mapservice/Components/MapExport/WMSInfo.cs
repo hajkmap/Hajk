@@ -25,6 +25,8 @@ namespace MapService.Components.MapExport
                 this._url = value;
             }
         }
+        public string styles { get; set; }
+        public string version { get; set; }
         public int zIndex { get; set; }
         public string workspacePrefix { get; set; }
         public List<string> layers { get; set; }
