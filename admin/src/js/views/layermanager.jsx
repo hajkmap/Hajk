@@ -22,13 +22,13 @@
 
 import React from "react";
 import { Component } from "react";
-import $ from 'jquery';
+import $ from "jquery";
 import Alert from "../views/alert.jsx";
-import WMSLayerForm from "./layerforms/wmslayerform.jsx"
-import ExtendedWMSLayerForm from "./layerforms/extendedwmslayerform.jsx"
-import WMTSLayerForm from "./layerforms/wmtslayerform.jsx"
-import ArcGISLayerForm from "./layerforms/arcgislayerform.jsx"
-import VectorLayerForm from "./layerforms/vectorlayerform.jsx"
+import WMSLayerForm from "./layerforms/wmslayerform.jsx";
+import ExtendedWMSLayerForm from "./layerforms/extendedwmslayerform.jsx";
+import WMTSLayerForm from "./layerforms/wmtslayerform.jsx";
+import ArcGISLayerForm from "./layerforms/arcgislayerform.jsx";
+import VectorLayerForm from "./layerforms/vectorlayerform.jsx";
 
 /**
  *
@@ -59,21 +59,20 @@ class Manager extends Component {
    *
    */
   componentDidMount() {
-    this.props.model.set('config', this.props.config);
+    this.props.model.set("config", this.props.config);
     this.props.model.getConfig(this.props.config.url_layers);
     this.setState(defaultState);
-    this.props.model.on('change:layers', () => {
+    this.props.model.on("change:layers", () => {
       this.setState({
-        layers: this.props.model.get('layers')
-      })
+        layers: this.props.model.get("layers")
+      });
     });
   }
   /**
    *
    */
   componentWillUnmount() {
-
-    this.props.model.off('change:layers');
+    this.props.model.off("change:layers");
   }
   /**
    *
@@ -109,9 +108,7 @@ class Manager extends Component {
    *
    */
   loadLayer(e, layer) {
-
     if (layer.type === "ArcGIS") {
-
       this.setState({
         mode: "edit",
         layerType: "ArcGIS"
@@ -147,13 +144,10 @@ class Manager extends Component {
         this.refs["ArcGISLayerForm"].loadLayers(layer, () => {
           this.refs["ArcGISLayerForm"].validate();
         });
-
       }, 0);
-
     }
 
     if (layer.type === "Vector") {
-
       this.setState({
         mode: "edit",
         layerType: "Vector"
@@ -187,7 +181,8 @@ class Manager extends Component {
           labelWeight: layer.labelWeight || "",
           labelFont: layer.labelFont || "",
           labelFillColor: layer.labelFillColor || "rgba(0, 0, 0, 1)",
-          labelOutlineColor: layer.labelOutlineColor || "rgba(255, 255, 255, 1)",
+          labelOutlineColor:
+            layer.labelOutlineColor || "rgba(255, 255, 255, 1)",
           labelOutlineWidth: layer.labelOutlineWidth || 3,
           labelAttribute: layer.labelAttribute || "",
           showLabels: layer.showLabels || true,
@@ -204,9 +199,7 @@ class Manager extends Component {
         this.refs["VectorLayerForm"].loadLayers(layer, () => {
           this.refs["VectorLayerForm"].validate();
         });
-
       }, 0);
-
     }
 
     if (layer.type === "WMS") {
@@ -252,9 +245,7 @@ class Manager extends Component {
         this.refs["WMSLayerForm"].loadLayers(layer, () => {
           this.refs["WMSLayerForm"].validate();
         });
-
       }, 0);
-
     }
 
     if (layer.type === "ExtendedWMS") {
@@ -294,13 +285,10 @@ class Manager extends Component {
         this.refs["ExtendedWMSLayerForm"].loadLayers(layer, () => {
           this.refs["ExtendedWMSLayerForm"].validate();
         });
-
       }, 0);
-
     }
 
     if (layer.type === "WMTS") {
-
       this.setState({
         mode: "edit",
         layerType: "WMTS"
@@ -335,20 +323,23 @@ class Manager extends Component {
         setTimeout(() => {
           this.refs["WMTSLayerForm"].validate();
         }, 0);
-      }, 0)
+      }, 0);
     }
-
   }
   /**
    *
    */
   describeLayer(e, layerName) {
-    this.props.model.getLayerDescription(this.refs.input_url.value, layerName, (properties) => {
-      this.setState({
-        layerProperties: properties,
-        layerPropertiesName: layerName
-      });
-    });
+    this.props.model.getLayerDescription(
+      this.refs.input_url.value,
+      layerName,
+      properties => {
+        this.setState({
+          layerProperties: properties,
+          layerPropertiesName: layerName
+        });
+      }
+    );
   }
   /**
    *
@@ -369,20 +360,20 @@ class Manager extends Component {
     if (this.state.layerProperties === false) {
       return (
         <div>
-          <i className="fa fa-times" onClick={() => this.closeDetails()}></i>
+          <i className="fa fa-times" onClick={() => this.closeDetails()} />
           <div>Information saknas</div>
         </div>
-      )
+      );
     }
-    var rows = this.state.layerProperties.map((property, i) =>
+    var rows = this.state.layerProperties.map((property, i) => (
       <tr key={"layerProperty_" + i}>
         <td>{property.name}</td>
         <td>{property.type}</td>
       </tr>
-    );
+    ));
     return (
       <div>
-        <i className="fa fa-times" onClick={() => this.closeDetails()}></i>
+        <i className="fa fa-times" onClick={() => this.closeDetails()} />
         <table>
           <thead>
             <tr>
@@ -390,21 +381,21 @@ class Manager extends Component {
               <th>Typ</th>
             </tr>
           </thead>
-          <tbody>
-            {rows}
-          </tbody>
+          <tbody>{rows}</tbody>
         </table>
       </div>
-    )
+    );
   }
   /**
    *
    */
   renderOwnerOptions() {
     if (this.props.config && this.props.config.owner_options) {
-      return this.props.config.owner_options.map((option, i) =>
-        <option value={option.value} key={"owner_" + i}>{option.title}</option>
-      );
+      return this.props.config.owner_options.map((option, i) => (
+        <option value={option.value} key={"owner_" + i}>
+          {option.title}
+        </option>
+      ));
     } else {
       return null;
     }
@@ -421,73 +412,86 @@ class Manager extends Component {
    *
    */
   getLayersWithFilter(filter) {
-    return this.props.model.get('layers').filter(layer => {
-      return (new RegExp(this.state.filter)).test(layer.caption.toLowerCase())
+    return this.props.model.get("layers").filter(layer => {
+      return new RegExp(this.state.filter).test(layer.caption.toLowerCase());
     });
   }
   /**
    *
    */
   renderLayersFromConfig(layers) {
-
-    layers = this.state.filter ? this.getLayersWithFilter() : this.props.model.get('layers');
+    layers = this.state.filter
+      ? this.getLayersWithFilter()
+      : this.props.model.get("layers");
 
     var startsWith = [];
     var alphabetically = [];
 
     if (this.state.filter) {
       layers.forEach(layer => {
-        layer.caption.toLowerCase().indexOf(this.state.filter) == 0 ? startsWith.push(layer) : alphabetically.push(layer);
+        layer.caption.toLowerCase().indexOf(this.state.filter) == 0
+          ? startsWith.push(layer)
+          : alphabetically.push(layer);
       });
 
       startsWith.sort(function(a, b) {
-        if(a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if(a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
+        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
         return 0;
       });
 
       alphabetically.sort(function(a, b) {
-        if(a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if(a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
+        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
         return 0;
       });
 
       layers = startsWith.concat(alphabetically);
     }
 
-    return layers.map((layer, i) => {
+    // Sort layers alphabetically
+    layers.sort((a, b) => {
+      return a.caption.toLowerCase().localeCompare(b.caption.toLowerCase());
+    });
 
+    return layers.map((layer, i) => {
       var displayType = "";
-      switch(layer.type) {
-        case 'WMS':
+      switch (layer.type) {
+        case "WMS":
           displayType = "";
           break;
-        case 'ExtendedWMS':
+        case "ExtendedWMS":
           displayType = "(Extended WMS)";
           break;
-        case 'WMTS':
+        case "WMTS":
           displayType = "(WMTS)";
           break;
-        case 'ArcGIS':
+        case "ArcGIS":
           displayType = "(ArcGIS)";
           break;
-        case 'Vector':
-            displayType = "(Vektor)";
-            break;
+        case "Vector":
+          displayType = "(Vektor)";
+          break;
       }
 
       return (
-        <li onClick={(e) => this.loadLayer(e, layer)} key={"layer_" + i}>
-          <span>{layer.caption} {displayType}</span>
-          <i title="Radera lager" onClick={(e) => this.removeLayer(e, layer)} className="fa fa-trash"></i>
-        </li>);
-
+        <li onClick={e => this.loadLayer(e, layer)} key={"layer_" + i}>
+          <span>
+            {layer.caption} {displayType}
+          </span>
+          <i
+            title="Radera lager"
+            onClick={e => this.removeLayer(e, layer)}
+            className="fa fa-trash"
+          />
+        </li>
+      );
     });
   }
   /**
    *
    */
-  abort (e) {
+  abort(e) {
     if (this.state.layerType === "WMS") {
       this.refs["WMSLayerForm"].reset();
     }
@@ -523,7 +527,6 @@ class Manager extends Component {
         alertMessage: "Uppdateringen lyckades!",
         date: date
       });
-
     } else {
       this.setState({
         alert: true,
@@ -535,13 +538,11 @@ class Manager extends Component {
    *
    */
   submit(e) {
-
     e.preventDefault();
 
-    var form = this.refs[this.state.layerType + "LayerForm"]
-    ,   valid = form.validate()
-    ,   layer = {}
-    ;
+    var form = this.refs[this.state.layerType + "LayerForm"],
+      valid = form.validate(),
+      layer = {};
 
     if (!valid) {
       return;
@@ -558,36 +559,38 @@ class Manager extends Component {
 
     if (this.state.mode === "edit") {
       if (layer.type === "ArcGIS" && layer.legend === "") {
-        this.props.model.getLegend(layer, (legend) => {
+        this.props.model.getLegend(layer, legend => {
           layer.legend = legend;
           this.props.model.updateLayer(layer, success => {
             this.whenLayerUpdated(success);
           });
-        })
+        });
       } else {
         this.props.model.updateLayer(layer, success => {
           this.whenLayerUpdated(success);
         });
       }
     }
-
   }
   /**
    *
    */
   uploadLegend(callback) {
-    $('#upload-form').submit();
+    $("#upload-form").submit();
     this.refs.uploadIframe.addEventListener("load", () => {
       if (this.refs.uploadIframe.contentDocument) {
         if (!window.location.origin) {
-          window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+          window.location.origin =
+            window.location.protocol +
+            "//" +
+            window.location.hostname +
+            (window.location.port ? ":" + window.location.port : "");
         }
-        var node = $(this.refs.uploadIframe.contentDocument).find('body')[0]
-        ,   url  = node.innerHTML
-        ,   a = $(`<a href="${url}"">temp</a>`)
-        ,   b = a[0].href
-        ;
-        this.props.model.set('legend', b);
+        var node = $(this.refs.uploadIframe.contentDocument).find("body")[0],
+          url = node.innerHTML,
+          a = $(`<a href="${url}"">temp</a>`),
+          b = a[0].href;
+        this.props.model.set("legend", b);
       }
     });
   }
@@ -595,49 +598,65 @@ class Manager extends Component {
    *
    */
   renderForm() {
-    switch(this.state.layerType) {
+    switch (this.state.layerType) {
       case "WMS":
         return (
           <WMSLayerForm
             ref="WMSLayerForm"
             model={this.props.model}
             layer={this.state.layer}
-            url={this.props.config.url_default_server} />
-        )
+            url={this.props.config.url_default_server}
+          />
+        );
       case "ExtendedWMS":
-        return <ExtendedWMSLayerForm
-          ref="ExtendedWMSLayerForm"
-          model={this.props.model}
-          layer={this.state.layer}
-          parentView={this}
-          url={this.props.config.url_default_server} />
+        return (
+          <ExtendedWMSLayerForm
+            ref="ExtendedWMSLayerForm"
+            model={this.props.model}
+            layer={this.state.layer}
+            parentView={this}
+            url={this.props.config.url_default_server}
+          />
+        );
       case "WFS":
-        return <WFSLayerForm
-          ref="WFSLayerForm"
-          model={this.props.model}
-          layer={this.state.layer}
-          url={this.props.config.url_default_server} />
+        return (
+          <WFSLayerForm
+            ref="WFSLayerForm"
+            model={this.props.model}
+            layer={this.state.layer}
+            url={this.props.config.url_default_server}
+          />
+        );
       case "WMTS":
-        return <WMTSLayerForm
-          ref="WMTSLayerForm"
-          model={this.props.model}
-          layer={this.state.layer}
-          url={this.props.config.url_default_server} />
+        return (
+          <WMTSLayerForm
+            ref="WMTSLayerForm"
+            model={this.props.model}
+            layer={this.state.layer}
+            url={this.props.config.url_default_server}
+          />
+        );
       case "ArcGIS":
-        return <ArcGISLayerForm
-          ref="ArcGISLayerForm"
-          model={this.props.model}
-          layer={this.state.layer}
-          url={this.props.config.url_default_server}
-          parent={this} />
-        case "Vector":
-        return <VectorLayerForm
-          ref="VectorLayerForm"
-          model={this.props.model}
-          layer={this.state.layer}
-          url={this.props.config.url_default_server}
-          parent={this} />
-      default :
+        return (
+          <ArcGISLayerForm
+            ref="ArcGISLayerForm"
+            model={this.props.model}
+            layer={this.state.layer}
+            url={this.props.config.url_default_server}
+            parent={this}
+          />
+        );
+      case "Vector":
+        return (
+          <VectorLayerForm
+            ref="VectorLayerForm"
+            model={this.props.model}
+            layer={this.state.layer}
+            url={this.props.config.url_default_server}
+            parent={this}
+          />
+        );
+      default:
         return <WMSLayerForm model={this.props.model} parent={this} />;
     }
   }
@@ -653,7 +672,7 @@ class Manager extends Component {
           alert: false,
           confirm: false,
           alertMessage: ""
-        })
+        });
       },
       denyAction: () => {
         this.state.denyAction();
@@ -661,13 +680,13 @@ class Manager extends Component {
           alert: false,
           confirm: false,
           alertMessage: ""
-        })
+        });
       },
       onClick: () => {
         this.setState({
           alert: false,
           alertMessage: ""
-        })
+        });
       }
     };
   }
@@ -675,45 +694,72 @@ class Manager extends Component {
    *
    */
   render() {
-
-    var abort = this.state.mode === "edit" ? <span className="btn btn-danger" onClick={(e) => this.abort(e)}>Avbryt</span> : null
-    ,   url = this.props.config.url_import //"/mapservice/export/importimage"
-    ,   typeSelectorDisabled = this.state.mode === "edit"
-    ;
+    var abort =
+        this.state.mode === "edit" ? (
+          <span className="btn btn-danger" onClick={e => this.abort(e)}>
+            Avbryt
+          </span>
+        ) : null,
+      url = this.props.config.url_import, // "/mapservice/export/importimage"
+      typeSelectorDisabled = this.state.mode === "edit";
 
     return (
       <section className="tab-pane active">
-        <Alert options={this.getAlertOptions()}/>
+        <Alert options={this.getAlertOptions()} />
         <aside>
-          <input placeholder="filtrera" type="text" onChange={(e) => this.filterLayers(e)} />
-          <ul className="config-layer-list">
-            {this.renderLayersFromConfig()}
-          </ul>
+          <input
+            placeholder="filtrera"
+            type="text"
+            onChange={e => this.filterLayers(e)}
+          />
+          <ul className="config-layer-list">{this.renderLayersFromConfig()}</ul>
         </aside>
         <article>
-          <form id="upload-form" method="post" action={url} encType="multipart/form-data" target="upload-iframe">
-            <input style={
-                {
-                  opacity: 0,
-                  position: 'absolute',
-                  width: 'auto',
-                  height: '100%',
-                  padding: 0,
-                  top: '-500px'
-                }
-              }
+          <form
+            id="upload-form"
+            method="post"
+            action={url}
+            encType="multipart/form-data"
+            target="upload-iframe"
+          >
+            <input
+              style={{
+                opacity: 0,
+                position: "absolute",
+                width: "auto",
+                height: "100%",
+                padding: 0,
+                top: "-500px"
+              }}
               id="select-image"
               type="file"
               multiple="false"
               name="files[]"
-              onChange={(e) => this.uploadLegend(e)}
+              onChange={e => this.uploadLegend(e)}
             />
-            <iframe id="upload-iframe" name="upload-iframe" ref="uploadIframe" style={{display: 'none'}}></iframe>
+            <iframe
+              id="upload-iframe"
+              name="upload-iframe"
+              ref="uploadIframe"
+              style={{ display: "none" }}
+            />
           </form>
-          <form method="post" action="" onSubmit={(e) => { this.submit(e) }}>
+          <form
+            method="post"
+            action=""
+            onSubmit={e => {
+              this.submit(e);
+            }}
+          >
             <p>
               <label>Välj lagertyp</label>
-              <select disabled={typeSelectorDisabled} value={this.state.layerType} onChange={(e) => { this.setState({layerType: e.target.value}) }}>
+              <select
+                disabled={typeSelectorDisabled}
+                value={this.state.layerType}
+                onChange={e => {
+                  this.setState({ layerType: e.target.value });
+                }}
+              >
                 <option>WMS</option>
                 <option value="ExtendedWMS">Extended WMS</option>
                 <option>WMTS</option>
@@ -722,13 +768,13 @@ class Manager extends Component {
               </select>
             </p>
             {this.renderForm()}
-            <button className="btn btn-primary">{this.state.mode == "edit" ? "Spara" : "Lägg till"}</button>&nbsp;
+            <button className="btn btn-primary">
+              {this.state.mode == "edit" ? "Spara" : "Lägg till"}
+            </button>&nbsp;
             {abort}
           </form>
         </article>
-        <div className="details">
-          {this.renderLayerProperties()}
-        </div>
+        <div className="details">{this.renderLayerProperties()}</div>
       </section>
     );
   }

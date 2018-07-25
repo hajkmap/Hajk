@@ -148,7 +148,7 @@ module.exports = function (grunt) {
       },
       dist: {
         files: {
-            // target : source
+          // target : source
           'dist/js/<%= pkg.name %>-transpiled.js': 'compiled/<%= pkg.name %>.js'
         }
       }
@@ -334,8 +334,8 @@ module.exports = function (grunt) {
         },
         files: {
           src: [
-              // 'src/**/*.js',
-              // 'src/**/*.jsx'
+            // 'src/**/*.js',
+            // 'src/**/*.jsx'
             'release/js/<%= pkg.name %>-<%= pkg.version %>.min.js'
           ]
         }

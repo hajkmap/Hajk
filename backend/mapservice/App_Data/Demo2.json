@@ -423,6 +423,7 @@
     "colors": {
       "primaryColor": "#bd4f2b",
       "secondaryColor": "#c91d1d"
-    }
+    },
+    "geoserverLegendOptions": ""
   }
 }

@@ -49,7 +49,7 @@ var SelectionPanelView = {
     });
   },
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     this.props.model.setActiveTool('');
     this.props.model.off('change:activeTool');
   },
@@ -64,8 +64,8 @@ var SelectionPanelView = {
 
   getClassNames: function (type) {
     return this.state.activeTool === type
-      ? "btn btn-primary"
-      : "btn btn-default";
+      ? 'btn btn-primary'
+      : 'btn btn-default';
   },
 
   /**
@@ -74,25 +74,24 @@ var SelectionPanelView = {
    * @return {external:ReactElement}
    */
   render: function () {
-
     var anchor = this.props.model.get('anchor');
 
     return (
-      <div className="selection-toolbar">
+      <div className='selection-toolbar'>
         <div>Sök baserat på markering i kartan</div>
-        <div className="btn-group btn-group-lg">
-          <button onClick={() => this.activateTool('drawSelection')} type="button" className={this.getClassNames('drawSelection')} title="Markera efter polygon" >
-            <i className="fa iconmoon-yta icon"></i>
+        <div className='btn-group btn-group-lg'>
+          <button onClick={() => this.activateTool('drawSelection')} type='button' className={this.getClassNames('drawSelection')} title='Markera efter polygon' >
+            <i className='fa iconmoon-yta icon' />
           </button>
-          <button onClick={() => this.activateTool('multiSelect')} type="button" className={this.getClassNames('multiSelect')} title="Markera flera objekt" >
-            <i className="fa fa-plus icon"></i>
+          <button onClick={() => this.activateTool('multiSelect')} type='button' className={this.getClassNames('multiSelect')} title='Markera flera objekt' >
+            <i className='fa fa-plus icon' />
           </button>
 
         </div>
-        <div className="btn btn-link" onClick={(e) => {
-            e.preventDefault();
-            this.props.model.abort();
-          }}>Rensa markering</div>
+        <div className='btn btn-link' onClick={(e) => {
+          e.preventDefault();
+          this.props.model.abort();
+        }}>Rensa markering</div>
       </div>
     );
   }

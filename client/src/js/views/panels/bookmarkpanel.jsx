@@ -30,7 +30,7 @@ var BookmarkPanelView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function() {
+  getInitialState: function () {
     return {
     };
   },
@@ -68,7 +68,7 @@ var BookmarkPanelView = {
   onSubmitForm: function (e) {
     e.preventDefault();
     var name = ReactDOM.findDOMNode(this.refs.name).value;
-    if(name.length > 0) {
+    if (name.length > 0) {
       this.props.model.addBookmark(name, () => this.forceUpdate());
     }
   },
@@ -93,7 +93,7 @@ var BookmarkPanelView = {
   updateBookmark: function (id, e) {
     var bookmarks = this.props.model.getBookmarks();
     var bookmark = bookmarks.filter(bookmark => bookmark.id === id)[0];
-    bookmarks.forEach((bookmark) => { bookmark.favourite = false });
+    bookmarks.forEach((bookmark) => { bookmark.favourite = false; });
 
     if (bookmark) {
       bookmark.favourite = true;
@@ -112,8 +112,8 @@ var BookmarkPanelView = {
     this.props.model.updateApplication(bookmark);
   },
 
-  openInstruction: function (){
-    var element = $("#instructionText");
+  openInstruction: function () {
+    var element = $('#instructionText');
     element.toggle();
   },
 
@@ -123,39 +123,38 @@ var BookmarkPanelView = {
    * @return {external:ReactElement}
    */
   render: function () {
-
     var bookmarks = this.props.model.getBookmarks();
     var items = null;
 
     if (bookmarks) {
       items = bookmarks.map((bookmark, i) => {
-        var iconClass = bookmark.favourite ?
-          'favourite fa icon fa-check-circle' :
-          'favourite fa icon fa-circle';
+        var iconClass = bookmark.favourite
+          ? 'favourite fa icon fa-check-circle'
+          : 'favourite fa icon fa-circle';
         return (
           <li key={i} onClick={this.loadBookmark.bind(this, bookmark)}>
-            <i className={iconClass} onClick={this.updateBookmark.bind(this, bookmark.id)}></i>
+            <i className={iconClass} onClick={this.updateBookmark.bind(this, bookmark.id)} />
             {bookmark.name}
-            <i className="delete fa icon fa-remove" onClick={this.removeBookmark.bind(this, bookmark.name)}></i>
+            <i className='delete fa icon fa-remove' onClick={this.removeBookmark.bind(this, bookmark.name)} />
           </li>
         );
       });
     }
 
     return (
-      <Panel title="Bokmärken" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
-        <div className="bookmark-panel panel-content">
+      <Panel title='Bokmärken' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
+        <div className='bookmark-panel panel-content'>
           <form onSubmit={this.onSubmitForm}>
-            <div className="form-group">
+            <div className='form-group'>
               <label>Lägg till bokmärke</label>
-              <div className="input-group">
-                <div className="input-group-addon">
-                  <i className="fa fa-bookmark"></i>
+              <div className='input-group'>
+                <div className='input-group-addon'>
+                  <i className='fa fa-bookmark' />
                 </div>
-                <input type="text"
-                  ref="name"
-                  className="form-control"
-                  placeholder="Ange namn" />
+                <input type='text'
+                  ref='name'
+                  className='form-control'
+                  placeholder='Ange namn' />
               </div>
             </div>
           </form>

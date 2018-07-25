@@ -25,18 +25,18 @@
  */
 var InformationView = {
 
-  componentDidMount: function() {
+  componentDidMount: function () {
     this.props.model.on('change:display', () => {
       this.setState({
         display: this.props.model.get('display')
-      })
+      });
     });
     this.setState({
       display: this.props.model.get('display')
     });
   },
 
-  componentWillUnMount: function() {
+  componentWillUnMount: function () {
     this.props.model.off('change:display');
   },
 
@@ -49,7 +49,7 @@ var InformationView = {
     this.props.model.set('display', false);
   },
 
-  /**lo
+  /** lo
    * Render the legend item component.
    * @instance
    * @return {external:ReactElement}
@@ -57,18 +57,18 @@ var InformationView = {
   render: function () {
     if (this.state && this.state.display) {
       var infoContent = this.props.model.get('text');
-      if(this.props.model.get('base64EncodeForInfotext')){
+      if (this.props.model.get('base64EncodeForInfotext')) {
         infoContent = atob(infoContent);
       }
 
       return (
-        <div id="blanket">
-          <div id="container">
-            <div key="a" id="header">{this.props.model.get('headerText')}
-              <i className="fa fa-times pull-right clickable panel-close" id="close" onClick={this.close}></i>
+        <div id='blanket'>
+          <div id='container'>
+            <div key='a' id='header'>{this.props.model.get('headerText')}
+              <i className='fa fa-times pull-right clickable panel-close' id='close' onClick={this.close} />
             </div>
-            <div id="body-wrapper">
-              <div key="b" id="body" dangerouslySetInnerHTML={{__html: infoContent}}></div>
+            <div id='body-wrapper'>
+              <div key='b' id='body' dangerouslySetInnerHTML={{__html: infoContent}} />
             </div>
           </div>
         </div>

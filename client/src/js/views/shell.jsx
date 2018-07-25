@@ -26,8 +26,8 @@ var Toolbar = require('views/toolbar');
 var LayerCollection = require('collections/layers');
 var Toolcollection = require('collections/tools');
 var NavigationPanel = require('views/navigationpanel');
-var NavigationPanelModel = require("models/navigation");
-var SearchBar = require("components/searchbar");
+var NavigationPanelModel = require('models/navigation');
+var SearchBar = require('components/searchbar');
 
 /**
  * @class
@@ -38,7 +38,7 @@ var ShellView = {
    * @instance
    * @return {object}
    */
-  getDefaultProps : function () {
+  getDefaultProps: function () {
     return {
       config: {
         layers: [],
@@ -85,17 +85,17 @@ var ShellView = {
    * @param {number} scale
    * @return {string} formatted
    */
-  formatScale: function(scale) {
-    return Math.round(scale).toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  formatScale: function (scale) {
+    return Math.round(scale).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
   },
 
-  configure: function() {
+  configure: function () {
     this.model.configure.call(this.model);
     this.setState({
       views: [
         <MapView key={this.model.cid} id={this.model.cid} />,
-        <Toolbar key="toolbar" model={this.model.get('toolCollection')} navigationModel={this.model.get('navigation')} />,
-        <NavigationPanel key="navigation" model={this.model.get('navigation')} />
+        <Toolbar key='toolbar' model={this.model.get('toolCollection')} navigationModel={this.model.get('navigation')} />,
+        <NavigationPanel key='navigation' model={this.model.get('navigation')} />
       ],
       scale: this.formatScale(this.model.getMap().getScale())
     });
@@ -131,7 +131,6 @@ var ShellView = {
       // Implementera inläsning av configobjekt för verktyg.
       // this.model.get('toolCollection').update(config.toolCollection);
     });
-
   },
 
   /**
@@ -140,56 +139,56 @@ var ShellView = {
    * @return {external:ReactElement}
    */
   render: function () {
-    var views = this.state.views
-    ,   scale
-    ,   popup
-    ,   searchbar
-    ,   logo
-    ,   pil;
+    var views = this.state.views,
+      scale,
+      popup,
+      searchbar,
+      logo,
+      pil;
 
     if (views.length === 3) {
       if (this.model.get('map').get('logo')) {
         logo = (
-          <div className="map-logo">
-            <img src={this.model.get('map').get('logo')}></img>
+          <div className='map-logo'>
+            <img src={this.model.get('map').get('logo')} />
           </div>
         );
       }
 
       if (this.model.get('map').get('pil') && isMobile) {
         pil = (
-          <div className="map-pil">
-            <img src={this.model.get('map').get('pil')}></img>
+          <div className='map-pil'>
+            <img src={this.model.get('map').get('pil')} />
           </div>
         );
       }
 
       scale = (
-        <div id="map-scale" className="map-scale">
-          <div id="map-scale-bar"></div>
-          <div className="map-scale-text">1:{this.state.scale}</div>
+        <div id='map-scale' className='map-scale'>
+          <div id='map-scale-bar' />
+          <div className='map-scale-text'>1:{this.state.scale}</div>
         </div>
-      )
+      );
 
       popup = (
-        <div id="popup" className="ol-popup">
-          <a href="#" id="popup-closer" className="ol-popup-closer"></a>
-          <div id="popup-content"></div>
+        <div id='popup' className='ol-popup'>
+          <a href='#' id='popup-closer' className='ol-popup-closer' />
+          <div id='popup-content' />
         </div>
-      )
+      );
 
       var searchTool = this.model.get('toolCollection').find(tool => tool.get('type') === 'search');
       if (searchTool && searchTool.get('onMap')) {
         searchbar = (
-          <div className="search-bar-holder">
-            <SearchBar model={this.model.get('toolCollection').find(tool => tool.get('type') === 'search')}></SearchBar>
+          <div className='search-bar-holder'>
+            <SearchBar model={this.model.get('toolCollection').find(tool => tool.get('type') === 'search')} />
           </div>
-        )
+        );
       }
     }
 
     return (
-      <div className="shell">
+      <div className='shell'>
         {logo}
         {pil}
         {scale}

@@ -29,22 +29,22 @@ var LayerItemView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function() {
+  getInitialState: function () {
     return {
-      caption: "",
+      caption: '',
       visible: false,
       expanded: false,
-      name: "",
+      name: '',
       legend: [],
-      status: "ok",
+      status: 'ok',
       infoVisible: false,
-      infoTitle: "",
-      infoText: "",
-      infoUrl: "",
-      infoUrlText: "",
-      infoOwner: "",
+      infoTitle: '',
+      infoText: '',
+      infoUrl: '',
+      infoUrlText: '',
+      infoOwner: '',
       infoExpanded: false,
-      instruction: ""
+      instruction: ''
     };
   },
 
@@ -53,9 +53,9 @@ var LayerItemView = {
    * @instance
    */
   componentDidMount: function () {
-    this.props.layer.on("change:status", this.onStatusChanged, this);
-    this.props.layer.on("change:visible", this.onVisibleChanged, this);
-    this.props.layer.on("change:legend", this.onLegendChanged, this);
+    this.props.layer.on('change:status', this.onStatusChanged, this);
+    this.props.layer.on('change:visible', this.onVisibleChanged, this);
+    this.props.layer.on('change:legend', this.onLegendChanged, this);
     this.props.layer.on('change:showLegend', this.onShowLegendChanged, this);
     this.props.layer.on('change:showInfo', this.onShowInfoChanged, this);
     this.setState({
@@ -79,10 +79,10 @@ var LayerItemView = {
    * @instance
    */
   componentWillUnmount: function () {
-    this.props.layer.off("change:visible", this.onVisibleChanged, this);
-    this.props.layer.off("change:legend", this.onLegendChanged, this);
+    this.props.layer.off('change:visible', this.onVisibleChanged, this);
+    this.props.layer.off('change:legend', this.onLegendChanged, this);
     this.props.layer.off('change:showLegend', this.onShowLegendChanged, this);
-    this.props.layer.off("change:status", this.onStatusChanged, this);
+    this.props.layer.off('change:status', this.onStatusChanged, this);
     this.props.layer.off('change:showInfo', this.onShowInfoChanged, this);
   },
 
@@ -166,12 +166,12 @@ var LayerItemView = {
    * @return {external:ReactElement}
    */
   renderStatus: function () {
-    return this.state.status === "loaderror" ?
-    (
-      <span href="#" className="tooltip" title="Lagret kunde inte laddas in. Kartservern svarar inte.">
-        <span title="" className="fa fa-exclamation-triangle tile-load-warning"></span>
-      </span>
-    ) : null;
+    return this.state.status === 'loaderror'
+      ? (
+        <span href='#' className='tooltip' title='Lagret kunde inte laddas in. Kartservern svarar inte.'>
+          <span title='' className='fa fa-exclamation-triangle tile-load-warning' />
+        </span>
+      ) : null;
   },
 
   /**
@@ -180,19 +180,19 @@ var LayerItemView = {
    * @return {external:ReactElement}
    */
   render: function () {
-    var caption       = this.state.caption
-    ,   expanded      = this.state.showLegend
-    ,   visible       = this.state.visible
-    ,   toggleLegend  = (e) => { this.toggleLegend(e) }
-    ,   toggleVisible = (e) => { this.toggleVisible(e) }
-    ,   toggleInfo  = (e) => { this.toggleInfo(e) }
-    ,   infoVisible   = this.state.infoVisible
-    ,   infoTitle     = this.state.infoTitle
-    ,   infoText      = this.state.infoText
-    ,   infoUrl       = this.state.infoUrl
-    ,   infoUrlText       = this.state.infoUrlText
-    ,   infoOwner     = this.state.infoOwner
-    ,   infoExpanded  = this.state.showInfo;
+    var caption = this.state.caption,
+      expanded = this.state.showLegend,
+      visible = this.state.visible,
+      toggleLegend = (e) => { this.toggleLegend(e); },
+      toggleVisible = (e) => { this.toggleVisible(e); },
+      toggleInfo = (e) => { this.toggleInfo(e); },
+      infoVisible = this.state.infoVisible,
+      infoTitle = this.state.infoTitle,
+      infoText = this.state.infoText,
+      infoUrl = this.state.infoUrl,
+      infoUrlText = this.state.infoUrlText,
+      infoOwner = this.state.infoOwner,
+      infoExpanded = this.state.showInfo;
 
     if (!caption) {
       return null;
@@ -202,23 +202,23 @@ var LayerItemView = {
       legendExpanded: expanded
     });
 
-    var innerBodyClass = expanded && components.legend.legendPanel ? "panel-body" : "hidden";
+    var innerBodyClass = expanded && components.legend.legendPanel ? 'panel-body' : 'hidden';
 
-    var statusClass = this.state.status === "loaderror" ? "fa fa-exclamation-triangle tile-load-warning tooltip" : "";
+    var statusClass = this.state.status === 'loaderror' ? 'fa fa-exclamation-triangle tile-load-warning tooltip' : '';
 
     var componentsInfo = this.props.layer.getExtendedComponents({
       infoExpanded: infoExpanded
     });
 
-    var innerInfoBodyClass = infoExpanded && componentsInfo.legend.legendPanel ? "dropdown" : "hidden";
-    
-    var infoUrlText =  this.state.infoUrlText && this.state.infoUrlText.length ? this.state.infoUrlText : this.state.infoUrl;
+    var innerInfoBodyClass = infoExpanded && componentsInfo.legend.legendPanel ? 'dropdown' : 'hidden';
+
+    var infoUrlText = this.state.infoUrlText && this.state.infoUrlText.length ? this.state.infoUrlText : this.state.infoUrl;
 
     return (
-      <div className="panel panel-default layer-item">
-        <div className="panel-heading unselectable" onClick={toggleLegend}>
-          <span onClick={toggleVisible} className="clickable" style={{ position: 'relative', top: '3px' }}>
-            <i className={visible ? 'fa fa-check-square-o': 'fa fa-square-o'} style={{ width: '15px'}}></i>&nbsp;
+      <div className='panel panel-default layer-item'>
+        <div className='panel-heading unselectable' onClick={toggleLegend}>
+          <span onClick={toggleVisible} className='clickable' style={{ position: 'relative', top: '3px' }}>
+            <i className={visible ? 'fa fa-check-square-o' : 'fa fa-square-o'} style={{ width: '15px'}} />&nbsp;
             {this.renderStatus()}
             <label className={visible ? 'layer-item-header-text active-group' : 'layer-item-header-text'}>{caption}</label>&nbsp;
           </span>
@@ -230,10 +230,10 @@ var LayerItemView = {
 
         </div>
         <div className={innerInfoBodyClass}>
-          <p className="info-title" dangerouslySetInnerHTML={{__html: this.state.infoTitle}}></p>
-          <p className="info-text" dangerouslySetInnerHTML={{__html: this.state.infoText}}></p>
-          <a className="info-text" href={this.state.infoUrl} target="_blank" dangerouslySetInnerHTML={{__html: infoUrlText}}></a>
-          <p className="info-text" dangerouslySetInnerHTML={{__html: this.state.infoOwner}}></p>
+          <p className='info-title' dangerouslySetInnerHTML={{__html: this.state.infoTitle}} />
+          <p className='info-text' dangerouslySetInnerHTML={{__html: this.state.infoText}} />
+          <a className='info-text' href={this.state.infoUrl} target='_blank' dangerouslySetInnerHTML={{__html: infoUrlText}} />
+          <p className='info-text' dangerouslySetInnerHTML={{__html: this.state.infoOwner}} />
         </div>
 
         <div className={innerBodyClass}>

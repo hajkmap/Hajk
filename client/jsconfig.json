@@ -36,7 +36,8 @@
         "compiled/infopanel.js": ["src/js/views/panels/infopanel.jsx"],
         "compiled/bookmarkpanel.js": ["src/js/views/panels/bookmarkpanel.jsx"],
         "compiled/presetpanel.js": ["src/js/views/panels/presetpanel.jsx"],
-        "compiled/measurepanel.js": ["src/js/views/panels/measurepanel.jsx"]
+        "compiled/measurepanel.js": ["src/js/views/panels/measurepanel.jsx"],
+        "compiled/mailexportpanel.js": ["src/js/views/panels/mailexportpanel.jsx"]
       }
     },
     "views": {
@@ -80,6 +81,7 @@
         "tools/location": "./src/js/tools/location.js",
         "tools/preset": "./src/js/tools/preset.js",
         "tools/measure": "./src/js/tools/measure.js",
+        "tools/mailexport": "./src/js/tools/mailexport.js",
         "layers/layer": "./src/js/layers/layer.js",
         "layers/wmslayer": "./src/js/layers/wmslayer.js",
         "layers/extendedwmslayer": "./src/js/layers/extendedwmslayer.js",
@@ -119,6 +121,7 @@
         "views/presetpanel": "./compiled/presetpanel.js",
         "views/measurepanel": "./compiled/measurepanel.js",
         "views/exportpanel": "./compiled/exportpanel.js",
+        "views/mailexportpanel": "./compiled/mailexportpanel.js",
         "views/panel": "./compiled/panel.js",
         "views/layerpanel": "./compiled/layerpanel.js",
         "views/layeritem": "./compiled/layeritem.js",

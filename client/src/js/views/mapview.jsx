@@ -29,9 +29,9 @@ var MapView = {
    * @instance
    * @return {object}
    */
-  getDefaultProps : function () {
+  getDefaultProps: function () {
     return {
-      id: "",
+      id: '',
       loaded: function () {}
     };
   },
@@ -47,7 +47,7 @@ var MapView = {
    */
   render: function () {
     return (
-      <div id={this.props.id} className="map-fullscreen"></div>
+      <div id={this.props.id} className='map-fullscreen' />
     );
   }
 };

@@ -46,10 +46,10 @@ namespace MapService.Components
         /// <param name="text"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        private void drawText(XGraphics gfx, string text, int x, int y, int height = 10)
+        private void drawText(XGraphics gfx, string fontName, string text, int x, int y, int height = 10)
         {
             XColor color = XColors.Black;
-            XFont font = new XFont("Verdana", height);
+            XFont font = new XFont(fontName, height);
             XBrush brush = new XSolidBrush(color);
             gfx.DrawString(text, font, brush, x, y);
         }
@@ -80,7 +80,7 @@ namespace MapService.Components
         /// <param name="path"></param>
         /// <param name="exportItem"></param>
         /// <returns>byte[]</returns>
-        private byte[] createPdf(Image img, MapExportItem exportItem)
+        private byte[] createPdf(Image img, MapExportItem exportItem, string fontName)
         {
             PdfDocument document = new PdfDocument();
             PdfPage page = document.AddPage();
@@ -158,21 +158,21 @@ namespace MapService.Components
 
                 gfx.DrawPolygon(XBrushes.White, points, XFillMode.Winding);
 
-                this.drawText(gfx, String.Format("Skala 1:{0}", exportItem.scale), 15, 25);
+                this.drawText(gfx, fontName, String.Format("Skala 1:{0}", exportItem.scale), 15, 25);
                 gfx.DrawLine(XPens.Black, new XPoint(15, 32), new XPoint(15 + displayLength, 32));
                 gfx.DrawLine(XPens.Black, new XPoint(15, 28), new XPoint(15, 36));
                 gfx.DrawLine(XPens.Black, new XPoint(15 + displayLength, 28), new XPoint(15 + displayLength, 36));
-                this.drawText(gfx, displayText, 20 + displayLength, 35);
+                this.drawText(gfx, fontName, displayText, 20 + displayLength, 35);
 
                 var y = (int)page.Height.Point - 15;
 
-                this.drawText(gfx, infoText, 15, y);
+                this.drawText(gfx, fontName, infoText, 15, y);
 
                 int i = 0;
                 copyrights.ForEach(copyright =>
                 {
                     int start = 50;
-                    this.drawText(gfx, String.Format("© {0}", copyright), 15, start + i * 10);
+                    this.drawText(gfx, fontName, String.Format("© {0}", copyright), 15, start + i * 10);
                     i++;
                 });
 
@@ -219,22 +219,22 @@ namespace MapService.Components
 
                 gfx.DrawPolygon(XBrushes.White, points, XFillMode.Winding);
                 // x y
-                this.drawText(gfx, String.Format("Skala 1:{0}", exportItem.scale), 33, (int)page.Height.Point - 23, 8);
+                this.drawText(gfx, fontName, String.Format("Skala 1:{0}", exportItem.scale), 33, (int)page.Height.Point - 23, 8);
                 gfx.DrawLine(XPens.Black, new XPoint(33, (int)page.Height.Point - 18), new XPoint(33 + displayLength, (int)page.Height.Point - 18));
                 gfx.DrawLine(XPens.Black, new XPoint(33, (int)page.Height.Point - 15), new XPoint(33, (int)page.Height.Point - 21));
                 gfx.DrawLine(XPens.Black, new XPoint(33 + displayLength / 2, (int)page.Height.Point - 17), new XPoint(33 + displayLength / 2, (int)page.Height.Point - 19));
                 gfx.DrawLine(XPens.Black, new XPoint(33 + displayLength, (int)page.Height.Point - 15), new XPoint(33 + displayLength, (int)page.Height.Point - 21));
-                this.drawText(gfx, displayText, 38 + displayLength, (int)page.Height.Point - 16, 8);
+                this.drawText(gfx, fontName, displayText, 38 + displayLength, (int)page.Height.Point - 16, 8);
                 
                 var y = (int)page.Height.Point - 2;
 
-                this.drawText(gfx, infoText, 33, y, 8);
+                this.drawText(gfx, fontName, infoText, 33, y, 8);
 
                 int i = 0;
                 copyrights.ForEach(copyright =>
                 {
                     int start = (int)page.Height.Point - 15;
-                    this.drawText(gfx, String.Format("© {0}", copyright), (int)page.Width.Point - 100, start + i * 10, 8);
+                    this.drawText(gfx, fontName, String.Format("© {0}", copyright), (int)page.Width.Point - 100, start + i * 10, 8);
                     i++;
                 });
 
@@ -297,14 +297,9 @@ namespace MapService.Components
             throw new ApplicationException("Unknown page size");
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="dataSet"></param>
-        /// <returns></returns>
-        public byte[] Create(MapExportItem exportItem)
+        public byte[] Create(MapExportItem exportItem, string fontName)
         {
-            return this.createPdf(MapImageCreator.GetImage(exportItem), exportItem);
+            return this.createPdf(MapImageCreator.GetImage(exportItem), exportItem, fontName);
         }
     }
 }

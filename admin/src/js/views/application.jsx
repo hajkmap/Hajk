@@ -43,8 +43,8 @@ import searchModel from '../models/search.js';
 var defaultState = {
   alert: false,
   corfirm: false,
-  alertMessage: "",
-  content: "",
+  alertMessage: '',
+  content: '',
   confirmAction: () => {},
   denyAction: () => {}
 };
@@ -55,7 +55,7 @@ class Application extends Component {
   /**
    *
    */
-  constructor() {
+  constructor () {
     super();
     this.state = defaultState;
   }
@@ -76,16 +76,16 @@ class Application extends Component {
   /**
    *
    */
-  resetAlert() {
+  resetAlert () {
     this.setState({
       alert: false,
-      alertMessage: ""
+      alertMessage: ''
     });
   }
   /**
    *
    */
-  getAlertOptions() {
+  getAlertOptions () {
     return {
       visible: this.state.alert,
       message: this.state.alertMessage,
@@ -95,36 +95,36 @@ class Application extends Component {
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ""
-        })
+          alertMessage: ''
+        });
       },
       denyAction: () => {
         this.state.denyAction();
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ""
-        })
+          alertMessage: ''
+        });
       },
       onClick: () => {
         this.setState({
           alert: false,
-          alertMessage: ""
-        })
+          alertMessage: ''
+        });
       }
     };
   }
   /**
    *
    */
-  renderTabs() {
+  renderTabs () {
     if (!this.state) return null;
 
     var tabs = this.props.tabs;
 
-    return tabs.map((item, i) =>  {
-      var anchor = "#!/" + item.name
-      ,   active = this.state.content === item.name ? "active" : "";
+    return tabs.map((item, i) => {
+      var anchor = '#!/' + item.name,
+        active = this.state.content === item.name ? 'active' : '';
       return (
         <li className={active} key={i}>
           <a href={anchor}>{item.title}</a>
@@ -133,7 +133,7 @@ class Application extends Component {
     });
   }
 
-  getView(name) {
+  getView (name) {
     switch (name) {
       case 'edit':
         return Edit;
@@ -152,7 +152,7 @@ class Application extends Component {
     }
   }
 
-  getModel(name) {
+  getModel (name) {
     switch (name) {
       case 'edit':
         return new editModel();
@@ -174,7 +174,7 @@ class Application extends Component {
   /**
    *
    */
-  renderContent() {
+  renderContent () {
     if (!this.state || !this.state.content) return null;
 
     var content = null;
@@ -182,8 +182,7 @@ class Application extends Component {
     try {
       content = this.getView(this.state.content);
       model = this.getModel(this.state.content);
-    }
-    catch (e) {
+    } catch (e) {
       console.error(e);
       return (<div>{e.message}</div>);
     }
@@ -197,25 +196,24 @@ class Application extends Component {
   /**
    *
    */
-  render() {
+  render () {
     var content = this.renderContent();
     var tabs = this.renderTabs();
 
     return (
       <main>
-        <Alert options={this.getAlertOptions()}/>
+        <Alert options={this.getAlertOptions()} />
         <nav>
-          <ul className="nav nav-tabs">
+          <ul className='nav nav-tabs'>
             {tabs}
           </ul>
         </nav>
-        <section className="tab-content">
+        <section className='tab-content'>
           {content}
         </section>
       </main>
     );
   }
-
 }
 
 export default Application;
