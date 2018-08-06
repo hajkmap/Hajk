@@ -16,15 +16,9 @@ import WFSVectorLayer from "./layers/VectorLayer.js";
 // import Drag from "./Drag.js";
 // import interaction from "ol/Interaction";
 
+import { Map, View, Overlay } from "ol";
+import { Zoom, Rotate, ScaleLine, Attribution } from "ol/control";
 import { register } from "ol/proj/proj4";
-
-import Map from "ol/Map";
-import View from "ol/View";
-import Zoom from "ol/control/Zoom";
-import Rotate from "ol/control/Rotate";
-import ScaleLine from "ol/control/ScaleLine";
-import Overlay from "ol/Overlay";
-import Attribution from "ol/control/Attribution";
 
 const pluginsFolder = "plugins";
 var map;
@@ -39,6 +33,7 @@ class AppModel {
     );
 
     register(this.coordinateSystemLoader.getProj4());
+    console.log("constructor() in AppModel.js finished.");
   }
 
   addPlugin(plugin) {
@@ -69,6 +64,10 @@ class AppModel {
   }
 
   getToolbarPlugins() {
+    console.log(
+      "getToolbarPlugins() in AppModel.js has following plugins available: ",
+      this.plugins
+    );
     return Object.keys(this.plugins).reduce((v, key) => {
       if (this.plugins[key].target === "toolbar") {
         v = [...v, this.plugins[key]];
@@ -94,7 +93,7 @@ class AppModel {
                   component: module.default
                 })
               );
-              callback();
+              callback(plugin);
             })
             .catch(err => {
               console.error(err);
@@ -118,10 +117,9 @@ class AppModel {
 
   /**
    * Initialize open layers map
-   * @param {string} target Target div
    * @return {ol.Map} map
    */
-  createMap(target) {
+  createMap() {
     var config = this.translateConfig();
     map = new Map({
       //interactions: interaction.defaults().extend([new Drag()]),
@@ -187,7 +185,7 @@ class AppModel {
         map.addLayer(layerItem.layer);
         break;
       case "vector":
-        layerConfig = configMapper.mapVectorConfig(layer);
+        layerConfig = configMapper.mapVectorConfig(layer, this.config);
         layerItem = new WFSVectorLayer(
           layerConfig.options,
           this.config.appConfig.proxy,
@@ -238,30 +236,27 @@ class AppModel {
     var layers = [
       ...this.lookup(layerSwitcherConfig.options.baselayers, "base"),
       ...this.lookup(this.expand(layerSwitcherConfig.options.groups), "layer")
-    ];          
+    ];
     layers = layers.reduce((a, b) => {
       a[b["id"]] = b;
       return a;
-    },  {});
+    }, {});
     return layers;
   }
 
   addLayers() {
     let layerSwitcherConfig = this.config.mapConfig.tools.find(
       tool => tool.type === "layerswitcher"
-    );    
-    this.layers = this.flattern(layerSwitcherConfig);      
+    );
+    this.layers = this.flattern(layerSwitcherConfig);
 
-    Object
-      .keys(this.layers)
-      .sort((a, b) => 
-        this.layers[a].drawOrder - this.layers[b].drawOrder)
-      .map(sortedKey => 
-        this.layers[sortedKey])
+    Object.keys(this.layers)
+      .sort((a, b) => this.layers[a].drawOrder - this.layers[b].drawOrder)
+      .map(sortedKey => this.layers[sortedKey])
       .forEach(layer => {
         this.addMapLayer(layer);
       });
-                
+
     return this;
   }
 

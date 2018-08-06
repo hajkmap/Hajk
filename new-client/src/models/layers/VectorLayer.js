@@ -9,15 +9,11 @@
 // https://openlayers.org/en/latest/apidoc/ol.source.ImageVector.html
 
 import VectorSource from "ol/source/Vector";
-import VectorLayer from "ol/layer/Vector";
-import ImageLayer from "ol/layer/Image";
-
+import { Image as ImageLayer, Vector as VectorLayer } from "ol/layer";
 import { WFS, GeoJSON } from "ol/format";
 import GML2 from "ol/format/GML2";
-
 import { Fill, Text, Stroke, Icon, Circle, Style } from "ol/style";
-
-import { all } from "ol/loadingstrategy";
+import { all as strategyAll } from "ol/loadingstrategy";
 import { transform } from "ol/proj";
 
 import LayerInfo from "./LayerInfo.js";
@@ -62,9 +58,8 @@ class WFSVectorLayer {
           }
         }
       },
-      strategy: all
+      strategy: strategyAll
     });
-    console.log("constructor(), this.vectorSource: ", this.vectorSource);
 
     this.layer = new ImageLayer({
       information: config.information,
@@ -80,7 +75,7 @@ class WFSVectorLayer {
         style: this.getStyle.bind(this)
       })
     });
-    console.log("constructor(), this.layer: ", this.layer);
+    // console.log("constructor(), this.layer: ", this.layer);
     this.type = "vector";
   }
 
