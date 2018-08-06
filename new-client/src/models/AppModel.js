@@ -173,12 +173,10 @@ class AppModel {
         );
         map.addLayer(layerItem.layer);
         break;
-
       // case "extendedwms":
       //   layerConfig = configMapper.mapExtendedWMSConfig(layer);
       //   layer = new ExtendedWMSLayer(layerConfig);
       //   break;
-
       case "wmts":
         layerConfig = configMapper.mapWMTSConfig(layer, this.config);
         layerItem = new WMTSLayer(
@@ -188,21 +186,15 @@ class AppModel {
         );
         map.addLayer(layerItem.layer);
         break;
-
       case "vector":
         layerConfig = configMapper.mapVectorConfig(layer);
         layerItem = new WFSVectorLayer(
           layerConfig.options,
           this.config.appConfig.proxy,
           map
-        );
-        console.log("app.js WFS -> layerItem: ", layerItem);
-        /* FIXME: the next line, which calls OL's addLayer(), stops rendering
-           and gives some errors. Uncomment to break your map... */
-        // map.addLayer(layerItem.layer);
-        console.log("app.js after WFS -> addLayer. map is:", map);
+        );              
+        map.addLayer(layerItem.layer);        
         break;
-
       // case "arcgis":
       //   layerConfig = configMapper.mapArcGISConfig(layer);
       //   layer = new ArcGISLayer(layerConfig);
