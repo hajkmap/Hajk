@@ -31,9 +31,7 @@ class AppModel {
     this.coordinateSystemLoader = new CoordinateSystemLoader(
       config.mapConfig.projections
     );
-
     register(this.coordinateSystemLoader.getProj4());
-    console.log("constructor() in AppModel.js finished.");
   }
 
   addPlugin(plugin) {
@@ -64,10 +62,6 @@ class AppModel {
   }
 
   getToolbarPlugins() {
-    console.log(
-      "getToolbarPlugins() in AppModel.js has following plugins available: ",
-      this.plugins
-    );
     return Object.keys(this.plugins).reduce((v, key) => {
       if (this.plugins[key].target === "toolbar") {
         v = [...v, this.plugins[key]];
@@ -161,7 +155,6 @@ class AppModel {
   addMapLayer(layer) {
     const configMapper = new ConfigMapper(this.config.appConfig.proxy);
     let layerItem, layerConfig;
-
     switch (layer.type) {
       case "wms":
         layerConfig = configMapper.mapWMSConfig(layer, this.config);
@@ -190,8 +183,8 @@ class AppModel {
           layerConfig.options,
           this.config.appConfig.proxy,
           map
-        );              
-        map.addLayer(layerItem.layer);        
+        );
+        map.addLayer(layerItem.layer);
         break;
       // case "arcgis":
       //   layerConfig = configMapper.mapArcGISConfig(layer);

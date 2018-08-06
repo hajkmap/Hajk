@@ -74,29 +74,24 @@ class App extends Component {
   }
 
   componentWillMount() {
-    console.log("componentWillMount() creates this.appModel.");
     this.appModel = new AppModel(this.props.config);
   }
 
   componentDidMount() {
-    console.log(
-      "componentDidMount() in App.js. Will call a bunch methods of this.appModel now.",
-      "*** THIS SHOULD SHOW ONLY ONCE ***"
-    );
-    this.appModel
+    var promises = this.appModel
       .configureApplication()
       .createMap()
       .addLayers()
-      .loadPlugins(this.props.activeTools, plugin => {
-        console.log("In callback from loadPlugins(). Got plugin: ", plugin);
-        this.setState({
-          tools: this.appModel.getPlugins()
-        });
+      .loadPlugins(this.props.activeTools, plugin => {});
+
+    Promise.all(promises).then(() => {
+      this.setState({
+        tools: this.appModel.getPlugins()
       });
+    });
   }
 
   render() {
-    console.log("render() in App.js called");
     /* FIXME:
      * render() is called each time a new plugin is being added, as state is changed.
      * This can be optimized if we would do callback (that does this.setState())
