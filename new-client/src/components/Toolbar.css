@@ -1,24 +1,47 @@
-.tool-toggle-button {
+/* .tool-toggle-button { */
+.toolbar > div {
+  background-color: white;
+  color: #333333;
   width: 50px;
   height: 50px;
-  border: 1px solid;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
   cursor: pointer;
   float: left;
-  margin: 10px;
+  margin: 10px 0;
   word-break: break-all;
+  text-align: center;
   font-size: 25pt;
   line-height: 25pt;
-  text-align: center;
-  border-radius: 3px;
 }
 
+.toolbar > div:first-of-type {
+  border-radius: 5px 0 0 5px;
+  border-left: 1px solid black;
+}
+
+.toolbar > div:last-of-type {
+  border-radius: 0 5px 5px 0;
+  border-right: 1px solid black;
+}
+
+.tool-toggle-button {
+  width: 100%;
+  height: 100%;
+}
 .tool-toggle-button:hover {
+  background-color: lightgray;
+}
+
+.tool-toggle-button:active {
+  box-shadow: inset 0 8px 16px 0 rgba(0, 0, 0, 0.24),
+    inset 0 1px 16px 0 rgba(0, 0, 0, 0.24);
 }
 
 .tool-toggle-button.active {
-  background: #00F;
-  box-shadow: 1px 1px 4px #999;
   color: white;
+  background-color: #333333;
+  box-shadow: 1px 1px 4px #999;
 }
 
 .toolbar {
@@ -26,8 +49,6 @@
   bottom: 5px;
   left: 5px;
   right: 5px;
-  background: white;
-  border: 2px solid;
   z-index: 1000;
 }
 
