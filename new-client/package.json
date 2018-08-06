@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "react": "^16.4.0",
-    "react-dom": "^16.4.0",
+    "react": "^16.4.2",
+    "react-dom": "^16.4.2",
     "react-scripts": "1.1.4"
   },
   "scripts": {
@@ -16,7 +16,7 @@
   "devDependencies": {
     "less-watch-compiler": "^1.11.3",
     "marked": "^0.4.0",
-    "ol": "^5.0.0",
+    "ol": "^5.1.3",
     "proj4": "^2.4.4",
     "react-event-observer": "^0.5.11"
   }
