@@ -54,6 +54,9 @@ class LayersSwitcher extends Component {
   }
 
   toggle() {
+    if (!this.state.toggled) {
+      this.props.toolbar.hide();
+    }
     this.setState({
       toggled: !this.state.toggled
     });
@@ -77,16 +80,24 @@ class LayersSwitcher extends Component {
       );
     });
   }
-
   renderPanel() {
     return createPortal(
       <div className={this.getVisibilityClass()}>
-        <BackgroundSwitcher
-          layers={this.options.baselayers}
-          layerMap={this.layerSwitcherModel.layerMap}
-        />
-        <div className="layer-groups">
-          {this.renderLayerGroups()}
+        <div className="header">
+          <i
+            className="fa fa-close pull-right big"
+            onClick={() => {
+              this.toggle();
+            }}
+          />
+          <h1>Lagerhanterare</h1>
+        </div>
+        <div className="tool-panel-content">
+          <BackgroundSwitcher
+            layers={this.options.baselayers}
+            layerMap={this.layerSwitcherModel.layerMap}
+          />
+          <div className="layer-groups">{this.renderLayerGroups()}</div>
         </div>
       </div>,
       document.getElementById("map")
@@ -97,7 +108,8 @@ class LayersSwitcher extends Component {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
-          <i className="fa fa-icon fa-list-alt icon"></i>
+          <i className="fa fa-icon fa-list-alt icon" />
+          <i className="tool-text">Lagerhanterare</i>
         </div>
         {this.renderPanel()}
       </div>

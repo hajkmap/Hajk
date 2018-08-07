@@ -1,7 +1,6 @@
 .tool-toggle-button {
   width: 50px;
   height: 50px;
-  border: 1px solid;
   cursor: pointer;
   float: left;
   margin: 10px;
@@ -9,14 +8,16 @@
   font-size: 25pt;
   line-height: 25pt;
   text-align: center;
-  border-radius: 3px;
+  border-radius: 150px;
 }
 
 .tool-toggle-button:hover {
+  background: #eee;
+  transition: 0.3s;
 }
 
 .tool-toggle-button.active {
-  background: #00F;
+  background: rgb(54, 135, 255);
   box-shadow: 1px 1px 4px #999;
   color: white;
 }
@@ -27,12 +28,68 @@
   left: 5px;
   right: 5px;
   background: white;
-  border: 2px solid;
-  z-index: 1000;
+  border: 1px solid #ccc;
+  z-index: 1001;
+}
+
+.toolbar-toggler {
+  display: none;
 }
 
 .toolbar .icon {
   display: inline-block;
   vertical-align: middle;
   line-height: normal;
+}
+
+.tool-text {
+  display: none;
+}
+
+@media only screen and (max-width: 600px) {
+  .toolbar-toggler {
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    font-size: 20pt;
+    right: 10px;
+    top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 100px;
+    z-index: 1001;
+    display: block;
+    position: fixed;
+    background: white;
+  }
+  .toolbar {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    top: 80px;
+    background: white;
+    z-index: 1000;
+    display: none;
+    border-radius: 0px;
+  }
+  .toolbar.visible {
+    display: block;
+  }
+  .tool-toggle-button {
+    display: block;
+    float: none;
+    width: inherit;
+    text-align: left;
+  }
+  .toolbar .icon {
+    padding-right: 10px;
+    padding-left: 10px;
+    width: 60px;
+    text-align: center;
+  }
+  .tool-text {
+    display: inline;
+    vertical-align: middle;
+  }
 }

@@ -10,7 +10,7 @@ class Informative extends Component {
     this.toggle = this.toggle.bind(this);
     this.state = {
       toggled: false,
-      text: "Laddar...",
+      text: "Laddar..."
     };
   }
 
@@ -32,7 +32,6 @@ class Informative extends Component {
     });
   }
 
-
   open() {
     this.setState({
       toggled: true
@@ -52,6 +51,9 @@ class Informative extends Component {
   }
 
   toggle() {
+    if (!this.state.toggled) {
+      this.props.toolbar.hide();
+    }
     this.setState({
       toggled: !this.state.toggled
     });
@@ -73,14 +75,27 @@ class Informative extends Component {
   }
 
   createMarkup() {
-    return {__html: this.state.text};
+    return { __html: this.state.text };
   }
 
   renderPanel() {
     return createPortal(
       <div className={this.getVisibilityClass()}>
-        <h1>Översiktsplan</h1>
-        <div className="informative" dangerouslySetInnerHTML={this.createMarkup()}></div>
+        <div className="header">
+          <i
+            className="fa fa-close pull-right big"
+            onClick={() => {
+              this.toggle();
+            }}
+          />
+          <h1>Översiktsplan</h1>
+        </div>
+        <div className="tool-panel-content">
+          <div
+            className="informative"
+            dangerouslySetInnerHTML={this.createMarkup()}
+          />
+        </div>
       </div>,
       document.getElementById("map")
     );
@@ -90,7 +105,8 @@ class Informative extends Component {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
-          <i className="fa fa-icon fa-tree icon"></i>
+          <i className="fa fa-icon fa-tree icon" />
+          <i className="tool-text">Översiktsplan</i>
         </div>
         {this.renderPanel()}
       </div>

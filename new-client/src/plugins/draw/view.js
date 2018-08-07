@@ -45,6 +45,9 @@ class Draw extends Component {
   }
 
   toggle() {
+    if (!this.state.toggled) {
+      this.props.toolbar.hide();
+    }
     this.setState({
       toggled: !this.state.toggled
     });
@@ -64,7 +67,18 @@ class Draw extends Component {
   renderPanel() {
     return createPortal(
       <div className={this.getVisibilityClass()}>
-        <div>Draw</div>
+        <div className="header">
+          <i
+            className="fa fa-close pull-right big"
+            onClick={() => {
+              this.toggle();
+            }}
+          />
+          <h1>Draw</h1>
+        </div>
+        <div className="tool-panel-content">
+          <div>Draw</div>
+        </div>
       </div>,
       document.getElementById("map")
     );
@@ -74,7 +88,8 @@ class Draw extends Component {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
-          <i className="fa fa-icon fa-pencil icon"></i>
+          <i className="fa fa-icon fa-pencil icon" />
+          <i className="tool-text">Rita</i>
         </div>
         {this.renderPanel()}
       </div>

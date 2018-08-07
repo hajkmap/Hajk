@@ -54,13 +54,6 @@ import "./App.css";
  *    it calls .addMapLayer() on each of those layers. The .addMapLayer method is important as it
  *    is here that the different layer types, such as WMS, Vector, or ArcGIS are configured.
  *
- *    .loadPlugins() is finally called on this.appModel. That method does an "import" asynchronously
- *    and when it's done a callback is executed that changes state of this App by adding a new Tool
- *    to this.state.tools object.
- *    __IMPORTANT__ This behavior could perhaps be optimized, as we
- *    now change state every time a plugin is added, and each state change calls for a re-render.
- *    Perhaps callback should be done only on Promise.all instead of current on-each-promise.
- *    __END_IMPORTANT_
  *
  * 5. This is pretty much it. Now we have an ol.Map object filled with layers, we have some plugins
  *    (mostly tools probably) loaded. User can interact with the Map as well as plugins and the
@@ -92,13 +85,6 @@ class App extends Component {
   }
 
   render() {
-    /* FIXME:
-     * render() is called each time a new plugin is being added, as state is changed.
-     * This can be optimized if we would do callback (that does this.setState())
-     * only once, when all plugins finished loading.
-     * 
-     * Set a breakpoint on the return statement below.
-     */
     return (
       <div>
         <div className="map" id="map">

@@ -3,6 +3,14 @@ body {
   padding: 0;
 }
 
+.header {
+  background: #dedede;
+  padding: 10px;
+  margin: -10px;
+  border-bottom: 1px solid #ccc;
+  height: 50px;
+}
+
 .tool-panel {
   position: fixed;
   top: 5px;
@@ -11,8 +19,18 @@ body {
   background: white;
   padding: 10px;
   bottom: 84px;
+  border: 1px solid #ccc;
+  z-index: 1002;
+}
+
+.tool-panel-content {
   overflow-y: auto;
-  border: 2px solid;
+  width: 100%;
+  position: absolute;
+  top: 50px;
+  bottom: 1px;
+  padding: 10px;
+  left: 0;
 }
 
 .tool-panel.hidden {
@@ -24,7 +42,9 @@ body {
 }
 
 .panel {
-  background: #ccc;
+  background: #eee;
+  margin: 3px;
+  border: 1px solid #ccc;
 }
 
 .ol-zoom {
@@ -42,7 +62,7 @@ body {
 }
 
 .ol-control {
-  border: 2px solid black;
+  border: 1px solid #ccc;
   border-radius: 0;
   background: inherit;
   padding: 0;
@@ -53,11 +73,42 @@ body {
 }
 
 .ol-control button:focus {
-  background: rgba(255,255,255, 1);
+  background: rgba(255, 255, 255, 1);
   outline: inherit;
 }
 
 .ol-control button:hover {
-  background: rgba(255,255,255, 0.5);
+  background: #eee;
+  transition: 0.3s;
+  box-shadow: inset 0px 0px 4px #ccc;
   outline: inherit;
+}
+
+h1 {
+  font-size: 16pt;
+}
+
+@media only screen and (max-width: 600px) {
+  .tool-panel {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    background: white;
+    padding: 10px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-radius: 0px;
+    width: inherit;
+  }
+}
+
+.big {
+  font-size: 20pt;
+}
+
+dialog {
+  border: 1px solid #ccc;
 }
