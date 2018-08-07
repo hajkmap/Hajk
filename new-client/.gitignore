@@ -1,4 +1,6 @@
 # See https://help.github.com/ignore-files/ for more about ignoring files.
+# Let us have the possibility to put a test file anywhere and not check it in
+test.html
 
 # dependencies
 /node_modules
