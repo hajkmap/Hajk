@@ -13,10 +13,9 @@
 }
 
 .toolbar > div {
-  width: 50px;
+  width: 100px;
   height: 50px;
   margin: auto 5px;
-  border-radius: 5px;
 }
 
 .tool-toggle-button {
@@ -25,8 +24,8 @@
   height: 100%;
   cursor: pointer;
   text-align: center;
-  font-size: 25pt;
-  line-height: 25pt;
+  display: flex;
+  flex-direction: column;
 }
 
 .tool-toggle-button:hover {
@@ -42,14 +41,21 @@
   display: none;
 }
 
-.toolbar .icon {
-  display: inline-block;
-  vertical-align: middle;
-  line-height: 50px;
+.tool-toggle-button .icon {
+  height: 25px;
+  line-height: 25px;
+  font-size: 20px;
 }
 
 .tool-text {
-  display: none;
+  height: 25px;
+  line-height: 25px;
+  font-size: 0.8125rem;
+  text-align: center;
+  font-style: normal;
+  text-transform: lowercase;
+  font-variant: small-caps;
+  user-select: none;
 }
 
 @media only screen and (max-width: 600px) {
