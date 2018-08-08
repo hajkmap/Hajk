@@ -1,7 +1,57 @@
 import React, { Component } from "react";
+import Observer from "react-event-observer";
 import AppModel from "./../models/AppModel.js";
 import Toolbar from "./Toolbar.js";
+import Popup from "./Popup.js";
 import "./App.css";
+
+
+class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      mapClickDataResult: {}
+    };
+  }
+
+  componentWillMount() {
+    this.observer = new Observer();
+    this.appModel = new AppModel(this.props.config, this.observer);    
+  }
+
+  componentDidMount() {
+    var promises = this.appModel
+      .configureApplication()
+      .createMap()
+      .addLayers()
+      .loadPlugins(this.props.activeTools, plugin => {});
+
+    Promise.all(promises).then(() => {
+      this.setState({
+        tools: this.appModel.getPlugins()
+      });
+    });
+    
+    this.observer.subscribe('mapClick', (mapClickDataResult) => {
+      this.setState({
+        mapClickDataResult: mapClickDataResult        
+      });  
+    });  
+  }
+
+  render() {
+    return (
+      <div>
+        <div className="map" id="map">
+          <Toolbar tools={this.appModel.getToolbarPlugins()} />
+          <Popup mapClickDataResult={this.state.mapClickDataResult} map={this.appModel.getMap()} />
+        </div>
+      </div>
+    );
+  }
+}
+
+export default App;
 
 /**
  * QUICK APP FLOW OVERVIEW
@@ -60,39 +110,3 @@ import "./App.css";
  *    the application will respond accordingly.
  *
  */
-class App extends Component {
-  constructor() {
-    super();
-    this.state = {};
-  }
-
-  componentWillMount() {
-    this.appModel = new AppModel(this.props.config);
-  }
-
-  componentDidMount() {
-    var promises = this.appModel
-      .configureApplication()
-      .createMap()
-      .addLayers()
-      .loadPlugins(this.props.activeTools, plugin => {});
-
-    Promise.all(promises).then(() => {
-      this.setState({
-        tools: this.appModel.getPlugins()
-      });
-    });
-  }
-
-  render() {
-    return (
-      <div>
-        <div className="map" id="map">
-          <Toolbar tools={this.appModel.getToolbarPlugins()} />
-        </div>
-      </div>
-    );
-  }
-}
-
-export default App;

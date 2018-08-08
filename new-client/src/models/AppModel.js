@@ -7,16 +7,16 @@ import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
 
 // import ArcGISLayer from "./layers/ArcGISLayer.js";
 // import DataLayer from "./layers/DataLayer.js";
-import WMSLayer from "./layers/WMSLayer.js";
 // import ExtendedWMSLayer from "./layers/ExtendedWMSLayer.js";
+
+import WMSLayer from "./layers/WMSLayer.js";
 import WMTSLayer from "./layers/WMTSLayer.js";
 import WFSVectorLayer from "./layers/VectorLayer.js";
+import Drag from "./Drag.js";
+import { bindMapClickEvent } from "./Click.js";
+import { defaults as defaultInteractions } from "ol/interaction";
 
-// FIXME: Is this custom interaction needed, when Drag and Rotate is loaded by default?
-// import Drag from "./Drag.js";
-// import interaction from "ol/Interaction";
-
-import { Map, View, Overlay } from "ol";
+import { Map, View } from "ol";
 import { Zoom, Rotate, ScaleLine, Attribution } from "ol/control";
 import { register } from "ol/proj/proj4";
 
@@ -24,13 +24,14 @@ const pluginsFolder = "plugins";
 var map;
 
 class AppModel {
-  constructor(config) {
+  constructor(config, observer) {
     this.plugins = {};
     this.activeTool = undefined;
     this.config = config;
     this.coordinateSystemLoader = new CoordinateSystemLoader(
       config.mapConfig.projections
     );
+    this.observer = observer;
     register(this.coordinateSystemLoader.getProj4());
   }
 
@@ -116,7 +117,7 @@ class AppModel {
   createMap() {
     var config = this.translateConfig();
     map = new Map({
-      //interactions: interaction.defaults().extend([new Drag()]),
+      interactions: defaultInteractions().extend([new Drag()]),     
       target: config.map.target,
       layers: [],
       logo: false,
@@ -137,16 +138,16 @@ class AppModel {
         zoom: config.map.zoom,
         units: "m",
         resolutions: config.map.resolutions,
-        center: config.map.center,
-        //projection: proj4.get(config.map.projection),
+        center: config.map.center,        
         projection: config.map.projection,
         extent: config.map.length !== 0 ? config.map.extent : undefined
       })
     });
-    //TODO: Fix better popups.
-    //map.addOverlay(this.createPopupOverlay());
+    bindMapClickEvent(map, mapClickDataResult => { 
+      this.observer.publish('mapClick', mapClickDataResult);
+    });  
     return this;
-  }
+  }  
 
   getMap() {
     return map;
@@ -177,8 +178,8 @@ class AppModel {
         );
         map.addLayer(layerItem.layer);
         break;
-      case "vector":
-        layerConfig = configMapper.mapVectorConfig(layer, this.config);
+      case "vector":                
+        layerConfig = configMapper.mapVectorConfig(layer);        
         layerItem = new WFSVectorLayer(
           layerConfig.options,
           this.config.appConfig.proxy,
@@ -204,13 +205,18 @@ class AppModel {
     layers.forEach(layer => {
       var layerConfig = this.config.layersConfig.find(
         lookupLayer => lookupLayer.id === layer.id
-      );
+      );          
       layer.layerType = type;
+      // Use the general value for infobox if not present in map config.
+      if (layer.infobox === "") {
+        layer.infobox = layerConfig.infobox;
+      }
       matchedLayers.push({
         ...layerConfig,
         ...layer
-      });
+      });      
     });
+        
     return matchedLayers;
   }
 
@@ -229,11 +235,12 @@ class AppModel {
     var layers = [
       ...this.lookup(layerSwitcherConfig.options.baselayers, "base"),
       ...this.lookup(this.expand(layerSwitcherConfig.options.groups), "layer")
-    ];
+    ];    
     layers = layers.reduce((a, b) => {
       a[b["id"]] = b;
       return a;
     }, {});
+
     return layers;
   }
 
@@ -241,8 +248,7 @@ class AppModel {
     let layerSwitcherConfig = this.config.mapConfig.tools.find(
       tool => tool.type === "layerswitcher"
     );
-    this.layers = this.flattern(layerSwitcherConfig);
-
+    this.layers = this.flattern(layerSwitcherConfig);  
     Object.keys(this.layers)
       .sort((a, b) => this.layers[a].drawOrder - this.layers[b].drawOrder)
       .map(sortedKey => this.layers[sortedKey])
@@ -251,26 +257,6 @@ class AppModel {
       });
 
     return this;
-  }
-
-  createPopupOverlay() {
-    var container = document.getElementById("popup"),
-      closer = document.getElementById("popup-closer"),
-      overlay = new Overlay({
-        element: container,
-        autoPan: false,
-        id: "popup-0"
-      });
-
-    if (closer) {
-      closer.onclick = function() {
-        overlay.setPosition(undefined);
-        closer.blur();
-        return false;
-      };
-    }
-
-    return overlay;
   }
 
   parseQueryParams() {

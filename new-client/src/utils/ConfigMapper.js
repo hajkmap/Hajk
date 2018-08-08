@@ -220,7 +220,7 @@ export default class ConfigMapper {
     return config;
   }
 
-  mapVectorConfig(args) {
+  mapVectorConfig(args) {        
     var config = {
       type: "vector",
       options: {

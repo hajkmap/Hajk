@@ -1,4 +1,4 @@
-import Pointer from "ol/interaction/pointer";
+import { Pointer } from "ol/interaction";
 
 class Drag extends Pointer {
   constructor() {
@@ -112,7 +112,7 @@ class Drag extends Pointer {
     }
   }
 
-  handleUpEvent(evt) {
+  handleUpEvent(evt) {      
     this.coordinate_ = null;
     this.feature_ = null;
     return false;
