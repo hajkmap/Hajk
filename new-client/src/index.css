@@ -1,36 +1,66 @@
+@import url("https://fonts.googleapis.com/css?family=Roboto");
+
+:root {
+  --white: #ffffff;
+  --dark1: #78849e;
+  --dark2: #454f63;
+  --dark3: #2a2e43;
+
+  --yellow: #ffb900;
+  --orange: #ff9057;
+  --pink: #ff4f9a;
+  --magenta: #c840e9;
+
+  --blue1: #3acce1;
+  --blue2: #3497fd;
+  --blue3: #5773ff;
+  --blue4: #665eff;
+
+  --box-shadow-left: -5px 0 15px -10px #333333;
+  --box-shadow-right: 5px 0 15px -10px #333333;
+  --box-shadow-top: 0 -5px 15px -10px #333333;
+  --box-shadow-bottom: 0 5px 15px -10px #333333;
+  --box-shadow-all: 0 0 5px 15px #333333;
+}
+
 body {
   margin: 0;
   padding: 0;
-}
-
-.header {
-  background: #dedede;
-  padding: 10px;
-  margin: -10px;
-  border-bottom: 1px solid #ccc;
-  height: 50px;
+  color: var(--dark2);
+  font-family: Roboto, sans-serif;
 }
 
 .tool-panel {
   position: fixed;
-  top: 5px;
-  left: 5px;
+  top: 0;
+  left: 0;
   width: 500px;
-  background: white;
+  background: var(--white);
+  bottom: 60px;
+  box-shadow: var(--box-shadow-right);
+  z-index: 1001;
+}
+
+.tool-panel .header {
+  background: var(--white);
   padding: 10px;
-  bottom: 84px;
-  border: 1px solid #ccc;
-  z-index: 1002;
+  border-bottom: 1px solid #ccc;
+  height: 60px;
+  text-transform: uppercase;
 }
 
 .tool-panel-content {
   overflow-y: auto;
   width: 100%;
   position: absolute;
-  top: 50px;
-  bottom: 1px;
+  top: 60px;
+  bottom: 0;
   padding: 10px;
   left: 0;
+}
+
+.tool-panel-content h1 {
+  font-size: 16pt;
 }
 
 .tool-panel.hidden {
@@ -42,29 +72,27 @@ body {
 }
 
 .panel {
-  background: #eee;
+  background: var(--blue1);
   margin: 3px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--blue3);
 }
 
 .ol-zoom {
-  top: 5px;
-  left: 5px;
+  top: 15px;
+  left: 15px;
 }
 
 .ol-control button {
-  background: rgba(255, 255, 255, 1);
+  background: var(--white);
+  color: var(--dark2);
   font-size: 20pt;
-  color: black;
-  border-radius: 0 !important;
+  font-weight: 500;
   cursor: pointer;
   margin: 0;
 }
 
 .ol-control {
-  border: 1px solid #ccc;
   border-radius: 0;
-  background: inherit;
   padding: 0;
 }
 
@@ -73,19 +101,19 @@ body {
 }
 
 .ol-control button:focus {
-  background: rgba(255, 255, 255, 1);
+  background: var(--white);
   outline: inherit;
 }
 
 .ol-control button:hover {
-  background: #eee;
+  background: var(--blue1);
+  color: var(--white);
   transition: 0.3s;
-  box-shadow: inset 0px 0px 4px #ccc;
   outline: inherit;
 }
 
-h1 {
-  font-size: 16pt;
+.ol-control button:active {
+  box-shadow: inset 0px 0px 5px var(--dark1);
 }
 
 @media only screen and (max-width: 600px) {
