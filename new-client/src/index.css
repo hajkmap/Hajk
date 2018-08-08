@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css?family=Roboto");
+@import url("https://fonts.googleapis.com/css?family=Roboto:100,100italic,300,300italic,400,400italic,500,500italic,700,700italic,900,900italic");
 
 :root {
   --white: #ffffff;
@@ -20,7 +20,7 @@
   --box-shadow-right: 5px 0 15px -10px #333333;
   --box-shadow-top: 0 -5px 15px -10px #333333;
   --box-shadow-bottom: 0 5px 15px -10px #333333;
-  --box-shadow-all: 0 0 5px 15px #333333;
+  --box-shadow-all: 0 0 5px 1px #eeeeee;
 }
 
 body {
@@ -28,7 +28,36 @@ body {
   padding: 0;
   color: var(--dark2);
   font-family: Roboto, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5rem;
 }
+
+/* START: default font styles as described in XD file 
+   For px->rem, consult http://www.standardista.com/px-to-rem-conversion-if-root-font-size-is-16px/
+*/
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: 500;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+/* Make sure to use Bootstrap's .form-control on <input>, <label> etc */
+.form-control::placeholder {
+  color: var(--dark1);
+  opacity: 0.56;
+}
+
+button {
+  font-variant: small-caps;
+  text-transform: lowercase;
+}
+
+/* END */
 
 .tool-panel {
   position: fixed;
@@ -61,6 +90,9 @@ body {
 
 .tool-panel-content h1 {
   font-size: 16pt;
+  font-weight: 300;
+  text-transform: lowercase;
+  font-variant: small-caps;
 }
 
 .tool-panel.hidden {

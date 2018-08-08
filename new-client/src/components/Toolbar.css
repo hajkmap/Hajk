@@ -35,8 +35,7 @@
 }
 
 .tool-toggle-button.active {
-  color: var(--white);
-  background-color: var(--dark2);
+  color: var(--blue2);
 }
 
 .toolbar-toggler {
