@@ -30,7 +30,7 @@ class Toolbar extends Component {
   render() {
     var c = this.state.toolbarVisible ? "toolbar visible" : "toolbar";
     return (
-      <div>
+      <div id="toolbar-group">
         <div
           className="toolbar-toggler fa fa-list"
           onClick={() => {

@@ -93,7 +93,9 @@ class Draw extends Component {
           <i className="tool-text">Information</i>
         </div>
         {createPortal(
-          <dialog open={this.getOpen()}>{this.renderDialogContent()}</dialog>,
+          <dialog className="information-dialog" open={this.getOpen()}>
+            {this.renderDialogContent()}
+          </dialog>,
           document.getElementById("map")
         )}
       </div>

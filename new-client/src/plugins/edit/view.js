@@ -61,7 +61,9 @@ class Draw extends Component {
   }
 
   getVisibilityClass() {
-    return this.state.toggled ? "tool-panel" : "tool-panel hidden";
+    return this.state.toggled
+      ? "tool-panel edit-panel"
+      : "tool-panel edit-panel hidden";
   }
 
   renderPanel() {

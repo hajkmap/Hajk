@@ -70,7 +70,9 @@ class LayersSwitcher extends Component {
   }
 
   getVisibilityClass() {
-    return this.state.toggled ? "tool-panel" : "tool-panel hidden";
+    return this.state.toggled
+      ? "tool-panel layerswitcher-panel"
+      : "tool-panel layerswitcher-panel hidden";
   }
 
   renderLayerGroups() {

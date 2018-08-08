@@ -67,7 +67,9 @@ class Informative extends Component {
   }
 
   getVisibilityClass() {
-    return this.state.toggled ? "tool-panel" : "tool-panel hidden";
+    return this.state.toggled
+      ? "tool-panel informative-panel"
+      : "tool-panel informative-panel hidden";
   }
 
   getOpen() {
