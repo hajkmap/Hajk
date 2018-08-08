@@ -111,7 +111,8 @@ button {
 
 .ol-zoom {
   top: 15px;
-  left: 15px;
+  left: unset;
+  right: 15px;
 }
 
 .ol-control button {
@@ -120,12 +121,15 @@ button {
   font-size: 20pt;
   font-weight: 500;
   cursor: pointer;
-  margin: 0;
+  margin: 10px;
+  border-radius: 5px !important;
+  box-shadow: var(--box-shadow-all);
 }
 
 .ol-control {
   border-radius: 0;
   padding: 0;
+  background: 0;
 }
 
 .ol-control:hover {
@@ -138,7 +142,7 @@ button {
 }
 
 .ol-control button:hover {
-  background: var(--blue1);
+  background: var(--blue2);
   color: var(--white);
   transition: 0.3s;
   outline: inherit;
