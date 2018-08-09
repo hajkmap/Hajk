@@ -57,7 +57,7 @@ class BackgroundSwitcher extends Component {
     checked = this.state.selectedLayer === config.id;
 
     return (
-      <div className="custom-control custom-radio">
+      <div className="custom-control custom-radio" key={index}>
         <input
           type="radio"
           id={caption + "_" + index}
