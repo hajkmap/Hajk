@@ -56,8 +56,9 @@ class BackgroundSwitcher extends Component {
     checked = this.state.selectedLayer === config.id;
 
     return (
-      <div key={index}>
+      <div className="form-check" key={index}>
         <input
+          className="form-check-input"
           onChange={this.onChange.bind(this)}
           checked={checked}
           value={config.id || config}
@@ -65,7 +66,9 @@ class BackgroundSwitcher extends Component {
           type="radio"
           name="background"
         />
-        <label htmlFor={caption + "_" + index}>{caption}</label>
+        <label className="form-check-label" htmlFor={caption + "_" + index}>
+          {caption}
+        </label>
       </div>
     );
   }
