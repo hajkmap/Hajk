@@ -117,7 +117,7 @@ class AppModel {
   createMap() {
     var config = this.translateConfig();
     map = new Map({
-      interactions: defaultInteractions().extend([new Drag()]),     
+      interactions: defaultInteractions().extend([new Drag()]),
       target: config.map.target,
       layers: [],
       logo: false,
@@ -138,16 +138,16 @@ class AppModel {
         zoom: config.map.zoom,
         units: "m",
         resolutions: config.map.resolutions,
-        center: config.map.center,        
+        center: config.map.center,
         projection: config.map.projection,
         extent: config.map.length !== 0 ? config.map.extent : undefined
       })
     });
-    bindMapClickEvent(map, mapClickDataResult => { 
-      this.observer.publish('mapClick', mapClickDataResult);
-    });  
+    bindMapClickEvent(map, mapClickDataResult => {
+      this.observer.publish("mapClick", mapClickDataResult);
+    });
     return this;
-  }  
+  }
 
   getMap() {
     return map;
@@ -178,8 +178,8 @@ class AppModel {
         );
         map.addLayer(layerItem.layer);
         break;
-      case "vector":                
-        layerConfig = configMapper.mapVectorConfig(layer);        
+      case "vector":
+        layerConfig = configMapper.mapVectorConfig(layer);
         layerItem = new WFSVectorLayer(
           layerConfig.options,
           this.config.appConfig.proxy,
@@ -205,18 +205,18 @@ class AppModel {
     layers.forEach(layer => {
       var layerConfig = this.config.layersConfig.find(
         lookupLayer => lookupLayer.id === layer.id
-      );          
+      );
       layer.layerType = type;
       // Use the general value for infobox if not present in map config.
-      if (layer.infobox === "") {
+      if (layer.infobox === "" && layerConfig !== undefined) {
         layer.infobox = layerConfig.infobox;
       }
       matchedLayers.push({
         ...layerConfig,
         ...layer
-      });      
+      });
     });
-        
+
     return matchedLayers;
   }
 
@@ -235,7 +235,7 @@ class AppModel {
     var layers = [
       ...this.lookup(layerSwitcherConfig.options.baselayers, "base"),
       ...this.lookup(this.expand(layerSwitcherConfig.options.groups), "layer")
-    ];    
+    ];
     layers = layers.reduce((a, b) => {
       a[b["id"]] = b;
       return a;
@@ -248,7 +248,7 @@ class AppModel {
     let layerSwitcherConfig = this.config.mapConfig.tools.find(
       tool => tool.type === "layerswitcher"
     );
-    this.layers = this.flattern(layerSwitcherConfig);  
+    this.layers = this.flattern(layerSwitcherConfig);
     Object.keys(this.layers)
       .sort((a, b) => this.layers[a].drawOrder - this.layers[b].drawOrder)
       .map(sortedKey => this.layers[sortedKey])
