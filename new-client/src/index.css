@@ -103,10 +103,14 @@ button {
   display: none;
 }
 
+.clickable {
+  user-select: none;
+  cursor: pointer;
+}
+
 .panel {
-  background: var(--blue1);
   margin: 3px;
-  border: 1px solid var(--blue3);
+  border-bottom: 1px solid var(--dark1);
 }
 
 .ol-zoom {
