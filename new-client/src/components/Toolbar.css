@@ -3,7 +3,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: var(--white);
+  background: rgba(255, 255, 255, 0.5);
   box-shadow: var(--box-shadow-top);
   z-index: 1002;
   height: 60px;
@@ -11,19 +11,17 @@
   flex-flow: no-wrap;
   align-items: center;
   justify-content: center;
-  opacity: 0.75;
   transition-duration: 0.3s;
 }
 
 .toolbar:hover {
-  opacity: 1;
+  background: rgba(255, 255, 255, 1);
 }
 
 .toolbar > div {
   width: 100px;
   height: 50px;
   margin: auto 5px;
-  opacity: 1;
 }
 
 .tool-toggle-button {

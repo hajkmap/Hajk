@@ -15,7 +15,8 @@ class LayersSwitcher extends Component {
     };
     this.toggle = this.toggle.bind(this);
     this.state = {
-      toggled: false
+      toggled: false,
+      layerGroupsExpanded: true
     };
   }
 
@@ -82,6 +83,25 @@ class LayersSwitcher extends Component {
       );
     });
   }
+
+  getLayerGroupsClass() {
+    return this.state.layerGroupsExpanded
+      ? "layer-groups visible"
+      : "layer-groups hidden";
+  }
+
+  toggleLayerGroups() {
+    this.setState({
+      layerGroupsExpanded: !this.state.layerGroupsExpanded
+    });
+  }
+
+  getArrowClass() {
+    return this.state.layerGroupsExpanded
+      ? "fa fa-angle-up arrow"
+      : "fa fa-angle-right arrow";
+  }
+
   renderPanel() {
     return createPortal(
       <div className={this.getVisibilityClass()}>
@@ -99,7 +119,18 @@ class LayersSwitcher extends Component {
             layers={this.options.baselayers}
             layerMap={this.layerSwitcherModel.layerMap}
           />
-          <div className="layer-groups">{this.renderLayerGroups()}</div>
+          <h1
+            onClick={() => {
+              this.toggleLayerGroups();
+            }}
+            className="clickable"
+          >
+            <i className={this.getArrowClass()} />
+            Kartlager
+          </h1>
+          <div className={this.getLayerGroupsClass()}>
+            {this.renderLayerGroups()}
+          </div>
         </div>
       </div>,
       document.getElementById("map")

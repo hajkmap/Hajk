@@ -110,7 +110,7 @@ button {
 
 .panel {
   margin: 3px;
-  border-bottom: 1px solid var(--dark1);
+  border-bottom: 1px solid #f4f4f6;
 }
 
 .ol-zoom {

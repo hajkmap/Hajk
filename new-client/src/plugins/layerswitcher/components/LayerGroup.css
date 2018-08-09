@@ -1,7 +1,17 @@
+.layer-groups {
+  margin-left: 10px;
+}
+.layer-groups > .layer-group {
+  margin-left: 0;
+}
+
 .layer-group {
   margin-left: 10px;
 }
 
-.layer-groups > .layer-group {
-  margin-left: 0;
-} 
+.layer-group h1 {
+  text-transform: none;
+  font-variant: normal;
+  font-weight: 500;
+  font-size: 1rem;
+}
