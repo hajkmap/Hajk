@@ -57,5 +57,10 @@
     "react-dom": "^15.4.2",
     "semistandard": "*",
     "x2js": "^3.2.1"
+  },
+  "dependencies": {
+    "draft-js": "^0.10.5",
+    "draft-js-export-html": "^1.2.0",    
+    "draft-js-import-html": "^1.2.1"    
   }
 }
