@@ -1,8 +1,8 @@
 .ol-popup {
   position: absolute;
   background-color: white;
-  -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
-  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+  -webkit-filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
   padding: 15px;
   border-radius: 10px;
   border: 1px solid #cccccc;
@@ -10,7 +10,8 @@
   left: -50px;
   min-width: 280px;
 }
-.ol-popup:after, .ol-popup:before {
+.ol-popup:after,
+.ol-popup:before {
   top: 100%;
   border: solid transparent;
   content: " ";
@@ -37,7 +38,7 @@
   top: 2px;
   right: 8px;
 }
-.ol-popup-closer {  
+.ol-popup-closer {
   cursor: pointer;
 }
 
@@ -52,16 +53,6 @@
   text-align: center;
   font-size: 20px;
   padding: 10px;
-}
-
-.toggle-left {
-  float: left;
-  cursor: pointer;
-}
-
-.toggle-right {
-  float: right;
-  cursor: pointer;
 }
 
 .toggle-text {

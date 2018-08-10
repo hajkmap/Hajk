@@ -106,16 +106,12 @@ class LayerItem extends Component {
    */
   renderStatus() {
     return this.state.status === "loaderror" ? (
-      <span
-        href="#"
-        className="tooltip"
+      <i
+        className="material-icons pull-right"
         title="Lagret kunde inte laddas in. Kartservern svarar inte."
       >
-        <span
-          title=""
-          className="fa fa-exclamation-triangle tile-load-warning"
-        />
-      </span>
+        warning
+      </i>
     ) : null;
   }
 
@@ -151,25 +147,13 @@ class LayerItem extends Component {
         ? this.state.infoUrlText
         : this.state.infoUrl;
 
-    /*
-    <i
-      className={visible ? "fa fa-check-square-o" : "fa fa-square-o"}
-      style={{ width: "15px" }}
-    />&nbsp;
-    */
-
     return (
       <div className="panel panel-default layer-item">
         <div className="panel-heading unselectable" onClick={toggleLegend}>
-          <span
-            onClick={toggleVisible}
-            className="clickable"
-            style={{ position: "relative", top: "3px" }}
-          >
-            <i
-              className={visible ? "fa fa-check-square-o" : "fa fa-square-o"}
-              style={{ width: "15px" }}
-            />&nbsp;
+          <span onClick={toggleVisible} className="clickable">
+            <i className="material-icons" style={{ width: "2rem" }}>
+              {visible ? "checkbox" : "check_box_outline_blank"}
+            </i>
             {this.renderStatus()}
             <label
               className={
@@ -178,8 +162,8 @@ class LayerItem extends Component {
                   : "layer-item-header-text"
               }
             >
-            {caption}
-            </label>&nbsp;
+              {caption}
+            </label>
           </span>
           {components.legend.legendButton}
 

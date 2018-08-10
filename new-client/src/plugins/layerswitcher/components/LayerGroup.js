@@ -3,7 +3,6 @@ import LayerItem from "./LayerItem.js";
 import "./LayerGroup.css";
 
 class LayerGroup extends Component {
-
   constructor() {
     super();
     this.state = {
@@ -22,31 +21,53 @@ class LayerGroup extends Component {
       ...this.props.group
     });
     this.model = this.props.model;
-  };
+  }
 
   renderLayerGroups() {
     return this.state.groups.map((group, i) => {
-      return (
-        <LayerGroup key={i} group={group} model={this.model} />
-      );
+      return <LayerGroup key={i} group={group} model={this.model} />;
     });
+  }
+
+  toggleExpanded() {
+    this.setState({ expanded: !this.state.expanded });
+  }
+
+  getExpandedClass() {
+    return this.state.expanded
+      ? "layer-group-items visible"
+      : "layer-group-items hidden";
+  }
+
+  getArrowClass() {
+    return this.state.expanded ? "expand_less" : "chevron_right";
   }
 
   render() {
     return (
       <div className="layer-group">
-        <h1>{this.state.name}</h1>
-        {this.state.layers.map((layer, i) => {
-          var mapLayer = this.model.layerMap[Number(layer.id)];
-          if (mapLayer) {
-            return (<LayerItem key={i} layer={mapLayer} />);
-          } else {
-            return null;
-          }
-        })}
-        {this.renderLayerGroups()}
+        <h1
+          onClick={() => {
+            this.toggleExpanded();
+          }}
+          className="clickable"
+        >
+          <i className="material-icons">{this.getArrowClass()}</i>
+          {this.state.name}
+        </h1>
+        <div className={this.getExpandedClass()}>
+          {this.state.layers.map((layer, i) => {
+            var mapLayer = this.model.layerMap[Number(layer.id)];
+            if (mapLayer) {
+              return <LayerItem key={i} layer={mapLayer} />;
+            } else {
+              return null;
+            }
+          })}
+          {this.renderLayerGroups()}
+        </div>
       </div>
-    )
+    );
   }
 }
 

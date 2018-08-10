@@ -6,7 +6,8 @@ class BackgroundSwitcher extends Component {
     super();
     this.onChange = this.onChange.bind(this);
     this.state = {
-      selectedLayer: -1
+      selectedLayer: -1,
+      toggled: true
     };
   }
 
@@ -56,16 +57,19 @@ class BackgroundSwitcher extends Component {
     checked = this.state.selectedLayer === config.id;
 
     return (
-      <div key={index}>
+      <div className="custom-control custom-radio" key={index}>
         <input
+          type="radio"
+          id={caption + "_" + index}
+          name="background"
+          className="custom-control-input"
           onChange={this.onChange.bind(this)}
           checked={checked}
           value={config.id || config}
-          id={caption + "_" + index}
-          type="radio"
-          name="background"
         />
-        <label htmlFor={caption + "_" + index}>{caption}</label>
+        <label className="custom-control-label" htmlFor={caption + "_" + index}>
+          {caption}
+        </label>
       </div>
     );
   }
@@ -103,11 +107,35 @@ class BackgroundSwitcher extends Component {
     return radioButtons;
   }
 
+  getVisibilityClass() {
+    return this.state.toggled ? "layers-list hidden" : "layers-list";
+  }
+
+  toggleVisibility() {
+    this.setState({ toggled: !this.state.toggled });
+  }
+
+  getToggleClass() {
+    return this.state.toggled ? "chevron_right" : "expand_less";
+  }
+
   render() {
     return (
-      <div>
-        <h1>Bakgrundskartor</h1>
-        {this.renderBaseLayerComponents()}
+      <div id="background-layers">
+        <div className="expand-toggler">
+          <h1
+            onClick={() => {
+              this.toggleVisibility();
+            }}
+            className="clickable"
+          >
+            <i className="material-icons">{this.getToggleClass()}</i>
+            Bakgrundskartor
+          </h1>
+        </div>
+        <div className={this.getVisibilityClass()}>
+          {this.renderBaseLayerComponents()}
+        </div>
       </div>
     );
   }

@@ -3,20 +3,25 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: var(--white);
+  background: rgba(255, 255, 255, 0.5);
   box-shadow: var(--box-shadow-top);
   z-index: 1002;
-  padding: 4px;
   height: 60px;
   display: flex;
-  flex-flow: wrap;
+  flex-flow: no-wrap;
+  align-items: center;
+  justify-content: center;
+  transition-duration: 0.3s;
+}
+
+.toolbar:hover {
+  background: rgba(255, 255, 255, 1);
 }
 
 .toolbar > div {
-  width: 50px;
+  width: 100px;
   height: 50px;
   margin: auto 5px;
-  border-radius: 5px;
 }
 
 .tool-toggle-button {
@@ -25,8 +30,9 @@
   height: 100%;
   cursor: pointer;
   text-align: center;
-  font-size: 25pt;
-  line-height: 25pt;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
 }
 
 .tool-toggle-button:hover {
@@ -35,22 +41,28 @@
 }
 
 .tool-toggle-button.active {
-  color: var(--white);
-  background-color: var(--dark2);
+  color: var(--blue2);
 }
 
 .toolbar-toggler {
   display: none;
 }
 
-.toolbar .icon {
-  display: inline-block;
-  vertical-align: middle;
-  line-height: 50px;
+.tool-toggle-button .icon {
+  height: 25px;
+  line-height: 25px;
+  font-size: 20px;
 }
 
 .tool-text {
-  display: none;
+  height: 25px;
+  line-height: 25px;
+  font-size: 0.8125rem;
+  text-align: center;
+  font-style: normal;
+  text-transform: lowercase;
+  font-variant: small-caps;
+  user-select: none;
 }
 
 @media only screen and (max-width: 600px) {

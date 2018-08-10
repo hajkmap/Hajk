@@ -1,4 +1,5 @@
-@import url("https://fonts.googleapis.com/css?family=Roboto");
+@import url("https://fonts.googleapis.com/css?family=Roboto:100,100italic,300,300italic,400,400italic,500,500italic,700,700italic,900,900italic");
+@import url("https://fonts.googleapis.com/icon?family=Material+Icons");
 
 :root {
   --white: #ffffff;
@@ -20,7 +21,7 @@
   --box-shadow-right: 5px 0 15px -10px #333333;
   --box-shadow-top: 0 -5px 15px -10px #333333;
   --box-shadow-bottom: 0 5px 15px -10px #333333;
-  --box-shadow-all: 0 0 5px 15px #333333;
+  --box-shadow-all: 0 0 5px 1px #eeeeee;
 }
 
 body {
@@ -28,7 +29,36 @@ body {
   padding: 0;
   color: var(--dark2);
   font-family: Roboto, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5rem;
 }
+
+/* START: default font styles as described in XD file 
+   For px->rem, consult http://www.standardista.com/px-to-rem-conversion-if-root-font-size-is-16px/
+*/
+
+h1 {
+  font-size: 2.5rem;
+  font-weight: 500;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+/* Make sure to use Bootstrap's .form-control on <input>, <label> etc */
+.form-control::placeholder {
+  color: var(--dark1);
+  opacity: 0.56;
+}
+
+button {
+  font-variant: small-caps;
+  text-transform: lowercase;
+}
+
+/* END */
 
 .tool-panel {
   position: fixed;
@@ -49,6 +79,30 @@ body {
   text-transform: uppercase;
 }
 
+.tool-panel .header h1 {
+  font-size: 1.5rem;
+  line-height: 2.5rem;
+}
+
+.tool-panel .header .icons {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.tool-panel .header .material-icons {
+  cursor: pointer;
+  user-select: none;
+}
+
+.tool-panel .header .material-icons:hover {
+  color: var(--dark1);
+}
+
+.tool-panel .header .material-icons:active {
+  color: var(--blue2);
+}
+
 .tool-panel-content {
   overflow-y: auto;
   width: 100%;
@@ -61,6 +115,9 @@ body {
 
 .tool-panel-content h1 {
   font-size: 16pt;
+  font-weight: 300;
+  text-transform: lowercase;
+  font-variant: small-caps;
 }
 
 .tool-panel.hidden {
@@ -71,15 +128,33 @@ body {
   display: none;
 }
 
+.clickable {
+  user-select: none;
+  cursor: pointer;
+}
+
+.clickable:hover {
+  color: var(dark1);
+}
+
+.clickable:active {
+  color: var(blue2);
+}
+
 .panel {
-  background: var(--blue1);
   margin: 3px;
-  border: 1px solid var(--blue3);
+  border-bottom: 1px solid #f4f4f6;
+}
+
+.panel:last-of-type {
+  border-bottom: none;
+  margin-bottom: 10px;
 }
 
 .ol-zoom {
   top: 15px;
-  left: 15px;
+  left: unset;
+  right: 15px;
 }
 
 .ol-control button {
@@ -88,12 +163,15 @@ body {
   font-size: 20pt;
   font-weight: 500;
   cursor: pointer;
-  margin: 0;
+  margin: 10px;
+  border-radius: 5px !important;
+  box-shadow: var(--box-shadow-all);
 }
 
 .ol-control {
   border-radius: 0;
   padding: 0;
+  background: 0;
 }
 
 .ol-control:hover {
@@ -106,7 +184,7 @@ body {
 }
 
 .ol-control button:hover {
-  background: var(--blue1);
+  background: var(--blue2);
   color: var(--white);
   transition: 0.3s;
   outline: inherit;
@@ -139,4 +217,17 @@ body {
 
 dialog {
   border: 1px solid #ccc;
+}
+
+.material-icons {
+  font-variant: normal;
+  vertical-align: middle;
+}
+
+.pull-left {
+  float: left;
+}
+
+.pull-right {
+  float: right;
 }

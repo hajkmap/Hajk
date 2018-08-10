@@ -3,6 +3,7 @@ import Observer from "react-event-observer";
 import LayerSwitcherModel from "./model.js";
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
+import PanelHeader from "../../components/PanelHeader.js";
 import { createPortal } from "react-dom";
 import "./style.css";
 
@@ -15,7 +16,8 @@ class LayersSwitcher extends Component {
     };
     this.toggle = this.toggle.bind(this);
     this.state = {
-      toggled: false
+      toggled: false,
+      layerGroupsExpanded: true
     };
   }
 
@@ -70,7 +72,9 @@ class LayersSwitcher extends Component {
   }
 
   getVisibilityClass() {
-    return this.state.toggled ? "tool-panel" : "tool-panel hidden";
+    return this.state.toggled
+      ? "tool-panel layerswitcher-panel"
+      : "tool-panel layerswitcher-panel hidden";
   }
 
   renderLayerGroups() {
@@ -80,24 +84,44 @@ class LayersSwitcher extends Component {
       );
     });
   }
+
+  getLayerGroupsClass() {
+    return this.state.layerGroupsExpanded
+      ? "layer-groups visible"
+      : "layer-groups hidden";
+  }
+
+  toggleLayerGroups() {
+    this.setState({
+      layerGroupsExpanded: !this.state.layerGroupsExpanded
+    });
+  }
+
+  getArrowClass() {
+    return this.state.layerGroupsExpanded ? "expand_less" : "chevron_right";
+  }
+
   renderPanel() {
     return createPortal(
       <div className={this.getVisibilityClass()}>
-        <div className="header">
-          <i
-            className="fa fa-close pull-right big"
-            onClick={() => {
-              this.toggle();
-            }}
-          />
-          <h1>Lagerhanterare</h1>
-        </div>
+        <PanelHeader title="Lagerhanterare" toggle={this.toggle} />
         <div className="tool-panel-content">
           <BackgroundSwitcher
             layers={this.options.baselayers}
             layerMap={this.layerSwitcherModel.layerMap}
           />
-          <div className="layer-groups">{this.renderLayerGroups()}</div>
+          <h1
+            onClick={() => {
+              this.toggleLayerGroups();
+            }}
+            className="clickable"
+          >
+            <i className="material-icons">{this.getArrowClass()}</i>
+            Kartlager
+          </h1>
+          <div className={this.getLayerGroupsClass()}>
+            {this.renderLayerGroups()}
+          </div>
         </div>
       </div>,
       document.getElementById("map")
@@ -108,7 +132,7 @@ class LayersSwitcher extends Component {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
-          <i className="fa fa-icon fa-list-alt icon" />
+          <i className="material-icons">layers</i>
           <i className="tool-text">Lagerhanterare</i>
         </div>
         {this.renderPanel()}

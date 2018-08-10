@@ -3,6 +3,7 @@ import Observer from "react-event-observer";
 import DrawModel from "./model.js";
 import { createPortal } from "react-dom";
 import "./style.css";
+import PanelHeader from "../../components/PanelHeader";
 
 class Draw extends Component {
   constructor() {
@@ -61,21 +62,15 @@ class Draw extends Component {
   }
 
   getVisibilityClass() {
-    return this.state.toggled ? "tool-panel" : "tool-panel hidden";
+    return this.state.toggled
+      ? "tool-panel draw-panel"
+      : "tool-panel draw-panel hidden";
   }
 
   renderPanel() {
     return createPortal(
       <div className={this.getVisibilityClass()}>
-        <div className="header">
-          <i
-            className="fa fa-close pull-right big"
-            onClick={() => {
-              this.toggle();
-            }}
-          />
-          <h1>Draw</h1>
-        </div>
+        <PanelHeader title="Rita" toggle={this.toggle} />
         <div className="tool-panel-content">
           <div>Draw</div>
         </div>
@@ -88,7 +83,7 @@ class Draw extends Component {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
-          <i className="fa fa-icon fa-pencil icon" />
+          <i className="material-icons">brush</i>
           <i className="tool-text">Rita</i>
         </div>
         {this.renderPanel()}
