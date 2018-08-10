@@ -40,9 +40,7 @@ class LayerGroup extends Component {
   }
 
   getArrowClass() {
-    return this.state.expanded
-      ? "fa fa-angle-up arrow"
-      : "fa fa-angle-right arrow";
+    return this.state.expanded ? "expand_less" : "chevron_right";
   }
 
   render() {
@@ -54,7 +52,7 @@ class LayerGroup extends Component {
           }}
           className="clickable"
         >
-          <i className={this.getArrowClass()} />
+          <i className="material-icons">{this.getArrowClass()}</i>
           {this.state.name}
         </h1>
         <div className={this.getExpandedClass()}>

@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import Observer from "react-event-observer";
 import EditModel from "./model.js";
 import { createPortal } from "react-dom";
+import PanelHeader from "../../components/PanelHeader.js";
+
 import "./style.css";
 
 class Draw extends Component {
@@ -69,15 +71,7 @@ class Draw extends Component {
   renderPanel() {
     return createPortal(
       <div className={this.getVisibilityClass()}>
-        <div className="header">
-          <i
-            className="fa fa-close pull-right big"
-            onClick={() => {
-              this.toggle();
-            }}
-          />
-          <h1>Redigera</h1>
-        </div>
+        <PanelHeader title="Redigera" toggle={this.toggle} />
         <div className="tool-panel-content">Redigera</div>
       </div>,
       document.getElementById("map")
@@ -88,7 +82,7 @@ class Draw extends Component {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
-          <i className="fa fa-icon fa-edit icon" />
+          <i className="material-icons">edit</i>
           <i className="tool-text">Redigera</i>
         </div>
         {this.renderPanel()}

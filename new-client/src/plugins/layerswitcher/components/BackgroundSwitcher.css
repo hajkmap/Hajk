@@ -1,3 +1,15 @@
-#background-layers > div {
-  margin-left: 10px;
+.layers-list {
+  padding-left: 4px;
+}
+
+.custom-radio {
+  line-height: 1.5rem;
+  border-bottom: 1px solid #f4f4f6;
+  padding-bottom: 6px;
+  padding-top: 6px;
+}
+
+.custom-radio:last-of-type {
+  border-bottom: none;
+  margin-bottom: 10px;
 }

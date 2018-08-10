@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css?family=Roboto:100,100italic,300,300italic,400,400italic,500,500italic,700,700italic,900,900italic");
+@import url("https://fonts.googleapis.com/icon?family=Material+Icons");
 
 :root {
   --white: #ffffff;
@@ -78,6 +79,30 @@ button {
   text-transform: uppercase;
 }
 
+.tool-panel .header h1 {
+  font-size: 1.5rem;
+  line-height: 2.5rem;
+}
+
+.tool-panel .header .icons {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.tool-panel .header .material-icons {
+  cursor: pointer;
+  user-select: none;
+}
+
+.tool-panel .header .material-icons:hover {
+  color: var(--dark1);
+}
+
+.tool-panel .header .material-icons:active {
+  color: var(--blue2);
+}
+
 .tool-panel-content {
   overflow-y: auto;
   width: 100%;
@@ -108,9 +133,22 @@ button {
   cursor: pointer;
 }
 
+.clickable:hover {
+  color: var(dark1);
+}
+
+.clickable:active {
+  color: var(blue2);
+}
+
 .panel {
   margin: 3px;
   border-bottom: 1px solid #f4f4f6;
+}
+
+.panel:last-of-type {
+  border-bottom: none;
+  margin-bottom: 10px;
 }
 
 .ol-zoom {
@@ -179,4 +217,17 @@ button {
 
 dialog {
   border: 1px solid #ccc;
+}
+
+.material-icons {
+  font-variant: normal;
+  vertical-align: middle;
+}
+
+.pull-left {
+  float: left;
+}
+
+.pull-right {
+  float: right;
 }

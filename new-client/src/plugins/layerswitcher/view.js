@@ -3,6 +3,7 @@ import Observer from "react-event-observer";
 import LayerSwitcherModel from "./model.js";
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
+import PanelHeader from "../../components/PanelHeader.js";
 import { createPortal } from "react-dom";
 import "./style.css";
 
@@ -97,23 +98,13 @@ class LayersSwitcher extends Component {
   }
 
   getArrowClass() {
-    return this.state.layerGroupsExpanded
-      ? "fa fa-angle-up arrow"
-      : "fa fa-angle-right arrow";
+    return this.state.layerGroupsExpanded ? "expand_less" : "chevron_right";
   }
 
   renderPanel() {
     return createPortal(
       <div className={this.getVisibilityClass()}>
-        <div className="header">
-          <i
-            className="fa fa-close pull-right big"
-            onClick={() => {
-              this.toggle();
-            }}
-          />
-          <h1>Lagerhanterare</h1>
-        </div>
+        <PanelHeader title="Lagerhanterare" toggle={this.toggle} />
         <div className="tool-panel-content">
           <BackgroundSwitcher
             layers={this.options.baselayers}
@@ -125,7 +116,7 @@ class LayersSwitcher extends Component {
             }}
             className="clickable"
           >
-            <i className={this.getArrowClass()} />
+            <i className="material-icons">{this.getArrowClass()}</i>
             Kartlager
           </h1>
           <div className={this.getLayerGroupsClass()}>
@@ -141,7 +132,7 @@ class LayersSwitcher extends Component {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
-          <i className="fa fa-icon fa-list-alt icon" />
+          <i className="material-icons">layers</i>
           <i className="tool-text">Lagerhanterare</i>
         </div>
         {this.renderPanel()}

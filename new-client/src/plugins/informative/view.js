@@ -3,6 +3,7 @@ import Observer from "react-event-observer";
 import InformativeModel from "./model.js";
 import { createPortal } from "react-dom";
 import "./style.css";
+import PanelHeader from "../../components/PanelHeader.js";
 
 class Informative extends Component {
   constructor() {
@@ -83,15 +84,7 @@ class Informative extends Component {
   renderPanel() {
     return createPortal(
       <div className={this.getVisibilityClass()}>
-        <div className="header">
-          <i
-            className="fa fa-close pull-right big"
-            onClick={() => {
-              this.toggle();
-            }}
-          />
-          <h1>Översiktsplan</h1>
-        </div>
+        <PanelHeader title="Översiktsplan" toggle={this.toggle} />
         <div className="tool-panel-content">
           <div
             className="informative"
@@ -107,7 +100,7 @@ class Informative extends Component {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
-          <i className="fa fa-icon fa-tree icon" />
+          <i className="material-icons">satellite</i>
           <i className="tool-text">Översiktsplan</i>
         </div>
         {this.renderPanel()}

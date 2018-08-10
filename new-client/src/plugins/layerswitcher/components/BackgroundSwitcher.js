@@ -108,7 +108,7 @@ class BackgroundSwitcher extends Component {
   }
 
   getVisibilityClass() {
-    return this.state.toggled ? "hidden" : "";
+    return this.state.toggled ? "layers-list hidden" : "layers-list";
   }
 
   toggleVisibility() {
@@ -116,23 +116,23 @@ class BackgroundSwitcher extends Component {
   }
 
   getToggleClass() {
-    return this.state.toggled
-      ? "fa fa-angle-right clickable arrow"
-      : "fa fa-angle-up clickable arrow";
+    return this.state.toggled ? "chevron_right" : "expand_less";
   }
 
   render() {
     return (
       <div id="background-layers">
-        <h1
-          onClick={() => {
-            this.toggleVisibility();
-          }}
-          className="clickable"
-        >
-          <i className={this.getToggleClass()} />
-          Bakgrundskartor
-        </h1>
+        <div className="expand-toggler">
+          <h1
+            onClick={() => {
+              this.toggleVisibility();
+            }}
+            className="clickable"
+          >
+            <i className="material-icons">{this.getToggleClass()}</i>
+            Bakgrundskartor
+          </h1>
+        </div>
         <div className={this.getVisibilityClass()}>
           {this.renderBaseLayerComponents()}
         </div>

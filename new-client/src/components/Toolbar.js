@@ -32,11 +32,13 @@ class Toolbar extends Component {
     return (
       <div id="toolbar-group">
         <div
-          className="toolbar-toggler fa fa-list"
+          className="toolbar-toggler material-icons"
           onClick={() => {
             this.toggleToolbar();
           }}
-        />
+        >
+          list
+        </div>
         <div id="toolbar" className={c}>
           {this.renderTools()}
         </div>

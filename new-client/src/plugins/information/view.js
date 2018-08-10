@@ -73,11 +73,13 @@ class Draw extends Component {
       <div>
         <div className="header">
           <i
-            className="fa fa-close pull-right big"
+            className="material-icons pull-right"
             onClick={() => {
               this.toggle();
             }}
-          />
+          >
+            close
+          </i>
           <h1>Information</h1>
         </div>
         <div className="tool-panel-content">Information</div>
@@ -89,7 +91,7 @@ class Draw extends Component {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
-          <i className="fa fa-icon fa-info icon" />
+          <i className="material-icons">info</i>
           <i className="tool-text">Information</i>
         </div>
         {createPortal(
