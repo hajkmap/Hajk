@@ -185,6 +185,7 @@
     </Content>
     <Content Include="App_Data\layers.json" />
     <Content Include="App_Data\map_1.json" />
+    <Content Include="App_Data\op.json" />
     <None Include="Properties\PublishProfiles\File.pubxml" />
   </ItemGroup>
   <ItemGroup>
@@ -197,6 +198,7 @@
     <Compile Include="Components\TIFFCreator.cs" />
     <Compile Include="Components\Util.cs" />
     <Compile Include="Controllers\ExtendedWMSLayerController.cs" />
+    <Compile Include="Controllers\InformativeController.cs" />
     <Compile Include="Controllers\LayerMenuController.cs" />
     <Compile Include="Controllers\ToolSettingsController.cs" />
     <Compile Include="Controllers\MapSettingsController.cs" />
@@ -264,7 +266,9 @@
       <DependentUpon>Web.config</DependentUpon>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Views\Informative\" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

@@ -27,6 +27,7 @@ import Alert from '../views/alert.jsx';
 import Edit from '../views/edit.jsx';
 import LayerManager from '../views/layermanager.jsx';
 import Map from '../views/map.jsx';
+import InformativeEditor from '../views/informativeeditor.jsx';
 import MapSettings from '../views/mapsettings.jsx';
 import Info from '../views/info.jsx';
 import Release from '../views/release.jsx';
@@ -35,6 +36,7 @@ import Search from '../views/search.jsx';
 import editModel from '../models/edit.js';
 import layerManagerModel from '../models/layermanager.js';
 import mapModel from '../models/map.js';
+import informativeEditorModel from '../models/informativeEditor.js';
 import mapSettingsModel from '../models/mapsettings.js';
 import infoModel from '../models/info.js';
 import releaseModel from '../models/release.js';
@@ -133,7 +135,7 @@ class Application extends Component {
     });
   }
 
-  getView (name) {
+  getView (name) {    
     switch (name) {
       case 'edit':
         return Edit;
@@ -141,6 +143,8 @@ class Application extends Component {
         return LayerManager;
       case 'map':
         return Map;
+      case 'informative':
+        return InformativeEditor;        
       case 'mapsettings':
         return MapSettings;
       case 'info':
@@ -152,7 +156,7 @@ class Application extends Component {
     }
   }
 
-  getModel (name) {
+  getModel (name) {    
     switch (name) {
       case 'edit':
         return new editModel();
@@ -160,6 +164,8 @@ class Application extends Component {
         return new layerManagerModel();
       case 'map':
         return new mapModel();
+      case 'informative':
+        return new informativeEditorModel();
       case 'mapsettings':
         return new mapSettingsModel();
       case 'info':

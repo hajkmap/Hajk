@@ -21,7 +21,7 @@ module.exports = function (grunt) {
           }
         },
         src: ['src/**/*.js', 'src/**/*.jsx'],
-        dest: 'dist/js/<%= pkg.name %>.js'
+        dest: '../backend/mapservice/admin/js/<%= pkg.name %>.js'
       },
       dist: {
         options: {
@@ -33,7 +33,7 @@ module.exports = function (grunt) {
           }
         },
         src: ['src/**/*.js', 'src/**/*.jsx'],
-        dest: 'dist/js/<%= pkg.name %>.min.js'
+        dest: '../backend/mapservice/admin/js/<%= pkg.name %>.min.js'
       }
     },
 
@@ -43,7 +43,7 @@ module.exports = function (grunt) {
       },
       target: {
         files: {
-          'dist/js/<%= pkg.name %>.min.js': ['dist/js/<%= pkg.name %>.min.js']
+          '../backend/mapservice/admin/js/<%= pkg.name %>.min.js': ['../backend/mapservice/admin/js/<%= pkg.name %>.min.js']
         }
       }
     },
@@ -53,7 +53,7 @@ module.exports = function (grunt) {
         options: {
         },
         files: {
-          'dist/css/hajk-admin.css': 'src/less/*.less'
+          '../backend/mapservice/admin/css/hajk-admin.css': 'src/less/*.less'
         }
       }
     },
@@ -86,27 +86,31 @@ module.exports = function (grunt) {
         files: [
           {
             src: 'src/static/config.json',
-            dest: 'dist/config.json'
+            dest: '../backend/mapservice/admin/config.json'
           },
           {
             src: 'src/static/index.html',
-            dest: 'dist/index.html'
+            dest: '../backend/mapservice/admin/index.html'
           },
           {
             src: 'src/static/debug.html',
-            dest: 'dist/debug.html'
+            dest: '../backend/mapservice/admin/debug.html'
           },
           {
             cwd: 'src/static/fonts',
             src: '**/*',
-            dest: 'dist/fonts',
+            dest: '../backend/mapservice/admin/fonts',
             expand: true
           },
           {
             cwd: 'node_modules/font-awesome/fonts',
             src: '*',
-            dest: 'dist/fonts',
+            dest: '../backend/mapservice/admin/fonts',
             expand: true
+          },
+          {            
+            src: 'node_modules/draft-js/dist/Draft.css',
+            dest: '../backend/mapservice/admin/css/draft.css'            
           }
         ]
       }

@@ -1,7 +1,7 @@
 {
   "appName": "Hajk",
   "version": "3.0.0",
-  "mapserviceBase": "http://demo.giscloud.se/mapservice",
+  "mapserviceBase": "http://localhost:55630",
   "defaultMap": "map_1",
   "proxy": ""
 }

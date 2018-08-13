@@ -173,79 +173,64 @@
       "options": {
         "baselayers": [
           {
-            "id": "7",
-            "visibleAtStart": false,
-            "drawOrder": 0,
-            "visibleForGroups": null
-          },
-          {
-            "id": "50",
+            "id": "5",
             "visibleAtStart": true,
             "drawOrder": 0,
-            "visibleForGroups": null
+            "visibleForGroups": [],
+            "infobox": ""
+          },
+          {
+            "id": "2",
+            "visibleAtStart": true,
+            "drawOrder": 0,
+            "visibleForGroups": [],
+            "infobox": ""
           }
         ],
         "groups": [
           {
-            "id": "96638717-9cf2-61f7-75a8-3a4859140cf7",
+            "id": "dec1ab4e-e209-9a07-d336-69abe4fe368f",
             "parent": "-1",
-            "name": "Grupp 1",
+            "name": "Karlager",
             "toggled": false,
             "expanded": false,
             "layers": [
               {
-                "id": "46",
-                "visibleAtStart": false,
-                "drawOrder": 0,
-                "visibleForGroups": []
+                "id": "4",
+                "visibleAtStart": true,
+                "drawOrder": 1,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "3",
+                "visibleAtStart": true,
+                "drawOrder": 2,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
+                "id": "1",
+                "visibleAtStart": true,
+                "drawOrder": 3,
+                "visibleForGroups": [],
+                "infobox": ""
               }
             ],
             "groups": [
               {
-                "id": "1bb6fbcb-9b16-d657-af9b-154a3ebc52aa",
-                "parent": "96638717-9cf2-61f7-75a8-3a4859140cf7",
-                "name": "Grupp 1.1",
+                "id": "376a00b9-a04c-a81d-5c54-bd5420c40dc1",
+                "parent": "dec1ab4e-e209-9a07-d336-69abe4fe368f",
+                "name": "Undergrupp",
                 "toggled": false,
                 "expanded": false,
                 "layers": [
                   {
-                    "id": "47",
+                    "id": "8",
                     "visibleAtStart": true,
-                    "drawOrder": 1000,
-                    "visibleForGroups": []
-                  }
-                ],
-                "groups": []
-              }
-            ]
-          },
-          {
-            "id": "cae3b092-b58e-7fa8-83bd-39b179696975",
-            "parent": "-1",
-            "name": "Grupp 2",
-            "toggled": false,
-            "expanded": false,
-            "layers": [
-              {
-                "id": "43",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": []
-              }
-            ],
-            "groups": [
-              {
-                "id": "12bd24f5-be7f-a022-4304-70e3353d3023",
-                "parent": "cae3b092-b58e-7fa8-83bd-39b179696975",
-                "name": "Grupp 2.1",
-                "toggled": false,
-                "expanded": false,
-                "layers": [
-                  {
-                    "id": "23",
-                    "visibleAtStart": false,
-                    "drawOrder": 1000,
-                    "visibleForGroups": []
+                    "drawOrder": 4,
+                    "visibleForGroups": [],
+                    "infobox": ""
                   }
                 ],
                 "groups": []
@@ -253,7 +238,7 @@
             ]
           }
         ],
-        "instruction": "instruktion",
+        "instruction": "",
         "active": true,
         "visibleAtStart": true,
         "backgroundSwitcherBlack": true,
@@ -269,16 +254,63 @@
       "index": 0
     },
     {
+      "type": "routing",
+      "options": {
+        "apiKey": "",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "location",
+      "options": {
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "measure",
+      "options": {
+        "instruction": "",
+        "icons": ""
+      },
+      "index": 0
+    },
+    {
+      "type": "preset",
+      "options": {
+        "presetList": [],
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "streetview",
+      "options": {
+        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
       "type": "search",
       "options": {
-        "onMap": true,
-        "toolbar": "",
-        "maxZoom": 15,
+        "onMap": false,
+        "bothSynlig": false,
+        "enableViewTogglePopupInSnabbsok": true,
+        "toolbar": "bottom",
+        "maxZoom": 14,
         "markerImg": "http://localhost/hajk/assets/icons/marker.png",
         "kmlExportUrl": "/mapservice/export/kml",
         "excelExportUrl": "/mapservice/export/excel",
         "displayPopup": true,
         "selectionTools": true,
+        "base64Encode": false,
+        "instruction": "",
+        "filterVisible": true,
         "anchor": [
           16,
           32
@@ -287,16 +319,14 @@
           32,
           32
         ],
-        "visibleForGroups": [
-          "Grupp1",
-          "Grupp2"
-        ],
+        "popupOffsetY": 0,
+        "visibleForGroups": [],
         "layers": [
           {
-            "id": "51",
+            "id": "6",
             "visibleForGroups": [
-              "Grupp X",
-              " Grupp Z"
+              "Office-SEKSD01",
+              "All-SE129"
             ]
           }
         ]
@@ -304,19 +334,25 @@
       "index": 0
     },
     {
-      "type": "infoclick",
+      "type": "information",
       "options": {
-        "displayPopup": true,
-        "markerImg": "assets/icons/marker.png",
-        "anchor": [
-          16,
-          32
-        ],
-        "imgSize": [
-          32,
-          32
-        ],
-        "popupOffsetY": -32
+        "text": "",
+        "headerText": "",
+        "visibleAtStart": false,
+        "showInfoOnce": false,
+        "base64EncodeForInfotext": false,
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "buffer",
+      "options": {
+        "instruction": "",
+        "varbergVer": false,
+        "geoserverUrl": "",
+        "notFeatureLayers": [],
+        "visibleForGroups": []
       },
       "index": 0
     },
@@ -327,6 +363,8 @@
         "exportTiffUrl": "/mapservice/export/tiff",
         "pdfActive": true,
         "tiffActive": true,
+        "base64Encode": false,
+        "autoScale": false,
         "scales": [
           250,
           500,
@@ -334,45 +372,23 @@
           2500,
           5000,
           10000,
-          10000,
           25000,
           50000,
           100000,
           250000
-        ]
+        ],
+        "proxyUrl": "",
+        "instruction": "",
+        "visibleForGroups": []
       },
       "index": 0
     },
     {
       "type": "edit",
-      "options": {},
-      "index": 0
-    },
-    {
-      "type": "coordinates",
       "options": {
-        "transformations": [
-          {
-            "code": "EPSG:3007",
-            "default": true,
-            "hint": "(Standard)",
-            "title": "Sweref 99 12 00",
-            "xtitle": "E",
-            "ytitle": "N",
-            "inverseAxis": false
-          }
-        ]
+        "instruction": "",
+        "visibleForGroups": []
       },
-      "index": 0
-    },
-    {
-      "type": "buffer",
-      "options": {},
-      "index": 0
-    },
-    {
-      "type": "anchor",
-      "options": {},
       "index": 0
     },
     {
@@ -380,46 +396,79 @@
       "options": {
         "exportUrl": "/mapservice/export/kml",
         "importUrl": "/mapservice/import/kml",
-        "icons": "marker, marker_black, marker_green, marker_red, marker_yellow, br, pin, pin_black, pin_green, pin_red, pin_yellow"
+        "base64Encode": false,
+        "instruction": "",
+        "icons": "",
+        "proxyUrl": "",
+        "visibleForGroups": []
       },
       "index": 0
     },
     {
-      "type": "location",
-      "options": {},
-      "index": 0
-    },
-    {
-      "type": "streetview",
+      "type": "coordinates",
       "options": {
-        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4"
-      },
-      "index": 0
-    },
-    {
-      "type": "information",
-      "options": {
-        "text": "",
-        "headerText": "",
-        "visibleAtStart": false
+        "instruction": "",
+        "transformations": [],
+        "visibleForGroups": []
       },
       "index": 0
     },
     {
       "type": "bookmark",
-      "options": {},
+      "options": {
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "anchor",
+      "options": {
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "infoclick",
+      "options": {
+        "displayPopup": false,
+        "markerImg": "assets/icons/marker.png",
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ],
+        "popupOffsetY": 0,
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "informative",
+      "options": {
+        "text": "",
+        "headerText": "",
+        "visibleAtStart": false,
+        "showInfoOnce": false,
+        "base64EncodeForInfotext": false,
+        "visibleForGroups": []
+      },
       "index": 0
     }
   ],
   "map": {
     "target": "map",
     "center": [
-      414962,
-      6583005
+      416200,
+      6582000
     ],
-    "title": "hohokarata",
+    "title": "Demo",
     "projection": "EPSG:3006",
-    "zoom": 3,
+    "zoom": 12,
     "maxZoom": 3,
     "minZoom": 9,
     "resolutions": [
@@ -450,6 +499,7 @@
     ],
     "logo": "assets/logo.png",
     "infologo": "",
+    "geoserverLegendOptions": "",
     "mobileleft": null,
     "mobileright": null,
     "pil": null,
@@ -457,7 +507,6 @@
     "colors": {
       "primaryColor": "#0affc2",
       "secondaryColor": "#ffffff"
-    },
-    "geoserverLegendOptions": ""
+    }
   }
 }

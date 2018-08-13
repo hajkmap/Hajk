@@ -28,7 +28,7 @@ class Informative extends Component {
     this.props.tool.instance = this;
     this.informativeModel.load(data => {
       this.setState({
-        text: data
+        data: data
       });
     });
   }
@@ -77,8 +77,28 @@ class Informative extends Component {
     return this.state.toggled ? "open" : "";
   }
 
-  createMarkup() {
-    return { __html: this.state.text };
+  parseChapters(chapters) {
+    var html = "";
+
+    chapters.forEach(chapter => {
+      html += `
+        <h1>${chapter.header}</h1>
+        ${chapter.html}
+      `;          
+      if (chapter.chapters.length > 0) {
+        html += this.parseChapters(chapter.chapters);
+      }
+    });
+
+    return html;
+  }
+
+  createMarkup() {    
+    var html = "";    
+    if (this.state.data) {
+      html = this.parseChapters(this.state.data);
+    }
+    return { __html: html };
   }
 
   renderPanel() {
@@ -96,7 +116,7 @@ class Informative extends Component {
     );
   }
 
-  render() {
+  render() {    
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
