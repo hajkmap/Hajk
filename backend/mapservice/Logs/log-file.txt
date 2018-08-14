@@ -1,0 +1,2 @@
+ERROR 2018-08-14 10:18:10 Exception in removeLayerFromConfig: Object reference not set to an instance of an object. 
+ERROR 2018-08-14 10:24:17 Exception in removeLayerFromConfig: Object reference not set to an instance of an object. 

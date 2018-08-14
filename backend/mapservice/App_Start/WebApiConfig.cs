@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Web.Http;
+using System.Web.Http.Cors;
 using log4net;
 
 namespace MapService
@@ -12,6 +13,8 @@ namespace MapService
         public static void Register(HttpConfiguration config)
         {
 			// Web API configuration and services			
+			config.EnableCors(new EnableCorsAttribute("http://localhost:3000", headers: "*", methods: "*"));
+			config.EnableCors(new EnableCorsAttribute("http://localhost:3001", headers: "*", methods: "*"));
 
 			// Web API routes
 			config.MapHttpAttributeRoutes();

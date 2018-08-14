@@ -173,18 +173,11 @@
       "options": {
         "baselayers": [
           {
-            "id": "5",
-            "visibleAtStart": true,
-            "drawOrder": 0,
-            "visibleForGroups": [],
-            "infobox": ""
-          },
-          {
             "id": "2",
             "visibleAtStart": true,
             "drawOrder": 0,
-            "visibleForGroups": [],
-            "infobox": ""
+            "visibleForGroups": null,
+            "infobox": null
           }
         ],
         "groups": [
@@ -196,25 +189,25 @@
             "expanded": false,
             "layers": [
               {
-                "id": "4",
+                "id": "5",
                 "visibleAtStart": true,
                 "drawOrder": 1,
-                "visibleForGroups": [],
-                "infobox": ""
-              },
-              {
-                "id": "3",
-                "visibleAtStart": true,
-                "drawOrder": 2,
-                "visibleForGroups": [],
-                "infobox": ""
+                "visibleForGroups": null,
+                "infobox": null
               },
               {
                 "id": "1",
                 "visibleAtStart": true,
+                "drawOrder": 2,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "3",
+                "visibleAtStart": true,
                 "drawOrder": 3,
-                "visibleForGroups": [],
-                "infobox": ""
+                "visibleForGroups": null,
+                "infobox": null
               }
             ],
             "groups": [
@@ -229,8 +222,8 @@
                     "id": "8",
                     "visibleAtStart": true,
                     "drawOrder": 4,
-                    "visibleForGroups": [],
-                    "infobox": ""
+                    "visibleForGroups": null,
+                    "infobox": null
                   }
                 ],
                 "groups": []
@@ -243,7 +236,7 @@
         "visibleAtStart": true,
         "backgroundSwitcherBlack": true,
         "backgroundSwitcherWhite": true,
-        "toggleAllButton": false,
+        "toggleAllButton": true,
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Rubrik temakarta",
         "visibleForGroups": [

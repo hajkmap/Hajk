@@ -19,7 +19,7 @@ namespace MapService.Controllers
 			Response.ContentType = "application/json; charset=utf-8";
 			Response.Headers.Add("Cache-Control", "private, no-cache");
 
-			string file = String.Format("{0}App_Data\\{1}.json", HostingEnvironment.ApplicationPhysicalPath, id);
+			string file = String.Format("{0}App_Data\\documents\\{1}.json", HostingEnvironment.ApplicationPhysicalPath, id);
 			if (System.IO.File.Exists(file))
 			{
 				return System.IO.File.ReadAllText(file);
@@ -32,7 +32,7 @@ namespace MapService.Controllers
 			Stream req = Request.InputStream;
 			req.Seek(0, System.IO.SeekOrigin.Begin);
 			string json = new StreamReader(req).ReadToEnd();
-			string file = String.Format("{0}App_Data\\{1}.json", HostingEnvironment.ApplicationPhysicalPath, id);						
+			string file = String.Format("{0}App_Data\\documents\\{1}.json", HostingEnvironment.ApplicationPhysicalPath, id);						
 			if (System.IO.File.Exists(file))
 			{
 				System.IO.File.WriteAllText(file, json);

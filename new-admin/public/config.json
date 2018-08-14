@@ -1,0 +1,48 @@
+{
+  "layermanager": {
+    "url_proxy": "",
+    "url_import": "http://localhost:55630/import/image",
+    "url_layers": "http://localhost:55630/config/layers",
+    "url_layer_settings": "http://localhost:55630/settings/wmslayer",
+    "url_layer_settings_extended": "http://localhost:55630/settings/extendedwmslayer",
+    "url_wmtslayer_settings": "http://localhost:55630/settings/wmtslayer",
+    "url_arcgislayer_settings": "http://localhost:55630/settings/arcgislayer",
+    "url_vectorlayer_settings": "http://localhost:55630/settings/vectorlayer",
+    "url_default_server": "http://giscloud.se/geoserver/wms",
+    "owner_options": [
+      { "value": "SBK", "title": "SBK" },
+      { "value": "Lantmäterienheten", "title": "Lantmäterienheten" }
+    ]
+  },
+  "search": {
+    "url_proxy": "",
+    "url_layers": "http://localhost:55630/config/layers",
+    "url_layer_settings": "http://localhost:55630/settings/wfslayer",
+    "url_default_server": "http://giscloud.se/geoserver/wfs"
+  },
+  "edit": {
+    "url_proxy": "",
+    "url_layers": "http://localhost:55630/config/layers",
+    "url_layer_settings": "http://localhost:55630/settings/wfstlayer",
+    "url_default_server": "http://giscloud.se/geoserver/wfs",
+    "projections": ["EPSG:3006", "EPSG:3007", "EPSG:3008"]
+  },
+  "mapsettings": {
+    "url_map": "http://localhost:55630/config",
+    "url_map_create": "http://localhost:55630/config/create",
+    "url_map_delete": "http://localhost:55630/config/delete",
+    "url_map_list": "http://localhost:55630/config/list",
+    "url_layers": "http://localhost:55630/config/layers",
+    "url_layermenu_settings": "http://localhost:55630/settings/layermenu",
+    "url_map_settings": "http://localhost:55630/settings/mapsettings",
+	  "url_tool_settings": "http://localhost:55630/settings/toolsettings",
+	  "authentication_active": false
+  },
+  "router": [
+    { "name": "layermanager", "title": "Visningstjänster", "default": true },
+    { "name": "search", "title": "Söktjänster" },
+    { "name": "edit", "title": "Redigeringstjänster" },
+    { "name": "mapsettings", "title": "Kartinställningar" },
+    { "name": "informative", "title": "Översiktsplan" }
+  ]
+}

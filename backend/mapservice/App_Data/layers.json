@@ -163,34 +163,44 @@
       "infoUrl": "",
       "infoUrlText": "",
       "infoOwner": ""
-    }
-  ],
-  "wfslayers": [
+    },
     {
-      "id": "6",
-      "caption": "Hamn",
-      "url": "http://giscloud.se/geoserver/wfs",
+      "id": "9",
+      "caption": "basin",
+      "url": "http://giscloud.se/geoserver/wms",
+      "owner": "",
+      "date": "1534246243266",
+      "content": "",
+      "legend": "",
+      "projection": null,
       "layers": [
-        "wsp:port_imo"
+        "wsp:basin"
       ],
-      "searchFields": [
-        "facility_n"
-      ],
-      "infobox": "Port name: {port_name}  \nFacilitynName: {facility_n} ",
-      "aliasDict": "",
-      "displayFields": [
-        "facility_n"
-      ],
-      "geometryField": "geom",
-      "outputFormat": "GML3",
+      "infobox": "",
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "opacity": 1.0,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
       "infoVisible": false,
-      "infoTitle": null,
-      "infoText": null,
-      "infoUrl": null,
-      "infoUrlText": null,
-      "infoOwner": null
+      "infoTitle": "",
+      "infoText": "",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOwner": ""
     }
   ],
+  "wfslayers": [],
   "vectorlayers": [
     {
       "id": "3",
@@ -283,40 +293,5 @@
     }
   ],
   "arcgislayers": [],
-  "extendedwmslayers": [
-    {
-      "id": "4",
-      "caption": "port",
-      "url": "http://giscloud.se/geoserver/wms",
-      "owner": "",
-      "date": "1529410907000",
-      "content": "",
-      "projection": "EPSG:3006",
-      "infoFormat": "application/json",
-      "infobox": "",
-      "legend": "",
-      "layers": [
-        {
-          "style": "polygon",
-          "queryable": true,
-          "name": "wsp:port"
-        }
-      ],
-      "searchFields": null,
-      "displayFields": null,
-      "visibleAtStart": false,
-      "tiled": false,
-      "singleTile": false,
-      "imageFormat": "image/png",
-      "serverType": "geoserver",
-      "attribution": "",
-      "version": "1.3.0",
-      "infoVisible": false,
-      "infoTitle": "",
-      "infoText": "",
-      "infoUrl": "",
-      "infoUrlText": "",
-      "infoOwner": ""
-    }
-  ]
+  "extendedwmslayers": []
 }
