@@ -3,17 +3,22 @@ import Observer from "react-event-observer";
 import EditModel from "./model.js";
 import { createPortal } from "react-dom";
 import "./style.css";
+import dialogPolyfill from "dialog-polyfill";
 
 class Draw extends Component {
   constructor() {
     super();
-    this.toggle = this.toggle.bind(this);
+    // this.toggle = this.toggle.bind(this);
     this.state = {
       toggled: false
     };
   }
 
   componentDidMount() {
+    // Register polyfill
+    this.dialog = document.querySelector("dialog");
+    dialogPolyfill.registerDialog(this.dialog);
+
     this.observer = Observer();
     this.observer.subscribe("myEvent", message => {
       console.log(message);
@@ -44,7 +49,7 @@ class Draw extends Component {
     });
   }
 
-  toggle() {
+  toggle = () => {
     if (!this.state.toggled) {
       this.props.toolbar.hide();
     }
@@ -52,7 +57,7 @@ class Draw extends Component {
       toggled: !this.state.toggled
     });
     this.props.tool.app.togglePlugin("information");
-  }
+  };
 
   getActiveClass() {
     return this.state.toggled
