@@ -31,15 +31,13 @@ var defaultState = {
 };
 
 class MapOptions extends Component {
-  /**
-   *
-   */
-  constructor () {
+
+  constructor() {
     super();
     this.state = defaultState;
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.props.model.on('change:mapConfig', (e) => {
       var config = this.props.model.get('mapConfig');
       this.setState({
@@ -57,17 +55,15 @@ class MapOptions extends Component {
         title: config.title ? config.title : '',
         geoserverLegendOptions: config.geoserverLegendOptions ? config.geoserverLegendOptions : ''
       });
+      this.validate();
     });
-    this.validate();
   }
 
-  componentWillUnmount () {
+  componentWillUnmount() {
     this.props.model.off('change:mapConfig');
   }
-  /**
-   *
-   */
-  componentWillMount () {
+
+  componentWillMount() {
     var mapConfig = this.props.model.get('mapConfig');  
     
     this.setState({
@@ -89,30 +85,42 @@ class MapOptions extends Component {
     });
   }
 
-  getValue (fieldName) {    
+  getValue(fieldName) {
     var input = this.refs['input_' + fieldName],
       value = input ? input.value : '';
 
     if (fieldName === 'center') value = value.split(',');
     if (fieldName === 'extent') value = value.split(',');
+    if (fieldName === 'title') {
+      if (value === "") {
+        value = this.props.model.get("mapFile");
+      }
+    }
 
     return value;
   }
 
-  validate () {
-    var valid = true,
-      validationFields = ['projection', 'zoom', 'center'];
+  validate(callback) {
+    var validationFields = ['title', 'projection', 'zoom', 'center'],
+        validationErrors = [];
 
     validationFields.forEach(field => {
-      if (!this.validateField(field)) {
-        valid = false;
+      var valid = this.validateField(field, false);
+      if (!valid) {
+        validationErrors.push(field);
       }
     });
 
-    return valid;
+    this.setState({
+      validationErrors: validationErrors
+    }, () => {
+      if (callback) {
+        callback(validationErrors.length === 0)
+      }
+    })    
   }
 
-  validateField (fieldName, e) {
+  validateField(fieldName, updateState) {
     var value = this.getValue(fieldName),
       valid = true;
 
@@ -133,6 +141,11 @@ class MapOptions extends Component {
     }
 
     switch (fieldName) {
+      case 'title':
+        if (empty(value)) {
+          valid = false;
+        }
+        break;
       case 'extent':
         if (!extent(value)) {
           valid = false;
@@ -162,54 +175,48 @@ class MapOptions extends Component {
         break;
     }
 
-    if (e) {
-      let state = {};
-      state[fieldName] = e.target.value;
-      this.setState(state);
-    } else {
-      if (!valid) {
+    if (updateState !== false) {        
+      if (!valid) {      
         this.setState({
           validationErrors: [...this.state.validationErrors, fieldName]
-        })
+        });
       } else {
         this.setState({
           validationErrors: this.state.validationErrors.filter(v => v !== fieldName)
-        })      
+        }); 
       }
-    }
+    }      
+
+    return valid;
   }
 
-  /**
-   *
-   */
-  save () {
+  save() {
     var config = this.props.model.get('mapConfig');
-    if (this.validate()) {
-      config.title = this.getValue('title');
-      config.projection = this.getValue('projection');
-      config.zoom = this.getValue('zoom');
-      config.center = this.getValue('center');
-      config.logo = this.getValue('logo');
-      config.extent = this.getValue('extent');
-      config.infologo = this.getValue('infologo');
-      config.mobile = this.state.mobile;
-      config.geoserverLegendOptions = this.getValue('geoserverLegendOptions');
-      this.props.model.updateMapConfig(config, success => {
-        var msg = success
-          ? 'Uppdateringen lyckades.'
-          : 'Uppdateringen misslyckades.';
-        this.props.parent.setState({
-          alert: true,
-          alertMessage: msg
-        });
-      });
-    }
+    this.validate(valid => {
+      if (valid) {
+        config.title = this.getValue('title');
+        config.projection = this.getValue('projection');
+        config.zoom = this.getValue('zoom');
+        config.center = this.getValue('center');
+        config.logo = this.getValue('logo');
+        config.extent = this.getValue('extent');
+        config.infologo = this.getValue('infologo');
+        config.mobile = this.state.mobile;
+        config.geoserverLegendOptions = this.getValue('geoserverLegendOptions');
+        this.props.model.updateMapConfig(config, success => {
+          var msg = success
+            ? 'Uppdateringen lyckades.'
+            : 'Uppdateringen misslyckades.';
+          this.props.parent.setState({
+            alert: true,
+            alertMessage: msg
+          });
+        });    
+      }
+    });
   }
 
-  /**
-   *
-   */
-  handlePrimaryColorComplete (color) {
+  handlePrimaryColorComplete(color) {
     if (!this.props.model.get('mapConfig').colors) {
       this.props.model.get('mapConfig').colors = {};
     }
@@ -219,10 +226,7 @@ class MapOptions extends Component {
     });
   }
 
-  /**
-   *
-   */
-  handleSecondaryColorComplete (color) {
+  handleSecondaryColorComplete(color) {
     if (!this.props.model.get('mapConfig').colors) {
       this.props.model.get('mapConfig').colors = {};
     }
@@ -232,14 +236,11 @@ class MapOptions extends Component {
     });
   }
 
-  getValidationClass (inputName) {
+  getValidationClass(inputName) {    
     return this.state.validationErrors.find(v => v === inputName) ? 'validation-error' : '';
   }
 
-  /**
-   *
-   */
-  render () {
+  render() {
     return (
       <div>
         <aside>
@@ -251,15 +252,17 @@ class MapOptions extends Component {
             <button className='btn btn-primary' onClick={(e) => this.save(e)}>Spara</button>
             <br />
             <div>
-              <label>Kartans titel <i className='fa fa-question-circle' data-toggle='tooltip' title='Om inget anges blir titel kartans filnamn' /></label>
+              <label>Titel <i className='fa fa-question-circle' data-toggle='tooltip' title='Om inget anges blir titel kartans filnamn' /></label>
               <input
                 type='text'
                 ref='input_title'
                 value={this.state.title}
                 className={this.getValidationClass('title')}
                 onChange={(e) => {
-                  this.setState({title: e.target.value});
-                  this.validateField('title');
+                  this.setState(
+                    {title: e.target.value}, 
+                    () => this.validateField('title')
+                  );
                 }}
               />
             </div>
@@ -271,8 +274,10 @@ class MapOptions extends Component {
                 value={this.state.projection}
                 className={this.getValidationClass('projection')}
                 onChange={(e) => {
-                  this.setState({projection: e.target.value});
-                  this.validateField('projection');
+                  this.setState(
+                    {projection: e.target.value}, 
+                    () => this.validateField('projection')
+                  );                  
                 }}
               />
             </div>
@@ -284,8 +289,10 @@ class MapOptions extends Component {
                 value={this.state.zoom}
                 className={this.getValidationClass('zoom')}
                 onChange={(e) => {
-                  this.setState({zoom: e.target.value});
-                  this.validateField('zoom');
+                  this.setState(
+                    {zoom: e.target.value}, 
+                    () => this.validateField('zoom')
+                  )
                 }}
               />
             </div>
@@ -297,33 +304,40 @@ class MapOptions extends Component {
                 value={this.state.center}
                 className={this.getValidationClass('center')}
                 onChange={(e) => {
-                  this.setState({center: e.target.value});
-                  this.validateField('center');
+                  this.setState(
+                    {center: e.target.value}, 
+                    () => this.validateField('center')
+                  );
                 }}
               />
             </div>
             <div>
-              <label>Logo*</label>
+              <label>Logo</label>
               <input
                 type='text'
                 ref='input_logo'
                 value={this.state.logo}
                 className={this.getValidationClass('logo')}
                 onChange={(e) => {
-                  this.setState({logo: e.target.value});
-                  this.validateField('logo');
+                  this.setState(
+                    {logo: e.target.value}, 
+                    () => this.validateField('logo')
+                  );
                 }}
               />
             </div>
             <div>
-              <label>Extent (bounding box)</label>
+              <label>Extent <i className='fa fa-question-circle' data-toggle='tooltip' title='Anges med formatering: 1,2,3,4' /></label>
               <input
                 type='text'
                 ref='input_extent'
                 value={this.state.extent}
                 className={this.getValidationClass('extent')}
                 onChange={(e) => {
-                  this.setState({extent: e.target.value});
+                  this.setState(
+                    {extent: e.target.value}, 
+                    () => this.validateField('extent')
+                  );
                 }}
               />
             </div>
@@ -335,14 +349,17 @@ class MapOptions extends Component {
                 value={this.state.infologo}
                 className={this.getValidationClass('logo')}
                 onChange={(e) => {
-                  this.setState({infologo: e.target.value});
-                  this.validateField('infologo');
+                  this.setState(
+                    {infologo: e.target.value}, 
+                    () => this.validateField('infologo')
+                  )
                 }}
               />
             </div>
             <div>
-              <label>Mobilanpassning</label>
+              <label htmlFor="input_mobile">Mobilanpassning</label>
               <input
+                id="input_mobile"
                 type='checkbox'
                 ref='input_mobile'
                 onChange={(e) => {
@@ -362,7 +379,7 @@ class MapOptions extends Component {
                 }}
               />
             </div>
-            <div className='col-md-12'>
+            <div className='clearfix'>
               <span className='pull-left'>
                 <div>Huvudfärg</div>
                 <SketchPicker

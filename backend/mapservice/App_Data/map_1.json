@@ -459,7 +459,7 @@
       416200,
       6582000
     ],
-    "title": "Demo",
+    "title": "map_1",
     "projection": "EPSG:3006",
     "zoom": 12,
     "maxZoom": 3,
@@ -498,8 +498,8 @@
     "pil": null,
     "mobile": false,
     "colors": {
-      "primaryColor": "#0affc2",
-      "secondaryColor": "#ffffff"
+      "primaryColor": "#66bba6",
+      "secondaryColor": "#6b1a1a"
     }
   }
 }
