@@ -20,9 +20,7 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import {
-  Model
-} from 'backbone';
+import { Model } from 'backbone';
 const $ = require('jquery');
 const jQuery = $;
 global.window.jQuery = jQuery;

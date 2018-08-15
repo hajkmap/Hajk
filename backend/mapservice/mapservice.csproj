@@ -197,6 +197,7 @@
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Attributes\AllowCrossSiteJsonAttribute.cs" />
     <Compile Include="Components\MapExport\Extensions\TileLayer2.cs" />
     <Compile Include="Components\MapExport\SharpMapExtensions\DpiWmsLayer.cs" />
     <Compile Include="Components\MapExport\SharpMapExtensions\LayerCollectionRendererThrowsException.cs" />
