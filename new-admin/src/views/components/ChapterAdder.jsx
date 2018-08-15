@@ -41,7 +41,7 @@ class ChapterAdder extends Component {
     if (this.state.inputVisible) {
       return (
         <div style={{display: "inline-block"}}>
-          <input style={{position: "relative", top: "2px"}} placeholder="Ange rubrik" value={this.state.title} type="text" name="chapter-title" onChange={(e) => {this.setTitle(e)}} />&nbsp;
+          <input placeholder="Ange rubrik" value={this.state.title} type="text" name="chapter-title" onChange={(e) => {this.setTitle(e)}} />&nbsp;
           <span className="btn btn-primary" onClick={() => this.addChapter()}>Ok</span>&nbsp;
           <span className="btn btn-danger" onClick={() => this.cancel()}>Avbryt</span>
         </div>
