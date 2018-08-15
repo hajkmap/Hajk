@@ -156,13 +156,12 @@ class ToolOptions extends Component {
     }
   }
 
-  addPreset(e) {
-    var elements = this.refs.presetForm.elements;
+  addPreset(e) {    
     this.setState({
       presetList: [
         ...this.state.presetList, {
-          'name': elements['name'].value, 
-          'presetUrl': elements['presetUrl'].value    
+          name: this.refs.preset_name.value, 
+          presetUrl: this.refs.preset_url.value    
         }
       ]
     });
@@ -188,15 +187,14 @@ class ToolOptions extends Component {
         'presetUrl': elements['presetUrl'].value
       };
       this.state.presetList.push(preset);
-    });
-    //this.state.presetList.push(preset);
+    });    
     this.renderForm(e);
   }
 
   results(value) {
     if (value.name === this.state.editing) {
       return (
-        <form ref='editForm' onSubmit={(e) => { e.preventDefault(); this.handleSubmit(e); }}>
+        <div ref='editForm'>
           <label>
               Name:
           </label>
@@ -205,8 +203,8 @@ class ToolOptions extends Component {
           <br />
           <input name='url' type='text' defaultValue={value.presetUrl} />
           <br />
-          <input type='submit' value='Submit' />
-        </form>
+          <input type='submit' value='Spara' onSubmit={(e) => { e.preventDefault(); this.handleSubmit(e); }}/>
+        </div>
       );
     }
   }
@@ -239,12 +237,12 @@ class ToolOptions extends Component {
   renderForm (value) {
     if (value.name === this.state.editing) {
       return (
-        <form ref='someForm' onSubmit={(e) => { e.preventDefault(); this.handleSubmit(e); }}>
+        <div>
           <label>Name:</label>
           <input type='text' name='name' defaultValue={this.state.presetList} />
           <input type='text' name='test' value='asd' />
-          <button className='btn btn-success'>Lägg till</button>
-        </form>
+          <button className='btn btn-success' onClick={(e) => { e.preventDefault(); this.handleSubmit(e); }}>Lägg till</button>
+        </div>
       );
     }
   }
@@ -365,16 +363,21 @@ class ToolOptions extends Component {
           </div>
           {this.renderVisibleForGroups()}
           <div>
-            <form ref='presetForm' onSubmit={(e) => { e.preventDefault(); this.addPreset(e); }}>
+            <div>
               <h4>Lägg till snabbval</h4>
               <div>
-                <label>Namn*</label><input name='name' type='text' placeholder='Namn på snabbval' defaultValue='Testkarta' required />
+                <label>Namn*</label>
+                <input name='name' type='text' placeholder='Namn på snabbval' required ref="preset_name"/>
               </div>
               <div>
-                <label>Url*</label><input name='presetUrl' type='text' placeholder='ex: ?m=map_1&x=147325.273544&y=6398754.167358001&z=4&l=10' defaultValue='url-test' required />
+                <label>Url*</label>
+                <input name='presetUrl' type='text' placeholder='ex: ?m=map_1&x=147325.273544&y=6398754.167358001&z=4&l=10' required ref="preset_url"/>
               </div>
-              <button className='btn btn-success'>Lägg till</button>
-            </form>
+              <button className='btn btn-success' onClick={e => { 
+                e.preventDefault();
+                this.addPreset(e);                
+              }}>Lägg till</button>
+            </div>
             <h4>Lista över aktiva snabbval</h4>
             <fieldset className='tree-view'>
               <ul>

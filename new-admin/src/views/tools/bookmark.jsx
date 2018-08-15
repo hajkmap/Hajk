@@ -39,7 +39,6 @@ class ToolOptions extends Component {
     super();
     this.state = defaultState;
     this.type = 'bookmark';
-
     this.handleAuthGrpsChange = this.handleAuthGrpsChange.bind(this);
   }
 
@@ -48,7 +47,7 @@ class ToolOptions extends Component {
     if (tool) {
       this.setState({
         active: true,
-        index: tool.options.index,
+        index: tool.index,
         instruction: tool.options.instruction,
         visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
       });

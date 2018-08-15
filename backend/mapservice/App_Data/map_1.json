@@ -271,15 +271,6 @@
       "index": 0
     },
     {
-      "type": "preset",
-      "options": {
-        "presetList": [],
-        "instruction": "",
-        "visibleForGroups": []
-      },
-      "index": 0
-    },
-    {
       "type": "streetview",
       "options": {
         "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
@@ -329,7 +320,7 @@
     {
       "type": "information",
       "options": {
-        "text": "",
+        "text": "Info",
         "headerText": "",
         "visibleAtStart": false,
         "showInfoOnce": false,
@@ -417,7 +408,7 @@
     {
       "type": "anchor",
       "options": {
-        "instruction": "",
+        "instruction": "QW5jaG9yIGluc3RydWN0aW9uIGhlcmU=",
         "visibleForGroups": []
       },
       "index": 0
@@ -448,6 +439,28 @@
         "visibleAtStart": false,
         "showInfoOnce": false,
         "base64EncodeForInfotext": false,
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "preset",
+      "options": {
+        "presetList": [
+          {
+            "name": "asd",
+            "presetUrl": "asd"
+          },
+          {
+            "name": "asdasd",
+            "presetUrl": "asd"
+          },
+          {
+            "name": "as",
+            "presetUrl": "asd"
+          }
+        ],
+        "instruction": "",
         "visibleForGroups": []
       },
       "index": 0
