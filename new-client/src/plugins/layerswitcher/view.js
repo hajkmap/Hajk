@@ -102,10 +102,19 @@ class LayersSwitcher extends Component {
     return this.state.layerGroupsExpanded ? "expand_less" : "chevron_right";
   }
 
+  hideAllLayers() {
+    console.log("will hide all layers");
+  }
+
   renderPanel() {
     return createPortal(
       <div className={this.getVisibilityClass()}>
-        <PanelHeader title="Lagerhanterare" toggle={this.toggle} />
+        <PanelHeader
+          title="Lagerhanterare"
+          hideAllLayersButton={this.options.toggleAllButton}
+          hideAllLayers={this.hideAllLayers}
+          toggle={this.toggle}
+        />
         <div className="tool-panel-content">
           <MapSwitcher
             options={this.options}

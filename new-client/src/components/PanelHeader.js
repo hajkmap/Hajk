@@ -1,11 +1,21 @@
 import React, { Component } from "react";
 
 class PanelHeader extends Component {
+  renderHideAllLayersButton() {
+    if (this.props.hideAllLayersButton === true) {
+      return (
+        <i className="material-icons" onClick={this.props.hideAllLayers}>
+          visibility_off
+        </i>
+      );
+    }
+  }
+
   render() {
     return (
       <div className="header">
         <div className="icons pull-right">
-          <i className="material-icons">visibility_off</i>
+          {this.renderHideAllLayersButton()}
           <i className="material-icons">minimize</i>
           <i
             className="material-icons"
