@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import Observer from "react-event-observer";
+import { createPortal } from "react-dom";
 import LayerSwitcherModel from "./model.js";
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
+import MapSwitcher from "./components/MapSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import PanelHeader from "../../components/PanelHeader.js";
-import { createPortal } from "react-dom";
 import "./style.css";
 
 class LayersSwitcher extends Component {
@@ -106,6 +107,11 @@ class LayersSwitcher extends Component {
       <div className={this.getVisibilityClass()}>
         <PanelHeader title="Lagerhanterare" toggle={this.toggle} />
         <div className="tool-panel-content">
+          <MapSwitcher
+            options={this.options}
+            observer={this.observer}
+            appConfig={this.props.tool.app.config.appConfig}
+          />
           <BackgroundSwitcher
             layers={this.options.baselayers}
             layerMap={this.layerSwitcherModel.layerMap}
