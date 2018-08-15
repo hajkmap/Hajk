@@ -127,14 +127,14 @@ class Search extends Component {
     });
 
     setTimeout(() => {
-      this.validate('caption');
-      this.validate('url');
+      this.validateField('caption', true);
+      this.validateField('url', true);
       this.loadWMSCapabilities(undefined, () => {
         this.setState({
           addedLayers: layer.layers
         });
 
-        this.validate('layers');
+        this.validateField('layers');
 
         Object.keys(this.refs).forEach(element => {          
           if (this.refs[element].dataset.type === 'wms-layer') {
@@ -192,8 +192,7 @@ class Search extends Component {
   appendLayer (e, checkedLayer) {    
     this.setState({
       addedLayers: [checkedLayer]
-    });    
-    this.validate('layers');
+    }, () => this.validateField('layers'));
   }
   /**
    *
@@ -220,9 +219,9 @@ class Search extends Component {
   /**
    *
    */
-  validate (fieldName, e) {
+  validateField(fieldName, updateState) {
     var value = this.getValue(fieldName),
-      valid = true;
+        valid = true;
 
     switch (fieldName) {
       case 'layers':
@@ -240,27 +239,15 @@ class Search extends Component {
         break;
     }
 
-    if (e) {      
-      if (fieldName === 'point' ||
-          fieldName === 'linestring' ||
-          fieldName === 'polygon') {
-        value = e.target.checked;
-      } else {
-        value = e.target.value;
-      }
-
-      let state = {};
-      state[fieldName] = value;
-      this.setState(state);
-    } else {
+    if (updateState !== false) {        
       if (!valid) {      
         this.setState({
           validationErrors: [...this.state.validationErrors, fieldName]
-        })
+        });
       } else {
         this.setState({
           validationErrors: this.state.validationErrors.filter(v => v !== fieldName)
-        })      
+        });
       }
     }
 
@@ -388,13 +375,20 @@ class Search extends Component {
    *
    */
   submit (e) {
-    var validations = [
-      this.validate('caption'),
-      this.validate('url'),
-      this.validate('layers')
-    ];
+    
+    var validationErrors = [];
+    var validations = ['caption', 'url', 'layers'];
+    validations.forEach(fieldName => {
+      var valid = this.validateField(fieldName, false);
+      if (!valid) {
+        validationErrors.push(fieldName);      
+      }
+    });
+    this.setState({
+      validationErrors: validationErrors
+    })    
 
-    if (validations.every(v => v === true)) {
+    if (validationErrors.length === 0) {
       let layer = {
         id: this.state.id,
         caption: this.getValue('caption'),
@@ -745,7 +739,12 @@ class Search extends Component {
                   type='text'
                   ref='input_caption'
                   value={this.state.caption}
-                  onChange={(e) => this.validate('caption', e)}
+                  onChange={e => {                    
+                    var v = e.target.value;                    
+                    this.setState({
+                      'caption': v
+                    },() => this.validateField('caption'));                    
+                  }}
                   className={this.getValidationClass('caption')}
                 />
               </div>
@@ -755,7 +754,12 @@ class Search extends Component {
                   type='text'
                   ref='input_url'
                   value={this.state.url}
-                  onChange={(e) => this.validate('url', e)}
+                  onChange={e => {                    
+                    var v = e.target.value;                    
+                    this.setState({
+                      'url': v
+                    },() => this.validateField('url'));
+                  }}
                   className={this.getValidationClass('url')}
                 />
                 <span onClick={(e) => { this.loadWMSCapabilities(e); }} className='btn btn-default'>Ladda lager {loader}</span>
@@ -785,14 +789,25 @@ class Search extends Component {
                 <div className='geometry-types'>
                   <input
                     checked={this.state.point}
-                    onChange={(e) => this.validate('point', e)}
+                    onChange={(e) => {                                    
+                      this.setState(
+                        {point: e.target.checked}, 
+                        () => this.validateField('point', true)
+                      ); 
+                    }}
                     ref='input_point'
-                    name='point' id='point'
+                    name='point' 
+                    id='point'
                     type='checkbox' />
                   <label htmlFor='point'>&nbsp;Punkter</label><br />
                   <input
                     checked={this.state.linestring}
-                    onChange={(e) => this.validate('linestring', e)}
+                    onChange={(e) => {
+                      this.setState(
+                        {linestring: e.target.checked}, 
+                        () => this.validateField('linestring', true)
+                      ); 
+                    }}
                     ref='input_linestring'
                     name='linestring'
                     id='linestring'
@@ -800,7 +815,12 @@ class Search extends Component {
                   <label htmlFor='linestring'>&nbsp;Linjer</label><br />
                   <input
                     checked={this.state.polygon}
-                    onChange={(e) => this.validate('polygon', e)}
+                    onChange={(e) => {
+                      this.setState(
+                        {polygon: e.target.checked}, 
+                        () => this.validateField('polygon', true)
+                      ); 
+                    }}
                     ref='input_polygon'
                     name='polygon'
                     id='polygon'

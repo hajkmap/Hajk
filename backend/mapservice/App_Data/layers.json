@@ -290,6 +290,71 @@
       "infoUrl": null,
       "infoUrlText": null,
       "infoOwner": null
+    },
+    {
+      "id": "10",
+      "caption": "Mussla",
+      "url": "http://giscloud.se/geoserver/wfs",
+      "projection": "EPSG:3006",
+      "layers": [
+        "skekraft:mussla"
+      ],
+      "editableFields": [
+        {
+          "index": 0,
+          "name": "species",
+          "dataType": "string",
+          "textType": "fritext",
+          "values": null,
+          "hidden": false,
+          "defaultValue": ""
+        },
+        {
+          "index": 25,
+          "name": "quantity",
+          "dataType": "int",
+          "textType": null,
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 31,
+          "name": "width",
+          "dataType": "int",
+          "textType": null,
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 32,
+          "name": "height",
+          "dataType": "int",
+          "textType": null,
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 47,
+          "name": "text",
+          "dataType": "string",
+          "textType": "fritext",
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        }
+      ],
+      "editPoint": true,
+      "editPolygon": false,
+      "editLine": false,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoUrlText": null,
+      "infoOwner": null
     }
   ],
   "arcgislayers": [],
