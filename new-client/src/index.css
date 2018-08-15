@@ -151,10 +151,20 @@ button {
   margin-bottom: 10px;
 }
 
-.ol-zoom {
+.ol-zoom,
+.ol-full-screen,
+.ol-rotate {
   top: 15px;
   left: unset;
   right: 15px;
+}
+
+.ol-full-screen {
+  top: 115px;
+}
+
+.ol-rotate {
+  top: 175px;
 }
 
 .ol-control button {
@@ -163,7 +173,7 @@ button {
   font-size: 20pt;
   font-weight: 500;
   cursor: pointer;
-  margin: 10px;
+  margin: 5px;
   border-radius: 5px !important;
   box-shadow: var(--box-shadow-all);
 }

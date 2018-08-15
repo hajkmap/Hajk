@@ -12,12 +12,15 @@ import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
 import WMSLayer from "./layers/WMSLayer.js";
 import WMTSLayer from "./layers/WMTSLayer.js";
 import WFSVectorLayer from "./layers/VectorLayer.js";
-import Drag from "./Drag.js";
 import { bindMapClickEvent } from "./Click.js";
-import { defaults as defaultInteractions } from "ol/interaction";
+// import Drag from "./Drag.js"; // Can it possibly be replaced by DragRotateAndZoom?
+import {
+  defaults as defaultInteractions,
+  DragRotateAndZoom
+} from "ol/interaction";
 
 import { Map, View } from "ol";
-import { Zoom, Rotate, ScaleLine, Attribution } from "ol/control";
+import { Zoom, Rotate, ScaleLine, Attribution, FullScreen } from "ol/control";
 import { register } from "ol/proj/proj4";
 
 const pluginsFolder = "plugins";
@@ -117,7 +120,8 @@ class AppModel {
   createMap() {
     var config = this.translateConfig();
     map = new Map({
-      interactions: defaultInteractions().extend([new Drag()]),
+      // interactions: defaultInteractions().extend([new Drag()]),
+      interactions: defaultInteractions().extend([new DragRotateAndZoom()]),
       target: config.map.target,
       layers: [],
       logo: false,
@@ -127,11 +131,12 @@ class AppModel {
           zoomInTipLabel: "Zooma in",
           zoomOutTipLabel: "Zooma ut"
         }),
-        new Attribution({ collapsible: false }),
+        new Attribution({ collapsible: true }),
         new Rotate({ tipLabel: "Återställ rotation" }),
         new ScaleLine({
           target: "map-scale-bar"
-        })
+        }),
+        new FullScreen()
       ],
       overlays: [],
       view: new View({

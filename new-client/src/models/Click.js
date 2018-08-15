@@ -18,11 +18,27 @@ function query(map, layer, evt) {
 
 /**
  * Query the map for features when the user clicks the map.
- * The aproach is to stack all the queryable WMS-requests and return a promise with a pointer to the reffering layer.
+ * The approach is to stack all the queryable WMS-requests and return a promise with a pointer to the reffering layer.
  * When the requests are done the features are parsed and given the original layer reference.
  * Vector layers are added with the features at pixel method and given the original layer reference as well.
  */
 function handleClick(evt, map, callback) {
+  // If Draw, Modify or Snap interaction are currently active, ignore clicks
+  if (
+    map
+      .getInteractions()
+      .getArray()
+      .filter(
+        interaction =>
+          ["Draw", "Snap", "Modify"].indexOf(interaction.constructor.name) !==
+          -1
+      ).length > 0
+  ) {
+    console.log("Draw/Snap/Modify active, ignoring click");
+
+    return false;
+  }
+
   document.querySelector("body").style.cursor = "progress";
   var promises = [];
   map
