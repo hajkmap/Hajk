@@ -1,3 +1,10 @@
 {
-  "activeTools": ["draw", "edit", "information", "layerswitcher", "informative"]
+  "activeTools": [
+    "draw",
+    "edit",
+    "information",
+    "layerswitcher",
+    "informative",
+    "geolocation"
+  ]
 }
