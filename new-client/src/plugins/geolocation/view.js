@@ -9,17 +9,62 @@ import { Vector as VectorSource } from "ol/source.js";
 import { Vector as VectorLayer } from "ol/layer.js";
 import "./style.css";
 
+import PropTypes from "prop-types";
+import classNames from "classnames";
+import { withStyles } from "@material-ui/core/styles";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import green from "@material-ui/core/colors/green";
+import Button from "@material-ui/core/Button";
+import CheckIcon from "@material-ui/icons/Check";
+import NavigationIcon from "@material-ui/icons/Navigation";
+
+const styles = theme => ({
+  root: {
+    display: "flex",
+    alignItems: "center",
+    top: "235px",
+    right: "15px",
+    position: "absolute"
+  },
+  wrapper: {
+    margin: theme.spacing.unit,
+    position: "relative"
+  },
+  buttonSuccess: {
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700]
+    }
+  },
+  fabProgress: {
+    color: green[500],
+    position: "absolute",
+    top: -6,
+    left: -6,
+    zIndex: 1
+  },
+  buttonProgress: {
+    color: green[500],
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginTop: -12,
+    marginLeft: -12
+  }
+});
 class Geolocation extends Component {
   constructor() {
     super();
     this.state = {
-      toggled: false
+      toggled: false,
       // currentCoords: null
+      loading: false,
+      success: false
     };
   }
 
   /* TODO:
-   * Make the "here you are" dot look nicer.
+   * Make the "here you are" dot looks nicer.
    * Add listener this.on('change:location', () => { this.setLocation(); }) and update dot's location
    * Don't render that nasty <span> to #toolbar!
    * */
@@ -56,36 +101,81 @@ class Geolocation extends Component {
     );
   };
 
+  geolocationSuccess = pos => {
+    const transformed = transform(
+      [pos.coords.longitude, pos.coords.latitude],
+      "EPSG:4326",
+      this.map.getView().getProjection()
+    );
+    // this.setState({ currentCoords: transformed });
+    this.drawPoint(transformed);
+    this.setState({ loading: false, success: true });
+    this.map.getView().animate({ center: transformed, zoom: 10 });
+  };
+
+  geolocationError = err => {
+    console.error(err);
+    this.setState({ loading: false, success: false });
+  };
+
   handleClick = () => {
-    this.btn.setAttribute("disabled", "disabled");
-    navigator.geolocation.getCurrentPosition(pos => {
-      const transformed = transform(
-        [pos.coords.longitude, pos.coords.latitude],
-        "EPSG:4326",
-        this.map.getView().getProjection()
+    // this.btn.setAttribute("disabled", "disabled");
+    if (!this.state.loading) {
+      this.setState(
+        {
+          loading: true,
+          success: false
+        },
+        () => {
+          navigator.geolocation.getCurrentPosition(
+            this.geolocationSuccess,
+            this.geolocationError
+          );
+        }
       );
-      // this.setState({ currentCoords: transformed });
-      this.drawPoint(transformed);
-      this.map.getView().animate({ center: transformed, zoom: 10 });
-    });
-    this.btn.removeAttribute("disabled");
+    }
+
+    // this.btn.removeAttribute("disabled");
   };
 
   render() {
+    const { loading, success } = this.state;
+    const { classes } = this.props;
+    const buttonClassname = classNames({
+      [classes.buttonSuccess]: success
+    });
     return (
       <span>
         {createPortal(
-          <div className="ol-control ol-geolocation">
-            <button
-              type="button"
-              title="Zooma till min nuvarande position"
-              ref={btn => {
-                this.btn = btn; // expose a ref btn can be reached from handleClick and disabled/enabled
-              }}
-              onClick={this.handleClick}
-            >
-              <i className="material-icons">navigation</i>
-            </button>
+          <div>
+            <div className={classes.root}>
+              <div className={classes.wrapper}>
+                <Button
+                  variant="fab"
+                  color="primary"
+                  className={buttonClassname}
+                  onClick={this.handleClick}
+                >
+                  {success ? <CheckIcon /> : <NavigationIcon />}
+                </Button>
+                {loading && (
+                  <CircularProgress size={68} className={classes.fabProgress} />
+                )}
+              </div>
+            </div>
+
+            {/* <div className="ol-control ol-geolocation">
+              <button
+                type="button"
+                title="Zooma till min nuvarande position"
+                ref={btn => {
+                  this.btn = btn; // expose a ref btn can be reached from handleClick and disabled/enabled
+                }}
+                onClick={this.handleClick}
+              >
+                <i className="material-icons">navigation</i>
+              </button>
+            </div> */}
           </div>,
           document.getElementById("map")
         )}
@@ -94,4 +184,9 @@ class Geolocation extends Component {
   }
 }
 
-export default Geolocation;
+Geolocation.propTypes = {
+  classes: PropTypes.object.isRequired
+};
+
+// export default Geolocation;
+export default withStyles(styles)(Geolocation);
