@@ -32,12 +32,10 @@ function handleClick(evt, map, callback) {
         interaction =>
           ["Draw", "Snap", "Modify"].indexOf(interaction.constructor.name) !==
           -1
-      ).length > 0
-  ) {
-    console.log("Draw/Snap/Modify active, ignoring click");
-
+      ).length > 0 || map.clicklock
+  ) {    
     return false;
-  }
+  }  
 
   document.querySelector("body").style.cursor = "progress";
   var promises = [];

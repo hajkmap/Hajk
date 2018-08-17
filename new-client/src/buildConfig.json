@@ -5,6 +5,7 @@
     "information",
     "layerswitcher",
     "informative",
-    "geolocation"
+    "geolocation",
+    "collector"
   ]
 }
