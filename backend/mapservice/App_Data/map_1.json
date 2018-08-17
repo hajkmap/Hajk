@@ -190,7 +190,7 @@
             "layers": [
               {
                 "id": "5",
-                "visibleAtStart": true,
+                "visibleAtStart": false,
                 "drawOrder": 1,
                 "visibleForGroups": null,
                 "infobox": null

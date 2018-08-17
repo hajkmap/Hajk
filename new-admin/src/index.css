@@ -665,13 +665,15 @@ figure {
   position: absolute;
   top: 10px;
   left: 10px;
-  bottom: 39px;
+  bottom: 55px;
   width: 250px;
   z-index: 100;
   border-right: 1px solid;
   border-bottom: 1px solid;
   list-style: none;
-  background: white
+  background: white;
+  margin: 0;
+  padding: 0;
 }
 
 #map {
@@ -681,5 +683,21 @@ figure {
 }
 
 .layer-list-item {
+  border: 1px solid #ccc;
+  background: #f8f8f8;
+  margin: 5px;
+  padding: 10px;
+  cursor: pointer;  
+  font-size: 12pt;
+  user-select: none;
+}
 
+.layer-list-item .fa {
+  width: 15px;
+}
+
+.layer-list-item .label {
+  margin-left: 5px;
+  position: relative;
+  top: -1px;
 }

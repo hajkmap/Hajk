@@ -24,14 +24,14 @@ class Map extends Component {
     this.map = new OpenLayersMap({
       target: target,
       config: this.props.chapter.mapSettings,
-      onUpdate: this.props.onUpdate
+      onUpdate: this.props.onMapUpdate
     });    
   }  
 
   render() {
     return (            
       <div id={target} style={{height: '100%'}}>
-        <LayerList></LayerList>
+        <LayerList chapter={this.props.chapter} onUpdate={this.props.onLayersUpdate}></LayerList>
       </div>      
     )
   }

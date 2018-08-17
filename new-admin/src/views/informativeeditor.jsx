@@ -102,13 +102,50 @@ class InformativeEditor extends Component {
     });
   }
 
-  renderChapter(parentChapters, chapter, index) {          
+  renderMapDialog(chapter) {
     
     var mapState = {},
+        checkedLayers = [],
         updateMapSettings = (state) => {
           mapState = state;
         },    
-        arrowStyle = !!chapter.expanded 
+        updateLayersSettings = (state) => {
+          checkedLayers = state;          
+        };
+
+    this.setState({
+      showModal: true,
+      showAbortButton: true,
+      modalContent: <Map 
+        chapter={chapter} 
+        onMapUpdate={state => updateMapSettings(state)}
+        onLayersUpdate={state => updateLayersSettings(state)} />,
+      modalConfirmCallback: () => {
+        this.hideModal();
+        chapter.mapSettings = {                
+          center: mapState.center,
+          zoom: mapState.zoom                
+        };      
+        chapter.layers = checkedLayers;
+      },
+      modalStyle: {
+        overlay: {
+        },
+        content: {
+          left: '30px',
+          top: '30px',
+          right: '30px',
+          bottom: '30px',
+          width: 'auto',
+          margin: 0
+        }   
+      }
+    });
+  }
+
+  renderChapter(parentChapters, chapter, index) {          
+    
+    var arrowStyle = !!chapter.expanded 
           ? "fa fa-chevron-down pointer" 
           : "fa fa-chevron-right pointer";
 
@@ -122,40 +159,15 @@ class InformativeEditor extends Component {
           chapter.chapters.push(new Chapter());
           this.forceUpdate();
         }} />&nbsp;
-        <span className="btn btn-success" onClick={() => {          
-          this.setState({
-            showModal: true,
-            showAbortButton: true,
-            modalContent: <Map chapter={chapter} onUpdate={state => updateMapSettings(state)}/>,
-            modalConfirmCallback: () => {
-              this.hideModal();
-              chapter.mapSettings = {      
-                layers: mapState.layers,
-                center: mapState.center,
-                zoom: mapState.zoom
-              }              
-            },
-            modalStyle: {
-              overlay: {
-              },
-              content: {
-                left: '30px',
-                top: '30px',
-                right: '30px',
-                bottom: '30px',
-                width: 'auto',
-                margin: 0
-              }   
-            }
-          });
+        <span className="btn btn-success" onClick={() => {
+          this.renderMapDialog(chapter);
         }} >Kartinställningar</span>&nbsp;
         <span className="btn btn-danger" onClick={() => {          
           this.removeChapter(parentChapters, index);
         }} >Ta bort rubrik</span>        
         <RichEditor 
           display={chapter.expanded} 
-          html={chapter.html} 
-          //ref={(editor) => { this.editors.push(editor); }}
+          html={chapter.html}           
           onUpdate={(html) => {
             chapter.html = html;    
           }

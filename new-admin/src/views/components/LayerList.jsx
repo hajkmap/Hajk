@@ -1,13 +1,19 @@
 import React from 'react';
 import { Component } from 'react';
+import LayerListItem from './LayerListItem.jsx';
 
-class Map extends Component {
+const urls = {
+  mapConfig: 'http://localhost:55630/config/map_1',
+  layersConfig: 'http://localhost:55630/config/layers'
+};
+
+class LayerList extends Component {
 
   constructor(props) {
     super(props);
     this.state = {      
-      layers: [
-      ]
+      layers: [],
+      checkedLayers: props.chapter.layers || []
     };
   }
 
@@ -17,37 +23,106 @@ class Map extends Component {
   componentDidUpdate() {    
   }
 
-  getLayers(groups) {
+  lookup(layerId) {          
+    var found = undefined;
+    var layerTypes = Object.keys(this.layersConfig);
+    for (let i = 0; i < layerTypes.length; i++) {             
+      for (let j = 0; j < this.layersConfig[layerTypes[i]].length; j++) {                
+        if (Number(this.layersConfig[layerTypes[i]][j].id) === Number(layerId)) {
+          found = this.layersConfig[layerTypes[i]][j].caption;
+          break;
+        }
+      }
+      if (found) {
+        break;
+      }
+    }
+    return found;
+  }
+
+  getLayers(layers, callback) {    
+    callback(
+      layers
+      .map(layer => { return {
+          id: layer.id,
+          name: this.lookup(layer.id)
+      }})
+      .filter(layer => layer.name !== undefined)
+    );
+  }
+
+  flattern(groups) {
     return groups.reduce((i, group) => {
       var layers = [];
       if (group.groups.length !== 0) {
-        layers = [...this.getLayers(group.groups)];
+        layers = [...this.flattern(group.groups)];
       }
       return  [...i, ...group.layers, ...layers];
     }, []);
   }
 
   componentDidMount() {  
-    fetch('http://localhost:55630/config/map_1').then(response => {            
-      response.json().then(config => {        
-        var layerSwitcherConfig = config.tools.find(tool => tool.type === "layerswitcher");        
+    
+    async function getJson(url) {
+      var reponse = await fetch(url);
+      var json = await reponse.json();
+      return json;
+    }
+    
+    function readMapConfig(mapConfig) {
+      var layerSwitcherConfig = mapConfig.tools.find(tool => tool.type === "layerswitcher"),
+          layers = this.flattern(layerSwitcherConfig.options.groups);
+
+      this.getLayers(layers, lookedUpLayers => {
         this.setState({
-          layers: this.getLayers(layerSwitcherConfig.options.groups)
-        })
+          layers: lookedUpLayers
+        }); 
+      });
+    }
+
+    getJson(urls.layersConfig).then(layersConfig => {      
+      this.layersConfig = layersConfig;
+      getJson(urls.mapConfig).then(mapConfig => {
+        readMapConfig.call(this, mapConfig);
       });
     });
-  }  
+        
+    this.props.onUpdate(this.state.checkedLayers);
+  }
 
-  render() {
-    return (            
+  onLayerListItemChanged(checked, layer) {  
+    var checkedLayers = this.state.checkedLayers;
+    if (checked) {
+      checkedLayers = [...checkedLayers, layer.id];
+    } else {
+      checkedLayers = checkedLayers.filter(layerId => layerId !==  layer.id);
+    }
+
+    this.setState({
+      checkedLayers: checkedLayers
+    }, () => this.props.onUpdate(this.state.checkedLayers));
+  }
+
+  render() {      
+    return (
       <ul className="layer-list-container">
-        {this.state.layers.map(layer => 
-          <li className="layer-list-item" key={layer.id}>{layer.id}</li>
-        )}        
+        {
+          this.state.layers.map(layer => {
+            var checked = false;
+            if (Array.isArray(this.props.chapter.layers)) {
+              checked = !!this.props.chapter.layers.find(layerId => Number(layerId) ===  Number(layer.id));
+            }            
+            return (
+              <LayerListItem checked={checked} key={layer.id} layer={layer} onChange={(checked) => {
+                this.onLayerListItemChanged(checked, layer);
+              }}></LayerListItem>
+            )
+          })            
+        }     
       </ul>      
     )
   }
 
 }
 
-export default Map;
+export default LayerList;

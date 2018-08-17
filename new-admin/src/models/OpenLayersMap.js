@@ -37,8 +37,7 @@ class OpenLayersMap {
   getState() {
     return {
       center: this.map.getView().getCenter(),
-      zoom: Math.round(this.map.getView().getZoom()),
-      layers: ["1", "2", "3"]
+      zoom: Math.round(this.map.getView().getZoom())        
     }
   }
 
