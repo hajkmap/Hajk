@@ -25,6 +25,21 @@ import { Component } from 'react';
 import ReactModal from 'react-modal';
 import RichEditor from './components/RichEditor.jsx'
 import ChapterAdder from './components/ChapterAdder.jsx'
+import Map from './components/Map.jsx'
+
+class Chapter {
+  constructor(settings) {
+    settings = settings || {};    
+    this.header = settings.header || "";
+    this.html = settings.html || "";    
+    this.mapSettings = {
+      layers: settings.layers || [],
+      center: settings.center || [900000, 8500000],
+      zoom: settings.zoom || 10
+    };
+    this.chapters = [];
+  }  
+}
 
 class InformativeEditor extends Component {
   constructor () {
@@ -59,13 +74,9 @@ class InformativeEditor extends Component {
   }
 
   addChapter(title) {
-    this.state.data.chapters.push({
-      header: title,
-      html: "",
-      layers: [],
-      chapters: []
-    });
-    
+    this.state.data.chapters.push(new Chapter({
+      header: title
+    }));    
     this.setState({
       data: this.state.data
     });
@@ -86,32 +97,74 @@ class InformativeEditor extends Component {
   hideModal() {
     this.setState({
       showModal: false,
-      modalConfirmCallback: () => {}
+      modalStyle: {},
+      modalConfirmCallback: () => {}      
     });
   }
 
-  renderChapter(parentChapters, chapter, index) {
-    return (
+  renderChapter(parentChapters, chapter, index) {          
+    
+    var mapState = {},
+        updateMapSettings = (state) => {
+          mapState = state;
+        },    
+        arrowStyle = !!chapter.expanded 
+          ? "fa fa-chevron-down pointer" 
+          : "fa fa-chevron-right pointer";
+
+    return (    
       <div key={Math.random() * 1E8} className="chapter">        
-        <h1>{chapter.header}</h1>
+        <h1><span className={arrowStyle} onClick={() => {
+          chapter.expanded = !chapter.expanded;
+          this.forceUpdate();
+        }} />{chapter.header}</h1>
         <ChapterAdder onAddChapter={title => {          
-          chapter.chapters.push({
-            header: title,
-            html: "",
-            layers: [],
-            chapters: []
-          });
+          chapter.chapters.push(new Chapter());
           this.forceUpdate();
         }} />&nbsp;
+        <span className="btn btn-success" onClick={() => {          
+          this.setState({
+            showModal: true,
+            showAbortButton: true,
+            modalContent: <Map chapter={chapter} onUpdate={state => updateMapSettings(state)}/>,
+            modalConfirmCallback: () => {
+              this.hideModal();
+              chapter.mapSettings = {      
+                layers: mapState.layers,
+                center: mapState.center,
+                zoom: mapState.zoom
+              }              
+            },
+            modalStyle: {
+              overlay: {
+              },
+              content: {
+                left: '30px',
+                top: '30px',
+                right: '30px',
+                bottom: '30px',
+                width: 'auto',
+                margin: 0
+              }   
+            }
+          });
+        }} >Kartinställningar</span>&nbsp;
         <span className="btn btn-danger" onClick={() => {          
           this.removeChapter(parentChapters, index);
         }} >Ta bort rubrik</span>        
-        <RichEditor html={chapter.html} ref={(editor) => { this.editors.push(editor); }} onUpdate={(html) => {
-          chapter.html = html;          
-        }} />
-        {chapter.chapters.map((innerChapter, innerIndex) => {          
-          return this.renderChapter(chapter.chapters, innerChapter, innerIndex);
-        })}
+        <RichEditor 
+          display={chapter.expanded} 
+          html={chapter.html} 
+          //ref={(editor) => { this.editors.push(editor); }}
+          onUpdate={(html) => {
+            chapter.html = html;    
+          }
+        } />
+        {
+          chapter.chapters.map((innerChapter, innerIndex) => {          
+            return this.renderChapter(chapter.chapters, innerChapter, innerIndex);
+          })
+        }
       </div>
     );
   }
@@ -136,14 +189,23 @@ class InformativeEditor extends Component {
         contentLabel="Bekräfta"
         className="Modal"
         overlayClassName="Overlay"
+        style={this.state.modalStyle}
         appElement={document.getElementById('root')}
       >
-        <p>{this.state.modalContent}</p>     
-        <button className="btn btn-success" onClick={(e) => {
-          this.state.modalConfirmCallback();
-          this.hideModal();
-        }}>Ok</button>&nbsp;
-        {abortButton}
+        <div style={{height: '100%'}}>
+          <div style={{
+            height: '100%',
+            paddingBottom: '45px',
+            marginBottom: '-35px',
+          }}>{this.state.modalContent}</div>
+          <button className="btn btn-success" onClick={(e) => {
+            if (this.state.modalConfirmCallback) {
+              this.state.modalConfirmCallback();
+            }
+            this.hideModal();
+          }}>Ok</button>&nbsp;        
+          {abortButton}
+        </div>
       </ReactModal>
     )
   }

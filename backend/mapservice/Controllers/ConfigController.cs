@@ -774,8 +774,8 @@ namespace MapService.Controllers
             }
             catch (Exception e)
             {
-                _log.FatalFormat("Can't get configuration file: {0}", e);
-                throw e;
+                _log.FatalFormat("Can't get configuration file: {0}", e);				
+				throw e;
             }
         }
     }

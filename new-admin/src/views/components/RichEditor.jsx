@@ -259,6 +259,7 @@ class RichEditor extends Component {
       {currentContent: contentStateWithEntity}
     );
 
+    console.log("Insert image");
     this.setState({
       editorState: AtomicBlockUtils.insertAtomicBlock(
         newEditorState,
@@ -267,7 +268,8 @@ class RichEditor extends Component {
       ),
     }, () => {
       setTimeout(() => this.focus(), 0);
-    });
+      console.log("Image inserted");
+    });    
   }
 
   componentDidMount() {    
@@ -307,6 +309,9 @@ class RichEditor extends Component {
         className += ' RichEditor-hidePlaceholder';
       }
     }    
+    if (!this.props.display) {
+      return null;
+    }
     if (this.state.readonly) {
       return (
         <div>

@@ -597,6 +597,7 @@ legend.header-side {
 
 figure {
   width: 0;
+  margin: 0;
 }
 
 .chapter {  
@@ -649,4 +650,36 @@ figure {
   right: 0;
   bottom: 0;
   background-color: rgba(255, 255, 255, 0.85);
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.chapter p {
+  margin: 0;
+  padding: 0;
+}
+
+.layer-list-container {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  bottom: 39px;
+  width: 250px;
+  z-index: 100;
+  border-right: 1px solid;
+  border-bottom: 1px solid;
+  list-style: none;
+  background: white
+}
+
+#map {
+  border-bottom: 1px solid;
+  margin-left: 250px;
+  position: ab
+}
+
+.layer-list-item {
+
 }

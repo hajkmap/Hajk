@@ -9,6 +9,7 @@
     "draft-js-import-html": "^1.2.1",
     "jquery": "^3.3.1",
     "jquery-sortable": "^0.9.13",
+    "ol": "^5.1.3",
     "openlayers": "^4.6.5",
     "react": "^16.4.2",
     "react-color": "^2.14.1",

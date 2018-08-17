@@ -2,3 +2,9 @@ ERROR 2018-08-14 10:18:10 Exception in removeLayerFromConfig: Object reference n
 ERROR 2018-08-14 10:24:17 Exception in removeLayerFromConfig: Object reference not set to an instance of an object. 
 ERROR 2018-08-15 10:56:16 File not found: C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\App_Data\map_2.json 
 ERROR 2018-08-15 10:58:03 File not found: C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\App_Data\map_2.json 
+FATAL 2018-08-16 16:06:29 Can't get configuration file: System.Web.HttpException (0x80004005): File name is not present
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 707 
+FATAL 2018-08-16 16:06:54 Can't get configuration file: System.Web.HttpException (0x80004005): File name is not present
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 707 
+FATAL 2018-08-16 16:07:46 Can't get configuration file: System.Web.HttpException (0x80004005): File name is not present
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 707 
