@@ -3,10 +3,10 @@ class LayerSwitcherModel {
     this.olMap = settings.map;
     this.observer = settings.observer;
     this.layerMap = this.olMap
-    	.getLayers()
-    	.getArray()
+      .getLayers()
+      .getArray()
       .reduce((a, b) => {
-        a[b.get('name')] = b;
+        a[b.get("name")] = b;
         return a;
       }, {});
   }

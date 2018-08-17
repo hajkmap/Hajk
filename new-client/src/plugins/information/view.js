@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import Observer from "react-event-observer";
-import EditModel from "./model.js";
+import InformationModel from "./model.js";
 import { createPortal } from "react-dom";
 import "./style.css";
 import dialogPolyfill from "dialog-polyfill";
@@ -23,7 +23,7 @@ class Draw extends Component {
     this.observer.subscribe("myEvent", message => {
       console.log(message);
     });
-    this.editModel = new EditModel({
+    this.InformationModel = new InformationModel({
       map: this.props.tool.map,
       app: this.props.tool.app,
       observer: this.observer

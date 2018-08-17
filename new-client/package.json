@@ -19,6 +19,7 @@
     "marked": "^0.4.0",
     "ol": "^5.1.3",
     "proj4": "^2.4.4",
+    "react-color": "^2.14.1",
     "react-event-observer": "^0.5.11"
   }
 }

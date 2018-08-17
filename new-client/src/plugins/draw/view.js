@@ -1,9 +1,11 @@
 import React, { Component } from "react";
+import { createPortal } from "react-dom";
 import Observer from "react-event-observer";
 import DrawModel from "./model.js";
-import { createPortal } from "react-dom";
-import "./style.css";
 import PanelHeader from "../../components/PanelHeader";
+import { ChromePicker } from "react-color";
+
+import "./style.css";
 
 class Draw extends Component {
   constructor() {
@@ -12,7 +14,8 @@ class Draw extends Component {
     this.state = {
       toggled: false,
       activeDrawTool: null,
-      activeModifyTool: null
+      activeModifyTool: null,
+      selectedColor: "#fff"
     };
   }
 
@@ -83,11 +86,23 @@ class Draw extends Component {
     return `btn btn-secondary ${isActive}`;
   }
 
+  handleColorChange = (color, event) => {
+    console.log(color, event);
+    this.setState({ selectedColor: color.rgb });
+  };
+
+  renderActionButton(settings) {}
+
   renderPanel() {
     return createPortal(
       <div className={this.getVisibilityClass()}>
         <PanelHeader title="Rita" toggle={this.toggle} />
         <div className="tool-panel-content">
+          <ChromePicker
+            onChangeComplete={this.handleColorChange}
+            color={this.state.selectedColor}
+          />
+
           <div className="btn-group" role="group">
             <button
               onClick={() => {
