@@ -148,6 +148,10 @@ class AppModel {
         extent: config.map.length !== 0 ? config.map.extent : undefined
       })
     });
+    setTimeout(() => {
+      map.updateSize();
+    }, 0);
+
     bindMapClickEvent(map, mapClickDataResult => {
       this.observer.publish("mapClick", mapClickDataResult);
     });

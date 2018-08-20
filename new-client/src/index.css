@@ -27,7 +27,7 @@ body {
   color: var(--dark2);
   font-family: Roboto, sans-serif;
   font-size: 1rem;
-  line-height: 1.5rem;
+  line-height: 1.5rem;  
 }
 
 /* START: default font styles as described in XD file 
@@ -56,6 +56,18 @@ button {
 }
 
 /* END */
+
+.start-error {
+  color: red;
+  background: rgb(255, 200, 200);
+  border: 1px solid red;
+  border-radius: 5px;
+  padding: 15px;
+  margin: 0 auto;
+  width: 50%;
+  text-align: center;
+  margin-top: 5%;
+}
 
 .tool-panel {
   position: fixed;

@@ -11,7 +11,7 @@
   flex-flow: no-wrap;
   align-items: center;
   justify-content: center;
-  transition-duration: 0.3s;
+  transition-duration: 0.3s;  
 }
 
 .toolbar:hover {

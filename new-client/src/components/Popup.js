@@ -165,6 +165,7 @@ class Popup extends Component {
       };
 
       this.overlay = new Overlay({
+        position: undefined,
         element: container,
         autoPan: true,
         autoPanAnimation: {
@@ -180,7 +181,8 @@ class Popup extends Component {
       this.props.mapClickDataResult.evt &&
       this.props.mapClickDataResult.features.length > 0
     ) {
-      this.overlay.setPosition(this.props.mapClickDataResult.evt.coordinate);
+      document.getElementById('popup').style.display = "inherit";
+      this.overlay.setPosition(this.props.mapClickDataResult.evt.coordinate);      
     } else {
       this.overlay.setPosition(undefined);
     }
