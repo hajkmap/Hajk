@@ -4,11 +4,13 @@ import registerServiceWorker from "./registerServiceWorker";
 
 import React from "react";
 import ReactDOM from "react-dom";
-import App from "./components/App.js";
+import App from "./components/App2.js";
 import buildConfig from "./buildConfig.json";
 
-const networkErrorMessage = "Fel när applikationen skulle läsas in. Detta beror troligtvis på ett nätverksfel. Försök igen senare.";
-const parseErrorMessage = "Fel när applikationen skulle läsas in. Detta beror troligtvis på ett konfigurationsfel. Försök igen senare.";
+const networkErrorMessage =
+  "Fel när applikationen skulle läsas in. Detta beror troligtvis på ett nätverksfel. Försök igen senare.";
+const parseErrorMessage =
+  "Fel när applikationen skulle läsas in. Detta beror troligtvis på ett konfigurationsfel. Försök igen senare.";
 
 fetch("appConfig.json")
   .then(appConfigResponse => {
@@ -45,32 +47,40 @@ fetch("appConfig.json")
             })
             .catch(err => {
               console.error("Parse error: ", err);
-              ReactDOM.render((
+              ReactDOM.render(
                 <div className="start-error">
-                  <div><i className="material-icons">error</i></div>
+                  <div>
+                    <i className="material-icons">error</i>
+                  </div>
                   <div>{parseErrorMessage}</div>
-                </div>  
-              ), 
-              document.getElementById("root"));
+                </div>,
+                document.getElementById("root")
+              );
             });
         })
         .catch(err => {
           console.error("Network error: ", err);
-          ReactDOM.render((
+          ReactDOM.render(
             <div className="start-error">
-              <div><i className="material-icons">error</i></div>
+              <div>
+                <i className="material-icons">error</i>
+              </div>
               <div>{networkErrorMessage}</div>
-            </div>  
-          ), document.getElementById("root"));
+            </div>,
+            document.getElementById("root")
+          );
         });
     });
   })
   .catch(err => {
     console.error("Network error: ", err);
-    ReactDOM.render((
+    ReactDOM.render(
       <div className="start-error">
-        <div><i className="material-icons">error</i></div>
+        <div>
+          <i className="material-icons">error</i>
+        </div>
         <div>{networkErrorMessage}</div>
-      </div>      
-    ), document.getElementById("root"));
+      </div>,
+      document.getElementById("root")
+    );
   });

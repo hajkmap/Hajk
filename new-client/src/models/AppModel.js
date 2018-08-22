@@ -76,12 +76,13 @@ class AppModel {
 
   loadPlugins(plugins, callback) {
     if (undefined !== map) {
-      let promises = [];          
+      let promises = [];
       plugins.forEach(plugin => {
         promises = [
           ...promises,
           import(`../${pluginsFolder}/${plugin}/view.js`)
             .then(module => {
+              // TODO: Read this.config.plugins and fetch plugin's desired target
               this.addPlugin(
                 new Plugin({
                   map: map,
