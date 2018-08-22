@@ -4,7 +4,7 @@ import registerServiceWorker from "./registerServiceWorker";
 
 import React from "react";
 import ReactDOM from "react-dom";
-import App from "./components/App2.js";
+import App from "./components/App.js";
 import buildConfig from "./buildConfig.json";
 
 const networkErrorMessage =
