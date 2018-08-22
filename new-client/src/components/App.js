@@ -5,6 +5,7 @@ import Toolbar from "./Toolbar.js";
 import Popup from "./Popup.js";
 import "./App.css";
 
+import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 
 class App extends Component {
   constructor() {
@@ -16,7 +17,7 @@ class App extends Component {
 
   componentWillMount() {
     this.observer = new Observer();
-    this.appModel = new AppModel(this.props.config, this.observer);    
+    this.appModel = new AppModel(this.props.config, this.observer);
   }
 
   componentDidMount() {
@@ -31,22 +32,39 @@ class App extends Component {
         tools: this.appModel.getPlugins()
       });
     });
-    
-    this.observer.subscribe('mapClick', (mapClickDataResult) => {
+
+    this.observer.subscribe("mapClick", mapClickDataResult => {
       this.setState({
-        mapClickDataResult: mapClickDataResult        
-      });  
-    });  
+        mapClickDataResult: mapClickDataResult
+      });
+    });
   }
 
-  render() {    
+  getTheme = () => {
+    // primary: blue // <- Can be done like this (don't forget to import blue from "@material-ui/core/colors/blue"!)
+    // secondary: { main: "#11cb5f" } // <- Or like this
+
+    return createMuiTheme({
+      palette: {
+        primary: { main: this.props.config.mapConfig.map.colors.primaryColor },
+        secondary: {
+          main: this.props.config.mapConfig.map.colors.secondaryColor
+        }
+      }
+    });
+  };
+
+  render() {
     return (
-      <div>
+      <MuiThemeProvider theme={this.getTheme()}>
         <div className="map" id="map">
           <Toolbar tools={this.appModel.getToolbarPlugins()} />
-          <Popup mapClickDataResult={this.state.mapClickDataResult} map={this.appModel.getMap()} />
+          <Popup
+            mapClickDataResult={this.state.mapClickDataResult}
+            map={this.appModel.getMap()}
+          />
         </div>
-      </div>
+      </MuiThemeProvider>
     );
   }
 }
