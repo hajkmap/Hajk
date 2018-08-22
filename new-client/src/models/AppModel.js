@@ -82,13 +82,25 @@ class AppModel {
           ...promises,
           import(`../${pluginsFolder}/${plugin}/view.js`)
             .then(module => {
-              // TODO: Read this.config.plugins and fetch plugin's desired target
+              // TODO: This will work once map config contains options.target info for each plugin.
+
+              // If plugin has own property of options.target, use it.
+              const filteredTool = this.config.mapConfig.tools.filter(
+                // Filter the array of objects to only contain current plugin
+                plug => plug.type.toLowerCase() === plugin.toLowerCase()
+              );
+              const target =
+                filteredTool.length > 0 &&
+                filteredTool[0].options.hasOwnProperty("target")
+                  ? filteredTool[0].options.target
+                  : "toolbar";
+
               this.addPlugin(
                 new Plugin({
                   map: map,
                   app: this,
                   type: plugin,
-                  target: "toolbar",
+                  target: target,
                   component: module.default
                 })
               );
