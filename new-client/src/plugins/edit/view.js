@@ -6,7 +6,7 @@ import PanelHeader from "../../components/PanelHeader.js";
 
 import "./style.css";
 
-class Draw extends Component {
+class Edit extends Component {
   constructor() {
     super();
     this.toggle = this.toggle.bind(this);
@@ -91,4 +91,4 @@ class Draw extends Component {
   }
 }
 
-export default Draw;
+export default Edit;

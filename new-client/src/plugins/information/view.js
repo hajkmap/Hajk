@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import "./style.css";
 import dialogPolyfill from "dialog-polyfill";
 
-class Draw extends Component {
+class Information extends Component {
   constructor() {
     super();
     // this.toggle = this.toggle.bind(this);
@@ -110,4 +110,4 @@ class Draw extends Component {
   }
 }
 
-export default Draw;
+export default Information;
