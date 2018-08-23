@@ -3,18 +3,18 @@ import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
-import ToggleButton from "@material-ui/lab/ToggleButton";
 import BrushIcon from "@material-ui/icons/Brush";
 import Observer from "react-event-observer";
 import DrawModel from "./model.js";
 import PanelHeader from "../../components/PanelHeader";
 import { ChromePicker } from "react-color";
 
-import "./style.css";
+// import "./style.css"; // TODO: Remove
 
 const styles = theme => ({
   button: {
-    margin: theme.spacing.unit
+    marginLeft: theme.spacing.unit,
+    marginRight: theme.spacing.unit
   }
 });
 
@@ -26,7 +26,7 @@ class Draw extends Component {
       toggled: false,
       activeDrawTool: null,
       activeModifyTool: null,
-      selectedColor: "#fff"
+      selectedColor: "#aaa"
     };
   }
 
@@ -75,11 +75,13 @@ class Draw extends Component {
     this.props.tool.app.togglePlugin("draw");
   }
 
-  // getActiveClass() {
-  //   return this.state.toggled
-  //     ? "tool-toggle-button active"
-  //     : "tool-toggle-button";
+  // getActiveClass() { // TODO: Remove
+  //   return this.state.toggled ? "active" : "";
   // }
+
+  isButtonActive() {
+    return this.state.toggled ? "contained" : "text";
+  }
 
   getVisibilityClass() {
     return this.state.toggled
@@ -101,8 +103,6 @@ class Draw extends Component {
     console.log(color, event);
     this.setState({ selectedColor: color.rgb });
   };
-
-  renderActionButton(settings) {}
 
   renderPanel() {
     return createPortal(
@@ -224,21 +224,19 @@ class Draw extends Component {
     const classes = this.props.classes;
     console.log("render Draw", classes);
     return (
-      // <div>
-      <ToggleButton value="draw">
-        <BrushIcon />
-      </ToggleButton>
-      /* <Button
+      <div>
+        <Button
+          variant={this.isButtonActive()}
           color="primary"
           className={classes.button}
           onClick={this.toggle}
         >
-          <i className="material-icons">brush</i>
+          <BrushIcon />
           Rita
-        </Button> */
-      // {this.renderPanel()}
-      // </div>
-      // <div>
+        </Button>
+        {this.renderPanel()}
+      </div>
+      // <div> // TODO: Remove
       //   <div className={this.getActiveClass()} onClick={this.toggle}>
       //     <i className="material-icons">brush</i>
       //     <i className="tool-text">Rita</i>
