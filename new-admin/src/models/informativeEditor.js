@@ -24,7 +24,7 @@ import { Model } from 'backbone';
 
 var informativeEditor = Model.extend({
   save: function(data, callback) {
-    var url = 'http://localhost:55630/informative/save/op';
+    var url = this.get('config').url_save;
     fetch(url, {
       method: 'post',
       body: data
@@ -35,7 +35,7 @@ var informativeEditor = Model.extend({
     });
   },
   load: function (callback) {    
-    var url = 'http://localhost:55630/informative/load/op';
+    var url = this.get('config').url_load;    
     fetch(url).then(response => {
       response.json().then(data => {
         callback(data);

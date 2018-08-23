@@ -28,7 +28,18 @@ var createFeature = function(coordinate) {
 class CollectorModel {
   constructor(settings) {
     this.olMap = settings.map;    
-    this.addMarker = this.addMarker.bind(this);
+    this.vectorSource = new VectorSource({
+      features: []
+    });
+    this.vectorLayer = new VectorLayer({
+      source: this.vectorSource
+    });
+    this.olMap.addLayer(this.vectorLayer);
+  }
+  
+  activate(type, clicked) {
+    this.olMap.clicklock = true;
+    this.olMap.on("singleclick", this.addMarker.bind(this, clicked));
   }
 
   deactivate(type) {
@@ -36,21 +47,17 @@ class CollectorModel {
     this.olMap.un("singleclick", this.addMarker);
   }
 
-  addMarker(evt) {
-    var vectorSource = new VectorSource({
-      features: [createFeature(evt.coordinate)]
-    });
-
-    var vectorLayer = new VectorLayer({
-      source: vectorSource
-    });
-
-    this.olMap.addLayer(vectorLayer);  
+  addMarker(clicked, evt) {        
+    var feature = createFeature(evt.coordinate);
+    this.vectorSource.clear();
+    this.vectorSource.addFeature(feature);
+    if (clicked) {
+      clicked();
+    }
   }
 
-  activate(type, clicked) {          
-    this.olMap.clicklock = true;
-    this.olMap.on("singleclick", this.addMarker);
+  clear() {    
+    this.vectorSource.clear();
   }
 
   load(callback) {    

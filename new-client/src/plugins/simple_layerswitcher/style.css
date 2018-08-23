@@ -1,0 +1,40 @@
+.layer-groups {  
+  margin-left: -10px;
+}
+
+.layer-group {
+  padding: 0;
+  margin: 0;
+  margin-bottom: 10px;
+  margin-left: 10px;
+}
+
+.panel {
+  margin: 0;
+  border: none;
+}
+
+.panel:last-of-type {
+  margin: 0;
+  border: none;
+}
+
+.layer-item {
+  background: #dfdfdf !important;
+  padding: 4px !important;
+  margin: 5px !important;
+  border: 1px solid #ccc !important;
+}
+
+.layer-item .left-col {
+  display: inline-block;
+  width: 80%;
+  float: left;
+}
+
+.layer-item .right-col {
+  display: inline-block;
+  float: left;
+  width: 20%;
+  text-align: right;
+}

@@ -5,13 +5,14 @@ import CollectorModel from "./model.js";
 import PanelHeader from "../../components/PanelHeader.js";
 import CollectorForm from "../../components/CollectorForm.js";
 import "./style.css";
-import Button from '@material-ui/core/Button'; 
+import Button from '@material-ui/core/Button';
 
 class Collector extends Component {
   constructor() {
     super();
     this.toggle = this.toggle.bind(this);
     this.activateMarker = this.activateMarker.bind(this);
+    this.abort = this.abort.bind(this);
     this.state = {
       toggled: false,
       markerActive: false,
@@ -31,7 +32,7 @@ class Collector extends Component {
       app: this.props.tool.app,
       observer: this.observer
     });
-    this.props.tool.instance = this;    
+    this.props.tool.instance = this;   
   }
 
   open() {
@@ -93,12 +94,21 @@ class Collector extends Component {
         this.collectorModel.deactivate('addPoint');        
       }
     });
+  }
 
+  abort() {
+    this.setState({
+      markerActive: false,
+      displayForm: false
+    });
+    this.collectorModel.clear();
   }
 
   renderPanel() {    
     var color = this.state.markerActive ? "secondary" : "primary";
     var alertClass = this.state.markerActive ? "alert alert-success" : "";
+    var text = this.state.markerActive ? "spara" : "starta";
+    var abortButton = this.state.markerActive ? <Button color="primary" onClick={this.abort}>Avbryt</Button> : null;
     return createPortal(
       <div className={this.getVisibilityClass()}>
         <PanelHeader title="Tyck till" toggle={this.toggle} />
@@ -106,8 +116,9 @@ class Collector extends Component {
           <div>Här kan du tycka till om en viss plats eller ett område.</div>          
           <div>            
             <Button variant="contained" color={color} onClick={this.activateMarker}>
-              Starta
-            </Button>&nbsp;            
+              {text}
+            </Button>&nbsp;
+            {abortButton}&nbsp;            
             <div className={alertClass}>{this.state.description}</div>
             <CollectorForm visible={this.state.displayForm} />
           </div>
