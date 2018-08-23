@@ -48,15 +48,16 @@ class InformativeEditor extends Component {
       showModal: false,
       data: undefined      
     };    
-    this.editors = [];
+    this.editors = [];    
   }
 
-  componentDidMount() {
+  componentDidMount() {    
+    this.props.model.set('config', this.props.config);
     this.props.model.load(data => {      
       this.setState({
         data: data
       });
-    });
+    });    
   }
 
   save() {
@@ -155,8 +156,10 @@ class InformativeEditor extends Component {
           chapter.expanded = !chapter.expanded;
           this.forceUpdate();
         }} />{chapter.header}</h1>
-        <ChapterAdder onAddChapter={title => {          
-          chapter.chapters.push(new Chapter());
+        <ChapterAdder onAddChapter={title => {
+          chapter.chapters.push(new Chapter({
+            header: title
+          }));
           this.forceUpdate();
         }} />&nbsp;
         <span className="btn btn-success" onClick={() => {

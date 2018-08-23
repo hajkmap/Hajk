@@ -4,11 +4,11 @@ class InformativeModel {
   }
 
   load(callback) {
-    fetch("op.json").then(response => {
-      response.json().then(data => {        
-        callback(data.chapters);
-      });
-    });
+    // fetch("op.json").then(response => {
+    //   response.json().then(data => {        
+    //     callback(data.chapters);
+    //   });
+    // });
   }
 }
 

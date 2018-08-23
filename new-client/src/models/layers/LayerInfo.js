@@ -15,5 +15,6 @@ export default class LayerInfo {
     this.searchOutputFormat = properties.searchOutputFormat;
     this.searchPropertyName = properties.searchPropertyName;
     this.searchUrl = properties.searchUrl;
+    this.layerType = properties.layerType;
   }
 }
