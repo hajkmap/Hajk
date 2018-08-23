@@ -1,11 +1,22 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
+import { withStyles } from "@material-ui/core/styles";
 import Observer from "react-event-observer";
 import AppModel from "./../models/AppModel.js";
 import Toolbar from "./Toolbar.js";
 import Popup from "./Popup.js";
-import "./App.css";
 
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
+
+const styles = theme => ({
+  map: {
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
+    position: "absolute"
+  }
+});
 
 class App extends Component {
   constructor() {
@@ -22,7 +33,7 @@ class App extends Component {
 
   componentDidMount() {
     var promises = this.appModel
-      .configureApplication()
+      //.configureApplication() // TODO: Remove
       .createMap()
       .addLayers()
       .loadPlugins(this.props.activeTools, plugin => {});
@@ -55,9 +66,10 @@ class App extends Component {
   };
 
   render() {
+    const classes = this.props.classes;
     return (
       <MuiThemeProvider theme={this.getTheme()}>
-        <div className="map" id="map">
+        <div className={classes.map} id="map">
           <Toolbar tools={this.appModel.getToolbarPlugins()} />
           <Popup
             mapClickDataResult={this.state.mapClickDataResult}
@@ -69,7 +81,11 @@ class App extends Component {
   }
 }
 
-export default App;
+App.propTypes = {
+  classes: PropTypes.object.isRequired
+};
+
+export default withStyles(styles)(App);
 
 /**
  * QUICK APP FLOW OVERVIEW
