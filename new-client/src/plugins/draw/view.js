@@ -1,11 +1,22 @@
 import React, { Component } from "react";
 import { createPortal } from "react-dom";
+import PropTypes from "prop-types";
+import { withStyles } from "@material-ui/core/styles";
+import Button from "@material-ui/core/Button";
+import ToggleButton from "@material-ui/lab/ToggleButton";
+import BrushIcon from "@material-ui/icons/Brush";
 import Observer from "react-event-observer";
 import DrawModel from "./model.js";
 import PanelHeader from "../../components/PanelHeader";
 import { ChromePicker } from "react-color";
 
 import "./style.css";
+
+const styles = theme => ({
+  button: {
+    margin: theme.spacing.unit
+  }
+});
 
 class Draw extends Component {
   constructor() {
@@ -64,11 +75,11 @@ class Draw extends Component {
     this.props.tool.app.togglePlugin("draw");
   }
 
-  getActiveClass() {
-    return this.state.toggled
-      ? "tool-toggle-button active"
-      : "tool-toggle-button";
-  }
+  // getActiveClass() {
+  //   return this.state.toggled
+  //     ? "tool-toggle-button active"
+  //     : "tool-toggle-button";
+  // }
 
   getVisibilityClass() {
     return this.state.toggled
@@ -210,16 +221,36 @@ class Draw extends Component {
   }
 
   render() {
+    const classes = this.props.classes;
+    console.log("render Draw", classes);
     return (
-      <div>
-        <div className={this.getActiveClass()} onClick={this.toggle}>
+      // <div>
+      <ToggleButton value="draw">
+        <BrushIcon />
+      </ToggleButton>
+      /* <Button
+          color="primary"
+          className={classes.button}
+          onClick={this.toggle}
+        >
           <i className="material-icons">brush</i>
-          <i className="tool-text">Rita</i>
-        </div>
-        {this.renderPanel()}
-      </div>
+          Rita
+        </Button> */
+      // {this.renderPanel()}
+      // </div>
+      // <div>
+      //   <div className={this.getActiveClass()} onClick={this.toggle}>
+      //     <i className="material-icons">brush</i>
+      //     <i className="tool-text">Rita</i>
+      //   </div>
+      //   {this.renderPanel()}
+      // </div>
     );
   }
 }
 
-export default Draw;
+Draw.propTypes = {
+  classes: PropTypes.object.isRequired
+};
+
+export default withStyles(styles)(Draw);

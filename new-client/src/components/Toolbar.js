@@ -1,13 +1,12 @@
 import React, { Component } from "react";
+import ToggleButton, { ToggleButtonGroup } from "@material-ui/lab/ToggleButton";
+
 import "./Toolbar.css";
 
 class Toolbar extends Component {
-  constructor() {
-    super();
-    this.state = {};
-  }
-
-  componentDidMount() {}
+  state = {
+    selectedTool: null
+  };
 
   renderTools() {
     return this.props.tools.map((tool, i) => {
@@ -27,7 +26,14 @@ class Toolbar extends Component {
     });
   }
 
+  handleToolbarClick = selectedTool => {
+    console.log("handleToolbarClick");
+
+    this.setState({ selectedTool });
+  };
+
   render() {
+    const { selectedTool } = this.state;
     var c = this.state.toolbarVisible ? "toolbar visible" : "toolbar";
     return (
       <div id="toolbar-group">
@@ -39,9 +45,17 @@ class Toolbar extends Component {
         >
           list
         </div>
-        <div id="toolbar" className={c}>
+        {/* <div id="toolbar" className={c}>
           {this.renderTools()}
-        </div>
+        </div> */}
+        <ToggleButtonGroup
+          value={selectedTool}
+          exclusive
+          onChange={this.handleToolbarClick}
+        >
+          <ToggleButton value="draw">Hello</ToggleButton>
+          {this.renderTools()}
+        </ToggleButtonGroup>
       </div>
     );
   }
