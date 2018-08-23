@@ -133,8 +133,7 @@ class AppModel {
   createMap() {
     var config = this.translateConfig();
     map = new Map({
-      // interactions: defaultInteractions().extend([new Drag()]),
-      interactions: defaultInteractions().extend([new DragRotateAndZoom()]),
+      interactions: defaultInteractions(),
       target: config.map.target,
       layers: [],
       logo: false,
