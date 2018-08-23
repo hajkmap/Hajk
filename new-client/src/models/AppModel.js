@@ -2,7 +2,7 @@ import Error from "./Error.js";
 import Plugin from "./Plugin.js";
 
 import ConfigMapper from "./../utils/ConfigMapper.js";
-import { configureCss } from "./../utils/CSSModifier.js";
+// import { configureCss } from "./../utils/CSSModifier.js"; // TODO: Remove
 import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
 
 // import ArcGISLayer from "./layers/ArcGISLayer.js";
@@ -13,11 +13,7 @@ import WMSLayer from "./layers/WMSLayer.js";
 import WMTSLayer from "./layers/WMTSLayer.js";
 import WFSVectorLayer from "./layers/VectorLayer.js";
 import { bindMapClickEvent } from "./Click.js";
-// import Drag from "./Drag.js"; // Can it possibly be replaced by DragRotateAndZoom?
-import {
-  defaults as defaultInteractions,
-  DragRotateAndZoom
-} from "ol/interaction";
+import { defaults as defaultInteractions } from "ol/interaction";
 
 import { Map, View } from "ol";
 import { Zoom, Rotate, ScaleLine, Attribution, FullScreen } from "ol/control";
@@ -76,18 +72,31 @@ class AppModel {
 
   loadPlugins(plugins, callback) {
     if (undefined !== map) {
-      let promises = [];          
+      let promises = [];
       plugins.forEach(plugin => {
         promises = [
           ...promises,
           import(`../${pluginsFolder}/${plugin}/view.js`)
             .then(module => {
+              // TODO: This will work once map config contains options.target info for each plugin.
+
+              // If plugin has own property of options.target, use it.
+              const filteredTool = this.config.mapConfig.tools.filter(
+                // Filter the array of objects to only contain current plugin
+                plug => plug.type.toLowerCase() === plugin.toLowerCase()
+              );
+              const target =
+                filteredTool.length > 0 &&
+                filteredTool[0].options.hasOwnProperty("target")
+                  ? filteredTool[0].options.target
+                  : "toolbar";
+
               this.addPlugin(
                 new Plugin({
                   map: map,
                   app: this,
                   type: plugin,
-                  target: "toolbar",
+                  target: target,
                   component: module.default
                 })
               );
@@ -108,10 +117,11 @@ class AppModel {
    * Configure application.
    * @return undefined
    */
-  configureApplication() {
-    configureCss(this.config.mapConfig);
-    return this;
-  }
+  // TODO: Remove
+  // configureApplication() {
+  //   configureCss(this.config.mapConfig);
+  //   return this;
+  // }
 
   /**
    * Initialize open layers map
@@ -120,8 +130,7 @@ class AppModel {
   createMap() {
     var config = this.translateConfig();
     map = new Map({
-      // interactions: defaultInteractions().extend([new Drag()]),
-      interactions: defaultInteractions().extend([new DragRotateAndZoom()]),
+      interactions: defaultInteractions(),
       target: config.map.target,
       layers: [],
       logo: false,

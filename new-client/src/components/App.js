@@ -1,10 +1,22 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
+import { withStyles } from "@material-ui/core/styles";
 import Observer from "react-event-observer";
 import AppModel from "./../models/AppModel.js";
 import Toolbar from "./Toolbar.js";
 import Popup from "./Popup.js";
-import "./App.css";
 
+import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
+
+const styles = theme => ({
+  map: {
+    left: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
+    position: "absolute"
+  }
+});
 
 class App extends Component {
   constructor() {
@@ -16,12 +28,12 @@ class App extends Component {
 
   componentWillMount() {
     this.observer = new Observer();
-    this.appModel = new AppModel(this.props.config, this.observer);    
+    this.appModel = new AppModel(this.props.config, this.observer);
   }
 
   componentDidMount() {
     var promises = this.appModel
-      .configureApplication()
+      //.configureApplication() // TODO: Remove
       .createMap()
       .addLayers()
       .loadPlugins(this.props.activeTools, plugin => {});
@@ -31,27 +43,49 @@ class App extends Component {
         tools: this.appModel.getPlugins()
       });
     });
-    
-    this.observer.subscribe('mapClick', (mapClickDataResult) => {
+
+    this.observer.subscribe("mapClick", mapClickDataResult => {
       this.setState({
-        mapClickDataResult: mapClickDataResult        
-      });  
-    });  
+        mapClickDataResult: mapClickDataResult
+      });
+    });
   }
 
-  render() {    
+  getTheme = () => {
+    // primary: blue // <- Can be done like this (don't forget to import blue from "@material-ui/core/colors/blue"!)
+    // secondary: { main: "#11cb5f" } // <- Or like this
+
+    return createMuiTheme({
+      palette: {
+        primary: { main: this.props.config.mapConfig.map.colors.primaryColor },
+        secondary: {
+          main: this.props.config.mapConfig.map.colors.secondaryColor
+        }
+      }
+    });
+  };
+
+  render() {
+    const classes = this.props.classes;
     return (
-      <div>
-        <div className="map" id="map">
+      <MuiThemeProvider theme={this.getTheme()}>
+        <div className={classes.map} id="map">
           <Toolbar tools={this.appModel.getToolbarPlugins()} />
-          <Popup mapClickDataResult={this.state.mapClickDataResult} map={this.appModel.getMap()} />
+          <Popup
+            mapClickDataResult={this.state.mapClickDataResult}
+            map={this.appModel.getMap()}
+          />
         </div>
-      </div>
+      </MuiThemeProvider>
     );
   }
 }
 
-export default App;
+App.propTypes = {
+  classes: PropTypes.object.isRequired
+};
+
+export default withStyles(styles)(App);
 
 /**
  * QUICK APP FLOW OVERVIEW
