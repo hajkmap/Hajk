@@ -1,11 +1,22 @@
 import React, { Component } from "react";
 import { createPortal } from "react-dom";
+import PropTypes from "prop-types";
+import { withStyles } from "@material-ui/core/styles";
+import Button from "@material-ui/core/Button";
+import BrushIcon from "@material-ui/icons/Brush";
 import Observer from "react-event-observer";
 import DrawModel from "./model.js";
 import PanelHeader from "../../components/PanelHeader";
 import { ChromePicker } from "react-color";
 
-import "./style.css";
+// import "./style.css"; // TODO: Remove
+
+const styles = theme => ({
+  button: {
+    marginLeft: theme.spacing.unit,
+    marginRight: theme.spacing.unit
+  }
+});
 
 class Draw extends Component {
   constructor() {
@@ -15,7 +26,7 @@ class Draw extends Component {
       toggled: false,
       activeDrawTool: null,
       activeModifyTool: null,
-      selectedColor: "#fff"
+      selectedColor: "#aaa"
     };
   }
 
@@ -64,10 +75,12 @@ class Draw extends Component {
     this.props.tool.app.togglePlugin("draw");
   }
 
-  getActiveClass() {
-    return this.state.toggled
-      ? "tool-toggle-button active"
-      : "tool-toggle-button";
+  // getActiveClass() { // TODO: Remove
+  //   return this.state.toggled ? "active" : "";
+  // }
+
+  isButtonActive() {
+    return this.state.toggled ? "contained" : "text";
   }
 
   getVisibilityClass() {
@@ -90,8 +103,6 @@ class Draw extends Component {
     console.log(color, event);
     this.setState({ selectedColor: color.rgb });
   };
-
-  renderActionButton(settings) {}
 
   renderPanel() {
     return createPortal(
@@ -210,16 +221,34 @@ class Draw extends Component {
   }
 
   render() {
+    const classes = this.props.classes;
+    console.log("render Draw", classes);
     return (
       <div>
-        <div className={this.getActiveClass()} onClick={this.toggle}>
-          <i className="material-icons">brush</i>
-          <i className="tool-text">Rita</i>
-        </div>
+        <Button
+          variant={this.isButtonActive()}
+          color="primary"
+          className={classes.button}
+          onClick={this.toggle}
+        >
+          <BrushIcon />
+          Rita
+        </Button>
         {this.renderPanel()}
       </div>
+      // <div> // TODO: Remove
+      //   <div className={this.getActiveClass()} onClick={this.toggle}>
+      //     <i className="material-icons">brush</i>
+      //     <i className="tool-text">Rita</i>
+      //   </div>
+      //   {this.renderPanel()}
+      // </div>
     );
   }
 }
 
-export default Draw;
+Draw.propTypes = {
+  classes: PropTypes.object.isRequired
+};
+
+export default withStyles(styles)(Draw);
