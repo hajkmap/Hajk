@@ -40,6 +40,12 @@ var FirSelectionPanelView = {
         }
     },
 
+    addMarker: function() {
+        console.log("addMarker", this);
+
+    },
+
+
     getClassNames: function (type) {
         return this.state.activeTool === type
             ? 'btn btn-primary'
@@ -73,11 +79,11 @@ var FirSelectionPanelView = {
                 </div>&nbsp;&nbsp;&nbsp;&nbsp;<b>Rita sökområde</b><div></div><br/>
 
                 <div className='btn-group btn-group-lg'>
-                    <button onClick={() => this.activateTool('plusSelection')} type='button' className={this.getClassNames('plusSelection')} title='Markera efter polygon' >
-                        <i className='fa fa-plus icon' />
+                    <button onClick={() => this.addMarker()} type='button' className={this.getClassNames('plusSelection')} style={{backgroundColor: "green"}} title='Markera efter polygon' >
+                        <i className='fa fa-check fa-0' />&nbsp;<span style={{fontSize: 16}}>Klar</span>
                     </button>
-                    <button onClick={() => this.activateTool('minusSelection')} type='button' className={this.getClassNames('minusSelection')} title='Markera flera objekt' >
-                        <i className='fa fa-minus icon' />
+                    <button onClick={() => this.deleteMarker()} type='button' className={this.getClassNames('minusSelection')} title='Markera flera objekt' >
+                        <i className='fa fa-trash fa-0' />&nbsp;<span style={{fontSize: 16}}>Radera Objekt</span>
                     </button>
                 </div>&nbsp;&nbsp;&nbsp;&nbsp;<b>Ändra urval</b>
 

@@ -163,6 +163,12 @@ var InfoClickModel = {
           layer.get('name') !== 'preview-layer' &&
           layer.get('name') !== 'highlight-wms'
         ) {
+            // only disable if there is a feature in highlight
+            if(layer.get("name") === "fir-highlight-vector-layer" && doNotShowInfoClick){
+                doNotShowInfoClick = false;
+                return;
+            }
+          console.log("layername",layer.get("name"));
           promises.push(new Promise((resolve, reject) => {
             features = [feature];
             _.each(features, (feature) => {

@@ -37,7 +37,8 @@ var FirModelProperties = {
     popupOffsetY: 0,
     aliasDict: {},
     chosenColumns: [],
-    firLayerCaption: "Fastighetsytor FIR2"
+    firLayerCaption: "Fastighetsytor FIR2",
+    feature: undefined
 };
 
 var FirModel = {
@@ -52,7 +53,7 @@ var FirModel = {
         this.set('displayPopupBar', this.get('displayPopup'));
         this.set('layerCollection', shell.getLayerCollection());
         this.set('map', shell.getMap().getMap());
-        this.featureLayer = new ol.layer.Vector({
+        this.firFeatureLayer= new ol.layer.Vector({
             caption: 'Sökträff',
             name: 'search-vector-layer',
             source: new ol.source.Vector(),
@@ -61,16 +62,16 @@ var FirModel = {
             style: this.getStyle()
         });
 
-        this.featureLayer.getSource().on('addfeature', evt => {
-            evt.feature.setStyle(this.featureLayer.getStyle());
+        this.firFeatureLayer.getSource().on('addfeature', evt => {
+            evt.feature.setStyle(this.firFeatureLayer.getStyle());
         });
 
-        this.get('map').addLayer(this.featureLayer);
+        this.get('map').addLayer(this.firFeatureLayer);
         console.log("MAP");
         console.log(this.get("map"));
 
         this.highlightResultLayer = new ol.layer.Vector({
-                caption: 'FIRSökresltat',
+            caption: 'FIRSökresltat',
             name: 'fir-highlight-vector-layer',
             source: new ol.source.Vector(),
             queryable: true,
@@ -90,48 +91,94 @@ var FirModel = {
                 layerCollection:shell.getLayerCollection()
             }));
         }
-
-        this.map.on('singleclick', (event) => {
-            try {
-                setTimeout(a => {
-                    if (!map.get('clickLock') && !event.filty) {
-                        this.clickedOnMap(event);
-                    }
-                }, 0);
-            } catch (e) {}
-        });
     },
 
+    /*
     clickedOnMap: function(event){
         // check if tool is active
         // add the clicked element to results
-        this.map.forEachFeatureAtPixel(event.pixel, (feature, layer) => {
-            if (layer && layer.get('name') && (layer.get('queryable') !== false) && layer.get("name") === "<firname>") {
-                /*promises.push(new Promise((resolve, reject) => {
-                    features = [feature];
-                    _.each(features, (feature) => {
-                        console.log("feature");
-                        console.log(feature);
-                        this.addInformation(feature, layer, (featureInfo) => {
-                            if (featureInfo) {
-                                infos.push(featureInfo);
+        console.log("this.map in fir.js");
+        var map = this.get("map");
+
+        var wmsLayers = this.get("layerCollection").filter((layer) => {
+                return (layer.get('type') === 'wms' || layer.get('type') === 'arcgis') &&
+                    layer.get('queryable') &&
+                    layer.getVisible() && layer.get('caption') == this.get("firLayerCaption");
+            }),
+            projection = this.get("map").getView().getProjection().getCode(),
+            resolution = this.get("map").getView().getResolution(),
+            infos = [],
+            promises = []
+        ;
+
+        console.log(wmsLayers);
+
+        this.layerOrder = {};
+
+        this.get("map").getLayers().forEach((layer, i) => {
+            this.layerOrder[layer.get('name')] = i;
+        });
+
+        wmsLayers.forEach((wmsLayer, index) => {
+            wmsLayer.index = index;
+            promises.push(new Promise((resolve, reject) => {
+                console.log("getFeatureInfo");
+                wmsLayer.getFeatureInformation({
+                    coordinate: event.coordinate,
+                    resolution: resolution,
+                    projection: projection,
+                    error: message => {
+                        resolve();
+                    },
+                    success: (features, layer) => {
+                        console.log("got features");
+                        // avoid to run same function two times
+                        if (Array.isArray(features) && features.length > 0) {
+                            features.forEach(feature => {
+                                console.log("feature");
+                                console.log(feature);
+                                // if in highfir layer and fir tool do nothing
+                                this.get("items").map(group => {
+                                    console.log("items");
+                                    console.log(this.get("items"));
+                                    console.log("group");
+                                    console.log(group);
+                                    if(group.layer === "Fastighet"){
+                                        group.hits.push(feature); // why do i need to push to feature?
+                                    }
+                                });
+                                    console.log("this.props.id");
+                                    console.log(this.get("id"));
+                                resolve();
                             }
+                            );
+                        } else {
                             resolve();
-                        });
-                    });
-                }));
-                */
-                // add to results
-                this.get("items").map(group => {
-                    if(group.layer === "Fastighet<check>"){
-                        group.hits.push(feature);
+                        }
                     }
                 });
-            }
+            }));
         });
 
 
-    },
+        Promise.all(promises).then(() => {
+            *//*
+            infos.sort((a, b) => {
+                var s1 = a.information.layerindex,
+                    s2 = b.information.layerindex
+                ;
+                return s1 === s2 ? 0 : s1 < s2 ? 1 : -1;
+            });
+
+            infos.forEach(info => {
+                this.get('features').add(info);
+            });
+            *//*
+            this.set('loadFinished', true);
+
+        });
+
+    },*/
 
     /**
      * @instance
@@ -141,9 +188,9 @@ var FirModel = {
 
     /**
      * @instance
-     * @property {external:"ol.layer"} featureLayer
+     * @property {external:"ol.layer"} firFeatureLayer
      */
-    featureLayer: undefined,
+    firFeatureLayer: undefined,
 
     /**
      * @instance
@@ -392,7 +439,7 @@ var FirModel = {
         if (this.get('firSelectionModel')) {
             this.get('firSelectionModel').abort();
         }
-        this.featureLayer.getSource().clear();
+        this.firFeatureLayer.getSource().clear();
         this.highlightResultLayer.getSource().clear();
         this.set('items', []);
         this.set('barItems', []);
@@ -506,6 +553,10 @@ var FirModel = {
      *
      */
     focus: function (spec, isBar) {
+        // TODO remove functionality that don't want
+        // Should change feature style (if this  is possible) of the one was clicked.
+        // If a previous was clicked (can be stored in model). Change back the style to blue
+        // After changing previous, save the current as the future previous
         function isPoint (coord) {
             if (coord.length === 1) {
                 coord = coord[0];
@@ -523,7 +574,6 @@ var FirModel = {
             exist = this.get('selectedIndices').find(item => item.group === spec.id),
             extent = spec.hit.getGeometry().getExtent(),
             size = map.getSize(),
-            ovl = map.getOverlayById('popup-0'),
             offsetY = 0;
 
         this.set('hits', [spec.hit]);
@@ -532,29 +582,17 @@ var FirModel = {
             maxZoom: this.get('maxZoom')
         });
 
-        this.featureLayer.getSource().clear();
-        this.featureLayer.getSource().addFeature(spec.hit);
-        var displayPopup = isBar ? this.get('displayPopupBar') : this.get('displayPopup');
-        if (ovl && displayPopup) {
-            let title = $(`<div class="popup-title">${spec.hit.caption}</div>`);
-            let textContent = $('<div id="popup-content-text"></div>');
+        // started to inplemented other solution: class="" then put the feature back? and delete class
+        // this.firFeatureLayer.getSource().clear(); --- this.clear() become "undefined"
+        /* TODO, need to add all features to this.highlightResultLayer instead of clear
+         instead of clear, do getFeatures().forEach() and add to highlightResultLayer. this.highlightResultLayer.getSource().addFeature(spec.hit);*/
+        console.log("this",this);
+        this.firFeatureLayer.getSource().getFeatures().forEach(hits => {
+            this.highlightResultLayer.getSource().addFeature(spec.hit);
+        });
 
-            textContent.html(this.getInformation(spec.hit));
-            $('#popup-content').empty().append(title, textContent);
-
-            if (isPoint(spec.hit.getGeometry().getCoordinates())) {
-                offsetY = this.get('popupOffsetY');
-            }
-            ovl.setOffset([0, offsetY]);
-            ovl.setPosition(map.getView().getCenter());
-            if (this.isTouchDevice()) {
-                this.enableScroll($('#popup-content')[0]);
-            }
-        }
-
-        if (ovl && !this.get('displayPopup')) {
-            ovl.setPosition(undefined);
-        }
+        // this.highlightResultLayer.getSource().addFeature(spec.hit);
+        // this.firFeatureLayer.getSource().addFeature(spec.hit);
 
         if (!(this.get('selectedIndices') instanceof Array)) {
             this.set('selectedIndices', []);
@@ -567,6 +605,7 @@ var FirModel = {
                 index: spec.index,
                 group: spec.id
             });
+
         }
     },
 
@@ -574,18 +613,13 @@ var FirModel = {
         var map = this.get('map'),
             exist = this.get('selectedIndices').find(item => item.group === spec.id && spec.index === item.index),
             extent = spec.hit.getGeometry().getExtent(),
-            size = map.getSize(),
-            ovl = map.getOverlayById('popup-0');
+            size = map.getSize();
 
         this.get('hits').push(spec.hit);
 
         map.getView().fit(extent, size, { maxZoom: this.get('maxZoom') });
 
-        this.featureLayer.getSource().addFeature(spec.hit);
-
-        if (ovl) {
-            ovl.setPosition(undefined);
-        }
+        this.firFeatureLayer.getSource().addFeature(spec.hit);
 
         if (!(this.get('selectedIndices') instanceof Array)) {
             this.set('selectedIndices', []);
@@ -599,6 +633,8 @@ var FirModel = {
                 group: spec.id
             });
         }
+
+
     },
 
     detach: function (spec) {
@@ -613,7 +649,8 @@ var FirModel = {
             hit.getId() !== spec.hit.getId()
         ));
 
-        this.featureLayer.getSource().removeFeature(spec.hit);
+        this.firFeatureLayer.getSource().removeFeature(spec.hit);
+        console.log("remove feature");
 
         if (ovl) {
             ovl.setPosition(undefined);
@@ -666,7 +703,7 @@ var FirModel = {
         if (this.get('hits').length === 0) {
             this.get('items').map(item => {
                 item.hits.forEach((hit, i) => {
-                    hit.setStyle(this.featureLayer.getStyle());
+                    hit.setStyle(this.firFeatureLayer.getStyle());
                     hits.push(hit);
                 });
             });
@@ -782,7 +819,6 @@ var FirModel = {
                     }
                 });
 
-                console.log("before return");
                 return columns.map(column => {
                     console.log("here");
                     console.log(column);
@@ -799,11 +835,6 @@ var FirModel = {
             });
 
             return values;
-            /*return {
-                TabName: group,
-                Cols: aliases,
-                Rows: values
-            };*/
         });
     },
 
@@ -841,7 +872,7 @@ var FirModel = {
             url: url,
             method: 'post',
             data: {
-                json: '{ "fnr": ["130136787","130129850","130132945","130139213"] }'  //'{ "fnr": [' + data +'] }' //'{ "fnr": ["130136787","130129850","130132945","130139213"] }' //postData
+                json: '{"fnr":['+data+']}'//'{ "fnr": ["130136787","130129850","130132945","130139213"] }'  //'{ "fnr": [' + data +'] }' //'{ "fnr": ["130136787","130129850","130132945","130139213"] }' //postData
             },
             format: 'json',
             success: (url) => {
@@ -917,7 +948,7 @@ var FirModel = {
 
         this.set('hits', []);
         this.set('selectedIndices', []);
-        this.featureLayer.getSource().clear();
+        this.firFeatureLayer.getSource().clear();
 
         layers.forEach(layer => {
             layer.get('params').LAYERS.split(',').forEach(featureType => {

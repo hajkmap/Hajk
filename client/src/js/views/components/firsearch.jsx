@@ -1,5 +1,6 @@
 var FirSelectionToolbar = require('components/firselectiontoolbar');
 var FirSearchResultGroup = require('components/firsearchresultgroup');
+var firstSlider = true;
 
 /**
  * @class
@@ -67,6 +68,17 @@ var FirSearchView = {
                 downloading: this.props.model.get('downloading')
             });
         });
+    },
+
+    componentDidUpdate: function () {
+        var slider = document.getElementById("bufferValue");
+        var output = document.getElementById("buffert");
+        output.innerHTML = slider.value;
+
+        slider.oninput = function(){
+            output.innerHTML = this.value;
+        }
+
     },
 
     /**
@@ -308,7 +320,7 @@ var FirSearchView = {
         }
 
         return (
-            <div className='search-results' key='search-results'>
+            <div className='firSearch-results' key='firSearch-results'>
                 <h3>Sökresultat</h3>
                 {
                     (() => {
@@ -388,6 +400,48 @@ var FirSearchView = {
         );
     },
 
+    renderAnalysFunctions: function() {
+
+        /*var slider = document.getElementById("bufferValue");
+        var output = document.getElementById("buffert");
+        output.innerHTML = this.value;
+
+        slider.oninput = function(){
+        output.innerHTML = this.value;
+        }
+        */
+        if(firstSlider){
+            console.log("first slider");
+            var slider = <input type="range" min="0" max="100" value="50" id="bufferValue" />;
+            var output = <span id="buffert"></span>;
+
+            output.innerHTML = 50;
+            console.log("slider", slider);
+            console.log("output", output);
+            firstSlider = false;
+        }
+
+
+        return (
+            <div className='panel panel-default'>
+                <div className='panel-heading'>Analyser</div>
+                <div className='panel-body'>
+                    <input type="checkbox" id="hittaNarmaste" onClick={()=> this.checkBoxFir("traktnamn")} /> Hitta närmaste <br/>
+                    <input type="range" min="0" max="100" value="50" id="bufferValue" />
+                        <p>Buffert: <span id="buffert"></span></p>
+                </div>
+            </div>
+        );
+    },
+
+    /*slide: function() {
+        console.log(this);
+        var output = document.getElementById("buffert");
+        console.log("output", output);
+        output.innerHTML = this.value;
+    },
+    */
+
     minBox: function() {
         var contains = $('#FIRSearchMinimizeBox');
         if(typeof contains === 'undefined'){
@@ -421,7 +475,6 @@ var FirSearchView = {
             options = this.renderOptions(),
             searchExpandedClassButton= "fa fa-angle-up clickable arrow pull-right";
 
-        console.log("firSearch.jsx");
         if (showResults) {
             if (this.state.loading) {
                 results = (
@@ -480,6 +533,7 @@ var FirSearchView = {
             : null;
 
         var fastighetsforteckning = this.renderFastighetsForteckning();
+        var analysFunctions = this.renderAnalysFunctions();
 
         return (
                 <div className='search-tools'>
@@ -496,7 +550,7 @@ var FirSearchView = {
                                 type='text'
                                 ref='searchInput'
                                 className='form-control'
-                                placeholder='Ange söktext..'
+                                placeholder='Ange fastighet..'
                                 value={value}
                                 onKeyDown={this.handleKeyDown}
                                 onChange={search_on_input} />
@@ -510,6 +564,7 @@ var FirSearchView = {
                         <button onClick={this.clear} type='submit' className='btn btn-primary' id='sokRensa'>Rensa</button>
                     </div>
                     </div>
+                    {analysFunctions}
                     {fastighetsforteckning}
                     {results}
                 </div>
