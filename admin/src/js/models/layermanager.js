@@ -31,7 +31,7 @@ var manager = Model.extend({
     layers: []
   },
 
-  parseDate (date) {
+  parseDate(date) {
     var parsed = parseInt(date);
     return isNaN(parsed) ? date : (new Date(parsed)).toLocaleString();
   },
@@ -39,17 +39,17 @@ var manager = Model.extend({
   getUrl: function (layer) {
     var t = layer['type'];
     delete layer['type'];
-    switch (t) {
-      case 'ExtendedWMS':
-        return this.get('config').url_layer_settings_extended;
-      case 'WMS':
-        return this.get('config').url_layer_settings;
-      case 'WMTS':
-        return this.get('config').url_wmtslayer_settings;
-      case 'ArcGIS':
-        return this.get('config').url_arcgislayer_settings;
-      case 'Vector':
-        return this.get('config').url_vectorlayer_settings;
+    switch(t) {
+      case "ExtendedWMS":
+        return this.get('config').url_layer_settings_extended
+      case "WMS":
+        return this.get('config').url_layer_settings
+      case "WMTS":
+        return this.get('config').url_wmtslayer_settings
+      case "ArcGIS":
+        return this.get('config').url_arcgislayer_settings
+      case "Vector":
+        return this.get('config').url_vectorlayer_settings
     }
   },
 
@@ -58,11 +58,11 @@ var manager = Model.extend({
       success: data => {
         var layers = [];
 
-        data.extendedwmslayers.forEach(l => { l.type = 'ExtendedWMS'; });
-        data.wmslayers.forEach(l => { l.type = 'WMS'; });
-        data.wmtslayers.forEach(l => { l.type = 'WMTS'; });
-        data.arcgislayers.forEach(l => { l.type = 'ArcGIS'; });
-        data.vectorlayers.forEach(l => { l.type = 'Vector'; });
+        data.extendedwmslayers.forEach(l => { l.type = "ExtendedWMS"});
+        data.wmslayers.forEach(l => { l.type = "WMS" });
+        data.wmtslayers.forEach(l => { l.type = "WMTS" });
+        data.arcgislayers.forEach(l => { l.type = "ArcGIS" });
+        data.vectorlayers.forEach(l => { l.type = "Vector" });
 
         layers = data.wmslayers
           .concat(data.extendedwmslayers)
@@ -71,8 +71,8 @@ var manager = Model.extend({
           .concat(data.vectorlayers);
 
         layers.sort((a, b) => {
-          var d1 = parseInt(a.date),
-            d2 = parseInt(b.date);
+          var d1 = parseInt(a.date)
+          ,   d2 = parseInt(b.date);
           return d1 === d2 ? 0 : d1 < d2 ? 1 : -1;
         });
         this.set('layers', layers);
@@ -82,30 +82,30 @@ var manager = Model.extend({
 
   getLegend: function (state, callback) {
     $.ajax({
-      url: state.url + '/legend',
-      method: 'GET',
-      dataType: 'json',
-      data: {
-        f: 'json'
-      },
-      success: (rsp) => {
-        var legends = [],
-          addedLayers = state.addedLayers.map(layer => layer.id);
+        url: state.url + '/legend',
+        method: 'GET',
+        dataType: 'json',
+        data: {
+          f: 'json'
+        },
+        success: (rsp) => {
+          var legends = []
+          ,   addedLayers = state.addedLayers.map(layer => layer.id);
 
-        rsp.layers.forEach(legendLayer => {
-          if (addedLayers.indexOf(legendLayer.layerId) !== -1) {
-            legendLayer.legend.forEach(legend => {
-              legends.push(`data:${legend.contentType};base64,${legend.imageData}&${legendLayer.layerName}`);
-            });
-          }
-        });
+          rsp.layers.forEach(legendLayer => {
+            if (addedLayers.indexOf(legendLayer.layerId) !== -1) {
+              legendLayer.legend.forEach(legend => {
+                legends.push(`data:${legend.contentType};base64,${legend.imageData}&${legendLayer.layerName}`);
+              });
+            }
+          });
 
-        callback(legends.join('#'));
-      },
-      error: () => {
-        callback(false);
-      }
-    });
+          callback(legends.join('#'));
+        },
+        error: () => {
+          callback(false);
+        }
+      });
   },
 
   addLayer: function (layer, callback) {
@@ -124,7 +124,7 @@ var manager = Model.extend({
     });
   },
 
-  updateLayer: function (layer, callback) {
+  updateLayer: function(layer, callback) {
     var url = this.getUrl(layer);
     $.ajax({
       url: url,
@@ -138,12 +138,13 @@ var manager = Model.extend({
         callback(false);
       }
     });
+
   },
 
   removeLayer: function (layer, callback) {
     var url = this.getUrl(layer);
     $.ajax({
-      url: url + '/' + layer.id,
+      url: url + "/" +layer.id,
       method: 'DELETE',
       contentType: 'application/json',
       success: () => {
@@ -156,12 +157,12 @@ var manager = Model.extend({
   },
 
   prepareProxyUrl: function (url) {
-    return this.get('config').url_proxy
-      ? this.get('config').url_proxy + '/' + url.replace(/http[s]?:\/\//, '')
-      : url;
+    return this.get('config').url_proxy ?
+      this.get('config').url_proxy + "/" + url.replace(/http[s]?:\/\//, '') :
+      url;
   },
 
-  getWFSLayerDescription: function (url, layer, callback) {
+  getWFSLayerDescription: function(url, layer, callback) {
     url = this.prepareProxyUrl(url);
     $.ajax(url, {
       data: {
@@ -169,17 +170,20 @@ var manager = Model.extend({
         typename: layer
       },
       success: data => {
-        var parser = new X2JS(),
-          xmlstr = data.xml ? data.xml : (new XMLSerializer()).serializeToString(data),
-          apa = parser.xml2js(xmlstr);
+        var parser = new X2JS()
+        ,   xmlstr = data.xml ? data.xml : (new XMLSerializer()).serializeToString(data)
+        ,   apa = parser.xml2js(xmlstr);
         try {
           var props = apa.schema.complexType.complexContent.extension.sequence.element.map(a => {
             return {
               name: a._name,
               localType: a._type ? a._type.replace(a.__prefix + ':', '') : ''
-            };
+            }
           });
-          if (props) { callback(props); } else { callback(false); }
+          if (props)
+            callback(props);
+          else
+            callback(false);
         } catch (e) {
           callback(false);
         }
@@ -188,21 +192,36 @@ var manager = Model.extend({
   },
 
   parseWFSCapabilitesTypes: function (data) {
-    var types = [];
-    $(data).find('FeatureType').each((i, featureType) => {
-      var projection = '',
-        crs = '';
+    var types = [],
+        typeElements = $(data).find('FeatureType');
 
+    if (typeElements.length === 0) {
+      typeElements = $(data).find('wfs\\:FeatureType');      
+    }
+
+    typeElements.each((i, featureType) => {
+      
+      var projection = '',
+          name = "",
+          title = "",
+          crs = '';
+      
       if ($(featureType).find('DefaultCRS').length > 0) {
         crs = $(featureType).find('DefaultCRS').first().get(0).textContent;
       }
       if ($(featureType).find('DefaultSRS').length > 0) {
         crs = $(featureType).find('DefaultSRS').first().get(0).textContent;
       }
-
+      if ($(featureType).find('wfs\\:DefaultCRS').length > 0) {
+        crs = $(featureType).find('wfs\\:DefaultCRS').first().get(0).textContent;
+      }
+      if ($(featureType).find('wfs\\:DefaultSRS').length > 0) {
+        crs = $(featureType).find('wfs\\:DefaultSRS').first().get(0).textContent;
+      }
       if (crs && typeof crs === 'string') {
         crs = crs.split(':');
       }
+
       if (Array.isArray(crs)) {
         crs.forEach(part => {
           if (/EPSG/.test(part)) {
@@ -213,14 +232,30 @@ var manager = Model.extend({
           }
         });
       }
-
-      if (!/^[A-Z]+:\d+$/.test(projection)) {
-        projection = '';
+      if (!/^[A-Z]+:\d+$/.test(projection)) {        
+        if (crs.length === 7) {
+          projection = crs[4] + ":" + crs[6];
+        } else {
+          projection = "";
+        }
       }
+      
+      if ($(featureType).find('Name').length > 0) {
+        name = $(featureType).find('Name').first().get(0).textContent
+      }
+      if ($(featureType).find('wfs\\:Name').length > 0) {
+        name = $(featureType).find('wfs\\:Name').first().get(0).textContent
+      }      
+      if ($(featureType).find('Title').length > 0) {
+        title = $(featureType).find('Title').first().get(0).textContent
+      }
+      if ($(featureType).find('wfs\\:Title').length > 0) {
+        title = $(featureType).find('wfs\\:Title').first().get(0).textContent
+      }    
 
       types.push({
-        name: $(featureType).find('Name').first().get(0).textContent,
-        title: $(featureType).find('Title').first().get(0).textContent,
+        name: name,
+        title: title,
         projection: projection
       });
     });
@@ -238,11 +273,11 @@ var manager = Model.extend({
         if (/MapServer\/WFSServer$/.test(url)) {
           url = url.replace('/services/', '/rest/services/').replace('WFSServer', 'legend?f=pjson');
           $.ajax(this.prepareProxyUrl(url), {
-            dataType: 'json',
+            dataType: "json",
             success: (legend) => {
               if (legend && legend.layers && legend.layers[0]) {
                 if (legend.layers[0].legend[0]) {
-                  response.legend = 'data:image/png;base64,' +
+                  response.legend = "data:image/png;base64," +
                     legend.layers[0].legend[0].imageData;
                 }
               }
@@ -262,9 +297,10 @@ var manager = Model.extend({
     });
   },
 
-  getArcGISLayerDescription: function (url, layer, callback) {
+  getArcGISLayerDescription: function(url, layer, callback) {
+
     url = this.prepareProxyUrl(url);
-    url += '/' + layer.id;
+    url += "/" + layer.id;
 
     $.ajax(url, {
       dataType: 'json',
@@ -278,10 +314,11 @@ var manager = Model.extend({
   },
 
   getArcGISCapabilities: function (url, callback) {
+
     $.ajax(this.prepareProxyUrl(url), {
-      dataType: 'json',
+      dataType: "json",
       data: {
-        f: 'json'
+        f: "json"
       },
       success: data => {
         callback(data);
@@ -290,6 +327,7 @@ var manager = Model.extend({
         callback(false);
       }
     });
+
   },
 
   getWMSCapabilities: function (url, callback) {
