@@ -1,5 +1,5 @@
 # Hajk
-Uppdaterad: 2018-05-03
+Uppdaterad: 2018-08-28
 
 ## Innehåll
 - [Hajk](#hajk)
