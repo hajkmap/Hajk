@@ -57,17 +57,17 @@ class AppModel {
     }
   }
 
-  getPlugins() {
-    return this.plugins;
+  getPlugins() {    
+    return Object.keys(this.plugins)      
+      .reduce((v, key) => {                  
+        return [...v, this.plugins[key]];
+      }, [])      
   }
 
   getToolbarPlugins() {
-    return Object.keys(this.plugins).reduce((v, key) => {
-      if (this.plugins[key].target === "toolbar") {
-        v = [...v, this.plugins[key]];
-      }
-      return v;
-    }, []);
+    return this.getPlugins()
+      .filter(plugin => plugin.target === "toolbar")
+      .sort((a, b) => a.sortOrder - b.sortOrder);
   }
 
   loadPlugins(plugins, callback) {
@@ -79,25 +79,31 @@ class AppModel {
           import(`../${pluginsFolder}/${plugin}/view.js`)
             .then(module => {
               // TODO: This will work once map config contains options.target info for each plugin.
-
               // If plugin has own property of options.target, use it.
-              const filteredTool = this.config.mapConfig.tools.filter(
+              const toolConfig = this.config.mapConfig.tools.find(
                 // Filter the array of objects to only contain current plugin
                 plug => plug.type.toLowerCase() === plugin.toLowerCase()
-              );
-              const target =
-                filteredTool.length > 0 &&
-                filteredTool[0].options.hasOwnProperty("target")
-                  ? filteredTool[0].options.target
+              ) || {};
+              const toolOptions = toolConfig && toolConfig.options ? toolConfig.options : {};
+
+              const target =                
+                toolOptions.hasOwnProperty("target")
+                  ? toolConfig.target
                   : "toolbar";
 
+              const sortOrder =                
+                toolConfig.hasOwnProperty("index")
+                  ? Number(toolConfig.index)
+                  : 0;
+              
               this.addPlugin(
                 new Plugin({
                   map: map,
                   app: this,
                   type: plugin,
                   target: target,
-                  component: module.default
+                  component: module.default,
+                  sortOrder: sortOrder
                 })
               );
               callback(plugin);
@@ -112,16 +118,6 @@ class AppModel {
       throw new Error("Initialize map before loading plugins.");
     }
   }
-
-  /**
-   * Configure application.
-   * @return undefined
-   */
-  // TODO: Remove
-  // configureApplication() {
-  //   configureCss(this.config.mapConfig);
-  //   return this;
-  // }
 
   /**
    * Initialize open layers map

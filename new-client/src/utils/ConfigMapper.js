@@ -15,7 +15,7 @@ export default class ConfigMapper {
       if (args.legend === "") {
         args.legend = `${proxy}${
           args.url
-        }?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${
+        }?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=60&HEIGHT=60&LAYER=${
           args.layers[0]
         }&${geoserverLegendOptions}`;
       }
@@ -52,8 +52,8 @@ export default class ConfigMapper {
         searchGeometryField: args.searchGeometryField,
         legend: [
           {
-            Url: getLegendUrl(args),
-            Description: "Teckenförklaring"
+            url: getLegendUrl(args),
+            description: "Teckenförklaring"
           }
         ],
         params: {
@@ -99,8 +99,8 @@ export default class ConfigMapper {
       let protocol = /^http/.test(legendUrl) ? "" : "http://";
 
       return {
-        Url: protocol + legendUrl,
-        Description: layer.name
+        url: protocol + legendUrl,
+        description: layer.name
       };
     };
 
@@ -263,8 +263,8 @@ export default class ConfigMapper {
         featureId: "FID",
         legend: [
           {
-            Url: args.legend,
-            Description: args.caption
+            url: args.legend,
+            description: args.caption
           }
         ],
         params: {
@@ -320,8 +320,8 @@ export default class ConfigMapper {
         },
         legend: [
           {
-            Url: getLegendUrl(args),
-            Description: "Teckenförklaring"
+            url: getLegendUrl(args),
+            description: "Teckenförklaring"
           }
         ],
         infoVisible: args.infoVisible || false,

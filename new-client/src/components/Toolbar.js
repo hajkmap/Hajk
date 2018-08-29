@@ -45,8 +45,11 @@ class Toolbar extends Component {
   }
 
   render() {
-    const classes = this.props.classes;
-    var c = this.state.toolbarVisible ? "toolbar visible" : "toolbar";
+    var classes = this.props.classes;
+    classes += this.state.toolbarVisible ? "toolbar visible" : "toolbar";
+    if (this.props.tools.length === 0) {
+      return null;
+    }
     return (
       // FIXME: Small screens must display tools vertically, make this toggle button work again.
       <div id="toolbar-group">
@@ -56,9 +59,9 @@ class Toolbar extends Component {
             this.toggleToolbar();
           }}
         >
-          <ListIcon />
+        <ListIcon />
         </div>
-        <div id="toolbar" className={c} className={classes.toolbar}>
+        <div id="toolbar" className={classes.toolbar}>
           {this.renderTools()}
         </div>
       </div>

@@ -1,4 +1,15 @@
-/*  Dialog-polyfill CSS */
+.information-tool-toggle-button {
+  position: absolute;
+  top: 70px;
+  left: 0;
+  background: white;
+  padding: 10px;
+  cursor: pointer;  
+  border: 1px solid;
+  border-left: 0;
+  width: 114px;
+}
+
 dialog {
   position: absolute;
   left: 0;
@@ -15,6 +26,7 @@ dialog {
   background: white;
   color: black;
   display: block;
+  z-index: 10000;
 }
 
 dialog:not([open]) {
@@ -43,7 +55,6 @@ dialog.fixed {
   top: 50%;
   transform: translate(0, -50%);
 }
-/* End dialog-polyfill */
 
 dialog {
   top: 20%;

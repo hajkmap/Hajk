@@ -69,6 +69,9 @@ class OpenLayersMap {
   }
   
   bindEvents() {
+    this.map.getView().on('change:zoom', () => {
+      this.onUpdate(this.getState());
+    });
     this.map.getView().on('change:center', () => {
       this.onUpdate(this.getState());
     });

@@ -31,7 +31,7 @@ class BreadCrumb extends Component {
           <span>{this.props.title} <i className="material-icons" onClick={this.setLayerVisibility(this.props.layer)}>close</i></span>
         </div>
         <div className="bread-crumb-body">
-          <a href="#">Läs mer</a>
+          <a href="#layer">Läs mer</a>
         </div>
       </div>
     );

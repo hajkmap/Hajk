@@ -64,9 +64,9 @@
       "caption": "Hamn",
       "url": "http://giscloud.se/geoserver/wms",
       "owner": "",
-      "date": "1534965014457",
+      "date": "1535113288230",
       "content": "",
-      "legend": "http://icons.iconarchive.com/icons/custom-icon-design/flatastic-11/256/Map-icon.png",
+      "legend": "",
       "projection": null,
       "layers": [
         "wsp:port"
@@ -134,9 +134,9 @@
       "caption": "Hamn - punkt",
       "url": "http://giscloud.se/geoserver/wms",
       "owner": "",
-      "date": "1534964923215",
+      "date": "1535113350646",
       "content": "",
-      "legend": "http://icons.iconarchive.com/icons/custom-icon-design/flatastic-11/256/Map-icon.png",
+      "legend": "",
       "projection": null,
       "layers": [
         "wsp:port_imo"

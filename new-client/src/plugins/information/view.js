@@ -10,7 +10,8 @@ class Information extends Component {
     super();
     // this.toggle = this.toggle.bind(this);
     this.state = {
-      toggled: false
+      toggled: false,
+      target: "map"
     };
   }
 
@@ -50,7 +51,7 @@ class Information extends Component {
   }
 
   toggle = () => {
-    if (!this.state.toggled) {
+    if (!this.state.toggled && this.props.toolbar) {
       this.props.toolbar.hide();
     }
     this.setState({
@@ -59,10 +60,17 @@ class Information extends Component {
     this.props.tool.app.togglePlugin("information");
   };
 
-  getActiveClass() {
+  getActiveClass() {    
+    const customClass = "information-";
+    var activeClass = "tool-toggle-button active";
+    var inactiveClass = "tool-toggle-button active";  
+    if (this.props.tool.target !== "toolbar") {
+      activeClass = customClass + activeClass;
+      inactiveClass = customClass + inactiveClass;
+    }
     return this.state.toggled
-      ? "tool-toggle-button active"
-      : "tool-toggle-button";
+      ? activeClass
+      : inactiveClass;
   }
 
   getVisibilityClass() {
@@ -96,7 +104,7 @@ class Information extends Component {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
-          <i className="material-icons">info</i>
+          <i className="material-icons">info</i>&nbsp;
           <i className="tool-text">Information</i>
         </div>
         {createPortal(

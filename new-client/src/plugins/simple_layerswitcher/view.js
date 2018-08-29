@@ -56,20 +56,23 @@ class LayersSwitcher extends Component {
     });
   }
 
-  toggle() {
-    if (!this.state.toggled) {
-      this.props.toolbar.hide();
-    }
+  toggle() {    
     this.setState({
       toggled: !this.state.toggled
-    });
-    this.props.tool.app.togglePlugin("simple_layerswitcher");
+    });    
   }
 
   getActiveClass() {
+    const customClass = "layerswitcher-";
+    var activeClass = "tool-toggle-button active";
+    var inactiveClass = "tool-toggle-button active";  
+    if (this.props.tool.target !== "toolbar") {
+      activeClass = customClass + activeClass;
+      inactiveClass = customClass + inactiveClass;
+    }
     return this.state.toggled
-      ? "tool-toggle-button active"
-      : "tool-toggle-button";
+      ? activeClass
+      : inactiveClass;
   }
 
   getVisibilityClass() {
@@ -145,8 +148,8 @@ class LayersSwitcher extends Component {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
-          <i className="material-icons">layers</i>
-          <i className="tool-text">Innehåll</i>
+          <i className="material-icons">layers</i>&nbsp;
+          <i className="tool-text">Visa innehåll</i>
         </div>
         {this.renderPanel()}
         {this.renderBreadCrumbs()}

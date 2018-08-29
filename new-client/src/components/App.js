@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Observer from "react-event-observer";
@@ -32,12 +33,11 @@ class App extends Component {
   }
 
   componentDidMount() {
-    var promises = this.appModel
-      //.configureApplication() // TODO: Remove
+    var promises = this.appModel      
       .createMap()
       .addLayers()
       .loadPlugins(this.props.activeTools, plugin => {});
-
+          
     Promise.all(promises).then(() => {
       this.setState({
         tools: this.appModel.getPlugins()
@@ -54,7 +54,6 @@ class App extends Component {
   getTheme = () => {
     // primary: blue // <- Can be done like this (don't forget to import blue from "@material-ui/core/colors/blue"!)
     // secondary: { main: "#11cb5f" } // <- Or like this
-
     return createMuiTheme({
       palette: {
         primary: { main: this.props.config.mapConfig.map.colors.primaryColor },
@@ -64,6 +63,16 @@ class App extends Component {
       }
     });
   };
+
+  renderWidgets() {
+    if (this.state.tools) {
+      return this.state.tools.map((tool, i) => {
+        return createPortal(<tool.component key={i} tool={tool}></tool.component>, document.getElementById("map"));
+      });
+    } else {
+      return null;
+    }
+  }
 
   render() {
     const classes = this.props.classes;
@@ -75,6 +84,7 @@ class App extends Component {
             mapClickDataResult={this.state.mapClickDataResult}
             map={this.appModel.getMap()}
           />
+          {this.renderWidgets()}        
         </div>
       </MuiThemeProvider>
     );

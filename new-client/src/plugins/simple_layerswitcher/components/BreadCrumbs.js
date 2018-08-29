@@ -101,16 +101,18 @@ class BreadCrumbs extends Component {
   render() {
     return (
       <div className="bread-crumbs">
-        {this.state.visibleLayers
-          .filter(layer => 
-            layer.getProperties().layerInfo 
-            ? layer.getProperties().layerInfo.layerType !== "base"
-            : false
-          )
-          .map((layer, i) => 
-            <BreadCrumb key={i} title={layer.get("caption")} layer={layer}></BreadCrumb>
-          )
-        }
+        <div className="bread-crumb-container">
+          {this.state.visibleLayers
+            .filter(layer => 
+              layer.getProperties().layerInfo 
+              ? layer.getProperties().layerInfo.layerType !== "base"
+              : false
+            )
+            .map((layer, i) => 
+              <BreadCrumb key={i} title={layer.get("caption")} layer={layer}></BreadCrumb>
+            )
+          }
+        </div>
       </div>
     );
   }

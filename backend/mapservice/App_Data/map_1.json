@@ -189,6 +189,13 @@
             "expanded": false,
             "layers": [
               {
+                "id": "1",
+                "visibleAtStart": true,
+                "drawOrder": 2,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
                 "id": "3",
                 "visibleAtStart": true,
                 "drawOrder": 3,
@@ -203,77 +210,38 @@
                 "infobox": null
               }
             ],
-            "groups": [
-              {
-                "id": "646e36af-2755-17dd-6016-91bf08a11e72",
-                "parent": "dec1ab4e-e209-9a07-d336-69abe4fe368f",
-                "name": "Undergrupp 1",
-                "toggled": false,
-                "expanded": false,
-                "layers": [
-                  {
-                    "id": "11",
-                    "visibleAtStart": false,
-                    "drawOrder": 1000,
-                    "visibleForGroups": null,
-                    "infobox": null
-                  }
-                ],
-                "groups": []
-              },
-              {
-                "id": "c19d8b4c-e758-4586-6830-4118f7c7cae2",
-                "parent": "dec1ab4e-e209-9a07-d336-69abe4fe368f",
-                "name": "Undergrupp",
-                "toggled": false,
-                "expanded": false,
-                "layers": [
-                  {
-                    "id": "1",
-                    "visibleAtStart": true,
-                    "drawOrder": 2,
-                    "visibleForGroups": null,
-                    "infobox": null
-                  },
-                  {
-                    "id": "5",
-                    "visibleAtStart": false,
-                    "drawOrder": 0,
-                    "visibleForGroups": null,
-                    "infobox": null
-                  }
-                ],
-                "groups": [
-                  {
-                    "id": "566de50d-4517-e30f-7a59-18178ef7e083",
-                    "parent": "c19d8b4c-e758-4586-6830-4118f7c7cae2",
-                    "name": "Undergrupp Undergrupp",
-                    "toggled": false,
-                    "expanded": false,
-                    "layers": [
-                      {
-                        "id": "12",
-                        "visibleAtStart": false,
-                        "drawOrder": 1000,
-                        "visibleForGroups": null,
-                        "infobox": null
-                      }
-                    ],
-                    "groups": []
-                  }
-                ]
-              }
-            ]
+            "groups": []
           },
           {
             "id": "376a00b9-a04c-a81d-5c54-bd5420c40dc1",
             "parent": "-1",
-            "name": "Basänger",
+            "name": "Kraft",
             "toggled": false,
             "expanded": false,
             "layers": [
               {
+                "id": "5",
+                "visibleAtStart": false,
+                "drawOrder": 0,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
                 "id": "9",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "11",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "12",
                 "visibleAtStart": false,
                 "drawOrder": 1000,
                 "visibleForGroups": null,
@@ -372,7 +340,7 @@
     {
       "type": "information",
       "options": {
-        "text": "Info",
+        "text": "Text som förtydligar varför, vad och hur… Lorem ipsum dolor sit amet, consectetur \nadipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna \naliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut \naliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in \nvoluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat \ncupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est \nlaborum\nHÄR KAN DU SE VAD SOM PLANERAS I DITT OMRÅDE\nVI VILL HÖRA DIN ÅSIKT!",
         "headerText": "",
         "visibleAtStart": false,
         "showInfoOnce": false,

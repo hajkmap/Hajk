@@ -13,3 +13,61 @@
 
 .informative h2 {
 }
+
+.informative-tool-toggle-button {
+  position: absolute;
+  top: 20px;  
+  right: 0;
+  background: white;
+  padding: 10px;
+  cursor: pointer;  
+  border: 1px solid;
+  border-right: 0;
+}
+
+.informative-panel {
+  right: 0;
+  left: auto;
+}
+
+@media only screen and (max-width: 600px) {
+  .informative-panel {
+    right: 0;
+    left: 0;
+  }
+}
+
+.informative-tool-toggle-button:active {
+
+}
+
+.ol-full-screen, .ol-zoom {
+  display: none;
+}
+
+.toc, .content {
+
+}
+
+.content img {
+  width: 100%;
+}
+
+.toc {
+  margin-bottom: 10px;
+}
+
+.chapter {
+  background: #efefef;
+  margin: 4px;
+  padding: 4px;
+  border: 1px solid #ccc;
+}
+
+.selected {
+  background: #ccc;
+}
+
+.folded {
+  display: none;
+}

@@ -6,6 +6,7 @@ export default class Plugin {
     this.type = spec.type;
     this.target = spec.target;
     this.component = spec.component;
+    this.sortOrder = spec.sortOrder || 0;
   }
 
   isOpen() {

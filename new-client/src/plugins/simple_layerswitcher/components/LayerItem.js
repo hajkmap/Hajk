@@ -143,7 +143,7 @@ class LayerItem extends Component {
             />
           </div>
           <div className="right-col">
-            <img width="60" src={this.state.legend[0] ? this.state.legend[0].Url : ""} />
+            <img width="60" alt="legend" src={this.state.legend[0] ? this.state.legend[0].url : ""} />
           </div>
         </div>        
       </div>

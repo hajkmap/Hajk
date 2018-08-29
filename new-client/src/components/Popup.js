@@ -105,19 +105,23 @@ class Popup extends Component {
       };
     };
 
-    var toggler = (
-      <div className="toggle">
-        <i className="material-icons pull-left clickable" id="step-left">
-          arrow_left
-        </i>
-        <span className="toggle-text">
-          {this.state.selectedIndex} av {features.length}
-        </span>
-        <i className="material-icons pull-right clickable" id="step-right">
-          arrow_right
-        </i>
-      </div>
-    );
+    var toggler = null;
+
+    if (features.length > 1) {
+      toggler = (
+        <div className="toggle">
+          <i className="material-icons pull-left clickable" id="step-left">
+            arrow_left
+          </i>
+          <span className="toggle-text">
+            {this.state.selectedIndex} av {features.length}
+          </span>
+          <i className="material-icons pull-right clickable" id="step-right">
+            arrow_right
+          </i>
+        </div>
+      );
+    }
 
     var featureList = features.map((feature, i) => {
       var markdown = feature.layer.get("layerInfo").information,

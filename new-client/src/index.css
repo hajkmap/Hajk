@@ -75,7 +75,7 @@ button {
   left: 0;
   width: 500px;
   background: var(--white);
-  bottom: 60px;
+  bottom: 0px;
   box-shadow: var(--box-shadow-right);
   z-index: 1001;
 }
@@ -116,7 +116,7 @@ button {
   overflow-y: auto;
   width: 100%;
   position: absolute;
-  top: 60px;
+  top: 70px;
   bottom: 0;
   padding: 10px;
   left: 0;
@@ -182,9 +182,7 @@ button {
   font-size: 20pt;
   font-weight: 500;
   cursor: pointer;
-  margin: 5px;
-  border-radius: 5px !important;
-  box-shadow: var(--box-shadow-all);
+  margin: 5px;  
 }
 
 .ol-control {

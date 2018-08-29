@@ -3,7 +3,7 @@ import Observer from "react-event-observer";
 import { createPortal } from "react-dom";
 import CollectorModel from "./model.js";
 import PanelHeader from "../../components/PanelHeader.js";
-import CollectorForm from "../../components/CollectorForm.js";
+import CollectorForm from "./components/CollectorForm.js";
 import "./style.css";
 import Button from '@material-ui/core/Button';
 
