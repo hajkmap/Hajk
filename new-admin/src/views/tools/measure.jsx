@@ -26,6 +26,7 @@ var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
+  target: 'toolbar',
   icons: '',
   instruction: ''
 };
@@ -46,6 +47,7 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
+        target: tool.options.target || 'toolbar',
         icons: tool.options.icons,
         instruction: tool.options.instruction
       });
@@ -109,6 +111,7 @@ class ToolOptions extends Component {
       'type': this.type,
       'index': this.state.index,
       'options': {
+        target: this.state.target,
         exportUrl: this.state.exportUrl,
         importUrl: this.state.importUrl,
         base64Encode: this.state.base64Encode,
@@ -183,6 +186,15 @@ class ToolOptions extends Component {
               onChange={(e) => { this.handleInputChange(e); }}
               value={this.state.index} />
           </div>
+          <div>
+            <label htmlFor='target'>Verktygsplacering</label>
+            <input
+              id='target'
+              name='target'
+              type='text'
+              onChange={(e) => { this.handleInputChange(e); }}
+              value={this.state.target} />
+          </div>           
           <div>
             <label htmlFor='instruction'>Instruktion</label>
             <textarea

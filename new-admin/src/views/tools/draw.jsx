@@ -27,6 +27,7 @@ var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
+  target: 'toolbar',
   exportUrl: '/mapservice/export/kml',
   importUrl: '/mapservice/import/kml',
   icons: '',
@@ -52,6 +53,7 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
+        target: tool.options.target,
         exportUrl: tool.options.exportUrl,
         importUrl: tool.options.importUrl,
         icons: tool.options.icons,
@@ -120,6 +122,7 @@ class ToolOptions extends Component {
       'type': this.type,
       'index': this.state.index,
       'options': {
+        'target': this.state.target,
         'exportUrl': this.state.exportUrl,
         'importUrl': this.state.importUrl,
         'base64Encode': this.state.base64Encode,
@@ -223,6 +226,15 @@ class ToolOptions extends Component {
               onChange={(e) => { this.handleInputChange(e); }}
               value={this.state.index} />
           </div>
+          <div>
+            <label htmlFor='target'>Verktygsplacering</label>
+            <input
+              id='target'
+              name='target'
+              type='text'
+              onChange={(e) => { this.handleInputChange(e); }}
+              value={this.state.target} />
+          </div>             
           <div>
             <label htmlFor='exportUrl'>URL till export-tjänst</label>
             <input value={this.state.exportUrl} type='text' name='exportUrl' onChange={(e) => { this.handleInputChange(e); }} />

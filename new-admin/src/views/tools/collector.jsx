@@ -40,7 +40,7 @@ class ToolOptions extends Component {
   constructor() {
     super();
     this.state = defaultState;
-    this.type = 'informative';
+    this.type = 'collector';
   }
 
   componentDidMount() {
@@ -219,7 +219,7 @@ class ToolOptions extends Component {
           </div>          
           {this.renderVisibleForGroups()}
           <div>
-            Inställningar för översiktsplan..
+            Inställningar för collector..
           </div>
         </form>
       </div>

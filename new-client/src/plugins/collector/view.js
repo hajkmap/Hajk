@@ -55,18 +55,24 @@ class Collector extends Component {
 
   toggle() {
     if (!this.state.toggled) {
-      this.props.toolbar.hide();
+      if (this.props.toolbar) {  
+        this.props.toolbar.hide();
+      }
     }
     this.setState({
       toggled: !this.state.toggled
-    });
-    this.props.tool.app.togglePlugin("collector");
+    });     
+    if (this.props.toolbar) {  
+      this.props.tool.app.togglePlugin("collector");   
+    }
   }
 
-  getActiveClass() {
+  getActiveClass() {        
+    var activeClass = "tool-toggle-button active";
+    var inactiveClass = "tool-toggle-button";      
     return this.state.toggled
-      ? "tool-toggle-button active"
-      : "tool-toggle-button";
+      ? activeClass
+      : inactiveClass;
   }
 
   getVisibilityClass() {
@@ -82,7 +88,7 @@ class Collector extends Component {
   activateMarker() {    
     this.setState({
       markerActive: !this.state.markerActive,
-      description: this.state.markerActive ? "" : "Klicka på en plats i kartan."
+      description: this.state.markerActive ? "" : "Ställ in kartan på vald plats"
     }, () => {
       if (this.state.markerActive) {
         this.collectorModel.activate('addPoint', () => {
@@ -91,7 +97,7 @@ class Collector extends Component {
           });
         });
       } else {
-        this.collectorModel.deactivate('addPoint');        
+        this.collectorModel.deactivate('addPoint');
       }
     });
   }

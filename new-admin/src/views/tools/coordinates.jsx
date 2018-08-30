@@ -28,6 +28,7 @@ var defaultState = {
   transformations: [],
   active: false,
   index: 0,
+  target: 0,
   instruction: '',
   visibleForGroups: []
 };
@@ -51,6 +52,7 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
+        target: tool.options.target || "toolbar",
         instruction: tool.options.instruction,
         transformations: tool.options.transformations || [],
         visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
@@ -115,6 +117,7 @@ class ToolOptions extends Component {
       'type': this.type,
       'index': this.state.index,
       'options': {
+        'target': this.state.target,
         'instruction': this.state.instruction,
         'transformations': this.state.transformations,
         'visibleForGroups': this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
@@ -255,6 +258,15 @@ class ToolOptions extends Component {
             onChange={(e) => { this.handleInputChange(e); }}
             value={this.state.index} />
         </div>
+        <div>
+          <label htmlFor='target'>Verktygsplacering</label>
+          <input
+            id='target'
+            name='target'
+            type='text'
+            onChange={(e) => { this.handleInputChange(e); }}
+            value={this.state.target} />
+        </div>        
         <div>
           <label htmlFor='instruction'>Instruktion</label>
           <textarea

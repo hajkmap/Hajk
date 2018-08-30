@@ -27,6 +27,7 @@ var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
+  target: 'toolbar',
   instruction: '',
   apiKey: 'AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4',
   visibleForGroups: []
@@ -48,6 +49,7 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
+        target: tool.options.target || 'toolbar',
         instruction: tool.options.instruction,
         apiKey: tool.options.apiKey,
         visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
@@ -109,12 +111,13 @@ class ToolOptions extends Component {
 
   save () {
     var tool = {
-      'type': this.type,
-      'index': this.state.index,
-      'options': {
-        'apiKey': this.state.apiKey,
-        'instruction': this.state.instruction,
-        'visibleForGroups': this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
+      type: this.type,
+      index: this.state.index,
+      options: {
+        target: this.state.target,
+        apiKey: this.state.apiKey,
+        instruction: this.state.instruction,
+        visibleForGroups: this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
       }
     };
 
@@ -212,6 +215,15 @@ class ToolOptions extends Component {
               onChange={(e) => { this.handleInputChange(e); }}
               value={this.state.index} />
           </div>
+          <div>
+            <label htmlFor='target'>Verktygsplacering</label>
+            <input
+              id='target'
+              name='target'
+              type='text'
+              onChange={(e) => { this.handleInputChange(e); }}
+              value={this.state.target} />
+          </div>           
           <div>
             <label htmlFor='instruction'>Instruktion</label>
             <textarea

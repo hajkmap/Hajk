@@ -27,6 +27,7 @@ var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
+  target: 'toolbar',
   visibleAtStart: false,
   text: '',
   headerText: '',
@@ -51,6 +52,7 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
+        target: tool.options.target || 'toolbar',
         visibleAtStart: tool.options.visibleAtStart || false,
         text: tool.options.text || '',
         headerText: tool.options.headerText || '',
@@ -113,6 +115,7 @@ class ToolOptions extends Component {
       'type': this.type,
       'index': this.state.index,
       'options': {
+        target: this.state.target,        
         text: this.state.text,
         headerText: this.state.headerText,
         visibleAtStart: this.state.visibleAtStart,
@@ -217,6 +220,15 @@ class ToolOptions extends Component {
               onChange={(e) => { this.handleInputChange(e); }}
               value={this.state.index} />
           </div>
+          <div>
+            <label htmlFor='target'>Verktygsplacering</label>
+            <input
+              id='target'
+              name='target'
+              type='text'
+              onChange={(e) => { this.handleInputChange(e); }}
+              value={this.state.target} />
+          </div>          
           <div>
             <input
               id='visibleAtStart'

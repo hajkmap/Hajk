@@ -27,6 +27,7 @@ var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
+  target: 'toolbar',
   exportUrl: '/mapservice/export/pdf',
   exportTiffUrl: '/mapservice/export/tiff',
   pdfActive: true,
@@ -66,6 +67,7 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
+        target: tool.options.target,
         exportUrl: tool.options.exportUrl,
         exportTiffUrl: tool.options.exportTiffUrl,
         tiffActive: tool.options.tiffActive,
@@ -136,6 +138,7 @@ class ToolOptions extends Component {
       'type': this.type,
       'index': this.state.index,
       'options': {
+        target: this.state.target,        
         exportUrl: this.state.exportUrl,
         exportTiffUrl: this.state.exportTiffUrl,
         pdfActive: this.state.pdfActive,
@@ -244,6 +247,15 @@ class ToolOptions extends Component {
               onChange={(e) => { this.handleInputChange(e); }}
               value={this.state.index} />
           </div>
+          <div>
+            <label htmlFor='target'>Verktygsplacering</label>
+            <input
+              id='target'
+              name='target'
+              type='text'
+              onChange={(e) => { this.handleInputChange(e); }}
+              value={this.state.target} />
+          </div>          
           <div>
             <label htmlFor='exportUrl'>URL till PDF-tjänst</label>
             <input value={this.state.exportUrl} type='text' name='exportUrl' onChange={(e) => { this.handleInputChange(e); }} />

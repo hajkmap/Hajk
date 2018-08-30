@@ -21,16 +21,16 @@ class BreadCrumbs extends Component {
     layer.on('change:visible', (e) => {      
       let changedLayer = e.target;
       if (changedLayer.get("visible")) {
-        this.setState({
+        setTimeout(() => this.setState({
           visibleLayers: [...this.state.visibleLayers, changedLayer]
-        });
+        }), 0);
       } else {
-        this.setState({
+        setTimeout(() => this.setState({
           visibleLayers: this.state.visibleLayers.filter(visibleLayer => 
             visibleLayer !== changedLayer)
-        });
+        }), 0);
       } 
-    })    
+    }); 
   };
 
   getVisibleLayers() {

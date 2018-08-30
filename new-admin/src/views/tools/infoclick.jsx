@@ -27,6 +27,7 @@ var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
+  target: 'toolbar',
   markerImg: 'assets/icons/marker.png',
   displayPopup: false,
   imgSizeX: 32,
@@ -53,6 +54,7 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
+        target: tool.options.target,
         markerImg: tool.options.markerImg,
         displayPopup: tool.options.displayPopup,
         imgSizeX: tool.options.imgSize[0] || this.state.imgSizeX,
@@ -117,6 +119,7 @@ class ToolOptions extends Component {
       'type': this.type,
       'index': this.state.index,
       'options': {
+        target: this.state.target,
         displayPopup: this.state.displayPopup,
         markerImg: this.state.markerImg,
         anchor: [this.state.anchorX, this.state.anchorY],
@@ -221,6 +224,15 @@ class ToolOptions extends Component {
               onChange={(e) => { this.handleInputChange(e); }}
               value={this.state.index} />
           </div>
+          <div>
+            <label htmlFor='target'>Verktygsplacering</label>
+            <input
+              id='target'
+              name='target'
+              type='text'
+              onChange={(e) => { this.handleInputChange(e); }}
+              value={this.state.target} />
+          </div>              
           {this.renderVisibleForGroups()}
           <div>
             <label htmlFor='markerImg'>Bild för markering</label>

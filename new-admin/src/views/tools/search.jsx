@@ -29,6 +29,7 @@ var defaultState = {
   toolbar: 'bottom',
   active: false,
   index: 0,
+  target: 'toolbar',
   onMap: false,
   bothSynlig: false,
   enableViewTogglePopupInSnabbsok: true,
@@ -74,6 +75,7 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
+        target: tool.options.target || 'toolbar',
         onMap: tool.options.onMap,
         bothSynlig: tool.options.bothSynlig,
         enableViewTogglePopupInSnabbsok: tool.options.enableViewTogglePopupInSnabbsok,
@@ -195,9 +197,10 @@ class ToolOptions extends Component {
     }
 
     var tool = {
-      'type': this.type,
-      'index': this.state.index,
-      'options': {
+      type: this.type,
+      index: this.state.index,
+      options: {
+        target: this.state.target,
         onMap: onMap,
         bothSynlig: this.state.bothSynlig,
         enableViewTogglePopupInSnabbsok: this.state.enableViewTogglePopupInSnabbsok,
@@ -362,6 +365,15 @@ class ToolOptions extends Component {
               value={this.state.index} />
           </div>
           <div>
+            <label htmlFor='target'>Verktygsplacering</label>
+            <input
+              id='target'
+              name='target'
+              type='text'
+              onChange={(e) => { this.handleInputChange(e); }}
+              value={this.state.target} />
+          </div>          
+          <div>
             <input
               id='onMap'
               name='onMap'
@@ -377,7 +389,7 @@ class ToolOptions extends Component {
               type='checkbox'
               onChange={(e) => { this.handleInputChange(e); }}
               checked={this.state.enableViewTogglePopupInSnabbsok} />&nbsp;
-            <label htmlFor='enableViewTogglePopupInSnabbsok'>Aktivera visning av "Visa information" i snabbsök</label>
+            <label htmlFor='enableViewTogglePopupInSnabbsok'>"Visa information" i snabbsök</label>
           </div>
           <div>
             <input
@@ -386,7 +398,7 @@ class ToolOptions extends Component {
               type='checkbox'
               onChange={(e) => { this.handleInputChange(e); }}
               checked={this.state.bothSynlig} />&nbsp;
-            <label htmlFor='bothSynlig'>Båda snabbsök och sökPanel synlig</label>
+            <label htmlFor='bothSynlig'>Visa snabbsök</label>
           </div>
           <div>
             <input
@@ -422,7 +434,7 @@ class ToolOptions extends Component {
               type='checkbox'
               onChange={(e) => { this.handleInputChange(e); }}
               checked={this.state.base64Encode} />&nbsp;
-            <label htmlFor='Base64-active'>Base64-encoding aktiverad</label>
+            <label htmlFor='Base64-active'>Komprimera instruktionstext</label>
           </div>
           <div>
             <label htmlFor='instruction'>Instruktion</label>

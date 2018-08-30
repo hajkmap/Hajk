@@ -27,6 +27,7 @@ var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
+  target: 'toolbar',
   instruction: '',
   visibleForGroups: []
 };
@@ -48,6 +49,7 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
+        target: tool.options.target || "toolbar",
         instruction: tool.options.instruction,
         visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
       });
@@ -100,7 +102,7 @@ class ToolOptions extends Component {
     this.props.model.get('toolConfig').forEach(t => {
       if (t.type === this.type) {
         t.options = tool.options;
-        t.index = tool.index;
+        t.index = tool.index;        
         t.instruction = tool.instruction;
       }
     });
@@ -111,6 +113,7 @@ class ToolOptions extends Component {
       'type': this.type,
       'index': this.state.index,
       'options': {
+        'target': this.state.target,
         'instruction': this.state.instruction,
         'visibleForGroups': this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
       }
@@ -209,6 +212,15 @@ class ToolOptions extends Component {
               type='text'
               onChange={(e) => { this.handleInputChange(e); }}
               value={this.state.index} />
+          </div>
+          <div>
+            <label htmlFor='target'>Verktygsplacering</label>
+            <input
+              id='target'
+              name='target'
+              type='text'
+              onChange={(e) => { this.handleInputChange(e); }}
+              value={this.state.target} />
           </div>
           <div>
             <label htmlFor='instruction'>Instruktion</label>

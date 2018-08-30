@@ -66,7 +66,7 @@ class AppModel {
 
   getToolbarPlugins() {
     return this.getPlugins()
-      .filter(plugin => plugin.target === "toolbar")
+      .filter(plugin => plugin.options.target === "toolbar")
       .sort((a, b) => a.sortOrder - b.sortOrder);
   }
 
@@ -78,35 +78,39 @@ class AppModel {
           ...promises,
           import(`../${pluginsFolder}/${plugin}/view.js`)
             .then(module => {
-              // TODO: This will work once map config contains options.target info for each plugin.
-              // If plugin has own property of options.target, use it.
-              const toolConfig = this.config.mapConfig.tools.find(
-                // Filter the array of objects to only contain current plugin
+
+              const toolConfig = this.config.mapConfig.tools.find(                
                 plug => plug.type.toLowerCase() === plugin.toLowerCase()
               ) || {};
+              
               const toolOptions = toolConfig && toolConfig.options ? toolConfig.options : {};
-
+              
               const target =                
-                toolOptions.hasOwnProperty("target")
-                  ? toolConfig.target
+                toolOptions.hasOwnProperty("options")
+                  ? toolConfig.options.target
                   : "toolbar";
-
+              
               const sortOrder =                
                 toolConfig.hasOwnProperty("index")
                   ? Number(toolConfig.index)
-                  : 0;
-              
-              this.addPlugin(
-                new Plugin({
-                  map: map,
-                  app: this,
-                  type: plugin,
-                  target: target,
-                  component: module.default,
-                  sortOrder: sortOrder
-                })
-              );
-              callback(plugin);
+                  : 0;              
+
+              if (Object.keys(toolConfig).length > 0) {                
+                this.addPlugin(
+                  new Plugin({
+                    map: map,
+                    app: this,
+                    type: plugin,
+                    target: target,
+                    component: module.default,
+                    sortOrder: sortOrder,
+                    options: toolOptions
+                  })       
+                );
+                callback(plugin);
+              } else {
+                callback();
+              }
             })
             .catch(err => {
               console.error(err);

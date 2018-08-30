@@ -61,13 +61,8 @@ class Information extends Component {
   };
 
   getActiveClass() {    
-    const customClass = "information-";
     var activeClass = "tool-toggle-button active";
-    var inactiveClass = "tool-toggle-button active";  
-    if (this.props.tool.target !== "toolbar") {
-      activeClass = customClass + activeClass;
-      inactiveClass = customClass + inactiveClass;
-    }
+    var inactiveClass = "tool-toggle-button";
     return this.state.toggled
       ? activeClass
       : inactiveClass;
@@ -104,7 +99,7 @@ class Information extends Component {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
-          <i className="material-icons">info</i>&nbsp;
+          <i className="material-icons">info</i>
           <i className="tool-text">Information</i>
         </div>
         {createPortal(

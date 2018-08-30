@@ -8,33 +8,24 @@ class Collector extends Component {
     super(props);
     this.state = {
       text: ""
-    };
-    this.save = this.save.bind(this);
-    this.handleChange.bind(this);
+    };  
   }
   
-  save() {
+  save = () => {
     console.log("Save", this.state);
   }
 
-  handleChange(name, event) {
+  handleChange = (name) => (event) => {
     this.setState({
       [name]: event.target.value,
     });
-  }
+  };
   
 
   render() {
     if (!this.props.visible) return null;    
     return (
-      <div>
-        <TextField
-          id="name"
-          label="Text"
-          value={this.state.text}
-          onChange={this.handleChange('text')}
-          margin="normal"
-        /><br/>
+      <div>        
         <TextField
           id="comment"
           label="Kommentar"

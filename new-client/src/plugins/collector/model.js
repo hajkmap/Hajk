@@ -38,8 +38,10 @@ class CollectorModel {
   }
   
   activate(type, clicked) {
-    this.olMap.clicklock = true;
-    this.olMap.on("singleclick", this.addMarker.bind(this, clicked));
+    //this.olMap.clicklock = true;
+    //this.olMap.on("singleclick", this.addMarker.bind(this, clicked));
+    var feature = createFeature(this.olMap.getView().getCenter());
+    this.vectorSource.addFeature(feature);
   }
 
   deactivate(type) {

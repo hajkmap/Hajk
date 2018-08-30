@@ -25,6 +25,10 @@
   border-right: 0;
 }
 
+.informative-tool-toggle-button:active {
+
+}
+
 .informative-panel {
   right: 0;
   left: auto;
@@ -35,10 +39,6 @@
     right: 0;
     left: 0;
   }
-}
-
-.informative-tool-toggle-button:active {
-
 }
 
 .ol-full-screen, .ol-zoom {
@@ -62,6 +62,8 @@
   margin: 4px;
   padding: 4px;
   border: 1px solid #ccc;
+  cursor: pointer;
+  user-select: none;
 }
 
 .selected {

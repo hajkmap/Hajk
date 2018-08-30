@@ -267,34 +267,28 @@
       "index": 0
     },
     {
-      "type": "routing",
+      "type": "infoclick",
       "options": {
-        "apiKey": "",
-        "instruction": "",
+        "displayPopup": false,
+        "markerImg": "assets/icons/marker.png",
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ],
+        "popupOffsetY": 0,
         "visibleForGroups": []
       },
       "index": 0
     },
     {
-      "type": "location",
+      "type": "informative",
       "options": {
-        "visibleForGroups": []
-      },
-      "index": 0
-    },
-    {
-      "type": "measure",
-      "options": {
-        "instruction": "",
-        "icons": ""
-      },
-      "index": 0
-    },
-    {
-      "type": "streetview",
-      "options": {
-        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
-        "instruction": "",
+        "target": "widget",
+        "visibleAtStart": false,
         "visibleForGroups": []
       },
       "index": 0
@@ -302,6 +296,7 @@
     {
       "type": "search",
       "options": {
+        "target": "widget",
         "onMap": false,
         "bothSynlig": false,
         "enableViewTogglePopupInSnabbsok": true,
@@ -325,22 +320,15 @@
         ],
         "popupOffsetY": 0,
         "visibleForGroups": [],
-        "layers": [
-          {
-            "id": "6",
-            "visibleForGroups": [
-              "Office-SEKSD01",
-              "All-SE129"
-            ]
-          }
-        ]
+        "layers": []
       },
       "index": 0
     },
     {
       "type": "information",
       "options": {
-        "text": "Text som förtydligar varför, vad och hur… Lorem ipsum dolor sit amet, consectetur \nadipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna \naliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut \naliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in \nvoluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat \ncupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est \nlaborum\nHÄR KAN DU SE VAD SOM PLANERAS I DITT OMRÅDE\nVI VILL HÖRA DIN ÅSIKT!",
+        "target": "widget",
+        "text": "Om kartan",
         "headerText": "",
         "visibleAtStart": false,
         "showInfoOnce": false,
@@ -350,137 +338,10 @@
       "index": 0
     },
     {
-      "type": "buffer",
+      "type": "collector",
       "options": {
-        "instruction": "",
-        "varbergVer": false,
-        "geoserverUrl": "",
-        "notFeatureLayers": [],
-        "visibleForGroups": []
-      },
-      "index": 0
-    },
-    {
-      "type": "export",
-      "options": {
-        "exportUrl": "/mapservice/export/pdf",
-        "exportTiffUrl": "/mapservice/export/tiff",
-        "pdfActive": true,
-        "tiffActive": true,
-        "base64Encode": false,
-        "autoScale": false,
-        "scales": [
-          250,
-          500,
-          1000,
-          2500,
-          5000,
-          10000,
-          25000,
-          50000,
-          100000,
-          250000
-        ],
-        "proxyUrl": "",
-        "instruction": "",
-        "visibleForGroups": []
-      },
-      "index": 0
-    },
-    {
-      "type": "edit",
-      "options": {
-        "instruction": "",
-        "visibleForGroups": []
-      },
-      "index": 0
-    },
-    {
-      "type": "draw",
-      "options": {
-        "exportUrl": "/mapservice/export/kml",
-        "importUrl": "/mapservice/import/kml",
-        "base64Encode": false,
-        "instruction": "",
-        "icons": "",
-        "proxyUrl": "",
-        "visibleForGroups": []
-      },
-      "index": 0
-    },
-    {
-      "type": "coordinates",
-      "options": {
-        "instruction": "",
-        "transformations": [],
-        "visibleForGroups": []
-      },
-      "index": 0
-    },
-    {
-      "type": "bookmark",
-      "options": {
-        "instruction": "",
-        "visibleForGroups": []
-      },
-      "index": 0
-    },
-    {
-      "type": "anchor",
-      "options": {
-        "instruction": "QW5jaG9yIGluc3RydWN0aW9uIGhlcmU=",
-        "visibleForGroups": []
-      },
-      "index": 0
-    },
-    {
-      "type": "infoclick",
-      "options": {
-        "displayPopup": false,
-        "markerImg": "assets/icons/marker.png",
-        "anchor": [
-          16,
-          32
-        ],
-        "imgSize": [
-          32,
-          32
-        ],
-        "popupOffsetY": 0,
-        "visibleForGroups": []
-      },
-      "index": 0
-    },
-    {
-      "type": "informative",
-      "options": {
-        "text": "",
-        "headerText": "",
+        "target": "widget",
         "visibleAtStart": false,
-        "showInfoOnce": false,
-        "base64EncodeForInfotext": false,
-        "visibleForGroups": []
-      },
-      "index": 0
-    },
-    {
-      "type": "preset",
-      "options": {
-        "presetList": [
-          {
-            "name": "asd",
-            "presetUrl": "asd"
-          },
-          {
-            "name": "asdasd",
-            "presetUrl": "asd"
-          },
-          {
-            "name": "as",
-            "presetUrl": "asd"
-          }
-        ],
-        "instruction": "",
         "visibleForGroups": []
       },
       "index": 0
@@ -531,7 +392,7 @@
     "pil": null,
     "mobile": false,
     "colors": {
-      "primaryColor": "#66bba6",
+      "primaryColor": "#9013fe",
       "secondaryColor": "#6b1a1a"
     }
   }

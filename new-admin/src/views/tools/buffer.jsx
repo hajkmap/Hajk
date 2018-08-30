@@ -27,6 +27,7 @@ var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
+  target: 'toolbar',
   instruction: '',
   varbergVer: false,
   geoserverUrl: '',
@@ -51,6 +52,7 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
+        target: tool.options.target || 'toolbar',
         instruction: tool.options.instruction,
         varbergVer: tool.options.varbergVer,
         geoserverUrl: tool.options.geoserverUrl,
@@ -107,7 +109,7 @@ class ToolOptions extends Component {
     this.props.model.get('toolConfig').forEach(t => {
       if (t.type === this.type) {
         t.options = tool.options;
-        t.index = tool.index;
+        t.index = tool.index;        
         t.instruction = tool.instruction;
       }
     });
@@ -118,6 +120,7 @@ class ToolOptions extends Component {
       'type': this.type,
       'index': this.state.index,
       'options': {
+        'target': this.state.target,
         'instruction': this.state.instruction,
         'varbergVer': this.state.varbergVer,
         'geoserverUrl': this.state.geoserverUrl,
@@ -230,6 +233,15 @@ class ToolOptions extends Component {
               type='text'
               onChange={(e) => { this.handleInputChange(e); }}
               value={this.state.index} />
+          </div>
+          <div>
+            <label htmlFor='target'>Verktygsplacering</label>
+            <input
+              id='target'
+              name='target'
+              type='text'
+              onChange={(e) => { this.handleInputChange(e); }}
+              value={this.state.target} />
           </div>
           <div>
             <label htmlFor='instruction'>Instruktion</label>

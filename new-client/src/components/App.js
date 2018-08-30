@@ -6,6 +6,7 @@ import Observer from "react-event-observer";
 import AppModel from "./../models/AppModel.js";
 import Toolbar from "./Toolbar.js";
 import Popup from "./Popup.js";
+import './App.css';
 
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 
@@ -66,9 +67,11 @@ class App extends Component {
 
   renderWidgets() {
     if (this.state.tools) {
-      return this.state.tools.map((tool, i) => {
-        return createPortal(<tool.component key={i} tool={tool}></tool.component>, document.getElementById("map"));
-      });
+      return this.state.tools
+        .filter(tool => tool.options.target !== "toolbar")
+        .map((tool, i) => {          
+          return <tool.component key={i} tool={tool}></tool.component>;
+        });
     } else {
       return null;
     }
@@ -83,8 +86,10 @@ class App extends Component {
           <Popup
             mapClickDataResult={this.state.mapClickDataResult}
             map={this.appModel.getMap()}
-          />
-          {this.renderWidgets()}        
+          />     
+          <div id="widgets">
+            {this.renderWidgets()}
+          </div>
         </div>
       </MuiThemeProvider>
     );

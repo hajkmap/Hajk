@@ -110,13 +110,26 @@ class LayerItem extends Component {
     ) : null;
   }
 
+  renderLegendImage() {
+    
+    var src = this.state.legend[0] && this.state.legend[0].url
+    ? this.state.legend[0].url 
+    : "";
+
+    return (
+      src
+      ? <img width="60" alt="legend" src={src} />
+      : null
+    )
+  }
+
   render() {
     var caption = this.props.layer.get("caption")
     ,   visible = this.state.visible;
 
     if (!caption) {
       return null;
-    }
+    }    
 
     return (
       <div className="panel panel-default layer-item">
@@ -143,7 +156,7 @@ class LayerItem extends Component {
             />
           </div>
           <div className="right-col">
-            <img width="60" alt="legend" src={this.state.legend[0] ? this.state.legend[0].url : ""} />
+            {this.renderLegendImage()}
           </div>
         </div>        
       </div>

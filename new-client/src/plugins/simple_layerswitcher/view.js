@@ -62,14 +62,9 @@ class LayersSwitcher extends Component {
     });    
   }
 
-  getActiveClass() {
-    const customClass = "layerswitcher-";
+  getActiveClass() {    
     var activeClass = "tool-toggle-button active";
-    var inactiveClass = "tool-toggle-button active";  
-    if (this.props.tool.target !== "toolbar") {
-      activeClass = customClass + activeClass;
-      inactiveClass = customClass + inactiveClass;
-    }
+    var inactiveClass = "tool-toggle-button";
     return this.state.toggled
       ? activeClass
       : inactiveClass;

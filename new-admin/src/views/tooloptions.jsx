@@ -38,6 +38,7 @@ import StreetView from './tools/streetview.jsx';
 import Preset from './tools/preset.jsx';
 import Measure from './tools/measure.jsx';
 import Routing from './tools/routing.jsx';
+import Collector from './tools/collector.jsx';
 
 var defaultState = {
   activeTool: ''
@@ -106,6 +107,8 @@ class ToolOptions extends Component {
         return <Measure parent={this} model={this.props.model} />;
       case 'routing':
         return <Routing parent={this} model={this.props.model} />;
+      case 'collector':
+        return <Collector parent={this} model={this.props.model} />;
       default:
         return null;
     }
@@ -163,7 +166,8 @@ class ToolOptions extends Component {
       preset: 'Snabbval',
       measure: 'Mät',
       location: 'Visa min position',
-      routing: 'Navigation'
+      routing: 'Navigation',
+      collector: 'Tyck till'
     };
 
     return (
