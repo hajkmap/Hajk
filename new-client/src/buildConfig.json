@@ -1,6 +1,7 @@
 {
   "activeTools": [
     "information",
+    "layerswitcher",
     "simple_layerswitcher",
     "informative",
     "collector"

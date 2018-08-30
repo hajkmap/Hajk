@@ -39,6 +39,7 @@ import Preset from './tools/preset.jsx';
 import Measure from './tools/measure.jsx';
 import Routing from './tools/routing.jsx';
 import Collector from './tools/collector.jsx';
+import SimpleLayerswitcher from './tools/simple_layerswitcher.jsx';
 
 var defaultState = {
   activeTool: ''
@@ -109,6 +110,8 @@ class ToolOptions extends Component {
         return <Routing parent={this} model={this.props.model} />;
       case 'collector':
         return <Collector parent={this} model={this.props.model} />;
+      case 'simple_layerswitcher':
+        return <SimpleLayerswitcher parent={this} model={this.props.model} />;        
       default:
         return null;
     }
@@ -167,7 +170,8 @@ class ToolOptions extends Component {
       measure: 'Mät',
       location: 'Visa min position',
       routing: 'Navigation',
-      collector: 'Tyck till'
+      collector: 'Tyck till',
+      simple_layerswitcher: 'Lagerhanterare'
     };
 
     return (

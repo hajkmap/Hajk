@@ -7,16 +7,14 @@ import dialogPolyfill from "dialog-polyfill";
 
 class Information extends Component {
   constructor() {
-    super();
-    // this.toggle = this.toggle.bind(this);
+    super();    
     this.state = {
       toggled: false,
       target: "map"
     };
   }
 
-  componentDidMount() {
-    // Register polyfill
+  componentDidMount() {    
     this.dialog = document.querySelector("dialog");
     dialogPolyfill.registerDialog(this.dialog);
 
@@ -29,7 +27,14 @@ class Information extends Component {
       app: this.props.tool.app,
       observer: this.observer
     });
-    this.props.tool.instance = this;
+    this.props.tool.instance = this;    
+    this.options = this.props.tool.options;
+    if (this.options && this.options.visibleAtStart) {
+      this.setState({
+        toggled: true
+      });
+      this.props.tool.app.togglePlugin("information");
+    }
   }
 
   open() {
@@ -50,9 +55,9 @@ class Information extends Component {
     });
   }
 
-  toggle = () => {
+  toggle = () => {        
     if (!this.state.toggled && this.props.toolbar) {
-      this.props.toolbar.hide();
+      this.props.toolbar.hide();      
     }
     this.setState({
       toggled: !this.state.toggled
@@ -72,25 +77,37 @@ class Information extends Component {
     return this.state.toggled ? "modal" : "modal hidden";
   }
 
-  getOpen() {
-    return this.state.toggled ? "open" : "";
+  getOpen() {    
+    return this.state.toggled === true ? "open" : "";      
+  }
+
+  getHtml(text) {
+    return {
+      __html: text
+    }
   }
 
   renderDialogContent() {
+    var header = "";
+    var text = "";
+    if (this.options) {
+      header = this.options.headerText;
+      text = this.options.text;
+    }   
     return (
       <div>
         <div className="header">
           <i
-            className="material-icons pull-right"
+            className="material-icons pull-right close"
             onClick={() => {
               this.toggle();
             }}
           >
             close
           </i>
-          <h1>Information</h1>
+          <h1>{header}</h1>
         </div>
-        <div className="tool-panel-content">Information</div>
+        <div dangerouslySetInnerHTML={this.getHtml(text)}></div>
       </div>
     );
   }

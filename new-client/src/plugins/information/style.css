@@ -10,6 +10,11 @@
   width: 114px;
 }
 
+.close {
+  cursor: pointer;
+  user-select: none;
+}
+
 dialog {
   position: absolute;
   left: 0;
@@ -27,6 +32,12 @@ dialog {
   color: black;
   display: block;
   z-index: 10000;
+  text-align: center;
+}
+
+.information-dialog {
+  width: 80%;
+  max-width: 800px;
 }
 
 dialog:not([open]) {

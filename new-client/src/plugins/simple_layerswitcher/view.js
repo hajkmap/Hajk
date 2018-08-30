@@ -19,7 +19,7 @@ class LayersSwitcher extends Component {
     this.state = {
       toggled: false,
       layerGroupsExpanded: true
-    };
+    };    
   }
 
   componentWillMount() {
@@ -30,7 +30,7 @@ class LayersSwitcher extends Component {
       app: this.props.tool.app,
       observer: this.observer
     });
-    this.props.tool.instance = this;
+    this.props.tool.instance = this;    
     this.options = this.props.tool.app.config.mapConfig.tools.find(
       t => t.type === "layerswitcher"
     ).options;
@@ -143,7 +143,7 @@ class LayersSwitcher extends Component {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>
-          <i className="material-icons">layers</i>&nbsp;
+          <i className="material-icons">layers</i>
           <i className="tool-text">Visa innehåll</i>
         </div>
         {this.renderPanel()}

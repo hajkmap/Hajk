@@ -4,13 +4,13 @@ import InformativeModel from "./model.js";
 import { createPortal } from "react-dom";
 import "./style.css";
 import PanelHeader from "../../components/PanelHeader.js";
-
-import PropTypes from 'prop-types';
-import classNames from 'classnames';
 import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
-import SaveIcon from '@material-ui/icons/Save';
+
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
 
 var history = (function () {
   var history = [];
@@ -146,15 +146,15 @@ class Informative extends Component {
   }
   
   renderTocItem(chapters) {    
-    return chapters.map((chapter, i) => {
-      return <div key={i} className="chapter" onClick={() => {         
+    return chapters.map((chapter, i) => {        
+      return <ListItem button key={i} className="chapter" onClick={() => {         
         var state = {
           chapters: chapter.chapters,
           chapter: chapter          
         }; 
         this.setState(state);
         history.add(state);
-      }}>{chapter.header}</div>
+      }}> <ListItemText primary={chapter.header} /></ListItem>
     });
   }
   
@@ -167,14 +167,15 @@ class Informative extends Component {
   }  
 
   renderBackButton() {    
+    const { classes } = this.props;
     if (history.get().length === 1) {
       return null;
     } else {
       return (
-        <a href="#back" onClick={() => {
+        <Button variant="outlined" color="primary" className={classes.button} onClick={() => {
           history.remove();          
           this.setState(history.getLast());          
-        }}>Tillbaka</a>
+        }}>Tillbaka</Button>
       );
     }
   }
@@ -187,7 +188,7 @@ class Informative extends Component {
           <div>
             {this.renderBackButton()}
           </div>
-          <div className="toc">{this.renderTocItem(this.state.chapters)}</div>
+          <List component="nav" className="toc">{this.renderTocItem(this.state.chapters)}</List>
           <div className="layers">{this.renderLayerItems(this.state.chapter)}</div>
           <h1>{this.state.chapter.header}</h1>
           <div className="content">{this.renderContent()}</div>

@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Observer from "react-event-observer";

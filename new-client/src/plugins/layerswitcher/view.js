@@ -57,8 +57,10 @@ class LayersSwitcher extends Component {
   }
 
   toggle() {
-    if (!this.state.toggled) {
-      this.props.toolbar.hide();
+    if (this.props.toolbar) {
+      if (!this.state.toggled) {
+        this.props.toolbar.hide();
+      }
     }
     this.setState({
       toggled: !this.state.toggled

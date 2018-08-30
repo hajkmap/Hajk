@@ -93,7 +93,7 @@ class AppModel {
               const sortOrder =                
                 toolConfig.hasOwnProperty("index")
                   ? Number(toolConfig.index)
-                  : 0;              
+                  : 0;
 
               if (Object.keys(toolConfig).length > 0) {                
                 this.addPlugin(

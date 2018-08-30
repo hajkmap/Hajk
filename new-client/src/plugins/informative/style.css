@@ -53,17 +53,14 @@
   width: 100%;
 }
 
-.toc {
-  margin-bottom: 10px;
+.toc {  
 }
 
-.chapter {
-  background: #efefef;
-  margin: 4px;
-  padding: 4px;
+.chapter {    
   border: 1px solid #ccc;
   cursor: pointer;
   user-select: none;
+  margin-bottom: 10px;
 }
 
 .selected {
