@@ -17,17 +17,16 @@ import EditIcon from "@material-ui/icons/Edit";
 
 const styles = theme => ({
   drawerPaper: {
-    width: "500px"
+    left: "72px",
+    width: "500px",
+    zIndex: theme.zIndex.drawer - 1
   }
 });
 
 class Edit extends Component {
-  constructor() {
-    super();
-    this.state = {
-      toggled: false
-    };
-  }
+  state = {
+    toggled: false
+  };
 
   componentDidMount() {
     this.observer = Observer();
@@ -70,17 +69,17 @@ class Edit extends Component {
     this.props.tool.app.togglePlugin("edit");
   };
 
-  getActiveClass() {
-    return this.state.toggled
-      ? "tool-toggle-button active"
-      : "tool-toggle-button";
-  }
+  // getActiveClass() {
+  //   return this.state.toggled
+  //     ? "tool-toggle-button active"
+  //     : "tool-toggle-button";
+  // }
 
-  getVisibilityClass() {
-    return this.state.toggled
-      ? "tool-panel edit-panel"
-      : "tool-panel edit-panel hidden";
-  }
+  // getVisibilityClass() {
+  //   return this.state.toggled
+  //     ? "tool-panel edit-panel"
+  //     : "tool-panel edit-panel hidden";
+  // }
 
   renderPanel() {
     const { toggled } = this.state;
@@ -88,7 +87,7 @@ class Edit extends Component {
     return createPortal(
       <Drawer
         variant="persistent"
-        anchor="right"
+        anchor="left"
         open={toggled}
         classes={{ paper: classes.drawerPaper }}
       >
@@ -100,14 +99,12 @@ class Edit extends Component {
     );
   }
 
-  isButtonActive() {
-    return this.state.toggled ? "contained" : "text";
-  }
+  isToolActive = () => (this.state.toggled ? true : false);
 
   render() {
     return (
       <div>
-        <ListItem button onClick={this.toggle}>
+        <ListItem button onClick={this.toggle} selected={this.isToolActive()}>
           <ListItemIcon>
             <EditIcon />
           </ListItemIcon>
