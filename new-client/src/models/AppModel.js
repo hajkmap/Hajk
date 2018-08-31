@@ -57,14 +57,15 @@ class AppModel {
     }
   }
 
-  getPlugins() {    
-    return Object.keys(this.plugins)      
-      .reduce((v, key) => {                  
-        return [...v, this.plugins[key]];
-      }, [])      
+  getPlugins() {
+    return Object.keys(this.plugins).reduce((v, key) => {
+      return [...v, this.plugins[key]];
+    }, []);
   }
 
   getToolbarPlugins() {
+    console.log("All plugins:", this.getPlugins());
+
     return this.getPlugins()
       .filter(plugin => plugin.options.target === "toolbar")
       .sort((a, b) => a.sortOrder - b.sortOrder);
@@ -78,24 +79,23 @@ class AppModel {
           ...promises,
           import(`../${pluginsFolder}/${plugin}/view.js`)
             .then(module => {
+              const toolConfig =
+                this.config.mapConfig.tools.find(
+                  plug => plug.type.toLowerCase() === plugin.toLowerCase()
+                ) || {};
 
-              const toolConfig = this.config.mapConfig.tools.find(                
-                plug => plug.type.toLowerCase() === plugin.toLowerCase()
-              ) || {};
-              
-              const toolOptions = toolConfig && toolConfig.options ? toolConfig.options : {};
-              
-              const target =                
-                toolOptions.hasOwnProperty("options")
-                  ? toolConfig.options.target
-                  : "toolbar";
-              
-              const sortOrder =                
-                toolConfig.hasOwnProperty("index")
-                  ? Number(toolConfig.index)
-                  : 0;
+              const toolOptions =
+                toolConfig && toolConfig.options ? toolConfig.options : {};
 
-              if (Object.keys(toolConfig).length > 0) {                
+              const target = toolOptions.hasOwnProperty("options")
+                ? toolConfig.options.target
+                : "toolbar";
+
+              const sortOrder = toolConfig.hasOwnProperty("index")
+                ? Number(toolConfig.index)
+                : 0;
+
+              if (Object.keys(toolConfig).length > 0) {
                 this.addPlugin(
                   new Plugin({
                     map: map,
@@ -105,7 +105,7 @@ class AppModel {
                     component: module.default,
                     sortOrder: sortOrder,
                     options: toolOptions
-                  })       
+                  })
                 );
                 callback(plugin);
               } else {

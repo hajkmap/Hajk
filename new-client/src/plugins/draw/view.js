@@ -1,27 +1,26 @@
 import React, { Component } from "react";
+import Observer from "react-event-observer";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import BrushIcon from "@material-ui/icons/Brush";
-import Observer from "react-event-observer";
+
 import DrawModel from "./model.js";
-import PanelHeader from "../../components/PanelHeader";
 import { ChromePicker } from "react-color";
+import PanelHeader from "../../components/PanelHeader";
 
-// import "./style.css"; // TODO: Remove
+import {
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Drawer
+} from "@material-ui/core";
+import BrushIcon from "@material-ui/icons/Brush";
 
-const styles = theme => ({
-  button: {
-    marginLeft: theme.spacing.unit,
-    marginRight: theme.spacing.unit
-  }
-});
+const styles = theme => ({});
 
 class Draw extends Component {
   constructor() {
     super();
-    this.toggle = this.toggle.bind(this);
     this.state = {
       toggled: false,
       activeDrawTool: null,
@@ -30,7 +29,7 @@ class Draw extends Component {
     };
   }
 
-  componentDidMount() {
+  componentWillMount() {
     this.observer = Observer();
     this.observer.subscribe("myEvent", message => {
       console.log(message);
@@ -62,26 +61,15 @@ class Draw extends Component {
     });
   }
 
-  toggle() {
+  toggle = () => {
     if (!this.state.toggled) {
-      this.props.toolbar.hide();
+      // this.props.toolbar.hide();
       this.drawModel.activate();
     } else {
       this.drawModel.deactivate();
     }
-    this.setState({
-      toggled: !this.state.toggled
-    });
     this.props.tool.app.togglePlugin("draw");
-  }
-
-  // getActiveClass() { // TODO: Remove
-  //   return this.state.toggled ? "active" : "";
-  // }
-
-  isButtonActive() {
-    return this.state.toggled ? "contained" : "text";
-  }
+  };
 
   getVisibilityClass() {
     return this.state.toggled
@@ -220,29 +208,19 @@ class Draw extends Component {
     );
   }
 
+  isToolActive = () => (this.state.toggled ? true : false);
+
   render() {
-    const classes = this.props.classes;
-    console.log("render Draw", classes);
     return (
       <div>
-        <Button
-          variant={this.isButtonActive()}
-          color="primary"
-          className={classes.button}
-          onClick={this.toggle}
-        >
-          <BrushIcon />
-          Rita
-        </Button>
+        <ListItem button onClick={this.toggle} selected={this.isToolActive()}>
+          <ListItemIcon>
+            <BrushIcon />
+          </ListItemIcon>
+          <ListItemText primary="Rita" />
+        </ListItem>
         {this.renderPanel()}
       </div>
-      // <div> // TODO: Remove
-      //   <div className={this.getActiveClass()} onClick={this.toggle}>
-      //     <i className="material-icons">brush</i>
-      //     <i className="tool-text">Rita</i>
-      //   </div>
-      //   {this.renderPanel()}
-      // </div>
     );
   }
 }
