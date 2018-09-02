@@ -40,9 +40,27 @@ var FirSelectionPanelView = {
         }
     },
 
-    addMarker: function() {
-        console.log("addMarker", this);
+    finishedDrawing: function() {
+        this.props.model.setActiveTool(undefined);
+    },
 
+    deleteMarker: function(event) {
+        console.log("deleteMarker");
+        this.props.model.setActiveTool(undefined);
+
+        // Should add a singleclick handler for deletion
+        // get the object detail
+        var map = this.props.model.get("map");
+
+        // get the object from highlightResultLayer
+        var source = this.props.model.highlightLayer.getSource();
+        console.log("source i deleteMarker", source);
+        map.forEachFeatureAtPixel(event.pixel, function(feature, layer){
+            if (layer.get("caption") === "FIRSökres"){
+                source.removeFeature(feature);
+
+            }
+        });
     },
 
 
@@ -62,13 +80,13 @@ var FirSelectionPanelView = {
 
         return (
             <div className='selection-toolbar'>
-                <div>Sök baserat på markering i kartan</div>
+                {/*<div>Sök baserat på markering i kartan</div>*/}
                 <div className='btn-group btn-group-lg'>
-                    <button onClick={() => this.activateTool('drawSelection')} type='button' className={this.getClassNames('drawSelection')} title='Markera efter polygon' >
+                    <button onClick={() => this.activateTool('polygonSelection')} type='button' className={this.getClassNames('polygonSelection')} title='Markera efter polygon' >
                         <i className='fa iconmoon-yta icon' />
                     </button>
                     <button onClick={() => this.activateTool('squareSelection')} type='button' className={this.getClassNames('squareSelection')} title='Markera flera objekt' >
-                        <i className='fa fa-crop icon' />
+                        <i className='fa fa-square-o icon' />
                     </button>
                     <button onClick={() => this.activateTool('lineSelection')} type='button' className={this.getClassNames('lineSelection')} title='Markera efter polygon' >
                         <i className='fa iconmoon-linje icon' />
@@ -79,13 +97,13 @@ var FirSelectionPanelView = {
                 </div>&nbsp;&nbsp;&nbsp;&nbsp;<b>Rita sökområde</b><div></div><br/>
 
                 <div className='btn-group btn-group-lg'>
-                    <button onClick={() => this.addMarker()} type='button' className={this.getClassNames('plusSelection')} style={{backgroundColor: "green"}} title='Markera efter polygon' >
+                    <button onClick={() => this.finishedDrawing()} type='button' className={this.getClassNames('plusSelection')} style={{backgroundColor: "green"}} title='Markera efter polygon' >
                         <i className='fa fa-check fa-0' />&nbsp;<span style={{fontSize: 16}}>Klar</span>
                     </button>
-                    <button onClick={() => this.deleteMarker()} type='button' className={this.getClassNames('minusSelection')} title='Markera flera objekt' >
+                    <button onClick={this.deleteMarker} type='button' className={this.getClassNames('minusSelection')} title='Ta bort objekt' >
                         <i className='fa fa-trash fa-0' />&nbsp;<span style={{fontSize: 16}}>Radera Objekt</span>
                     </button>
-                </div>&nbsp;&nbsp;&nbsp;&nbsp;<b>Ändra urval</b>
+                </div>
 
             </div>
         );

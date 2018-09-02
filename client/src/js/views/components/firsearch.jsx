@@ -1,6 +1,5 @@
 var FirSelectionToolbar = require('components/firselectiontoolbar');
 var FirSearchResultGroup = require('components/firsearchresultgroup');
-var firstSlider = true;
 
 /**
  * @class
@@ -71,14 +70,6 @@ var FirSearchView = {
     },
 
     componentDidUpdate: function () {
-        var slider = document.getElementById("bufferValue");
-        var output = document.getElementById("buffert");
-        output.innerHTML = slider.value;
-
-        slider.oninput = function(){
-            output.innerHTML = this.value;
-        }
-
     },
 
     /**
@@ -254,7 +245,7 @@ var FirSearchView = {
                 <p>
                     <span>Sök: </span>&nbsp;
                     <select value={this.props.model.get('filter')} onChange={(e) => { this.setFilter(e); }}>
-                        <option value='*'>--  Alla  --</option>
+                        {/*<option value='*'> -- Alla -- </option>*/}
                         {
                             (() => {
                                 return sources.map((wfslayer, i) => {
@@ -384,13 +375,15 @@ var FirSearchView = {
 
         return (
             <div className='panel panel-default'>
-                <div className='panel-heading'>Skapa fastighetsförteckning</div>
+                <div className='panel-heading'>Skapa fastighetsförteckning<button id="FIRCreateMinimizeButton" onClick={() => {console.log("clicked"); this.minBox('skapaFastighetsForteckning', "FIRCreateMinimizeButton")}} className={this.props.model.get("searchExpandedClassButton")}></button></div>
                 <div className='panel-body'>
+                    <div id="skapaFastighetsForteckning" className="">
                     <p>Inkludera i förteckning:</p>
                     <input type="checkbox" id="traktnamn" onClick={()=> this.checkBoxFir("traktnamn")} /> Fastigheter <br/>
                     <input type="checkbox" id="text" onClick={()=> this.checkBoxFir("text")} /> Marksamfälligheter <br/>
                     <input type="checkbox" id="typ" onClick={()=> this.checkBoxFir("typ")} /> Gemensamhetsanläggningar <br/>
                     <input type="checkbox" id="nyckel" onClick={()=> this.checkBoxFir("nyckel")} /> Rättigheter <br/><br/>
+                    </div>
                 <div>
                     <span className='pull-left'>{excelButton}</span>&nbsp;&nbsp; <span className='right'>Skapa fastighetsförteckning från sökresultat</span>
                     <div>{downloadLink}</div>
@@ -400,35 +393,91 @@ var FirSearchView = {
         );
     },
 
+    hittaGrannar: function(){
+        var checkedAngransade = document.getElementById("hittaGrannar").checked;
+        var checkedMedBuffer = document.getElementById("hittaGrannarMedBuffer").checked;
+
+        var bufferLength;
+
+        if(checkedAngransade){
+            document.getElementById("hittaGrannarMedBuffer").checked = false;
+            bufferLength = 1;
+        }else if(checkedMedBuffer){
+            document.getElementById("hittaGrannar").checked = false;
+            bufferLength = document.getElementById("bufferInput").value;
+        }
+
+        console.log("checkedAngransade", document.getElementById("hittaGrannar").checked);
+        console.log("checkedMedBuffer", document.getElementById("hittaGrannarMedBuffer").checked);
+        console.log("bufferLength", bufferLength);
+    },
+
+    /*hittaGrannar: function(){
+        var checkedAngransade = document.getElementById("hittaGrannar").checked;
+        var checkedMedBuffer = document.getElementById("hittaGrannarMedBuffer").checked;
+        if(checkedMedBuffer){
+            document.getElementById("hittaGrannarMedBuffer").checked = false;
+        }
+        console.log("checkedMedBuffer", document.getElementById("hittaGrannarMedBuffer").checked);
+
+
+        var bufferLength = "1"; //cm
+
+},
+
+    hittaGrannarMedBuffer: function() {
+        var checkedAngransade = document.getElementById("hittaGrannar").checked;
+        var checkedMedBuffer = document.getElementById("hittaGrannarMedBuffer").checked;
+        if(checkedAngransade){
+            document.getElementById("hittaGrannar").checked = false;
+        }
+        console.log("checkedAngransade", document.getElementById("hittaGrannar").checked);
+
+        var bufferLength = document.getElementById("bufferInput").value;
+            console.log("bufferLength med Buffer", bufferLength);
+
+
+        console.log("bufferLength updated", bufferLength);
+
+
+    },
+
+    */
+
+
+
+    bufferInput: function() {
+        //document.getElementById("bufferValue").value = document.getElementById("bufferInput").value;
+        var input = document.getElementById("bufferInput");
+        var output = document.getElementById("bufferValue");
+
+        output.value = input.value;
+
+    },
+
+    bufferBarInput: function() {
+        document.getElementById("bufferInput").value = document.getElementById("bufferValue").value;
+        //update hittaGrannar's bufferLength if value has changed
+        /*document.getElementById("bufferValue").addEventListener("change",function() {
+            console.log("bufferLength has Changed to", document.getElementById("bufferValue").value);
+        });*/
+    },
+
     renderAnalysFunctions: function() {
-
-        /*var slider = document.getElementById("bufferValue");
-        var output = document.getElementById("buffert");
-        output.innerHTML = this.value;
-
-        slider.oninput = function(){
-        output.innerHTML = this.value;
-        }
-        */
-        if(firstSlider){
-            console.log("first slider");
-            var slider = <input type="range" min="0" max="100" value="50" id="bufferValue" />;
-            var output = <span id="buffert"></span>;
-
-            output.innerHTML = 50;
-            console.log("slider", slider);
-            console.log("output", output);
-            firstSlider = false;
-        }
-
-
+        console.log("renderAnalysFunctions");
         return (
             <div className='panel panel-default'>
-                <div className='panel-heading'>Analyser</div>
-                <div className='panel-body'>
-                    <input type="checkbox" id="hittaNarmaste" onClick={()=> this.checkBoxFir("traktnamn")} /> Hitta närmaste <br/>
-                    <input type="range" min="0" max="100" value="50" id="bufferValue" />
-                        <p>Buffert: <span id="buffert"></span></p>
+                <div className='panel-heading'>Hitta grannar<button id="FIRHittaGrannarMinimizeButton" onClick={() => this.minBox('HittaGrannarMinimizeBox', "FIRHittaGrannarMinimizeButton")} className={this.props.model.get("searchMinimizedClassButton")}></button></div>
+                <div className='panel-body hidden' id='HittaGrannarMinimizeBox'>
+                    <div><input type="radio" name="bufferOrNot" id="hittaGrannar" onClick={this.hittaGrannar} defaultChecked={true}/> Hitta angränsade grannar <br/>
+                    <div className="row"><div className="col-md-12"> <input type="radio" id="hittaGrannarMedBuffer" name="bufferOrNot" onClick={this.hittaGrannar} /> Hitta grannar inom &nbsp;
+                        <input id="bufferInput" type='text' ref='bufferInput' defaultValue="50" onChange={this.bufferInput}/> meter </div></div><br/>
+                    <input id="bufferValue" type="range" min="0" max="100" defaultValue="50" onChange={() => {this.bufferBarInput(); this.hittaGrannar()}}/>
+                    </div><br/>
+                    <div className='pull-right'>
+                        <button onClick={() => console.log("not created")} type='submit' className='btn btn-primary'>Sök</button>&nbsp;
+                        <button onClick={() => console.log("not created")} type='submit' className='btn btn-primary' id='sokRensa'>Rensa</button>
+                    </div>
                 </div>
             </div>
         );
@@ -442,26 +491,48 @@ var FirSearchView = {
     },
     */
 
-    minBox: function() {
-        var contains = $('#FIRSearchMinimizeBox');
-        if(typeof contains === 'undefined'){
+    /*minBox: function(kategori) {
+        var contains = $('#'+kategori);
+        console.log("contains", contains);
+        if(typeof $('#'+kategori) === 'undefined'){
+            console.log("typeOfKategori is undefined");
             return;
         }
-        contains.toggle(function(){
-                $('#FIRSearchMinimizeBox').toggleClass("visible, hidden");
+
+        $('#'+kategori).toggle(function(){
+            $('#'+kategori).toggleClass("visible, hidden");
             },function(){
-                $('#FIRSearchMinimizeBox').toggleClass('hidden, visible');
+            $('#'+kategori).toggleClass('hidden, visible');
             }
         );
 
-        var buttonClass = $("#FIRSearchMinimizeBox")[0].attributes["class"].value.indexOf("hidden") !== -1
+        var buttonClass = $('#'+kategori)[0].attributes["class"].value.indexOf("hidden") !== -1
             ? 'fa fa-angle-up clickable arrow pull-right arrowBoxSize'
             : 'fa fa-angle-down clickable arrow pull-right arrowBoxSize';
         this.props.model.set("searchExpandedClassButton", buttonClass);
         document.getElementById("FIRSearchMinimizeButton").className = buttonClass;
 
     },
+*/
 
+    minBox: function (kategori, buttonId) {
+        var item = $('#'+kategori);
+        console.log("item", item);
+        if(typeof item === 'undefined'){
+            console.log("typeOfKategori is undefined");
+            return;
+        }
+
+        console.log("class", item[0].attributes["class"].value);
+        item.toggleClass('hidden');
+
+        var buttonClass = item[0].attributes["class"].value.indexOf("hidden") === -1
+            ? 'fa fa-angle-up clickable arrow pull-right arrowBoxSize'
+            : 'fa fa-angle-down clickable arrow pull-right arrowBoxSize';
+        this.props.model.set("searchExpandedClassButton", buttonClass);
+        document.getElementById(buttonId).className = buttonClass;
+
+    },
 
     /**
      * Render the panel component.
@@ -538,7 +609,7 @@ var FirSearchView = {
         return (
                 <div className='search-tools'>
                 <div className='panel panel-default'>
-                    <div className='panel-heading'>Sökning <button id="FIRSearchMinimizeButton" onClick={() => this.minBox()} className={this.props.model.get("searchExpandedClassButton")}></button></div>
+                    <div className='panel-heading'>Sökning <button id="FIRSearchMinimizeButton" onClick={() => this.minBox('FIRSearchMinimizeBox', "FIRSearchMinimizeButton")} className={this.props.model.get("searchExpandedClassButton")}></button></div>
                     <div className='panel-body visible' id='FIRSearchMinimizeBox'>
                         <div className='form-group'>
                         {options}
@@ -556,12 +627,14 @@ var FirSearchView = {
                                 onChange={search_on_input} />
                         </div>
                         <div className='clearfix'>
-                            <span className='info-text clearfix'>Inled sökningen med * för att söka på delar av en text.</span>
+                            {/*<span className='info-text clearfix'>Inled sökningen med * för att söka på delar av en text.</span>*/}
                         </div><br/>
                             {firSelectionToolbar}
                     </div>
-                        <button onClick={search_on_click} type='submit' className='btn btn-primary'>Sök</button>&nbsp;
-                        <button onClick={this.clear} type='submit' className='btn btn-primary' id='sokRensa'>Rensa</button>
+                        <div className='pull-right'>
+                            <button onClick={search_on_click} type='submit' className='btn btn-primary'>Sök</button>&nbsp;
+                            <button onClick={this.clear} type='submit' className='btn btn-primary' id='sokRensa'>Rensa</button>
+                        </div>
                     </div>
                     </div>
                     {analysFunctions}

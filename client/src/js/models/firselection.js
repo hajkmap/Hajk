@@ -53,6 +53,7 @@ var FirSelectionModel = {
             source: this.get('source'),
             queryable: false,
             name: 'search-selection-layer',
+            caption: 'search-selection-layer',
             style: (feature) => this.getScetchStyle(feature)
         }));
 
@@ -67,16 +68,24 @@ var FirSelectionModel = {
         this.get('olMap').addLayer(this.get('drawLayer'));
         this.get('olMap').addLayer(this.get('highlightLayer').layer);
 
-        this.set('drawTool', new ol.interaction.Draw({
+        this.set('polygonSelection', new ol.interaction.Draw({
             source: this.get('source'),
             style: this.getScetchStyle(),
             type: 'Polygon'
         }));
 
-        this.get('drawTool').on('drawend', () => {
-            this.get('source').clear();
-            this.get('highlightLayer').clearHighlight();
-            this.clear();
+        this.set('squareSelection', new ol.interaction.Draw({
+            source: this.get('source'),
+            style: this.getScetchStyle(),
+            type: 'Circle',
+            geometryName: "Box",
+            geometryFunction: ol.interaction.Draw.createBox()
+        }));
+
+        this.get('polygonSelection').on('drawend', () => {
+            //this.get('source').clear();
+            //this.get('highlightLayer').clearHighlight();
+            //this.clear();
         });
     },
 
@@ -215,11 +224,20 @@ var FirSelectionModel = {
     },
 
     setActiveTool: function (tool) {
-        this.get('olMap').removeInteraction(this.get('drawTool'));
+        console.log("activeTool", this.get("activeTool"));
+        if(this.get("activeTool") !== null || typeof this.get("activeTool") !== "undefined") {
+            console.log("removing");
+            this.get('olMap').removeInteraction(this.get(this.get('activeTool'))); // tool name in activeTool should match the interaction created in this file
+        }
         this.set('activeTool', tool);
 
-        if (tool === 'drawSelection') {
-            this.get('olMap').addInteraction(this.get('drawTool'));
+        if (tool === 'polygonSelection') {
+            this.get('olMap').addInteraction(this.get('polygonSelection'));
+            this.get('olMap').set('clickLock', true);
+        }
+
+        if (tool === 'squareSelection'){
+            this.get('olMap').addInteraction(this.get('squareSelection'));
             this.get('olMap').set('clickLock', true);
         }
 

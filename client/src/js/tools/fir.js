@@ -20,6 +20,7 @@ var FirModelProperties = {
     base64Encode: false,
     instruction: '',
     searchExpandedClassButton: "fa fa-angle-up clickable arrow pull-right",
+    searchMinimizedClassButton: "fa fa-angle-down clickable arrow pull-right",
     anchor: [
         16,
         32
