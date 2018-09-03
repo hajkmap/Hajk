@@ -64,12 +64,19 @@ class App extends Component {
     });
   };
 
-  renderWidgets() {
+  renderWidgets(target) {
     if (this.state.tools) {
       return this.state.tools
-        .filter(tool => tool.options.target !== "toolbar")
-        .map((tool, i) => {          
-          return <tool.component key={i} tool={tool}></tool.component>;
+        .filter(tool => tool.options.target === target)
+        .map((tool, i) => {            
+          if (tool.type === "layerswitcher" && !tool.options.active) {
+            return null;
+          }
+          return (
+              <div key={i} className="widget-button">
+                <tool.component tool={tool}></tool.component>
+              </div>
+            );
         });
     } else {
       return null;
@@ -86,9 +93,18 @@ class App extends Component {
             mapClickDataResult={this.state.mapClickDataResult}
             map={this.appModel.getMap()}
           />     
-          <div id="widgets">
-            {this.renderWidgets()}
+          <div className="widgets top-left">
+            {this.renderWidgets("top-left")}
           </div>
+          <div className="widgets bottom-left">
+            {this.renderWidgets("bottom-left")}
+          </div>
+          <div className="widgets top-right">
+            {this.renderWidgets("top-right")}
+          </div>
+          <div className="widgets bottom-right">
+            {this.renderWidgets("bottom-right")}
+          </div>          
         </div>
       </MuiThemeProvider>
     );

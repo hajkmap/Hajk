@@ -31,12 +31,14 @@ class LayersSwitcher extends Component {
       observer: this.observer
     });
     this.props.tool.instance = this;
-    this.options = this.props.tool.app.config.mapConfig.tools.find(
-      t => t.type === "layerswitcher"
-    ).options;
+    // this.options = this.props.tool.app.config.mapConfig.tools.find(
+    //   t => t.type === "layerswitcher"
+    // ).options;
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+    this.options = this.props.tool.options;    
+  }
 
   open() {
     this.setState({
@@ -145,7 +147,7 @@ class LayersSwitcher extends Component {
     );
   }
 
-  render() {
+  render() {    
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>

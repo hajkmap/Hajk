@@ -77,8 +77,8 @@ class Collector extends Component {
 
   getVisibilityClass() {
     return this.state.toggled
-      ? "tool-panel collector-panel"
-      : "tool-panel collector-panel hidden";
+      ? "static-popup"
+      : "static-popup hidden";
   }
 
   getOpen() {
@@ -90,12 +90,13 @@ class Collector extends Component {
       markerActive: !this.state.markerActive,
       description: this.state.markerActive ? "" : "Ställ in kartan på vald plats"
     }, () => {
-      if (this.state.markerActive) {
-        this.collectorModel.activate('addPoint', () => {
+      if (this.state.markerActive) {                  
+          
           this.setState({
-            displayForm: true
+            displayForm: true,
+            displayCross: true
           });
-        });
+
       } else {
         this.collectorModel.deactivate('addPoint');
       }
@@ -111,23 +112,11 @@ class Collector extends Component {
   }
 
   renderPanel() {    
-    var color = this.state.markerActive ? "secondary" : "primary";
-    var alertClass = this.state.markerActive ? "alert alert-success" : "";
-    var text = this.state.markerActive ? "spara" : "starta";
-    var abortButton = this.state.markerActive ? <Button color="primary" onClick={this.abort}>Avbryt</Button> : null;
     return createPortal(
       <div className={this.getVisibilityClass()}>
-        <PanelHeader title="Tyck till" toggle={this.toggle} />
-        <div className="tool-panel-content">
-          <div>Här kan du tycka till om en viss plats eller ett område.</div>          
-          <div>            
-            <Button variant="contained" color={color} onClick={this.activateMarker}>
-              {text}
-            </Button>&nbsp;
-            {abortButton}&nbsp;            
-            <div className={alertClass}>{this.state.description}</div>
-            <CollectorForm visible={this.state.displayForm} />
-          </div>
+        <div className="popup-content">    
+          <div>Här kan du tycka till om en viss plats eller ett område.</div>
+          <CollectorForm />
         </div>
       </div>,
       document.getElementById("map")

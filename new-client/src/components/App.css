@@ -6,11 +6,35 @@
   position: absolute;
 }
 
-#widgets {
-  position: absolute;
-  left: 0;
-  top: 0;
+.widget-button {
+  background: white;
+  border: 1px solid;
+  margin: 3px 0px;
+}
+
+.widgets {
+  position: absolute;  
   z-index: 1000;
   background: none;
-  width: 150px;
+  width: 150px;  
+}
+
+.top-left {
+  top: 10px;
+  left: 0;
+}
+
+.top-right {
+  top: 10px;
+  right: 0;
+}
+
+.bottom-left {
+  bottom: 10px;
+  left: 0;
+}
+
+.bottom-right {
+  bottom: 10px;
+  right: 0;
 }

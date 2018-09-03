@@ -32,11 +32,7 @@
   text-align: center;
   display: flex;
   flex-direction: column;
-  user-select: none;
-  background: white;
-  margin: 10px;
-  padding: 10px;
-  border: 1px solid;
+  user-select: none;    
 }
 
 .tool-toggle-button:hover {

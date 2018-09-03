@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-//import Button from '@material-ui/core/Button'; 
+import Button from '@material-ui/core/Button'; 
 import TextField from '@material-ui/core/TextField';
 
 class Collector extends Component {
@@ -22,17 +22,22 @@ class Collector extends Component {
   };
   
 
-  render() {
-    if (!this.props.visible) return null;    
+  render() {    
     return (
       <div>        
+        <div className="cross">
+          <i className="material-icons">trip_origin</i>
+        </div>
         <TextField
+          rows="2"
+          multiline="true"
           id="comment"
           label="Kommentar"
           value={this.state.comment}
           onChange={this.handleChange('comment')}
           margin="normal"
-        />
+        /><br/>
+        <Button color="primary" variant="contained" onClick={this.save()}>Spara</Button>
       </div>
     )
   }
