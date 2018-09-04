@@ -7,8 +7,10 @@ import Toolbar from "./Toolbar.js";
 import Popup from "./Popup.js";
 import "./App.css";
 
-import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
-
+// 'const styles' is to be seen as a replacement of App.css only.
+// Global customizations that previously went to custom.css
+// should now go to public/customTheme.json. They are later
+// merged when MUI Theme is created in index.js.
 const styles = theme =>
   console.log("Theme object:", theme) || {
     // We can also consult https://material-ui.com/customization/default-theme/ for available options
@@ -67,28 +69,6 @@ class App extends Component {
     });
   }
 
-  getTheme = () => {
-    // primary: blue // <- Can be done like this (don't forget to import blue from "@material-ui/core/colors/blue"!)
-    // secondary: { main: "#11cb5f" } // <- Or like this
-    return createMuiTheme({
-      palette: {
-        primary: { main: this.props.config.mapConfig.map.colors.primaryColor },
-        secondary: {
-          main: this.props.config.mapConfig.map.colors.secondaryColor
-        }
-      },
-      overrides: {
-        MuiListItemIcon: {
-          // Name of the component / style sheet
-          root: {
-            // Name of the rule
-            color: { main: this.props.config.mapConfig.map.colors.primaryColor } // Some CSS
-          }
-        }
-      }
-    });
-  };
-
   renderWidgets(target) {
     if (this.state.tools) {
       return this.state.tools
@@ -110,28 +90,25 @@ class App extends Component {
 
   render() {
     const { classes } = this.props;
+
     return (
-      <MuiThemeProvider theme={this.getTheme()}>
-        <main className={classes.map} id="map">
-          <Toolbar tools={this.appModel.getToolbarPlugins()} />
-          <Popup
-            mapClickDataResult={this.state.mapClickDataResult}
-            map={this.appModel.getMap()}
-          />
-          <div className="widgets top-left">
-            {this.renderWidgets("top-left")}
-          </div>
-          <div className="widgets bottom-left">
-            {this.renderWidgets("bottom-left")}
-          </div>
-          <div className="widgets top-right">
-            {this.renderWidgets("top-right")}
-          </div>
-          <div className="widgets bottom-right">
-            {this.renderWidgets("bottom-right")}
-          </div>
-        </main>
-      </MuiThemeProvider>
+      <main className={classes.map} id="map">
+        <Toolbar tools={this.appModel.getToolbarPlugins()} />
+        <Popup
+          mapClickDataResult={this.state.mapClickDataResult}
+          map={this.appModel.getMap()}
+        />
+        <div className="widgets top-left">{this.renderWidgets("top-left")}</div>
+        <div className="widgets bottom-left">
+          {this.renderWidgets("bottom-left")}
+        </div>
+        <div className="widgets top-right">
+          {this.renderWidgets("top-right")}
+        </div>
+        <div className="widgets bottom-right">
+          {this.renderWidgets("bottom-right")}
+        </div>
+      </main>
     );
   }
 }
