@@ -9,28 +9,30 @@ import "./App.css";
 
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 
-const styles = theme => ({
-  map: {
-    flexGrow: 1,
-    zIndex: 1,
-    overflow: "hidden",
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    display: "flex"
-  },
-  drawerPaper: {
-    position: "relative",
-    whiteSpace: "nowrap",
-    width: 240,
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen
-    })
-  }
-});
+const styles = theme =>
+  console.log("Theme object:", theme) || {
+    // We can also consult https://material-ui.com/customization/default-theme/ for available options
+    map: {
+      flexGrow: 1,
+      zIndex: 1,
+      overflow: "hidden",
+      position: "absolute",
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      display: "flex"
+    },
+    drawerPaper: {
+      position: "relative",
+      whiteSpace: "nowrap",
+      width: 240,
+      transition: theme.transitions.create("width", {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.enteringScreen
+      })
+    }
+  };
 
 class App extends Component {
   constructor() {
