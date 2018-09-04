@@ -1,5 +1,7 @@
 import "./LayerItem.css";
 import React, { Component } from "react";
+import Typography from "@material-ui/core/Typography";
+import Slider from "@material-ui/lab/Slider";
 
 class LayerItem extends Component {
   constructor() {
@@ -18,7 +20,8 @@ class LayerItem extends Component {
       infoUrlText: "",
       infoOwner: "",
       infoExpanded: false,
-      instruction: ""
+      instruction: "",
+      opacityValue: 1
     };
   }
   /**
@@ -41,7 +44,8 @@ class LayerItem extends Component {
       infoUrlText: layerInfo.infoUrlText,
       infoOwner: layerInfo.infoOwner,
       infoExpanded: false,
-      instruction: layerInfo.instruction
+      instruction: layerInfo.instruction,
+      opacity: this.props.layer.get("opacity")
     });
   }
 
@@ -115,7 +119,25 @@ class LayerItem extends Component {
     ) : null;
   }
 
+  /* This function does two things:
+   * 1) it updates opacityValue, which is in state, 
+   *    and is important as <Slider> uses it to set 
+   *    its internal value.
+   * 2) it changes OL layer's opacity
+   * 
+   * As <Slider> is set up to return a value between
+   * 0 and 1 and it has a step of 0.1, we don't have
+   * to worry about any conversion and rounding here.
+   * */
+  handleChange = (event, opacityValue) => {
+    this.setState({ opacityValue }, () => {
+      this.props.layer.setOpacity(this.state.opacityValue);
+    });
+  };
+
   render() {
+    let opacityValue = this.state.opacityValue;
+
     var caption = this.props.layer.get("caption"),
       expanded = this.state.showLegend,
       visible = this.state.visible,
@@ -195,6 +217,17 @@ class LayerItem extends Component {
         <div className={innerBodyClass}>
           {expanded ? components.legend.legendPanel : null}
         </div>
+
+        <Typography id="label">Opacity</Typography>
+        <Slider
+          value={opacityValue}
+          min={0}
+          max={1}
+          step={0.1}
+          aria-labelledby="label"
+          onChange={this.handleChange}
+          onDragEnd={this.handleDragEnd}
+        />
       </div>
     );
   }
