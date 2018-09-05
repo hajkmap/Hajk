@@ -66,7 +66,9 @@ class Edit extends Component {
     this.setState({
       toggled: !this.state.toggled
     });
+    
     this.props.tool.app.togglePlugin("edit");
+    this.props.onClick();
   };
 
   // getActiveClass() {
@@ -94,7 +96,6 @@ class Edit extends Component {
         <PanelHeader title="Redigera" toggle={this.toggle} />
         Redigera
       </Drawer>,
-
       document.getElementById("map")
     );
   }

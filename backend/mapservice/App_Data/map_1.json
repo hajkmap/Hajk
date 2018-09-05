@@ -269,6 +269,7 @@
     {
       "type": "infoclick",
       "options": {
+        "target": "",
         "displayPopup": false,
         "markerImg": "assets/icons/marker.png",
         "anchor": [
@@ -287,47 +288,16 @@
     {
       "type": "informative",
       "options": {
-        "target": "top-right",
+        "target": "left",
         "visibleAtStart": false,
         "visibleForGroups": []
       },
       "index": 0
     },
     {
-      "type": "search",
-      "options": {
-        "target": "widget",
-        "onMap": false,
-        "bothSynlig": false,
-        "enableViewTogglePopupInSnabbsok": true,
-        "toolbar": "bottom",
-        "maxZoom": 14,
-        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
-        "kmlExportUrl": "/mapservice/export/kml",
-        "excelExportUrl": "/mapservice/export/excel",
-        "displayPopup": true,
-        "selectionTools": true,
-        "base64Encode": false,
-        "instruction": "",
-        "filterVisible": true,
-        "anchor": [
-          16,
-          32
-        ],
-        "imgSize": [
-          32,
-          32
-        ],
-        "popupOffsetY": 0,
-        "visibleForGroups": [],
-        "layers": []
-      },
-      "index": 0
-    },
-    {
       "type": "information",
       "options": {
-        "target": "top-left",
+        "target": "left",
         "text": "<p>\nText som förtydligar varför, vad och hur… Lorem ipsum dolor sit amet, consectetur \nadipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna \naliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut \naliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in \nvoluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat \ncupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est \nlaborum\n</p>\n<h1>VI VILL HÖRA DIN ÅSIKT!</h1>",
         "headerText": "HÄR KAN DU SE VAD SOM PLANERAS I DITT OMRÅDE",
         "visibleAtStart": true,
@@ -340,7 +310,7 @@
     {
       "type": "collector",
       "options": {
-        "target": "bottom-right",
+        "target": "left",
         "visibleAtStart": false,
         "visibleForGroups": []
       },
@@ -349,8 +319,31 @@
     {
       "type": "simple_layerswitcher",
       "options": {
-        "target": "bottom-left",
+        "target": "left",
         "visibleAtStart": false,
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "draw",
+      "options": {
+        "target": "toolbar",
+        "exportUrl": "/mapservice/export/kml",
+        "importUrl": "/mapservice/import/kml",
+        "base64Encode": false,
+        "instruction": "",
+        "icons": "",
+        "proxyUrl": "",
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "edit",
+      "options": {
+        "target": "toolbar",
+        "instruction": "",
         "visibleForGroups": []
       },
       "index": 0

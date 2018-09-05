@@ -7,10 +7,10 @@ import {
   ListItemIcon,
   ListItemText,
   Drawer,
-  Divider
+  Divider,
+  Button
 } from "@material-ui/core";
-import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import {ChevronLeft, ChevronRight, Menu, Close, Brush} from "@material-ui/icons";
 import "./Toolbar.css"; // TODO: Move styles to JSS and remove the CSS file
 
 const drawerWidth = 240;
@@ -21,28 +21,56 @@ const styles = theme => ({
     width: drawerWidth,
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen
+      duration: 0
+      //duration: theme.transitions.duration.enteringScreen
     })
   },
   drawerPaperClose: {
     overflowX: "hidden",
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen
+      duration: 0
+      //duration: theme.transitions.duration.leavingScreen
     }),
     width: theme.spacing.unit * 7,
     [theme.breakpoints.up("sm")]: {
       width: theme.spacing.unit * 9
     }
+  },
+  button: {
+    marginBottom: '5px'
   }
 });
 
 class Toolbar extends Component {
   state = { open: false };
 
+  toggleTool = () => {
+    this.setState({ open: false });
+  };
+
   renderTools() {
+    //<tool.component key={i} tool={tool} toolbar={this} onClick={this.toggleTool}/>
     return this.props.tools.map((tool, i) => {
-      return <tool.component key={i} tool={tool} toolbar={this} />;
+      return (
+        <ListItem button onClick={() => {
+            if (tool.instance) {
+              console.log("Toogle", tool.instance);
+              tool.instance.toggle();
+            }
+          }} selected={() => {
+            if (tool.instance) {
+              return tool.instance.isToolActive();
+            } else {
+              return false;
+            }
+          }}>
+          <ListItemIcon>
+            <tool.component key={i} tool={tool} toolbar={this} onClick={this.toggleTool}/>
+          </ListItemIcon>
+          <ListItemText primary={tool.text || "Verktyg X"} />
+        </ListItem>
+      );
     });
   }
 
@@ -50,36 +78,18 @@ class Toolbar extends Component {
     this.setState({ open: !this.state.open });
   };
 
-  hide() {
-    // FIXME: This was previously used by all plugins to hide
-    // toolbar in mobile mode – necessary on small screens
-    // this.setState({
-    //   toolbarVisible: false
-    // });
-  }
+  toggleToolbar = () => {
+    this.setState({
+      toolbarVisible: !this.state.toolbarVisible
+    });
+  };
 
-  // toggleToolbar() {
-  //   this.setState({
-  //     toolbarVisible: !this.state.toolbarVisible
-  //   });
-  // }
-
-  render() {
-    // If there are no plugins to be rendered to toolbar, just quit
-    if (this.props.tools.length < 1) {
-      return "";
-    }
-
+  renderDrawer() {
     const { classes } = this.props;
-    let icon;
-
-    if (this.state.open === true) {
-      icon = <ChevronLeftIcon />;
-    } else {
-      icon = <ChevronRightIcon />;
-    }
-
-    return (
+    const icon = this.state.open === true
+      ? <ChevronLeft />
+      : <ChevronRight />;
+    return this.state.toolbarVisible ? (
       <Drawer
         variant="permanent"
         classes={{
@@ -90,6 +100,10 @@ class Toolbar extends Component {
         }}
         open={this.state.open}
       >
+        <ListItem button onClick={this.toggleToolbar}>
+          <ListItemIcon><Close /></ListItemIcon>
+          <ListItemText primary="Stäng" />
+        </ListItem>
         <ListItem button onClick={this.toggle}>
           <ListItemIcon>{icon}</ListItemIcon>
           <ListItemText primary="Minimera" />
@@ -97,6 +111,18 @@ class Toolbar extends Component {
         <Divider />
         {this.renderTools()}
       </Drawer>
+    ) : null
+  }
+
+  render() {
+    const { classes } = this.props;
+    return (
+      <div>
+        <Button variant="fab" color="primary" aria-label="Verktyg" className={classes.button} onClick={this.toggleToolbar}>
+          <Menu />
+        </Button>
+        {this.renderDrawer()}
+      </div>
     );
   }
 }

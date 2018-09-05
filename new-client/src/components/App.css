@@ -13,28 +13,20 @@
 }
 
 .widgets {
-  position: absolute;  
-  z-index: 1000;
-  background: none;
-  width: 150px;  
+  position: absolute;
+  z-index: 10000;  
+  width: 70px;
+  min-height: 50px;  
+  padding: 10px;
+  overflow: hidden;
 }
 
-.top-left {
-  top: 10px;
+.widgets.left {
+  top: 0px;
   left: 0;
 }
 
-.top-right {
-  top: 10px;
-  right: 0;
-}
-
-.bottom-left {
-  bottom: 10px;
-  left: 0;
-}
-
-.bottom-right {
-  bottom: 10px;
+.widgets.right  {
+  top: 50px;
   right: 0;
 }

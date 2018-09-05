@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
+import { Button } from "@material-ui/core";
+
 import Observer from "react-event-observer";
 import AppModel from "./../models/AppModel.js";
 import Toolbar from "./Toolbar.js";
@@ -29,6 +31,9 @@ const styles = theme => ({
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen
     })
+  },
+  button: {
+    marginBottom: '5px'
   }
 });
 
@@ -68,9 +73,20 @@ class App extends Component {
   getTheme = () => {
     // primary: blue // <- Can be done like this (don't forget to import blue from "@material-ui/core/colors/blue"!)
     // secondary: { main: "#11cb5f" } // <- Or like this
+
+    console.log(this.props.config);
+    console.log(this.props.config.mapConfig.map.colors.primaryColor);
+
     return createMuiTheme({
       palette: {
-        primary: { main: this.props.config.mapConfig.map.colors.primaryColor },
+        default: {
+          main: "#ccc",
+          light: "#dedede",
+          dark: "#666"
+        },
+        primary: {
+          main: this.props.config.mapConfig.map.colors.primaryColor
+        },
         secondary: {
           main: this.props.config.mapConfig.map.colors.secondaryColor
         }
@@ -80,7 +96,8 @@ class App extends Component {
           // Name of the component / style sheet
           root: {
             // Name of the rule
-            color: { main: this.props.config.mapConfig.map.colors.primaryColor } // Some CSS
+            marginRight: '14px',
+            color: this.props.config.mapConfig.map.colors.primaryColor
           }
         }
       }
@@ -88,18 +105,24 @@ class App extends Component {
   };
 
   renderWidgets(target) {
+    const { classes } = this.props;
     if (this.state.tools) {
       return this.state.tools
         .filter(tool => tool.options.target === target)
-        .map((tool, i) => {            
+        .map((tool, i) => {
           if (tool.type === "layerswitcher" && !tool.options.active) {
             return null;
           }
           return (
-              <div key={i} className="widget-button">
-                <tool.component tool={tool}></tool.component>
-              </div>
-            );
+            <Button variant="fab" color="default" aria-label="Verktyg" className={classes.button} onClick={() => {
+                if (tool.instance) {
+                  console.log("Toogle", tool.instance);
+                  tool.instance.toggle();
+                }
+              }}>
+              <tool.component tool={tool} onClick={() => {}}></tool.component>
+            </Button>
+          );
         });
     } else {
       return null;
@@ -111,24 +134,18 @@ class App extends Component {
     return (
       <MuiThemeProvider theme={this.getTheme()}>
         <main className={classes.map} id="map">
-          <Toolbar tools={this.appModel.getToolbarPlugins()} />
           <Popup
             mapClickDataResult={this.state.mapClickDataResult}
             map={this.appModel.getMap()}
-          />     
-          <div className="widgets top-left">
-            {this.renderWidgets("top-left")}
+          />
+          <div className="widgets left">
+            <Toolbar tools={this.appModel.getToolbarPlugins()} />
+            {this.renderWidgets("left")}
           </div>
-          <div className="widgets bottom-left">
-            {this.renderWidgets("bottom-left")}
+          <div className="widgets right">
+            {this.renderWidgets("right")}
           </div>
-          <div className="widgets top-right">
-            {this.renderWidgets("top-right")}
-          </div>
-          <div className="widgets bottom-right">
-            {this.renderWidgets("bottom-right")}
-          </div>          
-        </div>
+        </main>
       </MuiThemeProvider>
     );
   }

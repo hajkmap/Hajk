@@ -16,7 +16,7 @@ import {
 } from "@material-ui/core";
 import BrushIcon from "@material-ui/icons/Brush";
 
-const styles = theme => ({});
+const styles = theme => {};
 
 class Draw extends Component {
   constructor() {
@@ -63,12 +63,12 @@ class Draw extends Component {
 
   toggle = () => {
     if (!this.state.toggled) {
-      // this.props.toolbar.hide();
       this.drawModel.activate();
     } else {
       this.drawModel.deactivate();
     }
     this.props.tool.app.togglePlugin("draw");
+    this.props.onClick();
   };
 
   getVisibilityClass() {
@@ -210,18 +210,18 @@ class Draw extends Component {
 
   isToolActive = () => (this.state.toggled ? true : false);
 
+  getText() {
+    return "Rita";
+  }
+
   render() {
-    return (
-      <div>
-        <ListItem button onClick={this.toggle} selected={this.isToolActive()}>
-          <ListItemIcon>
-            <BrushIcon />
-          </ListItemIcon>
-          <ListItemText primary="Rita" />
-        </ListItem>
-        {this.renderPanel()}
-      </div>
-    );
+    return (<BrushIcon />);
+    // return (
+    //   <div>
+    //     <BrushIcon />
+    //     {this.renderPanel()}
+    //   </div>
+    // );
   }
 }
 
