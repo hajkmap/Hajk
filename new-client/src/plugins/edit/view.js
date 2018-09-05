@@ -11,7 +11,8 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Drawer
+  Drawer,
+  Button
 } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 
@@ -94,7 +95,6 @@ class Edit extends Component {
         classes={{ paper: classes.drawerPaper }}
       >
         <PanelHeader title="Redigera" toggle={this.toggle} />
-        Redigera
       </Drawer>,
       document.getElementById("map")
     );

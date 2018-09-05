@@ -19,19 +19,23 @@ import {
 import LayersIcon from "@material-ui/icons/Layers";
 import "./style.css";
 
-const styles = theme => {};
-class LayersSwitcher extends Component {
-  constructor() {
-    super();
-    this.options = {
-      baselayers: [],
-      groups: []
-    };
-    this.state = {
-      toggled: false,
-      layerGroupsExpanded: true
-    };
+const styles = theme => ({
+  drawerPaper: {
+    left: "72px",
+    width: "500px",
+    zIndex: theme.zIndex.drawer - 1
   }
+});
+class LayersSwitcher extends Component {
+  state = {
+    toggled: false,
+    layerGroupsExpanded: true
+  };
+
+  options = {
+    baselayers: [],
+    groups: []
+  };
 
   componentWillMount() {
     this.observer = Observer();
@@ -42,13 +46,10 @@ class LayersSwitcher extends Component {
       observer: this.observer
     });
     this.props.tool.instance = this;
-    // this.options = this.props.tool.app.config.mapConfig.tools.find(
-    //   t => t.type === "layerswitcher"
-    // ).options;
   }
 
   componentDidMount() {
-    this.options = this.props.tool.options;    
+    this.options = this.props.tool.options;
   }
 
   open() {
@@ -117,8 +118,15 @@ class LayersSwitcher extends Component {
   }
 
   renderPanel() {
+    const { toggled } = this.state;
+    const { classes } = this.props;
     return createPortal(
-      <div className={this.getVisibilityClass()}>
+      <Drawer
+        variant="persistent"
+        anchor="left"
+        open={toggled}
+        classes={{ paper: classes.drawerPaper }}
+      >
         <PanelHeader
           title="Lagerhanterare"
           hideAllLayersButton={this.options.toggleAllButton}
@@ -148,7 +156,7 @@ class LayersSwitcher extends Component {
             {this.renderLayerGroups()}
           </div>
         </div>
-      </div>,
+      </Drawer>,
       document.getElementById("map")
     );
   }

@@ -9,33 +9,34 @@ import Toolbar from "./Toolbar.js";
 import Popup from "./Popup.js";
 import "./App.css";
 
-import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
-
-const styles = theme => ({
-  map: {
-    flexGrow: 1,
-    zIndex: 1,
-    overflow: "hidden",
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    display: "flex"
-  },
-  drawerPaper: {
-    position: "relative",
-    whiteSpace: "nowrap",
-    width: 240,
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen
-    })
-  },
-  button: {
-    marginBottom: '5px'
-  }
-});
+// 'const styles' is to be seen as a replacement of App.css only.
+// Global customizations that previously went to custom.css
+// should now go to public/customTheme.json. They are later
+// merged when MUI Theme is created in index.js.
+const styles = theme =>
+  console.log("Theme object:", theme) || {
+    // We can also consult https://material-ui.com/customization/default-theme/ for available options
+    map: {
+      flexGrow: 1,
+      zIndex: 1,
+      overflow: "hidden",
+      position: "absolute",
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      display: "flex"
+    },
+    drawerPaper: {
+      position: "relative",
+      whiteSpace: "nowrap",
+      width: 240,
+      transition: theme.transitions.create("width", {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.enteringScreen
+      })
+    }
+  };
 
 class App extends Component {
   constructor() {
@@ -70,40 +71,6 @@ class App extends Component {
     });
   }
 
-  getTheme = () => {
-    // primary: blue // <- Can be done like this (don't forget to import blue from "@material-ui/core/colors/blue"!)
-    // secondary: { main: "#11cb5f" } // <- Or like this
-
-    console.log(this.props.config);
-    console.log(this.props.config.mapConfig.map.colors.primaryColor);
-
-    return createMuiTheme({
-      palette: {
-        default: {
-          main: "#ccc",
-          light: "#dedede",
-          dark: "#666"
-        },
-        primary: {
-          main: this.props.config.mapConfig.map.colors.primaryColor
-        },
-        secondary: {
-          main: this.props.config.mapConfig.map.colors.secondaryColor
-        }
-      },
-      overrides: {
-        MuiListItemIcon: {
-          // Name of the component / style sheet
-          root: {
-            // Name of the rule
-            marginRight: '14px',
-            color: this.props.config.mapConfig.map.colors.primaryColor
-          }
-        }
-      }
-    });
-  };
-
   renderWidgets(target) {
     const { classes } = this.props;
     if (this.state.tools) {
@@ -131,22 +98,22 @@ class App extends Component {
 
   render() {
     const { classes } = this.props;
+
     return (
-      <MuiThemeProvider theme={this.getTheme()}>
-        <main className={classes.map} id="map">
-          <Popup
-            mapClickDataResult={this.state.mapClickDataResult}
-            map={this.appModel.getMap()}
-          />
-          <div className="widgets left">
-            <Toolbar tools={this.appModel.getToolbarPlugins()} />
-            {this.renderWidgets("left")}
-          </div>
-          <div className="widgets right">
-            {this.renderWidgets("right")}
-          </div>
-        </main>
-      </MuiThemeProvider>
+      <main className={classes.map} id="map">
+        <Popup
+          mapClickDataResult={this.state.mapClickDataResult}
+          map={this.appModel.getMap()}
+        />
+      	<div className="widgets left">
+		  <Toolbar tools={this.appModel.getToolbarPlugins()} />
+		  {this.renderWidgets("left")}
+		</div>
+		<div className="widgets right">
+		  {this.renderWidgets("right")}
+		</div>
+	  </main>
+      
     );
   }
 }
