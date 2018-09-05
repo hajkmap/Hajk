@@ -7,6 +7,10 @@ import Observer from "react-event-observer";
 import AppModel from "./../models/AppModel.js";
 import Toolbar from "./Toolbar.js";
 import Popup from "./Popup.js";
+import AppBar from "@material-ui/core/AppBar";
+import Typography from "@material-ui/core/Typography";
+import { Toolbar as MUIToolbar } from "@material-ui/core";
+
 import "./App.css";
 
 // 'const styles' is to be seen as a replacement of App.css only.
@@ -21,20 +25,13 @@ const styles = theme =>
       zIndex: 1,
       overflow: "hidden",
       position: "absolute",
-      top: 0,
+      top: 64,
       bottom: 0,
       left: 0,
-      right: 0,
-      display: "flex"
+      right: 0
     },
-    drawerPaper: {
-      position: "relative",
-      whiteSpace: "nowrap",
-      width: 240,
-      transition: theme.transitions.create("width", {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen
-      })
+    flex: {
+      flexGrow: 1
     }
   };
 
@@ -81,13 +78,19 @@ class App extends Component {
             return null;
           }
           return (
-            <Button variant="fab" color="default" aria-label="Verktyg" className={classes.button} onClick={() => {
+            <Button
+              variant="fab"
+              color="default"
+              aria-label="Verktyg"
+              className={classes.button}
+              onClick={() => {
                 if (tool.instance) {
                   console.log("Toogle", tool.instance);
                   tool.instance.toggle();
                 }
-              }}>
-              <tool.component tool={tool} onClick={() => {}}></tool.component>
+              }}
+            >
+              <tool.component tool={tool} onClick={() => {}} />
             </Button>
           );
         });
@@ -100,20 +103,29 @@ class App extends Component {
     const { classes } = this.props;
 
     return (
-      <main className={classes.map} id="map">
-        <Popup
-          mapClickDataResult={this.state.mapClickDataResult}
-          map={this.appModel.getMap()}
-        />
-      	<div className="widgets left">
-		  <Toolbar tools={this.appModel.getToolbarPlugins()} />
-		  {this.renderWidgets("left")}
-		</div>
-		<div className="widgets right">
-		  {this.renderWidgets("right")}
-		</div>
-	  </main>
-      
+      <div className={classes.root}>
+        <AppBar position="static">
+          <MUIToolbar>
+            <Toolbar tools={this.appModel.getToolbarPlugins()} />
+            <Typography
+              variant="title"
+              color="inherit"
+              className={classes.flex}
+            >
+              Hajk 3
+            </Typography>
+            <Button color="inherit">Inloggad användare</Button>
+          </MUIToolbar>
+        </AppBar>
+        <main className={classes.map} id="map">
+          <Popup
+            mapClickDataResult={this.state.mapClickDataResult}
+            map={this.appModel.getMap()}
+          />
+          <div className="widgets left">{this.renderWidgets("left")}</div>
+          <div className="widgets right">{this.renderWidgets("right")}</div>
+        </main>
+      </div>
     );
   }
 }
