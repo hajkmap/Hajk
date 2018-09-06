@@ -342,7 +342,7 @@
     {
       "type": "edit",
       "options": {
-        "target": "toolbar",
+        "target": "right",
         "instruction": "",
         "visibleForGroups": []
       },
