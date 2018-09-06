@@ -38,7 +38,7 @@ class AppModel {
     this.plugins[plugin.type] = plugin;
   }
 
-  togglePlugin(type) {
+  togglePlugin(type, message) {
     if (this.activeTool !== undefined) {
       if (this.activeTool === type) {
         if (this.plugins[this.activeTool].isOpen()) {
@@ -64,63 +64,110 @@ class AppModel {
   }
 
   getToolbarPlugins() {
-    console.log("All plugins:", this.getPlugins());
-
     return this.getPlugins()
       .filter(plugin => plugin.options.target === "toolbar")
       .sort((a, b) => a.sortOrder - b.sortOrder);
   }
 
-  loadPlugins(plugins, callback) {
-    if (undefined !== map) {
-      let promises = [];
-      plugins.forEach(plugin => {
-        promises = [
-          ...promises,
-          import(`../${pluginsFolder}/${plugin}/view.js`)
-            .then(module => {
-              const toolConfig =
-                this.config.mapConfig.tools.find(
-                  plug => plug.type.toLowerCase() === plugin.toLowerCase()
-                ) || {};
+  loadPlugins(plugins) {
+    var promises = [];
+    plugins.forEach(plugin => {
+      var prom = import(`../plugins/${plugin}/${plugin}.js`).then(module => {
 
-              const toolOptions =
-                toolConfig && toolConfig.options ? toolConfig.options : {};
+        const toolConfig =
+          this.config.mapConfig.tools.find(
+            plug => plug.type.toLowerCase() === plugin.toLowerCase()
+          ) || {};
 
-              const target = toolOptions.hasOwnProperty("options")
-                ? toolConfig.options.target
-                : "toolbar";
+        const toolOptions =
+          toolConfig && toolConfig.options ? toolConfig.options : {};
 
-              const sortOrder = toolConfig.hasOwnProperty("index")
-                ? Number(toolConfig.index)
-                : 0;
+        const target = toolOptions.hasOwnProperty("options")
+          ? toolConfig.options.target
+          : "toolbar";
 
-              if (Object.keys(toolConfig).length > 0) {
-                this.addPlugin(
-                  new Plugin({
-                    map: map,
-                    app: this,
-                    type: plugin,
-                    target: target,
-                    component: module.default,
-                    sortOrder: sortOrder,
-                    options: toolOptions
-                  })
-                );
-                callback(plugin);
-              } else {
-                callback();
-              }
+        const sortOrder = toolConfig.hasOwnProperty("index")
+          ? Number(toolConfig.index)
+          : 0;
+
+        if (Object.keys(toolConfig).length > 0) {
+          this.addPlugin(
+            new module.default({
+              map: map,
+              app: this,
+              type: plugin,
+              target: target,
+              sortOrder: sortOrder,
+              options: toolOptions
             })
-            .catch(err => {
-              console.error(err);
-            })
-        ];
-      });
-      return promises;
-    } else {
-      throw new Error("Initialize map before loading plugins.");
-    }
+          );
+        }
+
+      }).catch(err => {
+        console.error(err);
+      })
+      promises.push(prom);
+      // promises = [
+      //   ...promises,
+      //   import(`../${pluginsFolder}/${plugin}/${plugin}.js`).then(module => {
+      //     console.log(module);
+      //   })
+      // ];
+    });
+    return promises;
+
+    // if (undefined !== map) {
+    //   let promises = [];
+    //   plugins.forEach(plugin => {
+    //     promises = [
+    //       ...promises,
+    //       import(`../${pluginsFolder}/${plugin}/${plugin}.js`)
+    //         .then(module => {
+
+    //           console.log("Plugin loaded", module);
+
+    //           // const toolConfig =
+    //           //   this.config.mapConfig.tools.find(
+    //           //     plug => plug.type.toLowerCase() === plugin.toLowerCase()
+    //           //   ) || {};
+
+    //           // const toolOptions =
+    //           //   toolConfig && toolConfig.options ? toolConfig.options : {};
+
+    //           // const target = toolOptions.hasOwnProperty("options")
+    //           //   ? toolConfig.options.target
+    //           //   : "toolbar";
+
+    //           // const sortOrder = toolConfig.hasOwnProperty("index")
+    //           //   ? Number(toolConfig.index)
+    //           //   : 0;
+
+    //           // if (Object.keys(toolConfig).length > 0) {
+    //           //   this.addPlugin(
+    //           //     new Plugin({
+    //           //       map: map,
+    //           //       app: this,
+    //           //       type: plugin,
+    //           //       target: target,
+    //           //       component: module.default,
+    //           //       sortOrder: sortOrder,
+    //           //       options: toolOptions
+    //           //     })
+    //           //   );
+    //           //   callback(plugin);
+    //           // } else {
+    //           //   callback();
+    //           // }
+    //         })
+    //         .catch(err => {
+    //           console.error(err);
+    //         })
+    //     ];
+    //   });
+    //   return promises;
+    // } else {
+    //   throw new Error("Initialize map before loading plugins.");
+    // }
   }
 
   /**

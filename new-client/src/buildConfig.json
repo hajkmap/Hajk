@@ -1,12 +1,6 @@
 {
   "activeTools": [
     "draw",
-    "edit",
-    "information",
-    "layerswitcher",
-    "simple_layerswitcher",
-    "informative",
-    "geolocation",
-    "collector"
+    "edit"
   ]
 }

@@ -14,15 +14,15 @@ export default class Plugin {
   }
 
   open() {
-    return this.instance.open();
+    return "open";
   }
 
   close() {
-    return this.instance.close();
+    return "close";
   }
 
   minimize() {
-    return this.instance.minimize();
+    return "minimize";
   }
 
 }

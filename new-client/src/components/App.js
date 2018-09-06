@@ -56,7 +56,7 @@ class App extends Component {
       //.configureApplication() // TODO: Remove, along with dependencies (look inside to see which files can be removed)
       .createMap()
       .addLayers()
-      .loadPlugins(this.props.activeTools, plugin => {});
+      .loadPlugins(this.props.activeTools);
 
     Promise.all(promises).then(() => {
       this.setState({
@@ -81,14 +81,18 @@ class App extends Component {
             return null;
           }
           return (
-            <Button variant="fab" color="default" aria-label="Verktyg" className={classes.button} onClick={() => {
-                if (tool.instance) {
-                  console.log("Toogle", tool.instance);
-                  tool.instance.toggle();
-                }
-              }}>
-              <tool.component tool={tool} onClick={() => {}}></tool.component>
-            </Button>
+            <div key={i}>
+              <Button variant="fab" color="default" aria-label="Verktyg" className={classes.button} onClick={(e) => {
+                  this.setState({
+                    activePanel: this.state.activePanel === tool.type
+                                 ? ""
+                                 : tool.type
+                  });
+                }}>
+                {tool.getButton()}
+              </Button>
+              {tool.getPanel(this.state.activePanel)}
+            </div>
           );
         });
     } else {
@@ -106,14 +110,14 @@ class App extends Component {
           map={this.appModel.getMap()}
         />
       	<div className="widgets left">
-		  <Toolbar tools={this.appModel.getToolbarPlugins()} />
+		  <Toolbar tools={this.appModel.getToolbarPlugins()} parent={this}/>
 		  {this.renderWidgets("left")}
 		</div>
 		<div className="widgets right">
 		  {this.renderWidgets("right")}
 		</div>
 	  </main>
-      
+
     );
   }
 }

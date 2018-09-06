@@ -8,15 +8,16 @@ import DrawModel from "./model.js";
 import { ChromePicker } from "react-color";
 import PanelHeader from "../../components/PanelHeader";
 
-import {
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Drawer
-} from "@material-ui/core";
+import { Drawer } from "@material-ui/core";
 import BrushIcon from "@material-ui/icons/Brush";
 
-const styles = theme => {};
+const styles = theme => ({
+  drawerPaper: {
+    left: "72px",
+    width: "500px",
+    zIndex: theme.zIndex.drawer - 1
+  }
+});
 
 class Draw extends Component {
   constructor() {
@@ -43,19 +44,22 @@ class Draw extends Component {
     this.props.tool.instance = this;
   }
 
-  open() {
+  open(message) {
+    this.active = true;
     this.setState({
       toggled: true
     });
   }
 
   close() {
+    this.active = false;
     this.setState({
       toggled: false
     });
   }
 
   minimize() {
+    this.active = false;
     this.setState({
       toggled: false
     });
@@ -93,8 +97,15 @@ class Draw extends Component {
   };
 
   renderPanel() {
+    const { toggled } = this.state;
+    const { classes } = this.props;
     return createPortal(
-      <div className={this.getVisibilityClass()}>
+      <Drawer
+        variant="persistent"
+        anchor="left"
+        open={toggled}
+        classes={{ paper: classes.drawerPaper }}
+      >
         <PanelHeader title="Rita" toggle={this.toggle} />
         <div className="tool-panel-content">
           <ChromePicker
@@ -203,25 +214,24 @@ class Draw extends Component {
             </button>
           </div>
         </div>
-      </div>,
+      </Drawer>,
       document.getElementById("map")
     );
   }
 
-  isToolActive = () => (this.state.toggled ? true : false);
+  isToolActive = () => this.active;
 
   getText() {
     return "Rita";
   }
 
   render() {
-    return (<BrushIcon />);
-    // return (
-    //   <div>
-    //     <BrushIcon />
-    //     {this.renderPanel()}
-    //   </div>
-    // );
+    return (
+      <div>
+        <BrushIcon className={this.props.className}/>
+        {this.renderPanel()}
+      </div>
+    );
   }
 }
 

@@ -17,7 +17,7 @@ const parseErrorMessage =
 
 /* Helper function that creates a MUI theme by merging
  * hard-coded values (in this function), with custom values
- * (obtained from customTheme.json in /public). 
+ * (obtained from customTheme.json in /public).
  * This way, user can customize look and feel of application
  * AFTER it has been build with webpack, by simply tweaking
  * values in customTheme.json.
@@ -39,7 +39,7 @@ function getTheme(config, customTheme) {
         // Name of the component / style sheet
         root: {
           // Name of the rule
-          color: config.mapConfig.map.colors.primaryColor // Some CSS
+          // color: config.mapConfig.map.colors.primaryColor // Some CSS
         }
       }
     }

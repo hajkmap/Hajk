@@ -7,13 +7,7 @@ import { withStyles } from "@material-ui/core/styles";
 import EditModel from "./model.js";
 import PanelHeader from "../../components/PanelHeader.js";
 
-import {
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Drawer,
-  Button
-} from "@material-ui/core";
+import { Drawer, Button } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 
 const styles = theme => ({
@@ -29,6 +23,8 @@ class Edit extends Component {
     toggled: false
   };
 
+  active = false;
+
   componentDidMount() {
     this.observer = Observer();
     this.observer.subscribe("myEvent", message => {
@@ -42,47 +38,31 @@ class Edit extends Component {
     this.props.tool.instance = this;
   }
 
-  open() {
+  open(message) {
+    this.active = true;
     this.setState({
       toggled: true
     });
   }
 
   close() {
+    this.active = false;
     this.setState({
       toggled: false
     });
   }
 
   minimize() {
+    this.active = false;
     this.setState({
       toggled: false
     });
   }
 
   toggle = () => {
-    // if (!this.state.toggled) {
-    //   this.props.toolbar.hide();
-    // }
-    this.setState({
-      toggled: !this.state.toggled
-    });
-    
     this.props.tool.app.togglePlugin("edit");
     this.props.onClick();
   };
-
-  // getActiveClass() {
-  //   return this.state.toggled
-  //     ? "tool-toggle-button active"
-  //     : "tool-toggle-button";
-  // }
-
-  // getVisibilityClass() {
-  //   return this.state.toggled
-  //     ? "tool-panel edit-panel"
-  //     : "tool-panel edit-panel hidden";
-  // }
 
   renderPanel() {
     const { toggled } = this.state;
@@ -100,17 +80,12 @@ class Edit extends Component {
     );
   }
 
-  isToolActive = () => (this.state.toggled ? true : false);
+  isToolActive = () => this.active;
 
   render() {
     return (
       <div>
-        <ListItem button onClick={this.toggle} selected={this.isToolActive()}>
-          <ListItemIcon>
-            <EditIcon />
-          </ListItemIcon>
-          <ListItemText primary="Redigera" />
-        </ListItem>
+        <EditIcon className={this.props.className}/>
         {this.renderPanel()}
       </div>
     );

@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import classNames from "classnames";
 import {
+  List,
   ListItem,
   ListItemIcon,
   ListItemText,
@@ -50,26 +51,28 @@ class Toolbar extends Component {
   };
 
   renderTools() {
-    //<tool.component key={i} tool={tool} toolbar={this} onClick={this.toggleTool}/>
+    const { classes, parent } = this.props;
     return this.props.tools.map((tool, i) => {
       return (
-        <ListItem button onClick={() => {
-            if (tool.instance) {
-              console.log("Toogle", tool.instance);
-              tool.instance.toggle();
-            }
-          }} selected={() => {
-            if (tool.instance) {
-              return tool.instance.isToolActive();
-            } else {
-              return false;
-            }
-          }}>
-          <ListItemIcon>
-            <tool.component key={i} tool={tool} toolbar={this} onClick={this.toggleTool}/>
-          </ListItemIcon>
-          <ListItemText primary={tool.text || "Verktyg X"} />
-        </ListItem>
+        <div key={i}>
+          <ListItem
+            button
+            divider={true}
+            selected={parent.state.activePanel === tool.type}
+            onClick={(e) => {
+              parent.setState({
+                activePanel: parent.state.activePanel === tool.type
+                             ? ""
+                             : tool.type
+              });
+            }}>
+            <ListItemIcon>
+              {tool.getButton()}
+            </ListItemIcon>
+            <ListItemText primary={tool.text || "Verktyg X"} />
+          </ListItem>,
+          {tool.getPanel(this.props.parent.state.activePanel)}
+        </div>
       );
     });
   }
@@ -100,16 +103,18 @@ class Toolbar extends Component {
         }}
         open={this.state.open}
       >
-        <ListItem button onClick={this.toggleToolbar}>
-          <ListItemIcon><Close /></ListItemIcon>
-          <ListItemText primary="Stäng" />
-        </ListItem>
-        <ListItem button onClick={this.toggle}>
-          <ListItemIcon>{icon}</ListItemIcon>
-          <ListItemText primary="Minimera" />
-        </ListItem>
-        <Divider />
-        {this.renderTools()}
+        <List>
+          <ListItem button onClick={this.toggleToolbar}>
+            <ListItemIcon><Close /></ListItemIcon>
+            <ListItemText primary="Stäng" />
+          </ListItem>
+          <ListItem button onClick={this.toggle}>
+            <ListItemIcon>{icon}</ListItemIcon>
+            <ListItemText primary="Minimera" />
+          </ListItem>
+          <Divider />
+          {this.renderTools()}
+        </List>
       </Drawer>
     ) : null
   }
