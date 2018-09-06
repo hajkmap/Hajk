@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import classNames from "classnames";
@@ -9,15 +10,16 @@ import {
   ListItemText,
   Drawer,
   Divider,
-  Button
+  IconButton
 } from "@material-ui/core";
-import {ChevronLeft, ChevronRight, Menu, Close, Brush} from "@material-ui/icons";
+import { ChevronLeft, ChevronRight, Menu, Close } from "@material-ui/icons";
 import "./Toolbar.css"; // TODO: Move styles to JSS and remove the CSS file
 
 const drawerWidth = 240;
 
 const styles = theme => ({
   drawerPaper: {
+    top: "64px",
     whiteSpace: "nowrap",
     width: drawerWidth,
     transition: theme.transitions.create("width", {
@@ -39,7 +41,7 @@ const styles = theme => ({
     }
   },
   button: {
-    marginBottom: '5px'
+    marginBottom: "5px"
   }
 });
 
@@ -89,43 +91,49 @@ class Toolbar extends Component {
 
   renderDrawer() {
     const { classes } = this.props;
-    const icon = this.state.open === true
-      ? <ChevronLeft />
-      : <ChevronRight />;
-    return this.state.toolbarVisible ? (
-      <Drawer
-        variant="permanent"
-        classes={{
-          paper: classNames(
-            classes.drawerPaper,
-            !this.state.open && classes.drawerPaperClose
-          )
-        }}
-        open={this.state.open}
-      >
-        <List>
-          <ListItem button onClick={this.toggleToolbar}>
-            <ListItemIcon><Close /></ListItemIcon>
-            <ListItemText primary="Stäng" />
-          </ListItem>
-          <ListItem button onClick={this.toggle}>
-            <ListItemIcon>{icon}</ListItemIcon>
-            <ListItemText primary="Minimera" />
-          </ListItem>
-          <Divider />
-          {this.renderTools()}
-        </List>
-      </Drawer>
-    ) : null
+    const icon = this.state.open === true ? <ChevronLeft /> : <ChevronRight />;
+    return this.state.toolbarVisible
+      ? createPortal(
+          <Drawer
+            variant="permanent"
+            classes={{
+              paper: classNames(
+                classes.drawerPaper,
+                !this.state.open && classes.drawerPaperClose
+              )
+            }}
+            open={this.state.open}
+          >
+            <ListItem button onClick={this.toggleToolbar}>
+              <ListItemIcon>
+                <Close />
+              </ListItemIcon>
+              <ListItemText primary="Stäng" />
+            </ListItem>
+            <ListItem button onClick={this.toggle}>
+              <ListItemIcon>{icon}</ListItemIcon>
+              <ListItemText primary="Minimera" />
+            </ListItem>
+            <Divider />
+            {this.renderTools()}
+          </Drawer>,
+          document.getElementById("map")
+        )
+      : null;
   }
 
   render() {
     const { classes } = this.props;
     return (
       <div>
-        <Button variant="fab" color="primary" aria-label="Verktyg" className={classes.button} onClick={this.toggleToolbar}>
+        <IconButton
+          className={classes.menuButton}
+          color="inherit"
+          aria-label="Menu"
+          onClick={this.toggleToolbar}
+        >
           <Menu />
-        </Button>
+        </IconButton>
         {this.renderDrawer()}
       </div>
     );
