@@ -7,6 +7,7 @@ import EditIcon from "@material-ui/icons/Edit";
 class Edit extends Plugin {
   constructor(spec) {
     super(spec);
+    this.text = "Mät";
   }
 
   getButton() {
@@ -15,7 +16,8 @@ class Edit extends Plugin {
 
   getPanel(activePanel) {
     const active = activePanel === this.type;
-    return createPortal(<Panel active={active} type={this.type}/>, document.getElementById("map"));
+    console.log("App", this.app);
+    return createPortal(<Panel active={active} type={this.type}/>, document.getElementById("map-overlay"));
   }
 }
 

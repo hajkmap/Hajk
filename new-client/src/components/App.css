@@ -17,7 +17,7 @@
   z-index: 10000;
   min-height: 50px;
   margin: 10px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .widgets.left {

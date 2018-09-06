@@ -18,8 +18,12 @@ import "./Toolbar.css"; // TODO: Move styles to JSS and remove the CSS file
 const drawerWidth = 240;
 
 const styles = theme => ({
+  drawer: {
+    order: 0,
+    zIndex: 10000
+  },
   drawerPaper: {
-    top: "64px",
+    position: 'inherit',
     whiteSpace: "nowrap",
     width: drawerWidth,
     transition: theme.transitions.create("width", {
@@ -42,6 +46,9 @@ const styles = theme => ({
   },
   button: {
     marginBottom: "5px"
+  },
+  menuButton: {
+    marginLeft: "-10px"
   }
 });
 
@@ -73,7 +80,7 @@ class Toolbar extends Component {
             </ListItemIcon>
             <ListItemText primary={tool.text || "Verktyg X"} />
           </ListItem>,
-          {tool.getPanel(this.props.parent.state.activePanel)}
+          {tool.getPanel(parent.state.activePanel)}
         </div>
       );
     });
@@ -97,6 +104,7 @@ class Toolbar extends Component {
           <Drawer
             variant="permanent"
             classes={{
+              docked: classes.drawer,
               paper: classNames(
                 classes.drawerPaper,
                 !this.state.open && classes.drawerPaperClose
@@ -104,12 +112,6 @@ class Toolbar extends Component {
             }}
             open={this.state.open}
           >
-            <ListItem button onClick={this.toggleToolbar}>
-              <ListItemIcon>
-                <Close />
-              </ListItemIcon>
-              <ListItemText primary="Stäng" />
-            </ListItem>
             <ListItem button onClick={this.toggle}>
               <ListItemIcon>{icon}</ListItemIcon>
               <ListItemText primary="Minimera" />
@@ -117,7 +119,7 @@ class Toolbar extends Component {
             <Divider />
             {this.renderTools()}
           </Drawer>,
-          document.getElementById("map")
+          document.getElementById("map-overlay")
         )
       : null;
   }

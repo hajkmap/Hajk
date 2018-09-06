@@ -7,6 +7,7 @@ import BrushIcon from "@material-ui/icons/Brush";
 class Draw extends Plugin {
   constructor(spec) {
     super(spec);
+    this.text = "Rita";
   }
 
   getButton() {
@@ -15,7 +16,7 @@ class Draw extends Plugin {
 
   getPanel(activePanel) {
     const active = activePanel === this.type;
-    return createPortal(<Panel active={active} type={this.type}/>, document.getElementById("map"));
+    return createPortal(<Panel active={active} type={this.type}/>, document.getElementById("map-overlay"));
   }
 }
 

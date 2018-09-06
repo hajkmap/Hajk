@@ -2,12 +2,19 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { Drawer } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
+import classNames from "classnames";
 
 const styles = theme => ({
+  drawer: {
+    order: 1
+  },
   drawerPaper: {
-    left: "72px",
-    width: "500px",
+    position: 'inherit',
+    width: "400px",
     zIndex: theme.zIndex.drawer - 1
+  },
+  drawerPaperClose: {
+    display: 'none'
   }
 });
 
@@ -24,7 +31,13 @@ class Panel extends Component {
         variant="persistent"
         anchor="left"
         open={active}
-        classes={{ paper: classes.drawerPaper }}
+        classes={{
+          docked: classes.drawer,
+          paper: classNames(
+            classes.drawerPaper,
+            !active && classes.drawerPaperClose
+          )
+        }}
       >
         <h1>{type}</h1>
       </Drawer>

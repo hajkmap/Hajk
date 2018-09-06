@@ -32,6 +32,13 @@ const styles = theme =>
     },
     flex: {
       flexGrow: 1
+    },
+    overlay: {
+      position: 'absolute',
+      display: "flex",
+      flexDirection: "row",
+      justifyContent: "flex-start",
+      height: '100%'
     }
   };
 
@@ -102,15 +109,15 @@ class App extends Component {
 
     return (
       <div className={classes.root}>
-        <AppBar position="static">
+        <AppBar position="absolute">
           <MUIToolbar>
-            <Toolbar tools={this.appModel.getToolbarPlugins()} />
+            <Toolbar tools={this.appModel.getToolbarPlugins()} parent={this} />
             <Typography
               variant="title"
               color="inherit"
               className={classes.flex}
             >
-              Hajk 3
+              Hajkmap 3.0
             </Typography>
             <Button color="inherit">Inloggad användare</Button>
           </MUIToolbar>
@@ -122,6 +129,7 @@ class App extends Component {
           />
           <div className="widgets left">{this.renderWidgets("left")}</div>
           <div className="widgets right">{this.renderWidgets("right")}</div>
+          <div id="map-overlay" className={classes.overlay}></div>
         </main>
       </div>
     );
