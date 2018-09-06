@@ -2,7 +2,6 @@ import Error from "./Error.js";
 import Plugin from "./Plugin.js";
 
 import ConfigMapper from "./../utils/ConfigMapper.js";
-// import { configureCss } from "./../utils/CSSModifier.js"; // TODO: Remove
 import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
 
 // import ArcGISLayer from "./layers/ArcGISLayer.js";
@@ -23,6 +22,11 @@ const pluginsFolder = "plugins";
 var map;
 
 class AppModel {
+  /**
+   * Initialize new AddModel
+   * @param oject Config
+   * @param Observer observer
+   */
   constructor(config, observer) {
     this.plugins = {};
     this.activeTool = undefined;
@@ -33,42 +37,38 @@ class AppModel {
     this.observer = observer;
     register(this.coordinateSystemLoader.getProj4());
   }
-
+  /**
+   * Add plugin to this tools property of loaded plugins.
+   * @internal
+   */
   addPlugin(plugin) {
     this.plugins[plugin.type] = plugin;
   }
-
-  togglePlugin(type, message) {
-    if (this.activeTool !== undefined) {
-      if (this.activeTool === type) {
-        if (this.plugins[this.activeTool].isOpen()) {
-          this.plugins[this.activeTool].minimize();
-        } else {
-          this.plugins[this.activeTool].open();
-        }
-      } else {
-        this.plugins[this.activeTool].close();
-        this.activeTool = type;
-        this.plugins[this.activeTool].open();
-      }
-    } else {
-      this.activeTool = type;
-      this.plugins[this.activeTool].open();
-    }
-  }
-
+  /**
+   * Get loaded plugins
+   * @returns Array<Plugin>
+   */
   getPlugins() {
     return Object.keys(this.plugins).reduce((v, key) => {
       return [...v, this.plugins[key]];
     }, []);
   }
-
+  /**
+   * Get plugins that are currently loaded in the toolbar.
+   * @returns Array<Plugin>
+   */
   getToolbarPlugins() {
     return this.getPlugins()
       .filter(plugin => plugin.options.target === "toolbar")
       .sort((a, b) => a.sortOrder - b.sortOrder);
   }
-
+  /**
+   * Dynamically load plugins from the configured plugins folder.
+   * Assumed that a folder exists with the same name as the requested plugin.
+   * There must also be a file present with the same name well.
+   * @param Array<string> - List of plugins to be loaded.
+   * @retunrs Array<Promise> - List of promises to be resolved for.
+   */
   loadPlugins(plugins) {
     var promises = [];
     plugins.forEach(plugin => {
@@ -107,67 +107,8 @@ class AppModel {
         console.error(err);
       })
       promises.push(prom);
-      // promises = [
-      //   ...promises,
-      //   import(`../${pluginsFolder}/${plugin}/${plugin}.js`).then(module => {
-      //     console.log(module);
-      //   })
-      // ];
     });
     return promises;
-
-    // if (undefined !== map) {
-    //   let promises = [];
-    //   plugins.forEach(plugin => {
-    //     promises = [
-    //       ...promises,
-    //       import(`../${pluginsFolder}/${plugin}/${plugin}.js`)
-    //         .then(module => {
-
-    //           console.log("Plugin loaded", module);
-
-    //           // const toolConfig =
-    //           //   this.config.mapConfig.tools.find(
-    //           //     plug => plug.type.toLowerCase() === plugin.toLowerCase()
-    //           //   ) || {};
-
-    //           // const toolOptions =
-    //           //   toolConfig && toolConfig.options ? toolConfig.options : {};
-
-    //           // const target = toolOptions.hasOwnProperty("options")
-    //           //   ? toolConfig.options.target
-    //           //   : "toolbar";
-
-    //           // const sortOrder = toolConfig.hasOwnProperty("index")
-    //           //   ? Number(toolConfig.index)
-    //           //   : 0;
-
-    //           // if (Object.keys(toolConfig).length > 0) {
-    //           //   this.addPlugin(
-    //           //     new Plugin({
-    //           //       map: map,
-    //           //       app: this,
-    //           //       type: plugin,
-    //           //       target: target,
-    //           //       component: module.default,
-    //           //       sortOrder: sortOrder,
-    //           //       options: toolOptions
-    //           //     })
-    //           //   );
-    //           //   callback(plugin);
-    //           // } else {
-    //           //   callback();
-    //           // }
-    //         })
-    //         .catch(err => {
-    //           console.error(err);
-    //         })
-    //     ];
-    //   });
-    //   return promises;
-    // } else {
-    //   throw new Error("Initialize map before loading plugins.");
-    // }
   }
 
   /**

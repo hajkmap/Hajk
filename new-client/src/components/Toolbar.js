@@ -69,16 +69,12 @@ class Toolbar extends Component {
             divider={true}
             selected={parent.state.activePanel === tool.type}
             onClick={(e) => {
-              parent.setState({
-                activePanel: parent.state.activePanel === tool.type
-                             ? ""
-                             : tool.type
-              });
+              tool.onClick(e, parent);
             }}>
             <ListItemIcon>
               {tool.getButton()}
             </ListItemIcon>
-            <ListItemText primary={tool.text || "Verktyg X"} />
+            <ListItemText primary={tool.text || ""} />
           </ListItem>,
           {tool.getPanel(parent.state.activePanel)}
         </div>

@@ -6,7 +6,8 @@ import classNames from "classnames";
 
 const styles = theme => ({
   drawer: {
-    order: 1
+    order: 1,
+    zIndex: 1
   },
   drawerPaper: {
     position: 'inherit',

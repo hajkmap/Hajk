@@ -86,12 +86,13 @@ class App extends Component {
           }
           return (
             <div key={i}>
-              <Button variant="fab" color="default" aria-label="Verktyg" className={classes.button} onClick={(e) => {
-                  this.setState({
-                    activePanel: this.state.activePanel === tool.type
-                                 ? ""
-                                 : tool.type
-                  });
+              <Button
+                variant="fab"
+                color="default"
+                aria-label="Verktyg"
+                className={classes.button}
+                onClick={(e) => {
+                  tool.onClick(e, this);
                 }}>
                 {tool.getButton()}
               </Button>

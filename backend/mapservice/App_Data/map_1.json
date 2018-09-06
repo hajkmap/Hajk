@@ -182,66 +182,21 @@
         ],
         "groups": [
           {
-            "id": "dec1ab4e-e209-9a07-d336-69abe4fe368f",
+            "id": "eff9c88f-fc3a-05c2-3a15-285712099854",
             "parent": "-1",
-            "name": "Hamnar",
+            "name": "Ny grupp",
             "toggled": false,
             "expanded": false,
             "layers": [
-              {
-                "id": "1",
-                "visibleAtStart": true,
-                "drawOrder": 2,
-                "visibleForGroups": null,
-                "infobox": null
-              },
               {
                 "id": "3",
-                "visibleAtStart": true,
-                "drawOrder": 3,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "8",
-                "visibleAtStart": true,
-                "drawOrder": 4,
-                "visibleForGroups": null,
-                "infobox": null
-              }
-            ],
-            "groups": []
-          },
-          {
-            "id": "376a00b9-a04c-a81d-5c54-bd5420c40dc1",
-            "parent": "-1",
-            "name": "Kraft",
-            "toggled": false,
-            "expanded": false,
-            "layers": [
-              {
-                "id": "5",
-                "visibleAtStart": false,
-                "drawOrder": 0,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "9",
                 "visibleAtStart": false,
                 "drawOrder": 1000,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
-                "id": "11",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "12",
+                "id": "1",
                 "visibleAtStart": false,
                 "drawOrder": 1000,
                 "visibleForGroups": null,

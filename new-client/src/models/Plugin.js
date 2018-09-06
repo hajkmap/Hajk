@@ -9,20 +9,14 @@ export default class Plugin {
     this.sortOrder = spec.sortOrder || 0;
   }
 
-  isOpen() {
-    return this.instance.state.toggled;
-  }
-
-  open() {
-    return "open";
-  }
-
-  close() {
-    return "close";
-  }
-
-  minimize() {
-    return "minimize";
+  onClick(e, appComponent) {
+    console.log("Default click behavoiur");
+    var active = appComponent.state.activePanel === this.type;
+    appComponent.setState({
+      activePanel: active
+        ? ""
+        : this.type
+    });
   }
 
 }
