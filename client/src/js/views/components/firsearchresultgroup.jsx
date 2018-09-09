@@ -51,21 +51,20 @@ FirSearchResultGroup = {
 
         var previousViewed = this.props.model.get("previousViewed");
         var previousInfo = $("#info-" + previousViewed);
-        if(previousViewed !== undefined){
-            console.log("hitId and PreviousViewed", hitId,previousViewed);
-            previousInfo.toggle();
+
+        if(hitId === this.props.model.get("previousViewed")){
+            this.props.model.set("previousViewed", undefined);
+        } else {
+            if(typeof previousViewed !== "undefined"){
+                console.log("hitId and PreviousViewed", hitId,previousViewed);
+                previousInfo.toggle();
+            }
+            this.props.model.set("previousViewed", hitId);
         }
-
-        this.props.model.set("previousViewed", hitId);
-
 
         var element = $(event.target),
             parent = $(ReactDOM.findDOMNode(this)),
             group = parent.find('.group');
-
-        //console.log("element", element);
-        //console.log("parent", parent);
-        //console.log("group", group);
 
         if (!ctrlIsDown) {
             this.props.model.highlightResultLayer.getSource().clear();
@@ -153,7 +152,7 @@ FirSearchResultGroup = {
         doNotShowInfoClick = true;
         map.on('singleclick', this.plusLayerActive);
 
-        this.props.model.set("plusActive", true); // TODO same for minus
+        this.props.model.set("plusActive", true);
 
        /* map.on('singleclick',(event) => {
             event.stopPropagation();
@@ -178,10 +177,11 @@ FirSearchResultGroup = {
         try {
             setTimeout(a => {
                 if (!map.get('clickLock')) {
-                    this.clickedOnMap(event);
+                    this.clickedOnMap(event, this);
                     map.un('singleclick', this.plusLayerActive);
+                    this.props.model.set("plusActive", false);
                 }
-            }, 0);
+            }, 50);
         } catch (e) {}
     },
 
@@ -191,6 +191,7 @@ FirSearchResultGroup = {
 
         map.on('singleclick', this.minusLayerActive);
         doNotShowInfoClick = true;
+        this.props.model.set("minusActive", true);
 
     },
 
@@ -202,8 +203,9 @@ FirSearchResultGroup = {
                 if (!map.get('clickLock')) {
                     this.minusObjectFromMap(event);
                     map.un('singleclick', this.minusLayerActive);
+                    this.props.model.set("minusActive", false);
                 }
-            }, 0);
+            }, 50);
         } catch (e) {
             console.log("minusLayer:Error", e);
         }
@@ -222,16 +224,27 @@ FirSearchResultGroup = {
             if (layer.get("caption") === "FIRSökresltat"){
                 var nyckelHighLight = feature.get("nyckel");
                 source.removeFeature(feature);
+
+                // var get id
+                var hitId = 0;
+                for(var i = 0; i < that.props.result.hits.length; i++){
+                    if(nyckelHighLight === that.props.result.hits[i].get("nyckel")){
+                        hitId = i;
+                        break;
+                    }
+                }
+                console.log("hitId", hitId, "groupId", that.props.id);
+                that.reduceOpenIfHigher(hitId, parseInt(that.props.id.substring(6)));
                 that.props.result.hits = that.props.result.hits.filter(element => element.get("nyckel") !== nyckelHighLight);
+            } else if (layer.get("caption") === "FIRHighlight"){
+                layer.getSource().removeFeature(feature);
             }
         });
         this.forceUpdate(); // it affect searchjs
 
-        // remove event "singleclick" and the layer
+        // hide the layer
         this.props.model.get("layerCollection").forEach(layer => {
             if(layer.get("caption") == this.props.model.get("firLayerCaption") && this.props.result.layer == "Fastighet" ){
-                console.log("this.props.result", this.props.result);
-                console.log("layer in minusObjectFromMap", layer);
                 layer.setVisible(false);
                 layer.layer.setVisible(false);
             }
@@ -251,16 +264,8 @@ FirSearchResultGroup = {
         console.log("previousViewed",previousViewed);
         console.log("currentlyViewed",currentlyViewed);
         if(previousViewed === currentlyViewed){
-            console.log("same object has clicked");
             this.props.model.highlightResultLayer.getSource().clear();
         }
-        /*if(previousViewed !== undefined){
-            console.log("///////Move popup");
-            var previousInfo = $("#info-" + previousViewed);
-            previousInfo.toggle();
-            this.props.model.highlightResultLayer.getSource().clear();
-            this.props.model.set("previousViewed", undefined);
-        }*/
 
         this.props.model.set("minusObject", true);
         console.log("minusObject", this.props.model.get("minusObject"));
@@ -270,8 +275,11 @@ FirSearchResultGroup = {
         var hitEnd = hitId.indexOf("-", hitStart);
         var hit = parseInt(hitId.substring(hitStart,hitEnd));//hitId[4]; // hit-10-group-0 // indexOf("-",4)
 
+
         var groupStart = hitId.indexOf("-", hitEnd + 1) +1;
         var group = parseInt(hitId.substring(groupStart));//this.props.id; //indexOf
+
+        this.reduceOpenIfHigher(hit, group);
 
         console.log("items", this.props.model.get("items"));
         console.log("group", this.props.model.get("items")[group].hits);
@@ -332,7 +340,7 @@ FirSearchResultGroup = {
             );
     },
 
-    clickedOnMap: function(event){
+    clickedOnMap: function(event) {
         // check if tool is active
         // add the clicked element to results
         var map = this.props.model.get("map");
@@ -345,12 +353,9 @@ FirSearchResultGroup = {
             projection = this.props.model.get("map").getView().getProjection().getCode(),
             resolution = this.props.model.get("map").getView().getResolution(),
             infos = [],
-            promises = []
-        ;
-
+            promises = [];
 
         this.props.model.layerOrder = {};
-
         this.props.model.get("map").getLayers().forEach((layer, i) => {
             this.props.model.layerOrder[layer.get('name')] = i;
         });
@@ -372,31 +377,36 @@ FirSearchResultGroup = {
                         if (Array.isArray(features) && features.length > 0) {
                             var infobox = null;
                             features.forEach(feature => {
-                                var found = false;
-                                var featureId = feature.getProperties().text;
-                                for (var i = 0; i < this.props.result.hits.length; i++) { //group.hits.length
-                                    var itemId = this.props.result.hits[i].get("text");//group.hits[i].getProperties().text;
-                                    if(featureId === itemId){ //if it is first hit then should found=false
-                                        console.log("Found");
-                                        found = true;
-                                        break;
-                                    }
-                                }
-
-                                if(!found) {
-                                    console.log("Adding new feature");
-                                    // Add to model
-                                    this.props.model.get("items").map(group => {
-                                        if (group.layer === "Fastighet") {
-                                            group.hits.push(feature);
+                                    var found = false;
+                                    var featureId = feature.getProperties().text;
+                                    for (var i = 0; i < this.props.result.hits.length; i++) { //group.hits.length
+                                        if(this.props.result.hits[i].infobox &&
+                                            typeof this.props.result.hits[i].infobox === "string" &&
+                                            this.props.result.hits[i].infobox.length > 0){
+                                            infobox = this.props.result.hits[i].infobox;
                                         }
-                                    });
 
+                                        var itemId = this.props.result.hits[i].get("text");//group.hits[i].getProperties().text;
+                                        if (featureId === itemId) { //if it is first hit then should found=false
+                                            console.log("Found");
+                                            found = true;
+                                            break;
+                                        }
+                                    }
 
-                                    // Add to props
-                                    feature.infobox = infobox;
-                                    this.props.model.firFeatureLayer.getSource().addFeature(feature);
-                                }
+                                    if (!found) {
+                                        console.log("Adding new feature");
+                                        // Add to model
+                                        this.props.model.get("items").map(group => {
+                                            if (group.layer === "Fastighet") {
+                                                group.hits.push(feature);
+                                            }
+                                        });
+
+                                        // Add to props
+                                        feature.infobox = infobox;
+                                        this.props.model.firFeatureLayer.getSource().addFeature(feature);
+                                    }
                                 }
                             );
                             resolve();
@@ -408,7 +418,6 @@ FirSearchResultGroup = {
             }));
         });
 
-
         Promise.all(promises).then(() => {
             this.props.model.set('loadFinished', true);
             this.forceUpdate();
@@ -416,14 +425,11 @@ FirSearchResultGroup = {
 
         // remove event "singleclick" and the layer
         this.props.model.get("layerCollection").forEach(layer => {
-            if(layer.get("caption") == this.props.model.get("firLayerCaption") && this.props.result.layer == "Fastighet"){
+            if (layer.get("caption") == this.props.model.get("firLayerCaption") && this.props.result.layer == "Fastighet") {
                 layer.setVisible(false);
                 layer.layer.setVisible(false);
             }
         });
-
-
-
     },
 
     expInfo: function(hitId){
@@ -431,6 +437,55 @@ FirSearchResultGroup = {
         var info = $("#info-" + hitId);
         info.toggle();
 
+    },
+
+    reduceOpenIfHigher: function(hit, group){ // hit = 1, group = 0
+        console.log("reduceOpenIfHigher");
+
+        var currentHitId = "#hit-" + hit + "-group-" + group;
+        console.log("'" + currentHitId + "'");
+        var hitObject = $(currentHitId);
+
+        if(hitObject.hasClass("selected")){
+            console.log("clickedonsame");
+            hitObject.toggleClass("selected");
+            this.props.model.set("previousViewed", undefined);
+        } else if (typeof this.props.model.get("previousViewed") !== "undefined"){
+            var hitStart = 4;
+            var hitEnd = this.props.model.get("previousViewed").indexOf("-", hitStart);
+            var prevHit = parseInt(this.props.model.get("previousViewed").substring(hitStart,hitEnd));
+            if (prevHit > hit){
+                this.props.model.set("previousViewed", "hit-" + (prevHit-1) + "-group-0");
+            }
+        }
+
+        var i = hit;
+        while(true){
+            // first fix open infobox
+            var currentHitId = "#info-hit-" + i + "-group-" + group;
+            var nextHitId = "#info-hit-" + (i+1) + "-group-" + group;
+            var hitObject = $(currentHitId);
+            var nextHitObject = $(nextHitId);
+            if(typeof nextHitObject[0] === "undefined"){
+                console.log("breaking");
+                break;
+            }
+
+            if(hitObject.is(":visible") != nextHitObject.is(":visible")){
+                hitObject.toggle();
+            }
+
+            // Fix class selected
+            var currentHitId = "#hit-" + i + "-group-" + group;
+            var nextHitId = "#hit-" + (i+1) + "-group-" + group;
+            var hitObject = $(currentHitId);
+            var nextHitObject = $(nextHitId);
+
+            if(hitObject.hasClass("selected") != nextHitObject.hasClass("selected")){
+                hitObject.toggleClass("selected");
+            }
+            i++;
+        }
     },
 
     resultBox: function(id) {

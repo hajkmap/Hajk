@@ -51,12 +51,13 @@ var FirModel = {
     },
 
     configure: function (shell) {
+        console.log("configure in fil.js");
         this.set('displayPopupBar', this.get('displayPopup'));
         this.set('layerCollection', shell.getLayerCollection());
         this.set('map', shell.getMap().getMap());
         this.firFeatureLayer= new ol.layer.Vector({
-            caption: 'Sökträff',
-            name: 'search-vector-layer',
+            caption: 'FIRSökresltat',
+            name: 'fir-search-vector-layer',
             source: new ol.source.Vector(),
             queryable: true,
             visible: true,
@@ -67,12 +68,18 @@ var FirModel = {
             evt.feature.setStyle(this.firFeatureLayer.getStyle());
         });
 
+        /*var aaaa = function(){
+          console.log("######################here", this.firFeatureLayer);
+        };
+
+        this.firFeatureLayer.getSource().on('removefeature', evt => {
+            aaaa();
+        });
+*/
         this.get('map').addLayer(this.firFeatureLayer);
-        console.log("MAP");
-        console.log(this.get("map"));
 
         this.highlightResultLayer = new ol.layer.Vector({
-            caption: 'FIRSökresltat',
+            caption: 'FIRHighlight',
             name: 'fir-highlight-vector-layer',
             source: new ol.source.Vector(),
             queryable: true,
@@ -80,8 +87,12 @@ var FirModel = {
             style: this.getHighlightStyle()
         });
 
-            this.highlightResultLayer.getSource().on('addfeature', evt => {
+        this.highlightResultLayer.getSource().on('addfeature', evt => {
             evt.feature.setStyle(this.highlightResultLayer.getStyle());
+        });
+
+        this.highlightResultLayer.getSource().on('removefeature', evt => {
+            evt.feature.setStyle(this.firFeatureLayer.getStyle());
         });
 
         this.get('map').addLayer(this.highlightResultLayer);
@@ -94,92 +105,49 @@ var FirModel = {
         }
     },
 
-    /*
     clickedOnMap: function(event){
-        // check if tool is active
-        // add the clicked element to results
-        console.log("this.map in fir.js");
-        var map = this.get("map");
+        if(this.get("plusActive") || this.get("minusActive")){
+            return;
+        }
 
-        var wmsLayers = this.get("layerCollection").filter((layer) => {
-                return (layer.get('type') === 'wms' || layer.get('type') === 'arcgis') &&
-                    layer.get('queryable') &&
-                    layer.getVisible() && layer.get('caption') == this.get("firLayerCaption");
-            }),
-            projection = this.get("map").getView().getProjection().getCode(),
-            resolution = this.get("map").getView().getResolution(),
-            infos = [],
-            promises = []
-        ;
-
-        console.log(wmsLayers);
-
-        this.layerOrder = {};
-
-        this.get("map").getLayers().forEach((layer, i) => {
-            this.layerOrder[layer.get('name')] = i;
-        });
-
-        wmsLayers.forEach((wmsLayer, index) => {
-            wmsLayer.index = index;
-            promises.push(new Promise((resolve, reject) => {
-                console.log("getFeatureInfo");
-                wmsLayer.getFeatureInformation({
-                    coordinate: event.coordinate,
-                    resolution: resolution,
-                    projection: projection,
-                    error: message => {
-                        resolve();
-                    },
-                    success: (features, layer) => {
-                        console.log("got features");
-                        // avoid to run same function two times
-                        if (Array.isArray(features) && features.length > 0) {
-                            features.forEach(feature => {
-                                console.log("feature");
-                                console.log(feature);
-                                // if in highfir layer and fir tool do nothing
-                                this.get("items").map(group => {
-                                    console.log("items");
-                                    console.log(this.get("items"));
-                                    console.log("group");
-                                    console.log(group);
-                                    if(group.layer === "Fastighet"){
-                                        group.hits.push(feature); // why do i need to push to feature?
-                                    }
-                                });
-                                    console.log("this.props.id");
-                                    console.log(this.get("id"));
-                                resolve();
-                            }
-                            );
-                        } else {
-                            resolve();
-                        }
+        // check if clicked on feature in firResultLayer, then expand in result list
+        var that = this;
+        this.get("map").forEachFeatureAtPixel(event.pixel, function(feature, layer){
+            if (layer.get("caption") === "FIRSökresltat"){
+                // var get id
+                var hitId = 0;
+                var group = 0;
+                var nyckelHighLight = feature.get("nyckel");
+                for(var i = 0; i < that.get("items")[group].hits.length; i++){
+                    console.log("that.get(items)[group].hits[i]", that.get("items")[group].hits[i]);
+                    if(nyckelHighLight === that.get("items")[group].hits[i].get("nyckel")){
+                        hitId = i;
+                        break;
                     }
-                });
-            }));
+                }
+
+                var clickedonId = "hit-" + hitId + "-group-0";
+
+                var hitObject = $("#" + clickedonId);
+                if(that.get("previousViewed") !== clickedonId){
+                    hitObject.toggleClass("selected");
+                    $("#" + that.get("previousViewed")).toggleClass("selected");
+                    $("#info-" + that.get("previousViewed")).toggle()
+                    that.set("previousViewed", clickedonId);
+                }
+
+                var currentHitId = "#info-hit-" + hitId + "-group-0";
+                var hitObject = $(currentHitId);
+
+                if(!hitObject.is(":visible")){
+                    hitObject.toggle();
+                }
+                that.highlightResultLayer.getSource().clear();
+                that.highlightResultLayer.getSource().addFeature(feature);
+            }
         });
-
-
-        Promise.all(promises).then(() => {
-            *//*
-            infos.sort((a, b) => {
-                var s1 = a.information.layerindex,
-                    s2 = b.information.layerindex
-                ;
-                return s1 === s2 ? 0 : s1 < s2 ? 1 : -1;
-            });
-
-            infos.forEach(info => {
-                this.get('features').add(info);
-            });
-            *//*
-            this.set('loadFinished', true);
-
-        });
-
-    },*/
+//        this.forceUpdate(); // it affect searchjs
+  },
 
     /**
      * @instance
@@ -588,11 +556,11 @@ var FirModel = {
         /* TODO, need to add all features to this.highlightResultLayer instead of clear
          instead of clear, do getFeatures().forEach() and add to highlightResultLayer. this.highlightResultLayer.getSource().addFeature(spec.hit);*/
         console.log("this",this);
-        this.firFeatureLayer.getSource().getFeatures().forEach(hits => {
-            this.highlightResultLayer.getSource().addFeature(spec.hit);
-        });
+        //this.firFeatureLayer.getSource().getFeatures().forEach(hits => {
+        //    this.highlightResultLayer.getSource().addFeature(spec.hit);
+        //});
 
-        // this.highlightResultLayer.getSource().addFeature(spec.hit);
+        this.highlightResultLayer.getSource().addFeature(spec.hit);
         // this.firFeatureLayer.getSource().addFeature(spec.hit);
 
         if (!(this.get('selectedIndices') instanceof Array)) {
@@ -620,7 +588,8 @@ var FirModel = {
 
         map.getView().fit(extent, size, { maxZoom: this.get('maxZoom') });
 
-        this.firFeatureLayer.getSource().addFeature(spec.hit);
+        //this.firFeatureLayer.getSource().addFeature(spec.hit);
+        this.highlightResultLayer.getSource().addFeature(spec.hit);
 
         if (!(this.get('selectedIndices') instanceof Array)) {
             this.set('selectedIndices', []);
@@ -1027,7 +996,7 @@ var FirModel = {
     getStyle: function () {
         return new ol.style.Style({
             fill: new ol.style.Fill({
-                color: 'rgba(255, 255, 255, 0.2)'
+                color: 'rgba(255, 255, 0, 0.4)'//'rgba(255, 26, 179, 0.4)'
             }),
             stroke: new ol.style.Stroke({
                 color: 'rgba(0, 0, 0, 0.6)',
