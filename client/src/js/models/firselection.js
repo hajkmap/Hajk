@@ -82,6 +82,19 @@ var FirSelectionModel = {
             geometryFunction: ol.interaction.Draw.createBox()
         }));
 
+        this.set('lineSelection', new ol.interaction.Draw({
+            source: this.get('source'),
+            style: this.getScetchStyle(),
+            type: 'LineString',
+        }));
+
+        this.set('pointSelection', new ol.interaction.Draw({
+            source: this.get('source'),
+            style: this.getScetchStyle(),
+            type: 'Point',
+        }));
+
+
         this.get('polygonSelection').on('drawend', () => {
             //this.get('source').clear();
             //this.get('highlightLayer').clearHighlight();
@@ -241,8 +254,13 @@ var FirSelectionModel = {
             this.get('olMap').set('clickLock', true);
         }
 
-        if (tool === 'multiSelect') {
-            this.get('olMap').on('singleclick', this.onMapSingleClick, this);
+        if (tool === 'lineSelection') {
+            this.get('olMap').addInteraction(this.get('lineSelection'));
+            this.get('olMap').set('clickLock', true);
+        }
+
+        if (tool === 'pointSelection') {
+            this.get('olMap').addInteraction(this.get('pointSelection'));
             this.get('olMap').set('clickLock', true);
         }
 
