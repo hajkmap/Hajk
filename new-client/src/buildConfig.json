@@ -2,6 +2,7 @@
   "activeTools": [
     "draw",
     "edit",
-    "information"
+    "information",
+    "simple_layerswitcher"
   ]
 }

@@ -49,7 +49,7 @@ const styles = theme => ({
   },
   widgets: {
     position: 'absolute',
-    zIndex: 10000,
+    zIndex: theme.zIndex.drawer - 2,
     minHeight: '50px',
     margin: '10px',
     overflow: 'visible',

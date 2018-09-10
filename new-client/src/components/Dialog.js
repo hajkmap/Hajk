@@ -10,7 +10,8 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import withMobileDialog from '@material-ui/core/withMobileDialog';
-import styles from './styles/Dialog.js';
+
+const styles = theme => {};
 
 class MyDialog extends Component {
 
@@ -25,6 +26,10 @@ class MyDialog extends Component {
    * If the lifecycle of the component is not controlled by itself
    * the render method can be used to make the component
    * update its state when props changes.
+   *
+   * It is not recommended to mutate the state of this component
+   * if the keys have the same name, it will duplicate the update event and
+   * the last prop value will be taken.
    *
    * NOTE: this method is considered safer than using legacy componentWillRecieveProps.
    *

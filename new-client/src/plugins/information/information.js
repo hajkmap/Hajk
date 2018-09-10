@@ -27,10 +27,15 @@ class Infomation extends Plugin {
   }
 
   getPanel(activePanel) {
+
+    var open = this.getState().dialogOpen === undefined
+      ? this.options.visibleAtStart
+      : this.getState().dialogOpen;
+
     this.dialog = (
       <Dialog
         options={this.options}
-        open={this.getState().dialogOpen || false}
+        open={open}
         onClose={this.onClose}>
       </Dialog>
     );
