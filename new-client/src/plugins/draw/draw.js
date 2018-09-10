@@ -1,5 +1,5 @@
-import Plugin from '../../models/Plugin.js';
-import Panel from '../../components/Panel.js';
+import Plugin from "../../models/Plugin.js";
+import Panel from "../../components/Panel.js";
 import React, { Component } from "react";
 import { createPortal } from "react-dom";
 import BrushIcon from "@material-ui/icons/Brush";
@@ -16,7 +16,17 @@ class Draw extends Plugin {
 
   getPanel(activePanel) {
     const active = activePanel === this.type;
-    return createPortal(<Panel active={active} type={this.type} onClose={this.closePanel}/>, document.getElementById("map-overlay"));
+    return createPortal(
+      <Panel
+        active={active}
+        type={this.type}
+        title={this.text}
+        onClose={this.closePanel}
+      >
+        I can't draw, yet.
+      </Panel>,
+      document.getElementById("map-overlay")
+    );
   }
 }
 

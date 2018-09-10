@@ -2,20 +2,16 @@ import Plugin from "../../models/Plugin.js";
 import Panel from "../../components/Panel.js";
 import React, { Component } from "react";
 import { createPortal } from "react-dom";
-import EditIcon from "@material-ui/icons/Edit";
+import LayersIcon from "@material-ui/icons/Layers";
 
-class Edit extends Plugin {
+class LayerSwitcher extends Plugin {
   constructor(spec) {
     super(spec);
-    this.text = "Mät";
+    this.text = "Lagerhanterare";
   }
 
-  // onClick(e, appComponent) {
-  //   alert("Override default behaviour on click.");
-  // }
-
   getButton() {
-    return <EditIcon />;
+    return <LayersIcon />;
   }
 
   getPanel(activePanel) {
@@ -27,11 +23,11 @@ class Edit extends Plugin {
         title={this.text}
         onClose={this.closePanel}
       >
-        Sorry. Edit no-go for now.
+        Hello, World.
       </Panel>,
       document.getElementById("map-overlay")
     );
   }
 }
 
-export default Edit;
+export default LayerSwitcher;
