@@ -235,3 +235,4 @@ Nu bör `C:/wwwroot` innehålla följande filer och mappar:
 
 ## Installation och konfiguration
 För installation och konfiguration i IIS hänvisas till Systemdokumentationen som finns i mappen dokumentation.
+
