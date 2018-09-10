@@ -211,6 +211,12 @@ button {
   box-shadow: inset 0px 0px 5px var(--dark1);
 }
 
+.ol-scale-line {
+  left: inherit;
+  right: 8px;
+}
+
+
 @media only screen and (max-width: 600px) {
   .tool-panel {
     position: fixed;

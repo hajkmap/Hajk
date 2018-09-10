@@ -18,8 +18,17 @@ export default class Plugin {
     }
   };
 
+  setState = (obj) => {
+    if (this.appComponent) {
+      this.appComponent.setState(obj);
+    }
+  }
+
+  getState() {
+    return this.appComponent.state;
+  }
+
   onClick(e, appComponent) {
-    console.log("Default click behavoiur");
     var active = appComponent.state.activePanel === this.type;
     appComponent.setState({
       activePanel: active
