@@ -41,6 +41,7 @@ var FirSearchView = {
      * @instance
      */
     componentDidMount: function () {
+        this.props.model.get("map").on('singleclick', this.props.model.clickedOnMap.bind(this.props.model));
         this.value = this.props.model.get('value');
         if (this.props.model.get('items')) {
             this.setState({
@@ -88,6 +89,9 @@ var FirSearchView = {
      * @instance
      */
     componentWillUnmount: function () {
+
+        this.props.model.get("map").un('singleclick', this.props.model.clickedOnMap);
+
         this.props.model.get('layerCollection').each((layer) => {
             layer.off('change:visible', this.search);
         });
@@ -161,10 +165,11 @@ var FirSearchView = {
             this.props.model.search(result => {
                 if (result.status === "success") {
                     this.props.model.highlightResultLayer.getSource().clear();
+                    this.props.model.firFeatureLayer.getSource().clear();
                     result.items.map(item => {
                         var groupName = item.layer;
                         item.hits.map(hit => {
-                            this.props.model.highlightResultLayer.getSource().addFeature(hit);
+                            this.props.model.firFeatureLayer.getSource().addFeature(hit);
                         });
                     });
                 }
@@ -189,7 +194,7 @@ var FirSearchView = {
     bindLayerVisibilityChange: function () {
         this.props.model.get('layerCollection').each((layer) => {
             layer.on('change:visible', () => {
-                this.update();
+                //this.update();
             });
         });
     },
@@ -375,9 +380,9 @@ var FirSearchView = {
 
         return (
             <div className='panel panel-default'>
-                <div className='panel-heading'>Skapa fastighetsförteckning<button id="FIRCreateMinimizeButton" onClick={() => {console.log("clicked"); this.minBox('skapaFastighetsForteckning', "FIRCreateMinimizeButton")}} className={this.props.model.get("searchExpandedClassButton")}></button></div>
+                <div className='panel-heading'>Skapa fastighetsförteckning<button id="FIRCreateMinimizeButton" onClick={() => {console.log("clicked"); this.minBox('skapaFastighetsForteckning', "FIRCreateMinimizeButton")}} className={this.props.model.get("searchMinimizedClassButton")}></button></div>
                 <div className='panel-body'>
-                    <div id="skapaFastighetsForteckning" className="">
+                    <div id="skapaFastighetsForteckning" className="hidden">
                     <p>Inkludera i förteckning:</p>
                     <input type="checkbox" id="traktnamn" onClick={()=> this.checkBoxFir("traktnamn")} /> Fastigheter <br/>
                     <input type="checkbox" id="text" onClick={()=> this.checkBoxFir("text")} /> Marksamfälligheter <br/>
@@ -385,6 +390,7 @@ var FirSearchView = {
                     <input type="checkbox" id="nyckel" onClick={()=> this.checkBoxFir("nyckel")} /> Rättigheter <br/><br/>
                     </div>
                 <div>
+                    <br/>
                     <span className='pull-left'>{excelButton}</span>&nbsp;&nbsp; <span className='right'>Skapa fastighetsförteckning från sökresultat</span>
                     <div>{downloadLink}</div>
                 </div>

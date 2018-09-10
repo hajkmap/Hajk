@@ -1,5 +1,5 @@
 var Panel = require('views/panel');
-
+var deleteMarkerEnabled = false;
 /**
  * @class
  */
@@ -44,25 +44,46 @@ var FirSelectionPanelView = {
         this.props.model.setActiveTool(undefined);
     },
 
-    deleteMarker: function(event) {
+    /*deleteMarker: function(event) {
         console.log("deleteMarker");
         this.props.model.setActiveTool(undefined);
+        console.log("setActiveTool", this.props.model.setActiveTool(undefined));
 
         // Should add a singleclick handler for deletion
         // get the object detail
         var map = this.props.model.get("map");
 
         // get the object from highlightResultLayer
-        var source = this.props.model.highlightLayer.getSource();
+        var source = this.props.model.get("highlightLayer").get("source");
         console.log("source i deleteMarker", source);
+        console.log("map.forEachFeatureAtPixel", map.forEachFeatureAtPixel);
+        console.log("pixelFromClickedOnMap", event);
         map.forEachFeatureAtPixel(event.pixel, function(feature, layer){
-            if (layer.get("caption") === "FIRSökres"){
+            console.log("feature", feature);
+            if (layer.get("caption") === "FIRSökes"){
                 source.removeFeature(feature);
 
             }
         });
+    },*/
+    deleteMarker: function(){
+        var map = this.props.model.get("map");
+        map.on('singleclick', this.firRemoveSelected);
     },
 
+    firRemoveSelected: function(event){
+        var map = this.props.model.get("map");
+        var source = this.props.model.get("highlightLayer").get("source");
+        console.log("source", source);
+        console.log("event", event);
+        map.forEachFeatureAtPixel(event.pixel, function(feature, layer){
+            console.log("deleteMarkerEnabled",deleteMarkerEnabled);
+            if (layer.get("caption") === "search-selection-layer") {
+                layer.getSource().removeFeature(feature);
+            }
+        });
+        map.un('singleclick', this.firRemoveSelected);
+    },
 
     getClassNames: function (type) {
         return this.state.activeTool === type
