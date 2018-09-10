@@ -25,7 +25,7 @@ Uppdaterad: 2018-05-03
       - [Kontrollera att allt kom med](#kontrollera-att-allt-kom-med)
   - [Installation och konfiguration](#installation-och-konfiguration)
 
-Hajk är ett projekt som drivs av flera organisationer i Västsverige, bl a Stadsbyggnadskontoret Göteborgs Stad, Kungsbacka kommun, 
+Hajk är ett projekt som drivs av flera organisationer i Västsverige, bl a Stadsbyggnadskontoret Göteborgs Stad, Kungsbacka kommun,
 Alingsås kommun, Varbergs kommun, Halmstads kommun.
 
 Projektet drivs som ett samarbetsprojekt och är avsett att kunna användas för generalla GIS-applikationer för webb.
@@ -49,19 +49,19 @@ För installation och konfiguration i IIS hänvisas till Systemdokumentationen s
 ### Installera Git
 Börja med att installera Git om det inte redan är gjort. Ladda ner en version för ditt operativsystem från https://git-scm.com/download/win. Installera med default-inställningar. Därmed bör Git installeras globalt för Windows och läggas till i `$PATH` .
 
-Starta en kommandoprompt, exempelvis cmd, Windows Powershell eller Git Bash. Verifiera installationen genom kontrollera vilken version av Git som har installerats:  
+Starta en kommandoprompt, exempelvis cmd, Windows Powershell eller Git Bash. Verifiera installationen genom kontrollera vilken version av Git som har installerats:
 ```bash
 git --version
 ```
 
->Tips: du kan med fördel använda den kommandoprompt som installerades med Git. Sök i Windows startmeny efter `Git Bash`, starta den, och verifiera installationen genom att skriva kommandot ovan. 
+>Tips: du kan med fördel använda den kommandoprompt som installerades med Git. Sök i Windows startmeny efter `Git Bash`, starta den, och verifiera installationen genom att skriva kommandot ovan.
 >
 >Fördelen med Git Bash är att du har tillgång till vanliga Unix-kommandon som `ls`, `pwd`, med flera, samt en fungerande auto-komplettering (börja skriva en sökväg och tryck på `TAB` för att testa). Dessutom finns Git med all säkerhet i `$PATH` när du använder Git Bash.
 
 ### Installera Node.js
 Gå till https://nodejs.org och ladda ner och installera den aktuella versionen (i skrivande stund Node 8).
 
-Verifiera installationen genom starta kommandoprompten och skriva:  
+Verifiera installationen genom starta kommandoprompten och skriva:
 ```bash
 node --version
 ```
@@ -73,9 +73,9 @@ Grunt är en NPM-modul som används till att "bygga" klient- och admindelen av k
 npm i -g grunt-cli
 ```
 
->Tips: Flaggan `-g` i kommandot ovan anger att NPM ska installera paketet globalt, istället för enbart i nuvarande projekt (vilket är default). 
+>Tips: Flaggan `-g` i kommandot ovan anger att NPM ska installera paketet globalt, istället för enbart i nuvarande projekt (vilket är default).
 
->Info: Kommandot `i` ovan är förkortning av `install`. Du kan således även skriva `npm install -g grunt-cli`, men det kan vara bra att känna till detta kortkommando. 
+>Info: Kommandot `i` ovan är förkortning av `install`. Du kan således även skriva `npm install -g grunt-cli`, men det kan vara bra att känna till detta kortkommando.
 
 ### Installera Visual Studio Community Edition
 För att installera Visual Studio gå till https://www.visualstudio.com/thank-you-downloading-visual-studio/?sku=Community&rel=15, ladda ner och installera programmet. Det finns många val som kan göras här med det som är nödvändigt för Hajk är att ASP.NET-komponenterna installeras.
@@ -85,9 +85,9 @@ För att installera Visual Studio gå till https://www.visualstudio.com/thank-yo
 ## Kompilering / Bygga koden
 
 ### Ladda ner koden
-När alla nödvändiga programmen är på plats kan du ladda ner själva källkoden för projektet och börja arbeta med den. 
+När alla nödvändiga programmen är på plats kan du ladda ner själva källkoden för projektet och börja arbeta med den.
 
-Skapa en mapp där du kommer arbeta med Hajk, exempelvis `C:\projekt`. 
+Skapa en mapp där du kommer arbeta med Hajk, exempelvis `C:\projekt`.
 ```bash
 cd C:
 mkdir projekt
@@ -117,12 +117,12 @@ npm install
 cd c:\Projekt\Hajk\client
 grunt dependencies
 ```
->Info: Kommandot `grunt dependencies` bygger ihop ett flertal hjälpbibliotek och paketerar dem till en fil, `dist/js/dependencies.min.js`. 
+>Info: Kommandot `grunt dependencies` bygger ihop ett flertal hjälpbibliotek och paketerar dem till en fil, `dist/js/dependencies.min.js`.
 
 ---
 
 ### Bygg klientdelen
-Grunt bygger två versioner av källkoden: en som är lite större men lättare att felsöka, och en som är mer komprimerad och används för skarp drift. Nedan visas hur båda delarna byggs: 
+Grunt bygger två versioner av källkoden: en som är lite större men lättare att felsöka, och en som är mer komprimerad och används för skarp drift. Nedan visas hur båda delarna byggs:
 ```bash
 # Öppna kommandoprompten och gå till projektets mapp
 cd c:\projekt\Hajk\client
@@ -130,12 +130,12 @@ cd c:\projekt\Hajk\client
 # Bygg version för test (målmapp "dist")
 grunt build
 
-# Bygg version för driftsättning. (målmapp "release")  
+# Bygg version för driftsättning. (målmapp "release")
 grunt release
 ```
 
 ### Bygg admindelen
-När admindelen byggs skapas också två versioner: en för test och en för driftsättning. Skillnaden mot klientdelen är att istället för att skapa separata mappar så skapas endast en mapp, `dist`, men den innehåller två filer: `index.html` och `debug.html`. 
+När admindelen byggs skapas också två versioner: en för test och en för driftsättning. Skillnaden mot klientdelen är att istället för att skapa separata mappar så skapas endast en mapp, `dist`, men den innehåller två filer: `index.html` och `debug.html`.
 
 ```bash
 # Öppna kommandopromten och gå till projektets mapp
@@ -150,9 +150,9 @@ grunt
 - Dubbelklicka på `MapService.sln`
 - Visual Studio öppnas
 - I `Solution Explorer` markera projektet `MapService`
-- I huvudmenyn, välj  `Build > Build Solution`  
+- I huvudmenyn, välj  `Build > Build Solution`
 - Invänta tills kompileringen är klar (du ser status i `Output`-fönstret längst ner, när det står något i stil med `Build: 2 succeeded, 0 failed, 0 up-to-date, 0 skipped` så är det klart)
-- I huvudmenyn, välj  `Build > Publish MapService`  
+- I huvudmenyn, välj  `Build > Publish MapService`
 - I fönstret som visas nu finns möjlighet att ändra `Target Location`, alltså stället dit backend-applikationen kommer att publiceras. Default-värde är `C:\install\mapservice\`. Du kan låta det vara kvar eller ändra till något annat. Huvudsaken är att du **vet var filerna läggs** för de kommer behövas senare när vi sätter ihop Hajk.
 
 ### Bygg proxy-applikation (HTTPProxy)
@@ -160,13 +160,13 @@ grunt
 - Dubbelklicka på `Proxy.sln`
 - Visual Studio öppnas
 - I `Solution Explorer` markera projektet `Proxy`
-- I huvudmenyn, välj  `Build > Build Solution`  
+- I huvudmenyn, välj  `Build > Build Solution`
 - Invänta tills kompileringen är klar (du ser status i `Output`-fönstret längst ner, när det står något i stil med `Build: 1 succeeded, 0 failed, 0 up-to-date, 0 skipped` så är det klart)
-- I huvudmenyn, välj  `Build > Publish Proxy`  
+- I huvudmenyn, välj  `Build > Publish Proxy`
 - I fönstret som visas nu finns möjlighet att ändra `Target Location`, alltså stället dit backend-applikationen kommer att publiceras. Default-värde är `C:\install\proxy\`. Du kan låta det vara kvar eller ändra till något annat. Huvudsaken är att du **vet var filerna läggs** för de kommer behövas senare när vi sätter ihop Hajk.
 
---- 
-## Sätta ihop Hajk 
+---
+## Sätta ihop Hajk
 
 Om du har följt anvisningarna så långt har du de tre *kompilerade* delarna som applikationen utgörs av på följande ställen:
 
@@ -178,7 +178,7 @@ Om du har följt anvisningarna så långt har du de tre *kompilerade* delarna so
 
 >Observera: som det nämndes tidigare i avsnittet om klientdelen så byggdes den i en drift- och en testversion. För driftsättning nu kommer vi använda den skarpa driftversionen, som alltså ligger i `release`. Men kom ihåg att även testversionen finns, i mappen `dist`, och instruktionerna här fungerar även för den. Byt bara ut mapparna mot varann.
 
->Info: Projektets backend-del är en .NET-applikation som i Windowsmiljö enklast körs i IIS (version 7 eller senare). Applikationen körs i en App Pool med `.NET version 4.0 integrated`.  
+>Info: Projektets backend-del är en .NET-applikation som i Windowsmiljö enklast körs i IIS (version 7 eller senare). Applikationen körs i en App Pool med `.NET version 4.0 integrated`.
 
 ### Skapa huvudmapp för applikationen
 För att underlätta installationen av Hajk kan man kopiera de tre *kompilerade* delarna till samma struktur som sedan ska användas i IIS.
@@ -193,9 +193,9 @@ Flytta hela mappar enligt tabell nedan:
 | `C:/projekt/Hajk/admin/dist`    | `C:/wwwroot/admin`      |
 | `C:/projekt/Hajk/client/release` | `C:/wwwroot/client`     |
 
-Nu har `C:/wwwroot` tre undermappar. Men vi ska göra ett till ingrepp. 
+Nu har `C:/wwwroot` tre undermappar. Men vi ska göra ett till ingrepp.
 
-Gå in i mappen `C:/wwwroot/client`. Markera alla mappar och filer inuti (förslagsvis genom att trycka `Ctrl+A` i Windows utforskare) och klipp ut markeringen (`Ctrl+X`). Gå upp en nivå (så du nu står i `C:/wwwroot`) och klistra in (`Ctrl+V`). När flytten är klar kan du radera den nu tomma mappen `client`. 
+Gå in i mappen `C:/wwwroot/client`. Markera alla mappar och filer inuti (förslagsvis genom att trycka `Ctrl+A` i Windows utforskare) och klipp ut markeringen (`Ctrl+X`). Gå upp en nivå (så du nu står i `C:/wwwroot`) och klistra in (`Ctrl+V`). När flytten är klar kan du radera den nu tomma mappen `client`.
 
 Därefter, skapa tre till mappar i `C:/wwwroot` och döp dem till `util`, `Temp` och `Upload` (var noga med stora och små bokstäver).
 
