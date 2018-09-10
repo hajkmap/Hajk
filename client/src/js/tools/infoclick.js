@@ -35,6 +35,9 @@ var FeatureModel = Backbone.Model.extend({
   }
 });
 
+
+var doNotShowInfoClick;
+
 var FeatureCollection = Backbone.Collection.extend({
   model: FeatureModel
 });
@@ -158,13 +161,15 @@ var InfoClickModel = {
     });
 
     this.map.forEachFeatureAtPixel(event.pixel, (feature, layer) => {
+      console.log("#####infoClicked");
       if (layer && layer.get('name') && (layer.get('queryable') !== false)) {
         if (
           layer.get('name') !== 'preview-layer' &&
           layer.get('name') !== 'highlight-wms'
         ) {
             // only disable if there is a feature in highlight
-            if(layer.get("name") === "fir-highlight-vector-layer" && doNotShowInfoClick){
+            console.log("doNotShowInfoClick", doNotShowInfoClick);
+            if(layer.get("name") === "fir-search-vector-layer" || layer.get("name") === "fir-highlight-vector-layer"){
                 doNotShowInfoClick = false;
                 return;
             }
