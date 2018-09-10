@@ -297,7 +297,7 @@
     {
       "type": "edit",
       "options": {
-        "target": "right",
+        "target": "left",
         "instruction": "",
         "visibleForGroups": []
       },

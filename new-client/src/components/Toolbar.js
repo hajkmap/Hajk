@@ -20,7 +20,13 @@ const drawerWidth = 240;
 const styles = theme => ({
   drawer: {
     order: 0,
-    zIndex: 10000
+    zIndex: 10000,
+    [theme.breakpoints.down('sm')]: {
+      position: 'absolute',
+      left: 0,
+      bottom: 0,
+      top: 0
+    }
   },
   drawerPaper: {
     position: 'inherit',
@@ -62,6 +68,9 @@ class Toolbar extends Component {
   renderTools() {
     const { classes, parent } = this.props;
     return this.props.tools.map((tool, i) => {
+
+      tool.appComponent = parent;
+
       return (
         <div key={i}>
           <ListItem

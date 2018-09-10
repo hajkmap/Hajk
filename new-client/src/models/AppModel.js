@@ -65,9 +65,9 @@ class AppModel {
   /**
    * Dynamically load plugins from the configured plugins folder.
    * Assumed that a folder exists with the same name as the requested plugin.
-   * There must also be a file present with the same name well.
+   * There must also be a file present with the same name as well.
    * @param Array<string> - List of plugins to be loaded.
-   * @retunrs Array<Promise> - List of promises to be resolved for.
+   * @returns Array<Promise> - List of promises to be resolved for.
    */
   loadPlugins(plugins) {
     var promises = [];

@@ -16,7 +16,7 @@ class Draw extends Plugin {
 
   getPanel(activePanel) {
     const active = activePanel === this.type;
-    return createPortal(<Panel active={active} type={this.type}/>, document.getElementById("map-overlay"));
+    return createPortal(<Panel active={active} type={this.type} onClose={this.closePanel}/>, document.getElementById("map-overlay"));
   }
 }
 

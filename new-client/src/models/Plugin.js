@@ -7,7 +7,16 @@ export default class Plugin {
     this.options = spec.options;
     this.component = spec.component;
     this.sortOrder = spec.sortOrder || 0;
+    this.appComponent = undefined;
   }
+
+  closePanel = () => {
+    if (this.appComponent) {
+      this.appComponent.setState({
+        activePanel: undefined
+      });
+    }
+  };
 
   onClick(e, appComponent) {
     console.log("Default click behavoiur");

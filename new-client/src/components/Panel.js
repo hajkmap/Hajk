@@ -3,27 +3,43 @@ import PropTypes from "prop-types";
 import { Drawer } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import classNames from "classnames";
+import PanelHeader from "./PanelHeader";
 
-const styles = theme => ({
-  drawer: {
-    order: 1,
-    zIndex: 1
-  },
-  drawerPaper: {
-    position: 'inherit',
-    width: "400px",
-    zIndex: theme.zIndex.drawer - 1
-  },
-  drawerPaperClose: {
-    display: 'none'
-  }
-});
+const styles = theme => {
+  return ({
+    drawer: {
+      order: 1,
+      zIndex: 10000
+    },
+    drawerPaper: {
+      position: 'inherit',
+      width: "400px",
+      zIndex: theme.zIndex.drawer - 1,
+      [theme.breakpoints.down('sm')]: {
+        position: 'absolute',
+        width: '100%',
+        zIndex: 10001
+      }
+    },
+    drawerPaperContent: {
+      padding: '10px'
+    },
+    drawerPaperClosed: {
+      display: 'none'
+    }
+  })
+};
 
 class Panel extends Component {
 
   constructor(props) {
     super(props);
   }
+
+  close = (e) => {
+    const { onClose } = this.props;
+    onClose();
+  };
 
   render() {
     const { classes, active, type } = this.props;
@@ -36,11 +52,14 @@ class Panel extends Component {
           docked: classes.drawer,
           paper: classNames(
             classes.drawerPaper,
-            !active && classes.drawerPaperClose
+            !active && classes.drawerPaperClosed
           )
         }}
       >
-        <h1>{type}</h1>
+        <PanelHeader onClose={this.close} title={type}></PanelHeader>
+        <div className={classes.drawerPaperContent}>
+          <h1>{type}</h1>
+        </div>
       </Drawer>
     );
   }

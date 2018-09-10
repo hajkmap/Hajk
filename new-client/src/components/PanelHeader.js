@@ -1,4 +1,18 @@
 import React, { Component } from "react";
+import { withStyles } from "@material-ui/core/styles";
+
+const styles = theme => ({
+  header: {
+    padding: "10px",
+    background: "#efefef",
+    borderBottom: "1px solid #ccc",
+    cursor: 'pointer',
+    userSelect: 'none'
+  },
+  headerText: {
+    marginBottom: 0
+  }
+});
 
 class PanelHeader extends Component {
   renderHideAllLayersButton() {
@@ -12,24 +26,21 @@ class PanelHeader extends Component {
   }
 
   render() {
+    const { classes } = this.props;
     return (
-      <div className="header">
+      <div className={classes.header}>
         <div className="icons pull-right">
           {this.renderHideAllLayersButton()}
           <i className="material-icons">minimize</i>
           <i
             className="material-icons"
-            onClick={() => {
-              this.props.toggle();
-            }}
-          >
-            close
-          </i>
+            onClick={this.props.onClose}
+          >close</i>
         </div>
-        <h1>{this.props.title}</h1>
+        <h2 className={classes.headerText}>{this.props.title}</h2>
       </div>
     );
   }
 }
 
-export default PanelHeader;
+export default withStyles(styles)(PanelHeader);

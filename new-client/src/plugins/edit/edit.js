@@ -10,18 +10,17 @@ class Edit extends Plugin {
     this.text = "Mät";
   }
 
-  onClick(e, appComponent) {
-    alert("Override default behaviour on click.");
-  }
+  // onClick(e, appComponent) {
+  //   alert("Override default behaviour on click.");
+  // }
 
   getButton() {
     return <EditIcon />;
   }
 
   getPanel(activePanel) {
-    //const active = activePanel === this.type;
-    //return createPortal(<Panel active={active} type={this.type}/>, document.getElementById("map-overlay"));
-    return null;
+    const active = activePanel === this.type;
+    return createPortal(<Panel active={active} type={this.type} onClose={this.closePanel}/>, document.getElementById("map-overlay"));
   }
 }
 
