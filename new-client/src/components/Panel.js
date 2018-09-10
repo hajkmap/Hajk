@@ -6,43 +6,42 @@ import classNames from "classnames";
 import PanelHeader from "./PanelHeader";
 
 const styles = theme => {
-  return ({
+  return {
     drawer: {
       order: 1,
-      zIndex: 10000
+      zIndex: theme.zIndex.drawer - 1
     },
     drawerPaper: {
-      position: 'inherit',
+      position: "inherit",
       width: "400px",
       zIndex: theme.zIndex.drawer - 1,
-      [theme.breakpoints.down('sm')]: {
-        position: 'absolute',
-        width: '100%',
+      [theme.breakpoints.down("sm")]: {
+        position: "absolute",
+        width: "100%",
         zIndex: 10001
       }
     },
     drawerPaperContent: {
-      padding: '10px'
+      padding: "10px"
     },
     drawerPaperClosed: {
-      display: 'none'
+      display: "none"
     }
-  })
+  };
 };
 
 class Panel extends Component {
-
   constructor(props) {
     super(props);
   }
 
-  close = (e) => {
+  close = e => {
     const { onClose } = this.props;
     onClose();
   };
 
   render() {
-    const { classes, active, type } = this.props;
+    const { classes, active, type, title, children } = this.props;
     return (
       <Drawer
         variant="persistent"
@@ -56,10 +55,8 @@ class Panel extends Component {
           )
         }}
       >
-        <PanelHeader onClose={this.close} title={type}></PanelHeader>
-        <div className={classes.drawerPaperContent}>
-          <h1>{type}</h1>
-        </div>
+        <PanelHeader onClose={this.close} title={title} />
+        <div className={classes.drawerPaperContent}>{children}</div>
       </Drawer>
     );
   }

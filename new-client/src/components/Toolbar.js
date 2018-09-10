@@ -21,15 +21,15 @@ const styles = theme => ({
   drawer: {
     order: 0,
     zIndex: 10000,
-    [theme.breakpoints.down('sm')]: {
-      position: 'absolute',
+    [theme.breakpoints.down("sm")]: {
+      position: "absolute",
       left: 0,
       bottom: 0,
       top: 0
     }
   },
   drawerPaper: {
-    position: 'inherit',
+    position: "inherit",
     whiteSpace: "nowrap",
     width: drawerWidth,
     transition: theme.transitions.create("width", {
@@ -68,7 +68,6 @@ class Toolbar extends Component {
   renderTools() {
     const { classes, parent } = this.props;
     return this.props.tools.map((tool, i) => {
-
       tool.appComponent = parent;
 
       return (
@@ -77,14 +76,13 @@ class Toolbar extends Component {
             button
             divider={true}
             selected={parent.state.activePanel === tool.type}
-            onClick={(e) => {
+            onClick={e => {
               tool.onClick(e, parent);
-            }}>
-            <ListItemIcon>
-              {tool.getButton()}
-            </ListItemIcon>
+            }}
+          >
+            <ListItemIcon>{tool.getButton()}</ListItemIcon>
             <ListItemText primary={tool.text || ""} />
-          </ListItem>,
+          </ListItem>
           {tool.getPanel(parent.state.activePanel)}
         </div>
       );
