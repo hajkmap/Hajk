@@ -40,7 +40,22 @@ class Panel extends Component {
     onClose();
   };
 
+  shouldComponentUpdate(nextProps, nextState) {
+    // console.log(`shouldComponentUpdate() ${this.props.type}`);
+    // console.log(this.props, this.state);
+    // console.log(nextProps, nextState);
+    if (this.props.active === nextProps.active) {
+      console.log(`Will NOT update ${this.props.type}`);
+      return false;
+    } else {
+      console.log(`WILL update ${this.props.type}`);
+      return true;
+    }
+  }
+
   render() {
+    console.log(`render() for ${this.props.type} panel`);
+
     const { classes, active, type, title, children } = this.props;
     return (
       <Drawer
