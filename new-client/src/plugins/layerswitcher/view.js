@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import Observer from "react-event-observer";
-import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 
@@ -8,7 +7,6 @@ import LayerSwitcherModel from "./model.js";
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import MapSwitcher from "./components/MapSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
-import PanelHeader from "../../components/PanelHeader.js";
 
 import {
   ListItem,
@@ -16,7 +14,6 @@ import {
   ListItemText,
   Drawer
 } from "@material-ui/core";
-import LayersIcon from "@material-ui/icons/Layers";
 import "./style.css";
 
 const styles = theme => ({
@@ -26,7 +23,7 @@ const styles = theme => ({
     zIndex: theme.zIndex.drawer - 1
   }
 });
-class LayersSwitcher extends Component {
+class LayersSwitcherComponent extends Component {
   state = {
     toggled: false,
     layerGroupsExpanded: true
@@ -41,15 +38,14 @@ class LayersSwitcher extends Component {
     this.observer = Observer();
     this.observer.subscribe("layerAdded", layer => {});
     this.layerSwitcherModel = new LayerSwitcherModel({
-      map: this.props.tool.map,
-      app: this.props.tool.app,
+      map: this.props.map,
+      app: this.props.app,
       observer: this.observer
     });
-    this.props.tool.instance = this;
   }
 
   componentDidMount() {
-    this.options = this.props.tool.options;
+    this.options = this.props.options;
   }
 
   open() {
@@ -74,7 +70,7 @@ class LayersSwitcher extends Component {
     this.setState({
       toggled: !this.state.toggled
     });
-    this.props.tool.app.togglePlugin("layerswitcher");
+    this.props.app.togglePlugin("layerswitcher");
   };
 
   getActiveClass() {
@@ -120,66 +116,42 @@ class LayersSwitcher extends Component {
   renderPanel() {
     const { toggled } = this.state;
     const { classes } = this.props;
-    return createPortal(
-      <Drawer
-        variant="persistent"
-        anchor="left"
-        open={toggled}
-        classes={{ paper: classes.drawerPaper }}
-      >
-        <PanelHeader
-          title="Lagerhanterare"
-          hideAllLayersButton={this.options.toggleAllButton}
-          hideAllLayers={this.hideAllLayers}
-          toggle={this.toggle}
+    return (
+      <div className="tool-panel-content">
+        <MapSwitcher
+          options={this.options}
+          observer={this.observer}
+          appConfig={this.props.app.config.appConfig}
         />
-        <div className="tool-panel-content">
-          <MapSwitcher
-            options={this.options}
-            observer={this.observer}
-            appConfig={this.props.tool.app.config.appConfig}
-          />
-          <BackgroundSwitcher
-            layers={this.options.baselayers}
-            layerMap={this.layerSwitcherModel.layerMap}
-          />
-          <h1
-            onClick={() => {
-              this.toggleLayerGroups();
-            }}
-            className="clickable"
-          >
-            <i className="material-icons">{this.getArrowClass()}</i>
-            Kartlager
-          </h1>
-          <div className={this.getLayerGroupsClass()}>
-            {this.renderLayerGroups()}
-          </div>
+        <BackgroundSwitcher
+          layers={this.options.baselayers}
+          layerMap={this.layerSwitcherModel.layerMap}
+        />
+        <h1
+          onClick={() => {
+            this.toggleLayerGroups();
+          }}
+          className="clickable"
+        >
+          <i className="material-icons">{this.getArrowClass()}</i>
+          Kartlager
+        </h1>
+        <div className={this.getLayerGroupsClass()}>
+          {this.renderLayerGroups()}
         </div>
-      </Drawer>,
-      document.getElementById("map")
+      </div>
     );
   }
 
   isToolActive = () => (this.state.toggled ? true : false);
 
   render() {
-    return (
-      <div>
-        <ListItem button onClick={this.toggle} selected={this.isToolActive()}>
-          <ListItemIcon>
-            <LayersIcon />
-          </ListItemIcon>
-          <ListItemText primary="Lagerhanterare" />
-        </ListItem>
-        {this.renderPanel()}
-      </div>
-    );
+    return this.renderPanel();
   }
 }
 
-LayersSwitcher.propTypes = {
+LayersSwitcherComponent.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(LayersSwitcher);
+export default withStyles(styles)(LayersSwitcherComponent);

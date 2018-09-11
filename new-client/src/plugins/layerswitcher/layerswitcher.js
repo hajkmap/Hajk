@@ -3,6 +3,7 @@ import Panel from "../../components/Panel.js";
 import React, { Component } from "react";
 import { createPortal } from "react-dom";
 import LayersIcon from "@material-ui/icons/Layers";
+import LayersSwitcherComponent from "./view.js";
 
 class LayerSwitcher extends Plugin {
   constructor(spec) {
@@ -23,7 +24,11 @@ class LayerSwitcher extends Plugin {
         title={this.text}
         onClose={this.closePanel}
       >
-        Hello, World.
+        <LayersSwitcherComponent
+          map={this.map}
+          app={this.app}
+          options={this.options}
+        />
       </Panel>,
       document.getElementById("map-overlay")
     );
