@@ -1,6 +1,6 @@
 import Plugin from "../../models/Plugin.js";
 import Panel from "../../components/Panel.js";
-import React, { Component } from "react";
+import React from "react";
 import { createPortal } from "react-dom";
 import RateReviewIcon from "@material-ui/icons/RateReview";
 

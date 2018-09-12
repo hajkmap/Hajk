@@ -2,10 +2,8 @@ import React, { Component } from "react";
 import Observer from "react-event-observer";
 import { createPortal } from "react-dom";
 import CollectorModel from "./model.js";
-import PanelHeader from "../../components/PanelHeader.js";
 import CollectorForm from "./components/CollectorForm.js";
 import "./style.css";
-import Button from '@material-ui/core/Button';
 
 class Collector extends Component {
   constructor() {
@@ -18,11 +16,11 @@ class Collector extends Component {
       markerActive: false,
       displayForm: false,
       description: "",
-      text: "Laddar..."    
-    };    
+      text: "Laddar..."
+    };
   }
 
-  componentDidMount() {    
+  componentDidMount() {
     this.observer = Observer();
     this.observer.subscribe("myEvent", message => {
       console.log(message);
@@ -32,7 +30,7 @@ class Collector extends Component {
       app: this.props.tool.app,
       observer: this.observer
     });
-    this.props.tool.instance = this;   
+    this.props.tool.instance = this;
   }
 
   open() {
@@ -55,21 +53,21 @@ class Collector extends Component {
 
   toggle() {
     if (!this.state.toggled) {
-      if (this.props.toolbar) {  
+      if (this.props.toolbar) {
         this.props.toolbar.hide();
       }
     }
     this.setState({
       toggled: !this.state.toggled
-    });     
-    if (this.props.toolbar) {  
-      this.props.tool.app.togglePlugin("collector");   
+    });
+    if (this.props.toolbar) {
+      this.props.tool.app.togglePlugin("collector");
     }
   }
 
-  getActiveClass() {        
+  getActiveClass() {
     var activeClass = "tool-toggle-button active";
-    var inactiveClass = "tool-toggle-button";      
+    var inactiveClass = "tool-toggle-button";
     return this.state.toggled
       ? activeClass
       : inactiveClass;
@@ -85,13 +83,13 @@ class Collector extends Component {
     return this.state.toggled ? "open" : "";
   }
 
-  activateMarker() {    
+  activateMarker() {
     this.setState({
       markerActive: !this.state.markerActive,
       description: this.state.markerActive ? "" : "Ställ in kartan på vald plats"
     }, () => {
-      if (this.state.markerActive) {                  
-          
+      if (this.state.markerActive) {
+
           this.setState({
             displayForm: true,
             displayCross: true
@@ -111,10 +109,10 @@ class Collector extends Component {
     this.collectorModel.clear();
   }
 
-  renderPanel() {    
+  renderPanel() {
     return createPortal(
       <div className={this.getVisibilityClass()}>
-        <div className="popup-content">    
+        <div className="popup-content">
           <div>Här kan du tycka till om en viss plats eller ett område.</div>
           <CollectorForm />
         </div>
@@ -123,7 +121,7 @@ class Collector extends Component {
     );
   }
 
-  render() {    
+  render() {
     return (
       <div>
         <div className={this.getActiveClass()} onClick={this.toggle}>

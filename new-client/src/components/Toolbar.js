@@ -4,7 +4,6 @@ import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import classNames from "classnames";
 import {
-  List,
   ListItem,
   ListItemIcon,
   ListItemText,
@@ -12,8 +11,12 @@ import {
   Divider,
   IconButton
 } from "@material-ui/core";
-import { ChevronLeft, ChevronRight, Menu, Close } from "@material-ui/icons";
-import "./Toolbar.css"; // TODO: Move styles to JSS and remove the CSS file
+import ChevronLeft from "@material-ui/icons/ChevronLeft";
+import ChevronRight from "@material-ui/icons/ChevronRight";
+import Menu from "@material-ui/icons/Menu";
+import "./Toolbar.css";
+
+//Hello
 
 const drawerWidth = 240;
 
@@ -35,7 +38,6 @@ const styles = theme => ({
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
       duration: 0
-      //duration: theme.transitions.duration.enteringScreen
     })
   },
   drawerPaperClose: {
@@ -43,7 +45,6 @@ const styles = theme => ({
     transition: theme.transitions.create("width", {
       easing: theme.transitions.easing.sharp,
       duration: 0
-      //duration: theme.transitions.duration.leavingScreen
     }),
     width: theme.spacing.unit * 7,
     [theme.breakpoints.up("sm")]: {
@@ -66,7 +67,7 @@ class Toolbar extends Component {
   };
 
   renderTools() {
-    const { classes, parent } = this.props;
+    const { parent } = this.props;
     return this.props.tools.map((tool, i) => {
       tool.appComponent = parent;
 

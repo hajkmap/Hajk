@@ -1,6 +1,6 @@
 import Plugin from '../../models/Plugin.js';
 import Dialog from '../../components/Dialog.js';
-import React, { Component } from "react";
+import React from "react";
 import { createPortal } from "react-dom";
 import InfoIcon from "@material-ui/icons/Info";
 

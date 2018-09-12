@@ -143,7 +143,6 @@ class App extends Component {
 
   render() {
     const { classes } = this.props;
-
     return (
       <div className={classes.root}>
         <main className={classes.map} id="map">
@@ -155,7 +154,7 @@ class App extends Component {
                 color="inherit"
                 className={classes.flex}
               >
-                Hajkmap
+                Hajkmap 3.0
               </Typography>
               <Button color="inherit">Inloggad användare</Button>
             </MUIToolbar>

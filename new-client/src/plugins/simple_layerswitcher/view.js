@@ -4,7 +4,6 @@ import { createPortal } from "react-dom";
 import LayerSwitcherModel from "./model.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
-import PanelHeader from "../../components/PanelHeader.js";
 
 import "./style.css";
 

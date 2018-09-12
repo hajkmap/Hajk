@@ -31,9 +31,6 @@ const styles = theme => {
 };
 
 class Panel extends Component {
-  constructor(props) {
-    super(props);
-  }
 
   close = e => {
     const { onClose } = this.props;
@@ -41,22 +38,11 @@ class Panel extends Component {
   };
 
   shouldComponentUpdate(nextProps, nextState) {
-    // console.log(`shouldComponentUpdate() ${this.props.type}`);
-    // console.log(this.props, this.state);
-    // console.log(nextProps, nextState);
-    if (this.props.active === nextProps.active) {
-      console.log(`Will NOT update ${this.props.type}`);
-      return false;
-    } else {
-      console.log(`WILL update ${this.props.type}`);
-      return true;
-    }
+    return this.props.active !== nextProps.active;
   }
 
   render() {
-    console.log(`render() for ${this.props.type} panel`);
-
-    const { classes, active, type, title, children } = this.props;
+    const { classes, active, title, children } = this.props;
     return (
       <Drawer
         variant="persistent"

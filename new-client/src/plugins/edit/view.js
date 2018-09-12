@@ -7,7 +7,7 @@ import { withStyles } from "@material-ui/core/styles";
 import EditModel from "./model.js";
 import PanelHeader from "../../components/PanelHeader.js";
 
-import { Drawer, Button } from "@material-ui/core";
+import { Drawer } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 
 const styles = theme => ({

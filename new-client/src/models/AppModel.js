@@ -1,6 +1,3 @@
-import Error from "./Error.js";
-import Plugin from "./Plugin.js";
-
 import ConfigMapper from "./../utils/ConfigMapper.js";
 import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
 
@@ -18,7 +15,6 @@ import { Map, View } from "ol";
 import { Zoom, Rotate, ScaleLine, Attribution, FullScreen } from "ol/control";
 import { register } from "ol/proj/proj4";
 
-const pluginsFolder = "plugins";
 var map;
 
 class AppModel {

@@ -279,6 +279,29 @@
         "visibleForGroups": []
       },
       "index": 0
+    },
+    {
+      "type": "edit",
+      "options": {
+        "target": "left",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "draw",
+      "options": {
+        "target": "left",
+        "exportUrl": "/mapservice/export/kml",
+        "importUrl": "/mapservice/import/kml",
+        "base64Encode": false,
+        "instruction": "",
+        "icons": "",
+        "proxyUrl": "",
+        "visibleForGroups": []
+      },
+      "index": 0
     }
   ],
   "map": {

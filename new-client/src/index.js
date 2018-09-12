@@ -82,8 +82,6 @@ fetch("appConfig.json")
                   layersConfig: layersConfig,
                   mapConfig: mapConfig
                 };
-                console.log("Got customTheme", customTheme);
-
                 ReactDOM.render(
                   <MuiThemeProvider theme={getTheme(config, customTheme)}>
                     <App
