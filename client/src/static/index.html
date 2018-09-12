@@ -29,8 +29,8 @@
           });
         HAJK2.configFile = config;
         HAJK2.start({
-          configPath: "/mapservice/config/" + config,
-          layersPath: "/mapservice/config/layers"
+          configPath: "http://localhost/mapservice/config/" + config,
+          layersPath: "http://localhost/mapservice/config/layers"
         }, function (status, message) {
           if (!status) {
             document.write(message);

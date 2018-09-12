@@ -28,6 +28,7 @@ var panels = {
   'coordinatespanel': require('views/coordinatespanel'),
   'exportpanel': require('views/exportpanel'),
   'drawpanel': require('views/drawpanel'),
+  'elevregisterpanel': require('views/elevregisterpanel'),
   'editpanel': require('views/editpanel'),
   'anchorpanel': require('views/anchorpanel'),
   'streetviewpanel': require('views/streetviewpanel'),

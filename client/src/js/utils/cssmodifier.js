@@ -63,6 +63,7 @@ module.exports = {
     var btnPrimaryActiveHoverIE = getCSSRule('.btn-primary:hover:active');
 
     var drawToolsSelected = getCSSRule('.draw-tools li.selected');
+    var elevregisterToolsSelected = getCSSRule('.elevregister-tools li.selected');
     var informationBlanketHeader = getCSSRule('.information #blanket #container #header');
     var informationBlanketContainer = getCSSRule('.information #blanket #container');
 
@@ -128,6 +129,10 @@ module.exports = {
 
     if (drawToolsSelected) {
       drawToolsSelected.style.backgroundColor = config.primaryColor;
+    }
+
+    if (elevregisterToolsSelected) {
+      elevregisterToolsSelected.style.backgroundColor = config.primaryColor;
     }
 
     if (informationBlanketHeader) {

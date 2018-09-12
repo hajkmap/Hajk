@@ -28,6 +28,7 @@ var Tool = require('tools/tool'),
   Coordinates = require('tools/coordinates'),
   Export = require('tools/export'),
   Draw = require('tools/draw'),
+  elevregister = require('tools/elevregister'),
   Edit = require('tools/edit'),
   Anchor = require('tools/anchor'),
   Buffer = require('tools/buffer'),
@@ -73,6 +74,8 @@ var ToolCollection = {
         return new Export(args.options);
       case 'draw':
         return new Draw(args.options);
+      case 'elevregister':
+        return new elevregister(args.options);
       case 'edit':
         return new Edit(args.options);
       case 'anchor':
