@@ -16,8 +16,6 @@ import ChevronRight from "@material-ui/icons/ChevronRight";
 import Menu from "@material-ui/icons/Menu";
 import "./Toolbar.css";
 
-//Hello
-
 const drawerWidth = 240;
 
 const styles = theme => ({

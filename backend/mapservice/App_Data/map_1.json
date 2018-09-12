@@ -178,26 +178,40 @@
             "drawOrder": 0,
             "visibleForGroups": null,
             "infobox": null
+          },
+          {
+            "id": "5",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
           }
         ],
         "groups": [
           {
             "id": "eff9c88f-fc3a-05c2-3a15-285712099854",
             "parent": "-1",
-            "name": "Ny grupp",
+            "name": "Kartlager",
             "toggled": false,
-            "expanded": false,
+            "expanded": true,
             "layers": [
               {
-                "id": "3",
+                "id": "14",
+                "visibleAtStart": true,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "13",
                 "visibleAtStart": false,
                 "drawOrder": 1000,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
-                "id": "1",
-                "visibleAtStart": false,
+                "id": "11",
+                "visibleAtStart": true,
                 "drawOrder": 1000,
                 "visibleForGroups": null,
                 "infobox": null
@@ -307,8 +321,8 @@
   "map": {
     "target": "map",
     "center": [
-      416200,
-      6582000
+      416000,
+      6583000
     ],
     "title": "map_1",
     "projection": "EPSG:3006",

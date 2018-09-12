@@ -7,7 +7,8 @@ class Popup extends Component {
   constructor() {
     super();
     this.state = {
-      selectedIndex: 1
+      selectedIndex: 1,
+      visible: false
     };
   }
 
@@ -17,6 +18,10 @@ class Popup extends Component {
     this.setState({
       selectedIndex: 1
     });
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return this.props.mapClickDataResult !== nextProps.mapClickDataResult;
   }
 
   componentDidUpdate() {
@@ -163,6 +168,9 @@ class Popup extends Component {
       closer.onclick = () => {
         if (this.overlay) {
           this.overlay.setPosition(undefined);
+          if (this.props.onClose) {
+            this.props.onClose();
+          }
           closer.blur();
         }
         return false;
@@ -182,11 +190,12 @@ class Popup extends Component {
     }
 
     if (
+      this.props.mapClickDataResult &&
       this.props.mapClickDataResult.evt &&
       this.props.mapClickDataResult.features.length > 0
     ) {
       document.getElementById('popup').style.display = "inherit";
-      this.overlay.setPosition(this.props.mapClickDataResult.evt.coordinate);      
+      this.overlay.setPosition(this.props.mapClickDataResult.evt.coordinate);
     } else {
       this.overlay.setPosition(undefined);
     }
@@ -197,7 +206,6 @@ class Popup extends Component {
     if (this.props.mapClickDataResult) {
       features = this.props.mapClickDataResult.features;
     }
-
     return (
       <div id="popup" className="ol-popup">
         <i

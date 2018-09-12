@@ -162,6 +162,11 @@ class App extends Component {
           <Popup
             mapClickDataResult={this.state.mapClickDataResult}
             map={this.appModel.getMap()}
+            onClose={() => {
+              this.setState({
+                mapClickDataResult: undefined
+              });
+            }}
           />
           <div className={classNames(classes.widgets, classes.widgetsLeft)}>{this.renderWidgets("left")}</div>
           <div className={classNames(classes.widgets, classes.widgetsRight)}>{this.renderWidgets("right")}</div>
