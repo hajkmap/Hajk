@@ -49,8 +49,6 @@ var ElevregisterPanelView = {
       polygonLineWidth: this.props.model.get('polygonLineWidth'),
       polygonLineStyle: this.props.model.get('polygonLineStyle'),
       polygonFillOpacity: this.props.model.get('polygonFillOpacity'),
-      exportUrl: false,
-      kmlImport: false,
       boxLineColor: this.props.model.get('boxLineColor'),
       boxFillColor: this.props.model.get('boxFillColor'),
       boxLineStyle: this.props.model.get('boxLineStyle'),
@@ -65,9 +63,6 @@ var ElevregisterPanelView = {
   componentWillUnmount: function () {
     this.props.model.abort();
     this.props.model.off('change:dialog');
-    this.props.model.off('change:kmlExportUrl');
-    this.props.model.off('change:kmlImport');
-    this.props.model.off('change:downloadElevregisterKml');
   },
 
   /**
@@ -91,17 +86,6 @@ var ElevregisterPanelView = {
       });
       this.refs.textInput.focus();
     });
-    this.props.model.on('change:kmlExportUrl', () => {
-      this.setState({
-        exportUrl: this.props.model.get('kmlExportUrl')
-      });
-    });
-    this.props.model.on('change:kmlImport', () => {
-      this.setState({
-        kmlImport: this.props.model.get('kmlImport')
-      });
-    });
-    this.props.model.on('change:downloadElevregisterKml');
   },
 
   /**
@@ -151,8 +135,6 @@ var ElevregisterPanelView = {
    */
   clear: function () {
     this.props.model.clear();
-    this.props.model.set('kmlExportUrl', false);
-    this.props.model.set('kmlImport', false);
     this.props.model.set('circleRadius', '');
     this.setState({
       circleRadius: ''
@@ -188,29 +170,7 @@ var ElevregisterPanelView = {
     this.setState({
       symbology: ''
     });
-    this.props.model.set('kmlExportUrl', false);
-    this.props.model.set('kmlImport', false);
     this.props.model.measureTooltip.setPosition(null);
-  },
-
-  /**
-   * Import kml.
-   * @instance
-   */
-  import: function () {
-    this.abort();
-    this.props.model.set('kmlExportUrl', false);
-    this.props.model.import();
-  },
-
-  /**
-   * Export kml.
-   * @instance
-   */
-  export: function () {
-    this.abort();
-    this.props.model.set('kmlImport', false);
-    this.props.model.export();
   },
 
   /**
@@ -235,8 +195,6 @@ var ElevregisterPanelView = {
     this.setState({
       symbology: ''
     });
-    this.props.model.set('kmlExportUrl', false);
-    this.props.model.set('kmlImport', false);
   },
 
   /**
@@ -251,8 +209,6 @@ var ElevregisterPanelView = {
     this.setState({
       symbology: ''
     });
-    this.props.model.set('kmlExportUrl', false);
-    this.props.model.set('kmlImport', false);
   },
 
   /**
@@ -267,8 +223,6 @@ var ElevregisterPanelView = {
     this.setState({
       symbology: ''
     });
-    this.props.model.set('kmlExportUrl', false);
-    this.props.model.set('kmlImport', false);
   },
 
   /*
@@ -284,8 +238,6 @@ var ElevregisterPanelView = {
     this.setState({
       symbology: type
     });
-    this.props.model.set('kmlExportUrl', false);
-    this.props.model.set('kmlImport', false);
   },
 
   /**
@@ -586,67 +538,6 @@ var ElevregisterPanelView = {
   },
 
   /**
-   * Render the import result component.
-   * @instance
-   * @param {string} url
-   * @return {external:ReactElement} component
-   */
-  renderImport: function (visible) {
-    function upload () {
-      this.refs.uploadIframe.addEventListener('load', () => {
-        this.props.model.importElevregisterLayer(this.refs.uploadIframe.contentDocument);
-      });
-    }
-
-    if (!visible) return null;
-    var url = this.props.model.get('importUrl');
-    var style = {display: 'none'};
-    return (
-      <div>
-        <h4>Importera</h4>
-        <p>Välj KML-fil att importera</p>
-        <form id='upload-form' method='post' action={url} target='upload-iframe' encType='multipart/form-data'>
-          <input onChange={upload.bind(this)} type='file' name='files[]' accept='.kml' multiple='false' className='btn btn-default' /><br />
-          <input type='submit' value='Ladda upp' name='upload-file-form' className='btn btn-default' /><br />
-          <iframe id='upload-iframe' name='upload-iframe' ref='uploadIframe' style={style} />
-        </form>
-      </div>
-    );
-  },
-
-  /**
-   * Render the export result component.
-   * @instance
-   * @param {string} url
-   * @return {external:ReactElement} component
-   */
-  renderExportResult: function (url) {
-    if (!url) return null;
-    if (url === 'NO_FEATURES') {
-      return (
-        <div>
-          <h4>Export</h4>
-          <p>Denna funktionen exporterar inritade objekt.</p>
-          <p>Kartan innehåller inte något att exportera.</p>
-        </div>
-      );
-    } else {
-      return (
-        <div>
-          <h4>Export</h4>
-          <p>Din export är klar, hämta den genom att klicka på länken nedan.</p>
-          <p>
-            Exportfilen är av typen .kml och kan vid ett senare tillfälle importeras i kartan.
-            Detta kan vara användbart om du vill dela med dig av det du ritat eller vill öppna det vid ett senare tillfälle.
-            Filen kan även öppnas i Google Earth.
-          </p>
-          <a href={url}>Hämta export</a>
-        </div>
-      );
-    }
-  },
-
-  /**
    * Render the dialog component.
    * @instance
    * @param {boolean} visible
@@ -701,9 +592,7 @@ var ElevregisterPanelView = {
   render: function () {
     var showLabels = this.state.showLabels ? 'checked' : '',
       symbology = this.renderSymbology(this.state.symbology),
-      dialog = this.renderDialog(this.state.dialog),
-      exportRes = this.renderExportResult(this.state.exportUrl),
-      importRes = this.renderImport(this.state.kmlImport);
+      dialog = this.renderDialog(this.state.dialog)
 
     return (
       <Panel title='Elevregister' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
@@ -716,8 +605,6 @@ var ElevregisterPanelView = {
         </div>
         <div className='panel-body'>
           {symbology}
-          {exportRes}
-          {importRes}
         </div>
         <div>{dialog}
           {this.renderAlert()}

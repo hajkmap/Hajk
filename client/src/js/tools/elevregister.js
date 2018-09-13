@@ -16,12 +16,11 @@
 //
 // Den här programvaran är öppen i syfte att den skall vara till nytta för andra
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
+// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE
 //
 // https://github.com/hajkmap/Hajk
 
 var ToolModel = require('tools/tool');
-var kmlWriter = require('utils/kmlwriter');
 var source;
 var olMap;
 
@@ -29,7 +28,7 @@ var olMap;
  * @typedef {Object} ElevregisterModel~ElevregisterModelProperties
  * @property {string} type - Default: 'elevregister'
  * @property {string} panel - Default: 'ElevregisterPanel'
- * @property {string} title - Default: 'Ritverktyg'
+ * @property {string} title - Default: 'Elevregister'
  * @property {string} toolbar - Default: 'bottom'
  * @property {string} visible - Default: false
  * @property {string} icon - Default: 'fa fa-building icon'
@@ -41,8 +40,6 @@ var olMap;
  * @property {external:"ol.source"} source - Default: undefined
  * @property {boolean} showLabels - Default: false
  * @property {boolean} dialog - Default: false
- * @property {boolean} kmlImport - Default: false
- * @property {boolean} kmlExportUrl - Default: false
  * @property {string} fontSize - Default: 10px
  * @property {string} fontColor - Default: "rgb(255, 255, 255)"
  * @property {string} fontBackColor - Default: "rgb(0, 0, 0)"
@@ -84,8 +81,6 @@ var ElevregisterModelProperties = {
   source: undefined,
   showLabels: false,
   dialog: false,
-  kmlImport: false,
-  kmlExportUrl: false,
   fontSize: '10',
   fontColor: 'rgb(255, 255, 255)',
   fontBackColor: 'rgb(0, 0, 0)',
@@ -602,66 +597,6 @@ var ElevregisterModel = {
   },
 
   /**
-   * Export elevregister layer.
-   * @instance
-   */
-  export: function () {
-    var features = this.get('elevregisterLayer').getSource().getFeatures(),
-      transformed = [],
-      postData,
-      form = document.createElement('form'),
-      input = document.createElement('input'),
-      curr = document.getElementById(this.exportHitsFormId);
-
-    if (features.length === 0) {
-      this.set({
-        'kmlExportUrl': 'NO_FEATURES'
-      });
-      return false;
-    }
-
-    features.forEach((feature) => {
-      var c = feature.clone();
-      if (c.getGeometry() instanceof ol.geom.Circle) {
-        let geom = ol.geom.Polygon.fromCircle(feature.getGeometry(), 96);
-        c.setGeometry(geom);
-      }
-      c.getGeometry().transform(this.get('olMap').getView().getProjection(), 'EPSG:4326');
-
-      if (c.getStyle()[1]) {
-        c.setProperties({
-          style: JSON.stringify(this.extractStyle(c.getStyle()[1] || c.getStyle()[0]))
-        });
-      }
-
-      transformed.push(c);
-    });
-
-    postData = kmlWriter.createXML(transformed, 'ritobjekt');
-    if (this.get('base64Encode')) {
-      postData = btoa(postData);
-    }
-
-    this.set('downloadingElevregisterKml', true);
-    $.ajax({
-      url: this.get('exportUrl'),
-      method: 'post',
-      data: {
-        json: postData
-      },
-      format: 'json',
-      success: (url) => {
-        this.set('downloadingElevregisterKml', false);
-        this.set('kmlExportUrl', this.validateProxyUrl(url));
-      },
-      error: (err) => {
-        this.set('downloadingElevregisterKml', false);
-        alert('Något gick fel. Försök igen');
-      }
-    });
-  },
-
-  /**
    * Set the features style from based upon its properties.
    * @param {external:"ol.feature"}
    * @instance
@@ -725,73 +660,6 @@ var ElevregisterModel = {
       }
     });
     return x.every(c => c) ? x : false;
-  },
-
-  /**
-   * Import elevregister layer and add features to the map.
-   * @instance
-   * @param {XMLDocument} xmlDocument
-   */
-  importElevregisterLayer: function (xmlDoc) {
-    var clonedNode = xmlDoc.childNodes[0].cloneNode(true),
-      serializer = new XMLSerializer(),
-      kml_string = serializer.serializeToString(clonedNode),
-      parser = new ol.format.KML(),
-      features = parser.readFeatures(kml_string),
-      extent = false;
-
-    features.forEach((feature) => {
-      coordinates = feature.getGeometry().getCoordinates();
-      type = feature.getGeometry().getType();
-      newCoordinates = [];
-      feature.setProperties({
-        user: true
-      });
-      if (type == 'LineString') {
-        coordinates.forEach((c, i) => {
-          pairs = [];
-          c.forEach((digit) => {
-            if (digit != 0) { pairs.push(digit); }
-          });
-          newCoordinates.push(pairs);
-        });
-        feature.getGeometry().setCoordinates(newCoordinates);
-      } else if (type == 'Polygon') {
-        newCoordinates[0] = [];
-        coordinates.forEach((polygon, i) => {
-          polygon.forEach((vertex, j) => {
-            pairs = [];
-            vertex.forEach((digit) => {
-              if (digit != 0) { pairs.push(digit); }
-            });
-            newCoordinates[0].push(pairs);
-          });
-        });
-        feature.getGeometry().setCoordinates(newCoordinates);
-      }
-
-      feature.getGeometry().transform(
-        'EPSG:4326',
-        this.get('olMap').getView().getProjection()
-      );
-      this.setStyleFromProperties(feature);
-    });
-
-    this.get('elevregisterLayer').getSource().addFeatures(features);
-    extent = this.calculateExtent(features);
-
-    if (extent) {
-      let size = this.get('olMap').getSize();
-      this.get('olMap').getView().fit(extent, size);
-    }
-  },
-
-  /**
-   * Trigger kml import
-   * @instance
-   */
-  import: function () {
-    this.set('kmlImport', true);
   },
 
   /**
