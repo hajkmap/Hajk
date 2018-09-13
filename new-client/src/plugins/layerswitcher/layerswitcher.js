@@ -17,6 +17,8 @@ class LayerSwitcher extends Plugin {
 
   getPanel(activePanel) {
     const active = activePanel === this.type;
+    console.log(`${this.type} is active? ${active}`);
+
     return createPortal(
       <Panel
         active={active}

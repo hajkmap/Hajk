@@ -28,53 +28,53 @@ const styles = theme => ({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingTop: '64px',
-    [theme.breakpoints.down('sm')]: {
-      paddingTop: '54px'
+    paddingTop: "64px",
+    [theme.breakpoints.down("sm")]: {
+      paddingTop: "54px"
     }
   },
   flex: {
     flexGrow: 1
   },
   overlay: {
-    [theme.breakpoints.down('sm')]: {
-      display: 'inherit',
-      width: '100%'
+    [theme.breakpoints.down("sm")]: {
+      display: "inherit",
+      width: "100%"
     },
-    position: 'absolute',
+    position: "absolute",
     display: "flex",
     flexDirection: "row",
     justifyContent: "flex-start",
-    height: '100%'
+    height: "100%"
   },
   widgets: {
-    position: 'absolute',
+    position: "absolute",
     zIndex: theme.zIndex.drawer - 2,
-    minHeight: '50px',
-    margin: '10px',
-    overflow: 'visible',
-    [theme.breakpoints.down('sm')]: {
-      margin: '5px',
+    minHeight: "50px",
+    margin: "10px",
+    overflow: "visible",
+    [theme.breakpoints.down("sm")]: {
+      margin: "5px"
     }
   },
   widgetsLeft: {
     left: 0,
-    top: '65px',
-    [theme.breakpoints.down('sm')]: {
-      top: '55px',
+    top: "65px",
+    [theme.breakpoints.down("sm")]: {
+      top: "55px"
     }
   },
   widgetsRight: {
-    right: '1px',
-    top: '200px',
-    [theme.breakpoints.down('sm')]: {
-      top: '190px',
+    right: "1px",
+    top: "200px",
+    [theme.breakpoints.down("sm")]: {
+      top: "190px"
     }
   },
   button: {
-    width: '50px',
-    height: '50px',
-    marginBottom: '5px'
+    width: "50px",
+    height: "50px",
+    marginBottom: "5px"
   }
 });
 
@@ -116,6 +116,7 @@ class App extends Component {
       return this.state.tools
         .filter(tool => tool.options.target === target)
         .map((tool, i) => {
+          console.log("renderWidgets() in App.js", tool.type);
           if (tool.type === "layerswitcher" && !tool.options.active) {
             return null;
           }
@@ -127,9 +128,10 @@ class App extends Component {
                 color="default"
                 aria-label="Verktyg"
                 className={classes.button}
-                onClick={(e) => {
+                onClick={e => {
                   tool.onClick(e, this);
-                }}>
+                }}
+              >
                 {tool.getButton()}
               </Button>
               {tool.getPanel(this.state.activePanel)}
@@ -141,14 +143,29 @@ class App extends Component {
     }
   }
 
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   console.log(this.props);
+  //   console.log(nextProps);
+  //   console.log(this.state);
+  //   console.log(nextState);
+  //   return true;
+  // }
+
   render() {
+    // Keep in mind: If a parent's render method gets called,
+    // all the child components' render methods will get called as well.
+    console.log("render() (App.js)");
+
     const { classes } = this.props;
     return (
       <div className={classes.root}>
         <main className={classes.map} id="map">
           <AppBar position="absolute">
             <MUIToolbar>
-              <Toolbar tools={this.appModel.getToolbarPlugins()} parent={this} />
+              <Toolbar
+                tools={this.appModel.getToolbarPlugins()}
+                parent={this}
+              />
               <Typography
                 variant="title"
                 color="inherit"
@@ -168,9 +185,13 @@ class App extends Component {
               });
             }}
           />
-          <div className={classNames(classes.widgets, classes.widgetsLeft)}>{this.renderWidgets("left")}</div>
-          <div className={classNames(classes.widgets, classes.widgetsRight)}>{this.renderWidgets("right")}</div>
-          <div id="map-overlay" className={classes.overlay}></div>
+          <div className={classNames(classes.widgets, classes.widgetsLeft)}>
+            {this.renderWidgets("left")}
+          </div>
+          <div className={classNames(classes.widgets, classes.widgetsRight)}>
+            {this.renderWidgets("right")}
+          </div>
+          <div id="map-overlay" className={classes.overlay} />
         </main>
       </div>
     );
