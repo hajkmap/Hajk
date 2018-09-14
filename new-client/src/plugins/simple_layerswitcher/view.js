@@ -82,10 +82,19 @@ class LayersSwitcher extends Component {
 
   renderLayerGroups() {
     const { expanded } = this.state;
+    var informativePlugin = this.props.app.plugins.hasOwnProperty("informative")
+      ? this.props.app.plugins.informative
+      : undefined;
+
     return this.options.groups.map((group, i) => {
       return (
-        <LayerGroup expanded={expanded === group.id} key={i} group={group} model={this.layerSwitcherModel}
+        <LayerGroup
+          expanded={expanded === group.id}
+          key={i}
+          group={group}
+          model={this.layerSwitcherModel}
           handleChange={this.handleChange}
+          informativePlugin={informativePlugin}
         />
       );
     });
@@ -118,20 +127,14 @@ class LayersSwitcher extends Component {
     );
   }
 
-  renderPanel() {
-    return (
-      <div className="tool-panel-content">
-        <div className={this.getLayerGroupsClass()}>
-          {this.renderLayerGroups()}
-        </div>
-      </div>
-    );
-  }
-
   render() {
     return (
       <div>
-        {this.renderPanel()}
+        <div className="tool-panel-content">
+          <div className={this.getLayerGroupsClass()}>
+            {this.renderLayerGroups()}
+          </div>
+        </div>
         {this.renderBreadCrumbs()}
       </div>
     );

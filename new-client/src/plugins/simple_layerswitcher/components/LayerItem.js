@@ -26,7 +26,7 @@ class LayerItem extends Component {
    * @instance
    */
   componentDidMount() {
-    var layerInfo = this.props.layer.get("layerInfo");    
+    var layerInfo = this.props.layer.get("layerInfo");
     this.setState({
       caption: layerInfo.caption,
       visible: this.props.layer.get("visible"),
@@ -43,8 +43,8 @@ class LayerItem extends Component {
       infoExpanded: false,
       instruction: layerInfo.instruction
     });
-    
-    this.props.layer.on("change:visible", (e) => {      
+
+    this.props.layer.on("change:visible", (e) => {
       this.setState({
         visible: !e.oldValue
       });
@@ -111,9 +111,9 @@ class LayerItem extends Component {
   }
 
   renderLegendImage() {
-    
+
     var src = this.state.legend[0] && this.state.legend[0].url
-    ? this.state.legend[0].url 
+    ? this.state.legend[0].url
     : "";
 
     return (
@@ -123,13 +123,50 @@ class LayerItem extends Component {
     )
   }
 
+  openInformative = (chapter) => (e) => {
+    this.props.onOpenChapter(chapter);
+  };
+
+  findChapters(id, chapters) {
+    return chapters.reduce((chaptersWithLayer, chapter) => {
+      if (Array.isArray(chapter.layers)) {
+        if (chapter.layers.some(layerId => layerId === id)) {
+          return [...chaptersWithLayer, chapter];
+        }
+        if (chapter.chapters.length > 0) {
+          return this.findChapters(id, chapter.chapters);
+        }
+      }
+      return chaptersWithLayer;
+    }, [])
+  }
+
+  renderChapterLinks(chapters) {
+    if (chapters) {
+      var chaptersWithLayer = this.findChapters(this.props.layer.get("name"), chapters);
+      return (
+        <ul>
+        {
+          chaptersWithLayer.map((chapter, i) => {
+            return (
+              <li key={i}><a href="#text1" onClick={this.openInformative(chapter)}>{chapter.header}</a></li>
+            )
+          })
+        }
+        </ul>
+      );
+    } else  {
+      return null;
+    }
+  }
+
   render() {
     var caption = this.props.layer.get("caption")
     ,   visible = this.state.visible;
 
     if (!caption) {
       return null;
-    }    
+    }
 
     return (
       <div className="panel panel-default layer-item">
@@ -149,7 +186,7 @@ class LayerItem extends Component {
               >
                 <strong>{caption}</strong>
               </label>
-            </span>          
+            </span>
             <p
               className="info-title"
               dangerouslySetInnerHTML={{ __html: this.state.infoText }}
@@ -158,7 +195,10 @@ class LayerItem extends Component {
           <div className="right-col">
             {this.renderLegendImage()}
           </div>
-        </div>        
+        </div>
+        <div className="clearfix">
+          {this.renderChapterLinks(this.props.chapters)}
+        </div>
       </div>
     );
   }

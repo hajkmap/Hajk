@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import LayersIcon from "@material-ui/icons/Layers";
 import LayerSwitcher from "./view.js";
 
-class Draw extends Plugin {
+class SimpleLayerSwitcher extends Plugin {
   constructor(spec) {
     super(spec);
     this.text = "Innehåll";
@@ -35,4 +35,4 @@ class Draw extends Plugin {
   }
 }
 
-export default Draw;
+export default SimpleLayerSwitcher;

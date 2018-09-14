@@ -1,12 +1,13 @@
 import React, { Component } from "react";
 import LayerItem from "./LayerItem.js";
-import "./LayerGroup.css";
 import { withStyles } from '@material-ui/core/styles';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Typography from '@material-ui/core/Typography';
+
+import "./LayerGroup.css";
 
 const styles = theme => ({
   root: {
@@ -15,7 +16,7 @@ const styles = theme => ({
     padding: 0
   },
   heading: {
-    fontSize: theme.typography.pxToRem(18),    
+    fontSize: theme.typography.pxToRem(18),
     flexBasis: '100%',
     flexShrink: 0,
   },
@@ -46,8 +47,8 @@ class LayerGroup extends Component {
     });
     this.model = this.props.model;
   }
-  
-  handleChange = panel => (event, expanded) => {        
+
+  handleChange = panel => (event, expanded) => {
     this.setState({
       expanded: expanded ? panel : false,
     });
@@ -57,7 +58,7 @@ class LayerGroup extends Component {
     const { expanded } = this.state;
     const { classes } = this.props;
     return this.state.groups.map((group, i) => {
-      return <LayerGroup expanded={expanded === group.id} key={i} group={group} model={this.model} 
+      return <LayerGroup expanded={expanded === group.id} key={i} group={group} model={this.model}
         handleChange={this.handleChange} classes={classes}
       />
     });
@@ -75,22 +76,35 @@ class LayerGroup extends Component {
 
   getArrowClass() {
     return this.state.expanded ? "expand_less" : "chevron_right";
-  }  
+  }
 
   render() {
-    const { classes } = this.props;    
+    const { classes } = this.props;
     return (
       <div className="layer-group">
         <ExpansionPanel expanded={this.props.expanded} onChange={this.props.handleChange(this.props.group.id)}>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography className={classes.heading}>{this.state.name}</Typography>          
+            <Typography className={classes.heading}>{this.state.name}</Typography>
           </ExpansionPanelSummary>
-          <ExpansionPanelDetails classes={{root: classes.root}}>          
+          <ExpansionPanelDetails classes={{root: classes.root}}>
             {this.state.layers.map((layer, i) => {
               var mapLayer = this.model.layerMap[Number(layer.id)];
               if (mapLayer) {
-                return (                
-                  <LayerItem key={i} layer={mapLayer} />                
+                return (
+                  <LayerItem
+                    key={i}
+                    layer={mapLayer}
+                    chapters={this.props.informativePlugin.informativeModel.chapters}
+                    onOpenChapter={(chapter) => {
+
+                      this.props.informativePlugin.openPanel((observer) => {
+
+                        observer.publish("changeChapter", chapter);
+
+                      });
+
+                    }}
+                  />
                 );
               } else {
                 return null;
@@ -98,7 +112,7 @@ class LayerGroup extends Component {
             })}
           </ExpansionPanelDetails>
           {this.renderLayerGroups()}
-        </ExpansionPanel>      
+        </ExpansionPanel>
       </div>
     );
   }

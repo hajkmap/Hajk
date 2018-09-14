@@ -8,7 +8,7 @@
   cursor: pointer;
 }
 
-.informative h1:hover {  
+.informative h1:hover {
 }
 
 .informative h2 {
@@ -16,11 +16,11 @@
 
 .informative-tool-toggle-button {
   position: absolute;
-  top: 20px;  
+  top: 20px;
   right: 0;
   background: white;
   padding: 10px;
-  cursor: pointer;  
+  cursor: pointer;
   border: 1px solid;
   border-right: 0;
 }
@@ -41,10 +41,6 @@
   }
 }
 
-.ol-full-screen, .ol-zoom {
-  display: none;
-}
-
 .toc, .content {
 
 }
@@ -53,10 +49,10 @@
   width: 100%;
 }
 
-.toc {  
+.toc {
 }
 
-.chapter {    
+.chapter {
   border: 1px solid #ccc;
   cursor: pointer;
   user-select: none;

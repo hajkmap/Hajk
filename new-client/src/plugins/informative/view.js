@@ -1,9 +1,4 @@
 import React, { Component } from "react";
-import Observer from "react-event-observer";
-import InformativeModel from "./model.js";
-import { createPortal } from "react-dom";
-import "./style.css";
-import PanelHeader from "../../components/PanelHeader.js";
 import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
 import Icon from '@material-ui/core/Icon';
@@ -12,23 +7,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
-var history = (function () {
-  var history = [];
-  return {
-    add: (state) => {          
-      history = [state, ...history];      
-    },
-    remove: () => {
-      history.splice(0, 1);   
-    },
-    get: () => {
-      return history;
-    },
-    getLast: () => {
-      return history[0];
-    }    
-  };
-}());
+import "./style.css";
 
 const styles = theme => ({
   button: {
@@ -48,10 +27,7 @@ const styles = theme => ({
 class Informative extends Component {
   constructor() {
     super();
-    this.toggle = this.toggle.bind(this);
     this.state = {
-      toggled: false,
-      text: "Laddar...",
       chapters: [],
       chapter: {
         header: "",
@@ -61,151 +37,126 @@ class Informative extends Component {
   }
 
   componentDidMount() {
-    this.observer = Observer();
-    this.observer.subscribe("myEvent", message => {
-      console.log(message);
-    });
-    this.informativeModel = new InformativeModel({
-      map: this.props.tool.map,
-      app: this.props.tool.app,
-      observer: this.observer
-    });
-    this.props.tool.instance = this;
-    this.informativeModel.load(chapters => {
+    this.props.parent.informativeModel.load(chapters => {
+      this.toc = chapters;
       var state = {
         chapters: chapters,
         chapter: {
           header: "",
           html: "<span></span>"
         }
-      };      
+      };
       this.setState(state);
-      history.add(state)
     });
-  }
-
-  open() {
-    this.setState({
-      toggled: true
+    this.props.observer.subscribe('changeChapter', (chapter) => {
+      this.setState({
+        chapters: chapter.chapters,
+        chapter: chapter
+      });
     });
-  }
-
-  close() {
-    this.setState({
-      toggled: false
-    });
-  }
-
-  minimize() {
-    this.setState({
-      toggled: false
-    });
-  }
-
-  toggle() {    
-    if (!this.state.toggled && this.props.toolbar) {
-      this.props.toolbar.hide();
-    }
-    this.setState({
-      toggled: !this.state.toggled
-    });    
-  }
-
-  getActiveClass() {        
-    var activeClass = "tool-toggle-button active";
-    var inactiveClass = "tool-toggle-button";
-    return this.state.toggled
-      ? activeClass
-      : inactiveClass;
-  }
-
-  getVisibilityClass() {
-    return this.state.toggled
-      ? "tool-panel informative-panel"
-      : "tool-panel informative-panel hidden";
-  }
-
-  getOpen() {
-    return this.state.toggled ? "open" : "";
   }
 
   displayMap(layers, mapSettings) {
-    this.informativeModel.displayMap(layers, mapSettings);
+    this.props.parent.informativeModel.displayMap(layers, mapSettings);
   }
 
   renderLayerItems(chapter) {
     const { classes } = this.props;
     if (Array.isArray(chapter.layers) && chapter.layers.length > 0) {
       return (
-        <Button variant="contained" color="primary" className={classes.button} onClick={() => this.displayMap(chapter.layers, chapter.mapSettings)}>
+        <Button
+          variant="contained"
+          color="primary"
+          className={classes.button}
+          onClick={() => {
+            this.displayMap(
+              chapter.layers,
+              chapter.mapSettings
+            );
+            if (document.body.scrollWidth < 600) {
+              this.props.parent.closePanel();
+            }
+          }}>
           Visa karta
           <Icon className={classes.rightIcon}>map</Icon>
-        </Button>      
+        </Button>
       )
     }
   }
-  
-  renderTocItem(chapters) {    
-    return chapters.map((chapter, i) => {        
-      return <ListItem button key={i} className="chapter" onClick={() => {         
+
+  renderTocItem(chapters) {
+    return chapters.map((chapter, i) => {
+      return <ListItem button key={i} className="chapter" onClick={() => {
         var state = {
           chapters: chapter.chapters,
-          chapter: chapter          
-        }; 
+          chapter: chapter
+        };
         this.setState(state);
-        history.add(state);
       }}> <ListItemText primary={chapter.header} /></ListItem>
     });
   }
-  
-  createMarkup() {        
+
+  createMarkup() {
     return { __html: this.state.chapter.html };
   }
 
   renderContent() {
     return <div dangerouslySetInnerHTML={this.createMarkup()}></div>
-  }  
-
-  renderBackButton() {    
-    const { classes } = this.props;
-    if (history.get().length === 1) {
-      return null;
-    } else {
-      return (
-        <Button variant="outlined" color="primary" className={classes.button} onClick={() => {
-          history.remove();          
-          this.setState(history.getLast());          
-        }}>Tillbaka</Button>
-      );
-    }
   }
 
-  renderPanel() {    
-    return createPortal(
-      <div className={this.getVisibilityClass()}>
-        <PanelHeader title="Översiktsplan" toggle={this.toggle} />
-        <div className="tool-panel-content">
-          <div>
-            {this.renderBackButton()}
-          </div>
-          <List component="nav" className="toc">{this.renderTocItem(this.state.chapters)}</List>
-          <div className="layers">{this.renderLayerItems(this.state.chapter)}</div>
-          <h1>{this.state.chapter.header}</h1>
-          <div className="content">{this.renderContent()}</div>
-        </div>
-      </div>,
-      document.getElementById("map")
+  findParentInToc(lookupChapter, chapters, parent) {
+    var foundParent = false;
+    chapters.forEach(chapter => {
+      if (chapter.chapters.length > 0 && !foundParent) {
+        foundParent = this.findParentInToc(lookupChapter, chapter.chapters, chapter);
+      }
+      if (lookupChapter === chapter && !foundParent) {
+          foundParent = {
+            chapter: parent,
+            chapters: chapters
+          }
+      }
+    });
+    return foundParent;
+  }
+
+  renderBackButton() {
+    const { classes } = this.props;
+    if (!this.state.chapter.header) {
+      return null;
+    }
+    return (
+      <Button
+        variant="outlined"
+        color="primary"
+        className={classes.button}
+        onClick={() => {
+          var parent = this.findParentInToc(this.state.chapter, this.toc, null);
+          if (parent) {
+            this.setState({
+              chapter: parent.chapter || {
+                header: "",
+                html: "<span></span>"
+              },
+              chapters: parent.chapters
+            });
+          }
+
+        }}
+      >Tillbaka</Button>
     );
   }
 
-  render() {    
+  render() {
     return (
       <div>
-        <div className={this.getActiveClass()} onClick={this.toggle}>
-          <i className="material-icons">satellite</i>
-          <i className="tool-text">Översiktsplan</i>
+        <div>
+          {this.renderBackButton()}
         </div>
-        {this.renderPanel()}
+        <List component="nav" className="toc">{this.renderTocItem(this.state.chapters)}</List>
+        <div className="layers">{this.renderLayerItems(this.state.chapter)}</div>
+        <h1>{this.state.chapter.header}</h1>
+        <div className="content">{this.renderContent()}</div>
       </div>
     );
   }

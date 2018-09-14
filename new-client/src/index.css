@@ -68,7 +68,7 @@ button {
   text-align: center;
   margin-top: 5%;
 }
-
+/*
 .tool-panel {
   position: fixed;
   top: 0;
@@ -131,7 +131,7 @@ button {
 
 .tool-panel.hidden {
   display: none;
-}
+}*/
 
 .hidden {
   display: none;

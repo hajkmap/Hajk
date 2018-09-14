@@ -29,3 +29,7 @@
   top: 200px;
   right: 0;
 }
+
+button:focus {
+  outline: none;
+}

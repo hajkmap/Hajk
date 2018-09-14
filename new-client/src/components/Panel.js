@@ -15,14 +15,22 @@ const styles = theme => {
       position: "inherit",
       width: "400px",
       zIndex: theme.zIndex.drawer - 1,
-      [theme.breakpoints.down("sm")]: {
+      [theme.breakpoints.down("xs")]: {
         position: "absolute",
         width: "100%",
         zIndex: 10001
       }
     },
+    drawerPaperRight: {
+      position: "fixed",
+      right: 0,
+      top: '64px',
+      [theme.breakpoints.down("xs")]: {
+        top: '54px'
+      }
+    },
     drawerPaperContent: {
-      padding: "10px"
+      padding: "10px",
     },
     drawerPaperClosed: {
       display: "none"
@@ -46,13 +54,14 @@ class Panel extends Component {
     return (
       <Drawer
         variant="persistent"
-        anchor="left"
+        anchor={this.props.position || "left"}
         open={active}
         classes={{
           docked: classes.drawer,
           paper: classNames(
             classes.drawerPaper,
-            !active && classes.drawerPaperClosed
+            !active && classes.drawerPaperClosed,
+            (this.props.position === "right" ? classes.drawerPaperRight : "")
           )
         }}
       >

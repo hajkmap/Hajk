@@ -17,66 +17,68 @@ import "./App.css";
 // Global customizations that previously went to custom.css
 // should now go to public/customTheme.json. They are later
 // merged when MUI Theme is created in index.js.
-const styles = theme => ({
-  // We can also consult https://material-ui.com/customization/default-theme/ for available options
-  map: {
-    flexGrow: 1,
-    zIndex: 1,
-    overflow: "hidden",
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingTop: '64px',
-    [theme.breakpoints.down('sm')]: {
-      paddingTop: '54px'
-    }
-  },
-  flex: {
-    flexGrow: 1
-  },
-  overlay: {
-    [theme.breakpoints.down('sm')]: {
-      display: 'inherit',
-      width: '100%'
+const styles = theme => {
+  return {
+    // We can also consult https://material-ui.com/customization/default-theme/ for available options
+    map: {
+      flexGrow: 1,
+      zIndex: 1,
+      overflow: "hidden",
+      position: "absolute",
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      [theme.breakpoints.down('xs')]: {
+        top: 0
+      }
     },
-    position: 'absolute',
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    height: '100%'
-  },
-  widgets: {
-    position: 'absolute',
-    zIndex: theme.zIndex.drawer - 2,
-    minHeight: '50px',
-    margin: '10px',
-    overflow: 'visible',
-    [theme.breakpoints.down('sm')]: {
-      margin: '5px',
+    flex: {
+      flexGrow: 1
+    },
+    overlay: {
+      display: "flex",
+      flexDirection: "row",
+      justifyContent: "flex-start",
+      top: '64px',
+      right: 0,
+      left: 0,
+      bottom: 0,
+      [theme.breakpoints.down('xs')]: {
+        display: 'inherit',
+        width: '100%',
+        top: '56px'
+      },
+      position: 'absolute'
+    },
+    widgets: {
+      position: 'absolute',
+      zIndex: theme.zIndex.drawer - 2,
+      minHeight: '50px',
+      margin: '10px',
+      overflow: 'visible',
+      [theme.breakpoints.down('xs')]: {
+      }
+    },
+    widgetsLeft: {
+      left: 0,
+      [theme.breakpoints.down('xs')]: {
+      }
+    },
+    widgetsRight: {
+      right: '4px',
+      top: '150px',
+      [theme.breakpoints.down('xs')]: {
+      }
+    },
+    button: {
+      width: '50px',
+      height: '50px',
+      marginBottom: '5px',
+      outline: 'none'
     }
-  },
-  widgetsLeft: {
-    left: 0,
-    top: '65px',
-    [theme.breakpoints.down('sm')]: {
-      top: '55px',
-    }
-  },
-  widgetsRight: {
-    right: '1px',
-    top: '200px',
-    [theme.breakpoints.down('sm')]: {
-      top: '190px',
-    }
-  },
-  button: {
-    width: '50px',
-    height: '50px',
-    marginBottom: '5px'
   }
-});
+};
 
 class App extends Component {
   constructor() {
@@ -132,7 +134,7 @@ class App extends Component {
                 }}>
                 {tool.getButton()}
               </Button>
-              {tool.getPanel(this.state.activePanel)}
+              {tool.getPanel(this.state.activePanel, this.state.secondActivePanel)}
             </div>
           );
         });
@@ -146,7 +148,7 @@ class App extends Component {
     return (
       <div className={classes.root}>
         <main className={classes.map} id="map">
-          <AppBar position="absolute">
+          <AppBar position="static">
             <MUIToolbar>
               <Toolbar tools={this.appModel.getToolbarPlugins()} parent={this} />
               <Typography
@@ -154,11 +156,14 @@ class App extends Component {
                 color="inherit"
                 className={classes.flex}
               >
-                Hajkmap 3.0
               </Typography>
               <Button color="inherit">Inloggad användare</Button>
             </MUIToolbar>
           </AppBar>
+          <div id="map-overlay" className={classes.overlay}>
+            <div className={classNames(classes.widgets, classes.widgetsLeft)}>{this.renderWidgets("left")}</div>
+            <div className={classNames(classes.widgets, classes.widgetsRight)}>{this.renderWidgets("right")}</div>
+          </div>
           <Popup
             mapClickDataResult={this.state.mapClickDataResult}
             map={this.appModel.getMap()}
@@ -168,9 +173,6 @@ class App extends Component {
               });
             }}
           />
-          <div className={classNames(classes.widgets, classes.widgetsLeft)}>{this.renderWidgets("left")}</div>
-          <div className={classNames(classes.widgets, classes.widgetsRight)}>{this.renderWidgets("right")}</div>
-          <div id="map-overlay" className={classes.overlay}></div>
         </main>
       </div>
     );
