@@ -118,6 +118,7 @@ class App extends Component {
       return this.state.tools
         .filter(tool => tool.options.target === target)
         .map((tool, i) => {
+          console.log("renderWidgets() in App.js", tool.type);
           if (tool.type === "layerswitcher" && !tool.options.active) {
             return null;
           }
@@ -129,9 +130,10 @@ class App extends Component {
                 color="default"
                 aria-label="Verktyg"
                 className={classes.button}
-                onClick={(e) => {
+                onClick={e => {
                   tool.onClick(e, this);
-                }}>
+                }}
+              >
                 {tool.getButton()}
               </Button>
               {tool.getPanel(this.state.activePanel, this.state.secondActivePanel)}
@@ -143,14 +145,29 @@ class App extends Component {
     }
   }
 
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   console.log(this.props);
+  //   console.log(nextProps);
+  //   console.log(this.state);
+  //   console.log(nextState);
+  //   return true;
+  // }
+
   render() {
+    // Keep in mind: If a parent's render method gets called,
+    // all the child components' render methods will get called as well.
+    console.log("render() (App.js)");
+
     const { classes } = this.props;
     return (
       <div className={classes.root}>
         <main className={classes.map} id="map">
           <AppBar position="static">
             <MUIToolbar>
-              <Toolbar tools={this.appModel.getToolbarPlugins()} parent={this} />
+              <Toolbar
+                tools={this.appModel.getToolbarPlugins()}
+                parent={this}
+              />
               <Typography
                 variant="title"
                 color="inherit"
@@ -173,6 +190,9 @@ class App extends Component {
               });
             }}
           />
+          <div className={classNames(classes.widgets, classes.widgetsLeft)}>{this.renderWidgets("left")}</div>
+          <div className={classNames(classes.widgets, classes.widgetsRight)}>{this.renderWidgets("right")}</div>
+          <div id="map-overlay" className={classes.overlay}></div>
         </main>
       </div>
     );

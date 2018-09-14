@@ -28,6 +28,8 @@ class LayersSwitcherComponent extends Component {
   };
 
   componentWillMount() {
+    console.log("Will mount LayerSwitcherComponent");
+
     this.observer = Observer();
     this.observer.subscribe("layerAdded", layer => {});
     this.layerSwitcherModel = new LayerSwitcherModel({
@@ -98,6 +100,7 @@ class LayersSwitcherComponent extends Component {
   }
 
   render() {
+    console.log("Will render LayerSwitcherComponent");
     return this.renderPanel();
   }
 }
