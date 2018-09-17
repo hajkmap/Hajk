@@ -1,9 +1,5 @@
 {
   "activeTools": [
-    "draw",
-    "edit",
-    "information",
-    "simple_layerswitcher",
-    "informative"
+    "information"
   ]
 }

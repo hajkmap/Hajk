@@ -1,3 +1,4 @@
+import Plugin from './Plugin.js';
 import ConfigMapper from "./../utils/ConfigMapper.js";
 import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
 
@@ -88,13 +89,14 @@ class AppModel {
 
         if (Object.keys(toolConfig).length > 0) {
           this.addPlugin(
-            new module.default({
+            new Plugin({
               map: map,
               app: this,
               type: plugin,
               target: target,
               sortOrder: sortOrder,
-              options: toolOptions
+              options: toolOptions,
+              component: module.default
             })
           );
         }

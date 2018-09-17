@@ -65,24 +65,10 @@ class Toolbar extends Component {
   };
 
   renderTools() {
-    const { parent } = this.props;
     return this.props.tools.map((tool, i) => {
-      tool.appComponent = parent;
-
       return (
         <div key={i}>
-          <ListItem
-            button
-            divider={true}
-            selected={parent.state.activePanel === tool.type}
-            onClick={e => {
-              tool.onClick(e, parent);
-            }}
-          >
-            <ListItemIcon>{tool.getButton()}</ListItemIcon>
-            <ListItemText primary={tool.text || ""} />
-          </ListItem>
-          {tool.getPanel(parent.state.activePanel)}
+          <tool.component options={tool.options} type="toolbarItem"></tool.component>
         </div>
       );
     });
@@ -94,36 +80,46 @@ class Toolbar extends Component {
 
   toggleToolbar = () => {
     this.setState({
-      toolbarVisible: !this.state.toolbarVisible
+      drawerRendered: !this.state.drawerRendered
     });
   };
 
   renderDrawer() {
     const { classes } = this.props;
     const icon = this.state.open === true ? <ChevronLeft /> : <ChevronRight />;
-    return this.state.toolbarVisible
-      ? createPortal(
-          <Drawer
-            variant="permanent"
-            classes={{
-              docked: classes.drawer,
-              paper: classNames(
-                classes.drawerPaper,
-                !this.state.open && classes.drawerPaperClose
-              )
-            }}
-            open={this.state.open}
-          >
-            <ListItem button onClick={this.toggle}>
-              <ListItemIcon>{icon}</ListItemIcon>
-              <ListItemText primary="Minimera" />
-            </ListItem>
-            <Divider />
-            {this.renderTools()}
-          </Drawer>,
-          document.getElementById("map-overlay")
-        )
-      : null;
+    if (!this.state.drawerRendered) {
+      return null;
+    }
+
+    return (
+      createPortal(
+        <Drawer
+          variant="permanent"
+          classes={{
+            docked: classes.drawer,
+            paper: classNames(
+              classes.drawerPaper,
+              !this.state.open && classes.drawerPaperClose
+            )
+          }}
+          open={this.state.open}
+        >
+          <ListItem button onClick={this.toggle}>
+            <ListItemIcon>{icon}</ListItemIcon>
+            <ListItemText primary="Minimera" />
+          </ListItem>
+          <Divider />
+          {this.renderTools()}
+        </Drawer>,
+        document.getElementById('map-overlay')
+      )
+    );
+  }
+
+  componentDidMount() {
+    this.setState({
+      drawerRendered: false
+    });
   }
 
   render() {

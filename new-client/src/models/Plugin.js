@@ -1,4 +1,4 @@
-export default class Plugin {
+class Plugin {
 
   constructor(spec) {
     this.map = spec.map;
@@ -10,31 +10,6 @@ export default class Plugin {
     this.appComponent = undefined;
   }
 
-  closePanel = () => {
-    if (this.appComponent) {
-      this.appComponent.setState({
-        activePanel: undefined
-      });
-    }
-  };
-
-  setState = (obj) => {
-    if (this.appComponent) {
-      this.appComponent.setState(obj);
-    }
-  }
-
-  getState() {
-    return this.appComponent.state;
-  }
-
-  onClick(e, appComponent) {
-    var active = appComponent.state.activePanel === this.type;
-    appComponent.setState({
-      activePanel: active
-        ? ""
-        : this.type
-    });
-  }
-
 }
+
+export default Plugin;
