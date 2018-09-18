@@ -29,6 +29,9 @@ const styles = theme => ({
       top: 0
     }
   },
+  drawerClose: {
+    display: 'none'
+  },
   drawerPaper: {
     position: "inherit",
     whiteSpace: "nowrap",
@@ -80,23 +83,25 @@ class Toolbar extends Component {
 
   toggleToolbar = () => {
     this.setState({
-      drawerRendered: !this.state.drawerRendered
+      toolbarOpen: !this.state.toolbarOpen
     });
   };
 
   renderDrawer() {
     const { classes } = this.props;
     const icon = this.state.open === true ? <ChevronLeft /> : <ChevronRight />;
-    if (!this.state.drawerRendered) {
+    if (!document.getElementById('map-overlay')) {
       return null;
     }
-
     return (
       createPortal(
         <Drawer
           variant="permanent"
           classes={{
-            docked: classes.drawer,
+            docked: classNames(
+              classes.drawer,
+              !this.state.toolbarOpen && classes.drawerClose
+            ),
             paper: classNames(
               classes.drawerPaper,
               !this.state.open && classes.drawerPaperClose
@@ -118,7 +123,7 @@ class Toolbar extends Component {
 
   componentDidMount() {
     this.setState({
-      drawerRendered: false
+      tolbarOpen: true
     });
   }
 

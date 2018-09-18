@@ -32,6 +32,10 @@ class Infomation extends Component {
     });
   }
 
+  componentWillUnmount() {
+    console.log("I will unmount..");
+  }
+
   componentsDidMount() {
   }
 
