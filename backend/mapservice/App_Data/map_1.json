@@ -300,6 +300,15 @@
         "visibleForGroups": []
       },
       "index": 0
+    },
+    {
+      "type": "edit",
+      "options": {
+        "target": "toolbar",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 0
     }
   ],
   "map": {

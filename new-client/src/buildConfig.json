@@ -1,5 +1,8 @@
 {
   "activeTools": [
-    "information"
+    "information",
+    "informative",
+    "draw",
+    "edit"
   ]
 }

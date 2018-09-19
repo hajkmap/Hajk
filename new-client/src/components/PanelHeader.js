@@ -15,23 +15,11 @@ const styles = theme => ({
 });
 
 class PanelHeader extends Component {
-  renderHideAllLayersButton() {
-    if (this.props.hideAllLayersButton === true) {
-      return (
-        <i className="material-icons" onClick={this.props.hideAllLayers}>
-          visibility_off
-        </i>
-      );
-    }
-  }
-
   render() {
     const { classes } = this.props;
     return (
       <div className={classes.header}>
         <div className="icons pull-right">
-          {this.renderHideAllLayersButton()}
-          <i className="material-icons">minimize</i>
           <i
             className="material-icons"
             onClick={this.props.onClose}

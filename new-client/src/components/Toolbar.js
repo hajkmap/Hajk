@@ -71,7 +71,7 @@ class Toolbar extends Component {
     return this.props.tools.map((tool, i) => {
       return (
         <div key={i}>
-          <tool.component options={tool.options} type="toolbarItem"></tool.component>
+          <tool.component map={tool.map} app={tool.app} options={tool.options} type="toolbarItem"></tool.component>
         </div>
       );
     });

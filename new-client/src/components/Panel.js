@@ -42,25 +42,21 @@ class Panel extends Component {
 
   close = e => {
     const { onClose } = this.props;
-    onClose();
+    if (onClose) onClose();
   };
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return this.props.active !== nextProps.active;
-  }
-
   render() {
-    const { classes, active, title, children } = this.props;
+    const { classes, open, title, children } = this.props;
     return (
       <Drawer
         variant="persistent"
         anchor={this.props.position || "left"}
-        open={active}
+        open={open}
         classes={{
           docked: classes.drawer,
           paper: classNames(
             classes.drawerPaper,
-            !active && classes.drawerPaperClosed,
+            !open && classes.drawerPaperClosed,
             (this.props.position === "right" ? classes.drawerPaperRight : "")
           )
         }}
@@ -73,9 +69,7 @@ class Panel extends Component {
 }
 
 Panel.propTypes = {
-  classes: PropTypes.object.isRequired,
-  active: PropTypes.bool.isRequired,
-  type: PropTypes.string.isRequired
+  classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles)(Panel);

@@ -123,7 +123,7 @@ class App extends Component {
           }
           return (
             <div key={i} className={classes.widgets[target]}>
-              <tool.component options={tool.options} type="widgetItem" />
+              <tool.component map={tool.map} app={tool.app} options={tool.options} type="widgetItem" />
             </div>
           );
         });

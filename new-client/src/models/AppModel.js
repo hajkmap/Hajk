@@ -19,12 +19,29 @@ import { register } from "ol/proj/proj4";
 var map;
 
 class AppModel {
+
+  registerPanel(panelComponent) {
+    this.panels.push(panelComponent);
+    console.log("Registered panels", this.panels);
+  }
+
+  onPanelOpen(currentPanel) {
+    this.panels
+      .filter(panel => panel !== currentPanel)
+      .forEach(panel => {
+        if (panel.position === currentPanel.position) {
+          panel.closePanel();
+        }
+      });
+  }
+
   /**
    * Initialize new AddModel
    * @param oject Config
    * @param Observer observer
    */
   constructor(config, observer) {
+    this.panels = [];
     this.plugins = {};
     this.activeTool = undefined;
     this.config = config;

@@ -1,10 +1,11 @@
-import Dialog from '../../components/Dialog.js';
 import React, { Component } from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
 import InfoIcon from "@material-ui/icons/Info";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+
+import Dialog from '../../components/Dialog.js';
 
 const styles = theme => {
   return {
@@ -30,13 +31,6 @@ class Infomation extends Component {
     this.setState({
       dialogOpen: this.props.options.visibleAtStart
     });
-  }
-
-  componentWillUnmount() {
-    console.log("I will unmount..");
-  }
-
-  componentsDidMount() {
   }
 
   onClose = () => {

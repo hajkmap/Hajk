@@ -1,16 +1,40 @@
-import Plugin from "../../models/Plugin.js";
-import Panel from "../../components/Panel.js";
-import React from "react";
+import React, { Component } from "react";
 import { createPortal } from "react-dom";
+import { withStyles } from "@material-ui/core/styles";
+import { Button } from "@material-ui/core";
+import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import SatelliteIcon from "@material-ui/icons/Satellite";
-import InformativeView from "./view.js";
-import InformativeModel from "./model.js";
+
+import Panel from "../../components/Panel.js";
+import InformativeView from "./InformativeView.js";
+import InformativeModel from "./InformativeModel.js";
 import Observer from "react-event-observer";
 
-class Informative extends Plugin {
+const styles = theme => {
+  return {
+  }
+};
+
+class Informative extends Component {
+
+  onClick = (e) => {
+    this.app.onPanelOpen(this);
+    this.setState({
+      panelOpen: true
+    });
+  };
+
+  closePanel = () => {
+    this.setState({
+      panelOpen: false
+    });
+  };
+
   constructor(spec) {
     super(spec);
+    this.position = "right";
     this.text = "Översiktsplan";
+    this.app = spec.app;
     this.observer = Observer();
     this.observer.subscribe("myEvent", message => {
       console.log(message);
@@ -20,48 +44,25 @@ class Informative extends Plugin {
       app: spec.app,
       observer: this.observer
     });
+    this.state = {
+      panelOpen: false
+    };
+    this.app.registerPanel(this);
   }
 
-  getButton() {
-    return <SatelliteIcon />;
-  }
-
-  closePanel = () => {
-    if (this.appComponent) {
-      this.appComponent.setState({
-        secondActivePanel: undefined
-      });
-    }
-  };
-
-  openPanel = (callback) => {
-    if (this.appComponent) {
-      this.appComponent.setState({
-        secondActivePanel: this.type
-      }, () => {
-        callback(this.observer);
-      });
-    }
-  };
-
-  onClick(e, appComponent) {
-    var active = appComponent.state.activePanel === this.type;
-    appComponent.setState({
-      secondActivePanel: active
-        ? ""
-        : this.type
+  componentWillMount() {
+    this.setState({
+      panelOpen: this.props.options.visibleAtStart
     });
   }
 
-  getPanel(activePanel, secondActivePanel) {
-    const active = activePanel === this.type || secondActivePanel === this.type;
+  renderPanel() {
     return createPortal(
       <Panel
-        active={active}
-        type={this.type}
         title={this.text}
         onClose={this.closePanel}
-        position="right"
+        position={this.position}
+        open={this.state.panelOpen}
       >
         <InformativeView
           app={this.app}
@@ -73,6 +74,57 @@ class Informative extends Plugin {
       document.getElementById("map-overlay")
     );
   }
+
+  renderAsWidgetItem() {
+    const {classes} = this.props;
+    return (
+      <div>
+        <Button
+          variant="fab"
+          color="default"
+          aria-label="Översiktsplan"
+          className={classes.button}
+          onClick={this.onClick}
+        >
+          <SatelliteIcon />
+        </Button>
+        {this.renderPanel()}
+      </div>
+    );
+  }
+
+  renderAsToolbarItem() {
+    return (
+      <div>
+        <ListItem
+          button
+          divider={true}
+          selected={this.state.panelOpen}
+          onClick={this.onClick}
+        >
+          <ListItemIcon>
+            <SatelliteIcon />
+          </ListItemIcon>
+          <ListItemText primary={this.text} />
+        </ListItem>
+        {this.renderPanel()}
+      </div>
+    );
+  }
+
+  render() {
+
+    if (this.props.type === "toolbarItem") {
+      return this.renderAsToolbarItem();
+    }
+
+    if (this.props.type === "widgetItem") {
+      return this.renderAsWidgetItem();
+    }
+
+    return null;
+
+  }
 }
 
-export default Informative;
+export default withStyles(styles)(Informative);
