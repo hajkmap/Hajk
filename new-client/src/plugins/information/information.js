@@ -56,8 +56,8 @@ class Infomation extends Component {
       <Dialog
         options={this.props.options}
         open={this.state.dialogOpen}
-        onClose={this.onClose}>
-      </Dialog>,
+        onClose={this.onClose}
+      ></Dialog>,
       document.getElementById("map")
     );
   }
