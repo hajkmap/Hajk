@@ -3,7 +3,6 @@ import Observer from "react-event-observer";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 
-import LayerSwitcherModel from "./model.js";
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import MapSwitcher from "./components/MapSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
@@ -17,7 +16,7 @@ const styles = theme => ({
     zIndex: theme.zIndex.drawer - 1
   }
 });
-class LayersSwitcherComponent extends Component {
+class LayersSwitcherView extends Component {
   state = {
     layerGroupsExpanded: true
   };
@@ -28,25 +27,19 @@ class LayersSwitcherComponent extends Component {
   };
 
   componentWillMount() {
-    console.log("Will mount LayerSwitcherComponent");
-
+    this.options = this.props.parent.props.options;
     this.observer = Observer();
     this.observer.subscribe("layerAdded", layer => {});
-    this.layerSwitcherModel = new LayerSwitcherModel({
-      map: this.props.map,
-      app: this.props.app,
-      observer: this.observer
-    });
-  }
-
-  componentDidMount() {
-    this.options = this.props.options;
   }
 
   renderLayerGroups() {
     return this.options.groups.map((group, i) => {
       return (
-        <LayerGroup key={i} group={group} model={this.layerSwitcherModel} />
+        <LayerGroup
+          key={i}
+          group={group}
+          model={this.props.parent.layerSwitcherModel}
+        />
       );
     });
   }
@@ -81,7 +74,7 @@ class LayersSwitcherComponent extends Component {
         />
         <BackgroundSwitcher
           layers={this.options.baselayers}
-          layerMap={this.layerSwitcherModel.layerMap}
+          layerMap={this.props.parent.layerSwitcherModel.layerMap}
         />
         <h1
           onClick={() => {
@@ -100,13 +93,13 @@ class LayersSwitcherComponent extends Component {
   }
 
   render() {
-    console.log("Will render LayerSwitcherComponent");
+    console.log("Will render LayerSwitcherView");
     return this.renderPanel();
   }
 }
 
-LayersSwitcherComponent.propTypes = {
+LayersSwitcherView.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(LayersSwitcherComponent);
+export default withStyles(styles)(LayersSwitcherView);

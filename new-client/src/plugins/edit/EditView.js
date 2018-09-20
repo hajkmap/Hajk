@@ -2,15 +2,12 @@ import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 
-const styles = theme => ({
-});
+const styles = theme => ({});
 
 class EditView extends Component {
-
   constructor() {
     super();
-    this.state = {
-    };
+    this.state = {};
   }
 
   getText() {
@@ -18,10 +15,9 @@ class EditView extends Component {
   }
 
   render() {
-    return (
-      <div className="tool-panel-content">
-      </div>
-    );
+    console.log("Will render EditView");
+
+    return <div className="tool-panel-content" />;
   }
 }
 

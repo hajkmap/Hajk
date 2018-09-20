@@ -3,8 +3,8 @@
   "version": "3.0.0-alpha1",
   "private": true,
   "dependencies": {
-    "react": "^16.5.0",
-    "react-dom": "^16.5.0",
+    "react": "^16.5.1",
+    "react-dom": "^16.5.1",
     "react-scripts": "1.1.5"
   },
   "scripts": {
@@ -14,9 +14,9 @@
     "eject": "react-scripts eject"
   },
   "devDependencies": {
-    "@material-ui/core": "^3.0.3",
+    "@material-ui/core": "^3.1.0",
     "@material-ui/icons": "^3.0.0",
-    "@material-ui/lab": "^3.0.0-alpha.15",
+    "@material-ui/lab": "^3.0.0-alpha.16",
     "deepmerge": "^2.1.1",
     "marked": "^0.4.0",
     "ol": "^5.2.0",
