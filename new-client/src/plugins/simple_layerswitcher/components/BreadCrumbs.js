@@ -3,22 +3,21 @@ import BreadCrumb from "./BreadCrumb.js";
 import "./BreadCrumbs.css";
 
 class BreadCrumbs extends Component {
-  constructor() {
-    super();
-    this.state = {      
+  constructor(props) {
+    super(props);
+    this.state = {
       visibleLayers: []
-    };    
+    };
   }
 
-  bindLayerEvents = (visibleLayers) => (layer) => {    
-        
+  bindLayerEvents = (visibleLayers) => (layer) => {
     if (layer.get('visible')) {
       visibleLayers.push(layer);
     }
     this.setState({
       visibleLayers: visibleLayers
-    });  
-    layer.on('change:visible', (e) => {      
+    });
+    layer.on('change:visible', (e) => {
       let changedLayer = e.target;
       if (changedLayer.get("visible")) {
         setTimeout(() => this.setState({
@@ -26,76 +25,23 @@ class BreadCrumbs extends Component {
         }), 0);
       } else {
         setTimeout(() => this.setState({
-          visibleLayers: this.state.visibleLayers.filter(visibleLayer => 
+          visibleLayers: this.state.visibleLayers.filter(visibleLayer =>
             visibleLayer !== changedLayer)
         }), 0);
-      } 
-    }); 
+      }
+    });
   };
 
   getVisibleLayers() {
-    return this.props.map.getLayers().getArray().filter(layer => 
+    return this.props.map.getLayers().getArray().filter(layer =>
       layer.getVisible());
   }
 
-  /**
-   * Triggered when the component is successfully mounted into the DOM.
-   * @instance
-   */
-  componentDidMount() {    
+  componentDidMount() {
     var visibleLayers = [];
-    this.props.map.getLayers().getArray().forEach(this.bindLayerEvents(visibleLayers));
-
-  }
-
-  /**
-   * Triggered when component unmounts.
-   * @instance
-   */
-  componentWillUnmount() {}
-
-  /**
-   * On visible change event handler.
-   * @instance
-   */
-  onVisibleChanged() {}
-
-  /**
-   * On legend change event handler.
-   * @instance
-   */
-  onLegendChanged() {}
-
-  /**
-   * On show legend change event handler.
-   * @instance
-   */
-  onShowLegendChanged() {}
-
-  /**
-   * On show info change event handler.
-   * @instance
-   */
-  onShowInfoChanged() {}
-
-  /**
-   * Toggle legend visibility
-   * @instance
-   */
-  toggleLegend() {}
-
-  /**
-   * Toggle info visibility
-   * @instance
-   */
-  toggleInfo() {}
-
-  /**
-   * Render the load information component.
-   * @instance
-   * @return {external:ReactElement}
-   */
-  renderStatus() {
+    if (this.props.map) {
+      this.props.map.getLayers().getArray().forEach(this.bindLayerEvents(visibleLayers));
+    }
   }
 
   render() {
@@ -103,12 +49,12 @@ class BreadCrumbs extends Component {
       <div className="bread-crumbs">
         <div className="bread-crumb-container">
           {this.state.visibleLayers
-            .filter(layer => 
-              layer.getProperties().layerInfo 
+            .filter(layer =>
+              layer.getProperties().layerInfo
               ? layer.getProperties().layerInfo.layerType !== "base"
               : false
             )
-            .map((layer, i) => 
+            .map((layer, i) =>
               <BreadCrumb key={i} title={layer.get("caption")} layer={layer}></BreadCrumb>
             )
           }

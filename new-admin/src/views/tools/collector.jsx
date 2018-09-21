@@ -27,8 +27,10 @@ var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
-  target: 'toolbar',  
-  visibleAtStart: false,  
+  target: 'toolbar',
+  url: '',
+  featureType: '',
+  visibleAtStart: false,
   templateJsonFilePath: 'http://localhost:55630/informative/load/op',
   visibleForGroups: []
 };
@@ -50,7 +52,9 @@ class ToolOptions extends Component {
         active: true,
         index: tool.index,
         target: tool.options.target,
-        visibleAtStart: tool.options.visibleAtStart || false,        
+        url: tool.options.url,
+        featureType: tool.options.featureType,
+        visibleAtStart: tool.options.visibleAtStart || false,
         visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
       });
     } else {
@@ -107,8 +111,10 @@ class ToolOptions extends Component {
     var tool = {
       'type': this.type,
       'index': this.state.index,
-      'options': {        
+      'options': {
         target: this.state.target,
+        url: this.state.url,
+        featureType: this.state.featureType,
         visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
       }
@@ -216,10 +222,25 @@ class ToolOptions extends Component {
               type='text'
               onChange={(e) => { this.handleInputChange(e); }}
               value={this.state.target} />
-          </div>          
+          </div>
           {this.renderVisibleForGroups()}
           <div>
-            Inställningar för collector..
+            <label htmlFor='url'>Url</label>
+            <input
+              id='url'
+              name='url'
+              type='text'
+              onChange={(e) => { this.handleInputChange(e); }}
+              value={this.state.url} />
+          </div>
+          <div>
+            <label htmlFor='featureType'>Lagernamn</label>
+            <input
+              id='featureType'
+              name='featureType'
+              type='text'
+              onChange={(e) => { this.handleInputChange(e); }}
+              value={this.state.featureType} />
           </div>
         </form>
       </div>

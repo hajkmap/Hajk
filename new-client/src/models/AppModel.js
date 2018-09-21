@@ -22,7 +22,6 @@ class AppModel {
 
   registerPanel(panelComponent) {
     this.panels.push(panelComponent);
-    console.log("Registered panels", this.panels);
   }
 
   onPanelOpen(currentPanel) {

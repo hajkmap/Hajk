@@ -24,6 +24,15 @@ class Informative extends Component {
     });
   };
 
+  open = (chapter) => {
+    this.app.onPanelOpen(this);
+    this.setState({
+      panelOpen: true
+    }, () => {
+      this.observer.publish('changeChapter', chapter);
+    });
+  };
+
   closePanel = () => {
     this.setState({
       panelOpen: false
@@ -33,6 +42,7 @@ class Informative extends Component {
   constructor(spec) {
     super(spec);
     this.position = "right";
+    this.type = "informative"
     this.text = "Översiktsplan";
     this.app = spec.app;
     this.observer = Observer();

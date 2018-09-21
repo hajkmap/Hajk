@@ -1,33 +1,113 @@
-import Plugin from "../../models/Plugin.js";
-import Panel from "../../components/Panel.js";
-import React from "react";
+import React, { Component } from "react";
 import { createPortal } from "react-dom";
+import { withStyles } from "@material-ui/core/styles";
+import { Button } from "@material-ui/core";
 import RateReviewIcon from "@material-ui/icons/RateReview";
+import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+import Observer from "react-event-observer";
 
-class Collector extends Plugin {
-  constructor(spec) {
-    super(spec);
-    this.text = "Rita";
+import CollectorView from './CollectorView.js';
+import CollectorModel from "./CollectorModel.js";
+
+const styles = theme => {
+  return {
+    button: {
+      width: '50px',
+      height: '50px',
+      marginBottom: '5px',
+      outline: 'none'
+    }
+  }
+};
+
+class Collector extends Component {
+  constructor(props) {
+    super(props);
+    this.text = "Infomation";
+    this.state = {
+      dialogOpen: false
+    };
+    this.observer = new Observer();
+    this.collectorModel = new CollectorModel({
+      map: props.map,
+      app: props.app,
+      observer: this.observer,
+      options: props.options
+    });
   }
 
-  getButton() {
-    return <RateReviewIcon />;
+  componentWillMount() {
   }
 
-  getPanel(activePanel) {
-    const active = activePanel === this.type;
+  onClose = () => {
+    this.setState({
+      dialogOpen: false
+    });
+  };
+
+  onClick = () => {
+    this.setState({
+      dialogOpen: true
+    });
+  };
+
+  renderDialog() {
     return createPortal(
-      <Panel
-        active={active}
-        type={this.type}
-        title={this.text}
-        onClose={this.closePanel}
-      >
-        Collector
-      </Panel>,
-      document.getElementById("map-overlay")
+      <CollectorView onClose={this.onClose}  model={this.collectorModel} dialogOpen={this.state.dialogOpen}></CollectorView>,
+      document.getElementById("map")
     );
+  }
+
+  renderAsWidgetItem() {
+    const {classes} = this.props;
+    return (
+      <div>
+        <Button
+          variant="fab"
+          color="default"
+          aria-label="Infomation"
+          className={classes.button}
+          onClick={this.onClick}
+        >
+          <RateReviewIcon />
+        </Button>
+        {this.renderDialog()}
+      </div>
+    );
+  }
+
+  renderAsToolbarItem() {
+    return (
+      <div>
+        <ListItem
+          button
+          divider={true}
+          selected={false}
+          onClick={this.onClick}
+        >
+          <ListItemIcon>
+            <RateReviewIcon />
+          </ListItemIcon>
+          <ListItemText primary={this.text} />
+        </ListItem>
+        {this.renderDialog()}
+      </div>
+    );
+  }
+
+  render() {
+
+    if (this.props.type === "toolbarItem") {
+      return this.renderAsToolbarItem();
+    }
+
+    if (this.props.type === "widgetItem") {
+      return this.renderAsWidgetItem();
+    }
+
+    return null;
+
   }
 }
 
-export default Collector;
+export default withStyles(styles)(Collector);

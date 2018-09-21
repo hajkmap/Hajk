@@ -1,77 +1,40 @@
 import React, { Component } from "react";
-import Observer from "react-event-observer";
 import { createPortal } from "react-dom";
-import LayerSwitcherModel from "./model.js";
+import { withStyles } from '@material-ui/core/styles';
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
-
 import "./style.css";
 
-class LayersSwitcher extends Component {
-  constructor() {
-    super();
-    this.options = {
-      baselayers: [],
-      groups: []
-    };
-    this.toggle = this.toggle.bind(this);
+const styles = theme => ({
+  button: {
+    margin: theme.spacing.unit,
+  },
+  leftIcon: {
+    marginRight: theme.spacing.unit,
+  },
+  rightIcon: {
+    marginLeft: theme.spacing.unit,
+  },
+  iconSmall: {
+    fontSize: 20,
+  },
+});
+
+class SimpleLayersSwitcherView extends Component {
+  constructor(props) {
+    super(props);
+    this.options = this.props.app.config.mapConfig.tools.find(
+      t => t.type === "layerswitcher"
+    ).options;
     this.state = {
-      toggled: false,
       layerGroupsExpanded: true
     };
   }
 
+  componentDidMount() {
+  }
+
   componentWillMount() {
-    this.observer = Observer();
-    this.observer.subscribe("layerAdded", layer => {});
-    this.layerSwitcherModel = new LayerSwitcherModel({
-      map: this.props.map,
-      app: this.props.app,
-      observer: this.observer
-    });
-    this.options = this.props.app.config.mapConfig.tools.find(
-      t => t.type === "layerswitcher"
-    ).options;
-  }
-
-  componentDidMount() {}
-
-  open() {
-    this.setState({
-      toggled: true
-    });
-  }
-
-  close() {
-    this.setState({
-      toggled: false
-    });
-  }
-
-  minimize() {
-    this.setState({
-      toggled: false
-    });
-  }
-
-  toggle() {
-    this.setState({
-      toggled: !this.state.toggled
-    });
-  }
-
-  getActiveClass() {
-    var activeClass = "tool-toggle-button active";
-    var inactiveClass = "tool-toggle-button";
-    return this.state.toggled
-      ? activeClass
-      : inactiveClass;
-  }
-
-  getVisibilityClass() {
-    return this.state.toggled
-      ? "tool-panel layerswitcher-panel"
-      : "tool-panel layerswitcher-panel hidden";
   }
 
   handleChange = panel => (event, expanded) => {
@@ -82,19 +45,15 @@ class LayersSwitcher extends Component {
 
   renderLayerGroups() {
     const { expanded } = this.state;
-    var informativePlugin = this.props.app.plugins.hasOwnProperty("informative")
-      ? this.props.app.plugins.informative
-      : undefined;
-
     return this.options.groups.map((group, i) => {
       return (
         <LayerGroup
           expanded={expanded === group.id}
           key={i}
           group={group}
-          model={this.layerSwitcherModel}
+          model={this.props.model}
           handleChange={this.handleChange}
-          informativePlugin={informativePlugin}
+          app={this.props.app}
         />
       );
     });
@@ -141,4 +100,4 @@ class LayersSwitcher extends Component {
   }
 }
 
-export default LayersSwitcher;
+export default withStyles(styles)(SimpleLayersSwitcherView);

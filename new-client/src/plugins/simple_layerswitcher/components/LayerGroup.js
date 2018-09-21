@@ -27,17 +27,23 @@ const styles = theme => ({
 });
 
 class LayerGroup extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       expanded: false,
       groups: [],
       layers: [],
       name: "",
       parent: "-1",
-      toggled: false
+      toggled: false,
+      chapters: []
     };
     this.toggleExpanded = this.toggleExpanded.bind(this);
+    props.app.observer.on('informativeLoaded', (chapters) => {
+      this.setState({
+        chapters: chapters
+      });
+    });
   }
 
   componentWillMount() {
@@ -58,8 +64,13 @@ class LayerGroup extends Component {
     const { expanded } = this.state;
     const { classes } = this.props;
     return this.state.groups.map((group, i) => {
-      return <LayerGroup expanded={expanded === group.id} key={i} group={group} model={this.model}
-        handleChange={this.handleChange} classes={classes}
+      return <LayerGroup
+        key={i}
+        group={group}
+        classes={classes}
+        model={this.model}
+        expanded={expanded === group.id}
+        handleChange={this.handleChange}
       />
     });
   }
@@ -94,15 +105,11 @@ class LayerGroup extends Component {
                   <LayerItem
                     key={i}
                     layer={mapLayer}
-                    chapters={this.props.informativePlugin.informativeModel.chapters}
+                    chapters={this.state.chapters}
                     onOpenChapter={(chapter) => {
-
-                      this.props.informativePlugin.openPanel((observer) => {
-
-                        observer.publish("changeChapter", chapter);
-
-                      });
-
+                      var informativePanel = this.props.app.panels
+                        .find(panel => panel.type === "informative");
+                      informativePanel.open(chapter);
                     }}
                   />
                 );

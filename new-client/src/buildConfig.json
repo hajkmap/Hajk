@@ -3,6 +3,8 @@
     "information",
     "informative",
     "draw",
-    "edit"
+    "edit",
+    "simple_layerswitcher",
+    "collector"
   ]
 }
