@@ -17,6 +17,10 @@ const styles = theme => {
 
 class SimpleLayerSwitcher extends Component {
 
+  state = {
+    panelOpen: false
+  };
+
   onClick = (e) => {
     this.app.onPanelOpen(this);
     this.setState({
@@ -41,10 +45,11 @@ class SimpleLayerSwitcher extends Component {
       app: spec.app,
       observer: this.observer
     });
-    this.state = {
-      panelOpen: false
-    };
     this.app.registerPanel(this);
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return this.state.panelOpen !== nextState.panelOpen;
   }
 
   componentWillMount() {
