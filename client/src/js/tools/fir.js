@@ -38,7 +38,7 @@ var FirModelProperties = {
     popupOffsetY: 0,
     aliasDict: {},
     chosenColumns: [],
-    firLayerCaption: "Fastighetsytor FIR2",
+    firLayerCaption: "Fastigheter",
     feature: undefined
 };
 
@@ -129,18 +129,31 @@ var FirModel = {
                 var clickedonId = "hit-" + hitId + "-group-0";
 
                 var hitObject = $("#" + clickedonId);
-                if(that.get("previousViewed") !== clickedonId){
-                    hitObject.toggleClass("selected");
+                var currentHitId = "#info-hit-" + hitId + "-group-0";
+                var infoHitObject = $(currentHitId);
+
+                // Ta bort blå färg
+                if(that.get("previousViewed") == clickedonId){
+                    that.highlightResultLayer.getSource().clear();
+                    if(hitObject.hasClass("selected")) {
+                        hitObject.toggleClass("selected");
+                    }
+                    if(infoHitObject.is(":visible")){
+                        infoHitObject.toggle();
+                    }
+                    that.set("previousViewed", undefined);
+                    return;
+                } else {
+                    if(!hitObject.hasClass("selected")) {
+                        hitObject.toggleClass("selected");
+                    }
                     $("#" + that.get("previousViewed")).toggleClass("selected");
-                    $("#info-" + that.get("previousViewed")).toggle()
+                    $("#info-" + that.get("previousViewed")).toggle();
                     that.set("previousViewed", clickedonId);
                 }
 
-                var currentHitId = "#info-hit-" + hitId + "-group-0";
-                var hitObject = $(currentHitId);
-
-                if(!hitObject.is(":visible")){
-                    hitObject.toggle();
+                if(!infoHitObject.is(":visible")){
+                    infoHitObject.toggle();
                 }
                 that.highlightResultLayer.getSource().clear();
                 that.highlightResultLayer.getSource().addFeature(feature);
@@ -522,7 +535,6 @@ var FirModel = {
      *
      */
     focus: function (spec, isBar) {
-        // TODO remove functionality that don't want
         // Should change feature style (if this  is possible) of the one was clicked.
         // If a previous was clicked (can be stored in model). Change back the style to blue
         // After changing previous, save the current as the future previous
@@ -706,9 +718,16 @@ var FirModel = {
      */
     getExcelData: function () {
         var groups = {},
-            exportItems = this.get('hits').length > 0
+            exportItems = this.get('items')[0].hits.length > 0
+                ? this.get('items')[0].hits
+                : this.getHitsFromItems();
+
+            /*exportItems = this.get('hits').length > 0
                 ? this.get('hits')
                 : this.getHitsFromItems();
+                */
+        console.log("getExcelData: exportItems", exportItems);
+        console.log("getExcelData: this", this);
 
         if (exportItems.length > 1 && _.isEqual(exportItems[0], exportItems[1])) {
             // Ensure we don't have duplicate first items (happens when user selects items to export manually)
@@ -824,11 +843,10 @@ var FirModel = {
                 url = this.get('excelExportUrl');
                 data = this.getExcelData();
                 postData = JSON.stringify(data);
-                console.log("data");
-                console.log(data);
+                console.log("data", data);
                 console.log("postDataPre");
                 console.log('{ "fnr": [' + data +'] }');
-                console.log(postData);
+                console.log("postData",postData);
                 break;
         }
 

@@ -170,8 +170,15 @@ var FirSearchView = {
                         var groupName = item.layer;
                         item.hits.map(hit => {
                             this.props.model.firFeatureLayer.getSource().addFeature(hit);
+
                         });
                     });
+                    if(this.props.model.get("force")) {
+                        this.props.model.get("map").getView().fit(this.props.model.firFeatureLayer.getSource().getExtent(), {
+                            size: this.props.model.get("map").getSize(),
+                            maxZoom: this.props.model.get('maxZoom')
+                        });
+                    }
                 }
                 var state = {
                     loading: false,
@@ -399,7 +406,7 @@ var FirSearchView = {
         );
     },
 
-    hittaGrannar: function(){
+    hittaGrannarUpdateRadio: function(){
         var checkedAngransade = document.getElementById("hittaGrannar").checked;
         var checkedMedBuffer = document.getElementById("hittaGrannarMedBuffer").checked;
 
@@ -418,39 +425,42 @@ var FirSearchView = {
         console.log("bufferLength", bufferLength);
     },
 
-    /*hittaGrannar: function(){
-        var checkedAngransade = document.getElementById("hittaGrannar").checked;
-        var checkedMedBuffer = document.getElementById("hittaGrannarMedBuffer").checked;
-        if(checkedMedBuffer){
-            document.getElementById("hittaGrannarMedBuffer").checked = false;
+
+    hittaGrannar: function() {
+        var parser = new jsts.io.OL3Parser();
+        parser.inject(ol.geom.Point, ol.geom.LineString, ol.geom.LinearRing, ol.geom.Polygon, ol.geom.MultiPoint, ol.geom.MultiLineString, ol.geom.MultiPolygon);
+
+        var radioCheckedAngransade = document.getElementById("hittaGrannar").checked,
+            radioCheckedMedBuffer = document.getElementById("hittaGrannarMedBuffer").checked,
+            bufferLength;
+
+        if(radioCheckedMedBuffer ){
+            bufferLength = document.getElementById("bufferInput").value;
+        }else{
+            bufferLength = 0.01;
         }
-        console.log("checkedMedBuffer", document.getElementById("hittaGrannarMedBuffer").checked);
+        console.log("bufferLength in hittaGrannar", bufferLength);
 
+        this.props.model.get("map").getLayers().forEach(layer => {
+           if(layer.get("caption") === "search-selection-layer"){
+               layer.getSource().getFeatures().forEach(feature => {
+                   if(typeof feature.hajkBuffered === "undefined" || feature.hajkBuffered ===  bufferLength) {
+                       if(typeof feature.hajkBuffered === "undefined"){
+                           feature.hajkBuffered = 0;
+                       }
+                       var jstsGeom = parser.read(feature.getGeometry());
 
-        var bufferLength = "1"; //cm
+                       // create a buffer of the required meters around each line
+                       var buffered = jstsGeom.buffer(bufferLength - feature.hajkBuffered);
 
-},
-
-    hittaGrannarMedBuffer: function() {
-        var checkedAngransade = document.getElementById("hittaGrannar").checked;
-        var checkedMedBuffer = document.getElementById("hittaGrannarMedBuffer").checked;
-        if(checkedAngransade){
-            document.getElementById("hittaGrannar").checked = false;
-        }
-        console.log("checkedAngransade", document.getElementById("hittaGrannar").checked);
-
-        var bufferLength = document.getElementById("bufferInput").value;
-            console.log("bufferLength med Buffer", bufferLength);
-
-
-        console.log("bufferLength updated", bufferLength);
-
-
+                       // convert back from JSTS and replace the geometry on the feature
+                       feature.setGeometry(parser.write(buffered));
+                       feature.hajkBuffered = bufferLength;
+                   }
+               });
+           }
+        });
     },
-
-    */
-
-
 
     bufferInput: function() {
         //document.getElementById("bufferValue").value = document.getElementById("bufferInput").value;
@@ -475,51 +485,19 @@ var FirSearchView = {
             <div className='panel panel-default'>
                 <div className='panel-heading'>Hitta grannar<button id="FIRHittaGrannarMinimizeButton" onClick={() => this.minBox('HittaGrannarMinimizeBox', "FIRHittaGrannarMinimizeButton")} className={this.props.model.get("searchMinimizedClassButton")}></button></div>
                 <div className='panel-body hidden' id='HittaGrannarMinimizeBox'>
-                    <div><input type="radio" name="bufferOrNot" id="hittaGrannar" onClick={this.hittaGrannar} defaultChecked={true}/> Hitta angränsade grannar <br/>
-                    <div className="row"><div className="col-md-12"> <input type="radio" id="hittaGrannarMedBuffer" name="bufferOrNot" onClick={this.hittaGrannar} /> Hitta grannar inom &nbsp;
+                    <div><input type="radio" name="bufferOrNot" id="hittaGrannar" onClick={this.hittaGrannarUpdateRadio} defaultChecked={true}/> Hitta angränsade grannar <br/>
+                    <div className="row"><div className="col-md-12"> <input type="radio" id="hittaGrannarMedBuffer" name="bufferOrNot" onClick={this.hittaGrannarUpdateRadio} /> Hitta grannar inom &nbsp;
                         <input id="bufferInput" type='text' ref='bufferInput' defaultValue="50" onChange={this.bufferInput}/> meter </div></div><br/>
-                    <input id="bufferValue" type="range" min="0" max="100" defaultValue="50" onChange={() => {this.bufferBarInput(); this.hittaGrannar()}}/>
+                    <input id="bufferValue" type="range" min="0" max="100" defaultValue="50" onChange={() => {this.bufferBarInput(); this.hittaGrannarUpdateRadio()}}/>
                     </div><br/>
                     <div className='pull-right'>
-                        <button onClick={() => console.log("not created")} type='submit' className='btn btn-primary'>Sök</button>&nbsp;
+                        <button id="fir-search-hitta-grannar" onClick={() => this.hittaGrannar()} type='submit' className='btn btn-primary'>Sök</button>&nbsp;
                         <button onClick={() => console.log("not created")} type='submit' className='btn btn-primary' id='sokRensa'>Rensa</button>
                     </div>
                 </div>
             </div>
         );
     },
-
-    /*slide: function() {
-        console.log(this);
-        var output = document.getElementById("buffert");
-        console.log("output", output);
-        output.innerHTML = this.value;
-    },
-    */
-
-    /*minBox: function(kategori) {
-        var contains = $('#'+kategori);
-        console.log("contains", contains);
-        if(typeof $('#'+kategori) === 'undefined'){
-            console.log("typeOfKategori is undefined");
-            return;
-        }
-
-        $('#'+kategori).toggle(function(){
-            $('#'+kategori).toggleClass("visible, hidden");
-            },function(){
-            $('#'+kategori).toggleClass('hidden, visible');
-            }
-        );
-
-        var buttonClass = $('#'+kategori)[0].attributes["class"].value.indexOf("hidden") !== -1
-            ? 'fa fa-angle-up clickable arrow pull-right arrowBoxSize'
-            : 'fa fa-angle-down clickable arrow pull-right arrowBoxSize';
-        this.props.model.set("searchExpandedClassButton", buttonClass);
-        document.getElementById("FIRSearchMinimizeButton").className = buttonClass;
-
-    },
-*/
 
     minBox: function (kategori, buttonId) {
         var item = $('#'+kategori);

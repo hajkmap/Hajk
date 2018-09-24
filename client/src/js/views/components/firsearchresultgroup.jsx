@@ -51,9 +51,21 @@ FirSearchResultGroup = {
 
         var previousViewed = this.props.model.get("previousViewed");
         var previousInfo = $("#info-" + previousViewed);
+        var clickedSame = false;
 
+        // Check if clicked same as before
         if(hitId === this.props.model.get("previousViewed")){
             this.props.model.set("previousViewed", undefined);
+            clickedSame = true;
+            console.log("hitId", hitId);
+            var selected = $("#" + hitId);
+            console.log("selected", selected);
+            // ta bort blå färg
+            console.log("ta bort blå färg");
+            this.props.model.highlightResultLayer.getSource().clear();
+            console.log("highlightResultLayer", this.props.model.highlightResultLayer);
+            console.log("highlightResultLayer.getSource()", this.props.model.highlightResultLayer.getSource());
+            console.log("clear the highlight");
         } else {
             if(typeof previousViewed !== "undefined"){
                 console.log("hitId and PreviousViewed", hitId,previousViewed);
@@ -66,9 +78,12 @@ FirSearchResultGroup = {
             parent = $(ReactDOM.findDOMNode(this)),
             group = parent.find('.group');
 
+        // These should be removed
+        ctrlIsDown = false;
+        shiftIsDown = false;
+
         if (!ctrlIsDown) {
             this.props.model.highlightResultLayer.getSource().clear();
-            console.log("highlight", this.props.model.highlightResultLayer);
         }
 
         var item = {
@@ -105,22 +120,26 @@ FirSearchResultGroup = {
             });
         } else if (ctrlIsDown) {
             if (element.hasClass('selected')) {
-                console.log("ctrlIsDown: detach item");
                 this.props.model.detach(item);
+                element.removeClass('selected');
             } else {
                 console.log("ctrlIsDown: go to append function");
                 this.props.model.append(item);
+                element.addClass('selected');
             }
         } else {
+            console.log("else");
+            var wasSelected = element.hasClass('selected');
             $('.firSearch-results').find('.selected').each(function (e) {
                 $(this).removeClass('selected');
             });
-            this.props.model.focus(item, this.props.isBar == 'yes');
-        }
 
-        if (!shiftIsDown) {
-            // Toggle
-            if (element.hasClass('selected')) { element.removeClass('selected'); } else { element.addClass('selected'); }
+            if(!wasSelected){
+                element.addClass('selected');
+            }
+            if(!clickedSame) {
+                this.props.model.focus(item, this.props.isBar == 'yes');
+            }
         }
 
         if (isMobile) {
@@ -140,7 +159,6 @@ FirSearchResultGroup = {
         // e.nativeEvent.stopImmediatePropagation();
 
         var map = this.props.model.get("map");
-        console.log("this.props.model.get.layerCollection", this.props.model.get("layerCollection"));
         this.props.model.get("layerCollection").forEach(layer => {
             if(layer.get("caption") == this.props.model.get("firLayerCaption") && this.props.result.layer == "Fastighet"){
                 layer.setVisible(true);
@@ -399,7 +417,13 @@ FirSearchResultGroup = {
                                         // Add to model
                                         this.props.model.get("items").map(group => {
                                             if (group.layer === "Fastighet") {
+                                                console.log("group.hits", group.hits);
+                                                console.log("feature", feature);
+                                                console.log("group.layer", group.layer);
+                                                feature.caption = group.layer;
+                                                feature.aliasDict = this.props.result.hits[0].aliasDict;
                                                 group.hits.push(feature);
+                                                console.log("this.props.model.get(items)", this.props.model.get("items"));
                                             }
                                         });
 
@@ -418,6 +442,7 @@ FirSearchResultGroup = {
             }));
         });
 
+        console.log("/////this.props.model.get(items)", this.props.model.get("items"));
         Promise.all(promises).then(() => {
             this.props.model.set('loadFinished', true);
             this.forceUpdate();
