@@ -106,7 +106,6 @@ namespace MapService.Controllers
         {
             try
             {
-                string a = Request.ContentType;
                 Response.Expires = 0;
                 Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
                 Response.ContentType = "text/html; charset=utf-8";
@@ -198,7 +197,7 @@ namespace MapService.Controllers
                         nsmgr.AddNamespace("ns4", "http://namespace.lantmateriet.se/distribution/produkter/inskrivning/v2.1");
 
                         // Skapa JSON för fliken Fastighetförteckning
-                        var jsonExcel = "[{ \"TabName\":\"Fastighetförteckning\",\"Cols\":[\"Beteckning\",\"Andel\",\"Ägare/Innehavare\",\"c/o\",\"Adress\",\"Postnummer\",\"Postadress\",\"Notering\"],\"Rows\":[";
+                        var jsonExcel = "[{ \"TabName\":\"Fastighetsförteckning\",\"Cols\":[\"Beteckning\",\"Andel\",\"Ägare/Innehavare\",\"c/o\",\"Adress\",\"Postnummer\",\"Postadress\",\"Notering\"],\"Rows\":[";
                         bool firstRow = true;
 
                         // Hämta fastighetsbeteckning
@@ -215,47 +214,56 @@ namespace MapService.Controllers
                             {
                                 foreach (XmlNode node in nodeList)
                                 {
-                                    var andel = node["ns4:BeviljadAndel"]["ns4:taljare"].InnerText + "/" + node["ns4:BeviljadAndel"]["ns4:namnare"].InnerText;
-
-                                    string agare, coAdress, adress, postnr, postort;
-                                    agare = coAdress = adress = postnr = postort = "Not Found";
-                                    var agareOrg = node["ns4:Agare"]["ns4:Organisation"];
-                                    var agarePerson = node["ns4:Agare"]["ns4:Person"];
-                                    if (agareOrg != null)
+                                    if (node["ns4:BeviljadAndel"] != null)
                                     {
-                                        agare = agareOrg["ns4:organisationsnamn"].InnerText;
-                                        coAdress = "";
-                                        if (agareOrg["ns4:Adress"]["ns4:coAdress"] != null)
-                                            coAdress = agareOrg["ns4:Adress"]["ns4:coAdress"].InnerText;
-                                        adress = "";
-                                        if (agareOrg["ns4:Adress"]["ns4:utdelningsadress2"] != null)
-                                            adress = agareOrg["ns4:Adress"]["ns4:utdelningsadress2"].InnerText;
-                                        if (agareOrg["ns4:Adress"]["ns4:utdelningsadress1"] != null)
-                                            adress += agareOrg["ns4:Adress"]["ns4:utdelningsadress1"].InnerText;
-                                        postnr = agareOrg["ns4:Adress"]["ns4:postnummer"].InnerText;
-                                        postort = agareOrg["ns4:Adress"]["ns4:postort"].InnerText;
-                                    }
-                                    else if (agarePerson != null)
-                                    {
-                                        agare = agarePerson["ns4:fornamn"].InnerText + " " + agarePerson["ns4:efternamn"].InnerText;
-                                        coAdress = "";
-                                        if (agarePerson["ns4:Adress"]["ns4:coAdress"] != null)
-                                            coAdress = agarePerson["ns4:Adress"]["ns4:coAdress"].InnerText;
-                                        adress = agarePerson["ns4:Adress"]["ns4:utdelningsadress2"].InnerText;
-                                        if (agarePerson["ns4:Adress"]["ns4:utdelningsadress1"] != null)
-                                            adress += agarePerson["ns4:Adress"]["ns4:utdelningsadress1"].InnerText;
-                                        postnr = agarePerson["ns4:Adress"]["ns4:postnummer"].InnerText;
-                                        postort = agarePerson["ns4:Adress"]["ns4:postort"].InnerText;
-                                    }
+                                        var andel = node["ns4:BeviljadAndel"]["ns4:taljare"].InnerText + "/" + node["ns4:BeviljadAndel"]["ns4:namnare"].InnerText;
 
-                                    jsonExcel = jsonExcel + (firstRow ? "":",") + "[\"" + fastighetsBeteckning + "\",\"" + andel + "\",\"" + agare + "\",\"" + coAdress + "\",\"" + adress + "\",\"" + postnr + "\",\"" + postort + "\",\"Lagfart\"]";
+                                        string agare, coAdress, adress, postnr, postort;
+                                        agare = coAdress = adress = postnr = postort = "Not Found";
+                                        var agareOrg = node["ns4:Agare"]["ns4:Organisation"];
+                                        var agarePerson = node["ns4:Agare"]["ns4:Person"];
+                                        if (agareOrg != null)
+                                        {
+                                            agare = agareOrg["ns4:organisationsnamn"].InnerText;
+                                            coAdress = "";
+                                            if (agareOrg["ns4:Adress"]["ns4:coAdress"] != null)
+                                                coAdress = agareOrg["ns4:Adress"]["ns4:coAdress"].InnerText;
+                                            adress = "";
+                                            if (agareOrg["ns4:Adress"]["ns4:utdelningsadress2"] != null)
+                                                adress = agareOrg["ns4:Adress"]["ns4:utdelningsadress2"].InnerText;
+                                            if (agareOrg["ns4:Adress"]["ns4:utdelningsadress1"] != null)
+                                                adress += agareOrg["ns4:Adress"]["ns4:utdelningsadress1"].InnerText;
+                                            postnr = agareOrg["ns4:Adress"]["ns4:postnummer"].InnerText;
+                                            postort = agareOrg["ns4:Adress"]["ns4:postort"].InnerText;
+                                        }
+                                        else if (agarePerson != null)
+                                        {
+                                            agare = agarePerson["ns4:fornamn"].InnerText + " " + agarePerson["ns4:efternamn"].InnerText;
+                                            coAdress = "";
+                                            if (agarePerson["ns4:Adress"]["ns4:coAdress"] != null)
+                                                coAdress = agarePerson["ns4:Adress"]["ns4:coAdress"].InnerText;
+                                            adress = agarePerson["ns4:Adress"]["ns4:utdelningsadress2"].InnerText;
+                                            if (agarePerson["ns4:Adress"]["ns4:utdelningsadress1"] != null)
+                                                adress += agarePerson["ns4:Adress"]["ns4:utdelningsadress1"].InnerText;
+                                            postnr = agarePerson["ns4:Adress"]["ns4:postnummer"].InnerText;
+                                            postort = agarePerson["ns4:Adress"]["ns4:postort"].InnerText;
+                                        }
+                                        else
+                                        {
+                                            if(node["ns4:Agare"]["ns4:fornamn"] != null && node["ns4:Agare"]["ns4:efternamn"] != null)
+                                                agare = node["ns4:Agare"]["ns4:fornamn"].InnerText + " " + node["ns4:Agare"]["ns4:efternamn"].InnerText;
+                                        }
+
+                                        jsonExcel = jsonExcel + (firstRow ? "" : ",") + "[\"" + fastighetsBeteckning + "\",\"" + andel + "\",\"" + agare + "\",\"" + coAdress + "\",\"" + adress + "\",\"" + postnr + "\",\"" + postort + "\",\"Lagfart\"]";
+                                        firstRow = false;
+                                    }
                                 }
                             }
                             else
                             {
                                 jsonExcel = jsonExcel + (firstRow ? "" : ",") + "[\"Ingen lagfart funnen\",\"\",\"\",\"\",\"\",\"\",\"\",\"Troligen Tomträtt\"]";
+                                firstRow = false;
                             }
-                            firstRow = false;
                         }
 
                         return jsonExcel + "]},";
@@ -277,7 +285,7 @@ namespace MapService.Controllers
 
             // Skapa JSON för fliken Marksamfälligheter
             var jsonExcel = "{ \"TabName\":\"Marksamfälligheter\",\"Cols\":[\"Marksamfälligheter\"],\"Rows\":[";
-            jsonExcel = jsonExcel + "[\"\"]";
+            jsonExcel = jsonExcel + "[\"Not implemented\"]";
             return jsonExcel + "]},";
         }
 
@@ -288,7 +296,7 @@ namespace MapService.Controllers
 
             // Skapa JSON för fliken Gemensamhetsanläggningar
             var jsonExcel = "{ \"TabName\":\"Gemensamhetsanläggningar\",\"Cols\":[\"Gemensamhetsanläggningar\"],\"Rows\":[";
-            jsonExcel = jsonExcel + "[\"\"]";
+            jsonExcel = jsonExcel + "[\"Not implemented\"]";
             return jsonExcel + "]},";
         }
 
@@ -299,7 +307,7 @@ namespace MapService.Controllers
 
             // Skapa JSON för fliken Rättigheter
             var jsonExcel = "{ \"TabName\":\"Rättigheter\",\"Cols\":[\"Avtalsrättighet\",\"Till förmån för\",\"Till last för \",\"Andel\",\"Ägare/Innehavare\",\"c/o\",\"Adress\",\"Postnummer\",\"Postadress\"],\"Rows\":[";
-            jsonExcel = jsonExcel + "[\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"]";
+            jsonExcel = jsonExcel + "[\"Not implemented\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"]";
             return jsonExcel + "]}]";
         }
 
