@@ -177,7 +177,10 @@ class Manager extends Component {
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
           infoUrlText: layer.infoUrlText,
-          infoOwner: layer.infoOwner
+          infoOwner: layer.infoOwner,
+          pointSize: layer.pointSize,
+          filterAttribute: layer.filterAttribute,
+          filterValue: layer.filterValue,
         });
 
         this.refs['VectorLayerForm'].loadLayers(layer, () => {
@@ -429,7 +432,7 @@ class Manager extends Component {
         case 'Vector':
           displayType = '(Vektor)';
           break;
-        default: 
+        default:
           break;
       }
 

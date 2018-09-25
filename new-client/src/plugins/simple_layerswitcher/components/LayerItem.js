@@ -51,37 +51,6 @@ class LayerItem extends Component {
     });
 
   }
-
-  /**
-   * Triggered when component unmounts.
-   * @instance
-   */
-  componentWillUnmount() {}
-
-  /**
-   * On visible change event handler.
-   * @instance
-   */
-  onVisibleChanged() {}
-
-  /**
-   * On legend change event handler.
-   * @instance
-   */
-  onLegendChanged() {}
-
-  /**
-   * On show legend change event handler.
-   * @instance
-   */
-  onShowLegendChanged() {}
-
-  /**
-   * On show info change event handler.
-   * @instance
-   */
-  onShowInfoChanged() {}
-
   /**
    * Toggle visibility of this layer item.
    * @instance
@@ -109,13 +78,10 @@ class LayerItem extends Component {
       </i>
     ) : null;
   }
-
   renderLegendImage() {
-
     var src = this.state.legend[0] && this.state.legend[0].url
     ? this.state.legend[0].url
     : "";
-
     return (
       src
       ? <img width="60" alt="legend" src={src} />
@@ -131,10 +97,10 @@ class LayerItem extends Component {
     return chapters.reduce((chaptersWithLayer, chapter) => {
       if (Array.isArray(chapter.layers)) {
         if (chapter.layers.some(layerId => layerId === id)) {
-          return [...chaptersWithLayer, chapter];
+          chaptersWithLayer = [...chaptersWithLayer, chapter];
         }
         if (chapter.chapters.length > 0) {
-          return this.findChapters(id, chapter.chapters);
+          chaptersWithLayer = [...chaptersWithLayer, ...this.findChapters(id, chapter.chapters)];
         }
       }
       return chaptersWithLayer;
@@ -143,7 +109,7 @@ class LayerItem extends Component {
 
   renderChapterLinks(chapters) {
     if (chapters) {
-      var chaptersWithLayer = this.findChapters(this.props.layer.get("name"), chapters);
+      let chaptersWithLayer = this.findChapters(this.props.layer.get("name"), chapters);
       return (
         <ul>
         {

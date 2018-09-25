@@ -1,10 +1,12 @@
 import VectorSource from "ol/source/Vector";
 import { Vector as VectorLayer } from "ol/layer";
 import { WFS, GeoJSON } from "ol/format";
-import GML2 from "ol/format/GML2";
+import GML2 from "ol/format/GML";
 import { Fill, Text, Stroke, Icon, Circle, Style } from "ol/style";
 import { all as strategyAll } from "ol/loadingstrategy";
 import { transform } from "ol/proj";
+import {toContext} from 'ol/render';
+import {Point, Polygon, LineString} from 'ol/geom';
 import LayerInfo from "./LayerInfo.js";
 
 let vectorLayerProperties = {
@@ -46,7 +48,15 @@ class WFSVectorLayer {
       },
       strategy: strategyAll
     });
+
+    if (config.legend[0].url === "") {
+      this.generateLegend(imageData => {
+        config.legend[0].url = imageData;
+      });
+    }
+
     this.layer = new VectorLayer({
+      featureType: config.params.typename.split(':')[1],
       information: config.information,
       caption: config.caption,
       name: config.name,
@@ -61,7 +71,7 @@ class WFSVectorLayer {
     this.type = "vector";
   }
 
-  getStyle(feature, resolution) {
+  getStyle(feature, resolution, forcedPointSize) {
     const icon = this.config.icon;
     const fillColor = this.config.fillColor;
     const lineColor = this.config.lineColor;
@@ -82,6 +92,7 @@ class WFSVectorLayer {
     const outlineWidth = this.config.labelOutlineWidth;
     const labelAttribute = this.config.labelAttribute;
     const showLabels = this.config.showLabels;
+    const pointSize = forcedPointSize || this.config.pointSize;
 
     function getLineDash() {
       var scale = (a, f) => a.map(b => f * b),
@@ -142,7 +153,7 @@ class WFSVectorLayer {
       return new Circle({
         fill: getFill(),
         stroke: getStroke(),
-        radius: 4
+        radius: parseInt(pointSize, 10) || 4
       });
     }
 
@@ -235,10 +246,18 @@ class WFSVectorLayer {
       this.reprojectFeatures(features, from, to);
     }
 
+    if (undefined !== this.config.filterAttribute &&
+        undefined !== this.config.filterValue) {
+      features = features.filter(feature =>
+        feature.getProperties()[this.config.filterAttribute] !==
+        this.config.filterValue
+      );
+    }
+
     this.vectorSource.addFeatures(features);
   }
 
-  createUrl(extent, ll) {
+  createUrl() {
     var props = Object.keys(this.config.params);
     var url = this.config.url + "?";
     for (let i = 0; i < props.length; i++) {
@@ -261,6 +280,56 @@ class WFSVectorLayer {
     fetch(url).then(response => {
       response.text().then(features => {
         this.addFeatures(features, format || "wfs");
+      });
+    });
+  }
+
+  generateLegend(callback) {
+    var url = this.proxyUrl + this.createUrl();
+    fetch(url).then(response => {
+      response.text().then(gmlText => {
+        const parser = new GML2();
+        const features = parser.readFeatures(gmlText);
+        const canvas = document.createElement('canvas');
+
+        const scale = 120;
+        const padding = 1/5;
+        const pointRadius = 15;
+
+        const vectorContext = toContext(canvas.getContext('2d'), {
+          size: [scale, scale]
+        });
+        const style = this.getStyle(undefined, undefined, pointRadius)[0];
+        vectorContext.setStyle(style);
+
+        var featureType = "Point";
+        if (features.length > 0) {
+          featureType = features[0].getGeometry().getType();
+        }
+
+        switch(featureType) {
+          case "Point":
+            vectorContext.drawGeometry(new Point([scale / 2, scale / 2]));
+            break;
+          case "Polygon":
+            vectorContext.drawGeometry(new Polygon([[
+              [scale * padding, scale * padding],
+              [scale * padding, scale - scale * padding],
+              [scale - scale * padding, scale - scale * padding],
+              [scale - scale * padding, scale * padding],
+              [scale * padding, scale * padding]
+            ]]));
+            break;
+          case "LineString":
+            vectorContext.drawGeometry(new LineString([
+              [scale * padding, scale - scale * padding],
+              [scale - scale * padding, scale * padding]
+            ]));
+            break;
+          default:
+            break;
+        }
+        callback(canvas.toDataURL());
       });
     });
   }

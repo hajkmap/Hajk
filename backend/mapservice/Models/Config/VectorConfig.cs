@@ -32,7 +32,13 @@ namespace MapService.Models.Config
 
         public string projection { get; set; }
 
-        public string lineStyle { get; set; }
+		public string pointSize { get; set; }
+
+		public string filterAttribute { get; set; }
+
+		public string filterValue { get; set; }
+
+		public string lineStyle { get; set; }
 
         public string lineWidth { get; set; }
 

@@ -10,6 +10,10 @@ class Popup extends Component {
       selectedIndex: 1,
       visible: false
     };
+    marked.setOptions({
+      sanitize: false,
+      xhtml: true
+    });
   }
 
   componentDidMount() {}
@@ -21,7 +25,10 @@ class Popup extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    return this.props.mapClickDataResult !== nextProps.mapClickDataResult;
+    return (
+      (this.props.mapClickDataResult !== nextProps.mapClickDataResult) ||
+      (nextState.selectedIndex !== this.state.selectedIndex)
+    )
   }
 
   componentDidUpdate() {
@@ -76,7 +83,6 @@ class Popup extends Component {
         markdown = markdown.replace(property, lookup(properties, property));
       });
     }
-
     return {
       __html: marked(markdown)
     };
@@ -100,6 +106,7 @@ class Popup extends Component {
   }
 
   html(features) {
+
     if (!features) return "";
 
     var visibleStyle = currentIndex => {
@@ -109,9 +116,7 @@ class Popup extends Component {
         display: displayValue
       };
     };
-
     var toggler = null;
-
     if (features.length > 1) {
       toggler = (
         <div className="toggle">
@@ -135,6 +140,7 @@ class Popup extends Component {
           : this.table(feature.getProperties());
 
       if (markdown) {
+        console.log(value);
         return (
           <div
             key={i}

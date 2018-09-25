@@ -182,6 +182,23 @@
         ],
         "groups": [
           {
+            "id": "f499fa2b-ad0a-cecd-c118-2e7037b541b1",
+            "parent": "-1",
+            "name": "Medborgardialog",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "15",
+                "visibleAtStart": false,
+                "drawOrder": 4,
+                "visibleForGroups": null,
+                "infobox": null
+              }
+            ],
+            "groups": []
+          },
+          {
             "id": "eff9c88f-fc3a-05c2-3a15-285712099854",
             "parent": "-1",
             "name": "Kartlager",
@@ -189,23 +206,23 @@
             "expanded": true,
             "layers": [
               {
-                "id": "13",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
+                "id": "16",
+                "visibleAtStart": true,
+                "drawOrder": 2,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "17",
+                "visibleAtStart": true,
+                "drawOrder": 1,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
                 "id": "14",
                 "visibleAtStart": true,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "11",
-                "visibleAtStart": true,
-                "drawOrder": 1000,
+                "drawOrder": 3,
                 "visibleForGroups": null,
                 "infobox": null
               }
@@ -273,8 +290,8 @@
       "type": "collector",
       "options": {
         "target": "right",
-        "url": "http://giscloud.se/geoserver/wfs",
-        "featureType": "wsp:opinion",
+        "url": "https://giscloud.se/geoserver/wsp/wfs",
+        "featureType": "opinion",
         "visibleAtStart": false,
         "visibleForGroups": []
       },

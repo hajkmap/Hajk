@@ -12,6 +12,12 @@ import Observer from "react-event-observer";
 
 const styles = theme => {
   return {
+    button: {
+      width: '50px',
+      height: '50px',
+      outline: 'none',
+      marginBottom: '10px'
+    }
   }
 };
 

@@ -1,4 +1,4 @@
-import WFS from 'ol/format/WFS';
+import {WFS, GML} from 'ol/format';
 import Feature from 'ol/Feature.js';
 import Point from 'ol/geom/Point.js';
 
@@ -9,39 +9,67 @@ class CollectorModel {
     this.featureType = settings.options.featureType;
   }
 
-  save(comment, success, error) {
+  /**
+   * Save changes.
+   * Send WFS-transactional request.
+   * @param {object} props
+   * @param function success | (text)
+   * @param function error | (text)
+   */
+  save(props, success, error) {
 
-    var coord = this.olMap.getView().getCenter();
+    const coord = this.olMap.getView().getCenter();
 
-    var wfs = new WFS({
+    const wfs = new WFS();
+    const gml = new GML({
       featureNS: this.url,
-      featureType: this.featureType
+      featureType: this.featureType,
+      srsName: this.olMap.getView().getProjection().getCode()
     });
 
-    var f = new Feature({
-      text: comment,
-      geometry: new Point(coord)
+    const f = new Feature({
+      text: props.comment,
+      visible: props.displayPlace
     });
+    if (!props.generic) {
+      f.setGeometryName("geom");
+      f.setGeometry(new Point(coord));
+    }
 
-    var inserts = [f];
+    const inserts = [f];
+    const node = wfs.writeTransaction(inserts, null, null, gml);
+    const xmlSerializer = new XMLSerializer();
+    const xmlString = xmlSerializer.serializeToString(node);
 
-    var node = wfs.writeTransaction(inserts, null, null, {
-      featureNS: this.url,
-      featureType: this.featureType
-    });
+    const request = {
+      method: 'POST',
+      headers:{
+        'Content-Type': 'text/xml'
+      },
+      body: xmlString
+    };
 
-    console.log("Write", node);
-
-    var request = new Request({
-      url: this.url,
-      method: 'post',
-      data: node
-    });
-
-    fetch(request).then(data => {
-      console.log(data);
-    });
-
+    fetch(this.url, request)
+      .then(reponse => {
+        reponse
+          .text()
+          .then(t => {
+            var mapLayer = this.olMap
+              .getLayers()
+              .getArray()
+              .find(layer =>
+                layer.getProperties &&
+                layer.getProperties().featureType === this.featureType
+              );
+            if (mapLayer) {
+              mapLayer.getSource().clear();
+            }
+            success(wfs.readTransactionResponse(t));
+          });
+      })
+      .catch(err => {
+        error(err);
+      });
   }
 }
 

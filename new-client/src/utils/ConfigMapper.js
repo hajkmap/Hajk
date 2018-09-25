@@ -224,7 +224,7 @@ export default class ConfigMapper {
     return config;
   }
 
-  mapVectorConfig(args) {        
+  mapVectorConfig(args) {
     var config = {
       type: "vector",
       options: {
@@ -248,6 +248,9 @@ export default class ConfigMapper {
         icon: args.legend,
         symbolXOffset: args.symbolXOffset,
         symbolYOffset: args.symbolYOffset,
+        pointSize: args.pointSize,
+        filterAttribute: args.filterAttribute,
+        filterValue: args.filterValue,
         labelAlign: args.labelAlign,
         labelBaseline: args.labelBaseline,
         labelSize: args.labelSize,

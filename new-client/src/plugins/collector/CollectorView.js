@@ -12,16 +12,24 @@ const styles = theme => {
     popup: {
       position: 'fixed',
       left: '50%',
-      top: '50%',
-      width: '300px',
-      marginLeft: '-150px',
-      marginTop: '-210px',
+      bottom: '50%',
+      width: '360px',
+      marginLeft: '-180px',
       border: '1px solid #ccc',
       boxShadow: '3px 4px 5px rgba(0, 0, 0, 0.5)',
       borderRadius: '10px',
       zIndex: 1200,
       background: 'white',
-      padding: '20px'
+      padding: '20px',
+      [theme.breakpoints.down('xs')]: {
+        left: '10px',
+        right: '10px',
+        marginLeft: 'auto',
+        width: 'auto'
+      }
+    },
+    right: {
+      float: 'right'
     }
   }
 };
@@ -47,10 +55,7 @@ class CollectorView extends Component {
       : classNames(classes.popup, classes.hidden)
     return (
       <div className={clsNames}>
-        <div>
-          <div>Här kan du tycka till om en viss plats eller ett område.</div>
-          <CollectorForm model={this.model} onClose={this.onClose}/>
-        </div>
+        <CollectorForm model={this.model} onClose={this.onClose}/>
       </div>
     );
   }

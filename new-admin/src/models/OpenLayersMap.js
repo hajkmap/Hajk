@@ -8,13 +8,13 @@ import CoordinateSystemLoader from "./CoordinateSystemLoader.js";
 import { register } from "ol/proj/proj4";
 
 class OpenLayersMap {
-  
+
   constructor(settings) {
     settings.config  = settings.config || {
       center: [319268, 6471199],
       zoom: 6
     };
-    
+
     this.coordinateSystemLoader = new CoordinateSystemLoader([{
       "code": "EPSG:3006",
       "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
@@ -26,14 +26,14 @@ class OpenLayersMap {
       ],
       "units": null
     }]);
-    
+
     register(this.coordinateSystemLoader.getProj4());
 
     this.map = new Map({
       layers: [
         new TileLayer({
           opacity: 1,
-          source: new WMTS({            
+          source: new WMTS({
             url: 'http://giscloud.se/mapservice/lmproxy/wmts',
             layer: 'topowebb',
             matrixSet: '3006',
@@ -54,7 +54,7 @@ class OpenLayersMap {
         center: settings.config.center,
         zoom: settings.config.zoom,
         projection: 'EPSG:3006',
-        resolutions: [4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2],
+        resolutions: [4096, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25],
         extent: [
           0,
           6000000,
@@ -63,11 +63,11 @@ class OpenLayersMap {
         ]
       })
     });
-    this.onUpdate = settings.onUpdate;    
+    this.onUpdate = settings.onUpdate;
     this.onUpdate(this.getState());
     this.bindEvents();
   }
-  
+
   bindEvents() {
     this.map.getView().on('change:zoom', () => {
       this.onUpdate(this.getState());
@@ -80,7 +80,7 @@ class OpenLayersMap {
   getState() {
     return {
       center: this.map.getView().getCenter(),
-      zoom: Math.round(this.map.getView().getZoom())        
+      zoom: Math.round(this.map.getView().getZoom())
     }
   }
 

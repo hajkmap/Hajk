@@ -55,18 +55,21 @@ const styles = theme => {
       position: 'absolute',
       zIndex: theme.zIndex.drawer - 2,
       minHeight: '50px',
-      margin: '10px',
+      margin: '5px',
       overflow: 'visible',
       [theme.breakpoints.down('xs')]: {
       }
     },
     widgetsLeft: {
-      left: 0,
+      left: '8px',
+      top: '8px',
       [theme.breakpoints.down('xs')]: {
+        left: '0px',
+        top: '0px'
       }
     },
     widgetsRight: {
-      right: '4px',
+      right: '7px',
       top: '150px',
       [theme.breakpoints.down('xs')]: {
       }
@@ -74,7 +77,7 @@ const styles = theme => {
     button: {
       width: '50px',
       height: '50px',
-      marginBottom: '5px',
+      marginBottom: '10px',
       outline: 'none'
     }
   }

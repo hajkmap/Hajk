@@ -12,7 +12,7 @@ const styles = theme => {
     button: {
       width: '50px',
       height: '50px',
-      marginBottom: '5px',
+      marginBottom: '10px',
       outline: 'none'
     }
   }
