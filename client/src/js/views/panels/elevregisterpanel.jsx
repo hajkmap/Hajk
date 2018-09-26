@@ -173,6 +173,10 @@ var ElevregisterPanelView = {
     this.props.model.measureTooltip.setPosition(null);
   },
 
+  showOnMap: function () {
+    this.props.model.showOnMap();
+  },
+
   /**
    * Handle change event of the show labels checkbox.
    * @instance
@@ -552,6 +556,10 @@ var ElevregisterPanelView = {
       }
     }
 
+    function showOnMap () {
+      this.props.model.showOnMap();
+    
+    }
     function abort () {
       this.props.model.set('dialog', false);
       this.refs.textInput.blur();
@@ -597,11 +605,7 @@ var ElevregisterPanelView = {
     return (
       <Panel title='Elevregister' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
         <div className='elevregister-tools'>
-          <ul>
-            <li id='abort' className='green' onClick={this.abort}>
-              <i className='fa fa-check fa-0' /> <span>Klar</span>
-            </li>
-          </ul>
+          <button className='btn btn-primary' onClick={this.showOnMap}>Visa</button>&nbsp;
         </div>
         <div className='panel-body'>
           {symbology}

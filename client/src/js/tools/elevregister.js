@@ -177,19 +177,83 @@ var ElevregisterModel = {
 
     this.set('elevregisterLayer', new ol.layer.Vector({
       source: this.get('source'),
-      queryable: false,
+      queryable: true,
       name: this.get('elevregisterLayerName'),
       style: (feature) => this.getStyle(feature)
     }));
 
     this.set('olMap', olMap);
-    this.get('olMap').addLayer(this.get('elevregisterLayer'));
+    //this.get('olMap').addLayer(this.get('elevregisterLayer'));
     this.set('elevregisterLayer', this.get('elevregisterLayer'));
     if (this.get('icons') !== '') {
       let icon = this.get('icons').split(',')[0];
       this.set('markerImg', window.location.href + 'assets/icons/' + icon + '.png');
     }
     this.createMeasureTooltip();
+  },
+
+  showOnMap: function () {
+    //https://ikarta.kungsbacka.se/API/Elevregister/api/klass/EG_114d0b1a-837d-48b4-b39c-c1470cb4a75a
+    //http://localhost/temp/elever.json
+    var request = $.ajax({
+      url: 'http://localhost/temp/elever-api.json',
+      success: (data) => {
+        var features = new ol.format.GeoJSON().readFeatures(data);
+        this.get('elevregisterLayer').getSource().addFeatures(features);
+        this.get('olMap').addLayer(this.get('elevregisterLayer'));
+        this.set('elevregisterLayer', this.get('elevregisterLayer'));
+        if (this.get('icons') !== '') {
+          let icon = this.get('icons').split(',')[0];
+          console.log(icon);
+          this.set('markerImg', window.location.href + 'assets/icons/' + icon + '.png');
+        }
+    
+      }
+    });
+  },
+
+  showOnMap2: function () {
+    source = new ol.source.Vector({ wrapX: false });
+    //olMap = shell.getMap().getMap();
+    this.set('source', source);
+
+    var features;
+    var gj;
+    var request = $.ajax({
+      url: 'http://localhost/temp/elever.json',
+      success: (data) => {
+        //console.log(data);
+        gj = data;
+        features = new ol.format.GeoJSON().readFeatures(data);
+        //console.log(features);
+      }
+    });
+    console.log(gj);
+    console.log(features);
+
+    var format = new ol.format.GeoJSON({
+      featureProjection:"EPSG:3007"
+    });
+
+    this.set('elevregisterLayer', new ol.layer.Vector({
+      //source: this.get('source'),
+      //vectorLayer.getSource().addFeatures(format.readFeatures(newRouteInGeoJSON));
+
+      source: new ol.source.Vector({
+        url: 'http://localhost/temp/elever.json',
+        format: new ol.format.GeoJSON()
+      }),
+      queryable: true,
+      name: this.get('elevregisterLayerName'),
+      style: (feature) => this.getStyle(feature)
+    }));
+
+    this.get('olMap').addLayer(this.get('elevregisterLayer'));
+    this.set('elevregisterLayer', this.get('elevregisterLayer'));
+    if (this.get('icons') !== '') {
+      let icon = this.get('icons').split(',')[0];
+      this.set('markerImg', window.location.href + 'assets/icons/' + icon + '.png');
+    }
   },
 
   editOpenDialog: function (event) {
