@@ -20,33 +20,33 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import React from 'react';
-import { Component } from 'react';
-import Alert from '../views/alert.jsx';
+import React from "react";
+import { Component } from "react";
+import Alert from "../views/alert.jsx";
 
-import Edit from '../views/edit.jsx';
-import LayerManager from '../views/layermanager.jsx';
-import Map from '../views/map.jsx';
-import InformativeEditor from '../views/informativeeditor.jsx';
-import MapSettings from '../views/mapsettings.jsx';
-import Info from '../views/info.jsx';
-import Release from '../views/release.jsx';
-import Search from '../views/search.jsx';
+import Edit from "../views/edit.jsx";
+import LayerManager from "../views/layermanager.jsx";
+import Map from "../views/map.jsx";
+import InformativeEditor from "../views/informativeeditor.jsx";
+import MapSettings from "../views/mapsettings.jsx";
+import Info from "../views/info.jsx";
+import Release from "../views/release.jsx";
+import Search from "../views/search.jsx";
 
-import editModel from '../models/edit.js';
-import layerManagerModel from '../models/layermanager.js';
-import mapModel from '../models/map.js';
-import informativeEditorModel from '../models/informativeEditor.js';
-import mapSettingsModel from '../models/mapsettings.js';
-import infoModel from '../models/info.js';
-import releaseModel from '../models/release.js';
-import searchModel from '../models/search.js';
+import editModel from "../models/edit.js";
+import layerManagerModel from "../models/layermanager.js";
+import mapModel from "../models/map.js";
+import informativeEditorModel from "../models/informativeEditor.js";
+import mapSettingsModel from "../models/mapsettings.js";
+import infoModel from "../models/info.js";
+import releaseModel from "../models/release.js";
+import searchModel from "../models/search.js";
 
 var defaultState = {
   alert: false,
   corfirm: false,
-  alertMessage: '',
-  content: '',
+  alertMessage: "",
+  content: "",
   confirmAction: () => {},
   denyAction: () => {}
 };
@@ -57,37 +57,37 @@ class Application extends Component {
   /**
    *
    */
-  constructor () {
+  constructor() {
     super();
     this.state = defaultState;
   }
   /**
    *
    */
-  componentDidMount () {
+  componentDidMount() {
     this.setState({
-      content: this.props.model.get('content')
+      content: this.props.model.get("content")
     });
 
-    this.props.model.on('change:content', () => {
+    this.props.model.on("change:content", () => {
       this.setState({
-        content: this.props.model.get('content')
+        content: this.props.model.get("content")
       });
     });
   }
   /**
    *
    */
-  resetAlert () {
+  resetAlert() {
     this.setState({
       alert: false,
-      alertMessage: ''
+      alertMessage: ""
     });
   }
   /**
    *
    */
-  getAlertOptions () {
+  getAlertOptions() {
     return {
       visible: this.state.alert,
       message: this.state.alertMessage,
@@ -97,7 +97,7 @@ class Application extends Component {
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ''
+          alertMessage: ""
         });
       },
       denyAction: () => {
@@ -105,13 +105,13 @@ class Application extends Component {
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ''
+          alertMessage: ""
         });
       },
       onClick: () => {
         this.setState({
           alert: false,
-          alertMessage: ''
+          alertMessage: ""
         });
       }
     };
@@ -119,14 +119,14 @@ class Application extends Component {
   /**
    *
    */
-  renderTabs () {
+  renderTabs() {
     if (!this.state) return null;
 
     var tabs = this.props.tabs;
 
     return tabs.map((item, i) => {
-      var anchor = '#!/' + item.name,
-        active = this.state.content === item.name ? 'active' : '';
+      var anchor = "#!/" + item.name,
+        active = this.state.content === item.name ? "active" : "";
       return (
         <li className={active} key={i}>
           <a href={anchor}>{item.title}</a>
@@ -135,44 +135,44 @@ class Application extends Component {
     });
   }
 
-  getView (name) {    
+  getView(name) {
     switch (name) {
-      case 'edit':
+      case "edit":
         return Edit;
-      case 'layermanager':
+      case "layermanager":
         return LayerManager;
-      case 'map':
+      case "map":
         return Map;
-      case 'informative':
-        return InformativeEditor;        
-      case 'mapsettings':
+      case "informative":
+        return InformativeEditor;
+      case "mapsettings":
         return MapSettings;
-      case 'info':
+      case "info":
         return Info;
-      case 'release':
+      case "release":
         return Release;
-      case 'search':
+      case "search":
         return Search;
     }
   }
 
-  getModel (name) {    
+  getModel(name) {
     switch (name) {
-      case 'edit':
+      case "edit":
         return new editModel();
-      case 'layermanager':
+      case "layermanager":
         return new layerManagerModel();
-      case 'map':
+      case "map":
         return new mapModel();
-      case 'informative':
+      case "informative":
         return new informativeEditorModel();
-      case 'mapsettings':
+      case "mapsettings":
         return new mapSettingsModel();
-      case 'info':
+      case "info":
         return new infoModel();
-      case 'release':
+      case "release":
         return new releaseModel();
-      case 'search':
+      case "search":
         return new searchModel();
     }
   }
@@ -180,7 +180,7 @@ class Application extends Component {
   /**
    *
    */
-  renderContent () {
+  renderContent() {
     if (!this.state || !this.state.content) return null;
 
     var content = null;
@@ -190,7 +190,7 @@ class Application extends Component {
       model = this.getModel(this.state.content);
     } catch (e) {
       console.error(e);
-      return (<div>{e.message}</div>);
+      return <div>{e.message}</div>;
     }
 
     return React.createElement(content, {
@@ -202,7 +202,7 @@ class Application extends Component {
   /**
    *
    */
-  render () {
+  render() {
     var content = this.renderContent();
     var tabs = this.renderTabs();
 
@@ -210,13 +210,9 @@ class Application extends Component {
       <main>
         <Alert options={this.getAlertOptions()} />
         <nav>
-          <ul className='nav nav-tabs'>
-            {tabs}
-          </ul>
+          <ul className="nav nav-tabs">{tabs}</ul>
         </nav>
-        <section className='tab-content'>
-          {content}
-        </section>
+        <section className="tab-content">{content}</section>
       </main>
     );
   }

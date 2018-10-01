@@ -20,7 +20,7 @@
 //
 // https://github.com/hajkmap/Hajk
 
-ol.interaction.Drag = function () {
+ol.interaction.Drag = function() {
   ol.interaction.Pointer.call(this, {
     handleDownEvent: ol.interaction.Drag.prototype.handleDownEvent,
     handleDragEvent: ol.interaction.Drag.prototype.handleDragEvent,
@@ -30,7 +30,7 @@ ol.interaction.Drag = function () {
 
   this.coordinate_ = null;
 
-  this.cursor_ = 'pointer';
+  this.cursor_ = "pointer";
 
   this.feature_ = null;
 
@@ -41,31 +41,34 @@ ol.interaction.Drag = function () {
 
 ol.inherits(ol.interaction.Drag, ol.interaction.Pointer);
 
-ol.interaction.Drag.prototype.pause = function () {
+ol.interaction.Drag.prototype.pause = function() {
   this.paused = true;
 };
 
-ol.interaction.Drag.prototype.resume = function () {
+ol.interaction.Drag.prototype.resume = function() {
   this.paused = false;
 };
 
 var acceptedLayers = {
-  'preview-layer': true
+  "preview-layer": true
 };
 
-ol.interaction.Drag.prototype.addAcceptedLayer = function (layerName) {
+ol.interaction.Drag.prototype.addAcceptedLayer = function(layerName) {
   acceptedLayers[layerName] = layerName;
 };
 
-ol.interaction.Drag.prototype.removeAcceptedLayer = function (layerName) {
+ol.interaction.Drag.prototype.removeAcceptedLayer = function(layerName) {
   delete acceptedLayers[layerName];
 };
 
-ol.interaction.Drag.prototype.isDraggable = function (layer) {
-  return layer ? acceptedLayers.hasOwnProperty(layer.getProperties().name) || layer.dragLocked === false : true;
+ol.interaction.Drag.prototype.isDraggable = function(layer) {
+  return layer
+    ? acceptedLayers.hasOwnProperty(layer.getProperties().name) ||
+        layer.dragLocked === false
+    : true;
 };
 
-ol.interaction.Drag.prototype.handleDownEvent = function (evt) {
+ol.interaction.Drag.prototype.handleDownEvent = function(evt) {
   var map = evt.map,
     feature;
 
@@ -80,7 +83,9 @@ ol.interaction.Drag.prototype.handleDownEvent = function (evt) {
     this.coordinate_ = evt.coordinate;
     this.feature_ = feature;
   } else {
-    if (this.layer_) { this.layer_.dragLocked = true; }
+    if (this.layer_) {
+      this.layer_.dragLocked = true;
+    }
     feature = false;
     this.feature_ = false;
   }
@@ -88,7 +93,7 @@ ol.interaction.Drag.prototype.handleDownEvent = function (evt) {
   return !!feature;
 };
 
-ol.interaction.Drag.prototype.handleDragEvent = function (evt) {
+ol.interaction.Drag.prototype.handleDragEvent = function(evt) {
   var map = evt.map,
     deltaX = 0,
     deltaY = 0,
@@ -104,14 +109,14 @@ ol.interaction.Drag.prototype.handleDragEvent = function (evt) {
   this.coordinate_[0] = evt.coordinate[0];
   this.coordinate_[1] = evt.coordinate[1];
 
-  if (this.layer_ && this.layer_.getProperties().name !== 'highlight-wms') {
+  if (this.layer_ && this.layer_.getProperties().name !== "highlight-wms") {
     this.feature_.getGeometry().translate(deltaX, deltaY);
   }
 };
 
-ol.interaction.Drag.prototype.handleMoveEvent = function (evt) {
+ol.interaction.Drag.prototype.handleMoveEvent = function(evt) {
   if (this.cursor_) {
-    var featureLayer = '',
+    var featureLayer = "",
       map = evt.map,
       feature = map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
         featureLayer = layer;
@@ -131,7 +136,7 @@ ol.interaction.Drag.prototype.handleMoveEvent = function (evt) {
   }
 };
 
-ol.interaction.Drag.prototype.handleUpEvent = function (evt) {
+ol.interaction.Drag.prototype.handleUpEvent = function(evt) {
   this.coordinate_ = null;
   this.feature_ = null;
   return false;

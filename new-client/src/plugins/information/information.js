@@ -5,17 +5,17 @@ import { Button } from "@material-ui/core";
 import InfoIcon from "@material-ui/icons/Info";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 
-import Dialog from '../../components/Dialog.js';
+import Dialog from "../../components/Dialog.js";
 
 const styles = theme => {
   return {
     button: {
-      width: '50px',
-      height: '50px',
-      marginBottom: '10px',
-      outline: 'none'
+      width: "50px",
+      height: "50px",
+      marginBottom: "10px",
+      outline: "none"
     }
-  }
+  };
 };
 
 class Infomation extends Component {
@@ -51,13 +51,13 @@ class Infomation extends Component {
         options={this.props.options}
         open={this.state.dialogOpen}
         onClose={this.onClose}
-      ></Dialog>,
+      />,
       document.getElementById("map")
     );
   }
 
   renderAsWidgetItem() {
-    const {classes} = this.props;
+    const { classes } = this.props;
     return (
       <div>
         <Button
@@ -77,12 +77,7 @@ class Infomation extends Component {
   renderAsToolbarItem() {
     return (
       <div>
-        <ListItem
-          button
-          divider={true}
-          selected={false}
-          onClick={this.onClick}
-        >
+        <ListItem button divider={true} selected={false} onClick={this.onClick}>
           <ListItemIcon>
             <InfoIcon />
           </ListItemIcon>
@@ -94,7 +89,6 @@ class Infomation extends Component {
   }
 
   render() {
-
     if (this.props.type === "toolbarItem") {
       return this.renderAsToolbarItem();
     }
@@ -104,7 +98,6 @@ class Infomation extends Component {
     }
 
     return null;
-
   }
 }
 

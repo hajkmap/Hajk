@@ -20,13 +20,13 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import { Model } from 'backbone';
+import { Model } from "backbone";
 
 var informativeEditor = Model.extend({
   save: function(data, callback) {
-    var url = 'http://localhost:55630/informative/save/op';
+    var url = "http://localhost:55630/informative/save/op";
     fetch(url, {
-      method: 'post',
+      method: "post",
       body: data
     }).then(response => {
       response.text().then(text => {
@@ -34,14 +34,14 @@ var informativeEditor = Model.extend({
       });
     });
   },
-  load: function (callback) {    
-    var url = 'http://localhost:55630/informative/load/op';
+  load: function(callback) {
+    var url = "http://localhost:55630/informative/load/op";
     fetch(url).then(response => {
       response.json().then(data => {
         callback(data);
       });
     });
-  }  
+  }
 });
 
 export default informativeEditor;

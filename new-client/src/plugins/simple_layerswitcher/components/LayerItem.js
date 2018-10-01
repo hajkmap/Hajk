@@ -44,18 +44,17 @@ class LayerItem extends Component {
       instruction: layerInfo.instruction
     });
 
-    this.props.layer.on("change:visible", (e) => {
+    this.props.layer.on("change:visible", e => {
       this.setState({
         visible: !e.oldValue
       });
     });
-
   }
   /**
    * Toggle visibility of this layer item.
    * @instance
    */
-  toggleVisible = (layer) => (e) => {
+  toggleVisible = layer => e => {
     var visible = !this.state.visible;
     this.setState({
       visible: visible
@@ -79,17 +78,14 @@ class LayerItem extends Component {
     ) : null;
   }
   renderLegendImage() {
-    var src = this.state.legend[0] && this.state.legend[0].url
-    ? this.state.legend[0].url
-    : "";
-    return (
-      src
-      ? <img width="60" alt="legend" src={src} />
-      : null
-    )
+    var src =
+      this.state.legend[0] && this.state.legend[0].url
+        ? this.state.legend[0].url
+        : "";
+    return src ? <img width="60" alt="legend" src={src} /> : null;
   }
 
-  openInformative = (chapter) => (e) => {
+  openInformative = chapter => e => {
     this.props.onOpenChapter(chapter);
   };
 
@@ -100,35 +96,43 @@ class LayerItem extends Component {
           chaptersWithLayer = [...chaptersWithLayer, chapter];
         }
         if (chapter.chapters.length > 0) {
-          chaptersWithLayer = [...chaptersWithLayer, ...this.findChapters(id, chapter.chapters)];
+          chaptersWithLayer = [
+            ...chaptersWithLayer,
+            ...this.findChapters(id, chapter.chapters)
+          ];
         }
       }
       return chaptersWithLayer;
-    }, [])
+    }, []);
   }
 
   renderChapterLinks(chapters) {
     if (chapters) {
-      let chaptersWithLayer = this.findChapters(this.props.layer.get("name"), chapters);
+      let chaptersWithLayer = this.findChapters(
+        this.props.layer.get("name"),
+        chapters
+      );
       return (
         <ul>
-        {
-          chaptersWithLayer.map((chapter, i) => {
+          {chaptersWithLayer.map((chapter, i) => {
             return (
-              <li key={i}><a href="#text1" onClick={this.openInformative(chapter)}>{chapter.header}</a></li>
-            )
-          })
-        }
+              <li key={i}>
+                <a href="#text1" onClick={this.openInformative(chapter)}>
+                  {chapter.header}
+                </a>
+              </li>
+            );
+          })}
         </ul>
       );
-    } else  {
+    } else {
       return null;
     }
   }
 
   render() {
-    var caption = this.props.layer.get("caption")
-    ,   visible = this.state.visible;
+    var caption = this.props.layer.get("caption"),
+      visible = this.state.visible;
 
     if (!caption) {
       return null;
@@ -138,7 +142,10 @@ class LayerItem extends Component {
       <div className="panel panel-default layer-item">
         <div className="panel-heading unselectable clearfix">
           <div className="left-col">
-            <span onClick={this.toggleVisible(this.props.layer)} className="clickable">
+            <span
+              onClick={this.toggleVisible(this.props.layer)}
+              className="clickable"
+            >
               <i className="material-icons" style={{ width: "2rem" }}>
                 {visible ? "check_box" : "check_box_outline_blank"}
               </i>
@@ -158,9 +165,7 @@ class LayerItem extends Component {
               dangerouslySetInnerHTML={{ __html: this.state.infoText }}
             />
           </div>
-          <div className="right-col">
-            {this.renderLegendImage()}
-          </div>
+          <div className="right-col">{this.renderLegendImage()}</div>
         </div>
         <div className="clearfix">
           {this.renderChapterLinks(this.props.chapters)}

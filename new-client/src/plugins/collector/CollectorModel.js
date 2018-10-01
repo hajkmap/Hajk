@@ -1,6 +1,6 @@
-import {WFS, GML} from 'ol/format';
-import Feature from 'ol/Feature.js';
-import Point from 'ol/geom/Point.js';
+import { WFS, GML } from "ol/format";
+import Feature from "ol/Feature.js";
+import Point from "ol/geom/Point.js";
 
 class CollectorModel {
   constructor(settings) {
@@ -17,14 +17,16 @@ class CollectorModel {
    * @param function error | (text)
    */
   save(props, success, error) {
-
     const coord = this.olMap.getView().getCenter();
 
     const wfs = new WFS();
     const gml = new GML({
       featureNS: this.url,
       featureType: this.featureType,
-      srsName: this.olMap.getView().getProjection().getCode()
+      srsName: this.olMap
+        .getView()
+        .getProjection()
+        .getCode()
     });
 
     const f = new Feature({
@@ -42,30 +44,29 @@ class CollectorModel {
     const xmlString = xmlSerializer.serializeToString(node);
 
     const request = {
-      method: 'POST',
-      headers:{
-        'Content-Type': 'text/xml'
+      method: "POST",
+      headers: {
+        "Content-Type": "text/xml"
       },
       body: xmlString
     };
 
     fetch(this.url, request)
       .then(reponse => {
-        reponse
-          .text()
-          .then(t => {
-            var mapLayer = this.olMap
-              .getLayers()
-              .getArray()
-              .find(layer =>
+        reponse.text().then(t => {
+          var mapLayer = this.olMap
+            .getLayers()
+            .getArray()
+            .find(
+              layer =>
                 layer.getProperties &&
                 layer.getProperties().featureType === this.featureType
-              );
-            if (mapLayer) {
-              mapLayer.getSource().clear();
-            }
-            success(wfs.readTransactionResponse(t));
-          });
+            );
+          if (mapLayer) {
+            mapLayer.getSource().clear();
+          }
+          success(wfs.readTransactionResponse(t));
+        });
       })
       .catch(err => {
         error(err);

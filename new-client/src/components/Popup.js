@@ -26,9 +26,9 @@ class Popup extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     return (
-      (this.props.mapClickDataResult !== nextProps.mapClickDataResult) ||
-      (nextState.selectedIndex !== this.state.selectedIndex)
-    )
+      this.props.mapClickDataResult !== nextProps.mapClickDataResult ||
+      nextState.selectedIndex !== this.state.selectedIndex
+    );
   }
 
   componentDidUpdate() {
@@ -106,7 +106,6 @@ class Popup extends Component {
   }
 
   html(features) {
-
     if (!features) return "";
 
     var visibleStyle = currentIndex => {
@@ -199,7 +198,7 @@ class Popup extends Component {
       this.props.mapClickDataResult.evt &&
       this.props.mapClickDataResult.features.length > 0
     ) {
-      document.getElementById('popup').style.display = "inherit";
+      document.getElementById("popup").style.display = "inherit";
       this.overlay.setPosition(this.props.mapClickDataResult.evt.coordinate);
     } else {
       this.overlay.setPosition(undefined);

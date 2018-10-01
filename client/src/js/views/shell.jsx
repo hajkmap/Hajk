@@ -20,14 +20,14 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var MapView = require('views/map');
-var MapModel = require('models/map');
-var Toolbar = require('views/toolbar');
-var LayerCollection = require('collections/layers');
-var Toolcollection = require('collections/tools');
-var NavigationPanel = require('views/navigationpanel');
-var NavigationPanelModel = require('models/navigation');
-var SearchBar = require('components/searchbar');
+var MapView = require("views/map");
+var MapModel = require("models/map");
+var Toolbar = require("views/toolbar");
+var LayerCollection = require("collections/layers");
+var Toolcollection = require("collections/tools");
+var NavigationPanel = require("views/navigationpanel");
+var NavigationPanelModel = require("models/navigation");
+var SearchBar = require("components/searchbar");
 
 /**
  * @class
@@ -38,7 +38,7 @@ var ShellView = {
    * @instance
    * @return {object}
    */
-  getDefaultProps: function () {
+  getDefaultProps: function() {
     return {
       config: {
         layers: [],
@@ -53,7 +53,7 @@ var ShellView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function () {
+  getInitialState: function() {
     return {
       mapModel: undefined,
       toolsCollection: undefined,
@@ -62,7 +62,7 @@ var ShellView = {
     };
   },
 
-  shouldComponentUpdate: function () {
+  shouldComponentUpdate: function() {
     return true;
   },
 
@@ -70,12 +70,10 @@ var ShellView = {
    * Triggered before the component mounts.
    * @instance
    */
-  componentWillMount: function () {
+  componentWillMount: function() {
     this.model = this.props.model;
     this.setState({
-      views: [
-        <MapView key={this.model.cid} id={this.model.cid} />
-      ]
+      views: [<MapView key={this.model.cid} id={this.model.cid} />]
     });
   },
 
@@ -85,24 +83,36 @@ var ShellView = {
    * @param {number} scale
    * @return {string} formatted
    */
-  formatScale: function (scale) {
-    return Math.round(scale).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  formatScale: function(scale) {
+    return Math.round(scale)
+      .toString()
+      .replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   },
 
-  configure: function () {
+  configure: function() {
     this.model.configure.call(this.model);
     this.setState({
       views: [
         <MapView key={this.model.cid} id={this.model.cid} />,
-        <Toolbar key='toolbar' model={this.model.get('toolCollection')} navigationModel={this.model.get('navigation')} />,
-        <NavigationPanel key='navigation' model={this.model.get('navigation')} />
+        <Toolbar
+          key="toolbar"
+          model={this.model.get("toolCollection")}
+          navigationModel={this.model.get("navigation")}
+        />,
+        <NavigationPanel
+          key="navigation"
+          model={this.model.get("navigation")}
+        />
       ],
       scale: this.formatScale(this.model.getMap().getScale())
     });
 
     var bindViewScaleEvents = () => {
-      var view = this.model.getMap().getMap().getView();
-      view.on('change:resolution', () => {
+      var view = this.model
+        .getMap()
+        .getMap()
+        .getView();
+      view.on("change:resolution", () => {
         this.setState({
           scale: this.formatScale(this.model.getMap().getScale())
         });
@@ -110,23 +120,26 @@ var ShellView = {
     };
 
     bindViewScaleEvents();
-    this.model.getMap().getMap().on('change:view', bindViewScaleEvents);
+    this.model
+      .getMap()
+      .getMap()
+      .on("change:view", bindViewScaleEvents);
   },
 
   /**
    * Triggered when the component is successfully mounted into the DOM.
    * @instance
    */
-  componentDidMount: function () {
+  componentDidMount: function() {
     this.configure();
 
-    this.model.on('change:configUpdated', () => {
+    this.model.on("change:configUpdated", () => {
       var config = this.model.getConfig();
-      this.model.get('map').update(config.map);
+      this.model.get("map").update(config.map);
       //
       // TODO:
       // Implementera inläsning av configobjekt för lager.
-      this.model.get('layerCollection').update(config.layers);
+      this.model.get("layerCollection").update(config.layers);
       //
       // Implementera inläsning av configobjekt för verktyg.
       // this.model.get('toolCollection').update(config.toolCollection);
@@ -138,7 +151,7 @@ var ShellView = {
    * @instance
    * @return {external:ReactElement}
    */
-  render: function () {
+  render: function() {
     var views = this.state.views,
       scale,
       popup,
@@ -147,48 +160,57 @@ var ShellView = {
       pil;
 
     if (views.length === 3) {
-      if (this.model.get('map').get('logo')) {
+      if (this.model.get("map").get("logo")) {
         logo = (
-          <div className='map-logo'>
-            <img src={this.model.get('map').get('logo')} />
+          <div className="map-logo">
+            <img src={this.model.get("map").get("logo")} />
           </div>
         );
       }
 
-      if (this.model.get('map').get('pil') && isMobile) {
+      if (this.model.get("map").get("pil") && isMobile) {
         pil = (
-          <div className='map-pil'>
-            <img src={this.model.get('map').get('pil')} />
+          <div className="map-pil">
+            <img src={this.model.get("map").get("pil")} />
           </div>
         );
       }
 
       scale = (
-        <div id='map-scale' className='map-scale'>
-          <div id='map-scale-bar' />
-          <div className='map-scale-text'>1:{this.state.scale}</div>
+        <div id="map-scale" className="map-scale">
+          <div id="map-scale-bar" />
+          <div className="map-scale-text">
+            1:
+            {this.state.scale}
+          </div>
         </div>
       );
 
       popup = (
-        <div id='popup' className='ol-popup'>
-          <a href='#' id='popup-closer' className='ol-popup-closer' />
-          <div id='popup-content' />
+        <div id="popup" className="ol-popup">
+          <a href="#" id="popup-closer" className="ol-popup-closer" />
+          <div id="popup-content" />
         </div>
       );
 
-      var searchTool = this.model.get('toolCollection').find(tool => tool.get('type') === 'search');
-      if (searchTool && searchTool.get('onMap')) {
+      var searchTool = this.model
+        .get("toolCollection")
+        .find(tool => tool.get("type") === "search");
+      if (searchTool && searchTool.get("onMap")) {
         searchbar = (
-          <div className='search-bar-holder'>
-            <SearchBar model={this.model.get('toolCollection').find(tool => tool.get('type') === 'search')} />
+          <div className="search-bar-holder">
+            <SearchBar
+              model={this.model
+                .get("toolCollection")
+                .find(tool => tool.get("type") === "search")}
+            />
           </div>
         );
       }
     }
 
     return (
-      <div className='shell'>
+      <div className="shell">
         {logo}
         {pil}
         {scale}

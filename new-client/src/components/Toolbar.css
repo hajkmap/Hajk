@@ -11,7 +11,7 @@
   flex-flow: no-wrap;
   align-items: center;
   justify-content: center;
-  transition-duration: 0.3s;  
+  transition-duration: 0.3s;
 }
 
 .toolbar:hover {
@@ -32,7 +32,7 @@
   text-align: center;
   display: flex;
   flex-direction: column;
-  user-select: none;    
+  user-select: none;
 }
 
 .tool-toggle-button:hover {

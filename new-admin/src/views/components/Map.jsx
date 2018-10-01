@@ -1,12 +1,11 @@
-import React from 'react';
-import { Component } from 'react';
-import OpenLayersMap from './../../models/OpenLayersMap.js';
-import LayerList from './LayerList.jsx';
+import React from "react";
+import { Component } from "react";
+import OpenLayersMap from "./../../models/OpenLayersMap.js";
+import LayerList from "./LayerList.jsx";
 
 const target = "map";
 
 class Map extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -14,11 +13,9 @@ class Map extends Component {
     };
   }
 
-  componentDidRecieveProps() {
-  }
+  componentDidRecieveProps() {}
 
-  componentDidUpdate() {
-  }
+  componentDidUpdate() {}
 
   componentDidMount() {
     this.map = new OpenLayersMap({
@@ -40,7 +37,6 @@ class Map extends Component {
       </div>
     );
   }
-
 }
 
 export default Map;

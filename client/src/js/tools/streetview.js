@@ -20,8 +20,8 @@
 //
 // https://github.com/hajkmap/Hajk
 
-const googleMapsLoader = require('google-maps');
-const ToolModel = require('tools/tool');
+const googleMapsLoader = require("google-maps");
+const ToolModel = require("tools/tool");
 var streetViewService;
 var panorama;
 
@@ -38,17 +38,17 @@ var panorama;
  * @property {string} apiKey
  */
 var StreetViewModelProperties = {
-  type: 'streetview',
-  panel: 'streetviewpanel',
-  toolbar: 'bottom',
-  icon: 'fa fa-street-view icon',
-  title: 'Google Street View',
+  type: "streetview",
+  panel: "streetviewpanel",
+  toolbar: "bottom",
+  icon: "fa fa-street-view icon",
+  title: "Google Street View",
   visible: false,
   shell: undefined,
   google: undefined,
-  imageDate: '',
-  apiKey: '',
-  instruction: ''
+  imageDate: "",
+  apiKey: "",
+  instruction: ""
 };
 
 /**
@@ -71,7 +71,7 @@ var StreetViewModel = {
    * Create and add marker interaction to map.
    * @instance
    */
-  initialize: function (options) {
+  initialize: function(options) {
     ToolModel.prototype.initialize.call(this);
   },
 
@@ -81,14 +81,14 @@ var StreetViewModel = {
    * @param {object} data
    * @param {google.maps.StreetViewStatus} status
    */
-  displayPanorama: function (data, status) {
+  displayPanorama: function(data, status) {
     if (status === google.maps.StreetViewStatus.OK) {
-      this.set('imageDate', `Bild tagen: ${data.imageDate}`);
+      this.set("imageDate", `Bild tagen: ${data.imageDate}`);
       panorama.setPano(data.location.pano);
       panorama.setPov({ heading: 270, pitch: 0 });
       panorama.setVisible(true);
     } else {
-      this.set('imageDate', 'Bild saknas för vald position.');
+      this.set("imageDate", "Bild saknas för vald position.");
     }
   },
 
@@ -98,46 +98,58 @@ var StreetViewModel = {
    * @instance
    * @param {array} coordinate
    */
-  showLocation: function (e) {
-    if (!this.get('activated')) return;
+  showLocation: function(e) {
+    if (!this.get("activated")) return;
 
     var coord = ol.proj.transform(
         e.coordinate,
-        this.get('olMap').getView().getProjection(),
-        'EPSG:4326'
+        this.get("olMap")
+          .getView()
+          .getProjection(),
+        "EPSG:4326"
       ),
-      	location = new google.maps.LatLng(coord[1], coord[0]);
+      location = new google.maps.LatLng(coord[1], coord[0]);
 
     this.addMarker(e.coordinate, (panorama && panorama.getPov().heading) || 0);
     streetViewService = new google.maps.StreetViewService();
-    panorama = new google.maps.StreetViewPanorama(document.getElementById('street-view-window'));
-    streetViewService.getPanoramaByLocation(location, 50, this.displayPanorama.bind(this));
-    google.maps.event.addListener(panorama, 'position_changed', () => { this.onPositionChanged(); });
-    google.maps.event.addListener(panorama, 'pov_changed', () => { this.onPositionChanged(); });
-    this.set('location', location);
-    this.set('location', location);
+    panorama = new google.maps.StreetViewPanorama(
+      document.getElementById("street-view-window")
+    );
+    streetViewService.getPanoramaByLocation(
+      location,
+      50,
+      this.displayPanorama.bind(this)
+    );
+    google.maps.event.addListener(panorama, "position_changed", () => {
+      this.onPositionChanged();
+    });
+    google.maps.event.addListener(panorama, "pov_changed", () => {
+      this.onPositionChanged();
+    });
+    this.set("location", location);
+    this.set("location", location);
   },
 
   /**
    * Create icon style based on rotation.
    * @instance
    */
-  getIconStyle: function (rotation) {
+  getIconStyle: function(rotation) {
     //
     // Find location in sprite of given rotation.
     //
-    function position (r) {
+    function position(r) {
       const w = 49;
       var i = 1;
       var n = 1;
-      for (;i <= 16; i++) {
+      for (; i <= 16; i++) {
         let min = 22.5 * (i - 1);
         let max = 22.5 * i;
         if (r >= min && r <= max) {
           n = i;
         }
       }
-      return (n * w) - w;
+      return n * w - w;
     }
 
     const p = position(rotation);
@@ -147,12 +159,12 @@ var StreetViewModel = {
     return new ol.style.Style({
       image: new ol.style.Icon({
         offset: [p, 0],
-        anchor: [(w / 2), (h / 2)],
+        anchor: [w / 2, h / 2],
         size: [w, h],
-        anchorXUnits: 'pixels',
-        anchorYUnits: 'pixels',
+        anchorXUnits: "pixels",
+        anchorYUnits: "pixels",
         opacity: 1,
-        src: 'assets/icons/google_man.png'
+        src: "assets/icons/google_man.png"
       })
     });
   },
@@ -161,29 +173,37 @@ var StreetViewModel = {
    * Create and add marker interaction to map.
    * @instance
    */
-  addMarker: function (coordinate, rotation) {
+  addMarker: function(coordinate, rotation) {
     var feature = new ol.Feature({
       geometry: new ol.geom.Point(coordinate)
     });
     feature.setStyle(this.getIconStyle(rotation));
-    this.set('marker', feature);
-    this.get('streetViewMarkerLayer').getSource().clear();
-    this.get('streetViewMarkerLayer').getSource().addFeature(this.get('marker'));
+    this.set("marker", feature);
+    this.get("streetViewMarkerLayer")
+      .getSource()
+      .clear();
+    this.get("streetViewMarkerLayer")
+      .getSource()
+      .addFeature(this.get("marker"));
   },
 
   /**
    * Moves the marker in the map based on the state of the panorama object.
    * @instance
    */
-  onPositionChanged: function () {
-    if (!panorama.getPosition() || this.get('activated') === false) { return; }
+  onPositionChanged: function() {
+    if (!panorama.getPosition() || this.get("activated") === false) {
+      return;
+    }
 
     var x = panorama.getPosition().lng(),
-    	  y = panorama.getPosition().lat(),
-    	  b = panorama.getPov().heading,
-    	  l = [x, y],
-      p = this.get('olMap').getView().getProjection(),
-      c = ol.proj.transform(l, 'EPSG:4326', p);
+      y = panorama.getPosition().lat(),
+      b = panorama.getPov().heading,
+      l = [x, y],
+      p = this.get("olMap")
+        .getView()
+        .getProjection(),
+      c = ol.proj.transform(l, "EPSG:4326", p);
 
     this.addMarker(c, b);
   },
@@ -192,33 +212,38 @@ var StreetViewModel = {
    * Initialize the model.
    * @instance
    */
-  configure: function (shell) {
-    this.set('map', shell.getMap());
-    this.set('olMap', shell.getMap().getMap());
+  configure: function(shell) {
+    this.set("map", shell.getMap());
+    this.set("olMap", shell.getMap().getMap());
 
-    googleMapsLoader.KEY = this.get('apiKey');
+    googleMapsLoader.KEY = this.get("apiKey");
     googleMapsLoader.load(google => {
-      this.set('google', google);
+      this.set("google", google);
     });
-    this.set('streetViewMarkerLayer', new ol.layer.Vector({
-      source: new ol.source.Vector({}),
-      name: 'streetViewMarkerLayer'
-    }));
-    this.get('olMap').addLayer(this.get('streetViewMarkerLayer'));
+    this.set(
+      "streetViewMarkerLayer",
+      new ol.layer.Vector({
+        source: new ol.source.Vector({}),
+        name: "streetViewMarkerLayer"
+      })
+    );
+    this.get("olMap").addLayer(this.get("streetViewMarkerLayer"));
   },
 
-  activate: function () {
-    this.get('olMap').set('clickLock', true);
-    this.eventKey = this.get('olMap').on('click', this.showLocation, this);
-    this.set('activated', true);
+  activate: function() {
+    this.get("olMap").set("clickLock", true);
+    this.eventKey = this.get("olMap").on("click", this.showLocation, this);
+    this.set("activated", true);
   },
 
-  deactivate: function () {
-    this.get('olMap').set('clickLock', false);
-    this.get('olMap').un('click', this.showLocation);
-    this.set('activated', false);
-    this.get('streetViewMarkerLayer').getSource().clear();
-    this.set('location', false);
+  deactivate: function() {
+    this.get("olMap").set("clickLock", false);
+    this.get("olMap").un("click", this.showLocation);
+    this.set("activated", false);
+    this.get("streetViewMarkerLayer")
+      .getSource()
+      .clear();
+    this.set("location", false);
   },
 
   /**
@@ -232,9 +257,9 @@ var StreetViewModel = {
    *
    * @instance
    */
-  clicked: function (arg) {
-    this.set('visible', !this.get('visible'));
-    this.set('toggled', !this.get('toggled'));
+  clicked: function(arg) {
+    this.set("visible", !this.get("visible"));
+    this.set("toggled", !this.get("toggled"));
   }
 };
 

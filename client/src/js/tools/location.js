@@ -20,7 +20,7 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var ToolModel = require('tools/tool');
+var ToolModel = require("tools/tool");
 
 /**
  * @typedef {Object} LocationModel~LocationModelProperties
@@ -32,12 +32,12 @@ var ToolModel = require('tools/tool');
  * @property {string} visible - Default: false
  */
 var LocationModelProperties = {
-  type: 'location',
-  Id: 'locationBtn',
-  panel: '',
-  toolbar: 'top-right',
-  icon: 'fa fa-location-arrow icon',
-  title: 'Visa min position',
+  type: "location",
+  Id: "locationBtn",
+  panel: "",
+  toolbar: "top-right",
+  icon: "fa fa-location-arrow icon",
+  title: "Visa min position",
   active: false,
   visible: false,
   location: {
@@ -67,17 +67,17 @@ var LocationModel = {
 
   watchId: undefined,
 
-  initialize: function (options) {
+  initialize: function(options) {
     ToolModel.prototype.initialize.call(this);
 
     var style = new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 0.5],
-        anchorXUnits: 'fraction',
-        anchorYUnits: 'fraction',
+        anchorXUnits: "fraction",
+        anchorYUnits: "fraction",
         opacity: 0.8,
-        src: 'assets/icons/gps.png',
-        scale: (1 / 2)
+        src: "assets/icons/gps.png",
+        scale: 1 / 2
       })
     });
 
@@ -85,14 +85,17 @@ var LocationModel = {
     var source = new ol.source.Vector({});
     // source.addFeature(this.get('accuracyFeature'));
 
-    this.set('layer', new ol.layer.Vector({
-      source: source,
-      name: 'location',
-      style: style
-    }));
+    this.set(
+      "layer",
+      new ol.layer.Vector({
+        source: source,
+        name: "location",
+        style: style
+      })
+    );
   },
 
-  getOptions: function () {
+  getOptions: function() {
     return {
       enableHighAccuracy: true,
       timeout: 10000,
@@ -100,40 +103,57 @@ var LocationModel = {
     };
   },
 
-  configure: function (shell) {
-    this.set('olMap', shell.getMap().getMap());
-    this.get('olMap').addLayer(this.get('layer'));
+  configure: function(shell) {
+    this.set("olMap", shell.getMap().getMap());
+    this.get("olMap").addLayer(this.get("layer"));
 
-    this.on('change:active', (e) => {
-      if (!this.get('active') || this.get('watchId') !== undefined) {
+    this.on("change:active", e => {
+      if (!this.get("active") || this.get("watchId") !== undefined) {
         this.reset();
       } else {
-        navigator.geolocation.getCurrentPosition(this.onLocationSucess.bind(this), this.onLocationError.bind(this));
+        navigator.geolocation.getCurrentPosition(
+          this.onLocationSucess.bind(this),
+          this.onLocationError.bind(this)
+        );
       }
     });
 
-    this.on('change:location', () => { this.setLocation(); });
+    this.on("change:location", () => {
+      this.setLocation();
+    });
   },
 
-  setLocation: function (coord) {
-    this.get('layer').getSource().clear();
-    if (this.get('location').lng && this.get('location').lat) {
+  setLocation: function(coord) {
+    this.get("layer")
+      .getSource()
+      .clear();
+    if (this.get("location").lng && this.get("location").lat) {
       let point = new ol.geom.Point([
-        this.get('location').lng,
-        this.get('location').lat
+        this.get("location").lng,
+        this.get("location").lat
       ]);
-      let transformed = ol.proj.transform(point.getCoordinates(), 'EPSG:4326', this.get('olMap').getView().getProjection());
-      point.setCoordinates(transformed);
-      this.get('layer').getSource().addFeature(
-        new ol.Feature({
-          geometry: point
-        })
+      let transformed = ol.proj.transform(
+        point.getCoordinates(),
+        "EPSG:4326",
+        this.get("olMap")
+          .getView()
+          .getProjection()
       );
-      this.get('olMap').getView().setCenter(point.getCoordinates());
+      point.setCoordinates(transformed);
+      this.get("layer")
+        .getSource()
+        .addFeature(
+          new ol.Feature({
+            geometry: point
+          })
+        );
+      this.get("olMap")
+        .getView()
+        .setCenter(point.getCoordinates());
     }
   },
 
-  reset: function () {
+  reset: function() {
     this.set({
       location: {
         lat: undefined,
@@ -142,7 +162,7 @@ var LocationModel = {
     });
   },
 
-  onLocationSucess: function (e) {
+  onLocationSucess: function(e) {
     this.set({
       location: {
         lat: e.coords.latitude,
@@ -162,10 +182,13 @@ var LocationModel = {
     */
   },
 
-  onLocationError: function (e) {
-    this.get('layer').getSource().clear();
-    if (typeof this.get('location').lat === 'undefined') { // quick fix for the reoccuring errors in Firefox
-      alert('Din position kan inte fastställas.');
+  onLocationError: function(e) {
+    this.get("layer")
+      .getSource()
+      .clear();
+    if (typeof this.get("location").lat === "undefined") {
+      // quick fix for the reoccuring errors in Firefox
+      alert("Din position kan inte fastställas.");
       console.error(e);
       console.warn(e);
       console.info(e);
@@ -185,10 +208,10 @@ var LocationModel = {
    *
    * @instance
    */
-  clicked: function () {
+  clicked: function() {
     this.set({
-      'visible': !this.get('visible'),
-      'active': !this.get('active')
+      visible: !this.get("visible"),
+      active: !this.get("active")
     });
   }
 };

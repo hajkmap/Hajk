@@ -4,31 +4,37 @@ import "./BreadCrumb.css";
 class BreadCrumb extends Component {
   constructor() {
     super();
-    this.state = {
-    };
+    this.state = {};
   }
   /**
    * Triggered when the component is successfully mounted into the DOM.
    * @instance
    */
-  componentDidMount() {
-  }
+  componentDidMount() {}
 
   /**
    * Triggered when component unmounts.
    * @instance
    */
-  componentWillUnmount() {}  
+  componentWillUnmount() {}
 
-  setLayerVisibility = (layer) => (event) => {
-    layer.set('visible', !layer.get('visible'));
+  setLayerVisibility = layer => event => {
+    layer.set("visible", !layer.get("visible"));
   };
 
-  render() {        
+  render() {
     return (
       <div className="bread-crumb">
         <div className="bread-crumb-header">
-          <span>{this.props.title} <i className="material-icons" onClick={this.setLayerVisibility(this.props.layer)}>close</i></span>
+          <span>
+            {this.props.title}{" "}
+            <i
+              className="material-icons"
+              onClick={this.setLayerVisibility(this.props.layer)}
+            >
+              close
+            </i>
+          </span>
         </div>
         <div className="bread-crumb-body">
           <a href="#layer">Läs mer</a>

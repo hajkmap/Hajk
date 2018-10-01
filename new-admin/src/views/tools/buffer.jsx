@@ -20,17 +20,17 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import React from 'react';
-import { Component } from 'react';
+import React from "react";
+import { Component } from "react";
 
 var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
-  target: 'toolbar',
-  instruction: '',
+  target: "toolbar",
+  instruction: "",
   varbergVer: false,
-  geoserverUrl: '',
+  geoserverUrl: "",
   notFeatureLayers: [],
   geoserverNameToCategoryName: {},
   visibleForGroups: []
@@ -40,25 +40,29 @@ class ToolOptions extends Component {
   /**
    *
    */
-  constructor () {
+  constructor() {
     super();
     this.state = defaultState;
-    this.type = 'buffer';
+    this.type = "buffer";
   }
 
-  componentDidMount () {
+  componentDidMount() {
     var tool = this.getTool();
     if (tool) {
       this.setState({
         active: true,
         index: tool.index,
-        target: tool.options.target || 'toolbar',
+        target: tool.options.target || "toolbar",
         instruction: tool.options.instruction,
         varbergVer: tool.options.varbergVer,
         geoserverUrl: tool.options.geoserverUrl,
-        notFeatureLayers: tool.options.notFeatureLayers ? tool.options.notFeatureLayers : [],
+        notFeatureLayers: tool.options.notFeatureLayers
+          ? tool.options.notFeatureLayers
+          : [],
         geoserverNameToCategoryName: tool.options.geoserverNameToCategoryName,
-        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
+        visibleForGroups: tool.options.visibleForGroups
+          ? tool.options.visibleForGroups
+          : []
       });
     } else {
       this.setState({
@@ -67,23 +71,21 @@ class ToolOptions extends Component {
     }
   }
 
-  componentWillUnmount () {
-  }
+  componentWillUnmount() {}
   /**
    *
    */
-  componentWillMount () {
-  }
+  componentWillMount() {}
 
-  handleInputChange (event) {
+  handleInputChange(event) {
     var target = event.target;
     var name = target.name;
-    var value = target.type === 'checkbox' ? target.checked : target.value;
-    if (typeof value === 'string' && value.trim() !== '') {
+    var value = target.type === "checkbox" ? target.checked : target.value;
+    if (typeof value === "string" && value.trim() !== "") {
       value = !isNaN(Number(value)) ? Number(value) : value;
     }
 
-    if (name === 'instruction') {
+    if (name === "instruction") {
       value = btoa(value);
     }
     this.setState({
@@ -91,53 +93,63 @@ class ToolOptions extends Component {
     });
   }
 
-  getTool () {
-    return this.props.model.get('toolConfig').find(tool => tool.type === this.type);
+  getTool() {
+    return this.props.model
+      .get("toolConfig")
+      .find(tool => tool.type === this.type);
   }
 
-  add (tool) {
-    this.props.model.get('toolConfig').push(tool);
+  add(tool) {
+    this.props.model.get("toolConfig").push(tool);
   }
 
-  remove (tool) {
+  remove(tool) {
     this.props.model.set({
-      'toolConfig': this.props.model.get('toolConfig').filter(tool => tool.type !== this.type)
+      toolConfig: this.props.model
+        .get("toolConfig")
+        .filter(tool => tool.type !== this.type)
     });
   }
 
-  replace (tool) {
-    this.props.model.get('toolConfig').forEach(t => {
+  replace(tool) {
+    this.props.model.get("toolConfig").forEach(t => {
       if (t.type === this.type) {
         t.options = tool.options;
-        t.index = tool.index;        
+        t.index = tool.index;
         t.instruction = tool.instruction;
       }
     });
   }
 
-  save () {
+  save() {
     var tool = {
-      'type': this.type,
-      'index': this.state.index,
-      'options': {
-        'target': this.state.target,
-        'instruction': this.state.instruction,
-        'varbergVer': this.state.varbergVer,
-        'geoserverUrl': this.state.geoserverUrl,
-        'notFeatureLayers': this.state.notFeatureLayers,
-        'visibleForGroups': this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
+      type: this.type,
+      index: this.state.index,
+      options: {
+        target: this.state.target,
+        instruction: this.state.instruction,
+        varbergVer: this.state.varbergVer,
+        geoserverUrl: this.state.geoserverUrl,
+        notFeatureLayers: this.state.notFeatureLayers,
+        visibleForGroups: this.state.visibleForGroups.map(
+          Function.prototype.call,
+          String.prototype.trim
+        )
       }
     };
 
     var existing = this.getTool();
 
-    function update () {
-      this.props.model.updateToolConfig(this.props.model.get('toolConfig'), () => {
-        this.props.parent.props.parent.setState({
-          alert: true,
-          alertMessage: 'Uppdateringen lyckades'
-        });
-      });
+    function update() {
+      this.props.model.updateToolConfig(
+        this.props.model.get("toolConfig"),
+        () => {
+          this.props.parent.props.parent.setState({
+            alert: true,
+            alertMessage: "Uppdateringen lyckades"
+          });
+        }
+      );
     }
 
     if (!this.state.active) {
@@ -145,7 +157,8 @@ class ToolOptions extends Component {
         this.props.parent.props.parent.setState({
           alert: true,
           confirm: true,
-          alertMessage: 'Verktyget kommer att tas bort. Nuvarande inställningar kommer att gå förlorade. Vill du fortsätta?',
+          alertMessage:
+            "Verktyget kommer att tas bort. Nuvarande inställningar kommer att gå förlorade. Vill du fortsätta?",
           confirmAction: () => {
             this.remove();
             update.call(this);
@@ -166,39 +179,47 @@ class ToolOptions extends Component {
     }
   }
 
-  handleAuthGrpsChange (event) {
+  handleAuthGrpsChange(event) {
     const target = event.target;
     const value = target.value;
     let groups = [];
 
     try {
-      groups = value.split(',');
+      groups = value.split(",");
     } catch (error) {
       console.log(`Någonting gick fel: ${error}`);
     }
 
     switch (target.id) {
-      case 'visibleForGroups':
+      case "visibleForGroups":
         this.setState({
-          visibleForGroups: value !== '' ? groups : []
+          visibleForGroups: value !== "" ? groups : []
         });
         break;
-      case 'notFeatureLayers':
+      case "notFeatureLayers":
         this.setState({
-          notFeatureLayers: value !== '' ? groups : []
+          notFeatureLayers: value !== "" ? groups : []
         });
         break;
-      default: 
+      default:
         break;
     }
   }
 
-  renderVisibleForGroups () {
+  renderVisibleForGroups() {
     if (this.props.parent.props.parent.state.authActive) {
       return (
         <div>
-          <label htmlFor='visibleForGroups'>Tillträde</label>
-          <input id='visibleForGroups' value={this.state.visibleForGroups} type='text' name='visibleForGroups' onChange={(e) => { this.handleAuthGrpsChange(e); }} />
+          <label htmlFor="visibleForGroups">Tillträde</label>
+          <input
+            id="visibleForGroups"
+            value={this.state.visibleForGroups}
+            type="text"
+            name="visibleForGroups"
+            onChange={e => {
+              this.handleAuthGrpsChange(e);
+            }}
+          />
         </div>
       );
     } else {
@@ -209,85 +230,121 @@ class ToolOptions extends Component {
   /**
    *
    */
-  render () {
+  render() {
     return (
       <div>
         <form>
           <p>
-            <button className='btn btn-primary' onClick={(e) => { e.preventDefault(); this.save(); }}>Spara</button>
+            <button
+              className="btn btn-primary"
+              onClick={e => {
+                e.preventDefault();
+                this.save();
+              }}
+            >
+              Spara
+            </button>
           </p>
           <div>
             <input
-              id='active'
-              name='active'
-              type='checkbox'
-              onChange={(e) => { this.handleInputChange(e); }}
-              checked={this.state.active} />&nbsp;
-            <label htmlFor='active'>Aktiverad</label>
+              id="active"
+              name="active"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.active}
+            />
+            &nbsp;
+            <label htmlFor="active">Aktiverad</label>
           </div>
           <div>
-            <label htmlFor='index'>Sorteringsordning</label>
+            <label htmlFor="index">Sorteringsordning</label>
             <input
-              id='index'
-              name='index'
-              type='text'
-              onChange={(e) => { this.handleInputChange(e); }}
-              value={this.state.index} />
+              id="index"
+              name="index"
+              type="text"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.index}
+            />
           </div>
           <div>
-            <label htmlFor='target'>Verktygsplacering</label>
+            <label htmlFor="target">Verktygsplacering</label>
             <input
-              id='target'
-              name='target'
-              type='text'
-              onChange={(e) => { this.handleInputChange(e); }}
-              value={this.state.target} />
+              id="target"
+              name="target"
+              type="text"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.target}
+            />
           </div>
           <div>
-            <label htmlFor='instruction'>Instruktion</label>
+            <label htmlFor="instruction">Instruktion</label>
             <textarea
-              type='text'
-              id='instruction'
-              name='instruction'
-              onChange={(e) => { this.handleInputChange(e); }}
-              value={this.state.instruction ? atob(this.state.instruction) : ''}
+              type="text"
+              id="instruction"
+              name="instruction"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.instruction ? atob(this.state.instruction) : ""}
             />
           </div>
           {this.renderVisibleForGroups()}
           <div>
             <input
-              id='varbergVer'
-              name='varbergVer'
-              type='checkbox'
-              onChange={(e) => { this.handleInputChange(e); }}
-              checked={this.state.varbergVer} />&nbsp;
-            <label htmlFor='varbergVer'>Varbergs version</label>
+              id="varbergVer"
+              name="varbergVer"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.varbergVer}
+            />
+            &nbsp;
+            <label htmlFor="varbergVer">Varbergs version</label>
           </div>
           <div>
-            <label htmlFor='geoserverUrl'>geoserverUrl</label>
+            <label htmlFor="geoserverUrl">geoserverUrl</label>
             <input
-              type='text'
-              id='geoserverUrl'
-              name='geoserverUrl'
-              onChange={(e) => { this.handleInputChange(e); }}
+              type="text"
+              id="geoserverUrl"
+              name="geoserverUrl"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
               value={this.state.geoserverUrl}
             />
           </div>
           <div>
-            <label htmlFor='notFeatureLayers'>notFeatureLayers</label>
-            <textarea id='notFeatureLayers'
+            <label htmlFor="notFeatureLayers">notFeatureLayers</label>
+            <textarea
+              id="notFeatureLayers"
               value={this.state.notFeatureLayers}
-              type='text'
-              name='notFeatureLayers'
-              onChange={(e) => { this.handleAuthGrpsChange(e); }} />
+              type="text"
+              name="notFeatureLayers"
+              onChange={e => {
+                this.handleAuthGrpsChange(e);
+              }}
+            />
           </div>
           <div>
-            <label htmlFor='geoserverNameToCategoryName'>geoserverNameToCategoryName</label>
-            <textarea id='geoserverNameToCategoryName'
+            <label htmlFor="geoserverNameToCategoryName">
+              geoserverNameToCategoryName
+            </label>
+            <textarea
+              id="geoserverNameToCategoryName"
               value={this.state.geoserverNameToCategoryName}
-              type='text'
-              name='geoserverNameToCategoryName'
-              onChange={(e) => { this.handleInputChange(e); }} />
+              type="text"
+              name="geoserverNameToCategoryName"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
           </div>
         </form>
       </div>

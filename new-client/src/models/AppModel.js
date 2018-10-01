@@ -1,4 +1,4 @@
-import Plugin from './Plugin.js';
+import Plugin from "./Plugin.js";
 import ConfigMapper from "./../utils/ConfigMapper.js";
 import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
 
@@ -19,19 +19,16 @@ import { register } from "ol/proj/proj4";
 var map;
 
 class AppModel {
-
   registerPanel(panelComponent) {
     this.panels.push(panelComponent);
   }
 
   onPanelOpen(currentPanel) {
-    this.panels
-      .filter(panel => panel !== currentPanel)
-      .forEach(panel => {
-        if (panel.position === currentPanel.position) {
-          panel.closePanel();
-        }
-      });
+    this.panels.filter(panel => panel !== currentPanel).forEach(panel => {
+      if (panel.position === currentPanel.position) {
+        panel.closePanel();
+      }
+    });
   }
 
   /**
@@ -85,41 +82,41 @@ class AppModel {
   loadPlugins(plugins) {
     var promises = [];
     plugins.forEach(plugin => {
-      var prom = import(`../plugins/${plugin}/${plugin}.js`).then(module => {
+      var prom = import(`../plugins/${plugin}/${plugin}.js`)
+        .then(module => {
+          const toolConfig =
+            this.config.mapConfig.tools.find(
+              plug => plug.type.toLowerCase() === plugin.toLowerCase()
+            ) || {};
 
-        const toolConfig =
-          this.config.mapConfig.tools.find(
-            plug => plug.type.toLowerCase() === plugin.toLowerCase()
-          ) || {};
+          const toolOptions =
+            toolConfig && toolConfig.options ? toolConfig.options : {};
 
-        const toolOptions =
-          toolConfig && toolConfig.options ? toolConfig.options : {};
+          const target = toolOptions.hasOwnProperty("options")
+            ? toolConfig.options.target
+            : "toolbar";
 
-        const target = toolOptions.hasOwnProperty("options")
-          ? toolConfig.options.target
-          : "toolbar";
+          const sortOrder = toolConfig.hasOwnProperty("index")
+            ? Number(toolConfig.index)
+            : 0;
 
-        const sortOrder = toolConfig.hasOwnProperty("index")
-          ? Number(toolConfig.index)
-          : 0;
-
-        if (Object.keys(toolConfig).length > 0) {
-          this.addPlugin(
-            new Plugin({
-              map: map,
-              app: this,
-              type: plugin,
-              target: target,
-              sortOrder: sortOrder,
-              options: toolOptions,
-              component: module.default
-            })
-          );
-        }
-
-      }).catch(err => {
-        console.error(err);
-      })
+          if (Object.keys(toolConfig).length > 0) {
+            this.addPlugin(
+              new Plugin({
+                map: map,
+                app: this,
+                type: plugin,
+                target: target,
+                sortOrder: sortOrder,
+                options: toolOptions,
+                component: module.default
+              })
+            );
+          }
+        })
+        .catch(err => {
+          console.error(err);
+        });
       promises.push(prom);
     });
     return promises;

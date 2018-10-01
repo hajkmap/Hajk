@@ -20,15 +20,15 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import React from 'react';
-import { Component } from 'react';
+import React from "react";
+import { Component } from "react";
 
 var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
-  instruction: '',
-  apiKey: 'AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4',
+  instruction: "",
+  apiKey: "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
   visibleForGroups: []
 };
 
@@ -36,13 +36,13 @@ class ToolOptions extends Component {
   /**
    *
    */
-  constructor () {
+  constructor() {
     super();
     this.state = defaultState;
-    this.type = 'streetview';
+    this.type = "streetview";
   }
 
-  componentDidMount () {
+  componentDidMount() {
     var tool = this.getTool();
     if (tool) {
       this.setState({
@@ -50,7 +50,9 @@ class ToolOptions extends Component {
         index: tool.index,
         instruction: tool.options.instruction,
         apiKey: tool.options.apiKey,
-        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
+        visibleForGroups: tool.options.visibleForGroups
+          ? tool.options.visibleForGroups
+          : []
       });
     } else {
       this.setState({
@@ -59,23 +61,21 @@ class ToolOptions extends Component {
     }
   }
 
-  componentWillUnmount () {
-  }
+  componentWillUnmount() {}
   /**
    *
    */
-  componentWillMount () {
-  }
+  componentWillMount() {}
 
-  handleInputChange (event) {
+  handleInputChange(event) {
     var target = event.target;
     var name = target.name;
-    var value = target.type === 'checkbox' ? target.checked : target.value;
-    if (typeof value === 'string' && value.trim() !== '') {
+    var value = target.type === "checkbox" ? target.checked : target.value;
+    if (typeof value === "string" && value.trim() !== "") {
       value = !isNaN(Number(value)) ? Number(value) : value;
     }
 
-    if (name == 'instruction') {
+    if (name == "instruction") {
       value = btoa(value);
     }
     this.setState({
@@ -83,22 +83,26 @@ class ToolOptions extends Component {
     });
   }
 
-  getTool () {
-    return this.props.model.get('toolConfig').find(tool => tool.type === this.type);
+  getTool() {
+    return this.props.model
+      .get("toolConfig")
+      .find(tool => tool.type === this.type);
   }
 
-  add (tool) {
-    this.props.model.get('toolConfig').push(tool);
+  add(tool) {
+    this.props.model.get("toolConfig").push(tool);
   }
 
-  remove (tool) {
+  remove(tool) {
     this.props.model.set({
-      'toolConfig': this.props.model.get('toolConfig').filter(tool => tool.type !== this.type)
+      toolConfig: this.props.model
+        .get("toolConfig")
+        .filter(tool => tool.type !== this.type)
     });
   }
 
-  replace (tool) {
-    this.props.model.get('toolConfig').forEach(t => {
+  replace(tool) {
+    this.props.model.get("toolConfig").forEach(t => {
       if (t.type === this.type) {
         t.options = tool.options;
         t.index = tool.index;
@@ -107,26 +111,32 @@ class ToolOptions extends Component {
     });
   }
 
-  save () {
+  save() {
     var tool = {
-      'type': this.type,
-      'index': this.state.index,
-      'options': {
-        'apiKey': this.state.apiKey,
-        'instruction': this.state.instruction,
-        'visibleForGroups': this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
+      type: this.type,
+      index: this.state.index,
+      options: {
+        apiKey: this.state.apiKey,
+        instruction: this.state.instruction,
+        visibleForGroups: this.state.visibleForGroups.map(
+          Function.prototype.call,
+          String.prototype.trim
+        )
       }
     };
 
     var existing = this.getTool();
 
-    function update () {
-      this.props.model.updateToolConfig(this.props.model.get('toolConfig'), () => {
-        this.props.parent.props.parent.setState({
-          alert: true,
-          alertMessage: 'Uppdateringen lyckades'
-        });
-      });
+    function update() {
+      this.props.model.updateToolConfig(
+        this.props.model.get("toolConfig"),
+        () => {
+          this.props.parent.props.parent.setState({
+            alert: true,
+            alertMessage: "Uppdateringen lyckades"
+          });
+        }
+      );
     }
 
     if (!this.state.active) {
@@ -134,7 +144,8 @@ class ToolOptions extends Component {
         this.props.parent.props.parent.setState({
           alert: true,
           confirm: true,
-          alertMessage: 'Verktyget kommer att tas bort. Nuvarande inställningar kommer att gå förlorade. Vill du fortsätta?',
+          alertMessage:
+            "Verktyget kommer att tas bort. Nuvarande inställningar kommer att gå förlorade. Vill du fortsätta?",
           confirmAction: () => {
             this.remove();
             update.call(this);
@@ -155,28 +166,36 @@ class ToolOptions extends Component {
     }
   }
 
-  handleAuthGrpsChange (event) {
+  handleAuthGrpsChange(event) {
     const target = event.target;
     const value = target.value;
     let groups = [];
 
     try {
-      groups = value.split(',');
+      groups = value.split(",");
     } catch (error) {
       console.log(`Någonting gick fel: ${error}`);
     }
 
     this.setState({
-      visibleForGroups: value !== '' ? groups : []
+      visibleForGroups: value !== "" ? groups : []
     });
   }
 
-  renderVisibleForGroups () {
+  renderVisibleForGroups() {
     if (this.props.parent.props.parent.state.authActive) {
       return (
         <div>
-          <label htmlFor='visibleForGroups'>Tillträde</label>
-          <input id='visibleForGroups' value={this.state.visibleForGroups} type='text' name='visibleForGroups' onChange={(e) => { this.handleAuthGrpsChange(e); }} />
+          <label htmlFor="visibleForGroups">Tillträde</label>
+          <input
+            id="visibleForGroups"
+            value={this.state.visibleForGroups}
+            type="text"
+            name="visibleForGroups"
+            onChange={e => {
+              this.handleAuthGrpsChange(e);
+            }}
+          />
         </div>
       );
     } else {
@@ -187,45 +206,69 @@ class ToolOptions extends Component {
   /**
    *
    */
-  render () {
+  render() {
     return (
       <div>
         <form>
           <p>
-            <button className='btn btn-primary' onClick={(e) => { e.preventDefault(); this.save(); }}>Spara</button>
+            <button
+              className="btn btn-primary"
+              onClick={e => {
+                e.preventDefault();
+                this.save();
+              }}
+            >
+              Spara
+            </button>
           </p>
           <div>
             <input
-              id='active'
-              name='active'
-              type='checkbox'
-              onChange={(e) => { this.handleInputChange(e); }}
-              checked={this.state.active} />&nbsp;
-            <label htmlFor='active'>Aktiverad</label>
+              id="active"
+              name="active"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.active}
+            />
+            &nbsp;
+            <label htmlFor="active">Aktiverad</label>
           </div>
           <div>
-            <label htmlFor='index'>Sorteringsordning</label>
+            <label htmlFor="index">Sorteringsordning</label>
             <input
-              id='index'
-              name='index'
-              type='text'
-              onChange={(e) => { this.handleInputChange(e); }}
-              value={this.state.index} />
+              id="index"
+              name="index"
+              type="text"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.index}
+            />
           </div>
           <div>
-            <label htmlFor='instruction'>Instruktion</label>
+            <label htmlFor="instruction">Instruktion</label>
             <textarea
-              type='text'
-              id='instruction'
-              name='instruction'
-              onChange={(e) => { this.handleInputChange(e); }}
-              value={this.state.instruction ? atob(this.state.instruction) : ''}
+              type="text"
+              id="instruction"
+              name="instruction"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.instruction ? atob(this.state.instruction) : ""}
             />
           </div>
           {this.renderVisibleForGroups()}
           <div>
-            <label htmlFor='apiKey'>API-nyckel</label>
-            <input value={this.state.apiKey} type='text' name='apiKey' onChange={(e) => { this.handleInputChange(e); }} />
+            <label htmlFor="apiKey">API-nyckel</label>
+            <input
+              value={this.state.apiKey}
+              type="text"
+              name="apiKey"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
           </div>
         </form>
       </div>

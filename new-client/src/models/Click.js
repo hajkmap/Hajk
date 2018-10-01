@@ -32,10 +32,11 @@ function handleClick(evt, map, callback) {
         interaction =>
           ["Draw", "Snap", "Modify"].indexOf(interaction.constructor.name) !==
           -1
-      ).length > 0 || map.clicklock
-  ) {    
+      ).length > 0 ||
+    map.clicklock
+  ) {
     return false;
-  }  
+  }
 
   document.querySelector("body").style.cursor = "progress";
   var promises = [];

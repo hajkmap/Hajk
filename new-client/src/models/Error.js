@@ -1,6 +1,6 @@
 class Error {
   constructor(message) {
-      this.message = message;
+    this.message = message;
   }
 }
 

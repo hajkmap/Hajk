@@ -1,8 +1,7 @@
-import React from 'react';
-import { Component } from 'react';
+import React from "react";
+import { Component } from "react";
 
 class ChapterAdder extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -43,43 +42,56 @@ class ChapterAdder extends Component {
     });
   }
 
-  componentDidUpdate() {      
-    if (this.refs.input) {      
+  componentDidUpdate() {
+    if (this.refs.input) {
       this.refs.input.focus();
     }
   }
 
   render() {
-    var style = this.state.invalid ? {backgroundColor: "#d9534f"} : {};
+    var style = this.state.invalid ? { backgroundColor: "#d9534f" } : {};
     if (this.state.inputVisible) {
       return (
-        <div style={{display: "inline-block"}}>
-          <input 
-            placeholder="Ange rubrik" 
-            value={this.state.title} 
-            type="text" 
-            name="chapter-title" 
+        <div style={{ display: "inline-block" }}>
+          <input
+            placeholder="Ange rubrik"
+            value={this.state.title}
+            type="text"
+            name="chapter-title"
             ref="input"
             style={style}
-            onKeyPress={(e) => {
+            onKeyPress={e => {
               if (e.key === "Enter") {
                 this.addChapter();
               }
             }}
-            onChange={(e) => {this.setTitle(e)}} />&nbsp;
-          <span className="btn btn-primary" onClick={() => this.addChapter()}>Ok</span>&nbsp;
-          <span className="btn btn-danger" onClick={() => this.cancel()}>Avbryt</span>          
+            onChange={e => {
+              this.setTitle(e);
+            }}
+          />
+          &nbsp;
+          <span className="btn btn-primary" onClick={() => this.addChapter()}>
+            Ok
+          </span>
+          &nbsp;
+          <span className="btn btn-danger" onClick={() => this.cancel()}>
+            Avbryt
+          </span>
         </div>
-      )
+      );
     } else {
       return (
-        <div style={{display: "inline-block"}}>
-          <span className="btn btn-success" onClick={() => this.toggleInputVisibility()}>Lägg till rubrik</span>          
+        <div style={{ display: "inline-block" }}>
+          <span
+            className="btn btn-success"
+            onClick={() => this.toggleInputVisibility()}
+          >
+            Lägg till rubrik
+          </span>
         </div>
-      )
-    }    
+      );
+    }
   }
-
 }
 
 export default ChapterAdder;

@@ -13,10 +13,7 @@
       "layer": "topowebb",
       "style": "default",
       "matrixSet": "3006",
-      "origin": [
-        "-1200000",
-        "8500000"
-      ],
+      "origin": ["-1200000", "8500000"],
       "resolutions": [
         "4096",
         "2048",
@@ -68,9 +65,7 @@
       "content": "",
       "legend": "",
       "projection": null,
-      "layers": [
-        "orto"
-      ],
+      "layers": ["orto"],
       "infobox": "",
       "searchFields": null,
       "displayFields": null,
@@ -276,9 +271,7 @@
       "caption": "Port",
       "url": "http://giscloud.se/geoserver/wfs",
       "projection": "EPSG:3006",
-      "layers": [
-        "wsp:port"
-      ],
+      "layers": ["wsp:port"],
       "editableFields": [
         {
           "index": 0,
@@ -323,9 +316,7 @@
       "caption": "Mussla",
       "url": "http://giscloud.se/geoserver/wfs",
       "projection": "EPSG:3006",
-      "layers": [
-        "skekraft:mussla"
-      ],
+      "layers": ["skekraft:mussla"],
       "editableFields": [
         {
           "index": 0,

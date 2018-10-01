@@ -20,7 +20,7 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var LegendItem = require('components/legenditem');
+var LegendItem = require("components/legenditem");
 
 /**
  * @class
@@ -31,14 +31,16 @@ var LegendView = {
    * @instance
    * @return {external:ReactElement}
    */
-  render: function () {
+  render: function() {
     return (
-      <div className='legend'>
-        {
-          this.props.legends.map((legend, index) =>
-            <LegendItem key={'legend_' + index} icon={legend.Url} text={legend.Description} />
-          )
-        }
+      <div className="legend">
+        {this.props.legends.map((legend, index) => (
+          <LegendItem
+            key={"legend_" + index}
+            icon={legend.Url}
+            text={legend.Description}
+          />
+        ))}
       </div>
     );
   }

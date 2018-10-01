@@ -1,40 +1,38 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import Button from '@material-ui/core/Button';
+import Button from "@material-ui/core/Button";
 
 const styles = theme => ({
   closed: {
-    display: 'none'
+    display: "none"
   },
   blanket: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     zIndex: 10000
   },
   content: {
-    maxHeight: '500px',
-    overflow: 'auto'
+    maxHeight: "500px",
+    overflow: "auto"
   },
-  bottom: {
-  },
+  bottom: {},
   dialog: {
-    backgroundColor: 'white',
-    borderRadius: '20px',
-    padding: '20px',
-    margin: '20%',
-    [theme.breakpoints.down('xs')]: {
-      margin: '20px'
+    backgroundColor: "white",
+    borderRadius: "20px",
+    padding: "20px",
+    margin: "20%",
+    [theme.breakpoints.down("xs")]: {
+      margin: "20px"
     }
-  },
+  }
 });
 
 class Dialog extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -60,15 +58,15 @@ class Dialog extends Component {
   static getDerivedStateFromProps(props, state) {
     return {
       open: props.open
-    }
+    };
   }
 
-  handleClose = (e) => {
+  handleClose = e => {
     e.stopPropagation();
     this.props.onClose();
   };
 
-  handleDialogClick = (e) => {
+  handleDialogClick = e => {
     e.stopPropagation();
     return false;
   };
@@ -76,19 +74,17 @@ class Dialog extends Component {
   getHtml(text) {
     return {
       __html: text
-    }
+    };
   }
 
   renderDialogContent(text) {
-    return (
-      <div dangerouslySetInnerHTML={this.getHtml(text)}></div>
-    );
+    return <div dangerouslySetInnerHTML={this.getHtml(text)} />;
   }
 
   render() {
-
     const { options, classes } = this.props;
-    var text = "", header = "";
+    var text = "",
+      header = "";
     if (options) {
       header = options.headerText;
       text = options.text;
@@ -112,7 +108,6 @@ class Dialog extends Component {
       </div>
     );
   }
-
 }
 
 Dialog.propTypes = {
@@ -122,4 +117,3 @@ Dialog.propTypes = {
 };
 
 export default withStyles(styles)(Dialog);
-

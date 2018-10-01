@@ -20,8 +20,8 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var SelectionToolbar = require('components/selectiontoolbar');
-var SearchResultGroup = require('components/searchresultgroup');
+var SelectionToolbar = require("components/selectiontoolbar");
+var SearchResultGroup = require("components/searchresultgroup");
 
 /**
  * @class
@@ -50,10 +50,10 @@ var SearchView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function () {
+  getInitialState: function() {
     return {
       visible: false,
-      displayPopup: this.props.model.get('displayPopup')
+      displayPopup: this.props.model.get("displayPopup")
     };
   },
 
@@ -61,31 +61,31 @@ var SearchView = {
    * Triggered when the component is successfully mounted into the DOM.
    * @instance
    */
-  componentDidMount: function () {
-    this.value = this.props.model.get('value');
-    if (this.props.model.get('items')) {
+  componentDidMount: function() {
+    this.value = this.props.model.get("value");
+    if (this.props.model.get("items")) {
       this.setState({
         showResults: true,
         result: {
-          status: 'success',
-          items: this.props.model.get('items')
+          status: "success",
+          items: this.props.model.get("items")
         }
       });
     }
 
-    this.props.model.on('change:displayPopup', () => {
+    this.props.model.on("change:displayPopup", () => {
       this.setState({
-        displayPopup: this.props.model.get('displayPopup')
+        displayPopup: this.props.model.get("displayPopup")
       });
     });
-    this.props.model.on('change:url', () => {
+    this.props.model.on("change:url", () => {
       this.setState({
-        downloadUrl: this.props.model.get('url')
+        downloadUrl: this.props.model.get("url")
       });
     });
-    this.props.model.on('change:downloading', () => {
+    this.props.model.on("change:downloading", () => {
       this.setState({
-        downloading: this.props.model.get('downloading')
+        downloading: this.props.model.get("downloading")
       });
     });
   },
@@ -94,41 +94,47 @@ var SearchView = {
    * Triggered before the component mounts.
    * @instance
    */
-  componentWillMount: function () {
-    this.props.model.get('layerCollection')
+  componentWillMount: function() {
+    this.props.model.get("layerCollection")
       ? this.bindLayerVisibilityChange()
-      : this.props.model.on('change:layerCollection', this.bindLayerVisibilityChange);
+      : this.props.model.on(
+          "change:layerCollection",
+          this.bindLayerVisibilityChange
+        );
   },
 
   /**
    * Triggered when component unmounts.
    * @instance
    */
-  componentWillUnmount: function () {
-    this.props.model.get('layerCollection').each((layer) => {
-      layer.off('change:visible', this.search);
+  componentWillUnmount: function() {
+    this.props.model.get("layerCollection").each(layer => {
+      layer.off("change:visible", this.search);
     });
-    this.props.model.off('change:layerCollection', this.bindLayerVisibilityChange);
-    this.props.model.off('change:displayPopup');
-    this.props.model.off('change:url');
-    this.props.model.off('change:downloading');
+    this.props.model.off(
+      "change:layerCollection",
+      this.bindLayerVisibilityChange
+    );
+    this.props.model.off("change:displayPopup");
+    this.props.model.off("change:url");
+    this.props.model.off("change:downloading");
   },
 
   /**
    * Clear the search result.
    * @instance
    */
-  clear: function () {
-    this.value = '';
-    this.props.model.set('value', '');
-    this.props.model.set('searchTriggered', false);
+  clear: function() {
+    this.value = "";
+    this.props.model.set("value", "");
+    this.props.model.set("searchTriggered", false);
     this.props.model.clear();
-    if (!isMobile && typeof $('#snabbsokRensa') !== 'undefined') {
-      $('#snabbsokRensa').click();
+    if (!isMobile && typeof $("#snabbsokRensa") !== "undefined") {
+      $("#snabbsokRensa").click();
     }
 
-    if (document.getElementById('alertSearchbar') != null) {
-      document.getElementById('alertSearchbar').remove();
+    if (document.getElementById("alertSearchbar") != null) {
+      document.getElementById("alertSearchbar").remove();
     }
 
     this.setState({
@@ -137,8 +143,8 @@ var SearchView = {
       result: []
     });
 
-    if (!isMobile && $('#searchbar-input-field').length != 0) {
-      $('#searchbar-input-field')[0].value = '';
+    if (!isMobile && $("#searchbar-input-field").length != 0) {
+      $("#searchbar-input-field")[0].value = "";
     }
   },
 
@@ -147,14 +153,14 @@ var SearchView = {
    * @instance
    * @param {object} event
    */
-  handleKeyDown: function (event) {
+  handleKeyDown: function(event) {
     if (event.keyCode === 13 && event.target.value.length < 5) {
       event.preventDefault();
-      this.props.model.set('value', event.target.value);
+      this.props.model.set("value", event.target.value);
       this.setState({
         force: true
       });
-      this.props.model.set('force', true);
+      this.props.model.set("force", true);
       this.search();
     }
   },
@@ -163,7 +169,7 @@ var SearchView = {
    * Perform a search in the model to update results.
    * @instance
    */
-  update: function () {
+  update: function() {
     this.props.model.search();
   },
 
@@ -172,8 +178,8 @@ var SearchView = {
    * @instance
    * @param {object} event
    */
-  search: function (event) {
-    this.props.model.set('searchTriggered', true);
+  search: function(event) {
+    this.props.model.set("searchTriggered", true);
     this.setState({
       loading: true
     });
@@ -201,9 +207,9 @@ var SearchView = {
    * If a layer changes visibility the result vill update.
    * @instance
    */
-  bindLayerVisibilityChange: function () {
-    this.props.model.get('layerCollection').each((layer) => {
-      layer.on('change:visible', () => {
+  bindLayerVisibilityChange: function() {
+    this.props.model.get("layerCollection").each(layer => {
+      layer.on("change:visible", () => {
         this.update();
       });
     });
@@ -215,8 +221,8 @@ var SearchView = {
    * @param {string} type
    * @param {object} event
    */
-  setFilter: function (event) {
-    this.props.model.set('filter', event.target.value);
+  setFilter: function(event) {
+    this.props.model.set("filter", event.target.value);
     this.search();
   },
 
@@ -225,47 +231,51 @@ var SearchView = {
    * @instance
    * @return {external:ReactElement}
    */
-  renderOptions: function () {
-    var settings = this.props.model.get('settings'),
-      sources = this.props.model.get('sources'),
-      filterVisible = this.props.model.get('filterVisible'),
-      filterVisibleBtn = null
-    ;
+  renderOptions: function() {
+    var settings = this.props.model.get("settings"),
+      sources = this.props.model.get("sources"),
+      filterVisible = this.props.model.get("filterVisible"),
+      filterVisibleBtn = null;
     if (filterVisible) {
       filterVisibleBtn = (
         <div>
           <input
-            id='filter-visible'
-            type='checkbox'
-            checked={this.props.model.get('filterVisibleActive')}
-            onChange={(e) => {
-              this.props.model.set('filterVisibleActive', e.target.checked);
+            id="filter-visible"
+            type="checkbox"
+            checked={this.props.model.get("filterVisibleActive")}
+            onChange={e => {
+              this.props.model.set("filterVisibleActive", e.target.checked);
               this.setState({
                 filterVisibleActive: e.target.checked
               });
             }}
-          />&nbsp;
-          <label htmlFor='filter-visible'>Sök i alla synliga lager</label>
+          />
+          &nbsp;
+          <label htmlFor="filter-visible">Sök i alla synliga lager</label>
         </div>
       );
     }
     return (
       <div>
         <p>
-          <span>Sök: </span>&nbsp;
-          <select value={this.props.model.get('filter')} onChange={(e) => { this.setFilter(e); }}>
-            <option value='*'>--  Alla  --</option>
-            {
-              (() => {
-                return sources.map((wfslayer, i) => {
-                  return (
-                    <option key={i} value={wfslayer.caption}>
-                      {wfslayer.caption}
-                    </option>
-                  );
-                });
-              })()
-            }
+          <span>Sök: </span>
+          &nbsp;
+          <select
+            value={this.props.model.get("filter")}
+            onChange={e => {
+              this.setFilter(e);
+            }}
+          >
+            <option value="*">-- Alla --</option>
+            {(() => {
+              return sources.map((wfslayer, i) => {
+                return (
+                  <option key={i} value={wfslayer.caption}>
+                    {wfslayer.caption}
+                  </option>
+                );
+              });
+            })()}
           </select>
         </p>
         {filterVisibleBtn}
@@ -273,11 +283,11 @@ var SearchView = {
     );
   },
 
-  onChangeDisplayPopup: function (e) {
-    this.props.model.set('displayPopup', e.target.checked);
+  onChangeDisplayPopup: function(e) {
+    this.props.model.set("displayPopup", e.target.checked);
   },
 
-  exportSelected: function (type) {
+  exportSelected: function(type) {
     this.props.model.export(type);
   },
 
@@ -286,72 +296,89 @@ var SearchView = {
    * @instance
    * @return {external:ReactElement}
    */
-  renderResults: function () {
-    var groups = this.props.model.get('items'),
+  renderResults: function() {
+    var groups = this.props.model.get("items"),
       excelButton = null,
       kmlButton = null,
-      downloadLink = null
-    ;
+      downloadLink = null;
 
-    if (this.props.model.get('kmlExportUrl')) {
+    if (this.props.model.get("kmlExportUrl")) {
       kmlButton = (
-        <button className='btn btn-default icon-button' onClick={(e) => this.exportSelected('kml')}>
-          <i className='kml' />
+        <button
+          className="btn btn-default icon-button"
+          onClick={e => this.exportSelected("kml")}
+        >
+          <i className="kml" />
         </button>
       );
     }
 
-    if (this.props.model.get('excelExportUrl')) {
+    if (this.props.model.get("excelExportUrl")) {
       excelButton = (
-        <button className='btn btn-default icon-button' onClick={(e) => this.exportSelected('excel')}>
-          <i className='excel' />
+        <button
+          className="btn btn-default icon-button"
+          onClick={e => this.exportSelected("excel")}
+        >
+          <i className="excel" />
         </button>
       );
     }
 
     // skapar en länk med url till nedladdning av export. Visar Spara
     // först när url finns.
-    if (this.props.model.get('downloading')) {
-      downloadLink = <a href='#'>Hämtar...</a>;
-    } else if (this.props.model.get('url')) {
-      downloadLink = <a href={this.props.model.get('url')}>Hämta sökresultat</a>;
+    if (this.props.model.get("downloading")) {
+      downloadLink = <a href="#">Hämtar...</a>;
+    } else if (this.props.model.get("url")) {
+      downloadLink = (
+        <a href={this.props.model.get("url")}>Hämta sökresultat</a>
+      );
     } else {
       downloadLink = null;
     }
 
     return (
-      <div className='search-results' key='search-results'>
+      <div className="search-results" key="search-results">
         <h3>Sökresultat</h3>
         <div>
-          <input type='checkbox' id='display-popup' ref='displayPopup' onChange={(e) => { this.onChangeDisplayPopup(e); }} checked={this.state.displayPopup} />
-          <label htmlFor='display-popup'>Visa information</label>
-          <span className='pull-right'>{excelButton}&nbsp;{kmlButton}</span>
+          <input
+            type="checkbox"
+            id="display-popup"
+            ref="displayPopup"
+            onChange={e => {
+              this.onChangeDisplayPopup(e);
+            }}
+            checked={this.state.displayPopup}
+          />
+          <label htmlFor="display-popup">Visa information</label>
+          <span className="pull-right">
+            {excelButton}
+            &nbsp;
+            {kmlButton}
+          </span>
           <div>{downloadLink}</div>
         </div>
-        {
-          (() => {
-            if (groups && groups.length > 0) {
-              return groups.map((item, i) => {
-                var id = 'group-' + i;
-                return (
-                  <SearchResultGroup
-                    isBar='no'
-                    id={id}
-                    key={id}
-                    result={item}
-                    numGroups={groups.length}
-                    model={this.props.model}
-                    parentView={this}
-                    map={this.props.model.get('map')} />
-                );
-              });
-            } else {
-              return (<div>Sökningen gav inget resultat.</div>);
-            }
-          })()
-        }
+        {(() => {
+          if (groups && groups.length > 0) {
+            return groups.map((item, i) => {
+              var id = "group-" + i;
+              return (
+                <SearchResultGroup
+                  isBar="no"
+                  id={id}
+                  key={id}
+                  result={item}
+                  numGroups={groups.length}
+                  model={this.props.model}
+                  parentView={this}
+                  map={this.props.model.get("map")}
+                />
+              );
+            });
+          } else {
+            return <div>Sökningen gav inget resultat.</div>;
+          }
+        })()}
       </div>
-
     );
   },
 
@@ -360,9 +387,9 @@ var SearchView = {
    * @instance
    * @return {external:ReactElement}
    */
-  render: function () {
+  render: function() {
     var results = null,
-      value = this.props.model.get('value'),
+      value = this.props.model.get("value"),
       showResults = this.props.model.shouldRenderResult(false),
       options = this.renderOptions();
 
@@ -370,33 +397,35 @@ var SearchView = {
       if (this.state.loading) {
         results = (
           <p>
-            <span className='sr-only'>Laddar...</span>
-            <i className='fa fa-refresh fa-spin fa-3x fa-fw' />
+            <span className="sr-only">Laddar...</span>
+            <i className="fa fa-refresh fa-spin fa-3x fa-fw" />
           </p>
         );
       } else {
-        if ((this.refs.searchInput &&
-             this.refs.searchInput.value.length > 3) ||
-             this.props.model.get('force')) {
+        if (
+          (this.refs.searchInput && this.refs.searchInput.value.length > 3) ||
+          this.props.model.get("force")
+        ) {
           results = this.renderResults();
         } else {
           results = (
-            <p className='alert alert-info'>
-              Skriv minst fyra tecken för att påbörja automatisk sökning. Tryck på <b>retur</b> för att forcera en sökning.
+            <p className="alert alert-info">
+              Skriv minst fyra tecken för att påbörja automatisk sökning. Tryck
+              på <b>retur</b> för att forcera en sökning.
             </p>
           );
         }
       }
     }
 
-    var search_on_input = (event) => {
+    var search_on_input = event => {
       this.value = event.target.value;
-      this.props.model.set('value', this.value);
+      this.props.model.set("value", this.value);
       this.setState({
         value: this.value,
         force: false
       });
-      this.props.model.set('force', false);
+      this.props.model.set("force", false);
       if (this.refs.searchInput.value.length > 3) {
         this.search();
       } else {
@@ -404,49 +433,66 @@ var SearchView = {
           loading: false
         });
       }
-      this.props.model.set('downloading', null);
-      this.props.model.set('url', null);
+      this.props.model.set("downloading", null);
+      this.props.model.set("url", null);
     };
 
-    var search_on_click = (event) => {
+    var search_on_click = event => {
       this.setState({
         force: true
       });
-      this.props.model.set('force', true);
+      this.props.model.set("force", true);
       this.search();
 
-      this.props.model.set('downloading', null);
-      this.props.model.set('url', null);
+      this.props.model.set("downloading", null);
+      this.props.model.set("url", null);
     };
 
-    var selectionToolbar = this.props.model.get('selectionTools')
-      ? <SelectionToolbar model={this.props.model.get('selectionModel')} />
-      : null;
+    var selectionToolbar = this.props.model.get("selectionTools") ? (
+      <SelectionToolbar model={this.props.model.get("selectionModel")} />
+    ) : null;
 
     return (
-      <div className='search-tools'>
-        <div className='form-group'>
+      <div className="search-tools">
+        <div className="form-group">
           {options}
           {selectionToolbar}
-          <div className='input-group'>
-            <div className='input-group-addon'>
-              <i className='fa fa-search' />
+          <div className="input-group">
+            <div className="input-group-addon">
+              <i className="fa fa-search" />
             </div>
             <input
-              type='text'
-              ref='searchInput'
-              className='form-control'
-              placeholder='Ange söktext..'
+              type="text"
+              ref="searchInput"
+              className="form-control"
+              placeholder="Ange söktext.."
               value={value}
               onKeyDown={this.handleKeyDown}
-              onChange={search_on_input} />
+              onChange={search_on_input}
+            />
           </div>
-          <div className='clearfix'>
-            <span className='info-text clearfix'>Inled sökningen med * för att söka på delar av en text.</span>
+          <div className="clearfix">
+            <span className="info-text clearfix">
+              Inled sökningen med * för att söka på delar av en text.
+            </span>
           </div>
         </div>
-        <button onClick={search_on_click} type='submit' className='btn btn-primary'>Sök</button>&nbsp;
-        <button onClick={this.clear} type='submit' className='btn btn-primary' id='sokRensa'>Rensa</button>
+        <button
+          onClick={search_on_click}
+          type="submit"
+          className="btn btn-primary"
+        >
+          Sök
+        </button>
+        &nbsp;
+        <button
+          onClick={this.clear}
+          type="submit"
+          className="btn btn-primary"
+          id="sokRensa"
+        >
+          Rensa
+        </button>
         {results}
       </div>
     );

@@ -1,4 +1,4 @@
-var ToolModel = require('tools/tool');
+var ToolModel = require("tools/tool");
 
 /**
  * @typedef {Object} CoordinatesModel~CoordinatesModelPropertiesPosition
@@ -25,17 +25,17 @@ var position = {
  * @property {CoordinatesModel~CoordinatesModelPropertiesPosition} position
  */
 var CoordinatesModelProperties = {
-  type: 'coordinates',
-  panel: 'CoordinatesPanel',
-  toolbar: 'bottom',
-  icon: 'fa fa-crosshairs icon',
-  title: 'Visa koordinater',
+  type: "coordinates",
+  panel: "CoordinatesPanel",
+  toolbar: "bottom",
+  icon: "fa fa-crosshairs icon",
+  title: "Visa koordinater",
   visible: false,
   map: undefined,
   features: undefined,
   interactionLayer: undefined,
   interactions: [],
-  instruction: '',
+  instruction: "",
   position: {
     x: undefined,
     y: undefined
@@ -49,25 +49,30 @@ var CoordinatesModelProperties = {
  * @param {CoordinatesModel~CoordinatesModelProperties} options - Default options
  */
 var CoordinatesModel = {
-
   /**
    * @instance
    * @property {CoordinatesModel~CoordinatesModelProperties} defaults - Default settings
    */
   defaults: CoordinatesModelProperties,
 
-  initialize: function (options) {
+  initialize: function(options) {
     ToolModel.prototype.initialize.call(this);
   },
 
-  configure: function (shell) {
-    this.set('map', shell.getMap().getMap());
-    this.set('interactionLayer', new ol.layer.Vector({
-      source: new ol.source.Vector({}),
-      name: 'coordinatesToolInteractionLayer'
-    }));
-    this.get('map').addLayer(this.get('interactionLayer'));
-    proj4.defs('EPSG:3021', '+proj=tmerc +lat_0=0 +lon_0=15.80827777777778 +k=1 +x_0=1500000 +y_0=0 +ellps=bessel +towgs84=414.1,41.3,603.1,-0.855,2.141,-7.023,0 +units=m +no_defs');
+  configure: function(shell) {
+    this.set("map", shell.getMap().getMap());
+    this.set(
+      "interactionLayer",
+      new ol.layer.Vector({
+        source: new ol.source.Vector({}),
+        name: "coordinatesToolInteractionLayer"
+      })
+    );
+    this.get("map").addLayer(this.get("interactionLayer"));
+    proj4.defs(
+      "EPSG:3021",
+      "+proj=tmerc +lat_0=0 +lon_0=15.80827777777778 +k=1 +x_0=1500000 +y_0=0 +ellps=bessel +towgs84=414.1,41.3,603.1,-0.855,2.141,-7.023,0 +units=m +no_defs"
+    );
   },
 
   /**
@@ -81,55 +86,56 @@ var CoordinatesModel = {
    *
    * @instance
    */
-  clicked: function (arg) {
-    this.set('visible', !this.get('visible'));
-    this.set('toggled', !this.get('toggled'));
+  clicked: function(arg) {
+    this.set("visible", !this.get("visible"));
+    this.set("toggled", !this.get("toggled"));
   },
 
   /**
    * Create and add marker interaction to map.
    * @instance
    */
-  createInteractions: function () {
-    var center = this.get('map').getView().getCenter();
-    var source = this.get('interactionLayer').getSource();
-    var feature = new ol.Feature({geometry: new ol.geom.Point(center)});
-    var iconStyle =
-      new ol.style.Style({
-        image: new ol.style.Icon({
-          anchor: [0.5, 32],
-          anchorXUnits: 'fraction',
-          anchorYUnits: 'pixels',
-          opacity: 0.75,
-          src: 'assets/icons/crosshairs-64x64.png'
-        })
-      });
-    var selectInteraction =
-      new ol.interaction.Select({
-        layers: [this.get('interactionLayer')]
-      });
+  createInteractions: function() {
+    var center = this.get("map")
+      .getView()
+      .getCenter();
+    var source = this.get("interactionLayer").getSource();
+    var feature = new ol.Feature({ geometry: new ol.geom.Point(center) });
+    var iconStyle = new ol.style.Style({
+      image: new ol.style.Icon({
+        anchor: [0.5, 32],
+        anchorXUnits: "fraction",
+        anchorYUnits: "pixels",
+        opacity: 0.75,
+        src: "assets/icons/crosshairs-64x64.png"
+      })
+    });
+    var selectInteraction = new ol.interaction.Select({
+      layers: [this.get("interactionLayer")]
+    });
     var selectedFeatures = selectInteraction.getFeatures();
-    var modifyInteraction =
-      new ol.interaction.Modify({
-        features: selectedFeatures,
-        style: iconStyle,
-        pixelTolerance: 32
-      });
+    var modifyInteraction = new ol.interaction.Modify({
+      features: selectedFeatures,
+      style: iconStyle,
+      pixelTolerance: 32
+    });
 
-    this.get('map').addInteraction(selectInteraction);
-    this.get('map').addInteraction(modifyInteraction);
-    this.set('interactions', [selectInteraction, modifyInteraction]);
+    this.get("map").addInteraction(selectInteraction);
+    this.get("map").addInteraction(modifyInteraction);
+    this.set("interactions", [selectInteraction, modifyInteraction]);
     this.setCoordinates(feature.getGeometry().getCoordinates());
 
     feature.setStyle(iconStyle);
     var timer = null;
-    feature.on('change', event => {
+    feature.on("change", event => {
       if (timer) clearTimeout(timer);
-      timer = setTimeout(() => { this.updateCoordinates(event); }, 50);
+      timer = setTimeout(() => {
+        this.updateCoordinates(event);
+      }, 50);
     });
 
     selectedFeatures.push(feature);
-    selectInteraction.on('select', event => {
+    selectInteraction.on("select", event => {
       if (event.deselected.length > 0) {
         selectedFeatures.push(feature);
       }
@@ -140,15 +146,15 @@ var CoordinatesModel = {
    * Remove the marker interaction from the map.
    * @instance
    */
-  removeInteractions: function () {
-    var interactions = this.get('interactions');
+  removeInteractions: function() {
+    var interactions = this.get("interactions");
     var i;
 
     for (i = 0; i < interactions.length; i++) {
-      this.get('map').removeInteraction(interactions[i]);
+      this.get("map").removeInteraction(interactions[i]);
     }
 
-    this.set('interactions', []);
+    this.set("interactions", []);
   },
 
   /**
@@ -156,8 +162,8 @@ var CoordinatesModel = {
    * @instance
    * @param {array} xy
    */
-  setCoordinates: function (xy) {
-    this.set('position', {
+  setCoordinates: function(xy) {
+    this.set("position", {
       x: xy[0],
       y: xy[1]
     });
@@ -168,7 +174,7 @@ var CoordinatesModel = {
    * @instance
    * @param {object} event
    */
-  updateCoordinates: function (e) {
+  updateCoordinates: function(e) {
     var coordinates = e.target.getGeometry().getCoordinates();
     this.setCoordinates(coordinates);
   },
@@ -185,8 +191,10 @@ var CoordinatesModel = {
    * @return {array<{number}>} coordinates
    *
    */
-  transform: function (coordinates, to) {
-    var from = this.get('map').getView().getProjection();
+  transform: function(coordinates, to) {
+    var from = this.get("map")
+      .getView()
+      .getProjection();
     return ol.proj.transform(coordinates, from, to);
   },
 
@@ -195,29 +203,41 @@ var CoordinatesModel = {
    * @instance
    * @return {object} coordinatePresentation
    */
-  presentCoordinates: function () {
+  presentCoordinates: function() {
     var presentedCoordinates = {
-      raw: this.get('position')
+      raw: this.get("position")
     };
     var transformedCoordinates = {};
-    var transformations = this.get('transformations');
-    var coordinates = this.extractXYArray(presentedCoordinates['raw']);
+    var transformations = this.get("transformations");
+    var coordinates = this.extractXYArray(presentedCoordinates["raw"]);
 
-    _.each(transformations, (transformation) => {
-      transformedCoordinates[transformation.title] = this.transform(coordinates, transformation.code);
-      transformedCoordinates[transformation.title] = this.extractXYObject(transformedCoordinates[transformation.title]);
+    _.each(transformations, transformation => {
+      transformedCoordinates[transformation.title] = this.transform(
+        coordinates,
+        transformation.code
+      );
+      transformedCoordinates[transformation.title] = this.extractXYObject(
+        transformedCoordinates[transformation.title]
+      );
 
-      transformedCoordinates[transformation.title].xtitle = transformation.xtitle || 'X';
-      transformedCoordinates[transformation.title].ytitle = transformation.ytitle || 'Y';
-      transformedCoordinates[transformation.title].inverseAxis = transformation.inverseAxis === undefined ? false : transformation.inverseAxis;
+      transformedCoordinates[transformation.title].xtitle =
+        transformation.xtitle || "X";
+      transformedCoordinates[transformation.title].ytitle =
+        transformation.ytitle || "Y";
+      transformedCoordinates[transformation.title].inverseAxis =
+        transformation.inverseAxis === undefined
+          ? false
+          : transformation.inverseAxis;
 
-      if (transformation.hasOwnProperty('default')) {
-        transformedCoordinates[transformation.title].default = transformation.default;
-        transformedCoordinates[transformation.title].hint = transformation.hint || '';
+      if (transformation.hasOwnProperty("default")) {
+        transformedCoordinates[transformation.title].default =
+          transformation.default;
+        transformedCoordinates[transformation.title].hint =
+          transformation.hint || "";
       }
     });
 
-    presentedCoordinates['transformed'] = transformedCoordinates;
+    presentedCoordinates["transformed"] = transformedCoordinates;
 
     return presentedCoordinates;
   },
@@ -228,9 +248,9 @@ var CoordinatesModel = {
    * @param {object} xyObject
    * @return {array} coordinates
    */
-  extractXYArray: function (xyObject) {
+  extractXYArray: function(xyObject) {
     return Object.keys(xyObject).map((key, value) => {
-      if (key === 'x' || key === 'y') {
+      if (key === "x" || key === "y") {
         return xyObject[key];
       }
     });
@@ -242,20 +262,19 @@ var CoordinatesModel = {
    * @param {array} coordinates
    * @return {object} xyObject
    */
-  extractXYObject: function (xy) {
+  extractXYObject: function(xy) {
     var coordinates = {};
     xy.forEach((element, index) => {
       if (index === 0) {
-        coordinates['x'] = element;
+        coordinates["x"] = element;
       } else if (index === 1) {
-        coordinates['y'] = element;
+        coordinates["y"] = element;
       } else {
-        throw 'Array index out of bounds while parsing coordinates.';
+        throw "Array index out of bounds while parsing coordinates.";
       }
     });
     return coordinates;
   }
-
 };
 
 /**

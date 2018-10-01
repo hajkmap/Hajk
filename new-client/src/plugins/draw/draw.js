@@ -11,17 +11,15 @@ import DrawModel from "./DrawModel.js";
 import Observer from "react-event-observer";
 
 const styles = theme => {
-  return {
-  }
+  return {};
 };
 
 class Draw extends Component {
-
   state = {
     panelOpen: false
   };
 
-  onClick = (e) => {
+  onClick = e => {
     this.app.onPanelOpen(this);
     this.setState({
       panelOpen: true
@@ -80,7 +78,7 @@ class Draw extends Component {
   }
 
   renderAsWidgetItem() {
-    const {classes} = this.props;
+    const { classes } = this.props;
     return (
       <div>
         <Button
@@ -117,7 +115,6 @@ class Draw extends Component {
   }
 
   render() {
-
     if (this.props.type === "toolbarItem") {
       return this.renderAsToolbarItem();
     }
@@ -127,7 +124,6 @@ class Draw extends Component {
     }
 
     return null;
-
   }
 }
 

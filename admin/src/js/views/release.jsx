@@ -20,18 +20,16 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import React from 'react';
-import { Component } from 'react';
+import React from "react";
+import { Component } from "react";
 
 class Release extends Component {
-  constructor () {
+  constructor() {
     super();
   }
 
-  render () {
-    return (
-      <div>Release</div>
-    );
+  render() {
+    return <div>Release</div>;
   }
 }
 

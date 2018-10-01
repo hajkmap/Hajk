@@ -20,10 +20,10 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var MapModel = require('models/map');
-var LayerCollection = require('collections/layers');
-var ToolCollection = require('collections/tools');
-var NavigationPanelModel = require('models/navigation');
+var MapModel = require("models/map");
+var LayerCollection = require("collections/layers");
+var ToolCollection = require("collections/tools");
+var NavigationPanelModel = require("models/navigation");
 
 /**
  * @description
@@ -38,44 +38,54 @@ var NavigationPanelModel = require('models/navigation');
  * @param {object} options - Default options
  */
 var ShellModel = {
-
-  initialize: function (config) {
+  initialize: function(config) {
     this.initialConfig = config;
-    this.cid += '_map';
+    this.cid += "_map";
     if (config) {
       config.map.target = this.cid;
-      _.each(config.projections || [], function (proj) {
+      _.each(config.projections || [], function(proj) {
         proj4.defs(proj.code, proj.definition);
-        ol.proj.addProjection(new ol.proj.Projection({
-          code: proj.code,
-          extent: proj.extent,
-          units: proj.units
-        }));
+        ol.proj.addProjection(
+          new ol.proj.Projection({
+            code: proj.code,
+            extent: proj.extent,
+            units: proj.units
+          })
+        );
       });
-      this.set('canStart', true);
+      this.set("canStart", true);
     } else {
-      this.set('canStart', false);
+      this.set("canStart", false);
     }
   },
 
-  configure: function () {
+  configure: function() {
     var config = this.initialConfig;
-    if (this.get('canStart')) {
-      config.tools.sort((a, b) => a === b ? 0 : a.index > b.index ? 1 : -1);
-      this.set('map', new MapModel(config.map));
-      this.set('layerCollection', new LayerCollection(config.layers, { shell: this, mapConfig: config.map, tools: config.tools }));
-      this.set('toolCollection', new ToolCollection(config.tools, { shell: this }));
+    if (this.get("canStart")) {
+      config.tools.sort((a, b) => (a === b ? 0 : a.index > b.index ? 1 : -1));
+      this.set("map", new MapModel(config.map));
+      this.set(
+        "layerCollection",
+        new LayerCollection(config.layers, {
+          shell: this,
+          mapConfig: config.map,
+          tools: config.tools
+        })
+      );
+      this.set(
+        "toolCollection",
+        new ToolCollection(config.tools, { shell: this })
+      );
 
-      let tools = this.get('toolCollection').toArray();
-      let panels = tools.filter(tool => tool.get('panel'))
-        .map(panel => {
-          return {
-            type: panel.get('panel'),
-            model: panel
-          };
-        });
+      let tools = this.get("toolCollection").toArray();
+      let panels = tools.filter(tool => tool.get("panel")).map(panel => {
+        return {
+          type: panel.get("panel"),
+          model: panel
+        };
+      });
 
-      this.set('navigation', new NavigationPanelModel({ panels: panels }));
+      this.set("navigation", new NavigationPanelModel({ panels: panels }));
     }
   },
 
@@ -84,8 +94,8 @@ var ShellModel = {
    * @instance
    * @return {MapModel} map model
    */
-  getMap: function () {
-    return this.get('map');
+  getMap: function() {
+    return this.get("map");
   },
 
   /**
@@ -93,8 +103,8 @@ var ShellModel = {
    * @instance
    * @return {LayerCollection} layer collection
    */
-  getLayerCollection: function () {
-    return this.get('layerCollection');
+  getLayerCollection: function() {
+    return this.get("layerCollection");
   },
 
   /**
@@ -102,8 +112,8 @@ var ShellModel = {
    * @instance
    * @return {ToolCollection} tool collection
    */
-  getToolCollection: function () {
-    return this.get('toolCollection');
+  getToolCollection: function() {
+    return this.get("toolCollection");
   },
 
   /**
@@ -111,8 +121,8 @@ var ShellModel = {
    * @instance
    * @return {NavigationModel} navigation model
    */
-  getNavigation: function () {
-    return this.get('navigation');
+  getNavigation: function() {
+    return this.get("navigation");
   },
 
   /**
@@ -120,7 +130,7 @@ var ShellModel = {
    * @instance
    * @return {string} JSON-string
    */
-  toJSON: function () {
+  toJSON: function() {
     var json = _.clone(this.initialConfig);
     json.layers = this.getLayerCollection().toJSON();
     json.map = this.getMap().toJSON();
@@ -133,8 +143,8 @@ var ShellModel = {
    * @instance
    * @param {Array<{object}>} bookmars
    */
-  setBookmarks: function (bookmarks) {
-    this.set('bookmarks', bookmarks);
+  setBookmarks: function(bookmarks) {
+    this.set("bookmarks", bookmarks);
   },
 
   /**
@@ -142,8 +152,8 @@ var ShellModel = {
    * @instance
    * @return {object} bookmars
    */
-  getBookmarks: function () {
-    return this.get('bookmarks');
+  getBookmarks: function() {
+    return this.get("bookmarks");
   },
 
   /**
@@ -151,8 +161,8 @@ var ShellModel = {
    * @instance
    * @return {object} configuration
    */
-  getConfig: function () {
-    return this.get('config');
+  getConfig: function() {
+    return this.get("config");
   },
 
   /**
@@ -160,9 +170,9 @@ var ShellModel = {
    * @instance
    * @param {object} configuration
    */
-  setConfig: function (config) {
-    this.set('config', config);
-    this.set('configUpdated', new Date().getTime());
+  setConfig: function(config) {
+    this.set("config", config);
+    this.set("configUpdated", new Date().getTime());
   },
 
   /**
@@ -170,8 +180,7 @@ var ShellModel = {
    * @instance
    * @param {object} configuration
    */
-  updateConfig: function () {
-  }
+  updateConfig: function() {}
 };
 
 /**

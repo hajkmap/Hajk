@@ -20,7 +20,7 @@
 //
 // https://github.com/Johkar/Hajk2
 
-var Panel = require('views/panel');
+var Panel = require("views/panel");
 /**
  * @class
  */
@@ -30,9 +30,9 @@ var PresetPanelView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function () {
+  getInitialState: function() {
     return {
-      anchor: ''
+      anchor: ""
     };
   },
 
@@ -41,7 +41,7 @@ var PresetPanelView = {
    * @instance
    * @param {object} e - Syntetic DOM event.
    */
-  onSubmitForm: function (e) {
+  onSubmitForm: function(e) {
     e.preventDefault();
     var name = ReactDOM.findDOMNode(this.refs.name).value;
     this.props.model.addPreset(name, () => this.forceUpdate());
@@ -51,14 +51,13 @@ var PresetPanelView = {
    * Triggered when component updates.
    * @instance
    */
-  componentDidUpdate: function () {
-  },
+  componentDidUpdate: function() {},
 
   /**
    * Triggered when the component is successfully mounted into the DOM.
    * @instance
    */
-  componentDidMount: function () {
+  componentDidMount: function() {
     this.generate();
   },
 
@@ -66,7 +65,7 @@ var PresetPanelView = {
    * Generete anchor text.
    * @instance
    */
-  generate: function () {
+  generate: function() {
     this.setState({
       anchor: this.props.model.generate()
     });
@@ -77,10 +76,10 @@ var PresetPanelView = {
    * @instance
    * @return {external:ReactElement}
    */
-  render: function () {
-    var anchor = this.props.model.get('anchor');
-    var presetName = this.props.model.get('presetName');
-    var presetUrl = this.props.model.get('presetUrl');
+  render: function() {
+    var anchor = this.props.model.get("anchor");
+    var presetName = this.props.model.get("presetName");
+    var presetUrl = this.props.model.get("presetUrl");
 
     var getUrl = this.props.model.getUrl();
     var presets = this.props.model.getPresets();
@@ -91,7 +90,7 @@ var PresetPanelView = {
         return (
           <a key={i} href={getUrl + preset.presetUrl}>
             <li>
-              {preset.name} <i className='fa fa-bookmark preset-icon' />
+              {preset.name} <i className="fa fa-bookmark preset-icon" />
             </li>
           </a>
         );
@@ -99,12 +98,15 @@ var PresetPanelView = {
     }
 
     return (
-      <Panel title='Snabbval' onUnmountClicked={this.props.onUnmountClicked} onCloseClicked={this.props.onCloseClicked} instruction={atob(this.props.model.get('instruction'))}>
-        <div className='bookmark-panel panel-content'>
+      <Panel
+        title="Snabbval"
+        onUnmountClicked={this.props.onUnmountClicked}
+        onCloseClicked={this.props.onCloseClicked}
+        instruction={atob(this.props.model.get("instruction"))}
+      >
+        <div className="bookmark-panel panel-content">
           <label>Tillgängliga snabbval</label>
-          <ul>
-            {items}
-          </ul>
+          <ul>{items}</ul>
         </div>
       </Panel>
     );

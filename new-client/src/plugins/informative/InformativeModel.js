@@ -17,20 +17,23 @@ class InformativeModel {
 
   displayMap(visibleLayers, mapSettings) {
     var layers = this.olMap.getLayers().getArray();
-    layers.filter(
-      layer =>
-        layer.getProperties()["layerInfo"] &&
-        layer.getProperties()["layerInfo"]["layerType"] !== "base"
-    )
-    .forEach(
-      layer => {
-        if (visibleLayers.some(visibleLayer =>
-          visibleLayer === layer.getProperties()["name"])) {
+    layers
+      .filter(
+        layer =>
+          layer.getProperties()["layerInfo"] &&
+          layer.getProperties()["layerInfo"]["layerType"] !== "base"
+      )
+      .forEach(layer => {
+        if (
+          visibleLayers.some(
+            visibleLayer => visibleLayer === layer.getProperties()["name"]
+          )
+        ) {
           layer.setVisible(true);
         } else {
           layer.setVisible(false);
-      }
-    });
+        }
+      });
 
     this.flyTo(this.olMap.getView(), mapSettings.center, mapSettings.zoom);
   }

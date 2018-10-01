@@ -20,64 +20,61 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var Panel = require('views/panel');
+var Panel = require("views/panel");
 
 var CoordinatesList = React.createClass({
-
-  isPlanar: function (epsgString) {
-    return (
-      ['WGS 84'].indexOf(epsgString) === -1
-    );
+  isPlanar: function(epsgString) {
+    return ["WGS 84"].indexOf(epsgString) === -1;
   },
 
-  convertDDToDMS: function (D, lng) {
+  convertDDToDMS: function(D, lng) {
     return {
-      dir: D < 0 ? lng ? 'W' : 'S' : lng ? 'E' : 'N',
-      deg: Math.floor((D < 0 ? D = -D : D)),
+      dir: D < 0 ? (lng ? "W" : "S") : lng ? "E" : "N",
+      deg: Math.floor(D < 0 ? (D = -D) : D),
       min: Math.floor((D * 60) % 60),
       sec: ((D * 3600) % 60).toFixed(5)
     };
   },
 
-  formatDMS: function (dms) {
-    return (
-      [dms.deg, '°', dms.min, '′', dms.sec, '″', dms.dir].join('')
-    );
+  formatDMS: function(dms) {
+    return [dms.deg, "°", dms.min, "′", dms.sec, "″", dms.dir].join("");
   },
 
-  getLon: function (xyObject) {
+  getLon: function(xyObject) {
     return (
       <span>
-        <strong>{ xyObject.xtitle }: </strong> { this.formatDMS(this.convertDDToDMS(xyObject.x, true)) }
+        <strong>{xyObject.xtitle}: </strong>{" "}
+        {this.formatDMS(this.convertDDToDMS(xyObject.x, true))}
       </span>
     );
   },
 
-  getLat: function (xyObject) {
+  getLat: function(xyObject) {
     return (
       <span>
-        <strong>{ xyObject.ytitle }: </strong> { this.formatDMS(this.convertDDToDMS(xyObject.y, false)) }
+        <strong>{xyObject.ytitle}: </strong>{" "}
+        {this.formatDMS(this.convertDDToDMS(xyObject.y, false))}
       </span>
     );
   },
 
-  getX: function (xyObject) {
+  getX: function(xyObject) {
     return (
       <span>
-        <strong>{ xyObject.xtitle }: </strong> { xyObject.x.toFixed(2) } m
+        <strong>{xyObject.xtitle}: </strong> {xyObject.x.toFixed(2)} m
       </span>
     );
   },
 
-  getY: function (xyObject) {
+  getY: function(xyObject) {
     return (
       <span>
-        <strong>{ xyObject.ytitle }: </strong> { xyObject.y.toFixed(2) } m
+        <strong>{xyObject.ytitle}: </strong> {xyObject.y.toFixed(2)} m
       </span>
     );
   },
 
-  processSphericalXY: function (xyObject) {
+  processSphericalXY: function(xyObject) {
     return (
       <div>
         <dd>
@@ -90,7 +87,7 @@ var CoordinatesList = React.createClass({
     );
   },
 
-  processPlanarXY: function (xyObject) {
+  processPlanarXY: function(xyObject) {
     return (
       <div>
         <dd>
@@ -103,37 +100,36 @@ var CoordinatesList = React.createClass({
     );
   },
 
-  processTitle: function (title, object) {
-    if (object.hasOwnProperty('default') && object['default'] === true) {
+  processTitle: function(title, object) {
+    if (object.hasOwnProperty("default") && object["default"] === true) {
       return (
         <dt>
-          <strong style={{fontWeight: 'bold'}}>{title}</strong> {object.hint}
+          <strong style={{ fontWeight: "bold" }}>{title}</strong> {object.hint}
         </dt>
       );
     } else {
-      return (
-        <dt>{title}</dt>
-      );
+      return <dt>{title}</dt>;
     }
   },
 
-  processRow: function (object, title) {
+  processRow: function(object, title) {
     if (this.isPlanar(title)) {
-      return (
-        [this.processTitle(title, object), this.processPlanarXY(object)]
-      );
+      return [this.processTitle(title, object), this.processPlanarXY(object)];
     } else {
-      return (
-        [this.processTitle(title, object), this.processSphericalXY(object)]
-      );
+      return [
+        this.processTitle(title, object),
+        this.processSphericalXY(object)
+      ];
     }
   },
 
-  render: function () {
+  render: function() {
     var coordinates = this.props.coordinates;
     return (
       <dl>
-        { Object.keys(coordinates).map((key) => this.processRow(coordinates[key], key)) }
+        {Object.keys(coordinates).map(key =>
+          this.processRow(coordinates[key], key)
+        )}
       </dl>
     );
   }
@@ -148,7 +144,7 @@ var CoordinatesPanelView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function () {
+  getInitialState: function() {
     return {
       visible: false,
       interactionVisible: true
@@ -159,8 +155,8 @@ var CoordinatesPanelView = {
    * Triggered when component unmounts.
    * @instance
    */
-  componentWillUnmount: function () {
-    this.props.model.off('change:position', this.writeCoordinates);
+  componentWillUnmount: function() {
+    this.props.model.off("change:position", this.writeCoordinates);
     this.props.model.removeInteractions();
   },
 
@@ -168,8 +164,8 @@ var CoordinatesPanelView = {
    * Triggered when the component is successfully mounted into the DOM.
    * @instance
    */
-  componentDidMount: function () {
-    this.props.model.on('change:position', this.writeCoordinates);
+  componentDidMount: function() {
+    this.props.model.on("change:position", this.writeCoordinates);
     this.setState({
       coordinates: this.props.model.presentCoordinates()
     });
@@ -179,7 +175,7 @@ var CoordinatesPanelView = {
    * Write coordinates, will trigger set state.
    * @instance
    */
-  writeCoordinates: function () {
+  writeCoordinates: function() {
     this.setState({
       coordinates: this.props.model.presentCoordinates()
     });
@@ -189,11 +185,12 @@ var CoordinatesPanelView = {
    * Reset the application, will trigger set state.
    * @instance
    */
-  reset: function () {
+  reset: function() {
     this.setState({
       interactionVisible: !this.state.interactionVisible
     });
-    this.state.interactionVisible ? this.props.model.removeInteractions()
+    this.state.interactionVisible
+      ? this.props.model.removeInteractions()
       : this.props.model.createInteractions();
   },
 
@@ -202,15 +199,23 @@ var CoordinatesPanelView = {
    * @instance
    * @return {external:ReactElement}
    */
-  render: function () {
+  render: function() {
     var coordinates;
-    if (this.props.model.get('interactions').length === 0) {
+    if (this.props.model.get("interactions").length === 0) {
       this.props.model.createInteractions();
     }
-    coordinates = this.state.coordinates ? this.state.coordinates.transformed : {};
+    coordinates = this.state.coordinates
+      ? this.state.coordinates.transformed
+      : {};
     return (
-      <Panel title='Koordinater' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
-        <div className='coordinate-display'>
+      <Panel
+        title="Koordinater"
+        onCloseClicked={this.props.onCloseClicked}
+        onUnmountClicked={this.props.onUnmountClicked}
+        minimized={this.props.minimized}
+        instruction={atob(this.props.model.get("instruction"))}
+      >
+        <div className="coordinate-display">
           <p>
             Välj en plats i kartan genom att dra i siktet. <br />
           </p>

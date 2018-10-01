@@ -20,29 +20,31 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var helper = (function () {
+var helper = (function() {
   return {
-    featureArrayToObject: function (a, k) {
+    featureArrayToObject: function(a, k) {
       var o = {};
-      _.each(a, (i) => {
-        o[i.getProperties()[k]] = i
+      _.each(a, i => {
+        o[i.getProperties()[k]] = i;
       });
       return o;
     },
-    move: function (origin, updatee) {
-      origin.getGeometry().setCoordinates(
-        updatee.getGeometry().getCoordinates()
-      );
+    move: function(origin, updatee) {
+      origin
+        .getGeometry()
+        .setCoordinates(updatee.getGeometry().getCoordinates());
     },
-    updateProps: function (origin, updatee) {
+    updateProps: function(origin, updatee) {
       origin.setProperties(
-        _.extend(updatee.getProperties(), { messages: origin.getProperties().messages })
+        _.extend(updatee.getProperties(), {
+          messages: origin.getProperties().messages
+        })
       );
     }
   };
-}());
+})();
 
-var LayerModel = require('layers/layer');
+var LayerModel = require("layers/layer");
 
 /**
  * @typedef {Object} WfsLayer~WfsLayerPropertiesParams
@@ -95,42 +97,49 @@ var DataLayerProperties = {
  */
 var DataLayer = {
   /**
-  * @property {WfsLayer~WfsLayerProperties} defaults - Default properties
-  * @instance
-  */
+   * @property {WfsLayer~WfsLayerProperties} defaults - Default properties
+   * @instance
+   */
   defaults: DataLayerProperties,
 
-  initialize: function () {
+  initialize: function() {
     LayerModel.prototype.initialize.call(this);
 
     this.vectorSource = new ol.source.Vector({
-      loader: (extent) => {
-
+      loader: extent => {
         setInterval(() => {
           $.ajax({
-            url: this.get('url'),
-            success: (vehicleFeatureCollection) => {
+            url: this.get("url"),
+            success: vehicleFeatureCollection => {
+              var source = this.getLayer()
+                  .getSource()
+                  .getSource(),
+                format = new ol.format.GeoJSON(),
+                projection = this.get("map").getCRS();
 
-              var source = this.getLayer().getSource().getSource()
-              ,   format = new ol.format.GeoJSON()
-              ,   projection = this.get('map').getCRS();
-
-              vehicleFeatureCollection = JSON.stringify(vehicleFeatureCollection);
-              vehicleFeatureCollection = format.readFeatures(vehicleFeatureCollection, {
-                dataProjection: "EPSG:4326",
-                featureProjection: projection
-              });
-
-              vehicleFeatureCollection = vehicleFeatureCollection.filter(feature => {
-                var f = false;
-                var p = feature.getProperties();
-
-                if (p.destination !== "" || p.transportMode === 3) {
-                  f = true;
+              vehicleFeatureCollection = JSON.stringify(
+                vehicleFeatureCollection
+              );
+              vehicleFeatureCollection = format.readFeatures(
+                vehicleFeatureCollection,
+                {
+                  dataProjection: "EPSG:4326",
+                  featureProjection: projection
                 }
+              );
 
-                return f;
-              });
+              vehicleFeatureCollection = vehicleFeatureCollection.filter(
+                feature => {
+                  var f = false;
+                  var p = feature.getProperties();
+
+                  if (p.destination !== "" || p.transportMode === 3) {
+                    f = true;
+                  }
+
+                  return f;
+                }
+              );
 
               if (this.initiallyLoaded) {
                 this.update(vehicleFeatureCollection, source);
@@ -138,11 +147,9 @@ var DataLayer = {
                 source.addFeatures(vehicleFeatureCollection);
                 this.initiallyLoaded = true;
               }
-
             }
           });
-        }, 1000)
-
+        }, 1000);
       },
       strategy: ol.loadingstrategy.fixed
     });
@@ -152,9 +159,12 @@ var DataLayer = {
       style: feature => {
         var icon = mode => {
           switch (mode) {
-            case 2: return "http://karta.varmlandstrafik.se/icons/bus-icon.png";
-            case 3: return "assets/icons/taxi.png";
-            case 5: return "http://karta.varmlandstrafik.se/icons/train-icon.png";
+            case 2:
+              return "http://karta.varmlandstrafik.se/icons/bus-icon.png";
+            case 3:
+              return "assets/icons/taxi.png";
+            case 5:
+              return "http://karta.varmlandstrafik.se/icons/train-icon.png";
           }
         };
         return [
@@ -163,13 +173,13 @@ var DataLayer = {
               src: icon(feature.getProperties().transportMode)
             })
           })
-        ]
+        ];
       }
     });
 
     this.layer = new ol.layer.Image({
-      caption: this.get('caption'),
-      name: this.get('name'),
+      caption: this.get("caption"),
+      name: this.get("name"),
       visible: this.get("visible"),
       source: this.imageSource
     });
@@ -182,17 +192,20 @@ var DataLayer = {
    * @param {Array<object>} vehicleFeatureCollection - Array of vechicles
    * @param {object} source - Layer source to update
    */
-  update: function (vehicleFeatureCollection, source) {
+  update: function(vehicleFeatureCollection, source) {
     // Walk through the collection of new vechicles and update
     // the corresponding source vechicle if found.
     // If the vechicle is not found in the source, add it.
     // If the vechicle is found in the source but is not present collection, remove it.
     var features = source.getFeatures();
-    var updates  = helper.featureArrayToObject(vehicleFeatureCollection, 'vehicleRef');
-    var presents = helper.featureArrayToObject(features, 'vehicleRef');
+    var updates = helper.featureArrayToObject(
+      vehicleFeatureCollection,
+      "vehicleRef"
+    );
+    var presents = helper.featureArrayToObject(features, "vehicleRef");
 
-    _.each(vehicleFeatureCollection, function (fromService) {
-      var id = fromService.getProperties()['vehicleRef'];
+    _.each(vehicleFeatureCollection, function(fromService) {
+      var id = fromService.getProperties()["vehicleRef"];
       if (presents.hasOwnProperty(id)) {
         helper.move(presents[id], fromService); // Move
         helper.updateProps(presents[id], fromService);
@@ -201,40 +214,39 @@ var DataLayer = {
       }
     });
 
-    _.each(features, (feature) => {
-      var id = feature.getProperties()['vehicleRef'];
+    _.each(features, feature => {
+      var id = feature.getProperties()["vehicleRef"];
       if (!updates.hasOwnProperty(id)) {
         source.removeFeature(feature); // Remove
       }
     });
   },
 
- /**
-  * getSource - Get the source of this laer
-  * @instance
-  * @return {external:"ol.source"} style
-  */
-  getSource: function () {
+  /**
+   * getSource - Get the source of this laer
+   * @instance
+   * @return {external:"ol.source"} style
+   */
+  getSource: function() {
     return this.vectorSource;
   },
 
- /**
-  * updateLayer - Add features to this layer source
-  * @instance
-  * @param {Array<{external:"ol.feature"}>} feature
-  */
-  updateLayer: function (features) {
+  /**
+   * updateLayer - Add features to this layer source
+   * @instance
+   * @param {Array<{external:"ol.feature"}>} feature
+   */
+  updateLayer: function(features) {
     this.getSource().addFeatures(features);
   },
 
- /**
-  * refresh - redraw the layer
-  * @instance
-  */
-  refresh: function () {
+  /**
+   * refresh - redraw the layer
+   * @instance
+   */
+  refresh: function() {
     this.imageSource.setStyle(this.imageSource.getStyle());
   }
-
 };
 
 /**

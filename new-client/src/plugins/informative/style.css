@@ -26,7 +26,6 @@
 }
 
 .informative-tool-toggle-button:active {
-
 }
 
 .informative-panel {
@@ -41,8 +40,8 @@
   }
 }
 
-.toc, .content {
-
+.toc,
+.content {
 }
 
 .content img {

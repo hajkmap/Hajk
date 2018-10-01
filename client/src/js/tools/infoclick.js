@@ -20,8 +20,8 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var ToolModel = require('tools/tool');
-var HighlightLayer = require('layers/highlightlayer');
+var ToolModel = require("tools/tool");
+var HighlightLayer = require("layers/highlightlayer");
 
 var FeatureModel = Backbone.Model.extend({
   defaults: {
@@ -30,7 +30,7 @@ var FeatureModel = Backbone.Model.extend({
     layer: undefined
   },
 
-  initialize: function () {
+  initialize: function() {
     this.id = this.cid;
   }
 });
@@ -52,24 +52,17 @@ var FeatureCollection = Backbone.Collection.extend({
  * @property {string} markerImg - Default: "assets/icons/marker.png"
  */
 var InfoClickModelProperties = {
-  type: 'infoclick',
-  panel: 'InfoPanel',
+  type: "infoclick",
+  panel: "InfoPanel",
   visible: false,
   map: undefined,
-  wmsCallbackName: 'LoadWmsFeatureInfo',
+  wmsCallbackName: "LoadWmsFeatureInfo",
   features: undefined,
   selectedFeature: undefined,
   highlightLayer: undefined,
-  markerImg: 'assets/ico' +
-  'ns/marker.png',
-  anchor: [
-    16,
-    16
-  ],
-  imgSize: [
-    32,
-    32
-  ],
+  markerImg: "assets/ico" + "ns/marker.png",
+  anchor: [16, 16],
+  imgSize: [32, 32],
   displayPopup: true,
   popupOffsetY: 0
 };
@@ -87,47 +80,50 @@ var InfoClickModel = {
    */
   defaults: InfoClickModelProperties,
 
-  initialize: function (options) {
+  initialize: function(options) {
     ToolModel.prototype.initialize.call(this);
     this.initialState = options;
 
-    this.set('highlightLayer', new HighlightLayer({
-      anchor: this.get('anchor'),
-      imgSize: this.get('imgSize'),
-      markerImg: this.get('markerImg')
-    }));
-    this.set('features', new FeatureCollection());
-    this.get('features').on('add', (feature, collection) => {
+    this.set(
+      "highlightLayer",
+      new HighlightLayer({
+        anchor: this.get("anchor"),
+        imgSize: this.get("imgSize"),
+        markerImg: this.get("markerImg")
+      })
+    );
+    this.set("features", new FeatureCollection());
+    this.get("features").on("add", (feature, collection) => {
       if (collection.length === 1) {
-        this.set('selectedFeature', feature);
+        this.set("selectedFeature", feature);
       }
     });
-    this.on('change:selectedFeature', (sender, feature) => {
+    this.on("change:selectedFeature", (sender, feature) => {
       setTimeout(() => {
-        if (this.get('visible')) {
+        if (this.get("visible")) {
           this.highlightFeature(feature);
         }
       }, 0);
     });
   },
 
-  configure: function (shell) {
+  configure: function(shell) {
     var map = shell.getMap().getMap();
 
     this.layerCollection = shell.getLayerCollection();
     this.map = map;
-    this.map.on('singleclick', (event) => {
+    this.map.on("singleclick", event => {
       try {
         setTimeout(a => {
-          if (!map.get('clickLock') && !event.filty) {
+          if (!map.get("clickLock") && !event.filty) {
             this.onMapPointer(event);
           }
         }, 0);
       } catch (e) {}
     });
-    this.set('map', this.map);
-    this.map.addLayer(this.get('highlightLayer').layer);
-    $('#popup-closer').click(() => {
+    this.set("map", this.map);
+    this.map.addLayer(this.get("highlightLayer").layer);
+    $("#popup-closer").click(() => {
       this.clearHighlight();
     });
   },
@@ -138,98 +134,107 @@ var InfoClickModel = {
    * @instance
    * @param {object} event - Mouse event
    */
-  onMapPointer: function (event) {
-    var wmsLayers = this.layerCollection.filter((layer) => {
-        return (layer.get('type') === 'wms' || layer.get('type') === 'arcgis') &&
-                 layer.get('queryable') &&
-                 layer.getVisible();
+  onMapPointer: function(event) {
+    var wmsLayers = this.layerCollection.filter(layer => {
+        return (
+          (layer.get("type") === "wms" || layer.get("type") === "arcgis") &&
+          layer.get("queryable") &&
+          layer.getVisible()
+        );
       }),
-      projection = this.map.getView().getProjection().getCode(),
+      projection = this.map
+        .getView()
+        .getProjection()
+        .getCode(),
       resolution = this.map.getView().getResolution(),
       infos = [],
-      promises = []
-    ;
+      promises = [];
 
     this.layerOrder = {};
-    this.get('features').reset();
+    this.get("features").reset();
 
     this.map.getLayers().forEach((layer, i) => {
-      this.layerOrder[layer.get('name')] = i;
+      this.layerOrder[layer.get("name")] = i;
     });
 
     this.map.forEachFeatureAtPixel(event.pixel, (feature, layer) => {
-      if (layer && layer.get('name') && (layer.get('queryable') !== false)) {
+      if (layer && layer.get("name") && layer.get("queryable") !== false) {
         if (
-          layer.get('name') !== 'preview-layer' &&
-          layer.get('name') !== 'highlight-wms'
+          layer.get("name") !== "preview-layer" &&
+          layer.get("name") !== "highlight-wms"
         ) {
-          promises.push(new Promise((resolve, reject) => {
-            features = [feature];
-            _.each(features, (feature) => {
-              this.addInformation(feature, layer, (featureInfo) => {
-                if (featureInfo) {
-                  infos.push(featureInfo);
-                }
-                resolve();
-              });
-            });
-          }));
-        }
-      }
-    });
-
-    wmsLayers.forEach((wmsLayer, index) => {
-      wmsLayer.index = index;
-      promises.push(new Promise((resolve, reject) => {
-        wmsLayer.getFeatureInformation({
-          coordinate: event.coordinate,
-          resolution: resolution,
-          projection: projection,
-          error: message => {
-            resolve();
-          },
-          success: (features, layer) => {
-            if (Array.isArray(features) && features.length > 0) {
-              features.forEach(feature => {
-                this.addInformation(feature, wmsLayer, (featureInfo) => {
+          promises.push(
+            new Promise((resolve, reject) => {
+              features = [feature];
+              _.each(features, feature => {
+                this.addInformation(feature, layer, featureInfo => {
                   if (featureInfo) {
                     infos.push(featureInfo);
                   }
                   resolve();
                 });
               });
-            } else {
-              resolve();
-            }
-          }
-        });
-      }));
+            })
+          );
+        }
+      }
     });
 
-    this.set('loadFinished', false);
+    wmsLayers.forEach((wmsLayer, index) => {
+      wmsLayer.index = index;
+      promises.push(
+        new Promise((resolve, reject) => {
+          wmsLayer.getFeatureInformation({
+            coordinate: event.coordinate,
+            resolution: resolution,
+            projection: projection,
+            error: message => {
+              resolve();
+            },
+            success: (features, layer) => {
+              if (Array.isArray(features) && features.length > 0) {
+                features.forEach(feature => {
+                  this.addInformation(feature, wmsLayer, featureInfo => {
+                    if (featureInfo) {
+                      infos.push(featureInfo);
+                    }
+                    resolve();
+                  });
+                });
+              } else {
+                resolve();
+              }
+            }
+          });
+        })
+      );
+    });
+
+    this.set("loadFinished", false);
 
     Promise.all(promises).then(() => {
       infos.sort((a, b) => {
         var s1 = a.information.layerindex,
-          s2 = b.information.layerindex
-        ;
+          s2 = b.information.layerindex;
         return s1 === s2 ? 0 : s1 < s2 ? 1 : -1;
       });
 
       infos.forEach(info => {
-        this.get('features').add(info);
+        this.get("features").add(info);
       });
 
-      this.set('loadFinished', true);
-      if (this.get('displayPopup')) {
+      this.set("loadFinished", true);
+      if (this.get("displayPopup")) {
         this.togglePopup(infos, event.coordinate);
       } else {
         this.togglePanel();
       }
 
       if (infos.length === 0) {
-        this.set('selectedFeature', undefined);
-        this.get('map').getOverlayById('popup-0').setPosition(undefined);
+        this.set("selectedFeature", undefined);
+        this.get("map")
+          .getOverlayById("popup-0")
+          .setPosition(undefined);
         this.clearHighlight();
       }
     });
@@ -241,22 +246,23 @@ var InfoClickModel = {
    * @param {object} object to transform
    * @return {string} markdown
    */
-  objectAsMarkdown: function (o) {
-    return Object
-      .keys(o)
-      .reduce((str, next, index, arr) =>
+  objectAsMarkdown: function(o) {
+    return Object.keys(o).reduce(
+      (str, next, index, arr) =>
         /^geom$|^geometry$|^the_geom$/.test(arr[index])
-          ? str : str + `**${arr[index]}**: ${o[arr[index]]}\r`
-        , '');
+          ? str
+          : str + `**${arr[index]}**: ${o[arr[index]]}\r`,
+      ""
+    );
   },
 
   /**
    * Check if this device supports touch.
    * @instance
    */
-  isTouchDevice: function () {
+  isTouchDevice: function() {
     try {
-      document.createEvent('TouchEvent');
+      document.createEvent("TouchEvent");
       return true;
     } catch (e) {
       return false;
@@ -268,15 +274,23 @@ var InfoClickModel = {
    * @instance
    * @param {DOMelement} elm
    */
-  enableScroll: function (elm) {
+  enableScroll: function(elm) {
     if (this.isTouchDevice()) {
       var scrollStartPos = 0;
-      elm.addEventListener('touchstart', function (event) {
-        scrollStartPos = this.scrollTop + event.touches[0].pageY;
-      }, false);
-      elm.addEventListener('touchmove', function (event) {
-        this.scrollTop = scrollStartPos - event.touches[0].pageY;
-      }, false);
+      elm.addEventListener(
+        "touchstart",
+        function(event) {
+          scrollStartPos = this.scrollTop + event.touches[0].pageY;
+        },
+        false
+      );
+      elm.addEventListener(
+        "touchmove",
+        function(event) {
+          this.scrollTop = scrollStartPos - event.touches[0].pageY;
+        },
+        false
+      );
     }
   },
 
@@ -286,43 +300,49 @@ var InfoClickModel = {
    * @param {array} infos
    * @param {array} coordinate
    */
-  togglePopup: function (infos, coordinate) {
-    const ovl = this.get('map').getOverlayById('popup-0');
+  togglePopup: function(infos, coordinate) {
+    const ovl = this.get("map").getOverlayById("popup-0");
 
-    function isPoint (coord) {
+    function isPoint(coord) {
       if (coord.length === 1) {
         coord = coord[0];
       }
-      return (
-        (coord.length === 2 || coord.length === 3) &&
-        typeof coord[0] === 'number' &&
-        typeof coord[1] === 'number'
-      )
+      return (coord.length === 2 || coord.length === 3) &&
+        typeof coord[0] === "number" &&
+        typeof coord[1] === "number"
         ? [coord[0], coord[1]]
         : false;
     }
 
     infos.forEach((info, i) => {
-      function display (index, inf) {
-        var coords = inf.feature.getGeometry() ? inf.feature.getGeometry().getCoordinates() : false,
+      function display(index, inf) {
+        var coords = inf.feature.getGeometry()
+            ? inf.feature.getGeometry().getCoordinates()
+            : false,
           position = coordinate,
           feature = new Backbone.Model(),
-          infobox = $('<div></div>'),
-          caption = $(`<div class="popup-navigation"> ${index + 1} av ${infos.length} </div>`),
+          infobox = $("<div></div>"),
+          caption = $(
+            `<div class="popup-navigation"> ${index + 1} av ${
+              infos.length
+            } </div>`
+          ),
           next = $('<span class="fa fa-btn fa-arrow-circle-o-right"></span>'),
           prev = $('<span class="fa fa-btn fa-arrow-circle-o-left"></span>'),
-          title = $(`<div class="popup-title">${inf.information.caption}</div>`),
+          title = $(
+            `<div class="popup-title">${inf.information.caption}</div>`
+          ),
           content = $(`<div id="popup-content-text"></div>`),
-          markdown = '',
+          markdown = "",
           offsetY = 0,
-          html = '';
+          html = "";
 
-        inf.layer.once('change:visible', () => {
+        inf.layer.once("change:visible", () => {
           ovl.setPosition(undefined);
           this.clearHighlight();
         });
 
-        if (typeof inf.information.information === 'object') {
+        if (typeof inf.information.information === "object") {
           markdown = this.objectAsMarkdown(inf.information.information);
         } else {
           markdown = inf.information.information;
@@ -330,7 +350,7 @@ var InfoClickModel = {
         html = marked(markdown, { sanitize: false, gfm: true, breaks: true });
         content.html(html);
 
-        if (coords = isPoint(coords)) {
+        if ((coords = isPoint(coords))) {
           position = coords;
         }
 
@@ -341,21 +361,25 @@ var InfoClickModel = {
         }
 
         infobox.append(title, content);
-        $('#popup-content').show().html(infobox);
+        $("#popup-content")
+          .show()
+          .html(infobox);
 
         if (this.isTouchDevice()) {
-          this.enableScroll($('#popup-content-text')[0]);
-          $('#popup-content-text').scrollTop(0);
+          this.enableScroll($("#popup-content-text")[0]);
+          $("#popup-content-text").scrollTop(0);
         }
 
         if (isPoint(coords)) {
-          offsetY = this.get('popupOffsetY');
+          offsetY = this.get("popupOffsetY");
         }
 
         ovl.setPosition(position);
         ovl.setOffset([0, offsetY]);
 
-        $(ovl.getElement()).hide().fadeIn(0);
+        $(ovl.getElement())
+          .hide()
+          .fadeIn(0);
 
         Object.keys(inf).forEach(key => {
           feature.set(key, inf[key]);
@@ -386,42 +410,50 @@ var InfoClickModel = {
    * @param {external:"ol.layer"} layer
    * @param {function} callback to invoke when information is added
    */
-  addInformation: function (feature, layer, callback) {
-    if (layer.get('name') === 'draw-layer') {
+  addInformation: function(feature, layer, callback) {
+    if (layer.get("name") === "draw-layer") {
       callback(false);
       return;
     }
 
-    var layerModel = this.layerCollection.findWhere({ name: layer.get('name') }),
+    var layerModel = this.layerCollection.findWhere({
+        name: layer.get("name")
+      }),
       layerindex = -1,
       properties,
       information,
-      iconUrl = feature.get('iconUrl') || ''
-    ;
+      iconUrl = feature.get("iconUrl") || "";
 
     properties = feature.getProperties();
-    information = layerModel && layerModel.get('information') || '';
+    information = (layerModel && layerModel.get("information")) || "";
 
     if (feature.infobox) {
       information = feature.infobox;
-      information = information.replace(/export:/g, '');
+      information = information.replace(/export:/g, "");
     }
 
-    if (information && typeof information === 'string') {
+    if (information && typeof information === "string") {
       (information.match(/\{.*?\}\s?/g) || []).forEach(property => {
-        function lookup (o, s) {
-          s = s.replace('{', '')
-            .replace('}', '')
+        function lookup(o, s) {
+          s = s
+            .replace("{", "")
+            .replace("}", "")
             .trim()
-            .split('.');
+            .split(".");
 
           switch (s.length) {
-            case 1: return o[s[0]] || '';
-            case 2: return o[s[0]][s[1]] || '';
-            case 3: return o[s[0]][s[1]][s[2]] || '';
+            case 1:
+              return o[s[0]] || "";
+            case 2:
+              return o[s[0]][s[1]] || "";
+            case 3:
+              return o[s[0]][s[1]][s[2]] || "";
           }
         }
-        information = information.replace(property, lookup(properties, property));
+        information = information.replace(
+          property,
+          lookup(properties, property)
+        );
       });
     }
 
@@ -437,7 +469,7 @@ var InfoClickModel = {
       feature: feature,
       layer: layer,
       information: {
-        caption: layerModel && layerModel.getCaption() || 'Sökträff',
+        caption: (layerModel && layerModel.getCaption()) || "Sökträff",
         layerindex: layerindex,
         information: information || properties,
         iconUrl: iconUrl
@@ -449,13 +481,15 @@ var InfoClickModel = {
    * Toggle the panel
    * @instance
    */
-  togglePanel: function () {
-    if (this.get('features').length > 0) {
-      this.set('r', Math.round(Math.random() * 1E12));
-      this.set('toggled', true);
-      this.set('visible', true);
-    } else if (this.get('navigation').get('activePanelType') === this.get('panel')) {
-      this.set('visible', false);
+  togglePanel: function() {
+    if (this.get("features").length > 0) {
+      this.set("r", Math.round(Math.random() * 1e12));
+      this.set("toggled", true);
+      this.set("visible", true);
+    } else if (
+      this.get("navigation").get("activePanelType") === this.get("panel")
+    ) {
+      this.set("visible", false);
     }
   },
 
@@ -464,12 +498,12 @@ var InfoClickModel = {
    * @instance
    * @param {external:"ol.feature"} feature
    */
-  createHighlightFeature: function (feature) {
-    var layer = this.get('highlightLayer');
+  createHighlightFeature: function(feature) {
+    var layer = this.get("highlightLayer");
     layer.clearHighlight();
     this.reorderLayers(feature);
-    layer.addHighlight(feature.get('feature').clone());
-    layer.setSelectedLayer(feature.get('layer'));
+    layer.addHighlight(feature.get("feature").clone());
+    layer.setSelectedLayer(feature.get("layer"));
   },
 
   /**
@@ -477,20 +511,26 @@ var InfoClickModel = {
    * @instance
    * @param {external:"ol.feature"}
    */
-  reorderLayers: function (feature) {
-    var layerCollection = this.get('map').getLayers(),
-      featureInfo = feature.get('information'),
-      selectedLayer = feature.get('layer'),
+  reorderLayers: function(feature) {
+    var layerCollection = this.get("map").getLayers(),
+      featureInfo = feature.get("information"),
+      selectedLayer = feature.get("layer"),
       insertIndex;
 
-    if (selectedLayer && this.layerOrder.hasOwnProperty(selectedLayer.get('name'))) {
-      insertIndex = this.layerOrder[selectedLayer.get('name')];
+    if (
+      selectedLayer &&
+      this.layerOrder.hasOwnProperty(selectedLayer.get("name"))
+    ) {
+      insertIndex = this.layerOrder[selectedLayer.get("name")];
       insertIndex += 1;
     }
 
     if (insertIndex) {
-      layerCollection.remove(this.get('highlightLayer').getLayer());
-      layerCollection.insertAt(insertIndex, this.get('highlightLayer').getLayer());
+      layerCollection.remove(this.get("highlightLayer").getLayer());
+      layerCollection.insertAt(
+        insertIndex,
+        this.get("highlightLayer").getLayer()
+      );
       insertIndex = undefined;
     }
   },
@@ -500,11 +540,11 @@ var InfoClickModel = {
    * @instance
    * @param {external:"ol.feature"} feature
    */
-  highlightFeature: function (feature) {
+  highlightFeature: function(feature) {
     if (feature) {
       this.createHighlightFeature(feature);
     } else {
-      this.get('highlightLayer').clearHighlight();
+      this.get("highlightLayer").clearHighlight();
     }
   },
 
@@ -513,10 +553,9 @@ var InfoClickModel = {
    * @instance
    * @param {external:"ol.feature"} feature
    */
-  clearHighlight: function () {
-    this.get('highlightLayer').clearHighlight();
+  clearHighlight: function() {
+    this.get("highlightLayer").clearHighlight();
   }
-
 };
 
 /**

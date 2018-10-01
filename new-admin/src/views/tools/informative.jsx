@@ -20,16 +20,16 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import React from 'react';
-import { Component } from 'react';
+import React from "react";
+import { Component } from "react";
 
 var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
-  target: 'toolbar',  
-  visibleAtStart: false,  
-  templateJsonFilePath: 'http://localhost:55630/informative/load/op',
+  target: "toolbar",
+  visibleAtStart: false,
+  templateJsonFilePath: "http://localhost:55630/informative/load/op",
   visibleForGroups: []
 };
 
@@ -40,7 +40,7 @@ class ToolOptions extends Component {
   constructor() {
     super();
     this.state = defaultState;
-    this.type = 'informative';
+    this.type = "informative";
   }
 
   componentDidMount() {
@@ -50,8 +50,10 @@ class ToolOptions extends Component {
         active: true,
         index: tool.index,
         target: tool.options.target,
-        visibleAtStart: tool.options.visibleAtStart || false,        
-        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
+        visibleAtStart: tool.options.visibleAtStart || false,
+        visibleForGroups: tool.options.visibleForGroups
+          ? tool.options.visibleForGroups
+          : []
       });
     } else {
       this.setState({
@@ -60,19 +62,17 @@ class ToolOptions extends Component {
     }
   }
 
-  componentWillUnmount() {
-  }
+  componentWillUnmount() {}
   /**
    *
    */
-  componentWillMount() {
-  }
+  componentWillMount() {}
 
   handleInputChange(event) {
     const target = event.target;
     const name = target.name;
-    var value = target.type === 'checkbox' ? target.checked : target.value;
-    if (typeof value === 'string' && value.trim() !== '') {
+    var value = target.type === "checkbox" ? target.checked : target.value;
+    if (typeof value === "string" && value.trim() !== "") {
       value = !isNaN(Number(value)) ? Number(value) : value;
     }
     this.setState({
@@ -81,21 +81,25 @@ class ToolOptions extends Component {
   }
 
   getTool() {
-    return this.props.model.get('toolConfig').find(tool => tool.type === this.type);
+    return this.props.model
+      .get("toolConfig")
+      .find(tool => tool.type === this.type);
   }
 
   add(tool) {
-    this.props.model.get('toolConfig').push(tool);
+    this.props.model.get("toolConfig").push(tool);
   }
 
   remove(tool) {
     this.props.model.set({
-      'toolConfig': this.props.model.get('toolConfig').filter(tool => tool.type !== this.type)
+      toolConfig: this.props.model
+        .get("toolConfig")
+        .filter(tool => tool.type !== this.type)
     });
   }
 
   replace(tool) {
-    this.props.model.get('toolConfig').forEach(t => {
+    this.props.model.get("toolConfig").forEach(t => {
       if (t.type === this.type) {
         t.options = tool.options;
         t.index = tool.index;
@@ -105,24 +109,30 @@ class ToolOptions extends Component {
 
   save() {
     var tool = {
-      'type': this.type,
-      'index': this.state.index,
-      'options': {        
+      type: this.type,
+      index: this.state.index,
+      options: {
         target: this.state.target,
         visibleAtStart: this.state.visibleAtStart,
-        visibleForGroups: this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
+        visibleForGroups: this.state.visibleForGroups.map(
+          Function.prototype.call,
+          String.prototype.trim
+        )
       }
     };
 
     var existing = this.getTool();
 
     function update() {
-      this.props.model.updateToolConfig(this.props.model.get('toolConfig'), () => {
-        this.props.parent.props.parent.setState({
-          alert: true,
-          alertMessage: 'Uppdateringen lyckades'
-        });
-      });
+      this.props.model.updateToolConfig(
+        this.props.model.get("toolConfig"),
+        () => {
+          this.props.parent.props.parent.setState({
+            alert: true,
+            alertMessage: "Uppdateringen lyckades"
+          });
+        }
+      );
     }
 
     if (!this.state.active) {
@@ -130,7 +140,8 @@ class ToolOptions extends Component {
         this.props.parent.props.parent.setState({
           alert: true,
           confirm: true,
-          alertMessage: 'Verktyget kommer att tas bort. Nuvarande inställningar kommer att gå förlorade. Vill du fortsätta?',
+          alertMessage:
+            "Verktyget kommer att tas bort. Nuvarande inställningar kommer att gå förlorade. Vill du fortsätta?",
           confirmAction: () => {
             this.remove();
             update.call(this);
@@ -157,13 +168,13 @@ class ToolOptions extends Component {
     let groups = [];
 
     try {
-      groups = value.split(',');
+      groups = value.split(",");
     } catch (error) {
       console.log(`Någonting gick fel: ${error}`);
     }
 
     this.setState({
-      visibleForGroups: value !== '' ? groups : []
+      visibleForGroups: value !== "" ? groups : []
     });
   }
 
@@ -171,8 +182,16 @@ class ToolOptions extends Component {
     if (this.props.parent.props.parent.state.authActive) {
       return (
         <div>
-          <label htmlFor='visibleForGroups'>Tillträde</label>
-          <input id='visibleForGroups' value={this.state.visibleForGroups} type='text' name='visibleForGroups' onChange={(e) => { this.handleAuthGrpsChange(e); }} />
+          <label htmlFor="visibleForGroups">Tillträde</label>
+          <input
+            id="visibleForGroups"
+            value={this.state.visibleForGroups}
+            type="text"
+            name="visibleForGroups"
+            onChange={e => {
+              this.handleAuthGrpsChange(e);
+            }}
+          />
         </div>
       );
     } else {
@@ -188,39 +207,55 @@ class ToolOptions extends Component {
       <div>
         <form>
           <p>
-            <button className='btn btn-primary' onClick={(e) => { e.preventDefault(); this.save(); }}>Spara</button>
+            <button
+              className="btn btn-primary"
+              onClick={e => {
+                e.preventDefault();
+                this.save();
+              }}
+            >
+              Spara
+            </button>
           </p>
           <div>
             <input
-              id='active'
-              name='active'
-              type='checkbox'
-              onChange={(e) => { this.handleInputChange(e); }}
-              checked={this.state.active} />&nbsp;
-            <label htmlFor='active'>Aktiverad</label>
+              id="active"
+              name="active"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.active}
+            />
+            &nbsp;
+            <label htmlFor="active">Aktiverad</label>
           </div>
           <div>
-            <label htmlFor='index'>Sorteringsordning</label>
+            <label htmlFor="index">Sorteringsordning</label>
             <input
-              id='index'
-              name='index'
-              type='text'
-              onChange={(e) => { this.handleInputChange(e); }}
-              value={this.state.index} />
+              id="index"
+              name="index"
+              type="text"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.index}
+            />
           </div>
           <div>
-            <label htmlFor='target'>Verktygsplacering</label>
+            <label htmlFor="target">Verktygsplacering</label>
             <input
-              id='target'
-              name='target'
-              type='text'
-              onChange={(e) => { this.handleInputChange(e); }}
-              value={this.state.target} />
-          </div>          
+              id="target"
+              name="target"
+              type="text"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.target}
+            />
+          </div>
           {this.renderVisibleForGroups()}
-          <div>
-            Inställningar för översiktsplan..
-          </div>
+          <div>Inställningar för översiktsplan..</div>
         </form>
       </div>
     );

@@ -20,7 +20,7 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var Panel = require('views/panel');
+var Panel = require("views/panel");
 /**
  * @class
  */
@@ -30,9 +30,9 @@ var StreetView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function () {
+  getInitialState: function() {
     return {
-      imageDate: ''
+      imageDate: ""
     };
   },
 
@@ -40,37 +40,40 @@ var StreetView = {
    * Triggered when component updates.
    * @instance
    */
-  componentDidUpdate: function () {
-  },
+  componentDidUpdate: function() {},
 
   /**
    * Triggered when the component is successfully mounted into the DOM.
    * @instance
    */
-  componentDidMount: function () {
-    $('.ol-viewport').css('cursor', 'crosshair');
+  componentDidMount: function() {
+    $(".ol-viewport").css("cursor", "crosshair");
     this.props.model.activate();
-    this.props.model.on('change:imageDate', () => {
+    this.props.model.on("change:imageDate", () => {
       this.setState({
-        imageDate: this.props.model.get('imageDate')
+        imageDate: this.props.model.get("imageDate")
       });
     });
-    this.props.model.on('change:location', () => {
+    this.props.model.on("change:location", () => {
       this.props.navigationPanel.maximize();
     });
   },
 
-  componentWillUnmount: function () {
-    $('.ol-viewport').css('cursor', 'default');
+  componentWillUnmount: function() {
+    $(".ol-viewport").css("cursor", "default");
     this.props.model.deactivate();
-    this.props.model.off('change:imageDate');
+    this.props.model.off("change:imageDate");
   },
 
-  renderInfoText: function () {
-    if (!this.props.model.get('location')) {
-      return <div>Klicka i kartan för att aktivera street view. <br />
-        Förstora fönstret genom att trycka på symbolen i övre högra hörnet. <br />
-      </div>;
+  renderInfoText: function() {
+    if (!this.props.model.get("location")) {
+      return (
+        <div>
+          Klicka i kartan för att aktivera street view. <br />
+          Förstora fönstret genom att trycka på symbolen i övre högra hörnet.{" "}
+          <br />
+        </div>
+      );
     }
   },
 
@@ -79,14 +82,21 @@ var StreetView = {
    * @instance
    * @return {external:ReactElement}
    */
-  render: function () {
+  render: function() {
     return (
-      <Panel title='Street View' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} instruction={atob(this.props.model.get('instruction'))}>
-        <div className='panel-content'>
+      <Panel
+        title="Street View"
+        onCloseClicked={this.props.onCloseClicked}
+        onUnmountClicked={this.props.onUnmountClicked}
+        instruction={atob(this.props.model.get("instruction"))}
+      >
+        <div className="panel-content">
           <h3>Street view</h3>
           {this.renderInfoText()}
-          <div id='street-view-window' />
-          <div id='image-date'>{this.state.imageDate ? this.state.imageDate : ''}</div>
+          <div id="street-view-window" />
+          <div id="image-date">
+            {this.state.imageDate ? this.state.imageDate : ""}
+          </div>
         </div>
       </Panel>
     );

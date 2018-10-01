@@ -20,11 +20,13 @@
 //
 // https://github.com/hajkmap/Hajk
 
-function toParamString (obj) {
-  return Object.keys(obj).map(k => `${k}=${obj[k]}`).join('&');
+function toParamString(obj) {
+  return Object.keys(obj)
+    .map(k => `${k}=${obj[k]}`)
+    .join("&");
 }
 
-var LayerModel = require('layers/layer');
+var LayerModel = require("layers/layer");
 
 /**
  * @typedef {Object} ArcGISLayer~ArcGISLayerProperties
@@ -33,10 +35,15 @@ var LayerModel = require('layers/layer');
  * @property {number} opacity - Default: 1
  */
 var ArcGISLayerProperties = {
-  url: 'http://ksdgis.se/arcgis/rest/services/hpl/MapServer',
-  projection: 'EPSG:3006',
+  url: "http://ksdgis.se/arcgis/rest/services/hpl/MapServer",
+  projection: "EPSG:3006",
   opacity: 0.8,
-  extent: [413888.8487813738, 6581993.154569996, 416840.2595669881, 6584784.713516495],
+  extent: [
+    413888.8487813738,
+    6581993.154569996,
+    416840.2595669881,
+    6584784.713516495
+  ],
   singleTile: false
 };
 
@@ -47,7 +54,6 @@ var ArcGISLayerProperties = {
  * @param {string} type
  */
 var ArcGISLayer = {
-
   /**
    * @property {ArcGISLayer~ArcGISLayerProperties} defaults - Default properties
    * @instance
@@ -60,60 +66,60 @@ var ArcGISLayer = {
    */
   validInfo: true,
 
-  initialize: function () {
+  initialize: function() {
     LayerModel.prototype.initialize.call(this);
-    var extent = this.get('extent');
+    var extent = this.get("extent");
     if (Array.isArray(extent)) {
       extent = extent.map((c, i) => {
-        const b = 1E5;
+        const b = 1e5;
         const v = parseFloat(c);
         return isNaN(v) ? 0 : i < 2 ? v - b : v + b;
       });
     }
-    if (this.get('singleTile')) {
+    if (this.get("singleTile")) {
       this.layer = new ol.layer.Image({
         extent: extent,
-        opacity: this.get('opacity'),
-        visible: this.get('visible'),
-        name: this.get('name'),
-        projection: this.get('projection'),
+        opacity: this.get("opacity"),
+        visible: this.get("visible"),
+        name: this.get("name"),
+        projection: this.get("projection"),
         source: new ol.source.ImageArcGISRest({
           attributions: this.getAttributions(),
-          url: this.get('url'),
-          params: this.get('params')
+          url: this.get("url"),
+          params: this.get("params")
         })
       });
     } else {
       this.layer = new ol.layer.Tile({
         extent: extent,
-        opacity: this.get('opacity'),
-        visible: this.get('visible'),
-        name: this.get('name'),
-        projection: this.get('projection'),
+        opacity: this.get("opacity"),
+        visible: this.get("visible"),
+        name: this.get("name"),
+        projection: this.get("projection"),
         source: new ol.source.TileArcGISRest({
           attributions: this.getAttributions(),
-          url: this.get('url'),
-          params: this.get('params')
+          url: this.get("url"),
+          params: this.get("params")
         })
       });
     }
 
-    this.layer.getSource().on('tileloaderror', e => {
+    this.layer.getSource().on("tileloaderror", e => {
       this.tileLoadError();
     });
 
-    this.layer.getSource().on('tileloadend', e => {
+    this.layer.getSource().on("tileloadend", e => {
       this.tileLoadOk();
     });
 
-    this.layer.on('change:visible', (e) => {
-      if (!this.get('visible')) {
+    this.layer.on("change:visible", e => {
+      if (!this.get("visible")) {
         this.tileLoadOk();
       }
     });
 
-    this.layer.getSource().set('url', this.get('url'));
-    this.set('type', 'arcgis');
+    this.layer.getSource().set("url", this.get("url"));
+    this.set("type", "arcgis");
   },
 
   /**
@@ -122,7 +128,7 @@ var ArcGISLayer = {
    * @param {object} data - response data from request
    * @param {function} callback
    */
-  parseFeatueInfoResponse: function (data, callback) {
+  parseFeatueInfoResponse: function(data, callback) {
     if (data && data.results && Array.isArray(data.results)) {
       if (data.results.length === 0) {
         callback();
@@ -143,23 +149,28 @@ var ArcGISLayer = {
    * @param {external:"ol.coordinate"} coordinate
    * @return {object} query params
    */
-  getQueryParams: function (coordinate) {
-    var layers = this.get('params')['LAYERS'].replace('show', 'visible'),
-      size = this.get('map').getMap().getSize(),
-      extent = this.get('map').getMap().getView().calculateExtent(size).join(','),
-      geom = coordinate[0] + ',' + coordinate[1],
-      imgd = size.concat([96]).join(',')
-    ;
+  getQueryParams: function(coordinate) {
+    var layers = this.get("params")["LAYERS"].replace("show", "visible"),
+      size = this.get("map")
+        .getMap()
+        .getSize(),
+      extent = this.get("map")
+        .getMap()
+        .getView()
+        .calculateExtent(size)
+        .join(","),
+      geom = coordinate[0] + "," + coordinate[1],
+      imgd = size.concat([96]).join(",");
 
     return {
-      geometryType: 'esriGeometryPoint',
+      geometryType: "esriGeometryPoint",
       geometry: geom,
       tolerance: 10,
       layers: layers,
       mapExtent: extent,
       imageDisplay: imgd,
       returnGeometry: true,
-      f: 'json'
+      f: "json"
     };
   },
 
@@ -169,18 +180,18 @@ var ArcGISLayer = {
    * @param {external:"ol.feature"} feature
    * @return {external:"ol.style"} style
    */
-  getFeatureInformation: function (params) {
-    var url = this.get('url');
-    url += '/identify?';
+  getFeatureInformation: function(params) {
+    var url = this.get("url");
+    url += "/identify?";
     url += toParamString(this.getQueryParams(params.coordinate));
 
     $.ajax({
       url: url,
-      dataType: 'json',
-      success: (data) => {
+      dataType: "json",
+      success: data => {
         this.parseFeatueInfoResponse(data, params.success);
       },
-      error: (rsp) => {
+      error: rsp => {
         params.error();
       }
     });
@@ -190,18 +201,17 @@ var ArcGISLayer = {
    * Triggers when a tile fails to load.
    * @instance
    */
-  tileLoadError: function () {
-    this.set('status', 'loaderror');
+  tileLoadError: function() {
+    this.set("status", "loaderror");
   },
 
   /**
    * Triggers when a tile loads.
    * @instance
    */
-  tileLoadOk: function () {
-    this.set('status', 'ok');
+  tileLoadOk: function() {
+    this.set("status", "ok");
   }
-
 };
 
 /**

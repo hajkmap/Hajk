@@ -25,7 +25,8 @@
   border-radius: 10px;
 }
 
-.static-popup:after, .static-popup:before {
+.static-popup:after,
+.static-popup:before {
   top: 100%;
   left: 50%;
   border: solid transparent;

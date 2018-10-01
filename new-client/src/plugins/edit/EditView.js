@@ -7,7 +7,7 @@ const styles = theme => ({});
 class EditView extends Component {
   constructor() {
     super();
-    this.state = {};
+    console.log("EditView constructor()", this);
   }
 
   getText() {
@@ -15,6 +15,8 @@ class EditView extends Component {
   }
 
   render() {
+    console.log("Will render EditView");
+
     return <div className="tool-panel-content">Verktyg</div>;
   }
 }

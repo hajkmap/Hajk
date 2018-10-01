@@ -20,128 +20,171 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import React from 'react';
-import { Component } from 'react';
+import React from "react";
+import { Component } from "react";
 
 class LayerAlert extends Component {
-  constructor (props) {
+  constructor(props) {
     super(props);
     this.state = {
       queryable: props.options.queryable || false,
-      style: props.options.style || (props.options.styles.length > 0 ? props.options.styles[0].Name : '')
+      style:
+        props.options.style ||
+        (props.options.styles.length > 0 ? props.options.styles[0].Name : "")
     };
   }
 
-  render () {
+  render() {
     let options = this.props.options;
     let imageLoader = this.props.imageLoader;
-    let styles = options.styles.map((style, index) => { return <option key={'style' + index}>{style.Name}</option>; });
-    return <div className='modal'>
-      <div className='modal-dialog'>
-        <div className='modal-content'>
-          <div className='modal-header'>
-            <h4 className='modal-title'>Infoklickinställningar - {options.name}</h4>
-          </div>
-          <div className='modal-body'>
-            <div className='row'>
-              <div className='col-md-6'>
-                <div className='form-group'>
-                  <label htmlFor='infoclickable'>Infoklick</label>
-                  <input
-                    id='infoclickable'
-                    type='checkbox'
-                    ref='input_queryable'
-                    checked={this.state.queryable}
-                    onChange={(e) => this._onQueryableChange(e)}
-                  />
+    let styles = options.styles.map((style, index) => {
+      return <option key={"style" + index}>{style.Name}</option>;
+    });
+    return (
+      <div className="modal">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h4 className="modal-title">
+                Infoklickinställningar - {options.name}
+              </h4>
+            </div>
+            <div className="modal-body">
+              <div className="row">
+                <div className="col-md-6">
+                  <div className="form-group">
+                    <label htmlFor="infoclickable">Infoklick</label>
+                    <input
+                      id="infoclickable"
+                      type="checkbox"
+                      ref="input_queryable"
+                      checked={this.state.queryable}
+                      onChange={e => this._onQueryableChange(e)}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-md-6">
+                  <div className="form-group">
+                    <label>Stil</label>
+                    <select
+                      className="form-control"
+                      defaultValue={this.state.style}
+                      onChange={e => this._onStyleChange(e)}
+                    >
+                      {styles}
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className='row'>
-              <div className='col-md-6'>
-                <div className='form-group'>
-                  <label>Stil</label>
-                  <select
-                    className='form-control'
-                    defaultValue={this.state.style}
-                    onChange={(e) => this._onStyleChange(e)}>
-                    {styles}
-                  </select>
-                </div>
-              </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                onClick={e => this._onCancelClick(e)}
+                className="btn btn-default"
+              >
+                Avbryt
+              </button>
+              &nbsp;
+              <button
+                type="button"
+                onClick={e => this._onSaveClick(e)}
+                className="btn btn-primary"
+              >
+                Spara
+              </button>
             </div>
-          </div>
-          <div className='modal-footer'>
-            <button type='button' onClick={(e) => this._onCancelClick(e)} className='btn btn-default'>Avbryt</button>&nbsp;
-            <button type='button' onClick={(e) => this._onSaveClick(e)} className='btn btn-primary'>Spara</button>
           </div>
         </div>
       </div>
-    </div>;
+    );
   }
 
-  _onStyleChange (e) {
+  _onStyleChange(e) {
     this.setState({
       style: e.target.value
     });
   }
 
-  _onQueryableChange (e) {
+  _onQueryableChange(e) {
     this.setState({
       queryable: e.target.checked
     });
   }
 
-  _onSaveClick (e) {
+  _onSaveClick(e) {
     // har vinåg
     this.props.options.confirmAction(this.state);
   }
 
-  _onCancelClick (e) {
+  _onCancelClick(e) {
     this.props.options.denyAction();
   }
 }
 
 class Alert extends Component {
-  constructor () {
+  constructor() {
     super();
   }
 
-  render () {
+  render() {
     var options = this.props.options;
     var imageLoader = this.props.imageLoader;
     if (options.confirm) {
-      return !options.visible ? false : (
-        <div className='modal'>
-          <div className='modal-dialog'>
-            <div className='modal-content'>
-              <div className='modal-header'>
-                <h4 className='modal-title'>Bekräfta</h4>
+      return !options.visible ? (
+        false
+      ) : (
+        <div className="modal">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h4 className="modal-title">Bekräfta</h4>
               </div>
-              <div className='modal-body'>
+              <div className="modal-body">
                 <p>{options.message}</p>
               </div>
-              <div className='modal-footer'>
-                <button type='button' onClick={options.denyAction} className='btn btn-default'>Avbryt</button>&nbsp;
-                <button type='button' onClick={options.confirmAction} className='btn btn-primary'>OK</button>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  onClick={options.denyAction}
+                  className="btn btn-default"
+                >
+                  Avbryt
+                </button>
+                &nbsp;
+                <button
+                  type="button"
+                  onClick={options.confirmAction}
+                  className="btn btn-primary"
+                >
+                  OK
+                </button>
               </div>
             </div>
           </div>
         </div>
       );
     } else if (options.settings) {
-      return !options.visible ? false : (<LayerAlert options={options} imageLoader={imageLoader} />);
+      return !options.visible ? (
+        false
+      ) : (
+        <LayerAlert options={options} imageLoader={imageLoader} />
+      );
     } else {
-      return !options.visible ? false : (
-        <div className='modal'>
-          <div className='modal-dialog'>
-            <div className='modal-content'>
-              <div className='modal-header'>
-                <h4 className='modal-title'>Meddelande</h4>
+      return !options.visible ? (
+        false
+      ) : (
+        <div className="modal">
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h4 className="modal-title">Meddelande</h4>
               </div>
-              <div className='modal-body'>
+              <div className="modal-body">
                 <p>
-                  {options.message.split('\n').map(function (text, i) {
+                  {options.message.split("\n").map(function(text, i) {
                     return (
                       <span key={i}>
                         <span>{text}</span>
@@ -151,8 +194,14 @@ class Alert extends Component {
                   })}
                 </p>
               </div>
-              <div className='modal-footer'>
-                <button type='button' onClick={options.onClick} className='btn btn-default'>OK</button>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  onClick={options.onClick}
+                  className="btn btn-default"
+                >
+                  OK
+                </button>
               </div>
             </div>
           </div>

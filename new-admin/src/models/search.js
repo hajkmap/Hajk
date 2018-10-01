@@ -20,17 +20,16 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import X2JS from 'x2js';
-import { Model } from 'backbone';
-import $ from 'jquery';
+import X2JS from "x2js";
+import { Model } from "backbone";
+import $ from "jquery";
 
 var search = Model.extend({
-
   defaults: {
     layers: []
   },
 
-  getConfig: function (url) {
+  getConfig: function(url) {
     $.ajax(url, {
       success: data => {
         data.wfslayers.sort((a, b) => {
@@ -38,16 +37,16 @@ var search = Model.extend({
             d2 = parseInt(b.date, 10);
           return d1 === d2 ? 0 : d1 < d2 ? 1 : -1;
         });
-        this.set('layers', data.wfslayers);
+        this.set("layers", data.wfslayers);
       }
     });
   },
 
-  addLayer: function (layer, callback) {
+  addLayer: function(layer, callback) {
     $.ajax({
-      url: this.get('config').url_layer_settings,
-      method: 'POST',
-      contentType: 'application/json',
+      url: this.get("config").url_layer_settings,
+      method: "POST",
+      contentType: "application/json",
       data: JSON.stringify(layer),
       success: () => {
         callback(true);
@@ -58,11 +57,11 @@ var search = Model.extend({
     });
   },
 
-  updateLayer: function (layer, callback) {
+  updateLayer: function(layer, callback) {
     $.ajax({
-      url: this.get('config').url_layer_settings,
-      method: 'PUT',
-      contentType: 'application/json',
+      url: this.get("config").url_layer_settings,
+      method: "PUT",
+      contentType: "application/json",
       data: JSON.stringify(layer),
       success: () => {
         callback(true);
@@ -73,11 +72,11 @@ var search = Model.extend({
     });
   },
 
-  removeLayer: function (layer, callback) {
+  removeLayer: function(layer, callback) {
     $.ajax({
-      url: this.get('config').url_layer_settings + '/' + layer.id,
-      method: 'DELETE',
-      contentType: 'application/json',
+      url: this.get("config").url_layer_settings + "/" + layer.id,
+      method: "DELETE",
+      contentType: "application/json",
       success: () => {
         callback(true);
       },
@@ -87,22 +86,22 @@ var search = Model.extend({
     });
   },
 
-  prepareProxyUrl: function (url) {
-    return this.get('config').url_proxy
-      ? this.get('config').url_proxy + '/' + url.replace(/http[s]?:\/\//, '')
+  prepareProxyUrl: function(url) {
+    return this.get("config").url_proxy
+      ? this.get("config").url_proxy + "/" + url.replace(/http[s]?:\/\//, "")
       : url;
   },
 
-  getArcGISLayerDescription: function (url, layer, callback) {
+  getArcGISLayerDescription: function(url, layer, callback) {
     url = this.prepareProxyUrl(url);
-    url += '/' + layer.id;
+    url += "/" + layer.id;
 
     console.log("Layer", layer);
 
     $.ajax(url, {
-      dataType: 'json',
+      dataType: "json",
       data: {
-        f: 'json'
+        f: "json"
       },
       success: data => {
         callback(data);
@@ -110,28 +109,38 @@ var search = Model.extend({
     });
   },
 
-  getLayerDescription: function (url, layer, arcgis, callback) {
+  getLayerDescription: function(url, layer, arcgis, callback) {
     url = this.prepareProxyUrl(url);
     if (arcgis) {
       this.getArcGISLayerDescription(url, layer, callback);
     } else {
       $.ajax(url, {
         data: {
-          request: 'describeFeatureType',
+          request: "describeFeatureType",
           typename: layer.name
         },
         success: data => {
           var parser = new X2JS(),
-            xmlstr = data.xml ? data.xml : (new XMLSerializer()).serializeToString(data),
+            xmlstr = data.xml
+              ? data.xml
+              : new XMLSerializer().serializeToString(data),
             apa = parser.xml2js(xmlstr);
           try {
-            var props = apa.schema.complexType.complexContent.extension.sequence.element.map(a => {
-              return {
-                name: a._name,
-                localType: a._type ? a._type.replace(a.__prefix + ':', '') : ''
-              };
-            });
-            if (props) { callback(props); } else { callback(false); }
+            var props = apa.schema.complexType.complexContent.extension.sequence.element.map(
+              a => {
+                return {
+                  name: a._name,
+                  localType: a._type
+                    ? a._type.replace(a.__prefix + ":", "")
+                    : ""
+                };
+              }
+            );
+            if (props) {
+              callback(props);
+            } else {
+              callback(false);
+            }
           } catch (e) {
             callback(false);
           }
@@ -140,68 +149,90 @@ var search = Model.extend({
     }
   },
 
-  parseWFSCapabilitesTypes: function (data) {      
-
+  parseWFSCapabilitesTypes: function(data) {
     var types = [],
-        typeElements = $(data).find('FeatureType');
+      typeElements = $(data).find("FeatureType");
 
     if (typeElements.length === 0) {
-      typeElements = $(data).find('wfs\\:FeatureType');      
+      typeElements = $(data).find("wfs\\:FeatureType");
     }
 
     typeElements.each((i, featureType) => {
-      
-      var projection = '',
-          name = "",
-          title = "",
-          crs = '';
-      
-      if ($(featureType).find('DefaultCRS').length > 0) {
-        crs = $(featureType).find('DefaultCRS').first().get(0).textContent;
+      var projection = "",
+        name = "",
+        title = "",
+        crs = "";
+
+      if ($(featureType).find("DefaultCRS").length > 0) {
+        crs = $(featureType)
+          .find("DefaultCRS")
+          .first()
+          .get(0).textContent;
       }
-      if ($(featureType).find('DefaultSRS').length > 0) {
-        crs = $(featureType).find('DefaultSRS').first().get(0).textContent;
+      if ($(featureType).find("DefaultSRS").length > 0) {
+        crs = $(featureType)
+          .find("DefaultSRS")
+          .first()
+          .get(0).textContent;
       }
-      if ($(featureType).find('wfs\\:DefaultCRS').length > 0) {
-        crs = $(featureType).find('wfs\\:DefaultCRS').first().get(0).textContent;
+      if ($(featureType).find("wfs\\:DefaultCRS").length > 0) {
+        crs = $(featureType)
+          .find("wfs\\:DefaultCRS")
+          .first()
+          .get(0).textContent;
       }
-      if ($(featureType).find('wfs\\:DefaultSRS').length > 0) {
-        crs = $(featureType).find('wfs\\:DefaultSRS').first().get(0).textContent;
+      if ($(featureType).find("wfs\\:DefaultSRS").length > 0) {
+        crs = $(featureType)
+          .find("wfs\\:DefaultSRS")
+          .first()
+          .get(0).textContent;
       }
-      if (crs && typeof crs === 'string') {
-        crs = crs.split(':');
+      if (crs && typeof crs === "string") {
+        crs = crs.split(":");
       }
 
       if (Array.isArray(crs)) {
         crs.forEach(part => {
           if (/EPSG/.test(part)) {
-            projection += part + ':';
+            projection += part + ":";
           }
           if (/^\d+$/.test(Number(part))) {
             projection += part;
           }
         });
       }
-      if (!/^[A-Z]+:\d+$/.test(projection)) {        
+      if (!/^[A-Z]+:\d+$/.test(projection)) {
         if (crs.length === 7) {
           projection = crs[4] + ":" + crs[6];
         } else {
           projection = "";
         }
       }
-      
-      if ($(featureType).find('Name').length > 0) {
-        name = $(featureType).find('Name').first().get(0).textContent
+
+      if ($(featureType).find("Name").length > 0) {
+        name = $(featureType)
+          .find("Name")
+          .first()
+          .get(0).textContent;
       }
-      if ($(featureType).find('wfs\\:Name').length > 0) {
-        name = $(featureType).find('wfs\\:Name').first().get(0).textContent
-      }      
-      if ($(featureType).find('Title').length > 0) {
-        title = $(featureType).find('Title').first().get(0).textContent
+      if ($(featureType).find("wfs\\:Name").length > 0) {
+        name = $(featureType)
+          .find("wfs\\:Name")
+          .first()
+          .get(0).textContent;
       }
-      if ($(featureType).find('wfs\\:Title').length > 0) {
-        title = $(featureType).find('wfs\\:Title').first().get(0).textContent
-      }    
+      if ($(featureType).find("Title").length > 0) {
+        title = $(featureType)
+          .find("Title")
+          .first()
+          .get(0).textContent;
+      }
+      if ($(featureType).find("wfs\\:Title").length > 0) {
+        title = $(featureType)
+          .find("wfs\\:Title")
+          .first()
+          .get(0).textContent;
+      }
 
       types.push({
         name: name,
@@ -212,11 +243,11 @@ var search = Model.extend({
     return types;
   },
 
-  getWMSCapabilities: function (url, callback) {
+  getWMSCapabilities: function(url, callback) {
     $.ajax(this.prepareProxyUrl(url), {
       data: {
-        service: 'WFS',
-        request: 'GetCapabilities'
+        service: "WFS",
+        request: "GetCapabilities"
       },
       success: data => {
         var response = this.parseWFSCapabilitesTypes(data);
@@ -236,7 +267,6 @@ var search = Model.extend({
   //     data:
   //   }
   // }
-
 });
 
 export default search;

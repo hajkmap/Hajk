@@ -6,8 +6,8 @@ const styles = theme => ({
     padding: "10px",
     background: "#efefef",
     borderBottom: "1px solid #ccc",
-    cursor: 'pointer',
-    userSelect: 'none'
+    cursor: "pointer",
+    userSelect: "none"
   },
   headerText: {
     marginBottom: 0
@@ -20,10 +20,9 @@ class PanelHeader extends Component {
     return (
       <div className={classes.header}>
         <div className="icons pull-right">
-          <i
-            className="material-icons"
-            onClick={this.props.onClose}
-          >close</i>
+          <i className="material-icons" onClick={this.props.onClose}>
+            close
+          </i>
         </div>
         <h2 className={classes.headerText}>{this.props.title}</h2>
       </div>
