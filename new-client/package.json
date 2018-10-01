@@ -12,15 +12,22 @@
     "start": "set HTTPS=false && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "precommit": "pretty-quick staged"
   },
   "devDependencies": {
     "@material-ui/core": "^3.1.0",
     "@material-ui/icons": "^3.0.0",
     "@material-ui/lab": "^3.0.0-alpha.16",
+    "@types/react": "^16.4.14",
+    "@types/react-dom": "^16.0.8",
     "deepmerge": "^2.1.1",
+    "eslint-plugin-prettier": "^3.0.0",
+    "husky": "^1.0.1",
     "marked": "^0.4.0",
     "ol": "^5.2.0",
+    "prettier": "^1.14.3",
+    "pretty-quick": "^1.7.0",
     "proj4": "^2.5.0",
     "react-color": "^2.14.1",
     "react-event-observer": "^0.5.11"
