@@ -21,26 +21,25 @@
 // https://github.com/hajkmap/Hajk
 
 var FaButton = React.createClass({
-
-  getDefaultProps: function () {
+  getDefaultProps: function() {
     return {
-      onClick: function () { },
-      customClass: '',
-      icon: '',
+      onClick: function() {},
+      customClass: "",
+      icon: "",
       right: false
     };
   },
 
-  render: function () {
+  render: function() {
     var onClick = this.props.onClick;
-    var btnClassName = 'btn';
-    var faClassName = 'fa ' + this.props.icon;
+    var btnClassName = "btn";
+    var faClassName = "fa " + this.props.icon;
 
     if (this.props.right) {
-      btnClassName += ' btn-right';
+      btnClassName += " btn-right";
     }
     if (this.props.customClass) {
-      btnClassName += ' ' + this.props.customClass;
+      btnClassName += " " + this.props.customClass;
     }
     return (
       <div className={btnClassName} title={this.props.title} onClick={onClick}>

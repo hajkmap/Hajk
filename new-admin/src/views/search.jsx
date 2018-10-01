@@ -20,31 +20,31 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import React from 'react';
-import { Component } from 'react';
-import Alert from '../views/alert.jsx';
+import React from "react";
+import { Component } from "react";
+import Alert from "../views/alert.jsx";
 
 const defaultState = {
   load: false,
   capabilities: false,
   validationErrors: [],
-  mode: 'add',
+  mode: "add",
   layers: [],
   addedLayers: [],
-  id: '',
-  caption: '',
-  date: 'Fylls i per automatik',
-  searchFields: '',
-  infobox: '',
-  aliasDict: '',
-  displayFields: '',
-  geometryField: '',
-  url: '',
+  id: "",
+  caption: "",
+  date: "Fylls i per automatik",
+  searchFields: "",
+  infobox: "",
+  aliasDict: "",
+  displayFields: "",
+  geometryField: "",
+  url: "",
   outputFormat: undefined,
   alert: false,
   corfirm: false,
-  alertMessage: '',
-  content: '',
+  alertMessage: "",
+  content: "",
   confirmAction: () => {},
   denyAction: () => {}
 };
@@ -55,19 +55,19 @@ class Search extends Component {
   /**
    *
    */
-  constructor () {
+  constructor() {
     super();
     this.state = defaultState;
   }
   /**
    *
    */
-  componentDidMount () {
-    this.props.model.set('config', this.props.config);
+  componentDidMount() {
+    this.props.model.set("config", this.props.config);
     this.props.model.getConfig(this.props.config.url_layers);
-    this.props.model.on('change:layers', () => {
+    this.props.model.on("change:layers", () => {
       this.setState({
-        layers: this.props.model.get('layers')
+        layers: this.props.model.get("layers")
       });
     });
 
@@ -78,17 +78,17 @@ class Search extends Component {
   /**
    *
    */
-  componentWillUnmount () {
-    this.props.model.off('change:layers');
+  componentWillUnmount() {
+    this.props.model.off("change:layers");
   }
   /**
    *
    */
-  removeLayer (e, layer) {
+  removeLayer(e, layer) {
     this.setState({
       alert: true,
       confirm: true,
-      alertMessage: 'Lagret kommer att tas bort. Är detta ok?',
+      alertMessage: "Lagret kommer att tas bort. Är detta ok?",
       confirmAction: () => {
         this.props.model.removeLayer(layer, success => {
           if (success) {
@@ -103,7 +103,7 @@ class Search extends Component {
           } else {
             this.setState({
               alert: true,
-              alertMessage: 'Lagret kunde inte tas bort. Försök igen senare.'
+              alertMessage: "Lagret kunde inte tas bort. Försök igen senare."
             });
           }
         });
@@ -114,10 +114,9 @@ class Search extends Component {
   /**
    *
    */
-  loadLayer (e, layer) {
-    
+  loadLayer(e, layer) {
     this.setState({
-      mode: 'edit',
+      mode: "edit",
       id: layer.id,
       caption: layer.caption,
       searchFields: layer.searchFields,
@@ -125,28 +124,27 @@ class Search extends Component {
       aliasDict: layer.aliasDict,
       displayFields: layer.displayFields,
       geometryField: layer.geometryField,
-      outputFormat: layer.outputFormat || 'GML3',
+      outputFormat: layer.outputFormat || "GML3",
       url: layer.url,
       addedLayers: []
     });
 
     setTimeout(() => {
-      
-      this.validateField('url', true);
-      this.validateField('searchFields', true);
-      this.validateField('displayFields', true);
-      this.validateField('geometryField', true);
-      this.validateField('outputFormat', true);
+      this.validateField("url", true);
+      this.validateField("searchFields", true);
+      this.validateField("displayFields", true);
+      this.validateField("geometryField", true);
+      this.validateField("outputFormat", true);
 
       this.loadWMSCapabilities(undefined, () => {
         this.setState({
           addedLayers: layer.layers
         });
 
-        this.validateField('layers', true);
+        this.validateField("layers", true);
 
-        Object.keys(this.refs).forEach(element => {          
-          if (this.refs[element].dataset.type === 'wms-layer') {
+        Object.keys(this.refs).forEach(element => {
+          if (this.refs[element].dataset.type === "wms-layer") {
             this.refs[element].checked = false;
           }
         });
@@ -160,8 +158,10 @@ class Search extends Component {
   /**
    *
    */
-  loadWMSCapabilities (e, callback) {
-    if (e) { e.preventDefault(); }
+  loadWMSCapabilities(e, callback) {
+    if (e) {
+      e.preventDefault();
+    }
 
     this.setState({
       load: true,
@@ -177,7 +177,7 @@ class Search extends Component {
       });
     }
 
-    this.props.model.getWMSCapabilities(this.state.url, (capabilities) => {      
+    this.props.model.getWMSCapabilities(this.state.url, capabilities => {
       this.setState({
         capabilities: capabilities,
         load: false
@@ -185,7 +185,7 @@ class Search extends Component {
       if (capabilities === false) {
         this.setState({
           alert: true,
-          alertMessage: 'Servern svarar inte. Försök med en annan URL.'
+          alertMessage: "Servern svarar inte. Försök med en annan URL."
         });
       }
       if (callback) {
@@ -196,43 +196,57 @@ class Search extends Component {
   /**
    *
    */
-  appendLayer (e, checkedLayer) {      
+  appendLayer(e, checkedLayer) {
     if (e.target.checked === true) {
-      this.setState({
-        addedLayers: [checkedLayer]
-      }, () => this.validateField('layers'), true);
+      this.setState(
+        {
+          addedLayers: [checkedLayer]
+        },
+        () => this.validateField("layers"),
+        true
+      );
     } else {
-      this.setState({
-        addedLayers: this.state.addedLayers.filter(layer => layer !== checkedLayer)
-      }, () => this.validateField('layers'), true);      
-    }     
+      this.setState(
+        {
+          addedLayers: this.state.addedLayers.filter(
+            layer => layer !== checkedLayer
+          )
+        },
+        () => this.validateField("layers"),
+        true
+      );
+    }
   }
   /**
    *
    */
-  renderSelectedLayers () {
+  renderSelectedLayers() {
     if (!this.state.addedLayers) return null;
 
-    function uncheck (layer) {
-      this.appendLayer({
-        target: {
-          checked: false
-        }
-      }, layer);
+    function uncheck(layer) {
+      this.appendLayer(
+        {
+          target: {
+            checked: false
+          }
+        },
+        layer
+      );
       this.refs[layer].checked = false;
     }
 
-    return this.state.addedLayers.map((layer, i) =>
-      <li className='layer' key={i}>
-        <span>{layer}</span>&nbsp;
-        <i className='fa fa-times' onClick={uncheck.bind(this, layer)} />
+    return this.state.addedLayers.map((layer, i) => (
+      <li className="layer" key={i}>
+        <span>{layer}</span>
+        &nbsp;
+        <i className="fa fa-times" onClick={uncheck.bind(this, layer)} />
       </li>
-    );
+    ));
   }
   /**
    *
    */
-  filterLayers (e) {
+  filterLayers(e) {
     this.setState({
       filter: e.target.value
     });
@@ -240,32 +254,36 @@ class Search extends Component {
   /**
    *
    */
-  getLayersWithFilter (filter) {
-    return this.props.model.get('layers').filter(layer => {
-      return (new RegExp(this.state.filter)).test(layer.caption.toLowerCase());
+  getLayersWithFilter(filter) {
+    return this.props.model.get("layers").filter(layer => {
+      return new RegExp(this.state.filter).test(layer.caption.toLowerCase());
     });
   }
   /**
    *
    */
-  renderLayersFromConfig (layers) {
-    layers = this.state.filter ? this.getLayersWithFilter() : this.props.model.get('layers');
+  renderLayersFromConfig(layers) {
+    layers = this.state.filter
+      ? this.getLayersWithFilter()
+      : this.props.model.get("layers");
 
     var startsWith = [];
     var alphabetically = [];
 
     if (this.state.filter) {
       layers.forEach(layer => {
-        layer.caption.toLowerCase().indexOf(this.state.filter) === 0 ? startsWith.push(layer) : alphabetically.push(layer);
+        layer.caption.toLowerCase().indexOf(this.state.filter) === 0
+          ? startsWith.push(layer)
+          : alphabetically.push(layer);
       });
 
-      startsWith.sort(function (a, b) {
+      startsWith.sort(function(a, b) {
         if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
         if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
         return 0;
       });
 
-      alphabetically.sort(function (a, b) {
+      alphabetically.sort(function(a, b) {
         if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
         if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
         return 0;
@@ -273,63 +291,71 @@ class Search extends Component {
 
       layers = startsWith.concat(alphabetically);
     }
-    return layers.map((layer, i) =>
-      <li onClick={(e) => this.loadLayer(e, layer)} key={Math.random()}>
+    return layers.map((layer, i) => (
+      <li onClick={e => this.loadLayer(e, layer)} key={Math.random()}>
         <span>{layer.caption}</span>
-        <i title='Radera lager' onClick={(e) => this.removeLayer(e, layer)} className='fa fa-trash' />
+        <i
+          title="Radera lager"
+          onClick={e => this.removeLayer(e, layer)}
+          className="fa fa-trash"
+        />
       </li>
-    );
+    ));
   }
   /**
    *
    */
-  abort (e) {
+  abort(e) {
     this.setState(defaultState);
   }
 
   validateField(fieldName, updateState) {
     var value = this.getValue(fieldName),
-        valid = true;
+      valid = true;
 
     switch (fieldName) {
-      case 'displayFields':
-      case 'searchFields':
+      case "displayFields":
+      case "searchFields":
         valid = value.every(val => /^\w+$/.test(val));
-        if (value.length === 1 && value[0] === '') {
+        if (value.length === 1 && value[0] === "") {
           valid = true;
         }
 
         break;
-      case 'layers':
+      case "layers":
         if (value.length === 0) {
           valid = false;
         }
         break;
-      case 'url':
-      case 'caption':
-      case 'geometryField':
-        if (value === '') {
+      case "url":
+      case "caption":
+      case "geometryField":
+        if (value === "") {
           valid = false;
         }
         break;
-      case 'outputFormat':
-        if (value === '') { valid = false; }
+      case "outputFormat":
+        if (value === "") {
+          valid = false;
+        }
         break;
-      default: 
+      default:
         break;
     }
-    
-    if (updateState !== false) {        
-      if (!valid) {      
+
+    if (updateState !== false) {
+      if (!valid) {
         this.setState({
           validationErrors: [...this.state.validationErrors, fieldName]
         });
       } else {
         this.setState({
-          validationErrors: this.state.validationErrors.filter(v => v !== fieldName)
-        }); 
+          validationErrors: this.state.validationErrors.filter(
+            v => v !== fieldName
+          )
+        });
       }
-    }      
+    }
 
     return valid;
   }
@@ -337,49 +363,69 @@ class Search extends Component {
   /**
    *
    */
-  getValue (fieldName) {
-    function create_date () {
-      return (new Date()).getTime();
+  getValue(fieldName) {
+    function create_date() {
+      return new Date().getTime();
     }
 
-    function format_layers (layers) {
+    function format_layers(layers) {
       return layers.map(layer => layer);
     }
 
-    var input = this.refs['input_' + fieldName],
-      value = input ? input.value : '';
+    var input = this.refs["input_" + fieldName],
+      value = input ? input.value : "";
 
-    if (fieldName === 'date') value = create_date();
-    if (fieldName === 'layers') value = format_layers(this.state.addedLayers);
-    if (fieldName === 'searchFields') value = value.split(',');
-    if (fieldName === 'displayFields') value = value.split(',');
+    if (fieldName === "date") value = create_date();
+    if (fieldName === "layers") value = format_layers(this.state.addedLayers);
+    if (fieldName === "searchFields") value = value.split(",");
+    if (fieldName === "displayFields") value = value.split(",");
 
     return value;
   }
   /**
    *
    */
-  createGuid (layers) {
-    function s4 () {
+  createGuid(layers) {
+    function s4() {
       return Math.floor((1 + Math.random()) * 0x10000)
         .toString(16)
         .substring(1);
     }
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+    return (
+      s4() +
+      s4() +
+      "-" +
+      s4() +
+      "-" +
+      s4() +
+      "-" +
+      s4() +
+      "-" +
+      s4() +
+      s4() +
+      s4()
+    );
   }
   /**
    *
    */
-  submit (e) {
-
+  submit(e) {
     var validationErrors = [],
-        validationFields = ["caption", "url", "layers", "searchFields", "displayFields", "geometryField", "outputFormat"];
+      validationFields = [
+        "caption",
+        "url",
+        "layers",
+        "searchFields",
+        "displayFields",
+        "geometryField",
+        "outputFormat"
+      ];
 
     validationFields.forEach(fieldName => {
       if (!this.validateField(fieldName, false)) {
         validationErrors.push(fieldName);
       }
-    });    
+    });
 
     this.setState({
       validationErrors: validationErrors
@@ -388,42 +434,43 @@ class Search extends Component {
     if (validationErrors.length === 0) {
       let layer = {
         id: this.state.id,
-        caption: this.getValue('caption'),
-        url: this.getValue('url'),
-        layers: this.getValue('layers'),
-        searchFields: this.getValue('searchFields'),
-        infobox: this.getValue('infobox'),
-        aliasDict: this.getValue('aliasDict'),
-        displayFields: this.getValue('displayFields'),
-        geometryField: this.getValue('geometryField'),
-        outputFormat: this.getValue('outputFormat')
+        caption: this.getValue("caption"),
+        url: this.getValue("url"),
+        layers: this.getValue("layers"),
+        searchFields: this.getValue("searchFields"),
+        infobox: this.getValue("infobox"),
+        aliasDict: this.getValue("aliasDict"),
+        displayFields: this.getValue("displayFields"),
+        geometryField: this.getValue("geometryField"),
+        outputFormat: this.getValue("outputFormat")
       };
 
-      if (this.state.mode === 'add') {
-        layer.id = this.createGuid(this.props.model.get('layers'));
+      if (this.state.mode === "add") {
+        layer.id = this.createGuid(this.props.model.get("layers"));
         this.props.model.addLayer(layer, success => {
-          if (success) {            
+          if (success) {
             this.props.model.getConfig(this.props.config.url_layers);
             this.abort();
             this.setState({
               alert: true,
-              alertMessage: 'Lagret har lagt till i listan av tillgängliga lager.'
+              alertMessage:
+                "Lagret har lagt till i listan av tillgängliga lager."
             });
           } else {
             this.setState({
               alert: true,
-              alertMessage: 'Lagret kunde inte läggas till. Försök igen senare.'
+              alertMessage: "Lagret kunde inte läggas till. Försök igen senare."
             });
           }
         });
       }
-      if (this.state.mode === 'edit') {
+      if (this.state.mode === "edit") {
         this.props.model.updateLayer(layer, success => {
           if (success) {
             this.props.model.getConfig(this.props.config.url_layers);
             this.setState({
               alert: true,
-              alertMessage: 'Uppdateringen lyckades!'
+              alertMessage: "Uppdateringen lyckades!"
             });
             this.setState({
               date: layer.date
@@ -431,7 +478,7 @@ class Search extends Component {
           } else {
             this.setState({
               alert: true,
-              alertMessage: 'Uppdateringen misslyckades.'
+              alertMessage: "Uppdateringen misslyckades."
             });
           }
         });
@@ -442,34 +489,39 @@ class Search extends Component {
   /**
    *
    */
-  parseDate () {
+  parseDate() {
     var parsed = parseInt(this.state.date, 10);
-    return isNaN(parsed)
-      ? this.state.date
-      : (new Date(parsed)).toLocaleString();
+    return isNaN(parsed) ? this.state.date : new Date(parsed).toLocaleString();
   }
   /**
    *
    */
-  getValidationClass (inputName) {
-    return this.state.validationErrors.find(v => v === inputName) ? 'validation-error' : '';
+  getValidationClass(inputName) {
+    return this.state.validationErrors.find(v => v === inputName)
+      ? "validation-error"
+      : "";
   }
   /**
    *
    */
-  describeLayer (e, layer) {    
+  describeLayer(e, layer) {
     var arcgis = /MapServer\/WFSServer$/.test(this.refs.input_url.value);
-    this.props.model.getLayerDescription(this.refs.input_url.value, layer, arcgis, (properties) => {
-      this.setState({
-        layerProperties: properties,
-        layerPropertiesName: layer.name
-      });
-    });
+    this.props.model.getLayerDescription(
+      this.refs.input_url.value,
+      layer,
+      arcgis,
+      properties => {
+        this.setState({
+          layerProperties: properties,
+          layerPropertiesName: layer.name
+        });
+      }
+    );
   }
   /**
    *
    */
-  closeDetails () {
+  closeDetails() {
     this.setState({
       layerProperties: undefined,
       layerPropertiesName: undefined
@@ -478,27 +530,27 @@ class Search extends Component {
   /**
    *
    */
-  renderLayerProperties () {
+  renderLayerProperties() {
     if (this.state.layerProperties === undefined) {
       return null;
     }
     if (this.state.layerProperties === false) {
       return (
         <div>
-          <i className='fa fa-times' onClick={() => this.closeDetails()} />
+          <i className="fa fa-times" onClick={() => this.closeDetails()} />
           <div>Information saknas</div>
         </div>
       );
     }
-    var rows = this.state.layerProperties.map((property, i) =>
+    var rows = this.state.layerProperties.map((property, i) => (
       <tr key={i}>
         <td>{property.name}</td>
         <td>{property.localType}</td>
       </tr>
-    );
+    ));
     return (
       <div>
-        <i className='fa fa-times' onClick={() => this.closeDetails()} />
+        <i className="fa fa-times" onClick={() => this.closeDetails()} />
         <table>
           <thead>
             <tr>
@@ -506,9 +558,7 @@ class Search extends Component {
               <th>Typ</th>
             </tr>
           </thead>
-          <tbody>
-            {rows}
-          </tbody>
+          <tbody>{rows}</tbody>
         </table>
       </div>
     );
@@ -516,16 +566,31 @@ class Search extends Component {
   /**
    *
    */
-  renderLayersFromCapabilites () {
+  renderLayersFromCapabilites() {
     if (this.state && this.state.capabilities) {
       return this.state.capabilities.map((layer, i) => {
-        var classNames = this.state.layerPropertiesName === layer.name
-          ? 'fa fa-info-circle active' : 'fa fa-info-circle';
+        var classNames =
+          this.state.layerPropertiesName === layer.name
+            ? "fa fa-info-circle active"
+            : "fa fa-info-circle";
         return (
           <li key={i}>
-            <input ref={layer.name} id={'layer' + i} type='radio' name='featureType' data-type='wms-layer' onChange={(e) => { this.appendLayer(e, layer.name); }} />&nbsp;
-            <label htmlFor={'layer' + i}>{layer.name}</label>
-            <i className={classNames} onClick={(e) => this.describeLayer(e, layer)} />
+            <input
+              ref={layer.name}
+              id={"layer" + i}
+              type="radio"
+              name="featureType"
+              data-type="wms-layer"
+              onChange={e => {
+                this.appendLayer(e, layer.name);
+              }}
+            />
+            &nbsp;
+            <label htmlFor={"layer" + i}>{layer.name}</label>
+            <i
+              className={classNames}
+              onClick={e => this.describeLayer(e, layer)}
+            />
           </li>
         );
       });
@@ -536,17 +601,15 @@ class Search extends Component {
   /**
    *
    */
-  renderLayerList () {
+  renderLayerList() {
     var layers = this.renderLayersFromCapabilites();
     return (
-      <div className='layer-list'>
-        <ul>
-          {layers}
-        </ul>
+      <div className="layer-list">
+        <ul>{layers}</ul>
       </div>
     );
   }
-  getAlertOptions () {
+  getAlertOptions() {
     return {
       visible: this.state.alert,
       message: this.state.alertMessage,
@@ -556,7 +619,7 @@ class Search extends Component {
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ''
+          alertMessage: ""
         });
       },
       denyAction: () => {
@@ -564,13 +627,13 @@ class Search extends Component {
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ''
+          alertMessage: ""
         });
       },
       onClick: () => {
         this.setState({
           alert: false,
-          alertMessage: ''
+          alertMessage: ""
         });
       }
     };
@@ -578,58 +641,89 @@ class Search extends Component {
   /**
    *
    */
-  render () {
-    var loader = this.state.load ? <i className='fa fa-refresh fa-spin' /> : null;
-    var abort = this.state.mode === 'edit' ? <span className='btn btn-danger' onClick={(e) => this.abort(e)}>Avbryt</span> : null;
+  render() {
+    var loader = this.state.load ? (
+      <i className="fa fa-refresh fa-spin" />
+    ) : null;
+    var abort =
+      this.state.mode === "edit" ? (
+        <span className="btn btn-danger" onClick={e => this.abort(e)}>
+          Avbryt
+        </span>
+      ) : null;
 
     return (
-      <section className='tab-pane active'>
+      <section className="tab-pane active">
         <Alert options={this.getAlertOptions()} />
         <aside>
-          <input placeholder='filtrera' type='text' onChange={(e) => this.filterLayers(e)} />
-          <ul className='config-layer-list'>
-            {this.renderLayersFromConfig()}
-          </ul>
+          <input
+            placeholder="filtrera"
+            type="text"
+            onChange={e => this.filterLayers(e)}
+          />
+          <ul className="config-layer-list">{this.renderLayersFromConfig()}</ul>
         </aside>
         <article>
-          <form method='post' action='' onSubmit={(e) => { this.submit(e); }}>
+          <form
+            method="post"
+            action=""
+            onSubmit={e => {
+              this.submit(e);
+            }}
+          >
             <fieldset>
               <legend>Lägg till WFS-tjänst</legend>
               <div>
                 <label>Visningsnamn*</label>
                 <input
-                  type='text'
-                  ref='input_caption'
+                  type="text"
+                  ref="input_caption"
                   value={this.state.caption}
-                  onChange={(e) => {
-                    this.setState({
-                      caption: e.target.value
-                    }, () => this.validateField('caption', true));
+                  onChange={e => {
+                    this.setState(
+                      {
+                        caption: e.target.value
+                      },
+                      () => this.validateField("caption", true)
+                    );
                   }}
-                  className={this.getValidationClass('caption')}
+                  className={this.getValidationClass("caption")}
                 />
               </div>
               <div>
                 <label>Url*</label>
                 <input
-                  type='text'
-                  ref='input_url'
+                  type="text"
+                  ref="input_url"
                   value={this.state.url}
-                  onChange={(e) => {
-                    this.setState({
-                      url: e.target.value
-                    }, () => this.validateField('url', true));
+                  onChange={e => {
+                    this.setState(
+                      {
+                        url: e.target.value
+                      },
+                      () => this.validateField("url", true)
+                    );
                   }}
-                  className={this.getValidationClass('url')}
+                  className={this.getValidationClass("url")}
                 />
-                <span onClick={(e) => { this.loadWMSCapabilities(e); }} className='btn btn-default'>Ladda lager {loader}</span>
+                <span
+                  onClick={e => {
+                    this.loadWMSCapabilities(e);
+                  }}
+                  className="btn btn-default"
+                >
+                  Ladda lager {loader}
+                </span>
               </div>
               <div>
                 <label>Valt lager*</label>
-                <div ref='input_layers' className={'layer-list-choosen ' + this.getValidationClass('layers')}>
-                  <ul>
-                    {this.renderSelectedLayers()}
-                  </ul>
+                <div
+                  ref="input_layers"
+                  className={
+                    "layer-list-choosen " + this.getValidationClass("layers")
+                  }
+                >
+                  <ul>{this.renderSelectedLayers()}</ul>
                 </div>
               </div>
               <div>
@@ -639,86 +733,99 @@ class Search extends Component {
               <div>
                 <label>Inforuta</label>
                 <textarea
-                  ref='input_infobox'
+                  ref="input_infobox"
                   value={this.state.infobox}
-                  onChange={(e) => this.setState({'infobox': e.target.value})}
+                  onChange={e => this.setState({ infobox: e.target.value })}
                 />
               </div>
               <div>
                 <label>Attributmappning</label>
                 <textarea
-                  ref='input_aliasDict'
+                  ref="input_aliasDict"
                   value={this.state.aliasDict}
-                  onChange={(e) => {
-                    this.setState({'aliasDict': e.target.value});
+                  onChange={e => {
+                    this.setState({ aliasDict: e.target.value });
                   }}
                 />
               </div>
               <div>
                 <label>Sökfält</label>
                 <input
-                  type='text'
-                  ref='input_searchFields'
-                  onChange={(e) => {
-                    this.setState({
-                      searchFields: e.target.value
-                    }, () => this.validateField('searchFields', true));
-                  }}                
+                  type="text"
+                  ref="input_searchFields"
+                  onChange={e => {
+                    this.setState(
+                      {
+                        searchFields: e.target.value
+                      },
+                      () => this.validateField("searchFields", true)
+                    );
+                  }}
                   value={this.state.searchFields}
-                  className={this.getValidationClass('searchFields')}
+                  className={this.getValidationClass("searchFields")}
                 />
               </div>
               <div>
                 <label>Visningsfält</label>
                 <input
-                  type='text'
-                  ref='input_displayFields'                  
-                  onChange={(e) => {
-                    this.setState({
-                      displayFields: e.target.value
-                    }, () => this.validateField('displayFields', true));
-                  }} 
+                  type="text"
+                  ref="input_displayFields"
+                  onChange={e => {
+                    this.setState(
+                      {
+                        displayFields: e.target.value
+                      },
+                      () => this.validateField("displayFields", true)
+                    );
+                  }}
                   value={this.state.displayFields}
-                  className={this.getValidationClass('displayFields')}
+                  className={this.getValidationClass("displayFields")}
                 />
               </div>
               <div>
                 <label>Geometrifält</label>
                 <input
-                  type='text'
-                  ref='input_geometryField'                  
-                  onChange={(e) => {
-                    this.setState({
-                      geometryField: e.target.value
-                    }, () => this.validateField('geometryField', true));
-                  }} 
+                  type="text"
+                  ref="input_geometryField"
+                  onChange={e => {
+                    this.setState(
+                      {
+                        geometryField: e.target.value
+                      },
+                      () => this.validateField("geometryField", true)
+                    );
+                  }}
                   value={this.state.geometryField}
-                  className={this.getValidationClass('geometryField')}
+                  className={this.getValidationClass("geometryField")}
                 />
               </div>
               <div>
                 <label>Responstyp</label>
-                <select 
-                  ref='input_outputFormat' 
-                  value={this.state.outputFormat} 
-                  onChange={(e) => {
-                    this.setState({
-                      outputFormat: e.target.value
-                    }, () => this.validateField('outputFormat', true));
+                <select
+                  ref="input_outputFormat"
+                  value={this.state.outputFormat}
+                  onChange={e => {
+                    this.setState(
+                      {
+                        outputFormat: e.target.value
+                      },
+                      () => this.validateField("outputFormat", true)
+                    );
                   }}
                 >
-                  <option value='GML3'>GML3</option>
-                  <option value='GML2'>GML2</option>
+                  <option value="GML3">GML3</option>
+                  <option value="GML2">GML2</option>
                 </select>
               </div>
             </fieldset>
-            <button className='btn btn-primary'>{this.state.mode === 'edit' ? 'Spara' : 'Lägg till'}</button>&nbsp;
+            <button className="btn btn-primary">
+              {this.state.mode === "edit" ? "Spara" : "Lägg till"}
+            </button>
+            &nbsp;
             {abort}
           </form>
         </article>
-        <div className='details'>
-          {this.renderLayerProperties()}
-        </div>
+        <div className="details">{this.renderLayerProperties()}</div>
       </section>
     );
   }

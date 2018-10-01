@@ -20,8 +20,8 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var ToolModel = require('tools/tool');
-var InformationView = require('components/information');
+var ToolModel = require("tools/tool");
+var InformationView = require("components/information");
 
 /**
  * @typedef {Object} SearchModel~SearchModelProperties
@@ -35,14 +35,14 @@ var InformationView = require('components/information');
  * @property {string} text - Default: false
  */
 var InformationModelProperties = {
-  type: 'information',
-  panel: '',
-  toolbar: 'bottom',
-  icon: 'fa fa-info-circle icon',
-  title: 'Om kartan',
+  type: "information",
+  panel: "",
+  toolbar: "bottom",
+  icon: "fa fa-info-circle icon",
+  title: "Om kartan",
   display: false,
-  headerText: 'Om kartan',
-  text: 'Information om kartan.'
+  headerText: "Om kartan",
+  text: "Information om kartan."
 };
 
 /**
@@ -58,28 +58,25 @@ var InformationModel = {
    */
   defaults: InformationModelProperties,
 
-  initialize: function (options) {
+  initialize: function(options) {
     var cookies = document.cookie;
     if (cookies.length == 0 || !options.showInfoOnce) {
       // TODO: Titta efter om vi ska använda cookie för att visa informationsrutan endast en gång
       // OBS! json.showInfoOnce kan vara undefined, då ska det fungera som innan cookie användes
       if (options.showInfoOnce) {
-        document.cookie = 'seen=true';
+        document.cookie = "seen=true";
       }
     } else {
-      this.set({'display': false});
-      this.set({'visibleAtStart': false});
+      this.set({ display: false });
+      this.set({ visibleAtStart: false });
     }
     ToolModel.prototype.initialize.call(this);
   },
 
-  configure: function (shell) {
-    this.set({'display': this.get('visibleAtStart')});
+  configure: function(shell) {
+    this.set({ display: this.get("visibleAtStart") });
     const element = <InformationView model={this} />;
-    ReactDOM.render(
-      element,
-      document.getElementById('information')
-    );
+    ReactDOM.render(element, document.getElementById("information"));
   },
   /**
    * @description
@@ -92,9 +89,9 @@ var InformationModel = {
    *
    * @instance
    */
-  clicked: function () {
+  clicked: function() {
     this.set({
-      'display': !this.get('display')
+      display: !this.get("display")
     });
   }
 };

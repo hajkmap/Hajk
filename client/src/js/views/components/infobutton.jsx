@@ -21,12 +21,18 @@
 // https://github.com/hajkmap/Hajk
 
 var InfoButton = React.createClass({
-  render: function () {
-    var title = this.props.checked ? 'Dölj tooltip' : 'Visa lagerinformation';
-    var className = this.props.checked ? 'fa fa-info-circle' : 'fa fa-info-circle';
-    var fontSize = this.props.checked ? '18px' : '18px';
+  render: function() {
+    var title = this.props.checked ? "Dölj tooltip" : "Visa lagerinformation";
+    var className = this.props.checked
+      ? "fa fa-info-circle"
+      : "fa fa-info-circle";
+    var fontSize = this.props.checked ? "18px" : "18px";
     return (
-      <span className='clickable pull-right' title={title} style={{ position: 'relative', top: '3px', marginRight: '14px' }}>
+      <span
+        className="clickable pull-right"
+        title={title}
+        style={{ position: "relative", top: "3px", marginRight: "14px" }}
+      >
         <i className={className} style={{ fontSize: fontSize }} />
       </span>
     );

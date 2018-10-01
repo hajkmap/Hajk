@@ -20,7 +20,7 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var ToolModel = require('tools/tool');
+var ToolModel = require("tools/tool");
 
 /**
  * @typedef {Object} SaveStateModel~SaveStateModelProperties
@@ -35,16 +35,16 @@ var ToolModel = require('tools/tool');
  * @property {object[]} bookmarks
  */
 var BookmarkProperties = {
-  type: 'bookmark',
-  panel: 'bookmarkpanel',
-  toolbar: 'bottom',
-  icon: 'fa fa-bookmark icon',
-  title: 'Bokmärken',
+  type: "bookmark",
+  panel: "bookmarkpanel",
+  toolbar: "bottom",
+  icon: "fa fa-bookmark icon",
+  title: "Bokmärken",
   visible: false,
   shell: undefined,
-  settingsUrl: '',
+  settingsUrl: "",
   bookmarks: [],
-  instruction: ''
+  instruction: ""
 };
 
 /**
@@ -60,28 +60,28 @@ var BookmarkModel = {
    */
   defaults: BookmarkProperties,
 
-  initialize: function (options) {
+  initialize: function(options) {
     ToolModel.prototype.initialize.call(this);
   },
 
-  configure: function (shell) {
-    var url = this.get('settingsUrl'),
+  configure: function(shell) {
+    var url = this.get("settingsUrl"),
       bookmarks;
 
-    this.set('shell', shell);
+    this.set("shell", shell);
 
     if (!shell.getBookmarks()) {
-      bookmarks = localStorage.getItem('bookmarks');
+      bookmarks = localStorage.getItem("bookmarks");
       if (bookmarks) {
         try {
           bookmarks = JSON.parse(bookmarks);
         } catch (e) {
           bookmarks = [];
-          localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+          localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
         }
       } else {
         bookmarks = [];
-        localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+        localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
       }
       shell.setBookmarks(bookmarks);
     }
@@ -92,10 +92,10 @@ var BookmarkModel = {
    * @instance
    * @param {object} bookmark - Bookmark with settings to be loaded.
    */
-  updateApplication: function (bookmark) {
+  updateApplication: function(bookmark) {
     var json = atob(bookmark.settings);
     var settings = JSON.parse(json);
-    this.get('shell').setConfig(settings);
+    this.get("shell").setConfig(settings);
   },
 
   /**
@@ -104,11 +104,12 @@ var BookmarkModel = {
    * @param {string} name - Name of the bookmark.
    * @param {function} callback - Fn to be called when the save is complete.
    */
-  addBookmark: function (name, callback) {
-    var numBookmarks = this.getBookmarks() &&
-        this.getBookmarks().length
-      ? this.getBookmarks().length : 0;
-    var model = this.get('shell').toJSON();
+  addBookmark: function(name, callback) {
+    var numBookmarks =
+      this.getBookmarks() && this.getBookmarks().length
+        ? this.getBookmarks().length
+        : 0;
+    var model = this.get("shell").toJSON();
     var b64 = btoa(model);
     var data = {
       name: name,
@@ -116,11 +117,11 @@ var BookmarkModel = {
       favourite: numBookmarks === 0
     };
 
-    if (!localStorage.getItem('bookmarks')) {
-      localStorage.setItem('bookmarks', JSON.stringify([]));
+    if (!localStorage.getItem("bookmarks")) {
+      localStorage.setItem("bookmarks", JSON.stringify([]));
     }
 
-    var bookmarks = localStorage.getItem('bookmarks');
+    var bookmarks = localStorage.getItem("bookmarks");
 
     try {
       bookmarks = JSON.parse(bookmarks);
@@ -132,18 +133,18 @@ var BookmarkModel = {
     }
 
     bookmarks.push(data);
-    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
-    this.get('shell').setBookmarks(bookmarks);
+    localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
+    this.get("shell").setBookmarks(bookmarks);
     callback();
   },
 
   /**
-  * Update an existing bookmark.
-  * @instance
-  * @param {object} bookmark - Bookmark to be updated.
-  * @param {function} callback - Fn to be called when the update is complete.
-  */
-  updateBookmark: function (bookmark, callback) {
+   * Update an existing bookmark.
+   * @instance
+   * @param {object} bookmark - Bookmark to be updated.
+   * @param {function} callback - Fn to be called when the update is complete.
+   */
+  updateBookmark: function(bookmark, callback) {
     /* var visibleLayers = []
     this.get('layerCollection').forEach(layer => {
       // if visible add to list
@@ -181,11 +182,11 @@ var BookmarkModel = {
    * @param {number} id - ID of bookmark to be removed.
    * @param {function} callback - Fn to be called when the removal is complete.
    */
-  removeBookmark: function (name, callback) {
+  removeBookmark: function(name, callback) {
     var bookmarks = this.getBookmarks();
 
     bookmarks = bookmarks.filter(bookmark => bookmark.name !== name);
-    localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+    localStorage.setItem("bookmarks", JSON.stringify(bookmarks));
     callback();
   },
 
@@ -194,8 +195,8 @@ var BookmarkModel = {
    * @instance
    * @return {object[]} bookmarks
    */
-  getBookmarks: function () {
-    var json = localStorage.getItem('bookmarks');
+  getBookmarks: function() {
+    var json = localStorage.getItem("bookmarks");
     if (json !== undefined) {
       return JSON.parse(json);
     }
@@ -213,9 +214,9 @@ var BookmarkModel = {
    *
    * @instance
    */
-  clicked: function (arg) {
-    this.set('visible', true);
-    this.set('toggled', !this.get('toggled'));
+  clicked: function(arg) {
+    this.set("visible", true);
+    this.set("toggled", !this.get("toggled"));
   }
 };
 

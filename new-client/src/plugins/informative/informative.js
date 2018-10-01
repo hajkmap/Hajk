@@ -13,34 +13,36 @@ import Observer from "react-event-observer";
 const styles = theme => {
   return {
     button: {
-      width: '50px',
-      height: '50px',
-      outline: 'none',
-      marginBottom: '10px'
+      width: "50px",
+      height: "50px",
+      outline: "none",
+      marginBottom: "10px"
     }
-  }
+  };
 };
 
 class Informative extends Component {
-
   state = {
     panelOpen: false
   };
 
-  onClick = (e) => {
+  onClick = e => {
     this.app.onPanelOpen(this);
     this.setState({
       panelOpen: true
     });
   };
 
-  open = (chapter) => {
+  open = chapter => {
     this.app.onPanelOpen(this);
-    this.setState({
-      panelOpen: true
-    }, () => {
-      this.observer.publish('changeChapter', chapter);
-    });
+    this.setState(
+      {
+        panelOpen: true
+      },
+      () => {
+        this.observer.publish("changeChapter", chapter);
+      }
+    );
   };
 
   closePanel = () => {
@@ -52,7 +54,7 @@ class Informative extends Component {
   constructor(spec) {
     super(spec);
     this.position = "right";
-    this.type = "informative"
+    this.type = "informative";
     this.text = "Översiktsplan";
     this.app = spec.app;
     this.observer = Observer();
@@ -97,7 +99,7 @@ class Informative extends Component {
   }
 
   renderAsWidgetItem() {
-    const {classes} = this.props;
+    const { classes } = this.props;
     return (
       <div>
         <Button
@@ -134,7 +136,6 @@ class Informative extends Component {
   }
 
   render() {
-
     if (this.props.type === "toolbarItem") {
       return this.renderAsToolbarItem();
     }
@@ -144,7 +145,6 @@ class Informative extends Component {
     }
 
     return null;
-
   }
 }
 

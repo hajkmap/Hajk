@@ -1,14 +1,13 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import Backbone from 'backbone';
-import { Router } from 'backbone';
-import ApplicationView from './views/application.jsx';
-import ApplicationModel from './models/application.js';
+import React from "react";
+import ReactDOM from "react-dom";
+import "./index.css";
+import Backbone from "backbone";
+import { Router } from "backbone";
+import ApplicationView from "./views/application.jsx";
+import ApplicationModel from "./models/application.js";
 
 //import $ from 'jquery';
 //import find from 'array.prototype.find';
-
 
 // Copyright (C) 2016 Göteborgs Stad
 //
@@ -34,25 +33,24 @@ import ApplicationModel from './models/application.js';
 
 //find.shim();
 
-(function () {
-  
-  function create_routes (routes, application_model) {
+(function() {
+  function create_routes(routes, application_model) {
     var route_settings = {
       routes: {}
     };
     routes.forEach(route => {
       if (route.default) {
-        route_settings.routes[''] = route.name;
+        route_settings.routes[""] = route.name;
       }
-      route_settings.routes['!/' + route.name] = route.name;
+      route_settings.routes["!/" + route.name] = route.name;
       route_settings[route.name] = () => {
-        application_model.set('content', route.name);
+        application_model.set("content", route.name);
       };
     });
     return route_settings;
   }
 
-  function load (config) {
+  function load(config) {
     var application_model = new ApplicationModel();
 
     var application_element = React.createElement(ApplicationView, {
@@ -65,17 +63,16 @@ import ApplicationModel from './models/application.js';
 
     new router();
     Backbone.history.start();
-    ReactDOM.render(application_element, document.getElementById('root'));
+    ReactDOM.render(application_element, document.getElementById("root"));
   }
 
-  fetch('config.json').then(response => {
+  fetch("config.json").then(response => {
     response.json().then(config => {
       try {
         load(config);
       } catch (error) {
-        console.log('error', error);
+        console.log("error", error);
       }
     });
   });
-
-}());
+})();

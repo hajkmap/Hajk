@@ -14,7 +14,6 @@ const styles = theme => {
   return {};
 };
 class LayerSwitcher extends Component {
-
   state = {
     panelOpen: false
   };

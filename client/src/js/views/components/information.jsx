@@ -24,20 +24,19 @@
  * @class
  */
 var InformationView = {
-
-  componentDidMount: function () {
-    this.props.model.on('change:display', () => {
+  componentDidMount: function() {
+    this.props.model.on("change:display", () => {
       this.setState({
-        display: this.props.model.get('display')
+        display: this.props.model.get("display")
       });
     });
     this.setState({
-      display: this.props.model.get('display')
+      display: this.props.model.get("display")
     });
   },
 
-  componentWillUnMount: function () {
-    this.props.model.off('change:display');
+  componentWillUnMount: function() {
+    this.props.model.off("change:display");
   },
 
   /**
@@ -45,8 +44,8 @@ var InformationView = {
    * @instance
    * @return {external:ReactElement}
    */
-  close: function () {
-    this.props.model.set('display', false);
+  close: function() {
+    this.props.model.set("display", false);
   },
 
   /** lo
@@ -54,21 +53,30 @@ var InformationView = {
    * @instance
    * @return {external:ReactElement}
    */
-  render: function () {
+  render: function() {
     if (this.state && this.state.display) {
-      var infoContent = this.props.model.get('text');
-      if (this.props.model.get('base64EncodeForInfotext')) {
+      var infoContent = this.props.model.get("text");
+      if (this.props.model.get("base64EncodeForInfotext")) {
         infoContent = atob(infoContent);
       }
 
       return (
-        <div id='blanket'>
-          <div id='container'>
-            <div key='a' id='header'>{this.props.model.get('headerText')}
-              <i className='fa fa-times pull-right clickable panel-close' id='close' onClick={this.close} />
+        <div id="blanket">
+          <div id="container">
+            <div key="a" id="header">
+              {this.props.model.get("headerText")}
+              <i
+                className="fa fa-times pull-right clickable panel-close"
+                id="close"
+                onClick={this.close}
+              />
             </div>
-            <div id='body-wrapper'>
-              <div key='b' id='body' dangerouslySetInnerHTML={{__html: infoContent}} />
+            <div id="body-wrapper">
+              <div
+                key="b"
+                id="body"
+                dangerouslySetInnerHTML={{ __html: infoContent }}
+              />
             </div>
           </div>
         </div>

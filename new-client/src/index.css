@@ -216,7 +216,6 @@ button {
   right: 8px;
 }
 
-
 @media only screen and (max-width: 600px) {
   .tool-panel {
     position: fixed;

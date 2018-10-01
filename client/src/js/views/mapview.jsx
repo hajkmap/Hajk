@@ -29,14 +29,14 @@ var MapView = {
    * @instance
    * @return {object}
    */
-  getDefaultProps: function () {
+  getDefaultProps: function() {
     return {
-      id: '',
-      loaded: function () {}
+      id: "",
+      loaded: function() {}
     };
   },
 
-  shouldComponentUpdate: function () {
+  shouldComponentUpdate: function() {
     return false;
   },
 
@@ -45,10 +45,8 @@ var MapView = {
    * @instance
    * @return {external:ReactElement}
    */
-  render: function () {
-    return (
-      <div id={this.props.id} className='map-fullscreen' />
-    );
+  render: function() {
+    return <div id={this.props.id} className="map-fullscreen" />;
   }
 };
 

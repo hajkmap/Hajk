@@ -20,50 +20,50 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import React from 'react';
-import { Component } from 'react';
-import ReactModal from 'react-modal';
-import RichEditor from './components/RichEditor.jsx'
-import ChapterAdder from './components/ChapterAdder.jsx'
-import Map from './components/Map.jsx'
+import React from "react";
+import { Component } from "react";
+import ReactModal from "react-modal";
+import RichEditor from "./components/RichEditor.jsx";
+import ChapterAdder from "./components/ChapterAdder.jsx";
+import Map from "./components/Map.jsx";
 
 class Chapter {
   constructor(settings) {
-    settings = settings || {};    
+    settings = settings || {};
     this.header = settings.header || "";
-    this.html = settings.html || "";    
+    this.html = settings.html || "";
     this.mapSettings = {
       layers: settings.layers || [],
       center: settings.center || [900000, 8500000],
       zoom: settings.zoom || 10
     };
     this.chapters = [];
-  }  
+  }
 }
 
 class InformativeEditor extends Component {
-  constructor () {
+  constructor() {
     super();
     this.state = {
       showModal: false,
-      data: undefined      
-    };    
-    this.editors = [];    
+      data: undefined
+    };
+    this.editors = [];
   }
 
-  componentDidMount() {    
-    this.props.model.set('config', this.props.config);
-    this.props.model.load(data => {      
+  componentDidMount() {
+    this.props.model.set("config", this.props.config);
+    this.props.model.load(data => {
       this.setState({
         data: data
       });
-    });    
+    });
   }
 
   save() {
-    this.props.model.save(JSON.stringify(this.state.data), (result) => {
+    this.props.model.save(JSON.stringify(this.state.data), result => {
       if (result === "File saved") {
-        result = "Filen sparades utan problem."
+        result = "Filen sparades utan problem.";
       }
       this.setState({
         showModal: true,
@@ -71,22 +71,25 @@ class InformativeEditor extends Component {
         showAbortButton: false,
         modalConfirmCallback: () => {}
       });
-    }); 
+    });
   }
 
   addChapter(title) {
-    this.state.data.chapters.push(new Chapter({
-      header: title
-    }));    
+    this.state.data.chapters.push(
+      new Chapter({
+        header: title
+      })
+    );
     this.setState({
       data: this.state.data
     });
-  }    
-  
+  }
+
   removeChapter(parentChapters, index) {
     this.setState({
       showModal: true,
-      modalContent: 'Detta kapitel och dess underkapitel kommer att tas bort, det går inte att ångra ditt val. Vill du verkställa ändringen?',
+      modalContent:
+        "Detta kapitel och dess underkapitel kommer att tas bort, det går inte att ångra ditt val. Vill du verkställa ändringen?",
       showAbortButton: true,
       modalConfirmCallback: () => {
         parentChapters.splice(index, 1);
@@ -99,104 +102,127 @@ class InformativeEditor extends Component {
     this.setState({
       showModal: false,
       modalStyle: {},
-      modalConfirmCallback: () => {}      
+      modalConfirmCallback: () => {}
     });
   }
 
   renderMapDialog(chapter) {
-    
     var mapState = {},
-        checkedLayers = [],
-        updateMapSettings = (state) => {
-          mapState = state;
-        },    
-        updateLayersSettings = (state) => {
-          checkedLayers = state;          
-        };
+      checkedLayers = [],
+      updateMapSettings = state => {
+        mapState = state;
+      },
+      updateLayersSettings = state => {
+        checkedLayers = state;
+      };
 
     this.setState({
       showModal: true,
       showAbortButton: true,
-      modalContent: <Map 
-        chapter={chapter} 
-        onMapUpdate={state => updateMapSettings(state)}
-        onLayersUpdate={state => updateLayersSettings(state)} />,
+      modalContent: (
+        <Map
+          chapter={chapter}
+          onMapUpdate={state => updateMapSettings(state)}
+          onLayersUpdate={state => updateLayersSettings(state)}
+        />
+      ),
       modalConfirmCallback: () => {
         this.hideModal();
-        chapter.mapSettings = {                
+        chapter.mapSettings = {
           center: mapState.center,
-          zoom: mapState.zoom                
-        };      
+          zoom: mapState.zoom
+        };
         chapter.layers = checkedLayers;
       },
       modalStyle: {
-        overlay: {
-        },
+        overlay: {},
         content: {
-          left: '30px',
-          top: '30px',
-          right: '30px',
-          bottom: '30px',
-          width: 'auto',
+          left: "30px",
+          top: "30px",
+          right: "30px",
+          bottom: "30px",
+          width: "auto",
           margin: 0
-        }   
+        }
       }
     });
   }
 
-  renderChapter(parentChapters, chapter, index) {          
-    
-    var arrowStyle = !!chapter.expanded 
-          ? "fa fa-chevron-down pointer" 
-          : "fa fa-chevron-right pointer";
+  renderChapter(parentChapters, chapter, index) {
+    var arrowStyle = !!chapter.expanded
+      ? "fa fa-chevron-down pointer"
+      : "fa fa-chevron-right pointer";
 
-    return (    
-      <div key={Math.random() * 1E8} className="chapter">        
-        <h1><span className={arrowStyle} onClick={() => {
-          chapter.expanded = !chapter.expanded;
-          this.forceUpdate();
-        }} />{chapter.header}</h1>
-        <ChapterAdder onAddChapter={title => {
-          chapter.chapters.push(new Chapter({
-            header: title
-          }));
-          this.forceUpdate();
-        }} />&nbsp;
-        <span className="btn btn-success" onClick={() => {
-          this.renderMapDialog(chapter);
-        }} >Kartinställningar</span>&nbsp;
-        <span className="btn btn-danger" onClick={() => {          
-          this.removeChapter(parentChapters, index);
-        }} >Ta bort rubrik</span>        
-        <RichEditor 
-          display={chapter.expanded} 
-          html={chapter.html}           
-          onUpdate={(html) => {
-            chapter.html = html;    
-          }
-        } />
-        {
-          chapter.chapters.map((innerChapter, innerIndex) => {          
-            return this.renderChapter(chapter.chapters, innerChapter, innerIndex);
-          })
-        }
+    return (
+      <div key={Math.random() * 1e8} className="chapter">
+        <h1>
+          <span
+            className={arrowStyle}
+            onClick={() => {
+              chapter.expanded = !chapter.expanded;
+              this.forceUpdate();
+            }}
+          />
+          {chapter.header}
+        </h1>
+        <ChapterAdder
+          onAddChapter={title => {
+            chapter.chapters.push(
+              new Chapter({
+                header: title
+              })
+            );
+            this.forceUpdate();
+          }}
+        />
+        &nbsp;
+        <span
+          className="btn btn-success"
+          onClick={() => {
+            this.renderMapDialog(chapter);
+          }}
+        >
+          Kartinställningar
+        </span>
+        &nbsp;
+        <span
+          className="btn btn-danger"
+          onClick={() => {
+            this.removeChapter(parentChapters, index);
+          }}
+        >
+          Ta bort rubrik
+        </span>
+        <RichEditor
+          display={chapter.expanded}
+          html={chapter.html}
+          onUpdate={html => {
+            chapter.html = html;
+          }}
+        />
+        {chapter.chapters.map((innerChapter, innerIndex) => {
+          return this.renderChapter(chapter.chapters, innerChapter, innerIndex);
+        })}
       </div>
     );
   }
 
   renderData() {
     if (this.state.data) {
-      return (
-        this.state.data.chapters.map((chapter, index) => 
-          this.renderChapter(this.state.data.chapters, chapter, index))
+      return this.state.data.chapters.map((chapter, index) =>
+        this.renderChapter(this.state.data.chapters, chapter, index)
       );
     }
   }
 
   renderModal() {
-    var abortButton = this.state.showAbortButton 
-      ? <button className="btn btn-danger" onClick={(e) => this.hideModal()}>Avbryt</button> 
-      : "";
+    var abortButton = this.state.showAbortButton ? (
+      <button className="btn btn-danger" onClick={e => this.hideModal()}>
+        Avbryt
+      </button>
+    ) : (
+      ""
+    );
 
     return (
       <ReactModal
@@ -205,32 +231,45 @@ class InformativeEditor extends Component {
         className="Modal"
         overlayClassName="Overlay"
         style={this.state.modalStyle}
-        appElement={document.getElementById('root')}
+        appElement={document.getElementById("root")}
       >
-        <div style={{height: '100%'}}>
-          <div style={{
-            height: '100%',
-            paddingBottom: '45px',
-            marginBottom: '-35px',
-          }}>{this.state.modalContent}</div>
-          <button className="btn btn-success" onClick={(e) => {
-            if (this.state.modalConfirmCallback) {
-              this.state.modalConfirmCallback();
-            }
-            this.hideModal();
-          }}>Ok</button>&nbsp;        
+        <div style={{ height: "100%" }}>
+          <div
+            style={{
+              height: "100%",
+              paddingBottom: "45px",
+              marginBottom: "-35px"
+            }}
+          >
+            {this.state.modalContent}
+          </div>
+          <button
+            className="btn btn-success"
+            onClick={e => {
+              if (this.state.modalConfirmCallback) {
+                this.state.modalConfirmCallback();
+              }
+              this.hideModal();
+            }}
+          >
+            Ok
+          </button>
+          &nbsp;
           {abortButton}
         </div>
       </ReactModal>
-    )
+    );
   }
 
-  render () {    
+  render() {
     return (
-      <div>     
+      <div>
         {this.renderModal()}
         <div className="padded">
-          <span className="btn btn-success" onClick={() => this.save()}>Spara</span>&nbsp;
+          <span className="btn btn-success" onClick={() => this.save()}>
+            Spara
+          </span>
+          &nbsp;
           <ChapterAdder onAddChapter={title => this.addChapter(title)} />
         </div>
         {this.renderData()}

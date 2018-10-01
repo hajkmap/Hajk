@@ -29,7 +29,7 @@ const styles = theme => {
       bottom: 0,
       left: 0,
       right: 0,
-      [theme.breakpoints.down('xs')]: {
+      [theme.breakpoints.down("xs")]: {
         top: 0
       }
     },
@@ -40,47 +40,45 @@ const styles = theme => {
       display: "flex",
       flexDirection: "row",
       justifyContent: "flex-start",
-      top: '64px',
+      top: "64px",
       right: 0,
       left: 0,
       bottom: 0,
-      [theme.breakpoints.down('xs')]: {
-        display: 'inherit',
-        width: '100%',
-        top: '56px'
+      [theme.breakpoints.down("xs")]: {
+        display: "inherit",
+        width: "100%",
+        top: "56px"
       },
-      position: 'absolute'
+      position: "absolute"
     },
     widgets: {
-      position: 'absolute',
+      position: "absolute",
       zIndex: theme.zIndex.drawer - 2,
-      minHeight: '50px',
-      margin: '5px',
-      overflow: 'visible',
-      [theme.breakpoints.down('xs')]: {
-      }
+      minHeight: "50px",
+      margin: "5px",
+      overflow: "visible",
+      [theme.breakpoints.down("xs")]: {}
     },
     widgetsLeft: {
-      left: '8px',
-      top: '8px',
-      [theme.breakpoints.down('xs')]: {
-        left: '0px',
-        top: '0px'
+      left: "8px",
+      top: "8px",
+      [theme.breakpoints.down("xs")]: {
+        left: "0px",
+        top: "0px"
       }
     },
     widgetsRight: {
-      right: '7px',
-      top: '150px',
-      [theme.breakpoints.down('xs')]: {
-      }
+      right: "7px",
+      top: "150px",
+      [theme.breakpoints.down("xs")]: {}
     },
     button: {
-      width: '50px',
-      height: '50px',
-      marginBottom: '10px',
-      outline: 'none'
+      width: "50px",
+      height: "50px",
+      marginBottom: "10px",
+      outline: "none"
     }
-  }
+  };
 };
 
 class App extends Component {
@@ -126,7 +124,12 @@ class App extends Component {
           }
           return (
             <div key={i} className={classes.widgets[target]}>
-              <tool.component map={tool.map} app={tool.app} options={tool.options} type="widgetItem" />
+              <tool.component
+                map={tool.map}
+                app={tool.app}
+                options={tool.options}
+                type="widgetItem"
+              />
             </div>
           );
         });
@@ -150,14 +153,17 @@ class App extends Component {
                 variant="title"
                 color="inherit"
                 className={classes.flex}
-              >
-              </Typography>
+              />
               <Button color="inherit">Inloggad användare</Button>
             </MUIToolbar>
           </AppBar>
           <div id="map-overlay" className={classes.overlay}>
-            <div className={classNames(classes.widgets, classes.widgetsLeft)}>{this.renderWidgets("left")}</div>
-            <div className={classNames(classes.widgets, classes.widgetsRight)}>{this.renderWidgets("right")}</div>
+            <div className={classNames(classes.widgets, classes.widgetsLeft)}>
+              {this.renderWidgets("left")}
+            </div>
+            <div className={classNames(classes.widgets, classes.widgetsRight)}>
+              {this.renderWidgets("right")}
+            </div>
           </div>
           <Popup
             mapClickDataResult={this.state.mapClickDataResult}

@@ -20,14 +20,12 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import { Model } from 'backbone';
+import { Model } from "backbone";
 
 var map = Model.extend({
-
-  hello: function () {
-    console.log('hello');
+  hello: function() {
+    console.log("hello");
   }
-
 });
 
 export default map;

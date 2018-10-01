@@ -29,22 +29,20 @@ var ToolbarView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function () {
+  getInitialState: function() {
     return {};
   },
 
-  componentDidMount: function () {
-
-  },
+  componentDidMount: function() {},
 
   /**
    * Triggered before the component mounts.
    * @instance
    */
-  componentWillMount: function () {
-    this.props.navigationModel.on('change:activePanelType', () => {
+  componentWillMount: function() {
+    this.props.navigationModel.on("change:activePanelType", () => {
       this.setState({
-        activeTool: this.props.navigationModel.get('activePanelType')
+        activeTool: this.props.navigationModel.get("activePanelType")
       });
     });
   },
@@ -54,115 +52,129 @@ var ToolbarView = {
    * @instance
    * @return {external:ReactElement}
    */
-  render: function () {
+  render: function() {
     var layerSwitcherTool = this.props.model
-      .filter(t => t.get('toolbar'))
-      .filter(tool => tool.get('type') === 'layerswitcher')
+      .filter(t => t.get("toolbar"))
+      .filter(tool => tool.get("type") === "layerswitcher")
       .map((tool, index) => {
-        tool.set('toolbar', isMobile ? 'stable' : 'bottom');
+        tool.set("toolbar", isMobile ? "stable" : "bottom");
       });
 
     var tools = this.props.model
-      .filter(t => t.get('toolbar'))
-      .filter(tool => tool.get('toolbar') === 'bottom' || (tool.get('toolbar') === 'stable' && !mobilAnpassningEnabled))
+      .filter(t => t.get("toolbar"))
+      .filter(
+        tool =>
+          tool.get("toolbar") === "bottom" ||
+          (tool.get("toolbar") === "stable" && !mobilAnpassningEnabled)
+      )
       .map((tool, index) => {
-        var a = tool.get('panel').toLowerCase(),
+        var a = tool.get("panel").toLowerCase(),
           b = this.state.activeTool,
-          c = a === b ? 'btn btn-primary' : 'btn btn-default';
-        var id = tool.get('Id');
+          c = a === b ? "btn btn-primary" : "btn btn-default";
+        var id = tool.get("Id");
 
-        if (tool.get('active') === false) {
+        if (tool.get("active") === false) {
           return null;
         }
 
         return (
           <button
             id={id}
-            type='button'
+            type="button"
             className={c}
             onClick={() => {
               tool.clicked();
-              if (tool.get('type') !== 'information') {
-                this.props.navigationModel.set('r', Math.random());
+              if (tool.get("type") !== "information") {
+                this.props.navigationModel.set("r", Math.random());
               }
             }}
             key={index}
-            title={tool.get('title')}>
-            <i className={tool.get('icon')} />
+            title={tool.get("title")}
+          >
+            <i className={tool.get("icon")} />
           </button>
         );
       });
 
     // stable button
     var stableButton = this.props.model
-      .filter(t => t.get('toolbar'))
-      .filter(tool => tool.get('toolbar') === 'stable' && mobilAnpassningEnabled)
+      .filter(t => t.get("toolbar"))
+      .filter(
+        tool => tool.get("toolbar") === "stable" && mobilAnpassningEnabled
+      )
       .map((tool, index) => {
-        var a = tool.get('panel').toLowerCase(),
+        var a = tool.get("panel").toLowerCase(),
           b = this.state.activeTool,
-          c = a === b ? 'btn btn-primary' : 'btn btn-default';
-        var id = tool.get('Id');
+          c = a === b ? "btn btn-primary" : "btn btn-default";
+        var id = tool.get("Id");
 
-        if (tool.get('active') === false) {
+        if (tool.get("active") === false) {
           return null;
         }
 
         return (
           <button
             id={id}
-            type='button'
+            type="button"
             className={c}
             onClick={() => {
               tool.clicked();
-              if (tool.get('type') !== 'information') {
-                this.props.navigationModel.set('r', Math.random());
+              if (tool.get("type") !== "information") {
+                this.props.navigationModel.set("r", Math.random());
               }
             }}
             key={index}
-            title={tool.get('title')}>
-            <i className={tool.get('icon')} />
+            title={tool.get("title")}
+          >
+            <i className={tool.get("icon")} />
           </button>
         );
       });
 
     var widgets = this.props.model
-      .filter(t => t.get('toolbar'))
-      .filter(tool => tool.get('toolbar') === 'top-right')
+      .filter(t => t.get("toolbar"))
+      .filter(tool => tool.get("toolbar") === "top-right")
       .map((tool, index) => {
-        var className = tool.get('active') ? 'btn btn-primary' : 'btn btn-default';
-        tool.on('change:active', () => {
+        var className = tool.get("active")
+          ? "btn btn-primary"
+          : "btn btn-default";
+        tool.on("change:active", () => {
           this.forceUpdate();
         });
         return (
           <button
-            id={tool.get('Id')}
-            type='button'
+            id={tool.get("Id")}
+            type="button"
             className={className}
             onClick={() => {
               tool.clicked();
             }}
             key={index}
-            title={tool.get('title')}>
-            <i className={tool.get('icon')} />
+            title={tool.get("title")}
+          >
+            <i className={tool.get("icon")} />
           </button>
         );
       });
 
     return (
-      <div id='toolbar-'>
-        <div className='map-toolbar-wrapper'>
-          <div className='map-toolbar'>
-            <div className='btn-group btn-group-lg stable-toolbar'>{stableButton}</div>
+      <div id="toolbar-">
+        <div className="map-toolbar-wrapper">
+          <div className="map-toolbar">
+            <div className="btn-group btn-group-lg stable-toolbar">
+              {stableButton}
+            </div>
             <div
-              className='btn-group btn-group-lg bottom-toolbar'
-              role='group'
-              id='arrow'
-              aria-label='toolbar'>
+              className="btn-group btn-group-lg bottom-toolbar"
+              role="group"
+              id="arrow"
+              aria-label="toolbar"
+            >
               {tools}
             </div>
           </div>
-          <div className='upper-toolbar'>{widgets}</div>
-          <div className='information' id='information' />
+          <div className="upper-toolbar">{widgets}</div>
+          <div className="information" id="information" />
         </div>
       </div>
     );

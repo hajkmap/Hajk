@@ -20,74 +20,75 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import { Model } from 'backbone';
-const $ = require('jquery');
+import { Model } from "backbone";
+const $ = require("jquery");
 const jQuery = $;
 global.window.jQuery = jQuery;
-require('jquery-sortable');
+require("jquery-sortable");
 
 var menu = Model.extend({
-
   defaults: {
     layers: [],
     addedLayers: []
   },
 
-  loadMaps: function (callback) {
+  loadMaps: function(callback) {
     $.ajax({
-      url: this.get('config').url_map_list,
-      method: 'GET',
-      contentType: 'application/json',
-      success: (data) => {
+      url: this.get("config").url_map_list,
+      method: "GET",
+      contentType: "application/json",
+      success: data => {
         var name = data[0];
         if (name === undefined) {
-          name = '';
+          name = "";
         }
         this.set({
-          urlMapConfig: this.get('config').url_map + '/' + name,
+          urlMapConfig: this.get("config").url_map + "/" + name,
           mapFile: name
         });
         callback(data);
       },
-      error: (message) => {
+      error: message => {
         callback(message);
       }
     });
   },
 
-  createMap: function (name, callback) {
+  createMap: function(name, callback) {
     $.ajax({
-      url: this.get('config').url_map_create + '/' + name,
-      method: 'GET',
-      contentType: 'application/json',
-      success: (data) => {
+      url: this.get("config").url_map_create + "/" + name,
+      method: "GET",
+      contentType: "application/json",
+      success: data => {
         callback(data);
       },
-      error: (message) => {
+      error: message => {
         callback(message);
       }
     });
   },
 
-  deleteMap: function (callback) {
+  deleteMap: function(callback) {
     $.ajax({
-      url: this.get('config').url_map_delete + '/' + this.get('mapFile'),
-      method: 'GET',
-      contentType: 'application/json',
+      url: this.get("config").url_map_delete + "/" + this.get("mapFile"),
+      method: "GET",
+      contentType: "application/json",
       success: () => {
         callback();
       },
-      error: (message) => {
-        callback('Kartan kunde inte tas bort. Försök igen senare.');
+      error: message => {
+        callback("Kartan kunde inte tas bort. Försök igen senare.");
       }
     });
   },
 
-  updateToolConfig: function (config, callback) {
+  updateToolConfig: function(config, callback) {
     $.ajax({
-      url: `${this.get('config').url_tool_settings}?mapFile=${this.get('mapFile')}.json`,
-      method: 'PUT',
-      contentType: 'application/json',
+      url: `${this.get("config").url_tool_settings}?mapFile=${this.get(
+        "mapFile"
+      )}.json`,
+      method: "PUT",
+      contentType: "application/json",
       data: JSON.stringify(config),
       success: () => {
         callback(true);
@@ -98,11 +99,13 @@ var menu = Model.extend({
     });
   },
 
-  updateMapConfig: function (config, callback) {
+  updateMapConfig: function(config, callback) {
     $.ajax({
-      url: `${this.get('config').url_map_settings}?mapFile=${this.get('mapFile')}.json`,
-      method: 'PUT',
-      contentType: 'application/json',
+      url: `${this.get("config").url_map_settings}?mapFile=${this.get(
+        "mapFile"
+      )}.json`,
+      method: "PUT",
+      contentType: "application/json",
       data: JSON.stringify(config),
       success: () => {
         callback(true);
@@ -114,21 +117,21 @@ var menu = Model.extend({
   },
 
   /**
-	 * Hämtar sträng med tillgängliga ad-grupper och konverterar till string[]
-	 */
-  fetchADGroups: function (callback) {
-    if (this.get('config').authentication_active) {
+   * Hämtar sträng med tillgängliga ad-grupper och konverterar till string[]
+   */
+  fetchADGroups: function(callback) {
+    if (this.get("config").authentication_active) {
       $.ajax({
-        url: '/mapservice/config/getusergroups',
-        method: 'GET',
-        success: (data) => {
-          let g = data.split(',');
+        url: "/mapservice/config/getusergroups",
+        method: "GET",
+        success: data => {
+          let g = data.split(",");
           let array = g.map(Function.prototype.call, String.prototype.trim);
 
           callback(array);
         },
-        error: (err) => {
-          console.log('Fel: ', err);
+        error: err => {
+          console.log("Fel: ", err);
         }
       });
     } else {
@@ -136,11 +139,13 @@ var menu = Model.extend({
     }
   },
 
-  updateConfig: function (config, callback) {
+  updateConfig: function(config, callback) {
     $.ajax({
-      url: `${this.get('config').url_layermenu_settings}?mapFile=${this.get('mapFile')}.json`,
-      method: 'PUT',
-      contentType: 'application/json',
+      url: `${this.get("config").url_layermenu_settings}?mapFile=${this.get(
+        "mapFile"
+      )}.json`,
+      method: "PUT",
+      contentType: "application/json",
       data: JSON.stringify(config),
       success: () => {
         callback(true);
@@ -151,41 +156,40 @@ var menu = Model.extend({
     });
   },
 
-  findLayerInConfig: function (id) {
+  findLayerInConfig: function(id) {
     var layer = false;
 
-    function findInGroups (groups, layerId) {
+    function findInGroups(groups, layerId) {
       groups.forEach(group => {
         var found = group.layers.find(l => l.id === layerId);
         if (found) {
           layer = found;
         }
-        if (group.hasOwnProperty('groups')) {
+        if (group.hasOwnProperty("groups")) {
           findInGroups(group.groups, layerId);
         }
       });
     }
 
-    findInGroups(this.get('layerMenuConfig').groups, id);
+    findInGroups(this.get("layerMenuConfig").groups, id);
 
     return layer;
   },
 
   /**
-	 * Tittar i config.json på attributet authentication_active om autentisering skall vara aktiverat eller ej
-	 */
-  getAuthSetting: function (callback) {
-    callback(this.get('config').authentication_active);
+   * Tittar i config.json på attributet authentication_active om autentisering skall vara aktiverat eller ej
+   */
+  getAuthSetting: function(callback) {
+    callback(this.get("config").authentication_active);
   },
 
-  getConfig: function (url, callback) {
+  getConfig: function(url, callback) {
     $.ajax(url, {
       success: data => {
         callback(data);
       }
     });
   }
-
 });
 
 export default menu;

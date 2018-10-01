@@ -20,9 +20,9 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var Panel = require('views/panel');
-var LayerItem = require('views/layeritem');
-var BackgroundSwitcher = require('components/backgroundswitcher');
+var Panel = require("views/panel");
+var LayerItem = require("views/layeritem");
+var BackgroundSwitcher = require("components/backgroundswitcher");
 
 /**
  * @class
@@ -41,7 +41,7 @@ var LayerPanelView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function () {
+  getInitialState: function() {
     this.renderedLayerGroups = {};
     return {
       visible: false,
@@ -50,27 +50,31 @@ var LayerPanelView = {
     };
   },
 
-  componentWillMount: function () {
-    this.props.model.setExpanded(this.props.model.get('groups'));
+  componentWillMount: function() {
+    this.props.model.setExpanded(this.props.model.get("groups"));
   },
 
   /**
    * Triggered when the component is successfully mounted into the DOM.
    * @instance
    */
-  componentDidMount: function () {
-    if (this.props.model.get('dropdownThemeMaps')) {
+  componentDidMount: function() {
+    if (this.props.model.get("dropdownThemeMaps")) {
       this.populateThemeMaps();
     }
 
-    this.props.model.on('change:layerCollection', this.onLayerCollectionChanged, this);
-    this.props.model.get('layerCollection').forEach(layer => {
-      layer.on('change:visible', () => {
+    this.props.model.on(
+      "change:layerCollection",
+      this.onLayerCollectionChanged,
+      this
+    );
+    this.props.model.get("layerCollection").forEach(layer => {
+      layer.on("change:visible", () => {
         this.updateGroupToggledCheckbox(layer);
       });
     });
     this.setState({
-      layers: this.props.model.get('layerCollection')
+      layers: this.props.model.get("layerCollection")
     });
   },
 
@@ -78,10 +82,14 @@ var LayerPanelView = {
    * Triggered when component unmounts.
    * @instance
    */
-  componentWillUnmount: function () {
-    this.props.model.off('change:layerCollection', this.onLayerCollectionChanged, this);
-    this.props.model.get('layerCollection').forEach(layer => {
-      layer.off('change:visible');
+  componentWillUnmount: function() {
+    this.props.model.off(
+      "change:layerCollection",
+      this.onLayerCollectionChanged,
+      this
+    );
+    this.props.model.get("layerCollection").forEach(layer => {
+      layer.off("change:visible");
     });
   },
 
@@ -89,8 +97,8 @@ var LayerPanelView = {
    * On layer collection change event handler.
    * @instance
    */
-  onLayerCollectionChanged: function () {
-    this.setState({ layers: this.props.model.get('layerCollection') });
+  onLayerCollectionChanged: function() {
+    this.setState({ layers: this.props.model.get("layerCollection") });
   },
 
   /**
@@ -100,13 +108,13 @@ var LayerPanelView = {
    * @param {number} groupId
    * @return {object} group
    */
-  findGroupInConfig: function recursive (groups, id) {
+  findGroupInConfig: function recursive(groups, id) {
     var found = false;
     groups.forEach(group => {
       if (group.id === id) {
         found = group;
       } else {
-        if (group.hasOwnProperty('groups')) {
+        if (group.hasOwnProperty("groups")) {
           if (!found) {
             found = recursive(group.groups, id);
           }
@@ -122,8 +130,8 @@ var LayerPanelView = {
    * @param {group} group
    * @return {Layer[]} layers
    */
-  getLayersForGroup: function (group) {
-    var layersInModel = this.props.model.get('layerCollection'),
+  getLayersForGroup: function(group) {
+    var layersInModel = this.props.model.get("layerCollection"),
       layers = [];
 
     if (!layersInModel || !group) {
@@ -133,7 +141,7 @@ var LayerPanelView = {
     group.layers.forEach(inLayer => {
       var layer = layersInModel.find(layer => layer.id === inLayer.id);
       if (layer) {
-        layer.set('group', group.id);
+        layer.set("group", group.id);
         layers.push(layer);
       }
     });
@@ -147,12 +155,12 @@ var LayerPanelView = {
    * @param {object} group
    * @return {Layer[]} layers
    */
-  drillGroupForLayers: function recursive (group) {
+  drillGroupForLayers: function recursive(group) {
     var groups = group.groups,
       layers = this.getLayersForGroup(group);
 
     if (groups) {
-      groups.forEach((subgroup) => {
+      groups.forEach(subgroup => {
         layers = layers.concat(recursive.call(this, subgroup));
       });
     }
@@ -167,16 +175,19 @@ var LayerPanelView = {
    * @param {object} group
    * @param {object} e
    */
-  toggleGroup: function (group, e) {
+  toggleGroup: function(group, e) {
     var layers = this.drillGroupForLayers(group);
-    if (group.autoChecked !== undefined && group.autoChecked !== group.checked) {
+    if (
+      group.autoChecked !== undefined &&
+      group.autoChecked !== group.checked
+    ) {
       group.checked = group.autoChecked;
     }
     group.checked = !group.checked;
     this.forceUpdate();
-    layers.forEach((layer) => {
-      var groupId = layer.get('group');
-      layer.set('visible', group.checked);
+    layers.forEach(layer => {
+      var groupId = layer.get("group");
+      layer.set("visible", group.checked);
     });
   },
 
@@ -187,10 +198,15 @@ var LayerPanelView = {
    * @param {object} group
    * @param {object} e
    */
-  updateGroupToggledCheckbox: function recur (layer) {
+  updateGroupToggledCheckbox: function recur(layer) {
     if (!layer) return;
 
-    var groupId = typeof layer === 'string' ? layer : (layer.get ? layer.get('group') : undefined),
+    var groupId =
+        typeof layer === "string"
+          ? layer
+          : layer.get
+            ? layer.get("group")
+            : undefined,
       group,
       layers;
 
@@ -203,12 +219,12 @@ var LayerPanelView = {
       }
 
       let checked = layers.every(layer => layer.getVisible() === true),
-        $ref = $(this.refs['group_' + group.id]),
-        checkedClass = 'fa-check-square-o',
-        uncheckedClass = 'fa-square-o',
+        $ref = $(this.refs["group_" + group.id]),
+        checkedClass = "fa-check-square-o",
+        uncheckedClass = "fa-square-o",
         activeGroup = layers.some(layer => layer.getVisible() === true),
         $refGroup = $(this.refs[group.id]),
-        activeClass = 'active-group';
+        activeClass = "active-group";
 
       if (checked) {
         $ref.removeClass(uncheckedClass);
@@ -221,9 +237,9 @@ var LayerPanelView = {
       }
 
       if (activeGroup) {
-        $refGroup.addClass('active-group');
+        $refGroup.addClass("active-group");
       } else {
-        $refGroup.removeClass('active-group');
+        $refGroup.removeClass("active-group");
       }
     }
   },
@@ -234,12 +250,12 @@ var LayerPanelView = {
    * @param {object} group
    * @param {object} e
    */
-  toggleGroupVisibility: function (group, e) {
+  toggleGroupVisibility: function(group, e) {
     var state = {},
       value,
-      id = 'group_' + group.id;
+      id = "group_" + group.id;
 
-    value = state[id] = this.state[id] === 'hidden' ? 'visible' : 'hidden';
+    value = state[id] = this.state[id] === "hidden" ? "visible" : "hidden";
     this.props.model.set(id, value);
     this.setState(state);
   },
@@ -250,7 +266,7 @@ var LayerPanelView = {
    * @param {object} group
    * @return {LayerItemView[]}
    */
-  renderLayers: function (group) {
+  renderLayers: function(group) {
     var layers = this.getLayersForGroup(group);
 
     if (layers.length === 0) {
@@ -258,7 +274,7 @@ var LayerPanelView = {
     }
 
     return layers.map((layer, index) => {
-      return (<LayerItem key={'layer_' + Math.random()} layer={layer} />);
+      return <LayerItem key={"layer_" + Math.random()} layer={layer} />;
     });
   },
 
@@ -268,7 +284,7 @@ var LayerPanelView = {
    * @param {object[]} groups
    * @return {external.ReactElement} groups
    */
-  renderGroups: function recursive (groups) {
+  renderGroups: function recursive(groups) {
     return groups.map((group, i) => {
       if (!this.renderedLayerGroups.hasOwnProperty(group.id)) {
         this.renderedLayerGroups[group.id] = this.renderLayers(group);
@@ -276,14 +292,14 @@ var LayerPanelView = {
 
       var layers = this.renderedLayerGroups[group.id],
         subgroups,
-        id = 'group_' + group.id,
+        id = "group_" + group.id,
         toggleGroup,
         buttonClassName,
         toggleClassName;
 
       if (layers) {
         layers.forEach(layer => {
-          var id = layer.props.layer.get('id');
+          var id = layer.props.layer.get("id");
           if (!this.mountedLayers.hasOwnProperty(id)) {
             this.mountedLayers[id] = layer.props.layer;
           }
@@ -294,32 +310,45 @@ var LayerPanelView = {
         this.state[id] = this.props.model.get(id);
       }
 
-      if (group.hasOwnProperty('groups')) {
+      if (group.hasOwnProperty("groups")) {
         subgroups = recursive.call(this, group.groups);
       }
 
-      buttonClassName = this.state[id] === 'hidden'
-        ? 'fa fa-angle-right clickable arrow'
-        : 'fa fa-angle-up clickable arrow';
+      buttonClassName =
+        this.state[id] === "hidden"
+          ? "fa fa-angle-right clickable arrow"
+          : "fa fa-angle-up clickable arrow";
 
-      toggleClassName = group.checked ? 'fa fa-check-square-o' : 'fa fa-square-o';
+      toggleClassName = group.checked
+        ? "fa fa-check-square-o"
+        : "fa fa-square-o";
 
-      toggleGroup = group.toggled
-        ? (<i
+      toggleGroup = group.toggled ? (
+        <i
           className={toggleClassName}
-          style={{cursor: 'pointer', marginLeft: '4px', width: '14px'}}
+          style={{ cursor: "pointer", marginLeft: "4px", width: "14px" }}
           ref={id}
           onClick={this.toggleGroup.bind(this, group)}
           id={id}
-        />)
-        : null;
+        />
+      ) : null;
 
       return (
-        <div className='layer-group' key={i}>
+        <div className="layer-group" key={i}>
           <div>
-            <span className={buttonClassName} onClick={this.toggleGroupVisibility.bind(this, group)} />
+            <span
+              className={buttonClassName}
+              onClick={this.toggleGroupVisibility.bind(this, group)}
+            />
             {toggleGroup}
-            <label style={{cursor: 'pointer', 'marginLeft': '4px'}} ref={group.id} onClick={this.toggleGroupVisibility.bind(this, group)} id={group.id}>{group.name}</label>
+            <label
+              style={{ cursor: "pointer", marginLeft: "4px" }}
+              ref={group.id}
+              onClick={this.toggleGroupVisibility.bind(this, group)}
+              id={group.id}
+            >
+              {group.name}
+            </label>
           </div>
           <div className={this.state[id]}>
             {layers}
@@ -334,7 +363,7 @@ var LayerPanelView = {
    * Toggle all layers
    * @instance
    */
-  toggleAllOff () {
+  toggleAllOff() {
     this.props.model.toggleAllOff();
   },
 
@@ -344,14 +373,14 @@ var LayerPanelView = {
    * @param {event} e
    */
 
-  setThemeMap: function (e) {
+  setThemeMap: function(e) {
     var configurationName = e.target.value;
     var index = e.nativeEvent.target.selectedIndex;
     var configurationTitle = e.nativeEvent.target[index].text;
     this.props.model.setThemeMap(configurationName, configurationTitle);
   },
 
-  populateThemeMaps: function () {
+  populateThemeMaps: function() {
     this.props.model.loadThemeMaps(mapConfigurations => {
       this.setState({
         mapConfigurations: mapConfigurations,
@@ -366,12 +395,12 @@ var LayerPanelView = {
    * @instance
    * @param {object} e
    */
-  selectTheme: function (e) {
+  selectTheme: function(e) {
     var value = e.target.value,
       before = this.mountedLayers;
 
     this.mountedLayers = {};
-    this.props.model.set('selectedTheme', parseInt(value));
+    this.props.model.set("selectedTheme", parseInt(value));
     this.setState({
       selectedTheme: value
     });
@@ -387,18 +416,16 @@ var LayerPanelView = {
         m = a.filter(e => b.indexOf(e) < 0),
         l = this.state.layers;
 
-      l.toArray().filter(layer =>
-        m.find(v =>
-          parseInt(v) === layer.get('id')
-        )
-      ).forEach(layer => {
-        layer.setVisible(false);
-      });
+      l.toArray()
+        .filter(layer => m.find(v => parseInt(v) === layer.get("id")))
+        .forEach(layer => {
+          layer.setVisible(false);
+        });
     }, 0);
   },
 
-  openInstruction: function () {
-    var element = $('#instructionText');
+  openInstruction: function() {
+    var element = $("#instructionText");
     element.toggle();
   },
   /**
@@ -408,9 +435,11 @@ var LayerPanelView = {
    * @param {object[]} themes
    * @return {external.ReactElement} theme options
    */
-  renderThemeOptions: function (themes) {
+  renderThemeOptions: function(themes) {
     return themes.map((theme, i) => (
-      <option key={i} value={theme.id}>{theme.name}</option>
+      <option key={i} value={theme.id}>
+        {theme.name}
+      </option>
     ));
   },
 
@@ -419,41 +448,61 @@ var LayerPanelView = {
    * @instance
    * @return {external:ReactElement}
    */
-  render: function () {
+  render: function() {
     var mapConfigurations = [];
-    if (typeof this.state.mapConfigurations !== 'undefined' && this.state.mapConfigurations != null) {
-      mapConfigurations = this.state.mapConfigurations.map((map, i) => <option value={map.mapConfigurationName} key={i}>{map.mapConfigurationTitle}</option>);
+    if (
+      typeof this.state.mapConfigurations !== "undefined" &&
+      this.state.mapConfigurations != null
+    ) {
+      mapConfigurations = this.state.mapConfigurations.map((map, i) => (
+        <option value={map.mapConfigurationName} key={i}>
+          {map.mapConfigurationTitle}
+        </option>
+      ));
     }
     var groups, toggleAllButton, dropdownThemeMaps, themeMapHeaderCaption;
 
-    this.groups = this.props.model.get('groups');
+    this.groups = this.props.model.get("groups");
 
-    groups = this.renderGroups(this.props.model.get('groups'));
+    groups = this.renderGroups(this.props.model.get("groups"));
 
-    this.props.model.get('layerCollection').forEach(layer => {
+    this.props.model.get("layerCollection").forEach(layer => {
       this.updateGroupToggledCheckbox(layer);
     });
 
-    if (this.props.model.get('toggleAllButton')) {
+    if (this.props.model.get("toggleAllButton")) {
       toggleAllButton = (
-        <div style={{marginBottom: '10px'}}>
-          <button className='btn btn-main btn-inverse' onClick={() => this.toggleAllOff()}>Släck alla lager</button>
+        <div style={{ marginBottom: "10px" }}>
+          <button
+            className="btn btn-main btn-inverse"
+            onClick={() => this.toggleAllOff()}
+          >
+            Släck alla lager
+          </button>
         </div>
       );
     }
 
-    if (this.props.model.get('themeMapHeaderCaption') !== null &&
-        this.props.model.get('themeMapHeaderCaption').length > 0) {
+    if (
+      this.props.model.get("themeMapHeaderCaption") !== null &&
+      this.props.model.get("themeMapHeaderCaption").length > 0
+    ) {
       themeMapHeaderCaption = (
-        <span style={{marginRight: '10px'}}>{this.props.model.get('themeMapHeaderCaption')}</span>
+        <span style={{ marginRight: "10px" }}>
+          {this.props.model.get("themeMapHeaderCaption")}
+        </span>
       );
     }
 
-    if (this.props.model.get('dropdownThemeMaps')) {
+    if (this.props.model.get("dropdownThemeMaps")) {
       dropdownThemeMaps = (
         <div>
           {themeMapHeaderCaption}
-          <select onChange={this.setThemeMap} style={{marginBottom: '10px', width: '100%'}} value={this.state.dropDownValue}>
+          <select
+            onChange={this.setThemeMap}
+            style={{ marginBottom: "10px", width: "100%" }}
+            value={this.state.dropDownValue}
+          >
             {mapConfigurations}
           </select>
         </div>
@@ -461,11 +510,20 @@ var LayerPanelView = {
     }
 
     return (
-      <Panel title='Kartlager' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
-        <div className='layer-panel'>
+      <Panel
+        title="Kartlager"
+        onCloseClicked={this.props.onCloseClicked}
+        onUnmountClicked={this.props.onUnmountClicked}
+        minimized={this.props.minimized}
+        instruction={atob(this.props.model.get("instruction"))}
+      >
+        <div className="layer-panel">
           {dropdownThemeMaps}
           {toggleAllButton}
-          <BackgroundSwitcher layers={this.props.model.getBaseLayers()} model={this.props.model} />
+          <BackgroundSwitcher
+            layers={this.props.model.getBaseLayers()}
+            model={this.props.model}
+          />
           <br />
           {groups}
         </div>

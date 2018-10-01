@@ -1,23 +1,23 @@
 import React, { Component } from "react";
 import { createPortal } from "react-dom";
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles } from "@material-ui/core/styles";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import "./style.css";
 
 const styles = theme => ({
   button: {
-    margin: theme.spacing.unit,
+    margin: theme.spacing.unit
   },
   leftIcon: {
-    marginRight: theme.spacing.unit,
+    marginRight: theme.spacing.unit
   },
   rightIcon: {
-    marginLeft: theme.spacing.unit,
+    marginLeft: theme.spacing.unit
   },
   iconSmall: {
-    fontSize: 20,
-  },
+    fontSize: 20
+  }
 });
 
 class SimpleLayersSwitcherView extends Component {
@@ -31,15 +31,13 @@ class SimpleLayersSwitcherView extends Component {
     };
   }
 
-  componentDidMount() {
-  }
+  componentDidMount() {}
 
-  componentWillMount() {
-  }
+  componentWillMount() {}
 
   handleChange = panel => (event, expanded) => {
     this.setState({
-      expanded: expanded ? panel : false,
+      expanded: expanded ? panel : false
     });
   };
 
@@ -81,7 +79,7 @@ class SimpleLayersSwitcherView extends Component {
 
   renderBreadCrumbs() {
     return createPortal(
-      <BreadCrumbs map={this.props.map}></BreadCrumbs>,
+      <BreadCrumbs map={this.props.map} />,
       document.getElementById("map")
     );
   }

@@ -11,17 +11,15 @@ import EditModel from "./EditModel.js";
 import Observer from "react-event-observer";
 
 const styles = theme => {
-  return {
-  }
+  return {};
 };
 
 class Edit extends Component {
-
   state = {
     panelOpen: false
   };
 
-  onClick = (e) => {
+  onClick = e => {
     this.app.onPanelOpen(this);
     this.setState({
       panelOpen: true
@@ -80,7 +78,7 @@ class Edit extends Component {
   }
 
   renderAsWidgetItem() {
-    const {classes} = this.props;
+    const { classes } = this.props;
     return (
       <div>
         <Button
@@ -117,6 +115,7 @@ class Edit extends Component {
   }
 
   render() {
+    console.log("edit.js render()", this);
 
     if (this.props.type === "toolbarItem") {
       return this.renderAsToolbarItem();
@@ -127,7 +126,6 @@ class Edit extends Component {
     }
 
     return null;
-
   }
 }
 

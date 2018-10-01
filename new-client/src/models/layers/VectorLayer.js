@@ -5,8 +5,8 @@ import GML2 from "ol/format/GML";
 import { Fill, Text, Stroke, Icon, Circle, Style } from "ol/style";
 import { all as strategyAll } from "ol/loadingstrategy";
 import { transform } from "ol/proj";
-import {toContext} from 'ol/render';
-import {Point, Polygon, LineString} from 'ol/geom';
+import { toContext } from "ol/render";
+import { Point, Polygon, LineString } from "ol/geom";
 import LayerInfo from "./LayerInfo.js";
 
 let vectorLayerProperties = {
@@ -56,7 +56,7 @@ class WFSVectorLayer {
     }
 
     this.layer = new VectorLayer({
-      featureType: config.params.typename.split(':')[1],
+      featureType: config.params.typename.split(":")[1],
       information: config.information,
       caption: config.caption,
       name: config.name,
@@ -246,11 +246,14 @@ class WFSVectorLayer {
       this.reprojectFeatures(features, from, to);
     }
 
-    if (undefined !== this.config.filterAttribute &&
-        undefined !== this.config.filterValue) {
-      features = features.filter(feature =>
-        feature.getProperties()[this.config.filterAttribute] !==
-        this.config.filterValue
+    if (
+      undefined !== this.config.filterAttribute &&
+      undefined !== this.config.filterValue
+    ) {
+      features = features.filter(
+        feature =>
+          feature.getProperties()[this.config.filterAttribute] !==
+          this.config.filterValue
       );
     }
 
@@ -290,13 +293,13 @@ class WFSVectorLayer {
       response.text().then(gmlText => {
         const parser = new GML2();
         const features = parser.readFeatures(gmlText);
-        const canvas = document.createElement('canvas');
+        const canvas = document.createElement("canvas");
 
         const scale = 120;
-        const padding = 1/5;
+        const padding = 1 / 5;
         const pointRadius = 15;
 
-        const vectorContext = toContext(canvas.getContext('2d'), {
+        const vectorContext = toContext(canvas.getContext("2d"), {
           size: [scale, scale]
         });
         const style = this.getStyle(undefined, undefined, pointRadius)[0];
@@ -307,24 +310,30 @@ class WFSVectorLayer {
           featureType = features[0].getGeometry().getType();
         }
 
-        switch(featureType) {
+        switch (featureType) {
           case "Point":
             vectorContext.drawGeometry(new Point([scale / 2, scale / 2]));
             break;
           case "Polygon":
-            vectorContext.drawGeometry(new Polygon([[
-              [scale * padding, scale * padding],
-              [scale * padding, scale - scale * padding],
-              [scale - scale * padding, scale - scale * padding],
-              [scale - scale * padding, scale * padding],
-              [scale * padding, scale * padding]
-            ]]));
+            vectorContext.drawGeometry(
+              new Polygon([
+                [
+                  [scale * padding, scale * padding],
+                  [scale * padding, scale - scale * padding],
+                  [scale - scale * padding, scale - scale * padding],
+                  [scale - scale * padding, scale * padding],
+                  [scale * padding, scale * padding]
+                ]
+              ])
+            );
             break;
           case "LineString":
-            vectorContext.drawGeometry(new LineString([
-              [scale * padding, scale - scale * padding],
-              [scale - scale * padding, scale * padding]
-            ]));
+            vectorContext.drawGeometry(
+              new LineString([
+                [scale * padding, scale - scale * padding],
+                [scale - scale * padding, scale * padding]
+              ])
+            );
             break;
           default:
             break;

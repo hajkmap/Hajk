@@ -39,11 +39,12 @@ class Suggest extends Component {
     window.location.href = string;
   };
 
-  // closePanel = () => {
-  //   this.setState({
-  //     panelOpen: false
-  //   });
-  // };
+  closePanel = () => {
+    // FIXME: This shouldn't really be required for plugins that don't have a panel…
+    this.setState({
+      panelOpen: false
+    });
+  };
 
   constructor(spec) {
     super(spec);

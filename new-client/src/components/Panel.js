@@ -24,13 +24,13 @@ const styles = theme => {
     drawerPaperRight: {
       position: "fixed",
       right: 0,
-      top: '64px',
+      top: "64px",
       [theme.breakpoints.down("xs")]: {
-        top: '54px'
+        top: "54px"
       }
     },
     drawerPaperContent: {
-      padding: "10px",
+      padding: "10px"
     },
     drawerPaperClosed: {
       display: "none"
@@ -39,13 +39,14 @@ const styles = theme => {
 };
 
 class Panel extends Component {
-
   close = e => {
     const { onClose } = this.props;
     if (onClose) onClose();
   };
 
   render() {
+    console.log("Panel.js render() props", this.props);
+
     const { classes, open, title, children } = this.props;
     return (
       <Drawer
@@ -57,7 +58,7 @@ class Panel extends Component {
           paper: classNames(
             classes.drawerPaper,
             !open && classes.drawerPaperClosed,
-            (this.props.position === "right" ? classes.drawerPaperRight : "")
+            this.props.position === "right" ? classes.drawerPaperRight : ""
           )
         }}
       >

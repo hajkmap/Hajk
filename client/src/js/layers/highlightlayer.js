@@ -20,7 +20,7 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var LayerModel = require('layers/layer');
+var LayerModel = require("layers/layer");
 
 /**
  * HighlightLayerProperties object
@@ -31,9 +31,9 @@ var LayerModel = require('layers/layer');
  */
 var HighlightLayerProperties = {
   source: undefined,
-  name: 'highlight-wms',
+  name: "highlight-wms",
   selectedLayer: undefined,
-  markerImg: 'assets/icons/marker.png'
+  markerImg: "assets/icons/marker.png"
 };
 
 /**
@@ -49,26 +49,26 @@ var HighlightLayer = {
    */
   defaults: HighlightLayerProperties,
 
-  getDefaultStyle: function () {
+  getDefaultStyle: function() {
     return new ol.style.Style({
       fill: new ol.style.Fill({
-        color: 'rgba(255, 255, 255, 0.2)'
+        color: "rgba(255, 255, 255, 0.2)"
       }),
       stroke: new ol.style.Stroke({
-        color: 'rgba(20, 20, 255, 0.8)',
+        color: "rgba(20, 20, 255, 0.8)",
         width: 4
       }),
       image: new ol.style.Icon({
-        anchor: this.get('anchor'),
-        anchorXUnits: 'pixels',
-        anchorYUnits: 'pixels',
-        src: this.get('markerImg'),
-        imgSize: this.get('imgSize')
+        anchor: this.get("anchor"),
+        anchorXUnits: "pixels",
+        anchorYUnits: "pixels",
+        src: this.get("markerImg"),
+        imgSize: this.get("imgSize")
       })
     });
   },
 
-  initialize: function (props) {
+  initialize: function(props) {
     LayerModel.prototype.initialize.call(this);
 
     this.set({
@@ -78,14 +78,14 @@ var HighlightLayer = {
       source: new ol.source.Vector({}),
       queryable: false,
       visible: true,
-      type: 'highlight'
+      type: "highlight"
     });
 
     this.layer = new ol.layer.Vector({
-      id: props.id || '',
+      id: props.id || "",
       visible: true,
-      name: this.get('name'),
-      source: this.get('source'),
+      name: this.get("name"),
+      source: this.get("source"),
       style: props.style || this.getDefaultStyle()
     });
   },
@@ -94,8 +94,8 @@ var HighlightLayer = {
    * Remove all features from the highlight layer.
    * @instance
    */
-  clearHighlight: function () {
-    var source = this.get('source');
+  clearHighlight: function() {
+    var source = this.get("source");
     source.clear();
   },
 
@@ -104,9 +104,9 @@ var HighlightLayer = {
    * @instance
    * @param {external:ol.Feature} feature
    */
-  addHighlight: function (feature, clear, style) {
-    var source = this.get('source');
-    this.set('visible', true);
+  addHighlight: function(feature, clear, style) {
+    var source = this.get("source");
+    this.set("visible", true);
     if (clear && source.getFeatures().length > 0) {
       this.clearHighlight();
     }
@@ -119,10 +119,12 @@ var HighlightLayer = {
    * @instance
    * @param {external:ol.Feature} feature
    */
-  removeHighlight: function (feature) {
-    var f = this.get('source').getFeatures().find(f => f.getId() === feature.getId());
+  removeHighlight: function(feature) {
+    var f = this.get("source")
+      .getFeatures()
+      .find(f => f.getId() === feature.getId());
     if (f) {
-      this.get('source').removeFeature(f);
+      this.get("source").removeFeature(f);
     }
   },
 
@@ -131,9 +133,9 @@ var HighlightLayer = {
    * @param {external:ol.layer} layer
    * @instance
    */
-  setSelectedLayer: function (layer) {
-    this.set('selectedLayer', layer);
-    this.get('selectedLayer').on('change:visible', (visibility) => {
+  setSelectedLayer: function(layer) {
+    this.set("selectedLayer", layer);
+    this.get("selectedLayer").on("change:visible", visibility => {
       this.selectedLayerChanged();
     });
   },
@@ -144,15 +146,14 @@ var HighlightLayer = {
    * @param {object} options
    * @param {object} args
    */
-  selectedLayerChanged: function () {
-    var visible = this.get('selectedLayer').get('visible');
-    this.set('visible', visible);
+  selectedLayerChanged: function() {
+    var visible = this.get("selectedLayer").get("visible");
+    this.set("visible", visible);
   },
 
-  getFeatures: function () {
-    return this.get('source').getFeatures();
+  getFeatures: function() {
+    return this.get("source").getFeatures();
   }
-
 };
 
 /**

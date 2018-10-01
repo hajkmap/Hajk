@@ -20,7 +20,7 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var Panel = require('views/panel');
+var Panel = require("views/panel");
 /**
  * @class
  */
@@ -30,37 +30,34 @@ var Location = {
    * @instance
    * @return {object}
    */
-  getInitialState: function () {
-    return {
-
-    };
+  getInitialState: function() {
+    return {};
   },
 
   /**
    * Triggered when component updates.
    * @instance
    */
-  componentDidUpdate: function () {
-  },
+  componentDidUpdate: function() {},
 
   /**
    * Triggered when the component is successfully mounted into the DOM.
    * @instance
    */
-  componentDidMount: function () {
-    $('.ol-viewport').css('cursor', 'crosshair');
+  componentDidMount: function() {
+    $(".ol-viewport").css("cursor", "crosshair");
     this.props.model.activate();
-    this.props.model.on('change:imageDate', () => {
+    this.props.model.on("change:imageDate", () => {
       this.setState({
-        imageDate: this.props.model.get('imageDate')
+        imageDate: this.props.model.get("imageDate")
       });
     });
   },
 
-  componentWillUnmount: function () {
-    $('.ol-viewport').css('cursor', 'default');
+  componentWillUnmount: function() {
+    $(".ol-viewport").css("cursor", "default");
     this.props.model.deactivate();
-    this.props.model.off('change:imageDate');
+    this.props.model.off("change:imageDate");
   },
 
   /**
@@ -68,8 +65,7 @@ var Location = {
    * @instance
    * @return {external:ReactElement}
    */
-  render: function () {
-  }
+  render: function() {}
 };
 
 /**

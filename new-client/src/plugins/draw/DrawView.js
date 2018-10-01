@@ -34,6 +34,8 @@ class DrawView extends Component {
   }
 
   render() {
+    console.log("Will render DrawView");
+
     return (
       <div className="tool-panel-content">
         <ChromePicker

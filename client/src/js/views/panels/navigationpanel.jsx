@@ -21,23 +21,23 @@
 // https://github.com/hajkmap/Hajk
 
 var panels = {
-  'infopanel': require('views/infopanel'),
-  'layerpanel': require('views/layerpanel'),
-  'bookmarkpanel': require('views/bookmarkpanel'),
-  'searchpanel': require('views/searchpanel'),
-  'coordinatespanel': require('views/coordinatespanel'),
-  'exportpanel': require('views/exportpanel'),
-  'drawpanel': require('views/drawpanel'),
-  'editpanel': require('views/editpanel'),
-  'anchorpanel': require('views/anchorpanel'),
-  'streetviewpanel': require('views/streetviewpanel'),
-  'bufferpanel': require('views/bufferpanel'),
-  'routingpanel': require('views/routingpanel'),
-  'presetpanel': require('views/presetpanel'),
-  'measurepanel': require('views/measurepanel')
+  infopanel: require("views/infopanel"),
+  layerpanel: require("views/layerpanel"),
+  bookmarkpanel: require("views/bookmarkpanel"),
+  searchpanel: require("views/searchpanel"),
+  coordinatespanel: require("views/coordinatespanel"),
+  exportpanel: require("views/exportpanel"),
+  drawpanel: require("views/drawpanel"),
+  editpanel: require("views/editpanel"),
+  anchorpanel: require("views/anchorpanel"),
+  streetviewpanel: require("views/streetviewpanel"),
+  bufferpanel: require("views/bufferpanel"),
+  routingpanel: require("views/routingpanel"),
+  presetpanel: require("views/presetpanel"),
+  measurepanel: require("views/measurepanel")
 };
 
-var Alert = require('alert');
+var Alert = require("alert");
 
 /**
  * @class
@@ -48,7 +48,7 @@ var NavigationPanelView = {
    * @instance
    * @return {object}
    */
-  getDefaultProps: function () {
+  getDefaultProps: function() {
     return {
       items: [],
       alertVisible: false
@@ -60,7 +60,7 @@ var NavigationPanelView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function () {
+  getInitialState: function() {
     return {
       toggled: false,
       minimized: false,
@@ -74,8 +74,8 @@ var NavigationPanelView = {
    * Triggered when the component is successfully mounted into the DOM.
    * @instance
    */
-  componentDidMount: function () {
-    this.props.model.on('change:activePanel', (sender, panel) => {
+  componentDidMount: function() {
+    this.props.model.on("change:activePanel", (sender, panel) => {
       this.forced = true;
       this.setState({
         activePanel: panel,
@@ -84,12 +84,12 @@ var NavigationPanelView = {
       this.forced = false;
     });
 
-    this.props.model.on('change:alert', (e, value) => {
-      this.setState({alertVisible: value});
+    this.props.model.on("change:alert", (e, value) => {
+      this.setState({ alertVisible: value });
     });
 
-    this.props.model.on('change:visible', (sender, visible) => {
-      this.setState({toggled: visible});
+    this.props.model.on("change:visible", (sender, visible) => {
+      this.setState({ toggled: visible });
       if (visible) {
         this.forced = true;
       }
@@ -98,16 +98,16 @@ var NavigationPanelView = {
       }, 100);
     });
 
-    this.props.model.on('change:toggled', (sender, visible) => {
+    this.props.model.on("change:toggled", (sender, visible) => {
       var minimized = true;
       if (this.forced) {
         minimized = false;
       }
-      this.setState({minimized: minimized});
+      this.setState({ minimized: minimized });
       this.forced = false;
     });
 
-    this.props.model.on('change:r', () => {
+    this.props.model.on("change:r", () => {
       this.maximize();
     });
   },
@@ -116,9 +116,9 @@ var NavigationPanelView = {
    * Toggle the panel to/from minimized mode.
    * @instance
    */
-  toggle: function () {
+  toggle: function() {
     if (this.state.activePanel) {
-      this.props.model.set('toggled', !this.props.model.get('toggled'));
+      this.props.model.set("toggled", !this.props.model.get("toggled"));
     }
   },
 
@@ -126,7 +126,7 @@ var NavigationPanelView = {
    * Maximize the panel.
    * @instance
    */
-  maximize: function () {
+  maximize: function() {
     if (this.state.minimized) {
       this.setState({
         minimized: false
@@ -138,7 +138,7 @@ var NavigationPanelView = {
    * Minimize the panel.
    * @instance
    */
-  minimize: function () {
+  minimize: function() {
     if (!this.state.minimized) {
       this.setState({
         minimized: true
@@ -150,28 +150,28 @@ var NavigationPanelView = {
    * Generate specification object for alert panel
    * @instance
    */
-  getAlertOptions: function () {
+  getAlertOptions: function() {
     return {
       visible: this.state.alertVisible,
       confirm: true,
-      message: 'Du har en aktiv redigeringssession startad, vill du avbryta?',
+      message: "Du har en aktiv redigeringssession startad, vill du avbryta?",
       denyAction: () => {
-        this.props.model.set('alert', false);
+        this.props.model.set("alert", false);
         this.props.model.deny();
       },
       confirmAction: () => {
-        this.props.model.set('alert', false);
+        this.props.model.set("alert", false);
         this.props.model.ok();
       }
     };
   },
 
-  unmount: function () {
-    var model = this.props.model.get('activePanel').model;
-    model.set({'visible': false});
-    this.props.model.set({'visible': false});
-    this.props.model.set({'activePanelType': undefined});
-    this.props.model.set({'activePanel': undefined});
+  unmount: function() {
+    var model = this.props.model.get("activePanel").model;
+    model.set({ visible: false });
+    this.props.model.set({ visible: false });
+    this.props.model.set({ activePanelType: undefined });
+    this.props.model.set({ activePanel: undefined });
   },
 
   /**
@@ -179,13 +179,15 @@ var NavigationPanelView = {
    * @instance
    * @return {external:ReactElement}
    */
-  render: function () {
-    var classes = this.state.toggled ? 'navigation-panel' : 'navigation-panel folded',
+  render: function() {
+    var classes = this.state.toggled
+        ? "navigation-panel"
+        : "navigation-panel folded",
       panelInstance = null,
       Panel = null;
 
     if (this.state.minimized) {
-      classes += ' minimized';
+      classes += " minimized";
     }
 
     if (this.state.activePanel) {
@@ -196,19 +198,23 @@ var NavigationPanelView = {
             model={this.state.activePanel.model}
             minimized={this.state.minimized}
             navigationPanel={this}
-            onCloseClicked={() => { this.toggle(); }}
-            onUnmountClicked={() => { this.unmount(); }}
+            onCloseClicked={() => {
+              this.toggle();
+            }}
+            onUnmountClicked={() => {
+              this.unmount();
+            }}
           />
         );
       } else {
-        console.error('Panel reference is not found. See Navigationpanel.jsx.');
+        console.error("Panel reference is not found. See Navigationpanel.jsx.");
       }
     }
 
     return (
       <div>
         <Alert options={this.getAlertOptions()} />
-        <div id='navigation-panel' className={classes} onClick={this.maximize}>
+        <div id="navigation-panel" className={classes} onClick={this.maximize}>
           {panelInstance}
         </div>
       </div>

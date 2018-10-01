@@ -20,8 +20,8 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var Panel = require('views/panel');
-var Search = require('components/search');
+var Panel = require("views/panel");
+var Search = require("components/search");
 
 /**
  * @class
@@ -32,7 +32,7 @@ var SearchPanelView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function () {
+  getInitialState: function() {
     return {
       visible: false
     };
@@ -42,32 +42,38 @@ var SearchPanelView = {
    * Triggered when the component is successfully mounted into the DOM.
    * @instance
    */
-  componentDidMount: function () {
-  },
+  componentDidMount: function() {},
 
   /**
    * Triggered before the component mounts.
    * @instance
    */
-  componentWillMount: function () {
-  },
+  componentWillMount: function() {},
 
   /**
    * Triggered when component unmounts.
    * @instance
    */
-  componentWillUnmount: function () {
-  },
+  componentWillUnmount: function() {},
 
   /**
    * Render the panel component.
    * @instance
    * @return {external:ReactElement}
    */
-  render: function () {
+  render: function() {
     return (
-      <Panel title='Sökning' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
-        <Search model={this.props.model} navigationPanel={this.props.navigationPanel} />
+      <Panel
+        title="Sökning"
+        onCloseClicked={this.props.onCloseClicked}
+        onUnmountClicked={this.props.onUnmountClicked}
+        minimized={this.props.minimized}
+        instruction={atob(this.props.model.get("instruction"))}
+      >
+        <Search
+          model={this.props.model}
+          navigationPanel={this.props.navigationPanel}
+        />
       </Panel>
     );
   }

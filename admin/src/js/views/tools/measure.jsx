@@ -20,27 +20,27 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
 var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
-  icons: '',
-  instruction: ''
+  icons: "",
+  instruction: ""
 };
 
 class ToolOptions extends Component {
   /**
    *
    */
-  constructor () {
+  constructor() {
     super();
     this.state = defaultState;
-    this.type = 'measure';
+    this.type = "measure";
   }
 
-  componentDidMount () {
+  componentDidMount() {
     var tool = this.getTool();
     if (tool) {
       this.setState({
@@ -56,23 +56,21 @@ class ToolOptions extends Component {
     }
   }
 
-  componentWillUnmount () {
-  }
+  componentWillUnmount() {}
   /**
    *
    */
-  componentWillMount () {
-  }
+  componentWillMount() {}
 
-  handleInputChange (event) {
+  handleInputChange(event) {
     var target = event.target;
     var name = target.name;
-    var value = target.type === 'checkbox' ? target.checked : target.value;
-    if (typeof value === 'string' && value.trim() !== '') {
+    var value = target.type === "checkbox" ? target.checked : target.value;
+    if (typeof value === "string" && value.trim() !== "") {
       value = !isNaN(Number(value)) ? Number(value) : value;
     }
 
-    if (name == 'instruction') {
+    if (name == "instruction") {
       value = btoa(value);
     }
     this.setState({
@@ -80,22 +78,26 @@ class ToolOptions extends Component {
     });
   }
 
-  getTool () {
-    return this.props.model.get('toolConfig').find(tool => tool.type === this.type);
+  getTool() {
+    return this.props.model
+      .get("toolConfig")
+      .find(tool => tool.type === this.type);
   }
 
-  add (tool) {
-    this.props.model.get('toolConfig').push(tool);
+  add(tool) {
+    this.props.model.get("toolConfig").push(tool);
   }
 
-  remove (tool) {
+  remove(tool) {
     this.props.model.set({
-      'toolConfig': this.props.model.get('toolConfig').filter(tool => tool.type !== this.type)
+      toolConfig: this.props.model
+        .get("toolConfig")
+        .filter(tool => tool.type !== this.type)
     });
   }
 
-  replace (tool) {
-    this.props.model.get('toolConfig').forEach(t => {
+  replace(tool) {
+    this.props.model.get("toolConfig").forEach(t => {
       if (t.type === this.type) {
         t.options = tool.options;
         t.index = tool.index;
@@ -104,11 +106,11 @@ class ToolOptions extends Component {
     });
   }
 
-  save () {
+  save() {
     var tool = {
-      'type': this.type,
-      'index': this.state.index,
-      'options': {
+      type: this.type,
+      index: this.state.index,
+      options: {
         exportUrl: this.state.exportUrl,
         importUrl: this.state.importUrl,
         base64Encode: this.state.base64Encode,
@@ -120,13 +122,16 @@ class ToolOptions extends Component {
 
     var existing = this.getTool();
 
-    function update () {
-      this.props.model.updateToolConfig(this.props.model.get('toolConfig'), () => {
-        this.props.parent.props.parent.setState({
-          alert: true,
-          alertMessage: 'Uppdateringen lyckades'
-        });
-      });
+    function update() {
+      this.props.model.updateToolConfig(
+        this.props.model.get("toolConfig"),
+        () => {
+          this.props.parent.props.parent.setState({
+            alert: true,
+            alertMessage: "Uppdateringen lyckades"
+          });
+        }
+      );
     }
 
     if (!this.state.active) {
@@ -134,7 +139,8 @@ class ToolOptions extends Component {
         this.props.parent.props.parent.setState({
           alert: true,
           confirm: true,
-          alertMessage: 'Verktyget kommer att tas bort. Nuvarande inställningar kommer att gå förlorade. Vill du fortsätta?',
+          alertMessage:
+            "Verktyget kommer att tas bort. Nuvarande inställningar kommer att gå förlorade. Vill du fortsätta?",
           confirmAction: () => {
             this.remove();
             update.call(this);
@@ -158,39 +164,57 @@ class ToolOptions extends Component {
   /**
    *
    */
-  render () {
+  render() {
     return (
       <div>
         <form>
           <p>
-            <button className='btn btn-primary' onClick={(e) => { e.preventDefault(); this.save(); }}>Spara</button>
+            <button
+              className="btn btn-primary"
+              onClick={e => {
+                e.preventDefault();
+                this.save();
+              }}
+            >
+              Spara
+            </button>
           </p>
           <div>
             <input
-              id='active'
-              name='active'
-              type='checkbox'
-              onChange={(e) => { this.handleInputChange(e); }}
-              checked={this.state.active} />&nbsp;
-            <label htmlFor='active'>Aktiverad</label>
+              id="active"
+              name="active"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.active}
+            />
+            &nbsp;
+            <label htmlFor="active">Aktiverad</label>
           </div>
           <div>
-            <label htmlFor='index'>Sorteringsordning</label>
+            <label htmlFor="index">Sorteringsordning</label>
             <input
-              id='index'
-              name='index'
-              type='text'
-              onChange={(e) => { this.handleInputChange(e); }}
-              value={this.state.index} />
+              id="index"
+              name="index"
+              type="text"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.index}
+            />
           </div>
           <div>
-            <label htmlFor='instruction'>Instruktion</label>
+            <label htmlFor="instruction">Instruktion</label>
             <textarea
-              type='text'
-              id='instruction'
-              name='instruction'
-              onChange={(e) => { this.handleInputChange(e); }}
-              value={this.state.instruction ? atob(this.state.instruction) : ''} />
+              type="text"
+              id="instruction"
+              name="instruction"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.instruction ? atob(this.state.instruction) : ""}
+            />
           </div>
         </form>
       </div>

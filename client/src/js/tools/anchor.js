@@ -20,7 +20,7 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var ToolModel = require('tools/tool');
+var ToolModel = require("tools/tool");
 
 /**
  * @typedef {Object} AnchorModel~AnchorModelProperties
@@ -34,15 +34,15 @@ var ToolModel = require('tools/tool');
  * @property {string} anchor - Default: ''
  */
 var AnchorModelProperties = {
-  type: 'anchor',
-  panel: 'anchorpanel',
-  toolbar: 'bottom',
-  icon: 'fa fa-link icon fa-flip-horizontal',
-  title: 'Länk till kartan',
+  type: "anchor",
+  panel: "anchorpanel",
+  toolbar: "bottom",
+  icon: "fa fa-link icon fa-flip-horizontal",
+  title: "Länk till kartan",
   visible: false,
   shell: undefined,
-  anchor: '',
-  instruction: ''
+  anchor: "",
+  instruction: ""
 };
 
 /**
@@ -61,20 +61,19 @@ var AnchorModel = {
    */
   defaults: AnchorModelProperties,
 
-  initialize: function (options) {
+  initialize: function(options) {
     ToolModel.prototype.initialize.call(this);
   },
 
-  configure: function (shell) {
-    this.set('map', shell.getMap());
-    this.set('layers', shell.getLayerCollection());
+  configure: function(shell) {
+    this.set("map", shell.getMap());
+    this.set("layers", shell.getLayerCollection());
 
     this.set(
-      'layerswitcher',
-      shell.getToolCollection()
-        .find(tool =>
-          tool.get('type') === 'layerswitcher'
-        )
+      "layerswitcher",
+      shell
+        .getToolCollection()
+        .find(tool => tool.get("type") === "layerswitcher")
     );
   },
 
@@ -83,22 +82,26 @@ var AnchorModel = {
    * @instance
    * @return {string} anchor
    */
-  generate: function () {
-    var a = document.location.protocol + '//' + document.location.host + document.location.pathname,
-      map = this.get('map'),
+  generate: function() {
+    var a =
+        document.location.protocol +
+        "//" +
+        document.location.host +
+        document.location.pathname,
+      map = this.get("map"),
       olMap = map.getMap(),
-      layers = this.get('layers'),
-
+      layers = this.get("layers"),
       c = olMap.getView().getCenter(),
       z = olMap.getView().getZoom(),
       x = c[0],
       y = c[1],
-      l = layers.filter(layer => layer.getVisible() === true)
-        .map(layer => encodeURIComponent(layer.getName())).join(',');
-
+      l = layers
+        .filter(layer => layer.getVisible() === true)
+        .map(layer => encodeURIComponent(layer.getName()))
+        .join(",");
 
     a += `?m=${HAJK2.configFile}&x=${x}&y=${y}&z=${z}&l=${l}`;
-    this.set('anchor', a);
+    this.set("anchor", a);
 
     return a;
   },
@@ -114,9 +117,9 @@ var AnchorModel = {
    *
    * @instance
    */
-  clicked: function (arg) {
-    this.set('visible', true);
-    this.set('toggled', !this.get('toggled'));
+  clicked: function(arg) {
+    this.set("visible", true);
+    this.set("toggled", !this.get("toggled"));
   }
 };
 

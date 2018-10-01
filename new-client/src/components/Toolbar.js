@@ -30,7 +30,7 @@ const styles = theme => ({
     }
   },
   drawerClose: {
-    display: 'none'
+    display: "none"
   },
   drawerPaper: {
     position: "inherit",
@@ -71,7 +71,12 @@ class Toolbar extends Component {
     return this.props.tools.map((tool, i) => {
       return (
         <div key={i}>
-          <tool.component map={tool.map} app={tool.app} options={tool.options} type="toolbarItem"></tool.component>
+          <tool.component
+            map={tool.map}
+            app={tool.app}
+            options={tool.options}
+            type="toolbarItem"
+          />
         </div>
       );
     });
@@ -90,34 +95,32 @@ class Toolbar extends Component {
   renderDrawer() {
     const { classes } = this.props;
     const icon = this.state.open === true ? <ChevronLeft /> : <ChevronRight />;
-    if (!document.getElementById('map-overlay')) {
+    if (!document.getElementById("map-overlay")) {
       return null;
     }
-    return (
-      createPortal(
-        <Drawer
-          variant="permanent"
-          classes={{
-            docked: classNames(
-              classes.drawer,
-              !this.state.toolbarOpen && classes.drawerClose
-            ),
-            paper: classNames(
-              classes.drawerPaper,
-              !this.state.open && classes.drawerPaperClose
-            )
-          }}
-          open={this.state.open}
-        >
-          <ListItem button onClick={this.toggle}>
-            <ListItemIcon>{icon}</ListItemIcon>
-            <ListItemText primary="Minimera" />
-          </ListItem>
-          <Divider />
-          {this.renderTools()}
-        </Drawer>,
-        document.getElementById('map-overlay')
-      )
+    return createPortal(
+      <Drawer
+        variant="permanent"
+        classes={{
+          docked: classNames(
+            classes.drawer,
+            !this.state.toolbarOpen && classes.drawerClose
+          ),
+          paper: classNames(
+            classes.drawerPaper,
+            !this.state.open && classes.drawerPaperClose
+          )
+        }}
+        open={this.state.open}
+      >
+        <ListItem button onClick={this.toggle}>
+          <ListItemIcon>{icon}</ListItemIcon>
+          <ListItemText primary="Minimera" />
+        </ListItem>
+        <Divider />
+        {this.renderTools()}
+      </Drawer>,
+      document.getElementById("map-overlay")
     );
   }
 

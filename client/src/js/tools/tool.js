@@ -31,15 +31,15 @@
  * @property {NavigationModel} navigation
  */
 var ToolModelProperties = {
-  type: 'tool',
+  type: "tool",
   toolbar: undefined,
   panel: undefined,
-  Id: '',
-  title: '',
-  icon: '',
+  Id: "",
+  title: "",
+  icon: "",
   collection: undefined,
   navigation: undefined,
-  instruction: ''
+  instruction: ""
 };
 
 /**
@@ -54,27 +54,26 @@ var ToolModel = {
    */
   defaults: ToolModelProperties,
 
-  initialize: function () {
+  initialize: function() {
     this.initialState = _.clone(this.attributes);
-    this.on('change:shell', (sender, shell) => {
-      this.set('navigation', shell.get('navigation'));
+    this.on("change:shell", (sender, shell) => {
+      this.set("navigation", shell.get("navigation"));
       this.configure(shell);
     });
   },
 
-  configure: function (shell) {
-  },
+  configure: function(shell) {},
 
   /**
    * Not implemented by base prototype.
    * @instance
    */
-  clicked: function (arg) { },
+  clicked: function(arg) {},
   /**
    * Get JSON-representation of this instance.
    * @instance
    */
-  toJSON: function () {
+  toJSON: function() {
     var json = this.initialState;
     return json;
   }

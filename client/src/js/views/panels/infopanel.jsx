@@ -20,8 +20,8 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var Panel = require('views/panel');
-var FeatureInfo = require('components/featureinfo');
+var Panel = require("views/panel");
+var FeatureInfo = require("components/featureinfo");
 
 /**
  * @class
@@ -38,7 +38,7 @@ var InfoPanelView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function () {
+  getInitialState: function() {
     return {
       featureinfo: [],
       activeIndex: 0
@@ -49,11 +49,16 @@ var InfoPanelView = {
    * Triggered when the component is successfully mounted into the DOM.
    * @instance
    */
-  componentDidMount: function () {
-    this.props.model.get('features').on('reset', this.handleReset);
-    this.props.model.on('change:loadFinished', this.handleAdd);
-    this.props.model.on('change:selectedFeature', this.handleChangeSelectedFeature);
-    this.features = this.props.model.get('features').map(f => f.get('information'));
+  componentDidMount: function() {
+    this.props.model.get("features").on("reset", this.handleReset);
+    this.props.model.on("change:loadFinished", this.handleAdd);
+    this.props.model.on(
+      "change:selectedFeature",
+      this.handleChangeSelectedFeature
+    );
+    this.features = this.props.model
+      .get("features")
+      .map(f => f.get("information"));
     this.setState({
       featureinfo: this.features
     });
@@ -63,10 +68,13 @@ var InfoPanelView = {
    * Triggered when component unmounts.
    * @instance
    */
-  componentWillUnmount: function () {
-    this.props.model.off('change:selectedFeature', this.handleChangeSelectedFeature);
-    this.props.model.off('change:loadFinished', this.handleAdd);
-    this.props.model.get('features').off('reset', this.handleReset);
+  componentWillUnmount: function() {
+    this.props.model.off(
+      "change:selectedFeature",
+      this.handleChangeSelectedFeature
+    );
+    this.props.model.off("change:loadFinished", this.handleAdd);
+    this.props.model.get("features").off("reset", this.handleReset);
     this.props.model.clearHighlight();
   },
 
@@ -74,7 +82,7 @@ var InfoPanelView = {
    * Reset the features of this panel.
    * @instance
    */
-  handleReset: function () {
+  handleReset: function() {
     this.features = [];
   },
 
@@ -83,9 +91,11 @@ var InfoPanelView = {
    * @instance
    * @param {external:"ol.feature"}
    */
-  handleAdd: function (feature, collection) {
-    if (this.props.model.get('loadFinished') === true) {
-      this.features = this.props.model.get('features').map(f => f.get('information'));
+  handleAdd: function(feature, collection) {
+    if (this.props.model.get("loadFinished") === true) {
+      this.features = this.props.model
+        .get("features")
+        .map(f => f.get("information"));
       this.setState({
         featureinfo: this.features
       });
@@ -98,9 +108,12 @@ var InfoPanelView = {
    * @param {object} s
    * @param {external:"ol.feature"}
    */
-  handleChangeSelectedFeature: function (s, feature) {
+  handleChangeSelectedFeature: function(s, feature) {
     this.setState({
-      activeIndex: this.props.model.get('features').toArray().indexOf(feature)
+      activeIndex: this.props.model
+        .get("features")
+        .toArray()
+        .indexOf(feature)
     });
   },
 
@@ -108,13 +121,14 @@ var InfoPanelView = {
    * Go to next feature.
    * @instance
    */
-  decreaseIndex: function () {
-    var newIndex = this.state.activeIndex > 0
-      ? this.state.activeIndex - 1
-      : this.state.activeIndex;
-    var feature = this.props.model.get('features').at(newIndex);
+  decreaseIndex: function() {
+    var newIndex =
+      this.state.activeIndex > 0
+        ? this.state.activeIndex - 1
+        : this.state.activeIndex;
+    var feature = this.props.model.get("features").at(newIndex);
     if (feature) {
-      this.props.model.set('selectedFeature', feature);
+      this.props.model.set("selectedFeature", feature);
     }
   },
 
@@ -122,13 +136,14 @@ var InfoPanelView = {
    * Go to the previous feature.
    * @instance
    */
-  increaseIndex: function () {
-    var newIndex = this.state.activeIndex < this.state.featureinfo.length - 1
-      ? this.state.activeIndex + 1
-      : this.state.activeIndex;
-    var feature = this.props.model.get('features').at(newIndex);
+  increaseIndex: function() {
+    var newIndex =
+      this.state.activeIndex < this.state.featureinfo.length - 1
+        ? this.state.activeIndex + 1
+        : this.state.activeIndex;
+    var feature = this.props.model.get("features").at(newIndex);
     if (feature) {
-      this.props.model.set('selectedFeature', feature);
+      this.props.model.set("selectedFeature", feature);
     }
   },
 
@@ -137,35 +152,50 @@ var InfoPanelView = {
    * @instance
    * @return {external:ReactElement}
    */
-  render: function () {
+  render: function() {
     var infos = this.state.featureinfo;
     var current = this.state.activeIndex;
     var that = this;
     var info;
-    infos.sort((a, b) =>
-      a.layerindex === b.layerindex ? 0
-        : a.layerindex > b.layerindex ? -1 : 1
+    infos.sort(
+      (a, b) =>
+        a.layerindex === b.layerindex ? 0 : a.layerindex > b.layerindex ? -1 : 1
     );
 
     info = infos[current];
 
     return (
-      <Panel title='Information' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
-        <div className='info-panel panel-content'>
-          {(function () {
+      <Panel
+        title="Information"
+        onCloseClicked={this.props.onCloseClicked}
+        onUnmountClicked={this.props.onUnmountClicked}
+        minimized={this.props.minimized}
+      >
+        <div className="info-panel panel-content">
+          {(function() {
             if (current !== -1) {
               return [
-                <div key='0' className='navigation'>
-                  <span onClick={that.decreaseIndex} className='fa fa-arrow-circle-left left' />
+                <div key="0" className="navigation">
+                  <span
+                    onClick={that.decreaseIndex}
+                    className="fa fa-arrow-circle-left left"
+                  />
                   {current + 1} av {infos.length}
-                  <span onClick={that.increaseIndex} className='fa fa-arrow-circle-right right' />
+                  <span
+                    onClick={that.increaseIndex}
+                    className="fa fa-arrow-circle-right right"
+                  />
                 </div>,
-                <FeatureInfo key='1' info={info} />
+                <FeatureInfo key="1" info={info} />
               ];
             } else {
-              return <div className='no-info'>Klicka på objekt i kartan för att få mer information...</div>;
+              return (
+                <div className="no-info">
+                  Klicka på objekt i kartan för att få mer information...
+                </div>
+              );
             }
-          }())}
+          })()}
         </div>
       </Panel>
     );

@@ -6,18 +6,18 @@ import RateReviewIcon from "@material-ui/icons/RateReview";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import Observer from "react-event-observer";
 
-import CollectorView from './CollectorView.js';
+import CollectorView from "./CollectorView.js";
 import CollectorModel from "./CollectorModel.js";
 
 const styles = theme => {
   return {
     button: {
-      width: '50px',
-      height: '50px',
-      outline: 'none',
-      marginBottom: '10px'
+      width: "50px",
+      height: "50px",
+      outline: "none",
+      marginBottom: "10px"
     }
-  }
+  };
 };
 
 class Collector extends Component {
@@ -36,8 +36,7 @@ class Collector extends Component {
     });
   }
 
-  componentWillMount() {
-  }
+  componentWillMount() {}
 
   onClose = () => {
     this.setState({
@@ -53,13 +52,17 @@ class Collector extends Component {
 
   renderDialog() {
     return createPortal(
-      <CollectorView onClose={this.onClose}  model={this.collectorModel} dialogOpen={this.state.dialogOpen}></CollectorView>,
+      <CollectorView
+        onClose={this.onClose}
+        model={this.collectorModel}
+        dialogOpen={this.state.dialogOpen}
+      />,
       document.getElementById("map")
     );
   }
 
   renderAsWidgetItem() {
-    const {classes} = this.props;
+    const { classes } = this.props;
     return (
       <div>
         <Button
@@ -79,12 +82,7 @@ class Collector extends Component {
   renderAsToolbarItem() {
     return (
       <div>
-        <ListItem
-          button
-          divider={true}
-          selected={false}
-          onClick={this.onClick}
-        >
+        <ListItem button divider={true} selected={false} onClick={this.onClick}>
           <ListItemIcon>
             <RateReviewIcon />
           </ListItemIcon>
@@ -96,7 +94,6 @@ class Collector extends Component {
   }
 
   render() {
-
     if (this.props.type === "toolbarItem") {
       return this.renderAsToolbarItem();
     }
@@ -106,7 +103,6 @@ class Collector extends Component {
     }
 
     return null;
-
   }
 }
 

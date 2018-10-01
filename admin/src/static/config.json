@@ -35,8 +35,8 @@
     "url_layers": "/config/layers",
     "url_layermenu_settings": "/settings/layermenu",
     "url_map_settings": "/settings/mapsettings",
-	  "url_tool_settings": "/settings/toolsettings",
-	  "authentication_active": false
+    "url_tool_settings": "/settings/toolsettings",
+    "authentication_active": false
   },
   "router": [
     { "name": "layermanager", "title": "Visningstjänster", "default": true },

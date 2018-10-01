@@ -1,5 +1,4 @@
 class Plugin {
-
   constructor(spec) {
     this.map = spec.map;
     this.app = spec.app;
@@ -8,7 +7,6 @@ class Plugin {
     this.component = spec.component;
     this.sortOrder = spec.sortOrder || 0;
   }
-
 }
 
 export default Plugin;

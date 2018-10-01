@@ -112,7 +112,7 @@ class Drag extends Pointer {
     }
   }
 
-  handleUpEvent(evt) {      
+  handleUpEvent(evt) {
     this.coordinate_ = null;
     this.feature_ = null;
     return false;

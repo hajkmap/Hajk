@@ -20,7 +20,7 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var ToolModel = require('tools/tool');
+var ToolModel = require("tools/tool");
 
 /**
  * @typedef {Object} EditModel~EditModelProperties
@@ -42,11 +42,11 @@ var ToolModel = require('tools/tool');
  * @property {ShellModel} shell - Default: undefined
  */
 var EditModelProperties = {
-  type: 'edit',
-  panel: 'editpanel',
-  toolbar: 'bottom',
-  icon: 'fa fa-pencil-square-o icon',
-  title: 'Editera',
+  type: "edit",
+  panel: "editpanel",
+  toolbar: "bottom",
+  icon: "fa fa-pencil-square-o icon",
+  title: "Editera",
   visible: false,
   vectorSource: undefined,
   imageSource: undefined,
@@ -58,7 +58,7 @@ var EditModelProperties = {
   editSource: undefined,
   removeFeature: undefined,
   shell: undefined,
-  instruction: ''
+  instruction: ""
 };
 
 /**
@@ -81,12 +81,12 @@ var EditModel = {
    */
   filty: false,
 
-  configure: function (shell) {
-    this.set('map', shell.getMap().getMap());
+  configure: function(shell) {
+    this.set("map", shell.getMap().getMap());
 
-    this.set('layerCollection', shell.getLayerCollection());
+    this.set("layerCollection", shell.getLayerCollection());
     var navigation = shell.getNavigation();
-    navigation.on('change:activePanel', (e) => {
+    navigation.on("change:activePanel", e => {
       this.deactivate();
     });
   },
@@ -97,19 +97,24 @@ var EditModel = {
    * @param {Array<{external:"ol.feature"}>} features
    * @return {string} XML-string to post
    */
-  write: function (features) {
+  write: function(features) {
     var format = new ol.format.WFS(),
-      lr = this.get('editSource').layers[0].split(':'),
-      ns = lr.length === 2 ? lr[0] : '',
+      lr = this.get("editSource").layers[0].split(":"),
+      ns = lr.length === 2 ? lr[0] : "",
       ft = lr.length === 2 ? lr[1] : lr[0],
       options = {
         featureNS: ns,
         featureType: ft,
-        srsName: this.get('editSource').projection
+        srsName: this.get("editSource").projection
       },
       gml = new ol.format.GML(options);
 
-    return format.writeTransaction(features.inserts, features.updates, features.deletes, gml);
+    return format.writeTransaction(
+      features.inserts,
+      features.updates,
+      features.deletes,
+      gml
+    );
   },
 
   /**
@@ -118,20 +123,23 @@ var EditModel = {
    * @instance
    * @param {string} layerName
    */
-  refreshLayer: function (layerName) {
+  refreshLayer: function(layerName) {
     var source,
-      foundLayer = this.get('layerCollection').find(layer => {
+      foundLayer = this.get("layerCollection").find(layer => {
         if (layer.getLayer().getSource().getParams) {
-          let p = layer.getLayer().getSource().getParams();
-          if (typeof p === 'object') {
-            let paramName = p['LAYERS'].split(':');
-            let layerSplit = layerName.split(':');
+          let p = layer
+            .getLayer()
+            .getSource()
+            .getParams();
+          if (typeof p === "object") {
+            let paramName = p["LAYERS"].split(":");
+            let layerSplit = layerName.split(":");
 
             if (paramName.length === 2 && layerSplit.length === 2) {
-              return layerName === p['LAYERS'];
+              return layerName === p["LAYERS"];
             }
             if (paramName.length === 1) {
-              return layerSplit[1] === p['LAYERS'];
+              return layerSplit[1] === p["LAYERS"];
             }
           }
         }
@@ -140,8 +148,8 @@ var EditModel = {
     if (foundLayer) {
       source = foundLayer.getLayer().getSource();
       source.changed();
-      source.updateParams({'time': Date.now()});
-      this.get('map').updateSize();
+      source.updateParams({ time: Date.now() });
+      this.get("map").updateSize();
     }
   },
   /**
@@ -149,9 +157,9 @@ var EditModel = {
    * @param {XMLDocument} response
    * @return {object} js-xml-translation-object
    */
-  parseWFSTresponse: function (response) {
-    var str = (new XMLSerializer()).serializeToString(response);
-    return (new X2JS()).xml2js(str);
+  parseWFSTresponse: function(response) {
+    var str = new XMLSerializer().serializeToString(response);
+    return new X2JS().xml2js(str);
   },
   /**
    * Make transaction
@@ -159,32 +167,34 @@ var EditModel = {
    * @param {Array<{external:"ol.feature"}>} features
    * @param {function} done - Callback to invoke when the transaction is complete.
    */
-  transact: function (features, done) {
+  transact: function(features, done) {
     var node = this.write(features),
       serializer = new XMLSerializer(),
-      src = this.get('editSource'),
+      src = this.get("editSource"),
       payload = node ? serializer.serializeToString(node) : undefined;
 
     if (payload) {
       $.ajax(HAJK2.searchProxy + src.url, {
-        type: 'POST',
-        dataType: 'xml',
+        type: "POST",
+        dataType: "xml",
         processData: false,
-        contentType: 'text/xml',
+        contentType: "text/xml",
         data: payload
-      }).done((data) => {
-        this.refreshLayer(src.layers[0]);
-        var data = this.parseWFSTresponse(data);
+      })
+        .done(data => {
+          this.refreshLayer(src.layers[0]);
+          var data = this.parseWFSTresponse(data);
 
-        this.get('vectorSource')
-          .getFeatures()
-          .filter(f => f.modification !== undefined)
-          .forEach(f => f.modification = undefined);
-        done(data);
-      }).fail((data) => {
-        var data = this.parseWFSTresponse(data);
-        done(data);
-      });
+          this.get("vectorSource")
+            .getFeatures()
+            .filter(f => f.modification !== undefined)
+            .forEach(f => (f.modification = undefined));
+          done(data);
+        })
+        .fail(data => {
+          var data = this.parseWFSTresponse(data);
+          done(data);
+        });
     }
   },
 
@@ -193,20 +203,23 @@ var EditModel = {
    * @instance
    * @param {function} done - Callback to invoke when the transaction is complete.
    */
-  save: function (done) {
+  save: function(done) {
     var find = mode =>
-      this.get('vectorSource').getFeatures().filter(feature =>
-        feature.modification === mode);
+      this.get("vectorSource")
+        .getFeatures()
+        .filter(feature => feature.modification === mode);
 
     var features = {
-      updates: find('updated'),
-      inserts: find('added'),
-      deletes: find('removed')
+      updates: find("updated"),
+      inserts: find("added"),
+      deletes: find("removed")
     };
 
-    if (features.updates.length === 0 &&
-        features.inserts.length === 0 &&
-        features.deletes.length === 0) {
+    if (
+      features.updates.length === 0 &&
+      features.inserts.length === 0 &&
+      features.deletes.length === 0
+    ) {
       return done();
     }
 
@@ -219,45 +232,49 @@ var EditModel = {
    * @param {external:"ol.feature"} feature
    * @return {Array<{external:"ol.style"}>}
    */
-  getSelectStyle: function (feature) {
-    return [new ol.style.Style({
-      stroke: new ol.style.Stroke({
-        color: 'rgba(0, 255, 255, 1)',
-        width: 3
-      }),
-      fill: new ol.style.Fill({
-        color: 'rgba(0, 0, 0, 0.5)'
-      }),
-      image: new ol.style.Circle({
-        fill: new ol.style.Fill({
-          color: 'rgba(0, 0, 0, 0.5)'
-        }),
+  getSelectStyle: function(feature) {
+    return [
+      new ol.style.Style({
         stroke: new ol.style.Stroke({
-          color: 'rgba(0, 255, 255, 1)',
-          width: 2
+          color: "rgba(0, 255, 255, 1)",
+          width: 3
         }),
-        radius: 3
+        fill: new ol.style.Fill({
+          color: "rgba(0, 0, 0, 0.5)"
+        }),
+        image: new ol.style.Circle({
+          fill: new ol.style.Fill({
+            color: "rgba(0, 0, 0, 0.5)"
+          }),
+          stroke: new ol.style.Stroke({
+            color: "rgba(0, 255, 255, 1)",
+            width: 2
+          }),
+          radius: 3
+        })
+      }),
+      new ol.style.Style({
+        image: new ol.style.RegularShape({
+          fill: new ol.style.Fill({
+            color: "rgba(0, 0, 0, 0.2)"
+          }),
+          stroke: new ol.style.Stroke({
+            color: "rgba(0, 0, 0, 1)",
+            width: 2
+          }),
+          points: 4,
+          radius: 8,
+          angle: Math.PI / 4
+        }),
+        geometry: function(feature) {
+          coordinates =
+            feature.getGeometry() instanceof ol.geom.Polygon
+              ? feature.getGeometry().getCoordinates()[0]
+              : feature.getGeometry().getCoordinates();
+          return new ol.geom.MultiPoint(coordinates);
+        }
       })
-    }), new ol.style.Style({
-      image: new ol.style.RegularShape({
-        fill: new ol.style.Fill({
-          color: 'rgba(0, 0, 0, 0.2)'
-        }),
-        stroke: new ol.style.Stroke({
-          color: 'rgba(0, 0, 0, 1)',
-          width: 2
-        }),
-        points: 4,
-        radius: 8,
-        angle: Math.PI / 4
-      }),
-      geometry: function (feature) {
-        coordinates = feature.getGeometry() instanceof ol.geom.Polygon
-          ? feature.getGeometry().getCoordinates()[0]
-          : feature.getGeometry().getCoordinates();
-        return new ol.geom.MultiPoint(coordinates);
-      }
-    })];
+    ];
   },
 
   /**
@@ -266,26 +283,28 @@ var EditModel = {
    * @param {external:"ol.feature"} feature
    * @return {Array<{external:"ol.style"}>}
    */
-  getStyle: function (feature) {
-    return [new ol.style.Style({
-      stroke: new ol.style.Stroke({
-        color: 'rgba(0, 0, 0, 1)',
-        width: 3
-      }),
-      fill: new ol.style.Fill({
-        color: 'rgba(0, 0, 0, 0.5)'
-      }),
-      image: new ol.style.Circle({
-        fill: new ol.style.Fill({
-          color: 'rgba(0, 0, 0, 0.5)'
-        }),
+  getStyle: function(feature) {
+    return [
+      new ol.style.Style({
         stroke: new ol.style.Stroke({
-          color: 'rgba(0, 0, 0, 1)',
+          color: "rgba(0, 0, 0, 1)",
           width: 3
         }),
-        radius: 4
+        fill: new ol.style.Fill({
+          color: "rgba(0, 0, 0, 0.5)"
+        }),
+        image: new ol.style.Circle({
+          fill: new ol.style.Fill({
+            color: "rgba(0, 0, 0, 0.5)"
+          }),
+          stroke: new ol.style.Stroke({
+            color: "rgba(0, 0, 0, 1)",
+            width: 3
+          }),
+          radius: 4
+        })
       })
-    })];
+    ];
   },
 
   /**
@@ -294,26 +313,28 @@ var EditModel = {
    * @param {external:"ol.feature"} feature
    * @return {Array<{external:"ol.style"}>}
    */
-  getHiddenStyle: function (feature) {
-    return [new ol.style.Style({
-      stroke: new ol.style.Stroke({
-        color: 'rgba(0, 0, 0, 0)',
-        width: 0
-      }),
-      fill: new ol.style.Fill({
-        color: 'rgba(1, 2, 3, 0)'
-      }),
-      image: new ol.style.Circle({
-        fill: new ol.style.Fill({
-          color: 'rgba(0, 0, 0, 0)'
-        }),
+  getHiddenStyle: function(feature) {
+    return [
+      new ol.style.Style({
         stroke: new ol.style.Stroke({
-          color: 'rgba(0, 0, 0, 0)',
+          color: "rgba(0, 0, 0, 0)",
           width: 0
         }),
-        radius: 0
+        fill: new ol.style.Fill({
+          color: "rgba(1, 2, 3, 0)"
+        }),
+        image: new ol.style.Circle({
+          fill: new ol.style.Fill({
+            color: "rgba(0, 0, 0, 0)"
+          }),
+          stroke: new ol.style.Stroke({
+            color: "rgba(0, 0, 0, 0)",
+            width: 0
+          }),
+          radius: 0
+        })
       })
-    })];
+    ];
   },
 
   /**
@@ -322,23 +343,23 @@ var EditModel = {
    * @param {external:"ol.feature"} feature
    * @return {Array<{external:"ol.style"}>}
    */
-  getScetchStyle: function () {
+  getScetchStyle: function() {
     return [
       new ol.style.Style({
         fill: new ol.style.Fill({
-          color: 'rgba(255, 255, 255, 0.5)'
+          color: "rgba(255, 255, 255, 0.5)"
         }),
         stroke: new ol.style.Stroke({
-          color: 'rgba(0, 0, 0, 0.5)',
+          color: "rgba(0, 0, 0, 0.5)",
           width: 4
         }),
         image: new ol.style.Circle({
           radius: 6,
           fill: new ol.style.Fill({
-            color: 'rgba(0, 0, 0, 0.5)'
+            color: "rgba(0, 0, 0, 0.5)"
           }),
           stroke: new ol.style.Stroke({
-            color: 'rgba(255, 255, 255, 0.5)',
+            color: "rgba(255, 255, 255, 0.5)",
             width: 2
           })
         })
@@ -352,9 +373,9 @@ var EditModel = {
    * @instance
    * @param {external:ol.Feature[]} features
    */
-  filterByDefaultValue: function (features) {
+  filterByDefaultValue: function(features) {
     return features.filter(feature => {
-      return this.get('editSource').editableFields.some(field => {
+      return this.get("editSource").editableFields.some(field => {
         var value = feature.getProperties()[field.name];
         if (field.hidden && value === field.defaultValue) {
           return true;
@@ -370,52 +391,64 @@ var EditModel = {
    * @param {number[]} extent
    * @param {function} done - Callback
    */
-  loadData: function (config, extent, done) {
+  loadData: function(config, extent, done) {
     var format = new ol.format.WFS();
     $.ajax(HAJK2.wfsProxy + config.url, {
-      type: 'GET',
+      type: "GET",
       data: {
-        service: 'WFS',
-        version: '1.1.0',
-        request: 'GetFeature',
+        service: "WFS",
+        version: "1.1.0",
+        request: "GetFeature",
         typename: config.layers[0],
         srsname: config.projection
       }
-    }).done(rsp => {
-      var features;
-      try {
-        features = format.readFeatures(rsp);
-      } catch (e) {
-        alert('Fel: data kan inte läsas in. Kontrollera koordinatsystem.');
-      }
-      if (features.length > 0) {
-        this.set('geometryName', features[0].getGeometryName());
-      }
+    })
+      .done(rsp => {
+        var features;
+        try {
+          features = format.readFeatures(rsp);
+        } catch (e) {
+          alert("Fel: data kan inte läsas in. Kontrollera koordinatsystem.");
+        }
+        if (features.length > 0) {
+          this.set("geometryName", features[0].getGeometryName());
+        }
 
-      if (this.get('editSource').editableFields.some(field => field.hidden)) {
-        features = this.filterByDefaultValue(features);
-      }
+        if (this.get("editSource").editableFields.some(field => field.hidden)) {
+          features = this.filterByDefaultValue(features);
+        }
 
-      this.get('vectorSource').addFeatures(features);
-      this.get('vectorSource').getFeatures().forEach(feature => {
-        // Property changed
-        feature.on('propertychange', (e) => {
-          if (feature.modification === 'removed') { return; }
-          if (feature.modification === 'added') { return; }
-          feature.modification = 'updated';
-        });
-        // Geometry changed.
-        feature.on('change', (e) => {
-          if (feature.modification === 'removed') { return; }
-          if (feature.modification === 'added') { return; }
-          feature.modification = 'updated';
-        });
+        this.get("vectorSource").addFeatures(features);
+        this.get("vectorSource")
+          .getFeatures()
+          .forEach(feature => {
+            // Property changed
+            feature.on("propertychange", e => {
+              if (feature.modification === "removed") {
+                return;
+              }
+              if (feature.modification === "added") {
+                return;
+              }
+              feature.modification = "updated";
+            });
+            // Geometry changed.
+            feature.on("change", e => {
+              if (feature.modification === "removed") {
+                return;
+              }
+              if (feature.modification === "added") {
+                return;
+              }
+              feature.modification = "updated";
+            });
+          });
+        if (done) done();
+      })
+      .fail(rsp => {
+        alert("Fel: data kan inte hämtas. Försök igen senare.");
+        if (done) done();
       });
-      if (done) done();
-    }).fail(rsp => {
-      alert('Fel: data kan inte hämtas. Försök igen senare.');
-      if (done) done();
-    });
   },
 
   /**
@@ -423,8 +456,8 @@ var EditModel = {
    * @instance
    * @param {external:"ol.feature"} feature
    */
-  editAttributes: function (feature) {
-    this.set({editFeature: feature});
+  editAttributes: function(feature) {
+    this.set({ editFeature: feature });
   },
 
   /**
@@ -432,10 +465,10 @@ var EditModel = {
    * @instance
    * @param {object} event
    */
-  featureSelected: function (event) {
-    if (this.get('removalToolMode') === 'on') {
+  featureSelected: function(event) {
+    if (this.get("removalToolMode") === "on") {
       event.selected.forEach(feature => {
-        this.set({removeFeature: feature});
+        this.set({ removeFeature: feature });
       });
       return;
     }
@@ -446,7 +479,9 @@ var EditModel = {
 
     event.selected.forEach(feature => {
       if (!feature.getId() && feature.getProperties().user) {
-        this.get('select').getFeatures().remove(feature);
+        this.get("select")
+          .getFeatures()
+          .remove(feature);
       }
       event.mapBrowserEvent.filty = true;
       this.editAttributes(feature);
@@ -459,55 +494,79 @@ var EditModel = {
    * @param {external:"ol.source"} source
    * @param {function} done - Callback
    */
-  setLayer: function (source, done) {
+  setLayer: function(source, done) {
     this.filty = true;
 
-    this.get('map').set('clickLock', true);
+    this.get("map").set("clickLock", true);
 
-    if (this.get('layer')) {
-      this.get('map').removeLayer(this.get('layer'));
+    if (this.get("layer")) {
+      this.get("map").removeLayer(this.get("layer"));
     }
 
-    this.set('vectorSource', new ol.source.Vector({
-      loader: (extent) => this.loadData(source, extent, done),
-      strategy: ol.loadingstrategy.all,
-      projection: source.projection
-    }));
+    this.set(
+      "vectorSource",
+      new ol.source.Vector({
+        loader: extent => this.loadData(source, extent, done),
+        strategy: ol.loadingstrategy.all,
+        projection: source.projection
+      })
+    );
 
-    this.set('imageSource', new ol.source.ImageVector({
-      source: this.get('vectorSource'),
-      style: this.getStyle()
-    }));
+    this.set(
+      "imageSource",
+      new ol.source.ImageVector({
+        source: this.get("vectorSource"),
+        style: this.getStyle()
+      })
+    );
 
-    this.set('layer', new ol.layer.Image({
-      source: this.get('imageSource'),
-      name: 'edit-layer'
-    }));
-    this.get('map').addLayer(this.get('layer'));
+    this.set(
+      "layer",
+      new ol.layer.Image({
+        source: this.get("imageSource"),
+        name: "edit-layer"
+      })
+    );
+    this.get("map").addLayer(this.get("layer"));
 
-    if (!this.get('select')) {
-      this.set('select', new ol.interaction.Select({
-        style: this.getSelectStyle(),
-        toggleCondition: ol.events.condition.never
-      }));
-      this.get('map').addInteraction(this.get('select'));
+    if (!this.get("select")) {
+      this.set(
+        "select",
+        new ol.interaction.Select({
+          style: this.getSelectStyle(),
+          toggleCondition: ol.events.condition.never
+        })
+      );
+      this.get("map").addInteraction(this.get("select"));
     } else {
-      this.get('select').getFeatures().clear();
-      this.get('select').unset(this.get('key'));
+      this.get("select")
+        .getFeatures()
+        .clear();
+      this.get("select").unset(this.get("key"));
     }
 
-    this.set('key', this.get('select').on('select', (event) => { this.featureSelected(event, source); }));
+    this.set(
+      "key",
+      this.get("select").on("select", event => {
+        this.featureSelected(event, source);
+      })
+    );
 
-    if (!this.get('modify')) {
-      this.set('modify', new ol.interaction.Modify({ features: this.get('select').getFeatures() }));
-      this.get('map').addInteraction(this.get('modify'));
+    if (!this.get("modify")) {
+      this.set(
+        "modify",
+        new ol.interaction.Modify({
+          features: this.get("select").getFeatures()
+        })
+      );
+      this.get("map").addInteraction(this.get("modify"));
     }
 
-    this.set({editSource: source});
-    this.set({editFeature: null});
-    this.get('select').setActive(true);
-    this.get('modify').setActive(true);
-    this.get('layer').dragLocked = true;
+    this.set({ editSource: source });
+    this.set({ editFeature: null });
+    this.get("select").setActive(true);
+    this.get("modify").setActive(true);
+    this.get("layer").dragLocked = true;
   },
 
   /**
@@ -516,8 +575,8 @@ var EditModel = {
    * @param {external:"ol.feature"} - Drawn feature
    * @param {string} geometryType - Geometry type of feature
    */
-  handleDrawEnd: function (feature, geometryType) {
-    feature.modification = 'added';
+  handleDrawEnd: function(feature, geometryType) {
+    feature.modification = "added";
     this.editAttributes(feature);
   },
 
@@ -526,8 +585,8 @@ var EditModel = {
    * @instance
    * @param {string} mode
    */
-  setRemovalToolMode: function (mode) {
-    this.set('removalToolMode', mode);
+  setRemovalToolMode: function(mode) {
+    this.set("removalToolMode", mode);
   },
 
   /**
@@ -535,34 +594,37 @@ var EditModel = {
    * @instance
    * @param {string} geometryType
    */
-  activateDrawTool: function (geometryType) {
+  activateDrawTool: function(geometryType) {
     var add = () => {
-      this.set('drawTool', new ol.interaction.Draw({
-        source: this.get('vectorSource'),
-        style: this.getScetchStyle(),
-        type: geometryType,
-        geometryName: this.get('geometryName')
-      }));
-      this.get('drawTool').on('drawend', (event) => {
+      this.set(
+        "drawTool",
+        new ol.interaction.Draw({
+          source: this.get("vectorSource"),
+          style: this.getScetchStyle(),
+          type: geometryType,
+          geometryName: this.get("geometryName")
+        })
+      );
+      this.get("drawTool").on("drawend", event => {
         this.handleDrawEnd(event.feature, geometryType);
       });
-      this.get('map').addInteraction(this.get('drawTool'));
+      this.get("map").addInteraction(this.get("drawTool"));
     };
 
     var remove = () => {
-      this.get('map').removeInteraction(this.get('drawTool'));
-      this.set('drawTool', undefined);
+      this.get("map").removeInteraction(this.get("drawTool"));
+      this.set("drawTool", undefined);
     };
 
-    this.get('map').set('clickLock', true);
+    this.get("map").set("clickLock", true);
 
-    if (this.get('select')) {
-      this.get('select').setActive(false);
+    if (this.get("select")) {
+      this.get("select").setActive(false);
     }
 
-    if (this.get('drawTool')) {
-      this.get('drawTool').setActive(true);
-      if (this.set('geometryType', geometryType) !== geometryType) {
+    if (this.get("drawTool")) {
+      this.get("drawTool").setActive(true);
+      if (this.set("geometryType", geometryType) !== geometryType) {
         remove();
         add();
       }
@@ -576,15 +638,17 @@ var EditModel = {
    * @instance
    * @param {boolean} keepClickLock - Whether to keep the maps' clicklock or not.
    */
-  deactivateDrawTool: function (keepClickLock) {
-    if (!keepClickLock) { this.get('map').set('clickLock', false); }
-
-    if (this.get('select')) {
-      this.get('select').setActive(true);
+  deactivateDrawTool: function(keepClickLock) {
+    if (!keepClickLock) {
+      this.get("map").set("clickLock", false);
     }
 
-    if (this.get('drawTool')) {
-      this.get('drawTool').setActive(false);
+    if (this.get("select")) {
+      this.get("select").setActive(true);
+    }
+
+    if (this.get("drawTool")) {
+      this.get("drawTool").setActive(false);
     }
   },
 
@@ -592,18 +656,20 @@ var EditModel = {
    * Deactivate all edit interactions.
    * @instance
    */
-  deactivateTools: function () {
-    if (this.get('select')) {
-      this.get('select').setActive(false);
-      this.get('select').getFeatures().clear();
+  deactivateTools: function() {
+    if (this.get("select")) {
+      this.get("select").setActive(false);
+      this.get("select")
+        .getFeatures()
+        .clear();
     }
 
-    if (this.get('modify')) {
-      this.get('modify').setActive(false);
+    if (this.get("modify")) {
+      this.get("modify").setActive(false);
     }
 
-    if (this.get('drawTool')) {
-      this.get('drawTool').setActive(false);
+    if (this.get("drawTool")) {
+      this.get("drawTool").setActive(false);
     }
   },
 
@@ -611,23 +677,25 @@ var EditModel = {
    * Deactivate the edit tool
    * @instance
    */
-  deactivate: function () {
-    if (this.get('select')) {
-      this.get('select').setActive(false);
-      this.get('select').getFeatures().clear();
+  deactivate: function() {
+    if (this.get("select")) {
+      this.get("select").setActive(false);
+      this.get("select")
+        .getFeatures()
+        .clear();
     }
 
-    if (this.get('modify')) {
-      this.get('modify').setActive(false);
+    if (this.get("modify")) {
+      this.get("modify").setActive(false);
     }
 
-    if (this.get('drawTool')) {
-      this.get('drawTool').setActive(false);
+    if (this.get("drawTool")) {
+      this.get("drawTool").setActive(false);
     }
 
-    if (this.get('layer')) {
-      this.get('map').removeLayer(this.get('layer'));
-      this.set('layer', undefined);
+    if (this.get("layer")) {
+      this.get("map").removeLayer(this.get("layer"));
+      this.set("layer", undefined);
     }
 
     this.set({
@@ -638,7 +706,7 @@ var EditModel = {
     });
 
     this.filty = false;
-    this.get('map').set('clickLock', false);
+    this.get("map").set("clickLock", false);
   },
 
   /**
@@ -652,9 +720,9 @@ var EditModel = {
    *
    * @instance
    */
-  clicked: function () {
-    this.set('visible', true);
-    this.set('toggled', !this.get('toggled'));
+  clicked: function() {
+    this.set("visible", true);
+    this.set("toggled", !this.get("toggled"));
   }
 };
 

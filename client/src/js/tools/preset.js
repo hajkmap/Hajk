@@ -20,7 +20,7 @@
 //
 // https://github.com/Johkar/Hajk2
 
-var ToolModel = require('tools/tool');
+var ToolModel = require("tools/tool");
 
 /**
  * @typedef {Object} PresetModel~PresetModelProperties
@@ -35,16 +35,16 @@ var ToolModel = require('tools/tool');
  * @property {string} preset - Default: ''
  */
 var PresetModelProperties = {
-  type: 'preset',
-  panel: 'presetpanel',
-  toolbar: 'bottom',
-  icon: 'fa fa-bookmark icon',
-  title: 'Snabbval',
+  type: "preset",
+  panel: "presetpanel",
+  toolbar: "bottom",
+  icon: "fa fa-bookmark icon",
+  title: "Snabbval",
   visible: false,
   shell: undefined,
-  anchor: '',
-  presetValue: '',
-  instruction: ''
+  anchor: "",
+  presetValue: "",
+  instruction: ""
 };
 
 /**
@@ -63,19 +63,18 @@ var PresetModel = {
    */
   defaults: PresetModelProperties,
 
-  initialize: function (options) {
+  initialize: function(options) {
     ToolModel.prototype.initialize.call(this);
   },
 
-  configure: function (shell) {
-    this.set('map', shell.getMap());
-    this.set('layers', shell.getLayerCollection());
+  configure: function(shell) {
+    this.set("map", shell.getMap());
+    this.set("layers", shell.getLayerCollection());
     this.set(
-      'layerswitcher',
-      shell.getToolCollection()
-        .find(tool =>
-          tool.get('type') === 'layerswitcher'
-        )
+      "layerswitcher",
+      shell
+        .getToolCollection()
+        .find(tool => tool.get("type") === "layerswitcher")
     );
   },
 
@@ -84,23 +83,28 @@ var PresetModel = {
    * @instance
    * @return {string} anchor
    */
-  generate: function () {
-    var a = document.location.protocol + '//' + document.location.host + document.location.pathname,
-      map = this.get('map'),
+  generate: function() {
+    var a =
+        document.location.protocol +
+        "//" +
+        document.location.host +
+        document.location.pathname,
+      map = this.get("map"),
       olMap = map.getMap(),
-      layers = this.get('layers'),
-
+      layers = this.get("layers"),
       c = olMap.getView().getCenter(),
       z = olMap.getView().getZoom(),
       x = c[0],
       y = c[1],
-      l = layers.filter(layer => layer.getVisible() === true)
-        .map(layer => encodeURIComponent(layer.getName())).join(',');
+      l = layers
+        .filter(layer => layer.getVisible() === true)
+        .map(layer => encodeURIComponent(layer.getName()))
+        .join(",");
 
     a += `?m=${HAJK2.configFile}&x=${x}&y=${y}&z=${z}&l=${l}`;
-    this.set('anchor', a);
-    this.set('presetName', this.get('presetList')[0].name);
-    this.set('presetUrl', this.get('presetList')[0].presetUrl);
+    this.set("anchor", a);
+    this.set("presetName", this.get("presetList")[0].name);
+    this.set("presetUrl", this.get("presetList")[0].presetUrl);
 
     return a;
   },
@@ -111,10 +115,10 @@ var PresetModel = {
    * @param {string} name - Name of the preset.
    * @param {function} callback - Fn to be called when the save is complete.
    */
-  addPreset: function (name, callback) {
+  addPreset: function(name, callback) {
     var preset = this.generate();
 
-    this.set('presetValue', preset);
+    this.set("presetValue", preset);
 
     this.updatePreset(preset);
   },
@@ -125,11 +129,13 @@ var PresetModel = {
    *
    *
    */
-  updatePreset: function (preset, callback) {
+  updatePreset: function(preset, callback) {
     $.ajax({
-      url: `${this.get('config').url_layermenu_settings}?mapFile=${this.get('mapFile')}.json`,
-      method: 'PUT',
-      contentType: 'application/json',
+      url: `${this.get("config").url_layermenu_settings}?mapFile=${this.get(
+        "mapFile"
+      )}.json`,
+      method: "PUT",
+      contentType: "application/json",
       data: JSON.stringify(preset),
       success: () => {
         callback(true);
@@ -146,8 +152,12 @@ var PresetModel = {
    *
    *
    */
-  getUrl: function () {
-    var a = document.location.protocol + '//' + document.location.host + document.location.pathname;
+  getUrl: function() {
+    var a =
+      document.location.protocol +
+      "//" +
+      document.location.host +
+      document.location.pathname;
 
     return a;
   },
@@ -157,8 +167,8 @@ var PresetModel = {
    * @instance
    * @return {object[]} presets
    */
-  getPresets: function () {
-    return this.get('presetList');
+  getPresets: function() {
+    return this.get("presetList");
   },
 
   /**
@@ -172,9 +182,9 @@ var PresetModel = {
    *
    * @instance
    */
-  clicked: function () {
-    this.set('visible', true);
-    this.set('toggled', !this.get('toggled'));
+  clicked: function() {
+    this.set("visible", true);
+    this.set("toggled", !this.get("toggled"));
   }
 };
 

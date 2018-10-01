@@ -4,7 +4,9 @@
     "informative",
     "draw",
     "edit",
+    "layerswitcher",
+    "collector",
     "simple_layerswitcher",
-    "collector"
+    "suggest"
   ]
 }

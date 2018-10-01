@@ -20,52 +20,58 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import React from 'react';
-import { Component } from 'react';
-import Anchor from './tools/anchor.jsx';
-import Buffer from './tools/buffer.jsx';
-import Bookmark from './tools/bookmark.jsx';
-import Coordinates from './tools/coordinates.jsx';
-import Draw from './tools/draw.jsx';
-import Edit from './tools/edit.jsx';
-import Export from './tools/export.jsx';
-import Infoclick from './tools/infoclick.jsx';
-import Information from './tools/information.jsx';
-import Informative from './tools/informative.jsx';
-import Location from './tools/location.jsx';
-import Search from './tools/search.jsx';
-import StreetView from './tools/streetview.jsx';
-import Preset from './tools/preset.jsx';
-import Measure from './tools/measure.jsx';
-import Routing from './tools/routing.jsx';
-import Collector from './tools/collector.jsx';
-import SimpleLayerswitcher from './tools/simple_layerswitcher.jsx';
+import React from "react";
+import { Component } from "react";
+import Anchor from "./tools/anchor.jsx";
+import Buffer from "./tools/buffer.jsx";
+import Bookmark from "./tools/bookmark.jsx";
+import Coordinates from "./tools/coordinates.jsx";
+import Draw from "./tools/draw.jsx";
+import Edit from "./tools/edit.jsx";
+import Export from "./tools/export.jsx";
+import Infoclick from "./tools/infoclick.jsx";
+import Information from "./tools/information.jsx";
+import Informative from "./tools/informative.jsx";
+import Location from "./tools/location.jsx";
+import Search from "./tools/search.jsx";
+import StreetView from "./tools/streetview.jsx";
+import Preset from "./tools/preset.jsx";
+import Measure from "./tools/measure.jsx";
+import Routing from "./tools/routing.jsx";
+import Collector from "./tools/collector.jsx";
+import SimpleLayerswitcher from "./tools/simple_layerswitcher.jsx";
 
 var defaultState = {
-  activeTool: ''
+  activeTool: ""
 };
 
 class ToolOptions extends Component {
   /**
    *
    */
-  constructor () {
+  constructor() {
     super();
     this.state = defaultState;
   }
 
-  componentDidMount () {
-    this.props.model.on('change:urlMapConfig', this.onUrlMapConfigChanged.bind(this));
+  componentDidMount() {
+    this.props.model.on(
+      "change:urlMapConfig",
+      this.onUrlMapConfigChanged.bind(this)
+    );
   }
 
-  componentWillUnmount () {
-    this.props.model.off('change:urlMapConfig', this.onUrlMapConfigChanged.bind(this));
+  componentWillUnmount() {
+    this.props.model.off(
+      "change:urlMapConfig",
+      this.onUrlMapConfigChanged.bind(this)
+    );
   }
 
-  onUrlMapConfigChanged () {
+  onUrlMapConfigChanged() {
     const t = this.state.activeTool;
     this.setState({
-      activeTool: ''
+      activeTool: ""
     });
     setTimeout(() => {
       this.setState({
@@ -74,61 +80,59 @@ class ToolOptions extends Component {
     }, 20);
   }
 
-  getActiveTool (tool) {
+  getActiveTool(tool) {
     switch (tool) {
-      case 'anchor':
+      case "anchor":
         return <Anchor parent={this} model={this.props.model} />;
-      case 'buffer':
+      case "buffer":
         return <Buffer parent={this} model={this.props.model} />;
-      case 'bookmark':
+      case "bookmark":
         return <Bookmark parent={this} model={this.props.model} />;
-      case 'coordinates':
+      case "coordinates":
         return <Coordinates parent={this} model={this.props.model} />;
-      case 'draw':
+      case "draw":
         return <Draw parent={this} model={this.props.model} />;
-      case 'edit':
+      case "edit":
         return <Edit parent={this} model={this.props.model} />;
-      case 'export':
+      case "export":
         return <Export parent={this} model={this.props.model} />;
-      case 'infoclick':
+      case "infoclick":
         return <Infoclick parent={this} model={this.props.model} />;
-      case 'information':
+      case "information":
         return <Information parent={this} model={this.props.model} />;
-      case 'informative':
-        return <Informative parent={this} model={this.props.model} />;        
-      case 'location':
+      case "informative":
+        return <Informative parent={this} model={this.props.model} />;
+      case "location":
         return <Location parent={this} model={this.props.model} />;
-      case 'search':
+      case "search":
         return <Search parent={this} model={this.props.model} />;
-      case 'streetview':
+      case "streetview":
         return <StreetView parent={this} model={this.props.model} />;
-      case 'preset':
+      case "preset":
         return <Preset parent={this} model={this.props.model} />;
-      case 'measure':
+      case "measure":
         return <Measure parent={this} model={this.props.model} />;
-      case 'routing':
+      case "routing":
         return <Routing parent={this} model={this.props.model} />;
-      case 'collector':
+      case "collector":
         return <Collector parent={this} model={this.props.model} />;
-      case 'simple_layerswitcher':
-        return <SimpleLayerswitcher parent={this} model={this.props.model} />;        
+      case "simple_layerswitcher":
+        return <SimpleLayerswitcher parent={this} model={this.props.model} />;
       default:
         return null;
     }
   }
 
-  toggleTool (tool) {
+  toggleTool(tool) {
     this.setState({
       activeTool: tool
     });
   }
 
-  getIndexForTool (tool) {
+  getIndexForTool(tool) {
     var found = false;
-    if (Array.isArray(this.props.model.get('toolConfig'))) {
-      found = this.props.model
-        .get('toolConfig')
-        .filter(t => t.type === tool);
+    if (Array.isArray(this.props.model.get("toolConfig"))) {
+      found = this.props.model.get("toolConfig").filter(t => t.type === tool);
     }
 
     if (found[0]) {
@@ -138,71 +142,79 @@ class ToolOptions extends Component {
     }
   }
 
-  getClassNamesForActive (tool) {
+  getClassNamesForActive(tool) {
     var found = false;
-    if (Array.isArray(this.props.model.get('toolConfig'))) {
-      found = this.props.model
-        .get('toolConfig')
-        .filter(t => t.type === tool).length > 0;
+    if (Array.isArray(this.props.model.get("toolConfig"))) {
+      found =
+        this.props.model.get("toolConfig").filter(t => t.type === tool).length >
+        0;
     }
-    return found ? 'fa fa-check-square-o' : 'fa fa-square-o';
+    return found ? "fa fa-check-square-o" : "fa fa-square-o";
   }
 
-  getClassNamesForSelected (tool) {
-    return this.state.activeTool === tool ? 'layer-item selected' : 'layer-item';
+  getClassNamesForSelected(tool) {
+    return this.state.activeTool === tool
+      ? "layer-item selected"
+      : "layer-item";
   }
 
-  render () {
+  render() {
     var toolTypes = {
-      anchor: 'Länk till kartan',
-      buffer: 'Skapa buffertzon',
-      bookmark: 'Bokmärken',
-      coordinates: 'Fånga koordinat',
-      draw: 'Rita och mäta',
-      edit: 'Editering',
-      export: 'Utskrift',
-      infoclick: 'Infoklick',
-      information: 'Om kartan',
-      informative: 'Översiktsplan',
-      search: 'Sök',
-      streetview: 'Google Street View',
-      preset: 'Snabbval',
-      measure: 'Mät',
-      location: 'Visa min position',
-      routing: 'Navigation',
-      collector: 'Tyck till',
-      simple_layerswitcher: 'Lagerhanterare'
+      anchor: "Länk till kartan",
+      buffer: "Skapa buffertzon",
+      bookmark: "Bokmärken",
+      coordinates: "Fånga koordinat",
+      draw: "Rita och mäta",
+      edit: "Editering",
+      export: "Utskrift",
+      infoclick: "Infoklick",
+      information: "Om kartan",
+      informative: "Översiktsplan",
+      search: "Sök",
+      streetview: "Google Street View",
+      preset: "Snabbval",
+      measure: "Mät",
+      location: "Visa min position",
+      routing: "Navigation",
+      collector: "Tyck till",
+      simple_layerswitcher: "Lagerhanterare"
     };
 
     return (
       <div>
         <aside>
-          <ul className='config-layer-list'>
-            {
-              Object
-                .keys(toolTypes)
-                .sort(
-                  (a, b) => this.getIndexForTool(a) === this.getIndexForTool(b) ? 0 : this.getIndexForTool(a) > this.getIndexForTool(b) ? 1 : -1)
-                .map((key, i) => {
-                  var index = this.getIndexForTool(key);
-                  return <li
+          <ul className="config-layer-list">
+            {Object.keys(toolTypes)
+              .sort(
+                (a, b) =>
+                  this.getIndexForTool(a) === this.getIndexForTool(b)
+                    ? 0
+                    : this.getIndexForTool(a) > this.getIndexForTool(b)
+                      ? 1
+                      : -1
+              )
+              .map((key, i) => {
+                var index = this.getIndexForTool(key);
+                return (
+                  <li
                     key={i}
                     className={this.getClassNamesForSelected(key)}
-                    onClick={() => this.toggleTool(key)}>
+                    onClick={() => this.toggleTool(key)}
+                  >
                     <span className={this.getClassNamesForActive(key)} />
-                      &nbsp;
-                    <span>{toolTypes[key]} ({index})</span>
-                  </li>;
-                })
-            }
+                    &nbsp;
+                    <span>
+                      {toolTypes[key]} ({index})
+                    </span>
+                  </li>
+                );
+              })}
           </ul>
         </aside>
         <article>
-          <fieldset className='tree-view'>
+          <fieldset className="tree-view">
             <legend>Verktygsinställningar</legend>
-            <div>
-              {this.getActiveTool(this.state.activeTool)}
-            </div>
+            <div>{this.getActiveTool(this.state.activeTool)}</div>
           </fieldset>
         </article>
       </div>

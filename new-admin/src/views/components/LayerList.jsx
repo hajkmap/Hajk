@@ -1,34 +1,33 @@
-import React from 'react';
-import { Component } from 'react';
-import LayerListItem from './LayerListItem.jsx';
+import React from "react";
+import { Component } from "react";
+import LayerListItem from "./LayerListItem.jsx";
 
 const urls = {
-  mapConfig: 'http://localhost:55630/config/map_1',
-  layersConfig: 'http://localhost:55630/config/layers'
+  mapConfig: "http://localhost:55630/config/map_1",
+  layersConfig: "http://localhost:55630/config/layers"
 };
 
 class LayerList extends Component {
-
   constructor(props) {
     super(props);
-    this.state = {      
+    this.state = {
       layers: [],
       checkedLayers: props.chapter.layers || []
     };
   }
 
-  componentDidRecieveProps() {
-  }
+  componentDidRecieveProps() {}
 
-  componentDidUpdate() {    
-  }
+  componentDidUpdate() {}
 
-  lookup(layerId) {          
+  lookup(layerId) {
     var found = undefined;
     var layerTypes = Object.keys(this.layersConfig);
-    for (let i = 0; i < layerTypes.length; i++) {             
-      for (let j = 0; j < this.layersConfig[layerTypes[i]].length; j++) {                
-        if (Number(this.layersConfig[layerTypes[i]][j].id) === Number(layerId)) {
+    for (let i = 0; i < layerTypes.length; i++) {
+      for (let j = 0; j < this.layersConfig[layerTypes[i]].length; j++) {
+        if (
+          Number(this.layersConfig[layerTypes[i]][j].id) === Number(layerId)
+        ) {
           found = this.layersConfig[layerTypes[i]][j].caption;
           break;
         }
@@ -40,14 +39,16 @@ class LayerList extends Component {
     return found;
   }
 
-  getLayers(layers, callback) {    
+  getLayers(layers, callback) {
     callback(
       layers
-      .map(layer => { return {
-          id: layer.id,
-          name: this.lookup(layer.id)
-      }})
-      .filter(layer => layer.name !== undefined)
+        .map(layer => {
+          return {
+            id: layer.id,
+            name: this.lookup(layer.id)
+          };
+        })
+        .filter(layer => layer.name !== undefined)
     );
   }
 
@@ -57,72 +58,80 @@ class LayerList extends Component {
       if (group.groups.length !== 0) {
         layers = [...this.flattern(group.groups)];
       }
-      return  [...i, ...group.layers, ...layers];
+      return [...i, ...group.layers, ...layers];
     }, []);
   }
 
-  componentDidMount() {  
-    
+  componentDidMount() {
     async function getJson(url) {
       var reponse = await fetch(url);
       var json = await reponse.json();
       return json;
     }
-    
+
     function readMapConfig(mapConfig) {
-      var layerSwitcherConfig = mapConfig.tools.find(tool => tool.type === "layerswitcher"),
-          layers = this.flattern(layerSwitcherConfig.options.groups);
+      var layerSwitcherConfig = mapConfig.tools.find(
+          tool => tool.type === "layerswitcher"
+        ),
+        layers = this.flattern(layerSwitcherConfig.options.groups);
 
       this.getLayers(layers, lookedUpLayers => {
         this.setState({
           layers: lookedUpLayers
-        }); 
+        });
       });
     }
 
-    getJson(urls.layersConfig).then(layersConfig => {      
+    getJson(urls.layersConfig).then(layersConfig => {
       this.layersConfig = layersConfig;
       getJson(urls.mapConfig).then(mapConfig => {
         readMapConfig.call(this, mapConfig);
       });
     });
-        
+
     this.props.onUpdate(this.state.checkedLayers);
   }
 
-  onLayerListItemChanged(checked, layer) {  
+  onLayerListItemChanged(checked, layer) {
     var checkedLayers = this.state.checkedLayers;
     if (checked) {
       checkedLayers = [...checkedLayers, layer.id];
     } else {
-      checkedLayers = checkedLayers.filter(layerId => layerId !==  layer.id);
+      checkedLayers = checkedLayers.filter(layerId => layerId !== layer.id);
     }
 
-    this.setState({
-      checkedLayers: checkedLayers
-    }, () => this.props.onUpdate(this.state.checkedLayers));
+    this.setState(
+      {
+        checkedLayers: checkedLayers
+      },
+      () => this.props.onUpdate(this.state.checkedLayers)
+    );
   }
 
-  render() {      
+  render() {
     return (
       <ul className="layer-list-container">
-        {
-          this.state.layers.map(layer => {
-            var checked = false;
-            if (Array.isArray(this.props.chapter.layers)) {
-              checked = !!this.props.chapter.layers.find(layerId => Number(layerId) ===  Number(layer.id));
-            }            
-            return (
-              <LayerListItem checked={checked} key={layer.id} layer={layer} onChange={(checked) => {
+        {this.state.layers.map(layer => {
+          var checked = false;
+          if (Array.isArray(this.props.chapter.layers)) {
+            checked = !!this.props.chapter.layers.find(
+              layerId => Number(layerId) === Number(layer.id)
+            );
+          }
+          return (
+            <LayerListItem
+              checked={checked}
+              key={layer.id}
+              layer={layer}
+              onChange={checked => {
                 this.onLayerListItemChanged(checked, layer);
-              }}></LayerListItem>
-            )
-          })            
-        }     
-      </ul>      
-    )
+              }}
+            />
+          );
+        })}
+      </ul>
+    );
   }
-
 }
 
 export default LayerList;

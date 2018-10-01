@@ -20,8 +20,8 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var Shell = require('views/shell');
-var ShellModel = require('models/shell');
+var Shell = require("views/shell");
+var ShellModel = require("models/shell");
 
 /**
  * Application view
@@ -38,16 +38,16 @@ var ApplicationView = {
    * @instance
    * @param {object} config
    */
-  load: function (config, bookmarks) {
+  load: function(config, bookmarks) {
     this.shell = new ShellModel(config);
     this.shell.setBookmarks(bookmarks);
-    this.shell.on('change:configUpdated', () => {
+    this.shell.on("change:configUpdated", () => {
       this.shell.updateConfig();
       this.shell.setBookmarks(bookmarks);
     });
   },
 
-  initialize: function (config, bookmarks) {
+  initialize: function(config, bookmarks) {
     this.load(config, bookmarks);
   },
   /**
@@ -55,26 +55,26 @@ var ApplicationView = {
    * @instance
    * @param {boolean} force - Force update
    */
-  render: function (force) {
+  render: function(force) {
     // TODO: get ID from config instead
-    var el = document.getElementById('map');
+    var el = document.getElementById("map");
 
-    var errorStyle = { 'margin-top': '50px', 'text-align': 'center' };
+    var errorStyle = { "margin-top": "50px", "text-align": "center" };
 
     if (!el) {
-      return alert('Applikationen har stannat. Försök igen senare.');
+      return alert("Applikationen har stannat. Försök igen senare.");
     }
 
     if (force) {
       ReactDOM.unmountComponentAtNode(el);
     }
 
-    if (this.shell.get('canStart')) {
+    if (this.shell.get("canStart")) {
       ReactDOM.render(<Shell model={this.shell} />, el);
     } else {
       ReactDOM.render(
-        <div className='container'>
-          <div className='alert alert-danger' style={errorStyle}>
+        <div className="container">
+          <div className="alert alert-danger" style={errorStyle}>
             <h2>Kartan kunde inte startas upp.</h2>
             <p>Var god kontakta systemadminstratören.</p>
           </div>

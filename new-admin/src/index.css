@@ -2,7 +2,7 @@ body {
   margin: 20px;
   width: 1400px;
   font-size: 12pt !important;
-  color: #373D3F;
+  color: #373d3f;
 }
 
 input[type="text"] {
@@ -52,7 +52,7 @@ article label {
 }
 
 article input[type="text"] {
-    width: 400px;
+  width: 400px;
   margin-right: 5px;
   margin-bottom: 5px;
 }
@@ -74,7 +74,7 @@ article fieldset > span > div {
   border-color: #ccc;
 }
 
-.btn-default:hover {  
+.btn-default:hover {
   background-color: #e6e6e6;
   border-color: #adadad;
 }
@@ -133,14 +133,14 @@ article fieldset > span > div {
 }
 .layer-list-test {
   display: block;
-    width: 95%;
-    height: 34px;
-    font-size: 14px;
-    line-height: 34px;
-    color: #555555;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+  width: 95%;
+  height: 34px;
+  font-size: 14px;
+  line-height: 34px;
+  color: #555555;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
   overflow: auto;
   cursor: pointer;
   min-height: 250px;
@@ -182,24 +182,22 @@ article fieldset > span > div {
   background: #dedede;
 }
 
-.layer-list li:nth-child(even)  {
-
+.layer-list li:nth-child(even) {
 }
 
-.layer-list li:nth-child(odd)  {
-
+.layer-list li:nth-child(odd) {
 }
 
 .layer-list li i {
   float: right;
   margin-top: 1px;
   padding: 4px;
-  border: 1px solid rgba(0,0,0,0);
+  border: 1px solid rgba(0, 0, 0, 0);
 }
 
 .layer-list li i.active {
-    color: #a94442;
-    border: 1px solid;
+  color: #a94442;
+  border: 1px solid;
 }
 
 .config-layer-list {
@@ -224,7 +222,6 @@ article fieldset > span > div {
 }
 
 table {
-
 }
 
 table th {
@@ -247,7 +244,8 @@ table td {
   display: inherit !important;
 }
 
-body.dragging, body.dragging * {
+body.dragging,
+body.dragging * {
   cursor: move !important;
 }
 
@@ -295,7 +293,7 @@ body.dragging, body.dragging * {
 
 .tree-view .layer-node {
   border: 1px solid #ccc;
-    background: #f8f8f8;
+  background: #f8f8f8;
   margin-bottom: 5px;
   padding: 10px;
   width: 100%;
@@ -316,7 +314,6 @@ body.dragging, body.dragging * {
 }
 
 .info {
-
 }
 
 .tab-pane-bar {
@@ -324,8 +321,8 @@ body.dragging, body.dragging * {
 }
 
 .tab-pane aside {
-    max-height: 100vh;
-    overflow-y: scroll;
+  max-height: 100vh;
+  overflow-y: scroll;
 }
 
 .expanded-at-start {
@@ -404,7 +401,7 @@ body.dragging, body.dragging * {
 }
 
 .sketch-picker {
-  display: inline-block
+  display: inline-block;
 }
 
 .text-display {
@@ -417,7 +414,6 @@ body.dragging, body.dragging * {
   font-size: 14px;
   color: #a0a0a0;
   margin: 0;
-
 }
 
 .layer-list-choosen-test {
@@ -469,7 +465,7 @@ body.dragging, body.dragging * {
   overflow: hidden;
 }
 .list-item li:hover {
-  background-color: #dedede; 
+  background-color: #dedede;
 }
 
 .overflow-hidden {
@@ -530,7 +526,7 @@ legend.header-side {
 .RichEditor-root {
   background: #fff;
   border: 1px solid #ddd;
-  font-family: 'Georgia', serif;
+  font-family: "Georgia", serif;
   font-size: 14px;
   padding: 15px;
   max-width: 800px;
@@ -560,7 +556,7 @@ legend.header-side {
 .RichEditor-editor .RichEditor-blockquote {
   border-left: 5px solid #eee;
   color: #666;
-  font-family: 'Hoefler Text', 'Georgia', serif;
+  font-family: "Hoefler Text", "Georgia", serif;
   font-style: italic;
   margin: 16px 0;
   padding: 10px 20px;
@@ -568,13 +564,13 @@ legend.header-side {
 
 .RichEditor-editor .public-DraftStyleDefault-pre {
   background-color: rgba(0, 0, 0, 0.05);
-  font-family: 'Inconsolata', 'Menlo', 'Consolas', monospace;
+  font-family: "Inconsolata", "Menlo", "Consolas", monospace;
   font-size: 16px;
   padding: 20px;
 }
 
 .RichEditor-controls {
-  font-family: 'Helvetica', sans-serif;
+  font-family: "Helvetica", sans-serif;
   font-size: 14px;
   margin-bottom: 5px;
   user-select: none;
@@ -583,7 +579,7 @@ legend.header-side {
 .RichEditor-styleButton {
   color: #999;
   cursor: pointer;
-  margin-right: 16px;  
+  margin-right: 16px;
   display: inline-block;
   padding: 5px;
   border: 1px solid #ccc;
@@ -600,9 +596,9 @@ figure {
   margin: 0;
 }
 
-.chapter {  
-  border-left: 1px solid #ccc;    
-  margin: 5px;  
+.chapter {
+  border-left: 1px solid #ccc;
+  margin: 5px;
   margin-left: 20px;
   padding: 4px;
 }
@@ -611,7 +607,7 @@ figure {
   font-size: 16pt;
   margin: 0;
   padding: 0;
-  margin-bottom: 5px;  
+  margin-bottom: 5px;
   font-style: underline;
 }
 
@@ -679,7 +675,7 @@ figure {
 #map {
   border-bottom: 1px solid;
   margin-left: 250px;
-  position: ab
+  position: ab;
 }
 
 .layer-list-item {
@@ -687,7 +683,7 @@ figure {
   background: #f8f8f8;
   margin: 5px;
   padding: 10px;
-  cursor: pointer;  
+  cursor: pointer;
   font-size: 12pt;
   user-select: none;
 }

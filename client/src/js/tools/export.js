@@ -20,30 +20,29 @@
 //
 // https://github.com/hajkmap/Hajk
 
-'use strict';
+"use strict";
 
-var ToolModel = require('tools/tool');
-var transform = require('models/transform');
+var ToolModel = require("tools/tool");
+var transform = require("models/transform");
 
-String.prototype.toHex = function () {
+String.prototype.toHex = function() {
   if (/^#/.test(this)) return this;
-  var hex = (
-    '#' +
-  this.match(/\d+(\.\d+)?/g)
-    .splice(0, 3)
-    .map(i => {
-      var v = parseInt(i, 10).toString(16);
-      if (parseInt(i) < 16) {
-        v = '0' + v;
-      }
-      return v;
-    })
-    .join('')
-  );
+  var hex =
+    "#" +
+    this.match(/\d+(\.\d+)?/g)
+      .splice(0, 3)
+      .map(i => {
+        var v = parseInt(i, 10).toString(16);
+        if (parseInt(i) < 16) {
+          v = "0" + v;
+        }
+        return v;
+      })
+      .join("");
   return hex;
 };
 
-String.prototype.toOpacity = function () {
+String.prototype.toOpacity = function() {
   return parseFloat(this.match(/\d+(\.\d+)?/g).splice(3, 1)[0]);
 };
 
@@ -59,20 +58,20 @@ String.prototype.toOpacity = function () {
  * @property {string} copyright - Default: © Lantmäteriverket i2009/00858
  */
 var ExportModelProperties = {
-  type: 'export',
-  panel: 'exportpanel',
-  title: 'Skriv ut',
-  toolbar: 'bottom',
-  icon: 'fa fa-print icon',
-  exportUrl: '/mapservice/export/pdf',
-  exportTiffUrl: '/mapservice/export/tiff',
+  type: "export",
+  panel: "exportpanel",
+  title: "Skriv ut",
+  toolbar: "bottom",
+  icon: "fa fa-print icon",
+  exportUrl: "/mapservice/export/pdf",
+  exportTiffUrl: "/mapservice/export/tiff",
   pdfActive: true,
   tiffActive: true,
-  copyright: '© Lantmäteriverket i2009/00858',
-  activeTool: '',
+  copyright: "© Lantmäteriverket i2009/00858",
+  activeTool: "",
   base64Encode: false,
   autoScale: false,
-  instruction: '',
+  instruction: "",
   scales: [250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000]
 };
 
@@ -89,64 +88,64 @@ var ExportModel = {
    */
   defaults: ExportModelProperties,
 
-  configure: function (shell) {
+  configure: function(shell) {
     const formats = [];
 
-    if (this.get('pdfActive')) {
-      formats.push('pdf');
+    if (this.get("pdfActive")) {
+      formats.push("pdf");
     }
-    if (this.get('tiffActive')) {
-      formats.push('tiff');
+    if (this.get("tiffActive")) {
+      formats.push("tiff");
     }
     if (formats.length > 0) {
       this.setActiveTool(formats[0]);
     }
 
     // change scale on the map here?
-    this.set('olMap', shell.getMap().getMap());
+    this.set("olMap", shell.getMap().getMap());
     this.addPreviewLayer();
   },
 
-  setActiveTool: function (tool) {
-    this.set('activeTool', tool);
+  setActiveTool: function(tool) {
+    this.set("activeTool", tool);
   },
 
   /**
    * Add preview layer to map.
    * @instance
    */
-  addPreviewLayer: function () {
+  addPreviewLayer: function() {
     this.previewLayer = new ol.layer.Vector({
       source: new ol.source.Vector(),
-      name: 'preview-layer',
+      name: "preview-layer",
       style: new ol.style.Style({
         stroke: new ol.style.Stroke({
-          color: 'rgba(0, 0, 0, 0.7)',
+          color: "rgba(0, 0, 0, 0.7)",
           width: 2
         }),
         fill: new ol.style.Fill({
-          color: 'rgba(255, 145, 20, 0.4)'
+          color: "rgba(255, 145, 20, 0.4)"
         })
       })
     });
-    this.get('olMap').addLayer(this.previewLayer);
+    this.get("olMap").addLayer(this.previewLayer);
   },
 
   /**
    * Remove preview layer from map.
    * @instance
    */
-  removePreview: function () {
-    this.set('previewFeature', undefined);
+  removePreview: function() {
+    this.set("previewFeature", undefined);
     this.previewLayer.getSource().clear();
   },
 
-  removeTiffPreview: function () {
-    this.get('transform').clear();
-    this.get('olMap').removeInteraction(this.get('transform'));
+  removeTiffPreview: function() {
+    this.get("transform").clear();
+    this.get("olMap").removeInteraction(this.get("transform"));
     this.previewLayer.getSource().clear();
-    this.set('previewFeature', undefined);
-    this.get('olMap').set('clickLock', false);
+    this.set("previewFeature", undefined);
+    this.get("olMap").set("clickLock", false);
   },
 
   /**
@@ -154,25 +153,27 @@ var ExportModel = {
    * @instance
    * @return {external:"ol.feature"} preview feature
    */
-  getPreviewFeature: function () {
-    return this.get('previewFeature');
+  getPreviewFeature: function() {
+    return this.get("previewFeature");
   },
 
   /**
    * Get center coordinate of the preview feature.
    * @return {external:"ol.coordinate"} center coordinate
    */
-  getPreviewCenter: function () {
-    var extent = this.getPreviewFeature().getGeometry().getExtent();
+  getPreviewCenter: function() {
+    var extent = this.getPreviewFeature()
+      .getGeometry()
+      .getExtent();
     return ol.extent.getCenter(extent);
   },
 
-  addTiffPreview: function (center) {
+  addTiffPreview: function(center) {
     var dpi = 25.4 / 0.28,
       ipu = 39.37,
       sf = 1,
-      w = (210 / dpi / ipu * 10000 / 2) * sf,
-      y = (297 / dpi / ipu * 10000 / 2) * sf,
+      w = (((210 / dpi / ipu) * 10000) / 2) * sf,
+      y = (((297 / dpi / ipu) * 10000) / 2) * sf,
       coords = [
         [
           [center[0] - w, center[1] - y],
@@ -184,27 +185,29 @@ var ExportModel = {
       ],
       feature = new ol.Feature({
         geometry: new ol.geom.Polygon(coords)
-      })
-    ;
+      });
 
     this.removePreview();
-    this.set('previewFeature', feature);
+    this.set("previewFeature", feature);
     this.previewLayer.getSource().addFeature(feature);
 
     var features = new ol.Collection();
     features.push(feature);
 
-    this.set('transform', new ol.interaction.Transform({
-      translateFeature: true,
-      scale: true,
-      rotate: false,
-      keepAspectRatio: false,
-      translate: true,
-      stretch: false,
-      features: features
-    }));
-    this.get('olMap').addInteraction(this.get('transform'));
-    this.get('olMap').set('clickLock', true);
+    this.set(
+      "transform",
+      new ol.interaction.Transform({
+        translateFeature: true,
+        scale: true,
+        rotate: false,
+        keepAspectRatio: false,
+        translate: true,
+        stretch: false,
+        features: features
+      })
+    );
+    this.get("olMap").addInteraction(this.get("transform"));
+    this.get("olMap").set("clickLock", true);
   },
 
   /**
@@ -214,12 +217,12 @@ var ExportModel = {
    * @param {object} paper
    * @param {number[]} center
    */
-  addPreview: function (scale, paper, center) {
+  addPreview: function(scale, paper, center) {
     var dpi = 25.4 / 0.28,
       ipu = 39.37,
       sf = 1,
-      w = (paper.width / dpi / ipu * scale / 2) * sf,
-      y = (paper.height / dpi / ipu * scale / 2) * sf,
+      w = (((paper.width / dpi / ipu) * scale) / 2) * sf,
+      y = (((paper.height / dpi / ipu) * scale) / 2) * sf,
       coords = [
         [
           [center[0] - w, center[1] - y],
@@ -231,11 +234,10 @@ var ExportModel = {
       ],
       feature = new ol.Feature({
         geometry: new ol.geom.Polygon(coords)
-      })
-    ;
+      });
 
     this.removePreview();
-    this.set('previewFeature', feature);
+    this.set("previewFeature", feature);
     this.previewLayer.getSource().addFeature(feature);
   },
 
@@ -245,9 +247,9 @@ var ExportModel = {
    * @param {HTMLElement} old canvas
    * @param {number} size
    */
-  cloneCanvas: function (oldCanvas, size) {
-    var newCanvas = document.createElement('canvas'),
-      context = newCanvas.getContext('2d');
+  cloneCanvas: function(oldCanvas, size) {
+    var newCanvas = document.createElement("canvas"),
+      context = newCanvas.getContext("2d");
 
     newCanvas.width = oldCanvas.width;
     newCanvas.height = oldCanvas.height;
@@ -260,31 +262,31 @@ var ExportModel = {
    * @instance
    * @return {string} svg image as string
    */
-  generateScaleBar: function () {
-    var elem = document.querySelector('.ol-scale-line').outerHTML,
+  generateScaleBar: function() {
+    var elem = document.querySelector(".ol-scale-line").outerHTML,
       clone = $(elem),
-      html = '',
+      html = "",
       data;
 
     clone.css({
-      'width': $('.ol-scale-line-inner').width() + 4,
-      'border-radius': '0px',
-      'padding': '4px',
-      'background': 'white'
+      width: $(".ol-scale-line-inner").width() + 4,
+      "border-radius": "0px",
+      padding: "4px",
+      background: "white"
     });
 
-    clone.find('.ol-scale-line-inner').css({
-      'border-right-width': '1px',
-      'border-bottom-width': '1px',
-      'border-left-width': '1px',
-      'border-style': 'none solid solid',
-      'border-right-color': 'rgb(0, 0, 0)',
-      'border-bottom-color': 'rgb(0, 0, 0)',
-      'border-left-color': 'rgb(0, 0, 0)',
-      'color': 'rgb(0, 0, 0)',
-      'font-size': '10px',
-      'text-align': 'center',
-      'margin': '1px'
+    clone.find(".ol-scale-line-inner").css({
+      "border-right-width": "1px",
+      "border-bottom-width": "1px",
+      "border-left-width": "1px",
+      "border-style": "none solid solid",
+      "border-right-color": "rgb(0, 0, 0)",
+      "border-bottom-color": "rgb(0, 0, 0)",
+      "border-left-color": "rgb(0, 0, 0)",
+      color: "rgb(0, 0, 0)",
+      "font-size": "10px",
+      "text-align": "center",
+      margin: "1px"
     });
 
     elem = clone.get(0).outerHTML;
@@ -308,29 +310,36 @@ var ExportModel = {
    * @instance
    * @return {object[]} wms layers
    */
-  findWMS: function () {
+  findWMS: function() {
     var exportable = layer =>
-      (layer instanceof ol.layer.Tile || layer instanceof ol.layer.Image) && (
-        layer.getSource() instanceof ol.source.TileWMS ||
-    layer.getSource() instanceof ol.source.ImageWMS) &&
-    layer.getVisible();
+      (layer instanceof ol.layer.Tile || layer instanceof ol.layer.Image) &&
+      (layer.getSource() instanceof ol.source.TileWMS ||
+        layer.getSource() instanceof ol.source.ImageWMS) &&
+      layer.getVisible();
 
     var formatUrl = url =>
       /^\//.test(url)
-        ? (window.location.protocol + '//' + window.location.host + url)
+        ? window.location.protocol + "//" + window.location.host + url
         : url;
 
-    return this.get('olMap')
+    return this.get("olMap")
       .getLayers()
       .getArray()
       .filter(exportable)
       .map((layer, i) => {
         return {
-          url: layer.getSource().get('url'),
-          layers: layer.getSource().getParams()['LAYERS'].split(','),
+          url: layer.getSource().get("url"),
+          layers: layer
+            .getSource()
+            .getParams()
+            ["LAYERS"].split(","),
           zIndex: i,
           workspacePrefix: null,
-          coordinateSystemId: this.get('olMap').getView().getProjection().getCode().split(':')[1]
+          coordinateSystemId: this.get("olMap")
+            .getView()
+            .getProjection()
+            .getCode()
+            .split(":")[1]
         };
       });
   },
@@ -340,14 +349,16 @@ var ExportModel = {
    * @instance
    * @return {object[]} vector layers
    */
-  findVector: function () {
-    function componentToHex (c) {
+  findVector: function() {
+    function componentToHex(c) {
       var hex = c.toString(16);
-      return hex.length == 1 ? '0' + hex : hex;
+      return hex.length == 1 ? "0" + hex : hex;
     }
 
-    function rgbToHex (rgbString) {
-      const matches = /rgb(a)?\((\d+), (\d+), (\d+)(, [\d\.]+)?\)/.exec(rgbString);
+    function rgbToHex(rgbString) {
+      const matches = /rgb(a)?\((\d+), (\d+), (\d+)(, [\d\.]+)?\)/.exec(
+        rgbString
+      );
       if (matches !== null) {
         let r = parseInt(matches[2]);
         let g = parseInt(matches[3]);
@@ -355,15 +366,15 @@ var ExportModel = {
         let a = parseInt(matches[5]);
         return a
           ? null
-          : ('#' + componentToHex(r) + componentToHex(g) + componentToHex(b));
+          : "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
       } else {
         return null;
       }
     }
 
-    function asObject (style) {
-      function olColorToHex (olColor) {
-        var colorString = olColor.join(', ');
+    function asObject(style) {
+      function olColorToHex(olColor) {
+        var colorString = olColor.join(", ");
         var hex = rgbToHex(`rgba(${colorString})`);
         return hex;
       }
@@ -379,40 +390,98 @@ var ExportModel = {
         }
       }
 
-      var fillColor = '#FC345C',
+      var fillColor = "#FC345C",
         fillOpacity = 0.5,
-        strokeColor = '#FC345C',
+        strokeColor = "#FC345C",
         strokeOpacity = 1,
         strokeWidth = 3,
-        strokeLinecap = 'round',
-        strokeDashstyle = 'solid',
+        strokeLinecap = "round",
+        strokeDashstyle = "solid",
         pointRadius = 10,
-        pointFillColor = '#FC345C',
-        pointSrc = '',
-        labelAlign = 'cm',
-        labelOutlineColor = 'white',
+        pointFillColor = "#FC345C",
+        pointSrc = "",
+        labelAlign = "cm",
+        labelOutlineColor = "white",
         labelOutlineWidth = 3,
-        fontSize = '16',
-        fontColor = '#FFFFFF',
-        fontBackColor = '#000000';
+        fontSize = "16",
+        fontColor = "#FFFFFF",
+        fontBackColor = "#000000";
 
-      if (style.getText && style.getText() && style.getText().getFont && style.getText().getFont()) {
-        fontSize = style.getText().getFont().match(/\d+/)[0];
+      if (
+        style.getText &&
+        style.getText() &&
+        style.getText().getFont &&
+        style.getText().getFont()
+      ) {
+        fontSize = style
+          .getText()
+          .getFont()
+          .match(/\d+/)[0];
       }
 
-      if (style.getText && style.getText() && style.getText().getFill && style.getText().getFill()) {
-        if (typeof style.getText().getFill().getColor() === 'string') {
-          fontColor = style.getText().getFill().getColor();
-        } else if (Array.isArray(style.getText().getFill().getColor())) {
-          fontColor = olColorToHex(style.getText().getFill().getColor());
+      if (
+        style.getText &&
+        style.getText() &&
+        style.getText().getFill &&
+        style.getText().getFill()
+      ) {
+        if (
+          typeof style
+            .getText()
+            .getFill()
+            .getColor() === "string"
+        ) {
+          fontColor = style
+            .getText()
+            .getFill()
+            .getColor();
+        } else if (
+          Array.isArray(
+            style
+              .getText()
+              .getFill()
+              .getColor()
+          )
+        ) {
+          fontColor = olColorToHex(
+            style
+              .getText()
+              .getFill()
+              .getColor()
+          );
         }
       }
 
-      if (style.getText && style.getText() && style.getText().getStroke && style.getText().getStroke()) {
-        if (typeof style.getText().getFill().getColor() === 'string') {
-          fontBackColor = style.getText().getStroke().getColor();
-        } else if (Array.isArray(style.getText().getStroke().getColor())) {
-          fontBackColor = olColorToHex(style.getText().getStroke().getColor());
+      if (
+        style.getText &&
+        style.getText() &&
+        style.getText().getStroke &&
+        style.getText().getStroke()
+      ) {
+        if (
+          typeof style
+            .getText()
+            .getFill()
+            .getColor() === "string"
+        ) {
+          fontBackColor = style
+            .getText()
+            .getStroke()
+            .getColor();
+        } else if (
+          Array.isArray(
+            style
+              .getText()
+              .getStroke()
+              .getColor()
+          )
+        ) {
+          fontBackColor = olColorToHex(
+            style
+              .getText()
+              .getStroke()
+              .getColor()
+          );
         }
       }
 
@@ -430,26 +499,39 @@ var ExportModel = {
 
       if (style.getFill && style.getFill() && style.getFill().getColor()) {
         if (style.getFill().getColor().toHex) {
-          fillColor = style.getFill().getColor().toHex();
-          fillOpacity = style.getFill().getColor().toOpacity();
+          fillColor = style
+            .getFill()
+            .getColor()
+            .toHex();
+          fillOpacity = style
+            .getFill()
+            .getColor()
+            .toOpacity();
         } else if (Array.isArray(style.getFill().getColor())) {
           fillColor = olColorToHex(style.getFill().getColor());
-          fillOpacity = style.getFill().getColor()[style.getFill().getColor().length - 1];
+          fillOpacity = style.getFill().getColor()[
+            style.getFill().getColor().length - 1
+          ];
         }
       }
 
       if (style.getFill && style.getStroke()) {
         if (style.getStroke().getColor().toHex) {
-          strokeColor = style.getStroke().getColor().toHex();
+          strokeColor = style
+            .getStroke()
+            .getColor()
+            .toHex();
         } else if (Array.isArray(style.getStroke().getColor())) {
           strokeColor = olColorToHex(style.getStroke().getColor());
         }
 
         strokeWidth = style.getStroke().getWidth() || 3;
-        strokeLinecap = style.getStroke().getLineCap() || 'round';
+        strokeLinecap = style.getStroke().getLineCap() || "round";
         strokeDashstyle = style.getStroke().getLineDash()
           ? style.getStroke().getLineDash()[0] === 12
-            ? 'dash' : 'dot' : 'solid';
+            ? "dash"
+            : "dot"
+          : "solid";
       }
 
       if (style.getImage && style.getImage()) {
@@ -458,7 +540,11 @@ var ExportModel = {
         }
         if (style.getImage() instanceof ol.style.Circle) {
           pointRadius = style.getImage().getRadius();
-          pointFillColor = style.getImage().getFill().getColor().toHex();
+          pointFillColor = style
+            .getImage()
+            .getFill()
+            .getColor()
+            .toHex();
         }
       }
 
@@ -482,44 +568,65 @@ var ExportModel = {
       };
     }
 
-    function as2DPairs (coordinates, type) {
+    function as2DPairs(coordinates, type) {
       switch (type) {
-        case 'Point':
+        case "Point":
           return [coordinates];
-        case 'LineString':
+        case "LineString":
           return coordinates;
-        case 'Polygon':
+        case "Polygon":
           return coordinates[0];
-        case 'MultiPolygon':
+        case "MultiPolygon":
           return coordinates[0][0];
-        case 'Circle':
+        case "Circle":
           return [coordinates[0], coordinates[1]];
       }
     }
 
-    function translateVector (features, layer) {
-      function getText (feature) {
-        var text = '';
+    function translateVector(features, layer) {
+      function getText(feature) {
+        var text = "";
 
-        if (feature.getProperties() &&
-          feature.getProperties().type === 'Text') {
-          if (feature.getProperties().description) { text = feature.getProperties().description; } else if (feature.getProperties().name) { text = feature.getProperties().name; } else { text = ''; }
+        if (
+          feature.getProperties() &&
+          feature.getProperties().type === "Text"
+        ) {
+          if (feature.getProperties().description) {
+            text = feature.getProperties().description;
+          } else if (feature.getProperties().name) {
+            text = feature.getProperties().name;
+          } else {
+            text = "";
+          }
           return text;
         }
 
-        if (feature.getStyle &&
+        if (
+          feature.getStyle &&
           Array.isArray(feature.getStyle()) &&
           feature.getStyle()[1] &&
           feature.getStyle()[1].getText() &&
-          feature.getStyle()[1].getText().getText()) {
-          text = feature.getStyle()[1].getText().getText();
+          feature
+            .getStyle()[1]
+            .getText()
+            .getText()
+        ) {
+          text = feature
+            .getStyle()[1]
+            .getText()
+            .getText();
         }
 
-        if (feature.getStyle &&
-            feature.getStyle() &&
-            feature.getStyle().getText &&
-            feature.getStyle().getText()) {
-          text = feature.getStyle().getText().getText();
+        if (
+          feature.getStyle &&
+          feature.getStyle() &&
+          feature.getStyle().getText &&
+          feature.getStyle().getText()
+        ) {
+          text = feature
+            .getStyle()
+            .getText()
+            .getText();
         }
 
         return text;
@@ -537,12 +644,15 @@ var ExportModel = {
             feature.setStyle(sourceStyle);
           }
 
-          coords = type === 'Circle'
-            ? as2DPairs([geom.getCenter(), [geom.getRadius(), 0]], 'Circle')
-            : as2DPairs(geom.getCoordinates(), type);
+          coords =
+            type === "Circle"
+              ? as2DPairs([geom.getCenter(), [geom.getRadius(), 0]], "Circle")
+              : as2DPairs(geom.getCoordinates(), type);
 
-          if (type === 'MultiPolygon') {
-            holes = geom.getCoordinates()[0].slice(1, geom.getCoordinates()[0].length);
+          if (type === "MultiPolygon") {
+            holes = geom
+              .getCoordinates()[0]
+              .slice(1, geom.getCoordinates()[0].length);
           }
 
           return {
@@ -561,31 +671,48 @@ var ExportModel = {
     var layers,
       vectorLayers,
       imageVectorLayers,
-      extent = this.previewLayer.getSource().getFeatures()[0].getGeometry().getExtent()
-    ;
+      extent = this.previewLayer
+        .getSource()
+        .getFeatures()[0]
+        .getGeometry()
+        .getExtent();
 
-    layers = this.get('olMap').getLayers().getArray();
+    layers = this.get("olMap")
+      .getLayers()
+      .getArray();
 
-    vectorLayers = layers.filter(layer =>
-      layer instanceof ol.layer.Vector &&
-      layer.getVisible() &&
-      layer.get('name') !== 'preview-layer' &&
-      layer.get('name') !== 'search-selection-layer'
+    vectorLayers = layers.filter(
+      layer =>
+        layer instanceof ol.layer.Vector &&
+        layer.getVisible() &&
+        layer.get("name") !== "preview-layer" &&
+        layer.get("name") !== "search-selection-layer"
     );
 
-    imageVectorLayers = layers.filter(layer =>
-      layer instanceof ol.layer.Image &&
-      layer.getSource() instanceof ol.source.ImageVector &&
-      layer.getVisible()
+    imageVectorLayers = layers.filter(
+      layer =>
+        layer instanceof ol.layer.Image &&
+        layer.getSource() instanceof ol.source.ImageVector &&
+        layer.getVisible()
     );
 
-    vectorLayers = vectorLayers.map(layer =>
-      translateVector(layer.getSource().getFeaturesInExtent(extent))
-    ).filter(layer => layer.features.length > 0);
+    vectorLayers = vectorLayers
+      .map(layer =>
+        translateVector(layer.getSource().getFeaturesInExtent(extent))
+      )
+      .filter(layer => layer.features.length > 0);
 
-    imageVectorLayers = imageVectorLayers.map(layer => {
-      return translateVector(layer.getSource().getSource().getFeaturesInExtent(extent), layer);
-    }).filter(layer => layer.features.length > 0);
+    imageVectorLayers = imageVectorLayers
+      .map(layer => {
+        return translateVector(
+          layer
+            .getSource()
+            .getSource()
+            .getFeaturesInExtent(extent),
+          layer
+        );
+      })
+      .filter(layer => layer.features.length > 0);
 
     return vectorLayers.concat(imageVectorLayers);
   },
@@ -595,17 +722,20 @@ var ExportModel = {
    * @instance
    * @return {object[]} wmts layers
    */
-  findWMTS: function () {
-    var layers = this.get('olMap').getLayers().getArray();
+  findWMTS: function() {
+    var layers = this.get("olMap")
+      .getLayers()
+      .getArray();
     return layers
-      .filter(layer =>
-        layer.getSource() instanceof ol.source.WMTS && layer.getVisible()
+      .filter(
+        layer =>
+          layer.getSource() instanceof ol.source.WMTS && layer.getVisible()
       )
       .map(layer => {
         var s = layer.getSource();
         return {
-          url: s.get('url'),
-          axisMode: s.get('axisMode')
+          url: s.get("url"),
+          axisMode: s.get("axisMode")
         };
       });
   },
@@ -615,19 +745,23 @@ var ExportModel = {
    * @instance
    * @return {object[]} wmts layers
    */
-  findArcGIS: function () {
-    function getArcGISLayerContract (layer) {
-      var url = layer.getSource().get('url'),
-        extent = layer.get('extent') || [],
+  findArcGIS: function() {
+    function getArcGISLayerContract(layer) {
+      var url = layer.getSource().get("url"),
+        extent = layer.get("extent") || [],
         layers = [],
-        projection = layer.get('projection');
+        projection = layer.get("projection");
 
-      if (typeof layer.getSource().getParams('params')['LAYERS'] === 'string') {
-        layers = layer.getSource().getParams('params')['LAYERS'].replace('show:', '').split(',');
+      if (typeof layer.getSource().getParams("params")["LAYERS"] === "string") {
+        layers = layer
+          .getSource()
+          .getParams("params")
+          ["LAYERS"].replace("show:", "")
+          .split(",");
       }
 
-      if (typeof projection === 'string') {
-        projection = projection.replace('EPSG:', '');
+      if (typeof projection === "string") {
+        projection = projection.replace("EPSG:", "");
       }
 
       return {
@@ -643,11 +777,16 @@ var ExportModel = {
       };
     }
 
-    function visibleArcGISLayer (layer) {
-      return layer.getSource() instanceof ol.source.TileArcGISRest && layer.getVisible();
+    function visibleArcGISLayer(layer) {
+      return (
+        layer.getSource() instanceof ol.source.TileArcGISRest &&
+        layer.getVisible()
+      );
     }
 
-    return this.get('olMap').getLayers().getArray()
+    return this.get("olMap")
+      .getLayers()
+      .getArray()
       .filter(visibleArcGISLayer)
       .map(getArcGISLayerContract);
   },
@@ -658,28 +797,27 @@ var ExportModel = {
    * @param {function} callback
    * @param {object} size
    */
-  exportMap: function (callback, size) {
-    var map = this.get('olMap');
-    map.once('postcompose', (event) => {
-      var href,
-        anchor,
-        canvas,
-        context,
-        exportImage
-    ;
+  exportMap: function(callback, size) {
+    var map = this.get("olMap");
+    map.once("postcompose", event => {
+      var href, anchor, canvas, context, exportImage;
       canvas = this.cloneCanvas(event.context.canvas, size);
-      context = canvas.getContext('2d');
-      context.textBaseline = 'bottom';
-      context.font = '12px sans-serif';
+      context = canvas.getContext("2d");
+      context.textBaseline = "bottom";
+      context.font = "12px sans-serif";
       if (!size.x) {
-        context.fillText(this.get('copyright'), 10, 25);
+        context.fillText(this.get("copyright"), 10, 25);
       }
       var img = new Image();
       img.src = this.generateScaleBar();
-      img.onload = function () {
-        context.drawImage(img, (size.x + 10) || 10, (size.y + size.height - 30) || (canvas.height - 30));
-        href = canvas.toDataURL('image/png');
-        href = href.split(';')[1].replace('base64,', '');
+      img.onload = function() {
+        context.drawImage(
+          img,
+          size.x + 10 || 10,
+          size.y + size.height - 30 || canvas.height - 30
+        );
+        href = canvas.toDataURL("image/png");
+        href = href.split(";")[1].replace("base64,", "");
         callback(href);
       };
     });
@@ -691,18 +829,18 @@ var ExportModel = {
    * @instance
    * @param {function} callback
    */
-  exportImage: function (callback) {
-    this.exportMap((href) => {
+  exportImage: function(callback) {
+    this.exportMap(href => {
       $.ajax({
-        url: this.get('url'),
-        type: 'post',
-        contentType: 'text/plain',
-        data: 'image;' + encodeURIComponent(href),
+        url: this.get("url"),
+        type: "post",
+        contentType: "text/plain",
+        data: "image;" + encodeURIComponent(href),
         success: response => {
-          var anchor = $('<a>Hämta</a>').attr({
+          var anchor = $("<a>Hämta</a>").attr({
             href: response,
-            target: '_blank',
-            download: 'karta.png'
+            target: "_blank",
+            download: "karta.png"
           });
           callback(anchor);
         }
@@ -718,18 +856,22 @@ var ExportModel = {
    * @param {object} options
    * @param {function} callback
    */
-  exportPDF: function (options, callback) {
-    var extent = this.previewLayer.getSource().getFeatures()[0].getGeometry().getExtent(),
+  exportPDF: function(options, callback) {
+    var extent = this.previewLayer
+        .getSource()
+        .getFeatures()[0]
+        .getGeometry()
+        .getExtent(),
       left = extent[0],
       right = extent[2],
       bottom = extent[1],
       top = extent[3],
       scale = options.scale,
       dpi = options.resolution,
-      form = document.createElement('form'),
-      input = document.createElement('input'),
+      form = document.createElement("form"),
+      input = document.createElement("input"),
       curr = document.getElementById(this.exportHitsFormId),
-      url = this.get('exportUrl'),
+      url = this.get("exportUrl"),
       data = {
         wmsLayers: [],
         vectorLayers: [],
@@ -755,52 +897,64 @@ var ExportModel = {
     data.orientation = options.orientation;
     data.format = options.format;
     data.scale = options.scale;
-    data.proxyUrl = this.get('proxyUrl');
+    data.proxyUrl = this.get("proxyUrl");
 
-    this.set('downloadingPdf', true);
-    var dataString = '';
-    if (this.get('base64Encode')) { // base64 here
+    this.set("downloadingPdf", true);
+    var dataString = "";
+    if (this.get("base64Encode")) {
+      // base64 here
       dataString = btoa(JSON.stringify(data));
     } else {
       dataString = JSON.stringify(data);
     }
     $.ajax({
       url: url,
-      method: 'post',
+      method: "post",
       data: {
         json: dataString
       },
-      format: 'json',
-      success: (url) => {
-        this.set('downloadingPdf', false);
-        this.set('urlPdf', url);
+      format: "json",
+      success: url => {
+        this.set("downloadingPdf", false);
+        this.set("urlPdf", url);
       },
-      error: (err) => {
-        this.set('downloadingPdf', false);
-        alert('Ett eller flera av lagren du försöker skriva ut klarar inte de angivna inställningarna. Prova med en mindre pappersstorlek eller lägre upplösning.');
+      error: err => {
+        this.set("downloadingPdf", false);
+        alert(
+          "Ett eller flera av lagren du försöker skriva ut klarar inte de angivna inställningarna. Prova med en mindre pappersstorlek eller lägre upplösning."
+        );
       }
     });
 
     callback();
   },
 
-  resolutionToScale: function (dpi, resolution) {
+  resolutionToScale: function(dpi, resolution) {
     var inchesPerMeter = 39.37;
     return resolution * dpi * inchesPerMeter;
   },
 
-  exportTIFF: function () {
-    var extent = this.previewLayer.getSource().getFeatures()[0].getGeometry().getExtent(),
+  exportTIFF: function() {
+    var extent = this.previewLayer
+        .getSource()
+        .getFeatures()[0]
+        .getGeometry()
+        .getExtent(),
       left = extent[0],
       right = extent[2],
       bottom = extent[1],
       top = extent[3],
-      dpi = (25.4 / 0.28),
-      scale = this.resolutionToScale(dpi, this.get('olMap').getView().getResolution()),
-      form = document.createElement('form'),
-      input = document.createElement('input'),
+      dpi = 25.4 / 0.28,
+      scale = this.resolutionToScale(
+        dpi,
+        this.get("olMap")
+          .getView()
+          .getResolution()
+      ),
+      form = document.createElement("form"),
+      input = document.createElement("input"),
       curr = document.getElementById(this.exportHitsFormId),
-      url = this.get('exportTiffUrl'),
+      url = this.get("exportTiffUrl"),
       data = {
         wmsLayers: [],
         vectorLayers: [],
@@ -823,31 +977,34 @@ var ExportModel = {
 
     data.resolution = 96;
     data.bbox = [left, right, bottom, top];
-    data.orientation = '';
-    data.format = '';
+    data.orientation = "";
+    data.format = "";
     data.scale = scale;
-    data.proxyUrl = this.get('proxyUrl');
-    this.set('downloadingTIFF', true);
-    var dataString = '';
-    if (this.get('base64Encode')) { // base64 here
+    data.proxyUrl = this.get("proxyUrl");
+    this.set("downloadingTIFF", true);
+    var dataString = "";
+    if (this.get("base64Encode")) {
+      // base64 here
       dataString = btoa(JSON.stringify(data));
     } else {
       dataString = JSON.stringify(data);
     }
     $.ajax({
       url: url,
-      method: 'post',
+      method: "post",
       data: {
         json: dataString
       },
-      format: 'json',
-      success: (url) => {
-        this.set('downloadingTIFF', false);
-        this.set('urlTIFF', url);
+      format: "json",
+      success: url => {
+        this.set("downloadingTIFF", false);
+        this.set("urlTIFF", url);
       },
-      error: (err) => {
-        this.set('downloadingTIFF', false);
-        alert('Ett eller flera av lagren du försöker skriva ut klarar inte de angivna inställningarna. Prova med en mindre pappersstorlek eller lägre upplösning.');
+      error: err => {
+        this.set("downloadingTIFF", false);
+        alert(
+          "Ett eller flera av lagren du försöker skriva ut klarar inte de angivna inställningarna. Prova med en mindre pappersstorlek eller lägre upplösning."
+        );
       }
     });
   },
@@ -863,11 +1020,10 @@ var ExportModel = {
    *
    * @instance
    */
-  clicked: function (arg) {
-    this.set('visible', true);
-    this.set('toggled', !this.get('toggled'));
+  clicked: function(arg) {
+    this.set("visible", true);
+    this.set("toggled", !this.get("toggled"));
   }
-
 };
 
 /**

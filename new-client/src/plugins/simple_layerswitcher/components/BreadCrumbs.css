@@ -8,13 +8,13 @@
 }
 
 @media only screen and (max-width: 600px) {
-    .bread-crumbs {
-      display: none;
-    }
+  .bread-crumbs {
+    display: none;
+  }
 }
 
 .bread-crumb-container {
   overflow-x: auto;
   overflow-y: hidden;
-  white-space: nowrap;  
+  white-space: nowrap;
 }

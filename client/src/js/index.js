@@ -26,20 +26,19 @@
  * @class HAJK2
  * @global
  */
-(global.HAJK2 = (function () {
-  'use strict';
+global.HAJK2 = (function() {
+  "use strict";
 
-  var ApplicationView = require('views/application'),
-    cssModifier = require('utils/cssmodifier'),
-    configPath = '/mapservice/settings/config/map_1',
-    layersPath = '/mapservice/settings/config/layers',
+  var ApplicationView = require("views/application"),
+    cssModifier = require("utils/cssmodifier"),
+    configPath = "/mapservice/settings/config/map_1",
+    layersPath = "/mapservice/settings/config/layers",
     req,
     elem,
     that = {},
-    internal = {}
-    ;
+    internal = {};
 
-  internal.load = function (config, bookmarks) {
+  internal.load = function(config, bookmarks) {
     var application = new ApplicationView(config, bookmarks);
     if (config && config.map && config.map.colors) {
       cssModifier.configure(config.map.colors);
@@ -48,24 +47,23 @@
     application.render(true);
   };
 
-  internal.init = function (config) {
+  internal.init = function(config) {
     internal.load(config);
   };
 
-  internal.parseQueryParams = function () {
+  internal.parseQueryParams = function() {
     var o = {};
-    document.location
-      .search
-      .replace(/(^\?)/, '')
-      .split('&')
+    document.location.search
+      .replace(/(^\?)/, "")
+      .split("&")
       .forEach(param => {
-        var a = param.split('=');
+        var a = param.split("=");
         o[a[0]] = a[1];
       });
     return o;
   };
 
-  internal.mergeConfig = function (a, b) {
+  internal.mergeConfig = function(a, b) {
     var x = parseFloat(b.x),
       y = parseFloat(b.y),
       z = parseInt(b.z);
@@ -89,13 +87,13 @@
     return a;
   };
 
-  internal.overrideGlobalInfoBox = function (layer, mapLayer) {
+  internal.overrideGlobalInfoBox = function(layer, mapLayer) {
     layer.infobox = mapLayer.infobox;
     return layer;
   };
 
-  internal.filterByLayerSwitcher = function (config, layers) {
-    function f (groups, layer) {
+  internal.filterByLayerSwitcher = function(config, layers) {
+    function f(groups, layer) {
       groups.forEach(group => {
         var mapLayer = group.layers.find(l => l.id === layer.id);
 
@@ -112,7 +110,7 @@
           filtered.push(layer);
         }
 
-        if (group.hasOwnProperty('groups')) {
+        if (group.hasOwnProperty("groups")) {
           f(group.groups, layer);
         }
       });
@@ -134,15 +132,13 @@
     return filtered;
   };
 
-  internal.getADSpecificSearchLayers = function () {
+  internal.getADSpecificSearchLayers = function() {
     $.ajax({
-      url: '/mapservice/config/ADspecificSearch',
-      method: 'GET',
-      contentType: 'application/json',
-      success: (data) => {
-
-      },
-      error: (message) => {
+      url: "/mapservice/config/ADspecificSearch",
+      method: "GET",
+      contentType: "application/json",
+      success: data => {},
+      error: message => {
         callback(message);
       }
     });
@@ -151,7 +147,7 @@
   /**
    * Overrides global search configuration and uses layers specified in mapconfiguration to do a search
    */
-  internal.overrideGlobalSearchConfig = function (searchTool, data) {
+  internal.overrideGlobalSearchConfig = function(searchTool, data) {
     var configSpecificSearchLayers = searchTool.options.layers;
     var searchLayers = data.wfslayers.filter(layer => {
       if (configSpecificSearchLayers.find(x => x.id == layer.id)) {
@@ -168,80 +164,99 @@
    * @param {object} config - configuration object for the application.
    * @param {function} done - callback to trigger when the application is loaded.
    */
-  that.start = function (config, done) {
-    function load_map (map_config) {
+  that.start = function(config, done) {
+    function load_map(map_config) {
       var layers = $.getJSON(config.layersPath || layersPath);
 
-      layers.done(data => {
-        // Set <title> in HTML if map has a title property in JSON config
-        if (map_config.hasOwnProperty('map') && map_config.map.hasOwnProperty('title')) {
-          document.title = map_config.map.title;
-        }
+      layers
+        .done(data => {
+          // Set <title> in HTML if map has a title property in JSON config
+          if (
+            map_config.hasOwnProperty("map") &&
+            map_config.map.hasOwnProperty("title")
+          ) {
+            document.title = map_config.map.title;
+          }
 
-        var layerSwitcherTool = map_config.tools.find(tool => {
-          return tool.type === 'layerswitcher';
-        });
+          var layerSwitcherTool = map_config.tools.find(tool => {
+            return tool.type === "layerswitcher";
+          });
 
-        var searchTool = map_config.tools.find(tool => {
-          return tool.type === 'search';
-        });
+          var searchTool = map_config.tools.find(tool => {
+            return tool.type === "search";
+          });
 
-        var editTool = map_config.tools.find(tool => {
-          return tool.type === 'edit';
-        });
+          var editTool = map_config.tools.find(tool => {
+            return tool.type === "edit";
+          });
 
-        if (layerSwitcherTool) {
-          let layers = [];
-          let _data = {
-            wmslayers: data.wmslayers || [],
-            wmtslayers: data.wmtslayers || [],
-            vectorlayers: data.vectorlayers || [],
-            arcgislayers: data.arcgislayers || [],
-            extendedwmslayers: data.extendedwmslayers || []
-          };
+          if (layerSwitcherTool) {
+            let layers = [];
+            let _data = {
+              wmslayers: data.wmslayers || [],
+              wmtslayers: data.wmtslayers || [],
+              vectorlayers: data.vectorlayers || [],
+              arcgislayers: data.arcgislayers || [],
+              extendedwmslayers: data.extendedwmslayers || []
+            };
 
-          _data.wmslayers.forEach(l => l.type = 'wms');
-          _data.wmtslayers.forEach(l => l.type = 'wmts');
-          _data.vectorlayers.forEach(l => l.type = 'vector');
-          _data.arcgislayers.forEach(l => l.type = 'arcgis');
-          _data.extendedwmslayers.forEach(l => l.type = 'extended_wms');
+            _data.wmslayers.forEach(l => (l.type = "wms"));
+            _data.wmtslayers.forEach(l => (l.type = "wmts"));
+            _data.vectorlayers.forEach(l => (l.type = "vector"));
+            _data.arcgislayers.forEach(l => (l.type = "arcgis"));
+            _data.extendedwmslayers.forEach(l => (l.type = "extended_wms"));
 
-          layers = data.wmslayers
-            .concat(_data.extendedwmslayers)
-            .concat(_data.wmtslayers)
-            .concat(_data.vectorlayers)
-            .concat(_data.arcgislayers);
-          map_config.layers = internal.filterByLayerSwitcher(layerSwitcherTool.options, layers);
+            layers = data.wmslayers
+              .concat(_data.extendedwmslayers)
+              .concat(_data.wmtslayers)
+              .concat(_data.vectorlayers)
+              .concat(_data.arcgislayers);
+            map_config.layers = internal.filterByLayerSwitcher(
+              layerSwitcherTool.options,
+              layers
+            );
 
-          map_config.layers.sort((a, b) => a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1);
-        }
+            map_config.layers.sort(
+              (a, b) =>
+                a.drawOrder === b.drawOrder
+                  ? 0
+                  : a.drawOrder < b.drawOrder
+                    ? -1
+                    : 1
+            );
+          }
 
-        if (searchTool) {
-          if (searchTool.options.layers == null) {
-            data.wfslayers = data.wfslayers;
-            searchTool.options.sources = data.wfslayers;
-          } else {
-            if (searchTool.options.layers.length != 0) {
-              var wfslayers = internal.overrideGlobalSearchConfig(searchTool, data);
-              searchTool.options.sources = wfslayers;
-              data.wfslayers = wfslayers;
-            } else {
+          if (searchTool) {
+            if (searchTool.options.layers == null) {
+              data.wfslayers = data.wfslayers;
               searchTool.options.sources = data.wfslayers;
+            } else {
+              if (searchTool.options.layers.length != 0) {
+                var wfslayers = internal.overrideGlobalSearchConfig(
+                  searchTool,
+                  data
+                );
+                searchTool.options.sources = wfslayers;
+                data.wfslayers = wfslayers;
+              } else {
+                searchTool.options.sources = data.wfslayers;
+              }
             }
           }
-        }
 
-        if (editTool) {
-          editTool.options.sources = data.wfstlayers;
-        }
+          if (editTool) {
+            editTool.options.sources = data.wfstlayers;
+          }
 
-        internal.init(
-          internal.mergeConfig(map_config, internal.parseQueryParams())
-        );
-        if (done) done(true);
-      })
+          internal.init(
+            internal.mergeConfig(map_config, internal.parseQueryParams())
+          );
+          if (done) done(true);
+        })
         .fail(() => {
-          if (done) { done(false, 'Kartans lagerkonfiguration kunde inte laddas in.'); }
+          if (done) {
+            done(false, "Kartans lagerkonfiguration kunde inte laddas in.");
+          }
         });
     }
 
@@ -249,9 +264,11 @@
     $.getJSON(config.configPath || configPath)
       .done(load_map)
       .fail(() => {
-        if (done) { done(false, 'Kartans konfiguration kunde inte laddas in'); }
+        if (done) {
+          done(false, "Kartans konfiguration kunde inte laddas in");
+        }
       });
   };
 
   return that;
-}()));
+})();

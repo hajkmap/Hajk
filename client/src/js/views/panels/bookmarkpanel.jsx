@@ -20,7 +20,7 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var Panel = require('views/panel');
+var Panel = require("views/panel");
 /**
  * @class
  */
@@ -30,16 +30,15 @@ var BookmarkPanelView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function () {
-    return {
-    };
+  getInitialState: function() {
+    return {};
   },
 
   /**
    * Triggered when component updates.
    * @instance
    */
-  componentDidUpdate: function () {
+  componentDidUpdate: function() {
     this.bind();
   },
 
@@ -47,7 +46,7 @@ var BookmarkPanelView = {
    * Triggered when the component is successfully mounted into the DOM.
    * @instance
    */
-  componentDidMount: function () {
+  componentDidMount: function() {
     this.bind();
   },
 
@@ -55,9 +54,9 @@ var BookmarkPanelView = {
    * Bind DOM events.
    * @instance
    */
-  bind: function () {
+  bind: function() {
     var node = $(ReactDOM.findDOMNode(this));
-    node.find('li').mousedown(() => false);
+    node.find("li").mousedown(() => false);
   },
 
   /**
@@ -65,7 +64,7 @@ var BookmarkPanelView = {
    * @instance
    * @param {object} e - Syntetic DOM event.
    */
-  onSubmitForm: function (e) {
+  onSubmitForm: function(e) {
     e.preventDefault();
     var name = ReactDOM.findDOMNode(this.refs.name).value;
     if (name.length > 0) {
@@ -79,7 +78,7 @@ var BookmarkPanelView = {
    * @param {number} id - ID of bookmark.
    * @param {object} e - Syntetic DOM event.
    */
-  removeBookmark: function (id, e) {
+  removeBookmark: function(id, e) {
     this.props.model.removeBookmark(id, () => this.forceUpdate());
     e.stopPropagation();
   },
@@ -90,10 +89,12 @@ var BookmarkPanelView = {
    * @param {number} id - ID of bookmark.
    * @param {object} e - Syntetic DOM event.
    */
-  updateBookmark: function (id, e) {
+  updateBookmark: function(id, e) {
     var bookmarks = this.props.model.getBookmarks();
     var bookmark = bookmarks.filter(bookmark => bookmark.id === id)[0];
-    bookmarks.forEach((bookmark) => { bookmark.favourite = false; });
+    bookmarks.forEach(bookmark => {
+      bookmark.favourite = false;
+    });
 
     if (bookmark) {
       bookmark.favourite = true;
@@ -108,12 +109,12 @@ var BookmarkPanelView = {
    * @instance
    * @param {object} bookmark
    */
-  loadBookmark: function (bookmark) {
+  loadBookmark: function(bookmark) {
     this.props.model.updateApplication(bookmark);
   },
 
-  openInstruction: function () {
-    var element = $('#instructionText');
+  openInstruction: function() {
+    var element = $("#instructionText");
     element.toggle();
   },
 
@@ -122,39 +123,53 @@ var BookmarkPanelView = {
    * @instance
    * @return {external:ReactElement}
    */
-  render: function () {
+  render: function() {
     var bookmarks = this.props.model.getBookmarks();
     var items = null;
 
     if (bookmarks) {
       items = bookmarks.map((bookmark, i) => {
         var iconClass = bookmark.favourite
-          ? 'favourite fa icon fa-check-circle'
-          : 'favourite fa icon fa-circle';
+          ? "favourite fa icon fa-check-circle"
+          : "favourite fa icon fa-circle";
         return (
           <li key={i} onClick={this.loadBookmark.bind(this, bookmark)}>
-            <i className={iconClass} onClick={this.updateBookmark.bind(this, bookmark.id)} />
+            <i
+              className={iconClass}
+              onClick={this.updateBookmark.bind(this, bookmark.id)}
+            />
             {bookmark.name}
-            <i className='delete fa icon fa-remove' onClick={this.removeBookmark.bind(this, bookmark.name)} />
+            <i
+              className="delete fa icon fa-remove"
+              onClick={this.removeBookmark.bind(this, bookmark.name)}
+            />
           </li>
         );
       });
     }
 
     return (
-      <Panel title='Bokmärken' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
-        <div className='bookmark-panel panel-content'>
+      <Panel
+        title="Bokmärken"
+        onCloseClicked={this.props.onCloseClicked}
+        onUnmountClicked={this.props.onUnmountClicked}
+        minimized={this.props.minimized}
+        instruction={atob(this.props.model.get("instruction"))}
+      >
+        <div className="bookmark-panel panel-content">
           <form onSubmit={this.onSubmitForm}>
-            <div className='form-group'>
+            <div className="form-group">
               <label>Lägg till bokmärke</label>
-              <div className='input-group'>
-                <div className='input-group-addon'>
-                  <i className='fa fa-bookmark' />
+              <div className="input-group">
+                <div className="input-group-addon">
+                  <i className="fa fa-bookmark" />
                 </div>
-                <input type='text'
-                  ref='name'
-                  className='form-control'
-                  placeholder='Ange namn' />
+                <input
+                  type="text"
+                  ref="name"
+                  className="form-control"
+                  placeholder="Ange namn"
+                />
               </div>
             </div>
           </form>
