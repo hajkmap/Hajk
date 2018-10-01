@@ -97181,13 +97181,11 @@
                   ((n = t.aa().xa()),
                   (n = t.Ia(n)),
                   (e = [n[0] + e[0], n[1] + e[1]]),
-                  t
-                    .aa()
-                    .animate({
-                      center: t.Ra(e),
-                      duration: this.autoPanAnimation.duration,
-                      easing: this.autoPanAnimation.easing
-                    }));
+                  t.aa().animate({
+                    center: t.Ra(e),
+                    duration: this.autoPanAnimation.duration,
+                    easing: this.autoPanAnimation.easing
+                  }));
             }
           }
         }),

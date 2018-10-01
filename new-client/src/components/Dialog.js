@@ -16,7 +16,10 @@ const styles = theme => ({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     zIndex: 10000
   },
-  content: {},
+  content: {
+    maxHeight: "500px",
+    overflow: "auto"
+  },
   bottom: {},
   dialog: {
     backgroundColor: "white",

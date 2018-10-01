@@ -5,6 +5,7 @@ import { Button } from "@material-ui/core";
 import RateReviewIcon from "@material-ui/icons/RateReview";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import Observer from "react-event-observer";
+import Panel from "../../components/Panel.js";
 
 import CollectorView from "./CollectorView.js";
 import CollectorModel from "./CollectorModel.js";
@@ -23,7 +24,8 @@ const styles = theme => {
 class Collector extends Component {
   constructor(props) {
     super(props);
-    this.text = "Infomation";
+    this.text = "Tyck till";
+    this.position = "right";
     this.state = {
       dialogOpen: false
     };
@@ -34,28 +36,58 @@ class Collector extends Component {
       observer: this.observer,
       options: props.options
     });
+    this.app = props.app;
   }
 
   componentWillMount() {}
 
-  onClose = () => {
+  onClick = e => {
+    this.app.onPanelOpen(this);
     this.setState({
-      dialogOpen: false
+      panelOpen: true
     });
   };
 
-  onClick = () => {
+  closePanel = () => {
     this.setState({
-      dialogOpen: true
+      panelOpen: false
     });
   };
+
+  openPanel = () => {
+    this.setState({
+      panelOpen: true
+    });
+  };
+
+  onClose = () => {};
+
+  renderPanel() {
+    return createPortal(
+      <Panel
+        title={this.text}
+        onClose={this.closePanel}
+        position={this.position}
+        open={this.state.panelOpen}
+      >
+        <CollectorView
+          onClose={this.onClose}
+          model={this.collectorModel}
+          dialogOpen={this.state.panelOpen}
+          closePanel={this.closePanel}
+          openPanel={this.openPanel}
+        />
+      </Panel>,
+      document.getElementById("map-overlay")
+    );
+  }
 
   renderDialog() {
     return createPortal(
       <CollectorView
         onClose={this.onClose}
         model={this.collectorModel}
-        dialogOpen={this.state.dialogOpen}
+        dialogOpen={this.state.panelOpen}
       />,
       document.getElementById("map")
     );
@@ -74,7 +106,7 @@ class Collector extends Component {
         >
           <RateReviewIcon />
         </Button>
-        {this.renderDialog()}
+        {this.renderPanel()}
       </div>
     );
   }
@@ -88,7 +120,7 @@ class Collector extends Component {
           </ListItemIcon>
           <ListItemText primary={this.text} />
         </ListItem>
-        {this.renderDialog()}
+        {this.renderPanel()}
       </div>
     );
   }

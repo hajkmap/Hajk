@@ -139,7 +139,6 @@ class Popup extends Component {
           : this.table(feature.getProperties());
 
       if (markdown) {
-        console.log(value);
         return (
           <div
             key={i}

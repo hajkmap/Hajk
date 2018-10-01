@@ -281,14 +281,12 @@ ol.interaction.Transform.prototype.drawSketch_ = function(center) {
   if (!this.feature_) return;
   if (center === true) {
     if (!this.ispt_) {
-      this.overlayLayer_
-        .getSource()
-        .addFeature(
-          new ol.Feature({
-            geometry: new ol.geom.Point(this.center_),
-            handle: "rotate0"
-          })
-        );
+      this.overlayLayer_.getSource().addFeature(
+        new ol.Feature({
+          geometry: new ol.geom.Point(this.center_),
+          handle: "rotate0"
+        })
+      );
       var ext = this.feature_.getGeometry().getExtent();
       var geom = ol.geom.Polygon.fromExtent(ext);
       var f = (this.bbox_ = new ol.Feature(geom));

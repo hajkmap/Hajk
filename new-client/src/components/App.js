@@ -25,13 +25,17 @@ const styles = theme => {
       zIndex: 1,
       overflow: "hidden",
       position: "absolute",
-      top: 0,
+      top: "64px",
       bottom: 0,
       left: 0,
       right: 0,
       [theme.breakpoints.down("xs")]: {
-        top: 0
+        top: "56px"
       }
+    },
+    toolbar: {
+      position: "fixed",
+      top: 0
     },
     flex: {
       flexGrow: 1
@@ -40,14 +44,14 @@ const styles = theme => {
       display: "flex",
       flexDirection: "row",
       justifyContent: "flex-start",
-      top: "64px",
+      top: "0",
       right: 0,
       left: 0,
       bottom: 0,
       [theme.breakpoints.down("xs")]: {
         display: "inherit",
         width: "100%",
-        top: "56px"
+        top: "0"
       },
       position: "absolute"
     },
@@ -143,7 +147,7 @@ class App extends Component {
     return (
       <div className={classes.root}>
         <main className={classes.map} id="map">
-          <AppBar position="static">
+          <AppBar position="fixed" className={classes.toolbar}>
             <MUIToolbar>
               <Toolbar
                 tools={this.appModel.getToolbarPlugins()}
