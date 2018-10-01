@@ -29,16 +29,16 @@ import Map from './components/Map.jsx'
 
 class Chapter {
   constructor(settings) {
-    settings = settings || {};    
+    settings = settings || {};
     this.header = settings.header || "";
-    this.html = settings.html || "";    
+    this.html = settings.html || "";
     this.mapSettings = {
       layers: settings.layers || [],
       center: settings.center || [900000, 8500000],
       zoom: settings.zoom || 10
     };
     this.chapters = [];
-  }  
+  }
 }
 
 class InformativeEditor extends Component {
@@ -46,18 +46,24 @@ class InformativeEditor extends Component {
     super();
     this.state = {
       showModal: false,
-      data: undefined      
-    };    
-    this.editors = [];    
+      data: undefined
+    };
+    this.editors = [];
   }
 
-  componentDidMount() {    
+  componentDidMount() {
     this.props.model.set('config', this.props.config);
-    this.props.model.load(data => {      
+    this.props.model.load(data => {
       this.setState({
         data: data
       });
-    });    
+    });
+    this.props.model.loadMaps(maps => {
+      this.setState({
+        maps: maps,
+        map: maps[0]
+      });
+    });
   }
 
   save() {
@@ -71,18 +77,18 @@ class InformativeEditor extends Component {
         showAbortButton: false,
         modalConfirmCallback: () => {}
       });
-    }); 
+    });
   }
 
   addChapter(title) {
     this.state.data.chapters.push(new Chapter({
       header: title
-    }));    
+    }));
     this.setState({
       data: this.state.data
     });
-  }    
-  
+  }
+
   removeChapter(parentChapters, index) {
     this.setState({
       showModal: true,
@@ -99,34 +105,36 @@ class InformativeEditor extends Component {
     this.setState({
       showModal: false,
       modalStyle: {},
-      modalConfirmCallback: () => {}      
+      modalConfirmCallback: () => {}
     });
   }
 
   renderMapDialog(chapter) {
-    
+
     var mapState = {},
         checkedLayers = [],
         updateMapSettings = (state) => {
           mapState = state;
-        },    
+        },
         updateLayersSettings = (state) => {
-          checkedLayers = state;          
+          checkedLayers = state;
         };
 
     this.setState({
       showModal: true,
       showAbortButton: true,
-      modalContent: <Map 
-        chapter={chapter} 
+      modalContent: <Map
+        config={this.props.config}
+        map={this.state.map}
+        chapter={chapter}
         onMapUpdate={state => updateMapSettings(state)}
         onLayersUpdate={state => updateLayersSettings(state)} />,
       modalConfirmCallback: () => {
         this.hideModal();
-        chapter.mapSettings = {                
+        chapter.mapSettings = {
           center: mapState.center,
-          zoom: mapState.zoom                
-        };      
+          zoom: mapState.zoom
+        };
         chapter.layers = checkedLayers;
       },
       modalStyle: {
@@ -139,19 +147,19 @@ class InformativeEditor extends Component {
           bottom: '30px',
           width: 'auto',
           margin: 0
-        }   
+        }
       }
     });
   }
 
-  renderChapter(parentChapters, chapter, index) {          
-    
-    var arrowStyle = !!chapter.expanded 
-          ? "fa fa-chevron-down pointer" 
+  renderChapter(parentChapters, chapter, index) {
+
+    var arrowStyle = !!chapter.expanded
+          ? "fa fa-chevron-down pointer"
           : "fa fa-chevron-right pointer";
 
-    return (    
-      <div key={Math.random() * 1E8} className="chapter">        
+    return (
+      <div key={Math.random() * 1E8} className="chapter">
         <h1><span className={arrowStyle} onClick={() => {
           chapter.expanded = !chapter.expanded;
           this.forceUpdate();
@@ -165,18 +173,18 @@ class InformativeEditor extends Component {
         <span className="btn btn-success" onClick={() => {
           this.renderMapDialog(chapter);
         }} >Kartinställningar</span>&nbsp;
-        <span className="btn btn-danger" onClick={() => {          
+        <span className="btn btn-danger" onClick={() => {
           this.removeChapter(parentChapters, index);
-        }} >Ta bort rubrik</span>        
-        <RichEditor 
-          display={chapter.expanded} 
-          html={chapter.html}           
+        }} >Ta bort rubrik</span>
+        <RichEditor
+          display={chapter.expanded}
+          html={chapter.html}
           onUpdate={(html) => {
-            chapter.html = html;    
+            chapter.html = html;
           }
         } />
         {
-          chapter.chapters.map((innerChapter, innerIndex) => {          
+          chapter.chapters.map((innerChapter, innerIndex) => {
             return this.renderChapter(chapter.chapters, innerChapter, innerIndex);
           })
         }
@@ -187,15 +195,15 @@ class InformativeEditor extends Component {
   renderData() {
     if (this.state.data) {
       return (
-        this.state.data.chapters.map((chapter, index) => 
+        this.state.data.chapters.map((chapter, index) =>
           this.renderChapter(this.state.data.chapters, chapter, index))
       );
     }
   }
 
   renderModal() {
-    var abortButton = this.state.showAbortButton 
-      ? <button className="btn btn-danger" onClick={(e) => this.hideModal()}>Avbryt</button> 
+    var abortButton = this.state.showAbortButton
+      ? <button className="btn btn-danger" onClick={(e) => this.hideModal()}>Avbryt</button>
       : "";
 
     return (
@@ -218,17 +226,35 @@ class InformativeEditor extends Component {
               this.state.modalConfirmCallback();
             }
             this.hideModal();
-          }}>Ok</button>&nbsp;        
+          }}>Ok</button>&nbsp;
           {abortButton}
         </div>
       </ReactModal>
     )
   }
 
-  render () {    
+  renderMaps() {
+    if (this.state.maps) {
+      return this.state.maps.map((map, i) => {
+        return <option onChange={() => {
+          this.setState({
+            map: map
+          });
+        }} key={i}>{map}</option>
+      });
+    } else {
+      return null;
+    }
+  }
+
+  render() {
     return (
-      <div>     
+      <div>
         {this.renderModal()}
+        <div class="inset-form">
+          <label>Välj karta:&nbsp;</label>
+          <select>{this.renderMaps()}</select>
+        </div>
         <div className="padded">
           <span className="btn btn-success" onClick={() => this.save()}>Spara</span>&nbsp;
           <ChapterAdder onAddChapter={title => this.addChapter(title)} />

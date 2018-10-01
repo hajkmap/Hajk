@@ -2,16 +2,11 @@ import React from 'react';
 import { Component } from 'react';
 import LayerListItem from './LayerListItem.jsx';
 
-const urls = {
-  mapConfig: 'http://localhost:55630/config/map_1',
-  layersConfig: 'http://localhost:55630/config/layers'
-};
-
 class LayerList extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {      
+    this.state = {
       layers: [],
       checkedLayers: props.chapter.layers || []
     };
@@ -20,14 +15,14 @@ class LayerList extends Component {
   componentDidRecieveProps() {
   }
 
-  componentDidUpdate() {    
+  componentDidUpdate() {
   }
 
-  lookup(layerId) {          
+  lookup(layerId) {
     var found = undefined;
     var layerTypes = Object.keys(this.layersConfig);
-    for (let i = 0; i < layerTypes.length; i++) {             
-      for (let j = 0; j < this.layersConfig[layerTypes[i]].length; j++) {                
+    for (let i = 0; i < layerTypes.length; i++) {
+      for (let j = 0; j < this.layersConfig[layerTypes[i]].length; j++) {
         if (Number(this.layersConfig[layerTypes[i]][j].id) === Number(layerId)) {
           found = this.layersConfig[layerTypes[i]][j].caption;
           break;
@@ -40,7 +35,7 @@ class LayerList extends Component {
     return found;
   }
 
-  getLayers(layers, callback) {    
+  getLayers(layers, callback) {
     callback(
       layers
       .map(layer => { return {
@@ -61,14 +56,14 @@ class LayerList extends Component {
     }, []);
   }
 
-  componentDidMount() {  
-    
+  componentDidMount() {
+
     async function getJson(url) {
       var reponse = await fetch(url);
       var json = await reponse.json();
       return json;
     }
-    
+
     function readMapConfig(mapConfig) {
       var layerSwitcherConfig = mapConfig.tools.find(tool => tool.type === "layerswitcher"),
           layers = this.flattern(layerSwitcherConfig.options.groups);
@@ -76,21 +71,21 @@ class LayerList extends Component {
       this.getLayers(layers, lookedUpLayers => {
         this.setState({
           layers: lookedUpLayers
-        }); 
+        });
       });
     }
 
-    getJson(urls.layersConfig).then(layersConfig => {      
+    getJson(this.props.config.url_layers).then(layersConfig => {
       this.layersConfig = layersConfig;
-      getJson(urls.mapConfig).then(mapConfig => {
+      getJson(this.props.config.url_map + "/" + this.props.map).then(mapConfig => {
         readMapConfig.call(this, mapConfig);
       });
     });
-        
+
     this.props.onUpdate(this.state.checkedLayers);
   }
 
-  onLayerListItemChanged(checked, layer) {  
+  onLayerListItemChanged(checked, layer) {
     var checkedLayers = this.state.checkedLayers;
     if (checked) {
       checkedLayers = [...checkedLayers, layer.id];
@@ -103,7 +98,7 @@ class LayerList extends Component {
     }, () => this.props.onUpdate(this.state.checkedLayers));
   }
 
-  render() {      
+  render() {
     return (
       <ul className="layer-list-container">
         {
@@ -111,15 +106,15 @@ class LayerList extends Component {
             var checked = false;
             if (Array.isArray(this.props.chapter.layers)) {
               checked = !!this.props.chapter.layers.find(layerId => Number(layerId) ===  Number(layer.id));
-            }            
+            }
             return (
               <LayerListItem checked={checked} key={layer.id} layer={layer} onChange={(checked) => {
                 this.onLayerListItemChanged(checked, layer);
               }}></LayerListItem>
             )
-          })            
-        }     
-      </ul>      
+          })
+        }
+      </ul>
     )
   }
 

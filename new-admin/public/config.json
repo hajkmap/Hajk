@@ -40,6 +40,8 @@
   },
   "informative": {
     "url_proxy": "",
+    "url_map": "http://localhost:55630/config",
+    "url_map_list": "http://localhost:55630/config/list",
     "url_layers": "http://localhost:55630/config/layers",
     "url_load": "http://localhost:55630/informative/load/op",
     "url_save": "http://localhost:55630/informative/save/op"

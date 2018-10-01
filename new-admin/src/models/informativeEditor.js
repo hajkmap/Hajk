@@ -34,14 +34,22 @@ var informativeEditor = Model.extend({
       });
     });
   },
-  load: function (callback) {    
-    var url = this.get('config').url_load;    
+  load: function (callback) {
+    var url = this.get('config').url_load;
     fetch(url).then(response => {
       response.json().then(data => {
         callback(data);
       });
     });
-  }  
+  },
+  loadMaps: function (callback) {
+    var url = this.get('config').url_map_list;
+    fetch(url).then(response => {
+      response.json().then(data => {
+        callback(data);
+      });
+    });
+  }
 });
 
 export default informativeEditor;

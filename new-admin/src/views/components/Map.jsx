@@ -10,14 +10,14 @@ class Map extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      chapter: props.chapter      
-    };    
+      chapter: props.chapter
+    };
   }
 
   componentDidRecieveProps() {
   }
 
-  componentDidUpdate() {    
+  componentDidUpdate() {
   }
 
   componentDidMount() {
@@ -25,15 +25,20 @@ class Map extends Component {
       target: target,
       config: this.props.chapter.mapSettings,
       onUpdate: this.props.onMapUpdate
-    });    
-  }  
+    });
+  }
 
   render() {
-    return (            
+    return (
       <div id={target} style={{height: '100%'}}>
-        <LayerList chapter={this.props.chapter} onUpdate={this.props.onLayersUpdate}></LayerList>
-      </div>      
-    )
+        <LayerList
+          map={this.props.map}
+          config={this.props.config}
+          chapter={this.props.chapter}
+          onUpdate={this.props.onLayersUpdate}>
+        </LayerList>
+      </div>
+    );
   }
 
 }
