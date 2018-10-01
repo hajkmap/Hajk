@@ -277,7 +277,7 @@
       "type": "information",
       "options": {
         "target": "left",
-        "text": "<p>\nText som förtydligar varför, vad och hur… Lorem ipsum dolor sit amet, consectetur \nadipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna \naliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut \naliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in \nvoluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat \ncupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est \nlaborum\n</p>\n<h1>VI VILL HÖRA DIN ÅSIKT!</h1>",
+        "text": "Text som förtydligar varför, vad och hur… Lorem ipsum dolor sit amet, consectetur \nadipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna \naliqua. Ut enim ad minim veniam, quis nostrud \nText som förtydligar varför, vad och hur… Lorem ipsum dolor sit amet, consectetur \nadipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna \n<h1>VI VILL HÖRA DIN ÅSIKT!</h1>",
         "headerText": "HÄR KAN DU SE VAD SOM PLANERAS I DITT OMRÅDE",
         "visibleAtStart": true,
         "showInfoOnce": false,

@@ -1,9 +1,11 @@
 import React, { Component } from "react";
+import { createPortal } from "react-dom";
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import { withStyles } from "@material-ui/core/styles";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
+import Snackbar from '@material-ui/core/Snackbar';
 
 const styles = theme => {
   return {
@@ -24,6 +26,10 @@ const styles = theme => {
         marginLeft: "-27px",
         marginTop: "9px"
       }
+    },
+    crossButton: {
+      marginTop: '10px',
+      marginLeft: '-31px'
     },
     saveError: {
       color: 'red',
@@ -55,6 +61,7 @@ class CollectorForm extends Component {
       mode: "place",
       displayPlace: true
     });
+    this.props.closePanel();
   };
 
   renderGenericForm = () => {
@@ -161,7 +168,6 @@ class CollectorForm extends Component {
             <Button color="primary" variant="contained" onClick={this.renderPlaceForm}>Kopplad till en plats</Button>&nbsp;
             <Button color="primary" variant="contained" onClick={this.renderGenericForm}>Generell</Button>
           </div>
-          <Button color="primary" onClick={this.abort}>Avbryt</Button>
         </div>
       </div>
     )
@@ -193,11 +199,32 @@ class CollectorForm extends Component {
     const { classes } = this.props;
     return (
       <div className={classes.form}>
-        <div className={classes.cross}>
-          <i className="material-icons">place</i>
-        </div>
-        <div>Dra i kartan så att markören hamnar rätt.</div>
-        <br />
+        {
+          createPortal(
+            <div className={classes.cross}>
+              <i className="material-icons">place</i><br/>
+              <Button
+                className={classes.crossButton}
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  this.props.openPanel();
+                }}>ok</Button>
+              <Snackbar
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center'
+                }}
+                open={true}
+                onClose={() => {}}
+                ContentProps={{
+                  'aria-describedby': 'message-id',
+                }}
+                message={<span id="message-id">Dra i kartan för att välja plats.</span>}
+              />
+            </div>,
+          document.getElementById("map"))
+        }
         <div>Skriv din synpunkt nedan: </div>
         <TextField
           rows="2"

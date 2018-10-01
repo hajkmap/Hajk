@@ -10,8 +10,9 @@ const styles = theme => {
       display: 'none'
     },
     popup: {
-      position: 'fixed',
+      position: 'absolute',
       left: '50%',
+      top: '10%',
       bottom: '50%',
       width: '360px',
       marginLeft: '-180px',
@@ -50,12 +51,14 @@ class CollectorView extends Component {
 
   render() {
     const { classes } = this.props;
-    var clsNames = this.props.dialogOpen
-      ? classNames(classes.popup)
-      : classNames(classes.popup, classes.hidden)
     return (
-      <div className={clsNames}>
-        <CollectorForm model={this.model} onClose={this.onClose}/>
+      <div>
+        <CollectorForm
+          model={this.model}
+          onClose={this.onClose}
+          closePanel={this.props.closePanel}
+          openPanel={this.props.openPanel}
+        />
       </div>
     );
   }
