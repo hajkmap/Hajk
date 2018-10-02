@@ -63,9 +63,10 @@ const styles = theme => ({
 class Toolbar extends Component {
   state = { open: false };
 
-  toggleTool = () => {
-    this.setState({ open: false });
-  };
+  // TODO: Seems unused, remove
+  // toggleTool = () => {
+  //   this.setState({ open: false });
+  // };
 
   renderTools() {
     return this.props.tools.map((tool, i) => {
@@ -82,7 +83,9 @@ class Toolbar extends Component {
     });
   }
 
-  toggle = () => {
+  toggleToolbarText = () => {
+    console.log("toggle", this.state.open);
+
     this.setState({ open: !this.state.open });
   };
 
@@ -113,7 +116,7 @@ class Toolbar extends Component {
         }}
         open={this.state.open}
       >
-        <ListItem button onClick={this.toggle}>
+        <ListItem button onClick={this.toggleToolbarText}>
           <ListItemIcon>{icon}</ListItemIcon>
           <ListItemText primary="Minimera" />
         </ListItem>
@@ -125,8 +128,10 @@ class Toolbar extends Component {
   }
 
   componentDidMount() {
+    // TODO: Get value of toolbarOpen from config
+    let toolbarOpen = true;
     this.setState({
-      tolbarOpen: true
+      toolbarOpen
     });
   }
 

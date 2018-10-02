@@ -1,31 +1,17 @@
 import React, { Component } from "react";
-//import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import CommentIcon from "@material-ui/icons/Comment";
 
-//import Panel from "../../components/Panel.js";
-// import SuggestView from "./SuggestView.js";
-// import SuggestModel from "./SuggestModel.js";
-import Observer from "react-event-observer";
-
-const { detect } = require("detect-browser");
+import { detect } from "detect-browser";
 
 const styles = theme => {
   return {};
 };
 
 class Suggest extends Component {
-  state = {
-    panelOpen: false
-  };
-
   onClick = e => {
-    // this.app.onPanelOpen(this);
-    // this.setState({
-    //   panelOpen: true
-    // });
     window.alert("Nu kommer ditt mailprogram öppnas.");
     let result = {};
     // TODO: email, as well as subject and body pretext should be grabbed from config
@@ -39,57 +25,11 @@ class Suggest extends Component {
     window.location.href = string;
   };
 
-  closePanel = () => {
-    // FIXME: This shouldn't really be required for plugins that don't have a panel…
-    this.setState({
-      panelOpen: false
-    });
-  };
-
   constructor(spec) {
     super(spec);
     this.text = "Redigera";
     this.app = spec.app;
-    this.observer = Observer();
-    this.observer.subscribe("myEvent", message => {
-      console.log(message);
-    });
-    // this.suggestModel = new SuggestModel({
-    //   map: spec.map,
-    //   app: spec.app,
-    //   observer: this.observer
-    // });
-    this.app.registerPanel(this);
   }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return this.state.panelOpen !== nextState.panelOpen;
-  }
-
-  componentWillMount() {
-    this.setState({
-      panelOpen: this.props.options.visibleAtStart
-    });
-  }
-
-  // renderPanel() {
-  //   return createPortal(
-  //     <Panel
-  //       title={this.text}
-  //       onClose={this.closePanel}
-  //       position="left"
-  //       open={this.state.panelOpen}
-  //     >
-  //       <SuggestView
-  //         app={this.app}
-  //         map={this.map}
-  //         parent={this}
-  //         observer={this.observer}
-  //       />
-  //     </Panel>,
-  //     document.getElementById("map-overlay")
-  //   );
-  // }
 
   renderAsWidgetItem() {
     const { classes } = this.props;
@@ -104,7 +44,6 @@ class Suggest extends Component {
         >
           <CommentIcon />
         </Button>
-        {/* {this.renderPanel()} */}
       </div>
     );
   }
@@ -123,7 +62,6 @@ class Suggest extends Component {
           </ListItemIcon>
           <ListItemText primary={this.text} />
         </ListItem>
-        {/* {this.renderPanel()} */}
       </div>
     );
   }
