@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import CollectorForm from "./components/CollectorForm.js";
-import classNames from "classnames";
 import "./style.css";
 
 const styles = theme => {
@@ -49,7 +48,6 @@ class CollectorView extends Component {
   };
 
   render() {
-    const { classes } = this.props;
     return (
       <div>
         <CollectorForm

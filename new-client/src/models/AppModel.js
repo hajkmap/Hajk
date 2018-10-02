@@ -341,7 +341,7 @@ class AppModel {
       this.config.mapConfig.hasOwnProperty("map") &&
       this.config.mapConfig.map.hasOwnProperty("title")
     ) {
-      document.title = this.config.mapConfig.map.title;
+      //document.title = this.config.mapConfig.map.title; // TODO: opt-out this override behaviour.
     }
 
     let layerSwitcherTool = this.config.mapConfig.tools.find(tool => {

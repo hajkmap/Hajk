@@ -45,8 +45,6 @@ class Panel extends Component {
   };
 
   render() {
-    console.log("Panel.js render() props", this.props);
-
     const { classes, open, title, children } = this.props;
     return (
       <Drawer
