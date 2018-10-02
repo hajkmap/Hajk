@@ -17,7 +17,6 @@ class CollectorModel {
    * @param function error | (text)
    */
   save(props, success, error) {
-
     if (!this.url || !this.featureType) {
       return error("Verktyget saknar nödvändig konfiguration.");
     }

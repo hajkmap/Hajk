@@ -125,12 +125,15 @@ class InformativeEditor extends Component {
     this.setState({
       showModal: true,
       showAbortButton: true,
-      modalContent: <Map
-        config={this.props.config}
-        map={this.state.map}
-        chapter={chapter}
-        onMapUpdate={state => updateMapSettings(state)}
-        onLayersUpdate={state => updateLayersSettings(state)} />,
+      modalContent: (
+        <Map
+          config={this.props.config}
+          map={this.state.map}
+          chapter={chapter}
+          onMapUpdate={state => updateMapSettings(state)}
+          onLayersUpdate={state => updateLayersSettings(state)}
+        />
+      ),
       modalConfirmCallback: () => {
         this.hideModal();
         chapter.mapSettings = {
@@ -269,11 +272,18 @@ class InformativeEditor extends Component {
   renderMaps() {
     if (this.state.maps) {
       return this.state.maps.map((map, i) => {
-        return <option onChange={() => {
-          this.setState({
-            map: map
-          });
-        }} key={i}>{map}</option>
+        return (
+          <option
+            onChange={() => {
+              this.setState({
+                map: map
+              });
+            }}
+            key={i}
+          >
+            {map}
+          </option>
+        );
       });
     } else {
       return null;

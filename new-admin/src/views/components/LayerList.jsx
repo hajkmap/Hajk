@@ -79,9 +79,11 @@ class LayerList extends Component {
 
     getJson(this.props.config.url_layers).then(layersConfig => {
       this.layersConfig = layersConfig;
-      getJson(this.props.config.url_map + "/" + this.props.map).then(mapConfig => {
-        readMapConfig.call(this, mapConfig);
-      });
+      getJson(this.props.config.url_map + "/" + this.props.map).then(
+        mapConfig => {
+          readMapConfig.call(this, mapConfig);
+        }
+      );
     });
 
     this.props.onUpdate(this.state.checkedLayers);

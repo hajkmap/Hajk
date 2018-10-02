@@ -27,13 +27,13 @@ class Map extends Component {
 
   render() {
     return (
-      <div id={target} style={{height: '100%'}}>
+      <div id={target} style={{ height: "100%" }}>
         <LayerList
           map={this.props.map}
           config={this.props.config}
           chapter={this.props.chapter}
-          onUpdate={this.props.onLayersUpdate}>
-        </LayerList>
+          onUpdate={this.props.onLayersUpdate}
+        />
       </div>
     );
   }
