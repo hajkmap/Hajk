@@ -1,11 +1,11 @@
 import React, { Component } from "react";
-import { createPortal } from "react-dom";
+//import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import CommentIcon from "@material-ui/icons/Comment";
 
-import Panel from "../../components/Panel.js";
+//import Panel from "../../components/Panel.js";
 // import SuggestView from "./SuggestView.js";
 // import SuggestModel from "./SuggestModel.js";
 import Observer from "react-event-observer";

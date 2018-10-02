@@ -59,7 +59,9 @@ class CollectorForm extends Component {
       mode: "place",
       displayPlace: true
     });
-    this.props.closePanel();
+    if (window.document.body.clientWidth < 600) {
+      this.props.closePanel();
+    }
   };
 
   renderGenericForm = () => {
@@ -219,6 +221,26 @@ class CollectorForm extends Component {
     );
   }
 
+  renderOkButton() {
+    const { classes } = this.props;
+    if (document.body.clientWidth < 600) {
+      return (
+        <Button
+          className={classes.crossButton}
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            this.props.openPanel();
+          }}
+        >
+          ok
+        </Button>
+      );
+    } else {
+      return null;
+    }
+  }
+
   renderPlace() {
     const { classes } = this.props;
     return (
@@ -227,16 +249,7 @@ class CollectorForm extends Component {
           <div className={classes.cross}>
             <i className="material-icons">place</i>
             <br />
-            <Button
-              className={classes.crossButton}
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                this.props.openPanel();
-              }}
-            >
-              ok
-            </Button>
+            {this.renderOkButton()}
             <Snackbar
               anchorOrigin={{
                 vertical: "bottom",

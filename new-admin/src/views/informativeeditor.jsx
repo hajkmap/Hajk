@@ -284,7 +284,7 @@ class InformativeEditor extends Component {
     return (
       <div>
         {this.renderModal()}
-        <div class="inset-form">
+        <div className="inset-form">
           <label>Välj karta:&nbsp;</label>
           <select>{this.renderMaps()}</select>
         </div>
