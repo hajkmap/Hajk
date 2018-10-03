@@ -7,6 +7,7 @@ class CollectorModel {
     this.olMap = settings.map;
     this.url = settings.options.url;
     this.featureType = settings.options.featureType;
+    this.featureNS = settings.options.featureNS;
   }
 
   /**
@@ -25,7 +26,7 @@ class CollectorModel {
 
     const wfs = new WFS();
     const gml = new GML({
-      featureNS: this.url,
+      featureNS: this.featureNS,
       featureType: this.featureType,
       srsName: this.olMap
         .getView()
@@ -67,6 +68,7 @@ class CollectorModel {
                 layer.getProperties().featureType === this.featureType
             );
           if (mapLayer) {
+            // This will refresh the layer.
             mapLayer.getSource().clear();
           }
           success(wfs.readTransactionResponse(t));

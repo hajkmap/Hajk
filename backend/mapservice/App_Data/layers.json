@@ -13,7 +13,10 @@
       "layer": "topowebb",
       "style": "default",
       "matrixSet": "3006",
-      "origin": ["-1200000", "8500000"],
+      "origin": [
+        "-1200000",
+        "8500000"
+      ],
       "resolutions": [
         "4096",
         "2048",
@@ -65,7 +68,9 @@
       "content": "",
       "legend": "",
       "projection": null,
-      "layers": ["orto"],
+      "layers": [
+        "orto"
+      ],
       "infobox": "",
       "searchFields": null,
       "displayFields": null,
@@ -88,9 +93,93 @@
       "infoUrl": "",
       "infoUrlText": "",
       "infoOwner": ""
+    },
+    {
+      "id": "18",
+      "caption": "Parkering WMS",
+      "url": "http://giscloud.se/geoserver/wms",
+      "owner": "",
+      "date": "1538553135805",
+      "content": "",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "wsp:parking_lot"
+      ],
+      "infobox": "",
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "opacity": 1.0,
+      "singleTile": true,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": false,
+      "infoTitle": "",
+      "infoText": "Parkering",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOwner": ""
     }
   ],
-  "wfslayers": [],
+  "wfslayers": [
+    {
+      "id": "20",
+      "caption": "Fastighet",
+      "url": "http://giscloud.se/geoserver/wfs",
+      "layers": [
+        "wsp:fastighet"
+      ],
+      "searchFields": [
+        "fastighet"
+      ],
+      "infobox": "",
+      "aliasDict": "",
+      "displayFields": [
+        "fastighet"
+      ],
+      "geometryField": "geom",
+      "outputFormat": "GML3",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoUrlText": null,
+      "infoOwner": null
+    },
+    {
+      "id": "21",
+      "caption": "Adress",
+      "url": "https://karta.uddevalla.se/geoserver/wfs",
+      "layers": [
+        "uddevalla:adresspunkt_p"
+      ],
+      "searchFields": [
+        "adress"
+      ],
+      "infobox": "",
+      "aliasDict": "",
+      "displayFields": [
+        "adress"
+      ],
+      "geometryField": "geom",
+      "outputFormat": "GML3",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoUrlText": null,
+      "infoOwner": null
+    }
+  ],
   "vectorlayers": [
     {
       "id": "14",
@@ -263,6 +352,49 @@
       "infoUrl": "",
       "infoUrlText": "",
       "infoOwner": ""
+    },
+    {
+      "id": "19",
+      "dataFormat": "WFS",
+      "caption": "Fastighet visning",
+      "url": "http://giscloud.se/geoserver/wfs",
+      "layer": "wsp:fastighet",
+      "owner": null,
+      "date": "1538567957488",
+      "content": "Fastighet",
+      "legend": "",
+      "symbolXOffset": 0.0,
+      "symbolYOffset": 0.0,
+      "projection": "EPSG:3006",
+      "pointSize": "4",
+      "filterAttribute": "",
+      "filterValue": "",
+      "lineStyle": "solid",
+      "lineWidth": "1",
+      "lineColor": "rgba(0, 0, 0, 0.5)",
+      "fillColor": "rgba(255, 255, 255, 0.5)",
+      "visibleAtStart": false,
+      "opacity": 1.0,
+      "infobox": "",
+      "queryable": true,
+      "labelAlign": "center",
+      "labelBaseline": "alphabetic",
+      "labelSize": "12px",
+      "labelOffsetX": 0,
+      "labelOffsetY": 0,
+      "labelWeight": "normal",
+      "labelFont": "Arial",
+      "labelFillColor": "#000000",
+      "labelOutlineColor": "#FFFFFF",
+      "labelOutlineWidth": 3,
+      "labelAttribute": "Name",
+      "showLabels": true,
+      "infoVisible": false,
+      "infoTitle": "",
+      "infoText": "",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOwner": ""
     }
   ],
   "wfstlayers": [
@@ -271,7 +403,9 @@
       "caption": "Port",
       "url": "http://giscloud.se/geoserver/wfs",
       "projection": "EPSG:3006",
-      "layers": ["wsp:port"],
+      "layers": [
+        "wsp:port"
+      ],
       "editableFields": [
         {
           "index": 0,
@@ -316,7 +450,9 @@
       "caption": "Mussla",
       "url": "http://giscloud.se/geoserver/wfs",
       "projection": "EPSG:3006",
-      "layers": ["skekraft:mussla"],
+      "layers": [
+        "skekraft:mussla"
+      ],
       "editableFields": [
         {
           "index": 0,

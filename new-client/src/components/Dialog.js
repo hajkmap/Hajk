@@ -17,7 +17,7 @@ const styles = theme => ({
     zIndex: 10000
   },
   content: {
-    maxHeight: "500px",
+    maxHeight: "450px",
     overflow: "auto"
   },
   bottom: {},

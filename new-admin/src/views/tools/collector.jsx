@@ -30,8 +30,8 @@ var defaultState = {
   target: "toolbar",
   url: "",
   featureType: "",
+  featureNS: "",
   visibleAtStart: false,
-  templateJsonFilePath: "http://localhost:55630/informative/load/op",
   visibleForGroups: []
 };
 
@@ -54,6 +54,7 @@ class ToolOptions extends Component {
         target: tool.options.target,
         url: tool.options.url,
         featureType: tool.options.featureType,
+        featureNS: tool.options.featureNS,
         visibleAtStart: tool.options.visibleAtStart || false,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
@@ -119,6 +120,7 @@ class ToolOptions extends Component {
         target: this.state.target,
         url: this.state.url,
         featureType: this.state.featureType,
+        featureNS: this.state.featureNS,
         visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
@@ -283,6 +285,18 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
               value={this.state.featureType}
+            />
+          </div>
+          <div>
+            <label htmlFor="featureNS">Namespace</label>
+            <input
+              id="featureNS"
+              name="featureNS"
+              type="text"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.featureNS}
             />
           </div>
         </form>

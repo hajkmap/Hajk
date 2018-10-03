@@ -73,6 +73,13 @@ class AppModel {
       .sort((a, b) => a.sortOrder - b.sortOrder);
   }
   /**
+   * Check if the search plugin is avaliable and if so return it.
+   * @returns Array<Plugin>
+   */
+  getSearchPlugin() {
+    return this.getPlugins().find(plugin => plugin.type === "search");
+  }
+  /**
    * Dynamically load plugins from the configured plugins folder.
    * Assumed that a folder exists with the same name as the requested plugin.
    * There must also be a file present with the same name as well.

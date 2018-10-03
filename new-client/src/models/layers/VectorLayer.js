@@ -7,6 +7,7 @@ import { all as strategyAll } from "ol/loadingstrategy";
 import { transform } from "ol/proj";
 import { toContext } from "ol/render";
 import { Point, Polygon, LineString } from "ol/geom";
+import Feature from 'ol/Feature';
 import LayerInfo from "./LayerInfo.js";
 
 let vectorLayerProperties = {
@@ -26,6 +27,120 @@ let vectorLayerProperties = {
   showLabels: true
 };
 
+function createStyle(feature, forcedPointRadius) {
+  const icon = this.config.icon;
+  const fillColor = this.config.fillColor;
+  const lineColor = this.config.lineColor;
+  const lineStyle = this.config.lineStyle;
+  const lineWidth = this.config.lineWidth;
+  const symbolXOffset = this.config.symbolXOffset;
+  const symbolYOffset = this.config.symbolYOffset;
+  const rotation = 0.0;
+  const align = this.config.labelAlign;
+  const baseline = this.config.labelBaseline;
+  const size = this.config.labelSize;
+  const offsetX = this.config.labelOffsetX;
+  const offsetY = this.config.labelOffsetY;
+  const weight = this.config.labelWeight;
+  const font = weight + " " + size + " " + this.config.labelFont;
+  const labelFillColor = this.config.labelFillColor;
+  const outlineColor = this.config.labelOutlineColor;
+  const outlineWidth = this.config.labelOutlineWidth;
+  const labelAttribute = this.config.labelAttribute;
+  const showLabels = this.config.showLabels;
+  const pointSize = forcedPointRadius || this.config.pointSize;
+
+  function getLineDash() {
+    var scale = (a, f) => a.map(b => f * b),
+      width = lineWidth,
+      style = lineStyle,
+      dash = [12, 7],
+      dot = [2, 7];
+    switch (style) {
+      case "dash":
+        return width > 3 ? scale(dash, 2) : dash;
+      case "dot":
+        return width > 3 ? scale(dot, 2) : dot;
+      default:
+        return undefined;
+    }
+  }
+
+  function getFill() {
+    return new Fill({
+      color: fillColor
+    });
+  }
+
+  feature = arguments[1] instanceof Feature
+  ? arguments[1]
+  : undefined;
+
+  function getText() {
+    return new Text({
+      textAlign: align,
+      textBaseline: baseline,
+      font: font,
+      text: feature ? feature.getProperties()[labelAttribute] : "",
+      fill: new Fill({
+        color: labelFillColor
+      }),
+      stroke: new Stroke({
+        color: outlineColor,
+        width: outlineWidth
+      }),
+      offsetX: offsetX,
+      offsetY: offsetY,
+      rotation: rotation
+    });
+  }
+
+  function getImage() {
+    return icon === "" ? getPoint() : getIcon();
+  }
+
+  function getIcon() {
+    return new Icon({
+      src: icon,
+      scale: 1,
+      anchorXUnits: "pixels",
+      anchorYUnits: "pixels",
+      anchor: [symbolXOffset, symbolYOffset]
+    });
+  }
+
+  function getPoint() {
+    return new Circle({
+      fill: getFill(),
+      stroke: getStroke(),
+      radius: parseInt(pointSize, 10) || 4
+    });
+  }
+
+  function getStroke() {
+    return new Stroke({
+      color: lineColor,
+      width: lineWidth,
+      lineDash: getLineDash()
+    });
+  }
+
+  function getStyleObj() {
+    var obj = {
+      fill: getFill(),
+      image: getImage(),
+      stroke: getStroke()
+    };
+    if (showLabels) {
+      obj.text = getText();
+    }
+
+    return obj;
+  }
+
+  return [new Style(getStyleObj())];
+}
+
 class WFSVectorLayer {
   constructor(config, proxyUrl, map) {
     config = {
@@ -35,7 +150,7 @@ class WFSVectorLayer {
     this.config = config;
     this.proxyUrl = proxyUrl;
     this.map = map;
-
+    this.style = createStyle.apply(this);
     this.vectorSource = new VectorSource({
       loader: extent => {
         if (config.dataFormat === "GeoJSON") {
@@ -71,114 +186,11 @@ class WFSVectorLayer {
     this.type = "vector";
   }
 
-  getStyle(feature, resolution, forcedPointSize) {
-    const icon = this.config.icon;
-    const fillColor = this.config.fillColor;
-    const lineColor = this.config.lineColor;
-    const lineStyle = this.config.lineStyle;
-    const lineWidth = this.config.lineWidth;
-    const symbolXOffset = this.config.symbolXOffset;
-    const symbolYOffset = this.config.symbolYOffset;
-    const rotation = 0.0;
-    const align = this.config.labelAlign;
-    const baseline = this.config.labelBaseline;
-    const size = this.config.labelSize;
-    const offsetX = this.config.labelOffsetX;
-    const offsetY = this.config.labelOffsetY;
-    const weight = this.config.labelWeight;
-    const font = weight + " " + size + " " + this.config.labelFont;
-    const labelFillColor = this.config.labelFillColor;
-    const outlineColor = this.config.labelOutlineColor;
-    const outlineWidth = this.config.labelOutlineWidth;
-    const labelAttribute = this.config.labelAttribute;
-    const showLabels = this.config.showLabels;
-    const pointSize = forcedPointSize || this.config.pointSize;
-
-    function getLineDash() {
-      var scale = (a, f) => a.map(b => f * b),
-        width = lineWidth,
-        style = lineStyle,
-        dash = [12, 7],
-        dot = [2, 7];
-      switch (style) {
-        case "dash":
-          return width > 3 ? scale(dash, 2) : dash;
-        case "dot":
-          return width > 3 ? scale(dot, 2) : dot;
-        default:
-          return undefined;
-      }
+  getStyle(forcedPointRadius) {
+    if (forcedPointRadius) {
+      return createStyle.call(this, undefined, forcedPointRadius);
     }
-
-    function getFill() {
-      return new Fill({
-        color: fillColor
-      });
-    }
-
-    function getText() {
-      return new Text({
-        textAlign: align,
-        textBaseline: baseline,
-        font: font,
-        text: feature ? feature.get(labelAttribute) : "",
-        fill: new Fill({
-          color: labelFillColor
-        }),
-        stroke: new Stroke({
-          color: outlineColor,
-          width: outlineWidth
-        }),
-        offsetX: offsetX,
-        offsetY: offsetY,
-        rotation: rotation
-      });
-    }
-
-    function getImage() {
-      return icon === "" ? getPoint() : getIcon();
-    }
-
-    function getIcon() {
-      return new Icon({
-        src: icon,
-        scale: 1,
-        anchorXUnits: "pixels",
-        anchorYUnits: "pixels",
-        anchor: [symbolXOffset, symbolYOffset]
-      });
-    }
-
-    function getPoint() {
-      return new Circle({
-        fill: getFill(),
-        stroke: getStroke(),
-        radius: parseInt(pointSize, 10) || 4
-      });
-    }
-
-    function getStroke() {
-      return new Stroke({
-        color: lineColor,
-        width: lineWidth,
-        lineDash: getLineDash()
-      });
-    }
-
-    function getStyleObj() {
-      var obj = {
-        fill: getFill(),
-        image: getImage(),
-        stroke: getStroke()
-      };
-      if (showLabels) {
-        obj.text = getText();
-      }
-
-      return obj;
-    }
-
-    return [new Style(getStyleObj())];
+    return this.style;
   }
 
   reprojectFeatures(features, from, to) {
@@ -302,7 +314,7 @@ class WFSVectorLayer {
         const vectorContext = toContext(canvas.getContext("2d"), {
           size: [scale, scale]
         });
-        const style = this.getStyle(undefined, undefined, pointRadius)[0];
+        const style = this.getStyle(pointRadius)[0];
         vectorContext.setStyle(style);
 
         var featureType = "Point";
@@ -312,9 +324,11 @@ class WFSVectorLayer {
 
         switch (featureType) {
           case "Point":
+          case "MultiPoint":
             vectorContext.drawGeometry(new Point([scale / 2, scale / 2]));
             break;
           case "Polygon":
+          case "MultiPolygon":
             vectorContext.drawGeometry(
               new Polygon([
                 [
@@ -328,6 +342,7 @@ class WFSVectorLayer {
             );
             break;
           case "LineString":
+          case "MultiLineString":
             vectorContext.drawGeometry(
               new LineString([
                 [scale * padding, scale - scale * padding],

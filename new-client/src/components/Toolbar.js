@@ -61,12 +61,8 @@ const styles = theme => ({
 });
 
 class Toolbar extends Component {
-  state = { open: false };
 
-  // TODO: Seems unused, remove
-  // toggleTool = () => {
-  //   this.setState({ open: false });
-  // };
+  state = { open: false };
 
   renderTools() {
     return this.props.tools.map((tool, i) => {
@@ -84,8 +80,6 @@ class Toolbar extends Component {
   }
 
   toggleToolbarText = () => {
-    console.log("toggle", this.state.open);
-
     this.setState({ open: !this.state.open });
   };
 
@@ -136,7 +130,10 @@ class Toolbar extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, tools } = this.props;
+    if (tools.length === 0) {
+      return null;
+    }
     return (
       <div>
         <IconButton

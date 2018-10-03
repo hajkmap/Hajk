@@ -1,14 +1,11 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import { Button } from "@material-ui/core";
-
 import Observer from "react-event-observer";
 import AppModel from "./../models/AppModel.js";
 import Toolbar from "./Toolbar.js";
 import Popup from "./Popup.js";
 import AppBar from "@material-ui/core/AppBar";
-import Typography from "@material-ui/core/Typography";
 import { Toolbar as MUIToolbar } from "@material-ui/core";
 import classNames from "classnames";
 
@@ -35,6 +32,7 @@ const styles = theme => {
     },
     toolbar: {
       position: "fixed",
+      zIndex: 20000,
       top: 0
     },
     flex: {
@@ -142,24 +140,34 @@ class App extends Component {
     }
   }
 
+  renderSearchPlugin() {
+    var searchPlugin = this.appModel.getSearchPlugin();
+    if (searchPlugin) {
+      return (
+        <searchPlugin.component
+          map={searchPlugin.map}
+          app={searchPlugin.app}
+          options={searchPlugin.options}
+        />
+      );
+    } else {
+      return null;
+    }
+  }
+
   render() {
     const { classes } = this.props;
     return (
       <div className={classes.root}>
         <main className={classes.map} id="map">
           <AppBar position="fixed" className={classes.toolbar}>
-            <MUIToolbar>
-              <Toolbar
-                tools={this.appModel.getToolbarPlugins()}
-                parent={this}
-              />
-              <Typography
-                variant="title"
-                color="inherit"
-                className={classes.flex}
-              />
-              <Button color="inherit">Inloggad användare</Button>
-            </MUIToolbar>
+          <MUIToolbar>
+            <Toolbar
+              tools={this.appModel.getToolbarPlugins()}
+              parent={this}
+            />
+            {this.renderSearchPlugin()}
+          </MUIToolbar>
           </AppBar>
           <div id="map-overlay" className={classes.overlay}>
             <div className={classNames(classes.widgets, classes.widgetsLeft)}>

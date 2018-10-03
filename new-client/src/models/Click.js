@@ -44,10 +44,13 @@ function handleClick(evt, map, callback) {
     .getLayers()
     .getArray()
     .filter(
-      layer =>
-        layer.type === "TILE" &&
-        layer.get("visible") === true &&
-        layer.get("queryable") === true
+      layer => {
+        return (
+          (layer.type === "TILE" || layer.type === "IMAGE") &&
+          layer.get("visible") === true &&
+          layer.get("queryable") === true
+        )
+      }
     )
     .forEach(layer => {
       var promise = query(map, layer, evt);
