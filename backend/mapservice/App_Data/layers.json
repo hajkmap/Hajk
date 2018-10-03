@@ -13,10 +13,7 @@
       "layer": "topowebb",
       "style": "default",
       "matrixSet": "3006",
-      "origin": [
-        "-1200000",
-        "8500000"
-      ],
+      "origin": ["-1200000", "8500000"],
       "resolutions": [
         "4096",
         "2048",
@@ -68,9 +65,7 @@
       "content": "",
       "legend": "",
       "projection": null,
-      "layers": [
-        "orto"
-      ],
+      "layers": ["orto"],
       "infobox": "",
       "searchFields": null,
       "displayFields": null,
@@ -103,9 +98,7 @@
       "content": "",
       "legend": "",
       "projection": null,
-      "layers": [
-        "wsp:parking_lot"
-      ],
+      "layers": ["wsp:parking_lot"],
       "infobox": "",
       "searchFields": null,
       "displayFields": null,
@@ -135,17 +128,11 @@
       "id": "20",
       "caption": "Fastighet",
       "url": "http://giscloud.se/geoserver/wfs",
-      "layers": [
-        "wsp:fastighet"
-      ],
-      "searchFields": [
-        "fastighet"
-      ],
+      "layers": ["wsp:fastighet"],
+      "searchFields": ["fastighet"],
       "infobox": "",
       "aliasDict": "",
-      "displayFields": [
-        "fastighet"
-      ],
+      "displayFields": ["fastighet"],
       "geometryField": "geom",
       "outputFormat": "GML3",
       "infoVisible": false,
@@ -159,17 +146,11 @@
       "id": "21",
       "caption": "Adress",
       "url": "https://karta.uddevalla.se/geoserver/wfs",
-      "layers": [
-        "uddevalla:adresspunkt_p"
-      ],
-      "searchFields": [
-        "adress"
-      ],
+      "layers": ["uddevalla:adresspunkt_p"],
+      "searchFields": ["adress"],
       "infobox": "",
       "aliasDict": "",
-      "displayFields": [
-        "adress"
-      ],
+      "displayFields": ["adress"],
       "geometryField": "geom",
       "outputFormat": "GML3",
       "infoVisible": false,
@@ -403,9 +384,7 @@
       "caption": "Port",
       "url": "http://giscloud.se/geoserver/wfs",
       "projection": "EPSG:3006",
-      "layers": [
-        "wsp:port"
-      ],
+      "layers": ["wsp:port"],
       "editableFields": [
         {
           "index": 0,
@@ -450,9 +429,7 @@
       "caption": "Mussla",
       "url": "http://giscloud.se/geoserver/wfs",
       "projection": "EPSG:3006",
-      "layers": [
-        "skekraft:mussla"
-      ],
+      "layers": ["skekraft:mussla"],
       "editableFields": [
         {
           "index": 0,

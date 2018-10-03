@@ -7,7 +7,7 @@ import { all as strategyAll } from "ol/loadingstrategy";
 import { transform } from "ol/proj";
 import { toContext } from "ol/render";
 import { Point, Polygon, LineString } from "ol/geom";
-import Feature from 'ol/Feature';
+import Feature from "ol/Feature";
 import LayerInfo from "./LayerInfo.js";
 
 let vectorLayerProperties = {
@@ -72,9 +72,7 @@ function createStyle(feature, forcedPointRadius) {
     });
   }
 
-  feature = arguments[1] instanceof Feature
-  ? arguments[1]
-  : undefined;
+  feature = arguments[1] instanceof Feature ? arguments[1] : undefined;
 
   function getText() {
     return new Text({

@@ -1,5 +1,5 @@
 import { WFS } from "ol/format";
-import IsLike from 'ol/format/filter/IsLike';
+import IsLike from "ol/format/filter/IsLike";
 
 class SearchModel {
   constructor(settings, map) {
@@ -9,11 +9,10 @@ class SearchModel {
   }
 
   lookup(source, searchInput) {
-
     const projCode = this.olMap
-        .getView()
-        .getProjection()
-        .getCode();
+      .getView()
+      .getProjection()
+      .getCode();
 
     const options = {
       featureTypes: source.layers,
@@ -23,9 +22,9 @@ class SearchModel {
       filter: new IsLike(
         source.searchFields[0],
         searchInput + "*",
-        "*",  // wild card
-        ".",  // single char
-        "!",  // escape char
+        "*", // wild card
+        ".", // single char
+        "!", // escape char
         false // match case
       )
     };
@@ -51,18 +50,19 @@ class SearchModel {
         this.lookup(source, searchInput)
       );
       Promise.all(promises).then(responses => {
-        Promise.all(responses.map(result => result.json())).then(jsonResults => {
-          jsonResults.forEach((jsonResult, i) => {
-            jsonResult.source = this.options.sources[i];
-          });
-          if (callback) callback(jsonResults);
-        });
+        Promise.all(responses.map(result => result.json())).then(
+          jsonResults => {
+            jsonResults.forEach((jsonResult, i) => {
+              jsonResult.source = this.options.sources[i];
+            });
+            if (callback) callback(jsonResults);
+          }
+        );
       });
     } else {
       callback(false);
     }
-  }
-
+  };
 }
 
 export default SearchModel;

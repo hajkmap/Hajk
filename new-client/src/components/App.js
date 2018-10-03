@@ -161,13 +161,13 @@ class App extends Component {
       <div className={classes.root}>
         <main className={classes.map} id="map">
           <AppBar position="fixed" className={classes.toolbar}>
-          <MUIToolbar>
-            <Toolbar
-              tools={this.appModel.getToolbarPlugins()}
-              parent={this}
-            />
-            {this.renderSearchPlugin()}
-          </MUIToolbar>
+            <MUIToolbar>
+              <Toolbar
+                tools={this.appModel.getToolbarPlugins()}
+                parent={this}
+              />
+              {this.renderSearchPlugin()}
+            </MUIToolbar>
           </AppBar>
           <div id="map-overlay" className={classes.overlay}>
             <div className={classNames(classes.widgets, classes.widgetsLeft)}>

@@ -61,7 +61,6 @@ const styles = theme => ({
 });
 
 class Toolbar extends Component {
-
   state = { open: false };
 
   renderTools() {

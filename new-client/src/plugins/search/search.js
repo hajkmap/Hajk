@@ -6,24 +6,22 @@ import SearchModel from "./SearchModel.js";
 
 const styles = theme => ({
   searchContainer: {
-    right: '15px',
-    width: '100%',
-    position: 'relative',
+    right: "15px",
+    width: "100%",
+    position: "relative",
     marginLeft: theme.spacing.unit,
-    [theme.breakpoints.up('sm')]: {
-      position: 'absolute',
+    [theme.breakpoints.up("sm")]: {
+      position: "absolute",
       marginLeft: theme.spacing.unit,
-      width: 'auto'
+      width: "auto"
     }
   }
 });
 
 class Search extends Component {
+  state = {};
 
-  state = {
-  };
-
-  resolve = (data) => {
+  resolve = data => {
     this.setState({
       result: data
     });
@@ -39,17 +37,20 @@ class Search extends Component {
   renderSearchResultList() {
     const { result } = this.state;
     if (!result) return null;
-    return <SearchResultList result={result} />
+    return <SearchResultList result={result} />;
   }
 
   render() {
     const { classes } = this.props;
     return (
       <div className={classes.searchContainer}>
-        <SearchBar onChange={this.searchModel.search} onComplete={this.resolve}/>
+        <SearchBar
+          onChange={this.searchModel.search}
+          onComplete={this.resolve}
+        />
         {this.renderSearchResultList()}
       </div>
-    )
+    );
   }
 }
 
