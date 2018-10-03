@@ -45,7 +45,7 @@ var SearchModelProperties = {
   maxZoom: 14,
   exportUrl: '',
   displayPopup: false,
-  displayPopupBar: false,
+  displayPopupBar: true,
   hits: [],
   popupOffsetY: 0,
   aliasDict: {}
@@ -69,7 +69,7 @@ var SearchModel = {
   },
 
   configure: function (shell) {
-    this.set('displayPopupBar', this.get('displayPopup'));
+    this.set('displayPopupBar', this.get('displayPopupBar'));
     this.set('layerCollection', shell.getLayerCollection());
     this.set('map', shell.getMap().getMap());
     this.featureLayer = new ol.layer.Vector({
@@ -120,7 +120,7 @@ var SearchModel = {
    * @return {string} wfs-filter
    */
   getPropertyFilter: function (props) {
-    var multipleAttributes = props.propertyName.split(',').length > 1;
+    var multipleAttributes = true;
     var conditions = props.propertyName.split(',').reduce((condition, property) => {
     /*  if (props.value == null){
         return condition;
@@ -598,7 +598,7 @@ var SearchModel = {
   getSources: function () {
     var filter = (source) => {
       var criteria = this.get('filter');
-      return criteria === '*' ? true : criteria === source.caption;
+      return criteria.indexOf('*') != -1 ? true : criteria.indexOf(source.caption) != -1;
     };
     return this.get('sources').filter(filter);
   },
@@ -936,6 +936,32 @@ var SearchModel = {
         imgSize: this.get('imgSize')
       })
     });
+  },
+
+  focusInfobox: function (spec, isBar) {
+    var map = this.get('map'),
+      exist = this.get('selectedIndices').find(item => item.group === spec.id),
+      extent = spec.hit.getGeometry().getExtent(),
+      size = map.getSize(),
+      ovl = map.getOverlayById('popup-0'),
+      offsetY = 0;
+
+    this.set('hits', [spec.hit]);
+    map.getView().fit(extent, {
+      size: size,
+      maxZoom: this.get('maxZoom')
+    });
+
+    this.featureLayer.getSource().clear();
+    this.featureLayer.getSource().addFeature(spec.hit);
+    var displayPopup = isBar ? this.get('displayPopupBar') : this.get('displayPopup');
+    if (ovl && displayPopup) {
+      let textContent = $('<div id="popup-content-text"></div>');
+      var getInfobox = 'hit-' + spec.index + '-' + spec.id + '-infobox';
+
+      textContent.html(this.getInformation(spec.hit));
+      $('#'+getInfobox).empty().append(textContent);
+    }
   },
 
   /**

@@ -38,8 +38,16 @@ window.onkeyup = (e) => {
  */
 SearchResultGroup = {
 
+  getInitialState: function () {
+    return {
+      activeClass: null
+    };
+  },
+
   componentDidMount: function () {
     var groups = $(ReactDOM.findDOMNode(this)).find('.group');
+
+    this.state.activeClass = null;
 
     groups.click(function () {
       $(this).next().toggleClass('hidden');
@@ -64,6 +72,16 @@ SearchResultGroup = {
     var element = $(event.target),
       parent = $(ReactDOM.findDOMNode(this)),
       group = parent.find('.group');
+
+    this.setState({
+      activeClass: index === this.state.activeClass ? null : index
+    });
+
+    var infoboxId = 'hit-' + index + '-' + group[0].id + '-infobox';
+
+    if (element.next('#'+infoboxId).length == 0) {
+        $('<div id='+infoboxId+' class="infobox-text"></div>').insertAfter(element);
+    }
 
     var item = {
       index: index,
@@ -107,6 +125,7 @@ SearchResultGroup = {
         $(this).removeClass('selected');
       });
       this.props.model.focus(item, this.props.isBar == 'yes');
+      this.props.model.focusInfobox(item, this.props.isBar == 'yes');
     }
 
     if (!shiftIsDown) {
@@ -127,6 +146,10 @@ SearchResultGroup = {
       groupStyleClass = this.props.numGroups === 1 ? '' : 'hidden'
     ;
 
+    var isActive = (index) => {
+      return this.state.activeClass === index ? 'infobox-show' : 'infobox-hide';
+    };
+
     return (
       <div>
         <div className='group' id={this.props.id}>{this.props.result.layer}
@@ -146,7 +169,9 @@ SearchResultGroup = {
                 title = getTitle(this.props.result.displayName),
                 index = i
               ;
-              return (<div id={hitId} key={hitId} index={i} data-index={i} onClick={this.handleClick.bind(this, hit, i)}>{title}</div>);
+              return (<div id={hitId} className={isActive(index)} key={hitId} index={i} data-index={i} onClick={this.handleClick.bind(this, hit, i)}>{title}</div>);
+              <i className="fa fa-angle-up clickable arrow"></i>
+              <i className="fa fa-angle-down clickable arrow"></i>
             })
           }
         </div>
