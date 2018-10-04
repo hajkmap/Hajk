@@ -170,8 +170,6 @@ SearchResultGroup = {
                 index = i
               ;
               return (<div id={hitId} className={isActive(index)} key={hitId} index={i} data-index={i} onClick={this.handleClick.bind(this, hit, i)}>{title}</div>);
-              <i className="fa fa-angle-up clickable arrow"></i>
-              <i className="fa fa-angle-down clickable arrow"></i>
             })
           }
         </div>

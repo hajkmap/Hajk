@@ -33,13 +33,14 @@
 }
 
 .searchbar-results {
+  background-color: #FFF;
   border: 1px solid #CCC;
   border-top: 0;
-  border-bottom: 0;
   padding: 10px;
 }
 
 .searchbar-results-no-results {
+  background-color: #FFF;
   border: 1px solid #CCC;
   border-top: 0;
   padding: 10px;
@@ -64,11 +65,11 @@
   max-height: 500px;
   overflow-y: scroll;
   margin-top: 10px;
-  
+
   > div > div {
     margin: 0 !important;
   }
-  
+
   > div:not(:last-of-type) {
     margin-bottom: 10px !important;
   }
@@ -77,11 +78,11 @@
 #searchbar-input-field-clear {
   position: absolute;
   z-index: 4;
-  right: 40px;
+  right: 75px;
   height: 100%;
   width: 40px;
   cursor: pointer;
-  
+
   &::before, &::after {
     content: "";
     position: absolute;
@@ -89,36 +90,32 @@
     left: 50%;
     background: #CCC;
     width: 2px;
-    height: 16px;
+    height: 12px;
     transition: 0.2s ease-in-out;
   }
-  
+
   &::before {
     transform: translate(-50%, -50%) rotate(45deg);
   }
-  
+
   &::after {
     transform: translate(-50%, -50%) rotate(-45deg);
   }
-  
+
   &:hover {
     &::before, &::after {
       background: @brand-danger;
       transition: 0.2s ease-in-out;
     }
-  } 
+  }
 }
 
 .search-results-toggle-minimze {
-  text-align: center;
   color: @brand-primary;
   font-weight: 600;
-  padding: 5px;
   background: #FFF;
-  border: 1px solid #CCC;
-  border-radius: 0 0 5px 5px;
-  box-shadow: 0 -2px 4px rgba(0,0,0,0.08);
   cursor: pointer;
+  float: right;
 
   .arrow {
     margin-left: 5px;
@@ -132,4 +129,163 @@
   background: #FFF;
   border-radius: 0 0 5px 5px;
   border: 1px solid #CCC;
+}
+
+/*Selection tool styling*/
+
+.search-bar-holder .selection-toolbar .btn-default {
+  margin-right: 15px;
+  border-radius: 6px !important;
+}
+
+.search-bar-holder .selection-toolbar .btn-primary {
+  margin-right: 15px;
+  border-radius: 6px !important;
+}
+
+.search-bar-holder .selection-toolbar .btn-link {
+  background-color: #af620c;
+  color: #FFF;
+  border-radius: 6px;
+  padding: 6px 12px;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.search-bar-holder .selection-toolbar .btn-link:hover {
+    background-color: #99550A;
+}
+
+.search-bar-holder .searchbar-results #searchbar-search-button {
+  margin-left: 20px;
+  margin-top: -4px;
+  padding: 6px 20px;
+  border-radius: 6px;
+}
+
+.search-bar-holder #selection-tool-button {
+  background-color: #FFF;
+  color: #1b78cc;
+  border-left: 0px;
+  border-color: #1b78cc;
+}
+
+.search-bar-holder .searchbar-results #searchbar-search-button {
+  background-color: #5CB85C;
+  color: #FFF;
+}
+
+.search-bar-holder .searchbar-results select {
+  padding: 5px;
+  border-radius: 6px;
+}
+
+.search-bar-holder #searchbar-input-field-clear {
+  height: 20px;
+  width: 20px;
+  background-color: #D9D9D9;
+  border-radius: 50%;
+  margin-top: 9px;
+  margin-right: 10px;
+}
+
+.search-bar-holder #searchbar-input-field-clear:before {
+  background: #9A9A9A;
+}
+
+.search-bar-holder #searchbar-input-field-clear:after {
+  background: #9A9A9A;
+}
+
+.search-bar-holder .alert-info {
+  margin-top: 2px;
+}
+
+.search-bar-holder #popup-content-text {
+  background-color: #FFF;
+  color: #000;
+  cursor: default;
+}
+
+.infobox-hide + .infobox-text {
+  display: none;
+}
+
+.search-bar-holder .infobox-text {
+  padding: 0px !important;
+}
+
+.search-bar-holder .infobox-text #popup-content-text {
+  margin-top: 0px;
+  box-shadow: unset;
+}
+
+.search-bar-holder .searchbar-results #searchbar-search-button:hover {
+  background-color: #358a44 !important;
+}
+
+.search-bar-holder .searchbar-results select {
+  max-width: 220px;
+}
+
+.search-bar-holder .searchbar-results select option:first-child {
+  display: none;
+}
+
+.search-bar-holder .searchbar-results .selected {
+  color: black;
+  font-weight: bold;
+}
+
+.search-bar-holder .searchbar-results li {
+  margin: 4px;
+  border-bottom: 1px solid lightgray;
+}
+
+.search-bar-holder .searchbar-results label {
+  width: 100%;
+  margin: 8px;
+}
+
+.search-bar-holder .searchbar-results button {
+  min-width: 60px;
+}
+
+.search-bar-holder .searchbar-results .fa-angle-down {
+  margin-top: 4px;
+  float: right;
+}
+
+.search-bar-holder .searchbar-results span:not(.label) {
+  font-size: 12pt;
+}
+
+.search-bar-holder .searchbar-results .infobox-show {
+  background: #E2E2E2;
+}
+
+.search-bar-holder .searchbar-results .btn-filter {
+  width: 210px;
+  background-color: #FFF;
+  border: 1px solid #1b78cc;
+  text-align: left;
+  margin-left: 30px;
+}
+
+.search-bar-holder .searchbar-results .dropdown-menu {
+  width: 300px;
+  left: 72px;
+}
+
+.search-bar-holder .searchbar-results .options-container {
+  position: relative;
+}
+
+.search-bar-holder .searchbar-results .options-container .fa-angle-down {
+  margin-left: 90px;
+  color: #1b78cc;
+}
+
+.search-bar-holder .searchbar-results .dropdown-menu span {
+  margin-left: 5px;
 }
