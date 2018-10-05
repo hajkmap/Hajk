@@ -260,9 +260,15 @@ class ExtendedWMSLayerForm extends Component {
 
   loadLayers (layer, callback) {
     this.loadWMSCapabilities(undefined, () => {
+
+      var capabilities = this.state.capabilitiesList.find(capabilities => capabilities.version === layer.version);
+      
       this.setState({
-        addedLayers: layer.layers
+        addedLayers: layer.layers,
+        capabilities,
+        version: capabilities.version,
       }, () => {
+        this.setServerType();
         this.validate();
       
         if (callback) callback();
@@ -283,16 +289,10 @@ class ExtendedWMSLayerForm extends Component {
     var capabilitiesPromise = this.props.model.getAllWMSCapabilities(this.state.url);
 
     capabilitiesPromise.then(capabilitiesList => {
-      var capabilities = capabilitiesList[0];
-
       this.setState({ 
         capabilitiesList,
         load: false,
-        capabilities,
-        version: capabilities.version,
        }, () => {
-        this.setServerType();
-
         if (callback) {
           callback();
         }
