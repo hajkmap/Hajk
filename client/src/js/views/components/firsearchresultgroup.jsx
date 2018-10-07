@@ -1,16 +1,5 @@
 
-var shiftIsDown = false;
-var ctrlIsDown = false;
 
-window.onkeydown = (e) => {
-    shiftIsDown = e.shiftKey;
-    ctrlIsDown = e.ctrlKey;
-};
-
-window.onkeyup = (e) => {
-    shiftIsDown = e.shiftKey;
-    ctrlIsDown = e.ctrlKey;
-};
 
 /**
  * @class
@@ -540,8 +529,8 @@ FirSearchResultGroup = {
                 return(
                     <div id={hitId} key={hitId} index={i} data-index={i}
                          onClick={this.handleClick.bind(this, hit, i)} style={{paddingBottom:'10px'}}>{title}
-                        <button className='btn btn-default pull-right plusMinus' onClick={e => {e.stopPropagation(); this.minusObject(e, hitId)}}>
-                            <i className='fa fa-minus'/>
+                        <button className='btn btn-default pull-right plusMinus faTrash' onClick={e => {e.stopPropagation(); this.minusObject(e, hitId)}}>
+                            <i className='fa fa-trash fa-2x'/>
                         </button>
                          <i className="fa fa-info-circle pull-right" onClick={(e) => {e.stopPropagation(); this.expInfo(hitId)}} style={{marginRight:'10px', marginTop:'5px'}}></i>{information}</div>
                 );

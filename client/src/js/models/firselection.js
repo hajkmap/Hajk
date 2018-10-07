@@ -57,6 +57,8 @@ var FirSelectionModel = {
             style: (feature) => this.getScetchStyle(feature)
         }));
 
+        //this.drawLayer.setZIndex(100);
+
         this.set('highlightLayer', new HighlightLayer({
             id: 'selection-highligt',
             anchor: this.get('anchor'),
@@ -65,14 +67,32 @@ var FirSelectionModel = {
             style: this.getScetchStyle()
         }));
 
+        // firBufferLayer: layer for sökningsbuffer
+        this.set("firBufferLayer", new ol.layer.Vector({
+            caption: 'bufferSearching',
+            name: 'fir-searching-buffer-layer',
+            source: new ol.source.Vector(),
+            queryable: false,
+            visible: true,
+            style: this.getFirBufferStyle()
+        }));
+
+        this.get("firBufferLayer").getSource().on('addfeature', evt => {
+            evt.feature.setStyle(this.get("firBufferLayer").getStyle());
+        });
+
+        this.get('map').addLayer(this.get("firBufferLayer"));
         this.get('olMap').addLayer(this.get('drawLayer'));
         this.get('olMap').addLayer(this.get('highlightLayer').layer);
 
         this.set('polygonSelection', new ol.interaction.Draw({
             source: this.get('source'),
             style: this.getScetchStyle(),
-            type: 'Polygon'
+            type: 'Polygon',
+            geometryName: "Polygon"
         }));
+
+        this.get('polygonSelection').on("drawend", this.deactiveTool.bind(this));
 
         this.set('squareSelection', new ol.interaction.Draw({
             source: this.get('source'),
@@ -82,25 +102,51 @@ var FirSelectionModel = {
             geometryFunction: ol.interaction.Draw.createBox()
         }));
 
+        this.get('squareSelection').on("drawend", this.deactiveTool.bind(this));
+
         this.set('lineSelection', new ol.interaction.Draw({
             source: this.get('source'),
             style: this.getScetchStyle(),
             type: 'LineString',
+            geometryName: "LineString"
         }));
+
+        this.get('lineSelection').on("drawend", this.deactiveTool.bind(this));
 
         this.set('pointSelection', new ol.interaction.Draw({
             source: this.get('source'),
             style: this.getScetchStyle(),
             type: 'Point',
+            geometryName: "Point"
         }));
 
-
-        this.get('polygonSelection').on('drawend', () => {
-            //this.get('source').clear();
-            //this.get('highlightLayer').clearHighlight();
-            //this.clear();
-        });
+        this.get('pointSelection').on("drawend", this.deactiveTool.bind(this));
     },
+
+    deactiveTool: function(event){
+        console.log("deactiateTool");
+        //this.setActiveTool(undefined);
+        if(!ctrlIsDown) {
+            setTimeout(a => {
+                console.log("here");
+                this.setActiveTool(undefined);
+                console.log("here2");
+            }, 50);
+        }
+    },
+
+    //firBufferStyle in searchingbox
+    getFirBufferStyle: function () {
+        return new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: 'rgba(77, 210, 255, 0.7)'
+            }),
+            stroke: new ol.style.Stroke({
+                color: 'rgba(153, 153, 153, 0.8)',
+                width: 4
+            })
+        });
+    } ,
 
     isQueryable: function (layer) {
         return (
@@ -209,16 +255,16 @@ var FirSelectionModel = {
         return [
             new ol.style.Style({
                 fill: new ol.style.Fill({
-                    color: 'rgba(0, 0, 0, 0)'
+                    color: 'rgba(255, 255, 255, 0.5)'
                 }),
                 stroke: new ol.style.Stroke({
                     color: color,
                     width: 4
                 }),
                 image: new ol.style.Circle({
-                    radius: 6,
+                    radius: 4,
                     fill: new ol.style.Fill({
-                        color: 'rgba(255, 255, 255, 0)'
+                        color: 'rgba(255, 255, 255, 0,5)'
                     }),
                     stroke: new ol.style.Stroke({
                         color: color,
@@ -238,6 +284,7 @@ var FirSelectionModel = {
 
     setActiveTool: function (tool) {
         console.log("activeTool", this.get("activeTool"));
+        console.log("Status 1 ?", this.get("activeToolStatus"));
         if(this.get("activeTool") !== null || typeof this.get("activeTool") !== "undefined") {
             console.log("removing");
             this.get('olMap').removeInteraction(this.get(this.get('activeTool'))); // tool name in activeTool should match the interaction created in this file
@@ -268,12 +315,68 @@ var FirSelectionModel = {
             this.get('olMap').set('clickLock', false);
             this.get('olMap').un('singleclick', this.onMapSingleClick, this);
         }
+
+
+    },
+
+    bufferSearchingInput: function(){
+        var bufferLength = document.getElementById("bufferSearchingInput").value;
+        console.log("bufferLength", bufferLength);
+
+        this.set("bufferLength", bufferLength);
+        console.log("this.props.model.bufferLength", this.get("bufferLength"));
+
+        this.bufferSearching(bufferLength);
+    },
+
+    bufferSearching: function(bufferSearchingLength) {
+        var parser = new jsts.io.OL3Parser();
+        parser.inject(ol.geom.Point, ol.geom.LineString, ol.geom.LinearRing, ol.geom.Polygon, ol.geom.MultiPoint, ol.geom.MultiLineString, ol.geom.MultiPolygon);
+
+        var bufferLength = bufferSearchingLength;
+        console.log("bufferLength in searching", bufferLength);
+        this.get("firBufferLayer").getSource().clear();
+
+        if(bufferSearchingLength > 0) {
+
+            this.get("map").getLayers().forEach(layer => {
+                if (layer.get("caption") === "search-selection-layer") {
+                    console.log("features.length", layer.getSource().getFeatures().length);
+                    layer.getSource().getFeatures().forEach(feature => {
+                        //console.log("type", typeof bufferLength);
+
+                        var jstsGeom = parser.read(feature.getGeometry());
+                        console.log("feature.getGeometry()", feature.getGeometry());
+                        console.log("+++jstsGeom", jstsGeom)
+                        // create a buffer of the required meters around each line
+                        console.log("bufferLength", bufferLength);
+                        var buffered = jstsGeom.buffer(bufferLength);
+                        console.log("+++buffered", parser.write(buffered));
+
+                        // create a new feature and add in a new layer that has highlightstyle
+                        var buffer = new ol.Feature();
+
+                        // convert back from JSTS and replace the geometry on the feature
+                        buffer.setGeometry(parser.write(buffered)); // change this to new feature
+
+                        this.get("firBufferLayer").getSource().addFeature(buffer);
+                    });
+                }
+            });
+        }
     },
 
     getFeatures: function () {
-        return this.get('highlightLayer').getFeatures().concat(
-            this.get('source').getFeatures()
-        );
+        var allFeatures = [];
+
+        this.bufferSearchingInput();
+
+        console.log("///allFeatures", allFeatures.concat(this.get('highlightLayer').getFeatures(), this.get('source').getFeatures(), this.get("firBufferLayer").getSource().getFeatures()));
+        allFeatures = allFeatures.concat(this.get('highlightLayer').getFeatures(), this.get('source').getFeatures(), this.get("firBufferLayer").getSource().getFeatures());
+        console.log("///allFeatures", allFeatures);
+
+        //return allFeatures;
+        return allFeatures.concat(this.get('highlightLayer').getFeatures(), this.get('source').getFeatures(), this.get("firBufferLayer").getSource().getFeatures());
     },
 
     abort: function () {
@@ -281,6 +384,7 @@ var FirSelectionModel = {
         this.get('source').clear();
         this.get('olMap').set('clickLock', false);
         this.get('highlightLayer').clearHighlight();
+        this.get("firBufferLayer").getSource().clear();
         this.clear();
     }
 };

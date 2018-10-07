@@ -1,6 +1,19 @@
 var FirSelectionToolbar = require('components/firselectiontoolbar');
 var FirSearchResultGroup = require('components/firsearchresultgroup');
 
+shiftIsDown = false;
+ctrlIsDown = false;
+
+window.onkeydown = (e) => {
+    shiftIsDown = e.shiftKey;
+    ctrlIsDown = e.ctrlKey;
+};
+
+window.onkeyup = (e) => {
+    shiftIsDown = e.shiftKey;
+    ctrlIsDown = e.ctrlKey;
+};
+
 /**
  * @class
  */
@@ -115,11 +128,20 @@ var FirSearchView = {
             document.getElementById('alertSearchbar').remove();
         }
 
+        var bufferLength = document.getElementById("bufferSearchingInput").value;
+        this.props.model.set("bufferLength", bufferLength);
+        this.clearBufferLength(bufferLength);
+
         this.setState({
             loading: true,
             showResults: true,
             result: []
         });
+    },
+
+    clearBufferLength: function (bufferLength) {
+        this.props.model.set("bufferLength", 0);
+        document.getElementById("bufferSearchingInput").value = this.props.model.get("bufferLength");
     },
 
     /**
@@ -173,7 +195,7 @@ var FirSearchView = {
 
                         });
                     });
-                    if(this.props.model.get("force")) {
+                    if(this.props.model.get("force") && result.items.length > 0) {
                         this.props.model.get("map").getView().fit(this.props.model.firFeatureLayer.getSource().getExtent(), {
                             size: this.props.model.get("map").getSize(),
                             maxZoom: this.props.model.get('maxZoom')
@@ -426,6 +448,23 @@ var FirSearchView = {
     },
 
 
+    /*hittaGrannar(){
+      var radioCheckedAngransade = document.getElementById("hittaGrannar").checked,
+          radioCheckedMedBuffer = document.getElementById("hittaGrannarMedBuffer").checked,
+            bufferLength;
+
+      if(radioCheckedMedBuffer){
+          bufferLength = document.getElementById("bufferInput").value;
+      }else{
+          bufferLength = 0.01;
+      }
+      console.log("bufferLength för HittaGrannar", bufferLength);
+
+      // Get the resultsList
+        //var resultList = this.props.result();
+        console.log("resultList: this.props.model.get items", this.props.model.get("items"));
+    },*/
+
     hittaGrannar: function() {
         var parser = new jsts.io.OL3Parser();
         parser.inject(ol.geom.Point, ol.geom.LineString, ol.geom.LinearRing, ol.geom.Polygon, ol.geom.MultiPoint, ol.geom.MultiLineString, ol.geom.MultiPolygon);
@@ -441,26 +480,41 @@ var FirSearchView = {
         }
         console.log("bufferLength in hittaGrannar", bufferLength);
 
+        this.props.model.firBufferFeatureLayer.getSource().clear();
+
+        var buffer = new ol.Feature();
+        var bufferGeom = false;
+
         this.props.model.get("map").getLayers().forEach(layer => {
-           if(layer.get("caption") === "search-selection-layer"){
+           if(layer.get("caption") === "FIRSökresltat")
                layer.getSource().getFeatures().forEach(feature => {
-                   if(typeof feature.hajkBuffered === "undefined" || feature.hajkBuffered ===  bufferLength) {
-                       if(typeof feature.hajkBuffered === "undefined"){
-                           feature.hajkBuffered = 0;
-                       }
-                       var jstsGeom = parser.read(feature.getGeometry());
+                   console.log("feature", feature);
+                   var jstsGeom = parser.read(feature.getGeometry());
 
-                       // create a buffer of the required meters around each line
-                       var buffered = jstsGeom.buffer(bufferLength - feature.hajkBuffered);
-
-                       // convert back from JSTS and replace the geometry on the feature
-                       feature.setGeometry(parser.write(buffered));
-                       feature.hajkBuffered = bufferLength;
+                   // create a buffer of the required meters around each line
+                   var buffered = jstsGeom.buffer(bufferLength);
+                   if(bufferGeom === false){
+                       bufferGeom = buffered;
+                   } else {
+                       bufferGeom = bufferGeom.union(buffered);
                    }
                });
-           }
         });
+        buffer.setGeometry(parser.write(bufferGeom));
+        this.props.model.firBufferFeatureLayer.getSource().addFeature(buffer);
+
+        this.props.model.set("hittaGrannar", true);
+
+        this.setState({
+            force: true
+        });
+        this.props.model.set('force', true);
+        this.search();
+
+        this.props.model.set('downloading', null);
+        this.props.model.set('url', null);
     },
+
 
     bufferInput: function() {
         //document.getElementById("bufferValue").value = document.getElementById("bufferInput").value;
@@ -492,7 +546,7 @@ var FirSearchView = {
                     </div><br/>
                     <div className='pull-right'>
                         <button id="fir-search-hitta-grannar" onClick={() => this.hittaGrannar()} type='submit' className='btn btn-primary'>Sök</button>&nbsp;
-                        <button onClick={() => console.log("not created")} type='submit' className='btn btn-primary' id='sokRensa'>Rensa</button>
+                        <button onClick={() => console.log("not created")} type='submit' className='btn btn-primary' id='rensaHittaGrannar'>Rensa</button>
                     </div>
                 </div>
             </div>
@@ -516,6 +570,22 @@ var FirSearchView = {
         this.props.model.set("searchExpandedClassButton", buttonClass);
         document.getElementById(buttonId).className = buttonClass;
 
+    },
+
+    exaktMatching: function(event) {
+        console.log("sök exakt matching");
+        this.props.model.set("exaktMatching", false);
+        var exaktSearching = document.getElementById("exaktMatching").checked;
+        console.log("this.props.model.exaktSearching", this.props.model.get("exaktMatching"));
+
+        if(exaktSearching){
+            this.props.model.set("exaktMatching", exaktSearching);
+            console.log("TRUE");
+        }else{
+            this.props.model.set("exaktMatching", exaktSearching);
+            console.log("FALSE");
+        }
+        console.log("exaktMatching", this.props.model.get("exaktMatching"));
     },
 
     /**
@@ -611,6 +681,7 @@ var FirSearchView = {
                                 onChange={search_on_input} />
                         </div>
                         <div className='clearfix'>
+                            <input type="checkbox" id="exaktMatching" onClick={(e)=> this.exaktMatching(e)} />  Sök exakt matching <br/>
                             {/*<span className='info-text clearfix'>Inled sökningen med * för att söka på delar av en text.</span>*/}
                         </div><br/>
                             {firSelectionToolbar}

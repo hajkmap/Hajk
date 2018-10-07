@@ -15,6 +15,10 @@ var FirSelectionPanelView = {
         };
     },
 
+    componentDidMount: function(){
+        this.props.model.get("drawLayer").getSource().on("addfeature", this.props.model.bufferSearchingInput.bind(this.props.model));
+    },
+
     /**
      * Triggered when the component is successfully mounted into the DOM.
      * @instance
@@ -25,6 +29,7 @@ var FirSelectionPanelView = {
                 activeTool: this.props.model.get('activeTool')
             });
         });
+
     },
 
     componentWillUnmount () {
@@ -35,54 +40,55 @@ var FirSelectionPanelView = {
     activateTool: function (name) {
         if (this.props.model.get('activeTool') === name) {
             this.props.model.setActiveTool(undefined);
+            console.log("///Inside activeTool: undefined");
         } else {
             this.props.model.setActiveTool(name);
+            console.log("///Inside activeTool: name is", name);
         }
+
+
+
+        var map = this.props.model.get("map");
+        map.un('singleclick', this.firRemoveSelected);
+        //map.un("singleclick", this.activateTool(name));
+        //map.removeInteraction(this.activateTool(name));
     },
 
     finishedDrawing: function() {
         this.props.model.setActiveTool(undefined);
+        // this.props.model.get("drawLayer").getSource().on("addfeature", this.bufferSearchingInput);
     },
 
-    /*deleteMarker: function(event) {
-        console.log("deleteMarker");
-        this.props.model.setActiveTool(undefined);
-        console.log("setActiveTool", this.props.model.setActiveTool(undefined));
-
-        // Should add a singleclick handler for deletion
-        // get the object detail
-        var map = this.props.model.get("map");
-
-        // get the object from highlightResultLayer
-        var source = this.props.model.get("highlightLayer").get("source");
-        console.log("source i deleteMarker", source);
-        console.log("map.forEachFeatureAtPixel", map.forEachFeatureAtPixel);
-        console.log("pixelFromClickedOnMap", event);
-        map.forEachFeatureAtPixel(event.pixel, function(feature, layer){
-            console.log("feature", feature);
-            if (layer.get("caption") === "FIRSökes"){
-                source.removeFeature(feature);
-
-            }
-        });
-    },*/
     deleteMarker: function(){
         var map = this.props.model.get("map");
         map.on('singleclick', this.firRemoveSelected);
+
     },
 
     firRemoveSelected: function(event){
         var map = this.props.model.get("map");
         var source = this.props.model.get("highlightLayer").get("source");
+
+        // souce for buffer
+        var sourceBuffer = this.props.model.get("firBufferLayer").get("source");
+
         console.log("source", source);
+        console.log("sourceBuffer", sourceBuffer);
         console.log("event", event);
+
         map.forEachFeatureAtPixel(event.pixel, function(feature, layer){
             console.log("deleteMarkerEnabled",deleteMarkerEnabled);
-            if (layer.get("caption") === "search-selection-layer") {
+            if (layer.get("caption") === "search-selection-layer" || layer.get("name") === "fir-searching-buffer-layer") {
                 layer.getSource().removeFeature(feature);
             }
         });
-        map.un('singleclick', this.firRemoveSelected);
+
+        //map.un('singleclick', this.firRemoveSelected);
+
+        console.log("ctrlisDown", ctrlIsDown);
+        if(!ctrlIsDown) {
+            map.un('singleclick', this.firRemoveSelected);
+        }
     },
 
     getClassNames: function (type) {
@@ -101,7 +107,7 @@ var FirSelectionPanelView = {
 
         return (
             <div className='selection-toolbar'>
-                {/*<div>Sök baserat på markering i kartan</div>*/}
+                <div><b>Sökområde</b></div>
                 <div className='btn-group btn-group-lg'>
                     <button onClick={() => this.activateTool('polygonSelection')} type='button' className={this.getClassNames('polygonSelection')} title='Markera efter polygon' >
                         <i className='fa iconmoon-yta icon' />
@@ -115,8 +121,12 @@ var FirSelectionPanelView = {
                     <button onClick={() => this.activateTool('pointSelection')} type='button' className={this.getClassNames('pointSelection')} title='Markera efter polygon' >
                         <i className='fa fa-circle icon' />
                     </button>
-                </div>&nbsp;&nbsp;&nbsp;&nbsp;<b>Rita sökområde</b><div></div><br/>
+                    <button onClick={this.deleteMarker} type='button' className={this.getClassNames('minusSelection')} title='Ta bort objekt' >
+                        <i className='fa fa-trash fa-0' />
+                    </button>
+                </div>
 
+                    {/*
                 <div className='btn-group btn-group-lg'>
                     <button onClick={() => this.finishedDrawing()} type='button' className={this.getClassNames('plusSelection')} style={{backgroundColor: "green"}} title='Markera efter polygon' >
                         <i className='fa fa-check fa-0' />&nbsp;<span style={{fontSize: 16}}>Klar</span>
@@ -124,7 +134,13 @@ var FirSelectionPanelView = {
                     <button onClick={this.deleteMarker} type='button' className={this.getClassNames('minusSelection')} title='Ta bort objekt' >
                         <i className='fa fa-trash fa-0' />&nbsp;<span style={{fontSize: 16}}>Radera Objekt</span>
                     </button>
+                </div><br/><br/> */}
+
+                <br/><br/>
+                <div>
+                    Lägg till buffert &nbsp; <input id="bufferSearchingInput" type='text' ref='bufferSearchingInput' defaultValue="0" onChange={this.props.model.bufferSearchingInput}/> meter till sökområde
                 </div>
+
 
             </div>
         );
