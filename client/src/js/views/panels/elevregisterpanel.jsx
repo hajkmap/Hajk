@@ -23,11 +23,12 @@
 var Panel = require('views/panel');
 var Alert = require('alert');
 var ColorPicker = require('components/colorpicker');
-
+var urlID = [],  elev_count =[], toggle=0, sum;
 /**
  * @class
  */
 var ElevregisterPanelView = {
+  
   /**
    * Get initial state.
    * @instance
@@ -135,10 +136,6 @@ var ElevregisterPanelView = {
    */
   clear: function () {
     this.props.model.clear();
-    this.props.model.set('circleRadius', '');
-    this.setState({
-      circleRadius: ''
-    });
   },
 
   /**
@@ -146,12 +143,15 @@ var ElevregisterPanelView = {
    * @instance
    */
   alertClear: function () {
-    this.setState({
+   
+     this.setState({
       alert: true,
-      alertMessage: ` Vill du verkligen rensa allt?`,
+      alertMessage: 'Vill du verkligen rensa allt?',
       confirm: true,
-      confirmAction: () => {
-        this.clear();
+      confirmAction: () => { 
+          this.clear();   
+          $('#elevCount').html('');
+          elev_count=[];  
       },
       denyAction: () => {
         this.setState({ alert: false });
@@ -159,23 +159,32 @@ var ElevregisterPanelView = {
     });
   },
 
+
+  showOnMap: function(){
+    this.props.model.showOnMap(urlID);
+
+    urlID.length=0;
+    //$("#klasser option:selected").prop("selected", false);
+    $('#elevCount').html('Antal elever: '+ sum);
+    elev_count=[];
+  },
   /**
    * Abort any operation and deselect any tool.
    * @instance
    */
   abort: function () {
     this.props.model.abort();
-    $('#Point, #Circle, #Text, #Polygon, #LineString, #move, #edit, #delete, #Box').removeClass('selected');
+  
     $('#abort').hide();
     this.setState({
       symbology: ''
     });
-    this.props.model.measureTooltip.setPosition(null);
+   
+
   },
 
-  showOnMap: function () {
-    this.props.model.showOnMap();
-  },
+  
+
 
   /**
    * Handle change event of the show labels checkbox.
@@ -235,13 +244,20 @@ var ElevregisterPanelView = {
    * @param {string} type
    */
   activateElevregisterTool: function (type) {
-    this.props.model.activateElevregisterTool(type);
-    $('#Circle, #Point, #Text, #Polygon, #LineString, #move, #edit, #delete, #Box').removeClass('selected');
-    $('#' + type).addClass('selected');
-    $('#abort').show();
-    this.setState({
-      symbology: type
-    });
+    if (toggle %2 ==0){
+      $('#color').attr('title', 'Dölj stilsättning');
+      $('#this_icon').removeClass('fa-paint-brush').addClass('fa-angle-up');
+      this.setState({
+        symbology: type
+      }); 
+       toggle++;
+    }
+    else{
+      $('#this_icon').removeClass('fa-angle-up').addClass('fa-paint-brush');
+      $('#color').attr('title', 'Välj stilsättning');
+      this.abort();  toggle++;
+    }
+     
   },
 
   /**
@@ -261,6 +277,7 @@ var ElevregisterPanelView = {
    * @return {external:ReactElement} component
    */
   renderSymbology: function (type) {
+   
     function update (func, state_prop, e) {
       var value = e.target.value,
         state = {};
@@ -275,6 +292,7 @@ var ElevregisterPanelView = {
           : !isNaN(parseInt(value))
             ? parseInt(value) : value;
       }
+    
       state[state_prop] = value;
       this.setState(state);
       this.props.model[func].call(this.props.model, value);
@@ -310,232 +328,40 @@ var ElevregisterPanelView = {
       switch (this.state.pointSettings) {
         case 'point':
           return (
-            <div>
-              <div>Färg</div>
-              <ColorPicker
+
+            <div className='panel panel-default colorPicker'>
+              
+              <div className='panel-body'>
+             <ColorPicker
                 model={this.props.model}
                 property='pointColor'
                 onChange={this.props.model.setPointColor.bind(this.props.model)}
               />
-              <div>Storlek</div>
+              <div>Välj storlek</div>
               <select value={this.state.pointRadius} onChange={update.bind(this, 'setPointRadius', 'pointRadius')}>
                 <option value='4'>Liten</option>
                 <option value='7'>Normal</option>
                 <option value='14'>Stor</option>
                 <option value='20'>Större</option>
               </select>
+               </div>
             </div>
+
           );
-        case 'symbol':
-          return (
-            <div className='point-marker-img'>
-              {renderIcons.call(this)}
-            </div>
-          );
+        
       }
     }
 
     switch (type) {
-      case 'Text':
-        return (
-          <div>
-            <h2>Ritmanér text</h2>
-            <div>Textstorlek</div>
-            <select value={this.state.fontSize} onChange={update.bind(this, 'setFontSize', 'fontSize')}>
-              <option value='8'>8</option>
-              <option value='10'>10</option>
-              <option value='12'>12</option>
-              <option value='14'>14</option>
-              <option value='16'>16</option>
-              <option value='18'>18</option>
-              <option value='20'>20</option>
-              <option value='30'>30</option>
-              <option value='40'>40</option>
-              <option value='60'>60</option>
-              <option value='80'>100</option>
-            </select>
-            <div>Textfärg</div>
-            <ColorPicker
-              model={this.props.model}
-              property='fontColor'
-              onChange={this.props.model.setFontColor.bind(this.props.model)}
-            />
-            <div>Bakgrundsfärg text</div>
-            <ColorPicker
-              model={this.props.model}
-              noColor='true'
-              property='fontBackColor'
-              onChange={this.props.model.setFontBackColor.bind(this.props.model)}
-            />
-          </div>
-        );
+      
       case 'Point':
         return (
-          <div>
-            <h2>Ritmanér punkt</h2>
-            <label>Välj typ</label>
-            <div>
-              <select value={this.state.pointSettings} onChange={e => {
-                var value = e.target.value === 'symbol';
-                update.call(this, 'setPointSettings', 'pointSettings', e);
-                update.call(this, 'setPointSymbol', 'pointSymbol', {
-                  target: {
-                    type: 'checkbox',
-                    checked: value
-                  }
-                });
-              }}>
-                <option key='point' value='point'>Punkt</option>
-                <option key='symbol' value='symbol'>Symbol</option>
-              </select>
-            </div>
+
+          <div>            
             {renderPointSettings.call(this)}
           </div>
         );
-      case 'LineString':
-        return (
-          <div>
-            <h2>Ritmanér linje</h2>
-            <div>Färg</div>
-            <ColorPicker
-              model={this.props.model}
-              property='lineColor'
-              onChange={this.props.model.setLineColor.bind(this.props.model)}
-            />
-            <div>Tjocklek</div>
-            <select value={this.state.lineWidth} onChange={update.bind(this, 'setLineWidth', 'lineWidth')}>
-              <option value='1'>Tunn</option>
-              <option value='3'>Normal</option>
-              <option value='5'>Tjock</option>
-              <option value='8'>Tjockare</option>
-            </select>
-            <div>Stil</div>
-            <select value={this.state.lineStyle} onChange={update.bind(this, 'setLineStyle', 'lineStyle')}>
-              <option value='solid'>Heldragen</option>
-              <option value='dash'>Streckad</option>
-              <option value='dot'>Punktad</option>
-            </select>
-          </div>
-        );
-      case 'Circle':
-        return (
-          <div>
-            <h2>Ritmanér cirkel</h2>
-            <label>Ange radie: </label>&nbsp;
-            <input type='text' name='circle-radius' value={this.state.circleRadius} onChange={update.bind(this, 'setCircleRadius', 'circleRadius')} />
-            <div>Linjefärg</div>
-            <ColorPicker
-              model={this.props.model}
-              property='circleLineColor'
-              onChange={this.props.model.setCircleLineColor.bind(this.props.model)}
-            />
-            <div>Fyllnadsfärg</div>
-            <ColorPicker
-              model={this.props.model}
-              property='circleFillColor'
-              onChange={this.props.model.setCircleFillColor.bind(this.props.model)}
-            />
-            <div>Opacitet</div>
-            <select value={this.state.circleFillOpacity} onChange={update.bind(this, 'setCircleFillOpacity', 'circleFillOpacity')}>
-              <option value='0'>0% (genomskinlig)</option>
-              <option value='0.25'>25%</option>
-              <option value='0.5'>50%</option>
-              <option value='0.75'>75%</option>
-              <option value='1'>100% (fylld)</option>
-            </select>
-            <div>Linjetjocklek</div>
-            <select value={this.state.circleLineWidth} onChange={update.bind(this, 'setCircleLineWidth', 'circleLineWidth')}>
-              <option value='1'>Tunn</option>
-              <option value='3'>Normal</option>
-              <option value='5'>Tjock</option>
-              <option value='8'>Tjockare</option>
-            </select>
-            <div>Linjestil</div>
-            <select value={this.state.circleLineStyle} onChange={update.bind(this, 'setCircleLineStyle', 'circleLineStyle')}>
-              <option value='solid'>Heldragen</option>
-              <option value='dash'>Streckad</option>
-              <option value='dot'>Punktad</option>
-            </select>
-          </div>
-        );
-      case 'Polygon':
-        return (
-          <div>
-            <h2>Ritmanér yta</h2>
-            <div>Linjefärg</div>
-            <ColorPicker
-              model={this.props.model}
-              property='polygonLineColor'
-              onChange={this.props.model.setPolygonLineColor.bind(this.props.model)}
-            />
-            <div>Fyllnadsfärg</div>
-            <ColorPicker
-              model={this.props.model}
-              property='polygonFillColor'
-              onChange={this.props.model.setPolygonFillColor.bind(this.props.model)}
-            />
-            <div>Opacitet</div>
-            <select value={this.state.polygonFillOpacity} onChange={update.bind(this, 'setPolygonFillOpacity', 'polygonFillOpacity')}>
-              <option value='0'>0% (genomskinlig)</option>
-              <option value='0.25'>25%</option>
-              <option value='0.5'>50%</option>
-              <option value='0.75'>75%</option>
-              <option value='1'>100% (fylld)</option>
-            </select>
-            <div>Linjetjocklek</div>
-            <select value={this.state.polygonLineWidth} onChange={update.bind(this, 'setPolygonLineWidth', 'polygonLineWidth')}>
-              <option value='1'>Tunn</option>
-              <option value='3'>Normal</option>
-              <option value='5'>Tjock</option>
-              <option value='8'>Tjockare</option>
-            </select>
-            <div>Linjestil</div>
-            <select value={this.state.polygonLineStyle} onChange={update.bind(this, 'setPolygonLineStyle', 'polygonLineStyle')}>
-              <option value='solid'>Heldragen</option>
-              <option value='dash'>Streckad</option>
-              <option value='dot'>Punktad</option>
-            </select>
-          </div>
-        );
-      case 'Box':
-        return (
-          <div>
-            <h2>Ritmanér yta</h2>
-            <div>Linjefärg</div>
-            <ColorPicker
-              model={this.props.model}
-              property='boxLineColor'
-              onChange={this.props.model.setBoxLineColor.bind(this.props.model)}
-            />
-            <div>Fyllnadsfärg</div>
-            <ColorPicker
-              model={this.props.model}
-              property='boxFillColor'
-              onChange={this.props.model.setBoxFillColor.bind(this.props.model)}
-            />
-            <div>Opacitet</div>
-            <select value={this.state.boxFillOpacity} onChange={update.bind(this, 'setBoxFillOpacity', 'boxFillOpacity')}>
-              <option value='0'>0% (genomskinlig)</option>
-              <option value='0.25'>25%</option>
-              <option value='0.5'>50%</option>
-              <option value='0.75'>75%</option>
-              <option value='1'>100% (fylld)</option>
-            </select>
-            <div>Linjetjocklek</div>
-            <select value={this.state.boxLineWidth} onChange={update.bind(this, 'setBoxLineWidth', 'boxLineWidth')}>
-              <option value='1'>Tunn</option>
-              <option value='3'>Normal</option>
-              <option value='5'>Tjock</option>
-              <option value='8'>Tjockare</option>
-            </select>
-            <div>Linjestil</div>
-            <select value={this.state.boxLineStyle} onChange={update.bind(this, 'setBoxLineStyle', 'boxLineStyle')}>
-              <option value='solid'>Heldragen</option>
-              <option value='dash'>Streckad</option>
-              <option value='dot'>Punktad</option>
-            </select>
-          </div>
-        );
+     
       default:
         return <div />;
     }
@@ -557,9 +383,13 @@ var ElevregisterPanelView = {
     }
 
     function showOnMap () {
-      this.props.model.showOnMap();
-    
+      this.props.model.showOnMap(urlID);
+      urlID.length=0;
+      $("#klasser option:selected").prop("selected", false);
+      $('#elevCount').html('Antal elever: '+ sum);
+      elev_count=[];
     }
+
     function abort () {
       this.props.model.set('dialog', false);
       this.refs.textInput.blur();
@@ -598,19 +428,122 @@ var ElevregisterPanelView = {
    * @return {external:ReactElement}
    */
   render: function () {
-    var showLabels = this.state.showLabels ? 'checked' : '',
-      symbology = this.renderSymbology(this.state.symbology),
-      dialog = this.renderDialog(this.state.dialog)
+    //view-source:https://ikarta.kungsbacka.se/fgadmin/fg-ist/elever.html
+    //klasser: Hold down the Ctrl (windows) / Command (Mac) button to select multiple options.
+    var skolData;
+  
+    function getSkolor() {
+			var $select = $('#skolor');
+			$.ajax({
+        //url: 'https://ikarta.kungsbacka.se/API/Elevregister/api/organisation/GR',
+        //url: 'GR.json'
+        url: 'GR.json',
+				dataType:'JSON',
+				success:function(data){
+          
+      
+				skolData = data;
+				//clear the current content of the select
+        $select.html('');
+        
+				$.each(data, function(key, val){       
+					$('#skolor').append('<option id="' + key + '">' + key + '</option>');         	
+          
+          $('#skolor').change( function() {
+            var skola = $("#skolor :selected").text(); 
+            
+            $("#klasser").empty();
+            for (s in skolData) {
+                if(s === skola) {
+                var klasser = skolData[s]
+                for (k in klasser) {
+                  $('<option>').val(klasser[k].klassId).text( klasser[k].klassNamn).appendTo('#klasser');
+                }
+                
+              }
+            };
+          });
+          var j=0;
+          $('#klasser').change( function() {
+            var uniqueNames = [];
+            
+            
+            $('#elevCount').html('');
+            $.each($("#klasser option:selected"), function(){            
+              uniqueNames.push($(this).val());
+          });
+          
+          $.each(uniqueNames, function(i, el){
+              if($.inArray(el, urlID) === -1) urlID.push(el);
+          });  
+          for (var l=0;l < urlID.length;l++) { 
+                
+            var request = $.ajax({
+              //url: 'https://ikarta.kungsbacka.se/API/Elevregister/api/klass/' + urlID[l],
+              url: 'temp/'+ urlID[l] +'.json',
+              success: (data) => {
+                elev_count[l] = data.totalFeatures; 
+                //sum = elev_count.reduce(function(a, b) { return a + b; }, 0);
+                sum += data.totalFeatures;
+                  console.log(data.totalFeatures + ' ' + sum);
+                  
+              }    
+            });
+           
+          };
+          });
+          
+          
+        })
+			},
+				error:function(){
+					//if there is an error append a 'none available' option
+					$select.html('<option id="-1">none available</option>');
+				}
+      });
+      
+      
+		};
+   var dialog = this.renderDialog(this.state.dialog),
+      symbology = this.renderSymbology(this.state.symbology);
 
+    getSkolor();
+    // onClick={this.activateElevregisterTool.bind(this, 'Point')}
     return (
       <Panel title='Elevregister' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
         <div className='elevregister-tools'>
-          <button className='btn btn-primary' onClick={this.showOnMap}>Visa</button>&nbsp;
+           <div>
+          <div className='panel panel-default'>
+              <div className='panel-heading'> Skolor </div>
+              <div className='panel-body'>
+              <select id="skolor"> 
+              <option value='none'> Välj skola</option>     
+                </select>
+              </div>
+            </div><br></br>
+            <div className='panel panel-default'>
+              <div className='panel-heading' > Klasser 
+              </div>
+              <div className='panel-body'>
+              <select id="klasser" multiple="multiple"><option value='none' ></option></select>
+              </div>
+            </div> <label id ="elevCount"></label><br></br>
+            <div>
+            </div>
+          </div>
+         
+          <div className='panel panel-default stilform'>
+              <div className='panel-heading' > 
+            <button id="showID"  className='btn btn-primary' onClick={this.showOnMap}>Visa</button>
+            <button id="clear" className='btn btn-secondary' onClick={this.alertClear}><i className='fa fa-trash fa-0' />Rensa</button>
+            <button id="color" className='btn btn-secondary pull-right'onClick={this.activateElevregisterTool.bind(this, 'Point')} title='Välj stilsättning'><i id="this_icon" className='fa fa-paint-brush'></i></button>
+         
+          </div>
+          </div>
         </div>
-        <div className='panel-body'>
+        <div>
+          {dialog}
           {symbology}
-        </div>
-        <div>{dialog}
           {this.renderAlert()}
         </div>
       </Panel>

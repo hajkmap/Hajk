@@ -67,6 +67,7 @@ var olMap;
  * @property {number} boxFillOpacity - Default: 0.5
  */
 var ElevregisterModelProperties = {
+  antalElever: 0,
   type: 'elevregister',
   panel: 'ElevregisterPanel',
   title: 'Elevregister',
@@ -132,6 +133,7 @@ var ElevregisterModelProperties = {
       })
     })]
 };
+var urlID;
 
 /**
  * Prototype for creating an elevregister model.
@@ -177,13 +179,13 @@ var ElevregisterModel = {
 
     this.set('elevregisterLayer', new ol.layer.Vector({
       source: this.get('source'),
-      queryable: true,
+      queryable: false,
       name: this.get('elevregisterLayerName'),
       style: (feature) => this.getStyle(feature)
     }));
 
     this.set('olMap', olMap);
-    //this.get('olMap').addLayer(this.get('elevregisterLayer'));
+    this.get('olMap').addLayer(this.get('elevregisterLayer'));
     this.set('elevregisterLayer', this.get('elevregisterLayer'));
     if (this.get('icons') !== '') {
       let icon = this.get('icons').split(',')[0];
@@ -191,28 +193,56 @@ var ElevregisterModel = {
     }
     this.createMeasureTooltip();
   },
-
-  showOnMap: function () {
+ 
+  showOnMap1: function (urlID) {
     //https://ikarta.kungsbacka.se/API/Elevregister/api/klass/EG_114d0b1a-837d-48b4-b39c-c1470cb4a75a
     //http://localhost/temp/elever.json
-    var request = $.ajax({
-      url: 'http://localhost/temp/elever-api.json',
-      success: (data) => {
-        var features = new ol.format.GeoJSON().readFeatures(data);
-        this.get('elevregisterLayer').getSource().addFeatures(features);
-        this.get('olMap').addLayer(this.get('elevregisterLayer'));
-        this.set('elevregisterLayer', this.get('elevregisterLayer'));
-        if (this.get('icons') !== '') {
-          let icon = this.get('icons').split(',')[0];
-          console.log(icon);
-          this.set('markerImg', window.location.href + 'assets/icons/' + icon + '.png');
+    //http://localhost/temp/elever-api.json
+    var i = 0;
+    this.get('elevregisterLayer').getSource().clear();
+    for (i;i < urlID.length;i++) {
+      var request = $.ajax({
+        //url: 'https://ikarta.kungsbacka.se/API/Elevregister/api/klass/' + urlID[i],
+        url: 'temp/'+ urlID[i] +'.json',
+        success: (data) => {       
+        
+         
+          var features = new ol.format.GeoJSON().readFeatures(data); 
+          this.get('elevregisterLayer').getSource().addFeatures(features);
+             console.log (data.totalFeatures);
         }
-    
-      }
-    });
+      });
+    }
   },
 
-  showOnMap2: function () {
+showOnMap: function (urlID) {
+  console.log(urlID);
+  this.get('elevregisterLayer').getSource().clear();
+  this.set('antalElever', 0);
+  that = this;
+  for (var i=0; i < urlID.length; i++) {
+    this.getData(urlID[i])  
+  };
+},
+
+getData: function(uid) {
+  return $.ajax({
+      url : 'temp/' + uid + '.json',
+      type: 'GET'
+  })
+  .done(this.handleData);
+},
+
+handleData: function (data /* , textStatus, jqXHR */ ) {
+  var features = new ol.format.GeoJSON().readFeatures(data); 
+  that.get('elevregisterLayer').getSource().addFeatures(features);
+  var ae = that.get('antalElever');
+  ae+= data.totalFeatures;
+  that.set('antalElever', ae);
+  $('#elevCount').html('Antal elever: '+ ae);
+},
+
+/* showOnMap2: function () {
     source = new ol.source.Vector({ wrapX: false });
     //olMap = shell.getMap().getMap();
     this.set('source', source);
@@ -254,7 +284,7 @@ var ElevregisterModel = {
       let icon = this.get('icons').split(',')[0];
       this.set('markerImg', window.location.href + 'assets/icons/' + icon + '.png');
     }
-  },
+  }, */
 
   editOpenDialog: function (event) {
     this.get('olMap').forEachFeatureAtPixel(event.pixel, (feature) => {
@@ -405,7 +435,7 @@ var ElevregisterModel = {
    * @params: {string} type
    * @instance
    */
-  handleElevregisterEnd: function (feature, type) {
+  handleDrawEnd: function (feature, type) {
     if (type === undefined) { return; }
     if (type === 'Text') {
       feature.setStyle(this.get('scetchStyle'));
@@ -424,7 +454,7 @@ var ElevregisterModel = {
    * @param {extern:"ol.geom.GeometryType"} type
    * @instance
    */
-  handleElevregisterStart: function (e, geometryType) {
+  handleDrawStart: function (e, geometryType) {
     var circleRadius = parseFloat(this.get('circleRadius'));
 
     if (!isNaN(circleRadius) && geometryType === 'Circle') {
@@ -555,18 +585,13 @@ var ElevregisterModel = {
     olMap.removeInteraction(this.get('editTool'));
     this.measureTooltip.setPosition(undefined);
 
-    if (type === 'Box') {
-      type = 'Circle';
-      geometryName = 'Box';
-      geometryFunction = ol.interaction.Elevregister.createBox();
-      this.set('circleRadius', undefined);
-    } else {
+    
       geometryName = type;
-    }
+    
 
     geometryType = type !== 'Text' ? type : 'Point';
 
-    elevregisterTool = new ol.interaction.Elevregister({
+    elevregisterTool = new ol.interaction.Draw({
       source: this.get('source'),
       style: this.get('scetchStyle'),
       type: geometryType,
