@@ -20,40 +20,42 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var Panel = require('views/panel');
-var Alert = require('alert');
-var ColorPicker = require('components/colorpicker');
-var urlID = [],  elev_count =[], toggle=0, sum;
+var Panel = require("views/panel");
+var Alert = require("alert");
+var ColorPicker = require("components/colorpicker");
+var urlID = [],
+  elev_count = [],
+  toggle = 0,
+  sum;
 /**
  * @class
  */
 var ElevregisterPanelView = {
-  
   /**
    * Get initial state.
    * @instance
    * @return {object}
    */
-  getInitialState: function () {
+  getInitialState: function() {
     return {
       visible: false,
-      pointSettings: this.props.model.get('pointSettings'),
-      pointRadius: this.props.model.get('pointRadius'),
-      pointSymbol: this.props.model.get('pointSymbol'),
-      fontSize: this.props.model.get('fontSize'),
-      lineWidth: this.props.model.get('lineWidth'),
-      lineStyle: this.props.model.get('lineStyle'),
-      circleLineColor: this.props.model.get('circleLineColor'),
-      circleFillColor: this.props.model.get('circleFillColor'),
-      circleLineStyle: this.props.model.get('circleLineStyle'),
-      circleLineWidth: this.props.model.get('circleLineWidth'),
-      polygonLineWidth: this.props.model.get('polygonLineWidth'),
-      polygonLineStyle: this.props.model.get('polygonLineStyle'),
-      polygonFillOpacity: this.props.model.get('polygonFillOpacity'),
-      boxLineColor: this.props.model.get('boxLineColor'),
-      boxFillColor: this.props.model.get('boxFillColor'),
-      boxLineStyle: this.props.model.get('boxLineStyle'),
-      boxLineWidth: this.props.model.get('boxLineWidth')
+      pointSettings: this.props.model.get("pointSettings"),
+      pointRadius: this.props.model.get("pointRadius"),
+      pointSymbol: this.props.model.get("pointSymbol"),
+      fontSize: this.props.model.get("fontSize"),
+      lineWidth: this.props.model.get("lineWidth"),
+      lineStyle: this.props.model.get("lineStyle"),
+      circleLineColor: this.props.model.get("circleLineColor"),
+      circleFillColor: this.props.model.get("circleFillColor"),
+      circleLineStyle: this.props.model.get("circleLineStyle"),
+      circleLineWidth: this.props.model.get("circleLineWidth"),
+      polygonLineWidth: this.props.model.get("polygonLineWidth"),
+      polygonLineStyle: this.props.model.get("polygonLineStyle"),
+      polygonFillOpacity: this.props.model.get("polygonFillOpacity"),
+      boxLineColor: this.props.model.get("boxLineColor"),
+      boxFillColor: this.props.model.get("boxFillColor"),
+      boxLineStyle: this.props.model.get("boxLineStyle"),
+      boxLineWidth: this.props.model.get("boxLineWidth")
     };
   },
 
@@ -61,18 +63,18 @@ var ElevregisterPanelView = {
    * Triggered when component unmounts.
    * @instance
    */
-  componentWillUnmount: function () {
+  componentWillUnmount: function() {
     this.props.model.abort();
-    this.props.model.off('change:dialog');
+    this.props.model.off("change:dialog");
   },
 
   /**
    * Triggered before the component mounts.
    * @instance
    */
-  componentWillMount: function () {
+  componentWillMount: function() {
     this.setState({
-      showLabels: this.props.model.get('showLabels')
+      showLabels: this.props.model.get("showLabels")
     });
   },
 
@@ -80,10 +82,10 @@ var ElevregisterPanelView = {
    * Triggered when the component is successfully mounted into the DOM.
    * @instance
    */
-  componentDidMount: function () {
-    this.props.model.on('change:dialog', () => {
+  componentDidMount: function() {
+    this.props.model.on("change:dialog", () => {
       this.setState({
-        dialog: this.props.model.get('dialog')
+        dialog: this.props.model.get("dialog")
       });
       this.refs.textInput.focus();
     });
@@ -94,7 +96,7 @@ var ElevregisterPanelView = {
    * @instance
    * @return {AlertView}
    */
-  renderAlert: function () {
+  renderAlert: function() {
     var options = {
       visible: this.state.alert,
       message: this.state.alertMessage,
@@ -104,7 +106,7 @@ var ElevregisterPanelView = {
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ''
+          alertMessage: ""
         });
       },
       denyAction: () => {
@@ -112,13 +114,13 @@ var ElevregisterPanelView = {
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ''
+          alertMessage: ""
         });
       },
       onClick: () => {
         this.setState({
           alert: false,
-          alertMessage: ''
+          alertMessage: ""
         });
       }
     };
@@ -134,7 +136,7 @@ var ElevregisterPanelView = {
    * Remove all drawings from map.
    * @instance
    */
-  clear: function () {
+  clear: function() {
     this.props.model.clear();
   },
 
@@ -142,16 +144,15 @@ var ElevregisterPanelView = {
    * Confirm before clear.
    * @instance
    */
-  alertClear: function () {
-   
-     this.setState({
+  alertClear: function() {
+    this.setState({
       alert: true,
-      alertMessage: 'Vill du verkligen rensa allt?',
+      alertMessage: "Vill du verkligen rensa allt?",
       confirm: true,
-      confirmAction: () => { 
-          this.clear();   
-          $('#elevCount').html('');
-          elev_count=[];  
+      confirmAction: () => {
+        this.clear();
+        $("#elevCount").html("");
+        elev_count = [];
       },
       denyAction: () => {
         this.setState({ alert: false });
@@ -159,38 +160,37 @@ var ElevregisterPanelView = {
     });
   },
 
+  schoolsSelected: function() {
+    console.log("schoolsSelected");
+  },
 
-  showOnMap: function(){
+  showOnMap: function() {
+    console.log("showOnMap function 1");
     this.props.model.showOnMap(urlID);
 
-    urlID.length=0;
-    //$("#klasser option:selected").prop("selected", false);
-    $('#elevCount').html('Antal elever: '+ sum);
-    elev_count=[];
+    // urlID.length = 0;
+    // //$("#klasser option:selected").prop("selected", false);
+    // $("#elevCount").html("Antal elever: " + sum);
+    // elev_count = [];
   },
   /**
    * Abort any operation and deselect any tool.
    * @instance
    */
-  abort: function () {
+  abort: function() {
     this.props.model.abort();
-  
-    $('#abort').hide();
+
+    $("#abort").hide();
     this.setState({
-      symbology: ''
+      symbology: ""
     });
-   
-
   },
-
-  
-
 
   /**
    * Handle change event of the show labels checkbox.
    * @instance
    */
-  toggleLabels: function () {
+  toggleLabels: function() {
     this.setState({
       showLabels: this.props.model.toggleLabels()
     });
@@ -200,13 +200,15 @@ var ElevregisterPanelView = {
    * Activate the removal tool and update visuals.
    * @instance
    */
-  activateRemovalTool: function () {
+  activateRemovalTool: function() {
     this.props.model.activateRemovalTool();
-    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete, #Box').removeClass('selected');
-    $('#delete').addClass('selected');
-    $('#abort').show();
+    $(
+      "#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete, #Box"
+    ).removeClass("selected");
+    $("#delete").addClass("selected");
+    $("#abort").show();
     this.setState({
-      symbology: ''
+      symbology: ""
     });
   },
 
@@ -214,13 +216,15 @@ var ElevregisterPanelView = {
    * Activate move tool and update visuals.
    * @instance
    */
-  activateMoveTool: function () {
+  activateMoveTool: function() {
     this.props.model.activateMoveTool();
-    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete, #Box').removeClass('selected');
-    $('#move').addClass('selected');
-    $('#abort').show();
+    $(
+      "#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete, #Box"
+    ).removeClass("selected");
+    $("#move").addClass("selected");
+    $("#abort").show();
     this.setState({
-      symbology: ''
+      symbology: ""
     });
   },
 
@@ -228,13 +232,15 @@ var ElevregisterPanelView = {
    * Activate move tool and update visuals.
    * @instance
    */
-  activateEditTool: function () {
+  activateEditTool: function() {
     this.props.model.activateEditTool();
-    $('#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete, #Box').removeClass('selected');
-    $('#edit').addClass('selected');
-    $('#abort').show();
+    $(
+      "#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete, #Box"
+    ).removeClass("selected");
+    $("#edit").addClass("selected");
+    $("#abort").show();
     this.setState({
-      symbology: ''
+      symbology: ""
     });
   },
 
@@ -243,21 +249,24 @@ var ElevregisterPanelView = {
    * @instance
    * @param {string} type
    */
-  activateElevregisterTool: function (type) {
-    if (toggle %2 ==0){
-      $('#color').attr('title', 'Dölj stilsättning');
-      $('#this_icon').removeClass('fa-paint-brush').addClass('fa-angle-up');
+  activateElevregisterTool: function(type) {
+    if (toggle % 2 == 0) {
+      $("#color").attr("title", "Dölj stilsättning");
+      $("#this_icon")
+        .removeClass("fa-paint-brush")
+        .addClass("fa-angle-up");
       this.setState({
         symbology: type
-      }); 
-       toggle++;
+      });
+      toggle++;
+    } else {
+      $("#this_icon")
+        .removeClass("fa-angle-up")
+        .addClass("fa-paint-brush");
+      $("#color").attr("title", "Välj stilsättning");
+      this.abort();
+      toggle++;
     }
-    else{
-      $('#this_icon').removeClass('fa-angle-up').addClass('fa-paint-brush');
-      $('#color').attr('title', 'Välj stilsättning');
-      this.abort();  toggle++;
-    }
-     
   },
 
   /**
@@ -265,8 +274,8 @@ var ElevregisterPanelView = {
    * @instance
    * @param {object} e
    */
-  setMarkerImg: function (e) {
-    this.props.model.set('markerImg', e.target.src);
+  setMarkerImg: function(e) {
+    this.props.model.set("markerImg", e.target.src);
     this.forceUpdate();
   },
 
@@ -276,92 +285,86 @@ var ElevregisterPanelView = {
    * @param {string} type
    * @return {external:ReactElement} component
    */
-  renderSymbology: function (type) {
-   
-    function update (func, state_prop, e) {
+  renderSymbology: function(type) {
+    function update(func, state_prop, e) {
       var value = e.target.value,
         state = {};
 
-      if (e.target.type === 'checkbox') {
+      if (e.target.type === "checkbox") {
         value = e.target.checked;
       }
 
-      if (typeof value === 'string') {
+      if (typeof value === "string") {
         value = !isNaN(parseFloat(value))
           ? parseFloat(value)
           : !isNaN(parseInt(value))
-            ? parseInt(value) : value;
+            ? parseInt(value)
+            : value;
       }
-    
+
       state[state_prop] = value;
       this.setState(state);
       this.props.model[func].call(this.props.model, value);
     }
 
-    function hasClass (icon) {
-      return this.props.model.get('markerImg') === window.location.href + `assets/icons/${icon}.png`
-        ? 'selected'
-        : '';
+    function hasClass(icon) {
+      return this.props.model.get("markerImg") ===
+        window.location.href + `assets/icons/${icon}.png`
+        ? "selected"
+        : "";
     }
 
-    function renderIcons () {
-      var icons = this.props.model.get('icons').split(',');
+    function renderIcons() {
+      var icons = this.props.model.get("icons").split(",");
 
-      return (
-        icons.map((icon, i) => {
-          icon = icon.trim();
-          if (icon === 'br') {
-            return (<br key={i} />);
-          } else {
-            var iconSrc = `assets/icons/${icon}.png`;
-            return (
-              <div key={i} className={hasClass.call(this, icon)}>
-                <img onClick={this.setMarkerImg} src={iconSrc} />
-              </div>
-            );
-          }
-        })
-      );
-    }
-
-    function renderPointSettings () {
-      switch (this.state.pointSettings) {
-        case 'point':
+      return icons.map((icon, i) => {
+        icon = icon.trim();
+        if (icon === "br") {
+          return <br key={i} />;
+        } else {
+          var iconSrc = `assets/icons/${icon}.png`;
           return (
-
-            <div className='panel panel-default colorPicker'>
-              
-              <div className='panel-body'>
-             <ColorPicker
-                model={this.props.model}
-                property='pointColor'
-                onChange={this.props.model.setPointColor.bind(this.props.model)}
-              />
-              <div>Välj storlek</div>
-              <select value={this.state.pointRadius} onChange={update.bind(this, 'setPointRadius', 'pointRadius')}>
-                <option value='4'>Liten</option>
-                <option value='7'>Normal</option>
-                <option value='14'>Stor</option>
-                <option value='20'>Större</option>
-              </select>
-               </div>
+            <div key={i} className={hasClass.call(this, icon)}>
+              <img onClick={this.setMarkerImg} src={iconSrc} />
             </div>
-
           );
-        
+        }
+      });
+    }
+
+    function renderPointSettings() {
+      switch (this.state.pointSettings) {
+        case "point":
+          return (
+            <div className="panel panel-default colorPicker">
+              <div className="panel-body">
+                <ColorPicker
+                  model={this.props.model}
+                  property="pointColor"
+                  onChange={this.props.model.setPointColor.bind(
+                    this.props.model
+                  )}
+                />
+                <div>Välj storlek</div>
+                <select
+                  value={this.state.pointRadius}
+                  onChange={update.bind(this, "setPointRadius", "pointRadius")}
+                >
+                  <option value="4">Liten</option>
+                  <option value="7">Normal</option>
+                  <option value="14">Stor</option>
+                  <option value="20">Större</option>
+                </select>
+              </div>
+            </div>
+          );
       }
     }
 
     switch (type) {
-      
-      case 'Point':
-        return (
+      case "Point":
+        return <div>{renderPointSettings.call(this)}</div>;
 
-          <div>            
-            {renderPointSettings.call(this)}
-          </div>
-        );
-     
       default:
         return <div />;
     }
@@ -373,48 +376,55 @@ var ElevregisterPanelView = {
    * @param {boolean} visible
    * @return {external:ReactElement} component
    */
-  renderDialog: function (visible) {
+  renderDialog: function(visible) {
     if (!visible) return null;
 
-    function enter (e) {
+    function enter(e) {
       if (e.keyCode == 13) {
         update.call(this);
       }
     }
 
-    function showOnMap () {
-      this.props.model.showOnMap(urlID);
-      urlID.length=0;
-      $("#klasser option:selected").prop("selected", false);
-      $('#elevCount').html('Antal elever: '+ sum);
-      elev_count=[];
-    }
-
-    function abort () {
-      this.props.model.set('dialog', false);
+    function abort() {
+      this.props.model.set("dialog", false);
       this.refs.textInput.blur();
       this.props.model.removeEditFeature();
     }
 
-    function update () {
+    function update() {
       this.refs.textInput.blur();
-      this.props.model.set('dialog', false);
+      this.props.model.set("dialog", false);
       this.props.model.setPointText(this.refs.textInput.value);
     }
 
     return (
-      <div className='modal'>
-        <div className='modal-dialog'>
-          <div className='modal-content'>
-            <div className='modal-header'>
-              <h4 className='modal-title'>Ange text</h4>
+      <div className="modal">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h4 className="modal-title">Ange text</h4>
             </div>
-            <div className='modal-body'>
-              <input ref='textInput' onKeyDown={enter.bind(this)} />
+            <div className="modal-body">
+              <input ref="textInput" onKeyDown={enter.bind(this)} />
             </div>
-            <div className='modal-footer'>
-              <button type='button' className='btn btn-default' data-dismiss='modal' onClick={update.bind(this)}>Spara</button>&nbsp;
-              <button type='button' className='btn btn-default' data-dismiss='modal' onClick={abort.bind(this)}>Avbryt</button>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-default"
+                data-dismiss="modal"
+                onClick={update.bind(this)}
+              >
+                Spara
+              </button>
+              &nbsp;
+              <button
+                type="button"
+                className="btn btn-default"
+                data-dismiss="modal"
+                onClick={abort.bind(this)}
+              >
+                Avbryt
+              </button>
             </div>
           </div>
         </div>
@@ -427,118 +437,142 @@ var ElevregisterPanelView = {
    * @instance
    * @return {external:ReactElement}
    */
-  render: function () {
+  render: function() {
     //view-source:https://ikarta.kungsbacka.se/fgadmin/fg-ist/elever.html
     //klasser: Hold down the Ctrl (windows) / Command (Mac) button to select multiple options.
     var skolData;
-  
+
     function getSkolor() {
-			var $select = $('#skolor');
-			$.ajax({
+      var $select = $("#skolor");
+      $.ajax({
         //url: 'https://ikarta.kungsbacka.se/API/Elevregister/api/organisation/GR',
         //url: 'GR.json'
-        url: 'GR.json',
-				dataType:'JSON',
-				success:function(data){
-          
-      
-				skolData = data;
-				//clear the current content of the select
-        $select.html('');
-        
-				$.each(data, function(key, val){       
-					$('#skolor').append('<option id="' + key + '">' + key + '</option>');         	
-          
-          $('#skolor').change( function() {
-            var skola = $("#skolor :selected").text(); 
-            
-            $("#klasser").empty();
-            for (s in skolData) {
-                if(s === skola) {
-                var klasser = skolData[s]
-                for (k in klasser) {
-                  $('<option>').val(klasser[k].klassId).text( klasser[k].klassNamn).appendTo('#klasser');
+        url: "GR.json",
+        dataType: "JSON",
+        success: function(data) {
+          skolData = data;
+          //clear the current content of the select
+          $select.html("");
+
+          $.each(data, function(key, val) {
+            $("#skolor").append(
+              '<option id="' + key + '">' + key + "</option>"
+            );
+
+            $("#skolor").change(function() {
+              var skola = $("#skolor :selected").text();
+
+              $("#klasser").empty();
+              for (s in skolData) {
+                if (s === skola) {
+                  var klasser = skolData[s];
+                  for (k in klasser) {
+                    $("<option>")
+                      .val(klasser[k].klassId)
+                      .text(klasser[k].klassNamn)
+                      .appendTo("#klasser");
+                  }
                 }
-                
               }
-            };
-          });
-          var j=0;
-          $('#klasser').change( function() {
-            var uniqueNames = [];
-            
-            
-            $('#elevCount').html('');
-            $.each($("#klasser option:selected"), function(){            
-              uniqueNames.push($(this).val());
-          });
-          
-          $.each(uniqueNames, function(i, el){
-              if($.inArray(el, urlID) === -1) urlID.push(el);
-          });  
-          for (var l=0;l < urlID.length;l++) { 
-                
-            var request = $.ajax({
-              //url: 'https://ikarta.kungsbacka.se/API/Elevregister/api/klass/' + urlID[l],
-              url: 'temp/'+ urlID[l] +'.json',
-              success: (data) => {
-                elev_count[l] = data.totalFeatures; 
-                //sum = elev_count.reduce(function(a, b) { return a + b; }, 0);
-                sum += data.totalFeatures;
-                  console.log(data.totalFeatures + ' ' + sum);
-                  
-              }    
             });
-           
-          };
+            var j = 0;
+            $("#klasser").change(function() {
+              var uniqueNames = [];
+
+              $("#elevCount").html("");
+              $.each($("#klasser option:selected"), function() {
+                console.log($(this).val());
+                uniqueNames.push($(this).val());
+              });
+
+              $.each(uniqueNames, function(i, el) {
+                console.log("el:" + el);
+                if ($.inArray(el, urlID) === -1) urlID.push(el);
+              });
+              for (var l = 0; l < urlID.length; l++) {
+                var request = $.ajax({
+                  //url: 'https://ikarta.kungsbacka.se/API/Elevregister/api/klass/' + urlID[l],
+                  url: "temp/" + urlID[l] + ".json",
+                  success: data => {
+                    elev_count[l] = data.totalFeatures;
+                    //sum = elev_count.reduce(function(a, b) { return a + b; }, 0);
+                    sum += data.totalFeatures;
+                    console.log(data.totalFeatures + " " + sum);
+                  }
+                });
+              }
+            });
           });
-          
-          
-        })
-			},
-				error:function(){
-					//if there is an error append a 'none available' option
-					$select.html('<option id="-1">none available</option>');
-				}
+        },
+        error: function() {
+          //if there is an error append a 'none available' option
+          $select.html('<option id="-1">none available</option>');
+        }
       });
-      
-      
-		};
-   var dialog = this.renderDialog(this.state.dialog),
+    }
+    var dialog = this.renderDialog(this.state.dialog),
       symbology = this.renderSymbology(this.state.symbology);
 
     getSkolor();
     // onClick={this.activateElevregisterTool.bind(this, 'Point')}
     return (
-      <Panel title='Elevregister' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
-        <div className='elevregister-tools'>
-           <div>
-          <div className='panel panel-default'>
-              <div className='panel-heading'> Skolor </div>
-              <div className='panel-body'>
-              <select id="skolor"> 
-              <option value='none'> Välj skola</option>     
+      <Panel
+        title="Elevregister"
+        onCloseClicked={this.props.onCloseClicked}
+        onUnmountClicked={this.props.onUnmountClicked}
+        minimized={this.props.minimized}
+        instruction={atob(this.props.model.get("instruction"))}
+      >
+        <div className="elevregister-tools">
+          <div>
+            <div className="panel panel-default">
+              <div className="panel-heading"> Skolor </div>
+              <div className="panel-body">
+                <select id="skolor">
+                  <option value="none"> Välj skola</option>
                 </select>
               </div>
-            </div><br></br>
-            <div className='panel panel-default'>
-              <div className='panel-heading' > Klasser 
-              </div>
-              <div className='panel-body'>
-              <select id="klasser" multiple="multiple"><option value='none' ></option></select>
-              </div>
-            </div> <label id ="elevCount"></label><br></br>
-            <div>
             </div>
+            <br />
+            <div className="panel panel-default">
+              <div className="panel-heading"> Klasser</div>
+              <div className="panel-body">
+                <select id="klasser" multiple="multiple">
+                  <option value="none" />
+                </select>
+              </div>
+            </div>{" "}
+            <label id="elevCount" />
+            <br />
+            <div />
           </div>
-         
-          <div className='panel panel-default stilform'>
-              <div className='panel-heading' > 
-            <button id="showID"  className='btn btn-primary' onClick={this.showOnMap}>Visa</button>
-            <button id="clear" className='btn btn-secondary' onClick={this.alertClear}><i className='fa fa-trash fa-0' />Rensa</button>
-            <button id="color" className='btn btn-secondary pull-right'onClick={this.activateElevregisterTool.bind(this, 'Point')} title='Välj stilsättning'><i id="this_icon" className='fa fa-paint-brush'></i></button>
-         
-          </div>
+
+          <div className="panel panel-default stilform">
+            <div className="panel-heading">
+              <button
+                id="showID"
+                className="btn btn-primary"
+                onClick={this.showOnMap}
+              >
+                Visa
+              </button>
+              <button
+                id="clear"
+                className="btn btn-secondary"
+                onClick={this.alertClear}
+              >
+                <i className="fa fa-trash fa-0" />
+                Rensa
+              </button>
+              <button
+                id="color"
+                className="btn btn-secondary pull-right"
+                onClick={this.activateElevregisterTool.bind(this, "Point")}
+                title="Välj stilsättning"
+              >
+                <i id="this_icon" className="fa fa-paint-brush" />
+              </button>
+            </div>
           </div>
         </div>
         <div>
@@ -547,7 +581,6 @@ var ElevregisterPanelView = {
           {this.renderAlert()}
         </div>
       </Panel>
-
     );
   }
 };
