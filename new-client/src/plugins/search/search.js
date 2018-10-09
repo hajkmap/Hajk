@@ -13,7 +13,7 @@ const styles = theme => ({
     [theme.breakpoints.down("xs")]: {
       width: "100%",
       position: "relative",
-      marginLeft: theme.spacing.unit,
+      marginLeft: theme.spacing.unit
     }
   }
 });

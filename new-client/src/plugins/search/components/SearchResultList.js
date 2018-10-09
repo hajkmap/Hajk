@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import SearchResultGroup from "./SearchResultGroup.js";
-import Badge from '@material-ui/core/Badge';
-import Typography from '@material-ui/core/Typography';
+import Badge from "@material-ui/core/Badge";
+import Typography from "@material-ui/core/Typography";
 
 const styles = theme => {
   return {
@@ -27,8 +27,7 @@ const styles = theme => {
         maxHeight: "inherit"
       }
     },
-    badge: {
-    },
+    badge: {},
     heading: {
       padding: 0,
       paddingRight: "14px",
@@ -39,13 +38,11 @@ const styles = theme => {
     header: {
       padding: "10px 0"
     }
-
-  }
+  };
 };
 
 class SearchResultList extends Component {
-  state = {
-  };
+  state = {};
 
   constructor(props) {
     super(props);
@@ -75,11 +72,17 @@ class SearchResultList extends Component {
                   badgeContent={featureType.features.length}
                   classes={{
                     badge: classes.badge
-                  }}>
-                  <Typography className={classes.heading}>{featureType.source.caption}</Typography>
+                  }}
+                >
+                  <Typography className={classes.heading}>
+                    {featureType.source.caption}
+                  </Typography>
                 </Badge>
               </div>
-              <SearchResultGroup featureType={featureType} model={this.props.model}></SearchResultGroup>
+              <SearchResultGroup
+                featureType={featureType}
+                model={this.props.model}
+              />
             </div>
           );
         })}

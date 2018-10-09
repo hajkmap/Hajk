@@ -1,7 +1,7 @@
 import { WFS } from "ol/format";
 import IsLike from "ol/format/filter/IsLike";
-import Intersects from 'ol/format/filter/Intersects';
-import { arraySort } from "./../../utils/ArraySort.js"
+import Intersects from "ol/format/filter/Intersects";
+import { arraySort } from "./../../utils/ArraySort.js";
 
 class SearchModel {
   constructor(settings, map) {
@@ -27,8 +27,8 @@ class SearchModel {
       outputFormat: "JSON", //source.outputFormat,
       geometryName: source.geometryField,
       filter: new Intersects(
-        "geom",  // geometryName
-        geom,    // geometry
+        "geom", // geometryName
+        geom, // geometry
         projCode // projCode
       )
     };
@@ -66,9 +66,9 @@ class SearchModel {
       filter: new IsLike(
         source.searchFields[0],
         searchInput + "*",
-        "*",  // wild card
-        ".",  // single char
-        "!",  // escape char
+        "*", // wild card
+        ".", // single char
+        "!", // escape char
         false // match case
       )
     };

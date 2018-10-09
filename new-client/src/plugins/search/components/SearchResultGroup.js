@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
-import GeoJSON from 'ol/format/GeoJSON';
+import GeoJSON from "ol/format/GeoJSON";
 
 const styles = theme => ({
   item: {
-    userSelect: 'none',
-    cursor: 'pointer'
+    userSelect: "none",
+    cursor: "pointer"
   }
 });
 
@@ -14,8 +14,8 @@ class SearchResultGroup extends Component {
     expanded: false
   };
 
-  itemClick = (feature) => (e) =>  {
-    var olFeature = (new GeoJSON()).readFeatures(feature)[0];
+  itemClick = feature => e => {
+    var olFeature = new GeoJSON().readFeatures(feature)[0];
     this.props.model.searchWithinArea({
       feature: olFeature
     });
@@ -28,21 +28,16 @@ class SearchResultGroup extends Component {
   componentWillMount() {}
 
   createItem(feature, displayField, i) {
-    const {classes} = this.props;
+    const { classes } = this.props;
     return (
-      <div
-        onClick={this.itemClick(feature)}
-        key={i}
-        className={classes.item}>
+      <div onClick={this.itemClick(feature)} key={i} className={classes.item}>
         {feature.properties[displayField]}
       </div>
     );
   }
 
-
   render() {
-
-    const {featureType} = this.props;
+    const { featureType } = this.props;
     var i = 0;
     var nodes = [];
 
@@ -59,11 +54,20 @@ class SearchResultGroup extends Component {
     }
 
     if (featureType.features.length > 10) {
-      nodes.push(<div key="toggler" onClick={() => {
-        this.setState({
-          expanded: !this.state.expanded
-        });
-      }}><a href="javascript:;">{this.state.expanded ? "Dölj" : "Visa fler..."}</a></div>);
+      nodes.push(
+        <div
+          key="toggler"
+          onClick={() => {
+            this.setState({
+              expanded: !this.state.expanded
+            });
+          }}
+        >
+          <a href="javascript:;">
+            {this.state.expanded ? "Dölj" : "Visa fler..."}
+          </a>
+        </div>
+      );
     }
 
     for (; i < featureType.features.length; i++) {
