@@ -25,9 +25,9 @@ const styles = theme => ({
     backgroundColor: "white",
     borderRadius: "20px",
     padding: "20px",
-    margin: "20%",
+    margin: "5% 20%",
     [theme.breakpoints.down("xs")]: {
-      margin: "20px"
+      margin: "5%"
     }
   }
 });

@@ -1,22 +1,51 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
+import SearchResultGroup from "./SearchResultGroup.js";
+import Badge from '@material-ui/core/Badge';
+import Typography from '@material-ui/core/Typography';
 
-const styles = theme => ({
-  searchResult: {
-    position: "absolute",
-    background: "white",
-    color: "black",
-    width: "100%",
-    maxHeight: "500px",
-    overflow: "auto",
-    padding: "15px",
-    border: "1px solid",
-    borderTop: "none"
+const styles = theme => {
+  return {
+    searchResult: {
+      position: "absolute",
+      background: "white",
+      color: "black",
+      width: "100%",
+      maxHeight: "500px",
+      overflow: "auto",
+      padding: "15px",
+      border: "1px solid",
+      borderTop: "none",
+      top: "49px",
+      [theme.breakpoints.down("xs")]: {
+        top: "56px",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        position: "fixed",
+        border: "none",
+        maxHeight: "inherit"
+      }
+    },
+    badge: {
+    },
+    heading: {
+      padding: 0,
+      paddingRight: "14px",
+      fontSize: "14pt",
+      fontWeight: "500",
+      marginBottom: "5px"
+    },
+    header: {
+      padding: "10px 0"
+    }
+
   }
-});
+};
 
 class SearchResultList extends Component {
-  state = {};
+  state = {
+  };
 
   constructor(props) {
     super(props);
@@ -39,14 +68,18 @@ class SearchResultList extends Component {
           if (featureType.features.length === 0) return null;
           return (
             <div key={i}>
-              <h3>{featureType.source.caption}</h3>
-              <div>
-                {featureType.features.map((feature, j) => (
-                  <div key={j}>
-                    {feature.properties[featureType.source.displayFields[0]]}
-                  </div>
-                ))}
+              <div className={classes.header}>
+                <Badge
+                  color="primary"
+                  className={classes.badge}
+                  badgeContent={featureType.features.length}
+                  classes={{
+                    badge: classes.badge
+                  }}>
+                  <Typography className={classes.heading}>{featureType.source.caption}</Typography>
+                </Badge>
               </div>
+              <SearchResultGroup featureType={featureType} model={this.props.model}></SearchResultGroup>
             </div>
           );
         })}

@@ -6,6 +6,7 @@ import SearchIcon from "@material-ui/icons/Search";
 
 const styles = theme => ({
   search: {
+    marginLeft: "10px",
     borderRadius: theme.shape.borderRadius,
     backgroundColor: fade(theme.palette.common.white, 0.15),
     "&:hover": {
@@ -13,7 +14,7 @@ const styles = theme => ({
     }
   },
   searchIcon: {
-    width: theme.spacing.unit * 9,
+    width: theme.spacing.unit * 4,
     height: "100%",
     position: "absolute",
     pointerEvents: "none",
@@ -29,7 +30,7 @@ const styles = theme => ({
     paddingTop: theme.spacing.unit,
     paddingRight: theme.spacing.unit,
     paddingBottom: theme.spacing.unit,
-    paddingLeft: theme.spacing.unit * 10,
+    paddingLeft: theme.spacing.unit * 5,
     transition: theme.transitions.create("width"),
     left: "100%",
     [theme.breakpoints.up("sm")]: {
@@ -56,7 +57,7 @@ class SearchBar extends Component {
               onComplete(data);
             });
           }}
-          placeholder="Sök…"
+          placeholder="Sök..."
           disableUnderline
           classes={{
             root: classes.inputRoot,
