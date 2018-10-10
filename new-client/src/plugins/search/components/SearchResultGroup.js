@@ -59,7 +59,9 @@ class SearchResultGroup extends Component {
             });
           }}
         >
-          <a href="#hej">{this.state.expanded ? "Dölj" : "Visa fler..."}</a>
+          <a href="#somewhere">
+            {this.state.expanded ? "Dölj" : "Visa fler..."}
+          </a>
         </div>
       );
     }

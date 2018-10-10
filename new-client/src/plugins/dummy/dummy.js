@@ -1,21 +1,29 @@
-import React, { Component } from "react";
+// Generic imports – all plugins need these
+import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
-import { Button } from "@material-ui/core";
-import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
-//import EditIcon from "@material-ui/icons/Edit";
-import TouchAppIcon from "@material-ui/icons/TouchApp";
 
-import Panel from "../../components/Panel.js";
+// The following imports can be changed, depending on desired appearance of the plugin.
+// If you want your plugin to be renderable in Toolbar and as Floating Action Button, you
+// need both the List* and Button imports.
+// Don't forget to change the icon though!
+import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+import { Button } from "@material-ui/core";
+import BugReportIcon from "@material-ui/icons/BugReport";
+
+// Finally there are some plugin-specific imports. Most plugins will need Model, View and Observer.
+// Panel is optional – you could use a Dialog or something else. This Dummy uses a Panel as an
+// example though.
 import DummyView from "./DummyView";
 import DummyModel from "./DummyModel";
 import Observer from "react-event-observer";
+import Panel from "../../components/Panel.js";
 
 const styles = theme => {
   return {};
 };
 
-class Dummy extends Component {
+class Dummy extends React.Component {
   // In native ES6 class we can set state like this, outside the constructor
   state = {
     panelOpen: false
@@ -42,14 +50,17 @@ class Dummy extends Component {
   constructor(spec) {
     super(spec);
     // Important, part of API. Must be a string. Could be fetched from config.
-    this.text = "Redigera";
+    this.text = "Dummy plugin header";
     this.app = spec.app;
 
     // Optionally setup an observer to allow sending messages between here and model/view
     this.observer = Observer();
     // Example on how to make observer listen for "myEvent" event sent from elsewhere
     this.observer.subscribe("myEvent", message => {
-      console.log(message);
+      console.log(
+        "myEvent in Dummy plugin fired with following message:",
+        message
+      );
     });
 
     // Initiate a model. Although optional, will probably be used for all except the most simple plugins.
@@ -86,6 +97,7 @@ class Dummy extends Component {
         position="left"
         open={this.state.panelOpen}
       >
+        {/* Note that normally you don't need to give View access to BOTH observer and model – one of those is sufficient */}
         <DummyView
           app={this.app}
           map={this.map}
@@ -113,11 +125,11 @@ class Dummy extends Component {
         <Button
           variant="fab"
           color="default"
-          aria-label="Editeringsverktyg"
+          aria-label="Dummy plugin"
           className={classes.button}
           onClick={this.onClick}
         >
-          <TouchAppIcon />
+          <EditIcon />
         </Button>
         {this.renderPanel()}
       </div>
@@ -135,7 +147,7 @@ class Dummy extends Component {
           onClick={this.onClick}
         >
           <ListItemIcon>
-            <TouchAppIcon />
+            <BugReportIcon />
           </ListItemIcon>
           <ListItemText primary={this.text} />
         </ListItem>

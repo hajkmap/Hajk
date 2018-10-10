@@ -1,7 +1,9 @@
-import React, { Component } from "react";
+import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 import { Button } from "@material-ui/core";
+
+import Button from "@material-ui/core/Button";
 
 const styles = theme => ({});
 
@@ -9,7 +11,7 @@ class DummyView extends Component {
   state = {};
 
   getText() {
-    return "Editera";
+    return "DummyView";
   }
 
   buttonClick = () => {
