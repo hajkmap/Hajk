@@ -21,10 +21,6 @@ class SearchResultGroup extends Component {
     });
   };
 
-  constructor(props) {
-    super(props);
-  }
-
   componentWillMount() {}
 
   createItem(feature, displayField, i) {
@@ -63,7 +59,7 @@ class SearchResultGroup extends Component {
             });
           }}
         >
-          <a href="javascript:;">
+          <a href="#somewhere">
             {this.state.expanded ? "Dölj" : "Visa fler..."}
           </a>
         </div>

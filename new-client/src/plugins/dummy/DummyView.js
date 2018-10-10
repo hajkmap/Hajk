@@ -22,7 +22,7 @@ class DummyView extends React.Component {
   render() {
     const { classes } = this.props;
     return (
-      <div>
+      <div className={classes.root}>
         <Button
           variant="contained"
           color="primary"
