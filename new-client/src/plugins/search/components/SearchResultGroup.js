@@ -34,51 +34,13 @@ class SearchResultGroup extends Component {
 
   render() {
     const { featureType } = this.props;
-    var i = 0;
-    var nodes = [];
-
-    for (; i < 10; i++) {
-      if (featureType.features[i]) {
-        nodes.push(
-          this.createItem(
-            featureType.features[i],
-            featureType.source.displayFields[0],
-            i
-          )
-        );
-      }
-    }
-
-    if (featureType.features.length > 10) {
-      nodes.push(
-        <div
-          key="toggler"
-          onClick={() => {
-            this.setState({
-              expanded: !this.state.expanded
-            });
-          }}
-        >
-          <a href="#somewhere">
-            {this.state.expanded ? "Dölj" : "Visa fler..."}
-          </a>
-        </div>
-      );
-    }
-
-    for (; i < featureType.features.length; i++) {
-      if (this.state.expanded && featureType.features[i]) {
-        nodes.push(
-          this.createItem(
-            featureType.features[i],
-            featureType.source.displayFields[0],
-            i
-          )
-        );
-      }
-    }
-
-    return nodes;
+    return featureType.features.map((feature, i) =>
+      this.createItem(
+        featureType.features[i],
+        featureType.source.displayFields[0],
+        i
+      )
+    );
   }
 }
 

@@ -129,7 +129,7 @@ class Dummy extends React.Component {
           className={classes.button}
           onClick={this.onClick}
         >
-          <EditIcon />
+          <BugReportIcon />
         </Button>
         {this.renderPanel()}
       </div>
