@@ -1,23 +1,37 @@
-import React, { Component } from "react";
+import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 
+import Button from "@material-ui/core/Button";
+
 const styles = theme => ({});
 
-class DummyView extends Component {
-  constructor(props) {
-    super(props);
-    console.log("EditView constructor()", this);
-  }
+class DummyView extends React.Component {
+  // constructor(props) {
+  //   super(props);
+  // }
 
   getText() {
-    return "Editera";
+    return "DummyView";
   }
 
+  handleOnClick = e => {
+    alert("Hello from Dummy Plugin");
+  };
+
   render() {
-    console.log("Will render EditView");
     const { classes } = this.props;
-    return <div className="tool-panel-content">Verktyg</div>;
+    return (
+      <div>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={this.handleOnClick}
+        >
+          Hello World
+        </Button>
+      </div>
+    );
   }
 }
 
