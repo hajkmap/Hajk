@@ -8,6 +8,7 @@
     "collector",
     "simple_layerswitcher",
     "suggest",
-    "search"
+    "search",
+    "dummy"
   ]
 }

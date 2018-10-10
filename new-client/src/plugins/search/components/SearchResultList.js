@@ -44,10 +44,6 @@ const styles = theme => {
 class SearchResultList extends Component {
   state = {};
 
-  constructor(props) {
-    super(props);
-  }
-
   componentWillMount() {}
 
   render() {

@@ -11,7 +11,7 @@ export function arraySort(options) {
   function num(str) {
     var re = /\d+/,
       n = re.exec(str);
-    return n !== null ? parseInt(n) : -1;
+    return n !== null ? parseInt(n, 10) : -1;
   }
   // Sortera på sträng
   // Tex Storgatan < Störgatan
@@ -26,7 +26,7 @@ export function arraySort(options) {
   function strnum(str) {
     var re = /(\d+)(:)?([a-zA-ZåäöÅÄÖ])?(\d+)?/,
       s = re.exec(str);
-    var r = s === null ? -1 : s[2] ? parseInt(s[4]) : s[3];
+    var r = s === null ? -1 : s[2] ? parseInt(s[4], 10) : s[3];
     return r;
   }
   // Jämför två strängar.

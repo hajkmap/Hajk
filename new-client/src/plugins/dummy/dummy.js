@@ -3,7 +3,8 @@ import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
-import EditIcon from "@material-ui/icons/Edit";
+//import EditIcon from "@material-ui/icons/Edit";
+import TouchAppIcon from "@material-ui/icons/TouchApp";
 
 import Panel from "../../components/Panel.js";
 import DummyView from "./DummyView";
@@ -52,7 +53,7 @@ class Dummy extends Component {
     });
 
     // Initiate a model. Although optional, will probably be used for all except the most simple plugins.
-    this.editModel = new DummyModel({
+    this.dummyModel = new DummyModel({
       map: spec.map,
       app: spec.app,
       observer: this.observer
@@ -90,6 +91,7 @@ class Dummy extends Component {
           map={this.map}
           parent={this}
           observer={this.observer}
+          model={this.dummyModel}
         />
       </Panel>,
       document.getElementById("map-overlay")
@@ -115,7 +117,7 @@ class Dummy extends Component {
           className={classes.button}
           onClick={this.onClick}
         >
-          <EditIcon />
+          <TouchAppIcon />
         </Button>
         {this.renderPanel()}
       </div>
@@ -133,7 +135,7 @@ class Dummy extends Component {
           onClick={this.onClick}
         >
           <ListItemIcon>
-            <EditIcon />
+            <TouchAppIcon />
           </ListItemIcon>
           <ListItemText primary={this.text} />
         </ListItem>
@@ -143,8 +145,6 @@ class Dummy extends Component {
   }
 
   render() {
-    console.log("dummy.js render()", this);
-
     if (this.props.type === "toolbarItem") {
       return this.renderAsToolbarItem();
     }
