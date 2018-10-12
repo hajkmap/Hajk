@@ -98,10 +98,12 @@ class ToolOptions extends Component {
           visibleForGroups: tool.options.visibleForGroups
             ? tool.options.visibleForGroups
             : [],
-          layers: tool.options.layers ? tool.options.layers : []
+          layers: tool.options.layers ? tool.options.layers : [],
+          selectedSources: tool.options.selectedSources ? tool.options.selectedSources : []
         },
         () => {
           this.loadLayers();
+          this.loadSources();
         }
       );
     } else {
@@ -241,7 +243,8 @@ class ToolOptions extends Component {
           Function.prototype.call,
           String.prototype.trim
         ),
-        layers: this.state.layers ? this.state.layers : []
+        layers: this.state.layers ? this.state.layers : [],
+        selectedSources: this.state.selectedSources ? this.state.selectedSources : []
       }
     };
 
@@ -376,6 +379,89 @@ class ToolOptions extends Component {
         layers: newArray
       });
     }
+  }
+
+  flattern(groups) {
+    return groups.reduce((i, group) => {
+      var layers = [];
+      if (group.groups.length !== 0) {
+        layers = [...this.flattern(group.groups)];
+      }
+      return [...i, ...group.layers, ...layers];
+    }, []);
+  }
+
+  lookup(layerId, layersConfig) {
+    var found = undefined;
+    var layerTypes = Object.keys(layersConfig);
+    for (let i = 0; i < layerTypes.length; i++) {
+      for (let j = 0; j < layersConfig[layerTypes[i]].length; j++) {
+        if (
+          Number(layersConfig[layerTypes[i]][j].id) === Number(layerId)
+        ) {
+          found = layersConfig[layerTypes[i]][j].caption;
+          break;
+        }
+      }
+      if (found) {
+        break;
+      }
+    }
+    return found;
+  }
+
+  loadSources = () => {
+    var urlLayers = this.props.model.get("config").url_layers;
+    this.props.model.getConfig(urlLayers, (layersConfig) => {
+
+      var layers = this.flattern(this.props.model.get("layerMenuConfig").groups);
+
+      layers = layers.map(layer => {
+        return {
+          id: layer.id,
+          name: this.lookup(layer.id, layersConfig)
+        }
+      })
+
+      this.setState({
+        sources: layers
+      });
+
+    });
+
+  };
+
+  selectedSourceChange = (id, checked) => (e) => {
+
+    var selectedSources = checked
+      ? this.state.selectedSources.filter(selectedSource => selectedSource !== id)
+      : [id, ...this.state.selectedSources];
+
+    this.setState({
+      selectedSources: selectedSources
+    });
+  }
+
+  renderSources(sources) {
+    if (!sources) return null;
+    return (
+      <ul style={{paddingLeft: 0}}>
+        {sources.map((source, i) => {
+          var id = "layer_" + source.id;
+          var checked = this.state.selectedSources.some(id => id === source.id);
+          return (
+            <li key={i}>
+              <label htmlFor={id}><b>{source.name}</b></label>
+              <input
+                id={id}
+                type="checkbox"
+                checked={checked}
+                onChange={this.selectedSourceChange(source.id, checked)}/>
+            </li>
+          )
+        })}
+      </ul>
+    );
   }
 
   /**
@@ -636,6 +722,12 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
             />
+          </div>
+          <div>
+            <label htmlFor="searchLayers">Visninstjänster för sök inom</label>
+            <div>
+              {this.renderSources(this.state.sources)}
+            </div>
           </div>
         </form>
         {this.state.tree}

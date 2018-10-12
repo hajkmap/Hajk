@@ -48,6 +48,12 @@ class Search extends Component {
         <SearchBar
           onChange={this.searchModel.search}
           onComplete={this.resolve}
+          onClear={() => {
+            this.searchModel.clear();
+            this.setState({
+              result: false
+            })
+          }}
         />
         {this.renderSearchResultList()}
       </div>

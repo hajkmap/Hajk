@@ -55,7 +55,8 @@ class WMSLayer {
         caption: config.caption,
         opacity: config.opacity,
         source: new ImageWMS(source),
-        layerInfo: this.layerInfo
+        layerInfo: this.layerInfo,
+        url: config.url
       });
     } else {
       this.layer = new TileLayer({
@@ -65,7 +66,8 @@ class WMSLayer {
         caption: config.caption,
         opacity: config.opacity,
         source: new TileWMS(source),
-        layerInfo: this.layerInfo
+        layerInfo: this.layerInfo,
+        url: config.url
       });
     }
 
