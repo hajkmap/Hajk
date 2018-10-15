@@ -3,6 +3,9 @@ import IsLike from "ol/format/filter/IsLike";
 import Intersects from "ol/format/filter/Intersects";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
+import GeoJSON from "ol/format/GeoJSON";
+import {fromCircle} from 'ol/geom/Polygon';
+import Draw from 'ol/interaction/Draw.js';
 import { arraySort } from "./../../utils/ArraySort.js";
 
 class SearchModel {
@@ -10,8 +13,10 @@ class SearchModel {
   layerList = [];
 
   mapSouceAsWFSPromise = (feature, projCode) => source => {
-
     var geom = feature.getGeometry();
+    if (geom.getType() === "Circle") {
+      geom = fromCircle(geom);
+    }
     const options = {
       featureTypes: source.layers,
       srsName: projCode,
@@ -55,30 +60,45 @@ class SearchModel {
   };
 
   searchWithinArea = (feature, callback) => {
-
     const projCode = this.olMap
       .getView()
       .getProjection()
       .getCode();
 
-    const searchLayers = this.options.selectedSources.reduce(this.getLayerAsSource, [])
-    const promises = searchLayers
-      .map(this.mapDisplayLayerAsSearchLayer)
-      .map(this.mapSouceAsWFSPromise(feature, projCode));
+    var search = () => {
 
-    Promise.all(promises).then(responses => {
-      Promise.all(responses.map(result => result.json())).then(
-        jsonResults => {
-          var result = [];
-          jsonResults.forEach((jsonResult, i) => {
-            if (jsonResult.totalFeatures > 0) {
-              result.push(searchLayers[i].layerId)
-            }
+      const searchLayers = this.options.selectedSources.reduce(this.getLayerAsSource, []);
+      const searchSources = searchLayers.map(this.mapDisplayLayerAsSearchLayer);
+      const promises = searchSources.map(this.mapSouceAsWFSPromise(feature, projCode));
+
+      Promise.all(promises).then(responses => {
+        Promise.all(responses.map(result => result.json())).then(
+          jsonResults => {
+            var result = [];
+            jsonResults.forEach((jsonResult, i) => {
+              if (jsonResult.totalFeatures > 0) {
+                result.push(searchLayers[i].layerId)
+              }
+            });
+            callback(result);
+          }
+        )
+      });
+    }
+
+    if (feature.getGeometry().getType() === "Point") {
+      this.options.sources.forEach(source => {
+        if (source.caption.toLowerCase() === "fastighet") {
+          this.lookupEstate(source, feature, estates => {
+            var olEstate = new GeoJSON().readFeatures(estates)[0];
+            feature = olEstate
+            search();
           });
-          callback(result);
         }
-      )
-    });
+      });
+    } else {
+      search();
+    }
   };
 
   search = (searchInput, callback) => {
@@ -111,6 +131,40 @@ class SearchModel {
   clear = () => {
     this.clearHighlight();
     this.clearLayerList();
+    this.drawSource.clear();
+  };
+
+  toggleDraw = (active, drawEndCallback) => {
+
+    if (active) {
+      this.draw = new Draw({
+        source: this.drawSource,
+        type: "Circle"
+      });
+      this.draw.on('drawend', e => {
+        if (drawEndCallback) {
+          drawEndCallback();
+        }
+        this.clear();
+        this.olMap.removeInteraction(this.draw);
+        setTimeout(() => {
+          this.olMap.clicklock = false;
+        }, 1000);
+        this.searchWithinArea(e.feature, (layerIds) => {
+          this.layerList = layerIds.reduce(this.getLayerAsSource, []);
+          this.layerList.forEach(layer => {
+            layer.setVisible(true);
+          });
+        });
+      });
+      this.olMap.clicklock = true;
+      this.olMap.addInteraction(this.draw);
+    } else {
+      if (this.draw) {
+        this.olMap.removeInteraction(this.draw);
+      }
+      this.olMap.clicklock = false;
+    }
   };
 
   constructor(settings, map) {
@@ -120,7 +174,12 @@ class SearchModel {
     this.vectorLayer = new VectorLayer({
       source: new VectorSource({})
     });
+    this.drawSource = new VectorSource({wrapX: false});
+    this.drawLayer = new VectorLayer({
+      source: this.drawSource
+    });
     this.olMap.addLayer(this.vectorLayer);
+    this.olMap.addLayer(this.drawLayer);
   }
 
   clearLayerList() {
@@ -175,6 +234,45 @@ class SearchModel {
         break;
     }
     return source;
+  }
+
+  lookupEstate(source, feature, callback) {
+    const projCode = this.olMap
+      .getView()
+      .getProjection()
+      .getCode();
+
+    const geom = feature.getGeometry();
+
+    const options = {
+      featureTypes: source.layers,
+      srsName: projCode,
+      outputFormat: "JSON", //source.outputFormat,
+      geometryName: source.geometryName,
+      filter: new Intersects(
+        "geom",   // geometryName
+        geom,     // geometry
+        projCode  // projCode
+      )
+    };
+
+    const node = this.wfsParser.writeGetFeature(options);
+    const xmlSerializer = new XMLSerializer();
+    const xmlString = xmlSerializer.serializeToString(node);
+
+    const request = {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/xml"
+      },
+      body: xmlString
+    };
+
+    fetch(source.url, request).then(response => {
+      response.json().then(estate => {
+        callback(estate);
+      });
+    });
   }
 
   lookup(source, searchInput) {

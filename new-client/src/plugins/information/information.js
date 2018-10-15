@@ -62,7 +62,7 @@ class Infomation extends Component {
       <div>
         <Button
           variant="fab"
-          color="default"
+          color="primary"
           aria-label="Infomation"
           className={classes.button}
           onClick={this.onClick}

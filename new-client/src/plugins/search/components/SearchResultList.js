@@ -29,9 +29,25 @@ const styles = theme => {
 };
 
 class SearchResultList extends Component {
-  state = {};
+  state = {
+    visible: true
+  };
 
   componentWillMount() {}
+
+  hide() {
+    if (document.body.scrollWidth < 600) {
+      this.setState({
+        visible: false
+      });
+    }
+  }
+
+  componentWillReceiveProps(e) {
+    this.setState({
+      visible: this.props.visible
+    });
+  }
 
   render() {
     const { classes, result } = this.props;
@@ -46,21 +62,26 @@ class SearchResultList extends Component {
       (i, r) => (r.features.length > 0 ? ++i : i),
       0
     );
-    return (
-      <div className={classes.searchResult}>
-        {result.map((featureType, i) => {
-          if (featureType.features.length === 0) return null;
-          return (
-            <SearchResultGroup
-              key={i}
-              featureType={featureType}
-              model={this.props.model}
-              expanded={resultWithHits < 2}
-            />
-          );
-        })}
-      </div>
-    );
+    if (!this.state.visible) {
+      return null;
+    } else {
+      return (
+        <div className={classes.searchResult}>
+          {result.map((featureType, i) => {
+            if (featureType.features.length === 0) return null;
+            return (
+              <SearchResultGroup
+                parent={this}
+                key={i}
+                featureType={featureType}
+                model={this.props.model}
+                expanded={resultWithHits < 2}
+              />
+            );
+          })}
+        </div>
+      );
+    }
   }
 }
 

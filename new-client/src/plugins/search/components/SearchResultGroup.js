@@ -47,6 +47,7 @@ class SearchResultGroup extends Component {
   highlight = feature => e => {
     var olFeature = new GeoJSON().readFeatures(feature)[0];
     this.props.model.highlight(olFeature);
+    this.props.parent.hide();
   };
 
   clear = e => {

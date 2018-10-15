@@ -13,7 +13,8 @@ import { bindMapClickEvent } from "./Click.js";
 import { defaults as defaultInteractions } from "ol/interaction";
 
 import { Map, View } from "ol";
-import { Zoom, Rotate, ScaleLine, Attribution, FullScreen } from "ol/control";
+import { Zoom } from "ol/control";
+//{ Rotate, ScaleLine, Attribution, FullScreen } from "ol/control";
 import { register } from "ol/proj/proj4";
 
 var map;
@@ -145,13 +146,7 @@ class AppModel {
         new Zoom({
           zoomInTipLabel: "Zooma in",
           zoomOutTipLabel: "Zooma ut"
-        }),
-        new Attribution({ collapsible: true }),
-        new Rotate({ tipLabel: "Återställ rotation" }),
-        new ScaleLine({
-          target: "map-scale-bar"
-        }),
-        new FullScreen()
+        })
       ],
       overlays: [],
       view: new View({

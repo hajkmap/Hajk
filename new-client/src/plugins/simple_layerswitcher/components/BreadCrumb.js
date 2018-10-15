@@ -36,9 +36,6 @@ class BreadCrumb extends Component {
             </i>
           </span>
         </div>
-        <div className="bread-crumb-body">
-          <a href="#layer">Läs mer</a>
-        </div>
       </div>
     );
   }

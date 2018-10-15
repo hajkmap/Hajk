@@ -6,6 +6,7 @@ import RateReviewIcon from "@material-ui/icons/RateReview";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import Observer from "react-event-observer";
 import Panel from "../../components/Panel.js";
+import Tooltip from '@material-ui/core/Tooltip';
 
 import CollectorView from "./CollectorView.js";
 import CollectorModel from "./CollectorModel.js";
@@ -97,15 +98,17 @@ class Collector extends Component {
     const { classes } = this.props;
     return (
       <div>
-        <Button
-          variant="fab"
-          color="default"
-          aria-label="Infomation"
-          className={classes.button}
-          onClick={this.onClick}
-        >
-          <RateReviewIcon />
-        </Button>
+        <Tooltip title="Tyck till">
+          <Button
+            variant="fab"
+            color="primary"
+            aria-label="Infomation"
+            className={classes.button}
+            onClick={this.onClick}
+          >
+            <RateReviewIcon />
+          </Button>
+        </Tooltip>
         {this.renderPanel()}
       </div>
     );

@@ -70,9 +70,11 @@ const styles = theme => {
       }
     },
     widgetsRight: {
-      right: "7px",
-      top: "150px",
-      [theme.breakpoints.down("xs")]: {}
+      right: "10px",
+      top: "110px",
+      [theme.breakpoints.down("xs")]: {
+        right: "5px"
+      }
     },
     button: {
       width: "50px",
