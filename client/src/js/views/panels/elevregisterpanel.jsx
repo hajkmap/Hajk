@@ -165,7 +165,7 @@ var ElevregisterPanelView = {
   },
 
   showOnMap: function() {
-    console.log("showOnMap function 1");
+    console.log("showOnMap function...");
     this.props.model.showOnMap(urlID);
 
     // urlID.length = 0;
@@ -174,14 +174,14 @@ var ElevregisterPanelView = {
     // elev_count = [];
   },
 
-  getSkolData: function() {
-    console.log("getSkolData...");
-    this.props.model.getSkolData();
+  getSchools: function() {
+    console.log("getSchools...");
+    this.props.model.getSchools();
   },
 
-  valSkola: function() {
-    console.log("valSkola...");
-    this.props.model.valSkola();
+  getClasses: function() {
+    console.log("getClasses...");
+    this.props.model.getClasses();
   },
   /**
    * Abort any operation and deselect any tool.
@@ -454,7 +454,7 @@ var ElevregisterPanelView = {
     var dialog = this.renderDialog(this.state.dialog),
       symbology = this.renderSymbology(this.state.symbology);
 
-    this.getSkolData();
+    this.getSchools();
     return (
       <Panel
         title="Elevregister"
@@ -468,7 +468,7 @@ var ElevregisterPanelView = {
             <div className="panel panel-default">
               <div className="panel-heading"> Skolor </div>
               <div className="panel-body">
-                <select id="skolor" onChange={this.valSkola}>
+                <select id="skolor" onChange={this.getClasses}>
                   <option value="none"> Välj skola</option>
                 </select>
               </div>

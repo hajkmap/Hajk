@@ -137,6 +137,7 @@ var ElevregisterModelProperties = {
   ]
 };
 var urlID;
+var skolData;
 
 /**
  * Prototype for creating an elevregister model.
@@ -203,6 +204,53 @@ var ElevregisterModel = {
     this.createMeasureTooltip();
   },
 
+  getSchools: function() {
+    console.log("...getSchools");
+    return $.ajax({
+      url: "GR.json",
+      type: "GET",
+      dataType: "JSON"
+    }).done(this.handleSchools);
+  },
+
+  handleSchools: function(data /* , textStatus, jqXHR */) {
+    console.log("handleSchools...");
+    console.log(data);
+    //this.set("elevregisterData", data);
+    skolData = data;
+    for (s in data) {
+      console.log(s);
+      $("#skolor").append('<option id="' + s + '">' + s + "</option>");
+    }
+  },
+
+  getClasses: function() {
+    console.log("...getClasses");
+    var skola = $("#skolor :selected").text();
+
+    //var skolData = this.get("elevregisterData");
+    console.log(skola);
+    console.log(skolData);
+    $("#klasser").empty();
+    for (s in skolData) {
+      //console.log('skolData[' + s + ']: ' + skolData[s]);
+      if (s === skola) {
+        console.log("Hittade " + skola);
+        var klasser = skolData[s];
+        for (k in klasser) {
+          console.log(klasser[k].klassNamn);
+          $("#klasser").append(
+            '<option value="' +
+              klasser[k].klassId +
+              '">' +
+              klasser[k].klassNamn +
+              "</option>"
+          );
+        }
+      }
+    }
+  },
+
   showOnMap: function(urlID) {
     console.log(urlID);
     this.get("elevregisterLayer")
@@ -210,46 +258,24 @@ var ElevregisterModel = {
       .clear();
     this.set("antalElever", 0);
     that = this;
-    for (var i = 0; i < urlID.length; i++) {
-      this.getElevData(urlID[i]);
-    }
+    //for (var i = 0; i < urlID.length; i++) {
+    //this.getStudentData(urlID[i]);
+    //}
+    this.getStudentData(urlID);
   },
 
-  getSkolData: function() {
-    console.log("...getSkolData");
+  getStudentData: function(uid) {
+    console.log(uid);
+    //var url = "temp/" + uid + ".json";
+    var url = "elever-api.json";
     return $.ajax({
-      url: "GR.json",
-      type: "GET"
-    }).done(this.handleSkolData);
+      url: url,
+      type: "GET",
+      dataType: "JSON"
+    }).done(this.handleStudentData);
   },
 
-  handleSkolData: function(data /* , textStatus, jqXHR */) {
-    console.log("handleSkolData...");
-    console.log(data);
-    for (s in data) {
-      console.log(s);
-      $("#skolor").append('<option id="' + s + '">' + s + "</option>");
-    }
-    //$select.html("");
-    // $.each(data, function(key, val) {
-    //   $("#skolor").append(
-    //     '<option id="' + key + '">' + key + "</option>"
-    //   )
-    // };
-  },
-
-  valSkola: function() {
-    console.log("...valSkola");
-  },
-
-  getElevData: function(uid) {
-    return $.ajax({
-      url: "temp/" + uid + ".json",
-      type: "GET"
-    }).done(this.handleElevData);
-  },
-
-  handleElevData: function(data /* , textStatus, jqXHR */) {
+  handleStudentData: function(data /* , textStatus, jqXHR */) {
     var features = new ol.format.GeoJSON().readFeatures(data);
     that
       .get("elevregisterLayer")
