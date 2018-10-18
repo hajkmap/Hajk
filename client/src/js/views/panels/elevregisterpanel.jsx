@@ -173,6 +173,16 @@ var ElevregisterPanelView = {
     // $("#elevCount").html("Antal elever: " + sum);
     // elev_count = [];
   },
+
+  getSkolData: function() {
+    console.log("getSkolData...");
+    this.props.model.getSkolData();
+  },
+
+  valSkola: function() {
+    console.log("valSkola...");
+    this.props.model.valSkola();
+  },
   /**
    * Abort any operation and deselect any tool.
    * @instance
@@ -440,81 +450,11 @@ var ElevregisterPanelView = {
   render: function() {
     //view-source:https://ikarta.kungsbacka.se/fgadmin/fg-ist/elever.html
     //klasser: Hold down the Ctrl (windows) / Command (Mac) button to select multiple options.
-    var skolData;
 
-    function getSkolor() {
-      var $select = $("#skolor");
-      $.ajax({
-        //url: 'https://ikarta.kungsbacka.se/API/Elevregister/api/organisation/GR',
-        //url: 'GR.json'
-        url: "GR.json",
-        dataType: "JSON",
-        success: function(data) {
-          skolData = data;
-          //clear the current content of the select
-          $select.html("");
-
-          $.each(data, function(key, val) {
-            $("#skolor").append(
-              '<option id="' + key + '">' + key + "</option>"
-            );
-
-            $("#skolor").change(function() {
-              var skola = $("#skolor :selected").text();
-
-              $("#klasser").empty();
-              for (s in skolData) {
-                if (s === skola) {
-                  var klasser = skolData[s];
-                  for (k in klasser) {
-                    $("<option>")
-                      .val(klasser[k].klassId)
-                      .text(klasser[k].klassNamn)
-                      .appendTo("#klasser");
-                  }
-                }
-              }
-            });
-            var j = 0;
-            $("#klasser").change(function() {
-              var uniqueNames = [];
-
-              $("#elevCount").html("");
-              $.each($("#klasser option:selected"), function() {
-                console.log($(this).val());
-                uniqueNames.push($(this).val());
-              });
-
-              $.each(uniqueNames, function(i, el) {
-                console.log("el:" + el);
-                if ($.inArray(el, urlID) === -1) urlID.push(el);
-              });
-              for (var l = 0; l < urlID.length; l++) {
-                var request = $.ajax({
-                  //url: 'https://ikarta.kungsbacka.se/API/Elevregister/api/klass/' + urlID[l],
-                  url: "temp/" + urlID[l] + ".json",
-                  success: data => {
-                    elev_count[l] = data.totalFeatures;
-                    //sum = elev_count.reduce(function(a, b) { return a + b; }, 0);
-                    sum += data.totalFeatures;
-                    console.log(data.totalFeatures + " " + sum);
-                  }
-                });
-              }
-            });
-          });
-        },
-        error: function() {
-          //if there is an error append a 'none available' option
-          $select.html('<option id="-1">none available</option>');
-        }
-      });
-    }
     var dialog = this.renderDialog(this.state.dialog),
       symbology = this.renderSymbology(this.state.symbology);
 
-    getSkolor();
-    // onClick={this.activateElevregisterTool.bind(this, 'Point')}
+    this.getSkolData();
     return (
       <Panel
         title="Elevregister"
@@ -528,7 +468,7 @@ var ElevregisterPanelView = {
             <div className="panel panel-default">
               <div className="panel-heading"> Skolor </div>
               <div className="panel-body">
-                <select id="skolor">
+                <select id="skolor" onChange={this.valSkola}>
                   <option value="none"> Välj skola</option>
                 </select>
               </div>
