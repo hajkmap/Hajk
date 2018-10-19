@@ -337,7 +337,9 @@ var manager = Model.extend({
       attributePrefix: '',
       arrayAccessFormPaths: [
         "WMS_Capabilities.Capability.Layer.Layer",
-        "WMT_MS_Capabilities.Capability.Layer.Layer"
+        "WMT_MS_Capabilities.Capability.Layer.Layer",
+        "WMS_Capabilities.Capability.Layer.Layer.Style",
+        "WMT_MS_Capabilities.Capability.Layer.Layer.Style",
       ]
     });
 

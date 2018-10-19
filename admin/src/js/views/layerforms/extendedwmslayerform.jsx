@@ -260,7 +260,6 @@ class ExtendedWMSLayerForm extends Component {
 
   loadLayers (layer, callback) {
     this.loadWMSCapabilities(undefined, () => {
-
       var capabilities = this.state.capabilitiesList.find(capabilities => capabilities.version === layer.version);
       
       this.setState({
@@ -293,8 +292,17 @@ class ExtendedWMSLayerForm extends Component {
         capabilitiesList,
         load: false,
        }, () => {
+        console.log('callback: ', callback);
         if (callback) {
           callback();
+        } else {
+          var capabilities = this.state.capabilitiesList[0];
+          this.setState({
+            capabilities,
+            version: capabilities.version
+          }, () => {
+            this.setServerType();
+          })
         }
        });
     }).catch(err => {
@@ -482,9 +490,16 @@ class ExtendedWMSLayerForm extends Component {
       return l.Name === layer.name;
     });
     // om lagret har styles, hämta dessa, annars, returnera meddelande
-    let layerStyles = currentLayer.Style ? currentLayer.Style.map((style, index) => {
+    /* let layerStyles = currentLayer.Style ? currentLayer.Style.map((style, index) => {
       return <option key={index}>{style.Name}</option>;
-    }) : <option key={index} value='' />;
+    }) : <option key={index} value='' />; */
+
+    if (currentLayer === undefined) {
+      return this.props.parentView.setState({
+        alert: true,
+        alertMessage: 'Det valda lagret finns inte.'
+      });
+    }
 
     // Sätt det state som behövs för att modalen skall populeras och knapparna skall fungera
     this.setState({
