@@ -292,7 +292,6 @@ class ExtendedWMSLayerForm extends Component {
         capabilitiesList,
         load: false,
        }, () => {
-        console.log('callback: ', callback);
         if (callback) {
           callback();
         } else {
