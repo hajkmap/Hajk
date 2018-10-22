@@ -179,7 +179,8 @@ class WFSVectorLayer {
       layerInfo: new LayerInfo(config),
       renderMode: "image",
       style: this.getStyle.bind(this),
-      source: this.vectorSource
+      source: this.vectorSource,
+      url: config.url
     });
     this.type = "vector";
   }

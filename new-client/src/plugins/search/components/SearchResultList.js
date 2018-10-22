@@ -1,8 +1,6 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import SearchResultGroup from "./SearchResultGroup.js";
-import Badge from "@material-ui/core/Badge";
-import Typography from "@material-ui/core/Typography";
 
 const styles = theme => {
   return {
@@ -14,7 +12,7 @@ const styles = theme => {
       maxHeight: "500px",
       overflow: "auto",
       padding: "15px",
-      border: "1px solid",
+      border: "1px solid #ccc",
       borderTop: "none",
       top: "49px",
       [theme.breakpoints.down("xs")]: {
@@ -26,25 +24,30 @@ const styles = theme => {
         border: "none",
         maxHeight: "inherit"
       }
-    },
-    badge: {},
-    heading: {
-      padding: 0,
-      paddingRight: "14px",
-      fontSize: "14pt",
-      fontWeight: "500",
-      marginBottom: "5px"
-    },
-    header: {
-      padding: "10px 0"
     }
   };
 };
 
 class SearchResultList extends Component {
-  state = {};
+  state = {
+    visible: true
+  };
 
   componentWillMount() {}
+
+  hide() {
+    if (document.body.scrollWidth < 600) {
+      this.setState({
+        visible: false
+      });
+    }
+  }
+
+  componentWillReceiveProps(e) {
+    this.setState({
+      visible: this.props.visible
+    });
+  }
 
   render() {
     const { classes, result } = this.props;
@@ -55,35 +58,30 @@ class SearchResultList extends Component {
         </div>
       );
     }
-    return (
-      <div className={classes.searchResult}>
-        {result.map((featureType, i) => {
-          if (featureType.features.length === 0) return null;
-          return (
-            <div key={i}>
-              <div className={classes.header}>
-                <Badge
-                  color="primary"
-                  className={classes.badge}
-                  badgeContent={featureType.features.length}
-                  classes={{
-                    badge: classes.badge
-                  }}
-                >
-                  <Typography className={classes.heading}>
-                    {featureType.source.caption}
-                  </Typography>
-                </Badge>
-              </div>
+    const resultWithHits = result.reduce(
+      (i, r) => (r.features.length > 0 ? ++i : i),
+      0
+    );
+    if (!this.state.visible) {
+      return null;
+    } else {
+      return (
+        <div className={classes.searchResult}>
+          {result.map((featureType, i) => {
+            if (featureType.features.length === 0) return null;
+            return (
               <SearchResultGroup
+                parent={this}
+                key={i}
                 featureType={featureType}
                 model={this.props.model}
+                expanded={resultWithHits < 2}
               />
-            </div>
-          );
-        })}
-      </div>
-    );
+            );
+          })}
+        </div>
+      );
+    }
   }
 }
 

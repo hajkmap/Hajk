@@ -4,7 +4,7 @@ import { withStyles } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import LayersIcon from "@material-ui/icons/Layers";
-
+import Tooltip from '@material-ui/core/Tooltip';
 import Panel from "../../components/Panel.js";
 import SimpleLayerSwitcherView from "./SimpleLayerSwitcherView.js";
 import SimpleLayerSwitcherModel from "./SimpleLayerSwitcherModel.js";
@@ -86,15 +86,17 @@ class SimpleLayerSwitcher extends Component {
     const { classes } = this.props;
     return (
       <div>
-        <Button
-          variant="fab"
-          color="default"
-          aria-label="Översiktsplan"
-          className={classes.button}
-          onClick={this.onClick}
-        >
-          <LayersIcon />
-        </Button>
+        <Tooltip title="Innehåll">
+          <Button
+            variant="fab"
+            color="primary"
+            aria-label="Översiktsplan"
+            className={classes.button}
+            onClick={this.onClick}
+          >
+            <LayersIcon />
+          </Button>
+        </Tooltip>
         {this.renderPanel()}
       </div>
     );

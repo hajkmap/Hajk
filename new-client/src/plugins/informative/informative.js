@@ -4,6 +4,7 @@ import { withStyles } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import SatelliteIcon from "@material-ui/icons/Satellite";
+import Tooltip from '@material-ui/core/Tooltip';
 
 import Panel from "../../components/Panel.js";
 import InformativeView from "./InformativeView.js";
@@ -102,15 +103,16 @@ class Informative extends Component {
     const { classes } = this.props;
     return (
       <div>
-        <Button
-          variant="fab"
-          color="default"
-          aria-label="Översiktsplan"
-          className={classes.button}
-          onClick={this.onClick}
-        >
-          <SatelliteIcon />
-        </Button>
+        <Tooltip title="Översiktsplan">
+          <Button
+            variant="fab"
+            color="primary"
+            className={classes.button}
+            onClick={this.onClick}
+          >
+            <SatelliteIcon />
+          </Button>
+        </Tooltip>
         {this.renderPanel()}
       </div>
     );

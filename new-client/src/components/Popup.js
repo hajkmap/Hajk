@@ -133,7 +133,7 @@ class Popup extends Component {
     }
 
     var featureList = features.map((feature, i) => {
-      var markdown = feature.layer.get("layerInfo").information,
+      var markdown = feature.layer.get("layerInfo") && feature.layer.get("layerInfo").information,
         value = markdown
           ? this.parse(markdown, feature.getProperties())
           : this.table(feature.getProperties());
