@@ -20,15 +20,18 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import React from 'react';
-import { Component } from 'react';
+import React from "react";
+import { Component } from "react";
+import Tree from '../tree.jsx';
 
 var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
-  instruction: '',
-  visibleForGroups: []
+  instruction: "",
+  visibleForGroups: [],
+  tree: "",
+  layers: []
 };
 
 class ToolOptions extends Component {
@@ -38,17 +41,24 @@ class ToolOptions extends Component {
   constructor () {
     super();
     this.state = defaultState;
-    this.type = 'edit';
+    this.type = "edit";
+    this.handleAddSearchable = this.handleAddSearchable.bind(this);
+    this.loadLayers = this.loadLayers.bind(this);
   }
 
-  componentDidMount () {
+  componentDidMount() {
+    if (this.props.parent.props.parent.state.authActive) {
+      this.loadEditableLayers();
+    }
+
     var tool = this.getTool();
     if (tool) {
       this.setState({
         active: true,
         index: tool.index,
         instruction: tool.options.instruction,
-        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : []
+        visibleForGroups: tool.options.visibleForGroups ? tool.options.visibleForGroups : [],
+        layers: tool.options.layers ? tool.options.layers : []
       });
     } else {
       this.setState({
@@ -65,7 +75,85 @@ class ToolOptions extends Component {
   componentWillMount () {
   }
 
-  handleInputChange (event) {
+  loadEditableLayers() {
+    let layers = this.props.model.getConfig(this.props.model.get('config').url_layers, (layers) => {
+      this.setState({
+        editableLayers: layers.wfstlayers,
+      });
+
+      this.setState({
+        tree: <Tree model={this} layers={this.state.editableLayers} handleAddSearchable={this.handleAddSearchable} loadLayers={this.loadLayers} />
+      });
+    });
+  }
+
+  /**
+   * Anropas från tree.jsx i componentDidMount som passar med refs.
+   * Sätter checkboxar och inputfält för söklager.
+   * @param {*} childRefs
+   */
+  loadLayers(childRefs) {
+    // checka checkboxar, visa textfält
+    // och sätt text från kartkonfig.json
+    let ids = [];
+
+    for (let id of this.state.layers) {
+      ids.push(id);
+    }
+
+    if (typeof childRefs != "undefined") {
+      for (let i of ids) {
+        childRefs["cb_" + i.id].checked = true;
+        childRefs[i.id].hidden = false;
+        childRefs[i.id].value = i.visibleForGroups.join();
+      }
+    }
+  }
+
+  handleAddSearchable(e, layer) {
+    if (e.target.type.toLowerCase() === "checkbox") {
+      if (e.target.checked) {
+        let toAdd = {
+          id: layer.id.toString(),
+          visibleForGroups: []
+        };
+        this.setState({
+          layers: [...this.state.layers, toAdd]
+        });
+      } else {
+        let newArray = this.state.layers.filter((o) => o.id != layer.id.toString());
+
+        this.setState({
+          layers: newArray
+        });
+      }
+    }
+    if (e.target.type.toLowerCase() === "text") {
+      let obj = this.state.layers.find((o) => o.id === layer.id.toString());
+      let newArray = this.state.layers.filter((o) => o.id !== layer.id.toString())
+
+      // Skapar array och trimmar whitespace från start och slut av varje cell
+      if (typeof obj != "undefined") {
+        obj.visibleForGroups = e.target.value.split(",");
+        obj.visibleForGroups = obj.visibleForGroups.map(el => el.trim());
+      }
+
+      newArray.push(obj);
+
+      //Sätter visibleForGroups till [] istället för [""] om inputfältet är tomt.
+      if (newArray.length === 1) {
+        if (newArray[0].visibleForGroups.length === 1 && newArray[0].visibleForGroups[0] === "") {
+          newArray[0].visibleForGroups = [];
+        }
+      }
+
+      this.setState({
+        layers: newArray
+      });
+    }
+  }
+
+  handleInputChange(event) {
     var target = event.target;
     var name = target.name;
     var value = target.type === 'checkbox' ? target.checked : target.value;
@@ -107,11 +195,12 @@ class ToolOptions extends Component {
 
   save () {
     var tool = {
-      'type': this.type,
-      'index': this.state.index,
-      'options': {
-        'instruction': this.state.instruction,
-        'visibleForGroups': this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim)
+      "type": this.type,
+      "index": this.state.index,
+      "options": {
+        "instruction": this.state.instruction,
+        "visibleForGroups": this.state.visibleForGroups.map(Function.prototype.call, String.prototype.trim),
+        "layers": this.state.layers ? this.state.layers : []
       }
     };
 
@@ -163,9 +252,9 @@ class ToolOptions extends Component {
       console.log(`Någonting gick fel: ${error}`);
     }
 
-    this.setState({
-      visibleForGroups: value !== '' ? groups : []
-    });
+		this.setState({
+			visibleForGroups: value !== "" ? groups : []
+		});
   }
 
   renderVisibleForGroups () {
@@ -221,6 +310,7 @@ class ToolOptions extends Component {
           </div>
           {this.renderVisibleForGroups()}
         </form>
+        {this.state.tree}
       </div>
     );
   }
