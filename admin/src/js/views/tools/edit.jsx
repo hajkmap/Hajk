@@ -136,16 +136,14 @@ class ToolOptions extends Component {
       if (typeof obj != "undefined") {
         obj.visibleForGroups = e.target.value.split(",");
         obj.visibleForGroups = obj.visibleForGroups.map(el => el.trim());
+
+        //Sätter visibleForGroups till [] istället för [""] om inputfältet är tomt.
+        if (obj.visibleForGroups.length === 1 && obj.visibleForGroups[0] === "") {
+          obj.visibleForGroups = [];
+        }
       }
 
       newArray.push(obj);
-
-      //Sätter visibleForGroups till [] istället för [""] om inputfältet är tomt.
-      if (newArray.length === 1) {
-        if (newArray[0].visibleForGroups.length === 1 && newArray[0].visibleForGroups[0] === "") {
-          newArray[0].visibleForGroups = [];
-        }
-      }
 
       this.setState({
         layers: newArray
@@ -203,6 +201,7 @@ class ToolOptions extends Component {
         "layers": this.state.layers ? this.state.layers : []
       }
     };
+    debugger
 
     var existing = this.getTool();
 
