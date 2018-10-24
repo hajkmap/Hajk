@@ -330,11 +330,68 @@ var manager = Model.extend({
 
   },
 
+  getAllWMSCapabilities: function(url) {
+    var promises = [];
+
+    var xmlParser = new X2JS({
+      attributePrefix: '',
+      arrayAccessFormPaths: [
+        "WMS_Capabilities.Capability.Layer.Layer",
+        "WMT_MS_Capabilities.Capability.Layer.Layer",
+        "WMS_Capabilities.Capability.Layer.Layer.Style",
+        "WMT_MS_Capabilities.Capability.Layer.Layer.Style",
+      ]
+    });
+
+    var versions = [
+      '1.3.0',
+      '1.1.1',
+      '1.1.0',
+      '1.0.0',
+    ];
+
+    versions.forEach(version => {
+      promises.push(
+        $.ajax(this.prepareProxyUrl(url), {
+          data: {
+            service: 'WMS',
+            request: 'GetCapabilities',
+            version
+          }
+        })
+      )
+    });
+
+    return Promise.all(promises)
+      .then(values => {
+        return values
+                .map(value => {
+                  
+                  /* 
+                    Openlayers can not parse all attributes in GetCapabilities response with WMS lower than 1.3.0, see Github issue.
+                    https://github.com/openlayers/openlayers/issues/5476
+
+                    Therefor the XML parser is used instead.
+                  */
+                  
+                  var xmlstr = typeof value === 'string' ? value : (new XMLSerializer()).serializeToString(value);
+                  var json = xmlParser.xml2js(xmlstr);
+
+                  // WMS_Capabilities or WMT_MS_Capabilities
+                  // First key in JSON
+                  var capabilitiesKey = Object.keys(json)[0];
+                 
+                  return json[capabilitiesKey];
+                })
+                .filter((wms, i, self) => self.findIndex(w => w.version === wms.version) === i);
+      })
+  },
+
   getWMSCapabilities: function (url, callback) {
     $.ajax(this.prepareProxyUrl(url), {
       data: {
         service: 'WMS',
-        request: 'GetCapabilities'
+        request: 'GetCapabilities',
       },
       success: data => {
         var response = (new format.WMSCapabilities()).read(data);
@@ -345,7 +402,6 @@ var manager = Model.extend({
       }
     });
   }
-
 });
 
 export default manager;

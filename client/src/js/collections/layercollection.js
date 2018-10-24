@@ -264,7 +264,9 @@ var LayerCollection = {
           'FORMAT': args.imageFormat,
           // Openlayers stödjer ej SWEREF 99  i wms verion 1.3.0
           // Vi har överlagring av funktion för tile men inte för single tile
-          'VERSION': args.singleTile || false ? '1.1.0' : args.version,
+
+          // Single tile är inte längre valbart i admin för WMS-version 1.3.0
+          'VERSION': /* args.singleTile || false ? '1.1.0' : */ args.version,
           'TILED': args.tiled,
           'INFO_FORMAT': args.infoFormat
         },
