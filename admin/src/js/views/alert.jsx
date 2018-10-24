@@ -28,14 +28,16 @@ class LayerAlert extends Component {
     super(props);
     this.state = {
       queryable: props.options.queryable || false,
-      style: props.options.style || (props.options.styles.length > 0 ? props.options.styles[0].Name : '')
+      style: props.options.style || '' /* (props.options.styles.length > 0 ? props.options.styles[0].Name : '') */
     };
   }
 
   render () {
     let options = this.props.options;
     let imageLoader = this.props.imageLoader;
-    let styles = options.styles.map((style, index) => { return <option key={'style' + index}>{style.Name}</option>; });
+    let styles = options.styles
+      .map(style => <option key={'style_' + style.Name} value={style.Name}>{style.Name}</option>)
+
     return <div className='modal'>
       <div className='modal-dialog'>
         <div className='modal-content'>
@@ -63,8 +65,9 @@ class LayerAlert extends Component {
                   <label>Stil</label>
                   <select
                     className='form-control'
-                    defaultValue={this.state.style}
+                    value={this.state.style}
                     onChange={(e) => this._onStyleChange(e)}>
+                    <option value={''}>{'<default>'}</option>
                     {styles}
                   </select>
                 </div>
