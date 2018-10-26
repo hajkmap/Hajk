@@ -151,7 +151,7 @@ var ElevregisterPanelView = {
       confirm: true,
       confirmAction: () => {
         this.clear();
-        $("#elevCount").html("");
+        $("#studentCount").html("");
         elev_count = [];
       },
       denyAction: () => {
@@ -167,11 +167,6 @@ var ElevregisterPanelView = {
   showOnMap: function() {
     console.log("showOnMap function...");
     this.props.model.showOnMap(urlID);
-
-    // urlID.length = 0;
-    // //$("#klasser option:selected").prop("selected", false);
-    // $("#elevCount").html("Antal elever: " + sum);
-    // elev_count = [];
   },
 
   getSchools: function() {
@@ -482,7 +477,7 @@ var ElevregisterPanelView = {
                 </select>
               </div>
             </div>{" "}
-            <label id="elevCount" />
+            <label id="studentCount" />
             <br />
             <div />
           </div>

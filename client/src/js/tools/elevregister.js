@@ -68,7 +68,7 @@ var olMap;
  * @property {number} boxFillOpacity - Default: 0.5
  */
 var ElevregisterModelProperties = {
-  antalElever: 0,
+  studentCount: 0,
   type: "elevregister",
   panel: "ElevregisterPanel",
   title: "Elevregister",
@@ -238,7 +238,7 @@ var ElevregisterModel = {
         console.log("Hittade " + skola);
         var klasser = skolData[s];
         for (k in klasser) {
-          console.log(klasser[k].klassNamn);
+          //console.log(klasser[k].klassNamn);
           $("#klasser").append(
             '<option value="' +
               klasser[k].klassId +
@@ -251,23 +251,102 @@ var ElevregisterModel = {
     }
   },
 
-  showOnMap: function(urlID) {
-    console.log(urlID);
+  showOnMap: function() {
+    console.log("showOnMap...");
     this.get("elevregisterLayer")
       .getSource()
       .clear();
-    this.set("antalElever", 0);
+    this.set("studentCount", 0);
     that = this;
-    //for (var i = 0; i < urlID.length; i++) {
-    //this.getStudentData(urlID[i]);
-    //}
-    this.getStudentData(urlID);
+
+    function getStudents(uid) {
+      console.log("getStudents " + uid);
+      var url = uid + ".json";
+      return $.ajax({
+        url: url,
+        type: "GET",
+        dataType: "JSON",
+        success: result => {
+          console.log("success" + result);
+          var features = new ol.format.GeoJSON().readFeatures(result);
+          that
+            .get("elevregisterLayer")
+            .getSource()
+            .addFeatures(features);
+          var cnt = that.get("studentCount");
+          cnt += result.totalFeatures;
+          console.log("Antal " + cnt);
+          that.set("studentCount", cnt);
+          $("#studentCount").html("Antal elever: " + cnt);
+        },
+        error: result => {
+          alert("Något gick fel");
+        }
+      });
+    }
+    var classes = $("#klasser").val();
+    // someArray.forEach(function(arrayElement) {
+    //   // ... code code code for this one element
+    //   someAsynchronousFunction(arrayElement, function() {
+    //     arrayElement.doSomething();
+    //   });
+    // });
+    //      groups.forEach(group => {
+    //forEach(l => { l.type = 'ExtendedWMS'; });
+
+    // classes.forEach(function(classElement) {
+    //   console.log("forEach " + classElement);
+    //   //getStudents(classElement);
+    //   var url = classElement + ".json";
+    //   return $.ajax({
+    //     url: url,
+    //     type: "GET",
+    //     dataType: "JSON",
+    //     //async: false,
+    //     success: result => {
+    //       console.log("success" + result);
+    //       var features = new ol.format.GeoJSON().readFeatures(result);
+    //       that
+    //         .get("elevregisterLayer")
+    //         .getSource()
+    //         .addFeatures(features);
+    //       var cnt = that.get("studentCount");
+    //       cnt += result.totalFeatures;
+    //       console.log("Antal " + cnt);
+    //       that.set("studentCount", cnt);
+    //       $("#studentCount").html("Antal elever: " + cnt);
+    //     },
+    //     error: result => {
+    //       alert("Något gick fel");
+    //     }
+    //   });
+
+    //   // ... code code code for this one element
+    //   someAsynchronousFunction(arrayElement, function() {
+    //     arrayElement.doSomething();
+    //   });
+    // });
+
+    console.log(classes);
+    for (var i = 0; i < classes.length; i++) {
+      (function(i) {
+        $.getJSON(classes[i] + ".json", function(data) {
+          console.log(classes[i]);
+          console.log(data);
+          var features = new ol.format.GeoJSON().readFeatures(data);
+          that
+            .get("elevregisterLayer")
+            .getSource()
+            .addFeatures(features);
+        });
+      })(i);
+    }
   },
 
   getStudentData: function(uid) {
-    console.log(uid);
     //var url = "temp/" + uid + ".json";
-    var url = "elever-api.json";
+    var url = uid + ".json";
+    console.log(url);
     return $.ajax({
       url: url,
       type: "GET",
@@ -276,60 +355,18 @@ var ElevregisterModel = {
   },
 
   handleStudentData: function(data /* , textStatus, jqXHR */) {
+    console.log("handleStudentData...");
     var features = new ol.format.GeoJSON().readFeatures(data);
     that
       .get("elevregisterLayer")
       .getSource()
       .addFeatures(features);
-    var ae = that.get("antalElever");
-    ae += data.totalFeatures;
-    that.set("antalElever", ae);
-    $("#elevCount").html("Antal elever: " + ae);
+    var cnt = that.get("studentCount");
+    cnt += data.totalFeatures;
+    console.log("Antal " + cnt);
+    that.set("studentCount", cnt);
+    $("#studentCount").html("Antal elever: " + cnt);
   },
-
-  /* showOnMap2: function () {
-    source = new ol.source.Vector({ wrapX: false });
-    //olMap = shell.getMap().getMap();
-    this.set('source', source);
-
-    var features;
-    var gj;
-    var request = $.ajax({
-      url: 'http://localhost/temp/elever.json',
-      success: (data) => {
-        //console.log(data);
-        gj = data;
-        features = new ol.format.GeoJSON().readFeatures(data);
-        //console.log(features);
-      }
-    });
-    console.log(gj);
-    console.log(features);
-
-    var format = new ol.format.GeoJSON({
-      featureProjection:"EPSG:3007"
-    });
-
-    this.set('elevregisterLayer', new ol.layer.Vector({
-      //source: this.get('source'),
-      //vectorLayer.getSource().addFeatures(format.readFeatures(newRouteInGeoJSON));
-
-      source: new ol.source.Vector({
-        url: 'http://localhost/temp/elever.json',
-        format: new ol.format.GeoJSON()
-      }),
-      queryable: true,
-      name: this.get('elevregisterLayerName'),
-      style: (feature) => this.getStyle(feature)
-    }));
-
-    this.get('olMap').addLayer(this.get('elevregisterLayer'));
-    this.set('elevregisterLayer', this.get('elevregisterLayer'));
-    if (this.get('icons') !== '') {
-      let icon = this.get('icons').split(',')[0];
-      this.set('markerImg', window.location.href + 'assets/icons/' + icon + '.png');
-    }
-  }, */
 
   editOpenDialog: function(event) {
     this.get("olMap").forEachFeatureAtPixel(event.pixel, feature => {
