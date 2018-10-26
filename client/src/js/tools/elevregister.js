@@ -136,8 +136,8 @@ var ElevregisterModelProperties = {
     })
   ]
 };
-var urlID;
 var skolData;
+var students = [];
 
 /**
  * Prototype for creating an elevregister model.
@@ -253,94 +253,54 @@ var ElevregisterModel = {
 
   showOnMap: function() {
     console.log("showOnMap...");
+    students.length = 0;
     this.get("elevregisterLayer")
       .getSource()
       .clear();
     this.set("studentCount", 0);
     that = this;
-
-    function getStudents(uid) {
-      console.log("getStudents " + uid);
-      var url = uid + ".json";
-      return $.ajax({
-        url: url,
-        type: "GET",
-        dataType: "JSON",
-        success: result => {
-          console.log("success" + result);
-          var features = new ol.format.GeoJSON().readFeatures(result);
-          that
-            .get("elevregisterLayer")
-            .getSource()
-            .addFeatures(features);
-          var cnt = that.get("studentCount");
-          cnt += result.totalFeatures;
-          console.log("Antal " + cnt);
-          that.set("studentCount", cnt);
-          $("#studentCount").html("Antal elever: " + cnt);
-        },
-        error: result => {
-          alert("Något gick fel");
-        }
-      });
-    }
     var classes = $("#klasser").val();
-    // someArray.forEach(function(arrayElement) {
-    //   // ... code code code for this one element
-    //   someAsynchronousFunction(arrayElement, function() {
-    //     arrayElement.doSomething();
-    //   });
-    // });
-    //      groups.forEach(group => {
-    //forEach(l => { l.type = 'ExtendedWMS'; });
-
-    // classes.forEach(function(classElement) {
-    //   console.log("forEach " + classElement);
-    //   //getStudents(classElement);
-    //   var url = classElement + ".json";
-    //   return $.ajax({
-    //     url: url,
-    //     type: "GET",
-    //     dataType: "JSON",
-    //     //async: false,
-    //     success: result => {
-    //       console.log("success" + result);
-    //       var features = new ol.format.GeoJSON().readFeatures(result);
-    //       that
-    //         .get("elevregisterLayer")
-    //         .getSource()
-    //         .addFeatures(features);
-    //       var cnt = that.get("studentCount");
-    //       cnt += result.totalFeatures;
-    //       console.log("Antal " + cnt);
-    //       that.set("studentCount", cnt);
-    //       $("#studentCount").html("Antal elever: " + cnt);
-    //     },
-    //     error: result => {
-    //       alert("Något gick fel");
-    //     }
-    //   });
-
-    //   // ... code code code for this one element
-    //   someAsynchronousFunction(arrayElement, function() {
-    //     arrayElement.doSomething();
-    //   });
-    // });
-
     console.log(classes);
+    count_getJSONs_done = 0;
     for (var i = 0; i < classes.length; i++) {
       (function(i) {
         $.getJSON(classes[i] + ".json", function(data) {
           console.log(classes[i]);
           console.log(data);
-          var features = new ol.format.GeoJSON().readFeatures(data);
-          that
-            .get("elevregisterLayer")
-            .getSource()
-            .addFeatures(features);
+          students.push(data);
+          // if (i === classes.length - 1) {
+          //   //console.log(students);
+          //   for (j = 0; j < students.length; j++) {
+          //     console.log(j + "/" + students.length + ": " + students[j]);
+          //     var features = new ol.format.GeoJSON().readFeatures(students[j]);
+          //     console.log("features " + j);
+          //     console.log(features);
+          //     that
+          //       .get("elevregisterLayer")
+          //       .getSource()
+          //       .addFeatures(features);
+          //   };
+          // };
+        }).always(function() {
+          count_getJSONs_done++;
+          console.log(count_getJSONs_done + "/" + classes.length);
+          if (count_getJSONs_done == classes.length) {
+            // the last getJSON in the loop is completed
+            for (j = 0; j < students.length; j++) {
+              console.log(j + "/" + students.length + ": " + students[j]);
+              var features = new ol.format.GeoJSON().readFeatures(students[j]);
+              console.log("features " + j);
+              console.log(features);
+              that
+                .get("elevregisterLayer")
+                .getSource()
+                .addFeatures(features);
+            }
+          }
         });
       })(i);
     }
+    console.log("End of showOnMap");
   },
 
   getStudentData: function(uid) {
