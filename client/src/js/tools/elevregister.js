@@ -21,8 +21,7 @@
 // https://github.com/hajkmap/Hajk
 
 var ToolModel = require("tools/tool");
-var source;
-var olMap;
+//var olMap;
 
 /**
  * @typedef {Object} ElevregisterModel~ElevregisterModelProperties
@@ -136,8 +135,7 @@ var ElevregisterModelProperties = {
     })
   ]
 };
-var skolData;
-var students = [];
+var schoolData;
 
 /**
  * Prototype for creating an elevregister model.
@@ -217,7 +215,7 @@ var ElevregisterModel = {
     console.log("handleSchools...");
     console.log(data);
     //this.set("elevregisterData", data);
-    skolData = data;
+    schoolData = data;
     for (s in data) {
       console.log(s);
       $("#skolor").append('<option id="' + s + '">' + s + "</option>");
@@ -226,17 +224,17 @@ var ElevregisterModel = {
 
   getClasses: function() {
     console.log("...getClasses");
-    var skola = $("#skolor :selected").text();
+    var school = $("#skolor :selected").text();
 
-    //var skolData = this.get("elevregisterData");
-    console.log(skola);
-    console.log(skolData);
+    //var schoolData = this.get("elevregisterData");
+    console.log(school);
+    console.log(schoolData);
     $("#klasser").empty();
-    for (s in skolData) {
-      //console.log('skolData[' + s + ']: ' + skolData[s]);
-      if (s === skola) {
-        console.log("Hittade " + skola);
-        var klasser = skolData[s];
+    for (s in schoolData) {
+      //console.log('schoolData[' + s + ']: ' + schoolData[s]);
+      if (s === school) {
+        console.log("Hittade " + school);
+        var klasser = schoolData[s];
         for (k in klasser) {
           //console.log(klasser[k].klassNamn);
           $("#klasser").append(
@@ -253,7 +251,6 @@ var ElevregisterModel = {
 
   showOnMap: function() {
     console.log("showOnMap...");
-    students.length = 0;
     this.get("elevregisterLayer")
       .getSource()
       .clear();
@@ -261,71 +258,27 @@ var ElevregisterModel = {
     that = this;
     var classes = $("#klasser").val();
     console.log(classes);
-    count_getJSONs_done = 0;
-    for (var i = 0; i < classes.length; i++) {
-      (function(i) {
-        $.getJSON(classes[i] + ".json", function(data) {
-          console.log(classes[i]);
-          console.log(data);
-          students.push(data);
-          // if (i === classes.length - 1) {
-          //   //console.log(students);
-          //   for (j = 0; j < students.length; j++) {
-          //     console.log(j + "/" + students.length + ": " + students[j]);
-          //     var features = new ol.format.GeoJSON().readFeatures(students[j]);
-          //     console.log("features " + j);
-          //     console.log(features);
-          //     that
-          //       .get("elevregisterLayer")
-          //       .getSource()
-          //       .addFeatures(features);
-          //   };
-          // };
-        }).always(function() {
-          count_getJSONs_done++;
-          console.log(count_getJSONs_done + "/" + classes.length);
-          if (count_getJSONs_done == classes.length) {
-            // the last getJSON in the loop is completed
-            for (j = 0; j < students.length; j++) {
-              console.log(j + "/" + students.length + ": " + students[j]);
-              var features = new ol.format.GeoJSON().readFeatures(students[j]);
-              console.log("features " + j);
-              console.log(features);
-              that
-                .get("elevregisterLayer")
-                .getSource()
-                .addFeatures(features);
-            }
-          }
+
+    var fetchNow = function() {
+      console.log("...fetchNow " + i);
+      fetch(classes[i] + ".json")
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(myJson) {
+          var features = new ol.format.GeoJSON().readFeatures(myJson);
+          console.log("features " + i);
+          console.log(features);
+          that
+            .get("elevregisterLayer")
+            .getSource()
+            .addFeatures(features);
         });
-      })(i);
+    };
+    for (var i = 0; i < classes.length; i++) {
+      console.log("fetchNow... " + i);
+      fetchNow();
     }
-    console.log("End of showOnMap");
-  },
-
-  getStudentData: function(uid) {
-    //var url = "temp/" + uid + ".json";
-    var url = uid + ".json";
-    console.log(url);
-    return $.ajax({
-      url: url,
-      type: "GET",
-      dataType: "JSON"
-    }).done(this.handleStudentData);
-  },
-
-  handleStudentData: function(data /* , textStatus, jqXHR */) {
-    console.log("handleStudentData...");
-    var features = new ol.format.GeoJSON().readFeatures(data);
-    that
-      .get("elevregisterLayer")
-      .getSource()
-      .addFeatures(features);
-    var cnt = that.get("studentCount");
-    cnt += data.totalFeatures;
-    console.log("Antal " + cnt);
-    that.set("studentCount", cnt);
-    $("#studentCount").html("Antal elever: " + cnt);
   },
 
   editOpenDialog: function(event) {
