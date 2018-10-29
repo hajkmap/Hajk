@@ -1,6 +1,29 @@
-# Hajk
+# Hajk 3
 
-Uppdaterad: 2018-05-03
+Last update: 2018-10-22
+
+## Quick start
+
+1. Clone repository: `git clone https://github.com/hajkmap/Hajk.git`
+1. Switch branch: `git checkout -b develop-new-client`
+1. The new client resides inside `new-client`, so you can do: `cd new-client`
+1. `npm install`
+1. Take a look in `public/appConfig.json` and ensure that `mapserviceBase` is a valid URL to a running instance of MapService that is reachable from your computer. MapService is the name of the .NET application that resides inside the `backend` directory.
+1. `npm start` will fire up the built in Node.js server and open a new browser window with your application running in it
+
+That's it!
+
+If you plan to develop for Hajk, make sure to read the next section on code standard for the project.
+
+## Code standard
+
+Hajk 3 uses **ESLint** and **Prettier** to enforce code formatting across the project. Code that gets checked in must follow those rules.
+
+The `new-client` directory contains `.eslint` file, so it's easy to follow the rules. The recommended way is to use an editor that has extensions for ESLint and Prettier. It is also highly recommended to make the editor run Prettier on each file save (i.e. in VSCode it can be controlled by the `formatOnSave: true` flag).
+
+**For a simple guide on setting up VSCode with ESLint, Prettier and some , see [this presentation](dokumentation/VSCodeSetup.pdf).**
+
+# Docs from Hajk 2
 
 ## Innehåll
 
