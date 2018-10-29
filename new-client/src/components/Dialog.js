@@ -3,34 +3,13 @@ import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 
-const styles = theme => ({
-  closed: {
-    display: "none"
-  },
-  blanket: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    zIndex: 10000
-  },
-  content: {
-    maxHeight: "450px",
-    overflow: "auto"
-  },
-  bottom: {},
-  dialog: {
-    backgroundColor: "white",
-    borderRadius: "20px",
-    padding: "20px",
-    margin: "5% 20%",
-    [theme.breakpoints.down("xs")]: {
-      margin: "5%"
-    }
-  }
-});
+import ReactDialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
+
+const styles = theme => ({});
 
 class Dialog extends Component {
   constructor(props) {
@@ -78,40 +57,45 @@ class Dialog extends Component {
   }
 
   renderDialogContent(text) {
-    return <div dangerouslySetInnerHTML={this.getHtml(text)} />;
+    return <span dangerouslySetInnerHTML={this.getHtml(text)} />;
   }
 
   render() {
-    const { options, classes } = this.props;
+    const { options } = this.props;
     var text = "",
       header = "";
+
     if (options) {
       header = options.headerText;
       text = options.text;
     }
 
-    var blanketClass = this.state.open ? classes.blanket : classes.closed;
+    var fullScreen = document.body.clientWidth < 600;
 
     return (
-      <div className={blanketClass} onClick={this.handleClose}>
-        <div className={classes.dialog} onClick={this.handleDialogClick}>
-          <div className={classes.content}>
-            <h3>{header}</h3>
+      <ReactDialog
+        fullScreen={fullScreen}
+        open={this.state.open}
+        onClose={this.handleClose}
+        aria-labelledby="responsive-dialog-title"
+      >
+        <DialogTitle id="responsive-dialog-title">{header}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
             {this.renderDialogContent(text)}
-          </div>
-          <div className={classes.bottom}>
-            <Button onClick={this.handleClose} color="primary" autoFocus>
-              Ok
-            </Button>
-          </div>
-        </div>
-      </div>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={this.handleClose} color="primary" autoFocus>
+            Stäng
+          </Button>
+        </DialogActions>
+      </ReactDialog>
     );
   }
 }
 
 Dialog.propTypes = {
-  classes: PropTypes.object.isRequired,
   options: PropTypes.object.isRequired,
   open: PropTypes.bool.isRequired
 };
