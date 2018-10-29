@@ -83,7 +83,8 @@ class InformativeEditor extends Component {
   addChapter(title) {
     this.state.data.chapters.push(
       new Chapter({
-        header: title
+        header: title,
+        center: this.props.model.get('config').default_coordinate
       })
     );
     this.setState({
@@ -173,11 +174,12 @@ class InformativeEditor extends Component {
           />
           {chapter.header}
         </h1>
-        <ChapterAdder
+         <ChapterAdder
           onAddChapter={title => {
             chapter.chapters.push(
               new Chapter({
-                header: title
+                header: title,
+                center: this.props.model.get('config').default_coordinate
               })
             );
             this.forceUpdate();

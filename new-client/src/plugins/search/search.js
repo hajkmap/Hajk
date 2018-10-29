@@ -9,10 +9,12 @@ const styles = theme => {
   return {
     searchContainer: {
       position: "absolute",
+      top: "12px",
       right: "15px",
       display: "flex",
       alignItems: "center",
       [theme.breakpoints.down("xs")]: {
+        top: "0",
         width: "100%",
         position: "relative",
         marginLeft: theme.spacing.unit
