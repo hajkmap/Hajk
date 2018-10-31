@@ -522,6 +522,13 @@ class Menu extends Component {
         .find("> ul > li.layer-node")
         .toArray()
         .map(node => {
+
+          const formattedNode = {
+            id: node.dataset.id,
+            drawOrder: node.dataset.draworder ? parseInt(node.dataset.draworder) : 1000, //parse integet
+            visibleAtStart: node.dataset.visibleatstart === 'true', //parse boolean
+          }
+
           if (that.state.authActive) {
             let visibleForGroups = node.dataset.visibleforgroups
               ? node.dataset.visibleforgroups.split(",")
@@ -536,19 +543,12 @@ class Menu extends Component {
               visibleForGroups = String.prototype.trim(visibleForGroups);
             }
 
-            return {
-              id: node.dataset.id,
-              drawOrder: node.dataset.draworder ? node.dataset.draworder : 1000,
-              visibleAtStart: node.dataset.visibleatstart,
-              visibleForGroups: visibleForGroups || [],
-              infobox: infobox || ""
-            };
+            formattedNode.visibleForGroups = visibleForGroups || [];
+            formattedNode.infobox = infobox || "";
+
+            return formattedNode;
           } else {
-            return {
-              id: node.dataset.id,
-              drawOrder: node.dataset.draworder ? node.dataset.draworder : 1000,
-              visibleAtStart: node.dataset.visibleatstart
-            };
+            return formattedNode;
           }
         });
     }
@@ -1056,16 +1056,17 @@ class Menu extends Component {
 
     layers.sort(
       (a, b) =>
-        a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1
+        a.drawOrder === b.drawOrder 
+          ? 0 
+          : (a.drawOrder < b.drawOrder ? -1 : 1)
     );
-    layers = layers.reverse();
 
-    return layers.map((layer, i) => {
+    return layers.reverse().map((layer, i) => {
       var name = this.getLayerNameFromId(layer.id);
       return (
         <li
           className="layer-node"
-          key={Math.round(Math.random() * 1e6)}
+          key={layer.id}
           data-id={layer.id}
         >
           {name}
