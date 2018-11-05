@@ -122,6 +122,7 @@ var FirSearchView = {
         this.value = '';
         this.props.model.set('value', '');
         this.props.model.set('searchTriggered', false);
+        this.props.model.set("backupItems", []);
         this.props.model.clear();
 
         if (document.getElementById('alertSearchbar') != null) {
@@ -407,9 +408,26 @@ var FirSearchView = {
             downloadLink = null;
         }
 
+        //infoknapp
+        var instructionBtn;
+        var instructionTxt;
+        if (typeof this.props.model.get("instructionSkapaFastighetsforteckning") !== 'undefined' && this.props.model.get("instructionSkapaFastighetsforteckning") !== null && this.props.model.get("instructionSkapaFastighetsforteckning").length > 0) {
+            instructionBtn = (
+                <button onClick={() => this.openInstruction("skapaFastighetsforteckning")} className='btn-info' id='instructionBox' ><img src={infologo} /></button>
+            );
+            instructionTxt = (
+                <div className='panel-body-instruction instructionsText' id='instructionsTextFirskapaFastighetsforteckning' dangerouslySetInnerHTML={{__html: this.props.model.get("instructionSkapaFastighetsforteckning")}} />
+            );
+        }
+        var navPanel = document.getElementById('navigation-panel');
+        navPanel.style.width = '417px';
+
+
         return (
             <div className='panel panel-default'>
-                <div className='panel-heading'>Skapa fastighetsförteckning<button id="FIRCreateMinimizeButton" onClick={() => {console.log("clicked"); this.minBox('skapaFastighetsForteckning', "FIRCreateMinimizeButton")}} className={this.props.model.get("searchMinimizedClassButton")}></button></div>
+                <div className='panel-heading'>Skapa fastighetsförteckning{instructionBtn}<button id="FIRCreateMinimizeButton" onClick={() => {console.log("clicked"); this.minBox('skapaFastighetsForteckning', "FIRCreateMinimizeButton")}} className={this.props.model.get("searchMinimizedClassButton")}></button>
+                    {instructionTxt}
+                    </div>
                 <div className='panel-body'>
                     <div id="skapaFastighetsForteckning" className="hidden">
                     <p>Inkludera i förteckning:</p>
@@ -447,24 +465,6 @@ var FirSearchView = {
         console.log("bufferLength", bufferLength);
     },
 
-
-    /*hittaGrannar(){
-      var radioCheckedAngransade = document.getElementById("hittaGrannar").checked,
-          radioCheckedMedBuffer = document.getElementById("hittaGrannarMedBuffer").checked,
-            bufferLength;
-
-      if(radioCheckedMedBuffer){
-          bufferLength = document.getElementById("bufferInput").value;
-      }else{
-          bufferLength = 0.01;
-      }
-      console.log("bufferLength för HittaGrannar", bufferLength);
-
-      // Get the resultsList
-        //var resultList = this.props.result();
-        console.log("resultList: this.props.model.get items", this.props.model.get("items"));
-    },*/
-
     hittaGrannar: function() {
         var parser = new jsts.io.OL3Parser();
         parser.inject(ol.geom.Point, ol.geom.LineString, ol.geom.LinearRing, ol.geom.Polygon, ol.geom.MultiPoint, ol.geom.MultiLineString, ol.geom.MultiPolygon);
@@ -481,6 +481,7 @@ var FirSearchView = {
         console.log("bufferLength in hittaGrannar", bufferLength);
 
         this.props.model.firBufferFeatureLayer.getSource().clear();
+        this.props.model.firBufferHiddenFeatureLayer.getSource().clear();
 
         var buffer = new ol.Feature();
         var bufferGeom = false;
@@ -493,6 +494,9 @@ var FirSearchView = {
 
                    // create a buffer of the required meters around each line
                    var buffered = jstsGeom.buffer(bufferLength);
+                   var bufferedFeature = new ol.Feature();
+                   bufferedFeature.setGeometry(parser.write(buffered));
+                   this.props.model.firBufferHiddenFeatureLayer.getSource().addFeature(bufferedFeature);
                    if(bufferGeom === false){
                        bufferGeom = buffered;
                    } else {
@@ -504,6 +508,8 @@ var FirSearchView = {
         this.props.model.firBufferFeatureLayer.getSource().addFeature(buffer);
 
         this.props.model.set("hittaGrannar", true);
+        this.props.model.set("bufferLength", bufferLength);
+        this.props.model.get("backupItems").push(this.props.model.get("items"));
 
         this.setState({
             force: true
@@ -515,6 +521,17 @@ var FirSearchView = {
         this.props.model.set('url', null);
     },
 
+    rensaHittaGrannar: function(){
+      this.props.model.firBufferFeatureLayer.getSource().clear();
+      this.props.model.firFeatureLayer.getSource().clear();
+      this.props.model.set("items", this.props.model.get("backupItems").pop());
+      this.props.model.get("items").forEach(group => {
+         group.hits.forEach(hit => {
+            this.props.model.firFeatureLayer.getSource().addFeature(hit);
+         });
+      });
+      this.forceUpdate();
+    },
 
     bufferInput: function() {
         //document.getElementById("bufferValue").value = document.getElementById("bufferInput").value;
@@ -533,11 +550,36 @@ var FirSearchView = {
         });*/
     },
 
+    openInstruction: function(id){
+        console.log("openInstruction, id", id);
+        var idName = "#instructionsTextFir" + id;
+        console.log("idName", idName);
+        var element = $(idName);
+        element.toggle();
+    },
+
     renderAnalysFunctions: function() {
         console.log("renderAnalysFunctions");
+
+        var instructionBtn;
+        var instructionTxt;
+        console.log("--- instructionHittaGrannar", this.props.model.get("instructionHittaGrannar"));
+        if (typeof this.props.model.get("instructionHittaGrannar") !== 'undefined' && this.props.model.get("instructionHittaGrannar") !== null && this.props.model.get("instructionHittaGrannar").length > 0) {
+            instructionBtn = (
+                <button onClick={() => this.openInstruction("hittaGrannar")} className='btn-info' id='instructionBox' ><img src={infologo} /></button>
+            );
+            instructionTxt = (
+                <div className='panel-body-instruction instructionsText' id='instructionsTextFirhittaGrannar' dangerouslySetInnerHTML={{__html: this.props.model.get("instructionHittaGrannar")}} />
+            );
+        }
+        var navPanel = document.getElementById('navigation-panel');
+        navPanel.style.width = '417px';
+
         return (
             <div className='panel panel-default'>
-                <div className='panel-heading'>Hitta grannar<button id="FIRHittaGrannarMinimizeButton" onClick={() => this.minBox('HittaGrannarMinimizeBox', "FIRHittaGrannarMinimizeButton")} className={this.props.model.get("searchMinimizedClassButton")}></button></div>
+                <div className='panel-heading'>Hitta grannar{instructionBtn}<button id="FIRHittaGrannarMinimizeButton" onClick={() => this.minBox('HittaGrannarMinimizeBox', "FIRHittaGrannarMinimizeButton")} className={this.props.model.get("searchMinimizedClassButton")}></button>
+                    {instructionTxt}
+                    </div>
                 <div className='panel-body hidden' id='HittaGrannarMinimizeBox'>
                     <div><input type="radio" name="bufferOrNot" id="hittaGrannar" onClick={this.hittaGrannarUpdateRadio} defaultChecked={true}/> Hitta angränsade grannar <br/>
                     <div className="row"><div className="col-md-12"> <input type="radio" id="hittaGrannarMedBuffer" name="bufferOrNot" onClick={this.hittaGrannarUpdateRadio} /> Hitta grannar inom &nbsp;
@@ -546,7 +588,7 @@ var FirSearchView = {
                     </div><br/>
                     <div className='pull-right'>
                         <button id="fir-search-hitta-grannar" onClick={() => this.hittaGrannar()} type='submit' className='btn btn-primary'>Sök</button>&nbsp;
-                        <button onClick={() => console.log("not created")} type='submit' className='btn btn-primary' id='rensaHittaGrannar'>Rensa</button>
+                        <button onClick={() => this.rensaHittaGrannar()} type='submit' className='btn btn-primary' id='rensaHittaGrannar'>Rensa</button>
                     </div>
                 </div>
             </div>
@@ -660,10 +702,28 @@ var FirSearchView = {
         var fastighetsforteckning = this.renderFastighetsForteckning();
         var analysFunctions = this.renderAnalysFunctions();
 
+
+        // Infoknapp
+        var instructionBtn;
+        var instructionTxt;
+        console.log("--- Instruction for Sökning", this.props);
+        if (typeof this.props.model.get("instructionSokning") !== 'undefined' && this.props.model.get("instructionSokning") !== null && this.props.model.get("instructionSokning").length > 0) {
+            instructionBtn = (
+                <button onClick={() => this.openInstruction("sokning")} className='btn-info' id='instructionBox' ><img src={infologo} /></button>
+            );
+            instructionTxt = (
+                <div className='panel-body-instruction instructionsText' id='instructionsTextFirsokning' dangerouslySetInnerHTML={{__html: this.props.model.get("instructionSokning")}} />
+            );
+        }
+        var navPanel = document.getElementById('navigation-panel');
+        navPanel.style.width = '417px';
+
         return (
                 <div className='search-tools'>
                 <div className='panel panel-default'>
-                    <div className='panel-heading'>Sökning <button id="FIRSearchMinimizeButton" onClick={() => this.minBox('FIRSearchMinimizeBox', "FIRSearchMinimizeButton")} className={this.props.model.get("searchExpandedClassButton")}></button></div>
+                    <div className='panel-heading'>Sökning {instructionBtn}<button id="FIRSearchMinimizeButton" onClick={() => this.minBox('FIRSearchMinimizeBox', "FIRSearchMinimizeButton")} className={this.props.model.get("searchExpandedClassButton")}></button>
+                        {instructionTxt}
+                        </div>
                     <div className='panel-body visible' id='FIRSearchMinimizeBox'>
                         <div className='form-group'>
                         {options}

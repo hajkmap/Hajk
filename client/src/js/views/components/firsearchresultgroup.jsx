@@ -147,8 +147,11 @@ FirSearchResultGroup = {
         // e.stopPropagation();
         // e.nativeEvent.stopImmediatePropagation();
 
+        console.log(" this.props.model.get(\"layerCollection\")",  this.props.model.get("layerCollection"));
         var map = this.props.model.get("map");
         this.props.model.get("layerCollection").forEach(layer => {
+            console.log("layer.get(\"caption\")",layer.get("caption"));
+            console.log("this.props.result.layer",this.props.result.layer);
             if(layer.get("caption") == this.props.model.get("firLayerCaption") && this.props.result.layer == "Fastighet"){
                 layer.setVisible(true);
                 console.log("layer", layer.layer);
@@ -230,7 +233,15 @@ FirSearchResultGroup = {
         map.forEachFeatureAtPixel(event.pixel, function(feature, layer){
             if (layer.get("caption") === "FIRSökresltat"){
                 var nyckelHighLight = feature.get("nyckel");
-                source.removeFeature(feature);
+
+                var toDeleteFeatures = source.getFeatures().filter(element => element.get("nyckel") === feature.get("nyckel"));
+                if (toDeleteFeatures.length > 0) {
+                    toDeleteFeatures.forEach(feature => {
+                        source.removeFeature(feature); // clickedOn and the feature in source are not equal?
+                    });
+                }
+
+                var nrDeleted = toDeleteFeatures.length;
 
                 // var get id
                 var hitId = 0;
@@ -241,7 +252,7 @@ FirSearchResultGroup = {
                     }
                 }
                 console.log("hitId", hitId, "groupId", that.props.id);
-                that.reduceOpenIfHigher(hitId, parseInt(that.props.id.substring(6)));
+                that.reduceOpenIfHigher(hitId, parseInt(that.props.id.substring(6)),nrDeleted);
                 that.props.result.hits = that.props.result.hits.filter(element => element.get("nyckel") !== nyckelHighLight);
             } else if (layer.get("caption") === "FIRHighlight"){
                 layer.getSource().removeFeature(feature);
@@ -277,6 +288,7 @@ FirSearchResultGroup = {
         this.props.model.set("minusObject", true);
         console.log("minusObject", this.props.model.get("minusObject"));
 
+
         // delete object from the results group
         var hitStart = 4;
         var hitEnd = hitId.indexOf("-", hitStart);
@@ -286,7 +298,6 @@ FirSearchResultGroup = {
         var groupStart = hitId.indexOf("-", hitEnd + 1) +1;
         var group = parseInt(hitId.substring(groupStart));//this.props.id; //indexOf
 
-        this.reduceOpenIfHigher(hit, group);
 
         console.log("items", this.props.model.get("items"));
         console.log("group", this.props.model.get("items")[group].hits);
@@ -307,8 +318,14 @@ FirSearchResultGroup = {
         console.log("features", features);
         console.log("toDeleteFeatures",toDeleteFeatures);
         if (toDeleteFeatures.length > 0) {
-            source.removeFeature(toDeleteFeatures[0]); // clickedOn and the feature in source are not equal?!
+            toDeleteFeatures.forEach(feature => {
+                source.removeFeature(feature); // clickedOn and the feature in source are not equal?!
+            });
         }
+
+        this.reduceOpenIfHigher(hit, group, toDeleteFeatures.length);
+
+
         this.forceUpdate(); // it affect searchjs
 
 
@@ -453,7 +470,7 @@ FirSearchResultGroup = {
 
     },
 
-    reduceOpenIfHigher: function(hit, group){ // hit = 1, group = 0
+    reduceOpenIfHigher: function(hit, group, nr){ // hit = 1, group = 0
         console.log("reduceOpenIfHigher");
 
         var currentHitId = "#hit-" + hit + "-group-" + group;
@@ -469,7 +486,7 @@ FirSearchResultGroup = {
             var hitEnd = this.props.model.get("previousViewed").indexOf("-", hitStart);
             var prevHit = parseInt(this.props.model.get("previousViewed").substring(hitStart,hitEnd));
             if (prevHit > hit){
-                this.props.model.set("previousViewed", "hit-" + (prevHit-1) + "-group-0");
+                this.props.model.set("previousViewed", "hit-" + (prevHit-nr) + "-group-0");
             }
         }
 
@@ -541,7 +558,7 @@ FirSearchResultGroup = {
     },
 
     render: function () {
-        console.log("render");
+        console.log("result render");
         var id = this.props.id,
             groupStyleClass = this.props.numGroups === 1 ? '' : 'hidden',
             resultBox = this.resultBox(id)

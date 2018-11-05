@@ -32,7 +32,7 @@ var FirPanelView = {
         return (
             <Panel title='FIR' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={window.atob(this.props.model.get('instruction'))}>
                 <div className='panel-content'>
-                    <FirSearch model={this.props.model} navigationPanel={this.props.navigationPanel} />
+                    <FirSearch model={this.props.model} navigationPanel={this.props.navigationPanel} instructionHittaGrannar={this.props.model.get("instructionSokning")} />
                 </div>
             </Panel>
         );

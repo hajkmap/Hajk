@@ -18,7 +18,10 @@ var FirModelProperties = {
     filterVisibleActive: false,
     markerImg: 'assets/icons/marker.png',
     base64Encode: false,
-    instruction: '',
+    instruction: 'A',
+    instructionSokning: 'B',
+    instructionHittaGrannar: 'C',
+    instructionSkapaFastighetsforteckning:'D',
     searchExpandedClassButton: "fa fa-angle-up clickable arrow pull-right",
     searchMinimizedClassButton: "fa fa-angle-down clickable arrow pull-right",
     anchor: [
@@ -38,9 +41,19 @@ var FirModelProperties = {
     popupOffsetY: 0,
     aliasDict: {},
     chosenColumns: [],
-    firLayerCaption: "Fastigheter",
+    firLayerCaption: "Fastighet", //Fastighet:port83&84
     feature: undefined,
-    hittaGrannar: false
+    hittaGrannar: false,
+    backupItems: [],
+    colorResult: "",//'rgba(255, 255, 0, 0.4)',
+    colorResultStroke: "",//'rgba(0, 0, 0, 0.6)',
+    colorHighlight: "",//'rgba(0, 0, 255, 0.5)',
+    colorHighlightStroke: "",//'rgba(0, 0, 0, 0.6)',
+    colorBuffer: "",//'rgba(255, 255, 0, 0.1)',
+    colorBufferStroke: "",//'rgba(0, 0, 0, 0.2)',
+    colorHittaGrannarBuffer: "",//'rgba(50, 200, 200, 0.4)',
+    colorHittaGrannarBufferStroke: "",//'rgba(0, 0, 0, 0.2)',
+    maxFeatures: "1000"
 };
 
 var FirModel = {
@@ -55,6 +68,7 @@ var FirModel = {
         this.set('displayPopupBar', this.get('displayPopup'));
         this.set('layerCollection', shell.getLayerCollection());
         this.set('map', shell.getMap().getMap());
+        console.log("map", this.get("map"));
         this.firFeatureLayer= new ol.layer.Vector({
             caption: 'FIRSökresltat',
             name: 'fir-search-vector-layer',
@@ -75,7 +89,7 @@ var FirModel = {
             caption: 'FIRHighlight',
             name: 'fir-highlight-vector-layer',
             source: new ol.source.Vector(),
-            queryable: true,
+            queryable: false,
             visible: true,
             style: this.getHighlightStyle(),
             zIndex: 100
@@ -95,9 +109,9 @@ var FirModel = {
             caption: 'FIRSökresltatBuffer',
             name: 'fir-buffer-search-vector-layer',
             source: new ol.source.Vector(),
-            queryable: true,
+            queryable: false,
             visible: true,
-            style: this.getStyle()
+            style: this.getFirBufferFeatureStyle()
         });
 
         this.firBufferFeatureLayer.getSource().on('addfeature', evt => {
@@ -105,6 +119,21 @@ var FirModel = {
         });
 
         this.get('map').addLayer(this.firBufferFeatureLayer);
+
+        this.firBufferHiddenFeatureLayer = new ol.layer.Vector({
+            caption: 'FIRHiddenSökresltatBuffer',
+            name: 'fir-buffer-hidden-search-vector-layer',
+            source: new ol.source.Vector(),
+            queryable: false,
+            visible: true, // set to false
+            style: this.getFirBufferHiddenFeatureStyle()
+        });
+
+        this.firBufferHiddenFeatureLayer.getSource().on('addfeature', evt => {
+            evt.feature.setStyle(this.firBufferHiddenFeatureLayer.getStyle());
+        });
+
+        this.get('map').addLayer(this.firBufferHiddenFeatureLayer);
 
         if (this.get('firSelectionTools')) {
             this.set('firSelectionModel', new FirSelectionModel({
@@ -261,7 +290,9 @@ var FirModel = {
                 var posList = '',
                     operation = 'Intersects',
                     coords = [],
-                    objektType = '';
+                    objektType = '',
+                    interiorList = '';
+                console.log("feature= ", feature);
 
                 if (feature.getGeometry() instanceof ol.geom.Circle) {
                     console.log("feature.getGeometry()", feature.getGeometry());
@@ -289,6 +320,16 @@ var FirModel = {
 
                 if (!found && this.isCoordinate(coords[0][0])) {
                     posList = coords[0].map(c => c[0] + ' ' + c[1]).join(' ');
+                    // add interiors as well
+                    var prefix = "\n                <gml:interior>\n                  <gml:LinearRing>\n                    <gml:posList>";
+                    var suffix = "</gml:posList>\n                  </gml:LinearRing>\n                </gml:interior>";
+                    if (coords.length > 1){
+                        for (var i=1; i < coords.length; i++){
+                            interiorList += prefix;
+                            interiorList += coords[i].map(c => c[0] + ' ' + c[1]).join(' ');
+                            interiorList += suffix;
+                        }
+                    }
                     found = true;
                 }
 
@@ -301,17 +342,30 @@ var FirModel = {
                     operation = feature.operation;
                 }
 
-                //gml:polygon -> objektType
-                str += `
+                var distance = "";
+                console.log("+++this.get(bufferSearch)",this.get("bufferSearch"));
+                if(this.get("hittaGrannar")){
+                    operation = "DWithin";
+                    distance = this.get("bufferLength"); // Need to write correct
+                    console.log("distance in meter", distance);
+                    distance = '<ogc:Distance units="meter">' + distance + '</ogc:Distance>';
+                    console.log("distance for parameter", distance);
+                }
+                console.log("coords", coords);
+                console.log("poslist", posList);
+
+                    //gml:polygon -> objektType
+                    str += `
             <ogc:${operation}>
               <ogc:PropertyName>${props.geometryField}</ogc:PropertyName>
               <gml:Polygon srsName="${props.srsName}">
-              <gml:exterior>
-                <gml:LinearRing>
-                  <gml:posList>${posList}</gml:posList>
-                </gml:LinearRing>
-                </gml:exterior>
+                <gml:exterior>
+                  <gml:LinearRing>
+                    <gml:posList>${posList}</gml:posList>
+                  </gml:LinearRing>
+                </gml:exterior>${interiorList}
               </gml:Polygon>
+              ${distance}
             </ogc:${operation}>
         `;
 
@@ -370,14 +424,35 @@ var FirModel = {
 
                 try {
                     features = format.readFeatures(result);
+                    console.log("features from xml", features.length);
                     features = features.reduce((r, f) => {
                         if (this.get('firSelectionTools')) {
                             let found = this.get('features').find(feature =>
                                 f.getId() === feature.getId()
                             );
-                            if (!found) {
+                            if (!found  || this.get("hittaGrannar")) {
                                 r.push(f);
                             }
+                            /*
+                            if (this.get("hittaGrannar")){
+                                // TODO: Compare if feature is in buffer with OpenLayers
+                                // this.firHiddenBUffer...layer.getSource().getFeatures().forEach( feature => {
+                                // if (f inside feature) { push and break}
+                                //}
+
+                                var foundIntersect = false;
+                                this.firBufferHiddenFeatureLayer.getSource().getFeatures().forEach(feature => {
+                                    var intersects = ol.extent.intersects(f.getGeometry().getExtent(), feature.getGeometry().getExtent());
+                                    if(!foundIntersect && intersects){
+                                       r.push(f);
+                                       foundIntersect = true;
+                                   }
+                                });
+                                if(!foundIntersect){
+                                    console.log("no intersect", f.getId());
+                                }
+                            }
+                            */
                         } else {
                             r.push(f);
                         }
@@ -438,7 +513,7 @@ var FirModel = {
          xmlns:xsi = 'http://www.w3.org/2001/XMLSchema-instance'
          xsi:schemaLocation='http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd'
          outputFormat="${outputFormat}"
-         maxFeatures="10000">
+         maxFeatures= "${this.get("maxFeatures")}">
          <wfs:Query typeName=` + typeName + ` srsName='${props.srsName}'>
           <ogc:Filter>
             ${filters}
@@ -495,6 +570,7 @@ var FirModel = {
         this.firFeatureLayer.getSource().clear();
         this.highlightResultLayer.getSource().clear();
         this.firBufferFeatureLayer.getSource().clear();
+        this.firBufferHiddenFeatureLayer.getSource().clear();
         this.set('items', []);
         this.set('barItems', []);
         if (ovl) {
@@ -978,6 +1054,7 @@ var FirModel = {
                     geometryField: searchProps.geometryField,
                     done: features => {
                         if (features.length > 0) {
+                            console.log("length of features", features.length);
                             features.forEach(feature => {
                                 feature.caption = searchProps.caption;
                                 feature.infobox = searchProps.infobox;
@@ -1006,9 +1083,8 @@ var FirModel = {
         }
 
         if(this.get("hittaGrannar")){
-            features = this.firBufferFeatureLayer.getSource().getFeatures();
+            features = this.firBufferHiddenFeatureLayer.getSource().getFeatures();
             this.set("features", features);
-            this.set("hittaGrannar", false);
         }
 
         if (value === '' && features.length === 0) return;
@@ -1068,6 +1144,7 @@ var FirModel = {
             this.set('items', items);
 
             if (done) {
+                this.set("hittaGrannar", false);
                 done({
                     status: 'success',
                     items: items
@@ -1096,10 +1173,10 @@ var FirModel = {
     getStyle: function () {
         return new ol.style.Style({
             fill: new ol.style.Fill({
-                color: 'rgba(255, 255, 0, 0.4)'//'rgba(255, 26, 179, 0.4)'
+                color: this.get("colorResult")//'rgba(255, 26, 179, 0.4)'
             }),
             stroke: new ol.style.Stroke({
-                color: 'rgba(0, 0, 0, 0.6)',
+                color: this.get("colorResultStroke"),
                 width: 4
             }),
             image: new ol.style.Icon({
@@ -1121,10 +1198,48 @@ var FirModel = {
     getBufferStyle: function () {
         return new ol.style.Style({
             fill: new ol.style.Fill({
-                color: 'rgba(255, 255, 0, 0.1)'//'rgba(255, 26, 179, 0.4)'
+                color: this.get("colorBuffer")//'rgba(255, 26, 179, 0.4)'
             }),
             stroke: new ol.style.Stroke({
-                color: 'rgba(0, 0, 0, 0.2)',
+                color: this.get("colorBufferStroke"),
+                width: 4
+            }),
+            image: new ol.style.Icon({
+                anchor: this.get('anchor'),
+                anchorXUnits: 'pixels',
+                anchorYUnits: 'pixels',
+                src: this.get('markerImg'),
+                imgSize: this.get('imgSize')
+            })
+        });
+    },
+
+    getFirBufferFeatureStyle: function () {
+        return new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: this.get("colorHittaGrannarBuffer")//'rgba(255, 26, 179, 0.4)'
+            }),
+            stroke: new ol.style.Stroke({
+                color: this.get("colorHittaGrannarBuffer"),
+                width: 4
+            }),
+            image: new ol.style.Icon({
+                anchor: this.get('anchor'),
+                anchorXUnits: 'pixels',
+                anchorYUnits: 'pixels',
+                src: this.get('markerImg'),
+                imgSize: this.get('imgSize')
+            })
+        });
+    },
+
+    getFirBufferHiddenFeatureStyle: function () {
+        return new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: 'rgba(255, 0, 0, 0.1)'
+            }),
+            stroke: new ol.style.Stroke({
+                color: 'rgba(0, 0, 0, 0.1)',
                 width: 4
             }),
             image: new ol.style.Icon({
@@ -1146,10 +1261,10 @@ var FirModel = {
     getHighlightStyle: function () {
         return new ol.style.Style({
             fill: new ol.style.Fill({
-                color: 'rgba(0, 0, 255, 0.5)'
+                color: this.get("colorHighlight")
             }),
             stroke: new ol.style.Stroke({
-                color: 'rgba(0, 0, 0, 0.6)',
+                color: this.get("colorHighlightStroke"),
                 width: 4
             }),
             image: new ol.style.Icon({
