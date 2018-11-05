@@ -2,19 +2,14 @@
 using System.IO;
 using System.Text;
 using System.Web;
-using System.Web.Hosting;
 using System.Web.Mvc;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using MapService.Models;
-using MapService.Models.ToolOptions;
 using log4net;
 using MapService.Components;
 using System.Configuration;
 using Newtonsoft.Json.Linq;
-using MapService.DataAccess;
-using System.Collections;
-using System.Security.Principal;
 using System.Net;
 using System.Xml;
 
@@ -101,6 +96,7 @@ namespace MapService.Controllers
 
         // Test: { "fnr": ["130121064","130129850","130132945","130139213"] }
         // Test: { "uuid": ["909a6a63-33aa-90ec-e040-ed8f66444c3f","909a6a63-55fc-90ec-e040-ed8f66444c3f","909a6a63-6213-90ec-e040-ed8f66444c3f","909a6a63-7a8f-90ec-e040-ed8f66444c3f"] }
+        // Test: {"fnr":["130120236","130120237","130120238","130120239","130120240","130121103","130121104","130121105","130121106","130121107","130121108","130121109","130121110","130121112","130121113","130121114","130121115","130121116","130121117","130121118","130121119","130121120","130121121","130121122","130121123","130121124","130121125","130121126","130121127","130121128","130121129","130121130","130121132","130121133","130121134","130121150","130121151","130121152","130125494","130127053","130127054","130127055","130127056","130127057","130127058","130127059","130127060","130127063","130127064","130127065","130127066","130127067","130127068","130127069","130127070","130131493","130131494","130131495","130131496","130131497","130131498","130131499","130131500","130131504","130131505","130131506","130131507","130131508","130131509","130131510","130131511","130131512","130145263","130145264","130145265","130145266","130145267","130145268","130145269","130145270","130145273","130145274","130145275","130145276","130145277","130145278","130145279","130145280"]}
         [HttpPost]
         public string PropertyOwnerList(string json)
         {
@@ -113,16 +109,17 @@ namespace MapService.Controllers
 
                 _log.DebugFormat("Received json: {0}", json);
 
+                List<ExcelTemplate> xls = new List<ExcelTemplate>();
                 // Fastighetförteckning
-                string jsonExcel = GenFastighetSheet(json);
+                xls.Add(GenFastighetSheet(json));
                 // Marksamfälligheter
-                jsonExcel += GenMarksamfallighetSheet(json);
+                xls.Add(GenMarksamfallighetSheet(json));
                 // Gemensamhetsanläggningar
-                jsonExcel += GenGASheet(json);
+                xls.Add(GenGASheet(json));
                 // Rättigheter
-                jsonExcel += GenRattighetSheet(json);
+                xls.Add(GenRattighetSheet(json));
 
-                return GenerateExcel(jsonExcel);
+                return GenerateExcel(xls);
             }
             catch (Exception e)
             {
@@ -131,7 +128,14 @@ namespace MapService.Controllers
             }
         }
 
-        private string GenFastighetSheet(string json)
+        /// <summary>
+        /// Försökt använda WCF i .NET utan att lyckas. Enligt LM krävs att man redigerar i de genererade filerna för att det ska funka med WCF och .NET
+        /// https://www.lantmateriet.se/sv/Kartor-och-geografisk-information/Geodatatjanster/Fragor-och-svar/Direktatkomsttjanster-/?faq=c31f
+        /// Använder därför SOAP utan ramverk. När tjänsten finns som REST med JSON-format bör denna portas från SOAP till REST.
+        /// </summary>
+        /// <param name="json"></param>
+        /// <returns></returns>
+        private ExcelTemplate GenFastighetSheet(string json)
         {
             try
             {
@@ -197,23 +201,28 @@ namespace MapService.Controllers
                         nsmgr.AddNamespace("ns4", "http://namespace.lantmateriet.se/distribution/produkter/inskrivning/v2.1");
 
                         // Skapa JSON för fliken Fastighetförteckning
-                        var jsonExcel = "[{ \"TabName\":\"Fastighetsförteckning\",\"Cols\":[\"Beteckning\",\"Andel\",\"Ägare/Innehavare\",\"c/o\",\"Adress\",\"Postnummer\",\"Postadress\",\"Notering\"],\"Rows\":[";
-                        bool firstRow = true;
+                        ExcelTemplate xls = new ExcelTemplate();
+                        xls.TabName = "Fastighetsförteckning";
+                        xls.Cols = new List<string>(new string[] { "Beteckning", "Andel", "Ägare/Innehavare", "c/o", "Adress", "Postnummer", "Postadress", "Notering" });
+                        xls.Rows = new List<List<object>>();
 
                         // Hämta fastighetsbeteckning
                         var nodeListInskrivningsInfo = doc.SelectNodes("//env:Envelope/env:Body/ns4:InskrivningResponse/ns4:InskrivningMember/ns4:Inskrivningsinformation", nsmgr);
                         foreach (XmlNode nodeInskrivning in nodeListInskrivningsInfo)
                         {
+                            var typ = nodeInskrivning["ns4:Registerenhetsreferens"]["ns4:typ"]; // TODO: Kontrollera vilka fler typer det finns (samfällighet?)
                             var fastighetsBeteckning = nodeInskrivning["ns4:Registerenhetsreferens"]["ns4:beteckning"].InnerText;
 
                             // Ägare kan finnas både under Lagfart och under Tomträttsinnehav. Vi tittar endast på Lagfart i piloten
                             // TODO: Även ta med Tomträttsinnehavare
                             var nodeList = nodeInskrivning.SelectNodes("ns4:Agande/ns4:Lagfart", nsmgr);
+                            //var nodeList = nodeInskrivning.SelectNodes("ns4:Agande/ns4:Tomtrattsinnehav", nsmgr);
 
                             if (nodeList.Count > 0)
                             {
                                 foreach (XmlNode node in nodeList)
                                 {
+
                                     if (node["ns4:BeviljadAndel"] != null)
                                     {
                                         var andel = node["ns4:BeviljadAndel"]["ns4:taljare"].InnerText + "/" + node["ns4:BeviljadAndel"]["ns4:namnare"].InnerText;
@@ -226,27 +235,33 @@ namespace MapService.Controllers
                                         {
                                             agare = agareOrg["ns4:organisationsnamn"].InnerText;
                                             coAdress = "";
-                                            if (agareOrg["ns4:Adress"]["ns4:coAdress"] != null)
-                                                coAdress = agareOrg["ns4:Adress"]["ns4:coAdress"].InnerText;
-                                            adress = "";
-                                            if (agareOrg["ns4:Adress"]["ns4:utdelningsadress2"] != null)
-                                                adress = agareOrg["ns4:Adress"]["ns4:utdelningsadress2"].InnerText;
-                                            if (agareOrg["ns4:Adress"]["ns4:utdelningsadress1"] != null)
-                                                adress += agareOrg["ns4:Adress"]["ns4:utdelningsadress1"].InnerText;
-                                            postnr = agareOrg["ns4:Adress"]["ns4:postnummer"].InnerText;
-                                            postort = agareOrg["ns4:Adress"]["ns4:postort"].InnerText;
+                                            if (agareOrg["ns4:Adress"] != null)
+                                            {
+                                                if (agareOrg["ns4:Adress"]["ns4:coAdress"] != null)
+                                                    coAdress = agareOrg["ns4:Adress"]["ns4:coAdress"].InnerText;
+                                                adress = "";
+                                                if (agareOrg["ns4:Adress"]["ns4:utdelningsadress2"] != null)
+                                                    adress = agareOrg["ns4:Adress"]["ns4:utdelningsadress2"].InnerText;
+                                                if (agareOrg["ns4:Adress"]["ns4:utdelningsadress1"] != null)
+                                                    adress += agareOrg["ns4:Adress"]["ns4:utdelningsadress1"].InnerText;
+                                                postnr = agareOrg["ns4:Adress"]["ns4:postnummer"].InnerText;
+                                                postort = agareOrg["ns4:Adress"]["ns4:postort"].InnerText;
+                                            }
                                         }
                                         else if (agarePerson != null)
                                         {
                                             agare = agarePerson["ns4:fornamn"].InnerText + " " + agarePerson["ns4:efternamn"].InnerText;
                                             coAdress = "";
-                                            if (agarePerson["ns4:Adress"]["ns4:coAdress"] != null)
-                                                coAdress = agarePerson["ns4:Adress"]["ns4:coAdress"].InnerText;
-                                            adress = agarePerson["ns4:Adress"]["ns4:utdelningsadress2"].InnerText;
-                                            if (agarePerson["ns4:Adress"]["ns4:utdelningsadress1"] != null)
-                                                adress += agarePerson["ns4:Adress"]["ns4:utdelningsadress1"].InnerText;
-                                            postnr = agarePerson["ns4:Adress"]["ns4:postnummer"].InnerText;
-                                            postort = agarePerson["ns4:Adress"]["ns4:postort"].InnerText;
+                                            if (agarePerson["ns4:Adress"] != null)
+                                            {
+                                                if (agarePerson["ns4:Adress"]["ns4:coAdress"] != null)
+                                                    coAdress = agarePerson["ns4:Adress"]["ns4:coAdress"].InnerText;
+                                                adress = agarePerson["ns4:Adress"]["ns4:utdelningsadress2"].InnerText;
+                                                if (agarePerson["ns4:Adress"]["ns4:utdelningsadress1"] != null)
+                                                    adress += agarePerson["ns4:Adress"]["ns4:utdelningsadress1"].InnerText;
+                                                postnr = agarePerson["ns4:Adress"]["ns4:postnummer"].InnerText;
+                                                postort = agarePerson["ns4:Adress"]["ns4:postort"].InnerText;
+                                            }
                                         }
                                         else
                                         {
@@ -254,19 +269,17 @@ namespace MapService.Controllers
                                                 agare = node["ns4:Agare"]["ns4:fornamn"].InnerText + " " + node["ns4:Agare"]["ns4:efternamn"].InnerText;
                                         }
 
-                                        jsonExcel = jsonExcel + (firstRow ? "" : ",") + "[\"" + fastighetsBeteckning + "\",\"" + andel + "\",\"" + agare + "\",\"" + coAdress + "\",\"" + adress + "\",\"" + postnr + "\",\"" + postort + "\",\"Lagfart\"]";
-                                        firstRow = false;
+                                        xls.Rows.Add(new List<object>(new string [] { fastighetsBeteckning, andel, agare, coAdress, adress, postnr, postort, "Lagfart" }));
                                     }
                                 }
                             }
                             else
                             {
-                                jsonExcel = jsonExcel + (firstRow ? "" : ",") + "[\"Ingen lagfart funnen\",\"\",\"\",\"\",\"\",\"\",\"\",\"Troligen Tomträtt\"]";
-                                firstRow = false;
+                                xls.Rows.Add(new List<object>(new string[] { fastighetsBeteckning, "", "", "", "", "", "", "Troligen Tomträtt" }));
                             }
                         }
 
-                        return jsonExcel + "]},";
+                        return xls;
                     }
                 }
             }
@@ -277,57 +290,57 @@ namespace MapService.Controllers
             }
         }
 
-        private string GenMarksamfallighetSheet(string json)
+        private ExcelTemplate GenMarksamfallighetSheet(string json)
         {
             // TODO: Hämta värden från LM Direkt
             // Osäker på vad som menas med marksamfälligheter. Är det någon form av samfällighetsförening kan dessa hittas i tjänsten nedan.
             // Värden för detta hittas i tjänsten Samfällighetsförening Direkt
 
-            // Skapa JSON för fliken Marksamfälligheter
-            var jsonExcel = "{ \"TabName\":\"Marksamfälligheter\",\"Cols\":[\"Marksamfälligheter\"],\"Rows\":[";
-            jsonExcel = jsonExcel + "[\"Not implemented\"]";
-            return jsonExcel + "]},";
+            // Skapa fliken Marksamfälligheter
+            ExcelTemplate xls = new ExcelTemplate();
+            xls.TabName = "Marksamfälligheter";
+            xls.Cols = new List<string>(new string[] { "Marksamfälligheter" });
+            xls.Rows = new List<List<object>>();
+            xls.Rows.Add(new List<object>(new string[] { "Not implemented" }));
+
+            return xls;
         }
 
-        private string GenGASheet(string json)
+        private ExcelTemplate GenGASheet(string json)
         {
             // TODO: Hämta värden från LM Direkt
             // Värden för detta hittas i tjänsten Gemensamhetsanläggning Direkt
 
-            // Skapa JSON för fliken Gemensamhetsanläggningar
-            var jsonExcel = "{ \"TabName\":\"Gemensamhetsanläggningar\",\"Cols\":[\"Gemensamhetsanläggningar\"],\"Rows\":[";
-            jsonExcel = jsonExcel + "[\"Not implemented\"]";
-            return jsonExcel + "]},";
+            // Skapa fliken Gemensamhetsanläggningar
+            ExcelTemplate xls = new ExcelTemplate();
+            xls.TabName = "Gemensamhetsanläggningar";
+            xls.Cols = new List<string>(new string[] { "Gemensamhetsanläggningar" });
+            xls.Rows = new List<List<object>>();
+            xls.Rows.Add(new List<object>(new string[] { "Not implemented" }));
+
+            return xls;
         }
 
-        private string GenRattighetSheet(string json)
+        private ExcelTemplate GenRattighetSheet(string json)
         {
             // TODO: Hämta värden från LM Direkt
             // Värden för detta hittas i tjänsten Inskrivning Direkt
 
-            // Skapa JSON för fliken Rättigheter
-            var jsonExcel = "{ \"TabName\":\"Rättigheter\",\"Cols\":[\"Avtalsrättighet\",\"Till förmån för\",\"Till last för \",\"Andel\",\"Ägare/Innehavare\",\"c/o\",\"Adress\",\"Postnummer\",\"Postadress\"],\"Rows\":[";
-            jsonExcel = jsonExcel + "[\"Not implemented\",\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"]";
-            return jsonExcel + "]}]";
+            // Skapa fliken Rättigheter
+            ExcelTemplate xls = new ExcelTemplate();
+            xls.TabName = "Rättigheter";
+            xls.Cols = new List<string>(new string[] { "Avtalsrättighet", "Till förmån för", "Till last för", "Andel", "Ägare/Innehavare", "c/o", "Adress", "Postnummer", "Postadress" });
+            xls.Rows = new List<List<object>>();
+            xls.Rows.Add(new List<object>(new string[] { "Not implemented", "", "", "", "", "", "", "", "" }));
+
+            return xls;
         }
 
-        private string GenerateExcel(string json)
+        private string GenerateExcel(List<ExcelTemplate> xls)
         {
             try
             {
-                //// Hårdkodat exempel, används inte
-                //json = "[{ \"TabName\":\"Fastighetförteckning\",\"Cols\":[\"Beteckning\",\"Andel\",\"Ägare/Innehavare\",\"c/o\",\"Adress\",\"Postnummer\",\"Postadress\",\"Notering\"],\"Rows\":[";
-                ////string json = "[{ \"TabName\":\"Fastighetförteckning\",\"Cols\":[\"Beteckning\",\"Andel\",\"Ägare/Innehavare\",\"c/o\",\"Adress\",\"Postnummer\",\"Postadress\",\"Notering\"],\"Rows\":[[\"Beteckning\",\"Andel\",\"Ägare/Innehavare\",\"c/o\",\"Adress\",\"Postnummer\",\"Postadress\",\"Notering\"]]}]";
-                ////json = json + "[\"Beteckning\",\"Andel\",\"Ägare/Innehavare\",\"c/o\",\"Adress\",\"Postnummer\",\"Postadress\",\"Notering\"]";
-                //json = json + "[\"Getakärr 1:1\",\"1/1\",\"Varbergs kommun\",\"\",\"BOX XXX\",\"43280\",\"Varberg\",\"\"],";
-                //json = json + "[\"Breared 3\",\"1/3\",\"Anders Andersson\",\"\",\"Stora Storgatan 1\",\"43281\",\"Varberg\",\"\"],";
-                //json = json + "[\"Breared 3\",\"1/3\",\"Anders 2 Andersson\",\"\",\"Stora Storgatan 2\",\"43281\",\"Varberg\",\"\"],";
-                //json = json + "[\"Breared 3\",\"1/3\",\"Anders 3 Andersson\",\"\",\"Stora Storgatan 3\",\"43281\",\"Varberg\",\"\"],";
-                //json = json + "[\"Ferien 6\",\"1/1\",\"BRF XXX\",\"c/o BRF XXX\",\"Lillgatan 1\",\"43284\",\"Varberg\",\"\"]";
-                //json = json + "]}]";
-
-                List<ExcelTemplate> data = JsonConvert.DeserializeObject<List<ExcelTemplate>>(json);
-                System.Data.DataSet dataSet = Util.ToDataSet(data);
+                System.Data.DataSet dataSet = Util.ToDataSet(xls);
                 ExcelCreator excelCreator = new ExcelCreator();
                 byte[] bytes = excelCreator.Create(dataSet);
                 string[] fileInfo = byteArrayToFileInfo(bytes, "xls");
