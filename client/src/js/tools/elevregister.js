@@ -21,7 +21,6 @@
 // https://github.com/hajkmap/Hajk
 
 var ToolModel = require("tools/tool");
-//var olMap;
 
 /**
  * @typedef {Object} ElevregisterModel~ElevregisterModelProperties
@@ -1034,51 +1033,6 @@ var ElevregisterModel = {
       default:
         return "";
     }
-  },
-
-  /**
-   * Set the property wich will show/hide labels and update the source.
-   * @instance
-   * @return {boolean} showLabels
-   */
-  toggleLabels: function() {
-    this.set("showLabels", !this.get("showLabels"));
-    this.get("source").changed();
-
-    source.forEachFeature(feature => {
-      if (
-        feature.getProperties().type !== "Text" &&
-        typeof feature.getProperties().description === "undefined" &&
-        feature.getStyle()
-      ) {
-        let style = feature.getStyle();
-        if (this.get("showLabels")) {
-          if (style[1]) {
-            style[1].getText().setText(this.getLabelText(feature));
-          } else if (style[0]) {
-            style[0].getText().setText(this.getLabelText(feature));
-          }
-        } else {
-          if (style[1]) {
-            style[1].getText().setText("");
-          } else if (style[0]) {
-            style[0].getText().setText("");
-          }
-        }
-      } else if (
-        feature.getProperties().type === "Text" ||
-        typeof feature.getProperties().description !== "undefined"
-      ) {
-        let style = feature.getStyle();
-        if (style[1]) {
-          style[1].getText().setText(this.getLabelText(feature));
-        } else if (style[0]) {
-          style[0].getText().setText(this.getLabelText(feature));
-        }
-      }
-    });
-
-    return this.get("showLabels");
   },
 
   /**

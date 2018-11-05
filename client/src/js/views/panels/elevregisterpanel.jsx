@@ -192,16 +192,6 @@ var ElevregisterPanelView = {
   },
 
   /**
-   * Handle change event of the show labels checkbox.
-   * @instance
-   */
-  toggleLabels: function() {
-    this.setState({
-      showLabels: this.props.model.toggleLabels()
-    });
-  },
-
-  /**
    * Activate the removal tool and update visuals.
    * @instance
    */
