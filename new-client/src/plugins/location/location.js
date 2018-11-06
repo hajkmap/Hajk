@@ -1,13 +1,9 @@
-import React, { Component } from "react";
-import Observer from "react-event-observer";
-import GeolocationModel from "./model.js";
-import { createPortal } from "react-dom";
+import React from "react";
 import { transform } from "ol/proj";
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
 import { Vector as VectorSource } from "ol/source.js";
 import { Vector as VectorLayer } from "ol/layer.js";
-import "./style.css";
 
 import PropTypes from "prop-types";
 import classNames from "classnames";
@@ -52,16 +48,14 @@ const styles = theme => ({
     marginLeft: -12
   }
 });
-class Geolocation extends Component {
-  constructor() {
-    super();
-    this.state = {
-      toggled: false,
-      // currentCoords: null
-      loading: false,
-      success: false
-    };
-  }
+
+class Location extends React.PureComponent {
+  state = {
+    toggled: false,
+    // currentCoords: null
+    loading: false,
+    success: false
+  };
 
   /* TODO:
    * Make the "here you are" dot looks nicer.
@@ -70,17 +64,7 @@ class Geolocation extends Component {
    * */
 
   componentDidMount() {
-    this.observer = Observer();
-    this.observer.subscribe("myEvent", message => {
-      console.log(message);
-    });
-    this.GeolocationModel = new GeolocationModel({
-      map: this.props.tool.map,
-      app: this.props.tool.app,
-      observer: this.observer
-    });
-    this.props.tool.instance = this;
-    this.map = this.props.tool.map;
+    this.map = this.props.map;
 
     // Init geolocation layer where the point will be drawn to
     this.source = new VectorSource({ wrapX: false });
@@ -119,7 +103,6 @@ class Geolocation extends Component {
   };
 
   handleClick = () => {
-    // this.btn.setAttribute("disabled", "disabled");
     if (!this.state.loading) {
       this.setState(
         {
@@ -134,59 +117,48 @@ class Geolocation extends Component {
         }
       );
     }
-
-    // this.btn.removeAttribute("disabled");
   };
 
-  render() {
+  renderAsWidgetItem() {
     const { loading, success } = this.state;
     const { classes } = this.props;
     const buttonClassname = classNames({
       [classes.buttonSuccess]: success
     });
     return (
-      <span>
-        {createPortal(
-          <div>
-            <div className={classes.root}>
-              <div className={classes.wrapper}>
-                <Button
-                  variant="fab"
-                  color="primary"
-                  className={buttonClassname}
-                  onClick={this.handleClick}
-                >
-                  {success ? <CheckIcon /> : <NavigationIcon />}
-                </Button>
-                {loading && (
-                  <CircularProgress size={68} className={classes.fabProgress} />
-                )}
-              </div>
-            </div>
+      <div className={classes.root}>
+        <div className={classes.wrapper}>
+          <Button
+            variant="fab"
+            color="primary"
+            className={buttonClassname}
+            onClick={this.handleClick}
+          >
+            {success ? <CheckIcon /> : <NavigationIcon />}
+          </Button>
+          {loading && (
+            <CircularProgress size={68} className={classes.fabProgress} />
+          )}
+        </div>
+      </div>
+    );
+  }
 
-            {/* <div className="ol-control ol-geolocation">
-              <button
-                type="button"
-                title="Zooma till min nuvarande position"
-                ref={btn => {
-                  this.btn = btn; // expose a ref btn can be reached from handleClick and disabled/enabled
-                }}
-                onClick={this.handleClick}
-              >
-                <i className="material-icons">navigation</i>
-              </button>
-            </div> */}
-          </div>,
-          document.getElementById("map")
-        )}
-      </span>
+  render() {
+    // This plugin can only be rendered as widget item. If configured
+    // otherwise, throw an error.
+    if (this.props.type === "widgetItem") {
+      return this.renderAsWidgetItem();
+    }
+
+    throw new Error(
+      "Location plugin can only be rendered as a widget item. Make sure that the 'target' property is either 'left' or 'right'."
     );
   }
 }
 
-Geolocation.propTypes = {
+Location.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-// export default Geolocation;
-export default withStyles(styles)(Geolocation);
+export default withStyles(styles)(Location);
