@@ -1,10 +1,10 @@
-import React, { Component } from "react";
+import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 
 const styles = theme => ({});
 
-class EditView extends Component {
+class EditView extends React.PureComponent {
   constructor() {
     super();
     console.log("EditView constructor()", this);

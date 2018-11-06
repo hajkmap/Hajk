@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import Observer from "react-event-observer";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
@@ -16,7 +16,7 @@ const styles = theme => ({
     zIndex: theme.zIndex.drawer - 1
   }
 });
-class LayersSwitcherView extends Component {
+class LayersSwitcherView extends React.PureComponent {
   state = {
     layerGroupsExpanded: true
   };

@@ -5,7 +5,7 @@ import Button from "@material-ui/core/Button";
 
 const styles = theme => ({});
 
-class DummyView extends React.Component {
+class DummyView extends React.PureComponent {
   state = {};
 
   getText() {
