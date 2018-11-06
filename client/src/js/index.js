@@ -220,21 +220,16 @@
           if (searchTool.options.layers == null) {
             searchTool.options.sources = data.wfslayers;
           } else {
-            if (searchTool.options.layers.length != 0) {
               var wfslayers = internal.overrideGlobalSearchConfig(searchTool, data);
               searchTool.options.sources = wfslayers;
               data.wfslayers = wfslayers;
-            } else {
-              searchTool.options.sources = data.wfslayers;
             }
-          }
         }
 
         if (editTool) {
-          if (!editTool.options.layers) {
+          if (editTool.options.layers == null) {
             editTool.options.sources = data.wfstlayers;
           } else {
-            if (editTool.options.layers.length > 0) {
               var layers = data.wfstlayers.filter(layer => {
                 if (editTool.options.layers.find(x => x.id == layer.id)) {
                   return layer;
@@ -243,10 +238,7 @@
 
               editTool.options.sources = layers;
               data.wfstlayers = layers;
-            } else {
-              editTool.options.sources = data.wfstlayers;
-            }
-          }
+            } 
         }
 
         internal.init(
