@@ -160,22 +160,15 @@ var ElevregisterPanelView = {
     });
   },
 
-  schoolsSelected: function() {
-    console.log("schoolsSelected");
-  },
-
   showOnMap: function() {
-    console.log("showOnMap function...");
     this.props.model.showOnMap(urlID);
   },
 
   getSchools: function() {
-    console.log("getSchools...");
     this.props.model.getSchools();
   },
 
   getClasses: function() {
-    console.log("getClasses...");
     this.props.model.getClasses();
   },
   /**
@@ -186,54 +179,6 @@ var ElevregisterPanelView = {
     this.props.model.abort();
 
     $("#abort").hide();
-    this.setState({
-      symbology: ""
-    });
-  },
-
-  /**
-   * Activate the removal tool and update visuals.
-   * @instance
-   */
-  activateRemovalTool: function() {
-    this.props.model.activateRemovalTool();
-    $(
-      "#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete, #Box"
-    ).removeClass("selected");
-    $("#delete").addClass("selected");
-    $("#abort").show();
-    this.setState({
-      symbology: ""
-    });
-  },
-
-  /**
-   * Activate move tool and update visuals.
-   * @instance
-   */
-  activateMoveTool: function() {
-    this.props.model.activateMoveTool();
-    $(
-      "#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete, #Box"
-    ).removeClass("selected");
-    $("#move").addClass("selected");
-    $("#abort").show();
-    this.setState({
-      symbology: ""
-    });
-  },
-
-  /**
-   * Activate move tool and update visuals.
-   * @instance
-   */
-  activateEditTool: function() {
-    this.props.model.activateEditTool();
-    $(
-      "#Point, #Text, #Polygon, #LineString, #Circle, #move, #edit, #delete, #Box"
-    ).removeClass("selected");
-    $("#edit").addClass("selected");
-    $("#abort").show();
     this.setState({
       symbology: ""
     });
@@ -433,7 +378,6 @@ var ElevregisterPanelView = {
    * @return {external:ReactElement}
    */
   render: function() {
-    //view-source:https://ikarta.kungsbacka.se/fgadmin/fg-ist/elever.html
     //klasser: Hold down the Ctrl (windows) / Command (Mac) button to select multiple options.
 
     var dialog = this.renderDialog(this.state.dialog),
@@ -453,7 +397,11 @@ var ElevregisterPanelView = {
             <div className="panel panel-default">
               <div className="panel-heading"> Skolor </div>
               <div className="panel-body">
-                <select id="skolor" onChange={this.getClasses}>
+                <select
+                  id="skolor"
+                  onChange={this.getClasses}
+                  style={{ width: "98%" }}
+                >
                   <option value="none"> Välj skola</option>
                 </select>
               </div>
@@ -462,7 +410,11 @@ var ElevregisterPanelView = {
             <div className="panel panel-default">
               <div className="panel-heading"> Klasser</div>
               <div className="panel-body">
-                <select id="klasser" multiple="multiple">
+                <select
+                  id="klasser"
+                  multiple="multiple"
+                  style={{ width: "98%" }}
+                >
                   <option value="none" />
                 </select>
               </div>

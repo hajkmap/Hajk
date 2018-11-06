@@ -31,7 +31,6 @@ var ToolModel = require("tools/tool");
  * @property {string} visible - Default: false
  * @property {string} icon - Default: 'fa fa-building icon'
  * @property {string} elevregisterLayerName - Default: 'elevregister-layer'
- * @property {string} elevregisterData - Default: undefined
  * @property {external:"ol.layer"} elevregisterLayer - Default: undefined
  * @property {object} elevregisterTool - Default: undefined
  * @property {object} removeTool - Default: undefined
@@ -73,10 +72,10 @@ var ElevregisterModelProperties = {
   toolbar: "bottom",
   visible: false,
   icon: "fa fa-building icon",
+  schoolData: undefined,
   elevregisterLayerName: "elevregister-layer",
   elevregisterLayer: undefined,
   elevregisterTool: undefined,
-  elevregisterData: undefined,
   removeTool: undefined,
   olMap: undefined,
   source: undefined,
@@ -134,7 +133,6 @@ var ElevregisterModelProperties = {
     })
   ]
 };
-var schoolData;
 
 /**
  * Prototype for creating an elevregister model.
@@ -202,7 +200,6 @@ var ElevregisterModel = {
   },
 
   getSchools: function() {
-    console.log("...getSchools");
     return $.ajax({
       url: "GR.json",
       type: "GET",
@@ -211,28 +208,19 @@ var ElevregisterModel = {
   },
 
   handleSchools: function(data /* , textStatus, jqXHR */) {
-    console.log("handleSchools...");
-    console.log(data);
-    //this.set("elevregisterData", data);
+    //console.log(data);
     schoolData = data;
     for (s in data) {
-      console.log(s);
+      //console.log(s);
       $("#skolor").append('<option id="' + s + '">' + s + "</option>");
     }
   },
 
   getClasses: function() {
-    console.log("...getClasses");
     var school = $("#skolor :selected").text();
-
-    //var schoolData = this.get("elevregisterData");
-    console.log(school);
-    console.log(schoolData);
     $("#klasser").empty();
     for (s in schoolData) {
-      //console.log('schoolData[' + s + ']: ' + schoolData[s]);
       if (s === school) {
-        console.log("Hittade " + school);
         var klasser = schoolData[s];
         for (k in klasser) {
           //console.log(klasser[k].klassNamn);
@@ -249,25 +237,22 @@ var ElevregisterModel = {
   },
 
   showOnMap: function() {
-    console.log("showOnMap...");
     this.get("elevregisterLayer")
       .getSource()
       .clear();
     this.set("studentCount", 0);
     that = this;
     var classes = $("#klasser").val();
-    console.log(classes);
-
     var fetchNow = function() {
-      console.log("...fetchNow " + i);
+      //console.log("...fetchNow " + i);
       fetch(classes[i] + ".json")
         .then(function(response) {
           return response.json();
         })
         .then(function(myJson) {
           var features = new ol.format.GeoJSON().readFeatures(myJson);
-          console.log("features " + i);
-          console.log(features);
+          //console.log("features " + i);
+          //console.log(features);
           that
             .get("elevregisterLayer")
             .getSource()
@@ -275,7 +260,6 @@ var ElevregisterModel = {
         });
     };
     for (var i = 0; i < classes.length; i++) {
-      console.log("fetchNow... " + i);
       fetchNow();
     }
   },
@@ -307,82 +291,6 @@ var ElevregisterModel = {
   },
 
   /**
-   * Activate tool for feature removal.
-   * @instance
-   */
-  activateRemovalTool: function() {
-    var dragInteraction = this.getDragInteraction();
-    this.get("olMap").removeInteraction(this.get("elevregisterTool"));
-    this.get("olMap").removeInteraction(this.get("editTool"));
-    this.get("olMap").set("clickLock", true);
-    this.get("olMap").un("singleclick", this.get("editOpenDialogBinded"));
-    this.get("olMap").on("singleclick", this.removeSelected);
-    if (dragInteraction) {
-      dragInteraction.removeAcceptedLayer("elevregister-layer");
-    }
-  },
-
-  /**
-   * Activate tool for feature edit.
-   * @instance
-   */
-  activateEditTool: function() {
-    var dragInteraction = this.getDragInteraction(),
-      revision = 1,
-      features = new ol.Collection();
-
-    this.get("olMap").un("singleclick", this.removeSelected);
-    this.get("olMap").un("singleclick", this.get("editOpenDialogBinded"));
-    this.get("olMap").removeInteraction(this.get("elevregisterTool"));
-    this.get("olMap").removeInteraction(this.get("editTool"));
-    this.get("olMap").set("clickLock", true);
-    this.set("elevregisterToolActive", true);
-
-    this.set("editOpenDialogBinded", this.editOpenDialog.bind(this));
-
-    this.get("olMap").on("singleclick", this.get("editOpenDialogBinded"));
-
-    if (dragInteraction) {
-      dragInteraction.removeAcceptedLayer("elevregister-layer");
-    }
-    this.get("source")
-      .getFeatures()
-      .forEach(f => {
-        features.push(f);
-      });
-
-    this.set(
-      "editTool",
-      new ol.interaction.Modify({
-        features: features
-      })
-    );
-
-    this.get("olMap").addInteraction(this.get("editTool"));
-
-    this.get("editTool").on("modifyend", e => {
-      this.measureTooltip.setPosition(undefined);
-      e.features.forEach(this.updateFeatureText.bind(this));
-    });
-  },
-
-  /**
-   * Update features text.
-   * @instance
-   */
-  updateFeatureText: function(feature) {
-    var labelText, style;
-    this.setFeaturePropertiesFromGeometry(feature);
-
-    labelText = this.getLabelText(feature);
-    style = feature.getStyle()[1] || feature.getStyle()[0];
-
-    if (style && style.getText() !== null) {
-      style.getText().setText(labelText);
-    }
-  },
-
-  /**
    * Get map´s first drag interaction, if any.
    * @instance
    */
@@ -391,22 +299,6 @@ var ElevregisterModel = {
       .getInteractions()
       .getArray()
       .filter(interaction => interaction instanceof ol.interaction.Drag)[0];
-  },
-
-  /**
-   * Activate drag intecation for elevregister layer.
-   * @instance
-   */
-  activateMoveTool: function() {
-    this.get("olMap").removeInteraction(this.get("elevregisterTool"));
-    this.get("olMap").removeInteraction(this.get("editTool"));
-    this.get("olMap").un("singleclick", this.removeSelected);
-    this.get("olMap").un("singleclick", this.get("editOpenDialogBinded"));
-    this.set("elevregisterToolActive", false);
-    var dragInteraction = this.getDragInteraction();
-    if (dragInteraction) {
-      dragInteraction.addAcceptedLayer("elevregister-layer");
-    }
   },
 
   /**
@@ -431,74 +323,6 @@ var ElevregisterModel = {
       );
       feature.setStyle(this.getStyle(feature));
     }
-  },
-
-  /**
-   * Event handler to excecute after features are elevregistern.
-   * @params: {external:"ol.feature"} type
-   * @params: {string} type
-   * @instance
-   */
-  handleDrawEnd: function(feature, type) {
-    if (type === undefined) {
-      return;
-    }
-    if (type === "Text") {
-      feature.setStyle(this.get("scetchStyle"));
-      this.set("dialog", true);
-      this.set("editing", false);
-      this.set("elevregisterFeature", feature);
-    } else {
-      this.setFeaturePropertiesFromGeometry(feature);
-      feature.setStyle(this.getStyle(feature));
-    }
-    this.measureTooltip.setPosition(undefined);
-  },
-
-  /**
-   * Event handler to excecute when the users starts to elevregister.
-   * @param {extern:"ol.geom.GeometryType"} type
-   * @instance
-   */
-  handleDrawStart: function(e, geometryType) {
-    var circleRadius = parseFloat(this.get("circleRadius"));
-
-    if (!isNaN(circleRadius) && geometryType === "Circle") {
-      this.get("elevregisterTool").finishElevregistering();
-      e.feature.getGeometry().setRadius(circleRadius);
-    }
-
-    e.feature.getGeometry().on("change", e => {
-      var toolTip = "",
-        coord = undefined,
-        pointerCoord;
-
-      if (this.get("elevregisterToolActive")) {
-        if (this.get("pointerPosition")) {
-          pointerCoord = this.get("pointerPosition").coordinate;
-        }
-
-        if (e.target instanceof ol.geom.LineString) {
-          toolTip = this.formatLabel("length", e.target.getLength());
-          coord = e.target.getLastCoordinate();
-        }
-
-        if (e.target instanceof ol.geom.Polygon) {
-          toolTip = this.formatLabel("area", e.target.getArea());
-          coord = pointerCoord || e.target.getFirstCoordinate();
-        }
-
-        if (e.target instanceof ol.geom.Circle) {
-          toolTip = this.formatLabel("length", e.target.getRadius());
-          coord = pointerCoord;
-        }
-
-        this.measureTooltipElement.innerHTML = toolTip;
-        if (this.get("showLabels") && coord) {
-          this.measureTooltip.setPosition(coord);
-        }
-      }
-    });
   },
 
   /**
@@ -1033,69 +857,6 @@ var ElevregisterModel = {
       default:
         return "";
     }
-  },
-
-  /**
-   * Update any feature with property to identify feature as text feature.
-   * @instance
-   * @params {external:"ol.feature"} feature
-   * @params {string} text
-   */
-  setFeaturePropertiesFromText: function(feature, text) {
-    if (!feature) return;
-    feature.setProperties({
-      type: "Text",
-      user: true,
-      description: text
-    });
-  },
-
-  /**
-   * Update any feature with properties from its own geometry.
-   * @instance
-   * @params {external:"ol.feature"} feature
-   */
-  setFeaturePropertiesFromGeometry: function(feature) {
-    if (!feature) return;
-    var geom,
-      type = "",
-      lenght = 0,
-      radius = 0,
-      area = 0,
-      position = {
-        n: 0,
-        e: 0
-      };
-    geom = feature.getGeometry();
-    type = geom.getType();
-    switch (type) {
-      case "Point":
-        position = {
-          n: Math.round(geom.getCoordinates()[1]),
-          e: Math.round(geom.getCoordinates()[0])
-        };
-        break;
-      case "LineString":
-        length = Math.round(geom.getLength() * 10) / 10;
-        break;
-      case "Polygon":
-        area = Math.round(geom.getArea());
-        break;
-      case "Circle":
-        radius = Math.round(geom.getRadius());
-        if (radius === 0) radius = parseFloat(this.get("circleRadius"));
-        break;
-      default:
-        break;
-    }
-    feature.setProperties({
-      type: type,
-      user: true,
-      length: length,
-      area: area,
-      radius: radius,
-      position: position
-    });
   },
 
   /**
