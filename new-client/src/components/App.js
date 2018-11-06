@@ -8,6 +8,8 @@ import Popup from "./Popup.js";
 import AppBar from "@material-ui/core/AppBar";
 import { Toolbar as MUIToolbar } from "@material-ui/core";
 import classNames from "classnames";
+import ErrorIcon from "@material-ui/icons/Error";
+import SentimentVeryDissatisfiedIcon from "@material-ui/icons/SentimentVeryDissatisfied";
 
 import "./App.css";
 
@@ -117,6 +119,10 @@ class App extends Component {
     });
   }
 
+  componentDidCatch(error) {
+    this.setState({ hasError: true, errorText: error });
+  }
+
   renderWidgets(target) {
     const { classes } = this.props;
     if (this.state.tools) {
@@ -159,6 +165,23 @@ class App extends Component {
 
   render() {
     const { classes } = this.props;
+
+    if (this.state.hasError) {
+      return (
+        <div className="start-error">
+          <div>
+            <ErrorIcon />
+          </div>
+          <div>
+            Åh nej! Applikationen kunde inte starta. Kontakta din lokala
+            administatör.
+            <br />
+            <SentimentVeryDissatisfiedIcon />
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className={classes.root}>
         <main className={classes.map} id="map">
