@@ -1,164 +1,142 @@
 import React from "react";
-import { transform } from "ol/proj";
-import Feature from "ol/Feature";
-import Point from "ol/geom/Point";
-import { Vector as VectorSource } from "ol/source.js";
-import { Vector as VectorLayer } from "ol/layer.js";
-
-import PropTypes from "prop-types";
-import classNames from "classnames";
+import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import green from "@material-ui/core/colors/green";
-import Button from "@material-ui/core/Button";
-import CheckIcon from "@material-ui/icons/Check";
+
+import {
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Button
+} from "@material-ui/core";
 import NavigationIcon from "@material-ui/icons/Navigation";
 
-const styles = theme => ({
-  root: {
-    display: "flex",
-    alignItems: "center",
-    top: "235px",
-    right: "15px",
-    position: "absolute"
-  },
-  wrapper: {
-    margin: theme.spacing.unit,
-    position: "relative"
-  },
-  buttonSuccess: {
-    backgroundColor: green[500],
-    "&:hover": {
-      backgroundColor: green[700]
-    }
-  },
-  fabProgress: {
-    color: green[500],
-    position: "absolute",
-    top: -6,
-    left: -6,
-    zIndex: 1
-  },
-  buttonProgress: {
-    color: green[500],
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginTop: -12,
-    marginLeft: -12
-  }
-});
+import Panel from "../../components/Panel.js";
+import LocationView from "./LocationView";
+
+const styles = theme => {
+  return {};
+};
 
 class Location extends React.PureComponent {
   state = {
-    toggled: false,
-    // currentCoords: null
-    loading: false,
-    success: false
+    panelOpen: false
   };
 
-  /* TODO:
-   * Make the "here you are" dot looks nicer.
-   * Add listener this.on('change:location', () => { this.setLocation(); }) and update dot's location
-   * Don't render that nasty <span> to #toolbar!
-   * */
+  // Called when plugin's <ListItem> or widget <Button> is clicked
+  onClick = e => {
+    // Callback that loops through app's panels and calls closePanel() on all except current
+    this.props.app.onPanelOpen(this);
 
-  componentDidMount() {
-    this.map = this.props.map;
-
-    // Init geolocation layer where the point will be drawn to
-    this.source = new VectorSource({ wrapX: false });
-    this.layer = new VectorLayer({
-      source: this.source,
-      name: "geolocation-layer"
+    // This state variable is being watched for in render() and decides whether MUI Component <Drawer> is open or not
+    this.setState({
+      panelOpen: true
     });
-    this.map.addLayer(this.layer);
+  };
+
+  // Important, part of API for plugins that contain panels.
+  closePanel = () => {
+    this.setState({
+      panelOpen: false
+    });
+  };
+
+  constructor(spec) {
+    super(spec);
+
+    // Important, part of API. Must be a string. Could be fetched from config.
+    this.text = "Spåra position";
+
+    // Important, part of API for plugins that contain panels. Makes App aware of this panels existence.
+    this.props.app.registerPanel(this);
   }
 
-  drawPoint = coords => {
-    this.layer.getSource().clear();
-    let point = new Point(coords);
-    this.layer.getSource().addFeature(
-      new Feature({
-        geometry: point
-      })
-    );
-  };
+  // Note: as we experiment with PureComponents, this has been out-commented.
+  // Important, part of API. Avoid re-rendering if current panel has not changed its state.
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   return this.state.panelOpen !== nextState.panelOpen;
+  // }
 
-  geolocationSuccess = pos => {
-    const transformed = transform(
-      [pos.coords.longitude, pos.coords.latitude],
-      "EPSG:4326",
-      this.map.getView().getProjection()
-    );
-    // this.setState({ currentCoords: transformed });
-    this.drawPoint(transformed);
-    this.setState({ loading: false, success: true });
-    this.map.getView().animate({ center: transformed, zoom: 10 });
-  };
-
-  geolocationError = err => {
-    console.error(err);
-    this.setState({ loading: false, success: false });
-  };
-
-  handleClick = () => {
-    if (!this.state.loading) {
-      this.setState(
-        {
-          loading: true,
-          success: false
-        },
-        () => {
-          navigator.geolocation.getCurrentPosition(
-            this.geolocationSuccess,
-            this.geolocationError
-          );
-        }
-      );
-    }
-  };
-
-  renderAsWidgetItem() {
-    const { loading, success } = this.state;
-    const { classes } = this.props;
-    const buttonClassname = classNames({
-      [classes.buttonSuccess]: success
+  // Important, part of API. Make sure to respect panel visibility set in config.
+  componentWillMount() {
+    this.setState({
+      panelOpen: this.props.options.visibleAtStart
     });
+  }
+
+  // Not part of API but rather convention. If plugin has a panel, its render method should be called renderPanel().
+  renderPanel() {
+    // Using Portals (see React docs) we render panel not in direct relation in DOM to the button, but rather in #map-overlay <div>.
+    // We make use of <Panel>, a component that encapsulates MUI's Drawer, that we've written to reuse across Hajk's plugins.
+    return createPortal(
+      <Panel
+        title={this.text}
+        onClose={this.closePanel}
+        position="left"
+        open={this.state.panelOpen}
+      >
+        <LocationView parent={this} />
+      </Panel>,
+      document.getElementById("map-overlay")
+    );
+  }
+
+  /* 
+   * Important, part of plugins API.
+   * Each plugin must present both renderAsWidgetItem and renderAsToolbarItem.
+   * Depending on user's preferred location, App will render the plugin
+   * using one of these two methods.
+  */
+
+  // Render as a FAB (floating action button, https://material-ui.com/demos/buttons/#floating-action-buttons)
+  renderAsWidgetItem() {
+    const { classes } = this.props;
     return (
-      <div className={classes.root}>
-        <div className={classes.wrapper}>
-          <Button
-            variant="fab"
-            color="primary"
-            className={buttonClassname}
-            onClick={this.handleClick}
-          >
-            {success ? <CheckIcon /> : <NavigationIcon />}
-          </Button>
-          {loading && (
-            <CircularProgress size={68} className={classes.fabProgress} />
-          )}
-        </div>
+      <div>
+        <Button
+          variant="fab"
+          color="default"
+          aria-label="Location plugin"
+          className={classes.button}
+          onClick={this.onClick}
+        >
+          <NavigationIcon />
+        </Button>
+        {this.renderPanel()}
+      </div>
+    );
+  }
+
+  // Render as a toolbar item, https://material-ui.com/demos/lists/
+  renderAsToolbarItem() {
+    return (
+      <div>
+        <ListItem
+          button
+          divider={true}
+          selected={this.state.panelOpen}
+          onClick={this.onClick}
+        >
+          <ListItemIcon>
+            <NavigationIcon />
+          </ListItemIcon>
+          <ListItemText primary={this.text} />
+        </ListItem>
+        {this.renderPanel()}
       </div>
     );
   }
 
   render() {
-    // This plugin can only be rendered as widget item. If configured
-    // otherwise, throw an error.
+    if (this.props.type === "toolbarItem") {
+      return this.renderAsToolbarItem();
+    }
+
     if (this.props.type === "widgetItem") {
       return this.renderAsWidgetItem();
     }
 
-    throw new Error(
-      "Location plugin can only be rendered as a widget item. Make sure that the 'target' property is either 'left' or 'right'."
-    );
+    return null;
   }
 }
-
-Location.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 
 export default withStyles(styles)(Location);
