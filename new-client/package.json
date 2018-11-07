@@ -1,12 +1,11 @@
 {
   "name": "hajk-client",
-  "version": "3.0.0-alpha1",
+  "version": "3.0.0-alpha2",
   "private": true,
   "dependencies": {
-    "detect-browser": "^3.0.1",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
-    "react-scripts": "1.1.5"
+    "react-scripts": "2.1.1"
   },
   "scripts": {
     "start": "set HTTPS=false && react-scripts start",
@@ -21,6 +20,7 @@
     "@types/react": "^16.4.16",
     "@types/react-dom": "^16.0.9",
     "deepmerge": "^2.2.1",
+    "detect-browser": "^3.0.1",
     "eslint-plugin-prettier": "^3.0.0",
     "marked": "^0.4.0",
     "ol": "^5.2.0",
@@ -28,5 +28,11 @@
     "proj4": "^2.5.0",
     "react-color": "^2.14.1",
     "react-event-observer": "^0.5.11"
-  }
+  },
+  "browserslist": [
+    ">1% in SE",
+    "not dead",
+    "not ie <= 10",
+    "not op_mini all"
+  ]
 }
