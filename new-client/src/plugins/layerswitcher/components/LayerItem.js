@@ -206,6 +206,7 @@ class LayerItem extends Component {
             className="info-text"
             href={this.state.infoUrl}
             target="_blank"
+            rel="noopener noreferrer"
             dangerouslySetInnerHTML={{ __html: infoUrlText }}
           />
           <p
