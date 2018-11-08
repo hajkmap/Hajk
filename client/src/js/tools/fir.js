@@ -41,7 +41,7 @@ var FirModelProperties = {
     popupOffsetY: 0,
     aliasDict: {},
     chosenColumns: [],
-    firLayerCaption: "Fastighet", //Fastighet:port83&84
+    firLayerCaption: "Fastigheter", //Fastighet:port83&84
     feature: undefined,
     hittaGrannar: false,
     backupItems: [],
@@ -53,7 +53,7 @@ var FirModelProperties = {
     colorBufferStroke: "",//'rgba(0, 0, 0, 0.2)',
     colorHittaGrannarBuffer: "",//'rgba(50, 200, 200, 0.4)',
     colorHittaGrannarBufferStroke: "",//'rgba(0, 0, 0, 0.2)',
-    maxFeatures: "1000"
+    maxFeatures: "" //"1000"
 };
 
 var FirModel = {
@@ -244,7 +244,7 @@ var FirModel = {
             console.log("getPropertyFilter: props", props);
 
             //check if it's exakt/lika sökning
-            var exaktMatching = this.get("exaktMatching");
+            var exaktMatching = props.exaktMatching;
             var wildcard;
             if(exaktMatching){
                 wildcard = "";
@@ -433,26 +433,6 @@ var FirModel = {
                             if (!found  || this.get("hittaGrannar")) {
                                 r.push(f);
                             }
-                            /*
-                            if (this.get("hittaGrannar")){
-                                // TODO: Compare if feature is in buffer with OpenLayers
-                                // this.firHiddenBUffer...layer.getSource().getFeatures().forEach( feature => {
-                                // if (f inside feature) { push and break}
-                                //}
-
-                                var foundIntersect = false;
-                                this.firBufferHiddenFeatureLayer.getSource().getFeatures().forEach(feature => {
-                                    var intersects = ol.extent.intersects(f.getGeometry().getExtent(), feature.getGeometry().getExtent());
-                                    if(!foundIntersect && intersects){
-                                       r.push(f);
-                                       foundIntersect = true;
-                                   }
-                                });
-                                if(!foundIntersect){
-                                    console.log("no intersect", f.getId());
-                                }
-                            }
-                            */
                         } else {
                             r.push(f);
                         }
@@ -1045,32 +1025,33 @@ var FirModel = {
         function addRequest (searchProps) {
             promises.push(new Promise((resolve, reject) => {
                 this.doWFSSearch({
-                    value: value,
-                    url: searchProps.url,
-                    featureType: searchProps.featureType,
-                    propertyName: searchProps.propertyName,
-                    srsName: searchProps.srsName,
-                    outputFormat: searchProps.outputFormat,
-                    geometryField: searchProps.geometryField,
-                    done: features => {
-                        if (features.length > 0) {
-                            console.log("length of features", features.length);
-                            features.forEach(feature => {
-                                feature.caption = searchProps.caption;
-                                feature.infobox = searchProps.infobox;
-                                try {
-                                    feature.aliasDict = JSON.parse(searchProps.aliasDict);
-                                } catch (e) {
-                                    feature.aliasDict = undefined;
+                            value: value,
+                            url: searchProps.url,
+                            featureType: searchProps.featureType,
+                            propertyName: searchProps.propertyName,
+                            srsName: searchProps.srsName,
+                            outputFormat: searchProps.outputFormat,
+                            geometryField: searchProps.geometryField,
+                            exaktMatching: this.get("exaktMatching"),
+                            done: features => {
+                                if (features.length > 0) {
+                                    console.log("length of features", features.length);
+                                    features.forEach(feature => {
+                                        feature.caption = searchProps.caption;
+                                        feature.infobox = searchProps.infobox;
+                                        try {
+                                            feature.aliasDict = JSON.parse(searchProps.aliasDict);
+                                        } catch (e) {
+                                            feature.aliasDict = undefined;
+                                        }
+                                    });
+                                    items.push({
+                                        layer: searchProps.caption,
+                                        displayName: searchProps.displayName,
+                                        propertyName: searchProps.propertyName,
+                                        hits: features
+                                    });
                                 }
-                            });
-                            items.push({
-                                layer: searchProps.caption,
-                                displayName: searchProps.displayName,
-                                propertyName: searchProps.propertyName,
-                                hits: features
-                            });
-                        }
                         resolve();
                     }
                 });
@@ -1110,7 +1091,9 @@ var FirModel = {
                     outputFormat: layer.get('searchOutputFormat'),
                     geometryField: layer.get('searchGeometryField')
                 };
-
+                console.log("alayer", layer);
+                console.log("searchProps", searchProps);
+                console.log("featureType", featureType);
                 addRequest.call(this, searchProps);
             });
         });
@@ -1128,6 +1111,9 @@ var FirModel = {
                 outputFormat: source.outputFormat,
                 geometryField: source.geometryField
             };
+            console.log("source", source);
+            console.log("searchProps", searchProps);
+            console.log("featureType", searchProps.featureType);
             addRequest.call(this, searchProps);
         });
 
@@ -1152,6 +1138,106 @@ var FirModel = {
             }
         });
     },
+
+    findWithSameName: function(name, layer){
+
+        console.log("name", "'" + name + "'");
+        console.log("layer", layer);
+        console.log("layerCollection", this.get("layerCollection"));
+
+        var sources = this.getSources();
+        var promises = [];
+
+        sources.forEach(source => {
+            console.log("source", source);
+            console.log("source.id", source.id, "layer.id", layer.get("id"));
+            var belongsToLayer = false;
+            source.layers.forEach(sourceLayer => {
+                console.log("sourceLayer", sourceLayer);
+                console.log(layer.get("params").LAYERS);
+               if (layer.get("params").LAYERS.indexOf(sourceLayer) >= 0){
+                   console.log("matches");
+                   belongsToLayer = true;
+               }
+            });
+            if (belongsToLayer) {
+                var searchProps = {
+                    url: (HAJK2.searchProxy || '') + source.url,
+                    caption: source.caption,
+                    infobox: source.infobox,
+                    aliasDict: source.aliasDict,
+                    featureType: source.layers[0].split(':')[1],
+                    propertyName: source.searchFields.join(','),
+                    displayName: source.displayFields ? source.displayFields : (source.searchFields[0] || 'Sökträff'),
+                    srsName: this.get('map').getView().getProjection().getCode(),
+                    outputFormat: source.outputFormat,
+                    geometryField: source.geometryField
+                };
+                promises.push(new Promise((resolve, reject) => {
+                    this.doWFSSearch({
+                        value: name,
+                        url: searchProps.url,
+                        featureType: searchProps.featureType,
+                        propertyName: searchProps.propertyName,
+                        srsName: searchProps.srsName,
+                        outputFormat: searchProps.outputFormat,
+                        geometryField: searchProps.geometryField,
+                        exaktMatching: true,
+                        done: features => {
+                            if (features.length > 0) {
+                                console.log("length of features", features.length);
+                                var addedFeatures = [];
+                                features.forEach(feature => {
+                                    console.log("here0");
+                                    feature.caption = searchProps.caption;
+                                    feature.infobox = searchProps.infobox;
+                                    try {
+                                        feature.aliasDict = JSON.parse(searchProps.aliasDict);
+                                    } catch (e) {
+                                        feature.aliasDict = undefined;
+                                    }
+
+
+                                    this.get("items").map(group => {
+                                        console.log("group.layer", group.layer, "layer.caption", layer.get("caption"));
+                                        if (group.layer === source.caption) {
+                                            var found = false;
+                                            console.log("feature", feature);
+                                            console.log("feature.get('nyckel')", feature.get("nyckel"));
+                                            group.hits.forEach(hit => {
+                                                console.log("here");
+                                                if(feature.get("nyckel") === hit.get("nyckel")){
+                                                    found = true;
+                                                }
+                                                console.log("here2");
+                                            });
+                                            console.log("here3");
+                                            console.log("feature", feature);
+                                            console.log("addedFeatures", addedFeatures);
+
+                                            if(!found || addedFeatures.find(e => e === feature.get("nyckel"))) {
+                                                console.log("here4");
+                                                addedFeatures.push(feature.get("nyckel"));
+                                                console.log("here5");
+                                                group.hits.push(feature);
+                                                this.firFeatureLayer.getSource().addFeature(feature);
+                                            }
+                                        }
+                                    });
+
+                                });
+                            }
+                            console.log("resolving");
+                            resolve();
+                        }
+                    });
+                }));
+            }
+        });
+
+        return promises;
+    },
+
 //removed isBar as an input
     shouldRenderResult: function () {
         return !!(

@@ -54,6 +54,10 @@ var FirSearchView = {
      * @instance
      */
     componentDidMount: function () {
+        //add correct values for the checkbox
+        $('#fastighetsLabel')[0].checked = true;
+        $('#slackaBufferSokomrade')[0].checked = true;
+
         this.props.model.get("map").on('singleclick', this.props.model.clickedOnMap.bind(this.props.model));
         this.value = this.props.model.get('value');
         if (this.props.model.get('items')) {
@@ -595,6 +599,39 @@ var FirSearchView = {
         );
     },
 
+    renderSearchOption: function() {
+
+        return(
+            <div className='selection-toolbar'>
+                <div><b>Sökalternativ</b></div>
+                <input type="checkbox" id="fastighetsLabel" onChange={(e)=> this.fastighetslabel(e)} /> &nbsp; Visa fastighetsbeteckning<br/>
+                <input type="checkbox" id="slackaBufferSokomrade" onChange={(e)=> this.slackaBufferSokomrade(e)} /> &nbsp; Visa buffer/sökområde
+            </div>
+        );
+    },
+
+    fastighetslabel: function() {
+        // TODO: WFS request fastighets ->
+
+        //put result on map
+
+    },
+
+    slackaBufferSokomrade: function(e) {
+        // TODO: need to check if the layers below are visible for searching so they are not used for filters then
+        console.log("this.props.model", this.props.model);
+        //maybe need to be created one more layer?
+
+        if(!$('#slackaBufferSokomrade').is(":checked")) {
+            this.props.model.get("firSelectionModel").get("drawLayer").setVisible(false);
+            this.props.model.firBufferFeatureLayer.setVisible(false);
+        }else{
+            this.props.model.get("firSelectionModel").get("drawLayer").setVisible(true);
+            this.props.model.firBufferFeatureLayer.setVisible(true);
+        }
+        console.log("finished");
+    },
+
     minBox: function (kategori, buttonId) {
         var item = $('#'+kategori);
         console.log("item", item);
@@ -701,6 +738,7 @@ var FirSearchView = {
 
         var fastighetsforteckning = this.renderFastighetsForteckning();
         var analysFunctions = this.renderAnalysFunctions();
+        var searchOption = this.renderSearchOption();
 
 
         // Infoknapp
@@ -745,6 +783,7 @@ var FirSearchView = {
                             {/*<span className='info-text clearfix'>Inled sökningen med * för att söka på delar av en text.</span>*/}
                         </div><br/>
                             {firSelectionToolbar}
+                            {searchOption}
                     </div>
                         <div className='pull-right'>
                             <button onClick={search_on_click} type='submit' className='btn btn-primary'>Sök</button>&nbsp;
