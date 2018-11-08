@@ -8,14 +8,24 @@ const styles = theme => ({});
 class DummyView extends React.PureComponent {
   state = {};
 
-  getText() {
-    return "DummyView";
+  constructor(props) {
+    super(props);
+    this.model = this.props.model;
+    this.observer = this.props.observer;
   }
 
   buttonClick = () => {
-    const { model, observer } = this.props;
-    console.log("Map is", model.getMap());
-    observer.publish("myEvent", "data here");
+    // We have access to plugin's model:
+    console.log("Dummy can access models's map:", this.model.getMap());
+
+    // We have access to plugin's observer. Below we publish an event that the parent
+    // component is listing to, see dummy.js for how to subscribe to events.
+    this.observer.publish(
+      "dummyEvent",
+      "This data has been sent from DummyView using the Observer!"
+    );
+
+    // And we can of course access this component's state
     this.setState({
       test: "test"
     });
