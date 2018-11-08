@@ -200,8 +200,10 @@ var ElevregisterModel = {
   },
 
   getSchools: function() {
+    // url: "https://ikarta.kungsbacka.se/API/Elevregister/api/organisation/gr"
+    // url: "GR.json"
     return $.ajax({
-      url: "GR.json",
+      url: "https://ikarta.kungsbacka.se/API/Elevregister/api/organisation/gr",
       type: "GET",
       dataType: "JSON"
     }).done(this.handleSchools);
@@ -238,6 +240,9 @@ var ElevregisterModel = {
                 klasser[k].klassId +
                 '">' +
                 klasser[k].klassNamn +
+                " (" +
+                schoolsSelected[ss] +
+                ")" +
                 "</option>"
             );
           }
@@ -255,7 +260,11 @@ var ElevregisterModel = {
     var classes = $("#klasser").val();
     var fetchNow = function() {
       //console.log("...fetchNow " + i);
-      fetch(classes[i] + ".json")
+      //https://ikarta.kungsbacka.se/API/Elevregister/api/klass/
+      //fetch(classes[i] + ".json")
+      fetch(
+        "https://ikarta.kungsbacka.se/API/Elevregister/api/klass/" + classes[i]
+      )
         .then(function(response) {
           return response.json();
         })
