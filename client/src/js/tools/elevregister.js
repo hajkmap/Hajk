@@ -211,26 +211,36 @@ var ElevregisterModel = {
     //console.log(data);
     schoolData = data;
     for (s in data) {
-      //console.log(s);
-      $("#skolor").append('<option id="' + s + '">' + s + "</option>");
+      console.log(s);
+      $("#skolor").append(
+        '<option id="' + s + '" value="' + s + '">' + s + "</option>"
+      );
     }
   },
 
   getClasses: function() {
     var school = $("#skolor :selected").text();
+    //var schoolsSelected = $("#skolor").val();
+    var schoolsSelected = [];
+    $("#skolor :selected").each(function() {
+      schoolsSelected.push($(this).val());
+    });
     $("#klasser").empty();
-    for (s in schoolData) {
-      if (s === school) {
-        var klasser = schoolData[s];
-        for (k in klasser) {
-          //console.log(klasser[k].klassNamn);
-          $("#klasser").append(
-            '<option value="' +
-              klasser[k].klassId +
-              '">' +
-              klasser[k].klassNamn +
-              "</option>"
-          );
+    for (var ss in schoolsSelected) {
+      //console.log(schoolsSelected[ss]);
+      for (s in schoolData) {
+        if (s === schoolsSelected[ss]) {
+          var klasser = schoolData[s];
+          for (k in klasser) {
+            //console.log(klasser[k].klassNamn);
+            $("#klasser").append(
+              '<option value="' +
+                klasser[k].klassId +
+                '">' +
+                klasser[k].klassNamn +
+                "</option>"
+            );
+          }
         }
       }
     }
@@ -727,8 +737,8 @@ var ElevregisterModel = {
         type === "Text"
           ? 0
           : forcedProperties
-            ? forcedProperties.pointRadius
-            : this.get("pointRadius");
+          ? forcedProperties.pointRadius
+          : this.get("pointRadius");
       var iconSrc = forcedProperties
         ? forcedProperties.image || this.get("markerImg")
         : this.get("markerImg");

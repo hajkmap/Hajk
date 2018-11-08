@@ -238,8 +238,8 @@ var ElevregisterPanelView = {
         value = !isNaN(parseFloat(value))
           ? parseFloat(value)
           : !isNaN(parseInt(value))
-            ? parseInt(value)
-            : value;
+          ? parseInt(value)
+          : value;
       }
 
       state[state_prop] = value;
@@ -399,10 +399,13 @@ var ElevregisterPanelView = {
               <div className="panel-body">
                 <select
                   id="skolor"
+                  multiple="multiple"
                   onChange={this.getClasses}
                   style={{ width: "98%" }}
                 >
-                  <option value="none"> Välj skola</option>
+                  <option id="0" value="none">
+                    Välj skola
+                  </option>
                 </select>
               </div>
             </div>
