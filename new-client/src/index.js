@@ -65,8 +65,10 @@ fetch("appConfig.json")
           }
         });
       Promise.all([
-        fetch(`${appConfig.mapserviceBase}/config/layers`),
-        fetch(`${appConfig.mapserviceBase}/config/${defaultMap}`),
+        fetch(`${appConfig.proxy}${appConfig.mapserviceBase}/config/layers`),
+        fetch(
+          `${appConfig.proxy}${appConfig.mapserviceBase}/config/${defaultMap}`
+        ),
         fetch("customTheme.json")
       ])
         .then(
