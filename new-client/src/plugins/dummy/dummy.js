@@ -47,24 +47,26 @@ class Dummy extends React.PureComponent {
     });
   };
 
-  constructor(spec) {
-    super(spec);
+  constructor(props) {
+    super(props);
+
     // Important, part of API. Must be a string. Could be fetched from config.
     this.text = "Dummy plugin header";
-    this.app = spec.app;
+    this.app = props.app;
 
-    // Optionally setup an observer to allow sending messages between here and model/view
-    this.observer = Observer();
+    // Optionally setup a local observer to allow sending messages between here and model/view.
+    // It's called 'localObserver' to distinguish it from AppModel's observer, that we call 'globalObserver'.
+    this.localObserver = Observer();
     // Example on how to make observer listen for "myEvent" event sent from elsewhere
-    this.observer.subscribe("dummyEvent", message => {
+    this.localObserver.subscribe("dummyEvent", message => {
       console.log(message);
     });
 
     // Initiate a model. Although optional, will probably be used for all except the most simple plugins.
     this.dummyModel = new DummyModel({
-      map: spec.map,
-      app: spec.app,
-      observer: this.observer
+      map: props.map,
+      app: props.app,
+      localObserver: this.localObserver
     });
 
     // Important, part of API for plugins that contain panels. Makes App aware of this panels existance.
@@ -100,7 +102,7 @@ class Dummy extends React.PureComponent {
         {/* IMPORTANT: Note that normally you don't need to give View access to BOTH observer and model – one of those is sufficient */}
         <DummyView
           // map={this.map} // Just an example. Make sure to ONLY include props that are ACTUALLY USED in the View.
-          observer={this.observer}
+          localObserver={this.localObserver}
           model={this.dummyModel}
           app={this.app}
         />

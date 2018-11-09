@@ -10,8 +10,8 @@ import { Toolbar as MUIToolbar } from "@material-ui/core";
 import classNames from "classnames";
 import ErrorIcon from "@material-ui/icons/Error";
 import SentimentVeryDissatisfiedIcon from "@material-ui/icons/SentimentVeryDissatisfied";
-
 import "./App.css";
+import SimpleSnackbar from "./UserMessage/SimpleSnackbar";
 
 // Global customizations that previously went to custom.css
 // should now go to public/customTheme.json. They are later
@@ -96,8 +96,8 @@ class App extends Component {
   }
 
   componentWillMount() {
-    this.observer = new Observer();
-    this.appModel = new AppModel(this.props.config, this.observer);
+    this.globalObserver = new Observer();
+    this.appModel = new AppModel(this.props.config, this.globalObserver);
   }
 
   componentDidMount() {
@@ -112,7 +112,7 @@ class App extends Component {
       });
     });
 
-    this.observer.subscribe("mapClick", mapClickDataResult => {
+    this.globalObserver.subscribe("mapClick", mapClickDataResult => {
       this.setState({
         mapClickDataResult: mapClickDataResult
       });
@@ -185,6 +185,7 @@ class App extends Component {
     return (
       <div className={classes.root}>
         <main className={classes.map} id="map">
+          <SimpleSnackbar globalObserver={this.globalObserver} />
           <AppBar position="fixed" className={classes.toolbar}>
             <MUIToolbar>
               <Toolbar

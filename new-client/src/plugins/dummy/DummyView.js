@@ -11,7 +11,9 @@ class DummyView extends React.PureComponent {
   constructor(props) {
     super(props);
     this.model = this.props.model;
-    this.observer = this.props.observer;
+    this.app = this.props.app;
+    this.localObserver = this.props.localObserver;
+    this.globalObserver = this.props.app.globalObserver;
   }
 
   buttonClick = () => {
@@ -20,7 +22,7 @@ class DummyView extends React.PureComponent {
 
     // We have access to plugin's observer. Below we publish an event that the parent
     // component is listing to, see dummy.js for how to subscribe to events.
-    this.observer.publish(
+    this.localObserver.publish(
       "dummyEvent",
       "This data has been sent from DummyView using the Observer!"
     );
@@ -31,9 +33,20 @@ class DummyView extends React.PureComponent {
     });
   };
 
+  handleMessageClick = () => {
+    this.globalObserver.publish("showMessage", {
+      type: "info",
+      message: "My message",
+      details: this
+    });
+  };
+
   render() {
     return (
-      <Button onClick={this.buttonClick}>Klicka här {this.state.test}</Button>
+      <>
+        <Button onClick={this.buttonClick}>Klicka här {this.state.test}</Button>
+        <Button onClick={this.handleMessageClick}>Show snackbar</Button>
+      </>
     );
   }
 }

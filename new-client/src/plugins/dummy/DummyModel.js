@@ -1,8 +1,10 @@
 class DummyModel {
   constructor(settings) {
+    console.log(settings);
+
     this.map = settings.map;
     this.app = settings.app;
-    this.observer = settings.observer;
+    this.localObserver = settings.localObserver;
   }
 
   getMap() {
