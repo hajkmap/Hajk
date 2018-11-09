@@ -147,7 +147,7 @@ var ElevregisterPanelView = {
   alertClear: function() {
     this.setState({
       alert: true,
-      alertMessage: "Ta bort symboler i kartan?",
+      alertMessage: "Släck valda symboler i kartan?",
       confirm: true,
       confirmAction: () => {
         this.clear();
