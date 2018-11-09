@@ -202,8 +202,14 @@ var ElevregisterModel = {
   getSchools: function() {
     // url: "https://ikarta.kungsbacka.se/API/Elevregister/api/organisation/gr"
     // url: "GR.json"
+    var skolForm = $("#skolform :selected").val();
+    console.log(skolForm + " " + $("#skolform :selected").text());
+    $("#skolor").empty();
+    $("#klasser").empty();
     return $.ajax({
-      url: "https://ikarta.kungsbacka.se/API/Elevregister/api/organisation/gr",
+      url:
+        "https://ikarta.kungsbacka.se/API/Elevregister/api/organisation/" +
+        skolForm,
       type: "GET",
       dataType: "JSON"
     }).done(this.handleSchools);
@@ -258,10 +264,11 @@ var ElevregisterModel = {
     this.set("studentCount", 0);
     that = this;
     var classes = $("#klasser").val();
+    var sCount;
     var fetchNow = function() {
       //console.log("...fetchNow " + i);
       //https://ikarta.kungsbacka.se/API/Elevregister/api/klass/
-      //fetch(classes[i] + ".json")
+      //fetch(classes[i] + ".json")  //Testdata
       fetch(
         "https://ikarta.kungsbacka.se/API/Elevregister/api/klass/" + classes[i]
       )
@@ -269,6 +276,14 @@ var ElevregisterModel = {
           return response.json();
         })
         .then(function(myJson) {
+          console.log(myJson.totalFeatures);
+          sCount = that.get("studentCount");
+          that.set("studentCount", sCount + myJson.totalFeatures);
+          console.log("Acc: " + that.get("studentCount"));
+          $("#studentCount").html(
+            "Antal elever i valda klasser/avdelningar: " +
+              that.get("studentCount")
+          );
           var features = new ol.format.GeoJSON().readFeatures(myJson);
           //console.log("features " + i);
           //console.log(features);

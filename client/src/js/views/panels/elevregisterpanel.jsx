@@ -147,7 +147,7 @@ var ElevregisterPanelView = {
   alertClear: function() {
     this.setState({
       alert: true,
-      alertMessage: "Vill du verkligen rensa allt?",
+      alertMessage: "Ta bort symboler i kartan?",
       confirm: true,
       confirmAction: () => {
         this.clear();
@@ -383,7 +383,7 @@ var ElevregisterPanelView = {
     var dialog = this.renderDialog(this.state.dialog),
       symbology = this.renderSymbology(this.state.symbology);
 
-    this.getSchools();
+    //this.getSchools();
     return (
       <Panel
         title="Elevregister"
@@ -395,23 +395,38 @@ var ElevregisterPanelView = {
         <div className="elevregister-tools">
           <div>
             <div className="panel panel-default">
-              <div className="panel-heading"> Skolor </div>
+              <div className="panel-heading">Skolform </div>
+              <div className="panel-body">
+                <select
+                  id="skolform"
+                  multiple="multiple"
+                  onChange={this.getSchools}
+                  style={{ width: "98%" }}
+                >
+                  <option id="0" value="FSK">
+                    Förskola
+                  </option>
+                  <option id="1" value="GR">
+                    Grundkola
+                  </option>
+                  <option id="2" value="GRSÄR">
+                    Grundsärskola
+                  </option>
+                </select>
+              </div>
+              <div className="panel-heading">Skolor </div>
               <div className="panel-body">
                 <select
                   id="skolor"
                   multiple="multiple"
                   onChange={this.getClasses}
                   style={{ width: "98%" }}
-                >
-                  <option id="0" value="none">
-                    Välj skola
-                  </option>
-                </select>
+                />
               </div>
             </div>
             <br />
             <div className="panel panel-default">
-              <div className="panel-heading"> Klasser</div>
+              <div className="panel-heading">Klasser / avdelningar</div>
               <div className="panel-body">
                 <select
                   id="klasser"
