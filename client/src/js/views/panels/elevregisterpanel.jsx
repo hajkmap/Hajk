@@ -399,9 +399,9 @@ var ElevregisterPanelView = {
               <div className="panel-body">
                 <select
                   id="skolform"
-                  multiple="multiple"
                   onChange={this.getSchools}
                   style={{ width: "98%" }}
+                  size="3"
                 >
                   <option id="0" value="FSK">
                     Förskola
