@@ -1,3 +1,10 @@
+// IE 11 starts here.
+// If you don't need IE 11, comment out those lines line.
+// Also, change 'browserlist' in package.json to exclude ie11.
+import "@babel/polyfill";
+import "react-app-polyfill/ie11";
+// IE 11 ends here.
+
 import "ol/ol.css";
 import "./index.css";
 import registerServiceWorker from "./registerServiceWorker";
