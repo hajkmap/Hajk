@@ -7,13 +7,12 @@ const styles = theme => ({
     padding: "10px",
     background: "#efefef",
     borderBottom: "1px solid #ccc",
-    userSelect: "none"
-  },
-  headerText: {
-    marginBottom: 0
+    userSelect: "none",
+    margin: 0
   },
   icon: {
-    cursor: "pointer"
+    cursor: "pointer",
+    float: "right"
   }
 });
 
@@ -21,12 +20,10 @@ class PanelHeader extends Component {
   render() {
     const { classes } = this.props;
     return (
-      <div className={classes.header}>
-        <div className="icons pull-right">
-          <CloseIcon onClick={this.props.onClose} className={classes.icon} />
-        </div>
-        <h2 className={classes.headerText}>{this.props.title}</h2>
-      </div>
+      <h2 className={classes.header}>
+        {this.props.title}
+        <CloseIcon onClick={this.props.onClose} className={classes.icon} />
+      </h2>
     );
   }
 }

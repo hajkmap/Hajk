@@ -18,25 +18,27 @@ class DummyView extends React.PureComponent {
 
   buttonClick = () => {
     // We have access to plugin's model:
-    console.log("Dummy can access models's map:", this.model.getMap());
+    console.log("Dummy can access model's map:", this.model.getMap());
 
     // We have access to plugin's observer. Below we publish an event that the parent
     // component is listing to, see dummy.js for how to subscribe to events.
     this.localObserver.publish(
       "dummyEvent",
-      "This data has been sent from DummyView using the Observer!"
+      "This has been sent from DummyView using the Observer"
     );
 
     // And we can of course access this component's state
     this.setState({
-      test: "test"
+      test: "State changed!"
     });
   };
 
+  // Event handler for a button that shows a global info message when clicked
   handleMessageClick = () => {
     this.globalObserver.publish("showMessage", {
       type: "info",
-      message: "My message",
+      message:
+        "My message from DummyView. This one is long. <b>Really</b> long. \nMy message from DummyView. This one is long. <b>Really</b> long.",
       details: this
     });
   };
@@ -44,7 +46,9 @@ class DummyView extends React.PureComponent {
   render() {
     return (
       <>
-        <Button onClick={this.buttonClick}>Klicka här {this.state.test}</Button>
+        <Button onClick={this.buttonClick}>
+          {this.state.test || "Click to change state"}
+        </Button>
         <Button onClick={this.handleMessageClick}>Show snackbar</Button>
       </>
     );

@@ -3,15 +3,19 @@ import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Observer from "react-event-observer";
 import AppModel from "./../models/AppModel.js";
-import Toolbar from "./Toolbar.js";
-import Popup from "./Popup.js";
+
 import AppBar from "@material-ui/core/AppBar";
+import Toolbar from "./Toolbar.js";
 import { Toolbar as MUIToolbar } from "@material-ui/core";
+import SimpleSnackbar from "./UserMessage/SimpleSnackbar";
+import Popup from "./Popup.js";
+import MapSwitcher from "./MapSwitcher";
+
 import classNames from "classnames";
 import ErrorIcon from "@material-ui/icons/Error";
 import SentimentVeryDissatisfiedIcon from "@material-ui/icons/SentimentVeryDissatisfied";
+
 import "./App.css";
-import SimpleSnackbar from "./UserMessage/SimpleSnackbar";
 
 // Global customizations that previously went to custom.css
 // should now go to public/customTheme.json. They are later
@@ -21,7 +25,6 @@ const styles = theme => {
     // We can also consult https://material-ui.com/customization/default-theme/ for available options
     map: {
       flexGrow: 1,
-      zIndex: 1,
       overflow: "hidden",
       position: "absolute",
       top: "64px",
@@ -31,11 +34,6 @@ const styles = theme => {
       [theme.breakpoints.down("xs")]: {
         top: "56px"
       }
-    },
-    toolbar: {
-      position: "fixed",
-      zIndex: 20000,
-      top: 0
     },
     flex: {
       flexGrow: 1
@@ -148,6 +146,21 @@ class App extends Component {
     }
   }
 
+  renderMapSwitcher = () => {
+    if (
+      this.appModel.config.mapConfig.tools["0"].options.hasOwnProperty(
+        "dropdownThemeMaps"
+      )
+      // FIXME: Don't forget to activate this! &&
+      // this.appModel.config.mapConfig.tools["0"].options.dropdownThemeMaps ===
+      //   true
+    )
+      return <MapSwitcher appModel={this.appModel} />;
+    else {
+      return null;
+    }
+  };
+
   renderSearchPlugin() {
     var searchPlugin = this.appModel.getSearchPlugin();
     if (searchPlugin) {
@@ -183,26 +196,16 @@ class App extends Component {
     }
 
     return (
-      <div className={classes.root}>
+      <>
+        <AppBar position="absolute">
+          <MUIToolbar>
+            <Toolbar tools={this.appModel.getToolbarPlugins()} parent={this} />
+            {this.renderSearchPlugin()}
+            {this.renderMapSwitcher()}
+          </MUIToolbar>
+        </AppBar>
         <main className={classes.map} id="map">
           <SimpleSnackbar globalObserver={this.globalObserver} />
-          <AppBar position="fixed" className={classes.toolbar}>
-            <MUIToolbar>
-              <Toolbar
-                tools={this.appModel.getToolbarPlugins()}
-                parent={this}
-              />
-              {this.renderSearchPlugin()}
-            </MUIToolbar>
-          </AppBar>
-          <div id="map-overlay" className={classes.overlay}>
-            <div className={classNames(classes.widgets, classes.widgetsLeft)}>
-              {this.renderWidgets("left")}
-            </div>
-            <div className={classNames(classes.widgets, classes.widgetsRight)}>
-              {this.renderWidgets("right")}
-            </div>
-          </div>
           <Popup
             mapClickDataResult={this.state.mapClickDataResult}
             map={this.appModel.getMap()}
@@ -212,8 +215,16 @@ class App extends Component {
               });
             }}
           />
+          <div id="map-overlay" className={classes.overlay}>
+            <div className={classNames(classes.widgets, classes.widgetsLeft)}>
+              {this.renderWidgets("left")}
+            </div>
+            <div className={classNames(classes.widgets, classes.widgetsRight)}>
+              {this.renderWidgets("right")}
+            </div>
+          </div>
         </main>
-      </div>
+      </>
     );
   }
 }

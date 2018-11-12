@@ -5,12 +5,12 @@ import classNames from "classnames";
 
 import Button from "@material-ui/core/Button";
 import Snackbar from "@material-ui/core/Snackbar";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
+// import IconButton from "@material-ui/core/IconButton";
+// import CloseIcon from "@material-ui/icons/Close";
 
 const styles = theme => ({
   snackbar: {
-    zIndex: 999999
+    marginTop: "12px"
   },
   close: {
     padding: theme.spacing.unit / 2
@@ -80,22 +80,23 @@ class SimpleSnackbar extends React.Component {
           message={<span id="message-id">{this.state.opts.message}</span>}
           action={[
             <Button
-              key="undo"
+              key="close" // React needs this, as we send an array of objects, so a "key" property is required on each object
               color="secondary"
               size="small"
               onClick={this.handleClose}
             >
-              UNDO
-            </Button>,
-            <IconButton
-              key="close"
-              aria-label="Close"
-              color="inherit"
-              className={classes.close}
-              onClick={this.handleClose}
-            >
-              <CloseIcon />
-            </IconButton>
+              OK, STÄNG
+            </Button>
+            // We could have an icon button instead:
+            // <IconButton
+            //   key="close2"
+            //   aria-label="Close"
+            //   color="inherit"
+            //   className={classes.close}
+            //   onClick={this.handleClose}
+            // >
+            //   <CloseIcon />
+            // </IconButton>
           ]}
         />
       </>
