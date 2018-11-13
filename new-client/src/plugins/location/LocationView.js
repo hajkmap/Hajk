@@ -2,6 +2,8 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 
+import { withSnackbar } from "notistack";
+
 import Geolocation from "ol/Geolocation.js";
 import Feature from "ol/Feature.js";
 import Point from "ol/geom/Point.js";
@@ -106,14 +108,10 @@ class LocationView extends React.PureComponent {
   };
 
   handleGeolocationError = error => {
-    console.error("GeoLocation error:", error);
     this.setState({ loading: false });
-    // TODO: Would LOVE to do something like:
-    // this.app.showMessage({
-    //   type: "error",
-    //   message: "Ooops, this was unexpected!",
-    //   details: error.message
-    // });
+    this.props.enqueueSnackbar("Kunde inte geolokalisera.", {
+      variant: "error"
+    });
   };
 
   handleGeolocationChangeAccuracy = () => {
@@ -189,7 +187,7 @@ class LocationView extends React.PureComponent {
 
   render() {
     return (
-      <React.Fragment>
+      <>
         <FormGroup row>
           <FormControlLabel
             control={
@@ -204,7 +202,7 @@ class LocationView extends React.PureComponent {
         </FormGroup>
         {this.state.loading && <LinearProgress />}
         {this.renderLocationDetails()}
-      </React.Fragment>
+      </>
     );
   }
 }
@@ -213,4 +211,4 @@ LocationView.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(LocationView);
+export default withStyles(styles)(withSnackbar(LocationView));

@@ -7,7 +7,7 @@ import AppModel from "./../models/AppModel.js";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "./Toolbar.js";
 import { Toolbar as MUIToolbar } from "@material-ui/core";
-import SimpleSnackbar from "./UserMessage/SimpleSnackbar";
+import { SnackbarProvider } from "notistack";
 import Popup from "./Popup.js";
 import MapSwitcher from "./MapSwitcher";
 
@@ -150,10 +150,9 @@ class App extends Component {
     if (
       this.appModel.config.mapConfig.tools["0"].options.hasOwnProperty(
         "dropdownThemeMaps"
-      )
-      // FIXME: Don't forget to activate this! &&
-      // this.appModel.config.mapConfig.tools["0"].options.dropdownThemeMaps ===
-      //   true
+      ) &&
+      this.appModel.config.mapConfig.tools["0"].options.dropdownThemeMaps ===
+        true
     )
       return <MapSwitcher appModel={this.appModel} />;
     else {
@@ -196,7 +195,13 @@ class App extends Component {
     }
 
     return (
-      <>
+      <SnackbarProvider
+        maxSnack={3}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "center"
+        }}
+      >
         <AppBar position="absolute">
           <MUIToolbar>
             <Toolbar tools={this.appModel.getToolbarPlugins()} parent={this} />
@@ -205,7 +210,6 @@ class App extends Component {
           </MUIToolbar>
         </AppBar>
         <main className={classes.map} id="map">
-          <SimpleSnackbar globalObserver={this.globalObserver} />
           <Popup
             mapClickDataResult={this.state.mapClickDataResult}
             map={this.appModel.getMap()}
@@ -224,7 +228,7 @@ class App extends Component {
             </div>
           </div>
         </main>
-      </>
+      </SnackbarProvider>
     );
   }
 }
