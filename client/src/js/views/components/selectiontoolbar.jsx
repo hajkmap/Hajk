@@ -78,20 +78,31 @@ var SelectionPanelView = {
 
     return (
       <div className='selection-toolbar'>
-        <div>Sök baserat på markering i kartan</div>
-        <div className='btn-group btn-group-lg'>
-          <button onClick={() => this.activateTool('drawSelection')} type='button' className={this.getClassNames('drawSelection')} title='Markera efter polygon' >
-            <i className='fa iconmoon-yta icon' />
-          </button>
-          <button onClick={() => this.activateTool('multiSelect')} type='button' className={this.getClassNames('multiSelect')} title='Markera flera objekt' >
-            <i className='fa fa-plus icon' />
-          </button>
+        <div className='selection-title'>
+          <b>Sök inom område</b>
+        </div>
+        <div className='btn-group btn-group'>
+          <div className="btn-selection" onClick={() => this.activateTool('drawSelection')}>
+            <button type='button' className={this.getClassNames('drawSelection')} title='Markera efter polygon'>
+              <i className='fa iconmoon-yta icon' />
+            </button>
+            <span className="clickable">Rita polygon</span>
+          </div>
+          <div className="btn-select" onClick={() => this.activateTool('multiSelect')}>
+            <button type='button' className={this.getClassNames('multiSelect')} title='Markera flera objekt'>
+              <i className='fa fa-hand-pointer-o icon' />
+            </button>
+            <span className="clickable">Markera objekt</span>
+          </div>
+          <div className="btn-clear" title="Rensa" onClick={(e) => {
+            e.preventDefault();
+            this.props.model.clearSelection();
+          }}>
+            <i className="fa fa-times-circle clickable" />&nbsp;
+            <span className="clickable">Rensa</span>
+          </div>
 
         </div>
-        <div className='btn btn-link' onClick={(e) => {
-          e.preventDefault();
-          this.props.model.abort();
-        }}>Rensa markering</div>
       </div>
     );
   }
