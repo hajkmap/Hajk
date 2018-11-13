@@ -29,7 +29,7 @@ export default class Tree extends Component {
   buildList () {
     return (
       <div>
-        <label>Tillgängliga söktjänster</label>
+        <label>Tillgängliga tjänster</label>
         <div className='layer-list'>
           <ul>
             {this.props.layers.map((layer) => {

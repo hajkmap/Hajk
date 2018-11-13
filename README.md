@@ -32,7 +32,7 @@ Projektet drivs som ett samarbetsprojekt och är avsett att kunna användas för
 
 Licensformen bygger på en öppen samarbetslicens. (CC BY SA NC).
 
-Applikationen består av två delar: en serverdel och en klientdel. Serverdelen är programmerad i .NET med tekniken WCF och kodspråket C#. Klientdelen är skriven i JavaScript (ES2015). Kommunikationen mellan klient och server sker via HTTP enligt REST.
+Applikationen består av två delar: en serverdel och en klientdel. Serverdelen är programmerad i .NET med tekniken MVC och kodspråket C#. Klientdelen är skriven i JavaScript (ES2015). Kommunikationen mellan klient och server sker via HTTP enligt REST.
 
 Klienten innehåller två separata webbapplikationer: en kartvy och en administrationsvy.
 
