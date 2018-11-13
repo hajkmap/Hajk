@@ -7,7 +7,8 @@ import AppModel from "./../models/AppModel.js";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "./Toolbar.js";
 import { Toolbar as MUIToolbar } from "@material-ui/core";
-import { SnackbarProvider } from "notistack";
+import { SnackbarProvider, withSnackbar } from "notistack";
+
 import Popup from "./Popup.js";
 import MapSwitcher from "./MapSwitcher";
 
@@ -117,8 +118,12 @@ class App extends Component {
     });
   }
 
+  // Catches exceptions generated in descendant components. Unhandled exceptions will cause the entire component tree to unmount.
   componentDidCatch(error) {
-    this.setState({ hasError: true, errorText: error });
+    console.error(error);
+    this.props.enqueueSnackbar("Åh nej! Ett fel har inträffat.", {
+      variant: "error"
+    });
   }
 
   renderWidgets(target) {
@@ -178,25 +183,9 @@ class App extends Component {
   render() {
     const { classes } = this.props;
 
-    if (this.state.hasError) {
-      return (
-        <div className="start-error">
-          <div>
-            <ErrorIcon />
-          </div>
-          <div>
-            Åh nej! Applikationen kunde inte starta. Kontakta din lokala
-            administatör.
-            <br />
-            <SentimentVeryDissatisfiedIcon />
-          </div>
-        </div>
-      );
-    }
-
     return (
       <SnackbarProvider
-        maxSnack={3}
+        maxSnack={2}
         anchorOrigin={{
           vertical: "top",
           horizontal: "center"
@@ -237,4 +226,4 @@ App.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(App);
+export default withStyles(styles)(withSnackbar(App));

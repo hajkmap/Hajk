@@ -18,7 +18,7 @@ const styles = theme => {
       [theme.breakpoints.down("xs")]: {
         position: "absolute",
         width: "100%",
-        zIndex: 10001
+        zIndex: 1300
       }
     },
     drawerPaperRight: {
