@@ -117,7 +117,9 @@ var SearchBarView = {
         valueBar: this.valueBar,
         minimized: false,
         force: true,
-        sAndVSearch: true
+        sAndVSearch: true,
+        selectionTool: false,
+        selectionList: false
       });
       this.props.model.set('force', true);
       this.search(); // always search on url-query
@@ -203,10 +205,15 @@ var SearchBarView = {
     });
   },
 
-  /*Toggle visibility of selection tool*/
   toggleSelectionTool: function () {
     this.setState({
       selectionTool: !this.state.selectionTool
+    });
+  },
+
+  toggleSelectionList: function () {
+    this.setState({
+      selectionList: !this.state.selectionList
     });
   },
 
@@ -260,13 +267,14 @@ var SearchBarView = {
   },
 
   /**
-   * Set search filter and perform a search.
+   * Set search filter.
    * @instance
    * @param {string} type
    * @param {object} event
    *
    */
   setFilter: function (event) {
+    //this.props.model.set('filter', event.target.value);
     var addFilter = this.state.filters.slice();
 
     event.target.value === '*' ? addFilter = [] : false;
@@ -285,8 +293,32 @@ var SearchBarView = {
     }
 
     this.props.model.set('filter', addFilter);
+    //this.search();
+  },
 
-    this.search();
+  /**
+   * Clear the search input field.
+   * @instance
+   */
+  clearInputField: function () {
+    if (typeof $('#sokRensa') !== 'undefined') {
+      $('#sokRensa').click();
+    }
+    var features = this.props.model.getSelectionModel();
+
+    this.valueBar = '';
+    this.props.model.set('valueBar', '');
+    this.props.model.clearInputField();
+    this.setState({
+      loading: false,
+      showResults: true,
+      result: []
+    });
+
+    if (features.length) {
+      this.searchOnClick();
+    }
+
   },
 
   /**
@@ -301,32 +333,39 @@ var SearchBarView = {
     ;
     return (
       <div className="options-container">
-        <div>
-          <span>Sök i: </span>&nbsp;
-          <button className="btn btn-filter" type="button" data-toggle="dropdown">
+        <div className={this.state.selectionList ? "options-layers open" : "options-layers"}>
+          <div className="options-title">
+            <b>Sök i lager</b>
+          </div>
+          <span>Välj: </span>
+          <button className="btn btn-filter" type="button" onClick={this.toggleSelectionList}>
             {!this.state.filters.length || this.state.filters.includes('*') ? "Alla lager" : (this.state.filters.length > 1 ? "Flera lager" : this.state.filters)}
             <i className="fa fa-angle-down clickable arrow"></i>
           </button>
 
-          <ul className="dropdown-menu" value={this.props.model.get('filter')} title={this.props.model.get('filter')} onChange={(e) => {
+          <ul className="dropdown-menu" onChange={(e) => {
             this.setFilter(e);
           }}>
 
           <li>
             <label>
               <input id="labels-checkbox" type="checkbox" value="*" checked={!this.state.filters.length || this.state.filters.includes('*')} />
-              <span>Alla lager</span>
+              <span className={!this.state.filters.length || this.state.filters.includes('*') ? "selected" : ""}>Alla lager</span>
             </label>
           </li>
 
           {
             (() => {
-              return sources.map((wfslayer, i) => {
+              return sources.sort(function(a, b){
+                if(a.caption < b.caption) { return -1; }
+                if(a.caption > b.caption) { return 1; }
+                return 0;
+              }).map((wfslayer, i) => {
                 return (
                   <li key={i} className={this.state.filters.indexOf(wfslayer.caption) > -1 ? "selected" : ""}>
                     <label>
                       <input id="labels-checkbox" type="checkbox" value={wfslayer.caption} checked={this.state.filters.includes(wfslayer.caption)} />
-                      <span>{wfslayer.caption}</span>
+                      <span className={this.state.filters.includes(wfslayer.caption) ? "selected" : ""}>{wfslayer.caption}</span>
                     </label>
                   </li>
                 );
@@ -335,9 +374,13 @@ var SearchBarView = {
           }
 
           </ul>
+        </div>
+        <div className="options-search">
+          <button id='searchbar-clear-button' className='btn btn-primary' onClick={() => { this.clear(); }}>
+            Rensa allt
+          </button>
           {searchBtn}
         </div>
-
       </div>
     );
   },
@@ -462,7 +505,7 @@ var SearchBarView = {
                 </div>
               </div>
             ) : (
-              <div className='searchbar-results-no-results'>Sökningen gav inget resultat.</div>
+                <div className='searchbar-results-no-results'>Sökningen gav inget resultat.</div>
             )
         }
       </div>
@@ -479,13 +522,15 @@ var SearchBarView = {
     var selectionToolbar = this.props.model.get('selectionTools')
       ? <SelectionToolbar model={this.props.model.get('selectionModel')} />
       : null;
-    var options = this.renderOptions();
 
+    var options = this.renderOptions();
     return (
       selectionTool ? (
         <div className='searchbar-results'>
+
           {selectionToolbar}
           {options}
+
         </div>
       ) : null
     );
@@ -523,12 +568,13 @@ var SearchBarView = {
     const inputClassName = this.state.loading || (showResults && !this.state.loading && shouldRenderSearchResults) ? 'form-control searchbar-input-field-active' : 'form-control';
     const buttonClassName = this.state.loading || (showResults && !this.state.loading && shouldRenderSearchResults) ? 'input-group-addon searchbar-search-button-active' : 'input-group-addon';
     const enable_selectionTool = this.props.model.get('enableSelectionTool');
+    const showSelectionTool = this.state.selectionTool ? 'input-group-addon searchbar-search-button-active' : 'input-group-addon searchbar-search-button';
 
     return (
       <div className='search-tools'>
         <div className='input-group' id='searchbar-search-area'>
           {valueBar ? <div id='searchbar-input-field-clear' onClick={() => {
-            this.clear();
+            this.clearInputField();
           }} /> : null}
           <input
             id='searchbar-input-field'
@@ -539,18 +585,19 @@ var SearchBarView = {
             value={valueBar}
             onKeyDown={this.handleKeyDown}
             onChange={this.searchOnInput} />
-
-            {enable_selectionTool ? (
-                <div id='selection-tool-button' className={buttonClassName} onClick={this.toggleSelectionTool}>
-                  <i className={this.state.selectionTool ? 'fa fa-angle-up clickable arrow' : 'fa fa-angle-down clickable arrow'} />
-                </div>
-              ) : null
-            }
-
           <div id='searchbar-search-button' className={buttonClassName} onClick={this.searchOnClick}>
             <i className='fa fa-search' />
           </div>
         </div>
+        {enable_selectionTool ? (
+            <div className={showSelectionTool}>
+              <div id='selection-tool-button' onClick={this.toggleSelectionTool}>
+                <span className='clickable'>{this.state.selectionTool ? 'Dölj sökalternativ' : 'Fler sökalternativ'}</span>
+                <i className={this.state.selectionTool ? 'fa fa-angle-up clickable arrow' : 'fa fa-angle-down clickable arrow'} />
+              </div>
+            </div>
+          ) : null
+        }
         {this.renderSelectionTool()}
         {
           showResults
