@@ -1,7 +1,10 @@
-import React, { Component } from "react";
+import React from "react";
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+
 import "./BackgroundSwitcher.css";
 
-class BackgroundSwitcher extends Component {
+class BackgroundSwitcher extends React.PureComponent {
   constructor() {
     super();
     this.onChange = this.onChange.bind(this);
@@ -115,8 +118,8 @@ class BackgroundSwitcher extends Component {
     this.setState({ toggled: !this.state.toggled });
   }
 
-  getToggleClass() {
-    return this.state.toggled ? "chevron_right" : "expand_less";
+  getToggleIcon() {
+    return this.state.toggled ? <ChevronRightIcon /> : <ExpandLessIcon />;
   }
 
   render() {
@@ -129,7 +132,7 @@ class BackgroundSwitcher extends Component {
             }}
             className="clickable"
           >
-            <i className="material-icons">{this.getToggleClass()}</i>
+            {this.getToggleIcon()}
             Bakgrundskartor
           </h1>
         </div>

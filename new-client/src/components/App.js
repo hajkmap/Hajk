@@ -13,8 +13,6 @@ import Popup from "./Popup.js";
 import MapSwitcher from "./MapSwitcher";
 
 import classNames from "classnames";
-import ErrorIcon from "@material-ui/icons/Error";
-import SentimentVeryDissatisfiedIcon from "@material-ui/icons/SentimentVeryDissatisfied";
 
 import "./App.css";
 
@@ -185,38 +183,45 @@ class App extends Component {
 
     return (
       <SnackbarProvider
-        maxSnack={2}
+        maxSnack={3}
         anchorOrigin={{
           vertical: "top",
           horizontal: "center"
         }}
       >
-        <AppBar position="absolute">
-          <MUIToolbar>
-            <Toolbar tools={this.appModel.getToolbarPlugins()} parent={this} />
-            {this.renderSearchPlugin()}
-            {this.renderMapSwitcher()}
-          </MUIToolbar>
-        </AppBar>
-        <main className={classes.map} id="map">
-          <Popup
-            mapClickDataResult={this.state.mapClickDataResult}
-            map={this.appModel.getMap()}
-            onClose={() => {
-              this.setState({
-                mapClickDataResult: undefined
-              });
-            }}
-          />
-          <div id="map-overlay" className={classes.overlay}>
-            <div className={classNames(classes.widgets, classes.widgetsLeft)}>
-              {this.renderWidgets("left")}
+        <>
+          <AppBar position="absolute">
+            <MUIToolbar>
+              <Toolbar
+                tools={this.appModel.getToolbarPlugins()}
+                parent={this}
+              />
+              {this.renderSearchPlugin()}
+              {this.renderMapSwitcher()}
+            </MUIToolbar>
+          </AppBar>
+          <main className={classes.map} id="map">
+            <Popup
+              mapClickDataResult={this.state.mapClickDataResult}
+              map={this.appModel.getMap()}
+              onClose={() => {
+                this.setState({
+                  mapClickDataResult: undefined
+                });
+              }}
+            />
+            <div id="map-overlay" className={classes.overlay}>
+              <div className={classNames(classes.widgets, classes.widgetsLeft)}>
+                {this.renderWidgets("left")}
+              </div>
+              <div
+                className={classNames(classes.widgets, classes.widgetsRight)}
+              >
+                {this.renderWidgets("right")}
+              </div>
             </div>
-            <div className={classNames(classes.widgets, classes.widgetsRight)}>
-              {this.renderWidgets("right")}
-            </div>
-          </div>
-        </main>
+          </main>
+        </>
       </SnackbarProvider>
     );
   }

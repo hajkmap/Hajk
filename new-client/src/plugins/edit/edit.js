@@ -115,8 +115,6 @@ class Edit extends Component {
   }
 
   render() {
-    console.log("edit.js render()", this);
-
     if (this.props.type === "toolbarItem") {
       return this.renderAsToolbarItem();
     }

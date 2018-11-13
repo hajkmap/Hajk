@@ -34,8 +34,6 @@ class DrawView extends React.PureComponent {
   }
 
   render() {
-    console.log("Will render DrawView");
-
     return (
       <div className="tool-panel-content">
         <ChromePicker

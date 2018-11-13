@@ -6,6 +6,7 @@ import { withStyles } from "@material-ui/core/styles";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import Snackbar from "@material-ui/core/Snackbar";
+import PlaceIcon from "@material-ui/icons/Place";
 
 const styles = theme => {
   return {
@@ -247,7 +248,7 @@ class CollectorForm extends Component {
       <div className={classes.form}>
         {createPortal(
           <div className={classes.cross}>
-            <i className="material-icons">place</i>
+            <PlaceIcon />
             <br />
             {this.renderOkButton()}
             <Snackbar

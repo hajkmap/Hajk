@@ -68,70 +68,6 @@ button {
   text-align: center;
   margin-top: 5%;
 }
-/*
-.tool-panel {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 500px;
-  background: var(--white);
-  bottom: 0px;
-  box-shadow: var(--box-shadow-right);
-  z-index: 10001;
-}
-
-.tool-panel .header {
-  background: var(--white);
-  padding: 10px;
-  border-bottom: 1px solid #ccc;
-  height: 60px;
-  text-transform: uppercase;
-}
-
-.tool-panel .header h1 {
-  font-size: 1.5rem;
-  line-height: 2.5rem;
-}
-
-.tool-panel .header .icons {
-  height: 100%;
-  display: flex;
-  align-items: center;
-}
-
-.tool-panel .header .material-icons {
-  cursor: pointer;
-  user-select: none;
-}
-
-.tool-panel .header .material-icons:hover {
-  color: var(--dark1);
-}
-
-.tool-panel .header .material-icons:active {
-  color: var(--blue2);
-}
-
-.tool-panel-content {
-  overflow-y: auto;
-  width: 100%;
-  position: absolute;
-  top: 70px;
-  bottom: 0;
-  padding: 10px;
-  left: 0;
-}
-
-.tool-panel-content h1 {
-  font-size: 16pt;
-  font-weight: 300;
-  text-transform: lowercase;
-  font-variant: small-caps;
-}
-
-.tool-panel.hidden {
-  display: none;
-}*/
 
 .hidden {
   display: none;
@@ -239,11 +175,6 @@ button {
 
 dialog {
   border: 1px solid #ccc;
-}
-
-.material-icons {
-  font-variant: normal;
-  vertical-align: middle;
 }
 
 .pull-left {

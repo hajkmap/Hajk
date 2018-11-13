@@ -18,8 +18,9 @@ class MapSwitcher extends React.PureComponent {
   }
 
   componentDidMount() {
-    console.log(this);
-    let { proxy, mapserviceBase, defaultMap } = this.appModel.config.appConfig;
+    // defaultMap from config is NOT the same as currently active map. How do we get that!?
+    // let { proxy, mapserviceBase, defaultMap } = this.appModel.config.appConfig;
+    let { proxy, mapserviceBase } = this.appModel.config.appConfig;
     fetch(`${proxy}${mapserviceBase}/config/userspecificmaps`)
       .then(resp => resp.json())
       .then(maps => {

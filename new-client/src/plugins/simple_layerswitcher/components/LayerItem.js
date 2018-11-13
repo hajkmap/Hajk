@@ -1,5 +1,8 @@
 import "./LayerItem.css";
 import React, { Component } from "react";
+import IconWarning from "@material-ui/icons/Warning";
+import CheckBoxIcon from "@material-ui/icons/CheckBox";
+import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 
 class LayerItem extends Component {
   constructor() {
@@ -69,14 +72,13 @@ class LayerItem extends Component {
    */
   renderStatus() {
     return this.state.status === "loaderror" ? (
-      <i
-        className="material-icons pull-right"
+      <IconWarning
+        style={{ float: "right" }}
         title="Lagret kunde inte laddas in. Kartservern svarar inte."
-      >
-        warning
-      </i>
+      />
     ) : null;
   }
+
   renderLegendImage() {
     var src =
       this.state.legend[0] && this.state.legend[0].url
@@ -146,9 +148,7 @@ class LayerItem extends Component {
               onClick={this.toggleVisible(this.props.layer)}
               className="clickable"
             >
-              <i className="material-icons" style={{ width: "2rem" }}>
-                {visible ? "check_box" : "check_box_outline_blank"}
-              </i>
+              {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
               {this.renderStatus()}
               <label
                 className={

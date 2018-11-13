@@ -74,6 +74,7 @@ class SimpleLayersSwitcherView extends Component {
   }
 
   hideAllLayers() {
+    // FIXME: Implement
     console.log("will hide all layers");
   }
 

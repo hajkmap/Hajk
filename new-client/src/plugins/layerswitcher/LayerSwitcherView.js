@@ -7,6 +7,9 @@ import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import MapSwitcher from "./components/MapSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+
 import "./style.css";
 
 const styles = theme => ({
@@ -56,12 +59,17 @@ class LayersSwitcherView extends React.PureComponent {
     });
   }
 
-  getArrowClass() {
-    return this.state.layerGroupsExpanded ? "expand_less" : "chevron_right";
+  getToggleIcon() {
+    return this.state.layerGroupsExpanded ? (
+      <ExpandLessIcon />
+    ) : (
+      <ChevronRightIcon />
+    );
   }
 
   hideAllLayers() {
-    console.log("will hide all layers");
+    // FIXME: Implement
+    console.log("Will hide all layers");
   }
 
   renderPanel() {
@@ -82,7 +90,7 @@ class LayersSwitcherView extends React.PureComponent {
           }}
           className="clickable"
         >
-          <i className="material-icons">{this.getArrowClass()}</i>
+          {this.getToggleIcon()}
           Kartlager
         </h1>
         <div className={this.getLayerGroupsClass()}>
@@ -93,7 +101,6 @@ class LayersSwitcherView extends React.PureComponent {
   }
 
   render() {
-    console.log("Will render LayerSwitcherView");
     return this.renderPanel();
   }
 }

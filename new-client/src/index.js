@@ -17,6 +17,8 @@ import buildConfig from "./buildConfig.json";
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import deepmerge from "deepmerge";
 
+import ErrorIcon from "@material-ui/icons/Error";
+
 const networkErrorMessage =
   "Fel när applikationen skulle läsas in. Detta beror troligtvis på ett nätverksfel. Försök igen senare.";
 const parseErrorMessage =
@@ -107,7 +109,7 @@ fetch("appConfig.json")
                 ReactDOM.render(
                   <div className="start-error">
                     <div>
-                      <i className="material-icons">error</i>
+                      <ErrorIcon />
                     </div>
                     <div>{parseErrorMessage}</div>
                   </div>,
@@ -121,7 +123,7 @@ fetch("appConfig.json")
           ReactDOM.render(
             <div className="start-error">
               <div>
-                <i className="material-icons">error</i>
+                <ErrorIcon />
               </div>
               <div>{networkErrorMessage}</div>
             </div>,
@@ -135,7 +137,7 @@ fetch("appConfig.json")
     ReactDOM.render(
       <div className="start-error">
         <div>
-          <i className="material-icons">error</i>
+          <ErrorIcon />
         </div>
         <div>{networkErrorMessage}</div>
       </div>,
