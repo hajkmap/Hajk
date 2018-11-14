@@ -39,7 +39,7 @@ class LayerGroup extends Component {
       chapters: []
     };
     this.toggleExpanded = this.toggleExpanded.bind(this);
-    props.app.observer.on("informativeLoaded", chapters => {
+    props.app.globalObserver.on("informativeLoaded", chapters => {
       this.setState({
         chapters: chapters
       });

@@ -47,7 +47,7 @@ class Informative extends Component {
         }
       };
       this.setState(state);
-      this.props.app.observer.publish("informativeLoaded", chapters);
+      this.props.app.globalObserver.publish("informativeLoaded", chapters);
     });
     this.props.observer.subscribe("changeChapter", chapter => {
       this.setState({

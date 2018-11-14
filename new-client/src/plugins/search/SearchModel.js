@@ -4,12 +4,11 @@ import Intersects from "ol/format/filter/Intersects";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
-import {fromCircle} from 'ol/geom/Polygon';
-import Draw from 'ol/interaction/Draw.js';
+import { fromCircle } from "ol/geom/Polygon";
+import Draw from "ol/interaction/Draw.js";
 import { arraySort } from "./../../utils/ArraySort.js";
 
 class SearchModel {
-
   layerList = [];
 
   mapSouceAsWFSPromise = (feature, projCode) => source => {
@@ -23,9 +22,9 @@ class SearchModel {
       outputFormat: "JSON", //source.outputFormat,
       geometryName: source.geometryName,
       filter: new Intersects(
-        "geom",   // geometryName
-        geom,     // geometry
-        projCode  // projCode
+        "geom", // geometryName
+        geom, // geometry
+        projCode // projCode
       )
     };
 
@@ -48,9 +47,7 @@ class SearchModel {
     var mapLayer = this.olMap
       .getLayers()
       .getArray()
-      .find(l =>
-        l.get('name') === layerId
-      );
+      .find(l => l.get("name") === layerId);
 
     if (mapLayer) {
       mapLayer.layerId = layerId;
@@ -66,10 +63,14 @@ class SearchModel {
       .getCode();
 
     var search = () => {
-
-      const searchLayers = this.options.selectedSources.reduce(this.getLayerAsSource, []);
+      const searchLayers = this.options.selectedSources.reduce(
+        this.getLayerAsSource,
+        []
+      );
       const searchSources = searchLayers.map(this.mapDisplayLayerAsSearchLayer);
-      const promises = searchSources.map(this.mapSouceAsWFSPromise(feature, projCode));
+      const promises = searchSources.map(
+        this.mapSouceAsWFSPromise(feature, projCode)
+      );
 
       Promise.all(promises).then(responses => {
         Promise.all(responses.map(result => result.json())).then(
@@ -77,21 +78,21 @@ class SearchModel {
             var result = [];
             jsonResults.forEach((jsonResult, i) => {
               if (jsonResult.totalFeatures > 0) {
-                result.push(searchLayers[i].layerId)
+                result.push(searchLayers[i].layerId);
               }
             });
             callback(result);
           }
-        )
+        );
       });
-    }
+    };
 
     if (feature.getGeometry().getType() === "Point") {
       this.options.sources.forEach(source => {
         if (source.caption.toLowerCase() === "fastighet") {
           this.lookupEstate(source, feature, estates => {
             var olEstate = new GeoJSON().readFeatures(estates)[0];
-            feature = olEstate
+            feature = olEstate;
             search();
           });
         }
@@ -135,13 +136,12 @@ class SearchModel {
   };
 
   toggleDraw = (active, drawEndCallback) => {
-
     if (active) {
       this.draw = new Draw({
         source: this.drawSource,
         type: "Circle"
       });
-      this.draw.on('drawend', e => {
+      this.draw.on("drawend", e => {
         if (drawEndCallback) {
           drawEndCallback();
         }
@@ -150,7 +150,7 @@ class SearchModel {
         setTimeout(() => {
           this.olMap.clicklock = false;
         }, 1000);
-        this.searchWithinArea(e.feature, (layerIds) => {
+        this.searchWithinArea(e.feature, layerIds => {
           this.layerList = layerIds.reduce(this.getLayerAsSource, []);
           this.layerList.forEach(layer => {
             layer.setVisible(true);
@@ -174,7 +174,7 @@ class SearchModel {
     this.vectorLayer = new VectorLayer({
       source: new VectorSource({})
     });
-    this.drawSource = new VectorSource({wrapX: false});
+    this.drawSource = new VectorSource({ wrapX: false });
     this.drawLayer = new VectorLayer({
       source: this.drawSource
     });
@@ -195,11 +195,8 @@ class SearchModel {
   highlight(feature) {
     this.clear();
     this.vectorLayer.getSource().addFeature(feature);
-    this.olMap.getView().fit(
-      feature.getGeometry(),
-      this.olMap.getSize()
-    );
-    this.searchWithinArea(feature, (layerIds) => {
+    this.olMap.getView().fit(feature.getGeometry(), this.olMap.getSize());
+    this.searchWithinArea(feature, layerIds => {
       this.layerList = layerIds.reduce(this.getLayerAsSource, []);
       this.layerList.forEach(layer => {
         layer.setVisible(true);
@@ -218,17 +215,20 @@ class SearchModel {
           layers: [searchLayer.get("featureType")],
           geometryName: "geom",
           layerId: searchLayer.layerId
-        }
+        };
         break;
       case "TILE":
       case "IMAGE":
         source = {
           type: type,
-          url: searchLayer.get("url").replace('wms', 'wfs'),
-          layers: searchLayer.getSource().getParams()["LAYERS"].split(','),
+          url: searchLayer.get("url").replace("wms", "wfs"),
+          layers: searchLayer
+            .getSource()
+            .getParams()
+            ["LAYERS"].split(","),
           geometryName: "geom",
           layerId: searchLayer.layerId
-        }
+        };
         break;
       default:
         break;
@@ -250,9 +250,9 @@ class SearchModel {
       outputFormat: "JSON", //source.outputFormat,
       geometryName: source.geometryName,
       filter: new Intersects(
-        "geom",   // geometryName
-        geom,     // geometry
-        projCode  // projCode
+        "geom", // geometryName
+        geom, // geometry
+        projCode // projCode
       )
     };
 
@@ -289,9 +289,9 @@ class SearchModel {
       filter: new IsLike(
         source.searchFields[0],
         searchInput + "*",
-        "*",  // wild card
-        ".",  // single char
-        "!",  // escape char
+        "*", // wild card
+        ".", // single char
+        "!", // escape char
         false // match case
       )
     };
@@ -310,7 +310,6 @@ class SearchModel {
 
     return fetch(source.url, request);
   }
-
 }
 
 export default SearchModel;
