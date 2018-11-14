@@ -34,10 +34,10 @@ class AppModel {
 
   /**
    * Initialize new AddModel
-   * @param oject Config
+   * @param object Config
    * @param Observer observer
    */
-  constructor(config, observer) {
+  constructor(config, globalObserver) {
     this.panels = [];
     this.plugins = {};
     this.activeTool = undefined;
@@ -45,7 +45,7 @@ class AppModel {
     this.coordinateSystemLoader = new CoordinateSystemLoader(
       config.mapConfig.projections
     );
-    this.observer = observer;
+    this.globalObserver = globalObserver;
     register(this.coordinateSystemLoader.getProj4());
   }
   /**
@@ -163,7 +163,7 @@ class AppModel {
     }, 0);
 
     bindMapClickEvent(map, mapClickDataResult => {
-      this.observer.publish("mapClick", mapClickDataResult);
+      this.globalObserver.publish("mapClick", mapClickDataResult);
     });
     return this;
   }

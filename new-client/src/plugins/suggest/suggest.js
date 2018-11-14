@@ -67,8 +67,6 @@ class Suggest extends Component {
   }
 
   render() {
-    console.log("Suggest.js render()", this);
-
     if (this.props.type === "toolbarItem") {
       return this.renderAsToolbarItem();
     }

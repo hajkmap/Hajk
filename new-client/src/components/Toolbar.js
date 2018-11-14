@@ -21,7 +21,7 @@ const drawerWidth = 240;
 const styles = theme => ({
   drawer: {
     order: 0,
-    zIndex: 10000,
+    zIndex: 1199,
     [theme.breakpoints.down("sm")]: {
       position: "absolute",
       left: 0,

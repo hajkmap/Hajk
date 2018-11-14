@@ -1,10 +1,12 @@
 class DummyModel {
   constructor(settings) {
-    this.olMap = settings.map;
+    this.map = settings.map;
+    this.app = settings.app;
+    this.localObserver = settings.localObserver;
   }
 
   getMap() {
-    return this.olMap;
+    return this.map;
   }
 }
 

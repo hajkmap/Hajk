@@ -16,7 +16,9 @@ class MapSwitcher extends Component {
 
   async fetchAvailableMaps() {
     let response = await fetch(
-      `${this.props.appConfig.mapserviceBase}/config/userspecificmaps`
+      `${this.props.appConfig.proxy}${
+        this.props.appConfig.mapserviceBase
+      }/config/userspecificmaps`
     );
     let data = await response.json();
     this.setState({ availableMaps: data });

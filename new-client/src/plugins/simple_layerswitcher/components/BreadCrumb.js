@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import CloseIcon from "@material-ui/icons/Close";
 import "./BreadCrumb.css";
 
 class BreadCrumb extends Component {
@@ -28,12 +29,10 @@ class BreadCrumb extends Component {
         <div className="bread-crumb-header">
           <span>
             {this.props.title}{" "}
-            <i
-              className="material-icons"
+            <CloseIcon
+              className="pointer"
               onClick={this.setLayerVisibility(this.props.layer)}
-            >
-              close
-            </i>
+            />
           </span>
         </div>
       </div>

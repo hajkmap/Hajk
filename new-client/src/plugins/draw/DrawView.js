@@ -1,11 +1,11 @@
-import React, { Component } from "react";
+import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { ChromePicker } from "react-color";
 import PropTypes from "prop-types";
 
 const styles = theme => ({});
 
-class DrawView extends Component {
+class DrawView extends React.PureComponent {
   handleColorChange = (color, event) => {
     this.setState({ selectedColor: color.rgb });
   };
@@ -34,8 +34,6 @@ class DrawView extends Component {
   }
 
   render() {
-    console.log("Will render DrawView");
-
     return (
       <div className="tool-panel-content">
         <ChromePicker

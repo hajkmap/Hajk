@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import Observer from "react-event-observer";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
@@ -6,6 +6,9 @@ import { withStyles } from "@material-ui/core/styles";
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import MapSwitcher from "./components/MapSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
+
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 
 import "./style.css";
 
@@ -16,7 +19,7 @@ const styles = theme => ({
     zIndex: theme.zIndex.drawer - 1
   }
 });
-class LayersSwitcherView extends Component {
+class LayersSwitcherView extends React.PureComponent {
   state = {
     layerGroupsExpanded: true
   };
@@ -56,12 +59,17 @@ class LayersSwitcherView extends Component {
     });
   }
 
-  getArrowClass() {
-    return this.state.layerGroupsExpanded ? "expand_less" : "chevron_right";
+  getToggleIcon() {
+    return this.state.layerGroupsExpanded ? (
+      <ExpandLessIcon />
+    ) : (
+      <ChevronRightIcon />
+    );
   }
 
   hideAllLayers() {
-    console.log("will hide all layers");
+    // FIXME: Implement
+    console.log("Will hide all layers");
   }
 
   renderPanel() {
@@ -82,7 +90,7 @@ class LayersSwitcherView extends Component {
           }}
           className="clickable"
         >
-          <i className="material-icons">{this.getArrowClass()}</i>
+          {this.getToggleIcon()}
           Kartlager
         </h1>
         <div className={this.getLayerGroupsClass()}>
@@ -93,7 +101,6 @@ class LayersSwitcherView extends Component {
   }
 
   render() {
-    console.log("Will render LayerSwitcherView");
     return this.renderPanel();
   }
 }

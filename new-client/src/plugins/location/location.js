@@ -1,30 +1,23 @@
-// Generic imports – all plugins need these
 import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 
-// The following imports can be changed, depending on desired appearance of the plugin.
-// If you want your plugin to be renderable in Toolbar and as Floating Action Button, you
-// need both the List* and Button imports.
-// Don't forget to change the icon though!
-import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
-import { Button } from "@material-ui/core";
-import BugReportIcon from "@material-ui/icons/BugReport";
+import {
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Button
+} from "@material-ui/core";
+import NavigationIcon from "@material-ui/icons/Navigation";
 
-// Finally there are some plugin-specific imports. Most plugins will need Model, View and Observer.
-// Panel is optional – you could use a Dialog or something else. This Dummy uses a Panel as an
-// example though.
-import DummyView from "./DummyView";
-import DummyModel from "./DummyModel";
-import Observer from "react-event-observer";
 import Panel from "../../components/Panel.js";
+import LocationView from "./LocationView";
 
 const styles = theme => {
   return {};
 };
 
-class Dummy extends React.PureComponent {
-  // In native ES6 class we can set state like this, outside the constructor
+class Location extends React.PureComponent {
   state = {
     panelOpen: false
   };
@@ -32,7 +25,7 @@ class Dummy extends React.PureComponent {
   // Called when plugin's <ListItem> or widget <Button> is clicked
   onClick = e => {
     // Callback that loops through app's panels and calls closePanel() on all except current
-    this.app.onPanelOpen(this);
+    this.props.app.onPanelOpen(this);
 
     // This state variable is being watched for in render() and decides whether MUI Component <Drawer> is open or not
     this.setState({
@@ -47,39 +40,21 @@ class Dummy extends React.PureComponent {
     });
   };
 
-  constructor(props) {
-    super(props);
+  constructor(spec) {
+    super(spec);
 
     // Important, part of API. Must be a string. Could be fetched from config.
-    this.text = "Dummy plugin header";
-    this.app = props.app;
+    this.text = "Spåra position";
 
-    // Optionally setup a local observer to allow sending messages between here and model/view.
-    // It's called 'localObserver' to distinguish it from AppModel's observer, that we call 'globalObserver'.
-    this.localObserver = Observer();
-    // Example on how to make observer listen for "myEvent" event sent from elsewhere
-    this.localObserver.subscribe("dummyEvent", message => {
-      console.log(message);
-    });
-
-    // Initiate a model. Although optional, will probably be used for all except the most simple plugins.
-    this.dummyModel = new DummyModel({
-      map: props.map,
-      app: props.app,
-      localObserver: this.localObserver
-    });
-
-    // Important, part of API for plugins that contain panels. Makes App aware of this panels existance.
-    this.app.registerPanel(this);
+    // Important, part of API for plugins that contain panels. Makes App aware of this panels existence.
+    this.props.app.registerPanel(this);
   }
 
-  // If you choose to extend React.Component, instead of React.PureComponent, make sure to un-comment
-  // this method. It will check if render is necessary, and avoid re-rendering if current panel has not changed its state.
-  // NB: The preferred way is to make plugins that extend PureComponent, hence this method is not needed as
-  // PureComponents already implement 'shouldComponentUpdate()'.
-  /* shouldComponentUpdate(nextProps, nextState) {
-    return this.state.panelOpen !== nextState.panelOpen;
-  } */
+  // Note: as we experiment with PureComponents, this has been out-commented.
+  // Important, part of API. Avoid re-rendering if current panel has not changed its state.
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   return this.state.panelOpen !== nextState.panelOpen;
+  // }
 
   // Important, part of API. Make sure to respect panel visibility set in config.
   componentWillMount() {
@@ -99,13 +74,7 @@ class Dummy extends React.PureComponent {
         position="left"
         open={this.state.panelOpen}
       >
-        {/* IMPORTANT: Note that normally you don't need to give View access to BOTH observer and model – one of those is sufficient */}
-        <DummyView
-          // map={this.map} // Just an example. Make sure to ONLY include props that are ACTUALLY USED in the View.
-          localObserver={this.localObserver}
-          model={this.dummyModel}
-          app={this.app}
-        />
+        <LocationView parent={this} />
       </Panel>,
       document.getElementById("map-overlay")
     );
@@ -126,11 +95,11 @@ class Dummy extends React.PureComponent {
         <Button
           variant="fab"
           color="default"
-          aria-label="Dummy plugin"
+          aria-label="Location plugin"
           className={classes.button}
           onClick={this.onClick}
         >
-          <BugReportIcon />
+          <NavigationIcon />
         </Button>
         {this.renderPanel()}
       </div>
@@ -148,7 +117,7 @@ class Dummy extends React.PureComponent {
           onClick={this.onClick}
         >
           <ListItemIcon>
-            <BugReportIcon />
+            <NavigationIcon />
           </ListItemIcon>
           <ListItemText primary={this.text} />
         </ListItem>
@@ -170,4 +139,4 @@ class Dummy extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(Dummy);
+export default withStyles(styles)(Location);

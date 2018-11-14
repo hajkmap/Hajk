@@ -3,10 +3,15 @@ import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Observer from "react-event-observer";
 import AppModel from "./../models/AppModel.js";
-import Toolbar from "./Toolbar.js";
-import Popup from "./Popup.js";
+
 import AppBar from "@material-ui/core/AppBar";
+import Toolbar from "./Toolbar.js";
 import { Toolbar as MUIToolbar } from "@material-ui/core";
+import { SnackbarProvider, withSnackbar } from "notistack";
+
+import Popup from "./Popup.js";
+import MapSwitcher from "./MapSwitcher";
+
 import classNames from "classnames";
 
 import "./App.css";
@@ -19,7 +24,6 @@ const styles = theme => {
     // We can also consult https://material-ui.com/customization/default-theme/ for available options
     map: {
       flexGrow: 1,
-      zIndex: 1,
       overflow: "hidden",
       position: "absolute",
       top: "64px",
@@ -95,8 +99,8 @@ class App extends Component {
   }
 
   componentWillMount() {
-    this.observer = new Observer();
-    this.appModel = new AppModel(this.props.config, this.observer);
+    this.globalObserver = new Observer();
+    this.appModel = new AppModel(this.props.config, this.globalObserver);
   }
 
   componentDidMount() {
@@ -111,10 +115,18 @@ class App extends Component {
       });
     });
 
-    this.observer.subscribe("mapClick", mapClickDataResult => {
+    this.globalObserver.subscribe("mapClick", mapClickDataResult => {
       this.setState({
         mapClickDataResult: mapClickDataResult
       });
+    });
+  }
+
+  // Catches exceptions generated in descendant components. Unhandled exceptions will cause the entire component tree to unmount.
+  componentDidCatch(error) {
+    console.error(error);
+    this.props.enqueueSnackbar("Åh nej! Ett fel har inträffat.", {
+      variant: "error"
     });
   }
 
@@ -143,6 +155,20 @@ class App extends Component {
     }
   }
 
+  renderMapSwitcher = () => {
+    if (
+      this.appModel.config.mapConfig.tools["0"].options.hasOwnProperty(
+        "dropdownThemeMaps"
+      ) &&
+      this.appModel.config.mapConfig.tools["0"].options.dropdownThemeMaps ===
+        true
+    )
+      return <MapSwitcher appModel={this.appModel} />;
+    else {
+      return null;
+    }
+  };
+
   renderSearchPlugin() {
     var searchPlugin = this.appModel.getSearchPlugin();
     if (searchPlugin) {
@@ -160,37 +186,49 @@ class App extends Component {
 
   render() {
     const { classes } = this.props;
+
     return (
-      <div className={classes.root}>
-        <main className={classes.map} id="map">
-          <AppBar position="fixed" className={classes.toolbar}>
+      <SnackbarProvider
+        maxSnack={3}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "center"
+        }}
+      >
+        <>
+          <AppBar position="absolute">
             <MUIToolbar>
               <Toolbar
                 tools={this.appModel.getToolbarPlugins()}
                 parent={this}
               />
               {this.renderSearchPlugin()}
+              {this.renderMapSwitcher()}
             </MUIToolbar>
           </AppBar>
-          <div id="map-overlay" className={classes.overlay}>
-            <div className={classNames(classes.widgets, classes.widgetsLeft)}>
-              {this.renderWidgets("left")}
+          <main className={classes.map} id="map">
+            <Popup
+              mapClickDataResult={this.state.mapClickDataResult}
+              map={this.appModel.getMap()}
+              onClose={() => {
+                this.setState({
+                  mapClickDataResult: undefined
+                });
+              }}
+            />
+            <div id="map-overlay" className={classes.overlay}>
+              <div className={classNames(classes.widgets, classes.widgetsLeft)}>
+                {this.renderWidgets("left")}
+              </div>
+              <div
+                className={classNames(classes.widgets, classes.widgetsRight)}
+              >
+                {this.renderWidgets("right")}
+              </div>
             </div>
-            <div className={classNames(classes.widgets, classes.widgetsRight)}>
-              {this.renderWidgets("right")}
-            </div>
-          </div>
-          <Popup
-            mapClickDataResult={this.state.mapClickDataResult}
-            map={this.appModel.getMap()}
-            onClose={() => {
-              this.setState({
-                mapClickDataResult: undefined
-              });
-            }}
-          />
-        </main>
-      </div>
+          </main>
+        </>
+      </SnackbarProvider>
     );
   }
 }
@@ -199,4 +237,4 @@ App.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(App);
+export default withStyles(styles)(withSnackbar(App));
