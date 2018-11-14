@@ -156,13 +156,7 @@ class App extends Component {
   }
 
   renderMapSwitcher = () => {
-    if (
-      this.appModel.config.mapConfig.tools["0"].options.hasOwnProperty(
-        "dropdownThemeMaps"
-      ) &&
-      this.appModel.config.mapConfig.tools["0"].options.dropdownThemeMaps ===
-        true
-    )
+    if (this.appModel.config.mapConfig.map.mapselector)
       return <MapSwitcher appModel={this.appModel} />;
     else {
       return null;

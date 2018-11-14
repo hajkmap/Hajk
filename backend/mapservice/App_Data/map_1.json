@@ -413,9 +413,10 @@
     "mobileright": null,
     "pil": null,
     "mobile": false,
+    "mapselector": false,
     "colors": {
-      "primaryColor": "#4a90e2",
-      "secondaryColor": "#6b1a1a"
+      "primaryColor": "#f5a623",
+      "secondaryColor": "#fffbcb"
     }
   }
 }
