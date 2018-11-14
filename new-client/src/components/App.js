@@ -36,9 +36,12 @@ const styles = theme => {
     },
     toolbar: {
       position: "fixed",
-      zIndex: 20000,
+      zIndex: 2000,
       top: 0,
       boxShadow: "none"
+    },
+    appBar: {
+      zIndex: 2000
     },
     flex: {
       flexGrow: 1
@@ -190,7 +193,7 @@ class App extends Component {
         }}
       >
         <>
-          <AppBar position="absolute">
+          <AppBar position="absolute" className={classes.appBar}>
             <MUIToolbar>
               <Toolbar
                 tools={this.appModel.getToolbarPlugins()}

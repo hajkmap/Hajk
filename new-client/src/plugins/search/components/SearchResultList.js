@@ -14,7 +14,8 @@ const styles = theme => {
       padding: "15px",
       border: "1px solid #ccc",
       borderTop: "none",
-      top: "49px",
+      top: "52px",
+      right: 0,
       [theme.breakpoints.down("xs")]: {
         top: "56px",
         left: 0,
