@@ -20,7 +20,7 @@ const styles = theme => {
         marginLeft: theme.spacing.unit
       }
     }
-  }
+  };
 };
 
 class Search extends Component {
@@ -42,14 +42,20 @@ class Search extends Component {
   renderSearchResultList() {
     const { result } = this.state;
     if (!result) return null;
-    return <SearchResultList result={result} model={this.searchModel} visible={true} />;
+    return (
+      <SearchResultList
+        result={result}
+        model={this.searchModel}
+        visible={true}
+      />
+    );
   }
 
   render() {
     const { classes } = this.props;
     return (
       <div className={classes.searchContainer}>
-        <SearchWithinButton model={this.searchModel}></SearchWithinButton>
+        <SearchWithinButton model={this.searchModel} />
         <SearchBar
           onChange={this.searchModel.search}
           onComplete={this.resolve}
@@ -57,7 +63,7 @@ class Search extends Component {
             this.searchModel.clear();
             this.setState({
               result: false
-            })
+            });
           }}
         />
         {this.renderSearchResultList()}

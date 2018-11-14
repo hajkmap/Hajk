@@ -3,7 +3,7 @@ import Input from "@material-ui/core/Input";
 import { withStyles } from "@material-ui/core/styles";
 import { fade } from "@material-ui/core/styles/colorManipulator";
 import SearchIcon from "@material-ui/icons/Search";
-import InputAdornment from '@material-ui/core/InputAdornment';
+import InputAdornment from "@material-ui/core/InputAdornment";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 
 const styles = theme => ({
@@ -13,13 +13,14 @@ const styles = theme => ({
     backgroundColor: fade(theme.palette.common.white, 0.15),
     "&:hover": {
       backgroundColor: fade(theme.palette.common.white, 0.25)
-    }
+    },
+    overflow: "hidden"
   },
   closeIcon: {
-    position: 'relative',
-    right: '5px',
-    transform: 'rotate(45deg)',
-    cursor: 'pointer'
+    position: "relative",
+    right: "5px",
+    transform: "rotate(45deg)",
+    cursor: "pointer"
   },
   searchIcon: {
     width: theme.spacing.unit * 4,
@@ -51,7 +52,6 @@ const styles = theme => ({
 });
 
 class SearchBar extends Component {
-
   state = {
     value: ""
   };
@@ -82,12 +82,14 @@ class SearchBar extends Component {
           }}
           endAdornment={
             <InputAdornment className={classes.closeIcon} position="end">
-              <AddCircleIcon onClick={() => {
-                onClear();
-                this.setState({
-                  value: ""
-                });
-              }}></AddCircleIcon>
+              <AddCircleIcon
+                onClick={() => {
+                  onClear();
+                  this.setState({
+                    value: ""
+                  });
+                }}
+              />
             </InputAdornment>
           }
         />

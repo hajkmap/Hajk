@@ -33,7 +33,8 @@ const styles = theme => {
     toolbar: {
       position: "fixed",
       zIndex: 20000,
-      top: 0
+      top: 0,
+      boxShadow: "none"
     },
     flex: {
       flexGrow: 1
