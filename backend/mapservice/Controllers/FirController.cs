@@ -32,8 +32,15 @@ namespace MapService.Controllers
             return request;
         }
 
+        // TODO: Remove this
         [HttpGet]
         public string PropertyDoc(string id)
+        {
+            return RealEstateDoc(id);
+        }
+
+        [HttpGet]
+        public string RealEstateDoc(string id)
         {
             try
             {
@@ -61,13 +68,20 @@ namespace MapService.Controllers
             }
             catch (Exception e)
             {
-                _log.FatalFormat("Can't get property document: {0}", e);
+                _log.FatalFormat("Can't get real estate document: {0}", e);
                 throw e;
             }
         }
 
+        /// <summary>
+        /// Returnernar fastigheter från en adress.
+        /// Problem med sökvillkoret.
+        /// TODO: Används inte. Ta bort
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet]
-        public string PropertyFromAddress(string id)
+        public string RealEstateFromAddress(string id)
         {
             try
             {
@@ -89,16 +103,24 @@ namespace MapService.Controllers
             }
             catch (Exception e)
             {
-                _log.FatalFormat("Can't get properties from adress: {0}", e);
+                _log.FatalFormat("Can't get real estates from adress: {0}", e);
                 throw e;
             }
+        }
+
+        // TODO: Remove this
+        [HttpPost]
+        public string PropertyOwnerList(string json)
+        {
+            return RealEstateOwnerList(json);
         }
 
         // Test: { "fnr": ["130121064","130129850","130132945","130139213"] }
         // Test: { "uuid": ["909a6a63-33aa-90ec-e040-ed8f66444c3f","909a6a63-55fc-90ec-e040-ed8f66444c3f","909a6a63-6213-90ec-e040-ed8f66444c3f","909a6a63-7a8f-90ec-e040-ed8f66444c3f"] }
         // Test: {"fnr":["130120236","130120237","130120238","130120239","130120240","130121103","130121104","130121105","130121106","130121107","130121108","130121109","130121110","130121112","130121113","130121114","130121115","130121116","130121117","130121118","130121119","130121120","130121121","130121122","130121123","130121124","130121125","130121126","130121127","130121128","130121129","130121130","130121132","130121133","130121134","130121150","130121151","130121152","130125494","130127053","130127054","130127055","130127056","130127057","130127058","130127059","130127060","130127063","130127064","130127065","130127066","130127067","130127068","130127069","130127070","130131493","130131494","130131495","130131496","130131497","130131498","130131499","130131500","130131504","130131505","130131506","130131507","130131508","130131509","130131510","130131511","130131512","130145263","130145264","130145265","130145266","130145267","130145268","130145269","130145270","130145273","130145274","130145275","130145276","130145277","130145278","130145279","130145280"]}
+        // Test: {"fnr":["130125550","130125547","130125548","130125552","130125549"]}
         [HttpPost]
-        public string PropertyOwnerList(string json)
+        public string RealEstateOwnerList(string json)
         {
             try
             {
@@ -137,29 +159,42 @@ namespace MapService.Controllers
         /// <returns></returns>
         private ExcelTemplate GenFastighetSheet(string json)
         {
+            string fastighetsBeteckning = "";
             try
             {
                 string soapEnvelope = "<?xml version=\"1.0\" encoding=\"utf-8\"?><soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\"><soap:Body><GetInskrivningRequest xmlns=\"http://namespace.lantmateriet.se/distribution/produkter/inskrivning/v2.1\"><InskrivningRegisterenhetFilter>{0}</InskrivningRegisterenhetFilter><IncludeData><total>true</total></IncludeData></GetInskrivningRequest></soap:Body></soap:Envelope>";
                 string uuidFormat = "<objektidentitet>{0}</objektidentitet>";
                 string fnrFormat = "<fastighetsnyckel>{0}</fastighetsnyckel>";
 
+                // TODO: Endast skicka 250 fastigheter åt gången
+                List<string> fnrList, uuidList;
                 string regEnhFilter = "";
                 JToken jsonBody = JsonConvert.DeserializeObject<JToken>(json);
                 if (jsonBody.SelectToken("fnr") != null)
                 {
-                    var fnr = jsonBody.SelectToken("fnr");
-                    foreach (var item in fnr)
-                    {
-                        regEnhFilter += string.Format(fnrFormat, item.ToString());
-                    }
+                    fnrList = GetList(jsonBody.SelectToken("fnr"));
+
+                    regEnhFilter = GetInskrivningRegisterenhetFilter(fnrList, fnrFormat, 0);
+
+                    //fnrList = new List<string>();
+                    //var fnr = jsonBody.SelectToken("fnr").Values();
+                    //foreach (var item in fnr)
+                    //{
+                    //    fnrList.Add(item.ToString());
+                    //    //regEnhFilter += string.Format(fnrFormat, item.ToString());
+                    //}
                 }
                 else if (jsonBody.SelectToken("uuid") != null)
                 {
-                    var uuid = jsonBody.SelectToken("uuid");
-                    foreach (var item in uuid)
-                    {
-                        regEnhFilter += string.Format(uuidFormat, item.ToString());
-                    }
+                    uuidList = GetList(jsonBody.SelectToken("uuid"));
+
+                    regEnhFilter = GetInskrivningRegisterenhetFilter(uuidList, uuidFormat, 0);
+
+                    //var uuid = jsonBody.SelectToken("uuid");
+                    //foreach (var item in uuid)
+                    //{
+                    //    regEnhFilter += string.Format(uuidFormat, item.ToString());
+                    //}
                 }
                 else
                 {
@@ -211,18 +246,20 @@ namespace MapService.Controllers
                         foreach (XmlNode nodeInskrivning in nodeListInskrivningsInfo)
                         {
                             var typ = nodeInskrivning["ns4:Registerenhetsreferens"]["ns4:typ"]; // TODO: Kontrollera vilka fler typer det finns (samfällighet?)
-                            var fastighetsBeteckning = nodeInskrivning["ns4:Registerenhetsreferens"]["ns4:beteckning"].InnerText;
+                            fastighetsBeteckning = nodeInskrivning["ns4:Registerenhetsreferens"]["ns4:beteckning"].InnerText;
+                            _log.DebugFormat("Fastighet '{0}' med följande typ: '{1}'", fastighetsBeteckning, typ.InnerText);
 
-                            // Ägare kan finnas både under Lagfart och under Tomträttsinnehav. Vi tittar endast på Lagfart i piloten
-                            // TODO: Även ta med Tomträttsinnehavare
+                            // Ägare kan finnas både under Lagfart och under Tomträttsinnehav.
+                            // TODO: Testa Tomträttsinnehavare
+                            // Enligt dokumentation ska Lagfart och Tomtrattsinnehav ha samma egenskaper förutom Lagfartsanmarkning och Tomtrattsinnehavsanmarkning
                             var nodeList = nodeInskrivning.SelectNodes("ns4:Agande/ns4:Lagfart", nsmgr);
-                            //var nodeList = nodeInskrivning.SelectNodes("ns4:Agande/ns4:Tomtrattsinnehav", nsmgr);
+                            if (nodeList.Count == 0)
+                                nodeList = nodeInskrivning.SelectNodes("ns4:Agande/ns4:Tomtrattsinnehav", nsmgr);
 
                             if (nodeList.Count > 0)
                             {
                                 foreach (XmlNode node in nodeList)
                                 {
-
                                     if (node["ns4:BeviljadAndel"] != null)
                                     {
                                         var andel = node["ns4:BeviljadAndel"]["ns4:taljare"].InnerText + "/" + node["ns4:BeviljadAndel"]["ns4:namnare"].InnerText;
@@ -265,8 +302,10 @@ namespace MapService.Controllers
                                         }
                                         else
                                         {
-                                            if(node["ns4:Agare"]["ns4:fornamn"] != null && node["ns4:Agare"]["ns4:efternamn"] != null)
+                                            if (node["ns4:Agare"]["ns4:fornamn"] != null && node["ns4:Agare"]["ns4:efternamn"] != null)
                                                 agare = node["ns4:Agare"]["ns4:fornamn"].InnerText + " " + node["ns4:Agare"]["ns4:efternamn"].InnerText;
+                                            else if (node["ns4:Agare"]["ns4:organisationsnamn"] != null)
+                                                agare = node["ns4:Agare"]["ns4:organisationsnamn"].InnerText;
                                         }
 
                                         xls.Rows.Add(new List<object>(new string [] { fastighetsBeteckning, andel, agare, coAdress, adress, postnr, postort, "Lagfart" }));
@@ -275,7 +314,8 @@ namespace MapService.Controllers
                             }
                             else
                             {
-                                xls.Rows.Add(new List<object>(new string[] { fastighetsBeteckning, "", "", "", "", "", "", "Troligen Tomträtt" }));
+                                // Kan finnas fastigheter utan ägande. Lägga med dem i fliken så får användaren ta bort dem manuellt
+                                xls.Rows.Add(new List<object>(new string[] { fastighetsBeteckning, "", "", "", "", "", "", "Ingen ägare funnen" }));
                             }
                         }
 
@@ -285,9 +325,32 @@ namespace MapService.Controllers
             }
             catch (Exception e)
             {
-                _log.FatalFormat("Can't get property owner list: {0}", e);
+                _log.FatalFormat("Can't get real estate owner list. Last real estate '{0}', {1}", fastighetsBeteckning, e);
                 throw e;
             }
+        }
+
+        private string GetInskrivningRegisterenhetFilter(List<string> list, string format, int n)
+        {
+            string res = "";
+            for (int i = n * 100; i < list.Count && i < (n + 1) * 100; i++)
+            {
+                res += string.Format(format, list[i]);
+            }
+
+            return res;
+        }
+
+        private List<string> GetList(JToken jToken)
+        {
+            var res = new List<string>();
+
+            foreach (var item in jToken)
+            {
+                res.Add(item.ToString());
+            }
+
+            return res;
         }
 
         private ExcelTemplate GenMarksamfallighetSheet(string json)
@@ -349,7 +412,7 @@ namespace MapService.Controllers
             }
             catch (Exception e)
             {
-                _log.FatalFormat("Can't get property owner list: {0}", e);
+                _log.FatalFormat("Can't generate excel file: {0}", e);
                 throw e;
             }
         }
