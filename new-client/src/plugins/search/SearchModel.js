@@ -207,6 +207,12 @@ class SearchModel {
   mapDisplayLayerAsSearchLayer(searchLayer) {
     var type = searchLayer.getType();
     var source = {};
+    var layers;
+    var layerSource = searchLayer.getSource();
+    if (type === "TILE" || type === "IMAGE") {
+      layers = layerSource.getParams()["LAYERS"].split(",");
+    }
+
     switch (type) {
       case "VECTOR":
         source = {
@@ -222,10 +228,7 @@ class SearchModel {
         source = {
           type: type,
           url: searchLayer.get("url").replace("wms", "wfs"),
-          layers: searchLayer
-            .getSource()
-            .getParams()
-            ["LAYERS"].split(","),
+          layers: layers,
           geometryName: "geom",
           layerId: searchLayer.layerId
         };

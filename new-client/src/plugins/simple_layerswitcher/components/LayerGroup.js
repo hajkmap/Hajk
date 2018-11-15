@@ -7,13 +7,13 @@ import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Typography from "@material-ui/core/Typography";
 
-import "./LayerGroup.css";
-
 const styles = theme => ({
   root: {
     width: "100%",
     display: "block",
-    padding: 0
+    padding: "5px 0",
+    borderTop: "1px solid #ccc",
+    background: "#efefef"
   },
   heading: {
     fontSize: theme.typography.pxToRem(18),
@@ -23,6 +23,9 @@ const styles = theme => ({
   secondaryHeading: {
     fontSize: theme.typography.pxToRem(15),
     color: theme.palette.text.secondary
+  },
+  disableTransition: {
+    transition: "none"
   }
 });
 
@@ -55,9 +58,14 @@ class LayerGroup extends Component {
   }
 
   handleChange = panel => (event, expanded) => {
-    this.setState({
-      expanded: expanded ? panel : false
-    });
+    this.setState(
+      {
+        expanded: expanded ? panel : false
+      },
+      () => {
+        console.log("Panel group expanded");
+      }
+    );
   };
 
   renderLayerGroups() {
@@ -81,23 +89,16 @@ class LayerGroup extends Component {
     this.setState({ expanded: !this.state.expanded });
   }
 
-  getExpandedClass() {
-    return this.state.expanded
-      ? "layer-group-items visible"
-      : "layer-group-items hidden";
-  }
-
-  getArrowClass() {
-    return this.state.expanded ? "expand_less" : "chevron_right";
-  }
-
   render() {
     const { classes } = this.props;
+
     return (
-      <div className="layer-group">
+      <div ref="panelElement">
         <ExpansionPanel
+          className={classes.disableTransition}
+          CollapseProps={{ classes: { container: classes.disableTransition } }}
           expanded={this.props.expanded}
-          onChange={this.props.handleChange(this.props.group.id)}
+          onChange={this.props.handleChange(this.props.group.id, this)}
         >
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
             <Typography className={classes.heading}>

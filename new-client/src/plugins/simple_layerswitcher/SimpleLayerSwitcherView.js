@@ -1,9 +1,8 @@
-import React, { Component } from "react";
+import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
-import "./style.css";
 
 const styles = theme => ({
   button: {
@@ -17,10 +16,11 @@ const styles = theme => ({
   },
   iconSmall: {
     fontSize: 20
-  }
+  },
+  layerSwitcher: {}
 });
 
-class SimpleLayersSwitcherView extends Component {
+class SimpleLayersSwitcherView extends React.PureComponent {
   constructor(props) {
     super(props);
     this.options = this.props.app.config.mapConfig.tools.find(
@@ -35,10 +35,17 @@ class SimpleLayersSwitcherView extends Component {
 
   componentWillMount() {}
 
-  handleChange = panel => (event, expanded) => {
-    this.setState({
-      expanded: expanded ? panel : false
-    });
+  handleChange = (panel, instance) => (event, expanded) => {
+    this.setState(
+      {
+        expanded: expanded ? panel : false
+      },
+      () => {
+        setTimeout(() => {
+          instance.refs.panelElement.scrollIntoView();
+        }, 50);
+      }
+    );
   };
 
   renderLayerGroups() {
@@ -55,12 +62,6 @@ class SimpleLayersSwitcherView extends Component {
         />
       );
     });
-  }
-
-  getLayerGroupsClass() {
-    return this.state.layerGroupsExpanded
-      ? "layer-groups visible"
-      : "layer-groups hidden";
   }
 
   toggleLayerGroups() {
@@ -86,12 +87,11 @@ class SimpleLayersSwitcherView extends Component {
   }
 
   render() {
+    const { classes } = this.props;
     return (
-      <div>
-        <div className="tool-panel-content">
-          <div className={this.getLayerGroupsClass()}>
-            {this.renderLayerGroups()}
-          </div>
+      <div className={classes.layerSwitcher}>
+        <div>
+          <div>{this.renderLayerGroups()}</div>
         </div>
         {this.renderBreadCrumbs()}
       </div>

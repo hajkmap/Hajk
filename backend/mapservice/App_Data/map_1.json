@@ -182,6 +182,32 @@
         ],
         "groups": [
           {
+            "id": "c1146dfb-6f78-775c-8ec0-6ecb1d245d19",
+            "parent": "-1",
+            "name": "Ny grupp",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "22",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "07920b13-c2e1-fdc9-b88b-9eb75da49ac6",
+            "parent": "-1",
+            "name": "Ny grupp",
+            "toggled": false,
+            "expanded": false,
+            "layers": [],
+            "groups": []
+          },
+          {
             "id": "f499fa2b-ad0a-cecd-c118-2e7037b541b1",
             "parent": "-1",
             "name": "Medborgardialog",
@@ -205,13 +231,6 @@
             "toggled": false,
             "expanded": true,
             "layers": [
-              {
-                "id": "22",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
               {
                 "id": "19",
                 "visibleAtStart": false,

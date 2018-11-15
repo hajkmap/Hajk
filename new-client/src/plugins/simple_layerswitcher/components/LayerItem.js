@@ -1,8 +1,41 @@
-import "./LayerItem.css";
 import React, { Component } from "react";
+import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
 import IconWarning from "@material-ui/icons/Warning";
+import AddCircleIcon from "@material-ui/icons/AddCircle";
+import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
+import { withStyles } from "@material-ui/core/styles";
+
+const styles = theme => ({
+  button: {},
+  caption: {},
+  captionText: {
+    marginLeft: "5px",
+    position: "relative",
+    top: "-6px"
+  },
+  image: {},
+  links: {
+    padding: 0,
+    margin: 0,
+    listStyle: "none"
+  },
+  layerItem: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+  layerItemContainer: {
+    padding: "10px",
+    margin: "5px",
+    background: "white",
+    borderTopRightRadius: "10px",
+    boxShadow:
+      "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)"
+  }
+});
 
 class LayerItem extends Component {
   constructor() {
@@ -44,7 +77,8 @@ class LayerItem extends Component {
       infoUrlText: layerInfo.infoUrlText,
       infoOwner: layerInfo.infoOwner,
       infoExpanded: false,
-      instruction: layerInfo.instruction
+      instruction: layerInfo.instruction,
+      open: false
     });
 
     this.props.layer.on("change:visible", e => {
@@ -109,70 +143,103 @@ class LayerItem extends Component {
   }
 
   renderChapterLinks(chapters) {
-    if (chapters) {
+    const { classes } = this.props;
+    if (chapters && chapters.length > 0) {
       let chaptersWithLayer = this.findChapters(
         this.props.layer.get("name"),
         chapters
       );
-      return (
-        <ul>
-          {chaptersWithLayer.map((chapter, i) => {
-            return (
-              <li key={i}>
-                <a href="#text1" onClick={this.openInformative(chapter)}>
-                  {chapter.header}
-                </a>
-              </li>
-            );
-          })}
-        </ul>
-      );
+      if (chaptersWithLayer.length > 0) {
+        return (
+          <>
+            <div>Visa kapitel i översiktsplan</div>
+            <ul className={classes.links}>
+              {chaptersWithLayer.map((chapter, i) => {
+                return (
+                  <li key={i}>
+                    <Button
+                      size="small"
+                      onClick={this.openInformative(chapter)}
+                    >
+                      {chapter.header}
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        );
+      } else {
+        return null;
+      }
     } else {
       return null;
     }
   }
 
+  toggle() {
+    this.setState({
+      open: !this.state.open
+    });
+  }
+
+  renderDetails() {
+    if (this.state.open) {
+      return (
+        <div>
+          <div dangerouslySetInnerHTML={{ __html: this.state.infoText }} />
+          <div>{this.renderLegendImage()}</div>
+          <div>{this.renderChapterLinks(this.props.chapters)}</div>
+        </div>
+      );
+    }
+  }
+
   render() {
     var caption = this.props.layer.get("caption"),
-      visible = this.state.visible;
+      visible = this.state.visible,
+      open = this.state.open;
 
     if (!caption) {
       return null;
     }
 
+    const { classes } = this.props;
+
     return (
-      <div className="panel panel-default layer-item">
-        <div className="panel-heading unselectable clearfix">
-          <div className="left-col">
-            <span
-              onClick={this.toggleVisible(this.props.layer)}
-              className="clickable"
-            >
+      <div className={classes.layerItemContainer}>
+        <div className={classes.layerItem}>
+          <div className={classes.caption}>
+            <span onClick={this.toggleVisible(this.props.layer)}>
               {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
               {this.renderStatus()}
-              <label
-                className={
-                  visible
-                    ? "layer-item-header-text active-group"
-                    : "layer-item-header-text"
-                }
-              >
+              <label className={classes.captionText}>
                 <strong>{caption}</strong>
               </label>
             </span>
-            <p
-              className="info-title"
-              dangerouslySetInnerHTML={{ __html: this.state.infoText }}
-            />
           </div>
-          <div className="right-col">{this.renderLegendImage()}</div>
+          <div>
+            {open ? (
+              <IconButton
+                className={classes.button}
+                onClick={() => this.toggle()}
+              >
+                <RemoveCircleIcon />
+              </IconButton>
+            ) : (
+              <IconButton
+                className={classes.button}
+                onClick={() => this.toggle()}
+              >
+                <AddCircleIcon />
+              </IconButton>
+            )}
+          </div>
         </div>
-        <div className="clearfix">
-          {this.renderChapterLinks(this.props.chapters)}
-        </div>
+        {this.renderDetails()}
       </div>
     );
   }
 }
 
-export default LayerItem;
+export default withStyles(styles)(LayerItem);

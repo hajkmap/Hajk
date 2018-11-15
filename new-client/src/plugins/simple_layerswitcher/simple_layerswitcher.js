@@ -1,10 +1,10 @@
-import React, { Component } from "react";
+import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import LayersIcon from "@material-ui/icons/Layers";
-import Tooltip from '@material-ui/core/Tooltip';
+import Tooltip from "@material-ui/core/Tooltip";
 import Panel from "../../components/Panel.js";
 import SimpleLayerSwitcherView from "./SimpleLayerSwitcherView.js";
 import SimpleLayerSwitcherModel from "./SimpleLayerSwitcherModel.js";
@@ -21,7 +21,7 @@ const styles = theme => {
   };
 };
 
-class SimpleLayerSwitcher extends Component {
+class SimpleLayerSwitcher extends React.PureComponent {
   state = {
     panelOpen: false
   };
@@ -51,10 +51,6 @@ class SimpleLayerSwitcher extends Component {
       observer: this.observer
     });
     this.app.registerPanel(this);
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return this.state.panelOpen !== nextState.panelOpen;
   }
 
   componentWillMount() {
