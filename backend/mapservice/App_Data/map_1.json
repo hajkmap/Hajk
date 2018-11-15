@@ -182,47 +182,48 @@
         ],
         "groups": [
           {
-            "id": "c1146dfb-6f78-775c-8ec0-6ecb1d245d19",
-            "parent": "-1",
-            "name": "Ny grupp",
-            "toggled": false,
-            "expanded": false,
-            "layers": [
-              {
-                "id": "22",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              }
-            ],
-            "groups": []
-          },
-          {
-            "id": "07920b13-c2e1-fdc9-b88b-9eb75da49ac6",
-            "parent": "-1",
-            "name": "Ny grupp",
-            "toggled": false,
-            "expanded": false,
-            "layers": [],
-            "groups": []
-          },
-          {
             "id": "f499fa2b-ad0a-cecd-c118-2e7037b541b1",
             "parent": "-1",
             "name": "Medborgardialog",
             "toggled": false,
             "expanded": false,
-            "layers": [
+            "layers": [],
+            "groups": [
               {
-                "id": "15",
-                "visibleAtStart": false,
-                "drawOrder": 4,
-                "visibleForGroups": null,
-                "infobox": null
+                "id": "07920b13-c2e1-fdc9-b88b-9eb75da49ac6",
+                "parent": "f499fa2b-ad0a-cecd-c118-2e7037b541b1",
+                "name": "Ny grupp",
+                "toggled": false,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "22",
+                    "visibleAtStart": false,
+                    "drawOrder": 1000,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "c1146dfb-6f78-775c-8ec0-6ecb1d245d19",
+                "parent": "f499fa2b-ad0a-cecd-c118-2e7037b541b1",
+                "name": "Adresser",
+                "toggled": false,
+                "expanded": true,
+                "layers": [
+                  {
+                    "id": "15",
+                    "visibleAtStart": false,
+                    "drawOrder": 4,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
               }
-            ],
-            "groups": []
+            ]
           },
           {
             "id": "eff9c88f-fc3a-05c2-3a15-285712099854",
@@ -434,8 +435,8 @@
     "mobile": false,
     "mapselector": false,
     "colors": {
-      "primaryColor": "#f5a623",
-      "secondaryColor": "#fffbcb"
+      "primaryColor": "#0065a6",
+      "secondaryColor": "#ffcc00"
     }
   }
 }

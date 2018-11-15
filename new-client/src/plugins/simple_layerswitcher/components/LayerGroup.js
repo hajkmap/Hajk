@@ -26,6 +26,9 @@ const styles = theme => ({
   },
   disableTransition: {
     transition: "none"
+  },
+  panel: {
+    marginLeft: "10px"
   }
 });
 
@@ -58,14 +61,9 @@ class LayerGroup extends Component {
   }
 
   handleChange = panel => (event, expanded) => {
-    this.setState(
-      {
-        expanded: expanded ? panel : false
-      },
-      () => {
-        console.log("Panel group expanded");
-      }
-    );
+    this.setState({
+      expanded: expanded ? panel : false
+    });
   };
 
   renderLayerGroups() {
@@ -74,12 +72,13 @@ class LayerGroup extends Component {
     return this.state.groups.map((group, i) => {
       return (
         <LayerGroup
+          expanded={expanded === group.id}
           key={i}
           group={group}
-          classes={classes}
-          model={this.model}
-          expanded={expanded === group.id}
+          model={this.props.model}
           handleChange={this.handleChange}
+          app={this.props.app}
+          classes={classes}
         />
       );
     });
@@ -93,7 +92,7 @@ class LayerGroup extends Component {
     const { classes } = this.props;
 
     return (
-      <div ref="panelElement">
+      <div ref="panelElement" className={classes.panel}>
         <ExpansionPanel
           className={classes.disableTransition}
           CollapseProps={{ classes: { container: classes.disableTransition } }}
@@ -126,8 +125,8 @@ class LayerGroup extends Component {
                 return null;
               }
             })}
+            {this.renderLayerGroups()}
           </ExpansionPanelDetails>
-          {this.renderLayerGroups()}
         </ExpansionPanel>
       </div>
     );

@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Observer from "react-event-observer";
 import AppModel from "./../models/AppModel.js";
-
+import Typography from "@material-ui/core/Typography";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "./Toolbar.js";
 import { Toolbar as MUIToolbar } from "@material-ui/core";
@@ -20,6 +20,8 @@ import "./App.css";
 // should now go to public/customTheme.json. They are later
 // merged when MUI Theme is created in index.js.
 const styles = theme => {
+  console.log(theme);
+
   return {
     // We can also consult https://material-ui.com/customization/default-theme/ for available options
     map: {
@@ -40,9 +42,32 @@ const styles = theme => {
       top: 0,
       boxShadow: "none"
     },
-    appBar: {
-      zIndex: 2000
+    center: {
+      zIndex: 1000,
+      position: "fixed",
+      background: theme.palette.secondary.main,
+      left: 0,
+      right: 0,
+      margin: "auto",
+      width: "50%",
+      height: "60px",
+      borderBottomLeftRadius: "10px",
+      borderBottomRightRadius: "10px",
+      minWidth: "450px"
     },
+    appBar: {
+      zIndex: 2000,
+      background: "white",
+      color: "black"
+    },
+    logo: {
+      height: "40px",
+      marginRight: "20px",
+      "& img": {
+        height: "100%"
+      }
+    },
+    title: {},
     flex: {
       flexGrow: 1
     },
@@ -195,11 +220,19 @@ class App extends Component {
         <>
           <AppBar position="absolute" className={classes.appBar}>
             <MUIToolbar>
+              <span className={classes.logo}>
+                <img
+                  src="https://www.uddevalla.se/images/18.115b2371518ed66b79ad45/1450096919434/Uddevalla-Kommun.png"
+                  alt="logo"
+                />
+              </span>
+              <span className={classes.title}>
+                <Typography variant="h4">ÖVERSIKTSPLAN</Typography>
+              </span>
               <Toolbar
                 tools={this.appModel.getToolbarPlugins()}
                 parent={this}
               />
-              {this.renderSearchPlugin()}
               {this.renderMapSwitcher()}
             </MUIToolbar>
           </AppBar>
@@ -213,6 +246,7 @@ class App extends Component {
                 });
               }}
             />
+            <div className={classes.center}>{this.renderSearchPlugin()}</div>
             <div id="map-overlay" className={classes.overlay}>
               <div className={classNames(classes.widgets, classes.widgetsLeft)}>
                 {this.renderWidgets("left")}

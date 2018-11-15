@@ -14,7 +14,7 @@ const styles = theme => {
       padding: "15px",
       border: "1px solid #ccc",
       borderTop: "none",
-      top: "52px",
+      top: "48px",
       right: 0,
       [theme.breakpoints.down("xs")]: {
         top: "56px",
@@ -37,11 +37,9 @@ class SearchResultList extends Component {
   componentWillMount() {}
 
   hide() {
-    if (document.body.scrollWidth < 600) {
-      this.setState({
-        visible: false
-      });
-    }
+    this.setState({
+      visible: false
+    });
   }
 
   componentWillReceiveProps(e) {
@@ -59,10 +57,6 @@ class SearchResultList extends Component {
         </div>
       );
     }
-    const resultWithHits = result.reduce(
-      (i, r) => (r.features.length > 0 ? ++i : i),
-      0
-    );
     if (!this.state.visible) {
       return null;
     } else {
@@ -76,7 +70,7 @@ class SearchResultList extends Component {
                 key={i}
                 featureType={featureType}
                 model={this.props.model}
-                expanded={resultWithHits < 2}
+                expanded={false}
               />
             );
           })}
