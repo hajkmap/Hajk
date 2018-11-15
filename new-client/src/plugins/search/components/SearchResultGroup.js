@@ -14,7 +14,7 @@ const styles = theme => ({
     cursor: "pointer",
     boxShadow: "0px 1px 2px 1px rgba(0, 0, 0, 0.22)",
     borderRadius: "2px",
-    padding: "4px",
+    padding: "6px",
     marginBottom: "10px"
   },
   resultGroup: {
@@ -50,6 +50,12 @@ class SearchResultGroup extends Component {
     this.props.parent.hide();
   };
 
+  zoomTo = feature => e => {
+    var olFeature = new GeoJSON().readFeatures(feature)[0];
+    this.props.model.highlightFeature(olFeature);
+    this.props.parent.hide();
+  };
+
   clear = e => {
     this.props.model.clearLayerList();
     this.props.model.clearHighlight();
@@ -60,7 +66,7 @@ class SearchResultGroup extends Component {
   createItem(feature, displayField, i) {
     const { classes } = this.props;
     return (
-      <div key={i} className={classes.item}>
+      <div key={i} className={classes.item} onClick={this.zoomTo(feature)}>
         {feature.properties[displayField]}
         <div>
           <Button color="primary" onClick={this.highlight(feature)}>
@@ -102,11 +108,6 @@ class SearchResultGroup extends Component {
         </ExpansionPanelSummary>
         <ExpansionPanelDetails className={classes.details}>
           <div className={classes.resultGroup}>
-            <p>
-              <Button variant="contained" onClick={this.clear}>
-                Rensa
-              </Button>
-            </p>
             <div className={classes.resultGroup}>
               {featureType.features.map((feature, i) =>
                 this.createItem(

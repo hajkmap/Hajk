@@ -4,7 +4,7 @@ import { withStyles } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import SatelliteIcon from "@material-ui/icons/Satellite";
-import Tooltip from '@material-ui/core/Tooltip';
+import Tooltip from "@material-ui/core/Tooltip";
 
 import Panel from "../../components/Panel.js";
 import InformativeView from "./InformativeView.js";

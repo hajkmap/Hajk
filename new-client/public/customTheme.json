@@ -4,6 +4,7 @@
       "dark": "#A51848",
       "light": "#ECEDED",
       "main": "#FFCC00",
+      "mainLight": "#ffeeaa",
       "complement": "#79AC54"
     }
   }

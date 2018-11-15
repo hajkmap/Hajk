@@ -1,11 +1,13 @@
 import React, { Component } from "react";
 import Button from "@material-ui/core/Button";
 import { withStyles } from "@material-ui/core/styles";
-import Icon from "@material-ui/core/Icon";
+import MapIcon from "@material-ui/icons/Map";
 
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
+
+import BreadCrumbs from "./components/BreadCrumbs.js";
 
 import "./style.css";
 
@@ -77,7 +79,7 @@ class Informative extends Component {
           }}
         >
           Visa karta
-          <Icon className={classes.rightIcon}>map</Icon>
+          <MapIcon />
         </Button>
       );
     }
@@ -168,6 +170,11 @@ class Informative extends Component {
         <List component="nav" className="toc">
           {this.renderTocItem(this.state.chapters)}
         </List>
+        <BreadCrumbs
+          chapter={this.state.chapter}
+          chapters={this.state.chapters}
+          toc={this.toc}
+        />
         <div className="layers">
           {this.renderLayerItems(this.state.chapter)}
         </div>
