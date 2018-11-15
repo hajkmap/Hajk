@@ -20,8 +20,6 @@ import "./App.css";
 // should now go to public/customTheme.json. They are later
 // merged when MUI Theme is created in index.js.
 const styles = theme => {
-  console.log(theme);
-
   return {
     // We can also consult https://material-ui.com/customization/default-theme/ for available options
     map: {
@@ -45,7 +43,7 @@ const styles = theme => {
     center: {
       zIndex: 1000,
       position: "fixed",
-      background: theme.palette.secondary.main,
+      background: theme.palette.secondary.mainLight,
       left: 0,
       right: 0,
       margin: "auto",
@@ -53,7 +51,8 @@ const styles = theme => {
       height: "60px",
       borderBottomLeftRadius: "10px",
       borderBottomRightRadius: "10px",
-      minWidth: "450px"
+      minWidth: "450px",
+      border: "1px solid " + theme.palette.secondary.main
     },
     appBar: {
       zIndex: 2000,

@@ -7,13 +7,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 const styles = theme => {
   return {
     button: {
-      width: "32px",
-      height: "32px",
-      padding: "5px",
-      color: theme.palette.primary.contrastText,
-      "&:hover": {
-        background: "rgba(255, 255, 255, 0.5)"
-      }
+      margin: "4px"
     }
   };
 };
@@ -30,7 +24,6 @@ class SearchWithinButton extends React.Component {
         <Button
           className={classes.button}
           variant={this.state.active ? "raised" : "text"}
-          color="primary"
           onClick={() => {
             this.setState(
               {
@@ -47,6 +40,7 @@ class SearchWithinButton extends React.Component {
           }}
         >
           <LoupeIcon />
+          &nbsp; Markera i kartan
         </Button>
       </Tooltip>
     );

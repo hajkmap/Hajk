@@ -67,8 +67,11 @@ class LayerGroup extends Component {
   };
 
   renderLayerGroups() {
-    const { expanded } = this.state;
+    let { expanded } = this.state;
     const { classes } = this.props;
+    if (this.state.groups.length === 1 && this.state.groups[0].expanded) {
+      expanded = this.state.groups[0].id;
+    }
     return this.state.groups.map((group, i) => {
       return (
         <LayerGroup
@@ -79,6 +82,7 @@ class LayerGroup extends Component {
           handleChange={this.handleChange}
           app={this.props.app}
           classes={classes}
+          child={true}
         />
       );
     });
@@ -89,10 +93,14 @@ class LayerGroup extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, child } = this.props;
+    var groupClass = "";
+    if (child) {
+      groupClass = classes.panel;
+    }
 
     return (
-      <div ref="panelElement" className={classes.panel}>
+      <div ref="panelElement" className={groupClass}>
         <ExpansionPanel
           className={classes.disableTransition}
           CollapseProps={{ classes: { container: classes.disableTransition } }}

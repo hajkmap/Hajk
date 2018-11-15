@@ -182,6 +182,23 @@
         ],
         "groups": [
           {
+            "id": "c1146dfb-6f78-775c-8ec0-6ecb1d245d19",
+            "parent": "-1",
+            "name": "Adresser",
+            "toggled": false,
+            "expanded": true,
+            "layers": [
+              {
+                "id": "22",
+                "visibleAtStart": false,
+                "drawOrder": 3,
+                "visibleForGroups": null,
+                "infobox": null
+              }
+            ],
+            "groups": []
+          },
+          {
             "id": "f499fa2b-ad0a-cecd-c118-2e7037b541b1",
             "parent": "-1",
             "name": "Medborgardialog",
@@ -194,29 +211,12 @@
                 "parent": "f499fa2b-ad0a-cecd-c118-2e7037b541b1",
                 "name": "Ny grupp",
                 "toggled": false,
-                "expanded": false,
-                "layers": [
-                  {
-                    "id": "22",
-                    "visibleAtStart": false,
-                    "drawOrder": 1000,
-                    "visibleForGroups": null,
-                    "infobox": null
-                  }
-                ],
-                "groups": []
-              },
-              {
-                "id": "c1146dfb-6f78-775c-8ec0-6ecb1d245d19",
-                "parent": "f499fa2b-ad0a-cecd-c118-2e7037b541b1",
-                "name": "Adresser",
-                "toggled": false,
                 "expanded": true,
                 "layers": [
                   {
                     "id": "15",
                     "visibleAtStart": false,
-                    "drawOrder": 4,
+                    "drawOrder": 7,
                     "visibleForGroups": null,
                     "infobox": null
                   }
@@ -235,35 +235,35 @@
               {
                 "id": "19",
                 "visibleAtStart": false,
-                "drawOrder": 1000,
+                "drawOrder": 4,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
                 "id": "18",
                 "visibleAtStart": false,
-                "drawOrder": 1000,
+                "drawOrder": 5,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
                 "id": "16",
                 "visibleAtStart": true,
-                "drawOrder": 2,
+                "drawOrder": 1,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
                 "id": "17",
                 "visibleAtStart": true,
-                "drawOrder": 1,
+                "drawOrder": 2,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
                 "id": "14",
                 "visibleAtStart": true,
-                "drawOrder": 3,
+                "drawOrder": 6,
                 "visibleForGroups": null,
                 "infobox": null
               }

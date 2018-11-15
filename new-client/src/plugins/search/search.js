@@ -3,6 +3,7 @@ import { withStyles } from "@material-ui/core/styles";
 import SearchBar from "./components/SearchBar.js";
 import SearchResultList from "./components/SearchResultList.js";
 import SearchWithinButton from "./components/SearchWithinButton.js";
+import ClearButton from "./components/ClearButton.js";
 import SearchModel from "./SearchModel.js";
 
 const styles = theme => {
@@ -54,15 +55,19 @@ class Search extends Component {
     return (
       <div className={classes.searchContainer}>
         <SearchWithinButton model={this.searchModel} />
-        <SearchBar
-          onChange={this.searchModel.search}
-          onComplete={this.resolve}
+        <ClearButton
+          model={this.searchModel}
           onClear={() => {
             this.searchModel.clear();
             this.setState({
               result: false
             });
           }}
+        />
+        <SearchBar
+          model={this.searchModel}
+          onChange={this.searchModel.search}
+          onComplete={this.resolve}
         />
         {this.renderSearchResultList()}
       </div>

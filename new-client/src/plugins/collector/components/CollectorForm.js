@@ -52,7 +52,7 @@ class CollectorForm extends Component {
     comment: "",
     saveError: "",
     validationError: "",
-    displayPlace: true
+    displayPlace: false
   };
 
   renderPlaceForm = () => {

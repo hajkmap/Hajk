@@ -2,13 +2,13 @@ import React, { Component } from "react";
 import Input from "@material-ui/core/Input";
 import { withStyles } from "@material-ui/core/styles";
 import { fade } from "@material-ui/core/styles/colorManipulator";
+import Button from "@material-ui/core/Button";
 import SearchIcon from "@material-ui/icons/Search";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 
 const styles = theme => ({
   search: {
-    marginLeft: "10px",
     borderRadius: theme.shape.borderRadius,
     backgroundColor: fade(theme.palette.common.white, 0.15),
     "&:hover": {
@@ -16,20 +16,13 @@ const styles = theme => ({
     },
     overflow: "hidden"
   },
-  closeIcon: {
-    position: "relative",
-    right: "5px",
-    transform: "rotate(45deg)",
-    cursor: "pointer"
-  },
+  closeIcon: {},
   searchIcon: {
-    width: theme.spacing.unit * 4,
     height: "100%",
-    position: "absolute",
+    position: "relative",
     pointerEvents: "none",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
+    padding: "6px",
+    background: theme.palette.secondary.main
   },
   inputRoot: {
     color: "inherit",
@@ -39,7 +32,7 @@ const styles = theme => ({
     paddingTop: theme.spacing.unit,
     paddingRight: theme.spacing.unit,
     paddingBottom: theme.spacing.unit,
-    paddingLeft: theme.spacing.unit * 5,
+    paddingLeft: theme.spacing.unit,
     transition: theme.transitions.create("width"),
     left: "100%",
     [theme.breakpoints.up("sm")]: {
@@ -60,9 +53,6 @@ class SearchBar extends Component {
     const { classes, onChange, onComplete, onClear } = this.props;
     return (
       <div className={classes.search}>
-        <div className={classes.searchIcon}>
-          <SearchIcon />
-        </div>
         <Input
           autoComplete="off"
           onChange={e => {
@@ -81,15 +71,8 @@ class SearchBar extends Component {
             input: classes.inputInput
           }}
           endAdornment={
-            <InputAdornment className={classes.closeIcon} position="end">
-              <AddCircleIcon
-                onClick={() => {
-                  onClear();
-                  this.setState({
-                    value: ""
-                  });
-                }}
-              />
+            <InputAdornment className={classes.searchIcon} position="end">
+              <SearchIcon />
             </InputAdornment>
           }
         />

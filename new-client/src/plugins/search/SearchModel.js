@@ -131,7 +131,7 @@ class SearchModel {
 
   clear = () => {
     this.clearHighlight();
-    this.clearLayerList();
+    this.hideVisibleLayers();
     this.drawSource.clear();
   };
 
@@ -182,6 +182,18 @@ class SearchModel {
     this.olMap.addLayer(this.drawLayer);
   }
 
+  hideVisibleLayers() {
+    this.olMap
+      .getLayers()
+      .getArray()
+      .forEach(layer => {
+        var props = layer.getProperties();
+        if (props.layerInfo && props.layerInfo.layerType !== "base") {
+          layer.setVisible(false);
+        }
+      });
+  }
+
   clearLayerList() {
     this.layerList.forEach(layer => {
       layer.setVisible(false);
@@ -190,6 +202,12 @@ class SearchModel {
 
   clearHighlight() {
     this.vectorLayer.getSource().clear();
+  }
+
+  highlightFeature(feature) {
+    this.clearHighlight();
+    this.vectorLayer.getSource().addFeature(feature);
+    this.olMap.getView().fit(feature.getGeometry(), this.olMap.getSize());
   }
 
   highlight(feature) {
