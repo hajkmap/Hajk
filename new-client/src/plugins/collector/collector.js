@@ -6,7 +6,7 @@ import RateReviewIcon from "@material-ui/icons/RateReview";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import Observer from "react-event-observer";
 import Panel from "../../components/Panel.js";
-import Tooltip from '@material-ui/core/Tooltip';
+import Tooltip from "@material-ui/core/Tooltip";
 
 import CollectorView from "./CollectorView.js";
 import CollectorModel from "./CollectorModel.js";
@@ -39,8 +39,6 @@ class Collector extends Component {
     });
     this.app = props.app;
   }
-
-  componentWillMount() {}
 
   onClick = e => {
     this.app.onPanelOpen(this);

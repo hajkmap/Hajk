@@ -17,7 +17,7 @@ class LayerGroup extends Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.setState({
       ...this.state,
       ...this.props.group

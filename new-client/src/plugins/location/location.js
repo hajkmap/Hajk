@@ -57,7 +57,7 @@ class Location extends React.PureComponent {
   // }
 
   // Important, part of API. Make sure to respect panel visibility set in config.
-  componentWillMount() {
+  componentDidMount() {
     this.setState({
       panelOpen: this.props.options.visibleAtStart
     });
@@ -80,12 +80,12 @@ class Location extends React.PureComponent {
     );
   }
 
-  /* 
+  /*
    * Important, part of plugins API.
    * Each plugin must present both renderAsWidgetItem and renderAsToolbarItem.
    * Depending on user's preferred location, App will render the plugin
    * using one of these two methods.
-  */
+   */
 
   // Render as a FAB (floating action button, https://material-ui.com/demos/buttons/#floating-action-buttons)
   renderAsWidgetItem() {

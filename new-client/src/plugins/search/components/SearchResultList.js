@@ -34,8 +34,6 @@ class SearchResultList extends Component {
     visible: true
   };
 
-  componentWillMount() {}
-
   hide() {
     this.setState({
       visible: false
