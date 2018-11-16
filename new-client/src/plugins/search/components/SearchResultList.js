@@ -58,14 +58,17 @@ class SearchResultList extends Component {
     });
   }
 
-  componentWillReceiveProps(e) {
-    // this.setState({
-    //   visible: this.props.visible
-    // });
-    // this.setState({
-    //   minimized: this.props.minimized
-    // });
-  }
+  // Seems not used as it was already inactivate by comment.
+  // If funcionality is required, consider replacing with current
+  // lifecycle methods, see https://github.com/hajkmap/Hajk/issues/175
+  // UNSAFE_componentWillReceiveProps(e) {
+  //   // this.setState({
+  //   //   visible: this.props.visible
+  //   // });
+  //   // this.setState({
+  //   //   minimized: this.props.minimized
+  //   // });
+  // }
 
   toggle() {
     this.setState({
