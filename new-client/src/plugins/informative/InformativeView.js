@@ -52,10 +52,12 @@ class Informative extends Component {
       this.props.app.globalObserver.publish("informativeLoaded", chapters);
     });
     this.props.observer.subscribe("changeChapter", chapter => {
-      this.setState({
-        chapters: chapter.chapters,
-        chapter: chapter
-      });
+      if (chapter) {
+        this.setState({
+          chapters: chapter.chapters,
+          chapter: chapter
+        });
+      }
     });
   }
 
@@ -167,14 +169,15 @@ class Informative extends Component {
     return (
       <div>
         <div>{this.renderBackButton()}</div>
-        <List component="nav" className="toc">
-          {this.renderTocItem(this.state.chapters)}
-        </List>
         <BreadCrumbs
           chapter={this.state.chapter}
           chapters={this.state.chapters}
           toc={this.toc}
+          observer={this.props.observer}
         />
+        <List component="nav" className="toc">
+          {this.renderTocItem(this.state.chapters)}
+        </List>
         <div className="layers">
           {this.renderLayerItems(this.state.chapter)}
         </div>

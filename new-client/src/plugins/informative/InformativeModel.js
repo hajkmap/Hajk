@@ -41,20 +41,20 @@ class InformativeModel {
     this.flyTo(this.olMap.getView(), mapSettings.center, mapSettings.zoom);
   }
 
-  setRootChapter(rootChapter, chapters) {
-    chapters.forEach(childChapter => {
-      childChapter.rootChapter = rootChapter;
-      if (childChapter.chapters.length > 0) {
-        this.setRootChapter(rootChapter, childChapter.chapters);
-      }
-    });
+  setParentChapter(chapter, parent) {
+    chapter.parent = parent;
+    if (chapter.chapters.length > 0) {
+      chapter.chapters.forEach(child => {
+        this.setParentChapter(child, chapter);
+      });
+    }
   }
 
   load(callback) {
     fetch(this.url).then(response => {
       response.json().then(data => {
         data.chapters.forEach(chapter => {
-          this.setRootChapter(chapter, chapter.chapters);
+          this.setParentChapter(chapter, undefined);
         });
         callback(data.chapters);
         this.chapters = data.chapters;

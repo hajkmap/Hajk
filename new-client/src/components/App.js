@@ -36,7 +36,7 @@ const styles = theme => {
     },
     toolbar: {
       position: "fixed",
-      zIndex: 2000,
+      zIndex: 1100,
       top: 0,
       boxShadow: "none"
     },
@@ -47,15 +47,14 @@ const styles = theme => {
       left: 0,
       right: 0,
       margin: "auto",
-      width: "50%",
-      height: "60px",
+      width: "600px",
+      height: "80px",
       borderBottomLeftRadius: "10px",
       borderBottomRightRadius: "10px",
-      minWidth: "450px",
       border: "1px solid " + theme.palette.secondary.main
     },
     appBar: {
-      zIndex: 2000,
+      zIndex: 1200,
       background: "white",
       color: "black"
     },

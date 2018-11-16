@@ -19,7 +19,7 @@ const styles = theme => {
       padding: "15px",
       border: "1px solid #ccc",
       borderTop: "none",
-      top: "49px",
+      top: "69px",
       right: 0,
       [theme.breakpoints.down("xs")]: {
         top: "56px",
