@@ -1,10 +1,18 @@
 import React from "react";
-import Button from "@material-ui/core/Button";
 import { withStyles } from "@material-ui/core/styles";
 
 const styles = theme => ({
+  breadCrumContainer: {
+    display: "inline-block",
+    padding: "3px",
+    cursor: "pointer"
+  },
   breadCrum: {
-    color: "blue"
+    color: theme.palette.primary.main
+  },
+  last: {
+    color: "black",
+    cursor: "pointer"
   }
 });
 
@@ -48,11 +56,19 @@ class BreadCrumbs extends React.PureComponent {
       return null;
     }
     return crums.map((crum, i) => {
+      let last = i === crums.length - 1;
       return (
-        <span key={i} onClick={this.onCrumClick(crum.chapter)}>
-          <span className={classes.breadCrum}>{crum.text}</span>{" "}
-          {crum.text && i !== crums.length - 1 ? ">" : ""} &nbsp;
-        </span>
+        <div
+          key={i}
+          onClick={this.onCrumClick(crum.chapter)}
+          className={classes.breadCrumContainer}
+        >
+          <span className={!last ? classes.breadCrum : classes.last}>
+            {crum.text}
+          </span>
+          &nbsp;
+          <span>{crum.text && !last ? ">" : ""}</span>
+        </div>
       );
     });
   }

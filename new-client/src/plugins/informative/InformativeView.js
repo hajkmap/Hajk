@@ -1,32 +1,54 @@
-import React, { Component } from "react";
+import React from "react";
 import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
 import { withStyles } from "@material-ui/core/styles";
 import MapIcon from "@material-ui/icons/Map";
-
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import MenuIcon from "@material-ui/icons/Menu";
+import Typography from "@material-ui/core/Typography";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
-
 import BreadCrumbs from "./components/BreadCrumbs.js";
 
-import "./style.css";
-
 const styles = theme => ({
-  button: {
-    margin: theme.spacing.unit
+  backButtonContainer: {
+    display: "inline-block",
+    cursor: "pointer"
   },
-  leftIcon: {
-    marginRight: theme.spacing.unit
+  backButton: {
+    display: "flex",
+    alignItems: "center"
+  },
+  backButtonText: {
+    display: "inline-block",
+    textTransform: "uppercase",
+    fontWeight: 500,
+    position: "relative",
+    top: "2px"
   },
   rightIcon: {
     marginLeft: theme.spacing.unit
   },
-  iconSmall: {
-    fontSize: 20
+  chapter: {
+    border: "1px solid #ccc",
+    margin: "5px 0"
+  },
+  toc: {
+    margin: "10px 0"
+  },
+  content: {
+    "& img": {
+      width: "100%"
+    }
   }
 });
 
-class Informative extends Component {
+const homeHeader = "";
+const homeHtml =
+  "<div>Genom översiktsplanen talar staden om hur bebyggelse och mark- och vattenanvändning kan utvecklas på lång sikt. Uddevalla ska vara en klimatsmart, växande stad med sammanhållande stadsmiljöer där det byggda och det gröna samspelar. En stad för alla.</div><h2>Vad vill vi uppnå?</h2>Uddevalla ska vara en stad med täta och sammanhållande stadsmiljöer där det byggda och det gröna samspelar.  Översiktsplanen utgår från stadens fyra mål för stadsbyggande.</div><img src='https://images.vastsverige.com/publishedmedia/jue8wzf2g5vrgjoy19xg/Uddevalla_170728-0082-Edit.jpg'/>";
+
+class Informative extends React.PureComponent {
   constructor() {
     super();
     this.state = {
@@ -44,8 +66,8 @@ class Informative extends Component {
       var state = {
         chapters: chapters,
         chapter: {
-          header: "",
-          html: "<span></span>"
+          header: homeHeader,
+          html: homeHtml
         }
       };
       this.setState(state);
@@ -55,24 +77,29 @@ class Informative extends Component {
       if (chapter && chapter !== "home") {
         this.setState({
           chapters: chapter.chapters,
-          chapter: chapter
+          chapter: chapter,
+          tocVisible: false
         });
       }
       if (chapter === "home") {
         this.setState({
           chapters: this.toc,
           chapter: {
-            header: "",
-            html: "<span></span>"
+            header: homeHeader,
+            html: homeHtml,
+            tocVisible: false
           }
         });
       }
     });
   }
 
-  displayMap(layers, mapSettings) {
+  displayMap = (layers, mapSettings) => e => {
     this.props.parent.informativeModel.displayMap(layers, mapSettings);
-  }
+    if (document.body.scrollWidth < 600) {
+      this.props.parent.closePanel();
+    }
+  };
 
   renderLayerItems(chapter) {
     const { classes } = this.props;
@@ -80,33 +107,28 @@ class Informative extends Component {
       return (
         <Button
           variant="contained"
-          color="primary"
-          className={classes.button}
-          onClick={() => {
-            this.displayMap(chapter.layers, chapter.mapSettings);
-            if (document.body.scrollWidth < 600) {
-              this.props.parent.closePanel();
-            }
-          }}
+          onClick={this.displayMap(chapter.layers, chapter.mapSettings)}
         >
           Visa karta
-          <MapIcon />
+          <MapIcon color="primary" className={classes.rightIcon} />
         </Button>
       );
     }
   }
 
   renderTocItem(chapters) {
+    var { classes } = this.props;
     return chapters.map((chapter, i) => {
       return (
         <ListItem
           button
           key={i}
-          className="chapter"
+          className={classes.chapter}
           onClick={() => {
             var state = {
               chapters: chapter.chapters,
-              chapter: chapter
+              chapter: chapter,
+              tocVisible: false
             };
             this.setState(state);
           }}
@@ -146,52 +168,78 @@ class Informative extends Component {
     return foundParent;
   }
 
+  onBackButtonClick = () => {
+    var parent = this.findParentInToc(this.state.chapter, this.toc, null);
+    if (parent) {
+      this.setState({
+        chapter: parent.chapter || {
+          header: homeHeader,
+          html: homeHtml
+        },
+        chapters: parent.chapters
+      });
+    }
+  };
+
   renderBackButton() {
     const { classes } = this.props;
     if (!this.state.chapter.header) {
       return null;
     }
     return (
-      <Button
-        variant="outlined"
-        color="primary"
-        className={classes.button}
-        onClick={() => {
-          var parent = this.findParentInToc(this.state.chapter, this.toc, null);
-          if (parent) {
-            this.setState({
-              chapter: parent.chapter || {
-                header: "",
-                html: "<span></span>"
-              },
-              chapters: parent.chapters
-            });
-          }
-        }}
-      >
-        Tillbaka
-      </Button>
+      <div className={classes.backButtonContainer}>
+        <div onClick={this.onBackButtonClick} className={classes.backButton}>
+          <ArrowBackIcon />
+          &nbsp;
+          <Typography className={classes.backButtonText}>Tillbaka</Typography>
+        </div>
+      </div>
+    );
+  }
+
+  toggleToc = () => {
+    this.setState({
+      tocVisible: !this.state.tocVisible
+    });
+  };
+
+  renderChapters() {
+    const { classes } = this.props;
+    const { tocVisible } = this.state;
+    if (!this.state.chapters || this.state.chapters.length === 0) {
+      return null;
+    }
+    return (
+      <div className={classes.toc}>
+        <Button variant="contained" onClick={this.toggleToc}>
+          Innehållsförteckning
+          <MenuIcon color="primary" className={classes.rightIcon} />
+        </Button>
+        {tocVisible ? (
+          <List component="nav">{this.renderTocItem(this.state.chapters)}</List>
+        ) : null}
+      </div>
     );
   }
 
   render() {
+    const { classes } = this.props;
     return (
       <div>
-        <div>{this.renderBackButton()}</div>
         <BreadCrumbs
           chapter={this.state.chapter}
           chapters={this.state.chapters}
           toc={this.toc}
           observer={this.props.observer}
         />
-        <List component="nav" className="toc">
-          {this.renderTocItem(this.state.chapters)}
-        </List>
+        {this.renderChapters()}
+        {this.state.chapter.header ? (
+          <h1>{this.state.chapter.header}</h1>
+        ) : null}
         <div className="layers">
           {this.renderLayerItems(this.state.chapter)}
         </div>
-        <h1>{this.state.chapter.header}</h1>
-        <div className="content">{this.renderContent()}</div>
+        <div className={classes.content}>{this.renderContent()}</div>
       </div>
     );
   }

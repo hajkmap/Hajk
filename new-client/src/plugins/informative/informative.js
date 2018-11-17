@@ -1,10 +1,9 @@
-import React, { Component } from "react";
+import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { IconButton } from "@material-ui/core";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import SatelliteIcon from "@material-ui/icons/Satellite";
-
 import Typography from "@material-ui/core/Typography";
 
 import Panel from "../../components/Panel.js";
@@ -40,6 +39,10 @@ const styles = theme => {
         "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
       "&:hover": {
         background: "#e9e9e9"
+      },
+      [theme.breakpoints.down("xs")]: {
+        width: "auto",
+        justifyContent: "inherit"
       }
     },
     title: {
@@ -51,7 +54,7 @@ const styles = theme => {
   };
 };
 
-class Informative extends Component {
+class Informative extends React.PureComponent {
   state = {
     panelOpen: false
   };
@@ -97,10 +100,6 @@ class Informative extends Component {
       observer: this.observer
     });
     this.app.registerPanel(this);
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return this.state.panelOpen !== nextState.panelOpen;
   }
 
   componentDidMount() {

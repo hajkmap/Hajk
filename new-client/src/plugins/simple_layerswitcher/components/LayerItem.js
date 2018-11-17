@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import IconWarning from "@material-ui/icons/Warning";
+import CallMadeIcon from "@material-ui/icons/CallMade";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
@@ -34,6 +35,9 @@ const styles = theme => ({
     borderTopRightRadius: "10px",
     boxShadow:
       "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)"
+  },
+  rightIcon: {
+    marginLeft: theme.spacing.unit
   }
 });
 
@@ -152,7 +156,10 @@ class LayerItem extends Component {
       if (chaptersWithLayer.length > 0) {
         return (
           <>
-            <div>Visa kapitel i översiktsplan</div>
+            <div>
+              Innehåll från denna kategori finns benämnt i följande kapitel i
+              Översiktsplanen:
+            </div>
             <ul className={classes.links}>
               {chaptersWithLayer.map((chapter, i) => {
                 return (
@@ -162,6 +169,7 @@ class LayerItem extends Component {
                       onClick={this.openInformative(chapter)}
                     >
                       {chapter.header}
+                      <CallMadeIcon className={classes.rightIcon} />
                     </Button>
                   </li>
                 );

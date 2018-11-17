@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import SearchResultGroup from "./SearchResultGroup.js";
-import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
@@ -77,7 +76,7 @@ class SearchResultList extends Component {
   }
 
   renderResult() {
-    const { classes, result } = this.props;
+    const { result } = this.props;
     if (this.state.minimized) return null;
     return (
       <div>

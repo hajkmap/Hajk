@@ -5,16 +5,16 @@ import Observer from "react-event-observer";
 import AppModel from "./../models/AppModel.js";
 import Typography from "@material-ui/core/Typography";
 import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "./Toolbar.js";
+import IconButton from "@material-ui/core/IconButton";
+import MenuIcon from "@material-ui/icons/Menu";
 import { Toolbar as MUIToolbar } from "@material-ui/core";
 import { SnackbarProvider, withSnackbar } from "notistack";
 
+import Toolbar from "./Toolbar.js";
 import Popup from "./Popup.js";
 import MapSwitcher from "./MapSwitcher";
 
 import classNames from "classnames";
-
-import "./App.css";
 
 // Global customizations that previously went to custom.css
 // should now go to public/customTheme.json. They are later
@@ -51,7 +51,10 @@ const styles = theme => {
       height: "80px",
       borderBottomLeftRadius: "10px",
       borderBottomRightRadius: "10px",
-      border: "1px solid " + theme.palette.secondary.main
+      border: "1px solid " + theme.palette.secondary.main,
+      [theme.breakpoints.down("xs")]: {
+        display: "none"
+      }
     },
     appBar: {
       zIndex: 1200,
@@ -63,6 +66,9 @@ const styles = theme => {
       marginRight: "20px",
       "& img": {
         height: "100%"
+      },
+      [theme.breakpoints.down("xs")]: {
+        marginRight: "0"
       }
     },
     title: {},
@@ -77,12 +83,10 @@ const styles = theme => {
       right: 0,
       left: 0,
       bottom: 0,
+      position: "absolute",
       [theme.breakpoints.down("xs")]: {
-        display: "inherit",
-        width: "100%",
-        top: "0"
-      },
-      position: "absolute"
+        flexDirection: "column"
+      }
     },
     widgets: {
       position: "absolute",
@@ -90,21 +94,40 @@ const styles = theme => {
       minHeight: "50px",
       margin: "5px",
       overflow: "visible",
-      [theme.breakpoints.down("xs")]: {}
+      [theme.breakpoints.down("xs")]: {
+        display: "none"
+      }
+    },
+    widgetsVisible: {
+      display: "block",
+      margin: 0,
+      padding: 0
     },
     widgetsLeft: {
       left: "8px",
       top: "8px",
       [theme.breakpoints.down("xs")]: {
-        left: "0px",
-        top: "0px"
+        right: "inherit",
+        left: "inherit",
+        position: "static"
       }
     },
     widgetsRight: {
       right: "10px",
       top: "110px",
       [theme.breakpoints.down("xs")]: {
-        right: "5px"
+        right: "inherit",
+        left: "inherit",
+        position: "static",
+        marginTop: "-10px"
+      }
+    },
+    widgetMenuIcon: {
+      [theme.breakpoints.up("xs")]: {
+        display: "none"
+      },
+      [theme.breakpoints.down("xs")]: {
+        display: "inline-block"
       }
     },
     button: {
@@ -112,6 +135,9 @@ const styles = theme => {
       height: "50px",
       marginBottom: "10px",
       outline: "none"
+    },
+    visible: {
+      display: "block"
     }
   };
 };
@@ -138,6 +164,12 @@ class App extends Component {
       });
     });
 
+    this.globalObserver.subscribe("panelOpened", () => {
+      this.setState({
+        widgetsVisible: false
+      });
+    });
+
     this.globalObserver.subscribe("mapClick", mapClickDataResult => {
       this.setState({
         mapClickDataResult: mapClickDataResult
@@ -152,6 +184,12 @@ class App extends Component {
       variant: "error"
     });
   }
+
+  onWidgetMenuIconClick = () => {
+    this.setState({
+      widgetsVisible: !this.state.widgetsVisible
+    });
+  };
 
   renderWidgets(target) {
     const { classes } = this.props;
@@ -201,12 +239,43 @@ class App extends Component {
     }
   }
 
+  renderWidgetMenuIcon() {
+    const { classes } = this.props;
+    return (
+      <IconButton
+        className={classes.widgetMenuIcon}
+        onClick={this.onWidgetMenuIconClick}
+      >
+        <MenuIcon />
+      </IconButton>
+    );
+  }
+
   render() {
     const { classes } = this.props;
+    const { widgetsVisible } = this.state;
+
+    var widgetClassesLeft = classNames(classes.widgets, classes.widgetsLeft);
+    var widgetClassesRight = classNames(classes.widgets, classes.widgetsRight);
+    var overlayClasses = classes.overlay;
+    if (widgetsVisible) {
+      widgetClassesLeft = classNames(
+        classes.widgets,
+        classes.widgetsLeft,
+        classes.widgetsVisible
+      );
+      widgetClassesRight = classNames(
+        classes.widgets,
+        classes.widgetsRight,
+        classes.widgetsVisible
+      );
+      overlayClasses = classNames(classes.overlay, classes.overlayVisible);
+    }
 
     return (
       <SnackbarProvider
         maxSnack={3}
+        classes
         anchorOrigin={{
           vertical: "top",
           horizontal: "center"
@@ -221,8 +290,9 @@ class App extends Component {
                   alt="logo"
                 />
               </span>
+              {this.renderWidgetMenuIcon()}
               <span className={classes.title}>
-                <Typography variant="h4">ÖVERSIKTSPLAN</Typography>
+                <Typography variant="h6">ÖVERSIKTSPLAN</Typography>
               </span>
               <Toolbar
                 tools={this.appModel.getToolbarPlugins()}
@@ -242,13 +312,11 @@ class App extends Component {
               }}
             />
             <div className={classes.center}>{this.renderSearchPlugin()}</div>
-            <div id="map-overlay" className={classes.overlay}>
-              <div className={classNames(classes.widgets, classes.widgetsLeft)}>
+            <div id="map-overlay" className={overlayClasses}>
+              <div className={widgetClassesLeft}>
                 {this.renderWidgets("left")}
               </div>
-              <div
-                className={classNames(classes.widgets, classes.widgetsRight)}
-              >
+              <div className={widgetClassesRight}>
                 {this.renderWidgets("right")}
               </div>
             </div>

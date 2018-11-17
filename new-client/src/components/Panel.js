@@ -9,25 +9,45 @@ const styles = theme => {
   return {
     drawer: {
       order: 1,
-      zIndex: theme.zIndex.drawer - 1
+      zIndex: theme.zIndex.drawer - 1,
+      [theme.breakpoints.down("xs")]: {
+        zIndex: theme.zIndex.drawer + 1
+      }
     },
     drawerPaper: {
       position: "inherit",
       width: "400px",
       zIndex: theme.zIndex.drawer - 1,
+      overflowY: "inherit",
       [theme.breakpoints.down("xs")]: {
-        position: "absolute",
+        position: "fixed",
         width: "100%",
-        zIndex: 1300
+        zIndex: 1300,
+        top: 0
       }
     },
-    drawerPaperRight: {
-      position: "fixed",
+    drawerRight: {
+      order: 1,
       right: 0,
-      top: "64px",
-      [theme.breakpoints.down("xs")]: {
-        top: "54px"
-      }
+      position: "absolute",
+      bottom: 0,
+      top: 0
+    },
+    drawerLeft: {
+      order: 1,
+      left: 0,
+      position: "absolute",
+      bottom: 0,
+      top: 0
+    },
+    drawerPaperRight: {},
+    drawerPaperContainer: {
+      top: "45px",
+      right: 0,
+      bottom: 0,
+      left: 0,
+      overflow: "auto",
+      position: "absolute"
     },
     drawerPaperContent: {
       userSelect: "none",
@@ -98,7 +118,12 @@ class Panel extends Component {
         anchor={this.props.position || "left"}
         open={open}
         PaperProps={{ style: this.state.newWidth }}
+        transitionDuration={0}
         classes={{
+          root:
+            this.props.position === "right"
+              ? classes.drawerRight
+              : classes.drawerLeft,
           docked: classes.drawer,
           paper: classNames(
             classes.drawerPaper,
@@ -115,7 +140,9 @@ class Panel extends Component {
           className={classes.dragger}
         />
         <PanelHeader onClose={this.close} title={title} />
-        <div className={classes.drawerPaperContent}>{children}</div>
+        <div className={classes.drawerPaperContainer}>
+          <div className={classes.drawerPaperContent}>{children}</div>
+        </div>
       </Drawer>
     );
   }

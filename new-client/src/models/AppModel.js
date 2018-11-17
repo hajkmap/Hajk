@@ -25,11 +25,17 @@ class AppModel {
   }
 
   onPanelOpen(currentPanel) {
-    this.panels.filter(panel => panel !== currentPanel).forEach(panel => {
-      if (panel.position === currentPanel.position) {
-        panel.closePanel();
-      }
-    });
+    this.panels
+      .filter(panel => panel !== currentPanel)
+      .forEach(panel => {
+        if (panel.position === currentPanel.position) {
+          panel.closePanel();
+        }
+        if (document.body.scrollWidth < 600) {
+          panel.closePanel();
+          this.globalObserver.publish("panelOpened");
+        }
+      });
   }
 
   /**

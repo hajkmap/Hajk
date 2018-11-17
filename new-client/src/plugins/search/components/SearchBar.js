@@ -2,10 +2,8 @@ import React, { Component } from "react";
 import Input from "@material-ui/core/Input";
 import { withStyles } from "@material-ui/core/styles";
 import { fade } from "@material-ui/core/styles/colorManipulator";
-import Button from "@material-ui/core/Button";
 import SearchIcon from "@material-ui/icons/Search";
 import InputAdornment from "@material-ui/core/InputAdornment";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
 
 const styles = theme => ({
   search: {
@@ -50,7 +48,7 @@ class SearchBar extends Component {
   };
 
   render() {
-    const { classes, onChange, onComplete, onClear } = this.props;
+    const { classes, onChange, onComplete } = this.props;
     return (
       <div className={classes.search}>
         <Input
