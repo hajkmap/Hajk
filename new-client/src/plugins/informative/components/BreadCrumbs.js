@@ -15,31 +15,38 @@ class BreadCrumbs extends React.PureComponent {
 
   generate(chapter) {
     var traverse = (c, crums) => {
-      crums = [
-        ...crums,
-        {
-          text: c.header,
-          chapter: c
-        }
-      ];
+      if (c.header) {
+        crums = [
+          ...crums,
+          {
+            text: c.header,
+            chapter: c
+          }
+        ];
+      }
       if (c.parent) {
         return traverse(c.parent, crums);
       }
       return crums;
     };
     var crums = traverse(chapter, []);
+    crums.push({
+      text: "Översiktsplan",
+      chapter: "home"
+    });
     return crums.reverse();
   }
 
   onCrumClick = chapter => event => {
-    if (chapter && Array.isArray(chapter.chapters)) {
-      this.props.observer.publish("changeChapter", chapter);
-    }
+    this.props.observer.publish("changeChapter", chapter);
   };
 
   renderCrums() {
     const { classes } = this.props;
     var crums = this.generate(this.props.chapter);
+    if (crums.length === 1) {
+      return null;
+    }
     return crums.map((crum, i) => {
       return (
         <span key={i} onClick={this.onCrumClick(crum.chapter)}>

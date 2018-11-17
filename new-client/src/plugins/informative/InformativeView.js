@@ -52,10 +52,19 @@ class Informative extends Component {
       this.props.app.globalObserver.publish("informativeLoaded", chapters);
     });
     this.props.observer.subscribe("changeChapter", chapter => {
-      if (chapter) {
+      if (chapter && chapter !== "home") {
         this.setState({
           chapters: chapter.chapters,
           chapter: chapter
+        });
+      }
+      if (chapter === "home") {
+        this.setState({
+          chapters: this.toc,
+          chapter: {
+            header: "",
+            html: "<span></span>"
+          }
         });
       }
     });
