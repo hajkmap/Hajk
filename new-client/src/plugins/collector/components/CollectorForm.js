@@ -58,7 +58,7 @@ class CollectorForm extends Component {
   renderPlaceForm = () => {
     this.setState({
       mode: "place",
-      displayPlace: true
+      displayPlace: false
     });
     if (window.document.body.clientWidth < 600) {
       this.props.closePanel();
