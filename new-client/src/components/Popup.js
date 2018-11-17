@@ -18,23 +18,22 @@ const styles = theme => ({
 });
 
 class Popup extends React.Component {
+  state = {
+    selectedIndex: 1,
+    visible: false
+  };
+
   constructor(props) {
     super(props);
-    this.state = {
-      selectedIndex: 1,
-      visible: false
-    };
     marked.setOptions({
       sanitize: false,
       xhtml: true
     });
-
     this.classes = this.props.classes;
   }
 
-  componentDidMount() {}
-
-  componentWillReceiveProps() {
+  // FIXME: Replace. Refer to https://github.com/hajkmap/Hajk/issues/175
+  UNSAFE_componentWillReceiveProps(e) {
     this.setState({
       selectedIndex: 1
     });

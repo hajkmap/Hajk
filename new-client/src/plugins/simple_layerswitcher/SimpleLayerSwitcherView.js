@@ -31,10 +31,6 @@ class SimpleLayersSwitcherView extends React.PureComponent {
     };
   }
 
-  componentDidMount() {}
-
-  componentWillMount() {}
-
   handleChange = (panel, instance) => (event, expanded) => {
     this.setState(
       {

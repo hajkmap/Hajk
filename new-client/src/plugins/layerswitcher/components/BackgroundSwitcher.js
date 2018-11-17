@@ -33,7 +33,7 @@ class BackgroundSwitcher extends React.PureComponent {
     });
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.props.layers
       .filter(layer => layer.visibleAtStart)
       .forEach((layer, i) => {

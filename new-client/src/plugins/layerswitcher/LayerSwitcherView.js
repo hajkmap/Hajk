@@ -29,7 +29,7 @@ class LayersSwitcherView extends React.PureComponent {
     groups: []
   };
 
-  componentWillMount() {
+  componentDidMount() {
     this.options = this.props.parent.props.options;
     this.observer = Observer();
     this.observer.subscribe("layerAdded", layer => {});

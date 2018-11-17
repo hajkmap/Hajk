@@ -81,7 +81,7 @@ class SimpleLayerSwitcher extends React.PureComponent {
     this.app.registerPanel(this);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.setState({
       panelOpen: this.props.options.visibleAtStart
     });

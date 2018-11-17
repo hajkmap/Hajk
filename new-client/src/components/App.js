@@ -117,16 +117,13 @@ const styles = theme => {
 };
 
 class App extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       mapClickDataResult: {}
     };
-  }
-
-  componentWillMount() {
     this.globalObserver = new Observer();
-    this.appModel = new AppModel(this.props.config, this.globalObserver);
+    this.appModel = new AppModel(props.config, this.globalObserver);
   }
 
   componentDidMount() {

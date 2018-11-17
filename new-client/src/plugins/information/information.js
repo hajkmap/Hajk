@@ -56,7 +56,7 @@ class Infomation extends Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.setState({
       dialogOpen: this.props.options.visibleAtStart
     });

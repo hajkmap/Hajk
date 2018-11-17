@@ -68,8 +68,6 @@ class Collector extends Component {
     this.app = props.app;
   }
 
-  componentWillMount() {}
-
   onClick = e => {
     this.app.onPanelOpen(this);
     this.setState({

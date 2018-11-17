@@ -51,7 +51,7 @@ class LayerSwitcher extends Component {
     return this.state.panelOpen !== nextState.panelOpen;
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.setState({
       panelOpen: this.props.options.visibleAtStart
     });

@@ -38,8 +38,6 @@ class Search extends Component {
     this.searchModel = new SearchModel(props.options, props.map);
   }
 
-  componentWillMount() {}
-
   renderSearchResultList() {
     const { result } = this.state;
     if (!result) return null;
