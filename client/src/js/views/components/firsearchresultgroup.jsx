@@ -51,9 +51,9 @@ FirSearchResultGroup = {
             console.log("selected", selected);
             // ta bort blå färg
             console.log("ta bort blå färg");
-            this.props.model.highlightResultLayer.getSource().clear();
-            console.log("highlightResultLayer", this.props.model.highlightResultLayer);
-            console.log("highlightResultLayer.getSource()", this.props.model.highlightResultLayer.getSource());
+            //this.props.model.highlightResultLayer.getSource().clear();
+            //console.log("highlightResultLayer", this.props.model.highlightResultLayer);
+            //console.log("highlightResultLayer.getSource()", this.props.model.highlightResultLayer.getSource());
             console.log("clear the highlight");
         } else {
             if(typeof previousViewed !== "undefined"){
@@ -386,6 +386,7 @@ FirSearchResultGroup = {
                         // avoid to run same function two times
                         if (Array.isArray(features) && features.length > 0) {
                             var infobox = null;
+                            var names = [];
                             features.forEach(feature => {
                                     var found = false;
                                     var featureId = feature.getProperties().text;
@@ -406,53 +407,17 @@ FirSearchResultGroup = {
 
                                     if (!found) {
                                         console.log("Adding new feature");
-
-                                        // TODO: Send a WFS request, to search for all features with same name. Then add these as done below
-                                        var sameNamePromises = this.props.model.findWithSameName(feature.get('text'), wmsLayer);
-
-                                        Promise.all(sameNamePromises).then(() => {
-                                           this.forceUpdate();
-                                        });
-
-
-                                        // no other features are added with this name
-                                        /*
-                                        console.log("feature.get('text')", feature.get("text"));
-                                        console.log("layer", layer);
-                                        var openLayer = [];
-
-                                        this.props.model.get("map").getLayers().forEach(l => {
-                                            if (l.get("caption") === layer.get("caption")){
-                                                openLayer.push(l);
-                                            }
-                                        });
-                                        console.log("len", openLayer.length, openLayer);
-                                        if(openLayer.length != 1){
-                                            console.log("Found more than one layer for the caption", openLayer, layer.get("caption"));
-                                        }
-
-                                        // TODO: Get the features from the layer so we can add them to the list and correct result layer
-                                        var toAddFeatures = openLayer[0].getSource().getFeatures().filter(f => f.get("text") === feature.get("text"));
-                                        console.log("toAdd", toAddFeatures.length, toAddFeatures);
-                                        */
-                                        // Add to model
-                                        /*
-                                        this.props.model.get("items").map(group => {
-                                            if (group.layer === layer.get("caption")) {
-                                                feature.caption = group.layer;
-                                                feature.aliasDict = this.props.result.hits[0].aliasDict;
-                                                group.hits.push(feature);
-                                                console.log("this.props.model.get(items)", this.props.model.get("items"));
-                                            }
-                                        });
-
-                                        // Add to props
-                                        feature.infobox = infobox;
-                                        this.props.model.firFeatureLayer.getSource().addFeature(feature);
-                                        */
+                                        console.log("-----findWithSameName: feature.get(text)", feature.get('text'));
+                                        console.log("-----fndWithSameName: wmsLayer", wmsLayer);
+                                        names.push(feature.get("text"));
                                     }
                                 }
                             );
+                            var sameNamePromises = this.props.model.findWithSameName(names, wmsLayer);
+
+                            Promise.all(sameNamePromises).then(() => {
+                                this.forceUpdate();
+                            });
                             resolve();
                         } else {
                             resolve();
@@ -475,121 +440,6 @@ FirSearchResultGroup = {
                 layer.layer.setVisible(false);
             }
         });
-    },
-
-    doWFSSearch: function(props){
-        console.log("---doWFSSearch");
-        var filters = '',
-            str = '',
-            featureFilter = '',
-            propertyFilter = '',
-            read = (result) => {
-                var format,
-                    features = [],
-                    outputFormat = props.outputFormat;
-
-                if (outputFormat === 'GML2') { format = new ol.format.GML2({}); } else { format = new ol.format.WFS({}); }
-
-                if (!(result instanceof XMLDocument)) {
-                    if (result.responseText) {
-                        result = result.responseText;
-                    }
-                }
-
-                try {
-                    features = format.readFeatures(result);
-                    features = features.reduce((r, f) => {
-                        if (this.get('selectionTools')) {
-                            let found = this.get('features').find(feature =>
-                                f.getId() === feature.getId()
-                            );
-                            if (!found) {
-                                r.push(f);
-                            }
-                        } else {
-                            r.push(f);
-                        }
-                        return r;
-                    }, []);
-                } catch (e) {
-                    console.error('Parsningsfel. Koordinatsystem kanske saknas i definitionsfilen? Mer information: ', e);
-                }
-                if (features.length === 0) {
-                    features = [];
-                }
-                props.done(features);
-            };
-
-        outputFormat = props.outputFormat;
-
-        if (!outputFormat || outputFormat === '') {
-            outputFormat = 'GML3';
-        }
-
-        propertyFilter = this.getPropertyFilter(props);
-        featureFilter = this.getFeatureFilter(this.get('features'), props);
-
-        if (featureFilter && propertyFilter) {
-            filters = `
-        <ogc:And>
-          ${propertyFilter}
-          ${featureFilter}
-        </ogc:And>
-      `;
-        } else if (propertyFilter) {
-            filters = propertyFilter;
-        } else if (featureFilter) {
-            filters = featureFilter;
-        } else {
-            filters = '';
-        }
-
-        var typeName = `'${props.featureType}'`;
-        if (!typeName.includes(':')) { // If no namespace, add "feature:"
-            typeName = `'feature:${props.featureType}'`;
-        }
-
-        str = `
-     <wfs:GetFeature
-         service = 'WFS'
-         version = '1.1.0'
-         xmlns:wfs = 'http://www.opengis.net/wfs'
-         xmlns:ogc = 'http://www.opengis.net/ogc'
-         xmlns:gml = 'http://www.opengis.net/gml'
-         xmlns:esri = 'http://www.esri.com'
-         xmlns:xsi = 'http://www.w3.org/2001/XMLSchema-instance'
-         xsi:schemaLocation='http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd'
-         outputFormat="${outputFormat}"
-         maxFeatures="1000">
-         <wfs:Query typeName=` + typeName + ` srsName='${props.srsName}'>
-          <ogc:Filter>
-            ${filters}
-          </ogc:Filter>
-         </wfs:Query>
-      </wfs:GetFeature>`;
-
-        var contentType = 'text/xml',
-            data = str;
-
-        this.requests.push(
-            $.ajax({
-                url: props.url,
-                contentType: contentType,
-                crossDomain: true,
-                type: 'post',
-                data: str,
-                success: result => {
-                    read(result);
-                },
-                error: result => {
-                    if (result.status === 200) {
-                        read(result);
-                    } else {
-                        props.done([]);
-                    }
-                }
-            })
-        );
     },
 
     getPropertyFilter: function (props) {

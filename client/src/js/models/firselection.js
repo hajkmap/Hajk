@@ -321,11 +321,7 @@ var FirSelectionModel = {
 
     bufferSearchingInput: function(){
         var bufferLength = document.getElementById("bufferSearchingInput").value;
-        console.log("bufferLength", bufferLength);
-
         this.set("bufferLength", bufferLength);
-        console.log("this.props.model.bufferLength", this.get("bufferLength"));
-
         this.bufferSearching(bufferLength);
     },
 
@@ -334,31 +330,23 @@ var FirSelectionModel = {
         parser.inject(ol.geom.Point, ol.geom.LineString, ol.geom.LinearRing, ol.geom.Polygon, ol.geom.MultiPoint, ol.geom.MultiLineString, ol.geom.MultiPolygon);
 
         var bufferLength = bufferSearchingLength;
-        console.log("bufferLength in searching", bufferLength);
         this.get("firBufferLayer").getSource().clear();
 
         if(bufferSearchingLength > 0) {
 
             this.get("map").getLayers().forEach(layer => {
                 if (layer.get("caption") === "search-selection-layer") {
-                    console.log("features.length", layer.getSource().getFeatures().length);
                     layer.getSource().getFeatures().forEach(feature => {
-                        //console.log("type", typeof bufferLength);
-
                         var jstsGeom = parser.read(feature.getGeometry());
-                        console.log("feature.getGeometry()", feature.getGeometry());
-                        console.log("+++jstsGeom", jstsGeom)
                         // create a buffer of the required meters around each line
-                        console.log("bufferLength", bufferLength);
                         var buffered = jstsGeom.buffer(bufferLength);
-                        console.log("+++buffered", parser.write(buffered));
 
                         // create a new feature and add in a new layer that has highlightstyle
                         var buffer = new ol.Feature();
 
                         // convert back from JSTS and replace the geometry on the feature
-                        buffer.setGeometry(parser.write(buffered)); // change this to new feature
-
+                        buffer.setGeometry(parser.write(buffered));
+                        buffer.set("originalFeature", feature);
                         this.get("firBufferLayer").getSource().addFeature(buffer);
                     });
                 }
@@ -370,10 +358,7 @@ var FirSelectionModel = {
         var allFeatures = [];
 
         this.bufferSearchingInput();
-
-        console.log("///allFeatures", allFeatures.concat(this.get('highlightLayer').getFeatures(), this.get('source').getFeatures(), this.get("firBufferLayer").getSource().getFeatures()));
         allFeatures = allFeatures.concat(this.get('highlightLayer').getFeatures(), this.get('source').getFeatures(), this.get("firBufferLayer").getSource().getFeatures());
-        console.log("///allFeatures", allFeatures);
 
         //return allFeatures;
         return allFeatures.concat(this.get('highlightLayer').getFeatures(), this.get('source').getFeatures(), this.get("firBufferLayer").getSource().getFeatures());

@@ -222,13 +222,13 @@
 
         if (searchTool) {
           if (searchTool.options.layers == null) {
-            data.wfslayers = data.wfslayers;
+            //data.wfslayers = data.wfslayers;
             searchTool.options.sources = data.wfslayers;
           } else {
             if (searchTool.options.layers.length != 0) {
               var wfslayers = internal.overrideGlobalSearchConfig(searchTool, data);
               searchTool.options.sources = wfslayers;
-              data.wfslayers = wfslayers;
+              //data.wfslayers = wfslayers;
             } else {
               searchTool.options.sources = data.wfslayers;
             }
@@ -236,14 +236,16 @@
         }
 
         if (firTool) {
+          console.log("firTool.options.layers",firTool.options.layers);
+          console.log("data.wfsLayers", data.wfslayers);
             if (firTool.options.layers == null) {
-                data.wfslayers = data.wfslayers;
+                //data.wfslayers = data.wfslayers;
                 firTool.options.sources = data.wfslayers;
             } else {
                 if (firTool.options.layers.length != 0) {
                     var wfslayers = internal.overrideGlobalSearchConfig(firTool, data);
                     firTool.options.sources = wfslayers;
-                    data.wfslayers = wfslayers;
+                    //data.wfslayers = wfslayers;
                 } else {
                     firTool.options.sources = data.wfslayers;
                 }

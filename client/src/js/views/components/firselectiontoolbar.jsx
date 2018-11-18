@@ -66,26 +66,29 @@ var FirSelectionPanelView = {
     },
 
     firRemoveSelected: function(event){
+        console.log("firRemoveSelected");
         var map = this.props.model.get("map");
+        console.log("firRemoveSelected2");
         var source = this.props.model.get("highlightLayer").get("source");
+        console.log("firRemoveSelected3");
 
         // souce for buffer
         var sourceBuffer = this.props.model.get("firBufferLayer").get("source");
-
-        console.log("source", source);
-        console.log("sourceBuffer", sourceBuffer);
-        console.log("event", event);
+        console.log("firRemoveSelected4");
 
         map.forEachFeatureAtPixel(event.pixel, function(feature, layer){
-            console.log("deleteMarkerEnabled",deleteMarkerEnabled);
-            if (layer.get("caption") === "search-selection-layer" || layer.get("name") === "fir-searching-buffer-layer") {
+            console.log("firRemoveSelected5");
+            if (layer.get("caption") === "search-selection-layer") {
                 layer.getSource().removeFeature(feature);
+            }else if(layer.get("name") === "fir-searching-buffer-layer"){
+                layer.getSource().removeFeature(feature);
+                console.log("firRemoveSelected6", this);
+                console.log("feature (buffer)", feature);
+                this.props.model.get("drawLayer").getSource().removeFeature(feature.get("originalFeature"));
             }
-        });
+        }.bind(this));
 
-        //map.un('singleclick', this.firRemoveSelected);
-
-        console.log("ctrlisDown", ctrlIsDown);
+        console.log("firRemoveSelected7", this);
         if(!ctrlIsDown) {
             map.un('singleclick', this.firRemoveSelected);
         }
@@ -121,7 +124,7 @@ var FirSelectionPanelView = {
                     <button onClick={() => this.activateTool('pointSelection')} type='button' className={this.getClassNames('pointSelection')} title='Markera efter polygon' >
                         <i className='fa fa-circle icon' />
                     </button>
-                    <button onClick={this.deleteMarker} type='button' className={this.getClassNames('minusSelection')} title='Ta bort objekt' >
+                    <button onClick={() => this.deleteMarker()} type='button' className={this.getClassNames('minusSelection')} title='Ta bort objekt' >
                         <i className='fa fa-trash fa-0' />
                     </button>
                 </div>

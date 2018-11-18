@@ -155,7 +155,7 @@ var FirSearchView = {
      * @param {object} event
      */
     handleKeyDown: function (event) {
-        if (event.keyCode === 13 && event.target.value.length < 5) {
+        if (event.keyCode === 13) {// && event.target.value.length < 5) {
             event.preventDefault();
             this.props.model.set('value', event.target.value);
             this.setState({
@@ -163,6 +163,7 @@ var FirSearchView = {
             });
             this.props.model.set('force', true);
             this.search();
+            document.getElementById("sokEnter").click();
         }
     },
 
@@ -173,6 +174,8 @@ var FirSearchView = {
     update: function () {
         this.props.model.search();
     },
+
+
 
     /**
      * Search requested information.
@@ -189,18 +192,35 @@ var FirSearchView = {
         this.timer = setTimeout(() => {
             var loader = this.loading;
             this.props.model.abort();
+            // this.props.model.firstStage();
             this.props.model.search(result => {
                 if (result.status === "success") {
                     this.props.model.highlightResultLayer.getSource().clear();
                     this.props.model.firFeatureLayer.getSource().clear();
+                    var wmsLayerForSameName = this.props.model.get("layerCollection").filter((layer) => {
+                        return (layer.get('type') === 'wms' || layer.get('type') === 'arcgis') &&
+                            layer.get('queryable') && layer.get('caption') === this.props.model.get("firLayerCaption");
+                    });
+                    var sameNamePromises = [];
                     result.items.map(item => {
                         var groupName = item.layer;
+                        var names = [];
                         item.hits.map(hit => {
+                            names.push(hit.get("text"));
                             this.props.model.firFeatureLayer.getSource().addFeature(hit);
-
                         });
+
+                        console.log("samename",names);
+                        var tmpPromises = this.props.model.findWithSameName(names, wmsLayerForSameName[0]);
+                        tmpPromises.forEach(promise => sameNamePromises.push(promise));
+                    });
+
+                    Promise.all(sameNamePromises).then(() => {
+                        this.forceUpdate();
+                        console.log("finished");
                     });
                     if(this.props.model.get("force") && result.items.length > 0) {
+                        console.log("force is true and resultslength is more than 0");
                         this.props.model.get("map").getView().fit(this.props.model.firFeatureLayer.getSource().getExtent(), {
                             size: this.props.model.get("map").getSize(),
                             maxZoom: this.props.model.get('maxZoom')
@@ -287,6 +307,7 @@ var FirSearchView = {
                         {/*<option value='*'> -- Alla -- </option>*/}
                         {
                             (() => {
+                                console.log("sources", sources);
                                 return sources.map((wfslayer, i) => {
                                     return (
                                         <option key={i} value={wfslayer.caption}>
@@ -417,7 +438,7 @@ var FirSearchView = {
         var instructionTxt;
         if (typeof this.props.model.get("instructionSkapaFastighetsforteckning") !== 'undefined' && this.props.model.get("instructionSkapaFastighetsforteckning") !== null && this.props.model.get("instructionSkapaFastighetsforteckning").length > 0) {
             instructionBtn = (
-                <button onClick={() => this.openInstruction("skapaFastighetsforteckning")} className='btn-info' id='instructionBox' ><img src={infologo} /></button>
+                <button onClick={() => this.openInstruction("skapaFastighetsforteckning")} className='btn-info' id='instructionBox' ><img src={this.props.model.get("infoKnappLogo")} /></button>
             );
             instructionTxt = (
                 <div className='panel-body-instruction instructionsText' id='instructionsTextFirskapaFastighetsforteckning' dangerouslySetInnerHTML={{__html: this.props.model.get("instructionSkapaFastighetsforteckning")}} />
@@ -579,6 +600,8 @@ var FirSearchView = {
         var navPanel = document.getElementById('navigation-panel');
         navPanel.style.width = '417px';
 
+        var hittaGrannarRensaLabel = this.props.model.get("backupItems").length > 0 ? "Bakåt" : "Rensa";
+
         return (
             <div className='panel panel-default'>
                 <div className='panel-heading'>Hitta grannar{instructionBtn}<button id="FIRHittaGrannarMinimizeButton" onClick={() => this.minBox('HittaGrannarMinimizeBox', "FIRHittaGrannarMinimizeButton")} className={this.props.model.get("searchMinimizedClassButton")}></button>
@@ -592,7 +615,7 @@ var FirSearchView = {
                     </div><br/>
                     <div className='pull-right'>
                         <button id="fir-search-hitta-grannar" onClick={() => this.hittaGrannar()} type='submit' className='btn btn-primary'>Sök</button>&nbsp;
-                        <button onClick={() => this.rensaHittaGrannar()} type='submit' className='btn btn-primary' id='rensaHittaGrannar'>Rensa</button>
+                        <button onClick={() => this.rensaHittaGrannar()} type='submit' className='btn btn-primary' id='rensaHittaGrannar'>{hittaGrannarRensaLabel}</button>
                     </div>
                 </div>
             </div>
@@ -610,11 +633,14 @@ var FirSearchView = {
         );
     },
 
-    fastighetslabel: function() {
-        // TODO: WFS request fastighets ->
+    fastighetslabel: function(e) {
 
-        //put result on map
-
+        if(!$('#fastighetsLabel').is(":checked")) {
+            this.props.model.set("showLabels", false);
+        }else{
+            this.props.model.set("showLabels", true);
+        }
+        this.props.model.updateLabelVisibility();
     },
 
     slackaBufferSokomrade: function(e) {
@@ -622,12 +648,15 @@ var FirSearchView = {
         console.log("this.props.model", this.props.model);
         //maybe need to be created one more layer?
 
+        console.log("---this", this);
         if(!$('#slackaBufferSokomrade').is(":checked")) {
             this.props.model.get("firSelectionModel").get("drawLayer").setVisible(false);
             this.props.model.firBufferFeatureLayer.setVisible(false);
+            this.props.model.get("firSelectionModel").get("firBufferLayer").setVisible(false);
         }else{
             this.props.model.get("firSelectionModel").get("drawLayer").setVisible(true);
             this.props.model.firBufferFeatureLayer.setVisible(true);
+            this.props.model.get("firSelectionModel").get("firBufferLayer").setVisible(true);
         }
         console.log("finished");
     },
@@ -786,7 +815,7 @@ var FirSearchView = {
                             {searchOption}
                     </div>
                         <div className='pull-right'>
-                            <button onClick={search_on_click} type='submit' className='btn btn-primary'>Sök</button>&nbsp;
+                            <button onClick={search_on_click} type='submit' className='btn btn-primary' id='sokEnter'>Sök</button>&nbsp;
                             <button onClick={this.clear} type='submit' className='btn btn-primary' id='sokRensa'>Rensa</button>
                         </div>
                     </div>

@@ -41,7 +41,7 @@ var FirModelProperties = {
     popupOffsetY: 0,
     aliasDict: {},
     chosenColumns: [],
-    firLayerCaption: "Fastigheter", //Fastighet:port83&84
+    firLayerCaption: "", //Fastighet:port83&84
     feature: undefined,
     hittaGrannar: false,
     backupItems: [],
@@ -49,11 +49,13 @@ var FirModelProperties = {
     colorResultStroke: "",//'rgba(0, 0, 0, 0.6)',
     colorHighlight: "",//'rgba(0, 0, 255, 0.5)',
     colorHighlightStroke: "",//'rgba(0, 0, 0, 0.6)',
-    colorBuffer: "",//'rgba(255, 255, 0, 0.1)',
-    colorBufferStroke: "",//'rgba(0, 0, 0, 0.2)',
     colorHittaGrannarBuffer: "",//'rgba(50, 200, 200, 0.4)',
     colorHittaGrannarBufferStroke: "",//'rgba(0, 0, 0, 0.2)',
-    maxFeatures: "" //"1000"
+    maxFeatures: "", //"1000",
+    omradeField: "",
+    label: "",
+    showLabels: true,
+    infoKnappLogo: ""
 };
 
 var FirModel = {
@@ -69,17 +71,44 @@ var FirModel = {
         this.set('layerCollection', shell.getLayerCollection());
         this.set('map', shell.getMap().getMap());
         console.log("map", this.get("map"));
+
         this.firFeatureLayer= new ol.layer.Vector({
             caption: 'FIRSökresltat',
             name: 'fir-search-vector-layer',
             source: new ol.source.Vector(),
             queryable: true,
-            visible: true,
-            style: this.getStyle()
+            visible: true
         });
 
         this.firFeatureLayer.getSource().on('addfeature', evt => {
-            evt.feature.setStyle(this.firFeatureLayer.getStyle());
+            console.log("adding feature", evt.feature);
+            evt.feature.setStyle(new ol.style.Style({
+                fill: new ol.style.Fill({
+                    color: this.get("colorResult")//'rgba(255, 26, 179, 0.4)'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: this.get("colorResultStroke"),
+                    width: 4
+                }),
+                image: new ol.style.Icon({
+                    anchor: this.get('anchor'),
+                    anchorXUnits: 'pixels',
+                    anchorYUnits: 'pixels',
+                    src: this.get('markerImg'),
+                    imgSize: this.get('imgSize')
+                }),
+                text: new ol.style.Text({
+                    font: '12px Calibri,sans-serif',
+                    fill: new ol.style.Fill({ color: '#000' }),
+                    stroke: new ol.style.Stroke({
+                        color: '#fff', width: 2
+                    }),
+                    // get the text from the feature - `this` is ol.Feature
+                    // and show only under certain resolution
+                    text: this.get("showLabels") ? evt.feature.get(this.get("label")) : ""
+                })
+            }));
+            //evt.feature.setStyleFunction(this.firFeatureLayer.getStyle);
         });
 
         this.get('map').addLayer(this.firFeatureLayer);
@@ -100,7 +129,34 @@ var FirModel = {
         });
 
         this.highlightResultLayer.getSource().on('removefeature', evt => {
-            evt.feature.setStyle(this.firFeatureLayer.getStyle());
+            evt.feature.setStyle(
+                new ol.style.Style({
+                    fill: new ol.style.Fill({
+                        color: this.get("colorResult")//'rgba(255, 26, 179, 0.4)'
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: this.get("colorResultStroke"),
+                        width: 4
+                    }),
+                    image: new ol.style.Icon({
+                        anchor: this.get('anchor'),
+                        anchorXUnits: 'pixels',
+                        anchorYUnits: 'pixels',
+                        src: this.get('markerImg'),
+                        imgSize: this.get('imgSize')
+                    }),
+                    text: new ol.style.Text({
+                        font: '12px Calibri,sans-serif',
+                        fill: new ol.style.Fill({ color: '#000' }),
+                        stroke: new ol.style.Stroke({
+                            color: '#fff', width: 2
+                        }),
+                        // get the text from the feature - `this` is ol.Feature
+                        // and show only under certain resolution
+                        text: this.get("showLabels") ? evt.feature.get(this.get("label")) : ""
+                    })
+                })
+            );//getStyle?
         });
 
         this.get('map').addLayer(this.highlightResultLayer);
@@ -125,7 +181,7 @@ var FirModel = {
             name: 'fir-buffer-hidden-search-vector-layer',
             source: new ol.source.Vector(),
             queryable: false,
-            visible: true, // set to false
+            visible: false,
             style: this.getFirBufferHiddenFeatureStyle()
         });
 
@@ -141,7 +197,6 @@ var FirModel = {
                 layerCollection:shell.getLayerCollection()
             }));
         }
-        //this.get("firSelectionModel").get("firBufferLayer")
     },
 
     clickedOnMap: function(event){
@@ -238,7 +293,6 @@ var FirModel = {
                 return condition;
             } */
             props.value.indexOf('\\') >= 0 ? props.value = props.value.replace(/\\/g, '\\\\') : props.value;
-
             console.log("getPropertyFilter: property", property);
             console.log("getPropertyFilter: condition", condition);
             console.log("getPropertyFilter: props", props);
@@ -343,16 +397,11 @@ var FirModel = {
                 }
 
                 var distance = "";
-                console.log("+++this.get(bufferSearch)",this.get("bufferSearch"));
                 if(this.get("hittaGrannar")){
                     operation = "DWithin";
                     distance = this.get("bufferLength"); // Need to write correct
-                    console.log("distance in meter", distance);
                     distance = '<ogc:Distance units="meter">' + distance + '</ogc:Distance>';
-                    console.log("distance for parameter", distance);
                 }
-                console.log("coords", coords);
-                console.log("poslist", posList);
 
                     //gml:polygon -> objektType
                     str += `
@@ -387,7 +436,7 @@ var FirModel = {
         var bufferLength = 0.01;
 
         var jstsGeom = parser.read(feature.getGeometry());
-        console.log("feature.getGeometry()",feature.getGeometry());
+
         // create a buffer of the required meters around each line
         var buffered = jstsGeom.buffer(bufferLength);
 
@@ -410,7 +459,7 @@ var FirModel = {
             str = '',
             featureFilter = '',
             propertyFilter = '',
-            read = (result) => {
+            read = (result) => { //parses the XML result
                 var format,
                     features = [],
                     outputFormat = props.outputFormat;
@@ -424,7 +473,6 @@ var FirModel = {
 
                 try {
                     features = format.readFeatures(result);
-                    console.log("features from xml", features.length);
                     features = features.reduce((r, f) => {
                         if (this.get('firSelectionTools')) {
                             let found = this.get('features').find(feature =>
@@ -454,14 +502,13 @@ var FirModel = {
         }
 
         propertyFilter = this.getPropertyFilter(props);
-        console.log("///propertyFilter", propertyFilter);
-        console.log("props", props);
-        console.log("this.get.features", this.get('features'));
-        console.log("this for getFeaturefilter", this);
-        featureFilter = this.getFeatureFilter(this.get('features'), props);
-        console.log("after featurefilter");
-        console.log("///featureFilter", featureFilter);
+        if(props.enableFilter){
+            featureFilter = this.getFeatureFilter(this.get('features'), props);
+        }else{
+            featureFilter = "";
+        }
 
+        console.log("here 1");
         if (featureFilter && propertyFilter) {
             filters = `
         <ogc:And>
@@ -473,8 +520,11 @@ var FirModel = {
             filters = propertyFilter;
         } else if (featureFilter) {
             filters = featureFilter;
+        } else if (props.sameNameFilter) {
+            console.log("here 2");
+            filters = props.sameNameFilter;
         } else {
-            filters = '';
+                filters = '';
         }
 
         var typeName = `'${props.featureType}'`;
@@ -482,6 +532,7 @@ var FirModel = {
             typeName = `'feature:${props.featureType}'`;
         }
 
+        console.log("here 3");
         str = `
      <wfs:GetFeature
          service = 'WFS'
@@ -501,6 +552,7 @@ var FirModel = {
          </wfs:Query>
       </wfs:GetFeature>`;
 
+        console.log("here 4");
         var contentType = 'text/xml',
             data = str;
 
@@ -512,7 +564,6 @@ var FirModel = {
                 type: 'post',
                 data: str,
                 success: result => {
-                    console.log("searched");
                     read(result);
                 },
                 error: result => {
@@ -937,15 +988,9 @@ var FirModel = {
                 });
 
                 return columns.map(column => {
-                    console.log("here");
-                    console.log(column);
                     if (column == "nyckel") {
-                        console.log("Nyckel");
-                        console.log('"' + Number(attributes[column]) + '"');
                         return '"' + Number(attributes[column]) + '"';
                     } else {
-                        console.log("other attr");
-                        console.log(attributes[column]);
                         return attributes[column] || null;
                     }
                 });
@@ -969,6 +1014,7 @@ var FirModel = {
                 break;
             case 'excel':
                 url = this.get('excelExportUrl');
+                console.log("url",url);
                 data = this.getExcelData();
                 postData = JSON.stringify(data);
                 console.log("data", data);
@@ -1032,6 +1078,7 @@ var FirModel = {
                             srsName: searchProps.srsName,
                             outputFormat: searchProps.outputFormat,
                             geometryField: searchProps.geometryField,
+                            enableFilter: true,
                             exaktMatching: this.get("exaktMatching"),
                             done: features => {
                                 if (features.length > 0) {
@@ -1089,7 +1136,8 @@ var FirModel = {
                     displayName: layer.get('searchDisplayName'),
                     srsName: this.get('map').getView().getProjection().getCode(),
                     outputFormat: layer.get('searchOutputFormat'),
-                    geometryField: layer.get('searchGeometryField')
+                    geometryField: layer.get('searchGeometryField'),
+                    omradeField: layer.get(this.get("omradeField"))
                 };
                 console.log("alayer", layer);
                 console.log("searchProps", searchProps);
@@ -1139,24 +1187,14 @@ var FirModel = {
         });
     },
 
-    findWithSameName: function(name, layer){
-
-        console.log("name", "'" + name + "'");
-        console.log("layer", layer);
-        console.log("layerCollection", this.get("layerCollection"));
-
+    findWithSameName: function(names, layer){
         var sources = this.getSources();
         var promises = [];
 
         sources.forEach(source => {
-            console.log("source", source);
-            console.log("source.id", source.id, "layer.id", layer.get("id"));
             var belongsToLayer = false;
             source.layers.forEach(sourceLayer => {
-                console.log("sourceLayer", sourceLayer);
-                console.log(layer.get("params").LAYERS);
                if (layer.get("params").LAYERS.indexOf(sourceLayer) >= 0){
-                   console.log("matches");
                    belongsToLayer = true;
                }
             });
@@ -1173,6 +1211,27 @@ var FirModel = {
                     outputFormat: source.outputFormat,
                     geometryField: source.geometryField
                 };
+
+                var sameNameFilter = "";
+                // Add initial or
+                for(var i = 0; i < names.length - 1; i++){
+                    sameNameFilter += "<ogc:Or>";
+                }
+
+                var prefix = "<ogc:PropertyIsLike matchCase=\"false\" wildCard=\"*\" singleChar=\".\" escapeChar=\"!\">\n" +
+                    "            <ogc:PropertyName>text</ogc:PropertyName>\n" +
+                    "            <ogc:Literal>";
+                var suffix = "</ogc:Literal>\n" +
+                    "          </ogc:PropertyIsLike>";
+
+                sameNameFilter += prefix + names[0] + suffix;
+
+                for(var i = 1; i < names.length; i++){
+                    sameNameFilter += prefix + names[i] + suffix;
+                    sameNameFilter += "</ogc:Or>";
+                }
+
+                console.log("filter", sameNameFilter);
                 promises.push(new Promise((resolve, reject) => {
                     this.doWFSSearch({
                         value: name,
@@ -1182,13 +1241,13 @@ var FirModel = {
                         srsName: searchProps.srsName,
                         outputFormat: searchProps.outputFormat,
                         geometryField: searchProps.geometryField,
+                        enableFilter: false,
                         exaktMatching: true,
+                        sameNameFilter: sameNameFilter,
                         done: features => {
+                            console.log("features", features.length, features);
                             if (features.length > 0) {
-                                console.log("length of features", features.length);
-                                var addedFeatures = [];
                                 features.forEach(feature => {
-                                    console.log("here0");
                                     feature.caption = searchProps.caption;
                                     feature.infobox = searchProps.infobox;
                                     try {
@@ -1197,37 +1256,23 @@ var FirModel = {
                                         feature.aliasDict = undefined;
                                     }
 
-
                                     this.get("items").map(group => {
-                                        console.log("group.layer", group.layer, "layer.caption", layer.get("caption"));
                                         if (group.layer === source.caption) {
                                             var found = false;
-                                            console.log("feature", feature);
-                                            console.log("feature.get('nyckel')", feature.get("nyckel"));
                                             group.hits.forEach(hit => {
-                                                console.log("here");
-                                                if(feature.get("nyckel") === hit.get("nyckel")){
+                                                if(feature.get("nyckel") === hit.get("nyckel") && feature.get("omrade") === hit.get("omrade")){ // TODO Check some unique ID instead
                                                     found = true;
                                                 }
-                                                console.log("here2");
                                             });
-                                            console.log("here3");
-                                            console.log("feature", feature);
-                                            console.log("addedFeatures", addedFeatures);
 
-                                            if(!found || addedFeatures.find(e => e === feature.get("nyckel"))) {
-                                                console.log("here4");
-                                                addedFeatures.push(feature.get("nyckel"));
-                                                console.log("here5");
+                                            if(!found) {
                                                 group.hits.push(feature);
                                                 this.firFeatureLayer.getSource().addFeature(feature);
                                             }
                                         }
                                     });
-
                                 });
                             }
-                            console.log("resolving");
                             resolve();
                         }
                     });
@@ -1238,7 +1283,6 @@ var FirModel = {
         return promises;
     },
 
-//removed isBar as an input
     shouldRenderResult: function () {
         return !!(
             (this.get('value')) ||
@@ -1271,6 +1315,16 @@ var FirModel = {
                 anchorYUnits: 'pixels',
                 src: this.get('markerImg'),
                 imgSize: this.get('imgSize')
+            }),
+            text: new ol.style.Text({
+                font: '12px Calibri,sans-serif',
+                fill: new ol.style.Fill({ color: '#000' }),
+                stroke: new ol.style.Stroke({
+                    color: '#fff', width: 2
+                }),
+                // get the text from the feature - `this` is ol.Feature
+                // and show only under certain resolution
+                text: this.get("text")
             })
         });
     },
@@ -1284,10 +1338,10 @@ var FirModel = {
     getBufferStyle: function () {
         return new ol.style.Style({
             fill: new ol.style.Fill({
-                color: this.get("colorBuffer")//'rgba(255, 26, 179, 0.4)'
+                color: 'rgba(255, 26, 179, 0.4)'//this.get("colorBuffer")//'rgba(255, 26, 179, 0.4)'
             }),
             stroke: new ol.style.Stroke({
-                color: this.get("colorBufferStroke"),
+                color: 'rgba(0, 0, 0, 0.4)',
                 width: 4
             }),
             image: new ol.style.Icon({
@@ -1322,10 +1376,10 @@ var FirModel = {
     getFirBufferHiddenFeatureStyle: function () {
         return new ol.style.Style({
             fill: new ol.style.Fill({
-                color: 'rgba(255, 0, 0, 0.1)'
+                color: 'rgba(0, 0, 0, 0.0)'
             }),
             stroke: new ol.style.Stroke({
-                color: 'rgba(0, 0, 0, 0.1)',
+                color: 'rgba(0, 0, 0, 0.0)',
                 width: 4
             }),
             image: new ol.style.Icon({
@@ -1361,6 +1415,39 @@ var FirModel = {
                 imgSize: this.get('imgSize')
             })
         });
+    },
+
+    updateLabelVisibility: function(){
+        this.firFeatureLayer.getSource().getFeatures().forEach(
+            feature => {
+                feature.setStyle(new ol.style.Style({
+                    fill: new ol.style.Fill({
+                        color: this.get("colorResult")//'rgba(255, 26, 179, 0.4)'
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: this.get("colorResultStroke"),
+                        width: 4
+                    }),
+                    image: new ol.style.Icon({
+                        anchor: this.get('anchor'),
+                        anchorXUnits: 'pixels',
+                        anchorYUnits: 'pixels',
+                        src: this.get('markerImg'),
+                        imgSize: this.get('imgSize')
+                    }),
+                    text: new ol.style.Text({
+                        font: '12px Calibri,sans-serif',
+                        fill: new ol.style.Fill({ color: '#000' }),
+                        stroke: new ol.style.Stroke({
+                            color: '#fff', width: 2
+                        }),
+                        // get the text from the feature - `this` is ol.Feature
+                        // and show only under certain resolution
+                        text: this.get("showLabels") ? feature.get(this.get("label")) : ""
+                    })
+                }));
+            }
+        );
     },
 
     /**

@@ -161,7 +161,6 @@ var InfoClickModel = {
     });
 
     this.map.forEachFeatureAtPixel(event.pixel, (feature, layer) => {
-      console.log("#####infoClicked");
       if (layer && layer.get('name') && (layer.get('queryable') !== false)) {
         if (
           layer.get('name') !== 'preview-layer' &&
