@@ -14,7 +14,7 @@ var FirModelProperties = {
     title: 'FIR',
     visible: false,
     value: '',
-    filter: '*',
+    filter: 'Fastighet',
     filterVisibleActive: false,
     markerImg: 'assets/icons/marker.png',
     base64Encode: false,
@@ -1234,7 +1234,7 @@ var FirModel = {
                 console.log("filter", sameNameFilter);
                 promises.push(new Promise((resolve, reject) => {
                     this.doWFSSearch({
-                        value: name,
+                        value: name, // TODO should be empty
                         url: searchProps.url,
                         featureType: searchProps.featureType,
                         propertyName: searchProps.propertyName,
@@ -1281,6 +1281,161 @@ var FirModel = {
         });
 
         return promises;
+    },
+
+    findWithSameNyckel: function(keys, items){
+        var sources = this.getSources();
+        var promises = [];
+        console.log("sources", this.get('sources'));
+        this.get('sources').forEach(source => {
+            console.log("source.caption", source.caption);
+            if(source.caption === "Fastighet") {
+                var searchProps = {
+                    url: (HAJK2.searchProxy || '') + source.url,
+                    caption: source.caption,
+                    infobox: source.infobox,
+                    aliasDict: source.aliasDict,
+                    featureType: source.layers[0].split(':')[1],
+                    propertyName: source.searchFields.join(','),
+                    displayName: source.displayFields ? source.displayFields : (source.searchFields[0] || 'Sökträff'),
+                    srsName: this.get('map').getView().getProjection().getCode(),
+                    outputFormat: source.outputFormat,
+                    geometryField: source.geometryField
+                };
+
+                var sameNameFilter = "";
+                // Add initial or
+                for (var i = 0; i < keys.length - 1; i++) {
+                    sameNameFilter += "<ogc:Or>";
+                }
+
+                var prefix = "<ogc:PropertyIsEqualTo matchCase=\"false\" wildCard=\"*\" singleChar=\".\" escapeChar=\"!\">\n" +
+                    "            <ogc:PropertyName>nyckel</ogc:PropertyName>\n" +
+                    "            <ogc:Literal>";
+                var suffix = "</ogc:Literal>\n" +
+                    "          </ogc:PropertyIsEqualTo>";
+
+                sameNameFilter += prefix + keys[0] + suffix;
+
+                for (var i = 1; i < keys.length; i++) {
+                    sameNameFilter += prefix + keys[i] + suffix;
+                    sameNameFilter += "</ogc:Or>";
+                }
+
+                promises.push(new Promise((resolve, reject) => {
+                    this.doWFSSearch({
+                        value: "",
+                        url: searchProps.url,
+                        featureType: searchProps.featureType,
+                        propertyName: searchProps.propertyName,
+                        srsName: searchProps.srsName,
+                        outputFormat: searchProps.outputFormat,
+                        geometryField: searchProps.geometryField,
+                        enableFilter: false,
+                        exaktMatching: true,
+                        sameNameFilter: sameNameFilter,
+                        done: features => {
+                            if (features.length > 0) {
+                                console.log("length of features", features.length);
+                                features.forEach(feature => {
+                                    feature.caption = searchProps.caption;
+                                    feature.infobox = searchProps.infobox;
+                                    try {
+                                        feature.aliasDict = JSON.parse(searchProps.aliasDict);
+                                    } catch (e) {
+                                        feature.aliasDict = undefined;
+                                    }
+                                });
+                                console.log("pushing items");
+                                items.push({
+                                    layer: searchProps.caption,
+                                    displayName: searchProps.displayName,
+                                    propertyName: searchProps.propertyName,
+                                    hits: features
+                                });
+                                console.log("length items", items.length, items);
+                            }
+                            resolve();
+                        }
+                    });
+
+                }));
+            }
+        });
+        return promises;
+    },
+
+    firstStage: function(done){
+        var sources = this.getSources();
+        var promises = [];
+        var value = this.get('value');
+        var items = [];
+
+        sources.forEach(source => {
+            var searchProps = {
+                url: (HAJK2.searchProxy || '') + source.url,
+                caption: source.caption,
+                infobox: source.infobox,
+                aliasDict: source.aliasDict,
+                featureType: source.layers[0].split(':')[1],
+                propertyName: source.searchFields.join(','),
+                displayName: source.displayFields ? source.displayFields : (source.searchFields[0] || 'Sökträff'),
+                srsName: this.get('map').getView().getProjection().getCode(),
+                outputFormat: source.outputFormat,
+                geometryField: source.geometryField
+            };
+
+            promises.push(new Promise((resolve, reject) => {
+                this.doWFSSearch({
+                    value: value,
+                    url: searchProps.url,
+                    featureType: searchProps.featureType,
+                    propertyName: searchProps.propertyName,
+                    srsName: searchProps.srsName,
+                    outputFormat: searchProps.outputFormat,
+                    geometryField: searchProps.geometryField,
+                    enableFilter: true,
+                    exaktMatching: this.get("exaktMatching"),
+                    done: features => {
+                        console.log("features", features.length, features);
+                        var keys = [];
+                        if (features.length > 0) {
+                            features.forEach(feature => {
+                                keys.push(feature.get("nyckel"));
+                            });
+                        }
+
+                        var childPromises = this.findWithSameNyckel(keys, items);
+                        Promise.all(childPromises).then(() => {
+                            console.log("all children finished");
+                            resolve();
+                        });
+                    }
+                });
+            }));
+        });
+
+        Promise.all(promises).then(() => {
+            console.log("length of items again", items.length, items);
+            items.forEach(function (item) {
+                item.hits = arraySort({
+                    array: item.hits,
+                    index: item.displayName
+                });
+            });
+            items = items.sort((a, b) => a.layer > b.layer ? 1 : -1
+            )
+            ;
+            this.set('items', items);
+
+            if (done) {
+                done({
+                    status: 'success',
+                    items: items
+                });
+            }
+        });
+
     },
 
     shouldRenderResult: function () {

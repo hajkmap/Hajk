@@ -192,8 +192,7 @@ var FirSearchView = {
         this.timer = setTimeout(() => {
             var loader = this.loading;
             this.props.model.abort();
-            // this.props.model.firstStage();
-            this.props.model.search(result => {
+            var done = result => {
                 if (result.status === "success") {
                     this.props.model.highlightResultLayer.getSource().clear();
                     this.props.model.firFeatureLayer.getSource().clear();
@@ -236,7 +235,14 @@ var FirSearchView = {
                     state.loading = true;
                 }
                 this.setState(state);
-            }, false);
+            };
+
+            console.log("filter", this.props.model.get("filter"));
+            if (this.props.model.get("filter") !== "Fastighet") { // TODO, check json
+                this.props.model.firstStage(done);
+            } else {
+                this.props.model.search(done, false);
+            }
         }, 200);
     },
 
@@ -261,7 +267,6 @@ var FirSearchView = {
      */
     setFilter: function (event) {
         this.props.model.set('filter', event.target.value);
-        this.search();
     },
 
     /**
@@ -303,11 +308,10 @@ var FirSearchView = {
             <div>
                 <p>
                     <span>Sök: </span>&nbsp;
-                    <select value={this.props.model.get('filter')} onChange={(e) => { this.setFilter(e); }}>
+                    <select value={this.props.model.get('filter')} onChange={(e) => { this.setFilter(e); this.forceUpdate(); }}>
                         {/*<option value='*'> -- Alla -- </option>*/}
                         {
                             (() => {
-                                console.log("sources", sources);
                                 return sources.map((wfslayer, i) => {
                                     return (
                                         <option key={i} value={wfslayer.caption}>
