@@ -4,6 +4,7 @@ import LoupeIcon from "@material-ui/icons/Loupe";
 import Button from "@material-ui/core/Button";
 import Tooltip from "@material-ui/core/Tooltip";
 import Snackbar from "@material-ui/core/Snackbar";
+import { createPortal } from "react-dom";
 
 const styles = theme => {
   return {
@@ -39,25 +40,31 @@ class SearchWithinButton extends React.Component {
                   });
                 }
               );
+              setTimeout(() => {
+                this.props.model.app.globalObserver.publish("hideSearchPanel");
+              }, 0);
             }}
           >
             <LoupeIcon />
             &nbsp; Markera i kartan
           </Button>
         </Tooltip>
-        <Snackbar
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          open={this.state.active ? true : false}
-          ContentProps={{
-            "aria-describedby": "message-id"
-          }}
-          message={
-            <span id="message-id">
-              Tryck på den plats i kartan där du vill söka. Dra därefter ut en
-              radie för att välja storlek på sökområde.
-            </span>
-          }
-        />
+        {createPortal(
+          <Snackbar
+            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            open={this.state.active ? true : false}
+            ContentProps={{
+              "aria-describedby": "message-id"
+            }}
+            message={
+              <span id="message-id">
+                Tryck på den plats i kartan där du vill söka. Dra därefter ut en
+                radie för att välja storlek på sökområde.
+              </span>
+            }
+          />,
+          document.getElementById("map-overlay")
+        )}
       </>
     );
   }

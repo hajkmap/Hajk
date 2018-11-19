@@ -7,12 +7,14 @@ import Typography from "@material-ui/core/Typography";
 import AppBar from "@material-ui/core/AppBar";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
+import SearchIcon from "@material-ui/icons/Search";
 import { Toolbar as MUIToolbar } from "@material-ui/core";
 import { SnackbarProvider, withSnackbar } from "notistack";
 
 import Toolbar from "./Toolbar.js";
 import Popup from "./Popup.js";
 import MapSwitcher from "./MapSwitcher";
+import Panel from "./Panel";
 
 import classNames from "classnames";
 
@@ -32,6 +34,11 @@ const styles = theme => {
       right: 0,
       [theme.breakpoints.down("xs")]: {
         top: "56px"
+      }
+    },
+    toolbarRoot: {
+      [theme.breakpoints.down("xs")]: {
+        justifyContent: "space-between"
       }
     },
     toolbar: {
@@ -88,6 +95,10 @@ const styles = theme => {
         flexDirection: "column"
       }
     },
+    overlayVisible: {
+      zIndex: 1,
+      background: "white"
+    },
     widgets: {
       position: "absolute",
       zIndex: theme.zIndex.drawer - 2,
@@ -138,6 +149,31 @@ const styles = theme => {
     },
     visible: {
       display: "block"
+    },
+    searchOverlay: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      bottom: 0,
+      right: 0,
+      zIndex: 2000,
+      background: "white"
+    },
+    searchIcon: {
+      [theme.breakpoints.up("xs")]: {
+        display: "none"
+      },
+      [theme.breakpoints.down("xs")]: {
+        display: "block"
+      }
+    },
+    mobileSearchPanel: {
+      [theme.breakpoints.down("xs")]: {
+        display: "block !important"
+      },
+      [theme.breakpoints.up("xs")]: {
+        display: "none"
+      }
     }
   };
 };
@@ -167,6 +203,12 @@ class App extends Component {
     this.globalObserver.subscribe("panelOpened", () => {
       this.setState({
         widgetsVisible: false
+      });
+    });
+
+    this.globalObserver.subscribe("hideSearchPanel", () => {
+      this.setState({
+        searchVisible: false
       });
     });
 
@@ -224,7 +266,7 @@ class App extends Component {
     }
   };
 
-  renderSearchPlugin() {
+  renderSearchPlugin(mobile) {
     var searchPlugin = this.appModel.getSearchPlugin();
     if (searchPlugin) {
       return (
@@ -232,6 +274,7 @@ class App extends Component {
           map={searchPlugin.map}
           app={searchPlugin.app}
           options={searchPlugin.options}
+          mobile={mobile}
         />
       );
     } else {
@@ -283,7 +326,7 @@ class App extends Component {
       >
         <>
           <AppBar position="absolute" className={classes.appBar}>
-            <MUIToolbar>
+            <MUIToolbar className={classes.toolbarRoot}>
               <span className={classes.logo}>
                 <img
                   src="https://www.uddevalla.se/images/18.115b2371518ed66b79ad45/1450096919434/Uddevalla-Kommun.png"
@@ -294,6 +337,15 @@ class App extends Component {
               <span className={classes.title}>
                 <Typography variant="h6">ÖVERSIKTSPLAN</Typography>
               </span>
+              <SearchIcon
+                className={classes.searchIcon}
+                onClick={() => {
+                  this.setState({
+                    searchVisible: !this.state.searchVisible,
+                    widgetsVisible: false
+                  });
+                }}
+              />
               <Toolbar
                 tools={this.appModel.getToolbarPlugins()}
                 parent={this}
@@ -312,6 +364,20 @@ class App extends Component {
               }}
             />
             <div className={classes.center}>{this.renderSearchPlugin()}</div>
+            <div className={classes.mobileSearchPanel}>
+              <Panel
+                title={"Sök i kartan"}
+                onClose={() => {
+                  this.setState({
+                    searchVisible: false
+                  });
+                }}
+                position="left"
+                open={this.state.searchVisible}
+              >
+                {this.renderSearchPlugin("mobile")}
+              </Panel>
+            </div>
             <div id="map-overlay" className={overlayClasses}>
               <div className={widgetClassesLeft}>
                 {this.renderWidgets("left")}

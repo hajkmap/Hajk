@@ -21,18 +21,18 @@ const styles = theme => {
       top: "150px",
       right: "10px",
       [theme.breakpoints.down("xs")]: {
-        top: "56px",
-        left: 0,
-        right: 0,
-        bottom: 0,
-        position: "fixed",
+        position: "static",
+        maxHeight: "inherit",
         border: "none",
-        maxHeight: "inherit"
+        padding: 0
       }
     },
     searchResultContainer: {
       maxHeight: "500px",
-      overflow: "auto"
+      overflow: "auto",
+      [theme.breakpoints.down("xs")]: {
+        maxHeight: "inherit"
+      }
     },
     searchResultTopBar: {
       display: "flex",

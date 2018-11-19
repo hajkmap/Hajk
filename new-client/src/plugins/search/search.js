@@ -17,7 +17,8 @@ const styles = theme => {
         top: "0",
         width: "100%",
         position: "relative",
-        marginLeft: theme.spacing.unit
+        marginLeft: theme.spacing.unit,
+        display: "inline"
       }
     }
   };
@@ -38,7 +39,9 @@ class Search extends Component {
     this.searchModel = new SearchModel(
       props.options,
       props.map,
-      this.localObserver
+      props.app,
+      this.localObserver,
+      this.props.mobile
     );
   }
 

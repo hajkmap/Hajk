@@ -189,7 +189,7 @@ class SearchModel {
     }
   };
 
-  constructor(settings, map, observer) {
+  constructor(settings, map, app, observer, mobile) {
     this.options = settings;
     this.olMap = map;
     this.wfsParser = new WFS();
@@ -204,6 +204,8 @@ class SearchModel {
     this.olMap.addLayer(this.vectorLayer);
     this.olMap.addLayer(this.drawLayer);
     this.observer = observer;
+    this.app = app;
+    this.mobile = mobile;
   }
 
   hideVisibleLayers() {

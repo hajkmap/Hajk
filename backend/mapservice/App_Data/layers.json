@@ -169,7 +169,7 @@
     {
       "id": "20",
       "caption": "Fastighet",
-      "url": "http://giscloud.se/geoserver/wfs",
+      "url": "http://demo.giscloud.se/geoserver/wfs",
       "layers": [
         "wsp:fastighet"
       ],

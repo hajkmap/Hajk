@@ -44,6 +44,9 @@ const styles = theme => ({
   },
   active: {
     background: theme.palette.secondary.main
+  },
+  disableTransition: {
+    transition: "none"
   }
 });
 
@@ -52,23 +55,33 @@ class SearchResultGroup extends Component {
     selfExpanded: false
   };
 
+  constructor(props) {
+    super(props);
+  }
+
   highlight = feature => e => {
     var olFeature = new GeoJSON().readFeatures(feature)[0];
     this.props.model.highlight(olFeature);
-    this.props.parent.hide();
+    if (!this.props.model.mobile) {
+      this.props.parent.hide();
+    }
     this.setState({
       activeFeature: feature
     });
     this.props.model.clearLayerList();
+    this.props.model.app.globalObserver.publish("hideSearchPanel");
   };
 
   zoomTo = feature => e => {
     var olFeature = new GeoJSON().readFeatures(feature)[0];
     this.props.model.highlightFeature(olFeature);
-    this.props.parent.hide();
+    if (!this.props.model.mobile) {
+      this.props.parent.hide();
+    }
     this.setState({
       activeFeature: feature
     });
+    this.props.model.app.globalObserver.publish("hideSearchPanel");
   };
 
   clear = e => {
@@ -113,33 +126,45 @@ class SearchResultGroup extends Component {
     }
 
     return (
-      <ExpansionPanel expanded={expanded}>
-        <ExpansionPanelSummary
-          onClick={this.toggle}
-          expandIcon={<ExpandMoreIcon />}
+      <div ref="panelElement">
+        <ExpansionPanel
+          className={classes.disableTransition}
+          expanded={expanded}
+          onChange={e => {
+            setTimeout(() => {
+              this.refs.panelElement.scrollIntoView();
+            }, 100);
+          }}
         >
-          <Typography className={classes.heading}>
-            {featureType.source.caption}
-            &nbsp;
-            <span className={classes.secondaryHeading}>
-              ({featureType.features.length})
-            </span>
-          </Typography>
-        </ExpansionPanelSummary>
-        <ExpansionPanelDetails className={classes.details}>
-          <div className={classes.resultGroup}>
+          <ExpansionPanelSummary
+            className={classes.disableTransition}
+            ref={this.panelHeaderElement}
+            onClick={this.toggle}
+            expandIcon={<ExpandMoreIcon />}
+          >
+            <Typography className={classes.heading}>
+              {featureType.source.caption}
+              &nbsp;
+              <span className={classes.secondaryHeading}>
+                ({featureType.features.length})
+              </span>
+            </Typography>
+          </ExpansionPanelSummary>
+          <ExpansionPanelDetails className={classes.details}>
             <div className={classes.resultGroup}>
-              {featureType.features.map((feature, i) =>
-                this.renderItem(
-                  featureType.features[i],
-                  featureType.source.displayFields[0],
-                  i
-                )
-              )}
+              <div className={classes.resultGroup}>
+                {featureType.features.map((feature, i) =>
+                  this.renderItem(
+                    featureType.features[i],
+                    featureType.source.displayFields[0],
+                    i
+                  )
+                )}
+              </div>
             </div>
-          </div>
-        </ExpansionPanelDetails>
-      </ExpansionPanel>
+          </ExpansionPanelDetails>
+        </ExpansionPanel>
+      </div>
     );
   }
 }
