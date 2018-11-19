@@ -7,12 +7,14 @@ import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Button from "@material-ui/core/Button";
+import classNames from "classnames";
 
 const styles = theme => ({
   item: {
     userSelect: "none",
     cursor: "pointer",
-    boxShadow: "0px 1px 2px 1px rgba(0, 0, 0, 0.22)",
+    boxShadow:
+      "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
     borderRadius: "2px",
     padding: "6px",
     marginBottom: "10px"
@@ -36,6 +38,12 @@ const styles = theme => ({
   },
   secondaryHeading: {
     fontSize: "10pt"
+  },
+  details: {
+    padding: "8px 12px 12px"
+  },
+  active: {
+    background: theme.palette.secondary.main
   }
 });
 
@@ -48,12 +56,19 @@ class SearchResultGroup extends Component {
     var olFeature = new GeoJSON().readFeatures(feature)[0];
     this.props.model.highlight(olFeature);
     this.props.parent.hide();
+    this.setState({
+      activeFeature: feature
+    });
+    this.props.model.clearLayerList();
   };
 
   zoomTo = feature => e => {
     var olFeature = new GeoJSON().readFeatures(feature)[0];
     this.props.model.highlightFeature(olFeature);
     this.props.parent.hide();
+    this.setState({
+      activeFeature: feature
+    });
   };
 
   clear = e => {
@@ -63,10 +78,15 @@ class SearchResultGroup extends Component {
 
   componentWillMount() {}
 
-  createItem(feature, displayField, i) {
+  renderItem(feature, displayField, i) {
     const { classes } = this.props;
+    const active = this.state.activeFeature === feature;
     return (
-      <div key={i} className={classes.item} onClick={this.zoomTo(feature)}>
+      <div
+        key={i}
+        className={classNames(classes.item, active ? classes.active : null)}
+        onClick={this.zoomTo(feature)}
+      >
         {feature.properties[displayField]}
         <div>
           <Button color="primary" onClick={this.highlight(feature)}>
@@ -110,7 +130,7 @@ class SearchResultGroup extends Component {
           <div className={classes.resultGroup}>
             <div className={classes.resultGroup}>
               {featureType.features.map((feature, i) =>
-                this.createItem(
+                this.renderItem(
                   featureType.features[i],
                   featureType.source.displayFields[0],
                   i

@@ -3,6 +3,7 @@ import { withStyles } from "@material-ui/core/styles";
 import LoupeIcon from "@material-ui/icons/Loupe";
 import Button from "@material-ui/core/Button";
 import Tooltip from "@material-ui/core/Tooltip";
+import Snackbar from "@material-ui/core/Snackbar";
 
 const styles = theme => {
   return {
@@ -20,29 +21,44 @@ class SearchWithinButton extends React.Component {
   render() {
     const { classes } = this.props;
     return (
-      <Tooltip title="Visa påverkan inom">
-        <Button
-          className={classes.button}
-          variant={this.state.active ? "raised" : "text"}
-          onClick={() => {
-            this.setState(
-              {
-                active: !this.state.active
-              },
-              () => {
-                this.props.model.toggleDraw(this.state.active, () => {
-                  this.setState({
-                    active: false
+      <>
+        <Tooltip title="Visa påverkan inom">
+          <Button
+            className={classes.button}
+            variant={this.state.active ? "contained" : "text"}
+            onClick={() => {
+              this.setState(
+                {
+                  active: !this.state.active
+                },
+                () => {
+                  this.props.model.toggleDraw(this.state.active, () => {
+                    this.setState({
+                      active: false
+                    });
                   });
-                });
-              }
-            );
+                }
+              );
+            }}
+          >
+            <LoupeIcon />
+            &nbsp; Markera i kartan
+          </Button>
+        </Tooltip>
+        <Snackbar
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          open={this.state.active ? true : false}
+          ContentProps={{
+            "aria-describedby": "message-id"
           }}
-        >
-          <LoupeIcon />
-          &nbsp; Markera i kartan
-        </Button>
-      </Tooltip>
+          message={
+            <span id="message-id">
+              Tryck på den plats i kartan där du vill söka. Dra därefter ut en
+              radie för att välja storlek på sökområde.
+            </span>
+          }
+        />
+      </>
     );
   }
 }

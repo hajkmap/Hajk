@@ -1,9 +1,10 @@
-import React, { Component } from "react";
+import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import SearchResultGroup from "./SearchResultGroup.js";
 import IconButton from "@material-ui/core/IconButton";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
+import classNames from "classnames";
 
 const styles = theme => {
   return {
@@ -13,13 +14,12 @@ const styles = theme => {
       color: "black",
       width: "100%",
       maxWidth: "350px",
-      maxHeight: "500px",
       overflow: "auto",
-      padding: "15px",
+      padding: "10px",
       border: "1px solid #ccc",
       borderTop: "none",
-      top: "69px",
-      right: 0,
+      top: "150px",
+      right: "10px",
       [theme.breakpoints.down("xs")]: {
         top: "56px",
         left: 0,
@@ -29,6 +29,10 @@ const styles = theme => {
         border: "none",
         maxHeight: "inherit"
       }
+    },
+    searchResultContainer: {
+      maxHeight: "500px",
+      overflow: "auto"
     },
     searchResultTopBar: {
       display: "flex",
@@ -45,7 +49,7 @@ const styles = theme => {
   };
 };
 
-class SearchResultList extends Component {
+class SearchResultList extends React.PureComponent {
   state = {
     visible: true,
     minimized: false
@@ -56,18 +60,6 @@ class SearchResultList extends Component {
       minimized: true
     });
   }
-
-  // Seems not used as it was already inactivate by comment.
-  // If funcionality is required, consider replacing with current
-  // lifecycle methods, see https://github.com/hajkmap/Hajk/issues/175
-  // UNSAFE_componentWillReceiveProps(e) {
-  //   // this.setState({
-  //   //   visible: this.props.visible
-  //   // });
-  //   // this.setState({
-  //   //   minimized: this.props.minimized
-  //   // });
-  // }
 
   toggle() {
     this.setState({
@@ -133,7 +125,10 @@ class SearchResultList extends Component {
             </div>
           </div>
           <div
-            className={this.state.minimized ? classes.hidden : classes.visible}
+            className={classNames(
+              classes.searchResultContainer,
+              this.state.minimized ? classes.hidden : classes.visible
+            )}
           >
             {result.map((featureType, i) => {
               if (featureType.features.length === 0) return null;

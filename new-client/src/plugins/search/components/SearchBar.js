@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import Input from "@material-ui/core/Input";
 import { withStyles } from "@material-ui/core/styles";
 import { fade } from "@material-ui/core/styles/colorManipulator";
@@ -8,6 +8,7 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 const styles = theme => ({
   search: {
     borderRadius: theme.shape.borderRadius,
+    border: "1px solid " + theme.palette.secondary.main,
     backgroundColor: fade(theme.palette.common.white, 0.15),
     "&:hover": {
       backgroundColor: fade(theme.palette.common.white, 0.25)
@@ -42,13 +43,22 @@ const styles = theme => ({
   }
 });
 
-class SearchBar extends Component {
+class SearchBar extends React.PureComponent {
   state = {
     value: ""
   };
 
+  constructor(props) {
+    super();
+    props.model.observer.subscribe("clearInput", () => {
+      this.setState({
+        value: ""
+      });
+    });
+  }
+
   render() {
-    const { classes, onChange, onComplete } = this.props;
+    const { classes, onChange, onComplete, value } = this.props;
     return (
       <div className={classes.search}>
         <Input
@@ -61,7 +71,7 @@ class SearchBar extends Component {
               value: e.target.value
             });
           }}
-          value={this.state.value}
+          value={value === "" ? value : this.state.value}
           placeholder="Sök..."
           disableUnderline
           classes={{

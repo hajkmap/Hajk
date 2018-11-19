@@ -16,13 +16,15 @@ const styles = theme => ({
     [theme.breakpoints.up("xs")]: {
       borderRadius: "4px",
       overflow: "hidden",
+      width: "269px",
       boxShadow:
         "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)"
     },
     [theme.breakpoints.down("xs")]: {
       left: 0,
       bottom: 0,
-      right: 0
+      right: 0,
+      width: "auto"
     }
   },
   breadCrumbsHeader: {

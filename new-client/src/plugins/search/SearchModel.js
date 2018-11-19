@@ -7,6 +7,28 @@ import GeoJSON from "ol/format/GeoJSON";
 import { fromCircle } from "ol/geom/Polygon";
 import Draw from "ol/interaction/Draw.js";
 import { arraySort } from "./../../utils/ArraySort.js";
+import { Stroke, Style, Icon } from "ol/style.js";
+
+var svg = `
+  <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="40px" height="40px" viewBox="0 0 40 40" enable-background="new 0 0 40 40" xml:space="preserve">
+  <path fill="#156BB1" d="M22.906,10.438c0,4.367-6.281,14.312-7.906,17.031c-1.719-2.75-7.906-12.665-7.906-17.031S10.634,2.531,15,2.531S22.906,6.071,22.906,10.438z"/>
+  <circle fill="#FFFFFF" cx="15" cy="10.677" r="3.291"/></svg>
+`;
+var svgImage = new Image();
+svgImage.src = "data:image/svg+xml," + escape(svg);
+
+var style = new Style({
+  stroke: new Stroke({
+    color: [0, 0, 0],
+    width: 2
+  }),
+  image: new Icon({
+    img: svgImage,
+    imgSize: [30, 30],
+    anchor: [0.5, 1],
+    scale: 1.5
+  })
+});
 
 class SearchModel {
   layerList = [];
@@ -131,7 +153,6 @@ class SearchModel {
 
   clear = () => {
     this.clearHighlight();
-    this.hideVisibleLayers();
     this.drawSource.clear();
   };
 
@@ -151,6 +172,7 @@ class SearchModel {
           this.olMap.clicklock = false;
         }, 1000);
         this.searchWithinArea(e.feature, layerIds => {
+          this.clearLayerList();
           this.layerList = layerIds.reduce(this.getLayerAsSource, []);
           this.layerList.forEach(layer => {
             layer.setVisible(true);
@@ -167,12 +189,13 @@ class SearchModel {
     }
   };
 
-  constructor(settings, map) {
+  constructor(settings, map, observer) {
     this.options = settings;
     this.olMap = map;
     this.wfsParser = new WFS();
     this.vectorLayer = new VectorLayer({
-      source: new VectorSource({})
+      source: new VectorSource({}),
+      style: () => style
     });
     this.drawSource = new VectorSource({ wrapX: false });
     this.drawLayer = new VectorLayer({
@@ -180,6 +203,7 @@ class SearchModel {
     });
     this.olMap.addLayer(this.vectorLayer);
     this.olMap.addLayer(this.drawLayer);
+    this.observer = observer;
   }
 
   hideVisibleLayers() {
@@ -198,6 +222,7 @@ class SearchModel {
     this.layerList.forEach(layer => {
       layer.setVisible(false);
     });
+    this.hideVisibleLayers();
   }
 
   clearHighlight() {
