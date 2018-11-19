@@ -24,9 +24,10 @@ const styles = theme => {
 };
 
 class Dummy extends React.PureComponent {
-  // In native ES6 class we can set state like this, outside the constructor
+  // In native ES6 class we can set state like this, outside the constructor.
+  // Important, part of API: Make sure to respect panel visibility set in config.
   state = {
-    panelOpen: false
+    panelOpen: this.props.options.visibleAtStart
   };
 
   // Called when plugin's <ListItem> or widget <Button> is clicked
@@ -80,13 +81,6 @@ class Dummy extends React.PureComponent {
   /* shouldComponentUpdate(nextProps, nextState) {
     return this.state.panelOpen !== nextState.panelOpen;
   } */
-
-  // Important, part of API. Make sure to respect panel visibility set in config.
-  componentDidMount() {
-    this.setState({
-      panelOpen: this.props.options.visibleAtStart
-    });
-  }
 
   // Not part of API but rather convention. If plugin has a panel, its render method should be called renderPanel().
   renderPanel() {

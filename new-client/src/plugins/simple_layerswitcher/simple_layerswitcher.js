@@ -55,7 +55,7 @@ const styles = theme => {
 
 class SimpleLayerSwitcher extends React.PureComponent {
   state = {
-    panelOpen: false
+    panelOpen: this.props.options.visibleAtStart
   };
 
   onClick = e => {
@@ -83,12 +83,6 @@ class SimpleLayerSwitcher extends React.PureComponent {
       observer: this.observer
     });
     this.app.registerPanel(this);
-  }
-
-  componentDidMount() {
-    this.setState({
-      panelOpen: this.props.options.visibleAtStart
-    });
   }
 
   renderPanel() {

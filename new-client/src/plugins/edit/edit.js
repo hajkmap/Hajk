@@ -16,7 +16,7 @@ const styles = theme => {
 
 class Edit extends Component {
   state = {
-    panelOpen: false
+    panelOpen: this.props.options.visibleAtStart
   };
 
   onClick = e => {
@@ -50,12 +50,6 @@ class Edit extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     return this.state.panelOpen !== nextState.panelOpen;
-  }
-
-  componentDidMount() {
-    this.setState({
-      panelOpen: this.props.options.visibleAtStart
-    });
   }
 
   renderPanel() {
