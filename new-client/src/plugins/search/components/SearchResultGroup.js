@@ -55,10 +55,6 @@ class SearchResultGroup extends Component {
     selfExpanded: false
   };
 
-  constructor(props) {
-    super(props);
-  }
-
   highlight = feature => e => {
     var olFeature = new GeoJSON().readFeatures(feature)[0];
     this.props.model.highlight(olFeature);

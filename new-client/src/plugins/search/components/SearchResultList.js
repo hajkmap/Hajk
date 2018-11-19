@@ -30,6 +30,9 @@ const styles = theme => {
     searchResultContainer: {
       maxHeight: "500px",
       overflow: "auto",
+      [theme.breakpoints.down("md")]: {
+        maxHeight: "450px"
+      },
       [theme.breakpoints.down("xs")]: {
         maxHeight: "inherit"
       }

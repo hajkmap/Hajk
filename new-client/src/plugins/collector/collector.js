@@ -136,7 +136,9 @@ class Collector extends Component {
           </div>
           <div>
             <Typography className={classes.title}>Tyck till</Typography>
-            <Typography className={classes.text}>Säg vad du tycker</Typography>
+            <Typography className={classes.text}>
+              Vi vill veta vad du tycker
+            </Typography>
           </div>
         </div>
         {this.renderPanel()}

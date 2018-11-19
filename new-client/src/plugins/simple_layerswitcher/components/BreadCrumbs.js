@@ -39,9 +39,12 @@ const styles = theme => ({
     marginRight: "15px"
   },
   breadCrumbsContainer: {
-    maxHeight: "500px",
+    maxHeight: "300px",
     overflow: "auto",
     margin: "10px",
+    [theme.breakpoints.down("md")]: {
+      maxHeight: "236px"
+    },
     [theme.breakpoints.down("xs")]: {
       maxHeight: "150px"
     }

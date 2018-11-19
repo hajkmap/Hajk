@@ -61,6 +61,9 @@ const styles = theme => {
       border: "1px solid " + theme.palette.secondary.main,
       [theme.breakpoints.down("xs")]: {
         display: "none"
+      },
+      [theme.breakpoints.down("md")]: {
+        marginLeft: "280px"
       }
     },
     appBar: {
@@ -126,6 +129,9 @@ const styles = theme => {
     widgetsRight: {
       right: "10px",
       top: "110px",
+      [theme.breakpoints.down("md")]: {
+        top: "147px"
+      },
       [theme.breakpoints.down("xs")]: {
         right: "inherit",
         left: "inherit",
