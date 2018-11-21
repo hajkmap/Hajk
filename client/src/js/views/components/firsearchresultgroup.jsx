@@ -127,7 +127,9 @@ FirSearchResultGroup = {
                 element.addClass('selected');
             }
             if(!clickedSame) {
+                console.log("not same clicked");
                 this.props.model.focus(item, this.props.isBar == 'yes');
+                console.log("after not same clicked");
             }
         }
 
@@ -143,7 +145,7 @@ FirSearchResultGroup = {
 
     // plus minus button in firsearchresultgroup
     plusLayer: function (layername,e) {
-        console.log("/////plusLayer");
+        console.log("+++ plusLayer");
         // e.stopPropagation();
         // e.nativeEvent.stopImmediatePropagation();
 
@@ -167,6 +169,7 @@ FirSearchResultGroup = {
     },
 
     plusLayerActive: function(event){
+        console.log("+++ plusLayerActive")
         var map = this.props.model.get("map");
 
         //event.stopPropagation();
@@ -354,7 +357,7 @@ FirSearchResultGroup = {
         // check if tool is active
         // add the clicked element to results
         var map = this.props.model.get("map");
-        console.log("clickedonmap in firSearchResultGroup");
+        console.log("+++ clickedonmap in firSearchResultGroup");
         var wmsLayers = this.props.model.get("layerCollection").filter((layer) => {
                 return (layer.get('type') === 'wms' || layer.get('type') === 'arcgis') &&
                     layer.get('queryable') &&
@@ -370,7 +373,7 @@ FirSearchResultGroup = {
             this.props.model.layerOrder[layer.get('name')] = i;
         });
 
-        console.log("wmslayers", wmsLayers);
+        console.log("+++ wmslayers", wmsLayers);
         wmsLayers.forEach((wmsLayer, index) => {
             wmsLayer.index = index;
             promises.push(new Promise((resolve, reject) => {
@@ -406,14 +409,11 @@ FirSearchResultGroup = {
                                     }
 
                                     if (!found) {
-                                        console.log("Adding new feature");
-                                        console.log("-----findWithSameName: feature.get(text)", feature.get('text'));
-                                        console.log("-----fndWithSameName: wmsLayer", wmsLayer);
-                                        names.push(feature.get("text"));
+                                        names.push(feature.get("nyckel"));
                                     }
                                 }
                             );
-                            var sameNamePromises = this.props.model.findWithSameName(names, wmsLayer);
+                            var sameNamePromises = this.props.model.findWithSameNames(names, wmsLayer);
 
                             Promise.all(sameNamePromises).then(() => {
                                 this.forceUpdate();
@@ -427,7 +427,7 @@ FirSearchResultGroup = {
             }));
         });
 
-        console.log("/////this.props.model.get(items)", this.props.model.get("items"));
+        console.log("+++ this.props.model.get(items)", this.props.model.get("items"));
         Promise.all(promises).then(() => {
             this.props.model.set('loadFinished', true);
             //this.forceUpdate();

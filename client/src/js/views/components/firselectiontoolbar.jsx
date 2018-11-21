@@ -29,7 +29,6 @@ var FirSelectionPanelView = {
                 activeTool: this.props.model.get('activeTool')
             });
         });
-
     },
 
     componentWillUnmount () {
@@ -50,16 +49,10 @@ var FirSelectionPanelView = {
 
         var map = this.props.model.get("map");
         map.un('singleclick', this.firRemoveSelected);
-        //map.un("singleclick", this.activateTool(name));
-        //map.removeInteraction(this.activateTool(name));
-    },
-
-    finishedDrawing: function() {
-        this.props.model.setActiveTool(undefined);
-        // this.props.model.get("drawLayer").getSource().on("addfeature", this.bufferSearchingInput);
     },
 
     deleteMarker: function(){
+        this.props.model.setActiveTool(undefined);
         var map = this.props.model.get("map");
         map.on('singleclick', this.firRemoveSelected);
 

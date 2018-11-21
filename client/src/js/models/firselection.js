@@ -57,8 +57,6 @@ var FirSelectionModel = {
             style: (feature) => this.getScetchStyle(feature)
         }));
 
-        //this.drawLayer.setZIndex(100);
-
         this.set('highlightLayer', new HighlightLayer({
             id: 'selection-highligt',
             anchor: this.get('anchor'),
@@ -89,7 +87,10 @@ var FirSelectionModel = {
             source: this.get('source'),
             style: this.getScetchStyle(),
             type: 'Polygon',
-            geometryName: "Polygon"
+            geometryName: "Polygon",
+            condition : function(e){ // this will ensure that it is possible to click out drawings even with ctrl pressed
+                return true;
+            }
         }));
 
         this.get('polygonSelection').on("drawend", this.deactiveTool.bind(this));
@@ -99,7 +100,10 @@ var FirSelectionModel = {
             style: this.getScetchStyle(),
             type: 'Circle',
             geometryName: "Box",
-            geometryFunction: ol.interaction.Draw.createBox()
+            geometryFunction: ol.interaction.Draw.createBox(),
+            condition : function(e){ // this will ensure that it is possible to click out drawings even with ctrl pressed
+                return true;
+            }
         }));
 
         this.get('squareSelection').on("drawend", this.deactiveTool.bind(this));
@@ -108,7 +112,10 @@ var FirSelectionModel = {
             source: this.get('source'),
             style: this.getScetchStyle(),
             type: 'LineString',
-            geometryName: "LineString"
+            geometryName: "LineString",
+            condition : function(e){ // this will ensure that it is possible to click out drawings even with ctrl pressed
+                return true;
+            }
         }));
 
         this.get('lineSelection').on("drawend", this.deactiveTool.bind(this));
@@ -117,20 +124,22 @@ var FirSelectionModel = {
             source: this.get('source'),
             style: this.getScetchStyle(),
             type: 'Point',
-            geometryName: "Point"
+            geometryName: "Point",
+            condition : function(e){ // this will ensure that it is possible to click out drawings even with ctrl pressed
+                return true;
+            }
         }));
 
         this.get('pointSelection').on("drawend", this.deactiveTool.bind(this));
     },
 
     deactiveTool: function(event){
-        console.log("deactiateTool");
-        //this.setActiveTool(undefined);
         if(!ctrlIsDown) {
             setTimeout(a => {
-                console.log("here");
                 this.setActiveTool(undefined);
-                console.log("here2");
+                if(!$('#slackaBufferSokomrade').is(":checked")) {
+                    $('#slackaBufferSokomrade').click();
+                }
             }, 50);
         }
     },
@@ -210,6 +219,7 @@ var FirSelectionModel = {
         ;
 
         this.get('olMap').forEachFeatureAtPixel(event.pixel, (feature, layer) => {
+            console.log("--- onMapSingleClick: dawLayer?");
             if (layer && layer.get('name')) {
                 if (
                     layer.get('name') !== 'preview-layer' &&
@@ -360,8 +370,8 @@ var FirSelectionModel = {
         this.bufferSearchingInput();
         allFeatures = allFeatures.concat(this.get('highlightLayer').getFeatures(), this.get('source').getFeatures(), this.get("firBufferLayer").getSource().getFeatures());
 
-        //return allFeatures;
-        return allFeatures.concat(this.get('highlightLayer').getFeatures(), this.get('source').getFeatures(), this.get("firBufferLayer").getSource().getFeatures());
+        return allFeatures;
+        //return allFeatures.concat(this.get('highlightLayer').getFeatures(), this.get('source').getFeatures(), this.get("firBufferLayer").getSource().getFeatures());
     },
 
     abort: function () {

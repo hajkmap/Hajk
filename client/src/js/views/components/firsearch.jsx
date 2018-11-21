@@ -183,6 +183,10 @@ var FirSearchView = {
      * @param {object} event
      */
     search: function (event) {
+        var sources = this.props.model.get('sources');
+        console.log("--- search: sources", sources);
+        console.log("--- search: realEstateLayer's id", this.props.model.get("realEstateLayer").id);
+
         this.props.model.set('searchTriggered', true);
         this.setState({
             loading: true
@@ -205,12 +209,12 @@ var FirSearchView = {
                         var groupName = item.layer;
                         var names = [];
                         item.hits.map(hit => {
-                            names.push(hit.get("text"));
+                            names.push(hit.get("nyckel"));
                             this.props.model.firFeatureLayer.getSource().addFeature(hit);
                         });
 
                         console.log("samename",names);
-                        var tmpPromises = this.props.model.findWithSameName(names, wmsLayerForSameName[0]);
+                        var tmpPromises = this.props.model.findWithSameNames(names, wmsLayerForSameName[0]);
                         tmpPromises.forEach(promise => sameNamePromises.push(promise));
                     });
 
@@ -238,7 +242,8 @@ var FirSearchView = {
             };
 
             console.log("filter", this.props.model.get("filter"));
-            if (this.props.model.get("filter") !== "Fastighet") { // TODO, check json
+            console.log("--- filter: layerCaption", this.props.model.get("realEstateLayer").layerCaption);
+            if (this.props.model.get("filter") !== this.props.model.get("realEstateLayer").layerCaption) { // TODO, check json "Fastighet"
                 this.props.model.firstStage(done);
             } else {
                 this.props.model.search(done, false);
@@ -442,7 +447,7 @@ var FirSearchView = {
         var instructionTxt;
         if (typeof this.props.model.get("instructionSkapaFastighetsforteckning") !== 'undefined' && this.props.model.get("instructionSkapaFastighetsforteckning") !== null && this.props.model.get("instructionSkapaFastighetsforteckning").length > 0) {
             instructionBtn = (
-                <button onClick={() => this.openInstruction("skapaFastighetsforteckning")} className='btn-info' id='instructionBox' ><img src={this.props.model.get("infoKnappLogo")} /></button>
+                <button onClick={() => this.openInstruction("skapaFastighetsforteckning")} className='btn-info-fir' id='instructionBox' ><img src={this.props.model.get("infoKnappLogo")} style={{height: '75%', width:'75%'}} /></button>
             );
             instructionTxt = (
                 <div className='panel-body-instruction instructionsText' id='instructionsTextFirskapaFastighetsforteckning' dangerouslySetInnerHTML={{__html: this.props.model.get("instructionSkapaFastighetsforteckning")}} />
@@ -595,7 +600,7 @@ var FirSearchView = {
         console.log("--- instructionHittaGrannar", this.props.model.get("instructionHittaGrannar"));
         if (typeof this.props.model.get("instructionHittaGrannar") !== 'undefined' && this.props.model.get("instructionHittaGrannar") !== null && this.props.model.get("instructionHittaGrannar").length > 0) {
             instructionBtn = (
-                <button onClick={() => this.openInstruction("hittaGrannar")} className='btn-info' id='instructionBox' ><img src={infologo} /></button>
+                <button onClick={() => this.openInstruction("hittaGrannar")} className='btn-info-fir' id='instructionBox' ><img src={this.props.model.get("infoKnappLogo")} style={{height: '30px', width:'30px'}} /></button>
             );
             instructionTxt = (
                 <div className='panel-body-instruction instructionsText' id='instructionsTextFirhittaGrannar' dangerouslySetInnerHTML={{__html: this.props.model.get("instructionHittaGrannar")}} />
@@ -780,7 +785,7 @@ var FirSearchView = {
         console.log("--- Instruction for Sökning", this.props);
         if (typeof this.props.model.get("instructionSokning") !== 'undefined' && this.props.model.get("instructionSokning") !== null && this.props.model.get("instructionSokning").length > 0) {
             instructionBtn = (
-                <button onClick={() => this.openInstruction("sokning")} className='btn-info' id='instructionBox' ><img src={infologo} /></button>
+                <button onClick={() => this.openInstruction("sokning")} className='btn-info-fir' id='instructionBox' ><img src={this.props.model.get("infoKnappLogo")} /></button>
             );
             instructionTxt = (
                 <div className='panel-body-instruction instructionsText' id='instructionsTextFirsokning' dangerouslySetInnerHTML={{__html: this.props.model.get("instructionSokning")}} />

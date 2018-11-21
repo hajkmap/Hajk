@@ -50,12 +50,13 @@ var FirModelProperties = {
     colorHighlight: "",//'rgba(0, 0, 255, 0.5)',
     colorHighlightStroke: "",//'rgba(0, 0, 0, 0.6)',
     colorHittaGrannarBuffer: "",//'rgba(50, 200, 200, 0.4)',
-    colorHittaGrannarBufferStroke: "",//'rgba(0, 0, 0, 0.2)',
+    colorHittaGrannarBufferStroke: "f",//'rgba(0, 0, 0, 0.2)',
     maxFeatures: "", //"1000",
     omradeField: "",
     label: "",
     showLabels: true,
-    infoKnappLogo: ""
+    infoKnappLogo: "",
+    realEstateLayer: ""
 };
 
 var FirModel = {
@@ -120,12 +121,44 @@ var FirModel = {
             source: new ol.source.Vector(),
             queryable: false,
             visible: true,
-            style: this.getHighlightStyle(),
+            //style: this.getHighlightStyle(),
             zIndex: 100
         });
 
         this.highlightResultLayer.getSource().on('addfeature', evt => {
-            evt.feature.setStyle(this.highlightResultLayer.getStyle());
+            //evt.feature.setStyle(this.highlightResultLayer.getStyle());
+
+
+            evt.feature.setStyle(
+                new ol.style.Style({
+                    fill: new ol.style.Fill({
+                        color: this.get("colorHighlight")
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: this.get("colorHighlightStroke"),
+                        width: 4
+                    }),
+                    image: new ol.style.Icon({
+                        anchor: this.get('anchor'),
+                        anchorXUnits: 'pixels',
+                        anchorYUnits: 'pixels',
+                        src: this.get('markerImg'),
+                        imgSize: this.get('imgSize')
+                    }),
+                    text: new ol.style.Text({
+                        font: '12px Calibri,sans-serif',
+                        fill: new ol.style.Fill({ color: '#000' }),
+                        stroke: new ol.style.Stroke({
+                            color: '#fff', width: 2
+                        }),
+                        text: this.get("showLabels") ? evt.feature.get(this.get("label")) : ""
+                    })
+                })
+            );//getStyle?
+
+
+
+
         });
 
         this.highlightResultLayer.getSource().on('removefeature', evt => {
@@ -212,9 +245,12 @@ var FirModel = {
                 var hitId = 0;
                 var group = 0;
                 var nyckelHighLight = feature.get("nyckel");
+                var omradeHighLight = feature.get("omrade");
                 for(var i = 0; i < that.get("items")[group].hits.length; i++){
                     console.log("that.get(items)[group].hits[i]", that.get("items")[group].hits[i]);
-                    if(nyckelHighLight === that.get("items")[group].hits[i].get("nyckel")){
+                    var currentNyckel = that.get("items")[group].hits[i].get("nyckel");
+                    var currentOmrade = that.get("items")[group].hits[i].get("omrade");
+                    if(nyckelHighLight === currentNyckel && omradeHighLight === currentOmrade){
                         hitId = i;
                         break;
                     }
@@ -251,9 +287,10 @@ var FirModel = {
                 }
                 that.highlightResultLayer.getSource().clear();
                 that.highlightResultLayer.getSource().addFeature(feature);
+
+                window.location.hash = clickedonId;
             }
         });
-//        this.forceUpdate(); // it affect searchjs
   },
 
     /**
@@ -460,6 +497,7 @@ var FirModel = {
             featureFilter = '',
             propertyFilter = '',
             read = (result) => { //parses the XML result
+                console.log("got result");
                 var format,
                     features = [],
                     outputFormat = props.outputFormat;
@@ -472,6 +510,7 @@ var FirModel = {
                 }
 
                 try {
+                    console.log("trying");
                     features = format.readFeatures(result);
                     features = features.reduce((r, f) => {
                         if (this.get('firSelectionTools')) {
@@ -492,6 +531,7 @@ var FirModel = {
                 if (features.length === 0) {
                     features = [];
                 }
+                console.log("calling done");
                 props.done(features);
             };
 
@@ -730,8 +770,12 @@ var FirModel = {
                 : false;
         }
 
+        if (!(this.get('selectedIndices') instanceof Array)) {
+            this.set('selectedIndices', []);
+        }
+
         var map = this.get('map'),
-            exist = this.get('selectedIndices').find(item => item.group === spec.id),
+            exist = this.get('selectedIndices').find(item => item.group === spec.id), //selectedIndices is undefined
             extent = spec.hit.getGeometry().getExtent(),
             size = map.getSize(),
             offsetY = 0;
@@ -742,21 +786,7 @@ var FirModel = {
             maxZoom: this.get('maxZoom')
         });
 
-        // started to inplemented other solution: class="" then put the feature back? and delete class
-        // this.firFeatureLayer.getSource().clear(); --- this.clear() become "undefined"
-        /* TODO, need to add all features to this.highlightResultLayer instead of clear
-         instead of clear, do getFeatures().forEach() and add to highlightResultLayer. this.highlightResultLayer.getSource().addFeature(spec.hit);*/
-        console.log("this",this);
-        //this.firFeatureLayer.getSource().getFeatures().forEach(hits => {
-        //    this.highlightResultLayer.getSource().addFeature(spec.hit);
-        //});
-
         this.highlightResultLayer.getSource().addFeature(spec.hit);
-        // this.firFeatureLayer.getSource().addFeature(spec.hit);
-
-        if (!(this.get('selectedIndices') instanceof Array)) {
-            this.set('selectedIndices', []);
-        }
 
         if (exist) {
             exist.index = spec.index;
@@ -1187,8 +1217,12 @@ var FirModel = {
         });
     },
 
-    findWithSameName: function(names, layer){
+    findWithSameNames: function(nycklar, layer){
+        console.log("findWithSamenNames");
+        var backupFilter = this.get("filter");
+        this.set("filter", this.get("realEstateLayer").layerCaption);
         var sources = this.getSources();
+        this.set("filter", backupFilter);
         var promises = [];
 
         sources.forEach(source => {
@@ -1198,7 +1232,9 @@ var FirModel = {
                    belongsToLayer = true;
                }
             });
+
             if (belongsToLayer) {
+                console.log("belongsToLayer");
                 var searchProps = {
                     url: (HAJK2.searchProxy || '') + source.url,
                     caption: source.caption,
@@ -1214,27 +1250,26 @@ var FirModel = {
 
                 var sameNameFilter = "";
                 // Add initial or
-                for(var i = 0; i < names.length - 1; i++){
+                for(var i = 0; i < nycklar.length - 1; i++){
                     sameNameFilter += "<ogc:Or>";
                 }
 
-                var prefix = "<ogc:PropertyIsLike matchCase=\"false\" wildCard=\"*\" singleChar=\".\" escapeChar=\"!\">\n" +
-                    "            <ogc:PropertyName>text</ogc:PropertyName>\n" +
+                var prefix = "<ogc:PropertyIsEqualTo matchCase=\"false\" wildCard=\"*\" singleChar=\".\" escapeChar=\"!\">\n" +
+                    "            <ogc:PropertyName>nyckel</ogc:PropertyName>\n" +
                     "            <ogc:Literal>";
                 var suffix = "</ogc:Literal>\n" +
-                    "          </ogc:PropertyIsLike>";
+                    "          </ogc:PropertyIsEqualTo>";
 
-                sameNameFilter += prefix + names[0] + suffix;
+                sameNameFilter += prefix + nycklar[0] + suffix;
 
-                for(var i = 1; i < names.length; i++){
-                    sameNameFilter += prefix + names[i] + suffix;
+                for(var i = 1; i < nycklar.length; i++){
+                    sameNameFilter += prefix + nycklar[i] + suffix;
                     sameNameFilter += "</ogc:Or>";
                 }
 
-                console.log("filter", sameNameFilter);
                 promises.push(new Promise((resolve, reject) => {
                     this.doWFSSearch({
-                        value: name, // TODO should be empty
+                        value: "",
                         url: searchProps.url,
                         featureType: searchProps.featureType,
                         propertyName: searchProps.propertyName,
@@ -1245,7 +1280,7 @@ var FirModel = {
                         exaktMatching: true,
                         sameNameFilter: sameNameFilter,
                         done: features => {
-                            console.log("features", features.length, features);
+                            console.log("done. features", features);
                             if (features.length > 0) {
                                 features.forEach(feature => {
                                     feature.caption = searchProps.caption;
@@ -1289,7 +1324,7 @@ var FirModel = {
         console.log("sources", this.get('sources'));
         this.get('sources').forEach(source => {
             console.log("source.caption", source.caption);
-            if(source.caption === "Fastighet") {
+            if(source.caption === this.get("realEstateLayer").layerCaption) {
                 var searchProps = {
                     url: (HAJK2.searchProxy || '') + source.url,
                     caption: source.caption,
@@ -1370,6 +1405,14 @@ var FirModel = {
         var promises = [];
         var value = this.get('value');
         var items = [];
+        var features = [];
+
+        console.log("before filter", this.get('firSelectionTools'));
+
+        if (this.get('firSelectionTools')) {
+            features = this.get('firSelectionModel').getFeatures();
+            this.set('features', features);
+        }
 
         sources.forEach(source => {
             var searchProps = {
@@ -1384,6 +1427,12 @@ var FirModel = {
                 outputFormat: source.outputFormat,
                 geometryField: source.geometryField
             };
+
+
+            console.log("features", features.length, features);
+            console.log("value", value);
+
+            if (value === '' && features.length === 0) return;
 
             promises.push(new Promise((resolve, reject) => {
                 this.doWFSSearch({
