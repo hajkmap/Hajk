@@ -10,6 +10,25 @@ import SearchModel from "./SearchModel.js";
 
 const styles = theme => {
   return {
+    center: {
+      zIndex: 1000,
+      padding: "10px",
+      position: "fixed",
+      background: "white",
+      left: 0,
+      right: 0,
+      margin: "auto",
+      width: "600px",
+      borderBottomLeftRadius: "10px",
+      borderBottomRightRadius: "10px",
+      border: "1px solid " + theme.palette.secondary.main,
+      [theme.breakpoints.down("xs")]: {
+        display: "none"
+      },
+      [theme.breakpoints.down("md")]: {
+        marginLeft: "280px"
+      }
+    },
     searchContainer: {
       display: "flex",
       alignItems: "center",
@@ -58,9 +77,9 @@ class Search extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes } = this.props;    
     return (
-      <>
+      <div className={classes.center}>
         <div>
           <Typography variant="h5" align="center">
             Vad händer i dina kvarter?
@@ -90,7 +109,7 @@ class Search extends Component {
           />
           {this.renderSearchResultList()}
         </div>
-      </>
+      </div>
     );
   }
 }

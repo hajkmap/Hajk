@@ -47,25 +47,6 @@ const styles = theme => {
       top: 0,
       boxShadow: "none"
     },
-    center: {
-      zIndex: 1000,
-      padding: "10px",
-      position: "fixed",
-      background: "white",
-      left: 0,
-      right: 0,
-      margin: "auto",
-      width: "600px",
-      borderBottomLeftRadius: "10px",
-      borderBottomRightRadius: "10px",
-      border: "1px solid " + theme.palette.secondary.main,
-      [theme.breakpoints.down("xs")]: {
-        display: "none"
-      },
-      [theme.breakpoints.down("md")]: {
-        marginLeft: "280px"
-      }
-    },
     appBar: {
       zIndex: 1200,
       background: "white",
@@ -375,7 +356,7 @@ class App extends Component {
                 });
               }}
             />
-            <div className={classes.center}>{this.renderSearchPlugin()}</div>
+            {this.renderSearchPlugin()}
             <div className={classes.mobileSearchPanel}>
               <Panel
                 title={"Sök i kartan"}

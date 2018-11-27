@@ -36,13 +36,13 @@ const styles = theme => {
     drawerLeft: {
       order: 1,
       left: 0,
-      position: "absolute",
+      position: "static",
       bottom: 0,
       top: 0
     },
     drawerPaperRight: {},
     drawerPaperContainer: {
-      top: "45px",
+      top: "47px",
       right: 0,
       bottom: 0,
       left: 0,

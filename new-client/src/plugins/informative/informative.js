@@ -85,10 +85,10 @@ class Informative extends React.PureComponent {
   };
 
   constructor(spec) {
-    super(spec);
-    this.position = "right";
+    super(spec);        
     this.type = "informative";
     this.text = "Översiktsplan";
+    this.position = spec.options.panel || "right";
     this.app = spec.app;
     this.observer = Observer();
     this.observer.subscribe("myEvent", message => {
