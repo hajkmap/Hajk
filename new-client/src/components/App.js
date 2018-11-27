@@ -99,8 +99,14 @@ const styles = theme => {
       }
     },
     overlayVisible: {
-      zIndex: 1,
-      background: "white"
+      [theme.breakpoints.down("xs")]: {
+        zIndex: 1,
+        background: "white"
+      },
+      [theme.breakpoints.down("s")]: {
+        zIndex: "auto",
+        background: "inherit"
+      }
     },
     widgets: {
       position: "absolute",

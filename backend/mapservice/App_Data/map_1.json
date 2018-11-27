@@ -233,9 +233,9 @@
             "expanded": true,
             "layers": [
               {
-                "id": "19",
+                "id": "23",
                 "visibleAtStart": false,
-                "drawOrder": 4,
+                "drawOrder": 1000,
                 "visibleForGroups": null,
                 "infobox": null
               },
@@ -377,6 +377,7 @@
         "visibleForGroups": [],
         "layers": [],
         "selectedSources": [
+          "23",
           "15",
           "14",
           "17",

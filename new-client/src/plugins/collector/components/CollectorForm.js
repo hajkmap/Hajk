@@ -28,8 +28,7 @@ const styles = theme => {
         fontSize: "50px",
         marginLeft: "-27px",
         marginTop: "9px"
-      },
-      zIndex: 2000
+      }
     },
     crossButton: {
       marginTop: "10px",
@@ -87,7 +86,8 @@ class CollectorForm extends Component {
   renderPlaceForm = () => {
     this.setState({
       mode: "place",
-      displayPlace: false
+      displayPlace: false,
+      placemarkVisible: true
     });
     if (window.document.body.clientWidth < 600) {
       this.props.closePanel();
@@ -247,6 +247,9 @@ class CollectorForm extends Component {
           color="primary"
           onClick={() => {
             this.props.openPanel();
+            this.setState({
+              placemarkVisible: false
+            });
           }}
         >
           ok
@@ -289,30 +292,32 @@ class CollectorForm extends Component {
     const { classes } = this.props;
     return (
       <div className={classes.form}>
-        {createPortal(
-          <div className={classes.cross}>
-            <PlaceIcon className={classes.placeIconMap} />
-            <br />
-            {this.renderOkButton()}
-            <Snackbar
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "center"
-              }}
-              open={true}
-              onClose={() => {}}
-              ContentProps={{
-                "aria-describedby": "message-id"
-              }}
-              message={
-                <span id="message-id">
-                  Drag i kartan för att placera markören på önskat plats
-                </span>
-              }
-            />
-          </div>,
-          document.getElementById("map-overlay")
-        )}
+        {this.state.placemarkVisible
+          ? createPortal(
+              <div className={classes.cross}>
+                <PlaceIcon className={classes.placeIconMap} />
+                <br />
+                {this.renderOkButton()}
+                <Snackbar
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "center"
+                  }}
+                  open={true}
+                  onClose={() => {}}
+                  ContentProps={{
+                    "aria-describedby": "message-id"
+                  }}
+                  message={
+                    <span id="message-id">
+                      Drag i kartan för att placera markören på önskat plats
+                    </span>
+                  }
+                />
+              </div>,
+              document.getElementById("map")
+            )
+          : null}
         <div>Skriv din synpunkt nedan</div>
         <TextField
           rows="10"

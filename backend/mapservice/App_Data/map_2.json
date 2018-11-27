@@ -373,6 +373,7 @@
     "mobileright": null,
     "pil": "",
     "mobile": false,
+    "mapselector": false,
     "colors": {
       "primaryColor": "#1B78CC",
       "secondaryColor": "#FFF"
