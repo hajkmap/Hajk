@@ -182,21 +182,48 @@
         ],
         "groups": [
           {
-            "id": "f499fa2b-ad0a-cecd-c118-2e7037b541b1",
+            "id": "c1146dfb-6f78-775c-8ec0-6ecb1d245d19",
             "parent": "-1",
-            "name": "Medborgardialog",
+            "name": "Adresser",
             "toggled": false,
-            "expanded": false,
+            "expanded": true,
             "layers": [
               {
-                "id": "15",
+                "id": "22",
                 "visibleAtStart": false,
-                "drawOrder": 4,
+                "drawOrder": 3,
                 "visibleForGroups": null,
                 "infobox": null
               }
             ],
             "groups": []
+          },
+          {
+            "id": "f499fa2b-ad0a-cecd-c118-2e7037b541b1",
+            "parent": "-1",
+            "name": "Medborgardialog",
+            "toggled": false,
+            "expanded": false,
+            "layers": [],
+            "groups": [
+              {
+                "id": "07920b13-c2e1-fdc9-b88b-9eb75da49ac6",
+                "parent": "f499fa2b-ad0a-cecd-c118-2e7037b541b1",
+                "name": "Ny grupp",
+                "toggled": false,
+                "expanded": true,
+                "layers": [
+                  {
+                    "id": "15",
+                    "visibleAtStart": false,
+                    "drawOrder": 7,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              }
+            ]
           },
           {
             "id": "eff9c88f-fc3a-05c2-3a15-285712099854",
@@ -206,14 +233,7 @@
             "expanded": true,
             "layers": [
               {
-                "id": "22",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "19",
+                "id": "23",
                 "visibleAtStart": false,
                 "drawOrder": 1000,
                 "visibleForGroups": null,
@@ -222,28 +242,28 @@
               {
                 "id": "18",
                 "visibleAtStart": false,
-                "drawOrder": 1000,
+                "drawOrder": 5,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
                 "id": "16",
                 "visibleAtStart": true,
-                "drawOrder": 2,
+                "drawOrder": 1,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
                 "id": "17",
                 "visibleAtStart": true,
-                "drawOrder": 1,
+                "drawOrder": 2,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
                 "id": "14",
                 "visibleAtStart": true,
-                "drawOrder": 3,
+                "drawOrder": 6,
                 "visibleForGroups": null,
                 "infobox": null
               }
@@ -357,6 +377,7 @@
         "visibleForGroups": [],
         "layers": [],
         "selectedSources": [
+          "23",
           "15",
           "14",
           "17",
@@ -413,9 +434,10 @@
     "mobileright": null,
     "pil": null,
     "mobile": false,
+    "mapselector": false,
     "colors": {
-      "primaryColor": "#4a90e2",
-      "secondaryColor": "#6b1a1a"
+      "primaryColor": "#0065a6",
+      "secondaryColor": "#ffcc00"
     }
   }
 }

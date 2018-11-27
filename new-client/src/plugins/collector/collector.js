@@ -1,12 +1,12 @@
 import React, { Component } from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
-import { Button } from "@material-ui/core";
+import { IconButton } from "@material-ui/core";
 import RateReviewIcon from "@material-ui/icons/RateReview";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import Observer from "react-event-observer";
 import Panel from "../../components/Panel.js";
-import Tooltip from '@material-ui/core/Tooltip';
+import Typography from "@material-ui/core/Typography";
 
 import CollectorView from "./CollectorView.js";
 import CollectorModel from "./CollectorModel.js";
@@ -16,9 +16,41 @@ const styles = theme => {
     button: {
       width: "50px",
       height: "50px",
+      marginRight: "30px",
       outline: "none",
-      marginBottom: "10px"
-    }
+      background: theme.palette.primary.main,
+      color: theme.palette.primary.contrastText,
+      "&:hover": {
+        background: theme.palette.primary.main
+      }
+    },
+    card: {
+      cursor: "pointer",
+      width: "180px",
+      borderRadius: "4px",
+      background: "white",
+      padding: "10px 20px",
+      margin: "10px",
+      display: "flex",
+      alignItems: "center",
+      flexDirection: "row",
+      justifyContent: "center",
+      boxShadow:
+        "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
+      "&:hover": {
+        background: "#e9e9e9"
+      },
+      [theme.breakpoints.down("xs")]: {
+        width: "auto",
+        justifyContent: "inherit"
+      }
+    },
+    title: {
+      fontSize: "10pt",
+      fontWeight: "bold",
+      marginBottom: "5px"
+    },
+    text: {}
   };
 };
 
@@ -39,8 +71,6 @@ class Collector extends Component {
     });
     this.app = props.app;
   }
-
-  componentWillMount() {}
 
   onClick = e => {
     this.app.onPanelOpen(this);
@@ -97,20 +127,22 @@ class Collector extends Component {
   renderAsWidgetItem() {
     const { classes } = this.props;
     return (
-      <div>
-        <Tooltip title="Tyck till">
-          <Button
-            variant="fab"
-            color="primary"
-            aria-label="Infomation"
-            className={classes.button}
-            onClick={this.onClick}
-          >
-            <RateReviewIcon />
-          </Button>
-        </Tooltip>
+      <>
+        <div className={classes.card} onClick={this.onClick}>
+          <div>
+            <IconButton className={classes.button}>
+              <RateReviewIcon />
+            </IconButton>
+          </div>
+          <div>
+            <Typography className={classes.title}>Tyck till</Typography>
+            <Typography className={classes.text}>
+              Vi vill veta vad du tycker
+            </Typography>
+          </div>
+        </div>
         {this.renderPanel()}
-      </div>
+      </>
     );
   }
 

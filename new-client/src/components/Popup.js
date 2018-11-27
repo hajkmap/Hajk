@@ -1,24 +1,39 @@
-import React, { Component } from "react";
+import React from "react";
+import { withStyles } from "@material-ui/core/styles";
 import Overlay from "ol/Overlay.js";
 import marked from "marked";
 import "./Popup.css";
+import IconButton from "@material-ui/core/IconButton";
+import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
+import ArrowRightIcon from "@material-ui/icons/ArrowRight";
+import CloseIcon from "@material-ui/icons/Close";
 
-class Popup extends Component {
-  constructor() {
-    super();
-    this.state = {
-      selectedIndex: 1,
-      visible: false
-    };
+const styles = theme => ({
+  floatLeft: {
+    float: "left"
+  },
+  floatRight: {
+    float: "right"
+  }
+});
+
+class Popup extends React.Component {
+  state = {
+    selectedIndex: 1,
+    visible: false
+  };
+
+  constructor(props) {
+    super(props);
     marked.setOptions({
       sanitize: false,
       xhtml: true
     });
+    this.classes = this.props.classes;
   }
 
-  componentDidMount() {}
-
-  componentWillReceiveProps() {
+  // FIXME: Replace. Refer to https://github.com/hajkmap/Hajk/issues/175
+  UNSAFE_componentWillReceiveProps(e) {
     this.setState({
       selectedIndex: 1
     });
@@ -119,21 +134,33 @@ class Popup extends Component {
     if (features.length > 1) {
       toggler = (
         <div className="toggle">
-          <i className="material-icons pull-left clickable" id="step-left">
-            arrow_left
-          </i>
+          <IconButton
+            className={this.classes.floatLeft}
+            aria-label="Previous"
+            color="primary"
+            id="step-left"
+          >
+            <ArrowLeftIcon />
+          </IconButton>
           <span className="toggle-text">
             {this.state.selectedIndex} av {features.length}
           </span>
-          <i className="material-icons pull-right clickable" id="step-right">
-            arrow_right
-          </i>
+          <IconButton
+            className={this.classes.floatRight}
+            aria-label="Next"
+            color="primary"
+            id="step-right"
+          >
+            <ArrowRightIcon />
+          </IconButton>
         </div>
       );
     }
 
     var featureList = features.map((feature, i) => {
-      var markdown = feature.layer.get("layerInfo") && feature.layer.get("layerInfo").information,
+      var markdown =
+          feature.layer.get("layerInfo") &&
+          feature.layer.get("layerInfo").information,
         value = markdown
           ? this.parse(markdown, feature.getProperties())
           : this.table(feature.getProperties());
@@ -212,16 +239,18 @@ class Popup extends Component {
     }
     return (
       <div id="popup" className="ol-popup">
-        <i
+        <IconButton
+          className={this.classes.floatRight}
+          aria-label="Close"
+          color="default"
           id="popup-closer"
-          className="ol-popup-closer clickable material-icons"
         >
-          close
-        </i>
+          <CloseIcon />
+        </IconButton>
         <div>{this.html(features)}</div>
       </div>
     );
   }
 }
 
-export default Popup;
+export default withStyles(styles)(Popup);

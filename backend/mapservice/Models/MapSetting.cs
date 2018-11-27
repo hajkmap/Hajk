@@ -48,6 +48,8 @@ namespace MapService.Models
 
         public bool mobile { get; set; }
 
-        public Colors colors { get; set; }
+		public bool mapselector { get; set; }
+
+		public Colors colors { get; set; }
     }
 }

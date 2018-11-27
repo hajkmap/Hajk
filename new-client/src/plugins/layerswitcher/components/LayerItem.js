@@ -2,6 +2,9 @@ import "./LayerItem.css";
 import React, { Component } from "react";
 import Typography from "@material-ui/core/Typography";
 import Slider from "@material-ui/lab/Slider";
+import IconWarning from "@material-ui/icons/Warning";
+import CheckBoxIcon from "@material-ui/icons/CheckBox";
+import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 
 class LayerItem extends Component {
   constructor() {
@@ -110,21 +113,19 @@ class LayerItem extends Component {
    */
   renderStatus() {
     return this.state.status === "loaderror" ? (
-      <i
-        className="material-icons pull-right"
+      <IconWarning
+        style={{ float: "right" }}
         title="Lagret kunde inte laddas in. Kartservern svarar inte."
-      >
-        warning
-      </i>
+      />
     ) : null;
   }
 
   /* This function does two things:
-   * 1) it updates opacityValue, which is in state, 
-   *    and is important as <Slider> uses it to set 
+   * 1) it updates opacityValue, which is in state,
+   *    and is important as <Slider> uses it to set
    *    its internal value.
    * 2) it changes OL layer's opacity
-   * 
+   *
    * As <Slider> is set up to return a value between
    * 0 and 1 and it has a step of 0.1, we don't have
    * to worry about any conversion and rounding here.
@@ -173,9 +174,7 @@ class LayerItem extends Component {
       <div className="panel panel-default layer-item">
         <div className="panel-heading unselectable" onClick={toggleLegend}>
           <span onClick={toggleVisible} className="clickable">
-            <i className="material-icons" style={{ width: "2rem" }}>
-              {visible ? "checkbox" : "check_box_outline_blank"}
-            </i>
+            {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
             {this.renderStatus()}
             <label
               className={
@@ -206,6 +205,7 @@ class LayerItem extends Component {
             className="info-text"
             href={this.state.infoUrl}
             target="_blank"
+            rel="noopener noreferrer"
             dangerouslySetInnerHTML={{ __html: infoUrlText }}
           />
           <p

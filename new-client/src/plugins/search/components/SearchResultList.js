@@ -1,6 +1,10 @@
-import React, { Component } from "react";
+import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import SearchResultGroup from "./SearchResultGroup.js";
+import IconButton from "@material-ui/core/IconButton";
+import AddCircleIcon from "@material-ui/icons/AddCircle";
+import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
+import classNames from "classnames";
 
 const styles = theme => {
   return {
@@ -9,48 +13,87 @@ const styles = theme => {
       background: "white",
       color: "black",
       width: "100%",
-      maxHeight: "500px",
+      maxWidth: "350px",
       overflow: "auto",
-      padding: "15px",
+      padding: "10px",
       border: "1px solid #ccc",
       borderTop: "none",
-      top: "49px",
+      top: "150px",
+      right: "10px",
       [theme.breakpoints.down("xs")]: {
-        top: "56px",
-        left: 0,
-        right: 0,
-        bottom: 0,
-        position: "fixed",
+        position: "static",
+        maxHeight: "inherit",
         border: "none",
+        padding: 0
+      }
+    },
+    searchResultContainer: {
+      maxHeight: "500px",
+      overflow: "auto",
+      [theme.breakpoints.down("md")]: {
+        maxHeight: "450px"
+      },
+      [theme.breakpoints.down("xs")]: {
         maxHeight: "inherit"
       }
+    },
+    searchResultTopBar: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      margin: "5px"
+    },
+    visible: {
+      display: "block"
+    },
+    hidden: {
+      display: "none"
     }
   };
 };
 
-class SearchResultList extends Component {
+class SearchResultList extends React.PureComponent {
   state = {
-    visible: true
+    visible: true,
+    minimized: false
   };
 
-  componentWillMount() {}
-
   hide() {
-    if (document.body.scrollWidth < 600) {
-      this.setState({
-        visible: false
-      });
-    }
+    this.setState({
+      minimized: true
+    });
   }
 
-  componentWillReceiveProps(e) {
+  toggle() {
     this.setState({
-      visible: this.props.visible
+      minimized: !this.state.minimized
     });
+  }
+
+  renderResult() {
+    const { result } = this.props;
+    if (this.state.minimized) return null;
+    return (
+      <div>
+        {result.map((featureType, i) => {
+          if (featureType.features.length === 0) return null;
+          return (
+            <SearchResultGroup
+              parent={this}
+              key={i}
+              featureType={featureType}
+              model={this.props.model}
+              expanded={false}
+            />
+          );
+        })}
+      </div>
+    );
   }
 
   render() {
     const { classes, result } = this.props;
+    const { minimized } = this.state;
     if (result.every(r => r.features.length === 0)) {
       return (
         <div className={classes.searchResult}>
@@ -58,27 +101,51 @@ class SearchResultList extends Component {
         </div>
       );
     }
-    const resultWithHits = result.reduce(
-      (i, r) => (r.features.length > 0 ? ++i : i),
-      0
-    );
+
     if (!this.state.visible) {
       return null;
     } else {
       return (
         <div className={classes.searchResult}>
-          {result.map((featureType, i) => {
-            if (featureType.features.length === 0) return null;
-            return (
-              <SearchResultGroup
-                parent={this}
-                key={i}
-                featureType={featureType}
-                model={this.props.model}
-                expanded={resultWithHits < 2}
-              />
-            );
-          })}
+          <div className={classes.searchResultTopBar}>
+            <div>SÖKRESULTAT</div>
+            <div>
+              {!minimized ? (
+                <IconButton
+                  className={classes.button}
+                  onClick={() => this.toggle()}
+                >
+                  <RemoveCircleIcon />
+                </IconButton>
+              ) : (
+                <IconButton
+                  className={classes.button}
+                  onClick={() => this.toggle()}
+                >
+                  <AddCircleIcon />
+                </IconButton>
+              )}
+            </div>
+          </div>
+          <div
+            className={classNames(
+              classes.searchResultContainer,
+              this.state.minimized ? classes.hidden : classes.visible
+            )}
+          >
+            {result.map((featureType, i) => {
+              if (featureType.features.length === 0) return null;
+              return (
+                <SearchResultGroup
+                  parent={this}
+                  key={i}
+                  featureType={featureType}
+                  model={this.props.model}
+                  expanded={false}
+                />
+              );
+            })}
+          </div>
         </div>
       );
     }

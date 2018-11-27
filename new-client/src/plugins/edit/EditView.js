@@ -1,22 +1,19 @@
-import React, { Component } from "react";
+import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 
 const styles = theme => ({});
 
-class EditView extends Component {
-  constructor() {
-    super();
-    console.log("EditView constructor()", this);
-  }
+class EditView extends React.PureComponent {
+  // constructor() {
+  //  super();
+  // }
 
   getText() {
     return "Editera";
   }
 
   render() {
-    console.log("Will render EditView");
-
     return <div className="tool-panel-content">Verktyg</div>;
   }
 }

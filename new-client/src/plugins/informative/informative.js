@@ -1,10 +1,10 @@
-import React, { Component } from "react";
+import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
-import { Button } from "@material-ui/core";
+import { IconButton } from "@material-ui/core";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import SatelliteIcon from "@material-ui/icons/Satellite";
-import Tooltip from '@material-ui/core/Tooltip';
+import Typography from "@material-ui/core/Typography";
 
 import Panel from "../../components/Panel.js";
 import InformativeView from "./InformativeView.js";
@@ -16,15 +16,47 @@ const styles = theme => {
     button: {
       width: "50px",
       height: "50px",
+      marginRight: "30px",
       outline: "none",
-      marginBottom: "10px"
-    }
+      background: theme.palette.primary.main,
+      color: theme.palette.primary.contrastText,
+      "&:hover": {
+        background: theme.palette.primary.main
+      }
+    },
+    card: {
+      cursor: "pointer",
+      width: "180px",
+      borderRadius: "4px",
+      background: "white",
+      padding: "10px 20px",
+      margin: "10px",
+      display: "flex",
+      alignItems: "center",
+      flexDirection: "row",
+      justifyContent: "center",
+      boxShadow:
+        "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
+      "&:hover": {
+        background: "#e9e9e9"
+      },
+      [theme.breakpoints.down("xs")]: {
+        width: "auto",
+        justifyContent: "inherit"
+      }
+    },
+    title: {
+      fontSize: "10pt",
+      fontWeight: "bold",
+      marginBottom: "5px"
+    },
+    text: {}
   };
 };
 
-class Informative extends Component {
+class Informative extends React.PureComponent {
   state = {
-    panelOpen: false
+    panelOpen: this.props.options.visibleAtStart
   };
 
   onClick = e => {
@@ -70,16 +102,6 @@ class Informative extends Component {
     this.app.registerPanel(this);
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return this.state.panelOpen !== nextState.panelOpen;
-  }
-
-  componentWillMount() {
-    this.setState({
-      panelOpen: this.props.options.visibleAtStart
-    });
-  }
-
   renderPanel() {
     return createPortal(
       <Panel
@@ -102,19 +124,22 @@ class Informative extends Component {
   renderAsWidgetItem() {
     const { classes } = this.props;
     return (
-      <div>
-        <Tooltip title="Översiktsplan">
-          <Button
-            variant="fab"
-            color="primary"
-            className={classes.button}
-            onClick={this.onClick}
-          >
-            <SatelliteIcon />
-          </Button>
-        </Tooltip>
+      <>
+        <div className={classes.card} onClick={this.onClick}>
+          <div>
+            <IconButton className={classes.button}>
+              <SatelliteIcon />
+            </IconButton>
+          </div>
+          <div>
+            <Typography className={classes.title}>Översiktsplan</Typography>
+            <Typography className={classes.text}>
+              Läs om vad som planeras i kommunen
+            </Typography>
+          </div>
+        </div>
         {this.renderPanel()}
-      </div>
+      </>
     );
   }
 

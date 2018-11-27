@@ -1,3 +1,10 @@
+// IE 11 starts here.
+// If you don't need IE 11, comment out those lines line.
+// Also, change 'browserlist' in package.json to exclude ie11.
+import "@babel/polyfill";
+import "react-app-polyfill/ie11";
+// IE 11 ends here.
+
 import "ol/ol.css";
 import "./index.css";
 import registerServiceWorker from "./registerServiceWorker";
@@ -9,6 +16,8 @@ import buildConfig from "./buildConfig.json";
 
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import deepmerge from "deepmerge";
+
+import ErrorIcon from "@material-ui/icons/Error";
 
 const networkErrorMessage =
   "Fel när applikationen skulle läsas in. Detta beror troligtvis på ett nätverksfel. Försök igen senare.";
@@ -65,8 +74,10 @@ fetch("appConfig.json")
           }
         });
       Promise.all([
-        fetch(`${appConfig.mapserviceBase}/config/layers`),
-        fetch(`${appConfig.mapserviceBase}/config/${defaultMap}`),
+        fetch(`${appConfig.proxy}${appConfig.mapserviceBase}/config/layers`),
+        fetch(
+          `${appConfig.proxy}${appConfig.mapserviceBase}/config/${defaultMap}`
+        ),
         fetch("customTheme.json")
       ])
         .then(
@@ -98,7 +109,7 @@ fetch("appConfig.json")
                 ReactDOM.render(
                   <div className="start-error">
                     <div>
-                      <i className="material-icons">error</i>
+                      <ErrorIcon />
                     </div>
                     <div>{parseErrorMessage}</div>
                   </div>,
@@ -112,7 +123,7 @@ fetch("appConfig.json")
           ReactDOM.render(
             <div className="start-error">
               <div>
-                <i className="material-icons">error</i>
+                <ErrorIcon />
               </div>
               <div>{networkErrorMessage}</div>
             </div>,
@@ -126,7 +137,7 @@ fetch("appConfig.json")
     ReactDOM.render(
       <div className="start-error">
         <div>
-          <i className="material-icons">error</i>
+          <ErrorIcon />
         </div>
         <div>{networkErrorMessage}</div>
       </div>,

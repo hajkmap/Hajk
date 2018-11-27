@@ -51,6 +51,7 @@ class MapOptions extends Component {
         mobileleft: config.mobileleft,
         mobileright: config.mobileright,
         mobile: config.mobile,
+        mapselector: config.mapselector,
         title: config.title ? config.title : "",
         geoserverLegendOptions: config.geoserverLegendOptions
           ? config.geoserverLegendOptions
@@ -66,7 +67,6 @@ class MapOptions extends Component {
 
   componentWillMount() {
     var mapConfig = this.props.model.get("mapConfig");
-
     this.setState({
       primaryColor:
         mapConfig.colors && mapConfig.colors.primaryColor
@@ -84,6 +84,7 @@ class MapOptions extends Component {
       extent: mapConfig.extent,
       infologo: mapConfig.infologo,
       mobile: mapConfig.mobile,
+      mapselector: mapConfig.mapselector,
       geoserverLegendOptions: mapConfig.geoserverLegendOptions
     });
   }
@@ -91,6 +92,10 @@ class MapOptions extends Component {
   getValue(fieldName) {
     var input = this.refs["input_" + fieldName],
       value = input ? input.value : "";
+
+    if (input.type === "checkbox") {
+      value = input.checked;
+    }
 
     if (fieldName === "center") value = value.split(",");
     if (fieldName === "extent") value = value.split(",");
@@ -138,8 +143,8 @@ class MapOptions extends Component {
       return typeof v === "string"
         ? v.trim() === ""
         : Array.isArray(v)
-          ? v[0] === ""
-          : false;
+        ? v[0] === ""
+        : false;
     }
 
     function coord(v) {
@@ -177,6 +182,7 @@ class MapOptions extends Component {
         }
         break;
       case "mobile":
+      case "mapselector":
         if (value !== true && value !== false) {
           valid = false;
         }
@@ -213,7 +219,8 @@ class MapOptions extends Component {
         config.logo = this.getValue("logo");
         config.extent = this.getValue("extent");
         config.infologo = this.getValue("infologo");
-        config.mobile = this.state.mobile;
+        config.mobile = this.getValue("mobile");
+        config.mapselector = this.getValue("mapselector");
         config.geoserverLegendOptions = this.getValue("geoserverLegendOptions");
         this.props.model.updateMapConfig(config, success => {
           var msg = success
@@ -414,6 +421,19 @@ class MapOptions extends Component {
                   this.setState({ geoserverLegendOptions: e.target.value });
                 }}
               />
+            </div>
+            <div>
+              <label htmlFor="input_mapselector">Visa kartväljare</label>
+              <input
+                id="input_mapselector"
+                type="checkbox"
+                ref="input_mapselector"
+                onChange={e => {
+                  this.setState({ mapselector: e.target.checked });
+                }}
+                checked={this.state.mapselector}
+              />
+              &nbsp;
             </div>
             <div className="clearfix">
               <span className="pull-left">

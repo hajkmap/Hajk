@@ -7,13 +7,13 @@ import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Typography from "@material-ui/core/Typography";
 
-import "./LayerGroup.css";
-
 const styles = theme => ({
   root: {
     width: "100%",
     display: "block",
-    padding: 0
+    padding: "5px 0",
+    borderTop: "1px solid #ccc",
+    background: "#efefef"
   },
   heading: {
     fontSize: theme.typography.pxToRem(18),
@@ -23,6 +23,12 @@ const styles = theme => ({
   secondaryHeading: {
     fontSize: theme.typography.pxToRem(15),
     color: theme.palette.text.secondary
+  },
+  disableTransition: {
+    transition: "none"
+  },
+  panel: {
+    marginLeft: "10px"
   }
 });
 
@@ -39,14 +45,14 @@ class LayerGroup extends Component {
       chapters: []
     };
     this.toggleExpanded = this.toggleExpanded.bind(this);
-    props.app.observer.on("informativeLoaded", chapters => {
+    props.app.globalObserver.on("informativeLoaded", chapters => {
       this.setState({
         chapters: chapters
       });
     });
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.setState({
       ...this.state,
       ...this.props.group
@@ -61,17 +67,22 @@ class LayerGroup extends Component {
   };
 
   renderLayerGroups() {
-    const { expanded } = this.state;
+    let { expanded } = this.state;
     const { classes } = this.props;
+    if (this.state.groups.length === 1 && this.state.groups[0].expanded) {
+      expanded = this.state.groups[0].id;
+    }
     return this.state.groups.map((group, i) => {
       return (
         <LayerGroup
+          expanded={expanded === group.id}
           key={i}
           group={group}
-          classes={classes}
-          model={this.model}
-          expanded={expanded === group.id}
+          model={this.props.model}
           handleChange={this.handleChange}
+          app={this.props.app}
+          classes={classes}
+          child={true}
         />
       );
     });
@@ -81,23 +92,20 @@ class LayerGroup extends Component {
     this.setState({ expanded: !this.state.expanded });
   }
 
-  getExpandedClass() {
-    return this.state.expanded
-      ? "layer-group-items visible"
-      : "layer-group-items hidden";
-  }
-
-  getArrowClass() {
-    return this.state.expanded ? "expand_less" : "chevron_right";
-  }
-
   render() {
-    const { classes } = this.props;
+    const { classes, child } = this.props;
+    var groupClass = "";
+    if (child) {
+      groupClass = classes.panel;
+    }
+
     return (
-      <div className="layer-group">
+      <div ref="panelElement" className={groupClass}>
         <ExpansionPanel
+          className={classes.disableTransition}
+          CollapseProps={{ classes: { container: classes.disableTransition } }}
           expanded={this.props.expanded}
-          onChange={this.props.handleChange(this.props.group.id)}
+          onChange={this.props.handleChange(this.props.group.id, this)}
         >
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
             <Typography className={classes.heading}>
@@ -125,8 +133,8 @@ class LayerGroup extends Component {
                 return null;
               }
             })}
+            {this.renderLayerGroups()}
           </ExpansionPanelDetails>
-          {this.renderLayerGroups()}
         </ExpansionPanel>
       </div>
     );

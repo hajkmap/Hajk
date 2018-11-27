@@ -6,6 +6,10 @@ import { withStyles } from "@material-ui/core/styles";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import Snackbar from "@material-ui/core/Snackbar";
+import PlaceIcon from "@material-ui/icons/Place";
+import FlareIcon from "@material-ui/icons/Flare";
+import LocalFloristIcon from "@material-ui/icons/LocalFlorist";
+import Typography from "@material-ui/core/Typography/Typography";
 
 const styles = theme => {
   return {
@@ -39,6 +43,31 @@ const styles = theme => {
     },
     padded: {
       padding: "20px 0"
+    },
+    button: {
+      width: "100%",
+      maxWidth: "278px",
+      justifyContent: "left"
+    },
+    buttonIcon: {
+      marginRight: "5px"
+    },
+    placeIconMap: {
+      fontSize: "64px",
+      position: "relative",
+      right: "32px",
+      bottom: "28px"
+    },
+    localFloristIcon: {
+      color: "green",
+      fontSize: "64px"
+    },
+    thank: {
+      fontSize: "2.8rem",
+      fontWeight: "500"
+    },
+    thankForm: {
+      textAlign: "center"
     }
   };
 };
@@ -51,13 +80,14 @@ class CollectorForm extends Component {
     comment: "",
     saveError: "",
     validationError: "",
-    displayPlace: true
+    displayPlace: false
   };
 
   renderPlaceForm = () => {
     this.setState({
       mode: "place",
-      displayPlace: true
+      displayPlace: false,
+      placemarkVisible: true
     });
     if (window.document.body.clientWidth < 600) {
       this.props.closePanel();
@@ -153,11 +183,17 @@ class CollectorForm extends Component {
     const { classes } = this.props;
     return (
       <div className={classes.form}>
-        <h2>TACK för din synpunkt - den är viktigt för oss!</h2>
-        <div>
-          <Button color="primary" onClick={this.abort}>
-            Stäng
-          </Button>
+        <div className={classes.thankForm}>
+          <LocalFloristIcon className={classes.localFloristIcon} />
+          <Typography variant="h2" className={classes.thank}>
+            TACK
+          </Typography>
+          <Typography>för din synpunkt!</Typography>
+          <div>
+            <Button color="primary" onClick={this.abort}>
+              Stäng
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -170,53 +206,33 @@ class CollectorForm extends Component {
         <div>
           <h2>Vi vill veta vad du tycker!</h2>
         </div>
-        <div>Är din synpunkt:</div>
         <div>
           <div className={classes.padded}>
-            <Button
-              color="primary"
-              variant="contained"
-              onClick={this.renderPlaceForm}
-            >
-              Kopplad till en plats
-            </Button>
-            &nbsp;
-            <Button
-              color="primary"
-              variant="contained"
-              onClick={this.renderGenericForm}
-            >
-              Generell
-            </Button>
+            <div>
+              <Button
+                color="primary"
+                variant="contained"
+                onClick={this.renderPlaceForm}
+                className={classes.button}
+              >
+                <PlaceIcon className={classes.buttonIcon} />
+                Tyck till om en plats
+              </Button>
+            </div>
+            <br />
+            <div>
+              <Button
+                color="primary"
+                variant="contained"
+                onClick={this.renderGenericForm}
+                className={classes.button}
+              >
+                <FlareIcon className={classes.buttonIcon} />
+                Lämna en generell synpunkt
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
-    );
-  }
-
-  renderGeneric() {
-    const { classes } = this.props;
-    return (
-      <div className={classes.form}>
-        <div>Skriv din synpunkt nedan: </div>
-        <TextField
-          rows="2"
-          multiline={true}
-          id="comment"
-          label={"Din synpunkt" + this.state.validationError}
-          value={this.state.comment}
-          className={classes.text}
-          onChange={this.handleChange("comment")}
-          margin="normal"
-        />
-        <br />
-        <Button color="primary" variant="contained" onClick={this.save(true)}>
-          Skicka
-        </Button>
-        <Button color="primary" onClick={this.abort}>
-          Avbryt
-        </Button>
-        {this.renderSaveError()}
       </div>
     );
   }
@@ -231,6 +247,9 @@ class CollectorForm extends Component {
           color="primary"
           onClick={() => {
             this.props.openPanel();
+            this.setState({
+              placemarkVisible: false
+            });
           }}
         >
           ok
@@ -241,35 +260,13 @@ class CollectorForm extends Component {
     }
   }
 
-  renderPlace() {
+  renderGeneric() {
     const { classes } = this.props;
     return (
       <div className={classes.form}>
-        {createPortal(
-          <div className={classes.cross}>
-            <i className="material-icons">place</i>
-            <br />
-            {this.renderOkButton()}
-            <Snackbar
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "center"
-              }}
-              open={true}
-              onClose={() => {}}
-              ContentProps={{
-                "aria-describedby": "message-id"
-              }}
-              message={
-                <span id="message-id">Dra i kartan för att välja plats.</span>
-              }
-            />
-          </div>,
-          document.getElementById("map")
-        )}
-        <div>Skriv din synpunkt nedan: </div>
+        <div>Skriv din synpunkt nedan</div>
         <TextField
-          rows="2"
+          rows="10"
           multiline={true}
           id="comment"
           label={"Din synpunkt" + this.state.validationError}
@@ -277,6 +274,61 @@ class CollectorForm extends Component {
           className={classes.text}
           onChange={this.handleChange("comment")}
           margin="normal"
+          autoFocus={true}
+        />
+        <br />
+        <Button color="primary" variant="contained" onClick={this.save(true)}>
+          Skicka
+        </Button>
+        <Button color="primary" onClick={this.abort}>
+          Avbryt
+        </Button>
+        {this.renderSaveError()}
+      </div>
+    );
+  }
+
+  renderPlace() {
+    const { classes } = this.props;
+    return (
+      <div className={classes.form}>
+        {this.state.placemarkVisible
+          ? createPortal(
+              <div className={classes.cross}>
+                <PlaceIcon className={classes.placeIconMap} />
+                <br />
+                {this.renderOkButton()}
+                <Snackbar
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "center"
+                  }}
+                  open={true}
+                  onClose={() => {}}
+                  ContentProps={{
+                    "aria-describedby": "message-id"
+                  }}
+                  message={
+                    <span id="message-id">
+                      Drag i kartan för att placera markören på önskat plats
+                    </span>
+                  }
+                />
+              </div>,
+              document.getElementById("map")
+            )
+          : null}
+        <div>Skriv din synpunkt nedan</div>
+        <TextField
+          rows="10"
+          multiline={true}
+          id="comment"
+          label={"Din synpunkt" + this.state.validationError}
+          value={this.state.comment}
+          className={classes.text}
+          onChange={this.handleChange("comment")}
+          margin="normal"
+          autoFocus={true}
         />
         <br />
         <Button color="primary" variant="contained" onClick={this.save(false)}>

@@ -16,7 +16,7 @@ const styles = theme => {
 
 class Draw extends Component {
   state = {
-    panelOpen: false
+    panelOpen: this.props.options.visibleAtStart
   };
 
   onClick = e => {
@@ -50,12 +50,6 @@ class Draw extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     return this.state.panelOpen !== nextState.panelOpen;
-  }
-
-  componentWillMount() {
-    this.setState({
-      panelOpen: this.props.options.visibleAtStart
-    });
   }
 
   renderPanel() {

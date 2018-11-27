@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import LayerItem from "./LayerItem.js";
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import "./LayerGroup.css";
 
 class LayerGroup extends Component {
@@ -15,7 +17,7 @@ class LayerGroup extends Component {
     };
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.setState({
       ...this.state,
       ...this.props.group
@@ -39,8 +41,8 @@ class LayerGroup extends Component {
       : "layer-group-items hidden";
   }
 
-  getArrowClass() {
-    return this.state.expanded ? "expand_less" : "chevron_right";
+  getToggleIcon() {
+    return this.state.expanded ? <ExpandLessIcon /> : <ChevronRightIcon />;
   }
 
   render() {
@@ -52,7 +54,7 @@ class LayerGroup extends Component {
           }}
           className="clickable"
         >
-          <i className="material-icons">{this.getArrowClass()}</i>
+          {this.getToggleIcon()}
           {this.state.name}
         </h1>
         <div className={this.getExpandedClass()}>
