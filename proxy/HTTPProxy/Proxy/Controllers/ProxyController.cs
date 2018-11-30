@@ -36,6 +36,7 @@ namespace Proxy.Controllers
         static private string _headerAttributeName;
         static private int _removeDomainFromUserName = -1; // -1 = not initialized from Web.config. 0 = Do not remove, 1 = Remove
 
+        // TODO: This needs refactornig for performance reasons. We should read config ONCE and save value. Something to put in constructor()?
         private bool IsAuthorizedInternetDomain(string url)
         {
             if(_authorizedInternetDomains == null) 
@@ -110,10 +111,16 @@ namespace Proxy.Controllers
                 request.UseDefaultCredentials = true;
                 request.Method = "GET";
 
+                if(!string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["authorizedInternetDomains"]) && !IsAuthorizedInternetDomain(url))
+                {
+                    throw new Exception("Domain not allowed in proxy");
+                }
+   
+
                 if (User.Identity.IsAuthenticated) // Add HTTP Header of authenticated user
                 {
                     _log.DebugFormat("User(in): {0}", User.Identity.Name);
-                    if (IsAuthorizedInternetDomain(url)) // Only add header for authorized domains (TODO: Maybe not do any call at all if the internet domain isn't valid?)
+                    if (IsAuthorizedInternetDomain(url)) // Only add header for authorized domains
                     {
                         string userName = GetUserNameForHeader(User.Identity.Name);
                         _log.DebugFormat("User(out): {0}", userName);
