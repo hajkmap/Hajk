@@ -1,5 +1,3 @@
-var changed;
-
 class AnchorModel {
   constructor(settings) {
     this.map = settings.map;

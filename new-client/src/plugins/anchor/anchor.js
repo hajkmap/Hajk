@@ -38,7 +38,7 @@ class Anchor extends React.PureComponent {
     this.text = "Länk till karta";
     this.app = props.app;
     this.localObserver = Observer();
-    this.dummyModel = new AnchorModel({
+    this.anchorModel = new AnchorModel({
       map: props.map,
       app: props.app,
       localObserver: this.localObserver
@@ -58,7 +58,8 @@ class Anchor extends React.PureComponent {
       >
         <AnchorView
           localObserver={this.localObserver}
-          model={this.dummyModel}
+          model={this.anchorModel}
+          parent={this}
         />
       </PopPanel>,
       document.getElementById("map-overlay")
