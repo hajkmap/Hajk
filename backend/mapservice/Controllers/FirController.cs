@@ -19,17 +19,41 @@ namespace MapService.Controllers
     {
         ILog _log = LogManager.GetLogger(typeof(FirController));
 
-        private static HttpWebRequest GetWebRequest(string id, string webConfigParameter, string urlPostfix)
+        private static HttpWebRequest GetWebRequestPost(string webConfigParameter, string urlPostfix)
         {
             CookieContainer myContainer = new CookieContainer();
-            string url = string.Format(ConfigurationManager.AppSettings[webConfigParameter] + urlPostfix, id);
+            string url = ConfigurationManager.AppSettings[webConfigParameter] + urlPostfix;
             var request = (HttpWebRequest)WebRequest.Create(url);
             request.Credentials = new NetworkCredential(ConfigurationManager.AppSettings["firLMServiceUser"], ConfigurationManager.AppSettings["firLMServicePassword"]);
             request.CookieContainer = myContainer;
             request.PreAuthenticate = true;
-            request.Method = "GET";
+            request.Method = "POST";
             request.Timeout = 20000;
             return request;
+        }
+
+        private void WritePostBody(HttpWebRequest request, string ContentType, string body, Encoding encoding)
+        {
+            byte[] bytes = encoding.GetBytes(body);
+
+            request.ContentType = ContentType;
+            request.ContentLength = bytes.Length;
+
+            using (var reqStream = request.GetRequestStream())
+            {
+                reqStream.Write(bytes, 0, bytes.Length);
+            }
+        }
+
+        private string ReadPostResponse(HttpWebRequest request)
+        {
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                using (var stream = new StreamReader(response.GetResponseStream()))
+                {
+                    return stream.ReadToEnd();
+                }
+            }
         }
 
         // TODO: Remove this
@@ -48,62 +72,22 @@ namespace MapService.Controllers
                 Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
                 Response.Headers.Add("Cache-Control", "private, no-cache");
 
-                HttpWebRequest request = GetWebRequest(id, "firLMUrlServiceFastighet", "{0}?includeData=basinformation&srid=3007");
+                HttpWebRequest request = GetWebRequestPost("firLMUrlServiceFastighet", "?includeData=basinformation");
+                WritePostBody(request, "application/json", string.Format("[\"{0}\"]", id), new ASCIIEncoding());
+                var res = ReadPostResponse(request);
+                JToken fastighet = JsonConvert.DeserializeObject<JToken>(res);
+                var uuid = fastighet.SelectToken("$.features[0].id");
 
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                if (uuid != null)
                 {
-                    using (var stream = new StreamReader(response.GetResponseStream()))
-                    {
-                        JToken fastighet = JsonConvert.DeserializeObject<JToken>(stream.ReadToEnd());
-                        var uuid = fastighet.SelectToken("$.features[0].id");
-
-                        if (uuid != null)
-                        {
-                            Response.Redirect(string.Format(ConfigurationManager.AppSettings["firUrlServicePropertyDoc"], uuid.ToString()), true);
-                        }
-
-                        return string.Format("Kan inte visa fastighetsrapport för {0}", id);
-                    }
+                    Response.Redirect(string.Format(ConfigurationManager.AppSettings["firUrlServicePropertyDoc"], uuid.ToString()), true);
                 }
+
+                return string.Format("Kan inte visa fastighetsrapport för {0}", id);
             }
             catch (Exception e)
             {
                 _log.FatalFormat("Can't get real estate document: {0}", e);
-                throw e;
-            }
-        }
-
-        /// <summary>
-        /// Returnernar fastigheter från en adress.
-        /// Problem med sökvillkoret.
-        /// TODO: Används inte. Ta bort
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpGet]
-        public string RealEstateFromAddress(string id)
-        {
-            try
-            {
-                Response.Expires = 0;
-                Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
-                Response.ContentType = "application/json; charset=utf-8";
-                Response.Headers.Add("Cache-Control", "private, no-cache");
-
-                HttpWebRequest request = GetWebRequest(id, "firLMUrlServiceUppslagAdress", "{0}");
-
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                {
-                    using (var stream = new StreamReader(response.GetResponseStream()))
-                    {
-                        var res = stream.ReadToEnd();
-                        return res;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                _log.FatalFormat("Can't get real estates from adress: {0}", e);
                 throw e;
             }
         }
@@ -129,19 +113,49 @@ namespace MapService.Controllers
                 Response.ContentType = "text/html; charset=utf-8";
                 Response.Headers.Add("Cache-Control", "private, no-cache");
 
-                _log.DebugFormat("Received json: {0}", json);
+                _log.DebugFormat("Received json: {0}", json);                
+
+                bool samfallighetParam = false, gaParam = false, rattighetParam = false, persnrParam = false, taxerad_agareParam = false;
+                JToken jParam = JsonConvert.DeserializeObject<JToken>(json).SelectToken("param");
+                if (jParam != null)
+                {                    
+                    samfallighetParam = jParam.SelectToken("samfallighet").Value<bool>();
+                    gaParam = jParam.SelectToken("ga").Value<bool>();
+                    rattighetParam = jParam.SelectToken("rattighet").Value<bool>();
+                    persnrParam = jParam.SelectToken("persnr").Value<bool>();
+                    taxerad_agareParam = jParam.SelectToken("taxerad_agare").Value<bool>();                    
+                }
+
+                // Skapa lista över begärda fastigheter, konvertera till uuid (då vissa tjänster kräver detta)
+                var fastighetAndSamfallighetLista = GetFastighetAndSamfallighet(json);
+
+                ExcelInfoLista excelInfoLista = new ExcelInfoLista();
+                // Lägga på alla samfälligheter
+                excelInfoLista.samfallighetLista.AddRange(fastighetAndSamfallighetLista.samfallighetLista);
+                // Hämta fastigheter
+                GetFastighet(fastighetAndSamfallighetLista.fastighetLista, true, persnrParam, ref excelInfoLista);
+                // TODO: Taxerad ägare
+
+                if (rattighetParam) // Hämta rättigheter
+                {
+                    GetRattighet(fastighetAndSamfallighetLista.fastighetLista, ref excelInfoLista);
+                    // TODO: Hämta fastigheter som refereras i rättigheter
+                    //GetFastighet(xx, false, persnrParam, ref excelInfoLista);
+                }
+                //if (gaParam) // TODO: Hämta GA
+                //    GetRattighet(fastighetAndSamfallighetLista.fastighetLista, ref excelInfoLista);
 
                 List<ExcelTemplate> xls = new List<ExcelTemplate>();
                 // Fastighetförteckning
-                xls.Add(GenFastighetSheet(json));
-                // Marksamfälligheter
-                xls.Add(GenMarksamfallighetSheet(json));
-                // Gemensamhetsanläggningar
-                xls.Add(GenGASheet(json));
-                // Rättigheter
-                xls.Add(GenRattighetSheet(json));
+                xls.Add(GenFastighetFlik(excelInfoLista));
+                if (samfallighetParam) // Samfälligheter
+                    xls.Add(GenSamfallighetFlik(excelInfoLista));
+                if (gaParam) // Gemensamhetsanläggningar
+                    xls.Add(GenGAFlik(json));
+                if (rattighetParam) // Rättigheter
+                    xls.Add(GenRattighetFlik(json));
 
-                return GenerateExcel(xls);
+                return GenExcel(xls);
             }
             catch (Exception e)
             {
@@ -154,172 +168,79 @@ namespace MapService.Controllers
         /// Försökt använda WCF i .NET utan att lyckas. Enligt LM krävs att man redigerar i de genererade filerna för att det ska funka med WCF och .NET
         /// https://www.lantmateriet.se/sv/Kartor-och-geografisk-information/Geodatatjanster/Fragor-och-svar/Direktatkomsttjanster-/?faq=c31f
         /// Använder därför SOAP utan ramverk. När tjänsten finns som REST med JSON-format bör denna portas från SOAP till REST.
+        /// Logik.
+        /// 1. Hämta alla fastigheter som användaren har begärt. Lägg dessa i primär fastighetslista lägg samfälligheterna i särskild lista
+        /// 2. Hämta alla rättigheter för fastigheter i primär lista
+        /// 3. Hämta de fastigheter som refereras av rättigheter och som inte redan har hämtats. Dessa läggs i sekundär lista
+        /// 4. Fyll på primär lista med taxerad ägare
+        /// 5. Hämta alla GA mha primär fastighetslista
+        /// 6. Skapa de olika flikarna i Excel med data ovan
         /// </summary>
-        /// <param name="json"></param>
-        /// <returns></returns>
-        private ExcelTemplate GenFastighetSheet(string json)
+        private void GetFastighet(List<FastighetArea> fastighetLista, bool primarFastighet, bool persnr, ref ExcelInfoLista excelInfoLista)
         {
             string fastighetsBeteckning = "";
             try
             {
-                string soapEnvelope = "<?xml version=\"1.0\" encoding=\"utf-8\"?><soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\"><soap:Body><GetInskrivningRequest xmlns=\"http://namespace.lantmateriet.se/distribution/produkter/inskrivning/v2.1\"><InskrivningRegisterenhetFilter>{0}</InskrivningRegisterenhetFilter><IncludeData><total>true</total></IncludeData></GetInskrivningRequest></soap:Body></soap:Envelope>";
-                string uuidFormat = "<objektidentitet>{0}</objektidentitet>";
-                string fnrFormat = "<fastighetsnyckel>{0}</fastighetsnyckel>";
+                // Hämta information om ägande för fastigheten (anges i includeData)
+                string soapEnvelope = "<?xml version=\"1.0\" encoding=\"utf-8\"?><soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\"><soap:Body><GetInskrivningRequest xmlns=\"{0}\"><InskrivningRegisterenhetFilter>{1}</InskrivningRegisterenhetFilter><IncludeData><agare>true</agare></IncludeData></GetInskrivningRequest></soap:Body></soap:Envelope>";
 
-                // TODO: Endast skicka 250 fastigheter åt gången
-                List<string> fnrList, uuidList;
-                string regEnhFilter = "";
-                JToken jsonBody = JsonConvert.DeserializeObject<JToken>(json);
-                if (jsonBody.SelectToken("fnr") != null)
+                var maxFastighet = 100;// Endast skicka 100 fastigheter åt gången (för prestanda)
+                for (int n = 0; n*maxFastighet < fastighetLista.Count; n++)
                 {
-                    fnrList = GetList(jsonBody.SelectToken("fnr"));
+                    string regEnhFilter = GetInskrivningRegisterenhetFilter(fastighetLista, n, maxFastighet);
 
-                    regEnhFilter = GetInskrivningRegisterenhetFilter(fnrList, fnrFormat, 0);
+                    string soapBody = string.Format(soapEnvelope, ConfigurationManager.AppSettings["firLMNamespaceInskrivning"], regEnhFilter);
+                    var request = GetWebRequestPost("firLMUrlServiceInskrivning", "");
+                    WritePostBody(request, "application/soap+xml", soapBody, new ASCIIEncoding());
+                    var res = ReadPostResponse(request);
+                    XmlDocument doc = new XmlDocument();
+                    doc.LoadXml(res);
 
-                    //fnrList = new List<string>();
-                    //var fnr = jsonBody.SelectToken("fnr").Values();
-                    //foreach (var item in fnr)
-                    //{
-                    //    fnrList.Add(item.ToString());
-                    //    //regEnhFilter += string.Format(fnrFormat, item.ToString());
-                    //}
-                }
-                else if (jsonBody.SelectToken("uuid") != null)
-                {
-                    uuidList = GetList(jsonBody.SelectToken("uuid"));
+                    // Add the namespace.  
+                    XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
+                    nsmgr.AddNamespace("env", "http://www.w3.org/2003/05/soap-envelope");
+                    nsmgr.AddNamespace("ns4", ConfigurationManager.AppSettings["firLMNamespaceInskrivning"]);
 
-                    regEnhFilter = GetInskrivningRegisterenhetFilter(uuidList, uuidFormat, 0);
-
-                    //var uuid = jsonBody.SelectToken("uuid");
-                    //foreach (var item in uuid)
-                    //{
-                    //    regEnhFilter += string.Format(uuidFormat, item.ToString());
-                    //}
-                }
-                else
-                {
-                    throw new HttpException(500, "Invalid JSON body");
-                }
-
-                string soapBody = string.Format(soapEnvelope, regEnhFilter);
-
-                CookieContainer myContainer = new CookieContainer();
-                var request = (HttpWebRequest)WebRequest.Create("http://services-ver.lantmateriet.se/distribution/produkter/inskrivning/v2.1");
-                request.Credentials = new NetworkCredential(ConfigurationManager.AppSettings["firLMServiceUser"], ConfigurationManager.AppSettings["firLMServicePassword"]);
-                request.CookieContainer = myContainer;
-                request.PreAuthenticate = true;
-                request.Method = "POST";
-                request.Timeout = 20000;
-
-                var encoding = new ASCIIEncoding();
-                byte[] bytes = encoding.GetBytes(soapBody);
-
-                request.ContentType = "application/soap+xml";
-                request.ContentLength = bytes.Length;
-
-                using (var reqStream = request.GetRequestStream())
-                {
-                    reqStream.Write(bytes, 0, bytes.Length);
-                }
-
-                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-                {
-                    using (var stream = new StreamReader(response.GetResponseStream()))
+                    // Hämta fastighetsbeteckning
+                    var nodeListInskrivningsInfo = doc.SelectNodes("//env:Envelope/env:Body/ns4:InskrivningResponse/ns4:InskrivningMember/ns4:Inskrivningsinformation", nsmgr);
+                    foreach (XmlNode nodeInskrivning in nodeListInskrivningsInfo)
                     {
-                        var res = stream.ReadToEnd();
-                        XmlDocument doc = new XmlDocument();
-                        doc.LoadXml(res);
+                        fastighetsBeteckning = nodeInskrivning["ns4:Registerenhetsreferens"]["ns4:beteckning"].InnerText;
+                        var uuid = nodeInskrivning["ns4:Registerenhetsreferens"]["ns4:objektidentitet"].InnerText;
 
-                        // Add the namespace.  
-                        XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
-                        nsmgr.AddNamespace("env", "http://www.w3.org/2003/05/soap-envelope");
-                        nsmgr.AddNamespace("ns4", "http://namespace.lantmateriet.se/distribution/produkter/inskrivning/v2.1");
+                        if (excelInfoLista.fastighetPrimarLista.Exists(item => item.uuid == uuid)) // Inte lägga till dubletter till primär fsatigheslista
+                            continue;
 
-                        // Skapa JSON för fliken Fastighetförteckning
-                        ExcelTemplate xls = new ExcelTemplate();
-                        xls.TabName = "Fastighetsförteckning";
-                        xls.Cols = new List<string>(new string[] { "Beteckning", "Andel", "Ägare/Innehavare", "c/o", "Adress", "Postnummer", "Postadress", "Notering" });
-                        xls.Rows = new List<List<object>>();
+                        var fastighetArea = fastighetLista.Find(item => item.uuid == uuid);
+                        var resFastighetInfo = new FastighetInfo(fastighetArea, fastighetsBeteckning);
 
-                        // Hämta fastighetsbeteckning
-                        var nodeListInskrivningsInfo = doc.SelectNodes("//env:Envelope/env:Body/ns4:InskrivningResponse/ns4:InskrivningMember/ns4:Inskrivningsinformation", nsmgr);
-                        foreach (XmlNode nodeInskrivning in nodeListInskrivningsInfo)
+                        // Ägare kan finnas både under Lagfart och under Tomträttsinnehav.
+                        var nodeLagfart = nodeInskrivning.SelectNodes("ns4:Agande/ns4:Lagfart", nsmgr);
+                        var nodeTomtratt = nodeInskrivning.SelectNodes("ns4:Agande/ns4:Tomtrattsinnehav", nsmgr);
+
+                        if (nodeLagfart.Count > 0 || nodeTomtratt.Count > 0)
                         {
-                            var typ = nodeInskrivning["ns4:Registerenhetsreferens"]["ns4:typ"]; // TODO: Kontrollera vilka fler typer det finns (samfällighet?)
-                            fastighetsBeteckning = nodeInskrivning["ns4:Registerenhetsreferens"]["ns4:beteckning"].InnerText;
-                            _log.DebugFormat("Fastighet '{0}' med följande typ: '{1}'", fastighetsBeteckning, typ.InnerText);
-
-                            // Ägare kan finnas både under Lagfart och under Tomträttsinnehav.
-                            // TODO: Testa Tomträttsinnehavare
-                            // Enligt dokumentation ska Lagfart och Tomtrattsinnehav ha samma egenskaper förutom Lagfartsanmarkning och Tomtrattsinnehavsanmarkning
-                            var nodeList = nodeInskrivning.SelectNodes("ns4:Agande/ns4:Lagfart", nsmgr);
-                            if (nodeList.Count == 0)
-                                nodeList = nodeInskrivning.SelectNodes("ns4:Agande/ns4:Tomtrattsinnehav", nsmgr);
-
-                            if (nodeList.Count > 0)
+                            foreach (XmlNode node in nodeLagfart)
                             {
-                                foreach (XmlNode node in nodeList)
-                                {
-                                    if (node["ns4:BeviljadAndel"] != null)
-                                    {
-                                        var andel = node["ns4:BeviljadAndel"]["ns4:taljare"].InnerText + "/" + node["ns4:BeviljadAndel"]["ns4:namnare"].InnerText;
-
-                                        string agare, coAdress, adress, postnr, postort;
-                                        agare = coAdress = adress = postnr = postort = "Not Found";
-                                        var agareOrg = node["ns4:Agare"]["ns4:Organisation"];
-                                        var agarePerson = node["ns4:Agare"]["ns4:Person"];
-                                        if (agareOrg != null)
-                                        {
-                                            agare = agareOrg["ns4:organisationsnamn"].InnerText;
-                                            coAdress = "";
-                                            if (agareOrg["ns4:Adress"] != null)
-                                            {
-                                                if (agareOrg["ns4:Adress"]["ns4:coAdress"] != null)
-                                                    coAdress = agareOrg["ns4:Adress"]["ns4:coAdress"].InnerText;
-                                                adress = "";
-                                                if (agareOrg["ns4:Adress"]["ns4:utdelningsadress2"] != null)
-                                                    adress = agareOrg["ns4:Adress"]["ns4:utdelningsadress2"].InnerText;
-                                                if (agareOrg["ns4:Adress"]["ns4:utdelningsadress1"] != null)
-                                                    adress += agareOrg["ns4:Adress"]["ns4:utdelningsadress1"].InnerText;
-                                                postnr = agareOrg["ns4:Adress"]["ns4:postnummer"].InnerText;
-                                                postort = agareOrg["ns4:Adress"]["ns4:postort"].InnerText;
-                                            }
-                                        }
-                                        else if (agarePerson != null)
-                                        {
-                                            agare = agarePerson["ns4:fornamn"].InnerText + " " + agarePerson["ns4:efternamn"].InnerText;
-                                            coAdress = "";
-                                            if (agarePerson["ns4:Adress"] != null)
-                                            {
-                                                if (agarePerson["ns4:Adress"]["ns4:coAdress"] != null)
-                                                    coAdress = agarePerson["ns4:Adress"]["ns4:coAdress"].InnerText;
-                                                adress = agarePerson["ns4:Adress"]["ns4:utdelningsadress2"].InnerText;
-                                                if (agarePerson["ns4:Adress"]["ns4:utdelningsadress1"] != null)
-                                                    adress += agarePerson["ns4:Adress"]["ns4:utdelningsadress1"].InnerText;
-                                                postnr = agarePerson["ns4:Adress"]["ns4:postnummer"].InnerText;
-                                                postort = agarePerson["ns4:Adress"]["ns4:postort"].InnerText;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (node["ns4:Agare"]["ns4:fornamn"] != null && node["ns4:Agare"]["ns4:efternamn"] != null)
-                                                agare = node["ns4:Agare"]["ns4:fornamn"].InnerText + " " + node["ns4:Agare"]["ns4:efternamn"].InnerText;
-                                            else if (node["ns4:Agare"]["ns4:organisationsnamn"] != null)
-                                                agare = node["ns4:Agare"]["ns4:organisationsnamn"].InnerText;
-                                        }
-
-                                        xls.Rows.Add(new List<object>(new string [] { fastighetsBeteckning, andel, agare, coAdress, adress, postnr, postort, "Lagfart" }));
-                                    }
-                                }
+                                var resOwner = GetAgareInfo(node, persnr, "Lagfart");
+                                resFastighetInfo.lagfarenAgareLista.Add(resOwner);
                             }
-                            else
+                            foreach (XmlNode node in nodeTomtratt)
                             {
-                                // Kan finnas fastigheter utan ägande. Lägga med dem i fliken så får användaren ta bort dem manuellt
-                                xls.Rows.Add(new List<object>(new string[] { fastighetsBeteckning, "", "", "", "", "", "", "Ingen ägare funnen" }));
+                                var resOwner = GetAgareInfo(node, persnr, "Tomträtt");
+                                resFastighetInfo.lagfarenAgareLista.Add(resOwner);
                             }
                         }
+                        else
+                        {
+                            // Kan finnas fastigheter utan ägande.
+                            resFastighetInfo.lagfarenAgareLista.Add(new Agare("-"));
+                        }
 
-                        return xls;
+                        if(primarFastighet)
+                            excelInfoLista.fastighetPrimarLista.Add(resFastighetInfo);
+                        else
+                            excelInfoLista.fastighetSekundarLista.Add(resFastighetInfo);
                     }
                 }
             }
@@ -330,46 +251,260 @@ namespace MapService.Controllers
             }
         }
 
-        private string GetInskrivningRegisterenhetFilter(List<string> list, string format, int n)
+        private Agare GetAgareInfo(XmlNode node, bool persnr, string notering)
+        {
+            var resOwner = new Agare("-", notering);
+            if (node["ns4:BeviljadAndel"] != null)
+            {
+                resOwner.andel = node["ns4:BeviljadAndel"]["ns4:taljare"].InnerText + "/" + node["ns4:BeviljadAndel"]["ns4:namnare"].InnerText;
+
+                var agareOrg = node["ns4:Agare"]["ns4:Organisation"];
+                var agarePerson = node["ns4:Agare"]["ns4:Person"];
+                if (agareOrg != null)
+                {
+                    resOwner.agare = agareOrg["ns4:organisationsnamn"].InnerText;
+                    if (agareOrg["ns4:organisationsnummer"] != null && persnr)
+                        resOwner.persnr = agareOrg["ns4:organisationsnummer"].InnerText;
+                    if (agareOrg["ns4:Adress"] != null)
+                    {
+                        if (agareOrg["ns4:Adress"]["ns4:coAdress"] != null)
+                            resOwner.coAdress = agareOrg["ns4:Adress"]["ns4:coAdress"].InnerText;
+                        if (agareOrg["ns4:Adress"]["ns4:utdelningsadress2"] != null)
+                            resOwner.adress = agareOrg["ns4:Adress"]["ns4:utdelningsadress2"].InnerText;
+                        if (agareOrg["ns4:Adress"]["ns4:utdelningsadress1"] != null)
+                            resOwner.adress += agareOrg["ns4:Adress"]["ns4:utdelningsadress1"].InnerText;
+                        resOwner.postnr = agareOrg["ns4:Adress"]["ns4:postnummer"].InnerText;
+                        resOwner.postort = agareOrg["ns4:Adress"]["ns4:postort"].InnerText;
+                    }
+                }
+                else if (agarePerson != null)
+                {
+                    resOwner.agare = agarePerson["ns4:fornamn"].InnerText + " " + agarePerson["ns4:efternamn"].InnerText;
+                    if (agarePerson["ns4:personnummer"] != null && persnr)
+                        resOwner.persnr = agarePerson["ns4:personnummer"].InnerText;
+                    if (agarePerson["ns4:Adress"] != null)
+                    {
+                        if (agarePerson["ns4:Adress"]["ns4:coAdress"] != null)
+                            resOwner.coAdress = agarePerson["ns4:Adress"]["ns4:coAdress"].InnerText;
+                        if (agarePerson["ns4:Adress"]["ns4:utdelningsadress2"] != null)
+                            resOwner.adress = agarePerson["ns4:Adress"]["ns4:utdelningsadress2"].InnerText;
+                        if (agarePerson["ns4:Adress"]["ns4:utdelningsadress1"] != null)
+                            resOwner.adress += agarePerson["ns4:Adress"]["ns4:utdelningsadress1"].InnerText;
+                        resOwner.postnr = agarePerson["ns4:Adress"]["ns4:postnummer"].InnerText;
+                        resOwner.postort = agarePerson["ns4:Adress"]["ns4:postort"].InnerText;
+                    }
+                }
+                else
+                {
+                    if (node["ns4:Agare"]["ns4:fornamn"] != null && node["ns4:Agare"]["ns4:efternamn"] != null)
+                        resOwner.agare = node["ns4:Agare"]["ns4:fornamn"].InnerText + " " + node["ns4:Agare"]["ns4:efternamn"].InnerText;
+                    else if (node["ns4:Agare"]["ns4:organisationsnamn"] != null)
+                        resOwner.agare = node["ns4:Agare"]["ns4:organisationsnamn"].InnerText;
+                }
+            }
+
+            return resOwner;
+        }
+
+        private List<string> GetRattighetsId(List<FastighetArea> fastighetLista)
+        {
+            List<string> resUuidList = new List<string>();
+
+            // TODO: Kontrollera vilken information som ska hämtas
+            // Hämta information om rättigheter för fastigheten (anges i includeData)
+            string soapEnvelope = "<?xml version=\"1.0\" encoding=\"utf-8\"?><soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\"><soap:Body><FindRattighetRequest xmlns=\"{0}\" ><RegisterenhetFilter>{1}</RegisterenhetFilter></FindRattighetRequest></soap:Body></soap:Envelope>";
+
+            var maxFastighet = 1;// Endast skicka 100 fastigheter åt gången (för prestanda). Varberg får endast fråga efter en fastighet i taget
+            for (int n = 0; n * maxFastighet < fastighetLista.Count; n++)
+            {
+                string regEnhFilter = GetInskrivningRegisterenhetFilter(fastighetLista, n, maxFastighet);
+
+                string soapBody = string.Format(soapEnvelope, ConfigurationManager.AppSettings["firLMNamespaceRattighet"], regEnhFilter);
+                //string soapBody = "<?xml version=\"1.0\" encoding=\"utf-8\"?><soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\"><soap:Body><FindRattighetRequest xmlns=\"http://namespace.lantmateriet.se/distribution/produkter/rattighet/v1.4\"><RegisterenhetFilter><objektidentitet>909a6a63-30d7-90ec-e040-ed8f66444c3f</objektidentitet></RegisterenhetFilter></FindRattighetRequest></soap:Body></soap:Envelope>";
+                var request = GetWebRequestPost("firLMUrlServiceRattighet", "");
+                WritePostBody(request, "application/soap+xml", soapBody, new ASCIIEncoding());
+                var res = ReadPostResponse(request);
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(res);
+
+                // Add the namespace.  
+                XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
+                nsmgr.AddNamespace("env", "http://www.w3.org/2003/05/soap-envelope");
+                nsmgr.AddNamespace("app", ConfigurationManager.AppSettings["firLMNamespaceRattighet"]);
+
+                var nodeListRattighetLast = doc.SelectNodes("//env:Envelope/env:Body/app:RattighetsreferensResponse/app:Last", nsmgr);
+                var nodeListRattighetForman = doc.SelectNodes("//env:Envelope/env:Body/app:RattighetsreferensResponse/app:Forman", nsmgr);
+
+                foreach (XmlNode node in nodeListRattighetLast)
+                {
+                    resUuidList.Add(node["app:Rattighetsreferens"]["app:objektidentitet"].InnerText);
+                }
+                foreach (XmlNode node in nodeListRattighetForman)
+                {
+                    // TODO: Kontrollera Förmån
+                    resUuidList.Add(node["app:Rattighetsreferens"]["app:objektidentitet"].InnerText);
+                }
+            }
+
+            return resUuidList;
+        }
+
+        private void GetRattighet(List<FastighetArea> fastighetLista, ref ExcelInfoLista excelInfoLista)
+        {
+            string rattighetsUuid = "";
+            try
+            {
+                // Hämta alla rättigheter som finns för fastigheterna
+                var rattighetLista = GetRattighetsId(fastighetLista);
+
+                // TODO: Kontrollera vilken information som ska hämtas
+                // Hämta information om rättigheter för fastigheten (anges i IncludeData). OBS! Stort I på IncludeData i denna tjänst
+                string soapEnvelope = "<?xml version=\"1.0\" encoding=\"utf-8\"?><soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://www.w3.org/2003/05/soap-envelope\"><soap:Body><GetRattighetRequest xmlns=\"{0}\" ><objektidentitet>{1}</objektidentitet><IncludeData><total>true</total></IncludeData></GetRattighetRequest></soap:Body></soap:Envelope>";
+
+                // Tjänsten stöder endast att man hämtar en rättighet åt gången
+                for (int n = 0; n < rattighetLista.Count; n++)
+                {
+                    //string regEnhFilter = GetInskrivningRegisterenhetFilter(rattighetLista, n, 1);
+                    rattighetsUuid = rattighetLista[n];
+                    string soapBody = string.Format(soapEnvelope, ConfigurationManager.AppSettings["firLMNamespaceRattighet"], rattighetsUuid);
+                    var request = GetWebRequestPost("firLMUrlServiceRattighet", "");
+                    WritePostBody(request, "application/soap+xml", soapBody, new ASCIIEncoding());
+                    var res = ReadPostResponse(request);
+                    XmlDocument doc = new XmlDocument();
+                    doc.LoadXml(res);
+
+                    // Add the namespace.  
+                    XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
+                    nsmgr.AddNamespace("env", "http://www.w3.org/2003/05/soap-envelope");
+                    nsmgr.AddNamespace("app", ConfigurationManager.AppSettings["firLMNamespaceRattighet"]);
+
+                    // Hämta fastighetsbeteckning
+                    var nodeRattighet = doc.SelectSingleNode("//env:Envelope/env:Body/app:RattighetResponse/app:RattighetMember", nsmgr);
+                    if (nodeRattighet["app:Avtalsservitut"] != null)
+                    {
+                        var nodeAvtalsServitut = nodeRattighet["app:Avtalsservitut"];
+                        string rattighetsbeteckning = nodeAvtalsServitut["app:rattighetsbeteckning"].InnerText;
+                        var nodeFormanList = nodeAvtalsServitut.SelectNodes("app:Forman", nsmgr);
+                        foreach (XmlNode node in nodeFormanList)
+                        {
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                _log.FatalFormat("Can't get real estate owner list. GetRattighet '{0}', {1}", rattighetsUuid, e);
+                throw e;
+            }
+        }
+
+        private string GetInskrivningRegisterenhetFilter(List<FastighetArea> list, int n, int maxFastighet)
         {
             string res = "";
-            for (int i = n * 100; i < list.Count && i < (n + 1) * 100; i++)
+            string format = "<objektidentitet>{0}</objektidentitet>";
+
+            for (int i = n * maxFastighet; i < list.Count && i < (n + 1) * maxFastighet; i++)
             {
-                res += string.Format(format, list[i]);
+                res += string.Format(format, list[i].uuid);
             }
 
             return res;
         }
 
-        private List<string> GetList(JToken jToken)
+        /// <summary>
+        /// Returnerar listor med fastigheter och samfälligheter uuid. Konverterar fnr till uuid om det behövs och slår upp total area
+        /// </summary>
+        private FastighetSamfallighetLista GetFastighetAndSamfallighet(string json)
         {
-            var res = new List<string>();
+            var res = new FastighetSamfallighetLista();
 
-            foreach (var item in jToken)
+            JToken jsonBody = JsonConvert.DeserializeObject<JToken>(json);
+            JToken jToken = jsonBody.SelectToken("fnr");
+            if (jToken == null)
+                jToken = jsonBody.SelectToken("uuid");
+            if (jToken == null)
+                throw new HttpException(500, "Invalid JSON body");
+            var items = new List<string>(jToken.Values<string>());
+
+            for (int i = 0; i < items.Count;)
             {
-                res.Add(item.ToString());
+                string bodyContent = "";
+                for (int j = 0; j < 1 && i < items.Count; j++, i++) // TODO: Öka detta till 250 när Varbergs konto har den rättigheten
+                {
+                    bodyContent += j > 0 ? "," + "\"" + items[i] + "\"" : "\"" + items[i] + "\"";
+                }
+                var request = GetWebRequestPost("firLMUrlServiceFastighet", "?includeData=basinformation");
+                WritePostBody(request, "application/json", string.Format("[{0}]", bodyContent), new ASCIIEncoding());
+                string resp = ReadPostResponse(request);
+
+                JToken jsonFastigheter = JsonConvert.DeserializeObject<JToken>(resp).SelectToken("features");
+                foreach (var item in jsonFastigheter)
+                {
+                    string totalArea = "";
+                    var typ = item.SelectToken("$.properties.typ").ToString();
+                    if (typ.Equals("Fastighet"))
+                    {
+                        string uuid = item.SelectToken("$.properties.objektidentitet").ToString();
+                        if(item.SelectToken("$.properties.fastighetsattribut.totalRegisterarea") != null)
+                            totalArea = item.SelectToken("$.properties.fastighetsattribut.totalRegisterarea").ToString();
+                        res.fastighetLista.Add( new FastighetArea(uuid, totalArea));
+                    }
+                    else if (typ.Equals("Samfällighet"))
+                    {
+                        var jBeteckning = item.SelectToken("$.properties.registerbeteckning");
+                        var beteckning = jBeteckning.SelectToken("$.registeromrade").ToString() + " " + jBeteckning.SelectToken("$.traktnamn").ToString() + " " + jBeteckning.SelectToken("$.block").ToString() + ":" + jBeteckning.SelectToken("$.enhet").ToString();
+                        if(item.SelectToken("$.properties.samfallighetsattribut.totalRegisterarea") != null)
+                            totalArea = item.SelectToken("$.properties.samfallighetsattribut.totalRegisterarea").ToString();
+                        res.samfallighetLista.Add(new SamfallighetArea(beteckning, totalArea));
+                    }
+                }
             }
 
             return res;
         }
 
-        private ExcelTemplate GenMarksamfallighetSheet(string json)
+        private ExcelTemplate GenFastighetFlik(ExcelInfoLista excelInfoLista)
         {
-            // TODO: Hämta värden från LM Direkt
-            // Osäker på vad som menas med marksamfälligheter. Är det någon form av samfällighetsförening kan dessa hittas i tjänsten nedan.
-            // Värden för detta hittas i tjänsten Samfällighetsförening Direkt
-
-            // Skapa fliken Marksamfälligheter
+            // Skapa fliken Fastighetsförteckning
             ExcelTemplate xls = new ExcelTemplate();
-            xls.TabName = "Marksamfälligheter";
-            xls.Cols = new List<string>(new string[] { "Marksamfälligheter" });
+            xls.TabName = "Fastighetsförteckning";
+            xls.Cols = new List<string>(new string[] { "Beteckning", "Total Area", "Ägandeform", "Andel", "Ägare/Innehavare", "Person-/Organisationsnummer", "c/o", "Adress", "Postnummer", "Postadress", "Notering" });
             xls.Rows = new List<List<object>>();
-            xls.Rows.Add(new List<object>(new string[] { "Not implemented" }));
+
+            foreach(var realEstate in excelInfoLista.fastighetPrimarLista)
+            {
+                foreach (var lagfarenAgare in realEstate.lagfarenAgareLista)
+                {
+                    xls.Rows.Add(new List<object>(new string[] { realEstate.fastighetsBeteckning, realEstate.totalArea, lagfarenAgare.notering, lagfarenAgare.andel, lagfarenAgare.agare, lagfarenAgare.persnr, lagfarenAgare.coAdress, lagfarenAgare.adress, lagfarenAgare.postnr, lagfarenAgare.postort, "" }));
+                }
+            }
+
+            if (xls.Rows.Count == 0)
+                xls.Rows.Add(new List<object>(new string[] { "", "", "", "", "", "", "", "", "", "", "" }));
 
             return xls;
         }
 
-        private ExcelTemplate GenGASheet(string json)
+        private ExcelTemplate GenSamfallighetFlik(ExcelInfoLista excelInfoLista)
+        {
+            // Skapa fliken Marksamfälligheter
+            ExcelTemplate xls = new ExcelTemplate();
+            xls.TabName = "Samfälligheter";
+            xls.Cols = new List<string>(new string[] { "Samfälligheter" });
+            xls.Rows = new List<List<object>>();
+
+            foreach (var samfallighet in excelInfoLista.samfallighetLista)
+            {
+                xls.Rows.Add(new List<object>(new string[] { samfallighet.beteckning }));
+            }
+
+            if(xls.Rows.Count==0)
+                xls.Rows.Add(new List<object>(new string[] { "" }));
+
+            return xls;
+        }
+
+        private ExcelTemplate GenGAFlik(string json)
         {
             // TODO: Hämta värden från LM Direkt
             // Värden för detta hittas i tjänsten Gemensamhetsanläggning Direkt
@@ -381,10 +516,13 @@ namespace MapService.Controllers
             xls.Rows = new List<List<object>>();
             xls.Rows.Add(new List<object>(new string[] { "Not implemented" }));
 
+            if (xls.Rows.Count == 0)
+                xls.Rows.Add(new List<object>(new string[] { "" }));
+
             return xls;
         }
 
-        private ExcelTemplate GenRattighetSheet(string json)
+        private ExcelTemplate GenRattighetFlik(string json)
         {
             // TODO: Hämta värden från LM Direkt
             // Värden för detta hittas i tjänsten Inskrivning Direkt
@@ -392,14 +530,17 @@ namespace MapService.Controllers
             // Skapa fliken Rättigheter
             ExcelTemplate xls = new ExcelTemplate();
             xls.TabName = "Rättigheter";
-            xls.Cols = new List<string>(new string[] { "Avtalsrättighet", "Till förmån för", "Till last för", "Andel", "Ägare/Innehavare", "c/o", "Adress", "Postnummer", "Postadress" });
+            xls.Cols = new List<string>(new string[] { "Avtalsrättighet", "Till förmån för", "Till last för", "Andel", "Ägare/Innehavare", "Person-/Organisationsnummer", "c/o", "Adress", "Postnummer", "Postadress" });
             xls.Rows = new List<List<object>>();
-            xls.Rows.Add(new List<object>(new string[] { "Not implemented", "", "", "", "", "", "", "", "" }));
+            xls.Rows.Add(new List<object>(new string[] { "Not implemented", "", "", "", "", "", "", "", "", "" }));
+
+            if (xls.Rows.Count == 0)
+                xls.Rows.Add(new List<object>(new string[] { "" }));
 
             return xls;
         }
 
-        private string GenerateExcel(List<ExcelTemplate> xls)
+        private string GenExcel(List<ExcelTemplate> xls)
         {
             try
             {
@@ -435,4 +576,81 @@ namespace MapService.Controllers
             return fileInfo;
         }
     }
+
+    internal class FastighetSamfallighetLista
+    {
+        public List<FastighetArea> fastighetLista = new List<FastighetArea>();
+        public List<SamfallighetArea> samfallighetLista = new List<SamfallighetArea>();
+    }
+
+    internal class FastighetArea
+    {
+        public string uuid;
+        public string totalArea;
+
+        public FastighetArea(string uuid, string totalArea)
+        {
+            this.uuid = uuid;
+            this.totalArea = totalArea;
+        }
+    }
+
+    internal class SamfallighetArea
+    {
+        public string beteckning;
+        public string totalArea;
+
+        public SamfallighetArea(string beteckning, string totalArea)
+        {
+            this.beteckning = beteckning;
+            this.totalArea = totalArea;
+        }
+    }
+
+    internal class ExcelInfoLista
+    {
+        public List<FastighetInfo> fastighetPrimarLista = new List<FastighetInfo>();
+        public List<Rattighet> rattighetLista = new List<Rattighet>();
+        public List<SamfallighetArea> samfallighetLista = new List<SamfallighetArea>();
+        public List<FastighetInfo> fastighetSekundarLista = new List<FastighetInfo>();
+        public List<string> gaLista = new List<string>();
+    }
+
+    internal class FastighetInfo
+    {
+        public string uuid = "";
+        public string fastighetsBeteckning = "";
+        public List<Agare> lagfarenAgareLista = new List<Agare>();
+        public List<Agare> taxeradAgareLista = new List<Agare>();
+        public string totalArea;
+
+        public FastighetInfo(FastighetArea fastighetArea, string fastbet)
+        {
+            this.uuid = fastighetArea.uuid;
+            fastighetsBeteckning = fastbet;
+            totalArea = fastighetArea.totalArea;
+        }
+    }
+
+    internal class Agare
+    {
+        public string andel, agare, persnr, coAdress, adress, postnr, postort, notering;
+        public Agare(string init, string notering = "")
+        {
+            andel = agare = persnr = adress = postnr = postort = init;
+            coAdress = "";
+            this.notering = notering;
+        }
+    }
+
+    internal class Rattighet
+    {
+        public string avtalsRattighet, formanFor, lastFor, andel, agare, persnr, coAdress, adress, postnr, postort;
+
+        public Rattighet(string init)
+        {
+            avtalsRattighet = formanFor = lastFor = andel = agare = persnr = coAdress = adress = postnr = postort = init;
+        }
+    }
 }
+
