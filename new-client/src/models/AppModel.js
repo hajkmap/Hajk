@@ -278,6 +278,11 @@ class AppModel {
       .sort((a, b) => this.layers[a].drawOrder - this.layers[b].drawOrder)
       .map(sortedKey => this.layers[sortedKey])
       .forEach(layer => {
+        if (this.layersFromParams) {
+          layer.visibleAtStart = this.layersFromParams.some(
+            layerId => layerId === layer.id
+          );
+        }
         this.addMapLayer(layer);
       });
 
@@ -299,7 +304,8 @@ class AppModel {
   mergeConfig(a, b) {
     var x = parseFloat(b.x),
       y = parseFloat(b.y),
-      z = parseInt(b.z, 10);
+      z = parseInt(b.z, 10),
+      l = b.l ? b.l.split(",") : [];
 
     if (isNaN(x)) {
       x = a.map.center[0];
@@ -311,11 +317,13 @@ class AppModel {
       z = a.map.zoom;
     }
 
-    // The parameters s and v can also be specified through the url. These are decoded and used in searchbar.jsx
-    // for snabbsok.
     a.map.center[0] = x;
     a.map.center[1] = y;
     a.map.zoom = z;
+
+    if (l) {
+      this.layersFromParams = l;
+    }
 
     return a;
   }

@@ -272,10 +272,10 @@
           }
         ],
         "instruction": "",
-        "active": false,
+        "active": true,
         "visibleAtStart": false,
-        "backgroundSwitcherBlack": true,
-        "backgroundSwitcherWhite": true,
+        "backgroundSwitcherBlack": false,
+        "backgroundSwitcherWhite": false,
         "toggleAllButton": true,
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Rubrik temakarta",
@@ -306,18 +306,9 @@
       "index": 0
     },
     {
-      "type": "informative",
-      "options": {
-        "target": "right",
-        "visibleAtStart": false,
-        "visibleForGroups": []
-      },
-      "index": 0
-    },
-    {
       "type": "information",
       "options": {
-        "target": "left",
+        "target": "toolbar",
         "text": "<p>Text som förtydligar varför, vad och hur… Lorem ipsum dolor sit amet, consectetur \nadipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna \naliqua.</p>\n<h1>VI VILL HÖRA DIN ÅSIKT!</h1>",
         "headerText": "HÄR KAN DU SE VAD SOM PLANERAS I DITT OMRÅDE",
         "visibleAtStart": true,
@@ -328,13 +319,10 @@
       "index": 0
     },
     {
-      "type": "collector",
+      "type": "anchor",
       "options": {
-        "target": "right",
-        "url": "http://demo.giscloud.se/geoserver/wfs",
-        "featureType": "opinion",
-        "featureNS": "wsp",
-        "visibleAtStart": false,
+        "target": "toolbar",
+        "instruction": "",
         "visibleForGroups": []
       },
       "index": 0
@@ -342,50 +330,18 @@
     {
       "type": "simple_layerswitcher",
       "options": {
-        "target": "left",
+        "target": "toolbar",
         "visibleAtStart": false,
         "visibleForGroups": []
       },
       "index": 0
     },
     {
-      "type": "search",
+      "type": "edit",
       "options": {
-        "target": "appbar",
-        "onMap": false,
-        "bothSynlig": false,
-        "enableViewTogglePopupInSnabbsok": true,
-        "toolbar": "bottom",
-        "maxZoom": 14,
-        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
-        "kmlExportUrl": "/mapservice/export/kml",
-        "excelExportUrl": "/mapservice/export/excel",
-        "displayPopup": true,
-        "selectionTools": true,
-        "base64Encode": false,
+        "target": "toolbar",
         "instruction": "",
-        "filterVisible": true,
-        "anchor": [
-          16,
-          32
-        ],
-        "imgSize": [
-          32,
-          32
-        ],
-        "popupOffsetY": 0,
-        "visibleForGroups": [],
-        "layers": [],
-        "selectedSources": [
-          "23",
-          "15",
-          "14",
-          "17",
-          "16",
-          "22",
-          "18",
-          "19"
-        ]
+        "visibleForGroups": []
       },
       "index": 0
     }
