@@ -278,7 +278,7 @@ class AppModel {
       .sort((a, b) => this.layers[a].drawOrder - this.layers[b].drawOrder)
       .map(sortedKey => this.layers[sortedKey])
       .forEach(layer => {
-        if (this.layersFromParams) {
+        if (this.layersFromParams.length > 0) {
           layer.visibleAtStart = this.layersFromParams.some(
             layerId => layerId === layer.id
           );
