@@ -14,14 +14,14 @@ var FirModelProperties = {
     title: 'FIR',
     visible: false,
     value: '',
-    filter: 'Fastighet',
+    filter: '',
     filterVisibleActive: false,
     markerImg: 'assets/icons/marker.png',
     base64Encode: false,
-    instruction: 'A',
-    instructionSokning: 'B',
-    instructionHittaGrannar: 'C',
-    instructionSkapaFastighetsforteckning:'D',
+    instruction: '',
+    instructionSokning: '',
+    instructionHittaGrannar: '',
+    instructionSkapaFastighetsforteckning: '',
     searchExpandedClassButton: "fa fa-angle-up clickable arrow pull-right",
     searchMinimizedClassButton: "fa fa-angle-down clickable arrow pull-right",
     anchor: [
@@ -33,15 +33,15 @@ var FirModelProperties = {
         32
     ],
     maxZoom: 14,
-    exportUrl: '',
+    kmlImportUrl: '/mapservice/import/kml',
+    kmlExportUrl: '',
     firSelectionTools: false,
-    displayPopup: false,
-    displayPopupBar: false,
+    //displayPopup: false,
+    //displayPopupBar: false,
     hits: [],
     popupOffsetY: 0,
     aliasDict: {},
-    chosenColumns: [],
-    firLayerCaption: "", //Fastighet:port83&84
+    chosenColumns: [], //Fastighet:port83&84
     feature: undefined,
     hittaGrannar: false,
     backupItems: [],
@@ -50,13 +50,11 @@ var FirModelProperties = {
     colorHighlight: "",//'rgba(0, 0, 255, 0.5)',
     colorHighlightStroke: "",//'rgba(0, 0, 0, 0.6)',
     colorHittaGrannarBuffer: "",//'rgba(50, 200, 200, 0.4)',
-    colorHittaGrannarBufferStroke: "f",//'rgba(0, 0, 0, 0.2)',
-    maxFeatures: "", //"1000",
-    omradeField: "",
-    label: "",
+    colorHittaGrannarBufferStroke: "",//'rgba(0, 0, 0, 0.2)',
     showLabels: true,
     infoKnappLogo: "",
-    realEstateLayer: ""
+    realEstateLayer: "",
+    realEstateWMSLayer: ""
 };
 
 var FirModel = {
@@ -68,7 +66,7 @@ var FirModel = {
     },
 
     configure: function (shell) {
-        this.set('displayPopupBar', this.get('displayPopup'));
+        //this.set('displayPopupBar', this.get('displayPopup'));
         this.set('layerCollection', shell.getLayerCollection());
         this.set('map', shell.getMap().getMap());
         console.log("map", this.get("map"));
@@ -78,7 +76,7 @@ var FirModel = {
             name: 'fir-search-vector-layer',
             source: new ol.source.Vector(),
             queryable: true,
-            visible: true
+            visible: true,
         });
 
         this.firFeatureLayer.getSource().on('addfeature', evt => {
@@ -106,7 +104,7 @@ var FirModel = {
                     }),
                     // get the text from the feature - `this` is ol.Feature
                     // and show only under certain resolution
-                    text: this.get("showLabels") ? evt.feature.get(this.get("label")) : ""
+                    text: this.get("showLabels") ? evt.feature.get(this.get("realEstateLayer").labelField) : ""
                 })
             }));
             //evt.feature.setStyleFunction(this.firFeatureLayer.getStyle);
@@ -151,7 +149,7 @@ var FirModel = {
                         stroke: new ol.style.Stroke({
                             color: '#fff', width: 2
                         }),
-                        text: this.get("showLabels") ? evt.feature.get(this.get("label")) : ""
+                        text: this.get("showLabels") ? evt.feature.get(this.get("realEstateLayer").labelField) : ""
                     })
                 })
             );//getStyle?
@@ -186,7 +184,7 @@ var FirModel = {
                         }),
                         // get the text from the feature - `this` is ol.Feature
                         // and show only under certain resolution
-                        text: this.get("showLabels") ? evt.feature.get(this.get("label")) : ""
+                        text: this.get("showLabels") ? evt.feature.get(this.get("realEstateLayer").labelField) : ""
                     })
                 })
             );//getStyle?
@@ -244,12 +242,12 @@ var FirModel = {
                 // var get id
                 var hitId = 0;
                 var group = 0;
-                var nyckelHighLight = feature.get("nyckel");
-                var omradeHighLight = feature.get("omrade");
+                var nyckelHighLight = feature.get(that.get("realEstateLayer").fnrField);
+                var omradeHighLight = feature.get(that.get("realEstateLayer").omradeField);
                 for(var i = 0; i < that.get("items")[group].hits.length; i++){
                     console.log("that.get(items)[group].hits[i]", that.get("items")[group].hits[i]);
-                    var currentNyckel = that.get("items")[group].hits[i].get("nyckel");
-                    var currentOmrade = that.get("items")[group].hits[i].get("omrade");
+                    var currentNyckel = that.get("items")[group].hits[i].get(that.get("realEstateLayer").fnrField);
+                    var currentOmrade = that.get("items")[group].hits[i].get(that.get("realEstateLayer").omradeField);
                     if(nyckelHighLight === currentNyckel && omradeHighLight === currentOmrade){
                         hitId = i;
                         break;
@@ -398,9 +396,10 @@ var FirModel = {
 
                 var found = false;
 
-                if (feature.getGeometryName() === "Point"  || feature.getGeometryName() === "LineString") {
-
-                    // buffer the point a bit
+                console.log("feature.getgeometryname()", feature.getGeometryName());
+                if (feature.getGeometryName() === "Point"  || feature.getGeometryName() === "LineString" || feature.getGeometryName() === "geometry") {
+                    console.log("feature.geometry: point or linestring");
+                    // buffer points, linestrings and all kml imported values a bit since geoserver wants polygons !!!
                     coords = this.bufferPoint(feature);
                 }
 
@@ -584,7 +583,7 @@ var FirModel = {
          xmlns:xsi = 'http://www.w3.org/2001/XMLSchema-instance'
          xsi:schemaLocation='http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd'
          outputFormat="${outputFormat}"
-         maxFeatures= "${this.get("maxFeatures")}">
+         maxFeatures= "${this.get("realEstateLayer").maxFeatures}">
          <wfs:Query typeName=` + typeName + ` srsName='${props.srsName}'>
           <ogc:Filter>
             ${filters}
@@ -593,8 +592,10 @@ var FirModel = {
       </wfs:GetFeature>`;
 
         console.log("here 4");
+
         var contentType = 'text/xml',
             data = str;
+
 
         this.requests.push(
             $.ajax({
@@ -651,7 +652,7 @@ var FirModel = {
         //plusminusLayer
         var map = this.get("map");
         map.getLayers().forEach(layer => {
-            if(layer.get("caption") == this.get("firLayerCaption")){
+            if(layer.get("caption") == this.get("realEstateWMSLayerCaption")){
                 layer.setVisible(false);
             }
         });
@@ -877,8 +878,11 @@ var FirModel = {
      * @return {Array<{external:"ol.source"}>} searchable/choosen sources
      */
     getSources: function () {
+        console.log("func getSources");
         var filter = (source) => {
+            console.log("source", source);
             var criteria = this.get('filter');
+            console.log("criteria: this", this);
             return criteria === '*' ? true : criteria === source.caption;
         };
         return this.get('sources').filter(filter);
@@ -926,15 +930,11 @@ var FirModel = {
      * @return {Object} excelData
      */
     getExcelData: function () {
-        var groups = {},
+        var nycklar = [],
             exportItems = this.get('items')[0].hits.length > 0
                 ? this.get('items')[0].hits
                 : this.getHitsFromItems();
 
-            /*exportItems = this.get('hits').length > 0
-                ? this.get('hits')
-                : this.getHitsFromItems();
-                */
         console.log("getExcelData: exportItems", exportItems);
         console.log("getExcelData: this", this);
 
@@ -944,90 +944,24 @@ var FirModel = {
         }
 
         exportItems.forEach(hit => {
-            if (!groups.hasOwnProperty(hit.caption)) {
-                groups[hit.caption] = [];
+            console.log("hit.nyckel", hit.get(this.get("realEstateLayer").fnrField));
+            if(nycklar.indexOf(hit.get(this.get("realEstateLayer").fnrField) > -1)){
+                nycklar.push(hit.get(this.get("realEstateLayer").fnrField));
             }
-            groups[hit.caption].push(hit);
         });
 
-        return Object.keys(groups).map(group => {
-            var columns = [],
-                aliases = [],
-                values = [],
-                chosenColumns = ["nyckel"];
+        var param = {};
+        param["samfallighet"] = this.get("chosenColumns").indexOf("samfallighet") != -1;
+        param["ga"] = this.get("chosenColumns").indexOf("ga") != -1;
+        param["rattighet"] = this.get("chosenColumns").indexOf("rattighet") != -1;
+        param["persnr"] = this.get("chosenColumns").indexOf("persnr") != -1;
+        param["taxerad_agare"] = this.get("chosenColumns").indexOf("taxerad_agare") != -1;
 
-            var getAliasWithDict = (column, aliasDict) => {
-                var keys = Object.keys(aliasDict);
-                if (keys.indexOf(column) >= 0) {
-                    return aliasDict[column];
-                } else {
-                    return column;
-                }
-            };
+        console.log("param", param);
+        console.log("chosenColumns", this.get("chosenColumns"));
 
-            var getAlias = (column, infobox) => {
-                var regExp = new RegExp(`{export:${column}( as .*)?}`),
-                    result = regExp.exec(infobox);
-
-                if (result && result[1]) {
-                    result[1] = result[1].replace(' as ', '');
-                }
-
-                return result && result[1] ? result[1] : column;
-            };
-
-            values = groups[group].map((hit) => {
-                if (typeof hit.aliasDict !== 'undefined' && hit.aliasDict !== null) {
-                    var attributes = hit.getProperties(),
-                        names = Object.keys(attributes),
-                        aliasKeys = Object.keys(hit.aliasDict);
-                    names = names.filter(name => {
-                        return aliasKeys.indexOf(name) >= 0 && chosenColumns.indexOf(name) >= 0;
-                    });
-                } else {
-                    var attributes = hit.getProperties(),
-                        names = Object.keys(attributes);
-                    names = names.filter(name => {
-                        if (chosenColumns.indexOf(name) == -1){
-                            return false;
-                        }
-                        if (!hit.infobox) {
-                            return typeof attributes[name] === 'string' ||
-                                typeof attributes[name] === 'boolean' ||
-                                typeof attributes[name] === 'number';
-                        } else {
-                            let regExp = new RegExp(`{export:${name}( as .*)?}`);
-                            return (
-                                regExp.test(hit.infobox)
-                            );
-                        }
-                    });
-                }
-
-                if (names.length > columns.length) {
-                    columns = names;
-                    aliases = columns.slice();
-                }
-
-                columns.forEach((column, i) => {
-                    if (typeof hit.aliasDict !== 'undefined' && hit.aliasDict !== null) {
-                        aliases[i] = getAliasWithDict(column, hit.aliasDict);
-                    } else {
-                        aliases[i] = getAlias(column, hit.infobox);
-                    }
-                });
-
-                return columns.map(column => {
-                    if (column == "nyckel") {
-                        return '"' + Number(attributes[column]) + '"';
-                    } else {
-                        return attributes[column] || null;
-                    }
-                });
-            });
-
-            return values;
-        });
+        return {fnr: nycklar, param: param};
+        //return {fnr: nycklar};
     },
 
     export: function (type) {
@@ -1046,7 +980,7 @@ var FirModel = {
                 url = this.get('excelExportUrl');
                 console.log("url",url);
                 data = this.getExcelData();
-                postData = JSON.stringify(data);
+                data = JSON.stringify(data);
                 console.log("data", data);
                 console.log("postDataPre");
                 console.log('{ "fnr": [' + data +'] }');
@@ -1064,7 +998,8 @@ var FirModel = {
             url: url,
             method: 'post',
             data: {
-                json: '{"fnr":['+data+']}'//'{ "fnr": ["130136787","130129850","130132945","130139213"] }'  //'{ "fnr": [' + data +'] }' //'{ "fnr": ["130136787","130129850","130132945","130139213"] }' //postData
+                json: data
+                //'{ "fnr": ["130136787","130129850","130132945","130139213"] }'  //'{ "fnr": [' + data +'] }' //'{ "fnr": ["130136787","130129850","130132945","130139213"] }' //postData
             },
             format: 'json',
             success: (url) => {
@@ -1167,7 +1102,7 @@ var FirModel = {
                     srsName: this.get('map').getView().getProjection().getCode(),
                     outputFormat: layer.get('searchOutputFormat'),
                     geometryField: layer.get('searchGeometryField'),
-                    omradeField: layer.get(this.get("omradeField"))
+                    omradeField: layer.get(this.get("realEstateLayer").omradeField)
                 };
                 console.log("alayer", layer);
                 console.log("searchProps", searchProps);
@@ -1218,101 +1153,101 @@ var FirModel = {
     },
 
     findWithSameNames: function(nycklar, layer){
-        console.log("findWithSamenNames");
+        console.log("+++findWithSameNames");
+        console.log("nycklar", nycklar);
+        console.log("layer", layer);
+        console.log("this.get(\"realEstateLayerCaption\")", this.get("realEstateLayerCaption"));
         var backupFilter = this.get("filter");
-        this.set("filter", this.get("realEstateLayer").layerCaption);
+        this.set("filter", this.get("realEstateLayerCaption"));
         var sources = this.getSources();
+        console.log("sources", sources);
+        console.log("layer.get(\"params\").LAYERS", layer.get("params").LAYERS);
         this.set("filter", backupFilter);
         var promises = [];
 
         sources.forEach(source => {
-            var belongsToLayer = false;
-            source.layers.forEach(sourceLayer => {
-               if (layer.get("params").LAYERS.indexOf(sourceLayer) >= 0){
-                   belongsToLayer = true;
-               }
-            });
+              var searchProps = {
+                url: (HAJK2.searchProxy || '') + source.url,
+                caption: source.caption,
+                infobox: source.infobox,
+                aliasDict: source.aliasDict,
+                featureType: source.layers[0].split(':')[1],
+                propertyName: source.searchFields.join(','),
+                displayName: source.displayFields ? source.displayFields : (source.searchFields[0] || 'Sökträff'),
+                srsName: this.get('map').getView().getProjection().getCode(),
+                outputFormat: source.outputFormat,
+                geometryField: source.geometryField
+            };
 
-            if (belongsToLayer) {
-                console.log("belongsToLayer");
-                var searchProps = {
-                    url: (HAJK2.searchProxy || '') + source.url,
-                    caption: source.caption,
-                    infobox: source.infobox,
-                    aliasDict: source.aliasDict,
-                    featureType: source.layers[0].split(':')[1],
-                    propertyName: source.searchFields.join(','),
-                    displayName: source.displayFields ? source.displayFields : (source.searchFields[0] || 'Sökträff'),
-                    srsName: this.get('map').getView().getProjection().getCode(),
-                    outputFormat: source.outputFormat,
-                    geometryField: source.geometryField
-                };
-
-                var sameNameFilter = "";
-                // Add initial or
-                for(var i = 0; i < nycklar.length - 1; i++){
-                    sameNameFilter += "<ogc:Or>";
-                }
-
-                var prefix = "<ogc:PropertyIsEqualTo matchCase=\"false\" wildCard=\"*\" singleChar=\".\" escapeChar=\"!\">\n" +
-                    "            <ogc:PropertyName>nyckel</ogc:PropertyName>\n" +
-                    "            <ogc:Literal>";
-                var suffix = "</ogc:Literal>\n" +
-                    "          </ogc:PropertyIsEqualTo>";
-
-                sameNameFilter += prefix + nycklar[0] + suffix;
-
-                for(var i = 1; i < nycklar.length; i++){
-                    sameNameFilter += prefix + nycklar[i] + suffix;
-                    sameNameFilter += "</ogc:Or>";
-                }
-
-                promises.push(new Promise((resolve, reject) => {
-                    this.doWFSSearch({
-                        value: "",
-                        url: searchProps.url,
-                        featureType: searchProps.featureType,
-                        propertyName: searchProps.propertyName,
-                        srsName: searchProps.srsName,
-                        outputFormat: searchProps.outputFormat,
-                        geometryField: searchProps.geometryField,
-                        enableFilter: false,
-                        exaktMatching: true,
-                        sameNameFilter: sameNameFilter,
-                        done: features => {
-                            console.log("done. features", features);
-                            if (features.length > 0) {
-                                features.forEach(feature => {
-                                    feature.caption = searchProps.caption;
-                                    feature.infobox = searchProps.infobox;
-                                    try {
-                                        feature.aliasDict = JSON.parse(searchProps.aliasDict);
-                                    } catch (e) {
-                                        feature.aliasDict = undefined;
-                                    }
-
-                                    this.get("items").map(group => {
-                                        if (group.layer === source.caption) {
-                                            var found = false;
-                                            group.hits.forEach(hit => {
-                                                if(feature.get("nyckel") === hit.get("nyckel") && feature.get("omrade") === hit.get("omrade")){ // TODO Check some unique ID instead
-                                                    found = true;
-                                                }
-                                            });
-
-                                            if(!found) {
-                                                group.hits.push(feature);
-                                                this.firFeatureLayer.getSource().addFeature(feature);
-                                            }
-                                        }
-                                    });
-                                });
-                            }
-                            resolve();
-                        }
-                    });
-                }));
+            var sameNameFilter = "";
+            // Add initial or
+            for(var i = 0; i < nycklar.length - 1; i++){
+                sameNameFilter += "<ogc:Or>";
             }
+
+            var prefixNyckel = "<ogc:And><ogc:PropertyIsEqualTo matchCase=\"false\" wildCard=\"*\" singleChar=\".\" escapeChar=\"!\">\n" +
+                "            <ogc:PropertyName>" + this.get("realEstateLayer").fnrField + "</ogc:PropertyName>\n" +
+                "            <ogc:Literal>";
+            var suffixNyckel = "</ogc:Literal>\n" +
+                "          </ogc:PropertyIsEqualTo>";
+            var prefixOmrade = "<ogc:PropertyIsEqualTo matchCase=\"false\" wildCard=\"*\" singleChar=\".\" escapeChar=\"!\">\n" +
+                "            <ogc:PropertyName>" + this.get("realEstateLayer").omradeField + "</ogc:PropertyName>\n" +
+                "            <ogc:Literal>";
+            var suffixOmrade = "</ogc:Literal>\n" +
+                "          </ogc:PropertyIsEqualTo></ogc:And>";
+
+            sameNameFilter += prefixNyckel + nycklar[0][0] + suffixNyckel + prefixOmrade + nycklar[0][1] + suffixOmrade;
+
+            for(var i = 1; i < nycklar.length; i++){
+                sameNameFilter += prefixNyckel + nycklar[i][0] + suffixNyckel + prefixOmrade + nycklar[i][1] + suffixOmrade;
+                sameNameFilter += "</ogc:Or>";
+            }
+
+            promises.push(new Promise((resolve, reject) => {
+                this.doWFSSearch({
+                    value: "",
+                    url: searchProps.url,
+                    featureType: searchProps.featureType,
+                    propertyName: searchProps.propertyName,
+                    srsName: searchProps.srsName,
+                    outputFormat: searchProps.outputFormat,
+                    geometryField: searchProps.geometryField,
+                    enableFilter: false,
+                    exaktMatching: true,
+                    sameNameFilter: sameNameFilter,
+                    done: features => {
+                        console.log("done. features", features);
+                        if (features.length > 0) {
+                            features.forEach(feature => {
+                                feature.caption = searchProps.caption;
+                                feature.infobox = searchProps.infobox;
+                                try {
+                                    feature.aliasDict = JSON.parse(searchProps.aliasDict);
+                                } catch (e) {
+                                    feature.aliasDict = undefined;
+                                }
+                                this.get("items").map(group => {
+                                    if (group.layer === source.caption) {
+                                        var found = false;
+                                        group.hits.forEach(hit => {
+                                            if(feature.get(this.get("realEstateLayer").fnrField) === hit.get(this.get("realEstateLayer").fnrField) && feature.get(this.get("realEstateLayer").omradeField) === hit.get(this.get("realEstateLayer").omradeField)){
+                                                found = true;
+                                            }
+                                        });
+
+                                        if(!found) {
+                                            group.hits.push(feature);
+                                            this.firFeatureLayer.getSource().addFeature(feature);
+                                        }
+                                    }
+                                });
+                            });
+                        }
+                        resolve();
+                    }
+                });
+            }));
+
         });
 
         return promises;
@@ -1324,7 +1259,7 @@ var FirModel = {
         console.log("sources", this.get('sources'));
         this.get('sources').forEach(source => {
             console.log("source.caption", source.caption);
-            if(source.caption === this.get("realEstateLayer").layerCaption) {
+            if(source.caption === this.get("realEstateLayerCaption")) {
                 var searchProps = {
                     url: (HAJK2.searchProxy || '') + source.url,
                     caption: source.caption,
@@ -1344,16 +1279,22 @@ var FirModel = {
                     sameNameFilter += "<ogc:Or>";
                 }
 
-                var prefix = "<ogc:PropertyIsEqualTo matchCase=\"false\" wildCard=\"*\" singleChar=\".\" escapeChar=\"!\">\n" +
-                    "            <ogc:PropertyName>nyckel</ogc:PropertyName>\n" +
+                var prefixNyckel = "<ogc:And><ogc:PropertyIsEqualTo matchCase=\"false\" wildCard=\"*\" singleChar=\".\" escapeChar=\"!\">\n" +
+                    "            <ogc:PropertyName>" + this.get("realEstateLayer").fnrField + "</ogc:PropertyName>\n" +
                     "            <ogc:Literal>";
-                var suffix = "</ogc:Literal>\n" +
+                var suffixNyckel = "</ogc:Literal>\n" +
                     "          </ogc:PropertyIsEqualTo>";
+                var prefixOmrade = "<ogc:PropertyIsEqualTo matchCase=\"false\" wildCard=\"*\" singleChar=\".\" escapeChar=\"!\">\n" +
+                    "            <ogc:PropertyName>" + this.get("realEstateLayer").omradeField + "</ogc:PropertyName>\n" +
+                    "            <ogc:Literal>";
+                var suffixOmrade = "</ogc:Literal>\n" +
+                    "          </ogc:PropertyIsEqualTo></ogc:And>";
 
-                sameNameFilter += prefix + keys[0] + suffix;
+                sameNameFilter += prefixNyckel + keys[0][0] + suffixNyckel + prefixOmrade + keys[0][1] + suffixOmrade;
+
 
                 for (var i = 1; i < keys.length; i++) {
-                    sameNameFilter += prefix + keys[i] + suffix;
+                    sameNameFilter += prefixNyckel + keys[i][0] + suffixNyckel + prefixOmrade + keys[i][1] + suffixOmrade;
                     sameNameFilter += "</ogc:Or>";
                 }
 
@@ -1407,8 +1348,6 @@ var FirModel = {
         var items = [];
         var features = [];
 
-        console.log("before filter", this.get('firSelectionTools'));
-
         if (this.get('firSelectionTools')) {
             features = this.get('firSelectionModel').getFeatures();
             this.set('features', features);
@@ -1428,10 +1367,6 @@ var FirModel = {
                 geometryField: source.geometryField
             };
 
-
-            console.log("features", features.length, features);
-            console.log("value", value);
-
             if (value === '' && features.length === 0) return;
 
             promises.push(new Promise((resolve, reject) => {
@@ -1446,17 +1381,28 @@ var FirModel = {
                     enableFilter: true,
                     exaktMatching: this.get("exaktMatching"),
                     done: features => {
-                        console.log("features", features.length, features);
                         var keys = [];
                         if (features.length > 0) {
+                            var omradeField = "";
+                            var fnrField = "";
+                            this.get("sources").forEach(source => {
+                                if(source.caption === this.get("filter")){
+                                    return this.get("layers").forEach(layer => {
+                                       if (layer.id === source.id){
+                                           fnrField =  layer.fnrField;
+                                           omradeField = layer.omradeField;
+                                       }
+                                    });
+                                }
+                            });
+
                             features.forEach(feature => {
-                                keys.push(feature.get("nyckel"));
+                                keys.push([feature.get(fnrField), feature.get(omradeField)]);
                             });
                         }
 
                         var childPromises = this.findWithSameNyckel(keys, items);
                         Promise.all(childPromises).then(() => {
-                            console.log("all children finished");
                             resolve();
                         });
                     }
@@ -1647,7 +1593,7 @@ var FirModel = {
                         }),
                         // get the text from the feature - `this` is ol.Feature
                         // and show only under certain resolution
-                        text: this.get("showLabels") ? feature.get(this.get("label")) : ""
+                        text: this.get("showLabels") ? feature.get(this.get("realEstateLayer").labelField) : ""
                     })
                 }));
             }
@@ -1668,7 +1614,8 @@ var FirModel = {
     clicked: function(arg){
         this.set('visible', true);
         this.set('toggled', !this.get('toggled'));
-    }
+    },
+
 };
 
 

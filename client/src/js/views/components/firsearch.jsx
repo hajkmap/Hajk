@@ -45,7 +45,7 @@ var FirSearchView = {
         console.log("firSearch -getInitialstate");
         return {
             visible: false,
-            displayPopup: this.props.model.get('displayPopup')
+        //displayPopup: this.props.model.get('displayPopup')
         };
     },
 
@@ -57,6 +57,8 @@ var FirSearchView = {
         //add correct values for the checkbox
         $('#fastighetsLabel')[0].checked = true;
         $('#slackaBufferSokomrade')[0].checked = true;
+        this.props.model.set('filter', $("#fir-category-source")[0][$("#fir-category-source")[0].selectedIndex].value);
+
 
         this.props.model.get("map").on('singleclick', this.props.model.clickedOnMap.bind(this.props.model));
         this.value = this.props.model.get('value');
@@ -70,11 +72,11 @@ var FirSearchView = {
             });
         }
 
-        this.props.model.on('change:displayPopup', () => {
+        /*this.props.model.on('change:displayPopup', () => {
             this.setState({
                 displayPopup: this.props.model.get('displayPopup')
             });
-        });
+        });*/
         this.props.model.on('change:url', () => {
             this.setState({
                 downloadUrl: this.props.model.get('url')
@@ -113,7 +115,7 @@ var FirSearchView = {
             layer.off('change:visible', this.search);
         });
         this.props.model.off('change:layerCollection', this.bindLayerVisibilityChange);
-        this.props.model.off('change:displayPopup');
+        //this.props.model.off('change:displayPopup');
         this.props.model.off('change:url');
         this.props.model.off('change:downloading');
     },
@@ -128,6 +130,7 @@ var FirSearchView = {
         this.props.model.set('searchTriggered', false);
         this.props.model.set("backupItems", []);
         this.props.model.clear();
+
 
         if (document.getElementById('alertSearchbar') != null) {
             document.getElementById('alertSearchbar').remove();
@@ -202,20 +205,24 @@ var FirSearchView = {
                     this.props.model.firFeatureLayer.getSource().clear();
                     var wmsLayerForSameName = this.props.model.get("layerCollection").filter((layer) => {
                         return (layer.get('type') === 'wms' || layer.get('type') === 'arcgis') &&
-                            layer.get('queryable') && layer.get('caption') === this.props.model.get("firLayerCaption");
+                            layer.get('queryable') && layer.get('caption') === this.props.model.get("realEstateWMSLayerCaption");
                     });
                     var sameNamePromises = [];
                     result.items.map(item => {
                         var groupName = item.layer;
                         var names = [];
                         item.hits.map(hit => {
-                            names.push(hit.get("nyckel"));
+                            names.push([hit.get(this.props.model.get("realEstateLayer").fnrField), hit.get(this.props.model.get("realEstateLayer").omradeField)]);
                             this.props.model.firFeatureLayer.getSource().addFeature(hit);
                         });
 
                         console.log("samename",names);
-                        var tmpPromises = this.props.model.findWithSameNames(names, wmsLayerForSameName[0]);
-                        tmpPromises.forEach(promise => sameNamePromises.push(promise));
+
+                        // Needs to match the filter below that decides if firstStage or search is executed
+                        if (this.props.model.get("filter") === this.props.model.get("realEstateLayerCaption") || this.props.model.get("hittaGrannar")) {
+                            var tmpPromises = this.props.model.findWithSameNames(names, wmsLayerForSameName[0]);
+                            tmpPromises.forEach(promise => sameNamePromises.push(promise));
+                        }
                     });
 
                     Promise.all(sameNamePromises).then(() => {
@@ -242,8 +249,10 @@ var FirSearchView = {
             };
 
             console.log("filter", this.props.model.get("filter"));
-            console.log("--- filter: layerCaption", this.props.model.get("realEstateLayer").layerCaption);
-            if (this.props.model.get("filter") !== this.props.model.get("realEstateLayer").layerCaption) { // TODO, check json "Fastighet"
+            console.log("--- filter: layerCaption", this.props.model.get("realEstateLayerCaption"));
+
+            // needs to match the code above in done that checks if findwithsamename
+            if (this.props.model.get("filter") !== this.props.model.get("realEstateLayerCaption") && !this.props.model.get("hittaGrannar")) {
                 this.props.model.firstStage(done);
             } else {
                 this.props.model.search(done, false);
@@ -271,6 +280,7 @@ var FirSearchView = {
      * @param {object} event
      */
     setFilter: function (event) {
+        console.log("+++ setFilter",event);
         this.props.model.set('filter', event.target.value);
     },
 
@@ -283,15 +293,15 @@ var FirSearchView = {
         console.log("render options");
         console.log("this.props.model");
         console.log(this.props.model);
-        console.log("filterVisible");
-        console.log(this.props.model.get("filterVisible"));
+        //console.log("filterVisible");
+        //console.log(this.props.model.get("filterVisible"));
         var settings = this.props.model.get('settings'),
             sources = this.props.model.get('sources'),
-            filterVisible = this.props.model.get('filterVisible'),
+            //filterVisible = this.props.model.get('filterVisible'),
             filterVisibleBtn = null
         ;
 
-        if (filterVisible) {
+        /*if (filterVisible) {
             filterVisibleBtn = (
                 <div>
                     <input
@@ -308,12 +318,12 @@ var FirSearchView = {
                     <label htmlFor='filter-visible'>Sök i alla synliga lager</label>
                 </div>
             );
-        }
+        }*/
         return (
             <div>
                 <p>
                     <span>Sök: </span>&nbsp;
-                    <select value={this.props.model.get('filter')} onChange={(e) => { this.setFilter(e); this.forceUpdate(); }}>
+                    <select value={this.props.model.get('filter')} id="fir-category-source" onChange={(e) => { this.setFilter(e); this.forceUpdate(); }}>
                         {/*<option value='*'> -- Alla -- </option>*/}
                         {
                             (() => {
@@ -333,9 +343,9 @@ var FirSearchView = {
         );
     },
 
-    onChangeDisplayPopup: function (e) {
+    /*onChangeDisplayPopup: function (e) {
         this.props.model.set('displayPopup', e.target.checked);
-    },
+    },*/
 
     exportSelected: function (type) {
         this.props.model.export(type);
@@ -423,7 +433,6 @@ var FirSearchView = {
         var excelButton = null,
             downloadLink = null;
 
-
         if (this.props.model.get('excelExportUrl')) {
             excelButton = (
                 <button className='btn btn-default icon-button' onClick={(e) => this.exportSelected('excel')}>
@@ -450,7 +459,7 @@ var FirSearchView = {
                 <button onClick={() => this.openInstruction("skapaFastighetsforteckning")} className='btn-info-fir' id='instructionBox' ><img src={this.props.model.get("infoKnappLogo")} style={{height: '75%', width:'75%'}} /></button>
             );
             instructionTxt = (
-                <div className='panel-body-instruction instructionsText' id='instructionsTextFirskapaFastighetsforteckning' dangerouslySetInnerHTML={{__html: this.props.model.get("instructionSkapaFastighetsforteckning")}} />
+                <div className='panel-body-instruction instructionsText' id='instructionsTextFirskapaFastighetsforteckning' dangerouslySetInnerHTML={{__html: atob(this.props.model.get("instructionSkapaFastighetsforteckning"))}} />
             );
         }
         var navPanel = document.getElementById('navigation-panel');
@@ -465,10 +474,11 @@ var FirSearchView = {
                 <div className='panel-body'>
                     <div id="skapaFastighetsForteckning" className="hidden">
                     <p>Inkludera i förteckning:</p>
-                    <input type="checkbox" id="traktnamn" onClick={()=> this.checkBoxFir("traktnamn")} /> Fastigheter <br/>
-                    <input type="checkbox" id="text" onClick={()=> this.checkBoxFir("text")} /> Marksamfälligheter <br/>
-                    <input type="checkbox" id="typ" onClick={()=> this.checkBoxFir("typ")} /> Gemensamhetsanläggningar <br/>
-                    <input type="checkbox" id="nyckel" onClick={()=> this.checkBoxFir("nyckel")} /> Rättigheter <br/><br/>
+                    <input type="checkbox" id="samfallighet" onClick={()=> this.checkBoxFir("samfallighet")} /> Samfälligheter <br/>
+                    <input type="checkbox" id="ga" onClick={()=> this.checkBoxFir("ga")} /> Gemensamhetsanläggningar <br/>
+                    <input type="checkbox" id="rattighet" onClick={()=> this.checkBoxFir("rattighet")} /> Rättigheter <br/>
+                    <input type="checkbox" id="persnr" onClick={()=> this.checkBoxFir("persnr")} /> Personnummer <br/>
+                    <input type="checkbox" id="taxerad_agare" onClick={()=> this.checkBoxFir("taxerad_agare")} /> Taxerad Ägare <br/><br/>
                     </div>
                 <div>
                     <br/>
@@ -523,7 +533,7 @@ var FirSearchView = {
         this.props.model.get("map").getLayers().forEach(layer => {
            if(layer.get("caption") === "FIRSökresltat")
                layer.getSource().getFeatures().forEach(feature => {
-                   console.log("feature", feature);
+                   console.log("hittaGrannar: feature", feature);
                    var jstsGeom = parser.read(feature.getGeometry());
 
                    // create a buffer of the required meters around each line
@@ -559,11 +569,19 @@ var FirSearchView = {
       this.props.model.firBufferFeatureLayer.getSource().clear();
       this.props.model.firFeatureLayer.getSource().clear();
       this.props.model.set("items", this.props.model.get("backupItems").pop());
-      this.props.model.get("items").forEach(group => {
-         group.hits.forEach(hit => {
-            this.props.model.firFeatureLayer.getSource().addFeature(hit);
-         });
-      });
+        console.log("here: rensaHittaGrannar1");
+        console.log("this.props.model.get(items)", this.props.model.get("items"));
+      if(this.props.model.get("items") === undefined){
+          this.clear;
+
+      }else {
+          this.props.model.get("items").forEach(group => {
+              console.log("here: rensaHittaGrannar2");
+              group.hits.forEach(hit => {
+                  this.props.model.firFeatureLayer.getSource().addFeature(hit);
+              });
+          });
+      }
       this.forceUpdate();
     },
 
@@ -597,13 +615,12 @@ var FirSearchView = {
 
         var instructionBtn;
         var instructionTxt;
-        console.log("--- instructionHittaGrannar", this.props.model.get("instructionHittaGrannar"));
         if (typeof this.props.model.get("instructionHittaGrannar") !== 'undefined' && this.props.model.get("instructionHittaGrannar") !== null && this.props.model.get("instructionHittaGrannar").length > 0) {
             instructionBtn = (
-                <button onClick={() => this.openInstruction("hittaGrannar")} className='btn-info-fir' id='instructionBox' ><img src={this.props.model.get("infoKnappLogo")} style={{height: '30px', width:'30px'}} /></button>
+                <button onClick={() => this.openInstruction("hittaGrannar")} className='btn-info-fir' id='instructionBox' ><img src={this.props.model.get("infoKnappLogo")} style={{height: '75%', width:'75%'}} /></button>
             );
             instructionTxt = (
-                <div className='panel-body-instruction instructionsText' id='instructionsTextFirhittaGrannar' dangerouslySetInnerHTML={{__html: this.props.model.get("instructionHittaGrannar")}} />
+                <div className='panel-body-instruction instructionsText' id='instructionsTextFirhittaGrannar' dangerouslySetInnerHTML={{__html: atob(this.props.model.get("instructionHittaGrannar"))}} />
             );
         }
         var navPanel = document.getElementById('navigation-panel');
@@ -641,6 +658,7 @@ var FirSearchView = {
             </div>
         );
     },
+
 
     fastighetslabel: function(e) {
 
@@ -785,10 +803,10 @@ var FirSearchView = {
         console.log("--- Instruction for Sökning", this.props);
         if (typeof this.props.model.get("instructionSokning") !== 'undefined' && this.props.model.get("instructionSokning") !== null && this.props.model.get("instructionSokning").length > 0) {
             instructionBtn = (
-                <button onClick={() => this.openInstruction("sokning")} className='btn-info-fir' id='instructionBox' ><img src={this.props.model.get("infoKnappLogo")} /></button>
+                <button onClick={() => this.openInstruction("sokning")} className='btn-info-fir' id='instructionBox' ><img src={this.props.model.get("infoKnappLogo")} style={{height: '75%', width:'75%'}} /></button>
             );
             instructionTxt = (
-                <div className='panel-body-instruction instructionsText' id='instructionsTextFirsokning' dangerouslySetInnerHTML={{__html: this.props.model.get("instructionSokning")}} />
+                <div className='panel-body-instruction instructionsText' id='instructionsTextFirsokning' dangerouslySetInnerHTML={{__html: atob(this.props.model.get("instructionSokning"))}} /> //instruction={window.atob(this.props.model.get('instruction'))} dangerouslySetInnerHTML={{__html: this.props.model.get("instructionSokning")}}
             );
         }
         var navPanel = document.getElementById('navigation-panel');

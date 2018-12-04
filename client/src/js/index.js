@@ -29,6 +29,8 @@
 (global.HAJK2 = (function () {
   'use strict';
 
+  window.location.hash = "";
+
   var ApplicationView = require('views/application'),
     cssModifier = require('utils/cssmodifier'),
     configPath = '/mapservice/settings/config/map_1',
@@ -237,19 +239,37 @@
 
         if (firTool) {
           console.log("firTool.options.layers",firTool.options.layers);
-          console.log("data.wfsLayers", data.wfslayers);
+          console.log("data.wfsLayers", data.getFeatureInformation);
+
+
             if (firTool.options.layers == null) {
-                //data.wfslayers = data.wfslayers;
                 firTool.options.sources = data.wfslayers;
             } else {
                 if (firTool.options.layers.length != 0) {
                     var wfslayers = internal.overrideGlobalSearchConfig(firTool, data);
                     firTool.options.sources = wfslayers;
-                    //data.wfslayers = wfslayers;
                 } else {
                     firTool.options.sources = data.wfslayers;
                 }
             }
+
+            // add caption for real estate to the options
+            var realEstateLayer = data.wfslayers.filter(layer => {
+                if (layer.id === firTool.options.realEstateLayer.id) {
+                    return layer;
+                }
+            });
+            firTool.options.realEstateLayerCaption = realEstateLayer[0].caption;
+
+            // add caption for real estate WMS layer to the options
+            var realEstateWMSLayer = data.wmslayers.filter(layer => {
+                if (layer.id === firTool.options.realEstateWMSLayer.id) {
+                    return layer;
+                }
+            });
+            console.log("realestateWMSLayer", realEstateWMSLayer[0].caption);
+
+            firTool.options.realEstateWMSLayerCaption = realEstateWMSLayer[0].caption;
         }
 
         if (editTool) {

@@ -21,7 +21,8 @@ var FirSelectionModelProperties = {
     imgSize: [
         16,
         16
-    ]
+    ],
+    kmlImportUrl: "/mapservice/import/kml"
 };
 
 /**
@@ -381,7 +382,409 @@ var FirSelectionModel = {
         this.get('highlightLayer').clearHighlight();
         this.get("firBufferLayer").getSource().clear();
         this.clear();
-    }
+    },
+
+    importDrawLayer: function (xmlDoc) {
+        var clonedNode = xmlDoc.childNodes[0].cloneNode(true),
+            serializer = new XMLSerializer(),
+            kml_string = serializer.serializeToString(clonedNode),
+            parser = new ol.format.KML(),
+            features = parser.readFeatures(kml_string),
+            extent = false;
+
+        features.forEach((feature) => {
+            console.log("1");
+            var coordinates = feature.getGeometry().getCoordinates();
+            console.log("1");
+            var type = feature.getGeometry().getType();
+
+            console.log("2");
+            var newCoordinates = [];
+            feature.setProperties({
+                user: true
+            });
+            console.log("3");
+            if (type == 'LineString') {
+                coordinates.forEach((c, i) => {
+                    pairs = [];
+                    c.forEach((digit) => {
+                        if (digit != 0) { pairs.push(digit); }
+                    });
+                    newCoordinates.push(pairs);
+                });
+                feature.getGeometry().setCoordinates(newCoordinates);
+            } else if (type == 'Polygon') {
+                console.log("4");
+                newCoordinates[0] = [];
+                coordinates.forEach((polygon, i) => {
+                    console.log("5");
+                    polygon.forEach((vertex, j) => {
+                        console.log("6");
+                        pairs = [];
+                        vertex.forEach((digit) => {
+                            if (digit != 0) { pairs.push(digit); }
+                        });
+                        newCoordinates[0].push(pairs);
+                    });
+                });
+                console.log("7");
+                feature.getGeometry().setCoordinates(newCoordinates);
+            }
+
+            console.log("8");
+            feature.getGeometry().transform(
+                'EPSG:4326',
+                this.get('olMap').getView().getProjection()
+            );
+            console.log("9");
+            this.setStyleFromProperties(feature);
+        });
+
+        console.log("10");
+        this.get('source').addFeatures(features);
+        console.log("11");
+        extent = this.calculateExtent(features);
+
+        console.log("12");
+        if (extent) {
+            console.log("13");
+            let size = this.get('olMap').getSize();
+            console.log("14");
+            this.get('olMap').getView().fit(extent, size);
+            console.log("15");
+        }
+    },
+
+    /**
+     * Set the features style from based upon its properties.
+     * @param {external:"ol.feature"}
+     * @instance
+     */
+    setStyleFromProperties: function (feature) {
+        if (feature.getProperties().style) {
+            try {
+                let style = JSON.parse(feature.getProperties().style);
+                if (style.text) {
+                    this.setFeaturePropertiesFromText(feature);
+                    if (style.pointRadius > 0) {
+                        this.setFeaturePropertiesFromGeometry(feature);
+                    }
+                } else {
+                    this.setFeaturePropertiesFromGeometry(feature);
+                }
+                feature.setStyle(this.getStyle(feature, style));
+            } catch (ex) {
+                console.error('Style attribute could not be parsed.', ex);
+            }
+        } else {
+            // https://github.com/openlayers/openlayers/issues/3262
+            let func = feature.getStyleFunction();
+            if (func) {
+                let style = func.call(feature, this.get('olMap').getView().getResolution());
+                if (style[0] && style[0].getFill && style[0].getFill() === null) {
+                    style[0].setFill(new ol.style.Fill({
+                        color: [0, 0, 0, 0]
+                    }));
+                }
+                feature.setStyle(style);
+            }
+        }
+    },
+
+    /**
+     * Calculate extent of given features
+     * @instance
+     * @param {array} features
+     * @return {external:ol.Extent} extent
+     */
+    calculateExtent (features) {
+        var x = [];
+        features.forEach((feature, i) => {
+            var e = feature.getGeometry().getExtent(); // l b r t
+            if (i === 0) {
+                x = e;
+            } else {
+                let t = 0;
+                for (;t < 4; t++) {
+                    if (t < 2) {
+                        if (x[t] > e[t]) {
+                            x[t] = e[t];
+                        }
+                    } else {
+                        if (x[t] < e[t]) {
+                            x[t] = e[t];
+                        }
+                    }
+                }
+            }
+        });
+        return x.every(c => c) ? x : false;
+    },
+
+    /**
+     * Update any feature with properties from its own geometry.
+     * @instance
+     * @params {external:"ol.feature"} feature
+     */
+    setFeaturePropertiesFromGeometry: function (feature) {
+        if (!feature) return;
+        var geom,
+            type = '',
+            lenght = 0,
+            radius = 0,
+            area = 0,
+            position = {
+                n: 0,
+                e: 0
+            }
+        ;
+        geom = feature.getGeometry();
+        type = geom.getType();
+        switch (type) {
+            case 'Point':
+                position = {
+                    n: Math.round(geom.getCoordinates()[1]),
+                    e: Math.round(geom.getCoordinates()[0])
+                };
+                break;
+            case 'LineString' :
+                length = Math.round(geom.getLength());
+                break;
+            case 'Polygon':
+                area = Math.round(geom.getArea());
+                break;
+            case 'Circle':
+                radius = Math.round(geom.getRadius());
+                if (radius === 0)
+                    radius = parseFloat(this.get('circleRadius'));
+                break;
+            default:
+                break;
+        }
+        feature.setProperties({
+            type: type,
+            user: true,
+            length: length,
+            area: area,
+            radius: radius,
+            position: position
+        });
+    },
+    /**
+     * Get styles array.
+     * @instance
+     * @param {external:"ol.feature"} feature
+     * @param {boolean} forcedProperties - Force certain properties to be taken directly from the feature.
+     * @return {Array<{external:"ol.style"}>} style
+     *
+     */
+    getStyle: function (feature, forcedProperties) {
+        var geometryName = feature.getGeometryName();
+        function getLineDash () {
+            var scale = (a, f) => a.map(b => f * b),
+                width = lookupWidth.call(this),
+                style = lookupStyle.call(this),
+                dash = [12, 7],
+                dot = [2, 7]
+            ;
+            switch (style) {
+                case 'dash':
+                    return width > 3 ? scale(dash, 2) : dash;
+                case 'dot':
+                    return width > 3 ? scale(dot, 2) : dot;
+                default :
+                    return undefined;
+            }
+        }
+
+        function getFill () {
+            function rgba () {
+                switch (geometryName) {
+                    case 'Circle':
+                        return this.get('circleFillColor')
+                            .replace('rgb', 'rgba')
+                            .replace(')', `, ${this.get('circleFillOpacity')})`);
+
+                    case 'Polygon':
+                        return this.get('polygonFillColor')
+                            .replace('rgb', 'rgba')
+                            .replace(')', `, ${this.get('polygonFillOpacity')})`);
+
+                    case 'Box':
+                        return this.get('boxFillColor')
+                            .replace('rgb', 'rgba')
+                            .replace(')', `, ${this.get('boxFillOpacity')})`);
+                }
+            }
+
+            var color = forcedProperties ? forcedProperties.fillColor : rgba.call(this);
+            var fill = new ol.style.Fill({
+                color: color
+            });
+
+            return fill;
+        }
+
+        function lookupStyle () {
+            switch (geometryName) {
+                case 'Polygon':
+                    return this.get('polygonLineStyle');
+                case 'Circle':
+                    return this.get('circleLineStyle');
+                case 'Box':
+                    return this.get('boxLineStyle');
+                default:
+                    return this.get('lineStyle');
+            }
+        }
+
+        function lookupWidth () {
+            switch (geometryName) {
+                case 'Polygon':
+                    return this.get('polygonLineWidth');
+                case 'Circle':
+                    return this.get('circleLineWidth');
+                case 'Box':
+                    return this.get('boxLineWidth');
+                default:
+                    return this.get('lineWidth');
+            }
+        }
+
+        function lookupColor () {
+            if (forcedProperties) {
+                return forcedProperties.strokeColor;
+            }
+            switch (geometryName) {
+                case 'Polygon':
+                    return this.get('polygonLineColor');
+                case 'Circle':
+                    return this.get('circleLineColor');
+                case 'Box':
+                    return this.get('boxLineColor');
+                default:
+                    return this.get('lineColor');
+            }
+        }
+
+        function getStroke () {
+            var color = forcedProperties
+                ? forcedProperties.strokeColor
+                : lookupColor.call(this);
+
+            var width = forcedProperties
+                ? forcedProperties.strokeWidth
+                : lookupWidth.call(this);
+
+            var lineDash = forcedProperties
+                ? forcedProperties.strokeDash
+                : getLineDash.call(this);
+
+            var stroke = new ol.style.Stroke({
+                color: color,
+                width: width,
+                lineDash: lineDash
+            });
+
+            return stroke;
+        }
+
+        function getImage () {
+            var radius = type === 'Text' ? 0 : forcedProperties ? forcedProperties.pointRadius : this.get('pointRadius');
+            var iconSrc = forcedProperties ? (forcedProperties.image || this.get('markerImg')) : this.get('markerImg');
+
+            var icon = new ol.style.Icon({
+                anchor: [0.5, 1],
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'fraction',
+                src: iconSrc
+            });
+
+            var dot = new ol.style.Circle({
+                radius: radius,
+                fill: new ol.style.Fill({
+                    color: forcedProperties ? forcedProperties.pointColor : this.get('pointColor')
+                }),
+                stroke: new ol.style.Stroke({
+                    color: 'rgb(255, 255, 255)',
+                    width: 2
+                })
+            });
+
+            if (forcedProperties) {
+                if (forcedProperties.image) {
+                    return icon;
+                } else {
+                    return dot;
+                }
+            }
+
+            if (this.get('pointSymbol') && type !== 'Text') {
+                return icon;
+            } else {
+                return dot;
+            }
+        }
+
+        function getText () {
+            var offsetY = () => {
+                var offset = -15;
+
+                if (this.get('pointSymbol')) { offset = -40; }
+
+                if (type === 'Text') { offset = 0; }
+
+                return offset;
+            };
+
+            return new ol.style.Text({
+                textAlign: 'center',
+                textBaseline: 'middle',
+                font: `${this.get('fontSize')}px sans-serif`,
+                text: forcedProperties ? forcedProperties.text : this.getLabelText(feature),
+                fill: new ol.style.Fill({color: this.get('fontColor')}),
+                stroke: new ol.style.Stroke({color: this.get('fontBackColor'), width: 3}),
+                offsetX: type === 'Text' ? 0 : 10,
+                offsetY: offsetY(),
+                rotation: 0,
+                scale: 1.4
+            });
+        }
+
+        var type = feature.getProperties().type;
+
+        return [
+            new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'rgba(255, 255, 255, 0.5)',
+                    width: type === 'Polygon'
+                        ? this.get('polygonLineWidth') + 2
+                        : this.get('lineWidth') + 2
+                })
+            }),
+            new ol.style.Style({
+                fill: getFill.call(this),
+                stroke: getStroke.call(this),
+                image: getImage.call(this),
+                text: getText.call(this)
+            })
+        ];
+    },
+
+    /**
+     * Update any feature with property to identify feature as text feature.
+     * @instance
+     * @params {external:"ol.feature"} feature
+     * @params {string} text
+     */
+    setFeaturePropertiesFromText: function (feature, text) {
+        if (!feature) return;
+        feature.setProperties({
+            type: 'Text',
+            user: true,
+            description: text
+        });
+    },
 };
 
 /**

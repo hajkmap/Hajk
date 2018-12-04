@@ -11,7 +11,8 @@ var FirSelectionPanelView = {
      */
     getInitialState: function () {
         return {
-            activeTool: this.props.model.get('activeTool')
+            activeTool: this.props.model.get('activeTool'),
+            importKMLActive: false
         };
     },
 
@@ -39,10 +40,8 @@ var FirSelectionPanelView = {
     activateTool: function (name) {
         if (this.props.model.get('activeTool') === name) {
             this.props.model.setActiveTool(undefined);
-            console.log("///Inside activeTool: undefined");
         } else {
             this.props.model.setActiveTool(name);
-            console.log("///Inside activeTool: name is", name);
         }
 
 
@@ -93,6 +92,47 @@ var FirSelectionPanelView = {
             : 'btn btn-default';
     },
 
+    openImportKml: function() {
+        this.setState({importKMLActive: !this.state.importKMLActive});
+    },
+
+
+    renderImportKml: function () {
+        function upload () {
+            this.refs.firUploadIframe.addEventListener('load', () => {
+                this.props.model.importDrawLayer(this.refs.firUploadIframe.contentDocument);
+                var element = $(kmlImport);
+                element.toggle();
+                this.setState({ importKMLActive: false });
+                this.props.model.setActiveTool(undefined);
+            });
+
+        }
+
+        var url = this.props.model.get('kmlImportUrl');
+        var style = {display: 'none'};
+
+        if(this.state.importKMLActive) {
+            return (
+                <div className='selection-toolbar' id='kmlImport'>
+                    <p><b>Importera KML-fil</b></p>
+                    <p4>Välj KML-fil att importera</p4>
+                    <form id='fir-upload-form' method='post' action={url} target='fir-upload-iframe'
+                          encType='multipart/form-data'>
+                        <input onChange={upload.bind(this)} type='file' name='files[]' accept='.kml' multiple='false'
+                               className='btn btn-default'/><br/>
+                        <input type='submit' value='Ladda upp' name='fir-upload-file-form'
+                               className='btn btn-default'/><br/>
+                        <iframe id='fir-upload-iframe' name='fir-upload-iframe' ref='firUploadIframe' style={style}/>
+                    </form>
+                </div>
+            );
+        } else {
+            return (
+                <p></p>
+            );
+        }
+    },
     /**
      * Render the view
      * @instance
@@ -100,7 +140,10 @@ var FirSelectionPanelView = {
      */
     render: function () {
         var anchor = this.props.model.get('anchor');
+        var importKML = this.renderImportKml();
 
+        // document.getElementById("bufferToSokomrade").disabled = true;
+        console.log("bufferToSokomrade" ,document.getElementsByClassName("bufferToSokomrade").disabled );
         return (
             <div className='selection-toolbar'>
                 <div><b>Sökområde</b></div>
@@ -117,10 +160,14 @@ var FirSelectionPanelView = {
                     <button onClick={() => this.activateTool('pointSelection')} type='button' className={this.getClassNames('pointSelection')} title='Markera efter polygon' >
                         <i className='fa fa-circle icon' />
                     </button>
+                    <button onClick={() => {this.openImportKml(); this.activateTool('kmlSelection')}} type='button' className={this.getClassNames('kmlSelection')} title='Importera KML-fil' >
+                        <i className='fa fa-file-o fa-0' />
+                    </button>
                     <button onClick={() => this.deleteMarker()} type='button' className={this.getClassNames('minusSelection')} title='Ta bort objekt' >
                         <i className='fa fa-trash fa-0' />
                     </button>
                 </div>
+                {importKML}
 
                     {/*
                 <div className='btn-group btn-group-lg'>
@@ -131,9 +178,8 @@ var FirSelectionPanelView = {
                         <i className='fa fa-trash fa-0' />&nbsp;<span style={{fontSize: 16}}>Radera Objekt</span>
                     </button>
                 </div><br/><br/> */}
-
                 <br/><br/>
-                <div>
+                <div className="bufferToSokomrade">
                     Lägg till buffert &nbsp; <input id="bufferSearchingInput" type='text' ref='bufferSearchingInput' defaultValue="0" onChange={this.props.model.bufferSearchingInput}/> meter till sökområde
                 </div>
 

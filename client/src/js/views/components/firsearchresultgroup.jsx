@@ -1,3 +1,5 @@
+//const Select = require('ol/interaction/Select.js');
+
 
 
 
@@ -8,6 +10,8 @@ FirSearchResultGroup = {
 
     componentDidMount: function () {
         var groups = $(ReactDOM.findDOMNode(this)).find('.group');
+
+        document.addEventListener("keyup", this.removeMinusOrPlusIfCtrlLifted.bind(this));
 
         groups.click(function (e) {
             if(e.originalEvent.target.className.indexOf("plusMinus") == -1) {
@@ -66,10 +70,6 @@ FirSearchResultGroup = {
         var element = $(event.target),
             parent = $(ReactDOM.findDOMNode(this)),
             group = parent.find('.group');
-
-        // These should be removed
-        ctrlIsDown = false;
-        shiftIsDown = false;
 
         if (!ctrlIsDown) {
             this.props.model.highlightResultLayer.getSource().clear();
@@ -146,6 +146,7 @@ FirSearchResultGroup = {
     // plus minus button in firsearchresultgroup
     plusLayer: function (layername,e) {
         console.log("+++ plusLayer");
+        console.log("+++ this.props.model.get(\"realEstateWMSLayer\").caption",this.props.model.get("realEstateWMSLayerCaption"));
         // e.stopPropagation();
         // e.nativeEvent.stopImmediatePropagation();
 
@@ -154,17 +155,26 @@ FirSearchResultGroup = {
         this.props.model.get("layerCollection").forEach(layer => {
             console.log("layer.get(\"caption\")",layer.get("caption"));
             console.log("this.props.result.layer",this.props.result.layer);
-            if(layer.get("caption") == this.props.model.get("firLayerCaption") && this.props.result.layer == "Fastighet"){
+            if(layer.get("caption") == this.props.model.get("realEstateWMSLayerCaption") && this.props.result.layer == this.props.model.get("realEstateLayerCaption")){
                 layer.setVisible(true);
                 console.log("layer", layer.layer);
                 layer.layer.setVisible(true);
             }
         });
 
+        // select interaction
+        /*var multiSelectSingleClick = new Select({
+            condition : function(e){ // this will ensure that it is possible to click out drawings even with ctrl pressed
+                return true;
+            }
+        });
+*/
+
         doNotShowInfoClick = true;
+        this.props.model.set("plusActive", true);
+        this.props.model.set("plusOrMinusAdded", false);
         map.on('singleclick', this.plusLayerActive);
 
-        this.props.model.set("plusActive", true);
 
     },
 
@@ -176,9 +186,12 @@ FirSearchResultGroup = {
         try {
             setTimeout(a => {
                 if (!map.get('clickLock')) {
-                    this.clickedOnMap(event, this);
-                    map.un('singleclick', this.plusLayerActive);
-                    this.props.model.set("plusActive", false);
+                    var ctrlValue = ctrlIsDown;
+                    this.clickedOnMap(event, ctrlValue);
+                    if(!ctrlValue) {
+                        map.un('singleclick', this.plusLayerActive);
+                        this.props.model.set("plusActive", false);
+                    }
                 }
             }, 50);
         } catch (e) {}
@@ -188,9 +201,10 @@ FirSearchResultGroup = {
         console.log("minusLayer");
         var map = this.props.model.get("map");
 
-        map.on('singleclick', this.minusLayerActive);
+        this.props.model.set("plusOrMinusAdded", false);
         doNotShowInfoClick = true;
         this.props.model.set("minusActive", true);
+        map.on('singleclick', this.minusLayerActive);
 
     },
 
@@ -200,9 +214,12 @@ FirSearchResultGroup = {
         try {
             setTimeout(a => {
                 if (!map.get('clickLock')) {
-                    this.minusObjectFromMap(event);
-                    map.un('singleclick', this.minusLayerActive);
-                    this.props.model.set("minusActive", false);
+                    var ctrlValue = ctrlIsDown;
+                    this.minusObjectFromMap(event, ctrlValue);
+                    if(!ctrlValue) {
+                        map.un('singleclick', this.minusLayerActive);
+                        this.props.model.set("minusActive", false);
+                    }
                 }
             }, 50);
         } catch (e) {
@@ -211,7 +228,7 @@ FirSearchResultGroup = {
 
     },
 
-    minusObjectFromMap: function(event){
+    minusObjectFromMap: function(event, ctrlValue){
 
         // get the object detail
         var map = this.props.model.get("map");
@@ -221,9 +238,10 @@ FirSearchResultGroup = {
         var that = this;
         map.forEachFeatureAtPixel(event.pixel, function(feature, layer){
             if (layer.get("caption") === "FIRSökresltat"){
-                var nyckelHighLight = feature.get("nyckel");
+                var nyckelHighLight = feature.get(that.props.model.get("realEstateLayer").fnrField);
+                var omrade = feature.get(that.props.model.get("realEstateLayer").omradeField);
 
-                var toDeleteFeatures = source.getFeatures().filter(element => element.get("nyckel") === feature.get("nyckel"));
+                var toDeleteFeatures = source.getFeatures().filter(element => element.get(that.props.model.get("realEstateLayer").fnrField) === feature.get(that.props.model.get("realEstateLayer").fnrField) && element.get(that.props.model.get("realEstateLayer").omradeField) == feature.get(that.props.model.get("realEstateLayer").omradeField));
                 if (toDeleteFeatures.length > 0) {
                     toDeleteFeatures.forEach(feature => {
                         source.removeFeature(feature); // clickedOn and the feature in source are not equal?
@@ -235,28 +253,30 @@ FirSearchResultGroup = {
                 // var get id
                 var hitId = 0;
                 for(var i = 0; i < that.props.result.hits.length; i++){
-                    if(nyckelHighLight === that.props.result.hits[i].get("nyckel")){
+                    if(nyckelHighLight === that.props.result.hits[i].get(that.props.model.get("realEstateLayer").fnrField) && omrade === that.props.result.hits[i].get(that.props.model.get("realEstateLayer").omradeField)){
                         hitId = i;
                         break;
                     }
                 }
                 console.log("hitId", hitId, "groupId", that.props.id);
                 that.reduceOpenIfHigher(hitId, parseInt(that.props.id.substring(6)),nrDeleted);
-                that.props.result.hits = that.props.result.hits.filter(element => element.get("nyckel") !== nyckelHighLight);
+                that.props.result.hits = that.props.result.hits.filter(element => element.get(that.props.model.get("realEstateLayer").fnrField) !== nyckelHighLight || omrade !== element.get(that.props.model.get("realEstateLayer").omradeField));
+                that.props.model.set("plusOrMinusAdded", true);
             } else if (layer.get("caption") === "FIRHighlight"){
                 layer.getSource().removeFeature(feature);
             }
         });
-        this.forceUpdate(); // it affect searchjs
+        this.forceUpdate(); // it affects searchjs
 
         // hide the layer
-        this.props.model.get("layerCollection").forEach(layer => {
-            if(layer.get("caption") == this.props.model.get("firLayerCaption") && this.props.result.layer == "Fastighet" ){
-                layer.setVisible(false);
-                layer.layer.setVisible(false);
-            }
-        });
-
+        if(!ctrlValue) {
+            this.props.model.get("layerCollection").forEach(layer => {
+                if (layer.get("caption") == this.props.model.get("realEstateWMSLayerCaption") && this.props.result.layer === this.props.model.get("realEstateLayerCaption")) {
+                    layer.setVisible(false);
+                    layer.layer.setVisible(false);
+                }
+            });
+        }
     },
 
     // need to rewrite the code, nyckel is only applied to fastighets.
@@ -294,15 +314,15 @@ FirSearchResultGroup = {
         console.log("clickedOn",clickedOn);
 
         var lenBefore = this.props.model.get("items")[group].hits.length;
-        this.props.model.get("items")[group].hits = this.props.model.get("items")[group].hits.filter(element => element.get("nyckel") != clickedOn.get("nyckel"));
+        this.props.model.get("items")[group].hits = this.props.model.get("items")[group].hits.filter(element => !(element.get(this.props.model.get("realEstateLayer").fnrField) === clickedOn.get(this.props.model.get("realEstateLayer").fnrField) && element.get(this.props.model.get("realEstateLayer").omradeField) === clickedOn.get(this.props.model.get("realEstateLayer").omradeField)));
         var lenAfter = this.props.model.get("items")[group].hits.length;
         console.log("lenBefore, lenAfter", lenBefore, lenAfter);
-        this.props.result.hits = this.props.result.hits.filter(element => element.get("nyckel") != clickedOn.get("nyckel"));
+        this.props.result.hits = this.props.result.hits.filter(element => !(element.get(this.props.model.get("realEstateLayer").fnrField) === clickedOn.get(this.props.model.get("realEstateLayer").fnrField) && element.get(this.props.model.get("realEstateLayer").omradeField) === clickedOn.get(this.props.model.get("realEstateLayer").omradeField)));
 
         //rerender the result
         var source = this.props.model.firFeatureLayer.getSource();
         var features = source.getFeatures();
-        var toDeleteFeatures = features.filter(element => element.get("nyckel") === clickedOn.get("nyckel"));
+        var toDeleteFeatures = features.filter(element => element.get(this.props.model.get("realEstateLayer").fnrField) === clickedOn.get(this.props.model.get("realEstateLayer").fnrField) && element.get(this.props.model.get("realEstateLayer").omradeField) === clickedOn.get(this.props.model.get("realEstateLayer").omradeField));
         console.log("source", source);
         console.log("features", features);
         console.log("toDeleteFeatures",toDeleteFeatures);
@@ -313,11 +333,37 @@ FirSearchResultGroup = {
         }
 
         this.reduceOpenIfHigher(hit, group, toDeleteFeatures.length);
-
-
         this.forceUpdate(); // it affect searchjs
 
 
+    },
+
+    removeMinusOrPlusIfCtrlLifted: function(event){
+        if (event.keyCode == 17 && this.props.model.get("plusOrMinusAdded")){
+            var map = this.props.model.get("map");
+            if(this.props.model.get("plusActive")){
+                map.un('singleclick', this.plusLayerActive);
+                this.props.model.set("plusActive", false);
+                this.props.model.get("layerCollection").forEach(layer => {
+                    if (layer.get("caption") == this.props.model.get("realEstateWMSLayerCaption") && this.props.result.layer == this.props.model.get("realEstateLayerCaption")) {
+                        layer.setVisible(false);
+                        layer.layer.setVisible(false);
+                    }
+                });
+                this.props.model.set("plusOrMinusAdded", false);
+            } else if(this.props.model.get("minusActive")){
+                map.un('singleclick', this.minusLayerActive);
+                this.props.model.set("minusActive", false);
+
+                this.props.model.get("layerCollection").forEach(layer => {
+                    if (layer.get("caption") == this.props.model.get("realEstateWMSLayerCaption") && this.props.result.layer == this.props.model.get("realEstateLayerCaption")) {
+                        layer.setVisible(false);
+                        layer.layer.setVisible(false);
+                    }
+                });
+                this.props.model.set("plusOrMinusAdded", false);
+            }
+        }
     },
 
     informationForEachResult: function(hit, hitId) {
@@ -353,7 +399,8 @@ FirSearchResultGroup = {
             );
     },
 
-    clickedOnMap: function(event) {
+    clickedOnMap: function(event, ctrlValue) {
+        this.props.model.set("plusOrMinusAdded", true);
         // check if tool is active
         // add the clicked element to results
         var map = this.props.model.get("map");
@@ -361,7 +408,7 @@ FirSearchResultGroup = {
         var wmsLayers = this.props.model.get("layerCollection").filter((layer) => {
                 return (layer.get('type') === 'wms' || layer.get('type') === 'arcgis') &&
                     layer.get('queryable') &&
-                    layer.getVisible() && layer.get('caption') == this.props.model.get("firLayerCaption");
+                    layer.getVisible() && layer.get('caption') == this.props.model.get("realEstateWMSLayerCaption");
             }),
             projection = this.props.model.get("map").getView().getProjection().getCode(),
             resolution = this.props.model.get("map").getView().getResolution(),
@@ -409,7 +456,8 @@ FirSearchResultGroup = {
                                     }
 
                                     if (!found) {
-                                        names.push(feature.get("nyckel"));
+                                        console.log("found 2");
+                                        names.push([feature.get(this.props.model.get("realEstateLayer").fnrField), feature.get(this.props.model.get("realEstateLayer").omradeField)]);
                                     }
                                 }
                             );
@@ -434,12 +482,14 @@ FirSearchResultGroup = {
         });
 
         // remove event "singleclick" and the layer
-        this.props.model.get("layerCollection").forEach(layer => {
-            if (layer.get("caption") == this.props.model.get("firLayerCaption") && this.props.result.layer == "Fastighet") {
-                layer.setVisible(false);
-                layer.layer.setVisible(false);
-            }
-        });
+        if(!ctrlValue) {
+            this.props.model.get("layerCollection").forEach(layer => {
+                if (layer.get("caption") == this.props.model.get("realEstateWMSLayerCaption") && this.props.result.layer == this.props.model.get("realEstateLayerCaption")) {
+                    layer.setVisible(false);
+                    layer.layer.setVisible(false);
+                }
+            });
+        }
     },
 
     getPropertyFilter: function (props) {
