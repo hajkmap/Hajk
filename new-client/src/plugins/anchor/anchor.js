@@ -54,7 +54,7 @@ class Anchor extends React.PureComponent {
         position="left"
         open={this.state.panelOpen}
         top={this.state.top}
-        height="320px"
+        height="325px"
       >
         <AnchorView
           localObserver={this.localObserver}

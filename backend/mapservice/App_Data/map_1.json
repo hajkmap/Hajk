@@ -344,6 +344,15 @@
         "visibleForGroups": []
       },
       "index": 0
+    },
+    {
+      "type": "measure",
+      "options": {
+        "target": "toolbar",
+        "instruction": "",
+        "icons": ""
+      },
+      "index": 0
     }
   ],
   "map": {

@@ -4,13 +4,7 @@ import { withStyles } from "@material-ui/core/styles";
 import classNames from "classnames";
 import PanelHeader from "./PanelHeader";
 
-const withStylesProps = styles => Component => props => {
-  var style = styles(props);
-  const Comp = withStyles(style)(Component);
-  return <Comp {...props} />;
-};
-
-const styles = props => {
+const styles = theme => {
   return {
     popPanel: {
       position: "relative",
@@ -19,11 +13,17 @@ const styles = props => {
       background: "white",
       zIndex: 1200,
       order: 1,
-      height: props.height,
       maxWidth: "400px",
-      top: props.top,
       boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
-      overflow: "hidden"
+      overflow: "hidden",
+      [theme.breakpoints.down("xs")]: {
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        top: "auto !important",
+        height: "auto"
+      }
     },
     hidden: {
       display: "none"
@@ -46,13 +46,20 @@ class PopPanel extends Component {
   componentDidMount() {}
 
   render() {
-    const { classes, children, open, top } = this.props;
+    const { classes, children, open, top, height } = this.props;
     var activeClasses = [classes.popPanel];
     if (!open) {
       activeClasses = [classes.hidden, activeClasses];
     }
     return (
-      <div ref="panel" className={classNames(activeClasses)}>
+      <div
+        ref="panel"
+        className={classNames(activeClasses)}
+        style={{
+          top: top,
+          height: height
+        }}
+      >
         <PanelHeader title={this.props.title} onClose={this.close} />
         <div className={classes.body}>{children}</div>
       </div>
@@ -64,5 +71,4 @@ PopPanel.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStylesProps(styles)(PopPanel);
-//export default withStyles(styles)(PopPanel);
+export default withStyles(styles)(PopPanel);

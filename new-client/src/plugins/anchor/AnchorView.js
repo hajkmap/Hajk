@@ -44,9 +44,9 @@ class AnchorView extends React.PureComponent {
     return (
       <>
         <p>
-          Kartans synliga lager och aktuella zoomnivå och utbredning är.
-          Högerklicka på knappen och välj spara länk för att kopiera länken till
-          urklipp.
+          Spara kartans synliga lager, aktuella zoomnivå och utbredning.
+          Högerklicka på knappen och välj "Kopiera länkadress" för att kopiera
+          länken till urklipp.
         </p>
         <Button variant="contained" target="_blank" href={this.state.anchor}>
           Länk till karta
