@@ -60,7 +60,6 @@ const styles = theme => {
       width: "8px",
       cursor: "ew-resize",
       padding: "2px 0 0",
-      borderTop: "1px solid #ddd",
       position: "absolute",
       top: 0,
       left: 0,
