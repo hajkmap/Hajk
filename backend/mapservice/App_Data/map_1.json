@@ -269,15 +269,6 @@
         "icons": ""
       },
       "index": 0
-    },
-    {
-      "type": "buffer",
-      "options": {
-        "target": "toolbar",
-        "instruction": "",
-        "icons": ""
-      },
-      "index": 0
     }
   ],
   "map": {
