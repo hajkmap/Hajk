@@ -8,14 +8,32 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import TextField from "@material-ui/core/TextField";
 
-const styles = theme => ({});
+const styles = theme => ({
+  container: {
+    display: "flex",
+    flexWrap: "wrap"
+  },
+  textField: {
+    marginLeft: theme.spacing.unit,
+    marginRight: theme.spacing.unit,
+    width: 200
+  },
+  dense: {
+    marginTop: 19
+  },
+  menu: {
+    width: 200
+  }
+});
 
 class Dialog extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      open: false
+      open: false,
+      text: ""
     };
   }
 
@@ -40,6 +58,12 @@ class Dialog extends Component {
     };
   }
 
+  handleChange = name => event => {
+    this.setState({
+      [name]: event.target.value
+    });
+  };
+
   handleClose = e => {
     e.stopPropagation();
     this.props.onClose();
@@ -58,6 +82,47 @@ class Dialog extends Component {
 
   renderDialogContent(text) {
     return <span dangerouslySetInnerHTML={this.getHtml(text)} />;
+  }
+
+  renderPromptInput() {
+    const { classes, options } = this.props;
+    if (!options.prompt) return null;
+
+    const focusUsernameInputField = textField => {
+      var input;
+      if (textField) {
+        input = document.getElementById(textField.props.id);
+      }
+      if (input) {
+        setTimeout(() => {
+          input.focus();
+        }, 100);
+      }
+    };
+
+    return (
+      <form
+        className={classes.container}
+        noValidate
+        autoComplete="off"
+        onSubmit={e => {
+          e.preventDefault();
+          this.props.onClose();
+          return false;
+        }}
+      >
+        <TextField
+          id="prompt-text"
+          label=""
+          className={classes.textField}
+          value={this.state.text}
+          onChange={this.handleChange("text")}
+          margin="normal"
+          autoFocus={true}
+          ref={focusUsernameInputField}
+        />
+      </form>
+    );
   }
 
   render() {
@@ -84,10 +149,11 @@ class Dialog extends Component {
           <DialogContentText>
             {this.renderDialogContent(text)}
           </DialogContentText>
+          {this.renderPromptInput()}
         </DialogContent>
         <DialogActions>
           <Button onClick={this.handleClose} color="primary" autoFocus>
-            Stäng
+            {options.buttonText || "Stäng"}
           </Button>
         </DialogActions>
       </ReactDialog>

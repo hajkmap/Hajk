@@ -306,26 +306,13 @@
       "index": 0
     },
     {
-      "type": "information",
-      "options": {
-        "target": "toolbar",
-        "text": "<p>Text som förtydligar varför, vad och hur… Lorem ipsum dolor sit amet, consectetur \nadipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna \naliqua.</p>\n<h1>VI VILL HÖRA DIN ÅSIKT!</h1>",
-        "headerText": "HÄR KAN DU SE VAD SOM PLANERAS I DITT OMRÅDE",
-        "visibleAtStart": true,
-        "showInfoOnce": false,
-        "base64EncodeForInfotext": false,
-        "visibleForGroups": []
-      },
-      "index": 0
-    },
-    {
       "type": "anchor",
       "options": {
         "target": "toolbar",
         "instruction": "",
         "visibleForGroups": []
       },
-      "index": 0
+      "index": 1
     },
     {
       "type": "simple_layerswitcher",
@@ -337,22 +324,27 @@
       "index": 0
     },
     {
-      "type": "edit",
-      "options": {
-        "target": "toolbar",
-        "instruction": "",
-        "visibleForGroups": []
-      },
-      "index": 0
-    },
-    {
       "type": "measure",
       "options": {
         "target": "toolbar",
         "instruction": "",
         "icons": ""
       },
-      "index": 0
+      "index": 2
+    },
+    {
+      "type": "draw",
+      "options": {
+        "target": "toolbar",
+        "exportUrl": "/mapservice/export/kml",
+        "importUrl": "/mapservice/import/kml",
+        "base64Encode": false,
+        "instruction": "",
+        "icons": "",
+        "proxyUrl": "",
+        "visibleForGroups": []
+      },
+      "index": 3
     }
   ],
   "map": {

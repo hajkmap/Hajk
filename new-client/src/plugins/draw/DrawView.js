@@ -1,147 +1,116 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
-import { ChromePicker } from "react-color";
 import PropTypes from "prop-types";
+import Button from "@material-ui/core/Button";
+import DeleteIcon from "@material-ui/icons/Delete";
+import NativeSelect from "@material-ui/core/NativeSelect";
+import FormControl from "@material-ui/core/FormControl";
+import Input from "@material-ui/core/Input";
+import InputLabel from "@material-ui/core/InputLabel";
+import { withSnackbar } from "notistack";
+import Dialog from "../../components/Dialog.js";
 
-const styles = theme => ({});
+const styles = theme => ({
+  root: {
+    display: "flex",
+    flexWrap: "wrap"
+  },
+  formControl: {
+    margin: theme.spacing.unit,
+    minWidth: 120
+  },
+  selectEmpty: {
+    marginTop: theme.spacing.unit * 2
+  },
+  row: {
+    marginBottom: "10px"
+  }
+});
 
 class DrawView extends React.PureComponent {
-  handleColorChange = (color, event) => {
-    this.setState({ selectedColor: color.rgb });
+  state = {
+    shape: "LineString"
   };
 
-  constructor() {
-    super();
-    this.state = {
-      activeDrawTool: null,
-      activeModifyTool: null,
-      selectedColor: "#aaa"
-    };
+  constructor(props) {
+    super(props);
+    this.model = this.props.model;
+    this.app = this.props.app;
+    this.localObserver = this.props.localObserver;
+    this.localObserver.on("dialog", () => {
+      this.setState({
+        dialog: true
+      });
+    });
   }
 
-  getDrawToolClass(symbol) {
-    let isActive = this.state.activeDrawTool === symbol ? "active" : "";
-    return `btn btn-secondary ${isActive}`;
-  }
+  componentDidMount() {}
 
-  getModifyToolClass(symbol) {
-    let isActive = this.state.activeModifyTool === symbol ? "active" : "";
-    return `btn btn-secondary ${isActive}`;
-  }
+  componentWillUnmount() {}
 
-  getText() {
-    return "Rita";
+  handleChange = name => event => {
+    this.setState({ [name]: event.target.value });
+    this.props.model.setType(event.target.value);
+  };
+
+  onClose = () => {
+    this.setState({
+      dialog: false
+    });
+  };
+
+  renderDialog() {
+    if (this.state.dialog) {
+      return createPortal(
+        <Dialog
+          options={{
+            text: "",
+            prompt: true,
+            headerText: "Ange text",
+            buttonText: "OK"
+          }}
+          open={this.state.dialog}
+          onClose={this.onClose}
+        />,
+        document.getElementById("map")
+      );
+    } else {
+      return null;
+    }
   }
 
   render() {
+    const { classes } = this.props;
     return (
-      <div className="tool-panel-content">
-        <ChromePicker
-          onChangeComplete={this.handleColorChange}
-          color={this.state.selectedColor}
-        />
-
-        <div className="btn-group" role="group">
-          <button
-            onClick={() => {
-              this.setState({
-                activeDrawTool: null,
-                activeModifyTool: "move"
-              });
-              this.drawModel.activateModifyTool("move");
-            }}
-            type="button"
-            className={this.getModifyToolClass("move")}
-          >
-            Flytta
-          </button>
-          <button
-            onClick={() => {
-              this.setState({
-                activeDrawTool: null,
-                activeModifyTool: "change"
-              });
-              this.drawModel.activateModifyTool("change");
-            }}
-            type="button"
-            className={this.getModifyToolClass("change")}
-          >
-            Ändra
-          </button>
-          <button
-            onClick={() => {
-              this.setState({
-                activeDrawTool: null,
-                activeModifyTool: "remove"
-              });
-              this.drawModel.activateModifyTool("remove");
-            }}
-            type="button"
-            className={this.getModifyToolClass("remove")}
-          >
-            Ta bort
-          </button>
+      <>
+        <div className={classes.row}>
+          <FormControl className={classes.formControl}>
+            <InputLabel htmlFor="age-native-helper">
+              Typ av ritobjekt
+            </InputLabel>
+            <NativeSelect
+              value={this.state.age}
+              onChange={this.handleChange("shape")}
+              input={<Input name="shape" id="shape-native-helper" />}
+            >
+              <option value="LineString">Linje</option>
+              <option value="Text">Text</option>
+              <option value="Polygon">Yta</option>
+              <option value="Square">Rektangel</option>
+              <option value="Circle">Cirkel</option>
+              <option value="Point">Punkt</option>
+            </NativeSelect>
+          </FormControl>
         </div>
-
-        <div className="btn-group" role="group">
-          <button
-            onClick={() => {
-              this.setState({
-                activeModifyTool: null,
-                activeDrawTool: "Point"
-              });
-              this.drawModel.activateDrawTool("Point");
-            }}
-            value="Point"
-            type="button"
-            className={this.getDrawToolClass("Point")}
-          >
-            Punkt
-          </button>
-          <button
-            onClick={() => {
-              this.setState({
-                activeModifyTool: null,
-                activeDrawTool: "LineString"
-              });
-              this.drawModel.activateDrawTool("LineString");
-            }}
-            value="LineString"
-            type="button"
-            className={this.getDrawToolClass("LineString")}
-          >
-            Linje
-          </button>
-          <button
-            onClick={() => {
-              this.setState({
-                activeModifyTool: null,
-                activeDrawTool: "Circle"
-              });
-              this.drawModel.activateDrawTool("Circle");
-            }}
-            value="Circle"
-            type="button"
-            className={this.getDrawToolClass("Circle")}
-          >
-            Cirkel
-          </button>
-          <button
-            onClick={() => {
-              this.setState({
-                activeModifyTool: null,
-                activeDrawTool: "Polygon"
-              });
-              this.drawModel.activateDrawTool("Polygon");
-            }}
-            value="Polygon"
-            type="button"
-            className={this.getDrawToolClass("Polygon")}
-          >
-            Polygon
-          </button>
+        <div className={classes.row}>
+          <Button variant="contained" onClick={this.props.model.clear}>
+            <DeleteIcon />
+            Ta bort alla ritobjekt
+          </Button>
         </div>
-      </div>
+        {this.renderDialog()}
+      </>
     );
   }
 }
@@ -150,4 +119,4 @@ DrawView.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(DrawView);
+export default withStyles(styles)(withSnackbar(DrawView));

@@ -1,92 +1,75 @@
-import React, { Component } from "react";
+import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
-import { Button } from "@material-ui/core";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
-import BrushIcon from "@material-ui/icons/Brush";
-
-import Panel from "../../components/Panel.js";
-import DrawView from "./DrawView.js";
-import DrawModel from "./DrawModel.js";
+import DrawIcon from "@material-ui/icons/Edit";
+import DrawView from "./DrawView";
+import DrawModel from "./DrawModel";
 import Observer from "react-event-observer";
+import PopPanel from "../../components/PopPanel.js";
+import "./draw.css";
 
 const styles = theme => {
   return {};
 };
 
-class Draw extends Component {
+class Draw extends React.PureComponent {
   state = {
-    panelOpen: this.props.options.visibleAtStart
+    panelOpen: this.props.options.visibleAtStart,
+    top: 0
   };
 
   onClick = e => {
     this.app.onPanelOpen(this);
     this.setState({
-      panelOpen: true
+      panelOpen: true,
+      top: e.currentTarget.offsetTop + "px"
     });
+    this.drawModel.setActive(true);
   };
 
   closePanel = () => {
     this.setState({
       panelOpen: false
     });
+    this.drawModel.setActive(false);
   };
 
-  constructor(spec) {
-    super(spec);
-    this.text = "Rita";
-    this.app = spec.app;
-    this.observer = Observer();
-    this.observer.subscribe("myEvent", message => {
-      console.log(message);
-    });
+  constructor(props) {
+    super(props);
+    this.text = "Ritverktyg";
+    this.app = props.app;
+    this.localObserver = Observer();
     this.drawModel = new DrawModel({
-      map: spec.map,
-      app: spec.app,
-      observer: this.observer
+      map: props.map,
+      app: props.app,
+      localObserver: this.localObserver
     });
     this.app.registerPanel(this);
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return this.state.panelOpen !== nextState.panelOpen;
-  }
-
   renderPanel() {
     return createPortal(
-      <Panel
+      <PopPanel
         title={this.text}
         onClose={this.closePanel}
         position="left"
         open={this.state.panelOpen}
+        top={this.state.top}
+        height="200px"
       >
         <DrawView
-          app={this.app}
-          map={this.map}
+          localObserver={this.localObserver}
+          model={this.drawModel}
           parent={this}
-          observer={this.observer}
         />
-      </Panel>,
+      </PopPanel>,
       document.getElementById("map-overlay")
     );
   }
 
   renderAsWidgetItem() {
-    const { classes } = this.props;
-    return (
-      <div>
-        <Button
-          variant="fab"
-          color="default"
-          aria-label="Översiktsplan"
-          className={classes.button}
-          onClick={this.onClick}
-        >
-          <BrushIcon />
-        </Button>
-        {this.renderPanel()}
-      </div>
-    );
+    throw new Error("Not implemented exception");
   }
 
   renderAsToolbarItem() {
@@ -96,10 +79,13 @@ class Draw extends Component {
           button
           divider={true}
           selected={this.state.panelOpen}
-          onClick={this.onClick}
+          onClick={e => {
+            e.preventDefault();
+            this.onClick(e);
+          }}
         >
           <ListItemIcon>
-            <BrushIcon />
+            <DrawIcon />
           </ListItemIcon>
           <ListItemText primary={this.text} />
         </ListItem>
