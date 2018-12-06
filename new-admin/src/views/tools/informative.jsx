@@ -28,6 +28,7 @@ var defaultState = {
   active: false,
   index: 0,
   target: "toolbar",
+  panel: "right",
   visibleAtStart: false,
   templateJsonFilePath: "http://localhost:55630/informative/load/op",
   visibleForGroups: []
@@ -50,6 +51,7 @@ class ToolOptions extends Component {
         active: true,
         index: tool.index,
         target: tool.options.target,
+        panel: tool.options.panel,
         visibleAtStart: tool.options.visibleAtStart || false,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
@@ -113,6 +115,7 @@ class ToolOptions extends Component {
       index: this.state.index,
       options: {
         target: this.state.target,
+        panel: this.state.panel,
         visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
@@ -255,7 +258,18 @@ class ToolOptions extends Component {
             />
           </div>
           {this.renderVisibleForGroups()}
-          <div>Inställningar för översiktsplan..</div>
+          <div>
+            <label htmlFor="panel">Panelplacering</label>
+            <input
+              id="panel"
+              name="panel"
+              type="text"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.panel}
+            />
+          </div>
         </form>
       </div>
     );
