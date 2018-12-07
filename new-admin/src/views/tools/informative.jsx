@@ -29,8 +29,12 @@ var defaultState = {
   index: 0,
   target: "toolbar",
   panel: "right",
+  abstract: "<div>HTML som beskriver dokumentets innehåll</div>",
+  caption: "Översiktsplan",
+  serviceUrl: "http://localhost:55630/informative/load",
+  documentList: [],
   visibleAtStart: false,
-  templateJsonFilePath: "http://localhost:55630/informative/load/op",
+  templateJsonFilePath: "op",
   visibleForGroups: []
 };
 
@@ -45,23 +49,43 @@ class ToolOptions extends Component {
   }
 
   componentDidMount() {
+    let url =
+      this.props.model.get("config").url_document_list +
+      "/" +
+      this.props.model.get("mapFile");
+
     var tool = this.getTool();
-    if (tool) {
-      this.setState({
-        active: true,
-        index: tool.index,
-        target: tool.options.target,
-        panel: tool.options.panel,
-        visibleAtStart: tool.options.visibleAtStart || false,
-        visibleForGroups: tool.options.visibleForGroups
-          ? tool.options.visibleForGroups
-          : []
-      });
-    } else {
-      this.setState({
-        active: false
-      });
-    }
+    this.props.model.getDocumentList(url, list => {
+      this.setState(
+        {
+          documentList: list
+        },
+        () => {
+          if (tool) {
+            this.props.model.getDocumentList(url, list => {
+              this.setState({
+                active: true,
+                index: tool.index,
+                target: tool.options.target,
+                panel: tool.options.panel,
+                caption: tool.options.caption,
+                abstract: tool.options.abstract,
+                serviceUrl: tool.options.serviceUrl,
+                document: tool.options.document,
+                visibleAtStart: tool.options.visibleAtStart || false,
+                visibleForGroups: tool.options.visibleForGroups
+                  ? tool.options.visibleForGroups
+                  : []
+              });
+            });
+          } else {
+            this.setState({
+              active: false
+            });
+          }
+        }
+      );
+    });
   }
 
   componentWillUnmount() {}
@@ -116,6 +140,10 @@ class ToolOptions extends Component {
       options: {
         target: this.state.target,
         panel: this.state.panel,
+        caption: this.state.caption,
+        serviceUrl: this.state.serviceUrl,
+        abstract: this.state.abstract,
+        document: this.state.document,
         visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
@@ -202,6 +230,12 @@ class ToolOptions extends Component {
     }
   }
 
+  renderDocumentList() {
+    return this.state.documentList.map((document, i) => {
+      return <option key={i}>{document}</option>;
+    });
+  }
+
   /**
    *
    */
@@ -269,6 +303,54 @@ class ToolOptions extends Component {
               }}
               value={this.state.panel}
             />
+          </div>
+          <div>
+            <label htmlFor="caption">Rubrik</label>
+            <input
+              id="caption"
+              name="caption"
+              type="text"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.caption}
+            />
+          </div>
+          <div>
+            <label htmlFor="abstract">Sammanfattning</label>
+            <textarea
+              id="abstract"
+              name="abstract"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.abstract}
+            />
+          </div>
+          <div>
+            <label htmlFor="serviceUrl">Länk till tjänst</label>
+            <input
+              id="serviceUrl"
+              name="serviceUrl"
+              type="text"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.serviceUrl}
+            />
+          </div>
+          <div>
+            <label htmlFor="document">Välj dokument</label>
+            <select
+              id="document"
+              name="document"
+              value={this.state.document}
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            >
+              {this.renderDocumentList()}
+            </select>
           </div>
         </form>
       </div>

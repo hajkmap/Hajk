@@ -36,6 +36,7 @@
     "url_layermenu_settings": "http://localhost:55630/settings/layermenu",
     "url_map_settings": "http://localhost:55630/settings/mapsettings",
     "url_tool_settings": "http://localhost:55630/settings/toolsettings",
+    "url_document_list": "http://localhost:55630/informative/list",
     "authentication_active": false
   },
   "informative": {

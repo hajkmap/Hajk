@@ -100,8 +100,6 @@ var menu = Model.extend({
   },
 
   updateMapConfig: function(config, callback) {
-    console.log("Update map config", config);
-
     $.ajax({
       url: `${this.get("config").url_map_settings}?mapFile=${this.get(
         "mapFile"
@@ -115,6 +113,13 @@ var menu = Model.extend({
       error: () => {
         callback(false);
       }
+    });
+  },
+
+  getDocumentList(url, callback) {
+    $.ajax({
+      url: url,
+      success: callback
     });
   },
 

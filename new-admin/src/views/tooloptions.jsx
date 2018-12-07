@@ -172,7 +172,7 @@ class ToolOptions extends Component {
       export: "Utskrift",
       infoclick: "Infoklick",
       information: "Om kartan",
-      informative: "Översiktsplan",
+      informative: "Dokumenthanterare",
       search: "Sök",
       streetview: "Google Street View",
       preset: "Snabbval",
@@ -189,13 +189,12 @@ class ToolOptions extends Component {
         <aside>
           <ul className="config-layer-list">
             {Object.keys(toolTypes)
-              .sort(
-                (a, b) =>
-                  this.getIndexForTool(a) === this.getIndexForTool(b)
-                    ? 0
-                    : this.getIndexForTool(a) > this.getIndexForTool(b)
-                      ? 1
-                      : -1
+              .sort((a, b) =>
+                this.getIndexForTool(a) === this.getIndexForTool(b)
+                  ? 0
+                  : this.getIndexForTool(a) > this.getIndexForTool(b)
+                  ? 1
+                  : -1
               )
               .map((key, i) => {
                 var index = this.getIndexForTool(key);

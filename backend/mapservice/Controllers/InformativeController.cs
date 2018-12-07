@@ -11,6 +11,12 @@ using System.Web.Mvc;
 
 namespace MapService.Controllers
 {
+	class Document
+	{
+		public string map { get; set; }
+		public object[] chapters { get; set; }
+	}
+
     public class InformativeController : Controller
     {
 		[System.Web.Http.HttpGet]
@@ -68,7 +74,7 @@ namespace MapService.Controllers
 		}
 
 		[System.Web.Http.HttpGet]
-		public string List()
+		public string List(string id)
 		{
 			Response.Expires = 0;
 			Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
@@ -77,8 +83,26 @@ namespace MapService.Controllers
 			string folder = String.Format("{0}App_Data\\documents\\", HostingEnvironment.ApplicationPhysicalPath);			
 			if (Directory.Exists(folder))
 			{
-				string[] files = Directory.GetFiles(folder).Select(f => Path.GetFileNameWithoutExtension(f)).ToArray();
-				return JsonConvert.SerializeObject(files);
+				string[] files = Directory.GetFiles(folder).Select(f => Path.GetFileNameWithoutExtension(f)).ToArray();				
+				if (id == null)
+				{
+					return JsonConvert.SerializeObject(files);
+				}
+				else
+				{
+					string[] fileNames = Directory.GetFiles(folder).Select(f => Path.GetFullPath(f)).ToArray();
+					List<string> documents = new List<string>();
+					foreach (string fileName in fileNames)
+					{						
+						var text = System.IO.File.ReadAllText(fileName);
+						Document d = JsonConvert.DeserializeObject<Document>(text);
+						if (d.map == id)
+						{
+							documents.Add(Path.GetFileNameWithoutExtension(fileName));
+						}
+					}
+					return JsonConvert.SerializeObject(documents);
+				}
 			}
 
 			return "Folder not found";

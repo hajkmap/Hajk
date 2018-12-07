@@ -327,6 +327,20 @@
         "visibleForGroups": []
       },
       "index": 0
+    },
+    {
+      "type": "informative",
+      "options": {
+        "target": "toolbar",
+        "panel": "right",
+        "caption": "Översiktsplan",
+        "serviceUrl": "http://localhost:55630/informative/load",
+        "abstract": "<div>HTML som beskriver dokumentets innehåll</div>",
+        "document": "op2",
+        "visibleAtStart": false,
+        "visibleForGroups": []
+      },
+      "index": 0
     }
   ],
   "map": {
