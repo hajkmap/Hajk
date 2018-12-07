@@ -39,7 +39,7 @@ class BreadCrumbs extends React.PureComponent {
     };
     var crums = traverse(chapter, []);
     crums.push({
-      text: "Översiktsplan",
+      text: this.props.caption,
       chapter: "home"
     });
     return crums.reverse();

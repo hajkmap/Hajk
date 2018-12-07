@@ -47,12 +47,12 @@ const styles = theme => ({
 });
 
 const homeHeader = "";
-const homeHtml =
-  "<div>Genom översiktsplanen talar staden om hur bebyggelse och mark- och vattenanvändning kan utvecklas på lång sikt. Uddevalla ska vara en klimatsmart, växande stad med sammanhållande stadsmiljöer där det byggda och det gröna samspelar. En stad för alla.</div><h2>Vad vill vi uppnå?</h2>Uddevalla ska vara en stad med täta och sammanhållande stadsmiljöer där det byggda och det gröna samspelar.  Översiktsplanen utgår från stadens fyra mål för stadsbyggande.</div><img src='https://images.vastsverige.com/publishedmedia/jue8wzf2g5vrgjoy19xg/Uddevalla_170728-0082-Edit.jpg'/>";
+var homeHtml = "";
 
 class Informative extends React.PureComponent {
-  constructor() {
+  constructor(props) {
     super();
+    homeHtml = props.abstract;
     this.state = {
       chapters: [],
       chapter: {
@@ -233,6 +233,7 @@ class Informative extends React.PureComponent {
           chapters={this.state.chapters}
           toc={this.toc}
           observer={this.props.observer}
+          caption={this.props.caption}
         />
         {this.renderChapters()}
         {this.state.chapter.header ? (

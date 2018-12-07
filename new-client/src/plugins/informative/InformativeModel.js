@@ -1,12 +1,7 @@
-const url = "/informative/load/op";
-
 class InformativeModel {
   constructor(settings) {
     this.olMap = settings.map;
-    this.url =
-      settings.app.config.appConfig.proxy +
-      settings.app.config.appConfig.mapserviceBase +
-      url;
+    this.url = settings.app.config.appConfig.proxy + settings.url;
   }
 
   flyTo(view, location, zoom) {

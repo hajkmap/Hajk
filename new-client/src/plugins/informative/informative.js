@@ -85,19 +85,17 @@ class Informative extends React.PureComponent {
   };
 
   constructor(spec) {
-    super(spec);        
+    super(spec);
     this.type = "informative";
-    this.text = "Översiktsplan";
+    this.text = spec.options.caption;
     this.position = spec.options.panel || "right";
     this.app = spec.app;
     this.observer = Observer();
-    this.observer.subscribe("myEvent", message => {
-      console.log(message);
-    });
     this.informativeModel = new InformativeModel({
       map: spec.map,
       app: spec.app,
-      observer: this.observer
+      observer: this.observer,
+      url: spec.options.serviceUrl + "/" + spec.options.document
     });
     this.app.registerPanel(this);
   }
@@ -115,6 +113,8 @@ class Informative extends React.PureComponent {
           map={this.map}
           parent={this}
           observer={this.observer}
+          caption={this.props.options.caption}
+          abstract={this.props.options.abstract}
         />
       </Panel>,
       document.getElementById("map-overlay")
