@@ -295,9 +295,7 @@ var FirSelectionModel = {
 
     setActiveTool: function (tool) {
         console.log("activeTool", this.get("activeTool"));
-        console.log("Status 1 ?", this.get("activeToolStatus"));
         if(this.get("activeTool") !== null || typeof this.get("activeTool") !== "undefined") {
-            console.log("removing");
             this.get('olMap').removeInteraction(this.get(this.get('activeTool'))); // tool name in activeTool should match the interaction created in this file
         }
         this.set('activeTool', tool);
@@ -385,73 +383,77 @@ var FirSelectionModel = {
     },
 
     importDrawLayer: function (xmlDoc) {
-        var clonedNode = xmlDoc.childNodes[0].cloneNode(true),
-            serializer = new XMLSerializer(),
-            kml_string = serializer.serializeToString(clonedNode),
-            parser = new ol.format.KML(),
-            features = parser.readFeatures(kml_string),
-            extent = false;
+        try {
+            var clonedNode = xmlDoc.childNodes[0].cloneNode(true),
+                serializer = new XMLSerializer(),
+                kml_string = serializer.serializeToString(clonedNode),
+                parser = new ol.format.KML(),
+                features = parser.readFeatures(kml_string),
+                extent = false;
 
         features.forEach((feature) => {
-            console.log("1");
-            var coordinates = feature.getGeometry().getCoordinates();
-            console.log("1");
-            var type = feature.getGeometry().getType();
+                var coordinates = feature.getGeometry().getCoordinates();
+            try {
+                var type = feature.getGeometry().getType();
 
-            console.log("2");
-            var newCoordinates = [];
-            feature.setProperties({
-                user: true
-            });
-            console.log("3");
-            if (type == 'LineString') {
-                coordinates.forEach((c, i) => {
-                    pairs = [];
-                    c.forEach((digit) => {
-                        if (digit != 0) { pairs.push(digit); }
-                    });
-                    newCoordinates.push(pairs);
+                var newCoordinates = [];
+                feature.setProperties({
+                    user: true
                 });
-                feature.getGeometry().setCoordinates(newCoordinates);
-            } else if (type == 'Polygon') {
-                console.log("4");
-                newCoordinates[0] = [];
-                coordinates.forEach((polygon, i) => {
-                    console.log("5");
-                    polygon.forEach((vertex, j) => {
-                        console.log("6");
+                if (type == 'LineString') {
+                    coordinates.forEach((c, i) => {
                         pairs = [];
-                        vertex.forEach((digit) => {
-                            if (digit != 0) { pairs.push(digit); }
+                        c.forEach((digit) => {
+                            if (digit != 0) {
+                                pairs.push(digit);
+                            }
                         });
-                        newCoordinates[0].push(pairs);
+                        newCoordinates.push(pairs);
                     });
-                });
-                console.log("7");
-                feature.getGeometry().setCoordinates(newCoordinates);
-            }
+                    feature.getGeometry().setCoordinates(newCoordinates);
+                } else if (type == 'Polygon') {
+                    newCoordinates[0] = [];
+                    coordinates.forEach((polygon, i) => {
+                        polygon.forEach((vertex, j) => {
+                            pairs = [];
+                            vertex.forEach((digit) => {
+                                if (digit != 0) {
+                                    pairs.push(digit);
+                                }
+                            });
+                            newCoordinates[0].push(pairs);
+                        });
+                    });
+                    feature.getGeometry().setCoordinates(newCoordinates);
+                }
 
-            console.log("8");
-            feature.getGeometry().transform(
-                'EPSG:4326',
-                this.get('olMap').getView().getProjection()
-            );
-            console.log("9");
-            this.setStyleFromProperties(feature);
+                feature.getGeometry().transform(
+                    'EPSG:4326',
+                    this.get('olMap').getView().getProjection()
+                );
+                this.setStyleFromProperties(feature);
+            }catch (e) {
+                alert("fel formated fil");
+                return;
+
+            }
         });
 
-        console.log("10");
+        if(features.length < 1){
+            alert("Kunde inte hitta några objekt i KML-filen");
+            return;
+        }
+
         this.get('source').addFeatures(features);
-        console.log("11");
         extent = this.calculateExtent(features);
 
-        console.log("12");
         if (extent) {
-            console.log("13");
             let size = this.get('olMap').getSize();
-            console.log("14");
             this.get('olMap').getView().fit(extent, size);
-            console.log("15");
+        }
+
+        } catch (e){
+            alert("Filen är inte korrekt formaterad");
         }
     },
 

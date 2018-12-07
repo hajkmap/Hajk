@@ -1152,7 +1152,7 @@ var FirModel = {
         });
     },
 
-    findWithSameNames: function(nycklar, layer){
+    findWithSameNames: function(nycklar, layer, useOmrade){
         console.log("+++findWithSameNames");
         console.log("nycklar", nycklar);
         console.log("layer", layer);
@@ -1185,7 +1185,7 @@ var FirModel = {
                 sameNameFilter += "<ogc:Or>";
             }
 
-            var prefixNyckel = "<ogc:And><ogc:PropertyIsEqualTo matchCase=\"false\" wildCard=\"*\" singleChar=\".\" escapeChar=\"!\">\n" +
+            var prefixNyckel = (useOmrade ? "<ogc:And>" : "") + "<ogc:PropertyIsEqualTo matchCase=\"false\" wildCard=\"*\" singleChar=\".\" escapeChar=\"!\">\n" +
                 "            <ogc:PropertyName>" + this.get("realEstateLayer").fnrField + "</ogc:PropertyName>\n" +
                 "            <ogc:Literal>";
             var suffixNyckel = "</ogc:Literal>\n" +
@@ -1196,10 +1196,16 @@ var FirModel = {
             var suffixOmrade = "</ogc:Literal>\n" +
                 "          </ogc:PropertyIsEqualTo></ogc:And>";
 
-            sameNameFilter += prefixNyckel + nycklar[0][0] + suffixNyckel + prefixOmrade + nycklar[0][1] + suffixOmrade;
+            sameNameFilter += prefixNyckel + nycklar[0][0] + suffixNyckel;
+            if(useOmrade){
+                sameNameFilter += prefixOmrade + nycklar[0][1] + suffixOmrade;
+            }
 
             for(var i = 1; i < nycklar.length; i++){
-                sameNameFilter += prefixNyckel + nycklar[i][0] + suffixNyckel + prefixOmrade + nycklar[i][1] + suffixOmrade;
+                sameNameFilter += prefixNyckel + nycklar[i][0] + suffixNyckel;
+                if(useOmrade){
+                    sameNameFilter += prefixOmrade + nycklar[i][1] + suffixOmrade;
+                }
                 sameNameFilter += "</ogc:Or>";
             }
 
@@ -1279,22 +1285,17 @@ var FirModel = {
                     sameNameFilter += "<ogc:Or>";
                 }
 
-                var prefixNyckel = "<ogc:And><ogc:PropertyIsEqualTo matchCase=\"false\" wildCard=\"*\" singleChar=\".\" escapeChar=\"!\">\n" +
+                var prefixNyckel = "<ogc:PropertyIsEqualTo matchCase=\"false\" wildCard=\"*\" singleChar=\".\" escapeChar=\"!\">\n" +
                     "            <ogc:PropertyName>" + this.get("realEstateLayer").fnrField + "</ogc:PropertyName>\n" +
                     "            <ogc:Literal>";
                 var suffixNyckel = "</ogc:Literal>\n" +
                     "          </ogc:PropertyIsEqualTo>";
-                var prefixOmrade = "<ogc:PropertyIsEqualTo matchCase=\"false\" wildCard=\"*\" singleChar=\".\" escapeChar=\"!\">\n" +
-                    "            <ogc:PropertyName>" + this.get("realEstateLayer").omradeField + "</ogc:PropertyName>\n" +
-                    "            <ogc:Literal>";
-                var suffixOmrade = "</ogc:Literal>\n" +
-                    "          </ogc:PropertyIsEqualTo></ogc:And>";
 
-                sameNameFilter += prefixNyckel + keys[0][0] + suffixNyckel + prefixOmrade + keys[0][1] + suffixOmrade;
+                sameNameFilter += prefixNyckel + keys[0][0] + suffixNyckel;
 
 
                 for (var i = 1; i < keys.length; i++) {
-                    sameNameFilter += prefixNyckel + keys[i][0] + suffixNyckel + prefixOmrade + keys[i][1] + suffixOmrade;
+                    sameNameFilter += prefixNyckel + keys[i][0] + suffixNyckel;
                     sameNameFilter += "</ogc:Or>";
                 }
 

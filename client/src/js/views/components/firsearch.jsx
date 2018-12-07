@@ -219,8 +219,8 @@ var FirSearchView = {
                         console.log("samename",names);
 
                         // Needs to match the filter below that decides if firstStage or search is executed
-                        if (this.props.model.get("filter") === this.props.model.get("realEstateLayerCaption") || this.props.model.get("hittaGrannar")) {
-                            var tmpPromises = this.props.model.findWithSameNames(names, wmsLayerForSameName[0]);
+                        if (this.props.model.get("filter") === this.props.model.get("realEstateLayerCaption")/* || this.props.model.get("hittaGrannar")*/) { // TODO add back if hittaGrannar should do this
+                            var tmpPromises = this.props.model.findWithSameNames(names, wmsLayerForSameName[0], false);
                             tmpPromises.forEach(promise => sameNamePromises.push(promise));
                         }
                     });
@@ -322,7 +322,7 @@ var FirSearchView = {
         return (
             <div>
                 <p>
-                    <span>Sök: </span>&nbsp;
+                    <span>Sök på: </span>&nbsp;
                     <select value={this.props.model.get('filter')} id="fir-category-source" onChange={(e) => { this.setFilter(e); this.forceUpdate(); }}>
                         {/*<option value='*'> -- Alla -- </option>*/}
                         {
@@ -538,9 +538,7 @@ var FirSearchView = {
 
                    // create a buffer of the required meters around each line
                    var buffered = jstsGeom.buffer(bufferLength);
-                   var bufferedFeature = new ol.Feature();
-                   bufferedFeature.setGeometry(parser.write(buffered));
-                   this.props.model.firBufferHiddenFeatureLayer.getSource().addFeature(bufferedFeature);
+                   this.props.model.firBufferHiddenFeatureLayer.getSource().addFeature(feature);
                    if(bufferGeom === false){
                        bufferGeom = buffered;
                    } else {
