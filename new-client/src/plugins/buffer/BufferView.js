@@ -10,7 +10,6 @@ import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import Tooltip from "@material-ui/core/Tooltip";
 
-var dist_val;
 const listStyle3 = {
   background: "#f5f5f5",
   backgroundColor: "#f5f5f5"

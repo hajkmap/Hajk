@@ -74,7 +74,7 @@ class BufferModel {
     var parser = new jsts.io.OL3Parser();
     parser.inject(Point, Polygon, MultiPoint, MultiLineString, MultiPolygon);
     currentMap.getLayers().forEach(function(layer) {
-      var minS = layer.getSource();
+      // var minS = layer.getSource();
       // console.log(minS);
     });
     var source = new VectorSource({
@@ -97,7 +97,7 @@ class BufferModel {
     currentMap.addInteraction(select);
 
     select.on("select", function(e) {
-      var thisFeature = this.getFeatures().getArray();
+      // var thisFeature = this.getFeatures().getArray();
       // console.log(thisFeature);
       // thisFeature.forEach(feature => {
       currentMap.getLayers().forEach(function(layer) {

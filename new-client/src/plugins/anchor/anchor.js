@@ -2,7 +2,6 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
-import { Button } from "@material-ui/core";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import AnchorView from "./AnchorView";
 import AnchorModel from "./AnchorModel";
