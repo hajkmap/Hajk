@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -26,6 +28,7 @@ namespace MapService.Controllers
 			}
 			return "File not found";
         }
+
 		[System.Web.Http.HttpPost]
 		public string Save(string id)
 		{			
@@ -39,6 +42,46 @@ namespace MapService.Controllers
 				return "File saved";
 			}			
 			return "File not found";
+		}
+
+		[System.Web.Http.HttpPost]
+		public string Create()
+		{
+			Stream req = Request.InputStream;
+			req.Seek(0, System.IO.SeekOrigin.Begin);
+			string json = new StreamReader(req).ReadToEnd();
+			JObject formData = JObject.Parse(json);
+			string documentName = (string)formData["documentName"];
+			string mapName = (string)formData["mapName"];			
+			string file = String.Format("{0}App_Data\\documents\\{1}.json", HostingEnvironment.ApplicationPhysicalPath, documentName);					
+			json = "{\"chapters\": [], \"map\": \"" + mapName + "\"}";
+			System.IO.File.WriteAllText(file, json);
+			return "Document created";			
+		}
+
+		[System.Web.Http.HttpDelete]
+		public string Delete(string id)
+		{			
+			string file = String.Format("{0}App_Data\\documents\\{1}.json", HostingEnvironment.ApplicationPhysicalPath, id);
+			System.IO.File.Delete(file);
+			return "Document deleted";
+		}
+
+		[System.Web.Http.HttpGet]
+		public string List()
+		{
+			Response.Expires = 0;
+			Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
+			Response.ContentType = "application/json; charset=utf-8";
+			Response.Headers.Add("Cache-Control", "private, no-cache");
+			string folder = String.Format("{0}App_Data\\documents\\", HostingEnvironment.ApplicationPhysicalPath);			
+			if (Directory.Exists(folder))
+			{
+				string[] files = Directory.GetFiles(folder).Select(f => Path.GetFileNameWithoutExtension(f)).ToArray();
+				return JsonConvert.SerializeObject(files);
+			}
+
+			return "Folder not found";
 		}
 	}
 }

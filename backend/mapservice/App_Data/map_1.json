@@ -345,6 +345,16 @@
         "visibleForGroups": []
       },
       "index": 3
+    },
+    {
+      "type": "informative",
+      "options": {
+        "target": "toolbar",
+        "panel": "right",
+        "visibleAtStart": false,
+        "visibleForGroups": []
+      },
+      "index": 0
     }
   ],
   "map": {

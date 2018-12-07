@@ -86,7 +86,7 @@ class ChapterAdder extends Component {
             className="btn btn-success"
             onClick={() => this.toggleInputVisibility()}
           >
-            Lägg till rubrik
+            Lägg till kapitel
           </span>
         </div>
       );

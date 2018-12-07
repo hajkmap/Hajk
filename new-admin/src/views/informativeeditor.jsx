@@ -46,37 +46,85 @@ class InformativeEditor extends Component {
     super();
     this.state = {
       showModal: false,
-      data: undefined
+      data: undefined,
+      newChapterName: "",
+      newDocumentName: "",
+      newDocumentMap: "",
+      documents: []
     };
     this.editors = [];
   }
 
-  componentDidMount() {
-    this.props.model.set("config", this.props.config);
-    this.props.model.load(data => {
-      this.setState({
-        data: data
-      });
-    });
-    this.props.model.loadMaps(maps => {
-      this.setState({
-        maps: maps,
-        map: maps[0]
-      });
+  load(document) {
+    this.props.model.loadDocuments(documents => {
+      if (documents.length > 0) {
+        this.props.model.load(document || documents[0], data => {
+          this.setState(
+            {
+              data: data,
+              documents: documents,
+              selectedDocument: document || documents[0]
+            },
+            () => {
+              this.props.model.loadMaps(maps => {
+                this.setState({
+                  maps: maps,
+                  map: data.map,
+                  newDocumentMap: maps[0]
+                });
+              });
+            }
+          );
+        });
+      } else {
+        this.props.model.loadMaps(maps => {
+          this.setState({
+            maps: maps,
+            newDocumentMap: maps[0]
+          });
+        });
+      }
     });
   }
 
+  componentDidMount() {
+    this.props.model.set("config", this.props.config);
+    this.load();
+  }
+
   save() {
-    this.props.model.save(JSON.stringify(this.state.data), result => {
-      if (result === "File saved") {
-        result = "Filen sparades utan problem.";
+    this.props.model.save(
+      this.state.selectedDocument,
+      this.state.data,
+      result => {
+        if (result === "File saved") {
+          result = "Filen sparades utan problem.";
+        }
+        this.setState({
+          showModal: true,
+          modalContent: result,
+          showAbortButton: false,
+          modalConfirmCallback: () => {}
+        });
       }
-      this.setState({
-        showModal: true,
-        modalContent: result,
-        showAbortButton: false,
-        modalConfirmCallback: () => {}
-      });
+    );
+  }
+
+  delete() {
+    this.setState({
+      showModal: true,
+      modalContent: (
+        <div>
+          Hela dokumentet kommer att raderas, detta kan inte ångras. Vill du
+          fortsätta?
+        </div>
+      ),
+      showAbortButton: true,
+      modalConfirmCallback: () => {
+        this.props.model.delete(this.state.selectedDocument, result => {
+          this.load();
+        });
+      }
     });
   }
 
@@ -84,7 +132,7 @@ class InformativeEditor extends Component {
     this.state.data.chapters.push(
       new Chapter({
         header: title,
-        center: this.props.model.get('config').default_coordinate
+        center: this.props.model.get("config").default_coordinate
       })
     );
     this.setState({
@@ -109,6 +157,7 @@ class InformativeEditor extends Component {
     this.setState({
       showModal: false,
       modalStyle: {},
+      okButtonText: "OK",
       modalConfirmCallback: () => {}
     });
   }
@@ -157,6 +206,154 @@ class InformativeEditor extends Component {
     });
   }
 
+  renderToc(currentChapter, chapters, parentChapters, index) {
+    var renderChapters = subchapters => {
+      var renderableChapters = subchapters ? subchapters : chapters;
+      return renderableChapters.map((chapter, i) => {
+        if (chapter !== currentChapter) {
+          return (
+            <div className="chapter" key={i}>
+              <div
+                className="toc"
+                onClick={() => {
+                  chapter.chapters.push(currentChapter);
+                  parentChapters.splice(index, 1);
+                  if (this.state.modalConfirmCallback) {
+                    this.state.modalConfirmCallback();
+                  }
+                }}
+              >
+                {chapter.header}
+              </div>
+              {chapter.chapters.length > 0
+                ? renderChapters(chapter.chapters)
+                : null}
+            </div>
+          );
+        } else {
+          return null;
+        }
+      });
+    };
+
+    return (
+      <div className="toc-container">
+        <p>
+          Flytta <b>{currentChapter.header}</b> till:{" "}
+        </p>
+        <div>
+          <div
+            className="toc"
+            onClick={() => {
+              chapters.push(currentChapter);
+              parentChapters.splice(index, 1);
+              if (this.state.modalConfirmCallback) {
+                this.state.modalConfirmCallback();
+              }
+            }}
+          >
+            Huvudkategori
+          </div>
+          {renderChapters()}
+        </div>
+      </div>
+    );
+  }
+
+  renderTocDialog(chapter, parentChapters, index) {
+    this.setState({
+      showModal: true,
+      showAbortButton: true,
+      modalContent: this.renderToc(
+        chapter,
+        this.state.data.chapters,
+        parentChapters,
+        index
+      ),
+      modalConfirmCallback: () => {
+        this.hideModal();
+      },
+      modalStyle: {
+        overlay: {},
+        content: {
+          left: "30px",
+          top: "30px",
+          right: "30px",
+          bottom: "30px",
+          width: "auto",
+          margin: 0
+        }
+      }
+    });
+  }
+
+  renderNameInput() {
+    setTimeout(() => {
+      var i = document.getElementById("change-name");
+      if (i) {
+        i.focus();
+      }
+    }, 50);
+    return (
+      <form
+        onSubmit={e => {
+          this.state.modalConfirmCallback();
+          e.preventDefault();
+        }}
+      >
+        <label>Ange nytt namn:</label>&nbsp;
+        <input
+          defaultValue={this.state.newChapterName}
+          type="text"
+          onChange={e => {
+            this.setState({
+              newChapterName: e.target.value
+            });
+          }}
+        />
+      </form>
+    );
+  }
+
+  renderChangeNameDialog(chapter) {
+    this.setState(
+      {
+        newChapterName: chapter.header
+      },
+      () => {
+        this.setState({
+          showModal: true,
+          showAbortButton: true,
+          modalContent: this.renderNameInput(),
+          modalConfirmCallback: () => {
+            chapter.header = this.state.newChapterName;
+            this.hideModal();
+          }
+        });
+      }
+    );
+  }
+
+  moveChapter(direction, chapters, index) {
+    var moveable = false,
+      from = index,
+      to = 0;
+
+    if (direction === "up" && index !== 0) {
+      to = index - 1;
+      moveable = true;
+    }
+    if (direction === "down" && index < chapters.length - 1) {
+      to = index + 1;
+      moveable = true;
+    }
+
+    if (moveable) {
+      chapters.splice(to, 0, chapters.splice(from, 1)[0]);
+      this.forceUpdate();
+    }
+  }
+
   renderChapter(parentChapters, chapter, index) {
     var arrowStyle = !!chapter.expanded
       ? "fa fa-chevron-down pointer"
@@ -164,22 +361,22 @@ class InformativeEditor extends Component {
 
     return (
       <div key={Math.random() * 1e8} className="chapter">
-        <h1>
-          <span
-            className={arrowStyle}
-            onClick={() => {
-              chapter.expanded = !chapter.expanded;
-              this.forceUpdate();
-            }}
-          />
+        <h1
+          className="chapterHeader"
+          onClick={() => {
+            chapter.expanded = !chapter.expanded;
+            this.forceUpdate();
+          }}
+        >
+          <span className={arrowStyle} />
           {chapter.header}
         </h1>
-         <ChapterAdder
+        <ChapterAdder
           onAddChapter={title => {
             chapter.chapters.push(
               new Chapter({
                 header: title,
-                center: this.props.model.get('config').default_coordinate
+                center: this.props.model.get("config").default_coordinate
               })
             );
             this.forceUpdate();
@@ -187,7 +384,7 @@ class InformativeEditor extends Component {
         />
         &nbsp;
         <span
-          className="btn btn-success"
+          className="btn btn-default"
           onClick={() => {
             this.renderMapDialog(chapter);
           }}
@@ -196,12 +393,48 @@ class InformativeEditor extends Component {
         </span>
         &nbsp;
         <span
+          className="btn btn-default"
+          onClick={() => {
+            this.renderTocDialog(chapter, parentChapters, index);
+          }}
+        >
+          Flytta
+        </span>
+        &nbsp;
+        <span
+          className="btn btn-default"
+          onClick={() => {
+            this.moveChapter("up", parentChapters, index);
+          }}
+        >
+          ⇧
+        </span>
+        &nbsp;
+        <span
+          className="btn btn-default"
+          onClick={() => {
+            this.moveChapter("down", parentChapters, index);
+          }}
+        >
+          ⇩
+        </span>
+        &nbsp;
+        <span
+          className="btn btn-default"
+          onClick={() => {
+            this.renderChangeNameDialog(chapter);
+          }}
+        >
+          Byt namn
+        </span>
+        &nbsp;
+        <span
           className="btn btn-danger"
           onClick={() => {
             this.removeChapter(parentChapters, index);
           }}
         >
-          Ta bort rubrik
+          Ta bort
         </span>
         <RichEditor
           display={chapter.expanded}
@@ -210,17 +443,32 @@ class InformativeEditor extends Component {
             chapter.html = html;
           }}
         />
-        {chapter.chapters.map((innerChapter, innerIndex) => {
-          return this.renderChapter(chapter.chapters, innerChapter, innerIndex);
-        })}
+        <div className="subChapters">
+          {chapter.expanded
+            ? chapter.chapters.map((innerChapter, innerIndex) => {
+                return this.renderChapter(
+                  chapter.chapters,
+                  innerChapter,
+                  innerIndex
+                );
+              })
+            : null}
+        </div>
       </div>
     );
   }
 
   renderData() {
     if (this.state.data) {
-      return this.state.data.chapters.map((chapter, index) =>
-        this.renderChapter(this.state.data.chapters, chapter, index)
+      return (
+        <div>
+          <p>
+            Detta dokument tillhör följande karta: <b>{this.state.data.map}</b>
+          </p>
+          {this.state.data.chapters.map((chapter, index) =>
+            this.renderChapter(this.state.data.chapters, chapter, index)
+          )}
+        </div>
       );
     }
   }
@@ -262,7 +510,7 @@ class InformativeEditor extends Component {
               this.hideModal();
             }}
           >
-            Ok
+            {this.state.okButtonText || "OK"}
           </button>
           &nbsp;
           {abortButton}
@@ -274,31 +522,119 @@ class InformativeEditor extends Component {
   renderMaps() {
     if (this.state.maps) {
       return this.state.maps.map((map, i) => {
-        return (
-          <option
-            onChange={() => {
-              this.setState({
-                map: map
-              });
-            }}
-            key={i}
-          >
-            {map}
-          </option>
-        );
+        return <option key={i}>{map}</option>;
       });
     } else {
       return null;
     }
   }
 
+  renderDocuments() {
+    return this.state.documents.map((document, i) => (
+      <option key={i}>{document}</option>
+    ));
+  }
+
+  validateNewDocumentName(value) {
+    var valid = value === "" || /^[A-Za-z0-9_]+$/.test(value);
+    return valid;
+  }
+
+  renderCreateForm() {
+    setTimeout(() => {
+      var i = document.getElementById("new-document-name");
+      if (i) {
+        i.focus();
+      }
+    }, 50);
+    return (
+      <form
+        onSubmit={e => {
+          this.state.modalConfirmCallback();
+          e.preventDefault();
+        }}
+      >
+        <div>
+          <label>Namn</label>&nbsp;
+          <input
+            type="text"
+            id="new-document-name"
+            value={this.state.newDocumentName}
+            onChange={e => {
+              if (this.validateNewDocumentName(e.target.value)) {
+                this.setState(
+                  {
+                    newDocumentName: e.target.value
+                  },
+                  () => {
+                    this.setState({
+                      modalContent: this.renderCreateForm()
+                    });
+                  }
+                );
+              }
+            }}
+          />
+        </div>
+        <div className="inset-form">
+          <label>Välj karta:&nbsp;</label>
+          <select
+            onChange={e => {
+              this.setState({
+                newDocumentMap: e.target.value
+              });
+            }}
+          >
+            {this.renderMaps()}
+          </select>
+        </div>
+      </form>
+    );
+  }
+
+  renderCreateDialog(chapter, parentChapters, index) {
+    this.setState({
+      showModal: true,
+      showAbortButton: true,
+      modalContent: this.renderCreateForm(),
+      okButtonText: "Spara",
+      modalConfirmCallback: () => {
+        var data = {
+          documentName: this.state.newDocumentName,
+          mapName: this.state.newDocumentMap
+        };
+        if (data.documentName !== "") {
+          this.props.model.createDocument(data, response => {
+            this.load(data.documentName);
+          });
+          this.hideModal();
+        }
+      }
+    });
+  }
+
   render() {
     return (
       <div>
         {this.renderModal()}
+        <div>
+          <span
+            className="btn btn-default"
+            onClick={() => this.renderCreateDialog()}
+          >
+            Skapa nytt dokument
+          </span>
+        </div>
         <div className="inset-form">
-          <label>Välj karta:&nbsp;</label>
-          <select>{this.renderMaps()}</select>
+          <label>Välj dokument:&nbsp;</label>
+          <select
+            onChange={e => {
+              this.load(e.target.value);
+            }}
+            value={this.state.selectedDocument}
+          >
+            {this.renderDocuments()}
+          </select>
         </div>
         <div className="padded">
           <span className="btn btn-success" onClick={() => this.save()}>
@@ -306,8 +642,12 @@ class InformativeEditor extends Component {
           </span>
           &nbsp;
           <ChapterAdder onAddChapter={title => this.addChapter(title)} />
+          &nbsp;
+          <span className="btn btn-danger" onClick={() => this.delete()}>
+            Ta bort
+          </span>
         </div>
-        {this.renderData()}
+        <div className="chapters">{this.renderData()}</div>
       </div>
     );
   }

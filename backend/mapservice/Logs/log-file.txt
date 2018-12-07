@@ -16,3 +16,7 @@ FATAL 2018-10-01 15:50:27 Can't get configuration file: System.Web.HttpException
    at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 771 
 FATAL 2018-10-01 16:04:58 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
    at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 771 
+FATAL 2018-12-07 11:36:08 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 771 
+FATAL 2018-12-07 11:36:50 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 771 

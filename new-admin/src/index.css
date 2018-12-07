@@ -596,19 +596,38 @@ figure {
   margin: 0;
 }
 
+figure img {
+  max-width: 567px;
+}
+
+.chapters {
+  display: inline-block;
+}
+
 .chapter {
-  border-left: 1px solid #ccc;
   margin: 5px;
-  margin-left: 20px;
+  margin: 5px;
+  margin-left: 15px;
   padding: 4px;
+}
+
+.toc {
+  cursor: pointer;
+  font-size: 14pt;
+}
+
+.toc-container {
+  height: 95%;
+  overflow: auto;
 }
 
 .chapter h1 {
   font-size: 16pt;
   margin: 0;
-  padding: 0;
+  padding: 10px;
   margin-bottom: 5px;
-  font-style: underline;
+  font-style: italic;
+  cursor: pointer;
 }
 
 .padded {

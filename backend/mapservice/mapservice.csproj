@@ -191,7 +191,6 @@
     </Content>
     <Content Include="App_Data\layers.json" />
     <Content Include="App_Data\map_1.json" />
-    <Content Include="App_Data\documents\op.json" />
     <None Include="Properties\PublishProfiles\File.pubxml" />
   </ItemGroup>
   <ItemGroup>
@@ -274,6 +273,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="App_Data\documents\" />
     <Folder Include="Views\Informative\" />
   </ItemGroup>
   <PropertyGroup>

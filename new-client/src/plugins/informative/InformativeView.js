@@ -38,7 +38,10 @@ const styles = theme => ({
   },
   content: {
     "& img": {
-      width: "100%"
+      maxWidth: "100%"
+    },
+    "& figure": {
+      margin: 0
     }
   }
 });

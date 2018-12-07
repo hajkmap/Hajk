@@ -23,25 +23,81 @@
 import { Model } from "backbone";
 
 var informativeEditor = Model.extend({
-  save: function(data, callback) {
-    var url = this.get("config").url_save;
+  setParentChapter: function setParentChapter(chapter, parent) {
+    chapter.parent = parent;
+    if (chapter.chapters.length > 0) {
+      chapter.chapters.forEach(child => {
+        setParentChapter(child, chapter);
+      });
+    }
+  },
+
+  deleteParentChapter: function deleteParentChapter(chapter, parent) {
+    delete chapter.parent;
+    if (chapter.chapters.length > 0) {
+      chapter.chapters.forEach(child => {
+        deleteParentChapter(child, chapter);
+      });
+    }
+  },
+
+  delete: function(documentName, callback) {
+    var url = this.get("config").url_delete + "/" + documentName;
+    fetch(url, {
+      method: "delete"
+    }).then(response => {
+      callback(response);
+    });
+  },
+
+  save: function(documentName, data, callback) {
+    var url = this.get("config").url_save + "/" + documentName;
+    data.chapters.forEach(chapter => {
+      this.deleteParentChapter(chapter, data.chapters);
+    });
     fetch(url, {
       method: "post",
-      body: data
+      body: JSON.stringify(data)
     }).then(response => {
       response.text().then(text => {
         callback(text);
       });
     });
   },
-  load: function(callback) {
-    var url = this.get("config").url_load;
+
+  loadDocuments: function(callback) {
+    var url = this.get("config").url_document_list;
     fetch(url).then(response => {
       response.json().then(data => {
         callback(data);
       });
     });
   },
+
+  createDocument(data, callback) {
+    var url = this.get("config").url_create;
+    fetch(url, {
+      method: "post",
+      body: JSON.stringify(data)
+    }).then(response => {
+      response.text().then(text => {
+        callback(text);
+      });
+    });
+  },
+
+  load: function(documentName, callback) {
+    var url = this.get("config").url_load + "/" + documentName;
+    fetch(url).then(response => {
+      response.json().then(data => {
+        data.chapters.forEach(chapter => {
+          this.setParentChapter(chapter, data.chapters);
+        });
+        callback(data);
+      });
+    });
+  },
+
   loadMaps: function(callback) {
     var url = this.get("config").url_map_list;
     fetch(url).then(response => {

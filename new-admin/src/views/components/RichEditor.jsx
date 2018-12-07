@@ -270,8 +270,6 @@ class RichEditor extends Component {
     const newEditorState = EditorState.set(editorState, {
       currentContent: contentStateWithEntity
     });
-
-    console.log("Insert image");
     this.setState(
       {
         editorState: AtomicBlockUtils.insertAtomicBlock(
@@ -282,7 +280,6 @@ class RichEditor extends Component {
       },
       () => {
         setTimeout(() => this.focus(), 0);
-        console.log("Image inserted");
       }
     );
   }
