@@ -1942,7 +1942,7 @@
     {
       "id": "1224",
       "caption": "Fastighetsytor FIR",
-      "url": "http://karta4.varberg.se/geoserver/wms",
+      "url": "http://karta.varberg.se/geoserver/wms",
       "owner": "",
       "date": "1526909018594",
       "content": "",
@@ -1976,15 +1976,15 @@
     },
     {
       "id": "1225",
-      "caption": "Fastighetsytor FIR2",
-      "url": "http://karta4.varberg.se/geoserver/ows",
+      "caption": "Fastigheter",
+      "url": "http://karta4.varberg.se/geoserver/varberg/wms/",
       "owner": "",
       "date": "1528886860052",
       "content": "",
       "legend": "",
       "projection": null,
       "layers": [
-        "varberg:fastighetsytor"
+        "varberg:fastighetsyta"
       ],
       "infobox": "<b>Fastighet:</b> {text}<br /><b>Nyckel:</b> {nyckel}<br /><br /><a href=\"http://censrv313:83/mapservice/fir/propertydoc/{nyckel}\" target=\"_blank\">Fastighetsrapport</a>\n",
       "searchFields": null,
@@ -1994,6 +1994,41 @@
       "tiled": false,
       "opacity": 0.0,
       "singleTile": true,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": false,
+      "infoTitle": "",
+      "infoText": "",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOwner": ""
+    },
+    {
+      "id": "1226",
+      "caption": "fastighetsyta_utokad",
+      "url": "http://karta2.varberg.se/geoserver/wms",
+      "owner": "",
+      "date": "1543483528572",
+      "content": "",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "Internt:fastighetsyta_utokad"
+      ],
+      "infobox": "<b>Fastighet:</b> {fastighetsadress}<br /><b>Nyckel:</b> {nyckel}<br /><br /><a href=\"http://censrv313:83/mapservice/fir/propertydoc/{nyckel}\" target=\"_blank\">Fastighetsrapport</a>\n",
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "opacity": 1.0,
+      "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
       "attribution": "",
@@ -2040,12 +2075,12 @@
       "caption": "Fastighet",
       "url": "https://karta4.varberg.se/geoserver/varberg/wms",
       "layers": [
-        "varberg:fastighetsytor"
+        "varberg:fastighetsyta"
       ],
       "searchFields": [
         "text"
       ],
-      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td><strong>Namn</strong></td><td>{text}</td></tr><tr><td><strong>Nyckel</strong></td><td>{nyckel}</td></tr></tbody></table><br/><br/><a href=\"http://censrv313:83/mapservice/fir/propertydoc/130139213\" target=\"_blank\">Fastighetsrapport</a>",
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\"><tbody><tr><td><strong>Namn</strong></td><td>{text}</td></tr><tr><td><strong>Nyckel</strong></td><td>{nyckel}</td></tr></tbody></table><br/><br/><a href=\"http://censrv313:83/mapservice/fir/realEstatedoc/{nyckel}\" target=\"_blank\">Fastighetsrapport</a>",
       "aliasDict": "{\"nyckel\":\"Nyckel\"}",
       "displayFields": [
         "text"
@@ -2145,6 +2180,126 @@
       "aliasDict": "",
       "displayFields": [
         "namn"
+      ],
+      "geometryField": "geom",
+      "outputFormat": "GML3",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoUrlText": null,
+      "infoOwner": null
+    },
+    {
+      "id": "1244",
+      "caption": "FastighetAdress",
+      "url": "http://karta2.varberg.se/geoserver/wfs",
+      "layers": [
+        "Internt:fastighet_adress"
+      ],
+      "searchFields": [
+        "adress"
+      ],
+      "infobox": "",
+      "aliasDict": null,
+      "displayFields": [
+        "fastighetsbeteckning"
+      ],
+      "geometryField": "geom",
+      "outputFormat": "GML3",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoUrlText": null,
+      "infoOwner": null
+    },
+    {
+      "id": "1245",
+      "caption": "FastighetÄgare",
+      "url": "http://karta2.varberg.se/geoserver/wfs",
+      "layers": [
+        "Internt:fastighet_agare"
+      ],
+      "searchFields": [
+        "namn"
+      ],
+      "infobox": "",
+      "aliasDict": null,
+      "displayFields": [
+        "fastighetsbeteckning"
+      ],
+      "geometryField": "geom",
+      "outputFormat": "GML3",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoUrlText": null,
+      "infoOwner": null
+    },
+    {
+      "id": "1246",
+      "caption": "Fastighetsbeteckning",
+      "url": "http://karta2.varberg.se/geoserver/wfs",
+      "layers": [
+        "Internt:fastighetsyta_utokad"
+      ],
+      "searchFields": [
+        "fastbet"
+      ],
+      "infobox": "<table class=\"table table-condensed\" style=\"font-size:14px\">\n<tbody>\n<tr><td><strong>Namn</strong></td><td>{fastbet}</td><td></td></tr>\n<tr><td><strong>Nyckel</strong></td><td>{nyckel}</td><td></td></tr>\n<tr><td><strong>Område</strong></td><td>{omrade}</td><td></td></tr>\n<tr><td><strong>Ägare</strong></td><td>{namn1}</td><td>{personorganisationnr1}</td></tr>\n<tr><td><strong>Ägare</strong></td><td>{namn2}</td><td>{personorganisationnr2}</td></tr>\n<tr><td><strong>Ägare</strong></td><td>{namn3}</td><td>{personorganisationnr3}</td></tr>\n<tr><td><strong>Notering ägare</strong></td><td>{agare_notering}</td><td></td></tr>\n<tr><td><strong>Fastighetsadress</strong></td><td>{fastighetsadress}</td><td></td></tr>\n<tr><td><strong>Registrerad totalarea (m2)</strong></td><td>{totalarea}</td><td></td></tr>\n</tbody>\n</table>\n<br/><br/>\n<a href=\"http://censrv313:84/mapservice/fir/realEstatedoc/{nyckel}\" target=\"_blank\">Fastighetsrapport utökad</a>\n<br/>\n<a href=\"http://censrv313:84/mapservice/fir/realEstatedoc/{nyckel}\" target=\"_blank\">Fastighetsrapport enkel</a>\n",
+      "aliasDict": "{\"nyckel\":\"Nyckel\"}",
+      "displayFields": [
+        "fastbet"
+      ],
+      "geometryField": "geom",
+      "outputFormat": "GML3",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoUrlText": null,
+      "infoOwner": null
+    },
+    {
+      "id": "1247",
+      "caption": "Adress",
+      "url": "http://karta2.varberg.se/geoserver/wfs",
+      "layers": [
+        "Internt:fastighet_adress"
+      ],
+      "searchFields": [
+        "adress"
+      ],
+      "infobox": "",
+      "aliasDict": "",
+      "displayFields": [
+        "fastbet"
+      ],
+      "geometryField": "geom",
+      "outputFormat": "GML3",
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoUrlText": null,
+      "infoOwner": null
+    },
+    {
+      "id": "1248",
+      "caption": "Ägare",
+      "url": "http://karta2.varberg.se/geoserver/wfs",
+      "layers": [
+        "Internt:fastighet_agare_vw"
+      ],
+      "searchFields": [
+        "namn"
+      ],
+      "infobox": "",
+      "aliasDict": null,
+      "displayFields": [
+        "fastbet"
       ],
       "geometryField": "geom",
       "outputFormat": "GML3",

@@ -398,6 +398,13 @@
                 "infobox": ""
               },
               {
+                "id": "1225",
+                "visibleAtStart": false,
+                "drawOrder": 5,
+                "visibleForGroups": [],
+                "infobox": ""
+              },
+              {
                 "id": "1212",
                 "visibleAtStart": false,
                 "drawOrder": 12,
@@ -547,13 +554,6 @@
                 "id": "601",
                 "visibleAtStart": false,
                 "drawOrder": 50,
-                "visibleForGroups": [],
-                "infobox": ""
-              },
-              {
-                "id": "1225",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
                 "visibleForGroups": [],
                 "infobox": ""
               }
@@ -746,12 +746,12 @@
         "visibleForGroups": [],
         "layers": [
           {
-            "id": "1209",
+            "id": "1225",
             "visibleForGroups": []
           },
           {
             "id": "1100",
-            "visibleForGroups": ["AR_FOR_HAMN_OCH_GATUFORVALTNING_ALL","AR_FOR_STADSBYGGNADSKONTOR_ALL_FIM","Func_ArcGisAdmin"]
+            "visibleForGroups": []
           }
         ]
       },
@@ -771,13 +771,18 @@
         "toolbar": "bottom",
         "maxZoom": 14,
         "markerImg": "http://localhost/hajk/assets/icons/marker.png",
+        "kmlImportUrl": "/mapservice/import/kml",
         "kmlExportUrl": "/mapservice/export/kml",
-        "excelExportUrl": "/mapservice/fir/propertyownerlist",
-        "displayPopup": true,
+        "excelExportUrl": "/mapservice/fir/realEstateOwnerlist",
+        "displayPopup": false,
         "firSelectionTools": true,
         "base64Encode": false,
-        "instruction": "",
+        "instruction": "TWVkIGRldHRhIHZlcmt0eWcga2FuIGR1IHP2a2Egb2NoIG1hcmtlcmEgZmFzdGlnaGV0ZXIsIGhpdHRhIGdyYW5uYXIgc2FtdCBza2FwYSBmYXN0aWdoZXRzZvZydGVja25pbmcuIER1IGthbiBs5HNhIG1lciBvY2ggaHVyIHZhcmplIGRlbCBmdW5nZXJhciBvbSBkdSBrbGlja2FyIHDlIHJlc3Bla3RpdmUgZnLlZ2V0ZWNrZW4uIA==",
         "filterVisible": false,
+        "infoKnappLogo": "/assets/icons/hjalpknapp_FIR.png",
+        "instructionSokning": "U/ZrbmluZyBrYW4gZ/ZyYXMgZ2Vub20gYXR0IHNrcml2YSBz9mtvcmQgb2NoL2VsbGVyIHJpdGEgZXR0IHP2a29tcuVkZS4gIApPbSBkdSBza3JpdmVyIGVuIHP2a25pbmcga29tbWVyIGV0dCBz9mtyZXN1bHRhdCBhdXRvbWF0aXNrIG7kciBkdSBza3Jpdml0IG1pbnN0IGZ5cmEgdGVja2VuLiBT9mtyZXN1bHRhdGV0IHN5bnMgc29tIG1hcmtlcmFkZSBmYXN0aWdoZXRlciBpIGthcnRhbiBzYW10IHNvbSBlbiBsaXN0YSBs5G5nc3QgbmVyIGkgcGFuZWxlbi4gTuRyIGR1IHRyeWNrZXIgcOUgc/ZrIGtvbW1lciBkdSBhdHQgem9vbWFzIHRpbGwgc/ZrcmVzdWx0YXRldCBpIGthcnRhbi4gIA==",
+        "instructionHittaGrannar": "TuRyIGR1IGhhciBnam9ydCBlbiBz9mtuaW5nIHPlIGF0dCBkdSBoYXIgZW4gZWxsZXIgZmxlcmEgZmFzdGlnaGV0ZXIgaSBkaXR0IHP2a3Jlc3VsdGF0IGthbiBkdSBhbnbkbmRhIGRlbm5hIGZ1bmt0aW9uLiAgCkhpdHRhIGFuZ3LkbnNhbmRlIGdyYW5uYXIgaW5uZWLkciBhdHQgYWxsYSBmYXN0aWdoZXRlciBzb20gZGVsYXIgZmFzdGlnaGV0c2dy5G5zIGtvbW1lciBhdHQgbWFya2VyYXMgb2NoIGzkZ2dhcyB0aWxsIGkgZGl0dCBz9mtyZXN1bHRhdC4gCkhpdHRhIGdyYW5uYXIgaW5vbSYgaW5uZWLkciBhdHQgZHUgc2thcGFyIGVuIGJ1ZmZlcnQgcnVudCBmYXN0aWdoZXRlbi9mYXN0aWdoZXRlcm5hIGkgc/ZrcmVzdWx0YXRldC4gQWxsYSBmYXN0aWdoZXRlciBzb20gbGlnZ2VyIGlubmFuZvZyIGVsbGVyIGtvcnNhciBidWZmZXJ0ZW4ga29tbWVyIGF0dCBs5GdnYXMgdGlsbCBpIHP2a3Jlc3VsdGF0ZXQu",
+        "instructionSkapaFastighetsforteckning": "TuRyIGR1IGhhciBnam9ydCBlbiBz9mtuaW5nIHPlIGF0dCBkdSBoYXIgZW4gZWxsZXIgZmxlcmEgZmFzdGlnaGV0ZXIgaSBkaXR0IHP2a3Jlc3VsdGF0IGthbiBkdSBhbnbkbmRhIGRlbm5hIGZ1bmt0aW9uLiBE5SBza2FwYXMgZW4gZXhjZWwtbGlzdGEgbWVkIGZhc3RpZ2hldGVybmEgaSBz9mtyZXN1bHRhdGV0LiA=",
         "anchor": [
           16,
           32
@@ -790,14 +795,41 @@
         "visibleForGroups": [],
         "layers": [
           {
-            "id": "1209",
+            "id": "1246",
+            "fnrField": "nyckel",
+            "omradeField": "omrade",
             "visibleForGroups": []
           },
           {
-            "id": "1100",
+            "id": "1247",
+            "fnrField": "nyckel",
+            "omradeField": "omrade",
+            "visibleForGroups": []
+          },
+          {
+            "id": "1248",
+            "fnrField": "nyckel",
+            "omradeField": "omrade",
             "visibleForGroups": []
           }
-        ]
+        ],
+        "realEstateLayer": {
+          "id": "1246",
+          "omradeField": "omrade",
+          "fnrField": "nyckel",
+          "labelField": "block_enhet",
+          "maxFeatures": "10000"
+        },
+        "realEstateWMSLayer": {
+          "id": "1225",
+          "fnrField": "nyckel"
+        },
+        "colorResult": "rgba(255,255,0,0.3)",
+        "colorResultStroke": "rgba(0,0,0,0.6)",
+        "colorHighlight": "rgba(0,0,255,0.2)",
+        "colorHighlightStroke": "rgba(0,0,0,0.6)",
+        "colorHittaGrannarBuffer": "rgba(50,200,200,0.4)",
+        "colorHittaGrannarBufferStroke": "rgba(0,0,0,0.2)"
       },
       "index": 13
     }
