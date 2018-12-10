@@ -240,6 +240,7 @@ namespace MapService.Components.MapExport
                             if (sublayerName != "")
                             {
                                 layer.AddLayer(sublayerName);
+                                layer.AddStyle(wmsLayers[i].styles);
                             }
                         }
                         catch (Exception ex)
