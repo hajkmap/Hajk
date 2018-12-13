@@ -105,6 +105,9 @@ var FirSelectionPanelView = {
                 element.toggle();
                 this.setState({ importKMLActive: false });
                 this.props.model.setActiveTool(undefined);
+                if(!$('#slackaBufferSokomrade').is(":checked")) {
+                    $('#slackaBufferSokomrade').click();
+                }
             });
 
         }
@@ -144,8 +147,8 @@ var FirSelectionPanelView = {
 
         // document.getElementById("bufferToSokomrade").disabled = true;
         console.log("bufferToSokomrade" ,document.getElementsByClassName("bufferToSokomrade").disabled );
-        return (
-            <div className='selection-toolbar'>
+                return (
+                <div className='selection-toolbar'>
                 <div><b>Sökområde</b></div>
                 <div className='btn-group btn-group-lg'>
                     <button onClick={() => this.activateTool('polygonSelection')} type='button' className={this.getClassNames('polygonSelection')} title='Markera efter polygon' >
@@ -184,8 +187,7 @@ var FirSelectionPanelView = {
                 </div>
 
 
-            </div>
-        );
+            </div>);
     }
 };
 

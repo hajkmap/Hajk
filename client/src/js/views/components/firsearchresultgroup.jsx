@@ -461,7 +461,7 @@ FirSearchResultGroup = {
                                     }
                                 }
                             );
-                            var sameNamePromises = this.props.model.findWithSameNames(names, wmsLayer);
+                            var sameNamePromises = this.props.model.findWithSameNames(names, wmsLayer, true);
 
                             Promise.all(sameNamePromises).then(() => {
                                 this.forceUpdate();
