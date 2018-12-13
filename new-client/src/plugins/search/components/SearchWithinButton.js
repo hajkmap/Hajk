@@ -10,6 +10,9 @@ const styles = theme => {
   return {
     button: {
       margin: "4px"
+    },
+    anchorOriginBottomCenter: {
+      bottom: "60px"
     }
   };
 };
@@ -51,6 +54,7 @@ class SearchWithinButton extends React.Component {
         </Tooltip>
         {createPortal(
           <Snackbar
+            classes={classes}
             anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
             open={this.state.active ? true : false}
             ContentProps={{

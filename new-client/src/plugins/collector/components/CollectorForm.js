@@ -68,6 +68,9 @@ const styles = theme => {
     },
     thankForm: {
       textAlign: "center"
+    },
+    anchorOriginBottomCenter: {
+      bottom: "60px"
     }
   };
 };
@@ -299,6 +302,7 @@ class CollectorForm extends Component {
                 <br />
                 {this.renderOkButton()}
                 <Snackbar
+                  classes={classes}
                   anchorOrigin={{
                     vertical: "bottom",
                     horizontal: "center"

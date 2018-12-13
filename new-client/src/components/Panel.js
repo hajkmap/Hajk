@@ -19,7 +19,9 @@ const styles = theme => {
       width: "400px",
       zIndex: theme.zIndex.drawer - 1,
       overflowY: "inherit",
+      border: "1px solid #ccc",
       [theme.breakpoints.down("xs")]: {
+        border: "none",
         position: "fixed",
         width: "100%",
         zIndex: 1300,
@@ -31,14 +33,23 @@ const styles = theme => {
       right: 0,
       position: "absolute",
       bottom: 0,
-      top: 0
+      top: 0,
+      margin: "0px",
+      marginBottom: "0px",
+      [theme.breakpoints.down("xs")]: {
+        margin: 0
+      }
     },
     drawerLeft: {
       order: 1,
       left: 0,
       position: "static",
-      bottom: 0,
-      top: 0
+      top: 0,
+      margin: "0px",
+      marginBottom: "0px",
+      [theme.breakpoints.down("xs")]: {
+        margin: 0
+      }
     },
     drawerPaperRight: {},
     drawerPaperContainer: {

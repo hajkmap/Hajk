@@ -99,9 +99,9 @@ button {
 .ol-zoom,
 .ol-full-screen,
 .ol-rotate {
-  top: 15px;
+  top: 8px;
   left: unset;
-  right: 15px;
+  right: 0px;
 }
 
 .ol-full-screen {
@@ -119,6 +119,7 @@ button {
   font-weight: 500;
   cursor: pointer;
   margin: 5px;
+  box-shadow: 1px 1px 3px #ccc;
 }
 
 .ol-control {
@@ -166,6 +167,10 @@ button {
     border: 1px solid #ccc;
     border-radius: 0px;
     width: inherit;
+  }
+  .ol-zoom {
+    bottom: 20px;
+    top: 20px;
   }
 }
 

@@ -114,11 +114,8 @@ const styles = theme => {
       }
     },
     widgetsRight: {
-      right: "10px",
-      top: "110px",
-      [theme.breakpoints.down("md")]: {
-        top: "147px"
-      },
+      right: "45px",
+      top: "8px",
       [theme.breakpoints.down("xs")]: {
         right: "inherit",
         left: "inherit",

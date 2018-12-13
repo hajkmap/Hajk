@@ -26,12 +26,16 @@ const styles = theme => {
         display: "none"
       },
       [theme.breakpoints.down("md")]: {
-        marginLeft: "280px"
+        marginLeft: "280px",
+        width: "300px"
       }
     },
     searchContainer: {
       display: "flex",
       alignItems: "center",
+      [theme.breakpoints.down("md")]: {
+        display: "unset"
+      },
       [theme.breakpoints.down("xs")]: {
         top: "0",
         width: "100%",
@@ -77,7 +81,7 @@ class Search extends Component {
   }
 
   render() {
-    const { classes } = this.props;    
+    const { classes } = this.props;
     return (
       <div className={classes.center}>
         <div>

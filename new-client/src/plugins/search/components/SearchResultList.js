@@ -20,6 +20,14 @@ const styles = theme => {
       borderTop: "none",
       top: "150px",
       right: "10px",
+      [theme.breakpoints.down("md")]: {
+        top: "unset",
+        position: "relative",
+        right: "unset",
+        padding: "unset",
+        borderTop: "unset",
+        border: "unset"
+      },
       [theme.breakpoints.down("xs")]: {
         position: "static",
         maxHeight: "inherit",
@@ -31,7 +39,8 @@ const styles = theme => {
       maxHeight: "500px",
       overflow: "auto",
       [theme.breakpoints.down("md")]: {
-        maxHeight: "450px"
+        maxHeight: "250px",
+        borderTop: "1px solid #ccc"
       },
       [theme.breakpoints.down("xs")]: {
         maxHeight: "inherit"

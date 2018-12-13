@@ -27,7 +27,7 @@ const styles = theme => {
       borderRadius: "4px",
       background: "white",
       padding: "10px 20px",
-      margin: "10px",
+      marginBottom: "10px",
       display: "flex",
       alignItems: "center",
       flexDirection: "row",

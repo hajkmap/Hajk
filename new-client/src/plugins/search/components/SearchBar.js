@@ -34,7 +34,7 @@ const styles = theme => ({
     paddingLeft: theme.spacing.unit,
     transition: theme.transitions.create("width"),
     left: "100%",
-    [theme.breakpoints.up("sm")]: {
+    [theme.breakpoints.up("lg")]: {
       width: 200,
       "&:focus": {
         width: 200

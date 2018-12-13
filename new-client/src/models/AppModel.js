@@ -241,7 +241,6 @@ class AppModel {
         ...layer
       });
     });
-
     return matchedLayers;
   }
 

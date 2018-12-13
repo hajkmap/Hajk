@@ -1,8 +1,11 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
+import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
+import Button from "@material-ui/core/Button";
+import PublicIcon from "@material-ui/icons/Public";
 
 const styles = theme => ({
   button: {
@@ -17,7 +20,10 @@ const styles = theme => ({
   iconSmall: {
     fontSize: 20
   },
-  layerSwitcher: {}
+  layerSwitcher: {},
+  reset: {
+    marginBottom: "10px"
+  }
 });
 
 class SimpleLayersSwitcherView extends React.PureComponent {
@@ -27,7 +33,16 @@ class SimpleLayersSwitcherView extends React.PureComponent {
       t => t.type === "layerswitcher"
     ).options;
     this.state = {
-      layerGroupsExpanded: true
+      layerGroupsExpanded: true,
+      baseLayers: this.props.map
+        .getLayers()
+        .getArray()
+        .filter(
+          l =>
+            l.getProperties().layerInfo &&
+            l.getProperties().layerInfo.layerType === "base"
+        )
+        .map(l => l.getProperties())
     };
   }
 
@@ -70,11 +85,6 @@ class SimpleLayersSwitcherView extends React.PureComponent {
     return this.state.layerGroupsExpanded ? "expand_less" : "chevron_right";
   }
 
-  hideAllLayers() {
-    // FIXME: Implement
-    console.log("will hide all layers");
-  }
-
   renderBreadCrumbs() {
     return createPortal(
       <BreadCrumbs map={this.props.map} />,
@@ -82,11 +92,26 @@ class SimpleLayersSwitcherView extends React.PureComponent {
     );
   }
 
+  clear = () => {
+    this.props.model.clear();
+  };
+
   render() {
     const { classes } = this.props;
     return (
       <div className={classes.layerSwitcher}>
+        <div className={classes.reset}>
+          <Button variant="contained" color="primary" onClick={this.clear}>
+            Återställ
+          </Button>
+        </div>
         <div>
+          <BackgroundSwitcher
+            layers={this.state.baseLayers}
+            layerMap={this.props.model.layerMap}
+            backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
+            backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
+          />
           <div>{this.renderLayerGroups()}</div>
         </div>
         {this.renderBreadCrumbs()}

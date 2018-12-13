@@ -178,6 +178,13 @@
             "drawOrder": 0,
             "visibleForGroups": null,
             "infobox": null
+          },
+          {
+            "id": "24",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
           }
         ],
         "groups": [
@@ -191,7 +198,7 @@
               {
                 "id": "22",
                 "visibleAtStart": false,
-                "drawOrder": 3,
+                "drawOrder": 5,
                 "visibleForGroups": null,
                 "infobox": null
               }
@@ -235,28 +242,28 @@
               {
                 "id": "23",
                 "visibleAtStart": false,
-                "drawOrder": 1000,
+                "drawOrder": 1,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
                 "id": "18",
                 "visibleAtStart": false,
-                "drawOrder": 5,
+                "drawOrder": 2,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
                 "id": "16",
                 "visibleAtStart": true,
-                "drawOrder": 1,
+                "drawOrder": 4,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
                 "id": "17",
                 "visibleAtStart": true,
-                "drawOrder": 2,
+                "drawOrder": 3,
                 "visibleForGroups": null,
                 "infobox": null
               },
@@ -306,15 +313,6 @@
       "index": 0
     },
     {
-      "type": "anchor",
-      "options": {
-        "target": "toolbar",
-        "instruction": "",
-        "visibleForGroups": []
-      },
-      "index": 1
-    },
-    {
       "type": "simple_layerswitcher",
       "options": {
         "target": "toolbar",
@@ -324,13 +322,27 @@
       "index": 0
     },
     {
-      "type": "measure",
+      "type": "informative",
+      "options": {
+        "target": "toolbar",
+        "panel": "right",
+        "caption": "Översiktsplanen",
+        "serviceUrl": "http://localhost:55630/informative/load",
+        "abstract": "<div><div>Genom översiktsplanen talar staden om hur bebyggelse och mark- och vattenanvändning kan utvecklas på lång sikt. Uddevalla ska vara en klimatsmart, växande stad med sammanhållande stadsmiljöer där det byggda och det gröna samspelar. En stad för alla.</div><h2>Vad vill vi uppnå?</h2>Uddevalla ska vara en stad med täta och sammanhållande stadsmiljöer där det byggda och det gröna samspelar.  Översiktsplanen utgår från stadens fyra mål för stadsbyggande.<img src=\"https://images.vastsverige.com/publishedmedia/jue8wzf2g5vrgjoy19xg/Uddevalla_170728-0082-Edit.jpg\"></div>",
+        "document": "op",
+        "visibleAtStart": false,
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "edit",
       "options": {
         "target": "toolbar",
         "instruction": "",
-        "icons": ""
+        "visibleForGroups": []
       },
-      "index": 2
+      "index": 0
     },
     {
       "type": "draw",
@@ -344,19 +356,14 @@
         "proxyUrl": "",
         "visibleForGroups": []
       },
-      "index": 3
+      "index": 0
     },
     {
-      "type": "informative",
+      "type": "measure",
       "options": {
         "target": "toolbar",
-        "panel": "right",
-        "caption": "Översiktsplanen",
-        "serviceUrl": "http://localhost:55630/informative/load",
-        "abstract": "<div><div>Genom översiktsplanen talar staden om hur bebyggelse och mark- och vattenanvändning kan utvecklas på lång sikt. Uddevalla ska vara en klimatsmart, växande stad med sammanhållande stadsmiljöer där det byggda och det gröna samspelar. En stad för alla.</div><h2>Vad vill vi uppnå?</h2>Uddevalla ska vara en stad med täta och sammanhållande stadsmiljöer där det byggda och det gröna samspelar.  Översiktsplanen utgår från stadens fyra mål för stadsbyggande.<img src=\"https://images.vastsverige.com/publishedmedia/jue8wzf2g5vrgjoy19xg/Uddevalla_170728-0082-Edit.jpg\"></div>",
-        "document": "op",
-        "visibleAtStart": false,
-        "visibleForGroups": []
+        "instruction": "",
+        "icons": ""
       },
       "index": 0
     }

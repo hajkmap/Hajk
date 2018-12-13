@@ -29,7 +29,7 @@ const styles = theme => {
       borderRadius: "4px",
       background: "white",
       padding: "10px 20px",
-      margin: "10px",
+      marginBottom: "10px",
       display: "flex",
       alignItems: "center",
       flexDirection: "row",
@@ -41,7 +41,8 @@ const styles = theme => {
       },
       [theme.breakpoints.down("xs")]: {
         width: "auto",
-        justifyContent: "inherit"
+        justifyContent: "inherit",
+        marginBottom: "20px"
       }
     },
     title: {

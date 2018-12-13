@@ -1,20 +1,67 @@
-import React, { Component } from "react";
+import React from "react";
+import { withStyles } from "@material-ui/core/styles";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import ExpansionPanel from "@material-ui/core/ExpansionPanel";
+import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
+import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import Typography from "@material-ui/core/Typography";
+import Radio from "@material-ui/core/Radio";
+import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
+import RadioButtonCheckedIcon from "@material-ui/icons/RadioButtonChecked";
 
-import "./BackgroundSwitcher.css";
+const styles = theme => ({
+  root: {
+    width: "100%",
+    display: "block",
+    padding: "5px 0",
+    borderTop: "1px solid #ccc",
+    background: "#efefef"
+  },
+  heading: {
+    fontSize: theme.typography.pxToRem(18),
+    flexBasis: "100%",
+    flexShrink: 0
+  },
+  secondaryHeading: {
+    fontSize: theme.typography.pxToRem(15),
+    color: theme.palette.text.secondary
+  },
+  disableTransition: {
+    transition: "none"
+  },
+  panel: {
+    marginLeft: "10px"
+  },
+  row: {
+    background: "white"
+  },
+  layerItemContainer: {
+    padding: "10px",
+    margin: "5px",
+    background: "white",
+    borderTopRightRadius: "10px",
+    boxShadow:
+      "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)"
+  },
+  captionText: {
+    marginLeft: "-6px",
+    position: "relative",
+    top: "2px"
+  }
+});
 
-class BackgroundSwitcher extends Component {
-  constructor() {
-    super();
-    this.onChange = this.onChange.bind(this);
+class BackgroundSwitcher extends React.PureComponent {
+  constructor(props) {
+    super(props);
     this.state = {
       selectedLayer: -1,
       toggled: true
     };
   }
 
-  onChange(e) {
+  onChange = e => {
     if (Number(this.state.selectedLayer) > 0) {
       this.props.layerMap[Number(this.state.selectedLayer)].setVisible(false);
     }
@@ -31,17 +78,18 @@ class BackgroundSwitcher extends Component {
     this.setState({
       selectedLayer: e.target.value
     });
-  }
+  };
 
   componentDidMount() {
-    this.props.layers
-      .filter(layer => layer.visibleAtStart)
+    const { layers } = this.props;
+    layers
+      .filter(layer => layer.visible)
       .forEach((layer, i) => {
-        if (i !== 0 && this.props.layerMap[Number(layer.id)]) {
-          this.props.layerMap[Number(layer.id)].setVisible(false);
+        if (i !== 0 && this.props.layerMap[Number(layer.name)]) {
+          this.props.layerMap[Number(layer.name)].setVisible(false);
         } else {
           this.setState({
-            selectedLayer: layer.id
+            selectedLayer: layer.name
           });
         }
       });
@@ -50,55 +98,64 @@ class BackgroundSwitcher extends Component {
   renderRadioButton(config, index) {
     var caption,
       checked,
-      mapLayer = this.props.layerMap[Number(config.id)];
+      mapLayer = this.props.layerMap[Number(config.name)];
+
+    const { classes } = this.props;
 
     if (mapLayer) {
       caption = mapLayer.get("layerInfo").caption;
     } else {
       caption = config.caption;
     }
-    checked = this.state.selectedLayer === config.id;
-
+    checked = this.state.selectedLayer === config.name;
     return (
-      <div className="custom-control custom-radio" key={index}>
-        <input
-          type="radio"
+      <div key={index} className={classes.layerItemContainer}>
+        <Radio
           id={caption + "_" + index}
-          name="background"
-          className="custom-control-input"
-          onChange={this.onChange.bind(this)}
           checked={checked}
-          value={config.id || config}
+          onChange={this.onChange}
+          value={config.name || config}
+          color="default"
+          name="radio-button-demo"
+          icon={<RadioButtonUncheckedIcon fontSize="small" />}
+          checkedIcon={<RadioButtonCheckedIcon fontSize="small" />}
         />
-        <label className="custom-control-label" htmlFor={caption + "_" + index}>
-          {caption}
+        <label htmlFor={caption + "_" + index} className={classes.captionText}>
+          <strong>{caption}</strong>
         </label>
       </div>
     );
   }
 
   renderBaseLayerComponents() {
-    var radioButtons = [];
+    const { backgroundSwitcherWhite, backgroundSwitcherBlack } = this.props;
+    var radioButtons = [],
+      defaults = [];
 
-    radioButtons = [
-      ...radioButtons,
-      ...[
+    if (backgroundSwitcherWhite) {
+      defaults.push(
         this.renderRadioButton(
           {
-            id: "-1",
+            name: "-1",
             caption: "Vit"
           },
           -1
-        ),
+        )
+      );
+    }
+    if (backgroundSwitcherBlack) {
+      defaults.push(
         this.renderRadioButton(
           {
-            id: "-2",
+            name: "-2",
             caption: "Svart"
           },
           -2
         )
-      ]
-    ];
+      );
+    }
+
+    radioButtons = [...radioButtons, ...[defaults]];
 
     radioButtons = [
       ...radioButtons,
@@ -123,25 +180,21 @@ class BackgroundSwitcher extends Component {
   }
 
   render() {
+    const { classes } = this.props;
     return (
-      <div id="background-layers">
-        <div className="expand-toggler">
-          <h1
-            onClick={() => {
-              this.toggleVisibility();
-            }}
-            className="clickable"
-          >
-            {this.getToggleIcon()}
-            Bakgrundskartor
-          </h1>
-        </div>
-        <div className={this.getVisibilityClass()}>
+      <ExpansionPanel
+        className={classes.disableTransition}
+        CollapseProps={{ classes: { container: classes.disableTransition } }}
+      >
+        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography className={classes.heading}>Bakgrundskartor</Typography>
+        </ExpansionPanelSummary>
+        <ExpansionPanelDetails classes={{ root: classes.root }}>
           {this.renderBaseLayerComponents()}
-        </div>
-      </div>
+        </ExpansionPanelDetails>
+      </ExpansionPanel>
     );
   }
 }
 
-export default BackgroundSwitcher;
+export default withStyles(styles)(BackgroundSwitcher);

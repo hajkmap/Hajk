@@ -33,6 +33,7 @@ var defaultState = {
   caption: "Översiktsplan",
   serviceUrl: "http://localhost:55630/informative/load",
   documentList: [],
+  document: "",
   visibleAtStart: false,
   templateJsonFilePath: "op",
   visibleForGroups: []
@@ -63,6 +64,7 @@ class ToolOptions extends Component {
         () => {
           if (tool) {
             this.props.model.getDocumentList(url, list => {
+              console.log("Document list", tool.options.document, list);
               this.setState({
                 active: true,
                 index: tool.index,
@@ -71,7 +73,7 @@ class ToolOptions extends Component {
                 caption: tool.options.caption,
                 abstract: tool.options.abstract,
                 serviceUrl: tool.options.serviceUrl,
-                document: tool.options.document,
+                document: tool.options.document || list[0],
                 visibleAtStart: tool.options.visibleAtStart || false,
                 visibleForGroups: tool.options.visibleForGroups
                   ? tool.options.visibleForGroups

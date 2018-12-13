@@ -10,6 +10,21 @@ class SimpleLayerSwitcherModel {
         return a;
       }, {});
   }
+
+  clear() {
+    this.olMap
+      .getLayers()
+      .getArray()
+      .forEach(layer => {
+        if (
+          layer.getProperties &&
+          layer.getProperties().layerInfo &&
+          layer.getProperties().layerInfo.layerType === "layer"
+        ) {
+          layer.setVisible(false);
+        }
+      });
+  }
 }
 
 export default SimpleLayerSwitcherModel;
