@@ -10,6 +10,7 @@ import Input from "@material-ui/core/Input";
 import InputLabel from "@material-ui/core/InputLabel";
 import { withSnackbar } from "notistack";
 import Dialog from "../../components/Dialog.js";
+import Symbology from "./components/Symbology.js";
 
 const styles = theme => ({
   root: {
@@ -38,9 +39,10 @@ class DrawView extends React.PureComponent {
     this.model = this.props.model;
     this.app = this.props.app;
     this.localObserver = this.props.localObserver;
-    this.localObserver.on("dialog", () => {
+    this.localObserver.on("dialog", feature => {
       this.setState({
-        dialog: true
+        dialog: true,
+        feature: feature
       });
     });
   }
@@ -54,10 +56,13 @@ class DrawView extends React.PureComponent {
     this.props.model.setType(event.target.value);
   };
 
-  onClose = () => {
+  onClose = text => {
+    this.state.feature.set("type", "Label");
+    this.state.feature.set("text", text);
     this.setState({
       dialog: false
     });
+    this.props.model.redraw();
   };
 
   renderDialog() {
@@ -108,6 +113,9 @@ class DrawView extends React.PureComponent {
             <DeleteIcon />
             Ta bort alla ritobjekt
           </Button>
+        </div>
+        <div className={classes.row}>
+          <Symbology type={this.state.shape} model={this.props.model} />
         </div>
         {this.renderDialog()}
       </>

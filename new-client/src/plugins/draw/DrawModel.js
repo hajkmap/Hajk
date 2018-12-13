@@ -19,40 +19,49 @@ class DrawModel {
     this.type = "LineString";
     this.displayText = false;
     this.createDrawTooltip();
+    this.strokeColor = "rgba(0, 0, 0, 0.5)";
+    this.strokeWidth = 3;
+  }
+
+  redraw() {
+    this.vector.changed();
   }
 
   createStyle = (feature, resolution) => {
+    const displayLabel = feature && feature.getProperties().type === "Label";
     return [
       new Style({
         fill: new Fill({
           color: "rgba(255, 255, 255, 0.3)"
         }),
         stroke: new Stroke({
-          color: "rgba(0, 0, 0, 0.5)",
-          width: 3
+          color: this.strokeColor,
+          width: this.strokeWidth
         }),
-        image: new CircleStyle({
-          radius: 5,
-          stroke: new Stroke({
-            color: "rgba(0, 0, 0, 0.7)"
-          }),
-          fill: new Fill({
-            color: "rgba(255, 255, 255, 0.2)"
-          })
-        }),
+        image: displayLabel
+          ? null
+          : new CircleStyle({
+              radius: 5,
+              stroke: new Stroke({
+                color: "rgba(0, 0, 0, 0.7)"
+              }),
+              fill: new Fill({
+                color: "rgba(255, 255, 255, 0.2)"
+              })
+            }),
         text: new Text({
           textAlign: "center",
           textBaseline: "middle",
           font: "12pt sans-serif",
           fill: new Fill({ color: "#FFF" }),
-          text: this.displayText ? this.getLabelText(feature) : undefined,
+          text: feature && this.getLabelText(feature),
           overflow: true,
           stroke: new Stroke({
             color: "rgba(0, 0, 0, 0.5)",
             width: 3
           }),
           offsetX: 0,
-          offsetY: -10,
+          offsetY: 0,
           rotation: 0,
           scale: 1
         })
@@ -66,9 +75,6 @@ class DrawModel {
   };
 
   handleDrawStart = e => {
-    if (this.text) {
-      this.localObserver.emit("dialog", "");
-    }
     e.feature.getGeometry().on("change", e => {
       var toolTip = "",
         coord = undefined,
@@ -96,6 +102,9 @@ class DrawModel {
   };
 
   handleDrawEnd = e => {
+    if (this.text) {
+      this.localObserver.emit("dialog", e.feature);
+    }
     this.setFeaturePropertiesFromGeometry(e.feature);
     this.drawTooltip.setPosition(undefined);
   };
@@ -155,6 +164,10 @@ class DrawModel {
 
   formatLabel(type, value) {
     var label;
+
+    if (type === "text") {
+      label = value;
+    }
 
     if (type === "point") {
       label = "Nord: " + value[0] + " Öst: " + value[1];
@@ -222,9 +235,13 @@ class DrawModel {
     const type = feature.getProperties().type;
     switch (type) {
       case "LineString":
-        return this.formatLabel("length", props.length);
+        return this.displayText
+          ? this.formatLabel("length", props.length)
+          : null;
       case "Polygon":
-        return this.formatLabel("area", props.area);
+        return this.displayText ? this.formatLabel("area", props.area) : null;
+      case "Label":
+        return this.formatLabel("text", props.text);
       default:
         return "";
     }

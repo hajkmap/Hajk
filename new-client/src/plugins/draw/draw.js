@@ -6,7 +6,7 @@ import DrawIcon from "@material-ui/icons/Edit";
 import DrawView from "./DrawView";
 import DrawModel from "./DrawModel";
 import Observer from "react-event-observer";
-import PopPanel from "../../components/PopPanel.js";
+import Panel from "../../components/Panel.js";
 import "./draw.css";
 
 const styles = theme => {
@@ -50,20 +50,20 @@ class Draw extends React.PureComponent {
 
   renderPanel() {
     return createPortal(
-      <PopPanel
+      <Panel
         title={this.text}
         onClose={this.closePanel}
         position="left"
         open={this.state.panelOpen}
         top={this.state.top}
-        height="200px"
+        height="500px"
       >
         <DrawView
           localObserver={this.localObserver}
           model={this.drawModel}
           parent={this}
         />
-      </PopPanel>,
+      </Panel>,
       document.getElementById("map-overlay")
     );
   }

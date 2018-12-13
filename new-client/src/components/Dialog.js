@@ -66,7 +66,7 @@ class Dialog extends Component {
 
   handleClose = e => {
     e.stopPropagation();
-    this.props.onClose();
+    this.props.onClose(this.state.text);
   };
 
   handleDialogClick = e => {
@@ -107,7 +107,7 @@ class Dialog extends Component {
         autoComplete="off"
         onSubmit={e => {
           e.preventDefault();
-          this.props.onClose();
+          this.props.onClose(this.state.text);
           return false;
         }}
       >
