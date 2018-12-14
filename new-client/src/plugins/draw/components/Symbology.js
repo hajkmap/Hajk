@@ -28,11 +28,41 @@ class Symbology extends React.PureComponent {
     shape: "LineString"
   };
 
-  update = (prop, styleProp) => e => {
-    var value = e.target.value,
+  componentDidMount() {
+    const { model } = this.props;
+    this.setState({
+      fontSize: model.fontSize,
+      fontTextColor: model.fontTextColor,
+      fontBackColor: model.fontBackColor,
+      pointText: model.pointText,
+      pointColor: model.pointColor,
+      pointRadius: model.pointRadius,
+      lineColor: model.lineColor,
+      lineWidth: model.lineWidth,
+      lineStyle: model.lineStyle,
+      circleFillColor: model.circleFillColor,
+      circleLineColor: model.circleLineColor,
+      circleFillOpacity: model.circleFillOpacity,
+      circleLineStyle: model.circleLineStyle,
+      circleLineWidth: model.circleLineWidth,
+      polygonLineColor: model.polygonLineColor,
+      polygonLineWidth: model.polygonLineWidth,
+      polygonLineStyle: model.polygonLineStyle,
+      polygonFillColor: model.polygonFillColor,
+      polygonFillOpacity: model.polygonFillOpacity,
+      squareFillColor: model.squareFillColor,
+      squareLineColor: model.squareLineColor,
+      squareFillOpacity: model.squareFillOpacity,
+      squareLineStyle: model.squareLineStyle,
+      squareLineWidth: model.squareLineWidth
+    });
+  }
+
+  update = prop => e => {
+    var value = e.hex ? e.hex : e.target.value,
       state = {};
 
-    if (e.target.type === "checkbox") {
+    if (e.target && e.target.type === "checkbox") {
       value = e.target.checked;
     }
 
@@ -45,35 +75,8 @@ class Symbology extends React.PureComponent {
     }
     state[prop] = value;
     this.setState(state);
-    if (styleProp) {
-      this.props.model[styleProp] = value;
-    }
+    this.props.model[prop] = value;
   };
-
-  // hasClass(icon) {
-  //   return this.props.model.get("markerImg") ===
-  //     window.location.href + `assets/icons/${icon}.png`
-  //     ? "selected"
-  //     : "";
-  // }
-
-  renderIcons() {
-    //var icons = this.props.model.get("icons").split(",");
-    //var icons = [];
-    // return icons.map((icon, i) => {
-    //   icon = icon.trim();
-    //   if (icon === "br") {
-    //     return <br key={i} />;
-    //   } else {
-    //     var iconSrc = `assets/icons/${icon}.png`;
-    //     return (
-    //       <div key={i} className={this.hasClass(icon)}>
-    //         <img onClick={this.setMarkerImg} src={iconSrc} />
-    //       </div>
-    //     );
-    //   }
-    // });
-  }
 
   renderPointSettings() {
     const { classes } = this.props;
@@ -82,11 +85,10 @@ class Symbology extends React.PureComponent {
         return (
           <div>
             <FormControl className={classes.formControl}>
-              <InputLabel>Färg</InputLabel>
+              <div>Färg</div>
               <ColorPicker
-                onChange={color => {
-                  this.update("pointColor", color);
-                }}
+                color={this.state.pointColor}
+                onChange={this.update("pointColor")}
               />
             </FormControl>
             <FormControl className={classes.formControl}>
@@ -104,7 +106,7 @@ class Symbology extends React.PureComponent {
           </div>
         );
       case "symbol":
-        return <div className="point-marker-img">{this.renderIcons()}</div>;
+        return <div>Val av ikon är ännu inte tillgängligt.</div>;
       default:
         return undefined;
     }
@@ -137,19 +139,17 @@ class Symbology extends React.PureComponent {
               </NativeSelect>
             </FormControl>
             <FormControl className={classes.formControl}>
-              <InputLabel>Textfärg</InputLabel>
+              <div>Textfärg</div>
               <ColorPicker
-                onChange={color => {
-                  this.update("fontTextColor", color);
-                }}
+                color={this.state.fontTextColor}
+                onChange={this.update("fontTextColor")}
               />
             </FormControl>
             <FormControl className={classes.formControl}>
-              <InputLabel>Bakgrundsfärg text</InputLabel>
+              <div>Bakgrundsfärg text</div>
               <ColorPicker
-                onChange={color => {
-                  this.update("fontBackColor", color);
-                }}
+                color={this.state.fontBackColor}
+                onChange={this.update("fontBackColor")}
               />
             </FormControl>
           </div>
@@ -178,11 +178,10 @@ class Symbology extends React.PureComponent {
         return (
           <div>
             <FormControl className={classes.formControl}>
-              <InputLabel>Färg</InputLabel>
+              <div>Färg</div>
               <ColorPicker
-                onChange={color => {
-                  this.update("lineColor", color);
-                }}
+                color={this.state.lineColor}
+                onChange={this.update("lineColor")}
               />
             </FormControl>
             <FormControl className={classes.formControl}>
@@ -223,21 +222,17 @@ class Symbology extends React.PureComponent {
               />
             </FormControl>
             <FormControl className={classes.formControl}>
-              <InputLabel>Linjefärg</InputLabel>
+              <div>Linjefärg</div>
               <ColorPicker
-                model={this.props.model}
-                property="circleLineColor"
-                onChange={color => {
-                  this.update("circleLineColor", color);
-                }}
+                color={this.state.circleLineColor}
+                onChange={this.update("circleLineColor")}
               />
             </FormControl>
             <FormControl className={classes.formControl}>
-              <InputLabel>Fyllnadsfärg</InputLabel>
+              <div>Fyllnadsfärg</div>
               <ColorPicker
-                onChange={color => {
-                  this.update("circleFillColor", color);
-                }}
+                color={this.state.circleFillColor}
+                onChange={this.update("circleFillColor")}
               />
             </FormControl>
             <FormControl className={classes.formControl}>
@@ -282,19 +277,17 @@ class Symbology extends React.PureComponent {
         return (
           <div>
             <FormControl className={classes.formControl}>
-              <InputLabel>Linjefärg</InputLabel>
+              <div>Linjefärg</div>
               <ColorPicker
-                onChange={color => {
-                  this.update("polygonLineColor", color);
-                }}
+                color={this.state.polygonLineColor}
+                onChange={this.update("polygonLineColor")}
               />
             </FormControl>
             <FormControl className={classes.formControl}>
-              <InputLabel>Fyllnadsfärg</InputLabel>
+              <div>Fyllnadsfärg</div>
               <ColorPicker
-                onChange={color => {
-                  this.update("polygonFillColor", color);
-                }}
+                color={this.state.polygonFillColor}
+                onChange={this.update("polygonFillColor")}
               />
             </FormControl>
             <FormControl className={classes.formControl}>
@@ -339,26 +332,24 @@ class Symbology extends React.PureComponent {
         return (
           <div>
             <FormControl className={classes.formControl}>
-              <InputLabel>Linjefärg</InputLabel>
+              <div>Linjefärg</div>
               <ColorPicker
-                onChange={color => {
-                  this.update("boxLineColor", color);
-                }}
+                color={this.state.squareLineColor}
+                onChange={this.update("squareLineColor")}
               />
             </FormControl>
             <FormControl className={classes.formControl}>
-              <InputLabel>Fyllnadsfärg</InputLabel>
+              <div>Fyllnadsfärg</div>
               <ColorPicker
-                onChange={color => {
-                  this.update("boxFillColor", color);
-                }}
+                color={this.state.squareFillColor}
+                onChange={this.update("squareFillColor")}
               />
             </FormControl>
             <FormControl className={classes.formControl}>
               <InputLabel>Opacitet</InputLabel>
               <NativeSelect
-                value={this.state.boxFillOpacity}
-                onChange={this.update("boxFillOpacity")}
+                value={this.state.squareFillOpacity}
+                onChange={this.update("squareFillOpacity")}
               >
                 <option value="0">0% (genomskinlig)</option>
                 <option value="0.25">25%</option>
@@ -370,8 +361,8 @@ class Symbology extends React.PureComponent {
             <FormControl className={classes.formControl}>
               <InputLabel>Linjetjocklek</InputLabel>
               <NativeSelect
-                value={this.state.boxLineWidth}
-                onChange={this.update("boxLineWidth")}
+                value={this.state.squareLineWidth}
+                onChange={this.update("squareLineWidth")}
               >
                 <option value="1">Tunn</option>
                 <option value="3">Normal</option>
@@ -382,8 +373,8 @@ class Symbology extends React.PureComponent {
             <FormControl className={classes.formControl}>
               <InputLabel>Linjestil</InputLabel>
               <NativeSelect
-                value={this.state.boxLineStyle}
-                onChange={this.update("boxLineStyle")}
+                value={this.state.squareLineStyle}
+                onChange={this.update("squareLineStyle")}
               >
                 <option value="solid">Heldragen</option>
                 <option value="dash">Streckad</option>
