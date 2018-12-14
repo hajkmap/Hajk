@@ -91,7 +91,7 @@ class DrawView extends React.PureComponent {
       <>
         <div className={classes.row}>
           <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="age-native-helper">
+            <InputLabel htmlFor="shape-native-helper">
               Typ av ritobjekt
             </InputLabel>
             <NativeSelect
@@ -115,6 +115,7 @@ class DrawView extends React.PureComponent {
           </Button>
         </div>
         <div className={classes.row}>
+          <div>Ritmanér</div>
           <Symbology type={this.state.shape} model={this.props.model} />
         </div>
         {this.renderDialog()}
