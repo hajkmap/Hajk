@@ -4,7 +4,6 @@ import { CompactPicker as ColorPicker } from "react-color";
 import NativeSelect from "@material-ui/core/NativeSelect";
 import Input from "@material-ui/core/Input";
 import InputLabel from "@material-ui/core/InputLabel";
-import Typography from "@material-ui/core/Typography";
 import FormControl from "@material-ui/core/FormControl";
 
 const styles = theme => ({
@@ -60,8 +59,7 @@ class Symbology extends React.PureComponent {
 
   renderIcons() {
     //var icons = this.props.model.get("icons").split(",");
-    var icons = [];
-
+    //var icons = [];
     // return icons.map((icon, i) => {
     //   icon = icon.trim();
     //   if (icon === "br") {

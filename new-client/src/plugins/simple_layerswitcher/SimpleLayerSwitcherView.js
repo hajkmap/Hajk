@@ -102,7 +102,8 @@ class SimpleLayersSwitcherView extends React.PureComponent {
       <div className={classes.layerSwitcher}>
         <div className={classes.reset}>
           <Button variant="contained" color="primary" onClick={this.clear}>
-            Återställ
+            <PublicIcon />
+            &nbsp;Återställ
           </Button>
         </div>
         <div>
