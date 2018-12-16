@@ -1417,6 +1417,7 @@ var FirModel = {
 
                             features.forEach(feature => {
                                 keys.push([feature.get(fnrField), feature.get(omradeField)]);
+                                //this.firFeatureLayer.getSource().addFeature(feature); // TODO Should be done only for addresspunkter
                             });
                         }
 

@@ -325,7 +325,33 @@ var FirSelectionModel = {
             this.get('olMap').un('singleclick', this.onMapSingleClick, this);
         }
 
+        console.log("drawSokomrade", this.get('olMap'));
+        this.clickEnterSokomrade();
+        //document.getElementById("sokEnter").click();
+/*
+        var searchInomOmrade = document.getElementById("sokEnter");
+        console.log("searchInomOmrade", searchInomOmrade);
 
+        searchInomOmrade.addEventListener("keydown", function (e) {
+            if (e.keyCode === 13) {
+            searchInomOmrade.click();
+        }
+        });
+*/
+    },
+
+    clickEnterSokomrade: function(){
+        if(this.get("callBackEnter") === "") {
+            console.log("### running");
+            this.set("callbackEnter", "listening");
+            window.addEventListener("keydown", function handler(e) {
+                if (e.keyCode === 13) {
+                    var searchInomOmrade = $("#sokEnter");
+                    searchInomOmrade.click();
+                }
+                window.removeEventListener("keydown", handler);
+            });
+        }
     },
 
     bufferSearchingInput: function(){
