@@ -13,6 +13,16 @@ using Newtonsoft.Json.Linq;
 using System.Net;
 using System.Xml;
 
+// För att FIRController ska fungera måste följande läggas till Web.config under <appSettings>
+//<add key = "firLMServiceUser" value="varb0002" />
+//<add key = "firLMServicePassword" value="PAIp2XdF28t45U" />
+//<add key = "firLMUrlServiceFastighet" value="http://services-ver.lantmateriet.se/distribution/produkter/fastighet/v2.1/" />
+//<add key = "firLMUrlServiceInskrivning" value="http://services-ver.lantmateriet.se/distribution/produkter/inskrivning/v2.1/" />
+//<add key = "firLMNamespaceInskrivning" value="http://namespace.lantmateriet.se/distribution/produkter/inskrivning/v2.1" />
+//<add key = "firLMUrlServiceRattighet" value="http://services-ver.lantmateriet.se/distribution/produkter/rattighet/v1.4/" />
+//<add key = "firLMNamespaceRattighet" value="http://namespace.lantmateriet.se/distribution/produkter/rattighet/v1.4" />
+//<add key = "firUrlServicePropertyDoc" value="http://karta4.varberg.se:85/Report/Fastighet/pdf/{0}" />
+
 namespace MapService.Controllers
 {
     public class FirController : Controller
@@ -468,19 +478,19 @@ namespace MapService.Controllers
             // Skapa fliken Fastighetsförteckning
             ExcelTemplate xls = new ExcelTemplate();
             xls.TabName = "Fastighetsförteckning";
-            xls.Cols = new List<string>(new string[] { "Beteckning", "Total Area", "Ägandeform", "Andel", "Ägare/Innehavare", "Person-/Organisationsnummer", "c/o", "Adress", "Postnummer", "Postadress", "Notering" });
+            xls.Cols = new List<string>(new string[] { "Beteckning", "Total Area", "Ägandeform", "Andel", "Ägare/Innehavare", "Person-/Organisationsnummer", "c/o", "Adress", "Postnummer", "Postadress" });
             xls.Rows = new List<List<object>>();
 
             foreach(var realEstate in excelInfoLista.fastighetPrimarLista)
             {
                 foreach (var lagfarenAgare in realEstate.lagfarenAgareLista)
                 {
-                    xls.Rows.Add(new List<object>(new string[] { realEstate.fastighetsBeteckning, realEstate.totalArea, lagfarenAgare.notering, lagfarenAgare.andel, lagfarenAgare.agare, lagfarenAgare.persnr, lagfarenAgare.coAdress, lagfarenAgare.adress, lagfarenAgare.postnr, lagfarenAgare.postort, "" }));
+                    xls.Rows.Add(new List<object>(new string[] { realEstate.fastighetsBeteckning, realEstate.totalArea, lagfarenAgare.notering, lagfarenAgare.andel, lagfarenAgare.agare, lagfarenAgare.persnr, lagfarenAgare.coAdress, lagfarenAgare.adress, lagfarenAgare.postnr, lagfarenAgare.postort }));
                 }
             }
 
             if (xls.Rows.Count == 0)
-                xls.Rows.Add(new List<object>(new string[] { "", "", "", "", "", "", "", "", "", "", "" }));
+                xls.Rows.Add(new List<object>(new string[] { "", "", "", "", "", "", "", "", "", "" }));
 
             return xls;
         }
