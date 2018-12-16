@@ -154,13 +154,13 @@ var FirSelectionPanelView = {
                     <button onClick={() => this.activateTool('polygonSelection')} type='button' className={this.getClassNames('polygonSelection')} title='Markera efter polygon' >
                         <i className='fa iconmoon-yta icon' />
                     </button>
-                    <button onClick={() => this.activateTool('squareSelection')} type='button' className={this.getClassNames('squareSelection')} title='Markera flera objekt' >
+                    <button onClick={() => this.activateTool('squareSelection')} type='button' className={this.getClassNames('squareSelection')} title='Markera efter square' >
                         <i className='fa fa-square-o icon' />
                     </button>
-                    <button onClick={() => this.activateTool('lineSelection')} type='button' className={this.getClassNames('lineSelection')} title='Markera efter polygon' >
+                    <button onClick={() => this.activateTool('lineSelection')} type='button' className={this.getClassNames('lineSelection')} title='Markera efter Linje' >
                         <i className='fa iconmoon-linje icon' />
                     </button>
-                    <button onClick={() => this.activateTool('pointSelection')} type='button' className={this.getClassNames('pointSelection')} title='Markera efter polygon' >
+                    <button onClick={() => this.activateTool('pointSelection')} type='button' className={this.getClassNames('pointSelection')} title='Markera efter punkt' >
                         <i className='fa fa-circle icon' />
                     </button>
                     <button onClick={() => {this.openImportKml(); this.activateTool('kmlSelection')}} type='button' className={this.getClassNames('kmlSelection')} title='Importera KML-fil' >

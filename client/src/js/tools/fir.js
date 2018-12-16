@@ -1075,15 +1075,23 @@ var FirModel = {
             this.set('features', features);
         }
 
-        if(this.get("hittaGrannar")){
+        var backupFilter = this.get("filter");
+        var inHittaGrannar = this.get("hittaGrannar");
+        console.log("inHittaGrannar", inHittaGrannar);
+        if(inHittaGrannar){
             features = this.firBufferHiddenFeatureLayer.getSource().getFeatures();
             this.set("features", features);
+            this.set("filter", this.get("realEstateLayerCaption"));
         }
 
         if (value === '' && features.length === 0) return;
 
         sources = this.getSources();
         layers = this.getLayers();
+
+        if(inHittaGrannar){
+            this.set("filter", backupFilter);
+        }
 
         this.set('hits', []);
         this.set('selectedIndices', []);
@@ -1262,6 +1270,11 @@ var FirModel = {
     findWithSameNyckel: function(keys, items){
         var sources = this.getSources();
         var promises = [];
+
+        if(typeof keys === "undefined" || keys.length == 0){
+            return [];
+        }
+
         console.log("sources", this.get('sources'));
         this.get('sources').forEach(source => {
             console.log("source.caption", source.caption);
@@ -1343,6 +1356,11 @@ var FirModel = {
     },
 
     firstStage: function(done){
+
+     /*   if(!this.props.model.get("hittaGrannar")){
+            this.props.model.firBufferFeatureLayer.getSource().clear();
+        }
+        */
         var sources = this.getSources();
         var promises = [];
         var value = this.get('value');

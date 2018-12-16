@@ -145,6 +145,8 @@ var FirSearchView = {
             showResults: true,
             result: []
         });
+
+        this.props.model.set("hittaGrannarLayer", false);
     },
 
     clearBufferLength: function (bufferLength) {
@@ -186,6 +188,16 @@ var FirSearchView = {
      * @param {object} event
      */
     search: function (event) {
+        // clear the source first
+        console.log("+++ clicked sokenter", $("#sokEnter").click());
+        /*if (document.getElementById("sokEnter").click()){
+            this.props.model.firBufferFeatureLayer.getSource().clear();
+        }*/
+
+        if(!this.props.model.get("hittaGrannar")){
+            this.props.model.firBufferFeatureLayer.getSource().clear();
+        }
+
         var sources = this.props.model.get('sources');
         console.log("--- search: sources", sources);
         console.log("--- search: realEstateLayer's id", this.props.model.get("realEstateLayer").id);
@@ -510,6 +522,7 @@ var FirSearchView = {
     },
 
     hittaGrannar: function() {
+        this.props.model.set("hittaGrannarLayer", true);
         var parser = new jsts.io.OL3Parser();
         parser.inject(ol.geom.Point, ol.geom.LineString, ol.geom.LinearRing, ol.geom.Polygon, ol.geom.MultiPoint, ol.geom.MultiLineString, ol.geom.MultiPolygon);
 

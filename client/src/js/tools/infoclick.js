@@ -36,7 +36,7 @@ var FeatureModel = Backbone.Model.extend({
 });
 
 
-var doNotShowInfoClick;
+doNotShowInfoClick = false;
 
 var FeatureCollection = Backbone.Collection.extend({
   model: FeatureModel
@@ -167,7 +167,8 @@ var InfoClickModel = {
           layer.get('name') !== 'highlight-wms'
         ) {
             // only disable if there is a feature in highlight
-            console.log("doNotShowInfoClick", doNotShowInfoClick);
+            console.log("+++ doNotShowInfoClick", doNotShowInfoClick);
+            console.log("+++ layer.name",layer.get("name"));
             if(layer.get("name") === "fir-search-vector-layer" || layer.get("name") === "fir-highlight-vector-layer"){
                 doNotShowInfoClick = false;
                 return;
@@ -190,37 +191,38 @@ var InfoClickModel = {
       }
     });
 
-    wmsLayers.forEach((wmsLayer, index) => {
-      wmsLayer.index = index;
-      promises.push(new Promise((resolve, reject) => {
-        wmsLayer.getFeatureInformation({
-          coordinate: event.coordinate,
-          resolution: resolution,
-          projection: projection,
-          error: message => {
-            resolve();
-          },
-          success: (features, layer) => {
-            if (Array.isArray(features) && features.length > 0) {
-              features.forEach(feature => {
-                  console.log("feature");
-                  console.log(feature);
-                  // if in highfir layer and fir tool do nothing
-                this.addInformation(feature, wmsLayer, (featureInfo) => {
-                  if (featureInfo) {
-                    infos.push(featureInfo);
-                  }
-                  resolve();
+    if(!doNotShowInfoClick) {
+        wmsLayers.forEach((wmsLayer, index) => {
+            wmsLayer.index = index;
+            promises.push(new Promise((resolve, reject) => {
+                wmsLayer.getFeatureInformation({
+                    coordinate: event.coordinate,
+                    resolution: resolution,
+                    projection: projection,
+                    error: message => {
+                        resolve();
+                    },
+                    success: (features, layer) => {
+                        if (Array.isArray(features) && features.length > 0) {
+                            features.forEach(feature => {
+                                console.log("feature");
+                                console.log(feature);
+                                // if in highfir layer and fir tool do nothing
+                                this.addInformation(feature, wmsLayer, (featureInfo) => {
+                                    if (featureInfo) {
+                                        infos.push(featureInfo);
+                                    }
+                                    resolve();
+                                });
+                            });
+                        } else {
+                            resolve();
+                        }
+                    }
                 });
-              });
-            } else {
-              resolve();
-            }
-          }
+            }));
         });
-      }));
-    });
-
+    }
     this.set('loadFinished', false);
 
     Promise.all(promises).then(() => {

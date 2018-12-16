@@ -156,7 +156,7 @@ class ToolOptions extends Component {
       });
 
       this.setState({
-        tree: <Tree model={this} layers={this.state.searchableLayers} handleAddSearchable={this.handleAddSearchable} loadLayers={this.loadLayers} />
+        tree: <Tree type="search" model={this} layers={this.state.searchableLayers} handleAddSearchable={this.handleAddSearchable} loadLayers={this.loadLayers} />
       });
     });
   }

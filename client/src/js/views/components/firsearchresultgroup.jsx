@@ -191,6 +191,7 @@ FirSearchResultGroup = {
                     if(!ctrlValue) {
                         map.un('singleclick', this.plusLayerActive);
                         this.props.model.set("plusActive", false);
+                        doNotShowInfoClick = false;
                     }
                 }
             }, 50);
@@ -219,6 +220,7 @@ FirSearchResultGroup = {
                     if(!ctrlValue) {
                         map.un('singleclick', this.minusLayerActive);
                         this.props.model.set("minusActive", false);
+                        doNotShowInfoClick = false;
                     }
                 }
             }, 50);
@@ -422,6 +424,7 @@ FirSearchResultGroup = {
 
         console.log("+++ wmslayers", wmsLayers);
         wmsLayers.forEach((wmsLayer, index) => {
+            console.log("+++ looping", wmsLayer, index);
             wmsLayer.index = index;
             promises.push(new Promise((resolve, reject) => {
                 wmsLayer.getFeatureInformation({
