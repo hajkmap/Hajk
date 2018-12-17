@@ -14,8 +14,8 @@ using System.Net;
 using System.Xml;
 
 // För att FIRController ska fungera måste följande läggas till Web.config under <appSettings>
-//<add key = "firLMServiceUser" value="varb0002" />
-//<add key = "firLMServicePassword" value="PAIp2XdF28t45U" />
+//<add key = "firLMServiceUser" value="" />
+//<add key = "firLMServicePassword" value="" />
 //<add key = "firLMUrlServiceFastighet" value="http://services-ver.lantmateriet.se/distribution/produkter/fastighet/v2.1/" />
 //<add key = "firLMUrlServiceInskrivning" value="http://services-ver.lantmateriet.se/distribution/produkter/inskrivning/v2.1/" />
 //<add key = "firLMNamespaceInskrivning" value="http://namespace.lantmateriet.se/distribution/produkter/inskrivning/v2.1" />
@@ -66,13 +66,6 @@ namespace MapService.Controllers
             }
         }
 
-        // TODO: Remove this
-        [HttpGet]
-        public string PropertyDoc(string id)
-        {
-            return RealEstateDoc(id);
-        }
-
         [HttpGet]
         public string RealEstateDoc(string id)
         {
@@ -81,6 +74,9 @@ namespace MapService.Controllers
                 Response.Expires = 0;
                 Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
                 Response.Headers.Add("Cache-Control", "private, no-cache");
+
+                if(string.IsNullOrEmpty(id))
+                    return string.Format("Inget FNR angivet. Kan inte visa fastighetsrapport!");
 
                 HttpWebRequest request = GetWebRequestPost("firLMUrlServiceFastighet", "?includeData=basinformation");
                 WritePostBody(request, "application/json", string.Format("[\"{0}\"]", id), new ASCIIEncoding());
@@ -100,13 +96,6 @@ namespace MapService.Controllers
                 _log.FatalFormat("Can't get real estate document: {0}", e);
                 throw e;
             }
-        }
-
-        // TODO: Remove this
-        [HttpPost]
-        public string PropertyOwnerList(string json)
-        {
-            return RealEstateOwnerList(json);
         }
 
         // Test: { "fnr": ["130121064","130129850","130132945","130139213"] }
