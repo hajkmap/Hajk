@@ -2,6 +2,7 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { CompactPicker as ColorPicker } from "react-color";
 import NativeSelect from "@material-ui/core/NativeSelect";
+import Checkbox from "@material-ui/core/Checkbox";
 import Input from "@material-ui/core/Input";
 import InputLabel from "@material-ui/core/InputLabel";
 import FormControl from "@material-ui/core/FormControl";
@@ -34,6 +35,7 @@ class Symbology extends React.PureComponent {
       fontSize: model.fontSize,
       fontTextColor: model.fontTextColor,
       fontBackColor: model.fontBackColor,
+      fontStroke: model.fontStroke,
       pointText: model.pointText,
       pointColor: model.pointColor,
       pointRadius: model.pointRadius,
@@ -54,7 +56,8 @@ class Symbology extends React.PureComponent {
       squareLineColor: model.squareLineColor,
       squareFillOpacity: model.squareFillOpacity,
       squareLineStyle: model.squareLineStyle,
-      squareLineWidth: model.squareLineWidth
+      squareLineWidth: model.squareLineWidth,
+      pointSettings: model.pointSettings
     });
   }
 
@@ -152,6 +155,14 @@ class Symbology extends React.PureComponent {
                 onChange={this.update("fontBackColor")}
               />
             </FormControl>
+            <div>
+              <div>Ingen bakgrundsfärg</div>
+              <Checkbox
+                checked={this.state.fontStroke}
+                onChange={this.update("fontStroke")}
+                color="primary"
+              />
+            </div>
           </div>
         );
       case "Point":

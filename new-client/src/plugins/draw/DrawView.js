@@ -57,8 +57,10 @@ class DrawView extends React.PureComponent {
   };
 
   onClose = text => {
-    this.state.feature.set("type", "Label");
-    this.state.feature.set("text", text);
+    const { feature } = this.state;
+    feature.set("type", "Text");
+    feature.set("text", text);
+    feature.setStyle(this.props.model.getStyle(feature));
     this.setState({
       dialog: false
     });
