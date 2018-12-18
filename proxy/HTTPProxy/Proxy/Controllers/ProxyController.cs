@@ -83,7 +83,7 @@ namespace Proxy.Controllers
         {
             try
             {
-                 _log.DebugFormat("url: {0}", url);
+                 _log.DebugFormat("GetPageContent url: {0}", url);
 
                 if (!url.StartsWith("http:/") &&
                     !url.StartsWith("https:/"))
@@ -113,7 +113,10 @@ namespace Proxy.Controllers
 
                 if(!string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["authorizedInternetDomains"]) && !IsAuthorizedInternetDomain(url))
                 {
-                    throw new Exception("Domain not allowed in proxy");
+                    throw new Exception("Domain " + url + " not allowed in proxy");
+                } else
+                {
+                    _log.Debug("Allowed proxy to: " + url);
                 }
    
 
@@ -222,6 +225,7 @@ namespace Proxy.Controllers
         [HttpGet]
         public async Task<MyActionResult> GetUrl(string url)
         {
+            _log.DebugFormat("GetUrl url: {0}", url);
             await this.GetPageContent(String.Format("{0}?{1}", url, Request.QueryString));            
             return new MyActionResult("");
         }
