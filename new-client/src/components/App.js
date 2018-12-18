@@ -62,7 +62,9 @@ const styles = theme => {
         marginRight: "0"
       }
     },
-    title: {},
+    title: {
+      marginLeft: "8px"
+    },
     flex: {
       flexGrow: 1
     },
@@ -212,9 +214,9 @@ class App extends Component {
   // Catches exceptions generated in descendant components. Unhandled exceptions will cause the entire component tree to unmount.
   componentDidCatch(error) {
     console.error(error);
-    this.props.enqueueSnackbar("Åh nej! Ett fel har inträffat.", {
-      variant: "error"
-    });
+    // this.props.enqueueSnackbar("Åh nej! Ett fel har inträffat.", {
+    //   variant: "error"
+    // });
   }
 
   onWidgetMenuIconClick = () => {
@@ -285,7 +287,7 @@ class App extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, config } = this.props;
     const { widgetsVisible } = this.state;
 
     var widgetClassesLeft = classNames(classes.widgets, classes.widgetsLeft);
@@ -318,14 +320,17 @@ class App extends Component {
           <AppBar position="absolute" className={classes.appBar}>
             <MUIToolbar className={classes.toolbarRoot}>
               <span className={classes.logo}>
-                <img
-                  src="https://www.uddevalla.se/images/18.115b2371518ed66b79ad45/1450096919434/Uddevalla-Kommun.png"
-                  alt="logo"
-                />
+                <img src={config.mapConfig.map.logo} alt="logo" />
               </span>
               {this.renderWidgetMenuIcon()}
+              <Toolbar
+                tools={this.appModel.getToolbarPlugins()}
+                parent={this}
+              />
               <span className={classes.title}>
-                <Typography variant="h6">ÖVERSIKTSPLAN</Typography>
+                <Typography variant="h6">
+                  {config.mapConfig.map.title}
+                </Typography>
               </span>
               <SearchIcon
                 className={classes.searchIcon}
@@ -335,10 +340,6 @@ class App extends Component {
                     widgetsVisible: false
                   });
                 }}
-              />
-              <Toolbar
-                tools={this.appModel.getToolbarPlugins()}
-                parent={this}
               />
               {this.renderMapSwitcher()}
             </MUIToolbar>

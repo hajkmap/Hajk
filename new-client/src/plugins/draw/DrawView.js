@@ -179,9 +179,8 @@ class DrawView extends React.PureComponent {
       return (
         <>
           <Typography>
-            Flyttaverktyget är aktiverat. Klicka det objekt i kartan som du vill
-            flytta. Du kan flytta dina egna ritobjekt. För att flytta andra
-            objekt använd editeraverktyget.
+            Klicka det objekt i kartan som du vill flytta. Du kan flytta dina
+            egna ritobjekt. För att flytta andra objekt använd editeraverktyget.
           </Typography>
         </>
       );

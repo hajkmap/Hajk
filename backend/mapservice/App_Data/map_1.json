@@ -322,27 +322,13 @@
       "index": 0
     },
     {
-      "type": "informative",
-      "options": {
-        "target": "toolbar",
-        "panel": "right",
-        "caption": "Översiktsplanen",
-        "serviceUrl": "http://localhost:55630/informative/load",
-        "abstract": "<div><div>Genom översiktsplanen talar staden om hur bebyggelse och mark- och vattenanvändning kan utvecklas på lång sikt. Uddevalla ska vara en klimatsmart, växande stad med sammanhållande stadsmiljöer där det byggda och det gröna samspelar. En stad för alla.</div><h2>Vad vill vi uppnå?</h2>Uddevalla ska vara en stad med täta och sammanhållande stadsmiljöer där det byggda och det gröna samspelar.  Översiktsplanen utgår från stadens fyra mål för stadsbyggande.<img src=\"https://images.vastsverige.com/publishedmedia/jue8wzf2g5vrgjoy19xg/Uddevalla_170728-0082-Edit.jpg\"></div>",
-        "document": "op",
-        "visibleAtStart": false,
-        "visibleForGroups": []
-      },
-      "index": 0
-    },
-    {
       "type": "edit",
       "options": {
         "target": "toolbar",
         "instruction": "",
         "visibleForGroups": []
       },
-      "index": 0
+      "index": 2
     },
     {
       "type": "draw",
@@ -356,7 +342,7 @@
         "proxyUrl": "",
         "visibleForGroups": []
       },
-      "index": 0
+      "index": 1
     },
     {
       "type": "measure",
@@ -365,7 +351,17 @@
         "instruction": "",
         "icons": ""
       },
-      "index": 0
+      "index": 3
+    },
+    {
+      "type": "streetview",
+      "options": {
+        "target": "toolbar",
+        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 4
     }
   ],
   "map": {
@@ -374,7 +370,7 @@
       416000,
       6583000
     ],
-    "title": "map_1",
+    "title": "Kommunkartan",
     "projection": "EPSG:3006",
     "zoom": 12,
     "maxZoom": 3,
@@ -405,7 +401,7 @@
       1000000.0,
       9000000.0
     ],
-    "logo": "assets/logo.png",
+    "logo": "http://logodust.com/img/free/logo33.png",
     "infologo": "",
     "geoserverLegendOptions": "",
     "mobileleft": null,
