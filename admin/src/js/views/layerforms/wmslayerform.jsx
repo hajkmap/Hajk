@@ -470,6 +470,7 @@ class WMSLayerForm extends Component {
             <option value='image/png'>image/png</option>
             <option value='image/png8'>image/png8</option>
             <option value='image/jpeg'>image/jpeg</option>
+            <option value='image/vnd.jpeg-png'>image/jpeg</option>
           </select>
         </div>
         <div>
