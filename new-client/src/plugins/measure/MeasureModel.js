@@ -168,11 +168,8 @@ class MeasureModel {
     }
 
     if (type === "area") {
-      let prefix = " m²";
-      if (value >= 1e6) {
-        prefix = " km²";
-        value = Math.round((value / 1e6) * 1e3) / 1e3;
-      }
+      let prefix = " ha";
+      value = Math.round((value / 1e4) * 1e2) / 100;
       label = value + prefix;
     }
 
