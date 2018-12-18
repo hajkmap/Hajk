@@ -1,28 +1,17 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
+import WKT from "ol/format/WKT.js";
+import { Icon, Stroke, Fill } from "ol/style.js";
+import {
+  Point,
+  MultiPoint,
+  Polygon,
+  MultiPolygon,
+  LineString,
+  MultiLineString
+} from "ol/geom.js";
 
 function componentToHex(c) {
   var hex = c.toString(16);
-  return hex.length == 1 ? "0" + hex : hex;
+  return hex.length === 1 ? "0" + hex : hex;
 }
 
 function rgbToHex(r, g, b) {
@@ -49,16 +38,26 @@ function colorToArray(color, type) {
 }
 
 function toKmlColor(color) {
-  var s, r, g, b, o, res;
+  var s, r, g, b, o;
   if (color) {
-    res = /^rgba/.test(color)
-      ? colorToArray(color, "rgba")
-      : colorToArray(color, "rgb");
-    s = rgbToHex(res[0], res[1], res[2]);
+    let res;
+    if (/^rgba/.test(color)) {
+      res = colorToArray(color, "rgba");
+    } else if (/^rgb/.test(color)) {
+      res = colorToArray(color, "rgb");
+    }
+    if (Array.isArray(res)) {
+      s = rgbToHex(res[0], res[1], res[2]);
+    } else {
+      s = color = color.replace("#", "");
+    }
     r = s.substr(0, 2);
     g = s.substr(2, 2);
     b = s.substr(4, 2);
-    o = Math.floor(res[3] * 255).toString(16);
+    o = "ff";
+    if (res && res[3]) {
+      o = Math.floor(res[3] * 255).toString(16);
+    }
     return o + b + g + r;
   }
 }
@@ -84,7 +83,7 @@ function toKmlString(str, type) {
     case "polygon":
       strs = str.split("),(");
       str = "";
-      _.each(strs, function(coords, i) {
+      strs.forEach((coords, i) => {
         if (i === 0) {
           coords = coords.replace(/^POLYGON\(\(/, "").replace(/\)$/, "");
           coords = coords.replace(/^POLYGON Z\(\(/, "").replace(/\)$/, "");
@@ -103,11 +102,10 @@ function toKmlString(str, type) {
         }
       });
       break;
-
     case "multiPolygon":
       a = str.split(")),((");
       str = "";
-      _.each(a, function(coords, t) {
+      a.forEach((coords, t) => {
         if (t === 0) {
           coords = coords.replace(/^MULTIPOLYGON\(\(/, "").replace(/\)$/, "");
           coords = coords
@@ -118,7 +116,7 @@ function toKmlString(str, type) {
         b = coords.split("),(");
 
         str += "<Polygon>";
-        _.each(b, function(coordinates, i) {
+        b.forEach((coordinates, i) => {
           coordinates = coordinates
             .replace(/\)/g, "")
             .split(",")
@@ -143,7 +141,8 @@ function toKmlString(str, type) {
         });
         str += "</Polygon>";
       });
-
+      break;
+    default:
       break;
   }
 
@@ -192,43 +191,9 @@ function safeInject(string) {
   return string.replace(/<\/?[^>]+(>|$)|&/g, "");
 }
 
-function extractStyle(style) {
-  var obj = {
-    text: "",
-    image: "",
-    pointRadius: 0,
-    pointColor: "",
-    fillColor: "",
-    strokeColor: "",
-    strokeWidth: "",
-    strokeDash: ""
-  };
-
-  obj.text = style.getText() ? style.getText().getText() : "";
-  obj.image =
-    style.getImage() instanceof ol.style.Icon ? style.getImage().getSrc() : "";
-  obj.pointRadius =
-    style.getImage() instanceof ol.style.Circle
-      ? style.getImage().getRadius()
-      : "";
-  obj.pointColor =
-    style.getImage() instanceof ol.style.Circle
-      ? style
-          .getImage()
-          .getFill()
-          .getColor()
-      : "";
-  obj.fillColor = style.getFill().getColor();
-  obj.strokeColor = style.getStroke().getColor();
-  obj.strokeWidth = style.getStroke().getWidth();
-  obj.strokeDash = style.getStroke().getLineDash();
-
-  return obj;
-}
-
 function filterProperties(template, properties) {
   var props = {};
-  Object.keys(properties).filter(property => {
+  Object.keys(properties).forEach(property => {
     var regExp = new RegExp(`{export:${property}}`);
     if (regExp.test(template)) {
       props[property] = properties[property];
@@ -237,9 +202,7 @@ function filterProperties(template, properties) {
   return props;
 }
 
-export var kmlWriter = {};
-
-kmlWriter.transform = (features, from, to) => {
+export function transform(features, from, to) {
   return features.map(feature => {
     var c = feature.clone(),
       style = Array.isArray(feature.getStyle())
@@ -251,11 +214,11 @@ kmlWriter.transform = (features, from, to) => {
     c.infobox = feature.infobox;
     return c;
   });
-};
+}
 
-kmlWriter.createXML = (features, name) => {
+export function createXML(features, name) {
   var header = "",
-    parser = new ol.format.WKT(),
+    parser = new WKT(),
     doc = "";
 
   header +=
@@ -273,7 +236,7 @@ kmlWriter.createXML = (features, name) => {
       : feature.getStyle();
 
     doc += '<Style id="' + i + '">';
-    if (style.getImage() instanceof ol.style.Icon) {
+    if (style.getImage() instanceof Icon) {
       doc += "<IconStyle>";
       doc += "<scale>" + style.getImage().getSize()[0] / 32 + "</scale>";
       doc += "<Icon>";
@@ -282,14 +245,14 @@ kmlWriter.createXML = (features, name) => {
       doc += "</IconStyle>";
     }
 
-    if (style.getStroke() instanceof ol.style.Stroke) {
+    if (style.getStroke() instanceof Stroke) {
       doc += "<LineStyle>";
       doc += "<color>" + toKmlColor(style.getStroke().getColor()) + "</color>";
       doc += "<width>" + style.getStroke().getWidth() + "</width>";
       doc += "</LineStyle>";
     }
 
-    if (style.getFill() instanceof ol.style.Fill) {
+    if (style.getFill() instanceof Fill) {
       doc += "<PolyStyle>";
       doc += "<color>" + toKmlColor(style.getFill().getColor()) + "</color>";
       doc += "</PolyStyle>";
@@ -320,15 +283,15 @@ kmlWriter.createXML = (features, name) => {
         properties = filterProperties(feature.infobox, properties);
       }
 
-      _.each(properties, function(value, attribute) {
+      Object.keys(properties).forEach(property => {
         if (
           typeof value === "string" ||
           typeof value === "number" ||
           typeof value === "boolean"
         ) {
           description += "<tr>";
-          description += "<td>" + attribute + "</td>";
-          description += "<td>" + safeInject(value) + "</td>";
+          description += "<td>" + property + "</td>";
+          description += "<td>" + safeInject(properties[property]) + "</td>";
           description += "</tr>";
         }
       });
@@ -344,22 +307,22 @@ kmlWriter.createXML = (features, name) => {
       "</description>";
     doc += "<styleUrl>#" + i + "</styleUrl>";
 
-    if (feature.getGeometry() instanceof ol.geom.Point) {
+    if (feature.getGeometry() instanceof Point) {
       doc += point(parser.writeFeature(feature));
     }
-    if (feature.getGeometry() instanceof ol.geom.MultiPoint) {
+    if (feature.getGeometry() instanceof MultiPoint) {
       doc += point(parser.writeFeature(feature));
     }
-    if (feature.getGeometry() instanceof ol.geom.LineString) {
+    if (feature.getGeometry() instanceof LineString) {
       doc += line(parser.writeFeature(feature));
     }
-    if (feature.getGeometry() instanceof ol.geom.MultiLineString) {
+    if (feature.getGeometry() instanceof MultiLineString) {
       doc += line(parser.writeFeature(feature));
     }
-    if (feature.getGeometry() instanceof ol.geom.Polygon) {
+    if (feature.getGeometry() instanceof Polygon) {
       doc += polygon(parser.writeFeature(feature));
     }
-    if (feature.getGeometry() instanceof ol.geom.MultiPolygon) {
+    if (feature.getGeometry() instanceof MultiPolygon) {
       doc += multiPolygon(parser.writeFeature(feature));
     }
 
@@ -379,4 +342,4 @@ kmlWriter.createXML = (features, name) => {
   header += "</kml>";
 
   return header;
-};
+}

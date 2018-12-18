@@ -43,6 +43,7 @@ class Draw extends React.PureComponent {
     this.drawModel = new DrawModel({
       map: props.map,
       app: props.app,
+      options: props.options,
       localObserver: this.localObserver
     });
     this.app.registerPanel(this);

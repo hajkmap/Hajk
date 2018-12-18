@@ -348,8 +348,8 @@
       "type": "draw",
       "options": {
         "target": "toolbar",
-        "exportUrl": "/mapservice/export/kml",
-        "importUrl": "/mapservice/import/kml",
+        "exportUrl": "http://localhost:55630/export/kml",
+        "importUrl": "http://localhost:55630/import/kml",
         "base64Encode": false,
         "instruction": "",
         "icons": "",

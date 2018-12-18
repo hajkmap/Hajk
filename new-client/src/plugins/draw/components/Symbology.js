@@ -47,6 +47,7 @@ class Symbology extends React.PureComponent {
       circleFillOpacity: model.circleFillOpacity,
       circleLineStyle: model.circleLineStyle,
       circleLineWidth: model.circleLineWidth,
+      circleRadius: model.circleRadius,
       polygonLineColor: model.polygonLineColor,
       polygonLineWidth: model.polygonLineWidth,
       polygonLineStyle: model.polygonLineStyle,
@@ -120,6 +121,9 @@ class Symbology extends React.PureComponent {
     const { classes } = this.props;
     switch (type) {
       case "Text":
+        if (this.state.fontStroke === undefined) {
+          return <div />;
+        }
         return (
           <div>
             <FormControl className={classes.formControl}>
@@ -221,13 +225,15 @@ class Symbology extends React.PureComponent {
           </div>
         );
       case "Circle":
+        if (this.state.circleRadius === undefined) {
+          return <div />;
+        }
         return (
           <div>
             <FormControl className={classes.formControl}>
               <InputLabel>Ange radie: </InputLabel>
               <Input
                 type="text"
-                name="circle-radius"
                 value={this.state.circleRadius}
                 onChange={this.update("circleRadius")}
               />

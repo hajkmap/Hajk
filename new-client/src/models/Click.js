@@ -30,8 +30,9 @@ function handleClick(evt, map, callback) {
       .getArray()
       .filter(
         interaction =>
-          ["Draw", "Snap", "Modify"].indexOf(interaction.constructor.name) !==
-          -1
+          ["Draw", "Snap", "Modify", "Select", "Translate"].indexOf(
+            interaction.constructor.name
+          ) !== -1
       ).length > 0 ||
     map.clicklock
   ) {
@@ -80,10 +81,18 @@ function handleClick(evt, map, callback) {
     Promise.all(jsonPromises).then(jsonPromisesData => {
       var features = [];
 
-      map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
-        feature.layer = layer;
-        features.push(feature);
-      });
+      map.forEachFeatureAtPixel(
+        evt.pixel,
+        (feature, layer) => {
+          if (layer.getProperties().name) {
+            feature.layer = layer;
+            features.push(feature);
+          }
+        },
+        {
+          hitTolerance: 10
+        }
+      );
 
       jsonPromisesData.forEach(jsonPromiseData => {
         if (jsonPromiseData.jsonData.features.length > 0) {

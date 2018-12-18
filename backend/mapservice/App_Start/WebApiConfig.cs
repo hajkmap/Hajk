@@ -13,8 +13,8 @@ namespace MapService
         public static void Register(HttpConfiguration config)
         {
 			// Web API configuration and services			
-			config.EnableCors(new EnableCorsAttribute("http://localhost:3000", headers: "*", methods: "*"));
-			config.EnableCors(new EnableCorsAttribute("http://localhost:3001", headers: "*", methods: "*"));
+			//config.EnableCors(new EnableCorsAttribute("http://localhost:3000", headers: "*", methods: "*"));
+			//config.EnableCors(new EnableCorsAttribute("http://localhost:3001", headers: "*", methods: "*"));
 
 			// Web API routes
 			config.MapHttpAttributeRoutes();
