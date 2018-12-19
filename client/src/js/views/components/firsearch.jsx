@@ -42,10 +42,8 @@ var FirSearchView = {
      * @return {object}
      */
     getInitialState: function () {
-        console.log("firSearch -getInitialstate");
         return {
             visible: false,
-        //displayPopup: this.props.model.get('displayPopup')
         };
     },
 
@@ -97,7 +95,6 @@ var FirSearchView = {
      * @instance
      */
     componentWillMount: function () {
-        console.log("firSearch -willmount");
         this.props.model.get('layerCollection')
             ? this.bindLayerVisibilityChange()
             : this.props.model.on('change:layerCollection', this.bindLayerVisibilityChange);
@@ -188,19 +185,12 @@ var FirSearchView = {
      * @param {object} event
      */
     search: function (event) {
-        // clear the source first
-        console.log("+++ clicked sokenter", $("#sokEnter").click());
-        /*if (document.getElementById("sokEnter").click()){
-            this.props.model.firBufferFeatureLayer.getSource().clear();
-        }*/
 
         if(!this.props.model.get("hittaGrannar")){
             this.props.model.firBufferFeatureLayer.getSource().clear();
         }
 
         var sources = this.props.model.get('sources');
-        console.log("--- search: sources", sources);
-        console.log("--- search: realEstateLayer's id", this.props.model.get("realEstateLayer").id);
 
         this.props.model.set('searchTriggered', true);
         this.setState({
@@ -228,8 +218,6 @@ var FirSearchView = {
                             this.props.model.firFeatureLayer.getSource().addFeature(hit);
                         });
 
-                        console.log("samename",names);
-
                         // Needs to match the filter below that decides if firstStage or search is executed
                         if (this.props.model.get("filter") === this.props.model.get("realEstateLayerCaption")/* || this.props.model.get("hittaGrannar")*/) { // TODO add back if hittaGrannar should do this
                             var tmpPromises = this.props.model.findWithSameNames(names, wmsLayerForSameName[0], false);
@@ -239,10 +227,8 @@ var FirSearchView = {
 
                     Promise.all(sameNamePromises).then(() => {
                         this.forceUpdate();
-                        console.log("finished");
                     });
                     if(this.props.model.get("force") && result.items.length > 0) {
-                        console.log("force is true and resultslength is more than 0");
                         this.props.model.get("map").getView().fit(this.props.model.firFeatureLayer.getSource().getExtent(), {
                             size: this.props.model.get("map").getSize(),
                             maxZoom: this.props.model.get('maxZoom')
@@ -259,9 +245,6 @@ var FirSearchView = {
                 }
                 this.setState(state);
             };
-
-            console.log("filter", this.props.model.get("filter"));
-            console.log("--- filter: layerCaption", this.props.model.get("realEstateLayerCaption"));
 
             // needs to match the code above in done that checks if findwithsamename
             if (this.props.model.get("filter") !== this.props.model.get("realEstateLayerCaption") && !this.props.model.get("hittaGrannar")) {
@@ -292,7 +275,6 @@ var FirSearchView = {
      * @param {object} event
      */
     setFilter: function (event) {
-        console.log("+++ setFilter",event);
         this.props.model.set('filter', event.target.value);
     },
 
@@ -302,35 +284,11 @@ var FirSearchView = {
      * @return {external:ReactElement}
      */
     renderOptions: function () {
-        console.log("render options");
-        console.log("this.props.model");
-        console.log(this.props.model);
-        //console.log("filterVisible");
-        //console.log(this.props.model.get("filterVisible"));
         var settings = this.props.model.get('settings'),
             sources = this.props.model.get('sources'),
-            //filterVisible = this.props.model.get('filterVisible'),
             filterVisibleBtn = null
         ;
 
-        /*if (filterVisible) {
-            filterVisibleBtn = (
-                <div>
-                    <input
-                        id='filter-visible'
-                        type='checkbox'
-                        checked={this.props.model.get('filterVisibleActive')}
-                        onChange={(e) => {
-                            this.props.model.set('filterVisibleActive', e.target.checked);
-                            this.setState({
-                                filterVisibleActive: e.target.checked
-                            });
-                        }}
-                    />&nbsp;
-                    <label htmlFor='filter-visible'>Sök i alla synliga lager</label>
-                </div>
-            );
-        }*/
         return (
             <div>
                 <p>
@@ -400,8 +358,6 @@ var FirSearchView = {
         } else {
             downloadLink = null;
         }
-
-        console.log("sokresult",this.props.model);
 
         return (
             <div className='firSearch-results' key='firSearch-results'>
@@ -483,7 +439,7 @@ var FirSearchView = {
 
         return (
             <div className='panel panel-default'>
-                <div className='panel-heading'>Skapa fastighetsförteckning{instructionBtn}<button id="FIRCreateMinimizeButton" onClick={() => {console.log("clicked"); this.minBox('skapaFastighetsForteckning', "FIRCreateMinimizeButton")}} className={this.props.model.get("searchMinimizedClassButton")}></button>
+                <div className='panel-heading'>Skapa fastighetsförteckning{instructionBtn}<button id="FIRCreateMinimizeButton" onClick={() => {this.minBox('skapaFastighetsForteckning', "FIRCreateMinimizeButton")}} className={this.props.model.get("searchMinimizedClassButton")}></button>
                     {instructionTxt}
                     </div>
                 <div className='panel-body'>
@@ -518,10 +474,6 @@ var FirSearchView = {
             document.getElementById("hittaGrannar").checked = false;
             bufferLength = document.getElementById("bufferInput").value;
         }
-
-        console.log("checkedAngransade", document.getElementById("hittaGrannar").checked);
-        console.log("checkedMedBuffer", document.getElementById("hittaGrannarMedBuffer").checked);
-        console.log("bufferLength", bufferLength);
     },
 
     hittaGrannar: function() {
@@ -538,7 +490,6 @@ var FirSearchView = {
         }else{
             bufferLength = 0.01;
         }
-        console.log("bufferLength in hittaGrannar", bufferLength);
 
         this.props.model.firBufferFeatureLayer.getSource().clear();
         this.props.model.firBufferHiddenFeatureLayer.getSource().clear();
@@ -549,7 +500,6 @@ var FirSearchView = {
         this.props.model.get("map").getLayers().forEach(layer => {
            if(layer.get("caption") === "FIRSökresltat")
                layer.getSource().getFeatures().forEach(feature => {
-                   console.log("hittaGrannar: feature", feature);
                    var jstsGeom = parser.read(feature.getGeometry());
 
                    // create a buffer of the required meters around each line
@@ -583,14 +533,11 @@ var FirSearchView = {
       this.props.model.firBufferFeatureLayer.getSource().clear();
       this.props.model.firFeatureLayer.getSource().clear();
       this.props.model.set("items", this.props.model.get("backupItems").pop());
-        console.log("here: rensaHittaGrannar1");
-        console.log("this.props.model.get(items)", this.props.model.get("items"));
       if(this.props.model.get("items") === undefined){
           this.clear;
 
       }else {
           this.props.model.get("items").forEach(group => {
-              console.log("here: rensaHittaGrannar2");
               group.hits.forEach(hit => {
                   this.props.model.firFeatureLayer.getSource().addFeature(hit);
               });
@@ -610,23 +557,15 @@ var FirSearchView = {
 
     bufferBarInput: function() {
         document.getElementById("bufferInput").value = document.getElementById("bufferValue").value;
-        //update hittaGrannar's bufferLength if value has changed
-        /*document.getElementById("bufferValue").addEventListener("change",function() {
-            console.log("bufferLength has Changed to", document.getElementById("bufferValue").value);
-        });*/
     },
 
     openInstruction: function(id){
-        console.log("openInstruction, id", id);
         var idName = "#instructionsTextFir" + id;
-        console.log("idName", idName);
         var element = $(idName);
         element.toggle();
     },
 
     renderAnalysFunctions: function() {
-        console.log("renderAnalysFunctions");
-
         var instructionBtn;
         var instructionTxt;
         if (typeof this.props.model.get("instructionHittaGrannar") !== 'undefined' && this.props.model.get("instructionHittaGrannar") !== null && this.props.model.get("instructionHittaGrannar").length > 0) {
@@ -685,11 +624,7 @@ var FirSearchView = {
     },
 
     slackaBufferSokomrade: function(e) {
-        // TODO: need to check if the layers below are visible for searching so they are not used for filters then
-        console.log("this.props.model", this.props.model);
-        //maybe need to be created one more layer?
 
-        console.log("---this", this);
         if(!$('#slackaBufferSokomrade').is(":checked")) {
             this.props.model.get("firSelectionModel").get("drawLayer").setVisible(false);
             this.props.model.firBufferFeatureLayer.setVisible(false);
@@ -699,18 +634,14 @@ var FirSearchView = {
             this.props.model.firBufferFeatureLayer.setVisible(true);
             this.props.model.get("firSelectionModel").get("firBufferLayer").setVisible(true);
         }
-        console.log("finished");
     },
 
     minBox: function (kategori, buttonId) {
         var item = $('#'+kategori);
-        console.log("item", item);
         if(typeof item === 'undefined'){
-            console.log("typeOfKategori is undefined");
             return;
         }
 
-        console.log("class", item[0].attributes["class"].value);
         item.toggleClass('hidden');
 
         var buttonClass = item[0].attributes["class"].value.indexOf("hidden") === -1
@@ -722,19 +653,14 @@ var FirSearchView = {
     },
 
     exaktMatching: function(event) {
-        console.log("sök exakt matching");
         this.props.model.set("exaktMatching", false);
         var exaktSearching = document.getElementById("exaktMatching").checked;
-        console.log("this.props.model.exaktSearching", this.props.model.get("exaktMatching"));
 
         if(exaktSearching){
             this.props.model.set("exaktMatching", exaktSearching);
-            console.log("TRUE");
         }else{
             this.props.model.set("exaktMatching", exaktSearching);
-            console.log("FALSE");
         }
-        console.log("exaktMatching", this.props.model.get("exaktMatching"));
     },
 
     /**
@@ -814,7 +740,6 @@ var FirSearchView = {
         // Infoknapp
         var instructionBtn;
         var instructionTxt;
-        console.log("--- Instruction for Sökning", this.props);
         if (typeof this.props.model.get("instructionSokning") !== 'undefined' && this.props.model.get("instructionSokning") !== null && this.props.model.get("instructionSokning").length > 0) {
             instructionBtn = (
                 <button onClick={() => this.openInstruction("sokning")} className='btn-info-fir' id='instructionBox' ><img src={this.props.model.get("infoKnappLogo")} style={{height: '75%', width:'75%'}} /></button>

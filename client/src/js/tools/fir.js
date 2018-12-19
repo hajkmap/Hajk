@@ -69,7 +69,6 @@ var FirModel = {
         //this.set('displayPopupBar', this.get('displayPopup'));
         this.set('layerCollection', shell.getLayerCollection());
         this.set('map', shell.getMap().getMap());
-        console.log("map", this.get("map"));
 
         this.firFeatureLayer= new ol.layer.Vector({
             caption: 'FIRSökresltat',
@@ -80,7 +79,6 @@ var FirModel = {
         });
 
         this.firFeatureLayer.getSource().on('addfeature', evt => {
-            console.log("adding feature", evt.feature);
             evt.feature.setStyle(new ol.style.Style({
                 fill: new ol.style.Fill({
                     color: this.get("colorResult")//'rgba(255, 26, 179, 0.4)'
@@ -245,7 +243,6 @@ var FirModel = {
                 var nyckelHighLight = feature.get(that.get("realEstateLayer").fnrField);
                 var omradeHighLight = feature.get(that.get("realEstateLayer").omradeField);
                 for(var i = 0; i < that.get("items")[group].hits.length; i++){
-                    console.log("that.get(items)[group].hits[i]", that.get("items")[group].hits[i]);
                     var currentNyckel = that.get("items")[group].hits[i].get(that.get("realEstateLayer").fnrField);
                     var currentOmrade = that.get("items")[group].hits[i].get(that.get("realEstateLayer").omradeField);
                     if(nyckelHighLight === currentNyckel && omradeHighLight === currentOmrade){
@@ -328,9 +325,6 @@ var FirModel = {
                 return condition;
             } */
             props.value.indexOf('\\') >= 0 ? props.value = props.value.replace(/\\/g, '\\\\') : props.value;
-            console.log("getPropertyFilter: property", property);
-            console.log("getPropertyFilter: condition", condition);
-            console.log("getPropertyFilter: props", props);
 
             //check if it's exakt/lika sökning
             var exaktMatching = props.exaktMatching;
@@ -371,34 +365,24 @@ var FirModel = {
      * @return {string} wfs-filter
      */
     getFeatureFilter: function (features, props) {
-        console.log("*** Inside getFeatureFilter ***");
-        console.log("features", features);
         if (Array.isArray(features) && features.length > 0) {
-            console.log("Array.isArray(features)=true && features.length>0");
             return features.reduce((str, feature) => {
                 var posList = '',
                     operation = 'Intersects',
                     coords = [],
                     objektType = '',
                     interiorList = '';
-                console.log("feature= ", feature);
 
                 if (feature.getGeometry() instanceof ol.geom.Circle) {
-                    console.log("feature.getGeometry()", feature.getGeometry());
-                    console.log("feature.getGeometry() instanceof ol.geom.Circle is true");
                     coords = ol.geom.Polygon.fromCircle(feature.getGeometry(), 96).getCoordinates();
                 } else {
-                    console.log("feature", feature);
-                    console.log("feature.getGeometry().getCoordinates()",feature.getGeometry().getCoordinates());
                     coords = feature.getGeometry().getCoordinates();
                 }
 
 
                 var found = false;
 
-                console.log("feature.getgeometryname()", feature.getGeometryName());
                 if (feature.getGeometryName() === "Point"  || feature.getGeometryName() === "LineString" || feature.getGeometryName() === "geometry") {
-                    console.log("feature.geometry: point or linestring");
                     // buffer points, linestrings and all kml imported values a bit since geoserver wants polygons !!!
                     coords = this.bufferPoint(feature);
                 }
@@ -496,7 +480,6 @@ var FirModel = {
             featureFilter = '',
             propertyFilter = '',
             read = (result) => { //parses the XML result
-                console.log("got result");
                 var format,
                     features = [],
                     outputFormat = props.outputFormat;
@@ -509,7 +492,6 @@ var FirModel = {
                 }
 
                 try {
-                    console.log("trying");
                     features = format.readFeatures(result);
                     features = features.reduce((r, f) => {
                         if (this.get('firSelectionTools')) {
@@ -530,7 +512,6 @@ var FirModel = {
                 if (features.length === 0) {
                     features = [];
                 }
-                console.log("calling done");
                 props.done(features);
             };
 
@@ -547,7 +528,6 @@ var FirModel = {
             featureFilter = "";
         }
 
-        console.log("here 1");
         if (featureFilter && propertyFilter) {
             filters = `
         <ogc:And>
@@ -560,7 +540,6 @@ var FirModel = {
         } else if (featureFilter) {
             filters = featureFilter;
         } else if (props.sameNameFilter) {
-            console.log("here 2");
             filters = props.sameNameFilter;
         } else {
                 filters = '';
@@ -571,7 +550,6 @@ var FirModel = {
             typeName = `'feature:${props.featureType}'`;
         }
 
-        console.log("here 3");
         str = `
      <wfs:GetFeature
          service = 'WFS'
@@ -591,7 +569,6 @@ var FirModel = {
          </wfs:Query>
       </wfs:GetFeature>`;
 
-        console.log("here 4");
 
         var contentType = 'text/xml',
             data = str;
@@ -842,7 +819,6 @@ var FirModel = {
         ));
 
         this.firFeatureLayer.getSource().removeFeature(spec.hit);
-        console.log("remove feature");
 
         if (ovl) {
             ovl.setPosition(undefined);
@@ -878,11 +854,8 @@ var FirModel = {
      * @return {Array<{external:"ol.source"}>} searchable/choosen sources
      */
     getSources: function () {
-        console.log("func getSources");
         var filter = (source) => {
-            console.log("source", source);
             var criteria = this.get('filter');
-            console.log("criteria: this", this);
             return criteria === '*' ? true : criteria === source.caption;
         };
         return this.get('sources').filter(filter);
@@ -935,8 +908,6 @@ var FirModel = {
                 ? this.get('items')[0].hits
                 : this.getHitsFromItems();
 
-        console.log("getExcelData: exportItems", exportItems);
-        console.log("getExcelData: this", this);
 
         if (exportItems.length > 1 && _.isEqual(exportItems[0], exportItems[1])) {
             // Ensure we don't have duplicate first items (happens when user selects items to export manually)
@@ -944,7 +915,6 @@ var FirModel = {
         }
 
         exportItems.forEach(hit => {
-            console.log("hit.nyckel", hit.get(this.get("realEstateLayer").fnrField));
             if(nycklar.indexOf(hit.get(this.get("realEstateLayer").fnrField) > -1)){
                 nycklar.push(hit.get(this.get("realEstateLayer").fnrField));
             }
@@ -957,11 +927,7 @@ var FirModel = {
         param["persnr"] = this.get("chosenColumns").indexOf("persnr") != -1;
         param["taxerad_agare"] = this.get("chosenColumns").indexOf("taxerad_agare") != -1;
 
-        console.log("param", param);
-        console.log("chosenColumns", this.get("chosenColumns"));
-
         return {fnr: nycklar, param: param};
-        //return {fnr: nycklar};
     },
 
     export: function (type) {
@@ -978,13 +944,8 @@ var FirModel = {
                 break;
             case 'excel':
                 url = this.get('excelExportUrl');
-                console.log("url",url);
                 data = this.getExcelData();
                 data = JSON.stringify(data);
-                console.log("data", data);
-                console.log("postDataPre");
-                console.log('{ "fnr": [' + data +'] }');
-                console.log("postData",postData);
                 break;
         }
 
@@ -1047,7 +1008,6 @@ var FirModel = {
                             exaktMatching: this.get("exaktMatching"),
                             done: features => {
                                 if (features.length > 0) {
-                                    console.log("length of features", features.length);
                                     features.forEach(feature => {
                                         feature.caption = searchProps.caption;
                                         feature.infobox = searchProps.infobox;
@@ -1077,7 +1037,6 @@ var FirModel = {
 
         var backupFilter = this.get("filter");
         var inHittaGrannar = this.get("hittaGrannar");
-        console.log("inHittaGrannar", inHittaGrannar);
         if(inHittaGrannar){
             features = this.firBufferHiddenFeatureLayer.getSource().getFeatures();
             this.set("features", features);
@@ -1112,9 +1071,6 @@ var FirModel = {
                     geometryField: layer.get('searchGeometryField'),
                     omradeField: layer.get(this.get("realEstateLayer").omradeField)
                 };
-                console.log("alayer", layer);
-                console.log("searchProps", searchProps);
-                console.log("featureType", featureType);
                 addRequest.call(this, searchProps);
             });
         });
@@ -1132,9 +1088,6 @@ var FirModel = {
                 outputFormat: source.outputFormat,
                 geometryField: source.geometryField
             };
-            console.log("source", source);
-            console.log("searchProps", searchProps);
-            console.log("featureType", searchProps.featureType);
             addRequest.call(this, searchProps);
         });
 
@@ -1161,15 +1114,9 @@ var FirModel = {
     },
 
     findWithSameNames: function(nycklar, layer, useOmrade){
-        console.log("+++findWithSameNames");
-        console.log("nycklar", nycklar);
-        console.log("layer", layer);
-        console.log("this.get(\"realEstateLayerCaption\")", this.get("realEstateLayerCaption"));
         var backupFilter = this.get("filter");
         this.set("filter", this.get("realEstateLayerCaption"));
         var sources = this.getSources();
-        console.log("sources", sources);
-        console.log("layer.get(\"params\").LAYERS", layer.get("params").LAYERS);
         this.set("filter", backupFilter);
         var promises = [];
 
@@ -1230,7 +1177,6 @@ var FirModel = {
                     exaktMatching: true,
                     sameNameFilter: sameNameFilter,
                     done: features => {
-                        console.log("done. features", features);
                         if (features.length > 0) {
                             features.forEach(feature => {
                                 feature.caption = searchProps.caption;
@@ -1275,9 +1221,7 @@ var FirModel = {
             return [];
         }
 
-        console.log("sources", this.get('sources'));
         this.get('sources').forEach(source => {
-            console.log("source.caption", source.caption);
             if(source.caption === this.get("realEstateLayerCaption")) {
                 var searchProps = {
                     url: (HAJK2.searchProxy || '') + source.url,
@@ -1326,7 +1270,6 @@ var FirModel = {
                         sameNameFilter: sameNameFilter,
                         done: features => {
                             if (features.length > 0) {
-                                console.log("length of features", features.length);
                                 features.forEach(feature => {
                                     feature.caption = searchProps.caption;
                                     feature.infobox = searchProps.infobox;
@@ -1336,14 +1279,12 @@ var FirModel = {
                                         feature.aliasDict = undefined;
                                     }
                                 });
-                                console.log("pushing items");
                                 items.push({
                                     layer: searchProps.caption,
                                     displayName: searchProps.displayName,
                                     propertyName: searchProps.propertyName,
                                     hits: features
                                 });
-                                console.log("length items", items.length, items);
                             }
                             resolve();
                         }
@@ -1431,7 +1372,6 @@ var FirModel = {
         });
 
         Promise.all(promises).then(() => {
-            console.log("length of items again", items.length, items);
             items.forEach(function (item) {
                 item.hits = arraySort({
                     array: item.hits,

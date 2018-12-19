@@ -220,7 +220,6 @@ var FirSelectionModel = {
         ;
 
         this.get('olMap').forEachFeatureAtPixel(event.pixel, (feature, layer) => {
-            console.log("--- onMapSingleClick: dawLayer?");
             if (layer && layer.get('name')) {
                 if (
                     layer.get('name') !== 'preview-layer' &&
@@ -294,7 +293,6 @@ var FirSelectionModel = {
     },
 
     setActiveTool: function (tool) {
-        console.log("activeTool", this.get("activeTool"));
         if(this.get("activeTool") !== null || typeof this.get("activeTool") !== "undefined") {
             this.get('olMap').removeInteraction(this.get(this.get('activeTool'))); // tool name in activeTool should match the interaction created in this file
         }
@@ -325,24 +323,11 @@ var FirSelectionModel = {
             this.get('olMap').un('singleclick', this.onMapSingleClick, this);
         }
 
-        console.log("drawSokomrade", this.get('olMap'));
         this.clickEnterSokomrade();
-        //document.getElementById("sokEnter").click();
-/*
-        var searchInomOmrade = document.getElementById("sokEnter");
-        console.log("searchInomOmrade", searchInomOmrade);
-
-        searchInomOmrade.addEventListener("keydown", function (e) {
-            if (e.keyCode === 13) {
-            searchInomOmrade.click();
-        }
-        });
-*/
     },
 
     clickEnterSokomrade: function(){
         if(this.get("callBackEnter") === "") {
-            console.log("### running");
             this.set("callbackEnter", "listening");
             window.addEventListener("keydown", function handler(e) {
                 if (e.keyCode === 13) {

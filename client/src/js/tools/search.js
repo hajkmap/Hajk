@@ -727,8 +727,6 @@ var SearchModel = {
         });
 
           return columns.map(column => {
-              console.log("here");
-              console.log(column);
                   if (column == "nyckel") {
                       return Number(attributes[column]);
                   } else {
@@ -738,7 +736,6 @@ var SearchModel = {
 
       });
 
-        console.log("return");
       return {
         TabName: group,
         Cols: aliases,
@@ -763,10 +760,6 @@ var SearchModel = {
         url = this.get('excelExportUrl');
         data = this.getExcelData();
         postData = JSON.stringify(data);
-          console.log("data");
-          console.log(data);
-          console.log("postData");
-          console.log(postData);
 
         break;
     }

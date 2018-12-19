@@ -30,7 +30,6 @@ var defaultState = {
     toolbar: 'bottom',
     active: false,
     index: 0,
-    onMap: false,
     base64Encode: false,
     instruction: '',
     filterVisible: false, //ta bort?
@@ -39,7 +38,6 @@ var defaultState = {
     maxZoom: 14,
     excelExportUrl: '/mapservice/export/excel',
     kmlImportUrl: '/mapservice/import/kml',
-    kmlExportUrl: '/mapservice/export/kml',
     markerImg: 'http://localhost/hajk/assets/icons/marker.png',
     infoKnappLogo: '/assets/icons/hjalpknapp_FIR.png',
     instructionSokning: '',
@@ -83,11 +81,9 @@ class ToolOptions extends Component {
         }
         var tool = this.getTool();
         if (tool) {
-            console.log("tool", tool);
             this.setState({
                 active: true,
                 index: tool.index,
-                onMap: tool.options.onMap,
                 base64Encode: tool.options.base64Encode,
                 instruction: tool.options.instruction,
                 instructionSokning: tool.options.instructionSokning,
@@ -99,7 +95,6 @@ class ToolOptions extends Component {
                 maxZoom: tool.options.maxZoom,
                 excelExportUrl: tool.options.excelExportUrl,
                 kmlImportUrl:tool.options.kmlImportUrl,
-                kmlExportUrl: tool.options.kmlExportUrl,
                 markerImg: tool.options.markerImg,
                 infoKnappLogo: tool.options.infoKnappLogo,
                 anchorX: tool.options.anchor[0] || this.state.anchorX,
@@ -170,7 +165,7 @@ class ToolOptions extends Component {
             value = !isNaN(Number(value)) ? Number(value) : value;
         }
 
-        if (name == 'instruction' || name == 'instructionSokning' || name == 'instructionHittaGrannar' || name == 'instructionSkapaFastighetsforteckning') {
+        if (name == 'instruction' || name == 'instructionSokning' || name == 'instructionHittaGrannar' || name == 'instructionSkapaFastighetsforteckning' || name == 'realEstateLayer_instructionVidSokresult') {
             value = btoa(value);
         }
 
@@ -229,19 +224,15 @@ class ToolOptions extends Component {
 
     save () {
         var toolbar = 'bottom';
-        var onMap = this.state.onMap;
-        console.log("save state", this.state);
         var tool = {
             'type': this.type,
             'index': this.state.index,
             'options': {
-                onMap: onMap,
                 toolbar: toolbar,
                 maxZoom: this.state.maxZoom,
                 markerImg: this.state.markerImg,
                 infoKnappLogo: this.state.infoKnappLogo,
                 kmlImportUrl: this.state.kmlImportUrl,
-                kmlExportUrl: this.state.kmlExportUrl,
                 excelExportUrl: this.state.excelExportUrl,
                 displayPopup: this.state.displayPopup,
                 base64Encode: this.state.base64Encode,
@@ -441,15 +432,6 @@ class ToolOptions extends Component {
                     </div>
                     <div>
                         <input
-                            id='onMap'
-                            name='onMap'
-                            type='checkbox'
-                            onChange={(e) => { this.handleInputChange(e); }}
-                            checked={this.state.onMap} />&nbsp;
-                        <label htmlFor='onMap'>Alltid synlig</label>
-                    </div>
-                    <div>
-                        <input
                             id='displayPopup'
                             name='displayPopup'
                             type='checkbox'
@@ -473,7 +455,7 @@ class ToolOptions extends Component {
                             type='checkbox'
                             onChange={(e) => { this.handleInputChange(e); }}
                             checked={this.state.firSelectionTools} />&nbsp;
-                        <label htmlFor='firSelectionTools'>Default should be true</label>
+                        <label htmlFor='firSelectionTools'>firSelectionTools *måste vara true</label>
                     </div>
                     <div>
                         <input
@@ -530,10 +512,6 @@ class ToolOptions extends Component {
                         <input value={this.state.kmlImportUrl} type='text' name='kmlImportUrl' onChange={(e) => { this.handleInputChange(e); }} />
                     </div>
                     <div>
-                        <label htmlFor='kmlExportUrl'>URL KML-tjänst(Export)</label>
-                        <input value={this.state.kmlExportUrl} type='text' name='kmlExportUrl' onChange={(e) => { this.handleInputChange(e); }} />
-                    </div>
-                    <div>
                         <label htmlFor='markerImg'>Ikon för sökträff</label>
                         <input value={this.state.markerImg} type='text' name='markerImg' onChange={(e) => { this.handleInputChange(e); }} />
                     </div>
@@ -564,14 +542,14 @@ class ToolOptions extends Component {
 
                     <div className='col-md-12'>
                       <span className='pull-left'>
-                        <div>Result färg</div>
+                        <div>Resultat - färg för yta</div>
                         <SketchPicker
                             color={this.state.colorResult}
                             onChangeComplete={(e) => this.handleColorResult(e)}
                         />
                       </span>
                       <span className='pull-left' style={{marginLeft: '10px'}}>
-                        <div>Results stroke färg</div>
+                        <div>Resultat - färg för kantlinje</div>
                         <SketchPicker
                             color={this.state.colorResultStroke}
                             onChangeComplete={(e) => this.handleColorResultStroke(e)}
@@ -580,14 +558,14 @@ class ToolOptions extends Component {
                     </div>
                     <div className='col-md-12'>
                       <span className='pull-left'>
-                        <div>Highlight färg</div>
+                        <div>Valt objekt (hightlight) - färg för yta</div>
                         <SketchPicker
                             color={this.state.colorHighlight}
                             onChangeComplete={(e) => this.handleColorHighlight(e)}
                         />
                       </span>
                         <span className='pull-left' style={{marginLeft: '10px'}}>
-                        <div>Highlights stroke färg</div>
+                        <div>Valt objekt (hightlight) - färg för kantlinje</div>
                         <SketchPicker
                             color={this.state.colorHighlightStroke}
                             onChangeComplete={(e) => this.handleColorHighlightStroke(e)}
@@ -596,20 +574,21 @@ class ToolOptions extends Component {
                     </div>
                     <div className='col-md-12'>
                       <span className='pull-left'>
-                        <div>Hitta grannars buffer färg</div>
+                        <div>Buffer - färg för yta</div>
                         <SketchPicker
                             color={this.state.colorHittaGrannarBuffer}
                             onChangeComplete={(e) => this.handleColorHittaGrannarBuffer(e)}
                         />
                       </span>
                         <span className='pull-left' style={{marginLeft: '10px'}}>
-                        <div>Hitta grannars buffers stroke färg</div>
+                        <div>Buffer - färg för kantlinje</div>
                         <SketchPicker
                             color={this.state.colorHittaGrannarBufferStroke}
                             onChangeComplete={(e) => this.handleColorHittaGrannarBufferStroke(e)}
                         />
                       </span>
                     </div>
+                    <div></div>
                     <div>
                         <label htmlFor='realEstateLayer_id'>realEstateLayers id</label>
                         <input value={this.state.realEstateLayer.id} type='text' name='realEstateLayer_id' onChange={(e) => { this.handleInputChange(e); }} />
@@ -629,6 +608,10 @@ class ToolOptions extends Component {
                     <div>
                         <label htmlFor='realEstateLayer_maxFeatures'>realEstateLayers maxFeatures</label>
                         <input value={this.state.realEstateLayer.maxFeatures} type='text' name='realEstateLayer_maxFeatures' onChange={(e) => { this.handleInputChange(e); }} />
+                    </div>
+                    <div>
+                        <label htmlFor='realEstateLayer_instructionVidSokresult'>realEstateLayers instructionVidSokresult</label>
+                        <input value={this.state.realEstateLayer.instructionVidSokresult ? atob(this.state.realEstateLayer.instructionVidSokresult) : ''} type='text' name='realEstateLayer_instructionVidSokresult' onChange={(e) => { this.handleInputChange(e); }} />
                     </div>
                     <div>
                         <label htmlFor='realEstateWMSLayer_id'>realEstateWMSLayers id</label>

@@ -58,29 +58,21 @@ var FirSelectionPanelView = {
     },
 
     firRemoveSelected: function(event){
-        console.log("firRemoveSelected");
         var map = this.props.model.get("map");
-        console.log("firRemoveSelected2");
         var source = this.props.model.get("highlightLayer").get("source");
-        console.log("firRemoveSelected3");
 
         // souce for buffer
         var sourceBuffer = this.props.model.get("firBufferLayer").get("source");
-        console.log("firRemoveSelected4");
 
         map.forEachFeatureAtPixel(event.pixel, function(feature, layer){
-            console.log("firRemoveSelected5");
             if (layer.get("caption") === "search-selection-layer") {
                 layer.getSource().removeFeature(feature);
             }else if(layer.get("name") === "fir-searching-buffer-layer"){
                 layer.getSource().removeFeature(feature);
-                console.log("firRemoveSelected6", this);
-                console.log("feature (buffer)", feature);
                 this.props.model.get("drawLayer").getSource().removeFeature(feature.get("originalFeature"));
             }
         }.bind(this));
 
-        console.log("firRemoveSelected7", this);
         if(!ctrlIsDown) {
             map.un('singleclick', this.firRemoveSelected);
         }
@@ -145,8 +137,6 @@ var FirSelectionPanelView = {
         var anchor = this.props.model.get('anchor');
         var importKML = this.renderImportKml();
 
-        // document.getElementById("bufferToSokomrade").disabled = true;
-        console.log("bufferToSokomrade" ,document.getElementsByClassName("bufferToSokomrade").disabled );
                 return (
                 <div className='selection-toolbar'>
                 <div><b>Sökområde</b></div>

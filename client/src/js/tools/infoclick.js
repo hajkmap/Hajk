@@ -167,18 +167,13 @@ var InfoClickModel = {
           layer.get('name') !== 'highlight-wms'
         ) {
             // only disable if there is a feature in highlight
-            console.log("+++ doNotShowInfoClick", doNotShowInfoClick);
-            console.log("+++ layer.name",layer.get("name"));
             if(layer.get("name") === "fir-search-vector-layer" || layer.get("name") === "fir-highlight-vector-layer"){
                 doNotShowInfoClick = false;
                 return;
             }
-          console.log("layername",layer.get("name"));
           promises.push(new Promise((resolve, reject) => {
             features = [feature];
             _.each(features, (feature) => {
-              console.log("feature");
-              console.log(feature);
               this.addInformation(feature, layer, (featureInfo) => {
                 if (featureInfo) {
                   infos.push(featureInfo);
@@ -205,8 +200,6 @@ var InfoClickModel = {
                     success: (features, layer) => {
                         if (Array.isArray(features) && features.length > 0) {
                             features.forEach(feature => {
-                                console.log("feature");
-                                console.log(feature);
                                 // if in highfir layer and fir tool do nothing
                                 this.addInformation(feature, wmsLayer, (featureInfo) => {
                                     if (featureInfo) {

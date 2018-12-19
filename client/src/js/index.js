@@ -238,10 +238,6 @@
         }
 
         if (firTool) {
-          console.log("firTool.options.layers",firTool.options.layers);
-          console.log("data.wfsLayers", data.getFeatureInformation);
-
-
             if (firTool.options.layers == null) {
                 firTool.options.sources = data.wfslayers;
             } else {
@@ -267,7 +263,6 @@
                     return layer;
                 }
             });
-            console.log("realestateWMSLayer", realEstateWMSLayer[0].caption);
 
             firTool.options.realEstateWMSLayerCaption = realEstateWMSLayer[0].caption;
         }
