@@ -401,6 +401,8 @@ var FirSearchView = {
             downloadLink = null;
         }
 
+        console.log("sokresult",this.props.model);
+
         return (
             <div className='firSearch-results' key='firSearch-results'>
                 <h3>Sökresultat</h3>
@@ -412,6 +414,7 @@ var FirSearchView = {
                                 return (
                                     <FirSearchResultGroup
                                         isBar='no'
+                                        instructions={this.props.model.get('realEstateLayer').instructionVidSokresult}
                                         id={id}
                                         key={id}
                                         result={item}
@@ -840,7 +843,7 @@ var FirSearchView = {
                                 type='text'
                                 ref='searchInput'
                                 className='form-control'
-                                placeholder='Ange fastighet..'
+                                placeholder='Ange söktext..'
                                 value={value}
                                 onKeyDown={this.handleKeyDown}
                                 onChange={search_on_input} />

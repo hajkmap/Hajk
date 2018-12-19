@@ -11,10 +11,14 @@ FirSearchResultGroup = {
     componentDidMount: function () {
         var groups = $(ReactDOM.findDOMNode(this)).find('.group');
 
+        var idName = "#instructions-" + this.props.id;
+        var element = $(idName);
+        element.toggle();
+
         document.addEventListener("keyup", this.removeMinusOrPlusIfCtrlLifted.bind(this));
 
         groups.click(function (e) {
-            if(e.originalEvent.target.className.indexOf("plusMinus") == -1) {
+            if(e.originalEvent.target.className.indexOf("plusMinus") == -1 && e.originalEvent.target.className.indexOf("btn-info-fir") == -1) {
                 $(this).next().toggleClass('hidden');
             }
         });
@@ -104,7 +108,6 @@ FirSearchResultGroup = {
 
             items.forEach(item => {
                 this.props.model.append(item);
-                console.log("shiftIsDown: go to append function");
                 parent.find(`div[data-index=${item.index}]`).addClass('selected');
             });
         } else if (ctrlIsDown) {
@@ -112,12 +115,10 @@ FirSearchResultGroup = {
                 this.props.model.detach(item);
                 element.removeClass('selected');
             } else {
-                console.log("ctrlIsDown: go to append function");
                 this.props.model.append(item);
                 element.addClass('selected');
             }
         } else {
-            console.log("else");
             var wasSelected = element.hasClass('selected');
             $('.firSearch-results').find('.selected').each(function (e) {
                 $(this).removeClass('selected');
@@ -127,9 +128,7 @@ FirSearchResultGroup = {
                 element.addClass('selected');
             }
             if(!clickedSame) {
-                console.log("not same clicked");
                 this.props.model.focus(item, this.props.isBar == 'yes');
-                console.log("after not same clicked");
             }
         }
 
@@ -673,6 +672,14 @@ FirSearchResultGroup = {
     );
     },
 
+    openInstruction: function(){
+        console.log("openInstruction, id", this.props.id);
+        var idName = "#instructions-" + this.props.id;
+        console.log("idName", idName);
+        var element = $(idName);
+        element.toggle();
+    },
+
     render: function () {
         console.log("result render");
         var id = this.props.id,
@@ -680,17 +687,30 @@ FirSearchResultGroup = {
             resultBox = this.resultBox(id)
         ;
 
+        var instructionsBtn = (
+            <span>
+            <button onClick={(e) => {e.stopPropagation(); this.openInstruction()}} className='btn-info-fir' style={{height: '15%', width:'15%'}} id={"instructionsbox-result-" + this.props.id} ><img src={this.props.model.get("infoKnappLogo")} style={{height: '75%', width:'75%'}} /></button>
+            </span>
+        );
+
+        var instructionTxt = (
+          <div className='panel-body-instruction instructionsText' id={"instructions-" + this.props.id} dangerouslySetInnerHTML={{__html: atob(this.props.instructions)}} />
+        );
+
+
 
         return (
             <div>
                 <div className='group' id={this.props.id} style={{paddingBottom:'15px'}}>{this.props.result.layer}
                     <span className='label'>{this.props.result.hits.length}</span>
+                    {instructionsBtn}
                     <button className='btn btn-default pull-right plusMinus' onClick={(e) => this.minusLayer(this.props.result.layer,e)}>
                         <i className='fa fa-minus plusMinusIkon' />
                     </button>
                     <button className='btn btn-default pull-right plusMinus' onClick={(e) => this.plusLayer(this.props.result.layer,e)}>
                         <i className='fa fa-plus plusMinusIkon' />
                     </button>
+                    {instructionTxt}
                 </div>
                 <div className={groupStyleClass}>
                     {resultBox}
