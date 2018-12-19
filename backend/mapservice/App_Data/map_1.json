@@ -362,6 +362,43 @@
         "visibleForGroups": []
       },
       "index": 4
+    },
+    {
+      "type": "export",
+      "options": {
+        "target": "toolbar",
+        "exportUrl": "http:///localhost:55630/export/pdf",
+        "exportTiffUrl": "",
+        "pdfActive": true,
+        "tiffActive": false,
+        "base64Encode": false,
+        "autoScale": false,
+        "scales": [
+          250,
+          500,
+          1000,
+          2500,
+          5000,
+          10000,
+          25000,
+          50000,
+          100000,
+          250000
+        ],
+        "proxyUrl": "",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 6
+    },
+    {
+      "type": "anchor",
+      "options": {
+        "target": "toolbar",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 5
     }
   ],
   "map": {

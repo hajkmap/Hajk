@@ -2,7 +2,7 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 import { withSnackbar } from "notistack";
-import classNames from "classnames";
+import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
   streetViewWindow: {
@@ -38,11 +38,10 @@ class StreetViewView extends React.PureComponent {
   renderInfoText() {
     if (!this.props.displayPanorama) {
       return (
-        <div>
+        <Typography>
           Klicka i kartan för att aktivera street view. <br />
-          Förstora fönstret genom att trycka på symbolen i övre högra hörnet.{" "}
-          <br />
-        </div>
+          Förstora fönstret genom att trycka på symbolen i övre högra hörnet.
+        </Typography>
       );
     }
   }
@@ -52,7 +51,6 @@ class StreetViewView extends React.PureComponent {
     return (
       <>
         <div>
-          <h3>Street view</h3>
           {this.renderInfoText()}
           <div className={this.props.displayPanorama ? null : classes.hidden}>
             <div id="street-view-window" className={classes.streetViewWindow} />

@@ -20,3 +20,8 @@ FATAL 2018-12-07 11:36:08 Can't get configuration file: System.Web.HttpException
    at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 771 
 FATAL 2018-12-07 11:36:50 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
    at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 771 
+ERROR 2018-12-19 09:54:05 Unable to create PDF: Invalid URI: The format of the URI could not be determined. 
+ERROR 2018-12-19 09:55:29 Unable to create PDF: There was a problem connecting to the WMS server when rendering layer 'WMSLayer_0' 
+ERROR 2018-12-19 09:55:50 Unable to create PDF: There was a problem connecting to the WMS server when rendering layer 'WMSLayer_0' 
+ERROR 2018-12-19 09:57:04 Unable to create PDF: Invalid URI: The format of the URI could not be determined. 
+ERROR 2018-12-19 13:11:40 Unable to create PDF: There was a problem connecting to the WMS server when rendering layer 'WMSLayer_0' 

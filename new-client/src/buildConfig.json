@@ -13,6 +13,7 @@
     "anchor",
     "buffer",
     "measure",
-    "streetview"
+    "streetview",
+    "export"
   ]
 }

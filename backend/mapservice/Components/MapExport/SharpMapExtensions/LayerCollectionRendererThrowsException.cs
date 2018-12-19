@@ -11,7 +11,6 @@ namespace MapService.Components.MapExport.SharpMapExtensions {
         {
         }
 
-
         /// <summary>
         /// Invokes the rendering of the layer; 
         /// Depending on the setting of ContinueOnError for the layer, 
@@ -21,28 +20,29 @@ namespace MapService.Components.MapExport.SharpMapExtensions {
         /// <param name="g"></param>
         /// <param name="map"></param>
         public static void RenderLayer(ILayer layer, Graphics g, Map map) {
-            try 
-            {
-                layer.Render(g, map);
-            }
-            catch (Exception ex) 
-            {
-                if (ContinueOnError(layer))
-                {
-                    using (Pen pen = new Pen(Color.Red, 4f))
-                    {
-                        Size size = map.Size;
-                        g.DrawLine(pen, 0, 0, size.Width, size.Height);
-                        g.DrawLine(pen, size.Width, 0, 0, size.Height);
-                        g.DrawRectangle(pen, 0, 0, size.Width, size.Height);
-                    }
-                }
-                else
-                {
-                    throw ex;
-                }
-            }
-        }
+			layer.Render(g, map);
+			//try
+			//{
+			//	layer.Render(g, map);
+			//}
+			//catch (Exception ex)
+			//{
+			//	if (ContinueOnError(layer))
+			//	{
+			//		using (Pen pen = new Pen(Color.Red, 4f))
+			//		{
+			//			Size size = map.Size;
+			//			g.DrawLine(pen, 0, 0, size.Width, size.Height);
+			//			g.DrawLine(pen, size.Width, 0, 0, size.Height);
+			//			g.DrawRectangle(pen, 0, 0, size.Width, size.Height);
+			//		}
+			//	}
+			//	else
+			//	{
+			//		throw ex;
+			//	}
+			//}
+		}
 
         private static bool ContinueOnError(ILayer layer)
         {
