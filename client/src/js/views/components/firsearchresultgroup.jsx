@@ -641,7 +641,7 @@ FirSearchResultGroup = {
 
         var instructionsBtn = (
             <span>
-            <button onClick={(e) => {e.stopPropagation(); this.openInstruction()}} className='btn-info-fir' style={{height: '15%', width:'15%'}} id={"instructionsbox-result-" + this.props.id} ><img src={this.props.model.get("infoKnappLogo")} style={{height: '75%', width:'75%'}} /></button>
+            <button onClick={(e) => {e.stopPropagation(); this.openInstruction()}} className='btn-info-fir' id={"instructionsbox-result-" + this.props.id} ><img className='btn-info-fir' src={this.props.model.get("infoKnappLogo")} style={{height: '55%', width:'55%'}} /></button>
             </span>
         );
 
