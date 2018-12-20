@@ -610,8 +610,12 @@ class ToolOptions extends Component {
                         <input value={this.state.realEstateLayer.maxFeatures} type='text' name='realEstateLayer_maxFeatures' onChange={(e) => { this.handleInputChange(e); }} />
                     </div>
                     <div>
-                        <label htmlFor='realEstateLayer_instructionVidSokresult'>realEstateLayers instructionVidSokresult</label>
-                        <input value={this.state.realEstateLayer.instructionVidSokresult ? atob(this.state.realEstateLayer.instructionVidSokresult) : ''} type='text' name='realEstateLayer_instructionVidSokresult' onChange={(e) => { this.handleInputChange(e); }} />
+                        <label htmlFor='realEstateLayer_instructionVidSokresult'>Instruktion vid sökresultat</label>
+                        <textarea
+                            id='realEstateLayer_instructionVidSokresult'
+                            name='realEstateLayer_instructionVidSokresult'
+                            onChange={(e) => { this.handleInputChange(e); }}
+                            value={this.state.realEstateLayer.instructionVidSokresult ? atob(this.state.realEstateLayer.instructionVidSokresult) : ''} />
                     </div>
                     <div>
                         <label htmlFor='realEstateWMSLayer_id'>realEstateWMSLayers id</label>
