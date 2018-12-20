@@ -20,18 +20,33 @@ namespace MapService.Controllers
             {
                 _log.ErrorFormat("Exception in WMSLayerController.Post", e.Message);
                 throw;
-            }
-            
+            }            
         }
 
         public void Delete(string id)
         {
-            this.settingsDataContext.RemoveWMSLayer(id);
+            try
+            {
+                this.settingsDataContext.RemoveWMSLayer(id);
+            }
+            catch (System.Exception e)
+            {
+                _log.ErrorFormat("Exception in WMSLayerController.Delete", e.Message);
+                throw;
+            }
         }
 
         public void Put(WMSConfig config)
         {
-            this.settingsDataContext.UpdateWMSLayer(config);
+            try
+            {
+                this.settingsDataContext.UpdateWMSLayer(config);
+            }
+            catch (System.Exception e)
+            {
+                _log.ErrorFormat("Exception in WMSLayerController.Put", e.Message);
+                throw;
+            }
         }
     }
 }

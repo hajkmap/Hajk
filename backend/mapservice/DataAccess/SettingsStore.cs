@@ -29,6 +29,7 @@ namespace MapService.DataAccess
             try
             {
                 string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.layerFile);
+                _log.DebugFormat("readLayerConfigFromFile: Reading config from file: {0}", file);
                 string jsonInput = System.IO.File.ReadAllText(file);
                 var config = JsonConvert.DeserializeObject<LayerConfig>(jsonInput);
                 //New wms config
@@ -53,6 +54,7 @@ namespace MapService.DataAccess
             try
             {
                 string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, mapFile);
+                _log.DebugFormat("readMapConfigFromFile: Reading config from file: {0}", file);
                 string jsonInput = System.IO.File.ReadAllText(file);
                 return JsonConvert.DeserializeObject<MapConfig>(jsonInput);
 
@@ -73,9 +75,9 @@ namespace MapService.DataAccess
             try
             {
                 string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, mapFile);
+                _log.DebugFormat("saveMapConfigToFile: Saving config to file: {0}", file);
                 string jsonOutput = JsonConvert.SerializeObject(mapConfig, Formatting.Indented);
                 System.IO.File.WriteAllText(file, jsonOutput);
-
             }
             catch (Exception e)
             {
@@ -93,9 +95,9 @@ namespace MapService.DataAccess
             try
             {
                 string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.layerFile);
+                _log.DebugFormat("saveLayerConfigToFile: Saving config to file: {0}", file);
                 string jsonOutput = JsonConvert.SerializeObject(layerConfig, Formatting.Indented);
                 System.IO.File.WriteAllText(file, jsonOutput);
-
             }
             catch (Exception e)
             {
@@ -113,7 +115,7 @@ namespace MapService.DataAccess
             try
             {
                 string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
-                IEnumerable<string> files = Directory.EnumerateFiles(folder);
+                IEnumerable<string> files = Directory.EnumerateFiles(folder, "*.json");
                 List<string> fileList = new List<string>();
                 foreach (string file in files)
                 {

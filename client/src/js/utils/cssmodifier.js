@@ -62,6 +62,13 @@ module.exports = {
     var btnPrimaryActiveHover = getCSSRule('.btn-primary:active:hover');
     var btnPrimaryActiveHoverIE = getCSSRule('.btn-primary:hover:active');
 
+    var btnMain = getCSSRule('.btn-main');
+    var btnMainFocus = getCSSRule('.btn-main:focus');
+    var btnMainHover = getCSSRule('.btn-main:hover');
+    var btnMainActive = getCSSRule('.btn-main:active');
+    var btnMainActiveHover = getCSSRule('.btn-main:active:hover');
+    var btnMainActiveHoverIE = getCSSRule('.btn-main:hover:active');
+
     var drawToolsSelected = getCSSRule('.draw-tools li.selected');
     var informationBlanketHeader = getCSSRule('.information #blanket #container #header');
     var informationBlanketContainer = getCSSRule('.information #blanket #container');
@@ -126,6 +133,33 @@ module.exports = {
       btnPrimaryActiveHoverIE.style.color = config.secondaryColor;
     }
 
+    if (btnMain) {
+      btnMain.style.backgroundColor = config.primaryColor;
+      btnMain.style.zIndex = 2;
+      btnMain.style.color = config.secondaryColor;
+    }
+    if (btnMainFocus) {
+      btnMainFocus.style.backgroundColor = config.primaryColor;
+      btnMainFocus.style.color = config.secondaryColor;
+    }
+    if (btnMainHover) {
+      btnMainHover.style.backgroundColor = config.primaryColor;
+      btnMainHover.style.color = config.secondaryColor;
+    }
+    if (btnMainActive) {
+      btnMainActive.style.backgroundColor = config.primaryColor;
+      btnMainActive.style.color = config.secondaryColor;
+    }
+    if (btnMainActiveHover) {
+      btnMainActiveHover.style.backgroundColor = config.primaryColor;
+      btnMainActiveHover.style.color = config.secondaryColor;
+    }
+
+    if (btnMainActiveHoverIE) {
+      btnMainActiveHoverIE.style.backgroundColor = config.primaryColor;
+      btnMainActiveHoverIE.style.color = config.secondaryColor;
+    }
+
     if (drawToolsSelected) {
       drawToolsSelected.style.backgroundColor = config.primaryColor;
     }
@@ -162,7 +196,7 @@ module.exports = {
     if (mapScaleText) {
       mapScaleText.style.backgroundColor = config.primaryColor;
       mapScaleText.style.color = config.secondaryColor;
-    }
+    }    
     if (searchbarInputField) {
       searchbarInputField.style.borderColor = config.primaryColor;
     }

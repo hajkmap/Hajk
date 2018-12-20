@@ -37,7 +37,8 @@ var Tool = require('tools/tool'),
   Routing = require('tools/routing'),
   Fir = require('tools/fir'),
   Preset = require('tools/preset'),
-  Measure = require('tools/measure');
+  Measure = require('tools/measure'),
+  MailExport = require('tools/mailexport');
 
 /**
  * @description
@@ -96,6 +97,8 @@ var ToolCollection = {
         return new Preset(args.options);
       case 'measure':
         return new Measure(args.options);
+      case 'mailexport':
+        return new MailExport(args.options);
       default:
         throw 'Tool not supported ' + args.type;
     }

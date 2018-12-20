@@ -38,6 +38,7 @@ import FIR from './tools/fir.jsx';
 import Preset from './tools/preset.jsx';
 import Measure from './tools/measure.jsx';
 import Routing from './tools/routing.jsx';
+import MailExport from './tools/mailexport.jsx';
 
 var defaultState = {
   activeTool: ''
@@ -106,6 +107,8 @@ class ToolOptions extends Component {
         return <Measure parent={this} model={this.props.model} />;
       case 'routing':
         return <Routing parent={this} model={this.props.model} />;
+      case 'mailexport':
+        return <MailExport parent={this} model={this.props.model} />;
       default:
         return null;
     }
@@ -163,7 +166,8 @@ class ToolOptions extends Component {
       measure: 'Mät',
       location: 'Visa min position',
       routing: 'Navigation',
-      fir: 'FIR'
+      fir: 'FIR',
+      mailexport: 'Mail & utskrift'
     };
 
     return (

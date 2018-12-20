@@ -272,6 +272,12 @@ class Search extends Component {
 
       layers = startsWith.concat(alphabetically);
     }
+
+    // Sort layers alphabetically
+    layers.sort((a, b) => {
+      return a.caption.toLowerCase().localeCompare(b.caption.toLowerCase());
+    });
+    
     return layers.map((layer, i) =>
       <li onClick={(e) => this.loadLayer(e, layer)} key={Math.random()}>
         <span>{layer.caption}</span>

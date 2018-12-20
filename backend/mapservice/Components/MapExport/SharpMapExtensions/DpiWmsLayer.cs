@@ -11,6 +11,7 @@ using SharpMap.Web.Wms;
 using System.Configuration;
 using MapService.Controllers;
 using log4net;
+using System.Text.RegularExpressions;
 
 namespace MapService.Components.MapExport {
 
@@ -48,11 +49,37 @@ namespace MapService.Components.MapExport {
 
             var requestUrl = base.GetRequestUrl(box, size);
 
+            if (this.Version == "1.3.0")
+            {
+                requestUrl = FlipBBOX(requestUrl);
+            }
+
             return proxy + requestUrl + string.Format("&{0}{3}&{1}{3}&{2}{3}", 
                 GeoserverDpi,
                 UMNDpi,
                 QGISDpi,
                 _requestedDpi);
+        }
+
+        private string FlipBBOX(string requestUrl)
+        {
+            Regex regex = new Regex(@"BBOX=(.+?)&");
+            Console.WriteLine(requestUrl);
+
+            var match = regex.Match(requestUrl);
+            string bbox = match.Groups[1].Value;
+
+            var bboxArr = bbox.Split(',');
+
+
+            var xmin = bboxArr[0];
+            var ymin = bboxArr[1];
+            var xmax = bboxArr[2];
+            var ymax = bboxArr[3];
+
+            string flippedBBOX = String.Format("BBOX={0},{1},{2},{3}&", ymin, xmin, ymax, xmax);
+
+            return regex.Replace(requestUrl, flippedBBOX);
         }
 
         /// <summary>

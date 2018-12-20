@@ -36,6 +36,7 @@ namespace Proxy.Controllers
         static private string _headerAttributeName;
         static private int _removeDomainFromUserName = -1; // -1 = not initialized from Web.config. 0 = Do not remove, 1 = Remove
 
+        // TODO: This needs refactornig for performance reasons. We should read config ONCE and save value. Something to put in constructor()?
         private bool IsAuthorizedInternetDomain(string url)
         {
             if(_authorizedInternetDomains == null) 
@@ -82,7 +83,7 @@ namespace Proxy.Controllers
         {
             try
             {
-                 _log.DebugFormat("url: {0}", url);
+                 _log.DebugFormat("GetPageContent url: {0}", url);
 
                 if (!url.StartsWith("http:/") &&
                     !url.StartsWith("https:/"))
@@ -110,10 +111,19 @@ namespace Proxy.Controllers
                 request.UseDefaultCredentials = true;
                 request.Method = "GET";
 
+                if(!string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings["authorizedInternetDomains"]) && !IsAuthorizedInternetDomain(url))
+                {
+                    throw new Exception("Domain " + url + " not allowed in proxy");
+                } else
+                {
+                    _log.Debug("Allowed proxy to: " + url);
+                }
+   
+
                 if (User.Identity.IsAuthenticated) // Add HTTP Header of authenticated user
                 {
                     _log.DebugFormat("User(in): {0}", User.Identity.Name);
-                    if (IsAuthorizedInternetDomain(url)) // Only add header for authorized domains (TODO: Maybe not do any call at all if the internet domain isn't valid?)
+                    if (IsAuthorizedInternetDomain(url)) // Only add header for authorized domains
                     {
                         string userName = GetUserNameForHeader(User.Identity.Name);
                         _log.DebugFormat("User(out): {0}", userName);
@@ -215,6 +225,7 @@ namespace Proxy.Controllers
         [HttpGet]
         public async Task<MyActionResult> GetUrl(string url)
         {
+            _log.DebugFormat("GetUrl url: {0}", url);
             await this.GetPageContent(String.Format("{0}?{1}", url, Request.QueryString));            
             return new MyActionResult("");
         }
