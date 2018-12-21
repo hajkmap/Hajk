@@ -25,7 +25,9 @@ class EditModel {
     this.shell = undefined;
     this.instruction = "";
     this.filty = false;
+    this.activeServices = settings.options;
     this.sources = [];
+    console.log(settings);
   }
 
   write(features) {
@@ -516,6 +518,19 @@ class EditModel {
 
     this.filty = false;
     this.map.clicklock = false;
+  }
+
+  loadSources(callback) {
+    console.log("Active services", this.activeServices);
+    this.sources = [
+      {
+        id: "25"
+      },
+      {
+        id: "26"
+      }
+    ];
+    callback(this.sources);
   }
 }
 

@@ -6,12 +6,13 @@ import AttributeEditor from "./components/AttributeEditor";
 const styles = theme => ({});
 
 class EditView extends React.PureComponent {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       visible: false,
       enabled: false,
-      checked: false
+      checked: false,
+      sources: []
     };
   }
 
@@ -58,6 +59,12 @@ class EditView extends React.PureComponent {
         // });
       }
     });
+
+    this.props.model.loadSources(sources => {
+      this.setState({
+        sources: sources
+      });
+    });
   }
 
   setLayer(source) {
@@ -92,7 +99,7 @@ class EditView extends React.PureComponent {
   }
 
   renderOptions() {
-    return this.props.model.sources.map((source, i) => {
+    return this.state.sources.map((source, i) => {
       var id = "edit-layer-" + i;
       return (
         <div key={i}>
@@ -121,7 +128,7 @@ class EditView extends React.PureComponent {
             model={this.props.model}
             observer={this.props.observer}
           />
-          <ul className="edit-layers">{this.renderOptions()}</ul>
+          <ul>{this.renderOptions()}</ul>
           <AttributeEditor
             ref="attributeEditor"
             feature={this.state.editFeature}

@@ -43,7 +43,8 @@ class Edit extends React.PureComponent {
     this.editModel = new EditModel({
       map: spec.map,
       app: spec.app,
-      observer: this.observer
+      observer: this.observer,
+      options: spec.options
     });
     this.app.registerPanel(this);
   }

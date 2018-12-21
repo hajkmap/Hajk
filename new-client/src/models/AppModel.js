@@ -376,6 +376,7 @@ class AppModel {
     if (layerSwitcherTool) {
       layers.wmslayers = this.config.layersConfig.wmslayers || [];
       layers.wfslayers = this.config.layersConfig.wfslayers || [];
+      layers.wfstlayers = this.config.layersConfig.wfstlayers || [];
       layers.wmtslayers = this.config.layersConfig.wmtslayers || [];
       layers.vectorlayers = this.config.layersConfig.vectorlayers || [];
       layers.arcgislayers = this.config.layersConfig.arcgislayers || [];
@@ -384,6 +385,7 @@ class AppModel {
 
       layers.wmslayers.forEach(l => (l.type = "wms"));
       layers.wmtslayers.forEach(l => (l.type = "wmts"));
+      layers.wfstlayers.forEach(l => (l.type = "edit"));
       layers.vectorlayers.forEach(l => (l.type = "vector"));
       layers.arcgislayers.forEach(l => (l.type = "arcgis"));
       layers.extendedwmslayers.forEach(l => (l.type = "extended_wms"));
@@ -393,6 +395,7 @@ class AppModel {
         ...layers.extendedwmslayers,
         ...layers.wmtslayers,
         ...layers.vectorlayers,
+        ...layers.wfstlayers,
         ...layers.arcgislayers
       ];
 
