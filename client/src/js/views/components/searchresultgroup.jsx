@@ -38,6 +38,13 @@ window.onkeyup = (e) => {
  */
 SearchResultGroup = {
 
+  getInitialState: function () {
+    return {
+      activeClass: null,
+      showInfobox: false
+    };
+  },
+
   componentDidMount: function () {
     var groups = $(ReactDOM.findDOMNode(this)).find('.group');
 
@@ -53,7 +60,7 @@ SearchResultGroup = {
             var nth = item.index + 1,
               elem = $(group).next().find('div:nth-child(' + nth + ')');
 
-            elem.addClass('selected');
+            //elem.addClass('selected');
           });
         }
       });
@@ -64,6 +71,29 @@ SearchResultGroup = {
     var element = $(event.target),
       parent = $(ReactDOM.findDOMNode(this)),
       group = parent.find('.group');
+
+      this.setState({
+        activeClass: index
+      });
+
+      var currentId = 'hit-' + index + '-' + group[0].id;
+      var infoboxId = 'hit-' + index + '-' + group[0].id + '-infobox';
+
+      if ($("#"+currentId).next('#'+infoboxId).length == 0) {
+        if (event.target.className == "fa fa-angle-down") {
+          $("#"+currentId).addClass("show-infobox");
+          $(event.target).removeClass("fa fa-angle-down");
+          $(event.target).addClass("fa fa-angle-up");
+
+          $('<div id='+infoboxId+' class="infobox-text"></div>').insertAfter($("#"+currentId));
+        }
+      } else if (event.target.className == "fa fa-angle-up") {
+          $("#"+currentId).removeClass("show-infobox");
+          $(event.target).removeClass("fa fa-angle-up");
+          $(event.target).addClass("fa fa-angle-down");
+
+         $("#"+infoboxId).remove();
+      }
 
     var item = {
       index: index,
@@ -92,26 +122,27 @@ SearchResultGroup = {
         });
       }
 
-      items.forEach(item => {
-        this.props.model.append(item);
-        parent.find(`div[data-index=${item.index}]`).addClass('selected');
-      });
+      //items.forEach(item => {
+      //  this.props.model.append(item);
+      //  parent.find(`div[data-index=${item.index}]`).addClass('selected');
+      //});
     } else if (ctrlIsDown) {
-      if (element.hasClass('selected')) {
-        this.props.model.detach(item);
-      } else {
-        this.props.model.append(item);
-      }
+      //if (element.hasClass('selected')) {
+      //  this.props.model.detach(item);
+      //} else {
+      //  this.props.model.append(item);
+      //}
     } else {
-      $('.search-results').find('.selected').each(function (e) {
-        $(this).removeClass('selected');
-      });
+      //$('.search-results').find('.selected').each(function (e) {
+      //  $(this).removeClass('selected');
+      //});
       this.props.model.focus(item, this.props.isBar == 'yes');
+      this.props.model.focusInfobox(item, this.props.isBar == 'yes');
     }
 
-    if (!shiftIsDown) {
-      if (element.hasClass('selected')) { element.removeClass('selected'); } else { element.addClass('selected'); }
-    }
+    //if (!shiftIsDown) {
+    //  if (element.hasClass('selected')) { element.removeClass('selected'); } else { element.addClass('selected'); }
+    //}
 
     if (isMobile) {
       if (this.props.parentView) {
@@ -126,6 +157,10 @@ SearchResultGroup = {
     var id = this.props.id,
       groupStyleClass = this.props.numGroups === 1 ? '' : 'hidden'
     ;
+
+    var isActive = (index) => {
+      return this.state.activeClass === index ? 'selected' : '';
+    };
 
     return (
       <div>
@@ -146,7 +181,14 @@ SearchResultGroup = {
                 title = getTitle(this.props.result.displayName),
                 index = i
               ;
-              return (<div id={hitId} key={hitId} index={i} data-index={i} onClick={this.handleClick.bind(this, hit, i)}>{title}</div>);
+              return (
+                <div id={hitId} className={isActive(index)} key={hitId} index={i} data-index={i} onClick={this.handleClick.bind(this, hit, i)}>
+                  {title}
+                  <span className='clickable pull-right' title='Dölj info' style={{ position: 'relative', marginRight: '14px' }}>
+                    <i className='fa fa-angle-down' style={{ fontSize: '18px' }} />
+                  </span>
+                </div>
+              );
             })
           }
         </div>
