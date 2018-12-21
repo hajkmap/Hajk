@@ -22,6 +22,7 @@
 
 import React from "react";
 import { Component } from "react";
+import EditModel from "./../../models/edit.js";
 
 var defaultState = {
   validationErrors: [],
@@ -40,16 +41,22 @@ class ToolOptions extends Component {
     super();
     this.state = defaultState;
     this.type = "edit";
+    this.editModel = new EditModel();
   }
 
   componentDidMount() {
     var tool = this.getTool();
+    var layersUrl =
+      this.props.model && this.props.model.get("config").url_layers
+        ? this.props.model.get("config").url_layers
+        : "";
     if (tool) {
       this.setState({
         active: true,
         index: tool.index,
         target: tool.options.target || "toolbar",
         instruction: tool.options.instruction,
+        activeServices: tool.options.activeServices || [],
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : []
@@ -57,6 +64,13 @@ class ToolOptions extends Component {
     } else {
       this.setState({
         active: false
+      });
+    }
+    if (layersUrl) {
+      this.editModel.getConfig(layersUrl, services => {
+        this.setState({
+          services: services
+        });
       });
     }
   }
@@ -118,6 +132,7 @@ class ToolOptions extends Component {
       options: {
         target: this.state.target,
         instruction: this.state.instruction,
+        activeServices: this.state.activeServices,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -203,6 +218,46 @@ class ToolOptions extends Component {
     }
   }
 
+  renderServices() {
+    const { services } = this.state;
+    if (services) {
+      return services.map((service, i) => {
+        var active = this.state.activeServices.find(
+          serviceId => serviceId === service.id
+        );
+        if (active === undefined) {
+          active = false;
+        }
+        return (
+          <li key={i}>
+            <input
+              id={service.id}
+              name={service.caption}
+              type="checkbox"
+              checked={active}
+              onChange={e => {
+                var actives = [...this.state.activeServices];
+                if (e.target.checked) {
+                  actives.push(service.id);
+                } else {
+                  actives = actives.filter(
+                    serviceId => serviceId !== service.id
+                  );
+                }
+                this.setState({
+                  activeServices: actives
+                });
+              }}
+            />
+            &nbsp;
+            <label htmlFor={service.id}>{service.caption}</label>
+          </li>
+        );
+      });
+    } else {
+      return null;
+    }
+  }
   /**
    *
    */
@@ -269,6 +324,17 @@ class ToolOptions extends Component {
               }}
               value={this.state.instruction ? atob(this.state.instruction) : ""}
             />
+          </div>
+          <div>
+            <label>Tjänster</label>
+            <ul
+              style={{
+                display: "inline-block",
+                padding: 0
+              }}
+            >
+              {this.renderServices()}
+            </ul>
           </div>
           {this.renderVisibleForGroups()}
         </form>

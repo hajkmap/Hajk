@@ -28,7 +28,7 @@ var edit = Model.extend({
     layers: []
   },
 
-  getConfig: function(url) {
+  getConfig: function(url, callback) {
     $.ajax(url, {
       success: data => {
         if (data.wfstlayers) {
@@ -39,6 +39,9 @@ var edit = Model.extend({
           });
         }
         this.set("layers", data.wfstlayers || []);
+        if (callback) {
+          callback(this.get("layers"));
+        }
       }
     });
   },

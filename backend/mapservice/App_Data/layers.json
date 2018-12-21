@@ -445,8 +445,37 @@
         }
       ],
       "editPoint": true,
+      "editPolygon": false,
+      "editLine": false,
+      "infoVisible": false,
+      "infoTitle": null,
+      "infoText": null,
+      "infoUrl": null,
+      "infoUrlText": null,
+      "infoOwner": null
+    },
+    {
+      "id": "26",
+      "caption": "Parkering",
+      "url": "http://giscloud.se/geoserver/wfs",
+      "projection": "EPSG:3006",
+      "layers": [
+        "wsp:parking_lot"
+      ],
+      "editableFields": [
+        {
+          "index": 1,
+          "name": "info",
+          "dataType": "string",
+          "textType": "fritext",
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        }
+      ],
+      "editPoint": false,
       "editPolygon": true,
-      "editLine": true,
+      "editLine": false,
       "infoVisible": false,
       "infoTitle": null,
       "infoText": null,
