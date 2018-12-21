@@ -1,9 +1,8 @@
-import React, { Component } from "react";
+import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
-import { Button } from "@material-ui/core";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
-import EditIcon from "@material-ui/icons/Edit";
+import FormatShapesIcon from "@material-ui/icons/FormatShapes";
 
 import Panel from "../../components/Panel.js";
 import EditView from "./EditView.js";
@@ -14,7 +13,7 @@ const styles = theme => {
   return {};
 };
 
-class Edit extends Component {
+class Edit extends React.PureComponent {
   state = {
     panelOpen: this.props.options.visibleAtStart
   };
@@ -40,16 +39,13 @@ class Edit extends Component {
     this.observer.subscribe("myEvent", message => {
       console.log(message);
     });
+
     this.editModel = new EditModel({
       map: spec.map,
       app: spec.app,
       observer: this.observer
     });
     this.app.registerPanel(this);
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return this.state.panelOpen !== nextState.panelOpen;
   }
 
   renderPanel() {
@@ -64,6 +60,7 @@ class Edit extends Component {
           app={this.app}
           map={this.map}
           parent={this}
+          model={this.editModel}
           observer={this.observer}
         />
       </Panel>,
@@ -72,21 +69,7 @@ class Edit extends Component {
   }
 
   renderAsWidgetItem() {
-    const { classes } = this.props;
-    return (
-      <div>
-        <Button
-          variant="fab"
-          color="default"
-          aria-label="Editeringsverktyg"
-          className={classes.button}
-          onClick={this.onClick}
-        >
-          <EditIcon />
-        </Button>
-        {this.renderPanel()}
-      </div>
-    );
+    throw new Error("Not implemented exception");
   }
 
   renderAsToolbarItem() {
@@ -99,7 +82,7 @@ class Edit extends Component {
           onClick={this.onClick}
         >
           <ListItemIcon>
-            <EditIcon />
+            <FormatShapesIcon />
           </ListItemIcon>
           <ListItemText primary={this.text} />
         </ListItem>
