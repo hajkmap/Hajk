@@ -4,7 +4,7 @@ import { MultiPoint, Polygon } from "ol/geom";
 import Vector from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { all as strategyAll } from "ol/loadingstrategy";
-import { Select, Modify, Draw } from "ol/interaction";
+import { Select, Modify, Draw, Translate } from "ol/interaction";
 import { never } from "ol/events/condition";
 import X2JS from "x2js";
 
@@ -13,7 +13,11 @@ class EditModel {
     this.map = settings.map;
     this.app = settings.app;
     this.observer = settings.observer;
-    //this.options = settings.app.options;
+    this.options = settings.options;
+
+    this.activeServices = this.options.activeServices;
+    this.sources = this.options.sources;
+
     this.vectorSource = undefined;
     this.layer = undefined;
     this.select = undefined;
@@ -25,20 +29,18 @@ class EditModel {
     this.shell = undefined;
     this.instruction = "";
     this.filty = false;
-    this.activeServices = settings.options;
-    this.sources = [];
-    console.log(settings);
+    this.removalToolMode = "off";
   }
 
   write(features) {
     var format = new WFS(),
-      lr = this.get("editSource").layers[0].split(":"),
+      lr = this.editSource.layers[0].split(":"),
       ns = lr.length === 2 ? lr[0] : "",
       ft = lr.length === 2 ? lr[1] : lr[0],
       options = {
         featureNS: ns,
         featureType: ft,
-        srsName: this.get("editSource").projection
+        srsName: this.editSource.projection
       },
       gml = new GML(options);
 
@@ -186,7 +188,7 @@ class EditModel {
     ];
   }
 
-  getStyle(feature) {
+  getVectorStyle(feature) {
     return [
       new Style({
         stroke: new Stroke({
@@ -313,15 +315,24 @@ class EditModel {
     alert("Fel: data kan inte hämtas. Försök igen senare.");
   };
 
-  loadData(config, extent, done) {
-    var url = `
-      ${config.url}&
-      service=WFS&
-      version=1.1.0&
-      request=GetFeature&
-      typename=${config.layers[0]}&
-      srsname=${config.projection}`;
+  urlFromObject(url, obj) {
+    return Object.keys(obj).reduce((str, key, i, a) => {
+      str = str + key + "=" + obj[key];
+      if (i < a.length - 1) {
+        str = str + "&";
+      }
+      return str;
+    }, (url += "?"));
+  }
 
+  loadData(source, extent, done) {
+    var url = this.urlFromObject(source.url, {
+      service: "WFS",
+      version: "1.1.0",
+      request: "GetFeature",
+      typename: source.layers[0],
+      srsname: source.projection
+    });
     fetch(url)
       .then(response => {
         response.text().then(data => {
@@ -362,175 +373,146 @@ class EditModel {
     });
   }
 
-  setLayer(source, done) {
+  setLayer(serviceId, done) {
+    this.source = this.sources.find(source => source.id === serviceId);
     this.filty = true;
-    this.map.clicklock = true;
+    this.vectorSource = new VectorSource({
+      loader: extent => this.loadData(this.source, extent, done),
+      strategy: strategyAll,
+      projection: this.source.projection
+    });
+
+    this.layer = new Vector({
+      source: this.vectorSource,
+      style: this.getVectorStyle()
+    });
 
     if (this.layer) {
       this.map.removeLayer(this.layer);
     }
 
-    this.vectorSource = new VectorSource({
-      loader: extent => this.loadData(source, extent, done),
-      strategy: strategyAll,
-      projection: source.projection
-    });
-
-    this.layer = new Vector({
-      renderMode: "image",
-      source: this.vectorSource,
-      name: "edit-layer"
-    });
-
     this.map.addLayer(this.layer);
+    this.editSource = this.source;
+    this.editFeature = null;
+    this.observer.emit("editSource", this.source);
+    this.observer.emit("editFeature", null);
+    this.observer.emit("layerChanged", this.layer);
+  }
 
-    if (!this.select) {
-      this.select = new Select({
-        style: this.getSelectStyle(),
-        toggleCondition: never
-      });
-      this.map.addInteraction(this.select);
-    } else {
-      this.select.getFeatures().clear();
-      this.select.unset(this.key);
-    }
-
-    this.key = this.select.on("select", event => {
-      this.featureSelected(event, source);
+  activateModify() {
+    this.select = new Select({
+      style: this.getSelectStyle(),
+      toggleCondition: never,
+      layers: [this.layer]
     });
 
-    if (!this.modify) {
-      this.modify = new Modify({
-        features: this.select.getFeatures()
-      });
-      this.map.addInteraction(this.modify);
-    }
+    this.select.on("select", event => {
+      this.featureSelected(event, this.source);
+    });
 
-    this.editSource = source;
-    this.editFeature = null;
-    this.observer.emit("editSource", source);
-    this.observer.emit("editFeature", source);
-
-    this.select.setActive(true);
-    this.modify.setActive(true);
-    this.layer.dragLocked = true;
+    this.modify = new Modify({
+      features: this.select.getFeatures()
+    });
+    this.map.addInteraction(this.select);
+    this.map.addInteraction(this.modify);
   }
 
-  handleDrawEnd(feature, geometryType) {
-    feature.modification = "added";
-    this.editAttributes(feature);
-  }
-
-  setRemovalToolMode(mode) {
-    this.removalToolMode = mode;
-  }
-
-  activateDrawTool(geometryType) {
-    var add = () => {
-      this.drawTool = new Draw({
-        source: this.vectorSource,
-        style: this.getScetchStyle(),
-        type: geometryType,
-        geometryName: this.geometryName
-      });
-      this.drawTool.on("drawend", event => {
-        this.handleDrawEnd(event.feature, geometryType);
-      });
-      this.map.addInteraction(this.drawTool);
-    };
-
-    var remove = () => {
-      this.map.removeInteraction(this.drawTool);
-      this.drawTool = undefined;
-    };
-
+  activateAdd(geometryType) {
+    this.draw = new Draw({
+      source: this.vectorSource,
+      style: this.getSketchStyle(),
+      type: geometryType,
+      geometryName: this.geometryName
+    });
+    this.draw.on("drawend", event => {
+      event.feature.modification = "added";
+      this.editAttributes(event.feature);
+    });
+    this.map.addInteraction(this.draw);
     this.map.clicklock = true;
+  }
 
-    if (this.select) {
-      this.select.setActive(false);
+  activateRemove() {
+    this.remove = true;
+    this.map.on("singleclick", this.removeSelected);
+  }
+
+  activateMove() {
+    this.move = new Translate({
+      layers: [this.layer]
+    });
+    this.map.addInteraction(this.move);
+  }
+
+  activateInteraction(type, geometryType) {
+    if (type === "add") {
+      this.activateAdd(geometryType);
     }
+    if (type === "move") {
+      this.activateMove();
+    }
+    if (type === "modify") {
+      this.activateModify();
+    }
+    if (type === "remove") {
+      this.map.clicklock = true;
+      this.activateRemove();
+    }
+  }
 
-    if (this.drawTool) {
-      this.drawTool.setActive(true);
-      if (this.geometryType !== geometryType) {
-        remove();
-        add();
+  removeSelected = e => {
+    this.map.forEachFeatureAtPixel(e.pixel, feature => {
+      if (this.vectorSource.getFeatures().some(f => f === feature)) {
+        this.vectorSource.removeFeature(feature);
       }
-    } else {
-      add();
-    }
-  }
+    });
+  };
 
-  deactivateDrawTool(keepClickLock) {
-    if (!keepClickLock) {
+  deactivateInteraction() {
+    if (this.select) {
+      this.map.removeInteraction(this.select);
+    }
+    if (this.modify) {
+      this.map.removeInteraction(this.modify);
+    }
+    if (this.draw) {
+      this.map.removeInteraction(this.draw);
+    }
+    if (this.move) {
+      this.map.removeInteraction(this.move);
+    }
+    if (this.remove) {
+      this.remove = false;
       this.map.clicklock = false;
-    }
-
-    if (this.select) {
-      this.select.setActive(true);
-    }
-
-    if (this.drawTool) {
-      this.drawTool.setActive(false);
+      this.map.un("singleclick", this.removeSelected);
     }
   }
 
-  deactivateTools() {
-    if (this.select) {
-      this.select.setActive(false);
-      this.select.getFeatures().clear();
-    }
-
-    if (this.modify) {
-      this.modify.setActive(false);
-    }
-
-    if (this.drawTool) {
-      this.drawTool.setActive(false);
-    }
-  }
-
-  deactivate() {
-    if (this.select) {
-      this.select.setActive(false);
-      this.select.getFeatures().clear();
-    }
-
-    if (this.modify) {
-      this.modify.setActive(false);
-    }
-
-    if (this.drawTool) {
-      this.drawTool.setActive(false);
-    }
-
+  reset() {
+    this.editSource = undefined;
+    this.editFeature = undefined;
+    this.removeFeature = undefined;
+    this.removalToolMode = "off";
+    this.filty = false;
+    this.map.clicklock = false;
     if (this.layer) {
       this.map.removeLayer(this.layer);
       this.layer = undefined;
     }
-
-    this.set({
-      editSource: undefined,
-      editFeature: undefined,
-      removeFeature: undefined,
-      removalToolMode: undefined
-    });
-
-    this.filty = false;
-    this.map.clicklock = false;
+    this.deactivateInteraction();
   }
 
-  loadSources(callback) {
-    console.log("Active services", this.activeServices);
-    this.sources = [
-      {
-        id: "25"
-      },
-      {
-        id: "26"
-      }
-    ];
-    callback(this.sources);
+  deactivate() {
+    this.reset();
+    this.observer.emit("editFeature", this.editFeature);
+    this.observer.emit("editSource", this.editSource);
+    this.observer.emit("deactivate");
+  }
+
+  getSources() {
+    return this.sources.filter(source => {
+      return this.activeServices.some(serviceId => serviceId === source.id);
+    });
   }
 }
 

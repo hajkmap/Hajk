@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -6,10 +6,13 @@ import ScatterPlotIcon from "@material-ui/icons/ScatterPlot";
 import BorderStyleIcon from "@material-ui/icons/BorderStyle";
 import LinearScaleIcon from "@material-ui/icons/LinearScale";
 import ZoomOutMapIcon from "@material-ui/icons/ZoomOutMap";
+import FormatShapesIcon from "@material-ui/icons/FormatShapes";
+import Typography from "@material-ui/core/Typography/Typography";
 
 const styles = theme => ({
   button: {
-    margin: theme.spacing.unit
+    margin: theme.spacing.unit,
+    width: "100px"
   },
   leftIcon: {
     marginRight: theme.spacing.unit
@@ -21,13 +24,15 @@ const styles = theme => ({
     fontSize: 20
   },
   toolbar: {
-    border: "1px solid",
-    padding: "10px"
+    padding: "10px",
+    borderRadius: "4px",
+    boxShadow:
+      "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)"
   },
   toolbarRow: {}
 });
 
-class Toolbar extends React.PureComponent {
+class Toolbar extends Component {
   constructor() {
     super();
     this.state = {
@@ -36,38 +41,56 @@ class Toolbar extends React.PureComponent {
   }
 
   componentWillMount() {
-    this.props.observer.on("layerChanged", () => {
-      if (this.props.model.layer) {
-        this.props.model.layer.dragLocked = true;
-        this.props.model.deactivateTools();
-        this.setState({
+    this.props.observer.on("deactivate", () => {
+      this.props.panel.setState({
+        checked: false,
+        enabled: false,
+        selectedSource: undefined
+      });
+      this.setState({
+        activeTool: undefined
+      });
+    });
+    this.props.observer.on("layerChanged", layer => {
+      this.setState(
+        {
           activeTool: undefined
-        });
-      }
+        },
+        () => {
+          this.props.model.deactivateInteraction();
+        }
+      );
     });
   }
 
-  changeTool(type) {
-    if (this.state.activeTool === type.toLowerCase()) {
-      this.props.model.deactivateDrawTool(true);
+  changeTool(type, geometryType) {
+    const { model } = this.props;
+    if (geometryType && this.state.activeTool === geometryType.toLowerCase()) {
+      model.deactivateInteraction();
       return this.setState({
         activeTool: undefined
       });
     }
+    if (this.state.activeTool === type) {
+      model.deactivateInteraction();
+      return this.setState({
+        activeTool: undefined
+      });
+    }
+    model.deactivateInteraction();
 
     switch (type) {
-      case "Point":
-      case "LineString":
-      case "Polygon":
-        this.props.model.activateDrawTool(type);
-        this.props.model.setRemovalToolMode("off");
+      case "add":
+        model.activateInteraction("add", geometryType);
         break;
       case "remove":
-        this.props.model.deactivateDrawTool(type);
+        model.activateInteraction("remove");
+        break;
+      case "modify":
+        model.activateInteraction("modify");
         break;
       case "move":
-        this.props.model.deactivateDrawTool(type);
-        this.props.model.setRemovalToolMode("off");
+        model.activateInteraction("move");
         break;
       default:
         break;
@@ -77,28 +100,29 @@ class Toolbar extends React.PureComponent {
   onAddPointClicked() {
     this.props.model.layer.dragLocked = true;
     this.setState({ activeTool: "point" });
-    this.changeTool("Point");
+    this.changeTool("add", "Point");
   }
 
   onAddLineClicked() {
     this.props.model.layer.dragLocked = true;
     this.setState({ activeTool: "linestring" });
-    this.changeTool("LineString");
+    this.changeTool("add", "LineString");
   }
 
   onAddPolygonClicked() {
     this.props.model.layer.dragLocked = true;
     this.setState({ activeTool: "polygon" });
-    this.changeTool("Polygon");
+    this.changeTool("add", "Polygon");
   }
 
   onRemoveClicked() {
-    this.props.model.layer.dragLocked = true;
-    this.props.model.setRemovalToolMode(
-      this.state.activeTool === "remove" ? "off" : "on"
-    );
     this.setState({ activeTool: "remove" });
     this.changeTool("remove");
+  }
+
+  onModifyClicked() {
+    this.setState({ activeTool: "modify" });
+    this.changeTool("modify");
   }
 
   onMoveClicked() {
@@ -151,11 +175,20 @@ class Toolbar extends React.PureComponent {
     this.props.model.deactivate();
     this.props.panel.setState({
       checked: false,
-      enabled: false
+      enabled: false,
+      selectedSource: undefined
     });
     this.setState({
       activeTool: undefined
     });
+  }
+
+  getSelectedStyle(type) {
+    var style = {};
+    if (type === this.state.activeTool) {
+      style.backgroundColor = "#ccc";
+    }
+    return style;
   }
 
   render() {
@@ -170,12 +203,12 @@ class Toolbar extends React.PureComponent {
       editLine = source.editLine;
       editPolygon = source.editPolygon;
     }
-
     const { classes } = this.props;
 
     return (
       <div>
         <div className={classes.toolbar}>
+          <Typography>Lägg till</Typography>
           <div className={classes.toolbarRow}>
             <Button
               variant="outlined"
@@ -186,6 +219,7 @@ class Toolbar extends React.PureComponent {
               }}
               type="button"
               title="Lägg till punkt"
+              style={this.getSelectedStyle("point")}
             >
               Punkt
               <ScatterPlotIcon className={classes.rightIcon} />
@@ -199,6 +233,7 @@ class Toolbar extends React.PureComponent {
               }}
               type="button"
               title="Lägg till linje"
+              style={this.getSelectedStyle("linestring")}
             >
               Linje
               <LinearScaleIcon className={classes.rightIcon} />
@@ -212,13 +247,16 @@ class Toolbar extends React.PureComponent {
               }}
               type="button"
               title="Lägg till yta"
+              style={this.getSelectedStyle("polygon")}
             >
               Yta
               <BorderStyleIcon className={classes.rightIcon} />
             </Button>
           </div>
+          <Typography>Editera</Typography>
           <div className={classes.toolbarRow}>
             <Button
+              size="small"
               className={classes.button}
               disabled={disabled}
               onClick={() => {
@@ -226,11 +264,13 @@ class Toolbar extends React.PureComponent {
               }}
               type="button"
               title="Flytta geometri"
+              style={this.getSelectedStyle("move")}
             >
               Flytta
               <ZoomOutMapIcon className={classes.rightIcon} />
             </Button>
             <Button
+              size="small"
               className={classes.button}
               disabled={disabled}
               onClick={() => {
@@ -238,9 +278,24 @@ class Toolbar extends React.PureComponent {
               }}
               type="button"
               title="Ta bort geometri"
+              style={this.getSelectedStyle("remove")}
             >
-              Ta bort
+              Radera
               <DeleteIcon className={classes.rightIcon} />
+            </Button>
+            <Button
+              size="small"
+              className={classes.button}
+              disabled={disabled}
+              onClick={() => {
+                this.onModifyClicked();
+              }}
+              type="button"
+              title="Ändra geometri"
+              style={this.getSelectedStyle("modify")}
+            >
+              Ändra
+              <FormatShapesIcon className={classes.rightIcon} />
             </Button>
           </div>
           <div className={classes.toolbarRow}>

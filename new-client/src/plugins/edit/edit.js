@@ -26,6 +26,7 @@ class Edit extends React.PureComponent {
   };
 
   closePanel = () => {
+    this.editModel.deactivate();
     this.setState({
       panelOpen: false
     });

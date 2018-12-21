@@ -3,8 +3,25 @@ import { MuiPickersUtilsProvider } from "material-ui-pickers";
 import DateFnsUtils from "@date-io/date-fns";
 import { DateTimePicker } from "material-ui-pickers";
 import { withStyles } from "@material-ui/core/styles";
+import TextField from "@material-ui/core/TextField";
 
-const styles = theme => ({});
+const styles = theme => ({
+  container: {
+    display: "flex",
+    flexWrap: "wrap"
+  },
+  textField: {
+    marginLeft: 0,
+    marginRight: 0,
+    width: "100%"
+  },
+  dense: {
+    marginTop: 16
+  },
+  menu: {
+    width: 200
+  }
+});
 
 class AttributeEditor extends React.PureComponent {
   constructor(props) {
@@ -18,8 +35,8 @@ class AttributeEditor extends React.PureComponent {
   componentDidMount() {
     this.props.observer.on("editFeature", attr => {
       var valueMap = {},
-        feature = this.props.model.get("editFeature"),
-        source = this.props.model.get("editSource"),
+        feature = this.props.model.editFeature,
+        source = this.props.model.editSource,
         props,
         defaultValue = "";
 
@@ -194,6 +211,7 @@ class AttributeEditor extends React.PureComponent {
   }
 
   getValueMarkup(field) {
+    const { classes } = this.props;
     if (field.dataType === "int") {
       field.textType = "heltal";
     }
@@ -208,21 +226,25 @@ class AttributeEditor extends React.PureComponent {
 
     var value = this.state.formValues[field.name];
 
+    if (value === undefined || value === null) {
+      value = "";
+    }
+
     if (value === "" && field.initialRender) {
-      value = field.defaultValue;
-      // var formValues = Object.assign({}, this.state.formValues);
-      // formValues[field.name] = value;
-      // this.setState({
-      //   formValues: formValues
-      // });
+      if (field.defaultValue !== null) {
+        value = field.defaultValue;
+      }
     }
 
     switch (field.textType) {
       case "heltal":
         return (
-          <input
-            className="form-control"
-            type="text"
+          <TextField
+            id={field.id}
+            label={field.name}
+            className={classes.textField}
+            margin="normal"
+            variant="outlined"
             value={value}
             onChange={e => {
               this.setChanged();
@@ -233,9 +255,12 @@ class AttributeEditor extends React.PureComponent {
         );
       case "nummer":
         return (
-          <input
-            className="form-control"
-            type="text"
+          <TextField
+            id={field.id}
+            label={field.name}
+            className={classes.textField}
+            margin="normal"
+            variant="outlined"
             value={value}
             onChange={e => {
               this.setChanged();
@@ -261,9 +286,12 @@ class AttributeEditor extends React.PureComponent {
       case "url":
       case "fritext":
         return (
-          <input
-            className="form-control"
-            type="text"
+          <TextField
+            id={field.id}
+            label={field.name}
+            className={classes.textField}
+            margin="normal"
+            variant="outlined"
             value={value}
             onChange={e => {
               this.setChanged();
@@ -352,12 +380,11 @@ class AttributeEditor extends React.PureComponent {
     }
 
     var markup = this.props.source.editableFields.map((field, i) => {
-      var value = this.getValueMarkup(field);
+      var valueMarkup = this.getValueMarkup(field);
       this.updateFeature();
       return (
-        <div key={i} ref={field.name} className="field">
-          <div>{field.name}</div>
-          <div>{value}</div>
+        <div key={i} ref={field.name}>
+          {valueMarkup}
         </div>
       );
     });

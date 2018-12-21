@@ -2,8 +2,23 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Toolbar from "./components/Toolbar";
 import AttributeEditor from "./components/AttributeEditor";
+import Radio from "@material-ui/core/Radio";
+import RadioGroup from "@material-ui/core/RadioGroup";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import FormControl from "@material-ui/core/FormControl";
+import Typography from "@material-ui/core/Typography";
 
-const styles = theme => ({});
+const styles = theme => ({
+  root: {
+    display: "flex"
+  },
+  formControl: {
+    margin: theme.spacing.unit * 3
+  },
+  group: {
+    margin: `${theme.spacing.unit}px 0`
+  }
+});
 
 class EditView extends React.PureComponent {
   constructor(props) {
@@ -12,7 +27,8 @@ class EditView extends React.PureComponent {
       visible: false,
       enabled: false,
       checked: false,
-      sources: []
+      sources: props.model.getSources(),
+      selectedSource: undefined
     };
   }
 
@@ -59,15 +75,9 @@ class EditView extends React.PureComponent {
         // });
       }
     });
-
-    this.props.model.loadSources(sources => {
-      this.setState({
-        sources: sources
-      });
-    });
   }
 
-  setLayer(source) {
+  setLayer(serviceId) {
     var clear = () => {
       var time = new Date().getTime() - timer;
       if (time < 1000) {
@@ -81,16 +91,16 @@ class EditView extends React.PureComponent {
 
     var changeActiveLayer = () => {
       this.setState({
-        checked: source.caption,
         loading: true,
         enabled: true
       });
-      this.props.model.setLayer(source, clear);
+      this.props.model.setLayer(serviceId, clear);
     };
 
     var timer = new Date().getTime();
 
     // TODO: user confirm
+    this.props.model.reset();
     changeActiveLayer();
   }
 
@@ -98,37 +108,50 @@ class EditView extends React.PureComponent {
     return "Editera";
   }
 
-  renderOptions() {
-    return this.state.sources.map((source, i) => {
-      var id = "edit-layer-" + i;
-      return (
-        <div key={i}>
-          <input
-            id={id}
-            type="radio"
-            name="source"
-            checked={this.state.checked === source.caption}
-            onChange={e => {
-              this.setLayer(source);
-            }}
-          />
-          <label htmlFor={id}>{source.caption}</label>
-        </div>
-      );
-    });
+  renderSources() {
+    const { classes } = this.props;
+    return (
+      <FormControl component="fieldset" className={classes.formControl}>
+        <Typography variant="subtitle1">Välj data för redigering</Typography>
+        <RadioGroup
+          aria-label="Services"
+          name="services"
+          className={classes.group}
+          value={this.state.selectedSource}
+          onChange={e => {
+            this.setLayer(e.target.value);
+            this.setState({
+              selectedSource: e.target.value
+            });
+          }}
+        >
+          {this.state.sources.map((source, i) => {
+            return (
+              <FormControlLabel
+                key={i}
+                value={source.id}
+                control={<Radio />}
+                label={source.caption}
+              />
+            );
+          })}
+        </RadioGroup>
+      </FormControl>
+    );
   }
 
   render() {
     return (
       <>
         <div>
+          {this.renderSources()}
           <Toolbar
             ref="toolbar"
             enabled={this.state.enabled}
             model={this.props.model}
+            panel={this}
             observer={this.props.observer}
           />
-          <ul>{this.renderOptions()}</ul>
           <AttributeEditor
             ref="attributeEditor"
             feature={this.state.editFeature}

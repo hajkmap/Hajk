@@ -442,6 +442,15 @@
           "values": null,
           "hidden": false,
           "defaultValue": null
+        },
+        {
+          "index": 2,
+          "name": "image",
+          "dataType": "string",
+          "textType": "fritext",
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
         }
       ],
       "editPoint": true,
@@ -475,7 +484,7 @@
       ],
       "editPoint": false,
       "editPolygon": true,
-      "editLine": false,
+      "editLine": true,
       "infoVisible": false,
       "infoTitle": null,
       "infoText": null,
