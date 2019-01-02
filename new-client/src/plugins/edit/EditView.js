@@ -40,40 +40,8 @@ class EditView extends React.PureComponent {
       });
     });
 
-    this.props.observer.on("removeFeature", attr => {
-      if (this.props.model.removeFeature) {
-        //TODO: confirm
-        if (true) {
-          var feature = this.props.model.removeFeature;
-          this.props.model.select.getFeatures().remove(feature);
-          feature.modification = "removed";
-          feature.setStyle(this.props.model.getHiddenStyle());
-        } else {
-          this.props.model.removeFeature = undefined;
-        }
-
-        // this.setState({
-        //   alert: true,
-        //   alertMessage: ` Vill du ta bort markerat obekt?
-
-        //     Tryck därefter på sparaknappen för definitiv verkan.
-        //   `,
-        //   confirm: true,
-        //   confirmAction: () => {
-        //     var feature = this.props.model.get("removeFeature");
-        //     this.props.model
-        //       .get("select")
-        //       .getFeatures()
-        //       .remove(feature);
-        //     feature.modification = "removed";
-        //     feature.setStyle(this.props.model.getHiddenStyle());
-        //   },
-        //   denyAction: () => {
-        //     this.setState({ alert: false });
-        //     this.props.model.set("removeFeature", undefined);
-        //   }
-        // });
-      }
+    this.props.observer.on("removeFeature", feature => {
+      //TODO: confirm
     });
   }
 

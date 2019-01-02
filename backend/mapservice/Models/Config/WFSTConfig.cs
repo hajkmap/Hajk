@@ -21,7 +21,9 @@ namespace MapService.Models.Config
 
         public string url { get; set; }
 
-        public string projection { get; set; }
+		public string uri { get; set; }
+
+		public string projection { get; set; }
 
         public List<string> layers { get; set; }
 

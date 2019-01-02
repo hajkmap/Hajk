@@ -1,9 +1,13 @@
 import React from "react";
-import { MuiPickersUtilsProvider } from "material-ui-pickers";
-import DateFnsUtils from "@date-io/date-fns";
-import { DateTimePicker } from "material-ui-pickers";
 import { withStyles } from "@material-ui/core/styles";
+import Input from "@material-ui/core/Input";
 import TextField from "@material-ui/core/TextField";
+import Checkbox from "@material-ui/core/Checkbox";
+import NativeSelect from "@material-ui/core/NativeSelect";
+import FormLabel from "@material-ui/core/FormLabel";
+import FormControl from "@material-ui/core/FormControl";
+import FormGroup from "@material-ui/core/FormGroup";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
 
 const styles = theme => ({
   container: {
@@ -20,6 +24,17 @@ const styles = theme => ({
   },
   menu: {
     width: 200
+  },
+  formControl: {
+    marginTop: "8px",
+    marginBottom: "8px"
+  },
+  error: {
+    color: "rgb(255, 50, 50)",
+    backgroundColor: "rgb(255, 150, 150)",
+    padding: "5px",
+    border: "1px solid rgb(255, 50, 50)",
+    borderRadius: "4px"
   }
 });
 
@@ -30,6 +45,7 @@ class AttributeEditor extends React.PureComponent {
       disabled: true,
       formValues: {}
     };
+    this.formErrors = {};
   }
 
   componentDidMount() {
@@ -94,7 +110,7 @@ class AttributeEditor extends React.PureComponent {
     }
     this.setState(
       {
-        formValues: this.state.formValues
+        formValues: formValues
       },
       () => {
         this.updateFeature();
@@ -114,7 +130,7 @@ class AttributeEditor extends React.PureComponent {
     }
     this.setState(
       {
-        formValues: this.state.formValues
+        formValues: formValues
       },
       () => {
         this.updateFeature();
@@ -128,13 +144,15 @@ class AttributeEditor extends React.PureComponent {
     var formValues = Object.assign({}, this.state.formValues);
     if (valid || value === "") {
       formValues[name] = value;
+      delete this.formErrors[name];
     } else {
       formValues[name] = "";
-      // TODO: present show info about the error;s
+      this.formErrors[name] =
+        "Ange en giltig url. t.ex. https://www.example.com";
     }
     this.setState(
       {
-        formValues: this.state.formValues
+        formValues: formValues
       },
       () => {
         this.updateFeature();
@@ -173,7 +191,7 @@ class AttributeEditor extends React.PureComponent {
     formValues[name][index].checked = checked;
     this.setState(
       {
-        formValues: this.state.formValues
+        formValues: formValues
       },
       () => {
         this.updateFeature();
@@ -182,14 +200,8 @@ class AttributeEditor extends React.PureComponent {
   }
 
   checkDate(name, date) {
-    var value = "";
-    if (date.format) {
-      value = date.format("Y-MM-DD HH:mm:ss");
-    } else {
-      value = date;
-    }
     var formValues = Object.assign({}, this.state.formValues);
-    formValues[name] = value;
+    formValues[name] = date;
     this.updateFeature();
     this.setState(
       {
@@ -208,6 +220,13 @@ class AttributeEditor extends React.PureComponent {
     ) {
       this.props.model.editFeature.modification = "updated";
     }
+  }
+
+  getError(field) {
+    const { classes } = this.props;
+    return this.formErrors.hasOwnProperty(field.name) ? (
+      <div className={classes.error}>{this.formErrors[field.name]}</div>
+    ) : null;
   }
 
   getValueMarkup(field) {
@@ -270,42 +289,51 @@ class AttributeEditor extends React.PureComponent {
           />
         );
       case "datum":
-        if (typeof value === "string") {
-          value = value.replace("T", " ").replace("Z", "");
-        }
-        return (
-          <MuiPickersUtilsProvider utils={DateFnsUtils}>
-            <DateTimePicker
-              value={value}
-              onChange={date => {
-                this.checkDate(date);
-              }}
-            />
-          </MuiPickersUtilsProvider>
-        );
-      case "url":
-      case "fritext":
         return (
           <TextField
             id={field.id}
             label={field.name}
             className={classes.textField}
+            type="datetime-local"
             margin="normal"
             variant="outlined"
             value={value}
             onChange={e => {
               this.setChanged();
-              this.checkText(field.name, e.target.value);
+              this.checkDate(field.name, e.target.value);
               field.initialRender = false;
             }}
-            onBlur={e => {
-              this.setChanged();
-              if (field.textType === "url") {
-                this.checkUrl(field.name, e.target.value);
-              }
-              field.initialRender = false;
+            InputLabelProps={{
+              shrink: true
             }}
           />
+        );
+      case "url":
+      case "fritext":
+        return (
+          <>
+            <TextField
+              id={field.id}
+              label={field.name}
+              className={classes.textField}
+              margin="normal"
+              variant="outlined"
+              value={value}
+              onChange={e => {
+                this.setChanged();
+                this.checkText(field.name, e.target.value);
+                field.initialRender = false;
+              }}
+              onBlur={e => {
+                this.setChanged();
+                if (field.textType === "url") {
+                  this.checkUrl(field.name, e.target.value);
+                }
+                field.initialRender = false;
+              }}
+            />
+            {this.getError(field)}
+          </>
         );
       case "flerval":
         let defaultValues = [];
@@ -327,22 +355,30 @@ class AttributeEditor extends React.PureComponent {
             item = value.find(item => item.name === val) || { checked: false };
 
           return (
-            <div key={i}>
-              <input
-                type="checkbox"
-                id={id}
-                checked={item.checked}
-                onChange={e => {
-                  this.setChanged();
-                  this.checkMultiple(field.name, e.target.checked, val, i);
-                  field.initialRender = false;
-                }}
-              />
-              <label htmlFor={id}>{val}</label>
-            </div>
+            <FormControlLabel
+              key={id}
+              control={
+                <Checkbox
+                  checked={item.checked}
+                  onChange={e => {
+                    this.setChanged();
+                    this.checkMultiple(field.name, e.target.checked, val, i);
+                    field.initialRender = false;
+                  }}
+                />
+              }
+              label={val}
+            />
           );
         });
-        return <div>{checkboxes}</div>;
+        return (
+          <div className={classes.root}>
+            <FormControl component="fieldset" className={classes.formControl}>
+              <FormLabel component="legend">{field.name}</FormLabel>
+              <FormGroup>{checkboxes}</FormGroup>
+            </FormControl>
+          </div>
+        );
       case "lista":
         let options = null;
         if (Array.isArray(field.values)) {
@@ -352,20 +388,24 @@ class AttributeEditor extends React.PureComponent {
             </option>
           ));
         }
-
         return (
-          <select
-            className="form-control"
-            value={value}
-            onChange={e => {
-              this.setChanged();
-              this.checkSelect(field.name, e.target.value);
-              field.initialRender = false;
-            }}
-          >
-            <option value="">-Välj värde-</option>
-            {options}
-          </select>
+          <div className={classes.root}>
+            <FormControl component="fieldset" className={classes.formControl}>
+              <FormLabel component="legend">{field.name}</FormLabel>
+              <NativeSelect
+                value={value}
+                input={<Input name={field.name} id={field.name} />}
+                onChange={e => {
+                  this.setChanged();
+                  this.checkSelect(field.name, e.target.value);
+                  field.initialRender = false;
+                }}
+              >
+                <option value="">-Välj värde-</option>
+                {options}
+              </NativeSelect>
+            </FormControl>
+          </div>
         );
       case null:
         return <span>{value}</span>;

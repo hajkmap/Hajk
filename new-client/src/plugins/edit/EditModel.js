@@ -1,10 +1,10 @@
-import { WFS, GML } from "ol/format";
+import { WFS } from "ol/format";
 import { Style, Stroke, Fill, Circle, RegularShape } from "ol/style";
 import { MultiPoint, Polygon } from "ol/geom";
 import Vector from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { all as strategyAll } from "ol/loadingstrategy";
-import { Select, Modify, Draw, Translate } from "ol/interaction";
+import { Select, Modify, Draw, Translate, Snap } from "ol/interaction";
 import { never } from "ol/events/condition";
 import X2JS from "x2js";
 
@@ -35,20 +35,22 @@ class EditModel {
   write(features) {
     var format = new WFS(),
       lr = this.editSource.layers[0].split(":"),
-      ns = lr.length === 2 ? lr[0] : "",
+      fp = lr.length === 2 ? lr[0] : "",
       ft = lr.length === 2 ? lr[1] : lr[0],
       options = {
-        featureNS: ns,
+        featureNS: this.editSource.uri,
+        featurePrefix: fp,
         featureType: ft,
+        hasZ: false,
+        version: "1.1.0", // or "1.0.0"
         srsName: this.editSource.projection
-      },
-      gml = new GML(options);
+      };
 
     return format.writeTransaction(
       features.inserts,
       features.updates,
       features.deletes,
-      gml
+      options
     );
   }
 
@@ -84,7 +86,10 @@ class EditModel {
   }
 
   parseWFSTresponse(response) {
-    var str = new XMLSerializer().serializeToString(response);
+    var str =
+      typeof response !== "string"
+        ? new XMLSerializer().serializeToString(response)
+        : response;
     return new X2JS().xml2js(str);
   }
 
@@ -103,19 +108,19 @@ class EditModel {
         }
       })
         .then(response => {
-          response.text().then(data => {
+          response.text().then(wfsResponseText => {
             this.refreshLayer(src.layers[0]);
-            var wfsData = this.parseWFSTresponse(data);
             this.vectorSource
               .getFeatures()
               .filter(f => f.modification !== undefined)
               .forEach(f => (f.modification = undefined));
-            done(wfsData);
+            done(this.parseWFSTresponse(wfsResponseText));
           });
         })
-        .catch(errorData => {
-          var wfsData = this.parseWFSTresponse(errorData);
-          done(wfsData);
+        .catch(response => {
+          response.text().then(errorMessage => {
+            done(errorMessage);
+          });
         });
     }
   }
@@ -352,14 +357,6 @@ class EditModel {
   }
 
   featureSelected(event) {
-    if (this.removalToolMode === "on") {
-      event.selected.forEach(feature => {
-        this.removeFeature = feature;
-        this.emit("removeFeature", feature);
-      });
-      return;
-    }
-
     if (event.selected.length === 0) {
       this.editAttributes(null, null);
     }
@@ -370,6 +367,32 @@ class EditModel {
       }
       event.mapBrowserEvent.filty = true;
       this.editAttributes(feature);
+    });
+  }
+
+  refreshEditingLayer() {
+    var mapLayers = this.map
+      .getLayers()
+      .getArray()
+      .filter(
+        layer => layer.getProperties().caption === this.editSource.caption
+      );
+
+    mapLayers.forEach(mapLayer => {
+      if (mapLayer.getSource) {
+        let s = mapLayer.getSource();
+        if (s.clear) {
+          s.clear();
+        }
+        if (s.getParams) {
+          var params = s.getParams();
+          params.t = new Date().getMilliseconds();
+          s.updateParams(params);
+        }
+        if (s.changed) {
+          s.changed();
+        }
+      }
     });
   }
 
@@ -413,8 +436,12 @@ class EditModel {
     this.modify = new Modify({
       features: this.select.getFeatures()
     });
+    this.snap = new Snap({
+      source: this.vectorSource
+    });
     this.map.addInteraction(this.select);
     this.map.addInteraction(this.modify);
+    this.map.addInteraction(this.snap);
   }
 
   activateAdd(geometryType) {
@@ -424,11 +451,15 @@ class EditModel {
       type: geometryType,
       geometryName: this.geometryName
     });
+    this.snap = new Snap({
+      source: this.vectorSource
+    });
     this.draw.on("drawend", event => {
       event.feature.modification = "added";
       this.editAttributes(event.feature);
     });
     this.map.addInteraction(this.draw);
+    this.map.addInteraction(this.snap);
     this.map.clicklock = true;
   }
 
@@ -463,7 +494,12 @@ class EditModel {
   removeSelected = e => {
     this.map.forEachFeatureAtPixel(e.pixel, feature => {
       if (this.vectorSource.getFeatures().some(f => f === feature)) {
-        this.vectorSource.removeFeature(feature);
+        if (feature.modification === "added") {
+          feature.modification = undefined;
+        } else {
+          feature.modification = "removed";
+        }
+        feature.setStyle(this.getHiddenStyle());
       }
     });
   };
@@ -480,6 +516,9 @@ class EditModel {
     }
     if (this.move) {
       this.map.removeInteraction(this.move);
+    }
+    if (this.snap) {
+      this.map.removeInteraction(this.snap);
     }
     if (this.remove) {
       this.remove = false;

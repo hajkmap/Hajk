@@ -34,6 +34,7 @@ const defaultState = {
   id: "",
   caption: "",
   url: "",
+  uri: "",
   projection: "",
   point: false,
   linestring: false,
@@ -119,6 +120,7 @@ class Search extends Component {
       id: layer.id,
       caption: layer.caption,
       url: layer.url,
+      uri: layer.uri,
       projection: layer.projection || "EPSG:3006",
       addedLayers: [],
       point: layer.editPoint,
@@ -413,6 +415,7 @@ class Search extends Component {
         id: this.state.id,
         caption: this.getValue("caption"),
         url: this.getValue("url"),
+        uri: this.getValue("uri"),
         layers: this.getValue("layers"),
         projection: this.getValue("projection"),
         editableFields: this.getValue("editableFields"),
@@ -859,6 +862,24 @@ class Search extends Component {
                 >
                   Ladda lager {loader}
                 </span>
+              </div>
+              <div>
+                <label>Namespace Uri</label>
+                <input
+                  type="text"
+                  ref="input_uri"
+                  value={this.state.uri}
+                  onChange={e => {
+                    var v = e.target.value;
+                    this.setState(
+                      {
+                        uri: v
+                      },
+                      () => this.validateField("uri")
+                    );
+                  }}
+                  className={this.getValidationClass("uri")}
+                />
               </div>
               <div>
                 <label>Projektion</label>

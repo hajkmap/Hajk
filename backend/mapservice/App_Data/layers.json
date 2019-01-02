@@ -428,7 +428,8 @@
     {
       "id": "25",
       "caption": "Hållplats",
-      "url": "http://giscloud.se/geoserver/wfs",
+      "url": "https://giscloud.se/geoserver/wfs",
+      "uri": "https://giscloud.se/wsp",
       "projection": "EPSG:3006",
       "layers": [
         "wsp:hpl"
@@ -447,10 +448,80 @@
           "index": 2,
           "name": "image",
           "dataType": "string",
-          "textType": "fritext",
+          "textType": "url",
           "values": null,
           "hidden": false,
           "defaultValue": null
+        },
+        {
+          "index": 4,
+          "name": "datum",
+          "dataType": "date",
+          "textType": null,
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 5,
+          "name": "typ",
+          "dataType": "string",
+          "textType": "lista",
+          "values": [
+            "parkering",
+            "parkeringshus"
+          ],
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 6,
+          "name": "trafikslag",
+          "dataType": "string",
+          "textType": "flerval",
+          "values": [
+            "bil",
+            "lastbil",
+            "buss"
+          ],
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 7,
+          "name": "max_antal",
+          "dataType": "int",
+          "textType": null,
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 8,
+          "name": "medel_antal",
+          "dataType": "number",
+          "textType": null,
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 9,
+          "name": "datum_text",
+          "dataType": "string",
+          "textType": "datum",
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 10,
+          "name": "typkod",
+          "dataType": "string",
+          "textType": "fritext",
+          "values": null,
+          "hidden": false,
+          "defaultValue": "park"
         }
       ],
       "editPoint": true,
@@ -466,7 +537,8 @@
     {
       "id": "26",
       "caption": "Parkering",
-      "url": "http://giscloud.se/geoserver/wfs",
+      "url": "https://giscloud.se/geoserver/wfs",
+      "uri": "https://giscloud.se/wsp",
       "projection": "EPSG:3006",
       "layers": [
         "wsp:parking_lot"

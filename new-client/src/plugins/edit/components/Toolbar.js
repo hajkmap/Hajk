@@ -24,7 +24,7 @@ const styles = theme => ({
     fontSize: 20
   },
   toolbar: {
-    padding: "10px",
+    padding: "5px",
     borderRadius: "4px",
     boxShadow:
       "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)"
@@ -162,12 +162,10 @@ class Toolbar extends Component {
     if (!this.props.model.editSource) {
       return;
     }
-
-    this.props.model.save(data => {
-      //Todo: alert user;
-      this.props.model.setRemovalToolMode("off");
+    this.props.model.save(response => {
       this.props.model.filty = false;
-      this.props.panel.setLayer(this.props.model.editSource);
+      this.props.model.refreshEditingLayer();
+      this.onCancelClicked();
     });
   }
 
