@@ -10,7 +10,7 @@ const styles = theme => {
     drawer: {
       order: 1,
       zIndex: theme.zIndex.drawer - 1,
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("md")]: {
         zIndex: theme.zIndex.drawer + 1
       }
     },
@@ -20,7 +20,7 @@ const styles = theme => {
       zIndex: theme.zIndex.drawer - 1,
       overflowY: "inherit",
       border: "1px solid #ccc",
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("md")]: {
         border: "none",
         position: "fixed",
         width: "100%",
@@ -36,7 +36,7 @@ const styles = theme => {
       top: 0,
       margin: "0px",
       marginBottom: "0px",
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("md")]: {
         margin: 0
       }
     },
@@ -47,7 +47,7 @@ const styles = theme => {
       top: 0,
       margin: "0px",
       marginBottom: "0px",
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("md")]: {
         margin: 0
       }
     },

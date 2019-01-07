@@ -1,15 +1,32 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
+import Typography from "@material-ui/core/Typography";
+import LayersClearIcon from "@material-ui/icons/LayersClear";
+import { IconButton } from "@material-ui/core";
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
-import Button from "@material-ui/core/Button";
-import PublicIcon from "@material-ui/icons/Public";
 
 const styles = theme => ({
   button: {
-    margin: theme.spacing.unit
+    margin: 0,
+    cursor: "pointer",
+    userSelect: "none",
+    textAlign: "center",
+    color: "#000",
+    fontSize: "10pt",
+    [theme.breakpoints.down("md")]: {
+      width: "50px",
+      height: "50px",
+      marginRight: "30px",
+      outline: "none",
+      background: theme.palette.primary.main,
+      color: theme.palette.primary.contrastText,
+      "&:hover": {
+        background: theme.palette.primary.main
+      }
+    }
   },
   leftIcon: {
     marginRight: theme.spacing.unit
@@ -20,10 +37,39 @@ const styles = theme => ({
   iconSmall: {
     fontSize: 20
   },
+  icon: {
+    fontSize: "20pt"
+  },
   layerSwitcher: {},
-  reset: {
-    marginBottom: "10px"
-  }
+  reset: {},
+  card: {
+    cursor: "pointer",
+    width: "180px",
+    borderRadius: "4px",
+    background: "white",
+    padding: "10px 20px",
+    marginBottom: "10px",
+    display: "flex",
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    boxShadow:
+      "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
+    "&:hover": {
+      background: "#e9e9e9"
+    },
+    [theme.breakpoints.down("md")]: {
+      width: "auto",
+      justifyContent: "inherit",
+      marginBottom: "20px"
+    }
+  },
+  title: {
+    fontSize: "10pt",
+    fontWeight: "bold",
+    marginBottom: "5px"
+  },
+  text: {}
 });
 
 class SimpleLayersSwitcherView extends React.PureComponent {
@@ -33,6 +79,7 @@ class SimpleLayersSwitcherView extends React.PureComponent {
       t => t.type === "layerswitcher"
     ).options;
     this.state = {
+      windowWidth: window.innerWidth,
       layerGroupsExpanded: true,
       baseLayers: this.props.map
         .getLayers()
@@ -44,6 +91,12 @@ class SimpleLayersSwitcherView extends React.PureComponent {
         )
         .map(l => l.getProperties())
     };
+
+    window.addEventListener("resize", () => {
+      this.setState({
+        innerWidth: window.innerWidth
+      });
+    });
   }
 
   handleChange = (panel, instance) => (event, expanded) => {
@@ -87,9 +140,46 @@ class SimpleLayersSwitcherView extends React.PureComponent {
 
   renderBreadCrumbs() {
     return createPortal(
-      <BreadCrumbs map={this.props.map} />,
+      <BreadCrumbs map={this.props.map} model={this.props.model} />,
       document.getElementById("map")
     );
+  }
+
+  renderClearButton() {
+    const { classes } = this.props;
+
+    if (window.innerWidth < 1280) {
+      return createPortal(
+        <>
+          <div className={classes.card} onClick={this.clear}>
+            <div>
+              <IconButton className={classes.button}>
+                <LayersClearIcon />
+              </IconButton>
+            </div>
+            <div>
+              <Typography className={classes.title}>Rensa kartan</Typography>
+              <Typography className={classes.text}>
+                Återställ kartan till ursprungligt innehåll
+              </Typography>
+            </div>
+          </div>
+        </>,
+        document.getElementById("widgets-other")
+      );
+    } else {
+      return createPortal(
+        <div className={classes.reset} onClick={this.clear}>
+          <div className={classes.button}>
+            <div className={classes.icon}>
+              <LayersClearIcon />
+            </div>
+            <div>RENSA KARTAN</div>
+          </div>
+        </div>,
+        document.getElementById("toolbar-right")
+      );
+    }
   }
 
   clear = () => {
@@ -100,12 +190,6 @@ class SimpleLayersSwitcherView extends React.PureComponent {
     const { classes } = this.props;
     return (
       <div className={classes.layerSwitcher}>
-        <div className={classes.reset}>
-          <Button variant="contained" color="primary" onClick={this.clear}>
-            <PublicIcon />
-            &nbsp;Återställ
-          </Button>
-        </div>
         <div>
           <BackgroundSwitcher
             layers={this.state.baseLayers}
@@ -116,6 +200,7 @@ class SimpleLayersSwitcherView extends React.PureComponent {
           <div>{this.renderLayerGroups()}</div>
         </div>
         {this.renderBreadCrumbs()}
+        {this.renderClearButton()}
       </div>
     );
   }

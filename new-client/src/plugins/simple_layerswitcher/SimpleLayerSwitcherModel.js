@@ -12,6 +12,7 @@ class SimpleLayerSwitcherModel {
   }
 
   clear() {
+    this.clearing = true;
     this.olMap
       .getLayers()
       .getArray()
@@ -21,9 +22,16 @@ class SimpleLayerSwitcherModel {
           layer.getProperties().layerInfo &&
           layer.getProperties().layerInfo.layerType === "layer"
         ) {
-          layer.setVisible(false);
+          if (layer.layerType === "group") {
+            this.observer.emit("hideLayer", layer);
+          } else {
+            layer.setVisible(false);
+          }
         }
       });
+    setTimeout(() => {
+      this.clearing = false;
+    }, 100);
   }
 }
 

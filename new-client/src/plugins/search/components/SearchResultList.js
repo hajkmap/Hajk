@@ -9,40 +9,29 @@ import classNames from "classnames";
 const styles = theme => {
   return {
     searchResult: {
-      position: "absolute",
-      background: "white",
-      color: "black",
-      width: "100%",
-      maxWidth: "350px",
-      overflow: "auto",
-      padding: "10px",
-      border: "1px solid #ccc",
-      borderTop: "none",
-      top: "150px",
-      right: "10px",
-      [theme.breakpoints.down("md")]: {
-        top: "unset",
-        position: "relative",
-        right: "unset",
-        padding: "unset",
-        borderTop: "unset",
-        border: "unset"
-      },
-      [theme.breakpoints.down("xs")]: {
-        position: "static",
-        maxHeight: "inherit",
-        border: "none",
-        padding: 0
+      position: "static",
+      maxHeight: "inherit",
+      maxWidth: "inherit",
+      border: "none",
+      padding: 0,
+      [theme.breakpoints.up("lg")]: {
+        position: "absolute",
+        background: "white",
+        color: "black",
+        width: "100%",
+        maxWidth: "350px",
+        overflow: "auto",
+        padding: "10px",
+        border: "1px solid #ccc",
+        borderTop: "none",
+        top: "150px",
+        right: "10px"
       }
     },
     searchResultContainer: {
       maxHeight: "500px",
       overflow: "auto",
-      [theme.breakpoints.down("md")]: {
-        maxHeight: "250px",
-        borderTop: "1px solid #ccc"
-      },
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("lg")]: {
         maxHeight: "inherit"
       }
     },

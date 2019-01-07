@@ -6,6 +6,14 @@ using System.Threading.Tasks;
 
 namespace MapService.Models.Config
 {
+	public class SubLayerConfig
+	{
+		public string id { get; set; }
+		public string caption { get; set; }
+		public string legend { get; set; }
+		public string infobox { get; set; }
+	}
+
     public class WMSConfig : ILayerConfig
     {
         public string id { get; set; }
@@ -26,7 +34,9 @@ namespace MapService.Models.Config
 
         public string[] layers { get; set; }
 
-        public string infobox { get; set; }
+		public SubLayerConfig[] layersInfo { get; set; }
+
+		public string infobox { get; set; }
 
         public string[] searchFields { get; set; }   
              

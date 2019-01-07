@@ -511,6 +511,7 @@ class Manager extends Component {
     }
 
     layer = form.getLayer();
+
     if (this.state.mode === "add") {
       layer.type = this.state.layerType;
       layer.id = null;
@@ -616,6 +617,8 @@ class Manager extends Component {
     return {
       visible: this.state.alert,
       message: this.state.alertMessage,
+      contentType: this.state.contentType,
+      caption: this.state.caption,
       confirm: this.state.confirm,
       confirmAction: () => {
         this.state.confirmAction();

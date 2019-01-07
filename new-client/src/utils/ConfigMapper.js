@@ -4,7 +4,8 @@ export default class ConfigMapper {
   }
 
   mapWMSConfig(args, properties) {
-    function getLegendUrl() {
+    function getLegendUrl(layer) {
+      var legend = "";
       // If property exists in map settings, use specified legend options (font, color, size, etc)
       let geoserverLegendOptions = "";
       if (properties.mapConfig.map.hasOwnProperty("geoserverLegendOptions")) {
@@ -12,16 +13,43 @@ export default class ConfigMapper {
           "legend_options=" + properties.mapConfig.map.geoserverLegendOptions;
       }
 
-      if (args.legend === "") {
-        args.legend = `${proxy}${
-          args.url
-        }?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=60&HEIGHT=60&LAYER=${
-          args.layers[0]
-        }&${geoserverLegendOptions}`;
+      var w = 60;
+      var h = 60;
+
+      if (args.layers.length > 1) {
+        w = 30;
+        h = 30;
       }
 
-      var protocol = /^http/.test(args.legend) ? "" : "http://";
-      return protocol + args.legend;
+      if (args.legend === "") {
+        legend = `${proxy}${
+          args.url
+        }?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=${w}&HEIGHT=${h}&LAYER=${layer}&${geoserverLegendOptions}`;
+      }
+
+      var protocol = /^http/.test(legend) ? "" : "http://";
+      return protocol + legend;
+    }
+
+    function getLegends() {
+      return args.layers.map(layer => {
+        return {
+          url: getLegendUrl(layer),
+          description: "Teckenförklaring"
+        };
+      });
+    }
+
+    function mapLayersInfo(layersInfo) {
+      if (Array.isArray(layersInfo)) {
+        return layersInfo.reduce((layersInfoObject, layerInfo) => {
+          layersInfoObject[layerInfo.id] = layerInfo;
+          if (!layerInfo.legend) {
+            layersInfoObject[layerInfo.id].legend = getLegendUrl(layerInfo.id);
+          }
+          return layersInfoObject;
+        }, {});
+      }
     }
 
     var proxy = this.proxy || "";
@@ -50,12 +78,7 @@ export default class ConfigMapper {
         searchDisplayName: args.searchDisplayName,
         searchOutputFormat: args.searchOutputFormat,
         searchGeometryField: args.searchGeometryField,
-        legend: [
-          {
-            url: getLegendUrl(args),
-            description: "Teckenförklaring"
-          }
-        ],
+        legend: getLegends(),
         params: {
           LAYERS: args.layers.join(","),
           FORMAT: args.imageFormat,
@@ -63,6 +86,7 @@ export default class ConfigMapper {
           SRS: properties.mapConfig.map.projection || "EPSG:3006",
           TILED: args.tiled
         },
+        layersInfo: mapLayersInfo(args.layersInfo),
         infoVisible: args.infoVisible || false,
         infoTitle: args.infoTitle,
         infoText: args.infoText,

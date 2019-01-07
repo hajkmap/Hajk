@@ -6,7 +6,7 @@ import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import SatelliteIcon from "@material-ui/icons/Satellite";
 import Typography from "@material-ui/core/Typography";
 
-import Panel from "../../components/Panel.js";
+import Window from "../../components/Window.js";
 import InformativeView from "./InformativeView.js";
 import InformativeModel from "./InformativeModel.js";
 import Observer from "react-event-observer";
@@ -40,7 +40,8 @@ const styles = theme => {
       "&:hover": {
         background: "#e9e9e9"
       },
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("md")]: {
+        margin: "5px",
         width: "auto",
         justifyContent: "inherit"
       }
@@ -101,12 +102,15 @@ class Informative extends React.PureComponent {
   }
 
   renderPanel() {
+    var left = this.position === "right" ? (window.innerWidth - 410) / 2 : 0;
     return createPortal(
-      <Panel
+      <Window
         title={this.text}
         onClose={this.closePanel}
-        position={this.position}
         open={this.state.panelOpen}
+        height={window.innerHeight - 380}
+        top={80}
+        left={left}
       >
         <InformativeView
           app={this.app}
@@ -116,7 +120,7 @@ class Informative extends React.PureComponent {
           caption={this.props.options.caption}
           abstract={this.props.options.abstract}
         />
-      </Panel>,
+      </Window>,
       document.getElementById("map-overlay")
     );
   }

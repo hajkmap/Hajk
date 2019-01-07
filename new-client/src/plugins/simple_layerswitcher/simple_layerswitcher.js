@@ -5,7 +5,7 @@ import { IconButton } from "@material-ui/core";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import LayersIcon from "@material-ui/icons/Layers";
 import Typography from "@material-ui/core/Typography";
-import Panel from "../../components/Panel.js";
+import Window from "../../components/Window.js";
 import SimpleLayerSwitcherView from "./SimpleLayerSwitcherView.js";
 import SimpleLayerSwitcherModel from "./SimpleLayerSwitcherModel.js";
 import Observer from "react-event-observer";
@@ -39,10 +39,11 @@ const styles = theme => {
       "&:hover": {
         background: "#e9e9e9"
       },
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("md")]: {
         width: "auto",
         justifyContent: "inherit",
-        marginBottom: "20px"
+        margin: "5px",
+        marginBottom: "10px"
       }
     },
     title: {
@@ -88,11 +89,11 @@ class SimpleLayerSwitcher extends React.PureComponent {
 
   renderPanel() {
     return createPortal(
-      <Panel
+      <Window
         title={this.text}
         onClose={this.closePanel}
-        position={this.position}
         open={this.state.panelOpen}
+        height={window.innerHeight - 380}
       >
         <SimpleLayerSwitcherView
           app={this.props.app}
@@ -100,7 +101,7 @@ class SimpleLayerSwitcher extends React.PureComponent {
           model={this.simpleLayerSwitcherModel}
           observer={this.observer}
         />
-      </Panel>,
+      </Window>,
       document.getElementById("map-overlay")
     );
   }

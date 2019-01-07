@@ -302,7 +302,7 @@ class CollectorForm extends Component {
                 <br />
                 {this.renderOkButton()}
                 <Snackbar
-                  classes={classes}
+                  className={classes.anchorOriginBottomCenter}
                   anchorOrigin={{
                     vertical: "bottom",
                     horizontal: "center"

@@ -1,13 +1,13 @@
 import React, { Component } from "react";
 import Button from "@material-ui/core/Button";
-import IconButton from "@material-ui/core/IconButton";
 import IconWarning from "@material-ui/icons/Warning";
 import CallMadeIcon from "@material-ui/icons/CallMade";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
-import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
+import InfoIcon from "@material-ui/icons/Info";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import { withStyles } from "@material-ui/core/styles";
+import "./LayerGroupItem.js";
+import LayerGroupItem from "./LayerGroupItem.js";
 
 const styles = theme => ({
   button: {},
@@ -36,9 +36,28 @@ const styles = theme => ({
     boxShadow:
       "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)"
   },
+  layerItemInfo: {
+    display: "flex",
+    alignItems: "center"
+  },
   rightIcon: {
     marginLeft: theme.spacing.unit,
     fontSize: "16px"
+  },
+  layerInfo: {
+    display: "flex",
+    alignItems: "center",
+    padding: "3px",
+    border: "1px solid #ccc"
+  },
+  infoContainer: {
+    padding: "5px",
+    marginRight: "5px",
+    borderRight: "1px solid #ccc"
+  },
+  infoButton: {
+    fontSize: "14pt",
+    cursor: "pointer"
   }
 });
 
@@ -123,7 +142,7 @@ class LayerItem extends Component {
       this.state.legend[0] && this.state.legend[0].url
         ? this.state.legend[0].url
         : "";
-    return src ? <img width="60" alt="legend" src={src} /> : null;
+    return src ? <img width="30" alt="legend" src={src} /> : null;
   }
 
   openInformative = chapter => e => {
@@ -197,7 +216,6 @@ class LayerItem extends Component {
       return (
         <div>
           <div dangerouslySetInnerHTML={{ __html: this.state.infoText }} />
-          <div>{this.renderLegendImage()}</div>
           <div>{this.renderChapterLinks(this.props.chapters)}</div>
         </div>
       );
@@ -206,8 +224,7 @@ class LayerItem extends Component {
 
   render() {
     var caption = this.props.layer.get("caption"),
-      visible = this.state.visible,
-      open = this.state.open;
+      visible = this.state.visible;
 
     if (!caption) {
       return null;
@@ -215,34 +232,35 @@ class LayerItem extends Component {
 
     const { classes } = this.props;
 
+    if (this.props.layer.layerType === "group") {
+      return (
+        <LayerGroupItem layer={this.props.layer} model={this.props.model} />
+      );
+    }
+
     return (
       <div className={classes.layerItemContainer}>
         <div className={classes.layerItem}>
-          <div className={classes.caption}>
-            <span onClick={this.toggleVisible(this.props.layer)}>
+          <div className={classes.layerItemInfo}>
+            <div className={classes.infoContainer}>
+              <InfoIcon
+                onClick={() => this.toggle()}
+                className={classes.infoButton}
+              />
+            </div>
+            <div
+              className={classes.caption}
+              onClick={this.toggleVisible(this.props.layer)}
+            >
               {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
               {this.renderStatus()}
               <label className={classes.captionText}>
                 <strong>{caption}</strong>
               </label>
-            </span>
+            </div>
           </div>
           <div>
-            {open ? (
-              <IconButton
-                className={classes.button}
-                onClick={() => this.toggle()}
-              >
-                <RemoveCircleIcon />
-              </IconButton>
-            ) : (
-              <IconButton
-                className={classes.button}
-                onClick={() => this.toggle()}
-              >
-                <AddCircleIcon />
-              </IconButton>
-            )}
+            <div className={classes.layerInfo}>{this.renderLegendImage()}</div>
           </div>
         </div>
         {this.renderDetails()}

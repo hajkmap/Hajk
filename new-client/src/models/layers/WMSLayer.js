@@ -24,6 +24,7 @@ class WMSLayer {
     this.legend = config.legend;
     this.attribution = config.attribution;
     this.layerInfo = new LayerInfo(config);
+    this.subLayers = config.params["LAYERS"].split(",");
 
     var source = {
       url: config.url,
@@ -31,7 +32,9 @@ class WMSLayer {
       projection: config.projection,
       serverType: config.serverType,
       imageFormat: config.imageFormat,
-      attributions: this.getAttributions()
+      attributions: this.getAttributions(),
+      cacheSize: this.subLayers.length > 1 ? 0 : 2048,
+      transition: this.subLayers.length > 1 ? 0 : 100
     };
 
     if (
@@ -71,8 +74,6 @@ class WMSLayer {
       });
     }
 
-    this.subLayers = config.params["LAYERS"].split(",");
-
     this.layer.getSource().on("tileloaderror", e => {
       this.tileLoadError();
     });
@@ -87,6 +88,9 @@ class WMSLayer {
       }
     });
 
+    this.layer.layersInfo = config.layersInfo;
+    this.layer.subLayers = this.subLayers;
+    this.layer.layerType = this.subLayers.length > 1 ? "group" : "layer";
     this.layer.getSource().set("url", config.url);
     this.type = "wms";
   }

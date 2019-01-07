@@ -32,6 +32,7 @@ const defaultState = {
   validationErrors: [],
   layers: [],
   addedLayers: [],
+  addedLayersInfo: {},
   id: "",
   caption: "",
   content: "",
@@ -126,15 +127,26 @@ class WMSLayerForm extends Component {
 
   appendLayer(e, checkedLayer, opts = {}) {
     if (e.target.checked === true) {
+      let addedLayersInfo = { ...this.state.addedLayersInfo };
+      addedLayersInfo[checkedLayer] = {
+        id: checkedLayer,
+        caption: "",
+        legend: "",
+        infobox: ""
+      };
       this.setState(
         {
-          addedLayers: [...this.state.addedLayers, checkedLayer]
+          addedLayers: [...this.state.addedLayers, checkedLayer],
+          addedLayersInfo: addedLayersInfo
         },
         () => this.validateLayers(opts)
       );
     } else {
+      let addedLayersInfo = { ...this.state.addedLayersInfo };
+      delete addedLayersInfo[checkedLayer];
       this.setState(
         {
+          addedLayersInfo: addedLayersInfo,
           addedLayers: this.state.addedLayers.filter(
             layer => layer !== checkedLayer
           )
@@ -142,6 +154,39 @@ class WMSLayerForm extends Component {
         () => this.validateLayers(opts)
       );
     }
+  }
+
+  renderLayerInfoInput(layerInfo) {
+    return (
+      <div>
+        <label>Visningsnamn&nbsp;</label>
+        <input
+          value={layerInfo.caption}
+          onChange={e => {
+            let addedLayersInfo = this.state.addedLayersInfo;
+            addedLayersInfo[layerInfo.id].caption = e.target.value;
+            this.setState(
+              {
+                addedLayersInfo: addedLayersInfo
+              },
+              () => {
+                this.renderLayerInfoDialog(layerInfo);
+              }
+            );
+          }}
+          type="text"
+        />
+      </div>
+    );
+  }
+
+  renderLayerInfoDialog(layerInfo) {
+    this.props.parent.setState({
+      alert: true,
+      alertMessage: this.renderLayerInfoInput(layerInfo),
+      contentType: "react",
+      caption: "Inställningar för lager"
+    });
   }
 
   renderSelectedLayers() {
@@ -162,7 +207,13 @@ class WMSLayerForm extends Component {
 
     return this.state.addedLayers.map((layer, i) => (
       <li className="layer" key={"addedLayer_" + i}>
-        <span>{layer}</span>
+        <span
+          onClick={() => {
+            this.renderLayerInfoDialog(this.state.addedLayersInfo[layer]);
+          }}
+        >
+          {layer}
+        </span>
         &nbsp;
         <i className="fa fa-times" onClick={uncheck.bind(this, layer)} />
       </li>
@@ -249,8 +300,27 @@ class WMSLayerForm extends Component {
 
   loadLayers(layer, callback) {
     this.loadWMSCapabilities(undefined, () => {
+      var addedLayersInfo = {};
+      if (layer.layersInfo) {
+        addedLayersInfo = layer.layersInfo.reduce((c, l) => {
+          c[l.id] = l;
+          return c;
+        }, {});
+      } else {
+        addedLayersInfo = {};
+        layer.layers.forEach(layer => {
+          addedLayersInfo[layer] = {
+            id: layer,
+            caption: "",
+            legend: "",
+            infobox: ""
+          };
+        });
+      }
+      console.log(addedLayersInfo);
       this.setState({
-        addedLayers: layer.layers
+        addedLayers: layer.layers,
+        addedLayersInfo: addedLayersInfo
       });
       Object.keys(this.refs).forEach(element => {
         if (this.refs[element].dataset.type === "wms-layer") {
@@ -272,6 +342,7 @@ class WMSLayerForm extends Component {
     this.setState({
       load: true,
       addedLayers: [],
+      addedLayersInfo: {},
       capabilities: false,
       layerProperties: undefined,
       layerPropertiesName: undefined
@@ -311,6 +382,7 @@ class WMSLayerForm extends Component {
       content: this.getValue("content"),
       legend: this.getValue("legend"),
       layers: this.getValue("layers"),
+      layersInfo: this.getValue("layersInfo"),
       infobox: this.getValue("infobox"),
       singleTile: this.getValue("singleTile"),
       imageFormat: this.getValue("imageFormat"),
@@ -344,6 +416,12 @@ class WMSLayerForm extends Component {
       return layers.map(layer => layer);
     }
 
+    function format_layers_info(layersInfo) {
+      return Object.keys(layersInfo).map(layerInfo => ({
+        ...layersInfo[layerInfo]
+      }));
+    }
+
     var input = this.refs["input_" + fieldName],
       value = input ? input.value : "";
 
@@ -352,6 +430,8 @@ class WMSLayerForm extends Component {
     if (fieldName === "tiled") value = input.checked;
     if (fieldName === "queryable") value = input.checked;
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
+    if (fieldName === "layersInfo")
+      value = format_layers_info(this.state.addedLayersInfo);
     if (fieldName === "infoVisible") value = input.checked;
 
     return value;

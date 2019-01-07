@@ -54,7 +54,7 @@ class SearchWithinButton extends React.Component {
         </Tooltip>
         {createPortal(
           <Snackbar
-            classes={classes}
+            className={classes.anchorOriginBottomCenter}
             anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
             open={this.state.active ? true : false}
             ContentProps={{

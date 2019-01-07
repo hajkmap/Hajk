@@ -14,7 +14,6 @@ import { SnackbarProvider, withSnackbar } from "notistack";
 import Toolbar from "./Toolbar.js";
 import Popup from "./Popup.js";
 import MapSwitcher from "./MapSwitcher";
-import Panel from "./Panel";
 
 import classNames from "classnames";
 
@@ -37,6 +36,7 @@ const styles = theme => {
       }
     },
     toolbarRoot: {
+      justifyContent: "space-between",
       [theme.breakpoints.down("xs")]: {
         justifyContent: "space-between"
       }
@@ -45,10 +45,15 @@ const styles = theme => {
       position: "fixed",
       zIndex: 1100,
       top: 0,
-      boxShadow: "none"
+      boxShadow: "none",
+      color: "black"
+    },
+    toolbarContent: {
+      display: "flex",
+      alignItems: "center"
     },
     appBar: {
-      zIndex: 1200,
+      zIndex: 1,
       background: "white",
       color: "black"
     },
@@ -77,18 +82,14 @@ const styles = theme => {
       left: 0,
       bottom: 0,
       position: "absolute",
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("md")]: {
         flexDirection: "column"
       }
     },
     overlayVisible: {
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("md")]: {
         zIndex: 1,
         background: "white"
-      },
-      [theme.breakpoints.down("s")]: {
-        zIndex: "auto",
-        background: "inherit"
       }
     },
     widgets: {
@@ -97,19 +98,19 @@ const styles = theme => {
       minHeight: "50px",
       margin: "5px",
       overflow: "visible",
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("md")]: {
         display: "none"
       }
     },
     widgetsVisible: {
-      display: "block",
+      display: "block !important",
       margin: 0,
       padding: 0
     },
     widgetsLeft: {
       left: "8px",
       top: "8px",
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("md")]: {
         right: "inherit",
         left: "inherit",
         position: "static"
@@ -118,18 +119,23 @@ const styles = theme => {
     widgetsRight: {
       right: "45px",
       top: "8px",
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("md")]: {
         right: "inherit",
         left: "inherit",
         position: "static",
         marginTop: "-10px"
       }
     },
+    widgetsOther: {
+      [theme.breakpoints.down("md")]: {
+        display: "none"
+      }
+    },
     widgetMenuIcon: {
-      [theme.breakpoints.up("xs")]: {
+      [theme.breakpoints.up("md")]: {
         display: "none"
       },
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("md")]: {
         display: "inline-block"
       }
     },
@@ -142,28 +148,9 @@ const styles = theme => {
     visible: {
       display: "block"
     },
-    searchOverlay: {
-      position: "fixed",
-      top: 0,
-      left: 0,
-      bottom: 0,
-      right: 0,
-      zIndex: 2000,
-      background: "white"
-    },
     searchIcon: {
-      [theme.breakpoints.up("xs")]: {
-        display: "none"
-      },
-      [theme.breakpoints.down("xs")]: {
-        display: "block"
-      }
-    },
-    mobileSearchPanel: {
-      [theme.breakpoints.down("xs")]: {
-        display: "block !important"
-      },
-      [theme.breakpoints.up("xs")]: {
+      display: "block",
+      [theme.breakpoints.up("lg")]: {
         display: "none"
       }
     }
@@ -174,7 +161,8 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      mapClickDataResult: {}
+      mapClickDataResult: {},
+      searchVisible: window.innerWidth > 1280
     };
     this.globalObserver = new Observer();
     this.appModel = new AppModel(props.config, this.globalObserver);
@@ -198,16 +186,31 @@ class App extends Component {
       });
     });
 
-    this.globalObserver.subscribe("hideSearchPanel", () => {
-      this.setState({
-        searchVisible: false
-      });
+    this.globalObserver.subscribe("hideSearchPanel", forced => {
+      if (window.innerWidth < 1280 || forced) {
+        this.setState({
+          searchVisible: false,
+          forced: false
+        });
+      }
     });
 
     this.globalObserver.subscribe("mapClick", mapClickDataResult => {
       this.setState({
         mapClickDataResult: mapClickDataResult
       });
+    });
+
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 1280) {
+        this.setState({
+          searchVisible: true
+        });
+      } else {
+        this.setState({
+          searchVisible: this.state.forced
+        });
+      }
     });
   }
 
@@ -266,7 +269,8 @@ class App extends Component {
           map={searchPlugin.map}
           app={searchPlugin.app}
           options={searchPlugin.options}
-          mobile={mobile}
+          visible={this.state.searchVisible}
+          mobile={window.innerWidth < 1280}
         />
       );
     } else {
@@ -292,6 +296,7 @@ class App extends Component {
 
     var widgetClassesLeft = classNames(classes.widgets, classes.widgetsLeft);
     var widgetClassesRight = classNames(classes.widgets, classes.widgetsRight);
+    var widgetClassesOther = classNames(classes.widgetsOther);
     var overlayClasses = classes.overlay;
     if (widgetsVisible) {
       widgetClassesLeft = classNames(
@@ -302,6 +307,10 @@ class App extends Component {
       widgetClassesRight = classNames(
         classes.widgets,
         classes.widgetsRight,
+        classes.widgetsVisible
+      );
+      widgetClassesOther = classNames(
+        classes.widgetsOther,
         classes.widgetsVisible
       );
       overlayClasses = classNames(classes.overlay, classes.overlayVisible);
@@ -319,28 +328,33 @@ class App extends Component {
         <>
           <AppBar position="absolute" className={classes.appBar}>
             <MUIToolbar className={classes.toolbarRoot}>
-              <span className={classes.logo}>
-                <img src={config.mapConfig.map.logo} alt="logo" />
-              </span>
-              {this.renderWidgetMenuIcon()}
-              <Toolbar
-                tools={this.appModel.getToolbarPlugins()}
-                parent={this}
-              />
-              <span className={classes.title}>
-                <Typography variant="h6">
-                  {config.mapConfig.map.title}
-                </Typography>
-              </span>
-              <SearchIcon
-                className={classes.searchIcon}
-                onClick={() => {
-                  this.setState({
-                    searchVisible: !this.state.searchVisible,
-                    widgetsVisible: false
-                  });
-                }}
-              />
+              <div id="toolbar-left" className={classes.toolbarContent}>
+                <div className={classes.logo}>
+                  <img src={config.mapConfig.map.logo} alt="logo" />
+                </div>
+                {this.renderWidgetMenuIcon()}
+                <Toolbar
+                  tools={this.appModel.getToolbarPlugins()}
+                  parent={this}
+                />
+                <span className={classes.title}>
+                  <Typography variant="h6">
+                    {config.mapConfig.map.title}
+                  </Typography>
+                </span>
+              </div>
+              <div id="toolbar-right" className={classes.toolbarContent}>
+                <SearchIcon
+                  className={classes.searchIcon}
+                  onClick={() => {
+                    this.setState({
+                      searchVisible: !this.state.searchVisible,
+                      forced: true,
+                      widgetsVisible: false
+                    });
+                  }}
+                />
+              </div>
               {this.renderMapSwitcher()}
             </MUIToolbar>
           </AppBar>
@@ -354,28 +368,17 @@ class App extends Component {
                 });
               }}
             />
-            {this.renderSearchPlugin()}
-            <div className={classes.mobileSearchPanel}>
-              <Panel
-                title={"Sök i kartan"}
-                onClose={() => {
-                  this.setState({
-                    searchVisible: false
-                  });
-                }}
-                position="left"
-                open={this.state.searchVisible}
-              >
-                {this.renderSearchPlugin("mobile")}
-              </Panel>
+            <div className={classes.searchPanel}>
+              {this.renderSearchPlugin()}
             </div>
             <div id="map-overlay" className={overlayClasses}>
               <div className={widgetClassesLeft}>
                 {this.renderWidgets("left")}
               </div>
-              <div className={widgetClassesRight}>
+              <div className={widgetClassesRight} id="widgets-right">
                 {this.renderWidgets("right")}
               </div>
+              <div id="widgets-other" className={widgetClassesOther} />
             </div>
           </main>
         </>

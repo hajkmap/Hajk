@@ -356,36 +356,57 @@
             "expanded": false,
             "layers": [
               {
-                "id": "22",
+                "id": "27",
                 "visibleAtStart": true,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "29",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "28",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "22",
+                "visibleAtStart": false,
                 "drawOrder": 7,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
                 "id": "23",
-                "visibleAtStart": true,
+                "visibleAtStart": false,
                 "drawOrder": 2,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
                 "id": "16",
-                "visibleAtStart": true,
+                "visibleAtStart": false,
                 "drawOrder": 5,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
                 "id": "14",
-                "visibleAtStart": true,
+                "visibleAtStart": false,
                 "drawOrder": 6,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
                 "id": "17",
-                "visibleAtStart": true,
+                "visibleAtStart": false,
                 "drawOrder": 4,
                 "visibleForGroups": null,
                 "infobox": null
@@ -420,7 +441,7 @@
         "visibleAtStart": false,
         "visibleForGroups": []
       },
-      "index": 0
+      "index": 5
     },
     {
       "type": "collector",
@@ -432,7 +453,7 @@
         "visibleAtStart": false,
         "visibleForGroups": []
       },
-      "index": 0
+      "index": 4
     },
     {
       "type": "informative",
@@ -446,7 +467,7 @@
         "visibleAtStart": false,
         "visibleForGroups": []
       },
-      "index": 0
+      "index": 2
     },
     {
       "type": "information",
@@ -459,7 +480,7 @@
         "base64EncodeForInfotext": false,
         "visibleForGroups": []
       },
-      "index": 0
+      "index": 1
     },
     {
       "type": "search",
@@ -499,7 +520,7 @@
           "15"
         ]
       },
-      "index": 0
+      "index": 3
     }
   ],
   "map": {
@@ -508,7 +529,7 @@
       416000,
       6583000
     ],
-    "title": "op",
+    "title": "Översiktsplan",
     "projection": "EPSG:3006",
     "zoom": 12,
     "maxZoom": 3,
@@ -539,7 +560,7 @@
       1000000.0,
       9000000.0
     ],
-    "logo": "assets/logo.png",
+    "logo": "http://logodust.com/img/free/logo33.png",
     "infologo": "",
     "geoserverLegendOptions": "",
     "mobileleft": null,

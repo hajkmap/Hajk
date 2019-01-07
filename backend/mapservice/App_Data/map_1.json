@@ -211,26 +211,16 @@
             "name": "Medborgardialog",
             "toggled": false,
             "expanded": false,
-            "layers": [],
-            "groups": [
+            "layers": [
               {
-                "id": "07920b13-c2e1-fdc9-b88b-9eb75da49ac6",
-                "parent": "f499fa2b-ad0a-cecd-c118-2e7037b541b1",
-                "name": "Ny grupp",
-                "toggled": false,
-                "expanded": true,
-                "layers": [
-                  {
-                    "id": "15",
-                    "visibleAtStart": false,
-                    "drawOrder": 7,
-                    "visibleForGroups": null,
-                    "infobox": null
-                  }
-                ],
-                "groups": []
+                "id": "15",
+                "visibleAtStart": false,
+                "drawOrder": 7,
+                "visibleForGroups": null,
+                "infobox": null
               }
-            ]
+            ],
+            "groups": []
           },
           {
             "id": "eff9c88f-fc3a-05c2-3a15-285712099854",
@@ -239,6 +229,27 @@
             "toggled": false,
             "expanded": true,
             "layers": [
+              {
+                "id": "27",
+                "visibleAtStart": true,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "29",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "28",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
               {
                 "id": "23",
                 "visibleAtStart": false,
@@ -255,22 +266,22 @@
               },
               {
                 "id": "16",
-                "visibleAtStart": true,
+                "visibleAtStart": false,
                 "drawOrder": 4,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
-                "id": "17",
-                "visibleAtStart": true,
-                "drawOrder": 3,
+                "id": "14",
+                "visibleAtStart": false,
+                "drawOrder": 6,
                 "visibleForGroups": null,
                 "infobox": null
               },
               {
-                "id": "14",
-                "visibleAtStart": true,
-                "drawOrder": 6,
+                "id": "17",
+                "visibleAtStart": false,
+                "drawOrder": 3,
                 "visibleForGroups": null,
                 "infobox": null
               }

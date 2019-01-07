@@ -40,7 +40,8 @@ const styles = theme => {
       "&:hover": {
         background: "#e9e9e9"
       },
-      [theme.breakpoints.down("xs")]: {
+      [theme.breakpoints.down("md")]: {
+        margin: "5px",
         width: "auto",
         justifyContent: "inherit"
       }

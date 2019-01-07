@@ -175,19 +175,25 @@ class Alert extends Component {
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
-                <h4 className="modal-title">Meddelande</h4>
+                <h4 className="modal-title">
+                  {options.caption || "Meddelande"}
+                </h4>
               </div>
               <div className="modal-body">
-                <p>
-                  {options.message.split("\n").map(function(text, i) {
-                    return (
-                      <span key={i}>
-                        <span>{text}</span>
-                        <br />
-                      </span>
-                    );
-                  })}
-                </p>
+                {options.contentType === "react" ? (
+                  options.message
+                ) : (
+                  <p>
+                    {options.message.split("\n").map(function(text, i) {
+                      return (
+                        <span key={i}>
+                          <span>{text}</span>
+                          <br />
+                        </span>
+                      );
+                    })}
+                  </p>
+                )}
               </div>
               <div className="modal-footer">
                 <button
