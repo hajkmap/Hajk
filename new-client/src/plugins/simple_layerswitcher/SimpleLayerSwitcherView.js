@@ -106,7 +106,9 @@ class SimpleLayersSwitcherView extends React.PureComponent {
       },
       () => {
         setTimeout(() => {
-          instance.refs.panelElement.scrollIntoView();
+          var parent = instance.refs.panelElement.offsetParent;
+          var topOfElement = instance.refs.panelElement.offsetTop;
+          parent.scroll({ top: topOfElement, behavior: "smooth" });
         }, 50);
       }
     );

@@ -26,6 +26,13 @@ const styles = theme => {
         height: "unset !important"
       }
     },
+    panelContent: {
+      position: "absolute",
+      top: 0,
+      right: 0,
+      left: 0,
+      bottom: 0
+    },
     content: {
       position: "absolute",
       top: "46px",
@@ -76,9 +83,11 @@ class Panel extends Component {
           height: this.props.height || 600
         }}
       >
-        <PanelHeader onClose={this.close} title={title} />
-        <div className={classes.content}>
-          <div className={classes.drawerPaperContent}>{children}</div>
+        <div className={classes.panelContent}>
+          <PanelHeader onClose={this.close} title={title} />
+          <div className={classes.content}>
+            <div className={classes.drawerPaperContent}>{children}</div>
+          </div>
         </div>
       </Rnd>
     );
