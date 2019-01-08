@@ -94,6 +94,7 @@ class SimpleLayerSwitcher extends React.PureComponent {
         onClose={this.closePanel}
         open={this.state.panelOpen}
         height={window.innerHeight - 380}
+        top={145}
       >
         <SimpleLayerSwitcherView
           app={this.props.app}
@@ -102,7 +103,7 @@ class SimpleLayerSwitcher extends React.PureComponent {
           observer={this.observer}
         />
       </Window>,
-      document.getElementById("map-overlay")
+      document.getElementById("root")
     );
   }
 

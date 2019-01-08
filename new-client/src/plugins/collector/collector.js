@@ -5,7 +5,7 @@ import { IconButton } from "@material-ui/core";
 import RateReviewIcon from "@material-ui/icons/RateReview";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import Observer from "react-event-observer";
-import Panel from "../../components/Panel.js";
+import Window from "../../components/Window.js";
 import Typography from "@material-ui/core/Typography";
 
 import CollectorView from "./CollectorView.js";
@@ -71,6 +71,7 @@ class Collector extends Component {
       options: props.options
     });
     this.app = props.app;
+    this.app.registerPanel(this);
   }
 
   onClick = e => {
@@ -95,12 +96,16 @@ class Collector extends Component {
   onClose = () => {};
 
   renderPanel() {
+    var left = this.position === "right" ? (window.innerWidth - 410) / 2 : 0;
     return createPortal(
-      <Panel
+      <Window
         title={this.text}
         onClose={this.closePanel}
         position={this.position}
         open={this.state.panelOpen}
+        height={450}
+        top={145}
+        left={left}
       >
         <CollectorView
           onClose={this.onClose}
@@ -109,8 +114,8 @@ class Collector extends Component {
           closePanel={this.closePanel}
           openPanel={this.openPanel}
         />
-      </Panel>,
-      document.getElementById("map-overlay")
+      </Window>,
+      document.getElementById("root")
     );
   }
 

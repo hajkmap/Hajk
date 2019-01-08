@@ -53,7 +53,7 @@ const styles = theme => {
       alignItems: "center"
     },
     appBar: {
-      zIndex: 1,
+      zIndex: 2,
       background: "white",
       color: "black"
     },

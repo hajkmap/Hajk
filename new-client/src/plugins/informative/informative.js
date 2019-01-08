@@ -108,8 +108,9 @@ class Informative extends React.PureComponent {
         title={this.text}
         onClose={this.closePanel}
         open={this.state.panelOpen}
+        position={this.position}
         height={window.innerHeight - 380}
-        top={80}
+        top={145}
         left={left}
       >
         <InformativeView
@@ -121,7 +122,7 @@ class Informative extends React.PureComponent {
           abstract={this.props.options.abstract}
         />
       </Window>,
-      document.getElementById("map-overlay")
+      document.getElementById("root")
     );
   }
 

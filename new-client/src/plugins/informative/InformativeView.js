@@ -5,36 +5,35 @@ import MapIcon from "@material-ui/icons/Map";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import MenuIcon from "@material-ui/icons/Menu";
 import Typography from "@material-ui/core/Typography";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
 import BreadCrumbs from "./components/BreadCrumbs.js";
+import AddCircleIcon from "@material-ui/icons/AddCircle";
+import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
 
 const styles = theme => ({
-  backButtonContainer: {
-    display: "inline-block",
-    cursor: "pointer"
-  },
-  backButton: {
-    display: "flex",
-    alignItems: "center"
-  },
-  backButtonText: {
-    display: "inline-block",
-    textTransform: "uppercase",
-    fontWeight: 500,
-    position: "relative",
-    top: "2px"
-  },
   rightIcon: {
     marginLeft: theme.spacing.unit
   },
-  chapter: {
-    border: "1px solid #ccc",
-    margin: "5px 0"
-  },
+  chapter: {},
   toc: {
-    margin: "10px 0"
+    marginBottom: "10px"
+  },
+  tocContainer: {
+    borderBottom: "1px solid #ccc",
+    padding: "10px 0"
+  },
+  tocChapter: {
+    display: "flex",
+    cursor: "pointer"
+  },
+  tocChapters: {
+    marginLeft: "10px"
+  },
+  tocChapterExpander: {
+    width: "30px",
+    height: "30px"
+  },
+  tocChapterHeader: {
+    textDecoration: "underline"
   },
   content: {
     "& img": {
@@ -122,22 +121,44 @@ class Informative extends React.PureComponent {
     var { classes } = this.props;
     return chapters.map((chapter, i) => {
       return (
-        <ListItem
-          button
-          key={i}
-          className={classes.chapter}
-          onClick={() => {
-            var state = {
-              chapters: chapter.chapters,
-              chapter: chapter,
-              tocVisible: false
-            };
-            this.setState(state);
-          }}
-        >
-          {" "}
-          <ListItemText primary={chapter.header} />
-        </ListItem>
+        <div key={i} className={classes.chapter}>
+          <div className={classes.tocChapter}>
+            <div
+              className={classes.tocChapterExpander}
+              onClick={() => {
+                chapter.tocExpanded = !chapter.tocExpanded;
+                this.forceUpdate();
+              }}
+            >
+              {chapter.chapters.length === 0 ? (
+                ""
+              ) : chapter.tocExpanded ? (
+                <RemoveCircleIcon />
+              ) : (
+                <AddCircleIcon />
+              )}
+            </div>
+            <div
+              className={classes.tocChapterHeader}
+              onClick={() => {
+                var state = {
+                  chapters: chapter.chapters,
+                  chapter: chapter,
+                  tocVisible: false
+                };
+                this.setState(state);
+              }}
+            >
+              {chapter.header}
+            </div>
+          </div>
+          <div
+            className={classes.tocChapters}
+            style={{ display: chapter.tocExpanded ? "block" : "none" }}
+          >
+            {this.renderTocItem(chapter.chapters)}
+          </div>
+        </div>
       );
     });
   }
@@ -208,9 +229,9 @@ class Informative extends React.PureComponent {
   renderChapters() {
     const { classes } = this.props;
     const { tocVisible } = this.state;
-    if (!this.state.chapters || this.state.chapters.length === 0) {
-      return null;
-    }
+    // if (!this.state.chapters || this.state.chapters.length === 0) {
+    //   return null;
+    // }
     return (
       <div className={classes.toc}>
         <Button variant="contained" onClick={this.toggleToc}>
@@ -218,7 +239,9 @@ class Informative extends React.PureComponent {
           <MenuIcon color="primary" className={classes.rightIcon} />
         </Button>
         {tocVisible ? (
-          <List component="nav">{this.renderTocItem(this.state.chapters)}</List>
+          <div className={classes.tocContainer} component="nav">
+            {this.renderTocItem(this.toc || [])}
+          </div>
         ) : null}
       </div>
     );

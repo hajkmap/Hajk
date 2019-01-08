@@ -31,7 +31,7 @@ class AppModel {
         if (panel.position === currentPanel.position) {
           panel.closePanel();
         }
-        if (document.body.scrollWidth < 600) {
+        if (window.innerWidth < 1280) {
           panel.closePanel();
           this.globalObserver.publish("panelOpened");
         }
