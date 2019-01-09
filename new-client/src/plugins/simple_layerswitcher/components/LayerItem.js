@@ -240,7 +240,7 @@ class LayerItem extends Component {
     if (infoUrl) {
       return (
         <div>
-          <a href={infoUrl} target="_blank">
+          <a href={infoUrl} target="_blank" rel="noopener noreferrer">
             {infoUrlText || infoUrl}
           </a>
         </div>

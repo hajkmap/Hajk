@@ -14,6 +14,8 @@
   --blue3: #5773ff;
   --blue4: #665eff;
 
+  --zoomHover: #0065a6;
+
   --box-shadow-left: -5px 0 15px -10px #333333;
   --box-shadow-right: 5px 0 15px -10px #333333;
   --box-shadow-top: 0 -5px 15px -10px #333333;
@@ -138,7 +140,7 @@ button {
 }
 
 .ol-control button:hover {
-  background: var(--blue2);
+  background: var(--zoomHover);
   color: var(--white);
   transition: 0.3s;
   outline: inherit;
