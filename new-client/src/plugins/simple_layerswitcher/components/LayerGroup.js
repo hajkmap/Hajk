@@ -122,6 +122,7 @@ class LayerGroup extends Component {
                     layer={mapLayer}
                     model={this.props.model}
                     chapters={this.state.chapters}
+                    app={this.props.app}
                     onOpenChapter={chapter => {
                       var informativePanel = this.props.app.panels.find(
                         panel => panel.type === "informative"

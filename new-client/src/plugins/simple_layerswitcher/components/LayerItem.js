@@ -288,7 +288,17 @@ class LayerItem extends Component {
 
     if (this.props.layer.layerType === "group") {
       return (
-        <LayerGroupItem layer={this.props.layer} model={this.props.model} />
+        <LayerGroupItem
+          layer={this.props.layer}
+          model={this.props.model}
+          chapters={this.props.chapters}
+          onOpenChapter={chapter => {
+            var informativePanel = this.props.app.panels.find(
+              panel => panel.type === "informative"
+            );
+            informativePanel.open(chapter);
+          }}
+        />
       );
     }
 

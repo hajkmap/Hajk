@@ -7,7 +7,6 @@ import Button from "@material-ui/core/Button";
 import CallMadeIcon from "@material-ui/icons/CallMade";
 import { withStyles } from "@material-ui/core/styles";
 import classnames from "classnames";
-import Typography from "@material-ui/core/Typography";
 import Popover from "@material-ui/core/Popover";
 
 const styles = theme => ({
