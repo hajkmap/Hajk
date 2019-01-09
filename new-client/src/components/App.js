@@ -270,7 +270,6 @@ class App extends Component {
           app={searchPlugin.app}
           options={searchPlugin.options}
           visible={this.state.searchVisible}
-          mobile={window.innerWidth < 1280}
         />
       );
     } else {

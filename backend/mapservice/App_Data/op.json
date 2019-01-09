@@ -507,6 +507,9 @@
           32,
           32
         ],
+        "tooltip": "Sök i kartan",
+        "searchWithinButtonText": "Markera i kartan",
+        "toolDescription": "<h2 style=\"text-align:center\">Vad händer i dina kvarter</h2><div>Sök innehåll i kartan.</div>",
         "popupOffsetY": 0,
         "visibleForGroups": [],
         "layers": [],

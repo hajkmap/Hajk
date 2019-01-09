@@ -46,6 +46,9 @@ var defaultState = {
   anchorY: 32,
   imgSizeX: 32,
   imgSizeY: 32,
+  tooltip: "Sök...",
+  searchWithinButtonText: "Markera i kartan",
+  toolDescription: "<div>Sök innehåll i kartan</div>",
   popupOffsetY: 0,
   visibleForGroups: [],
   searchableLayers: {},
@@ -94,12 +97,20 @@ class ToolOptions extends Component {
           anchorY: tool.options.anchor[1] || this.state.anchorY,
           imgSizeX: tool.options.imgSize[0] || this.state.imgSizeX,
           imgSizeY: tool.options.imgSize[1] || this.state.imgSizeX,
+          tooltip: tool.options.tooltip || this.state.tooltip,
+          searchWithinButtonText:
+            tool.options.searchWithinButtonText ||
+            this.state.searchWithinButtonText,
+          toolDescription:
+            tool.options.toolDescription || this.state.toolDescription,
           popupOffsetY: tool.options.popupOffsetY,
           visibleForGroups: tool.options.visibleForGroups
             ? tool.options.visibleForGroups
             : [],
           layers: tool.options.layers ? tool.options.layers : [],
-          selectedSources: tool.options.selectedSources ? tool.options.selectedSources : []
+          selectedSources: tool.options.selectedSources
+            ? tool.options.selectedSources
+            : []
         },
         () => {
           this.loadLayers();
@@ -238,13 +249,18 @@ class ToolOptions extends Component {
         filterVisible: this.state.filterVisible,
         anchor: [this.state.anchorX, this.state.anchorY],
         imgSize: [this.state.imgSizeX, this.state.imgSizeY],
+        tooltip: this.state.tooltip,
+        searchWithinButtonText: this.state.searchWithinButtonText,
+        toolDescription: this.state.toolDescription,
         popupOffsetY: this.state.popupOffsetY,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
         ),
         layers: this.state.layers ? this.state.layers : [],
-        selectedSources: this.state.selectedSources ? this.state.selectedSources : []
+        selectedSources: this.state.selectedSources
+          ? this.state.selectedSources
+          : []
       }
     };
 
@@ -396,9 +412,7 @@ class ToolOptions extends Component {
     var layerTypes = Object.keys(layersConfig);
     for (let i = 0; i < layerTypes.length; i++) {
       for (let j = 0; j < layersConfig[layerTypes[i]].length; j++) {
-        if (
-          Number(layersConfig[layerTypes[i]][j].id) === Number(layerId)
-        ) {
+        if (Number(layersConfig[layerTypes[i]][j].id) === Number(layerId)) {
           found = layersConfig[layerTypes[i]][j].caption;
           break;
         }
@@ -412,53 +426,56 @@ class ToolOptions extends Component {
 
   loadSources = () => {
     var urlLayers = this.props.model.get("config").url_layers;
-    this.props.model.getConfig(urlLayers, (layersConfig) => {
-
-      var layers = this.flattern(this.props.model.get("layerMenuConfig").groups);
+    this.props.model.getConfig(urlLayers, layersConfig => {
+      var layers = this.flattern(
+        this.props.model.get("layerMenuConfig").groups
+      );
 
       layers = layers.map(layer => {
         return {
           id: layer.id,
           name: this.lookup(layer.id, layersConfig)
-        }
-      })
+        };
+      });
 
       this.setState({
         sources: layers
       });
-
     });
-
   };
 
-  selectedSourceChange = (id, checked) => (e) => {
-
+  selectedSourceChange = (id, checked) => e => {
     var selectedSources = checked
-      ? this.state.selectedSources.filter(selectedSource => selectedSource !== id)
+      ? this.state.selectedSources.filter(
+          selectedSource => selectedSource !== id
+        )
       : [id, ...this.state.selectedSources];
 
     this.setState({
       selectedSources: selectedSources
     });
-  }
+  };
 
   renderSources(sources) {
     if (!sources) return null;
     return (
-      <ul style={{paddingLeft: 0}}>
+      <ul style={{ paddingLeft: 0 }}>
         {sources.map((source, i) => {
           var id = "layer_" + source.id;
           var checked = this.state.selectedSources.some(id => id === source.id);
           return (
             <li key={i}>
-              <label htmlFor={id}><b>{source.name}</b></label>
+              <label htmlFor={id}>
+                <b>{source.name}</b>
+              </label>
               <input
                 id={id}
                 type="checkbox"
                 checked={checked}
-                onChange={this.selectedSourceChange(source.id, checked)}/>
+                onChange={this.selectedSourceChange(source.id, checked)}
+              />
             </li>
-          )
+          );
         })}
       </ul>
     );
@@ -724,10 +741,41 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
+            <label htmlFor="tooltip">Söktips</label>
+            <input
+              value={this.state.tooltip}
+              type="text"
+              name="tooltip"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="searchWithinButtonText">Sök inom - snapptext</label>
+            <input
+              value={this.state.searchWithinButtonText}
+              type="text"
+              name="searchWithinButtonText"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="toolDescription">Beskrivning (html)</label>
+            <textarea
+              value={this.state.toolDescription}
+              type="text"
+              name="toolDescription"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
             <label htmlFor="searchLayers">Visninstjänster för sök inom</label>
-            <div>
-              {this.renderSources(this.state.sources)}
-            </div>
+            <div>{this.renderSources(this.state.sources)}</div>
           </div>
         </form>
         {this.state.tree}

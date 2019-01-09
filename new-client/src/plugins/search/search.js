@@ -40,9 +40,15 @@ const styles = theme => {
       }
     },
     panelBody: {
-      padding: "10px",
-      [theme.breakpoints.up("lg")]: {
-        padding: 0
+      padding: 0,
+      [theme.breakpoints.down("md")]: {
+        padding: "10px",
+        position: "absolute",
+        top: "46px",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        overflow: "auto"
       }
     },
     searchContainer: {
@@ -68,10 +74,12 @@ class Search extends Component {
       props.options,
       props.map,
       props.app,
-      this.localObserver,
-      this.props.mobile
+      this.localObserver
     );
     this.state = {};
+    this.toolDescription = props.options.toolDescription;
+    this.tooltip = props.options.tooltip;
+    this.searchWithinButtonText = props.options.searchWithinButtonText;
   }
 
   renderSearchResultList() {
@@ -84,6 +92,10 @@ class Search extends Component {
         visible={true}
       />
     );
+  }
+
+  renderDescription() {
+    return <div dangerouslySetInnerHTML={{ __html: this.toolDescription }} />;
   }
 
   render() {
@@ -102,18 +114,12 @@ class Search extends Component {
           />
         </div>
         <div className={classes.panelBody}>
-          <div>
-            <Typography variant="h5" align="center">
-              Vad händer i dina kvarter?
-            </Typography>
-            <Typography>
-              Sök efter en fastighet eller adress för att visa information från
-              översiktsplanen som påverkar dig. Du kan också markera ett område
-              i kartan för att söka inom ett valfritt område.
-            </Typography>
-          </div>
+          <div>{this.renderDescription()}</div>
           <div className={classes.searchContainer}>
-            <SearchWithinButton model={this.searchModel} />
+            <SearchWithinButton
+              buttonText={this.searchWithinButtonText}
+              model={this.searchModel}
+            />
             <ClearButton
               model={this.searchModel}
               onClear={() => {
@@ -128,9 +134,10 @@ class Search extends Component {
               model={this.searchModel}
               onChange={this.searchModel.search}
               onComplete={this.resolve}
+              tooltip={this.tooltip}
             />
-            {this.renderSearchResultList()}
           </div>
+          {this.renderSearchResultList()}
         </div>
       </div>
     );

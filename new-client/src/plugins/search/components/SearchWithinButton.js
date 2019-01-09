@@ -23,7 +23,7 @@ class SearchWithinButton extends React.Component {
   };
 
   render() {
-    const { classes } = this.props;
+    const { classes, buttonText } = this.props;
     return (
       <>
         <Tooltip title="Visa påverkan inom">
@@ -49,7 +49,7 @@ class SearchWithinButton extends React.Component {
             }}
           >
             <LoupeIcon />
-            &nbsp; Markera i kartan
+            &nbsp; {buttonText}
           </Button>
         </Tooltip>
         {createPortal(

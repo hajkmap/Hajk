@@ -8,6 +8,9 @@ import classNames from "classnames";
 
 const styles = theme => {
   return {
+    searchResultEmpty: {
+      padding: "10px"
+    },
     searchResult: {
       position: "static",
       maxHeight: "inherit",
@@ -24,14 +27,14 @@ const styles = theme => {
         padding: "10px",
         border: "1px solid #ccc",
         borderTop: "none",
-        top: "150px",
+        marginTop: "11px",
         right: "10px"
       }
     },
     searchResultContainer: {
       maxHeight: "500px",
       overflow: "auto",
-      [theme.breakpoints.down("lg")]: {
+      [theme.breakpoints.down("md")]: {
         maxHeight: "inherit"
       }
     },
@@ -95,7 +98,9 @@ class SearchResultList extends React.PureComponent {
     if (result.every(r => r.features.length === 0)) {
       return (
         <div className={classes.searchResult}>
-          <div>Sökningen gav inget resultat</div>
+          <div className={classes.searchResultEmpty}>
+            Sökningen gav inget resultat
+          </div>
         </div>
       );
     }

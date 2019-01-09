@@ -58,7 +58,7 @@ class SearchResultGroup extends Component {
   highlight = feature => e => {
     var olFeature = new GeoJSON().readFeatures(feature)[0];
     this.props.model.highlight(olFeature);
-    if (!this.props.model.mobile) {
+    if (window.innerWidth >= 1280) {
       this.props.parent.hide();
     }
     this.setState({
@@ -71,7 +71,7 @@ class SearchResultGroup extends Component {
   zoomTo = feature => e => {
     var olFeature = new GeoJSON().readFeatures(feature)[0];
     this.props.model.highlightFeature(olFeature);
-    if (!this.props.model.mobile) {
+    if (window.innerWidth >= 1280) {
       this.props.parent.hide();
     }
     this.setState({
