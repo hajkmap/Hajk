@@ -62,8 +62,7 @@ class SearchWithinButton extends React.Component {
             }}
             message={
               <span id="message-id">
-                Tryck på den plats i kartan där du vill söka. Dra därefter ut en
-                radie för att välja storlek på sökområde.
+                Dra ut en radie i kartan för att välja storlek på sökområde.
               </span>
             }
           />,

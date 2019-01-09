@@ -43,6 +43,9 @@ function getTheme(config, customTheme) {
         main: config.mapConfig.map.colors.secondaryColor // secondary: { main: "#11cb5f" } // <- Or like this
       }
     },
+    typography: {
+      useNextVariants: true
+    },
     overrides: {
       MuiListItemIcon: {
         // Name of the component / style sheet
