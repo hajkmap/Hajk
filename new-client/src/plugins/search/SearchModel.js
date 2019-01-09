@@ -160,7 +160,8 @@ class SearchModel {
     if (active) {
       this.draw = new Draw({
         source: this.drawSource,
-        type: "Circle"
+        type: "Circle",
+        freehand: true
       });
       this.draw.on("drawend", e => {
         if (drawEndCallback) {
