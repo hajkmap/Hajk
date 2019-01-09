@@ -126,6 +126,12 @@ class BreadCrumbs extends Component {
       visibleLayers: [],
       open: false
     };
+    props.app.globalObserver.on("informativeLoaded", chapters => {
+      console.log("Informative loaded", chapters);
+      this.setState({
+        chapters: chapters
+      });
+    });
   }
 
   expandSubLayers(layer) {
@@ -227,7 +233,7 @@ class BreadCrumbs extends Component {
 
   renderMobile(layers) {
     const { classes } = this.props;
-    const { open } = this.state;
+    const { open, chapters } = this.state;
     return (
       <div className={classes.breadCrumbs}>
         <div className={classes.breadCrumbsHeader}>
@@ -252,7 +258,7 @@ class BreadCrumbs extends Component {
             )}
           </div>
         </div>
-        {this.state.open ? (
+        {open ? (
           <div className={classes.breadCrumbsContainerMobile}>
             {layers.length > 0 ? (
               <Button onClick={this.clear}>Ta bort allt innehåll</Button>
@@ -267,6 +273,7 @@ class BreadCrumbs extends Component {
                 key={layer.get("caption") + Math.random()}
                 title={layer.get("caption")}
                 layer={layer}
+                chapters={chapters}
               />
             ))}
           </div>
@@ -276,13 +283,16 @@ class BreadCrumbs extends Component {
   }
 
   renderDesktop(layers) {
-    const { classes } = this.props;
+    const { classes, app } = this.props;
+    const { chapters } = this.state;
 
     var breadCrumbs = layers.map(layer => (
       <BreadCrumb
         key={layer.get("caption") + Math.random()}
         title={layer.get("caption")}
         layer={layer}
+        chapters={chapters}
+        app={app}
       />
     ));
 

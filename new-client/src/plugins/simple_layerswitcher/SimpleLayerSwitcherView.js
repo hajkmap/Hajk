@@ -142,7 +142,11 @@ class SimpleLayersSwitcherView extends React.PureComponent {
 
   renderBreadCrumbs() {
     return createPortal(
-      <BreadCrumbs map={this.props.map} model={this.props.model} />,
+      <BreadCrumbs
+        map={this.props.map}
+        model={this.props.model}
+        app={this.props.app}
+      />,
       document.getElementById("map")
     );
   }

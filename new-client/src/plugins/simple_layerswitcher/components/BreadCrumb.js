@@ -2,8 +2,13 @@ import React, { Component } from "react";
 import CloseIcon from "@material-ui/icons/Close";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
+import LaunchIcon from "@material-ui/icons/Launch";
+import Button from "@material-ui/core/Button";
+import CallMadeIcon from "@material-ui/icons/CallMade";
 import { withStyles } from "@material-ui/core/styles";
 import classnames from "classnames";
+import Typography from "@material-ui/core/Typography";
+import Popover from "@material-ui/core/Popover";
 
 const styles = theme => ({
   breadCrumbFlat: {
@@ -39,13 +44,24 @@ const styles = theme => ({
   },
   icon: {
     cursor: "pointer"
+  },
+  links: {
+    padding: "5px"
   }
 });
 
 class BreadCrumb extends Component {
-  constructor() {
-    super();
-    this.state = { hidden: false };
+  constructor(props) {
+    super(props);
+    this.state = {
+      hidden: false,
+      anchorEl: null,
+      popoverOpen: false
+    };
+    this.chapters = this.findChapters(
+      this.props.layer.get("name"),
+      this.props.chapters
+    );
   }
 
   setLayerOpacity = layer => event => {
@@ -73,6 +89,115 @@ class BreadCrumb extends Component {
     return overflow;
   }
 
+  findChapters(id, chapters) {
+    if (!chapters) {
+      return [];
+    }
+    return chapters.reduce((chaptersWithLayer, chapter) => {
+      if (Array.isArray(chapter.layers)) {
+        if (chapter.layers.some(layerId => layerId === id)) {
+          chaptersWithLayer = [...chaptersWithLayer, chapter];
+        }
+        if (chapter.chapters.length > 0) {
+          chaptersWithLayer = [
+            ...chaptersWithLayer,
+            ...this.findChapters(id, chapter.chapters)
+          ];
+        }
+      }
+      return chaptersWithLayer;
+    }, []);
+  }
+
+  renderChapterLinks() {
+    const { classes } = this.props;
+    if (this.chapters && this.chapters.length > 0) {
+      if (this.chapters.length > 0) {
+        return (
+          <div className={classes.infoTextContainer}>
+            <div className={classes.links}>
+              {this.chapters.map((chapter, i) => {
+                return (
+                  <div key={i}>
+                    <Button
+                      size="small"
+                      onClick={() => {
+                        this.setState({
+                          popoverOpen: false
+                        });
+                        this.openInformative(chapter);
+                      }}
+                    >
+                      {chapter.header}
+                      <CallMadeIcon className={classes.rightIcon} />
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
+
+  openInformative = chapter => {
+    var informativePanel = this.props.app.panels.find(
+      panel => panel.type === "informative"
+    );
+    informativePanel.open(chapter);
+  };
+
+  handleClose = () => {
+    this.setState({
+      anchorEl: null,
+      popoverOpen: false
+    });
+  };
+
+  renderChaptersPopover(target) {
+    this.setState({
+      anchorEl: target,
+      popoverOpen: true
+    });
+  }
+
+  renderInformativeIcon() {
+    if (!this.props.chapters) {
+      return null;
+    }
+    const { classes } = this.props;
+    if (this.chapters && this.chapters.length > 0) {
+      if (this.chapters.length === 1) {
+        return (
+          <div className={classes.part}>
+            <LaunchIcon
+              className={classes.icon}
+              onClick={() => this.openInformative(this.chapters[0])}
+            />
+          </div>
+        );
+      } else {
+        return (
+          <div className={classes.part}>
+            <LaunchIcon
+              className={classes.icon}
+              onClick={e => {
+                this.renderChaptersPopover(e.target);
+              }}
+            />
+          </div>
+        );
+      }
+    } else {
+      return null;
+    }
+  }
+
   render() {
     const { classes } = this.props;
     const { hidden } = this.state;
@@ -96,6 +221,7 @@ class BreadCrumb extends Component {
               />
             )}
           </div>
+          {this.renderInformativeIcon()}
           <div className={classes.part}>{this.props.title}</div>
         </div>
         <div className={classes.part}>
@@ -104,6 +230,22 @@ class BreadCrumb extends Component {
             onClick={this.setLayerVisibility(this.props.layer)}
           />
         </div>
+        <Popover
+          id="simple-popper"
+          open={this.state.popoverOpen}
+          anchorEl={this.state.anchorEl}
+          onClose={this.handleClose}
+          anchorOrigin={{
+            vertical: "top",
+            horizontal: "center"
+          }}
+          transformOrigin={{
+            vertical: "bottom",
+            horizontal: "center"
+          }}
+        >
+          {this.renderChapterLinks()}
+        </Popover>
       </div>
     );
   }
