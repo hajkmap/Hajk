@@ -162,11 +162,15 @@ class Popup extends React.Component {
         feature.layer.get("layerInfo") &&
         feature.layer.get("layerInfo").information;
 
-      var layer = Object.keys(feature.layer.layersInfo).find(id => {
-        var fid = feature.getId().split(".")[0];
-        var layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
-        return fid === layerId;
-      });
+      var layer;
+
+      if (feature.layer.layersInfo) {
+        layer = Object.keys(feature.layer.layersInfo).find(id => {
+          var fid = feature.getId().split(".")[0];
+          var layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
+          return fid === layerId;
+        });
+      }
 
       if (
         layer &&

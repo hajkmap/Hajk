@@ -127,7 +127,6 @@ class BreadCrumbs extends Component {
       open: false
     };
     props.app.globalObserver.on("informativeLoaded", chapters => {
-      console.log("Informative loaded", chapters);
       this.setState({
         chapters: chapters
       });
