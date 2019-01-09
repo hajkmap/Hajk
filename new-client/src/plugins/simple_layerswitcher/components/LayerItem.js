@@ -8,6 +8,7 @@ import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import { withStyles } from "@material-ui/core/styles";
 import "./LayerGroupItem.js";
 import LayerGroupItem from "./LayerGroupItem.js";
+import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
   button: {},
@@ -58,6 +59,9 @@ const styles = theme => ({
   infoButton: {
     fontSize: "14pt",
     cursor: "pointer"
+  },
+  infoTextContainer: {
+    margin: "10px 0"
   }
 });
 
@@ -145,6 +149,11 @@ class LayerItem extends Component {
     return src ? <img width="30" alt="legend" src={src} /> : null;
   }
 
+  isInfoEmpty() {
+    const { infoCaption, infoUrl, infoOwner, infoText } = this.state;
+    return !(infoCaption || infoUrl || infoOwner || infoText);
+  }
+
   openInformative = chapter => e => {
     this.props.onOpenChapter(chapter);
   };
@@ -175,11 +184,11 @@ class LayerItem extends Component {
       );
       if (chaptersWithLayer.length > 0) {
         return (
-          <>
-            <div>
+          <div className={classes.infoTextContainer}>
+            <Typography>
               Innehåll från denna kategori finns benämnt i följande kapitel i
               översiktsplanen:
-            </div>
+            </Typography>
             <ul className={classes.links}>
               {chaptersWithLayer.map((chapter, i) => {
                 return (
@@ -195,7 +204,7 @@ class LayerItem extends Component {
                 );
               })}
             </ul>
-          </>
+          </div>
         );
       } else {
         return null;
@@ -211,11 +220,56 @@ class LayerItem extends Component {
     });
   }
 
+  renderInfo() {
+    const { infoTitle, infoText } = this.state;
+    const { classes } = this.props;
+    if (infoText) {
+      return (
+        <div className={classes.infoTextContainer}>
+          <Typography variant="h6">{infoTitle}</Typography>
+          <Typography>{infoText}</Typography>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
+
+  renderMetadataLink() {
+    const { infoUrl, infoUrlText } = this.state;
+    if (infoUrl) {
+      return (
+        <div>
+          <a href={infoUrl} target="_blank">
+            {infoUrlText || infoUrl}
+          </a>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
+
+  renderOwner() {
+    const { infoOwner } = this.state;
+    if (infoOwner) {
+      return (
+        <Typography>
+          <strong>Dataägare:</strong> {infoOwner}
+        </Typography>
+      );
+    } else {
+      return null;
+    }
+  }
+
   renderDetails() {
     if (this.state.open) {
       return (
         <div>
-          <div dangerouslySetInnerHTML={{ __html: this.state.infoText }} />
+          {this.renderInfo()}
+          {this.renderOwner()}
+          {this.renderMetadataLink()}
           <div>{this.renderChapterLinks(this.props.chapters)}</div>
         </div>
       );
@@ -243,10 +297,27 @@ class LayerItem extends Component {
         <div className={classes.layerItem}>
           <div className={classes.layerItemInfo}>
             <div className={classes.infoContainer}>
-              <InfoIcon
-                onClick={() => this.toggle()}
-                className={classes.infoButton}
-              />
+              {!this.isInfoEmpty() ? (
+                <InfoIcon
+                  onClick={() => this.toggle()}
+                  className={classes.infoButton}
+                  style={{
+                    boxShadow: this.state.open
+                      ? "rgb(204, 204, 204) 2px 3px 1px"
+                      : "inherit",
+                    borderRadius: "100%"
+                  }}
+                />
+              ) : (
+                <InfoIcon
+                  onClick={() => this.toggle()}
+                  className={classes.infoButton}
+                  style={{
+                    color: "#999",
+                    cursor: "default"
+                  }}
+                />
+              )}
             </div>
             <div
               className={classes.caption}

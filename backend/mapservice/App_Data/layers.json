@@ -208,7 +208,7 @@
       "caption": "Kollektivtrafik",
       "url": "http://giscloud.se/geoserver/wms",
       "owner": "",
-      "date": "1546517517461",
+      "date": "1547037214836",
       "content": "",
       "legend": "",
       "projection": null,
@@ -253,12 +253,12 @@
       "searchDisplayName": "",
       "searchOutputFormat": "",
       "searchGeometryField": "",
-      "infoVisible": false,
-      "infoTitle": "",
-      "infoText": "",
-      "infoUrl": "",
-      "infoUrlText": "",
-      "infoOwner": ""
+      "infoVisible": true,
+      "infoTitle": "Rubrik",
+      "infoText": "Informationstext",
+      "infoUrl": "http://www.google.se",
+      "infoUrlText": "Länk",
+      "infoOwner": "Karl Kula"
     },
     {
       "id": "28",
@@ -308,7 +308,7 @@
       "caption": "Tågstation",
       "url": "http://giscloud.se/geoserver/wms",
       "owner": "",
-      "date": "1546595302474",
+      "date": "1547034527600",
       "content": "",
       "legend": "",
       "projection": null,
@@ -339,12 +339,12 @@
       "searchDisplayName": "",
       "searchOutputFormat": "",
       "searchGeometryField": "",
-      "infoVisible": false,
-      "infoTitle": "",
+      "infoVisible": true,
+      "infoTitle": "Tågstation rubrik",
       "infoText": "Ett lager med tågstationer.",
-      "infoUrl": "",
-      "infoUrlText": "",
-      "infoOwner": ""
+      "infoUrl": "https://www.google.se",
+      "infoUrlText": "Länk till metadata",
+      "infoOwner": "Trafikenheten"
     }
   ],
   "wfslayers": [

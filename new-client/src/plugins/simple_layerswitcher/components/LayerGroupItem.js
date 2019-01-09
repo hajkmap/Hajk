@@ -3,11 +3,13 @@ import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import IconWarning from "@material-ui/icons/Warning";
 import CallMadeIcon from "@material-ui/icons/CallMade";
+import InfoIcon from "@material-ui/icons/Info";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import { withStyles } from "@material-ui/core/styles";
+import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
   button: {},
@@ -36,9 +38,31 @@ const styles = theme => ({
     boxShadow:
       "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)"
   },
+  layerItemInfo: {
+    display: "flex",
+    alignItems: "center"
+  },
   rightIcon: {
     marginLeft: theme.spacing.unit,
     fontSize: "16px"
+  },
+  layerInfo: {
+    display: "flex",
+    alignItems: "center",
+    padding: "3px",
+    border: "1px solid #ccc"
+  },
+  infoContainer: {
+    padding: "5px",
+    marginRight: "5px",
+    borderRight: "1px solid #ccc"
+  },
+  infoButton: {
+    fontSize: "14pt",
+    cursor: "pointer"
+  },
+  infoTextContainer: {
+    margin: "10px 0"
   },
   layerGroup: {
     padding: "10px",
@@ -185,22 +209,29 @@ class LayerGroupItem extends Component {
     }
   }
 
+  toggleVisible = layer => e => {
+    var visible = !this.state.visible;
+    this.setState({
+      visible: visible
+    });
+    layer.setVisible(visible);
+  };
+
   toggle() {
     this.setState({
       open: !this.state.open
     });
   }
 
-  renderDetails() {
-    if (this.state.open) {
-      return (
-        <div>
-          <div dangerouslySetInnerHTML={{ __html: this.state.infoText }} />
-          <div>{this.renderLegendImage()}</div>
-          <div>{this.renderChapterLinks(this.props.chapters)}</div>
-        </div>
-      );
-    }
+  toggleInfo() {
+    this.setState({
+      infoVisible: !this.state.infoVisible
+    });
+  }
+
+  isInfoEmpty() {
+    const { infoCaption, infoUrl, infoOwner, infoText } = this.state;
+    return !(infoCaption || infoUrl || infoOwner || infoText);
   }
 
   setHidden(layer) {
@@ -325,6 +356,64 @@ class LayerGroupItem extends Component {
     }
   }
 
+  renderInfo() {
+    const { infoTitle, infoText } = this.state;
+    const { classes } = this.props;
+    if (infoText) {
+      return (
+        <div className={classes.infoTextContainer}>
+          <Typography variant="h6">{infoTitle}</Typography>
+          <Typography>{infoText}</Typography>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
+
+  renderMetadataLink() {
+    const { infoUrl, infoUrlText } = this.state;
+    if (infoUrl) {
+      return (
+        <div>
+          <a href={infoUrl} target="_blank">
+            {infoUrlText || infoUrl}
+          </a>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
+
+  renderOwner() {
+    const { infoOwner } = this.state;
+    if (infoOwner) {
+      return (
+        <Typography>
+          <strong>Dataägare:</strong> {infoOwner}
+        </Typography>
+      );
+    } else {
+      return null;
+    }
+  }
+
+  renderDetails() {
+    if (this.state.infoVisible) {
+      return (
+        <div>
+          {this.renderInfo()}
+          {this.renderOwner()}
+          {this.renderMetadataLink()}
+          <div>{this.renderChapterLinks(this.props.chapters)}</div>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  }
+
   render() {
     const { layer } = this.props;
     const { open, visible, visibleSubLayers } = this.state;
@@ -346,14 +435,44 @@ class LayerGroupItem extends Component {
       <div className={classes.layerGroup}>
         <div className={classes.layerGroupContainer}>
           <div className={classes.layerGroupHeader}>
-            <div
-              onClick={this.toggleGroupVisible(layer)}
-              className={classes.caption}
-            >
-              {getIcon()}
-              <label className={classes.captionText}>
-                <strong>{layer.get("caption")}</strong>
-              </label>
+            <div className={classes.layerItemInfo}>
+              <div className={classes.infoContainer}>
+                {!this.isInfoEmpty() ? (
+                  <InfoIcon
+                    onClick={() => this.toggleInfo()}
+                    className={classes.infoButton}
+                    style={{
+                      boxShadow: this.state.infoVisible
+                        ? "rgb(204, 204, 204) 2px 3px 1px"
+                        : "inherit",
+                      borderRadius: "100%"
+                    }}
+                  />
+                ) : (
+                  <InfoIcon
+                    onClick={() => this.toggleInfo()}
+                    className={classes.infoButton}
+                    style={{
+                      color: "#999",
+                      cursor: "default"
+                    }}
+                  />
+                )}
+              </div>
+              <div
+                className={classes.caption}
+                onClick={this.toggleVisible(this.props.layer)}
+              >
+                <div
+                  onClick={this.toggleGroupVisible(layer)}
+                  className={classes.caption}
+                >
+                  {getIcon()}
+                  <label className={classes.captionText}>
+                    <strong>{layer.get("caption")}</strong>
+                  </label>
+                </div>
+              </div>
             </div>
             <div>
               {open ? (
@@ -373,6 +492,7 @@ class LayerGroupItem extends Component {
               )}
             </div>
           </div>
+          {this.renderDetails()}
           {this.renderSubLayers()}
         </div>
       </div>
