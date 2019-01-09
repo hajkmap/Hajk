@@ -72,6 +72,7 @@ class Panel extends Component {
         style={{
           display: this.props.open ? "block" : "none"
         }}
+        disableDragging={true}
         className={classes.window}
         minWidth={300}
         minHeight={400}
