@@ -96,7 +96,7 @@ class Collector extends Component {
   onClose = () => {};
 
   renderPanel() {
-    var left = this.position === "right" ? (window.innerWidth - 410) / 2 : 0;
+    var left = this.position === "right" ? (window.innerWidth - 330) / 2 : 0;
     return createPortal(
       <Window
         title={this.text}
@@ -104,6 +104,7 @@ class Collector extends Component {
         position={this.position}
         open={this.state.panelOpen}
         height={450}
+        width={320}
         top={145}
         left={left}
       >

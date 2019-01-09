@@ -159,11 +159,27 @@ class Popup extends React.Component {
 
     var featureList = features.map((feature, i) => {
       var markdown =
-          feature.layer.get("layerInfo") &&
-          feature.layer.get("layerInfo").information,
-        value = markdown
-          ? this.parse(markdown, feature.getProperties())
-          : this.table(feature.getProperties());
+        feature.layer.get("layerInfo") &&
+        feature.layer.get("layerInfo").information;
+
+      var layer = Object.keys(feature.layer.layersInfo).find(id => {
+        var fid = feature.getId().split(".")[0];
+        var layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
+        return fid === layerId;
+      });
+
+      if (
+        layer &&
+        feature.layer.layersInfo &&
+        feature.layer.layersInfo[layer] &&
+        feature.layer.layersInfo[layer].infobox
+      ) {
+        markdown = feature.layer.layersInfo[layer].infobox;
+      }
+
+      var value = markdown
+        ? this.parse(markdown, feature.getProperties())
+        : this.table(feature.getProperties());
 
       if (markdown) {
         return (

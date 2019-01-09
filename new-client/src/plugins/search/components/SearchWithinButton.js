@@ -8,9 +8,7 @@ import { createPortal } from "react-dom";
 
 const styles = theme => {
   return {
-    button: {
-      margin: "4px"
-    },
+    button: {},
     anchorOriginBottomCenter: {
       bottom: "60px"
     }
@@ -26,10 +24,10 @@ class SearchWithinButton extends React.Component {
     const { classes, buttonText } = this.props;
     return (
       <>
-        <Tooltip title="Visa påverkan inom">
+        <Tooltip title="Visa påverkan inom ett område">
           <Button
             className={classes.button}
-            variant={this.state.active ? "contained" : "text"}
+            color={this.state.active ? "primary" : "default"}
             onClick={() => {
               this.setState(
                 {

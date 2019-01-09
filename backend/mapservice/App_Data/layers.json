@@ -215,7 +215,7 @@
       "caption": "Kollektivtrafik",
       "url": "http://giscloud.se/geoserver/wms",
       "owner": "",
-      "date": "1547037214836",
+      "date": "1547044383550",
       "content": "",
       "legend": "",
       "projection": null,
@@ -229,7 +229,7 @@
           "id": "wsp:hpl",
           "caption": "Hållplats",
           "legend": "",
-          "infobox": ""
+          "infobox": "<img src=\"{image}\" />"
         },
         {
           "id": "wsp:bus_line",

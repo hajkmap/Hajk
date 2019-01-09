@@ -159,23 +159,49 @@ class WMSLayerForm extends Component {
   renderLayerInfoInput(layerInfo) {
     return (
       <div>
-        <label>Visningsnamn&nbsp;</label>
-        <input
-          value={layerInfo.caption}
-          onChange={e => {
-            let addedLayersInfo = this.state.addedLayersInfo;
-            addedLayersInfo[layerInfo.id].caption = e.target.value;
-            this.setState(
-              {
-                addedLayersInfo: addedLayersInfo
-              },
-              () => {
-                this.renderLayerInfoDialog(layerInfo);
-              }
-            );
-          }}
-          type="text"
-        />
+        <div>
+          <div>
+            <label>Visningsnamn</label>
+          </div>
+          <input
+            value={layerInfo.caption}
+            onChange={e => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].caption = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+            type="text"
+          />
+        </div>
+        <div>
+          <div>
+            <label>Inforuta</label>
+          </div>
+          <textarea
+            style={{ width: "100%" }}
+            value={layerInfo.infobox}
+            onChange={e => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].infobox = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+            type="text"
+          />
+        </div>
       </div>
     );
   }
