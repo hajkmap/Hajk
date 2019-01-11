@@ -25,7 +25,8 @@ const styles = theme => ({
     color: theme.palette.text.secondary
   },
   disableTransition: {
-    transition: "none"
+    transition: "none",
+    borderRadius: "0 !important"
   },
   panel: {
     marginLeft: "10px"

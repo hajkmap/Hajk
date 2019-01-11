@@ -6,6 +6,7 @@ import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import LayersIcon from "@material-ui/icons/Layers";
 import Typography from "@material-ui/core/Typography";
 import Window from "../../components/Window.js";
+import Panel from "../../components/Panel.js";
 import SimpleLayerSwitcherView from "./SimpleLayerSwitcherView.js";
 import SimpleLayerSwitcherModel from "./SimpleLayerSwitcherModel.js";
 import Observer from "react-event-observer";
@@ -87,7 +88,7 @@ class SimpleLayerSwitcher extends React.PureComponent {
     this.app.registerPanel(this);
   }
 
-  renderPanel() {
+  renderWindow() {
     return createPortal(
       <Window
         title={this.text}
@@ -104,6 +105,25 @@ class SimpleLayerSwitcher extends React.PureComponent {
         />
       </Window>,
       document.getElementById("root")
+    );
+  }
+
+  renderPanel() {
+    return createPortal(
+      <Panel
+        title={this.text}
+        onClose={this.closePanel}
+        open={this.state.panelOpen}
+      >
+        <SimpleLayerSwitcherView
+          app={this.props.app}
+          map={this.props.map}
+          model={this.simpleLayerSwitcherModel}
+          observer={this.observer}
+          breadCrumbs={false}
+        />
+      </Panel>,
+      document.getElementById("map-overlay")
     );
   }
 
@@ -124,7 +144,7 @@ class SimpleLayerSwitcher extends React.PureComponent {
             </Typography>
           </div>
         </div>
-        {this.renderPanel()}
+        {this.renderWindow()}
       </>
     );
   }

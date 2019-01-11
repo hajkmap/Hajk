@@ -205,7 +205,7 @@ class SimpleLayersSwitcherView extends React.PureComponent {
           />
           <div>{this.renderLayerGroups()}</div>
         </div>
-        {this.renderBreadCrumbs()}
+        {this.props.breadCrumbs ? this.renderBreadCrumbs() : null}
         {this.renderClearButton()}
       </div>
     );

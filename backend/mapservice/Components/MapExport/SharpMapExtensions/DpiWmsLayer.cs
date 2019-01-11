@@ -29,21 +29,27 @@ namespace MapService.Components.MapExport {
         private const string QGISDpi = "DPI=";
 
 		private string protocol = "http";
+		private Uri uri;
 
         public DpiWmsLayer(string layername, string url, int dpi = 90) : base(layername, url)
         {
             _log = LogManager.GetLogger(typeof(DpiWmsLayer));
             _requestedDpi = dpi;
-			Uri uri = new Uri(url);
-			this.protocol = uri.Scheme + ":";
+			this.uri = new Uri(url);
+			this.protocol = this.uri.Scheme + ":";			
         }
 
         public override string GetRequestUrl(Envelope box, Size size)
         {
             var appsettings = ConfigurationManager.AppSettings;
-            string proxy = appsettings["ExportProxy"];            
-            var requestUrl = base.GetRequestUrl(box, size);			
-			if (String.IsNullOrEmpty(proxy))
+            string proxy = appsettings["ExportProxy"];            			
+            var requestUrl = base.GetRequestUrl(box, size);
+			Uri comparer = new Uri(requestUrl);
+			if (this.uri.Host != comparer.Host)
+			{
+				requestUrl = this.uri.OriginalString + comparer.Query;				
+			}
+			if (String.IsNullOrEmpty(proxy) && !requestUrl.StartsWith("http"))
 			{
 				proxy = this.protocol;
 			}
@@ -69,7 +75,9 @@ namespace MapService.Components.MapExport {
         public override void Render(Graphics g, MapViewport map)
         {
             Client.WmsOnlineResource resource = GetPreferredMethod();
-            var myUri = new Uri(GetRequestUrl(map.Envelope, map.Size));
+			var url = GetRequestUrl(map.Envelope, map.Size);
+			var myUri = new Uri(url);
+
             var myWebRequest = WebRequest.Create(myUri);
             myWebRequest.Method = resource.Type;
             myWebRequest.Timeout = TimeOut;

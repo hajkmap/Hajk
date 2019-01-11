@@ -293,7 +293,7 @@
         "active": true,
         "visibleAtStart": false,
         "backgroundSwitcherBlack": false,
-        "backgroundSwitcherWhite": false,
+        "backgroundSwitcherWhite": true,
         "toggleAllButton": true,
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Rubrik temakarta",
