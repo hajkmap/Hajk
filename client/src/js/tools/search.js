@@ -37,7 +37,8 @@ var SearchModelProperties = {
   anchor: [16, 32],
   imgSize: [32, 32],
   maxZoom: 14,
-  exportUrl: "",
+  exportUrl: '',
+  selectionTools: false,
   displayPopup: false,
   displayPopupBar: true,
   hits: [],
@@ -158,11 +159,11 @@ var SearchModel = {
    * @param {object} props
    * @return {string} wfs-filter
    */
-  getFeatureFilter: function(features, props) {
+  getFeatureFilter: function (features, props) {
     if (Array.isArray(features) && features.length > 0) {
       return features.reduce((str, feature) => {
-        var posList = "",
-          operation = "Intersects",
+        var posList = '',
+          operation = 'Intersects',
           coords = [];
 
         if (feature.getGeometry() instanceof ol.geom.Circle) {
@@ -208,7 +209,7 @@ var SearchModel = {
         }
 
         return str;
-      }, "");
+      }, '');
     } else {
       return "";
     }
@@ -219,12 +220,12 @@ var SearchModel = {
    * @instance
    * @param {object} props
    */
-  doWFSSearch: function(props) {
-    var filters = "",
-      str = "",
-      featureFilter = "",
-      propertyFilter = "",
-      read = result => {
+  doWFSSearch: function (props) {
+    var filters = '',
+      str = '',
+      featureFilter = '',
+      propertyFilter = '',
+      read = (result) => {
         var format,
           features = [],
           outputFormat = props.outputFormat;
@@ -427,7 +428,7 @@ var SearchModel = {
    * @param {extern:ol.feature} feature
    * @return {string} information
    */
-  getInformation: function(feature) {
+  getInformation: function (feature) {
     var info = feature.infobox || feature.getProperties();
     var content = "";
 
@@ -486,8 +487,8 @@ var SearchModel = {
    * @param {object} spec
    *
    */
-  focus: function(spec, isBar) {
-    function isPoint(coord) {
+  focus: function (spec, isBar) {
+    function isPoint (coord) {
       if (coord.length === 1) {
         coord = coord[0];
       }
@@ -513,9 +514,7 @@ var SearchModel = {
 
     this.featureLayer.getSource().clear();
     this.featureLayer.getSource().addFeature(spec.hit);
-    var displayPopup = isBar
-      ? this.get("displayPopupBar")
-      : this.get("displayPopup");
+    var displayPopup = isBar ? this.get('displayPopupBar') : this.get('displayPopup');
     if (ovl && displayPopup) {
       let title = $(`<div class="popup-title">${spec.hit.caption}</div>`);
       let textContent = $('<div id="popup-content-text"></div>');
@@ -553,11 +552,9 @@ var SearchModel = {
     }
   },
 
-  append: function(spec) {
-    var map = this.get("map"),
-      exist = this.get("selectedIndices").find(
-        item => item.group === spec.id && spec.index === item.index
-      ),
+  append: function (spec) {
+    var map = this.get('map'),
+      exist = this.get('selectedIndices').find(item => item.group === spec.id && spec.index === item.index),
       extent = spec.hit.getGeometry().getExtent(),
       size = map.getSize(),
       ovl = map.getOverlayById("popup-0");
@@ -586,11 +583,12 @@ var SearchModel = {
     }
   },
 
-  detach: function(spec) {
-    var map = this.get("map"),
-      ovl = map.getOverlayById("popup-0"),
-      exist = this.get("selectedIndices").find(
-        item => item.group === spec.id && spec.index === item.index
+  detach: function (spec) {
+    var map = this.get('map'),
+      ovl = map.getOverlayById('popup-0'),
+      exist = this.get('selectedIndices').find(item =>
+        item.group === spec.id &&
+                   spec.index === item.index
       );
 
     this.set(
@@ -604,13 +602,11 @@ var SearchModel = {
       ovl.setPosition(undefined);
     }
 
-    if (this.get("selectedIndices") instanceof Array) {
-      this.set(
-        "selectedIndices",
-        this.get("selectedIndices").filter(
-          f => f.index !== spec.index && f.id !== spec.id
-        )
-      );
+    if (this.get('selectedIndices') instanceof Array) {
+      this.set('selectedIndices', this.get('selectedIndices').filter(f =>
+        f.index !== spec.index &&
+        f.id !== spec.id
+      ));
     }
   },
 
@@ -619,15 +615,12 @@ var SearchModel = {
    * @isntance
    * @return {Layer[]} layers
    */
-  getLayers: function() {
-    var filter = layer => {
-      var criteria = this.get("filter");
-      var visible = this.get("filterVisibleActive");
-      var searchable = layer.get("searchUrl");
-      return (
-        (searchable && (visible ? layer.get("visible") : false)) ||
-        layer.get("id") === criteria
-      );
+  getLayers: function () {
+    var filter = (layer) => {
+      var criteria = this.get('filter');
+      var visible = this.get('filterVisibleActive');
+      var searchable = layer.get('searchUrl');
+      return (searchable && (visible ? layer.get('visible') : false) || layer.get('id') === criteria);
     };
 
     return this.get("layerCollection").filter(filter);
@@ -671,9 +664,10 @@ var SearchModel = {
    * @isntance
    * @return {string} xml-string
    */
-  getKmlData: function() {
-    var exportItems =
-      this.get("hits").length > 0 ? this.get("hits") : this.getHitsFromItems();
+  getKmlData: function () {
+    var exportItems = this.get('hits').length > 0
+      ? this.get('hits')
+      : this.getHitsFromItems();
 
     var transformed = kmlWriter.transform(
       exportItems,
@@ -691,7 +685,7 @@ var SearchModel = {
    * @isntance
    * @return {Object} excelData
    */
-  getExcelData: function() {
+  getExcelData: function () {
     var groups = {},
       exportItems =
         this.get("hits").length > 0
@@ -735,8 +729,8 @@ var SearchModel = {
         return result && result[1] ? result[1] : column;
       };
 
-      values = groups[group].map(hit => {
-        if (typeof hit.aliasDict !== "undefined" && hit.aliasDict !== null) {
+      values = groups[group].map((hit) => {
+        if (typeof hit.aliasDict !== 'undefined' && hit.aliasDict !== null) {
           var attributes = hit.getProperties(),
             names = Object.keys(attributes),
             aliasKeys = Object.keys(hit.aliasDict);
@@ -773,7 +767,14 @@ var SearchModel = {
           }
         });
 
-        return columns.map(column => attributes[column] || null);
+          return columns.map(column => {
+                  if (column == "nyckel") {
+                      return Number(attributes[column]);
+                  } else {
+                      return attributes[column] || null;
+                  }
+              });
+
       });
 
       return {
@@ -789,6 +790,7 @@ var SearchModel = {
       data = {},
       postData = "";
 
+
     switch (type) {
       case "kml":
         url = this.get("kmlExportUrl");
@@ -799,6 +801,7 @@ var SearchModel = {
         url = this.get("excelExportUrl");
         data = this.getExcelData();
         postData = JSON.stringify(data);
+
         break;
     }
 
@@ -897,28 +900,22 @@ var SearchModel = {
     this.featureLayer.getSource().clear();
 
     layers.forEach(layer => {
-      layer
-        .get("params")
-        .LAYERS.split(",")
-        .forEach(featureType => {
-          var searchProps = {
-            url: (HAJK2.searchProxy || "") + layer.get("searchUrl"),
-            caption: layer.get("caption"),
-            infobox: layer.get("infobox"),
-            aliasDict: layer.get("aliasDict"),
-            featureType: featureType,
-            propertyName: layer.get("searchPropertyName"),
-            displayName: layer.get("searchDisplayName"),
-            srsName: this.get("map")
-              .getView()
-              .getProjection()
-              .getCode(),
-            outputFormat: layer.get("searchOutputFormat"),
-            geometryField: layer.get("searchGeometryField")
-          };
+      layer.get('params').LAYERS.split(',').forEach(featureType => {
+        var searchProps = {
+          url: (HAJK2.searchProxy || '') + layer.get('searchUrl'),
+          caption: layer.get('caption'),
+          infobox: layer.get('infobox'),
+          aliasDict: layer.get('aliasDict'),
+          featureType: featureType,
+          propertyName: layer.get('searchPropertyName'),
+          displayName: layer.get('searchDisplayName'),
+          srsName: this.get('map').getView().getProjection().getCode(),
+          outputFormat: layer.get('searchOutputFormat'),
+          geometryField: layer.get('searchGeometryField')
+        };
 
-          addRequest.call(this, searchProps);
-        });
+        addRequest.call(this, searchProps);
+      });
     });
 
     sources.forEach(source => {
@@ -943,7 +940,7 @@ var SearchModel = {
     });
 
     Promise.all(promises).then(() => {
-      items.forEach(function(item) {
+      items.forEach(function (item) {
         item.hits = arraySort({
           array: item.hits,
           index: item.displayName

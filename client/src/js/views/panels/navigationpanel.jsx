@@ -33,6 +33,7 @@ var panels = {
   'streetviewpanel': require('views/streetviewpanel'),
   'bufferpanel': require('views/bufferpanel'),
   'routingpanel': require('views/routingpanel'),
+  'firpanel': require('views/firpanel'),
   'presetpanel': require('views/presetpanel'),
   'measurepanel': require('views/measurepanel'),
   'mailexportpanel': require('views/mailexportpanel')

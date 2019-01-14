@@ -34,6 +34,7 @@ import Information from './tools/information.jsx';
 import Location from './tools/location.jsx';
 import Search from './tools/search.jsx';
 import StreetView from './tools/streetview.jsx';
+import FIR from './tools/fir.jsx';
 import Preset from './tools/preset.jsx';
 import Measure from './tools/measure.jsx';
 import Routing from './tools/routing.jsx';
@@ -98,6 +99,8 @@ class ToolOptions extends Component {
         return <Search parent={this} model={this.props.model} />;
       case 'streetview':
         return <StreetView parent={this} model={this.props.model} />;
+      case 'fir':
+        return <FIR parent={this} model={this.props.model} />;
       case 'preset':
         return <Preset parent={this} model={this.props.model} />;
       case 'measure':
@@ -163,6 +166,7 @@ class ToolOptions extends Component {
       measure: 'Mät',
       location: 'Visa min position',
       routing: 'Navigation',
+      fir: 'FIR',
       mailexport: 'Mail & utskrift'
     };
 

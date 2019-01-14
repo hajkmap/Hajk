@@ -90,7 +90,6 @@ var RoutingModel = {
     startPoint.setGeometry(new ol.geom.Point(event.coordinate));
     /* Convert Geometry to Coordinate */
 
-    console.log(this.props);
     var lonlat = ol.proj.transform(startPoint.getGeometry().getCoordinates(), this.get('projection'), 'EPSG:4326');
     var lon = lonlat[0];
     var lat = lonlat[1];

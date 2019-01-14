@@ -19,14 +19,42 @@ export default class Tree extends Component {
 
       if (!layer.hidden) {
         layer.hidden = true;
+          if(this.props.type === "fir") {
+              this.refs[layerId + "_fnrField"].hidden = true;
+              this.refs[layerId + "_omradeField"].hidden = true;
+          }
         layer.value = '';
       } else {
         layer.hidden = false;
+          if(this.props.type === "fir") {
+              this.refs[layerId + "_fnrField"].hidden = false;
+              this.refs[layerId + "_omradeField"].hidden = false;
+          }
       }
     }
   }
 
+  buildLayerItem (layer){
+      if(this.props.type === "fir"){
+          return (
+              <div>
+              <input ref={layer.id + "_fnrField"} type='text' hidden='true' placeholder='fnrField' onChange={(e) => { this.props.handleAddSearchable(e, layer); }} />
+              <input ref={layer.id + "_omradeField"} type='text' hidden='true' placeholder='omradeField' onChange={(e) => { this.props.handleAddSearchable(e, layer); }} />
+              <input ref={layer.id} type='text' hidden='true' placeholder='Tillträde' onChange={(e) => { this.props.handleAddSearchable(e, layer); }} />
+              </div>
+      );
+      } else {
+          return (
+              <div>
+              <input ref={layer.id} type='text' hidden='true' placeholder='Tillträde' onChange={(e) => { this.props.handleAddSearchable(e, layer); }} />
+              </div>
+          );
+      }
+  }
+
   buildList () {
+    console.log("tree.jsx");
+
     return (
       <div>
         <label>Tillgängliga tjänster</label>
@@ -44,7 +72,7 @@ export default class Tree extends Component {
                       this.toggleHide(layer.id);
                     }} />&nbsp;
                   <label>{layer.caption}</label>
-                  <input ref={layer.id} type='text' hidden='true' placeholder='Tillträde' onChange={(e) => { this.props.handleAddSearchable(e, layer); }} />
+                    {this.buildLayerItem(layer)}
                 </li>
               );
             })}
