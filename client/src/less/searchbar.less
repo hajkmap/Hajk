@@ -1,5 +1,5 @@
 #searchbar-search-area {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 #searchbar-input-field {
@@ -18,7 +18,7 @@
 
 #searchbar-search-button {
   background-color: @color-yellow;
-  color: #FFF;
+  color: #fff;
   border: none;
 }
 
@@ -27,20 +27,21 @@
 }
 
 .searchbar-area {
-  background: #FFF;
+  background: #fff;
   margin: 0;
   border-radius: 0 0 5px 5px;
 }
 
 .searchbar-results {
-  border: 1px solid #CCC;
+  background-color: #fff;
+  border: 1px solid #ccc;
   border-top: 0;
-  border-bottom: 0;
   padding: 10px;
 }
 
 .searchbar-results-no-results {
-  border: 1px solid #CCC;
+  background-color: #fff;
+  border: 1px solid #ccc;
   border-top: 0;
   padding: 10px;
   border-radius: 0 0 5px 5px;
@@ -48,7 +49,7 @@
 
 #searchbar-results-title {
   margin: 0;
-  font-size: 1.1em;
+  font-size: 1em;
   font-weight: 500;
   color: #555;
 }
@@ -64,11 +65,11 @@
   max-height: 500px;
   overflow-y: scroll;
   margin-top: 10px;
-  
+
   > div > div {
     margin: 0 !important;
   }
-  
+
   > div:not(:last-of-type) {
     margin-bottom: 10px !important;
   }
@@ -81,44 +82,42 @@
   height: 100%;
   width: 40px;
   cursor: pointer;
-  
-  &::before, &::after {
+
+  &::before,
+  &::after {
     content: "";
     position: absolute;
     top: 50%;
     left: 50%;
-    background: #CCC;
+    background: #ccc;
     width: 2px;
-    height: 16px;
+    height: 12px;
     transition: 0.2s ease-in-out;
   }
-  
+
   &::before {
     transform: translate(-50%, -50%) rotate(45deg);
   }
-  
+
   &::after {
     transform: translate(-50%, -50%) rotate(-45deg);
   }
-  
+
   &:hover {
-    &::before, &::after {
+    &::before,
+    &::after {
       background: @brand-danger;
       transition: 0.2s ease-in-out;
     }
-  } 
+  }
 }
 
 .search-results-toggle-minimze {
-  text-align: center;
   color: @brand-primary;
   font-weight: 600;
-  padding: 5px;
-  background: #FFF;
-  border: 1px solid #CCC;
-  border-radius: 0 0 5px 5px;
-  box-shadow: 0 -2px 4px rgba(0,0,0,0.08);
+  background: #fff;
   cursor: pointer;
+  float: right;
 
   .arrow {
     margin-left: 5px;
@@ -129,7 +128,63 @@
   margin: 0;
   text-align: center;
   padding: 20px;
-  background: #FFF;
+  background: #fff;
   border-radius: 0 0 5px 5px;
-  border: 1px solid #CCC;
+  border: 1px solid #ccc;
+}
+
+/*Selection tool styling*/
+
+/*Search field*/
+.search-bar-holder .input-group .selection-tool-enabled {
+  right: 75px !important;
+}
+
+.search-bar-holder .input-group #searchbar-selection-tool-button {
+  background-color: #1b78cc;
+  color: #fff;
+  border: none;
+}
+
+/*Layer filter*/
+.search-bar-holder .searchbar-results .btn-filter {
+  width: 250px;
+  background-color: #fff;
+  border: 1px solid #0076bc;
+  text-align: left;
+  margin-left: 0px;
+}
+
+.search-bar-holder .searchbar-results .options-container .fa-angle-down {
+  margin-top: 4px;
+  margin-left: 90px;
+  color: #0076bc;
+  float: right;
+}
+
+.search-bar-holder .searchbar-results .options-container .dropdown-menu {
+  width: 300px;
+  height: 350px;
+  top: 105px;
+  left: 12px;
+  overflow: scroll;
+  overflow-x: hidden;
+}
+
+.search-bar-holder
+  .searchbar-results
+  .options-container
+  .dropdown-menu
+  > li:first-child {
+  background-color: #f2f2f2;
+}
+
+.search-bar-holder .searchbar-results .options-container .dropdown-menu > li {
+  margin: 0px !important;
+  padding: 4px;
+  border-bottom: 1px solid lightgray;
+}
+
+.search-bar-holder .searchbar-results .options-container .dropdown-menu span {
+  margin-left: 5px;
 }
