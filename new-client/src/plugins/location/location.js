@@ -10,7 +10,6 @@ import {
 } from "@material-ui/core";
 import NavigationIcon from "@material-ui/icons/Navigation";
 
-import Panel from "../../components/Panel.js";
 import PopPanel from "../../components/PopPanel";
 import LocationView from "./LocationView";
 
