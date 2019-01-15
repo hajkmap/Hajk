@@ -2,6 +2,11 @@
 # Let us have the possibility to put a test file anywhere and not check it in
 test.html
 
+#
+public/logo_large.png
+public/logo_small.png
+public/favicon.ico
+
 # dependencies
 /node_modules
 
