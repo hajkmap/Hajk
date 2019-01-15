@@ -52,18 +52,37 @@ const styles = theme => {
   };
 };
 
-class Infomation extends Component {
+class Information extends Component {
   constructor(spec) {
     super(spec);
-    this.text = "Infomation";
+    this.text = "Om kartan";
+    this.options = spec.options;
     this.state = {
       dialogOpen: false
     };
   }
 
   componentDidMount() {
+    let dialogOpen = this.options.visibleAtStart;
+
+    if (this.options.visibleAtStart === true) {
+      if (
+        this.options.showInfoOnce === true &&
+        parseInt(window.localStorage.getItem("alreadyShown")) === 1
+      ) {
+        dialogOpen = false;
+      } else {
+        if (this.options.showInfoOnce === true) {
+          window.localStorage.setItem("alreadyShown", 1);
+        }
+        dialogOpen = true;
+      }
+    } else {
+      dialogOpen = false;
+    }
+
     this.setState({
-      dialogOpen: this.props.options.visibleAtStart
+      dialogOpen: dialogOpen
     });
   }
 
@@ -101,7 +120,7 @@ class Infomation extends Component {
             </IconButton>
           </div>
           <div>
-            <Typography className={classes.title}>Information</Typography>
+            <Typography className={classes.title}>this.text</Typography>
             <Typography className={classes.text}>
               Visa mer information
             </Typography>
@@ -139,4 +158,4 @@ class Infomation extends Component {
   }
 }
 
-export default withStyles(styles)(Infomation);
+export default withStyles(styles)(Information);
