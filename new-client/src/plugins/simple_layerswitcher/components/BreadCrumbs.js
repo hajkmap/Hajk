@@ -210,10 +210,6 @@ class BreadCrumbs extends Component {
       });
   };
 
-  componentWillMount() {}
-
-  componentWillUnmount() {}
-
   componentDidMount() {
     var visibleLayers = [];
     if (this.props.map) {

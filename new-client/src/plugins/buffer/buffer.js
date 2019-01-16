@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
@@ -13,10 +13,10 @@ const styles = theme => {
   return {};
 };
 
-class buffer extends Component {
+class Buffer extends React.PureComponent {
   // In native ES6 class we can set state like this, outside the constructor
   state = {
-    panelOpen: false
+    panelOpen: this.props.options.visibleAtStart
   };
 
   // Called when plugin's <ListItem> or widget <Button> is clicked
@@ -61,18 +61,6 @@ class buffer extends Component {
     this.app.registerPanel(this);
   }
 
-  // Important, part of API. Avoid re-rendering if current panel has not changed its state.
-  shouldComponentUpdate(nextProps, nextState) {
-    return this.state.panelOpen !== nextState.panelOpen;
-  }
-
-  // Important, part of API. Make sure to respect panel visibility set in config.
-  componentWillMount() {
-    this.setState({
-      panelOpen: this.props.options.visibleAtStart
-    });
-  }
-
   // Not part of API but rather convention. If plugin has a panel, its render method should be called renderPanel().
   renderPanel() {
     // Using Portals (see React docs) we render panel not in direct relation in DOM to the button, but rather in #map-overlay <div>.
@@ -96,12 +84,12 @@ class buffer extends Component {
     );
   }
 
-  /* 
+  /*
    * Important, part of plugins API.
    * Each plugin must present both renderAsWidgetItem and renderAsToolbarItem.
    * Depending on user's preferred location, App will render the plugin
    * using one of these two methods.
-  */
+   */
 
   // Render as a FAB (floating action button, https://material-ui.com/demos/buttons/#floating-action-buttons)
   renderAsWidgetItem() {
@@ -155,4 +143,4 @@ class buffer extends Component {
   }
 }
 
-export default withStyles(styles)(buffer);
+export default withStyles(styles)(Buffer);
