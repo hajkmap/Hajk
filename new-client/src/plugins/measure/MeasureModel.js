@@ -144,7 +144,7 @@ class MeasureModel {
     var label;
 
     if (type === "point") {
-      label = "Nord: " + value[0] + " Öst: " + value[1];
+      label = "Nord: " + value.n + " Öst: " + value.e;
     }
 
     if (typeof value === "number") {
@@ -168,9 +168,11 @@ class MeasureModel {
     }
 
     if (type === "area") {
-      let prefix = " ha";
-      value = Math.round((value / 1e4) * 1e2) / 100;
-      label = value + prefix;
+      if (value > 10000) {
+        label = Math.round((value / 1000000) * 100) / 100 + " km²";
+      } else {
+        label = Math.round(value * 100) / 100 + " m²";
+      }
     }
 
     if (type === "length") {
@@ -205,8 +207,12 @@ class MeasureModel {
     const props = feature.getProperties();
     const type = feature.getProperties().type;
     switch (type) {
+      case "Point":
+        return this.formatLabel("point", props.position);
       case "LineString":
         return this.formatLabel("length", props.length);
+      case "Circle":
+        return this.formatLabel("circle", props.radius);
       case "Polygon":
         return this.formatLabel("area", props.area);
       default:
