@@ -87,9 +87,9 @@ class Informative extends React.PureComponent {
           chapters: this.toc,
           chapter: {
             header: homeHeader,
-            html: homeHtml,
-            tocVisible: false
-          }
+            html: homeHtml
+          },
+          tocVisible: false
         });
       }
     });
