@@ -104,6 +104,7 @@ class SimpleLayerSwitcher extends React.PureComponent {
           map={this.props.map}
           model={this.simpleLayerSwitcherModel}
           observer={this.observer}
+          breadCrumbs={this.props.type === "widgetItem"}
         />
       </Window>,
       document.getElementById("root")
@@ -122,7 +123,7 @@ class SimpleLayerSwitcher extends React.PureComponent {
           map={this.props.map}
           model={this.simpleLayerSwitcherModel}
           observer={this.observer}
-          breadCrumbs={false}
+          breadCrumbs={this.props.type === "widgetItem"}
         />
       </Panel>,
       document.getElementById("map-overlay")

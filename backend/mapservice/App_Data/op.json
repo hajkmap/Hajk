@@ -532,6 +532,25 @@
         ]
       },
       "index": 3
+    },
+    {
+      "type": "infoclick",
+      "options": {
+        "target": "toolbar",
+        "displayPopup": true,
+        "markerImg": "assets/icons/marker.png",
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ],
+        "popupOffsetY": 0,
+        "visibleForGroups": []
+      },
+      "index": 0
     }
   ],
   "map": {

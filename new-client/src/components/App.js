@@ -215,6 +215,31 @@ class App extends Component {
         });
       }
     });
+
+    // Add a listener to update the infoclick-information when a layer visibility changes.
+    this.appModel
+      .getMap()
+      .getLayers()
+      .getArray()
+      .forEach(layer => {
+        layer.on("change:visible", evt => {
+          let layer = evt.target;
+          if (
+            this.state.mapClickDataResult &&
+            Array.isArray(this.state.mapClickDataResult.features)
+          ) {
+            this.state.mapClickDataResult.features.forEach(feature => {
+              if (feature.layer === layer) {
+                let o = { ...this.state.mapClickDataResult };
+                o.features = o.features.filter(f => f !== feature);
+                this.setState({
+                  mapClickDataResult: o
+                });
+              }
+            });
+          }
+        });
+      });
   }
 
   // Catches exceptions generated in descendant components. Unhandled exceptions will cause the entire component tree to unmount.

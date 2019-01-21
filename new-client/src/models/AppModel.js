@@ -171,9 +171,11 @@ class AppModel {
       map.updateSize();
     }, 0);
 
-    bindMapClickEvent(map, mapClickDataResult => {
-      this.globalObserver.publish("mapClick", mapClickDataResult);
-    });
+    if (config.tools.some(tool => tool.type === "infoclick")) {
+      bindMapClickEvent(map, mapClickDataResult => {
+        this.globalObserver.publish("mapClick", mapClickDataResult);
+      });
+    }
     return this;
   }
 

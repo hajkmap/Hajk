@@ -14,6 +14,16 @@ const styles = theme => ({
   },
   floatRight: {
     float: "right"
+  },
+  closeButton: {
+    position: "absolute",
+    top: "2px",
+    right: "2px",
+    cursor: "pointer"
+  },
+  caption: {
+    marginBottom: "5px",
+    fontWeight: 500
   }
 });
 
@@ -121,6 +131,8 @@ class Popup extends React.Component {
   }
 
   html(features) {
+    const { classes } = this.props;
+
     if (!features) return "";
 
     var visibleStyle = currentIndex => {
@@ -162,6 +174,10 @@ class Popup extends React.Component {
         feature.layer.get("layerInfo") &&
         feature.layer.get("layerInfo").information;
 
+      var caption =
+        feature.layer.get("layerInfo") &&
+        feature.layer.get("layerInfo").caption;
+
       var layer;
 
       if (feature.layer.layersInfo) {
@@ -187,17 +203,16 @@ class Popup extends React.Component {
 
       if (markdown) {
         return (
-          <div
-            key={i}
-            className="markdown-content"
-            dangerouslySetInnerHTML={value}
-            style={visibleStyle(i)}
-          />
+          <div key={i} style={visibleStyle(i)}>
+            <div className={classes.caption}>{caption}</div>
+            <div className="markdown-content" dangerouslySetInnerHTML={value} />
+          </div>
         );
       } else {
         return (
           <div key={i} style={visibleStyle(i)}>
-            {value}
+            <div className={classes.caption}>{caption}</div>
+            <div>{value}</div>
           </div>
         );
       }
@@ -259,14 +274,9 @@ class Popup extends React.Component {
     }
     return (
       <div id="popup" className="ol-popup">
-        <IconButton
-          className={this.classes.floatRight}
-          aria-label="Close"
-          color="default"
-          id="popup-closer"
-        >
-          <CloseIcon />
-        </IconButton>
+        <div className={this.classes.closeButton}>
+          <CloseIcon aria-label="Close" id="popup-closer" />
+        </div>
         <div>{this.html(features)}</div>
       </div>
     );

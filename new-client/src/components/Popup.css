@@ -12,7 +12,7 @@
   border: 1px solid #cccccc;
   bottom: 12px;
   left: -50px;
-  min-width: 280px;
+  min-width: 230px;
   z-index: 2000;
 }
 .ol-popup:after,
@@ -48,16 +48,23 @@
 }
 
 #popup-content {
-  max-height: 250px;
+  max-height: 400px;
   overflow: auto;
-  margin-top: 7px;
-  margin-right: -9px;
+  margin: 12px;
+  padding: 5px;
+}
+
+#popup-content img {
+  max-width: 100%;
 }
 
 .toggle {
   text-align: center;
-  font-size: 20px;
-  padding: 10px;
+  font-size: 16px;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .toggle-text {
