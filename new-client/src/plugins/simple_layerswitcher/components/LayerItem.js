@@ -150,8 +150,18 @@ class LayerItem extends Component {
   }
 
   isInfoEmpty() {
+    let chaptersWithLayer = this.findChapters(
+      this.props.layer.get("name"),
+      this.props.chapters
+    );
     const { infoCaption, infoUrl, infoOwner, infoText } = this.state;
-    return !(infoCaption || infoUrl || infoOwner || infoText);
+    return !(
+      infoCaption ||
+      infoUrl ||
+      infoOwner ||
+      infoText ||
+      chaptersWithLayer.length > 0
+    );
   }
 
   openInformative = chapter => e => {
@@ -255,7 +265,7 @@ class LayerItem extends Component {
     if (infoOwner) {
       return (
         <Typography>
-          <strong>Dataägare:</strong> {infoOwner}
+          <strong>Datavärd:</strong> {infoOwner}
         </Typography>
       );
     } else {

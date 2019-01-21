@@ -85,7 +85,8 @@ const styles = theme => ({
   layerGroupLayers: {
     background: "#eee",
     padding: "10px",
-    borderRadius: "6px"
+    borderRadius: "6px",
+    marginTop: "5px"
   },
   layerGroupItem: {
     display: "flex"
@@ -230,8 +231,18 @@ class LayerGroupItem extends Component {
   }
 
   isInfoEmpty() {
+    let chaptersWithLayer = this.findChapters(
+      this.props.layer.get("name"),
+      this.props.chapters
+    );
     const { infoCaption, infoUrl, infoOwner, infoText } = this.state;
-    return !(infoCaption || infoUrl || infoOwner || infoText);
+    return !(
+      infoCaption ||
+      infoUrl ||
+      infoOwner ||
+      infoText ||
+      chaptersWithLayer.length > 0
+    );
   }
 
   setHidden(layer) {
