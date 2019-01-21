@@ -131,59 +131,49 @@ class BreadCrumbs extends Component {
         chapters: chapters
       });
     });
-  }
-
-  expandSubLayers(layer) {
-    return layer.subLayers.map(subLayer => {
-      return {
-        caption: layer.layersInfo[subLayer].caption,
-        getProperties: () => {
-          return {};
-        },
-        setOpacity: value => {
-          console.log("Set opacity", value);
-        },
-        get: property => {
-          return layer.layersInfo[subLayer][property];
-        },
-        set: (property, value) => {
-          console.log("Set", property, value);
-        }
-      };
-    });
+    this.timer = 0;
   }
 
   bindLayerEvents = visibleLayers => layer => {
     if (layer.get("visible")) {
       visibleLayers.push(layer);
-      // if (layer.layerType !== "group") {
-      //   visibleLayers.push(layer);
-      // } else {
-      //   visibleLayers = [...visibleLayers, ...this.expandSubLayers(layer)];
-      // }
     }
 
     this.setState({
       visibleLayers: visibleLayers
     });
 
+    this.addedLayerBuffer = [];
+    this.removedLayerBuffer = [];
+
     layer.on("change:visible", e => {
       let changedLayer = e.target;
+      setTimeout(() => {
+        var visibleLayers = [
+          ...this.state.visibleLayers,
+          ...this.addedLayerBuffer
+        ];
+        visibleLayers = visibleLayers.filter(visibleLayer => {
+          return !this.removedLayerBuffer.some(
+            removedLayer => visibleLayer === removedLayer
+          );
+        });
+        this.setState({
+          visibleLayers: visibleLayers
+        });
+        this.addedLayerBuffer = [];
+        this.removedLayerBuffer = [];
+      }, 0);
+
       if (this.props.model.clearing) {
         this.setState({
           visibleLayers: []
         });
       } else {
         if (changedLayer.get("visible")) {
-          this.setState({
-            visibleLayers: [...this.state.visibleLayers, changedLayer]
-          });
+          this.addedLayerBuffer.push(changedLayer);
         } else {
-          this.setState({
-            visibleLayers: this.state.visibleLayers.filter(
-              visibleLayer => visibleLayer !== changedLayer
-            )
-          });
+          this.removedLayerBuffer.push(changedLayer);
         }
       }
     });
