@@ -29,6 +29,8 @@ var defaultState = {
   index: 0,
   target: "toolbar",
   url: "",
+  title: "Tyck till",
+  abstract: "Vi vill veta vad du tycker!",
   featureType: "",
   featureNS: "",
   visibleAtStart: false,
@@ -120,6 +122,8 @@ class ToolOptions extends Component {
         target: this.state.target,
         url: this.state.url,
         featureType: this.state.featureType,
+        title: this.state.title,
+        abstract: this.state.abstract,
         featureNS: this.state.featureNS,
         visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
@@ -273,6 +277,28 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
               value={this.state.url}
+            />
+          </div>
+          <div>
+            <label htmlFor="abstract">Beskrivning</label>
+            <input
+              value={this.state.abstract}
+              type="text"
+              name="abstract"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="headerText">Rubrik</label>
+            <input
+              value={this.state.headerText}
+              type="text"
+              name="headerText"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
             />
           </div>
           <div>

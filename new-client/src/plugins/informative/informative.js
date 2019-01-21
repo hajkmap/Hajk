@@ -88,7 +88,12 @@ class Informative extends React.PureComponent {
   constructor(spec) {
     super(spec);
     this.type = "informative";
-    this.text = spec.options.caption;
+    this.options = spec.options;
+    this.title = this.options.title || "Översiktsplan";
+    this.abstract =
+      this.options.abstract || "Läs mer om vad som planeras i kommunen";
+    this.caption = this.options.caption || "Titel";
+    this.html = this.options.html || "<div>Html</div>";
     this.position = spec.options.panel || "right";
     this.app = spec.app;
     this.observer = Observer();
@@ -103,9 +108,10 @@ class Informative extends React.PureComponent {
 
   renderPanel() {
     var left = this.position === "right" ? (window.innerWidth - 410) / 2 : 0;
+    console.log("Render panel", this.caption);
     return createPortal(
       <Window
-        title={this.text}
+        title={this.title}
         onClose={this.closePanel}
         open={this.state.panelOpen}
         position={this.position}
@@ -118,8 +124,8 @@ class Informative extends React.PureComponent {
           map={this.map}
           parent={this}
           observer={this.observer}
-          caption={this.props.options.caption}
-          abstract={this.props.options.abstract}
+          caption={this.caption}
+          abstract={this.html}
         />
       </Window>,
       document.getElementById("root")
@@ -137,10 +143,8 @@ class Informative extends React.PureComponent {
             </IconButton>
           </div>
           <div>
-            <Typography className={classes.title}>Översiktsplan</Typography>
-            <Typography className={classes.text}>
-              Läs om vad som planeras i kommunen
-            </Typography>
+            <Typography className={classes.title}>{this.title}</Typography>
+            <Typography className={classes.text}>{this.abstract}</Typography>
           </div>
         </div>
         {this.renderPanel()}
@@ -160,7 +164,7 @@ class Informative extends React.PureComponent {
           <ListItemIcon>
             <SatelliteIcon />
           </ListItemIcon>
-          <ListItemText primary={this.text} />
+          <ListItemText primary={this.title} />
         </ListItem>
         {this.renderPanel()}
       </div>

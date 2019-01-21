@@ -29,8 +29,10 @@ var defaultState = {
   index: 0,
   target: "toolbar",
   panel: "right",
-  abstract: "<div>HTML som beskriver dokumentets innehåll</div>",
+  title: "Översiktsplan",
+  abstract: "Läs mer om vad som planeras i kommunen",
   caption: "Översiktsplan",
+  html: "<div>HTML som beskriver dokumentets innehåll</div>",
   serviceUrl: "http://localhost:55630/informative/load",
   documentList: [],
   document: "",
@@ -71,7 +73,9 @@ class ToolOptions extends Component {
                 target: tool.options.target,
                 panel: tool.options.panel,
                 caption: tool.options.caption,
+                title: tool.options.title,
                 abstract: tool.options.abstract,
+                html: tool.options.html,
                 serviceUrl: tool.options.serviceUrl,
                 document: tool.options.document || list[0],
                 visibleAtStart: tool.options.visibleAtStart || false,
@@ -142,9 +146,11 @@ class ToolOptions extends Component {
       options: {
         target: this.state.target,
         panel: this.state.panel,
+        title: this.state.title,
         caption: this.state.caption,
         serviceUrl: this.state.serviceUrl,
         abstract: this.state.abstract,
+        html: this.state.html,
         document: this.state.document,
         visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
@@ -307,7 +313,29 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
-            <label htmlFor="caption">Rubrik</label>
+            <label htmlFor="abstract">Beskrivning</label>
+            <input
+              value={this.state.abstract}
+              type="text"
+              name="abstract"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="title">Rubrik</label>
+            <input
+              value={this.state.title}
+              type="text"
+              name="title"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="caption">Titel</label>
             <input
               id="caption"
               name="caption"
@@ -319,14 +347,14 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
-            <label htmlFor="abstract">Sammanfattning</label>
+            <label htmlFor="html">Sammanfattning</label>
             <textarea
-              id="abstract"
-              name="abstract"
+              id="html"
+              name="html"
               onChange={e => {
                 this.handleInputChange(e);
               }}
-              value={this.state.abstract}
+              value={this.state.html}
             />
           </div>
           <div>

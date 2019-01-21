@@ -54,12 +54,13 @@ const styles = theme => {
     text: {}
   };
 };
-
 class Collector extends Component {
   constructor(props) {
     super(props);
-    this.text = "Tyck till";
     this.position = "right";
+    this.options = props.options;
+    this.title = this.options.title || "Tyck till";
+    this.abstract = this.options.abstract || "Vi vill veta vad du tycker!";
     this.state = {
       dialogOpen: false
     };
@@ -99,7 +100,7 @@ class Collector extends Component {
     var left = this.position === "right" ? (window.innerWidth - 330) / 2 : 0;
     return createPortal(
       <Window
-        title={this.text}
+        title={this.title}
         onClose={this.closePanel}
         position={this.position}
         open={this.state.panelOpen}
@@ -142,10 +143,8 @@ class Collector extends Component {
             </IconButton>
           </div>
           <div>
-            <Typography className={classes.title}>Tyck till</Typography>
-            <Typography className={classes.text}>
-              Vi vill veta vad du tycker
-            </Typography>
+            <Typography className={classes.title}>{this.title}</Typography>
+            <Typography className={classes.text}>{this.abstract}</Typography>
           </div>
         </div>
         {this.renderPanel()}

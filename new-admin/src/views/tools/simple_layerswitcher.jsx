@@ -28,6 +28,8 @@ var defaultState = {
   active: false,
   index: 0,
   target: "toolbar",
+  title: "Innehåll",
+  abstract: "Välj innehåll att visa i kartan",
   visibleAtStart: false,
   templateJsonFilePath: "http://localhost:55630/informative/load/op",
   visibleForGroups: []
@@ -50,6 +52,8 @@ class ToolOptions extends Component {
         active: true,
         index: tool.index,
         target: tool.options.target,
+        abstract: tool.options.abstract,
+        title: tool.options.title,
         visibleAtStart: tool.options.visibleAtStart || false,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
@@ -113,6 +117,8 @@ class ToolOptions extends Component {
       index: this.state.index,
       options: {
         target: this.state.target,
+        abstract: this.state.abstract,
+        title: this.state.title,
         visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
@@ -252,6 +258,28 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
               value={this.state.target}
+            />
+          </div>
+          <div>
+            <label htmlFor="title">Etikett</label>
+            <input
+              value={this.state.title}
+              type="text"
+              name="title"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="abstract">Beskrivning</label>
+            <input
+              value={this.state.abstract}
+              type="text"
+              name="abstract"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
             />
           </div>
           {this.renderVisibleForGroups()}

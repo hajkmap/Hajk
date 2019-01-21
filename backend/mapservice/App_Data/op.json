@@ -438,6 +438,8 @@
       "type": "simple_layerswitcher",
       "options": {
         "target": "left",
+        "abstract": "Välj innehåll att visa i kartan",
+        "title": "Innehåll",
         "visibleAtStart": false,
         "visibleForGroups": []
       },
@@ -449,6 +451,8 @@
         "target": "right",
         "url": "http://demo.giscloud.se/geoserver/wfs",
         "featureType": "opinion",
+        "title": "Tyck till",
+        "abstract": "Vi vill veta vad du tycker!",
         "featureNS": "wsp",
         "visibleAtStart": false,
         "visibleForGroups": []
@@ -460,9 +464,11 @@
       "options": {
         "target": "right",
         "panel": "right",
-        "caption": "Översiktsplan",
+        "title": "Övesiktsplan",
+        "caption": "Hem",
         "serviceUrl": "http://localhost:55630/informative/load",
-        "abstract": "<div><div>Genom översiktsplanen talar staden om hur bebyggelse och mark- och vattenanvändning kan utvecklas på lång sikt. Uddevalla ska vara en klimatsmart, växande stad med sammanhållande stadsmiljöer där det byggda och det gröna samspelar. En stad för alla.</div><h2>Vad vill vi uppnå?</h2>Uddevalla ska vara en stad med täta och sammanhållande stadsmiljöer där det byggda och det gröna samspelar.  Översiktsplanen utgår från stadens fyra mål för stadsbyggande.<img src=\"https://images.vastsverige.com/publishedmedia/jue8wzf2g5vrgjoy19xg/Uddevalla_170728-0082-Edit.jpg\"></div>",
+        "abstract": "Läs mer om våra planer",
+        "html": "<div>HTML som beskriver dokumentets innehåll.</div>",
         "document": "op",
         "visibleAtStart": false,
         "visibleForGroups": []
@@ -475,6 +481,8 @@
         "target": "left",
         "text": "ajdlkasj kldjas lksdjalk ajldk ajs\nasj \ndkasj d\nasj d\naskj daksj dklasjd lkasj\n\najdkas jdlkasj lkdsaj asj\nd ajkldjas lkdjsa\n\njasdkl jasldk jaskld jalksj\n\nasjd klasjd lkajsdlk as\n\nasdj aksjd sakl",
         "headerText": "HÄR KAN DU SE VAD SOM PLANERAS I DITT OMRÅDE",
+        "title": "Om",
+        "abstract": "Vad är en översiktsplan?",
         "visibleAtStart": true,
         "showInfoOnce": false,
         "base64EncodeForInfotext": false,

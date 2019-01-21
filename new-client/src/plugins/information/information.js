@@ -55,8 +55,10 @@ const styles = theme => {
 class Information extends Component {
   constructor(spec) {
     super(spec);
-    this.text = "Om kartan";
     this.options = spec.options;
+    console.log("Options", this.options);
+    this.title = this.options.title || "Om kartan";
+    this.abstract = this.options.abstract || "Visa mer information";
     this.state = {
       dialogOpen: false
     };
@@ -120,10 +122,8 @@ class Information extends Component {
             </IconButton>
           </div>
           <div>
-            <Typography className={classes.title}>this.text</Typography>
-            <Typography className={classes.text}>
-              Visa mer information
-            </Typography>
+            <Typography className={classes.title}>{this.title}</Typography>
+            <Typography className={classes.text}>{this.abstract}</Typography>
           </div>
         </div>
         {this.renderDialog()}

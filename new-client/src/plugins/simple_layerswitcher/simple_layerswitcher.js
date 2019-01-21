@@ -76,8 +76,10 @@ class SimpleLayerSwitcher extends React.PureComponent {
 
   constructor(spec) {
     super(spec);
-    this.text = "Innehåll";
     this.app = spec.app;
+    this.options = spec.options;
+    this.title = this.options.title || "Innehåll";
+    this.abstract = this.options.abstract || "Välj vad du vill se i kartan";
     this.observer = Observer();
     this.observer.subscribe("layerAdded", layer => {});
     this.simpleLayerSwitcherModel = new SimpleLayerSwitcherModel({
@@ -91,7 +93,7 @@ class SimpleLayerSwitcher extends React.PureComponent {
   renderWindow() {
     return createPortal(
       <Window
-        title={this.text}
+        title={this.title}
         onClose={this.closePanel}
         open={this.state.panelOpen}
         height={window.innerHeight - 380}
@@ -111,7 +113,7 @@ class SimpleLayerSwitcher extends React.PureComponent {
   renderPanel() {
     return createPortal(
       <Panel
-        title={this.text}
+        title={this.title}
         onClose={this.closePanel}
         open={this.state.panelOpen}
       >
@@ -138,10 +140,8 @@ class SimpleLayerSwitcher extends React.PureComponent {
             </IconButton>
           </div>
           <div>
-            <Typography className={classes.title}>Innehåll</Typography>
-            <Typography className={classes.text}>
-              Välj vad du vill se i kartan
-            </Typography>
+            <Typography className={classes.title}>{this.title}</Typography>
+            <Typography className={classes.text}>{this.abstract}</Typography>
           </div>
         </div>
         {this.renderWindow()}

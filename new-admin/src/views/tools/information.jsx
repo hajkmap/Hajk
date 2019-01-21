@@ -31,6 +31,8 @@ var defaultState = {
   visibleAtStart: false,
   text: "",
   headerText: "",
+  title: "",
+  abstract: "",
   showInfoOnce: false,
   base64EncodeForInfotext: false,
   visibleForGroups: []
@@ -56,6 +58,8 @@ class ToolOptions extends Component {
         visibleAtStart: tool.options.visibleAtStart || false,
         text: tool.options.text || "",
         headerText: tool.options.headerText || "",
+        title: tool.options.title || "",
+        abstract: tool.options.abstract || "",
         showInfoOnce: tool.options.showInfoOnce,
         base64EncodeForInfotext: tool.options.base64EncodeForInfotext,
         visibleForGroups: tool.options.visibleForGroups
@@ -122,6 +126,8 @@ class ToolOptions extends Component {
         target: this.state.target,
         text: this.state.text,
         headerText: this.state.headerText,
+        title: this.state.title,
+        abstract: this.state.abstract,
         visibleAtStart: this.state.visibleAtStart,
         showInfoOnce: this.state.showInfoOnce,
         base64EncodeForInfotext: this.state.base64EncodeForInfotext,
@@ -277,6 +283,28 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="visibleAtStart">Synlig vid start</label>
+          </div>
+          <div>
+            <label htmlFor="title">Etikett</label>
+            <input
+              value={this.state.title}
+              type="text"
+              name="title"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="abstract">Beskrivning</label>
+            <input
+              value={this.state.abstract}
+              type="text"
+              name="abstract"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
           </div>
           <div>
             <label htmlFor="headerText">Rubrik</label>
