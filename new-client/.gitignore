@@ -1,4 +1,16 @@
 # See https://help.github.com/ignore-files/ for more about ignoring files.
+
+# * ABOUT SKIPPED FILES * 
+# Some files in the repository are checked in, but further revisions to them are ignored.
+# This is achived with --skip-worktree, see https://stackoverflow.com/a/39776107/709339.
+#
+# To ADD FILES TO BE SKIPPED:
+# $ git update-index --skip-worktree someFile.txt
+# To LIST FILES THAT ARE ON SKIP LIST:
+# $ git ls-files -v . | grep ^S
+# To REMOVE FILES FROM SKIP LIST:
+# git update-index --no-skip-worktree someFile.txt
+
 # Let us have the possibility to put a test file anywhere and not check it in
 test.html
 

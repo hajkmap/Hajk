@@ -46,7 +46,7 @@ class PopPanel extends Component {
   componentDidMount() {}
 
   render() {
-    const { classes, children, open, top, height } = this.props;
+    const { classes, children, open, top, height, width } = this.props;
     var activeClasses = [classes.popPanel];
     if (!open) {
       activeClasses = [classes.hidden, activeClasses];
@@ -57,7 +57,8 @@ class PopPanel extends Component {
         className={classNames(activeClasses)}
         style={{
           top: top,
-          height: height
+          height: height,
+          width: width
         }}
       >
         <PanelHeader title={this.props.title} onClose={this.close} />

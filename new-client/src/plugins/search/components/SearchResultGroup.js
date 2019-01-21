@@ -85,8 +85,6 @@ class SearchResultGroup extends Component {
     this.props.model.clearHighlight();
   };
 
-  componentWillMount() {}
-
   renderItem(feature, displayField, i) {
     const { classes } = this.props;
     const active = this.state.activeFeature === feature;

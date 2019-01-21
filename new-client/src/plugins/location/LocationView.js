@@ -164,7 +164,7 @@ class LocationView extends React.PureComponent {
             <TableHead>
               <TableRow>
                 <TableCell>Egenskap</TableCell>
-                <TableCell numeric>Värde</TableCell>
+                <TableCell align="right">Värde</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -175,7 +175,7 @@ class LocationView extends React.PureComponent {
                     <TableCell component="th" scope="row">
                       {r.label}
                     </TableCell>
-                    <TableCell numeric>
+                    <TableCell align="right">
                       {this.state[row] ? this.state[row] : "–"}
                     </TableCell>
                   </TableRow>

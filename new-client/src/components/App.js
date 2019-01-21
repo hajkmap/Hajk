@@ -60,11 +60,13 @@ const styles = theme => {
     },
     logo: {
       height: "40px",
+      marginLeft: "20px",
       marginRight: "20px",
       "& img": {
         height: "100%"
       },
       [theme.breakpoints.down("xs")]: {
+        marginLeft: "0",
         marginRight: "0"
       }
     },
@@ -364,14 +366,14 @@ class App extends Component {
           <AppBar position="absolute" className={classes.appBar}>
             <MUIToolbar className={classes.toolbarRoot}>
               <div id="toolbar-left" className={classes.toolbarContent}>
-                <div className={classes.logo}>
-                  <img src={config.mapConfig.map.logo} alt="logo" />
-                </div>
                 {this.renderWidgetMenuIcon()}
                 <Toolbar
                   tools={this.appModel.getToolbarPlugins()}
                   parent={this}
                 />
+                <div className={classes.logo}>
+                  <img src={config.mapConfig.map.logo} alt="logo" />
+                </div>
                 <span className={classes.title}>
                   <Typography variant="h6">
                     {config.mapConfig.map.title}

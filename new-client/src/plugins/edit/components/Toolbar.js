@@ -40,7 +40,7 @@ class Toolbar extends Component {
     };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.props.observer.on("deactivate", () => {
       this.props.panel.setState({
         checked: false,

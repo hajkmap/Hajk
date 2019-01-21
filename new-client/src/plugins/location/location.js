@@ -10,7 +10,7 @@ import {
 } from "@material-ui/core";
 import NavigationIcon from "@material-ui/icons/Navigation";
 
-import Panel from "../../components/Panel.js";
+import PopPanel from "../../components/PopPanel";
 import LocationView from "./LocationView";
 
 const styles = theme => {
@@ -60,15 +60,26 @@ class Location extends React.PureComponent {
   renderPanel() {
     // Using Portals (see React docs) we render panel not in direct relation in DOM to the button, but rather in #map-overlay <div>.
     // We make use of <Panel>, a component that encapsulates MUI's Drawer, that we've written to reuse across Hajk's plugins.
+    // <Panel
+    //   title={this.text}
+    //   onClose={this.closePanel}
+    //   position="left"
+    //   open={this.state.panelOpen}
+    // >
+    //   <LocationView parent={this} />
+    // </Panel>,
     return createPortal(
-      <Panel
+      <PopPanel
         title={this.text}
         onClose={this.closePanel}
         position="left"
         open={this.state.panelOpen}
+        top={this.state.top}
+        height="430px"
+        width="330px"
       >
         <LocationView parent={this} />
-      </Panel>,
+      </PopPanel>,
       document.getElementById("map-overlay")
     );
   }
