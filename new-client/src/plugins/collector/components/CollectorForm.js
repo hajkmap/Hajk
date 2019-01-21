@@ -314,7 +314,7 @@ class CollectorForm extends Component {
                   }}
                   message={
                     <span id="message-id">
-                      Drag i kartan för att placera markören på önskat plats
+                      Drag i kartan för att placera markören på önskad plats
                     </span>
                   }
                 />
