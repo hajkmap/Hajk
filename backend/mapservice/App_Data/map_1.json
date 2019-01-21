@@ -230,8 +230,15 @@
             "expanded": true,
             "layers": [
               {
-                "id": "27",
+                "id": "30",
                 "visibleAtStart": true,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "27",
+                "visibleAtStart": false,
                 "drawOrder": 1000,
                 "visibleForGroups": null,
                 "infobox": null
@@ -419,12 +426,12 @@
   "map": {
     "target": "map",
     "center": [
-      416000,
-      6583000
+      620000,
+      6929122
     ],
     "title": "Kommunkartan",
     "projection": "EPSG:3006",
-    "zoom": 12,
+    "zoom": 8,
     "maxZoom": 3,
     "minZoom": 9,
     "resolutions": [

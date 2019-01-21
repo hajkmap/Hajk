@@ -16,6 +16,9 @@ import { Map, View } from "ol";
 import { Zoom } from "ol/control";
 //{ Rotate, ScaleLine, Attribution, FullScreen } from "ol/control";
 import { register } from "ol/proj/proj4";
+import VectorLayer from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector";
+import { Circle, Fill, Stroke, Style } from "ol/style.js";
 
 var map;
 
@@ -285,7 +288,42 @@ class AppModel {
         this.addMapLayer(layer);
       });
 
+    this.highlightSource = new VectorSource();
+    this.highlightLayer = new VectorLayer({
+      source: this.highlightSource,
+      style: new Style({
+        stroke: new Stroke({
+          color: "rgba(200, 0, 0, 0.7)",
+          width: 4
+        }),
+        fill: new Fill({
+          color: "rgba(255, 0, 0, 0.1)"
+        }),
+        image: new Circle({
+          radius: 4,
+          fill: new Fill({
+            color: "rgba(255, 0, 0, 0.1)"
+          }),
+          stroke: new Stroke({
+            color: "rgba(200, 0, 0, 0.7)",
+            width: 4
+          })
+        })
+      })
+    });
+    map.addLayer(this.highlightLayer);
+
     return this;
+  }
+
+  highlight(feature) {
+    if (this.highlightSource) {
+      if (!feature) {
+        this.highlightSource.clear();
+      } else {
+        this.highlightSource.addFeature(feature);
+      }
+    }
   }
 
   parseQueryParams() {

@@ -13,6 +13,7 @@ import { SnackbarProvider, withSnackbar } from "notistack";
 
 import Toolbar from "./Toolbar.js";
 import Popup from "./Popup.js";
+import PopupWindow from "./PopupWindow.js";
 import MapSwitcher from "./MapSwitcher";
 
 import classNames from "classnames";
@@ -289,6 +290,41 @@ class App extends Component {
     );
   }
 
+  renderPopup() {
+    var config = this.props.config.mapConfig.tools.find(
+      tool => tool.type === "infoclick"
+    );
+    if (config && config.options.displayPopup) {
+      return (
+        <Popup
+          mapClickDataResult={this.state.mapClickDataResult}
+          map={this.appModel.getMap()}
+          onClose={() => {
+            this.setState({
+              mapClickDataResult: undefined
+            });
+          }}
+        />
+      );
+    } else {
+      return (
+        <PopupWindow
+          mapClickDataResult={this.state.mapClickDataResult}
+          map={this.appModel.getMap()}
+          onDisplay={feature => {
+            this.appModel.highlight(feature);
+          }}
+          onClose={() => {
+            this.appModel.highlight(false);
+            this.setState({
+              mapClickDataResult: undefined
+            });
+          }}
+        />
+      );
+    }
+  }
+
   render() {
     const { classes, config } = this.props;
     const { widgetsVisible } = this.state;
@@ -358,15 +394,7 @@ class App extends Component {
             </MUIToolbar>
           </AppBar>
           <main className={classes.map} id="map">
-            <Popup
-              mapClickDataResult={this.state.mapClickDataResult}
-              map={this.appModel.getMap()}
-              onClose={() => {
-                this.setState({
-                  mapClickDataResult: undefined
-                });
-              }}
-            />
+            {this.renderPopup()}
             <div className={classes.searchPanel}>
               {this.renderSearchPlugin()}
             </div>

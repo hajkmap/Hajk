@@ -352,6 +352,49 @@
       "infoUrl": "https://www.google.se",
       "infoUrlText": "Länk till metadata",
       "infoOwner": "Trafikenheten"
+    },
+    {
+      "id": "30",
+      "caption": "Mätpunkter",
+      "url": "http://giscloud.se/geoserver/wms",
+      "owner": "",
+      "date": "1547253915771",
+      "content": "",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "wsp:measure_point"
+      ],
+      "layersInfo": [
+        {
+          "id": "wsp:measure_point",
+          "caption": "",
+          "legend": "",
+          "infobox": ""
+        }
+      ],
+      "infobox": "Provtagningar",
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "queryable": true,
+      "tiled": false,
+      "opacity": 1.0,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": false,
+      "infoTitle": "",
+      "infoText": "",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOwner": ""
     }
   ],
   "wfslayers": [
@@ -582,7 +625,7 @@
     {
       "id": "25",
       "caption": "Hållplats",
-      "url": "https://giscloud.se/geoserver/wfs",
+      "url": "https://giscloud.se/geoserver/wsp/wfs",
       "uri": "https://giscloud.se/wsp",
       "projection": "EPSG:3006",
       "layers": [
@@ -602,80 +645,10 @@
           "index": 2,
           "name": "image",
           "dataType": "string",
-          "textType": "url",
-          "values": null,
-          "hidden": false,
-          "defaultValue": null
-        },
-        {
-          "index": 4,
-          "name": "datum",
-          "dataType": "date",
-          "textType": null,
-          "values": null,
-          "hidden": false,
-          "defaultValue": null
-        },
-        {
-          "index": 5,
-          "name": "typ",
-          "dataType": "string",
-          "textType": "lista",
-          "values": [
-            "parkering",
-            "parkeringshus"
-          ],
-          "hidden": false,
-          "defaultValue": null
-        },
-        {
-          "index": 6,
-          "name": "trafikslag",
-          "dataType": "string",
-          "textType": "flerval",
-          "values": [
-            "bil",
-            "lastbil",
-            "buss"
-          ],
-          "hidden": false,
-          "defaultValue": null
-        },
-        {
-          "index": 7,
-          "name": "max_antal",
-          "dataType": "int",
-          "textType": null,
-          "values": null,
-          "hidden": false,
-          "defaultValue": null
-        },
-        {
-          "index": 8,
-          "name": "medel_antal",
-          "dataType": "number",
-          "textType": null,
-          "values": null,
-          "hidden": false,
-          "defaultValue": null
-        },
-        {
-          "index": 9,
-          "name": "datum_text",
-          "dataType": "string",
-          "textType": "datum",
-          "values": null,
-          "hidden": false,
-          "defaultValue": null
-        },
-        {
-          "index": 10,
-          "name": "typkod",
-          "dataType": "string",
           "textType": "fritext",
           "values": null,
           "hidden": false,
-          "defaultValue": "park"
+          "defaultValue": null
         }
       ],
       "editPoint": true,

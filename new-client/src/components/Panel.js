@@ -53,12 +53,7 @@ const styles = theme => {
     },
     drawerPaperRight: {},
     drawerPaperContainer: {
-      top: "47px",
-      right: 0,
-      bottom: 0,
-      left: 0,
-      overflow: "auto",
-      position: "absolute"
+      overflow: "auto"
     },
     drawerPaperContent: {
       userSelect: "none",

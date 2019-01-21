@@ -63,7 +63,12 @@ class Panel extends Component {
   }
 
   render() {
-    const { classes, title, children } = this.props;
+    const { classes, title, children, placement, width, height } = this.props;
+    var { left, top } = this.props;
+    if (placement === "bottom-right") {
+      left = (window.innerWidth - width) / 2 - 20;
+      top = (window.innerHeight - height) / 2 - 100;
+    }
     return (
       <Rnd
         ref={c => {
@@ -78,10 +83,10 @@ class Panel extends Component {
         minHeight={400}
         bounds="window"
         default={{
-          x: this.props.left || 8,
-          y: this.props.top || 70,
-          width: this.props.width || 400,
-          height: this.props.height || 600
+          x: left || 8,
+          y: top || 70,
+          width: width || 400,
+          height: height || 600
         }}
       >
         <div className={classes.panelContent}>
