@@ -126,6 +126,9 @@ class LayerGroupItem extends Component {
     model.observer.on("hideLayer", layer => {
       this.setHidden(layer);
     });
+    model.observer.on("toggleGroup", layer => {
+      this.toggleGroupVisible(layer)();
+    });
   }
 
   /**
@@ -265,7 +268,6 @@ class LayerGroupItem extends Component {
 
   toggleGroupVisible = layer => e => {
     var visible = !this.state.visible;
-
     if (visible) {
       layer.setVisible(visible);
       this.props.layer.getSource().updateParams({

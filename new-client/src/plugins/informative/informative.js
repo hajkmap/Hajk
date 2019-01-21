@@ -108,7 +108,6 @@ class Informative extends React.PureComponent {
 
   renderPanel() {
     var left = this.position === "right" ? (window.innerWidth - 410) / 2 : 0;
-    console.log("Render panel", this.caption);
     return createPortal(
       <Window
         title={this.title}

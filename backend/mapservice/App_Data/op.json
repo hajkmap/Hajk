@@ -335,13 +335,20 @@
             "id": "55494619-350f-6f36-0fc2-4fdf3f5cc567",
             "parent": "-1",
             "name": "Medborgardialog",
-            "toggled": false,
+            "toggled": true,
             "expanded": false,
             "layers": [
               {
                 "id": "15",
                 "visibleAtStart": false,
                 "drawOrder": 8,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "29",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
                 "visibleForGroups": null,
                 "infobox": null
               }
@@ -352,19 +359,12 @@
             "id": "9e0e18d0-7c57-0dcd-1582-5e350365aac1",
             "parent": "-1",
             "name": "Översiktsplan",
-            "toggled": false,
+            "toggled": true,
             "expanded": false,
             "layers": [
               {
                 "id": "27",
                 "visibleAtStart": true,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "29",
-                "visibleAtStart": false,
                 "drawOrder": 1000,
                 "visibleForGroups": null,
                 "infobox": null

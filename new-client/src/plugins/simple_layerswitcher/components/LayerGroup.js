@@ -5,6 +5,8 @@ import ExpansionPanel from "@material-ui/core/ExpansionPanel";
 import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import CheckBoxIcon from "@material-ui/icons/CheckBox";
+import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
@@ -30,6 +32,12 @@ const styles = theme => ({
   },
   panel: {
     marginLeft: "10px"
+  },
+  groupCheckbox: {
+    marginRight: "5px"
+  },
+  caption: {
+    display: "flex"
   }
 });
 
@@ -51,6 +59,15 @@ class LayerGroup extends Component {
         chapters: chapters
       });
     });
+    this.props.app
+      .getMap()
+      .getLayers()
+      .getArray()
+      .forEach(layer => {
+        layer.on("change:visible", () => {
+          this.forceUpdate();
+        });
+      });
   }
 
   componentDidMount() {
@@ -93,6 +110,75 @@ class LayerGroup extends Component {
     this.setState({ expanded: !this.state.expanded });
   }
 
+  isToggled() {
+    var layers = this.props.app
+      .getMap()
+      .getLayers()
+      .getArray();
+    const { group } = this.props;
+    return group.layers.some(layer => {
+      let foundMapLayer = layers.find(mapLayer => {
+        return mapLayer.get("name") === layer.id;
+      });
+      if (foundMapLayer && foundMapLayer.getVisible()) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }
+
+  toggleLayers(visibility, layers) {
+    var mapLayers = this.props.app
+      .getMap()
+      .getLayers()
+      .getArray();
+
+    mapLayers
+      .filter(mapLayer => {
+        return layers.some(layer => layer.id === mapLayer.get("name"));
+      })
+      .forEach(mapLayer => {
+        if (mapLayer.layerType === "group") {
+          this.model.observer.publish("toggleGroup", mapLayer);
+        }
+        mapLayer.setVisible(visibility);
+      });
+  }
+
+  renderToggleAll() {
+    const { classes } = this.props;
+    if (this.props.group.toggled) {
+      return (
+        <div
+          className={classes.caption}
+          onClick={e => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (this.isToggled()) {
+              this.toggleLayers(false, this.props.group.layers);
+            } else {
+              this.toggleLayers(true, this.props.group.layers);
+            }
+          }}
+        >
+          <div className={classes.groupCheckbox}>
+            {this.isToggled(this.props.group) ? (
+              <CheckBoxIcon />
+            ) : (
+              <CheckBoxOutlineBlankIcon />
+            )}
+          </div>
+          <Typography className={classes.heading}>{this.state.name}</Typography>
+        </div>
+      );
+    } else {
+      return (
+        <Typography className={classes.heading}>{this.state.name}</Typography>
+      );
+    }
+  }
+
   render() {
     const { classes, child } = this.props;
     var groupClass = "";
@@ -109,9 +195,7 @@ class LayerGroup extends Component {
           onChange={this.props.handleChange(this.props.group.id, this)}
         >
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography className={classes.heading}>
-              {this.state.name}
-            </Typography>
+            {this.renderToggleAll()}
           </ExpansionPanelSummary>
           <ExpansionPanelDetails classes={{ root: classes.root }}>
             {this.state.layers.map((layer, i) => {
