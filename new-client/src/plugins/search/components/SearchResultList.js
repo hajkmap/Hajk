@@ -35,7 +35,7 @@ const styles = theme => {
       maxHeight: "500px",
       overflow: "auto",
       padding: "5px",
-      paddingBottom: "20px",
+      paddingBottom: "22px",
       [theme.breakpoints.down("md")]: {
         maxHeight: "inherit"
       }
