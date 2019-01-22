@@ -45,8 +45,6 @@ const styles = theme => {
       padding: "20px 0"
     },
     button: {
-      width: "100%",
-      maxWidth: "300px",
       justifyContent: "left"
     },
     buttonIcon: {

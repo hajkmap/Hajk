@@ -102,7 +102,7 @@ button {
 .ol-full-screen,
 .ol-rotate {
   top: 8px;
-  left: unset;
+  left: inherit;
   right: 0px;
 }
 

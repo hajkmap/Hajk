@@ -17,7 +17,8 @@ const styles = theme => ({
       "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
     borderRadius: "2px",
     padding: "6px",
-    marginBottom: "10px"
+    marginBottom: "10px",
+    background: "white"
   },
   resultGroup: {
     width: "100%"
@@ -33,20 +34,24 @@ const styles = theme => ({
     padding: 0,
     paddingRight: "14px",
     fontSize: "14pt",
-    fontWeight: "500",
-    marginBottom: "5px"
+    fontWeight: "500"
   },
   secondaryHeading: {
     fontSize: "10pt"
   },
   details: {
-    padding: "8px 12px 12px"
+    padding: "8px 12px 12px",
+    background: "#efefef",
+    borderTop: "1px solid #ccc"
   },
   active: {
     background: theme.palette.secondary.main
   },
   disableTransition: {
     transition: "none"
+  },
+  expansionPanel: {
+    borderRadius: "0 !important"
   }
 });
 
@@ -122,7 +127,7 @@ class SearchResultGroup extends Component {
     return (
       <div ref="panelElement">
         <ExpansionPanel
-          className={classes.disableTransition}
+          className={classes.expansionPanel}
           expanded={expanded}
           onChange={e => {
             setTimeout(() => {
