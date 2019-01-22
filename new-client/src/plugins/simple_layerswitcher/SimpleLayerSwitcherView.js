@@ -7,6 +7,7 @@ import { IconButton } from "@material-ui/core";
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
+import "element-scroll-polyfill";
 
 const styles = theme => ({
   button: {

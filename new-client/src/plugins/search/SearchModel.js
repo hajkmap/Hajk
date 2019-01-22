@@ -166,8 +166,6 @@ class SearchModel {
           this.olMap.clicklock = false;
         }, 1000);
         this.searchWithinArea(e.feature, layerIds => {
-          console.log("Search within area");
-
           this.clearLayerList();
           setTimeout(() => {
             this.layerList = layerIds.reduce(this.getLayerAsSource, []);
