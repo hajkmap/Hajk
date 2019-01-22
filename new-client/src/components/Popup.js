@@ -237,7 +237,6 @@ class Popup extends React.Component {
           if (this.props.onClose) {
             this.props.onClose();
           }
-          closer.blur();
         }
         return false;
       };
