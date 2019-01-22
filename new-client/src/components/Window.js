@@ -56,8 +56,11 @@ class Panel extends Component {
   constructor(props) {
     super(props);
     window.addEventListener("resize", () => {
-      if (this.props.left > 50) {
-        this.rnd.updatePosition({ x: window.innerWidth - 410 });
+      var w = parseInt(this.rnd.getSelfElement().style.width);
+      if (this.props.left > 50 && w > 0) {
+        this.rnd.updatePosition({
+          x: window.innerWidth - (w + 20)
+        });
       }
     });
   }
