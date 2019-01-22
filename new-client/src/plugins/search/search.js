@@ -21,8 +21,8 @@ const styles = theme => {
       background: "white",
       [theme.breakpoints.up("lg")]: {
         zIndex: 1000,
-        top: "unset",
-        bottom: "unset",
+        top: "inherit",
+        bottom: "inherit",
         left: 0,
         right: 0,
         padding: "10px",
