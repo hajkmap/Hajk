@@ -64,19 +64,26 @@
       "caption": "Parkering WMS",
       "url": "http://giscloud.se/geoserver/wms",
       "owner": "",
-      "date": "1539247946343",
+      "date": "1548157477893",
       "content": "",
       "legend": "",
       "projection": null,
       "layers": [
         "wsp:parking_lot"
       ],
-      "layersInfo": null,
+      "layersInfo": [
+        {
+          "id": "wsp:parking_lot",
+          "caption": "",
+          "legend": "",
+          "infobox": ""
+        }
+      ],
       "infobox": "",
       "searchFields": null,
       "displayFields": null,
       "visibleAtStart": false,
-      "queryable": true,
+      "queryable": false,
       "tiled": false,
       "opacity": 1.0,
       "singleTile": false,
@@ -455,7 +462,7 @@
       "url": "http://giscloud.se/geoserver/wfs",
       "layer": "wsp:hpl",
       "owner": null,
-      "date": "1537870328853",
+      "date": "1548157635707",
       "content": "",
       "legend": "",
       "symbolXOffset": 0.0,
@@ -471,7 +478,7 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "{name}  \n<img src=\"{image}\"></img>",
-      "queryable": true,
+      "queryable": false,
       "labelAlign": "center",
       "labelBaseline": "alphabetic",
       "labelSize": "12px",

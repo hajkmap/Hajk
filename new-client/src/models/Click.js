@@ -84,7 +84,7 @@ function handleClick(evt, map, callback) {
       map.forEachFeatureAtPixel(
         evt.pixel,
         (feature, layer) => {
-          if (layer.getProperties().name) {
+          if (layer.get("queryable") === true && layer.getProperties().name) {
             feature.layer = layer;
             features.push(feature);
           }
