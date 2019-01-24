@@ -365,7 +365,7 @@
       "caption": "Mätpunkter",
       "url": "http://giscloud.se/geoserver/wms",
       "owner": "",
-      "date": "1547253915771",
+      "date": "1548188872840",
       "content": "",
       "legend": "",
       "projection": null,
@@ -380,7 +380,7 @@
           "infobox": ""
         }
       ],
-      "infobox": "Provtagningar",
+      "infobox": "<h3>{name}</h3> \nProvtagningar",
       "searchFields": null,
       "displayFields": null,
       "visibleAtStart": false,

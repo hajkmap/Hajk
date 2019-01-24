@@ -44,6 +44,7 @@ var informativeEditor = Model.extend({
   delete: function(documentName, callback) {
     var url = this.get("config").url_delete + "/" + documentName;
     fetch(url, {
+      credentials: "same-origin",
       method: "delete"
     }).then(response => {
       callback(response);
@@ -56,6 +57,7 @@ var informativeEditor = Model.extend({
       this.deleteParentChapter(chapter, data.chapters);
     });
     fetch(url, {
+      credentials: "same-origin",
       method: "post",
       body: JSON.stringify(data)
     }).then(response => {
@@ -67,7 +69,7 @@ var informativeEditor = Model.extend({
 
   loadDocuments: function(callback) {
     var url = this.get("config").url_document_list;
-    fetch(url).then(response => {
+    fetch(url, { credentials: "same-origin" }).then(response => {
       response.json().then(data => {
         callback(data);
       });
@@ -78,7 +80,8 @@ var informativeEditor = Model.extend({
     var url = this.get("config").url_create;
     fetch(url, {
       method: "post",
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      credentials: "same-origin"
     }).then(response => {
       response.text().then(text => {
         callback(text);
@@ -88,7 +91,7 @@ var informativeEditor = Model.extend({
 
   load: function(documentName, callback) {
     var url = this.get("config").url_load + "/" + documentName;
-    fetch(url).then(response => {
+    fetch(url, { credentials: "same-origin" }).then(response => {
       response.json().then(data => {
         data.chapters.forEach(chapter => {
           this.setParentChapter(chapter, data.chapters);
@@ -100,7 +103,7 @@ var informativeEditor = Model.extend({
 
   loadMaps: function(callback) {
     var url = this.get("config").url_map_list;
-    fetch(url).then(response => {
+    fetch(url, { credentials: "same-origin" }).then(response => {
       response.json().then(data => {
         callback(data);
       });

@@ -189,105 +189,21 @@
         ],
         "groups": [
           {
-            "id": "c1146dfb-6f78-775c-8ec0-6ecb1d245d19",
+            "id": "3a18c697-a52a-e5c9-cb77-2a7f03c648ec",
             "parent": "-1",
-            "name": "Adresser",
+            "name": "Kartlager",
             "toggled": false,
-            "expanded": true,
+            "expanded": false,
             "layers": [
               {
-                "id": "22",
-                "visibleAtStart": false,
-                "drawOrder": 5,
+                "id": "30",
+                "visibleAtStart": true,
+                "drawOrder": 1000,
                 "visibleForGroups": null,
                 "infobox": null
               }
             ],
             "groups": []
-          },
-          {
-            "id": "eff9c88f-fc3a-05c2-3a15-285712099854",
-            "parent": "-1",
-            "name": "Kartlager",
-            "toggled": false,
-            "expanded": true,
-            "layers": [
-              {
-                "id": "27",
-                "visibleAtStart": true,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "29",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "28",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "23",
-                "visibleAtStart": false,
-                "drawOrder": 1,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "18",
-                "visibleAtStart": false,
-                "drawOrder": 2,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "16",
-                "visibleAtStart": false,
-                "drawOrder": 4,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "14",
-                "visibleAtStart": false,
-                "drawOrder": 6,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "17",
-                "visibleAtStart": false,
-                "drawOrder": 3,
-                "visibleForGroups": null,
-                "infobox": null
-              }
-            ],
-            "groups": [
-              {
-                "id": "f499fa2b-ad0a-cecd-c118-2e7037b541b1",
-                "parent": "eff9c88f-fc3a-05c2-3a15-285712099854",
-                "name": "Medborgardialog",
-                "toggled": true,
-                "expanded": false,
-                "layers": [
-                  {
-                    "id": "15",
-                    "visibleAtStart": false,
-                    "drawOrder": 7,
-                    "visibleForGroups": null,
-                    "infobox": null
-                  }
-                ],
-                "groups": []
-              }
-            ]
           }
         ],
         "instruction": "",
@@ -420,12 +336,12 @@
   "map": {
     "target": "map",
     "center": [
-      416000,
-      6583000
+      626784,
+      6923488
     ],
-    "title": "Kommunkartan",
+    "title": "GIS Cloud",
     "projection": "EPSG:3006",
-    "zoom": 12,
+    "zoom": 5,
     "maxZoom": 3,
     "minZoom": 9,
     "resolutions": [
@@ -454,7 +370,7 @@
       1000000.0,
       9000000.0
     ],
-    "logo": "logo_small.png",
+    "logo": "https://www.wsp.com/-/media/WSP-Logo/Global/Image/img-jpg-wsp-red.jpg",
     "infologo": "",
     "geoserverLegendOptions": "",
     "mobileleft": null,
@@ -463,8 +379,8 @@
     "mobile": false,
     "mapselector": false,
     "colors": {
-      "primaryColor": "#0065a6",
-      "secondaryColor": "#ffcc00"
+      "primaryColor": "#ff0000",
+      "secondaryColor": "#ffffff"
     }
   }
 }

@@ -1,3 +1,7 @@
+const fetchConfig = {
+  credentials: "same-origin"
+};
+
 class InformativeModel {
   constructor(settings) {
     this.olMap = settings.map;
@@ -46,7 +50,7 @@ class InformativeModel {
   }
 
   load(callback) {
-    fetch(this.url).then(response => {
+    fetch(this.url, fetchConfig).then(response => {
       response.json().then(data => {
         data.chapters.forEach(chapter => {
           this.setParentChapter(chapter, undefined);

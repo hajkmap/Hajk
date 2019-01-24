@@ -24,6 +24,10 @@ const networkErrorMessage =
 const parseErrorMessage =
   "Fel när applikationen skulle läsas in. Detta beror troligtvis på ett konfigurationsfel. Försök igen senare.";
 
+const fetchConfig = {
+  credentials: "same-origin"
+};
+
 /* Helper function that creates a MUI theme by merging
  * hard-coded values (in this function), with custom values
  * (obtained from customTheme.json in /public).
@@ -61,7 +65,7 @@ function getTheme(config, customTheme) {
   return createMuiTheme(mergedTheme);
 }
 
-fetch("appConfig.json")
+fetch("appConfig.json", fetchConfig)
   .then(appConfigResponse => {
     appConfigResponse.json().then(appConfig => {
       let defaultMap = appConfig.defaultMap;
@@ -77,11 +81,15 @@ fetch("appConfig.json")
           }
         });
       Promise.all([
-        fetch(`${appConfig.proxy}${appConfig.mapserviceBase}/config/layers`),
         fetch(
-          `${appConfig.proxy}${appConfig.mapserviceBase}/config/${defaultMap}`
+          `${appConfig.proxy}${appConfig.mapserviceBase}/config/layers`,
+          fetchConfig
         ),
-        fetch("customTheme.json")
+        fetch(
+          `${appConfig.proxy}${appConfig.mapserviceBase}/config/${defaultMap}`,
+          fetchConfig
+        ),
+        fetch("customTheme.json", fetchConfig)
       ])
         .then(
           ([layersConfigResponse, mapConfigResponse, customThemeResponse]) => {

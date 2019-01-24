@@ -33,6 +33,10 @@ import ApplicationModel from "./models/application.js";
 
 //find.shim();
 
+const fetchConfig = {
+  credentials: "same-origin"
+};
+
 (function() {
   function create_routes(routes, application_model) {
     var route_settings = {
@@ -66,7 +70,7 @@ import ApplicationModel from "./models/application.js";
     ReactDOM.render(application_element, document.getElementById("root"));
   }
 
-  fetch("config.json").then(response => {
+  fetch("config.json", fetchConfig).then(response => {
     response.json().then(config => {
       try {
         load(config);

@@ -127,6 +127,7 @@ var manager = Model.extend({
     fetch(url, {
       method: "POST",
       cache: "no-cache",
+      credentials: "same-origin",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json"

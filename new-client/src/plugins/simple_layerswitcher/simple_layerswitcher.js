@@ -162,7 +162,7 @@ class SimpleLayerSwitcher extends React.PureComponent {
           <ListItemIcon>
             <LayersIcon />
           </ListItemIcon>
-          <ListItemText primary={this.text} />
+          <ListItemText primary={this.title} />
         </ListItem>
         {this.renderPanel()}
       </div>

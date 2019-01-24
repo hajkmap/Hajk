@@ -341,6 +341,8 @@ class App extends Component {
           onDisplay={feature => {
             this.appModel.highlight(feature);
           }}
+          testsUrl={this.appModel.config.appConfig.testsUrl}
+          dataUrl={this.appModel.config.appConfig.dataUrl}
           onClose={() => {
             this.appModel.highlight(false);
             this.setState({
