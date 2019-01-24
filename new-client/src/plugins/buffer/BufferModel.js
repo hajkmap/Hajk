@@ -2,123 +2,188 @@ import { Circle, Stroke, Fill, Style } from "ol/style.js";
 import { Vector as VectorSource } from "ol/source.js";
 import { Vector as VectorLayer } from "ol/layer.js";
 import Select from "ol/interaction/Select.js";
+import Feature from 'ol/Feature.js';
 import GeoJSON from "ol/format/GeoJSON.js";
 import { click } from "ol/events/condition.js";
-import {
-  Point,
-  Polygon,
-  MultiPoint,
-  MultiLineString,
-  MultiPolygon
-} from "ol/geom.js";
+import LinearRing from 'ol/geom/LinearRing.js';
+import {Point, LineString, Polygon, MultiPoint, MultiLineString, MultiPolygon} from "ol/geom.js";
 import * as jsts from "jsts";
+
+var selectedFeatures=[],
+    layer_added = false, 
+    highlight_added = false,
+    bufferSource = new VectorSource(),
+    bufferLayer = new VectorLayer({
+          source: bufferSource,
+          id: "buffer",
+          style: new Style({
+                fill: new Fill({
+                  color: "rgba(255, 255, 255, 0.5)"
+                }),
+                stroke: new Stroke({
+                  color: "rgba(75, 100, 115, 1.5)",
+                  width: 4
+                }),
+                image: new Circle({
+                  radius: 6,
+                  fill: new Fill({
+                    color: "rgba(255, 255, 255, 0.5)"
+                  }),
+                  stroke: new Stroke({
+                    color:  "rgba(75, 100, 115, 1.5)",
+                    width: 2
+                  })
+                })
+          })
+      }),
+    highlightStyle =new Style({
+      fill: new Fill({
+        color: "rgba(126, 168, 231, 0.47)"
+      }),
+      stroke: new Stroke({
+        color: "rgba(126, 168, 231, 1)",
+        width: 4
+      }),
+      image: new Circle({
+        radius: 6,
+        fill: new Fill({
+          color: "rgba(126, 168, 231, 0.47)"
+        }),
+        stroke: new Stroke({
+          color: "rgba(126, 168, 231, 1)",
+          width: 1
+        })
+      })
+}),
+    highlightSource = new VectorSource(),
+    highlightLayer = new VectorLayer({
+                        source: highlightSource,
+                        id: "HighlightFeature",
+                        style: highlightStyle
+      });
+
 
 class BufferModel {
   constructor(settings) {
-    this.olMap = settings.map;
-    this.observer = settings.observer;
+    this.map = settings.map;
   }
-  getDefaultStyle() {
-    const color = "rgba(90, 100, 115, 1.5)";
-    const fill = "rgba(255, 255, 255, 0.5)";
-    return [
-      new Style({
-        fill: new Fill({
-          color: fill
-        }),
-        stroke: new Stroke({
-          color: color,
-          width: 4
-        }),
-        image: new Circle({
-          radius: 6,
-          fill: new Fill({
-            color: fill
-          }),
-          stroke: new Stroke({
-            color: color,
-            width: 2
-          })
-        })
-      })
-    ];
-  }
-
   get getMap() {
     return this.setMap();
   }
 
   setMap() {
-    return this.olMap;
+    return this.map;
   }
 
-  get getObserver() {
-    return this.setObserver();
-  }
-
-  setObserver() {
-    return this.observer;
-  }
-
-  setActiveTool(dist) {
-    var currentObserver = this.getObserver;
-    currentObserver.subscribe("myEvent", message => {
-      console.log(message);
-    });
-    console.log(currentObserver);
-
-    var currentMap = this.getMap;
-    //om jsts inte hittas måste du installera det genom
-    // att stå i Hajk/new-client och köra
-    // =>>>>>>>     npm install jsts --save-dev
-    var parser = new jsts.io.OL3Parser();
-    parser.inject(Point, Polygon, MultiPoint, MultiLineString, MultiPolygon);
-    currentMap.getLayers().forEach(function(layer) {
-      // var minS = layer.getSource();
-      // console.log(minS);
-    });
-    var source = new VectorSource({
-      format: new GeoJSON(),
-      url: "temp/layer.geojson"
-    });
-    var layer = new VectorLayer({
-      source: source,
-      id: "buffer",
-      style: this.getDefaultStyle()
-    });
-
-    currentMap.addLayer(layer);
-    var selectClick = new Select({
-      condition: click
-    });
-
-    var select = selectClick;
-    //console.log(currentMap);
-    currentMap.addInteraction(select);
-
-    select.on("select", function(e) {
-      // var thisFeature = this.getFeatures().getArray();
-      // console.log(thisFeature);
-      // thisFeature.forEach(feature => {
-      currentMap.getLayers().forEach(function(layer) {
-        var minS = layer.getSource();
-        var feature = minS.getFeatures();
-        var geometry = feature.getGeometry();
-        if (geometry instanceof Circle) {
-          geometry = Polygon.fromCircle(geometry, 0b10000000);
-        }
-
-        var jstsGeom = parser.read(feature.getGeometry());
-        var buffered = jstsGeom.buffer(dist);
-
-        feature.setGeometry(parser.write(buffered));
+  setActive(active) {
+    if (active === true) { 
+      this.select = new Select({
+        condition: click
       });
-    });
+    this.map.clicklock = true;
+    this.map.addInteraction(this.select);
+    if (highlight_added === false) {
+      highlight_added = true;
+      this.map.addLayer(highlightLayer);
+    }
+    if (layer_added === false) {
+      layer_added = true;
+      this.map.addLayer(bufferLayer);
+    }
+    
+    }
+    if (active === false) {
+      if (this.select) {
+        this.map.removeInteraction(this.select);
+      }
+      this.map.clicklock = false;
+      this.map.un('click',this.selectFeatures);
+      
+     
+    }
+  }
+ selectFeatures= e => {
+
+  var currentMap = this.getMap;
+  var view = currentMap.getView();
+  var wmsLayers = currentMap.getLayers();
+  wmsLayers.forEach(function(lyr) {
+    
+    if(lyr.type === 'VECTOR' && lyr.values_.name === 'drawLayer'){ 
+           if(lyr.getSource().getFeatures().length > 0){
+                    var f = currentMap.getFeaturesAtPixel(e.pixel);
+                    var features = f;
+                      
+                    if (features) {
+                      highlightSource.addFeatures(features); 
+                      highlightSource.getFeatures().forEach(feature => {
+                          feature.setStyle(highlightStyle);
+                      });                                     
+                      selectedFeatures.push(highlightSource.getFeatures());
+                    }
+           }                      
+    }
+  
+      if(lyr.get("visible") === true && lyr.get("queryable") === true){      
+          if (e.coordinate !== undefined){
+          let url = lyr.getSource().getGetFeatureInfoUrl( e.coordinate, view.getResolution(), view.getProjection().getCode(), {'INFO_FORMAT': 'application/json'} );
+          fetch(url)
+          .then(function(response) {
+            return response.json();
+          })
+          .then(function(myJson) {          
+            var features = new GeoJSON().readFeatures(myJson);
+            if(features.length >0){ 
+              highlightSource.addFeatures(features);
+              selectedFeatures.push(highlightSource.getFeatures());      
+            }
+          });  
+        }
+       }
+
+  });
+
+ }
+  activateSelecting(activate) {
+    if (activate === true){
+      this.map.on('click',this.selectFeatures);
+    } 
+  }
+
+  bufferFeatures(dist) {   
+    var arr =[];
+    var parser = new jsts.io.OL3Parser();
+     parser.inject(Point, LineString, LinearRing, Polygon, MultiPoint, MultiLineString, MultiPolygon);
+    
+    if (selectedFeatures.length>0) {
+        selectedFeatures.forEach(function (element, key) {
+        var thisFeature=element[key];
+        
+        var olGeom = thisFeature.getGeometry();
+        if (olGeom instanceof Circle) {
+          olGeom = Polygon.fromCircle(olGeom, 0b10000000);
+        }
+        var jstsGeom = parser.read(olGeom);
+        var buffered = jstsGeom.buffer(dist);
+        var olf = new Feature();
+        olf.setGeometry(parser.write(buffered));  
+        olf.setId(Math.random() * 1E20);
+        arr.push(olf);
+      });
+      bufferSource.addFeatures(arr);      
+    }
+  }
+
+  clearSelection(){
+    if (selectedFeatures.length > 0){
+        highlightSource.clear();
+        selectedFeatures.length = 0;
+    }
+    
   }
   clearBuffer() {
-    // var featureSource = this.getSource;
-    // var vectorSource = this.getVector;
-    // vectorSource.removeFeature(featureSource);
+    this.clearSelection();
+    bufferSource.clear();    
   }
 }
 export default BufferModel;

@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 import Card from "@material-ui/core/Card";
@@ -10,46 +10,41 @@ import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import Tooltip from "@material-ui/core/Tooltip";
 
+//var dist_val;
 const listStyle3 = {
   background: "#f5f5f5",
   backgroundColor: "#f5f5f5"
 };
-const styles = theme => ({
-  root: {
-    display: "flex",
-    flexWrap: "wrap"
-  },
-  formControl: {
-    margin: theme.spacing.unit,
-    minWidth: 120,
-    maxWidth: 300
-  },
-  chips: {
-    display: "flex",
-    flexWrap: "wrap"
-  },
-  chip: {
-    margin: theme.spacing.unit / 4
-  }
-});
+const styles = theme => ({});
 
-class BufferView extends Component {
+class BufferView extends React.PureComponent{
   state = {
     name: ""
   };
-  distChange = dist => event => {
-    console.log(dist);
-  };
-  getDistans = name => event => {
-    var dist = document.querySelector("#distans").value;
-    this.props.parent.BufferModel.setActiveTool(dist);
+  constructor(props) {
+    // If you're not using some of properties defined below, remove them from your code.
+    // They are shown here for demonstration purposes only.
+    super(props);
+    this.model = this.props.model;
+    this.app = this.props.app;
+    this.localObserver = this.props.localObserver;
+    this.globalObserver = this.props.app.globalObserver;
+  }
+  clearBuffer =  name =>event => {
+    this.props.model.clearBuffer();
   };
 
-  clearBuffer = event => {
-    this.props.parent.BufferModel.clearBuffer();
+  clearSelection = name => event => {
+    
+    this.props.model.clearSelection();
   };
-  activateTool = name => event => {
-    this.props.parent.BufferModel.setActiveTool();
+  
+  activateSelecting = name => event => {
+    this.props.model.activateSelecting(true);
+  };
+  bufferFeatures = name => event => {
+    var dist = document.querySelector("#distans").value;
+    this.props.model.bufferFeatures(dist);
   };
   render() {
     const { classes } = this.props;
@@ -70,7 +65,7 @@ class BufferView extends Component {
                 <Button
                   variant="contained"
                   color="primary"
-                  onClick={this.activateTool()}
+                  onClick={this.activateSelecting()}
                 >
                   <AddIcon />
                 </Button>
@@ -78,9 +73,7 @@ class BufferView extends Component {
               &nbsp;
               <Tooltip title="Rensa selektering">
                 <Button
-                /* onClick={() => {
-                    this.props.model.clearSelection();
-                  }}*/
+                  onClick={this.clearSelection()}
                 >
                   <ClearIcon /> Rensa Selektering
                 </Button>
@@ -91,26 +84,28 @@ class BufferView extends Component {
         <br />
         <Card className={classes.card}>
           <CardContent style={listStyle3}>
-            <Typography component="h3">Ange buffertavstånd</Typography>
+            <Typography component="h3">Ange buffertavstånd (i meter)</Typography>
           </CardContent>
           <CardContent>
+         
             <span>
               <TextField
+            
                 id="distans"
-                placeholder="Avstånd i meter"
                 margin="normal"
-                variant="outlined"
-              />
-            </span>
+                variant="outlined"               
+                defaultValue="1000"
+              /> 
+            </span> 
             <br />
             <div>
               <Button
-                onClick={this.getDistans()}
+                onClick={this.bufferFeatures()}
                 variant="contained"
                 color="primary"
                 className={classes.button}
               >
-                Buffra
+                Skapa buffert
               </Button>
             </div>
           </CardContent>

@@ -3,69 +3,56 @@ import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
-import SchoolIcon from "@material-ui/icons/Adjust";
+import BufferIcon from "@material-ui/icons/Adjust";
 import Panel from "../../components/Panel.js";
 import BufferView from "./BufferView.js";
 import BufferModel from "./BufferModel.js";
 import Observer from "react-event-observer";
 
+
 const styles = theme => {
   return {};
 };
 
-class Buffer extends React.PureComponent {
-  // In native ES6 class we can set state like this, outside the constructor
+class buffer extends React.PureComponent {
+ 
   state = {
     panelOpen: this.props.options.visibleAtStart
   };
-
-  // Called when plugin's <ListItem> or widget <Button> is clicked
   onClick = e => {
-    // Callback that loops through app's panels and calls closePanel() on all except current
+   
     this.app.onPanelOpen(this);
-
-    // This state variable is being watched for in render() and decides whether MUI Component <Drawer> is open or not
     this.setState({
       panelOpen: true
-    });
+    });    
+    this.BufferModel.setActive(true);
   };
 
-  // Important, part of API for plugins that contain panels.
   closePanel = () => {
     this.setState({
       panelOpen: false
     });
+    this.BufferModel.setActive(false);
   };
 
-  constructor(spec) {
-    super(spec);
-    // Important, part of API. Must be a string. Could be fetched from config.
+  constructor(props) {
+    super(props);
+
     this.text = "Skapa buffertzon";
-    this.app = spec.app;
+    this.app = props.app;
+    this.localObserver = Observer();
 
-    // Optionally setup an observer to allow sending messages between here and model/view
-    this.observer = Observer();
-    // Example on how to make observer listen for "myEvent" event sent from elsewhere
-    this.observer.subscribe("myEvent", message => {
-      console.log(message);
-    });
 
-    // Initiate a model. Although optional, will probably be used for all except the most simple plugins.
     this.BufferModel = new BufferModel({
-      map: spec.map,
-      app: spec.app,
-      observer: this.observer
+      map: props.map,
+      app: props.app,
+      localObserver: this.localObserver
     });
 
-    // Important, part of API for plugins that contain panels. Makes App aware of this panels existance.
     this.app.registerPanel(this);
   }
-
-  // Not part of API but rather convention. If plugin has a panel, its render method should be called renderPanel().
+ 
   renderPanel() {
-    // Using Portals (see React docs) we render panel not in direct relation in DOM to the button, but rather in #map-overlay <div>.
-    // We make use of <Panel>, a component that encapsulates MUI's Drawer, that we've written to reuse across Hajk's plugins.
-
     return createPortal(
       <Panel
         title={this.text}
@@ -74,24 +61,15 @@ class Buffer extends React.PureComponent {
         open={this.state.panelOpen}
       >
         <BufferView
+          localObserver={this.localObserver}
+          model={this.BufferModel}
           app={this.app}
-          map={this.map}
-          parent={this}
-          observer={this.observer}
         />
       </Panel>,
       document.getElementById("map-overlay")
     );
   }
-
-  /*
-   * Important, part of plugins API.
-   * Each plugin must present both renderAsWidgetItem and renderAsToolbarItem.
-   * Depending on user's preferred location, App will render the plugin
-   * using one of these two methods.
-   */
-
-  // Render as a FAB (floating action button, https://material-ui.com/demos/buttons/#floating-action-buttons)
+  
   renderAsWidgetItem() {
     const { classes } = this.props;
     return (
@@ -103,14 +81,13 @@ class Buffer extends React.PureComponent {
           className={classes.button}
           onClick={this.onClick}
         >
-          <SchoolIcon />
+          <BufferIcon />
         </Button>
         {this.renderPanel()}
       </div>
     );
   }
 
-  // Render as a toolbar item, https://material-ui.com/demos/lists/
   renderAsToolbarItem() {
     return (
       <div>
@@ -121,7 +98,7 @@ class Buffer extends React.PureComponent {
           onClick={this.onClick}
         >
           <ListItemIcon>
-            <SchoolIcon />
+            <BufferIcon />
           </ListItemIcon>
           <ListItemText primary={this.text} />
         </ListItem>
@@ -142,5 +119,4 @@ class Buffer extends React.PureComponent {
     return null;
   }
 }
-
-export default withStyles(styles)(Buffer);
+export default withStyles(styles)(buffer);
