@@ -5,8 +5,8 @@ import "./Popup.css";
 import IconButton from "@material-ui/core/IconButton";
 import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
-import BarChartIcon from "@material-ui/icons/BarChart";
-import TableChartIcon from "@material-ui/icons/TableChart";
+//import BarChartIcon from "@material-ui/icons/BarChart";
+//import TableChartIcon from "@material-ui/icons/TableChart";
 //import { Chart } from "react-google-charts";
 import Window from "./Window.js";
 
