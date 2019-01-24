@@ -7,6 +7,10 @@ import GeoJSON from "ol/format/GeoJSON";
 import Attribution from "ol/control/Attribution";
 import LayerInfo from "./LayerInfo.js";
 
+const fetchConfig = {
+  credentials: "same-origin"
+};
+
 var WmsLayerProperties = {
   url: "",
   projection: "EPSG:3007",
@@ -137,7 +141,7 @@ class WMSLayer {
           url = encodeURIComponent(url);
         }
 
-        fetch(this.proxyUrl + url)
+        fetch(this.proxyUrl + url, fetchConfig)
           .then(response => {
             response.json().then(data => {
               var features = new GeoJSON().readFeatures(data);

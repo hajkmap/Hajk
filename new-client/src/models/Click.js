@@ -1,5 +1,9 @@
 import GeoJSON from "ol/format/GeoJSON.js";
 
+const fetchConfig = {
+  credentials: "same-origin"
+};
+
 function query(map, layer, evt) {
   let coordinate = evt.coordinate;
   let resolution = map.getView().getResolution();
@@ -13,7 +17,7 @@ function query(map, layer, evt) {
   let url = layer
     .getSource()
     .getGetFeatureInfoUrl(coordinate, resolution, referenceSystem, params);
-  return fetch(url);
+  return fetch(url, fetchConfig);
 }
 
 /**

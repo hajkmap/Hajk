@@ -528,6 +528,7 @@ class DrawModel {
       postData = createXML(transformed, "ritobjekt");
       fetch(this.exportUrl, {
         method: "POST",
+        credentials: "same-origin",
         headers: {
           "Content-Type": "application/json"
         },

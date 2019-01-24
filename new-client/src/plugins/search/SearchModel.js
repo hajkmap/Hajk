@@ -9,6 +9,10 @@ import Draw from "ol/interaction/Draw.js";
 import { arraySort } from "./../../utils/ArraySort.js";
 import { Stroke, Style, Circle } from "ol/style.js";
 
+const fetchConfig = {
+  credentials: "same-origin"
+};
+
 var style = new Style({
   stroke: new Stroke({
     color: "rgba(0, 0, 0, 0.6)",
@@ -48,6 +52,7 @@ class SearchModel {
     const xmlString = xmlSerializer.serializeToString(node);
 
     const request = {
+      credentials: "same-origin",
       method: "POST",
       headers: {
         "Content-Type": "text/xml"
@@ -304,6 +309,7 @@ class SearchModel {
     const xmlString = xmlSerializer.serializeToString(node);
 
     const request = {
+      credentials: "same-origin",
       method: "POST",
       headers: {
         "Content-Type": "text/xml"
@@ -344,6 +350,7 @@ class SearchModel {
     const xmlString = xmlSerializer.serializeToString(node);
 
     const request = {
+      credentials: "same-origin",
       method: "POST",
       headers: {
         "Content-Type": "text/xml"

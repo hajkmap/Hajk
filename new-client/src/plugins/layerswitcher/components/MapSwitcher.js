@@ -1,5 +1,9 @@
 import React, { Component } from "react";
 
+const fetchConfig = {
+  credentials: "same-origin"
+};
+
 class MapSwitcher extends Component {
   constructor() {
     super();
@@ -18,7 +22,8 @@ class MapSwitcher extends Component {
     let response = await fetch(
       `${this.props.appConfig.proxy}${
         this.props.appConfig.mapserviceBase
-      }/config/userspecificmaps`
+      }/config/userspecificmaps`,
+      fetchConfig
     );
     let data = await response.json();
     this.setState({ availableMaps: data });

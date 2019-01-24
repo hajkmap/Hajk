@@ -8,6 +8,9 @@ import { Select, Modify, Draw, Translate, Snap } from "ol/interaction";
 import { never } from "ol/events/condition";
 import X2JS from "x2js";
 
+const fetchConfig = {
+  credentials: "same-origin"
+};
 class EditModel {
   constructor(settings) {
     this.map = settings.map;
@@ -103,6 +106,7 @@ class EditModel {
       fetch(src.url, {
         method: "POST",
         body: payload,
+        credentials: "same-origin",
         headers: {
           "Content-Type": "text/xml"
         }
@@ -338,7 +342,7 @@ class EditModel {
       typename: source.layers[0],
       srsname: source.projection
     });
-    fetch(url)
+    fetch(url, fetchConfig)
       .then(response => {
         response.text().then(data => {
           this.loadDataSuccess(data);

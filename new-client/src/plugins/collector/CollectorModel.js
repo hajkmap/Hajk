@@ -50,6 +50,7 @@ class CollectorModel {
 
     const request = {
       method: "POST",
+      credentials: "same-origin",
       headers: {
         "Content-Type": "text/xml"
       },

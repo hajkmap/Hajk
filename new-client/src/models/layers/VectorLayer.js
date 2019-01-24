@@ -10,6 +10,10 @@ import { Point, Polygon, LineString } from "ol/geom";
 import Feature from "ol/Feature";
 import LayerInfo from "./LayerInfo.js";
 
+const fetchConfig = {
+  credentials: "same-origin"
+};
+
 let vectorLayerProperties = {
   url: "",
   featureId: "FID",
@@ -291,7 +295,7 @@ class WFSVectorLayer {
 
   loadData(url, format) {
     url = this.proxyUrl + url;
-    fetch(url).then(response => {
+    fetch(url, fetchConfig).then(response => {
       response.text().then(features => {
         this.addFeatures(features, format || "wfs");
       });
@@ -300,7 +304,7 @@ class WFSVectorLayer {
 
   generateLegend(callback) {
     var url = this.proxyUrl + this.createUrl();
-    fetch(url).then(response => {
+    fetch(url, fetchConfig).then(response => {
       response.text().then(gmlText => {
         const parser = new GML2();
         const features = parser.readFeatures(gmlText);

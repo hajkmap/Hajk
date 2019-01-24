@@ -6,6 +6,10 @@ import { withStyles } from "@material-ui/core/styles";
 
 const styles = theme => ({});
 
+const fetchConfig = {
+  credentials: "same-origin"
+};
+
 class MapSwitcher extends React.PureComponent {
   state = {
     maps: [],
@@ -21,7 +25,7 @@ class MapSwitcher extends React.PureComponent {
     // defaultMap from config is NOT the same as currently active map. How do we get that!?
     // let { proxy, mapserviceBase, defaultMap } = this.appModel.config.appConfig;
     let { proxy, mapserviceBase } = this.appModel.config.appConfig;
-    fetch(`${proxy}${mapserviceBase}/config/userspecificmaps`)
+    fetch(`${proxy}${mapserviceBase}/config/userspecificmaps`, fetchConfig)
       .then(resp => resp.json())
       .then(maps => {
         this.setState({ maps });
