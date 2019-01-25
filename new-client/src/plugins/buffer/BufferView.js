@@ -17,7 +17,7 @@ const listStyle3 = {
 };
 const styles = theme => ({});
 
-class BufferView extends React.PureComponent{
+class BufferView extends React.PureComponent {
   state = {
     name: ""
   };
@@ -30,15 +30,14 @@ class BufferView extends React.PureComponent{
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
   }
-  clearBuffer =  name =>event => {
+  clearBuffer = name => event => {
     this.props.model.clearBuffer();
   };
 
   clearSelection = name => event => {
-    
     this.props.model.clearSelection();
   };
-  
+
   activateSelecting = name => event => {
     this.props.model.activateSelecting(true);
   };
@@ -72,9 +71,7 @@ class BufferView extends React.PureComponent{
               </Tooltip>
               &nbsp;
               <Tooltip title="Rensa selektering">
-                <Button
-                  onClick={this.clearSelection()}
-                >
+                <Button onClick={this.clearSelection()}>
                   <ClearIcon /> Rensa Selektering
                 </Button>
               </Tooltip>
@@ -84,19 +81,19 @@ class BufferView extends React.PureComponent{
         <br />
         <Card className={classes.card}>
           <CardContent style={listStyle3}>
-            <Typography component="h3">Ange buffertavstånd (i meter)</Typography>
+            <Typography component="h3">
+              Ange buffertavstånd (i meter)
+            </Typography>
           </CardContent>
           <CardContent>
-         
             <span>
               <TextField
-            
                 id="distans"
                 margin="normal"
-                variant="outlined"               
+                variant="outlined"
                 defaultValue="1000"
-              /> 
-            </span> 
+              />
+            </span>
             <br />
             <div>
               <Button
