@@ -621,7 +621,7 @@ figure img {
   overflow: auto;
 }
 
-.chapter h1 {
+.chapterHeader {
   font-size: 16pt;
   margin: 0;
   padding: 10px;
