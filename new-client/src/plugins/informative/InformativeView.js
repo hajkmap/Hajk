@@ -45,6 +45,26 @@ const styles = theme => ({
   },
   layers: {
     marginTop: "10px"
+  },
+  markup: {
+    "& h1": {
+      lineHeight: "normal"
+    },
+    "& h2": {
+      lineHeight: "normal"
+    },
+    "& h3": {
+      lineHeight: "normal"
+    },
+    "& h4": {
+      lineHeight: "normal"
+    },
+    "& h5": {
+      lineHeight: "normal"
+    },
+    "& h6": {
+      lineHeight: "normal"
+    }
   }
 });
 
@@ -171,7 +191,13 @@ class Informative extends React.PureComponent {
   }
 
   renderContent() {
-    return <div dangerouslySetInnerHTML={this.createMarkup()} />;
+    const { classes } = this.props;
+    return (
+      <div
+        className={classes.markup}
+        dangerouslySetInnerHTML={this.createMarkup()}
+      />
+    );
   }
 
   findParentInToc(lookupChapter, chapters, parent) {

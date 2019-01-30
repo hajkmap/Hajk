@@ -469,7 +469,7 @@
         "serviceUrl": "http://localhost:55630/informative/load",
         "abstract": "Läs mer om våra planer",
         "html": "<div>HTML som beskriver dokumentets innehåll.</div>",
-        "document": "op",
+        "document": "oversiktsplan",
         "visibleAtStart": false,
         "visibleForGroups": []
       },

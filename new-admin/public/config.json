@@ -57,6 +57,6 @@
     { "name": "search", "title": "Söktjänster" },
     { "name": "edit", "title": "Redigeringstjänster" },
     { "name": "mapsettings", "title": "Kartinställningar" },
-    { "name": "informative", "title": "Översiktsplan" }
+    { "name": "informative", "title": "Dokumenthanterare" }
   ]
 }
