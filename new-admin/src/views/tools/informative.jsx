@@ -66,7 +66,6 @@ class ToolOptions extends Component {
         () => {
           if (tool) {
             this.props.model.getDocumentList(url, list => {
-              console.log("Document list", tool.options.document, list);
               this.setState({
                 active: true,
                 index: tool.index,

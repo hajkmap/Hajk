@@ -42,6 +42,9 @@ const styles = theme => ({
     "& figure": {
       margin: 0
     }
+  },
+  layers: {
+    marginTop: "10px"
   }
 });
 
@@ -229,9 +232,6 @@ class Informative extends React.PureComponent {
   renderChapters() {
     const { classes } = this.props;
     const { tocVisible } = this.state;
-    // if (!this.state.chapters || this.state.chapters.length === 0) {
-    //   return null;
-    // }
     return (
       <div className={classes.toc}>
         <Button variant="contained" onClick={this.toggleToc}>
@@ -260,9 +260,9 @@ class Informative extends React.PureComponent {
         />
         {this.renderChapters()}
         {this.state.chapter.header ? (
-          <h1>{this.state.chapter.header}</h1>
+          <Typography variant="h4">{this.state.chapter.header}</Typography>
         ) : null}
-        <div className="layers">
+        <div className={classes.layers}>
           {this.renderLayerItems(this.state.chapter)}
         </div>
         <div className={classes.content}>{this.renderContent()}</div>

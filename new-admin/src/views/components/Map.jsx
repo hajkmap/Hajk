@@ -21,9 +21,17 @@ class Map extends Component {
     this.map = new OpenLayersMap({
       target: target,
       config: this.props.chapter.mapSettings,
-      onUpdate: this.props.onMapUpdate
+      onUpdate: this.props.onMapUpdate,
+      wmtsUrl: this.props.config.wmtsUrl
     });
   }
+
+  update = checkedLayers => {
+    if (this.map) {
+      this.map.setLayers(checkedLayers);
+    }
+    this.props.onLayersUpdate(checkedLayers);
+  };
 
   render() {
     return (
@@ -32,7 +40,11 @@ class Map extends Component {
           map={this.props.map}
           config={this.props.config}
           chapter={this.props.chapter}
-          onUpdate={this.props.onLayersUpdate}
+          onUpdate={this.update}
+          onLoaded={layersConfig => {
+            this.map.setLayersConfig(layersConfig);
+            this.map.setLayers(this.props.chapter.layers);
+          }}
         />
       </div>
     );
