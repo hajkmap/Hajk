@@ -4,9 +4,11 @@ import {
   Editor,
   EditorState,
   RichUtils,
+  Modifier,
   AtomicBlockUtils,
   getDefaultKeyBinding
 } from "draft-js";
+//import { Editor } from "draft-extend";
 import { stateToHTML } from "draft-js-export-html";
 import { stateFromHTML } from "draft-js-import-html";
 
@@ -311,6 +313,41 @@ class RichEditor extends Component {
     };
   }
 
+  handlePastedText = (text, html) => {
+    const { editorState } = this.state;
+    const generatedState = stateFromHTML(html);
+    const generatedHtml = stateToHTML(generatedState);
+    const el = document.createElement("div");
+    el.innerHTML = generatedHtml;
+
+    const images = el.getElementsByTagName("img");
+
+    for (let i = 0; i < images.length; i++) {
+      let img = images[i];
+      img.src = img.alt;
+      img.alt = "";
+      let figure = document.createElement("figure");
+      figure.innerHTML = img.outerHTML;
+      img.parentNode.replaceChild(figure, img);
+    }
+
+    if (el.lastChild.getElementsByTagName("figure").length > 0) {
+      let p = document.createElement("p");
+      p.innerHTML = "&nbsp;";
+      el.appendChild(p);
+    }
+
+    const blockMap = stateFromHTML(el.outerHTML).blockMap;
+    const newState = Modifier.replaceWithFragment(
+      editorState.getCurrentContent(),
+      editorState.getSelection(),
+      blockMap
+    );
+    this.onChange(EditorState.push(editorState, newState, "insert-fragment"));
+
+    return true;
+  };
+
   render() {
     const { editorState } = this.state;
     let className = "RichEditor-editor";
@@ -372,6 +409,7 @@ class RichEditor extends Component {
                 customStyleMap={styleMap}
                 blockRendererFn={mediaBlockRenderer}
                 editorState={editorState}
+                handlePastedText={this.handlePastedText}
                 handleKeyCommand={this.handleKeyCommand}
                 keyBindingFn={this.mapKeyToEditorCommand}
                 onChange={this.onChange}

@@ -25,5 +25,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "draft-convert": "^2.1.4",
+    "draft-extend": "^1.6.1"
   }
 }
