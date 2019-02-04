@@ -119,7 +119,11 @@ class MeasureModel {
         };
         break;
       case "LineString":
-        length = Math.round(geom.getLength());
+        if (geom.getLength() < 1000) {
+          length = Math.round(geom.getLength() * 10) / 10;
+        } else {
+          length = Math.round(geom.getLength());
+        }
         break;
       case "Polygon":
         area = Math.round(geom.getArea());
@@ -148,7 +152,11 @@ class MeasureModel {
     }
 
     if (typeof value === "number") {
-      value = Math.round(value);
+      if (type === "length" && value < 1000) {
+        value = Math.round(value * 10) / 10;
+      } else {
+        value = Math.round(value);
+      }
     }
 
     if (type === "circle") {

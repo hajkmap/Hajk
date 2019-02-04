@@ -364,10 +364,7 @@ class AppModel {
     a.map.center[1] = y;
     a.map.zoom = z;
 
-    console.log("Layers", l);
-
     if (l) {
-      console.log("Layers from params", l);
       this.layersFromParams = l;
     }
 
