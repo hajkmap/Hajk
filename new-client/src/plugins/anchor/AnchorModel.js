@@ -38,7 +38,12 @@ class AnchorModel {
     return this.map
       .getLayers()
       .getArray()
-      .filter(layer => layer.getVisible() && layer.getProperties().name)
+      .filter(
+        layer =>
+          layer.getVisible() &&
+          layer.getProperties().name &&
+          !isNaN(parseInt(layer.getProperties().name))
+      )
       .map(layer => layer.getProperties().name)
       .join(",");
   }
@@ -50,7 +55,7 @@ class AnchorModel {
       z: this.map.getView().getZoom(),
       l: this.getVisibleLayers()
     });
-    return document.location.origin + str;
+    return document.location.href + str;
   }
 }
 

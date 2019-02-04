@@ -1,5 +1,4 @@
 import React from "react";
-import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
@@ -22,13 +21,14 @@ class Anchor extends React.PureComponent {
     this.app.onPanelOpen(this);
     this.setState({
       panelOpen: true,
-      top: e.currentTarget.offsetTop + "px"
+      anchorEl: e.currentTarget
     });
   };
 
   closePanel = () => {
     this.setState({
-      panelOpen: false
+      panelOpen: false,
+      anchorEl: null
     });
   };
 
@@ -46,22 +46,19 @@ class Anchor extends React.PureComponent {
   }
 
   renderPanel() {
-    return createPortal(
+    return (
       <PopPanel
         title={this.text}
         onClose={this.closePanel}
-        position="left"
         open={this.state.panelOpen}
-        top={this.state.top}
-        height="325px"
+        anchorEl={this.state.anchorEl}
       >
         <AnchorView
           localObserver={this.localObserver}
           model={this.anchorModel}
           parent={this}
         />
-      </PopPanel>,
-      document.getElementById("map-overlay")
+      </PopPanel>
     );
   }
 

@@ -1,11 +1,15 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import classNames from "classnames";
+import Popper from "@material-ui/core/Popper";
+import Paper from "@material-ui/core/Paper";
 import PanelHeader from "./PanelHeader";
 
 const styles = theme => {
   return {
+    content: {
+      maxWidth: "400px"
+    },
     popPanel: {
       position: "relative",
       display: "flex",
@@ -46,24 +50,19 @@ class PopPanel extends Component {
   componentDidMount() {}
 
   render() {
-    const { classes, children, open, top, height, width } = this.props;
-    var activeClasses = [classes.popPanel];
-    if (!open) {
-      activeClasses = [classes.hidden, activeClasses];
+    const { classes, children, anchorEl } = this.props;
+    var open = this.props.open;
+    if (open === undefined) {
+      open = false;
     }
+    const id = open ? "no-transition-popper" : null;
     return (
-      <div
-        ref="panel"
-        className={classNames(activeClasses)}
-        style={{
-          top: top,
-          height: height,
-          width: width
-        }}
-      >
-        <PanelHeader title={this.props.title} onClose={this.close} />
-        <div className={classes.body}>{children}</div>
-      </div>
+      <Popper id={id} open={open} anchorEl={anchorEl} placement={"right-start"}>
+        <Paper className={classes.content}>
+          <PanelHeader title={this.props.title} onClose={this.close} />
+          <div className={classes.body}>{children}</div>
+        </Paper>
+      </Popper>
     );
   }
 }

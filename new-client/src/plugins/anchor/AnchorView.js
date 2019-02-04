@@ -3,6 +3,7 @@ import { withStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
 import Button from "@material-ui/core/Button";
 import { withSnackbar } from "notistack";
+import Typography from "@material-ui/core/Typography/Typography";
 
 const styles = theme => ({
   anchor: {
@@ -43,11 +44,13 @@ class AnchorView extends React.PureComponent {
     const { classes } = this.props;
     return (
       <>
-        <p>
+        <Typography>
           Spara kartans synliga lager, aktuella zoomnivå och utbredning.
+          <br />
           Högerklicka på knappen och välj "Kopiera länkadress" för att kopiera
           länken till urklipp.
-        </p>
+        </Typography>
+        <br />
         <Button variant="contained" target="_blank" href={this.state.anchor}>
           Länk till karta
         </Button>

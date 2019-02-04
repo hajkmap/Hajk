@@ -1,5 +1,4 @@
 import React from "react";
-import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import SvgIcon from "@material-ui/core/SvgIcon";
@@ -25,22 +24,22 @@ function MeasureIcon(props) {
 
 class Measure extends React.PureComponent {
   state = {
-    panelOpen: this.props.options.visibleAtStart,
-    top: 0
+    panelOpen: this.props.options.visibleAtStart || false
   };
 
   onClick = e => {
     this.app.onPanelOpen(this);
     this.setState({
       panelOpen: true,
-      top: e.currentTarget.offsetTop + "px"
+      anchorEl: e.currentTarget
     });
     this.measureModel.setActive(true);
   };
 
   closePanel = () => {
     this.setState({
-      panelOpen: false
+      panelOpen: false,
+      anchorEl: null
     });
     this.measureModel.setActive(false);
   };
@@ -59,22 +58,19 @@ class Measure extends React.PureComponent {
   }
 
   renderPanel() {
-    return createPortal(
+    return (
       <PopPanel
         title={this.text}
         onClose={this.closePanel}
-        position="left"
         open={this.state.panelOpen}
-        top={this.state.top}
-        height="200px"
+        anchorEl={this.state.anchorEl}
       >
         <MeasureView
           localObserver={this.localObserver}
           model={this.measureModel}
           parent={this}
         />
-      </PopPanel>,
-      document.getElementById("map-overlay")
+      </PopPanel>
     );
   }
 

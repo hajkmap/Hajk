@@ -55,6 +55,7 @@ class AppModel {
       config.mapConfig.projections
     );
     this.globalObserver = globalObserver;
+    this.layersFromParams = [];
     register(this.coordinateSystemLoader.getProj4());
   }
   /**
@@ -344,7 +345,10 @@ class AppModel {
     var x = parseFloat(b.x),
       y = parseFloat(b.y),
       z = parseInt(b.z, 10),
-      l = b.l ? b.l.split(",") : [];
+      l = undefined;
+    if (typeof b.l === "string") {
+      l = b.l.split(",");
+    }
 
     if (isNaN(x)) {
       x = a.map.center[0];
@@ -360,7 +364,10 @@ class AppModel {
     a.map.center[1] = y;
     a.map.zoom = z;
 
+    console.log("Layers", l);
+
     if (l) {
+      console.log("Layers from params", l);
       this.layersFromParams = l;
     }
 
