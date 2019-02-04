@@ -93,6 +93,10 @@ class MeasureModel {
     this.addInteraction();
   }
 
+  getType() {
+    return this.type;
+  }
+
   removeInteraction() {
     this.measureTooltip.setPosition(undefined);
     this.map.removeInteraction(this.draw);

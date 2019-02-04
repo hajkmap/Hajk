@@ -26,15 +26,14 @@ const styles = theme => ({
 });
 
 class MeasureView extends React.PureComponent {
-  state = {
-    shape: "LineString"
-  };
-
   constructor(props) {
     super(props);
     this.model = this.props.model;
     this.app = this.props.app;
     this.localObserver = this.props.localObserver;
+    this.state = {
+      shape: this.props.model.getType()
+    };
   }
 
   componentDidMount() {}

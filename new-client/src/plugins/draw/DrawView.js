@@ -38,7 +38,8 @@ const styles = theme => ({
 class DrawView extends React.PureComponent {
   state = {
     shape: "LineString",
-    drawMethod: "add"
+    drawMethod: "add",
+    displayText: false
   };
 
   constructor(props) {
