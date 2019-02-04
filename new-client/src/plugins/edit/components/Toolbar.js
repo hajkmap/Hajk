@@ -33,25 +33,22 @@ const styles = theme => ({
 });
 
 class Toolbar extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       activeTool: undefined
     };
-  }
-
-  UNSAFE_componentWillMount() {
-    this.props.observer.on("deactivate", () => {
+    props.observer.on("deactivate", () => {
       this.props.panel.setState({
         checked: false,
         enabled: false,
-        selectedSource: undefined
+        selectedSource: false
       });
       this.setState({
         activeTool: undefined
       });
     });
-    this.props.observer.on("layerChanged", layer => {
+    props.observer.on("layerChanged", layer => {
       this.setState(
         {
           activeTool: undefined
@@ -133,28 +130,47 @@ class Toolbar extends Component {
 
   getStatusMessage(data) {
     if (!data) {
-      return `Uppdatateringen lyckades men det upptäcktes inte några ändringar.`;
+      return (
+        <Typography>
+          Uppdatateringen lyckades men det upptäcktes inte några ändringar.
+        </Typography>
+      );
     }
     if (data.ExceptionReport) {
-      return `Uppdateringen misslyckades: ${data.ExceptionReport.Exception.ExceptionText.toString()}`;
+      return (
+        <Typography>
+          Uppdateringen misslyckades:{" "}
+          {data.ExceptionReport.Exception.ExceptionText.toString()}
+        </Typography>
+      );
     }
     if (
       data.TransactionResponse &&
       data.TransactionResponse.TransactionSummary
     ) {
-      return `Uppdateringen lyckades:
-        antal skapade objekt: ${
-          data.TransactionResponse.TransactionSummary.totalInserted
-        }
-        antal borttagna objekt: ${
-          data.TransactionResponse.TransactionSummary.totalDeleted
-        }
-        antal uppdaterade objekt: ${
-          data.TransactionResponse.TransactionSummary.totalUpdated
-        }
-      `;
+      return (
+        <div>
+          <Typography>Uppdateringen lyckades.</Typography>
+          <Typography>
+            Antal skapade objekt:{" "}
+            {data.TransactionResponse.TransactionSummary.totalInserted.toString()}
+          </Typography>
+          <Typography>
+            Antal borttagna objekt:{" "}
+            {data.TransactionResponse.TransactionSummary.totalDeleted.toString()}
+          </Typography>
+          <Typography>
+            Antal uppdaterade objekt:{" "}
+            {data.TransactionResponse.TransactionSummary.totalUpdated.toString()}
+          </Typography>
+        </div>
+      );
     } else {
-      return "Status för uppdateringen kunde inte avläsas ur svaret från servern.";
+      return (
+        <Typography>
+          Status för uppdateringen kunde inte avläsas ur svaret från servern.
+        </Typography>
+      );
     }
   }
 
@@ -165,7 +181,10 @@ class Toolbar extends Component {
     this.props.model.save(response => {
       this.props.model.filty = false;
       this.props.model.refreshEditingLayer();
-      this.onCancelClicked();
+      this.props.app.globalObserver.emit(
+        "alert",
+        this.getStatusMessage(response)
+      );
     });
   }
 
@@ -174,7 +193,7 @@ class Toolbar extends Component {
     this.props.panel.setState({
       checked: false,
       enabled: false,
-      selectedSource: undefined
+      selectedSource: false
     });
     this.setState({
       activeTool: undefined

@@ -3,7 +3,6 @@ import { withStyles } from "@material-ui/core/styles";
 import Toolbar from "./components/Toolbar";
 import AttributeEditor from "./components/AttributeEditor";
 import Radio from "@material-ui/core/Radio";
-import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormControl from "@material-ui/core/FormControl";
 import Typography from "@material-ui/core/Typography";
@@ -81,29 +80,29 @@ class EditView extends React.PureComponent {
     return (
       <FormControl component="fieldset" className={classes.formControl}>
         <Typography variant="subtitle1">Välj data för redigering</Typography>
-        <RadioGroup
-          aria-label="Services"
-          name="services"
-          className={classes.group}
-          value={this.state.selectedSource}
-          onChange={e => {
-            this.setLayer(e.target.value);
-            this.setState({
-              selectedSource: e.target.value
-            });
-          }}
-        >
-          {this.state.sources.map((source, i) => {
-            return (
-              <FormControlLabel
-                key={i}
-                value={source.id}
-                control={<Radio />}
-                label={source.caption}
-              />
-            );
-          })}
-        </RadioGroup>
+        {this.state.sources.map((source, i) => {
+          return (
+            <FormControlLabel
+              value={source.id}
+              key={i}
+              control={
+                <Radio
+                  checked={source.id === this.state.selectedSource}
+                  onChange={e => {
+                    this.setLayer(e.target.value);
+                    this.setState({
+                      selectedSource: e.target.value
+                    });
+                  }}
+                  value={source.id}
+                  name="selected-source"
+                  aria-label="A"
+                />
+              }
+              label={source.caption}
+            />
+          );
+        })}
       </FormControl>
     );
   }
@@ -112,13 +111,13 @@ class EditView extends React.PureComponent {
     return (
       <>
         <div>
-          {this.renderSources()}
           <Toolbar
             ref="toolbar"
             enabled={this.state.enabled}
             model={this.props.model}
             panel={this}
             observer={this.props.observer}
+            app={this.props.app}
           />
           <AttributeEditor
             ref="attributeEditor"
@@ -129,6 +128,7 @@ class EditView extends React.PureComponent {
             observer={this.props.observer}
             panel={this}
           />
+          {this.renderSources()}
         </div>
       </>
     );

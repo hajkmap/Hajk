@@ -15,6 +15,8 @@ import Toolbar from "./Toolbar.js";
 import Popup from "./Popup.js";
 import PopupWindow from "./PopupWindow.js";
 import MapSwitcher from "./MapSwitcher";
+import Alert from "./Alert";
+import Loader from "./Loader";
 
 import classNames from "classnames";
 
@@ -164,6 +166,8 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      alert: false,
+      loading: false,
       mapClickDataResult: {},
       searchVisible: window.innerWidth > 1280
     };
@@ -201,6 +205,13 @@ class App extends Component {
     this.globalObserver.subscribe("mapClick", mapClickDataResult => {
       this.setState({
         mapClickDataResult: mapClickDataResult
+      });
+    });
+
+    this.globalObserver.subscribe("alert", message => {
+      this.setState({
+        alert: true,
+        alertMessage: message
       });
     });
 
@@ -390,6 +401,13 @@ class App extends Component {
         }}
       >
         <>
+          <Alert
+            open={this.state.alert}
+            message={this.state.alertMessage}
+            parent={this}
+            title="Meddelande"
+          />
+          <Loader visible={this.state.loading} />
           <AppBar position="absolute" className={classes.appBar}>
             <MUIToolbar className={classes.toolbarRoot}>
               <div id="toolbar-left" className={classes.toolbarContent}>
