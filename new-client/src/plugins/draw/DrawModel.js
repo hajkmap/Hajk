@@ -399,28 +399,34 @@ class DrawModel {
       e.feature.getGeometry().setRadius(this.circleRadius);
     }
 
-    e.feature.getGeometry().on("change", e => {
+    e.feature.getGeometry().on("change", evt => {
       var toolTip = "",
         coord = undefined,
         pointerCoord;
 
       if (this.displayText) {
-        if (this.pointerPosition) {
-          pointerCoord = this.pointerPosition.coordinate;
+        this.setFeaturePropertiesFromGeometry(e.feature);
+        if (this.drawMethod === "edit") {
+          e.feature.setStyle(this.getStyle(e.feature));
         }
+        if (this.drawMethod === "add") {
+          if (this.pointerPosition) {
+            pointerCoord = this.pointerPosition.coordinate;
+          }
 
-        if (e.target instanceof LineString) {
-          toolTip = this.formatLabel("length", e.target.getLength());
-          coord = e.target.getLastCoordinate();
+          if (evt.target instanceof LineString) {
+            toolTip = this.formatLabel("length", evt.target.getLength());
+            coord = evt.target.getLastCoordinate();
+          }
+
+          if (evt.target instanceof Polygon) {
+            toolTip = this.formatLabel("area", evt.target.getArea());
+            coord = pointerCoord || evt.target.getFirstCoordinate();
+          }
+
+          this.drawTooltipElement.innerHTML = toolTip;
+          this.drawTooltip.setPosition(coord);
         }
-
-        if (e.target instanceof Polygon) {
-          toolTip = this.formatLabel("area", e.target.getArea());
-          coord = pointerCoord || e.target.getFirstCoordinate();
-        }
-
-        this.drawTooltipElement.innerHTML = toolTip;
-        this.drawTooltip.setPosition(coord);
       }
     });
   };

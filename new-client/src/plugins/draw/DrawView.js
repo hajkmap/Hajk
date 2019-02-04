@@ -285,6 +285,7 @@ class DrawView extends React.PureComponent {
               onChange={this.handleChange("drawMethod")}
               input={<Input name="drawMethod" id="drawMethod-native-helper" />}
             >
+              <option value="abort">Ingen</option>
               <option value="add">Lägg till objekt</option>
               <option value="remove">Ta bort objekt</option>
               <option value="edit">Editera objekt</option>
