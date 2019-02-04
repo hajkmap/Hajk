@@ -140,7 +140,6 @@ class MeasureModel {
     }
     feature.setProperties({
       type: type,
-      user: true,
       length: length,
       area: area,
       radius: radius,

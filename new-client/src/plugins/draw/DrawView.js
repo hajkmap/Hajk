@@ -59,10 +59,6 @@ class DrawView extends React.PureComponent {
     });
   }
 
-  componentDidMount() {}
-
-  componentWillUnmount() {}
-
   handleChange = name => event => {
     this.setState({ [name]: event.target.value });
     if (name === "shape") {

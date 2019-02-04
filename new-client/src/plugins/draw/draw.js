@@ -15,17 +15,16 @@ const styles = theme => {
 
 class Draw extends React.PureComponent {
   state = {
-    panelOpen: this.props.options.visibleAtStart,
-    top: 0
+    panelOpen: this.props.options.visibleAtStart
   };
 
   onClick = e => {
     this.app.onPanelOpen(this);
     this.setState({
-      panelOpen: true,
-      top: e.currentTarget.offsetTop + "px"
+      panelOpen: true
     });
     this.drawModel.setActive(true);
+    this.drawModel.setDrawMethod();
   };
 
   closePanel = () => {
@@ -63,6 +62,7 @@ class Draw extends React.PureComponent {
           localObserver={this.localObserver}
           model={this.drawModel}
           parent={this}
+          open={this.state.panelOpen}
         />
       </Panel>,
       document.getElementById("map-overlay")

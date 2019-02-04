@@ -604,7 +604,9 @@ class DrawModel {
   }
 
   setDrawMethod(method) {
-    this.drawMethod = method;
+    if (method) {
+      this.drawMethod = method;
+    }
     this.removeInteraction();
 
     if (this.drawMethod === "remove") {
