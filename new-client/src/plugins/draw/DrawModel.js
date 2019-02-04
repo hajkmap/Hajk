@@ -599,13 +599,11 @@ class DrawModel {
   }
 
   setMoveActive() {
-    this.select = new Select({
-      layers: [this.vector]
+    let features = new Collection();
+    this.source.getFeatures().forEach(feature => {
+      features.push(feature);
     });
-    this.move = new Translate({
-      features: this.select.getFeatures()
-    });
-    this.map.addInteraction(this.select);
+    this.move = new Translate({ features: features });
     this.map.addInteraction(this.move);
   }
 
@@ -646,9 +644,6 @@ class DrawModel {
     }
     if (this.move) {
       this.map.removeInteraction(this.move);
-    }
-    if (this.select) {
-      this.map.removeInteraction(this.select);
     }
   }
 

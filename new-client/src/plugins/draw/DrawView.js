@@ -10,11 +10,12 @@ import NativeSelect from "@material-ui/core/NativeSelect";
 import FormControl from "@material-ui/core/FormControl";
 import Input from "@material-ui/core/Input";
 import InputLabel from "@material-ui/core/InputLabel";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Typography from "@material-ui/core/Typography/Typography";
+import Checkbox from "@material-ui/core/Checkbox";
 import { withSnackbar } from "notistack";
 import Dialog from "../../components/Dialog.js";
 import Symbology from "./components/Symbology.js";
-import Typography from "@material-ui/core/Typography/Typography";
-import Checkbox from "@material-ui/core/Checkbox";
 
 import "./draw.css";
 
@@ -127,20 +128,6 @@ class DrawView extends React.PureComponent {
             </FormControl>
           </div>
           <div className={classes.row}>
-            <div>Visa mått på ritobjekt</div>
-            <Checkbox
-              checked={this.state.displayText}
-              onChange={() => {
-                this.setState({
-                  displayText: !this.state.displayText
-                });
-                this.model.displayText = !this.model.displayText;
-                this.localObserver.emit("update");
-              }}
-              color="primary"
-            />
-          </div>
-          <div className={classes.row}>
             <div>Ritmanér</div>
             <Symbology type={this.state.shape} model={this.props.model} />
           </div>
@@ -176,8 +163,8 @@ class DrawView extends React.PureComponent {
       return (
         <>
           <Typography>
-            Klicka det objekt i kartan som du vill flytta. Du kan flytta dina
-            egna ritobjekt. För att flytta andra objekt använd editeraverktyget.
+            Du kan flytta dina egna ritobjekt. För att flytta andra objekt
+            använd editeraverktyget.
           </Typography>
         </>
       );
@@ -275,6 +262,24 @@ class DrawView extends React.PureComponent {
               <DeleteIcon />
               Ta bort alla ritobjekt
             </Button>
+          </div>
+          <div className={classes.row}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={this.state.displayText}
+                  onChange={() => {
+                    this.setState({
+                      displayText: !this.state.displayText
+                    });
+                    this.model.displayText = !this.model.displayText;
+                    this.localObserver.emit("update");
+                  }}
+                  color="primary"
+                />
+              }
+              label="Visa mått på ritobjekt"
+            />
           </div>
           <FormControl className={classes.formControl}>
             <InputLabel htmlFor="drawMethod-native-helper">
