@@ -267,6 +267,8 @@ class DrawModel {
         src: iconSrc
       });
 
+      console.log("Get point style", forcedProperties, radius);
+
       var dot = new CircleStyle({
         radius: radius,
         fill: new Fill({
@@ -416,8 +418,7 @@ class DrawModel {
   clear = () => {
     this.source.clear();
     if (this.select) {
-      var selected = this.select.getFeatures().clear();
-      console.log(selected);
+      this.select.getFeatures().clear();
     }
     this.drawTooltip.setPosition(undefined);
   };
@@ -596,9 +597,11 @@ class DrawModel {
     obj.image =
       style.getImage() instanceof Icon ? style.getImage().getSrc() : "";
     obj.pointRadius =
-      style.getImage() instanceof Circle ? style.getImage().getRadius() : "";
+      style.getImage() instanceof CircleStyle
+        ? style.getImage().getRadius()
+        : "";
     obj.pointColor =
-      style.getImage() instanceof Circle
+      style.getImage() instanceof CircleStyle
         ? style
             .getImage()
             .getFill()
@@ -608,7 +611,6 @@ class DrawModel {
     obj.strokeColor = style.getStroke().getColor();
     obj.strokeWidth = style.getStroke().getWidth();
     obj.strokeDash = style.getStroke().getLineDash();
-
     return obj;
   }
 
@@ -757,6 +759,14 @@ class DrawModel {
     });
   }
 
+  setFeaturePropertiesFromText(feature) {
+    if (!feature) return;
+    feature.setProperties({
+      type: "Text",
+      user: true
+    });
+  }
+
   formatLabel(type, value) {
     var label;
     if (type === "text") {
@@ -856,6 +866,7 @@ class DrawModel {
     if (feature.getProperties().style) {
       try {
         let style = JSON.parse(feature.getProperties().style);
+
         if (style.text) {
           this.setFeaturePropertiesFromText(feature);
           if (style.pointRadius > 0) {
@@ -913,17 +924,22 @@ class DrawModel {
     var geometryFunction;
     var geometryName = this.type.toString();
     this.text = false;
-    if (this.type === "Text") {
-      this.type = "Point";
+
+    var type = this.type;
+    this.interactionType = this.type;
+
+    if (type === "Text") {
+      type = "Point";
       this.text = true;
     }
-    if (this.type === "Square") {
-      this.type = "Circle";
+    if (type === "Square") {
+      type = "Circle";
       geometryFunction = createBox();
     }
+
     this.draw = new Draw({
       source: this.source,
-      type: this.type,
+      type: type,
       style: this.createStyle(),
       geometryFunction: geometryFunction,
       geometryName: geometryName
