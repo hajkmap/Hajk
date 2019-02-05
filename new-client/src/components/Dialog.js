@@ -69,6 +69,11 @@ class Dialog extends Component {
     this.props.onClose(this.state.text);
   };
 
+  handleAbort = e => {
+    e.stopPropagation();
+    this.props.onAbort(this.state.text);
+  };
+
   handleDialogClick = e => {
     e.stopPropagation();
     return false;
@@ -161,6 +166,11 @@ class Dialog extends Component {
           <Button onClick={this.handleClose} color="primary" autoFocus>
             {options.buttonText || "Stäng"}
           </Button>
+          {options.abortText ? (
+            <Button onClick={this.handleAbort} color="primary" autoFocus>
+              {options.abortText}
+            </Button>
+          ) : null}
         </DialogActions>
       </ReactDialog>
     );

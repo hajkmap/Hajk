@@ -55,7 +55,9 @@ class DrawView extends React.PureComponent {
         dialogPrompt: true,
         dialogText: "",
         dialogButtonText: "OK",
-        dialogCloseCallback: this.onCloseTextDialog
+        dialogAbortText: "Avbryt",
+        dialogCloseCallback: this.onCloseTextDialog,
+        dialogAbortCallback: this.onAbortTextDialog
       });
     });
   }
@@ -68,6 +70,12 @@ class DrawView extends React.PureComponent {
     if (name === "drawMethod") {
       this.props.model.setDrawMethod(event.target.value);
     }
+  };
+
+  onAbortTextDialog = () => {
+    this.setState({
+      dialog: false
+    });
   };
 
   onCloseTextDialog = text => {
@@ -89,10 +97,12 @@ class DrawView extends React.PureComponent {
             text: this.state.dialogText,
             prompt: this.state.dialogPrompt,
             headerText: this.state.dialogHeaderText || "Ange text",
-            buttonText: this.state.dialogButtonText || "OK"
+            buttonText: this.state.dialogButtonText || "OK",
+            abortText: this.state.dialogAbortText
           }}
           open={this.state.dialog}
           onClose={this.state.dialogCloseCallback}
+          onAbort={this.state.dialogAbortCallback}
         />,
         document.getElementById("map")
       );
@@ -163,8 +173,10 @@ class DrawView extends React.PureComponent {
       return (
         <>
           <Typography>
-            Du kan flytta dina egna ritobjekt. För att flytta andra objekt
-            använd editeraverktyget.
+            Klicka på det ritobjekt i kartan som du vill flytta för att aktivera
+            flyttläge, dra därefter objektet till ny position. Du kan flytta
+            dina egna ritobjekt. För att flytta andra objekt använd
+            editeraverktyget.
           </Typography>
         </>
       );

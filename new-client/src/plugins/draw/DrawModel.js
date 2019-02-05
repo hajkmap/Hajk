@@ -12,7 +12,7 @@ import { LineString, Polygon, Circle } from "ol/geom.js";
 import { fromCircle } from "ol/geom/Polygon.js";
 import Collection from "ol/Collection.js";
 import Draw, { createBox } from "ol/interaction/Draw.js";
-import { Modify, Select, Translate } from "ol/interaction.js";
+import { Modify, Translate, Select } from "ol/interaction.js";
 import Overlay from "ol/Overlay.js";
 import KML from "ol/format/KML.js";
 import { createXML } from "../../utils/KMLWriter.js";
@@ -26,8 +26,7 @@ class DrawModel {
 
     this.source = new VectorSource();
     this.vector = new VectorLayer({
-      source: this.source,
-      style: feature => this.getStyle(feature)
+      source: this.source
     });
 
     this.map.addLayer(this.vector);
@@ -106,8 +105,15 @@ class DrawModel {
   redraw() {
     this.vector.changed();
     this.source.getFeatures().forEach(feature => {
-      feature.setStyle(this.getStyle(feature));
+      this.updateText(feature);
     });
+  }
+
+  updateText(feature) {
+    feature
+      .getStyle()[1]
+      .getText()
+      .setText(this.getLabelText(feature));
   }
 
   getStyle = (feature, forcedProperties) => {
@@ -308,23 +314,42 @@ class DrawModel {
         ? forcedProperties.text
         : this.getLabelText(feature);
 
-      return new Text({
-        textAlign: "center",
-        textBaseline: "middle",
-        font: `${this.fontSize}px sans-serif`,
-        text: labelText,
-        fill: new Fill({ color: this.fontTextColor }),
-        stroke: !this.fontStroke
-          ? new Stroke({
-              color: this.fontBackColor,
-              width: 1
-            })
-          : null,
-        offsetX: type === "Text" ? 0 : 10,
-        offsetY: offsetY(),
-        rotation: 0,
-        scale: 1.4
-      });
+      if (type === "Text") {
+        return new Text({
+          textAlign: "center",
+          textBaseline: "middle",
+          font: `${this.fontSize}px sans-serif`,
+          text: labelText,
+          fill: new Fill({ color: this.fontTextColor }),
+          stroke: !this.fontStroke
+            ? new Stroke({
+                color: this.fontBackColor,
+                width: 1
+              })
+            : null,
+          offsetX: 0,
+          offsetY: offsetY(),
+          rotation: 0,
+          scale: 1.4
+        });
+      } else {
+        return new Text({
+          textAlign: "center",
+          textBaseline: "middle",
+          font: "12pt sans-serif",
+          fill: new Fill({ color: "#FFF" }),
+          text: labelText,
+          overflow: true,
+          stroke: new Stroke({
+            color: "rgba(0, 0, 0, 0.5)",
+            width: 3
+          }),
+          offsetX: 0,
+          offsetY: -10,
+          rotation: 0,
+          scale: 1
+        });
+      }
     }
 
     const type = feature.getGeometryName();
@@ -390,13 +415,17 @@ class DrawModel {
 
   clear = () => {
     this.source.clear();
+    if (this.select) {
+      var selected = this.select.getFeatures().clear();
+      console.log(selected);
+    }
     this.drawTooltip.setPosition(undefined);
   };
 
   handleDrawStart = e => {
     if (this.circleRadius > 0 && e.feature.getGeometryName() === "Circle") {
-      this.draw.finishDrawing();
       e.feature.getGeometry().setRadius(this.circleRadius);
+      this.draw.finishDrawing();
     }
 
     e.feature.getGeometry().on("change", evt => {
@@ -407,7 +436,7 @@ class DrawModel {
       if (this.displayText) {
         this.setFeaturePropertiesFromGeometry(e.feature);
         if (this.drawMethod === "edit") {
-          e.feature.setStyle(this.getStyle(e.feature));
+          this.updateText(e.feature);
         }
         if (this.drawMethod === "add") {
           if (this.pointerPosition) {
@@ -589,6 +618,17 @@ class DrawModel {
     this.addInteraction(type);
   }
 
+  editText = e => {
+    this.map.forEachFeatureAtPixel(e.pixel, feature => {
+      if (
+        feature.getProperties().type &&
+        feature.getProperties().type === "Text"
+      ) {
+        this.localObserver.emit("dialog", feature);
+      }
+    });
+  };
+
   setEditActive() {
     let features = new Collection();
     this.source.getFeatures().forEach(feature => {
@@ -599,12 +639,24 @@ class DrawModel {
   }
 
   setMoveActive() {
-    let features = new Collection();
-    this.source.getFeatures().forEach(feature => {
-      features.push(feature);
+    this.select = new Select();
+
+    this.select.on("select", evt => {
+      const { selected, deselected } = evt;
+      selected.forEach(f => {
+        if (f.getStyle() !== this.sketchStyle) {
+          f.set("_s", f.getStyle());
+        }
+        f.setStyle(f.getStyle().concat(this.sketchStyle));
+      });
+      deselected.forEach(f => {
+        f.setStyle(f.get("_s"));
+      });
     });
-    this.move = new Translate({ features: features });
+
+    this.move = new Translate({ features: this.select.getFeatures() });
     this.map.addInteraction(this.move);
+    this.map.addInteraction(this.select);
   }
 
   setDrawMethod(method) {
@@ -626,6 +678,7 @@ class DrawModel {
 
     if (this.drawMethod === "edit") {
       this.setEditActive();
+      this.map.on("singleclick", this.editText);
     }
 
     if (this.drawMethod === "move") {
@@ -636,6 +689,7 @@ class DrawModel {
   removeInteraction() {
     this.drawTooltip.setPosition(undefined);
     this.map.un("singleclick", this.removeSelected);
+    this.map.un("singleclick", this.editText);
     if (this.draw) {
       this.map.removeInteraction(this.draw);
     }
@@ -644,6 +698,15 @@ class DrawModel {
     }
     if (this.move) {
       this.map.removeInteraction(this.move);
+    }
+    if (this.select) {
+      this.select.getFeatures().forEach(feature => {
+        if (feature.get("_s")) {
+          feature.setStyle(feature.get("_s"));
+        }
+      });
+
+      this.map.removeInteraction(this.select);
     }
   }
 
