@@ -331,6 +331,11 @@ export function createXML(features, name) {
       doc += '<Data name="style">';
       doc += "<value>" + feature.getProperties().style + "</value>";
       doc += "</Data>";
+      if (feature.getProperties().geometryType) {
+        doc += '<Data name="geometryType">';
+        doc += "<value>" + feature.getProperties().geometryType + "</value>";
+        doc += "</Data>";
+      }
       doc += "</ExtendedData>";
     }
     doc += "</Placemark>";

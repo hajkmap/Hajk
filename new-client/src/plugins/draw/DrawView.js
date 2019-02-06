@@ -252,9 +252,13 @@ class DrawView extends React.PureComponent {
               var reader = new FileReader();
               reader.onload = () => {
                 this.onCloseUploadDialog();
-                this.props.model.import(reader.result);
+                this.props.model.import(reader.result, error => {
+                  console.log("Import error", error);
+                });
               };
-              reader.readAsText(file);
+              if (file) {
+                reader.readAsText(file);
+              }
             }}
           >
             Ladda upp

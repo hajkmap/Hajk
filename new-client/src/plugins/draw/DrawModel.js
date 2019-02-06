@@ -267,8 +267,6 @@ class DrawModel {
         src: iconSrc
       });
 
-      console.log("Get point style", forcedProperties, radius);
-
       var dot = new CircleStyle({
         radius: radius,
         fill: new Fill({
@@ -480,57 +478,88 @@ class DrawModel {
     });
   };
 
-  import = kmlString => {
-    var parser = new KML(),
-      features = parser.readFeatures(kmlString),
-      extent = false;
+  tanslateImportedFeature(feature) {
+    var coordinates = feature.getGeometry().getCoordinates(),
+      type = feature.getGeometry().getType(),
+      newCoordinates = [];
+    feature.setProperties({
+      user: true
+    });
 
-    features.forEach(feature => {
-      var coordinates = feature.getGeometry().getCoordinates(),
-        type = feature.getGeometry().getType(),
-        newCoordinates = [];
+    if (
+      feature.getProperties().geometryType &&
+      feature.getProperties().geometryType !== "Text"
+    ) {
       feature.setProperties({
-        user: true
+        text: ""
       });
-      if (type === "LineString") {
-        coordinates.forEach((c, i) => {
+    }
+
+    if (type === "LineString") {
+      coordinates.forEach((c, i) => {
+        var pairs = [];
+        c.forEach(digit => {
+          if (digit !== 0) {
+            pairs.push(digit);
+          }
+        });
+        newCoordinates.push(pairs);
+      });
+      feature.getGeometry().setCoordinates(newCoordinates);
+    } else if (type === "Polygon") {
+      newCoordinates[0] = [];
+      coordinates.forEach((polygon, i) => {
+        polygon.forEach((vertex, j) => {
           var pairs = [];
-          c.forEach(digit => {
+          vertex.forEach(digit => {
             if (digit !== 0) {
               pairs.push(digit);
             }
           });
-          newCoordinates.push(pairs);
+          newCoordinates[0].push(pairs);
         });
-        feature.getGeometry().setCoordinates(newCoordinates);
-      } else if (type === "Polygon") {
-        newCoordinates[0] = [];
-        coordinates.forEach((polygon, i) => {
-          polygon.forEach((vertex, j) => {
-            var pairs = [];
-            vertex.forEach(digit => {
-              if (digit !== 0) {
-                pairs.push(digit);
-              }
-            });
-            newCoordinates[0].push(pairs);
-          });
-        });
-        feature.getGeometry().setCoordinates(newCoordinates);
+      });
+      feature.getGeometry().setCoordinates(newCoordinates);
+    }
+
+    feature
+      .getGeometry()
+      .transform("EPSG:4326", this.map.getView().getProjection());
+
+    this.setStyleFromProperties(feature);
+    if (
+      feature.getProperties().geometryType === "Circle" &&
+      feature.getProperties().style
+    ) {
+      feature.setProperties({
+        radius: JSON.parse(feature.getProperties().style).radius
+      });
+    }
+  }
+
+  import = (kmlString, errback) => {
+    var parser = new KML(),
+      features = [],
+      extent = false;
+
+    try {
+      features = parser.readFeatures(kmlString);
+    } catch (ex) {
+      return errback(ex);
+    }
+
+    if (features.length > 0) {
+      features.forEach(feature => {
+        this.tanslateImportedFeature(feature);
+      });
+
+      this.source.addFeatures(features);
+      extent = this.calculateExtent(features);
+
+      if (extent) {
+        let size = this.map.getSize();
+        this.map.getView().fit(extent, size);
       }
-
-      feature
-        .getGeometry()
-        .transform("EPSG:4326", this.map.getView().getProjection());
-      this.setStyleFromProperties(feature);
-    });
-
-    this.source.addFeatures(features);
-    extent = this.calculateExtent(features);
-
-    if (extent) {
-      let size = this.map.getSize();
-      this.map.getView().fit(extent, size);
     }
   };
 
@@ -541,9 +570,11 @@ class DrawModel {
 
     features.forEach(feature => {
       var c = feature.clone();
+      var circleRadius = false;
       if (c.getGeometry() instanceof Circle) {
         let geom = fromCircle(feature.getGeometry(), 96);
         c.setGeometry(geom);
+        circleRadius = feature.getGeometry().getRadius();
       }
       c.getGeometry().transform(
         this.map.getView().getProjection(),
@@ -553,8 +584,12 @@ class DrawModel {
       if (c.getStyle()[1]) {
         c.setProperties({
           style: JSON.stringify(
-            this.extractStyle(c.getStyle()[1] || c.getStyle()[0])
-          )
+            this.extractStyle(c.getStyle()[1] || c.getStyle()[0], circleRadius)
+          ),
+          geometryType:
+            c.getGeometryName() === "geometry"
+              ? c.getProperties().geometryType
+              : c.getGeometryName()
         });
       }
 
@@ -581,7 +616,7 @@ class DrawModel {
     }
   };
 
-  extractStyle(style) {
+  extractStyle(style, circleRadius) {
     var obj = {
       text: "",
       image: "",
@@ -600,6 +635,9 @@ class DrawModel {
       style.getImage() instanceof CircleStyle
         ? style.getImage().getRadius()
         : "";
+    if (circleRadius) {
+      obj.radius = circleRadius;
+    }
     obj.pointColor =
       style.getImage() instanceof CircleStyle
         ? style
@@ -759,11 +797,12 @@ class DrawModel {
     });
   }
 
-  setFeaturePropertiesFromText(feature) {
+  setFeaturePropertiesFromText(feature, text) {
     if (!feature) return;
     feature.setProperties({
       type: "Text",
-      user: true
+      user: true,
+      text: text
     });
   }
 
@@ -838,7 +877,11 @@ class DrawModel {
 
   getLabelText(feature) {
     const props = feature.getProperties();
-    const type = feature.getGeometryName();
+    var type = feature.getGeometryName();
+    if (type === "geometry") {
+      type = feature.getProperties().geometryType;
+    }
+    console.log("Update text", type);
     switch (type) {
       case "LineString":
         return this.displayText
@@ -866,12 +909,9 @@ class DrawModel {
     if (feature.getProperties().style) {
       try {
         let style = JSON.parse(feature.getProperties().style);
-
-        if (style.text) {
-          this.setFeaturePropertiesFromText(feature);
-          if (style.pointRadius > 0) {
-            this.setFeaturePropertiesFromGeometry(feature);
-          }
+        var isText = feature.getProperties().geometryType === "Text";
+        if (isText) {
+          this.setFeaturePropertiesFromText(feature, style.text);
         } else {
           this.setFeaturePropertiesFromGeometry(feature);
         }
