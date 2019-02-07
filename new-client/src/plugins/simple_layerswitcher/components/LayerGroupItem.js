@@ -10,6 +10,7 @@ import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import { withStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
+import Slider from "@material-ui/lab/Slider";
 
 const styles = theme => ({
   button: {},
@@ -91,7 +92,11 @@ const styles = theme => ({
   layerGroupItem: {
     display: "flex"
   },
-  legend: {}
+  legend: {},
+  slider: {
+    padding: "30px",
+    overflow: "hidden"
+  }
 });
 
 class LayerGroupItem extends Component {
@@ -114,7 +119,8 @@ class LayerGroupItem extends Component {
       infoOwner: layerInfo.infoOwner,
       infoExpanded: false,
       instruction: layerInfo.instruction,
-      open: false
+      open: false,
+      opacityValue: 1
     };
   }
   /**
@@ -127,7 +133,22 @@ class LayerGroupItem extends Component {
       this.setHidden(layer);
     });
     model.observer.on("toggleGroup", layer => {
-      this.toggleGroupVisible(layer)();
+      this.toggleGroupVisible(layer);
+    });
+    this.props.layer.on("change:visible", e => {
+      var visible = e.target.getVisible();
+      if (!visible) {
+        console.log("Toggle group visible");
+        this.setHidden(e.target);
+      }
+    });
+    this.props.layer.on("change:opacity", e => {
+      var o = e.target.getOpacity();
+      if (o === 0 || o === 1) {
+        this.setState({
+          opacityValue: o
+        });
+      }
     });
   }
 
@@ -427,6 +448,39 @@ class LayerGroupItem extends Component {
     }
   }
 
+  renderOpacitySlider() {
+    let opacityValue = this.state.opacityValue;
+    const { classes } = this.props;
+    return (
+      <>
+        <Slider
+          classes={{ container: classes.slider }}
+          value={opacityValue}
+          min={0}
+          max={1}
+          step={0.1}
+          onChange={this.opacitySliderChanged}
+        />
+      </>
+    );
+  }
+
+  /* This function does two things:
+   * 1) it updates opacityValue, which is in state,
+   *    and is important as <Slider> uses it to set
+   *    its internal value.
+   * 2) it changes OL layer's opacity
+   *
+   * As <Slider> is set up to return a value between
+   * 0 and 1 and it has a step of 0.1, we don't have
+   * to worry about any conversion and rounding here.
+   * */
+  opacitySliderChanged = (event, opacityValue) => {
+    this.setState({ opacityValue }, () => {
+      this.props.layer.setOpacity(this.state.opacityValue);
+    });
+  };
+
   render() {
     const { layer } = this.props;
     const { open, visible, visibleSubLayers } = this.state;
@@ -506,6 +560,7 @@ class LayerGroupItem extends Component {
             </div>
           </div>
           {this.renderDetails()}
+          {this.renderOpacitySlider()}
           {this.renderSubLayers()}
         </div>
       </div>

@@ -65,7 +65,8 @@ const styles = theme => ({
     margin: "10px 0"
   },
   slider: {
-    padding: "20px 20px"
+    padding: "30px",
+    overflow: "hidden"
   }
 });
 
@@ -113,6 +114,15 @@ class LayerItem extends Component {
       instruction: layerInfo.instruction,
       open: false,
       opacity: this.props.layer.get("opacity")
+    });
+
+    this.props.layer.on("change:opacity", e => {
+      var o = e.target.getOpacity();
+      if (o === 0 || o === 1) {
+        this.setState({
+          opacityValue: o
+        });
+      }
     });
 
     this.props.layer.on("change:visible", e => {

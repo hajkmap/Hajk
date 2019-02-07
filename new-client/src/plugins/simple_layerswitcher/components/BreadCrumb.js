@@ -63,6 +63,21 @@ class BreadCrumb extends Component {
     );
   }
 
+  setHidden = e => {
+    var o = e.target.getOpacity();
+    this.setState({
+      hidden: o === 0
+    });
+  };
+
+  componentDidMount() {
+    this.props.layer.on("change:opacity", this.setHidden);
+  }
+
+  componentWillUnmount() {
+    this.props.layer.un("change:opacity", this.setHidden);
+  }
+
   setLayerOpacity = layer => event => {
     this.setState(
       {
