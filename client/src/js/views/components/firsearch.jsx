@@ -1,5 +1,6 @@
 var FirSelectionToolbar = require('components/firselectiontoolbar');
 var FirSearchResultGroup = require('components/firsearchresultgroup');
+var ResidentList = require('components/resident_list');
 
 shiftIsDown = false;
 ctrlIsDown = false;
@@ -433,9 +434,9 @@ var FirSearchView = {
                 <div className='panel-body-instruction instructionsText' id='instructionsTextFirskapaFastighetsforteckning' dangerouslySetInnerHTML={{__html: atob(this.props.model.get("instructionSkapaFastighetsforteckning"))}} />
             );
         }
+
         var navPanel = document.getElementById('navigation-panel');
         navPanel.style.width = '417px';
-
 
         return (
             <div className='panel panel-default'>
@@ -453,7 +454,8 @@ var FirSearchView = {
                     </div>
                 <div>
                     <br/>
-                    <span className='pull-left'>{excelButton}</span>&nbsp;&nbsp; <span className='right'>Skapa fastighetsförteckning från sökresultat</span>
+                    <span className='pull-left'>{excelButton}</span>&nbsp;&nbsp;
+                    <span className='right'>Skapa fastighetsförteckning från sökresultat</span>
                     <div>{downloadLink}</div>
                 </div>
                 </div>
@@ -732,12 +734,6 @@ var FirSearchView = {
             ? <FirSelectionToolbar model={this.props.model.get('firSelectionModel')} />
             : null;
 
-        var fastighetsforteckning = this.renderFastighetsForteckning();
-        var analysFunctions = this.renderAnalysFunctions();
-        var searchOption = this.renderSearchOption();
-
-
-        // Infoknapp
         var instructionBtn;
         var instructionTxt;
         if (typeof this.props.model.get("instructionSokning") !== 'undefined' && this.props.model.get("instructionSokning") !== null && this.props.model.get("instructionSokning").length > 0) {
@@ -778,7 +774,7 @@ var FirSearchView = {
                             {/*<span className='info-text clearfix'>Inled sökningen med * för att söka på delar av en text.</span>*/}
                         </div><br/>
                             {firSelectionToolbar}
-                            {searchOption}
+                            {this.renderSearchOption()}
                     </div>
                         <div className='pull-right'>
                             <button onClick={search_on_click} type='submit' className='btn btn-primary' id='sokEnter'>Sök</button>&nbsp;
@@ -786,8 +782,11 @@ var FirSearchView = {
                         </div>
                     </div>
                     </div>
-                    {analysFunctions}
-                    {fastighetsforteckning}
+                    {this.renderAnalysFunctions()}
+                    {this.renderFastighetsForteckning()}
+
+                    <ResidentList model={this.props.model}></ResidentList>
+
                     {results}
                 </div>
         );
@@ -801,7 +800,3 @@ var FirSearchView = {
  * @returns {SearchView}
  */
 module.exports = React.createClass(FirSearchView);
-
-
-
-
