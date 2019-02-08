@@ -21,8 +21,13 @@ class Map extends Component {
     this.map = new OpenLayersMap({
       target: target,
       config: this.props.chapter.mapSettings,
+      mapSettings: this.props.mapSettings,
       onUpdate: this.props.onMapUpdate,
-      wmtsUrl: this.props.config.wmtsUrl
+      wmsUrl: this.props.config.wms_url,
+      wmsLayers: this.props.config.wms_layers
+    });
+    this.setState({
+      map: this.map
     });
   }
 
@@ -32,6 +37,12 @@ class Map extends Component {
     }
     this.props.onLayersUpdate(checkedLayers);
   };
+
+  renderCoordinateSystemOptions(coordinateSystems) {
+    return coordinateSystems.map((coordinateSystem, i) => (
+      <option key={i}>{coordinateSystem}</option>
+    ));
+  }
 
   render() {
     return (

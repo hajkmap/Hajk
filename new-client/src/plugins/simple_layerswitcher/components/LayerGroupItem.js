@@ -138,7 +138,6 @@ class LayerGroupItem extends Component {
     this.props.layer.on("change:visible", e => {
       var visible = e.target.getVisible();
       if (!visible) {
-        console.log("Toggle group visible");
         this.setHidden(e.target);
       }
     });

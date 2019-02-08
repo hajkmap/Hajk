@@ -1,9 +1,8 @@
 import Map from "ol/Map";
 import View from "ol/View";
 import TileLayer from "ol/layer/Tile";
-import WMTSTileGrid from "ol/tilegrid/WMTS.js";
-import WMTS from "ol/source/WMTS.js";
 import TileWMS from "ol/source/TileWMS";
+import TileGrid from "ol/tilegrid/TileGrid";
 import VectorSource from "ol/source/Vector";
 import { Vector as VectorLayer } from "ol/layer";
 import GeoJSON from "ol/format/GeoJSON.js";
@@ -125,82 +124,70 @@ function createStyle(layer, feature) {
 
 class OpenLayersMap {
   constructor(settings) {
-    settings.config = settings.config || {
-      center: [319268, 6471199],
-      zoom: 6
-    };
+    var center = [0, 0],
+      zoom = 0;
 
-    this.coordinateSystemLoader = new CoordinateSystemLoader([
-      {
-        code: "EPSG:3006",
-        definition:
-          "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-        extent: [181896.33, 6101648.07, 864416.0, 7689478.3],
-        units: null
-      }
-    ]);
+    this.mapSettings = settings.mapSettings;
+
+    if (settings.config.center) {
+      center = settings.config.center;
+    } else {
+      center = this.mapSettings.center;
+    }
+    if (settings.config.zoom) {
+      zoom = settings.config.zoom;
+    } else {
+      zoom = this.mapSettings.zoom;
+    }
+
+    this.coordinateSystemLoader = new CoordinateSystemLoader();
 
     register(this.coordinateSystemLoader.getProj4());
+    this.definitions = this.coordinateSystemLoader.getDefinitions();
+
+    var definition = this.definitions.find(
+      definition => definition.code === this.mapSettings.projection
+    );
+
+    if (definition) {
+      this.projection = definition.code;
+    }
+    this.extent = this.mapSettings.extent;
     this.layers = [];
+    var source = {
+      url: settings.wmsUrl,
+      params: {
+        LAYERS: settings.wmsLayers,
+        FORMAT: "image/png",
+        VERSION: "1.1.0",
+        SRS: this.projection
+      },
+      serverType: "geoserver",
+      imageFormat: "image/png"
+    };
+    source.tileGrid = new TileGrid({
+      resolutions: this.mapSettings.resolutions,
+      origin: this.mapSettings.origin
+    });
+    source.extent = this.mapSettings.extent;
+
     this.map = new Map({
       layers: [
         new TileLayer({
+          visible: true,
           opacity: 1,
-          id: -1,
-          source: new WMTS({
-            url: settings.wmtsUrl,
-            layer: "topowebb",
-            matrixSet: "3006",
-            format: "image/png",
-            projection: "EPGS:3006",
-            tileGrid: new WMTSTileGrid({
-              origin: [-1200000, 8500000],
-              resolutions: [
-                4096,
-                2048,
-                1024,
-                512,
-                256,
-                128,
-                64,
-                32,
-                16,
-                8,
-                4,
-                2,
-                1,
-                0.5
-              ],
-              matrixIds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
-            }),
-            style: "default",
-            wrapX: false
-          })
+          source: new TileWMS(source),
+          id: -1
         })
       ],
       target: settings.target,
       view: new View({
-        center: settings.config.center,
-        zoom: settings.config.zoom,
-        projection: "EPSG:3006",
-        resolutions: [
-          4096,
-          2048,
-          1024,
-          512,
-          256,
-          128,
-          64,
-          32,
-          16,
-          8,
-          4,
-          2,
-          1,
-          0.5,
-          0.25
-        ],
-        extent: [0, 6000000, 1000000, 9000000]
+        zoom: zoom,
+        units: "m",
+        resolutions: this.mapSettings.resolutions,
+        center: center,
+        projection: this.projection,
+        extent: this.mapSettings.extent
       })
     });
     this.onUpdate = settings.onUpdate;
@@ -228,6 +215,10 @@ class OpenLayersMap {
     return this.map;
   }
 
+  getCoordinateSystems() {
+    return this.definitions;
+  }
+
   setLayersConfig(layersConfig) {
     this.layersConfig = layersConfig;
     this.addWmsLayers(this.layersConfig.wmslayers);
@@ -242,7 +233,7 @@ class OpenLayersMap {
           LAYERS: layer.layers.join(","),
           FORMAT: "image/png",
           VERSION: "1.1.0",
-          SRS: "EPSG:3006"
+          SRS: this.projection
         },
         serverType: "geoserver",
         imageFormat: "image/png"

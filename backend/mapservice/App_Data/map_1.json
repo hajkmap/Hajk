@@ -173,8 +173,8 @@
       "options": {
         "baselayers": [
           {
-            "id": "5",
-            "visibleAtStart": true,
+            "id": "31",
+            "visibleAtStart": false,
             "drawOrder": 0,
             "visibleForGroups": null,
             "infobox": null

@@ -49,8 +49,8 @@
     "url_save": "http://localhost:55630/informative/save",
     "url_create": "http://localhost:55630/informative/create",
     "url_delete": "http://localhost:55630/informative/delete",
-    "default_coordinate": [320564, 6471766],
-    "wmtsUrl": "http://giscloud.se/mapservice/lmproxy/wmts"
+    "wms_url": "http://giscloud.se/mapservice/lmproxy/wms/topowebb",
+    "wms_layers": "topowebbkartan"
   },
   "router": [
     { "name": "layermanager", "title": "Visningstjänster", "default": true },

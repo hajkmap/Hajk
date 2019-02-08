@@ -32,11 +32,7 @@ class Chapter {
     settings = settings || {};
     this.header = settings.header || "";
     this.html = settings.html || "";
-    this.mapSettings = {
-      layers: settings.layers || [],
-      center: settings.center || [900000, 8500000],
-      zoom: settings.zoom || 10
-    };
+    this.mapSettings = settings.mapSettings;
     this.chapters = [];
   }
 }
@@ -67,11 +63,20 @@ class InformativeEditor extends Component {
             },
             () => {
               this.props.model.loadMaps(maps => {
-                this.setState({
-                  maps: maps,
-                  map: data.map,
-                  newDocumentMap: maps[0]
-                });
+                this.setState(
+                  {
+                    maps: maps,
+                    map: data.map,
+                    newDocumentMap: maps[0]
+                  },
+                  () => {
+                    this.props.model.loadMapSettings(data.map, settings => {
+                      this.setState({
+                        mapSettings: settings
+                      });
+                    });
+                  }
+                );
               });
             }
           );
@@ -132,7 +137,7 @@ class InformativeEditor extends Component {
     this.state.data.chapters.push(
       new Chapter({
         header: title,
-        center: this.props.model.get("config").default_coordinate
+        mapSettings: this.state.mapSettings
       })
     );
     this.setState({
@@ -180,6 +185,7 @@ class InformativeEditor extends Component {
           config={this.props.config}
           map={this.state.map}
           chapter={chapter}
+          mapSettings={this.state.mapSettings}
           onMapUpdate={state => updateMapSettings(state)}
           onLayersUpdate={state => updateLayersSettings(state)}
         />
@@ -376,7 +382,7 @@ class InformativeEditor extends Component {
             chapter.chapters.push(
               new Chapter({
                 header: title,
-                center: this.props.model.get("config").default_coordinate
+                mapSettings: this.state.mapSettings
               })
             );
             this.forceUpdate();

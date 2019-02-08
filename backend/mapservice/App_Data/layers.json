@@ -402,6 +402,49 @@
       "infoUrl": "",
       "infoUrlText": "",
       "infoOwner": ""
+    },
+    {
+      "id": "31",
+      "caption": "Topowebbkartan",
+      "url": "http://giscloud.se/mapservice/lmproxy/wms/topowebb",
+      "owner": "",
+      "date": "1549622984766",
+      "content": "Topowebbkartan",
+      "legend": "",
+      "projection": null,
+      "layers": [
+        "topowebbkartan"
+      ],
+      "layersInfo": [
+        {
+          "id": "topowebbkartan",
+          "caption": "",
+          "legend": "",
+          "infobox": ""
+        }
+      ],
+      "infobox": "",
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "queryable": false,
+      "tiled": false,
+      "opacity": 1.0,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": false,
+      "infoTitle": "",
+      "infoText": "",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOwner": ""
     }
   ],
   "wfslayers": [
