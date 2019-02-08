@@ -316,7 +316,7 @@
       "options": {
         "baselayers": [
           {
-            "id": "5",
+            "id": "31",
             "visibleAtStart": true,
             "drawOrder": 0,
             "visibleForGroups": null,
@@ -560,7 +560,7 @@
       6583000
     ],
     "title": "Översiktsplan",
-    "projection": "EPSG:3006",
+    "projection": "EPSG:3007",
     "zoom": 12,
     "maxZoom": 3,
     "minZoom": 9,

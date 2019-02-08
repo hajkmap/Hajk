@@ -6,11 +6,16 @@ import TileGrid from "ol/tilegrid/TileGrid";
 import VectorSource from "ol/source/Vector";
 import { Vector as VectorLayer } from "ol/layer";
 import GeoJSON from "ol/format/GeoJSON.js";
+import { transform } from "ol/proj";
 import { Fill, Text, Stroke, Icon, Circle, Style } from "ol/style";
 import { all as strategyAll } from "ol/loadingstrategy";
 import "ol/ol.css";
 import CoordinateSystemLoader from "./CoordinateSystemLoader.js";
 import { register } from "ol/proj/proj4";
+
+const fetchConfig = {
+  credentials: "same-origin"
+};
 
 function createStyle(layer, feature) {
   const icon = layer.icon || "";
@@ -121,7 +126,6 @@ function createStyle(layer, feature) {
 
   return [new Style(getStyleObj())];
 }
-
 class OpenLayersMap {
   constructor(settings) {
     var center = [0, 0],
@@ -269,6 +273,68 @@ class OpenLayersMap {
     return url;
   }
 
+  reprojectFeatures(features, from, to) {
+    if (Array.isArray(features)) {
+      features.forEach(feature => {
+        if (feature.getGeometry().getCoordinates) {
+          let coords = feature.getGeometry().getCoordinates();
+          try {
+            switch (feature.getGeometry().getType()) {
+              case "Point":
+                feature
+                  .getGeometry()
+                  .setCoordinates(transform(coords, from, to));
+                break;
+              case "LineString":
+                feature
+                  .getGeometry()
+                  .setCoordinates(
+                    coords.map(coord => transform(coord, from, to))
+                  );
+                break;
+              case "Polygon":
+                feature
+                  .getGeometry()
+                  .setCoordinates([
+                    coords[0].map(coord => transform(coord, from, to))
+                  ]);
+                break;
+              default:
+                throw new Error("Unknown geometry type.");
+            }
+          } catch (e) {
+            console.error("Coordinate transformation error.", e);
+          }
+        }
+      });
+    }
+  }
+
+  loadData(layer, url, source) {
+    fetch(url, fetchConfig).then(response => {
+      response.text().then(features => {
+        this.addFeatures(layer, features, source);
+      });
+    });
+  }
+
+  addFeatures(layer, data, source) {
+    var features = [],
+      parser = new GeoJSON(),
+      to = this.map
+        .getView()
+        .getProjection()
+        .getCode(),
+      from = layer.projection;
+    features = parser.readFeatures(data);
+
+    if (to !== from) {
+      this.reprojectFeatures(features, from, to);
+    }
+
+    source.addFeatures(features);
+  }
+
   addVectorLayers(layers) {
     layers.forEach(layer => {
       layer.params = {
@@ -283,9 +349,9 @@ class OpenLayersMap {
 
       var vectorSource = new VectorSource({
         format: new GeoJSON(),
-        url: extent => {
+        loader: extent => {
           var url = this.createUrl(layer, extent);
-          return url;
+          this.loadData(layer, url, vectorSource);
         },
         strategy: strategyAll
       });
