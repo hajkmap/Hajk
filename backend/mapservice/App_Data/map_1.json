@@ -174,7 +174,7 @@
         "baselayers": [
           {
             "id": "31",
-            "visibleAtStart": false,
+            "visibleAtStart": true,
             "drawOrder": 0,
             "visibleForGroups": null,
             "infobox": null

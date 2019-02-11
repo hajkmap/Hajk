@@ -650,6 +650,8 @@ class WMSLayerForm extends Component {
             onChange={e => this.setState({ serverType: e.target.value })}
           >
             <option>geoserver</option>
+            <option>mapserver</option>
+            <option>qgis</option>
             <option>arcgis</option>
           </select>
         </div>
