@@ -163,7 +163,10 @@ class SearchModel {
         if (layerIds.some(id => id === props.name)) {
           hidden = false;
         }
-        if (props.layerInfo && props.layerInfo.layerType === "base") {
+        if (
+          (props.layerInfo && props.layerInfo.layerType === "base") ||
+          !props.layerInfo
+        ) {
           hidden = false;
         }
         return hidden;

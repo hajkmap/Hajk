@@ -3,7 +3,7 @@
 }
 
 .ol-popup {
-  position: absolute;
+  position: relative;
   background-color: white;
   -webkit-filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
   filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
@@ -15,6 +15,7 @@
   min-width: 230px;
   z-index: 2000;
 }
+
 .ol-popup:after,
 .ol-popup:before {
   top: 100%;
@@ -46,8 +47,7 @@
 .ol-popup-closer {
   cursor: pointer;
 }
-
-#popup-content {
+*/ #popup-content {
   max-height: 400px;
   overflow: auto;
   margin: 12px;

@@ -244,6 +244,7 @@ class Popup extends React.Component {
       this.overlay = new Overlay({
         position: undefined,
         element: container,
+        positioning: "bottom-left",
         autoPan: true,
         autoPanAnimation: {
           duration: 250
