@@ -199,7 +199,7 @@ class WFSVectorLayer {
   reprojectFeatures(features, from, to) {
     if (Array.isArray(features)) {
       features.forEach(feature => {
-        if (feature.getGeometry().getCoordinates) {
+        if (feature.getGeometry() && feature.getGeometry().getCoordinates) {
           let coords = feature.getGeometry().getCoordinates();
           try {
             switch (feature.getGeometry().getType()) {

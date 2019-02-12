@@ -140,7 +140,11 @@ class LayerGroup extends Component {
       })
       .forEach(mapLayer => {
         if (mapLayer.layerType === "group") {
-          this.model.observer.publish("toggleGroup", mapLayer);
+          if (visibility === true) {
+            this.model.observer.publish("showLayer", mapLayer);
+          } else {
+            this.model.observer.publish("hideLayer", mapLayer);
+          }
         }
         mapLayer.setVisible(visibility);
       });

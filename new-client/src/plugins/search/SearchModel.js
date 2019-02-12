@@ -1,6 +1,7 @@
 import { WFS } from "ol/format";
 import IsLike from "ol/format/filter/IsLike";
 import Intersects from "ol/format/filter/Intersects";
+import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
@@ -83,11 +84,13 @@ class SearchModel {
         this.getLayerAsSource,
         []
       );
-      const searchSources = searchLayers.map(this.mapDisplayLayerAsSearchLayer);
+      const searchSources = searchLayers
+        .map(this.mapDisplayLayerAsSearchLayer)
+        .filter(source => source.layers);
+
       const promises = searchSources.map(
         this.mapSouceAsWFSPromise(feature, projCode)
       );
-
       Promise.all(promises).then(responses => {
         Promise.all(responses.map(result => result.json())).then(
           jsonResults => {
@@ -150,6 +153,23 @@ class SearchModel {
     this.drawSource.clear();
   };
 
+  getHiddenLayers(layerIds) {
+    return this.olMap
+      .getLayers()
+      .getArray()
+      .filter(layer => {
+        var hidden = true;
+        var props = layer.getProperties();
+        if (layerIds.some(id => id === props.name)) {
+          hidden = false;
+        }
+        if (props.layerInfo && props.layerInfo.layerType === "base") {
+          hidden = false;
+        }
+        return hidden;
+      });
+  }
+
   toggleDraw = (active, drawEndCallback) => {
     if (active) {
       this.draw = new Draw({
@@ -166,14 +186,25 @@ class SearchModel {
         setTimeout(() => {
           this.olMap.clicklock = false;
         }, 1000);
+
         this.searchWithinArea(e.feature, layerIds => {
-          this.clearLayerList();
-          setTimeout(() => {
-            this.layerList = layerIds.reduce(this.getLayerAsSource, []);
-            this.layerList.forEach(layer => {
+          this.visibleLayers = layerIds.reduce(this.getLayerAsSource, []);
+          this.hiddenLayers = this.getHiddenLayers(layerIds);
+          this.hiddenLayers.forEach(layer => {
+            if (layer.layerType === "group") {
+              this.globalObserver.publish("hideLayer", layer);
+            } else {
+              layer.setVisible(false);
+            }
+          });
+
+          this.visibleLayers.forEach(layer => {
+            if (layer.layerType === "group") {
+              this.globalObserver.publish("showLayer", layer);
+            } else {
               layer.setVisible(true);
-            });
-          }, 0);
+            }
+          });
         });
       });
       this.olMap.clicklock = true;
@@ -201,6 +232,7 @@ class SearchModel {
     this.olMap.addLayer(this.vectorLayer);
     this.olMap.addLayer(this.drawLayer);
     this.observer = observer;
+    this.globalObserver = app.globalObserver;
     this.app = app;
   }
 
@@ -246,12 +278,21 @@ class SearchModel {
   }
 
   mapDisplayLayerAsSearchLayer(searchLayer) {
-    var type = searchLayer.getType();
+    var type =
+      searchLayer instanceof VectorLayer
+        ? "VECTOR"
+        : searchLayer instanceof TileLayer
+        ? "TILE"
+        : undefined;
     var source = {};
     var layers;
     var layerSource = searchLayer.getSource();
     if (type === "TILE" || type === "IMAGE") {
-      layers = layerSource.getParams()["LAYERS"].split(",");
+      if (searchLayer.layerType === "group") {
+        layers = searchLayer.subLayers;
+      } else {
+        layers = layerSource.getParams()["LAYERS"].split(",");
+      }
     }
 
     switch (type) {

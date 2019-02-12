@@ -129,17 +129,20 @@ class LayerGroupItem extends Component {
    */
   componentDidMount() {
     const { model } = this.props;
+    model.globalObserver.on("hideLayer", layer => {
+      this.setHidden(layer);
+    });
+    model.globalObserver.on("showLayer", layer => {
+      this.setVisible(layer);
+    });
+    model.observer.on("showLayer", layer => {
+      this.setVisible(layer);
+    });
     model.observer.on("hideLayer", layer => {
       this.setHidden(layer);
     });
     model.observer.on("toggleGroup", layer => {
       this.toggleGroupVisible(layer);
-    });
-    this.props.layer.on("change:visible", e => {
-      var visible = e.target.getVisible();
-      if (!visible) {
-        this.setHidden(e.target);
-      }
     });
     this.props.layer.on("change:opacity", e => {
       var o = e.target.getOpacity();
@@ -268,9 +271,22 @@ class LayerGroupItem extends Component {
     );
   }
 
+  updateState(visible) {
+    this.setState({
+      visible: visible,
+      visibleSubLayers: visible ? this.props.layer.subLayers : []
+    });
+    if (visible) {
+      this.props.layer.getSource().updateParams({
+        LAYERS: this.props.layer.subLayers,
+        CQL_FILTER: null
+      });
+    }
+  }
+
   setHidden(layer) {
     this.props.layer.getSource().updateParams({
-      LAYERS: this.props.layer.subLayers[0],
+      LAYERS: [this.props.layer.subLayers[0]],
       CQL_FILTER: "EXCLUDE"
     });
     setTimeout(() => {
@@ -286,18 +302,22 @@ class LayerGroupItem extends Component {
     }, 200);
   }
 
+  setVisible(layer) {
+    layer.setVisible(true);
+    this.props.layer.getSource().updateParams({
+      LAYERS: this.props.layer.subLayers,
+      CQL_FILTER: null
+    });
+    this.setState({
+      visible: true,
+      visibleSubLayers: this.props.layer.subLayers
+    });
+  }
+
   toggleGroupVisible = layer => e => {
     var visible = !this.state.visible;
     if (visible) {
-      layer.setVisible(visible);
-      this.props.layer.getSource().updateParams({
-        LAYERS: this.props.layer.subLayers,
-        CQL_FILTER: null
-      });
-      this.setState({
-        visible: visible,
-        visibleSubLayers: visible ? this.props.layer.subLayers : []
-      });
+      this.setVisible(layer);
     } else {
       this.setHidden(layer);
     }

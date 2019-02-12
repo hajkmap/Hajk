@@ -222,14 +222,13 @@
       "caption": "Kollektivtrafik",
       "url": "http://giscloud.se/geoserver/wms",
       "owner": "",
-      "date": "1547044383550",
+      "date": "1549958700041",
       "content": "",
       "legend": "",
       "projection": null,
       "layers": [
         "wsp:hpl",
-        "wsp:bus_line",
-        "wsp:parking_lot"
+        "wsp:bus_line"
       ],
       "layersInfo": [
         {
@@ -241,12 +240,6 @@
         {
           "id": "wsp:bus_line",
           "caption": "Busslinje",
-          "legend": "",
-          "infobox": ""
-        },
-        {
-          "id": "wsp:parking_lot",
-          "caption": "Parkering",
           "legend": "",
           "infobox": ""
         }

@@ -37,7 +37,7 @@ class WMSLayer {
       serverType: config.serverType,
       imageFormat: config.imageFormat,
       attributions: this.getAttributions(),
-      cacheSize: this.subLayers.length > 1 ? 0 : 2048,
+      cacheSize: this.subLayers.length > 1 ? 32 : 2048,
       transition: this.subLayers.length > 1 ? 0 : 100
     };
 
