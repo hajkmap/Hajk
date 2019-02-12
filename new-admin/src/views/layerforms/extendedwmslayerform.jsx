@@ -98,7 +98,8 @@ const supportedInfoFormats = [
 const supportedImageFormats = [
   "image/png",
   "image/jpeg",
-  "image/png; mode=8bit"
+  "image/png; mode=8bit",
+  "image/vnd.jpeg-png"
 ];
 
 /**
