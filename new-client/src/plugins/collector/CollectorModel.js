@@ -8,6 +8,7 @@ class CollectorModel {
     this.url = settings.options.url;
     this.featureType = settings.options.featureType;
     this.featureNS = settings.options.featureNS;
+    this.observer = settings.observer;
   }
 
   /**

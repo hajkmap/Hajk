@@ -84,14 +84,21 @@ class CollectorForm extends Component {
     displayPlace: false
   };
 
+  constructor(props) {
+    super();
+    props.model.observer.on("abort", () => {
+      this.abort();
+    });
+  }
+
   renderPlaceForm = () => {
     this.setState({
       mode: "place",
       displayPlace: false,
       placemarkVisible: true
     });
-    if (window.document.body.clientWidth < 600) {
-      this.props.closePanel();
+    if (window.document.body.clientWidth < 1024) {
+      this.props.minimizePanel();
     }
   };
 
@@ -240,7 +247,7 @@ class CollectorForm extends Component {
 
   renderOkButton() {
     const { classes } = this.props;
-    if (document.body.clientWidth < 600) {
+    if (document.body.clientWidth < 1024) {
       return (
         <Button
           className={classes.crossButton}

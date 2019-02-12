@@ -80,12 +80,19 @@ class Collector extends Component {
     this.setState({
       panelOpen: true
     });
-  };
+  };   
+
+  minimizePanel = () => {
+    this.setState({
+      panelOpen: false
+    });
+  }
 
   closePanel = () => {
     this.setState({
       panelOpen: false
     });
+    this.observer.publish("abort");
   };
 
   openPanel = () => {
@@ -113,7 +120,7 @@ class Collector extends Component {
           onClose={this.onClose}
           model={this.collectorModel}
           dialogOpen={this.state.panelOpen}
-          closePanel={this.closePanel}
+          minimizePanel={this.minimizePanel}
           openPanel={this.openPanel}
         />
       </Window>,

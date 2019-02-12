@@ -44,7 +44,7 @@ class CollectorView extends Component {
   componentDidMount() {}
 
   onClose = () => {
-    this.props.onClose();
+    this.props.onClose();    
   };
 
   render() {
@@ -53,7 +53,7 @@ class CollectorView extends Component {
         <CollectorForm
           model={this.model}
           onClose={this.onClose}
-          closePanel={this.props.closePanel}
+          minimizePanel={this.props.minimizePanel}
           openPanel={this.props.openPanel}
         />
       </div>
