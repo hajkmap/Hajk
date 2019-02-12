@@ -1,4 +1,5 @@
 import GeoJSON from "ol/format/GeoJSON.js";
+import TileLayer from "ol/layer/Tile";
 
 const fetchConfig = {
   credentials: "same-origin"
@@ -50,7 +51,7 @@ function handleClick(evt, map, callback) {
     .getArray()
     .filter(layer => {
       return (
-        (layer.type === "TILE" || layer.type === "IMAGE") &&
+        layer instanceof TileLayer &&
         layer.get("visible") === true &&
         layer.get("queryable") === true
       );
