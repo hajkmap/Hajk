@@ -28,6 +28,9 @@ function query(map, layer, evt) {
  * Vector layers are added with the features at pixel method and given the original layer reference as well.
  */
 function handleClick(evt, map, callback) {
+  if (evt.originalEvent.target.className !== "ol-overlaycontainer-stopevent") {
+    return;
+  }
   // If Draw, Modify or Snap interaction are currently active, ignore clicks
   if (
     map

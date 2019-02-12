@@ -62,10 +62,10 @@ class Popup extends React.Component {
     var right = document.getElementById("step-right");
 
     if (left && right) {
-      left.onclick = () => {
+      left.onclick = e => {
         this.changeSelectedIndex(-1);
       };
-      right.onclick = () => {
+      right.onclick = e => {
         this.changeSelectedIndex(1);
       };
     }
@@ -230,8 +230,7 @@ class Popup extends React.Component {
     if (!this.overlay) {
       let container = document.getElementById("popup");
       let closer = document.getElementById("popup-closer");
-
-      closer.onclick = () => {
+      closer.onclick = e => {
         if (this.overlay) {
           this.overlay.setPosition(undefined);
           if (this.props.onClose) {

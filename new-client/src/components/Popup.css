@@ -13,6 +13,8 @@
   bottom: 12px;
   left: -50px;
   min-width: 230px;
+  max-width: 450px;
+  max-height: 450px;
   z-index: 2000;
 }
 
