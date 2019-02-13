@@ -17,7 +17,9 @@ If you plan to develop for Hajk, make sure to read the next section on code stan
 
 ## Code standard
 
-Hajk 3 uses **ESLint** and **Prettier** to enforce code formatting across the project. Code that gets checked in must follow those rules.
+Hajk 3 uses **ESLint** and **Prettier** to enforce code formatting across the project. 
+
+🔥 **Code that gets checked in must follow those rules.** 🔥
 
 The `new-client` directory contains `.eslint` file, so it's easy to follow the rules. The recommended way is to use an editor that has extensions for ESLint and Prettier. It is also highly recommended to make the editor run Prettier on each file save (i.e. in VSCode it can be controlled by the `formatOnSave: true` flag).
 
