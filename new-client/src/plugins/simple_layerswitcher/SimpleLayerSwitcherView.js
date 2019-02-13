@@ -101,9 +101,11 @@ class SimpleLayersSwitcherView extends React.PureComponent {
     });
 
     props.app.globalObserver.on("informativeLoaded", chapters => {
-      this.setState({
-        chapters: chapters
-      });
+      if (Array.isArray(chapters)) {
+        this.setState({
+          chapters: chapters
+        });
+      }
     });
   }
 

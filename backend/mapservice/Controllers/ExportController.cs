@@ -115,7 +115,17 @@ namespace MapService.Controllers
 			//    _log.DebugFormat("Could not decode base64. Will treat as non-base64 encoded: {0}", e.Message);
 			//}
 			string fontName = string.IsNullOrEmpty(ConfigurationManager.AppSettings["exportFontName"]) ? "Verdana" : ConfigurationManager.AppSettings["exportFontName"];
-			MapExportItem exportItem = JsonConvert.DeserializeObject<MapExportItem>(uploadData.data);
+            MapExportItem exportItem = new MapExportItem();
+            if (uploadData.json != null)
+            {
+                exportItem = JsonConvert.DeserializeObject<MapExportItem>(uploadData.json);
+            } 
+            if (uploadData.data != null)
+            {
+                exportItem = JsonConvert.DeserializeObject<MapExportItem>(uploadData.data);
+
+            }
+
             AsyncManager.OutstandingOperations.Increment();
             PDFCreator pdfCreator = new PDFCreator();                
             byte[] blob = pdfCreator.Create(exportItem, fontName);                
