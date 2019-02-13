@@ -5,11 +5,12 @@ import CallMadeIcon from "@material-ui/icons/CallMade";
 import InfoIcon from "@material-ui/icons/Info";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
+import Typography from "@material-ui/core/Typography";
+import Slider from "@material-ui/lab/Slider";
 import { withStyles } from "@material-ui/core/styles";
 import "./LayerGroupItem.js";
 import LayerGroupItem from "./LayerGroupItem.js";
-import Typography from "@material-ui/core/Typography";
-import Slider from "@material-ui/lab/Slider";
+import LayerSettings from "./LayerSettings.js";
 
 const styles = theme => ({
   button: {},
@@ -324,21 +325,22 @@ class LayerItem extends React.PureComponent {
   };
 
   render() {
-    var caption = this.props.layer.get("caption"),
-      visible = this.state.visible;
+    const { classes, layer, model, app, chapters } = this.props;
+    const { visible } = this.state;
+    const caption = layer.get("caption");
 
     if (!caption) {
       return null;
     }
-    const { classes } = this.props;
-    if (this.props.layer.layerType === "group") {
+
+    if (layer.layerType === "group") {
       return (
         <LayerGroupItem
-          layer={this.props.layer}
-          model={this.props.model}
-          chapters={this.props.chapters}
+          layer={layer}
+          model={model}
+          chapters={chapters}
           onOpenChapter={chapter => {
-            var informativePanel = this.props.app.panels.find(
+            var informativePanel = app.panels.find(
               panel => panel.type === "informative"
             );
             informativePanel.open(chapter);
@@ -375,7 +377,7 @@ class LayerItem extends React.PureComponent {
             </div>
             <div
               className={classes.caption}
-              onClick={this.toggleVisible(this.props.layer)}
+              onClick={this.toggleVisible(layer)}
             >
               {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
               {this.renderStatus()}
@@ -389,7 +391,7 @@ class LayerItem extends React.PureComponent {
           </div>
         </div>
         {this.renderDetails()}
-        {this.renderOpacitySlider()}
+        <LayerSettings layer={layer} />
       </div>
     );
   }

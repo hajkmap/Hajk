@@ -53,7 +53,7 @@ class BreadCrumb extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      hidden: false,
+      hidden: props.layer.getOpacity() === 0,
       anchorEl: null,
       popoverOpen: false
     };
@@ -215,7 +215,7 @@ class BreadCrumb extends Component {
 
   render() {
     const { classes } = this.props;
-    const { hidden } = this.state;
+    var { hidden } = this.state;
     var cls =
       this.props.type === "flat"
         ? classnames(classes.breadCrumb, classes.breadCrumbFlat)
