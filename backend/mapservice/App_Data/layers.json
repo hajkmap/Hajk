@@ -272,16 +272,23 @@
       "caption": "Markanvändning",
       "url": "http://giscloud.se/geoserver/wms",
       "owner": "",
-      "date": "1546595260332",
+      "date": "1550041407048",
       "content": "",
       "legend": "",
       "projection": null,
       "layers": [
-        "wsp:landuse"
+        "wsp:landuse",
+        "wsp:museum"
       ],
       "layersInfo": [
         {
           "id": "wsp:landuse",
+          "caption": "",
+          "legend": "",
+          "infobox": ""
+        },
+        {
+          "id": "wsp:museum",
           "caption": "",
           "legend": "",
           "infobox": ""

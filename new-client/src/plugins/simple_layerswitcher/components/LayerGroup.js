@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import LayerItem from "./LayerItem.js";
 import { withStyles } from "@material-ui/core/styles";
 import ExpansionPanel from "@material-ui/core/ExpansionPanel";
@@ -41,7 +41,7 @@ const styles = theme => ({
   }
 });
 
-class LayerGroup extends Component {
+class LayerGroup extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -54,11 +54,6 @@ class LayerGroup extends Component {
       chapters: []
     };
     this.toggleExpanded = this.toggleExpanded.bind(this);
-    props.app.globalObserver.on("informativeLoaded", chapters => {
-      this.setState({
-        chapters: chapters
-      });
-    });
     this.props.app
       .getMap()
       .getLayers()
@@ -189,7 +184,6 @@ class LayerGroup extends Component {
     if (child) {
       groupClass = classes.panel;
     }
-
     return (
       <div ref="panelElement" className={groupClass}>
         <ExpansionPanel
@@ -204,25 +198,21 @@ class LayerGroup extends Component {
           <ExpansionPanelDetails classes={{ root: classes.root }}>
             {this.state.layers.map((layer, i) => {
               var mapLayer = this.model.layerMap[Number(layer.id)];
-              if (mapLayer) {
-                return (
-                  <LayerItem
-                    key={i}
-                    layer={mapLayer}
-                    model={this.props.model}
-                    chapters={this.state.chapters}
-                    app={this.props.app}
-                    onOpenChapter={chapter => {
-                      var informativePanel = this.props.app.panels.find(
-                        panel => panel.type === "informative"
-                      );
-                      informativePanel.open(chapter);
-                    }}
-                  />
-                );
-              } else {
-                return null;
-              }
+              return (
+                <LayerItem
+                  key={mapLayer.get("name")}
+                  layer={mapLayer}
+                  model={this.props.model}
+                  chapters={this.props.chapters}
+                  app={this.props.app}
+                  onOpenChapter={chapter => {
+                    var informativePanel = this.props.app.panels.find(
+                      panel => panel.type === "informative"
+                    );
+                    informativePanel.open(chapter);
+                  }}
+                />
+              );
             })}
             {this.renderLayerGroups()}
           </ExpansionPanelDetails>

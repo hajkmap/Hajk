@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import Button from "@material-ui/core/Button";
 import IconWarning from "@material-ui/icons/Warning";
 import CallMadeIcon from "@material-ui/icons/CallMade";
@@ -70,38 +70,16 @@ const styles = theme => ({
   }
 });
 
-class LayerItem extends Component {
-  constructor() {
-    super();
+class LayerItem extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    const { layer } = props;
+    var layerInfo = layer.get("layerInfo");
     this.state = {
-      caption: "",
-      visible: false,
-      expanded: false,
-      name: "",
-      legend: [],
-      status: "ok",
-      infoVisible: false,
-      infoTitle: "",
-      infoText: "",
-      infoUrl: "",
-      infoUrlText: "",
-      infoOwner: "",
-      infoExpanded: false,
-      instruction: "",
-      opacityValue: 1
-    };
-  }
-  /**
-   * Triggered when the component is successfully mounted into the DOM.
-   * @instance
-   */
-  componentDidMount() {
-    var layerInfo = this.props.layer.get("layerInfo");
-    this.setState({
       caption: layerInfo.caption,
-      visible: this.props.layer.get("visible"),
+      visible: layer.get("visible"),
       expanded: false,
-      name: this.props.layer.get("name"),
+      name: layer.get("name"),
       legend: layerInfo.legend,
       status: "ok",
       infoVisible: false,
@@ -113,9 +91,15 @@ class LayerItem extends Component {
       infoExpanded: false,
       instruction: layerInfo.instruction,
       open: false,
-      opacity: this.props.layer.get("opacity")
-    });
-
+      opacity: layer.get("opacity"),
+      opacityValue: 1
+    };
+  }
+  /**
+   * Triggered when the component is successfully mounted into the DOM.
+   * @instance
+   */
+  componentDidMount() {
     this.props.layer.on("change:opacity", e => {
       var o = e.target.getOpacity();
       if (o === 0 || o === 1) {
@@ -124,13 +108,13 @@ class LayerItem extends Component {
         });
       }
     });
-
     this.props.layer.on("change:visible", e => {
       this.setState({
         visible: !e.oldValue
       });
     });
   }
+
   /**
    * Toggle visibility of this layer item.
    * @instance
@@ -342,9 +326,7 @@ class LayerItem extends Component {
     if (!caption) {
       return null;
     }
-
     const { classes } = this.props;
-
     if (this.props.layer.layerType === "group") {
       return (
         <LayerGroupItem
@@ -360,7 +342,6 @@ class LayerItem extends Component {
         />
       );
     }
-
     return (
       <div className={classes.layerItemContainer}>
         <div className={classes.layerItem}>

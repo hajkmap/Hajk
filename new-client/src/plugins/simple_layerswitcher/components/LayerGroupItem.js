@@ -128,30 +128,25 @@ class LayerGroupItem extends Component {
    * @instance
    */
   componentDidMount() {
-    const { model } = this.props;
-    model.globalObserver.on("hideLayer", layer => {
-      this.setHidden(layer);
-    });
-    model.globalObserver.on("showLayer", layer => {
-      this.setVisible(layer);
-    });
-    model.observer.on("showLayer", layer => {
-      this.setVisible(layer);
-    });
-    model.observer.on("hideLayer", layer => {
-      this.setHidden(layer);
-    });
-    model.observer.on("toggleGroup", layer => {
-      this.toggleGroupVisible(layer);
-    });
-    this.props.layer.on("change:opacity", e => {
-      var o = e.target.getOpacity();
-      if (o === 0 || o === 1) {
-        this.setState({
-          opacityValue: o
-        });
-      }
-    });
+    const { model, layer } = this.props;
+
+    model.globalObserver.on("hideLayer", this.setHidden);
+    model.observer.on("hideLayer", this.setHidden);
+
+    model.globalObserver.on("showLayer", this.setVisible);
+    model.observer.on("showLayer", this.setVisible);
+
+    model.observer.on("toggleGroup", this.toggleGroupVisible);
+    layer.on("change:opacity", this.updateOpacity);
+  }
+
+  updateOpacity(e) {
+    var o = e.target.getOpacity();
+    if (o === 0 || o === 1) {
+      this.setState({
+        opacityValue: o
+      });
+    }
   }
 
   /**
@@ -271,48 +266,41 @@ class LayerGroupItem extends Component {
     );
   }
 
-  updateState(visible) {
-    this.setState({
-      visible: visible,
-      visibleSubLayers: visible ? this.props.layer.subLayers : []
-    });
-    if (visible) {
+  setHidden = l => {
+    const { layer } = this.props;
+    if (l === layer) {
+      this.props.layer.getSource().updateParams({
+        LAYERS: [this.props.layer.subLayers[0]],
+        CQL_FILTER: "EXCLUDE"
+      });
+      setTimeout(() => {
+        this.setState(
+          {
+            visible: false,
+            visibleSubLayers: []
+          },
+          () => {
+            layer.setVisible(false);
+          }
+        );
+      }, 200);
+    }
+  };
+
+  setVisible = l => {
+    const { layer } = this.props;
+    if (l === layer) {
+      layer.setVisible(true);
       this.props.layer.getSource().updateParams({
         LAYERS: this.props.layer.subLayers,
         CQL_FILTER: null
       });
+      this.setState({
+        visible: true,
+        visibleSubLayers: this.props.layer.subLayers
+      });
     }
-  }
-
-  setHidden(layer) {
-    this.props.layer.getSource().updateParams({
-      LAYERS: [this.props.layer.subLayers[0]],
-      CQL_FILTER: "EXCLUDE"
-    });
-    setTimeout(() => {
-      this.setState(
-        {
-          visible: false,
-          visibleSubLayers: []
-        },
-        () => {
-          layer.setVisible(false);
-        }
-      );
-    }, 200);
-  }
-
-  setVisible(layer) {
-    layer.setVisible(true);
-    this.props.layer.getSource().updateParams({
-      LAYERS: this.props.layer.subLayers,
-      CQL_FILTER: null
-    });
-    this.setState({
-      visible: true,
-      visibleSubLayers: this.props.layer.subLayers
-    });
-  }
+  };
 
   toggleGroupVisible = layer => e => {
     var visible = !this.state.visible;
@@ -444,7 +432,7 @@ class LayerGroupItem extends Component {
     if (infoOwner) {
       return (
         <Typography>
-          <strong>Dataägare:</strong> {infoOwner}
+          <strong>Datavärd:</strong> {infoOwner}
         </Typography>
       );
     } else {
@@ -516,7 +504,6 @@ class LayerGroupItem extends Component {
         return <CheckBoxOutlineBlankIcon />;
       }
     }
-
     return (
       <div className={classes.layerGroup}>
         <div className={classes.layerGroupContainer}>

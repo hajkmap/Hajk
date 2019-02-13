@@ -360,7 +360,7 @@
             "parent": "-1",
             "name": "Översiktsplan",
             "toggled": true,
-            "expanded": false,
+            "expanded": true,
             "layers": [
               {
                 "id": "27",
@@ -522,6 +522,14 @@
         "visibleForGroups": [],
         "layers": [],
         "selectedSources": [
+          "17",
+          "14",
+          "16",
+          "23",
+          "28",
+          "22",
+          "29",
+          "15",
           "27",
           "18"
         ]

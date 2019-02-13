@@ -92,6 +92,7 @@ class BreadCrumb extends Component {
   setLayerVisibility = layer => event => {
     if (layer.get("visible")) {
       layer.setOpacity(1);
+      this.props.app.globalObserver.publish("hideLayer", layer);
     }
     layer.set("visible", !layer.get("visible"));
   };

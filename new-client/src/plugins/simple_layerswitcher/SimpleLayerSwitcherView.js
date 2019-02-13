@@ -82,6 +82,7 @@ class SimpleLayersSwitcherView extends React.PureComponent {
     this.state = {
       windowWidth: window.innerWidth,
       layerGroupsExpanded: true,
+      chapters: [],
       baseLayers: this.props.map
         .getLayers()
         .getArray()
@@ -96,6 +97,12 @@ class SimpleLayersSwitcherView extends React.PureComponent {
     window.addEventListener("resize", () => {
       this.setState({
         innerWidth: window.innerWidth
+      });
+    });
+
+    props.app.globalObserver.on("informativeLoaded", chapters => {
+      this.setState({
+        chapters: chapters
       });
     });
   }
@@ -125,6 +132,7 @@ class SimpleLayersSwitcherView extends React.PureComponent {
           group={group}
           model={this.props.model}
           handleChange={this.handleChange}
+          chapters={this.state.chapters}
           app={this.props.app}
         />
       );
