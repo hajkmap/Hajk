@@ -357,11 +357,13 @@ class SearchModel {
       body: xmlString
     };
 
-    fetch(source.url, request).then(response => {
-      response.json().then(estate => {
-        callback(estate);
-      });
-    });
+    fetch(this.app.config.appConfig.proxy + source.url, request).then(
+      response => {
+        response.json().then(estate => {
+          callback(estate);
+        });
+      }
+    );
   }
 
   lookup(source, searchInput) {
@@ -398,7 +400,10 @@ class SearchModel {
       body: xmlString
     };
 
-    return fetch(source.url, request);
+    console.log("Searching:", source.url);
+    console.log("this", this);
+
+    return fetch(this.app.config.appConfig.proxy + source.url, request);
   }
 }
 
