@@ -38,7 +38,6 @@ class MapSwitcher extends React.PureComponent {
   renderMenuItems = () => {
     let menuItems = [];
     this.state.maps.forEach((item, index) => {
-      console.log(item);
       menuItems.push(
         <MenuItem key={index} onClick={this.handleClick}>
           {item.mapConfigurationTitle}
@@ -77,7 +76,6 @@ class MapSwitcher extends React.PureComponent {
         >
           {this.renderMenuItems()}
         </Menu>
-        {console.log(anchorEl)}
       </>
     );
   }
