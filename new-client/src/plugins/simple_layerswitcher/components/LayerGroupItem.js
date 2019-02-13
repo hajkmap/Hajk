@@ -447,7 +447,7 @@ class LayerGroupItem extends Component {
           {this.renderInfo()}
           {this.renderOwner()}
           {this.renderMetadataLink()}
-          <div>{this.renderChapterLinks(this.props.chapters)}</div>
+          <div>{this.renderChapterLinks(this.props.chapters || [])}</div>
         </div>
       );
     } else {

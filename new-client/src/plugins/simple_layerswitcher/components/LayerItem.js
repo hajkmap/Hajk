@@ -280,7 +280,7 @@ class LayerItem extends React.PureComponent {
           {this.renderInfo()}
           {this.renderOwner()}
           {this.renderMetadataLink()}
-          <div>{this.renderChapterLinks(this.props.chapters)}</div>
+          <div>{this.renderChapterLinks(this.props.chapters || [])}</div>
         </div>
       );
     }
