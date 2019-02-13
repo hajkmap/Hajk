@@ -59,6 +59,7 @@ class Collector extends Component {
     super(props);
     this.position = "right";
     this.options = props.options;
+    this.text = this.options.title || "Tyck till";
     this.title = this.options.title || "Tyck till";
     this.abstract = this.options.abstract || "Vi vill veta vad du tycker!";
     this.state = {
@@ -80,13 +81,13 @@ class Collector extends Component {
     this.setState({
       panelOpen: true
     });
-  };   
+  };
 
   minimizePanel = () => {
     this.setState({
       panelOpen: false
     });
-  }
+  };
 
   closePanel = () => {
     this.setState({
