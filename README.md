@@ -1,7 +1,5 @@
 # Hajk 3
 
-Last update: 2018-10-22
-
 ## Quick start
 
 1. Clone repository: `git clone https://github.com/hajkmap/Hajk.git`
