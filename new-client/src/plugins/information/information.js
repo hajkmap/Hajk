@@ -56,6 +56,7 @@ class Information extends Component {
   constructor(spec) {
     super(spec);
     this.options = spec.options;
+    this.text = this.options.title || "Om kartan";
     this.title = this.options.title || "Om kartan";
     this.abstract = this.options.abstract || "Visa mer information";
     this.state = {
