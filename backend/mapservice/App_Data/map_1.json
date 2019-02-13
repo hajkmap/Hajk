@@ -336,7 +336,7 @@
   "map": {
     "target": "map",
     "center": [
-      126784,
+      560000,
       6923488
     ],
     "title": "GIS Cloud",
@@ -370,7 +370,7 @@
       1000000.0,
       9000000.0
     ],
-    "logo": "https://www.wsp.com/-/media/WSP-Logo/Global/Image/img-jpg-wsp-red.jpg",
+    "logo": "https://www.thejobcrowd.com/wp-content/uploads/2017/12/wsp_new_logo_2017-2-300x147.png",
     "infologo": "",
     "geoserverLegendOptions": "",
     "mobileleft": null,

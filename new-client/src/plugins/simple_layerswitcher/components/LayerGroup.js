@@ -198,21 +198,25 @@ class LayerGroup extends React.PureComponent {
           <ExpansionPanelDetails classes={{ root: classes.root }}>
             {this.state.layers.map((layer, i) => {
               var mapLayer = this.model.layerMap[Number(layer.id)];
-              return (
-                <LayerItem
-                  key={mapLayer.get("name")}
-                  layer={mapLayer}
-                  model={this.props.model}
-                  chapters={this.props.chapters}
-                  app={this.props.app}
-                  onOpenChapter={chapter => {
-                    var informativePanel = this.props.app.panels.find(
-                      panel => panel.type === "informative"
-                    );
-                    informativePanel.open(chapter);
-                  }}
-                />
-              );
+              if (mapLayer) {
+                return (
+                  <LayerItem
+                    key={mapLayer.get("name")}
+                    layer={mapLayer}
+                    model={this.props.model}
+                    chapters={this.props.chapters}
+                    app={this.props.app}
+                    onOpenChapter={chapter => {
+                      var informativePanel = this.props.app.panels.find(
+                        panel => panel.type === "informative"
+                      );
+                      informativePanel.open(chapter);
+                    }}
+                  />
+                );
+              } else {
+                return null;
+              }
             })}
             {this.renderLayerGroups()}
           </ExpansionPanelDetails>

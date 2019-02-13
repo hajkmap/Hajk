@@ -17,8 +17,9 @@ namespace MapService.Controllers
 {
 	public class UploadData
 	{
-		public string data { get; set; }
-	}
+		public string json { get; set; }
+        public string data { get; set; }
+    }
 
     public class ExportController : AsyncController
     {
