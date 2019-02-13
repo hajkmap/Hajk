@@ -176,20 +176,24 @@ class LayerGroupItem extends Component {
   };
 
   findChapters(id, chapters) {
-    return chapters.reduce((chaptersWithLayer, chapter) => {
-      if (Array.isArray(chapter.layers)) {
-        if (chapter.layers.some(layerId => layerId === id)) {
-          chaptersWithLayer = [...chaptersWithLayer, chapter];
+    var result = [];
+    if (Array.isArray(chapters)) {
+      chapters = chapters.reduce((chaptersWithLayer, chapter) => {
+        if (Array.isArray(chapter.layers)) {
+          if (chapter.layers.some(layerId => layerId === id)) {
+            chaptersWithLayer = [...chaptersWithLayer, chapter];
+          }
+          if (chapter.chapters.length > 0) {
+            chaptersWithLayer = [
+              ...chaptersWithLayer,
+              ...this.findChapters(id, chapter.chapters)
+            ];
+          }
         }
-        if (chapter.chapters.length > 0) {
-          chaptersWithLayer = [
-            ...chaptersWithLayer,
-            ...this.findChapters(id, chapter.chapters)
-          ];
-        }
-      }
-      return chaptersWithLayer;
-    }, []);
+        return chaptersWithLayer;
+      }, []);
+    }
+    return result;
   }
 
   renderChapterLinks(chapters) {

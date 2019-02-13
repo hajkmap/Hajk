@@ -1,5 +1,6 @@
 import GeoJSON from "ol/format/GeoJSON.js";
 import TileLayer from "ol/layer/Tile";
+import ImageLayer from "ol/layer/Image";
 
 const fetchConfig = {
   credentials: "same-origin"
@@ -13,7 +14,8 @@ function query(map, layer, evt) {
     .getProjection()
     .getCode();
   let params = {
-    INFO_FORMAT: "application/json"
+    INFO_FORMAT: "application/json",
+    feature_count: 100
   };
   let url = layer
     .getSource()
@@ -54,7 +56,7 @@ function handleClick(evt, map, callback) {
     .getArray()
     .filter(layer => {
       return (
-        layer instanceof TileLayer &&
+        (layer instanceof TileLayer || layer instanceof ImageLayer) &&
         layer.get("visible") === true &&
         layer.get("queryable") === true
       );

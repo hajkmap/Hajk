@@ -2,6 +2,7 @@ import { WFS } from "ol/format";
 import IsLike from "ol/format/filter/IsLike";
 import Intersects from "ol/format/filter/Intersects";
 import TileLayer from "ol/layer/Tile";
+import ImageLayer from "ol/layer/Image";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
@@ -284,13 +285,13 @@ class SearchModel {
     var type =
       searchLayer instanceof VectorLayer
         ? "VECTOR"
-        : searchLayer instanceof TileLayer
+        : searchLayer instanceof TileLayer || searchLayer instanceof ImageLayer
         ? "TILE"
         : undefined;
     var source = {};
     var layers;
     var layerSource = searchLayer.getSource();
-    if (type === "TILE" || type === "IMAGE") {
+    if (type === "TILE") {
       if (searchLayer.layerType === "group") {
         layers = searchLayer.subLayers;
       } else {
@@ -309,7 +310,6 @@ class SearchModel {
         };
         break;
       case "TILE":
-      case "IMAGE":
         source = {
           type: type,
           url: searchLayer.get("url").replace("wms", "wfs"),
