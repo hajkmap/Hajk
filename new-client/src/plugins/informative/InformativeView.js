@@ -120,7 +120,7 @@ class Informative extends React.PureComponent {
 
   displayMap = (layers, mapSettings) => e => {
     this.props.parent.informativeModel.displayMap(layers, mapSettings);
-    if (document.body.scrollWidth < 600) {
+    if (document.body.scrollWidth < 1280) {
       this.props.parent.closePanel();
     }
   };

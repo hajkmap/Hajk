@@ -6,6 +6,7 @@ class InformativeModel {
   constructor(settings) {
     this.olMap = settings.map;
     this.url = settings.app.config.appConfig.proxy + settings.url;
+    this.globalObserver = settings.app.globalObserver;
   }
 
   flyTo(view, location, zoom) {
@@ -31,9 +32,17 @@ class InformativeModel {
             visibleLayer => visibleLayer === layer.getProperties()["name"]
           )
         ) {
-          layer.setVisible(true);
+          if (layer.layerType === "group") {
+            this.globalObserver.publish("showLayer", layer);
+          } else {
+            layer.setVisible(true);
+          }
         } else {
-          layer.setVisible(false);
+          if (layer.layerType === "group") {
+            this.globalObserver.publish("hideLayer", layer);
+          } else {
+            layer.setVisible(false);
+          }
         }
       });
 
