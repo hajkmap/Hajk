@@ -128,14 +128,11 @@ class LayerGroupItem extends Component {
    * @instance
    */
   componentDidMount() {
-    const { model, layer } = this.props;
-
+    const { model } = this.props;
     model.globalObserver.on("hideLayer", this.setHidden);
     model.observer.on("hideLayer", this.setHidden);
-
     model.globalObserver.on("showLayer", this.setVisible);
     model.observer.on("showLayer", this.setVisible);
-
     model.observer.on("toggleGroup", this.toggleGroupVisible);
   }
 
@@ -168,7 +165,7 @@ class LayerGroupItem extends Component {
   findChapters(id, chapters) {
     var result = [];
     if (Array.isArray(chapters)) {
-      chapters = chapters.reduce((chaptersWithLayer, chapter) => {
+      result = chapters.reduce((chaptersWithLayer, chapter) => {
         if (Array.isArray(chapter.layers)) {
           if (chapter.layers.some(layerId => layerId === id)) {
             chaptersWithLayer = [...chaptersWithLayer, chapter];

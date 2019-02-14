@@ -7,6 +7,9 @@ const styles = theme => ({
   sliderContainer: {
     padding: "30px",
     overflow: "hidden"
+  },
+  icon: {
+    cursor: "pointer"
   }
 });
 
@@ -79,7 +82,10 @@ class LayerSettings extends React.PureComponent {
     return (
       <div>
         <div>
-          <IconMoreHoriz onClick={this.toggle} />
+          <IconMoreHoriz
+            className={this.props.classes.icon}
+            onClick={this.toggle}
+          />
         </div>
         <div>{this.state.toggled ? this.renderSettings() : null}</div>
       </div>

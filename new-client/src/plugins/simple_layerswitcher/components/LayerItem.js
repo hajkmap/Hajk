@@ -172,7 +172,7 @@ class LayerItem extends React.PureComponent {
   findChapters(id, chapters) {
     var result = [];
     if (Array.isArray(chapters)) {
-      chapters = chapters.reduce((chaptersWithLayer, chapter) => {
+      result = chapters.reduce((chaptersWithLayer, chapter) => {
         if (Array.isArray(chapter.layers)) {
           if (chapter.layers.some(layerId => layerId === id)) {
             chaptersWithLayer = [...chaptersWithLayer, chapter];
