@@ -269,9 +269,13 @@ class App extends Component {
 
   renderWidgets(target) {
     const { classes } = this.props;
-    if (this.state.tools) {
-      return this.state.tools
+    const { tools } = this.state;
+    if (tools) {
+      return tools
         .filter(tool => tool.options.target === target)
+        .sort((a, b) =>
+          a.sortOrder === b.sortOrder ? 0 : a.sortOrder > b.sortOrder ? 1 : -1
+        )
         .map((tool, i) => {
           if (tool.type === "layerswitcher" && !tool.options.active) {
             return null;
