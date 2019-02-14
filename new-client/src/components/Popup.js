@@ -17,9 +17,10 @@ const styles = theme => ({
   },
   closeButton: {
     position: "absolute",
-    top: "2px",
-    right: "2px",
-    cursor: "pointer"
+    top: "5px",
+    right: "5px",
+    cursor: "pointer",
+    padding: "5px"
   },
   caption: {
     marginBottom: "5px",
@@ -205,14 +206,23 @@ class Popup extends React.Component {
         return (
           <div key={i} style={visibleStyle(i)}>
             <div className={classes.caption}>{caption}</div>
-            <div className="markdown-content" dangerouslySetInnerHTML={value} />
+            <div
+              style={{ height: features.length > 1 ? "220px" : "270px" }}
+              className="text-content"
+              dangerouslySetInnerHTML={value}
+            />
           </div>
         );
       } else {
         return (
           <div key={i} style={visibleStyle(i)}>
             <div className={classes.caption}>{caption}</div>
-            <div>{value}</div>
+            <div
+              style={{ height: features.length > 1 ? "220px" : "270px" }}
+              className="text-content"
+            >
+              {value}
+            </div>
           </div>
         );
       }
@@ -276,7 +286,7 @@ class Popup extends React.Component {
         <div className={this.classes.closeButton}>
           <CloseIcon aria-label="Close" id="popup-closer" />
         </div>
-        <div>{this.html(features)}</div>
+        <div className="popup-content-container">{this.html(features)}</div>
       </div>
     );
   }
