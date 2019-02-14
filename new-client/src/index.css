@@ -191,3 +191,11 @@ dialog {
 .pull-right {
   float: right;
 }
+
+.ol-overlaycontainer-stopevent {
+  z-index: inherit !important;
+}
+
+.ol-overlay-container {
+  z-index: 2000 !important;
+}
