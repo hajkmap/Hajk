@@ -96,6 +96,7 @@ class LayerGroup extends React.PureComponent {
           app={this.props.app}
           classes={classes}
           child={true}
+          chapters={this.props.chapters}
         />
       );
     });

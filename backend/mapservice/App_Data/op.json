@@ -363,13 +363,6 @@
             "expanded": true,
             "layers": [
               {
-                "id": "27",
-                "visibleAtStart": true,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
                 "id": "28",
                 "visibleAtStart": false,
                 "drawOrder": 1000,
@@ -419,7 +412,25 @@
                 "infobox": null
               }
             ],
-            "groups": []
+            "groups": [
+              {
+                "id": "11a73e92-bbe5-745d-cbcf-13faeacfe0e9",
+                "parent": "9e0e18d0-7c57-0dcd-1582-5e350365aac1",
+                "name": "Ny grupp",
+                "toggled": false,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "27",
+                    "visibleAtStart": true,
+                    "drawOrder": 1000,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              }
+            ]
           }
         ],
         "instruction": "",
