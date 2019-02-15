@@ -280,15 +280,15 @@ class BreadCrumbs extends Component {
         app={app}
       />
     ));
-
     return (
       <div className={classes.breadCrumbsContainer}>
         <ScrollMenu
+          ref="scrollMenu"
           data={breadCrumbs}
           alignCenter={false}
-          hideArrows={false}
-          arrowLeft={<Arrow type="left" />}
-          arrowRight={<Arrow type="right" />}
+          // hideArrows={false}
+          // arrowLeft={<Arrow type="left" />}
+          // arrowRight={<Arrow type="right" />}
         />
       </div>
     );
