@@ -163,6 +163,43 @@ namespace MapService.Controllers
             }
         }
 
+        [HttpPost]
+        public string ResidentList(string json)
+        {
+            try
+            {
+                Response.Expires = 0;
+                Response.ExpiresAbsolute = DateTime.Now.AddDays(-1);
+                Response.ContentType = "text/html; charset=utf-8";
+                Response.Headers.Add("Cache-Control", "private, no-cache");
+
+                JToken data = JsonConvert.DeserializeObject<JToken>(json);
+                if (data != null)
+                {
+                    var columns = data.SelectToken("columns");
+                    var rows = data.SelectToken("rows");
+
+                    List<ExcelTemplate> xls = new List<ExcelTemplate>();
+                    xls.Add(new ExcelTemplate
+                    {
+                        TabName = "Boendeförteckning",
+                        Cols = columns.ToObject<List<string>>(),
+                        Rows = rows.ToObject<List<List<object>>>()
+                    });
+
+                    return GenExcel(xls);
+                } else
+                {
+                    return null;
+                }
+            }
+            catch (Exception e)
+            {
+                _log.FatalFormat("Can't get property owner list: {0}", e);
+                throw e;
+            }
+        }
+
         /// <summary>
         /// Försökt använda WCF i .NET utan att lyckas. Enligt LM krävs att man redigerar i de genererade filerna för att det ska funka med WCF och .NET
         /// https://www.lantmateriet.se/sv/Kartor-och-geografisk-information/Geodatatjanster/Fragor-och-svar/Direktatkomsttjanster-/?faq=c31f
@@ -547,7 +584,7 @@ namespace MapService.Controllers
                 ExcelCreator excelCreator = new ExcelCreator();
                 byte[] bytes = excelCreator.Create(dataSet);
                 string[] fileInfo = byteArrayToFileInfo(bytes, "xls");
-
+                
                 return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
             }
             catch (Exception e)
