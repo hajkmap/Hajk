@@ -58,7 +58,20 @@ class SearchModel {
       body: xmlString
     };
 
-    return fetch(source.url, request);
+    // source.url for layers CONTAINS proxy (if defined). If we don't remove
+    // it, our URL will have duplicate proxies, (searchProxy + proxy + url).
+    // TODO: Rewrite, maybe ensure that searchProxy is not needed (if we replace
+    // current util/proxy with something that works with POST, we can use just one
+    // proxy for all types of requests).
+    let urlWithoutProxy = source.url.replace(
+      this.app.config.appConfig.proxy,
+      ""
+    );
+
+    return fetch(
+      this.app.config.appConfig.searchProxy + urlWithoutProxy,
+      request
+    );
   };
 
   getLayerAsSource = (sourceList, layerId) => {
@@ -357,7 +370,7 @@ class SearchModel {
       body: xmlString
     };
 
-    fetch(this.app.config.appConfig.proxy + source.url, request).then(
+    fetch(this.app.config.appConfig.searchProxy + source.url, request).then(
       response => {
         response.json().then(estate => {
           callback(estate);
@@ -400,10 +413,7 @@ class SearchModel {
       body: xmlString
     };
 
-    console.log("Searching:", source.url);
-    console.log("this", this);
-
-    return fetch(this.app.config.appConfig.proxy + source.url, request);
+    return fetch(this.app.config.appConfig.searchProxy + source.url, request);
   }
 }
 
