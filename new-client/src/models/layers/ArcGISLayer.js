@@ -35,7 +35,7 @@ var LayerModel = require("layers/layer");
  * @property {number} opacity - Default: 1
  */
 var ArcGISLayerProperties = {
-  url: "http://ksdgis.se/arcgis/rest/services/hpl/MapServer",
+  url: "https://ksdgis.se/arcgis/rest/services/hpl/MapServer",
   projection: "EPSG:3006",
   opacity: 0.8,
   extent: [
