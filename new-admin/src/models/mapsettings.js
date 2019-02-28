@@ -32,20 +32,30 @@ var menu = Model.extend({
     addedLayers: []
   },
 
+  prepareProxyUrl: function(url) {
+    return this.get("config").url_proxy
+      ? this.get("config").url_proxy + "/" + url.replace(/http[s]?:\/\//, "")
+      : url;
+  },
+
   loadMaps: function(callback) {
-    fetch(this.get("config").url_map_list).then(response =>  {
-      response.json().then(data => {
-        var name = data[0];
-        if (name === undefined) {
-          name = "";
-        }
-        this.set({
-          urlMapConfig: this.get("config").url_map + "/" + name,
-          mapFile: name
+    fetch(
+      this.prepareProxyUrl(this.get("config").url_map_list).then(response => {
+        response.json().then(data => {
+          var name = data[0];
+          if (name === undefined) {
+            name = "";
+          }
+          this.set({
+            urlMapConfig: this.prepareProxyUrl(
+              this.get("config").url_map + "/" + name
+            ),
+            mapFile: name
+          });
+          callback(data);
         });
-        callback(data);
       })
-    });
+    );
   },
 
   createMap: function(name, callback) {

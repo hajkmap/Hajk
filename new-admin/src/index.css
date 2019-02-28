@@ -213,12 +213,23 @@ article fieldset > span > div {
   padding: 10px;
   width: 100%;
   cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.config-layer-list .mainBox {
+  overflow-y: scroll;
+  white-space: nowrap;
+  width: 230px;
 }
 
 .config-layer-list li i {
-  float: right;
   cursor: pointer;
   font-size: 20px;
+  margin-right: 10px;
 }
 
 table {
