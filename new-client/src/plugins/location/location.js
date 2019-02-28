@@ -10,7 +10,9 @@ import {
 } from "@material-ui/core";
 import NavigationIcon from "@material-ui/icons/Navigation";
 
-import PopPanel from "../../components/PopPanel";
+import Window from "../../components/Window.js";
+import { isMobile } from "../../utils/IsMobile.js";
+
 import LocationView from "./LocationView";
 
 const styles = theme => {
@@ -57,7 +59,23 @@ class Location extends React.PureComponent {
   // }
 
   // Not part of API but rather convention. If plugin has a panel, its render method should be called renderPanel().
-  renderPanel() {
+  renderWindow(mode) {
+    return createPortal(
+      <Window
+        globalObserver={this.props.app.globalObserver}
+        title={this.title}
+        onClose={this.closePanel}
+        open={this.state.panelOpen}
+        width="400px"
+        height={window.innerHeight - 380 + "px"}
+        top={210}
+        left={5}
+        mode={mode}
+      >
+        <LocationView parent={this} />
+      </Window>,
+      document.getElementById(isMobile ? "app" : "toolbar-panel")
+    );
     // Using Portals (see React docs) we render panel not in direct relation in DOM to the button, but rather in #map-overlay <div>.
     // We make use of <Panel>, a component that encapsulates MUI's Drawer, that we've written to reuse across Hajk's plugins.
     // <Panel
@@ -68,20 +86,6 @@ class Location extends React.PureComponent {
     // >
     //   <LocationView parent={this} />
     // </Panel>,
-    return createPortal(
-      <PopPanel
-        title={this.text}
-        onClose={this.closePanel}
-        position="left"
-        open={this.state.panelOpen}
-        top={this.state.top}
-        height="430px"
-        width="330px"
-      >
-        <LocationView parent={this} />
-      </PopPanel>,
-      document.getElementById("map-overlay")
-    );
   }
 
   /*
@@ -105,7 +109,7 @@ class Location extends React.PureComponent {
         >
           <NavigationIcon />
         </Button>
-        {this.renderPanel()}
+        {this.renderWindow("window")}
       </div>
     );
   }
@@ -125,7 +129,7 @@ class Location extends React.PureComponent {
           </ListItemIcon>
           <ListItemText primary={this.text} />
         </ListItem>
-        {this.renderPanel()}
+        {this.renderWindow("panel")}
       </div>
     );
   }
