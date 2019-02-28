@@ -16,9 +16,11 @@ using MapService.DataAccess;
 using System.Collections;
 using System.Security.Principal;
 using MapService.Attributes;
+using System.Web.Http.Cors;
 
 namespace MapService.Controllers
 {
+    [CORSActionFilter]
     public class ConfigController : Controller
     {
         ILog _log = LogManager.GetLogger(typeof(ConfigController));
@@ -404,8 +406,7 @@ namespace MapService.Controllers
 			};
 			return parameters;
 		}
-
-		[CORSActionFilter]
+		
 		public void Delete(string id)
 		{
 			var method = Request.HttpMethod;
@@ -420,8 +421,7 @@ namespace MapService.Controllers
 				throw new HttpException(404, "File not found");
 			}
 		}
-
-		[CORSActionFilter]
+		
 		public void Create(string id)
 		{
 			string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
@@ -663,8 +663,7 @@ namespace MapService.Controllers
 			string jsonOutput = JsonConvert.SerializeObject(mapConfig, Formatting.Indented);
 			System.IO.File.WriteAllText(file, jsonOutput);
 		}
-
-		[CORSActionFilter]
+		
 		public string List(string id)
         {
             Response.Expires = 0;
@@ -690,8 +689,7 @@ namespace MapService.Controllers
             return JsonConvert.SerializeObject(fileList);
         }
 
-		[CORSActionFilter]
-		public string GetConfig(string name)
+        public string GetConfig(string name)
         {
             try
             {

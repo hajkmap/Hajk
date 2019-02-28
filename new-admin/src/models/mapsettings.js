@@ -33,11 +33,8 @@ var menu = Model.extend({
   },
 
   loadMaps: function(callback) {
-    $.ajax({
-      url: this.get("config").url_map_list,
-      method: "GET",
-      contentType: "application/json",
-      success: data => {
+    fetch(this.get("config").url_map_list).then(response =>  {
+      response.json().then(data => {
         var name = data[0];
         if (name === undefined) {
           name = "";
@@ -47,10 +44,7 @@ var menu = Model.extend({
           mapFile: name
         });
         callback(data);
-      },
-      error: message => {
-        callback(message);
-      }
+      })
     });
   },
 

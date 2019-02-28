@@ -7,9 +7,9 @@ import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import Observer from "react-event-observer";
 import Window from "../../components/Window.js";
 import Typography from "@material-ui/core/Typography";
-
 import CollectorView from "./CollectorView.js";
 import CollectorModel from "./CollectorModel.js";
+import { isMobile } from "../../utils/IsMobile.js";
 
 const styles = theme => {
   return {
@@ -104,18 +104,21 @@ class Collector extends Component {
 
   onClose = () => {};
 
-  renderPanel() {
-    var left = this.position === "right" ? (window.innerWidth - 330) / 2 : 0;
+  renderWindow(mode) {
+    var left = this.position === "right" ? (window.innerWidth - 410) / 2 : 0;
+    console.log("Render window", this.position);
     return createPortal(
       <Window
+        globalObserver={this.props.app.globalObserver}
         title={this.title}
         onClose={this.closePanel}
-        position={this.position}
         open={this.state.panelOpen}
+        position={this.position}
         height={450}
-        width={320}
-        top={145}
+        width={400}
+        top={210}
         left={left}
+        mode={mode}
       >
         <CollectorView
           onClose={this.onClose}
@@ -125,7 +128,7 @@ class Collector extends Component {
           openPanel={this.openPanel}
         />
       </Window>,
-      document.getElementById("root")
+      document.getElementById(isMobile ? "app" : "toolbar-panel")
     );
   }
 
@@ -155,21 +158,27 @@ class Collector extends Component {
             <Typography className={classes.text}>{this.abstract}</Typography>
           </div>
         </div>
-        {this.renderPanel()}
+        {this.renderWindow("window")}
       </>
     );
   }
 
   renderAsToolbarItem() {
+    this.position = undefined;
     return (
       <div>
-        <ListItem button divider={true} selected={false} onClick={this.onClick}>
+        <ListItem
+          button
+          divider={true}
+          selected={this.state.panelOpen}
+          onClick={this.onClick}
+        >
           <ListItemIcon>
             <RateReviewIcon />
           </ListItemIcon>
           <ListItemText primary={this.text} />
         </ListItem>
-        {this.renderPanel()}
+        {this.renderWindow("panel")}
       </div>
     );
   }

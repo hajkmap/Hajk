@@ -173,6 +173,20 @@
       "options": {
         "baselayers": [
           {
+            "id": "4",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
+          },
+          {
+            "id": "5",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
+          },
+          {
             "id": "31",
             "visibleAtStart": true,
             "drawOrder": 0,
@@ -338,6 +352,36 @@
         "visibleForGroups": []
       },
       "index": 5
+    },
+    {
+      "type": "informative",
+      "options": {
+        "target": "toolbar",
+        "panel": "",
+        "title": "Översiktsplan",
+        "caption": "Översiktsplan",
+        "serviceUrl": "http://localhost:55630/informative/load",
+        "abstract": "Läs mer om vad som planeras i kommunen",
+        "html": "<div>HTML som beskriver dokumentets innehåll</div>",
+        "document": "test",
+        "visibleAtStart": false,
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "collector",
+      "options": {
+        "target": "toolbar",
+        "url": "",
+        "featureType": "",
+        "title": "Tyck till",
+        "abstract": "Vi vill veta vad du tycker!",
+        "featureNS": "",
+        "visibleAtStart": false,
+        "visibleForGroups": []
+      },
+      "index": 0
     }
   ],
   "map": {

@@ -52,6 +52,7 @@ class Anchor extends React.PureComponent {
         onClose={this.closePanel}
         open={this.state.panelOpen}
         anchorEl={this.state.anchorEl}
+        globalObserver={this.app.globalObserver}
       >
         <AnchorView
           localObserver={this.localObserver}

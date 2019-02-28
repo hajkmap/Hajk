@@ -20,6 +20,8 @@ import Loader from "./Loader";
 
 import classNames from "classnames";
 
+var isMobile = window.innerWidth < 1280;
+
 // Global customizations that previously went to custom.css
 // should now go to public/customTheme.json. They are later
 // merged when MUI Theme is created in index.js.
@@ -33,23 +35,20 @@ const styles = theme => {
       top: "64px",
       bottom: 0,
       left: 0,
-      right: 0,
-      [theme.breakpoints.down("xs")]: {
-        top: "56px"
-      }
+      right: 0
     },
     toolbarRoot: {
+      height: "64px",
       justifyContent: "space-between",
       [theme.breakpoints.down("xs")]: {
         justifyContent: "space-between"
       }
     },
     toolbar: {
-      position: "fixed",
-      zIndex: 1100,
       top: 0,
-      boxShadow: "none",
-      color: "black"
+      color: "black",
+      zIndex: 2,
+      order: 0
     },
     toolbarContent: {
       display: "flex",
@@ -96,6 +95,11 @@ const styles = theme => {
         zIndex: 1,
         background: "white"
       }
+    },
+    toolbarPanel: {
+      order: 1,
+      width: "100%",
+      height: "100%"
     },
     widgets: {
       position: "absolute",
@@ -158,6 +162,14 @@ const styles = theme => {
       [theme.breakpoints.up("lg")]: {
         display: "none"
       }
+    },
+    footer: {
+      position: "absolute",
+      top: 0,
+      bottom: isMobile ? -(window.innerHeight - 45) + "px" : 0
+    },
+    desktop: {
+      minWidth: 1280
     }
   };
 };
@@ -369,7 +381,52 @@ class App extends Component {
     }
   }
 
-  render() {
+  renderMobile() {
+    const { classes, config } = this.props;
+    return (
+      <div id="app">
+        <AppBar position="absolute" className={classes.appBar}>
+          <MUIToolbar className={classes.toolbarRoot}>
+            <div id="toolbar-left" className={classes.toolbarContent}>
+              <Toolbar
+                tools={this.appModel.getToolbarPlugins()}
+                parent={this}
+                open={false}
+                mobile={true}
+                expanded={true}
+              />
+              <div className={classes.logo}>
+                <img src={config.mapConfig.map.logo} alt="logo" />
+              </div>
+              <span className={classes.title}>
+                <Typography variant="h6">
+                  {config.mapConfig.map.title}
+                </Typography>
+              </span>
+            </div>
+            <div id="toolbar-right" className={classes.toolbarContent}>
+              <SearchIcon
+                className={classes.searchIcon}
+                onClick={() => {
+                  this.setState({
+                    searchVisible: !this.state.searchVisible,
+                    forced: true,
+                    widgetsVisible: false
+                  });
+                }}
+              />
+            </div>
+          </MUIToolbar>
+        </AppBar>
+        <main id="map" className={classes.map}>
+          <div id="map-overlay" className={classes.overlay} />
+        </main>
+        <footer className={classes.footer} id="footer" />
+      </div>
+    );
+  }
+
+  renderDesktop() {
     const { classes, config } = this.props;
     const { widgetsVisible } = this.state;
 
@@ -404,7 +461,7 @@ class App extends Component {
           horizontal: "center"
         }}
       >
-        <>
+        <div className={classes.desktop}>
           <Alert
             open={this.state.alert}
             message={this.state.alertMessage}
@@ -415,11 +472,6 @@ class App extends Component {
           <AppBar position="absolute" className={classes.appBar}>
             <MUIToolbar className={classes.toolbarRoot}>
               <div id="toolbar-left" className={classes.toolbarContent}>
-                {this.renderWidgetMenuIcon()}
-                <Toolbar
-                  tools={this.appModel.getToolbarPlugins()}
-                  parent={this}
-                />
                 <div className={classes.logo}>
                   <img src={config.mapConfig.map.logo} alt="logo" />
                 </div>
@@ -450,6 +502,14 @@ class App extends Component {
               {this.renderSearchPlugin()}
             </div>
             <div id="map-overlay" className={overlayClasses}>
+              <div id="toolbar" className={classes.toolbar}>
+                <Toolbar
+                  tools={this.appModel.getToolbarPlugins()}
+                  parent={this}
+                  globalObserver={this.globalObserver}
+                />
+              </div>
+              <article id="toolbar-panel" className={classes.toolbarPanel} />
               <div className={widgetClassesLeft}>
                 {this.renderWidgets("left")}
               </div>
@@ -459,9 +519,14 @@ class App extends Component {
               <div id="widgets-other" className={widgetClassesOther} />
             </div>
           </main>
-        </>
+          <footer className={classes.footer} id="footer" />
+        </div>
       </SnackbarProvider>
     );
+  }
+
+  render() {
+    return isMobile ? this.renderMobile() : this.renderDesktop();
   }
 }
 

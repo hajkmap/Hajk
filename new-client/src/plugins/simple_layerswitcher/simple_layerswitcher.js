@@ -6,10 +6,10 @@ import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import LayersIcon from "@material-ui/icons/Layers";
 import Typography from "@material-ui/core/Typography";
 import Window from "../../components/Window.js";
-import Panel from "../../components/Panel.js";
 import SimpleLayerSwitcherView from "./SimpleLayerSwitcherView.js";
 import SimpleLayerSwitcherModel from "./SimpleLayerSwitcherModel.js";
 import Observer from "react-event-observer";
+import { isMobile } from "../../utils/IsMobile.js";
 
 const styles = theme => {
   return {
@@ -90,14 +90,18 @@ class SimpleLayerSwitcher extends React.PureComponent {
     this.app.registerPanel(this);
   }
 
-  renderWindow() {
+  renderWindow(mode) {
     return createPortal(
       <Window
+        globalObserver={this.props.app.globalObserver}
         title={this.title}
         onClose={this.closePanel}
         open={this.state.panelOpen}
-        height={window.innerHeight - 380}
-        top={145}
+        width="400px"
+        height={window.innerHeight - 380 + "px"}
+        top={210}
+        left={5}
+        mode={mode}
       >
         <SimpleLayerSwitcherView
           app={this.props.app}
@@ -107,33 +111,14 @@ class SimpleLayerSwitcher extends React.PureComponent {
           breadCrumbs={this.props.type === "widgetItem"}
         />
       </Window>,
-      document.getElementById("root")
-    );
-  }
-
-  renderPanel() {
-    return createPortal(
-      <Panel
-        title={this.title}
-        onClose={this.closePanel}
-        open={this.state.panelOpen}
-      >
-        <SimpleLayerSwitcherView
-          app={this.props.app}
-          map={this.props.map}
-          model={this.simpleLayerSwitcherModel}
-          observer={this.observer}
-          breadCrumbs={this.props.type === "widgetItem"}
-        />
-      </Panel>,
-      document.getElementById("map-overlay")
+      document.getElementById(isMobile ? "app" : "toolbar-panel")
     );
   }
 
   renderAsWidgetItem() {
     const { classes } = this.props;
     return (
-      <>
+      <div>
         <div className={classes.card} onClick={this.onClick}>
           <div>
             <IconButton className={classes.button}>
@@ -145,8 +130,8 @@ class SimpleLayerSwitcher extends React.PureComponent {
             <Typography className={classes.text}>{this.abstract}</Typography>
           </div>
         </div>
-        {this.renderWindow()}
-      </>
+        {this.renderWindow("window")}
+      </div>
     );
   }
 
@@ -164,7 +149,7 @@ class SimpleLayerSwitcher extends React.PureComponent {
           </ListItemIcon>
           <ListItemText primary={this.title} />
         </ListItem>
-        {this.renderPanel()}
+        {this.renderWindow("panel")}
       </div>
     );
   }

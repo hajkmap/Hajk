@@ -14,19 +14,21 @@ import {
 import ChevronLeft from "@material-ui/icons/ChevronLeft";
 import ChevronRight from "@material-ui/icons/ChevronRight";
 import Menu from "@material-ui/icons/Menu";
-import "./Toolbar.css";
+import Close from "@material-ui/icons/Close";
+import { isMobile } from "../utils/IsMobile.js";
 
-const drawerWidth = 240;
+const drawerWidth = "100%";
 
 const styles = theme => ({
   drawer: {
     order: 0,
-    zIndex: 1199,
-    [theme.breakpoints.down("sm")]: {
-      position: "absolute",
+    zIndex: 1,
+    height: "100%",
+    [theme.breakpoints.down("md")]: {
+      top: 0,
       left: 0,
       bottom: 0,
-      top: 0
+      width: "100%"
     }
   },
   drawerClose: {
@@ -35,22 +37,11 @@ const styles = theme => ({
   drawerPaper: {
     position: "inherit",
     whiteSpace: "nowrap",
-    width: drawerWidth,
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: 0
-    })
+    width: drawerWidth
   },
   drawerPaperClose: {
     overflowX: "hidden",
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: 0
-    }),
-    width: theme.spacing.unit * 7,
-    [theme.breakpoints.up("sm")]: {
-      width: theme.spacing.unit * 9
-    }
+    width: theme.spacing.unit * 7
   },
   button: {
     marginBottom: "5px"
@@ -61,12 +52,27 @@ const styles = theme => ({
 });
 
 class Toolbar extends Component {
-  state = { open: false };
+  constructor(props) {
+    super(props);
+    this.state = {
+      toolbarOpen: isMobile ? props.open : true,
+      open: props.expanded
+    };
+  }
+
+  itemClicked = e => {
+    if (isMobile) {
+      this.setState({
+        toolbarOpen: false
+      });
+    }
+  };
 
   renderTools() {
     return this.props.tools.map((tool, i) => {
+      console.log("Render tool", tool.options.title);
       return (
-        <div key={i}>
+        <div key={i} onClick={this.itemClicked}>
           <tool.component
             map={tool.map}
             app={tool.app}
@@ -80,6 +86,7 @@ class Toolbar extends Component {
 
   toggleToolbarText = () => {
     this.setState({ open: !this.state.open });
+    this.props.globalObserver.publish("toolbarExpanded", !this.state.open);
   };
 
   toggleToolbar = () => {
@@ -94,6 +101,7 @@ class Toolbar extends Component {
     if (!document.getElementById("map-overlay")) {
       return null;
     }
+
     return createPortal(
       <Drawer
         variant="permanent"
@@ -109,23 +117,19 @@ class Toolbar extends Component {
         }}
         open={this.state.open}
       >
-        <ListItem button onClick={this.toggleToolbarText}>
-          <ListItemIcon>{icon}</ListItemIcon>
-          <ListItemText primary="Minimera" />
-        </ListItem>
-        <Divider />
+        {isMobile ? null : (
+          <>
+            <ListItem button onClick={this.toggleToolbarText}>
+              <ListItemIcon>{icon}</ListItemIcon>
+              <ListItemText primary="Minimera" />
+            </ListItem>
+            <Divider />
+          </>
+        )}
         {this.renderTools()}
       </Drawer>,
-      document.getElementById("map-overlay")
+      document.getElementById(isMobile ? "map-overlay" : "toolbar")
     );
-  }
-
-  componentDidMount() {
-    // TODO: Get value of toolbarOpen from config
-    let toolbarOpen = true;
-    this.setState({
-      toolbarOpen
-    });
   }
 
   render() {
@@ -135,14 +139,16 @@ class Toolbar extends Component {
     }
     return (
       <div>
-        <IconButton
-          className={classes.menuButton}
-          color="inherit"
-          aria-label="Menu"
-          onClick={this.toggleToolbar}
-        >
-          <Menu />
-        </IconButton>
+        {isMobile ? (
+          <IconButton
+            className={classes.menuButton}
+            color="inherit"
+            aria-label="Menu"
+            onClick={this.toggleToolbar}
+          >
+            {this.state.toolbarOpen ? <Close /> : <Menu />}
+          </IconButton>
+        ) : null}
         {this.renderDrawer()}
       </div>
     );

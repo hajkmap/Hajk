@@ -3,11 +3,11 @@ import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import FormatShapesIcon from "@material-ui/icons/FormatShapes";
-
-import Panel from "../../components/Panel.js";
+import Window from "../../components/Window.js";
 import EditView from "./EditView.js";
 import EditModel from "./EditModel.js";
 import Observer from "react-event-observer";
+import { isMobile } from "../../utils/IsMobile.js";
 
 const styles = theme => {
   return {};
@@ -37,10 +37,6 @@ class Edit extends React.PureComponent {
     this.text = "Redigera";
     this.app = spec.app;
     this.observer = Observer();
-    this.observer.subscribe("myEvent", message => {
-      console.log(message);
-    });
-
     this.editModel = new EditModel({
       map: spec.map,
       app: spec.app,
@@ -48,15 +44,21 @@ class Edit extends React.PureComponent {
       options: spec.options
     });
     this.app.registerPanel(this);
+    this.title = "Redigera";
   }
 
-  renderPanel() {
+  renderWindow(mode) {
     return createPortal(
-      <Panel
-        title={this.text}
+      <Window
+        globalObserver={this.props.app.globalObserver}
+        title={this.title}
         onClose={this.closePanel}
-        position="left"
         open={this.state.panelOpen}
+        height={window.innerHeight - 380 + "px"}
+        width="400px"
+        top={145}
+        left={5}
+        mode={mode}
       >
         <EditView
           app={this.app}
@@ -65,8 +67,8 @@ class Edit extends React.PureComponent {
           model={this.editModel}
           observer={this.observer}
         />
-      </Panel>,
-      document.getElementById("map-overlay")
+      </Window>,
+      document.getElementById(isMobile ? "app" : "toolbar-panel")
     );
   }
 
@@ -88,7 +90,7 @@ class Edit extends React.PureComponent {
           </ListItemIcon>
           <ListItemText primary={this.text} />
         </ListItem>
-        {this.renderPanel()}
+        {this.renderWindow("panel")}
       </div>
     );
   }

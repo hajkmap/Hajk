@@ -1,4 +1,5 @@
-﻿using MapService.Components;
+﻿using MapService.Attributes;
+using MapService.Components;
 using System;
 using System.IO;
 using System.Web.Mvc;
@@ -6,9 +7,9 @@ using System.Xml;
 
 namespace MapService.Controllers
 {
+    [CORSActionFilter]
     public class ImportController : Controller
     {
-
         private byte[] readFully(Stream input)
         {
             byte[] buffer = new byte[16 * 1024];

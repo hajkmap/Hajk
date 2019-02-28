@@ -64,6 +64,7 @@ class Measure extends React.PureComponent {
         onClose={this.closePanel}
         open={this.state.panelOpen}
         anchorEl={this.state.anchorEl}
+        globalObserver={this.app.globalObserver}
       >
         <MeasureView
           localObserver={this.localObserver}

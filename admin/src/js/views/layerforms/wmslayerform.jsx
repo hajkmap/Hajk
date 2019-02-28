@@ -384,8 +384,6 @@ class WMSLayerForm extends Component {
         }
         break;
       case "opacity":
-        console.log(value);
-        console.log(typeof value);
         if (!/^-?\d+.\d+$/.test(value)) {
           valid = false;
         }

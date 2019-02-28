@@ -59,6 +59,8 @@ const styles = theme => {
   };
 };
 
+var isMobile = window.innerWidth < 1280;
+
 class Search extends Component {
   resolve = data => {
     this.setState({
@@ -96,8 +98,7 @@ class Search extends Component {
   renderDescription() {
     return <div dangerouslySetInnerHTML={{ __html: this.toolDescription }} />;
   }
-
-  render() {
+  renderDesktop() {
     const { classes, app } = this.props;
     return (
       <div
@@ -109,6 +110,12 @@ class Search extends Component {
             title="Sök"
             onClose={() => {
               app.globalObserver.publish("hideSearchPanel", true);
+            }}
+            onMinimize={() => {
+              console.log("Max");
+            }}
+            onMaximize={() => {
+              console.log("Min");
             }}
           />
         </div>
@@ -140,6 +147,61 @@ class Search extends Component {
         </div>
       </div>
     );
+  }
+
+  renderMobile() {
+    const { classes, app } = this.props;
+    return (
+      <div
+        className={classes.center}
+        style={{ display: this.props.visible ? "block" : "none" }}
+      >
+        <div className={classes.panelHeader}>
+          <PanelHeader
+            title="Sök"
+            onClose={() => {
+              app.globalObserver.publish("hideSearchPanel", true);
+            }}
+            onMinimize={() => {
+              console.log("Max");
+            }}
+            onMaximize={() => {
+              console.log("Min");
+            }}
+          />
+        </div>
+        <div className={classes.panelBody}>
+          <div>{this.renderDescription()}</div>
+          <div className={classes.searchContainer}>
+            <SearchWithinButton
+              buttonText={this.searchWithinButtonText}
+              model={this.searchModel}
+            />
+            <ClearButton
+              model={this.searchModel}
+              onClear={() => {
+                this.searchModel.clear();
+                this.localObserver.publish("clearInput");
+                this.setState({
+                  result: false
+                });
+              }}
+            />
+            <SearchBar
+              model={this.searchModel}
+              onChange={this.searchModel.search}
+              onComplete={this.resolve}
+              tooltip={this.tooltip}
+            />
+          </div>
+          {this.renderSearchResultList()}
+        </div>
+      </div>
+    );
+  }
+
+  render() {
+    return isMobile ? this.renderMobile() : this.renderDesktop();
   }
 }
 

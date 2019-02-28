@@ -12,6 +12,7 @@ using ICSharpCode.SharpZipLib.Zip;
 using ICSharpCode.SharpZipLib.Core;
 using log4net;
 using System.Configuration;
+using MapService.Attributes;
 
 namespace MapService.Controllers
 {
@@ -21,6 +22,7 @@ namespace MapService.Controllers
         public string data { get; set; }
     }
 
+    [CORSActionFilter]
     public class ExportController : AsyncController
     {
         ILog _log = LogManager.GetLogger(typeof(ExportController));

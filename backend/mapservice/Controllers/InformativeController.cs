@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using MapService.Attributes;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -17,9 +18,10 @@ namespace MapService.Controllers
 		public object[] chapters { get; set; }
 	}
 
+    [CORSActionFilter]
     public class InformativeController : Controller
-    {
-		[System.Web.Http.HttpGet]
+    {        
+        [System.Web.Http.HttpGet]
 		public string Load(string id)
         {			
 			Response.Expires = 0;
@@ -34,8 +36,8 @@ namespace MapService.Controllers
 			}
 			return "File not found";
         }
-
-		[System.Web.Http.HttpPost]
+        
+        [System.Web.Http.HttpPost]
 		public string Save(string id)
 		{			
 			Stream req = Request.InputStream;
@@ -49,8 +51,8 @@ namespace MapService.Controllers
 			}			
 			return "File not found";
 		}
-
-		[System.Web.Http.HttpPost]
+        
+        [System.Web.Http.HttpPost]
 		public string Create()
 		{
 			Stream req = Request.InputStream;
@@ -64,8 +66,8 @@ namespace MapService.Controllers
 			System.IO.File.WriteAllText(file, json);
 			return "Document created";			
 		}
-
-		[System.Web.Http.HttpDelete]
+        
+        [System.Web.Http.HttpDelete]
 		public string Delete(string id)
 		{			
 			string file = String.Format("{0}App_Data\\documents\\{1}.json", HostingEnvironment.ApplicationPhysicalPath, id);
@@ -73,7 +75,8 @@ namespace MapService.Controllers
 			return "Document deleted";
 		}
 
-		[System.Web.Http.HttpGet]
+        [CORSActionFilter]
+        [System.Web.Http.HttpGet]
 		public string List(string id)
 		{
 			Response.Expires = 0;
