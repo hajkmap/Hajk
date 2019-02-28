@@ -39,21 +39,23 @@ var menu = Model.extend({
   },
 
   loadMaps: function(callback) {
-    fetch(this.prepareProxyUrl(this.get("config").url_map_list).then(response =>  {
-      response.json().then(data => {
-        var name = data[0];
-        if (name === undefined) {
-          name = "";
-        }
-        this.set({
-          urlMapConfig: this.prepareProxyUrl(
-            this.get("config").url_map + "/" + name
-          ),
-          mapFile: name
+    fetch(
+      this.prepareProxyUrl(this.get("config").url_map_list).then(response => {
+        response.json().then(data => {
+          var name = data[0];
+          if (name === undefined) {
+            name = "";
+          }
+          this.set({
+            urlMapConfig: this.prepareProxyUrl(
+              this.get("config").url_map + "/" + name
+            ),
+            mapFile: name
+          });
+          callback(data);
         });
-        callback(data);
       })
-    });
+    );
   },
 
   createMap: function(name, callback) {
