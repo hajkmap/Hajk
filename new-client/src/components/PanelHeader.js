@@ -57,7 +57,7 @@ class PanelHeader extends Component {
   };
 
   renderMobile() {
-    const { classes, top } = this.props;
+    const { classes } = this.props;
     return (
       <header
         className={classes.header}

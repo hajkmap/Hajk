@@ -70,7 +70,6 @@ class Toolbar extends Component {
 
   renderTools() {
     return this.props.tools.map((tool, i) => {
-      console.log("Render tool", tool.options.title);
       return (
         <div key={i} onClick={this.itemClicked}>
           <tool.component

@@ -4,6 +4,7 @@ import { withStyles } from "@material-ui/core/styles";
 import PanelHeader from "./PanelHeader";
 import { Rnd } from "react-rnd";
 import { isMobile } from "../utils/IsMobile.js";
+import FeatureInfo from "./FeatureInfo.js";
 
 //
 // Patch the RND component's onDragStart method with the ability to disable drag by its internal state.
@@ -98,42 +99,13 @@ const styles = theme => {
 class Window extends Component {
   constructor(props) {
     super(props);
-    var { left, top, width, height, mode } = props;
 
-    this.mainHeight = window.innerHeight - 64;
-    if (mode === "panel") {
-      left = this.left = 0;
-      top = this.top = 0;
-      height = this.mainHeight;
-    }
-    if (props.placement === "bottom-right") {
-      left = (window.innerWidth - width) / 2 - 20;
-      top = (window.innerHeight - height) / 2 - 100;
-    }
-    if (isMobile) {
-      width = document.body.clientWidth;
-      left = 0;
-      top = 0;
-      height = window.innerHeight;
-    }
     this.state = {
-      left: left !== undefined ? left : 8,
-      top: top,
-      width: width,
-      height: height,
-      mode: "window"
+      left: 0,
+      top: 0,
+      width: 300,
+      height: 400
     };
-
-    this.left = this.state.left;
-    this.top = this.state.top;
-
-    this.mode = "window";
-    setTimeout(() => {
-      this.rnd.updatePosition({
-        y: this.top
-      });
-      this.left = this.left * 2;
-    }, 0);
 
     window.addEventListener("resize", () => {
       if (this.mode === "maximized") {
@@ -154,6 +126,53 @@ class Window extends Component {
     }
   }
 
+  componentDidMount() {
+    var { width, height, left, mode, position, top } = this.props;
+
+    this.mainHeight = window.innerHeight - 64;
+    if (mode === "panel") {
+      this.left = this.rnd
+        .getSelfElement()
+        .parentElement.getBoundingClientRect().x;
+      this.top = 0;
+      this.width = width;
+      this.height = this.mainHeight;
+    }
+    if (mode === "window") {
+      this.top = top;
+      this.left = left;
+      this.width = width;
+      this.height = height === "auto" ? this.mainHeight - top - 60 : height;
+    }
+    if (position === "right") {
+      this.left = window.innerWidth - width - 10;
+    }
+    if (isMobile) {
+      this.left = 0;
+      this.top = 0;
+      this.height = window.innerHeight;
+      this.width = document.body.clientWidth;
+    }
+
+    this.mode = "window";
+
+    this.setState(
+      {
+        left: this.left !== undefined ? this.left : 8,
+        top: this.top,
+        width: this.width,
+        height: this.height,
+        mode: "window"
+      },
+      () => {
+        this.rnd.updatePosition({
+          y: this.top,
+          x: this.left
+        });
+      }
+    );
+  }
+
   close = e => {
     const { onClose } = this.props;
     this.latestWidth = this.rnd.getSelfElement().clientWidth;
@@ -161,13 +180,20 @@ class Window extends Component {
   };
 
   update = target => {
-    if (this.left < target.getBoundingClientRect().x) {
-      this.rnd.updatePosition({
-        x: target.getBoundingClientRect().x
-      });
-      this.left = 0;
+    var currentOffset = target.getBoundingClientRect().x;
+    if (!this.offset || currentOffset > this.offset) {
+      this.offset = target.getBoundingClientRect().x;
     }
+
     var width = this.rnd.getSelfElement().clientWidth;
+
+    if (this.left < currentOffset || this.offset === this.left) {
+      let n = target.getBoundingClientRect().x;
+      this.rnd.updatePosition({
+        x: n
+      });
+      this.left = n;
+    }
     if (width === 0) {
       width = this.latestWidth;
     }
@@ -175,6 +201,13 @@ class Window extends Component {
       this.setState({
         width: this.rnd.getParentSize().width
       });
+    }
+    if (this.left + width > window.innerWidth) {
+      let w = window.innerWidth - width;
+      this.rnd.updatePosition({
+        x: w
+      });
+      this.left = w;
     }
   };
 
@@ -195,8 +228,8 @@ class Window extends Component {
 
   reset = target => {
     this.rnd.updatePosition({
-      x: target.getBoundingClientRect().x + this.left,
-      y: this.top
+      y: this.top,
+      x: this.left
     });
     this.rnd.setState({
       disableDrag: false
@@ -280,7 +313,7 @@ class Window extends Component {
   };
 
   render() {
-    const { classes, title, children, placement, mode } = this.props;
+    const { classes, title, children, features } = this.props;
     var { left, top, width, height } = this.state;
     var resizeBottom = true,
       resizeBottomLeft = true,
@@ -297,6 +330,7 @@ class Window extends Component {
         resizeBottom = resizeBottomLeft = resizeBottomRight = resizeRight = resizeTop = resizeTopLeft = resizeTopRight = resizeLeft = false;
       }
     }
+
     return (
       <Rnd
         ref={c => {
@@ -306,7 +340,7 @@ class Window extends Component {
           display: this.props.open ? "block" : "none"
         }}
         onDragStop={(e, d) => {
-          this.left = d.x;
+          this.left = this.rnd.getSelfElement().getClientRects()[0].x;
           this.top = d.y;
         }}
         onDrag={(e, d) => {
@@ -316,6 +350,8 @@ class Window extends Component {
         }}
         onResizeStop={() => {}}
         onResize={(e, direction, ref, delta, position) => {
+          this.width = ref.style.width;
+          this.height = ref.style.height;
           this.setState({
             width: ref.style.width,
             height: ref.style.height
@@ -358,7 +394,13 @@ class Window extends Component {
             mode={this.mode}
           />
           <section className={classes.content}>
-            <div className={classes.drawerPaperContent}>{children}</div>
+            <div className={classes.drawerPaperContent}>
+              {features ? (
+                <FeatureInfo features={this.props.features} />
+              ) : (
+                children
+              )}
+            </div>
           </section>
         </div>
       </Rnd>

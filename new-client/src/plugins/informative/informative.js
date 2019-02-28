@@ -115,8 +115,8 @@ class Informative extends React.PureComponent {
         onClose={this.closePanel}
         open={this.state.panelOpen}
         position={this.position}
-        width={400 + "px"}
-        height={window.innerHeight - 380 + "px"}
+        height="auto"
+        width={400}
         top={210}
         left={left}
         mode={mode}

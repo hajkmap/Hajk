@@ -97,8 +97,8 @@ class SimpleLayerSwitcher extends React.PureComponent {
         title={this.title}
         onClose={this.closePanel}
         open={this.state.panelOpen}
-        width="400px"
-        height={window.innerHeight - 380 + "px"}
+        height="auto"
+        width={400}
         top={210}
         left={5}
         mode={mode}

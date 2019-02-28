@@ -1,10 +1,8 @@
 {
   "appName": "Hajk",
   "version": "3.0.0",
-  "testsUrl": "http://localhost:56983/api/tests/",
-  "dataUrl": "http://localhost:56983/api/values/",
-  "mapserviceBase": "https://ADD_YOUR_DOMAIN.COM/mapservice",
-  "proxy": "https://ADD_YOUR_DOMAIN.COM/utiltest/proxy/geturl/",
-  "searchProxy": "https://ADD_YOUR_DOMAIN.COM/util/postproxy.aspx?url=",
+  "mapserviceBase": "http://localhost:55630",
+  "proxy": "",
+  "searchProxy": "",
   "defaultMap": "map_1"
 }

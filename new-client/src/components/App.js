@@ -10,17 +10,14 @@ import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
 import { Toolbar as MUIToolbar } from "@material-ui/core";
 import { SnackbarProvider, withSnackbar } from "notistack";
-
+import classNames from "classnames";
 import Toolbar from "./Toolbar.js";
 import Popup from "./Popup.js";
-import PopupWindow from "./PopupWindow.js";
+import Window from "./Window.js";
 import MapSwitcher from "./MapSwitcher";
 import Alert from "./Alert";
 import Loader from "./Loader";
-
-import classNames from "classnames";
-
-var isMobile = window.innerWidth < 1280;
+import { isMobile } from "../utils/IsMobile.js";
 
 // Global customizations that previously went to custom.css
 // should now go to public/customTheme.json. They are later
@@ -361,15 +358,27 @@ class App extends Component {
         />
       );
     } else {
+      var open =
+        this.state.mapClickDataResult &&
+        this.state.mapClickDataResult.features &&
+        this.state.mapClickDataResult.features.length > 0;
+      var features =
+        this.state.mapClickDataResult && this.state.mapClickDataResult.features;
+
       return (
-        <PopupWindow
-          mapClickDataResult={this.state.mapClickDataResult}
+        <Window
+          globalObserver={this.globalObserver}
+          title="Sökresultat"
+          open={open}
+          position="right"
+          mode="window"
+          width={350}
+          top={200}
+          features={features}
           map={this.appModel.getMap()}
           onDisplay={feature => {
             this.appModel.highlight(feature);
           }}
-          testsUrl={this.appModel.config.appConfig.testsUrl}
-          dataUrl={this.appModel.config.appConfig.dataUrl}
           onClose={() => {
             this.appModel.highlight(false);
             this.setState({
@@ -497,7 +506,6 @@ class App extends Component {
             </MUIToolbar>
           </AppBar>
           <main className={classes.map} id="map">
-            {this.renderPopup()}
             <div className={classes.searchPanel}>
               {this.renderSearchPlugin()}
             </div>
@@ -509,7 +517,9 @@ class App extends Component {
                   globalObserver={this.globalObserver}
                 />
               </div>
-              <article id="toolbar-panel" className={classes.toolbarPanel} />
+              <article id="toolbar-panel" className={classes.toolbarPanel}>
+                {this.renderPopup()}
+              </article>
               <div className={widgetClassesLeft}>
                 {this.renderWidgets("left")}
               </div>

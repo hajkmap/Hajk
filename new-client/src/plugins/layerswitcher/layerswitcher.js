@@ -5,7 +5,7 @@ import Button from "@material-ui/core/Button";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import LayersIcon from "@material-ui/icons/Layers";
 
-import Panel from "../../components/Panel.js";
+//import Panel from "../../components/Panel.js";
 import LayerSwitcherModel from "./LayerSwitcherModel";
 import LayerSwitcherView from "./LayerSwitcherView";
 import Observer from "react-event-observer";
@@ -53,7 +53,7 @@ class LayerSwitcher extends Component {
 
   renderPanel() {
     return createPortal(
-      <Panel
+      <div
         title={this.text}
         onClose={this.closePanel}
         position="left"
@@ -65,7 +65,7 @@ class LayerSwitcher extends Component {
           parent={this}
           observer={this.observer}
         />
-      </Panel>,
+      </div>,
       document.getElementById("map-overlay")
     );
   }

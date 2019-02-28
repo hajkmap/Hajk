@@ -4,27 +4,25 @@ import { withStyles } from "@material-ui/core/styles";
 import { Button } from "@material-ui/core";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import BufferIcon from "@material-ui/icons/Adjust";
-import Panel from "../../components/Panel.js";
 import BufferView from "./BufferView.js";
 import BufferModel from "./BufferModel.js";
 import Observer from "react-event-observer";
-
+import Window from "../../components/Window.js";
+import { isMobile } from "../../utils/IsMobile.js";
 
 const styles = theme => {
   return {};
 };
 
 class buffer extends React.PureComponent {
- 
   state = {
     panelOpen: this.props.options.visibleAtStart
   };
   onClick = e => {
-   
     this.app.onPanelOpen(this);
     this.setState({
       panelOpen: true
-    });    
+    });
     this.BufferModel.setActive(true);
   };
 
@@ -38,10 +36,9 @@ class buffer extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    this.text = "Skapa buffertzon";
+    this.title = "Skapa buffertzon";
     this.app = props.app;
     this.localObserver = Observer();
-
 
     this.BufferModel = new BufferModel({
       map: props.map,
@@ -51,25 +48,31 @@ class buffer extends React.PureComponent {
 
     this.app.registerPanel(this);
   }
- 
-  renderPanel() {
+
+  renderWindow(mode) {
     return createPortal(
-      <Panel
-        title={this.text}
+      <Window
+        globalObserver={this.props.app.globalObserver}
+        title={this.title}
         onClose={this.closePanel}
-        position="left"
         open={this.state.panelOpen}
+        position={this.position}
+        height={450}
+        width={400}
+        top={210}
+        left={0}
+        mode={mode}
       >
         <BufferView
           localObserver={this.localObserver}
           model={this.BufferModel}
           app={this.app}
         />
-      </Panel>,
-      document.getElementById("map-overlay")
+      </Window>,
+      document.getElementById(isMobile ? "app" : "toolbar-panel")
     );
   }
-  
+
   renderAsWidgetItem() {
     const { classes } = this.props;
     return (
@@ -83,7 +86,7 @@ class buffer extends React.PureComponent {
         >
           <BufferIcon />
         </Button>
-        {this.renderPanel()}
+        {this.renderWindow("window")}
       </div>
     );
   }
@@ -102,7 +105,7 @@ class buffer extends React.PureComponent {
           </ListItemIcon>
           <ListItemText primary={this.text} />
         </ListItem>
-        {this.renderPanel()}
+        {this.renderWindow("panel")}
       </div>
     );
   }

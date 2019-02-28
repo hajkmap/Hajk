@@ -17,7 +17,8 @@ import BugReportIcon from "@material-ui/icons/BugReport";
 import DummyView from "./DummyView";
 import DummyModel from "./DummyModel";
 import Observer from "react-event-observer";
-import Panel from "../../components/Panel.js";
+import Window from "../../components/Window.js";
+import { isMobile } from "../../utils/IsMobile.js";
 
 const styles = theme => {
   return {};
@@ -52,7 +53,7 @@ class Dummy extends React.PureComponent {
     super(props);
 
     // Important, part of API. Must be a string. Could be fetched from config.
-    this.text = "Dummy plugin header";
+    this.title = "Dummy plugin header";
     this.app = props.app;
 
     // Optionally setup a local observer to allow sending messages between here and model/view.
@@ -83,15 +84,21 @@ class Dummy extends React.PureComponent {
   } */
 
   // Not part of API but rather convention. If plugin has a panel, its render method should be called renderPanel().
-  renderPanel() {
+  renderWindow(mode) {
     // Using Portals (see React docs) we render panel not in direct relation in DOM to the button, but rather in #map-overlay <div>.
     // We make use of <Panel>, a component that encapsulates MUI's Drawer, that we've written to reuse across Hajk's plugins.
     return createPortal(
-      <Panel
-        title={this.text}
+      <Window
+        globalObserver={this.props.app.globalObserver}
+        title={this.title}
         onClose={this.closePanel}
-        position="left"
         open={this.state.panelOpen}
+        position={this.position}
+        height={450}
+        width={400}
+        top={210}
+        left={0}
+        mode={mode}
       >
         {/* IMPORTANT: Note that normally you don't need to give View access to BOTH observer and model – one of those is sufficient */}
         <DummyView
@@ -100,8 +107,8 @@ class Dummy extends React.PureComponent {
           model={this.dummyModel}
           app={this.app}
         />
-      </Panel>,
-      document.getElementById("map-overlay")
+      </Window>,
+      document.getElementById(isMobile ? "app" : "toolbar-panel")
     );
   }
 
