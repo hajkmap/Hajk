@@ -5,11 +5,11 @@ import { IconButton } from "@material-ui/core";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import SatelliteIcon from "@material-ui/icons/Satellite";
 import Typography from "@material-ui/core/Typography";
-
 import Window from "../../components/Window.js";
 import InformativeView from "./InformativeView.js";
 import InformativeModel from "./InformativeModel.js";
 import Observer from "react-event-observer";
+import { isMobile } from "../../utils/IsMobile.js";
 
 const styles = theme => {
   return {
@@ -94,7 +94,7 @@ class Informative extends React.PureComponent {
       this.options.abstract || "Läs mer om vad som planeras i kommunen";
     this.caption = this.options.caption || "Titel";
     this.html = this.options.html || "<div>Html</div>";
-    this.position = spec.options.panel || "right";
+    this.position = spec.options.panel ? spec.options.panel : undefined;
     this.app = spec.app;
     this.observer = Observer();
     this.informativeModel = new InformativeModel({
@@ -106,17 +106,20 @@ class Informative extends React.PureComponent {
     this.app.registerPanel(this);
   }
 
-  renderPanel() {
-    var left = this.position === "right" ? (window.innerWidth - 410) / 2 : 0;
+  renderWindow(mode) {
+    var left = this.position === "right" ? (window.innerWidth - 410) / 2 : 5;
     return createPortal(
       <Window
+        globalObserver={this.props.app.globalObserver}
         title={this.title}
         onClose={this.closePanel}
         open={this.state.panelOpen}
         position={this.position}
-        height={window.innerHeight - 380}
-        top={145}
+        width={400 + "px"}
+        height={window.innerHeight - 380 + "px"}
+        top={210}
         left={left}
+        mode={mode}
       >
         <InformativeView
           app={this.app}
@@ -127,7 +130,7 @@ class Informative extends React.PureComponent {
           abstract={this.html}
         />
       </Window>,
-      document.getElementById("root")
+      document.getElementById(isMobile ? "app" : "toolbar-panel")
     );
   }
 
@@ -146,7 +149,7 @@ class Informative extends React.PureComponent {
             <Typography className={classes.text}>{this.abstract}</Typography>
           </div>
         </div>
-        {this.renderPanel()}
+        {this.renderWindow("window")}
       </>
     );
   }
@@ -165,7 +168,7 @@ class Informative extends React.PureComponent {
           </ListItemIcon>
           <ListItemText primary={this.title} />
         </ListItem>
-        {this.renderPanel()}
+        {this.renderWindow("panel")}
       </div>
     );
   }

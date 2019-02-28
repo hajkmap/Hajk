@@ -1050,9 +1050,8 @@ class Menu extends Component {
 
     var layers = flatten(this.props.model.get("layerMenuConfig"));
 
-    layers.sort(
-      (a, b) =>
-        a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1
+    layers.sort((a, b) =>
+      a.drawOrder === b.drawOrder ? 0 : a.drawOrder < b.drawOrder ? -1 : 1
     );
     layers = layers.reverse();
 

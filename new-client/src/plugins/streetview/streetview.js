@@ -6,7 +6,8 @@ import StreetviewIcon from "@material-ui/icons/Streetview";
 import StreetViewView from "./StreetViewView";
 import StreetViewModel from "./StreetViewModel";
 import Observer from "react-event-observer";
-import Panel from "../../components/Panel.js";
+import Window from "../../components/Window.js";
+import { isMobile } from "../../utils/IsMobile.js";
 
 const styles = theme => {
   return {};
@@ -56,17 +57,20 @@ class StreetView extends React.PureComponent {
         displayPanorama: true
       });
     });
+    this.title = "Gatuvy";
   }
-
-  renderPanel() {
+  renderWindow(mode) {
     return createPortal(
-      <Panel
-        title={this.text}
+      <Window
+        globalObserver={this.props.app.globalObserver}
+        title={this.title}
         onClose={this.closePanel}
-        position="left"
         open={this.state.panelOpen}
-        top={this.state.top}
-        height="325px"
+        height={window.innerHeight - 380 + "px"}
+        width="400px"
+        top={145}
+        left={5}
+        mode={mode}
       >
         <StreetViewView
           localObserver={this.localObserver}
@@ -74,8 +78,8 @@ class StreetView extends React.PureComponent {
           parent={this}
           displayPanorama={this.state.displayPanorama}
         />
-      </Panel>,
-      document.getElementById("map-overlay")
+      </Window>,
+      document.getElementById(isMobile ? "app" : "toolbar-panel")
     );
   }
 
@@ -100,7 +104,7 @@ class StreetView extends React.PureComponent {
           </ListItemIcon>
           <ListItemText primary={this.text} />
         </ListItem>
-        {this.renderPanel()}
+        {this.renderWindow("panel")}
       </div>
     );
   }

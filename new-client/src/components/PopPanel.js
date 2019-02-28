@@ -45,21 +45,43 @@ class PopPanel extends Component {
     if (onClose) onClose();
   };
 
-  state = {};
+  state = {
+    panelPosition: false,
+    placement: "right-start"
+  };
 
-  componentDidMount() {}
+  componentDidMount() {
+    if (this.props.globalObserver) {
+      this.props.globalObserver.subscribe("toolbarExpanded", open => {
+        this.setState(
+          {
+            placement: "right"
+          },
+          () => {
+            this.setState({
+              placement: "right-start"
+            });
+          }
+        );
+      });
+    }
+  }
 
   render() {
-    const { classes, children, anchorEl } = this.props;
-    var open = this.props.open;
+    var { classes, children, anchorEl, open } = this.props;
+    const { placement } = this.state;
     if (open === undefined) {
       open = false;
     }
     const id = open ? "no-transition-popper" : null;
     return (
-      <Popper id={id} open={open} anchorEl={anchorEl} placement={"right-start"}>
+      <Popper id={id} open={open} anchorEl={anchorEl} placement={placement}>
         <Paper className={classes.content}>
-          <PanelHeader title={this.props.title} onClose={this.close} />
+          <PanelHeader
+            title={this.props.title}
+            onClose={this.close}
+            maximizable={false}
+          />
           <div className={classes.body}>{children}</div>
         </Paper>
       </Popper>

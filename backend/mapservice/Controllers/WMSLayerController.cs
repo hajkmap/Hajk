@@ -2,9 +2,11 @@
 using MapService.DataAccess;
 using MapService.Models.Config;
 using log4net;
+using System.Web.Http.Cors;
 
 namespace MapService.Controllers
 {
+    [EnableCors(origins: "*", headers: "*", methods: "*", exposedHeaders: "X-Custom-Header")]
     public class WMSLayerController : ApiController
     {
         ILog _log = LogManager.GetLogger(typeof(WMSLayerController));

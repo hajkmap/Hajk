@@ -6,8 +6,9 @@ import DrawIcon from "@material-ui/icons/Edit";
 import DrawView from "./DrawView";
 import DrawModel from "./DrawModel";
 import Observer from "react-event-observer";
-import Panel from "../../components/Panel.js";
+import Window from "../../components/Window.js";
 import "./draw.css";
+import { isMobile } from "../../utils/IsMobile.js";
 
 const styles = theme => {
   return {};
@@ -46,17 +47,21 @@ class Draw extends React.PureComponent {
       localObserver: this.localObserver
     });
     this.app.registerPanel(this);
+    this.title = "Rita";
   }
 
-  renderPanel() {
+  renderWindow(mode) {
     return createPortal(
-      <Panel
-        title={this.text}
+      <Window
+        globalObserver={this.props.app.globalObserver}
+        title={this.title}
         onClose={this.closePanel}
-        position="left"
         open={this.state.panelOpen}
-        top={this.state.top}
-        height="500px"
+        height={window.innerHeight - 380 + "px"}
+        width="400px"
+        top={145}
+        left={5}
+        mode={mode}
       >
         <DrawView
           localObserver={this.localObserver}
@@ -64,8 +69,8 @@ class Draw extends React.PureComponent {
           parent={this}
           open={this.state.panelOpen}
         />
-      </Panel>,
-      document.getElementById("map-overlay")
+      </Window>,
+      document.getElementById(isMobile ? "app" : "toolbar-panel")
     );
   }
 
@@ -90,7 +95,7 @@ class Draw extends React.PureComponent {
           </ListItemIcon>
           <ListItemText primary={this.text} />
         </ListItem>
-        {this.renderPanel()}
+        {this.renderWindow("panel")}
       </div>
     );
   }
