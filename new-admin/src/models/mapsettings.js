@@ -32,9 +32,15 @@ var menu = Model.extend({
     addedLayers: []
   },
 
+  prepareProxyUrl: function(url) {
+    return this.get("config").url_proxy
+      ? this.get("config").url_proxy + "/" + url.replace(/http[s]?:\/\//, "")
+      : url;
+  },
+
   loadMaps: function(callback) {
     $.ajax({
-      url: this.get("config").url_map_list,
+      url: this.prepareProxyUrl(this.get("config").url_map_list),
       method: "GET",
       contentType: "application/json",
       success: data => {
@@ -43,7 +49,9 @@ var menu = Model.extend({
           name = "";
         }
         this.set({
-          urlMapConfig: this.get("config").url_map + "/" + name,
+          urlMapConfig: this.prepareProxyUrl(
+            this.get("config").url_map + "/" + name
+          ),
           mapFile: name
         });
         callback(data);

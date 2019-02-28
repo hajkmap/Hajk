@@ -27,7 +27,56 @@ import $ from "jquery";
 
 var manager = Model.extend({
   defaults: {
-    layers: []
+    layers: [],
+    mapConfigs: [],
+    mapsWithLayers: []
+  },
+
+  fetchAllMapConfigsToModel: function(callback = function devNull() {}) {
+    $.ajax({
+      url: this.prepareProxyUrl(this.get("config").url_map_list),
+      method: "GET",
+      contentType: "application/json",
+      success: data => {
+        // Save all mapConfig names returned, we'll need them layer
+        this.set({ mapConfigs: data });
+
+        // Loop through all config names, and fetch the config files
+        for (let i = 0; i < data.length; i++) {
+          let url = this.prepareProxyUrl(
+            this.get("config").url_map + "/" + data[i]
+          );
+          fetch(url).then(res => {
+            // JSONify, filter just for one tool (layerswitcher), and then use first element (it's an array…)
+            res.json().then(d => {
+              let layerswitcherConfig = d.tools.filter(
+                tool => tool.type === "layerswitcher"
+              )[0];
+
+              // Created washed object that contains map title, baselayers and groups with layers.
+              // This will be used for filtering.
+              let washed = {
+                mapFilename: data[i],
+                mapTitle: d.map.title,
+                layers: {
+                  baseLayers: layerswitcherConfig.options.baselayers,
+                  groups: layerswitcherConfig.options.groups
+                }
+              };
+
+              // Push into model for later use
+              this.get("mapsWithLayers").push(washed);
+            });
+          });
+        }
+
+        callback(data);
+      },
+      error: message => {
+        console.error(message);
+        callback(message);
+      }
+    });
   },
 
   parseDate(date) {
@@ -55,7 +104,7 @@ var manager = Model.extend({
   },
 
   getConfig: function(url) {
-    $.ajax(url, {
+    $.ajax(this.prepareProxyUrl(url), {
       success: data => {
         var layers = [];
         data.extendedwmslayers.forEach(l => {

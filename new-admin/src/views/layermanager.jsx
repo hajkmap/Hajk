@@ -57,10 +57,65 @@ class Manager extends Component {
         layers: this.props.model.get("layers")
       });
     });
+
+    // Fetch all map configs to model
+    this.props.model.fetchAllMapConfigsToModel();
   }
 
   componentWillUnmount() {
     this.props.model.off("change:layers");
+  }
+
+  findLayerInConfig(id) {
+    let mapsWithLayers = this.props.model.get("mapsWithLayers");
+    let matchedConfigs = [];
+
+    function findInBaselayers(baselayers, layerId) {
+      return baselayers.find(l => l.id === layerId);
+    }
+
+    function findInGroups(groups, layerId) {
+      let config;
+      groups.forEach(group => {
+        let found = group.layers.find(l => l.id === layerId);
+        if (found) {
+          config = found;
+        }
+        if (group.hasOwnProperty("groups")) {
+          findInGroups(group.groups, layerId);
+        }
+      });
+      return config;
+    }
+
+    for (let i = 0; i < mapsWithLayers.length; i++) {
+      if (
+        findInBaselayers(mapsWithLayers[i].layers.baseLayers, id) ||
+        findInGroups(mapsWithLayers[i].layers.groups, id)
+      ) {
+        matchedConfigs.push(mapsWithLayers[i].mapFilename);
+      }
+    }
+
+    return matchedConfigs;
+  }
+
+  infoAboutLayer(e, layer) {
+    let matchedConfigs = this.findLayerInConfig(layer.id);
+    let alertMessage;
+    if (matchedConfigs.length < 1) {
+      alertMessage = `Lagret "${layer.caption}" används inte i någon karta.`;
+    } else {
+      alertMessage = `Lagret "${
+        layer.caption
+      }" används i följande kartor: ${matchedConfigs.toLocaleString()}`;
+    }
+
+    this.setState({
+      alert: true,
+      alertMessage: alertMessage
+    });
+    e.stopPropagation();
   }
 
   removeLayer(e, layer) {
@@ -446,14 +501,23 @@ class Manager extends Component {
 
       return (
         <li onClick={e => this.loadLayer(e, layer)} key={"layer_" + i}>
-          <span>
-            {layer.caption} {displayType}
-          </span>
-          <i
-            title="Radera lager"
-            onClick={e => this.removeLayer(e, layer)}
-            className="fa fa-trash"
-          />
+          <div className="mainBox">
+            <span>
+              {layer.caption} {displayType}
+            </span>
+          </div>
+          <div className="optionsBox">
+            <i
+              title="Info om lager"
+              onClick={e => this.infoAboutLayer(e, layer)}
+              className="fa fa-info"
+            />
+            <i
+              title="Radera lager"
+              onClick={e => this.removeLayer(e, layer)}
+              className="fa fa-trash"
+            />
+          </div>
         </li>
       );
     });
