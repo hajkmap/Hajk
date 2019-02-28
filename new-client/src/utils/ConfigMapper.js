@@ -27,7 +27,7 @@ export default class ConfigMapper {
         }?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=${w}&HEIGHT=${h}&LAYER=${layer}&${geoserverLegendOptions}`;
       }
 
-      var protocol = /^http/.test(legend) ? "" : "http://";
+      var protocol = /^http/.test(legend) ? "" : "https://";
       return protocol + legend;
     }
 
@@ -120,7 +120,7 @@ export default class ConfigMapper {
       }&FORMAT=image/png&WIDTH=32&HEIGHT=32&LAYER=${layer.name}&STYLE=${
         layer.style
       }&legend_options=forceLabels:on`;
-      let protocol = /^http/.test(legendUrl) ? "" : "http://";
+      let protocol = /^http/.test(legendUrl) ? "" : "https://";
 
       return {
         url: protocol + legendUrl,
@@ -320,7 +320,7 @@ export default class ConfigMapper {
         if (/^data/.test(args.legend)) {
           args.legend = args.legend.split("#");
         } else if (!/^http/.test(args.legend)) {
-          args.legend = "http://" + args.legend;
+          args.legend = "https://" + args.legend;
         }
       }
       return args.legend;

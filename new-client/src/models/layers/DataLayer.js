@@ -154,17 +154,18 @@ var DataLayer = {
       strategy: ol.loadingstrategy.fixed
     });
 
+    //FIXME: No absolute URLs to specific organizations
     this.imageSource = new ol.source.ImageVector({
       source: this.vectorSource,
       style: feature => {
         var icon = mode => {
           switch (mode) {
             case 2:
-              return "http://karta.varmlandstrafik.se/icons/bus-icon.png";
+              return "https://karta.varmlandstrafik.se/icons/bus-icon.png";
             case 3:
               return "assets/icons/taxi.png";
             case 5:
-              return "http://karta.varmlandstrafik.se/icons/train-icon.png";
+              return "https://karta.varmlandstrafik.se/icons/train-icon.png";
           }
         };
         return [

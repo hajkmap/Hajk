@@ -6,8 +6,6 @@ import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
-import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import ScrollMenu from "react-horizontal-scrolling-menu";
 import "./BreadCrumbs.css";
 
@@ -97,27 +95,6 @@ const styles = theme => ({
     border: "1px solid #ccc"
   }
 });
-class ArrowBase extends Component {
-  render() {
-    const { classes, type } = this.props;
-    if (type === "left") {
-      return (
-        <div className={classes.arrowLeft}>
-          <ChevronLeftIcon />
-        </div>
-      );
-    }
-    if (type === "right") {
-      return (
-        <div className={classes.arrowRight}>
-          <ChevronRightIcon />
-        </div>
-      );
-    }
-  }
-}
-
-const Arrow = withStyles(styles)(ArrowBase);
 
 class BreadCrumbs extends Component {
   constructor(props) {
