@@ -2,6 +2,14 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
+import { isMobile } from "../../utils/IsMobile.js";
+
+// In pretty much all cases, you'll want your plugin to render something.
+// There are currently two available ways: Window or Panel.
+// Most plugins (except those super simple) will need Window. Note that
+// Window has two render modes, either as 'panel' or as 'window' (yeah, it's a bit confusing).
+// You set Window's render mode using a prop to the Window component.
+import Window from "../../components/Window.js";
 
 // The following imports can be changed, depending on desired appearance of the plugin.
 // If you want your plugin to be renderable in Toolbar and as Floating Action Button, you
@@ -17,35 +25,42 @@ import BugReportIcon from "@material-ui/icons/BugReport";
 import DummyView from "./DummyView";
 import DummyModel from "./DummyModel";
 import Observer from "react-event-observer";
-import Window from "../../components/Window.js";
-import { isMobile } from "../../utils/IsMobile.js";
 
+// You can customize the look and feel of your plugin using theme overrides.
+// See docs: https://material-ui.com/customization/themes/
 const styles = theme => {
   return {};
 };
 
 class Dummy extends React.PureComponent {
-  // In native ES6 class we can set state like this, outside the constructor.
+  // In native ES6 class the default state should be sat like this, outside the constructor.
   // Important, part of API: Make sure to respect panel visibility set in config.
   state = {
     panelOpen: this.props.options.visibleAtStart
   };
 
-  // Called when plugin's <ListItem> or widget <Button> is clicked
-  onClick = e => {
-    // Callback that loops through app's panels and calls closePanel() on all except current
-    this.app.onPanelOpen(this);
-
-    // This state variable is being watched for in render() and decides whether MUI Component <Drawer> is open or not
-    this.setState({
-      panelOpen: true
-    });
-  };
-
   // Important, part of API for plugins that contain panels.
+  // When another plugin calls this.app.onPanelOpen, all other plugins
+  // that are registered as panel will hide themselves. In other words,
+  // if your plugin (for some reason) should not be hidden when other plugin
+  // opens, you could modify the function below to just do nothing. But don't
+  // remove it entirely as every plugin is assumed to have a method named closePanel().
   closePanel = () => {
     this.setState({
       panelOpen: false
+    });
+  };
+
+  // Called when plugin's <ListItem> or widget <Button> is clicked
+  onClick = e => {
+    // Tell App to call closePanel() on all other plugins. If your plugin
+    // doesn't need to hide other plugins when it opens, you can omit this method.
+    this.app.onPanelOpen(this);
+
+    // When user clicks the button to activate this plugin, set state of panelOpen to true.
+    // The value of panelOpen is being watched for in methods that render the actual Window/Panel.
+    this.setState({
+      panelOpen: true
     });
   };
 
@@ -65,6 +80,8 @@ class Dummy extends React.PureComponent {
     });
 
     // Initiate a model. Although optional, will probably be used for all except the most simple plugins.
+    // In this example, we make our localObserver available for the model as well. This makes it possible
+    // to send events between model and main plugin controller.
     this.dummyModel = new DummyModel({
       map: props.map,
       app: props.app,
@@ -72,6 +89,7 @@ class Dummy extends React.PureComponent {
     });
 
     // Important, part of API for plugins that contain panels. Makes App aware of this panels existance.
+    // Without this, the app won't know that your plugin exists.
     this.app.registerPanel(this);
   }
 
@@ -83,10 +101,12 @@ class Dummy extends React.PureComponent {
     return this.state.panelOpen !== nextState.panelOpen;
   } */
 
-  // Not part of API but rather convention. If plugin has a panel, its render method should be called renderPanel().
+  // The renderWindow method is not part of the API but rather convention.
+  // Please try to stick to the convention as it makes it easier to recognize logic flow in other people's plugins.
   renderWindow(mode) {
-    // Using Portals (see React docs) we render panel not in direct relation in DOM to the button, but rather in #map-overlay <div>.
-    // We make use of <Panel>, a component that encapsulates MUI's Drawer, that we've written to reuse across Hajk's plugins.
+    // Using Portals (see React docs) we render our Window (or Panel) in another <div>. Which <div> it is
+    // depends on whether the browser is a mobile or desktop.
+    // Value of 'mode' parameter determines whether the Window will render as a free floating window, or a "sticky" panel.
     return createPortal(
       <Window
         globalObserver={this.props.app.globalObserver}
@@ -100,12 +120,16 @@ class Dummy extends React.PureComponent {
         left={0}
         mode={mode}
       >
-        {/* IMPORTANT: Note that normally you don't need to give View access to BOTH observer and model – one of those is sufficient */}
+        {/* */}
         <DummyView
-          // map={this.map} // Just an example. Make sure to ONLY include props that are ACTUALLY USED in the View.
-          localObserver={this.localObserver}
-          model={this.dummyModel}
-          app={this.app}
+          // Here you send some props to the plugin's View.
+          // Note that normally you don't need to give the View access to BOTH Observer and Model,
+          // one of those is sufficient, as Model will mostly already have access to the Observer.
+          // So, for performance reasons, make sure to ONLY include props that are ACTUALLY USED in the View.
+          // map={this.map} // You can send the map
+          localObserver={this.localObserver} // You can send the Observer
+          model={this.dummyModel} // Etc...
+          app={this.app} // Or even the whole App
         />
       </Window>,
       document.getElementById(isMobile ? "app" : "toolbar-panel")
@@ -133,7 +157,7 @@ class Dummy extends React.PureComponent {
         >
           <BugReportIcon />
         </Button>
-        {this.renderPanel()}
+        {this.renderWindow("window")}
       </div>
     );
   }
@@ -153,11 +177,13 @@ class Dummy extends React.PureComponent {
           </ListItemIcon>
           <ListItemText primary={this.text} />
         </ListItem>
-        {this.renderPanel()}
+        {this.renderWindow("panel")}
       </div>
     );
   }
 
+  // Depending on how the plugin has been configured (in Hajk's admin GUI),
+  // render it as either toolbar item or a free floating action button (aka widget).
   render() {
     if (this.props.type === "toolbarItem") {
       return this.renderAsToolbarItem();
@@ -171,4 +197,5 @@ class Dummy extends React.PureComponent {
   }
 }
 
+// Part of API. Make a HOC of our plugin.
 export default withStyles(styles)(Dummy);
