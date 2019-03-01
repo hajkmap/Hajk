@@ -85,23 +85,23 @@ class Informative extends React.PureComponent {
     });
   };
 
-  constructor(spec) {
-    super(spec);
+  constructor(props) {
+    super(props);
     this.type = "informative";
-    this.options = spec.options;
+    this.options = props.options;
     this.title = this.options.title || "Översiktsplan";
     this.abstract =
       this.options.abstract || "Läs mer om vad som planeras i kommunen";
     this.caption = this.options.caption || "Titel";
     this.html = this.options.html || "<div>Html</div>";
-    this.position = spec.options.panel ? spec.options.panel : undefined;
-    this.app = spec.app;
+    this.position = props.options.panel ? props.options.panel : undefined;
+    this.app = props.app;
     this.observer = Observer();
     this.informativeModel = new InformativeModel({
-      map: spec.map,
-      app: spec.app,
+      map: props.map,
+      app: props.app,
       observer: this.observer,
-      url: spec.options.serviceUrl + "/" + spec.options.document
+      url: props.options.serviceUrl + "/" + props.options.document
     });
     this.app.registerPanel(this);
   }
