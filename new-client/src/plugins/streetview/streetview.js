@@ -41,7 +41,8 @@ class StreetView extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.text = " Street View";
+    this.options = props.options;
+    this.title = this.options.title || "Gatuvy";
     this.app = props.app;
     this.localObserver = Observer();
     this.streetViewModel = new StreetViewModel({
@@ -57,7 +58,6 @@ class StreetView extends React.PureComponent {
         displayPanorama: true
       });
     });
-    this.title = "Gatuvy";
   }
   renderWindow(mode) {
     return createPortal(
@@ -102,7 +102,7 @@ class StreetView extends React.PureComponent {
           <ListItemIcon>
             <StreetviewIcon />
           </ListItemIcon>
-          <ListItemText primary={this.text} />
+          <ListItemText primary={this.title} />
         </ListItem>
         {this.renderWindow("panel")}
       </div>

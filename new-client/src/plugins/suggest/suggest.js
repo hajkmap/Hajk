@@ -25,10 +25,11 @@ class Suggest extends Component {
     window.location.href = string;
   };
 
-  constructor(spec) {
-    super(spec);
-    this.text = "Redigera";
-    this.app = spec.app;
+  constructor(props) {
+    super(props);
+    this.options = props.options;
+    this.title = this.options.title || "Förbättra";
+    this.app = props.app;
   }
 
   renderAsWidgetItem() {
@@ -60,7 +61,7 @@ class Suggest extends Component {
           <ListItemIcon>
             <CommentIcon />
           </ListItemIcon>
-          <ListItemText primary={this.text} />
+          <ListItemText primary={this.title} />
         </ListItem>
       </div>
     );

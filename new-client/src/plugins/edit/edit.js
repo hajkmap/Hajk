@@ -32,19 +32,19 @@ class Edit extends React.PureComponent {
     });
   };
 
-  constructor(spec) {
-    super(spec);
-    this.text = "Redigera";
-    this.app = spec.app;
+  constructor(props) {
+    super(props);
+    this.options = props.options;
+    this.title = this.options.title || "Redigera";
+    this.app = props.app;
     this.observer = Observer();
     this.editModel = new EditModel({
-      map: spec.map,
-      app: spec.app,
+      map: props.map,
+      app: props.app,
       observer: this.observer,
-      options: spec.options
+      options: props.options
     });
     this.app.registerPanel(this);
-    this.title = "Redigera";
   }
 
   renderWindow(mode) {
@@ -88,7 +88,7 @@ class Edit extends React.PureComponent {
           <ListItemIcon>
             <FormatShapesIcon />
           </ListItemIcon>
-          <ListItemText primary={this.text} />
+          <ListItemText primary={this.title} />
         </ListItem>
         {this.renderWindow("panel")}
       </div>

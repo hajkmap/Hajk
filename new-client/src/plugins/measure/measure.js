@@ -46,7 +46,8 @@ class Measure extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.text = "Mätverktyg";
+    this.options = props.options;
+    this.title = this.options.title || "Mät";
     this.app = props.app;
     this.localObserver = Observer();
     this.measureModel = new MeasureModel({
@@ -60,7 +61,7 @@ class Measure extends React.PureComponent {
   renderPanel() {
     return (
       <PopPanel
-        title={this.text}
+        title={this.title}
         onClose={this.closePanel}
         open={this.state.panelOpen}
         anchorEl={this.state.anchorEl}
@@ -94,7 +95,7 @@ class Measure extends React.PureComponent {
           <ListItemIcon>
             <MeasureIcon />
           </ListItemIcon>
-          <ListItemText primary={this.text} />
+          <ListItemText primary={this.title} />
         </ListItem>
         {this.renderPanel()}
       </div>

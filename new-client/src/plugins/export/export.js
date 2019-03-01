@@ -35,7 +35,8 @@ class Export extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.text = "Exportera karta";
+    this.options = props.options;
+    this.title = this.options.title || "Exportera";
     this.app = props.app;
     this.localObserver = Observer();
     this.exportModel = new ExportModel({
@@ -45,7 +46,6 @@ class Export extends React.PureComponent {
       localObserver: this.localObserver
     });
     this.app.registerPanel(this);
-    this.title = "Exportera";
   }
 
   renderWindow(mode) {
@@ -90,7 +90,7 @@ class Export extends React.PureComponent {
           <ListItemIcon>
             <PrintIcon />
           </ListItemIcon>
-          <ListItemText primary={this.text} />
+          <ListItemText primary={this.title} />
         </ListItem>
         {this.renderWindow("panel")}
       </div>

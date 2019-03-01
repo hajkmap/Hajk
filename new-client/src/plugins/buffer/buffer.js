@@ -35,8 +35,8 @@ class buffer extends React.PureComponent {
 
   constructor(props) {
     super(props);
-
-    this.title = "Skapa buffertzon";
+    this.options = props.options;
+    this.title = this.options.title || "Buffra";
     this.app = props.app;
     this.localObserver = Observer();
 
@@ -103,7 +103,7 @@ class buffer extends React.PureComponent {
           <ListItemIcon>
             <BufferIcon />
           </ListItemIcon>
-          <ListItemText primary={this.text} />
+          <ListItemText primary={this.title} />
         </ListItem>
         {this.renderWindow("panel")}
       </div>

@@ -66,9 +66,11 @@ class Dummy extends React.PureComponent {
 
   constructor(props) {
     super(props);
+    this.options = props.options;
 
-    // Important, part of API. Must be a string. Could be fetched from config.
-    this.title = "Dummy plugin header";
+    // Important, part of API. Will be visible in Window's head and next to button (if toolbar item). Could be fetched from config.
+    this.title = this.options.title || "Dummy plugin";
+
     this.app = props.app;
 
     // Optionally setup a local observer to allow sending messages between here and model/view.
@@ -175,7 +177,7 @@ class Dummy extends React.PureComponent {
           <ListItemIcon>
             <BugReportIcon />
           </ListItemIcon>
-          <ListItemText primary={this.text} />
+          <ListItemText primary={this.title} />
         </ListItem>
         {this.renderWindow("panel")}
       </div>

@@ -31,17 +31,18 @@ class LayerSwitcher extends Component {
     });
   };
 
-  constructor(spec) {
-    super(spec);
-    this.text = "Lagerhanterare";
-    this.app = spec.app;
+  constructor(props) {
+    super(props);
+    this.options = props.options;
+    this.title = this.options.title || "Lagerhanterare";
+    this.app = props.app;
     this.observer = Observer();
     this.observer.subscribe("myEvent", message => {
       console.log(message);
     });
     this.layerSwitcherModel = new LayerSwitcherModel({
-      map: spec.map,
-      app: spec.app,
+      map: props.map,
+      app: props.app,
       observer: this.observer
     });
     this.app.registerPanel(this);
@@ -54,7 +55,7 @@ class LayerSwitcher extends Component {
   renderPanel() {
     return createPortal(
       <div
-        title={this.text}
+        title={this.title}
         onClose={this.closePanel}
         position="left"
         open={this.state.panelOpen}
@@ -100,7 +101,7 @@ class LayerSwitcher extends Component {
           <ListItemIcon>
             <LayersIcon />
           </ListItemIcon>
-          <ListItemText primary={this.text} />
+          <ListItemText primary={this.title} />
         </ListItem>
         {this.renderPanel()}
       </div>

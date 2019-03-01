@@ -34,7 +34,8 @@ class Anchor extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.text = "Länk till karta";
+    this.options = props.options;
+    this.title = this.options.title || "Dela";
     this.app = props.app;
     this.localObserver = Observer();
     this.anchorModel = new AnchorModel({
@@ -48,7 +49,7 @@ class Anchor extends React.PureComponent {
   renderPanel() {
     return (
       <PopPanel
-        title={this.text}
+        title={this.title}
         onClose={this.closePanel}
         open={this.state.panelOpen}
         anchorEl={this.state.anchorEl}
@@ -82,7 +83,7 @@ class Anchor extends React.PureComponent {
           <ListItemIcon>
             <OpenInNewIcon />
           </ListItemIcon>
-          <ListItemText primary={this.text} />
+          <ListItemText primary={this.title} />
         </ListItem>
         {this.renderPanel()}
       </div>

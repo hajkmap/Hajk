@@ -42,11 +42,12 @@ class Location extends React.PureComponent {
     });
   };
 
-  constructor(spec) {
-    super(spec);
+  constructor(props) {
+    super(props);
+    this.options = props.options;
 
     // Important, part of API. Must be a string. Could be fetched from config.
-    this.text = "Spåra position";
+    this.title = this.options.title || "GPS";
 
     // Important, part of API for plugins that contain panels. Makes App aware of this panels existence.
     this.props.app.registerPanel(this);
@@ -76,26 +77,8 @@ class Location extends React.PureComponent {
       </Window>,
       document.getElementById(isMobile ? "app" : "toolbar-panel")
     );
-    // Using Portals (see React docs) we render panel not in direct relation in DOM to the button, but rather in #map-overlay <div>.
-    // We make use of <Panel>, a component that encapsulates MUI's Drawer, that we've written to reuse across Hajk's plugins.
-    // <Panel
-    //   title={this.text}
-    //   onClose={this.closePanel}
-    //   position="left"
-    //   open={this.state.panelOpen}
-    // >
-    //   <LocationView parent={this} />
-    // </Panel>,
   }
 
-  /*
-   * Important, part of plugins API.
-   * Each plugin must present both renderAsWidgetItem and renderAsToolbarItem.
-   * Depending on user's preferred location, App will render the plugin
-   * using one of these two methods.
-   */
-
-  // Render as a FAB (floating action button, https://material-ui.com/demos/buttons/#floating-action-buttons)
   renderAsWidgetItem() {
     const { classes } = this.props;
     return (
@@ -114,7 +97,6 @@ class Location extends React.PureComponent {
     );
   }
 
-  // Render as a toolbar item, https://material-ui.com/demos/lists/
   renderAsToolbarItem() {
     return (
       <div>
@@ -127,7 +109,7 @@ class Location extends React.PureComponent {
           <ListItemIcon>
             <NavigationIcon />
           </ListItemIcon>
-          <ListItemText primary={this.text} />
+          <ListItemText primary={this.title} />
         </ListItem>
         {this.renderWindow("panel")}
       </div>

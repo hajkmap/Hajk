@@ -74,17 +74,18 @@ class SimpleLayerSwitcher extends React.PureComponent {
     });
   };
 
-  constructor(spec) {
-    super(spec);
-    this.app = spec.app;
-    this.options = spec.options;
-    this.title = this.options.title || "Innehåll";
+  constructor(props) {
+    super(props);
+    this.options = props.options;
+    this.app = props.app;
+    this.options = props.options;
+    this.title = this.options.title || "Visa";
     this.abstract = this.options.abstract || "Välj vad du vill se i kartan";
     this.observer = Observer();
     this.observer.subscribe("layerAdded", layer => {});
     this.simpleLayerSwitcherModel = new SimpleLayerSwitcherModel({
-      map: spec.map,
-      app: spec.app,
+      map: props.map,
+      app: props.app,
       observer: this.observer
     });
     this.app.registerPanel(this);

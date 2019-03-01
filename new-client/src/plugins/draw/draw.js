@@ -37,7 +37,8 @@ class Draw extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.text = "Ritverktyg";
+    this.options = props.options;
+    this.title = this.options.title || "Rita";
     this.app = props.app;
     this.localObserver = Observer();
     this.drawModel = new DrawModel({
@@ -47,7 +48,6 @@ class Draw extends React.PureComponent {
       localObserver: this.localObserver
     });
     this.app.registerPanel(this);
-    this.title = "Rita";
   }
 
   renderWindow(mode) {
@@ -93,7 +93,7 @@ class Draw extends React.PureComponent {
           <ListItemIcon>
             <DrawIcon />
           </ListItemIcon>
-          <ListItemText primary={this.text} />
+          <ListItemText primary={this.title} />
         </ListItem>
         {this.renderWindow("panel")}
       </div>

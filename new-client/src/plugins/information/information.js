@@ -53,10 +53,9 @@ const styles = theme => {
 };
 
 class Information extends Component {
-  constructor(spec) {
-    super(spec);
-    this.options = spec.options;
-    this.text = this.options.title || "Om kartan";
+  constructor(props) {
+    super(props);
+    this.options = props.options;
     this.title = this.options.title || "Om kartan";
     this.abstract = this.options.abstract || "Visa mer information";
     this.state = {
@@ -138,7 +137,7 @@ class Information extends Component {
           <ListItemIcon>
             <InfoIcon />
           </ListItemIcon>
-          <ListItemText primary={this.text} />
+          <ListItemText primary={this.title} />
         </ListItem>
         {this.renderDialog()}
       </div>
