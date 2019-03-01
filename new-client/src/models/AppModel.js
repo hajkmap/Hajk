@@ -18,7 +18,7 @@ import { Zoom } from "ol/control";
 import { register } from "ol/proj/proj4";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
-import { Circle, Fill, Stroke, Style } from "ol/style.js";
+import { Icon, Fill, Stroke, Style } from "ol/style.js";
 
 var map;
 
@@ -302,15 +302,12 @@ class AppModel {
         fill: new Fill({
           color: "rgba(255, 0, 0, 0.1)"
         }),
-        image: new Circle({
-          radius: 4,
-          fill: new Fill({
-            color: "rgba(255, 0, 0, 0.1)"
-          }),
-          stroke: new Stroke({
-            color: "rgba(200, 0, 0, 0.7)",
-            width: 4
-          })
+        image: new Icon({
+          anchor: [0.5, 1],
+          scale: 0.15,
+          anchorXUnits: "fraction",
+          anchorYUnits: "fraction",
+          src: "marker.png"
         })
       })
     });
@@ -319,12 +316,17 @@ class AppModel {
     return this;
   }
 
+  getCenter(e) {
+    return [e[0] + Math.abs(e[2] - e[0]) / 2, e[1] + Math.abs(e[3] - e[1]) / 2];
+  }
+
   highlight(feature) {
     if (this.highlightSource) {
-      if (!feature) {
-        this.highlightSource.clear();
-      } else {
+      this.highlightSource.clear();
+      if (feature) {
         this.highlightSource.addFeature(feature);
+        let geom = feature.getGeometry();
+        map.getView().setCenter(this.getCenter(geom.getExtent()));
       }
     }
   }

@@ -396,7 +396,16 @@ class Window extends Component {
           <section className={classes.content}>
             <div className={classes.drawerPaperContent}>
               {features ? (
-                <FeatureInfo features={this.props.features} />
+                <FeatureInfo
+                  features={this.props.features}
+                  onDisplay={this.props.onDisplay}
+                  key={
+                    Array.isArray(this.props.features) &&
+                    this.props.features.length > 0
+                      ? this.props.features[0].getId()
+                      : 0
+                  }
+                />
               ) : (
                 children
               )}

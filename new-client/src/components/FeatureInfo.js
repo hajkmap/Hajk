@@ -40,25 +40,9 @@ class FeatureInfo extends React.Component {
     this.classes = this.props.classes;
   }
 
-  // FIXME: Replace. Refer to https://github.com/hajkmap/Hajk/issues/175
-  UNSAFE_componentWillReceiveProps(e) {
-    this.setState({
-      selectedIndex: 1
-    });
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return (
-      this.props.mapClickDataResult !== nextProps.mapClickDataResult ||
-      nextState.selectedIndex !== this.state.selectedIndex
-    );
-  }
-
-  componentDidUpdate() {
-    this.createOverlay();
+  componentDidMount() {
     var left = document.getElementById("step-left");
     var right = document.getElementById("step-right");
-
     if (left && right) {
       left.onclick = e => {
         this.changeSelectedIndex(-1);
@@ -113,18 +97,22 @@ class FeatureInfo extends React.Component {
 
   changeSelectedIndex(amount) {
     var eot = false;
-    if (
-      amount > 0 &&
-      this.props.mapClickDataResult.features.length === this.state.selectedIndex
-    ) {
+    if (amount > 0 && this.props.features.length === this.state.selectedIndex) {
       eot = true;
     } else if (amount < 0 && this.state.selectedIndex === 1) {
       eot = true;
     }
     if (!eot) {
-      this.setState({
-        selectedIndex: this.state.selectedIndex + amount
-      });
+      this.setState(
+        {
+          selectedIndex: this.state.selectedIndex + amount
+        },
+        () => {
+          this.props.onDisplay(
+            this.props.features[this.state.selectedIndex - 1]
+          );
+        }
+      );
     }
   }
 
@@ -168,6 +156,8 @@ class FeatureInfo extends React.Component {
     }
 
     var featureList = features.map((feature, i) => {
+      if (i === 0) this.props.onDisplay(feature);
+
       var markdown =
         feature.layer.get("layerInfo") &&
         feature.layer.get("layerInfo").information;
