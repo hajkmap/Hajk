@@ -342,52 +342,55 @@ class App extends Component {
   }
 
   renderPopup() {
-    var config = this.props.config.mapConfig.tools.find(
-      tool => tool.type === "infoclick"
-    );
-    if (config && config.options.displayPopup) {
-      return (
-        <Popup
-          mapClickDataResult={this.state.mapClickDataResult}
-          map={this.appModel.getMap()}
-          onClose={() => {
-            this.setState({
-              mapClickDataResult: undefined
-            });
-          }}
-        />
-      );
-    } else {
-      var open =
-        this.state.mapClickDataResult &&
-        this.state.mapClickDataResult.features &&
-        this.state.mapClickDataResult.features.length > 0;
-      var features =
-        this.state.mapClickDataResult && this.state.mapClickDataResult.features;
+    // TODO: Ensure that Popup mode for infoclick works.
+    // I'm temporarily disabling that option and send all infoclicks to display as Window.
 
-      return (
-        <Window
-          globalObserver={this.globalObserver}
-          title="Sökresultat"
-          open={open}
-          position="right"
-          mode="window"
-          width={350}
-          top={200}
-          features={features}
-          map={this.appModel.getMap()}
-          onDisplay={feature => {
-            this.appModel.highlight(feature);
-          }}
-          onClose={() => {
-            this.appModel.highlight(false);
-            this.setState({
-              mapClickDataResult: undefined
-            });
-          }}
-        />
-      );
-    }
+    // var config = this.props.config.mapConfig.tools.find(
+    //   tool => tool.type === "infoclick"
+    // );
+    // if (config && config.options.displayPopup) {
+    //   return (
+    //     <Popup
+    //       mapClickDataResult={this.state.mapClickDataResult}
+    //       map={this.appModel.getMap()}
+    //       onClose={() => {
+    //         this.setState({
+    //           mapClickDataResult: undefined
+    //         });
+    //       }}
+    //     />
+    //   );
+    // } else {
+    var open =
+      this.state.mapClickDataResult &&
+      this.state.mapClickDataResult.features &&
+      this.state.mapClickDataResult.features.length > 0;
+    var features =
+      this.state.mapClickDataResult && this.state.mapClickDataResult.features;
+
+    return (
+      <Window
+        globalObserver={this.globalObserver}
+        title="Sökresultat"
+        open={open}
+        position="right"
+        mode="window"
+        width={350}
+        top={200}
+        features={features}
+        map={this.appModel.getMap()}
+        onDisplay={feature => {
+          this.appModel.highlight(feature);
+        }}
+        onClose={() => {
+          this.appModel.highlight(false);
+          this.setState({
+            mapClickDataResult: undefined
+          });
+        }}
+      />
+    );
+    //}
   }
 
   renderMobile() {
