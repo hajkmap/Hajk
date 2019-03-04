@@ -102,7 +102,8 @@ fetch("appConfig.json", fetchConfig)
                 var config = {
                   appConfig: appConfig,
                   layersConfig: layersConfig,
-                  mapConfig: mapConfig
+                  mapConfig: mapConfig,
+                  urlParams: new URLSearchParams(window.location.search)
                 };
                 ReactDOM.render(
                   <MuiThemeProvider theme={getTheme(config, customTheme)}>

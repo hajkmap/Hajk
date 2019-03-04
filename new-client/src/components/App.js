@@ -174,11 +174,14 @@ const styles = theme => {
 class App extends Component {
   constructor(props) {
     super(props);
+    let cleanVersion =
+      props.config.urlParams.get("clean") !== null ? true : false;
     this.state = {
       alert: false,
       loading: false,
       mapClickDataResult: {},
-      searchVisible: window.innerWidth > 1280
+      searchVisible: window.innerWidth > 1280,
+      cleanVersion
     };
     this.globalObserver = new Observer();
     this.appModel = new AppModel(props.config, this.globalObserver);
