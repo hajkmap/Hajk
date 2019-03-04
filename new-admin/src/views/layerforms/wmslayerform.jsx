@@ -343,7 +343,6 @@ class WMSLayerForm extends Component {
           };
         });
       }
-      console.log(addedLayersInfo);
       this.setState({
         addedLayers: layer.layers,
         addedLayersInfo: addedLayersInfo
