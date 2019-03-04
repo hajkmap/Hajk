@@ -220,10 +220,13 @@ article fieldset > span > div {
   align-items: center;
 }
 
-.config-layer-list .mainBox {
-  overflow-y: scroll;
-  white-space: nowrap;
+.config-layer-list .main-box {
   width: 230px;
+  padding-right: 5px;
+}
+
+.config-layer-list .options-box {
+  display: flex;
 }
 
 .config-layer-list li i {
@@ -333,7 +336,7 @@ body.dragging * {
 
 .tab-pane aside {
   max-height: 100vh;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .expanded-at-start {

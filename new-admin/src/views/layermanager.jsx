@@ -501,12 +501,12 @@ class Manager extends Component {
 
       return (
         <li onClick={e => this.loadLayer(e, layer)} key={"layer_" + i}>
-          <div className="mainBox">
+          <div className="main-box">
             <span>
               {layer.caption} {displayType}
             </span>
           </div>
-          <div className="optionsBox">
+          <div className="options-box">
             <i
               title="Info om lager"
               onClick={e => this.infoAboutLayer(e, layer)}
