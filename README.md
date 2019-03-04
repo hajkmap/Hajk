@@ -6,7 +6,7 @@
 1. Switch branch: `git checkout -b develop-new-client`.
 1. Hajk 3 client resides inside `new-client`, so you can do: `cd new-client` and then `npm install`.
 1. It is highly recommended to use Hajk 3's new admin (`cd ../new-admin && npm i && npm run build` to build admin to the `new-admin/build` directory).
-1. The new client and admin are accompanied by new version of both .NET apps. Open both projects in Visual Studio (in `mapservice` and `util` respectivly), then Build and Publish.
+1. The new client and admin are accompanied by new version of both .NET apps. Open both projects in Visual Studio (in `mapservice` and `util`), then Build and Publish.
 1. Deploy to IIS, make sure that everything is running (new admin, MapService and util).
 1. Now, go back to `new-client` and take a look in `public/appConfig.json`. Make sure that `mapserviceBase` is a valid URL to a running instance of MapService that is reachable from your computer (preferably the one you've just built and published. MapService is the name of the .NET application that resides inside the `backend` directory. You can also setup a proxy (there's one in the `util` that you've just published).
 1. With everything in place, go to `new-client` and do `npm start`. This will fire up the built in Node.js server and open a new browser window with your application running in it (on http://localhost:3000 by default).
