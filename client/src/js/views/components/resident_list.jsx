@@ -23,43 +23,47 @@
 var ResidentList = {
 
   getInitialState: function () {
+    this.config = this.props.model.get("residentList");
+
     return {
       visible: false,
-      minAge: 18,
+      minAge: this.props.model.get("residentList")["minAge"] || 18,
       includeAge: false,
       includeBirthDate: false,
       includeGender: false,
       fetchingExcel: false,
       excelIsReady: false,
-      excelUrl: ""
+      excelUrl: "",
+      errorMessage: null
     };
   },
 
   getResidentData: function(callback) {
-    var hits = this.props.model.get("items");
+    var hits = this.props.model.get("items"),
+        mapProjection = this.props.model.get("map").getView().getProjection().getCode();
+
     if (!hits || hits.length === 0) {
        alert("Inga fastigheter eller adresser valda");
        return;
     }
 
     var filters = [];
-    //Do we need to check if it's Fastighet/Address layer?
     hits.forEach(function(l) {
       l.hits.forEach(function(h) {
-        filters.push(new ol.format.filter.Intersects("geom", h.getGeometry(), "EPSG:3007"))
-      });
-    });
+        filters.push(new ol.format.filter.Intersects(this.config.residentDataLayer.geometryColumn, h.getGeometry(), mapProjection))
+      }.bind(this));
+    }.bind(this));
 
     var featureRequest = new ol.format.WFS().writeGetFeature({
-      srsName: 'EPSG:3007',
-      featureTypes: ['ext_skv_v1:kir_folk'],
+      srsName: mapProjection,
+      featureTypes: [this.config.residentDataLayer.layerName],
       outputFormat: 'application/json',
       filter: ol.format.filter.or.apply(null, filters)
     });
 
-    this.setState({ fetchingExcel: true, excelIsReady: false, excelUrl: "" });
+    this.setState({ fetchingExcel: true, excelIsReady: false, excelUrl: "", errorMessage: null });
     $.ajax({
-      url: "https://kommungis-utv.varberg.se/util/geoserver/wfs",
+      url: this.config.residentDataLayer.url,
       method: 'POST',
       contentType: 'application/xml',
       xhrFields: { withCredentials: true },
@@ -72,31 +76,63 @@ var ResidentList = {
         }
       }.bind(this),
       error: function(message) {
-        this.setState({ fetchingExcel: false });
+        this.setState({
+          fetchingExcel: false,
+          errorMessage: "Kunde inte hämta invånarinformation"
+        });
 
         console.error(message);
-      }
+      }.bind(this)
     });
   },
 
   generateExcel: function(features, callback) {
-    var columns = ["fonetnamn", "adress", "postnr", "ort", "personnr"];
-    if (this.state.includeGender) {
-      columns.push("koen");
+    var _config = this.config.residentDataLayer,
+        rows = [],
+        columns = [_config.namnDisplayName, _config.adressDisplayName, _config.postortDisplayName, _config.postnrDisplayName];
+
+    if (this.state.includeAge) {
+      columns.push(_config.alderDisplayName);
     }
 
-    var rows = [];
+    if (this.state.includeGender) {
+      columns.push(_config.koenDisplayName);
+    }
+
+    if (this.state.includeBirthDate) {
+      columns.push(_config.fodelsedatumDisplayName);
+    }
+
     features.forEach(function(f) {
       var row = [];
-      columns.forEach(function(c) {
-        row.push(f.properties[c]);
-      });
+      row.push(f.properties[_config.namnFieldName]);
+      row.push(f.properties[_config.adressFieldName]);
+      row.push(f.properties[_config.postortFieldName]);
+      row.push(f.properties[_config.postnrFieldName]);
+
+      var birthDate = this.dateFromPersonalNumber(f.properties[_config.alderFieldName]);
+      var age = new Date().getFullYear() - parseInt(birthDate.substring(0, 4));
+      if (age < this.state.minAge) {
+        return;
+      }
+
+      if (this.state.includeAge) {
+        row.push(f.properties[_config.alderFieldName]);
+      }
+
+      if (this.state.includeGender) {
+        row.push(f.properties[_config.koenFieldName]);
+      }
+
+      if (this.state.includeBirthDate) {
+        row.push(this.dateFromPersonalNumber(f.properties[_config.fodelsedatumFieldName]));
+      }
 
       rows.push(row);
-    });
+    }.bind(this));
 
     $.ajax({
-      url: HAJK2.servicePath + "/fir/residentlist",
+      url: HAJK2.servicePath + this.config.excelExportUrl,
       method: "POST",
       format: "json",
       data: { json: JSON.stringify({ "columns": columns, "rows": rows }) },
@@ -105,14 +141,22 @@ var ResidentList = {
           this.setState({
             fetchingExcel: false,
             excelIsReady: true,
-            excelUrl: response
+            excelUrl: response,
+            errorMessage: null
           });
         }
       }.bind(this),
       error: function() {
-        this.setState({ fetchingExcel: false });
+        this.setState({
+          fetchingExcel: false,
+          errorMessage: "Kunde inte skapa Excel-fil"
+        });
       }.bind(this)
     });
+  },
+
+  dateFromPersonalNumber: function(personalNumber) {
+    return personalNumber.substring(0, personalNumber.length - 4);
   },
 
   exportToEcxel: function() {
@@ -134,10 +178,9 @@ var ResidentList = {
               <fieldset>
                 <legend>Inkludera i förteckning:</legend>
 
-                <label htmlFor="min-age">Minimiålder</label>
+                <label htmlFor="min-age">Ange minsta ålder</label>
                 <input type="text" id="min-age" defaultValue={this.state.minAge}
-                  onChange={(e) => this.setState({ minAge: e.target.value })} />
-                <br />
+                  onChange={(e) => this.setState({ minAge: e.target.value })} /><br />
 
                 <input type="checkbox" id="cbx-age" defaultChecked={this.state.includeAge}
                   onChange={(e) => this.setState({ includeAge: e.target.checked })} />
@@ -166,6 +209,10 @@ var ResidentList = {
 
             {
               this.state.excelIsReady ? <a href={this.state.excelUrl} target="_blank">Ladda ner</a> : ""
+            }
+
+            {
+              this.state.errorMessage != null ? <div className="error-message">{this.state.errorMessage}</div> : ""
             }
         </div>
     );
