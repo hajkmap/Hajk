@@ -196,7 +196,7 @@ namespace MapService.Components.MapExport {
                         {
                             if (!ContinueOnError)
                             {
-                                throw new RenderException("Bad Content Type, WMS server dit not return an image.");
+                                throw new RenderException("Bad Content Type, WMS server did not return an image.");
                             }
                         }
                     }
@@ -205,6 +205,7 @@ namespace MapService.Components.MapExport {
             }
             catch (WebException webEx)
             {
+                _log.ErrorFormat("Error in DpiWmsLayer.Render using URL: {0}, Error: {1}", myUri, webEx.Message);
                 if (!ContinueOnError)
                     throw (new RenderException(
                         "There was a problem connecting to the WMS server when rendering layer '" + LayerName + "'",
@@ -212,6 +213,7 @@ namespace MapService.Components.MapExport {
             }
             catch (Exception ex)
             {
+                _log.ErrorFormat("Error in DpiWmsLayer.Render using URL: {0}, Error: {1}", myUri, ex.Message);
                 if (!ContinueOnError)
                     throw (new RenderException("There was a problem rendering layer '" + LayerName + "'", ex));
             }
