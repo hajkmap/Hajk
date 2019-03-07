@@ -74,7 +74,9 @@ class MapSwitcher extends React.PureComponent {
     // work in the App component, so that changing the value of this.appModel.config.activeMap
     // would dynamically reload configuration as needed.
     // But for now, simple redirection will do.
-    window.location.assign(`${window.location.origin}/?m=${selectedMap}`);
+    window.location.assign(
+      `${window.location.origin}${window.location.pathname}?m=${selectedMap}`
+    );
 
     // Not used as we change window.location. But in a better solution, we wouldn't reload the app,
     // and then code below would be needed.
