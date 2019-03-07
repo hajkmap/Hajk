@@ -11,9 +11,12 @@ const fetchConfig = {
 };
 
 class MapSwitcher extends React.PureComponent {
+  // Will hold map configs
+  maps = [];
+
   state = {
-    maps: [],
-    anchorEl: null
+    anchorEl: null,
+    selectedIndex: null
   };
 
   constructor(props) {
@@ -22,13 +25,20 @@ class MapSwitcher extends React.PureComponent {
   }
 
   componentDidMount() {
-    // defaultMap from config is NOT the same as currently active map. How do we get that!?
-    // let { proxy, mapserviceBase, defaultMap } = this.appModel.config.appConfig;
     let { proxy, mapserviceBase } = this.appModel.config.appConfig;
+    let { activeMap } = this.appModel.config;
+
     fetch(`${proxy}${mapserviceBase}/config/userspecificmaps`, fetchConfig)
       .then(resp => resp.json())
       .then(maps => {
-        this.setState({ maps });
+        // Save fetched map configs to global variable
+        this.maps = maps;
+
+        // Set selectedIndex to currently selected map
+        let selectedIndex = this.maps.findIndex(map => {
+          return map.mapConfigurationName === activeMap;
+        });
+        this.setState({ selectedIndex });
       })
       .catch(err => {
         throw new Error(err);
@@ -37,9 +47,14 @@ class MapSwitcher extends React.PureComponent {
 
   renderMenuItems = () => {
     let menuItems = [];
-    this.state.maps.forEach((item, index) => {
+    this.maps.forEach((item, index) => {
       menuItems.push(
-        <MenuItem key={index} onClick={this.handleClick}>
+        <MenuItem
+          key={index}
+          // disabled={index === this.state.selectedIndex}
+          selected={index === this.state.selectedIndex}
+          onClick={event => this.handleMenuItemClick(event, index)}
+        >
           {item.mapConfigurationTitle}
         </MenuItem>
       );
@@ -47,9 +62,23 @@ class MapSwitcher extends React.PureComponent {
     return menuItems;
   };
 
-  handleClick = e => {
-    console.log("I'd really want to change map config now…", e.currentTarget);
-    this.setState({ anchorEl: e.currentTarget });
+  // Show dropdown menu, anchored to the element clicked
+  handleClick = event => {
+    this.setState({ anchorEl: event.currentTarget });
+  };
+
+  handleMenuItemClick = (event, index) => {
+    let selectedMap = this.maps[index].mapConfigurationName;
+
+    // TODO: A better solution then redirecting is needed. It requires more
+    // work in the App component, so that changing the value of this.appModel.config.activeMap
+    // would dynamically reload configuration as needed.
+    // But for now, simple redirection will do.
+    window.location.assign(`${window.location.origin}/?m=${selectedMap}`);
+
+    // Not used as we change window.location. But in a better solution, we wouldn't reload the app,
+    // and then code below would be needed.
+    // this.setState({ anchorEl: null, selectedIndex: index });
   };
 
   handleClose = () => {
