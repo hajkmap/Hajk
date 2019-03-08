@@ -597,7 +597,8 @@ class DrawModel {
     });
     if (features.length > 0) {
       postData = createXML(transformed, "ritobjekt");
-      fetch(this.exportUrl, {
+
+      fetch(this.app.config.appConfig.searchProxy + this.exportUrl, {
         method: "POST",
         credentials: "same-origin",
         headers: {
@@ -881,7 +882,6 @@ class DrawModel {
     if (type === "geometry") {
       type = feature.getProperties().geometryType;
     }
-    console.log("Update text", type);
     switch (type) {
       case "LineString":
         return this.displayText

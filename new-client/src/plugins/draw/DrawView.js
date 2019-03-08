@@ -253,7 +253,7 @@ class DrawView extends React.PureComponent {
               reader.onload = () => {
                 this.onCloseUploadDialog();
                 this.props.model.import(reader.result, error => {
-                  console.log("Import error", error);
+                  console.error("Import error", error);
                 });
               };
               if (file) {
