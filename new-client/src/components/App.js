@@ -12,7 +12,8 @@ import { Toolbar as MUIToolbar } from "@material-ui/core";
 import { SnackbarProvider, withSnackbar } from "notistack";
 import classNames from "classnames";
 import Toolbar from "./Toolbar.js";
-import Popup from "./Popup.js";
+// TODO: Fix Popup
+//import Popup from "./Popup.js";
 import Window from "./Window.js";
 import MapSwitcher from "./MapSwitcher";
 import Alert from "./Alert";
@@ -174,14 +175,11 @@ const styles = theme => {
 class App extends Component {
   constructor(props) {
     super(props);
-    let cleanVersion =
-      props.config.urlParams.get("clean") !== null ? true : false;
     this.state = {
       alert: false,
       loading: false,
       mapClickDataResult: {},
-      searchVisible: window.innerWidth > 1280,
-      cleanVersion
+      searchVisible: window.innerWidth > 1280
     };
     this.globalObserver = new Observer();
     this.appModel = new AppModel(props.config, this.globalObserver);
