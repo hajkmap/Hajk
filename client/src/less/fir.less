@@ -1,0 +1,204 @@
+.plusMinus{
+  font-size: 10px;
+}
+.faTrash{
+  padding: 3px;
+}
+
+.plusMinusIkon{
+  font-size: 16px
+}
+
+.search-tools .search-options {
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.68);
+  margin: 2px;
+  margin-top: -15px;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.search-tools .hidden {
+  display: none;
+}
+
+.search-tools h3 {
+  margin: 10px 0px;
+}
+
+.search-tools .panel-row label {
+  font-weight: normal;
+  display: inline-block;
+  width: 110px;
+}
+
+.search-tools .label {
+  background: #FFFFFF;
+  color: black;
+  border-radius: 50px;
+  padding: 5px;
+  min-width: 23px;
+  display: inline-block;
+  text-align: center;
+  font-weight: 600;
+  margin-left: 5px;
+  top: -2px;
+  position: relative;
+}
+
+.search-tools .group {
+  background: @color-yellow;
+  padding: 10px;
+  margin: 7px -5px;
+  color: white;
+}
+
+.search-tools .group + div {
+  background: #eee;
+  margin: -5px;
+  padding: 5px;
+}
+
+.search-tools .group + div > div {
+  padding: 5px;
+  border-bottom: 1px solid #FFF;
+  cursor: pointer;
+}
+
+.search-tools .group + div > div:hover {
+  background: #E2E2E2;
+}
+
+.search-tools .group + div > div.selected {
+  background: #ccc;
+}
+
+.search-tools .group + div > div:last-child {
+  border-bottom: none;
+}
+
+.search-tools .info-text {
+  font-style: italic;
+}
+
+.icon-button {
+  position: relative;
+  top: -18px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-bottom: 5px;
+  padding-top: 10px;
+  i {
+    background-size: 25px 25px;
+    width: 25px;
+    height: 25px;
+    display: inline-block;
+  }
+  i.excel {
+    background-image: url("icons/excel.png");
+  }
+  i.kml {
+    background-image: url("icons/kml.png");
+  }
+}
+
+.search-bar-holder {
+  position: fixed;
+  width: 400px;
+  right: 69px;
+  top: .5em;
+  padding: 2px;
+  z-index: 100;
+  @media only screen and (max-device-width : 480px) {
+    right: 50px;
+    width: 200px;
+  }
+  .search-tools {
+    height: 100%;
+    //overflow: auto;
+  }
+  .firSearch-results {
+    padding: 10px;
+    border: 1px solid #ccc;
+    background: deeppink;
+    margin-top: -5px;
+    margin-left: 2px;
+    margin-right: 2px;
+    padding-top: 0;
+  }
+  .result-list {
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
+.selection-toolbar {
+  margin-bottom: 15px;
+  border-radius: 0px;
+}
+
+.fa-btn {
+  cursor: pointer;
+}
+
+.firSearch-results {
+  user-select: none;
+}
+
+#bufferInput{
+  width: 50px;
+}
+
+#bufferSearchingInput{
+  width: 50px;
+}
+
+.hittaGrannarMedBufferRow{
+  display: inline-block;
+}
+
+#FIRSearchMinimizeButton{
+  width: 35px;
+}
+
+#FIRHittaGrannarMinimizeButton{
+  width: 35px;
+}
+
+#FIRCreateMinimizeButton{
+  width: 35px;
+}
+
+// infoknapp
+
+#instructionsTextFirsokning{
+  display: none;
+}
+
+#instructionsTextFirhittaGrannar{
+  display: none;
+}
+
+#instructionsTextFirskapaFastighetsforteckning{
+  display: none;
+}
+
+#instructionsTextFir.panel-body-instruction{
+  font-size: 15px;
+  color: rgb(255, 0, 102);
+}
+
+@media only screen and (max-device-width: 736px) {
+  #instructionsTextFir.panel-body-instruction{
+    font-size: 12px;
+    color: rgb(255, 0, 102);
+  }
+}
+
+.btn-info-fir{
+  background: transparent;
+  border: none;
+}

@@ -1,16 +1,15 @@
-module.exports = function(grunt) {
-
+module.exports = function (grunt) {
   grunt.initConfig({
 
     pkg: grunt.file.readJSON('package.json'),
 
     licence_text: grunt.file.read('licence_header.txt'),
-    
+
     clean: [
       'dist',
       'node_modules'
     ],
-    
+
     browserify: {
       debug: {
         options: {
@@ -22,19 +21,19 @@ module.exports = function(grunt) {
           }
         },
         src: ['src/**/*.js', 'src/**/*.jsx'],
-        dest: 'dist/js/<%= pkg.name %>.js',
+        dest: 'dist/js/<%= pkg.name %>.js'
       },
       dist: {
         options: {
           transform: [
-            ['babelify', {presets: ['es2015', 'react']}],
+            ['babelify', {presets: ['es2015', 'react']}]
           ],
           browserifyOptions: {
             debug: false
           }
         },
         src: ['src/**/*.js', 'src/**/*.jsx'],
-        dest: 'dist/js/<%= pkg.name %>.min.js',
+        dest: 'dist/js/<%= pkg.name %>.min.js'
       }
     },
 
@@ -60,9 +59,9 @@ module.exports = function(grunt) {
     },
 
     env: {
-        prod: {
-            NODE_ENV: 'production'
-        }
+      prod: {
+        NODE_ENV: 'production'
+      }
     },
 
     usebanner: {
@@ -74,8 +73,8 @@ module.exports = function(grunt) {
         },
         files: {
           src: [
-            //'src/**/*.js',
-            //'src/**/*.jsx'
+            // 'src/**/*.js',
+            // 'src/**/*.jsx'
             'dist/js/<%= pkg.name %>.min.js'
           ]
         }
@@ -86,27 +85,29 @@ module.exports = function(grunt) {
       main: {
         files: [
           {
-            src: "src/static/config.json",
-            dest: "dist/config.json"
+            src: 'src/static/config.json',
+            dest: 'dist/config.json'
           },
           {
-            src: "src/static/index.html",
-            dest: "dist/index.html"
+            src: 'src/static/index.html',
+            dest: 'dist/index.html'
           },
           {
-            src: "src/static/debug.html",
-            dest: "dist/debug.html"
+            src: 'src/static/debug.html',
+            dest: 'dist/debug.html'
           },
           {
-            cwd: "src/static/fonts",
-            src: "**/*",
-            dest: "dist/fonts", expand: true
+            cwd: 'src/static/fonts',
+            src: '**/*',
+            dest: 'dist/fonts',
+            expand: true
           },
           {
-            cwd: "node_modules/font-awesome/fonts",
-            src: "*",
-            dest: "dist/fonts", expand: true
-          },
+            cwd: 'node_modules/font-awesome/fonts',
+            src: '*',
+            dest: 'dist/fonts',
+            expand: true
+          }
         ]
       }
     },

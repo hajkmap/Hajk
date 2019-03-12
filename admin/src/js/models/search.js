@@ -34,8 +34,8 @@ var search = Model.extend({
     $.ajax(url, {
       success: data => {
         data.wfslayers.sort((a, b) => {
-          var d1 = parseInt(a.date)
-          ,   d2 = parseInt(b.date);
+          var d1 = parseInt(a.date),
+            d2 = parseInt(b.date);
           return d1 === d2 ? 0 : d1 < d2 ? 1 : -1;
         });
         this.set('layers', data.wfslayers);
@@ -58,7 +58,7 @@ var search = Model.extend({
     });
   },
 
-  updateLayer: function(layer, callback) {
+  updateLayer: function (layer, callback) {
     $.ajax({
       url: this.get('config').url_layer_settings,
       method: 'PUT',
@@ -75,7 +75,7 @@ var search = Model.extend({
 
   removeLayer: function (layer, callback) {
     $.ajax({
-      url: this.get('config').url_layer_settings + "/" + layer.id,
+      url: this.get('config').url_layer_settings + '/' + layer.id,
       method: 'DELETE',
       contentType: 'application/json',
       success: () => {
@@ -88,12 +88,12 @@ var search = Model.extend({
   },
 
   prepareProxyUrl: function (url) {
-    return this.get('config').url_proxy ?
-      this.get('config').url_proxy + "/" + url.replace(/http[s]?:\/\//, '') :
-      url;
+    return this.get('config').url_proxy
+      ? this.get('config').url_proxy + '/' + url.replace(/http[s]?:\/\//, '')
+      : url;
   },
 
-  getLayerDescription: function(url, layer, callback) {
+  getLayerDescription: function (url, layer, callback) {
     url = this.prepareProxyUrl(url);
     $.ajax(url, {
       data: {
@@ -101,20 +101,17 @@ var search = Model.extend({
         typename: layer
       },
       success: data => {
-        var parser = new X2JS()
-        ,   xmlstr = data.xml ? data.xml : (new XMLSerializer()).serializeToString(data)
-        ,   apa = parser.xml2js(xmlstr);
+        var parser = new X2JS(),
+          xmlstr = data.xml ? data.xml : (new XMLSerializer()).serializeToString(data),
+          apa = parser.xml2js(xmlstr);
         try {
           var props = apa.schema.complexType.complexContent.extension.sequence.element.map(a => {
             return {
               name: a._name,
               localType: a._type ? a._type.replace(a.__prefix + ':', '') : ''
-            }
+            };
           });
-          if (props)
-            callback(props);
-          else
-            callback(false);
+          if (props) { callback(props); } else { callback(false); }
         } catch (e) {
           callback(false);
         }
@@ -147,14 +144,14 @@ var search = Model.extend({
         callback(false);
       }
     });
-  },
+  }
 
   /**
    * Hämtar sökbara lager från backend
    */
   // getWFSLayers: function (url, callback) {
   //   $.ajax(url), {
-  //     data: 
+  //     data:
   //   }
   // }
 

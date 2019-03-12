@@ -34,8 +34,8 @@ var edit = Model.extend({
       success: data => {
         if (data.wfstlayers) {
           data.wfstlayers.sort((a, b) => {
-            var d1 = parseInt(a.date)
-            ,   d2 = parseInt(b.date);
+            var d1 = parseInt(a.date),
+              d2 = parseInt(b.date);
             return d1 === d2 ? 0 : d1 < d2 ? 1 : -1;
           });
         }
@@ -59,7 +59,7 @@ var edit = Model.extend({
     });
   },
 
-  updateLayer: function(layer, callback) {
+  updateLayer: function (layer, callback) {
     $.ajax({
       url: this.get('config').url_layer_settings,
       method: 'PUT',
@@ -76,7 +76,7 @@ var edit = Model.extend({
 
   removeLayer: function (layer, callback) {
     $.ajax({
-      url: this.get('config').url_layer_settings + "/" + layer.id,
+      url: this.get('config').url_layer_settings + '/' + layer.id,
       method: 'DELETE',
       contentType: 'application/json',
       success: () => {
@@ -89,12 +89,12 @@ var edit = Model.extend({
   },
 
   prepareProxyUrl: function (url) {
-    return this.get('config').url_proxy ?
-      this.get('config').url_proxy + "/" + url.replace(/http[s]?:\/\//, '') :
-      url;
+    return this.get('config').url_proxy
+      ? this.get('config').url_proxy + '/' + url.replace(/http[s]?:\/\//, '')
+      : url;
   },
 
-  getLayerDescription: function(url, layer, callback) {
+  getLayerDescription: function (url, layer, callback) {
     url = this.prepareProxyUrl(url);
     $.ajax(url, {
       data: {
@@ -104,7 +104,7 @@ var edit = Model.extend({
       },
       success: data => {
         if (data.featureTypes && data.featureTypes[0]) {
-          callback(data.featureTypes[0].properties)
+          callback(data.featureTypes[0].properties);
         } else {
           callback(false);
         }

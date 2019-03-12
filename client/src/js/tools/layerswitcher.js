@@ -53,8 +53,8 @@ var LayerSwitcherModelProperties = {
   backgroundSwitcherBlack: true,
   backgroundSwitcherWhite: true,
   toggleAllButton: true,
-  dropdownThemeMaps : false,
-  themeMapHeaderCaption : 'Temakarta'
+  dropdownThemeMaps: false,
+  themeMapHeaderCaption: 'Temakarta'
 };
 
 /**
@@ -86,10 +86,10 @@ var LayerSwitcherModel = {
    * @instance
    * @param {object[]} groups
    */
-  setExpanded: function recursive(groups) {
+  setExpanded: function recursive (groups) {
     groups.forEach(group => {
-      if (!this.get("group_" + group.id)) {
-        this.set("group_" + group.id, group.expanded ? "visible" : "hidden");
+      if (!this.get('group_' + group.id)) {
+        this.set('group_' + group.id, group.expanded ? 'visible' : 'hidden');
         if (group.hasOwnProperty('groups')) {
           recursive.call(this, group.groups);
         }
@@ -97,12 +97,12 @@ var LayerSwitcherModel = {
     });
   },
 
-  setThemeMap : function (configurationName, configurationTitle) {
+  setThemeMap: function (configurationName, configurationTitle) {
     HAJK2.configFile = configurationName;
     HAJK2.configTitle = configurationTitle;
     HAJK2.start({
-      configPath: "/mapservice/config/" + configurationName,
-      layersPath: "/mapservice/config/layers"
+      configPath: HAJK2.servicePath + '/config/' + configurationName,
+      layersPath: HAJK2.servicePath + '/config/layers'
     }, function (status, message) {
       if (!status) {
         document.write(message);
@@ -110,14 +110,13 @@ var LayerSwitcherModel = {
     });
   },
 
-
   loadThemeMaps: function (callback) {
     $.ajax({
-      url: "/mapservice/config/userspecificmaps",
+      url: HAJK2.servicePath + '/config/userspecificmaps',
       method: 'GET',
       contentType: 'application/json',
       success: (data) => {
-         callback(data);
+        callback(data);
       },
       error: (message) => {
         callback(message);
@@ -129,15 +128,15 @@ var LayerSwitcherModel = {
    * Set visibility for all layers to false.
    * @instance
    */
-   toggleAllOff() {
-     var baseLayers = this.getBaseLayers();
-     this.get('layerCollection').forEach(layer => {
-       var isBaseLayer = baseLayers.find(l => l.id === layer.id);
-       if (!isBaseLayer) {
-         layer.setVisible(false);
-       }
-     });
-   },
+  toggleAllOff () {
+    var baseLayers = this.getBaseLayers();
+    this.get('layerCollection').forEach(layer => {
+      var isBaseLayer = baseLayers.find(l => l.id === layer.id);
+      if (!isBaseLayer) {
+        layer.setVisible(false);
+      }
+    });
+  },
 
   /**
    * Get base layers.

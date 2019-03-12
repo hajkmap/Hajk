@@ -1,4 +1,4 @@
-{
+﻿{
   "version": "1.0.5",
   "projections": [
     {
@@ -409,6 +409,75 @@
       "type": "bookmark",
       "options": {},
       "index": 0
+    },
+    {
+      "type": "fir",
+      "options": {
+        "toolbar": "bottom",
+        "maxZoom": 14,
+        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
+        "kmlImportUrl": "/mapservice/import/kml",
+        "kmlExportUrl": "/mapservice/export/kml",
+        "excelExportUrl": "/mapservice/fir/realEstateOwnerlist",
+        "displayPopup": false,
+        "firSelectionTools": true,
+        "base64Encode": false,
+        "instruction": "",
+        "filterVisible": false,
+        "infoKnappLogo": "/assets/icons/hjalpknapp_FIR.png",
+        "instructionSokning": "",
+        "instructionHittaGrannar": "",
+        "instructionSkapaFastighetsforteckning": "",
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ],
+        "popupOffsetY": 0,
+        "visibleForGroups": [],
+        "layers": [
+          {
+            "id": "1246",
+            "fnrField": "nyckel",
+            "omradeField": "omrade",
+            "visibleForGroups": []
+          },
+          {
+            "id": "1247",
+            "fnrField": "nyckel",
+            "omradeField": "omrade",
+            "visibleForGroups": []
+          },
+          {
+            "id": "1248",
+            "fnrField": "nyckel",
+            "omradeField": "omrade",
+            "visibleForGroups": []
+          }
+        ],
+        "realEstateLayer": {
+          "id": "1246",
+          "omradeField": "omrade",
+          "fnrField": "nyckel",
+          "labelField": "block_enhet",
+          "maxFeatures": "10000",
+          "instructionVidSokresult": ""
+        },
+        "realEstateWMSLayer": {
+          "id": "1225",
+          "fnrField": "nyckel"
+        },
+        "colorResult": "rgba(255,255,0,0.3)",
+        "colorResultStroke": "rgba(0,0,0,0.6)",
+        "colorHighlight": "rgba(0,0,255,0.2)",
+        "colorHighlightStroke": "rgba(0,0,0,0.6)",
+        "colorHittaGrannarBuffer": "rgba(50,200,200,0.4)",
+        "colorHittaGrannarBufferStroke": "rgba(0,0,0,0.2)"
+      },
+      "index": 13
     }
   ],
   "map": {
@@ -457,6 +526,7 @@
     "colors": {
       "primaryColor": "#0affc2",
       "secondaryColor": "#ffffff"
-    }
+    },
+    "geoserverLegendOptions": ""
   }
 }

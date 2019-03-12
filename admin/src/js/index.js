@@ -31,28 +31,26 @@ import find from 'array.prototype.find';
 
 find.shim();
 
-(function() {
-	
-  "use strict";
+(function () {
+  'use strict';
 
-  function create_routes(routes, application_model) {
+  function create_routes (routes, application_model) {
     var route_settings = {
       routes: {}
     };
     routes.forEach(route => {
       if (route.default) {
-        route_settings.routes[""] = route.name;
+        route_settings.routes[''] = route.name;
       }
-      route_settings.routes["!/" + route.name] = route.name;
+      route_settings.routes['!/' + route.name] = route.name;
       route_settings[route.name] = () => {
-        application_model.set('content', route.name)
+        application_model.set('content', route.name);
       };
-	});
+    });
     return route_settings;
   }
 
-  function load(config) {
-
+  function load (config) {
     var application_model = new ApplicationModel();
 
     var application_element = React.createElement(ApplicationView, {
@@ -69,13 +67,12 @@ find.shim();
   }
 
   $.getJSON('config.json').done((config) => {
-	try {
-		load(config);
-
-	} catch (error) {
-		console.log("error", error);
-	}
+    try {
+      load(config);
+    } catch (error) {
+      console.log('error', error);
+    }
   }).fail((xhr) => {
-	  console.log("xhr fail", xhr);
+	  console.log('xhr fail', xhr);
   });
 }());

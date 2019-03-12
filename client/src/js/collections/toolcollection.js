@@ -20,23 +20,25 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var Tool          = require('tools/tool')
-,   LayerSwitcher = require('tools/layerswitcher')
-,   InfoClick     = require('tools/infoclick')
-,   Bookmark      = require('tools/bookmark')
-,   Search        = require('tools/search')
-,   Coordinates   = require('tools/coordinates')
-,   Export        = require('tools/export')
-,   Draw          = require('tools/draw')
-,   Edit          = require('tools/edit')
-,   Anchor        = require('tools/anchor')
-,   Buffer        = require('tools/buffer')
-,   StreetView    = require('tools/streetview')
-,   Information   = require('tools/information')
-,   Location      = require('tools/location')
-,   Routing       = require('tools/routing')
-,   Preset        = require('tools/preset')
-,   Measure        = require('tools/measure');
+var Tool = require('tools/tool'),
+  LayerSwitcher = require('tools/layerswitcher'),
+  InfoClick = require('tools/infoclick'),
+  Bookmark = require('tools/bookmark'),
+  Search = require('tools/search'),
+  Coordinates = require('tools/coordinates'),
+  Export = require('tools/export'),
+  Draw = require('tools/draw'),
+  Edit = require('tools/edit'),
+  Anchor = require('tools/anchor'),
+  Buffer = require('tools/buffer'),
+  StreetView = require('tools/streetview'),
+  Information = require('tools/information'),
+  Location = require('tools/location'),
+  Routing = require('tools/routing'),
+  Fir = require('tools/fir'),
+  Preset = require('tools/preset'),
+  Measure = require('tools/measure'),
+  MailExport = require('tools/mailexport');
 
 /**
  * @description
@@ -58,44 +60,48 @@ var ToolCollection = {
    * @return {Tool} tool
    */
   model: function (args) {
-      switch (args.type) {
-        case "layerswitcher":
-            return new LayerSwitcher(args.options);
-        case "infoclick":
-            return new InfoClick(args.options);
-        case "bookmark":
-            return new Bookmark(args.options);
-        case "search":
-          return new Search(args.options);
-        case "coordinates":
-            return new Coordinates(args.options);
-        case "export":
-            return new Export(args.options);
-        case "draw":
-            return new Draw(args.options);
-        case "edit":
-            return new Edit(args.options);
-        case "anchor":
-            return new Anchor(args.options);
-        case "buffer":            
-            return new Buffer(args.options);
-        case "routing":
-            return new Routing(args.options);
-        case "streetview":
-            return new StreetView(args.options);
-        case "information":
-            return new Information(args.options);
-        case "selection":
-            return new Selection(args.options);
-        case "location":
-            return new Location(args.options);
-        case "preset":
-            return new Preset(args.options);
-        case "measure":
-            return new Measure(args.options);
-        default:
-            throw "Tool not supported " + args.type;
-      }
+    switch (args.type) {
+      case 'layerswitcher':
+        return new LayerSwitcher(args.options);
+      case 'infoclick':
+        return new InfoClick(args.options);
+      case 'bookmark':
+        return new Bookmark(args.options);
+      case 'search':
+        return new Search(args.options);
+      case 'coordinates':
+        return new Coordinates(args.options);
+      case 'export':
+        return new Export(args.options);
+      case 'draw':
+        return new Draw(args.options);
+      case 'edit':
+        return new Edit(args.options);
+      case 'anchor':
+        return new Anchor(args.options);
+      case 'buffer':
+        return new Buffer(args.options);
+      case 'routing':
+        return new Routing(args.options);
+      case 'streetview':
+        return new StreetView(args.options);
+      case 'fir':
+        return new Fir(args.options);
+      case 'information':
+        return new Information(args.options);
+      case 'selection':
+        return new Selection(args.options);
+      case 'location':
+        return new Location(args.options);
+      case 'preset':
+        return new Preset(args.options);
+      case 'measure':
+        return new Measure(args.options);
+      case 'mailexport':
+        return new MailExport(args.options);
+      default:
+        throw 'Tool not supported ' + args.type;
+    }
   },
 
   initialize: function (tools, args) {
@@ -105,9 +111,9 @@ var ToolCollection = {
     }, 0);
   },
 
-  configure: function() {
+  configure: function () {
     this.forEach(tool => {
-      tool.set("shell", this.shell)
+      tool.set('shell', this.shell);
     });
   },
 

@@ -48,28 +48,32 @@ String.prototype.toOpacity = function() {
 }
 
 /**
- * @typedef {Object} ExportModel~ExportModelProperties
+ * @typedef {Object} MailExportModel~MailExportModelProperties
  * @property {string} type - Default: export
  * @property {string} panel - Default: exportpanel
- * @property {string} title - Default: Skriv ut
+ * @property {string} title - Default: Mail & utskrift
  * @property {string} toolbar - Default: bottom
- * @property {string} icon - Default: fa fa-print icon
+ * @property {string} icon - Default: fa fa-file-pdf-o icon
  * @property {string} exportUrl - Default: /mapservice/export/pdf
  * @property {string} exportTiffUrl - Default: /mapservice/export/tiff
+ * @property {string} exportMailUrl - Default: /mapservice/export/email
  * @property {string} copyright - Default: © Lantmäteriverket i2009/00858
  */
-var ExportModelProperties = {
-  type: 'export',
-  panel: 'exportpanel',
-  title: 'Skriv ut',
+var MailExportModelProperties = {
+  type: 'mailexport',
+  panel: 'mailexportpanel',
+  title: 'Mail & utskrift',
   toolbar: 'bottom',
-  icon: 'fa fa-print icon',
+  icon: 'fa fa-file-pdf-o icon',
   exportUrl: '/mapservice/export/pdf',
   exportTiffUrl: '/mapservice/export/tiff',
+  exportMailUrl: '/mapservice/export/email',
   pdfActive: true,
-  tiffActive: true,
   copyright: "© Lantmäteriverket i2009/00858",
   activeTool: '',
+  base64Encode: false,
+  autoScale: false,
+  instruction: "",
   scales: [250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000]
 };
 
@@ -77,14 +81,14 @@ var ExportModelProperties = {
  * Prototype for creating an draw model.
  * @class
  * @augments {external:"Backbone.Model"}
- * @param {ExportModel~ExportModelProperties} options - Default options
+ * @param {MailExportModel~MailExportModelProperties} options - Default options
  */
-var ExportModel = {
+var MailExportModel = {
   /**
    * @instance
-   * @property {ExportModel~ExportModelProperties} defaults - Default settings
+   * @property {MailExportModel~MailExportModelProperties} defaults - Default settings
    */
-  defaults: ExportModelProperties,
+  defaults: MailExportModelProperties,
 
   configure: function (shell) {
 
@@ -93,13 +97,11 @@ var ExportModel = {
     if (this.get('pdfActive')) {
       formats.push('pdf');
     }
-    if (this.get('tiffActive')) {
-      formats.push('tiff');
-    }
     if (formats.length > 0) {
       this.setActiveTool(formats[0]);
     }
 
+    // change scale on the map here?
     this.set('olMap', shell.getMap().getMap());
     this.addPreviewLayer();
   },
@@ -138,14 +140,6 @@ var ExportModel = {
     this.previewLayer.getSource().clear();
   },
 
-  removeTiffPreview: function() {
-    this.get('transform').clear();
-    this.get('olMap').removeInteraction(this.get('transform'));
-    this.previewLayer.getSource().clear();
-    this.set('previewFeature', undefined);
-    this.get('olMap').set('clickLock', false);
-  },
-
   /**
    * Get the preview feature.
    * @instance
@@ -162,47 +156,6 @@ var ExportModel = {
   getPreviewCenter: function () {
     var extent = this.getPreviewFeature().getGeometry().getExtent();
     return ol.extent.getCenter(extent);
-  },
-
-  addTiffPreview: function (center) {
-
-    var dpi = 25.4 / 0.28
-      ,   ipu = 39.37
-      ,   sf  = 1
-      ,   w   = (210 / dpi / ipu * 10000 / 2) * sf
-      ,   y   = (297 / dpi  / ipu * 10000 / 2) * sf
-      ,   coords = [
-        [
-          [center[0] - w, center[1] - y],
-          [center[0] - w, center[1] + y],
-          [center[0] + w, center[1] + y],
-          [center[0] + w, center[1] - y],
-          [center[0] - w, center[1] - y]
-        ]
-      ]
-      ,   feature = new ol.Feature({
-        geometry: new ol.geom.Polygon(coords)
-      })
-    ;
-
-    this.removePreview();
-    this.set('previewFeature', feature);
-    this.previewLayer.getSource().addFeature(feature);
-
-    var features = new ol.Collection();
-    features.push(feature);
-
-    this.set('transform', new ol.interaction.Transform({
-      translateFeature: true,
-      scale: true,
-      rotate: false,
-      keepAspectRatio: false,
-      translate: true,
-      stretch: false,
-      features: features
-    }));
-    this.get('olMap').addInteraction(this.get('transform'));
-    this.get('olMap').set('clickLock', true);
   },
 
   /**
@@ -675,14 +628,14 @@ var ExportModel = {
    * @param {function} callback
    * @param {object} size
    */
-  exportMap: function(callback, size) {
+  mailExportMap: function(callback, size) {
     var map = this.get('olMap');
     map.once('postcompose', (event) => {
       var href
       ,   anchor
       ,   canvas
       ,   context
-      ,   exportImage
+      ,   mailExportImage
     ;
     canvas = this.cloneCanvas(event.context.canvas, size);
     context = canvas.getContext('2d');
@@ -708,7 +661,7 @@ var ExportModel = {
    * @instance
    * @param {function} callback
    */
-  exportImage: function(callback) {
+  mailExportImage: function(callback) {
     this.exportMap((href) => {
       $.ajax({
         url: this.get('url'),
@@ -776,29 +729,28 @@ var ExportModel = {
     data.proxyUrl = this.get('proxyUrl');
 
     this.set("downloadingPdf", true);
-
+    var dataString = '';
+    if (this.get('base64Encode')){ // base64 here
+      dataString = btoa(JSON.stringify(data));
+    } else {
+      dataString = JSON.stringify(data);
+    }
     $.ajax({
         url: url,
         method: "post",
         data: {
-          json: btoa(JSON.stringify(data))
+          json: dataString
         },
         format: "json",
         success: (url) => {
         this.set("downloadingPdf", false);
-<<<<<<< HEAD
-    this.set("urlPdf", url);
-  },
-    error: (err) => {
-      this.set("downloadingPdf", false);
-      alert("Det gick inte att skapa PDF. Försök igen senare");
-    }
-  });
-=======
+        this.set("urlPdf", url);
+      },
+      error: (err) => {
+        this.set("downloadingPdf", false);
         alert("Ett eller flera av lagren du försöker skriva ut klarar inte de angivna inställningarna. Prova med en mindre pappersstorlek eller lägre upplösning.");
       }
     });
->>>>>>> master
 
     callback();
   },
@@ -808,63 +760,77 @@ var ExportModel = {
     return resolution * dpi * inchesPerMeter;
   },
 
-  exportTIFF: function() {
-    var extent = this.previewLayer.getSource().getFeatures()[0].getGeometry().getExtent()
+    /**
+     * Send the map as a PDF-file by email
+     * @instance
+     * @param {object} options
+     * @param {function} callback
+     */
+    sendPDF: function(options, callback) {
+
+      var extent = this.previewLayer.getSource().getFeatures()[0].getGeometry().getExtent()
       ,   left   = extent[0]
       ,   right  = extent[2]
       ,   bottom = extent[1]
       ,   top    = extent[3]
-      ,   dpi    = (25.4 / 0.28)
-      ,   scale  = this.resolutionToScale(dpi, this.get('olMap').getView().getResolution())
+      ,   scale  = options.scale
+      ,   dpi    = options.resolution
       ,   form   = document.createElement('form')
       ,   input  = document.createElement('input')
       ,   curr   = document.getElementById(this.exportHitsFormId)
-      ,   url    = this.get('exportTiffUrl')
+      ,   url    = this.get('exportMailUrl') ///mapservice/export/email
       ,   data   = {
-      wmsLayers: [],
-      vectorLayers: [],
-      size: null,
-      bbox: null
-    };
+        wmsLayers: [],
+        vectorLayers: [],
+        size: null,
+        resolution: options.resolution,
+        bbox: null
+      };
 
-    data.vectorLayers = this.findVector() || [];
-    data.wmsLayers = this.findWMS() || [];
-    data.wmtsLayers = this.findWMTS() || [];
-    data.arcgisLayers = this.findArcGIS() || [];
+      data.vectorLayers = this.findVector() || [];
+      data.wmsLayers = this.findWMS() || [];
+      data.wmtsLayers = this.findWMTS() || [];
+      data.arcgisLayers = this.findArcGIS() || [];
 
-    dx = Math.abs(left - right);
-    dy = Math.abs(bottom - top);
+      dx = Math.abs(left - right);
+      dy = Math.abs(bottom - top);
 
-    data.size = [
-      parseInt(49.65 * (dx / scale) * dpi),
-      parseInt(49.65 * (dy / scale) * dpi)
-    ];
+      data.size = [
+        parseInt(options.size.width * dpi),
+        parseInt(options.size.height * dpi)
+      ];
 
-    data.resolution = 96;
-    data.bbox = [left, right, bottom, top];
-    data.orientation = "";
-    data.format = "";
-    data.scale = scale;
-    data.proxyUrl = this.get('proxyUrl');
-    this.set("downloadingTIFF", true);
+      data.bbox = [left, right, bottom, top];
+      data.orientation = options.orientation;
+      data.format = options.format;
+      data.scale = options.scale;
+      data.proxyUrl = this.get('proxyUrl');
+      data.documentUrl = options.documentUrl;
+      data.emailAddress = options.emailAddress;
 
-    $.ajax({
+      this.set("sendingMessage", true);
+
+      $.ajax({
         url: url,
         method: "post",
         data: {
-          json: btoa(JSON.stringify(data))
+          documentUrl: data.documentUrl,
+          paperSize: data.format,
+          emailAddress: data.emailAddress
         },
         format: "json",
         success: (url) => {
-        this.set("downloadingTIFF", false);
-        this.set("urlTIFF", url);
-      },
-      error: (err) => {
-        this.set("downloadingTIFF", false);
-        alert("Ett eller flera av lagren du försöker skriva ut klarar inte de angivna inställningarna. Prova med en mindre pappersstorlek eller lägre upplösning.");
-      }
-    });
-  },
+          this.set("sendingMessage", false);
+          this.set("messageSent", url);
+        },
+        error: (err) => {
+          this.set("sendingMessage", false);
+          alert("Ett eller flera av lagren du försöker skriva ut klarar inte de angivna inställningarna. Prova med en mindre pappersstorlek eller lägre upplösning.");
+        }
+      });
+
+      callback();
+    },
 
   /**
    * @description
@@ -887,7 +853,7 @@ var ExportModel = {
 /**
  * Eport model module.<br>
  * Use <code>require('models/export')</code> for instantiation.
- * @module ExportModel-module
- * @returns {ExportModel}
+ * @module MailExportModel-module
+ * @returns {MailExportModel}
  */
-module.exports = ToolModel.extend(ExportModel);
+module.exports = ToolModel.extend(MailExportModel);

@@ -36,7 +36,7 @@ var BackgroundSwitcherView = {
     return {
       displayMode: 'hidden',
       displayModeClass: 'fa fa-angle-right arrow'
-    }
+    };
   },
 
   /**
@@ -46,13 +46,13 @@ var BackgroundSwitcherView = {
   componentDidMount: function () {
     this.backgroundSwitcherModeChanged();
     this.props.model.on('change:backgroundSwitcherMode', () => {
-      this.backgroundSwitcherModeChanged()
+      this.backgroundSwitcherModeChanged();
     });
     this.props.model.on('change:showInfo', this.onShowInfoChanged, this);
     this.setState({
       selected: this.props.model.get('background'),
       showInfo: this.props.model.get('showInfo')
-    })
+    });
   },
 
   /**
@@ -69,8 +69,8 @@ var BackgroundSwitcherView = {
    * @instance
    */
   backgroundSwitcherModeChanged: function () {
-    var mode = this.props.model.get('backgroundSwitcherMode')
-    ,   cls  = (this.props.model.get('backgroundSwitcherMode') === 'hidden') ? 'fa fa-angle-right arrow' : 'fa fa-angle-up arrow'
+    var mode = this.props.model.get('backgroundSwitcherMode'),
+      cls = (this.props.model.get('backgroundSwitcherMode') === 'hidden') ? 'fa fa-angle-right arrow' : 'fa fa-angle-up arrow'
     ;
     this.setState({
       displayMode: mode,
@@ -86,7 +86,7 @@ var BackgroundSwitcherView = {
     this.clear();
     $('#map').css({background: 'black'});
     this.setState({
-      "selected" : 'black'
+      'selected': 'black'
     });
     this.props.model.set('background', 'black');
   },
@@ -99,7 +99,7 @@ var BackgroundSwitcherView = {
     this.clear();
     $('#map').css({background: 'white'});
     this.setState({
-      "selected" : 'white'
+      'selected': 'white'
     });
     this.props.model.set('background', 'white');
   },
@@ -108,7 +108,7 @@ var BackgroundSwitcherView = {
    * Hide current background layer
    * @instance
    */
-  clear: function() {
+  clear: function () {
     this.props.layers.forEach(baselayer => {
       baselayer.setVisible(false);
       baselayer.getLayer().setVisible(false);
@@ -128,8 +128,8 @@ var BackgroundSwitcherView = {
       baselayer.getLayer().setVisible(visible);
     });
     this.setState({
-      "selected" : layer.id
-    })
+      'selected': layer.id
+    });
     this.props.model.set('background', layer.id);
   },
 
@@ -137,7 +137,7 @@ var BackgroundSwitcherView = {
    * Set visibility of background layer
    * @instance
    */
-  setVisibility: function() {
+  setVisibility: function () {
     this.props.model.set('backgroundSwitcherMode',
       this.props.model.get('backgroundSwitcherMode') === 'hidden' ? '' : 'hidden'
     );
@@ -185,30 +185,30 @@ var BackgroundSwitcherView = {
   renderLayers: function () {
     return (
       this.props.layers.map((layer, i) => {
-        var index = "background-layer-" + i
-        ,   checked = this.getSelected(layer)
-        ,   infoIndex = i
-        ,   infoExpanded  = this.state.showInfo
-        ,   infoVisible = layer.get('infoVisible');
+        var index = 'background-layer-' + i,
+          checked = this.getSelected(layer),
+          infoIndex = i,
+          infoExpanded = this.state.showInfo,
+          infoVisible = layer.get('infoVisible');
         return (
           <li key={index}>
-            <input id={index} name="background" type="radio" checked={checked} onChange={(e) => this.setBackgroundLayer(layer) }></input>
+            <input id={index} name='background' type='radio' checked={checked} onChange={(e) => this.setBackgroundLayer(layer)} />
             <label htmlFor={index}>{layer.get('caption')}</label>
 
-            <span className={infoVisible ? "visible" : "hidden"} onClick={(e) => this.toggleInfo(e, i)}>
+            <span className={infoVisible ? 'visible' : 'hidden'} onClick={(e) => this.toggleInfo(e, i)}>
               <InfoButton key={index} index={index} />
             </span>
-          
-            <div className={infoExpanded === infoIndex ? "dropdown" : "hidden"}>
-              <p className="info-title">{layer.get('infoTitle')}</p>
-              <p className="info-text">{layer.get('infoText')}</p>
-              <a className="info-text" href={layer.get('infoUrl')} target="_blank">{layer.get('infoUrl')}</a><br/>
-              <i className="info-text">{layer.get('infoOwner') ? "Ägare: " + layer.get('infoOwner') : ""}</i>
+
+            <div className={infoExpanded === infoIndex ? 'dropdown' : 'hidden'}>
+              <p className='info-title'>{layer.get('infoTitle')}</p>
+              <p className='info-text'>{layer.get('infoText')}</p>
+              <a className='info-text' href={layer.get('infoUrl')} target='_blank'>{layer.get('infoUrl')}</a><br />
+              <i className='info-text'>{layer.get('infoOwner') ? 'Ägare: ' + layer.get('infoOwner') : ''}</i>
             </div>
           </li>
         );
       })
-    )
+    );
   },
 
   /**
@@ -217,35 +217,35 @@ var BackgroundSwitcherView = {
    * @instance
    * @return {external:ReactElement}
    */
-  renderExtraLayer: function(mode) {
-    var shouldRender = true
-    ,   changeMethod = () => {}
-    ,   caption = ""
-    ,   checked = false
+  renderExtraLayer: function (mode) {
+    var shouldRender = true,
+      changeMethod = () => {},
+      caption = '',
+      checked = false
     ;
 
     if (mode === 'black') {
-      shouldRender = this.props.model.get("backgroundSwitcherBlack");
+      shouldRender = this.props.model.get('backgroundSwitcherBlack');
       changeMethod = this.setBlackBackground;
-      caption = "Svart bakgrund";
-      checked = this.state.selected === "black";
+      caption = 'Svart bakgrund';
+      checked = this.state.selected === 'black';
     }
 
     if (mode === 'white') {
-      shouldRender = this.props.model.get("backgroundSwitcherWhite");
+      shouldRender = this.props.model.get('backgroundSwitcherWhite');
       changeMethod = this.setWhiteBackground;
-      caption = "Vit bakgrund";
-      checked = this.state.selected === "white";
+      caption = 'Vit bakgrund';
+      checked = this.state.selected === 'white';
     }
 
     if (shouldRender) {
       let id = Math.round(Math.random() * 1E8);
       return (
         <li key={id}>
-          <input id={id} name="background" type="radio" checked={checked} onChange={() => changeMethod.call(this) }></input>
+          <input id={id} name='background' type='radio' checked={checked} onChange={() => changeMethod.call(this)} />
           <label htmlFor={id}>{caption}</label>
         </li>
-      )
+      );
     }
     return null;
   },
@@ -257,12 +257,12 @@ var BackgroundSwitcherView = {
    */
   render: function () {
     return (
-      <div className="background-switcher">
-        <h3 onClick={this.setVisibility} ><span className={this.state.displayModeClass}></span>&nbsp;Bakgrundskartor</h3>
+      <div className='background-switcher'>
+        <h3 onClick={this.setVisibility} ><span className={this.state.displayModeClass} />&nbsp;Bakgrundskartor</h3>
         <ul className={this.state.displayMode}>
           {this.renderLayers()}
-          {this.renderExtraLayer("black")}
-          {this.renderExtraLayer("white")}
+          {this.renderExtraLayer('black')}
+          {this.renderExtraLayer('white')}
         </ul>
       </div>
     );

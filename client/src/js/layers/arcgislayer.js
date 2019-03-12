@@ -20,7 +20,7 @@
 //
 // https://github.com/hajkmap/Hajk
 
-function toParamString(obj) {
+function toParamString (obj) {
   return Object.keys(obj).map(k => `${k}=${obj[k]}`).join('&');
 }
 
@@ -33,8 +33,8 @@ var LayerModel = require('layers/layer');
  * @property {number} opacity - Default: 1
  */
 var ArcGISLayerProperties = {
-  url: "http://ksdgis.se/arcgis/rest/services/hpl/MapServer",
-  projection: "EPSG:3006",
+  url: 'http://ksdgis.se/arcgis/rest/services/hpl/MapServer',
+  projection: 'EPSG:3006',
   opacity: 0.8,
   extent: [413888.8487813738, 6581993.154569996, 416840.2595669881, 6584784.713516495],
   singleTile: false
@@ -113,7 +113,7 @@ var ArcGISLayer = {
     });
 
     this.layer.getSource().set('url', this.get('url'));
-    this.set("type", "arcgis");
+    this.set('type', 'arcgis');
   },
 
   /**
@@ -122,10 +122,8 @@ var ArcGISLayer = {
    * @param {object} data - response data from request
    * @param {function} callback
    */
-  parseFeatueInfoResponse: function(data, callback) {
-
+  parseFeatueInfoResponse: function (data, callback) {
     if (data && data.results && Array.isArray(data.results)) {
-
       if (data.results.length === 0) {
         callback();
       }
@@ -134,7 +132,6 @@ var ArcGISLayer = {
         var features = new ol.format.EsriJSON().readFeatures(result);
         callback(features);
       });
-
     } else {
       callback();
     }
@@ -146,17 +143,16 @@ var ArcGISLayer = {
    * @param {external:"ol.coordinate"} coordinate
    * @return {object} query params
    */
-  getQueryParams: function(coordinate) {
-
-    var layers = this.get('params')['LAYERS'].replace('show', 'visible')
-    ,   size   = this.get('map').getMap().getSize()
-    ,   extent = this.get('map').getMap().getView().calculateExtent(size).join(',')
-    ,   geom   = coordinate[0] + "," + coordinate[1]
-    ,   imgd   = size.concat([96]).join(',')
+  getQueryParams: function (coordinate) {
+    var layers = this.get('params')['LAYERS'].replace('show', 'visible'),
+      size = this.get('map').getMap().getSize(),
+      extent = this.get('map').getMap().getView().calculateExtent(size).join(','),
+      geom = coordinate[0] + ',' + coordinate[1],
+      imgd = size.concat([96]).join(',')
     ;
 
     return {
-      geometryType: "esriGeometryPoint",
+      geometryType: 'esriGeometryPoint',
       geometry: geom,
       tolerance: 10,
       layers: layers,
@@ -174,9 +170,8 @@ var ArcGISLayer = {
    * @return {external:"ol.style"} style
    */
   getFeatureInformation: function (params) {
-
     var url = this.get('url');
-    url += "/identify?";
+    url += '/identify?';
     url += toParamString(this.getQueryParams(params.coordinate));
 
     $.ajax({
@@ -196,7 +191,7 @@ var ArcGISLayer = {
    * @instance
    */
   tileLoadError: function () {
-    this.set("status", "loaderror");
+    this.set('status', 'loaderror');
   },
 
   /**
@@ -204,7 +199,7 @@ var ArcGISLayer = {
    * @instance
    */
   tileLoadOk: function () {
-    this.set("status", "ok");
+    this.set('status', 'ok');
   }
 
 };

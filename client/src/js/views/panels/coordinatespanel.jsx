@@ -24,25 +24,25 @@ var Panel = require('views/panel');
 
 var CoordinatesList = React.createClass({
 
-  isPlanar: function(epsgString) {
+  isPlanar: function (epsgString) {
     return (
       ['WGS 84'].indexOf(epsgString) === -1
     );
   },
 
-  convertDDToDMS: function(D, lng){
+  convertDDToDMS: function (D, lng) {
     return {
-      dir : D < 0 ? lng? 'W' : 'S' :lng ? 'E' : 'N',
-      deg : Math.floor((D < 0 ? D =- D : D)),
-      min : Math.floor((D * 60) % 60),
-      sec : ((D * 3600) % 60).toFixed(5)
+      dir: D < 0 ? lng ? 'W' : 'S' : lng ? 'E' : 'N',
+      deg: Math.floor((D < 0 ? D = -D : D)),
+      min: Math.floor((D * 60) % 60),
+      sec: ((D * 3600) % 60).toFixed(5)
     };
   },
 
-  formatDMS: function(dms) {
+  formatDMS: function (dms) {
     return (
       [dms.deg, '°', dms.min, '′', dms.sec, '″', dms.dir].join('')
-    )
+    );
   },
 
   getLon: function (xyObject) {
@@ -50,7 +50,7 @@ var CoordinatesList = React.createClass({
       <span>
         <strong>{ xyObject.xtitle }: </strong> { this.formatDMS(this.convertDDToDMS(xyObject.x, true)) }
       </span>
-    )
+    );
   },
 
   getLat: function (xyObject) {
@@ -58,7 +58,7 @@ var CoordinatesList = React.createClass({
       <span>
         <strong>{ xyObject.ytitle }: </strong> { this.formatDMS(this.convertDDToDMS(xyObject.y, false)) }
       </span>
-    )
+    );
   },
 
   getX: function (xyObject) {
@@ -66,7 +66,7 @@ var CoordinatesList = React.createClass({
       <span>
         <strong>{ xyObject.xtitle }: </strong> { xyObject.x.toFixed(2) } m
       </span>
-    )
+    );
   },
 
   getY: function (xyObject) {
@@ -74,10 +74,10 @@ var CoordinatesList = React.createClass({
       <span>
         <strong>{ xyObject.ytitle }: </strong> { xyObject.y.toFixed(2) } m
       </span>
-    )
+    );
   },
 
-  processSphericalXY: function(xyObject) {
+  processSphericalXY: function (xyObject) {
     return (
       <div>
         <dd>
@@ -87,10 +87,10 @@ var CoordinatesList = React.createClass({
           {xyObject.inverseAxis ? this.getLon(xyObject) : this.getLat(xyObject)}
         </dd>
       </div>
-    )
+    );
   },
 
-  processPlanarXY: function(xyObject) {
+  processPlanarXY: function (xyObject) {
     return (
       <div>
         <dd>
@@ -100,42 +100,42 @@ var CoordinatesList = React.createClass({
           {xyObject.inverseAxis ? this.getY(xyObject) : this.getX(xyObject)}
         </dd>
       </div>
-    )
+    );
   },
 
-  processTitle: function(title, object) {
-    if (object.hasOwnProperty('default') && object['default'] === true){
+  processTitle: function (title, object) {
+    if (object.hasOwnProperty('default') && object['default'] === true) {
       return (
         <dt>
           <strong style={{fontWeight: 'bold'}}>{title}</strong> {object.hint}
         </dt>
-      )
+      );
     } else {
       return (
         <dt>{title}</dt>
-      )
+      );
     }
   },
 
-  processRow: function(object, title) {
+  processRow: function (object, title) {
     if (this.isPlanar(title)) {
       return (
         [this.processTitle(title, object), this.processPlanarXY(object)]
-      )
+      );
     } else {
       return (
         [this.processTitle(title, object), this.processSphericalXY(object)]
-      )
+      );
     }
   },
 
-  render: function() {
+  render: function () {
     var coordinates = this.props.coordinates;
     return (
       <dl>
         { Object.keys(coordinates).map((key) => this.processRow(coordinates[key], key)) }
       </dl>
-    )
+    );
   }
 });
 
@@ -148,7 +148,7 @@ var CoordinatesPanelView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function() {
+  getInitialState: function () {
     return {
       visible: false,
       interactionVisible: true
@@ -193,8 +193,8 @@ var CoordinatesPanelView = {
     this.setState({
       interactionVisible: !this.state.interactionVisible
     });
-    this.state.interactionVisible ? this.props.model.removeInteractions() :
-                                    this.props.model.createInteractions();
+    this.state.interactionVisible ? this.props.model.removeInteractions()
+      : this.props.model.createInteractions();
   },
 
   /**
@@ -209,10 +209,10 @@ var CoordinatesPanelView = {
     }
     coordinates = this.state.coordinates ? this.state.coordinates.transformed : {};
     return (
-      <Panel title="Koordinater" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
-        <div className="coordinate-display">
+      <Panel title='Koordinater' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
+        <div className='coordinate-display'>
           <p>
-            Välj en plats i kartan genom att dra i siktet. <br/>
+            Välj en plats i kartan genom att dra i siktet. <br />
           </p>
           <CoordinatesList coordinates={coordinates} />
         </div>

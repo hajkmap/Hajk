@@ -28,21 +28,21 @@ const defaultState = {
   load: false,
   capabilities: [],
   validationErrors: [],
-  mode: "add",
+  mode: 'add',
   layers: [],
   addedLayers: [],
-  id: "",
-  caption: "",
-  url: "",
-  projection: "",
+  id: '',
+  caption: '',
+  url: '',
+  projection: '',
   point: false,
   linestring: false,
   polygon: false,
   layerProperties: [],
   alert: false,
   corfirm: false,
-  alertMessage: "",
-  content: "",
+  alertMessage: '',
+  content: '',
   confirmAction: () => {},
   denyAction: () => {}
 };
@@ -53,20 +53,20 @@ class Search extends Component {
   /**
    *
    */
-  constructor() {
+  constructor () {
     super();
     this.state = defaultState;
   }
   /**
    *
    */
-  componentDidMount() {
+  componentDidMount () {
     this.props.model.set('config', this.props.config);
     this.props.model.getConfig(this.props.config.url_layers);
     this.props.model.on('change:layers', () => {
       this.setState({
         layers: this.props.model.get('layers')
-      })
+      });
     });
 
     defaultState.url = this.props.config.url_default_server;
@@ -76,17 +76,17 @@ class Search extends Component {
   /**
    *
    */
-  componentWillUnmount() {
+  componentWillUnmount () {
     this.props.model.off('change:layers');
   }
   /**
    *
    */
-  removeLayer(e, layer) {
+  removeLayer (e, layer) {
     this.setState({
       alert: true,
       confirm: true,
-      alertMessage: "Lagret kommer att tas bort. Är detta ok?",
+      alertMessage: 'Lagret kommer att tas bort. Är detta ok?',
       confirmAction: () => {
         this.props.model.removeLayer(layer, success => {
           if (success) {
@@ -101,7 +101,7 @@ class Search extends Component {
           } else {
             this.setState({
               alert: true,
-              alertMessage: "Lagret kunde inte tas bort. Försök igen senare."
+              alertMessage: 'Lagret kunde inte tas bort. Försök igen senare.'
             });
           }
         });
@@ -112,15 +112,14 @@ class Search extends Component {
   /**
    *
    */
-  loadLayer(e, layer) {
-
+  loadLayer (e, layer) {
     this.abort();
     this.setState({
-      mode: "edit",
+      mode: 'edit',
       id: layer.id,
       caption: layer.caption,
       url: layer.url,
-      projection: layer.projection || "EPSG:3006",
+      projection: layer.projection || 'EPSG:3006',
       addedLayers: [],
       point: layer.editPoint,
       linestring: layer.editLine,
@@ -128,19 +127,18 @@ class Search extends Component {
     });
 
     setTimeout(() => {
-      this.validate("caption");
-      this.validate("url");
+      this.validate('caption');
+      this.validate('url');
       this.loadWMSCapabilities(undefined, () => {
-
         this.setState({
           addedLayers: layer.layers
         });
 
-        this.validate("layers");
+        this.validate('layers');
 
         Object.keys(this.refs).forEach(element => {
           var elem = this.refs[element];
-          if (this.refs[element].dataset.type == "wms-layer") {
+          if (this.refs[element].dataset.type == 'wms-layer') {
             this.refs[element].checked = false;
           }
         });
@@ -150,16 +148,14 @@ class Search extends Component {
         });
 
         this.describeLayer(undefined, layer.layers[0], layer);
-
       });
     }, 0);
   }
   /**
    *
    */
-  loadWMSCapabilities(e, callback) {
-    if (e)
-      e.preventDefault();
+  loadWMSCapabilities (e, callback) {
+    if (e) { e.preventDefault(); }
 
     this.setState({
       load: true,
@@ -183,8 +179,8 @@ class Search extends Component {
       if (capabilities === false) {
         this.setState({
           alert: true,
-          alertMessage: "Servern svarar inte. Försök med en annan URL."
-        })
+          alertMessage: 'Servern svarar inte. Försök med en annan URL.'
+        });
       }
       if (callback) {
         callback();
@@ -194,16 +190,16 @@ class Search extends Component {
   /**
    *
    */
-  appendLayer(e, checkedLayer) {
+  appendLayer (e, checkedLayer) {
     this.state.addedLayers = [];
     this.state.addedLayers.push(checkedLayer);
     this.forceUpdate();
-    this.validate("layers");
+    this.validate('layers');
   }
   /**
    *
    */
-  filterLayers(e) {
+  filterLayers (e) {
     this.setState({
       filter: e.target.value
     });
@@ -211,34 +207,33 @@ class Search extends Component {
   /**
    *
    */
-  getLayersWithFilter(filter) {
+  getLayersWithFilter (filter) {
     return this.props.model.get('layers').filter(layer => {
-      return (new RegExp(this.state.filter)).test(layer.caption.toLowerCase())
+      return (new RegExp(this.state.filter)).test(layer.caption.toLowerCase());
     });
   }
   /**
    *
    */
-  abort(e) {
+  abort (e) {
     this.setState(defaultState);
   }
   /**
    *
    */
-  validate(fieldName, e) {
-
-    var value = this.getValue(fieldName)
-    ,   valid = true;
+  validate (fieldName, e) {
+    var value = this.getValue(fieldName),
+      valid = true;
 
     switch (fieldName) {
-      case "layers":
+      case 'layers':
         if (value.length === 0) {
           valid = false;
         }
         break;
-      case "url":
-      case "caption":
-        if (value === "") {
+      case 'url':
+      case 'caption':
+        if (value === '') {
           valid = false;
         }
         break;
@@ -252,9 +247,9 @@ class Search extends Component {
 
     if (e) {
       var value;
-      if (fieldName === "point" ||
-          fieldName === "linestring" ||
-          fieldName === "polygon") {
+      if (fieldName === 'point' ||
+          fieldName === 'linestring' ||
+          fieldName === 'polygon') {
         value = e.target.checked;
       } else {
         value = e.target.value;
@@ -272,7 +267,7 @@ class Search extends Component {
   /**
    *
    */
-  getEditableFields() {
+  getEditableFields () {
     var filter, mapper;
     mapper = item => {
       return {
@@ -283,7 +278,7 @@ class Search extends Component {
         values: item.listValues || null,
         hidden: item.hidden,
         defaultValue: item.defaultValue
-      }
+      };
     };
 
     filter = item => item.checked === true;
@@ -298,18 +293,17 @@ class Search extends Component {
   /**
    *
    */
-  getValue(fieldName) {
-
-    function create_date() {
+  getValue (fieldName) {
+    function create_date () {
       return (new Date()).getTime();
     }
 
-    function format_layers(layers) {
+    function format_layers (layers) {
       return layers.map(layer => layer);
     }
 
-    var input = this.refs["input_" + fieldName]
-    ,   value = input ? input.value : "";
+    var input = this.refs['input_' + fieldName],
+      value = input ? input.value : '';
 
     if (fieldName === 'date') value = create_date();
     if (fieldName === 'layers') value = format_layers(this.state.addedLayers);
@@ -323,35 +317,34 @@ class Search extends Component {
   /**
    *
    */
-  createGuid(layers) {
-    function s4() {
+  createGuid (layers) {
+    function s4 () {
       return Math.floor((1 + Math.random()) * 0x10000)
         .toString(16)
         .substring(1);
     }
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +  s4() + '-' + s4() + s4() + s4();
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
   }
   /**
    *
    */
-  parseDate() {
+  parseDate () {
     var parsed = parseInt(this.state.date);
-    return isNaN(parsed) ?
-      this.state.date :
-      (new Date(parsed)).toLocaleString();
+    return isNaN(parsed)
+      ? this.state.date
+      : (new Date(parsed)).toLocaleString();
   }
   /**
    *
    */
-  getValidationClass(inputName) {
-    return this.state.validationErrors.find(v => v === inputName) ? "validation-error" : "";
+  getValidationClass (inputName) {
+    return this.state.validationErrors.find(v => v === inputName) ? 'validation-error' : '';
   }
   /**
    *
    */
-  describeLayer(e, layerName, layer) {
+  describeLayer (e, layerName, layer) {
     this.props.model.getLayerDescription(this.refs.input_url.value, layerName, (properties) => {
-
       if (layer && layer.editableFields) {
         layer.editableFields.forEach((editableField) => {
           properties[editableField.index].listValues = editableField.values;
@@ -366,13 +359,12 @@ class Search extends Component {
         layerProperties: properties,
         layerPropertiesName: layerName
       });
-
     });
   }
   /**
    *
    */
-  closeDetails() {
+  closeDetails () {
     this.setState({
       layerProperties: undefined,
       layerPropertiesName: undefined
@@ -381,7 +373,7 @@ class Search extends Component {
   /**
    *
    */
-  addListValue(index, e) {
+  addListValue (index, e) {
     if (this.state.layerProperties[index] && e.target.value !== '') {
       let props = this.state.layerProperties[index];
       if (!Array.isArray(props.listValues)) {
@@ -393,65 +385,62 @@ class Search extends Component {
   /**
    *
    */
-  submit(e) {
-
+  submit (e) {
     var validations = [
-      this.validate("caption"),
-      this.validate("url"),
-      this.validate("layers")
+      this.validate('caption'),
+      this.validate('url'),
+      this.validate('layers')
     ];
 
     if (validations.every(v => v === true)) {
-
       let layer = {
         id: this.state.id,
-        caption: this.getValue("caption"),
-        url: this.getValue("url"),
-        layers: this.getValue("layers"),
-        projection: this.getValue("projection"),
-        editableFields: this.getValue("editableFields"),
-        editPoint: this.getValue("point"),
-        editPolygon: this.getValue("polygon"),
-        editLine: this.getValue("linestring")
+        caption: this.getValue('caption'),
+        url: this.getValue('url'),
+        layers: this.getValue('layers'),
+        projection: this.getValue('projection'),
+        editableFields: this.getValue('editableFields'),
+        editPoint: this.getValue('point'),
+        editPolygon: this.getValue('polygon'),
+        editLine: this.getValue('linestring')
       };
 
-      if (this.state.mode === "add") {
-
+      if (this.state.mode === 'add') {
         layer.id = this.createGuid(this.props.model.get('layers'));
 
         this.props.model.addLayer(layer, success => {
           if (success) {
-            this.props.config.url_layers
+            this.props.config.url_layers;
             this.props.model.getConfig(this.props.config.url_layers);
             this.abort();
             this.setState({
               alert: true,
-              alertMessage: "Lagret har lagt till i listan av tillgängliga lager."
+              alertMessage: 'Lagret har lagt till i listan av tillgängliga lager.'
             });
           } else {
             this.setState({
               alert: true,
-              alertMessage: "Lagret kunde inte läggas till. Försök igen senare."
+              alertMessage: 'Lagret kunde inte läggas till. Försök igen senare.'
             });
           }
         });
       }
 
-      if (this.state.mode === "edit") {
+      if (this.state.mode === 'edit') {
         this.props.model.updateLayer(layer, success => {
           if (success) {
             this.props.model.getConfig(this.props.config.url_layers);
             this.setState({
               alert: true,
-              alertMessage: "Uppdateringen lyckades!"
+              alertMessage: 'Uppdateringen lyckades!'
             });
             this.setState({
-              date: layer.date,
+              date: layer.date
             });
           } else {
             this.setState({
               alert: true,
-              alertMessage: "Uppdateringen misslyckades."
+              alertMessage: 'Uppdateringen misslyckades.'
             });
           }
         });
@@ -462,7 +451,7 @@ class Search extends Component {
   /**
    *
    */
-  renderLayersFromConfig(layers) {
+  renderLayersFromConfig (layers) {
     layers = this.state.filter ? this.getLayersWithFilter() : this.props.model.get('layers');
 
     var startsWith = [];
@@ -473,56 +462,62 @@ class Search extends Component {
         layer.caption.toLowerCase().indexOf(this.state.filter) == 0 ? startsWith.push(layer) : alphabetically.push(layer);
       });
 
-      startsWith.sort(function(a, b) {
-        if(a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if(a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
-        return 0; 
+      startsWith.sort(function (a, b) {
+        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
+        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        return 0;
       });
 
-      alphabetically.sort(function(a, b) {
-        if(a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if(a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
-        return 0; 
+      alphabetically.sort(function (a, b) {
+        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
+        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        return 0;
       });
-        
+
       layers = startsWith.concat(alphabetically);
     }
+    
+    // Sort layers alphabetically
+    layers.sort((a, b) => {
+      return a.caption.toLowerCase().localeCompare(b.caption.toLowerCase());
+    });
+    
     return layers.map((layer, i) =>
       <li onClick={(e) => this.loadLayer(e, layer)} key={Math.random()}>
         <span>{layer.caption}</span>
-        <i title="Radera lager" onClick={(e) => this.removeLayer(e, layer)} className="fa fa-trash"></i>
+        <i title='Radera lager' onClick={(e) => this.removeLayer(e, layer)} className='fa fa-trash' />
       </li>
     );
   }
   /**
    *
    */
-  renderSelectedLayers() {
+  renderSelectedLayers () {
     if (!this.state.addedLayers) return null;
 
-    function uncheck(layer) {
+    function uncheck (layer) {
       this.state.addedLayers = [];
       this.refs[layer].checked = false;
       this.forceUpdate();
     }
 
     return this.state.addedLayers.map((layer, i) =>
-      <li className="layer noselect" key={i}>
+      <li className='layer noselect' key={i}>
         <span>{layer}</span>&nbsp;
-        <i className="fa fa-times" onClick={uncheck.bind(this, layer)}></i>
+        <i className='fa fa-times' onClick={uncheck.bind(this, layer)} />
       </li>
-    )
+    );
   }
   /**
    *
    */
-  renderListValues(index) {
+  renderListValues (index) {
     if (this.state.layerProperties[index] &&
         this.state.layerProperties[index].listValues) {
       return this.state.layerProperties[index].listValues.map((value, i) => {
         return (
-          <span className="list-value noselect" key={i}>
-            {value} <i className="fa fa-times" onClick={() => {
+          <span className='list-value noselect' key={i}>
+            {value} <i className='fa fa-times' onClick={() => {
               this.state.layerProperties[index].listValues.splice(i, 1);
               this.forceUpdate();
             }} />
@@ -536,7 +531,7 @@ class Search extends Component {
   /**
    *
    */
-  renderLayerProperties() {
+  renderLayerProperties () {
     if (this.state.layerProperties === undefined) {
       return null;
     }
@@ -545,33 +540,32 @@ class Search extends Component {
         <div>
           <div>Information saknas</div>
         </div>
-      )
+      );
     }
 
     var rows = this.state.layerProperties.map((property, i) => {
-
       var stringDataTypes = type => {
-        if (type === "string") {
+        if (type === 'string') {
           if (!property.textType) {
-            property.textType = "fritext";
+            property.textType = 'fritext';
           }
           return (
             <select defaultValue={property.textType} onChange={(e) => {
               property.textType = e.target.value;
             }}>
-              <option value="fritext">Fritext</option>
-              <option value="datum">Datum</option>
-              <option value="lista">Lista</option>
-              <option value="flerval">Flerval</option>
-              <option value="url">Url</option>
+              <option value='fritext'>Fritext</option>
+              <option value='datum'>Datum</option>
+              <option value='lista'>Lista</option>
+              <option value='flerval'>Flerval</option>
+              <option value='url'>Url</option>
             </select>
-          )
+          );
         }
         return null;
       };
 
       var listEditor = type => {
-        if (type === "string") {
+        if (type === 'string') {
           return (
             <div>
               <input onKeyDown={(e) => {
@@ -579,14 +573,14 @@ class Search extends Component {
                   e.preventDefault();
                   this.addListValue(i, e);
                   this.forceUpdate();
-                  e.target.value = "";
+                  e.target.value = '';
                 }
-              }} type="text"></input>
-              <div className="editable-list">
+              }} type='text' />
+              <div className='editable-list'>
                 { this.renderListValues(i) }
               </div>
             </div>
-          )
+          );
         }
         return null;
       };
@@ -594,11 +588,11 @@ class Search extends Component {
       var defaultValueEditor = (type, value) => {
         return (
           <div>
-            <input defaultValue={value} type="text" onChange={(e) => {
+            <input defaultValue={value} type='text' onChange={(e) => {
               property.defaultValue = e.target.value;
-            }}></input>
+            }} />
           </div>
-        )
+        );
       };
 
       if (!property.hasOwnProperty('hidden')) {
@@ -607,19 +601,19 @@ class Search extends Component {
 
       property.index = i;
 
-      if (property.localType === "Geometry") {
+      if (property.localType === 'Geometry') {
         return null;
       }
 
       return (
         <tr key={parseInt(Math.random() * 1E8)}>
           <td>
-            <input type="checkbox" defaultChecked={property.checked} onChange={(e) => {
+            <input type='checkbox' defaultChecked={property.checked} onChange={(e) => {
               property.checked = e.target.checked;
             }} />
           </td>
           <td>
-            <input type="checkbox" defaultChecked={property.hidden} onChange={(e) => {
+            <input type='checkbox' defaultChecked={property.hidden} onChange={(e) => {
               property.hidden = e.target.checked;
             }} />
           </td>
@@ -633,7 +627,7 @@ class Search extends Component {
     });
 
     return (
-      <table className="edit-fields-table">
+      <table className='edit-fields-table'>
         <thead>
           <tr>
             <th>Redigerbar</th>
@@ -649,23 +643,23 @@ class Search extends Component {
           {rows}
         </tbody>
       </table>
-    )
+    );
   }
   /**
    *
    */
-  renderLayersFromCapabilites() {
+  renderLayersFromCapabilites () {
     if (this.state && this.state.capabilities) {
       return this.state.capabilities.map((layer, i) => {
         return (
           <li key={i}>
-            <input ref={layer.name} id={"layer" + i} type="radio" name="featureType" data-type="wfs-layer" onChange={(e) => {
+            <input ref={layer.name} id={'layer' + i} type='radio' name='featureType' data-type='wfs-layer' onChange={(e) => {
               this.appendLayer(e, layer.name);
               this.describeLayer(e, layer.name);
-            }}/>&nbsp;
-            <label htmlFor={"layer" + i}>{layer.name}</label>
+            }} />&nbsp;
+            <label htmlFor={'layer' + i}>{layer.name}</label>
           </li>
-        )
+        );
       });
     } else {
       return null;
@@ -674,13 +668,12 @@ class Search extends Component {
   /**
    *
    */
-  renderProjections() {
-
+  renderProjections () {
     var render = (projection, i) => <option key={i} value={projection}>{projection}</option>;
     var options = this.props.config.projections.map(render);
 
     return (
-      <select ref="input_projection" value={this.state.projection} onChange={(e) => {
+      <select ref='input_projection' value={this.state.projection} onChange={(e) => {
         this.setState({
           projection: e.target.value
         });
@@ -690,18 +683,18 @@ class Search extends Component {
   /**
    *
    */
-  renderLayerList() {
+  renderLayerList () {
     var layers = this.renderLayersFromCapabilites();
     return (
-      <div className="layer-list">
+      <div className='layer-list'>
         <ul>
           {layers}
         </ul>
       </div>
-    )
+    );
   }
 
-  getAlertOptions() {
+  getAlertOptions () {
     return {
       visible: this.state.alert,
       message: this.state.alertMessage,
@@ -711,66 +704,65 @@ class Search extends Component {
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ""
-        })
+          alertMessage: ''
+        });
       },
       denyAction: () => {
         this.state.denyAction();
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ""
-        })
+          alertMessage: ''
+        });
       },
       onClick: () => {
         this.setState({
           alert: false,
-          alertMessage: ""
-        })
+          alertMessage: ''
+        });
       }
     };
   }
   /**
    *
    */
-  render() {
-
-    var loader = this.state.load ? <i className="fa fa-refresh fa-spin"></i> : null;
-    var abort = this.state.mode === "edit" ? <span className="btn btn-danger" onClick={(e) => this.abort(e)}>Avbryt</span> : null;
+  render () {
+    var loader = this.state.load ? <i className='fa fa-refresh fa-spin' /> : null;
+    var abort = this.state.mode === 'edit' ? <span className='btn btn-danger' onClick={(e) => this.abort(e)}>Avbryt</span> : null;
 
     return (
-      <section className="tab-pane active">
-        <Alert options={this.getAlertOptions()}/>
+      <section className='tab-pane active'>
+        <Alert options={this.getAlertOptions()} />
         <aside>
-          <input placeholder="filtrera" type="text" onChange={(e) => this.filterLayers(e)} />
-          <ul className="config-layer-list">
+          <input placeholder='filtrera' type='text' onChange={(e) => this.filterLayers(e)} />
+          <ul className='config-layer-list'>
             {this.renderLayersFromConfig()}
           </ul>
         </aside>
         <article>
-          <form method="post" action="" onSubmit={(e) => { this.submit(e) }}>
+          <form method='post' action='' onSubmit={(e) => { this.submit(e); }}>
             <fieldset>
               <legend>Lägg till WFST-tjänst</legend>
               <div>
                 <label>Visningsnamn*</label>
                 <input
-                  type="text"
-                  ref="input_caption"
+                  type='text'
+                  ref='input_caption'
                   value={this.state.caption}
-                  onChange={(e) => this.validate("caption", e)}
-                  className={this.getValidationClass("caption")}
+                  onChange={(e) => this.validate('caption', e)}
+                  className={this.getValidationClass('caption')}
                 />
               </div>
               <div>
                 <label>Url*</label>
                 <input
-                  type="text"
-                  ref="input_url"
+                  type='text'
+                  ref='input_url'
                   value={this.state.url}
-                  onChange={(e) => this.validate("url", e)}
-                  className={this.getValidationClass("url")}
+                  onChange={(e) => this.validate('url', e)}
+                  className={this.getValidationClass('url')}
                 />
-                <span onClick={(e) => {this.loadWMSCapabilities(e)}} className="btn btn-default">Ladda lager {loader}</span>
+                <span onClick={(e) => { this.loadWMSCapabilities(e); }} className='btn btn-default'>Ladda lager {loader}</span>
               </div>
               <div>
                 <label>Projektion</label>
@@ -778,7 +770,7 @@ class Search extends Component {
               </div>
               <div>
                 <label>Valt lager*</label>
-                <div ref="input_layers" className={"layer-list-choosen " + this.getValidationClass("layers")}>
+                <div ref='input_layers' className={'layer-list-choosen ' + this.getValidationClass('layers')}>
                   <ul>
                     {this.renderSelectedLayers()}
                   </ul>
@@ -794,37 +786,34 @@ class Search extends Component {
               </div>
               <div>
                 <label>Geometrityper</label>
-                <div className="geometry-types">
+                <div className='geometry-types'>
                   <input
                     checked={this.state.point}
-                    onChange={(e) => this.validate("point", e)}
-                    ref="input_point"
-                    name="point" id="point"
-                    type="checkbox">
-                  </input>
-                  <label htmlFor="point">&nbsp;Punkter</label><br/>
+                    onChange={(e) => this.validate('point', e)}
+                    ref='input_point'
+                    name='point' id='point'
+                    type='checkbox' />
+                  <label htmlFor='point'>&nbsp;Punkter</label><br />
                   <input
                     checked={this.state.linestring}
-                    onChange={(e) => this.validate("linestring", e)}
-                    ref="input_linestring"
-                    name="linestring"
-                    id="linestring"
-                    type="checkbox">
-                  </input>
-                  <label htmlFor="linestring">&nbsp;Linjer</label><br/>
+                    onChange={(e) => this.validate('linestring', e)}
+                    ref='input_linestring'
+                    name='linestring'
+                    id='linestring'
+                    type='checkbox' />
+                  <label htmlFor='linestring'>&nbsp;Linjer</label><br />
                   <input
                     checked={this.state.polygon}
-                    onChange={(e) => this.validate("polygon", e)}
-                    ref="input_polygon"
-                    name="polygon"
-                    id="polygon"
-                    type="checkbox">
-                  </input>
-                  <label htmlFor="polygon">&nbsp;Ytor</label>
+                    onChange={(e) => this.validate('polygon', e)}
+                    ref='input_polygon'
+                    name='polygon'
+                    id='polygon'
+                    type='checkbox' />
+                  <label htmlFor='polygon'>&nbsp;Ytor</label>
                 </div>
               </div>
             </fieldset>
-            <button className="btn btn-primary">{this.state.mode == "edit" ? "Spara" : "Lägg till"}</button>&nbsp;
+            <button className='btn btn-primary'>{this.state.mode == 'edit' ? 'Spara' : 'Lägg till'}</button>&nbsp;
             {abort}
           </form>
         </article>

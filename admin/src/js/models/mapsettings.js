@@ -21,7 +21,7 @@
 // https://github.com/hajkmap/Hajk
 
 import {
-	Model
+  Model
 } from 'backbone';
 const $ = require('jquery');
 const jQuery = $;
@@ -30,165 +30,163 @@ require('jquery-sortable');
 
 var menu = Model.extend({
 
-	defaults: {
-		layers: [],
-		addedLayers: []
-	},
+  defaults: {
+    layers: [],
+    addedLayers: []
+  },
 
-	loadMaps: function (callback) {
-		$.ajax({
-			url: this.get('config').url_map_list,
-			method: 'GET',
-			contentType: 'application/json',
-			success: (data) => {
-				var name = data[0];
-				if (name === undefined) {
-					name = "";
-				}
-				this.set({
-					urlMapConfig: this.get('config').url_map + "/" + name,
-					mapFile: name
-				});
-				callback(data);
-			},
-			error: (message) => {
-				callback(message);
-			}
-		});
-	},
+  loadMaps: function (callback) {
+    $.ajax({
+      url: this.get('config').url_map_list,
+      method: 'GET',
+      contentType: 'application/json',
+      success: (data) => {
+        var name = data[0];
+        if (name === undefined) {
+          name = '';
+        }
+        this.set({
+          urlMapConfig: this.get('config').url_map + '/' + name,
+          mapFile: name
+        });
+        callback(data);
+      },
+      error: (message) => {
+        callback(message);
+      }
+    });
+  },
 
-	createMap: function (name, callback) {
-		$.ajax({
-			url: this.get('config').url_map_create + "/" + name,
-			method: 'GET',
-			contentType: 'application/json',
-			success: (data) => {
-				callback(data);
-			},
-			error: (message) => {
-				callback(message);
-			}
-		});
-	},
+  createMap: function (name, callback) {
+    $.ajax({
+      url: this.get('config').url_map_create + '/' + name,
+      method: 'GET',
+      contentType: 'application/json',
+      success: (data) => {
+        callback(data);
+      },
+      error: (message) => {
+        callback(message);
+      }
+    });
+  },
 
-	deleteMap: function (callback) {
-		$.ajax({
-			url: this.get('config').url_map_delete + "/" + this.get('mapFile'),
-			method: 'GET',
-			contentType: 'application/json',
-			success: () => {
-				callback();
-			},
-			error: (message) => {
-				callback("Kartan kunde inte tas bort. Försök igen senare.");
-			}
-		});
-	},
+  deleteMap: function (callback) {
+    $.ajax({
+      url: this.get('config').url_map_delete + '/' + this.get('mapFile'),
+      method: 'GET',
+      contentType: 'application/json',
+      success: () => {
+        callback();
+      },
+      error: (message) => {
+        callback('Kartan kunde inte tas bort. Försök igen senare.');
+      }
+    });
+  },
 
-	updateToolConfig: function (config, callback) {
-		$.ajax({
-			url: `${this.get('config').url_tool_settings}?mapFile=${this.get('mapFile')}.json`,
-			method: 'PUT',
-			contentType: 'application/json',
-			data: JSON.stringify(config),
-			success: () => {
-				callback(true);
-			},
-			error: () => {
-				callback(false);
-			}
-		});
-	},
+  updateToolConfig: function (config, callback) {
+    $.ajax({
+      url: `${this.get('config').url_tool_settings}?mapFile=${this.get('mapFile')}.json`,
+      method: 'PUT',
+      contentType: 'application/json',
+      data: JSON.stringify(config),
+      success: () => {
+        callback(true);
+      },
+      error: () => {
+        callback(false);
+      }
+    });
+  },
 
-	updateMapConfig: function (config, callback) {
-		$.ajax({
-			url: `${this.get('config').url_map_settings}?mapFile=${this.get('mapFile')}.json`,
-			method: 'PUT',
-			contentType: 'application/json',
-			data: JSON.stringify(config),
-			success: () => {
-				callback(true);
-			},
-			error: () => {
-				callback(false);
-			}
-		});
-	},
+  updateMapConfig: function (config, callback) {
+    $.ajax({
+      url: `${this.get('config').url_map_settings}?mapFile=${this.get('mapFile')}.json`,
+      method: 'PUT',
+      contentType: 'application/json',
+      data: JSON.stringify(config),
+      success: () => {
+        callback(true);
+      },
+      error: () => {
+        callback(false);
+      }
+    });
+  },
 
-	/**
+  /**
 	 * Hämtar sträng med tillgängliga ad-grupper och konverterar till string[]
 	 */
-	fetchADGroups: function (callback) {
-		if (this.get('config').authentication_active) {
-			$.ajax({
-        url: "/mapservice/config/getusergroups",
+  fetchADGroups: function (callback) {
+    if (this.get('config').authentication_active) {
+      $.ajax({
+        url: '/mapservice/config/getusergroups',
         method: 'GET',
         success: (data) => {
-        let g = data.split(",");
-      let array = g.map(Function.prototype.call, String.prototype.trim)
+          let g = data.split(',');
+          let array = g.map(Function.prototype.call, String.prototype.trim);
 
-      callback(array);
-    },
-      error: (err) => {
-        console.log("Fel: ", err);
+          callback(array);
+        },
+        error: (err) => {
+          console.log('Fel: ', err);
+        }
+      });
+    } else {
+      return [];
+    }
+  },
+
+  updateConfig: function (config, callback) {
+    $.ajax({
+      url: `${this.get('config').url_layermenu_settings}?mapFile=${this.get('mapFile')}.json`,
+      method: 'PUT',
+      contentType: 'application/json',
+      data: JSON.stringify(config),
+      success: () => {
+        callback(true);
+      },
+      error: () => {
+        callback(false);
       }
-    })
+    });
+  },
 
-		} else {
-			return [];
-		}
-	},
+  findLayerInConfig: function (id) {
+    var layer = false;
 
-	updateConfig: function (config, callback) {
-		$.ajax({
-			url: `${this.get('config').url_layermenu_settings}?mapFile=${this.get('mapFile')}.json`,
-			method: 'PUT',
-			contentType: 'application/json',
-			data: JSON.stringify(config),
-			success: () => {
-				callback(true);
-			},
-			error: () => {
-				callback(false);
-			}
-		});
-	},
+    function findInGroups (groups, layerId) {
+      groups.forEach(group => {
+        var found = group.layers.find(l => l.id === layerId);
+        if (found) {
+          layer = found;
+        }
+        if (group.hasOwnProperty('groups')) {
+          findInGroups(group.groups, layerId);
+        }
+      });
+    }
 
-	findLayerInConfig: function (id) {
+    findInGroups(this.get('layerMenuConfig').groups, id);
 
-		var layer = false;
+    return layer;
+  },
 
-		function findInGroups(groups, layerId) {
-			groups.forEach(group => {
-				var found = group.layers.find(l => l.id === layerId);
-				if (found) {
-					layer = found;
-				}
-				if (group.hasOwnProperty('groups')) {
-					findInGroups(group.groups, layerId)
-				}
-			});
-		}
-
-		findInGroups(this.get('layerMenuConfig').groups, id);
-
-		return layer;
-	},
-
-	/**
+  /**
 	 * Tittar i config.json på attributet authentication_active om autentisering skall vara aktiverat eller ej
 	 */
-	getAuthSetting: function (callback) {
-		callback(this.get('config').authentication_active);
-	},
+  getAuthSetting: function (callback) {
+    callback(this.get('config').authentication_active);
+  },
 
-	getConfig: function (url, callback) {
-		$.ajax(url, {
-			success: data => {
-				callback(data);
-			}
-		});
-	}
+  getConfig: function (url, callback) {
+    $.ajax(url, {
+      success: data => {
+        callback(data);
+      }
+    });
+  }
 
 });
 

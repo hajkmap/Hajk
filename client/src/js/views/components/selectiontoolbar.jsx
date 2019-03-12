@@ -20,7 +20,7 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var Panel = require('views/panel');
+var Panel = require("views/panel");
 
 /**
  * @class
@@ -31,9 +31,9 @@ var SelectionPanelView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function () {
+  getInitialState: function() {
     return {
-      activeTool: this.props.model.get('activeTool')
+      activeTool: this.props.model.get("activeTool")
     };
   },
 
@@ -41,28 +41,28 @@ var SelectionPanelView = {
    * Triggered when the component is successfully mounted into the DOM.
    * @instance
    */
-  componentWillMount: function () {
-    this.props.model.on('change:activeTool', () => {
+  componentWillMount: function() {
+    this.props.model.on("change:activeTool", () => {
       this.setState({
-        activeTool: this.props.model.get('activeTool')
+        activeTool: this.props.model.get("activeTool")
       });
     });
   },
 
   componentWillUnmount() {
-    this.props.model.setActiveTool('');
-    this.props.model.off('change:activeTool');
+    this.props.model.setActiveTool("");
+    this.props.model.off("change:activeTool");
   },
 
-  activateTool: function (name) {
-    if (this.props.model.get('activeTool') === name) {
+  activateTool: function(name) {
+    if (this.props.model.get("activeTool") === name) {
       this.props.model.setActiveTool(undefined);
     } else {
       this.props.model.setActiveTool(name);
     }
   },
 
-  getClassNames: function (type) {
+  getClassNames: function(type) {
     return this.state.activeTool === type
       ? "btn btn-primary"
       : "btn btn-default";
@@ -73,26 +73,39 @@ var SelectionPanelView = {
    * @instance
    * @return {external:ReactElement}
    */
-  render: function () {
-
-    var anchor = this.props.model.get('anchor');
+  render: function() {
+    var anchor = this.props.model.get("anchor");
 
     return (
       <div className="selection-toolbar">
         <div>Sök baserat på markering i kartan</div>
         <div className="btn-group btn-group-lg">
-          <button onClick={() => this.activateTool('drawSelection')} type="button" className={this.getClassNames('drawSelection')} title="Markera efter polygon" >
-            <i className="fa iconmoon-yta icon"></i>
+          <button
+            onClick={() => this.activateTool("drawSelection")}
+            type="button"
+            className={this.getClassNames("drawSelection")}
+            title="Markera efter polygon"
+          >
+            <i className="fa iconmoon-yta icon" />
           </button>
-          <button onClick={() => this.activateTool('multiSelect')} type="button" className={this.getClassNames('multiSelect')} title="Markera flera objekt" >
-            <i className="fa fa-plus icon"></i>
+          <button
+            onClick={() => this.activateTool("multiSelect")}
+            type="button"
+            className={this.getClassNames("multiSelect")}
+            title="Markera flera objekt"
+          >
+            <i className="fa fa-plus icon" />
           </button>
-
         </div>
-        <div className="btn btn-link" onClick={(e) => {
+        <div
+          className="btn btn-link"
+          onClick={e => {
             e.preventDefault();
             this.props.model.abort();
-          }}>Rensa markering</div>
+          }}
+        >
+          Rensa markering
+        </div>
       </div>
     );
   }

@@ -192,40 +192,70 @@ var manager = Model.extend({
   },
 
   parseWFSCapabilitesTypes: function (data) {
-    var types = [];
-    $(data).find('FeatureType').each((i, featureType) => {
+    var types = [],
+        typeElements = $(data).find('FeatureType');
 
-      var projection = ""
-      ,   crs = "";
+    if (typeElements.length === 0) {
+      typeElements = $(data).find('wfs\\:FeatureType');      
+    }
 
+    typeElements.each((i, featureType) => {
+      
+      var projection = '',
+          name = "",
+          title = "",
+          crs = '';
+      
       if ($(featureType).find('DefaultCRS').length > 0) {
         crs = $(featureType).find('DefaultCRS').first().get(0).textContent;
       }
       if ($(featureType).find('DefaultSRS').length > 0) {
         crs = $(featureType).find('DefaultSRS').first().get(0).textContent;
       }
-
-      if (crs && typeof crs === "string") {
+      if ($(featureType).find('wfs\\:DefaultCRS').length > 0) {
+        crs = $(featureType).find('wfs\\:DefaultCRS').first().get(0).textContent;
+      }
+      if ($(featureType).find('wfs\\:DefaultSRS').length > 0) {
+        crs = $(featureType).find('wfs\\:DefaultSRS').first().get(0).textContent;
+      }
+      if (crs && typeof crs === 'string') {
         crs = crs.split(':');
       }
+
       if (Array.isArray(crs)) {
         crs.forEach(part => {
           if (/EPSG/.test(part)) {
-            projection += part + ":";
+            projection += part + ':';
           }
           if (/^\d+$/.test(Number(part))) {
             projection += part;
           }
         });
       }
-
-      if (!/^[A-Z]+:\d+$/.test(projection)) {
-        projection = "";
+      if (!/^[A-Z]+:\d+$/.test(projection)) {        
+        if (crs.length === 7) {
+          projection = crs[4] + ":" + crs[6];
+        } else {
+          projection = "";
+        }
       }
+      
+      if ($(featureType).find('Name').length > 0) {
+        name = $(featureType).find('Name').first().get(0).textContent
+      }
+      if ($(featureType).find('wfs\\:Name').length > 0) {
+        name = $(featureType).find('wfs\\:Name').first().get(0).textContent
+      }      
+      if ($(featureType).find('Title').length > 0) {
+        title = $(featureType).find('Title').first().get(0).textContent
+      }
+      if ($(featureType).find('wfs\\:Title').length > 0) {
+        title = $(featureType).find('wfs\\:Title').first().get(0).textContent
+      }    
 
       types.push({
-        name: $(featureType).find('Name').first().get(0).textContent,
-        title: $(featureType).find('Title').first().get(0).textContent,
+        name: name,
+        title: title,
         projection: projection
       });
     });
@@ -300,11 +330,68 @@ var manager = Model.extend({
 
   },
 
+  getAllWMSCapabilities: function(url) {
+    var promises = [];
+
+    var xmlParser = new X2JS({
+      attributePrefix: '',
+      arrayAccessFormPaths: [
+        "WMS_Capabilities.Capability.Layer.Layer",
+        "WMT_MS_Capabilities.Capability.Layer.Layer",
+        "WMS_Capabilities.Capability.Layer.Layer.Style",
+        "WMT_MS_Capabilities.Capability.Layer.Layer.Style",
+      ]
+    });
+
+    var versions = [
+      '1.3.0',
+      '1.1.1',
+      '1.1.0',
+      '1.0.0',
+    ];
+
+    versions.forEach(version => {
+      promises.push(
+        $.ajax(this.prepareProxyUrl(url), {
+          data: {
+            service: 'WMS',
+            request: 'GetCapabilities',
+            version
+          }
+        })
+      )
+    });
+
+    return Promise.all(promises)
+      .then(values => {
+        return values
+                .map(value => {
+                  
+                  /* 
+                    Openlayers can not parse all attributes in GetCapabilities response with WMS lower than 1.3.0, see Github issue.
+                    https://github.com/openlayers/openlayers/issues/5476
+
+                    Therefor the XML parser is used instead.
+                  */
+                  
+                  var xmlstr = typeof value === 'string' ? value : (new XMLSerializer()).serializeToString(value);
+                  var json = xmlParser.xml2js(xmlstr);
+
+                  // WMS_Capabilities or WMT_MS_Capabilities
+                  // First key in JSON
+                  var capabilitiesKey = Object.keys(json)[0];
+                 
+                  return json[capabilitiesKey];
+                })
+                .filter((wms, i, self) => self.findIndex(w => w.version === wms.version) === i);
+      })
+  },
+
   getWMSCapabilities: function (url, callback) {
     $.ajax(this.prepareProxyUrl(url), {
       data: {
         service: 'WMS',
-        request: 'GetCapabilities'
+        request: 'GetCapabilities',
       },
       success: data => {
         var response = (new format.WMSCapabilities()).read(data);
@@ -315,7 +402,6 @@ var manager = Model.extend({
       }
     });
   }
-
 });
 
 export default manager;

@@ -20,9 +20,9 @@
 //
 // https://github.com/hajkmap/Hajk
 
-var Legend = require('components/legend')
-,   LegendButton = require('components/legendbutton')
-,   InfoButton = require('components/infobutton');
+var Legend = require('components/legend'),
+  LegendButton = require('components/legendbutton'),
+  InfoButton = require('components/infobutton');
 
 /**
  * HighlightLayerProperties object
@@ -33,10 +33,11 @@ var Legend = require('components/legend')
  * @property {external:"ol.layer"} layer
  */
 var LayerModelProperties = {
-  name: "",
-  caption: "",
+  name: '',
+  caption: '',
   visible: false,
-  layer: undefined
+  layer: undefined,
+  visibleInLink: false
 };
 
 /**
@@ -58,18 +59,18 @@ var Layer = {
    * @param {string} url
    */
   loadJSON: function (url) {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
     script.src = url;
     script.async = true;
-    script.onload = () => { document.head.removeChild(script) };
+    script.onload = () => { document.head.removeChild(script); };
     document.head.appendChild(script);
   },
 
   initialize: function () {
     this.initialState = _.clone(this.attributes);
     this.on('change:shell', function (sender, shell) {
-      this.set("map", shell.get("map"));
+      this.set('map', shell.get('map'));
     }, this);
   },
 
@@ -88,7 +89,7 @@ var Layer = {
    * @return {LegendView} legend
    */
   getLegend: function () {
-    return this.get("legend");
+    return this.get('legend');
   },
 
   /**
@@ -97,7 +98,7 @@ var Layer = {
    * @return {string} name
    */
   getName: function () {
-    return this.get("name");
+    return this.get('name');
   },
 
   /**
@@ -106,7 +107,7 @@ var Layer = {
    * @return {string} caption
    */
   getCaption: function () {
-    return this.get("caption");
+    return this.get('caption');
   },
 
   /**
@@ -115,7 +116,7 @@ var Layer = {
    * @return {bool} visible
    */
   getVisible: function () {
-    return this.get("visible");
+    return this.get('visible');
   },
 
   /**
@@ -124,7 +125,7 @@ var Layer = {
    * @return {external:ol.layer} layer
    */
   getLayer: function () {
-    return this.layer || this.get("layer");
+    return this.layer || this.get('layer');
   },
 
   /**
@@ -133,7 +134,7 @@ var Layer = {
    * @return {boolean} infoVisible
    */
   getInfoVisible: function () {
-    return this.get("infoVisible");
+    return this.get('infoVisible');
   },
 
   /**
@@ -142,7 +143,7 @@ var Layer = {
    * @return {string} infoTitle
    */
   getInfoTitle: function () {
-    return this.get("infoTitle");
+    return this.get('infoTitle');
   },
 
   /**
@@ -151,7 +152,7 @@ var Layer = {
    * @return {string} infoText
    */
   getInfoText: function () {
-    return this.get("infoText");
+    return this.get('infoText');
   },
 
   /**
@@ -160,16 +161,16 @@ var Layer = {
    * @return {string} infoUrl
    */
   getInfoUrl: function () {
-    return this.get("infoUrl");
+    return this.get('infoUrl');
   },
- 
+
   /**
    * Get info url text.
    * @instance
    * @return {string} infoUrlText
    */
   getInfoUrlText: function () {
-    return this.get("infoUrlText");
+    return this.get('infoUrlText');
   },
 
   /**
@@ -178,7 +179,7 @@ var Layer = {
    * @return {string} infoOwner
    */
   getInfoOwner: function () {
-    return this.get("infoOwner");
+    return this.get('infoOwner');
   },
 
   /**
@@ -188,7 +189,7 @@ var Layer = {
    * @return {undefined}
    */
   setVisible: function (visible) {
-    this.set("visible", visible);
+    this.set('visible', visible);
   },
 
   /**
@@ -209,33 +210,33 @@ var Layer = {
    * @return {external:ReactElement} components.
    */
   getLegendComponents: function (settings) {
-      var legendComponents = {
-        legendButton: null,
-        legendPanel: null,
-        infoButton: null
-      };
+    var legendComponents = {
+      legendButton: null,
+      legendPanel: null,
+      infoButton: null
+    };
 
-      var legendProps = {
-        showLegend: settings.legendExpanded,
-        legends: this.getLegend(),
-        layer: this.getLayer()
-      };
+    var legendProps = {
+      showLegend: settings.legendExpanded,
+      legends: this.getLegend(),
+      layer: this.getLayer()
+    };
 
-      var legendButtonProps = {
-        checked: settings.legendExpanded
-      };
+    var legendButtonProps = {
+      checked: settings.legendExpanded
+    };
 
-      var infoButtonProps = {
-        checked: settings.infoExpanded
-      };
+    var infoButtonProps = {
+      checked: settings.infoExpanded
+    };
 
-      if (this.getLegend()) {
-        legendComponents.legendPanel = React.createElement(Legend, legendProps);
-        legendComponents.legendButton = React.createElement(LegendButton, legendButtonProps);
-        legendComponents.infoButton = React.createElement(InfoButton, infoButtonProps);
-      }
+    if (this.getLegend()) {
+      legendComponents.legendPanel = React.createElement(Legend, legendProps);
+      legendComponents.legendButton = React.createElement(LegendButton, legendButtonProps);
+      legendComponents.infoButton = React.createElement(InfoButton, infoButtonProps);
+    }
 
-      return legendComponents;
+    return legendComponents;
   },
 
   /**
@@ -246,7 +247,7 @@ var Layer = {
   getExtendedComponents: function (settings) {
     return {
       legend: this.getLegendComponents(settings)
-    }
+    };
   },
 
   /**
@@ -254,13 +255,13 @@ var Layer = {
    * @instance
    * @return {Array<external:"ol.Attribution">} attributions
    */
-  getAttributions: function() {
+  getAttributions: function () {
     if (this.get('attribution')) {
       return [
         new ol.Attribution({
           html: this.get('attribution')
         })
-      ]
+      ];
     }
   }
 };

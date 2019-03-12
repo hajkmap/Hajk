@@ -30,9 +30,9 @@ var StreetView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function() {
+  getInitialState: function () {
     return {
-      imageDate: ""
+      imageDate: ''
     };
   },
 
@@ -68,8 +68,8 @@ var StreetView = {
 
   renderInfoText: function () {
     if (!this.props.model.get('location')) {
-      return <div>Klicka i kartan för att aktivera street view. <br/>
-        Förstora fönstret genom att trycka på symbolen i övre högra hörnet. <br/>
+      return <div>Klicka i kartan för att aktivera street view. <br />
+        Förstora fönstret genom att trycka på symbolen i övre högra hörnet. <br />
       </div>;
     }
   },
@@ -81,12 +81,12 @@ var StreetView = {
    */
   render: function () {
     return (
-      <Panel title="Street View" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} instruction={atob(this.props.model.get('instruction'))}>
-        <div className="panel-content">
+      <Panel title='Street View' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} instruction={atob(this.props.model.get('instruction'))}>
+        <div className='panel-content'>
           <h3>Street view</h3>
           {this.renderInfoText()}
-          <div id="street-view-window"></div>
-          <div id="image-date">{this.state.imageDate ? this.state.imageDate : ""}</div>
+          <div id='street-view-window' />
+          <div id='image-date'>{this.state.imageDate ? this.state.imageDate : ''}</div>
         </div>
       </Panel>
     );

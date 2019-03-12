@@ -67,7 +67,7 @@ var CoordinatesModel = {
       name: 'coordinatesToolInteractionLayer'
     }));
     this.get('map').addLayer(this.get('interactionLayer'));
-    proj4.defs("EPSG:3021","+proj=tmerc +lat_0=0 +lon_0=15.80827777777778 +k=1 +x_0=1500000 +y_0=0 +ellps=bessel +towgs84=414.1,41.3,603.1,-0.855,2.141,-7.023,0 +units=m +no_defs");
+    proj4.defs('EPSG:3021', '+proj=tmerc +lat_0=0 +lon_0=15.80827777777778 +k=1 +x_0=1500000 +y_0=0 +ellps=bessel +towgs84=414.1,41.3,603.1,-0.855,2.141,-7.023,0 +units=m +no_defs');
   },
 
   /**
@@ -81,7 +81,7 @@ var CoordinatesModel = {
    *
    * @instance
    */
-  clicked: function(arg) {
+  clicked: function (arg) {
     this.set('visible', !this.get('visible'));
     this.set('toggled', !this.get('toggled'));
   },
@@ -106,14 +106,14 @@ var CoordinatesModel = {
       });
     var selectInteraction =
       new ol.interaction.Select({
-        layers: [this.get('interactionLayer')],
+        layers: [this.get('interactionLayer')]
       });
     var selectedFeatures = selectInteraction.getFeatures();
     var modifyInteraction =
       new ol.interaction.Modify({
         features: selectedFeatures,
         style: iconStyle,
-        pixelTolerance: 32,
+        pixelTolerance: 32
       });
 
     this.get('map').addInteraction(selectInteraction);
@@ -125,7 +125,7 @@ var CoordinatesModel = {
     var timer = null;
     feature.on('change', event => {
       if (timer) clearTimeout(timer);
-      timer = setTimeout(() => {this.updateCoordinates(event)}, 50)
+      timer = setTimeout(() => { this.updateCoordinates(event); }, 50);
     });
 
     selectedFeatures.push(feature);
@@ -144,7 +144,7 @@ var CoordinatesModel = {
     var interactions = this.get('interactions');
     var i;
 
-    for (i = 0;i < interactions.length; i++){
+    for (i = 0; i < interactions.length; i++) {
       this.get('map').removeInteraction(interactions[i]);
     }
 
@@ -197,7 +197,7 @@ var CoordinatesModel = {
    */
   presentCoordinates: function () {
     var presentedCoordinates = {
-      raw: this.get('position'),
+      raw: this.get('position')
     };
     var transformedCoordinates = {};
     var transformations = this.get('transformations');
@@ -213,7 +213,7 @@ var CoordinatesModel = {
 
       if (transformation.hasOwnProperty('default')) {
         transformedCoordinates[transformation.title].default = transformation.default;
-        transformedCoordinates[transformation.title].hint = transformation.hint || "";
+        transformedCoordinates[transformation.title].hint = transformation.hint || '';
       }
     });
 
@@ -250,7 +250,7 @@ var CoordinatesModel = {
       } else if (index === 1) {
         coordinates['y'] = element;
       } else {
-        throw 'Array index out of bounds while parsing coordinates.'
+        throw 'Array index out of bounds while parsing coordinates.';
       }
     });
     return coordinates;

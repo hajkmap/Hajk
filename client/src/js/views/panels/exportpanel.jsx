@@ -24,7 +24,7 @@ var Panel = require('views/panel');
 
 var ExportTiffSettings = React.createClass({
 
-  getInitialState: function() {
+  getInitialState: function () {
     return {
     };
   },
@@ -34,9 +34,9 @@ var ExportTiffSettings = React.createClass({
   },
 
   addPreview: function (map) {
-    var center = this.props.model.getPreviewFeature() ?
-                 ol.extent.getCenter(this.props.model.getPreviewFeature().getGeometry().getExtent()) :
-                 map.getView().getCenter();
+    var center = this.props.model.getPreviewFeature()
+      ? ol.extent.getCenter(this.props.model.getPreviewFeature().getGeometry().getExtent())
+      : map.getView().getCenter();
     this.props.model.addTiffPreview(center);
   },
 
@@ -45,113 +45,108 @@ var ExportTiffSettings = React.createClass({
     });
   },
 
-
-
   componentWillUnmount: function () {
     this.removePreview();
   },
 
   render: function () {
-
-    var map = this.props.olMap
-    ,   loader = null;
+    var map = this.props.olMap,
+      loader = null;
 
     if (this.state.loading) {
-      loader = <i className="fa fa-refresh fa-spin"></i>;
+      loader = <i className='fa fa-refresh fa-spin' />;
     }
-    
+
     if (this.props.model.previewLayer.getSource().getFeatures().length === 0) {
-      this.addPreview(map);    
-    }    
-    
-    //downloadlänk
-    if (this.props.model.get("downloadingTIFF")) {
-      downloadLink = <p>Hämtar...</p>
-    } else if (this.props.model.get("urlTIFF")) {
-      downloadLink = <a href={this.props.model.get("urlTIFF")} target="_blank"><p>Ladda ner TIFF</p></a>
+      this.addPreview(map);
+    }
+
+    // downloadlänk
+    if (this.props.model.get('downloadingTIFF')) {
+      downloadLink = <p>Hämtar...</p>;
+    } else if (this.props.model.get('urlTIFF')) {
+      downloadLink = <a href={this.props.model.get('urlTIFF')} target='_blank'><p>Ladda ner TIFF</p></a>;
     } else {
       downloadLink = null;
     }
-    
+
     return (
-      <div className="export-settings">
+      <div className='export-settings'>
         <div>
           <div>
-            <button onClick={this.exportTIFF} className="btn btn-primary">Skapa TIFF {loader}</button>
+            <button onClick={this.exportTIFF} className='btn btn-primary'>Skapa TIFF {loader}</button>
           </div>
           <div>{downloadLink}</div>
           <br />
-          <div id="tiff"></div>
+          <div id='tiff' />
         </div>
       </div>
     );
-
   }
 });
 
 var ExportPdfSettings = React.createClass({
   resolutions: [72, 96, 150, 200, 300],
-  paperFormats: ["A2", "A3", "A4"],
+  paperFormats: ['A2', 'A3', 'A4'],
 
-  getInitialState: function() {
+  getInitialState: function () {
     return {
       selectFormat: 'A4',
       selectOrientation: 'S',
       selectScale: '500',
       manualScale: '2500',
       selectResolution: '72',
-      center: this.props.model.getPreviewFeature() ?
-        this.props.model.getPreviewCenter() :
-        this.props.olMap.getView().getCenter(),
+      center: this.props.model.getPreviewFeature()
+        ? this.props.model.getPreviewCenter()
+        : this.props.olMap.getView().getCenter(),
       loading: false
     };
   },
 
   getPaperMeasures: function () {
-
     var pageSize = format => {
       switch (format) {
         case 'A4':
           return {
-            width:  this.getOrientation() === 'L' ? 297 : 210,
+            width: this.getOrientation() === 'L' ? 297 : 210,
             height: this.getOrientation() === 'L' ? 210 : 297
-          }
+          };
         case 'A3':
           return {
-            width:  this.getOrientation() === 'L' ? 420 : 297,
+            width: this.getOrientation() === 'L' ? 420 : 297,
             height: this.getOrientation() === 'L' ? 297 : 420
-          }
+          };
         case 'A2':
           return {
-              width:  this.getOrientation() === 'L' ? 594 : 420,
-              height: this.getOrientation() === 'L' ? 420 : 594
-          }
+            width: this.getOrientation() === 'L' ? 594 : 420,
+            height: this.getOrientation() === 'L' ? 420 : 594
+          };
         default: {
           return {
             width: 0,
             height: 0
-          }
+          };
         }
       }
-    }
+    };
 
-    var width  = pageSize(this.getFormat()).width
-    ,   height = pageSize(this.getFormat()).height;
+    var width = pageSize(this.getFormat()).width,
+      height = pageSize(this.getFormat()).height;
 
     return {
       width: ((width / 25.4)),
-      height:  ((height / 25.4))
+      height: ((height / 25.4))
     };
   },
 
-  getPreviewPaperMeasures: function() { 
-    var size = this.getPaperMeasures()
-    ,   inchInMillimeter = 25.4
-    ,   defaultPixelSizeInMillimeter = 0.28
-    ,   dpi = (inchInMillimeter / defaultPixelSizeInMillimeter); // ~90
+  getPreviewPaperMeasures: function () {
+    var size = this.getPaperMeasures(),
+      inchInMillimeter = 25.4,
+      defaultPixelSizeInMillimeter = 0.28,
+      dpi = (inchInMillimeter / defaultPixelSizeInMillimeter); // ~90
     return {
       width: size.width * dpi,
-      height:  size.height * dpi
+      height: size.height * dpi
     };
   },
 
@@ -177,43 +172,43 @@ var ExportPdfSettings = React.createClass({
     });
   },
 
-  setResolution: function(e) {
+  setResolution: function (e) {
     this.setState({
       selectResolution: e.target.value
     });
   },
 
-  setScale: function(e) {
+  setScale: function (e) {
     this.setState({
       selectScale: e.target.value
     });
   },
 
-  setCenter: function(val) {
+  setCenter: function (val) {
     this.setState({
       center: val
     });
   },
 
-  setManualScale: function(e) {
+  setManualScale: function (e) {
     if (e.target.value.startsWith('1:')) {
       e.target.value = e.target.value.split(':')[1];
     }
 
     var val = this.getScale();
-    //if (e.target.value < 250) {
+    // if (e.target.value < 250) {
     //  val = 250;
-    //} else if (e.target.value > 250000) {
+    // } else if (e.target.value > 250000) {
     //  val = 250000;
-    //} else {
-      val = e.target.value;
-    //}
+    // } else {
+    val = e.target.value;
+    // }
     this.setState({
       manualScale: val
     });
   },
 
-  setOrientation: function(e) {
+  setOrientation: function (e) {
     this.setState({
       selectOrientation: e.target.value
     });
@@ -224,54 +219,53 @@ var ExportPdfSettings = React.createClass({
   },
 
   addPreview: function (map) {
-    var scale  = this.getScale()
-    ,   paper  = this.getPreviewPaperMeasures()
-    //,   center = this.state.center;
-    ,   center = this.props.model.getPreviewFeature() ?
-                 ol.extent.getCenter(this.props.model.getPreviewFeature().getGeometry().getExtent()) :
-                 map.getView().getCenter();
+    var scale = this.getScale(),
+      paper = this.getPreviewPaperMeasures(),
+      //,   center = this.state.center;
+      center = this.props.model.getPreviewFeature()
+        ? ol.extent.getCenter(this.props.model.getPreviewFeature().getGeometry().getExtent())
+        : map.getView().getCenter();
 
     this.props.model.addPreview(scale, paper, center);
 
-
     var preScale = undefined;
 
-    switch(scale){
-      case "250":
+    switch (scale) {
+      case '250':
         preScale = 6;
         break;
-      case "500":
+      case '500':
         preScale = 6;
         break;
-      case "1000":
+      case '1000':
         preScale = 5;
         break;
-      case "2500":
+      case '2500':
         preScale = 4;
         break;
-      case "5000":
+      case '5000':
         preScale = 3;
         break;
-      case "10000":
+      case '10000':
         preScale = 2;
         break;
-      case "25000":
+      case '25000':
         preScale = 1;
         break;
-      case "50000":
+      case '50000':
         preScale = 1;
         break;
-      case "100000":
+      case '100000':
         preScale = 0;
         break;
-      case "250000":
+      case '250000':
         preScale = 0;
         break;
       default:
         preScale = map.getView().getZoom();
         break;
     }
-    if(this.props.model.get('autoScale') && isMobile && mobilAnpassningEnabled && preScale < map.getView().getZoom()){
+    if (this.props.model.get('autoScale') && isMobile && mobilAnpassningEnabled && preScale < map.getView().getZoom()) {
       map.getView().setZoom(preScale);
     }
   },
@@ -280,14 +274,14 @@ var ExportPdfSettings = React.createClass({
     this.setState({
       loading: true
     });
-    var node = $(ReactDOM.findDOMNode(this)).find('#pdf')
-    ,   options = {
-          size: this.getPaperMeasures(),
-          format: this.getFormat(),
-          orientation: this.getOrientation(),
-          scale: this.getScale(),
-          resolution: this.getResolution()
-        }
+    var node = $(ReactDOM.findDOMNode(this)).find('#pdf'),
+      options = {
+        size: this.getPaperMeasures(),
+        format: this.getFormat(),
+        orientation: this.getOrientation(),
+        scale: this.getScale(),
+        resolution: this.getResolution()
+      }
     ;
     node.html('');
     this.props.model.exportPDF(options, () => {
@@ -302,17 +296,17 @@ var ExportPdfSettings = React.createClass({
   },
 
   render: function () {
-    var map = this.props.olMap
-    ,   scales = this.props.model.get('scales')
-    ,   options
-    ,   resolutionOptions
-    ,   paperFormatOptions
-    ,   loader = null
-    ,   downloadLink = null
+    var map = this.props.olMap,
+      scales = this.props.model.get('scales'),
+      options,
+      resolutionOptions,
+      paperFormatOptions,
+      loader = null,
+      downloadLink = null
     ;
 
     if (this.state.loading) {
-      loader = <i className="fa fa-refresh fa-spin"></i>;
+      loader = <i className='fa fa-refresh fa-spin' />;
     }
 
     if (!this.props.visible) return null;
@@ -321,80 +315,80 @@ var ExportPdfSettings = React.createClass({
 
     resolutionOptions = this.resolutions.map((s, i) => {
       if (this.state.selectFormat === 'A2') {
-        return s !== 300 
+        return s !== 300
           ? <option key={i} value={s}>{s}</option>
           : <option key={i} value={s} disabled>{s}</option>;
-        } else {
-          return <option key={i} value={s}>{s}</option>;
-        }
-      });
+      } else {
+        return <option key={i} value={s}>{s}</option>;
+      }
+    });
     paperFormatOptions = this.paperFormats.map((s, i) => {
       if (this.state.selectResolution === '300') {
         return s !== 'A2'
           ? <option key={i} value={s}>{s}</option>
           : <option key={i} value={s} disabled>{s}</option>;
-        } else {
-          return <option key={i} value={s}>{s}</option>;
-        }
+      } else {
+        return <option key={i} value={s}>{s}</option>;
+      }
     });
-        
+
     this.addPreview(map);
 
-    //downloadlänk
-    if (this.props.model.get("downloadingPdf")) {
-      downloadLink = <p>Hämtar...</p>
-    } else if (this.props.model.get("urlPdf")) {
-      downloadLink = <a href={this.props.model.get("urlPdf")} target="_blank"><p>Ladda ner PDF</p></a>
+    // downloadlänk
+    if (this.props.model.get('downloadingPdf')) {
+      downloadLink = <p>Hämtar...</p>;
+    } else if (this.props.model.get('urlPdf')) {
+      downloadLink = <a href={this.props.model.get('urlPdf')} target='_blank'><p>Ladda ner PDF</p></a>;
     } else {
       downloadLink = null;
     }
 
     return (
-      <div className="export-settings">
-        <div className="panel panel-default">
-          <div className="panel-heading">Välj pappersstorlek</div>
-          <div className="panel-body">
+      <div className='export-settings'>
+        <div className='panel panel-default'>
+          <div className='panel-heading'>Välj pappersstorlek</div>
+          <div className='panel-body'>
             <select onChange={this.setFormat} value={this.state.selectFormat}>
               {paperFormatOptions}
             </select>
           </div>
         </div>
-        <div className="panel panel-default">
-          <div className="panel-heading">Välj orientering</div>
-          <div className="panel-body">
+        <div className='panel panel-default'>
+          <div className='panel-heading'>Välj orientering</div>
+          <div className='panel-body'>
             <select onChange={this.setOrientation} value={this.state.selectOrientation}>
-              <option value="P">stående</option>
-              <option value="L">liggande</option>
+              <option value='P'>stående</option>
+              <option value='L'>liggande</option>
             </select>
           </div>
         </div>
-        <div className="panel panel-default">
-          <div className="panel-heading">Välj skala</div>
-          <div className="panel-body">
+        <div className='panel panel-default'>
+          <div className='panel-heading'>Välj skala</div>
+          <div className='panel-body'>
             <select onChange={this.setScale} value={this.state.selectScale}>
               {options}
-              <option value="other">Annan skala</option>
+              <option value='other'>Annan skala</option>
             </select>
-            {this.state.selectScale==='other' && <input type="text" onChange={this.setManualScale} value={this.state.manualScale}></input>}
+            {this.state.selectScale === 'other' && <input type='text' onChange={this.setManualScale} value={this.state.manualScale} />}
           </div>
         </div>
-        <div className="panel panel-default">
-          <div className="panel-heading">Välj upplösning</div>
-          <div className="panel-body">
+        <div className='panel panel-default'>
+          <div className='panel-heading'>Välj upplösning</div>
+          <div className='panel-body'>
             <select onChange={this.setResolution} value={this.state.selectResolution}>
               {resolutionOptions}
             </select>
           </div>
         </div>
         <div>
-          <button onClick={this.exportPDF} className="btn btn-main">Skapa PDF {loader}</button>
+          <button onClick={this.exportPDF} className='btn btn-primary'>Skapa PDF {loader}</button>
           <br />
           {downloadLink}
         </div>
         <br />
-        <div id="pdf"></div>
+        <div id='pdf' />
       </div>
-    )
+    );
   }
 });
 
@@ -429,7 +423,6 @@ var ExportPanelView = {
         downloadingTIFF: this.props.model.get('downloadingTIFF')
       });
     });
-
   },
 
   componentWillUnmount: function () {
@@ -445,7 +438,7 @@ var ExportPanelView = {
    * @instance
    * @return {object}
    */
-  getInitialState: function() {
+  getInitialState: function () {
     return {
       showExportSettings: true,
       activeTool: this.props.model.get('activeTool')
@@ -485,24 +478,24 @@ var ExportPanelView = {
 
   getClassNames: function (type) {
     return this.state.activeTool === type
-      ? "btn btn-primary"
-      : "btn btn-default";
+      ? 'btn btn-primary'
+      : 'btn btn-default';
   },
 
   renderToolbar: function () {
     const activeFormats = [];
     if (this.props.model.get('pdfActive')) {
-        activeFormats.push('pdf');
+      activeFormats.push('pdf');
     }
     if (this.props.model.get('tiffActive')) {
-        activeFormats.push('tiff');
+      activeFormats.push('tiff');
     }
     return (
       <div>
         <div>Välj format</div>
-        <div className="btn-group">
+        <div className='btn-group'>
           {activeFormats.map((format, i) =>
-            <button key={i} onClick={() => this.activateTool(format)} type="button" className={this.getClassNames(format)} >
+            <button key={i} onClick={() => this.activateTool(format)} type='button' className={this.getClassNames(format)} >
               {format.toUpperCase()}
             </button>
           )}
@@ -518,25 +511,25 @@ var ExportPanelView = {
    */
   render: function () {
     var activeTool = this.props.model.get('activeTool');
-    var tool = <div>Välj utdataformat.</div>
+    var tool = <div>Välj utdataformat.</div>;
     if (activeTool === 'pdf' && this.props.model.get('olMap')) {
       tool = <ExportPdfSettings
         visible={this.state.showExportSettings}
         model={this.props.model}
-        olMap={this.props.model.get('olMap')}/>;
+        olMap={this.props.model.get('olMap')} />;
     }
     if (activeTool === 'tiff' && this.props.model.get('olMap')) {
       tool = <ExportTiffSettings
         model={this.props.model}
-        olMap={this.props.model.get('olMap')}/>;
+        olMap={this.props.model.get('olMap')} />;
     }
     return (
-      <Panel title="Skriv ut karta" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
-        <div className="export-panel">
+      <Panel title='Skriv ut karta' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
+        <div className='export-panel'>
           <div>
             {this.renderToolbar()}
           </div>
-          <br/>
+          <br />
           {tool}
         </div>
       </Panel>

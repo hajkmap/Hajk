@@ -26,23 +26,29 @@ var ctrlIsDown = false;
 window.onkeydown = (e) => {
   shiftIsDown = e.shiftKey;
   ctrlIsDown = e.ctrlKey;
-}
+};
 
-window.onkeyup  = (e) => {
+window.onkeyup = (e) => {
   shiftIsDown = e.shiftKey;
   ctrlIsDown = e.ctrlKey;
-}
+};
 
 /**
  * @class
  */
 SearchResultGroup = {
 
-  componentDidMount: function () {
+  getInitialState: function () {
+    return {
+      activeClass: null,
+      showInfobox: false
+    };
+  },
 
+  componentDidMount: function () {
     var groups = $(ReactDOM.findDOMNode(this)).find('.group');
 
-    groups.click(function() {
+    groups.click(function () {
       $(this).next().toggleClass('hidden');
     });
 
@@ -51,11 +57,10 @@ SearchResultGroup = {
         var items = this.props.model.get('selectedIndices').filter(item => group.id === item.group);
         if (items.length > 0) {
           items.forEach(item => {
+            var nth = item.index + 1,
+              elem = $(group).next().find('div:nth-child(' + nth + ')');
 
-            var nth = item.index + 1
-            ,   elem = $(group).next().find('div:nth-child(' + nth + ')');
-
-            elem.addClass('selected');
+            //elem.addClass('selected');
           });
         }
       });
@@ -63,10 +68,32 @@ SearchResultGroup = {
   },
 
   handleClick: function (hit, index, event) {
+    var element = $(event.target),
+      parent = $(ReactDOM.findDOMNode(this)),
+      group = parent.find('.group');
 
-    var element = $(event.target)
-    ,   parent = $(ReactDOM.findDOMNode(this))
-    ,   group = parent.find('.group');
+      this.setState({
+        activeClass: index
+      });
+
+      var currentId = 'hit-' + index + '-' + group[0].id;
+      var infoboxId = 'hit-' + index + '-' + group[0].id + '-infobox';
+
+      if ($("#"+currentId).next('#'+infoboxId).length == 0) {
+        if (event.target.className == "fa fa-angle-down") {
+          $("#"+currentId).addClass("show-infobox");
+          $(event.target).removeClass("fa fa-angle-down");
+          $(event.target).addClass("fa fa-angle-up");
+
+          $('<div id='+infoboxId+' class="infobox-text"></div>').insertAfter($("#"+currentId));
+        }
+      } else if (event.target.className == "fa fa-angle-up") {
+          $("#"+currentId).removeClass("show-infobox");
+          $(event.target).removeClass("fa fa-angle-up");
+          $(event.target).addClass("fa fa-angle-down");
+
+         $("#"+infoboxId).remove();
+      }
 
     var item = {
       index: index,
@@ -74,52 +101,48 @@ SearchResultGroup = {
       hit: hit,
       id: group[0].id
     };
-    
-    if (shiftIsDown) {
 
+    if (shiftIsDown) {
       let topIndex = 0;
       let items = [];
       let i;
 
-      parent.find('.selected').each(function (e, i) {                
-        topIndex = $(this).attr("data-index");
-      });                
+      parent.find('.selected').each(function (e, i) {
+        topIndex = $(this).attr('data-index');
+      });
 
       i = topIndex;
 
-      for (; i <= index; i++) {              
+      for (; i <= index; i++) {
         items.push({
           index: i,
           hits: this.props.result.hits,
           hit: this.props.result.hits[i],
           id: group[0].id
-        });        
+        });
       }
 
-      items.forEach(item => {
-        this.props.model.append(item);
-        parent.find(`div[data-index=${item.index}]`).addClass("selected");
-      });
-
+      //items.forEach(item => {
+      //  this.props.model.append(item);
+      //  parent.find(`div[data-index=${item.index}]`).addClass('selected');
+      //});
     } else if (ctrlIsDown) {
-      if (element.hasClass('selected')) {
-        this.props.model.detach(item);
-      } else {
-        this.props.model.append(item);
-      }
+      //if (element.hasClass('selected')) {
+      //  this.props.model.detach(item);
+      //} else {
+      //  this.props.model.append(item);
+      //}
     } else {
-      $('.search-results').find('.selected').each(function (e) {
-        $(this).removeClass('selected');
-      });
-      this.props.model.focus(item, this.props.isBar == "yes");
+      //$('.search-results').find('.selected').each(function (e) {
+      //  $(this).removeClass('selected');
+      //});
+      this.props.model.focus(item, this.props.isBar == 'yes');
+      this.props.model.focusInfobox(item, this.props.isBar == 'yes');
     }
 
-    if (!shiftIsDown) {
-      if (element.hasClass('selected'))
-        element.removeClass('selected');
-      else
-        element.addClass('selected');
-    }
+    //if (!shiftIsDown) {
+    //  if (element.hasClass('selected')) { element.removeClass('selected'); } else { element.addClass('selected'); }
+    //}
 
     if (isMobile) {
       if (this.props.parentView) {
@@ -128,35 +151,44 @@ SearchResultGroup = {
         }
       }
     }
-
   },
 
   render: function () {
-
-    var id = this.props.id
-    ,   groupStyleClass = this.props.numGroups === 1 ? "" : "hidden"
+    var id = this.props.id,
+      groupStyleClass = this.props.numGroups === 1 ? '' : 'hidden'
     ;
+
+    var isActive = (index) => {
+      return this.state.activeClass === index ? 'selected' : '';
+    };
 
     return (
       <div>
-        <div className="group" id={this.props.id}>{this.props.result.layer}
-          <span className="label">{this.props.result.hits.length}</span>
+        <div className='group' id={this.props.id}>{this.props.result.layer}
+          <span className='label'>{this.props.result.hits.length}</span>
         </div>
         <div className={groupStyleClass}>
           {
             this.props.result.hits.map((hit, i) => {
-              function getTitle(property) {
+              function getTitle (property) {
                 if (Array.isArray(property)) {
                   return property.map(item => hit.getProperties()[item]).join(', ');
                 } else {
-                  return hit.getProperties()[property] || property
+                  return hit.getProperties()[property] || property;
                 }
               }
-              var hitId = "hit-" + i + "-" + id
-              ,   title = getTitle(this.props.result.displayName)
-              ,   index = i
+              var hitId = 'hit-' + i + '-' + id,
+                title = getTitle(this.props.result.displayName),
+                index = i
               ;
-              return (<div id={hitId} key={hitId} index={i} data-index={i} onClick={this.handleClick.bind(this, hit, i)}>{title}</div>);
+              return (
+                <div id={hitId} className={isActive(index)} key={hitId} index={i} data-index={i} onClick={this.handleClick.bind(this, hit, i)}>
+                  {title}
+                  <span className='clickable pull-right' title='Dölj info' style={{ position: 'relative', marginRight: '14px' }}>
+                    <i className='fa fa-angle-down' style={{ fontSize: '18px' }} />
+                  </span>
+                </div>
+              );
             })
           }
         </div>

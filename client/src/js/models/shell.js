@@ -23,7 +23,7 @@
 var MapModel = require('models/map');
 var LayerCollection = require('collections/layers');
 var ToolCollection = require('collections/tools');
-var NavigationPanelModel = require("models/navigation");
+var NavigationPanelModel = require('models/navigation');
 
 /**
  * @description
@@ -72,7 +72,7 @@ var ShellModel = {
           return {
             type: panel.get('panel'),
             model: panel
-          }
+          };
         });
 
       this.set('navigation', new NavigationPanelModel({ panels: panels }));
