@@ -228,7 +228,6 @@
           } else {
               var wfslayers = internal.overrideGlobalSearchConfig(searchTool, data);
               searchTool.options.sources = wfslayers;
-              data.wfslayers = wfslayers;
             }
         }
 
@@ -250,7 +249,10 @@
                     return layer;
                 }
             });
-            firTool.options.realEstateLayerCaption = realEstateLayer[0].caption;
+
+            if (realEstateLayer[0]) {
+              firTool.options.realEstateLayerCaption = realEstateLayer[0].caption;
+            }
 
             // add caption for real estate WMS layer to the options
             var realEstateWMSLayer = data.wmslayers.filter(layer => {
