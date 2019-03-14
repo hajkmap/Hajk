@@ -414,8 +414,8 @@ FirSearchResultGroup = {
                                             infobox = this.props.result.hits[i].infobox;
                                         }
 
-                                        var itemId = this.props.result.hits[i].get("text");//group.hits[i].getProperties().text;
-                                        if (featureId === itemId) { //if it is first hit then should found=false
+                                        var itemId = this.props.result.hits[i].get("text");
+                                        if (featureId && featureId === itemId) { //if it is first hit then should found=false
                                             found = true;
                                             break;
                                         }
@@ -426,6 +426,7 @@ FirSearchResultGroup = {
                                     }
                                 }
                             );
+                            
                             var sameNamePromises = this.props.model.findWithSameNames(names, wmsLayer, true);
 
                             Promise.all(sameNamePromises).then(() => {
