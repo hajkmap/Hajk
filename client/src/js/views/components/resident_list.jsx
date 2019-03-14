@@ -170,7 +170,20 @@ var ResidentList = {
 
     return (
         <div className='panel panel-default kir'>
-            <div className='panel-heading'>Boendeförteckning från sökresultat
+            <div className='panel-heading'>Boendeförteckning
+              {
+                  this.props.model.get("instructionResidentList") != null ?
+                  <button className='btn-info-fir' onClick={() => this.setState({ instructionVisible: !this.state.instructionVisible })}>
+                    <img src={this.props.model.get("infoKnappLogo")} />
+                  </button> : ""
+              }
+
+              {
+                this.state.instructionVisible ?
+                <div className='panel-body-instruction'
+                  dangerouslySetInnerHTML={{__html: atob(this.props.model.get("instructionResidentList"))}} /> : ""
+              }
+
               <button className={ expandButtonClass } onClick={(e) => { this.setState({ visible: !this.state.visible })}}></button>
             </div>
 
