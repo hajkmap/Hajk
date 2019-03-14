@@ -46,7 +46,7 @@ var PropertyList = {
       } else {
         columns.pop(option);
       }
-      
+
       this.props.model.set("chosenColumns", columns);
     }.bind(this));
   },
@@ -68,7 +68,7 @@ var PropertyList = {
     return (
         <div className='panel panel-default kir'>
           <div className='panel-heading'>
-            Skapa fastighetsförteckning
+            Fastighetsförteckning
             {
               this.props.model.get("instructionSkapaFastighetsforteckning") != null ?
               <button className='btn-info-fir'

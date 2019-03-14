@@ -40,7 +40,16 @@ var ResidentList = {
 
   getResidentData: function(callback) {
     var hits = this.props.model.get("items"),
-        mapProjection = this.props.model.get("map").getView().getProjection().getCode();
+        mapProjection = this.props.model.get("map").getView().getProjection().getCode(),
+        wfslayer = null;
+
+    if (this.config.residentListWfsLayer && this.config.residentListWfsLayer.length > 0) {
+      wfslayer = this.config.residentListWfsLayer[0];
+    }
+    else {
+      concole.error("KIR WFS layer not configured");
+      return;
+    }
 
     if (!hits || hits.length === 0) {
        alert("Inga fastigheter eller adresser valda");
@@ -50,20 +59,20 @@ var ResidentList = {
     var filters = [];
     hits.forEach(function(l) {
       l.hits.forEach(function(h) {
-        filters.push(new ol.format.filter.Intersects(this.config.residentDataLayer.geometryColumn, h.getGeometry(), mapProjection))
+        filters.push(new ol.format.filter.Intersects(wfslayer.geometryField, h.getGeometry(), mapProjection))
       }.bind(this));
     }.bind(this));
 
     var featureRequest = new ol.format.WFS().writeGetFeature({
       srsName: mapProjection,
-      featureTypes: [this.config.residentDataLayer.layerName],
-      outputFormat: 'application/json',
+      featureTypes: wfslayer.layers,
+      outputFormat: wfslayer.outputFormat,
       filter: ol.format.filter.or.apply(null, filters)
     });
 
     this.setState({ fetchingExcel: true, excelIsReady: false, excelUrl: "", errorMessage: null });
     $.ajax({
-      url: this.config.residentDataLayer.url,
+      url: wfslayer.url,
       method: 'POST',
       contentType: 'application/xml',
       xhrFields: { withCredentials: true },
