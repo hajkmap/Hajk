@@ -451,8 +451,6 @@ var FirModel = {
 
     bufferPoint: function(feature){
         var parser = new jsts.io.OL3Parser();
-        parser.inject(ol.geom.Point, ol.geom.LineString, ol.geom.LinearRing, ol.geom.Polygon, ol.geom.MultiPoint, ol.geom.MultiLineString, ol.geom.MultiPolygon);
-
         var bufferLength = 0.01;
 
         var jstsGeom = parser.read(feature.getGeometry());

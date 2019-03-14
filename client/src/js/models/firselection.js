@@ -347,8 +347,6 @@ var FirSelectionModel = {
 
     bufferSearching: function(bufferSearchingLength) {
         var parser = new jsts.io.OL3Parser();
-        parser.inject(ol.geom.Point, ol.geom.LineString, ol.geom.LinearRing, ol.geom.Polygon, ol.geom.MultiPoint, ol.geom.MultiLineString, ol.geom.MultiPolygon);
-
         var bufferLength = bufferSearchingLength;
         this.get("firBufferLayer").getSource().clear();
 

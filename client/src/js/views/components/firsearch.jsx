@@ -481,8 +481,6 @@ var FirSearchView = {
     hittaGrannar: function() {
         this.props.model.set("hittaGrannarLayer", true);
         var parser = new jsts.io.OL3Parser();
-        parser.inject(ol.geom.Point, ol.geom.LineString, ol.geom.LinearRing, ol.geom.Polygon, ol.geom.MultiPoint, ol.geom.MultiLineString, ol.geom.MultiPolygon);
-
         var radioCheckedAngransade = document.getElementById("hittaGrannar").checked,
             radioCheckedMedBuffer = document.getElementById("hittaGrannarMedBuffer").checked,
             bufferLength;
