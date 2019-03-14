@@ -20,12 +20,6 @@ import Alert from "./Alert";
 import Loader from "./Loader";
 import { isMobile } from "../utils/IsMobile.js";
 
-// import Cesium from "cesium/Source/Cesium";
-// import Cesium from "cesium/Build/Cesium/Cesium";
-// import "cesium/Build/Cesium/Widgets/widgets.css";
-// import OLCesium from "olcs/OLCesium.js";
-// window.Cesium = Cesium;
-
 // Global customizations that previously went to custom.css
 // should now go to public/customTheme.json. They are later
 // merged when MUI Theme is created in index.js.
@@ -267,10 +261,6 @@ class App extends Component {
           }
         });
       });
-
-    // let ol2dMap = this.appModel.getMap();
-    // const ol3d = new OLCesium({ map: ol2dMap }); // ol2dMap is the ol.Map instance
-    // ol3d.setEnabled(true);
   }
 
   // Catches exceptions generated in descendant components. Unhandled exceptions will cause the entire component tree to unmount.
