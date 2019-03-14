@@ -23,6 +23,7 @@
 import X2JS from "x2js";
 import { Model } from "backbone";
 import $ from "jquery";
+import { prepareProxyUrl } from "../utils/ProxyHelper";
 
 var search = Model.extend({
   defaults: {
@@ -86,14 +87,8 @@ var search = Model.extend({
     });
   },
 
-  prepareProxyUrl: function(url) {
-    return this.get("config").url_proxy
-      ? this.get("config").url_proxy + "/" + url.replace(/http[s]?:\/\//, "")
-      : url;
-  },
-
   getArcGISLayerDescription: function(url, layer, callback) {
-    url = this.prepareProxyUrl(url);
+    url = prepareProxyUrl(url, this.get("config").url_proxy);
     url += "/" + layer.id;
 
     console.log("Layer", layer);
@@ -110,7 +105,7 @@ var search = Model.extend({
   },
 
   getLayerDescription: function(url, layer, arcgis, callback) {
-    url = this.prepareProxyUrl(url);
+    url = prepareProxyUrl(url, this.get("config").url_proxy);
     if (arcgis) {
       this.getArcGISLayerDescription(url, layer, callback);
     } else {
@@ -244,7 +239,7 @@ var search = Model.extend({
   },
 
   getWMSCapabilities: function(url, callback) {
-    $.ajax(this.prepareProxyUrl(url), {
+    $.ajax(prepareProxyUrl(url, this.get("config").url_proxy), {
       data: {
         service: "WFS",
         request: "GetCapabilities"

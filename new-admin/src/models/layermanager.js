@@ -24,6 +24,7 @@ import X2JS from "x2js";
 import { Model } from "backbone";
 import { format } from "openlayers";
 import $ from "jquery";
+import { prepareProxyUrl } from "../utils/ProxyHelper";
 
 var manager = Model.extend({
   defaults: {
@@ -34,7 +35,10 @@ var manager = Model.extend({
 
   fetchAllMapConfigsToModel: function(callback = function devNull() {}) {
     $.ajax({
-      url: this.prepareProxyUrl(this.get("config").url_map_list),
+      url: prepareProxyUrl(
+        this.get("config").url_map_list,
+        this.get("config").url_proxy
+      ),
       method: "GET",
       contentType: "application/json",
       success: data => {
@@ -43,8 +47,9 @@ var manager = Model.extend({
 
         // Loop through all config names, and fetch the config files
         for (let i = 0; i < data.length; i++) {
-          let url = this.prepareProxyUrl(
-            this.get("config").url_map + "/" + data[i]
+          let url = prepareProxyUrl(
+            this.get("config").url_map + "/" + data[i],
+            this.get("config").url_proxy
           );
           fetch(url).then(res => {
             // JSONify, filter just for one tool (layerswitcher), and then use first element (it's an array…)
@@ -104,7 +109,7 @@ var manager = Model.extend({
   },
 
   getConfig: function(url) {
-    $.ajax(this.prepareProxyUrl(url), {
+    $.ajax(prepareProxyUrl(url, this.get("config").url_proxy), {
       success: data => {
         var layers = [];
         data.extendedwmslayers.forEach(l => {
@@ -222,14 +227,8 @@ var manager = Model.extend({
     });
   },
 
-  prepareProxyUrl: function(url) {
-    return this.get("config").url_proxy
-      ? this.get("config").url_proxy + "/" + url.replace(/http[s]?:\/\//, "")
-      : url;
-  },
-
   getWFSLayerDescription: function(url, layer, callback) {
-    url = this.prepareProxyUrl(url);
+    url = prepareProxyUrl(url, this.get("config").url_proxy);
     $.ajax(url, {
       data: {
         request: "describeFeatureType",
@@ -357,7 +356,7 @@ var manager = Model.extend({
   },
 
   getWFSCapabilities: function(url, callback) {
-    $.ajax(this.prepareProxyUrl(url), {
+    $.ajax(prepareProxyUrl(url, this.get("config").url_proxy), {
       data: {
         service: "WFS",
         request: "GetCapabilities"
@@ -369,7 +368,7 @@ var manager = Model.extend({
           url = url
             .replace("/services/", "/rest/services/")
             .replace("WFSServer", "legend?f=pjson");
-          $.ajax(this.prepareProxyUrl(url), {
+          $.ajax(prepareProxyUrl(url, this.get("config").url_proxy), {
             dataType: "json",
             success: legend => {
               if (legend && legend.layers && legend.layers[0]) {
@@ -396,7 +395,7 @@ var manager = Model.extend({
   },
 
   getArcGISLayerDescription: function(url, layer, callback) {
-    url = this.prepareProxyUrl(url);
+    url = prepareProxyUrl(url, this.get("config").url_proxy);
     url += "/" + layer.id;
 
     $.ajax(url, {
@@ -411,7 +410,7 @@ var manager = Model.extend({
   },
 
   getArcGISCapabilities: function(url, callback) {
-    $.ajax(this.prepareProxyUrl(url), {
+    $.ajax(prepareProxyUrl(url, this.get("config").url_proxy), {
       dataType: "json",
       data: {
         f: "json"
@@ -426,7 +425,7 @@ var manager = Model.extend({
   },
 
   getWMSCapabilities: function(url, callback) {
-    $.ajax(this.prepareProxyUrl(url), {
+    $.ajax(prepareProxyUrl(url, this.get("config").url_proxy), {
       data: {
         service: "WMS",
         request: "GetCapabilities"

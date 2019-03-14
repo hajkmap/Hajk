@@ -22,6 +22,7 @@
 
 import { Model } from "backbone";
 import $ from "jquery";
+import { prepareProxyUrl } from "../utils/ProxyHelper";
 
 var edit = Model.extend({
   defaults: {
@@ -90,14 +91,8 @@ var edit = Model.extend({
     });
   },
 
-  prepareProxyUrl: function(url) {
-    return this.get("config").url_proxy
-      ? this.get("config").url_proxy + "/" + url.replace(/http[s]?:\/\//, "")
-      : url;
-  },
-
   getLayerDescription: function(url, layer, callback) {
-    url = this.prepareProxyUrl(url);
+    url = prepareProxyUrl(url, this.get("config").url_proxy);
     $.ajax(url, {
       data: {
         request: "describeFeatureType",
@@ -134,7 +129,7 @@ var edit = Model.extend({
   },
 
   getWMSCapabilities: function(url, callback) {
-    $.ajax(this.prepareProxyUrl(url), {
+    $.ajax(prepareProxyUrl(url, this.get("config").url_proxy), {
       data: {
         service: "WFS",
         request: "GetCapabilities"

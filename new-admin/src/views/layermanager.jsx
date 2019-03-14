@@ -749,7 +749,7 @@ class Manager extends Component {
               }}
               id="select-image"
               type="file"
-              multiple="false"
+              multiple={false}
               name="files[]"
               onChange={e => this.uploadLegend(e)}
             />

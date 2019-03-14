@@ -848,7 +848,7 @@ class Menu extends Component {
         >
           <span className={cls} />
           &nbsp;
-          <span>
+          <span className="main-box">
             {layer.caption} {displayType}
           </span>
         </li>

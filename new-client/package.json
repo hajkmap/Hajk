@@ -16,6 +16,7 @@
     "@material-ui/lab": "^3.0.0-alpha.30",
     "@types/react": "^16.8.7",
     "@types/react-dom": "^16.8.2",
+    "cesium": "^1.55.0",
     "deepmerge": "^2.2.1",
     "detect-browser": "^3.0.1",
     "element-scroll-polyfill": "^1.0.1",
@@ -50,5 +51,8 @@
     "hooks": {
       "pre-commit": "pretty-quick --staged"
     }
+  },
+  "dependencies": {
+    "olcs": "^2.8.0"
   }
 }
