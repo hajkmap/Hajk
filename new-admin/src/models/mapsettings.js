@@ -21,6 +21,8 @@
 // https://github.com/hajkmap/Hajk
 
 import { Model } from "backbone";
+import { prepareProxyUrl } from "../utils/ProxyHelper";
+
 const $ = require("jquery");
 const jQuery = $;
 global.window.jQuery = jQuery;
@@ -32,14 +34,11 @@ var menu = Model.extend({
     addedLayers: []
   },
 
-  prepareProxyUrl: function(url) {
-    return this.get("config").url_proxy
-      ? this.get("config").url_proxy + "/" + url.replace(/http[s]?:\/\//, "")
-      : url;
-  },
-
   loadMaps: function(callback) {
-    var url = this.prepareProxyUrl(this.get("config").url_map_list);
+    var url = prepareProxyUrl(
+      this.get("config").url_map_list,
+      this.get("config").url_proxy
+    );
     fetch(url).then(response => {
       response.json().then(data => {
         var name = data[0];
@@ -47,8 +46,9 @@ var menu = Model.extend({
           name = "";
         }
         this.set({
-          urlMapConfig: this.prepareProxyUrl(
-            this.get("config").url_map + "/" + name
+          urlMapConfig: prepareProxyUrl(
+            this.get("config").url_map + "/" + name,
+            this.get("config").url_proxy
           ),
           mapFile: name
         });

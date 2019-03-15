@@ -2,6 +2,8 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+import { IconButton } from "@material-ui/core";
+import Typography from "@material-ui/core/Typography";
 import DrawIcon from "@material-ui/icons/Edit";
 import DrawView from "./DrawView";
 import DrawModel from "./DrawModel";
@@ -10,7 +12,48 @@ import Window from "../../components/Window.js";
 import "./draw.css";
 
 const styles = theme => {
-  return {};
+  return {
+    button: {
+      width: "50px",
+      height: "50px",
+      marginRight: "30px",
+      outline: "none",
+      background: theme.palette.primary.main,
+      color: theme.palette.primary.contrastText,
+      "&:hover": {
+        background: theme.palette.primary.main
+      }
+    },
+    card: {
+      cursor: "pointer",
+      width: "180px",
+      borderRadius: "4px",
+      background: "white",
+      padding: "10px 20px",
+      marginBottom: "10px",
+      display: "flex",
+      alignItems: "center",
+      flexDirection: "row",
+      justifyContent: "center",
+      boxShadow:
+        "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
+      "&:hover": {
+        background: "#e9e9e9"
+      },
+      [theme.breakpoints.down("md")]: {
+        width: "auto",
+        justifyContent: "inherit",
+        margin: "5px",
+        marginBottom: "10px"
+      }
+    },
+    title: {
+      fontSize: "10pt",
+      fontWeight: "bold",
+      marginBottom: "5px"
+    },
+    text: {}
+  };
 };
 
 class Draw extends React.PureComponent {
@@ -38,6 +81,8 @@ class Draw extends React.PureComponent {
     super(props);
     this.options = props.options;
     this.title = this.options.title || "Rita";
+    this.abstract =
+      this.options.abstract || "Rita, mät, importera och exportera";
     this.app = props.app;
     this.localObserver = Observer();
     this.drawModel = new DrawModel({
@@ -74,7 +119,23 @@ class Draw extends React.PureComponent {
   }
 
   renderAsWidgetItem() {
-    throw new Error("Not implemented exception");
+    const { classes } = this.props;
+    return (
+      <div>
+        <div className={classes.card} onClick={this.onClick}>
+          <div>
+            <IconButton className={classes.button}>
+              <DrawIcon />
+            </IconButton>
+          </div>
+          <div>
+            <Typography className={classes.title}>{this.title}</Typography>
+            <Typography className={classes.text}>{this.abstract}</Typography>
+          </div>
+        </div>
+        {this.renderWindow("window")}
+      </div>
+    );
   }
 
   renderAsToolbarItem() {

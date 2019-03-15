@@ -1,8 +1,8 @@
 {
   "appName": "Hajk",
   "version": "3.0.0",
-  "mapserviceBase": "http://localhost:55630",
-  "proxy": "",
-  "searchProxy": "",
-  "defaultMap": "map_1"
+  "mapserviceBase": "https://interntestkarta.halmstad.se/mapservicetest",
+  "proxy": "https://interntestkarta.halmstad.se/utiltest/proxy/geturl/",
+  "searchProxy": "https://interntestkarta.halmstad.se/utiltest/postproxy.aspx?url=",
+  "defaultMap": "op"
 }
