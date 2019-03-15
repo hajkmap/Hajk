@@ -1,7 +1,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
-
 import {
   ListItem,
   ListItemIcon,
@@ -9,10 +8,7 @@ import {
   Button
 } from "@material-ui/core";
 import NavigationIcon from "@material-ui/icons/Navigation";
-
 import Window from "../../components/Window.js";
-import { isMobile } from "../../utils/IsMobile.js";
-
 import LocationView from "./LocationView";
 
 const styles = theme => {
@@ -75,7 +71,7 @@ class Location extends React.PureComponent {
       >
         <LocationView parent={this} />
       </Window>,
-      document.getElementById(isMobile ? "app" : "toolbar-panel")
+      document.getElementById("toolbar-panel")
     );
   }
 

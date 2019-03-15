@@ -1,58 +1,16 @@
 import React, { Component } from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
-import { IconButton } from "@material-ui/core";
 import RateReviewIcon from "@material-ui/icons/RateReview";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import Observer from "react-event-observer";
 import Window from "../../components/Window.js";
-import Typography from "@material-ui/core/Typography";
+import Card from "../../components/Card.js";
 import CollectorView from "./CollectorView.js";
 import CollectorModel from "./CollectorModel.js";
-import { isMobile } from "../../utils/IsMobile.js";
 
 const styles = theme => {
-  return {
-    button: {
-      width: "50px",
-      height: "50px",
-      marginRight: "30px",
-      outline: "none",
-      background: theme.palette.primary.main,
-      color: theme.palette.primary.contrastText,
-      "&:hover": {
-        background: theme.palette.primary.main
-      }
-    },
-    card: {
-      cursor: "pointer",
-      width: "180px",
-      borderRadius: "4px",
-      background: "white",
-      padding: "10px 20px",
-      marginBottom: "10px",
-      display: "flex",
-      alignItems: "center",
-      flexDirection: "row",
-      justifyContent: "center",
-      boxShadow:
-        "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
-      "&:hover": {
-        background: "#e9e9e9"
-      },
-      [theme.breakpoints.down("md")]: {
-        margin: "5px",
-        width: "auto",
-        justifyContent: "inherit"
-      }
-    },
-    title: {
-      fontSize: "10pt",
-      fontWeight: "bold",
-      marginBottom: "5px"
-    },
-    text: {}
-  };
+  return {};
 };
 class Collector extends Component {
   constructor(props) {
@@ -126,7 +84,7 @@ class Collector extends Component {
           openPanel={this.openPanel}
         />
       </Window>,
-      document.getElementById(isMobile ? "app" : "toolbar-panel")
+      document.getElementById("toolbar-panel")
     );
   }
 
@@ -142,22 +100,16 @@ class Collector extends Component {
   }
 
   renderAsWidgetItem() {
-    const { classes } = this.props;
     return (
-      <>
-        <div className={classes.card} onClick={this.onClick}>
-          <div>
-            <IconButton className={classes.button}>
-              <RateReviewIcon />
-            </IconButton>
-          </div>
-          <div>
-            <Typography className={classes.title}>{this.title}</Typography>
-            <Typography className={classes.text}>{this.abstract}</Typography>
-          </div>
-        </div>
+      <div>
+        <Card
+          icon={<RateReviewIcon />}
+          onClick={this.onClick}
+          title={this.title}
+          abstract={this.abstract}
+        />
         {this.renderWindow("window")}
-      </>
+      </div>
     );
   }
 

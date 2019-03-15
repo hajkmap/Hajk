@@ -44,7 +44,7 @@ class CollectorView extends Component {
   componentDidMount() {}
 
   onClose = () => {
-    this.props.onClose();    
+    this.props.onClose();
   };
 
   render() {

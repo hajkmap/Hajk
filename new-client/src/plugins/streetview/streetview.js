@@ -5,12 +5,10 @@ import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import StreetviewIcon from "@material-ui/icons/Streetview";
 import { IconButton } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
-
 import StreetViewView from "./StreetViewView";
 import StreetViewModel from "./StreetViewModel";
 import Observer from "react-event-observer";
 import Window from "../../components/Window.js";
-import { isMobile } from "../../utils/IsMobile.js";
 
 const styles = theme => {
   return {
@@ -129,7 +127,7 @@ class StreetView extends React.PureComponent {
           displayPanorama={this.state.displayPanorama}
         />
       </Window>,
-      document.getElementById(isMobile ? "app" : "toolbar-panel")
+      document.getElementById("toolbar-panel")
     );
   }
 

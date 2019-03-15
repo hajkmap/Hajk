@@ -7,27 +7,12 @@ import PanelHeader from "./PanelHeader";
 
 const styles = theme => {
   return {
-    content: {
-      maxWidth: "400px"
+    popper: {
+      zIndex: 4
     },
-    popPanel: {
-      position: "relative",
-      display: "flex",
-      flexDirection: "column",
-      background: "white",
-      zIndex: 1200,
-      order: 1,
+    content: {
       maxWidth: "400px",
-      boxShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)",
-      overflow: "hidden",
-      [theme.breakpoints.down("xs")]: {
-        position: "absolute",
-        left: 0,
-        right: 0,
-        bottom: 0,
-        top: "auto !important",
-        height: "auto"
-      }
+      background: "white"
     },
     hidden: {
       display: "none"
@@ -75,12 +60,20 @@ class PopPanel extends Component {
     }
     const id = open ? "no-transition-popper" : null;
     return (
-      <Popper id={id} open={open} anchorEl={anchorEl} placement={placement}>
+      <Popper
+        id={id}
+        open={open}
+        anchorEl={anchorEl}
+        placement={placement}
+        className={classes.popper}
+      >
         <Paper className={classes.content}>
           <PanelHeader
             title={this.props.title}
             onClose={this.close}
             maximizable={false}
+            onMaximize={() => {}}
+            onMinimize={() => {}}
           />
           <div className={classes.body}>{children}</div>
         </Paper>

@@ -24,6 +24,7 @@ const styles = theme => {
       color: theme.palette.primary.main,
       textShadow: "2px 2px rgba(0, 0, 0, 0.5)",
       userSelect: "none",
+      pointerEvents: "none",
       "& i": {
         fontSize: "50px",
         marginLeft: "-27px",

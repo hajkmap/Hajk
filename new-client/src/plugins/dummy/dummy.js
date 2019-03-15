@@ -2,7 +2,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
-import { isMobile } from "../../utils/IsMobile.js";
 
 // In pretty much all cases, you'll want your plugin to render something.
 // There are currently two available ways: Window or Panel.
@@ -134,7 +133,7 @@ class Dummy extends React.PureComponent {
           app={this.app} // Or even the whole App
         />
       </Window>,
-      document.getElementById(isMobile ? "app" : "toolbar-panel")
+      document.getElementById("toolbar-panel")
     );
   }
 

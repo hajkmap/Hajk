@@ -1,11 +1,12 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import AnchorView from "./AnchorView";
 import AnchorModel from "./AnchorModel";
 import Observer from "react-event-observer";
-import PopPanel from "../../components/PopPanel.js";
+import Window from "../../components/Window.js";
 
 const styles = theme => {
   return {};
@@ -45,22 +46,27 @@ class Anchor extends React.PureComponent {
     });
     this.app.registerPanel(this);
   }
-
   renderPanel() {
-    return (
-      <PopPanel
+    return createPortal(
+      <Window
+        globalObserver={this.props.app.globalObserver}
         title={this.title}
         onClose={this.closePanel}
         open={this.state.panelOpen}
-        anchorEl={this.state.anchorEl}
-        globalObserver={this.app.globalObserver}
+        position={this.position}
+        height={300}
+        width={100}
+        top={210}
+        left={10}
+        mode="window"
       >
         <AnchorView
           localObserver={this.localObserver}
           model={this.anchorModel}
           parent={this}
         />
-      </PopPanel>
+      </Window>,
+      document.getElementById("toolbar-panel")
     );
   }
 

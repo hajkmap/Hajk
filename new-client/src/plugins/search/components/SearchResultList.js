@@ -12,24 +12,13 @@ const styles = theme => {
       padding: "10px"
     },
     searchResult: {
-      position: "static",
-      maxHeight: "inherit",
-      maxWidth: "inherit",
-      border: "none",
-      padding: 0,
-      [theme.breakpoints.up("lg")]: {
-        position: "absolute",
-        background: "white",
-        color: "black",
-        width: "100%",
-        maxWidth: "350px",
-        overflow: "auto",
-        padding: "10px",
-        border: "1px solid #ccc",
-        borderTop: "none",
-        marginTop: "11px",
-        right: "10px"
-      }
+      overflow: "auto",
+      padding: "10px",
+      position: "relative",
+      top: "11px",
+      background: "white",
+      border: "1px solid " + theme.palette.secondary.main,
+      borderTop: "none"
     },
     searchResultContainer: {
       maxHeight: "500px",
@@ -97,14 +86,25 @@ class SearchResultList extends React.PureComponent {
   render() {
     const { classes, result } = this.props;
     const { minimized } = this.state;
-    if (result.every(r => r.features.length === 0)) {
+
+    if (typeof result[0] === "string") {
       return (
         <div className={classes.searchResult}>
           <div className={classes.searchResultEmpty}>
-            Sökningen gav inget resultat
+            Information hittades i {result.length} kartlager.
           </div>
         </div>
       );
+    } else {
+      if (result.every(r => r.features.length === 0)) {
+        return (
+          <div className={classes.searchResult}>
+            <div className={classes.searchResultEmpty}>
+              Sökningen gav inget resultat
+            </div>
+          </div>
+        );
+      }
     }
 
     if (!this.state.visible) {

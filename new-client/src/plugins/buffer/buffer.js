@@ -8,7 +8,6 @@ import BufferView from "./BufferView.js";
 import BufferModel from "./BufferModel.js";
 import Observer from "react-event-observer";
 import Window from "../../components/Window.js";
-import { isMobile } from "../../utils/IsMobile.js";
 
 const styles = theme => {
   return {};
@@ -69,7 +68,7 @@ class buffer extends React.PureComponent {
           app={this.app}
         />
       </Window>,
-      document.getElementById(isMobile ? "app" : "toolbar-panel")
+      document.getElementById("toolbar-panel")
     );
   }
 

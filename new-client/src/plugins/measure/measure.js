@@ -1,11 +1,12 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import SvgIcon from "@material-ui/core/SvgIcon";
 import MeasureView from "./MeasureView";
 import MeasureModel from "./MeasureModel";
 import Observer from "react-event-observer";
-import PopPanel from "../../components/PopPanel.js";
+import Window from "../../components/Window.js";
 import "./measure.css";
 
 const styles = theme => {
@@ -59,20 +60,26 @@ class Measure extends React.PureComponent {
   }
 
   renderPanel() {
-    return (
-      <PopPanel
+    return createPortal(
+      <Window
+        globalObserver={this.props.app.globalObserver}
         title={this.title}
         onClose={this.closePanel}
         open={this.state.panelOpen}
-        anchorEl={this.state.anchorEl}
-        globalObserver={this.app.globalObserver}
+        position={this.position}
+        height={300}
+        width={100}
+        top={210}
+        left={10}
+        mode="window"
       >
         <MeasureView
           localObserver={this.localObserver}
           model={this.measureModel}
           parent={this}
         />
-      </PopPanel>
+      </Window>,
+      document.getElementById("toolbar-panel")
     );
   }
 

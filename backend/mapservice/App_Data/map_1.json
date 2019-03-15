@@ -264,7 +264,7 @@
     {
       "type": "simple_layerswitcher",
       "options": {
-        "target": "toolbar",
+        "target": "left",
         "visibleAtStart": false,
         "visibleForGroups": []
       },
@@ -356,8 +356,8 @@
     {
       "type": "informative",
       "options": {
-        "target": "toolbar",
-        "panel": "",
+        "target": "right",
+        "panel": "right",
         "title": "Översiktsplan",
         "caption": "Översiktsplan",
         "serviceUrl": "http://localhost:55630/informative/load",
@@ -372,13 +372,66 @@
     {
       "type": "collector",
       "options": {
-        "target": "toolbar",
+        "target": "right",
         "url": "",
         "featureType": "",
         "title": "Tyck till",
         "abstract": "Vi vill veta vad du tycker!",
         "featureNS": "",
         "visibleAtStart": false,
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "search",
+      "options": {
+        "target": "center",
+        "onMap": true,
+        "bothSynlig": false,
+        "enableViewTogglePopupInSnabbsok": true,
+        "toolbar": "",
+        "maxZoom": 14,
+        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
+        "kmlExportUrl": "/mapservice/export/kml",
+        "excelExportUrl": "/mapservice/export/excel",
+        "displayPopup": true,
+        "selectionTools": true,
+        "base64Encode": false,
+        "instruction": "",
+        "filterVisible": true,
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ],
+        "tooltip": "Sök...",
+        "searchWithinButtonText": "Markera i kartan",
+        "toolDescription": "<div>Sök innehåll i kartan</div>",
+        "popupOffsetY": 0,
+        "visibleForGroups": [],
+        "layers": [],
+        "selectedSources": [
+          "27",
+          "30"
+        ]
+      },
+      "index": 0
+    },
+    {
+      "type": "information",
+      "options": {
+        "target": "left",
+        "text": "Hej",
+        "headerText": "Om kartan",
+        "title": "",
+        "abstract": "",
+        "visibleAtStart": false,
+        "showInfoOnce": false,
+        "base64EncodeForInfotext": false,
         "visibleForGroups": []
       },
       "index": 0

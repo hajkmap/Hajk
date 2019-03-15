@@ -7,7 +7,6 @@ import Window from "../../components/Window.js";
 import EditView from "./EditView.js";
 import EditModel from "./EditModel.js";
 import Observer from "react-event-observer";
-import { isMobile } from "../../utils/IsMobile.js";
 
 const styles = theme => {
   return {};
@@ -68,7 +67,7 @@ class Edit extends React.PureComponent {
           observer={this.observer}
         />
       </Window>,
-      document.getElementById(isMobile ? "app" : "toolbar-panel")
+      document.getElementById("toolbar-panel")
     );
   }
 

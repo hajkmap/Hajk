@@ -1,19 +1,16 @@
 import Plugin from "./Plugin.js";
 import ConfigMapper from "./../utils/ConfigMapper.js";
 import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
-
+import { isMobile } from "./../utils/IsMobile.js";
 // import ArcGISLayer from "./layers/ArcGISLayer.js";
 // import DataLayer from "./layers/DataLayer.js";
 // import ExtendedWMSLayer from "./layers/ExtendedWMSLayer.js";
-
 import WMSLayer from "./layers/WMSLayer.js";
 import WMTSLayer from "./layers/WMTSLayer.js";
 import WFSVectorLayer from "./layers/VectorLayer.js";
 import { bindMapClickEvent } from "./Click.js";
 import { defaults as defaultInteractions } from "ol/interaction";
-
 import { Map, View } from "ol";
-import { Zoom } from "ol/control";
 //{ Rotate, ScaleLine, Attribution, FullScreen } from "ol/control";
 import { register } from "ol/proj/proj4";
 import VectorLayer from "ol/layer/Vector";
@@ -31,12 +28,8 @@ class AppModel {
     this.panels
       .filter(panel => panel !== currentPanel)
       .forEach(panel => {
-        if (panel.position === currentPanel.position) {
+        if (panel.position === currentPanel.position || isMobile) {
           panel.closePanel();
-        }
-        if (window.innerWidth < 1280) {
-          panel.closePanel();
-          this.globalObserver.publish("panelOpened");
         }
       });
   }
@@ -152,12 +145,7 @@ class AppModel {
       layers: [],
       logo: false,
       pil: false,
-      controls: [
-        new Zoom({
-          zoomInTipLabel: "Zooma in",
-          zoomOutTipLabel: "Zooma ut"
-        })
-      ],
+      controls: [],
       overlays: [],
       view: new View({
         zoom: config.map.zoom,
@@ -182,6 +170,29 @@ class AppModel {
 
   getMap() {
     return map;
+  }
+
+  clear() {
+    this.clearing = true;
+    map
+      .getLayers()
+      .getArray()
+      .forEach(layer => {
+        if (
+          layer.getProperties &&
+          layer.getProperties().layerInfo &&
+          layer.getProperties().layerInfo.layerType === "layer"
+        ) {
+          if (layer.layerType === "group") {
+            this.globalObserver.emit("hideLayer", layer);
+          } else {
+            layer.setVisible(false);
+          }
+        }
+      });
+    setTimeout(() => {
+      this.clearing = false;
+    }, 100);
   }
 
   addMapLayer(layer) {

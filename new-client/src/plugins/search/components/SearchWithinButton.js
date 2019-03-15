@@ -34,10 +34,11 @@ class SearchWithinButton extends React.Component {
                   active: !this.state.active
                 },
                 () => {
-                  this.props.model.toggleDraw(this.state.active, () => {
+                  this.props.model.toggleDraw(this.state.active, layerIds => {
                     this.setState({
                       active: false
                     });
+                    this.props.onSearchWithin(layerIds);
                   });
                 }
               );

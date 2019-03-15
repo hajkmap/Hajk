@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import LinearProgress from "@material-ui/core/LinearProgress";
 import { withStyles } from "@material-ui/core/styles";
 import Observer from "react-event-observer";
 import SearchBar from "./components/SearchBar.js";
@@ -11,55 +12,40 @@ import PanelHeader from "./../../components/PanelHeader.js";
 const styles = theme => {
   return {
     center: {
-      position: "fixed",
-      zIndex: 1200,
-      left: 0,
-      right: 0,
-      top: 0,
-      bottom: 0,
-      width: "auto",
       background: "white",
-      [theme.breakpoints.up("lg")]: {
-        zIndex: 1000,
-        top: "inherit",
-        bottom: "inherit",
-        left: 0,
-        right: 0,
-        padding: "10px",
-        margin: "auto",
-        width: "618px",
-        borderBottomLeftRadius: "10px",
-        borderBottomRightRadius: "10px",
-        border: "1px solid " + theme.palette.secondary.main
-      }
+      borderBottomLeftRadius: "10px",
+      borderBottomRightRadius: "10px",
+      margin: "-10px 10px 10px 10px",
+      padding: "10px",
+      border: "1px solid " + theme.palette.secondary.main,
+      maxWidth: "600px"
     },
     panelHeader: {
-      [theme.breakpoints.up("lg")]: {
+      [theme.breakpoints.up("xs")]: {
         display: "none"
       }
     },
     panelBody: {
-      padding: 0,
-      [theme.breakpoints.down("md")]: {
-        padding: "10px",
-        position: "absolute",
-        top: "46px",
-        left: 0,
-        right: 0,
-        bottom: 0,
-        overflow: "auto"
-      }
+      padding: 0
     },
     searchContainer: {
       [theme.breakpoints.up("lg")]: {
         display: "flex",
         alignItems: "center"
       }
+    },
+    loader: {
+      height: "4px",
+      marginBottom: "4px",
+      borderRadius: "4px",
+      overflow: "hidden"
+    },
+    searchResults: {
+      overflow: "visible",
+      height: 0
     }
   };
 };
-
-var isMobile = window.innerWidth < 1280;
 
 class Search extends Component {
   resolve = data => {
@@ -81,127 +67,111 @@ class Search extends Component {
     this.toolDescription = props.options.toolDescription;
     this.tooltip = props.options.tooltip;
     this.searchWithinButtonText = props.options.searchWithinButtonText;
+    this.localObserver.on("searchStarted", () => {
+      this.setState({
+        loading: true
+      });
+    });
+    this.localObserver.on("searchComplete", () => {
+      this.setState({
+        loading: false
+      });
+    });
   }
 
   renderSearchResultList() {
+    const { classes } = this.props;
     const { result } = this.state;
     if (!result) return null;
     return (
-      <SearchResultList
-        result={result}
-        model={this.searchModel}
-        visible={true}
-      />
+      <div className={classes.searchResults}>
+        <SearchResultList
+          result={result}
+          model={this.searchModel}
+          visible={true}
+        />
+      </div>
     );
   }
 
   renderDescription() {
     return <div dangerouslySetInnerHTML={{ __html: this.toolDescription }} />;
   }
-  renderDesktop() {
-    const { classes, app } = this.props;
-    return (
-      <div
-        className={classes.center}
-        style={{ display: this.props.visible ? "block" : "none" }}
-      >
-        <div className={classes.panelHeader}>
-          <PanelHeader
-            title="Sök"
-            onClose={() => {
-              app.globalObserver.publish("hideSearchPanel", true);
-            }}
-            onMinimize={() => {
-              console.log("Max");
-            }}
-            onMaximize={() => {
-              console.log("Min");
-            }}
-          />
-        </div>
-        <div className={classes.panelBody}>
-          <div>{this.renderDescription()}</div>
-          <div className={classes.searchContainer}>
-            <SearchWithinButton
-              buttonText={this.searchWithinButtonText}
-              model={this.searchModel}
-            />
-            <ClearButton
-              model={this.searchModel}
-              onClear={() => {
-                this.searchModel.clear();
-                this.localObserver.publish("clearInput");
-                this.setState({
-                  result: false
-                });
-              }}
-            />
-            <SearchBar
-              model={this.searchModel}
-              onChange={this.searchModel.search}
-              onComplete={this.resolve}
-              tooltip={this.tooltip}
-            />
-          </div>
-          {this.renderSearchResultList()}
-        </div>
-      </div>
-    );
-  }
 
-  renderMobile() {
-    const { classes, app } = this.props;
-    return (
-      <div
-        className={classes.center}
-        style={{ display: this.props.visible ? "block" : "none" }}
-      >
-        <div className={classes.panelHeader}>
-          <PanelHeader
-            title="Sök"
-            onClose={() => {
-              app.globalObserver.publish("hideSearchPanel", true);
-            }}
-            onMinimize={() => {
-              console.log("Max");
-            }}
-            onMaximize={() => {
-              console.log("Min");
-            }}
-          />
+  renderLoader() {
+    const { classes } = this.props;
+    if (this.state.loading) {
+      return (
+        <div className={classes.loader}>
+          <LinearProgress variant="query" />
         </div>
-        <div className={classes.panelBody}>
-          <div>{this.renderDescription()}</div>
-          <div className={classes.searchContainer}>
-            <SearchWithinButton
-              buttonText={this.searchWithinButtonText}
-              model={this.searchModel}
-            />
-            <ClearButton
-              model={this.searchModel}
-              onClear={() => {
-                this.searchModel.clear();
-                this.localObserver.publish("clearInput");
-                this.setState({
-                  result: false
-                });
-              }}
-            />
-            <SearchBar
-              model={this.searchModel}
-              onChange={this.searchModel.search}
-              onComplete={this.resolve}
-              tooltip={this.tooltip}
-            />
-          </div>
-          {this.renderSearchResultList()}
-        </div>
-      </div>
-    );
+      );
+    } else {
+      return <div className={classes.loader} />;
+    }
   }
 
   render() {
-    return isMobile ? this.renderMobile() : this.renderDesktop();
+    const { classes, app } = this.props;
+    return (
+      <div
+        className={classes.center}
+        style={{ display: this.props.visible ? "block" : "none" }}
+      >
+        <div className={classes.panelHeader}>
+          <PanelHeader
+            title="Sök"
+            onClose={() => {
+              app.globalObserver.publish("hideSearchPanel", true);
+            }}
+            onMinimize={() => {
+              console.log("Max");
+            }}
+            onMaximize={() => {
+              console.log("Min");
+            }}
+          />
+        </div>
+        <div className={classes.panelBody}>
+          <div>{this.renderLoader()}</div>
+          <div>{this.renderDescription()}</div>
+          <div className={classes.searchContainer}>
+            <SearchWithinButton
+              buttonText={this.searchWithinButtonText}
+              model={this.searchModel}
+              onSearchWithin={layerIds => {
+                if (layerIds.length === 0) {
+                  this.setState({
+                    result: []
+                  });
+                } else {
+                  this.setState({
+                    result: layerIds
+                  });
+                }
+              }}
+            />
+            <ClearButton
+              model={this.searchModel}
+              onClear={() => {
+                this.searchModel.clear();
+                this.localObserver.publish("clearInput");
+                this.setState({
+                  result: false
+                });
+              }}
+            />
+            <SearchBar
+              model={this.searchModel}
+              onChange={this.searchModel.search}
+              onComplete={this.resolve}
+              tooltip={this.tooltip}
+            />
+          </div>
+          {this.renderSearchResultList()}
+        </div>
+      </div>
+    );
   }
 }
 

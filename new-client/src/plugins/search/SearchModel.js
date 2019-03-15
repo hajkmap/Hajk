@@ -105,6 +105,7 @@ class SearchModel {
       const promises = searchSources.map(
         this.mapSouceAsWFSPromise(feature, projCode)
       );
+      this.observer.publish("searchStarted");
       Promise.all(promises).then(responses => {
         Promise.all(responses.map(result => result.json())).then(
           jsonResults => {
@@ -114,6 +115,9 @@ class SearchModel {
                 result.push(searchLayers[i].layerId);
               }
             });
+            setTimeout(() => {
+              this.observer.publish("searchComplete");
+            }, 500);
             callback(result);
           }
         );
@@ -137,6 +141,7 @@ class SearchModel {
 
   search = (searchInput, callback) => {
     if (searchInput.length > 3) {
+      this.observer.publish("searchStarted");
       var promises = this.options.sources.map(source =>
         this.lookup(source, searchInput)
       );
@@ -152,6 +157,9 @@ class SearchModel {
               }
               jsonResult.source = this.options.sources[i];
             });
+            setTimeout(() => {
+              this.observer.publish("searchComplete");
+            }, 500);
             if (callback) callback(jsonResults);
           }
         );
@@ -195,9 +203,6 @@ class SearchModel {
         freehand: true
       });
       this.draw.on("drawend", e => {
-        if (drawEndCallback) {
-          drawEndCallback();
-        }
         this.clear();
         this.olMap.removeInteraction(this.draw);
         setTimeout(() => {
@@ -214,7 +219,9 @@ class SearchModel {
               layer.setVisible(false);
             }
           });
-
+          if (drawEndCallback) {
+            drawEndCallback(layerIds);
+          }
           this.visibleLayers.forEach(layer => {
             if (layer.layerType === "group") {
               this.globalObserver.publish("showLayer", layer);

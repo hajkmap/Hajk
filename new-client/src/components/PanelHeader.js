@@ -6,7 +6,7 @@ import ResetIcon from "@material-ui/icons/CancelPresentation";
 import MinimizeIcon from "@material-ui/icons/Minimize";
 import DownIcon from "@material-ui/icons/KeyboardArrowDown";
 import UpIcon from "@material-ui/icons/KeyboardArrowUp";
-import { isMobile } from "../utils/IsMobile.js";
+import { isMobile, getIsMobile } from "../utils/IsMobile.js";
 
 const styles = theme => {
   return {
@@ -29,8 +29,11 @@ const styles = theme => {
     },
     iconsLeft: {
       float: "left",
-      display: "flex",
-      alignItems: "center"
+      alignItems: "center",
+      display: "none",
+      [theme.breakpoints.down("xs")]: {
+        display: "flex"
+      }
     },
     icon: {
       cursor: "pointer",
@@ -47,6 +50,11 @@ const styles = theme => {
       "&:hover": {
         background: "rgb(255, 50, 50)"
       }
+    },
+    windowControllers: {
+      [theme.breakpoints.down("xs")]: {
+        display: "none"
+      }
     }
   };
 };
@@ -56,30 +64,58 @@ class PanelHeader extends Component {
     maximized: false
   };
 
-  renderMobile() {
+  renderButtons(maximizable) {
     const { classes } = this.props;
-    return (
-      <header
-        className={classes.header}
-        onClick={() => {
-          this.setState({
-            mode: "maximized"
-          });
-          this.props.onMaximize();
-        }}
-      >
-        <nav className={classes.iconsLeft}>
-          {this.state.mode === "minimized" ? (
-            <UpIcon
-              onClick={e => {
-                e.stopPropagation();
-                this.setState({
-                  mode: "maximized"
-                });
-                this.props.onMaximize();
-              }}
+    if (maximizable === false) {
+      return (
+        <CloseIcon onClick={this.props.onClose} className={classes.iconClose} />
+      );
+    } else {
+      return (
+        <>
+          <div className={classes.windowControllers}>
+            <MinimizeIcon
+              onClick={this.props.onMinimize}
               className={classes.icon}
             />
+            {this.props.mode === "maximized" ? (
+              <ResetIcon
+                onClick={this.props.onMaximize}
+                className={classes.icon}
+              />
+            ) : (
+              <MaximizeIcon
+                onClick={this.props.onMaximize}
+                className={classes.icon}
+              />
+            )}
+          </div>
+          <CloseIcon
+            onClick={this.props.onClose}
+            className={classes.iconClose}
+          />
+        </>
+      );
+    }
+  }
+
+  maximize = e => {
+    if (getIsMobile()) {
+      e.stopPropagation();
+      this.setState({
+        mode: "maximized"
+      });
+      this.props.onMaximize();
+    }
+  };
+
+  render() {
+    const { classes, maximizable } = this.props;
+    return (
+      <header className={classes.header} onMouseDown={this.maximize}>
+        <nav className={classes.iconsLeft}>
+          {this.state.mode === "minimized" ? (
+            <UpIcon onClick={this.maximize} className={classes.icon} />
           ) : (
             <DownIcon
               onClick={e => {
@@ -94,61 +130,9 @@ class PanelHeader extends Component {
           )}
         </nav>
         {this.props.title}
-        <nav className={classes.icons}>
-          <CloseIcon
-            onClick={this.props.onClose}
-            className={classes.iconClose}
-          />
-        </nav>
-      </header>
-    );
-  }
-
-  renderButtons(maximizable) {
-    const { classes } = this.props;
-    if (maximizable === false) {
-      return (
-        <CloseIcon onClick={this.props.onClose} className={classes.iconClose} />
-      );
-    } else {
-      return (
-        <>
-          <MinimizeIcon
-            onClick={this.props.onMinimize}
-            className={classes.icon}
-          />
-          {this.props.mode === "maximized" ? (
-            <ResetIcon
-              onClick={this.props.onMaximize}
-              className={classes.icon}
-            />
-          ) : (
-            <MaximizeIcon
-              onClick={this.props.onMaximize}
-              className={classes.icon}
-            />
-          )}
-          <CloseIcon
-            onClick={this.props.onClose}
-            className={classes.iconClose}
-          />
-        </>
-      );
-    }
-  }
-
-  renderDesktop() {
-    const { classes, maximizable } = this.props;
-    return (
-      <header className={classes.header}>
-        {this.props.title}
         <nav className={classes.icons}>{this.renderButtons(maximizable)}</nav>
       </header>
     );
-  }
-
-  render() {
-    return isMobile ? this.renderMobile() : this.renderDesktop();
   }
 }
 

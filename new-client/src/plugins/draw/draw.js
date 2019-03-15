@@ -8,7 +8,6 @@ import DrawModel from "./DrawModel";
 import Observer from "react-event-observer";
 import Window from "../../components/Window.js";
 import "./draw.css";
-import { isMobile } from "../../utils/IsMobile.js";
 
 const styles = theme => {
   return {};
@@ -70,7 +69,7 @@ class Draw extends React.PureComponent {
           open={this.state.panelOpen}
         />
       </Window>,
-      document.getElementById(isMobile ? "app" : "toolbar-panel")
+      document.getElementById("toolbar-panel")
     );
   }
 

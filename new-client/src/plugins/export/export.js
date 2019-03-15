@@ -7,7 +7,6 @@ import ExportView from "./ExportView";
 import ExportModel from "./ExportModel";
 import Observer from "react-event-observer";
 import Window from "../../components/Window.js";
-import { isMobile } from "../../utils/IsMobile.js";
 
 const styles = theme => {
   return {};
@@ -67,7 +66,7 @@ class Export extends React.PureComponent {
           parent={this}
         />
       </Window>,
-      document.getElementById(isMobile ? "app" : "toolbar-panel")
+      document.getElementById("toolbar-panel")
     );
   }
 

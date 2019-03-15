@@ -15,41 +15,60 @@ import ChevronLeft from "@material-ui/icons/ChevronLeft";
 import ChevronRight from "@material-ui/icons/ChevronRight";
 import Menu from "@material-ui/icons/Menu";
 import Close from "@material-ui/icons/Close";
-import { isMobile } from "../utils/IsMobile.js";
+import { isMobile, getIsMobile } from "../utils/IsMobile.js";
 
 const drawerWidth = "100%";
 
-const styles = theme => ({
-  drawer: {
-    order: 0,
-    zIndex: 1,
-    height: "100%",
-    [theme.breakpoints.down("md")]: {
-      top: 0,
-      left: 0,
-      bottom: 0,
-      width: "100%"
+const styles = theme => {
+  return {
+    drawer: {
+      order: 0,
+      zIndex: 1,
+      height: "100%",
+      [theme.breakpoints.down("xs")]: {
+        top: 0,
+        left: 0,
+        bottom: 0,
+        position: "absolute",
+        width: "100%",
+        zIndex: 10
+      }
+    },
+    drawerClose: {
+      display: "none"
+    },
+    drawerPaper: {
+      position: "inherit",
+      whiteSpace: "nowrap",
+      borderRight: "none",
+      [theme.breakpoints.down("xs")]: {
+        width: drawerWidth
+      }
+    },
+    drawerPaperClose: {
+      borderRight: "none",
+      overflowX: "hidden",
+      width: theme.spacing.unit * 7,
+      [theme.breakpoints.down("xs")]: {
+        width: drawerWidth
+      }
+    },
+    button: {
+      marginBottom: "5px"
+    },
+    toggler: {
+      [theme.breakpoints.down("xs")]: {
+        display: "none"
+      }
+    },
+    menuButton: {
+      display: "none",
+      [theme.breakpoints.down("xs")]: {
+        display: "block"
+      }
     }
-  },
-  drawerClose: {
-    display: "none"
-  },
-  drawerPaper: {
-    position: "inherit",
-    whiteSpace: "nowrap",
-    width: drawerWidth
-  },
-  drawerPaperClose: {
-    overflowX: "hidden",
-    width: theme.spacing.unit * 7
-  },
-  button: {
-    marginBottom: "5px"
-  },
-  menuButton: {
-    marginLeft: "-10px"
-  }
-});
+  };
+};
 
 class Toolbar extends Component {
   constructor(props) {
@@ -58,10 +77,28 @@ class Toolbar extends Component {
       toolbarOpen: isMobile ? props.open : true,
       open: props.expanded
     };
+    props.globalObserver.on("widgetItemClicked", e => {
+      this.itemClicked();
+    });
+    window.addEventListener("resize", e => {
+      if (window.innerWidth > 600) {
+        if (!this.state.toolbarOpen) {
+          this.setState({
+            toolbarOpen: true
+          });
+        }
+      } else {
+        if (this.state.toolbarOpen) {
+          this.setState({
+            toolbarOpen: false
+          });
+        }
+      }
+    });
   }
 
   itemClicked = e => {
-    if (isMobile) {
+    if (getIsMobile()) {
       this.setState({
         toolbarOpen: false
       });
@@ -101,7 +138,7 @@ class Toolbar extends Component {
       return null;
     }
 
-    return createPortal(
+    return (
       <Drawer
         variant="permanent"
         classes={{
@@ -116,38 +153,44 @@ class Toolbar extends Component {
         }}
         open={this.state.open}
       >
-        {isMobile ? null : (
-          <>
-            <ListItem button onClick={this.toggleToolbarText}>
-              <ListItemIcon>{icon}</ListItemIcon>
-              <ListItemText primary="Minimera" />
-            </ListItem>
-            <Divider />
-          </>
-        )}
+        <ListItem
+          button
+          onClick={this.toggleToolbarText}
+          className={classes.toggler}
+        >
+          <ListItemIcon>{icon}</ListItemIcon>
+          <ListItemText primary="Minimera" />
+        </ListItem>
+        <Divider />
         {this.renderTools()}
-      </Drawer>,
-      document.getElementById(isMobile ? "map-overlay" : "toolbar")
+        {this.props.widgets || null}
+      </Drawer>
+    );
+  }
+
+  renderToggler() {
+    const { classes } = this.props;
+    return createPortal(
+      <IconButton
+        className={classes.menuButton}
+        color="inherit"
+        aria-label="Menu"
+        onClick={this.toggleToolbar}
+      >
+        {this.state.toolbarOpen ? <Close /> : <Menu />}
+      </IconButton>,
+      document.getElementById("tools-toggler")
     );
   }
 
   render() {
-    const { classes, tools } = this.props;
+    const { tools } = this.props;
     if (tools.length === 0) {
       return null;
     }
     return (
       <div>
-        {isMobile ? (
-          <IconButton
-            className={classes.menuButton}
-            color="inherit"
-            aria-label="Menu"
-            onClick={this.toggleToolbar}
-          >
-            {this.state.toolbarOpen ? <Close /> : <Menu />}
-          </IconButton>
-        ) : null}
+        {this.renderToggler()}
         {this.renderDrawer()}
       </div>
     );

@@ -114,40 +114,30 @@ button {
   top: 175px;
 }
 
-.ol-control button {
-  background: var(--white);
-  color: var(--dark2);
-  font-size: 20pt;
-  font-weight: 500;
-  cursor: pointer;
-  margin: 5px;
-  box-shadow: 1px 1px 3px #ccc;
-}
-
 .ol-control {
   border-radius: 0;
   padding: 0;
   background: 0;
 }
 
-.ol-control:hover {
+.ol-control:hover,
+.ol-control:focus {
   background: inherit;
 }
 
+.ol-control button {
+  background: inherit;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  cursor: inherit;
+  margin: inherit;
+  box-shadow: inherit;
+}
+
+.ol-control button:hover,
 .ol-control button:focus {
-  background: var(--white);
-  outline: inherit;
-}
-
-.ol-control button:hover {
-  background: var(--zoomHover);
-  color: var(--white);
-  transition: 0.3s;
-  outline: inherit;
-}
-
-.ol-control button:active {
-  box-shadow: inset 0px 0px 5px var(--dark1);
+  background: inherit;
 }
 
 .ol-scale-line {

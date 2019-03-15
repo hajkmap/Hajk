@@ -1,23 +1,25 @@
 import React, { Component } from "react";
+import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Observer from "react-event-observer";
 import AppModel from "./../models/AppModel.js";
 import Typography from "@material-ui/core/Typography";
 import AppBar from "@material-ui/core/AppBar";
-import IconButton from "@material-ui/core/IconButton";
-import MenuIcon from "@material-ui/icons/Menu";
-import SearchIcon from "@material-ui/icons/Search";
 import { Toolbar as MUIToolbar } from "@material-ui/core";
 import { SnackbarProvider, withSnackbar } from "notistack";
-import classNames from "classnames";
 import Toolbar from "./Toolbar.js";
-import Popup from "./Popup.js";
+//import Popup from "./Popup.js";
 import Window from "./Window.js";
 import MapSwitcher from "./MapSwitcher";
 import Alert from "./Alert";
 import Loader from "./Loader";
+import Reparentable from "./Reparentable";
+import ToolbarMenu from "./ToolbarMenu";
 import { isMobile } from "../utils/IsMobile.js";
+import Zoom from "../controls/Zoom";
+
+document.windows = [];
 
 // Global customizations that previously went to custom.css
 // should now go to public/customTheme.json. They are later
@@ -32,9 +34,15 @@ const styles = theme => {
       top: "64px",
       bottom: 0,
       left: 0,
-      right: 0
+      right: 0,
+      zIndex: 1
+    },
+    extendedIcon: {
+      marginRight: theme.spacing.unit
     },
     toolbarRoot: {
+      paddingLeft: "5px",
+      paddingRight: "5px",
       height: "64px",
       justifyContent: "space-between",
       [theme.breakpoints.down("xs")]: {
@@ -58,8 +66,8 @@ const styles = theme => {
     },
     logo: {
       height: "40px",
-      marginLeft: "20px",
-      marginRight: "20px",
+      marginLeft: "10px",
+      marginRight: "10px",
       "& img": {
         height: "100%"
       },
@@ -74,6 +82,76 @@ const styles = theme => {
     flex: {
       flexGrow: 1
     },
+    columnToolbar: {
+      zIndex: 1,
+      background: "white",
+      boxShadow: "2px 2px 2px rgba(0, 0, 0, 0.18)",
+      [theme.breakpoints.down("xs")]: {
+        zIndex: 1000
+      }
+    },
+    column1: {
+      zIndex: 1,
+      [theme.breakpoints.down("xs")]: {
+        zIndex: 1000
+      }
+    },
+    column2: {
+      zIndex: 1,
+      width: "100%",
+      justifyContent: "center",
+      display: "flex",
+      [theme.breakpoints.down("xs")]: {
+        zIndex: 1000
+      }
+    },
+    column3: {
+      zIndex: 1,
+      [theme.breakpoints.down("xs")]: {
+        zIndex: 1000
+      }
+    },
+    columnControls: {
+      zIndex: 1,
+      pointerEvents: "none",
+      [theme.breakpoints.down("xs")]: {
+        zIndex: 1,
+        position: "absolute",
+        right: 0
+      }
+    },
+    columnWidgets: {
+      display: "flex",
+      flexDirection: "row"
+    },
+    columnCenter: {
+      width: "100%",
+      zIndex: 1,
+      display: "flex",
+      flexDirection: "column",
+      pointerEvents: "none",
+      padding: "10px",
+      [theme.breakpoints.down("xs")]: {
+        padding: 0,
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 3,
+        bottom: 0,
+        position: "absolute"
+      }
+    },
+    columnArticle: {
+      pointerEvents: "none",
+      flex: 1,
+      zIndex: 1,
+      marginBottom: "50px",
+      [theme.breakpoints.down("xs")]: {}
+    },
+    controls: {
+      zIndex: 1,
+      padding: "5px 5px 5px 0"
+    },
     overlay: {
       display: "flex",
       flexDirection: "row",
@@ -82,68 +160,12 @@ const styles = theme => {
       right: 0,
       left: 0,
       bottom: 0,
-      position: "absolute",
-      [theme.breakpoints.down("md")]: {
-        flexDirection: "column"
-      }
-    },
-    overlayVisible: {
-      [theme.breakpoints.down("md")]: {
-        zIndex: 1,
-        background: "white"
-      }
+      position: "absolute"
     },
     toolbarPanel: {
       order: 1,
       width: "100%",
       height: "100%"
-    },
-    widgets: {
-      position: "absolute",
-      zIndex: theme.zIndex.drawer - 2,
-      minHeight: "50px",
-      margin: "5px",
-      overflow: "visible",
-      [theme.breakpoints.down("md")]: {
-        display: "none"
-      }
-    },
-    widgetsVisible: {
-      display: "block !important",
-      margin: 0,
-      padding: 0
-    },
-    widgetsLeft: {
-      left: "8px",
-      top: "8px",
-      [theme.breakpoints.down("md")]: {
-        right: "inherit",
-        left: "inherit",
-        position: "static"
-      }
-    },
-    widgetsRight: {
-      right: "45px",
-      top: "8px",
-      [theme.breakpoints.down("md")]: {
-        right: "inherit",
-        left: "inherit",
-        position: "static",
-        marginTop: "-10px"
-      }
-    },
-    widgetsOther: {
-      [theme.breakpoints.down("md")]: {
-        display: "none"
-      }
-    },
-    widgetMenuIcon: {
-      [theme.breakpoints.up("md")]: {
-        display: "none"
-      },
-      [theme.breakpoints.down("md")]: {
-        display: "inline-block"
-      }
     },
     button: {
       width: "50px",
@@ -155,6 +177,7 @@ const styles = theme => {
       display: "block"
     },
     searchIcon: {
+      marginRight: theme.spacing.unit,
       display: "block",
       [theme.breakpoints.up("lg")]: {
         display: "none"
@@ -165,8 +188,15 @@ const styles = theme => {
       top: 0,
       bottom: isMobile ? -(window.innerHeight - 45) + "px" : 0
     },
-    desktop: {
-      minWidth: 1280
+    widgetItem: {
+      width: "220px",
+      pointerEvents: "all",
+      [theme.breakpoints.down("md")]: {
+        width: "100%"
+      }
+    },
+    searchWidget: {
+      pointerEvents: "all"
     }
   };
 };
@@ -178,10 +208,13 @@ class App extends Component {
       alert: false,
       loading: false,
       mapClickDataResult: {},
-      searchVisible: window.innerWidth > 1280
+      down: window.innerWidth < 600,
+      searchVisible: window.innerWidth > 600
     };
     this.globalObserver = new Observer();
     this.appModel = new AppModel(props.config, this.globalObserver);
+    this.widgetsLeftContainer = document.createElement("div");
+    this.widgetsRightContainer = document.createElement("div");
   }
 
   componentDidMount() {
@@ -225,18 +258,12 @@ class App extends Component {
     });
 
     window.addEventListener("resize", () => {
-      if (window.innerWidth > 1280) {
-        this.setState({
-          searchVisible: true
-        });
-      } else {
-        this.setState({
-          searchVisible: this.state.forced
-        });
-      }
+      this.setState({
+        down: window.innerWidth < 600,
+        searchVisible: window.innerWidth > 600
+      });
     });
 
-    // Add a listener to update the infoclick-information when a layer visibility changes.
     this.appModel
       .getMap()
       .getLayers()
@@ -262,19 +289,9 @@ class App extends Component {
       });
   }
 
-  // Catches exceptions generated in descendant components. Unhandled exceptions will cause the entire component tree to unmount.
   componentDidCatch(error) {
     console.error(error);
-    // this.props.enqueueSnackbar("Åh nej! Ett fel har inträffat.", {
-    //   variant: "error"
-    // });
   }
-
-  onWidgetMenuIconClick = () => {
-    this.setState({
-      widgetsVisible: !this.state.widgetsVisible
-    });
-  };
 
   renderWidgets(target) {
     const { classes } = this.props;
@@ -290,7 +307,13 @@ class App extends Component {
             return null;
           }
           return (
-            <div key={i} className={classes.widgets[target]}>
+            <div
+              key={i}
+              className={classes.widgetItem}
+              onClick={e => {
+                this.globalObserver.publish("widgetItemClicked");
+              }}
+            >
               <tool.component
                 map={tool.map}
                 app={tool.app}
@@ -312,34 +335,6 @@ class App extends Component {
       return null;
     }
   };
-
-  renderSearchPlugin(mobile) {
-    var searchPlugin = this.appModel.getSearchPlugin();
-    if (searchPlugin) {
-      return (
-        <searchPlugin.component
-          map={searchPlugin.map}
-          app={searchPlugin.app}
-          options={searchPlugin.options}
-          visible={this.state.searchVisible}
-        />
-      );
-    } else {
-      return null;
-    }
-  }
-
-  renderWidgetMenuIcon() {
-    const { classes } = this.props;
-    return (
-      <IconButton
-        className={classes.widgetMenuIcon}
-        onClick={this.onWidgetMenuIconClick}
-      >
-        <MenuIcon />
-      </IconButton>
-    );
-  }
 
   renderPopup() {
     // TODO: Ensure that Popup mode for infoclick works.
@@ -390,80 +385,10 @@ class App extends Component {
         }}
       />
     );
-    //}
   }
 
-  renderMobile() {
+  render() {
     const { classes, config } = this.props;
-    return (
-      <div id="app">
-        <AppBar position="absolute" className={classes.appBar}>
-          <MUIToolbar className={classes.toolbarRoot}>
-            <div id="toolbar-left" className={classes.toolbarContent}>
-              <Toolbar
-                tools={this.appModel.getToolbarPlugins()}
-                parent={this}
-                open={false}
-                mobile={true}
-                expanded={true}
-              />
-              <div className={classes.logo}>
-                <img src={config.mapConfig.map.logo} alt="logo" />
-              </div>
-              <span className={classes.title}>
-                <Typography variant="h6">
-                  {config.mapConfig.map.title}
-                </Typography>
-              </span>
-            </div>
-            <div id="toolbar-right" className={classes.toolbarContent}>
-              <SearchIcon
-                className={classes.searchIcon}
-                onClick={() => {
-                  this.setState({
-                    searchVisible: !this.state.searchVisible,
-                    forced: true,
-                    widgetsVisible: false
-                  });
-                }}
-              />
-            </div>
-          </MUIToolbar>
-        </AppBar>
-        <main id="map" className={classes.map}>
-          <div id="map-overlay" className={classes.overlay} />
-        </main>
-        <footer className={classes.footer} id="footer" />
-      </div>
-    );
-  }
-
-  renderDesktop() {
-    const { classes, config } = this.props;
-    const { widgetsVisible } = this.state;
-
-    var widgetClassesLeft = classNames(classes.widgets, classes.widgetsLeft);
-    var widgetClassesRight = classNames(classes.widgets, classes.widgetsRight);
-    var widgetClassesOther = classNames(classes.widgetsOther);
-    var overlayClasses = classes.overlay;
-    if (widgetsVisible) {
-      widgetClassesLeft = classNames(
-        classes.widgets,
-        classes.widgetsLeft,
-        classes.widgetsVisible
-      );
-      widgetClassesRight = classNames(
-        classes.widgets,
-        classes.widgetsRight,
-        classes.widgetsVisible
-      );
-      widgetClassesOther = classNames(
-        classes.widgetsOther,
-        classes.widgetsVisible
-      );
-      overlayClasses = classNames(classes.overlay, classes.overlayVisible);
-    }
-
     return (
       <SnackbarProvider
         maxSnack={3}
@@ -473,7 +398,7 @@ class App extends Component {
           horizontal: "center"
         }}
       >
-        <div className={classes.desktop}>
+        <div>
           <Alert
             open={this.state.alert}
             message={this.state.alertMessage}
@@ -481,9 +406,18 @@ class App extends Component {
             title="Meddelande"
           />
           <Loader visible={this.state.loading} />
+          {ReactDOM.createPortal(
+            this.renderWidgets("left"),
+            this.widgetsLeftContainer
+          )}
+          {ReactDOM.createPortal(
+            this.renderWidgets("right"),
+            this.widgetsRightContainer
+          )}
           <AppBar position="absolute" className={classes.appBar}>
             <MUIToolbar className={classes.toolbarRoot}>
               <div id="toolbar-left" className={classes.toolbarContent}>
+                <div id="tools-toggler" />
                 <div className={classes.logo}>
                   <img src={config.mapConfig.map.logo} alt="logo" />
                 </div>
@@ -494,52 +428,55 @@ class App extends Component {
                 </span>
               </div>
               <div id="toolbar-right" className={classes.toolbarContent}>
-                <SearchIcon
-                  className={classes.searchIcon}
-                  onClick={() => {
-                    this.setState({
-                      searchVisible: !this.state.searchVisible,
-                      forced: true,
-                      widgetsVisible: false
-                    });
-                  }}
-                />
+                <ToolbarMenu appModel={this.appModel} />
               </div>
               {this.renderMapSwitcher()}
             </MUIToolbar>
           </AppBar>
           <main className={classes.map} id="map">
-            <div className={classes.searchPanel}>
-              {this.renderSearchPlugin()}
-            </div>
-            <div id="map-overlay" className={overlayClasses}>
-              <div id="toolbar" className={classes.toolbar}>
+            <div id="map-overlay" className={classes.overlay}>
+              <div className={classes.columnToolbar}>
                 <Toolbar
                   tools={this.appModel.getToolbarPlugins()}
                   parent={this}
                   globalObserver={this.globalObserver}
+                  widgets={
+                    this.state.down && (
+                      <div>
+                        <Reparentable el={this.widgetsLeftContainer} />
+                        <Reparentable el={this.widgetsRightContainer} />
+                      </div>
+                    )
+                  }
                 />
               </div>
-              <article id="toolbar-panel" className={classes.toolbarPanel}>
-                {this.renderPopup()}
-              </article>
-              <div className={widgetClassesLeft}>
-                {this.renderWidgets("left")}
+              <div className={classes.columnCenter}>
+                <div className={classes.columnWidgets}>
+                  <div className={classes.column1}>
+                    {!this.state.down && (
+                      <Reparentable el={this.widgetsLeftContainer} />
+                    )}
+                  </div>
+                  <div className={classes.column2} id="center" />
+                  <div className={classes.column3}>
+                    {!this.state.down && (
+                      <Reparentable el={this.widgetsRightContainer} />
+                    )}
+                  </div>
+                </div>
+                <article id="toolbar-panel" className={classes.columnArticle} />
               </div>
-              <div className={widgetClassesRight} id="widgets-right">
-                {this.renderWidgets("right")}
+              <div className={classes.columnControls}>
+                <div className={classes.controls}>
+                  <Zoom map={this.appModel.getMap()} />
+                </div>
               </div>
-              <div id="widgets-other" className={widgetClassesOther} />
             </div>
           </main>
           <footer className={classes.footer} id="footer" />
         </div>
       </SnackbarProvider>
     );
-  }
-
-  render() {
-    return isMobile ? this.renderMobile() : this.renderDesktop();
   }
 }
 

@@ -1,9 +1,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
-import Typography from "@material-ui/core/Typography";
-import LayersClearIcon from "@material-ui/icons/LayersClear";
-import { IconButton } from "@material-ui/core";
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
@@ -162,47 +159,6 @@ class SimpleLayersSwitcherView extends React.PureComponent {
     );
   }
 
-  renderClearButton() {
-    const { classes } = this.props;
-
-    if (window.innerWidth < 1280) {
-      return createPortal(
-        <>
-          <div className={classes.card} onClick={this.clear}>
-            <div>
-              <IconButton className={classes.button}>
-                <LayersClearIcon />
-              </IconButton>
-            </div>
-            <div>
-              <Typography className={classes.title}>Rensa kartan</Typography>
-              <Typography className={classes.text}>
-                Återställ kartan till ursprungligt innehåll
-              </Typography>
-            </div>
-          </div>
-        </>,
-        document.getElementById("widgets-other")
-      );
-    } else {
-      return createPortal(
-        <div className={classes.reset} onClick={this.clear}>
-          <div className={classes.button}>
-            <div className={classes.icon}>
-              <LayersClearIcon />
-            </div>
-            <div>RENSA KARTAN</div>
-          </div>
-        </div>,
-        document.getElementById("toolbar-right")
-      );
-    }
-  }
-
-  clear = () => {
-    this.props.model.clear();
-  };
-
   render() {
     const { classes } = this.props;
     return (
@@ -217,7 +173,6 @@ class SimpleLayersSwitcherView extends React.PureComponent {
           <div>{this.renderLayerGroups()}</div>
         </div>
         {this.props.breadCrumbs ? this.renderBreadCrumbs() : null}
-        {/*this.renderClearButton()*/}
       </div>
     );
   }
