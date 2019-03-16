@@ -15,17 +15,20 @@ const styles = theme => {
       overflow: "auto",
       padding: "10px",
       position: "relative",
-      top: "11px",
+      top: "9px",
       background: "white",
       border: "1px solid " + theme.palette.secondary.main,
-      borderTop: "none"
+      borderTop: "none",
+      [theme.breakpoints.down("xs")]: {
+        border: "none"
+      }
     },
     searchResultContainer: {
-      maxHeight: "500px",
+      maxHeight: "calc(100vh - 380px)",
       overflow: "auto",
       padding: "5px",
       paddingBottom: "22px",
-      [theme.breakpoints.down("md")]: {
+      [theme.breakpoints.down("xs")]: {
         maxHeight: "inherit"
       }
     },

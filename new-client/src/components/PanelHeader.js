@@ -6,7 +6,7 @@ import ResetIcon from "@material-ui/icons/CancelPresentation";
 import MinimizeIcon from "@material-ui/icons/Minimize";
 import DownIcon from "@material-ui/icons/KeyboardArrowDown";
 import UpIcon from "@material-ui/icons/KeyboardArrowUp";
-import { isMobile, getIsMobile } from "../utils/IsMobile.js";
+import { getIsMobile } from "../utils/IsMobile.js";
 
 const styles = theme => {
   return {
@@ -60,9 +60,21 @@ const styles = theme => {
 };
 
 class PanelHeader extends Component {
-  state = {
-    maximized: false
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      maximized: false
+    };
+    if (this.props.localObserver) {
+      this.props.localObserver.on("maximizeWindow", v => {
+        console.log("Maximize", v);
+        this.setState({
+          mode: "maximized"
+        });
+        this.props.onMaximize();
+      });
+    }
+  }
 
   renderButtons(maximizable) {
     const { classes } = this.props;
@@ -101,7 +113,9 @@ class PanelHeader extends Component {
 
   maximize = e => {
     if (getIsMobile()) {
-      e.stopPropagation();
+      if (e) {
+        e.stopPropagation();
+      }
       this.setState({
         mode: "maximized"
       });
@@ -109,24 +123,34 @@ class PanelHeader extends Component {
     }
   };
 
+  minimize = e => {
+    if (getIsMobile()) {
+      if (e) {
+        e.stopPropagation();
+      }
+      this.setState({
+        mode: "minimized"
+      });
+      this.props.onMinimize();
+    }
+  };
+
   render() {
     const { classes, maximizable } = this.props;
     return (
-      <header className={classes.header} onMouseDown={this.maximize}>
+      <header
+        className={classes.header}
+        onMouseDown={e => {
+          if (e.target.tagName === "HEADER") {
+            this.maximize(e);
+          }
+        }}
+      >
         <nav className={classes.iconsLeft}>
           {this.state.mode === "minimized" ? (
             <UpIcon onClick={this.maximize} className={classes.icon} />
           ) : (
-            <DownIcon
-              onClick={e => {
-                e.stopPropagation();
-                this.setState({
-                  mode: "minimized"
-                });
-                this.props.onMinimize();
-              }}
-              className={classes.icon}
-            />
+            <DownIcon onClick={this.minimize} className={classes.icon} />
           )}
         </nav>
         {this.props.title}

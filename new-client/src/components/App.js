@@ -92,20 +92,23 @@ const styles = theme => {
     },
     column1: {
       zIndex: 1,
+      flex: 0,
       [theme.breakpoints.down("xs")]: {
         zIndex: 1000
       }
     },
     column2: {
-      zIndex: 1,
-      width: "100%",
+      zIndex: 2,
+      flex: 1,
       justifyContent: "center",
       display: "flex",
+      alignItems: "start",
       [theme.breakpoints.down("xs")]: {
         zIndex: 1000
       }
     },
     column3: {
+      flex: 0,
       zIndex: 1,
       [theme.breakpoints.down("xs")]: {
         zIndex: 1000
@@ -131,6 +134,9 @@ const styles = theme => {
       flexDirection: "column",
       pointerEvents: "none",
       padding: "10px",
+      [theme.breakpoints.down("md")]: {
+        zIndex: 1001
+      },
       [theme.breakpoints.down("xs")]: {
         padding: 0,
         top: 0,
@@ -194,9 +200,6 @@ const styles = theme => {
       [theme.breakpoints.down("md")]: {
         width: "100%"
       }
-    },
-    searchWidget: {
-      pointerEvents: "all"
     }
   };
 };
@@ -208,8 +211,7 @@ class App extends Component {
       alert: false,
       loading: false,
       mapClickDataResult: {},
-      down: window.innerWidth < 600,
-      searchVisible: window.innerWidth > 600
+      mobile: window.innerWidth < 600
     };
     this.globalObserver = new Observer();
     this.appModel = new AppModel(props.config, this.globalObserver);
@@ -229,21 +231,6 @@ class App extends Component {
       });
     });
 
-    this.globalObserver.subscribe("panelOpened", () => {
-      this.setState({
-        widgetsVisible: false
-      });
-    });
-
-    this.globalObserver.subscribe("hideSearchPanel", forced => {
-      if (window.innerWidth < 1280 || forced) {
-        this.setState({
-          searchVisible: false,
-          forced: false
-        });
-      }
-    });
-
     this.globalObserver.subscribe("mapClick", mapClickDataResult => {
       this.setState({
         mapClickDataResult: mapClickDataResult
@@ -259,8 +246,7 @@ class App extends Component {
 
     window.addEventListener("resize", () => {
       this.setState({
-        down: window.innerWidth < 600,
-        searchVisible: window.innerWidth > 600
+        mobile: window.innerWidth < 600
       });
     });
 
@@ -441,7 +427,7 @@ class App extends Component {
                   parent={this}
                   globalObserver={this.globalObserver}
                   widgets={
-                    this.state.down && (
+                    this.state.mobile && (
                       <div>
                         <Reparentable el={this.widgetsLeftContainer} />
                         <Reparentable el={this.widgetsRightContainer} />
@@ -453,13 +439,13 @@ class App extends Component {
               <div className={classes.columnCenter}>
                 <div className={classes.columnWidgets}>
                   <div className={classes.column1}>
-                    {!this.state.down && (
+                    {!this.state.mobile && (
                       <Reparentable el={this.widgetsLeftContainer} />
                     )}
                   </div>
                   <div className={classes.column2} id="center" />
                   <div className={classes.column3}>
-                    {!this.state.down && (
+                    {!this.state.mobile && (
                       <Reparentable el={this.widgetsRightContainer} />
                     )}
                   </div>

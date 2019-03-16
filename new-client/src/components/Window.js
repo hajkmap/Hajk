@@ -298,7 +298,7 @@ class Window extends Component {
 
   moveToBottom = target => {
     this.rnd.updatePosition({
-      y: window.innerHeight - 112
+      y: window.innerHeight - 110
     });
     this.mode = "minimized";
   };
@@ -323,6 +323,7 @@ class Window extends Component {
       }
     }
     if (onMaximize) onMaximize();
+    if (this.props.onResize) this.props.onResize();
   };
 
   minimize = e => {
@@ -340,6 +341,7 @@ class Window extends Component {
       });
     }
     if (onMinimize) onMinimize();
+    if (this.props.onResize) this.props.onResize();
   };
 
   bringToFront() {
@@ -402,6 +404,7 @@ class Window extends Component {
             width: ref.style.width,
             height: ref.style.height
           });
+          if (this.props.onResize) this.props.onResize();
         }}
         cancel="section,nav"
         disableDragging={false || getIsMobile()}
@@ -432,6 +435,7 @@ class Window extends Component {
       >
         <div className={classes.panelContent}>
           <PanelHeader
+            localObserver={this.props.localObserver}
             onClose={this.close}
             title={title}
             top={top}

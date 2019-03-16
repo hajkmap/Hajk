@@ -70,7 +70,6 @@ class Information extends Component {
   }
 
   renderAsWidgetItem() {
-    const { classes } = this.props;
     return (
       <div>
         <Card

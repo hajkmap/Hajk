@@ -105,15 +105,18 @@ fetch("appConfig.json", fetchConfig)
                   mapConfig: mapConfig,
                   activeMap: defaultMap
                 };
-                ReactDOM.render(
-                  <MuiThemeProvider theme={getTheme(config, customTheme)}>
-                    <App
-                      activeTools={buildConfig.activeTools}
-                      config={config}
-                    />
-                  </MuiThemeProvider>,
-                  document.getElementById("root")
-                );
+                setTimeout(() => {
+                  ReactDOM.render(
+                    <MuiThemeProvider theme={getTheme(config, customTheme)}>
+                      <App
+                        activeTools={buildConfig.activeTools}
+                        config={config}
+                      />
+                    </MuiThemeProvider>,
+                    document.getElementById("root")
+                  );
+                }, 500);
+
                 registerServiceWorker();
               })
               .catch(err => {

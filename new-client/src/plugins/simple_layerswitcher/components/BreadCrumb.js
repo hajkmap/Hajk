@@ -17,7 +17,6 @@ const styles = theme => ({
   breadCrumb: {
     [theme.breakpoints.down("xs")]: {
       background: "white",
-      margin: "3px",
       display: "flex",
       justifyContent: "space-between",
       padding: "10px",

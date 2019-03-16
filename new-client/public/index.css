@@ -2,24 +2,30 @@ body {
   margin: 0;
   padding: 0;
 }
-.lds-dual-ring {
-  display: inline-block;
-  width: 64px;
-  height: 64px;
-  padding: 10px;
+.app-start {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif !important;
+  color: black !important;
+  line-height: 1.4 !important;
+  font-weight: 300 !important;
+  font-size: 2rem !important;
+  justify-content: center;
+  align-items: center;
+  background: rgb(63, 63, 63);
+  color: white !important;
+  fill: white;
 }
-.lds-dual-ring:after {
-  content: " ";
-  display: block;
-  width: 46px;
-  height: 46px;
-  margin: 1px;
-  border-radius: 50%;
-  border: 5px solid #000;
-  border-color: #000 transparent #000 transparent;
-  animation: lds-dual-ring 1.2s linear infinite;
+.compass {
+  animation: compass 1.2s cubic-bezier(0.51, 0.41, 0.17, 1.1) infinite;
+  height: 80px;
 }
-@keyframes lds-dual-ring {
+@keyframes compass {
   0% {
     transform: rotate(0deg);
   }

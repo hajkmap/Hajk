@@ -99,7 +99,6 @@ class StreetView extends React.PureComponent {
     this.app.registerPanel(this);
     this.localObserver.on("locationChanged", () => {
       this.setState({
-        panelOpen: true,
         displayPanorama: true
       });
     });
@@ -110,15 +109,20 @@ class StreetView extends React.PureComponent {
     return createPortal(
       <Window
         globalObserver={this.props.app.globalObserver}
+        localObserver={this.localObserver}
         title={this.title}
         onClose={this.closePanel}
         open={this.state.panelOpen}
+        maximized={this.state.windowMaximized}
         position={this.position}
         height={300}
-        width={400}
+        width={420}
         top={210}
         left={left}
         mode={mode}
+        onResize={e => {
+          this.streetViewModel.showLocation();
+        }}
       >
         <StreetViewView
           localObserver={this.localObserver}

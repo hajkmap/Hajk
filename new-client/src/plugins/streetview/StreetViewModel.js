@@ -33,8 +33,21 @@ class StreetViewModel {
 
   activate() {
     this.map.clicklock = true;
+    this.streetViewService = new this.googleMapsApi.StreetViewService();
+    this.panorama = new this.googleMapsApi.StreetViewPanorama(
+      document.getElementById("street-view-window")
+    );
     document.querySelector(".ol-viewport").style.cursor = "crosshair";
-    this.map.on("singleclick", this.showLocation);
+    this.map.on("singleclick", e => {
+      this.coordinate = e.coordinate;
+      this.coord = transform(
+        this.coordinate,
+        this.map.getView().getProjection(),
+        "EPSG:4326"
+      );
+      this.showLocation();
+      this.localObserver.emit("maximizeWindow", true);
+    });
     this.activated = true;
   }
 
@@ -44,6 +57,8 @@ class StreetViewModel {
     this.map.un("singleclick", this.showLocation);
     this.activated = false;
     this.streetViewMarkerLayer.getSource().clear();
+    this.panorama = undefined;
+    document.getElementById("street-view-window").innerHTML = "";
   }
 
   getIconStyle = rotation => {
@@ -78,27 +93,29 @@ class StreetViewModel {
     });
   };
 
-  showLocation = e => {
-    var coord = transform(
-        e.coordinate,
-        this.map.getView().getProjection(),
-        "EPSG:4326"
-      ),
-      location = new this.googleMapsApi.LatLng(coord[1], coord[0]);
-
-    this.streetViewService = new this.googleMapsApi.StreetViewService();
-    this.panorama = new this.googleMapsApi.StreetViewPanorama(
-      document.getElementById("street-view-window")
-    );
+  showLocation = () => {
+    if (!this.panorama || !this.coord) {
+      return;
+    }
+    var location = new this.googleMapsApi.LatLng(this.coord[1], this.coord[0]);
     this.addMarker(
-      e.coordinate,
+      this.coordinate,
       (this.panorama && this.panorama.getPov().heading) || 0
     );
     this.streetViewService.getPanoramaByLocation(
       location,
       50,
-      this.displayPanorama.bind(this)
+      this.displayPanorama
     );
+
+    setTimeout(() => {
+      this.streetViewService.getPanoramaByLocation(
+        location,
+        50,
+        this.displayPanorama
+      );
+    }, 1000);
+
     this.googleMapsApi.event.addListener(
       this.panorama,
       "position_changed",
@@ -146,6 +163,8 @@ class StreetViewModel {
       this.panorama.setVisible(true);
     } else {
       this.imageDate = "Bild saknas för vald position.";
+      this.localObserver.emit("changeImageDate", this.imageDate);
+      this.panorama.setVisible(false);
     }
   };
 

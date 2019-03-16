@@ -1,9 +1,8 @@
 import React from "react";
-import { createPortal } from "react-dom";
 import Button from "@material-ui/core/Button";
-import SearchIcon from "@material-ui/icons/Search";
 import ClearIcon from "@material-ui/icons/LayersClear";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
+import IconButton from "@material-ui/core/IconButton";
 import { withStyles } from "@material-ui/core/styles";
 
 const styles = theme => {
@@ -17,6 +16,11 @@ const styles = theme => {
       [theme.breakpoints.down("xs")]: {
         display: "block"
       }
+    },
+    icon: {
+      color: "black",
+      padding: "3px",
+      overflow: "visible"
     },
     toolbarMenuItems: {
       display: "flex",
@@ -49,8 +53,7 @@ class ToolbarMenu extends React.Component {
 
   renderSearchPlugin() {
     const { classes, appModel } = this.props;
-    searchPlugin = appModel.plugins.search;
-    var searchPlugin = false;
+    const searchPlugin = appModel.plugins.search;
     if (searchPlugin) {
       return (
         <div className={classes.searchWidget}>
@@ -58,7 +61,6 @@ class ToolbarMenu extends React.Component {
             map={searchPlugin.map}
             app={searchPlugin.app}
             options={searchPlugin.options}
-            visible={this.state.searchVisible}
           />
         </div>
       );
@@ -80,7 +82,9 @@ class ToolbarMenu extends React.Component {
             });
           }}
         >
-          <MoreVertIcon />
+          <IconButton className={classes.icon}>
+            <MoreVertIcon />
+          </IconButton>
         </div>
         <div
           className={classes.toolbarMenuItems}
@@ -99,7 +103,7 @@ class ToolbarMenu extends React.Component {
                 this.props.appModel.clear();
               }}
             >
-              <ClearIcon className={classes.extendedIcon} />
+              <ClearIcon className={classes.icon} />
               Rensa kartan
             </Button>
           </div>

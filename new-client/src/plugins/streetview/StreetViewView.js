@@ -6,10 +6,25 @@ import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
   streetViewWindow: {
-    height: "250px"
+    flex: 1,
+    position: "static !important"
+  },
+  panorama: {
+    display: "flex"
   },
   hidden: {
     display: "none"
+  },
+  date: {
+    color: "white",
+    position: "absolute",
+    zIndex: 1,
+    top: 0,
+    left: 0,
+    background: "black",
+    padding: "0px 3px",
+    lineHeight: 1.4,
+    fontSize: "10px"
   }
 });
 
@@ -52,9 +67,13 @@ class StreetViewView extends React.PureComponent {
       <>
         <div>
           {this.renderInfoText()}
-          <div className={this.props.displayPanorama ? null : classes.hidden}>
+          <div
+            className={
+              this.props.displayPanorama ? classes.panorama : classes.hidden
+            }
+          >
             <div id="street-view-window" className={classes.streetViewWindow} />
-            <div id="image-date">
+            <div id="image-date" className={classes.date}>
               {this.state.imageDate ? this.state.imageDate : ""}
             </div>
           </div>
