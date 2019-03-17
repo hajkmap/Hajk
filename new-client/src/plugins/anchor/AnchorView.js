@@ -25,19 +25,14 @@ class AnchorView extends React.PureComponent {
 
   componentDidMount() {
     this.localObserver.subscribe("mapUpdated", anchor => {
-      if (this.props.parent.state.panelOpen) {
-        this.setState({
-          anchor: anchor
-        });
-      }
+      console.log("mapUpdated");
+      this.setState({
+        anchor: anchor
+      });
     });
     this.setState({
       anchor: this.props.model.getAnchor()
     });
-  }
-
-  componentWillUnmount() {
-    this.localObserver.unsubscribe("mapUpdated");
   }
 
   render() {

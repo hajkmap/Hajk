@@ -76,13 +76,13 @@ class SearchResultGroup extends Component {
   zoomTo = feature => e => {
     var olFeature = new GeoJSON().readFeatures(feature)[0];
     this.props.model.highlightFeature(olFeature);
-    if (window.innerWidth >= 1280) {
+    if (window.innerWidth >= 600) {
       this.props.parent.hide();
     }
     this.setState({
       activeFeature: feature
     });
-    this.props.model.app.globalObserver.publish("hideSearchPanel");
+    this.props.localObserver.publish("minimizeWindow", true);
   };
 
   clear = e => {

@@ -2,7 +2,6 @@ import React from "react";
 import { createPortal } from "react-dom";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import { withStyles } from "@material-ui/core/styles";
-import IconButton from "@material-ui/core/IconButton";
 import SearchIcon from "@material-ui/icons/Search";
 import Observer from "react-event-observer";
 import SearchBar from "./components/SearchBar.js";
@@ -85,6 +84,7 @@ const styles = theme => {
       color: "black",
       padding: "3px",
       overflow: "visible",
+      cursor: "pointer",
       [theme.breakpoints.up("lg")]: {
         display: "none"
       }
@@ -138,6 +138,7 @@ class Search extends React.PureComponent {
     return (
       <div className={classes.searchResults}>
         <SearchResultList
+          localObserver={this.localObserver}
           result={result}
           model={this.searchModel}
           visible={true}
@@ -167,14 +168,13 @@ class Search extends React.PureComponent {
     this.setState({
       visible: true
     });
+    this.props.app.closePanels();
   };
 
   renderButton() {
     const { classes } = this.props;
     return (
-      <IconButton className={classes.iconButton} onClick={this.toggleSearch}>
-        <SearchIcon />
-      </IconButton>
+      <SearchIcon className={classes.iconButton} onClick={this.toggleSearch} />
     );
   }
 
@@ -190,6 +190,7 @@ class Search extends React.PureComponent {
       >
         <div className={classes.panelHeader}>
           <PanelHeader
+            localObserver={this.localObserver}
             title="Sök"
             onClose={() => {
               this.setState({
@@ -219,6 +220,7 @@ class Search extends React.PureComponent {
           <div>{this.renderDescription()}</div>
           <div className={classes.searchContainer}>
             <SearchWithinButton
+              localObserver={this.localObserver}
               buttonText={this.searchWithinButtonText}
               model={this.searchModel}
               onSearchWithin={layerIds => {

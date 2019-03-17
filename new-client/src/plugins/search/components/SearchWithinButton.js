@@ -40,11 +40,11 @@ class SearchWithinButton extends React.Component {
                     });
                     this.props.onSearchWithin(layerIds);
                   });
+                  if (this.state.active) {
+                    this.props.localObserver.publish("minimizeWindow", true);
+                  }
                 }
               );
-              setTimeout(() => {
-                this.props.model.app.globalObserver.publish("hideSearchPanel");
-              }, 0);
             }}
           >
             <LoupeIcon />

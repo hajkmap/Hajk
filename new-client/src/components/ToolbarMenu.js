@@ -2,7 +2,6 @@ import React from "react";
 import Button from "@material-ui/core/Button";
 import ClearIcon from "@material-ui/icons/LayersClear";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
-import IconButton from "@material-ui/core/IconButton";
 import { withStyles } from "@material-ui/core/styles";
 
 const styles = theme => {
@@ -20,7 +19,8 @@ const styles = theme => {
     icon: {
       color: "black",
       padding: "3px",
-      overflow: "visible"
+      overflow: "visible",
+      cursor: "pointer"
     },
     toolbarMenuItems: {
       display: "flex",
@@ -69,6 +69,17 @@ class ToolbarMenu extends React.Component {
     }
   }
 
+  hideMenu = e => {
+    this.setState(
+      {
+        menuVisible: false
+      },
+      () => {
+        document.body.removeEventListener("click", this.hideMenu);
+      }
+    );
+  };
+
   render() {
     const { classes } = this.props;
     return (
@@ -77,14 +88,19 @@ class ToolbarMenu extends React.Component {
         <div
           className={classes.toolbarMenuButton}
           onClick={() => {
-            this.setState({
-              menuVisible: !this.state.menuVisible
-            });
+            this.setState(
+              {
+                menuVisible: !this.state.menuVisible
+              },
+              () => {
+                if (this.state.menuVisible) {
+                  document.body.addEventListener("click", this.hideMenu);
+                }
+              }
+            );
           }}
         >
-          <IconButton className={classes.icon}>
-            <MoreVertIcon />
-          </IconButton>
+          <MoreVertIcon className={classes.icon} />
         </div>
         <div
           className={classes.toolbarMenuItems}

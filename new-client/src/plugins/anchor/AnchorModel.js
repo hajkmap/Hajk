@@ -4,12 +4,11 @@ class AnchorModel {
     this.app = settings.app;
     this.localObserver = settings.localObserver;
     var update = e => {
-      var timeout = setTimeout(() => {
-        this.localObserver.emit("mapUpdated", this.getAnchor());
-      }, 500);
-      if (!e.target.getAnimating() && !e.target.getInteracting()) {
-        clearTimeout(timeout);
-      }
+      setTimeout(() => {
+        if (!e.target.getAnimating() && !e.target.getInteracting()) {
+          this.localObserver.emit("mapUpdated", this.getAnchor());
+        }
+      }, 0);
     };
     this.map.getView().on("change:resolution", update);
     this.map.getView().on("change:center", update);

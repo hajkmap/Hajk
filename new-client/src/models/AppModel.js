@@ -24,6 +24,12 @@ class AppModel {
     this.panels.push(panelComponent);
   }
 
+  closePanels() {
+    this.panels.forEach(panel => {
+      panel.closePanel();
+    });
+  }
+
   onPanelOpen(currentPanel) {
     this.panels
       .filter(panel => panel !== currentPanel)

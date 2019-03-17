@@ -20,7 +20,8 @@ const styles = theme => {
       border: "1px solid " + theme.palette.secondary.main,
       borderTop: "none",
       [theme.breakpoints.down("xs")]: {
-        border: "none"
+        border: "none",
+        padding: 0
       }
     },
     searchResultContainer: {
@@ -66,7 +67,7 @@ class SearchResultList extends React.PureComponent {
   }
 
   renderResult() {
-    const { result } = this.props;
+    const { result, localObserver } = this.props;
     if (this.state.minimized) return null;
     return (
       <div>
@@ -74,6 +75,7 @@ class SearchResultList extends React.PureComponent {
           if (featureType.features.length === 0) return null;
           return (
             <SearchResultGroup
+              localObserver={localObserver}
               parent={this}
               key={i}
               featureType={featureType}
@@ -87,7 +89,7 @@ class SearchResultList extends React.PureComponent {
   }
 
   render() {
-    const { classes, result } = this.props;
+    const { classes, result, localObserver } = this.props;
     const { minimized } = this.state;
 
     if (typeof result[0] === "string") {
@@ -145,6 +147,7 @@ class SearchResultList extends React.PureComponent {
               if (featureType.features.length === 0) return null;
               return (
                 <SearchResultGroup
+                  localObserver={localObserver}
                   parent={this}
                   key={i}
                   featureType={featureType}
