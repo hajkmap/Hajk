@@ -69,6 +69,7 @@ class Informative extends React.PureComponent {
     var left = this.position === "right" ? (window.innerWidth - 410) / 2 : 5;
     return createPortal(
       <Window
+        localObserver={this.observer}
         globalObserver={this.props.app.globalObserver}
         title={this.title}
         onClose={this.closePanel}

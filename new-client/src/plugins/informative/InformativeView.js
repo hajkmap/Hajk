@@ -120,8 +120,8 @@ class Informative extends React.PureComponent {
 
   displayMap = (layers, mapSettings) => e => {
     this.props.parent.informativeModel.displayMap(layers, mapSettings);
-    if (document.body.scrollWidth < 1280) {
-      this.props.parent.closePanel();
+    if (window.innerWidth < 600) {
+      this.props.observer.publish("minimizeWindow", true);
     }
   };
 
