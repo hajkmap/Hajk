@@ -33,7 +33,8 @@ const styles = theme => {
     },
     crossButton: {
       marginTop: "10px",
-      marginLeft: "-31px"
+      marginLeft: "-31px",
+      pointerEvents: "all"
     },
     saveError: {
       color: "red",
@@ -69,7 +70,20 @@ const styles = theme => {
       textAlign: "center"
     },
     anchorOriginBottomCenter: {
-      bottom: "60px"
+      bottom: "60px",
+      [theme.breakpoints.up("xs")]: {
+        left: "50%",
+        right: "auto",
+        transform: "translateX(-50%)",
+        borderRadius: "4px",
+        overflow: "hidden",
+        minWidth: "391px"
+      },
+      [theme.breakpoints.down("xs")]: {
+        width: "100%",
+        minWidth: "inherit",
+        borderRadius: "0"
+      }
     }
   };
 };
@@ -98,8 +112,8 @@ class CollectorForm extends Component {
       displayPlace: false,
       placemarkVisible: true
     });
-    if (window.document.body.clientWidth < 1024) {
-      this.props.minimizePanel();
+    if (window.document.body.clientWidth < 600) {
+      this.props.localObserver.emit("minimizeWindow", true);
     }
   };
 
@@ -248,14 +262,14 @@ class CollectorForm extends Component {
 
   renderOkButton() {
     const { classes } = this.props;
-    if (document.body.clientWidth < 1024) {
+    if (document.body.clientWidth < 600) {
       return (
         <Button
           className={classes.crossButton}
           variant="contained"
           color="primary"
           onClick={() => {
-            this.props.openPanel();
+            this.props.localObserver.emit("maximizeWindow", true);
             this.setState({
               placemarkVisible: false
             });

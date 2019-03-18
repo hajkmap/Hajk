@@ -65,6 +65,7 @@ class Collector extends Component {
     var left = this.position === "right" ? (window.innerWidth - 410) / 2 : 0;
     return createPortal(
       <Window
+        localObserver={this.observer}
         globalObserver={this.props.app.globalObserver}
         title={this.title}
         onClose={this.closePanel}
@@ -82,6 +83,7 @@ class Collector extends Component {
           dialogOpen={this.state.panelOpen}
           minimizePanel={this.minimizePanel}
           openPanel={this.openPanel}
+          localObserver={this.observer}
         />
       </Window>,
       document.getElementById("toolbar-panel")

@@ -51,10 +51,9 @@ class CollectorView extends Component {
     return (
       <div>
         <CollectorForm
+          localObserver={this.props.localObserver}
           model={this.model}
           onClose={this.onClose}
-          minimizePanel={this.props.minimizePanel}
-          openPanel={this.props.openPanel}
         />
       </div>
     );

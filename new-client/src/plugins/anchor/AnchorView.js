@@ -25,7 +25,6 @@ class AnchorView extends React.PureComponent {
 
   componentDidMount() {
     this.localObserver.subscribe("mapUpdated", anchor => {
-      console.log("mapUpdated");
       this.setState({
         anchor: anchor
       });
