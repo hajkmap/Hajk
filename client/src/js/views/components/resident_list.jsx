@@ -47,7 +47,7 @@ var ResidentList = {
       wfslayer = this.config.residentListWfsLayer[0];
     }
     else {
-      concole.error("KIR WFS layer not configured");
+      console.error("KIR WFS layer not configured");
       return;
     }
 
