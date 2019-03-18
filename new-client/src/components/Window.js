@@ -135,6 +135,15 @@ class Window extends Component {
   }
 
   componentDidMount() {
+    const { globalObserver } = this.props;
+    if (globalObserver) {
+      globalObserver.on("appLoaded", () => {
+        this.updatePosition();
+      });
+    }
+  }
+
+  updatePosition() {
     var { width, height, mode, position } = this.props;
     const parent = this.rnd.getSelfElement().parentElement;
     const header = document.getElementsByTagName("header")[0];
@@ -153,11 +162,7 @@ class Window extends Component {
       this.height = height === "auto" ? parent.clientHeight : height;
     }
     if (position === "right") {
-      this.left =
-        parent.getBoundingClientRect().right -
-        width +
-        20 -
-        parent.getBoundingClientRect().x;
+      this.left = parent.getBoundingClientRect().right - width;
     }
     if (isMobile) {
       this.left = 0;
@@ -355,7 +360,14 @@ class Window extends Component {
   }
 
   render() {
-    const { classes, title, children, features } = this.props;
+    const {
+      classes,
+      title,
+      children,
+      features,
+      open,
+      localObserver
+    } = this.props;
     var { left, top, width, height } = this.state;
     var resizeBottom = true,
       resizeBottomLeft = true,
@@ -387,7 +399,7 @@ class Window extends Component {
           this.rnd = c;
         }}
         style={{
-          display: this.props.open ? "block" : "none"
+          display: open ? "block" : "none"
         }}
         onDragStop={(e, d) => {
           this.left = this.rnd.getSelfElement().getClientRects()[0].x;
@@ -435,7 +447,7 @@ class Window extends Component {
       >
         <div className={classes.panelContent}>
           <PanelHeader
-            localObserver={this.props.localObserver}
+            localObserver={localObserver}
             onClose={this.close}
             title={title}
             top={top}

@@ -54,8 +54,8 @@ class Anchor extends React.PureComponent {
         onClose={this.closePanel}
         open={this.state.panelOpen}
         position={this.position}
-        height={300}
-        width={100}
+        height={350}
+        width={200}
         top={210}
         left={10}
         mode="window"

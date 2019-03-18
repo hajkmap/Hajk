@@ -224,13 +224,20 @@ class App extends Component {
       .createMap()
       .addLayers()
       .loadPlugins(this.props.activeTools);
-
     Promise.all(promises).then(() => {
       this.setState({
         tools: this.appModel.getPlugins()
       });
+      this.globalObserver.publish("appLoaded");
     });
+    this.bindHandlers();
+  }
 
+  componentDidCatch(error) {
+    console.error(error);
+  }
+
+  bindHandlers() {
     this.globalObserver.subscribe("mapClick", mapClickDataResult => {
       this.setState({
         mapClickDataResult: mapClickDataResult
@@ -273,10 +280,6 @@ class App extends Component {
           }
         });
       });
-  }
-
-  componentDidCatch(error) {
-    console.error(error);
   }
 
   renderWidgets(target) {
@@ -356,8 +359,8 @@ class App extends Component {
         open={open}
         position="right"
         mode="window"
-        width={350}
-        top={200}
+        width={400}
+        top={0}
         features={features}
         map={this.appModel.getMap()}
         onDisplay={feature => {
@@ -450,7 +453,9 @@ class App extends Component {
                     )}
                   </div>
                 </div>
-                <article id="toolbar-panel" className={classes.columnArticle} />
+                <article id="toolbar-panel" className={classes.columnArticle}>
+                  {this.renderPopup()}
+                </article>
               </div>
               <div className={classes.columnControls}>
                 <div className={classes.controls}>
