@@ -78,7 +78,9 @@ const styles = theme => {
       [theme.breakpoints.down("xs")]: {
         borderRadius: "0 !important",
         width: "100% !important",
-        zIndex: 2
+        zIndex: 2,
+        position: "fixed !important",
+        top: "64px !important"
       }
     },
     panelContent: {

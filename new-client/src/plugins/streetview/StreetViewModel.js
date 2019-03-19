@@ -151,6 +151,8 @@ class StreetViewModel {
       l = [x, y],
       p = this.map.getView().getProjection(),
       c = transform(l, "EPSG:4326", p);
+
+    this.coord = this.coordinate = l;
     this.addMarker(c, b);
   };
 

@@ -10,6 +10,7 @@ import PlaceIcon from "@material-ui/icons/Place";
 import FlareIcon from "@material-ui/icons/Flare";
 import LocalFloristIcon from "@material-ui/icons/LocalFlorist";
 import Typography from "@material-ui/core/Typography/Typography";
+import { isMobile } from "../../../utils/IsMobile";
 
 const styles = theme => {
   return {
@@ -352,7 +353,7 @@ class CollectorForm extends Component {
           className={classes.text}
           onChange={this.handleChange("comment")}
           margin="normal"
-          autoFocus={true}
+          autoFocus={isMobile ? false : true}
         />
         <br />
         <Button color="primary" variant="contained" onClick={this.save(false)}>

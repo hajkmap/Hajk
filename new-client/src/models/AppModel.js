@@ -180,6 +180,7 @@ class AppModel {
 
   clear() {
     this.clearing = true;
+    this.highlight(false);
     map
       .getLayers()
       .getArray()

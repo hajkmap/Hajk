@@ -264,7 +264,7 @@
     {
       "type": "simple_layerswitcher",
       "options": {
-        "target": "left",
+        "target": "toolbar",
         "visibleAtStart": false,
         "visibleForGroups": []
       },
@@ -356,7 +356,7 @@
     {
       "type": "informative",
       "options": {
-        "target": "right",
+        "target": "toolbar",
         "panel": "right",
         "title": "Översiktsplan",
         "caption": "Översiktsplan",
@@ -372,7 +372,7 @@
     {
       "type": "collector",
       "options": {
-        "target": "right",
+        "target": "toolbar",
         "url": "",
         "featureType": "",
         "title": "Tyck till",
@@ -424,7 +424,7 @@
     {
       "type": "information",
       "options": {
-        "target": "left",
+        "target": "toolbar",
         "text": "Hej",
         "headerText": "Om kartan",
         "title": "",

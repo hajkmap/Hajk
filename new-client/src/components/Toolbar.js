@@ -8,7 +8,6 @@ import {
   ListItemIcon,
   ListItemText,
   Drawer,
-  Divider,
   IconButton
 } from "@material-ui/core";
 import ChevronLeft from "@material-ui/icons/ChevronLeft";
@@ -24,7 +23,7 @@ const styles = theme => {
     drawer: {
       order: 0,
       zIndex: 1,
-      height: "100%",
+      height: "calc(100vh - 64px)",
       [theme.breakpoints.down("xs")]: {
         top: 0,
         left: 0,
@@ -48,7 +47,7 @@ const styles = theme => {
     drawerPaperClose: {
       borderRight: "none",
       overflowX: "hidden",
-      width: theme.spacing.unit * 7,
+      width: theme.spacing.unit * 8,
       [theme.breakpoints.down("xs")]: {
         width: drawerWidth
       }
@@ -56,7 +55,9 @@ const styles = theme => {
     button: {
       marginBottom: "5px"
     },
+    toolItem: {},
     toggler: {
+      height: "47px",
       [theme.breakpoints.down("xs")]: {
         display: "none"
       }
@@ -106,9 +107,10 @@ class Toolbar extends Component {
   };
 
   renderTools() {
+    const { classes } = this.props;
     return this.props.tools.map((tool, i) => {
       return (
-        <div key={i} onClick={this.itemClicked}>
+        <div key={i} onClick={this.itemClicked} className={classes.toolItem}>
           <tool.component
             map={tool.map}
             app={tool.app}
@@ -153,15 +155,17 @@ class Toolbar extends Component {
         }}
         open={this.state.open}
       >
-        <ListItem
-          button
-          onClick={this.toggleToolbarText}
-          className={classes.toggler}
-        >
-          <ListItemIcon>{icon}</ListItemIcon>
-          <ListItemText primary="Minimera" />
-        </ListItem>
-        <Divider />
+        <div>
+          <ListItem
+            button
+            divider={true}
+            onClick={this.toggleToolbarText}
+            className={classes.toggler}
+          >
+            <ListItemIcon>{icon}</ListItemIcon>
+            <ListItemText primary="Minimera" />
+          </ListItem>
+        </div>
         {this.renderTools()}
         {this.props.widgets || null}
       </Drawer>

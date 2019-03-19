@@ -11,6 +11,7 @@ import SearchWithinButton from "./components/SearchWithinButton.js";
 import ClearButton from "./components/ClearButton.js";
 import SearchModel from "./SearchModel.js";
 import PanelHeader from "./../../components/PanelHeader.js";
+import { isMobile } from "../../utils/IsMobile.js";
 
 const styles = theme => {
   return {
@@ -82,7 +83,8 @@ const styles = theme => {
         top: 0,
         background: "white",
         bottom: 0,
-        zIndex: 1
+        zIndex: 1,
+        overflow: "auto"
       }
     },
     loader: {
@@ -167,10 +169,12 @@ class Search extends React.PureComponent {
       }
     });
 
-    window.addEventListener("resize", () => {
-      this.setState({
-        visible: window.innerWidth > b
-      });
+    window.addEventListener("resize", e => {
+      if (!isMobile) {
+        this.setState({
+          visible: window.innerWidth > b
+        });
+      }
     });
   }
 

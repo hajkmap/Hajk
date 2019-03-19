@@ -239,6 +239,7 @@ class App extends Component {
 
   bindHandlers() {
     this.globalObserver.subscribe("mapClick", mapClickDataResult => {
+      this.appModel.highlight(false);
       this.setState({
         mapClickDataResult: mapClickDataResult
       });
