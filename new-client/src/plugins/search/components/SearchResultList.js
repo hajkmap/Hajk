@@ -24,6 +24,17 @@ const styles = theme => {
         padding: 0
       }
     },
+    searchResultTop: {
+      overflow: "auto",
+      padding: "10px",
+      position: "relative",
+      top: "-2px",
+      background: "white",
+      border: "1px solid " + theme.palette.secondary.main,
+      borderTop: "none",
+      borderBottomLeftRadius: "5px",
+      borderBottomRightRadius: "5px"
+    },
     searchResultContainer: {
       maxHeight: "calc(100vh - 380px)",
       overflow: "auto",
@@ -67,7 +78,7 @@ class SearchResultList extends React.PureComponent {
   }
 
   renderResult() {
-    const { result, localObserver } = this.props;
+    const { result, localObserver, target, model } = this.props;
     if (this.state.minimized) return null;
     return (
       <div>
@@ -79,8 +90,9 @@ class SearchResultList extends React.PureComponent {
               parent={this}
               key={i}
               featureType={featureType}
-              model={this.props.model}
+              model={model}
               expanded={false}
+              target={target}
             />
           );
         })}
@@ -89,12 +101,16 @@ class SearchResultList extends React.PureComponent {
   }
 
   render() {
-    const { classes, result, localObserver } = this.props;
+    const { classes, result, localObserver, target } = this.props;
     const { minimized } = this.state;
+    let searchResultClass = classes.searchResult;
+    if (this.props.target === "top") {
+      searchResultClass = classes.searchResultTop;
+    }
 
     if (typeof result[0] === "string") {
       return (
-        <div className={classes.searchResult}>
+        <div className={searchResultClass}>
           <div className={classes.searchResultEmpty}>
             Information hittades i {result.length} kartlager.
           </div>
@@ -103,7 +119,7 @@ class SearchResultList extends React.PureComponent {
     } else {
       if (result.every(r => r.features.length === 0)) {
         return (
-          <div className={classes.searchResult}>
+          <div className={searchResultClass}>
             <div className={classes.searchResultEmpty}>
               Sökningen gav inget resultat
             </div>
@@ -116,7 +132,7 @@ class SearchResultList extends React.PureComponent {
       return null;
     } else {
       return (
-        <div className={classes.searchResult}>
+        <div className={searchResultClass}>
           <div className={classes.searchResultTopBar}>
             <div>SÖKRESULTAT</div>
             <div>
@@ -153,6 +169,7 @@ class SearchResultList extends React.PureComponent {
                   featureType={featureType}
                   model={this.props.model}
                   expanded={false}
+                  target={target}
                 />
               );
             })}

@@ -386,11 +386,11 @@
     {
       "type": "search",
       "options": {
-        "target": "center",
-        "onMap": true,
+        "target": "header",
+        "onMap": false,
         "bothSynlig": false,
         "enableViewTogglePopupInSnabbsok": true,
-        "toolbar": "",
+        "toolbar": "bottom",
         "maxZoom": 14,
         "markerImg": "http://localhost/hajk/assets/icons/marker.png",
         "kmlExportUrl": "/mapservice/export/kml",

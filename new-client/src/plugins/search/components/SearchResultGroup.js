@@ -91,7 +91,7 @@ class SearchResultGroup extends Component {
   };
 
   renderItem(feature, displayField, i) {
-    const { classes } = this.props;
+    const { classes, target } = this.props;
     const active = this.state.activeFeature === feature;
     return (
       <div
@@ -100,11 +100,13 @@ class SearchResultGroup extends Component {
         onClick={this.zoomTo(feature)}
       >
         {feature.properties[displayField]}
-        <div>
-          <Button color="primary" onClick={this.highlight(feature)}>
-            Visa påverkan
-          </Button>
-        </div>
+        {target === "center" ? (
+          <div>
+            <Button color="primary" onClick={this.highlight(feature)}>
+              Visa påverkan
+            </Button>
+          </div>
+        ) : null}
       </div>
     );
   }

@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import { withStyles } from "@material-ui/core/styles";
 import SearchIcon from "@material-ui/icons/Search";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import Observer from "react-event-observer";
 import SearchBar from "./components/SearchBar.js";
 import SearchResultList from "./components/SearchResultList.js";
@@ -67,6 +68,23 @@ const styles = theme => {
         alignItems: "center"
       }
     },
+    searchContainerTop: {
+      display: "block",
+      width: "330px",
+      marginRight: "5px",
+      [theme.breakpoints.down("sm")]: {
+        display: "none",
+        padding: "10px",
+        position: "fixed",
+        width: "calc(100vw - 20px)",
+        left: 0,
+        right: 0,
+        top: 0,
+        background: "white",
+        bottom: 0,
+        zIndex: 1
+      }
+    },
     loader: {
       height: "4px",
       marginBottom: "4px",
@@ -80,12 +98,26 @@ const styles = theme => {
         height: "inherit"
       }
     },
+    iconButtonHeader: {
+      color: "black",
+      padding: "3px",
+      overflow: "visible",
+      cursor: "pointer",
+      [theme.breakpoints.up("md")]: {
+        display: "none"
+      }
+    },
     iconButton: {
       color: "black",
       padding: "3px",
       overflow: "visible",
       cursor: "pointer",
       [theme.breakpoints.up("lg")]: {
+        display: "none"
+      }
+    },
+    backIcon: {
+      [theme.breakpoints.up("md")]: {
         display: "none"
       }
     }
@@ -101,6 +133,7 @@ class Search extends React.PureComponent {
 
   constructor(props) {
     super(props);
+    var b = props.options.target === "header" ? 960 : 1280;
     this.localObserver = Observer();
     this.searchModel = new SearchModel(
       props.options,
@@ -109,7 +142,8 @@ class Search extends React.PureComponent {
       this.localObserver
     );
     this.state = {
-      visible: window.innerWidth > 1280
+      visible: window.innerWidth > b,
+      loading: false
     };
     this.toolDescription = props.options.toolDescription;
     this.tooltip = props.options.tooltip;
@@ -124,14 +158,23 @@ class Search extends React.PureComponent {
         loading: false
       });
     });
+
+    this.localObserver.on("minimizeWindow", () => {
+      if (props.options.target === "header" && window.innerWidth < 960) {
+        this.setState({
+          visible: false
+        });
+      }
+    });
+
     window.addEventListener("resize", () => {
       this.setState({
-        visible: window.innerWidth > 1280
+        visible: window.innerWidth > b
       });
     });
   }
 
-  renderSearchResultList() {
+  renderSearchResultList(target) {
     const { classes } = this.props;
     const { result } = this.state;
     if (!result) return null;
@@ -142,6 +185,7 @@ class Search extends React.PureComponent {
           result={result}
           model={this.searchModel}
           visible={true}
+          target={target}
         />
       </div>
     );
@@ -171,11 +215,13 @@ class Search extends React.PureComponent {
     this.props.app.closePanels();
   };
 
-  renderButton() {
+  renderButton(target) {
     const { classes } = this.props;
-    return (
-      <SearchIcon className={classes.iconButton} onClick={this.toggleSearch} />
-    );
+    var iconClass = classes.iconButton;
+    if (target === "header") {
+      iconClass = classes.iconButtonHeader;
+    }
+    return <SearchIcon className={iconClass} onClick={this.toggleSearch} />;
   }
 
   renderCenter() {
@@ -190,6 +236,7 @@ class Search extends React.PureComponent {
       >
         <div className={classes.panelHeader}>
           <PanelHeader
+            maximizable={false}
             localObserver={this.localObserver}
             title="Sök"
             onClose={() => {
@@ -252,8 +299,43 @@ class Search extends React.PureComponent {
               tooltip={this.tooltip}
             />
           </div>
-          {this.renderSearchResultList()}
+          {this.renderSearchResultList("center")}
         </div>
+      </div>
+    );
+  }
+
+  renderTop(target) {
+    const { classes } = this.props;
+    return (
+      <div
+        className={classes.searchContainerTop}
+        style={{ display: this.state.visible ? "block" : "none" }}
+      >
+        <ArrowBackIcon
+          className={classes.backIcon}
+          onClick={() => {
+            this.setState({
+              visible: false
+            });
+          }}
+        />
+        <SearchBar
+          model={this.searchModel}
+          onChange={this.searchModel.search}
+          onComplete={this.resolve}
+          tooltip={this.tooltip}
+          target="top"
+          loading={this.state.loading}
+          onClear={() => {
+            this.searchModel.clear();
+            this.localObserver.publish("clearInput");
+            this.setState({
+              result: false
+            });
+          }}
+        />
+        <div>{this.renderSearchResultList("top")}</div>
       </div>
     );
   }
@@ -264,13 +346,20 @@ class Search extends React.PureComponent {
     if (options.target === "center" && center) {
       return (
         <div>
-          {this.renderButton()}
+          {this.renderButton(options.target)}
           {createPortal(this.renderCenter(), center)}
         </div>
       );
-    } else {
-      return <div>Sök..</div>;
     }
+    if (options.target === "header") {
+      return (
+        <div>
+          {this.renderButton(options.target)}
+          {this.renderTop()}
+        </div>
+      );
+    }
+    return null;
   }
 }
 

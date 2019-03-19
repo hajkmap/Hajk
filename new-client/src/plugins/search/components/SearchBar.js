@@ -3,7 +3,9 @@ import Input from "@material-ui/core/Input";
 import { withStyles } from "@material-ui/core/styles";
 import { fade } from "@material-ui/core/styles/colorManipulator";
 import SearchIcon from "@material-ui/icons/Search";
+import ClearIcon from "@material-ui/icons/Clear";
 import InputAdornment from "@material-ui/core/InputAdornment";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 const styles = theme => ({
   search: {
@@ -16,10 +18,12 @@ const styles = theme => ({
     overflow: "hidden"
   },
   closeIcon: {},
+  clearIcon: {
+    cursor: "pointer"
+  },
   searchIcon: {
     height: "100%",
     position: "relative",
-    pointerEvents: "none",
     padding: "6px",
     background: theme.palette.secondary.main
   },
@@ -34,12 +38,25 @@ const styles = theme => ({
     paddingLeft: theme.spacing.unit,
     transition: theme.transitions.create("width"),
     left: "100%",
-    [theme.breakpoints.up("lg")]: {
-      width: 200,
-      "&:focus": {
-        width: 200
-      }
+    width: "100%"
+  },
+  inputInputWide: {
+    paddingTop: theme.spacing.unit,
+    paddingRight: theme.spacing.unit,
+    paddingBottom: theme.spacing.unit,
+    paddingLeft: theme.spacing.unit,
+    transition: theme.transitions.create("width"),
+    left: "100%",
+    width: "100%",
+    "&:focus": {
+      width: "100%"
     }
+  },
+  progress: {
+    width: "20px !important",
+    height: "20px !important",
+    color: "black",
+    margin: "2px"
   }
 });
 
@@ -58,7 +75,16 @@ class SearchBar extends React.PureComponent {
   }
 
   render() {
-    const { classes, onChange, onComplete, value } = this.props;
+    const {
+      classes,
+      onChange,
+      onComplete,
+      value,
+      target,
+      loading,
+      tooltip
+    } = this.props;
+
     return (
       <div className={classes.search}>
         <Input
@@ -72,15 +98,27 @@ class SearchBar extends React.PureComponent {
             });
           }}
           value={value === "" ? value : this.state.value}
-          placeholder={this.props.tooltip}
+          placeholder={tooltip}
           disableUnderline
           classes={{
             root: classes.inputRoot,
-            input: classes.inputInput
+            input:
+              target === "top" ? classes.inputInputWide : classes.inputInput
           }}
           endAdornment={
             <InputAdornment className={classes.searchIcon} position="end">
-              <SearchIcon />
+              {this.state.value ? (
+                loading ? (
+                  <CircularProgress className={classes.progress} />
+                ) : (
+                  <ClearIcon
+                    onClick={this.props.onClear}
+                    className={classes.clearIcon}
+                  />
+                )
+              ) : (
+                <SearchIcon />
+              )}
             </InputAdornment>
           }
         />
