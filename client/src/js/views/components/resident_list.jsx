@@ -67,7 +67,7 @@ var ResidentList = {
       srsName: mapProjection,
       featureTypes: wfslayer.layers,
       outputFormat: wfslayer.outputFormat,
-      filter: ol.format.filter.or.apply(null, filters)
+      filter: filters.length > 1 ? ol.format.filter.or.apply(null, filters) : filters[0]
     });
 
     this.setState({ fetchingExcel: true, excelIsReady: false, excelUrl: "", errorMessage: null });
