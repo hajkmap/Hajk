@@ -712,8 +712,10 @@ var FirSearchView = {
                     {/* Fastighetsförteckning */}
                     <PropertyList model={this.props.model}></PropertyList>
 
-                    {/* Boendeförteckning */}
-                    <ResidentList model={this.props.model}></ResidentList>
+                    {/* Boendeförteckning */
+                      this.props.model.get("residentList") != null ?
+                      <ResidentList model={this.props.model}></ResidentList> : ""
+                    }
 
                     {results}
                 </div>
