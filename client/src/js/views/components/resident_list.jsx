@@ -78,11 +78,10 @@ var ResidentList = {
       xhrFields: { withCredentials: true },
       data: new XMLSerializer().serializeToString(featureRequest),
       success: function(response) {
-        if (response && response.features) {
-          callback(response.features);
-        } else {
-          return null;
-        }
+        var features = wfslayer.outputFormat === "GML3" ?
+          new ol.format.GML().readFeatures(response) : new ol.format.GeoJSON().readFeatures(response);
+
+        callback(features);
       }.bind(this),
       error: function(message) {
         this.setState({
@@ -114,27 +113,28 @@ var ResidentList = {
 
     features.forEach(function(f) {
       var row = [];
-      row.push(f.properties[_config.namnFieldName]);
-      row.push(f.properties[_config.adressFieldName]);
-      row.push(f.properties[_config.postortFieldName]);
-      row.push(f.properties[_config.postnrFieldName]);
 
-      var birthDate = this.dateFromPersonalNumber(f.properties[_config.alderFieldName]);
+      row.push(f.get(_config.namnFieldName));
+      row.push(f.get(_config.adressFieldName));
+      row.push(f.get(_config.postortFieldName));
+      row.push(f.get(_config.postnrFieldName));
+
+      var birthDate = this.dateFromPersonalNumber(f.get(_config.alderFieldName));
       var age = new Date().getFullYear() - parseInt(birthDate.substring(0, 4));
       if (age < this.state.minAge) {
         return;
       }
 
       if (this.state.includeAge) {
-        row.push(f.properties[_config.alderFieldName]);
+        row.push(f.get(_config.alderFieldName));
       }
 
       if (this.state.includeGender) {
-        row.push(f.properties[_config.koenFieldName]);
+        row.push(f.get(_config.koenFieldName));
       }
 
       if (this.state.includeBirthDate) {
-        row.push(this.dateFromPersonalNumber(f.properties[_config.fodelsedatumFieldName]));
+        row.push(this.dateFromPersonalNumber(f.get(_config.fodelsedatumFieldName)));
       }
 
       rows.push(row);
