@@ -271,19 +271,6 @@
       "index": 0
     },
     {
-      "type": "edit",
-      "options": {
-        "target": "toolbar",
-        "instruction": "",
-        "activeServices": [
-          "25",
-          "26"
-        ],
-        "visibleForGroups": []
-      },
-      "index": 2
-    },
-    {
       "type": "draw",
       "options": {
         "target": "toolbar",
@@ -326,7 +313,7 @@
         "tiffActive": false,
         "base64Encode": false,
         "autoScale": false,
-        "scales": "",
+        "scales": "5000, 10000, 25000, 50000, 100000, 250000",
         "proxyUrl": "",
         "instruction": "",
         "visibleForGroups": []

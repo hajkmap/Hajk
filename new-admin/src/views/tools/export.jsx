@@ -35,7 +35,7 @@ var defaultState = {
   base64Encode: false,
   autoScale: false,
   instruction: "",
-  scales: [250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000],
+  scales: "250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000",
   proxyUrl: "",
   visibleForGroups: []
 };
@@ -53,8 +53,6 @@ class ToolOptions extends Component {
   componentDidMount() {
     var tool = this.getTool();
     if (tool) {
-      console.log("Scales", tool.options.scales);
-
       this.setState({
         active: true,
         index: tool.index,
@@ -67,7 +65,7 @@ class ToolOptions extends Component {
         autoScale: tool.options.autoScale,
         proxyUrl: tool.options.proxyUrl,
         instruction: tool.options.instruction,
-        scales: tool.options.scales || this.scales,
+        scales: tool.options.scales || this.state.scales,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : []

@@ -30,11 +30,12 @@ class ExportPdfSettings extends Component {
     super(props);
     this.resolutions = [72, 96, 150, 200, 300];
     this.paperFormats = ["A2", "A3", "A4"];
+    console.log(props);
     this.state = {
       selectFormat: "A4",
       selectOrientation: "S",
-      selectScale: "500",
-      manualScale: "2500",
+      selectScale: props.model.scales[0],
+      manualScale: "10000",
       selectResolution: "72",
       center: props.model.getPreviewFeature()
         ? props.model.getPreviewCenter()
