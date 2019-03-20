@@ -53,6 +53,8 @@ class ToolOptions extends Component {
   componentDidMount() {
     var tool = this.getTool();
     if (tool) {
+      console.log("Scales", tool.options.scales);
+
       this.setState({
         active: true,
         index: tool.index,
@@ -65,6 +67,7 @@ class ToolOptions extends Component {
         autoScale: tool.options.autoScale,
         proxyUrl: tool.options.proxyUrl,
         instruction: tool.options.instruction,
+        scales: tool.options.scales || this.scales,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : []
@@ -89,7 +92,6 @@ class ToolOptions extends Component {
     if (typeof value === "string" && value.trim() !== "") {
       value = !isNaN(Number(value)) ? Number(value) : value;
     }
-
     if (name === "instruction") {
       value = btoa(value);
     }
@@ -282,6 +284,17 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
+            <label htmlFor="scales">Skalor</label>
+            <input
+              value={this.state.scales}
+              type="text"
+              name="scales"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
             <label htmlFor="exportUrl">URL till PDF-tjänst</label>
             <input
               value={this.state.exportUrl}
@@ -340,7 +353,7 @@ class ToolOptions extends Component {
               checked={this.state.base64Encode}
             />
             &nbsp;
-            <label htmlFor="Base64-active">Base64-encoding aktiverad</label>
+            <label htmlFor="Base64-active">Base64-encoding</label>
           </div>
           <div>
             <input
@@ -353,9 +366,7 @@ class ToolOptions extends Component {
               checked={this.state.autoScale}
             />
             &nbsp;
-            <label htmlFor="autoScale-active">
-              autoScale av previewLayer för mobil aktiverad
-            </label>
+            <label htmlFor="autoScale-active">Automatisk skala</label>
           </div>
           <div>
             <label htmlFor="instruction">Instruktion</label>

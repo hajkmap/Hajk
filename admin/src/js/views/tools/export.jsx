@@ -87,7 +87,9 @@ class ToolOptions extends Component {
     if (typeof value === "string" && value.trim() !== "") {
       value = !isNaN(Number(value)) ? Number(value) : value;
     }
-
+    if (name == "scales") {
+      value = values.split(",");
+    }
     if (name == "instruction") {
       value = btoa(value);
     }
@@ -267,6 +269,17 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
+            <label htmlFor="scales">Skalor</label>
+            <input
+              value={this.state.scales}
+              type="text"
+              name="scales"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
             <label htmlFor="exportUrl">URL till PDF-tjänst</label>
             <input
               value={this.state.exportUrl}
@@ -325,7 +338,7 @@ class ToolOptions extends Component {
               checked={this.state.base64Encode}
             />
             &nbsp;
-            <label htmlFor="Base64-active">Base64-encoding aktiverad</label>
+            <label htmlFor="Base64-active">Base64-encoding</label>
           </div>
           <div>
             <input
@@ -338,9 +351,7 @@ class ToolOptions extends Component {
               checked={this.state.autoScale}
             />
             &nbsp;
-            <label htmlFor="autoScale-active">
-              autoScale av previewLayer för mobil aktiverad
-            </label>
+            <label htmlFor="autoScale-active">Automatisk skala</label>
           </div>
           <div>
             <label htmlFor="instruction">Instruktion</label>
@@ -356,7 +367,7 @@ class ToolOptions extends Component {
           </div>
           {this.renderVisibleForGroups()}
           <div>
-            <label htmlFor="proxyUrl">Proxy URL till utskrift och export</label>
+            <label htmlFor="proxyUrl">Proxy URL för utskrift</label>
             <input
               value={this.state.proxyUrl}
               type="text"

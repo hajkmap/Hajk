@@ -1,6 +1,7 @@
 body {
   margin: 0;
   padding: 0;
+  font-family: "Frutiger", sans-serif !important;
 }
 .app-start {
   position: absolute;
@@ -10,7 +11,6 @@ body {
   right: 0;
   display: flex;
   flex-direction: column;
-  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif !important;
   color: black !important;
   line-height: 1.4 !important;
   font-weight: 300 !important;

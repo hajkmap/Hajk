@@ -1,4 +1,7 @@
 {
+  "typography": {
+    "fontFamily": "'Frutiger', sans-serif"
+  },
   "palette": {
     "secondary": {
       "dark": "#A51848",

@@ -106,8 +106,9 @@ fetch("appConfig.json", fetchConfig)
                   activeMap: defaultMap
                 };
                 setTimeout(() => {
+                  let theme = getTheme(config, customTheme);
                   ReactDOM.render(
-                    <MuiThemeProvider theme={getTheme(config, customTheme)}>
+                    <MuiThemeProvider theme={theme}>
                       <App
                         activeTools={buildConfig.activeTools}
                         config={config}

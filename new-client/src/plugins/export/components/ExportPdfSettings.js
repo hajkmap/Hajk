@@ -92,7 +92,9 @@ class ExportPdfSettings extends Component {
 
   getScale() {
     return this.state.selectScale === "other"
-      ? this.state.manualScale
+      ? !isNaN(Number(this.state.manualScale))
+        ? this.state.manualScale
+        : 0
       : this.state.selectScale;
   }
 
@@ -133,10 +135,11 @@ class ExportPdfSettings extends Component {
   };
 
   setManualScale = e => {
+    var v = e.target.value.startsWith("1:")
+      ? e.target.value.split(":")[1]
+      : e.target.value;
     this.setState({
-      manualScale: e.target.value.startsWith("1:")
-        ? e.target.value.split(":")[1]
-        : e.target.value
+      manualScale: v
     });
   };
 
@@ -324,7 +327,9 @@ class ExportPdfSettings extends Component {
               input={<Input name="scale" id="scale-native-helper" />}
             >
               {scalesOptions}
-              <option value="other">Annan skala</option>
+              <option key={"other"} value={"other"}>
+                Annan skala
+              </option>
             </NativeSelect>
           </FormControl>
           {this.state.selectScale === "other" && (

@@ -42,22 +42,19 @@ class ExportModel {
     this.app = settings.app;
     this.localObserver = settings.localObserver;
     this.exportUrl = settings.options.exportUrl;
+    this.scales = this.validateScales(settings.options.scales);
     this.copyright = "© Lantmäteriverket i2009/00858";
     this.autoScale = false;
     this.instruction = "";
-    this.scales = [
-      250,
-      500,
-      1000,
-      2500,
-      5000,
-      10000,
-      25000,
-      50000,
-      100000,
-      250000
-    ];
     this.addPreviewLayer();
+  }
+
+  validateScales(s) {
+    if (/(\d+)(,\s*\d+)*/.test(s)) {
+      return s.split(",").map(s => Number(s));
+    } else {
+      return [250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000];
+    }
   }
 
   addPreviewLayer() {

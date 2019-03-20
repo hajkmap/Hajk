@@ -164,7 +164,7 @@ namespace MapService.Components.MapExport
         /// <returns></returns>
         private ITileSource createTileSource(WMTSInfo config)
         {
-            Uri uri = new Uri(string.Format("{0}{1}", config.url, "?request=getCapabilities"));
+            Uri uri = new Uri(string.Format("{0}{1}", config.url, "?request=getCapabilities&service=wmts"));
 
             var req = WebRequest.Create(uri);
             var resp = req.GetResponseAsync();
@@ -172,8 +172,8 @@ namespace MapService.Components.MapExport
 
             using (var stream = resp.Result.GetResponseStream())
             {
-                IEnumerable<ITileSource> tileSources = WmtsParser.Parse(stream);
-                tileSource = tileSources.FirstOrDefault();
+                IEnumerable<ITileSource> tileSources = WmtsParser.Parse(stream);                
+                tileSource = tileSources.Where(t => t.Name == "topowebb").FirstOrDefault();
             }
             return tileSource;
         }
