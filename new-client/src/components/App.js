@@ -102,7 +102,7 @@ const styles = theme => {
       flex: 1,
       justifyContent: "center",
       display: "flex",
-      alignItems: "start",
+      alignItems: "baseline",
       [theme.breakpoints.down("xs")]: {
         zIndex: 1000
       }
@@ -200,6 +200,15 @@ const styles = theme => {
       [theme.breakpoints.down("md")]: {
         width: "100%"
       }
+    },
+    windowContainer: {
+      position: "absolute",
+      top: "64px",
+      left: "50px",
+      right: 0,
+      bottom: 0,
+      background: "rgba(255, 255, 255, 0.5)",
+      zIndex: 5000
     }
   };
 };

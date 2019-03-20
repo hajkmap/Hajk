@@ -13,13 +13,16 @@ const zIndexStart = 1e3;
 // This is necessary so we can disable/enable drag at any time.
 //
 Rnd.prototype.onDragStart = function(e, data) {
-  if (this.state.disableDrag || e.target.tagName !== "HEADER") {
+  if (this.state.disableDrag || e.target.tagName !== "H1") {
     return false;
   }
+
   if (this.props.onDragStart) {
     this.props.onDragStart(e, data);
   }
+
   if (!this.props.bounds) return;
+
   var parent = this.getParent();
   var boundary;
   if (this.props.bounds === "parent") {
@@ -150,17 +153,14 @@ class Window extends Component {
     const parent = this.rnd.getSelfElement().parentElement;
     const header = document.getElementsByTagName("header")[0];
     this.headerHeight = header.clientHeight;
+    this.left = parent.getBoundingClientRect().left;
+    this.top = parent.getBoundingClientRect().top - this.headerHeight;
+    this.width = width;
 
     if (mode === "panel") {
-      this.left = parent.getBoundingClientRect().x;
-      this.top = parent.getBoundingClientRect().y - this.headerHeight;
-      this.width = width;
       this.height = parent.clientHeight;
     }
     if (mode === "window") {
-      this.left = parent.getBoundingClientRect().x;
-      this.top = parent.getBoundingClientRect().y - header.clientHeight;
-      this.width = width;
       this.height = height === "auto" ? parent.clientHeight : height;
     }
     if (position === "right") {
@@ -214,15 +214,17 @@ class Window extends Component {
   };
 
   update = target => {
-    var currentOffset = target.getBoundingClientRect().x;
+    var currentOffset = target.getBoundingClientRect().left;
     if (!this.offset || currentOffset > this.offset) {
-      this.offset = target.getBoundingClientRect().x;
+      this.offset = target.getBoundingClientRect().left;
     }
 
     var width = this.rnd.getSelfElement().clientWidth;
 
+    console.log("Left", this.left, "Current offset", currentOffset);
+
     if (this.left < currentOffset || this.offset === this.left) {
-      let n = target.getBoundingClientRect().x;
+      let n = target.getBoundingClientRect().left;
       this.rnd.updatePosition({
         x: n
       });
@@ -247,8 +249,8 @@ class Window extends Component {
 
   fit = target => {
     this.rnd.updatePosition({
-      x: target.getBoundingClientRect().x,
-      y: target.getBoundingClientRect().y - this.headerHeight
+      x: target.getBoundingClientRect().left,
+      y: target.getBoundingClientRect().top - this.headerHeight
     });
     this.rnd.setState({
       disableDrag: true
@@ -404,9 +406,10 @@ class Window extends Component {
           display: open ? "block" : "none"
         }}
         onDragStop={(e, d) => {
-          this.left = this.rnd.getSelfElement().getClientRects()[0].x;
+          this.left = this.rnd.getSelfElement().getClientRects()[0].left;
           this.top =
-            this.rnd.getSelfElement().getClientRects()[0].y - this.headerHeight;
+            this.rnd.getSelfElement().getClientRects()[0].top -
+            this.headerHeight;
           this.right = window.innerWidth - (this.left + parseFloat(this.width));
         }}
         onResize={(e, direction, ref, delta, position) => {
@@ -421,6 +424,7 @@ class Window extends Component {
           if (this.props.onResize) this.props.onResize();
         }}
         cancel="section,nav"
+        bounds={"article"}
         disableDragging={false || getIsMobile()}
         enableResizing={{
           bottom: resizeBottom,
@@ -435,7 +439,6 @@ class Window extends Component {
         className={classes.window}
         minWidth={300}
         minHeight={this.mode === "minimized" ? 46 : 300}
-        bounds={"article"}
         size={{
           width: width,
           height: height

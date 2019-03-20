@@ -137,10 +137,10 @@ class PanelHeader extends Component {
   render() {
     const { classes, maximizable } = this.props;
     return (
-      <header
+      <h1
         className={classes.header}
         onMouseDown={e => {
-          if (e.target.tagName === "HEADER") {
+          if (e.target.tagName === "H1") {
             this.maximize(e);
           }
         }}
@@ -154,7 +154,7 @@ class PanelHeader extends Component {
         </nav>
         {this.props.title}
         <nav className={classes.icons}>{this.renderButtons(maximizable)}</nav>
-      </header>
+      </h1>
     );
   }
 }

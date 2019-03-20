@@ -58,7 +58,8 @@ class StreetViewModel {
     this.activated = false;
     this.streetViewMarkerLayer.getSource().clear();
     this.panorama = undefined;
-    document.getElementById("street-view-window").innerHTML = "";
+    var win = document.getElementById("street-view-window");
+    if (win) win.innerHTML = "";
   }
 
   getIconStyle = rotation => {
