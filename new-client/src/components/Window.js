@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import PanelHeader from "./PanelHeader";
@@ -109,7 +109,7 @@ const styles = theme => {
   };
 };
 
-class Window extends Component {
+class Window extends React.PureComponent {
   constructor(props) {
     super(props);
     document.windows.push(this);
@@ -220,8 +220,6 @@ class Window extends Component {
     }
 
     var width = this.rnd.getSelfElement().clientWidth;
-
-    console.log("Left", this.left, "Current offset", currentOffset);
 
     if (this.left < currentOffset || this.offset === this.left) {
       let n = target.getBoundingClientRect().left;

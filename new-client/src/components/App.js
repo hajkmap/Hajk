@@ -108,7 +108,6 @@ const styles = theme => {
       }
     },
     column3: {
-      flex: 0,
       zIndex: 1,
       [theme.breakpoints.down("xs")]: {
         zIndex: 1000
@@ -213,7 +212,7 @@ const styles = theme => {
   };
 };
 
-class App extends Component {
+class App extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -432,7 +431,7 @@ class App extends Component {
               {this.renderMapSwitcher()}
             </MUIToolbar>
           </AppBar>
-          <main className={classes.map} id="map">
+          <div className={classes.map} id="map">
             <div id="map-overlay" className={classes.overlay}>
               <div className={classes.columnToolbar}>
                 <Toolbar
@@ -473,7 +472,7 @@ class App extends Component {
                 </div>
               </div>
             </div>
-          </main>
+          </div>
           <footer className={classes.footer} id="footer" />
         </div>
       </SnackbarProvider>
