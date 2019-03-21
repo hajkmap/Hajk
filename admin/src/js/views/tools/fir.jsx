@@ -111,7 +111,8 @@ class ToolOptions extends Component {
                 colorHighlight: tool.options.colorHighlight,
                 colorHighlightStroke: tool.options.colorHighlightStroke,
                 colorHittaGrannarBuffer: tool.options.colorHittaGrannarBuffer,
-                colorHittaGrannarBufferStroke: tool.options.colorHittaGrannarBufferStroke
+                colorHittaGrannarBufferStroke: tool.options.colorHittaGrannarBufferStroke,
+                residentList: tool.options.residentList
             }, () => { this.loadLayers(); });
         } else {
             this.setState({
@@ -254,7 +255,8 @@ class ToolOptions extends Component {
                 colorHighlight: this.state.colorHighlight ? this.state.colorHighlight : 'rgba(0,0,255,0.2)',
                 colorHighlightStroke: this.state.colorHighlightStroke ? this.state.colorHighlightStroke : 'rgba(0,0,0,0.6)',
                 colorHittaGrannarBuffer: this.state.colorHittaGrannarBuffer ? this.state.colorHittaGrannarBuffer : 'rgba(50,200,200,0.4)',
-                colorHittaGrannarBufferStroke: this.state.colorHittaGrannarBufferStroke ? this.state.colorHittaGrannarBufferStroke : 'rgba(0,0,0,0.2)'
+                colorHittaGrannarBufferStroke: this.state.colorHittaGrannarBufferStroke ? this.state.colorHittaGrannarBufferStroke : 'rgba(0,0,0,0.2)',
+                residentList: this.state.residentList
             }
         };
 
@@ -408,225 +410,294 @@ class ToolOptions extends Component {
     render () {
         return (
             <div>
-                <form>
-                    <p>
-                        <button className='btn btn-primary' onClick={(e) => { e.preventDefault(); this.save(); }}>Spara</button>
-                    </p>
-                    <div>
-                        <input
-                            id='active'
-                            name='active'
-                            type='checkbox'
-                            onChange={(e) => { this.handleInputChange(e); }}
-                            checked={this.state.active} />&nbsp;
-                        <label htmlFor='active'>Aktiverad</label>
-                    </div>
-                    <div>
-                        <label htmlFor='index'>Sorteringsordning</label>
-                        <input
-                            id='index'
-                            name='index'
-                            type='text'
-                            onChange={(e) => { this.handleInputChange(e); }}
-                            value={this.state.index} />
-                    </div>
-                    <div>
-                        <input
-                            id='displayPopup'
-                            name='displayPopup'
-                            type='checkbox'
-                            onChange={(e) => { this.handleInputChange(e); }}
-                            checked={this.state.displayPopup} />&nbsp;
-                        <label htmlFor='displayPopup'>Visa popup</label>
-                    </div>
-                    <div>
-                        <input
-                            id='filterVisible'
-                            name='filterVisible'
-                            type='checkbox'
-                            onChange={(e) => { this.handleInputChange(e); }}
-                            checked={this.state.filterVisible} />&nbsp;
-                        <label htmlFor='filterVisible'>Sök i synliga lager *måste vara false för Varbergsversion</label>
-                    </div>
-                    <div>
-                        <input
-                            id='firSelectionTools'
-                            name='firSelectionTools'
-                            type='checkbox'
-                            onChange={(e) => { this.handleInputChange(e); }}
-                            checked={this.state.firSelectionTools} />&nbsp;
-                        <label htmlFor='firSelectionTools'>firSelectionTools *måste vara true</label>
-                    </div>
-                    <div>
-                        <input
-                            id='Base64-active'
-                            name='base64Encode'
-                            type='checkbox'
-                            onChange={(e) => { this.handleInputChange(e); }}
-                            checked={this.state.base64Encode} />&nbsp;
-                        <label htmlFor='Base64-active'>Base64-encoding aktiverad</label>
-                    </div>
-                    <div>
-                        <label htmlFor='instruction'>Instruktion för FIR-verktyg</label>
-                        <textarea
-                            id='instruction'
-                            name='instruction'
-                            onChange={(e) => { this.handleInputChange(e); }}
-                            value={this.state.instruction ? atob(this.state.instruction) : ''} />
-                    </div>
-                    <div>
-                        <label htmlFor='instructionSokning'>Instruktion för "sökning"</label>
-                        <textarea
-                            id='instructionSokning'
-                            name='instructionSokning'
-                            onChange={(e) => { this.handleInputChange(e); }}
-                            value={this.state.instructionSokning ? atob(this.state.instructionSokning) : ''} />
-                    </div>
-                    <div>
-                        <label htmlFor='instructionHittaGrannar'>Instruktion för "hitta grannar"</label>
-                        <textarea
-                            id='instructionHittaGrannar'
-                            name='instructionHittaGrannar'
-                            onChange={(e) => { this.handleInputChange(e); }}
-                            value={this.state.instructionHittaGrannar ? atob(this.state.instructionHittaGrannar) : ''} />
-                    </div>
-                    <div>
-                        <label htmlFor='instructionSkapaFastighetsforteckning'>Instruktion för "skapa Fastighetsförteckning"</label>
-                        <textarea
-                            id='instructionSkapaFastighetsforteckning'
-                            name='instructionSkapaFastighetsforteckning'
-                            onChange={(e) => { this.handleInputChange(e); }}
-                            value={this.state.instructionSkapaFastighetsforteckning ? atob(this.state.instructionSkapaFastighetsforteckning) : ''} />
-                    </div>
-                    {this.renderVisibleForGroups()}
-                    <div>
-                        <label htmlFor='maxZoom'>Zoomnivå</label>
-                        <input value={this.state.maxZoom} type='text' name='maxZoom' onChange={(e) => { this.handleInputChange(e); }} />
-                    </div>
-                    <div>
-                        <label htmlFor='excelExportUrl'>URL Excel-tjänst</label>
-                        <input value={this.state.excelExportUrl} type='text' name='excelExportUrl' onChange={(e) => { this.handleInputChange(e); }} />
-                    </div>
-                    <div>
-                        <label htmlFor='kmlImportUrl'>URL KML-tjänst(Import)</label>
-                        <input value={this.state.kmlImportUrl} type='text' name='kmlImportUrl' onChange={(e) => { this.handleInputChange(e); }} />
-                    </div>
-                    <div>
-                        <label htmlFor='markerImg'>Ikon för sökträff</label>
-                        <input value={this.state.markerImg} type='text' name='markerImg' onChange={(e) => { this.handleInputChange(e); }} />
-                    </div>
-                    <div>
-                        <label htmlFor='infoKnappLogo'>Ikon för hjälpknapp</label>
-                        <input value={this.state.infoKnappLogo} type='text' name='infoKnappLogo' onChange={(e) => { this.handleInputChange(e); }} />
-                    </div>
-                    <div>
-                        <label htmlFor='anchorX'>Ikonförskjutning X</label>
-                        <input value={this.state.anchorX} type='text' name='anchorX' onChange={(e) => { this.handleInputChange(e); }} />
-                    </div>
-                    <div>
-                        <label htmlFor='anchorY'>Ikonförskjutning Y</label>
-                        <input value={this.state.anchorY} type='text' name='anchorY' onChange={(e) => { this.handleInputChange(e); }} />
-                    </div>
-                    <div>
-                        <label htmlFor='popupOffsetY'>Förskjutning popup-ruta</label>
-                        <input value={this.state.popupOffsetY} type='text' name='popupOffsetY' onChange={(e) => { this.handleInputChange(e); }} />
-                    </div>
-                    <div>
-                        <label htmlFor='imgSizeX'>Bildbredd</label>
-                        <input value={this.state.imgSizeX} type='text' name='imgSizeX' onChange={(e) => { this.handleInputChange(e); }} />
-                    </div>
-                    <div>
-                        <label htmlFor='imgSizeY'>Bildhöjd</label>
-                        <input value={this.state.imgSizeY} type='text' name='imgSizeY' onChange={(e) => { this.handleInputChange(e); }} />
-                    </div>
+                <button className='btn btn-primary' onClick={(e) => { e.preventDefault(); this.save(); }}>Spara</button>
+                <div className="row">
+                  <div className="col-md-2">
+                    <input id='active' name='active' type='checkbox'
+                      onChange={this.handleInputChange.bind(this)} checked={this.state.active} />
+                    <label htmlFor='active'>Aktiverad</label>
+                  </div>
+                  <div className="col-md-2">
+                    <input id="displayPopup" name='displayPopup' type='checkbox'
+                      onChange={this.handleInputChange.bind(this)} checked={this.state.displayPopup} />
+                    <label htmlFor='displayPopup'>Visa popup</label>
+                  </div>
+                  <div className="col-md-6">
+                    <input id='filterVisible' name='filterVisible' type='checkbox'
+                      onChange={this.handleInputChange.bind(this)} checked={this.state.filterVisible} />
+                    <label htmlFor='filterVisible'>Sök i synliga lager(måste vara false för Varbergsversion)</label>
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <input id='firSelectionTools' name='firSelectionTools' type='checkbox'
+                      onChange={this.handleInputChange.bind(this)} checked={this.state.firSelectionTools} />
+                    <label htmlFor='firSelectionTools'>firSelectionTools *måste vara true</label>
+                  </div>
+                  <div className="col-md-4">
+                    <input id='Base64-active' name='base64Encode' type='checkbox'
+                      onChange={this.handleInputChange.bind(this)} checked={this.state.base64Encode} />
+                    <label htmlFor='Base64-active'>Base64-encoding aktiverad</label>
+                  </div>
+                </div>
 
-                    <div className='col-md-12'>
-                      <span className='pull-left'>
-                        <div>Resultat - färg för yta</div>
-                        <SketchPicker
-                            color={this.state.colorResult}
-                            onChangeComplete={(e) => this.handleColorResult(e)}
-                        />
-                      </span>
-                      <span className='pull-left' style={{marginLeft: '10px'}}>
-                        <div>Resultat - färg för kantlinje</div>
-                        <SketchPicker
-                            color={this.state.colorResultStroke}
-                            onChangeComplete={(e) => this.handleColorResultStroke(e)}
-                        />
-                      </span>
-                    </div>
-                    <div className='col-md-12'>
-                      <span className='pull-left'>
-                        <div>Valt objekt (hightlight) - färg för yta</div>
-                        <SketchPicker
-                            color={this.state.colorHighlight}
-                            onChangeComplete={(e) => this.handleColorHighlight(e)}
-                        />
-                      </span>
-                        <span className='pull-left' style={{marginLeft: '10px'}}>
-                        <div>Valt objekt (hightlight) - färg för kantlinje</div>
-                        <SketchPicker
-                            color={this.state.colorHighlightStroke}
-                            onChangeComplete={(e) => this.handleColorHighlightStroke(e)}
-                        />
-                      </span>
-                    </div>
-                    <div className='col-md-12'>
-                      <span className='pull-left'>
-                        <div>Buffer - färg för yta</div>
-                        <SketchPicker
-                            color={this.state.colorHittaGrannarBuffer}
-                            onChangeComplete={(e) => this.handleColorHittaGrannarBuffer(e)}
-                        />
-                      </span>
-                        <span className='pull-left' style={{marginLeft: '10px'}}>
-                        <div>Buffer - färg för kantlinje</div>
-                        <SketchPicker
-                            color={this.state.colorHittaGrannarBufferStroke}
-                            onChangeComplete={(e) => this.handleColorHittaGrannarBufferStroke(e)}
-                        />
-                      </span>
-                    </div>
-                    <div></div>
-                    <div>
-                        <label htmlFor='realEstateLayer_id'>realEstateLayers id</label>
-                        <input value={this.state.realEstateLayer.id} type='text' name='realEstateLayer_id' onChange={(e) => { this.handleInputChange(e); }} />
-                    </div>
-                    <div>
-                        <label htmlFor='realEstateLayer_omradeField'>realEstateLayers omradeField</label>
-                        <input value={this.state.realEstateLayer.omradeField} type='text' name='realEstateLayer_omradeField' onChange={(e) => { this.handleInputChange(e); }} />
-                    </div>
-                    <div>
-                        <label htmlFor='realEstateLayer_fnrField'>realEstateLayers fnrField</label>
-                        <input value={this.state.realEstateLayer.fnrField} type='text' name='realEstateLayer_fnrField' onChange={(e) => { this.handleInputChange(e); }} />
-                    </div>
-                    <div>
-                        <label htmlFor='realEstateLayer_labelField'>realEstateLayers labelField</label>
-                        <input value={this.state.realEstateLayer.labelField} type='text' name='realEstateLayer_labelField' onChange={(e) => { this.handleInputChange(e); }} />
-                    </div>
-                    <div>
-                        <label htmlFor='realEstateLayer_maxFeatures'>realEstateLayers maxFeatures</label>
-                        <input value={this.state.realEstateLayer.maxFeatures} type='text' name='realEstateLayer_maxFeatures' onChange={(e) => { this.handleInputChange(e); }} />
-                    </div>
-                    <div>
-                        <label htmlFor='realEstateLayer_instructionVidSokresult'>Instruktion vid sökresultat</label>
-                        <textarea
-                            id='realEstateLayer_instructionVidSokresult'
-                            name='realEstateLayer_instructionVidSokresult'
-                            onChange={(e) => { this.handleInputChange(e); }}
-                            value={this.state.realEstateLayer.instructionVidSokresult ? atob(this.state.realEstateLayer.instructionVidSokresult) : ''} />
-                    </div>
-                    <div>
-                        <label htmlFor='realEstateWMSLayer_id'>realEstateWMSLayers id</label>
-                        <input value={this.state.realEstateWMSLayer.id} type='text' name='realEstateWMSLayer_id' onChange={(e) => { this.handleInputChange(e); }} />
-                    </div>
-                    <div>
-                        <label htmlFor='realEstateWMSLayer_fnrField'>realEstateWMSLayers fnrField</label>
-                        <input value={this.state.realEstateWMSLayer.fnrField} type='text' name='realEstateWMSLayer_fnrField' onChange={(e) => { this.handleInputChange(e); }} />
-                    </div>
-                </form>
-                <br/>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='index'>Sorteringsordning</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input id='index' name='index' type='text' onChange={this.handleInputChange.bind(this)} value={this.state.index} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='instruction'>Instruktion för FIR-verktyg</label>
+                  </div>
+                  <div className="col-md-8">
+                    <textarea id='instruction' name='instruction' onChange={this.handleInputChange.bind(this)}
+                      value={this.state.instruction ? atob(this.state.instruction) : ''} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='instructionSokning'>Instruktion för "sökning"</label>
+                  </div>
+                  <div className="col-md-8">
+                    <textarea id='instructionSokning' name='instructionSokning' onChange={this.handleInputChange.bind(this)}
+                      value={this.state.instructionSokning ? atob(this.state.instructionSokning) : ''} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='instructionSokning'>Instruktion för "Sökning"</label>
+                  </div>
+                  <div className="col-md-8">
+                    <textarea id='instructionSokning' name='instructionSokning' onChange={this.handleInputChange.bind(this)}
+                      value={this.state.instructionSokning ? atob(this.state.instructionSokning) : ''} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='instructionHittaGrannar'>Instruktion för "Hitta Grannar"</label>
+                  </div>
+                  <div className="col-md-8">
+                    <textarea id='instructionHittaGrannar' name='instructionHittaGrannar' onChange={this.handleInputChange.bind(this)}
+                      value={this.state.instructionHittaGrannar ? atob(this.state.instructionHittaGrannar) : ''} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='instructionSkapaFastighetsforteckning'>Instruktion för "skapa Fastighetsförteckning"</label>
+                  </div>
+                  <div className="col-md-8">
+                  <textarea id='instructionSkapaFastighetsforteckning' name='instructionSkapaFastighetsforteckning'
+                      onChange={this.handleInputChange.bind(this)} value={this.state.instructionSkapaFastighetsforteckning ? atob(this.state.instructionSkapaFastighetsforteckning) : ''} />
+                  </div>
+                </div>
+
+                {this.renderVisibleForGroups()}
+
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='maxZoom'>Zoomnivå</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input value={this.state.maxZoom} type='text' name='maxZoom' onChange={this.handleInputChange.bind(this)} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='excelExportUrl'>URL Excel-tjänst</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input value={this.state.excelExportUrl} type='text' name='excelExportUrl' onChange={this.handleInputChange.bind(this)} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='kmlImportUrl'>URL KML-tjänst(Import)</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input value={this.state.kmlImportUrl} type='text' name='kmlImportUrl' onChange={this.handleInputChange.bind(this)} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='markerImg'>Ikon för sökträff</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input value={this.state.markerImg} type='text' name='markerImg' onChange={this.handleInputChange.bind(this)} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='infoKnappLogo'>Ikon för hjälpknapp</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input value={this.state.infoKnappLogo} type='text' name='infoKnappLogo' onChange={this.handleInputChange.bind(this)} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='anchorX'>Ikonförskjutning X</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input value={this.state.anchorX} type='text' name='anchorX' onChange={this.handleInputChange.bind(this)} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='anchorY'>Ikonförskjutning Y</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input value={this.state.anchorY} type='text' name='anchorY' onChange={this.handleInputChange.bind(this)} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='popupOffsetY'>Förskjutning popup-ruta</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input value={this.state.popupOffsetY} type='text' name='popupOffsetY' onChange={this.handleInputChange.bind(this)} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='imgSizeX'>Bildbredd</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input value={this.state.imgSizeX} type='text' name='imgSizeX' onChange={this.handleInputChange.bind(this)} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='imgSizeY'>Bildhöjd</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input value={this.state.imgSizeY} type='text' name='imgSizeY' onChange={this.handleInputChange.bind(this)} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='realEstateLayer_id'>realEstateLayers id</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input value={this.state.realEstateLayer.id} type='text' name='realEstateLayer_id'
+                      onChange={this.handleInputChange.bind(this)} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='realEstateLayer_omradeField'>realEstateLayers omradeField</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input value={this.state.realEstateLayer.omradeField} type='text' name='realEstateLayer_omradeField'
+                      onChange={this.handleInputChange.bind(this)} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='realEstateLayer_fnrField'>realEstateLayers fnrField</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input value={this.state.realEstateLayer.fnrField} type='text' name='realEstateLayer_fnrField'
+                      onChange={this.handleInputChange.bind(this)} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='realEstateLayer_labelField'>realEstateLayers labelField</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input value={this.state.realEstateLayer.labelField} type='text' name='realEstateLayer_labelField' onChange={this.handleInputChange.bind(this)} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='realEstateLayer_maxFeatures'>realEstateLayers maxFeatures</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input value={this.state.realEstateLayer.maxFeatures} type='text' name='realEstateLayer_maxFeatures'
+                      onChange={this.handleInputChange.bind(this)} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='realEstateLayer_instructionVidSokresult'>Instruktion vid sökresultat</label>
+                  </div>
+                  <div className="col-md-8">
+                  <textarea id='realEstateLayer_instructionVidSokresult' name='realEstateLayer_instructionVidSokresult'
+                      onChange={this.handleInputChange.bind(this)} value={this.state.realEstateLayer.instructionVidSokresult ? atob(this.state.realEstateLayer.instructionVidSokresult) : ''} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='realEstateWMSLayer_id'>realEstateWMSLayers id</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input value={this.state.realEstateWMSLayer.id} type='text' name='realEstateWMSLayer_id' onChange={this.handleInputChange.bind(this)} />
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='realEstateWMSLayer_fnrField'>realEstateWMSLayers fnrField</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input value={this.state.realEstateWMSLayer.fnrField} type='text' name='realEstateWMSLayer_fnrField'
+                      onChange={this.handleInputChange.bind(this)} />
+                  </div>
+                </div>
+
+                <div className='col-md-12'>
+                  <span className='pull-left'>
+                    <div>Resultat - färg för yta</div>
+                    <SketchPicker
+                        color={this.state.colorResult}
+                        onChangeComplete={(e) => this.handleColorResult(e)}
+                    />
+                  </span>
+                  <span className='pull-left' style={{marginLeft: '10px'}}>
+                    <div>Resultat - färg för kantlinje</div>
+                    <SketchPicker
+                        color={this.state.colorResultStroke}
+                        onChangeComplete={(e) => this.handleColorResultStroke(e)}
+                    />
+                  </span>
+                </div>
+                <div className='col-md-12'>
+                  <span className='pull-left'>
+                    <div>Valt objekt (hightlight) - färg för yta</div>
+                    <SketchPicker
+                        color={this.state.colorHighlight}
+                        onChangeComplete={(e) => this.handleColorHighlight(e)}
+                    />
+                  </span>
+                    <span className='pull-left' style={{marginLeft: '10px'}}>
+                    <div>Valt objekt (hightlight) - färg för kantlinje</div>
+                    <SketchPicker
+                        color={this.state.colorHighlightStroke}
+                        onChangeComplete={(e) => this.handleColorHighlightStroke(e)}
+                    />
+                  </span>
+                </div>
+                <div className='col-md-12'>
+                  <span className='pull-left'>
+                    <div>Buffer - färg för yta</div>
+                    <SketchPicker
+                        color={this.state.colorHittaGrannarBuffer}
+                        onChangeComplete={(e) => this.handleColorHittaGrannarBuffer(e)} />
+                  </span>
+                    <span className='pull-left' style={{marginLeft: '10px'}}>
+                      <div>Buffer - färg för kantlinje</div>
+                      <SketchPicker
+                          color={this.state.colorHittaGrannarBufferStroke}
+                          onChangeComplete={(e) => this.handleColorHittaGrannarBufferStroke(e)} />
+                    </span>
+                </div>
+
                 {this.state.tree}
             </div>
         );
