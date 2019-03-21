@@ -661,6 +661,49 @@ namespace MapService.Controllers
 
             return mapConfiguration;
         }
+        private JToken FilterFirToolByAD(ActiveDirectoryLookup adLookup, JToken mapConfiguration, string activeUser)
+        {
+            var childrenToRemove = new List<string>();
+            var userGroups = adLookup.GetGroups(activeUser);
+            var firTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'fir')]");
+
+            var residentList = firTool.SelectToken("$.options.residentList");
+            if (residentList != null)
+            {
+                var visibleForGroups = residentList.SelectToken("$.visibleForGroups");
+                if(HasValidVisibleForGroups(visibleForGroups) && !IsGroupAllowedAccess(userGroups, visibleForGroups))
+                {
+                    (firTool.SelectToken("$.options") as JObject).Remove("residentList");
+                }
+            }
+
+            var layersInFirTool = firTool.SelectToken("$.options.layers");
+            if (layersInFirTool != null)
+            {
+                foreach (JToken child in layersInFirTool.Children())
+                {
+                    var visibleForGroups = child.SelectToken("$.visibleForGroups");
+                    bool allowed = true;
+
+                    if (HasValidVisibleForGroups(visibleForGroups))
+                    {
+                        allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
+                    }
+
+                    if (!allowed)
+                    {
+                        childrenToRemove.Add(child.SelectToken("$.id").ToString());
+                    }
+                }
+
+                foreach (string id in childrenToRemove)
+                {
+                    layersInFirTool.SelectToken("$.[?(@.id=='" + id + "')]").Remove();
+                }
+            }
+
+            return mapConfiguration;
+        }
         private bool HasValidVisibleForGroups(JToken visibleForGroups)
         {
             if (visibleForGroups != null)
@@ -779,6 +822,13 @@ namespace MapService.Controllers
                         if (editTool != null)
                         {
                             filteredMapConfiguration = FilterEditLayersByAD(adLookup, filteredMapConfiguration, activeUser);
+                        }
+
+                        // Filter FIR tool
+                        var firTool = filteredMapConfiguration.SelectToken("$.tools[?(@.type == 'fir')]");
+                        if (firTool != null)
+                        {
+                            filteredMapConfiguration = FilterFirToolByAD(adLookup, filteredMapConfiguration, activeUser);
                         }
 
                         return filteredMapConfiguration.ToString();
