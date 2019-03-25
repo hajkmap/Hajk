@@ -265,9 +265,9 @@
               firTool.options.realEstateWMSLayerCaption = realEstateWMSLayer[0].caption;
             }
 
-            if (firTool.options.residentList && firTool.options.residentList.residentDataLayer) {
+            if (firTool.options.residentListDataLayer) {
               firTool.options.residentList.residentListWfsLayer = data.wfslayers.filter(l => {
-                if (l.id === firTool.options.residentList.residentDataLayer.id) return l;
+                if (l.id === firTool.options.residentListDataLayer.id) return l;
               });
             }
          }

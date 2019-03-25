@@ -54,6 +54,8 @@ var defaultState = {
     layers: [],
     realEstateLayer: {},
     realEstateWMSLayer: {},
+    residentList: {},
+    residentListDataLayer: {},
     colorResult: 'rgba(255,255,0,0.3)',
     colorResultStroke: '',
     colorHighlight: '',
@@ -63,9 +65,6 @@ var defaultState = {
 };
 
 class ToolOptions extends Component {
-    /**
-     *
-     */
     constructor () {
         super();
         this.state = defaultState;
@@ -112,22 +111,14 @@ class ToolOptions extends Component {
                 colorHighlightStroke: tool.options.colorHighlightStroke,
                 colorHittaGrannarBuffer: tool.options.colorHittaGrannarBuffer,
                 colorHittaGrannarBufferStroke: tool.options.colorHittaGrannarBufferStroke,
-                residentList: tool.options.residentList
+                residentList: tool.options.residentList,
+                residentListDataLayer: tool.options.residentListDataLayer
             }, () => { this.loadLayers(); });
         } else {
             this.setState({
                 active: false
             });
         }
-    }
-
-    componentWillUnmount () {
-    }
-    /**
-     *
-     */
-    componentWillMount () {
-
     }
 
     /**
@@ -166,13 +157,13 @@ class ToolOptions extends Component {
             value = !isNaN(Number(value)) ? Number(value) : value;
         }
 
-        if (name == 'instruction' || name == 'instructionSokning' || name == 'instructionHittaGrannar' || name == 'instructionSkapaFastighetsforteckning' || name == 'realEstateLayer_instructionVidSokresult') {
+        if (name == 'instruction' || name == 'instructionSokning' || name == 'instructionHittaGrannar' ||
+            name == 'instructionSkapaFastighetsforteckning' || name == 'realEstateLayer_instructionVidSokresult') {
             value = btoa(value);
         }
 
         if(name.indexOf("_") !== -1){
             if(name.indexOf("realEstateLayer") !== -1){
-                //var realEstateLayer = this.state.realEstateLayer;
                 var field = name.split("_")[1];
                 this.state.realEstateLayer[field] = value.toString();
             } else if(name.indexOf("realEstateWMSLayer") !== -1){
@@ -180,7 +171,6 @@ class ToolOptions extends Component {
                 this.state.realEstateWMSLayer[field] = value.toString();
             }
         }
-
 
         this.setState({
             [name]: value
@@ -256,7 +246,8 @@ class ToolOptions extends Component {
                 colorHighlightStroke: this.state.colorHighlightStroke ? this.state.colorHighlightStroke : 'rgba(0,0,0,0.6)',
                 colorHittaGrannarBuffer: this.state.colorHittaGrannarBuffer ? this.state.colorHittaGrannarBuffer : 'rgba(50,200,200,0.4)',
                 colorHittaGrannarBufferStroke: this.state.colorHittaGrannarBufferStroke ? this.state.colorHittaGrannarBufferStroke : 'rgba(0,0,0,0.2)',
-                residentList: this.state.residentList
+                residentList: this.state.residentList,
+                residentListDataLayer: this.state.residentListDataLayer
             }
         };
 
@@ -404,9 +395,6 @@ class ToolOptions extends Component {
         this.state.colorHittaGrannarBufferStroke = color.hex;
     }
 
-    /**
-     *
-     */
     render () {
         return (
             <div>
@@ -456,15 +444,6 @@ class ToolOptions extends Component {
                   <div className="col-md-8">
                     <textarea id='instruction' name='instruction' onChange={this.handleInputChange.bind(this)}
                       value={this.state.instruction ? atob(this.state.instruction) : ''} />
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-md-4">
-                    <label htmlFor='instructionSokning'>Instruktion för "sökning"</label>
-                  </div>
-                  <div className="col-md-8">
-                    <textarea id='instructionSokning' name='instructionSokning' onChange={this.handleInputChange.bind(this)}
-                      value={this.state.instructionSokning ? atob(this.state.instructionSokning) : ''} />
                   </div>
                 </div>
                 <div className="row">
@@ -650,6 +629,176 @@ class ToolOptions extends Component {
                       onChange={this.handleInputChange.bind(this)} />
                   </div>
                 </div>
+
+                <h2>Boendeförteckning</h2>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label>Instruktionstext</label>
+                  </div>
+                  <div className="col-md-8">
+                    <textarea type='text' value={this.state.residentList.instruction}
+                      onChange={(e) => this.setState({
+                        residentList: Object.assign(this.state.residentList, { instruction: e.target.value })}
+                      )} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-4">
+                    <label>Excel-export URL</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input type='text' value={this.state.residentList.excelExportUrl}
+                      onChange={(e) => this.setState({
+                        residentList: Object.assign(this.state.residentList, { excelExportUrl: e.target.value })}
+                      )} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-4">
+                    <label>Minsta ålder</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input type='text' value={this.state.residentList.minAge}
+                      onChange={(e) => this.setState({
+                        residentList: Object.assign(this.state.residentList, { minAge: e.target.value })}
+                      )} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-4">
+                    <label>Dataset-ID</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input type='text' value={this.state.residentListDataLayer.id}
+                      onChange={(e) => this.setState({
+                        residentListDataLayer: Object.assign(this.state.residentListDataLayer, { id: e.target.value })}
+                      )} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-3">
+                    <label>Adress fältnamn</label>
+                    <input type='text' value={this.state.residentListDataLayer.adressFieldName}
+                      onChange={(e) => this.setState({
+                        residentListDataLayer: Object.assign(this.state.residentListDataLayer, { adressFieldName: e.target.value })}
+                      )} />
+                  </div>
+                  <div className="col-md-3 col-md-offset-1">
+                    <label>Adress visningsnamn</label>
+                    <input type='text' value={this.state.residentListDataLayer.adressDisplayName}
+                      onChange={(e) => this.setState({
+                        residentListDataLayer: Object.assign(this.state.residentListDataLayer, { adressDisplayName: e.target.value})}
+                      )} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-3">
+                    <label>Ålder fältnamn</label>
+                    <input type='text' value={this.state.residentListDataLayer.alderFieldName}
+                      onChange={(e) => this.setState({
+                        residentListDataLayer: Object.assign(this.state.residentListDataLayer, { alderFieldName: e.target.value })}
+                      )} />
+                  </div>
+                  <div className="col-md-3 col-md-offset-1">
+                    <label>Ålder visningsnamn</label>
+                    <input type='text' value={this.state.residentListDataLayer.alderDisplayName}
+                      onChange={(e) => this.setState({
+                        residentListDataLayer: Object.assign(this.state.residentListDataLayer, { alderDisplayName: e.target.value })}
+                      )} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-3">
+                    <label>Födelsedatum fältnamn</label>
+                    <input type='text' value={this.state.residentListDataLayer.fodelsedatumFieldName}
+                      onChange={(e) => this.setState({
+                        residentListDataLayer: Object.assign(this.state.residentListDataLayer, { fodelsedatumFieldName: e.target.value })}
+                      )} />
+                  </div>
+                  <div className="col-md-3 col-md-offset-1">
+                    <label>Födelsedatum visningsnamn</label>
+                    <input type='text' value={this.state.residentListDataLayer.fodelsedatumDisplayName}
+                      onChange={(e) => this.setState({
+                        residentListDataLayer: Object.assign(this.state.residentListDataLayer, { fodelsedatumDisplayName: e.target.value })}
+                      )} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-3">
+                    <label>Kön fältnamn</label>
+                    <input type='text' value={this.state.residentListDataLayer.koenFieldName}
+                      onChange={(e) => this.setState({
+                        residentListDataLayer: Object.assign(this.state.residentListDataLayer, { koenFieldName: e.target.value })}
+                      )} />
+                  </div>
+                  <div className="col-md-3 col-md-offset-1">
+                    <label>Kön visningsnamn</label>
+                    <input type='text' value={this.state.residentListDataLayer.koenDisplayName}
+                      onChange={(e) => this.setState({
+                        residentListDataLayer: Object.assign(this.state.residentListDataLayer, { koenDisplayName: e.target.value })}
+                      )} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-3">
+                    <label>Namn fältnamn</label>
+                    <input type='text' value={this.state.residentListDataLayer.namnFieldName}
+                      onChange={(e) => this.setState({
+                        residentListDataLayer: Object.assign(this.state.residentListDataLayer, { namnFieldName: e.target.value })}
+                      )} />
+                  </div>
+                  <div className="col-md-3 col-md-offset-1">
+                    <label>Namn visningsnamn</label>
+                    <input type='text' value={this.state.residentListDataLayer.namnDisplayName}
+                      onChange={(e) => this.setState({
+                        residentListDataLayer: Object.assign(this.state.residentListDataLayer, { namnDisplayName: e.target.value })}
+                      )} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-3">
+                    <label>Postnummer fältnamn</label>
+                    <input type='text' value={this.state.residentListDataLayer.postnrFieldName}
+                      onChange={(e) => this.setState({
+                        residentListDataLayer: Object.assign(this.state.residentListDataLayer, { postnrFieldName: e.target.value })}
+                      )} />
+                  </div>
+                  <div className="col-md-3 col-md-offset-1">
+                    <label>Postnummer visningsnamn</label>
+                    <input type='text' value={this.state.residentListDataLayer.postnrDisplayName}
+                      onChange={(e) => this.setState({
+                        residentListDataLayer: Object.assign(this.state.residentListDataLayer, { postnrDisplayName: e.target.value})}
+                      )} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-3">
+                    <label>Postort fältnamn</label>
+                    <input type='text' value={this.state.residentListDataLayer.postortFieldName}
+                      onChange={(e) => this.setState({
+                        residentListDataLayer: Object.assign(this.state.residentListDataLayer, { postortFieldName: e.target.value })}
+                      )} />
+                  </div>
+                  <div className="col-md-3 col-md-offset-1">
+                    <label>Postort visningsnamn</label>
+                    <input type='text' value={this.state.residentListDataLayer.postortDisplayName}
+                      onChange={(e) => this.setState({
+                        residentListDataLayer: Object.assign(this.state.residentListDataLayer, { postortDisplayName: e.target.value })}
+                      )} />
+                  </div>
+                </div>
+
+
 
                 <div className='col-md-12'>
                   <span className='pull-left'>

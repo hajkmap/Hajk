@@ -95,7 +95,7 @@ var ResidentList = {
   },
 
   generateExcel: function(features, callback) {
-    var _config = this.config.residentDataLayer,
+    var _config =  this.props.model.get("residentListDataLayer"),
         rows = [],
         columns = [_config.namnDisplayName, _config.adressDisplayName, _config.postortDisplayName, _config.postnrDisplayName];
 
