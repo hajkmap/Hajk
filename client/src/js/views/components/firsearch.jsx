@@ -2,6 +2,7 @@ var FirSelectionToolbar = require('components/firselectiontoolbar');
 var FirSearchResultGroup = require('components/firsearchresultgroup');
 var ResidentList = require('components/resident_list');
 var PropertyList = require('components/property_list');
+var EdpPropertyLink = require('components/edp_property_link');
 
 shiftIsDown = false;
 ctrlIsDown = false;
@@ -716,6 +717,8 @@ var FirSearchView = {
                       this.props.model.get("residentList") != null ?
                       <ResidentList model={this.props.model}></ResidentList> : ""
                     }
+
+                    <EdpPropertyLink model={this.props.model}></EdpPropertyLink>
 
                     {results}
                 </div>

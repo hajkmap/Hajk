@@ -19,6 +19,7 @@
         "compiled/firsearchresultgroup.js": ["src/js/views/components/firsearchresultgroup.jsx"],
         "compiled/property_list.js": ["src/js/views/components/property_list.jsx"],
         "compiled/resident_list.js": ["src/js/views/components/resident_list.jsx"],
+        "compiled/edp_property_link.js": ["src/js/views/components/edp_property_link.jsx"],
         "compiled/colorpicker.js": ["src/js/views/components/colorpicker.jsx"],
         "compiled/infobutton.js": ["src/js/views/components/infobutton.jsx"]
       }
@@ -116,6 +117,7 @@
         "components/firsearchresultgroup": "./compiled/firsearchresultgroup.js",
         "components/property_list": "./compiled/property_list.js",
         "components/resident_list": "./compiled/resident_list.js",
+        "components/edp_property_link": "./compiled/edp_property_link.js",
         "components/colorpicker": "./compiled/colorpicker.js",
         "components/infobutton": "./compiled/infobutton.js",
         "views/map": "./compiled/mapview.js",
