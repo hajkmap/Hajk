@@ -66,7 +66,7 @@ export default class ConfigMapper {
         queryable: args.queryable !== false,
         information: args.infobox,
         resolutions: properties.mapConfig.map.resolutions,
-        projection: properties.mapConfig.map.projection || "EPSG:3006",
+        projection: args.projection || "EPSG:3006",
         origin: properties.mapConfig.map.origin,
         extent: properties.mapConfig.map.extent,
         singleTile: args.singleTile || false,
@@ -82,9 +82,14 @@ export default class ConfigMapper {
         params: {
           LAYERS: args.layers.join(","),
           FORMAT: args.imageFormat,
-          VERSION: "1.1.0",
-          SRS: properties.mapConfig.map.projection || "EPSG:3006",
-          TILED: args.tiled
+          VERSION: args.version,
+          SRS: args.projection || "EPSG:3006",
+          TILED: args.tiled,
+          STYLES: args.layersInfo
+            .map(function(l) {
+              return l.style || "";
+            })
+            .join(",")
         },
         layersInfo: mapLayersInfo(args.layersInfo),
         infoVisible: args.infoVisible || false,

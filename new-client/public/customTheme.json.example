@@ -1,13 +1,30 @@
 // NOTICE THAT COMMENTS ARE NOT ALLOWED IN JSON FILES
 // HENCE THIS EXAMPLE.
+
+// The recommended way to create a custome theme is to use this tool
+// (https://react-theming.github.io/create-mui-theme/) and paste the 
+// resulting JSON into customeTheme.json.
+// Open that tool and follow the instructions (on HOW TO USE THIS link)
+// to create your own JSON theme.
+
 {
-  // Theme-specifc values can be customized globally here.
-  // Reffer to this URL to see what values can be found for theme:
+  // Theme-specifc values can be customized *GLOBALLY* here.
+  // Refer to this URL to see what values can be found for theme:
   // https://material-ui.com/customization/default-theme/#default-theme
   "palette": {
-    "primary": { "main": "#fa3033" }
+    "primary": { "main": "#fa3033" },
+    "secondary": {
+      "dark": "#a51848",
+      "light": "#eceded",
+      "main": "#ffcc00",
+      "mainLight": "#ffeeaa",
+      "complement": "#79ac54"
+    }
   },
-  // Overrides of specific MUI components can be done as you see below.
+  "typography": {
+    "fontFamily": "'Times New Roman', sans-serif"
+  },
+  // Overrides of *SPECIFIC MUI COMPONENTS* can be done as you see below.
   // In this case we override the default look of https://material-ui.com/api/list-item-icon/
   // by making the icon red.
   "overrides": {

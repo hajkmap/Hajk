@@ -10,12 +10,12 @@
     "eject": "react-scripts eject"
   },
   "devDependencies": {
-    "@babel/polyfill": "^7.2.5",
+    "@babel/polyfill": "^7.4.0",
     "@material-ui/core": "^3.9.2",
     "@material-ui/icons": "^3.0.2",
     "@material-ui/lab": "^3.0.0-alpha.30",
-    "@types/react": "^16.8.7",
-    "@types/react-dom": "^16.8.2",
+    "@types/react": "^16.8.8",
+    "@types/react-dom": "^16.8.3",
     "deepmerge": "^2.2.1",
     "detect-browser": "^3.0.1",
     "element-scroll-polyfill": "^1.0.1",

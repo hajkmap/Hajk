@@ -61,8 +61,47 @@ const defaultState = {
   infoUrl: "",
   infoUrlText: "",
   infoOwner: "",
-  solpopup: solpop
+  solpopup: solpop,
+  capabilitiesList: [],
+  version: "",
+  projection: "",
+  infoFormat: "",
+  style: []
 };
+
+const supportedProjections = [
+  "EPSG:3006",
+  "EPSG:3007",
+  "EPSG:3008",
+  "EPSG:3009",
+  "EPSG:3010",
+  "EPSG:3011",
+  "EPSG:3012",
+  "EPSG:3013",
+  "EPSG:3014",
+  "EPSG:3015",
+  "EPSG:3016",
+  "EPSG:3017",
+  "EPSG:3018",
+  "EPSG:3021",
+  "EPSG:4326",
+  "EPSG:3857",
+  "CRS:84"
+];
+
+const supportedInfoFormats = [
+  "application/json",
+  "text/plain",
+  "text/xml",
+  "application/geojson"
+];
+
+const supportedImageFormats = [
+  "image/png",
+  "image/jpeg",
+  "image/png; mode=8bit",
+  "image/vnd.jpeg-png"
+];
 
 /**
  *
@@ -132,7 +171,9 @@ class WMSLayerForm extends Component {
         id: checkedLayer,
         caption: "",
         legend: "",
-        infobox: ""
+        infobox: "",
+        style: "",
+        queryable: ""
       };
       this.setState(
         {
@@ -157,6 +198,28 @@ class WMSLayerForm extends Component {
   }
 
   renderLayerInfoInput(layerInfo) {
+    var currentLayer = this.state.capabilities.Capability.Layer.Layer.find(
+      l => {
+        return l.Name === layerInfo.id;
+      }
+    );
+
+    this.setState({
+      style: currentLayer.Style || []
+    });
+
+    let addedLayersInfo = this.state.addedLayersInfo;
+    addedLayersInfo[layerInfo.id].styles = currentLayer.Style;
+    this.setState({
+      addedLayersInfo: addedLayersInfo
+    });
+
+    let styles = layerInfo.styles.map(style => (
+      <option key={"style_" + style.Name} value={style.Name}>
+        {style.Name}
+      </option>
+    ));
+
     return (
       <div>
         <div>
@@ -200,6 +263,51 @@ class WMSLayerForm extends Component {
               );
             }}
             type="text"
+          />
+        </div>
+        <div>
+          <div>
+            <label>Stil</label>
+          </div>
+          <select
+            value={layerInfo.style}
+            onChange={e => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].style = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          >
+            <option value={""}>{"<default>"}</option>
+            {styles}
+          </select>
+        </div>
+        <div>
+          <div>
+            <label>Infoklick</label>
+          </div>
+          <input
+            id="infoclickable"
+            type="checkbox"
+            checked={layerInfo.queryable}
+            onChange={e => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].queryable = e.target.checked;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
           />
         </div>
       </div>
@@ -278,6 +386,15 @@ class WMSLayerForm extends Component {
           abstract: abstract
         };
 
+        var currentLayer = this.state.capabilities.Capability.Layer.Layer.find(
+          l => {
+            return l.Name === layer.Name;
+          }
+        );
+
+        var queryableIcon =
+          layer.queryable == "1" ? "fa fa-check" : "fa fa-remove";
+
         return (
           <li key={"fromCapability_" + i}>
             <input
@@ -298,6 +415,7 @@ class WMSLayerForm extends Component {
               className={classNames}
               onClick={e => this.describeLayer(e, layer.Name)}
             />
+            <i className={queryableIcon} value={layer.queryable} />
           </li>
         );
       };
@@ -327,6 +445,9 @@ class WMSLayerForm extends Component {
   loadLayers(layer, callback) {
     this.loadWMSCapabilities(undefined, () => {
       var addedLayersInfo = {};
+      var capabilities = this.state.capabilitiesList.find(
+        capabilities => capabilities.version === layer.version
+      );
       if (layer.layersInfo) {
         addedLayersInfo = layer.layersInfo.reduce((c, l) => {
           c[l.id] = l;
@@ -339,23 +460,29 @@ class WMSLayerForm extends Component {
             id: layer,
             caption: "",
             legend: "",
-            infobox: ""
+            infobox: "",
+            style: "",
+            queryable: ""
           };
         });
       }
-      this.setState({
-        addedLayers: layer.layers,
-        addedLayersInfo: addedLayersInfo
-      });
-      Object.keys(this.refs).forEach(element => {
-        if (this.refs[element].dataset.type === "wms-layer") {
-          this.refs[element].checked = false;
+
+      this.setState(
+        {
+          addedLayers: layer.layers,
+          addedLayersInfo: addedLayersInfo,
+          capabilities,
+          projection: layer.projection,
+          version: capabilities.version,
+          infoFormat: layer.infoFormat
+        },
+        () => {
+          this.setServerType();
+          this.validate();
+
+          if (callback) callback();
         }
-      });
-      layer.layers.forEach(layer => {
-        this.refs[layer].checked = true;
-      });
-      if (callback) callback();
+      );
     });
   }
 
@@ -379,19 +506,153 @@ class WMSLayerForm extends Component {
       });
     }
 
-    this.props.model.getWMSCapabilities(this.state.url, capabilities => {
-      this.setState({
-        capabilities: capabilities,
-        load: false
-      });
-      if (capabilities === false) {
-        this.props.parent.setState({
+    var capabilitiesPromise = this.props.model.getAllWMSCapabilities(
+      this.state.url
+    );
+
+    capabilitiesPromise
+      .then(capabilitiesList => {
+        this.setState(
+          {
+            capabilitiesList,
+            load: false
+          },
+          () => {
+            if (callback) {
+              callback();
+            } else {
+              var capabilities = this.state.capabilitiesList[0];
+              this.setState(
+                {
+                  capabilities,
+                  version: capabilities.version
+                },
+                () => {
+                  this.setServerType();
+                }
+              );
+            }
+          }
+        );
+      })
+      .catch(err => {
+        console.error(err);
+        this.props.parentView.setState({
           alert: true,
-          alertMessage: "Det gick inte att ladda data från vald Url."
+          alertMessage: "Servern svarar inte. Försök med en annan URL."
         });
+      });
+  }
+
+  selectVersion(e) {
+    var version = e.target.value;
+    var capabilities = this.state.capabilitiesList.find(
+      capabilities => capabilities.version === version
+    );
+
+    var singleTile = version === "1.3.0" ? false : this.state.singleTile;
+
+    this.setState({
+      capabilities,
+      version,
+      singleTile
+    });
+
+    this.setServerType();
+  }
+
+  setServerType() {
+    let formats;
+    if (this.state.capabilities) {
+      formats = this.state.capabilities.Capability.Request.GetFeatureInfo
+        .Format;
+    }
+    if (formats.indexOf("application/geojson") > -1) {
+      this.setState({ serverType: "arcgis" });
+    } else {
+      this.setState({ serverType: "geoserver" });
+    }
+  }
+
+  setProjections() {
+    let projections;
+    if (this.state.capabilities) {
+      var RS = this.state.version === "1.3.0" ? "CRS" : "SRS";
+      projections = this.state.capabilities.Capability.Layer[RS];
+    }
+
+    let projEles = projections
+      ? supportedProjections.map((proj, i) => {
+          if (projections.indexOf(proj) > -1) {
+            return <option key={i}>{proj}</option>;
+          } else {
+            return "";
+          }
+        })
+      : "";
+
+    return projEles;
+  }
+
+  setInfoFormats() {
+    let formats;
+    if (this.state.capabilities) {
+      formats = this.state.capabilities.Capability.Request.GetFeatureInfo
+        .Format;
+    }
+
+    let formatEles = formats
+      ? supportedInfoFormats.map((format, i) => {
+          if (formats.indexOf(format) > -1) {
+            return <option key={i}>{format}</option>;
+          } else {
+            return "";
+          }
+        })
+      : "";
+
+    return formatEles;
+  }
+
+  /**
+   * Populerar de fält som finns i modal för lagerinställningar layer.layer
+   * @param {*} layer
+   */
+  setLayerSettings(layer) {
+    // Hämta från capabilities det layer.layer som matchar namnet
+    var currentLayer = this.state.capabilities.Capability.Layer.Layer.find(
+      l => {
+        return l.Name === layer.name;
       }
-      if (callback) {
-        callback();
+    );
+
+    // Sätt det state som behövs för att modalen skall populeras och knapparna skall fungera
+    this.setState({
+      layerSettings: {
+        settings: true,
+        visible: true,
+        //styles: currentLayer.Style || [],
+        style: layer.style,
+        name: layer.name,
+        queryable: layer.queryable,
+        // confirmAction anropas från LayerAlert- komponenten och result är alertens state
+        confirmAction: result => {
+          this.saveLayerSettings(result, layer.name);
+          this.setState({
+            layerSettings: {
+              settings: false,
+              visible: false
+            }
+          });
+        },
+        denyAction: () => {
+          this.setState({
+            layerSettings: {
+              settings: false,
+              visible: false
+            }
+          });
+        }
       }
     });
   }
@@ -428,7 +689,11 @@ class WMSLayerForm extends Component {
       infoUrl: this.getValue("infoUrl"),
       infoUrlText: this.getValue("infoUrlText"),
       infoOwner: this.getValue("infoOwner"),
-      solpopup: this.getValue("solpopup")
+      solpopup: this.getValue("solpopup"),
+      version: this.state.version,
+      projection: this.getValue("projection"),
+      infoFormat: this.getValue("infoFormat"),
+      style: this.getValue("style")
     };
   }
 
@@ -541,20 +806,10 @@ class WMSLayerForm extends Component {
       <fieldset>
         <legend>WMS-lager</legend>
         <div>
-          <label>Visningsnamn*</label>
-          <input
-            type="text"
-            ref="input_caption"
-            value={this.state.caption}
-            onChange={e => {
-              this.setState({ caption: e.target.value });
-              this.validateField("caption");
-            }}
-            className={this.getValidationClass("caption")}
-          />
-        </div>
-        <div>
-          <label>Url*</label>
+          <label>
+            <b>Url*</b>
+          </label>
+          <br />
           <input
             type="text"
             ref="input_url"
@@ -575,22 +830,133 @@ class WMSLayerForm extends Component {
           </span>
         </div>
         <div>
-          <label>Senast ändrad</label>
-          <span ref="input_date">
-            <i>{this.props.model.parseDate(this.state.date)}</i>
-          </span>
+          <label>
+            <b>Version</b>
+          </label>
+          <br />
+          <select
+            ref="input_version"
+            onChange={this.selectVersion.bind(this)}
+            value={this.state.version}
+            className="form-control"
+          >
+            {this.state.capabilitiesList.map(capa => {
+              return (
+                <option key={capa.version} value={capa.version}>
+                  {capa.version}
+                </option>
+              );
+            })}
+          </select>
+          <div>
+            <label>
+              <b>Single tile</b>
+            </label>
+            <br />
+            <input
+              type="checkbox"
+              ref="input_singleTile"
+              onChange={e => this.setState({ singleTile: e.target.checked })}
+              checked={this.state.singleTile}
+              disabled={this.state.version === "1.3.0"}
+            />
+          </div>
         </div>
         <div>
-          <label>Innehåll</label>
+          <label>
+            <b>Bildformat</b>
+          </label>
+          <br />
+          <select
+            ref="input_imageFormat"
+            value={this.state.imageFormat}
+            onChange={e => this.setState({ imageFormat: e.target.value })}
+            className="form-control"
+          >
+            <option value="image/png">image/png</option>
+            <option value="image/png8">image/png8</option>
+            <option value="image/jpeg">image/jpeg</option>
+            <option value="image/vnd.jpeg-png">image/vnd.jpeg-png</option>
+          </select>
+        </div>
+        <div>
+          <label>
+            <b>Koordinatsystem</b>
+          </label>
+          <br />
+          <select
+            ref="input_projection"
+            value={this.state.projection}
+            onChange={e => this.setState({ projection: e.target.value })}
+            className="form-control"
+          >
+            {this.setProjections()}
+          </select>
+        </div>
+        <div>
+          <label>
+            <b>Lagerlista</b>
+          </label>
+          <br />
+          {this.renderLayerList()}
+        </div>
+        <div>
+          <label>
+            <b>Valda lager*</b>
+          </label>
+          <br />
+          <div
+            ref="input_layers"
+            className={
+              this.getValidationClass("layers") + " layer-list-choosen"
+            }
+          >
+            <ul>{this.renderSelectedLayers()}</ul>
+          </div>
+        </div>
+        <div>
+          <label>
+            <b>Visningsnamn*</b>
+          </label>
+          <br />
+          <input
+            type="text"
+            ref="input_caption"
+            value={this.state.caption}
+            onChange={e => {
+              this.setState({ caption: e.target.value });
+              this.validateField("caption");
+            }}
+            className={this.getValidationClass("caption")}
+          />
+        </div>
+        <div>
+          <label>
+            <b>Innehåll</b>
+          </label>
+          <br />
           <input
             type="text"
             ref="input_content"
             value={this.state.content}
             onChange={e => this.setState({ content: e.target.value })}
+            className="form-control"
           />
         </div>
         <div>
-          <label>Teckenförklaring</label>
+          <label>
+            <b>Senast ändrad</b>
+          </label>
+          <br />
+          <span ref="input_date">
+            <i>{this.props.model.parseDate(this.state.date)}</i>
+          </span>
+        </div>
+        <div>
+          <label>
+            <b>Teckenförklaring</b>
+          </label>
+          <br />
           <input
             type="text"
             ref="input_legend"
@@ -607,22 +973,10 @@ class WMSLayerForm extends Component {
           </span>
         </div>
         <div>
-          <label>Valda lager*</label>
-          <div
-            ref="input_layers"
-            className={
-              this.getValidationClass("layers") + " layer-list-choosen"
-            }
-          >
-            <ul>{this.renderSelectedLayers()}</ul>
-          </div>
-        </div>
-        <div>
-          <label>Lagerlista</label>
-          {this.renderLayerList()}
-        </div>
-        <div>
-          <label>Inforuta</label>
+          <label>
+            <b>Inforuta</b>
+          </label>
+          <br />
           <textarea
             ref="input_infobox"
             value={this.state.infobox}
@@ -630,24 +984,15 @@ class WMSLayerForm extends Component {
           />
         </div>
         <div>
-          <label>Bildformat</label>
-          <select
-            ref="input_imageFormat"
-            value={this.state.imageFormat}
-            onChange={e => this.setState({ imageFormat: e.target.value })}
-          >
-            <option value="image/png">image/png</option>
-            <option value="image/png8">image/png8</option>
-            <option value="image/jpeg">image/jpeg</option>
-            <option value="image/vnd.jpeg-png">image/vnd.jpeg-png</option>
-          </select>
-        </div>
-        <div>
-          <label>Servertyp</label>
+          <label>
+            <b>Servertyp</b>
+          </label>
+          <br />
           <select
             ref="input_serverType"
             value={this.state.serverType}
             onChange={e => this.setState({ serverType: e.target.value })}
+            className="form-control"
           >
             <option>geoserver</option>
             <option>mapserver</option>
@@ -656,7 +1001,10 @@ class WMSLayerForm extends Component {
           </select>
         </div>
         <div>
-          <label>Opacitet*</label>
+          <label>
+            <b>Opacitet*</b>
+          </label>
+          <br />
           <input
             type="number"
             step="0.01"
@@ -670,18 +1018,10 @@ class WMSLayerForm extends Component {
           />
         </div>
         <div>
-          <label>Single tile</label>
-          <input
-            type="checkbox"
-            ref="input_singleTile"
-            onChange={e => {
-              this.setState({ singleTile: e.target.checked });
-            }}
-            checked={this.state.singleTile}
-          />
-        </div>
-        <div>
-          <label>Infoklickbar</label>
+          <label>
+            <b>Infoklickbar</b>
+          </label>
+          <br />
           <input
             type="checkbox"
             ref="input_queryable"
@@ -692,7 +1032,10 @@ class WMSLayerForm extends Component {
           />
         </div>
         <div>
-          <label>GeoWebCache</label>
+          <label>
+            <b>GeoWebCache</b>
+          </label>
+          <br />
           <input
             type="checkbox"
             ref="input_tiled"
@@ -703,7 +1046,10 @@ class WMSLayerForm extends Component {
           />
         </div>
         <div>
-          <label>Upphovsrätt</label>
+          <label>
+            <b>Upphovsrätt</b>
+          </label>
+          <br />
           <input
             type="text"
             ref="input_attribution"
@@ -715,9 +1061,25 @@ class WMSLayerForm extends Component {
             className={this.getValidationClass("attribution")}
           />
         </div>
+        <div>
+          <label>
+            <b>Infoklick-format</b>
+          </label>
+          <br />
+          <select
+            ref="input_infoFormat"
+            value={this.state.infoFormat}
+            onChange={e => this.setState({ infoFormat: e.target.value })}
+            className="form-control"
+          >
+            {this.setInfoFormats()}
+          </select>
+        </div>
         <div className="info-container">
           <div>
-            <label htmlFor="info-document">Infodokument</label>
+            <label htmlFor="info-document">
+              <b>Infodokument</b>
+            </label>
             <input
               type="checkbox"
               ref="input_infoVisible"
