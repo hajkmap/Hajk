@@ -171,9 +171,9 @@ namespace MapService.Components.MapExport
             ITileSource tileSource;
 
             using (var stream = resp.Result.GetResponseStream())
-            {
-                IEnumerable<ITileSource> tileSources = WmtsParser.Parse(stream);                
-                tileSource = tileSources.Where(t => t.Name == "topowebb").FirstOrDefault();
+            {                
+                IEnumerable<ITileSource> tileSources = WmtsParser.Parse(stream);
+                tileSource = tileSources.FirstOrDefault();
             }
             return tileSource;
         }

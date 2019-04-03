@@ -242,7 +242,11 @@ class LayerItem extends React.PureComponent {
       return (
         <div className={classes.infoTextContainer}>
           <Typography variant="h6">{infoTitle}</Typography>
-          <Typography>{infoText}</Typography>
+          <Typography
+            dangerouslySetInnerHTML={{
+              __html: infoText
+            }}
+          />
         </div>
       );
     } else {
