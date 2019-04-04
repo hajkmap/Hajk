@@ -50,7 +50,7 @@ class ExportModel {
   }
 
   validateScales(s) {
-    if (/(\d+)(,\s*\d+)*/.test(s)) {
+    if (typeof s == "string" && /(\d+)(,\s*\d+)*/.test(s)) {
       return s.split(",").map(s => Number(s));
     } else {
       return [250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000];
