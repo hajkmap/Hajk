@@ -109,9 +109,15 @@ class AppModel {
           const toolOptions =
             toolConfig && toolConfig.options ? toolConfig.options : {};
 
-          const target = toolOptions.hasOwnProperty("options")
+          // Crucial step to ensure that target is passed on as an option.
+          // First find out if target has been set in JSON config for plugin.
+          // If yes, keep it. Else, default to 'toolbar'.
+          const target = toolOptions.hasOwnProperty("target")
             ? toolConfig.options.target
             : "toolbar";
+          // Next, pass on this determined target to _options_ array of plugin,
+          // and not as a property of the plugin itself.
+          toolOptions.target = target;
 
           const sortOrder = toolConfig.hasOwnProperty("index")
             ? Number(toolConfig.index)
@@ -123,7 +129,6 @@ class AppModel {
                 map: map,
                 app: this,
                 type: plugin,
-                target: target,
                 sortOrder: sortOrder,
                 options: toolOptions,
                 component: module.default
