@@ -43,7 +43,7 @@ class Location extends React.PureComponent {
     this.options = props.options;
 
     // Important, part of API. Must be a string. Could be fetched from config.
-    this.title = this.options.title || "GPS";
+    this.title = this.options.title || "Positionera";
 
     // Important, part of API for plugins that contain panels. Makes App aware of this panels existence.
     this.props.app.registerPanel(this);

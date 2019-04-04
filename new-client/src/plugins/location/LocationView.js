@@ -39,7 +39,7 @@ class LocationView extends React.PureComponent {
   };
 
   locationDetails = {
-    accuracy: { id: 0, label: "GPS-precision (m)" },
+    accuracy: { id: 0, label: "Precision (m)" },
     altitude: { id: 1, label: "Höjd (m. ö. h.)" },
     altitudeAccuracy: { id: 2, label: "Höjdprecision (m)" },
     heading: { id: 3, label: "Riktning (rad)" },
@@ -200,7 +200,7 @@ class LocationView extends React.PureComponent {
                 value="track"
               />
             }
-            label="GPS-spårning"
+            label="Visa min position"
           />
         </FormGroup>
         {this.state.loading && <LinearProgress />}
