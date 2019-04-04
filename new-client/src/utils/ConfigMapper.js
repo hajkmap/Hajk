@@ -85,11 +85,10 @@ export default class ConfigMapper {
           VERSION: args.version,
           SRS: args.projection || "EPSG:3006",
           TILED: args.tiled,
-          STYLES: args.layersInfo
-            .map(function(l) {
-              return l.style || "";
-            })
-            .join(",")
+          STYLES:
+            args.layersInfo !== null
+              ? args.layersInfo.map(l => l.style || "").join(",")
+              : null
         },
         layersInfo: mapLayersInfo(args.layersInfo),
         infoVisible: args.infoVisible || false,
