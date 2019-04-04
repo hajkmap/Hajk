@@ -52,8 +52,14 @@ export default class ConfigMapper {
       }
     }
 
-    var proxy = this.proxy || "";
-    var config = {
+    let proxy = this.proxy || "";
+    // We can not assume that args.projection is sat,
+    // and if it's not, we should fall back to map config's projection.
+    let projection =
+      args.projection !== null
+        ? args.projection
+        : properties.mapConfig.map.projection;
+    let config = {
       type: "wms",
       options: {
         id: args.id,
@@ -66,7 +72,7 @@ export default class ConfigMapper {
         queryable: args.queryable !== false,
         information: args.infobox,
         resolutions: properties.mapConfig.map.resolutions,
-        projection: args.projection || "EPSG:3006",
+        projection: projection || "EPSG:3006",
         origin: properties.mapConfig.map.origin,
         extent: properties.mapConfig.map.extent,
         singleTile: args.singleTile || false,
@@ -82,8 +88,8 @@ export default class ConfigMapper {
         params: {
           LAYERS: args.layers.join(","),
           FORMAT: args.imageFormat,
-          VERSION: args.version,
-          SRS: args.projection || "EPSG:3006",
+          VERSION: args.version || "1.1.0",
+          SRS: projection || "EPSG:3006",
           TILED: args.tiled,
           STYLES:
             args.layersInfo !== null
