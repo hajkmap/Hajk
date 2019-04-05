@@ -17,7 +17,7 @@ class LayerSettings extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      opacityValue: 1
+      opacityValue: props.layer.get("opacity")
     };
     props.layer.on("change:opacity", this.updateOpacity);
   }
