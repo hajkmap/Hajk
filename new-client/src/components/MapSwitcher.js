@@ -3,8 +3,16 @@ import Button from "@material-ui/core/Button";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import { withStyles } from "@material-ui/core/styles";
+import SwitchCameraIcon from "@material-ui/icons/SwitchCamera";
 
-const styles = theme => ({});
+const styles = theme => ({
+  icon: {
+    color: "black",
+    padding: "3px",
+    overflow: "visible",
+    cursor: "pointer"
+  }
+});
 
 const fetchConfig = {
   credentials: "same-origin"
@@ -89,6 +97,8 @@ class MapSwitcher extends React.PureComponent {
 
   render() {
     const { anchorEl } = this.state;
+    const { classes } = this.props;
+
     const open = Boolean(anchorEl);
     return (
       <>
@@ -97,6 +107,7 @@ class MapSwitcher extends React.PureComponent {
           aria-haspopup="true"
           onClick={this.handleClick}
         >
+          <SwitchCameraIcon className={classes.icon} />
           Byt karta
         </Button>
         <Menu

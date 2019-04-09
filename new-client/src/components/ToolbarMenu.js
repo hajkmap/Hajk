@@ -4,6 +4,8 @@ import ClearIcon from "@material-ui/icons/LayersClear";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import { withStyles } from "@material-ui/core/styles";
 
+import MapSwitcher from "./MapSwitcher";
+
 const styles = theme => {
   return {
     toolbarMenu: {
@@ -49,6 +51,15 @@ class ToolbarMenu extends React.Component {
         menuVisible: window.innerWidth > 600
       });
     });
+  }
+
+  renderMapSwitcher() {
+    const { appModel } = this.props;
+    if (appModel.config.mapConfig.map.mapselector)
+      return <MapSwitcher appModel={appModel} />;
+    else {
+      return null;
+    }
   }
 
   renderSearchPlugin() {
@@ -113,6 +124,7 @@ class ToolbarMenu extends React.Component {
           }}
         >
           <div>
+            {this.renderMapSwitcher()}
             <Button
               aria-label="Rensa"
               onClick={e => {

@@ -11,7 +11,6 @@ import { SnackbarProvider, withSnackbar } from "notistack";
 import Toolbar from "./Toolbar.js";
 //import Popup from "./Popup.js";
 import Window from "./Window.js";
-import MapSwitcher from "./MapSwitcher";
 import Alert from "./Alert";
 import Loader from "./Loader";
 import Reparentable from "./Reparentable";
@@ -326,14 +325,6 @@ class App extends React.PureComponent {
     }
   }
 
-  renderMapSwitcher = () => {
-    if (this.appModel.config.mapConfig.map.mapselector)
-      return <MapSwitcher appModel={this.appModel} />;
-    else {
-      return null;
-    }
-  };
-
   renderPopup() {
     // TODO: Ensure that Popup mode for infoclick works.
     // I'm temporarily disabling that option and send all infoclicks to display as Window.
@@ -428,7 +419,6 @@ class App extends React.PureComponent {
               <div id="toolbar-right" className={classes.toolbarContent}>
                 <ToolbarMenu appModel={this.appModel} />
               </div>
-              {this.renderMapSwitcher()}
             </MUIToolbar>
           </AppBar>
           <div className={classes.map} id="map">
