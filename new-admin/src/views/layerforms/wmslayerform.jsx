@@ -829,26 +829,34 @@ class WMSLayerForm extends Component {
             Ladda {loader}
           </span>
         </div>
-        <div>
-          <label>
-            <b>Version</b>
-          </label>
-          <br />
-          <select
-            ref="input_version"
-            onChange={this.selectVersion.bind(this)}
-            value={this.state.version}
-            className="form-control"
-          >
-            {this.state.capabilitiesList.map(capa => {
-              return (
-                <option key={capa.version} value={capa.version}>
-                  {capa.version}
-                </option>
-              );
-            })}
-          </select>
-          <div>
+        <div
+          style={{
+            background: "rgb(238, 238, 238)",
+            float: "left",
+            width: "100%"
+          }}
+        >
+          <div style={{ width: "50%", padding: "15px", float: "left" }}>
+            <label>
+              <b>Version</b>
+            </label>
+            <br />
+            <select
+              ref="input_version"
+              onChange={this.selectVersion.bind(this)}
+              value={this.state.version}
+              className="form-control"
+            >
+              {this.state.capabilitiesList.map(capa => {
+                return (
+                  <option key={capa.version} value={capa.version}>
+                    {capa.version}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+          <div style={{ width: "50%", padding: "15px", float: "left" }}>
             <label>
               <b>Single tile</b>
             </label>
@@ -868,6 +876,7 @@ class WMSLayerForm extends Component {
           </label>
           <br />
           <select
+            style={{ width: "50%" }}
             ref="input_imageFormat"
             value={this.state.imageFormat}
             onChange={e => this.setState({ imageFormat: e.target.value })}
@@ -885,6 +894,7 @@ class WMSLayerForm extends Component {
           </label>
           <br />
           <select
+            style={{ width: "50%" }}
             ref="input_projection"
             value={this.state.projection}
             onChange={e => this.setState({ projection: e.target.value })}
@@ -896,6 +906,9 @@ class WMSLayerForm extends Component {
         <div>
           <label>
             <b>Lagerlista</b>
+          </label>
+          <label style={{ float: "right" }}>
+            <b>Infoklick</b>
           </label>
           <br />
           {this.renderLayerList()}
@@ -945,12 +958,39 @@ class WMSLayerForm extends Component {
         </div>
         <div>
           <label>
+            <b>Inforuta</b>
+          </label>
+          <br />
+          <textarea
+            ref="input_infobox"
+            value={this.state.infobox}
+            onChange={e => this.setState({ infobox: e.target.value })}
+          />
+        </div>
+        <div>
+          <label>
             <b>Senast ändrad</b>
           </label>
           <br />
           <span ref="input_date">
             <i>{this.props.model.parseDate(this.state.date)}</i>
           </span>
+        </div>
+        <div>
+          <label>
+            <b>Upphovsrätt</b>
+          </label>
+          <br />
+          <input
+            type="text"
+            ref="input_attribution"
+            onChange={e => {
+              this.setState({ attribution: e.target.value });
+              this.validateField("attribution", e);
+            }}
+            value={this.state.attribution}
+            className={this.getValidationClass("attribution")}
+          />
         </div>
         <div>
           <label>
@@ -974,14 +1014,18 @@ class WMSLayerForm extends Component {
         </div>
         <div>
           <label>
-            <b>Inforuta</b>
+            <b>Infoklick-format</b>
           </label>
           <br />
-          <textarea
-            ref="input_infobox"
-            value={this.state.infobox}
-            onChange={e => this.setState({ infobox: e.target.value })}
-          />
+          <select
+            style={{ width: "50%" }}
+            ref="input_infoFormat"
+            value={this.state.infoFormat}
+            onChange={e => this.setState({ infoFormat: e.target.value })}
+            className="form-control"
+          >
+            {this.setInfoFormats()}
+          </select>
         </div>
         <div>
           <label>
@@ -989,6 +1033,7 @@ class WMSLayerForm extends Component {
           </label>
           <br />
           <select
+            style={{ width: "50%" }}
             ref="input_serverType"
             value={this.state.serverType}
             onChange={e => this.setState({ serverType: e.target.value })}
@@ -1006,6 +1051,7 @@ class WMSLayerForm extends Component {
           </label>
           <br />
           <input
+            style={{ width: "50%" }}
             type="number"
             step="0.01"
             ref="input_opacity"
@@ -1016,64 +1062,6 @@ class WMSLayerForm extends Component {
               this.validateField("opacity");
             }}
           />
-        </div>
-        <div>
-          <label>
-            <b>Infoklickbar</b>
-          </label>
-          <br />
-          <input
-            type="checkbox"
-            ref="input_queryable"
-            onChange={e => {
-              this.setState({ queryable: e.target.checked });
-            }}
-            checked={this.state.queryable}
-          />
-        </div>
-        <div>
-          <label>
-            <b>GeoWebCache</b>
-          </label>
-          <br />
-          <input
-            type="checkbox"
-            ref="input_tiled"
-            onChange={e => {
-              this.setState({ tiled: e.target.checked });
-            }}
-            checked={this.state.tiled}
-          />
-        </div>
-        <div>
-          <label>
-            <b>Upphovsrätt</b>
-          </label>
-          <br />
-          <input
-            type="text"
-            ref="input_attribution"
-            onChange={e => {
-              this.setState({ attribution: e.target.value });
-              this.validateField("attribution", e);
-            }}
-            value={this.state.attribution}
-            className={this.getValidationClass("attribution")}
-          />
-        </div>
-        <div>
-          <label>
-            <b>Infoklick-format</b>
-          </label>
-          <br />
-          <select
-            ref="input_infoFormat"
-            value={this.state.infoFormat}
-            onChange={e => this.setState({ infoFormat: e.target.value })}
-            className="form-control"
-          >
-            {this.setInfoFormats()}
-          </select>
         </div>
         <div className="info-container">
           <div>
@@ -1157,6 +1145,34 @@ class WMSLayerForm extends Component {
               className={this.getValidationClass("infoOwner")}
             />
           </div>
+        </div>
+        <div>
+          <label>
+            <b>Infoklickbar</b>
+          </label>
+          <br />
+          <input
+            type="checkbox"
+            ref="input_queryable"
+            onChange={e => {
+              this.setState({ queryable: e.target.checked });
+            }}
+            checked={this.state.queryable}
+          />
+        </div>
+        <div>
+          <label>
+            <b>GeoWebCache</b>
+          </label>
+          <br />
+          <input
+            type="checkbox"
+            ref="input_tiled"
+            onChange={e => {
+              this.setState({ tiled: e.target.checked });
+            }}
+            checked={this.state.tiled}
+          />
         </div>
         <h2>Sökning</h2>
         <div>
