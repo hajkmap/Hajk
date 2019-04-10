@@ -13,8 +13,6 @@ namespace MapService.Models.Config
     public string legend { get; set; }
     public string infobox { get; set; }
     public string style { get; set; }
-
-    public bool queryable { get; set; }
   }
 
   public class WMSConfig : ILayerConfig
@@ -46,6 +44,8 @@ namespace MapService.Models.Config
     public string[] displayFields { get; set; }
 
     public bool visibleAtStart { get; set; }
+
+    public bool queryable { get; set; }
 
     public bool tiled { get; set; }
 
