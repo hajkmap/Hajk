@@ -96,12 +96,12 @@ const supportedInfoFormats = [
   "application/geojson"
 ];
 
-const supportedImageFormats = [
-  "image/png",
-  "image/jpeg",
-  "image/png; mode=8bit",
-  "image/vnd.jpeg-png"
-];
+// const supportedImageFormats = [
+//   "image/png",
+//   "image/jpeg",
+//   "image/png; mode=8bit",
+//   "image/vnd.jpeg-png"
+// ];
 
 /**
  *
@@ -386,14 +386,15 @@ class WMSLayerForm extends Component {
           abstract: abstract
         };
 
-        var currentLayer = this.state.capabilities.Capability.Layer.Layer.find(
-          l => {
-            return l.Name === layer.Name;
-          }
-        );
+        // var currentLayer = this.state.capabilities.Capability.Layer.Layer.find(
+        //   l => {
+        //     return l.Name === layer.Name;
+        //   }
+        // );
 
+        // Since "typeof layer.queryable = string", we can safely do ===.
         var queryableIcon =
-          layer.queryable == "1" ? "fa fa-check" : "fa fa-remove";
+          layer.queryable === "1" ? "fa fa-check" : "fa fa-remove";
 
         return (
           <li key={"fromCapability_" + i}>
@@ -444,6 +445,13 @@ class WMSLayerForm extends Component {
 
   loadLayers(layer, callback) {
     this.loadWMSCapabilities(undefined, () => {
+      // We can not assume that layer.version exists, because the
+      // previous implementation of WMS always assumed it was "1.1.1"
+      // and did not add "version" property. Only ExtendedWMS layers
+      // had the property previously, and then it was either "1.1.1" or
+      // "1.3.0". So, for non existing version, let's assume "1.1.1".
+      layer.version = layer.version || "1.1.1";
+
       var addedLayersInfo = {};
       var capabilities = this.state.capabilitiesList.find(
         capabilities => capabilities.version === layer.version
@@ -620,11 +628,11 @@ class WMSLayerForm extends Component {
    */
   setLayerSettings(layer) {
     // Hämta från capabilities det layer.layer som matchar namnet
-    var currentLayer = this.state.capabilities.Capability.Layer.Layer.find(
-      l => {
-        return l.Name === layer.name;
-      }
-    );
+    // var currentLayer = this.state.capabilities.Capability.Layer.Layer.find(
+    //   l => {
+    //     return l.Name === layer.name;
+    //   }
+    // );
 
     // Sätt det state som behövs för att modalen skall populeras och knapparna skall fungera
     this.setState({
