@@ -214,11 +214,13 @@ class WMSLayerForm extends Component {
       addedLayersInfo: addedLayersInfo
     });
 
-    let styles = layerInfo.styles.map(style => (
-      <option key={"style_" + style.Name} value={style.Name}>
-        {style.Name}
-      </option>
-    ));
+    let styles = layerInfo.styles
+      ? layerInfo.styles.map(style => (
+          <option key={"style_" + style.Name} value={style.Name}>
+            {style.Name}
+          </option>
+        ))
+      : null;
 
     return (
       <div>
