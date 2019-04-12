@@ -904,7 +904,7 @@ class WMSLayerForm extends Component {
           <select
             style={{ width: "50%" }}
             ref="input_projection"
-            value={this.state.projection}
+            value={this.state.projection !== null ? this.state.projection : ""}
             onChange={e => this.setState({ projection: e.target.value })}
             className="form-control"
           >
