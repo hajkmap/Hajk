@@ -109,15 +109,17 @@ class LayerSwitcher extends Component {
   }
 
   render() {
-    if (this.props.type === "toolbarItem") {
-      return this.renderAsToolbarItem();
-    }
-
-    if (this.props.type === "widgetItem") {
-      return this.renderAsWidgetItem();
-    }
-
+    // Styling is gone for this component, and we use SimpleLayerSwitcher for now.
     return null;
+    // if (this.props.type === "toolbarItem") {
+    //   return this.renderAsToolbarItem();
+    // }
+
+    // if (this.props.type === "widgetItem") {
+    //   return this.renderAsWidgetItem();
+    // }
+
+    // return null;
   }
 }
 
