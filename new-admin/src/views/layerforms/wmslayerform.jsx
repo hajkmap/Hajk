@@ -512,7 +512,8 @@ class WMSLayerForm extends Component {
 
     if (this.state.capabilities) {
       this.state.capabilities.Capability.Layer.Layer.forEach((layer, i) => {
-        this.refs[layer.Name].checked = false;
+        if (this.refs.hasOwnProperty(layer.Name))
+          this.refs[layer.Name].checked = false;
       });
     }
 
