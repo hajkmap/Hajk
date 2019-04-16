@@ -171,6 +171,30 @@ class WMSLayerForm extends Component {
   appendLayer(e, checkedLayer, opts = {}) {
     if (e.target.checked === true) {
       let addedLayersInfo = { ...this.state.addedLayersInfo };
+
+      // Let's find checked layers projection and pre-select it
+      const foundCrs = this.state.capabilitiesList[
+        "0"
+      ].Capability.Layer.Layer.find(l => {
+        return l.Name === checkedLayer;
+      });
+
+      // We can not be sure that CRS property exists
+      if (foundCrs !== undefined && foundCrs.hasOwnProperty("CRS")) {
+        let projection;
+        // Sometimes a layer announces multiple CRSs, and we need to handle that too
+        if (Array.isArray(foundCrs.CRS)) {
+          foundCrs.CRS.forEach(crs => {
+            if (supportedProjections.indexOf(crs) !== -1) projection = crs;
+          });
+        }
+        // Or sometimes just one CRS is announced and our job is easier
+        else {
+          projection = foundCrs.CRS;
+        }
+        this.setState({ projection });
+      }
+
       addedLayersInfo[checkedLayer] = {
         id: checkedLayer,
         caption: "",
@@ -423,8 +447,10 @@ class WMSLayerForm extends Component {
        * according to WMS specification.
        */
       function recursivePushLayer(layer) {
-        // First append current layer, no matter if there are sublayers or not
-        layers.push(append(layer));
+        // Handle group type called "Containing category" in WMS specification.
+        // Such group has no name attribute and can't be rendered on its own. If we
+        // find one of these, don't add it to the list.
+        if (layer.Name) layers.push(append(layer));
         // Next, check if there are sublayers and repeat the procedure
         if (layer.Layer) {
           layer.Layer.forEach(layer => {
