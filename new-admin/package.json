@@ -21,7 +21,7 @@
     "x2js": "^3.2.6"
   },
   "scripts": {
-    "start": "set HTTPS=false && set PORT=3001 && react-scripts start",
+    "start": "PORT=3001 HTTPS=false react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"

@@ -4,7 +4,7 @@
   "homepage": "/hajk3/",
   "private": true,
   "scripts": {
-    "start": "set HTTPS=false && react-scripts start",
+    "start": "PORT=3000 HTTPS=false react-scripts start",
     "build": "set PUBLIC_URL=&&react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
