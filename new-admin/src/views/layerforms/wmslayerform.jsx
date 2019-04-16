@@ -137,12 +137,16 @@ class WMSLayerForm extends Component {
   }
 
   renderLayerList() {
-    var layers = this.renderLayersFromCapabilites();
-    return (
-      <div className="layer-list">
-        <ul>{layers}</ul>
-      </div>
-    );
+    let layers = this.renderLayersFromCapabilites();
+    let tr =
+      layers === null ? (
+        <tr>
+          <td colSpan="4">Klicka på Ladda-knappen för att se lagerlista</td>
+        </tr>
+      ) : (
+        layers
+      );
+    return <tbody>{tr}</tbody>;
   }
 
   validateLayers(opts) {
@@ -367,18 +371,7 @@ class WMSLayerForm extends Component {
       var layers = [];
 
       var append = layer => {
-        var classNames =
-          this.state.layerPropertiesName === layer.Name
-            ? "fa fa-info-circle active"
-            : "fa fa-info-circle";
-
-        var i = this.createGuid();
-        var title = /^\d+$/.test(layer.Name) ? (
-          <label>
-            &nbsp;
-            {layer.Title}
-          </label>
-        ) : null;
+        const guid = this.createGuid();
 
         let trueTitle = layer.hasOwnProperty("Title") ? layer.Title : "";
         let abstract = layer.hasOwnProperty("Abstract") ? layer.Abstract : "";
@@ -388,55 +381,60 @@ class WMSLayerForm extends Component {
           abstract: abstract
         };
 
-        // var currentLayer = this.state.capabilities.Capability.Layer.Layer.find(
-        //   l => {
-        //     return l.Name === layer.Name;
-        //   }
-        // );
-
-        // Since "typeof layer.queryable = string", we can safely do ===.
-        var queryableIcon =
+        let queryableIcon =
           layer.queryable === "1" ? "fa fa-check" : "fa fa-remove";
+        let isGroupIcon = layer.Layer ? "fa fa-check" : "fa fa-remove";
 
         return (
-          <li key={"fromCapability_" + i}>
-            <input
-              ref={layer.Name}
-              id={"layer" + i}
-              type="checkbox"
-              data-type="wms-layer"
-              checked={this.state.addedLayers.find(l => l === layer.Name)}
-              onChange={e => {
-                this.appendLayer(e, layer.Name, opts);
-              }}
-            />
-            &nbsp;
-            <label htmlFor={"layer" + i}>{layer.Name}</label>
-            {title}
-            <i
-              style={{ display: "none" }}
-              className={classNames}
-              onClick={e => this.describeLayer(e, layer.Name)}
-            />
-            <i className={queryableIcon} value={layer.queryable} />
-          </li>
+          <tr key={"fromCapability_" + guid}>
+            <td>
+              <input
+                ref={layer.Name}
+                id={"layer" + guid}
+                type="checkbox"
+                data-type="wms-layer"
+                checked={this.state.addedLayers.find(l => l === layer.Name)}
+                onChange={e => {
+                  this.appendLayer(e, layer.Name, opts);
+                }}
+              />
+              &nbsp;
+              <label htmlFor={"layer" + guid}>{trueTitle}</label>
+            </td>
+            <td>{layer.Name}</td>
+            <td>
+              <i className={isGroupIcon} />
+            </td>
+            <td>
+              <i className={queryableIcon} />
+            </td>
+          </tr>
         );
       };
 
-      this.state.capabilities.Capability.Layer.Layer.forEach(layer => {
+      /**
+       * Previous to this recursive approach the code did check 3
+       * levels down. Additionally it "flatted" the group layers down:
+       * if there were sublayers, only sublayers were added, while the
+       * parent group layer was ignored.
+       *
+       * This function handles all levels of subgrouping and additionally
+       * also adds parent group layer, which is how it should be handled
+       * according to WMS specification.
+       */
+      function recursivePushLayer(layer) {
+        // First append current layer, no matter if there are sublayers or not
+        layers.push(append(layer));
+        // Next, check if there are sublayers and repeat the procedure
         if (layer.Layer) {
           layer.Layer.forEach(layer => {
-            if (layer.Layer) {
-              layer.Layer.forEach(layer => {
-                layers.push(append(layer));
-              });
-            } else {
-              layers.push(append(layer));
-            }
+            recursivePushLayer(layer);
           });
-        } else {
-          layers.push(append(layer));
         }
+      }
+
+      this.state.capabilities.Capability.Layer.Layer.forEach(layer => {
+        recursivePushLayer(layer);
       });
 
       return layers;
@@ -915,14 +913,23 @@ class WMSLayerForm extends Component {
           </select>
         </div>
         <div>
-          <label>
-            <b>Lagerlista</b>
-          </label>
-          <label style={{ float: "right" }}>
-            <b>Infoklick</b>
-          </label>
-          <br />
-          {this.renderLayerList()}
+          <table
+            style={{
+              display: "block",
+              overflowY: "scroll",
+              maxHeight: "600px"
+            }}
+          >
+            <thead>
+              <tr>
+                <td style={{ overflowX: "scroll" }}>Titel</td>
+                <td>Namn</td>
+                <td>Grupp</td>
+                <td>Infoclick</td>
+              </tr>
+            </thead>
+            {this.renderLayerList()}
+          </table>
         </div>
         <div>
           <label>
