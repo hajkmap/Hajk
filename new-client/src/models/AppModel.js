@@ -16,6 +16,7 @@ import { register } from "ol/proj/proj4";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Icon, Fill, Stroke, Style } from "ol/style.js";
+import { Projection } from "ol/proj";
 
 var map;
 
@@ -150,6 +151,16 @@ class AppModel {
    */
   createMap() {
     var config = this.translateConfig();
+
+    // Create a new Projection
+    let projCode = config.map.projection,
+      projExtent = config.map.length !== 0 ? config.map.extent : undefined;
+    const customProjection = new Projection({
+      code: projCode,
+      axisOrientation: "neu",
+      extent: projExtent
+    });
+
     map = new Map({
       interactions: defaultInteractions(),
       target: config.map.target,
@@ -163,8 +174,8 @@ class AppModel {
         units: "m",
         resolutions: config.map.resolutions,
         center: config.map.center,
-        projection: config.map.projection,
-        extent: config.map.length !== 0 ? config.map.extent : undefined
+        projection: customProjection,
+        extent: projExtent
       })
     });
     setTimeout(() => {

@@ -59,6 +59,10 @@ export default class ConfigMapper {
       args.projection !== null
         ? args.projection
         : properties.mapConfig.map.projection;
+
+    // In the GetMap operation the srs parameter is called crs in 1.3.0,
+    // see: https://docs.geoserver.org/latest/en/user/services/wms/basics.html#differences-between-wms-versions
+    const srsOrCrs = args.version === "1.3.0" ? "CRS" : "SRS";
     let config = {
       type: "wms",
       options: {
@@ -88,8 +92,8 @@ export default class ConfigMapper {
         params: {
           LAYERS: args.layers.join(","),
           FORMAT: args.imageFormat,
-          VERSION: args.version || "1.1.0",
-          SRS: projection || "EPSG:3006",
+          VERSION: args.version || "1.1.1",
+          [srsOrCrs]: projection || "EPSG:3006",
           TILED: args.tiled,
           STYLES: Array.isArray(args.layersInfo)
             ? args.layersInfo.map(l => l.style || "").join(",")
