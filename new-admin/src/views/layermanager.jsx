@@ -97,7 +97,9 @@ class Manager extends Component {
       }
     }
 
-    return matchedConfigs;
+    // There might be duplicates, but we want to return unique values only.
+    // Also, sort values for a nicer output.
+    return [...new Set(matchedConfigs)].sort();
   }
 
   infoAboutLayer(e, layer) {
@@ -108,7 +110,7 @@ class Manager extends Component {
     } else {
       alertMessage = `Lagret "${
         layer.caption
-      }" används i följande kartor: ${matchedConfigs.toLocaleString()}`;
+      }" används i följande kartor: ${matchedConfigs.join(", ")}`;
     }
 
     this.setState({
