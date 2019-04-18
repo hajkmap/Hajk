@@ -96,12 +96,12 @@ const supportedInfoFormats = [
   "application/geojson"
 ];
 
-// const supportedImageFormats = [
-//   "image/png",
-//   "image/jpeg",
-//   "image/png; mode=8bit",
-//   "image/vnd.jpeg-png"
-// ];
+const supportedImageFormats = [
+  "image/png",
+  "image/jpeg",
+  "image/png; mode=8bit",
+  "image/vnd.jpeg-png"
+];
 
 /**
  *
@@ -596,6 +596,25 @@ class WMSLayerForm extends Component {
     this.setServerType();
   }
 
+  setImageFormats() {
+    let imgs;
+    if (this.state.capabilities) {
+      imgs = this.state.capabilities.Capability.Request.GetMap.Format;
+    }
+
+    let imgFormats = imgs
+      ? supportedImageFormats.map((imgFormat, i) => {
+          if (imgs.indexOf(imgFormat) > -1) {
+            return <option key={i}>{imgFormat}</option>;
+          } else {
+            return "";
+          }
+        })
+      : "";
+
+    return imgFormats;
+  }
+
   setServerType() {
     let formats;
     if (this.state.capabilities) {
@@ -917,10 +936,7 @@ class WMSLayerForm extends Component {
             onChange={e => this.setState({ imageFormat: e.target.value })}
             className="form-control"
           >
-            <option value="image/png">image/png</option>
-            <option value="image/png8">image/png8</option>
-            <option value="image/jpeg">image/jpeg</option>
-            <option value="image/vnd.jpeg-png">image/vnd.jpeg-png</option>
+            {this.setImageFormats()}
           </select>
         </div>
         <div>
