@@ -1,3 +1,5 @@
+import { Projection } from "ol/proj";
+
 export default class ConfigMapper {
   constructor(proxy) {
     this.proxy = proxy;
@@ -53,12 +55,24 @@ export default class ConfigMapper {
     }
 
     let proxy = this.proxy || "";
+
     // We can not assume that args.projection is sat,
     // and if it's not, we should fall back to map config's projection.
     let projection =
       args.projection !== null
         ? args.projection
         : properties.mapConfig.map.projection;
+
+    // WMS 1.3.0 requires a custom Projection object, as we need to specify 'axisOrientation'
+    if (args.version === "1.3.0") {
+      // Create a new Projection
+      let projCode = projection;
+      projection = new Projection({
+        code: projCode,
+        axisOrientation: "neu",
+        extent: properties.mapConfig.map.extent
+      });
+    }
 
     // In the GetMap operation the srs parameter is called crs in 1.3.0,
     // see: https://docs.geoserver.org/latest/en/user/services/wms/basics.html#differences-between-wms-versions
