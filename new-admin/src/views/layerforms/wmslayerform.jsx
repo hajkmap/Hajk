@@ -178,7 +178,6 @@ class WMSLayerForm extends Component {
       ].Capability.Layer.Layer.find(l => {
         return l.Name === checkedLayer;
       });
-
       // We can not be sure that CRS property exists
       if (foundCrs !== undefined && foundCrs.hasOwnProperty("CRS")) {
         let projection;
@@ -193,6 +192,56 @@ class WMSLayerForm extends Component {
           projection = foundCrs.CRS;
         }
         this.setState({ projection });
+      }
+
+      if (opts.children) {
+        /**
+         * TODO: If we're dealing with Named Tree type, we must ensure
+         * that the group itself is unchecked (not added to the "green list"),
+         * while its children must be checked and added. Vice versa on uncheck.
+         * Below is an attempt:
+         **/
+        /**
+         * The approach below didn't work out due to a racing scenario (setState
+         * is async). Before we're done setting state, the loop is done, resulting
+         * in only the last <input> being checked.
+         *
+         * This must be solved, but to get this working for now, we can inform the
+         * user to preform the correct selection manually.
+         **/
+        // // Fake event
+        // let e = {
+        //   target: {
+        //     checked: true
+        //   }
+        // };
+        // opts.children.forEach(childLayer => {
+        //   let trueTitle = childLayer.hasOwnProperty("Title")
+        //     ? childLayer.Title
+        //     : "";
+        //   let abstract = childLayer.hasOwnProperty("Abstract")
+        //     ? childLayer.Abstract
+        //     : "";
+        //   let o = {
+        //     title: trueTitle,
+        //     abstract: abstract,
+        //     children: childLayer.Layer
+        //   };
+        //   this.appendLayer(e, childLayer.Name, o);
+        // });
+
+        // Temporary solution, until we manage it properly
+        let message = `Det valda lagret (${checkedLayer}) är en lagergrupp som består av följande underlager:\n
+        ${opts.children.map(ch => ch.Title).join(", ")}\n
+        I dagsläget saknar Hajk funktionaliteten att automatiskt lägga till underlagren, men du kan enkelt göra det själv genom att kryssa för underlagren vars namn du ser ovan. \n
+        Se även till att avmarkera själva lagergruppen (${checkedLayer}), för den behöver du inte ha om du lägger till dess underlager.`;
+
+        this.props.parent.setState({
+          alert: true,
+          alertMessage: message,
+          caption: "Valt lager är en lagergrupp"
+        });
+        // End of temporary solution
       }
 
       addedLayersInfo[checkedLayer] = {
@@ -365,7 +414,14 @@ class WMSLayerForm extends Component {
         },
         layer
       );
-      this.refs[layer].checked = false;
+      // Don't assume there is something to uncheck - the layer might have been deleted from WMS server,
+      // and hence non existing in layers list and impossible to uncheck.
+      if (
+        this.refs[layer] !== undefined &&
+        this.refs[layer].hasOwnProperty("checked")
+      ) {
+        this.refs[layer].checked = false;
+      }
       this.validateField("layers");
     }
 
@@ -394,7 +450,7 @@ class WMSLayerForm extends Component {
     if (this.state && this.state.capabilities) {
       var layers = [];
 
-      var append = layer => {
+      const append = (layer, parentGuid) => {
         const guid = this.createGuid();
 
         let trueTitle = layer.hasOwnProperty("Title") ? layer.Title : "";
@@ -402,7 +458,8 @@ class WMSLayerForm extends Component {
 
         let opts = {
           title: trueTitle,
-          abstract: abstract
+          abstract: abstract,
+          children: layer.Layer
         };
 
         let queryableIcon =
@@ -421,6 +478,7 @@ class WMSLayerForm extends Component {
                 onChange={e => {
                   this.appendLayer(e, layer.Name, opts);
                 }}
+                // disabled={parentGuid !== null} // When we get auto-selection of sublayers to work, we should disable manual checking on sublayer items
               />
               &nbsp;
               <label htmlFor={"layer" + guid}>{trueTitle}</label>
@@ -446,18 +504,20 @@ class WMSLayerForm extends Component {
        * also adds parent group layer, which is how it should be handled
        * according to WMS specification.
        */
-      function recursivePushLayer(layer) {
+      const recursivePushLayer = (layer, parentGuid = null) => {
         // Handle group type called "Containing category" in WMS specification.
         // Such group has no name attribute and can't be rendered on its own. If we
         // find one of these, don't add it to the list.
-        if (layer.Name) layers.push(append(layer));
+        if (layer.Name) layers.push(append(layer, parentGuid));
         // Next, check if there are sublayers and repeat the procedure
         if (layer.Layer) {
+          // Create a guid to indicate which element is the parent of current
+          const guid = this.createGuid();
           layer.Layer.forEach(layer => {
-            recursivePushLayer(layer);
+            recursivePushLayer(layer, guid);
           });
         }
-      }
+      };
 
       this.state.capabilities.Capability.Layer.Layer.forEach(layer => {
         recursivePushLayer(layer);
@@ -797,7 +857,7 @@ class WMSLayerForm extends Component {
         }
         break;
       case "opacity":
-        if (isNaN(Number(value)) || (value < 0 || value > 1)) {
+        if (isNaN(Number(value)) || (value <= 0 || value >= 1)) {
           valid = false;
         }
         break;
