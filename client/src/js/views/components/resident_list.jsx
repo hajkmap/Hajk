@@ -119,9 +119,7 @@ var ResidentList = {
       row.push(f.get(_config.postortFieldName));
       row.push(f.get(_config.postnrFieldName));
 
-      var birthDate = this.dateFromPersonalNumber(f.get(_config.alderFieldName));
-      var age = new Date().getFullYear() - parseInt(birthDate.substring(0, 4));
-      if (age < this.state.minAge) {
+      if (f.get(_config.alderFieldName) && (parseInt(f.get(_config.alderFieldName)) < this.state.minAge)) {
         return;
       }
 
