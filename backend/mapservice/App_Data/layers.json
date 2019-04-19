@@ -13,10 +13,7 @@
       "layer": "topowebb_nedtonad",
       "style": "default",
       "matrixSet": "3006",
-      "origin": [
-        "-1200000",
-        "8500000"
-      ],
+      "origin": ["-1200000", "8500000"],
       "resolutions": [
         "4096",
         "2048",
@@ -70,10 +67,7 @@
       "layer": "topowebb",
       "style": "default",
       "matrixSet": "3006",
-      "origin": [
-        "-1200000",
-        "8500000"
-      ],
+      "origin": ["-1200000", "8500000"],
       "resolutions": [
         "4096",
         "2048",
@@ -125,15 +119,14 @@
       "content": "",
       "legend": "",
       "projection": null,
-      "layers": [
-        "wsp:parking_lot"
-      ],
+      "layers": ["wsp:parking_lot"],
       "layersInfo": [
         {
           "id": "wsp:parking_lot",
           "caption": "",
           "legend": "",
-          "infobox": ""
+          "infobox": "",
+          "style": null
         }
       ],
       "infobox": "",
@@ -157,7 +150,9 @@
       "infoText": "Parkering",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "version": null,
+      "infoFormat": null
     },
     {
       "id": "22",
@@ -168,9 +163,7 @@
       "content": "",
       "legend": "",
       "projection": null,
-      "layers": [
-        "uddevalla:adresspunkt_p"
-      ],
+      "layers": ["uddevalla:adresspunkt_p"],
       "layersInfo": null,
       "infobox": "",
       "searchFields": null,
@@ -193,7 +186,9 @@
       "infoText": "",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "version": null,
+      "infoFormat": null
     },
     {
       "id": "23",
@@ -204,9 +199,7 @@
       "content": "",
       "legend": "",
       "projection": null,
-      "layers": [
-        "wsp:fastighet"
-      ],
+      "layers": ["wsp:fastighet"],
       "layersInfo": null,
       "infobox": "",
       "searchFields": null,
@@ -229,7 +222,9 @@
       "infoText": "",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "version": null,
+      "infoFormat": null
     },
     {
       "id": "24",
@@ -240,15 +235,14 @@
       "content": "",
       "legend": "",
       "projection": null,
-      "layers": [
-        "orto050"
-      ],
+      "layers": ["orto050"],
       "layersInfo": [
         {
           "id": "orto050",
           "caption": "",
           "legend": "",
-          "infobox": ""
+          "infobox": "",
+          "style": null
         }
       ],
       "infobox": "",
@@ -272,7 +266,9 @@
       "infoText": "Lantmäteriets ortofoton, 0.50 m upplösning",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "version": null,
+      "infoFormat": null
     },
     {
       "id": "27",
@@ -283,22 +279,21 @@
       "content": "",
       "legend": "",
       "projection": null,
-      "layers": [
-        "wsp:hpl",
-        "wsp:bus_line"
-      ],
+      "layers": ["wsp:hpl", "wsp:bus_line"],
       "layersInfo": [
         {
           "id": "wsp:hpl",
           "caption": "Hållplats",
           "legend": "",
-          "infobox": "<img src=\"{image}\" />"
+          "infobox": "<img src=\"{image}\" />",
+          "style": null
         },
         {
           "id": "wsp:bus_line",
           "caption": "Busslinje",
           "legend": "",
-          "infobox": ""
+          "infobox": "",
+          "style": null
         }
       ],
       "infobox": "LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL\nLLLLLLLLLLLLLLLLLLL\n\n\nLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLll\n\n\n\n\nLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL",
@@ -322,7 +317,9 @@
       "infoText": "Informationstext",
       "infoUrl": "http://www.google.se",
       "infoUrlText": "Länk",
-      "infoOwner": "Karl Kula"
+      "infoOwner": "Karl Kula",
+      "version": null,
+      "infoFormat": null
     },
     {
       "id": "28",
@@ -333,22 +330,21 @@
       "content": "",
       "legend": "",
       "projection": null,
-      "layers": [
-        "wsp:landuse",
-        "wsp:museum"
-      ],
+      "layers": ["wsp:landuse", "wsp:museum"],
       "layersInfo": [
         {
           "id": "wsp:landuse",
           "caption": "",
           "legend": "",
-          "infobox": ""
+          "infobox": "",
+          "style": null
         },
         {
           "id": "wsp:museum",
           "caption": "",
           "legend": "",
-          "infobox": ""
+          "infobox": "",
+          "style": null
         }
       ],
       "infobox": "",
@@ -372,7 +368,9 @@
       "infoText": "",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "version": null,
+      "infoFormat": null
     },
     {
       "id": "29",
@@ -383,15 +381,14 @@
       "content": "",
       "legend": "",
       "projection": null,
-      "layers": [
-        "wsp:train_station"
-      ],
+      "layers": ["wsp:train_station"],
       "layersInfo": [
         {
           "id": "wsp:train_station",
           "caption": "",
           "legend": "",
-          "infobox": ""
+          "infobox": "",
+          "style": null
         }
       ],
       "infobox": "",
@@ -415,7 +412,9 @@
       "infoText": "Ett lager med tågstationer.",
       "infoUrl": "https://www.google.se",
       "infoUrlText": "Länk till metadata",
-      "infoOwner": "Trafikenheten"
+      "infoOwner": "Trafikenheten",
+      "version": null,
+      "infoFormat": null
     },
     {
       "id": "30",
@@ -426,15 +425,14 @@
       "content": "",
       "legend": "",
       "projection": null,
-      "layers": [
-        "wsp:measure_point"
-      ],
+      "layers": ["wsp:measure_point"],
       "layersInfo": [
         {
           "id": "wsp:measure_point",
           "caption": "",
           "legend": "",
-          "infobox": ""
+          "infobox": "",
+          "style": null
         }
       ],
       "infobox": "<h3>{name}</h3> \nProvtagningar",
@@ -458,7 +456,9 @@
       "infoText": "",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "version": null,
+      "infoFormat": null
     },
     {
       "id": "31",
@@ -469,15 +469,14 @@
       "content": "Topowebbkartan",
       "legend": "",
       "projection": null,
-      "layers": [
-        "topowebbkartan"
-      ],
+      "layers": ["topowebbkartan"],
       "layersInfo": [
         {
           "id": "topowebbkartan",
           "caption": "",
           "legend": "",
-          "infobox": ""
+          "infobox": "",
+          "style": null
         }
       ],
       "infobox": "",
@@ -501,49 +500,21 @@
       "infoText": "",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "version": null,
+      "infoFormat": null
     }
   ],
   "wfslayers": [
     {
-      "id": "20",
-      "caption": "Fastighet",
-      "url": "http://demo.giscloud.se/geoserver/wfs",
-      "layers": [
-        "wsp:fastighet"
-      ],
-      "searchFields": [
-        "fastighet"
-      ],
-      "infobox": "",
-      "aliasDict": "",
-      "displayFields": [
-        "fastighet"
-      ],
-      "geometryField": "geom",
-      "outputFormat": "GML3",
-      "infoVisible": false,
-      "infoTitle": null,
-      "infoText": null,
-      "infoUrl": null,
-      "infoUrlText": null,
-      "infoOwner": null
-    },
-    {
       "id": "21",
       "caption": "Adress",
-      "url": "https://karta.uddevalla.se/geoserver/wfs",
-      "layers": [
-        "uddevalla:adresspunkt_p"
-      ],
-      "searchFields": [
-        "adress"
-      ],
+      "url": "https://giscloud.se/geoserver/rol/wfs",
+      "layers": ["rol:adress"],
+      "searchFields": ["adress", "postnummer"],
       "infobox": "",
       "aliasDict": "",
-      "displayFields": [
-        "adress"
-      ],
+      "displayFields": ["adress", "postnummer"],
       "geometryField": "geom",
       "outputFormat": "GML3",
       "infoVisible": false,
@@ -735,9 +706,7 @@
       "url": "https://giscloud.se/geoserver/wsp/wfs",
       "uri": "https://giscloud.se/wsp",
       "projection": "EPSG:3006",
-      "layers": [
-        "wsp:hpl"
-      ],
+      "layers": ["wsp:hpl"],
       "editableFields": [
         {
           "index": 1,
@@ -774,9 +743,7 @@
       "url": "https://giscloud.se/geoserver/wfs",
       "uri": "https://giscloud.se/wsp",
       "projection": "EPSG:3006",
-      "layers": [
-        "wsp:parking_lot"
-      ],
+      "layers": ["wsp:parking_lot"],
       "editableFields": [
         {
           "index": 1,

@@ -139,32 +139,60 @@ class SearchModel {
     }
   };
 
+  timeout = -1;
+
+  controllers = [];
+
   search = (searchInput, callback) => {
+    clearTimeout(this.timeout);
     if (searchInput.length > 3) {
-      this.observer.publish("searchStarted");
-      var promises = this.options.sources.map(source =>
-        this.lookup(source, searchInput)
-      );
-      Promise.all(promises).then(responses => {
-        Promise.all(responses.map(result => result.json())).then(
-          jsonResults => {
-            jsonResults.forEach((jsonResult, i) => {
-              if (jsonResult.features.length > 0) {
-                arraySort({
-                  array: jsonResult.features,
-                  index: this.options.sources[i].searchFields[0]
+      this.timeout = setTimeout(() => {
+        this.observer.publish("searchStarted");
+        var promises = [];
+
+        if (this.controllers.length > 0) {
+          this.controllers.forEach(controller => {
+            controller.abort();
+          });
+        }
+
+        this.controllers.splice(0, this.controllers.length);
+
+        this.options.sources.forEach(source => {
+          const { promise, controller } = this.lookup(source, searchInput);
+          promises.push(promise);
+          this.controllers.push(controller);
+        });
+
+        var timeout = this.timeout;
+
+        Promise.all(promises)
+          .then(responses => {
+            Promise.all(responses.map(result => result.json()))
+              .then(jsonResults => {
+                if (this.timeout !== timeout) {
+                  return this.observer.publish("searchComplete");
+                }
+                jsonResults.forEach((jsonResult, i) => {
+                  if (jsonResult.features.length > 0) {
+                    arraySort({
+                      array: jsonResult.features,
+                      index: this.options.sources[i].searchFields[0]
+                    });
+                  }
+                  jsonResult.source = this.options.sources[i];
                 });
-              }
-              jsonResult.source = this.options.sources[i];
-            });
-            setTimeout(() => {
-              this.observer.publish("searchComplete");
-            }, 500);
-            if (callback) callback(jsonResults);
-          }
-        );
-      });
+                setTimeout(() => {
+                  this.observer.publish("searchComplete");
+                }, 500);
+                if (callback) callback(jsonResults);
+              })
+              .catch(parseErrors => {});
+          })
+          .catch(responseErrors => {});
+      }, 200);
     } else {
+      this.timeout = -1;
       this.clear();
       callback(false);
     }
@@ -397,6 +425,7 @@ class SearchModel {
       srsName: projCode,
       outputFormat: "JSON", //source.outputFormat,
       geometryName: source.geometryField,
+      maxFeatures: 100,
       filter: new IsLike(
         source.searchFields[0],
         searchInput + "*",
@@ -410,17 +439,24 @@ class SearchModel {
     const node = this.wfsParser.writeGetFeature(options);
     const xmlSerializer = new XMLSerializer();
     const xmlString = xmlSerializer.serializeToString(node);
+    const controller = new AbortController();
+    const signal = controller.signal;
 
     const request = {
       credentials: "same-origin",
+      signal: signal,
       method: "POST",
       headers: {
         "Content-Type": "text/xml"
       },
       body: xmlString
     };
+    const promise = fetch(
+      this.app.config.appConfig.searchProxy + source.url,
+      request
+    );
 
-    return fetch(this.app.config.appConfig.searchProxy + source.url, request);
+    return { promise, controller };
   }
 }
 
