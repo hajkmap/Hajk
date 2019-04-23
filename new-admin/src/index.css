@@ -731,3 +731,7 @@ figure img {
   position: relative;
   top: -1px;
 }
+
+.wms-layer-name {
+  word-wrap: break-word;
+}

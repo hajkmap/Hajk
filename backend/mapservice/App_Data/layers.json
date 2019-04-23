@@ -421,10 +421,10 @@
       "caption": "Mätpunkter",
       "url": "http://giscloud.se/geoserver/wms",
       "owner": "",
-      "date": "1548188872840",
+      "date": "1556020665067",
       "content": "",
       "legend": "",
-      "projection": null,
+      "projection": "EPSG:3006",
       "layers": ["wsp:measure_point"],
       "layersInfo": [
         {
@@ -441,7 +441,7 @@
       "visibleAtStart": false,
       "queryable": true,
       "tiled": false,
-      "opacity": 1.0,
+      "opacity": 0.5,
       "singleTile": false,
       "imageFormat": "image/png",
       "serverType": "geoserver",
@@ -457,8 +457,8 @@
       "infoUrl": "",
       "infoUrlText": "",
       "infoOwner": "",
-      "version": null,
-      "infoFormat": null
+      "version": "1.1.1",
+      "infoFormat": "application/json"
     },
     {
       "id": "31",
