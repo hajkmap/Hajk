@@ -1,6 +1,6 @@
 {
   "name": "new-admin",
-  "version": "3.0.0",
+  "version": "3.0.0-alpha.3",
   "private": true,
   "homepage": "/admin",
   "dependencies": {
@@ -14,14 +14,14 @@
     "openlayers": "^4.6.5",
     "proj4": "^2.5.0",
     "react": "^16.8.6",
-    "react-color": "^2.17.0",
+    "react-color": "^2.17.1",
     "react-dom": "^16.8.6",
     "react-modal": "^3.8.1",
     "react-scripts": "1.1.4",
     "x2js": "^3.2.6"
   },
   "scripts": {
-    "start": "set PORT=3001 && set HTTPS=false && react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
