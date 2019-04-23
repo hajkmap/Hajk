@@ -3,12 +3,12 @@
 // Also, change 'browserlist' in package.json to exclude ie11.
 import "react-app-polyfill/ie11";
 import "react-app-polyfill/stable";
-import "@babel/polyfill";
 import "abortcontroller-polyfill/dist/polyfill-patch-fetch";
 // IE 11 ends here.
 
 import "ol/ol.css";
 import "./index.css";
+
 import registerServiceWorker from "./registerServiceWorker";
 
 import React from "react";
