@@ -2,7 +2,10 @@
  * IE11 would require either core-js or react-app-polyfills.
  * However, neither seem to work for the moment with our code.
  * If - and only if - IE11 support in admin is required, someone
- * may take a closer look at this. */
+ * may take a closer look at this.
+ *
+ * If you uncomment the polyfills below, don't forget to 'npm install'
+ * proper packages (they're not in package.json by default). */
 
 // import "core-js";
 // import "react-app-polyfill/ie11";

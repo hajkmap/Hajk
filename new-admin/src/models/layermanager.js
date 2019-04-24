@@ -22,7 +22,7 @@
 
 import X2JS from "x2js";
 import { Model } from "backbone";
-import { format } from "openlayers";
+import WMSCapabilities from "ol/format/WMSCapabilities";
 import $ from "jquery";
 import { prepareProxyUrl } from "../utils/ProxyHelper";
 
@@ -487,7 +487,7 @@ var manager = Model.extend({
       },
       success: data => {
         try {
-          var response = new format.WMSCapabilities().read(data);
+          var response = new WMSCapabilities().read(data);
           callback(response);
         } catch (e) {
           console.error(e);
