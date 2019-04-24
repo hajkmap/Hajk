@@ -15,10 +15,9 @@ import React from "react";
 import ReactDOM from "react-dom";
 import App from "./components/App.js";
 import buildConfig from "./buildConfig.json";
+import { deepMerge } from "./utils/DeepMerge";
 
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
-import deepmerge from "deepmerge";
-
 import ErrorIcon from "@material-ui/icons/Error";
 
 const networkErrorMessage =
@@ -30,16 +29,17 @@ const fetchConfig = {
   credentials: "same-origin"
 };
 
-/* Helper function that creates a MUI theme by merging
+/**
+ * Helper function that creates a MUI theme by merging
  * hard-coded values (in this function), with custom values
  * (obtained from customTheme.json in /public).
  * This way, user can customize look and feel of application
  * AFTER it has been build with webpack, by simply tweaking
  * values in customTheme.json.
- * */
+ */
 function getTheme(config, customTheme) {
-  // Defaults is to lift colors from current map config and make them
-  // primary and secondary colors for MUI theme.
+  // Standard behavior is to use colors from current map config
+  // and make them primary and secondary colors for MUI theme.
   const hardCodedDefaults = {
     palette: {
       primary: {
@@ -51,19 +51,10 @@ function getTheme(config, customTheme) {
     },
     typography: {
       useNextVariants: true
-    },
-    overrides: {
-      MuiListItemIcon: {
-        // Name of the component / style sheet
-        root: {
-          // Name of the rule
-          // color: config.mapConfig.map.colors.primaryColor // Some CSS
-        }
-      }
     }
   };
 
-  const mergedTheme = deepmerge(hardCodedDefaults, customTheme);
+  const mergedTheme = deepMerge(hardCodedDefaults, customTheme);
   return createMuiTheme(mergedTheme);
 }
 
