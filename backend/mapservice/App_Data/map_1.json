@@ -347,12 +347,8 @@
     "origin": [0.0, 0.0],
     "extent": [0.0, 6000000.0, 1000000.0, 9000000.0],
     "logo": "https://github.com/hajkmap/Hajk/raw/develop-new-client/design/logo_small.png",
-    "infologo": "",
     "geoserverLegendOptions": "",
-    "mobileleft": null,
-    "mobileright": null,
     "pil": null,
-    "mobile": false,
     "mapselector": false,
     "colors": {
       "primaryColor": "#455A64",
