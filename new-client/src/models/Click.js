@@ -14,8 +14,7 @@ function query(map, layer, evt) {
     .getProjection()
     .getCode();
   let params = {
-    INFO_FORMAT: "application/json",
-    feature_count: 100
+    FEATURE_COUNT: 100
   };
   let url = layer
     .getSource()
@@ -30,7 +29,7 @@ function query(map, layer, evt) {
  * Vector layers are added with the features at pixel method and given the original layer reference as well.
  */
 function handleClick(evt, map, callback) {
-  // Temporary fix for OL6 beta
+  // TODO: Remove this temporary fix for OL6 beta when no longer necessary
   // if (evt.originalEvent.target.className !== "ol-unselectable") {
   //   return;
   // }
