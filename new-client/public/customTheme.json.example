@@ -1,14 +1,17 @@
 // NOTICE THAT COMMENTS ARE NOT ALLOWED IN JSON FILES
 // HENCE THIS EXAMPLE.
 
-// The recommended way to create a custome theme is to use this tool
+// The recommended way to create a custom theme is to use this tool
 // (https://react-theming.github.io/create-mui-theme/) and paste the 
-// resulting JSON into customeTheme.json.
+// resulting JSON into customTheme.json.
 // Open that tool and follow the instructions (on HOW TO USE THIS link)
 // to create your own JSON theme.
 
 {
-  // Theme-specifc values can be customized *GLOBALLY* here.
+  // PLEASE NOTE THAT CHANGING PALETTE'S PRIMARY OR SECONDARY COLOR 
+  // IN THIS FILE WILL OVERRIDE THE COLOR SETTINGS FROM MAPSERVICE!
+
+  // Theme-specific values can be customized *GLOBALLY* here.
   // Refer to this URL to see what values can be found for theme:
   // https://material-ui.com/customization/default-theme/#default-theme
   "palette": {

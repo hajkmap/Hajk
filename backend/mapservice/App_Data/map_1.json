@@ -323,7 +323,7 @@
   "map": {
     "target": "map",
     "center": [560000, 6923488],
-    "title": "GIS Cloud",
+    "title": "Hajk 3",
     "projection": "EPSG:3006",
     "zoom": 5,
     "maxZoom": 3,
@@ -346,17 +346,13 @@
     ],
     "origin": [0.0, 0.0],
     "extent": [0.0, 6000000.0, 1000000.0, 9000000.0],
-    "logo": "https://www.thejobcrowd.com/wp-content/uploads/2017/12/wsp_new_logo_2017-2-300x147.png",
-    "infologo": "",
+    "logo": "https://github.com/hajkmap/Hajk/raw/develop-new-client/design/logo_small.png",
     "geoserverLegendOptions": "",
-    "mobileleft": null,
-    "mobileright": null,
     "pil": null,
-    "mobile": false,
     "mapselector": false,
     "colors": {
-      "primaryColor": "#ff0000",
-      "secondaryColor": "#ffffff"
+      "primaryColor": "#455A64",
+      "secondaryColor": "#FFB74D"
     }
   }
 }

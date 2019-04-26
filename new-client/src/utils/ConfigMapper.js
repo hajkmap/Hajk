@@ -106,6 +106,7 @@ export default class ConfigMapper {
         params: {
           LAYERS: args.layers.join(","),
           FORMAT: args.imageFormat,
+          INFO_FORMAT: args.infoFormat,
           VERSION: args.version || "1.1.1",
           [srsOrCrs]: projection || "EPSG:3006",
           TILED: args.tiled,
