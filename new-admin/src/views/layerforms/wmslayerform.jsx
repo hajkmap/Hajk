@@ -63,7 +63,7 @@ const defaultState = {
   infoOwner: "",
   solpopup: solpop,
   capabilitiesList: [],
-  version: "",
+  version: "1.1.0",
   projection: "",
   infoFormat: "",
   style: []
@@ -468,7 +468,7 @@ class WMSLayerForm extends Component {
 
         return (
           <tr key={"fromCapability_" + guid}>
-            <td>
+            <td className="wms-layer-name">
               <input
                 ref={layer.Name}
                 id={"layer" + guid}
@@ -632,10 +632,12 @@ class WMSLayerForm extends Component {
       })
       .catch(err => {
         console.error(err);
-        this.props.parentView.setState({
-          alert: true,
-          alertMessage: "Servern svarar inte. Försök med en annan URL."
-        });
+        if (this.props.parentView) {
+          this.props.parentView.setState({
+            alert: true,
+            alertMessage: "Servern svarar inte. Försök med en annan URL."
+          });
+        }
       });
   }
 
@@ -658,7 +660,12 @@ class WMSLayerForm extends Component {
 
   setImageFormats() {
     let imgs;
-    if (this.state.capabilities) {
+    if (
+      this.state.capabilities &&
+      this.state.capabilities.Capability &&
+      this.state.capabilities.Capability.Request &&
+      this.state.capabilities.Capability.Request.GetMap
+    ) {
       imgs = this.state.capabilities.Capability.Request.GetMap.Format;
     }
 
@@ -677,11 +684,16 @@ class WMSLayerForm extends Component {
 
   setServerType() {
     let formats;
-    if (this.state.capabilities) {
+    if (
+      this.state.capabilities &&
+      this.state.capabilities.Capability &&
+      this.state.capabilities.Capability.Request &&
+      this.state.capabilities.Capability.Request.GetFeatureInfo
+    ) {
       formats = this.state.capabilities.Capability.Request.GetFeatureInfo
         .Format;
     }
-    if (formats.indexOf("application/geojson") > -1) {
+    if (formats && formats.indexOf("application/geojson") > -1) {
       this.setState({ serverType: "arcgis" });
     } else {
       this.setState({ serverType: "geoserver" });
@@ -690,7 +702,11 @@ class WMSLayerForm extends Component {
 
   setProjections() {
     let projections;
-    if (this.state.capabilities) {
+    if (
+      this.state.capabilities &&
+      this.state.capabilities.Capability &&
+      this.state.capabilities.Capability.Layer
+    ) {
       var RS = this.state.version === "1.3.0" ? "CRS" : "SRS";
       projections = this.state.capabilities.Capability.Layer[RS];
     }
@@ -710,7 +726,12 @@ class WMSLayerForm extends Component {
 
   setInfoFormats() {
     let formats;
-    if (this.state.capabilities) {
+    if (
+      this.state.capabilities &&
+      this.state.capabilities.Capability &&
+      this.state.capabilities.Capability.Request &&
+      this.state.capabilities.Capability.Request.GetFeatureInfo
+    ) {
       formats = this.state.capabilities.Capability.Request.GetFeatureInfo
         .Format;
     }
@@ -916,6 +937,9 @@ class WMSLayerForm extends Component {
     ) : null;
     var infoClass = this.state.infoVisible ? "tooltip-info" : "hidden";
 
+    const version = this.state.version || "1.1.1";
+    const infoFormat = this.state.infoFormat || "";
+
     return (
       <fieldset>
         <legend>WMS-lager</legend>
@@ -958,7 +982,7 @@ class WMSLayerForm extends Component {
             <select
               ref="input_version"
               onChange={this.selectVersion.bind(this)}
-              value={this.state.version}
+              value={version}
               className="form-control"
             >
               {this.state.capabilitiesList.map(capa => {
@@ -1024,7 +1048,7 @@ class WMSLayerForm extends Component {
           >
             <thead>
               <tr>
-                <td style={{ overflowX: "scroll" }}>Titel</td>
+                <td>Titel</td>
                 <td>Namn</td>
                 <td>Grupp</td>
                 <td>Infoclick</td>
@@ -1140,7 +1164,7 @@ class WMSLayerForm extends Component {
           <select
             style={{ width: "50%" }}
             ref="input_infoFormat"
-            value={this.state.infoFormat}
+            value={infoFormat}
             onChange={e => this.setState({ infoFormat: e.target.value })}
             className="form-control"
           >

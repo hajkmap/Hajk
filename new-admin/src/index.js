@@ -1,11 +1,25 @@
+/**
+ * IE11 would require either core-js or react-app-polyfills.
+ * However, neither seem to work for the moment with our code.
+ * If - and only if - IE11 support in admin is required, someone
+ * may take a closer look at this.
+ *
+ * If you uncomment the polyfills below, don't forget to 'npm install'
+ * proper packages (they're not in package.json by default). */
+
+// import "core-js";
+// import "react-app-polyfill/ie11";
+// import "react-app-polyfill/stable";
+// IE 11 ends here.
+
 import React from "react";
 import ReactDOM from "react-dom";
-import "./index.css";
 import Backbone from "backbone";
 import { Router } from "backbone";
 import ApplicationView from "./views/application.jsx";
 import ApplicationModel from "./models/application.js";
 
+import "./index.css";
 //import $ from 'jquery';
 //import find from 'array.prototype.find';
 

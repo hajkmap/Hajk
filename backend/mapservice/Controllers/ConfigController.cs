@@ -439,7 +439,6 @@ namespace MapService.Controllers
 					zoom = 3,
 					projection = "EPSG:3006",
 					target = "map",
-					infologo = "",
 					geoserverLegendOptions = "",
 					pil = "",
 					logo = "",

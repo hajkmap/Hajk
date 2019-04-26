@@ -47,10 +47,6 @@ class MapOptions extends Component {
         center: config.center,
         logo: config.logo,
         extent: config.extent,
-        infologo: config.infologo,
-        mobileleft: config.mobileleft,
-        mobileright: config.mobileright,
-        mobile: config.mobile,
         mapselector: config.mapselector,
         title: config.title ? config.title : "",
         geoserverLegendOptions: config.geoserverLegendOptions
@@ -82,8 +78,6 @@ class MapOptions extends Component {
       center: mapConfig.center,
       logo: mapConfig.logo,
       extent: mapConfig.extent,
-      infologo: mapConfig.infologo,
-      mobile: mapConfig.mobile,
       mapselector: mapConfig.mapselector,
       geoserverLegendOptions: mapConfig.geoserverLegendOptions
     });
@@ -181,7 +175,6 @@ class MapOptions extends Component {
           valid = false;
         }
         break;
-      case "mobile":
       case "mapselector":
         if (value !== true && value !== false) {
           valid = false;
@@ -218,8 +211,6 @@ class MapOptions extends Component {
         config.center = this.getValue("center");
         config.logo = this.getValue("logo");
         config.extent = this.getValue("extent");
-        config.infologo = this.getValue("infologo");
-        config.mobile = this.getValue("mobile");
         config.mapselector = this.getValue("mapselector");
         config.geoserverLegendOptions = this.getValue("geoserverLegendOptions");
         this.props.model.updateMapConfig(config, success => {
@@ -294,7 +285,14 @@ class MapOptions extends Component {
               />
             </div>
             <div>
-              <label>Projektion*</label>
+              <label>
+                Projektion{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Används som OpenLayers View 'projection'-parameter, ex 'EPSG:3008'"
+                />
+              </label>
               <input
                 type="text"
                 ref="input_projection"
@@ -308,7 +306,14 @@ class MapOptions extends Component {
               />
             </div>
             <div>
-              <label>Startzoom*</label>
+              <label>
+                Startzoom{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Används som OpenLayers View 'zoom'-parameter, ex '2'"
+                />
+              </label>
               <input
                 type="text"
                 ref="input_zoom"
@@ -322,7 +327,14 @@ class MapOptions extends Component {
               />
             </div>
             <div>
-              <label>Centrumkoordinat*</label>
+              <label>
+                Centrumkoordinat{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Används som OpenLayers View 'center'-parameter, ex '110600,6283796'"
+                />
+              </label>
               <input
                 type="text"
                 ref="input_center"
@@ -336,7 +348,14 @@ class MapOptions extends Component {
               />
             </div>
             <div>
-              <label>Logo</label>
+              <label>
+                Logo{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Sökväg till logga att använda i <img>-taggen. Kan vara relativ Hajk-root eller absolut."
+                />
+              </label>
               <input
                 type="text"
                 ref="input_logo"
@@ -355,7 +374,7 @@ class MapOptions extends Component {
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
-                  title="Anges med formatering: 1,2,3,4"
+                  title="Används som OpenLayers View 'extent'-parameter, ex '1,2,3,4'"
                 />
               </label>
               <input
@@ -369,33 +388,6 @@ class MapOptions extends Component {
                   );
                 }}
               />
-            </div>
-            <div>
-              <label>Logo infoknapp</label>
-              <input
-                type="text"
-                ref="input_infologo"
-                value={this.state.infologo}
-                className={this.getValidationClass("logo")}
-                onChange={e => {
-                  this.setState({ infologo: e.target.value }, () =>
-                    this.validateField("infologo")
-                  );
-                }}
-              />
-            </div>
-            <div>
-              <label htmlFor="input_mobile">Mobilanpassning</label>
-              <input
-                id="input_mobile"
-                type="checkbox"
-                ref="input_mobile"
-                onChange={e => {
-                  this.setState({ mobile: e.target.checked });
-                }}
-                checked={this.state.mobile}
-              />
-              &nbsp;
             </div>
             <div>
               <label>
@@ -423,7 +415,14 @@ class MapOptions extends Component {
               />
             </div>
             <div>
-              <label htmlFor="input_mapselector">Visa kartväljare</label>
+              <label htmlFor="input_mapselector">
+                Visa kartväljare{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktiv kommer en väljare med andra tillgängliga kartor att visas för användaren"
+                />
+              </label>
               <input
                 id="input_mapselector"
                 type="checkbox"

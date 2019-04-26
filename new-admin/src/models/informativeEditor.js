@@ -67,13 +67,19 @@ var informativeEditor = Model.extend({
     });
   },
 
-  loadDocuments: function(callback) {
+  loadDocuments: async function(callback) {
     var url = this.get("config").url_document_list;
-    fetch(url, { credentials: "same-origin" }).then(response => {
-      response.json().then(data => {
-        callback(data);
-      });
-    });
+    try {
+      const response = await fetch(url, { credentials: "same-origin" });
+      const text = await response.text();
+      const data = JSON.parse(text);
+      callback(data);
+    } catch (err) {
+      alert(
+        "Kunde inte ladda mappen med dokument. Verifiera att uppsättningen är korrekt utförd."
+      );
+      console.error(err);
+    }
   },
 
   createDocument(data, callback) {
