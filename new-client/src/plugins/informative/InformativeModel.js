@@ -58,16 +58,30 @@ class InformativeModel {
     }
   }
 
-  load(callback) {
-    fetch(this.url, fetchConfig).then(response => {
-      response.json().then(data => {
-        data.chapters.forEach(chapter => {
-          this.setParentChapter(chapter, undefined);
-        });
-        callback(data.chapters);
-        this.chapters = data.chapters;
+  async load(callback) {
+    let response;
+    try {
+      response = await fetch(this.url, fetchConfig);
+      const text = await response.text();
+      const data = await JSON.parse(text);
+
+      data.chapters.forEach(chapter => {
+        this.setParentChapter(chapter, undefined);
       });
-    });
+      callback(data.chapters);
+      this.chapters = data.chapters;
+    } catch (err) {
+      // TODO: replace "alert" with something that will use the Snackbar. But first, we must find a way to bind for Snackbar in AppModel.
+      // this.globalObserver.publish(
+      //   "alert",
+      //   "Informative Plugin kunde inte ladda data korrekt. Om felet kvarstår var god och meddela administratören."
+      // );
+      console.error(
+        `Couldn't load data for Informative plugin. Make sure that the URL to mapservice is correctly configured. Current value: ${
+          response.url
+        }`
+      );
+    }
   }
 }
 
