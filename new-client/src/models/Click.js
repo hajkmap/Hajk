@@ -80,12 +80,20 @@ function handleClick(evt, map, callback) {
     var jsonPromises = [];
     responses.forEach(response => {
       jsonPromises.push(
-        response.requestResponse.json().then(jsonData => {
-          return {
-            layer: response.layer,
-            jsonData: jsonData
-          };
-        })
+        response.requestResponse
+          .json()
+          .then(jsonData => {
+            return {
+              layer: response.layer,
+              jsonData: jsonData
+            };
+          })
+          .catch(err => {
+            console.error(
+              "GetFeatureInfo couldn't retrieve correct data for the clicked object. "
+            );
+            console.error(err);
+          })
       );
     });
 
@@ -106,7 +114,12 @@ function handleClick(evt, map, callback) {
       );
 
       jsonPromisesData.forEach(jsonPromiseData => {
-        if (jsonPromiseData.jsonData.features.length > 0) {
+        if (
+          jsonPromiseData !== undefined &&
+          jsonPromiseData.jsonData &&
+          jsonPromiseData.jsonData.features &&
+          jsonPromiseData.jsonData.features.length > 0
+        ) {
           let parsed = new GeoJSON().readFeatures(jsonPromiseData.jsonData);
           parsed.forEach(f => {
             f.layer = jsonPromiseData.layer;
