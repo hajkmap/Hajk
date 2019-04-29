@@ -2,6 +2,10 @@ import React, { Component } from "react";
 import { createPortal } from "react-dom";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
+import FormControl from "@material-ui/core/FormControl";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+import InputLabel from "@material-ui/core/InputLabel";
 import { withStyles } from "@material-ui/core/styles";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
@@ -85,13 +89,15 @@ const styles = theme => {
         minWidth: "inherit",
         borderRadius: "0"
       }
+    },
+    formControl: {
+      minWidth: 120
     }
   };
 };
 
 const saveErrorText = "Fel - din kommentar gick inte att spara.";
 const validationErrorText = " - detta fält krävs";
-
 class CollectorForm extends Component {
   state = {
     comment: "",
@@ -138,11 +144,19 @@ class CollectorForm extends Component {
   };
 
   reset = () => {
+    const { form } = this.props;
+
+    const formFieldNames = form.reduce((reducer, field) => {
+      reducer[field.name] = "";
+      return reducer;
+    }, {});
+
     this.setState({
       comment: "",
       saveError: "",
       validationError: "",
-      mode: "start"
+      mode: "start",
+      ...formFieldNames
     });
   };
 
@@ -190,9 +204,20 @@ class CollectorForm extends Component {
     this.props.onClose();
   };
 
+  stringify() {
+    const { form } = this.props;
+    return JSON.stringify(
+      form.reduce((reducer, field) => {
+        reducer[field.name] = this.state[field.name];
+        return reducer;
+      }, {})
+    );
+  }
+
   handleChange = name => event => {
     this.setState({
-      [name]: event.target.value
+      [name]: event.target.value,
+      comment: this.stringify()
     });
   };
 
@@ -205,10 +230,10 @@ class CollectorForm extends Component {
 
   renderSuccess() {
     const { classes } = this.props;
+    //<LocalFloristIcon className={classes.localFloristIcon} />
     return (
       <div className={classes.form}>
         <div className={classes.thankForm}>
-          <LocalFloristIcon className={classes.localFloristIcon} />
           <Typography variant="h2" className={classes.thank}>
             TACK
           </Typography>
@@ -312,6 +337,61 @@ class CollectorForm extends Component {
     );
   }
 
+  renderTextField(name, rows, i) {
+    const { classes } = this.props;
+    return (
+      <TextField
+        key={i}
+        rows={rows || 10}
+        multiline={true}
+        id="comment"
+        label={name + this.state.validationError}
+        value={this.state[name]}
+        className={classes.text}
+        onChange={this.handleChange(name)}
+        margin="normal"
+        autoFocus={isMobile ? false : true}
+      />
+    );
+  }
+
+  renderDropDownField(name, values, i) {
+    const { classes } = this.props;
+    return (
+      <FormControl key={i} className={classes.formControl}>
+        <InputLabel htmlFor={name}>{name}</InputLabel>
+        <Select
+          value={this.state[name] || ""}
+          onChange={this.handleChange(name)}
+          inputProps={{
+            name: name,
+            id: name
+          }}
+        >
+          {values.map((value, i) => (
+            <MenuItem key={i} value={value}>
+              {value}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    );
+  }
+
+  renderForm() {
+    const { form } = this.props;
+    return form.map((input, i) => {
+      switch (input.type) {
+        case "text":
+          return this.renderTextField(input.name, 10, i);
+        case "option":
+          return this.renderDropDownField(input.name, input.values, i);
+        default:
+          return this.renderTextField(input.name, 10, i);
+      }
+    });
+  }
+
   renderPlace() {
     const { classes } = this.props;
     return (
@@ -343,19 +423,7 @@ class CollectorForm extends Component {
               document.getElementById("map")
             )
           : null}
-        <div>Skriv din synpunkt nedan</div>
-        <TextField
-          rows="10"
-          multiline={true}
-          id="comment"
-          label={"Din synpunkt" + this.state.validationError}
-          value={this.state.comment}
-          className={classes.text}
-          onChange={this.handleChange("comment")}
-          margin="normal"
-          autoFocus={isMobile ? false : true}
-        />
-        <br />
+        {this.renderForm()}
         <Button color="primary" variant="contained" onClick={this.save(false)}>
           Skicka
         </Button>

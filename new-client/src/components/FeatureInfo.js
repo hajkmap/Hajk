@@ -53,12 +53,26 @@ class FeatureInfo extends React.Component {
     }
   }
 
+  valueFromJson(str) {
+    if (typeof str !== "string") return false;
+    const jsonStart = /^\[|^\{(?!\{)/;
+    const jsonEnds = {
+      "[": /]$/,
+      "{": /}$/
+    };
+    const start = str.match(jsonStart);
+    const jsonLike = start && jsonEnds[start[0]].test(str);
+
+    return jsonLike ? JSON.parse(str) : false;
+  }
+
   table(data) {
+    console.log("Display table", data);
     return Object.keys(data).map((key, i) => {
       if (typeof data[key] !== "object") {
         return (
           <div key={i}>
-            <span>{key}</span>: <span>{data[key]}</span>
+            <strong>{key}</strong>: <span>{data[key]}</span>
           </div>
         );
       } else {
@@ -185,9 +199,21 @@ class FeatureInfo extends React.Component {
         markdown = feature.layer.layersInfo[layer].infobox;
       }
 
+      var properties = feature.getProperties();
+
+      Object.keys(properties).forEach(property => {
+        var jsonData = this.valueFromJson(properties[property]);
+        if (jsonData) {
+          delete properties[property];
+          properties = { ...properties, ...jsonData };
+        }
+      });
+
+      feature.setProperties(properties);
+
       var value = markdown
-        ? this.parse(markdown, feature.getProperties())
-        : this.table(feature.getProperties());
+        ? this.parse(markdown, properties)
+        : this.table(properties);
 
       if (markdown) {
         return (

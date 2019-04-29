@@ -54,6 +54,7 @@ class CollectorView extends Component {
           localObserver={this.props.localObserver}
           model={this.model}
           onClose={this.onClose}
+          form={this.props.form}
         />
       </div>
     );

@@ -735,3 +735,9 @@ figure img {
 .wms-layer-name {
   word-wrap: break-word;
 }
+
+.collector-field {
+  padding: 10px;
+  border: 1px solid;
+  margin: 10px 0;
+}

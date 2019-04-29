@@ -22,6 +22,7 @@
 
 import React from "react";
 import { Component } from "react";
+import FieldEditor from "../components/FieldEditor.jsx";
 
 var defaultState = {
   validationErrors: [],
@@ -33,6 +34,7 @@ var defaultState = {
   abstract: "Vi vill veta vad du tycker!",
   featureType: "",
   featureNS: "",
+  form: [],
   visibleAtStart: false,
   visibleForGroups: []
 };
@@ -57,10 +59,9 @@ class ToolOptions extends Component {
         url: tool.options.url,
         featureType: tool.options.featureType,
         featureNS: tool.options.featureNS,
+        form: tool.options.form || [],
         visibleAtStart: tool.options.visibleAtStart || false,
-        visibleForGroups: tool.options.visibleForGroups
-          ? tool.options.visibleForGroups
-          : []
+        visibleForGroups: tool.options.visibleForGroups || []
       });
     } else {
       this.setState({
@@ -129,7 +130,8 @@ class ToolOptions extends Component {
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
-        )
+        ),
+        form: this.state.form
       }
     };
 
@@ -325,6 +327,7 @@ class ToolOptions extends Component {
               value={this.state.featureNS}
             />
           </div>
+          <FieldEditor form={this.state.form} parent={this} onSave={() => {}} />
         </form>
       </div>
     );

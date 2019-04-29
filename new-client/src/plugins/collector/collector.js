@@ -19,6 +19,7 @@ class Collector extends Component {
     this.options = props.options;
     this.title = this.options.title || "Tyck till";
     this.abstract = this.options.abstract || "Vi vill veta vad du tycker!";
+    this.form = this.options.form || [];
     this.state = {
       dialogOpen: false
     };
@@ -84,6 +85,7 @@ class Collector extends Component {
           minimizePanel={this.minimizePanel}
           openPanel={this.openPanel}
           localObserver={this.observer}
+          form={this.form}
         />
       </Window>,
       document.getElementById("toolbar-panel")
