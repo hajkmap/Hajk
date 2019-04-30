@@ -383,6 +383,8 @@ class CollectorForm extends Component {
     return form.map((input, i) => {
       switch (input.type) {
         case "text":
+          return this.renderTextField(input.name, 1, i);
+        case "textarea":
           return this.renderTextField(input.name, 10, i);
         case "option":
           return this.renderDropDownField(input.name, input.values, i);

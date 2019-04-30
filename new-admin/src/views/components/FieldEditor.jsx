@@ -74,7 +74,8 @@ class FieldAdder extends Component {
             <strong>Typ</strong>
           </div>
           <select onChange={this.fieldTypeChanged}>
-            <option value="text">Fritext</option>
+            <option value="text">Textfält</option>
+            <option value="textarea">Texruta</option>
             <option value="option">Lista</option>
           </select>
         </div>

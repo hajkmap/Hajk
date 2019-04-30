@@ -62,12 +62,22 @@ class FeatureInfo extends React.Component {
     };
     const start = str.match(jsonStart);
     const jsonLike = start && jsonEnds[start[0]].test(str);
+    var result = false;
 
-    return jsonLike ? JSON.parse(str) : false;
+    if (jsonLike) {
+      try {
+        result = JSON.parse(str);
+      } catch (ex) {
+        result = false;
+      }
+    } else {
+      result = false;
+    }
+
+    return result;
   }
 
   table(data) {
-    console.log("Display table", data);
     return Object.keys(data).map((key, i) => {
       if (typeof data[key] !== "object") {
         return (
