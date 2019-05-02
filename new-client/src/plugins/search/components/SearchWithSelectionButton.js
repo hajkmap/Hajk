@@ -24,28 +24,6 @@ class SearchWithSelectionButton extends React.Component {
     const { classes, buttonText } = this.props;
     return (
       <>
-        <Tooltip title="SÖK">
-          <Button
-            className={classes.button}
-            color={this.state.active ? "primary" : "default"}
-            onClick={() => {
-              this.setState(
-                {
-                  active: !this.state.active
-                },
-                () => {
-                  this.props.model.doSearch();
-                  if (this.state.active) {
-                    this.props.localObserver.publish("minimizeWindow", true);
-                  }
-                }
-              );
-            }}
-          >
-            <LoupeIcon />
-            &nbsp; {buttonText}
-          </Button>
-        </Tooltip>
         <Tooltip title="Visa påverkan inom ett område">
           <Button
             className={classes.button}
@@ -84,6 +62,28 @@ class SearchWithSelectionButton extends React.Component {
           >
             <LoupeIcon />
             &nbsp; {buttonText}
+          </Button>
+        </Tooltip>
+        <Tooltip title="SÖK">
+          <Button
+            className={classes.button}
+            color={this.state.active ? "primary" : "default"}
+            onClick={() => {
+              this.setState(
+                {
+                  active: !this.state.active
+                },
+                () => {
+                  this.props.model.doSearch();
+                  if (this.state.active) {
+                    this.props.localObserver.publish("minimizeWindow", true);
+                  }
+                }
+              );
+            }}
+          >
+            <LoupeIcon />
+            &nbsp; {"TILLFÄLLIG SÖKKNAPP - run doSearch()"}
           </Button>
         </Tooltip>
         {createPortal(

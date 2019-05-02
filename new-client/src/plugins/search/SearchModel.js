@@ -10,6 +10,7 @@ import { fromCircle } from "ol/geom/Polygon";
 import Draw from "ol/interaction/Draw.js";
 import { arraySort } from "./../../utils/ArraySort.js";
 import { Stroke, Style, Circle } from "ol/style.js";
+import { handleClick } from "../../models/Click.js";
 
 var style = new Style({
   stroke: new Stroke({
@@ -85,6 +86,32 @@ class SearchModel {
       sourceList = [mapLayer, ...sourceList];
     }
     return sourceList;
+  };
+
+  onSelectFeatures = evt => {
+    handleClick(evt, evt.map, response => {
+      this.vectorLayer.getSource().addFeatures(response.features);
+    });
+  };
+
+  doSearch = () => {
+    var features = this.vectorLayer.getSource().getFeatures();
+    console.log("GOING TO SEARCH");
+    console.log(features, "feature");
+    /* this.searchWithinArea(features, false, res => {
+      console.log(res, "res");
+    });*/
+  };
+
+  selectGeometriesForSpatialSearch = active => {
+    if (active) {
+      this.olMap.clicklock = true;
+      this.olMap.on("singleclick", this.onSelectFeatures);
+    } else {
+      this.olMap.clicklock = false;
+      this.clearHighlight();
+      this.olMap.un("singleclick", this.onSelectFeatures);
+    }
   };
 
   searchWithinArea = (feature, callback) => {

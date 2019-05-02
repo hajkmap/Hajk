@@ -310,7 +310,7 @@ class Search extends React.PureComponent {
                 }
               }}
             />
-            <SearchWithPolygonButton
+            <SearchWithSelectionButton
               localObserver={this.localObserver}
               buttonText={
                 this.searchWithSelectionButtonText || "Välj ett objekt i kartan"
