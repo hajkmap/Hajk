@@ -8,6 +8,8 @@ import Observer from "react-event-observer";
 import SearchBar from "./components/SearchBar.js";
 import SearchResultList from "./components/SearchResultList.js";
 import SearchWithinButton from "./components/SearchWithinButton.js";
+import SearchWithPolygonButton from "./components/SearchWithPolygonButton";
+import SearchWithSelectionButton from "./components/SearchWithSelectionButton";
 import ClearButton from "./components/ClearButton.js";
 import SearchModel from "./SearchModel.js";
 import PanelHeader from "./../../components/PanelHeader.js";
@@ -150,6 +152,10 @@ class Search extends React.PureComponent {
     this.toolDescription = props.options.toolDescription;
     this.tooltip = props.options.tooltip;
     this.searchWithinButtonText = props.options.searchWithinButtonText;
+    this.searchWithPolygonButtonText =
+      props.options.searchWithPolygonButtonText;
+    this.searchWithSelectionButtonText =
+      props.options.searchWithSelectionButtonText;
     this.localObserver.on("searchStarted", () => {
       this.setState({
         loading: true
@@ -273,6 +279,42 @@ class Search extends React.PureComponent {
             <SearchWithinButton
               localObserver={this.localObserver}
               buttonText={this.searchWithinButtonText}
+              model={this.searchModel}
+              onSearchWithin={layerIds => {
+                if (layerIds.length === 0) {
+                  this.setState({
+                    result: []
+                  });
+                } else {
+                  this.setState({
+                    result: layerIds
+                  });
+                }
+              }}
+            />
+            <SearchWithPolygonButton
+              localObserver={this.localObserver}
+              buttonText={
+                this.searchWithPolygonButtonText || "Rita polygon i kartan"
+              }
+              model={this.searchModel}
+              onSearchWithin={layerIds => {
+                if (layerIds.length === 0) {
+                  this.setState({
+                    result: []
+                  });
+                } else {
+                  this.setState({
+                    result: layerIds
+                  });
+                }
+              }}
+            />
+            <SearchWithPolygonButton
+              localObserver={this.localObserver}
+              buttonText={
+                this.searchWithSelectionButtonText || "Välj ett objekt i kartan"
+              }
               model={this.searchModel}
               onSearchWithin={layerIds => {
                 if (layerIds.length === 0) {

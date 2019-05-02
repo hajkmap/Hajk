@@ -28,27 +28,11 @@ function query(map, layer, evt) {
  * When the requests are done the features are parsed and given the original layer reference.
  * Vector layers are added with the features at pixel method and given the original layer reference as well.
  */
-function handleClick(evt, map, callback) {
+export function handleClick(evt, map, callback) {
   // TODO: Remove this temporary fix for OL6 beta when no longer necessary
   // if (evt.originalEvent.target.className !== "ol-unselectable") {
   //   return;
   // }
-
-  // If Draw, Modify or Snap interaction are currently active, ignore clicks
-  if (
-    map
-      .getInteractions()
-      .getArray()
-      .filter(
-        interaction =>
-          ["Draw", "Snap", "Modify", "Select", "Translate"].indexOf(
-            interaction.constructor.name
-          ) !== -1
-      ).length > 0 ||
-    map.clicklock
-  ) {
-    return false;
-  }
 
   document.querySelector("body").style.cursor = "progress";
   var promises = [];
@@ -138,6 +122,22 @@ function handleClick(evt, map, callback) {
 
 export function bindMapClickEvent(map, callback) {
   map.on("singleclick", evt => {
-    handleClick(evt, map, callback);
+    // If Draw, Modify or Snap interaction are currently active, ignore clicks
+    if (
+      map
+        .getInteractions()
+        .getArray()
+        .filter(
+          interaction =>
+            ["Draw", "Snap", "Modify", "Select", "Translate"].indexOf(
+              interaction.constructor.name
+            ) !== -1
+        ).length > 0 ||
+      map.clicklock
+    ) {
+      return;
+    } else {
+      handleClick(evt, map, callback);
+    }
   });
 }
