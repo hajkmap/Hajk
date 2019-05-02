@@ -14,7 +14,8 @@ function query(map, layer, evt) {
     .getProjection()
     .getCode();
   let params = {
-    FEATURE_COUNT: 100
+    FEATURE_COUNT: 100,
+    INFO_FORMAT: "application/json"
   };
   let url = layer
     .getSource()
