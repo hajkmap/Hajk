@@ -191,17 +191,17 @@ namespace MapService.Components
 
                 gfx.DrawPolygon(XBrushes.White, points, XFillMode.Winding);
 
-                this.drawText(gfx, String.Format("Skala 1:{0}", exportItem.scale), 15, 45);
-                gfx.DrawLine(XPens.Black, new XPoint(15, 52), new XPoint(15 + displayLength, 52));
-                gfx.DrawLine(XPens.Black, new XPoint(15, 48), new XPoint(15, 56));
-                gfx.DrawLine(XPens.Black, new XPoint(15 + displayLength, 48), new XPoint(15 + displayLength, 56));
-                this.drawText(gfx, displayText, 20 + displayLength, 55);
+                this.drawText(gfx, fontName, String.Format("Skala 1:{0}", exportItem.scale), 15, 25);
+                gfx.DrawLine(XPens.Black, new XPoint(15, 32), new XPoint(15 + displayLength, 32));
+                gfx.DrawLine(XPens.Black, new XPoint(15, 28), new XPoint(15, 36));
+                gfx.DrawLine(XPens.Black, new XPoint(15 + displayLength, 28), new XPoint(15 + displayLength, 36));
+                this.drawText(gfx, fontName, displayText, 20 + displayLength, 35);
 
                 var y = (int)page.Height.Point - 15;
                 var printText = commentText + "   " + pdfDate;
                 this.drawText(gfx, fontName, printText, 15, y - 20);
                 
-                this.drawText(gfx, fontname, infoText, 15, y);
+                this.drawText(gfx, fontName, infoText, 15, y);
 
                 int i = 0;
                 copyrights.ForEach(copyright =>
