@@ -35,6 +35,7 @@ import Location from './tools/location.jsx';
 import Search from './tools/search.jsx';
 import StreetView from './tools/streetview.jsx';
 import FIR from './tools/fir.jsx';
+import KIR from './tools/kir.jsx'; 
 import Preset from './tools/preset.jsx';
 import Measure from './tools/measure.jsx';
 import Routing from './tools/routing.jsx';

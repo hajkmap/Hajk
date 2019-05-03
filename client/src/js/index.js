@@ -192,6 +192,10 @@
             return tool.type === 'fir';
         });
 
+        var kirTool = map_config.tools.find(tool => {
+            return tool.type === 'kir';
+        });
+
         var editTool = map_config.tools.find(tool => {
           return tool.type === 'edit';
         });
@@ -271,6 +275,25 @@
               });
             }
          }
+
+         if (kirTool) {
+             if (kirTool.options.layers == null) {
+                 kirTool.options.sources = data.wfslayers;
+             } else {
+                 if (kirTool.options.layers.length != 0) {
+                     var wfslayers = internal.overrideGlobalSearchConfig(kirTool, data);
+                     kirTool.options.sources = wfslayers;
+                 } else {
+                     kirTool.options.sources = data.wfslayers;
+                 }
+             }
+
+             if (kirTool.options.residentListDataLayer) {
+               firTool.options.residentList.residentListWfsLayer = data.wfslayers.filter(l => {
+                 if (l.id === firTool.options.residentListDataLayer.id) return l;
+               });
+             }
+        }
 
         if (editTool) {
           if (editTool.options.layers == null) {

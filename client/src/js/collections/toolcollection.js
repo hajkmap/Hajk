@@ -36,6 +36,7 @@ var Tool = require('tools/tool'),
   Location = require('tools/location'),
   Routing = require('tools/routing'),
   Fir = require('tools/fir'),
+  Kir = require('tools/kir'),
   Preset = require('tools/preset'),
   Measure = require('tools/measure'),
   MailExport = require('tools/mailexport');
@@ -87,6 +88,8 @@ var ToolCollection = {
         return new StreetView(args.options);
       case 'fir':
         return new Fir(args.options);
+      case 'kir':
+        return new Kir(args.options);
       case 'information':
         return new Information(args.options);
       case 'selection':
