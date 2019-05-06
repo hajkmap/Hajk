@@ -177,8 +177,9 @@ namespace MapService.Components
                     infoText = ConfigurationManager.AppSettings["exportInfoText"];
                 }
 
-                int height = 65 + copyrights.Count * 10;
                 this.drawTextTitle(gfx, fontName, titleText, 15, 25);
+
+                int height = 65 + copyrights.Count * 10;
 
                 XPoint[] points = new XPoint[]
                 {
@@ -240,6 +241,8 @@ namespace MapService.Components
                 {
                     infoText = ConfigurationManager.AppSettings["exportInfoText"];
                 }
+                
+                this.drawTextTitle(gfx, fontName, titleText, 30, 27);
 
                 int height = 1;
 
@@ -262,6 +265,9 @@ namespace MapService.Components
                 this.drawText(gfx, fontName, displayText, 38 + displayLength, (int)page.Height.Point - 16, 8);
                 
                 var y = (int)page.Height.Point - 2;
+                
+                var printText = commentText + "   " + pdfDate;
+                this.drawText(gfx, fontName, printText, 40, y - 40);
 
                 this.drawText(gfx, fontName, infoText, 33, y, 8);
 
