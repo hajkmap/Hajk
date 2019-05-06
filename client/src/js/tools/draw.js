@@ -436,7 +436,7 @@ var DrawModel = {
     }
 
     if (typeof value === 'number') {
-      value = Math.round(value);
+      value = Math.round(value*100)/100;
     }
 
     if (type === 'circle') {
@@ -1101,14 +1101,14 @@ var DrawModel = {
         };
         break;
       case 'LineString' :
-        length = Math.round(geom.getLength());
+        length = Math.round(geom.getLength()*100)/100;
         break;
       case 'Polygon':
-        area = Math.round(geom.getArea());
+        area = Math.round(geom.getArea()*100)/100;
         break;
       case 'Circle':
-        radius = Math.round(geom.getRadius());
-        if (radius === 0) 
+        radius = Math.round(geom.getRadius()*100)/100;
+        if (radius === 0)
           radius = parseFloat(this.get('circleRadius'));
         break;
       default:
