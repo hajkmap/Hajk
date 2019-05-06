@@ -269,7 +269,7 @@
               firTool.options.realEstateWMSLayerCaption = realEstateWMSLayer[0].caption;
             }
 
-            if (firTool.options.residentListDataLayer) {
+            if (firTool.options.residentList && firTool.options.residentListDataLayer) {
               firTool.options.residentList.residentListWfsLayer = data.wfslayers.filter(l => {
                 if (l.id === firTool.options.residentListDataLayer.id) return l;
               });
@@ -288,9 +288,9 @@
                  }
              }
 
-             if (kirTool.options.residentListDataLayer) {
-               firTool.options.residentList.residentListWfsLayer = data.wfslayers.filter(l => {
-                 if (l.id === firTool.options.residentListDataLayer.id) return l;
+             if (kirTool.options.residentList && kirTool.options.residentListDataLayer) {
+               kirTool.options.residentList.residentListWfsLayer = data.wfslayers.filter(l => {
+                 if (l.id === kirTool.options.residentListDataLayer.id) return l;
                });
              }
         }
