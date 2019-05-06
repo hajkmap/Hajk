@@ -97,7 +97,7 @@ var ResidentList = {
   generateExcel: function(features, callback) {
     var _config =  this.props.model.get("residentListDataLayer"),
         rows = [],
-        columns = [_config.namnDisplayName, _config.adressDisplayName, _config.postortDisplayName, _config.postnrDisplayName];
+        columns = [_config.namnDisplayName, _config.adressDisplayName, _config.postnrDisplayName, _config.postortDisplayName];
 
     if (this.state.includeAge) {
       columns.push(_config.alderDisplayName);
@@ -116,8 +116,8 @@ var ResidentList = {
 
       row.push(f.get(_config.namnFieldName));
       row.push(f.get(_config.adressFieldName));
-      row.push(f.get(_config.postortFieldName));
       row.push(f.get(_config.postnrFieldName));
+      row.push(f.get(_config.postortFieldName));
 
       if (f.get(_config.alderFieldName) && (parseInt(f.get(_config.alderFieldName)) < this.state.minAge)) {
         return;
