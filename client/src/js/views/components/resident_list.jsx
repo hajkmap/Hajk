@@ -198,7 +198,7 @@ var ResidentList = {
               <fieldset>
                 <legend>Inkludera i förteckning:</legend>
 
-                <label htmlFor="min-age">Ange minsta ålder</label>
+                <label htmlFor="min-age">Ange lägsta ålder</label>
                 <input type="text" id="min-age" defaultValue={this.state.minAge}
                   onChange={(e) => this.setState({ minAge: e.target.value })} /><br />
 
