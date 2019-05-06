@@ -141,7 +141,6 @@ var ResidentList = {
     $.ajax({
       url: HAJK2.servicePath + this.config.excelExportUrl,
       method: "POST",
-      format: "json",
       data: { json: JSON.stringify({ "columns": columns, "rows": rows }) },
       success: function(response) {
         if (response) {

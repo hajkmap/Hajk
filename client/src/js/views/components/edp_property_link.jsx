@@ -53,8 +53,7 @@ var EdpPropertyLink = {
     $.ajax({
       url: "/mapservice/edp/SendRealEstateIdentifiers",
       method: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify(properties),
+      data: { json: JSON.stringify(properties) },
       success: function(response) {
         this.setState({
           sendingRequest: false,
