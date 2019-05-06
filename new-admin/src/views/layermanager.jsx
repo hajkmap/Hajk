@@ -206,6 +206,7 @@ class Manager extends Component {
           owner: layer.owner,
           url: layer.url,
           queryable: layer.queryable,
+          filterable: layer.filterable || false,
           projection: layer.projection,
           lineWidth: layer.lineWidth || "3",
           lineStyle: layer.lineStyle || "solid",

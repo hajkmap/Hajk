@@ -53,7 +53,9 @@ namespace MapService.Models.Config
         public string infobox { get; set; }
 
         public bool queryable { get; set; }
-            
+
+        public bool filterable { get; set; }
+
         public string labelAlign { get; set; }
 
         public string labelBaseline { get; set; }

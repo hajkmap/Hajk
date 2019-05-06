@@ -303,6 +303,7 @@ export default class ConfigMapper {
         lineWidth: args.lineWidth,
         url: args.url,
         queryable: args.queryable,
+        filterable: args.filterable,
         information: args.infobox,
         icon: args.legend,
         symbolXOffset: args.symbolXOffset,

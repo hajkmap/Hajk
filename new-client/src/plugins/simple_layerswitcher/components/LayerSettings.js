@@ -2,6 +2,7 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import IconMoreHoriz from "@material-ui/icons/MoreHoriz";
 import Slider from "@material-ui/lab/Slider";
+import VectorFilter from "./VectorFilter";
 
 const styles = theme => ({
   sliderContainer: {
@@ -72,8 +73,13 @@ class LayerSettings extends React.PureComponent {
 
   renderSettings() {
     return (
-      <div className={this.props.classes.sliderContainer}>
-        {this.renderOpacitySlider()}
+      <div>
+        <div className={this.props.classes.sliderContainer}>
+          {this.renderOpacitySlider()}
+        </div>
+        {this.props.layer.getProperties().filterable ? (
+          <VectorFilter layer={this.props.layer} />
+        ) : null}
       </div>
     );
   }
