@@ -59,6 +59,7 @@ var PropertyList = {
        return;
     }
 
+    this.props.model.set("url", "");
     this.props.model.export("excel");
   },
 
