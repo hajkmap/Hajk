@@ -1,6 +1,7 @@
 import GeoJSON from "ol/format/GeoJSON.js";
 import TileLayer from "ol/layer/Tile";
 import ImageLayer from "ol/layer/Image";
+import GML2 from "ol/format/GML2";
 
 const fetchConfig = {
   credentials: "same-origin"
@@ -14,13 +15,18 @@ function query(map, layer, evt) {
     .getProjection()
     .getCode();
   let params = {
-    FEATURE_COUNT: 100
+    FEATURE_COUNT: 100,
+    INFO_FORMAT: "text/xml"
+    //INFO_FORMAT: layer.getSource().getParams() || "application/json"
   };
+
   let url = layer
     .getSource()
     .getGetFeatureInfoUrl(coordinate, resolution, referenceSystem, params);
   return fetch(url, fetchConfig);
 }
+
+function parseAsJson() {}
 
 /**
  * Query the map for features when the user clicks the map.
@@ -33,22 +39,6 @@ function handleClick(evt, map, callback) {
   // if (evt.originalEvent.target.className !== "ol-unselectable") {
   //   return;
   // }
-
-  // If Draw, Modify or Snap interaction are currently active, ignore clicks
-  if (
-    map
-      .getInteractions()
-      .getArray()
-      .filter(
-        interaction =>
-          ["Draw", "Snap", "Modify", "Select", "Translate"].indexOf(
-            interaction.constructor.name
-          ) !== -1
-      ).length > 0 ||
-    map.clicklock
-  ) {
-    return false;
-  }
 
   document.querySelector("body").style.cursor = "progress";
   var promises = [];
@@ -77,28 +67,61 @@ function handleClick(evt, map, callback) {
     });
 
   Promise.all(promises).then(responses => {
-    var jsonPromises = [];
+    var featurePromises = [];
     responses.forEach(response => {
-      jsonPromises.push(
-        response.requestResponse
-          .json()
-          .then(jsonData => {
-            return {
-              layer: response.layer,
-              jsonData: jsonData
-            };
-          })
-          .catch(err => {
-            console.error(
-              "GetFeatureInfo couldn't retrieve correct data for the clicked object. "
+      console.log(response.requestResponse.headers.get("Content-Type"));
+      switch (response.requestResponse.headers.get("Content-Type")) {
+        case "application/json;charset=UTF-8":
+          {
+            console.log("??");
+            featurePromises.push(
+              response.requestResponse
+                .json()
+                .then(jsonData => {
+                  if (
+                    jsonData !== undefined &&
+                    jsonData &&
+                    jsonData.features &&
+                    jsonData.features.length > 0
+                  ) {
+                    let parsed = new GeoJSON().readFeatures(jsonData);
+                    parsed.forEach(f => {
+                      f.layer = response.layer;
+                    });
+                    return parsed;
+                  }
+                })
+                .catch(err => {
+                  console.error(
+                    "GetFeatureInfo couldn't retrieve correct data for the clicked object. "
+                  );
+                  console.error(err);
+                })
             );
-            console.error(err);
-          })
-      );
+          }
+          break;
+        case "text/xml": {
+          featurePromises.push(
+            response.requestResponse.text().then(text => {
+              let gml = new GML2();
+              new DOMParser().parseFromString(text, "text/xml");
+              let parsed = gml.readFeatures(text);
+              parsed.forEach(f => {
+                f.layer = response.layer;
+              });
+              return parsed;
+            })
+          );
+          break;
+        }
+        default:
+          break;
+      }
     });
 
-    Promise.all(jsonPromises).then(jsonPromisesData => {
-      var features = [];
+    Promise.all(featurePromises).then(features => {
+      console.log(features, "features");
+      const features2 = [].concat(...features);
 
       map.forEachFeatureAtPixel(
         evt.pixel,
@@ -113,6 +136,22 @@ function handleClick(evt, map, callback) {
         }
       );
 
+      //console.log(jsonPromisesData, "json");
+      //var features = [];
+      /*
+      map.forEachFeatureAtPixel(
+        evt.pixel,
+        (feature, layer) => {
+          if (layer.get("queryable") === true && layer.getProperties().name) {
+            feature.layer = layer;
+            features.push(feature);
+          }
+        },
+        {
+          hitTolerance: 10
+        }
+      );*/
+      /*
       jsonPromisesData.forEach(jsonPromiseData => {
         if (
           jsonPromiseData !== undefined &&
@@ -126,10 +165,10 @@ function handleClick(evt, map, callback) {
           });
           features = [...features, ...parsed];
         }
-      });
+      });*/
       document.querySelector("body").style.cursor = "initial";
       callback({
-        features: features,
+        features: features2,
         evt: evt
       });
     });
@@ -138,6 +177,22 @@ function handleClick(evt, map, callback) {
 
 export function bindMapClickEvent(map, callback) {
   map.on("singleclick", evt => {
-    handleClick(evt, map, callback);
+    // If Draw, Modify or Snap interaction are currently active, ignore clicks
+    if (
+      map
+        .getInteractions()
+        .getArray()
+        .filter(
+          interaction =>
+            ["Draw", "Snap", "Modify", "Select", "Translate"].indexOf(
+              interaction.constructor.name
+            ) !== -1
+        ).length > 0 ||
+      map.clicklock
+    ) {
+      return;
+    } else {
+      handleClick(evt, map, callback);
+    }
   });
 }
