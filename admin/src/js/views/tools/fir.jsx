@@ -287,13 +287,11 @@ class ToolOptions extends Component {
         }
     }
 
-    handleAuthGrpsChange (event) {
-        const target = event.target;
-        const value = target.value;
+    handleAuthGrpsChange (e) {
         let groups = [];
 
         try {
-            groups = value.split(',');
+            groups = e.target.value.split(',');
         } catch (error) {
             console.log(`Någonting gick fel: ${error}`);
         }
@@ -374,6 +372,16 @@ class ToolOptions extends Component {
     }
     handleColorHittaGrannarBufferStroke (color) {
         this.state.colorHittaGrannarBufferStroke = color.hex;
+    }
+
+    handleResidentListVisibleForGroupsChange (e) {
+      let groups = e.target.value.split(',');
+
+      if (groups != "") {
+        this.setState({
+          residentList: Object.assign(this.state.residentList, { visibleForGroups: groups })
+        });
+      }
     }
 
     render () {
@@ -634,6 +642,17 @@ class ToolOptions extends Component {
 
                 <div className="row">
                   <div className="col-md-4">
+                    <label htmlFor='residentListVisibleForGroups'>Tillträde</label>
+                  </div>
+                  <div className="col-md-8">
+                  <input type='text' id='residentListVisibleForGroups'
+                    value={this.state.residentList.visibleForGroups ? this.state.residentList.visibleForGroups.toString() : ""}
+                    onChange={ this.handleResidentListVisibleForGroupsChange.bind(this) } />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-4">
                     <label>Excel-export URL</label>
                   </div>
                   <div className="col-md-8">
@@ -646,7 +665,7 @@ class ToolOptions extends Component {
 
                 <div className="row">
                   <div className="col-md-4">
-                    <label>Minsta ålder</label>
+                    <label>Lägsta ålder</label>
                   </div>
                   <div className="col-md-8">
                     <input type='text' value={this.state.residentList.minAge}
