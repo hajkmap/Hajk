@@ -69,7 +69,6 @@ class ToolOptions extends Component {
         super();
         this.state = defaultState;
         this.type = 'fir';
-
         this.handleAddSearchable = this.handleAddSearchable.bind(this);
         this.loadLayers = this.loadLayers.bind(this);
     }
@@ -304,24 +303,6 @@ class ToolOptions extends Component {
         });
     }
 
-    renderVisibleForGroups () {
-        if (this.props.parent.props.parent.state.authActive) {
-            return (
-                <div>
-                    <label htmlFor='visibleForGroups'>Tillträde</label>
-                    <input id='visibleForGroups' value={this.state.visibleForGroups} type='text' name='visibleForGroups' onChange={(e) => { this.handleAuthGrpsChange(e); }} />
-                </div>
-            );
-        } else {
-            return null;
-        }
-    }
-    /**
-     * anropas från tree.jsx som eventhandler. Hantering för checkboxar och
-     * inmatning av AD-grupper för wfs:er
-     * @param {*} e
-     * @param {*} layer
-     */
     handleAddSearchable (e, layer) {
         if (e.target.type.toLowerCase() === 'checkbox') {
             if (e.target.checked) {
@@ -474,7 +455,15 @@ class ToolOptions extends Component {
                   </div>
                 </div>
 
-                {this.renderVisibleForGroups()}
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='visibleForGroups'>Tillträde</label>
+                  </div>
+                  <div className="col-md-8">
+                  <input id='visibleForGroups' value={this.state.visibleForGroups} type='text'
+                    name='visibleForGroups' onChange={ this.handleAuthGrpsChange.bind(this) } />
+                  </div>
+                </div>
 
                 <div className="row">
                   <div className="col-md-4">
