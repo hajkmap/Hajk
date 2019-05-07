@@ -24,6 +24,8 @@ namespace MapService.Controllers
         {
             try
             {
+                _log.DebugFormat("SendRealEstateIdentifiers: Recieved json: {0}", json);
+
                 var res = new HttpStatusCodeResult(HttpStatusCode.OK);
                 return res;
             }
@@ -39,6 +41,8 @@ namespace MapService.Controllers
         {
             try
             {
+                _log.DebugFormat("SendCoordinates: Recieved json: {0}", json);
+
                 var res = new HttpStatusCodeResult(HttpStatusCode.OK);
                 return res;
             }

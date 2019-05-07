@@ -154,7 +154,7 @@ namespace MapService.Controllers
                 if (rattighetParam) // Rättigheter
                     xls.Add(GenRattighetFlik(json));
 
-                return GenExcel(xls);
+                return GenExcel("kartexport", xls);
             }
             catch (Exception e)
             {
@@ -187,7 +187,7 @@ namespace MapService.Controllers
                         Rows = rows.ToObject<List<List<object>>>()
                     });
 
-                    return GenExcel(xls);
+                    return GenExcel("boendeforteckning", xls);
                 } else
                 {
                     return null;
@@ -576,15 +576,15 @@ namespace MapService.Controllers
             return xls;
         }
 
-        private string GenExcel(List<ExcelTemplate> xls)
+        private string GenExcel(string name, List<ExcelTemplate> xls)
         {
             try
             {
                 System.Data.DataSet dataSet = Util.ToDataSet(xls);
                 ExcelCreator excelCreator = new ExcelCreator();
                 byte[] bytes = excelCreator.Create(dataSet);
-                string[] fileInfo = byteArrayToFileInfo(bytes, "xls");
-                
+                string[] fileInfo = byteArrayToFileInfo(name, bytes, "xls");
+
                 return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
             }
             catch (Exception e)
@@ -604,9 +604,9 @@ namespace MapService.Controllers
             return new string[] { filepath, filename };
         }
 
-        private string[] byteArrayToFileInfo(byte[] bytes, string type)
+        private string[] byteArrayToFileInfo(string name, byte[] bytes, string type)
         {
-            string[] fileInfo = this.generateFileInfo("kartexport", type);
+            string[] fileInfo = this.generateFileInfo(name, type);
             System.IO.File.WriteAllBytes(fileInfo[0], bytes);
 
             return fileInfo;
