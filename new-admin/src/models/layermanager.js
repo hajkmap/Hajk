@@ -93,8 +93,6 @@ var manager = Model.extend({
     var t = layer["type"];
     delete layer["type"];
     switch (t) {
-      case "ExtendedWMS":
-        return this.get("config").url_layer_settings_extended;
       case "WMS":
         return this.get("config").url_layer_settings;
       case "WMTS":
@@ -112,9 +110,6 @@ var manager = Model.extend({
     $.ajax(prepareProxyUrl(url, this.get("config").url_proxy), {
       success: data => {
         var layers = [];
-        data.extendedwmslayers.forEach(l => {
-          l.type = "ExtendedWMS";
-        });
         data.wmslayers.forEach(l => {
           l.type = "WMS";
         });
@@ -129,7 +124,6 @@ var manager = Model.extend({
         });
 
         layers = data.wmslayers
-          .concat(data.extendedwmslayers)
           .concat(data.wmtslayers)
           .concat(data.arcgislayers)
           .concat(data.vectorlayers);

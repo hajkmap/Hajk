@@ -4,13 +4,13 @@ import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
 import { isMobile } from "./../utils/IsMobile.js";
 // import ArcGISLayer from "./layers/ArcGISLayer.js";
 // import DataLayer from "./layers/DataLayer.js";
-// import ExtendedWMSLayer from "./layers/ExtendedWMSLayer.js";
 import WMSLayer from "./layers/WMSLayer.js";
 import WMTSLayer from "./layers/WMTSLayer.js";
 import WFSVectorLayer from "./layers/VectorLayer.js";
 import { bindMapClickEvent } from "./Click.js";
 import { defaults as defaultInteractions } from "ol/interaction";
 import { Map, View } from "ol";
+// TODO: Uncomment and ensure they show as expected
 //{ Rotate, ScaleLine, Attribution, FullScreen } from "ol/control";
 import { register } from "ol/proj/proj4";
 import VectorLayer from "ol/layer/Vector";
@@ -219,10 +219,6 @@ class AppModel {
         );
         map.addLayer(layerItem.layer);
         break;
-      // case "extendedwms":
-      //   layerConfig = configMapper.mapExtendedWMSConfig(layer);
-      //   layer = new ExtendedWMSLayer(layerConfig);
-      //   break;
       case "wmts":
         layerConfig = configMapper.mapWMTSConfig(layer, this.config);
         layerItem = new WMTSLayer(
@@ -451,19 +447,15 @@ class AppModel {
       layers.wmtslayers = this.config.layersConfig.wmtslayers || [];
       layers.vectorlayers = this.config.layersConfig.vectorlayers || [];
       layers.arcgislayers = this.config.layersConfig.arcgislayers || [];
-      layers.extendedwmslayers =
-        this.config.layersConfig.extendedwmslayers || [];
 
       layers.wmslayers.forEach(l => (l.type = "wms"));
       layers.wmtslayers.forEach(l => (l.type = "wmts"));
       layers.wfstlayers.forEach(l => (l.type = "edit"));
       layers.vectorlayers.forEach(l => (l.type = "vector"));
       layers.arcgislayers.forEach(l => (l.type = "arcgis"));
-      layers.extendedwmslayers.forEach(l => (l.type = "extended_wms"));
 
       let allLayers = [
         ...layers.wmslayers,
-        ...layers.extendedwmslayers,
         ...layers.wmtslayers,
         ...layers.vectorlayers,
         ...layers.wfstlayers,
