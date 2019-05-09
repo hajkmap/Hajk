@@ -14,9 +14,21 @@ function query(map, layer, evt) {
     .getView()
     .getProjection()
     .getCode();
+
+  let subLayers = Object.values(layer.layersInfo);
+  let layersToQuery = subLayers
+    .filter(subLayer => {
+      return subLayer.queryable === true;
+    })
+    .map(queryableSubLayer => {
+      return queryableSubLayer.id;
+    })
+    .join(",");
+
   let params = {
     FEATURE_COUNT: 100,
-    INFO_FORMAT: layer.getSource().getParams().INFO_FORMAT
+    INFO_FORMAT: layer.getSource().getParams().INFO_FORMAT,
+    QUERY_LAYERS: layersToQuery
   };
   let url = layer
     .getSource()
@@ -45,7 +57,7 @@ function handleClick(evt, map, callback) {
       return (
         (layer instanceof TileLayer || layer instanceof ImageLayer) &&
         layer.get("visible") === true &&
-        layer.get("queryable") === true
+        layer.get("queryable") === true //WIP - Tobias - Should not be used anymore, need to check this
       );
     })
     .forEach(layer => {
