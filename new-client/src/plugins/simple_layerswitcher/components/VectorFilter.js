@@ -20,11 +20,37 @@ class VectorFilter extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      filterAttribute: this.props.layer.get("filterAttribute") || "",
-      filterValue: this.props.layer.get("filterValue") || "",
-      filterComparer: this.props.layer.get("filterComparer") || ""
+      filterAttribute: props.layer.get("filterAttribute") || "",
+      filterValue: props.layer.get("filterValue") || "",
+      filterComparer: props.layer.get("filterComparer") || "",
+      layerProperties: []
     };
+    this.loadFeatureInfo();
   }
+
+  loadFeatureInfo = () => {
+    const { layer } = this.props;
+    const url = layer.getProperties().url;
+    const featureType = layer.getProperties().featureType;
+    fetch(
+      url +
+        `?request=describeFeatureType&outputFormat=application/json&typename=${featureType}`
+    ).then(response => {
+      response.json().then(featureInfo => {
+        var featureTypeInfo = featureInfo.featureTypes.find(
+          type => type.typeName === featureType
+        );
+        if (featureTypeInfo && Array.isArray(featureTypeInfo.properties)) {
+          var layerProperties = featureTypeInfo.properties
+            .filter(property => property.type !== "gml:Geometry")
+            .map(property => property.name);
+          this.setState({
+            layerProperties: layerProperties
+          });
+        }
+      });
+    });
+  };
 
   handleChange = e => {
     this.setState({
@@ -57,28 +83,12 @@ class VectorFilter extends React.PureComponent {
     }, 200);
   };
 
-  getProperties(layer) {
-    const source = layer.getSource();
-    const features = source.getFeatures();
-    if (Array.isArray(this.properties)) {
-      return this.properties;
-    }
-    if (features.length > 0) {
-      let properties = features[0].getProperties();
-      this.properties = Object.keys(properties).filter(
-        p => typeof properties[p] !== "object"
-      );
-      return this.properties;
-    }
-    return [];
-  }
-
   render() {
     const { layer, classes } = this.props;
     if (layer instanceof VectorLayer) {
       return (
         <div>
-          <Typography ariant="subtitle1">
+          <Typography variant="subtitle1">
             Filtrera innehåll baserat på attribut:
           </Typography>
           <FormControl className={classes.formControl}>
@@ -91,7 +101,7 @@ class VectorFilter extends React.PureComponent {
                 id: "attribute"
               }}
             >
-              {this.getProperties(layer).map((property, i) => {
+              {this.state.layerProperties.map((property, i) => {
                 return (
                   <MenuItem key={i} value={property}>
                     {property}
