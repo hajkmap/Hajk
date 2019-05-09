@@ -91,7 +91,6 @@ const supportedProjections = [
 
 const supportedInfoFormats = [
   "application/json",
-  "text/plain",
   "text/xml",
   "application/geojson"
 ];

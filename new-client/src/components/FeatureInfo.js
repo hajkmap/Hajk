@@ -182,6 +182,22 @@ class FeatureInfo extends React.Component {
     var featureList = features.map((feature, i) => {
       if (i === 0) this.props.onDisplay(feature);
 
+      if (feature.get("rawHtml")) {
+        return (
+          <div key={i} style={visibleStyle(i)}>
+            <div className={classes.caption}>
+              {feature.layer.get("layerInfo").caption}
+            </div>
+            <div
+              style={{ height: features.length > 1 ? "220px" : "270px" }}
+              className="text-content"
+            >
+              {feature.get("text")}
+            </div>
+          </div>
+        );
+      }
+
       var markdown =
         feature.layer.get("layerInfo") &&
         feature.layer.get("layerInfo").information;
@@ -192,7 +208,8 @@ class FeatureInfo extends React.Component {
 
       var layer;
 
-      if (feature.layer.layersInfo) {
+      //Problem with geojson returned from AGS - Missing id on feature - how to handle?
+      if (feature.layer.layersInfo && feature.getId()) {
         layer = Object.keys(feature.layer.layersInfo).find(id => {
           var fid = feature.getId().split(".")[0];
           var layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
