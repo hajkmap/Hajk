@@ -2,6 +2,8 @@ import GeoJSON from "ol/format/GeoJSON.js";
 import TileLayer from "ol/layer/Tile";
 import ImageLayer from "ol/layer/Image";
 import GML2 from "ol/format/GML2";
+import Feature from "ol/Feature";
+import Point from "ol/geom/Point";
 
 const fetchConfig = {
   credentials: "same-origin"
@@ -16,7 +18,7 @@ function query(map, layer, evt) {
     .getCode();
   let params = {
     FEATURE_COUNT: 100,
-    INFO_FORMAT: "text/xml"
+    INFO_FORMAT: "text/plain"
     //INFO_FORMAT: layer.getSource().getParams() || "application/json"
   };
 
@@ -69,36 +71,34 @@ function handleClick(evt, map, callback) {
   Promise.all(promises).then(responses => {
     var featurePromises = [];
     responses.forEach(response => {
+      console.log(response, "response");
       console.log(response.requestResponse.headers.get("Content-Type"));
       switch (response.requestResponse.headers.get("Content-Type")) {
         case "application/json;charset=UTF-8":
-          {
-            console.log("??");
-            featurePromises.push(
-              response.requestResponse
-                .json()
-                .then(jsonData => {
-                  if (
-                    jsonData !== undefined &&
-                    jsonData &&
-                    jsonData.features &&
-                    jsonData.features.length > 0
-                  ) {
-                    let parsed = new GeoJSON().readFeatures(jsonData);
-                    parsed.forEach(f => {
-                      f.layer = response.layer;
-                    });
-                    return parsed;
-                  }
-                })
-                .catch(err => {
-                  console.error(
-                    "GetFeatureInfo couldn't retrieve correct data for the clicked object. "
-                  );
-                  console.error(err);
-                })
-            );
-          }
+          featurePromises.push(
+            response.requestResponse
+              .json()
+              .then(jsonData => {
+                if (
+                  jsonData !== undefined &&
+                  jsonData &&
+                  jsonData.features &&
+                  jsonData.features.length > 0
+                ) {
+                  let parsed = new GeoJSON().readFeatures(jsonData);
+                  parsed.forEach(f => {
+                    f.layer = response.layer;
+                  });
+                  return parsed;
+                }
+              })
+              .catch(err => {
+                console.error(
+                  "GetFeatureInfo couldn't retrieve correct data for the clicked object. "
+                );
+                console.error(err);
+              })
+          );
           break;
         case "text/xml": {
           featurePromises.push(
@@ -106,6 +106,7 @@ function handleClick(evt, map, callback) {
               let gml = new GML2();
               new DOMParser().parseFromString(text, "text/xml");
               let parsed = gml.readFeatures(text);
+              console.log(parsed, "text");
               parsed.forEach(f => {
                 f.layer = response.layer;
               });
@@ -114,6 +115,21 @@ function handleClick(evt, map, callback) {
           );
           break;
         }
+        case "text/plain;charset=UTF-8":
+          featurePromises.push(
+            response.requestResponse.text().then(text => {
+              console.log(text, "text");
+              let fakeFeature = new Feature({
+                geometry: new Point(evt.coordinate)
+              });
+              fakeFeature.layer = response.layer;
+              fakeFeature.setProperties({
+                text: text
+              });
+              return fakeFeature;
+            })
+          );
+          break;
         default:
           break;
       }
