@@ -12,7 +12,7 @@ import Checkbox from "@material-ui/core/Checkbox";
 import Snackbar from "@material-ui/core/Snackbar";
 import PlaceIcon from "@material-ui/icons/Place";
 import FlareIcon from "@material-ui/icons/Flare";
-import LocalFloristIcon from "@material-ui/icons/LocalFlorist";
+// import LocalFloristIcon from "@material-ui/icons/LocalFlorist";
 import Typography from "@material-ui/core/Typography/Typography";
 import { isMobile } from "../../../utils/IsMobile";
 

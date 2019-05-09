@@ -532,10 +532,8 @@ class WMSLayerForm extends Component {
   loadLayers(layer, callback) {
     this.loadWMSCapabilities(undefined, () => {
       // We can not assume that layer.version exists, because the
-      // previous implementation of WMS always assumed it was "1.1.1"
-      // and did not add "version" property. Only ExtendedWMS layers
-      // had the property previously, and then it was either "1.1.1" or
-      // "1.3.0". So, for non existing version, let's assume "1.1.1".
+      // previous implementation of WMS in Hajk2 assumed it was "1.1.1"
+      // and did not add "version" property.
       layer.version = layer.version || "1.1.1";
 
       var addedLayersInfo = {};
