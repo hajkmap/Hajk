@@ -457,7 +457,9 @@ class App extends React.PureComponent {
                     <article
                       id="toolbar-panel"
                       className={classes.toolbarPanel}
-                    />
+                    >
+                      {this.renderPopup()}
+                    </article>
                   </div>
                   <div className={classes.column3}>
                     {!this.state.mobile && (
