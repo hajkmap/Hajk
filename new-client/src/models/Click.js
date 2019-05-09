@@ -2,8 +2,6 @@ import GeoJSON from "ol/format/GeoJSON.js";
 import TileLayer from "ol/layer/Tile";
 import ImageLayer from "ol/layer/Image";
 import GML from "ol/format/GML";
-import Feature from "ol/Feature";
-import Point from "ol/geom/Point";
 
 const fetchConfig = {
   credentials: "same-origin"

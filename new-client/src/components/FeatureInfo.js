@@ -141,7 +141,6 @@ class FeatureInfo extends React.Component {
   }
 
   html(features) {
-    console.log(features, "features");
     const { classes } = this.props;
 
     if (!features) return "";
