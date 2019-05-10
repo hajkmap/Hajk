@@ -273,12 +273,32 @@ class WMSLayerForm extends Component {
     }
   }
 
-  renderLayerInfoInput(layerInfo) {
-    var currentLayer = this.state.capabilities.Capability.Layer.Layer.find(
-      l => {
-        return l.Name === layerInfo.id;
+  /**
+   * By default this method looks in the Capabilities document
+   * for a layer with name that matches layerName. If a layer contains
+   * another property named Layer (which means it basically is a group
+   * with sublayer), this method is called recursively, still looking
+   * for a layer with layerName but now looking inside the subgroup
+   * instead of Capabilities document.
+   * @param {String} layerName
+   * @param {Array} arrayToSearchIn
+   */
+  findInCapabilities(
+    layerName,
+    arrayToSearchIn = this.state.capabilities.Capability.Layer.Layer
+  ) {
+    let match = null;
+    match = arrayToSearchIn.find(l => {
+      if (l.hasOwnProperty("Layer")) {
+        return this.findInCapabilities(layerName, l.Layer);
       }
-    );
+      return l.Name === layerName;
+    });
+    return match;
+  }
+
+  renderLayerInfoInput(layerInfo) {
+    var currentLayer = this.findInCapabilities(layerInfo.id);
 
     this.setState({
       style: currentLayer.Style || []
