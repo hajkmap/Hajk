@@ -4,13 +4,28 @@ import marked from "marked";
 import IconButton from "@material-ui/core/IconButton";
 import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
+import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
-  floatLeft: {
-    float: "left"
+  windowSection: {
+    display: "flex",
+    flexFlow: "column",
+    height: "100%"
   },
-  floatRight: {
-    float: "right"
+  featureList: {
+    flex: 1,
+    overflow: "auto"
+  },
+  textContent: {
+    flex: 1
+  },
+  toggler: {
+    display: "flex"
+  },
+  togglerText: {
+    flex: 1,
+    textAlign: "center",
+    lineHeight: "3rem"
   },
   closeButton: {
     position: "absolute",
@@ -25,7 +40,7 @@ const styles = theme => ({
   }
 });
 
-class FeatureInfo extends React.Component {
+class FeatureInfo extends React.PureComponent {
   state = {
     selectedIndex: 1,
     visible: false
@@ -147,35 +162,27 @@ class FeatureInfo extends React.Component {
 
     var visibleStyle = currentIndex => {
       var displayValue =
-        this.state.selectedIndex === currentIndex + 1 ? "block" : "none";
+        this.state.selectedIndex === currentIndex + 1 ? "flex" : "none";
       return {
-        display: displayValue
+        display: displayValue,
+        flexFlow: "column",
+        height: "100%"
       };
     };
     var toggler = null;
     if (features.length > 1) {
       toggler = (
-        <div className="toggle">
-          <IconButton
-            className={this.classes.floatLeft}
-            aria-label="Previous"
-            color="primary"
-            id="step-left"
-          >
+        <header className={classes.toggler}>
+          <IconButton aria-label="Previous" color="primary" id="step-left">
             <ArrowLeftIcon />
           </IconButton>
-          <span className="toggle-text">
+          <Typography variant="button" className={classes.togglerText}>
             {this.state.selectedIndex} av {features.length}
-          </span>
-          <IconButton
-            className={this.classes.floatRight}
-            aria-label="Next"
-            color="primary"
-            id="step-right"
-          >
+          </Typography>
+          <IconButton aria-label="Next" color="primary" id="step-right">
             <ArrowRightIcon />
           </IconButton>
-        </div>
+        </header>
       );
     }
 
@@ -188,12 +195,7 @@ class FeatureInfo extends React.Component {
             <div className={classes.caption}>
               {feature.layer.get("layerInfo").caption}
             </div>
-            <div
-              style={{ height: features.length > 1 ? "220px" : "270px" }}
-              className="text-content"
-            >
-              {feature.get("text")}
-            </div>
+            <div className={classes.textContent}>{feature.get("text")}</div>
           </div>
         );
       }
@@ -247,8 +249,7 @@ class FeatureInfo extends React.Component {
           <div key={i} style={visibleStyle(i)}>
             <div className={classes.caption}>{caption}</div>
             <div
-              style={{ height: features.length > 1 ? "220px" : "270px" }}
-              className="text-content"
+              className={classes.textContent}
               dangerouslySetInnerHTML={value}
             />
           </div>
@@ -257,22 +258,17 @@ class FeatureInfo extends React.Component {
         return (
           <div key={i} style={visibleStyle(i)}>
             <div className={classes.caption}>{caption}</div>
-            <div
-              style={{ height: features.length > 1 ? "220px" : "270px" }}
-              className="text-content"
-            >
-              {value}
-            </div>
+            <div className={classes.textContent}>{value}</div>
           </div>
         );
       }
     });
 
     return (
-      <div>
+      <section className={classes.windowSection}>
         {toggler}
-        <div id="popup-content">{featureList}</div>
-      </div>
+        <section className={classes.featureList}>{featureList}</section>
+      </section>
     );
   }
 
