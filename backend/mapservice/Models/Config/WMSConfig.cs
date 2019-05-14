@@ -46,8 +46,6 @@ namespace MapService.Models.Config
 
     public bool visibleAtStart { get; set; }
 
-    public bool queryable { get; set; }
-
     public bool tiled { get; set; }
 
     public double opacity { get; set; }
