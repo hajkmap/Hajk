@@ -41,7 +41,6 @@ const defaultState = {
   legend: "",
   owner: "",
   url: "",
-  queryable: true,
   opacity: 1.0,
   tiled: false,
   singleTile: false,
@@ -825,7 +824,6 @@ class WMSLayerForm extends Component {
       singleTile: this.getValue("singleTile"),
       imageFormat: this.getValue("imageFormat"),
       serverType: this.getValue("serverType"),
-      queryable: this.getValue("queryable"),
       opacity: this.getValue("opacity"),
       tiled: this.getValue("tiled"),
       drawOrder: this.getValue("drawOrder"),
@@ -870,7 +868,7 @@ class WMSLayerForm extends Component {
     if (fieldName === "date") value = create_date();
     if (fieldName === "singleTile") value = input.checked;
     if (fieldName === "tiled") value = input.checked;
-    if (fieldName === "queryable") value = input.checked;
+    //if (fieldName === "queryable") value = input.checked;
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
     if (fieldName === "layersInfo")
       value = format_layers_info(this.state.addedLayersInfo);
@@ -1306,20 +1304,6 @@ class WMSLayerForm extends Component {
               className={this.getValidationClass("infoOwner")}
             />
           </div>
-        </div>
-        <div>
-          <label>
-            <b>Infoklickbar</b>
-          </label>
-          <br />
-          <input
-            type="checkbox"
-            ref="input_queryable"
-            onChange={e => {
-              this.setState({ queryable: e.target.checked });
-            }}
-            checked={this.state.queryable}
-          />
         </div>
         <div>
           <label>

@@ -1,7 +1,8 @@
 import GeoJSON from "ol/format/GeoJSON.js";
 import TileLayer from "ol/layer/Tile";
 import ImageLayer from "ol/layer/Image";
-import GML from "ol/format/GML";
+//import GML from "ol/format/GML";
+import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
 
 const fetchConfig = {
   credentials: "same-origin"
@@ -10,18 +11,62 @@ const fetchConfig = {
 function query(map, layer, evt) {
   let coordinate = evt.coordinate;
   let resolution = map.getView().getResolution();
+  let subLayersToQuery = [];
   let referenceSystem = map
     .getView()
     .getProjection()
     .getCode();
-  let params = {
-    FEATURE_COUNT: 100,
-    INFO_FORMAT: layer.getSource().getParams().INFO_FORMAT
-  };
-  let url = layer
-    .getSource()
-    .getGetFeatureInfoUrl(coordinate, resolution, referenceSystem, params);
-  return fetch(url, fetchConfig);
+
+  if (layer.layersInfo) {
+    let subLayers = Object.values(layer.layersInfo);
+    subLayersToQuery = subLayers
+      .filter(subLayer => {
+        return subLayer.queryable === true;
+      })
+      .map(queryableSubLayer => {
+        return queryableSubLayer.id;
+      });
+  }
+
+  if (subLayersToQuery.length > 0) {
+    let params = {
+      FEATURE_COUNT: 100,
+      INFO_FORMAT: layer.getSource().getParams().INFO_FORMAT,
+      QUERY_LAYERS: subLayersToQuery.join(",")
+    };
+    let url = layer
+      .getSource()
+      .getGetFeatureInfoUrl(coordinate, resolution, referenceSystem, params);
+    return fetch(url, fetchConfig);
+  } else {
+    return false;
+  }
+}
+
+function getFeaturesFromJson(response, jsonData) {
+  let parsed = new GeoJSON().readFeatures(jsonData);
+  if (parsed.length > 0) {
+    parsed.forEach(f => {
+      f.layer = response.layer;
+    });
+    return parsed;
+  } else {
+    return [];
+  }
+}
+
+function getFeaturesFromGml(response, text) {
+  let wmsGetFeatureInfo = new WMSGetFeatureInfo();
+  //let doc = new DOMParser().parseFromString(text, "text/xml");
+  let parsed = wmsGetFeatureInfo.readFeatures(text);
+  if (parsed.length > 0) {
+    parsed.forEach(f => {
+      f.layer = response.layer;
+    });
+    return parsed;
+  } else {
+    return [];
+  }
 }
 
 /**
@@ -44,8 +89,7 @@ function handleClick(evt, map, callback) {
     .filter(layer => {
       return (
         (layer instanceof TileLayer || layer instanceof ImageLayer) &&
-        layer.get("visible") === true &&
-        layer.get("queryable") === true
+        layer.get("visible") === true
       );
     })
     .forEach(layer => {
@@ -82,13 +126,7 @@ function handleClick(evt, map, callback) {
                   jsonData.features &&
                   jsonData.features.length > 0
                 ) {
-                  let parsed = new GeoJSON().readFeatures(jsonData);
-                  if (parsed.length > 0) {
-                    parsed.forEach(f => {
-                      f.layer = response.layer;
-                    });
-                    features.push(parsed);
-                  }
+                  features.push(...getFeaturesFromJson(response, jsonData));
                 }
               })
               .catch(err => {
@@ -99,20 +137,13 @@ function handleClick(evt, map, callback) {
               })
           );
           break;
-        case "text/xml": {
+        case "text/xml":
+        case "application/vnd.ogc.gml": {
           featurePromises.push(
             response.requestResponse
               .text()
               .then(text => {
-                let gml = new GML();
-                let doc = new DOMParser().parseFromString(text, "text/xml");
-                let parsed = gml.readFeatures(doc);
-                if (parsed.length > 0) {
-                  parsed.forEach(f => {
-                    f.layer = response.layer;
-                  });
-                  features.push(parsed);
-                }
+                features.push(...getFeaturesFromGml(response, text));
               })
               .catch(err => {
                 console.error(
@@ -144,9 +175,8 @@ function handleClick(evt, map, callback) {
       );
 
       document.querySelector("body").style.cursor = "initial";
-      var result = [].concat(...features);
       callback({
-        features: result,
+        features: features,
         evt: evt
       });
     });

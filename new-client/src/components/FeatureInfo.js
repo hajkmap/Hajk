@@ -189,17 +189,6 @@ class FeatureInfo extends React.PureComponent {
     var featureList = features.map((feature, i) => {
       if (i === 0) this.props.onDisplay(feature);
 
-      if (feature.get("rawHtml")) {
-        return (
-          <div key={i} style={visibleStyle(i)}>
-            <div className={classes.caption}>
-              {feature.layer.get("layerInfo").caption}
-            </div>
-            <div className={classes.textContent}>{feature.get("text")}</div>
-          </div>
-        );
-      }
-
       var markdown =
         feature.layer.get("layerInfo") &&
         feature.layer.get("layerInfo").information;
@@ -207,7 +196,6 @@ class FeatureInfo extends React.PureComponent {
       var caption =
         feature.layer.get("layerInfo") &&
         feature.layer.get("layerInfo").caption;
-
       var layer;
 
       //Problem with geojson returned from AGS - Missing id on feature - how to handle?

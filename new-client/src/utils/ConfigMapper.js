@@ -94,7 +94,7 @@ export default class ConfigMapper {
         caption: args.caption,
         visible: args.visibleAtStart,
         opacity: args.opacity || 1,
-        queryable: args.queryable !== false,
+        // queryable: args.queryable !== false,
         information: args.infobox,
         resolutions: properties.mapConfig.map.resolutions,
         projection: projection || "EPSG:3006",
