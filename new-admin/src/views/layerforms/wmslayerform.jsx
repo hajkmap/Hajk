@@ -785,7 +785,7 @@ class WMSLayerForm extends Component {
         //styles: currentLayer.Style || [],
         style: layer.style,
         name: layer.name,
-        queryable: layer.queryable,
+        //queryable: layer.queryable,
         // confirmAction anropas från LayerAlert- komponenten och result är alertens state
         confirmAction: result => {
           this.saveLayerSettings(result, layer.name);
@@ -868,7 +868,6 @@ class WMSLayerForm extends Component {
     if (fieldName === "date") value = create_date();
     if (fieldName === "singleTile") value = input.checked;
     if (fieldName === "tiled") value = input.checked;
-    //if (fieldName === "queryable") value = input.checked;
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
     if (fieldName === "layersInfo")
       value = format_layers_info(this.state.addedLayersInfo);
