@@ -785,7 +785,7 @@ class WMSLayerForm extends Component {
         //styles: currentLayer.Style || [],
         style: layer.style,
         name: layer.name,
-        //queryable: layer.queryable,
+
         // confirmAction anropas från LayerAlert- komponenten och result är alertens state
         confirmAction: result => {
           this.saveLayerSettings(result, layer.name);
