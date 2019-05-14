@@ -11,6 +11,7 @@ import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import { withStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import LayerSettings from "./LayerSettings.js";
+import marked from "marked";
 
 const styles = theme => ({
   button: {},
@@ -423,7 +424,7 @@ class LayerGroupItem extends Component {
     if (infoOwner) {
       return (
         <Typography>
-          <strong>Datavärd:</strong> {infoOwner}
+          <span dangerouslySetInnerHTML={{ __html: infoOwner }} />
         </Typography>
       );
     } else {
