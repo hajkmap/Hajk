@@ -804,7 +804,6 @@ class WMSLayerForm extends Component {
       singleTile: this.getValue("singleTile"),
       imageFormat: this.getValue("imageFormat"),
       serverType: this.getValue("serverType"),
-      //queryable: this.getValue("queryable"),
       opacity: this.getValue("opacity"),
       tiled: this.getValue("tiled"),
       drawOrder: this.getValue("drawOrder"),
