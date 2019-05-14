@@ -135,6 +135,13 @@
             "expanded": false,
             "layers": [
               {
+                "id": "33",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
                 "id": "32",
                 "visibleAtStart": true,
                 "drawOrder": 1000,

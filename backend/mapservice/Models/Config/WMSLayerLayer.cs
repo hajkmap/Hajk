@@ -8,7 +8,6 @@ namespace MapService.Models.Config
     public class WMSLayerLayer
     {
         public string style { get; set; }
-        public bool queryable { get; set; }
         public string name { get; set; }
     }
 }

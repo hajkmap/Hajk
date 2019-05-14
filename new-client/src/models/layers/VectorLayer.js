@@ -54,6 +54,8 @@ function createStyle(feature, forcedPointRadius) {
   const showLabels = this.config.showLabels;
   const pointSize = forcedPointRadius || this.config.pointSize;
 
+  feature = arguments[1] instanceof Feature ? arguments[1] : undefined;
+
   function getLineDash() {
     var scale = (a, f) => a.map(b => f * b),
       width = lineWidth,
@@ -75,8 +77,6 @@ function createStyle(feature, forcedPointRadius) {
       color: fillColor
     });
   }
-
-  feature = arguments[1] instanceof Feature ? arguments[1] : undefined;
 
   function getText() {
     return new Text({
@@ -142,7 +142,6 @@ function createStyle(feature, forcedPointRadius) {
 
   return [new Style(getStyleObj())];
 }
-
 class WFSVectorLayer {
   constructor(config, proxyUrl, map) {
     config = {
@@ -153,6 +152,8 @@ class WFSVectorLayer {
     this.proxyUrl = proxyUrl;
     this.map = map;
     this.style = createStyle.apply(this);
+    this.filterAttribute = config.filterAttribute;
+    this.filterValue = config.filterAttribute;
     this.vectorSource = new VectorSource({
       loader: extent => {
         if (config.dataFormat === "GeoJSON") {
@@ -180,6 +181,7 @@ class WFSVectorLayer {
       visible: config.visible,
       opacity: config.opacity,
       queryable: config.queryable,
+      filterable: config.filterable,
       layerInfo: new LayerInfo(config),
       renderMode: "image",
       style: this.getStyle.bind(this),
@@ -261,15 +263,8 @@ class WFSVectorLayer {
       this.reprojectFeatures(features, from, to);
     }
 
-    if (
-      undefined !== this.config.filterAttribute &&
-      undefined !== this.config.filterValue
-    ) {
-      features = features.filter(
-        feature =>
-          feature.getProperties()[this.config.filterAttribute] !==
-          this.config.filterValue
-      );
+    if (undefined !== this.filterAttribute && undefined !== this.filterValue) {
+      features = features.filter(feature => this.filter(feature));
     }
 
     this.vectorSource.addFeatures(features);
@@ -293,8 +288,52 @@ class WFSVectorLayer {
     return url;
   }
 
+  filterAttribute = "";
+
+  filterComparer = "not";
+
+  filterValue = "";
+
+  filter(feature) {
+    var filterAttribute =
+      this.layer.get("filterAttribute") || this.filterAttribute;
+    var filterValue = this.layer.get("filterValue") || this.filterValue;
+    var filterComparer =
+      this.layer.get("filterComparer") || this.filterComparer;
+
+    switch (filterComparer) {
+      case "gt":
+        return (
+          Number(feature.getProperties()[filterAttribute]) > Number(filterValue)
+        );
+      case "lt":
+        return (
+          Number(feature.getProperties()[filterAttribute]) < Number(filterValue)
+        );
+      case "eq":
+        if (!isNaN(Number(filterValue))) {
+          return (
+            Number(feature.getProperties()[filterAttribute]) ===
+            Number(filterValue)
+          );
+        }
+        return feature.getProperties()[filterAttribute] === filterValue;
+      case "not":
+        if (!isNaN(Number(filterValue))) {
+          return (
+            Number(feature.getProperties()[filterAttribute]) !==
+            Number(filterValue)
+          );
+        }
+        return feature.getProperties()[filterAttribute] !== filterValue;
+      default:
+        return false;
+    }
+  }
+
   loadData(url, format) {
     url = this.proxyUrl + url;
+
     fetch(url, fetchConfig).then(response => {
       response.text().then(features => {
         this.addFeatures(features, format || "wfs");

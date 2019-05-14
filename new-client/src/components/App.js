@@ -101,10 +101,20 @@ const styles = theme => {
       flex: 1,
       justifyContent: "center",
       display: "flex",
-      alignItems: "baseline",
+      margin: "0 10px",
+      flexDirection: "column",
       [theme.breakpoints.down("xs")]: {
         zIndex: 1000
       }
+    },
+    centerContainer: {
+      flex: 0,
+      display: "flex",
+      justifyContent: "center",
+      zIndex: 1000
+    },
+    toolbarPanel: {
+      flex: 1
     },
     column3: {
       zIndex: 1,
@@ -123,7 +133,8 @@ const styles = theme => {
     },
     columnWidgets: {
       display: "flex",
-      flexDirection: "row"
+      flexDirection: "row",
+      height: "100%"
     },
     columnCenter: {
       width: "100%",
@@ -150,7 +161,8 @@ const styles = theme => {
       flex: 1,
       zIndex: 1,
       marginBottom: "50px",
-      [theme.breakpoints.down("xs")]: {}
+      [theme.breakpoints.down("xs")]: {},
+      position: "absolute"
     },
     controls: {
       zIndex: 1,
@@ -165,11 +177,6 @@ const styles = theme => {
       left: 0,
       bottom: 0,
       position: "absolute"
-    },
-    toolbarPanel: {
-      order: 1,
-      width: "100%",
-      height: "100%"
     },
     button: {
       width: "50px",
@@ -445,16 +452,21 @@ class App extends React.PureComponent {
                       <Reparentable el={this.widgetsLeftContainer} />
                     )}
                   </div>
-                  <div className={classes.column2} id="center" />
+                  <div className={classes.column2}>
+                    <div id="center" className={classes.centerContainer} />
+                    <article
+                      id="toolbar-panel"
+                      className={classes.toolbarPanel}
+                    >
+                      {this.renderPopup()}
+                    </article>
+                  </div>
                   <div className={classes.column3}>
                     {!this.state.mobile && (
                       <Reparentable el={this.widgetsRightContainer} />
                     )}
                   </div>
                 </div>
-                <article id="toolbar-panel" className={classes.columnArticle}>
-                  {this.renderPopup()}
-                </article>
               </div>
               <div className={classes.columnControls}>
                 <div className={classes.controls}>

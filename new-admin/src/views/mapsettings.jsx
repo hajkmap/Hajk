@@ -433,14 +433,10 @@ class Menu extends Component {
             data.vectorlayers.forEach(l => {
               l.type = "Vector";
             });
-            data.extendedwmslayers.forEach(l => {
-              l.type = "ExtendedWMS";
-            });
             layers = data.wmslayers
               .concat(data.wmtslayers)
               .concat(data.arcgislayers)
-              .concat(data.vectorlayers)
-              .concat(data.extendedwmslayers);
+              .concat(data.vectorlayers);
             layers.sort((a, b) => {
               var d1 = parseInt(a.date, 10),
                 d2 = parseInt(b.date, 10);
@@ -832,9 +828,6 @@ class Menu extends Component {
           break;
         case "Vector":
           displayType = "(Vektor)";
-          break;
-        case "ExtendedWMS":
-          displayType = "(Extended WMS)";
           break;
         default:
           break;

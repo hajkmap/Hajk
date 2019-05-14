@@ -526,15 +526,17 @@ class ToolOptions extends Component {
           </div>
           <div>
             <label htmlFor="target">Verktygsplacering</label>
-            <input
+            <select
               id="target"
               name="target"
-              type="text"
               onChange={e => {
                 this.handleInputChange(e);
               }}
               value={this.state.target}
-            />
+            >
+              <option value="header">AppBar</option>
+              <option value="center">Centrerad i kartan</option>
+            </select>
           </div>
           <div>
             <input

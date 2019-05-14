@@ -7,8 +7,6 @@ import { isMobile, getIsMobile } from "../utils/IsMobile.js";
 import FeatureInfo from "./FeatureInfo.js";
 
 const zIndexStart = 1e3;
-
-//
 // Patch the RND component's onDragStart method with the ability to disable drag by its internal state.
 // This is necessary so we can disable/enable drag at any time.
 //
@@ -187,8 +185,8 @@ class Window extends React.PureComponent {
       },
       () => {
         this.rnd.updatePosition({
-          y: this.top,
-          x: this.left
+          y: Math.round(this.top),
+          x: Math.round(this.left)
         });
       }
     );
@@ -208,8 +206,8 @@ class Window extends React.PureComponent {
     this.right = window.innerWidth - (this.left + parseFloat(this.width));
 
     this.rnd.updatePosition({
-      x: this.left,
-      y: this.top
+      x: Math.round(this.left),
+      y: Math.round(this.top)
     });
   };
 
@@ -224,7 +222,7 @@ class Window extends React.PureComponent {
     if (this.left < currentOffset || this.offset === this.left) {
       let n = target.getBoundingClientRect().left;
       this.rnd.updatePosition({
-        x: n
+        x: Math.round(n)
       });
       this.left = n;
     }
@@ -239,7 +237,7 @@ class Window extends React.PureComponent {
     if (this.left + width > window.innerWidth) {
       let w = window.innerWidth - width;
       this.rnd.updatePosition({
-        x: w
+        x: Math.round(w)
       });
       this.left = w;
     }
@@ -247,8 +245,8 @@ class Window extends React.PureComponent {
 
   fit = target => {
     this.rnd.updatePosition({
-      x: target.getBoundingClientRect().left,
-      y: target.getBoundingClientRect().top - this.headerHeight
+      x: Math.round(target.getBoundingClientRect().left),
+      y: Math.round(target.getBoundingClientRect().top - this.headerHeight)
     });
     this.rnd.setState({
       disableDrag: true
@@ -262,8 +260,8 @@ class Window extends React.PureComponent {
 
   reset = target => {
     this.rnd.updatePosition({
-      y: this.top,
-      x: this.left
+      y: Math.round(this.top),
+      x: Math.round(this.left)
     });
     this.rnd.setState({
       disableDrag: false
@@ -286,7 +284,7 @@ class Window extends React.PureComponent {
     }
 
     this.rnd.updatePosition({
-      y: this.top
+      y: Math.round(this.top)
     });
     this.rnd.setState({
       disableDrag: false
@@ -305,7 +303,7 @@ class Window extends React.PureComponent {
 
   moveToBottom = target => {
     this.rnd.updatePosition({
-      y: window.innerHeight - 110
+      y: Math.round(window.innerHeight - 110)
     });
     this.mode = "minimized";
   };
@@ -459,22 +457,20 @@ class Window extends React.PureComponent {
             mode={this.mode}
           />
           <section className={classes.content}>
-            <div className={classes.drawerPaperContent}>
-              {features ? (
-                <FeatureInfo
-                  features={this.props.features}
-                  onDisplay={this.props.onDisplay}
-                  key={
-                    Array.isArray(this.props.features) &&
-                    this.props.features.length > 0
-                      ? this.props.features[0].getId()
-                      : 0
-                  }
-                />
-              ) : (
-                children
-              )}
-            </div>
+            {features ? (
+              <FeatureInfo
+                features={this.props.features}
+                onDisplay={this.props.onDisplay}
+                key={
+                  Array.isArray(this.props.features) &&
+                  this.props.features.length > 0
+                    ? this.props.features[0].getId()
+                    : 0
+                }
+              />
+            ) : (
+              children
+            )}
           </section>
         </div>
       </Rnd>

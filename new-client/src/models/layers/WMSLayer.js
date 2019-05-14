@@ -58,7 +58,6 @@ class WMSLayer {
       this.layer = new ImageLayer({
         name: config.name,
         visible: config.visible,
-        queryable: config.queryable,
         caption: config.caption,
         opacity: config.opacity,
         source: new ImageWMS(source),
@@ -69,7 +68,6 @@ class WMSLayer {
       this.layer = new TileLayer({
         name: config.name,
         visible: config.visible,
-        queryable: config.queryable,
         caption: config.caption,
         opacity: config.opacity,
         source: new TileWMS(source),

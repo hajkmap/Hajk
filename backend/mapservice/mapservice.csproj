@@ -203,7 +203,6 @@
     <Compile Include="Components\MapExport\SharpMapExtensions\MapThrowsException.cs" />
     <Compile Include="Components\TIFFCreator.cs" />
     <Compile Include="Components\Util.cs" />
-    <Compile Include="Controllers\ExtendedWMSLayerController.cs" />
     <Compile Include="Controllers\InformativeController.cs" />
     <Compile Include="Controllers\LayerMenuController.cs" />
     <Compile Include="Controllers\ToolSettingsController.cs" />
@@ -213,7 +212,6 @@
     <Compile Include="Models\ThemeMap.cs" />
     <Compile Include="Models\Config\ArcGISConfig.cs" />
     <Compile Include="Components\ActiveDirectoryLookup.cs" />
-    <Compile Include="Models\Config\ExtendedWmsConfig.cs" />
     <Compile Include="Models\Config\ILayerConfig.cs" />
     <Compile Include="Models\Config\IUserLookup.cs" />
     <Compile Include="Models\Config\LayerConfig.cs" />

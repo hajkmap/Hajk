@@ -41,7 +41,6 @@ const defaultState = {
   legend: "",
   owner: "",
   url: "",
-  queryable: true,
   opacity: 1.0,
   tiled: false,
   singleTile: false,
@@ -91,7 +90,6 @@ const supportedProjections = [
 
 const supportedInfoFormats = [
   "application/json",
-  "text/plain",
   "text/xml",
   "application/geojson"
 ];
@@ -274,12 +272,32 @@ class WMSLayerForm extends Component {
     }
   }
 
-  renderLayerInfoInput(layerInfo) {
-    var currentLayer = this.state.capabilities.Capability.Layer.Layer.find(
-      l => {
-        return l.Name === layerInfo.id;
+  /**
+   * By default this method looks in the Capabilities document
+   * for a layer with name that matches layerName. If a layer contains
+   * another property named Layer (which means it basically is a group
+   * with sublayer), this method is called recursively, still looking
+   * for a layer with layerName but now looking inside the subgroup
+   * instead of Capabilities document.
+   * @param {String} layerName
+   * @param {Array} arrayToSearchIn
+   */
+  findInCapabilities(
+    layerName,
+    arrayToSearchIn = this.state.capabilities.Capability.Layer.Layer
+  ) {
+    let match = null;
+    match = arrayToSearchIn.find(l => {
+      if (l.hasOwnProperty("Layer")) {
+        return this.findInCapabilities(layerName, l.Layer);
       }
-    );
+      return l.Name === layerName;
+    });
+    return match;
+  }
+
+  renderLayerInfoInput(layerInfo) {
+    var currentLayer = this.findInCapabilities(layerInfo.id);
 
     this.setState({
       style: currentLayer.Style || []
@@ -532,10 +550,8 @@ class WMSLayerForm extends Component {
   loadLayers(layer, callback) {
     this.loadWMSCapabilities(undefined, () => {
       // We can not assume that layer.version exists, because the
-      // previous implementation of WMS always assumed it was "1.1.1"
-      // and did not add "version" property. Only ExtendedWMS layers
-      // had the property previously, and then it was either "1.1.1" or
-      // "1.3.0". So, for non existing version, let's assume "1.1.1".
+      // previous implementation of WMS in Hajk2 assumed it was "1.1.1"
+      // and did not add "version" property.
       layer.version = layer.version || "1.1.1";
 
       var addedLayersInfo = {};
@@ -769,7 +785,7 @@ class WMSLayerForm extends Component {
         //styles: currentLayer.Style || [],
         style: layer.style,
         name: layer.name,
-        queryable: layer.queryable,
+
         // confirmAction anropas från LayerAlert- komponenten och result är alertens state
         confirmAction: result => {
           this.saveLayerSettings(result, layer.name);
@@ -808,7 +824,6 @@ class WMSLayerForm extends Component {
       singleTile: this.getValue("singleTile"),
       imageFormat: this.getValue("imageFormat"),
       serverType: this.getValue("serverType"),
-      queryable: this.getValue("queryable"),
       opacity: this.getValue("opacity"),
       tiled: this.getValue("tiled"),
       drawOrder: this.getValue("drawOrder"),
@@ -853,7 +868,6 @@ class WMSLayerForm extends Component {
     if (fieldName === "date") value = create_date();
     if (fieldName === "singleTile") value = input.checked;
     if (fieldName === "tiled") value = input.checked;
-    if (fieldName === "queryable") value = input.checked;
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
     if (fieldName === "layersInfo")
       value = format_layers_info(this.state.addedLayersInfo);
@@ -1289,20 +1303,6 @@ class WMSLayerForm extends Component {
               className={this.getValidationClass("infoOwner")}
             />
           </div>
-        </div>
-        <div>
-          <label>
-            <b>Infoklickbar</b>
-          </label>
-          <br />
-          <input
-            type="checkbox"
-            ref="input_queryable"
-            onChange={e => {
-              this.setState({ queryable: e.target.checked });
-            }}
-            checked={this.state.queryable}
-          />
         </div>
         <div>
           <label>

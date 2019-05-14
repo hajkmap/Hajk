@@ -39,6 +39,7 @@ const defaultState = {
   legend: "",
   url: "",
   queryable: true,
+  filterable: false,
   drawOrder: 1,
   filterAttribute: "",
   filterValue: "",
@@ -141,6 +142,7 @@ class VectorLayerForm extends Component {
       symbolXOffset: this.getValue("symbolXOffset"),
       symbolYOffset: this.getValue("symbolYOffset"),
       queryable: this.getValue("queryable"),
+      filterable: this.getValue("filterable"),
       infobox: this.getValue("infobox"),
       showLabels: this.getValue("showLabels"),
       labelAlign: this.getValue("labelAlign"),
@@ -177,6 +179,7 @@ class VectorLayerForm extends Component {
 
     if (fieldName === "date") value = create_date();
     if (fieldName === "queryable") value = input.checked;
+    if (fieldName === "filterable") value = input.checked;
     if (fieldName === "showLabels") value = input.checked;
     if (fieldName === "fillColor") value = rgba_to_string(this.state.fillColor);
     if (fieldName === "lineColor") value = rgba_to_string(this.state.lineColor);
@@ -223,8 +226,8 @@ class VectorLayerForm extends Component {
       return typeof v === "string"
         ? v.trim() === ""
         : Array.isArray(v)
-          ? v[0] === ""
-          : false;
+        ? v[0] === ""
+        : false;
     }
 
     switch (fieldName) {
@@ -922,6 +925,18 @@ class VectorLayerForm extends Component {
               this.setState({ queryable: e.target.checked });
             }}
             checked={this.state.queryable}
+          />
+        </div>
+        <div>
+          <label htmlFor="filterable">Filterbar</label>
+          <input
+            type="checkbox"
+            ref="input_filterable"
+            id="filterable"
+            onChange={e => {
+              this.setState({ filterable: e.target.checked });
+            }}
+            checked={this.state.filterable}
           />
         </div>
         <div className="info-container">
