@@ -125,7 +125,16 @@ class BufferModel {
         }
       }
 
-      if (lyr.get("visible") === true && lyr.get("queryable") === true) {
+      if (lyr.get("visible") === true && lyr.layersInfo) {
+        let subLayers = Object.values(lyr.layersInfo);
+        let subLayersToQuery = subLayers
+          .filter(subLayer => {
+            return subLayer.queryable === true;
+          })
+          .map(queryableSubLayer => {
+            return queryableSubLayer.id;
+          });
+
         if (e.coordinate !== undefined) {
           let url = lyr
             .getSource()
@@ -133,7 +142,10 @@ class BufferModel {
               e.coordinate,
               view.getResolution(),
               view.getProjection().getCode(),
-              { INFO_FORMAT: "application/json" }
+              {
+                INFO_FORMAT: "application/json",
+                QUERY_LAYERS: subLayersToQuery.join(",")
+              }
             );
           fetch(url)
             .then(function(response) {
