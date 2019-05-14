@@ -14,26 +14,32 @@ function query(map, layer, evt) {
     .getView()
     .getProjection()
     .getCode();
+  let subLayersToQuery = [];
 
-  let subLayers = Object.values(layer.layersInfo);
-  let layersToQuery = subLayers
-    .filter(subLayer => {
-      return subLayer.queryable === true;
-    })
-    .map(queryableSubLayer => {
-      return queryableSubLayer.id;
-    })
-    .join(",");
+  if (layer.layersInfo) {
+    let subLayers = Object.values(layer.layersInfo);
+    subLayersToQuery = subLayers
+      .filter(subLayer => {
+        return subLayer.queryable === true;
+      })
+      .map(queryableSubLayer => {
+        return queryableSubLayer.id;
+      });
+  }
 
-  let params = {
-    FEATURE_COUNT: 100,
-    INFO_FORMAT: layer.getSource().getParams().INFO_FORMAT,
-    QUERY_LAYERS: layersToQuery
-  };
-  let url = layer
-    .getSource()
-    .getGetFeatureInfoUrl(coordinate, resolution, referenceSystem, params);
-  return fetch(url, fetchConfig);
+  if (subLayersToQuery.length > 0) {
+    let params = {
+      FEATURE_COUNT: 100,
+      INFO_FORMAT: layer.getSource().getParams().INFO_FORMAT,
+      QUERY_LAYERS: subLayersToQuery.join(",")
+    };
+    let url = layer
+      .getSource()
+      .getGetFeatureInfoUrl(coordinate, resolution, referenceSystem, params);
+    return fetch(url, fetchConfig);
+  } else {
+    return false;
+  }
 }
 
 /**
@@ -56,8 +62,7 @@ function handleClick(evt, map, callback) {
     .filter(layer => {
       return (
         (layer instanceof TileLayer || layer instanceof ImageLayer) &&
-        layer.get("visible") === true &&
-        layer.get("queryable") === true //WIP - Tobias - Should not be used anymore, need to check this
+        layer.get("visible") === true
       );
     })
     .forEach(layer => {
