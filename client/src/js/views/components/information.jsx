@@ -58,7 +58,7 @@ var InformationView = {
     if (this.state && this.state.display) {
       var infoContent = this.props.model.get('text');
       if (this.props.model.get('base64EncodeForInfotext')) {
-        infoContent = atob(infoContent);
+        infoContent = atob(infoContent.replace(/\s/g, ''));
       }
 
       return (
