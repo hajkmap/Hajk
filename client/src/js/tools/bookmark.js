@@ -109,7 +109,8 @@ var BookmarkModel = {
         this.getBookmarks().length
       ? this.getBookmarks().length : 0;
     var model = this.get('shell').toJSON();
-    var b64 = btoa(model);
+
+    var b64 = new Buffer(model).toString('base64');
     var data = {
       name: name,
       settings: b64,
