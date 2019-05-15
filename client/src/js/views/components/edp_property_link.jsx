@@ -93,7 +93,7 @@ var EdpPropertyLink = {
             {
               this.props.model.get('excelExportUrl') != null ?
               <button className='btn btn-default fir-icon-button' onClick={this.sendProperties}>
-                <i className='excel' />Skicka till EDP
+                <i className='edp' />Skicka till EDP
               </button> : ""
             }
 
