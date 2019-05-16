@@ -266,7 +266,7 @@ class LayerItem extends React.PureComponent {
       return (
         <div className={classes.infoTextContainer}>
           <Typography>
-            <strong>Dataägare:</strong> {infoOwner}
+            <span dangerouslySetInnerHTML={{ __html: infoOwner }} />
           </Typography>
         </div>
       );
