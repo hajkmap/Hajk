@@ -298,17 +298,7 @@ class Search extends React.PureComponent {
                 this.searchWithPolygonButtonText || "Rita polygon i kartan"
               }
               model={this.searchModel}
-              onSearchWithin={layerIds => {
-                if (layerIds.length === 0) {
-                  this.setState({
-                    result: []
-                  });
-                } else {
-                  this.setState({
-                    result: layerIds
-                  });
-                }
-              }}
+              onComplete={this.resolve}
             />
             <SearchWithSelectionButton
               localObserver={this.localObserver}

@@ -38,7 +38,17 @@ class SearchWithPolygon extends React.Component {
                     this.state.active,
                     "Polygon",
                     false,
-                    e => {}
+                    e => {
+                      this.props.model.searchWithinArea(
+                        e.feature,
+                        false,
+                        featureCollections => {
+                          console.log(this.props, "pros");
+                          this.props.onComplete(featureCollections);
+                          console.log(featureCollections, "featureCollections");
+                        }
+                      );
+                    }
                   );
                   this.setState({
                     active: false

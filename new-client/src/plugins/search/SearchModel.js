@@ -114,26 +114,28 @@ class SearchModel {
     }
   };
 
-  searchWithinArea = (feature, callback) => {
+  searchWithinArea = (feature, useTransformedWmsSource, callback) => {
     const projCode = this.olMap
       .getView()
       .getProjection()
       .getCode();
-    console.log(this.options, "options");
+
     var search = () => {
-      //Handles special search for search within
-      const searchLayers = this.options.selectedSources.reduce(
-        this.getLayerAsSource,
-        []
-      );
-      const searchSources = searchLayers
-        .map(this.mapDisplayLayerAsSearchLayer)
-        .filter(source => source.layers);
+      let searchSources = this.options.sources;
+
+      if (useTransformedWmsSource) {
+        const searchLayers = this.options.selectedSources.reduce(
+          this.getLayerAsSource,
+          []
+        );
+        searchSources = searchLayers
+          .map(this.mapDisplayLayerAsSearchLayer)
+          .filter(source => source.layers);
+      }
 
       const promises = searchSources.map(
         this.mapSouceAsWFSPromise(feature, projCode)
       );
-      //
 
       this.observer.publish("searchStarted");
       Promise.all(promises).then(responses => {
@@ -142,7 +144,9 @@ class SearchModel {
             var result = [];
             jsonResults.forEach((jsonResult, i) => {
               if (jsonResult.totalFeatures > 0) {
-                jsonResult.layerId = searchLayers[i].layerId;
+                if (useTransformedWmsSource) {
+                  jsonResult.layerId = searchSources[i].layerId;
+                }
                 result.push(jsonResult);
               }
             });
