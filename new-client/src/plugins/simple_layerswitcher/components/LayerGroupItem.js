@@ -1,20 +1,22 @@
 import React, { Component } from "react";
 import Button from "@material-ui/core/Button";
-import IconButton from "@material-ui/core/IconButton";
 import IconWarning from "@material-ui/icons/Warning";
 import CallMadeIcon from "@material-ui/icons/CallMade";
 import InfoIcon from "@material-ui/icons/Info";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
-import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import { withStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
+import IconMoreHoriz from "@material-ui/icons/MoreHoriz";
+import ArrowRightIcon from "@material-ui/icons/ArrowRight";
+import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import LayerSettings from "./LayerSettings.js";
 import marked from "marked";
 
 const styles = theme => ({
-  button: {},
+  button: {
+    cursor: "pointer"
+  },
   caption: {},
   captionText: {
     marginLeft: "5px",
@@ -28,9 +30,14 @@ const styles = theme => ({
     listStyle: "none"
   },
   layerItem: {
-    display: "flex",
     justifyContent: "space-between",
-    alignItems: "center"
+    alignItems: "center",
+    borderBottom: "1px dashed #CCC",
+    paddingTop: "10px",
+    paddingBottom: "5px",
+    "&:last-child": {
+      borderBottom: "none"
+    }
   },
   layerItemContainer: {
     padding: "10px",
@@ -55,24 +62,19 @@ const styles = theme => ({
     border: "1px solid #ccc"
   },
   infoContainer: {
-    padding: "5px",
-    marginRight: "5px",
-    borderRight: "1px solid #ccc"
+    padding: "5px"
   },
   infoButton: {
     fontSize: "14pt",
     cursor: "pointer"
   },
   infoTextContainer: {
-    margin: "10px 0"
+    margin: "10px 25px"
   },
   layerGroup: {
-    padding: "10px",
-    margin: "5px",
     background: "white",
-    borderTopRightRadius: "10px",
-    boxShadow:
-      "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)"
+    borderBottom: "1px solid #ccc",
+    paddingLeft: "20px"
   },
   layerGroupContainer: {
     background: "white",
@@ -81,14 +83,12 @@ const styles = theme => ({
   layerGroupHeader: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
-    margin: "5px 0"
+    alignItems: "center"
   },
   layerGroupLayers: {
-    background: "#eee",
-    padding: "10px",
-    borderRadius: "6px",
-    marginTop: "5px"
+    marginTop: "5px",
+    borderTop: "1px solid #ccc",
+    paddingLeft: "45px"
   },
   layerGroupItem: {
     display: "flex"
@@ -97,6 +97,12 @@ const styles = theme => ({
   slider: {
     padding: "30px",
     overflow: "hidden"
+  },
+  settingsButton: {
+    fontSize: "14pt",
+    cursor: "pointer",
+    padding: "5px",
+    float: "right"
   }
 });
 
@@ -121,8 +127,12 @@ class LayerGroupItem extends Component {
       infoExpanded: false,
       instruction: layerInfo.instruction,
       open: false,
-      opacityValue: 1
+      opacityValue: 1,
+      toggleSettings: false,
+      toggleSubLayerSettings: {}
     };
+    this.toggleSubLayerSettings = this.toggleSubLayerSettings.bind(this);
+    this.renderSubLayer = this.renderSubLayer.bind(this);
   }
   /**
    * Triggered when the component is successfully mounted into the DOM.
@@ -193,11 +203,11 @@ class LayerGroupItem extends Component {
       );
       if (chaptersWithLayer.length > 0) {
         return (
-          <>
-            <div>
+          <div className={classes.infoTextContainer}>
+            <Typography>
               Innehåll från denna kategori finns benämnt i följande kapitel i
               översiktsplanen:
-            </div>
+            </Typography>
             <ul className={classes.links}>
               {chaptersWithLayer.map((chapter, i) => {
                 return (
@@ -213,7 +223,7 @@ class LayerGroupItem extends Component {
                 );
               })}
             </ul>
-          </>
+          </div>
         );
       } else {
         return null;
@@ -351,6 +361,7 @@ class LayerGroupItem extends Component {
     var visible = visibleSubLayers.some(
       visibleSubLayer => visibleSubLayer === subLayer
     );
+    var toggleSettings = this.toggleSubLayerSettings.bind(this, index);
 
     return (
       <div key={index} className={classes.layerItem}>
@@ -361,12 +372,22 @@ class LayerGroupItem extends Component {
               <strong>{layer.layersInfo[subLayer].caption}</strong>
             </label>
           </span>
+          <IconMoreHoriz
+            className={classes.settingsButton}
+            onClick={toggleSettings}
+          />
         </div>
         <div className={classes.legend}>
-          <img
-            src={this.props.layer.layersInfo[subLayer].legend}
-            alt="teckenförklaring"
-          />
+          {this.state.toggleSubLayerSettings[index] ? (
+            <>
+              <span>Teckenförklaring:</span>
+              <br />
+              <img
+                src={this.props.layer.layersInfo[subLayer].legend}
+                alt="teckenförklaring"
+              />
+            </>
+          ) : null}
         </div>
       </div>
     );
@@ -406,9 +427,10 @@ class LayerGroupItem extends Component {
 
   renderMetadataLink() {
     const { infoUrl, infoUrlText } = this.state;
+    const { classes } = this.props;
     if (infoUrl) {
       return (
-        <div>
+        <div className={classes.infoTextContainer}>
           <a href={infoUrl} target="_blank" rel="noopener noreferrer">
             {infoUrlText || infoUrl}
           </a>
@@ -421,11 +443,14 @@ class LayerGroupItem extends Component {
 
   renderOwner() {
     const { infoOwner } = this.state;
+    const { classes } = this.props;
     if (infoOwner) {
       return (
-        <Typography>
-          <span dangerouslySetInnerHTML={{ __html: infoOwner }} />
-        </Typography>
+        <div className={classes.infoTextContainer}>
+          <Typography>
+            <span dangerouslySetInnerHTML={{ __html: infoOwner }} />
+          </Typography>
+        </div>
       );
     } else {
       return null;
@@ -445,6 +470,18 @@ class LayerGroupItem extends Component {
     } else {
       return null;
     }
+  }
+
+  toggleSettings() {
+    this.setState({
+      toggleSettings: !this.state.toggleSettings
+    });
+  }
+
+  toggleSubLayerSettings(index) {
+    var selected = this.state.toggleSubLayerSettings;
+    selected[index] = !selected[index];
+    this.setState({ toggleSubLayerSettings: selected });
   }
 
   render() {
@@ -468,26 +505,16 @@ class LayerGroupItem extends Component {
         <div className={classes.layerGroupContainer}>
           <div className={classes.layerGroupHeader}>
             <div className={classes.layerItemInfo}>
-              <div className={classes.infoContainer}>
-                {!this.isInfoEmpty() ? (
-                  <InfoIcon
-                    onClick={() => this.toggleInfo()}
-                    className={classes.infoButton}
-                    style={{
-                      boxShadow: this.state.infoVisible
-                        ? "rgb(204, 204, 204) 2px 3px 1px"
-                        : "inherit",
-                      borderRadius: "100%"
-                    }}
+              <div>
+                {open ? (
+                  <ArrowDropDownIcon
+                    className={classes.button}
+                    onClick={() => this.toggle()}
                   />
                 ) : (
-                  <InfoIcon
-                    onClick={() => this.toggleInfo()}
-                    className={classes.infoButton}
-                    style={{
-                      color: "#999",
-                      cursor: "default"
-                    }}
+                  <ArrowRightIcon
+                    className={classes.button}
+                    onClick={() => this.toggle()}
                   />
                 )}
               </div>
@@ -507,25 +534,49 @@ class LayerGroupItem extends Component {
               </div>
             </div>
             <div>
-              {open ? (
-                <IconButton
-                  className={classes.button}
-                  onClick={() => this.toggle()}
-                >
-                  <RemoveCircleIcon />
-                </IconButton>
-              ) : (
-                <IconButton
-                  className={classes.button}
-                  onClick={() => this.toggle()}
-                >
-                  <AddCircleIcon />
-                </IconButton>
-              )}
+              <div style={{ float: "left" }}>
+                <div className={classes.infoContainer}>
+                  {!this.isInfoEmpty() ? (
+                    <InfoIcon
+                      onClick={() => this.toggleInfo()}
+                      className={classes.infoButton}
+                      style={{
+                        boxShadow: this.state.infoVisible
+                          ? "rgb(204, 204, 204) 2px 3px 1px"
+                          : "inherit",
+                        borderRadius: "100%"
+                      }}
+                    />
+                  ) : (
+                    <InfoIcon
+                      onClick={() => this.toggleInfo()}
+                      className={classes.infoButton}
+                      style={{
+                        color: "#999",
+                        cursor: "default"
+                      }}
+                    />
+                  )}
+                </div>
+              </div>
+              <div style={{ float: "left" }}>
+                <IconMoreHoriz
+                  onClick={() => this.toggleSettings()}
+                  className={classes.settingsButton}
+                />
+              </div>
             </div>
           </div>
           {this.renderDetails()}
-          <LayerSettings layer={layer} observer={this.props.model.observer} />
+          <div>
+            <LayerSettings
+              layer={layer}
+              observer={this.props.model.observer}
+              toggled={this.state.toggleSettings}
+              showOpacity={true}
+              showLegend={false}
+            />
+          </div>
           {this.renderSubLayers()}
         </div>
       </div>
