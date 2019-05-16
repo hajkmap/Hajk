@@ -258,7 +258,6 @@ class AppModel {
       );
       layer.layerType = type;
       // Use the general value for infobox if not present in map config.
-      console.log(layer, "layer");
       /*if (!layer.infobox && layerConfig) {
         layer.infobox = layerConfig.infobox;
       }*/

@@ -258,7 +258,6 @@ class Manager extends Component {
           caption: layer.caption,
           content: layer.content,
           date: layer.date,
-          //infobox: layer.infobox,
           legend: layer.legend,
           owner: layer.owner,
           url: layer.url,
@@ -267,7 +266,6 @@ class Manager extends Component {
           singleTile: layer.singleTile,
           imageFormat: layer.imageFormat,
           version: layer.version,
-          serverType: layer.serverType,
           drawOrder: layer.drawOrder,
           addedLayers: [],
           layerType: layer.type,
@@ -284,7 +282,6 @@ class Manager extends Component {
           infoUrlText: layer.infoUrlText,
           infoOwner: layer.infoOwner
         });
-
         this.refs["WMSLayerForm"].loadLayers(layer, () => {
           this.refs["WMSLayerForm"].validate();
         });

@@ -14,7 +14,6 @@ const fetchConfig = {
 var WmsLayerProperties = {
   url: "",
   projection: "EPSG:3007",
-  serverType: "geoserver",
   opacity: 1,
   status: "ok",
   params: {}
@@ -34,7 +33,7 @@ class WMSLayer {
       url: config.url,
       params: config.params,
       projection: config.projection,
-      serverType: config.serverType,
+      //serverType: config.serverType,
       imageFormat: config.imageFormat,
       attributions: this.getAttributions(),
       cacheSize: this.subLayers.length > 1 ? 32 : 2048,
@@ -113,6 +112,7 @@ class WMSLayer {
    * @param {external:"ol.feature"} feature
    * @return {external:"ol.style"} style
    */
+  /*
   getFeatureInformation(params) {
     var url;
     try {
@@ -153,7 +153,7 @@ class WMSLayer {
     } catch (e) {
       params.error(e);
     }
-  }
+  }*/
 
   /**
    * Get legend url.

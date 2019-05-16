@@ -160,28 +160,32 @@ class FeatureInfo extends React.PureComponent {
     var shortcodes = str.match(/\[(.*?)\]/g);
     shortcodes = shortcodes === null ? [] : shortcodes;
 
-    shortcodes.forEach(code => {
-      str = str.replace(code, "");
-      var params = code
-        .replace("[", "")
-        .replace("]", "")
-        .split(" ");
-      var c = {};
+    if (shortcodes) {
+      shortcodes.forEach(code => {
+        str = str.replace(code, "");
+        var params = code
+          .replace("[", "")
+          .replace("]", "")
+          .split(" ");
+        var c = {};
 
-      params.forEach((param, i) => {
-        if (i === 0) {
-          c.shortcode = param;
-        } else {
-          let parts = param.split("=");
-          c[parts[0]] = param.replace(parts[0] + "=", "").replace(/"/g, "");
-        }
+        params.forEach((param, i) => {
+          if (i === 0) {
+            c.shortcode = param;
+          } else {
+            let parts = param.split("=");
+            c[parts[0]] = param.replace(parts[0] + "=", "").replace(/"/g, "");
+          }
+        });
+        codes.push(c);
       });
-      codes.push(c);
-    });
-    return {
-      str: str,
-      codes: codes
-    };
+      return {
+        str: str,
+        codes: codes
+      };
+    } else {
+      return;
+    }
   }
 
   html(features) {
@@ -217,7 +221,6 @@ class FeatureInfo extends React.PureComponent {
 
     var featureList = features.map((feature, i) => {
       if (i === 0) this.props.onDisplay(feature);
-
       var markdown =
         feature.layer.get("layerInfo") &&
         feature.layer.get("layerInfo").information;
@@ -260,8 +263,10 @@ class FeatureInfo extends React.PureComponent {
 
       if (markdown) {
         let transformed = this.shortcode(markdown);
-        shortcodes = transformed.codes;
-        markdown = transformed.str;
+        if (transformed) {
+          shortcodes = transformed.codes;
+          markdown = transformed.str;
+        }
       }
 
       var value = markdown
