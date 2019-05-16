@@ -4,18 +4,17 @@ import { withStyles } from "@material-ui/core/styles";
 import ExpansionPanel from "@material-ui/core/ExpansionPanel";
 import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import Typography from "@material-ui/core/Typography";
+import ArrowRightIcon from "@material-ui/icons/ArrowRight";
+import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 
 const styles = theme => ({
   root: {
     width: "100%",
     display: "block",
-    padding: "5px 0",
-    borderTop: "1px solid #ccc",
-    background: "#efefef"
+    padding: "5px 0"
   },
   heading: {
     fontSize: theme.typography.pxToRem(18),
@@ -28,7 +27,8 @@ const styles = theme => ({
   },
   disableTransition: {
     transition: "none",
-    borderRadius: "0 !important"
+    borderRadius: "0 !important",
+    boxShadow: "none"
   },
   panel: {
     marginLeft: "10px"
@@ -38,6 +38,10 @@ const styles = theme => ({
   },
   caption: {
     display: "flex"
+  },
+  panelSummary: {
+    padding: "0px",
+    borderBottom: "1px solid #ccc"
   }
 });
 
@@ -193,7 +197,8 @@ class LayerGroup extends React.PureComponent {
           expanded={this.props.expanded}
           onChange={this.props.handleChange(this.props.group.id, this)}
         >
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+          <ExpansionPanelSummary className={classes.panelSummary}>
+            {this.props.expanded ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
             {this.renderToggleAll()}
           </ExpansionPanelSummary>
           <ExpansionPanelDetails classes={{ root: classes.root }}>

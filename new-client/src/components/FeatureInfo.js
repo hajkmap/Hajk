@@ -158,6 +158,7 @@ class FeatureInfo extends React.PureComponent {
   shortcode(str) {
     var codes = [];
     var shortcodes = str.match(/\[(.*?)\]/g);
+    shortcodes = shortcodes === null ? [] : shortcodes;
 
     shortcodes.forEach(code => {
       str = str.replace(code, "");

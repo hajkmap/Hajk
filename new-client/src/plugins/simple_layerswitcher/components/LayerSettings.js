@@ -1,6 +1,5 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import IconMoreHoriz from "@material-ui/icons/MoreHoriz";
 import Slider from "@material-ui/lab/Slider";
 import VectorFilter from "./VectorFilter";
 
@@ -11,14 +10,23 @@ const styles = theme => ({
   },
   icon: {
     cursor: "pointer"
+  },
+  settingsContainer: {
+    overflow: "hidden",
+    paddingLeft: "30px",
+    paddingRight: "30px",
+    paddingBottom: "30px"
   }
 });
 
 class LayerSettings extends React.PureComponent {
   constructor(props) {
     super(props);
+    const { layer } = props;
+    var layerInfo = layer.get("layerInfo");
     this.state = {
-      opacityValue: props.layer.get("opacity")
+      opacityValue: props.layer.get("opacity"),
+      legend: layerInfo.legend
     };
     props.layer.on("change:opacity", this.updateOpacity);
   }
@@ -37,6 +45,7 @@ class LayerSettings extends React.PureComponent {
     const { classes } = this.props;
     return (
       <>
+        <span>Opacitet: </span>
         <Slider
           classes={{ container: classes.slider }}
           value={opacityValue}
@@ -74,26 +83,38 @@ class LayerSettings extends React.PureComponent {
   renderSettings() {
     return (
       <div>
-        <div className={this.props.classes.sliderContainer}>
-          {this.renderOpacitySlider()}
+        <div className={this.props.classes.settingsContainer}>
+          {this.props.showOpacity ? this.renderOpacitySlider() : null}
+          {this.props.showLegend ? this.renderLegendImage() : null}
+          {this.props.layer.getProperties().filterable ? (
+            <VectorFilter layer={this.props.layer} />
+          ) : null}
         </div>
-        {this.props.layer.getProperties().filterable ? (
-          <VectorFilter layer={this.props.layer} />
-        ) : null}
       </div>
     );
+  }
+
+  renderLegendImage() {
+    var index = this.props.index ? this.props.index : 0;
+
+    var src =
+      this.state.legend[index] && this.state.legend[index].url
+        ? this.state.legend[index].url
+        : "";
+    return src ? (
+      <>
+        <br />
+        <span>Teckenförklaring:</span>
+        <br />
+        <img max-width="250px" alt="legend" src={src} />{" "}
+      </>
+    ) : null;
   }
 
   render() {
     return (
       <div>
-        <div>
-          <IconMoreHoriz
-            className={this.props.classes.icon}
-            onClick={this.toggle}
-          />
-        </div>
-        <div>{this.state.toggled ? this.renderSettings() : null}</div>
+        <div>{this.props.toggled ? this.renderSettings() : null}</div>
       </div>
     );
   }
