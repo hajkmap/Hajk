@@ -10,6 +10,7 @@ import SearchResultList from "./components/SearchResultList.js";
 import SearchWithinButton from "./components/SearchWithinButton.js";
 import SearchWithPolygonButton from "./components/SearchWithPolygonButton";
 import SearchWithSelectionButton from "./components/SearchWithSelectionButton";
+import SpatialSearchOptions from "./components/SpatialSearchOptions";
 import ClearButton from "./components/ClearButton.js";
 import SearchModel from "./SearchModel.js";
 import PanelHeader from "./../../components/PanelHeader.js";
@@ -277,7 +278,14 @@ class Search extends React.PureComponent {
           <div>{this.renderLoader()}</div>
           <div>{this.renderDescription()}</div>
           <div className={classes.searchContainer}>
-            <SearchWithinButton
+            <SearchBar
+              model={this.searchModel}
+              onChange={this.searchModel.search}
+              onComplete={this.resolve}
+              tooltip={this.tooltip}
+            />
+            <SpatialSearchOptions />
+            {/*<SearchWithinButton
               localObserver={this.localObserver}
               buttonText={this.searchWithinButtonText}
               model={this.searchModel}
@@ -292,7 +300,7 @@ class Search extends React.PureComponent {
                   });
                 }
               }}
-            />
+            />*/}
             <SearchWithPolygonButton
               localObserver={this.localObserver}
               buttonText={
@@ -301,24 +309,15 @@ class Search extends React.PureComponent {
               model={this.searchModel}
               onComplete={this.resolve}
             />
+            {/*
             <SearchWithSelectionButton
               localObserver={this.localObserver}
               buttonText={
-                this.searchWithSelectionButtonText || "Välj ett objekt i kartan"
+                this.searchWithPolygonButtonText || "Rita polygon i kartan"
               }
               model={this.searchModel}
-              onSearchWithin={layerIds => {
-                if (layerIds.length === 0) {
-                  this.setState({
-                    result: []
-                  });
-                } else {
-                  this.setState({
-                    result: layerIds
-                  });
-                }
-              }}
-            />
+              onComplete={this.resolve}
+            />*/}
             <ClearButton
               model={this.searchModel}
               onClear={() => {
@@ -328,12 +327,6 @@ class Search extends React.PureComponent {
                   result: false
                 });
               }}
-            />
-            <SearchBar
-              model={this.searchModel}
-              onChange={this.searchModel.search}
-              onComplete={this.resolve}
-              tooltip={this.tooltip}
             />
           </div>
           {this.renderSearchResultList("center")}
