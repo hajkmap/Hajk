@@ -15,6 +15,7 @@ var FirModelProperties = {
     visible: false,
     value: '',
     filter: '',
+    exaktMatching: true,
     filterVisibleActive: false,
     markerImg: 'assets/icons/marker.png',
     base64Encode: false,

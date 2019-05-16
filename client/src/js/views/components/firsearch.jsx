@@ -581,17 +581,6 @@ var FirSearchView = {
 
     },
 
-    exaktMatching: function(event) {
-        this.props.model.set("exaktMatching", false);
-        var exaktSearching = document.getElementById("exaktMatching").checked;
-
-        if(exaktSearching){
-            this.props.model.set("exaktMatching", exaktSearching);
-        }else{
-            this.props.model.set("exaktMatching", exaktSearching);
-        }
-    },
-
     /**
      * Render the panel component.
      * @instance
@@ -697,7 +686,9 @@ var FirSearchView = {
                                 onChange={search_on_input} />
                         </div>
                         <div className='clearfix'>
-                            <input type="checkbox" id="exaktMatching" onClick={(e)=> this.exaktMatching(e)} />  Sök exakt matching <br/>
+                            <input type="checkbox" id="exaktMatching" defaultChecked={this.props.model.get("exaktMatching")}
+                              onClick={(e) => this.props.model.set("exaktMatching", !this.props.model.get("exaktMatching"))} />
+                            <label htmlFor="exaktMatching">Sök exakt matching</label>
                         </div><br/>
                             {firSelectionToolbar}
                             {this.renderSearchOption()}
