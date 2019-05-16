@@ -43,9 +43,7 @@ class SearchWithPolygon extends React.Component {
                         e.feature,
                         false,
                         featureCollections => {
-                          console.log(this.props, "pros");
                           this.props.onComplete(featureCollections);
-                          console.log(featureCollections, "featureCollections");
                         }
                       );
                     }

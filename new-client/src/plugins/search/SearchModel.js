@@ -90,6 +90,7 @@ class SearchModel {
 
   onSelectFeatures = evt => {
     handleClick(evt, evt.map, response => {
+      console.log(evt, "evt");
       this.vectorLayer.getSource().addFeatures(response.features);
     });
   };
@@ -144,9 +145,7 @@ class SearchModel {
             var result = [];
             jsonResults.forEach((jsonResult, i) => {
               if (jsonResult.totalFeatures > 0) {
-                if (useTransformedWmsSource) {
-                  jsonResult.layerId = searchSources[i].layerId;
-                }
+                jsonResult.source = searchSources[i];
                 result.push(jsonResult);
               }
             });

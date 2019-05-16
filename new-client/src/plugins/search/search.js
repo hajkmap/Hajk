@@ -130,6 +130,7 @@ const styles = theme => {
 
 class Search extends React.PureComponent {
   resolve = data => {
+    console.log(data, "data");
     this.setState({
       result: data
     });

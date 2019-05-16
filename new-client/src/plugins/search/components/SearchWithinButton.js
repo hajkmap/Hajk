@@ -41,10 +41,11 @@ class SearchWithinButton extends React.Component {
                     e => {
                       this.props.model.searchWithinArea(
                         e.feature,
+                        true,
                         featureCollections => {
                           let layerIds = featureCollections.map(
                             featureCollection => {
-                              return featureCollection.layerId;
+                              return featureCollection.source.layerId;
                             }
                           );
                           this.props.model.showLayers(layerIds);
