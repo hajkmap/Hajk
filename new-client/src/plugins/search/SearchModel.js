@@ -119,7 +119,7 @@ class SearchModel {
       .getView()
       .getProjection()
       .getCode();
-
+    console.log(this.options, "options");
     var search = () => {
       //Handles special search for search within
       const searchLayers = this.options.selectedSources.reduce(
@@ -142,8 +142,8 @@ class SearchModel {
             var result = [];
             jsonResults.forEach((jsonResult, i) => {
               if (jsonResult.totalFeatures > 0) {
-                console.log(searchLayers[i], "seachLayers");
-                result.push(searchLayers[i].layerId);
+                jsonResult.layerId = searchLayers[i].layerId;
+                result.push(jsonResult);
               }
             });
             setTimeout(() => {
@@ -254,7 +254,7 @@ class SearchModel {
       });
   }
 
-  searchWithinShowLayers = layerIds => {
+  showLayers = layerIds => {
     this.visibleLayers = layerIds.reduce(this.getLayerAsSource, []);
     this.hiddenLayers = this.getHiddenLayers(layerIds);
     this.hiddenLayers.forEach(layer => {
