@@ -14,7 +14,6 @@ const fetchConfig = {
 var WmsLayerProperties = {
   url: "",
   projection: "EPSG:3007",
-  //serverType: "geoserver",
   opacity: 1,
   status: "ok",
   params: {}
