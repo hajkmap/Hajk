@@ -611,7 +611,7 @@ class VectorLayerForm extends Component {
           <label>Inforuta</label>
           <textarea
             ref="input_infobox"
-            value={this.state.infobox}
+            value={"NOT IMPLEMENTED"} //this.state.infobox
             onChange={e => this.setState({ infobox: e.target.value })}
           />
         </div>
