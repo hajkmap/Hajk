@@ -426,7 +426,7 @@ FirSearchResultGroup = {
                                     }
                                 }
                             );
-                            
+
                             var sameNamePromises = this.props.model.findWithSameNames(names, wmsLayer, true);
 
                             Promise.all(sameNamePromises).then(() => {
@@ -641,9 +641,9 @@ FirSearchResultGroup = {
         ;
 
         var instructionsBtn = (
-            <span>
-            <button onClick={(e) => {e.stopPropagation(); this.openInstruction()}} className='btn-info-fir' id={"instructionsbox-result-" + this.props.id} ><img className='btn-info-fir' src={this.props.model.get("infoKnappLogo")} style={{height: '55%', width:'55%'}} /></button>
-            </span>
+            <button onClick={(e) => {e.stopPropagation(); this.openInstruction()}} className='btn-info-fir' id={"instructionsbox-result-" + this.props.id} >
+              <img src={this.props.model.get("infoKnappLogo")} />
+            </button>
         );
 
         var instructionTxt = (
