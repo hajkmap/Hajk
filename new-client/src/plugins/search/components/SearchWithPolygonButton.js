@@ -36,11 +36,9 @@ class SearchWithPolygon extends React.Component {
                 () => {
                   this.props.model.toggleDraw(
                     this.state.active,
-                    { freehand: false, type: "Polygon" },
-                    { useSearchWithinSources: false },
-                    featureCollections => {
-                      this.props.onComplete(featureCollections);
-                    }
+                    "Polygon",
+                    false,
+                    e => {}
                   );
                   this.setState({
                     active: false

@@ -121,6 +121,7 @@ class SearchModel {
       .getCode();
 
     var search = () => {
+      //Handles special search for search within
       const searchLayers = this.options.selectedSources.reduce(
         this.getLayerAsSource,
         []
@@ -132,6 +133,8 @@ class SearchModel {
       const promises = searchSources.map(
         this.mapSouceAsWFSPromise(feature, projCode)
       );
+      //
+
       this.observer.publish("searchStarted");
       Promise.all(promises).then(responses => {
         Promise.all(responses.map(result => result.json())).then(
@@ -139,6 +142,7 @@ class SearchModel {
             var result = [];
             jsonResults.forEach((jsonResult, i) => {
               if (jsonResult.totalFeatures > 0) {
+                console.log(searchLayers[i], "seachLayers");
                 result.push(searchLayers[i].layerId);
               }
             });
@@ -250,12 +254,31 @@ class SearchModel {
       });
   }
 
-  toggleDraw = (active, drawEndCallback) => {
+  searchWithinShowLayers = layerIds => {
+    this.visibleLayers = layerIds.reduce(this.getLayerAsSource, []);
+    this.hiddenLayers = this.getHiddenLayers(layerIds);
+    this.hiddenLayers.forEach(layer => {
+      if (layer.layerType === "group") {
+        this.globalObserver.publish("hideLayer", layer);
+      } else {
+        layer.setVisible(false);
+      }
+    });
+    this.visibleLayers.forEach(layer => {
+      if (layer.layerType === "group") {
+        this.globalObserver.publish("showLayer", layer);
+      } else {
+        layer.setVisible(true);
+      }
+    });
+  };
+
+  toggleDraw = (active, type, freehand, drawEndCallback) => {
     if (active) {
       this.draw = new Draw({
         source: this.drawSource,
-        type: "Circle",
-        freehand: true
+        type: type,
+        freehand: freehand
       });
       this.draw.on("drawend", e => {
         this.clear();
@@ -263,28 +286,9 @@ class SearchModel {
         setTimeout(() => {
           this.olMap.clicklock = false;
         }, 1000);
-
-        this.searchWithinArea(e.feature, layerIds => {
-          this.visibleLayers = layerIds.reduce(this.getLayerAsSource, []);
-          this.hiddenLayers = this.getHiddenLayers(layerIds);
-          this.hiddenLayers.forEach(layer => {
-            if (layer.layerType === "group") {
-              this.globalObserver.publish("hideLayer", layer);
-            } else {
-              layer.setVisible(false);
-            }
-          });
-          if (drawEndCallback) {
-            drawEndCallback(layerIds);
-          }
-          this.visibleLayers.forEach(layer => {
-            if (layer.layerType === "group") {
-              this.globalObserver.publish("showLayer", layer);
-            } else {
-              layer.setVisible(true);
-            }
-          });
-        });
+        if (drawEndCallback) {
+          drawEndCallback(e);
+        }
       });
       this.olMap.clicklock = true;
       this.olMap.addInteraction(this.draw);

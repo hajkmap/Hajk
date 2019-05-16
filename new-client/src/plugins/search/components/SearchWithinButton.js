@@ -34,12 +34,24 @@ class SearchWithinButton extends React.Component {
                   active: !this.state.active
                 },
                 () => {
-                  this.props.model.toggleDraw(this.state.active, layerIds => {
-                    this.setState({
-                      active: false
-                    });
-                    this.props.onSearchWithin(layerIds);
-                  });
+                  this.props.model.toggleDraw(
+                    this.state.active,
+                    "Circle",
+                    true,
+                    e => {
+                      this.props.model.searchWithinArea(
+                        e.feature,
+                        featureCollections => {
+                          console.log(featureCollections, "layerIds");
+                          this.props.model.searchWithinShowLayers(null);
+                          this.props.onSearchWithin(null);
+                        }
+                      );
+                      this.setState({
+                        active: false
+                      });
+                    }
+                  );
                   if (this.state.active) {
                     this.props.localObserver.publish("minimizeWindow", true);
                   }

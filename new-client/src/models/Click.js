@@ -16,16 +16,6 @@ function query(map, layer, evt) {
     .getView()
     .getProjection()
     .getCode();
-<<<<<<< HEAD
-  let params = {
-    FEATURE_COUNT: 100,
-    INFO_FORMAT: "application/json"
-  };
-  let url = layer
-    .getSource()
-    .getGetFeatureInfoUrl(coordinate, resolution, referenceSystem, params);
-  return fetch(url, fetchConfig);
-=======
 
   if (layer.layersInfo) {
     let subLayers = Object.values(layer.layersInfo);
@@ -77,7 +67,6 @@ function getFeaturesFromGml(response, text) {
   } else {
     return [];
   }
->>>>>>> develop-new-client
 }
 
 /**
