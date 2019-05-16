@@ -38,8 +38,6 @@ namespace MapService.Models.Config
 
     public SubLayerConfig[] layersInfo { get; set; }
 
-    public string infobox { get; set; }
-
     public string[] searchFields { get; set; }
 
     public string[] displayFields { get; set; }

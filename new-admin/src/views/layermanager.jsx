@@ -258,7 +258,7 @@ class Manager extends Component {
           caption: layer.caption,
           content: layer.content,
           date: layer.date,
-          infobox: layer.infobox,
+          //infobox: layer.infobox,
           legend: layer.legend,
           owner: layer.owner,
           url: layer.url,

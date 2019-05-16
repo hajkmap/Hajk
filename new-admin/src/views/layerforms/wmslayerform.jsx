@@ -37,7 +37,7 @@ const defaultState = {
   caption: "",
   content: "",
   date: "Fylls i per automatik",
-  infobox: "",
+  //infobox: "",
   legend: "",
   owner: "",
   url: "",
@@ -820,7 +820,7 @@ class WMSLayerForm extends Component {
       legend: this.getValue("legend"),
       layers: this.getValue("layers"),
       layersInfo: this.getValue("layersInfo"),
-      infobox: this.getValue("infobox"),
+      //infobox: this.getValue("infobox"),
       singleTile: this.getValue("singleTile"),
       imageFormat: this.getValue("imageFormat"),
       serverType: this.getValue("serverType"),
@@ -1114,7 +1114,7 @@ class WMSLayerForm extends Component {
             className="form-control"
           />
         </div>
-        <div>
+        {/*}<div>
           <label>
             <b>Inforuta</b>
           </label>
@@ -1123,8 +1123,7 @@ class WMSLayerForm extends Component {
             ref="input_infobox"
             value={this.state.infobox}
             onChange={e => this.setState({ infobox: e.target.value })}
-          />
-        </div>
+          />*/}
         <div>
           <label>
             <b>Senast ändrad</b>
