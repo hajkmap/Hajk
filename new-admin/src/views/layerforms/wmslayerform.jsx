@@ -45,7 +45,7 @@ const defaultState = {
   tiled: false,
   singleTile: false,
   imageFormat: "",
-  serverType: "geoserver",
+  //serverType: "geoserver",
   drawOrder: 1,
   layerType: "WMS",
   attribution: "",
@@ -587,7 +587,7 @@ class WMSLayerForm extends Component {
           infoFormat: layer.infoFormat
         },
         () => {
-          this.setServerType();
+          //this.setServerType();
           this.validate();
 
           if (callback) callback();
@@ -639,7 +639,7 @@ class WMSLayerForm extends Component {
                   version: capabilities.version
                 },
                 () => {
-                  this.setServerType();
+                  //this.setServerType();
                 }
               );
             }
@@ -671,7 +671,7 @@ class WMSLayerForm extends Component {
       singleTile
     });
 
-    this.setServerType();
+    //this.setServerType();
   }
 
   setImageFormats() {
@@ -697,7 +697,7 @@ class WMSLayerForm extends Component {
 
     return imgFormats;
   }
-
+  /*
   setServerType() {
     let formats;
     if (
@@ -714,7 +714,7 @@ class WMSLayerForm extends Component {
     } else {
       this.setState({ serverType: "geoserver" });
     }
-  }
+  }*/
 
   setProjections() {
     let projections;
@@ -823,7 +823,7 @@ class WMSLayerForm extends Component {
       //infobox: this.getValue("infobox"),
       singleTile: this.getValue("singleTile"),
       imageFormat: this.getValue("imageFormat"),
-      serverType: this.getValue("serverType"),
+      //serverType: this.getValue("serverType"),
       opacity: this.getValue("opacity"),
       tiled: this.getValue("tiled"),
       drawOrder: this.getValue("drawOrder"),
@@ -1184,7 +1184,7 @@ class WMSLayerForm extends Component {
             {this.setInfoFormats()}
           </select>
         </div>
-        <div>
+        {/*<div>
           <label>
             <b>Servertyp</b>
           </label>
@@ -1201,7 +1201,7 @@ class WMSLayerForm extends Component {
             <option>qgis</option>
             <option>arcgis</option>
           </select>
-        </div>
+        </div>*/}
         <div>
           <label>
             <b>Opacitet*</b>
