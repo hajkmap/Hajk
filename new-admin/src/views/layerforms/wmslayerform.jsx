@@ -170,12 +170,17 @@ class WMSLayerForm extends Component {
     if (e.target.checked === true) {
       let addedLayersInfo = { ...this.state.addedLayersInfo };
 
+      //OBS!! Already fetched CRS when fetching wms-endpoint - dont have to update
+      //CRS when appending layer
+
+      /*
       // Let's find checked layers projection and pre-select it
       const foundCrs = this.state.capabilitiesList[
         "0"
       ].Capability.Layer.Layer.find(l => {
         return l.Name === checkedLayer;
       });
+
       // We can not be sure that CRS property exists
       if (foundCrs !== undefined && foundCrs.hasOwnProperty("CRS")) {
         let projection;
@@ -190,7 +195,7 @@ class WMSLayerForm extends Component {
           projection = foundCrs.CRS;
         }
         this.setState({ projection });
-      }
+      }*/
 
       if (opts.children) {
         /**
@@ -576,7 +581,6 @@ class WMSLayerForm extends Component {
           };
         });
       }
-
       this.setState(
         {
           addedLayers: layer.layers,
@@ -600,7 +604,6 @@ class WMSLayerForm extends Component {
     if (e) {
       e.preventDefault();
     }
-
     this.setState({
       load: true,
       addedLayers: [],
