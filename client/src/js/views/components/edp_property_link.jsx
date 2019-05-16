@@ -76,37 +76,37 @@ var EdpPropertyLink = {
         <div className='panel panel-default kir'>
             <div className='panel-heading'>EDP Vision
               {
-                  this.props.model.get("instructionEDPVision") != null ?
+                  this.props.model.get("instructionEDPVision") &&
                   <button className='btn-info-fir' onClick={() => this.setState({ instructionVisible: !this.state.instructionVisible })}>
                     <img src={this.props.model.get("infoKnappLogo")} />
-                  </button> : ""
+                  </button>
               }
 
               {
-                this.state.instructionVisible ?
+                this.state.instructionVisible &&
                 <div className='panel-body-instruction'
-                  dangerouslySetInnerHTML={{__html: atob(this.props.model.get("instructionResidentList"))}} /> : ""
+                  dangerouslySetInnerHTML={{__html: atob(this.props.model.get("instructionEDPVision"))}} />
               }
 
             </div>
 
             {
-              this.props.model.get('excelExportUrl') != null ?
+              this.props.model.get('excelExportUrl') != null &&
               <button className='btn btn-default fir-icon-button' onClick={this.sendProperties}>
                 <i className='edp' />Skicka till EDP
-              </button> : ""
+              </button>
             }
 
             {
-              this.state.sendingRequest ? "Skickar..." : ""
+              this.state.sendingRequest && "Skickar..."
             }
 
             {
-              this.state.requestReady ? <span>{this.state.propertiesCount} objekt har skickats</span> : ""
+              this.state.requestReady && <span>{this.state.propertiesCount} objekt har skickats</span>
             }
 
             {
-              this.state.errorMessage != null ? <div className="error-message">{this.state.errorMessage}</div> : ""
+              this.state.errorMessage != null && <div className="error-message">{this.state.errorMessage}</div>
             }
         </div>
     );

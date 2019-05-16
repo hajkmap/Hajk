@@ -43,6 +43,7 @@ var defaultState = {
     instructionSokning: '',
     instructionHittaGrannar: '',
     instructionSkapaFastighetsforteckning: '',
+    instructionEDPVision: "",
     anchorX: 16,
     anchorY: 32,
     imgSizeX: 32,
@@ -87,6 +88,7 @@ class ToolOptions extends Component {
                 instructionSokning: tool.options.instructionSokning,
                 instructionHittaGrannar: tool.options.instructionHittaGrannar,
                 instructionSkapaFastighetsforteckning: tool.options.instructionSkapaFastighetsforteckning,
+                instructionEDPVision: tool.options.instructionEDPVision,
                 filterVisible: tool.options.filterVisible,
                 firSelectionTools: tool.options.firSelectionTools,
                 displayPopup: tool.options.displayPopup,
@@ -156,9 +158,9 @@ class ToolOptions extends Component {
             value = !isNaN(Number(value)) ? Number(value) : value;
         }
 
-        if (name == 'instruction' || name == 'instructionSokning' || name == 'instructionHittaGrannar' ||
+        if (name == 'instruction' || name == 'instructionSokning' || name == 'instructionHittaGrannar' || name == 'instructionEDPVision' ||
             name == 'instructionSkapaFastighetsforteckning' || name == 'realEstateLayer_instructionVidSokresult') {
-            value = btoa(value);
+            value = new Buffer(value).toString('base64');
         }
 
         if(name.indexOf("_") !== -1){
@@ -230,6 +232,7 @@ class ToolOptions extends Component {
                 instructionSokning: this.state.instructionSokning,
                 instructionHittaGrannar: this.state.instructionHittaGrannar,
                 instructionSkapaFastighetsforteckning: this.state.instructionSkapaFastighetsforteckning,
+                instructionEDPVision: this.state.instructionEDPVision,
                 filterVisible: this.state.filterVisible,
                 firSelectionTools: this.state.firSelectionTools,
                 anchor: [this.state.anchorX, this.state.anchorY],
@@ -455,11 +458,21 @@ class ToolOptions extends Component {
                 </div>
                 <div className="row">
                   <div className="col-md-4">
-                    <label htmlFor='instructionSkapaFastighetsforteckning'>Instruktion för "skapa Fastighetsförteckning"</label>
+                    <label htmlFor='instructionSkapaFastighetsforteckning'>Instruktion för "Skapa Fastighetsförteckning"</label>
                   </div>
                   <div className="col-md-8">
                   <textarea id='instructionSkapaFastighetsforteckning' name='instructionSkapaFastighetsforteckning'
                       onChange={this.handleInputChange.bind(this)} value={this.state.instructionSkapaFastighetsforteckning ? atob(this.state.instructionSkapaFastighetsforteckning) : ''} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='instructionEDPVision'>Instruktion för "EDP Vision"</label>
+                  </div>
+                  <div className="col-md-8">
+                  <textarea id='instructionEDPVision' name='instructionEDPVision' onChange={this.handleInputChange.bind(this)}
+                    value={this.state.instructionEDPVision ? atob(this.state.instructionEDPVision) : ''} />
                   </div>
                 </div>
 
