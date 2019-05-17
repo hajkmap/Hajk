@@ -227,6 +227,7 @@ export default class ConfigMapper {
         symbolXOffset: args.symbolXOffset,
         symbolYOffset: args.symbolYOffset,
         pointSize: args.pointSize,
+        filterComparer: args.filterComparer,
         filterAttribute: args.filterAttribute,
         filterValue: args.filterValue,
         labelAlign: args.labelAlign,

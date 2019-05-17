@@ -237,7 +237,8 @@ class Manager extends Component {
           infoOwner: layer.infoOwner,
           pointSize: layer.pointSize,
           filterAttribute: layer.filterAttribute,
-          filterValue: layer.filterValue
+          filterValue: layer.filterValue,
+          filterComparer: layer.filterComparer
         });
 
         this.refs["VectorLayerForm"].loadLayers(layer, () => {

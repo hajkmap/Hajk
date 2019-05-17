@@ -153,7 +153,9 @@ class WFSVectorLayer {
     this.map = map;
     this.style = createStyle.apply(this);
     this.filterAttribute = config.filterAttribute;
-    this.filterValue = config.filterAttribute;
+    this.filterValue = config.filterValue;
+    this.filterComparer = config.filterComparer;
+
     this.vectorSource = new VectorSource({
       loader: extent => {
         if (config.dataFormat === "GeoJSON") {
@@ -263,7 +265,10 @@ class WFSVectorLayer {
       this.reprojectFeatures(features, from, to);
     }
 
-    if (undefined !== this.filterAttribute && undefined !== this.filterValue) {
+    if (
+      (this.filterAttribute && this.filterValue) ||
+      (this.layer.get("filterValue") && this.layer.get("filterAttribute"))
+    ) {
       features = features.filter(feature => this.filter(feature));
     }
 

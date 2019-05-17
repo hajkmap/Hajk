@@ -142,6 +142,13 @@
                 "infobox": null
               },
               {
+                "id": "34",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
                 "id": "32",
                 "visibleAtStart": true,
                 "drawOrder": 1000,
