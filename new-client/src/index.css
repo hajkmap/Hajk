@@ -1,64 +1,4 @@
-:root {
-  --white: #ffffff;
-  --dark1: #78849e;
-  --dark2: #454f63;
-  --dark3: #2a2e43;
-
-  --yellow: #ffb900;
-  --orange: #ff9057;
-  --pink: #ff4f9a;
-  --magenta: #c840e9;
-
-  --blue1: #3acce1;
-  --blue2: #3497fd;
-  --blue3: #5773ff;
-  --blue4: #665eff;
-
-  --zoomHover: #0065a6;
-
-  --box-shadow-left: -5px 0 15px -10px #333333;
-  --box-shadow-right: 5px 0 15px -10px #333333;
-  --box-shadow-top: 0 -5px 15px -10px #333333;
-  --box-shadow-bottom: 0 5px 15px -10px #333333;
-  --box-shadow-all: 0 0 5px 1px #eeeeee;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  color: var(--dark2);
-  font-family: Roboto, sans-serif;
-  font-size: 1rem;
-  line-height: 1.5rem;
-}
-
-/* START: default font styles as described in XD file
-   For px->rem, consult http://www.standardista.com/px-to-rem-conversion-if-root-font-size-is-16px/
-*/
-
-h1 {
-  font-size: 2.5rem;
-  font-weight: 500;
-}
-
-h2 {
-  font-size: 1.5rem;
-  font-weight: 500;
-}
-
-/* Make sure to use Bootstrap's .form-control on <input>, <label> etc */
-.form-control::placeholder {
-  color: var(--dark1);
-  opacity: 0.56;
-}
-
-button {
-  font-variant: small-caps;
-  text-transform: lowercase;
-}
-
-/* END */
-
+/* Used only for displaying error if nothing loaded (and we don't have any MUI yet) */
 .start-error {
   color: red;
   background: rgb(255, 200, 200);
@@ -71,33 +11,7 @@ button {
   margin-top: 5%;
 }
 
-.hidden {
-  display: none;
-}
-
-.clickable {
-  user-select: none;
-  cursor: pointer;
-}
-
-.clickable:hover {
-  color: var(dark1);
-}
-
-.clickable:active {
-  color: var(blue2);
-}
-
-.panel {
-  margin: 3px;
-  border-bottom: 1px solid #f4f4f6;
-}
-
-.panel:last-of-type {
-  border-bottom: none;
-  margin-bottom: 10px;
-}
-
+/* OpenLayers styling */
 .ol-zoom,
 .ol-full-screen,
 .ol-rotate {
@@ -145,6 +59,14 @@ button {
   right: 8px;
 }
 
+.ol-overlaycontainer-stopevent {
+  z-index: inherit !important;
+}
+
+.ol-overlay-container {
+  z-index: 2000 !important;
+}
+
 @media only screen and (max-width: 600px) {
   .tool-panel {
     position: fixed;
@@ -164,28 +86,4 @@ button {
     bottom: 20px;
     top: 20px;
   }
-}
-
-.big {
-  font-size: 20pt;
-}
-
-dialog {
-  border: 1px solid #ccc;
-}
-
-.pull-left {
-  float: left;
-}
-
-.pull-right {
-  float: right;
-}
-
-.ol-overlaycontainer-stopevent {
-  z-index: inherit !important;
-}
-
-.ol-overlay-container {
-  z-index: 2000 !important;
 }

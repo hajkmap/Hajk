@@ -6,7 +6,7 @@ import Observer from "react-event-observer";
 import AppModel from "./../models/AppModel.js";
 import Typography from "@material-ui/core/Typography";
 import AppBar from "@material-ui/core/AppBar";
-import { Toolbar as MUIToolbar } from "@material-ui/core";
+import { Toolbar as MUIToolbar, CssBaseline } from "@material-ui/core";
 import { SnackbarProvider, withSnackbar } from "notistack";
 import Toolbar from "./Toolbar.js";
 //import Popup from "./Popup.js";
@@ -394,7 +394,8 @@ class App extends React.PureComponent {
           horizontal: "center"
         }}
       >
-        <div>
+        <>
+          <CssBaseline />
           <Alert
             open={this.state.alert}
             message={this.state.alertMessage}
@@ -476,7 +477,7 @@ class App extends React.PureComponent {
             </div>
           </div>
           <footer className={classes.footer} id="footer" />
-        </div>
+        </>
       </SnackbarProvider>
     );
   }

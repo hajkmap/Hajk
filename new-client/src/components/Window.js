@@ -11,7 +11,7 @@ const zIndexStart = 1e3;
 // This is necessary so we can disable/enable drag at any time.
 //
 Rnd.prototype.onDragStart = function(e, data) {
-  if (this.state.disableDrag || e.target.tagName !== "H1") {
+  if (this.state.disableDrag) {
     return false;
   }
 
@@ -85,18 +85,13 @@ const styles = theme => {
       }
     },
     panelContent: {
-      position: "absolute",
-      top: 0,
-      right: 0,
-      left: 0,
-      bottom: 0
+      display: "flex",
+      height: "100%",
+      width: "100%",
+      flexDirection: "column"
     },
     content: {
-      position: "absolute",
-      top: "46px",
-      left: 0,
-      right: 0,
-      bottom: 0,
+      flex: "1",
       overflowY: "auto",
       padding: "10px",
       cursor: "default !important",
