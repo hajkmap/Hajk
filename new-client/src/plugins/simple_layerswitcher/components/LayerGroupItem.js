@@ -11,7 +11,6 @@ import IconMoreHoriz from "@material-ui/icons/MoreHoriz";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import LayerSettings from "./LayerSettings.js";
-import marked from "marked";
 
 const styles = theme => ({
   button: {

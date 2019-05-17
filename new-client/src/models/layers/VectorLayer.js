@@ -174,7 +174,6 @@ class WFSVectorLayer {
         config.legend[0].url = imageData;
       });
     }
-
     this.layer = new VectorLayer({
       featureType: config.params.typename.split(":")[1],
       information: config.information,

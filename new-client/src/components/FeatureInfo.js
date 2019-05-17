@@ -248,9 +248,7 @@ class FeatureInfo extends React.PureComponent {
       ) {
         markdown = feature.layer.layersInfo[layer].infobox;
       }
-
       var properties = feature.getProperties();
-
       Object.keys(properties).forEach(property => {
         var jsonData = this.valueFromJson(properties[property]);
         if (jsonData) {
@@ -268,7 +266,6 @@ class FeatureInfo extends React.PureComponent {
           markdown = transformed.str;
         }
       }
-
       var value = markdown
         ? this.parse(markdown, properties)
         : this.table(properties);
@@ -311,6 +308,8 @@ class FeatureInfo extends React.PureComponent {
           );
         case "table":
           return <div key={i}>Tabell</div>;
+        default:
+          return null;
       }
     });
   }

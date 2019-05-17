@@ -7,10 +7,6 @@ import GeoJSON from "ol/format/GeoJSON";
 import Attribution from "ol/control/Attribution";
 import LayerInfo from "./LayerInfo.js";
 
-const fetchConfig = {
-  credentials: "same-origin"
-};
-
 var WmsLayerProperties = {
   url: "",
   projection: "EPSG:3007",
