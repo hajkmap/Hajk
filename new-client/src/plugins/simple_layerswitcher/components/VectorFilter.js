@@ -13,6 +13,9 @@ const styles = theme => ({
   formControl: {
     margin: theme.spacing.unit,
     minWidth: 120
+  },
+  subtitle2: {
+    fontWeight: 500
   }
 });
 
@@ -88,8 +91,8 @@ class VectorFilter extends React.PureComponent {
     if (layer instanceof VectorLayer) {
       return (
         <div>
-          <Typography variant="subtitle1">
-            Filtrera innehåll baserat på attribut:
+          <Typography className={classes.subtitle2} variant="subtitle2">
+            Filtrera innehåll baserat på attribut
           </Typography>
           <FormControl className={classes.formControl}>
             <InputLabel htmlFor="attribute">Attribut</InputLabel>

@@ -37,7 +37,7 @@ const styles = theme => ({
   layerItemContainer: {
     background: "white",
     borderBottom: "1px solid #ccc",
-    paddingLeft: "20px"
+    paddingLeft: "0"
   },
   layerItemInfo: {
     display: "flex",
@@ -64,7 +64,7 @@ const styles = theme => ({
     margin: "10px 25px"
   },
   settingsButton: {
-    fontSize: "14pt",
+    fontSize: "22pt",
     cursor: "pointer",
     padding: "5px"
   }

@@ -86,8 +86,11 @@ const styles = theme => {
     },
     panelContent: {
       display: "flex",
-      height: "100%",
-      width: "100%",
+      position: "absolute",
+      top: 0,
+      left: 0,
+      bottom: 0,
+      right: 0,
       flexDirection: "column"
     },
     content: {
@@ -429,7 +432,7 @@ class Window extends React.PureComponent {
         }}
         className={classes.window}
         minWidth={300}
-        minHeight={this.mode === "minimized" ? 46 : 300}
+        minHeight={this.mode === "minimized" ? 42 : 300}
         size={{
           width: width,
           height: height

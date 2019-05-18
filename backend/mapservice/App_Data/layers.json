@@ -265,10 +265,10 @@
       "caption": "Kollektivtrafik",
       "url": "http://giscloud.se/geoserver/wms",
       "owner": "",
-      "date": "1551696276422",
+      "date": "1558191018309",
       "content": "",
       "legend": "",
-      "projection": null,
+      "projection": "EPSG:3006",
       "layers": ["wsp:hpl", "wsp:bus_line"],
       "layersInfo": [
         {
@@ -276,16 +276,16 @@
           "caption": "Hållplats",
           "legend": "",
           "infobox": "<img src=\"{image}\" />",
-          "style": null,
-          "queryable": false
+          "style": "point",
+          "queryable": true
         },
         {
           "id": "wsp:bus_line",
           "caption": "Busslinje",
           "legend": "",
           "infobox": "",
-          "style": null,
-          "queryable": false
+          "style": "line_outlined",
+          "queryable": true
         }
       ],
       "searchFields": null,
@@ -307,8 +307,8 @@
       "infoUrl": "http://www.google.se",
       "infoUrlText": "Länk",
       "infoOwner": "Karl Kula",
-      "version": null,
-      "infoFormat": null
+      "version": "1.1.1",
+      "infoFormat": "application/json"
     },
     {
       "id": "28",
@@ -407,7 +407,7 @@
       "caption": "Mätpunkter",
       "url": "http://giscloud.se/geoserver/wms",
       "owner": "",
-      "date": "1557956151760",
+      "date": "1558192495398",
       "content": "",
       "legend": "",
       "projection": "EPSG:3006",
@@ -418,7 +418,7 @@
           "caption": "",
           "legend": "",
           "infobox": "",
-          "style": null,
+          "style": "measure_point",
           "queryable": true
         }
       ],

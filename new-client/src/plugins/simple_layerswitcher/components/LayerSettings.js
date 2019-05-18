@@ -2,6 +2,7 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Slider from "@material-ui/lab/Slider";
 import VectorFilter from "./VectorFilter";
+import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
   sliderContainer: {
@@ -16,6 +17,9 @@ const styles = theme => ({
     paddingLeft: "30px",
     paddingRight: "30px",
     paddingBottom: "30px"
+  },
+  subtitle2: {
+    fontWeight: 500
   }
 });
 
@@ -44,17 +48,19 @@ class LayerSettings extends React.PureComponent {
     let opacityValue = this.state.opacityValue;
     const { classes } = this.props;
     return (
-      <>
-        <span>Opacitet: </span>
+      <div>
+        <Typography className={classes.subtitle2} variant="subtitle2">
+          Opacitet
+        </Typography>
         <Slider
-          classes={{ container: classes.slider }}
+          classes={{ container: classes.sliderContainer }}
           value={opacityValue}
           min={0}
           max={1}
           step={0.1}
           onChange={this.opacitySliderChanged}
         />
-      </>
+      </div>
     );
   }
 
@@ -95,6 +101,7 @@ class LayerSettings extends React.PureComponent {
   }
 
   renderLegendImage() {
+    const { classes } = this.props;
     var index = this.props.index ? this.props.index : 0;
 
     var src =
@@ -102,12 +109,12 @@ class LayerSettings extends React.PureComponent {
         ? this.state.legend[index].url
         : "";
     return src ? (
-      <>
-        <br />
-        <span>Teckenförklaring:</span>
-        <br />
-        <img max-width="250px" alt="legend" src={src} />{" "}
-      </>
+      <div>
+        <Typography className={classes.subtitle2} variant="subtitle2">
+          Teckenförklaring
+        </Typography>
+        <img width="55px" alt="Teckenförklaring" src={src} />
+      </div>
     ) : null;
   }
 

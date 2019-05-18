@@ -41,7 +41,8 @@ const styles = theme => ({
   },
   panelSummary: {
     padding: "0px",
-    borderBottom: "1px solid #ccc"
+    borderBottom: "1px solid #ccc",
+    overflow: "hidden"
   }
 });
 

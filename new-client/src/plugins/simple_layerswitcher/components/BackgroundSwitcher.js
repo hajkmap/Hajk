@@ -181,17 +181,19 @@ class BackgroundSwitcher extends React.PureComponent {
   render() {
     const { classes } = this.props;
     return (
-      <ExpansionPanel
-        className={classes.disableTransition}
-        CollapseProps={{ classes: { container: classes.disableTransition } }}
-      >
-        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography className={classes.heading}>Bakgrundskartor</Typography>
-        </ExpansionPanelSummary>
-        <ExpansionPanelDetails classes={{ root: classes.root }}>
-          {this.renderBaseLayerComponents()}
-        </ExpansionPanelDetails>
-      </ExpansionPanel>
+      <div style={{ display: this.props.display ? "block" : "none" }}>
+        <ExpansionPanel
+          className={classes.disableTransition}
+          CollapseProps={{ classes: { container: classes.disableTransition } }}
+        >
+          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography className={classes.heading}>Bakgrundskartor</Typography>
+          </ExpansionPanelSummary>
+          <ExpansionPanelDetails classes={{ root: classes.root }}>
+            {this.renderBaseLayerComponents()}
+          </ExpansionPanelDetails>
+        </ExpansionPanel>
+      </div>
     );
   }
 }

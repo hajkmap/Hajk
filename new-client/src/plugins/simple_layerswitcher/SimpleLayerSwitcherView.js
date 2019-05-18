@@ -47,6 +47,9 @@ const styles = theme => ({
   layerSwitcher: {
     marginTop: "85px"
   },
+  layerGroups: {
+    padding: "0px"
+  },
   reset: {},
   card: {
     cursor: "pointer",
@@ -106,6 +109,10 @@ class SimpleLayersSwitcherView extends React.PureComponent {
       });
     });
 
+    props.observer.on("panelOpen", () => {
+      this.forceUpdate();
+    });
+
     props.app.globalObserver.on("informativeLoaded", chapters => {
       if (Array.isArray(chapters)) {
         this.setState({
@@ -122,9 +129,12 @@ class SimpleLayersSwitcherView extends React.PureComponent {
       },
       () => {
         setTimeout(() => {
-          var parent = instance.refs.panelElement.offsetParent;
-          var topOfElement = instance.refs.panelElement.offsetTop;
-          parent.scroll({ top: topOfElement, behavior: "smooth" });
+          const parent = instance.refs.panelElement.offsetParent;
+          const topOfElement = instance.refs.panelElement.offsetTop - 145;
+          const sections = parent.getElementsByTagName("section");
+          if (sections.length > 0) {
+            sections[0].scroll({ top: topOfElement, behavior: "smooth" });
+          }
         }, 50);
       }
     );
@@ -182,7 +192,6 @@ class SimpleLayersSwitcherView extends React.PureComponent {
             onChange={this.handleChangeTabs}
             indicatorColor="primary"
             textColor="primary"
-            variant="fullWidth"
           >
             <Tab label="Kartlager" />
             <Tab label="Bakgrundskartor" />
@@ -196,33 +205,30 @@ class SimpleLayersSwitcherView extends React.PureComponent {
               }}
             >
               <CancelIcon className={classes.icon} />
-              <span>Släck alla</span>
+              &nbsp;
+              <span>Släck alla lager</span>
             </Button>
           </div>
         </AppBar>
         <div className={classes.layerSwitcher}>
           <div>
-            <section>
-              <div className="content">
-                {this.state.activeTab === 0 && (
-                  <div style={{ width: "100%", float: "left" }}>
-                    {this.renderLayerGroups()}
-                  </div>
-                )}
-                {this.state.activeTab === 1 && (
-                  <BackgroundSwitcher
-                    layers={this.state.baseLayers}
-                    layerMap={this.props.model.layerMap}
-                    backgroundSwitcherBlack={
-                      this.options.backgroundSwitcherBlack
-                    }
-                    backgroundSwitcherWhite={
-                      this.options.backgroundSwitcherWhite
-                    }
-                  />
-                )}
+            <div className="content">
+              <div
+                style={{
+                  display: this.state.activeTab === 0 ? "block" : "none"
+                }}
+                className={classes.layerGroups}
+              >
+                {this.renderLayerGroups()}
               </div>
-            </section>
+              <BackgroundSwitcher
+                display={this.state.activeTab === 1}
+                layers={this.state.baseLayers}
+                layerMap={this.props.model.layerMap}
+                backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
+                backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
+              />
+            </div>
           </div>
           {this.props.breadCrumbs ? this.renderBreadCrumbs() : null}
         </div>

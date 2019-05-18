@@ -73,7 +73,7 @@ const styles = theme => ({
   layerGroup: {
     background: "white",
     borderBottom: "1px solid #ccc",
-    paddingLeft: "20px"
+    paddingLeft: "0px"
   },
   layerGroupContainer: {
     background: "white",
@@ -98,10 +98,13 @@ const styles = theme => ({
     overflow: "hidden"
   },
   settingsButton: {
-    fontSize: "14pt",
+    fontSize: "22pt",
     cursor: "pointer",
     padding: "5px",
     float: "right"
+  },
+  subtitle2: {
+    fontWeight: 500
   }
 });
 
@@ -378,14 +381,15 @@ class LayerGroupItem extends Component {
         </div>
         <div className={classes.legend}>
           {this.state.toggleSubLayerSettings[index] ? (
-            <>
-              <span>Teckenförklaring:</span>
-              <br />
+            <div>
+              <Typography className={classes.subtitle2} variant="subtitle2">
+                Teckenförklaring
+              </Typography>
               <img
                 src={this.props.layer.layersInfo[subLayer].legend}
                 alt="teckenförklaring"
               />
-            </>
+            </div>
           ) : null}
         </div>
       </div>
