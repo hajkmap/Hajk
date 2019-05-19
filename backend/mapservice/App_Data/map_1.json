@@ -131,8 +131,8 @@
             "id": "3a18c697-a52a-e5c9-cb77-2a7f03c648ec",
             "parent": "-1",
             "name": "Kartlager",
-            "toggled": false,
-            "expanded": false,
+            "toggled": true,
+            "expanded": true,
             "layers": [
               {
                 "id": "33",

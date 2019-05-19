@@ -32,7 +32,8 @@ const styles = theme => ({
   layerItem: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center"
+    alignItems: "center",
+    paddingLeft: "10px"
   },
   layerItemContainer: {
     background: "white",

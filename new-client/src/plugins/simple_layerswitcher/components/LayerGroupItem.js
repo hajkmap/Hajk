@@ -73,7 +73,7 @@ const styles = theme => ({
   layerGroup: {
     background: "white",
     borderBottom: "1px solid #ccc",
-    paddingLeft: "0px"
+    paddingLeft: "10px"
   },
   layerGroupContainer: {
     background: "white",
