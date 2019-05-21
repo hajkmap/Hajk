@@ -10,11 +10,9 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 const styles = theme => ({
   search: {
     borderRadius: theme.shape.borderRadius,
-    border: "1px solid " + theme.palette.secondary.main,
-    backgroundColor: fade(theme.palette.common.white, 0.15),
-    "&:hover": {
-      backgroundColor: fade(theme.palette.common.white, 0.25)
-    },
+
+    backgroundColor: "inherit",
+
     overflow: "hidden"
   },
   closeIcon: {},
@@ -82,7 +80,8 @@ class SearchBar extends React.PureComponent {
       value,
       target,
       loading,
-      tooltip
+      tooltip,
+      activeTool
     } = this.props;
 
     return (
@@ -98,14 +97,22 @@ class SearchBar extends React.PureComponent {
             });
           }}
           value={value === "" ? value : this.state.value}
-          placeholder={tooltip}
+          placeholder={activeTool}
           disableUnderline
           classes={{
             root: classes.inputRoot,
             input:
               target === "top" ? classes.inputInputWide : classes.inputInput
           }}
-          endAdornment={
+        />
+      </div>
+    );
+  }
+}
+
+export default withStyles(styles)(SearchBar);
+
+/*endAdornment={
             <InputAdornment className={classes.searchIcon} position="end">
               {this.state.value ? (
                 loading ? (
@@ -120,11 +127,4 @@ class SearchBar extends React.PureComponent {
                 <SearchIcon />
               )}
             </InputAdornment>
-          }
-        />
-      </div>
-    );
-  }
-}
-
-export default withStyles(styles)(SearchBar);
+          }*/

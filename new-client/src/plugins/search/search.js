@@ -7,11 +7,8 @@ import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import Observer from "react-event-observer";
 import SearchBar from "./components/SearchBar.js";
 import SearchResultList from "./components/SearchResultList.js";
-import SearchWithinButton from "./components/SearchWithinButton.js";
-import SearchWithPolygonButton from "./components/SearchWithPolygonButton";
-import SearchWithSelectionButton from "./components/SearchWithSelectionButton";
-import SpatialSearchOptions from "./components/SpatialSearchOptions";
-import ClearButton from "./components/ClearButton.js";
+import SpatialSearch from "./components/SpatialSearch";
+//import ClearButton from "./components/ClearButton.js";
 import SearchModel from "./SearchModel.js";
 import PanelHeader from "./../../components/PanelHeader.js";
 import { isMobile } from "../../utils/IsMobile.js";
@@ -69,7 +66,9 @@ const styles = theme => {
     searchContainer: {
       [theme.breakpoints.up("lg")]: {
         display: "flex",
-        alignItems: "center"
+        alignItems: "center",
+        backgroundColor: "#eee",
+        borderRadius: theme.shape.borderRadius
       }
     },
     searchContainerTop: {
@@ -149,7 +148,8 @@ class Search extends React.PureComponent {
     );
     this.state = {
       visible: window.innerWidth > b,
-      loading: false
+      loading: false,
+      activeTool: "textsearch"
     };
     this.toolDescription = props.options.toolDescription;
     this.tooltip = props.options.tooltip;
@@ -283,13 +283,35 @@ class Search extends React.PureComponent {
               onChange={this.searchModel.search}
               onComplete={this.resolve}
               tooltip={this.tooltip}
+              activeTool={this.state.activeTool}
             />
-            <SpatialSearchOptions
-              onChange={e =>
-                this.setState({
-                  activeTool: e.target.value
-                })
-              }
+            <SpatialSearch
+              onChange={e => {
+                this.setState(
+                  {
+                    activeTool: e.target.value
+                  },
+                  () => {
+                    switch (this.state.activeTool) {
+                      case "polygon":
+                        this.searchModel.polygonSearch(featureCollections => {
+                          this.resolve(featureCollections);
+                        });
+                        break;
+                      case "within":
+                        this.searchModel.withinSearch(layerIds => {
+                          this.props.onSearchWithin(layerIds);
+                        });
+                        break;
+                      case "selection":
+                        this.searchModel.selectionSearch();
+                        break;
+                      default:
+                        break;
+                    }
+                  }
+                );
+              }}
             />
             {/*<SearchWithinButton
               localObserver={this.localObserver}
@@ -322,7 +344,7 @@ class Search extends React.PureComponent {
               }
               model={this.searchModel}
               onComplete={this.resolve}
-            />*/}
+            />
             <ClearButton
               model={this.searchModel}
               onClear={() => {
@@ -332,7 +354,7 @@ class Search extends React.PureComponent {
                   result: false
                 });
               }}
-            />
+            />*/}
           </div>
           {this.renderSearchResultList("center")}
         </div>
