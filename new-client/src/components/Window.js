@@ -400,11 +400,13 @@ class Window extends React.PureComponent {
           display: open ? "block" : "none"
         }}
         onDragStop={(e, d) => {
-          this.left = this.rnd.getSelfElement().getClientRects()[0].left;
-          this.top =
-            this.rnd.getSelfElement().getClientRects()[0].top -
-            this.headerHeight;
-          this.right = window.innerWidth - (this.left + parseFloat(this.width));
+          const rect = this.rnd.getSelfElement().getClientRects()[0];
+          if (rect) {
+            this.left = rect.left;
+            this.top = rect.top - this.headerHeight;
+            this.right =
+              window.innerWidth - (this.left + parseFloat(this.width));
+          }
         }}
         onResize={(e, direction, ref, delta, position) => {
           this.width = ref.style.width;

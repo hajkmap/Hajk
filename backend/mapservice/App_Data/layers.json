@@ -407,7 +407,7 @@
       "caption": "Mätpunkter",
       "url": "http://giscloud.se/geoserver/wms",
       "owner": "",
-      "date": "1558192495398",
+      "date": "1558423815220",
       "content": "",
       "legend": "",
       "projection": "EPSG:3006",
@@ -415,9 +415,9 @@
       "layersInfo": [
         {
           "id": "wsp:measure_point",
-          "caption": "",
+          "caption": "Mätpunkt",
           "legend": "",
-          "infobox": "",
+          "infobox": "<p>Diagram</p>\n[diagram source=\"https://giscloud.se/geoserver/wsp/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=wsp%3Ameasure_data&maxFeatures=50&outputFormat=application%2Fjson&cql_filter=measure_point_id={point_id}\"]\n[table source=\"https://giscloud.se/geoserver/wsp/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=wsp%3Ameasure_data&maxFeatures=50&outputFormat=application%2Fjson&cql_filter=measure_point_id={point_id}\"]",
           "style": "measure_point",
           "queryable": true
         }

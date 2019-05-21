@@ -1,16 +1,22 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend
-} from "recharts";
 
-const styles = theme => ({});
+const styles = theme => ({
+  table: {
+    borderCollapse: "collapse",
+    borderColor: "black",
+    margin: "10px",
+    "& th": {
+      textAlign: "left"
+    },
+    "& td": {
+      border: "1px solid #999"
+    },
+    "& thead": {
+      borderBottom: "2px solid"
+    }
+  }
+});
 
 class FeatureInfo extends React.PureComponent {
   state = {
@@ -66,26 +72,25 @@ class FeatureInfo extends React.PureComponent {
   }
 
   render() {
+    const { classes } = this.props;
     if (this.state.data) {
       return (
-        <LineChart
-          width={400}
-          height={300}
-          data={this.state.data}
-          margin={{
-            top: 5,
-            right: 30,
-            left: 20,
-            bottom: 5
-          }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="value" stroke="#82ca9d" />
-        </LineChart>
+        <table className={classes.table}>
+          <thead>
+            <tr>
+              <th>Datum</th>
+              <th>Mätvärde</th>
+            </tr>
+          </thead>
+          <tbody>
+            {this.state.data.map((dataPair, i) => (
+              <tr key={i}>
+                <td>{dataPair.date}</td>
+                <td>{dataPair.value}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       );
     } else {
       return <div>Laddar</div>;
