@@ -89,6 +89,7 @@ class SearchModel {
   };
 
   onSelectFeatures = evt => {
+    console.log(evt, "evt");
     handleClick(evt, evt.map, response => {
       console.log(evt, "evt");
       this.vectorLayer.getSource().addFeatures(response.features);
@@ -97,14 +98,15 @@ class SearchModel {
 
   doSearch = () => {
     var features = this.vectorLayer.getSource().getFeatures();
-    console.log("GOING TO SEARCH");
-    console.log(features, "feature");
-    /* this.searchWithinArea(features, false, res => {
-      console.log(res, "res");
-    });*/
+    console.log(features, "features");
+    if (features.length > 0) {
+      this.searchWithinArea(features, false, res => {
+        console.log(res, "res");
+      });
+    }
   };
 
-  selectGeometriesForSpatialSearch = active => {
+  toggleSelectGeometriesForSpatialSearch = active => {
     if (active) {
       this.olMap.clicklock = true;
       this.olMap.on("singleclick", this.onSelectFeatures);
@@ -276,6 +278,19 @@ class SearchModel {
     });
   };
 
+  removeRecentSpatialSearch = () => {
+    this.toggleDraw(false);
+    this.toggleSelectGeometriesForSpatialSearch(false);
+    this.clearHighlight();
+    this.clearLayerList();
+    this.clear();
+  };
+
+  selectionSearch = searchDone => {
+    this.toggleDraw(false);
+    this.toggleSelectGeometriesForSpatialSearch(true);
+  };
+
   withinSearch = searchDone => {
     this.toggleDraw(true, "Circle", true, e => {
       this.searchWithinArea(e.feature, true, featureCollections => {
@@ -304,7 +319,7 @@ class SearchModel {
         freehand: freehand
       });
       this.draw.on("drawend", e => {
-        this.clear();
+        //this.clear();
         this.olMap.removeInteraction(this.draw);
         setTimeout(() => {
           this.olMap.clicklock = false;
@@ -317,6 +332,7 @@ class SearchModel {
       this.olMap.addInteraction(this.draw);
     } else {
       if (this.draw) {
+        this.clear();
         this.olMap.removeInteraction(this.draw);
       }
       this.olMap.clicklock = false;

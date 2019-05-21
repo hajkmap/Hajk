@@ -9,6 +9,8 @@ import SearchBar from "./components/SearchBar.js";
 import SearchResultList from "./components/SearchResultList.js";
 import SpatialSearch from "./components/SpatialSearch";
 //import ClearButton from "./components/ClearButton.js";
+import SearchSettingsButton from "./components/SearchSettingsButton";
+import SearchButton from "./components/SearchButton";
 import SearchModel from "./SearchModel.js";
 import PanelHeader from "./../../components/PanelHeader.js";
 import { isMobile } from "../../utils/IsMobile.js";
@@ -69,6 +71,12 @@ const styles = theme => {
         alignItems: "center",
         backgroundColor: "#eee",
         borderRadius: theme.shape.borderRadius
+      }
+    },
+    searchToolsContainer: {
+      [theme.breakpoints.up("lg")]: {
+        display: "flex",
+        alignItems: "center"
       }
     },
     searchContainerTop: {
@@ -277,84 +285,53 @@ class Search extends React.PureComponent {
         >
           <div>{this.renderLoader()}</div>
           <div>{this.renderDescription()}</div>
-          <div className={classes.searchContainer}>
-            <SearchBar
-              model={this.searchModel}
-              onChange={this.searchModel.search}
-              onComplete={this.resolve}
-              tooltip={this.tooltip}
-              activeTool={this.state.activeTool}
-            />
-            <SpatialSearch
-              onChange={e => {
-                this.setState(
-                  {
-                    activeTool: e.target.value
-                  },
-                  () => {
-                    switch (this.state.activeTool) {
-                      case "polygon":
-                        this.searchModel.polygonSearch(featureCollections => {
-                          this.resolve(featureCollections);
-                        });
-                        break;
-                      case "within":
-                        this.searchModel.withinSearch(layerIds => {
-                          this.props.onSearchWithin(layerIds);
-                        });
-                        break;
-                      case "selection":
-                        this.searchModel.selectionSearch();
-                        break;
-                      default:
-                        break;
+          <div className={classes.searchToolsContainer}>
+            <div className={classes.searchContainer}>
+              <SearchBar
+                model={this.searchModel}
+                onChange={this.searchModel.search}
+                onComplete={this.resolve}
+                tooltip={this.tooltip}
+                activeTool={this.state.activeToolType}
+              />
+              <SpatialSearch
+                onChange={e => {
+                  this.searchModel.removeRecentSpatialSearch();
+                  this.setState(
+                    {
+                      activeToolType: e.target.value,
+                      result: false
+                    },
+                    () => {
+                      switch (this.state.activeToolType) {
+                        case "polygon":
+                          this.searchModel.polygonSearch(featureCollections => {
+                            this.resolve(featureCollections);
+                          });
+                          break;
+                        case "within":
+                          console.log("within");
+                          this.searchModel.withinSearch(layerIds => {
+                            if (layerIds.length > 0) {
+                              this.props.onSearchWithin(layerIds);
+                            }
+                          });
+                          break;
+                        case "selection":
+                          console.log("selection");
+                          this.searchModel.selectionSearch(
+                            this.state.otherToolActive
+                          );
+                          break;
+                        default:
+                          break;
+                      }
                     }
-                  }
-                );
-              }}
-            />
-            {/*<SearchWithinButton
-              localObserver={this.localObserver}
-              buttonText={this.searchWithinButtonText}
-              model={this.searchModel}
-              onSearchWithin={layerIds => {
-                if (layerIds.length === 0) {
-                  this.setState({
-                    result: []
-                  });
-                } else {
-                  this.setState({
-                    result: layerIds
-                  });
-                }
-              }}
-            />
-            <SearchWithPolygonButton
-              localObserver={this.localObserver}
-              buttonText={
-                this.searchWithPolygonButtonText || "Rita polygon i kartan"
-              }
-              model={this.searchModel}
-              onComplete={this.resolve}
-            />
-            <SearchWithSelectionButton
-              localObserver={this.localObserver}
-              buttonText={
-                this.searchWithPolygonButtonText || "Rita polygon i kartan"
-              }
-              model={this.searchModel}
-              onComplete={this.resolve}
-            />
-            <ClearButton
-              model={this.searchModel}
-              onClear={() => {
-                this.searchModel.clear();
-                this.localObserver.publish("clearInput");
-                this.setState({
-                  result: false
-                });
-              }}
-            />*/}
+                  );
+                }}
+              />
+            </div>
+            <SearchSettingsButton />
           </div>
           {this.renderSearchResultList("center")}
         </div>

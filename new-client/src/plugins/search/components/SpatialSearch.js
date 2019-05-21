@@ -9,6 +9,7 @@ import Select from "@material-ui/core/Select";
 import Tooltip from "@material-ui/core/Tooltip";
 import CropSquare from "@material-ui/icons/CropSquare";
 import TripOrigin from "@material-ui/icons/TripOrigin";
+import Stop from "@material-ui/icons/Stop";
 import Grid from "@material-ui/core/Grid";
 import Icon from "@material-ui/core/Icon";
 import TouchApp from "@material-ui/icons/TouchApp";
@@ -27,7 +28,7 @@ const styles = theme => ({
 
   formControl: {
     margin: theme.spacing.unit,
-    minWidth: 150,
+    minWidth: 20,
     maxWidth: 300
   },
   noLabel: {
@@ -68,6 +69,9 @@ class SpatialSearchOptions extends React.Component {
             }}
             className={classes.select}
           >
+            <MenuItem value="" disabled>
+              <Stop />
+            </MenuItem>
             <MenuItem value={"polygon"} alignItems="center">
               <Tooltip title="Visa påverkan inom ett område">
                 <Grid container direction="row" alignItems="center">

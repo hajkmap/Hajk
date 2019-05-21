@@ -97,13 +97,18 @@ class SearchBar extends React.PureComponent {
             });
           }}
           value={value === "" ? value : this.state.value}
-          placeholder={activeTool}
+          placeholder={"test"}
           disableUnderline
           classes={{
             root: classes.inputRoot,
             input:
               target === "top" ? classes.inputInputWide : classes.inputInput
           }}
+          startAdornment={
+            <InputAdornment position="start">
+              <SearchIcon />
+            </InputAdornment>
+          }
         />
       </div>
     );
