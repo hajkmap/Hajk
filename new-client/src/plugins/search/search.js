@@ -284,7 +284,13 @@ class Search extends React.PureComponent {
               onComplete={this.resolve}
               tooltip={this.tooltip}
             />
-            <SpatialSearchOptions />
+            <SpatialSearchOptions
+              onChange={e =>
+                this.setState({
+                  activeTool: e.target.value
+                })
+              }
+            />
             {/*<SearchWithinButton
               localObserver={this.localObserver}
               buttonText={this.searchWithinButtonText}
@@ -300,7 +306,7 @@ class Search extends React.PureComponent {
                   });
                 }
               }}
-            />*/}
+            />
             <SearchWithPolygonButton
               localObserver={this.localObserver}
               buttonText={
@@ -309,7 +315,6 @@ class Search extends React.PureComponent {
               model={this.searchModel}
               onComplete={this.resolve}
             />
-            {/*
             <SearchWithSelectionButton
               localObserver={this.localObserver}
               buttonText={
