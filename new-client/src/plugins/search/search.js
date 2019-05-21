@@ -20,7 +20,7 @@ const styles = theme => {
       borderBottomLeftRadius: "10px",
       borderBottomRightRadius: "10px",
       margin: "-10px 10px 10px 10px",
-      border: "1px solid " + theme.palette.secondary.main,
+      border: "1px solid " + theme.palette.primary.main,
       maxWidth: "600px",
       pointerEvents: "all",
       [theme.breakpoints.down("md")]: {
@@ -221,11 +221,14 @@ class Search extends React.PureComponent {
 
   renderButton(target) {
     const { classes } = this.props;
-    var iconClass = classes.iconButton;
-    if (target === "header") {
-      iconClass = classes.iconButtonHeader;
-    }
-    return <SearchIcon className={iconClass} onClick={this.toggleSearch} />;
+    return (
+      <SearchIcon
+        className={
+          target === "header" ? classes.iconButtonHeader : classes.iconButton
+        }
+        onClick={this.toggleSearch}
+      />
+    );
   }
 
   renderCenter() {
@@ -309,7 +312,7 @@ class Search extends React.PureComponent {
     );
   }
 
-  renderTop(target) {
+  renderTop() {
     const { classes } = this.props;
     return (
       <div

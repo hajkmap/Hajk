@@ -1,7 +1,6 @@
 import React from "react";
 import Input from "@material-ui/core/Input";
 import { withStyles } from "@material-ui/core/styles";
-import { fade } from "@material-ui/core/styles/colorManipulator";
 import SearchIcon from "@material-ui/icons/Search";
 import ClearIcon from "@material-ui/icons/Clear";
 import InputAdornment from "@material-ui/core/InputAdornment";
@@ -10,52 +9,35 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 const styles = theme => ({
   search: {
     borderRadius: theme.shape.borderRadius,
-    border: "1px solid " + theme.palette.secondary.main,
-    backgroundColor: fade(theme.palette.common.white, 0.15),
-    "&:hover": {
-      backgroundColor: fade(theme.palette.common.white, 0.25)
-    },
-    overflow: "hidden"
-  },
-  closeIcon: {},
-  clearIcon: {
-    cursor: "pointer"
-  },
-  searchIcon: {
-    height: "100%",
-    position: "relative",
-    padding: "6px",
-    background: theme.palette.secondary.main
+    border: "1px solid " + theme.palette.primary.main
   },
   inputRoot: {
-    color: "inherit",
     width: "100%"
   },
   inputInput: {
-    paddingTop: theme.spacing.unit,
-    paddingRight: theme.spacing.unit,
-    paddingBottom: theme.spacing.unit,
-    paddingLeft: theme.spacing.unit,
-    transition: theme.transitions.create("width"),
+    padding: theme.spacing.unit,
     left: "100%",
     width: "100%"
   },
   inputInputWide: {
-    paddingTop: theme.spacing.unit,
-    paddingRight: theme.spacing.unit,
-    paddingBottom: theme.spacing.unit,
-    paddingLeft: theme.spacing.unit,
-    transition: theme.transitions.create("width"),
+    padding: theme.spacing.unit,
     left: "100%",
     width: "100%",
     "&:focus": {
       width: "100%"
     }
   },
+  clearIcon: {
+    cursor: "pointer"
+  },
+  searchIcon: {
+    position: "relative",
+    padding: "6px"
+  },
   progress: {
     width: "20px !important",
     height: "20px !important",
-    color: "black",
+    color: theme.palette.primary.main,
     margin: "2px"
   }
 });
