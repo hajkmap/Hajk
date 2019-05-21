@@ -1,7 +1,7 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: arial;
+  font-family: "Roboto", sans-serif;
 }
 .app-start {
   position: absolute;
@@ -20,6 +20,13 @@ body {
   background: rgb(63, 63, 63);
   color: white !important;
   fill: white;
+}
+
+.app-start div {
+  font-size: 3rem;
+  font-style: italic;
+  font-weight: 100;
+  font-variant-caps: all-small-caps;
 }
 .compass {
   animation: compass 1.2s cubic-bezier(0.51, 0.41, 0.17, 1.1) infinite;
