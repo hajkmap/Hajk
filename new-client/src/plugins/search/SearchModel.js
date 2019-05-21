@@ -276,6 +276,26 @@ class SearchModel {
     });
   };
 
+  withinSearch = searchDone => {
+    this.toggleDraw(true, "Circle", true, e => {
+      this.searchWithinArea(e.feature, true, featureCollections => {
+        let layerIds = featureCollections.map(featureCollection => {
+          return featureCollection.source.layerId;
+        });
+        this.showLayers(layerIds);
+        searchDone(layerIds);
+      });
+    });
+  };
+
+  polygonSearch = searchDone => {
+    this.toggleDraw(true, "Polygon", false, e => {
+      this.searchWithinArea(e.feature, false, featureCollections => {
+        searchDone(featureCollections);
+      });
+    });
+  };
+
   toggleDraw = (active, type, freehand, drawEndCallback) => {
     if (active) {
       this.draw = new Draw({
