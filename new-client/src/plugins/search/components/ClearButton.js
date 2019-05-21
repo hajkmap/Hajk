@@ -10,7 +10,7 @@ const styles = theme => {
   };
 };
 
-class SearchWithinButton extends React.Component {
+class ClearButton extends React.PureComponent {
   state = {
     active: false
   };
@@ -25,4 +25,4 @@ class SearchWithinButton extends React.Component {
   }
 }
 
-export default withStyles(styles)(SearchWithinButton);
+export default withStyles(styles)(ClearButton);
