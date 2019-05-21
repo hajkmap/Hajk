@@ -6,6 +6,7 @@ import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import Typography from "@material-ui/core/Typography";
 import marked from "marked";
 import Diagram from "./Diagram";
+import Table from "./Table";
 
 const styles = theme => ({
   windowSection: {
@@ -307,7 +308,7 @@ class FeatureInfo extends React.PureComponent {
             <Diagram key={i} source={shortcode.source} feature={feature} />
           );
         case "table":
-          return <div key={i}>Tabell</div>;
+          return <Table key={i} source={shortcode.source} feature={feature} />;
         default:
           return null;
       }

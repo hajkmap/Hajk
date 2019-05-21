@@ -1,1 +1,21 @@
-{"chapters":[{"header":"Riksintresse","html":"<p>Detta kapitel beskriver information om riksintressen som till <em>exempel</em> naturreservat eller nationalparker.</p>\n<h2>Naturreservat</h2>\n<p>Inom ramen för <strong>översiktsplanering</strong> hanterar kommunen naturreservat, det är länsstyrelsen som beslutar och vårdar dessa.</p>\n<h2>Nationalpark</h2>\n<p>En nationalpark är ett riksintresse som hanteras av staten, inom detta område finns tydliga restriktioner i hur kommunen får nyttja marken.</p>\n<figure><img src=\"https://images.vastsverige.com/publishedmedia/rg8rtu96j55elx37c2qh/Uddev2_180121-0147.jpg\" alt=\"\"/></figure>\n<p>&nbsp;</p>","mapSettings":{"center":[236624.60426922567,6585679.835748331],"zoom":11},"chapters":[],"expanded":false,"layers":["27"]},{"header":"Test","html":"<p>Test</p>","mapSettings":{"center":[236000,6585000],"zoom":10},"chapters":[],"expanded":true,"layers":["27","17"]}],"map":"op"}
+{
+  "chapters": [
+    {
+      "header": "Riksintresse",
+      "html": "<p>Detta kapitel beskriver information om riksintressen som till <em>exempel</em> naturreservat eller nationalparker.</p>\n<h2>Naturreservat</h2>\n<p>Inom ramen för <strong>översiktsplanering</strong> hanterar kommunen naturreservat, det är länsstyrelsen som beslutar och vårdar dessa.</p>\n<h2>Nationalpark</h2>\n<p>En nationalpark är ett riksintresse som hanteras av staten, inom detta område finns tydliga restriktioner i hur kommunen får nyttja marken.&nbsp;</p>",
+      "mapSettings": { "center": [236032.5, 6585885.5], "zoom": 13 },
+      "chapters": [],
+      "expanded": true,
+      "layers": ["27"]
+    },
+    {
+      "header": "Test",
+      "html": "<p>Test</p>",
+      "mapSettings": { "center": [236000, 6585000], "zoom": 10 },
+      "chapters": [],
+      "expanded": true,
+      "layers": ["27", "17"]
+    }
+  ],
+  "map": "op"
+}

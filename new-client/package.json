@@ -52,6 +52,7 @@
     "react-dom": "^16.8.6",
     "react-event-observer": "^0.5.11",
     "react-horizontal-scrolling-menu": "^0.5.8",
-    "react-rnd": "^9.1.2"
+    "react-rnd": "^9.1.2",
+    "recharts": "^1.6.1"
   }
 }

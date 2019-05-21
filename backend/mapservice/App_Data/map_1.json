@@ -320,35 +320,6 @@
       "index": 0
     },
     {
-      "type": "search",
-      "options": {
-        "target": "header",
-        "onMap": false,
-        "bothSynlig": false,
-        "enableViewTogglePopupInSnabbsok": true,
-        "toolbar": "bottom",
-        "maxZoom": 14,
-        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
-        "kmlExportUrl": "/mapservice/export/kml",
-        "excelExportUrl": "/mapservice/export/excel",
-        "displayPopup": true,
-        "selectionTools": true,
-        "base64Encode": false,
-        "instruction": "",
-        "filterVisible": true,
-        "anchor": [16, 32],
-        "imgSize": [32, 32],
-        "tooltip": "Sök...",
-        "searchWithinButtonText": "Markera i kartan",
-        "toolDescription": "<div>Sök innehåll i kartan</div>",
-        "popupOffsetY": 0,
-        "visibleForGroups": [],
-        "layers": [],
-        "selectedSources": ["27", "30"]
-      },
-      "index": 0
-    },
-    {
       "type": "information",
       "options": {
         "target": "toolbar",
