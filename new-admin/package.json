@@ -1,6 +1,6 @@
 {
   "name": "new-admin",
-  "version": "3.0.0-alpha.4",
+  "version": "3.0.0-alpha.5",
   "private": true,
   "homepage": "/admin",
   "dependencies": {
@@ -31,7 +31,7 @@
     "draft-extend": "^1.6.1",
     "husky": "^2.3.0",
     "prettier": "^1.17.1",
-    "pretty-quick": "^1.10.0"
+    "pretty-quick": "^1.11.0"
   },
   "browserslist": [
     ">1% in SE",
