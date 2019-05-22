@@ -74,14 +74,21 @@ class SearchBar extends React.PureComponent {
   }
 
   render() {
-    const { classes, onChange, onComplete, value, target } = this.props;
+    const {
+      classes,
+      onChange,
+      onComplete,
+      value,
+      target,
+      forceSearch
+    } = this.props;
 
     return (
       <div className={classes.search}>
         <Input
           autoComplete="off"
           onChange={e => {
-            onChange(e.target.value, data => {
+            onChange(e.target.value, false, data => {
               onComplete(data);
             });
             this.setState({
@@ -91,6 +98,14 @@ class SearchBar extends React.PureComponent {
           value={value === "" ? value : this.state.value}
           placeholder={"Sök"}
           disableUnderline
+          onKeyPress={e => {
+            //keyCode deprecated so using e.key instead
+            if (e.key === "Enter") {
+              forceSearch(e.target.value, true, data => {
+                onComplete(data);
+              });
+            }
+          }}
           classes={{
             root: classes.inputRoot,
             input:

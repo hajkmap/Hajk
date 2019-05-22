@@ -12,7 +12,7 @@ class SearchSettingsButton extends React.Component {
 
   render() {
     return (
-      <IconButton onClick={console.log("Not implemented")}>
+      <IconButton>
         <Settings />
       </IconButton>
     );

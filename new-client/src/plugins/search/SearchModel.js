@@ -179,9 +179,9 @@ class SearchModel {
 
   controllers = [];
 
-  search = (searchInput, callback) => {
+  search = (searchInput, force, callback) => {
     clearTimeout(this.timeout);
-    if (searchInput.length > 3) {
+    if (searchInput.length > 3 || force === true) {
       this.timeout = setTimeout(() => {
         this.observer.publish("searchStarted");
         var promises = [];

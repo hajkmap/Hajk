@@ -30,7 +30,7 @@ const styles = theme => ({
     marginTop: theme.spacing.unit * 3
   }
 });
-const ITEM_HEIGHT = 48;
+
 const POLYGON = "polygon";
 const WITHIN = "within";
 const SELECTION = "selection";

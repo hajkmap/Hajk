@@ -158,7 +158,6 @@ const SELECTION = "selection";
 
 class Search extends React.PureComponent {
   resolve = data => {
-    console.log(data, "data");
     this.setState({
       result: data
     });
@@ -219,7 +218,6 @@ class Search extends React.PureComponent {
   }
 
   renderSearchResultList(target) {
-    console.log("renderSearch");
     const { classes } = this.props;
     const { result } = this.state;
     if (!result) return null;
@@ -410,6 +408,7 @@ class Search extends React.PureComponent {
       return (
         <SearchBar
           model={this.searchModel}
+          forceSearch={this.searchModel.search}
           onChange={this.searchModel.search}
           localObserver={this.localObserver}
           onComplete={this.resolve}
