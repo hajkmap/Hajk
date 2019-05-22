@@ -1,6 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import LinearProgress from "@material-ui/core/LinearProgress";
+import Button from "@material-ui/core/Button";
 import { withStyles } from "@material-ui/core/styles";
 import SearchIcon from "@material-ui/icons/Search";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
@@ -11,6 +12,7 @@ import SpatialSearch from "./components/SpatialSearch";
 //import ClearButton from "./components/ClearButton.js";
 import SearchSettingsButton from "./components/SearchSettingsButton";
 import SearchButton from "./components/SearchButton";
+import SearchWithinBar from "./components/SearchWithinBar";
 import SearchModel from "./SearchModel.js";
 import PanelHeader from "./../../components/PanelHeader.js";
 import { isMobile } from "../../utils/IsMobile.js";
@@ -47,6 +49,9 @@ const styles = theme => {
         borderRadius: 0,
         boxShadow: "none"
       }
+    },
+    button: {
+      margin: theme.spacing.unit
     },
     panelHeader: {
       [theme.breakpoints.up("lg")]: {
@@ -157,7 +162,7 @@ class Search extends React.PureComponent {
     this.state = {
       visible: window.innerWidth > b,
       loading: false,
-      activeTool: "textsearch"
+      activeToolType: "textsearch"
     };
     this.toolDescription = props.options.toolDescription;
     this.tooltip = props.options.tooltip;
@@ -287,15 +292,73 @@ class Search extends React.PureComponent {
           <div>{this.renderDescription()}</div>
           <div className={classes.searchToolsContainer}>
             <div className={classes.searchContainer}>
-              <SearchBar
-                model={this.searchModel}
-                onChange={this.searchModel.search}
-                onComplete={this.resolve}
-                tooltip={this.tooltip}
-                activeTool={this.state.activeToolType}
-              />
-              <SpatialSearch
-                onChange={e => {
+              {this.renderTest()}
+              {this.renderSearchBar()}
+              {this.renderSpatialSearchOptions()}
+            </div>
+            {this.renderMainContainerButton()}
+          </div>
+          {this.renderSearchResultList("center")}
+        </div>
+      </div>
+    );
+  }
+
+  renderMainContainerButton() {
+    const { classes } = this.props;
+    if (this.state.activeToolType !== "textsearch") {
+      return <Button className={classes.button}>Avbryt</Button>;
+    } else {
+      return <SearchSettingsButton />;
+    }
+  }
+
+  renderTest() {
+    if (this.state.activeToolType !== "textsearch") {
+      return (
+        <div>
+          <SearchWithinBar />
+        </div>
+      );
+    } else {
+      return;
+    }
+  }
+
+  renderSpatialSearchOptions() {
+    if (this.state.activeToolType == "textsearch") {
+      return (
+        <SpatialSearch
+          onToolChanged={toolType => {
+            console.log(toolType, "activeToolType");
+            this.setState({
+              activeToolType: toolType
+            });
+          }}
+        />
+      );
+    } else {
+      return;
+    }
+  }
+
+  renderSearchBar() {
+    if (this.state.activeToolType == "textsearch") {
+      return (
+        <SearchBar
+          model={this.searchModel}
+          onChange={this.searchModel.search}
+          onComplete={this.resolve}
+          tooltip={this.tooltip}
+          activeTool={this.state.activeToolType}
+        />
+      );
+    } else {
+      return;
+    }
+  }
+
+  /* onChange={e => {
                   this.searchModel.removeRecentSpatialSearch();
                   this.setState(
                     {
@@ -328,16 +391,7 @@ class Search extends React.PureComponent {
                       }
                     }
                   );
-                }}
-              />
-            </div>
-            <SearchSettingsButton />
-          </div>
-          {this.renderSearchResultList("center")}
-        </div>
-      </div>
-    );
-  }
+                }}*/
 
   renderTop(target) {
     const { classes } = this.props;

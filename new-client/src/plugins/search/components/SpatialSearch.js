@@ -39,7 +39,9 @@ const styles = theme => ({
   }
 });
 const ITEM_HEIGHT = 48;
-const names = ["Polygon", "Radie", "Välj"];
+const POLYGON = "polygon";
+const WITHIN = "within";
+const SELECTION = "selection";
 
 class SpatialSearchOptions extends React.Component {
   state = {
@@ -47,11 +49,21 @@ class SpatialSearchOptions extends React.Component {
     anchorEl: null
   };
 
-  handleClick = event => {
-    this.setState({ anchorEl: event.currentTarget });
+  handleMenuItemClick = toolTypeActive => {
+    this.props.onToolChanged(toolTypeActive);
+    this.setState({
+      anchorEl: null,
+      toolTypeActive: toolTypeActive
+    });
   };
 
-  handleClose = () => {
+  handleDropdownClick = event => {
+    this.setState({
+      anchorEl: event.currentTarget
+    });
+  };
+
+  handleClose = toolTypeActive => {
     this.setState({ anchorEl: null });
   };
 
@@ -66,7 +78,7 @@ class SpatialSearchOptions extends React.Component {
           aria-label="More"
           aria-owns={open ? "long-menu" : undefined}
           aria-haspopup="true"
-          onClick={this.handleClick}
+          onClick={this.handleDropdownClick}
         >
           <CropSquare />
           <ArrowDownward style={{ fontSize: 10 }} />
@@ -86,8 +98,8 @@ class SpatialSearchOptions extends React.Component {
           }}
         >
           <MenuItem
-            onClick={this.handleClose}
-            value={"polygon"}
+            onClick={() => this.handleMenuItemClick(WITHIN)}
+            value={WITHIN}
             alignItems="center"
           >
             <Tooltip title="Visa påverkan inom ett område">
@@ -102,7 +114,11 @@ class SpatialSearchOptions extends React.Component {
               </Grid>
             </Tooltip>
           </MenuItem>
-          <MenuItem value={"selection"} alignItems="center">
+          <MenuItem
+            value={POLYGON}
+            onClick={() => this.handleMenuItemClick(POLYGON)}
+            alignItems="center"
+          >
             <Tooltip title="Visa påverkan inom ett område">
               <Grid container direction="row" alignItems="center">
                 <Grid item>
@@ -115,7 +131,11 @@ class SpatialSearchOptions extends React.Component {
               </Grid>
             </Tooltip>
           </MenuItem>
-          <MenuItem value={"within"} alignItems="center">
+          <MenuItem
+            value={SELECTION}
+            onClick={() => this.handleMenuItemClick(SELECTION)}
+            alignItems="center"
+          >
             <Tooltip title="Visa påverkan inom ett område">
               <Grid container direction="row" alignItems="center">
                 <Grid item>
