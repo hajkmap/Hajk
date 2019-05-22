@@ -8,6 +8,13 @@ import { createPortal } from "react-dom";
 
 const styles = theme => ({
   chip: {
+    backgroundColor: "inherit",
+    "&:hover": {
+      backgroundColor: "transparent"
+    },
+    "&:focus": {
+      backgroundColor: "transparent"
+    },
     margin: theme.spacing.unit,
     minWidth: 200
   }

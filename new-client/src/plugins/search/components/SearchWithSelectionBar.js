@@ -6,6 +6,13 @@ import CropSquare from "@material-ui/icons/CropSquare";
 
 const styles = theme => ({
   chip: {
+    backgroundColor: "inherit",
+    "&:hover": {
+      backgroundColor: "transparent"
+    },
+    "&:focus": {
+      backgroundColor: "transparent"
+    },
     margin: theme.spacing.unit,
     minWidth: 200
   }

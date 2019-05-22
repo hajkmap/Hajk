@@ -62,10 +62,10 @@ class SpatialSearchOptions extends React.Component {
   };
 
   render() {
-    const { classes } = this.props;
+    const { classes, activeSpatialTools } = this.props;
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
-
+    console.log(activeSpatialTools, "activeSpatialTools");
     return (
       <div className={classes.root}>
         <IconButton

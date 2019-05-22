@@ -8,7 +8,7 @@ import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import Observer from "react-event-observer";
 import SearchBar from "./components/SearchBar.js";
 import SearchResultList from "./components/SearchResultList.js";
-import SpatialSearch from "./components/SpatialSearch";
+import SpatialSearchMenu from "./components/SpatialSearchMenu";
 //import ClearButton from "./components/ClearButton.js";
 import SearchSettingsButton from "./components/SearchSettingsButton";
 import SearchButton from "./components/SearchButton";
@@ -53,7 +53,7 @@ const styles = theme => {
       }
     },
     button: {
-      margin: theme.spacing.unit
+      margin: "4px"
     },
     panelHeader: {
       [theme.breakpoints.up("lg")]: {
@@ -76,8 +76,17 @@ const styles = theme => {
       [theme.breakpoints.up("lg")]: {
         display: "flex",
         alignItems: "center",
+        width: "270px",
         backgroundColor: "#eee",
         borderRadius: theme.shape.borderRadius
+      }
+    },
+    mainContainerButton: {
+      [theme.breakpoints.up("lg")]: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "80px"
       }
     },
     searchToolsContainer: {
@@ -315,18 +324,24 @@ class Search extends React.PureComponent {
     const { classes } = this.props;
     if (this.state.activeToolType !== TEXTSEARCH) {
       return (
-        <Button
-          className={classes.button}
-          onClick={() => {
-            this.searchModel.removeRecentSpatialSearch();
-            this.setState({ activeToolType: TEXTSEARCH });
-          }}
-        >
-          Avbryt
-        </Button>
+        <div className={classes.mainContainerButton}>
+          <Button
+            className={classes.button}
+            onClick={() => {
+              this.searchModel.removeRecentSpatialSearch();
+              this.setState({ activeToolType: TEXTSEARCH });
+            }}
+          >
+            Avbryt
+          </Button>
+        </div>
       );
     } else {
-      return <SearchSettingsButton />;
+      return (
+        <div className={classes.mainContainerButton}>
+          <SearchSettingsButton />
+        </div>
+      );
     }
   }
 
@@ -379,13 +394,13 @@ class Search extends React.PureComponent {
   renderSpatialSearchOptions() {
     if (this.state.activeToolType == TEXTSEARCH) {
       return (
-        <SpatialSearch
+        <SpatialSearchMenu
           onToolChanged={toolType => {
-            console.log(toolType, "activeToolType");
             this.setState({
               activeToolType: toolType
             });
           }}
+          activeSpatialTools={this.props.options.activeSpatialTools}
         />
       );
     } else {
