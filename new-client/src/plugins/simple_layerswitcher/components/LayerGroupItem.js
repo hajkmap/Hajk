@@ -443,8 +443,12 @@ class LayerGroupItem extends Component {
     if (infoText) {
       return (
         <div className={classes.infoTextContainer}>
-          <Typography variant="h6">{infoTitle}</Typography>
-          <Typography>{infoText}</Typography>
+          <strong>{infoTitle}</strong>
+          <p
+            dangerouslySetInnerHTML={{
+              __html: infoText
+            }}
+          />
         </div>
       );
     } else {
