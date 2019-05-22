@@ -3,13 +3,7 @@ import { withStyles } from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
 import Settings from "@material-ui/icons/Settings";
 
-const styles = theme => {
-  return {
-    button: {
-      margin: "4px"
-    }
-  };
-};
+const styles = theme => {};
 
 class SearchSettingsButton extends React.Component {
   state = {
@@ -17,9 +11,8 @@ class SearchSettingsButton extends React.Component {
   };
 
   render() {
-    const { classes } = this.props;
     return (
-      <IconButton onClick={console.log("??")}>
+      <IconButton onClick={console.log("Not implemented")}>
         <Settings />
       </IconButton>
     );

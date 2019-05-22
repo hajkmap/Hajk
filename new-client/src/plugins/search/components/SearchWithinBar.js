@@ -19,14 +19,14 @@ const styles = theme => ({
     minWidth: 200
   }
 });
-
+/*
 function handleDelete() {
   alert("You clicked the delete icon."); // eslint-disable-line no-alert
 }
 
 function handleClick() {
   alert("You clicked the Chip."); // eslint-disable-line no-alert
-}
+}*/
 
 class SearchWithinBar extends React.PureComponent {
   componentDidMount() {
@@ -45,7 +45,7 @@ class SearchWithinBar extends React.PureComponent {
         <Chip
           icon={<TripOrigin />}
           label="Sök med radie i kartan"
-          onClick={handleClick}
+          //onClick={handleClick}
           className={classes.chip}
         />
         {createPortal(

@@ -1,11 +1,8 @@
 import React from "react";
 import Input from "@material-ui/core/Input";
 import { withStyles } from "@material-ui/core/styles";
-import { fade } from "@material-ui/core/styles/colorManipulator";
 import SearchIcon from "@material-ui/icons/Search";
-import ClearIcon from "@material-ui/icons/Clear";
 import InputAdornment from "@material-ui/core/InputAdornment";
-import CircularProgress from "@material-ui/core/CircularProgress";
 
 const styles = theme => ({
   search: {
@@ -73,16 +70,7 @@ class SearchBar extends React.PureComponent {
   }
 
   render() {
-    const {
-      classes,
-      onChange,
-      onComplete,
-      value,
-      target,
-      loading,
-      tooltip,
-      activeTool
-    } = this.props;
+    const { classes, onChange, onComplete, value, target } = this.props;
 
     return (
       <div className={classes.search}>

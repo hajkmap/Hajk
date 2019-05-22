@@ -1,10 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
-import classNames from "classnames";
 import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
 import MenuItem from "@material-ui/core/MenuItem";
-import Tooltip from "@material-ui/core/Tooltip";
 import CropSquare from "@material-ui/icons/CropSquare";
 import TripOrigin from "@material-ui/icons/TripOrigin";
 import Grid from "@material-ui/core/Grid";
@@ -65,7 +63,6 @@ class SpatialSearchOptions extends React.Component {
     const { classes, activeSpatialTools } = this.props;
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
-    console.log(activeSpatialTools, "activeSpatialTools");
     return (
       <div className={classes.root}>
         <IconButton

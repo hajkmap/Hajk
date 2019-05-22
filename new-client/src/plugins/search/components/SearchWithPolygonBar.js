@@ -17,14 +17,14 @@ const styles = theme => ({
     width: "inherit"
   }
 });
-
+/*
 function handleDelete() {
   alert("You clicked the delete icon."); // eslint-disable-line no-alert
 }
 
 function handleClick() {
   alert("You clicked the Chip."); // eslint-disable-line no-alert
-}
+}*/
 
 class SearchWithPolygonBar extends React.PureComponent {
   componentDidMount() {
@@ -39,7 +39,7 @@ class SearchWithPolygonBar extends React.PureComponent {
       <Chip
         icon={<CropSquare />}
         label="Rita objekt i kartan"
-        onClick={handleClick}
+        //onClick={handleClick}
         className={classes.chip}
       />
     );

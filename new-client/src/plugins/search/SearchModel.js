@@ -92,12 +92,10 @@ class SearchModel {
     handleClick(evt, evt.map, response => {
       this.vectorLayer.getSource().addFeatures(response.features);
       if (response.features.length > 0) {
-        console.log(response.features, "response.features.length");
         this.searchWithinArea(
           response.features[0],
           false,
           featureCollections => {
-            console.log(featureCollections, "featureCollections");
             callback(featureCollections);
           }
         );
@@ -106,7 +104,6 @@ class SearchModel {
   };
 
   toggleSelectGeometriesForSpatialSearch = (active, callback) => {
-    console.log("HERJ");
     if (active) {
       this.olMap.clicklock = true;
       this.olMap.once("singleclick", e => {
@@ -275,10 +272,8 @@ class SearchModel {
     });
     this.visibleLayers.forEach(layer => {
       if (layer.layerType === "group") {
-        console.log(layer, "layer1");
         this.globalObserver.publish("showLayer", layer);
       } else {
-        console.log(layer, "layer2");
         layer.setVisible(true);
       }
     });

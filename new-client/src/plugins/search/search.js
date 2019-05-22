@@ -11,7 +11,6 @@ import SearchResultList from "./components/SearchResultList.js";
 import SpatialSearchMenu from "./components/SpatialSearchMenu";
 //import ClearButton from "./components/ClearButton.js";
 import SearchSettingsButton from "./components/SearchSettingsButton";
-import SearchButton from "./components/SearchButton";
 import SearchWithinBar from "./components/SearchWithinBar";
 import SearchWithSelectionBar from "./components/SearchWithSelectionBar";
 import SearchWithPolygonBar from "./components/SearchWithPolygonBar";
@@ -392,7 +391,7 @@ class Search extends React.PureComponent {
   }
 
   renderSpatialSearchOptions() {
-    if (this.state.activeToolType == TEXTSEARCH) {
+    if (this.state.activeToolType === TEXTSEARCH) {
       return (
         <SpatialSearchMenu
           onToolChanged={toolType => {
@@ -409,7 +408,7 @@ class Search extends React.PureComponent {
   }
 
   renderSearchBar() {
-    if (this.state.activeToolType == TEXTSEARCH) {
+    if (this.state.activeToolType === TEXTSEARCH) {
       return (
         <SearchBar
           model={this.searchModel}
