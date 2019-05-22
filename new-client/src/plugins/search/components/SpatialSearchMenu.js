@@ -37,7 +37,6 @@ const SELECTION = "selection";
 
 class SpatialSearchOptions extends React.Component {
   state = {
-    activeTool: "",
     anchorEl: null
   };
 
@@ -55,7 +54,7 @@ class SpatialSearchOptions extends React.Component {
     });
   };
 
-  handleClose = toolTypeActive => {
+  handleClose = e => {
     this.setState({ anchorEl: null });
   };
 
@@ -73,18 +72,12 @@ class SpatialSearchOptions extends React.Component {
 
     return (
       <Menu
-        id="long-menu"
+        id="menu"
         anchorEl={anchorEl}
         getContentAnchorEl={null}
         open={open}
         onClose={this.handleClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        PaperProps={{
-          style: {
-            maxHeight: ITEM_HEIGHT * 4.5,
-            width: 200
-          }
-        }}
       >
         {menuItems.map(menuItem => {
           return menuItem;
@@ -121,7 +114,7 @@ class SpatialSearchOptions extends React.Component {
       <div className={classes.root}>
         <IconButton
           aria-label="More"
-          aria-owns={open ? "long-menu" : undefined}
+          aria-owns={open ? "menu" : undefined}
           aria-haspopup="true"
           onClick={this.handleDropdownClick}
         >

@@ -30,7 +30,6 @@ function handleClick() {
 
 class SearchWithinBar extends React.PureComponent {
   componentDidMount() {
-    console.log("didMount");
     const { model, onSearchWithin } = this.props;
     model.withinSearch(layerIds => {
       if (layerIds.length > 0) {

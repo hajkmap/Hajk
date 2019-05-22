@@ -29,7 +29,6 @@ function handleClick() {
 class SearchWithSelectionBar extends React.PureComponent {
   componentDidMount() {
     const { model, onSearchDone } = this.props;
-    console.log(onSearchDone, "onSearchDonme");
     model.selectionSearch(onSearchDone);
   }
   render() {
