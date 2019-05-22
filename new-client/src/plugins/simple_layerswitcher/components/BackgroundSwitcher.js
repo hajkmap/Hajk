@@ -40,7 +40,9 @@ const styles = theme => ({
   layerItemContainer: {
     background: "white",
     borderBottom: "1px solid #ccc",
-    paddingLeft: "10px"
+    paddingLeft: "10px",
+    fontFamily: "Verdana, Geneva, sans-serif",
+    fontSize: "14px"
   },
   captionText: {
     marginLeft: "-6px",
@@ -116,9 +118,10 @@ class BackgroundSwitcher extends React.PureComponent {
           name="radio-button-demo"
           icon={<RadioButtonUncheckedIcon fontSize="small" />}
           checkedIcon={<RadioButtonCheckedIcon fontSize="small" />}
+          style={{ padding: "7px" }}
         />
         <label htmlFor={caption + "_" + index} className={classes.captionText}>
-          <strong>{caption}</strong>
+          {caption}
         </label>
       </div>
     );
@@ -161,8 +164,6 @@ class BackgroundSwitcher extends React.PureComponent {
       )
     ];
 
-    radioButtons.reverse();
-
     return radioButtons;
   }
 
@@ -181,19 +182,18 @@ class BackgroundSwitcher extends React.PureComponent {
   render() {
     const { classes } = this.props;
     return (
-      <div style={{ display: this.props.display ? "block" : "none" }}>
-        <ExpansionPanel
-          className={classes.disableTransition}
-          CollapseProps={{ classes: { container: classes.disableTransition } }}
-        >
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography className={classes.heading}>Bakgrundskartor</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails classes={{ root: classes.root }}>
-            {this.renderBaseLayerComponents()}
-          </ExpansionPanelDetails>
-        </ExpansionPanel>
-      </div>
+      /*<ExpansionPanel
+        className={classes.disableTransition}
+        CollapseProps={{ classes: { container: classes.disableTransition } }}
+      >
+        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography className={classes.heading}>Bakgrundskartor</Typography>
+        </ExpansionPanelSummary>
+        <ExpansionPanelDetails classes={{ root: classes.root }}>
+          {this.renderBaseLayerComponents()}
+        </ExpansionPanelDetails>
+      </ExpansionPanel>*/
+      <div>{this.renderBaseLayerComponents()}</div>
     );
   }
 }

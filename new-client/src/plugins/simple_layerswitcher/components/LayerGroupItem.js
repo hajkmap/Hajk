@@ -10,7 +10,9 @@ import Typography from "@material-ui/core/Typography";
 import IconMoreHoriz from "@material-ui/icons/MoreHoriz";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
+import CheckIcon from "@material-ui/icons/Check";
 import LayerSettings from "./LayerSettings.js";
+import marked from "marked";
 
 const styles = theme => ({
   button: {
@@ -20,7 +22,7 @@ const styles = theme => ({
   captionText: {
     marginLeft: "5px",
     position: "relative",
-    top: "-6px"
+    top: "-5px"
   },
   image: {},
   links: {
@@ -31,12 +33,13 @@ const styles = theme => ({
   layerItem: {
     justifyContent: "space-between",
     alignItems: "center",
-    borderBottom: "1px dashed #CCC",
+    borderBottom: "1px dashed #d9d9d9",
     paddingTop: "10px",
     paddingBottom: "5px",
     "&:last-child": {
       borderBottom: "none"
-    }
+    },
+    paddingLeft: "5px"
   },
   layerItemContainer: {
     padding: "10px",
@@ -58,7 +61,7 @@ const styles = theme => ({
     display: "flex",
     alignItems: "center",
     padding: "3px",
-    border: "1px solid #ccc"
+    border: "1px solid #d9d9d9"
   },
   infoContainer: {
     padding: "5px"
@@ -72,12 +75,11 @@ const styles = theme => ({
   },
   layerGroup: {
     background: "white",
-    borderBottom: "1px solid #ccc",
-    paddingLeft: "10px"
+    paddingLeft: "20px"
   },
   layerGroupContainer: {
     background: "white",
-    borderRadius: "6px"
+    borderBottom: "1px solid #d9d9d9"
   },
   layerGroupHeader: {
     display: "flex",
@@ -86,7 +88,7 @@ const styles = theme => ({
   },
   layerGroupLayers: {
     marginTop: "5px",
-    borderTop: "1px solid #ccc",
+    borderTop: "1px solid #d9d9d9",
     paddingLeft: "45px"
   },
   layerGroupItem: {
@@ -102,9 +104,6 @@ const styles = theme => ({
     cursor: "pointer",
     padding: "5px",
     float: "right"
-  },
-  subtitle2: {
-    fontWeight: 500
   }
 });
 
@@ -369,9 +368,33 @@ class LayerGroupItem extends Component {
       <div key={index} className={classes.layerItem}>
         <div className={classes.caption}>
           <span onClick={this.toggleLayerVisible(subLayer)}>
-            {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
+            {visible ? (
+              <CheckIcon
+                style={{
+                  fill: "#000",
+                  border: "1px solid #7f7f7f",
+                  borderRadius: "4px",
+                  fontSize: "16px",
+                  marginBottom: "2px"
+                }}
+              />
+            ) : (
+              <CheckIcon
+                style={{
+                  fill: "white",
+                  border: "1px solid #7f7f7f",
+                  borderRadius: "4px",
+                  fontSize: "16px",
+                  marginBottom: "2px"
+                }}
+              />
+            )}
             <label className={classes.captionText}>
-              <strong>{layer.layersInfo[subLayer].caption}</strong>
+              {visible ? (
+                <strong>{layer.layersInfo[subLayer].caption}</strong>
+              ) : (
+                <label>{layer.layersInfo[subLayer].caption}</label>
+              )}
             </label>
           </span>
           <IconMoreHoriz
@@ -382,13 +405,14 @@ class LayerGroupItem extends Component {
         <div className={classes.legend}>
           {this.state.toggleSubLayerSettings[index] ? (
             <div>
-              <Typography className={classes.subtitle2} variant="subtitle2">
-                Teckenförklaring
-              </Typography>
-              <img
-                src={this.props.layer.layersInfo[subLayer].legend}
-                alt="teckenförklaring"
-              />
+              <br />
+              <div>
+                <img
+                  max-width="250px"
+                  alt="legend"
+                  src={this.props.layer.layersInfo[subLayer].legend}
+                />{" "}
+              </div>
             </div>
           ) : null}
         </div>
@@ -465,8 +489,8 @@ class LayerGroupItem extends Component {
       return (
         <div>
           {this.renderInfo()}
-          {this.renderOwner()}
           {this.renderMetadataLink()}
+          {this.renderOwner()}
           <div>{this.renderChapterLinks(this.props.chapters || [])}</div>
         </div>
       );
@@ -495,12 +519,43 @@ class LayerGroupItem extends Component {
     function getIcon() {
       if (visible) {
         if (visibleSubLayers.length === layer.subLayers.length) {
-          return <CheckBoxIcon />;
+          return (
+            <CheckIcon
+              style={{
+                fill: "#000",
+                border: "1px solid #7f7f7f",
+                borderRadius: "4px",
+                fontSize: "16px",
+                marginBottom: "2px"
+              }}
+            />
+          );
         } else {
-          return <CheckBoxIcon style={{ fill: "gray" }} />;
+          return (
+            <CheckIcon
+              style={{
+                fill: "#000",
+                border: "1px solid #7f7f7f",
+                borderRadius: "4px",
+                fontSize: "16px",
+                marginBottom: "2px",
+                backgroundColor: "#d9d9d9"
+              }}
+            />
+          );
         }
       } else {
-        return <CheckBoxOutlineBlankIcon />;
+        return (
+          <CheckIcon
+            style={{
+              fill: "white",
+              border: "1px solid #7f7f7f",
+              borderRadius: "4px",
+              fontSize: "16px",
+              marginBottom: "2px"
+            }}
+          />
+        );
       }
     }
     return (
@@ -531,7 +586,7 @@ class LayerGroupItem extends Component {
                 >
                   {getIcon()}
                   <label className={classes.captionText}>
-                    <strong>{layer.get("caption")}</strong>
+                    <label>{layer.get("caption")}</label>
                   </label>
                 </div>
               </div>
