@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Chip from "@material-ui/core/Chip";
-import TripOrigin from "@material-ui/icons/TripOrigin";
+import CropSquare from "@material-ui/icons/CropSquare";
 
 const styles = theme => ({
   chip: {
@@ -19,20 +19,16 @@ function handleClick() {
   alert("You clicked the Chip."); // eslint-disable-line no-alert
 }
 
-class SearchWithinBar extends React.PureComponent {
+class SearchWithSelectionBar extends React.PureComponent {
   componentDidMount() {
-    const { model, onSearchWithin } = this.props;
-    model.withinSearch(layerIds => {
-      if (layerIds.length > 0) {
-        this.onSearchWithin(layerIds);
-      }
-    });
+    const { model, onSearchDone } = this.props;
+    model.selectionSearch(false);
   }
   render() {
     const { classes } = this.props;
     return (
       <Chip
-        icon={<TripOrigin />}
+        icon={<CropSquare />}
         label="Rita polygon"
         onClick={handleClick}
         className={classes.chip}
@@ -41,8 +37,8 @@ class SearchWithinBar extends React.PureComponent {
   }
 }
 
-SearchWithinBar.propTypes = {
+SearchWithSelectionBar.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(SearchWithinBar);
+export default withStyles(styles)(SearchWithSelectionBar);

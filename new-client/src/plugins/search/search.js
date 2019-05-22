@@ -13,6 +13,8 @@ import SpatialSearch from "./components/SpatialSearch";
 import SearchSettingsButton from "./components/SearchSettingsButton";
 import SearchButton from "./components/SearchButton";
 import SearchWithinBar from "./components/SearchWithinBar";
+import SearchWithSelectionBar from "./components/SearchWithSelectionBar";
+import SearchWithPolygonBar from "./components/SearchWithPolygonBar";
 import SearchModel from "./SearchModel.js";
 import PanelHeader from "./../../components/PanelHeader.js";
 import { isMobile } from "../../utils/IsMobile.js";
@@ -317,7 +319,21 @@ class Search extends React.PureComponent {
     if (this.state.activeToolType !== "textsearch") {
       return (
         <div>
-          <SearchWithinBar />
+          <SearchWithSelectionBar model={this.searchModel} />
+          {/*<SearchWithPolygonBar
+            model={this.searchModel}
+            onSearchDone={featureCollections =>
+              this.resolve(featureCollections)
+            }
+          />
+          <SearchWithinBar
+            onSearchWithin={layerIds =>
+              this.setState({
+                result: layerIds
+              })
+            }
+            model={this.searchModel}
+          />*/}
         </div>
       );
     } else {
