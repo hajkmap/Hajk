@@ -31,7 +31,7 @@ class SearchWithPolygonBar extends React.PureComponent {
     return (
       <Chip
         icon={<CropSquare />}
-        label="Rita polygon"
+        label="Rita objekt i kartan"
         onClick={handleClick}
         className={classes.chip}
       />

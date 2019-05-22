@@ -4,17 +4,11 @@ import classNames from "classnames";
 import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
 import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
-import Select from "@material-ui/core/Select";
 import Tooltip from "@material-ui/core/Tooltip";
 import CropSquare from "@material-ui/icons/CropSquare";
 import TripOrigin from "@material-ui/icons/TripOrigin";
-import Stop from "@material-ui/icons/Stop";
 import Grid from "@material-ui/core/Grid";
-import Icon from "@material-ui/core/Icon";
 import TouchApp from "@material-ui/icons/TouchApp";
-import { createPortal } from "react-dom";
-import Snackbar from "@material-ui/core/Snackbar";
 import IconButton from "@material-ui/core/IconButton";
 import Menu from "@material-ui/core/Menu";
 
@@ -102,66 +96,47 @@ class SpatialSearchOptions extends React.Component {
             value={WITHIN}
             alignItems="center"
           >
-            <Tooltip title="Visa påverkan inom ett område">
-              <Grid container direction="row" alignItems="center">
-                <Grid item>
-                  <TripOrigin />
-                </Grid>
-                <Grid item />
-                <Typography variant="subtitle1" gutterBottom>
-                  Rita
-                </Typography>
+            <Grid container direction="row" alignItems="center">
+              <Grid item>
+                <TripOrigin />
               </Grid>
-            </Tooltip>
+              <Grid item />
+              <Typography variant="subtitle1" gutterBottom>
+                Rita
+              </Typography>
+            </Grid>
           </MenuItem>
           <MenuItem
             value={POLYGON}
             onClick={() => this.handleMenuItemClick(POLYGON)}
             alignItems="center"
           >
-            <Tooltip title="Visa påverkan inom ett område">
-              <Grid container direction="row" alignItems="center">
-                <Grid item>
-                  <CropSquare />
-                </Grid>
-                <Grid item />
-                <Typography variant="subtitle1" gutterBottom>
-                  Rita
-                </Typography>
+            <Grid container direction="row" alignItems="center">
+              <Grid item>
+                <CropSquare />
               </Grid>
-            </Tooltip>
+              <Grid item />
+              <Typography variant="subtitle1" gutterBottom>
+                Rita
+              </Typography>
+            </Grid>
           </MenuItem>
           <MenuItem
             value={SELECTION}
             onClick={() => this.handleMenuItemClick(SELECTION)}
             alignItems="center"
           >
-            <Tooltip title="Visa påverkan inom ett område">
-              <Grid container direction="row" alignItems="center">
-                <Grid item>
-                  <TouchApp />
-                </Grid>
-                <Grid item />
-                <Typography variant="subtitle1" gutterBottom>
-                  Markera
-                </Typography>
+            <Grid container direction="row" alignItems="center">
+              <Grid item>
+                <TouchApp />
               </Grid>
-            </Tooltip>
+              <Grid item />
+              <Typography variant="subtitle1" gutterBottom>
+                Markera
+              </Typography>
+            </Grid>
           </MenuItem>
         </Menu>
-
-        {createPortal(
-          <Snackbar
-            className={classes.anchorOriginBottomCenter}
-            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-            open={true /*this.state.active ? true : false*/}
-            ContentProps={{
-              "aria-describedby": "message-id"
-            }}
-            message={<span id="message-id">{this.state.activeTool}</span>}
-          />,
-          document.getElementById("map-overlay")
-        )}
       </div>
     );
   }

@@ -97,7 +97,7 @@ class SearchBar extends React.PureComponent {
             });
           }}
           value={value === "" ? value : this.state.value}
-          placeholder={"test"}
+          placeholder={"Sök"}
           disableUnderline
           classes={{
             root: classes.inputRoot,

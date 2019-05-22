@@ -88,11 +88,20 @@ class SearchModel {
     return sourceList;
   };
 
-  onSelectFeatures = evt => {
-    console.log(evt, "evt");
+  onSelectFeatures = (evt, callback) => {
     handleClick(evt, evt.map, response => {
-      console.log(evt, "evt");
       this.vectorLayer.getSource().addFeatures(response.features);
+      if (response.features.length > 0) {
+        console.log(response.features, "response.features.length");
+        this.searchWithinArea(
+          response.features[0],
+          false,
+          featureCollections => {
+            console.log(featureCollections, "featureCollections");
+            callback(featureCollections);
+          }
+        );
+      }
     });
   };
 
@@ -106,14 +115,15 @@ class SearchModel {
     }
   };
 
-  toggleSelectGeometriesForSpatialSearch = active => {
+  toggleSelectGeometriesForSpatialSearch = (active, callback) => {
     if (active) {
       this.olMap.clicklock = true;
-      this.olMap.on("singleclick", this.onSelectFeatures);
+      this.olMap.once("singleclick", e => {
+        this.onSelectFeatures(e, callback);
+      });
     } else {
       this.olMap.clicklock = false;
       this.clearHighlight();
-      this.olMap.un("singleclick", this.onSelectFeatures);
     }
   };
 
@@ -154,7 +164,9 @@ class SearchModel {
             setTimeout(() => {
               this.observer.publish("searchComplete");
             }, 500);
-            callback(result);
+            if (callback) {
+              callback(result);
+            }
           }
         );
       });
@@ -287,8 +299,7 @@ class SearchModel {
   };
 
   selectionSearch = searchDone => {
-    this.toggleDraw(false);
-    this.toggleSelectGeometriesForSpatialSearch(true);
+    this.toggleSelectGeometriesForSpatialSearch(true, searchDone);
   };
 
   withinSearch = searchDone => {

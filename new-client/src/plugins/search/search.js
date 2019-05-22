@@ -143,6 +143,11 @@ const styles = theme => {
   };
 };
 
+const POLYGON = "polygon";
+const WITHIN = "within";
+const TEXTSEARCH = "textsearch";
+const SELECTION = "selection";
+
 class Search extends React.PureComponent {
   resolve = data => {
     console.log(data, "data");
@@ -294,7 +299,7 @@ class Search extends React.PureComponent {
           <div>{this.renderDescription()}</div>
           <div className={classes.searchToolsContainer}>
             <div className={classes.searchContainer}>
-              {this.renderTest()}
+              {this.renderSpatialBar()}
               {this.renderSearchBar()}
               {this.renderSpatialSearchOptions()}
             </div>
@@ -308,41 +313,71 @@ class Search extends React.PureComponent {
 
   renderMainContainerButton() {
     const { classes } = this.props;
-    if (this.state.activeToolType !== "textsearch") {
-      return <Button className={classes.button}>Avbryt</Button>;
+    if (this.state.activeToolType !== TEXTSEARCH) {
+      return (
+        <Button
+          className={classes.button}
+          onClick={() => {
+            this.searchModel.removeRecentSpatialSearch();
+            this.setState({ activeToolType: TEXTSEARCH });
+          }}
+        >
+          Avbryt
+        </Button>
+      );
     } else {
       return <SearchSettingsButton />;
     }
   }
 
-  renderTest() {
-    if (this.state.activeToolType !== "textsearch") {
-      return (
-        <div>
-          <SearchWithSelectionBar model={this.searchModel} />
-          {/*<SearchWithPolygonBar
-            model={this.searchModel}
-            onSearchDone={featureCollections =>
-              this.resolve(featureCollections)
-            }
-          />
-          <SearchWithinBar
-            onSearchWithin={layerIds =>
-              this.setState({
-                result: layerIds
-              })
-            }
-            model={this.searchModel}
-          />*/}
-        </div>
-      );
-    } else {
-      return;
+  renderSpatialBar() {
+    if (this.state.activeToolType !== TEXTSEARCH) {
+      switch (this.state.activeToolType) {
+        case POLYGON:
+          return (
+            <SearchWithPolygonBar
+              model={this.searchModel}
+              onSearchDone={featureCollections => {
+                this.resolve(featureCollections);
+                this.searchModel.removeRecentSpatialSearch();
+                this.setState({ activeToolType: TEXTSEARCH });
+              }}
+            />
+          );
+        case WITHIN: {
+          return (
+            <SearchWithinBar
+              onSearchWithin={layerIds => {
+                this.setState({
+                  result: layerIds,
+                  activeToolType: TEXTSEARCH
+                });
+                this.searchModel.removeRecentSpatialSearch();
+              }}
+              model={this.searchModel}
+            />
+          );
+        }
+        case SELECTION: {
+          return (
+            <SearchWithSelectionBar
+              model={this.searchModel}
+              onSearchDone={featureCollections => {
+                this.resolve(featureCollections);
+                this.searchModel.removeRecentSpatialSearch();
+                this.setState({ activeToolType: TEXTSEARCH });
+              }}
+            />
+          );
+        }
+        default:
+          return;
+      }
     }
   }
 
   renderSpatialSearchOptions() {
-    if (this.state.activeToolType == "textsearch") {
+    if (this.state.activeToolType == TEXTSEARCH) {
       return (
         <SpatialSearch
           onToolChanged={toolType => {
@@ -359,7 +394,7 @@ class Search extends React.PureComponent {
   }
 
   renderSearchBar() {
-    if (this.state.activeToolType == "textsearch") {
+    if (this.state.activeToolType == TEXTSEARCH) {
       return (
         <SearchBar
           model={this.searchModel}
@@ -373,41 +408,6 @@ class Search extends React.PureComponent {
       return;
     }
   }
-
-  /* onChange={e => {
-                  this.searchModel.removeRecentSpatialSearch();
-                  this.setState(
-                    {
-                      activeToolType: e.target.value,
-                      result: false
-                    },
-                    () => {
-                      switch (this.state.activeToolType) {
-                        case "polygon":
-                          this.searchModel.polygonSearch(featureCollections => {
-                            this.resolve(featureCollections);
-                          });
-                          break;
-                        case "within":
-                          console.log("within");
-                          this.searchModel.withinSearch(layerIds => {
-                            if (layerIds.length > 0) {
-                              this.props.onSearchWithin(layerIds);
-                            }
-                          });
-                          break;
-                        case "selection":
-                          console.log("selection");
-                          this.searchModel.selectionSearch(
-                            this.state.otherToolActive
-                          );
-                          break;
-                        default:
-                          break;
-                      }
-                    }
-                  );
-                }}*/
 
   renderTop(target) {
     const { classes } = this.props;

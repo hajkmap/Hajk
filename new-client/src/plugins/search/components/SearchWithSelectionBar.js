@@ -22,14 +22,15 @@ function handleClick() {
 class SearchWithSelectionBar extends React.PureComponent {
   componentDidMount() {
     const { model, onSearchDone } = this.props;
-    model.selectionSearch(false);
+    console.log(onSearchDone, "onSearchDonme");
+    model.selectionSearch(onSearchDone);
   }
   render() {
     const { classes } = this.props;
     return (
       <Chip
         icon={<CropSquare />}
-        label="Rita polygon"
+        label="Markera objekt i kartan"
         onClick={handleClick}
         className={classes.chip}
       />
