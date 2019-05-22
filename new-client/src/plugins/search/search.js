@@ -179,7 +179,6 @@ class Search extends React.PureComponent {
       loading: false,
       activeToolType: "textsearch"
     };
-    this.toolDescription = props.options.toolDescription;
     this.tooltip = props.options.tooltip;
     this.searchWithinButtonText = props.options.searchWithinButtonText;
     this.searchWithPolygonButtonText =
@@ -235,10 +234,6 @@ class Search extends React.PureComponent {
         />
       </div>
     );
-  }
-
-  renderDescription() {
-    return <div dangerouslySetInnerHTML={{ __html: this.toolDescription }} />;
   }
 
   renderLoader() {
@@ -310,7 +305,6 @@ class Search extends React.PureComponent {
           }}
         >
           <div>{this.renderLoader()}</div>
-          <div>{this.renderDescription()}</div>
           <div className={classes.searchToolsContainer}>
             <div className={classes.searchContainer}>
               {this.renderSpatialBar()}
@@ -360,8 +354,6 @@ class Search extends React.PureComponent {
               localObserver={this.localObserver}
               onSearchDone={featureCollections => {
                 this.resolve(featureCollections);
-                //this.searchModel.clearRecentSpatialSearch();
-                //this.setState({ activeToolType: TEXTSEARCH });
               }}
             />
           );
@@ -386,8 +378,6 @@ class Search extends React.PureComponent {
               model={this.searchModel}
               onSearchDone={featureCollections => {
                 this.resolve(featureCollections);
-                //this.searchModel.clearRecentSpatialSearch();
-                //this.setState({ activeToolType: TEXTSEARCH });
               }}
             />
           );
