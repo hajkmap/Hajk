@@ -191,6 +191,11 @@ class Search extends React.PureComponent {
         loading: true
       });
     });
+    this.localObserver.on("toolchanged", () => {
+      this.setState({
+        result: false
+      });
+    });
     this.localObserver.on("searchComplete", () => {
       this.setState({
         loading: false
@@ -215,6 +220,7 @@ class Search extends React.PureComponent {
   }
 
   renderSearchResultList(target) {
+    console.log("renderSearch");
     const { classes } = this.props;
     const { result } = this.state;
     if (!result) return null;
@@ -351,20 +357,21 @@ class Search extends React.PureComponent {
           return (
             <SearchWithPolygonBar
               model={this.searchModel}
+              localObserver={this.localObserver}
               onSearchDone={featureCollections => {
                 this.resolve(featureCollections);
-                this.searchModel.clearRecentSpatialSearch();
-                this.setState({ activeToolType: TEXTSEARCH });
+                //this.searchModel.clearRecentSpatialSearch();
+                //this.setState({ activeToolType: TEXTSEARCH });
               }}
             />
           );
         case WITHIN: {
           return (
             <SearchWithinBar
+              localObserver={this.localObserver}
               onSearchWithin={layerIds => {
                 this.setState({
-                  result: layerIds,
-                  activeToolType: TEXTSEARCH
+                  result: layerIds
                 });
                 this.searchModel.clearRecentSpatialSearch();
               }}
@@ -375,11 +382,12 @@ class Search extends React.PureComponent {
         case SELECTION: {
           return (
             <SearchWithSelectionBar
+              localObserver={this.localObserver}
               model={this.searchModel}
               onSearchDone={featureCollections => {
                 this.resolve(featureCollections);
-                this.searchModel.clearRecentSpatialSearch();
-                this.setState({ activeToolType: TEXTSEARCH });
+                //this.searchModel.clearRecentSpatialSearch();
+                //this.setState({ activeToolType: TEXTSEARCH });
               }}
             />
           );
@@ -413,6 +421,7 @@ class Search extends React.PureComponent {
         <SearchBar
           model={this.searchModel}
           onChange={this.searchModel.search}
+          localObserver={this.localObserver}
           onComplete={this.resolve}
           tooltip={this.tooltip}
           activeTool={this.state.activeToolType}

@@ -28,7 +28,8 @@ function handleClick() {
 
 class SearchWithPolygonBar extends React.PureComponent {
   componentDidMount() {
-    const { model, onSearchDone } = this.props;
+    const { model, onSearchDone, localObserver } = this.props;
+    localObserver.publish("toolchanged");
     model.polygonSearch(featureCollections => {
       onSearchDone(featureCollections);
     });

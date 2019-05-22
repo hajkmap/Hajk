@@ -30,7 +30,8 @@ function handleClick() {
 
 class SearchWithinBar extends React.PureComponent {
   componentDidMount() {
-    const { model, onSearchWithin } = this.props;
+    const { model, onSearchWithin, localObserver } = this.props;
+    localObserver.publish("toolchanged");
     model.withinSearch(layerIds => {
       if (layerIds.length > 0) {
         onSearchWithin(layerIds);

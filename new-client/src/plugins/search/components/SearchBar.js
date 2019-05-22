@@ -60,6 +60,10 @@ class SearchBar extends React.PureComponent {
     value: ""
   };
 
+  componentDidMount() {
+    this.props.localObserver.publish("toolchanged");
+  }
+
   constructor(props) {
     super();
     props.model.observer.subscribe("clearInput", () => {
