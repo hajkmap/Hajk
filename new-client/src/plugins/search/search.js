@@ -328,7 +328,7 @@ class Search extends React.PureComponent {
           <Button
             className={classes.button}
             onClick={() => {
-              this.searchModel.removeRecentSpatialSearch();
+              this.searchModel.clearRecentSpatialSearch();
               this.setState({ activeToolType: TEXTSEARCH });
             }}
           >
@@ -354,7 +354,7 @@ class Search extends React.PureComponent {
               model={this.searchModel}
               onSearchDone={featureCollections => {
                 this.resolve(featureCollections);
-                this.searchModel.removeRecentSpatialSearch();
+                this.searchModel.clearRecentSpatialSearch();
                 this.setState({ activeToolType: TEXTSEARCH });
               }}
             />
@@ -367,7 +367,7 @@ class Search extends React.PureComponent {
                   result: layerIds,
                   activeToolType: TEXTSEARCH
                 });
-                this.searchModel.removeRecentSpatialSearch();
+                this.searchModel.clearRecentSpatialSearch();
               }}
               model={this.searchModel}
             />
@@ -379,7 +379,7 @@ class Search extends React.PureComponent {
               model={this.searchModel}
               onSearchDone={featureCollections => {
                 this.resolve(featureCollections);
-                this.searchModel.removeRecentSpatialSearch();
+                this.searchModel.clearRecentSpatialSearch();
                 this.setState({ activeToolType: TEXTSEARCH });
               }}
             />

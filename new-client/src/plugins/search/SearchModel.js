@@ -105,17 +105,8 @@ class SearchModel {
     });
   };
 
-  doSearch = () => {
-    var features = this.vectorLayer.getSource().getFeatures();
-    console.log(features, "features");
-    if (features.length > 0) {
-      this.searchWithinArea(features, false, res => {
-        console.log(res, "res");
-      });
-    }
-  };
-
   toggleSelectGeometriesForSpatialSearch = (active, callback) => {
+    console.log("HERJ");
     if (active) {
       this.olMap.clicklock = true;
       this.olMap.once("singleclick", e => {
@@ -274,6 +265,7 @@ class SearchModel {
   showLayers = layerIds => {
     this.visibleLayers = layerIds.reduce(this.getLayerAsSource, []);
     this.hiddenLayers = this.getHiddenLayers(layerIds);
+
     this.hiddenLayers.forEach(layer => {
       if (layer.layerType === "group") {
         this.globalObserver.publish("hideLayer", layer);
@@ -283,18 +275,19 @@ class SearchModel {
     });
     this.visibleLayers.forEach(layer => {
       if (layer.layerType === "group") {
+        console.log(layer, "layer1");
         this.globalObserver.publish("showLayer", layer);
       } else {
+        console.log(layer, "layer2");
         layer.setVisible(true);
       }
     });
   };
 
-  removeRecentSpatialSearch = () => {
+  clearRecentSpatialSearch = () => {
     this.toggleDraw(false);
     this.toggleSelectGeometriesForSpatialSearch(false);
     this.clearHighlight();
-    this.clearLayerList();
     this.clear();
   };
 
@@ -308,6 +301,7 @@ class SearchModel {
         let layerIds = featureCollections.map(featureCollection => {
           return featureCollection.source.layerId;
         });
+
         this.showLayers(layerIds);
         searchDone(layerIds);
       });
