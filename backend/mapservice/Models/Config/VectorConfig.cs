@@ -38,7 +38,9 @@ namespace MapService.Models.Config
 
 		public string filterValue { get; set; }
 
-		public string lineStyle { get; set; }
+        public string filterComparer { get; set; }
+
+        public string lineStyle { get; set; }
 
         public string lineWidth { get; set; }
 

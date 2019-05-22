@@ -7,12 +7,16 @@ import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
+import IconMoreHoriz from "@material-ui/icons/MoreHoriz";
+import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import "./LayerGroupItem.js";
 import LayerGroupItem from "./LayerGroupItem.js";
 import LayerSettings from "./LayerSettings.js";
 
 const styles = theme => ({
-  button: {},
+  button: {
+    opacity: "0"
+  },
   caption: {},
   captionText: {
     marginLeft: "5px",
@@ -28,15 +32,13 @@ const styles = theme => ({
   layerItem: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center"
+    alignItems: "center",
+    paddingLeft: "10px"
   },
   layerItemContainer: {
-    padding: "10px",
-    margin: "5px",
     background: "white",
-    borderTopRightRadius: "10px",
-    boxShadow:
-      "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)"
+    borderBottom: "1px solid #ccc",
+    paddingLeft: "0"
   },
   layerItemInfo: {
     display: "flex",
@@ -53,16 +55,19 @@ const styles = theme => ({
     border: "1px solid #ccc"
   },
   infoContainer: {
-    padding: "5px",
-    marginRight: "5px",
-    borderRight: "1px solid #ccc"
+    padding: "5px"
   },
   infoButton: {
     fontSize: "14pt",
     cursor: "pointer"
   },
   infoTextContainer: {
-    margin: "10px 0"
+    margin: "10px 25px"
+  },
+  settingsButton: {
+    fontSize: "22pt",
+    cursor: "pointer",
+    padding: "5px"
   }
 });
 
@@ -86,7 +91,8 @@ class LayerItem extends React.PureComponent {
       infoOwner: layerInfo.infoOwner,
       infoExpanded: false,
       instruction: layerInfo.instruction,
-      open: false
+      open: false,
+      toggleSettings: false
     };
   }
   /**
@@ -256,11 +262,14 @@ class LayerItem extends React.PureComponent {
 
   renderOwner() {
     const { infoOwner } = this.state;
+    const { classes } = this.props;
     if (infoOwner) {
       return (
-        <Typography>
-          <strong>Datavärd:</strong> {infoOwner}
-        </Typography>
+        <div className={classes.infoTextContainer}>
+          <Typography>
+            <span dangerouslySetInnerHTML={{ __html: infoOwner }} />
+          </Typography>
+        </div>
       );
     } else {
       return null;
@@ -278,6 +287,12 @@ class LayerItem extends React.PureComponent {
         </div>
       );
     }
+  }
+
+  toggleSettings() {
+    this.setState({
+      toggleSettings: !this.state.toggleSettings
+    });
   }
 
   render() {
@@ -308,33 +323,11 @@ class LayerItem extends React.PureComponent {
       <div className={classes.layerItemContainer}>
         <div className={classes.layerItem}>
           <div className={classes.layerItemInfo}>
-            <div className={classes.infoContainer}>
-              {!this.isInfoEmpty() ? (
-                <InfoIcon
-                  onClick={() => this.toggle()}
-                  className={classes.infoButton}
-                  style={{
-                    boxShadow: this.state.open
-                      ? "rgb(204, 204, 204) 2px 3px 1px"
-                      : "inherit",
-                    borderRadius: "100%"
-                  }}
-                />
-              ) : (
-                <InfoIcon
-                  onClick={() => this.toggle()}
-                  className={classes.infoButton}
-                  style={{
-                    color: "#999",
-                    cursor: "default"
-                  }}
-                />
-              )}
-            </div>
             <div
               className={classes.caption}
               onClick={this.toggleVisible(layer)}
             >
+              <ChevronRightIcon className={classes.button} />
               {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
               {this.renderStatus()}
               <label className={classes.captionText}>
@@ -343,11 +336,48 @@ class LayerItem extends React.PureComponent {
             </div>
           </div>
           <div>
-            <div className={classes.layerInfo}>{this.renderLegendImage()}</div>
+            <div style={{ float: "left" }}>
+              <div className={classes.infoContainer}>
+                {!this.isInfoEmpty() ? (
+                  <InfoIcon
+                    onClick={() => this.toggle()}
+                    className={classes.infoButton}
+                    style={{
+                      boxShadow: this.state.open
+                        ? "rgb(204, 204, 204) 2px 3px 1px"
+                        : "inherit",
+                      borderRadius: "100%"
+                    }}
+                  />
+                ) : (
+                  <InfoIcon
+                    onClick={() => this.toggle()}
+                    className={classes.infoButton}
+                    style={{
+                      color: "#999",
+                      cursor: "default"
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+            <div style={{ float: "left" }}>
+              <IconMoreHoriz
+                onClick={() => this.toggleSettings()}
+                className={classes.settingsButton}
+              />
+            </div>
           </div>
         </div>
-        {this.renderDetails()}
-        <LayerSettings layer={layer} />
+        <div>
+          {this.renderDetails()}
+          <LayerSettings
+            layer={layer}
+            toggled={this.state.toggleSettings}
+            showOpacity={true}
+            showLegend={true}
+          />
+        </div>
       </div>
     );
   }

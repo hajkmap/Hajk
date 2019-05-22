@@ -7,10 +7,8 @@ import SwitchCameraIcon from "@material-ui/icons/SwitchCamera";
 
 const styles = theme => ({
   icon: {
-    color: "black",
-    padding: "3px",
-    overflow: "visible",
-    cursor: "pointer"
+    color: theme.palette.primary.dark,
+    padding: "3px"
   }
 });
 

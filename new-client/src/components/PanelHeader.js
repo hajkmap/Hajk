@@ -7,48 +7,43 @@ import MinimizeIcon from "@material-ui/icons/Minimize";
 import DownIcon from "@material-ui/icons/KeyboardArrowDown";
 import UpIcon from "@material-ui/icons/KeyboardArrowUp";
 import { getIsMobile } from "../utils/IsMobile.js";
+import { Typography } from "@material-ui/core";
 
 const styles = theme => {
   return {
     header: {
-      padding: "11px",
+      padding: "5px 10px",
       background: theme.palette.primary.main,
       color: theme.palette.primary.contrastText,
       borderBottom: "1px solid #ccc",
       userSelect: "none",
-      margin: 0,
-      fontSize: "14pt",
       display: "flex",
-      justifyContent: "space-between",
-      height: "23px"
+      justifyContent: "space-between"
     },
-    icons: {
-      float: "right",
-      display: "flex",
-      alignItems: "center"
+    title: {
+      color: theme.palette.primary.contrastText
     },
     iconsLeft: {
-      float: "left",
       alignItems: "center",
       display: "none",
+      "&>*": {
+        marginRight: "5px"
+      },
       [theme.breakpoints.down("xs")]: {
         display: "flex"
       }
     },
-    icon: {
-      cursor: "pointer",
-      padding: "0 6px",
-      height: "30px",
-      "&:hover": {
-        background: theme.palette.primary.light
+    iconsRight: {
+      display: "flex",
+      alignItems: "center",
+      "&>*": {
+        marginLeft: "5px"
       }
     },
-    iconClose: {
+    icon: {
       cursor: "pointer",
-      padding: "0 6px",
-      height: "30px",
       "&:hover": {
-        background: "rgb(255, 50, 50)"
+        background: theme.palette.primary.light
       }
     },
     windowControllers: {
@@ -79,32 +74,27 @@ class PanelHeader extends Component {
     const { classes } = this.props;
     if (maximizable === false) {
       return (
-        <CloseIcon onClick={this.props.onClose} className={classes.iconClose} />
+        <CloseIcon onClick={this.props.onClose} className={classes.icon} />
       );
     } else {
       return (
         <>
-          <div className={classes.windowControllers}>
-            <MinimizeIcon
-              onClick={this.props.onMinimize}
-              className={classes.icon}
-            />
-            {this.props.mode === "maximized" ? (
-              <ResetIcon
-                onClick={this.props.onMaximize}
-                className={classes.icon}
-              />
-            ) : (
-              <MaximizeIcon
-                onClick={this.props.onMaximize}
-                className={classes.icon}
-              />
-            )}
-          </div>
-          <CloseIcon
-            onClick={this.props.onClose}
-            className={classes.iconClose}
+          <MinimizeIcon
+            onClick={this.props.onMinimize}
+            className={`${classes.icon} ${classes.windowControllers}`}
           />
+          {this.props.mode === "maximized" ? (
+            <ResetIcon
+              onClick={this.props.onMaximize}
+              className={`${classes.icon} ${classes.windowControllers}`}
+            />
+          ) : (
+            <MaximizeIcon
+              onClick={this.props.onMaximize}
+              className={`${classes.icon} ${classes.windowControllers}`}
+            />
+          )}
+          <CloseIcon onClick={this.props.onClose} className={classes.icon} />
         </>
       );
     }
@@ -137,10 +127,10 @@ class PanelHeader extends Component {
   render() {
     const { classes, maximizable } = this.props;
     return (
-      <h1
+      <header
         className={classes.header}
         onMouseDown={e => {
-          if (e.target.tagName === "H1") {
+          if (e.target.tagName === "header") {
             this.maximize(e);
           }
         }}
@@ -152,9 +142,18 @@ class PanelHeader extends Component {
             <DownIcon onClick={this.minimize} className={classes.icon} />
           )}
         </nav>
-        {this.props.title}
-        <nav className={classes.icons}>{this.renderButtons(maximizable)}</nav>
-      </h1>
+        <Typography
+          variant="h6"
+          align="left"
+          noWrap={true}
+          className={classes.title}
+        >
+          {this.props.title}
+        </Typography>
+        <nav className={classes.iconsRight}>
+          {this.renderButtons(maximizable)}
+        </nav>
+      </header>
     );
   }
 }

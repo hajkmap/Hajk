@@ -24,6 +24,7 @@ class SimpleLayerSwitcher extends React.PureComponent {
       panelOpen: true,
       revision: Math.round(Math.random() * 1e8)
     });
+    this.observer.emit("panelOpen");
   };
 
   closePanel = () => {

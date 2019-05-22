@@ -131,11 +131,18 @@
             "id": "3a18c697-a52a-e5c9-cb77-2a7f03c648ec",
             "parent": "-1",
             "name": "Kartlager",
-            "toggled": false,
-            "expanded": false,
+            "toggled": true,
+            "expanded": true,
             "layers": [
               {
                 "id": "33",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "34",
                 "visibleAtStart": false,
                 "drawOrder": 1000,
                 "visibleForGroups": null,
@@ -194,7 +201,7 @@
     {
       "type": "simple_layerswitcher",
       "options": {
-        "target": "left",
+        "target": "toolbar",
         "visibleAtStart": false,
         "visibleForGroups": []
       },
@@ -262,7 +269,7 @@
     {
       "type": "informative",
       "options": {
-        "target": "right",
+        "target": "toolbar",
         "panel": "right",
         "title": "Översiktsplan",
         "caption": "Översiktsplan",
@@ -278,11 +285,11 @@
     {
       "type": "collector",
       "options": {
-        "target": "right",
+        "target": "toolbar",
         "url": "http://giscloud.se/geoserver/wfs",
         "featureType": "opinion",
         "title": "Tyck till",
-        "abstract": "Kommentera",
+        "abstract": "Vi vill veta vad du tycker!",
         "featureNS": "wsp",
         "visibleAtStart": false,
         "visibleForGroups": [],
@@ -313,38 +320,9 @@
       "index": 0
     },
     {
-      "type": "search",
-      "options": {
-        "target": "header",
-        "onMap": false,
-        "bothSynlig": false,
-        "enableViewTogglePopupInSnabbsok": true,
-        "toolbar": "bottom",
-        "maxZoom": 14,
-        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
-        "kmlExportUrl": "/mapservice/export/kml",
-        "excelExportUrl": "/mapservice/export/excel",
-        "displayPopup": true,
-        "selectionTools": true,
-        "base64Encode": false,
-        "instruction": "",
-        "filterVisible": true,
-        "anchor": [16, 32],
-        "imgSize": [32, 32],
-        "tooltip": "Sök...",
-        "searchWithinButtonText": "Markera i kartan",
-        "toolDescription": "<div>Sök innehåll i kartan</div>",
-        "popupOffsetY": 0,
-        "visibleForGroups": [],
-        "layers": [],
-        "selectedSources": ["27", "30"]
-      },
-      "index": 0
-    },
-    {
       "type": "information",
       "options": {
-        "target": "left",
+        "target": "toolbar",
         "text": "Hej",
         "headerText": "Om kartan",
         "title": "",

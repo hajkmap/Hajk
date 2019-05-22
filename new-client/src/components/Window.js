@@ -11,7 +11,7 @@ const zIndexStart = 1e3;
 // This is necessary so we can disable/enable drag at any time.
 //
 Rnd.prototype.onDragStart = function(e, data) {
-  if (this.state.disableDrag || e.target.tagName !== "H1") {
+  if (this.state.disableDrag) {
     return false;
   }
 
@@ -85,18 +85,16 @@ const styles = theme => {
       }
     },
     panelContent: {
+      display: "flex",
       position: "absolute",
       top: 0,
-      right: 0,
       left: 0,
-      bottom: 0
+      bottom: 0,
+      right: 0,
+      flexDirection: "column"
     },
     content: {
-      position: "absolute",
-      top: "46px",
-      left: 0,
-      right: 0,
-      bottom: 0,
+      flex: "1",
       overflowY: "auto",
       padding: "10px",
       cursor: "default !important",
@@ -402,11 +400,13 @@ class Window extends React.PureComponent {
           display: open ? "block" : "none"
         }}
         onDragStop={(e, d) => {
-          this.left = this.rnd.getSelfElement().getClientRects()[0].left;
-          this.top =
-            this.rnd.getSelfElement().getClientRects()[0].top -
-            this.headerHeight;
-          this.right = window.innerWidth - (this.left + parseFloat(this.width));
+          const rect = this.rnd.getSelfElement().getClientRects()[0];
+          if (rect) {
+            this.left = rect.left;
+            this.top = rect.top - this.headerHeight;
+            this.right =
+              window.innerWidth - (this.left + parseFloat(this.width));
+          }
         }}
         onResize={(e, direction, ref, delta, position) => {
           this.width = ref.style.width;
@@ -434,7 +434,7 @@ class Window extends React.PureComponent {
         }}
         className={classes.window}
         minWidth={300}
-        minHeight={this.mode === "minimized" ? 46 : 300}
+        minHeight={this.mode === "minimized" ? 42 : 300}
         size={{
           width: width,
           height: height

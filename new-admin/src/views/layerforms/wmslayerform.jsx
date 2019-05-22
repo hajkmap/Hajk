@@ -37,7 +37,6 @@ const defaultState = {
   caption: "",
   content: "",
   date: "Fylls i per automatik",
-  infobox: "",
   legend: "",
   owner: "",
   url: "",
@@ -45,7 +44,6 @@ const defaultState = {
   tiled: false,
   singleTile: false,
   imageFormat: "",
-  serverType: "geoserver",
   drawOrder: 1,
   layerType: "WMS",
   attribution: "",
@@ -587,7 +585,6 @@ class WMSLayerForm extends Component {
           infoFormat: layer.infoFormat
         },
         () => {
-          this.setServerType();
           this.validate();
 
           if (callback) callback();
@@ -638,9 +635,7 @@ class WMSLayerForm extends Component {
                   capabilities,
                   version: capabilities.version
                 },
-                () => {
-                  this.setServerType();
-                }
+                () => {}
               );
             }
           }
@@ -670,8 +665,6 @@ class WMSLayerForm extends Component {
       version,
       singleTile
     });
-
-    this.setServerType();
   }
 
   setImageFormats() {
@@ -696,24 +689,6 @@ class WMSLayerForm extends Component {
       : "";
 
     return imgFormats;
-  }
-
-  setServerType() {
-    let formats;
-    if (
-      this.state.capabilities &&
-      this.state.capabilities.Capability &&
-      this.state.capabilities.Capability.Request &&
-      this.state.capabilities.Capability.Request.GetFeatureInfo
-    ) {
-      formats = this.state.capabilities.Capability.Request.GetFeatureInfo
-        .Format;
-    }
-    if (formats && formats.indexOf("application/geojson") > -1) {
-      this.setState({ serverType: "arcgis" });
-    } else {
-      this.setState({ serverType: "geoserver" });
-    }
   }
 
   setProjections() {
@@ -820,10 +795,8 @@ class WMSLayerForm extends Component {
       legend: this.getValue("legend"),
       layers: this.getValue("layers"),
       layersInfo: this.getValue("layersInfo"),
-      infobox: this.getValue("infobox"),
       singleTile: this.getValue("singleTile"),
       imageFormat: this.getValue("imageFormat"),
-      serverType: this.getValue("serverType"),
       opacity: this.getValue("opacity"),
       tiled: this.getValue("tiled"),
       drawOrder: this.getValue("drawOrder"),
@@ -1116,17 +1089,6 @@ class WMSLayerForm extends Component {
         </div>
         <div>
           <label>
-            <b>Inforuta</b>
-          </label>
-          <br />
-          <textarea
-            ref="input_infobox"
-            value={this.state.infobox}
-            onChange={e => this.setState({ infobox: e.target.value })}
-          />
-        </div>
-        <div>
-          <label>
             <b>Senast ändrad</b>
           </label>
           <br />
@@ -1183,24 +1145,6 @@ class WMSLayerForm extends Component {
             className="form-control"
           >
             {this.setInfoFormats()}
-          </select>
-        </div>
-        <div>
-          <label>
-            <b>Servertyp</b>
-          </label>
-          <br />
-          <select
-            style={{ width: "50%" }}
-            ref="input_serverType"
-            value={this.state.serverType}
-            onChange={e => this.setState({ serverType: e.target.value })}
-            className="form-control"
-          >
-            <option>geoserver</option>
-            <option>mapserver</option>
-            <option>qgis</option>
-            <option>arcgis</option>
           </select>
         </div>
         <div>

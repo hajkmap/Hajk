@@ -17,7 +17,7 @@ const styles = theme => {
       position: "relative",
       top: "9px",
       background: "white",
-      border: "1px solid " + theme.palette.secondary.main,
+      border: "1px solid " + theme.palette.primary.main,
       borderTop: "none",
       [theme.breakpoints.down("xs")]: {
         border: "none",
@@ -28,9 +28,9 @@ const styles = theme => {
       overflow: "auto",
       padding: "10px",
       position: "relative",
-      top: "-2px",
+      top: "-4px",
       background: "white",
-      border: "1px solid " + theme.palette.secondary.main,
+      border: "1px solid " + theme.palette.primary.main,
       borderTop: "none",
       borderBottomLeftRadius: "5px",
       borderBottomRightRadius: "5px"

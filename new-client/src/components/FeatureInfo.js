@@ -1,10 +1,12 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import marked from "marked";
 import IconButton from "@material-ui/core/IconButton";
 import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import Typography from "@material-ui/core/Typography";
+import marked from "marked";
+import Diagram from "./Diagram";
+import Table from "./Table";
 
 const styles = theme => ({
   windowSection: {
@@ -16,9 +18,7 @@ const styles = theme => ({
     flex: 1,
     overflow: "auto"
   },
-  textContent: {
-    flex: 1
-  },
+  textContent: {},
   toggler: {
     display: "flex"
   },
@@ -126,6 +126,7 @@ class FeatureInfo extends React.PureComponent {
               return "";
           }
         }
+
         markdown = markdown.replace(property, lookup(properties, property));
       });
     }
@@ -152,6 +153,39 @@ class FeatureInfo extends React.PureComponent {
           );
         }
       );
+    }
+  }
+
+  shortcode(str) {
+    var codes = [];
+    var shortcodes = str.match(/\[(.*?)\]/g);
+    shortcodes = shortcodes === null ? [] : shortcodes;
+
+    if (shortcodes) {
+      shortcodes.forEach(code => {
+        str = str.replace(code, "");
+        var params = code
+          .replace("[", "")
+          .replace("]", "")
+          .split(" ");
+        var c = {};
+
+        params.forEach((param, i) => {
+          if (i === 0) {
+            c.shortcode = param;
+          } else {
+            let parts = param.split("=");
+            c[parts[0]] = param.replace(parts[0] + "=", "").replace(/"/g, "");
+          }
+        });
+        codes.push(c);
+      });
+      return {
+        str: str,
+        codes: codes
+      };
+    } else {
+      return;
     }
   }
 
@@ -188,7 +222,6 @@ class FeatureInfo extends React.PureComponent {
 
     var featureList = features.map((feature, i) => {
       if (i === 0) this.props.onDisplay(feature);
-
       var markdown =
         feature.layer.get("layerInfo") &&
         feature.layer.get("layerInfo").information;
@@ -196,7 +229,8 @@ class FeatureInfo extends React.PureComponent {
       var caption =
         feature.layer.get("layerInfo") &&
         feature.layer.get("layerInfo").caption;
-      var layer;
+      var layer,
+        shortcodes = [];
 
       //Problem with geojson returned from AGS - Missing id on feature - how to handle?
       if (feature.layer.layersInfo && feature.getId()) {
@@ -215,9 +249,7 @@ class FeatureInfo extends React.PureComponent {
       ) {
         markdown = feature.layer.layersInfo[layer].infobox;
       }
-
       var properties = feature.getProperties();
-
       Object.keys(properties).forEach(property => {
         var jsonData = this.valueFromJson(properties[property]);
         if (jsonData) {
@@ -228,6 +260,13 @@ class FeatureInfo extends React.PureComponent {
 
       feature.setProperties(properties);
 
+      if (markdown) {
+        let transformed = this.shortcode(markdown);
+        if (transformed) {
+          shortcodes = transformed.codes;
+          markdown = transformed.str;
+        }
+      }
       var value = markdown
         ? this.parse(markdown, properties)
         : this.table(properties);
@@ -240,6 +279,7 @@ class FeatureInfo extends React.PureComponent {
               className={classes.textContent}
               dangerouslySetInnerHTML={value}
             />
+            {this.renderShortcodes(shortcodes, feature)}
           </div>
         );
       } else {
@@ -258,6 +298,21 @@ class FeatureInfo extends React.PureComponent {
         <section className={classes.featureList}>{featureList}</section>
       </section>
     );
+  }
+
+  renderShortcodes(shortcodes, feature) {
+    return shortcodes.map((shortcode, i) => {
+      switch (shortcode.shortcode) {
+        case "diagram":
+          return (
+            <Diagram key={i} source={shortcode.source} feature={feature} />
+          );
+        case "table":
+          return <Table key={i} source={shortcode.source} feature={feature} />;
+        default:
+          return null;
+      }
+    });
   }
 
   render() {

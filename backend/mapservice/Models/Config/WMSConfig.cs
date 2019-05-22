@@ -38,8 +38,6 @@ namespace MapService.Models.Config
 
     public SubLayerConfig[] layersInfo { get; set; }
 
-    public string infobox { get; set; }
-
     public string[] searchFields { get; set; }
 
     public string[] displayFields { get; set; }
@@ -53,8 +51,6 @@ namespace MapService.Models.Config
     public bool singleTile { get; set; }
 
     public string imageFormat { get; set; }
-
-    public string serverType { get; set; }
 
     public string attribution { get; set; }
 

@@ -43,6 +43,7 @@ const defaultState = {
   drawOrder: 1,
   filterAttribute: "",
   filterValue: "",
+  filterComparer: "eq",
   pointSize: 6,
   lineColor: "rgba(0, 0, 0, 0.5)",
   lineWidth: "3",
@@ -131,6 +132,7 @@ class VectorLayerForm extends Component {
       legend: this.getValue("legend"),
       filterValue: this.getValue("filterValue"),
       filterAttribute: this.getValue("filterAttribute"),
+      filterComparer: this.getValue("filterComparer"),
       pointSize: this.getValue("pointSize"),
       lineStyle: this.getValue("lineStyle"),
       lineColor: this.getValue("lineColor"),
@@ -352,6 +354,12 @@ class VectorLayerForm extends Component {
   setFilterValue(e) {
     this.setState({
       filterValue: e.target.value
+    });
+  }
+
+  setFilterComparer(e) {
+    this.setState({
+      filterComparer: e.target.value
     });
   }
 
@@ -625,7 +633,25 @@ class VectorLayerForm extends Component {
               this.setState({ filterAttribute: e.target.value });
             }}
           />
-          <div />
+        </div>
+        <div>
+          <label>Filterjämförare</label>
+          <select
+            ref="input_filterComparer"
+            value={this.state.filterComparer}
+            onChange={e => {
+              this.setState({
+                filterComparer: e.target.value
+              });
+            }}
+          >
+            <option value="lt">Mindre än</option>
+            <option value="gt">Större än</option>
+            <option value="eq">Lika med</option>
+            <option value="not">Skilt från</option>
+          </select>
+        </div>
+        <div>
           <label>Filtervärde</label>
           <input
             type="text"

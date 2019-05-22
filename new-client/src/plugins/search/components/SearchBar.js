@@ -7,50 +7,35 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 const styles = theme => ({
   search: {
     borderRadius: theme.shape.borderRadius,
-
-    backgroundColor: "inherit",
-
-    overflow: "hidden"
-  },
-  closeIcon: {},
-  clearIcon: {
-    cursor: "pointer"
-  },
-  searchIcon: {
-    height: "100%",
-    position: "relative",
-    padding: "6px",
-    background: theme.palette.secondary.main
+    border: "1px solid " + theme.palette.primary.main
   },
   inputRoot: {
-    color: "inherit",
     width: "100%"
   },
   inputInput: {
-    paddingTop: theme.spacing.unit,
-    paddingRight: theme.spacing.unit,
-    paddingBottom: theme.spacing.unit,
-    paddingLeft: theme.spacing.unit,
-    transition: theme.transitions.create("width"),
+    padding: theme.spacing.unit,
     left: "100%",
     width: "100%"
   },
   inputInputWide: {
-    paddingTop: theme.spacing.unit,
-    paddingRight: theme.spacing.unit,
-    paddingBottom: theme.spacing.unit,
-    paddingLeft: theme.spacing.unit,
-    transition: theme.transitions.create("width"),
+    padding: theme.spacing.unit,
     left: "100%",
     width: "100%",
     "&:focus": {
       width: "100%"
     }
   },
+  clearIcon: {
+    cursor: "pointer"
+  },
+  searchIcon: {
+    position: "relative",
+    padding: "6px"
+  },
   progress: {
     width: "20px !important",
     height: "20px !important",
-    color: "black",
+    color: theme.palette.primary.main,
     margin: "2px"
   }
 });

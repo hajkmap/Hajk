@@ -1,6 +1,11 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
+import Button from "@material-ui/core/Button";
+import CancelIcon from "@material-ui/icons/Cancel";
+import AppBar from "@material-ui/core/AppBar";
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
@@ -36,9 +41,15 @@ const styles = theme => ({
     fontSize: 20
   },
   icon: {
-    fontSize: "20pt"
+    fontSize: "14pt",
+    color: "#d24723"
   },
-  layerSwitcher: {},
+  layerSwitcher: {
+    marginTop: "85px"
+  },
+  layerGroups: {
+    padding: "0px"
+  },
   reset: {},
   card: {
     cursor: "pointer",
@@ -88,13 +99,18 @@ class SimpleLayersSwitcherView extends React.PureComponent {
             l.getProperties().layerInfo &&
             l.getProperties().layerInfo.layerType === "base"
         )
-        .map(l => l.getProperties())
+        .map(l => l.getProperties()),
+      activeTab: 0
     };
 
     window.addEventListener("resize", () => {
       this.setState({
         innerWidth: window.innerWidth
       });
+    });
+
+    props.observer.on("panelOpen", () => {
+      this.forceUpdate();
     });
 
     props.app.globalObserver.on("informativeLoaded", chapters => {
@@ -113,9 +129,12 @@ class SimpleLayersSwitcherView extends React.PureComponent {
       },
       () => {
         setTimeout(() => {
-          var parent = instance.refs.panelElement.offsetParent;
-          var topOfElement = instance.refs.panelElement.offsetTop;
-          parent.scroll({ top: topOfElement, behavior: "smooth" });
+          const parent = instance.refs.panelElement.offsetParent;
+          const topOfElement = instance.refs.panelElement.offsetTop - 145;
+          const sections = parent.getElementsByTagName("section");
+          if (sections.length > 0) {
+            sections[0].scroll({ top: topOfElement, behavior: "smooth" });
+          }
         }, 50);
       }
     );
@@ -159,20 +178,60 @@ class SimpleLayersSwitcherView extends React.PureComponent {
     );
   }
 
+  handleChangeTabs = (event, value) => {
+    this.setState({ activeTab: value });
+  };
+
   render() {
     const { classes } = this.props;
     return (
-      <div className={classes.layerSwitcher}>
-        <div>
-          <BackgroundSwitcher
-            layers={this.state.baseLayers}
-            layerMap={this.props.model.layerMap}
-            backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
-            backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
-          />
-          <div>{this.renderLayerGroups()}</div>
+      <div>
+        <AppBar position="fixed" color="default" style={{ top: "45px" }}>
+          <Tabs
+            value={this.state.activeTab}
+            onChange={this.handleChangeTabs}
+            indicatorColor="primary"
+            textColor="primary"
+          >
+            <Tab label="Kartlager" />
+            <Tab label="Bakgrundskartor" />
+          </Tabs>
+          <div style={{ float: "right" }}>
+            <Button
+              aria-label="Rensa"
+              onClick={e => {
+                e.stopPropagation();
+                this.props.app.clear();
+              }}
+            >
+              <CancelIcon className={classes.icon} />
+              &nbsp;
+              <span>Släck alla lager</span>
+            </Button>
+          </div>
+        </AppBar>
+        <div className={classes.layerSwitcher}>
+          <div>
+            <div className="content">
+              <div
+                style={{
+                  display: this.state.activeTab === 0 ? "block" : "none"
+                }}
+                className={classes.layerGroups}
+              >
+                {this.renderLayerGroups()}
+              </div>
+              <BackgroundSwitcher
+                display={this.state.activeTab === 1}
+                layers={this.state.baseLayers}
+                layerMap={this.props.model.layerMap}
+                backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
+                backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
+              />
+            </div>
+          </div>
+          {this.props.breadCrumbs ? this.renderBreadCrumbs() : null}
         </div>
-        {this.props.breadCrumbs ? this.renderBreadCrumbs() : null}
       </div>
     );
   }

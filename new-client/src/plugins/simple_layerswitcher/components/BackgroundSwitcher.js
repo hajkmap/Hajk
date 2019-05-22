@@ -38,12 +38,9 @@ const styles = theme => ({
     background: "white"
   },
   layerItemContainer: {
-    padding: "10px",
-    margin: "5px",
     background: "white",
-    borderTopRightRadius: "10px",
-    boxShadow:
-      "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)"
+    borderBottom: "1px solid #ccc",
+    paddingLeft: "10px"
   },
   captionText: {
     marginLeft: "-6px",
@@ -164,6 +161,8 @@ class BackgroundSwitcher extends React.PureComponent {
       )
     ];
 
+    radioButtons.reverse();
+
     return radioButtons;
   }
 
@@ -182,17 +181,19 @@ class BackgroundSwitcher extends React.PureComponent {
   render() {
     const { classes } = this.props;
     return (
-      <ExpansionPanel
-        className={classes.disableTransition}
-        CollapseProps={{ classes: { container: classes.disableTransition } }}
-      >
-        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography className={classes.heading}>Bakgrundskartor</Typography>
-        </ExpansionPanelSummary>
-        <ExpansionPanelDetails classes={{ root: classes.root }}>
-          {this.renderBaseLayerComponents()}
-        </ExpansionPanelDetails>
-      </ExpansionPanel>
+      <div style={{ display: this.props.display ? "block" : "none" }}>
+        <ExpansionPanel
+          className={classes.disableTransition}
+          CollapseProps={{ classes: { container: classes.disableTransition } }}
+        >
+          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography className={classes.heading}>Bakgrundskartor</Typography>
+          </ExpansionPanelSummary>
+          <ExpansionPanelDetails classes={{ root: classes.root }}>
+            {this.renderBaseLayerComponents()}
+          </ExpansionPanelDetails>
+        </ExpansionPanel>
+      </div>
     );
   }
 }
