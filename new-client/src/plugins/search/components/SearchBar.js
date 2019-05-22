@@ -6,8 +6,7 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 
 const styles = theme => ({
   search: {
-    borderRadius: theme.shape.borderRadius,
-    border: "1px solid " + theme.palette.primary.main
+    borderRadius: theme.shape.borderRadius
   },
   inputRoot: {
     width: "100%"
