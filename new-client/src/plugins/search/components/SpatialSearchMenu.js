@@ -59,10 +59,64 @@ class SpatialSearchOptions extends React.Component {
     this.setState({ anchorEl: null });
   };
 
+  renderMenu(anchorEl, open, activeSpatialTools) {
+    let menuItems = [];
+    if (activeSpatialTools.polygon) {
+      menuItems.push(this.renderMenuItem(POLYGON, <CropSquare />, "Rita"));
+    }
+    if (activeSpatialTools.within) {
+      menuItems.push(this.renderMenuItem(WITHIN, <TripOrigin />, "Radie"));
+    }
+    if (activeSpatialTools.selection) {
+      menuItems.push(this.renderMenuItem(SELECTION, <TouchApp />, "Markera"));
+    }
+
+    return (
+      <Menu
+        id="long-menu"
+        anchorEl={anchorEl}
+        getContentAnchorEl={null}
+        open={open}
+        onClose={this.handleClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        PaperProps={{
+          style: {
+            maxHeight: ITEM_HEIGHT * 4.5,
+            width: 200
+          }
+        }}
+      >
+        {menuItems.map(menuItem => {
+          return menuItem;
+        })}
+      </Menu>
+    );
+  }
+
+  renderMenuItem(spatialType, icon, text) {
+    return (
+      <MenuItem
+        key={spatialType}
+        onClick={() => this.handleMenuItemClick(spatialType)}
+        value={spatialType}
+        alignItems="center"
+      >
+        <Grid container direction="row" alignItems="center">
+          <Grid item>{icon}</Grid>
+          <Grid item />
+          <Typography variant="subtitle1" gutterBottom>
+            {text}
+          </Typography>
+        </Grid>
+      </MenuItem>
+    );
+  }
+
   render() {
     const { classes, activeSpatialTools } = this.props;
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
+
     return (
       <div className={classes.root}>
         <IconButton
@@ -74,66 +128,7 @@ class SpatialSearchOptions extends React.Component {
           <CropSquare />
           <ArrowDownward style={{ fontSize: 10 }} />
         </IconButton>
-        <Menu
-          id="long-menu"
-          anchorEl={anchorEl}
-          getContentAnchorEl={null}
-          open={open}
-          onClose={this.handleClose}
-          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-          PaperProps={{
-            style: {
-              maxHeight: ITEM_HEIGHT * 4.5,
-              width: 200
-            }
-          }}
-        >
-          <MenuItem
-            onClick={() => this.handleMenuItemClick(WITHIN)}
-            value={WITHIN}
-            alignItems="center"
-          >
-            <Grid container direction="row" alignItems="center">
-              <Grid item>
-                <TripOrigin />
-              </Grid>
-              <Grid item />
-              <Typography variant="subtitle1" gutterBottom>
-                Rita
-              </Typography>
-            </Grid>
-          </MenuItem>
-          <MenuItem
-            value={POLYGON}
-            onClick={() => this.handleMenuItemClick(POLYGON)}
-            alignItems="center"
-          >
-            <Grid container direction="row" alignItems="center">
-              <Grid item>
-                <CropSquare />
-              </Grid>
-              <Grid item />
-              <Typography variant="subtitle1" gutterBottom>
-                Rita
-              </Typography>
-            </Grid>
-          </MenuItem>
-          <MenuItem
-            value={SELECTION}
-            onClick={() => this.handleMenuItemClick(SELECTION)}
-            alignItems="center"
-          >
-            <Grid container direction="row" alignItems="center">
-              <Grid item>
-                <TouchApp />
-              </Grid>
-              <Grid item />
-              <Typography variant="subtitle1" gutterBottom>
-                Markera
-              </Typography>
-            </Grid>
-          </MenuItem>
-        </Menu>
+        {this.renderMenu(anchorEl, open, activeSpatialTools)}
       </div>
     );
   }
