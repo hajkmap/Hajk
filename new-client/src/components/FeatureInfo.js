@@ -5,6 +5,7 @@ import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import Typography from "@material-ui/core/Typography";
 import marked from "marked";
+import mergeFeaturePropsWithMarkdown from "../utils/FeaturePropsAndMarkdownMerge";
 import Diagram from "./Diagram";
 import Table from "./Table";
 
@@ -104,35 +105,6 @@ class FeatureInfo extends React.PureComponent {
         return null;
       }
     });
-  }
-
-  parse(markdown, properties) {
-    markdown = markdown.replace(/export:/g, "");
-    if (markdown && typeof markdown === "string") {
-      (markdown.match(/{(.*?)}/g) || []).forEach(property => {
-        function lookup(o, s) {
-          s = s
-            .replace("{", "")
-            .replace("}", "")
-            .split(".");
-          switch (s.length) {
-            case 1:
-              return o[s[0]] || "";
-            case 2:
-              return o[s[0]][s[1]] || "";
-            case 3:
-              return o[s[0]][s[1]][s[2]] || "";
-            default:
-              return "";
-          }
-        }
-
-        markdown = markdown.replace(property, lookup(properties, property));
-      });
-    }
-    return {
-      __html: marked(markdown)
-    };
   }
 
   changeSelectedIndex(amount) {
@@ -268,7 +240,7 @@ class FeatureInfo extends React.PureComponent {
         }
       }
       var value = markdown
-        ? this.parse(markdown, properties)
+        ? mergeFeaturePropsWithMarkdown(markdown, properties)
         : this.table(properties);
 
       if (markdown) {

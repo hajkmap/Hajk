@@ -7,6 +7,8 @@ import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Button from "@material-ui/core/Button";
+import mergeFeaturePropsWithMarkdown from "../../../utils/FeaturePropsAndMarkdownMerge";
+
 import classNames from "classnames";
 
 const styles = theme => ({
@@ -82,7 +84,7 @@ class SearchResultGroup extends Component {
     this.setState({
       activeFeature: feature
     });
-    this.props.localObserver.publish("minimizeWindow", true);
+    //this.props.localObserver.publish("minimizeWindow", true);
   };
 
   clear = e => {
@@ -90,24 +92,36 @@ class SearchResultGroup extends Component {
     this.props.model.clearHighlight();
   };
 
-  renderItem(feature, displayField, i) {
+  renderItem(feature, displayField, infoBox, i) {
     const { classes, target } = this.props;
     const active = this.state.activeFeature === feature;
     return (
-      <div
-        key={i}
+      <ExpansionPanel
         className={classNames(classes.item, active ? classes.active : null)}
-        onClick={this.zoomTo(feature)}
       >
-        {feature.properties[displayField]}
-        {target === "center" ? (
-          <div>
-            <Button color="primary" onClick={this.highlight(feature)}>
-              Visa påverkan
-            </Button>
+        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+          <div style={{ flex: "auto", display: "flex" }}>
+            <div key={i} onClick={this.zoomTo(feature)}>
+              {feature.properties[displayField]}
+              {target === "center" ? (
+                <div>
+                  <Button color="primary" onClick={this.highlight(feature)}>
+                    Visa påverkan
+                  </Button>
+                </div>
+              ) : null}
+            </div>
           </div>
-        ) : null}
-      </div>
+        </ExpansionPanelSummary>
+        <ExpansionPanelDetails>
+          <div
+            dangerouslySetInnerHTML={mergeFeaturePropsWithMarkdown(
+              infoBox,
+              feature.properties
+            )}
+          />
+        </ExpansionPanelDetails>
+      </ExpansionPanel>
     );
   }
 
@@ -158,6 +172,7 @@ class SearchResultGroup extends Component {
                   this.renderItem(
                     featureType.features[i],
                     featureType.source.displayFields[0],
+                    featureType.source.infobox,
                     i
                   )
                 )}
