@@ -85,6 +85,7 @@ class ToolOptions extends Component {
           enableViewTogglePopupInSnabbsok:
             tool.options.enableViewTogglePopupInSnabbsok,
           selectionTools: tool.options.selectionTools,
+          //activeSpatialTools: this.options.activeSpatialTools,
           base64Encode: tool.options.base64Encode,
           instruction: tool.options.instruction,
           filterVisible: tool.options.filterVisible,
@@ -244,6 +245,7 @@ class ToolOptions extends Component {
         excelExportUrl: this.state.excelExportUrl,
         displayPopup: this.state.displayPopup,
         selectionTools: this.state.selectionTools,
+        //activeSpatialTools: this.state.activeSpatialTools,
         base64Encode: this.state.base64Encode,
         instruction: this.state.instruction,
         filterVisible: this.state.filterVisible,
@@ -616,7 +618,51 @@ class ToolOptions extends Component {
               checked={this.state.selectionTools}
             />
             &nbsp;
-            <label htmlFor="selectionTools">Verktyg för ytsökning</label>
+            <label>Verktyg för ytsökning</label>
+          </div>
+          <div>
+            <strong>
+              <label>Aktiva spatial sökverktyg</label>
+            </strong>
+          </div>
+          <div>
+            <div>
+              <input
+                id="polygonTool"
+                name="polygonTool"
+                type="checkbox"
+                onChange={e => {
+                  this.handleInputChange(e);
+                }}
+                checked={this.state.selectionTools}
+              />
+              <label htmlFor="polygonTool">Polygon</label>
+              <div>
+                <input
+                  id="withinTool"
+                  name="withinTool"
+                  type="checkbox"
+                  onChange={e => {
+                    this.handleInputChange(e);
+                  }}
+                  checked={this.state.selectionTools}
+                />
+                <label htmlFor="withinTool">Radie</label>
+              </div>
+              <div>
+                <input
+                  id="selectionTool"
+                  name="selectionTool"
+                  type="checkbox"
+                  onChange={e => {
+                    this.handleInputChange(e);
+                  }}
+                  checked={this.state.selectionTools}
+                />
+                <label htmlFor="selectionTool">Selektion</label>
+              </div>
+            </div>
+            &nbsp;
           </div>
           <div>
             <input
