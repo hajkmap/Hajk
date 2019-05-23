@@ -4,8 +4,8 @@ import { withStyles } from "@material-ui/core/styles";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Button from "@material-ui/core/Button";
+import CancelIcon from "@material-ui/icons/Cancel";
 import AppBar from "@material-ui/core/AppBar";
-import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
@@ -41,12 +41,14 @@ const styles = theme => ({
     fontSize: 20
   },
   icon: {
-    fontSize: "12pt",
-    marginRight: "4px",
-    marginBottom: "1px"
+    fontSize: "14pt",
+    color: "#d24723"
   },
   layerSwitcher: {
-    marginTop: "52px"
+    marginTop: "85px"
+  },
+  layerGroups: {
+    padding: "0px"
   },
   reset: {},
   card: {
@@ -76,26 +78,8 @@ const styles = theme => ({
     fontWeight: "bold",
     marginBottom: "5px"
   },
-  text: {},
-  clearContainer: {
-    float: "right"
-  },
-  clearButton: {
-    margin: theme.spacing.unit,
-    fontSize: "12px",
-    textTransform: "none"
-  }
+  text: {}
 });
-
-const StyledTab = withStyles({
-  root: {
-    minWidth: "50px",
-    width: "120px",
-    height: "50px",
-    textTransform: "unset",
-    fontSize: "15px"
-  }
-})(Tab);
 
 class SimpleLayersSwitcherView extends React.PureComponent {
   constructor(props) {
@@ -201,70 +185,50 @@ class SimpleLayersSwitcherView extends React.PureComponent {
   render() {
     const { classes } = this.props;
     return (
-      <div className={classes.layerSwitcher}>
-        <AppBar
-          position="fixed"
-          color="default"
-          style={{ top: "43px", display: "unset", height: "50px" }}
-        >
+      <div>
+        <AppBar position="fixed" color="default" style={{ top: "45px" }}>
           <Tabs
             value={this.state.activeTab}
             onChange={this.handleChangeTabs}
             indicatorColor="primary"
             textColor="primary"
-            variant="standard"
-            style={{ display: "unset" }}
           >
-            <StyledTab label="Kartlager" />
-            <StyledTab label="Bakgrund" />
-            <div className={classes.clearContainer}>
-              <Button
-                variant="outlined"
-                size="small"
-                color="primary"
-                className={classes.clearButton}
-                aria-label="Rensa"
-                onClick={e => {
-                  e.stopPropagation();
-                  this.props.app.clear();
-                }}
-              >
-                <VisibilityOffIcon className={classes.icon} />
-                <span>Släck alla</span>
-              </Button>
-            </div>
+            <Tab label="Kartlager" />
+            <Tab label="Bakgrundskartor" />
           </Tabs>
+          <div style={{ float: "right" }}>
+            <Button
+              aria-label="Rensa"
+              onClick={e => {
+                e.stopPropagation();
+                this.props.app.clear();
+              }}
+            >
+              <CancelIcon className={classes.icon} />
+              &nbsp;
+              <span>Släck alla lager</span>
+            </Button>
+          </div>
         </AppBar>
-        <div>
+        <div className={classes.layerSwitcher}>
           <div>
-            <section>
-              <div className="content">
-                {this.state.activeTab === 0 && (
-                  <div
-                    style={{
-                      width: "100%",
-                      float: "left",
-                      fontFamily: "Verdana, Geneva, sans-serif",
-                      fontSize: "14px"
-                    }}
-                  >
-                    {this.renderLayerGroups()}
-                  </div>
-                )}
-                {this.state.activeTab === 1 && (
-                  <BackgroundSwitcher
-                    layers={this.state.baseLayers}
-                    layerMap={this.props.model.layerMap}
-                    backgroundSwitcherBlack={
-                      this.options.backgroundSwitcherBlack
-                    }
-                    backgroundSwitcherWhite={
-                      this.options.backgroundSwitcherWhite
-                    }
-                  />
-                )}
+            <div className="content">
+              <div
+                style={{
+                  display: this.state.activeTab === 0 ? "block" : "none"
+                }}
+                className={classes.layerGroups}
+              >
+                {this.renderLayerGroups()}
               </div>
-            </section>
+              <BackgroundSwitcher
+                display={this.state.activeTab === 1}
+                layers={this.state.baseLayers}
+                layerMap={this.props.model.layerMap}
+                backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
+                backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
+              />
+            </div>
           </div>
           {this.props.breadCrumbs ? this.renderBreadCrumbs() : null}
         </div>

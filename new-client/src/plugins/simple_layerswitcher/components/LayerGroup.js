@@ -9,20 +9,20 @@ import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import Typography from "@material-ui/core/Typography";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
-import CheckIcon from "@material-ui/icons/Check";
 
 const styles = theme => ({
   root: {
     width: "100%",
     display: "block",
-    padding: "0px 0"
+    padding: "5px 0"
   },
   heading: {
+    fontSize: theme.typography.pxToRem(18),
     flexBasis: "100%",
-    flexShrink: 0,
-    marginTop: "2px"
+    flexShrink: 0
   },
   secondaryHeading: {
+    fontSize: theme.typography.pxToRem(15),
     color: theme.palette.text.secondary
   },
   disableTransition: {
@@ -31,7 +31,7 @@ const styles = theme => ({
     boxShadow: "none"
   },
   panel: {
-    marginLeft: "20px"
+    marginLeft: "10px"
   },
   groupCheckbox: {
     marginRight: "5px"
@@ -41,45 +41,10 @@ const styles = theme => ({
   },
   panelSummary: {
     padding: "0px",
-    borderBottom: "1px solid #d9d9d9",
-    overflow: "hidden",
-    minHeight: "0px !important",
-    "&$expanded": {
-      margin: "12px 0"
-    }
+    borderBottom: "1px solid #ccc",
+    overflow: "hidden"
   }
 });
-
-const StyledExpansionPanel = withStyles({
-  root: {
-    boxShadow: "none",
-    "&:not(:last-child)": {
-      borderBottom: 0
-    },
-    "&:before": {
-      display: "none"
-    }
-  },
-  expanded: {
-    margin: "auto"
-  }
-})(ExpansionPanel);
-
-const StyledExpansionPanelSummary = withStyles({
-  root: {
-    minHeight: 56,
-    "&$expanded": {
-      minHeight: 56
-    }
-  },
-  content: {
-    margin: "5px 0",
-    "&$expanded": {
-      margin: "5px 0"
-    }
-  },
-  expanded: {}
-})(ExpansionPanelSummary);
 
 class LayerGroup extends React.PureComponent {
   constructor(props) {
@@ -204,32 +169,18 @@ class LayerGroup extends React.PureComponent {
         >
           <div className={classes.groupCheckbox}>
             {this.isToggled(this.props.group) ? (
-              <CheckIcon
-                style={{
-                  fill: "#000",
-                  border: "1px solid #7f7f7f",
-                  borderRadius: "4px",
-                  fontSize: "16px",
-                  marginTop: "3px"
-                }}
-              />
+              <CheckBoxIcon />
             ) : (
-              <CheckIcon
-                style={{
-                  fill: "white",
-                  border: "1px solid #7f7f7f",
-                  borderRadius: "4px",
-                  fontSize: "16px",
-                  marginTop: "3px"
-                }}
-              />
+              <CheckBoxOutlineBlankIcon />
             )}
           </div>
-          <label className={classes.heading}>{this.state.name}</label>
+          <Typography className={classes.heading}>{this.state.name}</Typography>
         </div>
       );
     } else {
-      return <label className={classes.heading}>{this.state.name}</label>;
+      return (
+        <Typography className={classes.heading}>{this.state.name}</Typography>
+      );
     }
   }
 
@@ -247,10 +198,10 @@ class LayerGroup extends React.PureComponent {
           expanded={this.props.expanded}
           onChange={this.props.handleChange(this.props.group.id, this)}
         >
-          <StyledExpansionPanelSummary className={classes.panelSummary}>
+          <ExpansionPanelSummary className={classes.panelSummary}>
             {this.props.expanded ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
             {this.renderToggleAll()}
-          </StyledExpansionPanelSummary>
+          </ExpansionPanelSummary>
           <ExpansionPanelDetails classes={{ root: classes.root }}>
             {this.state.layers.map((layer, i) => {
               var mapLayer = this.model.layerMap[Number(layer.id)];
