@@ -74,18 +74,17 @@ const styles = theme => {
     searchContainer: {
       [theme.breakpoints.up("lg")]: {
         display: "flex",
+        flex: "auto",
         alignItems: "center",
-        width: "270px",
+
         backgroundColor: "#eee",
         borderRadius: theme.shape.borderRadius
       }
     },
     mainContainerButton: {
       [theme.breakpoints.up("lg")]: {
-        display: "flex",
         alignItems: "center",
-        justifyContent: "center",
-        width: "80px"
+        justifyContent: "center"
       }
     },
     searchToolsContainer: {
