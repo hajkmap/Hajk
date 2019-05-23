@@ -9,7 +9,6 @@ import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
 import IconMoreHoriz from "@material-ui/icons/MoreHoriz";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import CheckIcon from "@material-ui/icons/Check";
 import "./LayerGroupItem.js";
 import LayerGroupItem from "./LayerGroupItem.js";
 import LayerSettings from "./LayerSettings.js";
@@ -33,12 +32,13 @@ const styles = theme => ({
   layerItem: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center"
+    alignItems: "center",
+    paddingLeft: "10px"
   },
   layerItemContainer: {
     background: "white",
-    marginLeft: "20px",
-    borderBottom: "1px solid #d9d9d9"
+    borderBottom: "1px solid #ccc",
+    paddingLeft: "0"
   },
   layerItemInfo: {
     display: "flex",
@@ -52,7 +52,7 @@ const styles = theme => ({
     display: "flex",
     alignItems: "center",
     padding: "3px",
-    border: "1px solid #d9d9d9"
+    border: "1px solid #ccc"
   },
   infoContainer: {
     padding: "5px"
@@ -232,8 +232,8 @@ class LayerItem extends React.PureComponent {
     if (infoText) {
       return (
         <div className={classes.infoTextContainer}>
-          <strong>{infoTitle}</strong>
-          <p
+          <Typography variant="h6">{infoTitle}</Typography>
+          <Typography
             dangerouslySetInnerHTML={{
               __html: infoText
             }}
@@ -247,10 +247,9 @@ class LayerItem extends React.PureComponent {
 
   renderMetadataLink() {
     const { infoUrl, infoUrlText } = this.state;
-    const { classes } = this.props;
     if (infoUrl) {
       return (
-        <div className={classes.infoTextContainer}>
+        <div>
           <a href={infoUrl} target="_blank" rel="noopener noreferrer">
             {infoUrlText || infoUrl}
           </a>
@@ -267,7 +266,9 @@ class LayerItem extends React.PureComponent {
     if (infoOwner) {
       return (
         <div className={classes.infoTextContainer}>
-          <span dangerouslySetInnerHTML={{ __html: infoOwner }} />
+          <Typography>
+            <span dangerouslySetInnerHTML={{ __html: infoOwner }} />
+          </Typography>
         </div>
       );
     } else {
@@ -278,15 +279,10 @@ class LayerItem extends React.PureComponent {
   renderDetails() {
     if (this.state.open) {
       return (
-        <div
-          style={{
-            fontFamily: "Verdana, Geneva, sans-serif",
-            fontSize: "13px"
-          }}
-        >
+        <div>
           {this.renderInfo()}
-          {this.renderMetadataLink()}
           {this.renderOwner()}
+          {this.renderMetadataLink()}
           <div>{this.renderChapterLinks(this.props.chapters || [])}</div>
         </div>
       );
@@ -332,34 +328,10 @@ class LayerItem extends React.PureComponent {
               onClick={this.toggleVisible(layer)}
             >
               <ChevronRightIcon className={classes.button} />
-              {visible ? (
-                <CheckIcon
-                  style={{
-                    fill: "#000",
-                    border: "1px solid #7f7f7f",
-                    borderRadius: "4px",
-                    fontSize: "16px",
-                    marginBottom: "2px"
-                  }}
-                />
-              ) : (
-                <CheckIcon
-                  style={{
-                    fill: "white",
-                    border: "1px solid #7f7f7f",
-                    borderRadius: "4px",
-                    fontSize: "16px",
-                    marginBottom: "2px"
-                  }}
-                />
-              )}
+              {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
               {this.renderStatus()}
               <label className={classes.captionText}>
-                {visible ? (
-                  <strong>{caption}</strong>
-                ) : (
-                  <label>{caption}</label>
-                )}
+                <strong>{caption}</strong>
               </label>
             </div>
           </div>
