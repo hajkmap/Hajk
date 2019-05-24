@@ -166,7 +166,7 @@ class OpenLayersMap {
         VERSION: "1.1.0",
         SRS: this.projection
       },
-      //serverType: "geoserver",
+      serverType: "geoserver",
       imageFormat: "image/png"
     };
     source.tileGrid = new TileGrid({
@@ -239,7 +239,7 @@ class OpenLayersMap {
           VERSION: "1.1.0",
           SRS: this.projection
         },
-        //serverType: "geoserver",
+        serverType: "geoserver",
         imageFormat: "image/png"
       };
 
