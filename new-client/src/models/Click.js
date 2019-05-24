@@ -19,9 +19,13 @@ function query(map, layer, evt) {
 
   if (layer.layersInfo) {
     let subLayers = Object.values(layer.layersInfo);
+    let visibleSubLayers = layer.getSource().getParams()["LAYERS"];
     subLayersToQuery = subLayers
       .filter(subLayer => {
-        return subLayer.queryable === true;
+        return (
+          subLayer.queryable === true &&
+          visibleSubLayers.indexOf(subLayer.id) !== -1 // QUERY_LAYERS must not include anything that's not in LAYERS, see https://github.com/hajkmap/Hajk/issues/211
+        );
       })
       .map(queryableSubLayer => {
         return queryableSubLayer.id;
