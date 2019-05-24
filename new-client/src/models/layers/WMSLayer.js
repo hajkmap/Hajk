@@ -9,7 +9,7 @@ import LayerInfo from "./LayerInfo.js";
 
 var WmsLayerProperties = {
   url: "",
-  projection: "EPSG:3007",
+  projection: "EPSG:3006",
   serverType: "geoserver",
   opacity: 1,
   status: "ok",

@@ -53,7 +53,7 @@ var LayerModel = require("layers/layer");
  * @property {string} request - Type of request to perform.
  * @property {string} typename - Name of the featureclass to query.
  * @property {string} outputFormat - Version ov the output format eg: GML2, GML3.
- * @property {string} srsname - SRID of the coordinatesystem eg: EPSG:3007.
+ * @property {string} srsname - SRID of the coordinatesystem eg: EPSG:3006.
  * @property {Array} bbox - Bounding box of wich to restrict the query.
  */
 
