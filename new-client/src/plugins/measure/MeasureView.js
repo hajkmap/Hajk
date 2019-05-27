@@ -28,11 +28,11 @@ const styles = theme => ({
 class MeasureView extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.model = this.props.model;
-    this.app = this.props.app;
-    this.localObserver = this.props.localObserver;
+    this.model = this.props.parent.model;
+    this.app = this.props.parent.app;
+    this.localObserver = this.props.parent.localObserver;
     this.state = {
-      shape: this.props.model.getType()
+      shape: this.model.getType()
     };
   }
 
@@ -42,7 +42,7 @@ class MeasureView extends React.PureComponent {
 
   handleChange = name => event => {
     this.setState({ [name]: event.target.value });
-    this.props.model.setType(event.target.value);
+    this.model.setType(event.target.value);
   };
 
   render() {
@@ -65,7 +65,7 @@ class MeasureView extends React.PureComponent {
           </FormControl>
         </div>
         <div className={classes.row}>
-          <Button variant="contained" onClick={this.props.model.clear}>
+          <Button variant="contained" onClick={this.model.clear}>
             Rensa mätning
           </Button>
         </div>

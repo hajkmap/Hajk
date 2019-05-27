@@ -7,6 +7,8 @@ import MeasureView from "./MeasureView";
 import MeasureModel from "./MeasureModel";
 import Observer from "react-event-observer";
 import Window from "../../components/Window.js";
+import Card from "../../components/Card.js";
+
 import "./measure.css";
 
 const styles = theme => {
@@ -28,30 +30,16 @@ class Measure extends React.PureComponent {
     panelOpen: this.props.options.visibleAtStart || false
   };
 
-  onClick = e => {
-    this.app.onPanelOpen(this);
-    this.setState({
-      panelOpen: true,
-      anchorEl: e.currentTarget
-    });
-    this.measureModel.setActive(true);
-  };
-
-  closePanel = () => {
-    this.setState({
-      panelOpen: false,
-      anchorEl: null
-    });
-    this.measureModel.setActive(false);
-  };
-
   constructor(props) {
     super(props);
+    this.type = "measure";
     this.options = props.options;
     this.title = this.options.title || "Mät";
+    this.abstract = this.options.abstract || "Mät längder och ytor";
+    this.position = props.options.panel ? props.options.panel : undefined;
     this.app = props.app;
     this.localObserver = Observer();
-    this.measureModel = new MeasureModel({
+    this.model = new MeasureModel({
       map: props.map,
       app: props.app,
       localObserver: this.localObserver
@@ -59,32 +47,57 @@ class Measure extends React.PureComponent {
     this.app.registerPanel(this);
   }
 
-  renderPanel() {
+  onClick = e => {
+    this.app.onPanelOpen(this);
+    this.setState({
+      panelOpen: true,
+      anchorEl: e.currentTarget
+    });
+    this.model.setActive(true);
+  };
+
+  closePanel = () => {
+    this.setState({
+      panelOpen: false,
+      anchorEl: null
+    });
+    this.model.setActive(false);
+  };
+
+  renderWindow(mode) {
+    const left = this.position === "right" ? (window.innerWidth - 410) / 2 : 5;
     return createPortal(
       <Window
+        localObserver={this.observer}
         globalObserver={this.props.app.globalObserver}
         title={this.title}
         onClose={this.closePanel}
         open={this.state.panelOpen}
         position={this.position}
         height={300}
-        width={100}
+        width={300}
         top={210}
-        left={10}
-        mode="window"
+        left={left}
+        mode={mode}
       >
-        <MeasureView
-          localObserver={this.localObserver}
-          model={this.measureModel}
-          parent={this}
-        />
+        <MeasureView parent={this} />
       </Window>,
       document.getElementById("toolbar-panel")
     );
   }
 
   renderAsWidgetItem() {
-    throw new Error("Not implemented exception");
+    return (
+      <div>
+        <Card
+          icon={<MeasureIcon />}
+          onClick={this.onClick}
+          title={this.title}
+          abstract={this.abstract}
+        />
+        {this.renderWindow("window")}
+      </div>
+    );
   }
 
   renderAsToolbarItem() {
@@ -94,17 +107,14 @@ class Measure extends React.PureComponent {
           button
           divider={true}
           selected={this.state.panelOpen}
-          onClick={e => {
-            e.preventDefault();
-            this.onClick(e);
-          }}
+          onClick={this.onClick}
         >
           <ListItemIcon>
             <MeasureIcon />
           </ListItemIcon>
           <ListItemText primary={this.title} />
         </ListItem>
-        {this.renderPanel()}
+        {this.renderWindow()}
       </div>
     );
   }
