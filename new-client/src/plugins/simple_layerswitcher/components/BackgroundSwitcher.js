@@ -45,7 +45,8 @@ const styles = theme => ({
   captionText: {
     marginLeft: "-6px",
     position: "relative",
-    top: "2px"
+    top: "2px",
+    fontSize: theme.typography.pxToRem(15)
   }
 });
 
@@ -118,7 +119,7 @@ class BackgroundSwitcher extends React.PureComponent {
           checkedIcon={<RadioButtonCheckedIcon fontSize="small" />}
         />
         <label htmlFor={caption + "_" + index} className={classes.captionText}>
-          <strong>{caption}</strong>
+          {caption}
         </label>
       </div>
     );
@@ -182,7 +183,7 @@ class BackgroundSwitcher extends React.PureComponent {
     const { classes } = this.props;
     return (
       <div style={{ display: this.props.display ? "block" : "none" }}>
-        <ExpansionPanel
+        {/*<ExpansionPanel
           className={classes.disableTransition}
           CollapseProps={{ classes: { container: classes.disableTransition } }}
         >
@@ -192,7 +193,8 @@ class BackgroundSwitcher extends React.PureComponent {
           <ExpansionPanelDetails classes={{ root: classes.root }}>
             {this.renderBaseLayerComponents()}
           </ExpansionPanelDetails>
-        </ExpansionPanel>
+        </ExpansionPanel>*/}
+        {this.renderBaseLayerComponents()}
       </div>
     );
   }

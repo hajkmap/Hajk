@@ -4,8 +4,8 @@ import { withStyles } from "@material-ui/core/styles";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Button from "@material-ui/core/Button";
-import CancelIcon from "@material-ui/icons/Cancel";
 import AppBar from "@material-ui/core/AppBar";
+import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
@@ -41,11 +41,10 @@ const styles = theme => ({
     fontSize: 20
   },
   icon: {
-    fontSize: "14pt",
-    color: "#d24723"
+    fontSize: 14
   },
   layerSwitcher: {
-    marginTop: "85px"
+    marginTop: "55px"
   },
   layerGroups: {
     padding: "0px"
@@ -78,8 +77,27 @@ const styles = theme => ({
     fontWeight: "bold",
     marginBottom: "5px"
   },
-  text: {}
+  text: {},
+  clearContainer: {
+    float: "right",
+    position: "fixed",
+    marginLeft: "250px",
+    marginTop: "5px"
+  },
+  clearButton: {
+    textTransform: "none"
+  }
 });
+
+const StyledTab = withStyles({
+  root: {
+    minWidth: "50px",
+    width: "120px",
+    height: "50px",
+    textTransform: "unset",
+    fontSize: 15
+  }
+})(Tab);
 
 class SimpleLayersSwitcherView extends React.PureComponent {
   constructor(props) {
@@ -193,20 +211,22 @@ class SimpleLayersSwitcherView extends React.PureComponent {
             indicatorColor="primary"
             textColor="primary"
           >
-            <Tab label="Kartlager" />
-            <Tab label="Bakgrundskartor" />
+            <StyledTab label="Kartlager" />
+            <StyledTab label="Bakgrund" />
           </Tabs>
-          <div style={{ float: "right" }}>
+          <div className={classes.clearContainer}>
             <Button
-              aria-label="Rensa"
+              variant="outlined"
+              size="small"
+              color="primary"
+              className={classes.clearButton}
               onClick={e => {
                 e.stopPropagation();
                 this.props.app.clear();
               }}
             >
-              <CancelIcon className={classes.icon} />
-              &nbsp;
-              <span>Släck alla lager</span>
+              <VisibilityOffIcon className={classes.leftIcon} />
+              Släck alla
             </Button>
           </div>
         </AppBar>

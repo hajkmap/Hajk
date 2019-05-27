@@ -14,10 +14,10 @@ const styles = theme => ({
   root: {
     width: "100%",
     display: "block",
-    padding: "5px 0"
+    padding: "0"
   },
   heading: {
-    fontSize: theme.typography.pxToRem(18),
+    fontSize: theme.typography.pxToRem(15),
     flexBasis: "100%",
     flexShrink: 0
   },
@@ -45,6 +45,22 @@ const styles = theme => ({
     overflow: "hidden"
   }
 });
+
+const StyledExpansionPanelSummary = withStyles({
+  root: {
+    minHeight: 35,
+    "&$expanded": {
+      minHeight: 35
+    }
+  },
+  content: {
+    margin: "5px 0",
+    "&$expanded": {
+      margin: "5px 0"
+    }
+  },
+  expanded: {}
+})(ExpansionPanelSummary);
 
 class LayerGroup extends React.PureComponent {
   constructor(props) {
@@ -198,10 +214,10 @@ class LayerGroup extends React.PureComponent {
           expanded={this.props.expanded}
           onChange={this.props.handleChange(this.props.group.id, this)}
         >
-          <ExpansionPanelSummary className={classes.panelSummary}>
+          <StyledExpansionPanelSummary className={classes.panelSummary}>
             {this.props.expanded ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
             {this.renderToggleAll()}
-          </ExpansionPanelSummary>
+          </StyledExpansionPanelSummary>
           <ExpansionPanelDetails classes={{ root: classes.root }}>
             {this.state.layers.map((layer, i) => {
               var mapLayer = this.model.layerMap[Number(layer.id)];
