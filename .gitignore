@@ -1,3 +1,5 @@
+node_modules/
+
 ### VS Code ###
 .vscode/*
 #!.vscode/settings.json
