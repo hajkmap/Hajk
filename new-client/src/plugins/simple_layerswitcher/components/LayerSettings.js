@@ -117,7 +117,6 @@ class LayerSettings extends React.PureComponent {
   }
 
   renderLegendImage() {
-    const { classes } = this.props;
     var index = this.props.index ? this.props.index : 0;
 
     var src =

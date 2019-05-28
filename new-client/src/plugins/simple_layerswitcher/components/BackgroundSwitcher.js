@@ -2,11 +2,6 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import ExpansionPanel from "@material-ui/core/ExpansionPanel";
-import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
-import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import Typography from "@material-ui/core/Typography";
 import Radio from "@material-ui/core/Radio";
 import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import RadioButtonCheckedIcon from "@material-ui/icons/RadioButtonChecked";
@@ -180,20 +175,8 @@ class BackgroundSwitcher extends React.PureComponent {
   }
 
   render() {
-    const { classes } = this.props;
     return (
       <div style={{ display: this.props.display ? "block" : "none" }}>
-        {/*<ExpansionPanel
-          className={classes.disableTransition}
-          CollapseProps={{ classes: { container: classes.disableTransition } }}
-        >
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography className={classes.heading}>Bakgrundskartor</Typography>
-          </ExpansionPanelSummary>
-          <ExpansionPanelDetails classes={{ root: classes.root }}>
-            {this.renderBaseLayerComponents()}
-          </ExpansionPanelDetails>
-        </ExpansionPanel>*/}
         {this.renderBaseLayerComponents()}
       </div>
     );
