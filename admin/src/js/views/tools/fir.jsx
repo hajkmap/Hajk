@@ -291,17 +291,9 @@ class ToolOptions extends Component {
     }
 
     handleAuthGrpsChange (e) {
-        let groups = [];
+        let groups = e.target.value !== "" ? e.target.value.split(',') : [];
 
-        try {
-            groups = e.target.value.split(',');
-        } catch (error) {
-            console.log(`Någonting gick fel: ${error}`);
-        }
-
-        this.setState({
-            visibleForGroups: value !== '' ? groups : []
-        });
+        this.setState({ visibleForGroups: groups });
     }
 
     handleAddSearchable (e, layer) {
@@ -378,13 +370,11 @@ class ToolOptions extends Component {
     }
 
     handleResidentListVisibleForGroupsChange (e) {
-      let groups = e.target.value.split(',');
+      let groups = e.target.value !== "" ? e.target.value.split(',') : [];
 
-      if (groups != "") {
-        this.setState({
-          residentList: Object.assign(this.state.residentList, { visibleForGroups: groups })
-        });
-      }
+      this.setState({
+        residentList: Object.assign(this.state.residentList, { visibleForGroups: groups })
+      });
     }
 
     render () {
