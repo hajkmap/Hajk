@@ -620,6 +620,10 @@ class ToolOptions extends Component {
             &nbsp;
             <label>Verktyg för ytsökning</label>
           </div>
+          {/*
+          THIS SECTION SHOULD BE IMPLEMENTED FOR THE WORK OF GOKART3 -
+          COMMENTING IT OUT TO NOT SHOW UNIMPLEMENTED FUNCTIONALITY IN 
+          THE ADMIN UI
           <div>
             <strong>
               <label>Aktiva spatial sökverktyg</label>
@@ -663,7 +667,7 @@ class ToolOptions extends Component {
               </div>
             </div>
             &nbsp;
-          </div>
+                </div>*/}
           <div>
             <input
               id="Base64-active"
