@@ -5,7 +5,10 @@ import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import Typography from "@material-ui/core/Typography";
 import marked from "marked";
-import mergeFeaturePropsWithMarkdown from "../utils/FeaturePropsAndMarkdownMerge";
+import {
+  mergeFeaturePropsWithMarkdown,
+  extractPropertiesFromJson
+} from "../utils/FeaturePropsAndMarkdownMerge";
 import Diagram from "./Diagram";
 import Table from "./Table";
 
@@ -67,30 +70,6 @@ class FeatureInfo extends React.PureComponent {
         this.changeSelectedIndex(1);
       };
     }
-  }
-
-  valueFromJson(str) {
-    if (typeof str !== "string") return false;
-    const jsonStart = /^\[|^\{(?!\{)/;
-    const jsonEnds = {
-      "[": /]$/,
-      "{": /}$/
-    };
-    const start = str.match(jsonStart);
-    const jsonLike = start && jsonEnds[start[0]].test(str);
-    var result = false;
-
-    if (jsonLike) {
-      try {
-        result = JSON.parse(str);
-      } catch (ex) {
-        result = false;
-      }
-    } else {
-      result = false;
-    }
-
-    return result;
   }
 
   table(data) {
@@ -222,13 +201,7 @@ class FeatureInfo extends React.PureComponent {
         markdown = feature.layer.layersInfo[layer].infobox;
       }
       var properties = feature.getProperties();
-      Object.keys(properties).forEach(property => {
-        var jsonData = this.valueFromJson(properties[property]);
-        if (jsonData) {
-          delete properties[property];
-          properties = { ...properties, ...jsonData };
-        }
-      });
+      properties = extractPropertiesFromJson(properties);
 
       feature.setProperties(properties);
 

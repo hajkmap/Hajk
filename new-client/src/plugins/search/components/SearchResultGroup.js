@@ -7,7 +7,10 @@ import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Button from "@material-ui/core/Button";
-import mergeFeaturePropsWithMarkdown from "../../../utils/FeaturePropsAndMarkdownMerge";
+import {
+  extractPropertiesFromJson,
+  mergeFeaturePropsWithMarkdown
+} from "../../../utils/FeaturePropsAndMarkdownMerge";
 
 import classNames from "classnames";
 

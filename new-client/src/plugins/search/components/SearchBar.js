@@ -108,20 +108,3 @@ class SearchBar extends React.PureComponent {
 }
 
 export default withStyles(styles)(SearchBar);
-
-/*endAdornment={
-            <InputAdornment className={classes.searchIcon} position="end">
-              {this.state.value ? (
-                loading ? (
-                  <CircularProgress className={classes.progress} />
-                ) : (
-                  <ClearIcon
-                    onClick={this.props.onClear}
-                    className={classes.clearIcon}
-                  />
-                )
-              ) : (
-                <SearchIcon />
-              )}
-            </InputAdornment>
-          }*/
