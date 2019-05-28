@@ -44,6 +44,7 @@ var defaultState = {
     instructionHittaGrannar: '',
     instructionSkapaFastighetsforteckning: '',
     instructionEDPVision: "",
+    instructionResidentList: "",
     anchorX: 16,
     anchorY: 32,
     imgSizeX: 32,
@@ -89,6 +90,7 @@ class ToolOptions extends Component {
                 instructionHittaGrannar: tool.options.instructionHittaGrannar,
                 instructionSkapaFastighetsforteckning: tool.options.instructionSkapaFastighetsforteckning,
                 instructionEDPVision: tool.options.instructionEDPVision,
+                instructionResidentList: tool.options.instructionResidentList,
                 filterVisible: tool.options.filterVisible,
                 firSelectionTools: tool.options.firSelectionTools,
                 displayPopup: tool.options.displayPopup,
@@ -159,8 +161,8 @@ class ToolOptions extends Component {
         }
 
         if (name == 'instruction' || name == 'instructionSokning' || name == 'instructionHittaGrannar' || name == 'instructionEDPVision' ||
-            name == 'instructionSkapaFastighetsforteckning' || name == 'realEstateLayer_instructionVidSokresult') {
-            value = new Buffer(value).toString('base64');
+            name == 'instructionSkapaFastighetsforteckning' || name == 'realEstateLayer_instructionVidSokresult' || name == "instructionResidentList") {
+            value =  window.btoa(encodeURIComponent(value));
         }
 
         if(name.indexOf("_") !== -1){
@@ -233,6 +235,7 @@ class ToolOptions extends Component {
                 instructionHittaGrannar: this.state.instructionHittaGrannar,
                 instructionSkapaFastighetsforteckning: this.state.instructionSkapaFastighetsforteckning,
                 instructionEDPVision: this.state.instructionEDPVision,
+                instructionResidentList: this.state.instructionResidentList,
                 filterVisible: this.state.filterVisible,
                 firSelectionTools: this.state.firSelectionTools,
                 anchor: [this.state.anchorX, this.state.anchorY],
@@ -425,7 +428,7 @@ class ToolOptions extends Component {
                   </div>
                   <div className="col-md-8">
                     <textarea id='instruction' name='instruction' onChange={this.handleInputChange.bind(this)}
-                      value={this.state.instruction ? atob(this.state.instruction) : ''} />
+                      value={this.state.instruction ? decodeURIComponent(atob(this.state.instruction)) : ''} />
                   </div>
                 </div>
                 <div className="row">
@@ -434,7 +437,7 @@ class ToolOptions extends Component {
                   </div>
                   <div className="col-md-8">
                     <textarea id='instructionSokning' name='instructionSokning' onChange={this.handleInputChange.bind(this)}
-                      value={this.state.instructionSokning ? atob(this.state.instructionSokning) : ''} />
+                      value={this.state.instructionSokning ? decodeURIComponent(atob(this.state.instructionSokning)) : ''} />
                   </div>
                 </div>
                 <div className="row">
@@ -443,7 +446,7 @@ class ToolOptions extends Component {
                   </div>
                   <div className="col-md-8">
                     <textarea id='instructionHittaGrannar' name='instructionHittaGrannar' onChange={this.handleInputChange.bind(this)}
-                      value={this.state.instructionHittaGrannar ? atob(this.state.instructionHittaGrannar) : ''} />
+                      value={this.state.instructionHittaGrannar ? decodeURIComponent(atob(this.state.instructionHittaGrannar)) : ''} />
                   </div>
                 </div>
                 <div className="row">
@@ -452,7 +455,17 @@ class ToolOptions extends Component {
                   </div>
                   <div className="col-md-8">
                   <textarea id='instructionSkapaFastighetsforteckning' name='instructionSkapaFastighetsforteckning'
-                      onChange={this.handleInputChange.bind(this)} value={this.state.instructionSkapaFastighetsforteckning ? atob(this.state.instructionSkapaFastighetsforteckning) : ''} />
+                      onChange={this.handleInputChange.bind(this)} value={this.state.instructionSkapaFastighetsforteckning ? decodeURIComponent(atob(this.state.instructionSkapaFastighetsforteckning)) : ''} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-4">
+                    <label>Instruktion för "Boendeförteckning"</label>
+                  </div>
+                  <div className="col-md-8">
+                    <textarea id='instructionResidentList' name='instructionResidentList' onChange={this.handleInputChange.bind(this)}
+                      value={this.state.instructionResidentList ? decodeURIComponent(atob(this.state.instructionResidentList)) : ''} />
                   </div>
                 </div>
 
@@ -462,7 +475,7 @@ class ToolOptions extends Component {
                   </div>
                   <div className="col-md-8">
                   <textarea id='instructionEDPVision' name='instructionEDPVision' onChange={this.handleInputChange.bind(this)}
-                    value={this.state.instructionEDPVision ? atob(this.state.instructionEDPVision) : ''} />
+                    value={this.state.instructionEDPVision ? decodeURIComponent(atob(this.state.instructionEDPVision)) : ''} />
                   </div>
                 </div>
 
@@ -609,7 +622,7 @@ class ToolOptions extends Component {
                   </div>
                   <div className="col-md-8">
                   <textarea id='realEstateLayer_instructionVidSokresult' name='realEstateLayer_instructionVidSokresult'
-                      onChange={this.handleInputChange.bind(this)} value={this.state.realEstateLayer.instructionVidSokresult ? atob(this.state.realEstateLayer.instructionVidSokresult) : ''} />
+                      onChange={this.handleInputChange.bind(this)} value={this.state.realEstateLayer.instructionVidSokresult ? decodeURIComponent(atob(this.state.realEstateLayer.instructionVidSokresult)) : ''} />
                   </div>
                 </div>
                 <div className="row">
@@ -631,18 +644,6 @@ class ToolOptions extends Component {
                 </div>
 
                 <h2>Boendeförteckning</h2>
-                <div className="row">
-                  <div className="col-md-4">
-                    <label>Instruktionstext</label>
-                  </div>
-                  <div className="col-md-8">
-                    <textarea type='text' value={this.state.residentList.instruction}
-                      onChange={(e) => this.setState({
-                        residentList: Object.assign(this.state.residentList, { instruction: e.target.value })}
-                      )} />
-                  </div>
-                </div>
-
                 <div className="row">
                   <div className="col-md-4">
                     <label htmlFor='residentListVisibleForGroups'>Tillträde</label>

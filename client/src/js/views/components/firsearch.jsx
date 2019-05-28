@@ -502,7 +502,7 @@ var FirSearchView = {
                 <img src={this.props.model.get("infoKnappLogo")} /></button>
             );
             instructionTxt = (
-                <div className='panel-body-instruction instructionsText' id='instructionsTextFirhittaGrannar' dangerouslySetInnerHTML={{__html: atob(this.props.model.get("instructionHittaGrannar"))}} />
+                <div className='panel-body-instruction instructionsText' id='instructionsTextFirhittaGrannar' dangerouslySetInnerHTML={{__html: decodeURIComponent(atob(this.props.model.get("instructionHittaGrannar")))}} />
             );
         }
         var navPanel = document.getElementById('navigation-panel');
@@ -657,7 +657,7 @@ var FirSearchView = {
                 <button onClick={() => this.openInstruction("sokning")} className='btn-info-fir' id='instructionBox' ><img src={this.props.model.get("infoKnappLogo")} /></button>
             );
             instructionTxt = (
-                <div className='panel-body-instruction instructionsText' id='instructionsTextFirsokning' dangerouslySetInnerHTML={{__html: atob(this.props.model.get("instructionSokning"))}} /> //instruction={window.atob(this.props.model.get('instruction'))} dangerouslySetInnerHTML={{__html: this.props.model.get("instructionSokning")}}
+                <div className='panel-body-instruction instructionsText' id='instructionsTextFirsokning' dangerouslySetInnerHTML={{__html: decodeURIComponent(atob(this.props.model.get("instructionSokning")))}} />
             );
         }
         var navPanel = document.getElementById('navigation-panel');

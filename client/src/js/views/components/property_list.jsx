@@ -83,7 +83,7 @@ var PropertyList = {
             {
               this.state.instructionVisible ?
               <div className='panel-body-instruction instructionsText'
-                dangerouslySetInnerHTML={{__html: atob(this.props.model.get("instructionSkapaFastighetsforteckning"))}}></div> : ""
+                dangerouslySetInnerHTML={{__html: decodeURIComponent(atob(this.props.model.get("instructionSkapaFastighetsforteckning")))}}></div> : ""
             }
           </div>
 

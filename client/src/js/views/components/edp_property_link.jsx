@@ -85,7 +85,7 @@ var EdpPropertyLink = {
               {
                 this.state.instructionVisible &&
                 <div className='panel-body-instruction'
-                  dangerouslySetInnerHTML={{__html: atob(this.props.model.get("instructionEDPVision"))}} />
+                  dangerouslySetInnerHTML={{__html: decodeURIComponent(atob(this.props.model.get("instructionEDPVision")))}} />
               }
 
             </div>
