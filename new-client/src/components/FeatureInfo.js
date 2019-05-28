@@ -8,7 +8,7 @@ import marked from "marked";
 import {
   mergeFeaturePropsWithMarkdown,
   extractPropertiesFromJson
-} from "../utils/FeaturePropsAndMarkdownMerge";
+} from "../utils/FeaturePropsParsing";
 import Diagram from "./Diagram";
 import Table from "./Table";
 

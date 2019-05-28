@@ -10,7 +10,7 @@ import Button from "@material-ui/core/Button";
 import {
   extractPropertiesFromJson,
   mergeFeaturePropsWithMarkdown
-} from "../../../utils/FeaturePropsAndMarkdownMerge";
+} from "../../../utils/FeaturePropsParsing";
 
 import classNames from "classnames";
 
