@@ -389,7 +389,10 @@ class Search extends React.PureComponent {
   }
 
   renderSpatialSearchOptions() {
-    if (this.state.activeToolType === TEXTSEARCH) {
+    if (
+      this.state.activeToolType === TEXTSEARCH &&
+      this.props.options.activeSpatialTools
+    ) {
       return (
         <SpatialSearchMenu
           onToolChanged={toolType => {

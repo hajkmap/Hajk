@@ -60,14 +60,16 @@ class SpatialSearchOptions extends React.Component {
 
   renderMenu(anchorEl, open, activeSpatialTools) {
     let menuItems = [];
-    if (activeSpatialTools.polygon) {
-      menuItems.push(this.renderMenuItem(POLYGON, <CropSquare />, "Rita"));
-    }
-    if (activeSpatialTools.within) {
-      menuItems.push(this.renderMenuItem(WITHIN, <TripOrigin />, "Radie"));
-    }
-    if (activeSpatialTools.selection) {
-      menuItems.push(this.renderMenuItem(SELECTION, <TouchApp />, "Markera"));
+    if (activeSpatialTools) {
+      if (activeSpatialTools.polygon) {
+        menuItems.push(this.renderMenuItem(POLYGON, <CropSquare />, "Rita"));
+      }
+      if (activeSpatialTools.within) {
+        menuItems.push(this.renderMenuItem(WITHIN, <TripOrigin />, "Radie"));
+      }
+      if (activeSpatialTools.selection) {
+        menuItems.push(this.renderMenuItem(SELECTION, <TouchApp />, "Markera"));
+      }
     }
 
     return (

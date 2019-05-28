@@ -100,11 +100,13 @@ class SearchResultGroup extends Component {
     const active = this.state.activeFeature === feature;
     return (
       <ExpansionPanel
+        key={i}
+        onClick={this.zoomTo(feature)}
         className={classNames(classes.item, active ? classes.active : null)}
       >
         <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
           <div style={{ flex: "auto", display: "flex" }}>
-            <div key={i} onClick={this.zoomTo(feature)}>
+            <div>
               {feature.properties[displayField]}
               {target === "center" ? (
                 <div>
