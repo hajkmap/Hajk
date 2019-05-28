@@ -95,9 +95,16 @@ class SearchResultGroup extends Component {
     this.props.model.clearHighlight();
   };
 
+  getHtmlItemInfoBox = (feature, infoBox) => {
+    var properties = extractPropertiesFromJson(feature.properties);
+    feature.properties = properties;
+    return mergeFeaturePropsWithMarkdown(infoBox, feature.properties);
+  };
+
   renderItem(feature, displayField, infoBox, i) {
     const { classes, target } = this.props;
     const active = this.state.activeFeature === feature;
+
     return (
       <ExpansionPanel
         key={i}
@@ -120,10 +127,7 @@ class SearchResultGroup extends Component {
         </ExpansionPanelSummary>
         <ExpansionPanelDetails>
           <div
-            dangerouslySetInnerHTML={mergeFeaturePropsWithMarkdown(
-              infoBox,
-              feature.properties
-            )}
+            dangerouslySetInnerHTML={this.getHtmlItemInfoBox(feature, infoBox)}
           />
         </ExpansionPanelDetails>
       </ExpansionPanel>
