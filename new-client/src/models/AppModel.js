@@ -258,7 +258,7 @@ class AppModel {
       );
       layer.layerType = type;
       // Use the general value for infobox if not present in map config.
-      if (layerConfig.type === "vector") {
+      if (layerConfig !== undefined && layerConfig.type === "vector") {
         if (!layer.infobox && layerConfig) {
           layer.infobox = layerConfig.infobox;
         }
