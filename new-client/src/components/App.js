@@ -6,7 +6,7 @@ import Observer from "react-event-observer";
 import AppModel from "./../models/AppModel.js";
 import Typography from "@material-ui/core/Typography";
 import AppBar from "@material-ui/core/AppBar";
-import { Toolbar as MUIToolbar, CssBaseline } from "@material-ui/core";
+import { Toolbar as MUIToolbar } from "@material-ui/core";
 import { SnackbarProvider, withSnackbar } from "notistack";
 import Toolbar from "./Toolbar.js";
 //import Popup from "./Popup.js";
@@ -37,7 +37,7 @@ const styles = theme => {
       zIndex: 1
     },
     extendedIcon: {
-      marginRight: theme.spacing.unit
+      marginRight: theme.spacing(1)
     },
     toolbarRoot: {
       paddingLeft: "5px",
@@ -188,7 +188,7 @@ const styles = theme => {
       display: "block"
     },
     searchIcon: {
-      marginRight: theme.spacing.unit,
+      marginRight: theme.spacing(1),
       display: "block",
       [theme.breakpoints.up("lg")]: {
         display: "none"
@@ -395,7 +395,6 @@ class App extends React.PureComponent {
         }}
       >
         <>
-          <CssBaseline />
           <Alert
             open={this.state.alert}
             message={this.state.alertMessage}

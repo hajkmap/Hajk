@@ -11,14 +11,14 @@ import Typography from "@material-ui/core/Typography/Typography";
 
 const styles = theme => ({
   button: {
-    margin: theme.spacing.unit,
+    margin: theme.spacing(1),
     width: "100px"
   },
   leftIcon: {
-    marginRight: theme.spacing.unit
+    marginRight: theme.spacing(1)
   },
   rightIcon: {
-    marginLeft: theme.spacing.unit
+    marginLeft: theme.spacing(1)
   },
   iconSmall: {
     fontSize: 20
