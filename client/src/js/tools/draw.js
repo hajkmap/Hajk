@@ -442,9 +442,9 @@ var DrawModel = {
     if (type === 'circle') {
       let prefix = ' m';
       let prefixSq = ' m²';
-      if (value >= 1E3) {
+      if (value >= 1000) {
         prefix = ' km';
-        value = value / 1E3;
+        value = Math.round((value / 1000) * 100) / 100;
       }
       label = (
         'R = ' + value + prefix +
@@ -454,18 +454,18 @@ var DrawModel = {
 
     if (type === 'area') {
       let prefix = ' m²';
-      if (value >= 1E6) {
+      if (value >= 1000000) {
         prefix = ' km²';
-        value = Math.round((value / 1E6) * 1E3) / 1E3;
+        value = Math.round((value / 1000000) * 100) / 100;
       }
       label = value + prefix;
     }
 
     if (type === 'length') {
       let prefix = ' m';
-      if (value >= 1E3) {
+      if (value >= 1000) {
         prefix = ' km';
-        value = value / 1E3;
+        value = Math.round((value / 1000) * 100) / 100;
       }
       label = value + prefix;
     }
