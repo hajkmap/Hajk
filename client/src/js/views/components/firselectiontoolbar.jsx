@@ -139,7 +139,7 @@ var FirSelectionPanelView = {
 
                 return (
                 <div className='selection-toolbar'>
-                <div><b>Sökområde</b></div>
+                <div>Sökområde</div>
                 <div className='btn-group btn-group-lg'>
                     <button onClick={() => this.activateTool('polygonSelection')} type='button' className={this.getClassNames('polygonSelection')} title='Markera efter polygon' >
                         <i className='fa iconmoon-yta icon' />
