@@ -152,6 +152,14 @@ namespace Proxy.Controllers
                                 }
                             }
                         }
+                        // Copy GeoWebCache Headers
+                        foreach (var headerName in resp.Headers.AllKeys)
+                        {
+                            if (headerName.StartsWith("geowebcache"))
+                            {
+                                Response.Headers.Add(headerName, resp.Headers[headerName]);
+                            }
+                        }
                     }
                 }
                 catch (WebException e)
