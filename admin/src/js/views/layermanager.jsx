@@ -220,6 +220,8 @@ class Manager extends Component {
           url: layer.url,
           queryable: layer.queryable,
           opacity: layer.opacity,
+          minResolution: layer.minResolution,
+          maxResolution: layer.maxResolution,
           tiled: layer.tiled,
           singleTile: layer.singleTile,
           imageFormat: layer.imageFormat,

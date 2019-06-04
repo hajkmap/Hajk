@@ -177,6 +177,8 @@ var LayerCollection = {
         'caption': args.caption,
         'visible': args.visibleAtStart,
         'opacity': args.opacity || 1,
+        'minResolution': args.minResolution,
+        'maxResolution': args.maxResolution,
         'queryable': args.queryable !== false,
         'information': args.infobox,
         'resolutions': properties.mapConfig.resolutions,

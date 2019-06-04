@@ -72,7 +72,9 @@ var WmsLayer = {
         queryable: this.get('queryable'),
         caption: this.get('caption'),
         opacity: this.get('opacity'),
-        source: new ol.source.ImageWMS(source)
+        source: new ol.source.ImageWMS(source),
+        minResolution: this.get("minResolution"),
+        maxResolution: this.get("maxResolution")
       });
     } else {
       this.layer = new ol.layer.Tile({
@@ -81,7 +83,9 @@ var WmsLayer = {
         queryable: this.get('queryable'),
         caption: this.get('caption'),
         opacity: this.get('opacity'),
-        source: new ol.source.TileWMS(source)
+        source: new ol.source.TileWMS(source),
+        minResolution: this.get("minResolution"),
+        maxResolution: this.get("maxResolution")
       });
     }
 
