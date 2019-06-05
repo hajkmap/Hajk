@@ -179,6 +179,13 @@ class Search extends React.PureComponent {
       loading: false,
       activeSearchView: DEFAULT
     };
+
+    this.activeSpatialTools = {
+      radiusSearch: this.props.options.radiusSearch,
+      selectionSearch: this.props.options.selectionSearch,
+      polygonSearch: this.props.options.polygonSearch
+    };
+
     this.tooltip = props.options.tooltip;
     this.searchWithinButtonText = props.options.searchWithinButtonText;
     this.searchWithPolygonButtonText =
@@ -273,10 +280,25 @@ class Search extends React.PureComponent {
     );
   }
 
+  isAnySpatialToolActive() {
+    var numberOfActiveTools = Object.values(this.activeSpatialTools).filter(
+      tool => {
+        return tool == true;
+      }
+    ).length;
+
+    if (numberOfActiveTools > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   renderCenter() {
     const { classes } = this.props;
     var maincontainerButton;
     var searchBar;
+    var spatialSearchOptions;
 
     if (this.state.activeSearchView === DEFAULT) {
       searchBar = this.renderInputSearchBar();
@@ -286,9 +308,9 @@ class Search extends React.PureComponent {
 
     if (
       this.state.activeSearchView === DEFAULT &&
-      this.props.options.activeSpatialTools
+      this.isAnySpatialToolActive()
     ) {
-      var spatialSearchOptions = this.renderSpatialSearchOptions();
+      spatialSearchOptions = this.renderSpatialSearchOptions();
     }
 
     if (this.state.activeSearchView !== DEFAULT) {
@@ -354,7 +376,6 @@ class Search extends React.PureComponent {
   }
 
   renderSearchSettingButton() {
-    console.log("HERE");
     const { classes } = this.props;
     return (
       <div className={classes.mainContainerButton}>
@@ -432,7 +453,7 @@ class Search extends React.PureComponent {
             activeSearchView: toolType
           });
         }}
-        activeSpatialTools={this.props.options.activeSpatialTools}
+        activeSpatialTools={this.activeSpatialTools}
       />
     );
   }

@@ -32,7 +32,7 @@ const styles = theme => ({
 });
 
 const POLYGON = "polygon";
-const WITHIN = "within";
+const RADIUS = "radius";
 const SELECTION = "selection";
 
 class SpatialSearchOptions extends React.Component {
@@ -61,13 +61,13 @@ class SpatialSearchOptions extends React.Component {
   renderMenu(anchorEl, open, activeSpatialTools) {
     let menuItems = [];
     if (activeSpatialTools) {
-      if (activeSpatialTools.polygon) {
+      if (activeSpatialTools.polygonSearch) {
         menuItems.push(this.renderMenuItem(POLYGON, <CropSquare />, "Rita"));
       }
-      if (activeSpatialTools.within) {
-        menuItems.push(this.renderMenuItem(WITHIN, <TripOrigin />, "Radie"));
+      if (activeSpatialTools.radiusSearch) {
+        menuItems.push(this.renderMenuItem(RADIUS, <TripOrigin />, "Radie"));
       }
-      if (activeSpatialTools.selection) {
+      if (activeSpatialTools.selectionSearch) {
         menuItems.push(this.renderMenuItem(SELECTION, <TouchApp />, "Markera"));
       }
     }
