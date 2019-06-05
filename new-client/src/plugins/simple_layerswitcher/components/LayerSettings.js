@@ -6,7 +6,6 @@ import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
   sliderContainer: {
-    padding: "30px",
     overflow: "hidden"
   },
   icon: {
@@ -14,12 +13,21 @@ const styles = theme => ({
   },
   settingsContainer: {
     overflow: "hidden",
-    paddingLeft: "30px",
+    paddingLeft: "45px",
     paddingRight: "30px",
-    paddingBottom: "30px"
+    paddingBottom: "10px",
+    paddingTop: "10px"
   },
   subtitle2: {
     fontWeight: 500
+  },
+  sliderItem: {
+    float: "left",
+    width: "120px",
+    padding: "10px"
+  },
+  sliderText: {
+    float: "left"
   }
 });
 
@@ -48,18 +56,26 @@ class LayerSettings extends React.PureComponent {
     let opacityValue = this.state.opacityValue;
     const { classes } = this.props;
     return (
-      <div>
-        <Typography className={classes.subtitle2} variant="subtitle2">
-          Opacitet
-        </Typography>
-        <Slider
-          classes={{ container: classes.sliderContainer }}
-          value={opacityValue}
-          min={0}
-          max={1}
-          step={0.1}
-          onChange={this.opacitySliderChanged}
-        />
+      <div className={classes.sliderContainer}>
+        <div className={classes.sliderText}>
+          <Typography className={classes.subtitle2} variant="subtitle2">
+            Transparens:
+          </Typography>
+        </div>
+        <div className={classes.sliderItem}>
+          <Slider
+            value={opacityValue}
+            min={1}
+            max={0}
+            step={0.1}
+            onChange={this.opacitySliderChanged}
+          />
+        </div>
+        <div className={classes.sliderText}>
+          <Typography className={classes.subtitle2} variant="subtitle2">
+            {Math.trunc(100 * (1 - opacityValue).toFixed(1))} %
+          </Typography>
+        </div>
       </div>
     );
   }
@@ -101,7 +117,6 @@ class LayerSettings extends React.PureComponent {
   }
 
   renderLegendImage() {
-    const { classes } = this.props;
     var index = this.props.index ? this.props.index : 0;
 
     var src =
@@ -110,10 +125,7 @@ class LayerSettings extends React.PureComponent {
         : "";
     return src ? (
       <div>
-        <Typography className={classes.subtitle2} variant="subtitle2">
-          Teckenförklaring
-        </Typography>
-        <img width="55px" alt="Teckenförklaring" src={src} />
+        <img max-width="250px" alt="Teckenförklaring" src={src} />
       </div>
     ) : null;
   }

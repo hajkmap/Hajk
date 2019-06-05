@@ -258,7 +258,7 @@ class AppModel {
       );
       layer.layerType = type;
       // Use the general value for infobox if not present in map config.
-      if (layerConfig.type === "vector") {
+      if (layerConfig !== undefined && layerConfig.type === "vector") {
         if (!layer.infobox && layerConfig) {
           layer.infobox = layerConfig.infobox;
         }
@@ -425,7 +425,7 @@ class AppModel {
       this.config.mapConfig.hasOwnProperty("map") &&
       this.config.mapConfig.map.hasOwnProperty("title")
     ) {
-      //document.title = this.config.mapConfig.map.title; // TODO: opt-out this override behaviour.
+      document.title = this.config.mapConfig.map.title; // TODO: add opt-out in admin to cancel this override behaviour.
     }
 
     let layerSwitcherTool = this.config.mapConfig.tools.find(tool => {

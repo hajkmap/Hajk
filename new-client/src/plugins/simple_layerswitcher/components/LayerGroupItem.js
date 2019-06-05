@@ -20,7 +20,8 @@ const styles = theme => ({
   captionText: {
     marginLeft: "5px",
     position: "relative",
-    top: "-6px"
+    top: "-6px",
+    fontSize: theme.typography.pxToRem(15)
   },
   image: {},
   links: {
@@ -31,12 +32,12 @@ const styles = theme => ({
   layerItem: {
     justifyContent: "space-between",
     alignItems: "center",
-    borderBottom: "1px dashed #CCC",
-    paddingTop: "10px",
-    paddingBottom: "5px",
+    borderBottom: "1px solid #CCC",
     "&:last-child": {
       borderBottom: "none"
-    }
+    },
+    margin: "5px 0",
+    paddingLeft: "15px"
   },
   layerItemContainer: {
     padding: "10px",
@@ -68,24 +69,23 @@ const styles = theme => ({
     cursor: "pointer"
   },
   infoTextContainer: {
-    margin: "10px 25px"
+    margin: "10px 45px"
   },
   layerGroup: {
     background: "white",
-    borderBottom: "1px solid #ccc",
-    paddingLeft: "10px"
+    borderBottom: "1px solid #ccc"
   },
   layerGroupContainer: {
     background: "white",
-    borderRadius: "6px"
+    margin: "5px 0"
   },
   layerGroupHeader: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center"
+    alignItems: "center",
+    marginLeft: "15px"
   },
   layerGroupLayers: {
-    marginTop: "5px",
     borderTop: "1px solid #ccc",
     paddingLeft: "45px"
   },
@@ -98,7 +98,6 @@ const styles = theme => ({
     overflow: "hidden"
   },
   settingsButton: {
-    fontSize: "22pt",
     cursor: "pointer",
     padding: "5px",
     float: "right"
@@ -371,7 +370,7 @@ class LayerGroupItem extends Component {
           <span onClick={this.toggleLayerVisible(subLayer)}>
             {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
             <label className={classes.captionText}>
-              <strong>{layer.layersInfo[subLayer].caption}</strong>
+              {layer.layersInfo[subLayer].caption}
             </label>
           </span>
           <IconMoreHoriz
@@ -382,12 +381,10 @@ class LayerGroupItem extends Component {
         <div className={classes.legend}>
           {this.state.toggleSubLayerSettings[index] ? (
             <div>
-              <Typography className={classes.subtitle2} variant="subtitle2">
-                Teckenförklaring
-              </Typography>
               <img
+                max-width="250px"
+                alt="Teckenförklaring"
                 src={this.props.layer.layersInfo[subLayer].legend}
-                alt="teckenförklaring"
               />
             </div>
           ) : null}
@@ -419,8 +416,12 @@ class LayerGroupItem extends Component {
     if (infoText) {
       return (
         <div className={classes.infoTextContainer}>
-          <Typography variant="h6">{infoTitle}</Typography>
-          <Typography>{infoText}</Typography>
+          <Typography variant="subtitle2">{infoTitle}</Typography>
+          <Typography
+            dangerouslySetInnerHTML={{
+              __html: infoText
+            }}
+          />
         </div>
       );
     } else {
@@ -529,10 +530,12 @@ class LayerGroupItem extends Component {
                   onClick={this.toggleGroupVisible(layer)}
                   className={classes.caption}
                 >
-                  {getIcon()}
-                  <label className={classes.captionText}>
-                    <strong>{layer.get("caption")}</strong>
-                  </label>
+                  <Typography>
+                    {getIcon()}
+                    <label className={classes.captionText}>
+                      {layer.get("caption")}
+                    </label>
+                  </Typography>
                 </div>
               </div>
             </div>

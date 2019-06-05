@@ -21,7 +21,8 @@ const styles = theme => ({
   captionText: {
     marginLeft: "5px",
     position: "relative",
-    top: "-6px"
+    top: "-6px",
+    fontSize: theme.typography.pxToRem(15)
   },
   image: {},
   links: {
@@ -33,12 +34,13 @@ const styles = theme => ({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingLeft: "10px"
+    marginLeft: "15px",
+    margin: "5px 0"
   },
   layerItemContainer: {
     background: "white",
-    borderBottom: "1px solid #ccc",
-    paddingLeft: "0"
+    paddingLeft: "0",
+    borderBottom: "1px solid #ccc"
   },
   layerItemInfo: {
     display: "flex",
@@ -62,10 +64,9 @@ const styles = theme => ({
     cursor: "pointer"
   },
   infoTextContainer: {
-    margin: "10px 25px"
+    margin: "10px 45px"
   },
   settingsButton: {
-    fontSize: "22pt",
     cursor: "pointer",
     padding: "5px"
   }
@@ -232,7 +233,7 @@ class LayerItem extends React.PureComponent {
     if (infoText) {
       return (
         <div className={classes.infoTextContainer}>
-          <Typography variant="h6">{infoTitle}</Typography>
+          <Typography variant="subtitle2">{infoTitle}</Typography>
           <Typography
             dangerouslySetInnerHTML={{
               __html: infoText
@@ -327,12 +328,12 @@ class LayerItem extends React.PureComponent {
               className={classes.caption}
               onClick={this.toggleVisible(layer)}
             >
-              <ChevronRightIcon className={classes.button} />
-              {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
-              {this.renderStatus()}
-              <label className={classes.captionText}>
-                <strong>{caption}</strong>
-              </label>
+              <Typography>
+                <ChevronRightIcon className={classes.button} />
+                {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
+                {this.renderStatus()}
+                <label className={classes.captionText}>{caption}</label>
+              </Typography>
             </div>
           </div>
           <div>

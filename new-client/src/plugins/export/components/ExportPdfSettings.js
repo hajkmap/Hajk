@@ -1,15 +1,23 @@
 import { getCenter } from "ol/extent.js";
-import React, { Component } from "react";
+import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import InputLabel from "@material-ui/core/InputLabel";
-import FormControl from "@material-ui/core/FormControl";
-import NativeSelect from "@material-ui/core/NativeSelect";
-import Input from "@material-ui/core/Input";
-import Button from "@material-ui/core/Button";
+import {
+  Paper,
+  FormControl,
+  Button,
+  Input,
+  InputLabel,
+  NativeSelect,
+  LinearProgress
+} from "@material-ui/core";
+
+import ArrowDownward from "@material-ui/icons/ArrowDownward";
+import PictureAsPdf from "@material-ui/icons/PictureAsPdf";
 
 const styles = theme => ({
   root: {
     display: "flex",
+    flexGrow: 1,
     flexWrap: "wrap"
   },
   formControl: {
@@ -22,10 +30,13 @@ const styles = theme => ({
   loader: {
     opacity: 1,
     transition: "opacity 2s ease-in"
+  },
+  icon: {
+    marginRight: theme.spacing.unit
   }
 });
 
-class ExportPdfSettings extends Component {
+class ExportPdfSettings extends React.Component {
   constructor(props) {
     super(props);
     this.resolutions = [72, 96, 150, 200, 300];
@@ -231,6 +242,11 @@ class ExportPdfSettings extends Component {
     });
   };
 
+  // downloadAttachment = () => {
+  //  // Not so good as it actually shows the PDF in browser, instead of displaying a Save dialog…
+  //   window.location = this.state.url;
+  // };
+
   render() {
     const { classes } = this.props;
 
@@ -291,6 +307,11 @@ class ExportPdfSettings extends Component {
 
     return (
       <>
+        {this.state.loading && (
+          <Paper className={classes.loader}>
+            <LinearProgress />
+          </Paper>
+        )}
         <div className={classes.root}>
           <FormControl className={classes.formControl}>
             <InputLabel htmlFor="paper-size-native-helper">
@@ -353,22 +374,29 @@ class ExportPdfSettings extends Component {
               {resolutionOptions}
             </NativeSelect>
           </FormControl>
+        </div>
+        <FormControl className={classes.formControl}>
+          <Button
+            variant="contained"
+            color="primary"
+            fullWidth={true}
+            onClick={this.exportPDF}
+          >
+            <PictureAsPdf className={classes.icon} /> Skapa PDF
+          </Button>
+        </FormControl>
+        {this.state.url && (
           <FormControl className={classes.formControl}>
-            <Button variant="outlined" onClick={this.exportPDF}>
-              Skapa PDF
+            <Button
+              variant="contained"
+              fullWidth={true}
+              // onClick={this.downloadAttachment}
+              href={this.state.url}
+            >
+              <ArrowDownward className={classes.icon} /> Ladda ner
             </Button>
           </FormControl>
-        </div>
-        <div>
-          {this.state.loading ? (
-            <div className={classes.loader}>Skapar karta...</div>
-          ) : null}
-          {this.state.url ? (
-            <a target="_blank" rel="noopener noreferrer" href={this.state.url}>
-              Ladda hem
-            </a>
-          ) : null}
-        </div>
+        )}
       </>
     );
   }

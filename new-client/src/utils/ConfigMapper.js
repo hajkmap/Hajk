@@ -101,7 +101,7 @@ export default class ConfigMapper {
         extent: properties.mapConfig.map.extent,
         singleTile: args.singleTile || false,
         imageFormat: args.imageFormat || "image/png",
-        //serverType: args.serverType || "geoserver",
+        serverType: args.serverType || "geoserver",
         attribution: args.attribution,
         searchUrl: args.searchUrl,
         searchPropertyName: args.searchPropertyName,

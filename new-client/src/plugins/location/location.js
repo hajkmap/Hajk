@@ -1,24 +1,29 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
-import {
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Button
-} from "@material-ui/core";
+import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import NavigationIcon from "@material-ui/icons/Navigation";
 import Window from "../../components/Window.js";
+import Card from "../../components/Card.js";
 import LocationView from "./LocationView";
 
-const styles = theme => {
-  return {};
-};
+const styles = theme => ({});
 
 class Location extends React.PureComponent {
   state = {
     panelOpen: this.props.options.visibleAtStart
   };
+
+  constructor(props) {
+    super(props);
+    this.type = "location";
+    this.options = props.options;
+    this.title = this.options.title || "Positionera";
+    this.abstract = this.options.abstract || "Visa min position i kartan";
+    this.position = props.options.panel ? props.options.panel : undefined;
+    this.app = props.app;
+    this.app.registerPanel(this);
+  }
 
   // Called when plugin's <ListItem> or widget <Button> is clicked
   onClick = e => {
@@ -38,17 +43,6 @@ class Location extends React.PureComponent {
     });
   };
 
-  constructor(props) {
-    super(props);
-    this.options = props.options;
-
-    // Important, part of API. Must be a string. Could be fetched from config.
-    this.title = this.options.title || "Positionera";
-
-    // Important, part of API for plugins that contain panels. Makes App aware of this panels existence.
-    this.props.app.registerPanel(this);
-  }
-
   // Note: as we experiment with PureComponents, this has been out-commented.
   // Important, part of API. Avoid re-rendering if current panel has not changed its state.
   // shouldComponentUpdate(nextProps, nextState) {
@@ -57,16 +51,17 @@ class Location extends React.PureComponent {
 
   // Not part of API but rather convention. If plugin has a panel, its render method should be called renderPanel().
   renderWindow(mode) {
+    const left = this.position === "right" ? (window.innerWidth - 410) / 2 : 5;
     return createPortal(
       <Window
         globalObserver={this.props.app.globalObserver}
         title={this.title}
         onClose={this.closePanel}
         open={this.state.panelOpen}
-        width="400px"
-        height={window.innerHeight - 380 + "px"}
+        height={420}
+        width={300}
         top={210}
-        left={5}
+        left={left}
         mode={mode}
       >
         <LocationView parent={this} />
@@ -76,18 +71,14 @@ class Location extends React.PureComponent {
   }
 
   renderAsWidgetItem() {
-    const { classes } = this.props;
     return (
       <div>
-        <Button
-          variant="fab"
-          color="default"
-          aria-label="Location plugin"
-          className={classes.button}
+        <Card
+          icon={<NavigationIcon />}
           onClick={this.onClick}
-        >
-          <NavigationIcon />
-        </Button>
+          title={this.title}
+          abstract={this.abstract}
+        />
         {this.renderWindow("window")}
       </div>
     );
@@ -107,7 +98,7 @@ class Location extends React.PureComponent {
           </ListItemIcon>
           <ListItemText primary={this.title} />
         </ListItem>
-        {this.renderWindow("panel")}
+        {this.renderWindow("window")}
       </div>
     );
   }
