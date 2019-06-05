@@ -26,7 +26,7 @@ function handleClick() {
   alert("You clicked the Chip."); // eslint-disable-line no-alert
 }*/
 
-class SearchWithPolygonBarInput extends React.PureComponent {
+class SearchWithPolygonInput extends React.PureComponent {
   componentDidMount() {
     const { model, onSearchDone, localObserver } = this.props;
     localObserver.publish("toolchanged");
@@ -47,8 +47,8 @@ class SearchWithPolygonBarInput extends React.PureComponent {
   }
 }
 
-SearchWithPolygonBarInput.propTypes = {
+SearchWithPolygonInput.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(SearchWithPolygonBarInput);
+export default withStyles(styles)(SearchWithPolygonInput);

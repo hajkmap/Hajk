@@ -41,16 +41,13 @@ const styles = theme => ({
 });
 
 class SearchBarStart extends React.PureComponent {
-  state = {
-    value: ""
-  };
-
   constructor(props) {
     super();
   }
 
   componentDidMount() {
-    this.props.localObserver.publish("toolchanged");
+    const { localObserver } = this.props;
+    localObserver.publish("toolchanged");
   }
 
   render() {

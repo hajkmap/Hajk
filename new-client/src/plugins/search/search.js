@@ -6,15 +6,15 @@ import { withStyles } from "@material-ui/core/styles";
 import SearchIcon from "@material-ui/icons/Search";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import Observer from "react-event-observer";
-import SearchBarInput from "./components/inputviews/SearchBarInput";
+import SearchWithTextInput from "./components/inputviews/SearchWithTextInput";
 import SearchResultList from "./components/resultviews/SearchResultList.js";
 import SpatialSearchMenu from "./components/startviews/SpatialSearchMenu";
 import SearchBarStart from "./components/startviews/SearchBarStart";
 //import ClearButton from "./components/ClearButton.js";
 import SearchSettingsButton from "./components/startviews/SearchSettingsButton";
-import SearchWithinBarInput from "./components/inputviews/SearchWithinBarInput";
-import SearchWithSelectionBarInput from "./components/inputviews/SearchWithSelectionBarInput";
-import SearchWithPolygonBarInput from "./components/inputviews/SearchWithPolygonBarInput";
+import SearchWithRadiusInput from "./components/inputviews/SearchWithRadiusInput";
+import SearchWithSelectionInput from "./components/inputviews/SearchWithSelectionInput";
+import SearchWithPolygonInput from "./components/inputviews/SearchWithPolygonInput";
 import SearchModel from "./SearchModel.js";
 import PanelHeader from "./../../components/PanelHeader.js";
 import { isMobile } from "../../utils/IsMobile.js";
@@ -152,7 +152,7 @@ const styles = theme => {
 };
 
 const POLYGON = "polygon";
-const WITHIN = "within";
+const RADIUS = "radius";
 const TEXTSEARCH = "textsearch";
 const SELECTION = "selection";
 const DEFAULT = "default";
@@ -284,7 +284,7 @@ class Search extends React.PureComponent {
   isAnySpatialToolActive() {
     var numberOfActiveTools = Object.values(this.activeSpatialTools).filter(
       tool => {
-        return tool == true;
+        return tool === true;
       }
     ).length;
 
@@ -302,9 +302,9 @@ class Search extends React.PureComponent {
     var spatialSearchOptions;
 
     if (this.state.activeSearchView === DEFAULT) {
-      searchBar = this.renderInputSearchBar();
+      searchBar = this.renderSearchBarStart();
     } else if (this.state.activeSearchView === TEXTSEARCH) {
-      searchBar = this.renderSearchBar();
+      searchBar = this.renderSearchWithText();
     }
 
     if (
@@ -407,7 +407,7 @@ class Search extends React.PureComponent {
     switch (this.state.activeSearchView) {
       case POLYGON:
         return (
-          <SearchWithPolygonBarInput
+          <SearchWithPolygonInput
             model={this.searchModel}
             localObserver={this.localObserver}
             onSearchDone={featureCollections => {
@@ -415,9 +415,9 @@ class Search extends React.PureComponent {
             }}
           />
         );
-      case WITHIN: {
+      case RADIUS: {
         return (
-          <SearchWithinBarInput
+          <SearchWithRadiusInput
             localObserver={this.localObserver}
             onSearchWithin={layerIds => {
               this.setState({
@@ -431,7 +431,7 @@ class Search extends React.PureComponent {
       }
       case SELECTION: {
         return (
-          <SearchWithSelectionBarInput
+          <SearchWithSelectionInput
             localObserver={this.localObserver}
             model={this.searchModel}
             onSearchDone={featureCollections => {
@@ -459,7 +459,7 @@ class Search extends React.PureComponent {
     );
   }
 
-  renderInputSearchBar() {
+  renderSearchBarStart() {
     return (
       <SearchBarStart
         localObserver={this.localObserver}
@@ -472,9 +472,9 @@ class Search extends React.PureComponent {
     );
   }
 
-  renderSearchBar() {
+  renderSearchWithText() {
     return (
-      <SearchBarInput
+      <SearchWithTextInput
         model={this.searchModel}
         forceSearch={this.searchModel.search}
         onChange={this.searchModel.search}
@@ -501,7 +501,7 @@ class Search extends React.PureComponent {
             });
           }}
         />
-        <SearchBarInput
+        <SearchWithTextInput
           model={this.searchModel}
           onChange={this.searchModel.search}
           onComplete={this.resolve}

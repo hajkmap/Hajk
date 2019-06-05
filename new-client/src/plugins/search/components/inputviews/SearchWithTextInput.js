@@ -40,10 +40,15 @@ const styles = theme => ({
   }
 });
 
-class SearchBarInput extends React.PureComponent {
+class SearchWithTextInput extends React.PureComponent {
   state = {
     value: ""
   };
+
+  componentDidMount() {
+    const { localObserver } = this.props;
+    localObserver.publish("toolchanged");
+  }
 
   constructor(props) {
     super();
@@ -104,4 +109,4 @@ class SearchBarInput extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(SearchBarInput);
+export default withStyles(styles)(SearchWithTextInput);

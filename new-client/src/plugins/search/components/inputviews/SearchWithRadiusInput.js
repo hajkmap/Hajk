@@ -28,7 +28,7 @@ function handleClick() {
   alert("You clicked the Chip."); // eslint-disable-line no-alert
 }*/
 
-class SearchWithinBarInput extends React.PureComponent {
+class SearchWithRadiusInput extends React.PureComponent {
   componentDidMount() {
     const { model, onSearchWithin, localObserver } = this.props;
     localObserver.publish("toolchanged");
@@ -69,8 +69,8 @@ class SearchWithinBarInput extends React.PureComponent {
   }
 }
 
-SearchWithinBarInput.propTypes = {
+SearchWithRadiusInput.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(SearchWithinBarInput);
+export default withStyles(styles)(SearchWithRadiusInput);

@@ -26,7 +26,7 @@ function handleClick() {
   alert("You clicked the Chip."); // eslint-disable-line no-alert
 }*/
 
-class SearchWithSelectionBarInput extends React.PureComponent {
+class SearchWithSelectionInput extends React.PureComponent {
   componentDidMount() {
     const { model, onSearchDone, localObserver } = this.props;
     localObserver.publish("toolchanged");
@@ -45,8 +45,8 @@ class SearchWithSelectionBarInput extends React.PureComponent {
   }
 }
 
-SearchWithSelectionBarInput.propTypes = {
+SearchWithSelectionInput.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(SearchWithSelectionBarInput);
+export default withStyles(styles)(SearchWithSelectionInput);

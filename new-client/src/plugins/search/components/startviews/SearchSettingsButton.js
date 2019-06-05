@@ -6,10 +6,6 @@ import Settings from "@material-ui/icons/Settings";
 const styles = theme => {};
 
 class SearchSettingsButton extends React.Component {
-  state = {
-    active: false
-  };
-
   render() {
     return (
       <IconButton>
