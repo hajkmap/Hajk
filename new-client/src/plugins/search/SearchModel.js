@@ -1,4 +1,5 @@
 import { WFS } from "ol/format";
+import GeometryType from "ol/geom/GeometryType";
 import IsLike from "ol/format/filter/IsLike";
 import Intersects from "ol/format/filter/Intersects";
 import TileLayer from "ol/layer/Tile";
@@ -110,17 +111,29 @@ class SearchModel {
     return sourceList;
   };
 
+  //Only handles single select and is restricted to polygon and multipolygon atm
   onSelectFeatures = (evt, callback) => {
     handleClick(evt, evt.map, response => {
-      this.drawLayer.getSource().addFeatures(response.features);
-      if (response.features.length > 0) {
-        this.searchWithinArea(
-          response.features[0],
-          false,
-          featureCollections => {
-            callback(featureCollections);
-          }
-        );
+      var geometryType = response.features[0].getGeometry().getType();
+      if (
+        geometryType === GeometryType.POLYGON ||
+        geometryType === GeometryType.MULTI_POLYGON
+      ) {
+        this.drawLayer.getSource().addFeatures(response.features);
+        if (response.features.length > 0) {
+          this.searchWithinArea(
+            response.features[0],
+            false,
+            featureCollections => {
+              callback(featureCollections);
+            }
+          );
+        }
+      } else {
+        this.olMap.clicklock = true;
+        this.olMap.once("singleclick", e => {
+          this.onSelectFeatures(e, callback);
+        });
       }
     });
   };
