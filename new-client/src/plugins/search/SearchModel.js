@@ -352,6 +352,7 @@ class SearchModel {
         source: this.drawSource,
         type: type,
         freehand: freehand,
+        stopClick: true,
         style: drawStyle
       });
       this.draw.on("drawend", e => {
