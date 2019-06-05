@@ -59,6 +59,7 @@ class SearchModel {
       featureTypes: source.layers,
       srsName: projCode,
       outputFormat: "JSON", //source.outputFormat,
+      maxFeatures: 100,
       geometryName: source.geometryName,
       filter: new Intersects(
         "geom", // geometryName
