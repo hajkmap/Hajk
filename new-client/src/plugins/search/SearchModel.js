@@ -9,14 +9,18 @@ import GeoJSON from "ol/format/GeoJSON";
 import { fromCircle } from "ol/geom/Polygon";
 import Draw from "ol/interaction/Draw.js";
 import { arraySort } from "./../../utils/ArraySort.js";
-import { Stroke, Style, Circle, Fill } from "ol/style.js";
+import { Stroke, Style, Circle, Fill, Icon } from "ol/style.js";
 import { handleClick } from "../../models/Click.js";
 
 var style = new Style({
   stroke: new Stroke({
-    color: "rgba(0, 0, 0, 0.6)",
-    width: 2
+    color: "rgba(244, 83, 63, 1)",
+    width: 4
   }),
+  fill: new Fill({
+    color: "rgba(244, 83, 63, 0.2)"
+  }),
+  //Setting image in constructor to MarkerImage - this is default style
   image: new Circle({
     radius: 6,
     stroke: new Stroke({
@@ -363,7 +367,16 @@ class SearchModel {
     this.wfsParser = new WFS();
     this.vectorLayer = new VectorLayer({
       source: new VectorSource({}),
-      style: () => style
+      style: () => {
+        if (this.options.markerImg && this.options.markerImg !== "") {
+          style.setImage(
+            new Icon({
+              src: this.options.markerImg
+            })
+          );
+        }
+        return style;
+      }
     });
 
     this.drawSource = new VectorSource({ wrapX: false });
