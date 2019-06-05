@@ -34,6 +34,9 @@ var defaultState = {
   bothSynlig: false,
   enableViewTogglePopupInSnabbsok: true,
   selectionTools: true,
+  selectionSearch: false,
+  radiusSearch: false,
+  polygonSearch: false,
   base64Encode: false,
   instruction: "",
   filterVisible: true,
@@ -85,10 +88,15 @@ class ToolOptions extends Component {
           enableViewTogglePopupInSnabbsok:
             tool.options.enableViewTogglePopupInSnabbsok,
           selectionTools: tool.options.selectionTools,
-          //activeSpatialTools: this.options.activeSpatialTools,
+          selectionSearch: tool.options.selectionSearch,
+          radiusSearch: tool.options.radiusSearch,
+          polygonSearch: tool.options.polygonSearch,
           base64Encode: tool.options.base64Encode,
           instruction: tool.options.instruction,
           filterVisible: tool.options.filterVisible,
+          radiusSearch: tool.options.radiusSearch,
+          polygonSearch: tool.options.polygonSearch,
+          selectionSearch: tool.options.selectionSearch,
           displayPopup: tool.options.displayPopup,
           maxZoom: tool.options.maxZoom,
           excelExportUrl: tool.options.excelExportUrl,
@@ -161,7 +169,7 @@ class ToolOptions extends Component {
     if (typeof value === "string" && value.trim() !== "") {
       value = !isNaN(Number(value)) ? Number(value) : value;
     }
-
+    console.log([name], "name", value, "value");
     if (name === "instruction") {
       value = btoa(value);
     }
@@ -245,7 +253,9 @@ class ToolOptions extends Component {
         excelExportUrl: this.state.excelExportUrl,
         displayPopup: this.state.displayPopup,
         selectionTools: this.state.selectionTools,
-        //activeSpatialTools: this.state.activeSpatialTools,
+        selectionSearch: this.state.selectionSearch,
+        radiusSearch: this.state.radiusSearch,
+        polygonSearch: this.state.polygonSearch,
         base64Encode: this.state.base64Encode,
         instruction: this.state.instruction,
         filterVisible: this.state.filterVisible,
@@ -620,10 +630,7 @@ class ToolOptions extends Component {
             &nbsp;
             <label>Verktyg för ytsökning</label>
           </div>
-          {/*
-          THIS SECTION SHOULD BE IMPLEMENTED FOR THE WORK OF GOKART3 -
-          COMMENTING IT OUT TO NOT SHOW UNIMPLEMENTED FUNCTIONALITY IN 
-          THE ADMIN UI
+
           <div>
             <strong>
               <label>Aktiva spatial sökverktyg</label>
@@ -632,42 +639,42 @@ class ToolOptions extends Component {
           <div>
             <div>
               <input
-                id="polygonTool"
-                name="polygonTool"
+                id="polygonSearch"
+                name="polygonSearch"
                 type="checkbox"
                 onChange={e => {
                   this.handleInputChange(e);
                 }}
-                checked={this.state.selectionTools}
+                checked={this.state.polygonSearch}
               />
-              <label htmlFor="polygonTool">Polygon</label>
+              <label htmlFor="polygonSearch">Polygon</label>
               <div>
                 <input
-                  id="withinTool"
-                  name="withinTool"
+                  id="radiusSearch"
+                  name="radiusSearch"
                   type="checkbox"
                   onChange={e => {
                     this.handleInputChange(e);
                   }}
-                  checked={this.state.selectionTools}
+                  checked={this.state.radiusSearch}
                 />
-                <label htmlFor="withinTool">Radie</label>
+                <label htmlFor="radiusSearch">Radie</label>
               </div>
               <div>
                 <input
-                  id="selectionTool"
-                  name="selectionTool"
+                  id="selectionSearch"
+                  name="selectionSearch"
                   type="checkbox"
                   onChange={e => {
                     this.handleInputChange(e);
                   }}
-                  checked={this.state.selectionTools}
+                  checked={this.state.selectionSearch}
                 />
-                <label htmlFor="selectionTool">Selektion</label>
+                <label htmlFor="selectionSearch">Selektion</label>
               </div>
             </div>
             &nbsp;
-                </div>*/}
+          </div>
           <div>
             <input
               id="Base64-active"
