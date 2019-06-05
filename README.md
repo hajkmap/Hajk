@@ -1,7 +1,7 @@
 # Hajk 3
 _An open source web GIS solution based on OpenLayers_
 
-![alt text](https://github.com/hajkmap/Hajk/raw/develop-new-client/design/demo-hajk3-2.png "Hajk 3 with all tools visible")
+![alt text](https://github.com/hajkmap/Hajk/raw/master/design/demo-hajk3-2.png "Hajk 3 with all tools visible")
 
 
 ## Quick start
