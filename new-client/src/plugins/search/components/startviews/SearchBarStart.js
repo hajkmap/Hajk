@@ -40,57 +40,29 @@ const styles = theme => ({
   }
 });
 
-class SearchBar extends React.PureComponent {
+class SearchBarStart extends React.PureComponent {
   state = {
     value: ""
   };
+
+  constructor(props) {
+    super();
+  }
 
   componentDidMount() {
     this.props.localObserver.publish("toolchanged");
   }
 
-  constructor(props) {
-    super();
-    props.model.observer.subscribe("clearInput", () => {
-      this.setState({
-        value: ""
-      });
-    });
-  }
-
   render() {
-    const {
-      classes,
-      onChange,
-      onComplete,
-      value,
-      target,
-      forceSearch
-    } = this.props;
+    const { classes, onMouseEnter, target } = this.props;
 
     return (
       <div className={classes.search}>
         <Input
           autoComplete="off"
-          onChange={e => {
-            onChange(e.target.value, false, data => {
-              onComplete(data);
-            });
-            this.setState({
-              value: e.target.value
-            });
-          }}
-          value={value === "" ? value : this.state.value}
+          onClick={onMouseEnter}
           placeholder={"Sök"}
           disableUnderline
-          onKeyPress={e => {
-            //keyCode deprecated so using e.key instead
-            if (e.key === "Enter") {
-              forceSearch(e.target.value, true, data => {
-                onComplete(data);
-              });
-            }
-          }}
           classes={{
             root: classes.inputRoot,
             input:
@@ -107,4 +79,4 @@ class SearchBar extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(SearchBar);
+export default withStyles(styles)(SearchBarStart);

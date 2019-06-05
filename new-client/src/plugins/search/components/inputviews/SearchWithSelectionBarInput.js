@@ -14,7 +14,7 @@ const styles = theme => ({
       backgroundColor: "transparent"
     },
     margin: theme.spacing.unit,
-    width: "inherit"
+    minWidth: 200
   }
 });
 /*
@@ -26,20 +26,18 @@ function handleClick() {
   alert("You clicked the Chip."); // eslint-disable-line no-alert
 }*/
 
-class SearchWithPolygonBar extends React.PureComponent {
+class SearchWithSelectionBarInput extends React.PureComponent {
   componentDidMount() {
     const { model, onSearchDone, localObserver } = this.props;
     localObserver.publish("toolchanged");
-    model.polygonSearch(featureCollections => {
-      onSearchDone(featureCollections);
-    });
+    model.selectionSearch(onSearchDone);
   }
   render() {
     const { classes } = this.props;
     return (
       <Chip
         icon={<CropSquare />}
-        label="Rita objekt i kartan"
+        label="Markera objekt i kartan"
         //onClick={handleClick}
         className={classes.chip}
       />
@@ -47,8 +45,8 @@ class SearchWithPolygonBar extends React.PureComponent {
   }
 }
 
-SearchWithPolygonBar.propTypes = {
+SearchWithSelectionBarInput.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(SearchWithPolygonBar);
+export default withStyles(styles)(SearchWithSelectionBarInput);

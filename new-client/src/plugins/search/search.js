@@ -6,14 +6,15 @@ import { withStyles } from "@material-ui/core/styles";
 import SearchIcon from "@material-ui/icons/Search";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import Observer from "react-event-observer";
-import SearchBar from "./components/SearchBar.js";
-import SearchResultList from "./components/SearchResultList.js";
-import SpatialSearchMenu from "./components/SpatialSearchMenu";
+import SearchBarInput from "./components/inputviews/SearchBarInput";
+import SearchResultList from "./components/resultviews/SearchResultList.js";
+import SpatialSearchMenu from "./components/startviews/SpatialSearchMenu";
+import SearchBarStart from "./components/startviews/SearchBarStart";
 //import ClearButton from "./components/ClearButton.js";
-import SearchSettingsButton from "./components/SearchSettingsButton";
-import SearchWithinBar from "./components/SearchWithinBar";
-import SearchWithSelectionBar from "./components/SearchWithSelectionBar";
-import SearchWithPolygonBar from "./components/SearchWithPolygonBar";
+import SearchSettingsButton from "./components/startviews/SearchSettingsButton";
+import SearchWithinBarInput from "./components/inputviews/SearchWithinBarInput";
+import SearchWithSelectionBarInput from "./components/inputviews/SearchWithSelectionBarInput";
+import SearchWithPolygonBarInput from "./components/inputviews/SearchWithPolygonBarInput";
 import SearchModel from "./SearchModel.js";
 import PanelHeader from "./../../components/PanelHeader.js";
 import { isMobile } from "../../utils/IsMobile.js";
@@ -154,6 +155,7 @@ const POLYGON = "polygon";
 const WITHIN = "within";
 const TEXTSEARCH = "textsearch";
 const SELECTION = "selection";
+const DEFAULT = "default";
 
 class Search extends React.PureComponent {
   resolve = data => {
@@ -175,7 +177,7 @@ class Search extends React.PureComponent {
     this.state = {
       visible: window.innerWidth > b,
       loading: false,
-      activeToolType: "textsearch"
+      activeSearchView: DEFAULT
     };
     this.tooltip = props.options.tooltip;
     this.searchWithinButtonText = props.options.searchWithinButtonText;
@@ -184,6 +186,12 @@ class Search extends React.PureComponent {
     this.searchWithSelectionButtonText =
       props.options.searchWithSelectionButtonText;
     this.localObserver.on("searchStarted", () => {
+      this.setState({
+        loading: true,
+        activeSearchView: TEXTSEARCH
+      });
+    });
+    this.localObserver.on("spatialSearchStarted", () => {
       this.setState({
         loading: true
       });
@@ -267,6 +275,32 @@ class Search extends React.PureComponent {
 
   renderCenter() {
     const { classes } = this.props;
+    var maincontainerButton;
+    var searchBar;
+
+    if (this.state.activeSearchView === DEFAULT) {
+      searchBar = this.renderInputSearchBar();
+    } else if (this.state.activeSearchView === TEXTSEARCH) {
+      searchBar = this.renderSearchBar();
+    }
+
+    if (
+      this.state.activeSearchView === DEFAULT &&
+      this.props.options.activeSpatialTools
+    ) {
+      var spatialSearchOptions = this.renderSpatialSearchOptions();
+    }
+
+    if (this.state.activeSearchView !== DEFAULT) {
+      var spatialBar = this.renderSpatialBar();
+    }
+
+    if (this.state.activeSearchView !== DEFAULT) {
+      maincontainerButton = this.renderMainContainerButton();
+    } else {
+      maincontainerButton = this.renderSearchSettingButton();
+    }
+
     return (
       <div
         className={classes.center}
@@ -307,11 +341,11 @@ class Search extends React.PureComponent {
           <div>{this.renderLoader()}</div>
           <div className={classes.searchToolsContainer}>
             <div className={classes.searchContainer}>
-              {this.renderSpatialBar()}
-              {this.renderSearchBar()}
-              {this.renderSpatialSearchOptions()}
+              {spatialBar}
+              {searchBar}
+              {spatialSearchOptions}
             </div>
-            {this.renderMainContainerButton()}
+            {maincontainerButton}
           </div>
           {this.renderSearchResultList("center")}
         </div>
@@ -319,111 +353,115 @@ class Search extends React.PureComponent {
     );
   }
 
+  renderSearchSettingButton() {
+    console.log("HERE");
+    const { classes } = this.props;
+    return (
+      <div className={classes.mainContainerButton}>
+        <SearchSettingsButton />
+      </div>
+    );
+  }
+
   renderMainContainerButton() {
     const { classes } = this.props;
-    if (this.state.activeToolType !== TEXTSEARCH) {
-      return (
-        <div className={classes.mainContainerButton}>
-          <Button
-            className={classes.button}
-            onClick={() => {
-              this.searchModel.clearRecentSpatialSearch();
-              this.setState({ activeToolType: TEXTSEARCH });
-            }}
-          >
-            Avbryt
-          </Button>
-        </div>
-      );
-    } else {
-      return (
-        <div className={classes.mainContainerButton}>
-          <SearchSettingsButton />
-        </div>
-      );
-    }
+
+    return (
+      <div className={classes.mainContainerButton}>
+        <Button
+          className={classes.button}
+          onClick={() => {
+            this.searchModel.clearRecentSpatialSearch();
+            this.setState({ activeSearchView: DEFAULT });
+          }}
+        >
+          Avbryt
+        </Button>
+      </div>
+    );
   }
 
   renderSpatialBar() {
-    if (this.state.activeToolType !== TEXTSEARCH) {
-      switch (this.state.activeToolType) {
-        case POLYGON:
-          return (
-            <SearchWithPolygonBar
-              model={this.searchModel}
-              localObserver={this.localObserver}
-              onSearchDone={featureCollections => {
-                this.resolve(featureCollections);
-              }}
-            />
-          );
-        case WITHIN: {
-          return (
-            <SearchWithinBar
-              localObserver={this.localObserver}
-              onSearchWithin={layerIds => {
-                this.setState({
-                  result: layerIds
-                });
-                this.searchModel.clearRecentSpatialSearch();
-              }}
-              model={this.searchModel}
-            />
-          );
-        }
-        case SELECTION: {
-          return (
-            <SearchWithSelectionBar
-              localObserver={this.localObserver}
-              model={this.searchModel}
-              onSearchDone={featureCollections => {
-                this.resolve(featureCollections);
-              }}
-            />
-          );
-        }
-        default:
-          return;
+    switch (this.state.activeSearchView) {
+      case POLYGON:
+        return (
+          <SearchWithPolygonBarInput
+            model={this.searchModel}
+            localObserver={this.localObserver}
+            onSearchDone={featureCollections => {
+              this.resolve(featureCollections);
+            }}
+          />
+        );
+      case WITHIN: {
+        return (
+          <SearchWithinBarInput
+            localObserver={this.localObserver}
+            onSearchWithin={layerIds => {
+              this.setState({
+                result: layerIds
+              });
+              this.searchModel.clearRecentSpatialSearch();
+            }}
+            model={this.searchModel}
+          />
+        );
       }
+      case SELECTION: {
+        return (
+          <SearchWithSelectionBarInput
+            localObserver={this.localObserver}
+            model={this.searchModel}
+            onSearchDone={featureCollections => {
+              this.resolve(featureCollections);
+            }}
+          />
+        );
+      }
+
+      default:
+        return;
     }
   }
 
   renderSpatialSearchOptions() {
-    if (
-      this.state.activeToolType === TEXTSEARCH &&
-      this.props.options.activeSpatialTools
-    ) {
-      return (
-        <SpatialSearchMenu
-          onToolChanged={toolType => {
-            this.setState({
-              activeToolType: toolType
-            });
-          }}
-          activeSpatialTools={this.props.options.activeSpatialTools}
-        />
-      );
-    } else {
-      return;
-    }
+    return (
+      <SpatialSearchMenu
+        onToolChanged={toolType => {
+          this.setState({
+            activeSearchView: toolType
+          });
+        }}
+        activeSpatialTools={this.props.options.activeSpatialTools}
+      />
+    );
+  }
+
+  renderInputSearchBar() {
+    return (
+      <SearchBarStart
+        localObserver={this.localObserver}
+        onMouseEnter={() => {
+          this.setState({
+            activeSearchView: TEXTSEARCH
+          });
+        }}
+      />
+    );
   }
 
   renderSearchBar() {
-    if (this.state.activeToolType === TEXTSEARCH) {
-      return (
-        <SearchBar
-          model={this.searchModel}
-          forceSearch={this.searchModel.search}
-          onChange={this.searchModel.search}
-          localObserver={this.localObserver}
-          onComplete={this.resolve}
-          tooltip={this.tooltip}
-          activeTool={this.state.activeToolType}
-        />
-      );
-    } else {
-      return;
-    }
+    return (
+      <SearchBarInput
+        model={this.searchModel}
+        forceSearch={this.searchModel.search}
+        onChange={this.searchModel.search}
+        localObserver={this.localObserver}
+        onComplete={this.resolve}
+        tooltip={this.tooltip}
+        activeTool={this.state.activeSearchView}
+      />
+    );
   }
 
   renderTop() {
@@ -441,7 +479,7 @@ class Search extends React.PureComponent {
             });
           }}
         />
-        <SearchBar
+        <SearchBarInput
           model={this.searchModel}
           onChange={this.searchModel.search}
           onComplete={this.resolve}

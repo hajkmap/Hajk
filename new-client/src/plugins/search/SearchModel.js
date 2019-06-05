@@ -173,7 +173,7 @@ class SearchModel {
         this.mapSouceAsWFSPromise(feature, projCode)
       );
 
-      this.observer.publish("searchStarted");
+      this.observer.publish("spatialSearchStarted");
       Promise.all(promises).then(responses => {
         Promise.all(responses.map(result => result.json())).then(
           jsonResults => {
