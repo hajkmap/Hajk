@@ -167,6 +167,7 @@ class SearchResultList extends React.PureComponent {
                   parent={this}
                   key={i}
                   featureType={featureType}
+                  renderAffectButton={this.props.renderAffectButton}
                   model={this.props.model}
                   expanded={false}
                   target={target}

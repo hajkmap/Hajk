@@ -240,6 +240,7 @@ class Search extends React.PureComponent {
         <SearchResultList
           localObserver={this.localObserver}
           result={result}
+          renderAffectButton={this.activeSpatialTools.radiusSearch}
           model={this.searchModel}
           visible={true}
           target={target}

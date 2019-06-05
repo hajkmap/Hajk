@@ -115,7 +115,7 @@ class SearchResultGroup extends Component {
           <div style={{ flex: "auto", display: "flex" }}>
             <div>
               {feature.properties[displayField]}
-              {target === "center" ? (
+              {target === "center" && this.props.renderAffectButton ? (
                 <div>
                   <Button color="primary" onClick={this.highlight(feature)}>
                     Visa påverkan
