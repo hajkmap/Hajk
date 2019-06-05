@@ -9,7 +9,7 @@ import GeoJSON from "ol/format/GeoJSON";
 import { fromCircle } from "ol/geom/Polygon";
 import Draw from "ol/interaction/Draw.js";
 import { arraySort } from "./../../utils/ArraySort.js";
-import { Stroke, Style, Circle } from "ol/style.js";
+import { Stroke, Style, Circle, Fill } from "ol/style.js";
 import { handleClick } from "../../models/Click.js";
 
 var style = new Style({
@@ -21,6 +21,23 @@ var style = new Style({
     radius: 6,
     stroke: new Stroke({
       color: "rgba(0, 0, 0, 0.6)",
+      width: 2
+    })
+  })
+});
+
+var drawStyle = new Style({
+  stroke: new Stroke({
+    color: "rgba(255, 214, 91, 0.6)",
+    width: 4
+  }),
+  fill: new Fill({
+    color: "rgba(255, 214, 91, 0.2)"
+  }),
+  image: new Circle({
+    radius: 6,
+    stroke: new Stroke({
+      color: "rgba(255, 214, 91, 0.6)",
       width: 2
     })
   })
@@ -316,7 +333,8 @@ class SearchModel {
       this.draw = new Draw({
         source: this.drawSource,
         type: type,
-        freehand: freehand
+        freehand: freehand,
+        style: drawStyle
       });
       this.draw.on("drawend", e => {
         //this.clear();
@@ -349,7 +367,8 @@ class SearchModel {
     });
     this.drawSource = new VectorSource({ wrapX: false });
     this.drawLayer = new VectorLayer({
-      source: this.drawSource
+      source: this.drawSource,
+      style: drawStyle
     });
     this.olMap.addLayer(this.vectorLayer);
     this.olMap.addLayer(this.drawLayer);
