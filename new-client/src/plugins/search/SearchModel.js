@@ -107,7 +107,7 @@ class SearchModel {
 
   onSelectFeatures = (evt, callback) => {
     handleClick(evt, evt.map, response => {
-      this.vectorLayer.getSource().addFeatures(response.features);
+      this.drawLayer.getSource().addFeatures(response.features);
       if (response.features.length > 0) {
         this.searchWithinArea(
           response.features[0],
@@ -365,11 +365,13 @@ class SearchModel {
       source: new VectorSource({}),
       style: () => style
     });
+
     this.drawSource = new VectorSource({ wrapX: false });
     this.drawLayer = new VectorLayer({
       source: this.drawSource,
       style: drawStyle
     });
+
     this.olMap.addLayer(this.vectorLayer);
     this.olMap.addLayer(this.drawLayer);
     this.observer = observer;
