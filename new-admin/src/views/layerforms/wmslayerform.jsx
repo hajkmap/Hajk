@@ -175,8 +175,14 @@ class WMSLayerForm extends Component {
       ].Capability.Layer.Layer.find(l => {
         return l.Name === checkedLayer;
       });
-      // We can not be sure that CRS property exists
-      if (foundCrs !== undefined && foundCrs.hasOwnProperty("CRS")) {
+      // Proceed only if this is the first layer to be added (else we risk overwriting existing user selection of projection).
+      // Also, make sure that CRS property really exists before proceeding.
+      if (
+        foundCrs !== undefined &&
+        foundCrs.hasOwnProperty("CRS") &&
+        Object.keys(this.state.addedLayers).length === 0 &&
+        this.state.addedLayers.constructor === Object
+      ) {
         let projection;
         // Sometimes a layer announces multiple CRSs, and we need to handle that too
         if (Array.isArray(foundCrs.CRS)) {
