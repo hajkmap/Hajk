@@ -6,6 +6,7 @@ import ExpansionPanel from "@material-ui/core/ExpansionPanel";
 import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import Button from "@material-ui/core/Button";
 import {
   extractPropertiesFromJson,
@@ -62,7 +63,8 @@ const styles = theme => ({
 
 class SearchResultGroup extends Component {
   state = {
-    selfExpanded: false
+    selfExpanded: false,
+    expanded: false
   };
 
   highlight = feature => e => {
@@ -82,7 +84,7 @@ class SearchResultGroup extends Component {
     var olFeature = new GeoJSON().readFeatures(feature)[0];
     this.props.model.highlightFeature(olFeature);
     if (window.innerWidth >= 600) {
-      this.props.parent.hide();
+      //this.props.parent.hide();
     }
     this.setState({
       activeFeature: feature
@@ -109,9 +111,25 @@ class SearchResultGroup extends Component {
       <ExpansionPanel
         key={i}
         onClick={this.zoomTo(feature)}
+        expanded={this.state.expanded === i}
         className={classNames(classes.item, active ? classes.active : null)}
       >
-        <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+        <ExpansionPanelSummary
+          expandIcon={
+            <Button>
+              <MoreHorizIcon
+                onClick={() => {
+                  if (this.state.expanded === i) {
+                    this.setState({ expanded: -1 });
+                  } else {
+                    this.setState({ expanded: i });
+                  }
+                }}
+                key={i}
+              />
+            </Button>
+          }
+        >
           <div style={{ flex: "auto", display: "flex" }}>
             <div>
               {feature.properties[displayField]}
