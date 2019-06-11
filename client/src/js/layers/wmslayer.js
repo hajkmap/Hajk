@@ -65,29 +65,25 @@ var WmsLayer = {
       source.extent = this.get('extent');
     }
 
-    if (this.get('singleTile')) {
-      this.layer = new ol.layer.Image({
-        name: this.get('name'),
-        visible: this.get('visible'),
-        queryable: this.get('queryable'),
-        caption: this.get('caption'),
-        opacity: this.get('opacity'),
-        source: new ol.source.ImageWMS(source),
-        minResolution: this.get("minResolution"),
-        maxResolution: this.get("maxResolution")
-      });
-    } else {
-      this.layer = new ol.layer.Tile({
-        name: this.get('name'),
-        visible: this.get('visible'),
-        queryable: this.get('queryable'),
-        caption: this.get('caption'),
-        opacity: this.get('opacity'),
-        source: new ol.source.TileWMS(source),
-        minResolution: this.get("minResolution"),
-        maxResolution: this.get("maxResolution")
-      });
+    var layerOptions = {
+      name: this.get('name'),
+      visible: this.get('visible'),
+      queryable: this.get('queryable'),
+      caption: this.get('caption'),
+      opacity: this.get('opacity')
+    };
+
+    layerOptions["source"] = this.get('singleTile') ? new ol.source.ImageWMS(source) : new ol.source.TileWMS(source);
+
+    if (this.get("minResolution") && this.get("minResolution") > 0) {
+      layerOptions["minResolution"] = this.get("minResolution");
     }
+
+    if (this.get("maxResolution") && this.get("maxResolution") > 0) {
+      layerOptions["maxResolution"] = this.get("maxResolution");
+    }
+
+    this.layer = this.get('singleTile') ? new ol.layer.Image(layerOptions) : new ol.layer.Tile(layerOptions);
 
     this.set('wmsCallbackName', 'wmscallback' + Math.floor(Math.random() * 1000) + 1);
     global.window[this.get('wmsCallbackName')] = _.bind(this.getFeatureInformationReponse, this);

@@ -42,6 +42,8 @@ const defaultState = {
   url: '',
   queryable: true,
   opacity: 1.0,
+  minResolution: 0,
+  maxResolution: 100,
   tiled: false,
   singleTile: false,
   imageFormat: '',
@@ -286,6 +288,8 @@ class WMSLayerForm extends Component {
       serverType: this.getValue('serverType'),
       queryable: this.getValue('queryable'),
       opacity: this.getValue('opacity'),
+      minResolution: this.getValue('minResolution'),
+      maxResolution: this.getValue('maxResolution'),
       tiled: this.getValue('tiled'),
       drawOrder: this.getValue('drawOrder'),
       attribution: this.getValue('attribution'),
@@ -355,8 +359,6 @@ class WMSLayerForm extends Component {
         }
         break;
       case 'opacity':
-        console.log(value);
-        console.log(typeof value);
         if (!/^-?\d+.\d+$/.test(value)) {
           valid = false;
         }
@@ -492,6 +494,34 @@ class WMSLayerForm extends Component {
               console.log(e.target.value);
               this.setState({opacity: e.target.value});
               this.validateField('opacity');
+            }}
+          />
+        </div>
+        <div>
+          <label>Min resolution</label>
+          <input
+            type='number'
+            ref='input_minResolution'
+            value={this.state.minResolution}
+            className={this.getValidationClass('minResolution')}
+            onChange={(e) => {
+              console.log(e.target.value);
+              this.setState({minResolution: e.target.value});
+              this.validateField('minResolution');
+            }}
+          />
+        </div>
+        <div>
+          <label>Max resolution</label>
+          <input
+            type='number'
+            ref='input_maxResolution'
+            value={this.state.maxResolution}
+            className={this.getValidationClass('maxResolution')}
+            onChange={(e) => {
+              console.log(e.target.value);
+              this.setState({maxResolution: e.target.value});
+              this.validateField('maxResolution');
             }}
           />
         </div>
