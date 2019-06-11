@@ -210,8 +210,7 @@ class LayerGroup extends React.PureComponent {
       <div ref="panelElement" className={groupClass}>
         <ExpansionPanel
           className={classes.disableTransition}
-          CollapseProps={{ classes: { container: classes.disableTransition } }}
-          expanded={this.props.expanded}
+          defaultExpanded={this.props.expanded}
           onChange={this.props.handleChange(this.props.group.id, this)}
         >
           <StyledExpansionPanelSummary className={classes.panelSummary}>

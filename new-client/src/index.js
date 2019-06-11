@@ -16,8 +16,9 @@ import ReactDOM from "react-dom";
 import App from "./components/App.js";
 import buildConfig from "./buildConfig.json";
 import { deepMerge } from "./utils/DeepMerge";
-
-import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
+import CssBaseline from "@material-ui/core/CssBaseline";
+import { createMuiTheme } from "@material-ui/core/styles";
+import { ThemeProvider } from "@material-ui/styles";
 import ErrorIcon from "@material-ui/icons/Error";
 
 const networkErrorMessage =
@@ -48,9 +49,6 @@ function getTheme(config, customTheme) {
       secondary: {
         main: config.mapConfig.map.colors.secondaryColor // secondary: { main: "#11cb5f" } // <- Or like this
       }
-    },
-    typography: {
-      useNextVariants: true
     }
   };
 
@@ -101,12 +99,13 @@ fetch("appConfig.json", fetchConfig)
                 setTimeout(() => {
                   let theme = getTheme(config, customTheme);
                   ReactDOM.render(
-                    <MuiThemeProvider theme={theme}>
+                    <ThemeProvider theme={theme}>
+                      <CssBaseline />
                       <App
                         activeTools={buildConfig.activeTools}
                         config={config}
                       />
-                    </MuiThemeProvider>,
+                    </ThemeProvider>,
                     document.getElementById("root")
                   );
                 }, 500);
