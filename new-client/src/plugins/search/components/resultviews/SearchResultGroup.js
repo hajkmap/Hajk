@@ -45,7 +45,11 @@ const styles = theme => ({
     fontWeight: "500"
   },
   secondaryHeading: {
-    fontSize: "10pt"
+    fontSize: "10pt",
+    color: "black",
+    backgroundColor: "white",
+    padding: "3px",
+    borderRadius: "3px"
   },
   details: {
     padding: "0px",
@@ -79,6 +83,7 @@ const styles = theme => ({
   },
   groupRoot: {
     minHeight: "0px",
+    padding: "5px",
     "&$expanded": {
       minHeight: 0
     }
@@ -230,7 +235,7 @@ class SearchResultGroup extends Component {
               {featureType.source.caption}
               &nbsp;
               <span className={classes.secondaryHeading}>
-                ({featureType.features.length})
+                {featureType.features.length}
               </span>
             </Typography>
           </ExpansionPanelSummary>

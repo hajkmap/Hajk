@@ -8,6 +8,7 @@ import Place from "@material-ui/icons/Place";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import classNames from "classnames";
+import { FormHelperText } from "@material-ui/core";
 
 const styles = theme => {
   return {
@@ -50,12 +51,20 @@ const styles = theme => {
         maxHeight: "inherit"
       }
     },
+    searchResultTopBarLeft: {
+      display: "flex"
+    },
+    searchResultTopBarRight: {
+      display: "flex",
+      alignItems: "center"
+    },
     searchResultTopBar: {
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
       margin: "5px"
     },
+
     visible: {
       display: "block"
     },
@@ -140,9 +149,19 @@ class SearchResultList extends React.PureComponent {
       return (
         <div className={searchResultClass}>
           <div className={classes.searchResultTopBar}>
-            <Place />
-            <Typography>77 Sökträffar</Typography>
-            <div>
+            <div className={classes.searchResultTopBarLeft}>
+              <Place />
+              <Typography className={classes.resultCount}>
+                {result.reduce((x, t) => {
+                  return x + t.features.length;
+                }, 0) + " sökträffar"}
+              </Typography>
+            </div>
+            <div className={classes.searchResultTopBarRight}>
+              <Typography color="primary" className={classes.resultCount}>
+                Dölj
+              </Typography>
+
               {!minimized ? (
                 <IconButton
                   className={classes.button}
