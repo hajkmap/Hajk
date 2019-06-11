@@ -8,7 +8,6 @@ import Place from "@material-ui/icons/Place";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import classNames from "classnames";
-import { FormHelperText } from "@material-ui/core";
 
 const styles = theme => {
   return {
@@ -27,9 +26,6 @@ const styles = theme => {
         border: "none",
         padding: 0
       }
-    },
-    divider: {
-      margin: 0
     },
     searchResultTop: {
       overflow: "auto",
@@ -179,7 +175,10 @@ class SearchResultList extends React.PureComponent {
               )}
             </div>
           </div>
-          <Divider className={classes.divider} variant="middle" />
+          <Divider
+            className={this.state.minimized ? classes.hidden : classes.visible}
+            variant="fullWidth"
+          />
           <div
             className={classNames(
               classes.searchResultContainer,

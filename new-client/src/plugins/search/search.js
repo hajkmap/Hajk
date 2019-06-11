@@ -28,6 +28,8 @@ const styles = theme => {
       margin: "-10px 10px 10px 10px",
       border: "1px solid " + theme.palette.primary.main,
       maxWidth: "600px",
+      minWidth: "370px",
+
       pointerEvents: "all",
       [theme.breakpoints.down("md")]: {
         left: 0,
@@ -77,21 +79,19 @@ const styles = theme => {
         display: "flex",
         flex: "auto",
         alignItems: "center",
-
         backgroundColor: "#eee",
         borderRadius: theme.shape.borderRadius
       }
     },
     mainContainerButton: {
       [theme.breakpoints.up("lg")]: {
-        alignItems: "center",
-        justifyContent: "center"
+        display: "flex"
       }
     },
     searchToolsContainer: {
+      minHeight: "48px",
       [theme.breakpoints.up("lg")]: {
-        display: "flex",
-        alignItems: "center"
+        display: "flex"
       }
     },
     searchContainerTop: {
