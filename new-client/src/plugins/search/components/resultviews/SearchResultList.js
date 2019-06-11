@@ -2,8 +2,11 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import SearchResultGroup from "./SearchResultGroup.js";
 import IconButton from "@material-ui/core/IconButton";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
-import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
+import Divider from "@material-ui/core/Divider";
+import Typography from "@material-ui/core/Typography";
+import Place from "@material-ui/icons/Place";
+import ExpandLess from "@material-ui/icons/ExpandLess";
+import ExpandMore from "@material-ui/icons/ExpandMore";
 import classNames from "classnames";
 
 const styles = theme => {
@@ -13,7 +16,7 @@ const styles = theme => {
     },
     searchResult: {
       overflow: "auto",
-      padding: "10px",
+      padding: "5px",
       position: "relative",
       top: "9px",
       background: "white",
@@ -23,6 +26,9 @@ const styles = theme => {
         border: "none",
         padding: 0
       }
+    },
+    divider: {
+      margin: 0
     },
     searchResultTop: {
       overflow: "auto",
@@ -38,7 +44,7 @@ const styles = theme => {
     searchResultContainer: {
       maxHeight: "calc(100vh - 380px)",
       overflow: "auto",
-      padding: "5px",
+      marginTop: "10px",
       paddingBottom: "22px",
       [theme.breakpoints.down("xs")]: {
         maxHeight: "inherit"
@@ -134,25 +140,27 @@ class SearchResultList extends React.PureComponent {
       return (
         <div className={searchResultClass}>
           <div className={classes.searchResultTopBar}>
-            <div>SÖKRESULTAT</div>
+            <Place />
+            <Typography>77 Sökträffar</Typography>
             <div>
               {!minimized ? (
                 <IconButton
                   className={classes.button}
                   onClick={() => this.toggle()}
                 >
-                  <RemoveCircleIcon />
+                  <ExpandLess />
                 </IconButton>
               ) : (
                 <IconButton
                   className={classes.button}
                   onClick={() => this.toggle()}
                 >
-                  <AddCircleIcon />
+                  <ExpandMore />
                 </IconButton>
               )}
             </div>
           </div>
+          <Divider className={classes.divider} variant="middle" />
           <div
             className={classNames(
               classes.searchResultContainer,

@@ -22,42 +22,74 @@ const styles = theme => ({
     boxShadow:
       "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
     borderRadius: "2px",
-    padding: "6px",
-    marginBottom: "10px",
-    background: "white"
+    background: "white",
+    margin: "0px"
   },
   resultGroup: {
     width: "100%"
   },
-  expanded: {
+  expanded2: {
     display: "block"
   },
   hidden: {
     display: "none"
   },
+  button: {
+    padding: 0
+  },
   badge: {},
   heading: {
     padding: 0,
     paddingRight: "14px",
-    fontSize: "14pt",
+    color: "white",
     fontWeight: "500"
   },
   secondaryHeading: {
     fontSize: "10pt"
   },
   details: {
-    padding: "8px 12px 12px",
+    padding: "0px",
     background: "#efefef",
     borderTop: "1px solid #ccc"
   },
   active: {
     background: theme.palette.primary.main
   },
-  disableTransition: {
-    transition: "none"
+  content: {
+    "&$expanded": {
+      margin: "0px"
+    },
+    margin: "0px"
+  },
+  itemRoot: {
+    minHeight: 0,
+    padding: 5,
+    "&$expanded": {
+      minHeight: 0
+    }
+  },
+  featureMenu: {
+    padding: "0px",
+    "&:hover": {
+      backgroundColor: "transparent"
+    },
+    "&:focus": {
+      backgroundColor: "transparent"
+    }
+  },
+  groupRoot: {
+    minHeight: "0px",
+    "&$expanded": {
+      minHeight: 0
+    }
+  },
+  expanded: {
+    margin: 0
   },
   expansionPanel: {
-    borderRadius: "0 !important"
+    borderRadius: "0 !important",
+    height: "30%",
+    backgroundColor: "#0076bc"
   }
 });
 
@@ -115,8 +147,14 @@ class SearchResultGroup extends Component {
         className={classNames(classes.item, active ? classes.active : null)}
       >
         <ExpansionPanelSummary
+          classes={{
+            expandIcon: classes.featureMenu,
+            expanded: classes.expanded,
+            content: classes.content
+          }}
+          className={classes.itemRoot}
           expandIcon={
-            <Button>
+            <Button className={classes.button}>
               <MoreHorizIcon
                 onClick={() => {
                   if (this.state.expanded === i) {
@@ -179,12 +217,16 @@ class SearchResultGroup extends Component {
           }}
         >
           <ExpansionPanelSummary
-            className={classes.disableTransition}
+            classes={{
+              expanded: classes.expanded,
+              content: classes.content
+            }}
+            className={classes.groupRoot}
             ref={this.panelHeaderElement}
             onClick={this.toggle}
             expandIcon={<ExpandMoreIcon />}
           >
-            <Typography className={classes.heading}>
+            <Typography variant="subtitle1" className={classes.heading}>
               {featureType.source.caption}
               &nbsp;
               <span className={classes.secondaryHeading}>
