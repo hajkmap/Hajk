@@ -391,6 +391,7 @@ class Search extends React.PureComponent {
     return (
       <div className={classes.mainContainerButton}>
         <Button
+          color="primary"
           className={classes.button}
           onClick={() => {
             this.searchModel.clearRecentSpatialSearch();
@@ -477,7 +478,15 @@ class Search extends React.PureComponent {
       <SearchWithTextInput
         model={this.searchModel}
         forceSearch={this.searchModel.search}
+        onClear={() => {
+          this.searchModel.clear();
+          this.localObserver.publish("clearInput");
+          this.setState({
+            result: false
+          });
+        }}
         onChange={this.searchModel.search}
+        loading={this.state.loading}
         localObserver={this.localObserver}
         onComplete={this.resolve}
         tooltip={this.tooltip}
@@ -503,6 +512,7 @@ class Search extends React.PureComponent {
         />
         <SearchWithTextInput
           model={this.searchModel}
+          forceSearch={this.searchModel.search}
           onChange={this.searchModel.search}
           onComplete={this.resolve}
           tooltip={this.tooltip}

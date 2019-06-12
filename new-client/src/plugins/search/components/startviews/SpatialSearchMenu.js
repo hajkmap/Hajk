@@ -3,14 +3,15 @@ import PropTypes from "prop-types";
 import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
 import MenuItem from "@material-ui/core/MenuItem";
-import CropSquare from "@material-ui/icons/CropSquare";
-import TripOrigin from "@material-ui/icons/TripOrigin";
+import Edit from "@material-ui/icons/Edit";
+import AddCircleOutline from "@material-ui/icons/AddCircleOutline";
+import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
+import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
 import Grid from "@material-ui/core/Grid";
-import TouchApp from "@material-ui/icons/TouchApp";
+import RadioButtonUnchecked from "@material-ui/icons/RadioButtonUnchecked";
 import IconButton from "@material-ui/core/IconButton";
 import Menu from "@material-ui/core/Menu";
 
-import ArrowDownward from "@material-ui/icons/ArrowDownward";
 const styles = theme => ({
   root: {
     display: "flex",
@@ -62,13 +63,17 @@ class SpatialSearchOptions extends React.Component {
     let menuItems = [];
     if (activeSpatialTools) {
       if (activeSpatialTools.polygonSearch) {
-        menuItems.push(this.renderMenuItem(POLYGON, <CropSquare />, "Rita"));
+        menuItems.push(this.renderMenuItem(POLYGON, <Edit />, "Rita"));
       }
       if (activeSpatialTools.radiusSearch) {
-        menuItems.push(this.renderMenuItem(RADIUS, <TripOrigin />, "Radie"));
+        menuItems.push(
+          this.renderMenuItem(RADIUS, <RadioButtonUnchecked />, "Radie")
+        );
       }
       if (activeSpatialTools.selectionSearch) {
-        menuItems.push(this.renderMenuItem(SELECTION, <TouchApp />, "Markera"));
+        menuItems.push(
+          this.renderMenuItem(SELECTION, <AddCircleOutline />, "Markera")
+        );
       }
     }
 
@@ -120,8 +125,7 @@ class SpatialSearchOptions extends React.Component {
           aria-haspopup="true"
           onClick={this.handleDropdownClick}
         >
-          <CropSquare />
-          <ArrowDownward style={{ fontSize: 10 }} />
+          {open ? <ArrowDropUp /> : <ArrowDropDown />}
         </IconButton>
         {this.renderMenu(anchorEl, open, activeSpatialTools)}
       </div>

@@ -1,7 +1,7 @@
 import React from "react";
 import Input from "@material-ui/core/Input";
 import { withStyles } from "@material-ui/core/styles";
-import SearchIcon from "@material-ui/icons/Search";
+import ClearIcon from "@material-ui/icons/Clear";
 import InputAdornment from "@material-ui/core/InputAdornment";
 
 const styles = theme => ({
@@ -9,6 +9,7 @@ const styles = theme => ({
     borderRadius: theme.shape.borderRadius,
     flex: "auto"
   },
+  clearIcon: {},
   inputRoot: {
     width: "100%"
   },
@@ -66,7 +67,8 @@ class SearchWithTextInput extends React.PureComponent {
       onComplete,
       value,
       target,
-      forceSearch
+      forceSearch,
+      onClear
     } = this.props;
 
     return (
@@ -98,9 +100,9 @@ class SearchWithTextInput extends React.PureComponent {
             input:
               target === "top" ? classes.inputInputWide : classes.inputInput
           }}
-          startAdornment={
-            <InputAdornment position="start">
-              <SearchIcon />
+          endAdornment={
+            <InputAdornment position="end">
+              <ClearIcon className={classes.clearIcon} onClick={onClear} />
             </InputAdornment>
           }
         />

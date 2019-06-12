@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Chip from "@material-ui/core/Chip";
-import CropSquare from "@material-ui/icons/CropSquare";
+import Edit from "@material-ui/icons/Edit";
 
 const styles = theme => ({
   chip: {
@@ -38,7 +38,7 @@ class SearchWithPolygonInput extends React.PureComponent {
     const { classes } = this.props;
     return (
       <Chip
-        icon={<CropSquare />}
+        icon={<Edit />}
         label="Rita objekt i kartan"
         //onClick={handleClick}
         className={classes.chip}

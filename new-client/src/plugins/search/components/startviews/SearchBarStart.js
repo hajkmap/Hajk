@@ -67,7 +67,7 @@ class SearchBarStart extends React.PureComponent {
           }}
           startAdornment={
             <InputAdornment position="start">
-              <SearchIcon />
+              <SearchIcon color="disabled" />
             </InputAdornment>
           }
         />
