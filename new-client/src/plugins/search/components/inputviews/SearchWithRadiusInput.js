@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Chip from "@material-ui/core/Chip";
-import TripOrigin from "@material-ui/icons/TripOrigin";
+import RadioButtonUnchecked from "@material-ui/icons/RadioButtonUnchecked";
 import Snackbar from "@material-ui/core/Snackbar";
 import { createPortal } from "react-dom";
 
@@ -43,7 +43,7 @@ class SearchWithRadiusInput extends React.PureComponent {
     return (
       <div>
         <Chip
-          icon={<TripOrigin />}
+          icon={<RadioButtonUnchecked />}
           label="Sök med radie i kartan"
           //onClick={handleClick}
           className={classes.chip}

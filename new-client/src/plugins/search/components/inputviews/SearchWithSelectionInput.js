@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Chip from "@material-ui/core/Chip";
-import CropSquare from "@material-ui/icons/CropSquare";
+import AddCircleOutline from "@material-ui/icons/AddCircleOutline";
 
 const styles = theme => ({
   chip: {
@@ -36,7 +36,7 @@ class SearchWithSelectionInput extends React.PureComponent {
     const { classes } = this.props;
     return (
       <Chip
-        icon={<CropSquare />}
+        icon={<AddCircleOutline />}
         label="Markera objekt i kartan"
         //onClick={handleClick}
         className={classes.chip}
