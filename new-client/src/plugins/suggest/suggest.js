@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
-import { Button } from "@material-ui/core";
+import { Fab } from "@material-ui/core";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import CommentIcon from "@material-ui/icons/Comment";
 
@@ -36,15 +36,13 @@ class Suggest extends Component {
     const { classes } = this.props;
     return (
       <div>
-        <Button
-          variant="fab"
-          color="default"
+        <Fab
           aria-label="Lämna synpunkter"
           className={classes.button}
           onClick={this.onClick}
         >
           <CommentIcon />
-        </Button>
+        </Fab>
       </div>
     );
   }

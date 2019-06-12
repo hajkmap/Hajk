@@ -1,8 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
-import { Button } from "@material-ui/core";
-import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+import { Fab, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import BufferIcon from "@material-ui/icons/Adjust";
 import BufferView from "./BufferView.js";
 import BufferModel from "./BufferModel.js";
@@ -76,15 +75,9 @@ class buffer extends React.PureComponent {
     const { classes } = this.props;
     return (
       <div>
-        <Button
-          variant="fab"
-          color="default"
-          aria-label="Skapa buffertzon"
-          className={classes.button}
-          onClick={this.onClick}
-        >
+        <Fab className={classes.button} onClick={this.onClick}>
           <BufferIcon />
-        </Button>
+        </Fab>
         {this.renderWindow("window")}
       </div>
     );

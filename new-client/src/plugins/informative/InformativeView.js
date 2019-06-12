@@ -11,7 +11,7 @@ import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
 
 const styles = theme => ({
   rightIcon: {
-    marginLeft: theme.spacing.unit
+    marginLeft: theme.spacing(1)
   },
   chapter: {},
   toc: {

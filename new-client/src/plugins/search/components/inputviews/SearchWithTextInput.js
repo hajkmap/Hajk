@@ -14,12 +14,12 @@ const styles = theme => ({
     width: "100%"
   },
   inputInput: {
-    padding: theme.spacing.unit,
+    padding: theme.spacing(1),
     left: "100%",
     width: "100%"
   },
   inputInputWide: {
-    padding: theme.spacing.unit,
+    padding: theme.spacing(1),
     left: "100%",
     width: "100%",
     "&:focus": {

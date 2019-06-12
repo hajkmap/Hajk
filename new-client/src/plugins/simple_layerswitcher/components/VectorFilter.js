@@ -11,7 +11,7 @@ import { Vector as VectorLayer } from "ol/layer";
 
 const styles = theme => ({
   formControl: {
-    margin: theme.spacing.unit,
+    margin: theme.spacing(1),
     minWidth: 120
   },
   subtitle2: {
