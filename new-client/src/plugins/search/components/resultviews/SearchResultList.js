@@ -73,7 +73,8 @@ const styles = theme => {
 class SearchResultList extends React.PureComponent {
   state = {
     visible: true,
-    minimized: false
+    minimized: false,
+    highlightedFeatures: []
   };
 
   hide() {
@@ -110,6 +111,10 @@ class SearchResultList extends React.PureComponent {
       </div>
     );
   }
+
+  setHighlightedFeatures = (i, callback) => {
+    this.setState({ highlightedFeatures: i }, callback);
+  };
 
   render() {
     const { classes, result, localObserver, target } = this.props;
@@ -192,6 +197,8 @@ class SearchResultList extends React.PureComponent {
                   localObserver={localObserver}
                   parent={this}
                   key={i}
+                  setHighlightedFeatures={this.setHighlightedFeatures}
+                  highlightedFeatures={this.state.highlightedFeatures}
                   featureType={featureType}
                   renderAffectButton={this.props.renderAffectButton}
                   model={this.props.model}

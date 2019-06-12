@@ -426,14 +426,26 @@ class SearchModel {
     this.hideVisibleLayers();
   }
 
+  clearFeatureHighlight(feature) {
+    this.vectorLayer
+      .getSource()
+      .removeFeature(
+        this.vectorLayer.getSource().getFeatureById(feature.getId())
+      );
+  }
   clearHighlight() {
     this.vectorLayer.getSource().clear();
   }
 
+  highlightFeatures(features) {
+    this.vectorLayer.getSource().addFeatures(features);
+    this.olMap
+      .getView()
+      .fit(this.vectorLayer.getSource().getExtent(), this.olMap.getSize());
+  }
+
   highlightFeature(feature) {
     this.clearHighlight();
-    this.vectorLayer.getSource().addFeature(feature);
-    this.olMap.getView().fit(feature.getGeometry(), this.olMap.getSize());
   }
 
   highlight(feature) {

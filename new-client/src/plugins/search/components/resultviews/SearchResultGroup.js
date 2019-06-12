@@ -57,7 +57,7 @@ const styles = theme => ({
     borderTop: "1px solid #ccc"
   },
   active: {
-    background: theme.palette.primary.main
+    background: "blue"
   },
   content: {
     "&$expanded": {
@@ -110,23 +110,41 @@ class SearchResultGroup extends Component {
     if (window.innerWidth >= 1280) {
       this.props.parent.hide();
     }
-    this.setState({
-      activeFeature: feature
-    });
+
     this.props.model.clearLayerList();
     this.props.model.app.globalObserver.publish("hideSearchPanel");
   };
 
-  zoomTo = feature => e => {
-    var olFeature = new GeoJSON().readFeatures(feature)[0];
-    this.props.model.highlightFeature(olFeature);
+  zoomTo = feature => {
+    var features = this.props.highlightedFeatures.map(feature => {
+      return new GeoJSON().readFeatures(feature)[0];
+    });
+
+    this.props.model.highlightFeatures(features);
     if (window.innerWidth >= 600) {
       //this.props.parent.hide();
     }
-    this.setState({
-      activeFeature: feature
-    });
-    //this.props.localObserver.publish("minimizeWindow", true);
+  };
+
+  handleOnFeatureClick = feature => {
+    var highlightedFeatures = this.props.highlightedFeatures;
+
+    var indexOfHighlightedFeature = highlightedFeatures.indexOf(feature);
+
+    if (indexOfHighlightedFeature > -1) {
+      var newHighlightedFeaturesArray = [...highlightedFeatures];
+      newHighlightedFeaturesArray.splice(indexOfHighlightedFeature, 1);
+      this.props.setHighlightedFeatures(newHighlightedFeaturesArray, () => {
+        var featureAsGeoJson = new GeoJSON().readFeatures(feature)[0];
+        this.props.model.clearFeatureHighlight(featureAsGeoJson);
+        this.zoomTo();
+      });
+    } else {
+      newHighlightedFeaturesArray = highlightedFeatures.concat([feature]);
+      this.props.setHighlightedFeatures(newHighlightedFeaturesArray, () => {
+        this.zoomTo();
+      });
+    }
   };
 
   clear = e => {
@@ -142,12 +160,19 @@ class SearchResultGroup extends Component {
 
   renderItem(feature, displayField, infoBox, i) {
     const { classes, target } = this.props;
-    const active = this.state.activeFeature === feature;
+    var active =
+      this.props.highlightedFeatures
+        .map(highlightedFeature => {
+          return highlightedFeature;
+        })
+        .indexOf(feature) > -1;
 
     return (
       <ExpansionPanel
         key={i}
-        onClick={this.zoomTo(feature)}
+        onClick={e => {
+          this.handleOnFeatureClick(feature);
+        }}
         expanded={this.state.expanded === i}
         className={classNames(classes.item, active ? classes.active : null)}
       >
