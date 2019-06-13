@@ -28,19 +28,9 @@ const styles = theme => {
       margin: "-10px 10px 10px 10px",
       border: "1px solid " + theme.palette.primary.main,
       maxWidth: "600px",
-      minWidth: "370px",
-
+      minWidth: "360px",
       pointerEvents: "all",
-      [theme.breakpoints.down("md")]: {
-        left: 0,
-        right: 0,
-        margin: "0 10px 10px 10px",
-        position: "absolute",
-        maxWidth: "inherit",
-        border: "none",
-        boxShadow:
-          "0px 0px 3px rgba(0, 0, 0, 0.3), 2px 2px 6px rgba(0, 0, 0, 0.4)"
-      },
+
       [theme.breakpoints.down("xs")]: {
         position: "absolute",
         top: 0,
@@ -58,7 +48,7 @@ const styles = theme => {
       margin: "4px"
     },
     panelHeader: {
-      [theme.breakpoints.up("lg")]: {
+      [theme.breakpoints.up("sm")]: {
         display: "none"
       }
     },
@@ -75,7 +65,7 @@ const styles = theme => {
       }
     },
     searchContainer: {
-      [theme.breakpoints.up("lg")]: {
+      [theme.breakpoints.up("xs")]: {
         display: "flex",
         flex: "auto",
         alignItems: "center",
@@ -84,15 +74,11 @@ const styles = theme => {
       }
     },
     mainContainerButton: {
-      [theme.breakpoints.up("lg")]: {
-        display: "flex"
-      }
+      display: "flex"
     },
     searchToolsContainer: {
       minHeight: "48px",
-      [theme.breakpoints.up("lg")]: {
-        display: "flex"
-      }
+      display: "flex"
     },
     searchContainerTop: {
       display: "block",
@@ -139,9 +125,7 @@ const styles = theme => {
       padding: "3px",
       overflow: "visible",
       cursor: "pointer",
-      [theme.breakpoints.up("lg")]: {
-        display: "none"
-      }
+      display: "none"
     },
     backIcon: {
       [theme.breakpoints.up("md")]: {
@@ -166,7 +150,6 @@ class Search extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    var b = props.options.target === "header" ? 960 : 1280;
     this.localObserver = Observer();
     this.searchModel = new SearchModel(
       props.options,
@@ -175,7 +158,7 @@ class Search extends React.PureComponent {
       this.localObserver
     );
     this.state = {
-      visible: window.innerWidth > b,
+      visible: true,
       loading: false,
       activeSearchView: DEFAULT
     };
@@ -225,7 +208,7 @@ class Search extends React.PureComponent {
     window.addEventListener("resize", e => {
       if (!isMobile) {
         this.setState({
-          visible: window.innerWidth > b
+          visible: true
         });
       }
     });
