@@ -284,9 +284,11 @@ var KirSearchView = {
 
                   <div className="kir-filters">
                     Kön:
-                    <input type="checkbox" id="gender-m" defaultChecked={this.state.genderM} onChange={(e) => this.setState({ genderM: e.target.checked })} />
+                    <input type="checkbox" id="gender-m" checked={this.state.genderM}
+                      onChange={(e) => if(this.state.genderK){this.setState({ genderM: e.target.checked })}} />
                     <label htmlFor="gender-m">Man</label>
-                    <input type="checkbox" id="gender-k" defaultChecked={this.state.genderK} onChange={(e) => this.setState({ genderK: e.target.checked })} />
+                    <input type="checkbox" id="gender-k" checked={this.state.genderK}
+                      onChange={(e) => if(this.state.genderM){this.setState({ genderK: e.target.checked })}} />
                     <label htmlFor="gender-k">Kvinna</label>
                   </div>
 
