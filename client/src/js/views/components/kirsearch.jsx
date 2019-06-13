@@ -121,14 +121,14 @@ var KirSearchView = {
       var geomFilter = geomFilters.length > 1 ? ol.format.filter.or.apply(null, geomFilters) : geomFilters[0];
 
       var filters = [];
-      filters.push(geomFilter, new ol.format.filter.IsBetween("alder", this.state.minAge, this.state.maxAge));
+      filters.push(geomFilter, new ol.format.filter.IsBetween(this.props.model.get("residentListDataLayer").alderFieldName, this.state.minAge, this.state.maxAge));
 
       if (this.state.genderK && !this.state.genderM) {
-        filters.push(new ol.format.filter.EqualTo("koen", "K"));
+        filters.push(new ol.format.filter.EqualTo(this.props.model.get("residentListDataLayer").koenFieldName, "K"));
       }
 
       if (this.state.genderM && !this.state.genderK) {
-        filters.push(new ol.format.filter.EqualTo("koen", "M"));
+        filters.push(new ol.format.filter.EqualTo(this.props.model.get("residentListDataLayer").koenFieldName, "M"));
       }
 
 
@@ -237,20 +237,20 @@ var KirSearchView = {
 
     render: function () {
         var searchResults = this.state.searchResults.map((item) => {
-          var gender = item.get("koen").toLowerCase() === "m" ? "Man" : "Kvinna";
+          var gender = item.get(this.props.model.get("residentListDataLayer").koenFieldName).toLowerCase() === "m" ? "Man" : "Kvinna";
           var key = item.get(this.props.model.get("featureIDFieldName"));
           return <li id={"feat-"+this.state.selectedFeatureKey} key={key}
             onClick={() => { this.setState({ selectedFeatureKey: key}); this.selectTool.getFeatures().clear()}}>
-            {gender}, {item.get("alder")} år
+            {gender}, {item.get(this.props.model.get("residentListDataLayer").alderFieldName)} år
             <button className="btn btn-default btn-xs pull-right" onClick={() => this.deleteSearchResult(key)}>
               <i className="fa fa-trash"></i>
             </button>
             <i className="fa fa-info-circle pull-right"></i>
             <table className={this.state.selectedFeatureKey === key ? "" : "collapse"}>
               <tbody>
-                <tr><td><b>Namn:</b></td><td>{item.get("fonetnamn")}</td></tr>
-                <tr><td><b>Adress:</b></td><td>{item.get("adress")}</td></tr>
-                <tr><td><b>Personnummer:</b></td><td>{item.get(this.props.model.get("featureIDFieldName"))}</td></tr>
+                <tr><td><b>{this.props.model.get("residentListDataLayer").namnDisplayName}:</b></td><td>{item.get(this.props.model.get("residentListDataLayer").namnFieldName)}</td></tr>
+                <tr><td><b>{this.props.model.get("residentListDataLayer").adressDisplayName}:</b></td><td>{item.get(this.props.model.get("residentListDataLayer").adressFieldName)}</td></tr>
+                <tr><td><b>{this.props.model.get("residentListDataLayer").fodelsedatumDisplayName}:</b></td><td>{item.get(this.props.model.get("residentListDataLayer").fodelsedatumFieldName)}</td></tr>
               </tbody>
             </table>
           </li>
@@ -342,7 +342,7 @@ var KirSearchView = {
           </div>
 
           {/* Boendeförteckning */
-            this.props.model.get("residentList") &&
+            this.props.model.get("residentListDataLayer") &&
             <ResidentList model={this.props.model} residentData={this.state.searchResults}></ResidentList>
           }
 
