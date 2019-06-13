@@ -6,7 +6,7 @@ import ExpansionPanel from "@material-ui/core/ExpansionPanel";
 import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
+import KeyboardArrowDown from "@material-ui/icons/KeyboardArrowDown";
 import Button from "@material-ui/core/Button";
 import {
   extractPropertiesFromJson,
@@ -22,7 +22,7 @@ const styles = theme => ({
     boxShadow:
       "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
     borderRadius: "2px",
-    background: "white",
+    background: "#f0efef",
     margin: "0px"
   },
   resultGroup: {
@@ -56,8 +56,16 @@ const styles = theme => ({
     background: "#efefef",
     borderTop: "1px solid #ccc"
   },
-  active: {
-    background: "blue"
+  activeExpansionPanelSummary: {
+    background: "#e1e1e1",
+    fontWeight: "bold"
+  },
+  activeExpansionPanelDetails: {
+    background: "#e1e1e1"
+  },
+
+  expandButton: {
+    color: "grey"
   },
   content: {
     "&$expanded": {
@@ -174,7 +182,7 @@ class SearchResultGroup extends Component {
           this.handleOnFeatureClick(feature);
         }}
         expanded={this.state.expanded === i}
-        className={classNames(classes.item, active ? classes.active : null)}
+        className={classes.item}
       >
         <ExpansionPanelSummary
           classes={{
@@ -182,11 +190,13 @@ class SearchResultGroup extends Component {
             expanded: classes.expanded,
             content: classes.content
           }}
-          className={classes.itemRoot}
+          className={active ? classes.activeExpansionPanelSummary : null}
           expandIcon={
             <Button className={classes.button}>
-              <MoreHorizIcon
-                onClick={() => {
+              <KeyboardArrowDown
+                className={active ? classes.active : classes.expandButton}
+                onClick={e => {
+                  e.stopPropagation();
                   if (this.state.expanded === i) {
                     this.setState({ expanded: -1 });
                   } else {
@@ -211,7 +221,9 @@ class SearchResultGroup extends Component {
             </div>
           </div>
         </ExpansionPanelSummary>
-        <ExpansionPanelDetails>
+        <ExpansionPanelDetails
+          className={active ? classes.activeExpansionPanelDetails : null}
+        >
           <div
             dangerouslySetInnerHTML={this.getHtmlItemInfoBox(feature, infoBox)}
           />
