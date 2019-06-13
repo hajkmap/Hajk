@@ -40,12 +40,15 @@ var EdpPropertyLink = {
        return;
     }
 
-    var properties = [];
+    var properties = [],
+        fnr = this.props.model.get("edp").fnrFieldName,
+        fastbet = this.props.model.get("edp").fastbetFieldName;
+
     hits.forEach(function(l) {
       l.hits.forEach(function(h) {
-        properties.push({ "Fnr": h.get("fnr") });
-      });
-    });
+        properties.push({ "Fnr": h.get(fnr), "Fastbet": h.get(fastbet) });
+      }.bind(this));
+    }.bind(this));
 
     this.setState({ sendingRequest: true, requestReady: false, errorMessage: null, propertiesCount: properties.length });
     $.ajax({

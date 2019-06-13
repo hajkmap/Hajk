@@ -673,7 +673,31 @@ class ToolOptions extends Component {
                   <div className="col-md-8">
                     <input type='text' value={this.state.edp.url}
                       onChange={(e) => this.setState({
-                        residentList: Object.assign(this.state.edp, { url: e.target.value })}
+                        edp: Object.assign(this.state.edp, { url: e.target.value })}
+                      )} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-4">
+                    <label>fnrFieldName</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input type='text' value={this.state.edp.fnrFieldName}
+                      onChange={(e) => this.setState({
+                        edp: Object.assign(this.state.edp, { fnrFieldName: e.target.value })}
+                      )} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-4">
+                    <label>fastbetFieldName</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input type='text' value={this.state.edp.fastbetFieldName}
+                      onChange={(e) => this.setState({
+                        edp: Object.assign(this.state.edp, { fastbetFieldName: e.target.value })}
                       )} />
                   </div>
                 </div>
