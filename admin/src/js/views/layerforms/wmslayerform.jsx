@@ -500,7 +500,7 @@ class WMSLayerForm extends Component {
         <div>
           <label>Min resolution</label>
           <input
-            type='number'
+            type='number' step="any"
             ref='input_minResolution'
             value={this.state.minResolution}
             className={this.getValidationClass('minResolution')}
@@ -514,7 +514,7 @@ class WMSLayerForm extends Component {
         <div>
           <label>Max resolution</label>
           <input
-            type='number'
+            type='number' step="any"
             ref='input_maxResolution'
             value={this.state.maxResolution}
             className={this.getValidationClass('maxResolution')}
