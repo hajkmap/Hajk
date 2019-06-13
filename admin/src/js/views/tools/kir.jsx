@@ -41,8 +41,8 @@ var defaultState = {
     markerImg: 'http://localhost/hajk/assets/icons/marker.png',
     infoKnappLogo: '/assets/icons/hjalpknapp_FIR.png',
     instructionSokning: '',
-    instructionHittaGrannar: '',
-    instructionSkapaFastighetsforteckning: '',
+    instructionResidentList: "",
+    featureIDFieldName: "",
     anchorX: 16,
     anchorY: 32,
     imgSizeX: 32,
@@ -52,8 +52,6 @@ var defaultState = {
     searchableLayers: {},
     tree: '',
     layers: [],
-    realEstateLayer: {},
-    realEstateWMSLayer: {},
     residentList: {},
     residentListDataLayer: {},
     colorResult: 'rgba(255,255,0,0.3)',
@@ -69,7 +67,6 @@ class ToolOptions extends Component {
         super();
         this.state = defaultState;
         this.type = 'kir';
-
         this.handleAddSearchable = this.handleAddSearchable.bind(this);
         this.loadLayers = this.loadLayers.bind(this);
     }
@@ -88,12 +85,15 @@ class ToolOptions extends Component {
                 instructionSokning: tool.options.instructionSokning,
                 instructionHittaGrannar: tool.options.instructionHittaGrannar,
                 instructionSkapaFastighetsforteckning: tool.options.instructionSkapaFastighetsforteckning,
+                instructionEDPVision: tool.options.instructionEDPVision,
+                instructionResidentList: tool.options.instructionResidentList,
                 filterVisible: tool.options.filterVisible,
                 firSelectionTools: tool.options.firSelectionTools,
                 displayPopup: tool.options.displayPopup,
                 maxZoom: tool.options.maxZoom,
                 excelExportUrl: tool.options.excelExportUrl,
                 kmlImportUrl:tool.options.kmlImportUrl,
+                featureIDFieldName: tool.options.featureIDFieldName,
                 markerImg: tool.options.markerImg,
                 infoKnappLogo: tool.options.infoKnappLogo,
                 anchorX: tool.options.anchor[0] || this.state.anchorX,
@@ -157,9 +157,9 @@ class ToolOptions extends Component {
             value = !isNaN(Number(value)) ? Number(value) : value;
         }
 
-        if (name == 'instruction' || name == 'instructionSokning' || name == 'instructionHittaGrannar' ||
-            name == 'instructionSkapaFastighetsforteckning' || name == 'realEstateLayer_instructionVidSokresult') {
-            value = btoa(value);
+        if (name == 'instruction' || name == 'instructionSokning' || name == 'instructionHittaGrannar' || name == 'instructionEDPVision' ||
+            name == 'instructionSkapaFastighetsforteckning' || name == 'realEstateLayer_instructionVidSokresult' || name == "instructionResidentList") {
+            value =  window.btoa(encodeURIComponent(value));
         }
 
         if(name.indexOf("_") !== -1){
@@ -185,7 +185,7 @@ class ToolOptions extends Component {
 
             console.log("searchable", this.state.searchableLayers);
             this.setState({
-                tree: <Tree type="kir" model={this} layers={this.state.searchableLayers} handleAddSearchable={this.handleAddSearchable} loadLayers={this.loadLayers} />
+                tree: <Tree type="fir" model={this} layers={this.state.searchableLayers} handleAddSearchable={this.handleAddSearchable} loadLayers={this.loadLayers} />
             });
         });
     }
@@ -231,8 +231,11 @@ class ToolOptions extends Component {
                 instructionSokning: this.state.instructionSokning,
                 instructionHittaGrannar: this.state.instructionHittaGrannar,
                 instructionSkapaFastighetsforteckning: this.state.instructionSkapaFastighetsforteckning,
+                instructionEDPVision: this.state.instructionEDPVision,
+                instructionResidentList: this.state.instructionResidentList,
                 filterVisible: this.state.filterVisible,
                 firSelectionTools: this.state.firSelectionTools,
+                featureIDFieldName: this.state.featureIDFieldName,
                 anchor: [this.state.anchorX, this.state.anchorY],
                 imgSize: [this.state.imgSizeX, this.state.imgSizeY],
                 popupOffsetY: this.state.popupOffsetY,
@@ -288,40 +291,12 @@ class ToolOptions extends Component {
         }
     }
 
-    handleAuthGrpsChange (event) {
-        const target = event.target;
-        const value = target.value;
-        let groups = [];
+    handleAuthGrpsChange (e) {
+        let groups = e.target.value !== "" ? e.target.value.split(',') : [];
 
-        try {
-            groups = value.split(',');
-        } catch (error) {
-            console.log(`Någonting gick fel: ${error}`);
-        }
-
-        this.setState({
-            visibleForGroups: value !== '' ? groups : []
-        });
+        this.setState({ visibleForGroups: groups });
     }
 
-    renderVisibleForGroups () {
-        if (this.props.parent.props.parent.state.authActive) {
-            return (
-                <div>
-                    <label htmlFor='visibleForGroups'>Tillträde</label>
-                    <input id='visibleForGroups' value={this.state.visibleForGroups} type='text' name='visibleForGroups' onChange={(e) => { this.handleAuthGrpsChange(e); }} />
-                </div>
-            );
-        } else {
-            return null;
-        }
-    }
-    /**
-     * anropas från tree.jsx som eventhandler. Hantering för checkboxar och
-     * inmatning av AD-grupper för wfs:er
-     * @param {*} e
-     * @param {*} layer
-     */
     handleAddSearchable (e, layer) {
         if (e.target.type.toLowerCase() === 'checkbox') {
             if (e.target.checked) {
@@ -395,6 +370,14 @@ class ToolOptions extends Component {
         this.state.colorHittaGrannarBufferStroke = color.hex;
     }
 
+    handleResidentListVisibleForGroupsChange (e) {
+      let groups = e.target.value !== "" ? e.target.value.split(',') : [];
+
+      this.setState({
+        residentList: Object.assign(this.state.residentList, { visibleForGroups: groups })
+      });
+    }
+
     render () {
         return (
             <div>
@@ -410,18 +393,8 @@ class ToolOptions extends Component {
                       onChange={this.handleInputChange.bind(this)} checked={this.state.displayPopup} />
                     <label htmlFor='displayPopup'>Visa popup</label>
                   </div>
-                  <div className="col-md-6">
-                    <input id='filterVisible' name='filterVisible' type='checkbox'
-                      onChange={this.handleInputChange.bind(this)} checked={this.state.filterVisible} />
-                    <label htmlFor='filterVisible'>Sök i synliga lager(måste vara false för Varbergsversion)</label>
-                  </div>
                 </div>
                 <div className="row">
-                  <div className="col-md-4">
-                    <input id='firSelectionTools' name='firSelectionTools' type='checkbox'
-                      onChange={this.handleInputChange.bind(this)} checked={this.state.firSelectionTools} />
-                    <label htmlFor='firSelectionTools'>firSelectionTools *måste vara true</label>
-                  </div>
                   <div className="col-md-4">
                     <input id='Base64-active' name='base64Encode' type='checkbox'
                       onChange={this.handleInputChange.bind(this)} checked={this.state.base64Encode} />
@@ -439,11 +412,11 @@ class ToolOptions extends Component {
                 </div>
                 <div className="row">
                   <div className="col-md-4">
-                    <label htmlFor='instruction'>Instruktion för FIR-verktyg</label>
+                    <label htmlFor='instruction'>Instruktion för KIR-verktyg</label>
                   </div>
                   <div className="col-md-8">
                     <textarea id='instruction' name='instruction' onChange={this.handleInputChange.bind(this)}
-                      value={this.state.instruction ? atob(this.state.instruction) : ''} />
+                      value={this.state.instruction ? decodeURIComponent(atob(this.state.instruction)) : ''} />
                   </div>
                 </div>
                 <div className="row">
@@ -452,29 +425,29 @@ class ToolOptions extends Component {
                   </div>
                   <div className="col-md-8">
                     <textarea id='instructionSokning' name='instructionSokning' onChange={this.handleInputChange.bind(this)}
-                      value={this.state.instructionSokning ? atob(this.state.instructionSokning) : ''} />
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-md-4">
-                    <label htmlFor='instructionHittaGrannar'>Instruktion för "Hitta Grannar"</label>
-                  </div>
-                  <div className="col-md-8">
-                    <textarea id='instructionHittaGrannar' name='instructionHittaGrannar' onChange={this.handleInputChange.bind(this)}
-                      value={this.state.instructionHittaGrannar ? atob(this.state.instructionHittaGrannar) : ''} />
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-md-4">
-                    <label htmlFor='instructionSkapaFastighetsforteckning'>Instruktion för "skapa Fastighetsförteckning"</label>
-                  </div>
-                  <div className="col-md-8">
-                  <textarea id='instructionSkapaFastighetsforteckning' name='instructionSkapaFastighetsforteckning'
-                      onChange={this.handleInputChange.bind(this)} value={this.state.instructionSkapaFastighetsforteckning ? atob(this.state.instructionSkapaFastighetsforteckning) : ''} />
+                      value={this.state.instructionSokning ? decodeURIComponent(atob(this.state.instructionSokning)) : ''} />
                   </div>
                 </div>
 
-                {this.renderVisibleForGroups()}
+                <div className="row">
+                  <div className="col-md-4">
+                    <label>Instruktion för "Boendeförteckning"</label>
+                  </div>
+                  <div className="col-md-8">
+                    <textarea id='instructionResidentList' name='instructionResidentList' onChange={this.handleInputChange.bind(this)}
+                      value={this.state.instructionResidentList ? decodeURIComponent(atob(this.state.instructionResidentList)) : ''} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='visibleForGroups'>Tillträde</label>
+                  </div>
+                  <div className="col-md-8">
+                  <input id='visibleForGroups' value={this.state.visibleForGroups} type='text'
+                    name='visibleForGroups' onChange={ this.handleAuthGrpsChange.bind(this) } />
+                  </div>
+                </div>
 
                 <div className="row">
                   <div className="col-md-4">
@@ -561,85 +534,23 @@ class ToolOptions extends Component {
                 </div>
                 <div className="row">
                   <div className="col-md-4">
-                    <label htmlFor='realEstateLayer_id'>realEstateLayers id</label>
+                    <label htmlFor='featureIDFieldName'>Feature-ID field name</label>
                   </div>
                   <div className="col-md-8">
-                    <input value={this.state.realEstateLayer.id} type='text' name='realEstateLayer_id'
-                      onChange={this.handleInputChange.bind(this)} />
+                    <input value={this.state.featureIDFieldName} type='text' name='featureIDFieldName' onChange={this.handleInputChange.bind(this)} />
                   </div>
                 </div>
-                <div className="row">
-                  <div className="col-md-4">
-                    <label htmlFor='realEstateLayer_omradeField'>realEstateLayers omradeField</label>
-                  </div>
-                  <div className="col-md-8">
-                    <input value={this.state.realEstateLayer.omradeField} type='text' name='realEstateLayer_omradeField'
-                      onChange={this.handleInputChange.bind(this)} />
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-md-4">
-                    <label htmlFor='realEstateLayer_fnrField'>realEstateLayers fnrField</label>
-                  </div>
-                  <div className="col-md-8">
-                    <input value={this.state.realEstateLayer.fnrField} type='text' name='realEstateLayer_fnrField'
-                      onChange={this.handleInputChange.bind(this)} />
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-md-4">
-                    <label htmlFor='realEstateLayer_labelField'>realEstateLayers labelField</label>
-                  </div>
-                  <div className="col-md-8">
-                    <input value={this.state.realEstateLayer.labelField} type='text' name='realEstateLayer_labelField' onChange={this.handleInputChange.bind(this)} />
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-md-4">
-                    <label htmlFor='realEstateLayer_maxFeatures'>realEstateLayers maxFeatures</label>
-                  </div>
-                  <div className="col-md-8">
-                    <input value={this.state.realEstateLayer.maxFeatures} type='text' name='realEstateLayer_maxFeatures'
-                      onChange={this.handleInputChange.bind(this)} />
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-md-4">
-                    <label htmlFor='realEstateLayer_instructionVidSokresult'>Instruktion vid sökresultat</label>
-                  </div>
-                  <div className="col-md-8">
-                  <textarea id='realEstateLayer_instructionVidSokresult' name='realEstateLayer_instructionVidSokresult'
-                      onChange={this.handleInputChange.bind(this)} value={this.state.realEstateLayer.instructionVidSokresult ? atob(this.state.realEstateLayer.instructionVidSokresult) : ''} />
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-md-4">
-                    <label htmlFor='realEstateWMSLayer_id'>realEstateWMSLayers id</label>
-                  </div>
-                  <div className="col-md-8">
-                    <input value={this.state.realEstateWMSLayer.id} type='text' name='realEstateWMSLayer_id' onChange={this.handleInputChange.bind(this)} />
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-md-4">
-                    <label htmlFor='realEstateWMSLayer_fnrField'>realEstateWMSLayers fnrField</label>
-                  </div>
-                  <div className="col-md-8">
-                    <input value={this.state.realEstateWMSLayer.fnrField} type='text' name='realEstateWMSLayer_fnrField'
-                      onChange={this.handleInputChange.bind(this)} />
-                  </div>
-                </div>
+
 
                 <h2>Boendeförteckning</h2>
                 <div className="row">
                   <div className="col-md-4">
-                    <label>Instruktionstext</label>
+                    <label htmlFor='residentListVisibleForGroups'>Tillträde</label>
                   </div>
                   <div className="col-md-8">
-                    <textarea type='text' value={this.state.residentList.instruction}
-                      onChange={(e) => this.setState({
-                        residentList: Object.assign(this.state.residentList, { instruction: e.target.value })}
-                      )} />
+                  <input type='text' id='residentListVisibleForGroups'
+                    value={this.state.residentList.visibleForGroups ? this.state.residentList.visibleForGroups.toString() : ""}
+                    onChange={ this.handleResidentListVisibleForGroupsChange.bind(this) } />
                   </div>
                 </div>
 
@@ -657,7 +568,7 @@ class ToolOptions extends Component {
 
                 <div className="row">
                   <div className="col-md-4">
-                    <label>Minsta ålder</label>
+                    <label>Lägsta ålder</label>
                   </div>
                   <div className="col-md-8">
                     <input type='text' value={this.state.residentList.minAge}

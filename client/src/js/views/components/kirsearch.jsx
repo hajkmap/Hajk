@@ -50,43 +50,42 @@ var KirSearchView = {
         });
     },
 
+    resultsStyle: function(feature, resolution) {
+      var selected = feature.get(this.props.model.get("featureIDFieldName")) === this.state.selectedFeatureKey,
+        fill = selected ? this.props.model.get("colorHighlight") : this.props.model.get("colorResult"),
+        stroke =  selected ? this.props.model.get("colorHighlightStroke") : this.props.model.get("colorResultStroke");
+
+      return new ol.style.Style({
+        image: new ol.style.Circle({
+          fill: new ol.style.Fill({ color: fill }),
+          radius: selected? 10 : 5,
+          stroke: new ol.style.Stroke({ color: stroke, width: 2 })
+        })
+      })
+    },
+
     componentDidUpdate: function(prevProps, prevState, snapshot) {
       this.props.model.get("firSelectionModel").get("drawLayer").setVisible(this.state.searchAreaVisible);
       this.props.model.firBufferFeatureLayer.setVisible(this.state.searchAreaVisible);
       this.props.model.get("firSelectionModel").get("firBufferLayer").setVisible(this.state.searchAreaVisible);
 
       if (!this.searchResultsLayer) {
+
         this.searchResultsSource = new ol.source.Vector();
         this.searchResultsLayer = new ol.layer.Vector({
           source: this.searchResultsSource,
-          style: function(feature, resolution) {
-            var selected = feature.get("personnr") === this.state.selectedFeatureKey;
-            return new ol.style.Style({
-              image: new ol.style.Circle({
-                fill: new ol.style.Fill({ color: selected ? "red" : "black"}),
-                radius: selected? 10 : 5, stroke: new ol.style.Stroke({ color: "white", width: 2 })
-              })
-            })
-          }.bind(this)
+          style: this.resultsStyle.bind(this)
         });
         this.props.model.get("map").addLayer(this.searchResultsLayer);
 
         this.selectTool = new ol.interaction.Select({
           layers: [this.searchResultsLayer ],
-          style: function(feature, resolution) {
-            var selected = feature.get("personnr") === this.state.selectedFeatureKey;
-            return new ol.style.Style({
-              image: new ol.style.Circle({
-                fill: new ol.style.Fill({ color: selected ? "red" : "black"}),
-                radius: selected? 10 : 5, stroke: new ol.style.Stroke({ color: "white", width: 2 })
-              })
-            })
-          }.bind(this)
+          style: this.resultsStyle.bind(this)
         });
         this.selectTool.on("select", function(e) {
           var feature = e.target.getFeatures().getArray()[0];
           if (feature) {
-            this.setState({ selectedFeatureKey: feature.get("personnr") });
+            this.setState({ selectedFeatureKey: feature.get(this.props.model.get("featureIDFieldName")) });
             document.getElementById("feat-" + this.state.selectedFeatureKey).scrollIntoView();
           }
         }.bind(this));
@@ -185,7 +184,7 @@ var KirSearchView = {
 
     deleteSearchResult(key) {
       var searchResults = this.state.searchResults.filter((o) => {
-        return o.get("personnr") !== key;
+        return o.get(this.props.model.get("featureIDFieldName")) !== key;
       });
 
       this.setState({searchResults: searchResults});
@@ -239,7 +238,7 @@ var KirSearchView = {
     render: function () {
         var searchResults = this.state.searchResults.map((item) => {
           var gender = item.get("koen").toLowerCase() === "m" ? "Man" : "Kvinna";
-          var key = item.get("personnr");
+          var key = item.get(this.props.model.get("featureIDFieldName"));
           return <li id={"feat-"+this.state.selectedFeatureKey} key={key}
             onClick={() => { this.setState({ selectedFeatureKey: key}); this.selectTool.getFeatures().clear()}}>
             {gender}, {item.get("alder")} år
@@ -251,7 +250,7 @@ var KirSearchView = {
               <tbody>
                 <tr><td><b>Namn:</b></td><td>{item.get("fonetnamn")}</td></tr>
                 <tr><td><b>Adress:</b></td><td>{item.get("adress")}</td></tr>
-                <tr><td><b>Personnummer:</b></td><td>{item.get("personnr")}</td></tr>
+                <tr><td><b>Personnummer:</b></td><td>{item.get(this.props.model.get("featureIDFieldName"))}</td></tr>
               </tbody>
             </table>
           </li>
