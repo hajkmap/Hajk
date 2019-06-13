@@ -27,17 +27,26 @@ function handleClick() {
 }*/
 
 class SearchWithSelectionInput extends React.PureComponent {
+  state = {
+    selectionDone: false
+  };
   componentDidMount() {
     const { model, onSearchDone, localObserver } = this.props;
     localObserver.publish("toolchanged");
-    model.selectionSearch(onSearchDone);
+    model.selectionSearch(() => {
+      this.setState({ selectionDone: true });
+    }, onSearchDone);
   }
   render() {
     const { classes } = this.props;
     return (
       <Chip
         icon={<AddCircleOutline />}
-        label="Markera objekt i kartan"
+        label={
+          this.state.selectionDone
+            ? "Markerat område : 1"
+            : "Markera objekt i kartan"
+        } //Number of objects should be dynamic when implementing multidraw
         //onClick={handleClick}
         className={classes.chip}
       />

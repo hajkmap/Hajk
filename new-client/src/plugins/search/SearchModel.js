@@ -112,7 +112,7 @@ class SearchModel {
   };
 
   //Only handles single select and is restricted to polygon and multipolygon atm
-  onSelectFeatures = (evt, callback) => {
+  onSelectFeatures = (evt, selectionDone, callback) => {
     handleClick(evt, evt.map, response => {
       var geometryType = response.features[0].getGeometry().getType();
       if (
@@ -121,6 +121,7 @@ class SearchModel {
       ) {
         this.drawLayer.getSource().addFeatures(response.features);
         if (response.features.length > 0) {
+          selectionDone();
           this.searchWithinArea(
             response.features[0],
             false,
@@ -138,11 +139,15 @@ class SearchModel {
     });
   };
 
-  toggleSelectGeometriesForSpatialSearch = (active, callback) => {
+  toggleSelectGeometriesForSpatialSearch = (
+    active,
+    selectionDone,
+    callback
+  ) => {
     if (active) {
       this.olMap.clicklock = true;
       this.olMap.once("singleclick", e => {
-        this.onSelectFeatures(e, callback);
+        this.onSelectFeatures(e, selectionDone, callback);
       });
     } else {
       this.olMap.clicklock = false;
@@ -321,12 +326,17 @@ class SearchModel {
     this.clear();
   };
 
-  selectionSearch = searchDone => {
-    this.toggleSelectGeometriesForSpatialSearch(true, searchDone);
+  selectionSearch = (selectionDone, searchDone) => {
+    this.toggleSelectGeometriesForSpatialSearch(
+      true,
+      selectionDone,
+      searchDone
+    );
   };
 
-  withinSearch = searchDone => {
+  withinSearch = (radiusDrawn, searchDone) => {
     this.toggleDraw(true, "Circle", true, e => {
+      radiusDrawn();
       this.searchWithinArea(e.feature, true, featureCollections => {
         let layerIds = featureCollections.map(featureCollection => {
           return featureCollection.source.layerId;
@@ -338,8 +348,9 @@ class SearchModel {
     });
   };
 
-  polygonSearch = searchDone => {
+  polygonSearch = (polygonDrawn, searchDone) => {
     this.toggleDraw(true, "Polygon", false, e => {
+      polygonDrawn();
       this.searchWithinArea(e.feature, false, featureCollections => {
         searchDone(featureCollections);
       });
@@ -450,7 +461,6 @@ class SearchModel {
   }*/
 
   highlightImpact(feature) {
-    console.log(feature, "feature");
     this.clear();
     this.vectorLayer.getSource().addFeature(feature);
     this.olMap.getView().fit(feature.getGeometry(), this.olMap.getSize());

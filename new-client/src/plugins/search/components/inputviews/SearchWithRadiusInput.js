@@ -29,14 +29,23 @@ function handleClick() {
 }*/
 
 class SearchWithRadiusInput extends React.PureComponent {
+  state = {
+    radiusDrawn: false
+  };
+
   componentDidMount() {
     const { model, onSearchWithin, localObserver } = this.props;
     localObserver.publish("toolchanged");
-    model.withinSearch(layerIds => {
-      if (layerIds.length > 0) {
-        onSearchWithin(layerIds);
+    model.withinSearch(
+      () => {
+        this.setState({ radiusDrawn: true });
+      },
+      layerIds => {
+        if (layerIds.length > 0) {
+          onSearchWithin(layerIds);
+        }
       }
-    });
+    );
   }
   render() {
     const { classes } = this.props;
@@ -44,7 +53,9 @@ class SearchWithRadiusInput extends React.PureComponent {
       <div>
         <Chip
           icon={<RadioButtonUnchecked />}
-          label="Sök med radie i kartan"
+          label={
+            this.state.radiusDrawn ? "Ritad radie: 1" : "Sök med radie i kartan"
+          } //Number of objects should be dynamic when implementing multidraw
           //onClick={handleClick}
           className={classes.chip}
         />

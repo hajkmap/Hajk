@@ -27,19 +27,31 @@ function handleClick() {
 }*/
 
 class SearchWithPolygonInput extends React.PureComponent {
+  state = {
+    polygonDrawn: false
+  };
   componentDidMount() {
     const { model, onSearchDone, localObserver } = this.props;
     localObserver.publish("toolchanged");
-    model.polygonSearch(featureCollections => {
-      onSearchDone(featureCollections);
-    });
+    console.log("HERE");
+
+    model.polygonSearch(
+      () => {
+        this.setState({ polygonDrawn: true });
+      },
+      featureCollections => {
+        onSearchDone(featureCollections);
+      }
+    );
   }
   render() {
     const { classes } = this.props;
     return (
       <Chip
         icon={<Edit />}
-        label="Rita objekt i kartan"
+        label={
+          this.state.polygonDrawn ? "Ritat område: 1" : "Rita objekt i kartan" //Number of objects should be dynamic when implementing multidraw
+        }
         //onClick={handleClick}
         className={classes.chip}
       />
