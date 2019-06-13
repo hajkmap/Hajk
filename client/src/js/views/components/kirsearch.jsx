@@ -19,6 +19,7 @@ var KirSearchView = {
         genderK: true,
         genderM: true,
         searchInProgress: false,
+        selectedFeatureKey: null,
         searchResults: [],
         expandedResults: []
       };
@@ -56,8 +57,40 @@ var KirSearchView = {
 
       if (!this.searchResultsLayer) {
         this.searchResultsSource = new ol.source.Vector();
-        this.searchResultsLayer = new ol.layer.Vector({ source: this.searchResultsSource });
+        this.searchResultsLayer = new ol.layer.Vector({
+          source: this.searchResultsSource,
+          style: function(feature, resolution) {
+            var selected = feature.get("personnr") === this.state.selectedFeatureKey;
+            return new ol.style.Style({
+              image: new ol.style.Circle({
+                fill: new ol.style.Fill({ color: selected ? "red" : "black"}),
+                radius: selected? 10 : 5, stroke: new ol.style.Stroke({ color: "white", width: 2 })
+              })
+            })
+          }.bind(this)
+        });
         this.props.model.get("map").addLayer(this.searchResultsLayer);
+
+        this.selectTool = new ol.interaction.Select({
+          layers: [this.searchResultsLayer ],
+          style: function(feature, resolution) {
+            var selected = feature.get("personnr") === this.state.selectedFeatureKey;
+            return new ol.style.Style({
+              image: new ol.style.Circle({
+                fill: new ol.style.Fill({ color: selected ? "red" : "black"}),
+                radius: selected? 10 : 5, stroke: new ol.style.Stroke({ color: "white", width: 2 })
+              })
+            })
+          }.bind(this)
+        });
+        this.selectTool.on("select", function(e) {
+          var feature = e.target.getFeatures().getArray()[0];
+          if (feature) {
+            this.setState({ selectedFeatureKey: feature.get("personnr") });
+            document.getElementById("feat-" + this.state.selectedFeatureKey).scrollIntoView();
+          }
+        }.bind(this));
+        this.props.model.get("map").addInteraction(this.selectTool);
       }
 
       this.searchResultsSource.clear();
@@ -158,17 +191,6 @@ var KirSearchView = {
       this.setState({searchResults: searchResults});
     },
 
-    expandSearchResult(key) {
-      var expandedResults = this.state.expandedResults;
-      if (expandedResults.includes(key)) {
-        expandedResults.splice(expandedResults.indexOf(key), 1);
-      } else {
-        expandedResults.push(key);
-      }
-
-      this.setState({expandedResults: expandedResults});
-    },
-
     renderImportKml: function () {
       function upload () {
           this.refs.firUploadIframe.addEventListener('load', () => {
@@ -181,7 +203,6 @@ var KirSearchView = {
                   $('#slackaBufferSokomrade').click();
               }
           });
-
       }
 
       var url = this.props.model.get('kmlImportUrl');
@@ -219,13 +240,14 @@ var KirSearchView = {
         var searchResults = this.state.searchResults.map((item) => {
           var gender = item.get("koen").toLowerCase() === "m" ? "Man" : "Kvinna";
           var key = item.get("personnr");
-          return <li key={key} onClick={() => this.expandSearchResult(key)}>
+          return <li id={"feat-"+this.state.selectedFeatureKey} key={key}
+            onClick={() => { this.setState({ selectedFeatureKey: key}); this.selectTool.getFeatures().clear()}}>
             {gender}, {item.get("alder")} år
             <button className="btn btn-default btn-xs pull-right" onClick={() => this.deleteSearchResult(key)}>
               <i className="fa fa-trash"></i>
             </button>
             <i className="fa fa-info-circle pull-right"></i>
-            <table className={this.state.expandedResults.includes(key) ? "" : "collapse"}>
+            <table className={this.state.selectedFeatureKey === key ? "" : "collapse"}>
               <tbody>
                 <tr><td><b>Namn:</b></td><td>{item.get("fonetnamn")}</td></tr>
                 <tr><td><b>Adress:</b></td><td>{item.get("adress")}</td></tr>
