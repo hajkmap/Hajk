@@ -200,6 +200,10 @@ class FeatureInfo extends React.PureComponent {
       ) {
         markdown = feature.layer.layersInfo[layer].infobox;
       }
+      //Features coming from searchresult has infobox set on Feature instead of layer due to different features sharing same vectorlayer
+      if (feature.infobox) {
+        markdown = feature.infobox;
+      }
       var properties = feature.getProperties();
       properties = extractPropertiesFromJson(properties);
 

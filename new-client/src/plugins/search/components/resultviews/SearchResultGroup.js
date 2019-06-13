@@ -125,8 +125,12 @@ class SearchResultGroup extends Component {
 
   zoomTo = feature => {
     var features = this.props.highlightedFeatures.map(feature => {
-      return new GeoJSON().readFeatures(feature)[0];
+      var geoJsonFeature = new GeoJSON().readFeatures(feature)[0];
+      geoJsonFeature.infobox = feature.infobox;
+      return geoJsonFeature;
     });
+
+    console.log(features, "feature");
 
     this.props.model.highlightFeatures(features);
     if (window.innerWidth >= 600) {
@@ -135,6 +139,7 @@ class SearchResultGroup extends Component {
   };
 
   handleOnFeatureClick = feature => {
+    console.log(feature, "feature");
     var highlightedFeatures = this.props.highlightedFeatures;
 
     var indexOfHighlightedFeature = highlightedFeatures.indexOf(feature);
@@ -144,6 +149,7 @@ class SearchResultGroup extends Component {
       newHighlightedFeaturesArray.splice(indexOfHighlightedFeature, 1);
       this.props.setHighlightedFeatures(newHighlightedFeaturesArray, () => {
         var featureAsGeoJson = new GeoJSON().readFeatures(feature)[0];
+        console.log(featureAsGeoJson, "featureAsGeo");
         this.props.model.clearFeatureHighlight(featureAsGeoJson);
         this.zoomTo();
       });
@@ -166,7 +172,7 @@ class SearchResultGroup extends Component {
     return mergeFeaturePropsWithMarkdown(infoBox, feature.properties);
   };
 
-  renderItem(feature, displayField, infoBox, i) {
+  renderItem(feature, displayField, i) {
     const { classes, target } = this.props;
     var active =
       this.props.highlightedFeatures
@@ -225,7 +231,10 @@ class SearchResultGroup extends Component {
           className={active ? classes.activeExpansionPanelDetails : null}
         >
           <div
-            dangerouslySetInnerHTML={this.getHtmlItemInfoBox(feature, infoBox)}
+            dangerouslySetInnerHTML={this.getHtmlItemInfoBox(
+              feature,
+              feature.infobox
+            )}
           />
         </ExpansionPanelDetails>
       </ExpansionPanel>
@@ -246,6 +255,16 @@ class SearchResultGroup extends Component {
     if (selfExpanded) {
       expanded = true;
     }
+
+    var items = featureType.features.map((feature, i) => {
+      //Putting infobox on feature instead of layers due to searchresult sharing same vectorlayer
+      featureType.features[i].infobox = featureType.source.infobox;
+      return this.renderItem(
+        featureType.features[i],
+        featureType.source.displayFields[0],
+        i
+      );
+    });
 
     return (
       <div ref="panelElement">
@@ -278,16 +297,7 @@ class SearchResultGroup extends Component {
           </ExpansionPanelSummary>
           <ExpansionPanelDetails className={classes.details}>
             <div className={classes.resultGroup}>
-              <div className={classes.resultGroup}>
-                {featureType.features.map((feature, i) =>
-                  this.renderItem(
-                    featureType.features[i],
-                    featureType.source.displayFields[0],
-                    featureType.source.infobox,
-                    i
-                  )
-                )}
-              </div>
+              <div className={classes.resultGroup}>{items}</div>
             </div>
           </ExpansionPanelDetails>
         </ExpansionPanel>

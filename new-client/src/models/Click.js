@@ -168,7 +168,10 @@ export function handleClick(evt, map, callback) {
       map.forEachFeatureAtPixel(
         evt.pixel,
         (feature, layer) => {
-          if (layer.get("queryable") === true && layer.getProperties().name) {
+          if (
+            layer.get("queryable") === true ||
+            layer.get("type") === "searchResultLayer"
+          ) {
             feature.layer = layer;
             features.push(feature);
           }

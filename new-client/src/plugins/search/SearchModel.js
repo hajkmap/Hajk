@@ -380,6 +380,7 @@ class SearchModel {
     this.options = settings;
     this.olMap = map;
     this.wfsParser = new WFS();
+
     this.vectorLayer = new VectorLayer({
       source: new VectorSource({}),
       style: () => {
@@ -393,7 +394,7 @@ class SearchModel {
         return style;
       }
     });
-
+    this.vectorLayer.set("type", "searchResultLayer");
     this.drawSource = new VectorSource({ wrapX: false });
     this.drawLayer = new VectorLayer({
       source: this.drawSource,
