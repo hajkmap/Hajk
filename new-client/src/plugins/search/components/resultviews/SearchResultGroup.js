@@ -13,8 +13,6 @@ import {
   mergeFeaturePropsWithMarkdown
 } from "../../../../utils/FeaturePropsParsing";
 
-import classNames from "classnames";
-
 const styles = theme => ({
   item: {
     userSelect: "none",
