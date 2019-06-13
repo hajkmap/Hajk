@@ -33,8 +33,6 @@ var EdpPropertyLink = {
     };
   },
 
-
-
   sendProperties: function() {
     var hits = this.props.model.get("items");
     if (!hits || hits.length === 0) {
@@ -51,7 +49,7 @@ var EdpPropertyLink = {
 
     this.setState({ sendingRequest: true, requestReady: false, errorMessage: null, propertiesCount: properties.length });
     $.ajax({
-      url: "/mapservice/edp/SendRealEstateIdentifiers",
+      url: this.props.model.get("edp").url,
       method: 'POST',
       data: { json: JSON.stringify(properties) },
       success: function(response) {

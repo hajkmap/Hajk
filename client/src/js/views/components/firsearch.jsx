@@ -705,11 +705,14 @@ var FirSearchView = {
                     <PropertyList model={this.props.model}></PropertyList>
 
                     {/* Boendeförteckning */
-                      this.props.model.get("residentList") != null ?
-                      <ResidentList model={this.props.model}></ResidentList> : ""
+                      this.props.model.get("residentList") != null &&
+                      <ResidentList model={this.props.model}></ResidentList>
                     }
 
-                    <EdpPropertyLink model={this.props.model}></EdpPropertyLink>
+                    {/* Boendeförteckning */
+                      this.props.model.get("edp") != null &&
+                      <EdpPropertyLink model={this.props.model}></EdpPropertyLink>
+                    }
 
                     {results}
                 </div>

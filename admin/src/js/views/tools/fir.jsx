@@ -57,6 +57,7 @@ var defaultState = {
     realEstateLayer: {},
     realEstateWMSLayer: {},
     residentList: {},
+    edp: {},
     residentListDataLayer: {},
     colorResult: 'rgba(255,255,0,0.3)',
     colorResultStroke: '',
@@ -115,7 +116,8 @@ class ToolOptions extends Component {
                 colorHittaGrannarBuffer: tool.options.colorHittaGrannarBuffer,
                 colorHittaGrannarBufferStroke: tool.options.colorHittaGrannarBufferStroke,
                 residentList: tool.options.residentList,
-                residentListDataLayer: tool.options.residentListDataLayer
+                residentListDataLayer: tool.options.residentListDataLayer,
+                edp: tool.options.edp || {}
             }, () => { this.loadLayers(); });
         } else {
             this.setState({
@@ -252,7 +254,8 @@ class ToolOptions extends Component {
                 colorHittaGrannarBuffer: this.state.colorHittaGrannarBuffer ? this.state.colorHittaGrannarBuffer : 'rgba(50,200,200,0.4)',
                 colorHittaGrannarBufferStroke: this.state.colorHittaGrannarBufferStroke ? this.state.colorHittaGrannarBufferStroke : 'rgba(0,0,0,0.2)',
                 residentList: this.state.residentList,
-                residentListDataLayer: this.state.residentListDataLayer
+                residentListDataLayer: this.state.residentListDataLayer,
+                edp: this.state.edp
             }
         };
 
@@ -377,6 +380,14 @@ class ToolOptions extends Component {
 
       this.setState({
         residentList: Object.assign(this.state.residentList, { visibleForGroups: groups })
+      });
+    }
+
+    handleEdpVisibleForGroupsChange (e) {
+      let groups = e.target.value !== "" ? e.target.value.split(',') : [];
+
+      this.setState({
+        edp: Object.assign(this.state.edp, { visibleForGroups: groups })
       });
     }
 
@@ -640,6 +651,30 @@ class ToolOptions extends Component {
                   <div className="col-md-8">
                     <input value={this.state.realEstateWMSLayer.fnrField} type='text' name='realEstateWMSLayer_fnrField'
                       onChange={this.handleInputChange.bind(this)} />
+                  </div>
+                </div>
+
+                <h2>EDP</h2>
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='edpVisibleForGroups'>Tillträde</label>
+                  </div>
+                  <div className="col-md-8">
+                  <input type='text' id='edpVisibleForGroups'
+                    value={this.state.edp.visibleForGroups ? this.state.edp.visibleForGroups.toString() : ""}
+                    onChange={ this.handleEdpVisibleForGroupsChange.bind(this) } />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-4">
+                    <label>URL</label>
+                  </div>
+                  <div className="col-md-8">
+                    <input type='text' value={this.state.edp.url}
+                      onChange={(e) => this.setState({
+                        residentList: Object.assign(this.state.edp, { url: e.target.value })}
+                      )} />
                   </div>
                 </div>
 
