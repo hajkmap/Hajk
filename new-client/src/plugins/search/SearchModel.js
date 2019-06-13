@@ -444,16 +444,20 @@ class SearchModel {
       .getView()
       .fit(this.vectorLayer.getSource().getExtent(), this.olMap.getSize());
   }
-
+  /*
   highlightFeature(feature) {
     this.clearHighlight();
-  }
+  }*/
 
-  highlight(feature) {
+  highlightImpact(feature) {
+    console.log(feature, "feature");
     this.clear();
     this.vectorLayer.getSource().addFeature(feature);
     this.olMap.getView().fit(feature.getGeometry(), this.olMap.getSize());
-    this.searchWithinArea(feature, layerIds => {
+    this.searchWithinArea(feature, true, featureCollections => {
+      var layerIds = featureCollections.map(featureCollection => {
+        return featureCollection.source.layerId;
+      });
       this.layerList = layerIds.reduce(this.getLayerAsSource, []);
       this.layerList.forEach(layer => {
         layer.setVisible(true);

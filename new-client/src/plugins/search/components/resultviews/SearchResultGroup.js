@@ -112,9 +112,9 @@ class SearchResultGroup extends Component {
     expanded: false
   };
 
-  highlight = feature => e => {
+  highlightImpact = feature => e => {
     var olFeature = new GeoJSON().readFeatures(feature)[0];
-    this.props.model.highlight(olFeature);
+    this.props.model.highlightImpact(olFeature);
     if (window.innerWidth >= 1280) {
       this.props.parent.hide();
     }
@@ -123,18 +123,18 @@ class SearchResultGroup extends Component {
     this.props.model.app.globalObserver.publish("hideSearchPanel");
   };
 
-  zoomTo = feature => {
+  zoomTo = () => {
     var features = this.props.highlightedFeatures.map(feature => {
       var geoJsonFeature = new GeoJSON().readFeatures(feature)[0];
       geoJsonFeature.infobox = feature.infobox;
       return geoJsonFeature;
     });
 
-    console.log(features, "feature");
-
-    this.props.model.highlightFeatures(features);
-    if (window.innerWidth >= 600) {
-      //this.props.parent.hide();
+    if (features.length > 0) {
+      this.props.model.highlightFeatures(features);
+      if (window.innerWidth >= 600) {
+        //this.props.parent.hide();
+      }
     }
   };
 
@@ -219,7 +219,10 @@ class SearchResultGroup extends Component {
               {feature.properties[displayField]}
               {target === "center" && this.props.renderAffectButton ? (
                 <div>
-                  <Button color="primary" onClick={this.highlight(feature)}>
+                  <Button
+                    color="primary"
+                    onClick={this.highlightImpact(feature)}
+                  >
                     Visa påverkan
                   </Button>
                 </div>
@@ -257,7 +260,7 @@ class SearchResultGroup extends Component {
     }
 
     var items = featureType.features.map((feature, i) => {
-      //Putting infobox on feature instead of layers due to searchresult sharing same vectorlayer
+      //Putting infobox on feature instead of layer due to searchresult sharing same vectorlayer
       featureType.features[i].infobox = featureType.source.infobox;
       return this.renderItem(
         featureType.features[i],
