@@ -42,8 +42,8 @@ const defaultState = {
   url: '',
   queryable: true,
   opacity: 1.0,
-  minResolution: 0,
-  maxResolution: 100,
+  minResolution: 0.0,
+  maxResolution: 0.0,
   tiled: false,
   singleTile: false,
   imageFormat: '',
@@ -509,7 +509,7 @@ class WMSLayerForm extends Component {
               this.setState({minResolution: e.target.value});
               this.validateField('minResolution');
             }}
-          />
+          /> m/pixel (0 för att alltid synas)
         </div>
         <div>
           <label>Max resolution</label>
@@ -523,7 +523,7 @@ class WMSLayerForm extends Component {
               this.setState({maxResolution: e.target.value});
               this.validateField('maxResolution');
             }}
-          />
+          /> m/pixel (0 för att alltid synas)
         </div>
         <div>
           <label>Single tile</label>
