@@ -139,7 +139,6 @@ class SearchResultGroup extends Component {
   };
 
   handleOnFeatureClick = feature => {
-    console.log(feature, "feature");
     var highlightedFeatures = this.props.highlightedFeatures;
 
     var indexOfHighlightedFeature = highlightedFeatures.indexOf(feature);
@@ -149,7 +148,6 @@ class SearchResultGroup extends Component {
       newHighlightedFeaturesArray.splice(indexOfHighlightedFeature, 1);
       this.props.setHighlightedFeatures(newHighlightedFeaturesArray, () => {
         var featureAsGeoJson = new GeoJSON().readFeatures(feature)[0];
-        console.log(featureAsGeoJson, "featureAsGeo");
         this.props.model.clearFeatureHighlight(featureAsGeoJson);
         this.zoomTo();
       });
@@ -181,6 +179,21 @@ class SearchResultGroup extends Component {
         })
         .indexOf(feature) > -1;
 
+    const ExpandIconWrapper = ({ children }) => (
+      <div
+        onClick={e => {
+          e.stopPropagation();
+          if (this.state.expanded === i) {
+            this.setState({ expanded: -1 });
+          } else {
+            this.setState({ expanded: i });
+          }
+        }}
+      >
+        {children}
+      </div>
+    );
+
     return (
       <ExpansionPanel
         key={i}
@@ -198,23 +211,15 @@ class SearchResultGroup extends Component {
           }}
           className={active ? classes.activeExpansionPanelSummary : null}
           expandIcon={
-            <Button className={classes.button}>
+            <ExpandIconWrapper>
               <KeyboardArrowDown
                 className={active ? classes.active : classes.expandButton}
-                onClick={e => {
-                  e.stopPropagation();
-                  if (this.state.expanded === i) {
-                    this.setState({ expanded: -1 });
-                  } else {
-                    this.setState({ expanded: i });
-                  }
-                }}
                 key={i}
               />
-            </Button>
+            </ExpandIconWrapper>
           }
         >
-          <div style={{ flex: "auto", display: "flex" }}>
+          <div>
             <div>
               {feature.properties[displayField]}
               {target === "center" && this.props.renderAffectButton ? (
@@ -299,9 +304,7 @@ class SearchResultGroup extends Component {
             </Typography>
           </ExpansionPanelSummary>
           <ExpansionPanelDetails className={classes.details}>
-            <div className={classes.resultGroup}>
-              <div className={classes.resultGroup}>{items}</div>
-            </div>
+            <div className={classes.resultGroup}>{items}</div>
           </ExpansionPanelDetails>
         </ExpansionPanel>
       </div>

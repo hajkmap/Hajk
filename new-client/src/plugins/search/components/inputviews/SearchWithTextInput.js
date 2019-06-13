@@ -9,7 +9,6 @@ const styles = theme => ({
     borderRadius: theme.shape.borderRadius,
     flex: "auto"
   },
-  clearIcon: {},
   inputRoot: {
     width: "100%"
   },
