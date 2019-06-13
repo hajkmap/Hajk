@@ -209,6 +209,12 @@ var KirSearchView = {
       }
     },
 
+    clearSearch: function() {
+      this.props.model.get("firSelectionModel").get("firBufferLayer").getSource().clear();
+      this.props.model.get("firSelectionModel").clearSelection();
+      this.setState({ searchResults: []});
+    },
+
     render: function () {
         var searchResults = this.state.searchResults.map((item) => {
           var gender = item.get("koen").toLowerCase() === "m" ? "Man" : "Kvinna";
@@ -285,10 +291,10 @@ var KirSearchView = {
                   <div className="kir-filters">
                     Kön:
                     <input type="checkbox" id="gender-m" checked={this.state.genderM}
-                      onChange={(e) => if(this.state.genderK){this.setState({ genderM: e.target.checked })}} />
+                      onChange={(e) => {if(this.state.genderK){this.setState({ genderM: e.target.checked })}}} />
                     <label htmlFor="gender-m">Man</label>
                     <input type="checkbox" id="gender-k" checked={this.state.genderK}
-                      onChange={(e) => if(this.state.genderM){this.setState({ genderK: e.target.checked })}} />
+                      onChange={(e) => {if(this.state.genderM){this.setState({ genderK: e.target.checked })}}} />
                     <label htmlFor="gender-k">Kvinna</label>
                   </div>
 
@@ -309,7 +315,7 @@ var KirSearchView = {
                 <button onClick={this.search} type='submit' className='btn btn-primary'>
                   { this.state.searchInProgress ? <i className="fa fa-spinner fa-spin loader" /> : null }Sök
                 </button>&nbsp;
-                <button onClick={() => this.setState({ searchResults: []})} type='submit' className='btn btn-primary'>Rensa</button>
+                <button onClick={this.clearSearch} type='submit' className='btn btn-primary'>Rensa</button>
               </div>
             </div>
           </div>
