@@ -94,7 +94,7 @@ var ResidentList = {
     });
   },
 
-  generateExcel: function(features, callback) {
+  generateExcel: function(features) {
     var _config =  this.props.model.get("residentListDataLayer"),
         rows = [],
         columns = [_config.namnDisplayName, _config.adressDisplayName, _config.postnrDisplayName, _config.postortDisplayName];
@@ -166,9 +166,13 @@ var ResidentList = {
   },
 
   exportToEcxel: function() {
-    this.getResidentData(function(features) {
-      this.generateExcel(features);
-    }.bind(this));
+    if (this.props.residentData) {
+      this.generateExcel(this.props.residentData);
+    } else {
+      this.getResidentData(function(features) {
+        this.generateExcel(features);
+      }.bind(this));
+    }
   },
 
   render: function() {
