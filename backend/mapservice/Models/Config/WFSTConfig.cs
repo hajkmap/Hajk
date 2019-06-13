@@ -45,6 +45,8 @@ namespace MapService.Models.Config
 
         public string infoUrlText { get; set; }
 
-        public string infoOwner { get; set; } 
+        public string infoOwner { get; set; }
+
+        public int? zIndex { get; set; }
     }
 }

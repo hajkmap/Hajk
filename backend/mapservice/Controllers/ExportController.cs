@@ -13,6 +13,7 @@ using ICSharpCode.SharpZipLib.Core;
 using log4net;
 using System.Configuration;
 using MapService.Attributes;
+using System.Net.Http;
 
 namespace MapService.Controllers
 {
@@ -223,6 +224,24 @@ namespace MapService.Controllers
             byte[] bytes = excelCreator.Create(dataSet);
             string[] fileInfo = byteArrayToFileInfo(bytes, "xls");      
             return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
+        }
+
+        [HttpOptions]
+        public ActionResult Document()
+        {
+            // Catches and authorises pre-flight requests for /export/document from remote domains
+            Response.AddHeader("Access-Control-Allow-Origin", "*");
+            Response.AddHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+            Response.AddHeader("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
+            return null;
+        }
+
+        [HttpPost]
+        public string Document([System.Web.Http.FromBody]UploadData uploadData)
+        {
+            string folder = Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/";
+            DocumentCreator documentCreator = new DocumentCreator();
+            return documentCreator.Create(folder);            
         }
     }
 }

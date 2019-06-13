@@ -1,13 +1,72 @@
-﻿using System;
+﻿using MapService.Components.MapExport;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using BAMCIS.GeoJSON;
 
 namespace MapService.Models.Config
 {
+
     public class VectorConfig : ILayerConfig
     {
+        public FeatureInfo AsInfo(int coordinateSystemId, int zIndex)
+        {
+            FeatureInfo featureInfo = new FeatureInfo();
+            List<Components.MapExport.Feature> features = this.Load(this.url);
+            featureInfo.features = features;
+            return featureInfo;
+        }
+
+        public List<Components.MapExport.Feature> Load(string url)
+        {
+            List<Components.MapExport.Feature> features = new List<Components.MapExport.Feature>();
+            url += String.Format("?service=WFS&version=1.0.0&request=GetFeature&typeName={0}&maxFeatures=100000&outputFormat=application%2Fjson", layer);
+
+            WebRequest request = WebRequest.Create(url);
+            WebResponse response = request.GetResponse();
+            using (Stream dataStream = response.GetResponseStream())
+            {
+                StreamReader reader = new StreamReader(dataStream);
+                string responseFromServer = reader.ReadToEnd();
+                FeatureCollection jsonFeatures = JsonConvert.DeserializeObject<FeatureCollection>(responseFromServer);                
+                jsonFeatures.Features.Select(feature =>
+                {
+                    Components.MapExport.Feature f = new Components.MapExport.Feature();
+                    f.type = feature.Type.ToString();
+                    if (feature.Type == GeoJsonType.Point)
+                    {
+                        Point p = feature.Geometry as Point;
+                        f.coordinates = new List<double[]>();
+                        f.coordinates.Add(new double[]
+                        {
+                            p.Coordinates.Latitude,
+                            p.Coordinates.Longitude
+                        });
+                    }
+
+                    if (feature.Type == GeoJsonType.LineString)
+                    {
+                        LineString l = feature.Geometry as LineString;
+                        f.coordinates = l.Coordinates.Select(p =>
+                        {
+                            return new double[] {
+                                p.Latitude,
+                                p.Longitude
+                            };
+                        }).ToList();
+                    }
+
+                    return f;
+                });
+            }
+            return features;
+        }
+
         public string id { get; set; }
 
         public string dataFormat { get; set; }
@@ -32,11 +91,11 @@ namespace MapService.Models.Config
 
         public string projection { get; set; }
 
-		public string pointSize { get; set; }
+        public string pointSize { get; set; }
 
-		public string filterAttribute { get; set; }
+        public string filterAttribute { get; set; }
 
-		public string filterValue { get; set; }
+        public string filterValue { get; set; }
 
         public string filterComparer { get; set; }
 
@@ -62,7 +121,7 @@ namespace MapService.Models.Config
 
         public string labelBaseline { get; set; }
 
-        public string labelSize{ get; set; }
+        public string labelSize { get; set; }
 
         public int labelOffsetX { get; set; }
 
@@ -80,8 +139,8 @@ namespace MapService.Models.Config
 
         public string labelAttribute { get; set; }
 
-        public bool showLabels { get; set; } 
-        
+        public bool showLabels { get; set; }
+
         public bool infoVisible { get; set; }
 
         public string infoTitle { get; set; }
@@ -92,6 +151,8 @@ namespace MapService.Models.Config
 
         public string infoUrlText { get; set; }
 
-        public string infoOwner { get; set; }               
+        public string infoOwner { get; set; }
+
+        public int? zIndex { get; set; }
     }
 }

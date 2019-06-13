@@ -4,6 +4,7 @@ import { withStyles } from "@material-ui/core/styles";
 import MapIcon from "@material-ui/icons/Map";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import MenuIcon from "@material-ui/icons/Menu";
+import PrintIcon from "@material-ui/icons/Print";
 import Typography from "@material-ui/core/Typography";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
@@ -11,11 +12,16 @@ import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
 
 const styles = theme => ({
   rightIcon: {
-    marginLeft: theme.spacing.unit
+    marginLeft: theme.spacing.unit,
+    cursor: "pointer"
   },
   chapter: {},
   toc: {
     marginBottom: "10px"
+  },
+  tocHeader: {
+    display: "flex",
+    alignItems: "center"
   },
   tocContainer: {
     borderBottom: "1px solid #ccc",
@@ -76,6 +82,7 @@ class Informative extends React.PureComponent {
     super();
     homeHtml = props.abstract;
     this.state = {
+      url: "",
       chapters: [],
       chapter: {
         header: "",
@@ -255,15 +262,38 @@ class Informative extends React.PureComponent {
     });
   };
 
+  print = () => {
+    this.props.parent.informativeModel.print(this.state.chapter, url => {
+      this.setState({
+        url: url
+      });
+    });
+  };
+
   renderChapters() {
     const { classes } = this.props;
     const { tocVisible } = this.state;
     return (
       <div className={classes.toc}>
-        <Button variant="contained" onClick={this.toggleToc}>
-          Innehållsförteckning
-          <MenuIcon color="primary" className={classes.rightIcon} />
-        </Button>
+        <div className={classes.tocHeader}>
+          <Button variant="contained" onClick={this.toggleToc}>
+            Innehållsförteckning
+            <MenuIcon color="primary" className={classes.rightIcon} />
+          </Button>
+          <PrintIcon
+            color="primary"
+            className={classes.rightIcon}
+            title="Skriv ut"
+            onClick={this.print}
+          />
+        </div>
+        <div>
+          {this.state.url ? (
+            <a href={this.state.url} target="_blank" rel="noopener">
+              Klicka här
+            </a>
+          ) : null}
+        </div>
         {tocVisible ? (
           <div className={classes.tocContainer} component="nav">
             {this.renderTocItem(this.toc || [])}

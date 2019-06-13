@@ -26,5 +26,7 @@ namespace MapService.Components.MapExport
         public int[] layers { get; set; }
 
         public string spatialReference { get; set; }
+
+        public int zIndex { get; set; }
     }
 }

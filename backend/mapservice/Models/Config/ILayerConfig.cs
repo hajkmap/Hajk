@@ -23,5 +23,7 @@ namespace MapService.Models.Config
         string infoUrlText { get; set; }
 
         string infoOwner { get; set; }
+
+        int? zIndex { get; set; }
     }
 }

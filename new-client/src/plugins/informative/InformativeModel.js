@@ -7,6 +7,8 @@ class InformativeModel {
     this.olMap = settings.map;
     this.url = settings.app.config.appConfig.proxy + settings.url;
     this.globalObserver = settings.app.globalObserver;
+    this.app = settings.app;
+    this.exportUrl = "http://localhost:55630/export/document";
   }
 
   flyTo(view, location, zoom) {
@@ -15,6 +17,24 @@ class InformativeModel {
       zoom: zoom,
       center: location,
       duration: duration
+    });
+  }
+
+  print(chapter, callback) {
+    fetch(this.exportUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        data: JSON.stringify({
+          chapter: chapter
+        })
+      })
+    }).then(rsp => {
+      rsp.text().then(url => {
+        callback(url);
+      });
     });
   }
 

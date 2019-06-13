@@ -194,7 +194,8 @@ class InformativeEditor extends Component {
         this.hideModal();
         chapter.mapSettings = {
           center: mapState.center,
-          zoom: mapState.zoom
+          zoom: mapState.zoom,
+          extent: mapState.extent
         };
         chapter.layers = checkedLayers;
       },
