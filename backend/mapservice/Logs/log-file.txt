@@ -1,29 +1,151 @@
-ERROR 2018-08-14 10:18:10 Exception in removeLayerFromConfig: Object reference not set to an instance of an object. 
-ERROR 2018-08-14 10:24:17 Exception in removeLayerFromConfig: Object reference not set to an instance of an object. 
-ERROR 2018-08-15 10:56:16 File not found: C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\App_Data\map_2.json 
-ERROR 2018-08-15 10:58:03 File not found: C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\App_Data\map_2.json 
-FATAL 2018-08-16 16:06:29 Can't get configuration file: System.Web.HttpException (0x80004005): File name is not present
-   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 707 
-FATAL 2018-08-16 16:06:54 Can't get configuration file: System.Web.HttpException (0x80004005): File name is not present
-   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 707 
-FATAL 2018-08-16 16:07:46 Can't get configuration file: System.Web.HttpException (0x80004005): File name is not present
-   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 707 
-FATAL 2018-09-12 14:59:24 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
-   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 771 
-FATAL 2018-10-01 15:25:41 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
-   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 771 
-FATAL 2018-10-01 15:50:27 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
-   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 771 
-FATAL 2018-10-01 16:04:58 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
-   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 771 
-FATAL 2018-12-07 11:36:08 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
-   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 771 
-FATAL 2018-12-07 11:36:50 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
-   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 771 
-ERROR 2018-12-19 09:54:05 Unable to create PDF: Invalid URI: The format of the URI could not be determined. 
-ERROR 2018-12-19 09:55:29 Unable to create PDF: There was a problem connecting to the WMS server when rendering layer 'WMSLayer_0' 
-ERROR 2018-12-19 09:55:50 Unable to create PDF: There was a problem connecting to the WMS server when rendering layer 'WMSLayer_0' 
-ERROR 2018-12-19 09:57:04 Unable to create PDF: Invalid URI: The format of the URI could not be determined. 
-ERROR 2018-12-19 13:11:40 Unable to create PDF: There was a problem connecting to the WMS server when rendering layer 'WMSLayer_0' 
-FATAL 2019-06-12 13:03:38 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
-   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk3\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 768 
+INFO 2019-06-14 15:03:06 Create pdf: 0 
+INFO 2019-06-14 15:03:06 Document loaded: -7,5209 
+INFO 2019-06-14 15:03:14 PDF rendered: 7936,4638 
+INFO 2019-06-14 15:03:14 TOC created: 8164,6091 
+INFO 2019-06-14 15:03:15 Final PDF created: 8374,0266 
+INFO 2019-06-14 15:03:15 Final PDF saved: 8395,5522 
+DEBUG 2019-06-14 15:05:15 Executing GetConfig, name='list' 
+DEBUG 2019-06-14 15:05:15 Executing GetConfig, name='op' 
+DEBUG 2019-06-14 15:05:15 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:05:15 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:05:18 Executing GetConfig, name='layers' 
+DEBUG 2019-06-14 15:05:18 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:05:18 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:05:18 Executing GetConfig, name='op' 
+DEBUG 2019-06-14 15:05:18 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:05:18 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:06:08 Executing GetConfig, name='layers' 
+DEBUG 2019-06-14 15:06:08 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:06:08 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:06:08 Executing GetConfig, name='op' 
+DEBUG 2019-06-14 15:06:08 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:06:08 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+INFO 2019-06-14 15:06:15 Create pdf: 0 
+INFO 2019-06-14 15:06:15 Document loaded: 0,5018 
+INFO 2019-06-14 15:06:21 PDF rendered: 6253,5004 
+INFO 2019-06-14 15:06:21 TOC created: 6464,0969 
+INFO 2019-06-14 15:06:21 Final PDF created: 6661,6104 
+INFO 2019-06-14 15:06:21 Final PDF saved: 6674,9908 
+INFO 2019-06-14 15:08:14 Create pdf: 0 
+INFO 2019-06-14 15:08:14 Document loaded: 7,0544 
+INFO 2019-06-14 15:08:18 Start render PDF: 3577,8189 
+INFO 2019-06-14 15:08:21 PDF rendered: 6276,6349 
+INFO 2019-06-14 15:08:21 TOC created: 6486,2254 
+INFO 2019-06-14 15:08:21 Final PDF created: 6679,9142 
+INFO 2019-06-14 15:08:21 Final PDF saved: 6699,4817 
+INFO 2019-06-14 15:08:52 Create pdf: 0 
+INFO 2019-06-14 15:08:52 Document loaded: 0,5021 
+INFO 2019-06-14 15:08:56 Start render PDF: 3760,9716 
+INFO 2019-06-14 15:08:56 PDF rendered: 4169,4618 
+INFO 2019-06-14 15:08:56 TOC created: 4245,6661 
+INFO 2019-06-14 15:08:56 Final PDF created: 4422,0752 
+INFO 2019-06-14 15:08:56 Final PDF saved: 4433,1029 
+INFO 2019-06-14 15:09:12 Create pdf: 0 
+INFO 2019-06-14 15:09:12 Document loaded: 0 
+INFO 2019-06-14 15:09:15 Start render PDF: 2998,737 
+INFO 2019-06-14 15:09:15 PDF rendered: 3386,5029 
+INFO 2019-06-14 15:09:15 TOC created: 3453,9073 
+INFO 2019-06-14 15:09:15 Final PDF created: 3626,6731 
+INFO 2019-06-14 15:09:15 Final PDF saved: 3642,3859 
+INFO 2019-06-14 15:09:29 Create pdf: 0 
+INFO 2019-06-14 15:09:29 Document loaded: 0 
+INFO 2019-06-14 15:09:32 Start render PDF: 3403,0205 
+INFO 2019-06-14 15:09:33 PDF rendered: 3800,9497 
+INFO 2019-06-14 15:09:33 TOC created: 3868,0112 
+INFO 2019-06-14 15:09:33 Final PDF created: 4041,5592 
+INFO 2019-06-14 15:09:33 Final PDF saved: 4066,5641 
+INFO 2019-06-14 15:12:09 Create pdf: 0 
+INFO 2019-06-14 15:12:09 Document loaded: 6,5483 
+INFO 2019-06-14 15:12:12 Document deserialized and modified3433,2399 
+INFO 2019-06-14 15:12:12 Start render PDF: 3435,7454 
+INFO 2019-06-14 15:12:15 PDF rendered: 6134,3363 
+INFO 2019-06-14 15:12:15 TOC created: 6348,9122 
+INFO 2019-06-14 15:12:15 Final PDF created: 6561,4159 
+INFO 2019-06-14 15:12:15 Final PDF saved: 6593,4744 
+INFO 2019-06-14 15:14:14 Create pdf: 0 
+INFO 2019-06-14 15:14:14 Document loaded: 7,5162 
+INFO 2019-06-14 15:14:14 Document deserialized: 13,5304 
+INFO 2019-06-14 15:14:17 Documentmodified: 3470,0599 
+INFO 2019-06-14 15:14:17 Start render PDF: 3473,0679 
+INFO 2019-06-14 15:14:20 PDF rendered: 6206,8451 
+INFO 2019-06-14 15:14:20 TOC created: 6420,4088 
+INFO 2019-06-14 15:14:21 Final PDF created: 6612,0539 
+INFO 2019-06-14 15:14:21 Final PDF saved: 6625,5871 
+DEBUG 2019-06-14 15:30:20 Executing GetConfig, name='layers' 
+DEBUG 2019-06-14 15:30:20 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:30:20 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:30:20 Executing GetConfig, name='op' 
+DEBUG 2019-06-14 15:30:20 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:30:20 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:34:07 Executing GetConfig, name='layers' 
+DEBUG 2019-06-14 15:34:07 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:34:07 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:34:07 Executing GetConfig, name='op' 
+DEBUG 2019-06-14 15:34:07 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:34:07 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:37:08 Executing GetConfig, name='layers' 
+DEBUG 2019-06-14 15:37:08 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:37:08 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:37:08 Executing GetConfig, name='op' 
+DEBUG 2019-06-14 15:37:08 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:37:08 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:37:25 Executing GetConfig, name='layers' 
+DEBUG 2019-06-14 15:37:25 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:37:25 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:37:25 Executing GetConfig, name='op' 
+DEBUG 2019-06-14 15:37:25 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:37:25 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:40:15 Executing GetConfig, name='layers' 
+DEBUG 2019-06-14 15:40:15 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:40:15 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:40:15 Executing GetConfig, name='op' 
+DEBUG 2019-06-14 15:40:15 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:40:15 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:40:29 Executing GetConfig, name='op' 
+DEBUG 2019-06-14 15:40:29 Executing GetConfig, name='layers' 
+DEBUG 2019-06-14 15:40:29 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:40:29 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:40:29 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:40:29 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:42:01 Executing GetConfig, name='layers' 
+DEBUG 2019-06-14 15:42:01 Executing GetConfig, name='op' 
+DEBUG 2019-06-14 15:42:01 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:42:01 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:42:01 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:42:01 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:42:30 Executing GetConfig, name='layers' 
+DEBUG 2019-06-14 15:42:30 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:42:30 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:42:30 Executing GetConfig, name='op' 
+DEBUG 2019-06-14 15:42:30 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:42:30 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:43:25 Executing GetConfig, name='layers' 
+DEBUG 2019-06-14 15:43:25 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:43:25 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:43:25 Executing GetConfig, name='op' 
+DEBUG 2019-06-14 15:43:25 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:43:25 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:44:45 Executing GetConfig, name='layers' 
+DEBUG 2019-06-14 15:44:45 Executing GetConfig, name='op' 
+DEBUG 2019-06-14 15:44:45 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:44:45 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:44:45 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:44:45 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:45:56 Executing GetConfig, name='op' 
+DEBUG 2019-06-14 15:45:56 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:45:56 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:45:56 Executing GetConfig, name='layers' 
+DEBUG 2019-06-14 15:45:56 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:45:56 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:53:50 Executing GetConfig, name='layers' 
+DEBUG 2019-06-14 15:53:50 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:53:50 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:53:50 Executing GetConfig, name='op' 
+DEBUG 2019-06-14 15:53:50 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:53:50 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:56:25 Executing GetConfig, name='op' 
+DEBUG 2019-06-14 15:56:25 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:56:25 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-14 15:56:25 Executing GetConfig, name='layers' 
+DEBUG 2019-06-14 15:56:25 UseAdLookup: user CORP\SEEE20345, Impersonation level: None 
+DEBUG 2019-06-14 15:56:25 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 

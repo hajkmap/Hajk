@@ -390,7 +390,7 @@ class ExportPdfSettings extends React.Component {
             <Button
               variant="contained"
               fullWidth={true}
-              // onClick={this.downloadAttachment}
+              target="_blank"
               href={this.state.url}
             >
               <ArrowDownward className={classes.icon} /> Ladda ner

@@ -10,6 +10,7 @@ namespace MapService.Components.MapExport
     {
         public string type { get; set; }
         public Metadata attributes { get; set; }
+        public IDictionary<string, dynamic> properties { get; set; }
         public List<double[]> coordinates { get; set; }
         public List<List<double[]>> holes { get; set; }
     }

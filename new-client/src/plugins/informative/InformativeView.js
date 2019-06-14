@@ -1,14 +1,17 @@
 import React from "react";
 import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
+import LinearProgress from "@material-ui/core/LinearProgress";
 import { withStyles } from "@material-ui/core/styles";
 import MapIcon from "@material-ui/icons/Map";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import ArrowRightIcon from "@material-ui/icons/ArrowRight";
+import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import MenuIcon from "@material-ui/icons/Menu";
 import PrintIcon from "@material-ui/icons/Print";
 import Typography from "@material-ui/core/Typography";
 import BreadCrumbs from "./components/BreadCrumbs.js";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
-import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
+import Alert from "../../components/Alert.js";
 
 const styles = theme => ({
   rightIcon: {
@@ -71,6 +74,13 @@ const styles = theme => ({
     "& h6": {
       lineHeight: "normal"
     }
+  },
+  loader: {
+    opacity: 1,
+    transition: "opacity 2s ease-in"
+  },
+  button: {
+    margin: theme.spacing.unit
   }
 });
 
@@ -83,6 +93,8 @@ class Informative extends React.PureComponent {
     homeHtml = props.abstract;
     this.state = {
       url: "",
+      loading: false,
+      alert: false,
       chapters: [],
       chapter: {
         header: "",
@@ -163,9 +175,9 @@ class Informative extends React.PureComponent {
               {chapter.chapters.length === 0 ? (
                 ""
               ) : chapter.tocExpanded ? (
-                <RemoveCircleIcon />
+                <ArrowDropDownIcon />
               ) : (
-                <AddCircleIcon />
+                <ArrowRightIcon />
               )}
             </div>
             <div
@@ -263,10 +275,27 @@ class Informative extends React.PureComponent {
   };
 
   print = () => {
+    this.setState({
+      loading: true,
+      url: false
+    });
     this.props.parent.informativeModel.print(this.state.chapter, url => {
-      this.setState({
-        url: url
-      });
+      if (url === "error") {
+        this.setState({
+          loading: false,
+          url: false,
+          alert: true
+        });
+      } else {
+        this.setState({
+          url: url,
+          loading: false
+        });
+        this.refs.anchor.click();
+        this.setState({
+          url: false
+        });
+      }
     });
   };
 
@@ -275,24 +304,37 @@ class Informative extends React.PureComponent {
     const { tocVisible } = this.state;
     return (
       <div className={classes.toc}>
+        {this.state.loading && <LinearProgress className={classes.loader} />}
+        <Alert
+          open={this.state.alert}
+          dialogTitle="Felmeddelande"
+          message="Det gick inte att skriva ut för tillfället, försök igen senare"
+          parent={this}
+        />
         <div className={classes.tocHeader}>
           <Button variant="contained" onClick={this.toggleToc}>
             Innehållsförteckning
             <MenuIcon color="primary" className={classes.rightIcon} />
           </Button>
-          <PrintIcon
-            color="primary"
-            className={classes.rightIcon}
-            title="Skriv ut"
+          <IconButton
+            className={classes.button}
+            aria-label="Skriv ut"
             onClick={this.print}
-          />
+          >
+            <PrintIcon color="primary" title="Skriv ut" />
+          </IconButton>
         </div>
         <div>
-          {this.state.url ? (
-            <a href={this.state.url} target="_blank" rel="noopener">
-              Klicka här
+          {this.state.url && (
+            <a
+              ref="anchor"
+              href={this.state.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              &nbsp;
             </a>
-          ) : null}
+          )}
         </div>
         {tocVisible ? (
           <div className={classes.tocContainer} component="nav">

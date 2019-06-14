@@ -19,6 +19,8 @@ using MapService.Components.MapExport;
 using MapService.Models;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Security.AccessControl;
+using Common.Logging;
 
 namespace MapService.Components
 {       
@@ -103,7 +105,7 @@ namespace MapService.Components
             if (t != null)
             {                
                 this.layerSwitcherOptions = JsonConvert.DeserializeObject<LayerSwitcherOptions>(t.options.ToString());
-            }                       
+            }                        
         }
 
         /// <summary>
@@ -205,7 +207,7 @@ namespace MapService.Components
                 int mapHeight = 500;
                 int mapWidth = (int)(mapHeight * ((1 + Math.Sqrt(5)) / 2));
                 mapExportItem.size = new int[] { mapWidth, mapHeight };
-                mapExportItem.resolution = 150;
+                mapExportItem.resolution = 90;
                 double[] mapExtent = chapter.mapSettings.extent;                
                 mapExportItem.bbox = new double[] { mapExtent[0], mapExtent[2], mapExtent[1], mapExtent[3] };
 
@@ -217,8 +219,8 @@ namespace MapService.Components
                     layer.AsInfo(3007, layer.zIndex == null ? 0 : (int)layer.zIndex)
                 ).ToList();
 
-                mapExportItem.vectorLayers = layerConfig.vectorlayers.Select(layer =>
-                    layer.AsInfo(3007, layer.zIndex == null ? 0 : (int)layer.zIndex)
+                mapExportItem.vectorLayers = layerConfig.vectorlayers.Select(layer =>                    
+                    layer.AsInfo(3007, layer.zIndex == null ? 0 : (int)layer.zIndex, new double[] { mapExtent[1], mapExtent[0], mapExtent[3], mapExtent[2] })
                 ).ToList();
 
                 try
@@ -229,7 +231,7 @@ namespace MapService.Components
                     i.Save(path, System.Drawing.Imaging.ImageFormat.Png);
                     (new Task(() =>
                     {
-                        Thread.Sleep(5000);
+                        Thread.Sleep(20000);
                         File.Delete(path);
                     })).Start();
                     return string.Format("<div><img src='{0}'/></div>", path);
@@ -237,7 +239,7 @@ namespace MapService.Components
                 catch (Exception ex)
                 {
                     return String.Empty;
-                }                               
+                }
             }
             else
             {
@@ -323,6 +325,8 @@ namespace MapService.Components
                 .Where(layer => this.layerLookup(layer, layers)).ToList();
 
             WMSLayers.ForEach(layer => { this.setLayerZIndex(layer); });
+            VectorLayers.ForEach(layer => { this.setLayerZIndex(layer); });
+            ArcGISLayers.ForEach(layer => { this.setLayerZIndex(layer); });
 
             return new LayerConfig()
             {
@@ -338,36 +342,47 @@ namespace MapService.Components
         /// </summary>
         /// <param name="folder"></param>
         /// <returns>Path to saved document</returns>
-        public string Create(string folder)
-        {
-            string documentFile = String.Format("{0}App_Data\\documents\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.documentFile);
-            string documentJson = System.IO.File.ReadAllText(documentFile);
+        public string Create(string folder, string requestedDocumentFile, string requestedMapFile)
+        {            
+            this.documentFile = requestedDocumentFile;
+            this.mapFile = requestedMapFile;
 
+            // Some operations will use the tmp-folder. Created files are deleted when used.
+            Directory.CreateDirectory("C:\\tmp");
+            
+            // Load informative document
+            string documentFile = String.Format("{0}App_Data\\documents\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.documentFile);            
+            string documentJson = System.IO.File.ReadAllText(documentFile);            
             var exportDocument = JsonConvert.DeserializeObject<Document>(documentJson);            
+
             string html = "";
-            this.appendHtml(exportDocument.chapters.ToList(), ref html);
+            // Append maps to document
+            this.appendHtml(exportDocument.chapters.ToList(), ref html);            
+
             var renderer = new HtmlToPdf();
 
             string cssFile = String.Format("{0}App_Data\\styles\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.cssFile);
             renderer.PrintOptions.CustomCssUrl = new Uri(cssFile);
-
-            // Build a footer using html to style the text
-            // mergable fields are:
+                        
             // {page} {total-pages} {url} {date} {time} {html-title} & {pdf-title}
             renderer.PrintOptions.Footer = new HtmlHeaderFooter()
             {
                 Height = 15,
                 HtmlFragment = "<center>{page}</center>",
                 DrawDividerLine = false
-            };            
-
+            };
+            
             var pdf2 = renderer.RenderHtmlAsPdf(html);            
 
             string path = "C:\\tmp\\temp_pdf_export.pdf";
             pdf2.SaveAs(path);
-
+            
             string tocHtml = "";
 
+            //
+            // Read the created document and match headers to create toc.
+            // Headers must be unique
+            //
             using (PdfReader reader = new PdfReader(path))
             {
                 Dictionary<int, string[]> pageContents = new Dictionary<int, string[]>();
@@ -378,19 +393,19 @@ namespace MapService.Components
                 }
                 tocHtml = "<h1>Innehållsförteckning</h1>";                
                 this.appendHeader(exportDocument.chapters.ToList(), ref tocHtml, pageContents);
-            }
+            }            
 
+            //Remove temporatry file
             File.Delete(path);
 
             var pdf1 = renderer.RenderHtmlAsPdf(tocHtml);
-
-            var pdf = IronPdf.PdfDocument.Merge(pdf1, pdf2);
-
+            var pdf = IronPdf.PdfDocument.Merge(pdf1, pdf2);                    
             var r = new Random();
             var i = r.Next();
             string fileName = "pdf-export-" + i + ".pdf";
             string localFile = HostingEnvironment.ApplicationPhysicalPath + "//Temp//" + fileName;
             pdf.SaveAs(localFile);
+
             return folder + fileName;                        
         }
     }

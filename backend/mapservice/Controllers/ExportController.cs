@@ -241,7 +241,8 @@ namespace MapService.Controllers
         {
             string folder = Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/";
             DocumentCreator documentCreator = new DocumentCreator();
-            return documentCreator.Create(folder);            
+            InformativeExport data = JsonConvert.DeserializeObject<InformativeExport>(uploadData.data);
+            return documentCreator.Create(folder, data.documentFile, data.mapFile);
         }
     }
 }

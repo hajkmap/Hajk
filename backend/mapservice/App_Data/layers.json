@@ -52,7 +52,8 @@
       "infoText": "Hej",
       "infoUrl": "http://google.se",
       "infoUrlText": "Google",
-      "infoOwner": "Erik"
+      "infoOwner": "Erik",
+      "zIndex": null
     },
     {
       "id": "5",
@@ -106,7 +107,8 @@
       "infoText": "Hej",
       "infoUrl": "http://google.se",
       "infoUrlText": "Google",
-      "infoOwner": "Erik"
+      "infoOwner": "Erik",
+      "zIndex": null
     }
   ],
   "wmslayers": [
@@ -137,6 +139,7 @@
       "opacity": 1.0,
       "singleTile": false,
       "imageFormat": "image/png",
+      "serverType": null,
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -150,7 +153,8 @@
       "infoUrlText": "",
       "infoOwner": "",
       "version": "1.1.1",
-      "infoFormat": "text/plain"
+      "infoFormat": "text/plain",
+      "zIndex": null
     },
     {
       "id": "22",
@@ -170,6 +174,7 @@
       "opacity": 1.0,
       "singleTile": false,
       "imageFormat": "image/png",
+      "serverType": null,
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -183,7 +188,8 @@
       "infoUrlText": "",
       "infoOwner": "",
       "version": null,
-      "infoFormat": null
+      "infoFormat": null,
+      "zIndex": null
     },
     {
       "id": "23",
@@ -203,6 +209,7 @@
       "opacity": 1.0,
       "singleTile": false,
       "imageFormat": "image/png",
+      "serverType": null,
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -216,7 +223,8 @@
       "infoUrlText": "",
       "infoOwner": "",
       "version": null,
-      "infoFormat": null
+      "infoFormat": null,
+      "zIndex": null
     },
     {
       "id": "24",
@@ -245,6 +253,7 @@
       "opacity": 1.0,
       "singleTile": false,
       "imageFormat": "image/png",
+      "serverType": null,
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -258,7 +267,8 @@
       "infoUrlText": "",
       "infoOwner": "",
       "version": null,
-      "infoFormat": null
+      "infoFormat": null,
+      "zIndex": null
     },
     {
       "id": "27",
@@ -295,6 +305,7 @@
       "opacity": 1.0,
       "singleTile": true,
       "imageFormat": "image/png",
+      "serverType": null,
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -308,7 +319,8 @@
       "infoUrlText": "Länk",
       "infoOwner": "Karl Kula",
       "version": "1.1.1",
-      "infoFormat": "application/json"
+      "infoFormat": "application/json",
+      "zIndex": null
     },
     {
       "id": "28",
@@ -345,6 +357,7 @@
       "opacity": 1.0,
       "singleTile": false,
       "imageFormat": "image/png",
+      "serverType": null,
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -358,7 +371,8 @@
       "infoUrlText": "",
       "infoOwner": "",
       "version": null,
-      "infoFormat": null
+      "infoFormat": null,
+      "zIndex": null
     },
     {
       "id": "29",
@@ -387,6 +401,7 @@
       "opacity": 1.0,
       "singleTile": false,
       "imageFormat": "image/png",
+      "serverType": null,
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -400,7 +415,8 @@
       "infoUrlText": "Länk till metadata",
       "infoOwner": "Trafikenheten",
       "version": null,
-      "infoFormat": null
+      "infoFormat": null,
+      "zIndex": null
     },
     {
       "id": "30",
@@ -429,6 +445,7 @@
       "opacity": 1.0,
       "singleTile": false,
       "imageFormat": "image/png",
+      "serverType": null,
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -442,7 +459,8 @@
       "infoUrlText": "",
       "infoOwner": "",
       "version": "1.1.1",
-      "infoFormat": "application/json"
+      "infoFormat": "application/json",
+      "zIndex": null
     },
     {
       "id": "31",
@@ -471,6 +489,7 @@
       "opacity": 1.0,
       "singleTile": false,
       "imageFormat": "image/png",
+      "serverType": null,
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -484,7 +503,8 @@
       "infoUrlText": "",
       "infoOwner": "",
       "version": null,
-      "infoFormat": null
+      "infoFormat": null,
+      "zIndex": null
     }
   ],
   "wfslayers": [
@@ -504,7 +524,8 @@
       "infoText": null,
       "infoUrl": null,
       "infoUrlText": null,
-      "infoOwner": null
+      "infoOwner": null,
+      "zIndex": null
     }
   ],
   "vectorlayers": [
@@ -515,7 +536,7 @@
       "url": "http://giscloud.se/geoserver/wfs",
       "layer": "wsp:hpl",
       "owner": null,
-      "date": "1548157635707",
+      "date": "1560494395644",
       "content": "",
       "legend": "",
       "symbolXOffset": 0.0,
@@ -524,7 +545,7 @@
       "pointSize": "4",
       "filterAttribute": "",
       "filterValue": "",
-      "filterComparer": null,
+      "filterComparer": "eq",
       "lineStyle": "solid",
       "lineWidth": "1",
       "lineColor": "rgba(0, 0, 0, 1)",
@@ -532,7 +553,7 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "{name}  \n<img src=\"{image}\"></img>",
-      "queryable": false,
+      "queryable": true,
       "filterable": false,
       "labelAlign": "center",
       "labelBaseline": "alphabetic",
@@ -541,17 +562,18 @@
       "labelOffsetY": 0,
       "labelWeight": "normal",
       "labelFont": "Arial",
-      "labelFillColor": "#000000",
+      "labelFillColor": "rgba(144, 19, 254, 0.62)",
       "labelOutlineColor": "#FFFFFF",
       "labelOutlineWidth": 3,
-      "labelAttribute": "Name",
+      "labelAttribute": "name",
       "showLabels": true,
       "infoVisible": true,
       "infoTitle": "",
       "infoText": "Detta lager innehåller hållplatser.",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "zIndex": null
     },
     {
       "id": "15",
@@ -596,7 +618,8 @@
       "infoText": "",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "zIndex": null
     },
     {
       "id": "16",
@@ -641,7 +664,8 @@
       "infoText": "",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "zIndex": null
     },
     {
       "id": "17",
@@ -650,7 +674,7 @@
       "url": "http://giscloud.se/geoserver/wfs",
       "layer": "wsp:parking_lot",
       "owner": null,
-      "date": "1537870176529",
+      "date": "1560495579013",
       "content": "",
       "legend": "",
       "symbolXOffset": 0.0,
@@ -659,10 +683,10 @@
       "pointSize": "4",
       "filterAttribute": "",
       "filterValue": "",
-      "filterComparer": null,
+      "filterComparer": "eq",
       "lineStyle": "solid",
-      "lineWidth": "1",
-      "lineColor": "rgba(74, 74, 74, 1)",
+      "lineWidth": "5",
+      "lineColor": "rgba(255, 0, 0, 1)",
       "fillColor": "rgba(0, 0, 0, 0.54)",
       "visibleAtStart": false,
       "opacity": 1.0,
@@ -686,7 +710,8 @@
       "infoText": "",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "zIndex": null
     },
     {
       "id": "32",
@@ -731,7 +756,8 @@
       "infoText": "",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "zIndex": null
     },
     {
       "id": "33",
@@ -776,7 +802,8 @@
       "infoText": "",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "zIndex": null
     },
     {
       "id": "34",
@@ -821,7 +848,8 @@
       "infoText": "",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "zIndex": null
     }
   ],
   "wfstlayers": [
@@ -860,7 +888,8 @@
       "infoText": null,
       "infoUrl": null,
       "infoUrlText": null,
-      "infoOwner": null
+      "infoOwner": null,
+      "zIndex": null
     },
     {
       "id": "26",
@@ -888,7 +917,8 @@
       "infoText": null,
       "infoUrl": null,
       "infoUrlText": null,
-      "infoOwner": null
+      "infoOwner": null,
+      "zIndex": null
     }
   ],
   "arcgislayers": []

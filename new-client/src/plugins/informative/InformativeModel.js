@@ -21,6 +21,10 @@ class InformativeModel {
   }
 
   print(chapter, callback) {
+    const mapFile = this.app.config.activeMap + ".json";
+    const documentFile =
+      this.app.plugins.informative.options.document + ".json";
+
     fetch(this.exportUrl, {
       method: "POST",
       headers: {
@@ -28,14 +32,21 @@ class InformativeModel {
       },
       body: JSON.stringify({
         data: JSON.stringify({
-          chapter: chapter
+          mapFile: mapFile,
+          documentFile: documentFile,
+          chapterHeader: chapter.header,
+          chapterHtml: chapter.html
         })
       })
-    }).then(rsp => {
-      rsp.text().then(url => {
-        callback(url);
+    })
+      .then(rsp => {
+        rsp.text().then(url => {
+          callback(url);
+        });
+      })
+      .catch(() => {
+        callback("error");
       });
-    });
   }
 
   displayMap(visibleLayers, mapSettings) {
