@@ -74,6 +74,9 @@ class SearchWithTextInput extends React.PureComponent {
       <div className={classes.search}>
         <Input
           autoComplete="off"
+          inputRef={input => {
+            this.input = input;
+          }}
           onChange={e => {
             onChange(e.target.value, false, data => {
               onComplete(data);
@@ -101,7 +104,15 @@ class SearchWithTextInput extends React.PureComponent {
           }}
           endAdornment={
             <InputAdornment position="end">
-              <ClearIcon className={classes.clearIcon} onClick={onClear} />
+              <ClearIcon
+                className={classes.clearIcon}
+                onClick={() => {
+                  if (this.input) {
+                    this.input.focus();
+                  }
+                  onClear();
+                }}
+              />
             </InputAdornment>
           }
         />
