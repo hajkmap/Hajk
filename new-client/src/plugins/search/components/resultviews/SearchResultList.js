@@ -158,24 +158,30 @@ class SearchResultList extends React.PureComponent {
               </Typography>
             </div>
             <div className={classes.searchResultTopBarRight}>
-              <Typography color="primary" className={classes.resultCount}>
-                Dölj
-              </Typography>
-
               {!minimized ? (
-                <IconButton
-                  className={classes.button}
-                  onClick={() => this.toggle()}
-                >
-                  <ExpandLess />
-                </IconButton>
+                <div>
+                  <IconButton
+                    className={classes.button}
+                    onClick={() => this.toggle()}
+                  >
+                    <Typography color="primary" className={classes.resultCount}>
+                      Dölj
+                    </Typography>
+                    <ExpandLess />
+                  </IconButton>
+                </div>
               ) : (
-                <IconButton
-                  className={classes.button}
-                  onClick={() => this.toggle()}
-                >
-                  <ExpandMore />
-                </IconButton>
+                <div>
+                  <IconButton
+                    className={classes.button}
+                    onClick={() => this.toggle()}
+                  >
+                    <Typography color="primary" className={classes.resultCount}>
+                      Visa
+                    </Typography>
+                    <ExpandMore />
+                  </IconButton>
+                </div>
               )}
             </div>
           </div>
