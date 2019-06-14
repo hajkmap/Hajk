@@ -336,7 +336,7 @@ class Search extends React.PureComponent {
             </div>
             {this.state.activeSearchView === STARTVIEW
               ? this.renderSearchSettingButton()
-              : this.renderSearchSettingButton()}
+              : this.renderMainContainerButton()}
           </div>
           {this.renderSearchResultList("center")}
         </div>
