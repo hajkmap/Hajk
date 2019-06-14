@@ -45,7 +45,6 @@ class SearchSettingsButton extends React.Component {
   }
 
   render() {
-    console.log(this.state, "this.state");
     return (
       <div>
         <IconButton onClick={this.handleClick}>
