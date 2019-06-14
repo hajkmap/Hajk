@@ -33,8 +33,6 @@ class SearchWithPolygonInput extends React.PureComponent {
   componentDidMount() {
     const { model, onSearchDone, localObserver } = this.props;
     localObserver.publish("toolchanged");
-    console.log("HERE");
-
     model.polygonSearch(
       () => {
         this.setState({ polygonDrawn: true });
