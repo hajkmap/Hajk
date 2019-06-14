@@ -41,6 +41,8 @@ const styles = theme => {
     searchResultContainer: {
       maxHeight: "calc(100vh - 380px)",
       overflow: "auto",
+      display: "flex",
+      flexDirection: "column",
       marginTop: "10px",
       paddingBottom: "22px",
       [theme.breakpoints.down("xs")]: {
@@ -61,9 +63,6 @@ const styles = theme => {
       margin: "5px"
     },
 
-    visible: {
-      display: "block"
-    },
     hidden: {
       display: "none"
     }
@@ -181,13 +180,13 @@ class SearchResultList extends React.PureComponent {
             </div>
           </div>
           <Divider
-            className={this.state.minimized ? classes.hidden : classes.visible}
+            className={this.state.minimized ? classes.hidden : null}
             variant="fullWidth"
           />
           <div
             className={classNames(
               classes.searchResultContainer,
-              this.state.minimized ? classes.hidden : classes.visible
+              this.state.minimized ? classes.hidden : null
             )}
           >
             {result.map((featureType, i) => {

@@ -100,6 +100,7 @@ const styles = theme => ({
   expansionPanel: {
     borderRadius: "0 !important",
     height: "30%",
+    margin: "5px",
     backgroundColor: "#0076bc"
   }
 });
