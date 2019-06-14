@@ -139,7 +139,7 @@ const POLYGON = "polygon";
 const RADIUS = "radius";
 const TEXTSEARCH = "textsearch";
 const SELECTION = "selection";
-const DEFAULT = "default";
+const STARTVIEW = "startview";
 
 class Search extends React.PureComponent {
   resolve = data => {
@@ -160,7 +160,7 @@ class Search extends React.PureComponent {
     this.state = {
       visible: true,
       loading: false,
-      activeSearchView: DEFAULT
+      activeSearchView: STARTVIEW
     };
 
     this.activeSpatialTools = {
@@ -280,31 +280,12 @@ class Search extends React.PureComponent {
 
   renderCenter() {
     const { classes } = this.props;
-    var maincontainerButton;
     var searchBar;
-    var spatialSearchOptions;
 
-    if (this.state.activeSearchView === DEFAULT) {
+    if (this.state.activeSearchView === STARTVIEW) {
       searchBar = this.renderSearchBarStart();
     } else if (this.state.activeSearchView === TEXTSEARCH) {
       searchBar = this.renderSearchWithText();
-    }
-
-    if (
-      this.state.activeSearchView === DEFAULT &&
-      this.isAnySpatialToolActive()
-    ) {
-      spatialSearchOptions = this.renderSpatialSearchOptions();
-    }
-
-    if (this.state.activeSearchView !== DEFAULT) {
-      var spatialBar = this.renderSpatialBar();
-    }
-
-    if (this.state.activeSearchView !== DEFAULT) {
-      maincontainerButton = this.renderMainContainerButton();
-    } else {
-      maincontainerButton = this.renderSearchSettingButton();
     }
 
     return (
@@ -347,11 +328,16 @@ class Search extends React.PureComponent {
           <div>{this.renderLoader()}</div>
           <div className={classes.searchToolsContainer}>
             <div className={classes.searchContainer}>
-              {spatialBar}
+              {this.state.activeSearchView ? this.renderSpatialBar() : null}
               {searchBar}
-              {spatialSearchOptions}
+              {this.state.activeSearchView === STARTVIEW &&
+              this.isAnySpatialToolActive()
+                ? this.renderSpatialSearchOptions()
+                : null}
             </div>
-            {maincontainerButton}
+            {this.state.activeSearchView === STARTVIEW
+              ? this.renderSearchSettingButton()
+              : this.renderSearchSettingButton()}
           </div>
           {this.renderSearchResultList("center")}
         </div>
@@ -378,7 +364,7 @@ class Search extends React.PureComponent {
           className={classes.button}
           onClick={() => {
             this.searchModel.clearRecentSpatialSearch();
-            this.setState({ activeSearchView: DEFAULT });
+            this.setState({ activeSearchView: STARTVIEW });
           }}
         >
           Avbryt
