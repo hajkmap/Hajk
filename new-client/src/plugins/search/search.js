@@ -10,7 +10,6 @@ import SearchWithTextInput from "./components/inputviews/SearchWithTextInput";
 import SearchResultList from "./components/resultviews/SearchResultList.js";
 import SpatialSearchMenu from "./components/startviews/SpatialSearchMenu";
 import SearchBarStart from "./components/startviews/SearchBarStart";
-//import ClearButton from "./components/ClearButton.js";
 import SearchSettingsButton from "./components/startviews/SearchSettingsButton";
 import SearchWithRadiusInput from "./components/inputviews/SearchWithRadiusInput";
 import SearchWithSelectionInput from "./components/inputviews/SearchWithSelectionInput";
@@ -484,6 +483,7 @@ class Search extends React.PureComponent {
           forceSearch={this.searchModel.search}
           onChange={this.searchModel.search}
           onComplete={this.resolve}
+          localObserver={this.localObserver}
           tooltip={this.tooltip}
           target="top"
           loading={this.state.loading}
@@ -504,12 +504,7 @@ class Search extends React.PureComponent {
     const { options } = this.props;
     const center = document.getElementById("center");
     if (options.target === "center" && center) {
-      return (
-        <div>
-          {this.renderButton(options.target)}
-          {createPortal(this.renderCenter(), center)}
-        </div>
-      );
+      return <div>{createPortal(this.renderCenter(), center)}</div>;
     }
     if (options.target === "header") {
       return (
