@@ -47,7 +47,7 @@ const styles = theme => {
     drawerPaperClose: {
       borderRight: "none",
       overflowX: "hidden",
-      width: theme.spacing.unit * 8,
+      width: theme.spacing(8),
       [theme.breakpoints.down("xs")]: {
         width: drawerWidth
       }

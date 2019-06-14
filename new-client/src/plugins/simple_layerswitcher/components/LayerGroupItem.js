@@ -52,7 +52,7 @@ const styles = theme => ({
     alignItems: "center"
   },
   rightIcon: {
-    marginLeft: theme.spacing.unit,
+    marginLeft: theme.spacing(1),
     fontSize: "16px"
   },
   layerInfo: {
