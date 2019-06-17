@@ -19,7 +19,25 @@ To build admin or client, just do `npm run build` instead of `npm start`. This w
 
 If you plan to develop for Hajk, make sure to read the next section on code standard for the project.
 
-## Code standard
+## Contributing
+
+### Git workflow
+Hajk strictly enforces the use of **Git Feature Branch Workflow** as described in [this document](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow). 
+
+In short, developing a new feature, would look something like:
+1. Always fetch latest with `git fetch`.
+1. Make sure you are in master branch by `git checkout master`.
+1. Make sure that you've pulled all latest changes with `git pull`.
+1. Create a new branch, let's say `three-d-mode`, by runnig `git checkout -b three-d-mode`
+1. Don't forget to set upstream so that your newly created branch is pushed to GitHub: `git branch --set-upstream-to origin/three-d-mode`
+1. `git push` and check that your branch uploads to GitHub.
+1. Code… :neckbeard:
+1. Regulary commit changes to your branch with `git commit -S -m "A good comment, can be multiline."`. (Note, the `-S` flag [signs your commit](https://help.github.com/en/articles/signing-commits), and signing commits is something you really should be doing.)
+1. Occasionally, checkout the master branch and merge in changes to your local branch. **This is the really important part.** You can do like this: `git fetch && git merge origin/master`.
+1. When you're done coding, go to GitHub and create a new Pull request, so that your branch can be merged up to `master`. 
+1. Administrators overlooking the project will get notified when you create your Pull request, take a look at the code and if everything looks fine merge it into `master` and delete your feature branch from GitHub. You will still have a copy of your feature branch locally, but it can be safely removed by running `git branch -d three-d-mode`. 
+
+### Code standard
 
 Hajk 3 uses **ESLint** and **Prettier** to enforce code formatting across the project.
 
