@@ -248,9 +248,10 @@ class LayerItem extends React.PureComponent {
 
   renderMetadataLink() {
     const { infoUrl, infoUrlText } = this.state;
+    const { classes } = this.props;
     if (infoUrl) {
       return (
-        <div>
+        <div className={classes.infoTextContainer}>
           <a href={infoUrl} target="_blank" rel="noopener noreferrer">
             {infoUrlText || infoUrl}
           </a>
