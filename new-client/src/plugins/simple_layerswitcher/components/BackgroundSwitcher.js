@@ -157,8 +157,6 @@ class BackgroundSwitcher extends React.PureComponent {
       )
     ];
 
-    radioButtons.reverse();
-
     return radioButtons;
   }
 

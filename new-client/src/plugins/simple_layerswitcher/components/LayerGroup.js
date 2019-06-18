@@ -202,6 +202,7 @@ class LayerGroup extends React.PureComponent {
 
   render() {
     const { classes, child } = this.props;
+    const { expanded } = this.state;
     var groupClass = "";
     if (child) {
       groupClass = classes.panel;
@@ -210,11 +211,15 @@ class LayerGroup extends React.PureComponent {
       <div ref="panelElement" className={groupClass}>
         <ExpansionPanel
           className={classes.disableTransition}
-          defaultExpanded={this.props.expanded}
+          defaultExpanded={expanded}
           onChange={this.props.handleChange(this.props.group.id, this)}
         >
           <StyledExpansionPanelSummary className={classes.panelSummary}>
-            {this.props.expanded ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
+            {expanded ? (
+              <ArrowDropDownIcon onClick={() => this.toggleExpanded()} />
+            ) : (
+              <ArrowRightIcon onClick={() => this.toggleExpanded()} />
+            )}
             {this.renderToggleAll()}
           </StyledExpansionPanelSummary>
           <ExpansionPanelDetails classes={{ root: classes.root }}>

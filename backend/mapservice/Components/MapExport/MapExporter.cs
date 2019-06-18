@@ -1,4 +1,4 @@
-﻿using GeoAPI.Geometries;
+using GeoAPI.Geometries;
 using NetTopologySuite.Geometries;
 using SharpMap;
 using SharpMap.Data;
@@ -214,6 +214,10 @@ namespace MapService.Components.MapExport
 					if (sublayerName != "")
 					{
 						layer.AddLayer(sublayerName);
+						if (wmsLayers[i].styles != null)
+						{
+							layer.AddStyle(wmsLayers[i].styles);
+						}
 					}                                        
                 }
                 layer.SRID = wmsLayers[i].coordinateSystemId;                    
