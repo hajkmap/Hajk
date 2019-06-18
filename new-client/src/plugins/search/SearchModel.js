@@ -51,8 +51,9 @@ var drawStyle = new Style({
 
 class SearchModel {
   layerList = [];
+  controllers = [];
 
-  mapSouceAsWFSPromise = (feature, projCode) => source => {
+  mapSourceAsWFSPromise = (feature, projCode, source) => {
     var geom = feature.getGeometry();
     if (geom.getType() === "Circle") {
       geom = fromCircle(geom);
@@ -73,9 +74,12 @@ class SearchModel {
     const node = this.wfsParser.writeGetFeature(options);
     const xmlSerializer = new XMLSerializer();
     const xmlString = xmlSerializer.serializeToString(node);
+    const controller = new AbortController();
+    const signal = controller.signal;
 
     const request = {
       credentials: "same-origin",
+      signal: signal,
       method: "POST",
       headers: {
         "Content-Type": "text/xml"
@@ -93,10 +97,11 @@ class SearchModel {
       ""
     );
 
-    return fetch(
+    const promise = fetch(
       this.app.config.appConfig.searchProxy + urlWithoutProxy,
       request
     );
+    return { promise, controller };
   };
 
   getLayerAsSource = (sourceList, layerId) => {
@@ -163,42 +168,53 @@ class SearchModel {
       .getCode();
 
     var search = () => {
+      let promises = [];
       let searchSources = this.options.sources;
+      this.abortSearches();
 
       if (useTransformedWmsSource) {
         const searchLayers = this.options.selectedSources.reduce(
           this.getLayerAsSource,
           []
         );
+
         searchSources = searchLayers
           .map(this.mapDisplayLayerAsSearchLayer)
           .filter(source => source.layers);
       }
-
-      const promises = searchSources.map(
-        this.mapSouceAsWFSPromise(feature, projCode)
-      );
+      this.controllers.splice(0, this.controllers.length);
+      searchSources.forEach(source => {
+        const { promise, controller } = this.mapSourceAsWFSPromise(
+          feature,
+          projCode,
+          source
+        );
+        promises.push(promise);
+        this.controllers.push(controller);
+      });
 
       this.observer.publish("spatialSearchStarted");
-      Promise.all(promises).then(responses => {
-        Promise.all(responses.map(result => result.json())).then(
-          jsonResults => {
-            var result = [];
-            jsonResults.forEach((jsonResult, i) => {
-              if (jsonResult.totalFeatures > 0) {
-                jsonResult.source = searchSources[i];
-                result.push(jsonResult);
+      Promise.all(promises)
+        .then(responses => {
+          Promise.all(responses.map(result => result.json())).then(
+            jsonResults => {
+              var result = [];
+              jsonResults.forEach((jsonResult, i) => {
+                if (jsonResult.totalFeatures > 0) {
+                  jsonResult.source = searchSources[i];
+                  result.push(jsonResult);
+                }
+              });
+              setTimeout(() => {
+                this.observer.publish("searchComplete");
+              }, 500);
+              if (callback) {
+                callback(result);
               }
-            });
-            setTimeout(() => {
-              this.observer.publish("searchComplete");
-            }, 500);
-            if (callback) {
-              callback(result);
             }
-          }
-        );
-      });
+          );
+        })
+        .catch(() => {}); //Need to have a catch method to not get error in console when aborting through signal
     };
 
     if (feature.getGeometry().getType() === "Point") {
@@ -218,20 +234,23 @@ class SearchModel {
 
   timeout = -1;
 
-  controllers = [];
+  abortSearches() {
+    if (this.controllers.length > 0) {
+      this.controllers.forEach(controller => {
+        controller.abort();
+        this.observer.publish("searchComplete");
+      });
+    }
+    this.controllers.splice(0, this.controllers.length);
+  }
 
   search = (searchInput, force, callback) => {
+    this.abortSearches();
     clearTimeout(this.timeout);
     if (searchInput.length > 3 || force === true) {
       this.timeout = setTimeout(() => {
         this.observer.publish("searchStarted");
         var promises = [];
-
-        if (this.controllers.length > 0) {
-          this.controllers.forEach(controller => {
-            controller.abort();
-          });
-        }
 
         this.controllers.splice(0, this.controllers.length);
 

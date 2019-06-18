@@ -362,6 +362,7 @@ class Search extends React.PureComponent {
           color="primary"
           className={classes.button}
           onClick={() => {
+            this.searchModel.abortSearches();
             this.searchModel.clearRecentSpatialSearch();
             this.setState({ activeSearchView: STARTVIEW });
           }}
