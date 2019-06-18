@@ -131,6 +131,11 @@ class ExportModel {
       .getArray()
       .filter(exportable)
       .map((layer, i) => {
+        var getLayers = layer
+          .getSource()
+          .getParams()
+          .LAYERS.split(",");
+
         return {
           url: layer.getSource().get("url"),
           layers: layer
@@ -143,7 +148,8 @@ class ExportModel {
             .getView()
             .getProjection()
             .getCode()
-            .split(":")[1]
+            .split(":")[1],
+          styles: layer.layersInfo[getLayers].style || null
         };
       });
   }

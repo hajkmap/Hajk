@@ -287,10 +287,10 @@ class AppModel {
       ...this.lookup(layerSwitcherConfig.options.baselayers, "base"),
       ...this.lookup(this.expand(layerSwitcherConfig.options.groups), "layer")
     ];
-    layers = layers.reduce((a, b) => {
-      a[b["id"]] = b;
-      return a;
-    }, {});
+    // layers = layers.reduce((a, b) => {
+    //   a[b["id"]] = b;
+    //   return a;
+    // }, {});
 
     return layers;
   }
