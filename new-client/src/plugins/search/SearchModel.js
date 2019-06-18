@@ -1,6 +1,7 @@
 import { WFS } from "ol/format";
 import GeometryType from "ol/geom/GeometryType";
 import IsLike from "ol/format/filter/IsLike";
+import Or from "ol/format/filter/Or";
 import Intersects from "ol/format/filter/Intersects";
 import TileLayer from "ol/layer/Tile";
 import ImageLayer from "ol/layer/Image";
@@ -566,20 +567,27 @@ class SearchModel {
       .getProjection()
       .getCode();
 
+    var isLikeFilters = source.searchFields.map(searchField => {
+      return new IsLike(
+        searchField,
+        searchInput + "*",
+        "*", // wild card
+        ".", // single char
+        "!", // escape char
+        false // match case
+      );
+    });
+
+    var filter =
+      isLikeFilters.length > 1 ? new Or(...isLikeFilters) : isLikeFilters[0];
+
     const options = {
       featureTypes: source.layers,
       srsName: projCode,
       outputFormat: "JSON", //source.outputFormat,
       geometryName: source.geometryField,
       maxFeatures: 100,
-      filter: new IsLike(
-        source.searchFields[0],
-        searchInput + "*",
-        "*", // wild card
-        ".", // single char
-        "!", // escape char
-        false // match case
-      )
+      filter: filter
     };
 
     const node = this.wfsParser.writeGetFeature(options);
