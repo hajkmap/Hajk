@@ -29,11 +29,11 @@ In short, developing a new feature, would look something like:
 1. Make sure you are in master branch by `git checkout master`.
 1. Make sure that you've pulled all latest changes with `git pull`.
 1. Create a new branch, let's say `three-d-mode`, by runnig `git checkout -b three-d-mode`
-1. Don't forget to set upstream so that your newly created branch is pushed to GitHub: `git branch --set-upstream-to origin/three-d-mode`
-1. `git push` and check that your branch uploads to GitHub.
+1. Don't forget to set upstream so that your newly created branch is pushed to GitHub: `git push --set-upstream origin three-d-mode`
 1. Code… :neckbeard:
 1. Regulary commit changes to your branch with `git commit -S -m "A good comment, can be multiline."`. (Note, the `-S` flag [signs your commit](https://help.github.com/en/articles/signing-commits), and signing commits is something you really should be doing.)
-1. Occasionally, checkout the master branch and merge in changes to your local branch. **This is the really important part.** You can do like this: `git fetch && git merge origin/master`.
+1. Regulary push your changes to GitHub with `git push`
+1. Regulary rebase your branch from master. That means that you will incoporate recent changes in master into your local branch. **This is the really important part.** You can do it like this: `git fetch && git rebase master`.
 1. When you're done coding, go to GitHub and create a new Pull request, so that your branch can be merged up to `master`. 
 1. Administrators overlooking the project will get notified when you create your Pull request, take a look at the code and if everything looks fine merge it into `master` and delete your feature branch from GitHub. You will still have a copy of your feature branch locally, but it can be safely removed by running `git branch -d three-d-mode`. 
 
