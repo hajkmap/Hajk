@@ -80,7 +80,7 @@ var WmsLayer = {
     }
 
     if (this.get("maxResolution") && this.get("maxResolution") > 0) {
-      layerOptions["maxResolution"] = this.get("maxResolution");
+      layerOptions["maxResolution"] = this.get("maxResolution") + 0.001; // Ensure that specified max resolution is displayed
     }
 
     this.layer = this.get('singleTile') ? new ol.layer.Image(layerOptions) : new ol.layer.Tile(layerOptions);

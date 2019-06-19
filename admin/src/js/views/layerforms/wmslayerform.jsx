@@ -288,8 +288,8 @@ class WMSLayerForm extends Component {
       serverType: this.getValue('serverType'),
       queryable: this.getValue('queryable'),
       opacity: this.getValue('opacity'),
-      minResolution: this.getValue('minResolution'),
-      maxResolution: this.getValue('maxResolution'),
+      minResolution: this.getValue('minResolution') * 0.00028, // Convert to m/pixel
+      maxResolution: this.getValue('maxResolution') * 0.00028, // Convert to m/pixel
       tiled: this.getValue('tiled'),
       drawOrder: this.getValue('drawOrder'),
       attribution: this.getValue('attribution'),
@@ -498,7 +498,7 @@ class WMSLayerForm extends Component {
           />
         </div>
         <div>
-          <label>Min resolution</label>
+          <label>Min skala 1:</label>
           <input
             type='number' step="any"
             ref='input_minResolution'
@@ -509,10 +509,10 @@ class WMSLayerForm extends Component {
               this.setState({minResolution: e.target.value});
               this.validateField('minResolution');
             }}
-          /> m/pixel (0 för att alltid synas)
+          /> (Lagret visas för angiven skala, ange 0 om lagret alltid ska visas)
         </div>
         <div>
-          <label>Max resolution</label>
+          <label>Max skala 1:</label>
           <input
             type='number' step="any"
             ref='input_maxResolution'
@@ -523,7 +523,7 @@ class WMSLayerForm extends Component {
               this.setState({maxResolution: e.target.value});
               this.validateField('maxResolution');
             }}
-          /> m/pixel (0 för att alltid synas)
+          /> (Lagret visas för angiven skala, ange 0 om lagret alltid ska visas)
         </div>
         <div>
           <label>Single tile</label>
