@@ -1,13 +1,15 @@
 import React from "react";
-import Input from "@material-ui/core/Input";
+import OutlinedInput from "@material-ui/core/OutlinedInput";
 import { withStyles } from "@material-ui/core/styles";
 import ClearIcon from "@material-ui/icons/Clear";
 import InputAdornment from "@material-ui/core/InputAdornment";
+import SearchButton from "../SearchButton";
 
 const styles = theme => ({
   search: {
     borderRadius: theme.shape.borderRadius,
-    flex: "auto"
+    flex: "auto",
+    display: "flex"
   },
   inputRoot: {
     width: "100%"
@@ -67,19 +69,21 @@ class SearchWithTextInput extends React.PureComponent {
       value,
       target,
       forceSearch,
-      onClear
+      resetToStartView
     } = this.props;
 
     return (
       <div className={classes.search}>
-        <Input
+        <OutlinedInput
           autoComplete="off"
           inputRef={input => {
             this.input = input;
           }}
           onChange={e => {
             onChange(e.target.value, false, data => {
-              onComplete(data);
+              if (data) {
+                onComplete(data);
+              }
             });
             this.setState({
               value: e.target.value
@@ -88,7 +92,6 @@ class SearchWithTextInput extends React.PureComponent {
           autoFocus={true}
           value={value === "" ? value : this.state.value}
           placeholder={"Sök"}
-          disableUnderline
           onKeyPress={e => {
             //keyCode deprecated so using e.key instead
             if (e.key === "Enter") {
@@ -107,14 +110,18 @@ class SearchWithTextInput extends React.PureComponent {
               <ClearIcon
                 className={classes.clearIcon}
                 onClick={() => {
-                  if (this.input) {
-                    this.input.focus();
-                  }
-                  onClear();
+                  resetToStartView();
                 }}
               />
             </InputAdornment>
           }
+        />
+        <SearchButton
+          onClick={() => {
+            forceSearch(this.state.value, true, data => {
+              onComplete(data);
+            });
+          }}
         />
       </div>
     );

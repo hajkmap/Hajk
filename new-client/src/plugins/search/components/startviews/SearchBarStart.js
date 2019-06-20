@@ -1,13 +1,15 @@
 import React from "react";
-import Input from "@material-ui/core/Input";
+import OutlinedInput from "@material-ui/core/OutlinedInput";
 import { withStyles } from "@material-ui/core/styles";
 import SearchIcon from "@material-ui/icons/Search";
 import InputAdornment from "@material-ui/core/InputAdornment";
+import SpatialSearchMenu from "../../components/startviews/SpatialSearchMenu";
 
 const styles = theme => ({
   search: {
     borderRadius: theme.shape.borderRadius,
-    flex: "auto"
+    flex: "auto",
+    display: "flex"
   },
   inputRoot: {
     width: "100%"
@@ -31,12 +33,6 @@ const styles = theme => ({
   searchIcon: {
     position: "relative",
     padding: "6px"
-  },
-  progress: {
-    width: "20px !important",
-    height: "20px !important",
-    color: theme.palette.primary.main,
-    margin: "2px"
   }
 });
 
@@ -50,16 +46,25 @@ class SearchBarStart extends React.PureComponent {
     localObserver.publish("toolchanged");
   }
 
+  renderSpatialSearchOptions() {
+    const { activeSpatialTools } = this.props;
+    return (
+      <SpatialSearchMenu
+        onToolChanged={this.props.onToolChanged}
+        activeSpatialTools={activeSpatialTools}
+      />
+    );
+  }
+
   render() {
     const { classes, onMouseEnter, target } = this.props;
 
     return (
       <div className={classes.search}>
-        <Input
+        <OutlinedInput
           autoComplete="off"
           onClick={onMouseEnter}
           placeholder={"Sök"}
-          disableUnderline
           classes={{
             root: classes.inputRoot,
             input:
@@ -71,6 +76,8 @@ class SearchBarStart extends React.PureComponent {
             </InputAdornment>
           }
         />
+
+        {this.renderSpatialSearchOptions()}
       </div>
     );
   }

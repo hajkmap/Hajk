@@ -1,14 +1,13 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import LinearProgress from "@material-ui/core/LinearProgress";
-import Button from "@material-ui/core/Button";
 import { withStyles } from "@material-ui/core/styles";
 import SearchIcon from "@material-ui/icons/Search";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import Observer from "react-event-observer";
 import SearchWithTextInput from "./components/inputviews/SearchWithTextInput";
 import SearchResultList from "./components/resultviews/SearchResultList.js";
-import SpatialSearchMenu from "./components/startviews/SpatialSearchMenu";
+
 import SearchBarStart from "./components/startviews/SearchBarStart";
 import SearchSettingsButton from "./components/startviews/SearchSettingsButton";
 import SearchWithRadiusInput from "./components/inputviews/SearchWithRadiusInput";
@@ -62,6 +61,10 @@ const styles = theme => {
         left: 0,
         right: 0
       }
+    },
+    searchButton: {
+      borderRadius: 0,
+      border: "solid"
     },
     searchContainer: {
       [theme.breakpoints.up("xs")]: {
@@ -263,20 +266,6 @@ class Search extends React.PureComponent {
     );
   }
 
-  isAnySpatialToolActive() {
-    var numberOfActiveTools = Object.values(this.activeSpatialTools).filter(
-      tool => {
-        return tool === true;
-      }
-    ).length;
-
-    if (numberOfActiveTools > 0) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   renderCenter() {
     const { classes } = this.props;
     var searchBar;
@@ -329,10 +318,6 @@ class Search extends React.PureComponent {
             <div className={classes.searchContainer}>
               {this.state.activeSearchView ? this.renderSpatialBar() : null}
               {searchBar}
-              {this.state.activeSearchView === STARTVIEW &&
-              this.isAnySpatialToolActive()
-                ? this.renderSpatialSearchOptions()
-                : null}
             </div>
             {this.renderSearchSettingButton()}
           </div>
@@ -350,33 +335,21 @@ class Search extends React.PureComponent {
       </div>
     );
   }
-  /*
-  renderMainContainerButton() {
-    const { classes } = this.props;
 
-    return (
-      <div className={classes.mainContainerButton}>
-        <Button
-          color="primary"
-          className={classes.button}
-          onClick={() => {
-            this.searchModel.abortSearches();
-            this.searchModel.clearRecentSpatialSearch();
-            this.setState({ activeSearchView: STARTVIEW });
-          }}
-        >
-          Avbryt
-        </Button>
-      </div>
-    );
-  }*/
-
+  resetToStartView() {
+    this.searchModel.abortSearches();
+    this.searchModel.clearRecentSpatialSearch();
+    this.setState({ activeSearchView: STARTVIEW });
+  }
   renderSpatialBar() {
     switch (this.state.activeSearchView) {
       case POLYGON:
         return (
           <SearchWithPolygonInput
             model={this.searchModel}
+            resetToStartView={() => {
+              this.resetToStartView();
+            }}
             localObserver={this.localObserver}
             onSearchDone={featureCollections => {
               this.resolve(featureCollections);
@@ -387,6 +360,9 @@ class Search extends React.PureComponent {
         return (
           <SearchWithRadiusInput
             localObserver={this.localObserver}
+            resetToStartView={() => {
+              this.resetToStartView();
+            }}
             onSearchWithin={layerIds => {
               this.setState({
                 result: layerIds
@@ -401,6 +377,9 @@ class Search extends React.PureComponent {
         return (
           <SearchWithSelectionInput
             localObserver={this.localObserver}
+            resetToStartView={() => {
+              this.resetToStartView();
+            }}
             model={this.searchModel}
             onSearchDone={featureCollections => {
               this.resolve(featureCollections);
@@ -414,23 +393,16 @@ class Search extends React.PureComponent {
     }
   }
 
-  renderSpatialSearchOptions() {
+  renderSearchBarStart() {
     return (
-      <SpatialSearchMenu
+      <SearchBarStart
+        localObserver={this.localObserver}
+        activeSpatialTools={this.activeSpatialTools}
         onToolChanged={toolType => {
           this.setState({
             activeSearchView: toolType
           });
         }}
-        activeSpatialTools={this.activeSpatialTools}
-      />
-    );
-  }
-
-  renderSearchBarStart() {
-    return (
-      <SearchBarStart
-        localObserver={this.localObserver}
         onMouseEnter={() => {
           this.setState({
             activeSearchView: TEXTSEARCH
@@ -451,6 +423,11 @@ class Search extends React.PureComponent {
           this.setState({
             result: false
           });
+        }}
+        resetToStartView={() => {
+          this.searchModel.abortSearches();
+          this.searchModel.clearRecentSpatialSearch();
+          this.setState({ activeSearchView: STARTVIEW });
         }}
         onChange={this.searchModel.search}
         loading={this.state.loading}

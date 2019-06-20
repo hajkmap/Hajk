@@ -245,12 +245,12 @@ class SearchModel {
   }
 
   search = (searchInput, force, callback) => {
-    this.abortSearches();
     clearTimeout(this.timeout);
 
-    var autoExecution = searchInput.length > 3;
+    //var autoExecution = searchInput.length > 3;
 
     if (/*autoExecution ||*/ force === true) {
+      this.abortSearches();
       this.timeout = setTimeout(() => {
         this.observer.publish("searchStarted");
         var promises = [];

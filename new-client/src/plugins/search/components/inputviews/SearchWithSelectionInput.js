@@ -1,30 +1,17 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import Chip from "@material-ui/core/Chip";
+import ClearIcon from "@material-ui/icons/Clear";
 import AddCircleOutline from "@material-ui/icons/AddCircleOutline";
+import SearchButton from "../../components/SearchButton";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import { OutlinedInput } from "@material-ui/core";
 
 const styles = theme => ({
-  chip: {
-    backgroundColor: "inherit",
-    "&:hover": {
-      backgroundColor: "transparent"
-    },
-    "&:focus": {
-      backgroundColor: "transparent"
-    },
-    margin: theme.spacing.unit,
-    minWidth: 200
+  clearIcon: {
+    cursor: "pointer"
   }
 });
-/*
-function handleDelete() {
-  alert("You clicked the delete icon."); // eslint-disable-line no-alert
-}
-
-function handleClick() {
-  alert("You clicked the Chip."); // eslint-disable-line no-alert
-}*/
 
 class SearchWithSelectionInput extends React.PureComponent {
   state = {
@@ -37,19 +24,53 @@ class SearchWithSelectionInput extends React.PureComponent {
       this.setState({ selectionDone: true });
     }, onSearchDone);
   }
-  render() {
-    const { classes } = this.props;
+
+  renderInput() {
+    const { classes, resetToStartView } = this.props;
+    if (this.state.polygonDrawn) {
+      this.input.blur();
+    }
     return (
-      <Chip
-        icon={<AddCircleOutline />}
-        label={
-          this.state.selectionDone
-            ? "Markerat område : 1"
-            : "Markera objekt i kartan"
-        } //Number of objects should be dynamic when implementing multidraw
-        //onClick={handleClick}
-        className={classes.chip}
-      />
+      <div style={{ display: "flex", flex: "auto" }}>
+        <OutlinedInput
+          autoComplete="off"
+          autoFocus
+          readOnly
+          inputRef={input => {
+            this.input = input;
+          }}
+          value={
+            this.state.selectionDone
+              ? "Markerat område : 1"
+              : "Markera objekt i kartan"
+          }
+          startAdornment={
+            <InputAdornment position="start">
+              <AddCircleOutline />
+            </InputAdornment>
+          }
+          endAdornment={
+            <InputAdornment position="end">
+              <ClearIcon
+                className={classes.clearIcon}
+                onClick={() => {
+                  resetToStartView();
+                }}
+              />
+            </InputAdornment>
+          }
+        />
+
+        <SearchButton />
+      </div>
+    );
+  }
+  render() {
+    return (
+      <div style={{ display: "flex", flex: "auto" }}>
+        {this.renderInput()}
+        <SearchButton />
+      </div>
     );
   }
 }

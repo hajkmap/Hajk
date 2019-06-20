@@ -1,32 +1,19 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import Chip from "@material-ui/core/Chip";
 import RadioButtonUnchecked from "@material-ui/icons/RadioButtonUnchecked";
 import Snackbar from "@material-ui/core/Snackbar";
 import { createPortal } from "react-dom";
+import SearchButton from "../../components/SearchButton";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import ClearIcon from "@material-ui/icons/Clear";
+import { OutlinedInput } from "@material-ui/core";
 
 const styles = theme => ({
-  chip: {
-    backgroundColor: "inherit",
-    "&:hover": {
-      backgroundColor: "transparent"
-    },
-    "&:focus": {
-      backgroundColor: "transparent"
-    },
-    margin: theme.spacing.unit,
-    minWidth: 200
+  clearIcon: {
+    cursor: "pointer"
   }
 });
-/*
-function handleDelete() {
-  alert("You clicked the delete icon."); // eslint-disable-line no-alert
-}
-
-function handleClick() {
-  alert("You clicked the Chip."); // eslint-disable-line no-alert
-}*/
 
 class SearchWithRadiusInput extends React.PureComponent {
   state = {
@@ -48,17 +35,49 @@ class SearchWithRadiusInput extends React.PureComponent {
     );
   }
   render() {
-    const { classes } = this.props;
     return (
-      <div>
-        <Chip
-          icon={<RadioButtonUnchecked />}
-          label={
+      <div style={{ display: "flex", flex: "auto" }}>
+        {this.renderInput()}
+        <SearchButton />
+      </div>
+    );
+  }
+
+  renderInput() {
+    const { classes, resetToStartView } = this.props;
+    if (this.state.polygonDrawn) {
+      this.input.blur();
+    }
+    return (
+      <div style={{ display: "flex", flex: "auto" }}>
+        <OutlinedInput
+          autoComplete="off"
+          autoFocus
+          readOnly
+          inputRef={input => {
+            this.input = input;
+          }}
+          value={
             this.state.radiusDrawn ? "Ritad radie: 1" : "Sök med radie i kartan"
-          } //Number of objects should be dynamic when implementing multidraw
-          //onClick={handleClick}
-          className={classes.chip}
+          }
+          startAdornment={
+            <InputAdornment position="start">
+              <RadioButtonUnchecked />
+            </InputAdornment>
+          }
+          endAdornment={
+            <InputAdornment position="end">
+              <ClearIcon
+                className={classes.clearIcon}
+                onClick={() => {
+                  resetToStartView();
+                }}
+              />
+            </InputAdornment>
+          }
         />
+
+        <div />
         {createPortal(
           <Snackbar
             className={classes.anchorOriginBottomCenter}
