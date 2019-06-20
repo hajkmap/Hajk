@@ -14,14 +14,23 @@ namespace MapService.Components
 
         private PrincipalContext _domain;
 
-        public ActiveDirectoryLookup(string domain, string container, string user, string password)
+        public ActiveDirectoryLookup(string domain, string container, bool useSSL, string user, string password)
         {
             try {
-                _domain = new PrincipalContext(ContextType.Domain, domain, container, user, password);
+                if (useSSL)
+                {
+                    _log.Info("Reading from Active Directory using SSL.");
+                    _domain = new PrincipalContext(ContextType.Domain, domain, container, ContextOptions.Negotiate | ContextOptions.SecureSocketLayer, user, password);
+                }
+                else
+                {
+                    _log.Info("Reading from Active Directory NOT using SSL.");
+                    _domain = new PrincipalContext(ContextType.Domain, domain, container, user, password);
+                }
             }
-            catch
+            catch (Exception e)
             {
-                _log.Error("Kunde inte koppla upp mot Active Directory, kontrollera inloggningsuppgifter");
+                _log.ErrorFormat("Kunde inte koppla upp mot Active Directory, kontrollera inloggningsuppgifter: error {0}", e.Message);
             }
           }
 

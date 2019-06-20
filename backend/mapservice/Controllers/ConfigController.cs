@@ -351,7 +351,7 @@ namespace MapService.Controllers
 
             _log.Debug("AD-information found in Web.config and will be used.");
             var parameters = GetLookupParameters();
-            return new ActiveDirectoryLookup(parameters["ADdomain"], parameters["ADcontainer"], parameters["ADuser"], parameters["ADpassword"]);
+            return new ActiveDirectoryLookup(parameters["ADdomain"], parameters["ADcontainer"], parameters["ADuseSSL"] == "1", parameters["ADuser"], parameters["ADpassword"]);
         }
         private List<ThemeMap> GetAllowedMapConfigurations()
         {
@@ -452,6 +452,7 @@ namespace MapService.Controllers
                 { "ADuser", appsettings["ActiveDirectoryUser"] == null ? "" : appsettings["ActiveDirectoryUser"] },
                 { "ADpassword", appsettings["ActiveDirectoryUserPassword"] == null ? "" : appsettings["ActiveDirectoryUserPassword"] },
                 { "ADcontainer", appsettings["ActiveDirectoryContainer"] == null ? "" : appsettings["ActiveDirectoryContainer"] },
+                { "ADuseSSL", appsettings["ActiveDirectoryUseSSL"] == null ? "" : appsettings["ActiveDirectoryUseSSL"] },
                 { "defaultADGroupsForAdmin", appsettings["defaultADGroupsForAdmin"] == null ? "" : appsettings["defaultADGroupsForAdmin"] }
             };
             return parameters;
