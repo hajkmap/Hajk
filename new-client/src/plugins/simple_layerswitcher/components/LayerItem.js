@@ -127,10 +127,7 @@ class LayerItem extends React.PureComponent {
    */
   renderStatus() {
     return this.state.status === "loaderror" ? (
-      <IconWarning
-        style={{ float: "right" }}
-        title="Lagret kunde inte laddas in. Kartservern svarar inte."
-      />
+      <IconWarning title="Lagret kunde inte laddas in. Kartservern svarar inte." />
     ) : null;
   }
 
@@ -332,12 +329,12 @@ class LayerItem extends React.PureComponent {
               <Typography>
                 <ChevronRightIcon className={classes.button} />
                 {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
-                {this.renderStatus()}
                 <label className={classes.captionText}>{caption}</label>
               </Typography>
             </div>
           </div>
           <div>
+            <div style={{ float: "left" }}>{this.renderStatus()}</div>
             <div style={{ float: "left" }}>
               <div className={classes.infoContainer}>
                 {!this.isInfoEmpty() ? (

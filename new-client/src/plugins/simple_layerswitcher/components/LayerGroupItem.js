@@ -155,10 +155,7 @@ class LayerGroupItem extends Component {
    */
   renderStatus() {
     return this.state.status === "loaderror" ? (
-      <IconWarning
-        style={{ float: "right" }}
-        title="Lagret kunde inte laddas in. Kartservern svarar inte."
-      />
+      <IconWarning title="Lagret kunde inte laddas in. Kartservern svarar inte." />
     ) : null;
   }
 
@@ -540,6 +537,7 @@ class LayerGroupItem extends Component {
               </div>
             </div>
             <div>
+              <div style={{ float: "left" }}>{this.renderStatus()}</div>
               <div style={{ float: "left" }}>
                 <div className={classes.infoContainer}>
                   {!this.isInfoEmpty() ? (
