@@ -10,6 +10,9 @@ import { OutlinedInput } from "@material-ui/core";
 const styles = theme => ({
   clearIcon: {
     cursor: "pointer"
+  },
+  input: {
+    flex: "auto"
   }
 });
 
@@ -27,12 +30,13 @@ class SearchWithSelectionInput extends React.PureComponent {
 
   renderInput() {
     const { classes, resetToStartView } = this.props;
-    if (this.state.polygonDrawn) {
+    if (this.state.selectionDone) {
       this.input.blur();
     }
     return (
       <div style={{ display: "flex", flex: "auto" }}>
         <OutlinedInput
+          className={classes.input}
           autoComplete="off"
           autoFocus
           readOnly
@@ -60,8 +64,6 @@ class SearchWithSelectionInput extends React.PureComponent {
             </InputAdornment>
           }
         />
-
-        <SearchButton />
       </div>
     );
   }

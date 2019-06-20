@@ -10,6 +10,9 @@ import { OutlinedInput } from "@material-ui/core";
 const styles = theme => ({
   clearIcon: {
     cursor: "pointer"
+  },
+  input: {
+    flex: "auto"
   }
 });
 
@@ -39,6 +42,7 @@ class SearchWithPolygonInput extends React.PureComponent {
 
     return (
       <OutlinedInput
+        className={classes.input}
         autoComplete="off"
         autoFocus
         readOnly

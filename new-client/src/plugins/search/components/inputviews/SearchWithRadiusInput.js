@@ -12,6 +12,9 @@ import { OutlinedInput } from "@material-ui/core";
 const styles = theme => ({
   clearIcon: {
     cursor: "pointer"
+  },
+  input: {
+    flex: "auto"
   }
 });
 
@@ -45,12 +48,13 @@ class SearchWithRadiusInput extends React.PureComponent {
 
   renderInput() {
     const { classes, resetToStartView } = this.props;
-    if (this.state.polygonDrawn) {
+    if (this.state.radiusDrawn) {
       this.input.blur();
     }
     return (
       <div style={{ display: "flex", flex: "auto" }}>
         <OutlinedInput
+          className={classes.input}
           autoComplete="off"
           autoFocus
           readOnly
