@@ -668,6 +668,16 @@ namespace MapService.Controllers
             var userGroups = adLookup.GetGroups(activeUser);
             var firTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'fir')]");
 
+            var edpList = firTool.SelectToken("$.options.edp");
+            if (edpList != null)
+            {
+                var visibleForGroups = edpList.SelectToken("$.visibleForGroups");
+                if (HasValidVisibleForGroups(visibleForGroups) && !IsGroupAllowedAccess(userGroups, visibleForGroups))
+                {
+                    (firTool.SelectToken("$.options") as JObject).Remove("edp");
+                }
+            }
+
             var residentList = firTool.SelectToken("$.options.residentList");
             if (residentList != null)
             {
