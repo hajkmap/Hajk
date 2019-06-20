@@ -292,7 +292,6 @@ class SearchResultGroup extends Component {
             className={classes.groupRoot}
             ref={this.panelHeaderElement}
             onClick={this.toggle}
-            expandIcon={<ExpandMoreIcon />}
           >
             <Typography variant="subtitle1" className={classes.heading}>
               {featureType.source.caption}
