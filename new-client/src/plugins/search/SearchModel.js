@@ -247,7 +247,10 @@ class SearchModel {
   search = (searchInput, force, callback) => {
     this.abortSearches();
     clearTimeout(this.timeout);
-    if (searchInput.length > 3 || force === true) {
+
+    var autoExecution = searchInput.length > 3;
+
+    if (/*autoExecution ||*/ force === true) {
       this.timeout = setTimeout(() => {
         this.observer.publish("searchStarted");
         var promises = [];

@@ -1,7 +1,7 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
-import Settings from "@material-ui/icons/Settings";
+import MoreVert from "@material-ui/icons/MoreVert";
 import Window from "../../../../components/Window.js";
 import SettingsMenu from "./SettingsMenu";
 
@@ -48,7 +48,7 @@ class SearchSettingsButton extends React.Component {
     return (
       <div>
         <IconButton onClick={this.handleClick}>
-          <Settings />
+          <MoreVert />
         </IconButton>
         {this.renderWindow()}
       </div>

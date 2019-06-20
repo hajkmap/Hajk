@@ -334,9 +334,7 @@ class Search extends React.PureComponent {
                 ? this.renderSpatialSearchOptions()
                 : null}
             </div>
-            {this.state.activeSearchView === STARTVIEW
-              ? this.renderSearchSettingButton()
-              : this.renderMainContainerButton()}
+            {this.renderSearchSettingButton()}
           </div>
           {this.renderSearchResultList("center")}
         </div>
@@ -352,7 +350,7 @@ class Search extends React.PureComponent {
       </div>
     );
   }
-
+  /*
   renderMainContainerButton() {
     const { classes } = this.props;
 
@@ -371,7 +369,7 @@ class Search extends React.PureComponent {
         </Button>
       </div>
     );
-  }
+  }*/
 
   renderSpatialBar() {
     switch (this.state.activeSearchView) {
