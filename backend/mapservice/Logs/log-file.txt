@@ -1,0 +1,38 @@
+DEBUG 2019-06-18 12:22:52 Executing GetConfig, name='map_1' 
+DEBUG 2019-06-18 12:22:52 Executing GetConfig, name='layers' 
+DEBUG 2019-06-18 12:22:52 UseAdLookup: user CORP\SELP21611, Impersonation level: None 
+DEBUG 2019-06-18 12:22:52 UseAdLookup: user CORP\SELP21611, Impersonation level: None 
+DEBUG 2019-06-18 12:22:52 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-18 12:22:52 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-18 12:23:04 Executing GetConfig, name='op' 
+DEBUG 2019-06-18 12:23:04 Executing GetConfig, name='layers' 
+DEBUG 2019-06-18 12:23:04 UseAdLookup: user CORP\SELP21611, Impersonation level: None 
+DEBUG 2019-06-18 12:23:04 UseAdLookup: user CORP\SELP21611, Impersonation level: None 
+DEBUG 2019-06-18 12:23:04 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-18 12:23:04 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-18 12:42:01 Executing GetConfig, name='layers' 
+DEBUG 2019-06-18 12:42:01 UseAdLookup: user CORP\SELP21611, Impersonation level: None 
+DEBUG 2019-06-18 12:42:01 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-18 12:42:01 Executing GetConfig, name='list' 
+DEBUG 2019-06-18 12:42:01 Executing GetConfig, name='map_1' 
+DEBUG 2019-06-18 12:42:01 Executing GetConfig, name='op' 
+DEBUG 2019-06-18 12:42:01 UseAdLookup: user CORP\SELP21611, Impersonation level: None 
+DEBUG 2019-06-18 12:42:01 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-18 12:42:01 UseAdLookup: user CORP\SELP21611, Impersonation level: None 
+DEBUG 2019-06-18 12:42:01 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-18 12:42:20 Executing GetConfig, name='list' 
+DEBUG 2019-06-18 12:42:20 Executing GetConfig, name='op' 
+DEBUG 2019-06-18 12:42:20 UseAdLookup: user CORP\SELP21611, Impersonation level: None 
+DEBUG 2019-06-18 12:42:20 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-18 12:42:47 Executing GetConfig, name='layers' 
+DEBUG 2019-06-18 12:42:47 UseAdLookup: user CORP\SELP21611, Impersonation level: None 
+DEBUG 2019-06-18 12:42:47 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-18 12:42:47 Executing GetConfig, name='op' 
+DEBUG 2019-06-18 12:42:47 UseAdLookup: user CORP\SELP21611, Impersonation level: None 
+DEBUG 2019-06-18 12:42:47 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-18 12:43:09 Executing GetConfig, name='layers' 
+DEBUG 2019-06-18 12:43:09 UseAdLookup: user CORP\SELP21611, Impersonation level: None 
+DEBUG 2019-06-18 12:43:09 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
+DEBUG 2019-06-18 12:43:09 Executing GetConfig, name='op' 
+DEBUG 2019-06-18 12:43:09 UseAdLookup: user CORP\SELP21611, Impersonation level: None 
+DEBUG 2019-06-18 12:43:09 Will not use AD lookup. Check Windows authentication, ASP.NET Impersonation and AD-config values in Web.config. 
