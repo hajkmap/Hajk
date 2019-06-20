@@ -47,9 +47,7 @@ class SearchWithPolygonInput extends React.PureComponent {
         autoFocus
         readOnly
         value={
-          this.state.polygonDrawn
-            ? "Markerat område : 1"
-            : "Markera objekt i kartan"
+          this.state.polygonDrawn ? "Ritat område : 1" : "Rita objekt i kartan"
         }
         inputRef={input => {
           this.input = input;
