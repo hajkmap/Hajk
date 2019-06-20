@@ -46,8 +46,8 @@ const styles = theme => ({
     fontSize: "10pt",
     color: "black",
     backgroundColor: "white",
-    padding: "3px",
-    borderRadius: "3px"
+    padding: "3px 6px 3px 6px",
+    borderRadius: "30%"
   },
   details: {
     padding: "0px",
