@@ -158,6 +158,100 @@
       ],
       "expanded": true,
       "layers": []
+    },
+    {
+      "header": "Kapitel 2",
+      "html": "<p>Cras nec mollis lectus. Curabitur fringilla lorem quis ex tincidunt, in mattis libero molestie. Quisque erat erat, lacinia in nisl quis, pretium rutrum odio. In sit amet sodales felis, sit amet fermentum lacus. Quisque ultrices nunc ac ipsum ultricies condimentum. Curabitur faucibus dolor nec est molestie, vel accumsan sapien dapibus. In fermentum mattis pellentesque. Ut vitae pulvinar massa. Integer dictum, dui non consequat hendrerit, lorem nulla lobortis nibh, vitae commodo ligula sapien in dui. Donec imperdiet eros vitae venenatis auctor. Aliquam vulputate libero lacinia tellus eleifend, vitae malesuada sem lacinia. Mauris tincidunt vitae urna sit amet iaculis. Aenean tristique mattis accumsan. Nullam odio velit, gravida vitae orci sed, malesuada faucibus dui. Curabitur aliquet ante id hendrerit volutpat. Ut leo felis, varius at rhoncus eget, aliquam id sapien.</p>\n<p><br></p>\n<p>Vestibulum cursus eu justo vel aliquet. Maecenas mattis tortor a ex sollicitudin finibus. Cras nec eros sit amet enim suscipit vulputate. Nunc imperdiet metus enim, ut gravida libero sodales eu. Integer dictum tortor est, accumsan eleifend nibh scelerisque ut. Ut blandit urna fringilla, aliquam sem eget, tempus mi. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Sed rutrum ligula sit amet urna suscipit, congue pulvinar nibh pretium. Cras et erat aliquet, accumsan leo a, eleifend eros. Integer faucibus nunc vitae augue tempor hendrerit. Donec varius condimentum suscipit. Vivamus sagittis metus nec sodales tempus.</p>\n<p><br></p>\n<p>Nam hendrerit elit tortor, id convallis elit gravida ut. Phasellus porttitor aliquet turpis, id vestibulum orci blandit nec. Nullam id pharetra justo. Integer in urna vel metus commodo scelerisque. Cras pretium sapien est, ut sagittis nunc pharetra nec. Nullam non libero non elit aliquet hendrerit. Ut eu faucibus nunc, eget placerat lorem. Vivamus a metus et nunc imperdiet mattis. Sed nisi metus, tempus eu ipsum vulputate, porta tempor massa. Proin ipsum diam, lacinia sed nunc ac, dignissim tristique velit. Nunc pellentesque auctor fringilla. Aliquam maximus velit a felis finibus elementum. Donec mollis, tellus at elementum dapibus, ligula ligula bibendum sapien, blandit consequat nunc ligula sed ipsum. Nulla mauris erat, volutpat sit amet semper ut, vestibulum a nisi. Morbi suscipit porttitor ultricies. Interdum et malesuada fames ac ante ipsum primis in faucibus.</p>\n<p><br></p>\n<p>Mauris et consequat lorem, a laoreet enim. Proin viverra ante a augue condimentum ultrices et ut dui. Donec eu ullamcorper nulla. Nam varius, est in condimentum scelerisque, lectus lorem eleifend sem, id pharetra nisi nulla eu urna. Donec quis accumsan tortor, eu hendrerit purus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Ut mollis, arcu sed blandit molestie, erat eros aliquet nunc, a semper eros risus at sapien. Quisque tristique arcu lectus, tincidunt dapibus felis vestibulum et. Vestibulum scelerisque placerat metus, eu varius risus porta a. Ut venenatis libero velit, mattis auctor risus vestibulum ac. Nulla pulvinar, felis sit amet iaculis aliquet, dolor risus porttitor turpis, vel tempus dolor enim vel orci. Ut vehicula quam ac dignissim facilisis. Maecenas vel sapien cursus, tincidunt nunc nec, facilisis ex. Nullam fermentum est tellus, et ornare ligula euismod efficitur.</p>",
+      "mapSettings": {
+        "target": "map",
+        "center": [236000, 6585000],
+        "title": "Översiktsplan",
+        "projection": "EPSG:3007",
+        "zoom": 10,
+        "maxZoom": 3,
+        "minZoom": 9,
+        "resolutions": [
+          4096,
+          2048,
+          1024,
+          512,
+          256,
+          128,
+          64,
+          32,
+          16,
+          8,
+          4,
+          2,
+          1,
+          0.5
+        ],
+        "origin": [0, 0],
+        "extent": [0, 6000000, 1000000, 9000000],
+        "logo": "http://logodust.com/img/free/logo33.png",
+        "geoserverLegendOptions": "",
+        "pil": "",
+        "mapselector": false,
+        "colors": { "primaryColor": "#0065a6", "secondaryColor": "#ffcc00" }
+      },
+      "chapters": [
+        {
+          "header": "Kapitel 2.1",
+          "html": "<p>Sed placerat massa vel eros tempus, eu molestie nunc lacinia. Nullam et ligula pellentesque, tempus lacus non, commodo dolor. Quisque vitae nisl congue, vehicula felis non, volutpat diam. Etiam commodo efficitur velit, nec rhoncus velit tincidunt ac. Nullam ac pretium nulla, et aliquam quam. Morbi ornare mattis quam eu scelerisque. Proin ut arcu pulvinar, vulputate augue non, elementum elit.</p>\n<p>Vivamus sit amet lectus nisl. Nunc id arcu at justo rhoncus elementum a sit amet diam. Proin mi quam, interdum non vulputate ac, pellentesque in purus. Ut feugiat tortor id nunc posuere consectetur. Sed est sem, euismod id iaculis a, feugiat semper nunc. Sed eu sem finibus, porta risus sed, congue metus. Aliquam quis metus mollis, porttitor dolor sit amet, pellentesque neque. Suspendisse vestibulum odio nunc, ut sollicitudin lectus viverra vitae. Fusce efficitur commodo velit nec aliquam. Integer venenatis porttitor fringilla. Donec in rutrum odio. Suspendisse eleifend erat sit amet odio commodo tincidunt.</p>\n<figure><img src=\"https://cdn.pixabay.com/photo/2018/11/17/22/15/tree-3822149_960_720.jpg\"/></figure>\n<p>Pellentesque accumsan tortor vitae elit dapibus, ut egestas leo tincidunt. Sed vulputate, dui ut pretium sodales, orci est malesuada eros, vel sodales ligula augue eu sapien. Donec vulputate hendrerit mi, vel consequat mauris porta a. Etiam fringilla metus in diam tincidunt, at sollicitudin mi venenatis. Vestibulum euismod molestie lobortis. Phasellus venenatis sem ac elit gravida ultricies. Donec ac tristique sem.</p>\n<p>Curabitur tincidunt, nibh nec efficitur aliquam, lectus dui varius nibh, sit amet vestibulum lectus nisl nec tortor. In blandit massa ac odio faucibus auctor. Fusce elit lacus, lobortis quis diam sit amet, commodo condimentum elit. Suspendisse potenti. Vestibulum in risus in mauris mattis iaculis vel eget mi. Donec sodales ante odio, quis iaculis mi laoreet in. Suspendisse et nunc tempor, fermentum felis sit amet, dignissim arcu. Donec convallis luctus risus, in facilisis lacus. Morbi convallis lacus arcu, ut imperdiet tortor faucibus non. Sed consequat sapien et odio vestibulum, maximus faucibus ipsum ultrices. Nam ex nisl, cursus et facilisis non, varius ac ipsum.</p>",
+          "mapSettings": {
+            "center": [236817.18151796266, 6585798.307536212],
+            "zoom": 13,
+            "extent": [
+              236424.43151796266,
+              6585558.057536212,
+              237209.93151796266,
+              6586038.557536212
+            ]
+          },
+          "chapters": [],
+          "expanded": true,
+          "layers": ["27", "18"]
+        }
+      ],
+      "expanded": true
+    },
+    {
+      "header": "Kapitel 3",
+      "html": "<p>Vestibulum pretium justo a finibus iaculis. Duis cursus fermentum erat vel pulvinar. Maecenas finibus, tortor quis dignissim hendrerit, felis tellus bibendum turpis, eget dapibus diam est ut ex. Morbi ac dui et est tempor aliquam. Aliquam erat volutpat. Suspendisse pretium tortor arcu, eu volutpat quam auctor ut. Donec neque sem, consectetur tempor auctor ac, lobortis non sem. Donec rhoncus orci ut elit suscipit, eu pellentesque velit interdum. Duis tempus est blandit, venenatis dui quis, accumsan quam. Aliquam eleifend luctus enim sed finibus. Aenean ultricies consequat gravida. Etiam sit amet laoreet magna.</p>\n<p>Nulla eu egestas velit, ac egestas ipsum. Sed finibus ipsum eget dignissim iaculis. Etiam non dapibus nibh. Maecenas ac odio suscipit, pharetra odio et, aliquet erat. Cras ac elementum enim. Duis molestie diam quam, et varius felis tristique ut. Nulla ac elementum lacus. Curabitur efficitur fringilla sem ut sollicitudin. Fusce nec ullamcorper quam. Suspendisse faucibus bibendum scelerisque. Fusce sit amet faucibus ligula.</p>\n<p>Fusce eu luctus nulla. Sed dapibus, massa nec ultricies commodo, ante nisi maximus nunc, at pharetra dui tellus non nisl. Suspendisse luctus felis eu sapien faucibus vulputate. Sed lectus massa, porta eget tempus at, elementum ut turpis. Vivamus sed ipsum elit. Integer at quam magna. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce id lobortis nunc. Donec euismod ultricies tincidunt. Sed quis purus justo. Fusce id venenatis augue. Sed eu purus non lacus ullamcorper aliquet.</p>\n<p>Nunc sed velit ex. Nulla vulputate placerat neque vel semper. Maecenas eu justo porttitor orci mattis consequat. Fusce et est vel lacus pulvinar faucibus. Praesent auctor felis quis suscipit convallis. Aliquam quis commodo lorem, ut dapibus lectus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;</p>\n<figure><img src=\"https://cdn.pixabay.com/photo/2017/05/29/19/13/fire-and-water-2354583__340.jpg\"/></figure>\n<p><br></p>",
+      "mapSettings": {
+        "target": "map",
+        "center": [236000, 6585000],
+        "title": "Översiktsplan",
+        "projection": "EPSG:3007",
+        "zoom": 10,
+        "maxZoom": 3,
+        "minZoom": 9,
+        "resolutions": [
+          4096,
+          2048,
+          1024,
+          512,
+          256,
+          128,
+          64,
+          32,
+          16,
+          8,
+          4,
+          2,
+          1,
+          0.5
+        ],
+        "origin": [0, 0],
+        "extent": [0, 6000000, 1000000, 9000000],
+        "logo": "http://logodust.com/img/free/logo33.png",
+        "geoserverLegendOptions": "",
+        "pil": "",
+        "mapselector": false,
+        "colors": { "primaryColor": "#0065a6", "secondaryColor": "#ffcc00" }
+      },
+      "chapters": [],
+      "expanded": true
     }
   ],
   "map": "op"

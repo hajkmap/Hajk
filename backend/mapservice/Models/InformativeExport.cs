@@ -11,5 +11,6 @@ namespace MapService.Models
         public string documentFile { get; set; }
         public string chapterHeader { get; set; }
         public string chapterHtml { get; set; }
+        public string baseMapId { get; set; }
     }
 }

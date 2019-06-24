@@ -82,6 +82,12 @@ namespace MapService.Components
 
         private string mapFile = "op.json";
 
+        private int renderedChapters;
+
+        private int totalChapters;
+
+        private string baseLayer = "31";
+
         private LayerConfig layers;
 
         private MapConfig mapConfig;
@@ -105,7 +111,17 @@ namespace MapService.Components
             if (t != null)
             {                
                 this.layerSwitcherOptions = JsonConvert.DeserializeObject<LayerSwitcherOptions>(t.options.ToString());
-            }                        
+            }            
+        }
+
+        private int GetTotalChapters(List<Chapter> chapters, int numChapters)
+        {
+            numChapters += chapters.Count;
+            foreach(Chapter chapter in chapters)
+            {
+                return GetTotalChapters(chapter.chapters.ToList(), numChapters);
+            }
+            return numChapters;
         }
 
         /// <summary>
@@ -123,17 +139,21 @@ namespace MapService.Components
         /// </summary>
         /// <param name="chapters"></param>
         /// <param name="html"></param>
-        private void appendHtml(List<Chapter> chapters, ref string html)
-        {            
+        private void appendHtml(List<Chapter> chapters, ref StringBuilder html)
+        {           
             foreach (Chapter chapter in chapters)
             {
-                html += "<h1>" + chapter.header + "</h1>";
-                html += chapter.html;
-                html += this.appendMap(chapter);
+                renderedChapters += 1;
+                html.Append("<h1>" + chapter.header + "</h1>");            
+                html.Append(chapter.html);
+                html.Append(this.appendMap(chapter));
+                if (renderedChapters < totalChapters) {
+                    html.Append("<div style='page-break-after: always;'></div>");
+                }
                 if (chapter.chapters.Length > 0)
                 {
                     this.appendHtml(chapter.chapters.ToList(), ref html);
-                };                
+                };
             }           
         }
 
@@ -194,10 +214,10 @@ namespace MapService.Components
         /// <returns>Path to created map image</returns>
         private string appendMap(Chapter chapter)
         {
-            MapSettings mapSettings = chapter.mapSettings;
-            chapter.baseLayer = "31";
+            MapSettings mapSettings = chapter.mapSettings;            
+            chapter.baseLayer = this.baseLayer;
             string[] layers = chapter.layers;
-            if (layers != null && chapter.mapSettings.extent != null)
+            if (layers != null && chapter.mapSettings.extent != null && layers.Length > 0)
             {
                 if (chapter.baseLayer != null) {
                     layers = (new string[] { chapter.baseLayer }).Union(chapter.layers).ToArray();
@@ -342,10 +362,11 @@ namespace MapService.Components
         /// </summary>
         /// <param name="folder"></param>
         /// <returns>Path to saved document</returns>
-        public string Create(string folder, string requestedDocumentFile, string requestedMapFile)
+        public string Create(string folder, string requestedDocumentFile, string requestedMapFile, string baseMapId)
         {            
             this.documentFile = requestedDocumentFile;
             this.mapFile = requestedMapFile;
+            this.baseLayer = baseMapId;
 
             // Some operations will use the tmp-folder. Created files are deleted when used.
             Directory.CreateDirectory("C:\\tmp");
@@ -353,10 +374,11 @@ namespace MapService.Components
             // Load informative document
             string documentFile = String.Format("{0}App_Data\\documents\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.documentFile);            
             string documentJson = System.IO.File.ReadAllText(documentFile);            
-            var exportDocument = JsonConvert.DeserializeObject<Document>(documentJson);            
+            var exportDocument = JsonConvert.DeserializeObject<Document>(documentJson);
 
-            string html = "";
+            StringBuilder html = new StringBuilder();
             // Append maps to document
+            this.totalChapters = GetTotalChapters(exportDocument.chapters.ToList(), 1);
             this.appendHtml(exportDocument.chapters.ToList(), ref html);            
 
             var renderer = new HtmlToPdf();
@@ -372,7 +394,7 @@ namespace MapService.Components
                 DrawDividerLine = false
             };
             
-            var pdf2 = renderer.RenderHtmlAsPdf(html);            
+            var pdf2 = renderer.RenderHtmlAsPdf(html.ToString());            
 
             string path = "C:\\tmp\\temp_pdf_export.pdf";
             pdf2.SaveAs(path);

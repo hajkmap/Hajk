@@ -25,6 +25,16 @@ class InformativeModel {
     const documentFile =
       this.app.plugins.informative.options.document + ".json";
 
+    const baseLayer = this.olMap
+      .getLayers()
+      .getArray()
+      .find(
+        l =>
+          l.getProperties().layerInfo &&
+          l.getProperties().layerInfo.layerType === "base" &&
+          l.getVisible()
+      );
+
     fetch(this.exportUrl, {
       method: "POST",
       headers: {
@@ -35,7 +45,8 @@ class InformativeModel {
           mapFile: mapFile,
           documentFile: documentFile,
           chapterHeader: chapter.header,
-          chapterHtml: chapter.html
+          chapterHtml: chapter.html,
+          baseMapId: baseLayer ? baseLayer.getProperties().name : ""
         })
       })
     })
@@ -108,9 +119,7 @@ class InformativeModel {
       //   "Informative Plugin kunde inte ladda data korrekt. Om felet kvarstår var god och meddela administratören."
       // );
       console.error(
-        `Couldn't load data for Informative plugin. Make sure that the URL to mapservice is correctly configured. Current value: ${
-          response.url
-        }`
+        `Couldn't load data for Informative plugin. Make sure that the URL to mapservice is correctly configured. Current value: ${response.url}`
       );
     }
   }
