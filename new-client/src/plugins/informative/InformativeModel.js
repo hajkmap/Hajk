@@ -20,6 +20,43 @@ class InformativeModel {
     });
   }
 
+  getLegends(chapter) {
+    var legendUrls = [];
+
+    const layers = this.olMap
+      .getLayers()
+      .getArray()
+      .filter(
+        l =>
+          chapter.layers &&
+          chapter.layers.some(layer => layer === l.getProperties()["name"])
+      );
+
+    layers.forEach(layer => {
+      if (
+        layer.getProperties().layerInfo &&
+        layer.getProperties().layerInfo["layerType"] !== "base"
+      ) {
+        if (layer.layersInfo) {
+          Object.values(layer.layersInfo).forEach(layerInfo => {
+            legendUrls.push({
+              caption:
+                layerInfo.caption || layer.getProperties().layerInfo["caption"],
+              url: layerInfo.legend
+            });
+          });
+        } else {
+          legendUrls.push({
+            caption: layer.getProperties().layerInfo.caption,
+            url: layer.getProperties().layerInfo.legend[0].url
+          });
+        }
+      }
+    });
+
+    return legendUrls;
+  }
+
   print(chapter, callback) {
     const mapFile = this.app.config.activeMap + ".json";
     const documentFile =

@@ -117,7 +117,7 @@
       "caption": "Parkering WMS",
       "url": "http://giscloud.se/geoserver/wms",
       "owner": "",
-      "date": "1556896376754",
+      "date": "1561383227631",
       "content": "",
       "legend": "",
       "projection": "EPSG:3006",
@@ -128,7 +128,7 @@
           "caption": "",
           "legend": "",
           "infobox": "",
-          "style": null,
+          "style": "",
           "queryable": false
         }
       ],
@@ -139,7 +139,7 @@
       "opacity": 1.0,
       "singleTile": false,
       "imageFormat": "image/png",
-      "serverType": null,
+      "serverType": "geoserver",
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -153,7 +153,7 @@
       "infoUrlText": "",
       "infoOwner": "",
       "version": "1.1.1",
-      "infoFormat": "text/plain",
+      "infoFormat": "application/json",
       "zIndex": null
     },
     {

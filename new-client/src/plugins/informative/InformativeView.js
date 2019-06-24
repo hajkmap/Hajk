@@ -9,6 +9,7 @@ import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import MenuIcon from "@material-ui/icons/Menu";
 import PrintIcon from "@material-ui/icons/Print";
+import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import Typography from "@material-ui/core/Typography";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import Alert from "../../components/Alert.js";
@@ -80,7 +81,19 @@ const styles = theme => ({
     transition: "opacity 2s ease-in"
   },
   button: {
-    margin: theme.spacing.unit
+    margin: theme.spacing(1)
+  },
+  legend: {
+    border: "1px solid #999",
+    padding: theme.spacing(1),
+    flexFlow: "row wrap",
+    display: "flex",
+    borderRadius: "5px"
+  },
+  legendItem: {
+    margin: theme.spacing(1),
+    fontWeight: 600,
+    textAlign: "center"
   }
 });
 
@@ -95,6 +108,7 @@ class Informative extends React.PureComponent {
       url: "",
       loading: false,
       alert: false,
+      displayLegend: false,
       chapters: [],
       chapter: {
         header: "",
@@ -121,6 +135,7 @@ class Informative extends React.PureComponent {
         this.setState({
           chapters: chapter.chapters,
           chapter: chapter,
+          displayLegend: false,
           tocVisible: false
         });
       }
@@ -131,7 +146,8 @@ class Informative extends React.PureComponent {
             header: homeHeader,
             html: homeHtml
           },
-          tocVisible: false
+          tocVisible: false,
+          displayLegend: false
         });
       }
     });
@@ -148,13 +164,22 @@ class Informative extends React.PureComponent {
     const { classes } = this.props;
     if (Array.isArray(chapter.layers) && chapter.layers.length > 0) {
       return (
-        <Button
-          variant="contained"
-          onClick={this.displayMap(chapter.layers, chapter.mapSettings)}
-        >
-          Visa karta
-          <MapIcon color="primary" className={classes.rightIcon} />
-        </Button>
+        <div>
+          <Button
+            variant="contained"
+            onClick={this.displayMap(chapter.layers, chapter.mapSettings)}
+          >
+            Visa karta
+            <MapIcon color="primary" className={classes.rightIcon} />
+          </Button>
+          <IconButton
+            className={classes.button}
+            aria-label="Teckenförklaring"
+            onClick={this.toggleLegend}
+          >
+            <MoreHorizIcon color="primary" title="Teckenförklaring" />
+          </IconButton>
+        </div>
       );
     }
   }
@@ -186,7 +211,8 @@ class Informative extends React.PureComponent {
                 var state = {
                   chapters: chapter.chapters,
                   chapter: chapter,
-                  tocVisible: false
+                  tocVisible: false,
+                  displayLegend: false
                 };
                 this.setState(state);
               }}
@@ -299,6 +325,12 @@ class Informative extends React.PureComponent {
     });
   };
 
+  toggleLegend = () => {
+    this.setState({
+      displayLegend: !this.state.displayLegend
+    });
+  };
+
   renderChapters() {
     const { classes } = this.props;
     const { tocVisible } = this.state;
@@ -345,6 +377,29 @@ class Informative extends React.PureComponent {
     );
   }
 
+  renderLegend() {
+    const { classes } = this.props;
+    return (
+      this.state.displayLegend && (
+        <div>
+          <Typography variant="overline">Teckenförklaring</Typography>
+          <div className={classes.legend}>
+            {this.props.parent.informativeModel
+              .getLegends(this.state.chapter)
+              .map((legend, i) => {
+                return (
+                  <div className={classes.legendItem} key={i}>
+                    <div>{legend.caption}</div>
+                    <img key={i} alt="toc" src={legend.url} />
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      )
+    );
+  }
+
   render() {
     const { classes } = this.props;
     return (
@@ -363,6 +418,7 @@ class Informative extends React.PureComponent {
         <div className={classes.layers}>
           {this.renderLayerItems(this.state.chapter)}
         </div>
+        {this.renderLegend()}
         <div className={classes.content}>{this.renderContent()}</div>
       </div>
     );
