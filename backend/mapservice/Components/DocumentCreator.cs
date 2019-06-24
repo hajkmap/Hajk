@@ -38,6 +38,8 @@ namespace MapService.Components
         public MapSettings mapSettings { get; set; }
         public string[] layers { get; set; }
         public string baseLayer { get; set; }
+        public int startPage { get; set; }
+        public int stopPage { get; set; }
     }
 
     public class Document
@@ -80,13 +82,15 @@ namespace MapService.Components
 
         private string layersFile = "layers.json";
 
-        private string mapFile = "op.json";
+        private string mapFile = "op.json";        
 
         private int renderedChapters;
 
         private int totalChapters;
 
         private string baseLayer = "31";
+
+        private List<int> printPages;
 
         private LayerConfig layers;
 
@@ -114,6 +118,12 @@ namespace MapService.Components
             }            
         }
 
+        /// <summary>
+        /// Count total number of chapters
+        /// </summary>
+        /// <param name="chapters"></param>
+        /// <param name="numChapters"></param>
+        /// <returns></returns>
         private int GetTotalChapters(List<Chapter> chapters, int numChapters)
         {
             numChapters += chapters.Count;
@@ -139,20 +149,20 @@ namespace MapService.Components
         /// </summary>
         /// <param name="chapters"></param>
         /// <param name="html"></param>
-        private void appendHtml(List<Chapter> chapters, ref StringBuilder html)
+        private void AppendHtml(List<Chapter> chapters, ref StringBuilder html)
         {           
             foreach (Chapter chapter in chapters)
             {
                 renderedChapters += 1;
                 html.Append("<h1>" + chapter.header + "</h1>");            
                 html.Append(chapter.html);
-                html.Append(this.appendMap(chapter));
+                html.Append(this.AppendMap(chapter));
                 if (renderedChapters < totalChapters) {
                     html.Append("<div style='page-break-after: always;'></div>");
                 }
                 if (chapter.chapters.Length > 0)
                 {
-                    this.appendHtml(chapter.chapters.ToList(), ref html);
+                    this.AppendHtml(chapter.chapters.ToList(), ref html);
                 };
             }           
         }
@@ -163,7 +173,7 @@ namespace MapService.Components
         /// <param name="chapters"></param>
         /// <param name="html"></param>
         /// <param name="pageContents"></param>
-        private void appendHeader(List<Chapter> chapters, ref string html, Dictionary<int, string[]> pageContents)
+        private void AppendHeader(List<Chapter> chapters, ref string html, Dictionary<int, string[]> pageContents)
         {            
             foreach (Chapter chapter in chapters)
             {                
@@ -190,7 +200,8 @@ namespace MapService.Components
                                 {
                                     found = true;
                                     foundPage = i.ToString();
-                                }                                                                                                    
+                                    chapter.startPage = i;
+                                }                                                                                        
                             }
                         }
                     }
@@ -202,7 +213,7 @@ namespace MapService.Components
 
                 if (chapter.chapters.Length > 0)
                 {                    
-                    this.appendHeader(chapter.chapters.ToList(), ref html, pageContents);
+                    this.AppendHeader(chapter.chapters.ToList(), ref html, pageContents);
                 };
             };
         }
@@ -212,7 +223,7 @@ namespace MapService.Components
         /// </summary>
         /// <param name="chapter"></param>
         /// <returns>Path to created map image</returns>
-        private string appendMap(Chapter chapter)
+        private string AppendMap(Chapter chapter)
         {
             MapSettings mapSettings = chapter.mapSettings;            
             chapter.baseLayer = this.baseLayer;
@@ -222,7 +233,7 @@ namespace MapService.Components
                 if (chapter.baseLayer != null) {
                     layers = (new string[] { chapter.baseLayer }).Union(chapter.layers).ToArray();
                 }
-                LayerConfig layerConfig = this.lookupLayers(layers);                
+                LayerConfig layerConfig = this.LookupLayers(layers);                
                 MapExportItem mapExportItem = new MapExportItem();                
                 int mapHeight = 500;
                 int mapWidth = (int)(mapHeight * ((1 + Math.Sqrt(5)) / 2));
@@ -273,7 +284,7 @@ namespace MapService.Components
         /// <param name="layer"></param>
         /// <param name="layers"></param>
         /// <returns>Mathing layers</returns>
-        private bool layerLookup(ILayerConfig layer, string[] layers)
+        private bool LayerLookup(ILayerConfig layer, string[] layers)
         {
             return layers.Any(layerId => layerId == layer.id);
         }
@@ -284,11 +295,11 @@ namespace MapService.Components
         /// <param name="lookupLayer"></param>
         /// <param name="groups"></param>
         /// <returns>Found layer</returns>
-        private LayerOptions findLayerInGroup(ILayerConfig lookupLayer, List<GroupOptions> groups)
+        private LayerOptions FindLayerInGroup(ILayerConfig lookupLayer, List<GroupOptions> groups)
         {            
             foreach (GroupOptions group in groups)
             {
-                var found = findLayerInGroup(lookupLayer, group.groups);
+                var found = this.FindLayerInGroup(lookupLayer, group.groups);
                 if (found != null)
                 {
                     return found;
@@ -308,12 +319,12 @@ namespace MapService.Components
         /// Set the layer zIndex from the map config.
         /// </summary>
         /// <param name="layer"></param>
-        private void setLayerZIndex(ILayerConfig layer)
+        private void SetLayerZIndex(ILayerConfig layer)
         {
             LayerOptions foundLayer = this.layerSwitcherOptions.baselayers.ToList().Find(l => l.id == layer.id);
             if (foundLayer == null)
             {
-                foundLayer = this.findLayerInGroup(layer, this.layerSwitcherOptions.groups);         
+                foundLayer = this.FindLayerInGroup(layer, this.layerSwitcherOptions.groups);         
                 if (foundLayer != null)
                 {
                     layer.zIndex = foundLayer.drawOrder;
@@ -330,23 +341,23 @@ namespace MapService.Components
         /// </summary>
         /// <param name="layers"></param>
         /// <returns>Mathing layers</returns>
-        private LayerConfig lookupLayers(string[] layers)
+        private LayerConfig LookupLayers(string[] layers)
         {
             List<ArcGISConfig> ArcGISLayers = this.layers.arcgislayers
-                .Where(layer => this.layerLookup(layer, layers)).ToList();
+                .Where(layer => this.LayerLookup(layer, layers)).ToList();
 
             List<VectorConfig> VectorLayers = this.layers.vectorlayers
-                .Where(layer => this.layerLookup(layer, layers)).ToList();
+                .Where(layer => this.LayerLookup(layer, layers)).ToList();
 
             List<WMSConfig> WMSLayers = this.layers.wmslayers
-                .Where(layer => this.layerLookup(layer, layers)).ToList();
+                .Where(layer => this.LayerLookup(layer, layers)).ToList();
 
             List<WMTSConfig> WMTSLayers = this.layers.wmtslayers
-                .Where(layer => this.layerLookup(layer, layers)).ToList();
+                .Where(layer => this.LayerLookup(layer, layers)).ToList();
 
-            WMSLayers.ForEach(layer => { this.setLayerZIndex(layer); });
-            VectorLayers.ForEach(layer => { this.setLayerZIndex(layer); });
-            ArcGISLayers.ForEach(layer => { this.setLayerZIndex(layer); });
+            WMSLayers.ForEach(layer => { this.SetLayerZIndex(layer); });
+            VectorLayers.ForEach(layer => { this.SetLayerZIndex(layer); });
+            ArcGISLayers.ForEach(layer => { this.SetLayerZIndex(layer); });
 
             return new LayerConfig()
             {
@@ -358,15 +369,129 @@ namespace MapService.Components
         }
 
         /// <summary>
+        /// Flatten a tree of chapters
+        /// </summary>
+        /// <param name="chapters"></param>
+        /// <param name="flattened"></param>
+        private void FlattenChapters(Chapter[] chapters, ref List<Chapter> flattened)
+        {
+            foreach (Chapter chapter in chapters)
+            {
+                {
+                    flattened.Add(new Chapter()
+                    {
+                        header = chapter.header,
+                        html = chapter.html,
+                        startPage = chapter.startPage
+                    });
+                    if (chapter.chapters.Length > 0)
+                    {
+                        FlattenChapters(chapter.chapters, ref flattened);
+                    }
+                }
+            }
+        }
+
+        private Chapter LastChapter(Chapter chapter)
+        {
+            if (chapter.chapters.Length > 0)
+            {
+                return LastChapter(chapter.chapters[chapter.chapters.Length - 1]);
+            }
+            else
+            {
+                return chapter;
+            }
+        }
+
+        /// <summary>
+        /// Find pages to print.
+        /// This is based on from witch chapter the PDF is exported.
+        /// </summary>
+        /// <param name="header"></param>
+        /// <param name="html"></param>
+        /// <returns></returns>
+        private void RemoveSurroundingPages(string header, string html, Chapter[] chapters, IronPdf.PdfDocument document)
+        {            
+            for (int i = 0; i < chapters.Count(); i++)
+            {
+                if (chapters[i].header == header)
+                {
+                    int startPage = chapters[i].startPage;
+                    int stopPage = document.PageCount;
+                    
+                    if (i < chapters.Count() - 1)
+                    {                        
+                        stopPage = chapters[i + 1].startPage;
+                    }
+                    else
+                    {
+                        if (chapters[i].chapters.Length > 0)
+                        {
+                            Chapter lastChapter = this.LastChapter(chapters[i]);
+                            stopPage = lastChapter.stopPage;
+                        }
+                        else
+                        {
+                            if (chapters[i].stopPage > 0)
+                            {
+                                stopPage = chapters[i].stopPage;
+                            }
+                        }                        
+                    }
+
+                    int startIndex = 0;
+                    int stopIndex = document.PageCount - 1;
+                    int chapterStartIndex = startPage - 1;
+                    int chapterEndIndex = stopPage - 2;
+                    
+                    if (chapterEndIndex < stopIndex)
+                        document.RemovePages(chapterEndIndex + 1, stopIndex);
+                    if (chapterStartIndex > startIndex)
+                        document.RemovePages(startIndex, chapterStartIndex - 1);
+
+                    break;
+                }
+                if (chapters[i].chapters.Length > 0)
+                {
+                    RemoveSurroundingPages(header, html, chapters[i].chapters, document);
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// Compare a flat list with chapters and set the stop page for a chapter in the tree.
+        /// </summary>
+        /// <param name="chapters"></param>
+        /// <param name="flattened"></param>
+        /// <param name="counter"></param>
+        private void SetChapterPages(Chapter[] chapters, List<Chapter> flattened, ref int counter)
+        {
+            foreach(Chapter chapter in chapters)
+            {
+                counter += 1;
+                if (counter < flattened.Count)
+                {
+                    chapter.stopPage = flattened[counter].startPage;
+                }
+                if (chapter.chapters.Length > 0)
+                {
+                    SetChapterPages(chapter.chapters, flattened, ref counter);
+                }
+            }
+        }
+
+        /// <summary>
         /// Create PDF-document
         /// </summary>
         /// <param name="folder"></param>
         /// <returns>Path to saved document</returns>
-        public string Create(string folder, string requestedDocumentFile, string requestedMapFile, string baseMapId)
+        public string Create(string folder, InformativeExport informativeExport)
         {            
-            this.documentFile = requestedDocumentFile;
-            this.mapFile = requestedMapFile;
-            this.baseLayer = baseMapId;
+            this.documentFile = informativeExport.documentFile;
+            this.mapFile = informativeExport.mapFile;
+            this.baseLayer = informativeExport.baseMapId;            
 
             // Some operations will use the tmp-folder. Created files are deleted when used.
             Directory.CreateDirectory("C:\\tmp");
@@ -379,7 +504,7 @@ namespace MapService.Components
             StringBuilder html = new StringBuilder();
             // Append maps to document
             this.totalChapters = GetTotalChapters(exportDocument.chapters.ToList(), 1);
-            this.appendHtml(exportDocument.chapters.ToList(), ref html);            
+            this.AppendHtml(exportDocument.chapters.ToList(), ref html);            
 
             var renderer = new HtmlToPdf();
 
@@ -394,18 +519,14 @@ namespace MapService.Components
                 DrawDividerLine = false
             };
             
-            var pdf2 = renderer.RenderHtmlAsPdf(html.ToString());            
-
-            string path = "C:\\tmp\\temp_pdf_export.pdf";
-            pdf2.SaveAs(path);
-            
-            string tocHtml = "";
-
+            var pdf2 = renderer.RenderHtmlAsPdf(html.ToString());
+                        
             //
             // Read the created document and match headers to create toc.
             // Headers must be unique
-            //
-            using (PdfReader reader = new PdfReader(path))
+            //            
+            string tocHtml = "";            
+            using (PdfReader reader = new PdfReader(pdf2.Stream))
             {
                 Dictionary<int, string[]> pageContents = new Dictionary<int, string[]>();
                 for (int j = 1; j <= reader.NumberOfPages; j++)
@@ -414,14 +535,30 @@ namespace MapService.Components
                     pageContents.Add(j, text.Split('\n'));
                 }
                 tocHtml = "<h1>Innehållsförteckning</h1>";                
-                this.appendHeader(exportDocument.chapters.ToList(), ref tocHtml, pageContents);
-            }            
+                this.AppendHeader(exportDocument.chapters.ToList(), ref tocHtml, pageContents);
+            }
 
-            //Remove temporatry file
-            File.Delete(path);
+            renderer.PrintOptions.Footer = new HtmlHeaderFooter()
+            {
+                Height = 15,
+                HtmlFragment = "<center></center>",
+                DrawDividerLine = false
+            };
 
             var pdf1 = renderer.RenderHtmlAsPdf(tocHtml);
-            var pdf = IronPdf.PdfDocument.Merge(pdf1, pdf2);                    
+
+            //
+            // Remove unwanted pages.
+            // Pages within the same chapter will remain.
+            //
+            List<Chapter> flattened = new List<Chapter>();
+            FlattenChapters(exportDocument.chapters, ref flattened);
+            int chapterCount = 0;
+            this.SetChapterPages(exportDocument.chapters, flattened, ref chapterCount);
+            this.RemoveSurroundingPages(informativeExport.chapterHeader, informativeExport.chapterHtml, exportDocument.chapters, pdf2);
+
+            var pdf = IronPdf.PdfDocument.Merge(pdf1, pdf2);  
+
             var r = new Random();
             var i = r.Next();
             string fileName = "pdf-export-" + i + ".pdf";
