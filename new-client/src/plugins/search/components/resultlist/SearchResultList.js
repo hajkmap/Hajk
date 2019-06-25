@@ -71,7 +71,7 @@ const styles = theme => {
 
 class SearchResultList extends React.PureComponent {
   state = {
-    visible: true,
+    visible: true, //is this really used?
     minimized: false,
     highlightedFeatures: []
   };

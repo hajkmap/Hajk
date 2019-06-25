@@ -63,10 +63,7 @@ const styles = theme => {
         right: 0
       }
     },
-    searchButton: {
-      borderRadius: 0,
-      border: "solid"
-    },
+
     searchContainer: {
       [theme.breakpoints.up("xs")]: {
         display: "flex",
@@ -225,11 +222,9 @@ class Search extends React.PureComponent {
     return (
       <div className={classes.searchResults}>
         <SearchResultList
-          localObserver={this.localObserver}
           result={result}
           renderAffectButton={this.activeSpatialTools.radiusSearch}
           model={this.searchModel}
-          visible={true}
           target={target}
         />
       </div>
