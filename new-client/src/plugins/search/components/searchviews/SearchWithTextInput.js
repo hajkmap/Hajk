@@ -29,16 +29,6 @@ const styles = theme => ({
   },
   clearIcon: {
     cursor: "pointer"
-  },
-  searchIcon: {
-    position: "relative",
-    padding: "6px"
-  },
-  progress: {
-    width: "20px !important",
-    height: "20px !important",
-    color: theme.palette.primary.main,
-    margin: "2px"
   }
 });
 
