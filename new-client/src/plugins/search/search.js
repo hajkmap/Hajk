@@ -22,7 +22,7 @@ const styles = theme => {
       background: "white",
       borderRadius: "10px",
       margin: "0px 10px 10px 10px",
-      //Boxshadow is the same as for card - Should maybe be changed to a card instead
+      // TODO - Component card should be used instead
       boxShadow:
         "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0)",
       minWidth: "360px",
