@@ -480,9 +480,10 @@ class SearchModel {
 
   highlightFeatures(features) {
     this.vectorLayer.getSource().addFeatures(features);
-    this.olMap
-      .getView()
-      .fit(this.vectorLayer.getSource().getExtent(), this.olMap.getSize());
+    this.olMap.getView().fit(this.vectorLayer.getSource().getExtent(), {
+      size: this.olMap.getSize(),
+      maxZoom: 7
+    });
   }
   /*
   highlightFeature(feature) {

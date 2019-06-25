@@ -126,7 +126,6 @@ class SearchResultItem extends Component {
   };
 
   getHtmlItemInfoBox = (feature, infoBox) => {
-    console.log(mergeFeaturePropsWithMarkdown, "??");
     var properties = extractPropertiesFromJson(feature.properties);
     feature.properties = properties;
     return mergeFeaturePropsWithMarkdown(infoBox, feature.properties);
