@@ -120,28 +120,37 @@ class SearchModel {
   //Only handles single select and is restricted to polygon and multipolygon atm
   onSelectFeatures = (evt, selectionDone, callback) => {
     handleClick(evt, evt.map, response => {
-      var geometryType = response.features[0].getGeometry().getType();
-      if (
-        geometryType === GeometryType.POLYGON ||
-        geometryType === GeometryType.MULTI_POLYGON
-      ) {
-        this.drawLayer.getSource().addFeatures(response.features);
-        if (response.features.length > 0) {
-          selectionDone();
-          this.searchWithinArea(
-            response.features[0],
-            false,
-            featureCollections => {
-              callback(featureCollections);
-            }
-          );
+      if (response.features.length > 0) {
+        var geometryType = response.features[0].getGeometry().getType();
+
+        if (
+          geometryType === GeometryType.POLYGON ||
+          geometryType === GeometryType.MULTI_POLYGON
+        ) {
+          this.drawLayer.getSource().addFeatures(response.features);
+          if (response.features.length > 0) {
+            selectionDone();
+            this.searchWithinArea(
+              response.features[0],
+              false,
+              featureCollections => {
+                callback(featureCollections);
+              }
+            );
+          }
+        } else {
+          this.activateSelectionClick(selectionDone, callback);
         }
       } else {
-        this.olMap.clicklock = true;
-        this.olMap.once("singleclick", e => {
-          this.onSelectFeatures(e, callback);
-        });
+        this.activateSelectionClick(selectionDone, callback);
       }
+    });
+  };
+
+  activateSelectionClick = (selectionDone, callback) => {
+    this.olMap.clicklock = true;
+    this.olMap.once("singleclick", e => {
+      this.onSelectFeatures(e, selectionDone, callback);
     });
   };
 
@@ -151,10 +160,7 @@ class SearchModel {
     callback
   ) => {
     if (active) {
-      this.olMap.clicklock = true;
-      this.olMap.once("singleclick", e => {
-        this.onSelectFeatures(e, selectionDone, callback);
-      });
+      this.activateSelectionClick(selectionDone, callback);
     } else {
       this.olMap.clicklock = false;
       this.clearHighlight();
