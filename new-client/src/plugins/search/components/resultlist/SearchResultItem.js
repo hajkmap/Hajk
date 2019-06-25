@@ -71,14 +71,12 @@ class SearchResultItem extends Component {
     var olFeature = new GeoJSON().readFeatures(feature)[0];
     this.props.model.highlightImpact(olFeature);
     if (window.innerWidth >= 1280) {
-      this.props.parent.hide();
+      this.props.searchResultList.hide();
     }
-
     this.props.model.clearLayerList();
-    this.props.model.app.globalObserver.publish("hideSearchPanel");
   };
 
-  zoomTo = () => {
+  zoomToHighLightedFeatures = () => {
     var features = this.props.highlightedFeatures.map(feature => {
       var geoJsonFeature = new GeoJSON().readFeatures(feature)[0];
       geoJsonFeature.infobox = feature.infobox;
@@ -87,15 +85,16 @@ class SearchResultItem extends Component {
 
     if (features.length > 0) {
       this.props.model.highlightFeatures(features);
-      if (window.innerWidth >= 600) {
-        //this.props.parent.hide();
-      }
+      console.log(window.innerWidth, "HERE");
+      /*if (window.innerWidth >= 600) {
+        this.props.searchResultList.hide();
+      }*/
     }
   };
 
+  //TODO - Break up into smaller functions
   handleOnFeatureClick = feature => {
     var highlightedFeatures = this.props.highlightedFeatures;
-
     var indexOfHighlightedFeature = highlightedFeatures.indexOf(feature);
 
     if (indexOfHighlightedFeature > -1) {
@@ -104,12 +103,12 @@ class SearchResultItem extends Component {
       this.props.setHighlightedFeatures(newHighlightedFeaturesArray, () => {
         var featureAsGeoJson = new GeoJSON().readFeatures(feature)[0];
         this.props.model.clearFeatureHighlight(featureAsGeoJson);
-        this.zoomTo();
+        this.zoomToHighLightedFeatures();
       });
     } else {
       newHighlightedFeaturesArray = highlightedFeatures.concat([feature]);
       this.props.setHighlightedFeatures(newHighlightedFeaturesArray, () => {
-        this.zoomTo();
+        this.zoomToHighLightedFeatures();
       });
     }
   };

@@ -89,7 +89,7 @@ class SearchResultList extends React.PureComponent {
   }
 
   renderResult() {
-    const { result, localObserver, target, model } = this.props;
+    const { result, target } = this.props;
     if (this.state.minimized) return null;
     return (
       <div>
@@ -97,11 +97,13 @@ class SearchResultList extends React.PureComponent {
           if (featureType.features.length === 0) return null;
           return (
             <SearchResultGroup
-              localObserver={localObserver}
               parent={this}
               key={i}
+              setHighlightedFeatures={this.setHighlightedFeatures}
+              highlightedFeatures={this.state.highlightedFeatures}
               featureType={featureType}
-              model={model}
+              renderAffectButton={this.props.renderAffectButton}
+              model={this.props.model}
               expanded={false}
               target={target}
             />
@@ -116,7 +118,7 @@ class SearchResultList extends React.PureComponent {
   };
 
   render() {
-    const { classes, result, localObserver, target } = this.props;
+    const { classes, result, target } = this.props;
     const { minimized } = this.state;
     let searchResultClass = classes.searchResult;
     if (this.props.target === "top") {
@@ -195,23 +197,7 @@ class SearchResultList extends React.PureComponent {
               this.state.minimized ? classes.hidden : null
             )}
           >
-            {result.map((featureType, i) => {
-              if (featureType.features.length === 0) return null;
-              return (
-                <SearchResultGroup
-                  localObserver={localObserver}
-                  parent={this}
-                  key={i}
-                  setHighlightedFeatures={this.setHighlightedFeatures}
-                  highlightedFeatures={this.state.highlightedFeatures}
-                  featureType={featureType}
-                  renderAffectButton={this.props.renderAffectButton}
-                  model={this.props.model}
-                  expanded={false}
-                  target={target}
-                />
-              );
-            })}
+            {this.renderResult()}
           </div>
         </div>
       );

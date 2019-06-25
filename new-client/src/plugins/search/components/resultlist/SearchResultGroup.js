@@ -79,7 +79,10 @@ class SearchResultGroup extends Component {
       return (
         <SearchResultItem
           key={i}
+          searchResultList={this.props.parent}
+          renderAffectButton={this.props.renderAffectButton}
           model={this.props.model}
+          target={this.props.target}
           feature={featureType.features[i]}
           highlightedFeatures={this.props.highlightedFeatures}
           setHighlightedFeatures={this.props.setHighlightedFeatures}
