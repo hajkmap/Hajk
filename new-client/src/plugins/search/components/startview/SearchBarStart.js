@@ -26,13 +26,6 @@ const styles = theme => ({
     "&:focus": {
       width: "100%"
     }
-  },
-  clearIcon: {
-    cursor: "pointer"
-  },
-  searchIcon: {
-    position: "relative",
-    padding: "6px"
   }
 });
 

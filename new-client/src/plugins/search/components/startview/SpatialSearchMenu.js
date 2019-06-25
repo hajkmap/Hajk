@@ -17,18 +17,6 @@ const styles = theme => ({
     display: "flex",
     flexWrap: "wrap",
     borderLeft: "1px solid rgba(0, 0, 0, 0.42)"
-  },
-  anchorOriginBottomCenter: {
-    bottom: "60px"
-  },
-
-  formControl: {
-    margin: theme.spacing.unit,
-    minWidth: 20,
-    maxWidth: 300
-  },
-  noLabel: {
-    marginTop: theme.spacing.unit * 3
   }
 });
 
