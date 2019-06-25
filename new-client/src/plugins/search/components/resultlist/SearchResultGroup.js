@@ -195,13 +195,13 @@ class SearchResultGroup extends Component {
     return (
       <ExpansionPanel
         key={i}
-        onClick={e => {
-          this.handleOnFeatureClick(feature);
-        }}
         expanded={this.state.expanded === i}
         className={classes.item}
       >
         <ExpansionPanelSummary
+          onClick={e => {
+            this.handleOnFeatureClick(feature);
+          }}
           classes={{
             expandIcon: classes.featureMenu,
             expanded: classes.expanded,
