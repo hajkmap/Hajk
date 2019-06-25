@@ -113,12 +113,18 @@ class SearchResultList extends React.PureComponent {
     );
   }
 
+  getNumberOfResults = result => {
+    return result.reduce((accumulated, result) => {
+      return accumulated + result.features.length;
+    }, 0);
+  };
+
   setHighlightedFeatures = (i, callback) => {
     this.setState({ highlightedFeatures: i }, callback);
   };
 
   render() {
-    const { classes, result, target } = this.props;
+    const { classes, result } = this.props;
     const { minimized } = this.state;
     let searchResultClass = classes.searchResult;
     if (this.props.target === "top") {
@@ -153,34 +159,22 @@ class SearchResultList extends React.PureComponent {
           <div className={classes.searchResultTopBar}>
             <div className={classes.searchResultTopBarLeft}>
               <Place />
-              <Typography className={classes.resultCount}>
-                {result.reduce((x, t) => {
-                  return x + t.features.length;
-                }, 0) + " sökträffar"}
+              <Typography>
+                {this.getNumberOfResults(result) + " sökträffar"}
               </Typography>
             </div>
             <div className={classes.searchResultTopBarRight}>
               {!minimized ? (
                 <div>
-                  <IconButton
-                    className={classes.button}
-                    onClick={() => this.toggle()}
-                  >
-                    <Typography color="primary" className={classes.resultCount}>
-                      Dölj
-                    </Typography>
+                  <IconButton onClick={() => this.toggle()}>
+                    <Typography color="primary">Dölj</Typography>
                     <ExpandLess />
                   </IconButton>
                 </div>
               ) : (
                 <div>
-                  <IconButton
-                    className={classes.button}
-                    onClick={() => this.toggle()}
-                  >
-                    <Typography color="primary" className={classes.resultCount}>
-                      Visa
-                    </Typography>
+                  <IconButton onClick={() => this.toggle()}>
+                    <Typography color="primary">Visa</Typography>
                     <ExpandMore />
                   </IconButton>
                 </div>

@@ -34,13 +34,13 @@ const styles = theme => ({
     background: "#e1e1e1",
     fontWeight: "bold"
   },
+  activeExpandButton: {
+    color: "black"
+  },
   expansionPanelDetails: {
     background: "white"
   },
 
-  expandButton: {
-    color: "grey"
-  },
   content: {
     "&$expanded": {
       margin: "0px"
@@ -163,7 +163,7 @@ class SearchResultItem extends Component {
           expandIcon={
             <ExpandIconWrapper>
               <KeyboardArrowDown
-                className={active ? classes.active : classes.expandButton}
+                className={active ? classes.activeExpandButton : null}
               />
             </ExpandIconWrapper>
           }
