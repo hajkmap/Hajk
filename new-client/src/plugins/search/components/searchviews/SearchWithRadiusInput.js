@@ -4,7 +4,7 @@ import { withStyles } from "@material-ui/core/styles";
 import RadioButtonUnchecked from "@material-ui/icons/RadioButtonUnchecked";
 import Snackbar from "@material-ui/core/Snackbar";
 import { createPortal } from "react-dom";
-import SearchButton from "../../components/SearchButton";
+import SearchButton from "../../components/shared/SearchButton";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import ClearIcon from "@material-ui/icons/Clear";
 import { OutlinedInput } from "@material-ui/core";

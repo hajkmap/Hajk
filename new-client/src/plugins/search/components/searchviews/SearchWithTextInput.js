@@ -3,7 +3,7 @@ import OutlinedInput from "@material-ui/core/OutlinedInput";
 import { withStyles } from "@material-ui/core/styles";
 import ClearIcon from "@material-ui/icons/Clear";
 import InputAdornment from "@material-ui/core/InputAdornment";
-import SearchButton from "../SearchButton";
+import SearchButton from "../../components/shared/SearchButton";
 
 const styles = theme => ({
   search: {

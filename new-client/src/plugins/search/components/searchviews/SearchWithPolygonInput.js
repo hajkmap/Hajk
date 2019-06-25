@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Edit from "@material-ui/icons/Edit";
-import SearchButton from "../../components/SearchButton";
+import SearchButton from "../../components/shared/SearchButton";
 import ClearIcon from "@material-ui/icons/Clear";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import { OutlinedInput } from "@material-ui/core";
