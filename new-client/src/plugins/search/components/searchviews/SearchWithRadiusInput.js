@@ -15,6 +15,10 @@ const styles = theme => ({
   },
   input: {
     flex: "auto"
+  },
+  root: {
+    display: "flex",
+    flex: "auto"
   }
 });
 
@@ -37,14 +41,6 @@ class SearchWithRadiusInput extends React.PureComponent {
       }
     );
   }
-  render() {
-    return (
-      <div style={{ display: "flex", flex: "auto" }}>
-        {this.renderInput()}
-        <SearchButton />
-      </div>
-    );
-  }
 
   renderInput() {
     const { classes, resetToStartView } = this.props;
@@ -52,7 +48,7 @@ class SearchWithRadiusInput extends React.PureComponent {
       this.input.blur();
     }
     return (
-      <div style={{ display: "flex", flex: "auto" }}>
+      <div>
         <OutlinedInput
           className={classes.input}
           autoComplete="off"
@@ -84,7 +80,6 @@ class SearchWithRadiusInput extends React.PureComponent {
         <div />
         {createPortal(
           <Snackbar
-            className={classes.anchorOriginBottomCenter}
             anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
             open={true}
             ContentProps={{
@@ -98,6 +93,15 @@ class SearchWithRadiusInput extends React.PureComponent {
           />,
           document.getElementById("map-overlay")
         )}
+      </div>
+    );
+  }
+  render() {
+    const { classes } = this.props;
+    return (
+      <div className={classes.root}>
+        {this.renderInput()}
+        <SearchButton />
       </div>
     );
   }

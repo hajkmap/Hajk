@@ -1,3 +1,10 @@
+/* OBS!
+
+THIS VIEW IS NOT IMPLEMENTED AND NEED TO BE CLEANED AS WELL
+
+ OBS! 
+*/
+
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Input from "@material-ui/core/Input";

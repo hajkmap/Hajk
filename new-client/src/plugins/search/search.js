@@ -400,7 +400,7 @@ class Search extends React.PureComponent {
             activeSearchView: toolType
           });
         }}
-        onMouseEnter={() => {
+        onTextFieldClick={() => {
           this.setState({
             activeSearchView: TEXTSEARCH
           });

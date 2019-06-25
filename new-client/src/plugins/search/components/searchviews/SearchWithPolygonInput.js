@@ -13,6 +13,10 @@ const styles = theme => ({
   },
   input: {
     flex: "auto"
+  },
+  root: {
+    display: "flex",
+    flex: "auto"
   }
 });
 
@@ -72,8 +76,9 @@ class SearchWithPolygonInput extends React.PureComponent {
   }
 
   render() {
+    const { classes } = this.props;
     return (
-      <div style={{ display: "flex", flex: "auto" }}>
+      <div className={classes.root}>
         {this.renderInput()}
         <SearchButton />
       </div>

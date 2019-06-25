@@ -50,13 +50,13 @@ class SearchBarStart extends React.PureComponent {
   }
 
   render() {
-    const { classes, onMouseEnter, target } = this.props;
+    const { classes, onTextFieldClick, target } = this.props;
 
     return (
       <div className={classes.search}>
         <OutlinedInput
           autoComplete="off"
-          onClick={onMouseEnter}
+          onClick={onTextFieldClick}
           placeholder={"Sök"}
           classes={{
             root: classes.inputRoot,

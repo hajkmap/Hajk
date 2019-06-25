@@ -13,6 +13,10 @@ const styles = theme => ({
   },
   input: {
     flex: "auto"
+  },
+  root: {
+    display: "flex",
+    flex: "auto"
   }
 });
 
@@ -34,7 +38,7 @@ class SearchWithSelectionInput extends React.PureComponent {
       this.input.blur();
     }
     return (
-      <div style={{ display: "flex", flex: "auto" }}>
+      <div>
         <OutlinedInput
           className={classes.input}
           autoComplete="off"
@@ -68,8 +72,9 @@ class SearchWithSelectionInput extends React.PureComponent {
     );
   }
   render() {
+    const { classes } = this.props;
     return (
-      <div style={{ display: "flex", flex: "auto" }}>
+      <div className={classes.root}>
         {this.renderInput()}
         <SearchButton />
       </div>
