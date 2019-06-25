@@ -85,7 +85,6 @@ class SearchResultItem extends Component {
 
     if (features.length > 0) {
       this.props.model.highlightFeatures(features);
-      console.log(window.innerWidth, "HERE");
       /*if (window.innerWidth >= 600) {
         this.props.searchResultList.hide();
       }*/
