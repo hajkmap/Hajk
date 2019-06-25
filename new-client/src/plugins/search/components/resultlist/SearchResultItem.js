@@ -34,8 +34,8 @@ const styles = theme => ({
     background: "#e1e1e1",
     fontWeight: "bold"
   },
-  activeExpansionPanelDetails: {
-    background: "#e1e1e1"
+  expansionPanelDetails: {
+    background: "white"
   },
 
   expandButton: {
@@ -59,12 +59,6 @@ const styles = theme => ({
   },
   expanded: {
     margin: 0
-  },
-  expansionPanel: {
-    borderRadius: "0 !important",
-    height: "30%",
-    margin: "5px",
-    backgroundColor: "#0076bc"
   }
 });
 
@@ -191,9 +185,7 @@ class SearchResultItem extends Component {
             </div>
           </div>
         </ExpansionPanelSummary>
-        <ExpansionPanelDetails
-          className={active ? classes.activeExpansionPanelDetails : null}
-        >
+        <ExpansionPanelDetails className={classes.expansionPanelDetails}>
           <div
             dangerouslySetInnerHTML={this.getHtmlItemInfoBox(
               feature,

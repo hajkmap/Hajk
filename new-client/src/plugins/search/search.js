@@ -20,14 +20,16 @@ const styles = theme => {
   return {
     center: {
       background: "white",
-      borderBottomLeftRadius: "10px",
-      borderBottomRightRadius: "10px",
-      margin: "-10px 10px 10px 10px",
-      border: "1px solid " + theme.palette.primary.main,
-      maxWidth: "600px",
+      borderRadius: "10px",
+      margin: "0px 10px 10px 10px",
+      //Boxshadow is the same as for card - Should maybe be changed to a card instead
+      boxShadow:
+        "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0)",
       minWidth: "360px",
       pointerEvents: "all",
-
+      [theme.breakpoints.up("sm")]: {
+        maxWidth: "200px"
+      },
       [theme.breakpoints.down("xs")]: {
         position: "absolute",
         top: 0,
@@ -101,6 +103,7 @@ const styles = theme => {
     },
     loader: {
       height: "4px",
+      marginTop: "-5px",
       marginBottom: "4px",
       borderRadius: "4px",
       overflow: "hidden"
