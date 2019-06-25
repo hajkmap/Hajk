@@ -167,6 +167,8 @@ class SearchModel {
     }
   };
 
+  /*useTransformedWmsSource uses sources specified under Tools -> Search in admin -> 
+  "Visningstjänster för sök inom" instead of the global wfs sources specifed in admin*/
   searchWithinArea = (feature, useTransformedWmsSource, callback) => {
     const projCode = this.olMap
       .getView()
@@ -485,10 +487,6 @@ class SearchModel {
       maxZoom: 7
     });
   }
-  /*
-  highlightFeature(feature) {
-    this.clearHighlight();
-  }*/
 
   highlightImpact(feature) {
     this.clear();
