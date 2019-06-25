@@ -7,7 +7,7 @@ import AppModel from "./../models/AppModel.js";
 import Typography from "@material-ui/core/Typography";
 import AppBar from "@material-ui/core/AppBar";
 import { Toolbar as MUIToolbar } from "@material-ui/core";
-import { SnackbarProvider, withSnackbar } from "notistack";
+import { SnackbarProvider } from "notistack";
 import Toolbar from "./Toolbar.js";
 //import Popup from "./Popup.js";
 import Window from "./Window.js";
@@ -388,7 +388,6 @@ class App extends React.PureComponent {
     return (
       <SnackbarProvider
         maxSnack={3}
-        classes
         anchorOrigin={{
           vertical: "top",
           horizontal: "center"
@@ -486,4 +485,4 @@ App.propTypes = {
   classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles)(withSnackbar(App));
+export default withStyles(styles)(App);
