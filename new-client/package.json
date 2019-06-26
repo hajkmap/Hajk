@@ -1,7 +1,7 @@
 {
   "name": "hajk-client",
   "version": "3.0.0-alpha.5",
-  "homepage": "/hajk3",
+  "homepage": ".",
   "private": true,
   "scripts": {
     "start": "set HTTPS=false && react-scripts start",

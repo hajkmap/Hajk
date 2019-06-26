@@ -2,7 +2,7 @@
   "name": "new-admin",
   "version": "3.0.0-alpha.5",
   "private": true,
-  "homepage": "/admin3",
+  "homepage": ".",
   "dependencies": {
     "backbone": "^1.4.0",
     "draft-js": "^0.10.5",
