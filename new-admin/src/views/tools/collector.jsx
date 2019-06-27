@@ -24,6 +24,26 @@ import React from "react";
 import { Component } from "react";
 import FieldEditor from "../components/FieldEditor.jsx";
 
+class LayerDescription extends Component {
+  render() {
+    return this.props.layerDescription ? (
+      <div>
+        <div>Editerbara fält</div>
+        <div>
+          <code>
+            {this.props.layerDescription
+              .reduce((str, field, i, a) => {
+                var v = "{" + field.name + "}";
+                return [...str, v];
+              }, [])
+              .join(", ")}
+          </code>
+        </div>
+      </div>
+    ) : null;
+  }
+}
+
 var defaultState = {
   validationErrors: [],
   active: false,
@@ -34,9 +54,12 @@ var defaultState = {
   abstract: "Vi vill veta vad du tycker!",
   featureType: "",
   featureNS: "",
+  serviceId: "-1",
   form: [],
   visibleAtStart: false,
-  visibleForGroups: []
+  visibleForGroups: [],
+  editServices: [],
+  layerDescription: undefined
 };
 
 class ToolOptions extends Component {
@@ -61,13 +84,31 @@ class ToolOptions extends Component {
         featureNS: tool.options.featureNS,
         form: tool.options.form || [],
         visibleAtStart: tool.options.visibleAtStart || false,
-        visibleForGroups: tool.options.visibleForGroups || []
+        visibleForGroups: tool.options.visibleForGroups || [],
+        serviceId: tool.options.serviceId
       });
+      console.log("Collector loaded", tool.options.form);
     } else {
       this.setState({
         active: false
       });
     }
+
+    this.props.model.getEditServices(services => {
+      this.setState(
+        {
+          editServices: services
+        },
+        () => {
+          const selectedService = services.find(
+            s => s.id === this.state.serviceId
+          );
+          if (selectedService) {
+            this.describeLayer(selectedService);
+          }
+        }
+      );
+    });
   }
 
   componentWillUnmount() {}
@@ -131,7 +172,8 @@ class ToolOptions extends Component {
           Function.prototype.call,
           String.prototype.trim
         ),
-        form: this.state.form
+        form: this.state.form,
+        serviceId: this.state.serviceId
       }
     };
 
@@ -189,6 +231,12 @@ class ToolOptions extends Component {
 
     this.setState({
       visibleForGroups: value !== "" ? groups : []
+    });
+  }
+
+  describeLayer(layer) {
+    this.setState({
+      layerDescription: layer.editableFields
     });
   }
 
@@ -304,30 +352,51 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
-            <label htmlFor="featureType">Lagernamn</label>
-            <input
-              id="featureType"
-              name="featureType"
-              type="text"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              value={this.state.featureType}
-            />
+            <label htmlFor="featureNS">Redigeringstjänst</label>
+            <div className="block-row">
+              {this.state.editServices.map((service, i) => {
+                const l = service.layers[0].split(":");
+                const serviceFeatureType = l.length > 1 ? l[1] : l[0];
+                const serviceFeatureNs = l.length > 1 ? l[0] : "";
+                return (
+                  <div key={i}>
+                    <input
+                      id={service.id + "_" + i}
+                      type="radio"
+                      value={this.state.serviceId}
+                      checked={this.state.serviceId === service.id}
+                      name="service"
+                      onChange={() => {
+                        this.setState(
+                          {
+                            featureType: serviceFeatureType,
+                            featureNs: serviceFeatureNs,
+                            serviceId: service.id
+                          },
+                          () => {
+                            this.describeLayer(service);
+                          }
+                        );
+                      }}
+                    />
+                    <label className="full" htmlFor={service.id + "_" + i}>
+                      {service.caption}
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-          <div>
-            <label htmlFor="featureNS">Namespace</label>
-            <input
-              id="featureNS"
-              name="featureNS"
-              type="text"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              value={this.state.featureNS}
-            />
-          </div>
-          <FieldEditor form={this.state.form} parent={this} onSave={() => {}} />
+          <LayerDescription layerDescription={this.state.layerDescription} />
+          <FieldEditor
+            form={this.state.form}
+            parent={this}
+            onUpdate={form => {
+              this.setState({
+                form: form
+              });
+            }}
+          />
         </form>
       </div>
     );
