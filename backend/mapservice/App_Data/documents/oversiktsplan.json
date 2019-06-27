@@ -18,13 +18,13 @@
           "header": "Underkapitel 1",
           "html": "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque luctus ultrices eros eu iaculis. Etiam eget tortor consectetur, egestas elit eu, malesuada metus. Fusce molestie odio hendrerit risus ultricies dignissim. Integer eleifend tellus in semper lacinia. Duis ut convallis quam. Nunc a turpis sed nisi aliquet pretium rhoncus ut dolor. Nulla facilisis lacus a arcu dictum ultricies. In magna turpis, posuere et egestas ac, pharetra quis tortor. Pellentesque ultricies nulla et dui interdum, vel mollis dolor molestie.</p>\n<p><br></p>\n<p>Donec urna quam, interdum molestie viverra at, faucibus id magna. Aliquam venenatis nunc eu eros tristique tincidunt. Integer elementum turpis justo, ac molestie mi iaculis maximus. Nam porta magna eget dapibus mollis. Integer ac leo facilisis, luctus massa nec, faucibus ante. Nam varius ornare velit at suscipit. Praesent ultrices eros eu velit eleifend maximus. Phasellus porta nibh non ornare suscipit. Praesent et mi velit. Aliquam scelerisque tristique orci, eget lacinia sem egestas quis. Phasellus quis lobortis nunc, et sodales eros. Pellentesque vehicula ut dolor sed dictum. Ut convallis imperdiet blandit. Aenean pharetra nisi non metus sollicitudin, non rutrum erat pretium. Donec augue nisl, aliquet in accumsan at, placerat at diam.</p>\n<p>Donec id commodo tellus. Donec tincidunt, risus et consectetur efficitur, magna risus commodo elit, a sodales est nunc quis tortor. Donec sapien diam, porta sed facilisis dictum, pretium eu est. Cras malesuada hendrerit risus, vel dapibus turpis interdum a. Nulla magna nisi, laoreet vel libero ut, hendrerit vehicula ante. Maecenas gravida ut leo quis viverra. Nam efficitur arcu ac consectetur tristique. Etiam in ligula quis lorem semper laoreet. Etiam vitae congue metus. Curabitur eget tortor vitae nibh ullamcorper malesuada. Proin sit amet egestas ex. Etiam cursus nibh a lectus pretium fermentum.</p>\n<p><br></p>\n<p>Phasellus aliquam vulputate metus. Nunc vehicula urna lectus, id ultricies arcu molestie quis. Cras sit amet sollicitudin magna. Etiam tempus, purus vitae pretium gravida, mi libero consectetur erat, eget sollicitudin justo lectus eu ex. Duis suscipit odio risus, sed porttitor lacus dictum et. Ut feugiat nunc faucibus, imperdiet elit eget, maximus massa. Curabitur eu diam porttitor tellus ultricies pellentesque. Quisque rhoncus arcu turpis, sed venenatis eros vulputate a.</p>\n<p><br></p>\n<p>Aliquam vitae arcu iaculis, tristique neque ut, auctor nunc. Donec hendrerit mi ipsum, vel dignissim orci sodales non. Vivamus ac augue enim. Integer eget consectetur turpis, egestas eleifend dui. Morbi tincidunt mi ipsum, eu aliquam mi cursus vitae. Fusce fringilla, tortor sit amet dictum euismod, tellus lectus tincidunt ligula, sed feugiat magna nisi nec metus. Etiam finibus justo a enim tempus mattis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Fusce consequat non purus eget pulvinar. Nunc hendrerit libero ut suscipit dapibus. Donec vel faucibus justo. Mauris ac fermentum felis, at ultricies mi. Donec in lectus malesuada, tristique turpis ut, condimentum sem. Etiam et cursus nulla, sit amet tempor odio.</p>",
           "mapSettings": {
-            "center": [236837.7991958735, 6585642.129631366],
-            "zoom": 11,
+            "center": [235920.86740102156, 6585822.844186342],
+            "zoom": 13,
             "extent": [
-              235266.7991958735,
-              6584730.129631366,
-              238408.7991958735,
-              6586554.129631366
+              235612.61740102156,
+              6585582.594186342,
+              236229.11740102156,
+              6586063.094186342
             ]
           },
           "chapters": [
@@ -195,7 +195,7 @@
             }
           ],
           "expanded": true,
-          "layers": ["17", "16", "14"]
+          "layers": ["17", "16", "14", "18"]
         }
       ],
       "expanded": true,

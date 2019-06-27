@@ -294,14 +294,28 @@
         "title": "Tyck till",
         "abstract": "Vi vill veta vad du tycker!",
         "featureNS": "wsp",
+        "showThankYou": true,
+        "thankYou": "Hej",
         "visibleAtStart": false,
         "visibleForGroups": [],
         "form": [
           {
-            "id": 0,
+            "id": 2,
             "order": 0,
-            "header": "Ditt namn",
-            "text": "Ange namn: {name}"
+            "header": "Välkommen",
+            "text": "<div>Lämna en synpunkt om:</div>\n[place-button]\n[general-opinion-button]"
+          },
+          {
+            "id": 1,
+            "order": 1,
+            "header": "Namn",
+            "text": "{name}"
+          },
+          {
+            "id": 0,
+            "order": 2,
+            "header": "Bild",
+            "text": "{image}"
           }
         ],
         "serviceId": "25"
@@ -311,7 +325,7 @@
     {
       "type": "information",
       "options": {
-        "target": "toolbar",
+        "target": "right",
         "text": "Hej",
         "headerText": "Om kartan",
         "title": "",

@@ -104,24 +104,15 @@ class FieldAdder extends Component {
 
 class FieldEditor extends Component {
   constructor(props) {
-    super();
-  }
-
-  state = {
-    showModal: false,
-    pages: []
-  };
-
-  componentDidMount() {
-    console.log("Render form", this.props.form);
-    this.setState({
+    super(props);
+    this.state = {
+      showModal: false,
       pages: this.props.form
-    });
+    };
   }
 
   addField = e => {
     const { parent } = this.props;
-
     this.setState({
       showModal: true,
       modalContent: this.fieldAdder,

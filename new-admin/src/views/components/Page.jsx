@@ -2,10 +2,13 @@ import React from "react";
 import { Component } from "react";
 
 class Page extends Component {
-  state = {
-    header: "",
-    text: ""
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      header: props.page.header,
+      text: props.page.text
+    };
+  }
 
   render() {
     return (

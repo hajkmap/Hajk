@@ -55,6 +55,8 @@ var defaultState = {
   featureType: "",
   featureNS: "",
   serviceId: "-1",
+  showThankYou: true,
+  thankYou: "",
   form: [],
   visibleAtStart: false,
   visibleForGroups: [],
@@ -66,35 +68,42 @@ class ToolOptions extends Component {
   /**
    *
    */
-  constructor() {
-    super();
+
+  constructor(props) {
+    super(props);
     this.state = defaultState;
     this.type = "collector";
-  }
 
-  componentDidMount() {
     var tool = this.getTool();
+
     if (tool) {
-      this.setState({
+      this.state = {
+        ...defaultState,
         active: true,
         index: tool.index,
         target: tool.options.target,
         url: tool.options.url,
         featureType: tool.options.featureType,
         featureNS: tool.options.featureNS,
+        showThankYou: tool.options.showThankYou,
+        thankYou: tool.options.thankYou,
         form: tool.options.form || [],
         visibleAtStart: tool.options.visibleAtStart || false,
         visibleForGroups: tool.options.visibleForGroups || [],
-        serviceId: tool.options.serviceId
-      });
-      console.log("Collector loaded", tool.options.form);
+        serviceId: tool.options.serviceId,
+        editServices: []
+      };
     } else {
-      this.setState({
+      this.state = {
+        ...defaultState,
         active: false
-      });
+      };
     }
+  }
 
-    this.props.model.getEditServices(services => {
+  componentDidMount() {
+    const { model } = this.props;
+    model.getEditServices(services => {
       this.setState(
         {
           editServices: services
@@ -167,6 +176,8 @@ class ToolOptions extends Component {
         title: this.state.title,
         abstract: this.state.abstract,
         featureNS: this.state.featureNS,
+        showThankYou: this.state.showThankYou,
+        thankYou: this.state.thankYou,
         visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
@@ -346,6 +357,29 @@ class ToolOptions extends Component {
               value={this.state.headerText}
               type="text"
               name="headerText"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <input
+              id="showThankYou"
+              name="showThankYou"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.showThankYou}
+            />
+            &nbsp;
+            <label htmlFor="showThankYou">Visa tacksida</label>
+          </div>
+          <div>
+            <label htmlFor="thankYou">Text för tacksida</label>
+            <textarea
+              value={this.state.thankYou}
+              name="thankYou"
               onChange={e => {
                 this.handleInputChange(e);
               }}
