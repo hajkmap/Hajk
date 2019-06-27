@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace MapService.Components.MapExport
 {
     public class FeatureInfo
-    {
+    {        
         public List<Feature> features { get; set; }
     }
 }

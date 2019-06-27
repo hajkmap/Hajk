@@ -1,0 +1,29 @@
+﻿body {
+  font-family: Arial;
+  font-size: 12pt !important;
+}
+
+h1 {
+  font-size: 20pt !important;
+}
+
+h2 {
+  font-size: 16pt !important;
+}
+
+figure {
+  width: auto;
+  margin: 0;
+  padding: 0;
+}
+
+img {
+  max-width: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+}
+
+.toc {
+  font-size: 16pt;
+}

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MapService.Components.MapExport;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,23 @@ namespace MapService.Models.Config
 {
     public class ArcGISConfig : ILayerConfig
     {
+        public ArcGISInfo AsInfo(int coordinateSystemId, int zIndex)
+        {
+            ArcGISInfo info = new ArcGISInfo();
+            info.extent = new MapExtent()
+            {
+                bottom = double.Parse(this.extent[0]),
+                left = double.Parse(this.extent[1]),
+                top = double.Parse(this.extent[2]),
+                right = double.Parse(this.extent[3])
+            };
+            info.layers = this.layers.Select(l => int.Parse(l)).ToArray();
+            info.url = this.url;            
+            info.spatialReference = "EPSG:"+ coordinateSystemId;
+            info.zIndex = zIndex;
+            return info;
+        }
+
         public string id { get; set; }
 
         public string caption { get; set; }
@@ -51,5 +69,7 @@ namespace MapService.Models.Config
         public string infoUrlText { get; set; }
 
         public string infoOwner { get; set; }
+
+        public int? zIndex { get; set; }
     }
 }

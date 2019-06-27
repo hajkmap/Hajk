@@ -301,20 +301,10 @@
         "toggleAllButton": false,
         "dropdownThemeMaps": false,
         "themeMapHeaderCaption": "",
-        "visibleForGroups": []
+        "visibleForGroups": [],
+        "target": "left"
       },
       "index": 0
-    },
-    {
-      "type": "simple_layerswitcher",
-      "options": {
-        "target": "left",
-        "abstract": "Välj innehåll att visa i kartan",
-        "title": "Innehåll",
-        "visibleAtStart": false,
-        "visibleForGroups": []
-      },
-      "index": 5
     },
     {
       "type": "collector",
@@ -433,6 +423,34 @@
         "anchor": [16, 32],
         "imgSize": [32, 32],
         "popupOffsetY": 0,
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "simple_layerswitcher",
+      "options": {
+        "target": "toolbar",
+        "abstract": "Välj innehåll att visa i kartan",
+        "title": "Innehåll",
+        "visibleAtStart": false,
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "export",
+      "options": {
+        "target": "toolbar",
+        "exportUrl": "http://localhost:55630/export/pdf",
+        "exportTiffUrl": "/mapservice/export/tiff",
+        "pdfActive": true,
+        "tiffActive": true,
+        "base64Encode": false,
+        "autoScale": false,
+        "scales": "250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 250000",
+        "proxyUrl": "",
+        "instruction": "",
         "visibleForGroups": []
       },
       "index": 0

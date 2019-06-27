@@ -101,7 +101,8 @@ namespace MapService.Components.MapExport
 
             Graphics g = Graphics.FromImage(target);
             g.FillRectangle(new SolidBrush(Color.White), 0, 0, target.Width, target.Height);
-            g.DrawImage(src, 0, 0);
+            g.DrawImage(src, 0, 0);            
+
             return target;
         }        
 

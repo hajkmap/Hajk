@@ -86,6 +86,7 @@ namespace MapService.Components.MapExport
 
                 Color color = ColorTranslator.FromHtml(featureStyle.fillColor);
                 Color pointColor = ColorTranslator.FromHtml(featureStyle.pointFillColor);
+                Color pointOutline = ColorTranslator.FromHtml(featureStyle.strokeColor);
 
                 if (featureStyle.fillOpacity != null)
                 {
@@ -96,24 +97,16 @@ namespace MapService.Components.MapExport
                 else
                 {
                     style.Fill = new SolidBrush(color);
-                }
-
-                _log.DebugFormat("Feature pointSrc = {0}", featureStyle.pointSrc);
+                }                
                 if (featureStyle.pointSrc != "")
                 {
                     try
-                    {
-                        _log.Debug("start download");
-                        WebClient wc = new WebClient();
-                        _log.Debug("start download1");
-                        byte[] bytes = wc.DownloadData(featureStyle.pointSrc);
-                        _log.Debug("start download2");
-                        MemoryStream ms = new MemoryStream(bytes);
-                        _log.Debug("start download3");
-                        Image img = Image.FromStream(ms);
-                        _log.Debug("start download4");
-                        style.Symbol = img;
-                        _log.Debug("start download5");
+                    {                        
+                        WebClient wc = new WebClient();                        
+                        byte[] bytes = wc.DownloadData(featureStyle.pointSrc);                        
+                        MemoryStream ms = new MemoryStream(bytes);                        
+                        Image img = Image.FromStream(ms);                        
+                        style.Symbol = img;                        
                     }
                     catch (Exception ex)
                     {
@@ -121,9 +114,11 @@ namespace MapService.Components.MapExport
                     }
                 }
                 else
-                {
+                {                    
                     style.PointColor = new SolidBrush(pointColor);
                     style.PointSize = (float)featureStyle.pointRadius * 2;
+                    style.Outline = new Pen(pointOutline, (float)featureStyle.strokeWidth);
+                    style.EnableOutline = true;
                 }
 
             }
@@ -441,14 +436,13 @@ namespace MapService.Components.MapExport
         /// <param name="row"></param>
         /// <returns></returns>
         private IStyle GetFeatureStyle(FeatureDataRow row)
-        {
-            _log.Debug("GetFeatureStyle");
+        {            
             VectorStyle style = new VectorStyle();
             if (row["style"] != null)
             {
                 Style featureStyle = (Style)row["style"];
                 style.EnableOutline = true;
-
+                
                 style.Line.Color = ColorTranslator.FromHtml(featureStyle.strokeColor);
                 style.Line.Width = (float)featureStyle.strokeWidth;
                 style.Line.SetLineCap(LineCap.Round, LineCap.Round, DashCap.Round);
@@ -482,7 +476,6 @@ namespace MapService.Components.MapExport
                 }
 
                 style.Outline = style.Line;
-
                 Color color = ColorTranslator.FromHtml(featureStyle.fillColor);
                 Color pointColor = ColorTranslator.FromHtml(featureStyle.pointFillColor);
 
@@ -496,8 +489,7 @@ namespace MapService.Components.MapExport
                 {
                     style.Fill = new SolidBrush(color);
                 }
-
-                _log.DebugFormat("Featurestyle.pointSrc = {0}", featureStyle.pointSrc);
+                
                 if (featureStyle.pointSrc != "")
                 {
                     if (featureStyle.pointSrc.StartsWith("data:"))
@@ -520,9 +512,7 @@ namespace MapService.Components.MapExport
                             else
                             {
                                  protocol = "http://";
-                            }
-                            
-                            _log.DebugFormat("url: {0}", url);
+                            }                                                       
                             WebClient wc = new WebClient();
                             byte[] bytes = wc.DownloadData(protocol + url + "/" + featureStyle.pointSrc);                            
                             style.Symbol = this.ImageFromBytes(bytes);                            
@@ -537,7 +527,7 @@ namespace MapService.Components.MapExport
                 else
                 {
                     style.PointColor = new SolidBrush(pointColor);
-                    style.PointSize = (float)featureStyle.pointRadius * 2;
+                    style.PointSize = (float)featureStyle.pointRadius * 2;                    
                 }
 
             }
