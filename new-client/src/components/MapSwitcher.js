@@ -1,5 +1,6 @@
 import React from "react";
 import Button from "@material-ui/core/Button";
+import Tooltip from "@material-ui/core/Tooltip";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import { withStyles } from "@material-ui/core/styles";
@@ -96,18 +97,29 @@ class MapSwitcher extends React.PureComponent {
   render() {
     const { anchorEl } = this.state;
     const { classes } = this.props;
-
     const open = Boolean(anchorEl);
+
+    const toolOptions = this.props.appModel.config.mapConfig.tools.find(
+      tool => tool.type === "layerswitcher"
+    ).options;
+    const themeMapHeaderCaption =
+      toolOptions.themeMapHeaderCaption || "Byt karta";
+    const instruction = toolOptions.instruction
+      ? window.atob(toolOptions.instruction)
+      : "";
+
     return (
       <>
-        <Button
-          aria-owns={open ? "render-props-menu" : undefined}
-          aria-haspopup="true"
-          onClick={this.handleClick}
-        >
-          <SwitchCameraIcon className={classes.icon} />
-          Byt karta
-        </Button>
+        <Tooltip title={instruction}>
+          <Button
+            aria-owns={open ? "render-props-menu" : undefined}
+            aria-haspopup="true"
+            onClick={this.handleClick}
+          >
+            <SwitchCameraIcon className={classes.icon} />
+            {themeMapHeaderCaption}
+          </Button>
+        </Tooltip>
         <Menu
           id="render-props-menu"
           anchorEl={anchorEl}
