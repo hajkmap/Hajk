@@ -302,20 +302,14 @@
           {
             "id": 2,
             "order": 0,
-            "header": "Välkommen",
-            "text": "<div>Lämna en synpunkt om:</div>\n[place-button]\n[general-opinion-button]"
+            "header": "Lämna en synpunkt",
+            "text": "<div>Vi vill gärna veta vad du tycker. Du kan markera en plats i kartan eller beskriva dina åsikter i text.</div>\n<h5>Vad tycker du till om?</h5>\n<div>ashdkjahjdkhasdkj</div>\n<div type=\"toolbar\"></div>"
           },
           {
-            "id": 1,
+            "id": 3,
             "order": 1,
-            "header": "Namn",
-            "text": "{name}"
-          },
-          {
-            "id": 0,
-            "order": 2,
-            "header": "Bild",
-            "text": "{image}"
+            "header": "Formulär: ",
+            "text": "<div>Datum: </div>\n<div field=\"datum_text\"></div>\n<div>Typ: </div>\n<div field=\"typ\"></div>\n<div>Bild: </div>\n<div field=\"image\"></div>\n<div>Namn: </div>\n<div field=\"name\"></div>\n<div>Trafikslag: </div>\n<div field=\"trafikslag\"></div>"
           }
         ],
         "serviceId": "25"
@@ -333,6 +327,16 @@
         "visibleAtStart": false,
         "showInfoOnce": false,
         "base64EncodeForInfotext": false,
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "edit",
+      "options": {
+        "target": "toolbar",
+        "instruction": "",
+        "activeServices": ["26"],
         "visibleForGroups": []
       },
       "index": 0
@@ -369,8 +373,8 @@
     "pil": null,
     "mapselector": false,
     "colors": {
-      "primaryColor": "#455A64",
-      "secondaryColor": "#FFB74D"
+      "primaryColor": "#5b8dff",
+      "secondaryColor": "#747474"
     }
   }
 }

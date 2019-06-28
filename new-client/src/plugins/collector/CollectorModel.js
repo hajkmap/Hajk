@@ -1,84 +1,411 @@
-import { WFS, GML } from "ol/format";
-import Feature from "ol/Feature.js";
-import Point from "ol/geom/Point.js";
+import { WFS } from "ol/format";
+import Feature from "ol/Feature";
+import { Style, Stroke, Fill, Circle, RegularShape, Icon } from "ol/style";
+import { MultiPoint, Polygon } from "ol/geom";
+import Vector from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector";
+import { all as strategyAll } from "ol/loadingstrategy";
+import { Draw } from "ol/interaction";
+import X2JS from "x2js";
 
 class CollectorModel {
   constructor(settings) {
-    this.olMap = settings.map;
-    this.url = settings.options.url;
-    this.featureType = settings.options.featureType;
-    this.featureNS = settings.options.featureNS;
+    this.app = settings.options.app;
+    this.map = settings.map;
     this.observer = settings.observer;
+    this.activeServices = [settings.options.serviceId];
+    this.sources = [settings.options.serviceConfig];
+    this.vectorSource = undefined;
+    this.layer = undefined;
+    this.select = undefined;
+    this.modify = undefined;
+    this.key = undefined;
+    this.editFeature = undefined;
+    this.editSource = undefined;
+    this.filty = false;
+    this.setLayer(settings.options.serviceConfig);
+    this.formValues = settings.options.serviceConfig.editableFields.reduce(
+      (obj, field) => {
+        obj[field.name] = this.valueByDataType(field);
+        return obj;
+      },
+      {}
+    );
   }
 
-  /**
-   * Save changes.
-   * Send WFS-transactional request.
-   * @param {object} props
-   * @param function success | (text)
-   * @param function error | (text)
-   */
-  save(props, success, error) {
-    if (!this.url || !this.featureType) {
-      return error("Verktyget saknar nödvändig konfiguration.");
+  valueByDataType(field) {
+    switch (field.dataType) {
+      case "date-time":
+        return new Date().getTime();
+      case "int":
+      case "number":
+        return 0;
+      case "string":
+        if (field.textType === "flerval") {
+          return field.values.map(f => ({ checked: false, value: f }));
+        }
+        return "";
+      default:
+        return "";
     }
+  }
 
-    const coord = this.olMap.getView().getCenter();
+  write(features) {
+    var format = new WFS(),
+      lr = this.editSource.layers[0].split(":"),
+      fp = lr.length === 2 ? lr[0] : "",
+      ft = lr.length === 2 ? lr[1] : lr[0],
+      options = {
+        featureNS: this.editSource.uri,
+        featurePrefix: fp,
+        featureType: ft,
+        hasZ: false,
+        version: "1.1.0", // or "1.0.0"
+        srsName: this.editSource.projection
+      };
 
-    const wfs = new WFS();
-    const gml = new GML({
-      featureNS: this.featureNS,
-      featureType: this.featureType,
-      srsName: this.olMap
-        .getView()
-        .getProjection()
-        .getCode()
-    });
+    return format.writeTransaction(
+      features.inserts,
+      features.updates,
+      features.deletes,
+      options
+    );
+  }
 
-    const f = new Feature({
-      text: props.comment,
-      visible: props.displayPlace
-    });
-    if (!props.generic) {
-      f.setGeometryName("geom");
-      f.setGeometry(new Point(coord));
-    }
-
-    const inserts = [f];
-    const node = wfs.writeTransaction(inserts, null, null, gml);
-    const xmlSerializer = new XMLSerializer();
-    const xmlString = xmlSerializer.serializeToString(node);
-
-    const request = {
-      method: "POST",
-      credentials: "same-origin",
-      headers: {
-        "Content-Type": "text/xml"
-      },
-      body: xmlString
-    };
-
-    fetch(this.url, request)
-      .then(reponse => {
-        reponse.text().then(t => {
-          var mapLayer = this.olMap
-            .getLayers()
-            .getArray()
-            .find(
-              layer =>
-                layer.getProperties &&
-                layer.getProperties().featureType === this.featureType
-            );
-          if (mapLayer) {
-            // This will refresh the layer.
-            mapLayer.getSource().clear();
+  refreshLayer(layerName) {
+    var source,
+      foundLayer = this.map
+        .getLayers()
+        .getArray()
+        .find(layer => {
+          var match = false;
+          if (layer.getSource().getParams) {
+            let params = layer.getSource().getParams();
+            if (typeof params === "object") {
+              let paramName = params.LAYERS.split(":");
+              let layerSplit = layerName.split(":");
+              if (paramName.length === 2 && layerSplit.length === 2) {
+                match = layerName === params.LAYERS;
+              }
+              if (paramName.length === 1) {
+                match = layerSplit[1] === params.LAYERS;
+              }
+            }
           }
-          success(wfs.readTransactionResponse(t));
+          return match;
         });
+
+    if (foundLayer) {
+      source = foundLayer.getSource();
+      source.changed();
+      source.updateParams({ time: Date.now() });
+      this.map.updateSize();
+    }
+  }
+
+  parseWFSTresponse(response) {
+    var str =
+      typeof response !== "string"
+        ? new XMLSerializer().serializeToString(response)
+        : response;
+    return new X2JS().xml2js(str);
+  }
+
+  transact(features, done) {
+    var node = this.write(features),
+      serializer = new XMLSerializer(),
+      src = this.editSource,
+      payload = node ? serializer.serializeToString(node) : undefined;
+
+    if (payload) {
+      fetch(src.url, {
+        method: "POST",
+        body: payload,
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "text/xml"
+        }
       })
-      .catch(err => {
-        error(err);
-      });
+        .then(response => {
+          response.text().then(wfsResponseText => {
+            this.refreshLayer(src.layers[0]);
+            this.vectorSource
+              .getFeatures()
+              .filter(f => f.modification !== undefined)
+              .forEach(f => (f.modification = undefined));
+            done(this.parseWFSTresponse(wfsResponseText));
+          });
+        })
+        .catch(response => {
+          response.text().then(errorMessage => {
+            done(errorMessage);
+          });
+        });
+    }
+  }
+
+  save(done) {
+    const feature = this.vectorSource.getFeatures()[0] || new Feature();
+    const formValues = { ...this.formValues };
+
+    Object.keys(formValues).forEach(key => {
+      if (Array.isArray(formValues[key])) {
+        formValues[key] = formValues[key]
+          .filter(v => v.checked)
+          .map(v => v.value)
+          .join(", ");
+      }
+    });
+    feature.setProperties(formValues);
+    console.log("Values", feature.getProperties());
+    //this.transact(features, done);
+  }
+
+  getSelectStyle(feature) {
+    return [
+      new Style({
+        stroke: new Stroke({
+          color: "rgba(0, 255, 255, 1)",
+          width: 3
+        }),
+        fill: new Fill({
+          color: "rgba(0, 0, 0, 0.5)"
+        }),
+        image: new Circle({
+          fill: new Fill({
+            color: "rgba(0, 0, 0, 0.5)"
+          }),
+          stroke: new Stroke({
+            color: "rgba(0, 255, 255, 1)",
+            width: 2
+          }),
+          radius: 3
+        })
+      }),
+      new Style({
+        image: new RegularShape({
+          fill: new Fill({
+            color: "rgba(0, 0, 0, 0.2)"
+          }),
+          stroke: new Stroke({
+            color: "rgba(0, 0, 0, 1)",
+            width: 2
+          }),
+          points: 4,
+          radius: 8,
+          angle: Math.PI / 4
+        }),
+        geometry: feature => {
+          var coordinates =
+            feature.getGeometry() instanceof Polygon
+              ? feature.getGeometry().getCoordinates()[0]
+              : feature.getGeometry().getCoordinates();
+          return new MultiPoint(coordinates);
+        }
+      })
+    ];
+  }
+
+  getVectorStyle(feature) {
+    return [
+      new Style({
+        stroke: new Stroke({
+          color: "rgba(255, 165, 20, 1)",
+          width: 3
+        }),
+        fill: new Fill({
+          color: "rgba(255, 165, 20, 0.5)"
+        }),
+        image: new Icon({
+          scale: 1 / 2,
+          anchor: [0.5, 1],
+          anchorXUnits: "fraction",
+          anchorYUnits: "fraction",
+          src: "marker_x2.png"
+        })
+      })
+    ];
+  }
+
+  getHiddenStyle(feature) {
+    return [
+      new Style({
+        stroke: new Stroke({
+          color: "rgba(0, 0, 0, 0)",
+          width: 0
+        }),
+        fill: new Fill({
+          color: "rgba(1, 2, 3, 0)"
+        }),
+        image: new Circle({
+          fill: new Fill({
+            color: "rgba(0, 0, 0, 0)"
+          }),
+          stroke: new Stroke({
+            color: "rgba(0, 0, 0, 0)",
+            width: 0
+          }),
+          radius: 0
+        })
+      })
+    ];
+  }
+
+  getSketchStyle() {
+    return [
+      new Style({
+        fill: new Fill({
+          color: "rgba(255, 255, 255, 0.5)"
+        }),
+        stroke: new Stroke({
+          color: "rgba(0, 0, 0, 0.5)",
+          width: 4
+        }),
+        image: new Circle({
+          radius: 6,
+          fill: new Fill({
+            color: "rgba(0, 0, 0, 0.5)"
+          }),
+          stroke: new Stroke({
+            color: "rgba(255, 255, 255, 0.5)",
+            width: 2
+          })
+        })
+      })
+    ];
+  }
+
+  refreshEditingLayer() {
+    var mapLayers = this.map
+      .getLayers()
+      .getArray()
+      .filter(
+        layer => layer.getProperties().caption === this.editSource.caption
+      );
+
+    mapLayers.forEach(mapLayer => {
+      if (mapLayer.getSource) {
+        let s = mapLayer.getSource();
+        if (s.clear) {
+          s.clear();
+        }
+        if (s.getParams) {
+          var params = s.getParams();
+          params.t = new Date().getMilliseconds();
+          s.updateParams(params);
+        }
+        if (s.changed) {
+          s.changed();
+        }
+      }
+    });
+  }
+
+  setLayer(serviceConfig) {
+    this.source = serviceConfig;
+    this.filty = true;
+    this.vectorSource = new VectorSource({
+      strategy: strategyAll,
+      projection: this.source.projection
+    });
+
+    this.layer = new Vector({
+      source: this.vectorSource,
+      style: this.getVectorStyle()
+    });
+
+    if (this.layer) {
+      this.map.removeLayer(this.layer);
+    }
+
+    this.map.addLayer(this.layer);
+    this.editSource = this.source;
+    this.editFeature = null;
+    this.observer.emit("editSource", this.source);
+    this.observer.emit("editFeature", null);
+    this.observer.emit("layerChanged", this.layer);
+  }
+
+  activateAdd(geometryType) {
+    this.draw = new Draw({
+      source: this.vectorSource,
+      style: this.getSketchStyle(),
+      type: geometryType,
+      geometryName: this.geometryName
+    });
+
+    this.draw.on("drawend", event => {
+      this.vectorSource.clear();
+      event.feature.modification = "added";
+    });
+    this.map.addInteraction(this.draw);
+    this.map.clicklock = true;
+  }
+
+  activateInteraction(type, geometryType) {
+    if (type === "add") {
+      this.activateAdd(geometryType);
+    }
+    if (type === "move") {
+      this.activateMove();
+    }
+    if (type === "modify") {
+      this.activateModify();
+    }
+    if (type === "remove") {
+      this.map.clicklock = true;
+      this.activateRemove();
+    }
+  }
+
+  deactivateInteraction() {
+    if (this.select) {
+      this.map.removeInteraction(this.select);
+    }
+    if (this.modify) {
+      this.map.removeInteraction(this.modify);
+    }
+    if (this.draw) {
+      this.map.removeInteraction(this.draw);
+    }
+    if (this.move) {
+      this.map.removeInteraction(this.move);
+    }
+    if (this.snap) {
+      this.map.removeInteraction(this.snap);
+    }
+    if (this.remove) {
+      this.remove = false;
+      this.map.clicklock = false;
+      this.map.un("singleclick", this.removeSelected);
+    }
+  }
+
+  reset() {
+    this.editSource = undefined;
+    this.editFeature = undefined;
+    this.removeFeature = undefined;
+    this.removalToolMode = "off";
+    this.filty = false;
+    this.map.clicklock = false;
+    if (this.layer) {
+      this.map.removeLayer(this.layer);
+      this.layer = undefined;
+    }
+    this.deactivateInteraction();
+  }
+
+  deactivate() {
+    this.reset();
+    this.observer.emit("editFeature", this.editFeature);
+    this.observer.emit("editSource", this.editSource);
+    this.observer.emit("deactivate");
+  }
+
+  getSources() {
+    return this.sources.filter(source => {
+      return this.activeServices.some(serviceId => serviceId === source.id);
+    });
   }
 }
 

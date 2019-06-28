@@ -317,29 +317,7 @@
         "featureNS": "wsp",
         "visibleAtStart": false,
         "visibleForGroups": [],
-        "form": [
-          {
-            "displayOptions": false,
-            "name": "Säg vad du tycker!",
-            "type": "text",
-            "value": "",
-            "values": []
-          },
-          {
-            "displayOptions": false,
-            "name": "Hej",
-            "type": "textarea",
-            "value": "",
-            "values": []
-          },
-          {
-            "displayOptions": true,
-            "name": "Test",
-            "type": "option",
-            "value": "",
-            "values": ["1", "2", "4"]
-          }
-        ]
+        "form": []
       },
       "index": 4
     },

@@ -30,6 +30,9 @@ const styles = theme => {
     },
     right: {
       float: "right"
+    },
+    left: {
+      float: "left"
     }
   };
 };
@@ -49,14 +52,13 @@ class CollectorView extends Component {
 
   render() {
     return (
-      <div>
-        <CollectorForm
-          localObserver={this.props.localObserver}
-          model={this.model}
-          onClose={this.onClose}
-          form={this.props.form}
-        />
-      </div>
+      <CollectorForm
+        localObserver={this.props.localObserver}
+        model={this.model}
+        onClose={this.onClose}
+        form={this.props.form}
+        serviceConfig={this.props.serviceConfig}
+      />
     );
   }
 }

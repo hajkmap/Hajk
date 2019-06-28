@@ -34,6 +34,7 @@ article {
 }
 
 article textarea {
+  resize: auto;
   width: 400px;
   height: 150px;
   border-radius: 3px;
@@ -186,12 +187,6 @@ article fieldset > span > div {
   background: #dedede;
 }
 
-.layer-list li:nth-child(even) {
-}
-
-.layer-list li:nth-child(odd) {
-}
-
 .layer-list li i {
   float: right;
   margin-top: 1px;
@@ -237,9 +232,6 @@ article fieldset > span > div {
   cursor: pointer;
   font-size: 20px;
   margin-right: 10px;
-}
-
-table {
 }
 
 table th {
@@ -331,9 +323,6 @@ body.dragging * {
   overflow: hidden;
 }
 
-.info {
-}
-
 .tab-pane-bar {
   margin: 0 0 18px 0;
 }
@@ -361,9 +350,6 @@ body.dragging * {
 .edit-fields-table input[type="text"] {
   width: 160px !important;
   margin: 0 !important;
-}
-
-.editable-list {
 }
 
 .list-value:first-child {

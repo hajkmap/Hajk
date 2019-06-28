@@ -16,6 +16,7 @@ class Collector extends Component {
   constructor(props) {
     super(props);
     this.position = "right";
+    this.app = props.app;
     this.options = props.options;
     this.title = this.options.title || "Tyck till";
     this.abstract = this.options.abstract || "Vi vill veta vad du tycker!";
@@ -23,15 +24,24 @@ class Collector extends Component {
     this.state = {
       dialogOpen: false
     };
+    this.serviceConfig = this.getLayerConfigById(this.options.serviceId);
     this.observer = new Observer();
     this.collectorModel = new CollectorModel({
       map: props.map,
       app: props.app,
       observer: this.observer,
-      options: props.options
+      options: {
+        ...props.options,
+        serviceConfig: this.serviceConfig
+      }
     });
-    this.app = props.app;
     this.app.registerPanel(this);
+  }
+
+  getLayerConfigById(serviceId) {
+    return this.app.config.layersConfig.find(
+      layerConfig => layerConfig.type === "edit" && layerConfig.id === serviceId
+    );
   }
 
   onClick = e => {
@@ -73,7 +83,7 @@ class Collector extends Component {
         open={this.state.panelOpen}
         position={this.position}
         height={450}
-        width={400}
+        width={430}
         top={210}
         left={left}
         mode={mode}
@@ -86,20 +96,10 @@ class Collector extends Component {
           openPanel={this.openPanel}
           localObserver={this.observer}
           form={this.form}
+          serviceConfig={this.serviceConfig}
         />
       </Window>,
       document.getElementById("toolbar-panel")
-    );
-  }
-
-  renderDialog() {
-    return createPortal(
-      <CollectorView
-        onClose={this.onClose}
-        model={this.collectorModel}
-        dialogOpen={this.state.panelOpen}
-      />,
-      document.getElementById("map")
     );
   }
 

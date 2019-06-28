@@ -862,6 +862,15 @@
       "layers": ["wsp:hpl"],
       "editableFields": [
         {
+          "index": 0,
+          "name": "id",
+          "dataType": "int",
+          "textType": null,
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
           "index": 1,
           "name": "name",
           "dataType": "string",
@@ -878,11 +887,65 @@
           "values": null,
           "hidden": false,
           "defaultValue": null
+        },
+        {
+          "index": 5,
+          "name": "typ",
+          "dataType": "string",
+          "textType": "flerval",
+          "values": ["brun", "grå", "vit"],
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 6,
+          "name": "trafikslag",
+          "dataType": "string",
+          "textType": "lista",
+          "values": ["buss", "taxi"],
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 7,
+          "name": "max_antal",
+          "dataType": "int",
+          "textType": null,
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 8,
+          "name": "medel_antal",
+          "dataType": "number",
+          "textType": null,
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 9,
+          "name": "datum_text",
+          "dataType": "string",
+          "textType": "datum",
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 10,
+          "name": "typkod",
+          "dataType": "string",
+          "textType": "fritext",
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
         }
       ],
       "editPoint": true,
-      "editPolygon": false,
-      "editLine": false,
+      "editPolygon": true,
+      "editLine": true,
       "infoVisible": false,
       "infoTitle": null,
       "infoText": null,

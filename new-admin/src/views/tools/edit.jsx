@@ -30,7 +30,8 @@ var defaultState = {
   index: 0,
   target: "toolbar",
   instruction: "",
-  visibleForGroups: []
+  visibleForGroups: [],
+  activeServices: []
 };
 
 class ToolOptions extends Component {
