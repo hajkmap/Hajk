@@ -294,9 +294,17 @@ class LayerGroupItem extends Component {
     const { layer } = this.props;
     if (l === layer) {
       layer.setVisible(true);
+
       this.props.layer.getSource().updateParams({
         LAYERS: this.props.layer.subLayers,
-        CQL_FILTER: null
+        CQL_FILTER: null,
+        // Extract .style property from each sub layer.
+        // Join them into a string that will be used to
+        // reset STYLES param for the GET request.
+        STYLES: Object.entries(this.props.layer.layersInfo)
+          .map(o => o[1])
+          .map(l => l.style)
+          .join()
       });
       this.setState({
         visible: true,
@@ -341,8 +349,17 @@ class LayerGroupItem extends Component {
     }
 
     if (visibleSubLayers.length >= 1) {
+      // Create an Array to be used as STYLES param, it should only contain selected sublayers' styles
+      let visibleSubLayersStyles = [];
+      visibleSubLayers.forEach(subLayer => {
+        visibleSubLayersStyles.push(
+          this.props.layer.layersInfo[subLayer].style
+        );
+      });
+
       this.props.layer.getSource().updateParams({
         LAYERS: visibleSubLayers,
+        STYLES: visibleSubLayersStyles.join(),
         CQL_FILTER: null
       });
       this.props.layer.setVisible(layerVisibility);
