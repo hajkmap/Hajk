@@ -9,7 +9,8 @@ import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import MenuIcon from "@material-ui/icons/Menu";
 import PrintIcon from "@material-ui/icons/Print";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import TocIcon from "@material-ui/icons/Toc";
 import Typography from "@material-ui/core/Typography";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import Alert from "../../components/Alert.js";
@@ -172,7 +173,7 @@ class Informative extends React.PureComponent {
             variant="contained"
             onClick={this.displayMap(chapter.layers, chapter.mapSettings)}
           >
-            Visa karta
+            Karta
             <MapIcon color="primary" className={classes.rightIcon} />
           </Button>
           <IconButton
@@ -180,7 +181,11 @@ class Informative extends React.PureComponent {
             aria-label="Teckenförklaring"
             onClick={this.toggleLegend}
           >
-            <MoreHorizIcon color="primary" title="Teckenförklaring" />
+            {this.state.displayLegend ? (
+              <ExpandLessIcon color="primary" title="Teckenförklaring" />
+            ) : (
+              <TocIcon color="primary" title="Teckenförklaring" />
+            )}
           </IconButton>
         </div>
       );
