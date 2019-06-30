@@ -58,6 +58,7 @@ class CollectorView extends Component {
         onClose={this.onClose}
         form={this.props.form}
         serviceConfig={this.props.serviceConfig}
+        options={this.props.options}
       />
     );
   }

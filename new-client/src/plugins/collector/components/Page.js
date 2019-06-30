@@ -15,6 +15,7 @@ import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import Slide from "@material-ui/core/Slide";
 import Toolbar from "./Toolbar.js";
+import { withSnackbar } from "notistack";
 
 const styles = theme => ({
   button: {
@@ -39,6 +40,9 @@ const styles = theme => ({
     overflowX: "hidden",
     borderBottom: "1px solid #ccc"
   },
+  pageContentInner: {
+    paddingBottom: "10px"
+  },
   buttons: {}
 });
 
@@ -48,7 +52,8 @@ class Page extends Component {
     if (props.page.text) {
       var json = Parser.html2json(props.page.text);
       this.state = {
-        json: json
+        json: json,
+        displayThankYou: false
       };
       this.formErrors = {};
     }
@@ -132,7 +137,7 @@ class Page extends Component {
     this.forceUpdate();
   }
 
-  getValueMarkup(field) {
+  getValueMarkup(field, label) {
     const { classes } = this.props;
 
     if (!field) return null;
@@ -166,7 +171,7 @@ class Page extends Component {
         return (
           <TextField
             id={field.id}
-            label={field.name}
+            label={label || field.name}
             className={classes.textField}
             margin="normal"
             variant="outlined"
@@ -181,7 +186,7 @@ class Page extends Component {
         return (
           <TextField
             id={field.id}
-            label={field.name}
+            label={label || field.name}
             className={classes.textField}
             margin="normal"
             variant="outlined"
@@ -196,7 +201,7 @@ class Page extends Component {
         return (
           <TextField
             id={field.id}
-            label={field.name}
+            label={label || field.name}
             className={classes.textField}
             type="datetime-local"
             margin="normal"
@@ -217,7 +222,7 @@ class Page extends Component {
           <>
             <TextField
               id={field.id}
-              label={field.name}
+              label={label || field.name}
               className={classes.textField}
               margin="normal"
               variant="outlined"
@@ -277,7 +282,7 @@ class Page extends Component {
         return (
           <div className={classes.root}>
             <FormControl component="fieldset" className={classes.formControl}>
-              <FormLabel component="legend">{field.name}</FormLabel>
+              <FormLabel component="legend">{label || field.name}</FormLabel>
               <FormGroup>{checkboxes}</FormGroup>
             </FormControl>
           </div>
@@ -295,7 +300,7 @@ class Page extends Component {
         return (
           <div className={classes.root}>
             <FormControl component="fieldset" className={classes.formControl}>
-              <FormLabel component="legend">{field.name}</FormLabel>
+              <FormLabel component="legend">{label || field.name}</FormLabel>
               <NativeSelect
                 value={value}
                 input={<Input name={field.name} id={field.name} />}
@@ -330,14 +335,21 @@ class Page extends Component {
           <Toolbar
             ref="toolbar"
             serviceConfig={this.props.serviceConfig}
-            observer={this.props.model.observer}
             enabled={true}
             model={this.props.model}
+            onChangeTool={() => {
+              if (window.innerWidth < 600) {
+                this.props.model.observer.publish("minimizeWindow", true);
+                this.props.enqueueSnackbar(
+                  "Klicka i kartan för att rita objekt"
+                );
+              }
+            }}
           />
         );
       }
       if (attr.field) {
-        return this.getValueMarkup(this.getFieldConfig(attr.field));
+        return this.getValueMarkup(this.getFieldConfig(attr.field), attr.label);
       }
     } else {
       return null;
@@ -356,7 +368,46 @@ class Page extends Component {
                   {this.renderFromJsonDom(child)}
                 </div>
               );
+            case "p":
+              return (
+                <p key={i}>
+                  {this.renderFromAttribute(child.attr)}
+                  {this.renderFromJsonDom(child)}
+                </p>
+              );
+            case "label":
+              return <label key={i}>{this.renderFromJsonDom(child)}</label>;
+            case "h1":
+              return (
+                <Typography variant="h1" key={i}>
+                  {this.renderFromJsonDom(child)}
+                </Typography>
+              );
+            case "h2":
+              return (
+                <Typography variant="h2" key={i}>
+                  {this.renderFromJsonDom(child)}
+                </Typography>
+              );
+            case "h3":
+              return (
+                <Typography variant="h3" key={i}>
+                  {this.renderFromJsonDom(child)}
+                </Typography>
+              );
+            case "h4":
+              return (
+                <Typography variant="h4" key={i}>
+                  {this.renderFromJsonDom(child)}
+                </Typography>
+              );
             case "h5":
+              return (
+                <Typography variant="h5" key={i}>
+                  {this.renderFromJsonDom(child)}
+                </Typography>
+              );
+            case "h6":
               return (
                 <Typography variant="h5" key={i}>
                   {this.renderFromJsonDom(child)}
@@ -375,6 +426,47 @@ class Page extends Component {
       return null;
     }
   }
+
+  save = () => {
+    this.props.model.save(
+      r => {
+        console.log(r);
+        if (
+          r &&
+          r.TransactionResponse &&
+          r.TransactionResponse.TransactionSummary &&
+          r.TransactionResponse.TransactionSummary.totalInserted
+        ) {
+          const ins = r.TransactionResponse.TransactionSummary.totalInserted.toString();
+          console.log("Inserted", ins);
+
+          if (Number(ins) > 0) {
+            if (this.props.options.showThankYou) {
+              this.setState({
+                displayThankYou: true
+              });
+            } else {
+              this.props.model.observer.publish("abort");
+            }
+          } else {
+            this.saveError();
+          }
+        } else {
+          this.saveError();
+        }
+      },
+      error => {
+        this.saveError();
+      }
+    );
+  };
+
+  saveError = () => {
+    this.props.model.globalObserver.emit(
+      "alert",
+      "Det gick inte att spara, försök igen senare."
+    );
+  };
 
   renderButtons() {
     const { page, numPages, classes, onPrevPage, onNextPage } = this.props;
@@ -410,15 +502,28 @@ class Page extends Component {
         variant="outlined"
         color="primary"
         className={classes.buttonRight}
-        onClick={() => {
-          this.props.model.save(response => {
-            console.log(response);
-          });
-        }}
+        onClick={this.save}
       >
         Skicka
       </Button>
     );
+
+    const okButton = (
+      <Button
+        variant="outlined"
+        color="primary"
+        className={classes.buttonRight}
+        onClick={() => {
+          this.props.model.observer.publish("abort");
+        }}
+      >
+        Stäng
+      </Button>
+    );
+
+    if (this.state.displayThankYou) {
+      return <div>{okButton}</div>;
+    }
 
     if (page.order === numPages - 1) {
       return (
@@ -443,25 +548,45 @@ class Page extends Component {
     return null;
   }
 
-  render() {
+  createMarkup = () => {
+    return {
+      __html: this.props.options.thankYou
+    };
+  };
+
+  renderThankYou() {
+    return <div dangerouslySetInnerHTML={this.createMarkup()}></div>;
+  }
+
+  renderSlide() {
     const { classes, page } = this.props;
     const { json } = this.state;
+    return (
+      <Slide
+        direction={this.props.direction || "left"}
+        in={true}
+        mountOnEnter
+        unmountOnExit
+        className={classes.page}
+      >
+        <div>
+          <Typography variant="h4">{page.header}</Typography>
+          <div className={classes.pageContentInner}>
+            {this.renderFromJsonDom(json)}
+          </div>
+        </div>
+      </Slide>
+    );
+  }
+
+  render() {
+    const { classes } = this.props;
+    const { displayThankYou } = this.state;
     return (
       this.props.active && (
         <div className={classes.page}>
           <div className={classes.pageContent}>
-            <Slide
-              direction={this.props.direction || "left"}
-              in={true}
-              mountOnEnter
-              unmountOnExit
-              className={classes.page}
-            >
-              <div>
-                <Typography variant="h4">{page.header}</Typography>
-                <div>{this.renderFromJsonDom(json)}</div>
-              </div>
-            </Slide>
+            {displayThankYou ? this.renderThankYou() : this.renderSlide()}
           </div>
           <div className={classes.buttons}>{this.renderButtons()}</div>
         </div>
@@ -470,4 +595,4 @@ class Page extends Component {
   }
 }
 
-export default withStyles(styles)(Page);
+export default withStyles(styles)(withSnackbar(Page));

@@ -26,10 +26,12 @@ class Collector extends Component {
     };
     this.serviceConfig = this.getLayerConfigById(this.options.serviceId);
     this.observer = new Observer();
+
     this.collectorModel = new CollectorModel({
       map: props.map,
       app: props.app,
       observer: this.observer,
+      globalObserver: this.app.globalObserver,
       options: {
         ...props.options,
         serviceConfig: this.serviceConfig
@@ -61,7 +63,8 @@ class Collector extends Component {
     this.setState({
       panelOpen: false
     });
-    this.observer.publish("abort");
+    this.collectorModel.reset();
+    this.collectorModel.observer.publish("abortInteraction");
   };
 
   openPanel = () => {
@@ -69,8 +72,6 @@ class Collector extends Component {
       panelOpen: true
     });
   };
-
-  onClose = () => {};
 
   renderWindow(mode) {
     var left = this.position === "right" ? (window.innerWidth - 410) / 2 : 0;
@@ -89,14 +90,14 @@ class Collector extends Component {
         mode={mode}
       >
         <CollectorView
-          onClose={this.onClose}
+          onClose={this.closePanel}
           model={this.collectorModel}
           dialogOpen={this.state.panelOpen}
           minimizePanel={this.minimizePanel}
           openPanel={this.openPanel}
-          localObserver={this.observer}
           form={this.form}
           serviceConfig={this.serviceConfig}
+          options={this.options}
         />
       </Window>,
       document.getElementById("toolbar-panel")

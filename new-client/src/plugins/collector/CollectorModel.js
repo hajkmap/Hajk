@@ -1,5 +1,4 @@
 import { WFS } from "ol/format";
-import Feature from "ol/Feature";
 import { Style, Stroke, Fill, Circle, RegularShape, Icon } from "ol/style";
 import { MultiPoint, Polygon } from "ol/geom";
 import Vector from "ol/layer/Vector";
@@ -13,6 +12,7 @@ class CollectorModel {
     this.app = settings.options.app;
     this.map = settings.map;
     this.observer = settings.observer;
+    this.globalObserver = settings.globalObserver;
     this.activeServices = [settings.options.serviceId];
     this.sources = [settings.options.serviceConfig];
     this.vectorSource = undefined;
@@ -23,15 +23,18 @@ class CollectorModel {
     this.editFeature = undefined;
     this.editSource = undefined;
     this.filty = false;
+    this.geometryName = "geom";
+    this.serviceConfig = settings.options.serviceConfig;
+    this.setFormValuesFromConfig();
     this.setLayer(settings.options.serviceConfig);
-    this.formValues = settings.options.serviceConfig.editableFields.reduce(
-      (obj, field) => {
-        obj[field.name] = this.valueByDataType(field);
-        return obj;
-      },
-      {}
-    );
   }
+
+  setFormValuesFromConfig = () => {
+    this.formValues = this.serviceConfig.editableFields.reduce((obj, field) => {
+      obj[field.name] = this.valueByDataType(field);
+      return obj;
+    }, {});
+  };
 
   valueByDataType(field) {
     switch (field.dataType) {
@@ -145,7 +148,7 @@ class CollectorModel {
   }
 
   save(done) {
-    const feature = this.vectorSource.getFeatures()[0] || new Feature();
+    const inserts = this.vectorSource.getFeatures();
     const formValues = { ...this.formValues };
 
     Object.keys(formValues).forEach(key => {
@@ -156,9 +159,11 @@ class CollectorModel {
           .join(", ");
       }
     });
-    feature.setProperties(formValues);
-    console.log("Values", feature.getProperties());
-    //this.transact(features, done);
+
+    if (inserts.length > 0) {
+      inserts[0].setProperties(formValues);
+      this.transact({ inserts: inserts }, done);
+    }
   }
 
   getSelectStyle(feature) {
@@ -382,17 +387,13 @@ class CollectorModel {
   }
 
   reset() {
-    this.editSource = undefined;
-    this.editFeature = undefined;
-    this.removeFeature = undefined;
-    this.removalToolMode = "off";
-    this.filty = false;
-    this.map.clicklock = false;
-    if (this.layer) {
-      this.map.removeLayer(this.layer);
-      this.layer = undefined;
+    if (this.vectorSource) {
+      this.vectorSource.clear();
     }
+    this.map.clicklock = false;
     this.deactivateInteraction();
+    this.setFormValuesFromConfig();
+    this.observer.emit("reset");
   }
 
   deactivate() {

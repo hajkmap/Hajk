@@ -135,6 +135,13 @@
             "expanded": true,
             "layers": [
               {
+                "id": "14",
+                "visibleAtStart": true,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
                 "id": "33",
                 "visibleAtStart": false,
                 "drawOrder": 1000,
@@ -181,8 +188,7 @@
         "toggleAllButton": true,
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Rubrik temakarta",
-        "visibleForGroups": ["Office-SEKSD01", "All-SE129"],
-        "target": "left"
+        "visibleForGroups": ["Office-SEKSD01", "All-SE129"]
       },
       "index": 0
     },
@@ -295,7 +301,7 @@
         "abstract": "Vi vill veta vad du tycker!",
         "featureNS": "wsp",
         "showThankYou": true,
-        "thankYou": "Hej",
+        "thankYou": "Tack för din medverkan!",
         "visibleAtStart": false,
         "visibleForGroups": [],
         "form": [
@@ -303,13 +309,13 @@
             "id": 2,
             "order": 0,
             "header": "Lämna en synpunkt",
-            "text": "<div>Vi vill gärna veta vad du tycker. Du kan markera en plats i kartan eller beskriva dina åsikter i text.</div>\n<h5>Vad tycker du till om?</h5>\n<div>ashdkjahjdkhasdkj</div>\n<div type=\"toolbar\"></div>"
+            "text": "<div>Vi vill gärna veta vad du tycker. Du kan markera en plats i kartan eller beskriva dina åsikter i text.</div>\n<h5>Vad tycker du till om?</h5>\n<div field=\"typ\" label=\"Typ\"></div>\n<div type=\"toolbar\"></div>"
           },
           {
             "id": 3,
             "order": 1,
             "header": "Formulär: ",
-            "text": "<div>Datum: </div>\n<div field=\"datum_text\"></div>\n<div>Typ: </div>\n<div field=\"typ\"></div>\n<div>Bild: </div>\n<div field=\"image\"></div>\n<div>Namn: </div>\n<div field=\"name\"></div>\n<div>Trafikslag: </div>\n<div field=\"trafikslag\"></div>"
+            "text": "<div field=\"datum_text\" label=\"Datum\"></div>\n<div field=\"image\" label=\"Bild\"></div>\n<div field=\"name\" label=\"Namn\"></div>\n<div field=\"trafikslag\" label=\"Trafikslag\"></div>\n<div>Extra info här</div>\nbara text utan tagg\n<p>Paragraf</p>"
           }
         ],
         "serviceId": "25"
@@ -336,7 +342,7 @@
       "options": {
         "target": "toolbar",
         "instruction": "",
-        "activeServices": ["26"],
+        "activeServices": ["26", "25"],
         "visibleForGroups": []
       },
       "index": 0

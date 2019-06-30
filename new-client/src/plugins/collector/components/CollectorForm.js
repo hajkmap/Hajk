@@ -106,6 +106,12 @@ class CollectorForm extends Component {
       this.abort();
     });
 
+    props.model.observer.on("reset", () => {
+      this.setState({
+        activePage: 0
+      });
+    });
+
     this.state = {
       ...this.state,
       form: props.form
@@ -118,39 +124,6 @@ class CollectorForm extends Component {
     });
   };
 
-  save = generic => () => {
-    this.props.model.save(
-      {
-        comment: this.state.comment,
-        displayPlace: this.state.displayPlace,
-        generic: generic
-      },
-      transactionResult => {
-        if (
-          transactionResult &&
-          transactionResult.transactionSummary &&
-          transactionResult.transactionSummary.totalInserted
-        ) {
-          if (transactionResult.transactionSummary.totalInserted > 0) {
-            this.setState({
-              comment: "",
-              saveError: "",
-              validationError: "",
-              mode: "success"
-            });
-          } else {
-            this.saveError();
-          }
-        } else {
-          this.saveError();
-        }
-      },
-      error => {
-        this.saveError(error);
-      }
-    );
-  };
-
   renderSaveError() {
     const { classes } = this.props;
     return this.state.saveError ? (
@@ -159,7 +132,6 @@ class CollectorForm extends Component {
   }
 
   abort = () => {
-    this.reset();
     this.props.onClose();
   };
 
@@ -181,6 +153,7 @@ class CollectorForm extends Component {
               numPages={form.length}
               page={page}
               direction={direction}
+              options={this.props.options}
               onNextPage={() => {
                 this.setState({
                   activePage: activePage + 1,

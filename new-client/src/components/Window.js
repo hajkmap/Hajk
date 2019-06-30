@@ -99,7 +99,7 @@ const styles = theme => {
       padding: "10px",
       cursor: "default !important",
       [theme.breakpoints.down("xs")]: {
-        bottom: "64px"
+        marginBottom: "64px"
       }
     }
   };
@@ -301,7 +301,7 @@ class Window extends React.PureComponent {
 
   moveToBottom = target => {
     this.rnd.updatePosition({
-      y: Math.round(window.innerHeight - 110)
+      y: Math.round(window.innerHeight - 106)
     });
     this.mode = "minimized";
   };

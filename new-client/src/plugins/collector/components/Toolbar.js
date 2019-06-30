@@ -32,47 +32,21 @@ class Toolbar extends Component {
     this.state = {
       activeTool: undefined
     };
-    props.observer.on("deactivate", () => {
-      this.props.panel.setState({
-        checked: false,
-        enabled: false,
-        selectedSource: false
-      });
+    this.props.model.observer.on("abortInteraction", () => {
       this.setState({
         activeTool: undefined
       });
     });
-    props.observer.on("layerChanged", layer => {
-      this.setState(
-        {
-          activeTool: undefined
-        },
-        () => {
-          this.props.model.deactivateInteraction();
-        }
-      );
-    });
-    props.observer.on("abort", layer => {
-      console.log("Set state on component");
-      this.setState(
-        {
-          activeTool: undefined
-        },
-        () => {
-          this.props.model.deactivateInteraction();
-        }
-      );
-    });
   }
 
   componentWillUnmount() {
-    this.props.observer.off("deactivate");
-    this.props.observer.off("layerChanged");
-    this.props.observer.off("abort");
+    this.props.model.observer.off("abortInteraction");
+    this.props.model.deactivateInteraction();
   }
 
   changeTool(type, geometryType) {
     const { model } = this.props;
+    this.props.onChangeTool();
     if (geometryType && this.state.activeTool === geometryType.toLowerCase()) {
       model.deactivateInteraction();
       return this.setState({

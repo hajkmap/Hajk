@@ -158,6 +158,9 @@ class Informative extends React.PureComponent {
     if (window.innerWidth < 600) {
       this.props.observer.publish("minimizeWindow", true);
     }
+    this.setState({
+      displayLegend: true
+    });
   };
 
   renderLayerItems(chapter) {
