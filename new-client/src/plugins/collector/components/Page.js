@@ -430,7 +430,6 @@ class Page extends Component {
   save = () => {
     this.props.model.save(
       r => {
-        console.log(r);
         if (
           r &&
           r.TransactionResponse &&
@@ -438,8 +437,6 @@ class Page extends Component {
           r.TransactionResponse.TransactionSummary.totalInserted
         ) {
           const ins = r.TransactionResponse.TransactionSummary.totalInserted.toString();
-          console.log("Inserted", ins);
-
           if (Number(ins) > 0) {
             if (this.props.options.showThankYou) {
               this.setState({

@@ -1,6 +1,7 @@
 import { WFS } from "ol/format";
 import { Style, Stroke, Fill, Circle, RegularShape, Icon } from "ol/style";
 import { MultiPoint, Polygon } from "ol/geom";
+import Feature from "ol/Feature";
 import Vector from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { all as strategyAll } from "ol/loadingstrategy";
@@ -148,7 +149,7 @@ class CollectorModel {
   }
 
   save(done) {
-    const inserts = this.vectorSource.getFeatures();
+    var inserts = this.vectorSource.getFeatures();
     const formValues = { ...this.formValues };
 
     Object.keys(formValues).forEach(key => {
@@ -159,6 +160,10 @@ class CollectorModel {
           .join(", ");
       }
     });
+
+    if (inserts.length === 0) {
+      inserts.push(new Feature());
+    }
 
     if (inserts.length > 0) {
       inserts[0].setProperties(formValues);
