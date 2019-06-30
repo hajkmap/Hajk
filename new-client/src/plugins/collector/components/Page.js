@@ -35,6 +35,9 @@ const styles = theme => ({
   page: {
     height: "100%"
   },
+  textField: {
+    minWidth: "60%"
+  },
   pageContent: {
     height: "calc(100% - 60px)",
     overflowX: "hidden",
@@ -166,6 +169,10 @@ class Page extends Component {
       }
     }
 
+    if (Array.isArray(label)) {
+      label = label.join(" ");
+    }
+
     switch (field.textType) {
       case "heltal":
         return (
@@ -222,6 +229,7 @@ class Page extends Component {
           <>
             <TextField
               id={field.id}
+              multiline
               label={label || field.name}
               className={classes.textField}
               margin="normal"

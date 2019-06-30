@@ -129,7 +129,7 @@ class FieldEditor extends Component {
     const { onUpdate } = this.props;
     this.setState(
       {
-        pages: [{ id: this.state.pages.length }, ...this.state.pages]
+        pages: [{ id: Math.round(Math.random() * 1e12) }, ...this.state.pages]
       },
       () => {
         onUpdate(this.getForm());

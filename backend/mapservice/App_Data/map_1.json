@@ -306,16 +306,22 @@
         "visibleForGroups": [],
         "form": [
           {
-            "id": 2,
+            "id": 482791167411,
             "order": 0,
-            "header": "Lämna en synpunkt",
-            "text": "<div>Vi vill gärna veta vad du tycker. Du kan markera en plats i kartan eller beskriva dina åsikter i text.</div>\n<h5>Vad tycker du till om?</h5>\n<div field=\"typ\" label=\"Typ\"></div>\n<div type=\"toolbar\"></div>"
+            "header": "Ny sida",
+            "text": "Bara text"
           },
           {
-            "id": 3,
+            "id": 464454144564,
             "order": 1,
-            "header": "Formulär: ",
-            "text": "<div field=\"datum_text\" label=\"Datum\"></div>\n<div field=\"image\" label=\"Bild\"></div>\n<div field=\"name\" label=\"Namn\"></div>\n<div field=\"trafikslag\" label=\"Trafikslag\"></div>\n<div>Extra info här</div>\nbara text utan tagg\n<p>Paragraf</p>"
+            "header": " Formulär: ",
+            "text": "<div field=\"datum_text\" label=\"Datum\"></div>\n<div field=\"image\" label=\"Bild namn\"></div>\n<div field=\"name\" label=\"Namn\"></div>\n<div field=\"trafikslag\" label=\"Trafik slag\"></div>\n<div>Extra info här</div>\nbara text utan tagg\n<p>Paragraf</p>"
+          },
+          {
+            "id": 828488168060,
+            "order": 2,
+            "header": "Lämna en synpunkt",
+            "text": "<div>Vi vill gärna veta vad du tycker. Du kan markera en plats i kartan eller beskriva dina åsikter i text.</div>\n<h5>Vad tycker du till om?</h5>\n<div field=\"typ\" label=\"Typ\"></div>\n<div type=\"toolbar\"></div>"
           }
         ],
         "serviceId": "25"
