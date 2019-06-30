@@ -34,6 +34,7 @@ var defaultState = {
   caption: "Översiktsplan",
   html: "<div>HTML som beskriver dokumentets innehåll</div>",
   serviceUrl: "http://localhost:55630/informative/load",
+  exportUrl: "http://localhost:55630/export/document",
   documentList: [],
   document: "",
   visibleAtStart: false,
@@ -76,6 +77,7 @@ class ToolOptions extends Component {
                 abstract: tool.options.abstract,
                 html: tool.options.html,
                 serviceUrl: tool.options.serviceUrl,
+                exportUrl: tool.options.exportUrl,
                 document: tool.options.document || list[0],
                 visibleAtStart: tool.options.visibleAtStart || false,
                 visibleForGroups: tool.options.visibleForGroups
@@ -148,6 +150,7 @@ class ToolOptions extends Component {
         title: this.state.title,
         caption: this.state.caption,
         serviceUrl: this.state.serviceUrl,
+        exportUrl: this.state.exportUrl,
         abstract: this.state.abstract,
         html: this.state.html,
         document: this.state.document,
@@ -366,6 +369,18 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
               value={this.state.serviceUrl}
+            />
+          </div>
+          <div>
+            <label htmlFor="exportUrl">Länk till export</label>
+            <input
+              id="exportUrl"
+              name="exportUrl"
+              type="text"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.exportUrl}
             />
           </div>
           <div>

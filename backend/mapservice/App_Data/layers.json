@@ -532,11 +532,11 @@
     {
       "id": "14",
       "dataFormat": "WFS",
-      "caption": "Hållplats",
+      "caption": "Synpuntker",
       "url": "http://giscloud.se/geoserver/wfs",
       "layer": "wsp:hpl",
       "owner": null,
-      "date": "1560494395644",
+      "date": "1561929418825",
       "content": "",
       "legend": "",
       "symbolXOffset": 0.0,

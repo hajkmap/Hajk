@@ -8,7 +8,7 @@ class InformativeModel {
     this.url = settings.app.config.appConfig.proxy + settings.url;
     this.globalObserver = settings.app.globalObserver;
     this.app = settings.app;
-    this.exportUrl = "http://localhost:55630/export/document";
+    this.exportUrl = settings.exportUrl;
   }
 
   flyTo(view, location, zoom) {

@@ -283,6 +283,7 @@
         "title": "Översiktsplan",
         "caption": "Översiktsplan",
         "serviceUrl": "http://localhost:55630/informative/load",
+        "exportUrl": "http://localhost:55630/export/document",
         "abstract": "Läs mer om vad som planeras i kommunen",
         "html": "<div>HTML som beskriver dokumentets innehåll</div>",
         "document": "test",

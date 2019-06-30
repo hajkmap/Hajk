@@ -60,7 +60,8 @@ class Informative extends React.PureComponent {
       map: props.map,
       app: props.app,
       observer: this.observer,
-      url: props.options.serviceUrl + "/" + props.options.document
+      url: props.options.serviceUrl + "/" + props.options.document,
+      exportUrl: props.options.exportUrl
     });
     this.app.registerPanel(this);
   }

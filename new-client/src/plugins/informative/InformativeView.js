@@ -11,6 +11,7 @@ import MenuIcon from "@material-ui/icons/Menu";
 import PrintIcon from "@material-ui/icons/Print";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import TocIcon from "@material-ui/icons/Toc";
+import ArrowDownward from "@material-ui/icons/ArrowDownward";
 import Typography from "@material-ui/core/Typography";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import Alert from "../../components/Alert.js";
@@ -19,6 +20,9 @@ const styles = theme => ({
   rightIcon: {
     marginLeft: theme.spacing(1),
     cursor: "pointer"
+  },
+  icon: {
+    marginRight: theme.spacing(1)
   },
   chapter: {},
   toc: {
@@ -325,10 +329,6 @@ class Informative extends React.PureComponent {
           url: url,
           loading: false
         });
-        this.refs.anchor.click();
-        this.setState({
-          url: false
-        });
       }
     });
   };
@@ -366,14 +366,19 @@ class Informative extends React.PureComponent {
         </div>
         <div>
           {this.state.url && (
-            <a
+            <Button
               ref="anchor"
               href={this.state.url}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() => {
+                this.setState({
+                  url: ""
+                });
+              }}
             >
-              &nbsp;
-            </a>
+              <ArrowDownward className={classes.icon} /> Ladda ner
+            </Button>
           )}
         </div>
         {tocVisible ? (
