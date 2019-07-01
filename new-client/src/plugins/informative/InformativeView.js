@@ -318,8 +318,8 @@ class Informative extends React.PureComponent {
       url: false
     });
     this.props.parent.informativeModel.print(this.state.chapter, url => {
-      if (undefined !== this.options.exportRoot) {
-        url = this.options.exportRoot + url;
+      if (undefined !== this.props.options.exportRoot) {
+        url = this.props.options.exportRoot + url;
       }
       if (url === "error") {
         this.setState({

@@ -604,7 +604,7 @@ namespace MapService.Components
             string localFile = HostingEnvironment.ApplicationPhysicalPath + "//Temp//" + fileName;            
             outputDocument.Save(localFile);            
 
-            return folder + fileName;            
+            return fileName;            
         }
     }
 }
