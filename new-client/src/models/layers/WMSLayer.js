@@ -37,20 +37,18 @@ class WMSLayer {
       transition: this.subLayers.length > 1 ? 0 : 100
     };
 
-    console.log(config.resolutions);
-
-    // if (
-    //   config.resolutions &&
-    //   config.resolutions.length > 0 &&
-    //   config.origin &&
-    //   config.origin.length > 0
-    // ) {
-    //   source.tileGrid = new TileGrid({
-    //     resolutions: config.resolutions,
-    //     origin: config.origin
-    //   });
-    //   source.extent = config.extent;
-    // }
+    if (
+      config.resolutions &&
+      config.resolutions.length > 0 &&
+      config.origin &&
+      config.origin.length > 0
+    ) {
+      source.tileGrid = new TileGrid({
+        resolutions: config.resolutions,
+        origin: config.origin
+      });
+      source.extent = config.extent;
+    }
 
     if (config.singleTile) {
       this.layer = new ImageLayer({

@@ -89,6 +89,7 @@ class Informative extends React.PureComponent {
           observer={this.observer}
           caption={this.caption}
           abstract={this.html}
+          options={this.options}
         />
       </Window>,
       document.getElementById("toolbar-panel")

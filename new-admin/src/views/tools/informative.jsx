@@ -35,10 +35,11 @@ var defaultState = {
   html: "<div>HTML som beskriver dokumentets innehåll</div>",
   serviceUrl: "http://localhost:55630/informative/load",
   exportUrl: "http://localhost:55630/export/document",
+  exportRoot: "",
   documentList: [],
   document: "",
   visibleAtStart: false,
-  templateJsonFilePath: "op",
+  templateJsonFilePath: "",
   visibleForGroups: []
 };
 
@@ -78,6 +79,7 @@ class ToolOptions extends Component {
                 html: tool.options.html,
                 serviceUrl: tool.options.serviceUrl,
                 exportUrl: tool.options.exportUrl,
+                exportRoot: tool.options.exportRoot,
                 document: tool.options.document || list[0],
                 visibleAtStart: tool.options.visibleAtStart || false,
                 visibleForGroups: tool.options.visibleForGroups
@@ -151,6 +153,7 @@ class ToolOptions extends Component {
         caption: this.state.caption,
         serviceUrl: this.state.serviceUrl,
         exportUrl: this.state.exportUrl,
+        exportRoot: this.state.exportRoot,
         abstract: this.state.abstract,
         html: this.state.html,
         document: this.state.document,
@@ -381,6 +384,18 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
               value={this.state.exportUrl}
+            />
+          </div>
+          <div>
+            <label htmlFor="exportRoot">Virtuell mapp till tjänst</label>
+            <input
+              id="exportRoot"
+              name="exportRoot"
+              type="text"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.exportRoot}
             />
           </div>
           <div>

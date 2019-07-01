@@ -196,7 +196,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="App_Data\styles\oversiktsplan.css" />
     <Content Include="assets\logo.png" />
     <Content Include="assets\style.css" />
     <Content Include="Global.asax" />
@@ -206,7 +205,6 @@
     </Content>
     <Content Include="App_Data\layers.json" />
     <Content Include="App_Data\map_1.json" />
-    <Content Include="App_Data\op.json" />
     <Content Include="App_Data\documents\oversiktsplan.json" />
     <None Include="Properties\PublishProfiles\File.pubxml" />
   </ItemGroup>

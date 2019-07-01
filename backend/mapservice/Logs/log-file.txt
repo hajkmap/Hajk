@@ -1,0 +1,28 @@
+FATAL 2019-07-01 06:41:23 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk3\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 768 
+FATAL 2019-07-01 06:44:26 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk3\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 768 
+FATAL 2019-07-01 06:45:53 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk3\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 768 
+FATAL 2019-07-01 06:47:25 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk3\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 768 
+FATAL 2019-07-01 06:48:29 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk3\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 768 
+FATAL 2019-07-01 06:49:42 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk3\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 768 
+FATAL 2019-07-01 06:51:16 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk3\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 768 
+FATAL 2019-07-01 06:52:25 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk3\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 768 
+FATAL 2019-07-01 06:56:30 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk3\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 768 
+FATAL 2019-07-01 07:01:35 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk3\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 768 
+FATAL 2019-07-01 07:01:59 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk3\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 768 
+FATAL 2019-07-01 07:04:12 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk3\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 768 
+FATAL 2019-07-01 07:05:50 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk3\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 768 
+FATAL 2019-07-01 07:06:43 Can't get configuration file: System.Web.HttpException (0x80004005): File not found
+   at MapService.Controllers.ConfigController.GetConfig(String name) in C:\Projekt\hajkmap_Hajk3\Hajk\backend\mapservice\Controllers\ConfigController.cs:line 768 

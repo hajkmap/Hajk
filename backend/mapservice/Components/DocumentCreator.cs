@@ -601,9 +601,8 @@ namespace MapService.Components
             var r = new Random();
             var i = r.Next();
             string fileName = "pdf-export-" + i + ".pdf";
-            string localFile = HostingEnvironment.ApplicationPhysicalPath + "//Temp//" + fileName;
-
-            outputDocument.Save(localFile);
+            string localFile = HostingEnvironment.ApplicationPhysicalPath + "//Temp//" + fileName;            
+            outputDocument.Save(localFile);            
 
             return folder + fileName;            
         }

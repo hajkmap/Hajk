@@ -242,7 +242,7 @@ namespace MapService.Controllers
             string folder = Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/";
             DocumentCreator documentCreator = new DocumentCreator();
             InformativeExport data = JsonConvert.DeserializeObject<InformativeExport>(uploadData.data);            
-            return documentCreator.Create(folder, data);
+            return documentCreator.Create(folder, data);            
         }
     }
 }
