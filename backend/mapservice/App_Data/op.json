@@ -176,13 +176,6 @@
       "options": {
         "baselayers": [
           {
-            "id": "31",
-            "visibleAtStart": true,
-            "drawOrder": 0,
-            "visibleForGroups": null,
-            "infobox": null
-          },
-          {
             "id": "24",
             "visibleAtStart": false,
             "drawOrder": 0,
@@ -301,8 +294,7 @@
         "toggleAllButton": false,
         "dropdownThemeMaps": false,
         "themeMapHeaderCaption": "",
-        "visibleForGroups": [],
-        "target": "left"
+        "visibleForGroups": []
       },
       "index": 0
     },

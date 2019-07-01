@@ -1,0 +1,132 @@
+{
+  "chapters": [
+    {
+      "header": "Kapitel 1",
+      "html": "<p>Text</p>\n<p><br></p>\n<figure><img src=\"https://www.wonderplugin.com/videos/demo-image0.jpg\"/></figure>\n<p><br></p>",
+      "mapSettings": {
+        "center": [325396, 6375548.5],
+        "zoom": 13,
+        "extent": [325003.25, 6375338.25, 325788.75, 6375758.75]
+      },
+      "chapters": [
+        {
+          "header": "Kapitel 1.1",
+          "html": "<p>Text</p>",
+          "mapSettings": {
+            "target": "map",
+            "center": [325000, 6375000],
+            "title": "Kungsbacka Kommun - Översiktsplan",
+            "projection": "EPSG:3006",
+            "zoom": 8,
+            "maxZoom": 3,
+            "minZoom": 9,
+            "resolutions": [
+              4096,
+              2048,
+              1024,
+              512,
+              256,
+              128,
+              64,
+              32,
+              16,
+              8,
+              4,
+              2,
+              1,
+              0.5
+            ],
+            "origin": [0, 0],
+            "extent": [0, 6000000, 1000000, 9000000],
+            "logo": "logo_small.png",
+            "geoserverLegendOptions": "",
+            "pil": null,
+            "mapselector": false,
+            "colors": { "primaryColor": "#2e79de", "secondaryColor": "#747474" }
+          },
+          "chapters": [],
+          "expanded": true
+        }
+      ],
+      "expanded": true,
+      "layers": ["27"]
+    },
+    {
+      "header": "Kapitel 2",
+      "html": "<p>Text</p>",
+      "mapSettings": {
+        "target": "map",
+        "center": [325000, 6375000],
+        "title": "Kungsbacka Kommun - Översiktsplan",
+        "projection": "EPSG:3006",
+        "zoom": 8,
+        "maxZoom": 3,
+        "minZoom": 9,
+        "resolutions": [
+          4096,
+          2048,
+          1024,
+          512,
+          256,
+          128,
+          64,
+          32,
+          16,
+          8,
+          4,
+          2,
+          1,
+          0.5
+        ],
+        "origin": [0, 0],
+        "extent": [0, 6000000, 1000000, 9000000],
+        "logo": "logo_small.png",
+        "geoserverLegendOptions": "",
+        "pil": null,
+        "mapselector": false,
+        "colors": { "primaryColor": "#2e79de", "secondaryColor": "#747474" }
+      },
+      "chapters": [],
+      "expanded": true
+    },
+    {
+      "header": "Kapitel 3",
+      "html": "<p>Text</p>",
+      "mapSettings": {
+        "target": "map",
+        "center": [325000, 6375000],
+        "title": "Kungsbacka Kommun - Översiktsplan",
+        "projection": "EPSG:3006",
+        "zoom": 8,
+        "maxZoom": 3,
+        "minZoom": 9,
+        "resolutions": [
+          4096,
+          2048,
+          1024,
+          512,
+          256,
+          128,
+          64,
+          32,
+          16,
+          8,
+          4,
+          2,
+          1,
+          0.5
+        ],
+        "origin": [0, 0],
+        "extent": [0, 6000000, 1000000, 9000000],
+        "logo": "logo_small.png",
+        "geoserverLegendOptions": "",
+        "pil": null,
+        "mapselector": false,
+        "colors": { "primaryColor": "#2e79de", "secondaryColor": "#747474" }
+      },
+      "chapters": [],
+      "expanded": true
+    }
+  ],
+  "map": "map_1"
+}

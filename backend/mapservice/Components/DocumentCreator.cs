@@ -6,14 +6,10 @@ using System.Linq;
 using System.Web;
 using System.Web.Hosting;
 using System.IO;
-using IronPdf;
-using iTextSharp.text;
-using iTextSharp.text.pdf;
 using System.Net.Http;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
-using iTextSharp.text.pdf.parser;
 using MapService.Models.Config;
 using MapService.Components.MapExport;
 using MapService.Models;
@@ -84,7 +80,7 @@ namespace MapService.Components
 
         private string mapFile = "op.json";        
 
-        private int renderedChapters;
+        private int renderedChapters = 0;
 
         private int totalChapters;
 
@@ -103,19 +99,7 @@ namespace MapService.Components
         /// The layerlist is loaded from file.
         /// </summary>
         public DocumentCreator()
-        {
-            string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.layersFile);
-            var layersJson = System.IO.File.ReadAllText(file);
-            this.layers = JsonConvert.DeserializeObject<LayerConfig>(layersJson);
-
-            string mapFile = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.mapFile);
-            var mapJson = System.IO.File.ReadAllText(mapFile);
-            this.mapConfig = JsonConvert.DeserializeObject<MapConfig>(mapJson);
-            Tool t = this.mapConfig.tools.Find(tool => tool.type == "layerswitcher");
-            if (t != null)
-            {                
-                this.layerSwitcherOptions = JsonConvert.DeserializeObject<LayerSwitcherOptions>(t.options.ToString());
-            }            
+        {           
         }
 
         /// <summary>
@@ -156,7 +140,7 @@ namespace MapService.Components
                 renderedChapters += 1;
                 html.Append("<h1>" + chapter.header + "</h1>");            
                 html.Append(chapter.html);
-                html.Append(this.AppendMap(chapter));
+                html.Append(this.AppendMap(chapter));                
                 if (renderedChapters < totalChapters) {
                     html.Append("<div style='page-break-after: always;'></div>");
                 }
@@ -225,7 +209,7 @@ namespace MapService.Components
         /// <returns>Path to created map image</returns>
         private string AppendMap(Chapter chapter)
         {
-            MapSettings mapSettings = chapter.mapSettings;            
+            MapSettings mapSettings = chapter.mapSettings;                      
             chapter.baseLayer = this.baseLayer;
             string[] layers = chapter.layers;
             if (layers != null && chapter.mapSettings.extent != null && layers.Length > 0)
@@ -240,18 +224,18 @@ namespace MapService.Components
                 mapExportItem.size = new int[] { mapWidth, mapHeight };
                 mapExportItem.resolution = 90;
                 double[] mapExtent = chapter.mapSettings.extent;                
-                mapExportItem.bbox = new double[] { mapExtent[0], mapExtent[2], mapExtent[1], mapExtent[3] };
+                mapExportItem.bbox = new double[] { mapExtent[0], mapExtent[2], mapExtent[1], mapExtent[3] };                                
 
-                mapExportItem.arcgisLayers = layerConfig.arcgislayers.Select(layer =>                     
-                    layer.AsInfo(3007, layer.zIndex == null ? 0 : (int)layer.zIndex)
+                mapExportItem.arcgisLayers = layerConfig.arcgislayers.Select(layer =>                    
+                    layer.AsInfo(layer.zIndex == null ? 0 : (int)layer.zIndex)
                 ).ToList();
 
-                mapExportItem.wmsLayers = layerConfig.wmslayers.Select(layer =>
-                    layer.AsInfo(3007, layer.zIndex == null ? 0 : (int)layer.zIndex)
+                mapExportItem.wmsLayers = layerConfig.wmslayers.Select(layer =>                                            
+                    layer.AsInfo(layer.zIndex == null ? 0 : (int)layer.zIndex)
                 ).ToList();
 
                 mapExportItem.vectorLayers = layerConfig.vectorlayers.Select(layer =>                    
-                    layer.AsInfo(3007, layer.zIndex == null ? 0 : (int)layer.zIndex, new double[] { mapExtent[1], mapExtent[0], mapExtent[3], mapExtent[2] })
+                    layer.AsInfo(layer.zIndex == null ? 0 : (int)layer.zIndex, new double[] { mapExtent[1], mapExtent[0], mapExtent[3], mapExtent[2] })
                 ).ToList();
 
                 try
@@ -411,17 +395,17 @@ namespace MapService.Components
         /// <param name="header"></param>
         /// <param name="html"></param>
         /// <returns></returns>
-        private void RemoveSurroundingPages(string header, string html, Chapter[] chapters, IronPdf.PdfDocument document)
-        {            
+        private void RemoveSurroundingPages(string header, string html, Chapter[] chapters, PdfSharp.Pdf.PdfDocument document)
+        {
             for (int i = 0; i < chapters.Count(); i++)
             {
                 if (chapters[i].header == header)
                 {
                     int startPage = chapters[i].startPage;
                     int stopPage = document.PageCount;
-                    
+
                     if (i < chapters.Count() - 1)
-                    {                        
+                    {
                         stopPage = chapters[i + 1].startPage;
                     }
                     else
@@ -437,18 +421,27 @@ namespace MapService.Components
                             {
                                 stopPage = chapters[i].stopPage;
                             }
-                        }                        
+                        }
                     }
 
                     int startIndex = 0;
-                    int stopIndex = document.PageCount - 1;
+                    int stopIndex = document.PageCount;
                     int chapterStartIndex = startPage - 1;
-                    int chapterEndIndex = stopPage - 2;
-                    
-                    if (chapterEndIndex < stopIndex)
-                        document.RemovePages(chapterEndIndex + 1, stopIndex);
-                    if (chapterStartIndex > startIndex)
-                        document.RemovePages(startIndex, chapterStartIndex - 1);
+                    int chapterEndIndex = stopPage - 1;
+
+                    if (chapterEndIndex < stopIndex) {     
+                        for (int t = chapterEndIndex; t < stopIndex; t++)
+                        {
+                            document.Pages.RemoveAt(chapterEndIndex);
+                        }
+                    }
+
+                    if (chapterStartIndex > startIndex) {                                                
+                        for (int j = startIndex; j < chapterStartIndex; j++)
+                        {
+                            document.Pages.RemoveAt(0);
+                        }
+                    }
 
                     break;
                 }
@@ -488,10 +481,23 @@ namespace MapService.Components
         /// <param name="folder"></param>
         /// <returns>Path to saved document</returns>
         public string Create(string folder, InformativeExport informativeExport)
-        {            
+        {
             this.documentFile = informativeExport.documentFile;
             this.mapFile = informativeExport.mapFile;
-            this.baseLayer = informativeExport.baseMapId;            
+            this.baseLayer = informativeExport.baseMapId;
+
+            string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.layersFile);
+            var layersJson = System.IO.File.ReadAllText(file);
+            this.layers = JsonConvert.DeserializeObject<LayerConfig>(layersJson);
+
+            string mapFile = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.mapFile);
+            var mapJson = System.IO.File.ReadAllText(mapFile);
+            this.mapConfig = JsonConvert.DeserializeObject<MapConfig>(mapJson);
+            Tool t = this.mapConfig.tools.Find(tool => tool.type == "layerswitcher");
+            if (t != null)
+            {
+                this.layerSwitcherOptions = JsonConvert.DeserializeObject<LayerSwitcherOptions>(t.options.ToString());
+            }          
 
             // Some operations will use the tmp-folder. Created files are deleted when used.
             Directory.CreateDirectory("C:\\tmp");
@@ -502,70 +508,104 @@ namespace MapService.Components
             var exportDocument = JsonConvert.DeserializeObject<Document>(documentJson);
 
             StringBuilder html = new StringBuilder();
+            String.Format("{0}App_Data\\documents\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.documentFile);
+
+            html.AppendLine("<head>");
+            html.AppendLine("<meta charset='UTF-8'>");
+            html.AppendLine("</head>");
+            html.AppendLine("<body>");
+            html.AppendLine("<style>");            
+            html.AppendLine("body { font-family: arial; font-size: 13pt !important;}");
+            html.AppendLine("body img { width: 100%; }");
+            html.AppendLine("</style>");
+
             // Append maps to document
-            this.totalChapters = GetTotalChapters(exportDocument.chapters.ToList(), 1);
-            this.AppendHtml(exportDocument.chapters.ToList(), ref html);            
+            this.totalChapters = GetTotalChapters(exportDocument.chapters.ToList(), 0);
+            this.AppendHtml(exportDocument.chapters.ToList(), ref html);
+            html.AppendLine("</body>");
 
-            var renderer = new HtmlToPdf();
+            var htmlToPdf = new NReco.PdfGenerator.HtmlToPdfConverter();
 
-            string cssFile = String.Format("{0}App_Data\\styles\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.cssFile);
-            renderer.PrintOptions.CustomCssUrl = new Uri(cssFile);
-                        
-            // {page} {total-pages} {url} {date} {time} {html-title} & {pdf-title}
-            renderer.PrintOptions.Footer = new HtmlHeaderFooter()
-            {
-                Height = 15,
-                HtmlFragment = "<center>{page}</center>",
-                DrawDividerLine = false
-            };
-            
-            var pdf2 = renderer.RenderHtmlAsPdf(html.ToString());
-                        
+            htmlToPdf.Margins.Bottom = 15;
+            htmlToPdf.Margins.Top = 15;
+
+            htmlToPdf.PageFooterHtml = "<div style='text-align:center;'><span class='page'></span> </div>";
+            var pdfBytes1 = htmlToPdf.GeneratePdf(html.ToString());            
+
             //
             // Read the created document and match headers to create toc.
             // Headers must be unique
             //            
-            string tocHtml = "";            
-            using (PdfReader reader = new PdfReader(pdf2.Stream))
+            string tocHtml = "";
+            iTextSharp.text.pdf.PdfReader reader = new iTextSharp.text.pdf.PdfReader(pdfBytes1);
+            
+            Dictionary<int, string[]> pageContents = new Dictionary<int, string[]>();
+            for (int j = 1; j <= reader.NumberOfPages; j++)
             {
-                Dictionary<int, string[]> pageContents = new Dictionary<int, string[]>();
-                for (int j = 1; j <= reader.NumberOfPages; j++)
-                {
-                    string text = PdfTextExtractor.GetTextFromPage(reader, j);
-                    pageContents.Add(j, text.Split('\n'));
-                }
-                tocHtml = "<h1>Innehållsförteckning</h1>";                
-                this.AppendHeader(exportDocument.chapters.ToList(), ref tocHtml, pageContents);
+                string text = iTextSharp.text.pdf.parser.PdfTextExtractor.GetTextFromPage(reader, j);
+                pageContents.Add(j, text.Split('\n'));
             }
+            tocHtml += "<head>";
+            tocHtml += "<meta charset='UTF-8'>";
+            tocHtml += "</head>";
+            tocHtml += "<body>";
+            tocHtml += "<style>";
+            tocHtml += "body { font-family: arial; font-size: 13pt !important;}";
+            tocHtml += "body img { width: 100%; }";
+            tocHtml += "</style>";                                
+            tocHtml += "<h1>Innehållsförteckning</h1>";
 
-            renderer.PrintOptions.Footer = new HtmlHeaderFooter()
-            {
-                Height = 15,
-                HtmlFragment = "<center></center>",
-                DrawDividerLine = false
-            };
+            this.AppendHeader(exportDocument.chapters.ToList(), ref tocHtml, pageContents);
 
-            var pdf1 = renderer.RenderHtmlAsPdf(tocHtml);
+            tocHtml += "</body>";
 
+            htmlToPdf.PageFooterHtml = "";
+            var pdfBytes2 = htmlToPdf.GeneratePdf(tocHtml.ToString());
+
+            MemoryStream stream1 = new MemoryStream(pdfBytes1);
+            MemoryStream stream2 = new MemoryStream(pdfBytes2);
+
+            PdfSharp.Pdf.PdfDocument inputDocument1 = PdfSharp.Pdf.IO.PdfReader.Open(stream1, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Import);
+            PdfSharp.Pdf.PdfDocument inputDocument2 = PdfSharp.Pdf.IO.PdfReader.Open(stream2, PdfSharp.Pdf.IO.PdfDocumentOpenMode.Import);
+            PdfSharp.Pdf.PdfDocument outputDocument = new PdfSharp.Pdf.PdfDocument();
+
+            List<PdfSharp.Pdf.PdfDocument> inputDocuments = new List<PdfSharp.Pdf.PdfDocument>();
+
+            inputDocuments.Add(inputDocument2);
+            inputDocuments.Add(inputDocument1);                
+           
             //
             // Remove unwanted pages.
-            // Pages within the same chapter will remain.
+            // Pages within the same chapter will remain.            
             //
             List<Chapter> flattened = new List<Chapter>();
             FlattenChapters(exportDocument.chapters, ref flattened);
             int chapterCount = 0;
             this.SetChapterPages(exportDocument.chapters, flattened, ref chapterCount);
-            this.RemoveSurroundingPages(informativeExport.chapterHeader, informativeExport.chapterHtml, exportDocument.chapters, pdf2);
+            this.RemoveSurroundingPages(informativeExport.chapterHeader, informativeExport.chapterHtml, exportDocument.chapters, inputDocument1);
 
-            var pdf = IronPdf.PdfDocument.Merge(pdf1, pdf2);  
+            inputDocuments.ForEach(document =>
+            {
+                int count = document.PageCount;
+                for (int idx = 0; idx < count; idx++)
+                {
+                    PdfSharp.Pdf.PdfPage page = document.Pages[idx];
+                    outputDocument.AddPage(page);
+                }
+            });
+
+            reader.Close();
+            stream1.Close();
+            stream2.Close();
 
             var r = new Random();
             var i = r.Next();
             string fileName = "pdf-export-" + i + ".pdf";
             string localFile = HostingEnvironment.ApplicationPhysicalPath + "//Temp//" + fileName;
-            pdf.SaveAs(localFile);
 
-            return folder + fileName;                        
+            outputDocument.Save(localFile);
+
+            return folder + fileName;            
         }
     }
 }

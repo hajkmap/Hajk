@@ -161,10 +161,11 @@ class AppModel {
       view: new View({
         zoom: config.map.zoom,
         units: "m",
-        resolutions: config.map.resolutions,
         center: config.map.center,
         projection: config.map.projection,
-        extent: config.map.length !== 0 ? config.map.extent : undefined
+        extent: config.map.length !== 0 ? config.map.extent : undefined,
+        maxZoom: config.map.maxZoom || 24,
+        minZoom: config.map.minZoom || 0
       })
     });
     setTimeout(() => {

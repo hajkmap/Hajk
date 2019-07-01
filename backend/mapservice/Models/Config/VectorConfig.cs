@@ -61,9 +61,10 @@ namespace MapService.Models.Config
 
     public class VectorConfig : ILayerConfig
     {        
-        public FeatureInfo AsInfo(int coordinateSystemId, int zIndex, double[] extent)
+        public FeatureInfo AsInfo(int zIndex, double[] extent)
         {
             FeatureInfo featureInfo = new FeatureInfo();            
+            int coordinateSystemId = int.Parse(this.projection.Split(':')[1]);
             List<Components.MapExport.Feature> features = this.Load(this.url, coordinateSystemId, extent);
             featureInfo.features = features;
             features.ForEach(feature =>

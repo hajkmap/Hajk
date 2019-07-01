@@ -9,7 +9,7 @@ namespace MapService.Models.Config
 {
     public class ArcGISConfig : ILayerConfig
     {
-        public ArcGISInfo AsInfo(int coordinateSystemId, int zIndex)
+        public ArcGISInfo AsInfo(int zIndex)
         {
             ArcGISInfo info = new ArcGISInfo();
             info.extent = new MapExtent()
@@ -21,7 +21,7 @@ namespace MapService.Models.Config
             };
             info.layers = this.layers.Select(l => int.Parse(l)).ToArray();
             info.url = this.url;            
-            info.spatialReference = "EPSG:"+ coordinateSystemId;
+            info.spatialReference = this.projection;
             info.zIndex = zIndex;
             return info;
         }

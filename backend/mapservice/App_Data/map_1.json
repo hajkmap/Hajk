@@ -98,29 +98,8 @@
       "options": {
         "baselayers": [
           {
-            "id": "4",
-            "visibleAtStart": false,
-            "drawOrder": 0,
-            "visibleForGroups": null,
-            "infobox": null
-          },
-          {
-            "id": "5",
-            "visibleAtStart": false,
-            "drawOrder": 0,
-            "visibleForGroups": null,
-            "infobox": null
-          },
-          {
-            "id": "31",
+            "id": "35",
             "visibleAtStart": true,
-            "drawOrder": 0,
-            "visibleForGroups": null,
-            "infobox": null
-          },
-          {
-            "id": "24",
-            "visibleAtStart": false,
             "drawOrder": 0,
             "visibleForGroups": null,
             "infobox": null
@@ -286,7 +265,7 @@
         "exportUrl": "http://localhost:55630/export/document",
         "abstract": "Läs mer om vad som planeras i kommunen",
         "html": "<div>HTML som beskriver dokumentets innehåll</div>",
-        "document": "test",
+        "document": "kungsbacka",
         "visibleAtStart": false,
         "visibleForGroups": []
       },
@@ -361,26 +340,11 @@
     "title": "Hajk 3",
     "projection": "EPSG:3006",
     "zoom": 5,
-    "maxZoom": 3,
-    "minZoom": 9,
-    "resolutions": [
-      4096.0,
-      2048.0,
-      1024.0,
-      512.0,
-      256.0,
-      128.0,
-      64.0,
-      32.0,
-      16.0,
-      8.0,
-      4.0,
-      2.0,
-      1.0,
-      0.5
-    ],
+    "maxZoom": 20,
+    "minZoom": 8,
+    "resolutions": [256.0, 128.0, 64.0, 32.0, 16.0, 8.0, 4.0, 2.0, 1.0, 0.5],
     "origin": [0.0, 0.0],
-    "extent": [0.0, 6000000.0, 1000000.0, 9000000.0],
+    "extent": [-1200000.0, 4700000.0, 2600000.0, 8500000.0],
     "logo": "https://github.com/hajkmap/Hajk/raw/develop-new-client/design/logo_small.png",
     "geoserverLegendOptions": "",
     "pil": null,

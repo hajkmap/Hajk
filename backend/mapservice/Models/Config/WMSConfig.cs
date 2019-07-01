@@ -19,10 +19,10 @@ namespace MapService.Models.Config
 
     public class WMSConfig : ILayerConfig
     {
-        public WMSInfo AsInfo(int coordinateSystemId, int zIndex)
+        public WMSInfo AsInfo(int zIndex)
         {
             WMSInfo info = new WMSInfo();
-            info.coordinateSystemId = coordinateSystemId;
+            info.coordinateSystemId = int.Parse(this.projection.Split(':')[1]);
             info.url = this.url;
             info.layers = this.layers.ToList();
             info.zIndex = zIndex;
