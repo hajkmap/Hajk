@@ -26,7 +26,8 @@ class DrawModel {
 
     this.source = new VectorSource();
     this.vector = new VectorLayer({
-      source: this.source
+      source: this.source,
+      name: "drawLayer"
     });
 
     this.map.addLayer(this.vector);
