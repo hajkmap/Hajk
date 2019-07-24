@@ -174,16 +174,19 @@ class Toolbar extends Component {
 
   renderToggler() {
     const { classes } = this.props;
-    return createPortal(
-      <IconButton
-        className={classes.menuButton}
-        color="inherit"
-        aria-label="Menu"
-        onClick={this.toggleToolbar}
-      >
-        {this.state.toolbarOpen ? <Close /> : <Menu />}
-      </IconButton>,
-      document.getElementById("tools-toggler")
+    return (
+      document.getElementById("tools-toggler") &&
+      createPortal(
+        <IconButton
+          className={classes.menuButton}
+          color="inherit"
+          aria-label="Menu"
+          onClick={this.toggleToolbar}
+        >
+          {this.state.toolbarOpen ? <Close /> : <Menu />}
+        </IconButton>,
+        document.getElementById("tools-toggler")
+      )
     );
   }
 
