@@ -282,7 +282,14 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
-            <label htmlFor="abstract">Beskrivning</label>
+            <label htmlFor="abstract">
+              Beskrivning{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Om verktyget visas som widget (inställningen 'Verktygsplacering' sätts till 'left' eller 'right) så kommer denna beskrivning att visas inne i widget-knappen."
+              />
+            </label>
             <input
               value={this.state.abstract}
               type="text"
