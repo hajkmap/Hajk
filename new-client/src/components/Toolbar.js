@@ -8,7 +8,8 @@ import {
   ListItemIcon,
   ListItemText,
   Drawer,
-  IconButton
+  IconButton,
+  Tooltip
 } from "@material-ui/core";
 import ChevronLeft from "@material-ui/icons/ChevronLeft";
 import ChevronRight from "@material-ui/icons/ChevronRight";
@@ -109,15 +110,20 @@ class Toolbar extends Component {
   renderTools() {
     const { classes } = this.props;
     return this.props.tools.map((tool, i) => {
+      const tooltipInstruction = tool.options.instruction
+        ? atob(tool.options.instruction)
+        : "";
       return (
-        <div key={i} onClick={this.itemClicked} className={classes.toolItem}>
-          <tool.component
-            map={tool.map}
-            app={tool.app}
-            options={tool.options}
-            type="toolbarItem"
-          />
-        </div>
+        <Tooltip title={tooltipInstruction} key={i}>
+          <div onClick={this.itemClicked} className={classes.toolItem}>
+            <tool.component
+              map={tool.map}
+              app={tool.app}
+              options={tool.options}
+              type="toolbarItem"
+            />
+          </div>
+        </Tooltip>
       );
     });
   }
