@@ -18,6 +18,7 @@ import ToolbarMenu from "./ToolbarMenu";
 import { isMobile } from "../utils/IsMobile.js";
 import Zoom from "../controls/Zoom";
 import ScaleLine from "../controls/ScaleLine";
+import Attribution from "../controls/Attribution.js";
 
 document.windows = [];
 
@@ -173,7 +174,7 @@ const styles = theme => {
       display: "flex",
       flexDirection: "row",
       justifyContent: "flex-start",
-      top: "0",
+      top: 0,
       right: 0,
       left: 0,
       bottom: 0,
@@ -197,8 +198,9 @@ const styles = theme => {
     },
     footer: {
       position: "absolute",
-      top: 0,
-      bottom: isMobile ? -(window.innerHeight - 45) + "px" : 0
+      bottom: 0,
+      zIndex: 1000,
+      width: "100%"
     },
     widgetItem: {
       width: "220px",
@@ -471,12 +473,14 @@ class App extends React.PureComponent {
               <div className={classes.columnControls}>
                 <div className={classes.controls}>
                   <Zoom map={this.appModel.getMap()} />
-                  <ScaleLine map={this.appModel.getMap()} />
                 </div>
               </div>
             </div>
           </div>
-          <footer className={classes.footer} id="footer" />
+          <footer className={classes.footer} id="footer">
+            <Attribution map={this.appModel.getMap()} />
+            <ScaleLine map={this.appModel.getMap()} />
+          </footer>
         </>
       </SnackbarProvider>
     );

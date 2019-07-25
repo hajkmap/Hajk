@@ -6,14 +6,12 @@ const styles = theme => {
   return {
     scaleLine: {
       "& .ol-scale-line": {
-        position: "fixed",
-        right: "0",
-        bottom: "0",
+        right: "10px",
+        bottom: "10px",
         background: theme.palette.background.paper,
         boxShadow: theme.shadows[4],
         border: "1px solid rgba(255 ,255, 255, 0.5)",
-        borderRadius: "2px",
-        margin: "0 10px 5px 0"
+        borderRadius: "2px"
       },
       "& .ol-scale-line-inner": {
         borderColor: theme.palette.text.primary,
