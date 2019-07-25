@@ -15,7 +15,6 @@ import Alert from "./Alert";
 import Loader from "./Loader";
 import Reparentable from "./Reparentable";
 import ToolbarMenu from "./ToolbarMenu";
-import { isMobile } from "../utils/IsMobile.js";
 import Zoom from "../controls/Zoom";
 import ScaleLine from "../controls/ScaleLine";
 import Attribution from "../controls/Attribution.js";
