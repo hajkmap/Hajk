@@ -220,27 +220,27 @@
       "caption": "Kollektivtrafik",
       "url": "http://giscloud.se/geoserver/wms",
       "owner": "",
-      "date": "1558191018309",
+      "date": "1564400225281",
       "content": "",
       "legend": "",
       "projection": "EPSG:3006",
-      "layers": ["wsp:hpl", "wsp:bus_line"],
+      "layers": ["wsp:parking_lot", "wsp:bus_line"],
       "layersInfo": [
         {
-          "id": "wsp:hpl",
-          "caption": "Hållplats",
+          "id": "wsp:parking_lot",
+          "caption": "Parkering",
           "legend": "",
-          "infobox": "<img src=\"{image}\" />",
-          "style": "point",
-          "queryable": true
+          "infobox": "",
+          "style": "",
+          "queryable": false
         },
         {
           "id": "wsp:bus_line",
           "caption": "Busslinje",
           "legend": "",
           "infobox": "",
-          "style": "line_outlined",
-          "queryable": true
+          "style": "",
+          "queryable": false
         }
       ],
       "searchFields": null,
@@ -250,7 +250,7 @@
       "opacity": 1.0,
       "singleTile": true,
       "imageFormat": "image/png",
-      "serverType": null,
+      "serverType": "geoserver",
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -259,7 +259,7 @@
       "searchGeometryField": "",
       "infoVisible": true,
       "infoTitle": "Rubrik",
-      "infoText": "Informationstext",
+      "infoText": "Parkering",
       "infoUrl": "http://www.google.se",
       "infoUrlText": "Länk",
       "infoOwner": "Karl Kula",
@@ -819,10 +819,10 @@
           "index": 1,
           "name": "name",
           "dataType": "string",
-          "textType": "fritext",
-          "values": null,
+          "textType": "lista",
+          "values": ["a", "b"],
           "hidden": false,
-          "defaultValue": null
+          "defaultValue": "a"
         },
         {
           "index": 2,
@@ -904,7 +904,7 @@
       "caption": "Parkering",
       "url": "https://giscloud.se/geoserver/wfs",
       "uri": "https://giscloud.se/wsp",
-      "projection": "EPSG:3006",
+      "projection": "EPSG:3007",
       "layers": ["wsp:parking_lot"],
       "editableFields": [
         {

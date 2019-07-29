@@ -114,8 +114,15 @@
             "expanded": true,
             "layers": [
               {
-                "id": "14",
+                "id": "18",
                 "visibleAtStart": true,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "14",
+                "visibleAtStart": false,
                 "drawOrder": 1000,
                 "visibleForGroups": null,
                 "infobox": null
@@ -136,7 +143,7 @@
               },
               {
                 "id": "32",
-                "visibleAtStart": true,
+                "visibleAtStart": false,
                 "drawOrder": 1000,
                 "visibleForGroups": null,
                 "infobox": null
@@ -150,7 +157,7 @@
               },
               {
                 "id": "30",
-                "visibleAtStart": true,
+                "visibleAtStart": false,
                 "drawOrder": 1000,
                 "visibleForGroups": null,
                 "infobox": null
@@ -306,26 +313,26 @@
         "abstract": "Vi vill veta vad du tycker!",
         "featureNS": "",
         "showThankYou": true,
-        "thankYou": "Tack!",
+        "thankYou": "",
         "visibleAtStart": false,
         "visibleForGroups": [],
         "form": [
           {
-            "id": 226944280674,
+            "id": 303302667498,
             "order": 0,
-            "header": "Form 1",
-            "text": "Text 1"
+            "header": "test 2",
+            "text": "test2\n<div label=\"Namn\" field=\"name\"></div>\n<div type=\"toolbar\"></div>"
           },
           {
-            "id": 101642298145,
+            "id": 979784104217,
             "order": 1,
-            "header": "Form 2",
-            "text": "Text 2"
+            "header": "test",
+            "text": "test"
           }
         ],
         "serviceId": "25"
       },
-      "index": 7
+      "index": 0
     }
   ],
   "map": {
