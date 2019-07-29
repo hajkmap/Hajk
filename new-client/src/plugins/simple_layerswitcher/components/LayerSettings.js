@@ -1,6 +1,7 @@
 import React from "react";
 import VectorFilter from "./VectorFilter";
-import { Slider, Typography } from "@material-ui/core";
+import Typography from "@material-ui/core/Typography";
+import Slider from "@material-ui/core/Slider";
 import { withStyles } from "@material-ui/core/styles";
 
 const styles = theme => ({

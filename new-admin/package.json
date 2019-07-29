@@ -27,7 +27,7 @@
     "eject": "react-scripts eject"
   },
   "devDependencies": {
-    "draft-convert": "^2.1.6",
+    "draft-convert": "^2.1.7",
     "draft-extend": "^1.6.3",
     "husky": "^3.0.1",
     "prettier": "^1.18.2",
