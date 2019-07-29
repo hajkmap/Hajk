@@ -24,17 +24,29 @@ class CollectorModel {
     this.editFeature = undefined;
     this.editSource = undefined;
     this.filty = false;
+    this.saving = false;
     this.geometryName = "geom";
     this.serviceConfig = settings.options.serviceConfig;
-    this.setFormValuesFromConfig();
-    this.setLayer(settings.options.serviceConfig);
+    if (this.serviceConfig) {
+      this.setFormValuesFromConfig();
+      this.setLayer(settings.options.serviceConfig);
+    } else {
+      console.warn("Edit service is missing or not properly configured.");
+    }
   }
 
   setFormValuesFromConfig = () => {
-    this.formValues = this.serviceConfig.editableFields.reduce((obj, field) => {
-      obj[field.name] = this.valueByDataType(field);
-      return obj;
-    }, {});
+    if (this.serviceConfig) {
+      this.formValues = this.serviceConfig.editableFields.reduce(
+        (obj, field) => {
+          obj[field.name] = this.valueByDataType(field);
+          return obj;
+        },
+        {}
+      );
+    } else {
+      this.formValues = {};
+    }
   };
 
   valueByDataType(field) {
@@ -121,7 +133,8 @@ class CollectorModel {
       src = this.editSource,
       payload = node ? serializer.serializeToString(node) : undefined;
 
-    if (payload) {
+    if (payload && this.saving === false) {
+      this.saving = true;
       fetch(src.url, {
         method: "POST",
         body: payload,
@@ -131,6 +144,7 @@ class CollectorModel {
         }
       })
         .then(response => {
+          this.saving = false;
           response.text().then(wfsResponseText => {
             this.refreshLayer(src.layers[0]);
             this.vectorSource
@@ -141,6 +155,7 @@ class CollectorModel {
           });
         })
         .catch(response => {
+          this.saving = false;
           response.text().then(errorMessage => {
             done(errorMessage);
           });
@@ -151,7 +166,6 @@ class CollectorModel {
   save(done) {
     var inserts = this.vectorSource.getFeatures();
     const formValues = { ...this.formValues };
-
     Object.keys(formValues).forEach(key => {
       if (Array.isArray(formValues[key])) {
         formValues[key] = formValues[key]

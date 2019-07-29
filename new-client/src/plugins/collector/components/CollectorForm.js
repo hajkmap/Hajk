@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Page from "./Page.js";
+import Typography from "@material-ui/core/Typography/Typography";
 
 const styles = theme => {
   return {
@@ -82,6 +83,10 @@ const styles = theme => {
     page: {
       background: "blue",
       height: "100%"
+    },
+    errorText: {
+      fontSize: "14pt",
+      color: "red"
     }
   };
 };
@@ -102,20 +107,38 @@ class CollectorForm extends Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      ...this.state,
+      form: props.form
+    };
+
     props.model.observer.on("abort", () => {
       this.abort();
     });
 
     props.model.observer.on("reset", () => {
-      this.setState({
-        activePage: 0
-      });
+      // Set the page indicator to -1. This will reset the form properly.
+      // Then set the page indicator to 0 to display the first page.
+      // Just setting the flag to 0 will not reset the form if there is only one page.
+      this.setState(
+        {
+          activePage: -1
+        },
+        () => {
+          this.setState({
+            activePage: 0
+          });
+        }
+      );
     });
+  }
 
-    this.state = {
-      ...this.state,
-      form: props.form
-    };
+  componentDidMount() {
+    if (!this.props.model.serviceConfig) {
+      this.setState({
+        configurationError: true
+      });
+    }
   }
 
   saveError = text => {
@@ -137,38 +160,47 @@ class CollectorForm extends Component {
 
   render() {
     const { activePage, direction } = this.state;
-    const { form, serviceConfig } = this.props;
-    return form
-      .sort((p1, p2) =>
-        p1.order === p2.order ? 0 : p1.order > p2.order ? 1 : -1
-      )
-      .map(
-        (page, i) =>
-          activePage === page.order && (
-            <Page
-              key={i}
-              serviceConfig={serviceConfig}
-              model={this.props.model}
-              active={activePage === page.order}
-              numPages={form.length}
-              page={page}
-              direction={direction}
-              options={this.props.options}
-              onNextPage={() => {
-                this.setState({
-                  activePage: activePage + 1,
-                  direction: "left"
-                });
-              }}
-              onPrevPage={() => {
-                this.setState({
-                  activePage: activePage - 1,
-                  direction: "right"
-                });
-              }}
-            ></Page>
-          )
+    const { form, serviceConfig, classes } = this.props;
+    if (this.state.configurationError) {
+      return (
+        <Typography className={classes.errorText}>
+          Nödvändig konfiguration saknas. Verktyget kan inte användas för
+          tillfället.
+        </Typography>
       );
+    } else {
+      return form
+        .sort((p1, p2) =>
+          p1.order === p2.order ? 0 : p1.order > p2.order ? 1 : -1
+        )
+        .map(
+          (page, i) =>
+            activePage === page.order && (
+              <Page
+                key={i}
+                serviceConfig={serviceConfig}
+                model={this.props.model}
+                active={activePage === page.order}
+                numPages={form.length}
+                page={page}
+                direction={direction}
+                options={this.props.options}
+                onNextPage={() => {
+                  this.setState({
+                    activePage: activePage + 1,
+                    direction: "left"
+                  });
+                }}
+                onPrevPage={() => {
+                  this.setState({
+                    activePage: activePage - 1,
+                    direction: "right"
+                  });
+                }}
+              ></Page>
+            )
+        );
+    }
   }
 }
 

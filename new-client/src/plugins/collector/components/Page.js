@@ -52,6 +52,9 @@ const styles = theme => ({
 class Page extends Component {
   constructor(props) {
     super(props);
+
+    console.log("Page constructor");
+
     if (props.page.text) {
       var json = Parser.html2json(props.page.text);
       this.state = {
@@ -530,7 +533,10 @@ class Page extends Component {
       return <div>{okButton}</div>;
     }
 
-    if (page.order === numPages - 1) {
+    if (numPages === 1) {
+      return <div>{sendButton}</div>;
+    }
+    if (numPages > 1 && page.order === numPages - 1) {
       return (
         <div>
           {prevButton}

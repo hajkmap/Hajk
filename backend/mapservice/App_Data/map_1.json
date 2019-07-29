@@ -272,43 +272,6 @@
       "index": 0
     },
     {
-      "type": "collector",
-      "options": {
-        "target": "toolbar",
-        "url": "http://giscloud.se/geoserver/wfs",
-        "featureType": "hpl",
-        "title": "Tyck till",
-        "abstract": "Vi vill veta vad du tycker!",
-        "featureNS": "wsp",
-        "showThankYou": true,
-        "thankYou": "Tack för din medverkan!",
-        "visibleAtStart": false,
-        "visibleForGroups": [],
-        "form": [
-          {
-            "id": 482791167411,
-            "order": 0,
-            "header": "Ny sida",
-            "text": "Bara text"
-          },
-          {
-            "id": 464454144564,
-            "order": 1,
-            "header": " Formulär: ",
-            "text": "<div field=\"datum_text\" label=\"Datum\"></div>\n<div field=\"image\" label=\"Bild namn\"></div>\n<div field=\"name\" label=\"Namn\"></div>\n<div field=\"trafikslag\" label=\"Trafik slag\"></div>\n<div>Extra info här</div>\nbara text utan tagg\n<p>Paragraf</p>"
-          },
-          {
-            "id": 828488168060,
-            "order": 2,
-            "header": "Lämna en synpunkt",
-            "text": "<div>Vi vill gärna veta vad du tycker. Du kan markera en plats i kartan eller beskriva dina åsikter i text.</div>\n<h5>Vad tycker du till om?</h5>\n<div field=\"typ\" label=\"Typ\"></div>\n<div type=\"toolbar\"></div>"
-          }
-        ],
-        "serviceId": "25"
-      },
-      "index": 0
-    },
-    {
       "type": "information",
       "options": {
         "target": "right",
@@ -332,6 +295,31 @@
         "visibleForGroups": []
       },
       "index": 0
+    },
+    {
+      "type": "collector",
+      "options": {
+        "target": "toolbar",
+        "url": "",
+        "featureType": "hpl",
+        "title": "Tyck till",
+        "abstract": "Vi vill veta vad du tycker!",
+        "featureNS": "",
+        "showThankYou": true,
+        "thankYou": "Tack!",
+        "visibleAtStart": false,
+        "visibleForGroups": [],
+        "form": [
+          {
+            "id": 981433367611,
+            "order": 0,
+            "header": "Test",
+            "text": "Test"
+          }
+        ],
+        "serviceId": "25"
+      },
+      "index": 7
     }
   ],
   "map": {
@@ -343,23 +331,23 @@
     "maxZoom": 18,
     "minZoom": 3,
     "resolutions": [
-      4096,
-      2048,
-      1024,
-      512,
-      256,
-      128,
-      64,
-      32,
-      16,
-      8,
-      4,
-      2,
-      1,
+      4096.0,
+      2048.0,
+      1024.0,
+      512.0,
+      256.0,
+      128.0,
+      64.0,
+      32.0,
+      16.0,
+      8.0,
+      4.0,
+      2.0,
+      1.0,
       0.5
     ],
     "origin": [0.0, 0.0],
-    "extent": [0, 6000000, 1000000, 9000000],
+    "extent": [0.0, 6000000.0, 1000000.0, 9000000.0],
     "logo": "https://github.com/hajkmap/Hajk/raw/develop-new-client/design/logo_small.png",
     "geoserverLegendOptions": "",
     "pil": null,
