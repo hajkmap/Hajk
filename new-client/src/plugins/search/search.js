@@ -176,6 +176,7 @@ class Search extends React.PureComponent {
       props.options.searchWithPolygonButtonText;
     this.searchWithSelectionButtonText =
       props.options.searchWithSelectionButtonText;
+    this.searchSettings = props.options.searchSettings;
     this.localObserver.on("searchStarted", () => {
       this.setState({
         loading: true,
@@ -316,7 +317,7 @@ class Search extends React.PureComponent {
               {this.state.activeSearchView ? this.renderSpatialBar() : null}
               {searchBar}
             </div>
-            {this.renderSearchSettingButton()}
+            {this.searchSettings ? this.renderSearchSettingButton() : null}
           </div>
           {this.renderSearchResultList("center")}
         </div>

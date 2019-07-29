@@ -37,6 +37,7 @@ var defaultState = {
   selectionSearch: false,
   radiusSearch: false,
   polygonSearch: false,
+  searchSettings: false,
   base64Encode: false,
   instruction: "",
   filterVisible: true,
@@ -91,12 +92,10 @@ class ToolOptions extends Component {
           selectionSearch: tool.options.selectionSearch,
           radiusSearch: tool.options.radiusSearch,
           polygonSearch: tool.options.polygonSearch,
+          searchSettings: tool.options.searchSettings,
           base64Encode: tool.options.base64Encode,
           instruction: tool.options.instruction,
           filterVisible: tool.options.filterVisible,
-          radiusSearch: tool.options.radiusSearch,
-          polygonSearch: tool.options.polygonSearch,
-          selectionSearch: tool.options.selectionSearch,
           displayPopup: tool.options.displayPopup,
           maxZoom: tool.options.maxZoom,
           excelExportUrl: tool.options.excelExportUrl,
@@ -256,6 +255,7 @@ class ToolOptions extends Component {
         selectionSearch: this.state.selectionSearch,
         radiusSearch: this.state.radiusSearch,
         polygonSearch: this.state.polygonSearch,
+        searchSettings: this.state.searchSettings,
         base64Encode: this.state.base64Encode,
         instruction: this.state.instruction,
         filterVisible: this.state.filterVisible,
@@ -674,6 +674,19 @@ class ToolOptions extends Component {
               </div>
             </div>
             &nbsp;
+          </div>
+          <div>
+            <input
+              id="searchSettings"
+              name="searchSettings"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.searchSettings}
+            />
+            &nbsp;
+            <label htmlFor="searchSettings">Visa sökalternativ</label>
           </div>
           <div>
             <input
