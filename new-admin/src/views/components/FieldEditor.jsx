@@ -206,6 +206,7 @@ class FieldEditor extends Component {
           this.setState({
             pages: pages
           });
+          onUpdate(this.getForm());
         }}
       >
         {this.state.pages.map((page, i) => (

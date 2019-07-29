@@ -5,8 +5,8 @@ class Page extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      header: props.page.header,
-      text: props.page.text
+      header: props.page.header || "",
+      text: props.page.text || ""
     };
   }
 

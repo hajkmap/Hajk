@@ -433,6 +433,7 @@ class ToolOptions extends Component {
             form={this.state.form}
             parent={this}
             onUpdate={form => {
+              console.log("Update");
               this.setState({
                 form: form
               });
