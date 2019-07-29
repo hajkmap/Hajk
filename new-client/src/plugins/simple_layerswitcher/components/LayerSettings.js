@@ -1,8 +1,7 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Slider from "@material-ui/lab/Slider";
 import VectorFilter from "./VectorFilter";
-import Typography from "@material-ui/core/Typography";
+import { Slider, Typography } from "@material-ui/core";
+import { withStyles } from "@material-ui/core/styles";
 
 const styles = theme => ({
   sliderContainer: {
@@ -65,8 +64,8 @@ class LayerSettings extends React.PureComponent {
         <div className={classes.sliderItem}>
           <Slider
             value={opacityValue}
-            min={1}
-            max={0}
+            min={0}
+            max={1}
             step={0.1}
             onChange={this.opacitySliderChanged}
           />

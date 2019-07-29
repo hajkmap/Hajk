@@ -367,7 +367,14 @@ class ToolOptions extends Component {
             <label htmlFor="autoScale-active">Automatisk skala</label>
           </div>
           <div>
-            <label htmlFor="instruction">Instruktion</label>
+            <label htmlFor="instruction">
+              Instruktion{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Visas som tooltip vid mouseover på verktygsknappen"
+              />
+            </label>
             <textarea
               type="text"
               id="instruction"

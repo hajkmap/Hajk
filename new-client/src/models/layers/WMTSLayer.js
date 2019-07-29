@@ -2,7 +2,6 @@ import View from "ol/View";
 import TileLayer from "ol/layer/Tile";
 import WMTS from "ol/source/WMTS";
 import WMTSTileGrid from "ol/tilegrid/WMTS";
-import Attribution from "ol/control/Attribution";
 import LayerInfo from "./LayerInfo.js";
 
 var wmtsLayerProperties = {
@@ -51,7 +50,7 @@ class WMTSLayer {
       queryable: config.queryable,
       opacity: config.opacity,
       source: new WMTS({
-        attributions: this.getAttributions(config.attribution),
+        attributions: config.attribution,
         format: "image/png",
         wrapX: false,
         url: config.url,
@@ -71,16 +70,6 @@ class WMTSLayer {
     });
     this.updateMapViewResolutions();
     this.type = "wmts";
-  }
-
-  getAttributions(attribution) {
-    if (attribution) {
-      return [
-        new Attribution({
-          label: attribution
-        })
-      ];
-    }
   }
 
   updateMapViewResolutions() {

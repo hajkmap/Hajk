@@ -4,7 +4,6 @@ import TileLayer from "ol/layer/Tile";
 import ImageWMS from "ol/source/ImageWMS";
 import TileWMS from "ol/source/TileWMS";
 import GeoJSON from "ol/format/GeoJSON";
-import Attribution from "ol/control/Attribution";
 import LayerInfo from "./LayerInfo.js";
 
 var WmsLayerProperties = {
@@ -32,7 +31,7 @@ class WMSLayer {
       projection: config.projection,
       serverType: config.serverType,
       imageFormat: config.imageFormat,
-      attributions: this.getAttributions(),
+      attributions: config.attribution,
       cacheSize: this.subLayers.length > 1 ? 32 : 2048,
       transition: this.subLayers.length > 1 ? 0 : 100
     };
@@ -91,16 +90,6 @@ class WMSLayer {
     this.layer.layerType = this.subLayers.length > 1 ? "group" : "layer";
     this.layer.getSource().set("url", config.url);
     this.type = "wms";
-  }
-
-  getAttributions() {
-    if (this.attribution) {
-      return [
-        new Attribution({
-          label: this.attribution
-        })
-      ];
-    }
   }
 
   /**
