@@ -79,6 +79,14 @@ const styles = theme => ({
     },
     "& h6": {
       lineHeight: "normal"
+    },
+    "& blockquote": {
+      borderLeft: "5px solid #eee",
+      color: "#666",
+      fontFamily: "Hoefler Text, Georgia, serif",
+      fontStyle: "italic",
+      margin: "16px 0",
+      padding: "10px 20px"
     }
   },
   loader: {
@@ -125,6 +133,9 @@ class Informative extends React.PureComponent {
   componentDidMount() {
     this.props.parent.informativeModel.load(chapters => {
       this.toc = chapters;
+      if (this.props.options.tocExpanded) {
+        this.expandToc(this.toc);
+      }
       var state = {
         chapters: chapters,
         chapter: {
@@ -156,6 +167,17 @@ class Informative extends React.PureComponent {
         });
       }
     });
+  }
+
+  expandToc(chapters) {
+    if (Array.isArray(chapters)) {
+      chapters.forEach(chapter => {
+        chapter.tocExpanded = true;
+        if (Array.isArray(chapter.chapters) && chapter.chapters.length > 0) {
+          this.expandToc(chapter.chapters);
+        }
+      });
+    }
   }
 
   displayMap = (layers, mapSettings) => e => {

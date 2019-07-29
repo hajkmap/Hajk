@@ -26,6 +26,7 @@ import { Component } from "react";
 var defaultState = {
   validationErrors: [],
   active: false,
+  tocExpanded: true,
   index: 0,
   target: "toolbar",
   panel: "right",
@@ -70,6 +71,10 @@ class ToolOptions extends Component {
             this.props.model.getDocumentList(url, list => {
               this.setState({
                 active: true,
+                tocExpanded:
+                  tool.options.tocExpanded === undefined
+                    ? true
+                    : tool.options.tocExpanded,
                 index: tool.index,
                 target: tool.options.target,
                 panel: tool.options.panel,
@@ -149,6 +154,7 @@ class ToolOptions extends Component {
       options: {
         target: this.state.target,
         panel: this.state.panel,
+        tocExpanded: this.state.tocExpanded,
         title: this.state.title,
         caption: this.state.caption,
         serviceUrl: this.state.serviceUrl,
@@ -279,6 +285,19 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="active">Aktiverad</label>
+          </div>
+          <div>
+            <input
+              id="tocExpanded"
+              name="tocExpanded"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.tocExpanded}
+            />
+            &nbsp;
+            <label htmlFor="tocExpanded">Expanderad teckenförklaring</label>
           </div>
           <div>
             <label htmlFor="index">Sorteringsordning</label>

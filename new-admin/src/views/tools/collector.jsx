@@ -59,7 +59,6 @@ var defaultState = {
   visibleAtStart: false,
   thankYou: "",
   form: [],
-  visibleAtStart: false,
   visibleForGroups: [],
   editServices: [],
   layerDescription: undefined
@@ -87,7 +86,6 @@ class ToolOptions extends Component {
         featureType: tool.options.featureType,
         featureNS: tool.options.featureNS,
         showThankYou: tool.options.showThankYou,
-        visibleAtStart: tool.options.visibleAtStart,
         thankYou: tool.options.thankYou,
         form: tool.options.form || [],
         visibleAtStart: tool.options.visibleAtStart || false,
@@ -181,7 +179,6 @@ class ToolOptions extends Component {
         showThankYou: this.state.showThankYou,
         visibleAtStart: this.state.visibleAtStart,
         thankYou: this.state.thankYou,
-        visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
