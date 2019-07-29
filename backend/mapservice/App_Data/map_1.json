@@ -354,7 +354,7 @@
     ],
     "origin": [0.0, 0.0],
     "extent": [0.0, 6000000.0, 1000000.0, 9000000.0],
-    "logo": "https://github.com/hajkmap/Hajk/raw/develop-new-client/design/logo_small.png",
+    "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
     "geoserverLegendOptions": "",
     "pil": null,
     "mapselector": false,

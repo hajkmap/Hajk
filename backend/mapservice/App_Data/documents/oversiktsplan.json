@@ -287,8 +287,47 @@
         "mapselector": false,
         "colors": { "primaryColor": "#0065a6", "secondaryColor": "#ffcc00" }
       },
-      "chapters": [],
-      "expanded": false
+      "chapters": [
+        {
+          "header": "Kapitel 3.1",
+          "html": "<h2><strong>Kapitel 3.1</strong></h2>\n<p>Vestibulum pretium justo a finibus iaculis. Duis cursus fermentum erat vel pulvinar. Maecenas finibus, tortor quis dignissim hendrerit, felis tellus bibendum turpis, eget dapibus diam est ut ex. Morbi ac dui et est tempor aliquam. Aliquam erat volutpat. Suspendisse pretium tortor arcu, eu volutpat quam auctor ut. Donec neque sem, consectetur tempor auctor ac, lobortis non sem. Donec rhoncus orci ut elit suscipit, eu pellentesque velit interdum. Duis tempus est blandit, venenatis dui quis, accumsan quam. Aliquam eleifend luctus enim sed finibus. Aenean ultricies consequat gravida. Etiam sit amet laoreet magna.</p>\n<p>Nulla eu egestas velit, ac egestas ipsum. Sed finibus ipsum eget dignissim iaculis. Etiam non dapibus nibh. Maecenas ac odio suscipit, pharetra odio et, aliquet erat. Cras ac elementum enim. Duis molestie diam quam, et varius felis tristique ut. Nulla ac elementum lacus. Curabitur efficitur fringilla sem ut sollicitudin. Fusce nec ullamcorper quam. Suspendisse faucibus bibendum scelerisque. Fusce sit amet faucibus ligula.</p>\n<p>Fusce eu luctus nulla. Sed dapibus, massa nec ultricies commodo, ante nisi maximus nunc, at pharetra dui tellus non nisl. Suspendisse luctus felis eu sapien faucibus vulputate. Sed lectus massa, porta eget tempus at, elementum ut turpis. Vivamus sed ipsum elit. Integer at quam magna. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce id lobortis nunc. Donec euismod ultricies tincidunt. Sed quis purus justo. Fusce id venenatis augue. Sed eu purus non lacus ullamcorper aliquet.</p>\n<p>Nunc sed velit ex. Nulla vulputate placerat neque vel semper. Maecenas eu justo porttitor orci mattis consequat. Fusce et est vel lacus pulvinar faucibus. Praesent auctor felis quis suscipit convallis. Aliquam quis commodo lorem, ut dapibus lectus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;</p>",
+          "mapSettings": {
+            "target": "map",
+            "center": [236000, 6585000],
+            "title": "Hajk 3",
+            "projection": "EPSG:3007",
+            "zoom": 10,
+            "maxZoom": 18,
+            "minZoom": 3,
+            "resolutions": [
+              4096,
+              2048,
+              1024,
+              512,
+              256,
+              128,
+              64,
+              32,
+              16,
+              8,
+              4,
+              2,
+              1,
+              0.5
+            ],
+            "origin": [0, 0],
+            "extent": [0, 6000000, 1000000, 9000000],
+            "logo": "https://github.com/hajkmap/Hajk/raw/develop-new-client/design/logo_small.png",
+            "geoserverLegendOptions": "",
+            "pil": null,
+            "mapselector": false,
+            "colors": { "primaryColor": "#5b8dff", "secondaryColor": "#747474" }
+          },
+          "chapters": [],
+          "expanded": true
+        }
+      ],
+      "expanded": true
     }
   ],
   "map": "map_1"

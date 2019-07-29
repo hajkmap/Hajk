@@ -140,14 +140,16 @@ namespace MapService.Components
                 renderedChapters += 1;
                 html.Append("<h1>" + chapter.header + "</h1>");            
                 html.Append(chapter.html);
-                html.Append(this.AppendMap(chapter));                
-                if (renderedChapters < totalChapters) {
-                    html.Append("<div style='page-break-after: always;'></div>");
-                }
+                html.Append(this.AppendMap(chapter));
+                html.Append("<div style='page-break-after: always;'></div>");
+
                 if (chapter.chapters.Length > 0)
                 {
                     this.AppendHtml(chapter.chapters.ToList(), ref html);
                 };
+                //if (renderedChapters < totalChapters)
+                //{                
+                //}
             }           
         }
 
@@ -388,6 +390,11 @@ namespace MapService.Components
             }
         }
 
+        private void RemoveLastPage(PdfSharp.Pdf.PdfDocument document)
+        {
+            document.Pages.RemoveAt(document.Pages.Count - 1);
+        }
+
         /// <summary>
         /// Find pages to print.
         /// This is based on from witch chapter the PDF is exported.
@@ -423,6 +430,10 @@ namespace MapService.Components
                             }
                         }
                     }
+                    if (stopPage == 0)
+                    {
+                        stopPage = document.PageCount;
+                    }
 
                     int startIndex = 0;
                     int stopIndex = document.PageCount;
@@ -450,7 +461,6 @@ namespace MapService.Components
                     RemoveSurroundingPages(header, html, chapters[i].chapters, document);
                 }
             }
-
         }
 
         /// <summary>
@@ -467,6 +477,10 @@ namespace MapService.Components
                 if (counter < flattened.Count)
                 {
                     chapter.stopPage = flattened[counter].startPage;
+                }
+                else
+                {
+                    chapter.stopPage = chapters.ToList().Last().stopPage;
                 }
                 if (chapter.chapters.Length > 0)
                 {
@@ -582,7 +596,13 @@ namespace MapService.Components
             FlattenChapters(exportDocument.chapters, ref flattened);
             int chapterCount = 0;
             this.SetChapterPages(exportDocument.chapters, flattened, ref chapterCount);
+            int initialPageCount = inputDocument1.Pages.Count;
             this.RemoveSurroundingPages(informativeExport.chapterHeader, informativeExport.chapterHtml, exportDocument.chapters, inputDocument1);
+            int modifiedPageCount = inputDocument1.Pages.Count;
+
+            if (initialPageCount == modifiedPageCount) {
+                this.RemoveLastPage(inputDocument1);
+            }
 
             inputDocuments.ForEach(document =>
             {

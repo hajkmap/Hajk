@@ -52,9 +52,6 @@ const styles = theme => ({
 class Page extends Component {
   constructor(props) {
     super(props);
-
-    console.log("Page constructor");
-
     if (props.page.text) {
       var json = Parser.html2json(props.page.text);
       this.state = {
