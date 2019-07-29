@@ -56,6 +56,7 @@ var defaultState = {
   featureNS: "",
   serviceId: "-1",
   showThankYou: true,
+  visibleAtStart: false,
   thankYou: "",
   form: [],
   visibleAtStart: false,
@@ -86,6 +87,7 @@ class ToolOptions extends Component {
         featureType: tool.options.featureType,
         featureNS: tool.options.featureNS,
         showThankYou: tool.options.showThankYou,
+        visibleAtStart: tool.options.visibleAtStart,
         thankYou: tool.options.thankYou,
         form: tool.options.form || [],
         visibleAtStart: tool.options.visibleAtStart || false,
@@ -177,6 +179,7 @@ class ToolOptions extends Component {
         abstract: this.state.abstract,
         featureNS: this.state.featureNS,
         showThankYou: this.state.showThankYou,
+        visibleAtStart: this.state.visibleAtStart,
         thankYou: this.state.thankYou,
         visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
@@ -368,6 +371,19 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
             />
+          </div>
+          <div>
+            <input
+              id="visibleAtStart"
+              name="visibleAtStart"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.visibleAtStart}
+            />
+            &nbsp;
+            <label htmlFor="visibleAtStart">Synlig vid start</label>
           </div>
           <div>
             <input

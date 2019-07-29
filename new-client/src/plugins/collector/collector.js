@@ -15,18 +15,18 @@ const styles = theme => {
 class Collector extends Component {
   constructor(props) {
     super(props);
-    this.position = "right";
+    this.position = props.options.target;
     this.app = props.app;
     this.options = props.options;
     this.title = this.options.title || "Tyck till";
     this.abstract = this.options.abstract || "Vi vill veta vad du tycker!";
     this.form = this.options.form || [];
+    this.visibleAtStart = this.options.visibleAtStart;
     this.state = {
       dialogOpen: false
     };
     this.serviceConfig = this.getLayerConfigById(this.options.serviceId);
     this.observer = new Observer();
-
     this.collectorModel = new CollectorModel({
       map: props.map,
       app: props.app,
@@ -38,6 +38,14 @@ class Collector extends Component {
       }
     });
     this.app.registerPanel(this);
+  }
+
+  componentDidMount() {
+    if (this.visibleAtStart) {
+      this.setState({
+        panelOpen: true
+      });
+    }
   }
 
   getLayerConfigById(serviceId) {
@@ -75,6 +83,7 @@ class Collector extends Component {
 
   renderWindow(mode) {
     var left = this.position === "right" ? (window.innerWidth - 410) / 2 : 0;
+    console.log("Render window", this.position, left);
     return createPortal(
       <Window
         localObserver={this.observer}
