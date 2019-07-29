@@ -296,13 +296,24 @@ class Page extends Component {
           </div>
         );
       case "lista":
-        let options = null;
+        let options = [];
         if (Array.isArray(field.values)) {
           options = field.values.map((val, i) => (
             <option key={i} value={val}>
               {val}
             </option>
           ));
+          if (field.defaultValue === undefined || field.defaultValue === "") {
+            options.unshift(
+              <option key="-1" value="">
+                -Välj värde-
+              </option>
+            );
+          }
+        }
+
+        if ((!value || value === "") && field.defaultValue) {
+          value = field.defaultValue;
         }
 
         return (
@@ -317,7 +328,6 @@ class Page extends Component {
                   field.initialRender = false;
                 }}
               >
-                <option value="">-Välj värde-</option>
                 {options}
               </NativeSelect>
             </FormControl>

@@ -83,7 +83,6 @@ class Collector extends Component {
 
   renderWindow(mode) {
     var left = this.position === "right" ? (window.innerWidth - 410) / 2 : 0;
-    console.log("Render window", this.position, left);
     return createPortal(
       <Window
         localObserver={this.observer}

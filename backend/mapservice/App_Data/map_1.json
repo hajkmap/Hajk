@@ -312,8 +312,8 @@
         "title": "Tyck till",
         "abstract": "Vi vill veta vad du tycker!",
         "featureNS": "",
-        "showThankYou": true,
-        "visibleAtStart": false,
+        "showThankYou": false,
+        "visibleAtStart": true,
         "thankYou": "",
         "visibleForGroups": [],
         "form": [
