@@ -2,8 +2,11 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import SearchResultGroup from "./SearchResultGroup.js";
 import IconButton from "@material-ui/core/IconButton";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
-import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
+import Divider from "@material-ui/core/Divider";
+import Typography from "@material-ui/core/Typography";
+import Place from "@material-ui/icons/Place";
+import ExpandLess from "@material-ui/icons/ExpandLess";
+import ExpandMore from "@material-ui/icons/ExpandMore";
 import classNames from "classnames";
 
 const styles = theme => {
@@ -13,7 +16,7 @@ const styles = theme => {
     },
     searchResult: {
       overflow: "auto",
-      padding: "10px",
+      padding: "5px",
       position: "relative",
       top: "9px",
       background: "white",
@@ -38,11 +41,20 @@ const styles = theme => {
     searchResultContainer: {
       maxHeight: "calc(100vh - 380px)",
       overflow: "auto",
-      padding: "5px",
+      display: "flex",
+      flexDirection: "column",
+      marginTop: "10px",
       paddingBottom: "22px",
       [theme.breakpoints.down("xs")]: {
         maxHeight: "inherit"
       }
+    },
+    searchResultTopBarLeft: {
+      display: "flex"
+    },
+    searchResultTopBarRight: {
+      display: "flex",
+      alignItems: "center"
     },
     searchResultTopBar: {
       display: "flex",
@@ -50,9 +62,7 @@ const styles = theme => {
       alignItems: "center",
       margin: "5px"
     },
-    visible: {
-      display: "block"
-    },
+
     hidden: {
       display: "none"
     }
@@ -61,8 +71,9 @@ const styles = theme => {
 
 class SearchResultList extends React.PureComponent {
   state = {
-    visible: true,
-    minimized: false
+    visible: true, //is this really used?
+    minimized: false,
+    highlightedFeatures: []
   };
 
   hide() {
@@ -78,7 +89,7 @@ class SearchResultList extends React.PureComponent {
   }
 
   renderResult() {
-    const { result, localObserver, target, model } = this.props;
+    const { result, target } = this.props;
     if (this.state.minimized) return null;
     return (
       <div>
@@ -86,11 +97,13 @@ class SearchResultList extends React.PureComponent {
           if (featureType.features.length === 0) return null;
           return (
             <SearchResultGroup
-              localObserver={localObserver}
               parent={this}
               key={i}
+              setHighlightedFeatures={this.setHighlightedFeatures}
+              highlightedFeatures={this.state.highlightedFeatures}
               featureType={featureType}
-              model={model}
+              renderAffectButton={this.props.renderAffectButton}
+              model={this.props.model}
               expanded={false}
               target={target}
             />
@@ -100,8 +113,18 @@ class SearchResultList extends React.PureComponent {
     );
   }
 
+  getNumberOfResults = result => {
+    return result.reduce((accumulated, result) => {
+      return accumulated + result.features.length;
+    }, 0);
+  };
+
+  setHighlightedFeatures = (i, callback) => {
+    this.setState({ highlightedFeatures: i }, callback);
+  };
+
   render() {
-    const { classes, result, localObserver, target } = this.props;
+    const { classes, result } = this.props;
     const { minimized } = this.state;
     let searchResultClass = classes.searchResult;
     if (this.props.target === "top") {
@@ -134,45 +157,41 @@ class SearchResultList extends React.PureComponent {
       return (
         <div className={searchResultClass}>
           <div className={classes.searchResultTopBar}>
-            <div>SÖKRESULTAT</div>
-            <div>
+            <div className={classes.searchResultTopBarLeft}>
+              <Place />
+              <Typography>
+                {this.getNumberOfResults(result) + " sökträffar"}
+              </Typography>
+            </div>
+            <div className={classes.searchResultTopBarRight}>
               {!minimized ? (
-                <IconButton
-                  className={classes.button}
-                  onClick={() => this.toggle()}
-                >
-                  <RemoveCircleIcon />
-                </IconButton>
+                <div>
+                  <IconButton onClick={() => this.toggle()}>
+                    <Typography color="primary">Dölj</Typography>
+                    <ExpandLess />
+                  </IconButton>
+                </div>
               ) : (
-                <IconButton
-                  className={classes.button}
-                  onClick={() => this.toggle()}
-                >
-                  <AddCircleIcon />
-                </IconButton>
+                <div>
+                  <IconButton onClick={() => this.toggle()}>
+                    <Typography color="primary">Visa</Typography>
+                    <ExpandMore />
+                  </IconButton>
+                </div>
               )}
             </div>
           </div>
+          <Divider
+            className={this.state.minimized ? classes.hidden : null}
+            variant="fullWidth"
+          />
           <div
             className={classNames(
               classes.searchResultContainer,
-              this.state.minimized ? classes.hidden : classes.visible
+              this.state.minimized ? classes.hidden : null
             )}
           >
-            {result.map((featureType, i) => {
-              if (featureType.features.length === 0) return null;
-              return (
-                <SearchResultGroup
-                  localObserver={localObserver}
-                  parent={this}
-                  key={i}
-                  featureType={featureType}
-                  model={this.props.model}
-                  expanded={false}
-                  target={target}
-                />
-              );
-            })}
+            {this.renderResult()}
           </div>
         </div>
       );

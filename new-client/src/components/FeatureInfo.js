@@ -5,6 +5,10 @@ import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import Typography from "@material-ui/core/Typography";
 import marked from "marked";
+import {
+  mergeFeaturePropsWithMarkdown,
+  extractPropertiesFromJson
+} from "../utils/FeaturePropsParsing";
 import Diagram from "./Diagram";
 import Table from "./Table";
 
@@ -68,30 +72,6 @@ class FeatureInfo extends React.PureComponent {
     }
   }
 
-  valueFromJson(str) {
-    if (typeof str !== "string") return false;
-    const jsonStart = /^\[|^\{(?!\{)/;
-    const jsonEnds = {
-      "[": /]$/,
-      "{": /}$/
-    };
-    const start = str.match(jsonStart);
-    const jsonLike = start && jsonEnds[start[0]].test(str);
-    var result = false;
-
-    if (jsonLike) {
-      try {
-        result = JSON.parse(str);
-      } catch (ex) {
-        result = false;
-      }
-    } else {
-      result = false;
-    }
-
-    return result;
-  }
-
   table(data) {
     return Object.keys(data).map((key, i) => {
       if (typeof data[key] !== "object") {
@@ -104,35 +84,6 @@ class FeatureInfo extends React.PureComponent {
         return null;
       }
     });
-  }
-
-  parse(markdown, properties) {
-    markdown = markdown.replace(/export:/g, "");
-    if (markdown && typeof markdown === "string") {
-      (markdown.match(/{(.*?)}/g) || []).forEach(property => {
-        function lookup(o, s) {
-          s = s
-            .replace("{", "")
-            .replace("}", "")
-            .split(".");
-          switch (s.length) {
-            case 1:
-              return o[s[0]] || "";
-            case 2:
-              return o[s[0]][s[1]] || "";
-            case 3:
-              return o[s[0]][s[1]][s[2]] || "";
-            default:
-              return "";
-          }
-        }
-
-        markdown = markdown.replace(property, lookup(properties, property));
-      });
-    }
-    return {
-      __html: marked(markdown)
-    };
   }
 
   changeSelectedIndex(amount) {
@@ -249,14 +200,12 @@ class FeatureInfo extends React.PureComponent {
       ) {
         markdown = feature.layer.layersInfo[layer].infobox;
       }
+      //Features coming from searchresult has infobox set on Feature instead of layer due to different features sharing same vectorlayer
+      if (feature.infobox) {
+        markdown = feature.infobox;
+      }
       var properties = feature.getProperties();
-      Object.keys(properties).forEach(property => {
-        var jsonData = this.valueFromJson(properties[property]);
-        if (jsonData) {
-          delete properties[property];
-          properties = { ...properties, ...jsonData };
-        }
-      });
+      properties = extractPropertiesFromJson(properties);
 
       feature.setProperties(properties);
 
@@ -268,7 +217,7 @@ class FeatureInfo extends React.PureComponent {
         }
       }
       var value = markdown
-        ? this.parse(markdown, properties)
+        ? mergeFeaturePropsWithMarkdown(markdown, properties)
         : this.table(properties);
 
       if (markdown) {
