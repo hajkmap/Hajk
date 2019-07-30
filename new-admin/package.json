@@ -17,6 +17,7 @@
     "react-dom": "^16.8.6",
     "react-modal": "^3.9.1",
     "react-scripts": "3.0.1",
+    "react-smooth-dnd": "^0.11.0",
     "typescript": "^3.5.3",
     "x2js": "^3.3.1"
   },
