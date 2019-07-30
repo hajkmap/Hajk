@@ -820,9 +820,9 @@
           "name": "name",
           "dataType": "string",
           "textType": "lista",
-          "values": ["a", "b"],
+          "values": ["10-20", "20-30", "30-40", "40-65", "65+"],
           "hidden": false,
-          "defaultValue": "a"
+          "defaultValue": "10-20"
         },
         {
           "index": 2,

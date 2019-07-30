@@ -321,14 +321,14 @@
           {
             "id": 303302667498,
             "order": 0,
-            "header": "test 2",
-            "text": "test2\n<div label=\"Namn\" field=\"name\"></div>\n<div type=\"toolbar\"></div>"
+            "header": "Vem är du?",
+            "text": "<p>Ålder:</p>\n<div label=\"Namn\" field=\"name\"></div>\n<p>Namn:</p>\n<div label=\"Namn\" field=\"image\"></div>\n\n"
           },
           {
             "id": 979784104217,
             "order": 1,
-            "header": "test",
-            "text": "test"
+            "header": "Tyck till om en plats",
+            "text": "<p>Välj typ av plats, klicka sedan i kartan för att markera den</p>\n<div type=\"toolbar\"></div>"
           }
         ],
         "serviceId": "25"
@@ -367,8 +367,8 @@
     "pil": null,
     "mapselector": false,
     "colors": {
-      "primaryColor": "#5b8dff",
-      "secondaryColor": "#747474"
+      "primaryColor": "#333333",
+      "secondaryColor": "#ffffff"
     }
   }
 }

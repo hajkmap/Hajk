@@ -181,7 +181,6 @@ class Page extends Component {
             label={label || field.name}
             className={classes.textField}
             margin="normal"
-            variant="outlined"
             value={value}
             onChange={e => {
               this.checkInteger(field.name, e.target.value);
@@ -196,7 +195,6 @@ class Page extends Component {
             label={label || field.name}
             className={classes.textField}
             margin="normal"
-            variant="outlined"
             value={value}
             onChange={e => {
               this.checkNumber(field.name, e.target.value);
@@ -212,7 +210,6 @@ class Page extends Component {
             className={classes.textField}
             type="datetime-local"
             margin="normal"
-            variant="outlined"
             value={value}
             onChange={e => {
               this.checkDate(field.name, e.target.value);
@@ -233,7 +230,6 @@ class Page extends Component {
               label={label || field.name}
               className={classes.textField}
               margin="normal"
-              variant="outlined"
               value={value}
               onChange={e => {
                 this.checkText(field.name, e.target.value);
