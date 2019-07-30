@@ -1,15 +1,15 @@
 import React from "react";
-import Input from "@material-ui/core/Input";
+import OutlinedInput from "@material-ui/core/OutlinedInput";
 import { withStyles } from "@material-ui/core/styles";
-import SearchIcon from "@material-ui/icons/Search";
 import ClearIcon from "@material-ui/icons/Clear";
 import InputAdornment from "@material-ui/core/InputAdornment";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import SearchButton from "../../components/shared/SearchButton";
 
 const styles = theme => ({
   search: {
     borderRadius: theme.shape.borderRadius,
-    border: "1px solid " + theme.palette.primary.main
+    flex: "auto",
+    display: "flex"
   },
   inputRoot: {
     width: "100%"
@@ -29,23 +29,18 @@ const styles = theme => ({
   },
   clearIcon: {
     cursor: "pointer"
-  },
-  searchIcon: {
-    position: "relative",
-    padding: "6px"
-  },
-  progress: {
-    width: "20px !important",
-    height: "20px !important",
-    color: theme.palette.primary.main,
-    margin: "2px"
   }
 });
 
-class SearchBar extends React.PureComponent {
+class SearchWithTextInput extends React.PureComponent {
   state = {
     value: ""
   };
+
+  componentDidMount() {
+    const { localObserver } = this.props;
+    localObserver.publish("toolchanged");
+  }
 
   constructor(props) {
     super();
@@ -63,50 +58,64 @@ class SearchBar extends React.PureComponent {
       onComplete,
       value,
       target,
-      loading,
-      tooltip
+      forceSearch,
+      resetToStartView
     } = this.props;
 
     return (
       <div className={classes.search}>
-        <Input
+        <OutlinedInput
           autoComplete="off"
+          inputRef={input => {
+            this.input = input;
+          }}
           onChange={e => {
-            onChange(e.target.value, data => {
-              onComplete(data);
+            onChange(e.target.value, false, data => {
+              if (data) {
+                onComplete(data);
+              }
             });
             this.setState({
               value: e.target.value
             });
           }}
+          autoFocus={true}
           value={value === "" ? value : this.state.value}
-          placeholder={tooltip}
-          disableUnderline
+          placeholder={"Sök"}
+          onKeyPress={e => {
+            //keyCode deprecated so using e.key instead
+            if (e.key === "Enter") {
+              forceSearch(e.target.value, true, data => {
+                onComplete(data);
+              });
+            }
+          }}
           classes={{
             root: classes.inputRoot,
             input:
               target === "top" ? classes.inputInputWide : classes.inputInput
           }}
           endAdornment={
-            <InputAdornment className={classes.searchIcon} position="end">
-              {this.state.value ? (
-                loading ? (
-                  <CircularProgress className={classes.progress} />
-                ) : (
-                  <ClearIcon
-                    onClick={this.props.onClear}
-                    className={classes.clearIcon}
-                  />
-                )
-              ) : (
-                <SearchIcon />
-              )}
+            <InputAdornment position="end">
+              <ClearIcon
+                className={classes.clearIcon}
+                onClick={() => {
+                  resetToStartView();
+                }}
+              />
             </InputAdornment>
           }
+        />
+        <SearchButton
+          onClick={() => {
+            forceSearch(this.state.value, true, data => {
+              onComplete(data);
+            });
+          }}
         />
       </div>
     );
   }
 }
 
-export default withStyles(styles)(SearchBar);
+export default withStyles(styles)(SearchWithTextInput);

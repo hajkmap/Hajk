@@ -232,7 +232,7 @@ class DrawView extends React.PureComponent {
       <div>
         <Typography>Välj KML-fil att importera:</Typography>
         <div className={classes.row}>
-          <Input
+          <input
             type="file"
             name="files[]"
             accept=".kml"

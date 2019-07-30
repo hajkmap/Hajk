@@ -34,6 +34,10 @@ var defaultState = {
   bothSynlig: false,
   enableViewTogglePopupInSnabbsok: true,
   selectionTools: true,
+  selectionSearch: false,
+  radiusSearch: false,
+  polygonSearch: false,
+  searchSettings: false,
   base64Encode: false,
   instruction: "",
   filterVisible: true,
@@ -85,6 +89,10 @@ class ToolOptions extends Component {
           enableViewTogglePopupInSnabbsok:
             tool.options.enableViewTogglePopupInSnabbsok,
           selectionTools: tool.options.selectionTools,
+          selectionSearch: tool.options.selectionSearch,
+          radiusSearch: tool.options.radiusSearch,
+          polygonSearch: tool.options.polygonSearch,
+          searchSettings: tool.options.searchSettings,
           base64Encode: tool.options.base64Encode,
           instruction: tool.options.instruction,
           filterVisible: tool.options.filterVisible,
@@ -160,7 +168,7 @@ class ToolOptions extends Component {
     if (typeof value === "string" && value.trim() !== "") {
       value = !isNaN(Number(value)) ? Number(value) : value;
     }
-
+    console.log([name], "name", value, "value");
     if (name === "instruction") {
       value = btoa(value);
     }
@@ -244,6 +252,10 @@ class ToolOptions extends Component {
         excelExportUrl: this.state.excelExportUrl,
         displayPopup: this.state.displayPopup,
         selectionTools: this.state.selectionTools,
+        selectionSearch: this.state.selectionSearch,
+        radiusSearch: this.state.radiusSearch,
+        polygonSearch: this.state.polygonSearch,
+        searchSettings: this.state.searchSettings,
         base64Encode: this.state.base64Encode,
         instruction: this.state.instruction,
         filterVisible: this.state.filterVisible,
@@ -616,7 +628,65 @@ class ToolOptions extends Component {
               checked={this.state.selectionTools}
             />
             &nbsp;
-            <label htmlFor="selectionTools">Verktyg för ytsökning</label>
+            <label>Verktyg för ytsökning</label>
+          </div>
+
+          <div>
+            <strong>
+              <label>Aktiva spatial sökverktyg</label>
+            </strong>
+          </div>
+          <div>
+            <div>
+              <input
+                id="polygonSearch"
+                name="polygonSearch"
+                type="checkbox"
+                onChange={e => {
+                  this.handleInputChange(e);
+                }}
+                checked={this.state.polygonSearch}
+              />
+              <label htmlFor="polygonSearch">Polygon</label>
+              <div>
+                <input
+                  id="radiusSearch"
+                  name="radiusSearch"
+                  type="checkbox"
+                  onChange={e => {
+                    this.handleInputChange(e);
+                  }}
+                  checked={this.state.radiusSearch}
+                />
+                <label htmlFor="radiusSearch">Radie</label>
+              </div>
+              <div>
+                <input
+                  id="selectionSearch"
+                  name="selectionSearch"
+                  type="checkbox"
+                  onChange={e => {
+                    this.handleInputChange(e);
+                  }}
+                  checked={this.state.selectionSearch}
+                />
+                <label htmlFor="selectionSearch">Selektion</label>
+              </div>
+            </div>
+            &nbsp;
+          </div>
+          <div>
+            <input
+              id="searchSettings"
+              name="searchSettings"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.searchSettings}
+            />
+            &nbsp;
+            <label htmlFor="searchSettings">Visa sökalternativ</label>
           </div>
           <div>
             <input

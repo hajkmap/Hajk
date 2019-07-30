@@ -79,7 +79,7 @@ function getFeaturesFromGml(response, text) {
  * When the requests are done the features are parsed and given the original layer reference.
  * Vector layers are added with the features at pixel method and given the original layer reference as well.
  */
-function handleClick(evt, map, callback) {
+export function handleClick(evt, map, callback) {
   // TODO: Remove this temporary fix for OL6 beta when no longer necessary
   // if (evt.originalEvent.target.className !== "ol-unselectable") {
   //   return;
@@ -168,7 +168,10 @@ function handleClick(evt, map, callback) {
       map.forEachFeatureAtPixel(
         evt.pixel,
         (feature, layer) => {
-          if (layer.get("queryable") === true && layer.getProperties().name) {
+          if (
+            layer.get("queryable") === true ||
+            layer.get("type") === "searchResultLayer"
+          ) {
             feature.layer = layer;
             features.push(feature);
           }

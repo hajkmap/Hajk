@@ -5,10 +5,13 @@ import { withStyles } from "@material-ui/core/styles";
 import SearchIcon from "@material-ui/icons/Search";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import Observer from "react-event-observer";
-import SearchBar from "./components/SearchBar.js";
-import SearchResultList from "./components/SearchResultList.js";
-import SearchWithinButton from "./components/SearchWithinButton.js";
-import ClearButton from "./components/ClearButton.js";
+import SearchWithTextInput from "./components/searchviews/SearchWithTextInput";
+import SearchResultList from "./components/resultlist/SearchResultList.js";
+import SearchBarStart from "./components/startview/SearchBarStart";
+import SearchSettingsButton from "./components/shared/SearchSettingsButton";
+import SearchWithRadiusInput from "./components/searchviews/SearchWithRadiusInput";
+import SearchWithSelectionInput from "./components/searchviews/SearchWithSelectionInput";
+import SearchWithPolygonInput from "./components/searchviews/SearchWithPolygonInput";
 import SearchModel from "./SearchModel.js";
 import PanelHeader from "./../../components/PanelHeader.js";
 import { isMobile } from "../../utils/IsMobile.js";
@@ -17,21 +20,15 @@ const styles = theme => {
   return {
     center: {
       background: "white",
-      borderBottomLeftRadius: "10px",
-      borderBottomRightRadius: "10px",
-      margin: "-10px 10px 10px 10px",
-      border: "1px solid " + theme.palette.primary.main,
-      maxWidth: "600px",
+      borderRadius: "10px",
+      margin: "0px 10px 10px 10px",
+      // TODO - Component card should be used instead
+      boxShadow:
+        "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0)",
+      minWidth: "360px",
       pointerEvents: "all",
-      [theme.breakpoints.down("md")]: {
-        left: 0,
-        right: 0,
-        margin: "0 10px 10px 10px",
-        position: "absolute",
-        maxWidth: "inherit",
-        border: "none",
-        boxShadow:
-          "0px 0px 3px rgba(0, 0, 0, 0.3), 2px 2px 6px rgba(0, 0, 0, 0.4)"
+      [theme.breakpoints.up("sm")]: {
+        maxWidth: "200px"
       },
       [theme.breakpoints.down("xs")]: {
         position: "absolute",
@@ -46,8 +43,11 @@ const styles = theme => {
         boxShadow: "none"
       }
     },
+    button: {
+      margin: "4px"
+    },
     panelHeader: {
-      [theme.breakpoints.up("lg")]: {
+      [theme.breakpoints.up("sm")]: {
         display: "none"
       }
     },
@@ -63,11 +63,22 @@ const styles = theme => {
         right: 0
       }
     },
+
     searchContainer: {
-      [theme.breakpoints.up("lg")]: {
+      [theme.breakpoints.up("xs")]: {
         display: "flex",
-        alignItems: "center"
+        flex: "auto",
+        alignItems: "center",
+        backgroundColor: "#eee",
+        borderRadius: theme.shape.borderRadius
       }
+    },
+    mainContainerButton: {
+      display: "flex"
+    },
+    searchToolsContainer: {
+      minHeight: "48px",
+      display: "flex"
     },
     searchContainerTop: {
       display: "block",
@@ -89,6 +100,7 @@ const styles = theme => {
     },
     loader: {
       height: "4px",
+      marginTop: "-5px",
       marginBottom: "4px",
       borderRadius: "4px",
       overflow: "hidden"
@@ -114,9 +126,7 @@ const styles = theme => {
       padding: "3px",
       overflow: "visible",
       cursor: "pointer",
-      [theme.breakpoints.up("lg")]: {
-        display: "none"
-      }
+      display: "none"
     },
     backIcon: {
       [theme.breakpoints.up("md")]: {
@@ -125,6 +135,12 @@ const styles = theme => {
     }
   };
 };
+
+const POLYGON = "polygon";
+const RADIUS = "radius";
+const TEXTSEARCH = "textsearch";
+const SELECTION = "selection";
+const STARTVIEW = "startview";
 
 class Search extends React.PureComponent {
   resolve = data => {
@@ -135,7 +151,6 @@ class Search extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    var b = props.options.target === "header" ? 960 : 1280;
     this.localObserver = Observer();
     this.searchModel = new SearchModel(
       props.options,
@@ -144,15 +159,38 @@ class Search extends React.PureComponent {
       this.localObserver
     );
     this.state = {
-      visible: window.innerWidth > b,
-      loading: false
+      visible: true,
+      loading: false,
+      activeSearchView: STARTVIEW
     };
-    this.toolDescription = props.options.toolDescription;
+
+    this.activeSpatialTools = {
+      radiusSearch: this.props.options.radiusSearch,
+      selectionSearch: this.props.options.selectionSearch,
+      polygonSearch: this.props.options.polygonSearch
+    };
+
     this.tooltip = props.options.tooltip;
     this.searchWithinButtonText = props.options.searchWithinButtonText;
+    this.searchWithPolygonButtonText =
+      props.options.searchWithPolygonButtonText;
+    this.searchWithSelectionButtonText =
+      props.options.searchWithSelectionButtonText;
+    this.searchSettings = props.options.searchSettings;
     this.localObserver.on("searchStarted", () => {
       this.setState({
+        loading: true,
+        activeSearchView: TEXTSEARCH
+      });
+    });
+    this.localObserver.on("spatialSearchStarted", () => {
+      this.setState({
         loading: true
+      });
+    });
+    this.localObserver.on("toolchanged", () => {
+      this.setState({
+        result: false
       });
     });
     this.localObserver.on("searchComplete", () => {
@@ -172,7 +210,7 @@ class Search extends React.PureComponent {
     window.addEventListener("resize", e => {
       if (!isMobile) {
         this.setState({
-          visible: window.innerWidth > b
+          visible: true
         });
       }
     });
@@ -185,18 +223,13 @@ class Search extends React.PureComponent {
     return (
       <div className={classes.searchResults}>
         <SearchResultList
-          localObserver={this.localObserver}
           result={result}
+          renderAffectButton={this.activeSpatialTools.radiusSearch}
           model={this.searchModel}
-          visible={true}
           target={target}
         />
       </div>
     );
-  }
-
-  renderDescription() {
-    return <div dangerouslySetInnerHTML={{ __html: this.toolDescription }} />;
   }
 
   renderLoader() {
@@ -233,6 +266,14 @@ class Search extends React.PureComponent {
 
   renderCenter() {
     const { classes } = this.props;
+    var searchBar;
+
+    if (this.state.activeSearchView === STARTVIEW) {
+      searchBar = this.renderSearchBarStart();
+    } else if (this.state.activeSearchView === TEXTSEARCH) {
+      searchBar = this.renderSearchWithText();
+    }
+
     return (
       <div
         className={classes.center}
@@ -271,44 +312,128 @@ class Search extends React.PureComponent {
           }}
         >
           <div>{this.renderLoader()}</div>
-          <div>{this.renderDescription()}</div>
-          <div className={classes.searchContainer}>
-            <SearchWithinButton
-              localObserver={this.localObserver}
-              buttonText={this.searchWithinButtonText}
-              model={this.searchModel}
-              onSearchWithin={layerIds => {
-                if (layerIds.length === 0) {
-                  this.setState({
-                    result: []
-                  });
-                } else {
-                  this.setState({
-                    result: layerIds
-                  });
-                }
-              }}
-            />
-            <ClearButton
-              model={this.searchModel}
-              onClear={() => {
-                this.searchModel.clear();
-                this.localObserver.publish("clearInput");
-                this.setState({
-                  result: false
-                });
-              }}
-            />
-            <SearchBar
-              model={this.searchModel}
-              onChange={this.searchModel.search}
-              onComplete={this.resolve}
-              tooltip={this.tooltip}
-            />
+          <div className={classes.searchToolsContainer}>
+            <div className={classes.searchContainer}>
+              {this.state.activeSearchView ? this.renderSpatialBar() : null}
+              {searchBar}
+            </div>
+            {this.searchSettings ? this.renderSearchSettingButton() : null}
           </div>
           {this.renderSearchResultList("center")}
         </div>
       </div>
+    );
+  }
+
+  renderSearchSettingButton() {
+    const { classes } = this.props;
+    return (
+      <div className={classes.mainContainerButton}>
+        <SearchSettingsButton />
+      </div>
+    );
+  }
+
+  resetToStartView() {
+    this.searchModel.abortSearches();
+    this.searchModel.clearRecentSpatialSearch();
+    this.setState({ activeSearchView: STARTVIEW });
+  }
+  renderSpatialBar() {
+    switch (this.state.activeSearchView) {
+      case POLYGON:
+        return (
+          <SearchWithPolygonInput
+            model={this.searchModel}
+            resetToStartView={() => {
+              this.resetToStartView();
+            }}
+            localObserver={this.localObserver}
+            onSearchDone={featureCollections => {
+              this.resolve(featureCollections);
+            }}
+          />
+        );
+      case RADIUS: {
+        return (
+          <SearchWithRadiusInput
+            localObserver={this.localObserver}
+            resetToStartView={() => {
+              this.resetToStartView();
+            }}
+            onSearchWithin={layerIds => {
+              this.setState({
+                result: layerIds
+              });
+              this.searchModel.clearRecentSpatialSearch();
+            }}
+            model={this.searchModel}
+          />
+        );
+      }
+      case SELECTION: {
+        return (
+          <SearchWithSelectionInput
+            localObserver={this.localObserver}
+            resetToStartView={() => {
+              this.resetToStartView();
+            }}
+            model={this.searchModel}
+            onSearchDone={featureCollections => {
+              this.resolve(featureCollections);
+            }}
+          />
+        );
+      }
+
+      default:
+        return;
+    }
+  }
+
+  renderSearchBarStart() {
+    return (
+      <SearchBarStart
+        localObserver={this.localObserver}
+        activeSpatialTools={this.activeSpatialTools}
+        onToolChanged={toolType => {
+          this.setState({
+            activeSearchView: toolType
+          });
+        }}
+        onTextFieldClick={() => {
+          this.setState({
+            activeSearchView: TEXTSEARCH
+          });
+        }}
+      />
+    );
+  }
+
+  renderSearchWithText() {
+    return (
+      <SearchWithTextInput
+        model={this.searchModel}
+        forceSearch={this.searchModel.search}
+        onClear={() => {
+          this.searchModel.clear();
+          this.localObserver.publish("clearInput");
+          this.setState({
+            result: false
+          });
+        }}
+        resetToStartView={() => {
+          this.searchModel.abortSearches();
+          this.searchModel.clearRecentSpatialSearch();
+          this.setState({ activeSearchView: STARTVIEW });
+        }}
+        onChange={this.searchModel.search}
+        loading={this.state.loading}
+        localObserver={this.localObserver}
+        onComplete={this.resolve}
+        tooltip={this.tooltip}
+        activeTool={this.state.activeSearchView}
+      />
     );
   }
 
@@ -327,10 +452,12 @@ class Search extends React.PureComponent {
             });
           }}
         />
-        <SearchBar
+        <SearchWithTextInput
           model={this.searchModel}
+          forceSearch={this.searchModel.search}
           onChange={this.searchModel.search}
           onComplete={this.resolve}
+          localObserver={this.localObserver}
           tooltip={this.tooltip}
           target="top"
           loading={this.state.loading}
@@ -351,12 +478,7 @@ class Search extends React.PureComponent {
     const { options } = this.props;
     const center = document.getElementById("center");
     if (options.target === "center" && center) {
-      return (
-        <div>
-          {this.renderButton(options.target)}
-          {createPortal(this.renderCenter(), center)}
-        </div>
-      );
+      return <div>{createPortal(this.renderCenter(), center)}</div>;
     }
     if (options.target === "header") {
       return (
