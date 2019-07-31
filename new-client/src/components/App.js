@@ -35,7 +35,12 @@ const styles = theme => {
       bottom: 0,
       left: 0,
       right: 0,
-      zIndex: 1
+      zIndex: 2
+    },
+    main: {
+      display: "flex",
+      width: "100%",
+      marginBottom: "45px"
     },
     extendedIcon: {
       marginRight: theme.spacing(1)
@@ -60,7 +65,7 @@ const styles = theme => {
       alignItems: "center"
     },
     appBar: {
-      zIndex: 2,
+      zIndex: 3,
       background: "white",
       color: "black"
     },
@@ -198,7 +203,7 @@ const styles = theme => {
     footer: {
       position: "absolute",
       bottom: 0,
-      zIndex: 1000,
+      zIndex: 1,
       width: "100%"
     },
     widgetItem: {
@@ -446,40 +451,42 @@ class App extends React.PureComponent {
                   }
                 />
               </div>
-              <div className={classes.columnCenter}>
-                <div className={classes.columnWidgets}>
-                  <div className={classes.column1}>
-                    {!this.state.mobile && (
-                      <Reparentable el={this.widgetsLeftContainer} />
-                    )}
-                  </div>
-                  <div className={classes.column2}>
-                    <div id="center" className={classes.centerContainer} />
-                    <article
-                      id="toolbar-panel"
-                      className={classes.toolbarPanel}
-                    >
-                      {this.renderPopup()}
-                    </article>
-                  </div>
-                  <div className={classes.column3}>
-                    {!this.state.mobile && (
-                      <Reparentable el={this.widgetsRightContainer} />
-                    )}
+              <main className={classes.main} id="main">
+                <div className={classes.columnCenter}>
+                  <div className={classes.columnWidgets}>
+                    <div className={classes.column1}>
+                      {!this.state.mobile && (
+                        <Reparentable el={this.widgetsLeftContainer} />
+                      )}
+                    </div>
+                    <div className={classes.column2}>
+                      <div id="center" className={classes.centerContainer} />
+                      <article
+                        id="toolbar-panel"
+                        className={classes.toolbarPanel}
+                      >
+                        {this.renderPopup()}
+                      </article>
+                    </div>
+                    <div className={classes.column3}>
+                      {!this.state.mobile && (
+                        <Reparentable el={this.widgetsRightContainer} />
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </main>
               <div className={classes.columnControls}>
                 <div className={classes.controls}>
                   <Zoom map={this.appModel.getMap()} />
                 </div>
               </div>
             </div>
+            <footer className={classes.footer} id="footer">
+              <Attribution map={this.appModel.getMap()} />
+              <ScaleLine map={this.appModel.getMap()} />
+            </footer>
           </div>
-          <footer className={classes.footer} id="footer">
-            <Attribution map={this.appModel.getMap()} />
-            <ScaleLine map={this.appModel.getMap()} />
-          </footer>
         </>
       </SnackbarProvider>
     );
