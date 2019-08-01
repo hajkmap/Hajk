@@ -114,6 +114,27 @@
             "expanded": true,
             "layers": [
               {
+                "id": "32",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "16",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "17",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
                 "id": "18",
                 "visibleAtStart": true,
                 "drawOrder": 1000,
@@ -136,13 +157,6 @@
               },
               {
                 "id": "34",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "32",
                 "visibleAtStart": false,
                 "drawOrder": 1000,
                 "visibleForGroups": null,
@@ -371,9 +385,9 @@
   ],
   "map": {
     "target": "map",
-    "center": [236000, 6585000],
+    "center": [415000, 6585000],
     "title": "Hajk 3",
-    "projection": "EPSG:3007",
+    "projection": "EPSG:3006",
     "zoom": 10,
     "maxZoom": 18,
     "minZoom": 3,
