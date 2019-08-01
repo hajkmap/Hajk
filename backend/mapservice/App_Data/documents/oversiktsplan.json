@@ -132,15 +132,15 @@
                   "expanded": true
                 }
               ],
-              "expanded": true,
+              "expanded": false,
               "layers": ["27"]
             }
           ],
-          "expanded": true,
+          "expanded": false,
           "layers": ["17", "16"]
         }
       ],
-      "expanded": true,
+      "expanded": false,
       "layers": []
     },
     {
@@ -248,7 +248,7 @@
           "layers": ["32"]
         }
       ],
-      "expanded": true
+      "expanded": false
     }
   ],
   "map": "map_1"

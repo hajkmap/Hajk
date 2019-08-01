@@ -310,6 +310,11 @@ class Page extends Component {
 
         if ((!value || value === "") && field.defaultValue) {
           value = field.defaultValue;
+          if (field.initialRender !== false) {
+            setTimeout(() => {
+              this.checkSelect(field.name, value);
+            }, 0);
+          }
         }
 
         return (
@@ -457,7 +462,14 @@ class Page extends Component {
                 displayThankYou: true
               });
             } else {
-              this.props.model.observer.publish("abort");
+              this.setState(
+                {
+                  displayThankYou: true
+                },
+                () => {
+                  this.props.model.observer.publish("abort");
+                }
+              );
             }
           } else {
             this.saveError();

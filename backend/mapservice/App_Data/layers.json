@@ -822,7 +822,7 @@
           "textType": "lista",
           "values": ["10-20", "20-30", "30-40", "40-65", "65+"],
           "hidden": false,
-          "defaultValue": "10-20"
+          "defaultValue": "65+"
         },
         {
           "index": 2,
