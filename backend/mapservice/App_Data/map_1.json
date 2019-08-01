@@ -266,7 +266,7 @@
       "options": {
         "target": "toolbar",
         "panel": "right",
-        "tocExpanded": true,
+        "tocExpanded": false,
         "title": "Översiktsplan",
         "caption": "Översiktsplan",
         "serviceUrl": "http://localhost:55630/informative/load",
@@ -299,7 +299,7 @@
       "options": {
         "target": "toolbar",
         "instruction": "",
-        "activeServices": ["26", "25"],
+        "activeServices": ["25"],
         "visibleForGroups": []
       },
       "index": 0
@@ -307,15 +307,15 @@
     {
       "type": "collector",
       "options": {
-        "target": "right",
+        "target": "left",
         "url": "",
         "featureType": "hpl",
         "title": "Tyck till",
         "abstract": "Vi vill veta vad du tycker!",
         "featureNS": "",
-        "showThankYou": false,
+        "showThankYou": true,
         "visibleAtStart": false,
-        "thankYou": "",
+        "thankYou": "Tack",
         "visibleForGroups": [],
         "form": [
           {

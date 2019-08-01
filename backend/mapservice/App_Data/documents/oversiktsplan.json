@@ -6,20 +6,20 @@
       "mapSettings": {
         "center": [236417, 6585633],
         "zoom": 13,
-        "extent": [236218.75, 6585427, 236615.25, 6585839]
+        "extent": [236024.25, 6585422.75, 236809.75, 6585843.25]
       },
       "chapters": [
         {
           "header": "Underkapitel 1",
           "html": "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque luctus ultrices eros eu iaculis. Etiam eget tortor consectetur, egestas elit eu, malesuada metus. Fusce molestie odio hendrerit risus ultricies dignissim. Integer eleifend tellus in semper lacinia. Duis ut convallis quam. Nunc a turpis sed nisi aliquet pretium rhoncus ut dolor. Nulla facilisis lacus a arcu dictum ultricies. In magna turpis, posuere et egestas ac, pharetra quis tortor. Pellentesque ultricies nulla et dui interdum, vel mollis dolor molestie.</p>\n<p><br></p>\n<p>Donec urna quam, interdum molestie viverra at, faucibus id magna. Aliquam venenatis nunc eu eros tristique tincidunt. Integer elementum turpis justo, ac molestie mi iaculis maximus. Nam porta magna eget dapibus mollis. Integer ac leo facilisis, luctus massa nec, faucibus ante. Nam varius ornare velit at suscipit. Praesent ultrices eros eu velit eleifend maximus. Phasellus porta nibh non ornare suscipit. Praesent et mi velit. Aliquam scelerisque tristique orci, eget lacinia sem egestas quis. Phasellus quis lobortis nunc, et sodales eros. Pellentesque vehicula ut dolor sed dictum. Ut convallis imperdiet blandit. Aenean pharetra nisi non metus sollicitudin, non rutrum erat pretium. Donec augue nisl, aliquet in accumsan at, placerat at diam.</p>\n<p>Donec id commodo tellus. Donec tincidunt, risus et consectetur efficitur, magna risus commodo elit, a sodales est nunc quis tortor. Donec sapien diam, porta sed facilisis dictum, pretium eu est. Cras malesuada hendrerit risus, vel dapibus turpis interdum a. Nulla magna nisi, laoreet vel libero ut, hendrerit vehicula ante. Maecenas gravida ut leo quis viverra. Nam efficitur arcu ac consectetur tristique. Etiam in ligula quis lorem semper laoreet. Etiam vitae congue metus. Curabitur eget tortor vitae nibh ullamcorper malesuada. Proin sit amet egestas ex. Etiam cursus nibh a lectus pretium fermentum.</p>\n<p><br></p>\n<p>Phasellus aliquam vulputate metus. Nunc vehicula urna lectus, id ultricies arcu molestie quis. Cras sit amet sollicitudin magna. Etiam tempus, purus vitae pretium gravida, mi libero consectetur erat, eget sollicitudin justo lectus eu ex. Duis suscipit odio risus, sed porttitor lacus dictum et. Ut feugiat nunc faucibus, imperdiet elit eget, maximus massa. Curabitur eu diam porttitor tellus ultricies pellentesque. Quisque rhoncus arcu turpis, sed venenatis eros vulputate a.</p>\n<p><br></p>\n<p>Aliquam vitae arcu iaculis, tristique neque ut, auctor nunc. Donec hendrerit mi ipsum, vel dignissim orci sodales non. Vivamus ac augue enim. Integer eget consectetur turpis, egestas eleifend dui. Morbi tincidunt mi ipsum, eu aliquam mi cursus vitae. Fusce fringilla, tortor sit amet dictum euismod, tellus lectus tincidunt ligula, sed feugiat magna nisi nec metus. Etiam finibus justo a enim tempus mattis. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Fusce consequat non purus eget pulvinar. Nunc hendrerit libero ut suscipit dapibus. Donec vel faucibus justo. Mauris ac fermentum felis, at ultricies mi. Donec in lectus malesuada, tristique turpis ut, condimentum sem. Etiam et cursus nulla, sit amet tempor odio.</p>",
           "mapSettings": {
-            "center": [235920.86740102156, 6585822.844186342],
+            "center": [236395.74583737456, 6585782.41952739],
             "zoom": 13,
             "extent": [
-              235612.61740102156,
-              6585582.594186342,
-              236229.11740102156,
-              6586063.094186342
+              236002.99583737456,
+              6585572.16952739,
+              236788.49583737456,
+              6585992.66952739
             ]
           },
           "chapters": [
@@ -27,42 +27,18 @@
               "header": "Underkapitel 1.1",
               "html": "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras ac erat ac nulla aliquam aliquam eget ac nibh. Maecenas tristique quis eros vitae dapibus. Maecenas finibus, velit vulputate varius hendrerit, nunc eros lacinia lorem, a fermentum neque tellus vel neque. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Proin tincidunt nunc ut mi dapibus ultricies. Aliquam eget consectetur libero, vel accumsan ex. Fusce consectetur sed dui at sollicitudin. Integer dictum ultrices felis lacinia suscipit.</p>\n<p>Mauris a leo blandit, ultrices tortor consequat, rhoncus justo. Etiam justo est, malesuada id auctor at, facilisis a odio. Duis dignissim facilisis nunc et ultrices. Cras luctus molestie condimentum. Vivamus et mollis libero. Integer cursus nibh ac consequat molestie. Ut quis velit venenatis nibh ornare convallis ac ac tellus. Mauris vel ex et nulla porttitor mollis. Cras dignissim ante quis metus dignissim, fringilla accumsan nulla suscipit. Nunc in urna id erat cursus pretium. Duis eget condimentum metus, ac vestibulum nisl. Integer risus quam, tristique elementum suscipit placerat, feugiat ac arcu. Praesent porttitor quam a neque consectetur, eu cursus justo elementum. Sed non orci sed leo malesuada maximus vel et nisi.</p>\n<p><br></p>\n<p>Aenean ullamcorper scelerisque cursus. Curabitur lacinia purus erat, a convallis arcu molestie ut. Fusce ut velit eu ligula porta semper. Suspendisse diam ex, ornare rhoncus volutpat ut, viverra nec leo. Phasellus eros ex, feugiat quis purus sed, porttitor malesuada metus. Praesent vestibulum non diam vel efficitur. Pellentesque faucibus nunc nisi, ac ornare nulla viverra ac. Integer consequat sem id justo mollis vulputate.</p>\n<p>Sed sit amet justo venenatis, euismod massa tincidunt, facilisis turpis. Sed ac dictum urna, non fringilla purus. Nunc interdum felis a sapien pharetra auctor. Mauris ac est felis. Etiam nec sem ac risus commodo elementum sit amet non odio. Fusce scelerisque in leo nec congue. Nulla nec mauris nec tellus tincidunt tempor. Nam at justo sit amet nisl lobortis volutpat. Cras lacinia vel ipsum et efficitur. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum suscipit sem vitae interdum dapibus. Integer et malesuada est, a auctor ex. Donec vestibulum lorem lacus, eget scelerisque ligula pretium quis. Sed aliquet elit a ex feugiat, sit amet sagittis ipsum venenatis. Aliquam erat volutpat. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>\n<p><br></p>\n<p>Vestibulum sollicitudin risus id mauris semper eleifend. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Morbi at ornare lorem. Praesent bibendum ultricies pharetra. Praesent at libero sit amet tortor ultricies placerat. Nunc sem ligula, consequat nec interdum ac, ultricies quis ligula. Donec elementum est ac venenatis dapibus. Sed eu sem in justo vehicula rhoncus at id justo. Duis non pellentesque dui, quis lobortis tellus. Praesent tempor, leo eu hendrerit cursus, neque turpis vehicula nibh, ac hendrerit libero eros sed massa. Maecenas vel tellus imperdiet, tristique eros a, sodales arcu.</p>",
               "mapSettings": {
-                "target": "map",
-                "center": [236000, 6585000],
-                "title": "Översiktsplan",
-                "projection": "EPSG:3007",
-                "zoom": 10,
-                "maxZoom": 3,
-                "minZoom": 9,
-                "resolutions": [
-                  4096,
-                  2048,
-                  1024,
-                  512,
-                  256,
-                  128,
-                  64,
-                  32,
-                  16,
-                  8,
-                  4,
-                  2,
-                  1,
-                  0.5
-                ],
-                "origin": [0, 0],
-                "extent": [0, 6000000, 1000000, 9000000],
-                "logo": "http://logodust.com/img/free/logo33.png",
-                "geoserverLegendOptions": "",
-                "pil": "",
-                "mapselector": false,
-                "colors": {
-                  "primaryColor": "#0065a6",
-                  "secondaryColor": "#ffcc00"
-                }
+                "center": [236352.6249080779, 6585446.421227029],
+                "zoom": 11,
+                "extent": [
+                  234781.6249080779,
+                  6584605.421227029,
+                  237923.6249080779,
+                  6586287.421227029
+                ]
               },
               "chapters": [],
-              "expanded": false
+              "expanded": false,
+              "layers": []
             },
             {
               "header": "Underkapitel 1.2",
@@ -109,39 +85,9 @@
               "header": "Underkapitel 1.3",
               "html": "<p>Hello there!</p>\n<p><br></p>\n<p>Aenean ullamcorper scelerisque cursus. Curabitur lacinia purus erat, a convallis arcu molestie ut. Fusce ut velit eu ligula porta semper. Suspendisse diam ex, ornare rhoncus volutpat ut, viverra nec leo. Phasellus eros ex, feugiat quis purus sed, porttitor malesuada metus. Praesent vestibulum non diam vel efficitur. Pellentesque faucibus nunc nisi, ac ornare nulla viverra ac. Integer consequat sem id justo mollis vulputate.</p>\n<p>Sed sit amet justo venenatis, euismod massa tincidunt, facilisis turpis. Sed ac dictum urna, non fringilla purus. Nunc interdum felis a sapien pharetra auctor. Mauris ac est felis. Etiam nec sem ac risus commodo elementum sit amet non odio. Fusce scelerisque in leo nec congue. Nulla nec mauris nec tellus tincidunt tempor. Nam at justo sit amet nisl lobortis volutpat. Cras lacinia vel ipsum et efficitur. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum suscipit sem vitae interdum dapibus. Integer et malesuada est, a auctor ex. Donec vestibulum lorem lacus, eget scelerisque ligula pretium quis. Sed aliquet elit a ex feugiat, sit amet sagittis ipsum venenatis. Aliquam erat volutpat. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>\n<p><br></p>\n<p>Vestibulum sollicitudin risus id mauris semper eleifend. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Morbi at ornare lorem. Praesent bibendum ultricies pharetra. Praesent at libero sit amet tortor ultricies placerat. Nunc sem ligula, consequat nec interdum ac, ultricies quis ligula. Donec elementum est ac venenatis dapibus. Sed eu sem in justo vehicula rhoncus at id justo. Duis non pellentesque dui, quis lobortis tellus. Praesent tempor, leo eu hendrerit cursus, neque turpis vehicula nibh, ac hendrerit libero eros sed massa. Maecenas vel tellus imperdiet, tristique eros a, sodales arcu.</p>",
               "mapSettings": {
-                "target": "map",
                 "center": [236000, 6585000],
-                "title": "Översiktsplan",
-                "projection": "EPSG:3007",
                 "zoom": 10,
-                "maxZoom": 3,
-                "minZoom": 9,
-                "resolutions": [
-                  4096,
-                  2048,
-                  1024,
-                  512,
-                  256,
-                  128,
-                  64,
-                  32,
-                  16,
-                  8,
-                  4,
-                  2,
-                  1,
-                  0.5
-                ],
-                "origin": [0, 0],
-                "extent": [0, 6000000, 1000000, 9000000],
-                "logo": "http://logodust.com/img/free/logo33.png",
-                "geoserverLegendOptions": "",
-                "pil": "",
-                "mapselector": false,
-                "colors": {
-                  "primaryColor": "#0065a6",
-                  "secondaryColor": "#ffcc00"
-                }
+                "extent": [232858, 6583318, 239142, 6586682]
               },
               "chapters": [
                 {
@@ -186,15 +132,16 @@
                   "expanded": true
                 }
               ],
-              "expanded": true
+              "expanded": true,
+              "layers": ["27"]
             }
           ],
           "expanded": true,
-          "layers": ["17", "16", "14", "18"]
+          "layers": ["17", "16"]
         }
       ],
       "expanded": true,
-      "layers": ["27"]
+      "layers": []
     },
     {
       "header": "Kapitel 2",
@@ -292,39 +239,13 @@
           "header": "Kapitel 3.1",
           "html": "<h2><strong>Kapitel 3.1</strong></h2>\n<p>Vestibulum pretium justo a finibus iaculis. Duis cursus fermentum erat vel pulvinar. Maecenas finibus, tortor quis dignissim hendrerit, felis tellus bibendum turpis, eget dapibus diam est ut ex. Morbi ac dui et est tempor aliquam. Aliquam erat volutpat. Suspendisse pretium tortor arcu, eu volutpat quam auctor ut. Donec neque sem, consectetur tempor auctor ac, lobortis non sem. Donec rhoncus orci ut elit suscipit, eu pellentesque velit interdum. Duis tempus est blandit, venenatis dui quis, accumsan quam. Aliquam eleifend luctus enim sed finibus. Aenean ultricies consequat gravida. Etiam sit amet laoreet magna.</p>\n<p>Nulla eu egestas velit, ac egestas ipsum. Sed finibus ipsum eget dignissim iaculis. Etiam non dapibus nibh. Maecenas ac odio suscipit, pharetra odio et, aliquet erat. Cras ac elementum enim. Duis molestie diam quam, et varius felis tristique ut. Nulla ac elementum lacus. Curabitur efficitur fringilla sem ut sollicitudin. Fusce nec ullamcorper quam. Suspendisse faucibus bibendum scelerisque. Fusce sit amet faucibus ligula.</p>\n<p>Fusce eu luctus nulla. Sed dapibus, massa nec ultricies commodo, ante nisi maximus nunc, at pharetra dui tellus non nisl. Suspendisse luctus felis eu sapien faucibus vulputate. Sed lectus massa, porta eget tempus at, elementum ut turpis. Vivamus sed ipsum elit. Integer at quam magna. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce id lobortis nunc. Donec euismod ultricies tincidunt. Sed quis purus justo. Fusce id venenatis augue. Sed eu purus non lacus ullamcorper aliquet.</p>\n<p>Nunc sed velit ex. Nulla vulputate placerat neque vel semper. Maecenas eu justo porttitor orci mattis consequat. Fusce et est vel lacus pulvinar faucibus. Praesent auctor felis quis suscipit convallis. Aliquam quis commodo lorem, ut dapibus lectus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae;</p>",
           "mapSettings": {
-            "target": "map",
             "center": [236000, 6585000],
-            "title": "Hajk 3",
-            "projection": "EPSG:3007",
             "zoom": 10,
-            "maxZoom": 18,
-            "minZoom": 3,
-            "resolutions": [
-              4096,
-              2048,
-              1024,
-              512,
-              256,
-              128,
-              64,
-              32,
-              16,
-              8,
-              4,
-              2,
-              1,
-              0.5
-            ],
-            "origin": [0, 0],
-            "extent": [0, 6000000, 1000000, 9000000],
-            "logo": "https://github.com/hajkmap/Hajk/raw/develop-new-client/design/logo_small.png",
-            "geoserverLegendOptions": "",
-            "pil": null,
-            "mapselector": false,
-            "colors": { "primaryColor": "#5b8dff", "secondaryColor": "#747474" }
+            "extent": [232858, 6583318, 239142, 6586682]
           },
           "chapters": [],
-          "expanded": true
+          "expanded": true,
+          "layers": ["32"]
         }
       ],
       "expanded": true

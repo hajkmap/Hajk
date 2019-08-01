@@ -181,8 +181,8 @@ namespace MapService.Components
                                 break;
                             }
                             else
-                            {                                                                           
-                                if (pageLines[j] == chapter.header)
+                            {                
+                                if (pageLines[j].TrimEnd() == chapter.header.TrimEnd())
                                 {
                                     found = true;
                                     foundPage = i.ToString();
