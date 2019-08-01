@@ -273,7 +273,10 @@ class Menu extends Component {
       dropdownThemeMaps: false,
       themeMapHeaderCaption: "Temakartor",
       visibleForGroups: [],
-      adList: null
+      adList: null,
+      target: "toolbar",
+      title: "Innehåll",
+      description: "Välj innehåll att visa i kartan"
     };
     this.state = state;
   }
@@ -312,7 +315,10 @@ class Menu extends Component {
           visibleForGroups: this.props.model.get("layerMenuConfig")
             .visibleForGroups
             ? this.props.model.get("layerMenuConfig").visibleForGroups
-            : []
+            : [],
+          target: this.props.model.get("layerMenuConfig").target,
+          title: this.props.model.get("layerMenuConfig").title,
+          description: this.props.model.get("layerMenuConfig").description
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -511,7 +517,10 @@ class Menu extends Component {
       visibleForGroups: this.state.visibleForGroups.map(
         Function.prototype.call,
         String.prototype.trim
-      )
+      ),
+      target: this.state.target,
+      title: this.state.title,
+      description: this.state.description
     };
 
     var roots = $(".tree-view > ul > li");
@@ -1393,6 +1402,53 @@ class Menu extends Component {
                 >
                   Släck alla lager-knapp
                 </label>
+              </div>
+              <div className="row">
+                <div className="col-sm-12">
+                  <label htmlFor="target">Verktygsplacering</label>
+                  <input
+                    id="target"
+                    name="target"
+                    type="text"
+                    onChange={e => {
+                      this.handleInputChange(e);
+                    }}
+                    value={this.state.target}
+                  />
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-sm-12">
+                  <label htmlFor="title">Etikett</label>
+                  <input
+                    value={this.state.title}
+                    type="text"
+                    name="title"
+                    onChange={e => {
+                      this.handleInputChange(e);
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-sm-12">
+                  <label htmlFor="description">
+                    Beskrivning{" "}
+                    <i
+                      className="fa fa-question-circle"
+                      data-toggle="tooltip"
+                      title="Om verktyget visas som widget (inställningen 'Verktygsplacering' sätts till 'left' eller 'right) så kommer denna beskrivning att visas inne i widget-knappen."
+                    />
+                  </label>{" "}
+                  <input
+                    value={this.state.description}
+                    type="text"
+                    name="description"
+                    onChange={e => {
+                      this.handleInputChange(e);
+                    }}
+                  />
+                </div>
               </div>
               {this.renderThemeMapCheckbox()}
               {this.renderThemeMapHeaderInput()}

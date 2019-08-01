@@ -13,7 +13,6 @@
     "location",
     "measure",
     "search",
-    "simple_layerswitcher",
     "streetview",
     "suggest"
   ],
@@ -31,7 +30,6 @@
     "location",
     "measure",
     "search",
-    "simple_layerswitcher",
     "streetview",
     "suggest"
   ]

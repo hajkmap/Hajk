@@ -46,5 +46,9 @@ namespace MapService.Models.ToolOptions
         public string themeMapHeaderCaption { get; set; }
 		
 		public string[] visibleForGroups { get; set; }
+
+		public string title { get; set; }
+
+		public string description { get; set; }
     }
 }

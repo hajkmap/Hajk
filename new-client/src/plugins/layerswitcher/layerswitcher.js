@@ -5,15 +5,15 @@ import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import LayersIcon from "@material-ui/icons/Layers";
 import Window from "../../components/Window.js";
 import Card from "../../components/Card.js";
-import SimpleLayerSwitcherView from "./SimpleLayerSwitcherView.js";
-import SimpleLayerSwitcherModel from "./SimpleLayerSwitcherModel.js";
+import LayerSwitcherView from "./LayerSwitcherView.js";
+import LayerSwitcherModel from "./LayerSwitcherModel.js";
 import Observer from "react-event-observer";
 
 const styles = theme => {
   return {};
 };
 
-class SimpleLayerSwitcher extends React.PureComponent {
+class LayerSwitcher extends React.PureComponent {
   state = {
     panelOpen: this.props.options.visibleAtStart
   };
@@ -39,10 +39,11 @@ class SimpleLayerSwitcher extends React.PureComponent {
     this.app = props.app;
     this.options = props.options;
     this.title = this.options.title || "Visa";
-    this.abstract = this.options.abstract || "Välj vad du vill se i kartan";
+    this.description =
+      this.options.description || "Välj vad du vill se i kartan";
     this.observer = Observer();
     this.observer.subscribe("layerAdded", layer => {});
-    this.simpleLayerSwitcherModel = new SimpleLayerSwitcherModel({
+    this.layerSwitcherModel = new LayerSwitcherModel({
       map: props.map,
       app: props.app,
       observer: this.observer
@@ -63,10 +64,10 @@ class SimpleLayerSwitcher extends React.PureComponent {
         left={5}
         mode={mode}
       >
-        <SimpleLayerSwitcherView
+        <LayerSwitcherView
           app={this.props.app}
           map={this.props.map}
-          model={this.simpleLayerSwitcherModel}
+          model={this.layerSwitcherModel}
           observer={this.observer}
           breadCrumbs={this.props.type === "widgetItem"}
         />
@@ -82,7 +83,7 @@ class SimpleLayerSwitcher extends React.PureComponent {
           icon={<LayersIcon />}
           onClick={this.onClick}
           title={this.title}
-          abstract={this.abstract}
+          abstract={this.description}
         />
         {this.renderWindow("window")}
       </div>
@@ -121,4 +122,4 @@ class SimpleLayerSwitcher extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(SimpleLayerSwitcher);
+export default withStyles(styles)(LayerSwitcher);

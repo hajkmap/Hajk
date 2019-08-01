@@ -652,7 +652,10 @@ namespace MapService.Controllers
 							backgroundSwitcherWhite = true,
 							instruction = String.Empty,
 							themeMapHeaderCaption = String.Empty,
-							visibleForGroups = new string[0]
+							visibleForGroups = new string[0],
+							target = String.Empty,
+							title = String.Empty,
+							description = String.Empty
 						},
 						index = 0
 					}

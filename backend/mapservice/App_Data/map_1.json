@@ -181,7 +181,10 @@
         "toggleAllButton": true,
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Rubrik temakarta",
-        "visibleForGroups": ["Office-SEKSD01", "All-SE129"]
+        "visibleForGroups": ["Office-SEKSD01", "All-SE129"],
+        "target": "toolbar",
+        "title": "Innehåll",
+        "description": "Välj innehåll att visa i kartan"
       },
       "index": 0
     },
@@ -194,15 +197,6 @@
         "anchor": [16, 32],
         "imgSize": [32, 32],
         "popupOffsetY": 0,
-        "visibleForGroups": []
-      },
-      "index": 0
-    },
-    {
-      "type": "simple_layerswitcher",
-      "options": {
-        "target": "toolbar",
-        "visibleAtStart": false,
         "visibleForGroups": []
       },
       "index": 0

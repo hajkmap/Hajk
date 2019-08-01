@@ -1,4 +1,4 @@
-class SimpleLayerSwitcherModel {
+class LayerSwitcherModel {
   constructor(settings) {
     this.olMap = settings.map;
     this.observer = settings.observer;
@@ -13,4 +13,4 @@ class SimpleLayerSwitcherModel {
   }
 }
 
-export default SimpleLayerSwitcherModel;
+export default LayerSwitcherModel;

@@ -301,20 +301,12 @@
         "toggleAllButton": false,
         "dropdownThemeMaps": false,
         "themeMapHeaderCaption": "",
-        "visibleForGroups": []
+        "visibleForGroups": [],
+        "target": "toolbar",
+        "title": "Innehåll",
+        "description": "Välj innehåll att visa i kartan"
       },
       "index": 0
-    },
-    {
-      "type": "simple_layerswitcher",
-      "options": {
-        "target": "left",
-        "abstract": "Välj innehåll att visa i kartan",
-        "title": "Innehåll",
-        "visibleAtStart": false,
-        "visibleForGroups": []
-      },
-      "index": 5
     },
     {
       "type": "collector",
