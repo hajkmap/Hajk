@@ -99,7 +99,7 @@ const StyledTab = withStyles({
   }
 })(Tab);
 
-class SimpleLayersSwitcherView extends React.PureComponent {
+class LayersSwitcherView extends React.PureComponent {
   constructor(props) {
     super(props);
     this.options = this.props.app.config.mapConfig.tools.find(
@@ -257,4 +257,4 @@ class SimpleLayersSwitcherView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(SimpleLayersSwitcherView);
+export default withStyles(styles)(LayersSwitcherView);
