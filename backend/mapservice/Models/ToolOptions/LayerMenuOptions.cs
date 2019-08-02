@@ -47,6 +47,8 @@ namespace MapService.Models.ToolOptions
 		
 		public string[] visibleForGroups { get; set; }
 
+		public string target { get; set; }
+
 		public string title { get; set; }
 
 		public string description { get; set; }
