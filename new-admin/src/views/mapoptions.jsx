@@ -44,6 +44,8 @@ class MapOptions extends Component {
         secondaryColor: config.colors.secondaryColor,
         projection: config.projection,
         zoom: config.zoom,
+        maxZoom: config.maxZoom,
+        minZoom: config.minZoom,
         center: config.center,
         logo: config.logo,
         extent: config.extent,
@@ -75,6 +77,8 @@ class MapOptions extends Component {
       title: mapConfig.title,
       projection: mapConfig.projection,
       zoom: mapConfig.zoom,
+      maxZoom: mapConfig.maxZoom,
+      minZoom: mapConfig.minZoom,
       center: mapConfig.center,
       logo: mapConfig.logo,
       extent: mapConfig.extent,
@@ -103,7 +107,14 @@ class MapOptions extends Component {
   }
 
   validate(callback) {
-    var validationFields = ["title", "projection", "zoom", "center"],
+    var validationFields = [
+        "title",
+        "projection",
+        "zoom",
+        "maxZoom",
+        "minZoom",
+        "center"
+      ],
       validationErrors = [];
 
     validationFields.forEach(field => {
@@ -166,6 +177,8 @@ class MapOptions extends Component {
         }
         break;
       case "zoom":
+      case "minZoom":
+      case "maxZoom":
         if (!number(value) || empty(value)) {
           valid = false;
         }
@@ -208,6 +221,8 @@ class MapOptions extends Component {
         config.title = this.getValue("title");
         config.projection = this.getValue("projection");
         config.zoom = this.getValue("zoom");
+        config.maxZoom = this.getValue("maxZoom");
+        config.minZoom = this.getValue("minZoom");
         config.center = this.getValue("center");
         config.logo = this.getValue("logo");
         config.extent = this.getValue("extent");
@@ -322,6 +337,48 @@ class MapOptions extends Component {
                 onChange={e => {
                   this.setState({ zoom: e.target.value }, () =>
                     this.validateField("zoom")
+                  );
+                }}
+              />
+            </div>
+            <div>
+              <label>
+                Max-zoomnivå{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Används som OpenLayers View 'maxZoom'-parameter, ex '20'"
+                />
+              </label>
+              <input
+                type="text"
+                ref="input_maxZoom"
+                value={this.state.maxZoom}
+                className={this.getValidationClass("maxZoom")}
+                onChange={e => {
+                  this.setState({ maxZoom: e.target.value }, () =>
+                    this.validateField("maxZoom")
+                  );
+                }}
+              />
+            </div>
+            <div>
+              <label>
+                Min-zoomnivå{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Används som OpenLayers View 'minZoom'-parameter, ex '0'"
+                />
+              </label>
+              <input
+                type="text"
+                ref="input_minZoom"
+                value={this.state.minZoom}
+                className={this.getValidationClass("minZoom")}
+                onChange={e => {
+                  this.setState({ minZoom: e.target.value }, () =>
+                    this.validateField("minZoom")
                   );
                 }}
               />

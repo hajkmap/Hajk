@@ -98,29 +98,8 @@
       "options": {
         "baselayers": [
           {
-            "id": "4",
-            "visibleAtStart": false,
-            "drawOrder": 0,
-            "visibleForGroups": null,
-            "infobox": null
-          },
-          {
-            "id": "5",
-            "visibleAtStart": false,
-            "drawOrder": 0,
-            "visibleForGroups": null,
-            "infobox": null
-          },
-          {
-            "id": "31",
+            "id": "35",
             "visibleAtStart": true,
-            "drawOrder": 0,
-            "visibleForGroups": null,
-            "infobox": null
-          },
-          {
-            "id": "24",
-            "visibleAtStart": false,
             "drawOrder": 0,
             "visibleForGroups": null,
             "infobox": null
@@ -134,6 +113,41 @@
             "toggled": true,
             "expanded": true,
             "layers": [
+              {
+                "id": "32",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "16",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "17",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "18",
+                "visibleAtStart": true,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "14",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
               {
                 "id": "33",
                 "visibleAtStart": false,
@@ -149,13 +163,6 @@
                 "infobox": null
               },
               {
-                "id": "32",
-                "visibleAtStart": true,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
                 "id": "27",
                 "visibleAtStart": false,
                 "drawOrder": 1000,
@@ -164,7 +171,7 @@
               },
               {
                 "id": "30",
-                "visibleAtStart": true,
+                "visibleAtStart": false,
                 "drawOrder": 1000,
                 "visibleForGroups": null,
                 "infobox": null
@@ -201,7 +208,9 @@
     {
       "type": "simple_layerswitcher",
       "options": {
-        "target": "toolbar",
+        "target": "left",
+        "abstract": "Välj innehåll att visa i kartan",
+        "title": "Innehållet",
         "visibleAtStart": false,
         "visibleForGroups": []
       },
@@ -271,58 +280,23 @@
       "options": {
         "target": "toolbar",
         "panel": "right",
+        "tocExpanded": false,
         "title": "Översiktsplan",
         "caption": "Översiktsplan",
         "serviceUrl": "http://localhost:55630/informative/load",
+        "exportUrl": "http://localhost:55630/export/document",
         "abstract": "Läs mer om vad som planeras i kommunen",
         "html": "<div>HTML som beskriver dokumentets innehåll</div>",
-        "document": "test",
+        "document": "oversiktsplan",
         "visibleAtStart": false,
         "visibleForGroups": []
       },
       "index": 0
     },
     {
-      "type": "collector",
-      "options": {
-        "target": "toolbar",
-        "url": "http://giscloud.se/geoserver/wfs",
-        "featureType": "opinion",
-        "title": "Tyck till",
-        "abstract": "Vi vill veta vad du tycker!",
-        "featureNS": "wsp",
-        "visibleAtStart": false,
-        "visibleForGroups": [],
-        "form": [
-          {
-            "displayOptions": true,
-            "name": "Typ",
-            "type": "option",
-            "value": "",
-            "values": ["Damm", "Kraftverk"]
-          },
-          {
-            "displayOptions": false,
-            "name": "Kommentar",
-            "type": "text",
-            "value": "",
-            "values": []
-          },
-          {
-            "displayOptions": false,
-            "name": "Övrig kommentar",
-            "type": "text",
-            "value": "",
-            "values": []
-          }
-        ]
-      },
-      "index": 0
-    },
-    {
       "type": "information",
       "options": {
-        "target": "toolbar",
+        "target": "right",
         "text": "Hej",
         "headerText": "Om kartan",
         "title": "",
@@ -333,16 +307,90 @@
         "visibleForGroups": []
       },
       "index": 0
+    },
+    {
+      "type": "edit",
+      "options": {
+        "target": "toolbar",
+        "instruction": "",
+        "activeServices": ["25"],
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "collector",
+      "options": {
+        "target": "left",
+        "url": "",
+        "featureType": "hpl",
+        "title": "Tyck till",
+        "abstract": "Vi vill veta vad du tycker!",
+        "featureNS": "",
+        "showThankYou": false,
+        "visibleAtStart": false,
+        "thankYou": "Tack",
+        "visibleForGroups": [],
+        "form": [
+          {
+            "id": 303302667498,
+            "order": 0,
+            "header": "Vem är du?",
+            "text": "<p>Ålder:</p>\n<div label=\"Namn\" field=\"name\"></div>\n<p>Namn:</p>\n<div label=\"Namn\" field=\"image\"></div>\n\n"
+          },
+          {
+            "id": 979784104217,
+            "order": 1,
+            "header": "Tyck till om en plats",
+            "text": "<p>Välj typ av plats, klicka sedan i kartan för att markera den</p>\n<div type=\"toolbar\"></div>"
+          }
+        ],
+        "serviceId": "25"
+      },
+      "index": 0
+    },
+    {
+      "type": "search",
+      "options": {
+        "target": "center",
+        "onMap": true,
+        "bothSynlig": true,
+        "enableViewTogglePopupInSnabbsok": true,
+        "toolbar": "bottom",
+        "maxZoom": 14,
+        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
+        "kmlExportUrl": "/mapservice/export/kml",
+        "excelExportUrl": "/mapservice/export/excel",
+        "displayPopup": true,
+        "selectionTools": true,
+        "selectionSearch": true,
+        "radiusSearch": true,
+        "polygonSearch": true,
+        "searchSettings": true,
+        "base64Encode": false,
+        "instruction": "",
+        "filterVisible": true,
+        "anchor": [16, 32],
+        "imgSize": [32, 32],
+        "tooltip": "Sök...",
+        "searchWithinButtonText": "Markera i kartan",
+        "toolDescription": "<div>Sök innehåll i kartan</div>",
+        "popupOffsetY": 0,
+        "visibleForGroups": [],
+        "layers": [],
+        "selectedSources": ["30", "27", "32", "34", "33", "14", "18"]
+      },
+      "index": 7
     }
   ],
   "map": {
     "target": "map",
-    "center": [560000, 6923488],
+    "center": [415000, 6585000],
     "title": "Hajk 3",
     "projection": "EPSG:3006",
-    "zoom": 5,
-    "maxZoom": 3,
-    "minZoom": 9,
+    "zoom": 10,
+    "maxZoom": 18,
+    "minZoom": 3,
     "resolutions": [
       4096.0,
       2048.0,
@@ -361,13 +409,13 @@
     ],
     "origin": [0.0, 0.0],
     "extent": [0.0, 6000000.0, 1000000.0, 9000000.0],
-    "logo": "https://github.com/hajkmap/Hajk/raw/develop-new-client/design/logo_small.png",
+    "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
     "geoserverLegendOptions": "",
     "pil": null,
     "mapselector": false,
     "colors": {
-      "primaryColor": "#455A64",
-      "secondaryColor": "#FFB74D"
+      "primaryColor": "#333333",
+      "secondaryColor": "#ffffff"
     }
   }
 }

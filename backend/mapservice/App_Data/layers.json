@@ -52,61 +52,8 @@
       "infoText": "Hej",
       "infoUrl": "http://google.se",
       "infoUrlText": "Google",
-      "infoOwner": "Erik"
-    },
-    {
-      "id": "5",
-      "caption": "Topowebbkartan (översikt)",
-      "url": "https://api.lantmateriet.se/open/topowebb-ccby/v1/wmts/token/b84e03e0-c917-313e-9f7d-fb5303034148/",
-      "owner": null,
-      "date": "1529572108770",
-      "content": "Topowebbkartan i WMTS-format",
-      "legend": "",
-      "projection": "EPSG:3006",
-      "visibleAtStart": false,
-      "layer": "topowebb",
-      "style": "default",
-      "matrixSet": "3006",
-      "origin": ["-1200000", "8500000"],
-      "resolutions": [
-        "4096",
-        "2048",
-        "1024",
-        "512",
-        "256",
-        "128",
-        "64",
-        "32",
-        "16",
-        "8",
-        "4",
-        "2",
-        "1",
-        "0.5"
-      ],
-      "matrixIds": [
-        "0",
-        "1",
-        "2",
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
-        "10",
-        "11",
-        "12",
-        "13"
-      ],
-      "attribution": "Lantmäteriet",
-      "infoVisible": true,
-      "infoTitle": "Hej",
-      "infoText": "Hej",
-      "infoUrl": "http://google.se",
-      "infoUrlText": "Google",
-      "infoOwner": "Erik"
+      "infoOwner": "Erik",
+      "zIndex": null
     }
   ],
   "wmslayers": [
@@ -115,7 +62,7 @@
       "caption": "Parkering WMS",
       "url": "http://giscloud.se/geoserver/wms",
       "owner": "",
-      "date": "1556896376754",
+      "date": "1561383227631",
       "content": "",
       "legend": "",
       "projection": "EPSG:3006",
@@ -126,7 +73,7 @@
           "caption": "",
           "legend": "",
           "infobox": "",
-          "style": null,
+          "style": "",
           "queryable": false
         }
       ],
@@ -137,6 +84,7 @@
       "opacity": 1.0,
       "singleTile": false,
       "imageFormat": "image/png",
+      "serverType": "geoserver",
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -150,7 +98,8 @@
       "infoUrlText": "",
       "infoOwner": "",
       "version": "1.1.1",
-      "infoFormat": "text/plain"
+      "infoFormat": "application/json",
+      "zIndex": null
     },
     {
       "id": "22",
@@ -170,6 +119,7 @@
       "opacity": 1.0,
       "singleTile": false,
       "imageFormat": "image/png",
+      "serverType": null,
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -183,7 +133,8 @@
       "infoUrlText": "",
       "infoOwner": "",
       "version": null,
-      "infoFormat": null
+      "infoFormat": null,
+      "zIndex": null
     },
     {
       "id": "23",
@@ -203,6 +154,7 @@
       "opacity": 1.0,
       "singleTile": false,
       "imageFormat": "image/png",
+      "serverType": null,
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -216,7 +168,8 @@
       "infoUrlText": "",
       "infoOwner": "",
       "version": null,
-      "infoFormat": null
+      "infoFormat": null,
+      "zIndex": null
     },
     {
       "id": "24",
@@ -245,6 +198,7 @@
       "opacity": 1.0,
       "singleTile": false,
       "imageFormat": "image/png",
+      "serverType": null,
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -258,34 +212,35 @@
       "infoUrlText": "",
       "infoOwner": "",
       "version": null,
-      "infoFormat": null
+      "infoFormat": null,
+      "zIndex": null
     },
     {
       "id": "27",
       "caption": "Kollektivtrafik",
       "url": "http://giscloud.se/geoserver/wms",
       "owner": "",
-      "date": "1558191018309",
+      "date": "1564400225281",
       "content": "",
       "legend": "",
       "projection": "EPSG:3006",
-      "layers": ["wsp:hpl", "wsp:bus_line"],
+      "layers": ["wsp:parking_lot", "wsp:bus_line"],
       "layersInfo": [
         {
-          "id": "wsp:hpl",
-          "caption": "Hållplats",
+          "id": "wsp:parking_lot",
+          "caption": "Parkering",
           "legend": "",
-          "infobox": "<img src=\"{image}\" />",
-          "style": "point",
-          "queryable": true
+          "infobox": "",
+          "style": "",
+          "queryable": false
         },
         {
           "id": "wsp:bus_line",
           "caption": "Busslinje",
           "legend": "",
           "infobox": "",
-          "style": "line_outlined",
-          "queryable": true
+          "style": "",
+          "queryable": false
         }
       ],
       "searchFields": null,
@@ -295,6 +250,7 @@
       "opacity": 1.0,
       "singleTile": true,
       "imageFormat": "image/png",
+      "serverType": "geoserver",
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -303,12 +259,13 @@
       "searchGeometryField": "",
       "infoVisible": true,
       "infoTitle": "Rubrik",
-      "infoText": "Informationstext",
+      "infoText": "Parkering",
       "infoUrl": "http://www.google.se",
       "infoUrlText": "Länk",
       "infoOwner": "Karl Kula",
       "version": "1.1.1",
-      "infoFormat": "application/json"
+      "infoFormat": "application/json",
+      "zIndex": null
     },
     {
       "id": "28",
@@ -345,6 +302,7 @@
       "opacity": 1.0,
       "singleTile": false,
       "imageFormat": "image/png",
+      "serverType": null,
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -358,7 +316,8 @@
       "infoUrlText": "",
       "infoOwner": "",
       "version": null,
-      "infoFormat": null
+      "infoFormat": null,
+      "zIndex": null
     },
     {
       "id": "29",
@@ -387,6 +346,7 @@
       "opacity": 1.0,
       "singleTile": false,
       "imageFormat": "image/png",
+      "serverType": null,
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -400,7 +360,8 @@
       "infoUrlText": "Länk till metadata",
       "infoOwner": "Trafikenheten",
       "version": null,
-      "infoFormat": null
+      "infoFormat": null,
+      "zIndex": null
     },
     {
       "id": "30",
@@ -429,6 +390,7 @@
       "opacity": 1.0,
       "singleTile": false,
       "imageFormat": "image/png",
+      "serverType": null,
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -442,25 +404,26 @@
       "infoUrlText": "",
       "infoOwner": "",
       "version": "1.1.1",
-      "infoFormat": "application/json"
+      "infoFormat": "application/json",
+      "zIndex": null
     },
     {
-      "id": "31",
-      "caption": "Topowebbkartan",
-      "url": "http://giscloud.se/mapservice/lmproxy/wms/topowebb",
+      "id": "35",
+      "caption": "Topografiska Webbkartan",
+      "url": "https://giscloud.se/geoserver/test/wms/",
       "owner": "",
-      "date": "1551942717869",
-      "content": "Topowebbkartan",
+      "date": "1564694331576",
+      "content": "",
       "legend": "",
-      "projection": null,
+      "projection": "EPSG:3006",
       "layers": ["topowebbkartan"],
       "layersInfo": [
         {
           "id": "topowebbkartan",
-          "caption": "",
+          "caption": "Topografiska Webbkartan",
           "legend": "",
           "infobox": "",
-          "style": null,
+          "style": "",
           "queryable": false
         }
       ],
@@ -471,6 +434,7 @@
       "opacity": 1.0,
       "singleTile": false,
       "imageFormat": "image/png",
+      "serverType": "geoserver",
       "attribution": "",
       "searchUrl": "",
       "searchPropertyName": "",
@@ -479,12 +443,13 @@
       "searchGeometryField": "",
       "infoVisible": false,
       "infoTitle": "",
-      "infoText": "",
+      "infoText": "Lantmäteriets Topografiska Webbkarta",
       "infoUrl": "",
       "infoUrlText": "",
       "infoOwner": "",
-      "version": null,
-      "infoFormat": null
+      "version": "1.1.1",
+      "infoFormat": "application/json",
+      "zIndex": null
     }
   ],
   "wfslayers": [
@@ -504,7 +469,8 @@
       "infoText": null,
       "infoUrl": null,
       "infoUrlText": null,
-      "infoOwner": null
+      "infoOwner": null,
+      "zIndex": null
     }
   ],
   "vectorlayers": [
@@ -515,7 +481,7 @@
       "url": "http://giscloud.se/geoserver/wfs",
       "layer": "wsp:hpl",
       "owner": null,
-      "date": "1548157635707",
+      "date": "1564694433642",
       "content": "",
       "legend": "",
       "symbolXOffset": 0.0,
@@ -524,7 +490,7 @@
       "pointSize": "4",
       "filterAttribute": "",
       "filterValue": "",
-      "filterComparer": null,
+      "filterComparer": "eq",
       "lineStyle": "solid",
       "lineWidth": "1",
       "lineColor": "rgba(0, 0, 0, 1)",
@@ -532,7 +498,7 @@
       "visibleAtStart": false,
       "opacity": 1.0,
       "infobox": "{name}  \n<img src=\"{image}\"></img>",
-      "queryable": false,
+      "queryable": true,
       "filterable": false,
       "labelAlign": "center",
       "labelBaseline": "alphabetic",
@@ -541,17 +507,18 @@
       "labelOffsetY": 0,
       "labelWeight": "normal",
       "labelFont": "Arial",
-      "labelFillColor": "#000000",
+      "labelFillColor": "rgba(144, 19, 254, 0.62)",
       "labelOutlineColor": "#FFFFFF",
       "labelOutlineWidth": 3,
-      "labelAttribute": "Name",
+      "labelAttribute": "name",
       "showLabels": true,
       "infoVisible": true,
       "infoTitle": "",
       "infoText": "Detta lager innehåller hållplatser.",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "zIndex": null
     },
     {
       "id": "15",
@@ -596,7 +563,8 @@
       "infoText": "",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "zIndex": null
     },
     {
       "id": "16",
@@ -605,7 +573,7 @@
       "url": "https://giscloud.se/geoserver/wfs",
       "layer": "wsp:bus_line",
       "owner": null,
-      "date": "1537870160229",
+      "date": "1564694198130",
       "content": "",
       "legend": "",
       "symbolXOffset": 0.0,
@@ -614,7 +582,7 @@
       "pointSize": "4",
       "filterAttribute": "",
       "filterValue": "",
-      "filterComparer": null,
+      "filterComparer": "eq",
       "lineStyle": "solid",
       "lineWidth": "5",
       "lineColor": "rgba(74, 144, 226, 1)",
@@ -641,7 +609,8 @@
       "infoText": "",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "zIndex": null
     },
     {
       "id": "17",
@@ -650,7 +619,7 @@
       "url": "http://giscloud.se/geoserver/wfs",
       "layer": "wsp:parking_lot",
       "owner": null,
-      "date": "1537870176529",
+      "date": "1564694449994",
       "content": "",
       "legend": "",
       "symbolXOffset": 0.0,
@@ -659,10 +628,10 @@
       "pointSize": "4",
       "filterAttribute": "",
       "filterValue": "",
-      "filterComparer": null,
+      "filterComparer": "eq",
       "lineStyle": "solid",
-      "lineWidth": "1",
-      "lineColor": "rgba(74, 74, 74, 1)",
+      "lineWidth": "5",
+      "lineColor": "rgba(255, 0, 0, 1)",
       "fillColor": "rgba(0, 0, 0, 0.54)",
       "visibleAtStart": false,
       "opacity": 1.0,
@@ -686,7 +655,8 @@
       "infoText": "",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "zIndex": null
     },
     {
       "id": "32",
@@ -695,7 +665,7 @@
       "url": "https://giscloud.se/geoserver/wfs",
       "layer": "wsp:opinion",
       "owner": null,
-      "date": "1556488822154",
+      "date": "1564694421091",
       "content": "",
       "legend": "",
       "symbolXOffset": 0.0,
@@ -704,7 +674,7 @@
       "pointSize": "8",
       "filterAttribute": "",
       "filterValue": "",
-      "filterComparer": null,
+      "filterComparer": "eq",
       "lineStyle": "solid",
       "lineWidth": "1",
       "lineColor": "rgba(126, 211, 33, 1)",
@@ -725,13 +695,14 @@
       "labelOutlineColor": "#FFFFFF",
       "labelOutlineWidth": 3,
       "labelAttribute": "Name",
-      "showLabels": false,
+      "showLabels": true,
       "infoVisible": false,
       "infoTitle": "",
       "infoText": "",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "zIndex": null
     },
     {
       "id": "33",
@@ -776,7 +747,8 @@
       "infoText": "",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "zIndex": null
     },
     {
       "id": "34",
@@ -821,7 +793,8 @@
       "infoText": "",
       "infoUrl": "",
       "infoUrlText": "",
-      "infoOwner": ""
+      "infoOwner": "",
+      "zIndex": null
     }
   ],
   "wfstlayers": [
@@ -834,13 +807,22 @@
       "layers": ["wsp:hpl"],
       "editableFields": [
         {
-          "index": 1,
-          "name": "name",
-          "dataType": "string",
-          "textType": "fritext",
+          "index": 0,
+          "name": "id",
+          "dataType": "int",
+          "textType": null,
           "values": null,
           "hidden": false,
           "defaultValue": null
+        },
+        {
+          "index": 1,
+          "name": "name",
+          "dataType": "string",
+          "textType": "lista",
+          "values": ["10-20", "20-30", "30-40", "40-65", "65+"],
+          "hidden": false,
+          "defaultValue": "65+"
         },
         {
           "index": 2,
@@ -850,24 +832,79 @@
           "values": null,
           "hidden": false,
           "defaultValue": null
+        },
+        {
+          "index": 5,
+          "name": "typ",
+          "dataType": "string",
+          "textType": "flerval",
+          "values": ["brun", "grå", "vit"],
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 6,
+          "name": "trafikslag",
+          "dataType": "string",
+          "textType": "lista",
+          "values": ["buss", "taxi"],
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 7,
+          "name": "max_antal",
+          "dataType": "int",
+          "textType": null,
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 8,
+          "name": "medel_antal",
+          "dataType": "number",
+          "textType": null,
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 9,
+          "name": "datum_text",
+          "dataType": "string",
+          "textType": "datum",
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
+        },
+        {
+          "index": 10,
+          "name": "typkod",
+          "dataType": "string",
+          "textType": "fritext",
+          "values": null,
+          "hidden": false,
+          "defaultValue": null
         }
       ],
       "editPoint": true,
-      "editPolygon": false,
-      "editLine": false,
+      "editPolygon": true,
+      "editLine": true,
       "infoVisible": false,
       "infoTitle": null,
       "infoText": null,
       "infoUrl": null,
       "infoUrlText": null,
-      "infoOwner": null
+      "infoOwner": null,
+      "zIndex": null
     },
     {
       "id": "26",
       "caption": "Parkering",
       "url": "https://giscloud.se/geoserver/wfs",
       "uri": "https://giscloud.se/wsp",
-      "projection": "EPSG:3006",
+      "projection": "EPSG:3007",
       "layers": ["wsp:parking_lot"],
       "editableFields": [
         {
@@ -888,7 +925,8 @@
       "infoText": null,
       "infoUrl": null,
       "infoUrlText": null,
-      "infoOwner": null
+      "infoOwner": null,
+      "zIndex": null
     }
   ],
   "arcgislayers": []

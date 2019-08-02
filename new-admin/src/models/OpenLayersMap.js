@@ -211,7 +211,8 @@ class OpenLayersMap {
   getState() {
     return {
       center: this.map.getView().getCenter(),
-      zoom: Math.round(this.map.getView().getZoom())
+      zoom: Math.round(this.map.getView().getZoom()),
+      extent: this.map.getView().calculateExtent(this.map.getSize())
     };
   }
 
@@ -276,7 +277,7 @@ class OpenLayersMap {
   reprojectFeatures(features, from, to) {
     if (Array.isArray(features)) {
       features.forEach(feature => {
-        if (feature.getGeometry().getCoordinates) {
+        if (feature.getGeometry() && feature.getGeometry().getCoordinates) {
           let coords = feature.getGeometry().getCoordinates();
           try {
             switch (feature.getGeometry().getType()) {

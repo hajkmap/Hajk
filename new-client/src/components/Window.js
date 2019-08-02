@@ -99,7 +99,7 @@ const styles = theme => {
       padding: "10px",
       cursor: "default !important",
       [theme.breakpoints.down("xs")]: {
-        bottom: "64px"
+        marginBottom: "64px"
       }
     }
   };
@@ -118,18 +118,18 @@ class Window extends React.PureComponent {
 
     window.addEventListener("resize", () => {
       if (this.mode === "maximized") {
-        this.fit(this.rnd.getSelfElement().parentElement);
+        this.fit(document.getElementById("main"));
       } else {
-        this.updatePos();
+        this.updatePosition();
       }
     });
 
     if (props.globalObserver) {
       props.globalObserver.subscribe("toolbarExpanded", open => {
         if (this.mode === "maximized") {
-          this.fit(this.rnd.getSelfElement().parentElement);
+          this.fit(document.getElementById("main"));
         } else {
-          this.update(this.rnd.getSelfElement().parentElement);
+          this.update(document.getElementById("main"));
         }
       });
     }
@@ -301,7 +301,7 @@ class Window extends React.PureComponent {
 
   moveToBottom = target => {
     this.rnd.updatePosition({
-      y: Math.round(window.innerHeight - 110)
+      y: Math.round(window.innerHeight - 106)
     });
     this.mode = "minimized";
   };
@@ -316,10 +316,10 @@ class Window extends React.PureComponent {
           this.enlarge();
           break;
         case "window":
-          this.fit(this.rnd.getSelfElement().parentElement);
+          this.fit(document.getElementById("main"));
           break;
         case "maximized":
-          this.reset(this.rnd.getSelfElement().parentElement);
+          this.reset(document.getElementById("main"));
           break;
         default:
           break;
@@ -331,11 +331,17 @@ class Window extends React.PureComponent {
 
   minimize = e => {
     const { onMinimize } = this.props;
+    if (getIsMobile()) {
+      this.moveToBottom();
+    }
+    if (this.mode === "minimized") {
+      return;
+    }
     if (this.mode === "maximized") {
-      this.reset(this.rnd.getSelfElement().parentElement);
+      this.reset(document.getElementById("main"));
     }
     if (getIsMobile()) {
-      this.moveToBottom(this.rnd.getSelfElement().parentElement);
+      this.moveToBottom();
     } else {
       this.mode = "minimized";
       this.height = this.state.height;
@@ -420,7 +426,7 @@ class Window extends React.PureComponent {
           if (this.props.onResize) this.props.onResize();
         }}
         cancel="section,nav"
-        bounds={"article"}
+        bounds={"main"}
         disableDragging={false || getIsMobile()}
         enableResizing={{
           bottom: resizeBottom,

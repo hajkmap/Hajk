@@ -1,6 +1,8 @@
 import React from "react";
 import { Component } from "react";
 import ReactModal from "react-modal";
+import Page from "./Page.jsx";
+import { Container, Draggable } from "react-smooth-dnd";
 
 class FieldAdder extends Component {
   state = {
@@ -102,23 +104,15 @@ class FieldAdder extends Component {
 
 class FieldEditor extends Component {
   constructor(props) {
-    super();
+    super(props);
+    this.state = {
+      showModal: false,
+      pages: this.props.form
+    };
   }
-
-  state = {
-    showModal: false
-  };
-
-  removeField = field => e => {
-    const { parent } = this.props;
-    parent.setState({
-      form: parent.state.form.filter(f => f !== field)
-    });
-  };
 
   addField = e => {
     const { parent } = this.props;
-
     this.setState({
       showModal: true,
       modalContent: this.fieldAdder,
@@ -129,6 +123,18 @@ class FieldEditor extends Component {
         });
       }
     });
+  };
+
+  addPage = e => {
+    const { onUpdate } = this.props;
+    this.setState(
+      {
+        pages: [{ id: Math.round(Math.random() * 1e12) }, ...this.state.pages]
+      },
+      () => {
+        onUpdate(this.getForm());
+      }
+    );
   };
 
   hideModal() {
@@ -186,52 +192,67 @@ class FieldEditor extends Component {
     );
   }
 
-  renderFields(form) {
-    if (form && Array.isArray(form)) {
-      return form.map((field, i) => {
-        return (
-          <div key={i} className="collector-field">
-            <span
-              className="collector-field-remove btn btn-danger"
-              onClick={this.removeField(field)}
-            >
-              Ta bort
-            </span>
-            <div>
-              <strong>Typ: </strong>
-              {field.type}
-            </div>
-            <div>
-              <strong>Etikett: </strong>
-              {field.name}
-            </div>
-            {Array.isArray(field.values) && field.values.length > 0 ? (
-              <div>
-                <strong>Värden: </strong>
-                <ul className="collector-values">
-                  {field.values.map((value, i) => (
-                    <li key={i}>{value}</li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-          </div>
-        );
-      });
-    }
+  renderPages() {
+    const { onUpdate } = this.props;
+
+    return (
+      <Container
+        nonDragAreaSelector=".nodrag"
+        onDrop={r => {
+          var pages = [...this.state.pages];
+          const { removedIndex, addedIndex } = r;
+          var removed = pages.splice(removedIndex, 1);
+          pages.splice(addedIndex, 0, removed[0]);
+          this.setState({
+            pages: pages
+          });
+          onUpdate(this.getForm());
+        }}
+      >
+        {this.state.pages.map((page, i) => (
+          <Draggable key={page.id}>
+            <Page
+              page={page}
+              ref={page.id}
+              onUpdate={() => {
+                onUpdate(this.getForm());
+              }}
+              onRemove={id => {
+                this.setState(
+                  {
+                    pages: this.state.pages.filter(p => p.id !== id)
+                  },
+                  () => {
+                    onUpdate(this.getForm());
+                  }
+                );
+              }}
+            />
+          </Draggable>
+        ))}
+      </Container>
+    );
+  }
+
+  getForm() {
+    return this.state.pages.map((page, i) => ({
+      id: page.id,
+      order: i,
+      header: this.refs[page.id].state.header,
+      text: this.refs[page.id].state.text
+    }));
   }
 
   render() {
-    const { form } = this.props;
     this.fieldAdder = <FieldAdder ref="fieldAdder" />;
     return (
       <div>
         {this.renderModal()}
         <h3>Formulär</h3>
-        <span className="btn btn-primary" onClick={this.addField}>
-          Lägg till fält
+        <span className="btn btn-primary" onClick={this.addPage}>
+          Lägg till ny sida
         </span>
-        {this.renderFields(form)}
+        <div className="pages">{this.renderPages()}</div>
       </div>
     );
   }

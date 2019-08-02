@@ -26,6 +26,7 @@ import { Component } from "react";
 var defaultState = {
   validationErrors: [],
   active: false,
+  tocExpanded: true,
   index: 0,
   target: "toolbar",
   panel: "right",
@@ -34,10 +35,12 @@ var defaultState = {
   caption: "Översiktsplan",
   html: "<div>HTML som beskriver dokumentets innehåll</div>",
   serviceUrl: "http://localhost:55630/informative/load",
+  exportUrl: "http://localhost:55630/export/document",
+  exportRoot: "",
   documentList: [],
   document: "",
   visibleAtStart: false,
-  templateJsonFilePath: "op",
+  templateJsonFilePath: "",
   visibleForGroups: []
 };
 
@@ -68,6 +71,10 @@ class ToolOptions extends Component {
             this.props.model.getDocumentList(url, list => {
               this.setState({
                 active: true,
+                tocExpanded:
+                  tool.options.tocExpanded === undefined
+                    ? true
+                    : tool.options.tocExpanded,
                 index: tool.index,
                 target: tool.options.target,
                 panel: tool.options.panel,
@@ -76,6 +83,8 @@ class ToolOptions extends Component {
                 abstract: tool.options.abstract,
                 html: tool.options.html,
                 serviceUrl: tool.options.serviceUrl,
+                exportUrl: tool.options.exportUrl,
+                exportRoot: tool.options.exportRoot,
                 document: tool.options.document || list[0],
                 visibleAtStart: tool.options.visibleAtStart || false,
                 visibleForGroups: tool.options.visibleForGroups
@@ -145,9 +154,12 @@ class ToolOptions extends Component {
       options: {
         target: this.state.target,
         panel: this.state.panel,
+        tocExpanded: this.state.tocExpanded,
         title: this.state.title,
         caption: this.state.caption,
         serviceUrl: this.state.serviceUrl,
+        exportUrl: this.state.exportUrl,
+        exportRoot: this.state.exportRoot,
         abstract: this.state.abstract,
         html: this.state.html,
         document: this.state.document,
@@ -275,6 +287,19 @@ class ToolOptions extends Component {
             <label htmlFor="active">Aktiverad</label>
           </div>
           <div>
+            <input
+              id="tocExpanded"
+              name="tocExpanded"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.tocExpanded}
+            />
+            &nbsp;
+            <label htmlFor="tocExpanded">Expanderad teckenförklaring</label>
+          </div>
+          <div>
             <label htmlFor="index">Sorteringsordning</label>
             <input
               id="index"
@@ -373,6 +398,30 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
               value={this.state.serviceUrl}
+            />
+          </div>
+          <div>
+            <label htmlFor="exportUrl">Länk till export</label>
+            <input
+              id="exportUrl"
+              name="exportUrl"
+              type="text"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.exportUrl}
+            />
+          </div>
+          <div>
+            <label htmlFor="exportRoot">Virtuell mapp till tjänst</label>
+            <input
+              id="exportRoot"
+              name="exportRoot"
+              type="text"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.exportRoot}
             />
           </div>
           <div>

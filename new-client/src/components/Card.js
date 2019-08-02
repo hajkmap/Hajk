@@ -15,6 +15,7 @@ const styles = theme => {
     },
     card: {
       marginBottom: "10px",
+      width: "210px",
       [theme.breakpoints.down("xs")]: {
         boxShadow: "none",
         borderBottom: "1px solid #ccc",

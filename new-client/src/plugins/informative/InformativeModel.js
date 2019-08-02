@@ -7,6 +7,8 @@ class InformativeModel {
     this.olMap = settings.map;
     this.url = settings.app.config.appConfig.proxy + settings.url;
     this.globalObserver = settings.app.globalObserver;
+    this.app = settings.app;
+    this.exportUrl = settings.exportUrl;
   }
 
   flyTo(view, location, zoom) {
@@ -16,6 +18,83 @@ class InformativeModel {
       center: location,
       duration: duration
     });
+  }
+
+  getLegends(chapter) {
+    var legendUrls = [];
+
+    const layers = this.olMap
+      .getLayers()
+      .getArray()
+      .filter(
+        l =>
+          chapter.layers &&
+          chapter.layers.some(layer => layer === l.getProperties()["name"])
+      );
+
+    layers.forEach(layer => {
+      if (
+        layer.getProperties().layerInfo &&
+        layer.getProperties().layerInfo["layerType"] !== "base"
+      ) {
+        if (layer.layersInfo) {
+          Object.values(layer.layersInfo).forEach(layerInfo => {
+            legendUrls.push({
+              caption:
+                layerInfo.caption || layer.getProperties().layerInfo["caption"],
+              url: layerInfo.legend
+            });
+          });
+        } else {
+          legendUrls.push({
+            caption: layer.getProperties().layerInfo.caption,
+            url: layer.getProperties().layerInfo.legend[0].url
+          });
+        }
+      }
+    });
+
+    return legendUrls;
+  }
+
+  print(chapter, callback) {
+    const mapFile = this.app.config.activeMap + ".json";
+    const documentFile =
+      this.app.plugins.informative.options.document + ".json";
+
+    const baseLayer = this.olMap
+      .getLayers()
+      .getArray()
+      .find(
+        l =>
+          l.getProperties().layerInfo &&
+          l.getProperties().layerInfo.layerType === "base" &&
+          l.getVisible()
+      );
+
+    fetch(this.exportUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        data: JSON.stringify({
+          mapFile: mapFile,
+          documentFile: documentFile,
+          chapterHeader: chapter.header,
+          chapterHtml: chapter.html,
+          baseMapId: baseLayer ? baseLayer.getProperties().name : ""
+        })
+      })
+    })
+      .then(rsp => {
+        rsp.text().then(url => {
+          callback(url);
+        });
+      })
+      .catch(() => {
+        callback("error");
+      });
   }
 
   displayMap(visibleLayers, mapSettings) {
@@ -77,9 +156,7 @@ class InformativeModel {
       //   "Informative Plugin kunde inte ladda data korrekt. Om felet kvarstår var god och meddela administratören."
       // );
       console.error(
-        `Couldn't load data for Informative plugin. Make sure that the URL to mapservice is correctly configured. Current value: ${
-          response.url
-        }`
+        `Couldn't load data for Informative plugin. Make sure that the URL to mapservice is correctly configured. Current value: ${response.url}`
       );
     }
   }

@@ -22,6 +22,7 @@
 
 import { Model } from "backbone";
 import { prepareProxyUrl } from "../utils/ProxyHelper";
+import X2JS from "x2js";
 
 const $ = require("jquery");
 const jQuery = $;
@@ -191,6 +192,48 @@ var menu = Model.extend({
    */
   getAuthSetting: function(callback) {
     callback(this.get("config").authentication_active);
+  },
+
+  getEditServices: function(callback) {
+    $.ajax(this.get("config").url_layers, {
+      success: data => {
+        callback(data.wfstlayers);
+      }
+    });
+  },
+
+  getWFSLayerDescription: function(url, layer, callback) {
+    url = prepareProxyUrl(url, this.get("config").url_proxy);
+    $.ajax(url, {
+      data: {
+        request: "describeFeatureType",
+        typename: layer
+      },
+      success: data => {
+        var parser = new X2JS(),
+          xmlstr = data.xml
+            ? data.xml
+            : new XMLSerializer().serializeToString(data),
+          apa = parser.xml2js(xmlstr);
+        try {
+          var props = apa.schema.complexType.complexContent.extension.sequence.element.map(
+            a => {
+              return {
+                name: a._name,
+                localType: a._type ? a._type.replace(a.__prefix + ":", "") : ""
+              };
+            }
+          );
+          if (props) {
+            callback(props);
+          } else {
+            callback(false);
+          }
+        } catch (e) {
+          callback(false);
+        }
+      }
+    });
   },
 
   getConfig: function(url, callback) {

@@ -1,21 +1,36 @@
 import React from "react";
 import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
+import LinearProgress from "@material-ui/core/LinearProgress";
 import { withStyles } from "@material-ui/core/styles";
 import MapIcon from "@material-ui/icons/Map";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import ArrowRightIcon from "@material-ui/icons/ArrowRight";
+import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import MenuIcon from "@material-ui/icons/Menu";
+import PrintIcon from "@material-ui/icons/Print";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import TocIcon from "@material-ui/icons/Toc";
+import ArrowDownward from "@material-ui/icons/ArrowDownward";
 import Typography from "@material-ui/core/Typography";
 import BreadCrumbs from "./components/BreadCrumbs.js";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
-import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
+import Alert from "../../components/Alert.js";
 
 const styles = theme => ({
   rightIcon: {
-    marginLeft: theme.spacing(1)
+    marginLeft: theme.spacing(1),
+    cursor: "pointer"
+  },
+  icon: {
+    marginRight: theme.spacing(1)
   },
   chapter: {},
   toc: {
     marginBottom: "10px"
+  },
+  tocHeader: {
+    display: "flex",
+    alignItems: "center"
   },
   tocContainer: {
     borderBottom: "1px solid #ccc",
@@ -64,7 +79,34 @@ const styles = theme => ({
     },
     "& h6": {
       lineHeight: "normal"
+    },
+    "& blockquote": {
+      borderLeft: "5px solid #eee",
+      color: "#666",
+      fontFamily: "Hoefler Text, Georgia, serif",
+      fontStyle: "italic",
+      margin: "16px 0",
+      padding: "10px 20px"
     }
+  },
+  loader: {
+    opacity: 1,
+    transition: "opacity 2s ease-in"
+  },
+  button: {
+    margin: theme.spacing(1)
+  },
+  legend: {
+    border: "1px solid #999",
+    padding: theme.spacing(1),
+    flexFlow: "row wrap",
+    display: "flex",
+    borderRadius: "5px"
+  },
+  legendItem: {
+    margin: theme.spacing(1),
+    fontWeight: 600,
+    textAlign: "center"
   }
 });
 
@@ -76,6 +118,10 @@ class Informative extends React.PureComponent {
     super();
     homeHtml = props.abstract;
     this.state = {
+      url: "",
+      loading: false,
+      alert: false,
+      displayLegend: false,
       chapters: [],
       chapter: {
         header: "",
@@ -87,6 +133,9 @@ class Informative extends React.PureComponent {
   componentDidMount() {
     this.props.parent.informativeModel.load(chapters => {
       this.toc = chapters;
+      if (this.props.options.tocExpanded) {
+        this.expandToc(this.toc);
+      }
       var state = {
         chapters: chapters,
         chapter: {
@@ -102,6 +151,7 @@ class Informative extends React.PureComponent {
         this.setState({
           chapters: chapter.chapters,
           chapter: chapter,
+          displayLegend: false,
           tocVisible: false
         });
       }
@@ -112,10 +162,22 @@ class Informative extends React.PureComponent {
             header: homeHeader,
             html: homeHtml
           },
-          tocVisible: false
+          tocVisible: false,
+          displayLegend: false
         });
       }
     });
+  }
+
+  expandToc(chapters) {
+    if (Array.isArray(chapters)) {
+      chapters.forEach(chapter => {
+        chapter.tocExpanded = true;
+        if (Array.isArray(chapter.chapters) && chapter.chapters.length > 0) {
+          this.expandToc(chapter.chapters);
+        }
+      });
+    }
   }
 
   displayMap = (layers, mapSettings) => e => {
@@ -123,19 +185,35 @@ class Informative extends React.PureComponent {
     if (window.innerWidth < 600) {
       this.props.observer.publish("minimizeWindow", true);
     }
+    this.setState({
+      displayLegend: true
+    });
   };
 
   renderLayerItems(chapter) {
     const { classes } = this.props;
     if (Array.isArray(chapter.layers) && chapter.layers.length > 0) {
       return (
-        <Button
-          variant="contained"
-          onClick={this.displayMap(chapter.layers, chapter.mapSettings)}
-        >
-          Visa karta
-          <MapIcon color="primary" className={classes.rightIcon} />
-        </Button>
+        <div>
+          <Button
+            variant="contained"
+            onClick={this.displayMap(chapter.layers, chapter.mapSettings)}
+          >
+            Karta
+            <MapIcon color="primary" className={classes.rightIcon} />
+          </Button>
+          <IconButton
+            className={classes.button}
+            aria-label="Teckenförklaring"
+            onClick={this.toggleLegend}
+          >
+            {this.state.displayLegend ? (
+              <ExpandLessIcon color="primary" title="Teckenförklaring" />
+            ) : (
+              <TocIcon color="primary" title="Teckenförklaring" />
+            )}
+          </IconButton>
+        </div>
       );
     }
   }
@@ -156,9 +234,9 @@ class Informative extends React.PureComponent {
               {chapter.chapters.length === 0 ? (
                 ""
               ) : chapter.tocExpanded ? (
-                <RemoveCircleIcon />
+                <ArrowDropDownIcon />
               ) : (
-                <AddCircleIcon />
+                <ArrowRightIcon />
               )}
             </div>
             <div
@@ -167,7 +245,8 @@ class Informative extends React.PureComponent {
                 var state = {
                   chapters: chapter.chapters,
                   chapter: chapter,
-                  tocVisible: false
+                  tocVisible: false,
+                  displayLegend: false
                 };
                 this.setState(state);
               }}
@@ -255,21 +334,107 @@ class Informative extends React.PureComponent {
     });
   };
 
+  print = () => {
+    this.setState({
+      loading: true,
+      url: false
+    });
+    this.props.parent.informativeModel.print(this.state.chapter, url => {
+      if (undefined !== this.props.options.exportRoot) {
+        url = this.props.options.exportRoot + url;
+      }
+      if (url === "error") {
+        this.setState({
+          loading: false,
+          url: false,
+          alert: true
+        });
+      } else {
+        this.setState({
+          url: url,
+          loading: false
+        });
+      }
+    });
+  };
+
+  toggleLegend = () => {
+    this.setState({
+      displayLegend: !this.state.displayLegend
+    });
+  };
+
   renderChapters() {
     const { classes } = this.props;
     const { tocVisible } = this.state;
     return (
       <div className={classes.toc}>
-        <Button variant="contained" onClick={this.toggleToc}>
-          Innehållsförteckning
-          <MenuIcon color="primary" className={classes.rightIcon} />
-        </Button>
+        {this.state.loading && <LinearProgress className={classes.loader} />}
+        <Alert
+          open={this.state.alert}
+          dialogTitle="Felmeddelande"
+          message="Det gick inte att skriva ut för tillfället, försök igen senare"
+          parent={this}
+        />
+        <div className={classes.tocHeader}>
+          <Button variant="contained" onClick={this.toggleToc}>
+            Innehållsförteckning
+            <MenuIcon color="primary" className={classes.rightIcon} />
+          </Button>
+          <IconButton
+            className={classes.button}
+            aria-label="Skriv ut"
+            onClick={this.print}
+          >
+            <PrintIcon color="primary" title="Skriv ut" />
+          </IconButton>
+        </div>
+        <div>
+          {this.state.url && (
+            <Button
+              ref="anchor"
+              href={this.state.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                this.setState({
+                  url: ""
+                });
+              }}
+            >
+              <ArrowDownward className={classes.icon} /> Ladda ner
+            </Button>
+          )}
+        </div>
         {tocVisible ? (
           <div className={classes.tocContainer} component="nav">
             {this.renderTocItem(this.toc || [])}
           </div>
         ) : null}
       </div>
+    );
+  }
+
+  renderLegend() {
+    const { classes } = this.props;
+    return (
+      this.state.displayLegend && (
+        <div>
+          <Typography variant="overline">Teckenförklaring</Typography>
+          <div className={classes.legend}>
+            {this.props.parent.informativeModel
+              .getLegends(this.state.chapter)
+              .map((legend, i) => {
+                return (
+                  <div className={classes.legendItem} key={i}>
+                    <div>{legend.caption}</div>
+                    <img key={i} alt="toc" src={legend.url} />
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      )
     );
   }
 
@@ -291,6 +456,7 @@ class Informative extends React.PureComponent {
         <div className={classes.layers}>
           {this.renderLayerItems(this.state.chapter)}
         </div>
+        {this.renderLegend()}
         <div className={classes.content}>{this.renderContent()}</div>
       </div>
     );

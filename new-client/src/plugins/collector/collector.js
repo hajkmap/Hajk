@@ -15,23 +15,43 @@ const styles = theme => {
 class Collector extends Component {
   constructor(props) {
     super(props);
-    this.position = "right";
+    this.position = props.options.target;
+    this.app = props.app;
     this.options = props.options;
     this.title = this.options.title || "Tyck till";
     this.abstract = this.options.abstract || "Vi vill veta vad du tycker!";
     this.form = this.options.form || [];
+    this.visibleAtStart = this.options.visibleAtStart;
     this.state = {
       dialogOpen: false
     };
+    this.serviceConfig = this.getLayerConfigById(this.options.serviceId);
     this.observer = new Observer();
     this.collectorModel = new CollectorModel({
       map: props.map,
       app: props.app,
       observer: this.observer,
-      options: props.options
+      globalObserver: this.app.globalObserver,
+      options: {
+        ...props.options,
+        serviceConfig: this.serviceConfig
+      }
     });
-    this.app = props.app;
     this.app.registerPanel(this);
+  }
+
+  componentDidMount() {
+    if (this.visibleAtStart) {
+      this.setState({
+        panelOpen: true
+      });
+    }
+  }
+
+  getLayerConfigById(serviceId) {
+    return this.app.config.layersConfig.find(
+      layerConfig => layerConfig.type === "edit" && layerConfig.id === serviceId
+    );
   }
 
   onClick = e => {
@@ -51,7 +71,8 @@ class Collector extends Component {
     this.setState({
       panelOpen: false
     });
-    this.observer.publish("abort");
+    this.collectorModel.reset();
+    this.collectorModel.observer.publish("abortInteraction");
   };
 
   openPanel = () => {
@@ -59,8 +80,6 @@ class Collector extends Component {
       panelOpen: true
     });
   };
-
-  onClose = () => {};
 
   renderWindow(mode) {
     var left = this.position === "right" ? (window.innerWidth - 410) / 2 : 0;
@@ -73,33 +92,23 @@ class Collector extends Component {
         open={this.state.panelOpen}
         position={this.position}
         height={450}
-        width={400}
+        width={430}
         top={210}
         left={left}
         mode={mode}
       >
         <CollectorView
-          onClose={this.onClose}
+          onClose={this.closePanel}
           model={this.collectorModel}
           dialogOpen={this.state.panelOpen}
           minimizePanel={this.minimizePanel}
           openPanel={this.openPanel}
-          localObserver={this.observer}
           form={this.form}
+          serviceConfig={this.serviceConfig}
+          options={this.options}
         />
       </Window>,
       document.getElementById("toolbar-panel")
-    );
-  }
-
-  renderDialog() {
-    return createPortal(
-      <CollectorView
-        onClose={this.onClose}
-        model={this.collectorModel}
-        dialogOpen={this.state.panelOpen}
-      />,
-      document.getElementById("map")
     );
   }
 
