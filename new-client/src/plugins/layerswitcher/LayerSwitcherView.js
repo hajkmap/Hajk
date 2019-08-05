@@ -3,9 +3,7 @@ import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
-import Button from "@material-ui/core/Button";
 import AppBar from "@material-ui/core/AppBar";
-import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
@@ -77,16 +75,7 @@ const styles = theme => ({
     fontWeight: "bold",
     marginBottom: "5px"
   },
-  text: {},
-  clearContainer: {
-    float: "right",
-    position: "fixed",
-    marginLeft: "250px",
-    marginTop: "5px"
-  },
-  clearButton: {
-    textTransform: "none"
-  }
+  text: {}
 });
 
 const StyledTab = withStyles({
@@ -214,21 +203,6 @@ class LayersSwitcherView extends React.PureComponent {
             <StyledTab label="Kartlager" />
             <StyledTab label="Bakgrund" />
           </Tabs>
-          <div className={classes.clearContainer}>
-            <Button
-              variant="outlined"
-              size="small"
-              color="primary"
-              className={classes.clearButton}
-              onClick={e => {
-                e.stopPropagation();
-                this.props.app.clear();
-              }}
-            >
-              <VisibilityOffIcon className={classes.leftIcon} />
-              Släck alla
-            </Button>
-          </div>
         </AppBar>
         <div className={classes.layerSwitcher}>
           <div>
