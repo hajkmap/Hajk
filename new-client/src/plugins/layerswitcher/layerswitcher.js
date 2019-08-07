@@ -1,19 +1,19 @@
-import React, { Component } from "react";
+import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import LayersIcon from "@material-ui/icons/Layers";
-
-//import Panel from "../../components/Panel.js";
-import LayerSwitcherModel from "./LayerSwitcherModel";
-import LayerSwitcherView from "./LayerSwitcherView";
+import Window from "../../components/Window.js";
+import Card from "../../components/Card.js";
+import LayerSwitcherView from "./LayerSwitcherView.js";
+import LayerSwitcherModel from "./LayerSwitcherModel.js";
 import Observer from "react-event-observer";
 
 const styles = theme => {
   return {};
 };
-class LayerSwitcher extends Component {
+
+class LayerSwitcher extends React.PureComponent {
   state = {
     panelOpen: this.props.options.visibleAtStart
   };
@@ -21,8 +21,10 @@ class LayerSwitcher extends Component {
   onClick = e => {
     this.app.onPanelOpen(this);
     this.setState({
-      panelOpen: true
+      panelOpen: true,
+      revision: Math.round(Math.random() * 1e8)
     });
+    this.observer.emit("panelOpen");
   };
 
   closePanel = () => {
@@ -34,12 +36,13 @@ class LayerSwitcher extends Component {
   constructor(props) {
     super(props);
     this.options = props.options;
-    this.title = this.options.title || "Lagerhanterare";
     this.app = props.app;
+    this.options = props.options;
+    this.title = this.options.title || "Visa";
+    this.description =
+      this.options.description || "Välj vad du vill se i kartan";
     this.observer = Observer();
-    this.observer.subscribe("myEvent", message => {
-      console.log(message);
-    });
+    this.observer.subscribe("layerAdded", layer => {});
     this.layerSwitcherModel = new LayerSwitcherModel({
       map: props.map,
       app: props.app,
@@ -48,43 +51,41 @@ class LayerSwitcher extends Component {
     this.app.registerPanel(this);
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return this.state.panelOpen !== nextState.panelOpen;
-  }
-
-  renderPanel() {
+  renderWindow(mode) {
     return createPortal(
-      <div
+      <Window
+        globalObserver={this.props.app.globalObserver}
         title={this.title}
         onClose={this.closePanel}
-        position="left"
         open={this.state.panelOpen}
+        height="auto"
+        width={400}
+        top={210}
+        left={5}
+        mode={mode}
       >
         <LayerSwitcherView
-          app={this.app}
-          map={this.map}
-          parent={this}
+          app={this.props.app}
+          map={this.props.map}
+          model={this.layerSwitcherModel}
           observer={this.observer}
+          breadCrumbs={this.props.type === "widgetItem"}
         />
-      </div>,
-      document.getElementById("map-overlay")
+      </Window>,
+      document.getElementById("toolbar-panel")
     );
   }
 
   renderAsWidgetItem() {
-    const { classes } = this.props;
     return (
       <div>
-        <Button
-          variant="fab"
-          color="default"
-          aria-label="Lagerhanterare"
-          className={classes.button}
+        <Card
+          icon={<LayersIcon />}
           onClick={this.onClick}
-        >
-          <LayersIcon />
-        </Button>
-        {this.renderPanel()}
+          title={this.title}
+          abstract={this.description}
+        />
+        {this.renderWindow("window")}
       </div>
     );
   }
@@ -103,23 +104,21 @@ class LayerSwitcher extends Component {
           </ListItemIcon>
           <ListItemText primary={this.title} />
         </ListItem>
-        {this.renderPanel()}
+        {this.renderWindow("panel")}
       </div>
     );
   }
 
   render() {
-    // Styling is gone for this component, and we use SimpleLayerSwitcher for now.
+    if (this.props.type === "toolbarItem") {
+      return this.renderAsToolbarItem();
+    }
+
+    if (this.props.type === "widgetItem") {
+      return this.renderAsWidgetItem();
+    }
+
     return null;
-    // if (this.props.type === "toolbarItem") {
-    //   return this.renderAsToolbarItem();
-    // }
-
-    // if (this.props.type === "widgetItem") {
-    //   return this.renderAsWidgetItem();
-    // }
-
-    // return null;
   }
 }
 

@@ -39,7 +39,7 @@ import Preset from "./tools/preset.jsx";
 import Measure from "./tools/measure.jsx";
 import Routing from "./tools/routing.jsx";
 import Collector from "./tools/collector.jsx";
-import SimpleLayerswitcher from "./tools/simple_layerswitcher.jsx";
+import Layerswitcher from "./tools/layerswitcher.jsx";
 import Dummy from "./tools/dummy.jsx";
 
 var defaultState = {
@@ -119,8 +119,8 @@ class ToolOptions extends Component {
         return <Routing parent={this} model={this.props.model} />;
       case "collector":
         return <Collector parent={this} model={this.props.model} />;
-      case "simple_layerswitcher":
-        return <SimpleLayerswitcher parent={this} model={this.props.model} />;
+      case "layerswitcher":
+        return <Layerswitcher parent={this} model={this.props.model} />;
       default:
         return null;
     }
@@ -180,7 +180,7 @@ class ToolOptions extends Component {
       location: "Visa min position",
       routing: "Navigation",
       collector: "Tyck till",
-      simple_layerswitcher: "Lagerhanterare",
+      layerswitcher: "Lagerhanterare",
       dummy: "Dummy plugin"
     };
 

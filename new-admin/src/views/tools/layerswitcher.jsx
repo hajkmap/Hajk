@@ -29,7 +29,7 @@ var defaultState = {
   index: 0,
   target: "toolbar",
   title: "Innehåll",
-  abstract: "Välj innehåll att visa i kartan",
+  description: "Välj innehåll att visa i kartan",
   visibleAtStart: false,
   templateJsonFilePath: "http://localhost:55630/informative/load/op",
   visibleForGroups: []
@@ -42,7 +42,7 @@ class ToolOptions extends Component {
   constructor() {
     super();
     this.state = defaultState;
-    this.type = "simple_layerswitcher";
+    this.type = "layerswitcher";
   }
 
   componentDidMount() {
@@ -52,7 +52,7 @@ class ToolOptions extends Component {
         active: true,
         index: tool.index,
         target: tool.options.target,
-        abstract: tool.options.abstract,
+        description: tool.options.description,
         title: tool.options.title,
         visibleAtStart: tool.options.visibleAtStart || false,
         visibleForGroups: tool.options.visibleForGroups
@@ -117,7 +117,7 @@ class ToolOptions extends Component {
       index: this.state.index,
       options: {
         target: this.state.target,
-        abstract: this.state.abstract,
+        description: this.state.description,
         title: this.state.title,
         visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
@@ -272,7 +272,7 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
-            <label htmlFor="abstract">
+            <label htmlFor="description">
               Beskrivning{" "}
               <i
                 className="fa fa-question-circle"
@@ -281,9 +281,9 @@ class ToolOptions extends Component {
               />
             </label>{" "}
             <input
-              value={this.state.abstract}
+              value={this.state.description}
               type="text"
-              name="abstract"
+              name="description"
               onChange={e => {
                 this.handleInputChange(e);
               }}

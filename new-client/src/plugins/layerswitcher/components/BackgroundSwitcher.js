@@ -1,20 +1,60 @@
 import React from "react";
+import { withStyles } from "@material-ui/core/styles";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import Radio from "@material-ui/core/Radio";
+import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
+import RadioButtonCheckedIcon from "@material-ui/icons/RadioButtonChecked";
 
-import "./BackgroundSwitcher.css";
+const styles = theme => ({
+  root: {
+    width: "100%",
+    display: "block",
+    padding: "5px 0",
+    borderTop: "1px solid #ccc",
+    background: "#efefef"
+  },
+  heading: {
+    fontSize: theme.typography.pxToRem(18),
+    flexBasis: "100%",
+    flexShrink: 0
+  },
+  secondaryHeading: {
+    fontSize: theme.typography.pxToRem(15),
+    color: theme.palette.text.secondary
+  },
+  disableTransition: {
+    transition: "none"
+  },
+  panel: {
+    marginLeft: "10px"
+  },
+  row: {
+    background: "white"
+  },
+  layerItemContainer: {
+    background: "white",
+    borderBottom: "1px solid #ccc",
+    paddingLeft: "10px"
+  },
+  captionText: {
+    marginLeft: "-6px",
+    position: "relative",
+    top: "2px",
+    fontSize: theme.typography.pxToRem(15)
+  }
+});
 
 class BackgroundSwitcher extends React.PureComponent {
-  constructor() {
-    super();
-    this.onChange = this.onChange.bind(this);
+  constructor(props) {
+    super(props);
     this.state = {
       selectedLayer: -1,
       toggled: true
     };
   }
 
-  onChange(e) {
+  onChange = e => {
     if (Number(this.state.selectedLayer) > 0) {
       this.props.layerMap[Number(this.state.selectedLayer)].setVisible(false);
     }
@@ -31,17 +71,18 @@ class BackgroundSwitcher extends React.PureComponent {
     this.setState({
       selectedLayer: e.target.value
     });
-  }
+  };
 
   componentDidMount() {
-    this.props.layers
-      .filter(layer => layer.visibleAtStart)
+    const { layers } = this.props;
+    layers
+      .filter(layer => layer.visible)
       .forEach((layer, i) => {
-        if (i !== 0 && this.props.layerMap[Number(layer.id)]) {
-          this.props.layerMap[Number(layer.id)].setVisible(false);
+        if (i !== 0 && this.props.layerMap[Number(layer.name)]) {
+          this.props.layerMap[Number(layer.name)].setVisible(false);
         } else {
           this.setState({
-            selectedLayer: layer.id
+            selectedLayer: layer.name
           });
         }
       });
@@ -50,27 +91,29 @@ class BackgroundSwitcher extends React.PureComponent {
   renderRadioButton(config, index) {
     var caption,
       checked,
-      mapLayer = this.props.layerMap[Number(config.id)];
+      mapLayer = this.props.layerMap[Number(config.name)];
+
+    const { classes } = this.props;
 
     if (mapLayer) {
       caption = mapLayer.get("layerInfo").caption;
     } else {
       caption = config.caption;
     }
-    checked = this.state.selectedLayer === config.id;
-
+    checked = this.state.selectedLayer === config.name;
     return (
-      <div className="custom-control custom-radio" key={index}>
-        <input
-          type="radio"
+      <div key={index} className={classes.layerItemContainer}>
+        <Radio
           id={caption + "_" + index}
-          name="background"
-          className="custom-control-input"
-          onChange={this.onChange.bind(this)}
           checked={checked}
-          value={config.id || config}
+          onChange={this.onChange}
+          value={config.name || config}
+          color="default"
+          name="radio-button-demo"
+          icon={<RadioButtonUncheckedIcon fontSize="small" />}
+          checkedIcon={<RadioButtonCheckedIcon fontSize="small" />}
         />
-        <label className="custom-control-label" htmlFor={caption + "_" + index}>
+        <label htmlFor={caption + "_" + index} className={classes.captionText}>
           {caption}
         </label>
       </div>
@@ -78,27 +121,34 @@ class BackgroundSwitcher extends React.PureComponent {
   }
 
   renderBaseLayerComponents() {
-    var radioButtons = [];
+    const { backgroundSwitcherWhite, backgroundSwitcherBlack } = this.props;
+    var radioButtons = [],
+      defaults = [];
 
-    radioButtons = [
-      ...radioButtons,
-      ...[
+    if (backgroundSwitcherWhite) {
+      defaults.push(
         this.renderRadioButton(
           {
-            id: "-1",
+            name: "-1",
             caption: "Vit"
           },
           -1
-        ),
+        )
+      );
+    }
+    if (backgroundSwitcherBlack) {
+      defaults.push(
         this.renderRadioButton(
           {
-            id: "-2",
+            name: "-2",
             caption: "Svart"
           },
           -2
         )
-      ]
-    ];
+      );
+    }
+
+    radioButtons = [...radioButtons, ...[defaults]];
 
     radioButtons = [
       ...radioButtons,
@@ -124,24 +174,11 @@ class BackgroundSwitcher extends React.PureComponent {
 
   render() {
     return (
-      <div id="background-layers">
-        <div className="expand-toggler">
-          <h1
-            onClick={() => {
-              this.toggleVisibility();
-            }}
-            className="clickable"
-          >
-            {this.getToggleIcon()}
-            Bakgrundskartor
-          </h1>
-        </div>
-        <div className={this.getVisibilityClass()}>
-          {this.renderBaseLayerComponents()}
-        </div>
+      <div style={{ display: this.props.display ? "block" : "none" }}>
+        {this.renderBaseLayerComponents()}
       </div>
     );
   }
 }
 
-export default BackgroundSwitcher;
+export default withStyles(styles)(BackgroundSwitcher);

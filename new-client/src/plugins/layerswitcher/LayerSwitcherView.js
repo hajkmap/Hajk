@@ -1,56 +1,167 @@
 import React from "react";
-import Observer from "react-event-observer";
-import PropTypes from "prop-types";
+import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
-
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
+import AppBar from "@material-ui/core/AppBar";
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
-import MapSwitcher from "./components/MapSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
-
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-
-import "./style.css";
+import BreadCrumbs from "./components/BreadCrumbs.js";
+import "element-scroll-polyfill";
 
 const styles = theme => ({
-  drawerPaper: {
-    left: "72px",
-    width: "500px",
-    zIndex: theme.zIndex.drawer - 1
-  }
+  button: {
+    margin: 0,
+    cursor: "pointer",
+    userSelect: "none",
+    textAlign: "center",
+    color: "#000",
+    fontSize: "10pt",
+    [theme.breakpoints.down("md")]: {
+      width: "50px",
+      height: "50px",
+      marginRight: "30px",
+      outline: "none",
+      background: theme.palette.primary.main,
+      color: theme.palette.primary.contrastText,
+      "&:hover": {
+        background: theme.palette.primary.main
+      }
+    }
+  },
+  leftIcon: {
+    marginRight: theme.spacing(1)
+  },
+  rightIcon: {
+    marginLeft: theme.spacing(1)
+  },
+  iconSmall: {
+    fontSize: 20
+  },
+  icon: {
+    fontSize: 14
+  },
+  layerSwitcher: {
+    marginTop: "55px"
+  },
+  layerGroups: {
+    padding: "0px"
+  },
+  reset: {},
+  card: {
+    cursor: "pointer",
+    width: "180px",
+    borderRadius: "4px",
+    background: "white",
+    padding: "10px 20px",
+    marginBottom: "10px",
+    display: "flex",
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    boxShadow:
+      "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
+    "&:hover": {
+      background: "#e9e9e9"
+    },
+    [theme.breakpoints.down("md")]: {
+      width: "auto",
+      justifyContent: "inherit",
+      marginBottom: "20px"
+    }
+  },
+  title: {
+    fontSize: "10pt",
+    fontWeight: "bold",
+    marginBottom: "5px"
+  },
+  text: {}
 });
-class LayersSwitcherView extends React.PureComponent {
-  state = {
-    layerGroupsExpanded: true
-  };
 
-  options = {
-    baselayers: [],
-    groups: []
-  };
-
-  componentDidMount() {
-    this.options = this.props.parent.props.options;
-    this.observer = Observer();
-    this.observer.subscribe("layerAdded", layer => {});
+const StyledTab = withStyles({
+  root: {
+    minWidth: "50px",
+    width: "120px",
+    height: "50px",
+    textTransform: "unset",
+    fontSize: 15
   }
+})(Tab);
 
-  renderLayerGroups() {
-    return this.options.groups.map((group, i) => {
-      return (
-        <LayerGroup
-          key={i}
-          group={group}
-          model={this.props.parent.layerSwitcherModel}
-        />
-      );
+class LayersSwitcherView extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.options = this.props.app.config.mapConfig.tools.find(
+      t => t.type === "layerswitcher"
+    ).options;
+    this.state = {
+      windowWidth: window.innerWidth,
+      layerGroupsExpanded: true,
+      chapters: [],
+      baseLayers: this.props.map
+        .getLayers()
+        .getArray()
+        .filter(
+          l =>
+            l.getProperties().layerInfo &&
+            l.getProperties().layerInfo.layerType === "base"
+        )
+        .map(l => l.getProperties()),
+      activeTab: 0
+    };
+
+    window.addEventListener("resize", () => {
+      this.setState({
+        innerWidth: window.innerWidth
+      });
+    });
+
+    props.observer.on("panelOpen", () => {
+      this.forceUpdate();
+    });
+
+    props.app.globalObserver.on("informativeLoaded", chapters => {
+      if (Array.isArray(chapters)) {
+        this.setState({
+          chapters: chapters
+        });
+      }
     });
   }
 
-  getLayerGroupsClass() {
-    return this.state.layerGroupsExpanded
-      ? "layer-groups visible"
-      : "layer-groups hidden";
+  handleChange = (panel, instance) => (event, expanded) => {
+    this.setState(
+      {
+        expanded: expanded ? panel : false
+      },
+      () => {
+        setTimeout(() => {
+          const parent = instance.refs.panelElement.offsetParent;
+          const topOfElement = instance.refs.panelElement.offsetTop - 145;
+          const sections = parent.getElementsByTagName("section");
+          if (sections.length > 0) {
+            sections[0].scroll({ top: topOfElement, behavior: "smooth" });
+          }
+        }, 50);
+      }
+    );
+  };
+
+  renderLayerGroups() {
+    const { expanded } = this.state;
+    return this.options.groups.map((group, i) => {
+      return (
+        <LayerGroup
+          expanded={expanded === group.id}
+          key={i}
+          group={group}
+          model={this.props.model}
+          handleChange={this.handleChange}
+          chapters={this.state.chapters}
+          app={this.props.app}
+        />
+      );
+    });
   }
 
   toggleLayerGroups() {
@@ -59,54 +170,65 @@ class LayersSwitcherView extends React.PureComponent {
     });
   }
 
-  getToggleIcon() {
-    return this.state.layerGroupsExpanded ? (
-      <ExpandLessIcon />
-    ) : (
-      <ChevronRightIcon />
+  getArrowClass() {
+    return this.state.layerGroupsExpanded ? "expand_less" : "chevron_right";
+  }
+
+  renderBreadCrumbs() {
+    return createPortal(
+      <BreadCrumbs
+        map={this.props.map}
+        model={this.props.model}
+        app={this.props.app}
+      />,
+      document.getElementById("map")
     );
   }
 
-  hideAllLayers() {
-    // FIXME: Implement
-    console.log("Will hide all layers");
-  }
+  handleChangeTabs = (event, value) => {
+    this.setState({ activeTab: value });
+  };
 
-  renderPanel() {
+  render() {
+    const { classes } = this.props;
     return (
-      <div className="tool-panel-content">
-        <MapSwitcher
-          options={this.options}
-          observer={this.observer}
-          appConfig={this.props.app.config.appConfig}
-        />
-        <BackgroundSwitcher
-          layers={this.options.baselayers}
-          layerMap={this.props.parent.layerSwitcherModel.layerMap}
-        />
-        <h1
-          onClick={() => {
-            this.toggleLayerGroups();
-          }}
-          className="clickable"
-        >
-          {this.getToggleIcon()}
-          Kartlager
-        </h1>
-        <div className={this.getLayerGroupsClass()}>
-          {this.renderLayerGroups()}
+      <div>
+        <AppBar position="fixed" color="default" style={{ top: "45px" }}>
+          <Tabs
+            value={this.state.activeTab}
+            onChange={this.handleChangeTabs}
+            indicatorColor="primary"
+            textColor="primary"
+          >
+            <StyledTab label="Kartlager" />
+            <StyledTab label="Bakgrund" />
+          </Tabs>
+        </AppBar>
+        <div className={classes.layerSwitcher}>
+          <div>
+            <div className="content">
+              <div
+                style={{
+                  display: this.state.activeTab === 0 ? "block" : "none"
+                }}
+                className={classes.layerGroups}
+              >
+                {this.renderLayerGroups()}
+              </div>
+              <BackgroundSwitcher
+                display={this.state.activeTab === 1}
+                layers={this.state.baseLayers}
+                layerMap={this.props.model.layerMap}
+                backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
+                backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
+              />
+            </div>
+          </div>
+          {this.props.breadCrumbs ? this.renderBreadCrumbs() : null}
         </div>
       </div>
     );
   }
-
-  render() {
-    return this.renderPanel();
-  }
 }
-
-LayersSwitcherView.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 
 export default withStyles(styles)(LayersSwitcherView);

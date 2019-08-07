@@ -1,7 +1,7 @@
 import React from "react";
 import Button from "@material-ui/core/Button";
-import ClearIcon from "@material-ui/icons/LayersClear";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
+import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import { withStyles } from "@material-ui/core/styles";
 
 import MapSwitcher from "./MapSwitcher";
@@ -125,11 +125,13 @@ class ToolbarMenu extends React.Component {
             {this.renderMapSwitcher()}
             <Button
               aria-label="Rensa"
+              variant="outlined"
+              size="small"
               onClick={e => {
                 this.props.appModel.clear();
               }}
             >
-              <ClearIcon className={classes.icon} />
+              <VisibilityOffIcon className={classes.icon} />
               Rensa kartan
             </Button>
           </div>

@@ -1,7 +1,9 @@
 class LayerSwitcherModel {
   constructor(settings) {
+    this.olMap = settings.map;
     this.observer = settings.observer;
-    this.layerMap = settings.map
+    this.globalObserver = settings.app.globalObserver;
+    this.layerMap = this.olMap
       .getLayers()
       .getArray()
       .reduce((a, b) => {
