@@ -128,26 +128,36 @@
         ],
         "groups": [
           {
-            "id": "3a18c697-a52a-e5c9-cb77-2a7f03c648ec",
+            "id": "2b2bdc3a-4fe2-56bb-dc86-04f24f5b06ee",
             "parent": "-1",
-            "name": "Kartlager",
+            "name": "Fisk",
             "toggled": true,
             "expanded": true,
             "layers": [
+              {
+                "id": "34",
+                "visibleAtStart": true,
+                "drawOrder": 1000,
+                "visibleForGroups": null,
+                "infobox": null
+              },
               {
                 "id": "33",
                 "visibleAtStart": false,
                 "drawOrder": 1000,
                 "visibleForGroups": null,
                 "infobox": null
-              },
-              {
-                "id": "34",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "3a18c697-a52a-e5c9-cb77-2a7f03c648ec",
+            "parent": "-1",
+            "name": "Kartlager",
+            "toggled": true,
+            "expanded": true,
+            "layers": [
               {
                 "id": "32",
                 "visibleAtStart": true,

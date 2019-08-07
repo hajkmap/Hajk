@@ -18,15 +18,13 @@ const styles = theme => ({
   },
   heading: {
     fontSize: theme.typography.pxToRem(15),
-    flexBasis: "100%",
-    flexShrink: 0
+    flexBasis: "100%"
   },
   secondaryHeading: {
     fontSize: theme.typography.pxToRem(15),
     color: theme.palette.text.secondary
   },
   disableTransition: {
-    transition: "none",
     borderRadius: "0 !important",
     boxShadow: "none"
   },
@@ -54,9 +52,12 @@ const StyledExpansionPanelSummary = withStyles({
     }
   },
   content: {
-    margin: "5px 0",
+    transition: "inherit !important",
+    marginTop: "4px",
+    marginBottom: "0",
     "&$expanded": {
-      margin: "5px 0"
+      marginTop: "4px",
+      marginBottom: "0"
     }
   },
   expanded: {}
@@ -145,6 +146,24 @@ class LayerGroup extends React.PureComponent {
     });
   }
 
+  isSemiToggled() {
+    var layers = this.props.app
+      .getMap()
+      .getLayers()
+      .getArray();
+    const { group } = this.props;
+    return group.layers.every(layer => {
+      let foundMapLayer = layers.find(mapLayer => {
+        return mapLayer.get("name") === layer.id;
+      });
+      if (foundMapLayer && foundMapLayer.getVisible()) {
+        return true;
+      } else {
+        return false;
+      }
+    });
+  }
+
   toggleLayers(visibility, layers) {
     var mapLayers = this.props.app
       .getMap()
@@ -185,7 +204,11 @@ class LayerGroup extends React.PureComponent {
         >
           <div className={classes.groupCheckbox}>
             {this.isToggled(this.props.group) ? (
-              <CheckBoxIcon />
+              this.isSemiToggled(this.props.group) ? (
+                <CheckBoxIcon />
+              ) : (
+                <CheckBoxIcon style={{ color: "gray" }} />
+              )
             ) : (
               <CheckBoxOutlineBlankIcon />
             )}
@@ -211,8 +234,15 @@ class LayerGroup extends React.PureComponent {
       <div ref="panelElement" className={groupClass}>
         <ExpansionPanel
           className={classes.disableTransition}
-          defaultExpanded={expanded}
-          onChange={this.props.handleChange(this.props.group.id, this)}
+          expanded={this.state.expanded}
+          TransitionProps={{
+            timeout: 0
+          }}
+          onChange={() => {
+            this.setState({
+              expanded: !this.state.expanded
+            });
+          }}
         >
           <StyledExpansionPanelSummary className={classes.panelSummary}>
             {expanded ? (

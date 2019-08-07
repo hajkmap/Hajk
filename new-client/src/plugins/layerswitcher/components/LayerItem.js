@@ -3,11 +3,13 @@ import Button from "@material-ui/core/Button";
 import IconWarning from "@material-ui/icons/Warning";
 import CallMadeIcon from "@material-ui/icons/CallMade";
 import InfoIcon from "@material-ui/icons/Info";
+import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
-import IconMoreHoriz from "@material-ui/icons/MoreHoriz";
+import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
+import CloseIcon from "@material-ui/icons/Close";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import "./LayerGroupItem.js";
 import LayerGroupItem from "./LayerGroupItem.js";
@@ -17,11 +19,14 @@ const styles = theme => ({
   button: {
     opacity: "0"
   },
-  caption: {},
+  caption: {
+    cursor: "pointer"
+  },
   captionText: {
     marginLeft: "5px",
     position: "relative",
     top: "-6px",
+    cursor: "pointer",
     fontSize: theme.typography.pxToRem(15)
   },
   image: {},
@@ -35,7 +40,8 @@ const styles = theme => ({
     justifyContent: "space-between",
     alignItems: "center",
     marginLeft: "15px",
-    margin: "5px 0"
+    marginTop: "0",
+    marginBottom: "-5px"
   },
   layerItemContainer: {
     background: "white",
@@ -59,16 +65,19 @@ const styles = theme => ({
   infoContainer: {
     padding: "5px"
   },
-  infoButton: {
-    fontSize: "14pt",
-    cursor: "pointer"
-  },
+  infoButton: {},
   infoTextContainer: {
     margin: "10px 45px"
   },
-  settingsButton: {
+  settingsButton: {},
+  layerButtons: {
+    display: "flex",
+    alignItems: "center"
+  },
+  layerButton: {
     cursor: "pointer",
-    padding: "5px"
+    fontSize: "15pt",
+    width: "32px"
   }
 });
 
@@ -276,7 +285,7 @@ class LayerItem extends React.PureComponent {
   }
 
   renderDetails() {
-    if (this.state.open) {
+    if (this.state.infoVisible) {
       return (
         <div>
           {this.renderInfo()}
@@ -291,6 +300,12 @@ class LayerItem extends React.PureComponent {
   toggleSettings() {
     this.setState({
       toggleSettings: !this.state.toggleSettings
+    });
+  }
+
+  toggleInfo() {
+    this.setState({
+      infoVisible: !this.state.infoVisible
     });
   }
 
@@ -333,43 +348,59 @@ class LayerItem extends React.PureComponent {
               </Typography>
             </div>
           </div>
-          <div>
-            <div style={{ float: "left" }}>{this.renderStatus()}</div>
-            <div style={{ float: "left" }}>
+          <div className={classes.layerButtons}>
+            <div className={classes.layerButton}>{this.renderStatus()}</div>
+            <div className={classes.layerButton}>
               <div className={classes.infoContainer}>
                 {!this.isInfoEmpty() ? (
-                  <InfoIcon
-                    onClick={() => this.toggle()}
-                    className={classes.infoButton}
-                    style={{
-                      boxShadow: this.state.open
-                        ? "rgb(204, 204, 204) 2px 3px 1px"
-                        : "inherit",
-                      borderRadius: "100%"
-                    }}
-                  />
+                  this.state.infoVisible ? (
+                    <RemoveCircleIcon
+                      className={classes.infoButton}
+                      onClick={() => this.toggleInfo()}
+                    />
+                  ) : (
+                    <InfoIcon
+                      onClick={() => this.toggleInfo()}
+                      className={classes.infoButton}
+                      style={{
+                        boxShadow: this.state.infoVisible
+                          ? "rgb(204, 204, 204) 2px 3px 1px"
+                          : "inherit",
+                        borderRadius: "100%"
+                      }}
+                    />
+                  )
                 ) : (
                   <InfoIcon
-                    onClick={() => this.toggle()}
+                    onClick={() => this.toggleInfo()}
                     className={classes.infoButton}
                     style={{
-                      color: "#999",
+                      color: "gray",
                       cursor: "default"
                     }}
                   />
                 )}
               </div>
             </div>
-            <div style={{ float: "left" }}>
-              <IconMoreHoriz
-                onClick={() => this.toggleSettings()}
-                className={classes.settingsButton}
-              />
+            <div className={classes.layerButton}>
+              {this.state.toggleSettings ? (
+                <CloseIcon onClick={() => this.toggleSettings()} />
+              ) : (
+                <MoreHorizIcon
+                  onClick={() => this.toggleSettings()}
+                  className={classes.settingsButton}
+                />
+              )}
             </div>
           </div>
         </div>
         <div>
           {this.renderDetails()}
+          {this.state.toggleSettings &&
+          this.state.infoVisible &&
+          !this.isInfoEmpty() ? (
+            <hr />
+          ) : null}
           <LayerSettings
             layer={layer}
             toggled={this.state.toggleSettings}
