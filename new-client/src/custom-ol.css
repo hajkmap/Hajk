@@ -1,17 +1,4 @@
-/* Used only for displaying error if nothing loaded (and we don't have any MUI yet) */
-.start-error {
-  color: red;
-  background: rgb(255, 200, 200);
-  border: 1px solid red;
-  border-radius: 5px;
-  padding: 15px;
-  margin: 0 auto;
-  width: 50%;
-  text-align: center;
-  margin-top: 5%;
-}
-
-/* OpenLayers styling */
+/* OpenLayers custom styling ONLY */
 .ol-zoom,
 .ol-full-screen,
 .ol-rotate {
@@ -65,25 +52,4 @@
 
 .ol-overlay-container {
   z-index: 2000 !important;
-}
-
-@media only screen and (max-width: 600px) {
-  .tool-panel {
-    position: fixed;
-    top: 0px;
-    left: 0px;
-    right: 0;
-    left: 0;
-    bottom: 0;
-    background: white;
-    padding: 10px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    border-radius: 0px;
-    width: inherit;
-  }
-  .ol-zoom {
-    bottom: 20px;
-    top: 20px;
-  }
 }
