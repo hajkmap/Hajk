@@ -7,38 +7,11 @@ import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import RadioButtonCheckedIcon from "@material-ui/icons/RadioButtonChecked";
 
 const styles = theme => ({
-  root: {
-    width: "100%",
-    display: "block",
-    padding: "5px 0",
-    borderTop: "1px solid #ccc",
-    background: "#efefef"
-  },
-  heading: {
-    fontSize: theme.typography.pxToRem(18),
-    flexBasis: "100%",
-    flexShrink: 0
-  },
-  secondaryHeading: {
-    fontSize: theme.typography.pxToRem(15),
-    color: theme.palette.text.secondary
-  },
-  disableTransition: {
-    transition: "none"
-  },
-  panel: {
-    marginLeft: "10px"
-  },
-  row: {
-    background: "white"
-  },
   layerItemContainer: {
-    background: "white",
-    borderBottom: "1px solid #ccc",
-    paddingLeft: "10px"
+    borderBottom: "1px solid #ccc"
   },
+
   captionText: {
-    marginLeft: "-6px",
     position: "relative",
     top: "2px",
     fontSize: theme.typography.pxToRem(15)
