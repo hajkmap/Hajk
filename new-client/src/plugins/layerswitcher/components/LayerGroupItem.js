@@ -42,7 +42,7 @@ const styles = theme => ({
       borderBottom: "none"
     },
     margin: "5px 0",
-    paddingLeft: "15px"
+    marginLeft: "45px"
   },
   layerItemContainer: {
     background: "white",
@@ -75,7 +75,8 @@ const styles = theme => ({
   },
   layerGroup: {
     background: "white",
-    borderBottom: "1px solid #ccc"
+    borderBottom: "1px solid #ccc",
+    marginLeft: "45px"
   },
   layerGroupContainer: {
     marginTop: "0",
@@ -84,12 +85,10 @@ const styles = theme => ({
   layerGroupHeader: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginLeft: "15px"
+    alignItems: "center"
   },
   layerGroupLayers: {
     borderTop: "1px solid #ccc",
-    paddingLeft: "45px",
     marginTop: "-5px"
   },
   layerGroupItem: {

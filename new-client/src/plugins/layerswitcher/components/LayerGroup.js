@@ -29,7 +29,7 @@ const styles = theme => ({
     boxShadow: "none"
   },
   panel: {
-    marginLeft: "10px"
+    marginLeft: "45px"
   },
   groupCheckbox: {
     marginRight: "5px"

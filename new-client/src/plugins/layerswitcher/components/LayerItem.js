@@ -39,14 +39,14 @@ const styles = theme => ({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginLeft: "15px",
     marginTop: "0",
     marginBottom: "-5px"
   },
   layerItemContainer: {
     background: "white",
     paddingLeft: "0",
-    borderBottom: "1px solid #ccc"
+    borderBottom: "1px solid #ccc",
+    marginLeft: "45px"
   },
   layerItemInfo: {
     display: "flex",
@@ -342,7 +342,6 @@ class LayerItem extends React.PureComponent {
               onClick={this.toggleVisible(layer)}
             >
               <Typography>
-                <ChevronRightIcon className={classes.button} />
                 {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
                 <label className={classes.captionText}>{caption}</label>
               </Typography>
@@ -376,7 +375,8 @@ class LayerItem extends React.PureComponent {
                     className={classes.infoButton}
                     style={{
                       color: "gray",
-                      cursor: "default"
+                      cursor: "default",
+                      visibility: "hidden"
                     }}
                   />
                 )}
