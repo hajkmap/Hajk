@@ -10,7 +10,7 @@
     "eject": "react-scripts eject"
   },
   "devDependencies": {
-    "@types/react": "^16.9.1",
+    "@types/react": "^16.9.2",
     "@types/react-dom": "^16.8.5",
     "ajv": "^6.10.2",
     "eslint-plugin-prettier": "^3.1.0",
@@ -41,7 +41,7 @@
     "detect-browser": "^4.6.0",
     "element-scroll-polyfill": "^1.0.1",
     "html2json": "^1.0.2",
-    "jsts": "^2.0.6",
+    "jsts": "^2.0.8",
     "load-google-maps-api": "^2.0.0",
     "marked": "^0.7.0",
     "notistack": "^0.8.9",
