@@ -252,13 +252,11 @@ class Search extends React.PureComponent {
     this.props.app.closePanels();
   };
 
-  renderButton(target) {
+  renderSearchToggleButtonInMobileView() {
     const { classes } = this.props;
     return (
       <SearchIcon
-        className={
-          target === "header" ? classes.iconButtonHeader : classes.iconButton
-        }
+        className={classes.iconButtonHeader}
         onClick={this.toggleSearch}
       />
     );
@@ -423,9 +421,7 @@ class Search extends React.PureComponent {
           });
         }}
         resetToStartView={() => {
-          this.searchModel.abortSearches();
-          this.searchModel.clearRecentSpatialSearch();
-          this.setState({ activeSearchView: STARTVIEW });
+          this.resetToStartView();
         }}
         onChange={this.searchModel.search}
         loading={this.state.loading}
@@ -461,6 +457,9 @@ class Search extends React.PureComponent {
           tooltip={this.tooltip}
           target="top"
           loading={this.state.loading}
+          resetToStartView={() => {
+            this.resetToStartView();
+          }}
           onClear={() => {
             this.searchModel.clear();
             this.localObserver.publish("clearInput");
@@ -473,19 +472,36 @@ class Search extends React.PureComponent {
       </div>
     );
   }
-
+  /**
+   * Renders the search plugin.
+   * Search is a bit special as it can be render to:
+   * a) AppBar (when "target==='header'"), or
+   * b) a div with ID "center", (when "target==='center'")
+   * In both cases, we need to take care of rendering a
+   * search toggle button. The button will be visible in AppBar
+   * on small viewports.
+   *
+   * @returns
+   * @memberof Search
+   */
   render() {
     const { options } = this.props;
     const center = document.getElementById("center");
+
     if (options.target === "center" && center) {
-      return <div>{createPortal(this.renderCenter(), center)}</div>;
+      return (
+        <>
+          {this.renderSearchToggleButtonInMobileView("header")}
+          {createPortal(this.renderCenter(), center)}
+        </>
+      );
     }
     if (options.target === "header") {
       return (
-        <div>
-          {this.renderButton(options.target)}
+        <>
+          {this.renderSearchToggleButtonInMobileView("header")}
           {this.renderTop()}
-        </div>
+        </>
       );
     }
     return null;

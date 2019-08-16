@@ -22,7 +22,7 @@ const styles = theme => ({
     minWidth: "200px"
   },
   formControl: {
-    margin: theme.spacing.unit,
+    margin: theme.spacing(1),
     flex: "auto",
     minWidth: 120,
     maxWidth: 300

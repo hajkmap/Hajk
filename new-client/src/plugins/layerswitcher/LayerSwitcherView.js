@@ -10,83 +10,13 @@ import BreadCrumbs from "./components/BreadCrumbs.js";
 import "element-scroll-polyfill";
 
 const styles = theme => ({
-  button: {
-    margin: 0,
-    cursor: "pointer",
-    userSelect: "none",
-    textAlign: "center",
-    color: "#000",
-    fontSize: "10pt",
-    [theme.breakpoints.down("md")]: {
-      width: "50px",
-      height: "50px",
-      marginRight: "30px",
-      outline: "none",
-      background: theme.palette.primary.main,
-      color: theme.palette.primary.contrastText,
-      "&:hover": {
-        background: theme.palette.primary.main
-      }
-    }
+  windowContent: {
+    margin: "-10px" // special case, we need to "unset" the padding for Window content that's set in Window.js
   },
-  leftIcon: {
-    marginRight: theme.spacing(1)
-  },
-  rightIcon: {
-    marginLeft: theme.spacing(1)
-  },
-  iconSmall: {
-    fontSize: 20
-  },
-  icon: {
-    fontSize: 14
-  },
-  layerSwitcher: {
-    marginTop: "55px"
-  },
-  layerGroups: {
-    padding: "0px"
-  },
-  reset: {},
-  card: {
-    cursor: "pointer",
-    width: "180px",
-    borderRadius: "4px",
-    background: "white",
-    padding: "10px 20px",
-    marginBottom: "10px",
-    display: "flex",
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    boxShadow:
-      "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
-    "&:hover": {
-      background: "#e9e9e9"
-    },
-    [theme.breakpoints.down("md")]: {
-      width: "auto",
-      justifyContent: "inherit",
-      marginBottom: "20px"
-    }
-  },
-  title: {
-    fontSize: "10pt",
-    fontWeight: "bold",
-    marginBottom: "5px"
-  },
-  text: {}
-});
-
-const StyledTab = withStyles({
-  root: {
-    minWidth: "50px",
-    width: "120px",
-    height: "50px",
-    textTransform: "unset",
-    fontSize: 15
+  tabContent: {
+    padding: "10px"
   }
-})(Tab);
+});
 
 class LayersSwitcherView extends React.PureComponent {
   constructor(props) {
@@ -192,38 +122,34 @@ class LayersSwitcherView extends React.PureComponent {
   render() {
     const { classes } = this.props;
     return (
-      <div>
-        <AppBar position="fixed" color="default" style={{ top: "45px" }}>
+      <div className={classes.windowContent}>
+        <AppBar position="static" color="default">
           <Tabs
             value={this.state.activeTab}
             onChange={this.handleChangeTabs}
             indicatorColor="primary"
             textColor="primary"
+            variant="fullWidth"
           >
-            <StyledTab label="Kartlager" />
-            <StyledTab label="Bakgrund" />
+            <Tab label="Kartlager" />
+            <Tab label="Bakgrund" />
           </Tabs>
         </AppBar>
-        <div className={classes.layerSwitcher}>
-          <div>
-            <div className="content">
-              <div
-                style={{
-                  display: this.state.activeTab === 0 ? "block" : "none"
-                }}
-                className={classes.layerGroups}
-              >
-                {this.renderLayerGroups()}
-              </div>
-              <BackgroundSwitcher
-                display={this.state.activeTab === 1}
-                layers={this.state.baseLayers}
-                layerMap={this.props.model.layerMap}
-                backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
-                backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
-              />
-            </div>
+        <div className={classes.tabContent}>
+          <div
+            style={{
+              display: this.state.activeTab === 0 ? "block" : "none"
+            }}
+          >
+            {this.renderLayerGroups()}
           </div>
+          <BackgroundSwitcher
+            display={this.state.activeTab === 1}
+            layers={this.state.baseLayers}
+            layerMap={this.props.model.layerMap}
+            backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
+            backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
+          />
           {this.props.breadCrumbs ? this.renderBreadCrumbs() : null}
         </div>
       </div>

@@ -19,6 +19,7 @@ import Zoom from "../controls/Zoom";
 import ScaleLine from "../controls/ScaleLine";
 import Attribution from "../controls/Attribution.js";
 
+// A global that holds our windows, for use see components/Window.js
 document.windows = [];
 
 // Global customizations that previously went to custom.css

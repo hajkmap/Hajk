@@ -124,9 +124,7 @@ class ToolbarMenu extends React.Component {
           <div>
             {this.renderMapSwitcher()}
             <Button
-              aria-label="Rensa"
-              variant="outlined"
-              size="small"
+              aria-label="Rensa kartan"
               onClick={e => {
                 this.props.appModel.clear();
               }}
