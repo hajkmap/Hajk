@@ -10,7 +10,6 @@ import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import CloseIcon from "@material-ui/icons/Close";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import "./LayerGroupItem.js";
 import LayerGroupItem from "./LayerGroupItem.js";
 import LayerSettings from "./LayerSettings.js";

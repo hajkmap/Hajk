@@ -1,7 +1,5 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import Radio from "@material-ui/core/Radio";
 import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import RadioButtonCheckedIcon from "@material-ui/icons/RadioButtonChecked";
@@ -10,7 +8,6 @@ const styles = theme => ({
   layerItemContainer: {
     borderBottom: "1px solid #ccc"
   },
-
   captionText: {
     position: "relative",
     top: "2px",
@@ -22,8 +19,7 @@ class BackgroundSwitcher extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      selectedLayer: -1,
-      toggled: true
+      selectedLayer: -1
     };
   }
 
@@ -82,7 +78,7 @@ class BackgroundSwitcher extends React.PureComponent {
           onChange={this.onChange}
           value={config.name || config}
           color="default"
-          name="radio-button-demo"
+          name="backgroundLayer"
           icon={<RadioButtonUncheckedIcon fontSize="small" />}
           checkedIcon={<RadioButtonCheckedIcon fontSize="small" />}
         />
@@ -131,18 +127,6 @@ class BackgroundSwitcher extends React.PureComponent {
     ];
 
     return radioButtons;
-  }
-
-  getVisibilityClass() {
-    return this.state.toggled ? "layers-list hidden" : "layers-list";
-  }
-
-  toggleVisibility() {
-    this.setState({ toggled: !this.state.toggled });
-  }
-
-  getToggleIcon() {
-    return this.state.toggled ? <ChevronRightIcon /> : <ExpandLessIcon />;
   }
 
   render() {
