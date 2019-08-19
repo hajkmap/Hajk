@@ -3,11 +3,13 @@ import Button from "@material-ui/core/Button";
 import IconWarning from "@material-ui/icons/Warning";
 import CallMadeIcon from "@material-ui/icons/CallMade";
 import InfoIcon from "@material-ui/icons/Info";
+import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import { withStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
-import IconMoreHoriz from "@material-ui/icons/MoreHoriz";
+import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
+import CloseIcon from "@material-ui/icons/Close";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import LayerSettings from "./LayerSettings.js";
@@ -16,12 +18,18 @@ const styles = theme => ({
   button: {
     cursor: "pointer"
   },
-  caption: {},
+  caption: {
+    display: "flex",
+    justifyContent: "space-between"
+  },
   captionText: {
-    marginLeft: "5px",
-    position: "relative",
     top: "-6px",
-    fontSize: theme.typography.pxToRem(15)
+    cursor: "pointer",
+    fontSize: theme.typography.pxToRem(15),
+    width: "85%",
+    float: "left",
+    paddingLeft: "5px",
+    paddingBottom: "5px"
   },
   image: {},
   links: {
@@ -37,11 +45,9 @@ const styles = theme => ({
       borderBottom: "none"
     },
     margin: "5px 0",
-    paddingLeft: "15px"
+    marginLeft: "45px"
   },
   layerItemContainer: {
-    padding: "10px",
-    margin: "5px",
     background: "white",
     borderTopRightRadius: "10px",
     boxShadow:
@@ -65,7 +71,6 @@ const styles = theme => ({
     padding: "5px"
   },
   infoButton: {
-    fontSize: "14pt",
     cursor: "pointer"
   },
   infoTextContainer: {
@@ -73,21 +78,21 @@ const styles = theme => ({
   },
   layerGroup: {
     background: "white",
-    borderBottom: "1px solid #ccc"
+    borderBottom: "1px solid #ccc",
+    marginLeft: "45px"
   },
   layerGroupContainer: {
-    background: "white",
-    margin: "5px 0"
+    marginTop: "0",
+    marginBottom: "-5px"
   },
   layerGroupHeader: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginLeft: "15px"
+    alignItems: "center"
   },
   layerGroupLayers: {
     borderTop: "1px solid #ccc",
-    paddingLeft: "45px"
+    marginTop: "-5px"
   },
   layerGroupItem: {
     display: "flex"
@@ -98,12 +103,24 @@ const styles = theme => ({
     overflow: "hidden"
   },
   settingsButton: {
-    cursor: "pointer",
-    padding: "5px",
-    float: "right"
+    cursor: "pointer"
   },
   subtitle2: {
     fontWeight: 500
+  },
+  layerButtons: {
+    display: "flex",
+    alignItems: "center"
+  },
+  layerButton: {
+    cursor: "pointer",
+    fontSize: "15pt",
+    width: "32px"
+  },
+  checkBoxIcon: {
+    cursor: "pointer",
+    width: "15%",
+    float: "left"
   }
 });
 
@@ -381,16 +398,29 @@ class LayerGroupItem extends Component {
     return (
       <div key={index} className={classes.layerItem}>
         <div className={classes.caption}>
-          <span onClick={this.toggleLayerVisible(subLayer)}>
-            {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
+          <div onClick={this.toggleLayerVisible(subLayer)}>
+            {visible ? (
+              <CheckBoxIcon className={classes.checkBoxIcon} />
+            ) : (
+              <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
+            )}
             <label className={classes.captionText}>
               {layer.layersInfo[subLayer].caption}
             </label>
-          </span>
-          <IconMoreHoriz
-            className={classes.settingsButton}
-            onClick={toggleSettings}
-          />
+          </div>
+          <div className={classes.layerButton}>
+            {this.state.toggleSubLayerSettings[index] ? (
+              <CloseIcon
+                className={classes.settingsButton}
+                onClick={toggleSettings}
+              />
+            ) : (
+              <MoreHorizIcon
+                className={classes.settingsButton}
+                onClick={toggleSettings}
+              />
+            )}
+          </div>
         </div>
         <div className={classes.legend}>
           {this.state.toggleSubLayerSettings[index] ? (
@@ -510,12 +540,17 @@ class LayerGroupItem extends Component {
     function getIcon() {
       if (visible) {
         if (visibleSubLayers.length === layer.subLayers.length) {
-          return <CheckBoxIcon />;
+          return <CheckBoxIcon className={classes.checkBoxIcon} />;
         } else {
-          return <CheckBoxIcon style={{ fill: "gray" }} />;
+          return (
+            <CheckBoxIcon
+              style={{ fill: "gray" }}
+              className={classes.checkBoxIcon}
+            />
+          );
         }
       } else {
-        return <CheckBoxOutlineBlankIcon />;
+        return <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />;
       }
     }
     return (
@@ -553,21 +588,28 @@ class LayerGroupItem extends Component {
                 </div>
               </div>
             </div>
-            <div>
-              <div style={{ float: "left" }}>{this.renderStatus()}</div>
-              <div style={{ float: "left" }}>
+            <div className={classes.layerButtons}>
+              <div className={classes.layerButton}>{this.renderStatus()}</div>
+              <div className={classes.layerButton}>
                 <div className={classes.infoContainer}>
                   {!this.isInfoEmpty() ? (
-                    <InfoIcon
-                      onClick={() => this.toggleInfo()}
-                      className={classes.infoButton}
-                      style={{
-                        boxShadow: this.state.infoVisible
-                          ? "rgb(204, 204, 204) 2px 3px 1px"
-                          : "inherit",
-                        borderRadius: "100%"
-                      }}
-                    />
+                    this.state.infoVisible ? (
+                      <RemoveCircleIcon
+                        className={classes.infoButton}
+                        onClick={() => this.toggleInfo()}
+                      />
+                    ) : (
+                      <InfoIcon
+                        onClick={() => this.toggleInfo()}
+                        className={classes.infoButton}
+                        style={{
+                          boxShadow: this.state.infoVisible
+                            ? "rgb(204, 204, 204) 2px 3px 1px"
+                            : "inherit",
+                          borderRadius: "100%"
+                        }}
+                      />
+                    )
                   ) : (
                     <InfoIcon
                       onClick={() => this.toggleInfo()}
@@ -580,15 +622,24 @@ class LayerGroupItem extends Component {
                   )}
                 </div>
               </div>
-              <div style={{ float: "left" }}>
-                <IconMoreHoriz
-                  onClick={() => this.toggleSettings()}
-                  className={classes.settingsButton}
-                />
+              <div className={classes.layerButton}>
+                {this.state.toggleSettings ? (
+                  <CloseIcon onClick={() => this.toggleSettings()} />
+                ) : (
+                  <MoreHorizIcon
+                    onClick={() => this.toggleSettings()}
+                    className={classes.settingsButton}
+                  />
+                )}
               </div>
             </div>
           </div>
           {this.renderDetails()}
+          {this.state.toggleSettings &&
+          this.state.infoVisible &&
+          !this.isInfoEmpty() ? (
+            <hr />
+          ) : null}
           <div>
             <LayerSettings
               layer={layer}
