@@ -41,6 +41,10 @@ const styles = theme => ({
     padding: "0px",
     borderBottom: "1px solid #ccc",
     overflow: "hidden"
+  },
+  checkBoxIcon: {
+    cursor: "pointer",
+    float: "left"
   }
 });
 
@@ -205,12 +209,15 @@ class LayerGroup extends React.PureComponent {
           <div className={classes.groupCheckbox}>
             {this.isToggled(this.props.group) ? (
               this.isSemiToggled(this.props.group) ? (
-                <CheckBoxIcon />
+                <CheckBoxIcon className={classes.checkBoxIcon} />
               ) : (
-                <CheckBoxIcon style={{ color: "gray" }} />
+                <CheckBoxIcon
+                  style={{ color: "gray" }}
+                  className={classes.checkBoxIcon}
+                />
               )
             ) : (
-              <CheckBoxOutlineBlankIcon />
+              <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
             )}
           </div>
           <Typography className={classes.heading}>{this.state.name}</Typography>

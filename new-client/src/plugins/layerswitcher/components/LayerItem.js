@@ -21,8 +21,6 @@ const styles = theme => ({
     cursor: "pointer"
   },
   captionText: {
-    marginLeft: "5px",
-    position: "relative",
     top: "-6px",
     cursor: "pointer",
     fontSize: theme.typography.pxToRem(15)
@@ -36,7 +34,6 @@ const styles = theme => ({
   layerItem: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
     marginTop: "0",
     marginBottom: "-5px"
   },
@@ -44,11 +41,12 @@ const styles = theme => ({
     background: "white",
     paddingLeft: "0",
     borderBottom: "1px solid #ccc",
-    marginLeft: "45px"
+    marginLeft: "45px",
+    paddingTop: "5px",
+    paddingBottom: "5px"
   },
   layerItemInfo: {
-    display: "flex",
-    alignItems: "center"
+    display: "flex"
   },
   rightIcon: {
     marginLeft: theme.spacing(1),
@@ -60,9 +58,7 @@ const styles = theme => ({
     padding: "3px",
     border: "1px solid #ccc"
   },
-  infoContainer: {
-    padding: "5px"
-  },
+  infoContainer: {},
   infoButton: {},
   infoTextContainer: {
     margin: "10px 45px"
@@ -76,6 +72,11 @@ const styles = theme => ({
     cursor: "pointer",
     fontSize: "15pt",
     width: "32px"
+  },
+  checkBoxIcon: {
+    cursor: "pointer",
+    float: "left",
+    marginRight: "5px"
   }
 });
 
@@ -340,7 +341,11 @@ class LayerItem extends React.PureComponent {
               onClick={this.toggleVisible(layer)}
             >
               <Typography>
-                {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
+                {visible ? (
+                  <CheckBoxIcon className={classes.checkBoxIcon} />
+                ) : (
+                  <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
+                )}
                 <label className={classes.captionText}>{caption}</label>
               </Typography>
             </div>

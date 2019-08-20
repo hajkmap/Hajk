@@ -23,9 +23,8 @@ const styles = theme => ({
     justifyContent: "space-between"
   },
   captionText: {
-    marginLeft: "5px",
-    position: "relative",
     top: "-6px",
+    cursor: "pointer",
     fontSize: theme.typography.pxToRem(15)
   },
   image: {},
@@ -36,7 +35,6 @@ const styles = theme => ({
   },
   layerItem: {
     justifyContent: "space-between",
-    alignItems: "center",
     borderBottom: "1px solid #CCC",
     "&:last-child": {
       borderBottom: "none"
@@ -51,8 +49,7 @@ const styles = theme => ({
       "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)"
   },
   layerItemInfo: {
-    display: "flex",
-    alignItems: "center"
+    display: "flex"
   },
   rightIcon: {
     marginLeft: theme.spacing(1),
@@ -64,9 +61,7 @@ const styles = theme => ({
     padding: "3px",
     border: "1px solid #ccc"
   },
-  infoContainer: {
-    padding: "5px"
-  },
+  infoContainer: {},
   infoButton: {
     cursor: "pointer"
   },
@@ -76,7 +71,9 @@ const styles = theme => ({
   layerGroup: {
     background: "white",
     borderBottom: "1px solid #ccc",
-    marginLeft: "45px"
+    marginLeft: "45px",
+    paddingTop: "5px",
+    paddingBottom: "5px"
   },
   layerGroupContainer: {
     marginTop: "0",
@@ -84,8 +81,7 @@ const styles = theme => ({
   },
   layerGroupHeader: {
     display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center"
+    justifyContent: "space-between"
   },
   layerGroupLayers: {
     borderTop: "1px solid #ccc",
@@ -113,6 +109,11 @@ const styles = theme => ({
     cursor: "pointer",
     fontSize: "15pt",
     width: "32px"
+  },
+  checkBoxIcon: {
+    cursor: "pointer",
+    float: "left",
+    marginRight: "5px"
   }
 });
 
@@ -391,7 +392,11 @@ class LayerGroupItem extends Component {
       <div key={index} className={classes.layerItem}>
         <div className={classes.caption}>
           <div onClick={this.toggleLayerVisible(subLayer)}>
-            {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
+            {visible ? (
+              <CheckBoxIcon className={classes.checkBoxIcon} />
+            ) : (
+              <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
+            )}
             <label className={classes.captionText}>
               {layer.layersInfo[subLayer].caption}
             </label>
@@ -528,12 +533,17 @@ class LayerGroupItem extends Component {
     function getIcon() {
       if (visible) {
         if (visibleSubLayers.length === layer.subLayers.length) {
-          return <CheckBoxIcon />;
+          return <CheckBoxIcon className={classes.checkBoxIcon} />;
         } else {
-          return <CheckBoxIcon style={{ fill: "gray" }} />;
+          return (
+            <CheckBoxIcon
+              style={{ fill: "gray" }}
+              className={classes.checkBoxIcon}
+            />
+          );
         }
       } else {
-        return <CheckBoxOutlineBlankIcon />;
+        return <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />;
       }
     }
     return (
