@@ -96,7 +96,7 @@ const styles = theme => {
     },
     content: {
       flex: "1",
-      overflowY: "auto",
+      overflowY: "scroll",
       padding: "10px",
       cursor: "default !important",
       [theme.breakpoints.down("xs")]: {

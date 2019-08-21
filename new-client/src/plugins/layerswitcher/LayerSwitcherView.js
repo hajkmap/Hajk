@@ -15,6 +15,18 @@ const styles = theme => ({
   },
   tabContent: {
     padding: "10px"
+  },
+  indicator: {
+    display: "none"
+  },
+  tabStyle: {
+    maxWidth: "120px",
+    borderRadius: "35px",
+    marginBottom: "5px",
+    marginTop: "5px"
+  },
+  tabActive: {
+    backgroundColor: theme.palette.primary.main
   }
 });
 
@@ -128,11 +140,19 @@ class LayersSwitcherView extends React.PureComponent {
             value={this.state.activeTab}
             onChange={this.handleChangeTabs}
             indicatorColor="primary"
-            textColor="primary"
+            textColor="secondary"
             variant="fullWidth"
+            classes={{ indicator: classes.indicator }}
+            centered
           >
-            <Tab label="Kartlager" />
-            <Tab label="Bakgrund" />
+            <Tab
+              label="Kartlager"
+              classes={{ root: classes.tabStyle, selected: classes.tabActive }}
+            />
+            <Tab
+              label="Bakgrund"
+              classes={{ root: classes.tabStyle, selected: classes.tabActive }}
+            />
           </Tabs>
         </AppBar>
         <div className={classes.tabContent}>
