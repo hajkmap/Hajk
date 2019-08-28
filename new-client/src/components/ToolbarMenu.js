@@ -51,15 +51,6 @@ class ToolbarMenu extends React.Component {
     });
   }
 
-  renderMapSwitcher() {
-    const { appModel } = this.props;
-    if (appModel.config.mapConfig.map.mapselector)
-      return <MapSwitcher appModel={appModel} />;
-    else {
-      return null;
-    }
-  }
-
   renderSearchPlugin() {
     const { classes, appModel } = this.props;
     const searchPlugin = appModel.plugins.search;
@@ -90,7 +81,7 @@ class ToolbarMenu extends React.Component {
   };
 
   render() {
-    const { classes } = this.props;
+    const { classes, appModel } = this.props;
     return (
       <div className={classes.toolbarMenu}>
         {this.renderSearchPlugin()}
@@ -122,7 +113,7 @@ class ToolbarMenu extends React.Component {
           }}
         >
           <div>
-            {this.renderMapSwitcher()}
+            <MapSwitcher appModel={appModel} />{" "}
             <Button
               aria-label="Rensa kartan"
               onClick={e => {
