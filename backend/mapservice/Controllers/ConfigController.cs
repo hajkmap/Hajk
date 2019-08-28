@@ -351,7 +351,7 @@ namespace MapService.Controllers
 
             _log.Debug("AD-information found in Web.config and will be used.");
             var parameters = GetLookupParameters();
-            return new ActiveDirectoryLookup(parameters["ADdomain"], parameters["ADcontainer"], parameters["ADuser"], parameters["ADpassword"]);
+            return new ActiveDirectoryLookup(parameters["ADdomain"], parameters["ADcontainer"], parameters["ADuseSSL"] == "1", parameters["ADuser"], parameters["ADpassword"]);
         }
         private List<ThemeMap> GetAllowedMapConfigurations()
         {
@@ -452,6 +452,7 @@ namespace MapService.Controllers
                 { "ADuser", appsettings["ActiveDirectoryUser"] == null ? "" : appsettings["ActiveDirectoryUser"] },
                 { "ADpassword", appsettings["ActiveDirectoryUserPassword"] == null ? "" : appsettings["ActiveDirectoryUserPassword"] },
                 { "ADcontainer", appsettings["ActiveDirectoryContainer"] == null ? "" : appsettings["ActiveDirectoryContainer"] },
+                { "ADuseSSL", appsettings["ActiveDirectoryUseSSL"] == null ? "" : appsettings["ActiveDirectoryUseSSL"] },
                 { "defaultADGroupsForAdmin", appsettings["defaultADGroupsForAdmin"] == null ? "" : appsettings["defaultADGroupsForAdmin"] }
             };
             return parameters;
@@ -661,6 +662,59 @@ namespace MapService.Controllers
 
             return mapConfiguration;
         }
+        private JToken FilterFirToolByAD(ActiveDirectoryLookup adLookup, JToken mapConfiguration, string activeUser)
+        {
+            var childrenToRemove = new List<string>();
+            var userGroups = adLookup.GetGroups(activeUser);
+            var firTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'fir')]");
+
+            var edpList = firTool.SelectToken("$.options.edp");
+            if (edpList != null)
+            {
+                var visibleForGroups = edpList.SelectToken("$.visibleForGroups");
+                if (HasValidVisibleForGroups(visibleForGroups) && !IsGroupAllowedAccess(userGroups, visibleForGroups))
+                {
+                    (firTool.SelectToken("$.options") as JObject).Remove("edp");
+                }
+            }
+
+            var residentList = firTool.SelectToken("$.options.residentList");
+            if (residentList != null)
+            {
+                var visibleForGroups = residentList.SelectToken("$.visibleForGroups");
+                if(HasValidVisibleForGroups(visibleForGroups) && !IsGroupAllowedAccess(userGroups, visibleForGroups))
+                {
+                    (firTool.SelectToken("$.options") as JObject).Remove("residentList");
+                }
+            }
+
+            var layersInFirTool = firTool.SelectToken("$.options.layers");
+            if (layersInFirTool != null)
+            {
+                foreach (JToken child in layersInFirTool.Children())
+                {
+                    var visibleForGroups = child.SelectToken("$.visibleForGroups");
+                    bool allowed = true;
+
+                    if (HasValidVisibleForGroups(visibleForGroups))
+                    {
+                        allowed = IsGroupAllowedAccess(userGroups, visibleForGroups);
+                    }
+
+                    if (!allowed)
+                    {
+                        childrenToRemove.Add(child.SelectToken("$.id").ToString());
+                    }
+                }
+
+                foreach (string id in childrenToRemove)
+                {
+                    layersInFirTool.SelectToken("$.[?(@.id=='" + id + "')]").Remove();
+                }
+            }
+
+            return mapConfiguration;
+        }
         private bool HasValidVisibleForGroups(JToken visibleForGroups)
         {
             if (visibleForGroups != null)
@@ -779,6 +833,13 @@ namespace MapService.Controllers
                         if (editTool != null)
                         {
                             filteredMapConfiguration = FilterEditLayersByAD(adLookup, filteredMapConfiguration, activeUser);
+                        }
+
+                        // Filter FIR tool
+                        var firTool = filteredMapConfiguration.SelectToken("$.tools[?(@.type == 'fir')]");
+                        if (firTool != null)
+                        {
+                            filteredMapConfiguration = FilterFirToolByAD(adLookup, filteredMapConfiguration, activeUser);
                         }
 
                         return filteredMapConfiguration.ToString();

@@ -34,6 +34,7 @@ var panels = {
   'bufferpanel': require('views/bufferpanel'),
   'routingpanel': require('views/routingpanel'),
   'firpanel': require('views/firpanel'),
+  'kirpanel': require('views/kirpanel'),
   'presetpanel': require('views/presetpanel'),
   'measurepanel': require('views/measurepanel'),
   'mailexportpanel': require('views/mailexportpanel')

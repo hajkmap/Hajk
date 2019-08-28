@@ -93,6 +93,8 @@ var ExportPdfSettings = React.createClass({
     return {
       selectFormat: 'A4',
       selectOrientation: 'S',
+      manualComment: '',
+      manualPdfTitle:'',
       selectScale: '500',
       manualScale: '2500',
       selectResolution: '72',
@@ -154,6 +156,14 @@ var ExportPdfSettings = React.createClass({
     return (this.state.selectScale === 'other') ? this.state.manualScale : this.state.selectScale;
   },
 
+  getComments: function () {
+    return  this.state.manualComment;
+  },
+
+  getPdfTitle: function () {
+    return  this.state.manualPdfTitle;
+  },
+
   getResolution: function () {
     return this.state.selectResolution;
   },
@@ -187,6 +197,22 @@ var ExportPdfSettings = React.createClass({
   setCenter: function (val) {
     this.setState({
       center: val
+    });
+  },
+ 
+  setCommentText: function(e) {
+    val = e.target.value;
+    //}
+    this.setState({
+        manualComment: val
+    });
+  },
+
+  setPdfTitleText: function(e) {
+    val = e.target.value;
+    //}
+    this.setState({
+        manualPdfTitle: val
     });
   },
 
@@ -280,7 +306,9 @@ var ExportPdfSettings = React.createClass({
         format: this.getFormat(),
         orientation: this.getOrientation(),
         scale: this.getScale(),
-        resolution: this.getResolution()
+        resolution: this.getResolution(),
+        comments: this.getComments(),
+        pdftitle: this.getPdfTitle()
       }
     ;
     node.html('');
@@ -345,6 +373,18 @@ var ExportPdfSettings = React.createClass({
 
     return (
       <div className='export-settings'>
+      <div className="panel panel-default">
+        <div className="panel-heading">Titel</div>
+        <div className="panel-body">
+                <input type="text" size="30" onChange={this.setPdfTitleText} value={this.state.manualPdfTitle} />
+        </div>
+      </div>
+      <div className="panel panel-default">
+        <div className="panel-heading">Kommentar</div>
+        <div className="panel-body">
+          <input type="text" size="40" onChange={this.setCommentText} value={this.state.manualComment} />
+        </div>
+      </div>
         <div className='panel panel-default'>
           <div className='panel-heading'>Välj pappersstorlek</div>
           <div className='panel-body'>

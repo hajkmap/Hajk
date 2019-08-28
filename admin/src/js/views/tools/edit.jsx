@@ -201,8 +201,7 @@ class ToolOptions extends Component {
         "layers": this.state.layers ? this.state.layers : []
       }
     };
-    debugger
-
+    
     var existing = this.getTool();
 
     function update () {

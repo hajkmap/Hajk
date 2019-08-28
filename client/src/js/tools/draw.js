@@ -436,15 +436,15 @@ var DrawModel = {
     }
 
     if (typeof value === 'number') {
-      value = Math.round(value);
+      value = Math.round(value*100)/100;
     }
 
     if (type === 'circle') {
       let prefix = ' m';
       let prefixSq = ' m²';
-      if (value >= 1E3) {
+      if (value >= 1000) {
         prefix = ' km';
-        value = value / 1E3;
+        value = Math.round((value / 1000) * 100) / 100;
       }
       label = (
         'R = ' + value + prefix +
@@ -454,18 +454,18 @@ var DrawModel = {
 
     if (type === 'area') {
       let prefix = ' m²';
-      if (value >= 1E6) {
+      if (value >= 1000000) {
         prefix = ' km²';
-        value = Math.round((value / 1E6) * 1E3) / 1E3;
+        value = Math.round((value / 1000000) * 100) / 100;
       }
       label = value + prefix;
     }
 
     if (type === 'length') {
       let prefix = ' m';
-      if (value >= 1E3) {
+      if (value >= 1000) {
         prefix = ' km';
-        value = value / 1E3;
+        value = Math.round((value / 1000) * 100) / 100;
       }
       label = value + prefix;
     }
@@ -1101,14 +1101,14 @@ var DrawModel = {
         };
         break;
       case 'LineString' :
-        length = Math.round(geom.getLength());
+        length = Math.round(geom.getLength()*100)/100;
         break;
       case 'Polygon':
-        area = Math.round(geom.getArea());
+        area = Math.round(geom.getArea()*100)/100;
         break;
       case 'Circle':
-        radius = Math.round(geom.getRadius());
-        if (radius === 0) 
+        radius = Math.round(geom.getRadius()*100)/100;
+        if (radius === 0)
           radius = parseFloat(this.get('circleRadius'));
         break;
       default:

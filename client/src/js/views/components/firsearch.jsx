@@ -1,5 +1,8 @@
 var FirSelectionToolbar = require('components/firselectiontoolbar');
 var FirSearchResultGroup = require('components/firsearchresultgroup');
+var ResidentList = require('components/resident_list');
+var PropertyList = require('components/property_list');
+var EdpPropertyLink = require('components/edp_property_link');
 
 shiftIsDown = false;
 ctrlIsDown = false;
@@ -44,6 +47,8 @@ var FirSearchView = {
     getInitialState: function () {
         return {
             visible: false,
+            instructionPropertyListVisible: false,
+            instructionHittaGrannarVisible: false
         };
     },
 
@@ -313,10 +318,6 @@ var FirSearchView = {
         );
     },
 
-    /*onChangeDisplayPopup: function (e) {
-        this.props.model.set('displayPopup', e.target.checked);
-    },*/
-
     exportSelected: function (type) {
         this.props.model.export(type);
     },
@@ -390,77 +391,6 @@ var FirSearchView = {
         );
     },
 
-    checkBoxFir: function(column){
-        var modelChosen = this.props.model.get("chosenColumns");
-        if($("#"+column)[0].checked){
-            modelChosen.push(column);
-        }else {
-            modelChosen.pop(column);
-        }
-        this.props.model.set("chosenColumns", modelChosen);
-    },
-
-    renderFastighetsForteckning: function(){
-        var excelButton = null,
-            downloadLink = null;
-
-        if (this.props.model.get('excelExportUrl')) {
-            excelButton = (
-                <button className='btn btn-default icon-button' onClick={(e) => this.exportSelected('excel')}>
-                    <i className='excel' />
-                </button>
-            );
-        }
-
-        // skapar en länk med url till nedladdning av export. Visar Spara
-        // först när url finns.
-        if (this.props.model.get('downloading')) {
-            downloadLink = <a href='#'>Hämtar...</a>;
-        } else if (this.props.model.get('url')) {
-            downloadLink = <a href={this.props.model.get('url')}>Hämta sökresultat</a>;
-        } else {
-            downloadLink = null;
-        }
-
-        //infoknapp
-        var instructionBtn;
-        var instructionTxt;
-        if (typeof this.props.model.get("instructionSkapaFastighetsforteckning") !== 'undefined' && this.props.model.get("instructionSkapaFastighetsforteckning") !== null && this.props.model.get("instructionSkapaFastighetsforteckning").length > 0) {
-            instructionBtn = (
-                <button onClick={() => this.openInstruction("skapaFastighetsforteckning")} className='btn-info-fir' id='instructionBox' ><img src={this.props.model.get("infoKnappLogo")} style={{height: '75%', width:'75%'}} /></button>
-            );
-            instructionTxt = (
-                <div className='panel-body-instruction instructionsText' id='instructionsTextFirskapaFastighetsforteckning' dangerouslySetInnerHTML={{__html: atob(this.props.model.get("instructionSkapaFastighetsforteckning"))}} />
-            );
-        }
-        var navPanel = document.getElementById('navigation-panel');
-        navPanel.style.width = '417px';
-
-
-        return (
-            <div className='panel panel-default'>
-                <div className='panel-heading'>Skapa fastighetsförteckning{instructionBtn}<button id="FIRCreateMinimizeButton" onClick={() => {this.minBox('skapaFastighetsForteckning', "FIRCreateMinimizeButton")}} className={this.props.model.get("searchMinimizedClassButton")}></button>
-                    {instructionTxt}
-                    </div>
-                <div className='panel-body'>
-                    <div id="skapaFastighetsForteckning" className="hidden">
-                    <p>Inkludera i förteckning:</p>
-                    <input type="checkbox" id="samfallighet" onClick={()=> this.checkBoxFir("samfallighet")} /> Samfälligheter <br/>
-                    <input type="checkbox" id="ga" onClick={()=> this.checkBoxFir("ga")} /> Gemensamhetsanläggningar <br/>
-                    <input type="checkbox" id="rattighet" onClick={()=> this.checkBoxFir("rattighet")} /> Rättigheter <br/>
-                    <input type="checkbox" id="persnr" onClick={()=> this.checkBoxFir("persnr")} /> Personnummer <br/>
-                    <input type="checkbox" id="taxerad_agare" onClick={()=> this.checkBoxFir("taxerad_agare")} /> Taxerad Ägare <br/><br/>
-                    </div>
-                <div>
-                    <br/>
-                    <span className='pull-left'>{excelButton}</span>&nbsp;&nbsp; <span className='right'>Skapa fastighetsförteckning från sökresultat</span>
-                    <div>{downloadLink}</div>
-                </div>
-                </div>
-            </div>
-        );
-    },
-
     hittaGrannarUpdateRadio: function(){
         var checkedAngransade = document.getElementById("hittaGrannar").checked;
         var checkedMedBuffer = document.getElementById("hittaGrannarMedBuffer").checked;
@@ -479,8 +409,6 @@ var FirSearchView = {
     hittaGrannar: function() {
         this.props.model.set("hittaGrannarLayer", true);
         var parser = new jsts.io.OL3Parser();
-        parser.inject(ol.geom.Point, ol.geom.LineString, ol.geom.LinearRing, ol.geom.Polygon, ol.geom.MultiPoint, ol.geom.MultiLineString, ol.geom.MultiPolygon);
-
         var radioCheckedAngransade = document.getElementById("hittaGrannar").checked,
             radioCheckedMedBuffer = document.getElementById("hittaGrannarMedBuffer").checked,
             bufferLength;
@@ -570,10 +498,11 @@ var FirSearchView = {
         var instructionTxt;
         if (typeof this.props.model.get("instructionHittaGrannar") !== 'undefined' && this.props.model.get("instructionHittaGrannar") !== null && this.props.model.get("instructionHittaGrannar").length > 0) {
             instructionBtn = (
-                <button onClick={() => this.openInstruction("hittaGrannar")} className='btn-info-fir' id='instructionBox' ><img src={this.props.model.get("infoKnappLogo")} style={{height: '75%', width:'75%'}} /></button>
+                <button onClick={() => this.openInstruction("hittaGrannar")} className='btn-info-fir' id='instructionBox' >
+                <img src={this.props.model.get("infoKnappLogo")} /></button>
             );
             instructionTxt = (
-                <div className='panel-body-instruction instructionsText' id='instructionsTextFirhittaGrannar' dangerouslySetInnerHTML={{__html: atob(this.props.model.get("instructionHittaGrannar"))}} />
+                <div className='panel-body-instruction instructionsText' id='instructionsTextFirhittaGrannar' dangerouslySetInnerHTML={{__html: decodeURIComponent(atob(this.props.model.get("instructionHittaGrannar")))}} />
             );
         }
         var navPanel = document.getElementById('navigation-panel');
@@ -652,17 +581,6 @@ var FirSearchView = {
 
     },
 
-    exaktMatching: function(event) {
-        this.props.model.set("exaktMatching", false);
-        var exaktSearching = document.getElementById("exaktMatching").checked;
-
-        if(exaktSearching){
-            this.props.model.set("exaktMatching", exaktSearching);
-        }else{
-            this.props.model.set("exaktMatching", exaktSearching);
-        }
-    },
-
     /**
      * Render the panel component.
      * @instance
@@ -732,20 +650,14 @@ var FirSearchView = {
             ? <FirSelectionToolbar model={this.props.model.get('firSelectionModel')} />
             : null;
 
-        var fastighetsforteckning = this.renderFastighetsForteckning();
-        var analysFunctions = this.renderAnalysFunctions();
-        var searchOption = this.renderSearchOption();
-
-
-        // Infoknapp
         var instructionBtn;
         var instructionTxt;
         if (typeof this.props.model.get("instructionSokning") !== 'undefined' && this.props.model.get("instructionSokning") !== null && this.props.model.get("instructionSokning").length > 0) {
             instructionBtn = (
-                <button onClick={() => this.openInstruction("sokning")} className='btn-info-fir' id='instructionBox' ><img src={this.props.model.get("infoKnappLogo")} style={{height: '75%', width:'75%'}} /></button>
+                <button onClick={() => this.openInstruction("sokning")} className='btn-info-fir' id='instructionBox' ><img src={this.props.model.get("infoKnappLogo")} /></button>
             );
             instructionTxt = (
-                <div className='panel-body-instruction instructionsText' id='instructionsTextFirsokning' dangerouslySetInnerHTML={{__html: atob(this.props.model.get("instructionSokning"))}} /> //instruction={window.atob(this.props.model.get('instruction'))} dangerouslySetInnerHTML={{__html: this.props.model.get("instructionSokning")}}
+                <div className='panel-body-instruction instructionsText' id='instructionsTextFirsokning' dangerouslySetInnerHTML={{__html: decodeURIComponent(atob(this.props.model.get("instructionSokning")))}} />
             );
         }
         var navPanel = document.getElementById('navigation-panel');
@@ -774,11 +686,12 @@ var FirSearchView = {
                                 onChange={search_on_input} />
                         </div>
                         <div className='clearfix'>
-                            <input type="checkbox" id="exaktMatching" onClick={(e)=> this.exaktMatching(e)} />  Sök exakt matching <br/>
-                            {/*<span className='info-text clearfix'>Inled sökningen med * för att söka på delar av en text.</span>*/}
+                            <input type="checkbox" id="exaktMatching" defaultChecked={this.props.model.get("exaktMatching")}
+                              onClick={(e) => this.props.model.set("exaktMatching", !this.props.model.get("exaktMatching"))} />
+                            <label htmlFor="exaktMatching">Sök exakt matching</label>
                         </div><br/>
                             {firSelectionToolbar}
-                            {searchOption}
+                            {this.renderSearchOption()}
                     </div>
                         <div className='pull-right'>
                             <button onClick={search_on_click} type='submit' className='btn btn-primary' id='sokEnter'>Sök</button>&nbsp;
@@ -786,8 +699,21 @@ var FirSearchView = {
                         </div>
                     </div>
                     </div>
-                    {analysFunctions}
-                    {fastighetsforteckning}
+                    {this.renderAnalysFunctions()}
+
+                    {/* Fastighetsförteckning */}
+                    <PropertyList model={this.props.model}></PropertyList>
+
+                    {/* Boendeförteckning */
+                      this.props.model.get("residentList") != null &&
+                      <ResidentList model={this.props.model}></ResidentList>
+                    }
+
+                    {/* Boendeförteckning */
+                      this.props.model.get("edp") != null &&
+                      <EdpPropertyLink model={this.props.model}></EdpPropertyLink>
+                    }
+
                     {results}
                 </div>
         );
@@ -801,7 +727,3 @@ var FirSearchView = {
  * @returns {SearchView}
  */
 module.exports = React.createClass(FirSearchView);
-
-
-
-

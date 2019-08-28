@@ -40,6 +40,10 @@ namespace MapService.Models.Config
 
         public double opacity { get; set; }
 
+        public double minResolution { get; set; }
+
+        public double maxResolution { get; set; }
+
         public bool singleTile { get; set; }
 
         public string imageFormat { get; set; }

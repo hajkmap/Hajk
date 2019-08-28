@@ -42,6 +42,8 @@ const defaultState = {
   url: '',
   queryable: true,
   opacity: 1.0,
+  minResolution: 0.0,
+  maxResolution: 0.0,
   tiled: false,
   singleTile: false,
   imageFormat: '',
@@ -286,6 +288,8 @@ class WMSLayerForm extends Component {
       serverType: this.getValue('serverType'),
       queryable: this.getValue('queryable'),
       opacity: this.getValue('opacity'),
+      minResolution: this.getValue('minResolution') * 0.00028, // Convert to m/pixel
+      maxResolution: this.getValue('maxResolution') * 0.00028, // Convert to m/pixel
       tiled: this.getValue('tiled'),
       drawOrder: this.getValue('drawOrder'),
       attribution: this.getValue('attribution'),
@@ -355,8 +359,6 @@ class WMSLayerForm extends Component {
         }
         break;
       case 'opacity':
-        console.log(value);
-        console.log(typeof value);
         if (!/^-?\d+.\d+$/.test(value)) {
           valid = false;
         }
@@ -494,6 +496,34 @@ class WMSLayerForm extends Component {
               this.validateField('opacity');
             }}
           />
+        </div>
+        <div>
+          <label>Min skala 1:</label>
+          <input
+            type='number' step="any"
+            ref='input_minResolution'
+            value={this.state.minResolution}
+            className={this.getValidationClass('minResolution')}
+            onChange={(e) => {
+              console.log(e.target.value);
+              this.setState({minResolution: e.target.value});
+              this.validateField('minResolution');
+            }}
+          /> (Lagret visas för angiven skala, ange 0 om lagret alltid ska visas)
+        </div>
+        <div>
+          <label>Max skala 1:</label>
+          <input
+            type='number' step="any"
+            ref='input_maxResolution'
+            value={this.state.maxResolution}
+            className={this.getValidationClass('maxResolution')}
+            onChange={(e) => {
+              console.log(e.target.value);
+              this.setState({maxResolution: e.target.value});
+              this.validateField('maxResolution');
+            }}
+          /> (Lagret visas för angiven skala, ange 0 om lagret alltid ska visas)
         </div>
         <div>
           <label>Single tile</label>

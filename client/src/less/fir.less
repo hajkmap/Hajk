@@ -28,6 +28,10 @@
   margin: 10px 0px;
 }
 
+.search-tools label {
+  font-weight: normal;
+}
+
 .search-tools .panel-row label {
   font-weight: normal;
   display: inline-block;
@@ -104,6 +108,60 @@
   }
 }
 
+.kir {
+  .expand-button {
+    width: 35px;
+  }
+
+  .panel-body {
+    padding: 15px;
+
+    legend {
+      font-size: 16px;
+      border-bottom: none;
+      margin-bottom: 10px;
+    }
+
+    input#min-age {
+      width: 50px;
+      margin-left: 10px;
+    }
+  }
+
+  .fir-icon-button {
+    padding: 10px;
+    margin: 10px;
+
+    i {
+      background-size: 25px 25px;
+      width: 25px;
+      height: 25px;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 10px;
+
+      &.excel {
+        background-image: url("icons/excel.png");
+      }
+
+      &.kml {
+        background-image: url("icons/kml.png");
+      }
+
+      &.edp {
+        background-image: url("icons/edp.png");
+        margin-top: -3px;
+      }
+    }
+  }
+
+  .error-message {
+    padding: 5px 10px;
+    color: red;
+  }
+}
+
+
 .search-bar-holder {
   position: fixed;
   width: 400px;
@@ -146,6 +204,12 @@
 
 .firSearch-results {
   user-select: none;
+
+  .btn-info-fir {
+    width: 24px;
+    padding: 0;
+    margin-left: 5px;
+  }
 }
 
 #bufferInput{
@@ -160,29 +224,15 @@
   display: inline-block;
 }
 
-#FIRSearchMinimizeButton{
+.collapse-panel-button,
+#FIRSearchMinimizeButton,
+#FIRHittaGrannarMinimizeButton {
   width: 35px;
 }
 
-#FIRHittaGrannarMinimizeButton{
-  width: 35px;
-}
-
-#FIRCreateMinimizeButton{
-  width: 35px;
-}
-
-// infoknapp
-
-#instructionsTextFirsokning{
-  display: none;
-}
-
-#instructionsTextFirhittaGrannar{
-  display: none;
-}
-
-#instructionsTextFirskapaFastighetsforteckning{
+#instructionsTextFirsokning,
+#instructionsTextFirhittaGrannar,
+#instructionsTextFirskapaFastighetsforteckning {
   display: none;
 }
 
@@ -198,7 +248,12 @@
   }
 }
 
-.btn-info-fir{
+.btn-info-fir {
+  width: 40px;
   background: transparent;
   border: none;
+
+  img {
+    width: 100%;
+  }
 }

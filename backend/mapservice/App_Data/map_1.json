@@ -414,20 +414,19 @@
       "type": "fir",
       "options": {
         "toolbar": "bottom",
-        "maxZoom": 14,
+        "maxZoom": 7,
         "markerImg": "http://localhost/hajk/assets/icons/marker.png",
+        "infoKnappLogo": "/assets/icons/hjalpknapp_FIR.png",
         "kmlImportUrl": "/mapservice/import/kml",
-        "kmlExportUrl": "/mapservice/export/kml",
         "excelExportUrl": "/mapservice/fir/realEstateOwnerlist",
         "displayPopup": false,
-        "firSelectionTools": true,
         "base64Encode": false,
-        "instruction": "",
+        "instruction": "PHA+TWVkIGRldHRhIHZlcmt0eWcga2FuIGR1IHP2a2Egb2NoIG1hcmtlcmEgZmFzdGlnaGV0ZXIsIGhpdHRhIGdyYW5uYXIgc2FtdCBza2FwYSBmYXN0aWdoZXRzZvZydGVja25pbmcuIDxici8+PGJyLz4gCkR1IGthbiBs5HNhIG1lciBvY2ggaHVyIHZhcmplIGRlbCBmdW5nZXJhciBvbSBkdSBrbGlja2FyIHDlIHJlc3Bla3RpdmUgZnLlZ2V0ZWNrZW4uIDwvcD4=",
+        "instructionSokning": "PHA+U/ZrbmluZyBrYW4gZ/ZyYXMgZ2Vub20gYXR0IHNrcml2YSBz9mtvcmQgb2NoL2VsbGVyIHJpdGEgZXR0IHP2a29tcuVkZS4gTuRyIGR1IHRyeWNrZXIgcOUgc/ZrIGtvbW1lciBkdSBhdHQgem9vbWFzIHRpbGwgc/ZrcmVzdWx0YXRldCBpIGthcnRhbi4gPGJyLz48YnIvPiAKIAo8c3Ryb25nPlP2a29yZDwvc3Ryb25nPjxici8+IApEdSBrYW4gduRsamEgYXR0IHP2a2EgcOUgZmFzdGlnaGV0c2JldGVja25pbmcsIGFkcmVzcyBlbGxlciDkZ2FyZS4gTuRyIGR1IHNrcml2ZXIga29tbWVyIHP2a3Jlc3VsdGF0IGF1dG9tYXRpc2sgbuRyIGR1IHNrcml2aXQgbWluc3QgZnlyYSB0ZWNrZW4uICBEZXQgc3lucyBzb20gbWFya2VyYWRlIGZhc3RpZ2hldGVyIGkga2FydGFuIHNhbXQgc29tIGVuIGxpc3RhIGzkbmdzdCBuZXIgaSBwYW5lbGVuLiBEdSBrYW4gduRsamEgYXR0IHP2a2EgZXhha3QgbWF0Y2huaW5nIHNvbSBpbm5lYuRyIGF0dCBlbmRhcyByZXN1bHRhdCBzb20gZXhha3QgbWF0Y2hhciBz9mtvcmRldCBrb21tZXIgbWVkLiA8YnIvPjxici8+IAogCjxzdHJvbmc+U/Zrb21y5WRlPC9zdHJvbmc+PGJyLz4gCkR1IGthbiByaXRhIHP2a29tcuVkZSBzb20gZW4geXRhLCBwdW5rdCBlbGxlciBsaW5qZS4gRGV0IGflciBvY2tz5SBhdHQgbGFkZGEgdXBwIGVuIGttbC1maWwgb2NoIGFuduRuZGEgc29tIHP2a29tcuVkZS4gVmlsbCBkdSB0YSBib3J0IGV0dCBz9mtvbXLlZGUgYW525G5kZXIgZHUgc29wdHVubmFuLiBBbGxhIGZhc3RpZ2hldGVyIHNvbSBsaWdnZXIgaGVsdCBlbGxlciBkZWx2aXMgaW5vbSBz9mtvbXLlZGV0IGtvbW1lciBtZWQgaSBz9mtyZXN1bHRhdGV0LiA8YnIvPjxici8+IAogCkhhciBkdSByaXRhdC9sYWRkYXQgdXBwIHP2a29tcuVkZSBrYW4gZHUgbORnZ2EgcOUgZW4gYnVmZmVydCBnZW5vbSBhdHQgZnlsbGEgaSD2bnNrYXQgYnVmZmVydGF2c3TlbmQuIEFsbGEgZmFzdGlnaGV0ZXIgc29tIGxpZ2dlciBoZWx0IGVsbGVyIGRlbHZpcyBpbm9tIHP2a29tcuVkZXQgb2NoIGJ1ZmZlcnRlbiBrb21tZXIgbWVkIGkgc/ZrcmVzdWx0YXRldC4gPGJyLz48YnIvPiAKIAo8c3Ryb25nPlP2a2FsdGVybmF0aXY8L3N0cm9uZz48YnIvPiAKSORyIGthbiBkdSB25GxqYSBvbSBkdSB25GxqYSBib3J0IGF0dCBmYXN0aWdoZXRzYmV0ZWNrbmluZyB2aXNhcyBzb20gZXRpa2V0dCBw5SBtYXJrZXJhZGUgZmFzdGlnaGV0ZXIuIEf2ciBkdSBlbiBz9mtuaW5nIHDlIHP2a29tcuVkZSBvY2ggZXZlbnR1ZWxsIGJ1ZmZlcnQgcnVudCBz9mtvbXLlZGV0IGthbiBkdSB25GxqYSBib3J0IGF0dCBkZXR0YSB2aXNhcyBpIGthcnRhbi4gPC9wPiA=",
+        "instructionHittaGrannar": "PHA+TuRyIGR1IGhhciBnam9ydCBlbiBz9mtuaW5nIHPlIGF0dCBkdSBoYXIgZW4gZWxsZXIgZmxlcmEgZmFzdGlnaGV0ZXIgaSBkaXR0IHP2a3Jlc3VsdGF0IGthbiBkdSBhbnbkbmRhIGRlbm5hIGZ1bmt0aW9uLiA8YnIvPjxici8+IAogCkhpdHRhIGFuZ3LkbnNhbmRlIGdyYW5uYXIgaW5uZWLkciBhdHQgYWxsYSBmYXN0aWdoZXRlciBzb20gZGVsYXIgZmFzdGlnaGV0c2dy5G5zIGtvbW1lciBhdHQgbWFya2VyYXMgb2NoIGzkZ2dhcyB0aWxsIGkgZGl0dCBz9mtyZXN1bHRhdC4gPGJyLz48YnIvPiAKIApIaXR0YSBncmFubmFyIGlub20mIGlubmVi5HIgYXR0IGR1IHNrYXBhciBlbiBidWZmZXJ0IHJ1bnQgZmFzdGlnaGV0ZW4vZmFzdGlnaGV0ZXJuYSBpIHP2a3Jlc3VsdGF0ZXQuIEFsbGEgZmFzdGlnaGV0ZXIgc29tIGxpZ2dlciBoZWx0IGVsbGVyIGRlbHZpcyBpbm5hbmb2ciBidWZmZXJ0ZW4ga29tbWVyIGF0dCBs5GdnYXMgdGlsbCBpIHP2a3Jlc3VsdGF0ZXQuIDwvcD4=",
+        "instructionSkapaFastighetsforteckning": "PHA+TuRyIGR1IGhhciBnam9ydCBlbiBz9mtuaW5nIHPlIGF0dCBkdSBoYXIgZW4gZWxsZXIgZmxlcmEgZmFzdGlnaGV0ZXIgaSBkaXR0IHP2a3Jlc3VsdGF0IGthbiBkdSBhbnbkbmRhIGRlbm5hIGZ1bmt0aW9uLiBE5SBza2FwYXMgZW4gZXhjZWwtbGlzdGEgbWVkIGZhc3RpZ2hldGVybmEgaSBz9mtyZXN1bHRhdGV0LiA8YnIvPjxici8+IAogCjxzdHJvbmc+RvZydGVja25pbmdlbiBpbm5laOVsbGVyOjwvc3Ryb25nPjxici8+IApCZXRlY2tuaW5nPGJyLz4gClRvdGFsIGFyZWE8YnIvPiAKxGdhbmRlZm9ybSAoPWxhZ2ZhcnQgZWxsZXIgdG9tdHLkdHQpIDxici8+IApBbmRlbDxici8+IArEZ2FyZS9pbm5laGF2YXJlPGJyLz4gClBlcnNvbi0vb3JnYW5pc2F0aW9uc251bW1lciATIFZBTEJBUjxici8+IApjL288YnIvPiAKQWRyZXNzPGJyLz4gClBvc3RudW1tZXI8YnIvPiAKUG9zdGFkcmVzczxici8+PGJyLz4gCiAKPHN0cm9uZz5WYWwgYXR0IGlua2x1ZGVyYSBpIGZhc3RpZ2hldHNm9nJ0ZWNrbmluZ2VuOjwvc3Ryb25nPjxici8+IApTYW1m5GxsaWdoZXRlciATIEVHRU4gRkxJSzxici8+IApHZW1lbnNhbWhldHNhbmzkZ2duaW5nYXITIEVHRU4gRkxJSzxici8+IApS5HR0aWdoZXRlchMgRUdFTiBGTElLPGJyLz4gClBlcnNvbm51bW1lcjxici8+IApUYXhlcmFkIORnYXJlEyBFR0VOIEZMSUs8L3A+IA==",
         "filterVisible": false,
-        "infoKnappLogo": "/assets/icons/hjalpknapp_FIR.png",
-        "instructionSokning": "",
-        "instructionHittaGrannar": "",
-        "instructionSkapaFastighetsforteckning": "",
+        "firSelectionTools": true,
         "anchor": [
           16,
           32
@@ -441,18 +440,18 @@
         "layers": [
           {
             "id": "1246",
-            "fnrField": "nyckel",
-            "omradeField": "omrade",
-            "visibleForGroups": []
-          },
-          {
-            "id": "1247",
-            "fnrField": "nyckel",
+            "fnrField": "fnr",
             "omradeField": "omrade",
             "visibleForGroups": []
           },
           {
             "id": "1248",
+            "fnrField": "fnr",
+            "omradeField": "omrade",
+            "visibleForGroups": ["NO_SUCH_GROUP"]
+          },
+          {
+            "id": "1249",
             "fnrField": "nyckel",
             "omradeField": "omrade",
             "visibleForGroups": []
@@ -461,21 +460,44 @@
         "realEstateLayer": {
           "id": "1246",
           "omradeField": "omrade",
-          "fnrField": "nyckel",
+          "fnrField": "fnr",
           "labelField": "block_enhet",
           "maxFeatures": "10000",
-          "instructionVidSokresult": ""
+          "instructionVidSokresult": "aW5zdHJ1Y3Rpb24="
         },
         "realEstateWMSLayer": {
-          "id": "1225",
-          "fnrField": "nyckel"
+          "id": "1226",
+          "fnrField": "fnr"
         },
         "colorResult": "rgba(255,255,0,0.3)",
         "colorResultStroke": "rgba(0,0,0,0.6)",
         "colorHighlight": "rgba(0,0,255,0.2)",
         "colorHighlightStroke": "rgba(0,0,0,0.6)",
         "colorHittaGrannarBuffer": "rgba(50,200,200,0.4)",
-        "colorHittaGrannarBufferStroke": "rgba(0,0,0,0.2)"
+        "colorHittaGrannarBufferStroke": "rgba(0,0,0,0.2)",
+        "instructionResidentList": "aW5zdHJ1Y3Rpb24=",
+        "residentList": {
+          "visibleForGroups": ["NO_SUCH_GROUP"],
+          "excelExportUrl": "/fir/residentlist",
+          "minAge": 18,
+          "residentDataLayer": {
+            "id": "1247",
+            "namnFieldName": "tillnamn",
+            "namnDisplayName": "Namn",
+            "adressFieldName": "adress",
+            "adressDisplayName": "Adress",
+            "postnrFieldName": "postnr",
+            "postnrDisplayName": "Postnummer",
+            "postortFieldName": "ort",
+            "postortDisplayName": "Postort",
+            "alderFieldName": "personnr",
+            "alderDisplayName": "Ålder",
+            "koenFieldName": "koen",
+            "koenDisplayName": "Kön",
+            "fodelsedatumFieldName": "personnr",
+            "fodelsedatumDisplayName": "Födelsedatum"
+          }
+        }
       },
       "index": 13
     }

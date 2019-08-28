@@ -192,6 +192,10 @@
             return tool.type === 'fir';
         });
 
+        var kirTool = map_config.tools.find(tool => {
+            return tool.type === 'kir';
+        });
+
         var editTool = map_config.tools.find(tool => {
           return tool.type === 'edit';
         });
@@ -228,7 +232,6 @@
           } else {
               var wfslayers = internal.overrideGlobalSearchConfig(searchTool, data);
               searchTool.options.sources = wfslayers;
-              data.wfslayers = wfslayers;
             }
         }
 
@@ -250,7 +253,10 @@
                     return layer;
                 }
             });
-            firTool.options.realEstateLayerCaption = realEstateLayer[0].caption;
+
+            if (realEstateLayer[0]) {
+              firTool.options.realEstateLayerCaption = realEstateLayer[0].caption;
+            }
 
             // add caption for real estate WMS layer to the options
             var realEstateWMSLayer = data.wmslayers.filter(layer => {
@@ -259,7 +265,34 @@
                 }
             });
 
-            firTool.options.realEstateWMSLayerCaption = realEstateWMSLayer[0].caption;
+            if (realEstateWMSLayer[0]) {
+              firTool.options.realEstateWMSLayerCaption = realEstateWMSLayer[0].caption;
+            }
+
+            if (firTool.options.residentList && firTool.options.residentListDataLayer) {
+              firTool.options.residentList.residentListWfsLayer = data.wfslayers.filter(l => {
+                if (l.id === firTool.options.residentListDataLayer.id) return l;
+              });
+            }
+         }
+
+         if (kirTool) {
+             if (kirTool.options.layers == null) {
+                 kirTool.options.sources = data.wfslayers;
+             } else {
+                 if (kirTool.options.layers.length != 0) {
+                     var wfslayers = internal.overrideGlobalSearchConfig(kirTool, data);
+                     kirTool.options.sources = wfslayers;
+                 } else {
+                     kirTool.options.sources = data.wfslayers;
+                 }
+             }
+
+             if (kirTool.options.residentList && kirTool.options.residentListDataLayer) {
+               kirTool.options.residentList.residentListWfsLayer = data.wfslayers.filter(l => {
+                 if (l.id === kirTool.options.residentListDataLayer.id) return l;
+               });
+             }
         }
 
         if (editTool) {

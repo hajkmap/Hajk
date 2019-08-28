@@ -196,6 +196,7 @@
     <Compile Include="Components\MapExport\SharpMapExtensions\MapThrowsException.cs" />
     <Compile Include="Components\TIFFCreator.cs" />
     <Compile Include="Components\Util.cs" />
+    <Compile Include="Controllers\EdpController.cs" />
     <Compile Include="Controllers\FirController.cs" />
     <Compile Include="Controllers\ExtendedWMSLayerController.cs" />
     <Compile Include="Controllers\LayerMenuController.cs" />

@@ -43,6 +43,7 @@ namespace MapService.Components
         /// 
         /// </summary>
         /// <param name="gfx"></param>
+        /// <param name="fontName"></param>
         /// <param name="text"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
@@ -50,6 +51,22 @@ namespace MapService.Components
         {
             XColor color = XColors.Black;
             XFont font = new XFont(fontName, height);
+            XBrush brush = new XSolidBrush(color);
+            gfx.DrawString(text, font, brush, x, y);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="gfx"></param>
+        /// <param name="fontName"></param>
+        /// <param name="text"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        private void drawTextTitle(XGraphics gfx, string fontName, string text, int x, int y, int height = 20)
+        {
+            XColor color = XColors.Black;
+            XFont font = new XFont(fontName, height, XFontStyle.Bold);
             XBrush brush = new XSolidBrush(color);
             gfx.DrawString(text, font, brush, x, y);
         }
@@ -124,6 +141,21 @@ namespace MapService.Components
 
             int displayLength = GetDisplayLength(unitLength, scaleBarLengths, scale);
             string displayText = GetDisplayText(unitLength, scaleBarTexts, scale);
+            string commentText = String.Empty;
+            if (exportItem.comments != null)
+            {
+                commentText = exportItem.comments;
+            }
+
+            string titleText = String.Empty;
+            if (exportItem.pdftitle != null)
+            {
+                titleText = exportItem.pdftitle;
+                titleText = titleText.ToUpper();
+            }
+            DateTime thisDay = DateTime.Today;
+            string pdfDate = thisDay.ToString("d");
+            // Display date using short date string.
 
             // adding support for different layouts
             int layout = ConfigurationManager.AppSettings["exportLayout"] != null ? int.Parse(ConfigurationManager.AppSettings["exportLayout"]) : 1;
@@ -145,16 +177,18 @@ namespace MapService.Components
                     infoText = ConfigurationManager.AppSettings["exportInfoText"];
                 }
 
-                int height = 45 + copyrights.Count * 10;
+                this.drawTextTitle(gfx, fontName, titleText, 15, 25);
+
+                int height = 65 + copyrights.Count * 10;
 
                 XPoint[] points = new XPoint[]
                 {
-                new XPoint(12, 12),
-                new XPoint(12, height),
-                new XPoint(55 + displayLength, height),
-                new XPoint(55 + displayLength, 12),
-                new XPoint(12, 12)
-                };
+                    new XPoint(15, 35),
+                    new XPoint(15, height),
+                    new XPoint(70 + displayLength, height),
+                    new XPoint(70 + displayLength, 35),
+                    new XPoint(15, 35)
+                 };
 
                 gfx.DrawPolygon(XBrushes.White, points, XFillMode.Winding);
 
@@ -165,13 +199,15 @@ namespace MapService.Components
                 this.drawText(gfx, fontName, displayText, 20 + displayLength, 35);
 
                 var y = (int)page.Height.Point - 15;
-
+                var printText = commentText + "   " + pdfDate;
+                this.drawText(gfx, fontName, printText, 15, y - 20);
+                
                 this.drawText(gfx, fontName, infoText, 15, y);
 
                 int i = 0;
                 copyrights.ForEach(copyright =>
                 {
-                    int start = 50;
+                    int start = 70;
                     this.drawText(gfx, fontName, String.Format("© {0}", copyright), 15, start + i * 10);
                     i++;
                 });
@@ -205,6 +241,8 @@ namespace MapService.Components
                 {
                     infoText = ConfigurationManager.AppSettings["exportInfoText"];
                 }
+                
+                this.drawTextTitle(gfx, fontName, titleText, 30, 27);
 
                 int height = 1;
 
@@ -227,6 +265,9 @@ namespace MapService.Components
                 this.drawText(gfx, fontName, displayText, 38 + displayLength, (int)page.Height.Point - 16, 8);
                 
                 var y = (int)page.Height.Point - 2;
+                
+                var printText = commentText + "   " + pdfDate;
+                this.drawText(gfx, fontName, printText, 40, y - 40);
 
                 this.drawText(gfx, fontName, infoText, 33, y, 8);
 

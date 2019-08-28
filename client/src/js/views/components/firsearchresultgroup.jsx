@@ -414,8 +414,8 @@ FirSearchResultGroup = {
                                             infobox = this.props.result.hits[i].infobox;
                                         }
 
-                                        var itemId = this.props.result.hits[i].get("text");//group.hits[i].getProperties().text;
-                                        if (featureId === itemId) { //if it is first hit then should found=false
+                                        var itemId = this.props.result.hits[i].get("text");
+                                        if (featureId && featureId === itemId) { //if it is first hit then should found=false
                                             found = true;
                                             break;
                                         }
@@ -426,6 +426,7 @@ FirSearchResultGroup = {
                                     }
                                 }
                             );
+
                             var sameNamePromises = this.props.model.findWithSameNames(names, wmsLayer, true);
 
                             Promise.all(sameNamePromises).then(() => {
@@ -640,9 +641,9 @@ FirSearchResultGroup = {
         ;
 
         var instructionsBtn = (
-            <span>
-            <button onClick={(e) => {e.stopPropagation(); this.openInstruction()}} className='btn-info-fir' id={"instructionsbox-result-" + this.props.id} ><img className='btn-info-fir' src={this.props.model.get("infoKnappLogo")} style={{height: '55%', width:'55%'}} /></button>
-            </span>
+            <button onClick={(e) => {e.stopPropagation(); this.openInstruction()}} className='btn-info-fir' id={"instructionsbox-result-" + this.props.id} >
+              <img src={this.props.model.get("infoKnappLogo")} />
+            </button>
         );
 
         var instructionTxt = (
