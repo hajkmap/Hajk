@@ -1,10 +1,9 @@
 import React from "react";
-import Button from "@material-ui/core/Button";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
-import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import { withStyles } from "@material-ui/core/styles";
 
 import MapSwitcher from "./MapSwitcher";
+import BackgroundCleaner from "./BackgroundCleaner";
 
 const styles = theme => {
   return {
@@ -51,15 +50,6 @@ class ToolbarMenu extends React.Component {
     });
   }
 
-  renderMapSwitcher() {
-    const { appModel } = this.props;
-    if (appModel.config.mapConfig.map.mapselector)
-      return <MapSwitcher appModel={appModel} />;
-    else {
-      return null;
-    }
-  }
-
   renderSearchPlugin() {
     const { classes, appModel } = this.props;
     const searchPlugin = appModel.plugins.search;
@@ -90,7 +80,7 @@ class ToolbarMenu extends React.Component {
   };
 
   render() {
-    const { classes } = this.props;
+    const { classes, appModel } = this.props;
     return (
       <div className={classes.toolbarMenu}>
         {this.renderSearchPlugin()}
@@ -122,16 +112,8 @@ class ToolbarMenu extends React.Component {
           }}
         >
           <div>
-            {this.renderMapSwitcher()}
-            <Button
-              aria-label="Rensa kartan"
-              onClick={e => {
-                this.props.appModel.clear();
-              }}
-            >
-              <VisibilityOffIcon className={classes.icon} />
-              Rensa kartan
-            </Button>
+            <MapSwitcher appModel={appModel} />{" "}
+            <BackgroundCleaner appModel={appModel} />{" "}
           </div>
         </div>
       </div>

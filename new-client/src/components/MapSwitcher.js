@@ -109,26 +109,29 @@ class MapSwitcher extends React.PureComponent {
       : "";
 
     return (
-      <>
-        <Tooltip title={instruction}>
-          <Button
-            aria-owns={open ? "render-props-menu" : undefined}
-            aria-haspopup="true"
-            onClick={this.handleClick}
+      // Render only if config says so
+      this.props.appModel.config.mapConfig.map.mapselector && (
+        <>
+          <Tooltip title={instruction}>
+            <Button
+              aria-owns={open ? "render-props-menu" : undefined}
+              aria-haspopup="true"
+              onClick={this.handleClick}
+            >
+              <SwitchCameraIcon className={classes.icon} />
+              {themeMapHeaderCaption}
+            </Button>
+          </Tooltip>
+          <Menu
+            id="render-props-menu"
+            anchorEl={anchorEl}
+            open={open}
+            onClose={this.handleClose}
           >
-            <SwitchCameraIcon className={classes.icon} />
-            {themeMapHeaderCaption}
-          </Button>
-        </Tooltip>
-        <Menu
-          id="render-props-menu"
-          anchorEl={anchorEl}
-          open={open}
-          onClose={this.handleClose}
-        >
-          {this.renderMenuItems()}
-        </Menu>
-      </>
+            {this.renderMenuItems()}
+          </Menu>
+        </>
+      )
     );
   }
 }
