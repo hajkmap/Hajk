@@ -90,7 +90,8 @@ class SearchResultList extends React.PureComponent {
 
   renderResult() {
     const { result, target } = this.props;
-    if (this.state.minimized) return null;
+    //if (this.state.minimized) return null;
+
     return (
       <div>
         {result.map((featureType, i) => {
@@ -191,7 +192,9 @@ class SearchResultList extends React.PureComponent {
               this.state.minimized ? classes.hidden : null
             )}
           >
-            {this.renderResult()}
+            <div className={this.state.minimized ? classes.hidden : null}>
+              {this.renderResult()}
+            </div>
           </div>
         </div>
       );
