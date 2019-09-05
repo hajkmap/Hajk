@@ -58,10 +58,10 @@ class LayerSwitcher extends React.PureComponent {
         title={this.title}
         onClose={this.closePanel}
         open={this.state.panelOpen}
-        height="auto"
         width={400}
-        top={210}
-        left={5}
+        height="auto"
+        // top={210}
+        // left={5}
         mode={mode}
       >
         <LayerSwitcherView
@@ -72,7 +72,7 @@ class LayerSwitcher extends React.PureComponent {
           breadCrumbs={this.props.type === "widgetItem"}
         />
       </Window>,
-      document.getElementById("toolbar-panel")
+      document.getElementById("windows-container")
     );
   }
 

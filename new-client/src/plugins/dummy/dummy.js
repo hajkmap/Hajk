@@ -133,7 +133,7 @@ class Dummy extends React.PureComponent {
           app={this.app} // Or even the whole App
         />
       </Window>,
-      document.getElementById("toolbar-panel")
+      document.getElementById("windows-container")
     );
   }
 

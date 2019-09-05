@@ -108,7 +108,7 @@ class Collector extends Component {
           options={this.options}
         />
       </Window>,
-      document.getElementById("toolbar-panel")
+      document.getElementById("windows-container")
     );
   }
 

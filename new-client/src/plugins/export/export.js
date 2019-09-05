@@ -66,7 +66,7 @@ class Export extends React.PureComponent {
           parent={this}
         />
       </Window>,
-      document.getElementById("toolbar-panel")
+      document.getElementById("windows-container")
     );
   }
 

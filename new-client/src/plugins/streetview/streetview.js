@@ -131,7 +131,7 @@ class StreetView extends React.PureComponent {
           displayPanorama={this.state.displayPanorama}
         />
       </Window>,
-      document.getElementById("toolbar-panel")
+      document.getElementById("windows-container")
     );
   }
 

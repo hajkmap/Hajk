@@ -114,7 +114,7 @@ class Draw extends React.PureComponent {
           open={this.state.panelOpen}
         />
       </Window>,
-      document.getElementById("toolbar-panel")
+      document.getElementById("windows-container")
     );
   }
 

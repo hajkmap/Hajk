@@ -82,7 +82,7 @@ class Measure extends React.PureComponent {
       >
         <MeasureView parent={this} />
       </Window>,
-      document.getElementById("toolbar-panel")
+      document.getElementById("windows-container")
     );
   }
 

@@ -67,7 +67,7 @@ class buffer extends React.PureComponent {
           app={this.app}
         />
       </Window>,
-      document.getElementById("toolbar-panel")
+      document.getElementById("windows-container")
     );
   }
 

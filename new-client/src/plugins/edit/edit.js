@@ -67,7 +67,7 @@ class Edit extends React.PureComponent {
           observer={this.observer}
         />
       </Window>,
-      document.getElementById("toolbar-panel")
+      document.getElementById("windows-container")
     );
   }
 

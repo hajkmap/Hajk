@@ -1,9 +1,6 @@
 import React from "react";
-import { createPortal } from "react-dom";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import { withStyles } from "@material-ui/core/styles";
-import SearchIcon from "@material-ui/icons/Search";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import Observer from "react-event-observer";
 import SearchWithTextInput from "./components/searchviews/SearchWithTextInput";
 import SearchResultList from "./components/resultlist/SearchResultList.js";
@@ -15,6 +12,16 @@ import SearchWithPolygonInput from "./components/searchviews/SearchWithPolygonIn
 import SearchModel from "./SearchModel.js";
 import PanelHeader from "./../../components/PanelHeader.js";
 import { isMobile } from "../../utils/IsMobile.js";
+
+import { Tooltip } from "@material-ui/core";
+import IconButton from "@material-ui/core/IconButton";
+import MenuIcon from "@material-ui/icons/Menu";
+
+import Paper from "@material-ui/core/Paper";
+import InputBase from "@material-ui/core/InputBase";
+import Divider from "@material-ui/core/Divider";
+import SearchIcon from "@material-ui/icons/Search";
+import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 
 const styles = theme => {
   return {
@@ -121,17 +128,37 @@ const styles = theme => {
         display: "none"
       }
     },
-    iconButton: {
-      color: "black",
-      padding: "3px",
-      overflow: "visible",
-      cursor: "pointer",
-      display: "none"
-    },
+    // iconButton: {
+    //   color: "black",
+    //   padding: "3px",
+    //   overflow: "visible",
+    //   cursor: "pointer",
+    //   display: "none"
+    // },
     backIcon: {
       [theme.breakpoints.up("md")]: {
         display: "none"
       }
+    },
+    // New styles
+    root: {
+      padding: "2px 4px",
+      display: "flex",
+      alignItems: "center",
+      maxWidth: 400,
+      minWidth: 200,
+      marginBottom: theme.spacing(1)
+    },
+    input: {
+      marginLeft: theme.spacing(1),
+      flex: 1
+    },
+    iconButton: {
+      padding: 10
+    },
+    divider: {
+      height: 28,
+      margin: 4
     }
   };
 };
@@ -252,17 +279,7 @@ class Search extends React.PureComponent {
     this.props.app.closePanels();
   };
 
-  renderSearchToggleButtonInMobileView() {
-    const { classes } = this.props;
-    return (
-      <SearchIcon
-        className={classes.iconButtonHeader}
-        onClick={this.toggleSearch}
-      />
-    );
-  }
-
-  renderCenter() {
+  renderCenter2() {
     const { classes } = this.props;
     var searchBar;
 
@@ -273,53 +290,76 @@ class Search extends React.PureComponent {
     }
 
     return (
-      <div
-        className={classes.center}
-        style={{
-          display: this.state.visible ? "block" : "none",
-          top: this.state.minimized ? "calc(100vh - 110px)" : "0"
-        }}
-      >
-        <div className={classes.panelHeader}>
-          <PanelHeader
-            maximizable={false}
-            localObserver={this.localObserver}
-            title="Sök"
-            onClose={() => {
-              this.setState({
-                visible: false
-              });
-            }}
-            onMinimize={() => {
-              this.setState({
-                minimized: true
-              });
-            }}
-            onMaximize={() => {
-              this.setState({
-                minimized: false
-              });
-            }}
-          />
-        </div>
-        <div
-          className={classes.panelBody}
-          style={{
-            height: this.state.minimized ? 0 : "auto",
-            overflow: this.state.minimized ? "hidden" : "visible"
-          }}
-        >
-          <div>{this.renderLoader()}</div>
-          <div className={classes.searchToolsContainer}>
-            <div className={classes.searchContainer}>
-              {this.state.activeSearchView ? this.renderSpatialBar() : null}
-              {searchBar}
-            </div>
-            {this.searchSettings ? this.renderSearchSettingButton() : null}
+      <>
+        <div>{this.renderLoader()}</div>
+        <div className={classes.searchToolsContainer}>
+          <div className={classes.searchContainer}>
+            {this.state.activeSearchView ? this.renderSpatialBar() : null}
+            {searchBar}
           </div>
-          {this.renderSearchResultList("center")}
+          {this.searchSettings ? this.renderSearchSettingButton() : null}
+          <Tooltip title="Visa verktygspanelen">
+            <IconButton
+              onClick={this.props.onMenuClick}
+              className={classes.iconButton2}
+              disabled={this.props.menuButtonDisabled}
+              aria-label="menu"
+            >
+              <MenuIcon />
+            </IconButton>
+          </Tooltip>
         </div>
-      </div>
+        {this.renderSearchResultList("center")}
+      </>
+    );
+  }
+
+  renderCenter() {
+    const { classes, onMenuClick, menuButtonDisabled } = this.props;
+
+    return (
+      <>
+        <Paper className={classes.root}>
+          {this.renderLoader()}
+          <Tooltip title="Visa verktygspanelen">
+            <IconButton
+              onClick={onMenuClick}
+              className={classes.iconButton}
+              disabled={menuButtonDisabled}
+              aria-label="menu"
+            >
+              <MenuIcon />
+            </IconButton>
+          </Tooltip>
+          <InputBase
+            className={classes.input}
+            placeholder="Sök i Hajk"
+            inputProps={{ "aria-label": "search hajk maps" }}
+          />
+          <Tooltip title="Sök i Hajk">
+            <IconButton
+              className={classes.iconButton}
+              aria-label="search"
+              onClick={this.searchModel.search}
+            >
+              <SearchIcon />
+            </IconButton>
+          </Tooltip>
+          <Divider className={classes.divider} orientation="vertical" />
+          <Tooltip title="Visa fler sökalternativ">
+            <IconButton
+              color="primary"
+              className={classes.iconButton}
+              aria-label="MoreHoriz"
+            >
+              <MoreHorizIcon />
+            </IconButton>
+          </Tooltip>
+          {this.state.activeSearchView ? this.renderSpatialBar() : null}
+          {this.searchSettings ? this.renderSearchSettingButton() : null}
+        </Paper>
+        {this.renderSearchResultList("center")}
+      </>
     );
   }
 
@@ -433,45 +473,6 @@ class Search extends React.PureComponent {
     );
   }
 
-  renderTop() {
-    const { classes } = this.props;
-    return (
-      <div
-        className={classes.searchContainerTop}
-        style={{ display: this.state.visible ? "block" : "none" }}
-      >
-        <ArrowBackIcon
-          className={classes.backIcon}
-          onClick={() => {
-            this.setState({
-              visible: false
-            });
-          }}
-        />
-        <SearchWithTextInput
-          model={this.searchModel}
-          forceSearch={this.searchModel.search}
-          onChange={this.searchModel.search}
-          onComplete={this.resolve}
-          localObserver={this.localObserver}
-          tooltip={this.tooltip}
-          target="top"
-          loading={this.state.loading}
-          resetToStartView={() => {
-            this.resetToStartView();
-          }}
-          onClear={() => {
-            this.searchModel.clear();
-            this.localObserver.publish("clearInput");
-            this.setState({
-              result: false
-            });
-          }}
-        />
-        <div>{this.renderSearchResultList("top")}</div>
-      </div>
-    );
-  }
   /**
    * Renders the search plugin.
    * Search is a bit special as it can be render to:
@@ -485,26 +486,7 @@ class Search extends React.PureComponent {
    * @memberof Search
    */
   render() {
-    const { options } = this.props;
-    const center = document.getElementById("center");
-
-    if (options.target === "center" && center) {
-      return (
-        <>
-          {this.renderSearchToggleButtonInMobileView("header")}
-          {createPortal(this.renderCenter(), center)}
-        </>
-      );
-    }
-    if (options.target === "header") {
-      return (
-        <>
-          {this.renderSearchToggleButtonInMobileView("header")}
-          {this.renderTop()}
-        </>
-      );
-    }
-    return null;
+    return this.renderCenter();
   }
 }
 

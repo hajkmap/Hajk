@@ -66,7 +66,7 @@ class Location extends React.PureComponent {
       >
         <LocationView parent={this} />
       </Window>,
-      document.getElementById("toolbar-panel")
+      document.getElementById("windows-container")
     );
   }
 

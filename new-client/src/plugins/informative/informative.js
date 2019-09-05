@@ -92,7 +92,7 @@ class Informative extends React.PureComponent {
           options={this.options}
         />
       </Window>,
-      document.getElementById("toolbar-panel")
+      document.getElementById("windows-container")
     );
   }
 
