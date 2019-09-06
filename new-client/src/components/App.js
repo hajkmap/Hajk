@@ -9,7 +9,7 @@ import AppModel from "./../models/AppModel.js";
 import Window from "./Window.js";
 import Alert from "./Alert";
 import Loader from "./Loader";
-import PluginsList from "./PluginsList";
+// import PluginsList from "./PluginsList";
 import PluginWindows from "./PluginWindows";
 
 import Zoom from "../controls/Zoom";

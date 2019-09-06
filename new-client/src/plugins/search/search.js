@@ -10,7 +10,7 @@ import SearchWithRadiusInput from "./components/searchviews/SearchWithRadiusInpu
 import SearchWithSelectionInput from "./components/searchviews/SearchWithSelectionInput";
 import SearchWithPolygonInput from "./components/searchviews/SearchWithPolygonInput";
 import SearchModel from "./SearchModel.js";
-import PanelHeader from "./../../components/PanelHeader.js";
+// import PanelHeader from "./../../components/PanelHeader.js";
 import { isMobile } from "../../utils/IsMobile.js";
 
 import { Tooltip } from "@material-ui/core";
