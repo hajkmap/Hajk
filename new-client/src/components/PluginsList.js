@@ -14,26 +14,26 @@ import { Hidden, Tooltip } from "@material-ui/core";
  * @param {*} props
  * @returns React.Component
  */
-export default function PluginsList(props) {
-  const { plugins, onPluginClicked } = props;
-  return plugins.map((tool, i) => {
-    const tooltipInstruction = tool.options.instruction
-      ? atob(tool.options.instruction)
-      : "";
+// export default function PluginsList(props) {
+//   const { plugins, onPluginClicked } = props;
+//   return plugins.map((tool, i) => {
+//     const tooltipInstruction = tool.options.instruction
+//       ? atob(tool.options.instruction)
+//       : "";
 
-    return (
-      <Hidden key={i} smUp={tool.options.target !== "toolbar"}>
-        <Tooltip title={tooltipInstruction} placement="top">
-          <div onClick={onPluginClicked} onMouseOver={e => e.stopPropagation()}>
-            <tool.component
-              map={tool.map}
-              app={tool.app}
-              options={tool.options}
-              type="toolbarItem"
-            />
-          </div>
-        </Tooltip>
-      </Hidden>
-    );
-  });
-}
+//     return (
+//       <Hidden key={i} smUp={tool.options.target !== "toolbar"}>
+//         <Tooltip title={tooltipInstruction} placement="top">
+//           <div onClick={onPluginClicked} onMouseOver={e => e.stopPropagation()}>
+//             <tool.component
+//               map={tool.map}
+//               app={tool.app}
+//               options={tool.options}
+//               type="toolbarItem"
+//             />
+//           </div>
+//         </Tooltip>
+//       </Hidden>
+//     );
+//   });
+// }

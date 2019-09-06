@@ -1,52 +1,44 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import Observer from "react-event-observer";
-import AppModel from "./../models/AppModel.js";
-// import Typography from "@material-ui/core/Typography";
-// import AppBar from "@material-ui/core/AppBar";
-// import { Toolbar as MUIToolbar } from "@material-ui/core";
+import cslx from "clsx";
 import { SnackbarProvider } from "notistack";
+import Observer from "react-event-observer";
+
+import AppModel from "./../models/AppModel.js";
 import Window from "./Window.js";
 import Alert from "./Alert";
 import Loader from "./Loader";
-// import Reparentable from "./Reparentable";
+import PluginsList from "./PluginsList";
+import PluginWindows from "./PluginWindows";
+
 import Zoom from "../controls/Zoom";
 import ScaleLine from "../controls/ScaleLine";
 import Attribution from "../controls/Attribution.js";
-
-import Drawer from "@material-ui/core/Drawer";
-import Divider from "@material-ui/core/Divider";
-import Hidden from "@material-ui/core/Hidden";
-import cslx from "clsx";
-
-import IconButton from "@material-ui/core/IconButton";
-import LockIcon from "@material-ui/icons/Lock";
-import LockOpenIcon from "@material-ui/icons/LockOpen";
-
 import MapSwitcher from "./MapSwitcher";
 import BackgroundCleaner from "./BackgroundCleaner";
 
-// import SearchBox from "./SearchBox";
-import { Tooltip, Backdrop } from "@material-ui/core";
-import PluginsList from "./PluginsList";
+import {
+  Backdrop,
+  Divider,
+  Drawer,
+  Hidden,
+  IconButton,
+  Tooltip
+} from "@material-ui/core";
+
+import LockIcon from "@material-ui/icons/Lock";
+import LockOpenIcon from "@material-ui/icons/LockOpen";
 
 // A global that holds our windows, for use see components/Window.js
 document.windows = [];
 
 const DRAWER_WIDTH = 250;
 
-// Global customizations that previously went to custom.css
-// should now go to public/customTheme.json. They are later
-// merged when MUI Theme is created in index.js.
 const styles = theme => {
   return {
-    // We can also consult https://material-ui.com/customization/default-theme/ for available options
-
     map: {
       zIndex: 1,
-      background: "aliceblue",
       position: "absolute",
       left: 0,
       right: 0,
@@ -135,8 +127,8 @@ const styles = theme => {
     widgetItem: {
       width: "220px"
     },
+    // IMPORTANT: shiftedLeft definition must be the last one, as styles are applied in that order via JSS
     shiftedLeft: {
-      // Must be the last, as styles are applied in that order via JSS
       left: DRAWER_WIDTH
     }
   };
@@ -151,14 +143,12 @@ class App extends React.PureComponent {
       mapClickDataResult: {},
 
       // Drawer-related states
-      visible: true,
-      permanent: false,
-      mouseOverLock: false
+      drawerVisible: true,
+      drawerPermanent: false,
+      drawerMouseOverLock: false
     };
     this.globalObserver = new Observer();
     this.appModel = new AppModel(props.config, this.globalObserver);
-    // this.widgetsLeftContainer = document.createElement("div");
-    // this.widgetsRightContainer = document.createElement("div");
   }
 
   componentDidMount() {
@@ -194,6 +184,14 @@ class App extends React.PureComponent {
       });
     });
 
+    this.globalObserver.subscribe("hideDrawer", () => {
+      this.state.drawerVisible &&
+        !this.state.drawerPermanent &&
+        this.setState({ drawerVisible: false }, () => {
+          console.log("hideDrawer called");
+        });
+    });
+
     this.appModel
       .getMap()
       .getLayers()
@@ -219,6 +217,7 @@ class App extends React.PureComponent {
       });
   }
 
+  /*
   renderWidgets(target) {
     const { classes } = this.props;
     const { tools } = this.state;
@@ -253,13 +252,14 @@ class App extends React.PureComponent {
       return null;
     }
   }
+  */
 
-  renderPopup() {
-    var open =
+  renderSearchResultsWindow() {
+    const open =
       this.state.mapClickDataResult &&
       this.state.mapClickDataResult.features &&
       this.state.mapClickDataResult.features.length > 0;
-    var features =
+    const features =
       this.state.mapClickDataResult && this.state.mapClickDataResult.features;
 
     return (
@@ -294,37 +294,38 @@ class App extends React.PureComponent {
       return;
     }
 
-    this.setState({ visible: open });
+    this.setState({ drawerVisible: open });
   };
 
   /**
-   * Flip the @this.state.permanent switch, then preform some
+   * Flip the @this.state.drawerPermanent switch, then preform some
    * more work to ensure the OpenLayers canvas has the correct
    * canvas size.
    *
    * @memberof App
    */
   togglePermanent = e => {
-    this.setState({ permanent: !this.state.permanent }, () => {
+    this.setState({ drawerPermanent: !this.state.drawerPermanent }, () => {
       // Viewport size has changed, hence we must tell OL
       // to refresh canvas size.
       this.appModel.getMap().updateSize();
 
       // If user clicked on Toggle Permanent and the result is,
-      // that this.state.permanent===false, this means that we
+      // that this.state.drawerPermanent===false, this means that we
       // have exited the permanent mode. In this case, we also
       // want to ensure that Drawer is hidden (otherwise we would
       // just "unpermanent" the Drawer, but it would still be visible).
-      this.state.permanent === false && this.setState({ visible: false });
+      this.state.drawerPermanent === false &&
+        this.setState({ drawerVisible: false });
     });
   };
 
   handleMouseEnter = e => {
-    this.setState({ mouseOverLock: true });
+    this.setState({ drawerMouseOverLock: true });
   };
 
   handleMouseLeave = e => {
-    this.setState({ mouseOverLock: false });
+    this.setState({ drawerMouseOverLock: false });
   };
 
   renderSearchPlugin() {
@@ -335,18 +336,14 @@ class App extends React.PureComponent {
           map={searchPlugin.map}
           app={searchPlugin.app}
           options={searchPlugin.options}
-          onMenuClick={this.toggleDrawer(!this.state.visible)}
-          menuButtonDisabled={this.state.permanent}
+          onMenuClick={this.toggleDrawer(!this.state.drawerVisible)}
+          menuButtonDisabled={this.state.drawerPermanent}
         />
       );
     } else {
       return null;
     }
   }
-
-  handleClickInDrawer = e => {
-    this.state.permanent === false && this.setState({ visible: false });
-  };
 
   render() {
     const { classes, config } = this.props;
@@ -368,9 +365,8 @@ class App extends React.PureComponent {
           />
           <Loader visible={this.state.loading} />
           <div
-            id="flexBox"
             className={cslx(classes.flexBox, {
-              [classes.shiftedLeft]: this.state.permanent
+              [classes.shiftedLeft]: this.state.drawerPermanent
             })}
           >
             <header
@@ -380,22 +376,22 @@ class App extends React.PureComponent {
             </header>
             <main className={classes.main}>
               <div
+                id="left-column"
                 className={cslx(
                   classes.leftColumn,
                   classes.pointerEventsOnChildren
                 )}
-              >
-                <Hidden xsDown>{this.renderWidgets("left")}</Hidden>
-              </div>
+              ></div>
               <div
+                id="right-column"
                 className={cslx(
                   classes.rightColumn,
                   classes.pointerEventsOnChildren
                 )}
-              >
-                <Hidden xsDown>{this.renderWidgets("right")}</Hidden>
-              </div>
+              ></div>
+
               <div
+                id="controls-column"
                 className={cslx(
                   classes.controlsColumn,
                   classes.pointerEventsOnChildren
@@ -416,7 +412,7 @@ class App extends React.PureComponent {
           <div
             id="map"
             className={cslx(classes.map, {
-              [classes.shiftedLeft]: this.state.permanent
+              [classes.shiftedLeft]: this.state.drawerPermanent
             })}
           ></div>
           <div
@@ -425,14 +421,17 @@ class App extends React.PureComponent {
               classes.pointerEventsOnChildren,
               classes.windowsContainer,
               {
-                [classes.shiftedLeft]: this.state.permanent
+                [classes.shiftedLeft]: this.state.drawerPermanent
               }
             )}
           >
-            {this.renderPopup()}
+            {this.renderSearchResultsWindow()}
+            <PluginWindows
+              plugins={this.appModel.getBothDrawerAndWidgetPlugins()}
+            />
           </div>
           <Drawer
-            open={this.state.visible}
+            open={this.state.drawerVisible}
             // NB: we can't simply toggle between permanent|temporary,
             // as the temporary mode unmounts element from DOM and
             // re-mounts it the next time, so we would re-rendering
@@ -449,7 +448,7 @@ class App extends React.PureComponent {
               <Hidden xsDown>
                 <Tooltip
                   title={
-                    (this.state.permanent ? "Lås upp" : "Lås fast") +
+                    (this.state.drawerPermanent ? "Lås upp" : "Lås fast") +
                     " verktygspanelen"
                   }
                 >
@@ -459,13 +458,13 @@ class App extends React.PureComponent {
                     onMouseEnter={this.handleMouseEnter}
                     onMouseLeave={this.handleMouseLeave}
                   >
-                    {this.state.permanent ? (
-                      this.state.mouseOverLock ? (
+                    {this.state.drawerPermanent ? (
+                      this.state.drawerMouseOverLock ? (
                         <LockOpenIcon />
                       ) : (
                         <LockIcon />
                       )
-                    ) : this.state.mouseOverLock ? (
+                    ) : this.state.drawerMouseOverLock ? (
                       <LockIcon />
                     ) : (
                       <LockOpenIcon />
@@ -475,16 +474,12 @@ class App extends React.PureComponent {
               </Hidden>
             </div>
             <Divider />
-            <PluginsList
-              onPluginClicked={this.handleClickInDrawer}
-              plugins={this.appModel.getBothDrawerAndWidgetPlugins()}
-              globalObserver={this.globalObserver}
-            />
+            <div id="plugin-buttons" />
           </Drawer>
           <Backdrop
-            open={this.state.visible && !this.state.permanent}
+            open={this.state.drawerVisible && !this.state.drawerPermanent}
             className={classes.backdrop}
-            onClick={this.toggleDrawer(!this.state.visible)}
+            onClick={this.toggleDrawer(!this.state.drawerVisible)}
           />
         </>
       </SnackbarProvider>

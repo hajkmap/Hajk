@@ -1,7 +1,12 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
-import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+import {
+  Hidden,
+  ListItem,
+  ListItemIcon,
+  ListItemText
+} from "@material-ui/core";
 import LayersIcon from "@material-ui/icons/Layers";
 import Window from "../../components/Window.js";
 import Card from "../../components/Card.js";
@@ -18,12 +23,12 @@ class LayerSwitcher extends React.PureComponent {
     panelOpen: this.props.options.visibleAtStart
   };
 
-  onClick = e => {
+  handleButtonClick = e => {
     this.app.onPanelOpen(this);
     this.setState({
-      panelOpen: true,
-      revision: Math.round(Math.random() * 1e8)
+      panelOpen: true
     });
+    this.app.globalObserver.publish("hideDrawer");
     this.observer.emit("panelOpen");
   };
 
@@ -34,6 +39,7 @@ class LayerSwitcher extends React.PureComponent {
   };
 
   constructor(props) {
+    console.log("props: ", props);
     super(props);
     this.options = props.options;
     this.app = props.app;
@@ -51,74 +57,81 @@ class LayerSwitcher extends React.PureComponent {
     this.app.registerPanel(this);
   }
 
-  renderWindow(mode) {
-    return createPortal(
-      <Window
-        globalObserver={this.props.app.globalObserver}
-        title={this.title}
-        onClose={this.closePanel}
-        open={this.state.panelOpen}
-        width={400}
-        height="auto"
-        // top={210}
-        // left={5}
-        mode={mode}
-      >
-        <LayerSwitcherView
-          app={this.props.app}
-          map={this.props.map}
-          model={this.layerSwitcherModel}
-          observer={this.observer}
-          breadCrumbs={this.props.type === "widgetItem"}
-        />
-      </Window>,
-      document.getElementById("windows-container")
-    );
-  }
-
-  renderAsWidgetItem() {
+  renderWindow(mode = "window") {
     return (
-      <div>
-        <Card
-          icon={<LayersIcon />}
-          onClick={this.onClick}
+      <>
+        <Window
+          globalObserver={this.props.app.globalObserver}
           title={this.title}
-          abstract={this.description}
-        />
-        {this.renderWindow("window")}
-      </div>
+          onClose={this.closePanel}
+          open={this.state.panelOpen}
+          width={400}
+          height="auto"
+          // top={210}
+          // left={5}
+          mode={mode}
+        >
+          <LayerSwitcherView
+            app={this.props.app}
+            map={this.props.map}
+            model={this.layerSwitcherModel}
+            observer={this.observer}
+            breadCrumbs={this.props.type === "widgetItem"}
+          />
+        </Window>
+        {this.renderDrawerButton()}
+        {this.options.target === "left" &&
+          this.renderWidgetButton("left-column")}
+        {this.options.target === "right" &&
+          this.renderWidgetButton("right-column")}
+      </>
     );
   }
 
-  renderAsToolbarItem() {
-    return (
-      <div>
+  /**
+   * This is a bit of a special case. This method will render
+   * not only plugins specified as Drawer plugins (target===toolbar),
+   * but it will also render Widget plugins - given some special condition.
+   *
+   * Those special conditions are small screens, were there's no screen
+   * estate to render the Widget button in Map Overlay.
+   */
+  renderDrawerButton() {
+    return createPortal(
+      <Hidden smUp={this.options.target !== "toolbar"}>
         <ListItem
           button
           divider={true}
           selected={this.state.panelOpen}
-          onClick={this.onClick}
+          onClick={this.handleButtonClick}
         >
           <ListItemIcon>
             <LayersIcon />
           </ListItemIcon>
           <ListItemText primary={this.title} />
         </ListItem>
-        {this.renderWindow("panel")}
-      </div>
+      </Hidden>,
+      document.getElementById("plugin-buttons")
+    );
+  }
+
+  renderWidgetButton(id) {
+    return createPortal(
+      // Hide Widget button on small screens, see renderDrawerButton too
+      <Hidden xsDown>
+        <Card
+          icon={<LayersIcon />}
+          onClick={this.handleButtonClick}
+          title={this.title}
+          abstract={this.description}
+        />
+      </Hidden>,
+      document.getElementById(id)
     );
   }
 
   render() {
-    if (this.props.type === "toolbarItem") {
-      return this.renderAsToolbarItem();
-    }
-
-    if (this.props.type === "widgetItem") {
-      return this.renderAsWidgetItem();
-    }
-
-    return null;
+    return this.renderWindow();
   }
 }
 

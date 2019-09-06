@@ -14,9 +14,16 @@ import Window from "../../components/Window.js";
 // If you want your plugin to be renderable in Toolbar and as Floating Action Button, you
 // need both the List* and Button imports.
 // Don't forget to change the icon though!
-import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+import {
+  Hidden,
+  ListItem,
+  ListItemIcon,
+  ListItemText
+} from "@material-ui/core";
 import { Button } from "@material-ui/core";
 import BugReportIcon from "@material-ui/icons/BugReport";
+
+import Card from "../../components/Card.js";
 
 // Finally there are some plugin-specific imports. Most plugins will need Model, View and Observer.
 // Panel is optional – you could use a Dialog or something else. This Dummy uses a Panel as an
@@ -51,7 +58,7 @@ class Dummy extends React.PureComponent {
   };
 
   // Called when plugin's <ListItem> or widget <Button> is clicked
-  onClick = e => {
+  handleButtonClick = e => {
     // Tell App to call closePanel() on all other plugins. If your plugin
     // doesn't need to hide other plugins when it opens, you can omit this method.
     this.app.onPanelOpen(this);
@@ -61,9 +68,14 @@ class Dummy extends React.PureComponent {
     this.setState({
       panelOpen: true
     });
+
+    this.globalObserver.publish("hideDrawer");
+    this.localObserver.emit("panelOpen");
   };
 
   constructor(props) {
+    console.log("props: ", props);
+
     super(props);
     this.options = props.options;
 
@@ -71,6 +83,9 @@ class Dummy extends React.PureComponent {
     this.title = this.options.title || "Dummy plugin";
 
     this.app = props.app;
+
+    // It can be convenient to have access to global observer
+    this.globalObserver = this.app.globalObserver;
 
     // Optionally setup a local observer to allow sending messages between here and model/view.
     // It's called 'localObserver' to distinguish it from AppModel's observer, that we call 'globalObserver'.
@@ -102,38 +117,71 @@ class Dummy extends React.PureComponent {
     return this.state.panelOpen !== nextState.panelOpen;
   } */
 
+  // Using Portals (see React docs) we render our Window (or Panel) in another <div>. Which <div> it is
+  // depends on whether the browser is a mobile or desktop.
+  // Value of 'mode' parameter determines whether the Window will render as a free floating window, or a "sticky" panel.
+
   // The renderWindow method is not part of the API but rather convention.
-  // Please try to stick to the convention as it makes it easier to recognize logic flow in other people's plugins.
-  renderWindow(mode) {
-    // Using Portals (see React docs) we render our Window (or Panel) in another <div>. Which <div> it is
-    // depends on whether the browser is a mobile or desktop.
-    // Value of 'mode' parameter determines whether the Window will render as a free floating window, or a "sticky" panel.
+  // Please try to stick to the convention as it makes it easier to recognize logic flow in other people's plugins
+  renderWindow(mode = "window") {
+    return (
+      <>
+        <Window
+          globalObserver={this.props.app.globalObserver}
+          title={this.title}
+          onClose={this.closePanel}
+          open={this.state.panelOpen}
+          position={this.position}
+          height={450}
+          width={400}
+          top={210}
+          left={0}
+          mode={mode}
+        >
+          <DummyView
+            // Here you send some props to the plugin's View.
+            // Note that normally you don't need to give the View access to BOTH Observer and Model,
+            // one of those is sufficient, as Model will mostly already have access to the Observer.
+            // So, for performance reasons, make sure to ONLY include props that are ACTUALLY USED in the View.
+            // map={this.map} // You can send the map
+            localObserver={this.localObserver} // You can send the Observer
+            model={this.dummyModel} // Etc...
+            app={this.app} // Or even the whole App
+          />
+        </Window>
+        {this.renderDrawerButton()}
+        {this.options.target === "left" &&
+          this.renderWidgetButton("left-column")}
+        {this.options.target === "right" &&
+          this.renderWidgetButton("right-column")}
+      </>
+    );
+  }
+
+  /**
+   * This is a bit of a special case. This method will render
+   * not only plugins specified as Drawer plugins (target===toolbar),
+   * but it will also render Widget plugins - given some special condition.
+   *
+   * Those special conditions are small screens, were there's no screen
+   * estate to render the Widget button in Map Overlay.
+   */
+  renderDrawerButton() {
     return createPortal(
-      <Window
-        globalObserver={this.props.app.globalObserver}
-        title={this.title}
-        onClose={this.closePanel}
-        open={this.state.panelOpen}
-        position={this.position}
-        height={450}
-        width={400}
-        top={210}
-        left={0}
-        mode={mode}
-      >
-        {/* */}
-        <DummyView
-          // Here you send some props to the plugin's View.
-          // Note that normally you don't need to give the View access to BOTH Observer and Model,
-          // one of those is sufficient, as Model will mostly already have access to the Observer.
-          // So, for performance reasons, make sure to ONLY include props that are ACTUALLY USED in the View.
-          // map={this.map} // You can send the map
-          localObserver={this.localObserver} // You can send the Observer
-          model={this.dummyModel} // Etc...
-          app={this.app} // Or even the whole App
-        />
-      </Window>,
-      document.getElementById("windows-container")
+      <Hidden smUp={this.options.target !== "toolbar"}>
+        <ListItem
+          button
+          divider={true}
+          selected={this.state.panelOpen}
+          onClick={this.handleButtonClick}
+        >
+          <ListItemIcon>
+            <BugReportIcon />
+          </ListItemIcon>
+          <ListItemText primary={this.title} />
+        </ListItem>
+      </Hidden>,
+      document.getElementById("plugin-buttons")
     );
   }
 
@@ -143,58 +191,23 @@ class Dummy extends React.PureComponent {
    * Depending on user's preferred location, App will render the plugin
    * using one of these two methods.
    */
-
-  // Render as a FAB (floating action button, https://material-ui.com/demos/buttons/#floating-action-buttons)
-  renderAsWidgetItem() {
-    const { classes } = this.props;
-    return (
-      <div>
-        <Button
-          variant="fab"
-          color="default"
-          aria-label="Dummy plugin"
-          className={classes.button}
-          onClick={this.onClick}
-        >
-          <BugReportIcon />
-        </Button>
-        {this.renderWindow("window")}
-      </div>
+  renderWidgetButton(id) {
+    return createPortal(
+      // Hide Widget button on small screens, see renderDrawerButton too
+      <Hidden xsDown>
+        <Card
+          icon={<BugReportIcon />}
+          onClick={this.handleButtonClick}
+          title={this.title}
+          abstract={this.description}
+        />
+      </Hidden>,
+      document.getElementById(id)
     );
   }
 
-  // Render as a toolbar item, https://material-ui.com/demos/lists/
-  renderAsToolbarItem() {
-    return (
-      <div>
-        <ListItem
-          button
-          divider={true}
-          selected={this.state.panelOpen}
-          onClick={this.onClick}
-        >
-          <ListItemIcon>
-            <BugReportIcon />
-          </ListItemIcon>
-          <ListItemText primary={this.title} />
-        </ListItem>
-        {this.renderWindow("panel")}
-      </div>
-    );
-  }
-
-  // Depending on how the plugin has been configured (in Hajk's admin GUI),
-  // render it as either toolbar item or a free floating action button (aka widget).
   render() {
-    if (this.props.type === "toolbarItem") {
-      return this.renderAsToolbarItem();
-    }
-
-    if (this.props.type === "widgetItem") {
-      return this.renderAsWidgetItem();
-    }
-
-    return null;
+    return this.renderWindow();
   }
 }
 
