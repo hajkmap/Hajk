@@ -40,7 +40,6 @@ class BaseWindowPlugin extends React.PureComponent {
         ? (window.innerWidth - this.width) / 2
         : props.theme.spacing(2);
 
-    console.log("this.left: ", this.left, this);
     props.app.registerPanel(this);
   }
 
