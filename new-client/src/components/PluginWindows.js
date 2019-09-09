@@ -9,7 +9,6 @@ import React from "react";
 export default function PluginWindows(props) {
   const { plugins } = props;
   return plugins.map((tool, i) => {
-    console.log("tool: ", tool);
     return (
       <tool.component
         key={i}
