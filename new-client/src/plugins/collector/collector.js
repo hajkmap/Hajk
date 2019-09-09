@@ -1,5 +1,4 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
 import RateReviewIcon from "@material-ui/icons/RateReview";
@@ -8,9 +7,6 @@ import Observer from "react-event-observer";
 import CollectorView from "./CollectorView.js";
 import CollectorModel from "./CollectorModel.js";
 
-const styles = theme => {
-  return {};
-};
 class Collector extends React.Component {
   constructor(props) {
     super(props);
@@ -72,4 +68,4 @@ class Collector extends React.Component {
   }
 }
 
-export default withStyles(styles)(Collector);
+export default Collector;
