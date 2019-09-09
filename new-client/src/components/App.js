@@ -9,7 +9,6 @@ import AppModel from "./../models/AppModel.js";
 import Window from "./Window.js";
 import Alert from "./Alert";
 import Loader from "./Loader";
-// import PluginsList from "./PluginsList";
 import PluginWindows from "./PluginWindows";
 
 import Zoom from "../controls/Zoom";
@@ -216,43 +215,6 @@ class App extends React.PureComponent {
         });
       });
   }
-
-  /*
-  renderWidgets(target) {
-    const { classes } = this.props;
-    const { tools } = this.state;
-    if (tools) {
-      return tools
-        .filter(tool => tool.options.target === target)
-        .sort((a, b) =>
-          a.sortOrder === b.sortOrder ? 0 : a.sortOrder > b.sortOrder ? 1 : -1
-        )
-        .map((tool, i) => {
-          if (tool.type === "layerswitcher" && !tool.options.active) {
-            return null;
-          }
-          return (
-            <div
-              key={i}
-              className={classes.widgetItem}
-              // onClick={e => {
-              //   this.globalObserver.publish("widgetItemClicked");
-              // }}
-            >
-              <tool.component
-                map={tool.map}
-                app={tool.app}
-                options={tool.options}
-                type="widgetItem"
-              />
-            </div>
-          );
-        });
-    } else {
-      return null;
-    }
-  }
-  */
 
   renderSearchResultsWindow() {
     const open =
