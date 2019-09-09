@@ -38,8 +38,8 @@ class Export extends React.PureComponent {
           title: "Exportera",
           description: "Exportera kartan till andra format",
           height: "auto",
-          width: "400px",
-          top: undefined, // Will default to BaseWindowPlugin's top/left
+          width: 400,
+          top: undefined,
           left: undefined
         }}
       >

@@ -36,9 +36,9 @@ class Buffer extends React.PureComponent {
           icon: <BufferIcon />,
           title: "Buffra",
           description: "Skapa en buffer runt objekt utvalda objekt i kartan",
-          height: "400px",
-          width: "400px",
-          top: undefined, // Will default to BaseWindowPlugin's top/left
+          height: 400,
+          width: 400,
+          top: undefined,
           left: undefined,
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide

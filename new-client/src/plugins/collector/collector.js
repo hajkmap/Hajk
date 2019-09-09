@@ -49,9 +49,9 @@ class Collector extends React.Component {
           icon: <RateReviewIcon />,
           title: "Tyck till",
           description: "Vi vill veta vad du tycker!",
-          height: "450px",
-          width: "430px",
-          top: "210px", // Will default to BaseWindowPlugin's top/left
+          height: 450,
+          width: 430,
+          top: 210,
           left: undefined,
           onWindowHide: this.onWindowHide
         }}

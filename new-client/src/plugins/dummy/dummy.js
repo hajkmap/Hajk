@@ -52,8 +52,8 @@ class Dummy extends React.PureComponent {
           icon: <BugReportIcon />, // Custom icon for this plugin
           title: "Dummy", // Custom title, etc
           description: "En kort beskrivning som visas i widgeten",
-          height: "450px", // Custom height/width etc
-          width: "400px",
+          height: 450, // Custom height/width etc | Use "auto" for automatic or leave undefined
+          width: 400,
           top: undefined, // If undefined, it will fallback to BaseWindowPlugin's defaults
           left: undefined
         }}

@@ -41,8 +41,8 @@ class Draw extends React.PureComponent {
           title: "Rita",
           description: "Rita, mät, importera och exportera",
           height: "auto",
-          width: "400px",
-          top: undefined, // Will default to BaseWindowPlugin's top/left
+          width: 400,
+          top: undefined,
           left: undefined,
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide

@@ -8,7 +8,7 @@ import EditModel from "./EditModel.js";
 import Observer from "react-event-observer";
 
 class Edit extends React.PureComponent {
-  onWindowClose = () => {
+  onWindowHide = () => {
     this.editModel.deactivate();
   };
 
@@ -32,9 +32,10 @@ class Edit extends React.PureComponent {
           title: "Redigera",
           description: "Redigera objekt i kartan (WFS)",
           height: "auto",
-          width: "400px",
-          top: undefined, // Will default to BaseWindowPlugin's top/left
-          left: undefined
+          width: 400,
+          top: undefined,
+          left: undefined,
+          onWindowHide: this.onWindowHide
         }}
       >
         <EditView

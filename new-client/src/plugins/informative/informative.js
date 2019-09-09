@@ -38,8 +38,8 @@ class Informative extends React.PureComponent {
           title: "Översiktsplan",
           description: "Läs mer om vad som planeras i kommunen",
           height: "auto",
-          width: "400px",
-          top: undefined, // Will default to BaseWindowPlugin's top/left
+          width: 400,
+          top: undefined,
           left: undefined
         }}
       >

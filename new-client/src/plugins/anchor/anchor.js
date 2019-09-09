@@ -30,9 +30,9 @@ class Anchor extends React.PureComponent {
           icon: <OpenInNewIcon />,
           title: "Dela",
           description: "Skapa en länk och dela det du ser i kartan med andra",
-          height: "350px",
-          width: "200px",
-          top: undefined, // Will default to BaseWindowPlugin's top/left
+          height: 350,
+          width: 200,
+          top: undefined,
           left: undefined
         }}
       >

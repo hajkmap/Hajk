@@ -30,8 +30,8 @@ class LayerSwitcher extends React.PureComponent {
           title: "Visa",
           description: "Välj vad du vill se i kartan",
           height: "auto",
-          width: "400px",
-          top: undefined, // Will default to BaseWindowPlugin's top/left
+          width: 400,
+          top: undefined,
           left: undefined
         }}
       >
