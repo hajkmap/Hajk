@@ -26,7 +26,22 @@ class BaseWindowPlugin extends React.PureComponent {
     this.title = props.options.title || props.custom.title;
     this.description = props.options.description || props.custom.description;
 
-    this.props.app.registerPanel(this);
+    this.width = props.custom.width || 400;
+    this.height = props.custom.height || "auto";
+
+    this.top = props.custom.top || props.theme.spacing(2);
+
+    // Determine the left margin. If target=toolbar|right, set left margin
+    // to almost 0. If target=left however, we don't want to display
+    // the window on top of Widget button, so we place the window on the
+    // right side of the screen.
+    this.left =
+      props.options.target === "left"
+        ? (window.innerWidth - this.width) / 2
+        : props.theme.spacing(2);
+
+    console.log("this.left: ", this.left, this);
+    props.app.registerPanel(this);
   }
 
   componentDidMount() {
@@ -70,10 +85,10 @@ class BaseWindowPlugin extends React.PureComponent {
           title={this.title}
           onClose={this.closePanel}
           open={this.state.windowVisible}
-          width={400}
-          height="auto"
-          top={this.props.theme.spacing(2)}
-          left={this.props.theme.spacing(2)}
+          width={this.width}
+          height={this.height}
+          top={this.top}
+          left={this.left}
           mode={mode}
         >
           {this.props.children}
