@@ -108,8 +108,6 @@ const styles = theme => {
 
 class Window extends React.PureComponent {
   constructor(props) {
-    console.log(`construct() ${props.title}`, props);
-
     super(props);
     document.windows.push(this);
     this.state = {
@@ -155,7 +153,6 @@ class Window extends React.PureComponent {
        * be it Drawer or Widget.
        */
 
-      console.error("RND is null for this:", this);
       return;
     }
 
@@ -343,7 +340,6 @@ class Window extends React.PureComponent {
       open,
       localObserver
     } = this.props;
-    console.log(`render() ${this.props.title}`, this.props);
 
     var { left, top, width, height } = this.state;
     var resizeBottom = true,
