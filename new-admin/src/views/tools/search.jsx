@@ -636,7 +636,14 @@ class ToolOptions extends Component {
 
           <div>
             <strong>
-              <label>Aktiva spatial sökverktyg</label>
+              <label>
+                Aktiva spatial sökverktyg{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title='"Radie" fungerar endast med angivna visningstjänster (se lista längst ner)'
+                />
+              </label>
             </strong>
           </div>
           <div>
