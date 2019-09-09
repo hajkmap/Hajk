@@ -9,7 +9,8 @@ const styles = theme => ({
   search: {
     borderRadius: theme.shape.borderRadius,
     flex: "auto",
-    display: "flex"
+    display: "flex",
+    height: "100%"
   },
   inputRoot: {
     width: "100%"
