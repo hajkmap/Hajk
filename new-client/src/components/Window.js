@@ -157,25 +157,20 @@ class Window extends React.PureComponent {
     }
 
     // const { width, height, mode, position } = this.props;
-    const { width, height, position } = this.props;
+    const { width, height, left, top, position } = this.props;
     const parent = this.rnd.getSelfElement().parentElement;
 
     //FIXME: JW - Not the best solution for parent resize to set top/left to 0/0, but it ensures we don't get a window outside of the parent
-    this.left = parent.getBoundingClientRect().left;
-    this.top = parent.getBoundingClientRect().top;
+    // this.left = parent.getBoundingClientRect().left;
+    // this.top = parent.getBoundingClientRect().top;
+    this.left = left;
+    this.top = top;
     this.width = width;
-
-    // if (mode === "panel") {
-    //   this.height = parent.clientHeight;
-    // }
-    // if (mode === "window") {
-    //   this.height = height === "auto" ? parent.clientHeight : height;
-    // }
     this.height = height === "auto" ? parent.clientHeight : height;
     if (position === "right") {
       this.left = parent.getBoundingClientRect().right - width;
     }
-    if (isMobile) {
+    if (getIsMobile()) {
       this.left = 0;
       this.top = 0;
       this.height = window.innerHeight;
