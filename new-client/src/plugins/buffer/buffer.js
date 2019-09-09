@@ -1,41 +1,29 @@
 import React from "react";
-import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
-import { Fab, ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+import BaseWindowPlugin from "../BaseWindowPlugin";
+
 import BufferIcon from "@material-ui/icons/Adjust";
+
 import BufferView from "./BufferView.js";
 import BufferModel from "./BufferModel.js";
 import Observer from "react-event-observer";
-import Window from "../../components/Window.js";
 
 const styles = theme => {
   return {};
 };
 
-class buffer extends React.PureComponent {
-  state = {
-    panelOpen: this.props.options.visibleAtStart
-  };
-  onClick = e => {
-    this.app.onPanelOpen(this);
-    this.setState({
-      panelOpen: true
-    });
+class Buffer extends React.PureComponent {
+  onWindowShow = () => {
     this.BufferModel.setActive(true);
   };
 
-  closePanel = () => {
-    this.setState({
-      panelOpen: false
-    });
+  onWindowHide = () => {
     this.BufferModel.setActive(false);
   };
 
   constructor(props) {
     super(props);
-    this.options = props.options;
-    this.title = this.options.title || "Buffra";
-    this.app = props.app;
+
     this.localObserver = Observer();
 
     this.BufferModel = new BufferModel({
@@ -43,75 +31,31 @@ class buffer extends React.PureComponent {
       app: props.app,
       localObserver: this.localObserver
     });
-
-    this.app.registerPanel(this);
   }
 
-  renderWindow(mode) {
-    return createPortal(
-      <Window
-        globalObserver={this.props.app.globalObserver}
-        title={this.title}
-        onClose={this.closePanel}
-        open={this.state.panelOpen}
-        position={this.position}
-        height={450}
-        width={400}
-        top={210}
-        left={0}
-        mode={mode}
+  render() {
+    return (
+      <BaseWindowPlugin
+        {...this.props}
+        custom={{
+          icon: <BufferIcon />,
+          title: "Buffra",
+          description: "Skapa en buffer runt objekt utvalda objekt i kartan",
+          height: "400px",
+          width: "400px",
+          top: undefined, // Will default to BaseWindowPlugin's top/left
+          left: undefined,
+          onWindowShow: this.onWindowShow,
+          onWindowHide: this.onWindowHide
+        }}
       >
         <BufferView
           localObserver={this.localObserver}
           model={this.BufferModel}
-          app={this.app}
+          app={this.props.app}
         />
-      </Window>,
-      document.getElementById("windows-container")
+      </BaseWindowPlugin>
     );
-  }
-
-  renderAsWidgetItem() {
-    const { classes } = this.props;
-    return (
-      <div>
-        <Fab className={classes.button} onClick={this.onClick}>
-          <BufferIcon />
-        </Fab>
-        {this.renderWindow("window")}
-      </div>
-    );
-  }
-
-  renderAsToolbarItem() {
-    return (
-      <div>
-        <ListItem
-          button
-          divider={true}
-          selected={this.state.panelOpen}
-          onClick={this.onClick}
-        >
-          <ListItemIcon>
-            <BufferIcon />
-          </ListItemIcon>
-          <ListItemText primary={this.title} />
-        </ListItem>
-        {this.renderWindow("panel")}
-      </div>
-    );
-  }
-
-  render() {
-    if (this.props.type === "toolbarItem") {
-      return this.renderAsToolbarItem();
-    }
-
-    if (this.props.type === "widgetItem") {
-      return this.renderAsWidgetItem();
-    }
-
-    return null;
   }
 }
-export default withStyles(styles)(buffer);
+export default withStyles(styles)(Buffer);
