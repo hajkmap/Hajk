@@ -84,6 +84,7 @@ class BaseWindowPlugin extends React.PureComponent {
           title={this.title}
           onClose={this.closePanel}
           open={this.state.windowVisible}
+          onResize={this.props.custom.onResize}
           width={this.width}
           height={this.height}
           top={this.top}
