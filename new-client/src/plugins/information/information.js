@@ -1,9 +1,15 @@
-import React, { Component } from "react";
+import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
+
 import InfoIcon from "@material-ui/icons/Info";
 import Card from "../../components/Card.js";
-import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+import {
+  Hidden,
+  ListItem,
+  ListItemIcon,
+  ListItemText
+} from "@material-ui/core";
 
 import Dialog from "../../components/Dialog.js";
 
@@ -11,7 +17,7 @@ const styles = theme => {
   return {};
 };
 
-class Information extends Component {
+class Information extends React.PureComponent {
   constructor(props) {
     super(props);
     this.options = props.options;
@@ -59,54 +65,58 @@ class Information extends Component {
   };
 
   renderDialog() {
-    return createPortal(
-      <Dialog
-        options={this.props.options}
-        open={this.state.dialogOpen}
-        onClose={this.onClose}
-      />,
-      document.getElementById("map")
+    return (
+      <>
+        <Dialog
+          options={this.props.options}
+          open={this.state.dialogOpen}
+          onClose={this.onClose}
+        />
+        {this.renderDrawerButton()}
+        {this.props.options.target === "left" &&
+          this.renderWidgetButton("left-column")}
+        {this.props.options.target === "right" &&
+          this.renderWidgetButton("right-column")}
+      </>
     );
   }
 
-  renderAsWidgetItem() {
-    return (
-      <div>
+  renderDrawerButton() {
+    return createPortal(
+      <Hidden smUp={this.props.options.target !== "toolbar"}>
+        <ListItem
+          button
+          divider={true}
+          selected={this.state.windowVisible}
+          onClick={this.onClick}
+        >
+          <ListItemIcon>
+            <InfoIcon />
+          </ListItemIcon>
+          <ListItemText primary={this.title} />
+        </ListItem>
+      </Hidden>,
+      document.getElementById("plugin-buttons")
+    );
+  }
+
+  renderWidgetButton(id) {
+    return createPortal(
+      // Hide Widget button on small screens, see renderDrawerButton too
+      <Hidden xsDown>
         <Card
           icon={<InfoIcon />}
           onClick={this.onClick}
           title={this.title}
           abstract={this.abstract}
         />
-        {this.renderDialog()}
-      </div>
-    );
-  }
-
-  renderAsToolbarItem() {
-    return (
-      <div>
-        <ListItem button divider={true} selected={false} onClick={this.onClick}>
-          <ListItemIcon>
-            <InfoIcon />
-          </ListItemIcon>
-          <ListItemText primary={this.title} />
-        </ListItem>
-        {this.renderDialog()}
-      </div>
+      </Hidden>,
+      document.getElementById(id)
     );
   }
 
   render() {
-    if (this.props.type === "toolbarItem") {
-      return this.renderAsToolbarItem();
-    }
-
-    if (this.props.type === "widgetItem") {
-      return this.renderAsWidgetItem();
-    }
-
-    return null;
+    return this.renderDialog();
   }
 }
 
