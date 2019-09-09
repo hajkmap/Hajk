@@ -1,6 +1,5 @@
 // Generic imports – all plugins need these
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
 // All plugins need some icon – make sure to pick a relevant one from Material UI Icons
@@ -10,12 +9,6 @@ import BugReportIcon from "@material-ui/icons/BugReport";
 import DummyModel from "./DummyModel";
 import DummyView from "./DummyView";
 import Observer from "react-event-observer";
-
-// You can customize the look and feel of your plugin using theme overrides.
-// See docs: https://material-ui.com/customization/themes/
-const styles = theme => {
-  return {};
-};
 
 class Dummy extends React.PureComponent {
   constructor(props) {
@@ -80,4 +73,4 @@ class Dummy extends React.PureComponent {
 }
 
 // Part of API. Make a HOC of our plugin.
-export default withStyles(styles)(Dummy);
+export default Dummy;

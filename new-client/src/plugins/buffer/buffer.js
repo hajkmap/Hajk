@@ -1,5 +1,4 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
 import BufferIcon from "@material-ui/icons/Adjust";
@@ -7,10 +6,6 @@ import BufferIcon from "@material-ui/icons/Adjust";
 import BufferView from "./BufferView.js";
 import BufferModel from "./BufferModel.js";
 import Observer from "react-event-observer";
-
-const styles = theme => {
-  return {};
-};
 
 class Buffer extends React.PureComponent {
   onWindowShow = () => {
@@ -58,4 +53,4 @@ class Buffer extends React.PureComponent {
     );
   }
 }
-export default withStyles(styles)(Buffer);
+export default Buffer;

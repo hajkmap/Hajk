@@ -1,5 +1,4 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
@@ -7,10 +6,6 @@ import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import AnchorView from "./AnchorView";
 import AnchorModel from "./AnchorModel";
 import Observer from "react-event-observer";
-
-const styles = theme => {
-  return {};
-};
 
 class Anchor extends React.PureComponent {
   constructor(props) {
@@ -50,4 +45,4 @@ class Anchor extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(Anchor);
+export default Anchor;

@@ -1,5 +1,4 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
 import LayersIcon from "@material-ui/icons/Layers";
@@ -7,10 +6,6 @@ import LayersIcon from "@material-ui/icons/Layers";
 import LayerSwitcherView from "./LayerSwitcherView.js";
 import LayerSwitcherModel from "./LayerSwitcherModel.js";
 import Observer from "react-event-observer";
-
-const styles = theme => {
-  return {};
-};
 
 class LayerSwitcher extends React.PureComponent {
   constructor(props) {
@@ -52,4 +47,4 @@ class LayerSwitcher extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(LayerSwitcher);
+export default LayerSwitcher;
