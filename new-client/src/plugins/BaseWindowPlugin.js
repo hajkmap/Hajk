@@ -37,16 +37,29 @@ class BaseWindowPlugin extends React.PureComponent {
 
   handleButtonClick = e => {
     this.props.app.onPanelOpen(this);
-    this.setState({
-      windowVisible: true
-    });
+    this.setState(
+      {
+        windowVisible: true
+      },
+      () => {
+        // If there's a callback defined in custom, run it
+        typeof this.props.custom.onWindowShow === "function" &&
+          this.props.custom.onWindowShow();
+      }
+    );
     this.props.app.globalObserver.publish("hideDrawer");
   };
 
   closePanel = () => {
-    this.setState({
-      windowVisible: false
-    });
+    this.setState(
+      {
+        windowVisible: false
+      },
+      () => {
+        typeof this.props.custom.onWindowHide === "function" &&
+          this.props.custom.onWindowHide();
+      }
+    );
   };
 
   renderWindow(mode = "window") {
