@@ -19,7 +19,6 @@ class AnchorView extends React.PureComponent {
   constructor(props) {
     super(props);
     this.model = this.props.model;
-    this.app = this.props.app;
     this.localObserver = this.props.localObserver;
   }
 
