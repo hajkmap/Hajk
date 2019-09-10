@@ -186,9 +186,7 @@ class App extends React.PureComponent {
     this.globalObserver.subscribe("hideDrawer", () => {
       this.state.drawerVisible &&
         !this.state.drawerPermanent &&
-        this.setState({ drawerVisible: false }, () => {
-          console.log("hideDrawer called");
-        });
+        this.setState({ drawerVisible: false });
     });
 
     this.appModel
