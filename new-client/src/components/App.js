@@ -1,227 +1,134 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import Observer from "react-event-observer";
-import AppModel from "./../models/AppModel.js";
-import Typography from "@material-ui/core/Typography";
-import AppBar from "@material-ui/core/AppBar";
-import { Toolbar as MUIToolbar } from "@material-ui/core";
+import cslx from "clsx";
 import { SnackbarProvider } from "notistack";
-import Toolbar from "./Toolbar.js";
-//import Popup from "./Popup.js";
+import Observer from "react-event-observer";
+
+import AppModel from "./../models/AppModel.js";
 import Window from "./Window.js";
 import Alert from "./Alert";
 import Loader from "./Loader";
-import Reparentable from "./Reparentable";
-import ToolbarMenu from "./ToolbarMenu";
+import PluginWindows from "./PluginWindows";
+
 import Zoom from "../controls/Zoom";
 import ScaleLine from "../controls/ScaleLine";
 import Attribution from "../controls/Attribution.js";
+import MapSwitcher from "./MapSwitcher";
+import BackgroundCleaner from "./BackgroundCleaner";
+
+import {
+  Backdrop,
+  Divider,
+  Drawer,
+  Hidden,
+  IconButton,
+  Tooltip
+} from "@material-ui/core";
+
+import LockIcon from "@material-ui/icons/Lock";
+import LockOpenIcon from "@material-ui/icons/LockOpen";
 
 // A global that holds our windows, for use see components/Window.js
 document.windows = [];
 
-// Global customizations that previously went to custom.css
-// should now go to public/customTheme.json. They are later
-// merged when MUI Theme is created in index.js.
+const DRAWER_WIDTH = 250;
+
 const styles = theme => {
   return {
-    // We can also consult https://material-ui.com/customization/default-theme/ for available options
     map: {
-      flexGrow: 1,
-      overflow: "hidden",
+      zIndex: 1,
       position: "absolute",
-      top: "64px",
-      bottom: 0,
       left: 0,
       right: 0,
-      zIndex: 2
+      bottom: 0,
+      top: 0
+    },
+    flexBox: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: 0,
+      top: 0,
+      padding: theme.spacing(2),
+      display: "flex",
+      flexDirection: "column",
+      pointerEvents: "none"
+    },
+    windowsContainer: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: 0,
+      top: 0
+    },
+    pointerEventsOnChildren: {
+      "& > *": {
+        pointerEvents: "auto"
+      }
+    },
+    header: {
+      zIndex: 2,
+      flex: 0,
+      height: theme.spacing(8)
     },
     main: {
-      display: "flex",
-      width: "100%",
-      marginBottom: "45px"
-    },
-    extendedIcon: {
-      marginRight: theme.spacing(1)
-    },
-    toolbarRoot: {
-      paddingLeft: "5px",
-      paddingRight: "5px",
-      height: "64px",
-      justifyContent: "space-between",
-      [theme.breakpoints.down("xs")]: {
-        justifyContent: "space-between"
-      }
-    },
-    toolbar: {
-      top: 0,
-      color: "black",
-      zIndex: 2,
-      order: 0
-    },
-    toolbarContent: {
-      display: "flex",
-      alignItems: "center"
-    },
-    appBar: {
-      zIndex: 3,
-      background: "white",
-      color: "black"
-    },
-    logo: {
-      height: "40px",
-      marginLeft: "10px",
-      marginRight: "10px",
-      "& img": {
-        height: "100%"
-      },
-      [theme.breakpoints.down("xs")]: {
-        marginLeft: "0",
-        marginRight: "0"
-      }
-    },
-    title: {
-      marginLeft: "8px"
-    },
-    flex: {
-      flexGrow: 1
-    },
-    columnToolbar: {
-      zIndex: 1,
-      background: "white",
-      boxShadow: "2px 2px 2px rgba(0, 0, 0, 0.18)",
-      [theme.breakpoints.down("xs")]: {
-        zIndex: 1000
-      }
-    },
-    column1: {
-      zIndex: 1,
-      flex: 0,
-      [theme.breakpoints.down("xs")]: {
-        zIndex: 1000
-      }
-    },
-    column2: {
       zIndex: 2,
       flex: 1,
-      justifyContent: "center",
-      display: "flex",
-      margin: "0 10px",
-      flexDirection: "column",
-      [theme.breakpoints.down("xs")]: {
-        zIndex: 1000
-      }
+      display: "flex"
     },
-    centerContainer: {
-      flex: 0,
-      display: "flex",
-      justifyContent: "center",
-      zIndex: 1000
-    },
-    toolbarPanel: {
+    leftColumn: {
       flex: 1
     },
-    column3: {
-      zIndex: 1,
+    rightColumn: {
+      marginTop: theme.spacing(-7),
+      flex: 0,
       [theme.breakpoints.down("xs")]: {
-        zIndex: 1000
+        marginTop: 0
       }
     },
-    columnControls: {
-      zIndex: 1,
-      pointerEvents: "none",
-      [theme.breakpoints.down("xs")]: {
-        zIndex: 1,
-        position: "absolute",
-        right: 0
-      }
-    },
-    columnWidgets: {
-      display: "flex",
-      flexDirection: "row",
-      height: "100%"
-    },
-    columnCenter: {
-      width: "100%",
-      zIndex: 1,
+    controlsColumn: {
+      flex: 0,
       display: "flex",
       flexDirection: "column",
-      pointerEvents: "none",
-      padding: "10px",
-      [theme.breakpoints.down("md")]: {
-        zIndex: 1001
-      },
+      marginTop: theme.spacing(-7),
       [theme.breakpoints.down("xs")]: {
-        padding: 0,
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 3,
-        bottom: 0,
-        position: "absolute"
-      }
-    },
-    columnArticle: {
-      pointerEvents: "none",
-      flex: 1,
-      zIndex: 1,
-      marginBottom: "50px",
-      [theme.breakpoints.down("xs")]: {},
-      position: "absolute"
-    },
-    controls: {
-      zIndex: 1,
-      padding: "5px 5px 5px 0"
-    },
-    overlay: {
-      display: "flex",
-      flexDirection: "row",
-      justifyContent: "flex-start",
-      top: 0,
-      right: 0,
-      left: 0,
-      bottom: 0,
-      position: "absolute"
-    },
-    button: {
-      width: "50px",
-      height: "50px",
-      marginBottom: "10px",
-      outline: "none"
-    },
-    visible: {
-      display: "block"
-    },
-    searchIcon: {
-      marginRight: theme.spacing(1),
-      display: "block",
-      [theme.breakpoints.up("lg")]: {
-        display: "none"
+        marginTop: 0
       }
     },
     footer: {
-      position: "absolute",
-      bottom: 0,
-      zIndex: 1,
-      width: "100%"
-    },
-    widgetItem: {
-      width: "220px",
-      pointerEvents: "all",
-      [theme.breakpoints.down("md")]: {
-        width: "100%"
+      zIndex: 2,
+      flex: 0,
+      display: "flex",
+      justifyContent: "end",
+      "& div": {
+        marginLeft: theme.spacing(1)
+      },
+      "& span": {
+        lineHeight: "12px",
+        padding: "0 10px"
       }
     },
-    windowContainer: {
-      position: "absolute",
-      top: "64px",
-      left: "50px",
-      right: 0,
-      bottom: 0,
-      background: "rgba(255, 255, 255, 0.5)",
-      zIndex: 5000
+    drawerHeader: {
+      width: DRAWER_WIDTH,
+      display: "flex",
+      alignItems: "center",
+      padding: theme.spacing(0, 2),
+      ...theme.mixins.toolbar,
+      justifyContent: "space-between"
+    },
+    logo: {
+      maxHeight: 35
+    },
+    backdrop: {
+      zIndex: theme.zIndex.drawer - 1 // Carefully selected to be above Window but below Drawer
+    },
+    widgetItem: {
+      width: "220px"
+    },
+    // IMPORTANT: shiftedLeft definition must be the last one, as styles are applied in that order via JSS
+    shiftedLeft: {
+      left: DRAWER_WIDTH
     }
   };
 };
@@ -233,12 +140,14 @@ class App extends React.PureComponent {
       alert: false,
       loading: false,
       mapClickDataResult: {},
-      mobile: window.innerWidth < 600
+
+      // Drawer-related states
+      drawerVisible: true,
+      drawerPermanent: false,
+      drawerMouseOverLock: false
     };
     this.globalObserver = new Observer();
     this.appModel = new AppModel(props.config, this.globalObserver);
-    this.widgetsLeftContainer = document.createElement("div");
-    this.widgetsRightContainer = document.createElement("div");
   }
 
   componentDidMount() {
@@ -250,7 +159,7 @@ class App extends React.PureComponent {
       this.setState({
         tools: this.appModel.getPlugins()
       });
-      this.globalObserver.publish("appLoaded");
+      this.globalObserver.publish("appLoaded"); // Window.js subscribes to this event
     });
     this.bindHandlers();
   }
@@ -274,10 +183,10 @@ class App extends React.PureComponent {
       });
     });
 
-    window.addEventListener("resize", () => {
-      this.setState({
-        mobile: window.innerWidth < 600
-      });
+    this.globalObserver.subscribe("hideDrawer", () => {
+      this.state.drawerVisible &&
+        !this.state.drawerPermanent &&
+        this.setState({ drawerVisible: false });
     });
 
     this.appModel
@@ -305,66 +214,12 @@ class App extends React.PureComponent {
       });
   }
 
-  renderWidgets(target) {
-    const { classes } = this.props;
-    const { tools } = this.state;
-    if (tools) {
-      return tools
-        .filter(tool => tool.options.target === target)
-        .sort((a, b) =>
-          a.sortOrder === b.sortOrder ? 0 : a.sortOrder > b.sortOrder ? 1 : -1
-        )
-        .map((tool, i) => {
-          if (tool.type === "layerswitcher" && !tool.options.active) {
-            return null;
-          }
-          return (
-            <div
-              key={i}
-              className={classes.widgetItem}
-              onClick={e => {
-                this.globalObserver.publish("widgetItemClicked");
-              }}
-            >
-              <tool.component
-                map={tool.map}
-                app={tool.app}
-                options={tool.options}
-                type="widgetItem"
-              />
-            </div>
-          );
-        });
-    } else {
-      return null;
-    }
-  }
-
-  renderPopup() {
-    // TODO: Ensure that Popup mode for infoclick works.
-    // I'm temporarily disabling that option and send all infoclicks to display as Window.
-
-    // var config = this.props.config.mapConfig.tools.find(
-    //   tool => tool.type === "infoclick"
-    // );
-    // if (config && config.options.displayPopup) {
-    //   return (
-    //     <Popup
-    //       mapClickDataResult={this.state.mapClickDataResult}
-    //       map={this.appModel.getMap()}
-    //       onClose={() => {
-    //         this.setState({
-    //           mapClickDataResult: undefined
-    //         });
-    //       }}
-    //     />
-    //   );
-    // } else {
-    var open =
+  renderSearchResultsWindow() {
+    const open =
       this.state.mapClickDataResult &&
       this.state.mapClickDataResult.features &&
       this.state.mapClickDataResult.features.length > 0;
-    var features =
+    const features =
       this.state.mapClickDataResult && this.state.mapClickDataResult.features;
 
     return (
@@ -391,8 +246,68 @@ class App extends React.PureComponent {
     );
   }
 
+  toggleDrawer = open => event => {
+    if (
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
+      return;
+    }
+
+    this.setState({ drawerVisible: open });
+  };
+
+  /**
+   * Flip the @this.state.drawerPermanent switch, then preform some
+   * more work to ensure the OpenLayers canvas has the correct
+   * canvas size.
+   *
+   * @memberof App
+   */
+  togglePermanent = e => {
+    this.setState({ drawerPermanent: !this.state.drawerPermanent }, () => {
+      // Viewport size has changed, hence we must tell OL
+      // to refresh canvas size.
+      this.appModel.getMap().updateSize();
+
+      // If user clicked on Toggle Permanent and the result is,
+      // that this.state.drawerPermanent===false, this means that we
+      // have exited the permanent mode. In this case, we also
+      // want to ensure that Drawer is hidden (otherwise we would
+      // just "unpermanent" the Drawer, but it would still be visible).
+      this.state.drawerPermanent === false &&
+        this.setState({ drawerVisible: false });
+    });
+  };
+
+  handleMouseEnter = e => {
+    this.setState({ drawerMouseOverLock: true });
+  };
+
+  handleMouseLeave = e => {
+    this.setState({ drawerMouseOverLock: false });
+  };
+
+  renderSearchPlugin() {
+    const searchPlugin = this.appModel.plugins.search;
+    if (searchPlugin) {
+      return (
+        <searchPlugin.component
+          map={searchPlugin.map}
+          app={searchPlugin.app}
+          options={searchPlugin.options}
+          onMenuClick={this.toggleDrawer(!this.state.drawerVisible)}
+          menuButtonDisabled={this.state.drawerPermanent}
+        />
+      );
+    } else {
+      return null;
+    }
+  }
+
   render() {
     const { classes, config } = this.props;
+
     return (
       <SnackbarProvider
         maxSnack={3}
@@ -409,85 +324,123 @@ class App extends React.PureComponent {
             title="Meddelande"
           />
           <Loader visible={this.state.loading} />
-          {ReactDOM.createPortal(
-            this.renderWidgets("left"),
-            this.widgetsLeftContainer
-          )}
-          {ReactDOM.createPortal(
-            this.renderWidgets("right"),
-            this.widgetsRightContainer
-          )}
-          <AppBar position="absolute" className={classes.appBar}>
-            <MUIToolbar className={classes.toolbarRoot}>
-              <div id="toolbar-left" className={classes.toolbarContent}>
-                <div id="tools-toggler" />
-                <div className={classes.logo}>
-                  <img src={config.mapConfig.map.logo} alt="logo" />
-                </div>
-                <span className={classes.title}>
-                  <Typography variant="h6">
-                    {config.mapConfig.map.title}
-                  </Typography>
-                </span>
+          <div
+            className={cslx(classes.flexBox, {
+              [classes.shiftedLeft]: this.state.drawerPermanent
+            })}
+          >
+            <header
+              className={cslx(classes.header, classes.pointerEventsOnChildren)}
+            >
+              {this.renderSearchPlugin()}
+            </header>
+            <main className={classes.main}>
+              <div
+                id="left-column"
+                className={cslx(
+                  classes.leftColumn,
+                  classes.pointerEventsOnChildren
+                )}
+              ></div>
+              <div
+                id="right-column"
+                className={cslx(
+                  classes.rightColumn,
+                  classes.pointerEventsOnChildren
+                )}
+              ></div>
+
+              <div
+                id="controls-column"
+                className={cslx(
+                  classes.controlsColumn,
+                  classes.pointerEventsOnChildren
+                )}
+              >
+                <Zoom map={this.appModel.getMap()} />
+                <MapSwitcher appModel={this.appModel} />{" "}
+                <BackgroundCleaner appModel={this.appModel} />{" "}
               </div>
-              <div id="toolbar-right" className={classes.toolbarContent}>
-                <ToolbarMenu appModel={this.appModel} />
-              </div>
-            </MUIToolbar>
-          </AppBar>
-          <div className={classes.map} id="map">
-            <div id="map-overlay" className={classes.overlay}>
-              <div className={classes.columnToolbar}>
-                <Toolbar
-                  tools={this.appModel.getToolbarPlugins()}
-                  parent={this}
-                  globalObserver={this.globalObserver}
-                  widgets={
-                    this.state.mobile && (
-                      <div>
-                        <Reparentable el={this.widgetsLeftContainer} />
-                        <Reparentable el={this.widgetsRightContainer} />
-                      </div>
-                    )
-                  }
-                />
-              </div>
-              <main className={classes.main} id="main">
-                <div className={classes.columnCenter}>
-                  <div className={classes.columnWidgets}>
-                    <div className={classes.column1}>
-                      {!this.state.mobile && (
-                        <Reparentable el={this.widgetsLeftContainer} />
-                      )}
-                    </div>
-                    <div className={classes.column2}>
-                      <div id="center" className={classes.centerContainer} />
-                      <article
-                        id="toolbar-panel"
-                        className={classes.toolbarPanel}
-                      >
-                        {this.renderPopup()}
-                      </article>
-                    </div>
-                    <div className={classes.column3}>
-                      {!this.state.mobile && (
-                        <Reparentable el={this.widgetsRightContainer} />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </main>
-              <div className={classes.columnControls}>
-                <div className={classes.controls}>
-                  <Zoom map={this.appModel.getMap()} />
-                </div>
-              </div>
-            </div>
-            <footer className={classes.footer} id="footer">
+            </main>
+            <footer
+              className={cslx(classes.footer, classes.pointerEventsOnChildren)}
+            >
               <Attribution map={this.appModel.getMap()} />
               <ScaleLine map={this.appModel.getMap()} />
             </footer>
           </div>
+          <div
+            id="map"
+            className={cslx(classes.map, {
+              [classes.shiftedLeft]: this.state.drawerPermanent
+            })}
+          ></div>
+          <div
+            id="windows-container"
+            className={cslx(
+              classes.pointerEventsOnChildren,
+              classes.windowsContainer,
+              {
+                [classes.shiftedLeft]: this.state.drawerPermanent
+              }
+            )}
+          >
+            {this.renderSearchResultsWindow()}
+            <PluginWindows
+              plugins={this.appModel.getBothDrawerAndWidgetPlugins()}
+            />
+          </div>
+          <Drawer
+            open={this.state.drawerVisible}
+            // NB: we can't simply toggle between permanent|temporary,
+            // as the temporary mode unmounts element from DOM and
+            // re-mounts it the next time, so we would re-rendering
+            // our plugins all the time.
+            variant="persistent"
+          >
+            <div className={classes.drawerHeader}>
+              <img
+                alt="Logo"
+                className={classes.logo}
+                src={config.mapConfig.map.logo}
+              />
+              {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
+              <Hidden xsDown>
+                <Tooltip
+                  title={
+                    (this.state.drawerPermanent ? "Lås upp" : "Lås fast") +
+                    " verktygspanelen"
+                  }
+                >
+                  <IconButton
+                    aria-label="pin"
+                    onClick={this.togglePermanent}
+                    onMouseEnter={this.handleMouseEnter}
+                    onMouseLeave={this.handleMouseLeave}
+                  >
+                    {this.state.drawerPermanent ? (
+                      this.state.drawerMouseOverLock ? (
+                        <LockOpenIcon />
+                      ) : (
+                        <LockIcon />
+                      )
+                    ) : this.state.drawerMouseOverLock ? (
+                      <LockIcon />
+                    ) : (
+                      <LockOpenIcon />
+                    )}
+                  </IconButton>
+                </Tooltip>
+              </Hidden>
+            </div>
+            <Divider />
+            <div id="plugin-buttons" />
+          </Drawer>
+          <Backdrop
+            open={this.state.drawerVisible && !this.state.drawerPermanent}
+            className={classes.backdrop}
+            onClick={this.toggleDrawer(!this.state.drawerVisible)}
+          />
         </>
       </SnackbarProvider>
     );

@@ -14,7 +14,6 @@ class DummyView extends React.PureComponent {
     // They are shown here for demonstration purposes only.
     super(props);
     this.model = this.props.model;
-    this.app = this.props.app;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
   }

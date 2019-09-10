@@ -158,7 +158,10 @@ class StreetViewModel {
   };
 
   displayPanorama = (data, status) => {
-    if (status === this.googleMapsApi.StreetViewStatus.OK) {
+    if (
+      status === this.googleMapsApi.StreetViewStatus.OK &&
+      this.activated === true
+    ) {
       this.imageDate = `Bild tagen: ${data.imageDate}`;
       this.localObserver.emit("changeImageDate", this.imageDate);
       this.panorama.setPano(data.location.pano);

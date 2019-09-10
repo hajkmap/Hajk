@@ -119,21 +119,11 @@ class Window extends React.PureComponent {
 
     window.addEventListener("resize", () => {
       if (this.mode === "maximized") {
-        this.fit(document.getElementById("main"));
+        this.fit(document.getElementById("windows-container"));
       } else {
         this.updatePosition();
       }
     });
-
-    if (props.globalObserver) {
-      props.globalObserver.subscribe("toolbarExpanded", open => {
-        if (this.mode === "maximized") {
-          this.fit(document.getElementById("main"));
-        } else {
-          this.update(document.getElementById("main"));
-        }
-      });
-    }
   }
 
   componentDidMount() {
@@ -146,24 +136,42 @@ class Window extends React.PureComponent {
   }
 
   updatePosition() {
-    var { width, height, mode, position } = this.props;
-    const parent = this.rnd.getSelfElement().parentElement;
-    const header = document.getElementsByTagName("header")[0];
-    this.headerHeight = header.clientHeight;
-    this.left = parent.getBoundingClientRect().left;
-    this.top = parent.getBoundingClientRect().top - this.headerHeight;
-    this.width = width;
+    if (this.rnd === null) {
+      /**
+       * FIXME: This is a nasty consequence of us rendering Windows twice
+       * (as both widgets and drawer plugins). The best way to solve this
+       * and memory leak caused by unmounted components is to change
+       * how our plugins act.
+       *
+       * Today a plugin renders a button (or widget button) and then creates
+       * the Window in a Portal.
+       *
+       * A better solution now would be to let the plugin render the Window
+       * (if any), and from that method create both Drawer plugin button and
+       * Widget plugin button. This way, we would end up with only one instance
+       * of Window per plugin, which then could be controlled via any button,
+       * be it Drawer or Widget.
+       */
 
-    if (mode === "panel") {
-      this.height = parent.clientHeight;
+      return;
     }
-    if (mode === "window") {
-      this.height = height === "auto" ? parent.clientHeight : height;
-    }
+
+    // const { width, height, mode, position } = this.props;
+    const { width, height, position } = this.props;
+    // const { width, height, left, top, position } = this.props;
+    const parent = this.rnd.getSelfElement().parentElement;
+
+    //FIXME: JW - Not the best solution for parent resize to set top/left to 0/0, but it ensures we don't get a window outside of the parent
+    this.left = parent.getBoundingClientRect().left + 16;
+    this.top = parent.getBoundingClientRect().top + 16;
+    // this.left = left;
+    // this.top = top;
+    this.width = width;
+    this.height = -32 + (height === "auto" ? parent.clientHeight : height);
     if (position === "right") {
       this.left = parent.getBoundingClientRect().right - width;
     }
-    if (isMobile) {
+    if (getIsMobile()) {
       this.left = 0;
       this.top = 0;
       this.height = window.innerHeight;
@@ -197,55 +205,10 @@ class Window extends React.PureComponent {
     if (onClose) onClose();
   };
 
-  updatePos = target => {
-    if (this.right < 62)
-      this.left =
-        window.innerWidth - (parseFloat(this.right) + parseFloat(this.width));
-
-    this.right = window.innerWidth - (this.left + parseFloat(this.width));
-
-    this.rnd.updatePosition({
-      x: Math.round(this.left),
-      y: Math.round(this.top)
-    });
-  };
-
-  update = target => {
-    var currentOffset = target.getBoundingClientRect().left;
-    if (!this.offset || currentOffset > this.offset) {
-      this.offset = target.getBoundingClientRect().left;
-    }
-
-    var width = this.rnd.getSelfElement().clientWidth;
-
-    if (this.left < currentOffset || this.offset === this.left) {
-      let n = target.getBoundingClientRect().left;
-      this.rnd.updatePosition({
-        x: Math.round(n)
-      });
-      this.left = n;
-    }
-    if (width === 0) {
-      width = this.latestWidth;
-    }
-    if (width > target.clientWidth) {
-      this.setState({
-        width: this.rnd.getParentSize().width
-      });
-    }
-    if (this.left + width > window.innerWidth) {
-      let w = window.innerWidth - width;
-      this.rnd.updatePosition({
-        x: Math.round(w)
-      });
-      this.left = w;
-    }
-  };
-
   fit = target => {
     this.rnd.updatePosition({
       x: Math.round(target.getBoundingClientRect().left),
-      y: Math.round(target.getBoundingClientRect().top - this.headerHeight)
+      y: Math.round(target.getBoundingClientRect().top)
     });
     this.rnd.setState({
       disableDrag: true
@@ -276,7 +239,7 @@ class Window extends React.PureComponent {
     let t = parseFloat(this.top);
     let h = parseFloat(this.height);
     let c = this.rnd.getSelfElement().parentElement.getBoundingClientRect();
-    let o = t + h + this.headerHeight;
+    let o = t + h;
 
     if (o > c.bottom) {
       this.top = this.top - o + c.bottom;
@@ -317,10 +280,10 @@ class Window extends React.PureComponent {
           this.enlarge();
           break;
         case "window":
-          this.fit(document.getElementById("main"));
+          this.fit(document.getElementById("windows-container"));
           break;
         case "maximized":
-          this.reset(document.getElementById("main"));
+          this.reset(document.getElementById("windows-container"));
           break;
         default:
           break;
@@ -339,7 +302,7 @@ class Window extends React.PureComponent {
       return;
     }
     if (this.mode === "maximized") {
-      this.reset(document.getElementById("main"));
+      this.reset(document.getElementById("windows-container"));
     }
     if (getIsMobile()) {
       this.moveToBottom();
@@ -373,6 +336,7 @@ class Window extends React.PureComponent {
       open,
       localObserver
     } = this.props;
+
     var { left, top, width, height } = this.state;
     var resizeBottom = true,
       resizeBottomLeft = true,
@@ -400,6 +364,7 @@ class Window extends React.PureComponent {
         onMouseDown={e => {
           this.bringToFront();
         }}
+        onMouseOver={e => e.stopPropagation()} // If this bubbles, we'll have Tooltip show up even when we're only on Window. FIXME: Not needed when we change the rendering order.
         ref={c => {
           this.rnd = c;
         }}
@@ -410,12 +375,12 @@ class Window extends React.PureComponent {
           const rect = this.rnd.getSelfElement().getClientRects()[0];
           if (rect) {
             this.left = rect.left;
-            this.top = rect.top - this.headerHeight;
+            this.top = rect.top;
             this.right =
               window.innerWidth - (this.left + parseFloat(this.width));
           }
         }}
-        onResize={(e, direction, ref, delta, position) => {
+        onResizeStop={(e, direction, ref, delta, position) => {
           this.width = ref.style.width;
           if (this.mode !== "minimized") {
             this.height = ref.style.height;
@@ -427,7 +392,7 @@ class Window extends React.PureComponent {
           if (this.props.onResize) this.props.onResize();
         }}
         cancel="section,nav"
-        bounds={"main"}
+        bounds={"#windows-container"}
         disableDragging={false || getIsMobile()}
         enableResizing={{
           bottom: resizeBottom,

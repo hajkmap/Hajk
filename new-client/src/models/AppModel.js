@@ -74,21 +74,37 @@ class AppModel {
     }, []);
   }
   /**
-   * Get plugins that are currently loaded in the toolbar.
-   * @returns Array<Plugin>
+   * A plugin has a 'target' option. Currently we use three
+   * targets: toolbar, left and right. Toolbar means it's a
+   * plugin that will be visible in Drawer list. Left and right
+   * are Widget plugins, that on large displays show on left/right
+   * side of the map viewport, while on small screens change its
+   * appearance and end up as Drawer list plugins too.
+   *
+   * This method filters out those plugins that should go into
+   * the Drawer or Widget list and returns them.
+   *
+   * @returns array of Plugins
+   * @memberof AppModel
    */
-  getToolbarPlugins() {
-    return this.getPlugins()
-      .filter(plugin => plugin.options.target === "toolbar")
+  getBothDrawerAndWidgetPlugins() {
+    const r = this.getPlugins()
+      .filter(
+        plugin =>
+          ["toolbar", "left", "right"].indexOf(plugin.options.target) >= 0
+      )
       .sort((a, b) => a.sortOrder - b.sortOrder);
+    return r;
   }
+
   /**
    * Check if the search plugin is avaliable and if so return it.
    * @returns Array<Plugin>
    */
-  getSearchPlugin() {
-    return this.getPlugins().find(plugin => plugin.type === "search");
-  }
+  // getSearchPlugin() {
+  //   return this.getPlugins().find(plugin => plugin.type === "search");
+  // }
+
   /**
    * Dynamically load plugins from the configured plugins folder.
    * Assumed that a folder exists with the same name as the requested plugin.

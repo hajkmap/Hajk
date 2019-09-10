@@ -47,8 +47,7 @@ class LocationView extends React.PureComponent {
   };
 
   componentDidMount() {
-    this.app = this.props.parent.props.app;
-    this.map = this.props.parent.props.map;
+    this.map = this.props.map;
 
     // Create source and layer and add to map. Later on we'll draw features to this layer.
     this.source = new VectorSource({ wrapX: false });

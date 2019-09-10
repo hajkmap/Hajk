@@ -1,29 +1,20 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
+import IconButton from "@material-ui/core/IconButton";
 import Tooltip from "@material-ui/core/Tooltip";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 
-const useStyles = makeStyles(theme => ({
-  icon: {
-    padding: "3px"
-  }
-}));
-
 export default function BackgroundCleaner(props) {
-  const classes = useStyles();
-
   return (
     <Tooltip title="Dölj alla aktiva lager">
-      <Button
+      <IconButton
+        color="primary"
         aria-label="Rensa kartan"
         onClick={e => {
           props.appModel.clear();
         }}
       >
-        <VisibilityOffIcon className={classes.icon} />
-        Rensa kartan
-      </Button>
+        <VisibilityOffIcon />
+      </IconButton>
     </Tooltip>
   );
 }

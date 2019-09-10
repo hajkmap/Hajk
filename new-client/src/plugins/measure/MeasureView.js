@@ -21,24 +21,20 @@ const styles = theme => ({
     marginTop: theme.spacing(2)
   },
   row: {
-    marginBottom: "10px"
+    marginBottom: theme.spacing(1)
   }
 });
 
 class MeasureView extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.model = this.props.parent.model;
-    this.app = this.props.parent.app;
-    this.localObserver = this.props.parent.localObserver;
+    this.model = props.model;
+    this.app = props.app;
+    this.localObserver = props.localObserver;
     this.state = {
       shape: this.model.getType()
     };
   }
-
-  componentDidMount() {}
-
-  componentWillUnmount() {}
 
   handleChange = name => event => {
     this.setState({ [name]: event.target.value });
