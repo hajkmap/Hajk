@@ -5,9 +5,11 @@ import { Attribution } from "ol/control";
 const styles = theme => {
   return {
     attributions: {
+      "& .ol-control": {
+        position: "static",
+        maxWidth: "none"
+      },
       "& .ol-attribution": {
-        right: "10px",
-        bottom: "45px",
         background: theme.palette.background.paper,
         boxShadow: theme.shadows[4],
         border: "1px solid rgba(255 ,255, 255, 0.5)",

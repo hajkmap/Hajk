@@ -7,8 +7,10 @@ const styles = theme => {
   return {
     scaleLine: {
       "& .ol-scale-line": {
-        right: "75px",
-        bottom: "10px",
+        position: "static",
+        right: "inherit",
+        bottom: "inherit",
+        padding: "3px",
         background: theme.palette.background.paper,
         boxShadow: theme.shadows[4],
         border: "1px solid rgba(255 ,255, 255, 0.5)",
@@ -23,13 +25,9 @@ const styles = theme => {
       }
     },
     scaleBadge: {
-      position: "absolute",
-      right: "10px",
-      bottom: "10px",
-      padding: "5px",
+      padding: "0 4px",
       color: "rgba(0, 0, 0, 0.87)",
       fontSize: "0.7em",
-      lineHeight: "1.5em",
       borderRadius: "2px",
       cursor: "default"
     }

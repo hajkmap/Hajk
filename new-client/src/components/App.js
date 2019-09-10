@@ -101,12 +101,8 @@ const styles = theme => {
       flex: 0,
       display: "flex",
       justifyContent: "end",
-      "& div": {
+      "& > *": {
         marginLeft: theme.spacing(1)
-      },
-      "& span": {
-        lineHeight: "12px",
-        padding: "0 10px"
       }
     },
     drawerHeader: {
@@ -365,8 +361,8 @@ class App extends React.PureComponent {
             <footer
               className={cslx(classes.footer, classes.pointerEventsOnChildren)}
             >
-              <Attribution map={this.appModel.getMap()} />
               <ScaleLine map={this.appModel.getMap()} />
+              <Attribution map={this.appModel.getMap()} />
             </footer>
           </div>
           <div
