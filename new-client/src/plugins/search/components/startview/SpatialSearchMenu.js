@@ -104,20 +104,28 @@ class SpatialSearchOptions extends React.Component {
     const { classes, activeSpatialTools } = this.props;
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
+    const activeTools =
+      activeSpatialTools.polygonSearch ||
+      activeSpatialTools.selectionSearch ||
+      activeSpatialTools.radiusSearch;
 
-    return (
-      <div className={classes.root}>
-        <IconButton
-          aria-label="More"
-          aria-owns={open ? "menu" : undefined}
-          aria-haspopup="true"
-          onClick={this.handleDropdownClick}
-        >
-          {open ? <ArrowDropUp /> : <ArrowDropDown />}
-        </IconButton>
-        {this.renderMenu(anchorEl, open, activeSpatialTools)}
-      </div>
-    );
+    if (activeTools) {
+      return (
+        <div className={classes.root}>
+          <IconButton
+            aria-label="More"
+            aria-owns={open ? "menu" : undefined}
+            aria-haspopup="true"
+            onClick={this.handleDropdownClick}
+          >
+            {open ? <ArrowDropUp /> : <ArrowDropDown />}
+          </IconButton>
+          {this.renderMenu(anchorEl, open, activeSpatialTools)}
+        </div>
+      );
+    } else {
+      return null;
+    }
   }
 }
 
