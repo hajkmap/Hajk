@@ -6,8 +6,7 @@ import React from "react";
  * @param {*} props
  * @returns React.Component
  */
-export default function PluginWindows(props) {
-  const { plugins } = props;
+function PluginWindows({ plugins }) {
   return plugins.map((tool, i) => {
     return (
       <tool.component
@@ -19,3 +18,18 @@ export default function PluginWindows(props) {
     );
   });
 }
+
+/**
+ * The arePropsEqual() function is defined with two parameters:
+ * prevProps and nextProps respectively.
+ * The arePropsEqual() function returns true when the props are
+ * compared to be equal, thereby preventing the component from
+ * re-rendering, and returns false when the props are not equal.
+ * @param {*} prevProps
+ * @param {*} nextProps
+ */
+function arePropsEqual(prevProps, nextProps) {
+  return prevProps.plugins.length === nextProps.plugins.length;
+}
+
+export default React.memo(PluginWindows, arePropsEqual);

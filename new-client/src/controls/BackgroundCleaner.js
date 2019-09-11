@@ -13,7 +13,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function BackgroundCleaner(props) {
+const BackgroundCleaner = React.memo(props => {
   const classes = useStyles();
 
   return (
@@ -31,4 +31,6 @@ export default function BackgroundCleaner(props) {
       </Paper>
     </Tooltip>
   );
-}
+});
+
+export default BackgroundCleaner;

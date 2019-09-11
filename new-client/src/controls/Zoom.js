@@ -14,7 +14,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function ZoomControl(props) {
+const ZoomControl = React.memo(props => {
   const classes = useStyles();
 
   function zoomByDelta(delta) {
@@ -66,4 +66,6 @@ export default function ZoomControl(props) {
       </Button>
     </Paper>
   );
-}
+});
+
+export default ZoomControl;
