@@ -6,7 +6,10 @@ import RemoveIcon from "@material-ui/icons/Remove";
 import { makeStyles } from "@material-ui/styles";
 
 const useStyles = makeStyles(theme => ({
-  root: {
+  paper: {
+    marginBottom: theme.spacing(1)
+  },
+  button: {
     minWidth: "unset"
   }
 }));
@@ -42,9 +45,10 @@ export default function ZoomControl(props) {
   }
 
   return (
-    <Paper>
+    <Paper className={classes.paper}>
       <Button
-        className={classes.root}
+        aria-label="Zooma in"
+        className={classes.button}
         onClick={() => {
           zoomByDelta(1);
         }}
@@ -52,7 +56,8 @@ export default function ZoomControl(props) {
         <AddIcon />
       </Button>
       <Button
-        className={classes.root}
+        aria-label="Zooma ut"
+        className={classes.button}
         onClick={() => {
           zoomByDelta(-1);
         }}

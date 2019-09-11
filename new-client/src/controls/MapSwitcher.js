@@ -1,12 +1,16 @@
 import React from "react";
-import IconButton from "@material-ui/core/IconButton";
-import Tooltip from "@material-ui/core/Tooltip";
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
+import { Button, Menu, MenuItem, Paper, Tooltip } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import SwitchCameraIcon from "@material-ui/icons/SwitchCamera";
 
-const styles = theme => ({});
+const styles = theme => ({
+  paper: {
+    marginBottom: theme.spacing(1)
+  },
+  button: {
+    minWidth: "unset"
+  }
+});
 
 const fetchConfig = {
   credentials: "same-origin"
@@ -105,15 +109,17 @@ class MapSwitcher extends React.PureComponent {
       // Render only if config says so
       this.props.appModel.config.mapConfig.map.mapselector && (
         <>
-          <Tooltip title={instruction}>
-            <IconButton
-              color="primary"
-              aria-owns={open ? "render-props-menu" : undefined}
-              aria-haspopup="true"
-              onClick={this.handleClick}
-            >
-              <SwitchCameraIcon className={classes.icon} />
-            </IconButton>
+          <Tooltip title={`Nuvarande karta: ${instruction}`}>
+            <Paper className={classes.paper}>
+              <Button
+                aria-owns={open ? "render-props-menu" : undefined}
+                aria-haspopup="true"
+                className={classes.button}
+                onClick={this.handleClick}
+              >
+                <SwitchCameraIcon />
+              </Button>
+            </Paper>
           </Tooltip>
           <Menu
             id="render-props-menu"

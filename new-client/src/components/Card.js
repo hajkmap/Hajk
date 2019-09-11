@@ -14,7 +14,7 @@ const styles = theme => {
       color: theme.palette.primary.contrastText
     },
     card: {
-      marginBottom: "10px",
+      marginBottom: theme.spacing(1),
       width: "210px",
       [theme.breakpoints.down("xs")]: {
         boxShadow: "none",

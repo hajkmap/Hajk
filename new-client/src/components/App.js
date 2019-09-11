@@ -14,8 +14,8 @@ import PluginWindows from "./PluginWindows";
 import Zoom from "../controls/Zoom";
 import ScaleLine from "../controls/ScaleLine";
 import Attribution from "../controls/Attribution.js";
-import MapSwitcher from "./MapSwitcher";
-import BackgroundCleaner from "./BackgroundCleaner";
+import MapSwitcher from "../controls/MapSwitcher";
+import BackgroundCleaner from "../controls/BackgroundCleaner";
 
 import {
   Backdrop,
@@ -82,6 +82,8 @@ const styles = theme => {
     },
     rightColumn: {
       marginTop: theme.spacing(-7),
+      paddingLeft: theme.spacing(2),
+      paddingRight: theme.spacing(2),
       flex: 0,
       [theme.breakpoints.down("xs")]: {
         marginTop: 0
@@ -138,7 +140,7 @@ class App extends React.PureComponent {
       mapClickDataResult: {},
 
       // Drawer-related states
-      drawerVisible: true,
+      drawerVisible: false,
       drawerPermanent: false,
       drawerMouseOverLock: false
     };
@@ -354,8 +356,8 @@ class App extends React.PureComponent {
                 )}
               >
                 <Zoom map={this.appModel.getMap()} />
-                <MapSwitcher appModel={this.appModel} />{" "}
-                <BackgroundCleaner appModel={this.appModel} />{" "}
+                <MapSwitcher appModel={this.appModel} />
+                <BackgroundCleaner appModel={this.appModel} />
               </div>
             </main>
             <footer
