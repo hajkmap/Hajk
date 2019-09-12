@@ -44,9 +44,11 @@ class BaseWindowPlugin extends React.PureComponent {
   }
 
   componentDidMount() {
-    this.setState({
-      windowVisible: this.props.options.visibleAtStart
-    });
+    // visibleAtStart is false by default. Change to true only if option really is 'true'.
+    this.props.options.visibleAtStart === true &&
+      this.setState({
+        windowVisible: true
+      });
   }
 
   handleButtonClick = e => {
