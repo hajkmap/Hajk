@@ -93,7 +93,7 @@ const styles = theme => {
       flex: 0,
       display: "flex",
       flexDirection: "column",
-      marginTop: theme.spacing(-7),
+      marginTop: theme.spacing(-7) - 4, // Searchbox has 2+2px padding which we need to take care of here
       [theme.breakpoints.down("xs")]: {
         marginTop: 0
       }
@@ -403,7 +403,7 @@ class App extends React.PureComponent {
                 src={config.mapConfig.map.logo}
               />
               {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
-              <Hidden xsDown>
+              <Hidden smDown>
                 <Tooltip
                   title={
                     (this.state.drawerPermanent ? "Lås upp" : "Lås fast") +

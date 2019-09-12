@@ -145,9 +145,11 @@ const styles = theme => {
       padding: "2px 4px",
       display: "flex",
       alignItems: "center",
-      maxWidth: 400,
       minWidth: 200,
-      marginBottom: theme.spacing(1)
+      marginBottom: theme.spacing(1),
+      [theme.breakpoints.up("sm")]: {
+        maxWidth: 520
+      }
     },
     input: {
       marginLeft: theme.spacing(1),

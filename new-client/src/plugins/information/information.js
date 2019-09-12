@@ -83,7 +83,7 @@ class Information extends React.PureComponent {
 
   renderDrawerButton() {
     return createPortal(
-      <Hidden smUp={this.props.options.target !== "toolbar"}>
+      <Hidden mdUp={this.props.options.target !== "toolbar"}>
         <ListItem
           button
           divider={true}
@@ -103,7 +103,7 @@ class Information extends React.PureComponent {
   renderWidgetButton(id) {
     return createPortal(
       // Hide Widget button on small screens, see renderDrawerButton too
-      <Hidden xsDown>
+      <Hidden smDown>
         <Card
           icon={<InfoIcon />}
           onClick={this.onClick}
