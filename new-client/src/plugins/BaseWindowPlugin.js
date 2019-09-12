@@ -40,7 +40,7 @@ class BaseWindowPlugin extends React.PureComponent {
         ? (window.innerWidth - this.width) / 2
         : props.theme.spacing(2);
 
-    props.app.registerPanel(this);
+    props.app.registerWindowPlugin(this);
   }
 
   componentDidMount() {
@@ -50,7 +50,7 @@ class BaseWindowPlugin extends React.PureComponent {
   }
 
   handleButtonClick = e => {
-    this.props.app.onPanelOpen(this);
+    this.props.app.onWindowOpen(this);
     this.setState(
       {
         windowVisible: true
@@ -64,7 +64,7 @@ class BaseWindowPlugin extends React.PureComponent {
     this.props.app.globalObserver.publish("hideDrawer");
   };
 
-  closePanel = () => {
+  closeWindow = () => {
     this.setState(
       {
         windowVisible: false
@@ -82,7 +82,7 @@ class BaseWindowPlugin extends React.PureComponent {
         <Window
           globalObserver={this.props.app.globalObserver}
           title={this.title}
-          onClose={this.closePanel}
+          onClose={this.closeWindow}
           open={this.state.windowVisible}
           onResize={this.props.custom.onResize}
           width={this.width}

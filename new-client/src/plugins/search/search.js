@@ -276,7 +276,7 @@ class Search extends React.PureComponent {
     this.setState({
       visible: true
     });
-    this.props.app.closePanels();
+    this.props.app.invokeCloseOnAllWindowPlugins();
   };
 
   renderCenter2() {

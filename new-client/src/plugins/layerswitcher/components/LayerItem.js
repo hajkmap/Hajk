@@ -324,8 +324,8 @@ class LayerItem extends React.PureComponent {
           model={model}
           chapters={chapters}
           onOpenChapter={chapter => {
-            var informativePanel = app.panels.find(
-              panel => panel.type === "informative"
+            const informativePanel = app.windows.find(
+              window => window.type === "informative"
             );
             informativePanel.open(chapter);
           }}

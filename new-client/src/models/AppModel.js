@@ -31,22 +31,22 @@ import { Icon, Fill, Stroke, Style } from "ol/style.js";
 var map;
 
 class AppModel {
-  registerPanel(panelComponent) {
-    this.panels.push(panelComponent);
+  registerWindowPlugin(windowComponent) {
+    this.windows.push(windowComponent);
   }
 
-  closePanels() {
-    this.panels.forEach(panel => {
-      panel.closePanel();
+  invokeCloseOnAllWindowPlugins() {
+    this.windows.forEach(window => {
+      window.closeWindow();
     });
   }
 
-  onPanelOpen(currentPanel) {
-    this.panels
-      .filter(panel => panel !== currentPanel)
-      .forEach(panel => {
-        if (panel.position === currentPanel.position || isMobile) {
-          panel.closePanel();
+  onWindowOpen(currentWindow) {
+    this.windows
+      .filter(window => window !== currentWindow)
+      .forEach(window => {
+        if (window.position === currentWindow.position || isMobile) {
+          window.closeWindow();
         }
       });
   }
@@ -57,7 +57,7 @@ class AppModel {
    * @param Observer observer
    */
   constructor(config, globalObserver) {
-    this.panels = [];
+    this.windows = [];
     this.plugins = {};
     this.activeTool = undefined;
     this.config = config;
@@ -107,14 +107,6 @@ class AppModel {
       .sort((a, b) => a.sortOrder - b.sortOrder);
     return r;
   }
-
-  /**
-   * Check if the search plugin is avaliable and if so return it.
-   * @returns Array<Plugin>
-   */
-  // getSearchPlugin() {
-  //   return this.getPlugins().find(plugin => plugin.type === "search");
-  // }
 
   /**
    * Dynamically load plugins from the configured plugins folder.
@@ -435,18 +427,6 @@ class AppModel {
     }
 
     return a;
-  }
-
-  getADSpecificSearchLayers() {
-    // $.ajax({
-    //   url: "/mapservice/config/ADspecificSearch",
-    //   method: "GET",
-    //   contentType: "application/json",
-    //   success: data => {},
-    //   error: message => {
-    //     callback(message);
-    //   }
-    // });
   }
 
   overrideGlobalSearchConfig(searchTool, data) {
