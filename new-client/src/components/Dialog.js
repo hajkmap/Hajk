@@ -101,18 +101,6 @@ class Dialog extends Component {
     const { classes, options } = this.props;
     if (!options.prompt) return null;
 
-    const focusUsernameInputField = textField => {
-      var input;
-      if (textField) {
-        input = document.getElementById(textField.props.id);
-      }
-      if (input) {
-        setTimeout(() => {
-          input.focus();
-        }, 100);
-      }
-    };
-
     return (
       <form
         className={classes.container}
@@ -132,7 +120,6 @@ class Dialog extends Component {
           onChange={this.handleChange("text")}
           margin="normal"
           autoFocus={true}
-          ref={focusUsernameInputField}
         />
       </form>
     );
@@ -140,6 +127,7 @@ class Dialog extends Component {
 
   render() {
     const { options } = this.props;
+
     var text = "",
       header = "";
 
