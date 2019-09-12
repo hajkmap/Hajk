@@ -316,6 +316,12 @@ class Search extends React.PureComponent {
     );
   }
 
+  doSearch(v) {
+    this.searchModel.search(v, true, d => {
+      this.resolve(d);
+    });
+  }
+
   renderCenter() {
     const { classes, onMenuClick, menuButtonDisabled } = this.props;
 
@@ -336,13 +342,31 @@ class Search extends React.PureComponent {
           <InputBase
             className={classes.input}
             placeholder="Sök i Hajk"
-            inputProps={{ "aria-label": "search hajk maps" }}
+            inputProps={{
+              "aria-label": "search hajk maps",
+              id: "searchbox"
+            }}
+            onChange={e => {
+              const v = e.target.value;
+              if (v.length <= 3) {
+                return;
+              }
+              this.doSearch(v);
+            }}
+            onKeyPress={e => {
+              if (e.key === "Enter") {
+                this.doSearch(e.target.value);
+              }
+            }}
           />
           <Tooltip title="Sök i Hajk">
             <IconButton
               className={classes.iconButton}
               aria-label="search"
-              onClick={this.searchModel.search}
+              onClick={e => {
+                const v = document.getElementById("searchbox").value;
+                this.doSearch(v);
+              }}
             >
               <SearchIcon />
             </IconButton>
