@@ -3,6 +3,7 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Observer from "react-event-observer";
 // import SearchWithTextInput from "./components/searchviews/SearchWithTextInput";
+import SpatialSearchMenu from "./components/startview/SpatialSearchMenu.js";
 import SearchResultList from "./components/resultlist/SearchResultList.js";
 // import SearchBarStart from "./components/startview/SearchBarStart";
 // import SearchSettingsButton from "./components/shared/SearchSettingsButton";
@@ -20,7 +21,6 @@ import MenuIcon from "@material-ui/icons/Menu";
 import { CircularProgress, Divider, InputBase, Paper } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
 import ClearIcon from "@material-ui/icons/Clear";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 
 const styles = theme => {
   return {
@@ -188,7 +188,8 @@ class Search extends React.PureComponent {
     this.state = {
       visible: true,
       loading: false,
-      activeSearchView: STARTVIEW
+      activeSearchView: STARTVIEW,
+      searchboxPlaceholder: "Sök i Hajk"
     };
 
     this.activeSpatialTools = {
@@ -215,9 +216,10 @@ class Search extends React.PureComponent {
         loading: true
       });
     });
-    this.localObserver.on("toolchanged", () => {
+    this.localObserver.on("toolchanged", placeholderText => {
       this.setState({
-        result: false
+        result: false,
+        searchboxPlaceholder: placeholderText ? placeholderText : "Sök i Hajk"
       });
     });
     this.localObserver.on("searchComplete", () => {
@@ -340,7 +342,7 @@ class Search extends React.PureComponent {
           </Tooltip>
           <InputBase
             className={classes.input}
-            placeholder="Sök i Hajk"
+            placeholder={this.state.searchboxPlaceholder}
             inputProps={{
               "aria-label": "search hajk maps",
               id: "searchbox"
@@ -358,7 +360,13 @@ class Search extends React.PureComponent {
               }
             }}
           />
-          <Tooltip title="Sök i Hajk">
+          <Tooltip
+            title={
+              this.state.activeSearchView === STARTVIEW
+                ? "Sök i Hajk"
+                : "Återställ sökruta"
+            }
+          >
             <IconButton
               className={classes.iconButton}
               aria-label="search"
@@ -381,16 +389,15 @@ class Search extends React.PureComponent {
             </IconButton>
           </Tooltip>
           <Divider className={classes.divider} orientation="vertical" />
-          <Tooltip title="Visa fler sökalternativ">
-            <IconButton
-              color="primary"
-              className={classes.iconButton}
-              aria-label="MoreHoriz"
-            >
-              <MoreHorizIcon />
-            </IconButton>
-          </Tooltip>
-          {this.state.activeSearchView ? this.renderSpatialBar() : null}
+          <SpatialSearchMenu
+            onToolChanged={toolType => {
+              this.setState({
+                activeSearchView: toolType
+              });
+            }}
+            activeSpatialTools={this.activeSpatialTools}
+          />
+          {this.state.activeSearchView && this.renderSpatialBar()}
           {/* {this.searchSettings ? this.renderSearchSettingButton() : null} */}
         </Paper>
         {this.renderSearchResultList("center")}
@@ -409,13 +416,13 @@ class Search extends React.PureComponent {
 
   resetToStartView() {
     document.getElementById("searchbox").value = "";
+    this.localObserver.publish("toolchanged");
     this.searchModel.abortSearches();
     this.searchModel.clearRecentSpatialSearch();
     this.setState({ activeSearchView: STARTVIEW });
   }
 
   renderSpatialBar() {
-    console.log("renderSpatialBar: ", this.state.activeSearchView);
     switch (this.state.activeSearchView) {
       case POLYGON:
         return (

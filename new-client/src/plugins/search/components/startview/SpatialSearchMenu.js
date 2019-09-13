@@ -1,16 +1,19 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Typography from "@material-ui/core/Typography";
 import { withStyles } from "@material-ui/core/styles";
-import MenuItem from "@material-ui/core/MenuItem";
-import Edit from "@material-ui/icons/Edit";
-import AddCircleOutline from "@material-ui/icons/AddCircleOutline";
-import ArrowDropDown from "@material-ui/icons/ArrowDropDown";
-import ArrowDropUp from "@material-ui/icons/ArrowDropUp";
-import Grid from "@material-ui/core/Grid";
-import RadioButtonUnchecked from "@material-ui/icons/RadioButtonUnchecked";
-import IconButton from "@material-ui/core/IconButton";
-import Menu from "@material-ui/core/Menu";
+import {
+  Grid,
+  IconButton,
+  Menu,
+  MenuItem,
+  Tooltip,
+  Typography
+} from "@material-ui/core";
+
+import EditIcon from "@material-ui/icons/Edit";
+import AddCircleOutlineIcon from "@material-ui/icons/AddCircleOutline";
+import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
+import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 
 const styles = theme => ({
   root: {
@@ -51,16 +54,16 @@ class SpatialSearchOptions extends React.Component {
     let menuItems = [];
     if (activeSpatialTools) {
       if (activeSpatialTools.polygonSearch) {
-        menuItems.push(this.renderMenuItem(POLYGON, <Edit />, "Rita"));
+        menuItems.push(this.renderMenuItem(POLYGON, <EditIcon />, "Rita"));
       }
       if (activeSpatialTools.radiusSearch) {
         menuItems.push(
-          this.renderMenuItem(RADIUS, <RadioButtonUnchecked />, "Radie")
+          this.renderMenuItem(RADIUS, <RadioButtonUncheckedIcon />, "Radie")
         );
       }
       if (activeSpatialTools.selectionSearch) {
         menuItems.push(
-          this.renderMenuItem(SELECTION, <AddCircleOutline />, "Markera")
+          this.renderMenuItem(SELECTION, <AddCircleOutlineIcon />, "Markera")
         );
       }
     }
@@ -72,7 +75,14 @@ class SpatialSearchOptions extends React.Component {
         getContentAnchorEl={null}
         open={open}
         onClose={this.handleClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "center"
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "center"
+        }}
       >
         {menuItems.map(menuItem => {
           return menuItem;
@@ -111,17 +121,23 @@ class SpatialSearchOptions extends React.Component {
 
     if (activeTools) {
       return (
-        <div className={classes.root}>
-          <IconButton
-            aria-label="More"
-            aria-owns={open ? "menu" : undefined}
-            aria-haspopup="true"
-            onClick={this.handleDropdownClick}
-          >
-            {open ? <ArrowDropUp /> : <ArrowDropDown />}
-          </IconButton>
+        // <div className={classes.root}>
+        <>
+          <Tooltip title="Visa fler sökalternativ">
+            <IconButton
+              aria-label="MoreHoriz"
+              aria-owns={open ? "menu" : undefined}
+              aria-haspopup="true"
+              color="primary"
+              className={classes.iconButton}
+              onClick={this.handleDropdownClick}
+            >
+              <MoreHorizIcon />
+            </IconButton>
+          </Tooltip>
           {this.renderMenu(anchorEl, open, activeSpatialTools)}
-        </div>
+        </>
+        // </div>
       );
     } else {
       return null;

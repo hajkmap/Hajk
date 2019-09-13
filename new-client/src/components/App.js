@@ -69,7 +69,7 @@ const styles = theme => {
     },
     header: {
       zIndex: 4,
-      height: theme.spacing(7)
+      height: theme.spacing(8)
     },
     main: {
       zIndex: 2,
@@ -80,7 +80,7 @@ const styles = theme => {
       flex: 1
     },
     rightColumn: {
-      marginTop: theme.spacing(-7),
+      marginTop: theme.spacing(-8),
       paddingLeft: theme.spacing(2),
       paddingRight: theme.spacing(2),
       flex: 0,
@@ -92,7 +92,7 @@ const styles = theme => {
       flex: 0,
       display: "flex",
       flexDirection: "column",
-      marginTop: theme.spacing(-7),
+      marginTop: theme.spacing(-8),
       [theme.breakpoints.down("xs")]: {
         marginTop: 0
       }
