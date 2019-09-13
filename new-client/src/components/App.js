@@ -69,9 +69,7 @@ const styles = theme => {
     },
     header: {
       zIndex: 4,
-      // flex: 0,
-      height: theme.spacing(8),
-      marginBottom: theme.spacing(1)
+      height: theme.spacing(7)
     },
     main: {
       zIndex: 2,
@@ -94,14 +92,13 @@ const styles = theme => {
       flex: 0,
       display: "flex",
       flexDirection: "column",
-      marginTop: theme.spacing(-7) - 4, // Searchbox has 2+2px padding which we need to take care of here
+      marginTop: theme.spacing(-7),
       [theme.breakpoints.down("xs")]: {
         marginTop: 0
       }
     },
     footer: {
       zIndex: 3,
-      // flex: 0,
       display: "flex",
       justifyContent: "flex-end",
       height: 25,

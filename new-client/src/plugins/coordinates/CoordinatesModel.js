@@ -1,14 +1,12 @@
 import { MousePosition } from "ol/control";
 class CoordinatesModel {
   constructor(settings) {
-    console.log("settings: ", settings);
     this.map = settings.map;
     this.app = settings.app;
     this.localObserver = settings.localObserver;
   }
 
   activate = () => {
-    console.log("activate, this:", this);
     const target = document.getElementById("coordinatesContainer");
     target.childElementCount === 0 &&
       this.map.addControl(
@@ -19,9 +17,7 @@ class CoordinatesModel {
       );
   };
 
-  deactivate = () => {
-    console.log("deactivate");
-  };
+  deactivate = () => {};
 }
 
 export default CoordinatesModel;

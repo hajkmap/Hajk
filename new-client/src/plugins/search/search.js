@@ -1,26 +1,25 @@
 import React from "react";
-import LinearProgress from "@material-ui/core/LinearProgress";
+// import LinearProgress from "@material-ui/core/LinearProgress";
 import { withStyles } from "@material-ui/core/styles";
 import Observer from "react-event-observer";
-import SearchWithTextInput from "./components/searchviews/SearchWithTextInput";
+// import SearchWithTextInput from "./components/searchviews/SearchWithTextInput";
 import SearchResultList from "./components/resultlist/SearchResultList.js";
-import SearchBarStart from "./components/startview/SearchBarStart";
-import SearchSettingsButton from "./components/shared/SearchSettingsButton";
+// import SearchBarStart from "./components/startview/SearchBarStart";
+// import SearchSettingsButton from "./components/shared/SearchSettingsButton";
 import SearchWithRadiusInput from "./components/searchviews/SearchWithRadiusInput";
 import SearchWithSelectionInput from "./components/searchviews/SearchWithSelectionInput";
 import SearchWithPolygonInput from "./components/searchviews/SearchWithPolygonInput";
 import SearchModel from "./SearchModel.js";
 // import PanelHeader from "./../../components/PanelHeader.js";
-import { isMobile } from "../../utils/IsMobile.js";
+// import { isMobile } from "../../utils/IsMobile.js";
 
 import { Tooltip } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 
-import Paper from "@material-ui/core/Paper";
-import InputBase from "@material-ui/core/InputBase";
-import Divider from "@material-ui/core/Divider";
+import { CircularProgress, Divider, InputBase, Paper } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
+import ClearIcon from "@material-ui/icons/Clear";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 
 const styles = theme => {
@@ -235,19 +234,19 @@ class Search extends React.PureComponent {
       }
     });
 
-    window.addEventListener("resize", e => {
-      if (!isMobile) {
-        this.setState({
-          visible: true
-        });
-      }
-    });
+    // window.addEventListener("resize", e => {
+    //   if (!isMobile) {
+    //     this.setState({
+    //       visible: true
+    //     });
+    //   }
+    // });
   }
 
   renderSearchResultList(target) {
     // const { classes } = this.props;
     const { result } = this.state;
-    if (!result) return null;
+    if (!result || this.state.activeSearchView === STARTVIEW) return null;
     return (
       // <div className={classes.searchResults}>
       <SearchResultList
@@ -260,62 +259,64 @@ class Search extends React.PureComponent {
     );
   }
 
-  renderLoader() {
-    const { classes } = this.props;
-    if (this.state.loading) {
-      return (
-        <div className={classes.loader}>
-          <LinearProgress variant="query" />
-        </div>
-      );
-    } else {
-      return <div className={classes.loader} />;
-    }
-  }
+  // renderLoader() {
+  //   const { classes } = this.props;
+  //   if (this.state.loading) {
+  //     console.log("this.state.loading: ", this.state.loading);
+  //     return (
+  //       <div className={classes.loader}>
+  //         <LinearProgress variant="query" />
+  //       </div>
+  //     );
+  //   } else {
+  //     return <div className={classes.loader} />;
+  //   }
+  // }
 
-  toggleSearch = () => {
-    this.setState({
-      visible: true
-    });
-    this.props.app.invokeCloseOnAllWindowPlugins();
-  };
+  // toggleSearch = () => {
+  //   this.setState({
+  //     visible: true
+  //   });
+  //   this.props.app.invokeCloseOnAllWindowPlugins();
+  // };
 
-  renderCenter2() {
-    const { classes } = this.props;
-    var searchBar;
+  // renderCenter2() {
+  //   const { classes } = this.props;
+  //   var searchBar;
 
-    if (this.state.activeSearchView === STARTVIEW) {
-      searchBar = this.renderSearchBarStart();
-    } else if (this.state.activeSearchView === TEXTSEARCH) {
-      searchBar = this.renderSearchWithText();
-    }
+  //   if (this.state.activeSearchView === STARTVIEW) {
+  //     searchBar = this.renderSearchBarStart();
+  //   } else if (this.state.activeSearchView === TEXTSEARCH) {
+  //     searchBar = this.renderSearchWithText();
+  //   }
 
-    return (
-      <>
-        <div>{this.renderLoader()}</div>
-        <div className={classes.searchToolsContainer}>
-          <div className={classes.searchContainer}>
-            {this.state.activeSearchView ? this.renderSpatialBar() : null}
-            {searchBar}
-          </div>
-          {this.searchSettings ? this.renderSearchSettingButton() : null}
-          <Tooltip title="Visa verktygspanelen">
-            <IconButton
-              onClick={this.props.onMenuClick}
-              className={classes.iconButton2}
-              disabled={this.props.menuButtonDisabled}
-              aria-label="menu"
-            >
-              <MenuIcon />
-            </IconButton>
-          </Tooltip>
-        </div>
-        {this.renderSearchResultList("center")}
-      </>
-    );
-  }
+  //   return (
+  //     <>
+  //       <div>{this.renderLoader()}</div>
+  //       <div className={classes.searchToolsContainer}>
+  //         <div className={classes.searchContainer}>
+  //           {this.state.activeSearchView ? this.renderSpatialBar() : null}
+  //           {searchBar}
+  //         </div>
+  //         {/* {this.searchSettings ? this.renderSearchSettingButton() : null} */}
+  //         <Tooltip title="Visa verktygspanelen">
+  //           <IconButton
+  //             onClick={this.props.onMenuClick}
+  //             className={classes.iconButton2}
+  //             disabled={this.props.menuButtonDisabled}
+  //             aria-label="menu"
+  //           >
+  //             <MenuIcon />
+  //           </IconButton>
+  //         </Tooltip>
+  //       </div>
+  //       {this.renderSearchResultList("center")}
+  //     </>
+  //   );
+  // }
 
   doSearch(v) {
+    if (v.length <= 3) return null;
     this.searchModel.search(v, true, d => {
       this.resolve(d);
     });
@@ -327,7 +328,6 @@ class Search extends React.PureComponent {
     return (
       <>
         <Paper className={classes.root}>
-          {this.renderLoader()}
           <Tooltip title="Visa verktygspanelen">
             <IconButton
               onClick={onMenuClick}
@@ -363,11 +363,21 @@ class Search extends React.PureComponent {
               className={classes.iconButton}
               aria-label="search"
               onClick={e => {
-                const v = document.getElementById("searchbox").value;
-                this.doSearch(v);
+                if (this.state.activeSearchView === STARTVIEW) {
+                  const v = document.getElementById("searchbox").value;
+                  this.doSearch(v);
+                } else {
+                  this.resetToStartView();
+                }
               }}
             >
-              <SearchIcon />
+              {this.state.activeSearchView === STARTVIEW && <SearchIcon />}
+              {this.state.activeSearchView !== STARTVIEW &&
+                (this.state.loading ? (
+                  <CircularProgress size={20} />
+                ) : (
+                  <ClearIcon />
+                ))}
             </IconButton>
           </Tooltip>
           <Divider className={classes.divider} orientation="vertical" />
@@ -381,28 +391,31 @@ class Search extends React.PureComponent {
             </IconButton>
           </Tooltip>
           {this.state.activeSearchView ? this.renderSpatialBar() : null}
-          {this.searchSettings ? this.renderSearchSettingButton() : null}
+          {/* {this.searchSettings ? this.renderSearchSettingButton() : null} */}
         </Paper>
         {this.renderSearchResultList("center")}
       </>
     );
   }
 
-  renderSearchSettingButton() {
-    const { classes } = this.props;
-    return (
-      <div className={classes.mainContainerButton}>
-        <SearchSettingsButton />
-      </div>
-    );
-  }
+  // renderSearchSettingButton() {
+  //   const { classes } = this.props;
+  //   return (
+  //     <div className={classes.mainContainerButton}>
+  //       <SearchSettingsButton />
+  //     </div>
+  //   );
+  // }
 
   resetToStartView() {
+    document.getElementById("searchbox").value = "";
     this.searchModel.abortSearches();
     this.searchModel.clearRecentSpatialSearch();
     this.setState({ activeSearchView: STARTVIEW });
   }
+
   renderSpatialBar() {
+    console.log("renderSpatialBar: ", this.state.activeSearchView);
     switch (this.state.activeSearchView) {
       case POLYGON:
         return (
@@ -454,49 +467,49 @@ class Search extends React.PureComponent {
     }
   }
 
-  renderSearchBarStart() {
-    return (
-      <SearchBarStart
-        localObserver={this.localObserver}
-        activeSpatialTools={this.activeSpatialTools}
-        onToolChanged={toolType => {
-          this.setState({
-            activeSearchView: toolType
-          });
-        }}
-        onTextFieldClick={() => {
-          this.setState({
-            activeSearchView: TEXTSEARCH
-          });
-        }}
-      />
-    );
-  }
+  // renderSearchBarStart() {
+  //   return (
+  //     <SearchBarStart
+  //       localObserver={this.localObserver}
+  //       activeSpatialTools={this.activeSpatialTools}
+  //       onToolChanged={toolType => {
+  //         this.setState({
+  //           activeSearchView: toolType
+  //         });
+  //       }}
+  //       onTextFieldClick={() => {
+  //         this.setState({
+  //           activeSearchView: TEXTSEARCH
+  //         });
+  //       }}
+  //     />
+  //   );
+  // }
 
-  renderSearchWithText() {
-    return (
-      <SearchWithTextInput
-        model={this.searchModel}
-        forceSearch={this.searchModel.search}
-        onClear={() => {
-          this.searchModel.clear();
-          this.localObserver.publish("clearInput");
-          this.setState({
-            result: false
-          });
-        }}
-        resetToStartView={() => {
-          this.resetToStartView();
-        }}
-        onChange={this.searchModel.search}
-        loading={this.state.loading}
-        localObserver={this.localObserver}
-        onComplete={this.resolve}
-        tooltip={this.tooltip}
-        activeTool={this.state.activeSearchView}
-      />
-    );
-  }
+  // renderSearchWithText() {
+  //   return (
+  //     <SearchWithTextInput
+  //       model={this.searchModel}
+  //       forceSearch={this.searchModel.search}
+  //       onClear={() => {
+  //         this.searchModel.clear();
+  //         this.localObserver.publish("clearInput");
+  //         this.setState({
+  //           result: false
+  //         });
+  //       }}
+  //       resetToStartView={() => {
+  //         this.resetToStartView();
+  //       }}
+  //       onChange={this.searchModel.search}
+  //       loading={this.state.loading}
+  //       localObserver={this.localObserver}
+  //       onComplete={this.resolve}
+  //       tooltip={this.tooltip}
+  //       activeTool={this.state.activeSearchView}
+  //     />
+  //   );
+  // }
 
   /**
    * Renders the search plugin.
