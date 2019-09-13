@@ -8,6 +8,7 @@ import Place from "@material-ui/icons/Place";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import classNames from "classnames";
+import { Paper } from "@material-ui/core";
 
 const styles = theme => {
   return {
@@ -46,7 +47,7 @@ const styles = theme => {
       marginTop: "10px",
       paddingBottom: "22px",
       [theme.breakpoints.down("xs")]: {
-        maxHeight: "inherit"
+        maxHeight: "calc(100vh - 200px)"
       }
     },
     searchResultTopBarLeft: {
@@ -65,6 +66,13 @@ const styles = theme => {
 
     hidden: {
       display: "none"
+    },
+    // New styles
+    root: {
+      minWidth: 200,
+      [theme.breakpoints.up("sm")]: {
+        maxWidth: 520
+      }
     }
   };
 };
@@ -156,7 +164,8 @@ class SearchResultList extends React.PureComponent {
       return null;
     } else {
       return (
-        <div className={searchResultClass}>
+        <Paper className={classes.root}>
+          {/* <div className={searchResultClass}> */}
           <div className={classes.searchResultTopBar}>
             <div className={classes.searchResultTopBarLeft}>
               <Place />
@@ -196,7 +205,8 @@ class SearchResultList extends React.PureComponent {
               {this.renderResult()}
             </div>
           </div>
-        </div>
+        </Paper>
+        // </div>
       );
     }
   }

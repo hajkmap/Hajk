@@ -112,13 +112,13 @@ const styles = theme => {
       borderRadius: "4px",
       overflow: "hidden"
     },
-    searchResults: {
-      overflow: "visible",
-      height: 0,
-      [theme.breakpoints.down("xs")]: {
-        height: "inherit"
-      }
-    },
+    // searchResults: {
+    //   overflow: "visible",
+    //   height: 0,
+    //   [theme.breakpoints.down("xs")]: {
+    //     height: "inherit"
+    //   }
+    // },
     iconButtonHeader: {
       color: "black",
       padding: "3px",
@@ -146,7 +146,6 @@ const styles = theme => {
       display: "flex",
       alignItems: "center",
       minWidth: 200,
-      marginBottom: theme.spacing(1),
       [theme.breakpoints.up("sm")]: {
         maxWidth: 520
       }
@@ -246,18 +245,18 @@ class Search extends React.PureComponent {
   }
 
   renderSearchResultList(target) {
-    const { classes } = this.props;
+    // const { classes } = this.props;
     const { result } = this.state;
     if (!result) return null;
     return (
-      <div className={classes.searchResults}>
-        <SearchResultList
-          result={result}
-          renderAffectButton={this.activeSpatialTools.radiusSearch}
-          model={this.searchModel}
-          target={target}
-        />
-      </div>
+      // <div className={classes.searchResults}>
+      <SearchResultList
+        result={result}
+        renderAffectButton={this.activeSpatialTools.radiusSearch}
+        model={this.searchModel}
+        target={target}
+      />
+      // </div>
     );
   }
 

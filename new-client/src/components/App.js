@@ -68,9 +68,10 @@ const styles = theme => {
       }
     },
     header: {
-      zIndex: 2,
-      flex: 0,
-      height: theme.spacing(8)
+      zIndex: 4,
+      // flex: 0,
+      height: theme.spacing(8),
+      marginBottom: theme.spacing(1)
     },
     main: {
       zIndex: 2,
@@ -99,10 +100,11 @@ const styles = theme => {
       }
     },
     footer: {
-      zIndex: 2,
-      flex: 0,
+      zIndex: 3,
+      // flex: 0,
       display: "flex",
-      justifyContent: "end",
+      justifyContent: "flex-end",
+      height: 25,
       "& > *": {
         marginLeft: theme.spacing(1)
       }
