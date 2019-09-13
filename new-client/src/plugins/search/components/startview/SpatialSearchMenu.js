@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import {
+  Divider,
   Grid,
   IconButton,
   Menu,
@@ -20,6 +21,10 @@ const styles = theme => ({
     display: "flex",
     flexWrap: "wrap",
     borderLeft: "1px solid rgba(0, 0, 0, 0.42)"
+  },
+  divider: {
+    height: 28,
+    margin: 4
   }
 });
 
@@ -123,6 +128,7 @@ class SpatialSearchOptions extends React.Component {
       return (
         // <div className={classes.root}>
         <>
+          <Divider className={classes.divider} orientation="vertical" />
           <Tooltip title="Visa fler sökalternativ">
             <IconButton
               aria-label="MoreHoriz"

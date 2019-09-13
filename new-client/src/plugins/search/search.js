@@ -18,7 +18,7 @@ import { Tooltip } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 
-import { CircularProgress, Divider, InputBase, Paper } from "@material-ui/core";
+import { CircularProgress, InputBase, Paper } from "@material-ui/core";
 import SearchIcon from "@material-ui/icons/Search";
 import ClearIcon from "@material-ui/icons/Clear";
 
@@ -155,10 +155,6 @@ const styles = theme => {
     },
     iconButton: {
       padding: 10
-    },
-    divider: {
-      height: 28,
-      margin: 4
     }
   };
 };
@@ -388,7 +384,6 @@ class Search extends React.PureComponent {
                 ))}
             </IconButton>
           </Tooltip>
-          <Divider className={classes.divider} orientation="vertical" />
           <SpatialSearchMenu
             onToolChanged={toolType => {
               this.setState({
