@@ -40,7 +40,9 @@ class LayerSwitcher extends React.PureComponent {
           map={this.props.map}
           model={this.layerSwitcherModel}
           observer={this.localObserver}
-          breadCrumbs={this.props.type === "widgetItem"}
+          breadCrumbs={
+            ["left", "right"].indexOf(this.props.options.target) >= 0 // Show Breadcrumbs only if plugins is configured to show as Widget
+          }
         />
       </BaseWindowPlugin>
     );
