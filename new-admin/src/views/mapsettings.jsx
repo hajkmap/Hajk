@@ -257,7 +257,7 @@ class Menu extends Component {
    */
   constructor() {
     super();
-    var state = {
+    this.state = {
       adGroups: [],
       isHidden: true,
       drawOrder: false,
@@ -268,7 +268,7 @@ class Menu extends Component {
       visibleAtStart: true,
       backgroundSwitcherBlack: true,
       backgroundSwitcherWhite: true,
-      toggleAllButton: false,
+      showBreadcrumbs: false,
       instruction: "",
       dropdownThemeMaps: false,
       themeMapHeaderCaption: "Temakartor",
@@ -278,7 +278,6 @@ class Menu extends Component {
       title: "Innehåll",
       description: "Välj innehåll att visa i kartan"
     };
-    this.state = state;
   }
 
   /**
@@ -305,8 +304,8 @@ class Menu extends Component {
             .backgroundSwitcherBlack,
           backgroundSwitcherWhite: this.props.model.get("layerMenuConfig")
             .backgroundSwitcherWhite,
-          toggleAllButton: this.props.model.get("layerMenuConfig")
-            .toggleAllButton,
+          showBreadcrumbs: this.props.model.get("layerMenuConfig")
+            .showBreadcrumbs,
           instruction: this.props.model.get("layerMenuConfig").instruction,
           dropdownThemeMaps: this.props.model.get("layerMenuConfig")
             .dropdownThemeMaps,
@@ -316,9 +315,9 @@ class Menu extends Component {
             .visibleForGroups
             ? this.props.model.get("layerMenuConfig").visibleForGroups
             : [],
-          target: this.props.model.get("layerMenuConfig").target,
-          title: this.props.model.get("layerMenuConfig").title,
-          description: this.props.model.get("layerMenuConfig").description
+          target: this.props.model.get("layerMenuConfig").target || "toolbar",
+          title: this.props.model.get("layerMenuConfig").title || "",
+          description: this.props.model.get("layerMenuConfig").description || ""
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -510,7 +509,7 @@ class Menu extends Component {
       visibleAtStart: this.state.visibleAtStart,
       backgroundSwitcherBlack: this.state.backgroundSwitcherBlack,
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
-      toggleAllButton: this.state.toggleAllButton,
+      showBreadcrumbs: this.state.showBreadcrumbs,
       instruction: this.state.instruction,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
       themeMapHeaderCaption: this.state.themeMapHeaderCaption,
@@ -1076,7 +1075,7 @@ class Menu extends Component {
     });
   }
 
-  handleInputChange(event) {
+  handleInputChange = event => {
     const target = event.target;
     const name = target.name;
     var value = target.type === "checkbox" ? target.checked : target.value;
@@ -1095,7 +1094,7 @@ class Menu extends Component {
     this.setState({
       [name]: value
     });
-  }
+  };
 
   /**
    * Hanterar event för inmatningsfält för Active Directory-grupper
@@ -1203,9 +1202,7 @@ class Menu extends Component {
               id="dropdownThemeMaps"
               name="dropdownThemeMaps"
               type="checkbox"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
+              onChange={this.handleInputChange}
               checked={this.state.dropdownThemeMaps}
             />
             &nbsp;
@@ -1214,7 +1211,7 @@ class Menu extends Component {
             className="layer-menu-label-checkbox"
             htmlFor="dropdownThemeMaps"
           >
-            Visa lista över temakartor
+            Visa kartan i lista över tillgängliga kartor
           </label>
         </div>
       );
@@ -1315,9 +1312,7 @@ class Menu extends Component {
                     id="active"
                     name="active"
                     type="checkbox"
-                    onChange={e => {
-                      this.handleInputChange(e);
-                    }}
+                    onChange={this.handleInputChange}
                     checked={this.state.active}
                   />
                   &nbsp;
@@ -1332,9 +1327,7 @@ class Menu extends Component {
                     id="visibleAtStart"
                     name="visibleAtStart"
                     type="checkbox"
-                    onChange={e => {
-                      this.handleInputChange(e);
-                    }}
+                    onChange={this.handleInputChange}
                     checked={this.state.visibleAtStart}
                   />
                   &nbsp;
@@ -1352,9 +1345,7 @@ class Menu extends Component {
                     id="backgroundSwitcherBlack"
                     name="backgroundSwitcherBlack"
                     type="checkbox"
-                    onChange={e => {
-                      this.handleInputChange(e);
-                    }}
+                    onChange={this.handleInputChange}
                     checked={this.state.backgroundSwitcherBlack}
                   />
                   &nbsp;
@@ -1372,9 +1363,7 @@ class Menu extends Component {
                     id="backgroundSwitcherWhite"
                     name="backgroundSwitcherWhite"
                     type="checkbox"
-                    onChange={e => {
-                      this.handleInputChange(e);
-                    }}
+                    onChange={this.handleInputChange}
                     checked={this.state.backgroundSwitcherWhite}
                   />
                   &nbsp;
@@ -1386,54 +1375,60 @@ class Menu extends Component {
               <div className="row">
                 <div className="col-sm-1">
                   <input
-                    id="toggleAllButton"
-                    name="toggleAllButton"
+                    id="showBreadcrumbs"
+                    name="showBreadcrumbs"
                     type="checkbox"
-                    onChange={e => {
-                      this.handleInputChange(e);
-                    }}
-                    checked={this.state.toggleAllButton}
+                    onChange={this.handleInputChange}
+                    checked={this.state.showBreadcrumbs}
                   />
                   &nbsp;
                 </div>
                 <label
                   className="layer-menu-label-checkbox"
-                  htmlFor="toggleAllButton"
+                  htmlFor="showBreadcrumbs"
                 >
-                  Släck alla lager-knapp
+                  Visa "brödsmulor"{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="När rutan är ikryssad visas små kort längst ned på skärmen, ett för varje lager som är aktivt"
+                  />
                 </label>
               </div>
               <div className="row">
                 <div className="col-sm-12">
-                  <label htmlFor="target">Verktygsplacering</label>
+                  <label htmlFor="target">
+                    Verktygsplacering{" "}
+                    <i
+                      className="fa fa-question-circle"
+                      data-toggle="tooltip"
+                      title="Avgör om verktyget visas som en Widget Plugin (om 'left' eller 'right' anges här) eller Drawer Plugin (om 'toolbar' anges här)."
+                    />
+                  </label>
                   <input
                     id="target"
                     name="target"
                     type="text"
-                    onChange={e => {
-                      this.handleInputChange(e);
-                    }}
+                    onChange={this.handleInputChange}
                     value={this.state.target}
                   />
                 </div>
               </div>
               <div className="row">
                 <div className="col-sm-12">
-                  <label htmlFor="title">Etikett</label>
+                  <label htmlFor="title">Rubrik (Widget Plugin)</label>
                   <input
                     value={this.state.title}
                     type="text"
                     name="title"
-                    onChange={e => {
-                      this.handleInputChange(e);
-                    }}
+                    onChange={this.handleInputChange}
                   />
                 </div>
               </div>
               <div className="row">
                 <div className="col-sm-12">
                   <label htmlFor="description">
-                    Beskrivning{" "}
+                    Beskrivning (Widget Plugin){" "}
                     <i
                       className="fa fa-question-circle"
                       data-toggle="tooltip"
@@ -1444,9 +1439,7 @@ class Menu extends Component {
                     value={this.state.description}
                     type="text"
                     name="description"
-                    onChange={e => {
-                      this.handleInputChange(e);
-                    }}
+                    onChange={this.handleInputChange}
                   />
                 </div>
               </div>
@@ -1459,9 +1452,7 @@ class Menu extends Component {
                     id="instruction"
                     name="instruction"
                     type="text"
-                    onChange={e => {
-                      this.handleInputChange(e);
-                    }}
+                    onChange={this.handleInputChange}
                     value={
                       this.state.instruction ? atob(this.state.instruction) : ""
                     }

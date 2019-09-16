@@ -50,6 +50,7 @@ class MapOptions extends Component {
         logo: config.logo,
         extent: config.extent,
         mapselector: config.mapselector,
+        mapcleaner: config.mapcleaner,
         title: config.title ? config.title : "",
         geoserverLegendOptions: config.geoserverLegendOptions
           ? config.geoserverLegendOptions
@@ -83,6 +84,7 @@ class MapOptions extends Component {
       logo: mapConfig.logo,
       extent: mapConfig.extent,
       mapselector: mapConfig.mapselector,
+      mapcleaner: mapConfig.mapcleaner,
       geoserverLegendOptions: mapConfig.geoserverLegendOptions
     });
   }
@@ -189,6 +191,7 @@ class MapOptions extends Component {
         }
         break;
       case "mapselector":
+      case "mapcleaner":
         if (value !== true && value !== false) {
           valid = false;
         }
@@ -227,6 +230,7 @@ class MapOptions extends Component {
         config.logo = this.getValue("logo");
         config.extent = this.getValue("extent");
         config.mapselector = this.getValue("mapselector");
+        config.mapcleaner = this.getValue("mapcleaner");
         config.geoserverLegendOptions = this.getValue("geoserverLegendOptions");
         this.props.model.updateMapConfig(config, success => {
           var msg = success
@@ -488,6 +492,26 @@ class MapOptions extends Component {
                   this.setState({ mapselector: e.target.checked });
                 }}
                 checked={this.state.mapselector}
+              />
+              &nbsp;
+            </div>
+            <div>
+              <label htmlFor="input_mapcleaner">
+                Visa knapp för att rensa kartan{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktiv kommer en väljare med andra tillgängliga kartor att visas för användaren"
+                />
+              </label>
+              <input
+                id="input_mapcleaner"
+                type="checkbox"
+                ref="input_mapcleaner"
+                onChange={e => {
+                  this.setState({ mapcleaner: e.target.checked });
+                }}
+                checked={this.state.mapcleaner}
               />
               &nbsp;
             </div>
