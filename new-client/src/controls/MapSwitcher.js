@@ -101,15 +101,13 @@ class MapSwitcher extends React.PureComponent {
     const toolOptions = this.props.appModel.config.mapConfig.tools.find(
       tool => tool.type === "layerswitcher"
     ).options;
-    const instruction = toolOptions.instruction
-      ? window.atob(toolOptions.instruction)
-      : "";
+    const title = toolOptions.title || "Titel saknas";
 
     return (
       // Render only if config says so
       this.props.appModel.config.mapConfig.map.mapselector && (
         <>
-          <Tooltip title={`Nuvarande karta: ${instruction}`}>
+          <Tooltip title={`Nuvarande karta: ${title}`}>
             <Paper className={classes.paper}>
               <Button
                 aria-owns={open ? "render-props-menu" : undefined}
