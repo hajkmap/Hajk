@@ -38,10 +38,10 @@ namespace MapService.Models
 
         public string geoserverLegendOptions { get; set; }
 
-        public string pil { get; set; }
-
 		public bool mapselector { get; set; }
 
-		public Colors colors { get; set; }
+        public bool mapcleaner { get; set; }
+
+        public Colors colors { get; set; }
     }
 }

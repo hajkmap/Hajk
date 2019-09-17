@@ -440,7 +440,8 @@ namespace MapService.Controllers
 					projection = "EPSG:3006",
 					target = "map",
 					geoserverLegendOptions = "",
-					pil = "",
+                    mapselector = true,
+                    mapcleaner = true,
 					logo = "",
 					colors = new Colors()
 					{

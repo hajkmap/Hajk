@@ -37,8 +37,6 @@ namespace MapService.Models.ToolOptions
 
         public bool backgroundSwitcherWhite { get; set; }
 
-        public bool toggleAllButton { get; set; }
-
         public bool showBreadcrumbs { get; set; }
 
         public string target { get; set; }
