@@ -23,15 +23,17 @@ export default class ConfigMapper {
         h = 30;
       }
 
-      let getIndex = args.layersInfo
-        ? args.layersInfo.findIndex(l => l.id === layer)
-        : "";
-      let style = args.layersInfo ? args.layersInfo[getIndex].style : "";
+      let getIndex =
+        args.layersInfo !== null
+          ? args.layersInfo.findIndex(l => l.id === layer)
+          : null;
+      let style =
+        args.layersInfo !== null &&
+        getIndex >= 0 &&
+        args.layersInfo[getIndex].style;
 
       if (args.legend === "") {
-        legend = `${proxy}${
-          args.url
-        }?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=${w}&HEIGHT=${h}&LAYER=${layer}&STYLE=${style}&${geoserverLegendOptions}`;
+        legend = `${proxy}${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=${w}&HEIGHT=${h}&LAYER=${layer}&STYLE=${style}&${geoserverLegendOptions}`;
       } else {
         legend = args.legend;
       }
