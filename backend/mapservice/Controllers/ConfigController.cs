@@ -654,6 +654,7 @@ namespace MapService.Controllers
 							instruction = String.Empty,
 							themeMapHeaderCaption = String.Empty,
 							visibleForGroups = new string[0],
+                            showBreadcrumbs = true,
 							target = String.Empty,
 							title = String.Empty,
 							description = String.Empty
