@@ -98,10 +98,8 @@ class MapSwitcher extends React.PureComponent {
     const { classes } = this.props;
     const open = Boolean(anchorEl);
 
-    const toolOptions = this.props.appModel.config.mapConfig.tools.find(
-      tool => tool.type === "layerswitcher"
-    ).options;
-    const title = toolOptions.title || "Titel saknas";
+    const title =
+      this.props.appModel.config.mapConfig.map.title || "Karta utan titel";
 
     return (
       // Render only if config says so
