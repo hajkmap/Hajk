@@ -29,8 +29,6 @@ namespace MapService.Models.ToolOptions
 
         public List<LayerGroup> groups { get; set; }
 
-        public string instruction { get; set; }
-
         public bool active { get; set; }
 
         public bool visibleAtStart { get; set; }
@@ -41,16 +39,23 @@ namespace MapService.Models.ToolOptions
 
         public bool toggleAllButton { get; set; }
 
+        public bool showBreadcrumbs { get; set; }
+
+        public string target { get; set; }
+
+        public string title { get; set; }
+
+        public string description { get; set; }
+
         public bool dropdownThemeMaps { get; set; }
 
         public string themeMapHeaderCaption { get; set; }
+
+        public string instruction { get; set; }
 		
 		public string[] visibleForGroups { get; set; }
 
-		public string target { get; set; }
 
-		public string title { get; set; }
-
-		public string description { get; set; }
+		
     }
 }
