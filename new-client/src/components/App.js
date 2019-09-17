@@ -15,7 +15,7 @@ import Zoom from "../controls/Zoom";
 import ScaleLine from "../controls/ScaleLine";
 import Attribution from "../controls/Attribution.js";
 import MapSwitcher from "../controls/MapSwitcher";
-import BackgroundCleaner from "../controls/BackgroundCleaner";
+import MapCleaner from "../controls/MapCleaner";
 
 import {
   Backdrop,
@@ -356,7 +356,7 @@ class App extends React.PureComponent {
               >
                 <Zoom map={this.appModel.getMap()} />
                 <MapSwitcher appModel={this.appModel} />
-                <BackgroundCleaner appModel={this.appModel} />
+                <MapCleaner appModel={this.appModel} />
               </div>
             </main>
             <footer
