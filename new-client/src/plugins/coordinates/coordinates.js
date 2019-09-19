@@ -17,6 +17,7 @@ class Coordinates extends React.PureComponent {
     this.coordinatesModel = new CoordinatesModel({
       map: props.map,
       app: props.app,
+      options: props.options,
       observer: this.localObserver
     });
   }
@@ -40,6 +41,7 @@ class Coordinates extends React.PureComponent {
         <CoordinatesView
           app={this.props.app}
           map={this.props.map}
+          options={this.props.options}
           model={this.coordinatesModel}
           observer={this.localObserver}
         />

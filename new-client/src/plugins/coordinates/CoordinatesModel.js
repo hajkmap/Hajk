@@ -3,6 +3,7 @@ class CoordinatesModel {
   constructor(settings) {
     this.map = settings.map;
     this.app = settings.app;
+    this.options = settings.options;
     this.localObserver = settings.localObserver;
   }
 
