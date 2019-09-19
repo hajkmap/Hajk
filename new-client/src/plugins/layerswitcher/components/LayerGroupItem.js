@@ -39,8 +39,7 @@ const styles = theme => ({
     "&:last-child": {
       borderBottom: "none"
     },
-    margin: "5px 0",
-    marginLeft: "45px"
+    margin: "5px 0"
   },
   layerItemContainer: {
     background: "white",
@@ -70,8 +69,6 @@ const styles = theme => ({
   },
   layerGroup: {
     background: "white",
-    borderBottom: "1px solid #ccc",
-    marginLeft: "45px",
     paddingTop: "5px",
     paddingBottom: "5px"
   },
@@ -81,11 +78,12 @@ const styles = theme => ({
   },
   layerGroupHeader: {
     display: "flex",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
+    borderBottom: "1px solid #ccc"
   },
   layerGroupLayers: {
-    borderTop: "1px solid #ccc",
-    marginTop: "-5px"
+    marginLeft: "45px",
+    borderBottom: "1px solid #ccc"
   },
   layerGroupItem: {
     display: "flex"
@@ -114,6 +112,9 @@ const styles = theme => ({
     cursor: "pointer",
     float: "left",
     marginRight: "5px"
+  },
+  arrowIcon: {
+    float: "left"
   }
 });
 
@@ -549,21 +550,21 @@ class LayerGroupItem extends Component {
     return (
       <div className={classes.layerGroup}>
         <div className={classes.layerGroupContainer}>
+          <div className={classes.arrowIcon}>
+            {open ? (
+              <ArrowDropDownIcon
+                className={classes.button}
+                onClick={() => this.toggle()}
+              />
+            ) : (
+              <ArrowRightIcon
+                className={classes.button}
+                onClick={() => this.toggle()}
+              />
+            )}
+          </div>
           <div className={classes.layerGroupHeader}>
             <div className={classes.layerItemInfo}>
-              <div>
-                {open ? (
-                  <ArrowDropDownIcon
-                    className={classes.button}
-                    onClick={() => this.toggle()}
-                  />
-                ) : (
-                  <ArrowRightIcon
-                    className={classes.button}
-                    onClick={() => this.toggle()}
-                  />
-                )}
-              </div>
               <div
                 className={classes.caption}
                 onClick={this.toggleVisible(this.props.layer)}

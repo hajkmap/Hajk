@@ -9,6 +9,7 @@ import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
 import Typography from "@material-ui/core/Typography";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
+import Checkbox from "@material-ui/core/Checkbox";
 
 const styles = theme => ({
   root: {
@@ -28,23 +29,30 @@ const styles = theme => ({
     borderRadius: "0 !important",
     boxShadow: "none"
   },
-  panel: {
-    marginLeft: "45px"
-  },
-  groupCheckbox: {
+  panel: {},
+  /*groupCheckbox: {
     marginRight: "5px"
-  },
+  },*/
   caption: {
-    display: "flex"
+    display: "flex",
+    flexBasis: "100%",
+    borderBottom: "1px solid #ccc"
   },
   panelSummary: {
     padding: "0px",
-    borderBottom: "1px solid #ccc",
     overflow: "hidden"
   },
   checkBoxIcon: {
     cursor: "pointer",
+    float: "left",
+    marginRight: "5px",
+    padding: "0"
+  },
+  arrowIcon: {
     float: "left"
+  },
+  expansionPanel: {
+    marginLeft: "18px"
   }
 });
 
@@ -57,10 +65,10 @@ const StyledExpansionPanelSummary = withStyles({
   },
   content: {
     transition: "inherit !important",
-    marginTop: "4px",
+    marginTop: "0",
     marginBottom: "0",
     "&$expanded": {
-      marginTop: "4px",
+      marginTop: "0",
       marginBottom: "0"
     }
   },
@@ -206,7 +214,7 @@ class LayerGroup extends React.PureComponent {
             }
           }}
         >
-          <div className={classes.groupCheckbox}>
+          <div>
             {this.isToggled(this.props.group) ? (
               this.isSemiToggled(this.props.group) ? (
                 <CheckBoxIcon className={classes.checkBoxIcon} />
@@ -225,7 +233,10 @@ class LayerGroup extends React.PureComponent {
       );
     } else {
       return (
-        <Typography className={classes.heading}>{this.state.name}</Typography>
+        <div className={classes.caption}>
+          <Checkbox className={classes.checkBoxIcon} disabled />
+          <Typography className={classes.heading}>{this.state.name}</Typography>
+        </div>
       );
     }
   }
@@ -252,37 +263,41 @@ class LayerGroup extends React.PureComponent {
           }}
         >
           <StyledExpansionPanelSummary className={classes.panelSummary}>
-            {expanded ? (
-              <ArrowDropDownIcon onClick={() => this.toggleExpanded()} />
-            ) : (
-              <ArrowRightIcon onClick={() => this.toggleExpanded()} />
-            )}
+            <div className={classes.arrowIcon}>
+              {expanded ? (
+                <ArrowDropDownIcon onClick={() => this.toggleExpanded()} />
+              ) : (
+                <ArrowRightIcon onClick={() => this.toggleExpanded()} />
+              )}
+            </div>
             {this.renderToggleAll()}
           </StyledExpansionPanelSummary>
           <ExpansionPanelDetails classes={{ root: classes.root }}>
-            {this.state.layers.map((layer, i) => {
-              var mapLayer = this.model.layerMap[Number(layer.id)];
-              if (mapLayer) {
-                return (
-                  <LayerItem
-                    key={mapLayer.get("name")}
-                    layer={mapLayer}
-                    model={this.props.model}
-                    chapters={this.props.chapters}
-                    app={this.props.app}
-                    onOpenChapter={chapter => {
-                      const informativePanel = this.props.app.windows.find(
-                        window => window.type === "informative"
-                      );
-                      informativePanel.open(chapter);
-                    }}
-                  />
-                );
-              } else {
-                return null;
-              }
-            })}
-            {this.renderLayerGroups()}
+            <div className={classes.expansionPanel}>
+              {this.state.layers.map((layer, i) => {
+                var mapLayer = this.model.layerMap[Number(layer.id)];
+                if (mapLayer) {
+                  return (
+                    <LayerItem
+                      key={mapLayer.get("name")}
+                      layer={mapLayer}
+                      model={this.props.model}
+                      chapters={this.props.chapters}
+                      app={this.props.app}
+                      onOpenChapter={chapter => {
+                        const informativePanel = this.props.app.windows.find(
+                          window => window.type === "informative"
+                        );
+                        informativePanel.open(chapter);
+                      }}
+                    />
+                  );
+                } else {
+                  return null;
+                }
+              })}
+              {this.renderLayerGroups()}
+            </div>
           </ExpansionPanelDetails>
         </ExpansionPanel>
       </div>

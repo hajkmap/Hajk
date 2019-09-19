@@ -40,10 +40,10 @@ const styles = theme => ({
   layerItemContainer: {
     background: "white",
     paddingLeft: "0",
-    borderBottom: "1px solid #ccc",
-    marginLeft: "45px",
     paddingTop: "5px",
-    paddingBottom: "5px"
+    paddingBottom: "5px",
+    borderBottom: "1px solid #CCC",
+    marginLeft: "24px"
   },
   layerItemInfo: {
     display: "flex"
