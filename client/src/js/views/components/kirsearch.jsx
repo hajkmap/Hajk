@@ -248,9 +248,18 @@ var KirSearchView = {
             <i className="fa fa-info-circle pull-right"></i>
             <table className={this.state.selectedFeatureKey === key ? "" : "collapse"}>
               <tbody>
-                <tr><td><b>{this.props.model.get("residentListDataLayer").namnDisplayName}:</b></td><td>{item.get(this.props.model.get("residentListDataLayer").namnFieldName)}</td></tr>
-                <tr><td><b>{this.props.model.get("residentListDataLayer").adressDisplayName}:</b></td><td>{item.get(this.props.model.get("residentListDataLayer").adressFieldName)}</td></tr>
-                <tr><td><b>{this.props.model.get("residentListDataLayer").fodelsedatumDisplayName}:</b></td><td>{item.get(this.props.model.get("residentListDataLayer").fodelsedatumFieldName)}</td></tr>
+                <tr>
+                  <td><b>{this.props.model.get("residentListDataLayer").namnDisplayName}:</b></td>
+                  <td>{item.get(this.props.model.get("residentListDataLayer").namnFieldName)}</td>
+                </tr>
+                <tr>
+                  <td><b>{this.props.model.get("residentListDataLayer").adressDisplayName}:</b></td>
+                  <td>{item.get(this.props.model.get("residentListDataLayer").adressFieldName)}</td>
+                </tr>
+                <tr>
+                  <td><b>{this.props.model.get("residentListDataLayer").fodelsedatumDisplayName}:</b></td>
+                  <td>{item.get(this.props.model.get("residentListDataLayer").fodelsedatumFieldName).substring(0, 8)}</td>
+                </tr>
               </tbody>
             </table>
           </li>
