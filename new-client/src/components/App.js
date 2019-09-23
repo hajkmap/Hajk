@@ -267,6 +267,11 @@ class App extends React.PureComponent {
       // to refresh canvas size.
       this.appModel.getMap().updateSize();
 
+      // If Drawer has been "(un)permanented", our #windows-container size has changed.
+      // To ensure that our Windows still are inside the container, we dispach an
+      // event that all Windows subscribe to.
+      this.globalObserver.publish("drawerToggled");
+
       // If user clicked on Toggle Permanent and the result is,
       // that this.state.drawerPermanent===false, this means that we
       // have exited the permanent mode. In this case, we also

@@ -129,34 +129,16 @@ class Window extends React.PureComponent {
   componentDidMount() {
     const { globalObserver } = this.props;
     if (globalObserver) {
-      globalObserver.on("appLoaded", () => {
+      globalObserver.subscribe("appLoaded", () => {
+        this.updatePosition();
+      });
+      globalObserver.subscribe("drawerToggled", () => {
         this.updatePosition();
       });
     }
   }
 
   updatePosition() {
-    if (this.rnd === null) {
-      /**
-       * FIXME: This is a nasty consequence of us rendering Windows twice
-       * (as both widgets and drawer plugins). The best way to solve this
-       * and memory leak caused by unmounted components is to change
-       * how our plugins act.
-       *
-       * Today a plugin renders a button (or widget button) and then creates
-       * the Window in a Portal.
-       *
-       * A better solution now would be to let the plugin render the Window
-       * (if any), and from that method create both Drawer plugin button and
-       * Widget plugin button. This way, we would end up with only one instance
-       * of Window per plugin, which then could be controlled via any button,
-       * be it Drawer or Widget.
-       */
-
-      return;
-    }
-
-    // const { width, height, mode, position } = this.props;
     const { width, height, position } = this.props;
     // const { width, height, left, top, position } = this.props;
     const parent = this.rnd.getSelfElement().parentElement;
