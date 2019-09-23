@@ -145,11 +145,11 @@ class Window extends React.PureComponent {
 
     //FIXME: JW - Not the best solution for parent resize to set top/left to 0/0, but it ensures we don't get a window outside of the parent
     this.left = parent.getBoundingClientRect().left + 16;
-    this.top = parent.getBoundingClientRect().top + 16;
+    this.top = parent.getBoundingClientRect().top + 78; // Nasty hack, but ensure that Window is placed below Search bar
     // this.left = left;
     // this.top = top;
     this.width = width;
-    this.height = -32 + (height === "auto" ? parent.clientHeight : height);
+    this.height = -16 - 78 + (height === "auto" ? parent.clientHeight : height); // When determining height, we must take into account that we set some top value, and still want to keep some space to the bottom
     if (position === "right") {
       this.left = parent.getBoundingClientRect().right - width;
     }
