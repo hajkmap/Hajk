@@ -112,11 +112,11 @@ class CollectorForm extends Component {
       form: props.form
     };
 
-    props.model.observer.on("abort", () => {
+    props.model.observer.subscribe("abort", () => {
       this.abort();
     });
 
-    props.model.observer.on("reset", () => {
+    props.model.observer.subscribe("reset", () => {
       // Set the page indicator to -1. This will reset the form properly.
       // Then set the page indicator to 0 to display the first page.
       // Just setting the flag to 0 will not reset the form if there is only one page.

@@ -49,7 +49,7 @@ class AttributeEditor extends React.PureComponent {
   }
 
   componentDidMount() {
-    this.props.observer.on("editFeature", attr => {
+    this.props.observer.subscribe("editFeature", attr => {
       var valueMap = {},
         feature = this.props.model.editFeature,
         source = this.props.model.editSource,

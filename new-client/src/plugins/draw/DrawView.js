@@ -48,7 +48,7 @@ class DrawView extends React.PureComponent {
     this.model = this.props.model;
     this.app = this.props.app;
     this.localObserver = this.props.localObserver;
-    this.localObserver.on("dialog", feature => {
+    this.localObserver.subscribe("dialog", feature => {
       this.setState({
         feature: feature,
         dialog: true,
@@ -289,7 +289,7 @@ class DrawView extends React.PureComponent {
                       displayText: !this.state.displayText
                     });
                     this.model.displayText = !this.model.displayText;
-                    this.localObserver.emit("update");
+                    this.localObserver.publish("update");
                   }}
                   color="primary"
                 />

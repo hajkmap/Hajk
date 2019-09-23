@@ -32,14 +32,14 @@ class EditView extends React.PureComponent {
   }
 
   componentDidMount() {
-    this.props.observer.on("editFeature", attr => {
+    this.props.observer.subscribe("editFeature", attr => {
       this.setState({
         editFeature: this.props.model.editFeature,
         editSource: this.props.model.editSource
       });
     });
 
-    this.props.observer.on("removeFeature", feature => {
+    this.props.observer.subscribe("removeFeature", feature => {
       //TODO: confirm
     });
   }

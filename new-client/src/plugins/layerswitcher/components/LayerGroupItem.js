@@ -152,11 +152,11 @@ class LayerGroupItem extends Component {
    */
   componentDidMount() {
     const { model } = this.props;
-    model.globalObserver.on("hideLayer", this.setHidden);
-    model.observer.on("hideLayer", this.setHidden);
-    model.globalObserver.on("showLayer", this.setVisible);
-    model.observer.on("showLayer", this.setVisible);
-    model.observer.on("toggleGroup", this.toggleGroupVisible);
+    model.globalObserver.subscribe("hideLayer", this.setHidden);
+    model.observer.subscribe("hideLayer", this.setHidden);
+    model.globalObserver.subscribe("showLayer", this.setVisible);
+    model.observer.subscribe("showLayer", this.setVisible);
+    model.observer.subscribe("toggleGroup", this.toggleGroupVisible);
   }
 
   /**

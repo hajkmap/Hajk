@@ -46,11 +46,11 @@ class LayersSwitcherView extends React.PureComponent {
       });
     });
 
-    // props.observer.on("panelOpen", () => {
+    // props.observer.subscribe("panelOpen", () => {
     //   this.forceUpdate();
     // });
 
-    props.app.globalObserver.on("informativeLoaded", chapters => {
+    props.app.globalObserver.subscribe("informativeLoaded", chapters => {
       if (Array.isArray(chapters)) {
         this.setState({
           chapters: chapters

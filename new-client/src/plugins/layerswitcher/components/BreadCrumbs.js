@@ -103,7 +103,7 @@ class BreadCrumbs extends Component {
       visibleLayers: [],
       open: false
     };
-    props.app.globalObserver.on("informativeLoaded", chapters => {
+    props.app.globalObserver.subscribe("informativeLoaded", chapters => {
       this.setState({
         chapters: chapters
       });

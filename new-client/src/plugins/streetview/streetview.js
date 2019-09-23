@@ -16,7 +16,7 @@ class StreetView extends React.PureComponent {
     super(props);
 
     this.localObserver = Observer();
-    this.localObserver.on("locationChanged", () => {
+    this.localObserver.subscribe("locationChanged", () => {
       this.setState({
         displayPanorama: true
       });

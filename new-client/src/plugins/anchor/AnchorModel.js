@@ -6,7 +6,7 @@ class AnchorModel {
     var update = e => {
       setTimeout(() => {
         if (!e.target.getAnimating() && !e.target.getInteracting()) {
-          this.localObserver.emit("mapUpdated", this.getAnchor());
+          this.localObserver.publish("mapUpdated", this.getAnchor());
         }
       }, 0);
     };
@@ -17,7 +17,7 @@ class AnchorModel {
       .getArray()
       .forEach(layer => {
         layer.on("change:visible", layer => {
-          this.localObserver.emit("mapUpdated", this.getAnchor());
+          this.localObserver.publish("mapUpdated", this.getAnchor());
         });
       });
   }

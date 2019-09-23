@@ -345,9 +345,9 @@ class CollectorModel {
     this.map.addLayer(this.layer);
     this.editSource = this.source;
     this.editFeature = null;
-    this.observer.emit("editSource", this.source);
-    this.observer.emit("editFeature", null);
-    this.observer.emit("layerChanged", this.layer);
+    this.observer.publish("editSource", this.source);
+    this.observer.publish("editFeature", null);
+    this.observer.publish("layerChanged", this.layer);
   }
 
   activateAdd(geometryType) {
@@ -412,14 +412,14 @@ class CollectorModel {
     this.map.clicklock = false;
     this.deactivateInteraction();
     this.setFormValuesFromConfig();
-    this.observer.emit("reset");
+    this.observer.publish("reset");
   }
 
   deactivate() {
     this.reset();
-    this.observer.emit("editFeature", this.editFeature);
-    this.observer.emit("editSource", this.editSource);
-    this.observer.emit("deactivate");
+    this.observer.publish("editFeature", this.editFeature);
+    this.observer.publish("editSource", this.editSource);
+    this.observer.publish("deactivate");
   }
 
   getSources() {

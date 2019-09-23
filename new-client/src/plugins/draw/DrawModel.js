@@ -98,7 +98,7 @@ class DrawModel {
       })
     ];
 
-    this.localObserver.on("update", () => {
+    this.localObserver.subscribe("update", () => {
       this.redraw();
     });
   }
@@ -462,7 +462,7 @@ class DrawModel {
 
   handleDrawEnd = e => {
     if (this.text) {
-      this.localObserver.emit("dialog", e.feature);
+      this.localObserver.publish("dialog", e.feature);
     }
     this.setFeaturePropertiesFromGeometry(e.feature);
     this.drawTooltip.setPosition(undefined);
@@ -666,7 +666,7 @@ class DrawModel {
         feature.getProperties().type &&
         feature.getProperties().type === "Text"
       ) {
-        this.localObserver.emit("dialog", feature);
+        this.localObserver.publish("dialog", feature);
       }
     });
   };

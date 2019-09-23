@@ -32,7 +32,7 @@ class Toolbar extends Component {
     this.state = {
       activeTool: undefined
     };
-    this.props.model.observer.on("abortInteraction", () => {
+    this.props.model.observer.subscribe("abortInteraction", () => {
       this.setState({
         activeTool: undefined
       });
@@ -147,7 +147,7 @@ class Toolbar extends Component {
     this.props.model.save(response => {
       this.props.model.filty = false;
       this.props.model.refreshEditingLayer();
-      this.props.app.globalObserver.emit(
+      this.props.app.globalObserver.publish(
         "alert",
         this.getStatusMessage(response)
       );

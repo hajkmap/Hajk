@@ -38,7 +38,7 @@ class Toolbar extends Component {
     this.state = {
       activeTool: undefined
     };
-    props.observer.on("deactivate", () => {
+    props.observer.subscribe("deactivate", () => {
       this.props.panel.setState({
         checked: false,
         enabled: false,
@@ -48,7 +48,7 @@ class Toolbar extends Component {
         activeTool: undefined
       });
     });
-    props.observer.on("layerChanged", layer => {
+    props.observer.subscribe("layerChanged", layer => {
       this.setState(
         {
           activeTool: undefined
@@ -181,7 +181,7 @@ class Toolbar extends Component {
     this.props.model.save(response => {
       this.props.model.filty = false;
       this.props.model.refreshEditingLayer();
-      this.props.app.globalObserver.emit(
+      this.props.app.globalObserver.publish(
         "alert",
         this.getStatusMessage(response)
       );

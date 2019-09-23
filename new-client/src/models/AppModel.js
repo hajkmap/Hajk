@@ -229,7 +229,7 @@ class AppModel {
           layer.getProperties().layerInfo.layerType === "layer"
         ) {
           if (layer.layerType === "group") {
-            this.globalObserver.emit("hideLayer", layer);
+            this.globalObserver.publish("hideLayer", layer);
           } else {
             layer.setVisible(false);
           }

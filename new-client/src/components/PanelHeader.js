@@ -61,10 +61,10 @@ class PanelHeader extends Component {
       maximized: false
     };
     if (this.props.localObserver) {
-      this.props.localObserver.on("maximizeWindow", v => {
+      this.props.localObserver.subscribe("maximizeWindow", v => {
         this.maximize();
       });
-      this.props.localObserver.on("minimizeWindow", v => {
+      this.props.localObserver.subscribe("minimizeWindow", v => {
         this.minimize();
       });
     }

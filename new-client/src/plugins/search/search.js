@@ -201,30 +201,30 @@ class Search extends React.PureComponent {
     this.searchWithSelectionButtonText =
       props.options.searchWithSelectionButtonText;
     this.searchSettings = props.options.searchSettings;
-    this.localObserver.on("searchStarted", () => {
+    this.localObserver.subscribe("searchStarted", () => {
       this.setState({
         loading: true,
         activeSearchView: TEXTSEARCH
       });
     });
-    this.localObserver.on("spatialSearchStarted", () => {
+    this.localObserver.subscribe("spatialSearchStarted", () => {
       this.setState({
         loading: true
       });
     });
-    this.localObserver.on("toolchanged", placeholderText => {
+    this.localObserver.subscribe("toolchanged", placeholderText => {
       this.setState({
         result: false,
         searchboxPlaceholder: placeholderText ? placeholderText : "Sök i Hajk"
       });
     });
-    this.localObserver.on("searchComplete", () => {
+    this.localObserver.subscribe("searchComplete", () => {
       this.setState({
         loading: false
       });
     });
 
-    this.localObserver.on("minimizeWindow", () => {
+    this.localObserver.subscribe("minimizeWindow", () => {
       if (props.options.target === "header" && window.innerWidth < 960) {
         this.setState({
           visible: false

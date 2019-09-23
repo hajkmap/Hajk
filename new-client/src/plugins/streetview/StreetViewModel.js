@@ -46,7 +46,7 @@ class StreetViewModel {
         "EPSG:4326"
       );
       this.showLocation();
-      this.localObserver.emit("maximizeWindow", true);
+      this.localObserver.publish("maximizeWindow", true);
     });
     this.activated = true;
   }
@@ -128,7 +128,7 @@ class StreetViewModel {
       this.onPositionChanged();
     });
     this.location = location;
-    this.localObserver.emit("locationChanged", location);
+    this.localObserver.publish("locationChanged", location);
   };
 
   addMarker = (coordinate, rotation) => {
@@ -163,13 +163,13 @@ class StreetViewModel {
       this.activated === true
     ) {
       this.imageDate = `Bild tagen: ${data.imageDate}`;
-      this.localObserver.emit("changeImageDate", this.imageDate);
+      this.localObserver.publish("changeImageDate", this.imageDate);
       this.panorama.setPano(data.location.pano);
       this.panorama.setPov({ heading: 270, pitch: 0 });
       this.panorama.setVisible(true);
     } else {
       this.imageDate = "Bild saknas för vald position.";
-      this.localObserver.emit("changeImageDate", this.imageDate);
+      this.localObserver.publish("changeImageDate", this.imageDate);
       this.panorama.setVisible(false);
     }
   };

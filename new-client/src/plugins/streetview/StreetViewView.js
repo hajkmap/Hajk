@@ -46,7 +46,7 @@ class StreetViewView extends React.PureComponent {
   }
 
   componentDidMount() {
-    this.localObserver.on("changeImageDate", imageDate => {
+    this.localObserver.subscribe("changeImageDate", imageDate => {
       this.setState({
         imageDate: imageDate
       });
