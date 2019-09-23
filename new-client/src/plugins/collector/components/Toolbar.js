@@ -40,7 +40,7 @@ class Toolbar extends Component {
   }
 
   componentWillUnmount() {
-    this.props.model.observer.off("abortInteraction");
+    this.props.model.observer.unsubscribe("abortInteraction");
     this.props.model.deactivateInteraction();
   }
 
