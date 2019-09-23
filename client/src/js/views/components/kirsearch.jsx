@@ -229,19 +229,32 @@ var KirSearchView = {
       this.props.model.get("firSelectionModel").get("firBufferLayer").getSource().clear();
       this.props.model.get("firSelectionModel").clearSelection();
       this.setState({ searchResults: []});
+      this.props.model.set('kirSearchResults', []);
+      this.props.model.get("kirSearchResultsLayer").getSource().clear();
+    },
+
+    expandSearchResultItem(key) {
+      this.setState({ 
+        selectedFeatureKey: this.state.selectedFeatureKey !== key ? key : null
+      }); 
+      
+      this.props.model.get("kirSearchResultsSelectTool").getFeatures().clear()
     },
 
     render: function () {
         var searchResults = this.state.searchResults.map((item) => {
           var gender = item.get(this.props.model.get("residentListDataLayer").koenFieldName).toLowerCase() === "m" ? "Man" : "Kvinna";
           var key = item.get(this.props.model.get("featureIDFieldName"));
-          return <li id={"feat-"+this.state.selectedFeatureKey} key={key}
-            onClick={() => { this.setState({ selectedFeatureKey: key}); this.selectTool.getFeatures().clear()}}>
+          return <li id={"feat-" + key} key={key}
+            onClick={() => this.expandSearchResultItem(key)}>
             {gender}, {item.get(this.props.model.get("residentListDataLayer").alderFieldName)} år
+            
             <button className="btn btn-default btn-xs pull-right" onClick={() => this.deleteSearchResult(key)}>
               <i className="fa fa-trash"></i>
             </button>
+            
             <i className="fa fa-info-circle pull-right"></i>
+            
             <table className={this.state.selectedFeatureKey === key ? "" : "collapse"}>
               <tbody>
                 <tr>
