@@ -48,7 +48,10 @@ var KirModelProperties = {
     showLabels: true,
     infoKnappLogo: "",
     realEstateLayer: "",
-    realEstateWMSLayer: ""
+    realEstateWMSLayer: "",
+    kirSearchResults: [],
+    kirSearchResultsLayer: null,
+    kirSearchResultsSelectTool: null
 };
 
 var KirModel = {

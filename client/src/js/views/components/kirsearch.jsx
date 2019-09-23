@@ -26,28 +26,21 @@ var KirSearchView = {
     },
 
     componentDidMount: function () {
-      this.props.model.get("map").on('singleclick', this.props.model.clickedOnMap.bind(this.props.model));
-        this.value = this.props.model.get('value');
-        if (this.props.model.get('items')) {
-            this.setState({
-                showResults: true,
-                result: {
-                    status: 'success',
-                    items: this.props.model.get('items')
-                }
-            });
-        }
+      this.value = this.props.model.get('value');
+      if (this.props.model.get('kirSearchResults')) {
+          this.setState({ searchResults: this.props.model.get('kirSearchResults') });
+      }
 
-        this.props.model.on('change:url', () => {
-            this.setState({
-                downloadUrl: this.props.model.get('url')
-            });
-        });
-        this.props.model.on('change:downloading', () => {
-            this.setState({
-                downloading: this.props.model.get('downloading')
-            });
-        });
+      this.props.model.on('change:url', () => {
+          this.setState({
+              downloadUrl: this.props.model.get('url')
+          });
+      });
+      this.props.model.on('change:downloading', () => {
+          this.setState({
+              downloading: this.props.model.get('downloading')
+          });
+      });
     },
 
     resultsStyle: function(feature, resolution) {
@@ -68,37 +61,39 @@ var KirSearchView = {
       this.props.model.get("firSelectionModel").get("drawLayer").setVisible(this.state.searchAreaVisible);
       this.props.model.firBufferFeatureLayer.setVisible(this.state.searchAreaVisible);
       this.props.model.get("firSelectionModel").get("firBufferLayer").setVisible(this.state.searchAreaVisible);
+      var searchResultsLayer = this.props.model.get("kirSearchResultsLayer");
+      var selectTool = this.props.model.get("kirSearchResultsSelectTool");
 
-      if (!this.searchResultsLayer) {
-
-        this.searchResultsSource = new ol.source.Vector();
-        this.searchResultsLayer = new ol.layer.Vector({
-          source: this.searchResultsSource,
+      if (!searchResultsLayer) {        
+        searchResultsLayer = new ol.layer.Vector({
+          source: new ol.source.Vector(),
           style: this.resultsStyle.bind(this)
         });
-        this.props.model.get("map").addLayer(this.searchResultsLayer);
+        this.props.model.get("map").addLayer(searchResultsLayer);
 
-        this.selectTool = new ol.interaction.Select({
-          layers: [this.searchResultsLayer ],
+        selectTool = new ol.interaction.Select({
+          layers: [searchResultsLayer],
           style: this.resultsStyle.bind(this)
         });
-        this.selectTool.on("select", function(e) {
+
+        selectTool.on("select", function(e) {
           var feature = e.target.getFeatures().getArray()[0];
           if (feature) {
             this.setState({ selectedFeatureKey: feature.get(this.props.model.get("featureIDFieldName")) });
             document.getElementById("feat-" + this.state.selectedFeatureKey).scrollIntoView();
           }
         }.bind(this));
-        this.props.model.get("map").addInteraction(this.selectTool);
+        
+        this.props.model.get("map").addInteraction(selectTool);
       }
 
-      this.searchResultsSource.clear();
-      this.searchResultsSource.addFeatures(this.state.searchResults);
+      searchResultsLayer.getSource().clear();
+      searchResultsLayer.getSource().addFeatures(this.state.searchResults);
+      this.props.model.set("kirSearchResultsLayer", searchResultsLayer);
+      this.props.model.set("kirSearchResultsSelectTool", selectTool);
     },
 
     componentWillUnmount: function () {
-        this.props.model.get("map").un('singleclick', this.props.model.clickedOnMap);
-
         this.props.model.get('layerCollection').each((layer) => {
             layer.off('change:visible', this.search);
         });
@@ -153,6 +148,7 @@ var KirSearchView = {
             new ol.format.GML().readFeatures(response) : new ol.format.GeoJSON().readFeatures(response);
 
           this.setState({ searchInProgress: false, searchResults: features });
+          this.props.model.set("kirSearchResults", features)
         }.bind(this),
         error: function(message) {
           this.setState({ searchInProgress: false, errorMessage: "Kunde inte hämta invånarinformation" });
