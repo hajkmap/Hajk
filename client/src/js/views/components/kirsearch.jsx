@@ -273,7 +273,7 @@ var KirSearchView = {
                 {
                   this.state.instructionVisible ?
                   <div className="panel-body-instruction instructionsText"
-                    dangerouslySetInnerHTML={{__html: atob(this.props.model.get("instructionSokning"))}} /> : null
+                    dangerouslySetInnerHTML={{__html: decodeURIComponent(atob(this.props.model.get("instructionSokning")))}} /> : null
                 }
               </div>
 
