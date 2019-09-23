@@ -231,7 +231,7 @@ var ResidentList = {
             }
 
             {
-              this.state.excelIsReady ? <a href={this.state.excelUrl} target="_blank">Ladda ner</a> : ""
+              this.state.excelIsReady && this.props.model.get("kirSearchResults").length > 0 ? <a href={this.state.excelUrl} target="_blank">Ladda ner</a> : ""
             }
 
             {
