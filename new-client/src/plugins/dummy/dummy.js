@@ -48,6 +48,7 @@ class Dummy extends React.PureComponent {
     return (
       <BaseWindowPlugin
         {...this.props} // Pass on all props
+        type={this.constructor.name}
         custom={{
           icon: <BugReportIcon />, // Custom icon for this plugin
           title: "Dummy", // Custom title, etc

@@ -6,15 +6,11 @@ import NavigationIcon from "@material-ui/icons/Navigation";
 import LocationView from "./LocationView";
 
 class Location extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.type = "location";
-  }
-
   render() {
     return (
       <BaseWindowPlugin
         {...this.props}
+        type={this.constructor.name}
         custom={{
           icon: <NavigationIcon />,
           title: "Positionera",

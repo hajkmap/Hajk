@@ -26,6 +26,7 @@ class Anchor extends React.PureComponent {
     return (
       <BaseWindowPlugin
         {...this.props}
+        type={this.constructor.name}
         custom={{
           icon: <OpenInNewIcon />,
           title: "Dela",

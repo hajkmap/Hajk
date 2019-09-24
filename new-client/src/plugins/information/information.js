@@ -20,6 +20,7 @@ const styles = theme => {
 class Information extends React.PureComponent {
   constructor(props) {
     super(props);
+    this.type = "Information"; // Special case - plugins that don't use BaseWindowPlugin must specify .type here
     this.options = props.options;
     this.title = this.options.title || "Om kartan";
     this.abstract = this.options.abstract || "Visa mer information";

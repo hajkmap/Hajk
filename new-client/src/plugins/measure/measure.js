@@ -22,8 +22,6 @@ function MeasureIcon(props) {
 class Measure extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.type = "measure";
-
     this.localObserver = Observer();
 
     this.model = new MeasureModel({
@@ -45,6 +43,7 @@ class Measure extends React.PureComponent {
     return (
       <BaseWindowPlugin
         {...this.props}
+        type={this.constructor.name}
         custom={{
           icon: <MeasureIcon />,
           title: "Mät",

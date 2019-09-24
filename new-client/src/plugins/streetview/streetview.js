@@ -46,6 +46,7 @@ class StreetView extends React.PureComponent {
     return (
       <BaseWindowPlugin
         {...this.props}
+        type={this.constructor.name}
         custom={{
           icon: <StreetviewIcon />,
           title: "Gatuvy",

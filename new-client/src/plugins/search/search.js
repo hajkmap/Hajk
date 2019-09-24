@@ -174,6 +174,7 @@ class Search extends React.PureComponent {
 
   constructor(props) {
     super(props);
+    this.type = "Search"; // Special case - plugins that don't use BaseWindowPlugin must specify .type here
     this.localObserver = Observer();
     this.searchModel = new SearchModel(
       props.options,

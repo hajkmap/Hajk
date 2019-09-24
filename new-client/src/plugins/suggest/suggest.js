@@ -27,6 +27,7 @@ class Suggest extends Component {
 
   constructor(props) {
     super(props);
+    this.type = "Suggest"; // Special case - plugins that don't use BaseWindowPlugin must specify .type here
     this.options = props.options;
     this.title = this.options.title || "Förbättra";
     this.app = props.app;

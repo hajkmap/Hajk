@@ -10,7 +10,7 @@ import Observer from "react-event-observer";
 class Informative extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.type = "informative";
+
     this.options = props.options;
     this.caption = this.options.caption || "Titel";
     this.html = this.options.html || "<div>Html</div>";
@@ -33,6 +33,8 @@ class Informative extends React.PureComponent {
     return (
       <BaseWindowPlugin
         {...this.props}
+        open={this.open} // Expose open() so it can be used from other plugins (BreadCrumbs uses this)
+        type={this.constructor.name}
         custom={{
           icon: <SatelliteIcon />,
           title: "Översiktsplan",

@@ -22,6 +22,7 @@ class BaseWindowPlugin extends React.PureComponent {
 
   constructor(props) {
     super(props);
+    this.type = props.type.toLowerCase() || undefined;
     // There will be defaults in props.custom, so that each plugin has own default title/description
     this.title = props.options.title || props.custom.title;
     this.description = props.options.description || props.custom.description;

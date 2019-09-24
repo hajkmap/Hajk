@@ -32,6 +32,7 @@ class Buffer extends React.PureComponent {
     return (
       <BaseWindowPlugin
         {...this.props}
+        type={this.constructor.name}
         custom={{
           icon: <BufferIcon />,
           title: "Buffra",

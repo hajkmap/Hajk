@@ -36,6 +36,7 @@ class Draw extends React.PureComponent {
     return (
       <BaseWindowPlugin
         {...this.props}
+        type={this.constructor.name}
         custom={{
           icon: <DrawIcon />,
           title: "Rita",

@@ -45,6 +45,7 @@ class Collector extends React.Component {
     return (
       <BaseWindowPlugin
         {...this.props}
+        type={this.constructor.name}
         custom={{
           icon: <RateReviewIcon />,
           title: "Tyck till",
