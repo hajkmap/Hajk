@@ -29,7 +29,9 @@ const styles = theme => ({
     borderRadius: "0 !important",
     boxShadow: "none"
   },
-  panel: {},
+  panel: {
+    marginLeft: "21px"
+  },
   /*groupCheckbox: {
     marginRight: "5px"
   },*/
@@ -51,9 +53,7 @@ const styles = theme => ({
   arrowIcon: {
     float: "left"
   },
-  expansionPanel: {
-    marginLeft: "18px"
-  }
+  expansionPanel: {}
 });
 
 const StyledExpansionPanelSummary = withStyles({

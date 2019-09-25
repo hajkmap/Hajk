@@ -43,7 +43,7 @@ const styles = theme => ({
     paddingTop: "5px",
     paddingBottom: "5px",
     borderBottom: "1px solid #CCC",
-    marginLeft: "24px"
+    marginLeft: "45px"
   },
   layerItemInfo: {
     display: "flex"
