@@ -42,6 +42,29 @@ var KirSearchView = {
               downloading: this.props.model.get('downloading')
           });
       });
+
+      this.searchResultsLayer = new ol.layer.Vector({
+        source: new ol.source.Vector(),
+        style: this.resultsStyle
+      });
+      this.props.model.get("map").addLayer(this.searchResultsLayer);
+      
+      this.selectTool = new ol.interaction.Select({
+        layers: [this.searchResultsLayer],
+        style: this.resultsStyle
+      });
+
+      this.selectTool.on("select", function(e) {
+        var feature = e.target.getFeatures().getArray()[0];
+        
+        if (feature) {
+          var featureId = feature.get(this.props.model.get("featureIDFieldName"));
+          this.setState({ selectedFeatureKey: featureId });
+          document.getElementById("feat-" + featureId).scrollIntoView();
+        }
+      }.bind(this));
+      
+      this.props.model.get("map").addInteraction(this.selectTool);
     },
 
     resultsStyle: function(feature, resolution) {
@@ -62,36 +85,9 @@ var KirSearchView = {
       this.props.model.get("firSelectionModel").get("drawLayer").setVisible(this.state.searchAreaVisible);
       this.props.model.firBufferFeatureLayer.setVisible(this.state.searchAreaVisible);
       this.props.model.get("firSelectionModel").get("firBufferLayer").setVisible(this.state.searchAreaVisible);
-      var searchResultsLayer = this.props.model.get("kirSearchResultsLayer");
-      var selectTool = this.props.model.get("kirSearchResultsSelectTool");
-
-      if (!searchResultsLayer) {        
-        searchResultsLayer = new ol.layer.Vector({
-          source: new ol.source.Vector(),
-          style: this.resultsStyle
-        });
-        this.props.model.get("map").addLayer(searchResultsLayer);
-
-        selectTool = new ol.interaction.Select({
-          layers: [searchResultsLayer],
-          style: this.resultsStyle
-        });
-
-        selectTool.on("select", function(e) {
-          var feature = e.target.getFeatures().getArray()[0];
-          if (feature) {
-            this.setState({ selectedFeatureKey: feature.get(this.props.model.get("featureIDFieldName")) });
-            document.getElementById("feat-" + this.state.selectedFeatureKey).scrollIntoView();
-          }
-        }.bind(this));
-        
-        this.props.model.get("map").addInteraction(selectTool);
-      }
-
-      searchResultsLayer.getSource().clear();
-      searchResultsLayer.getSource().addFeatures(this.state.searchResults);
-      this.props.model.set("kirSearchResultsLayer", searchResultsLayer);
-      this.props.model.set("kirSearchResultsSelectTool", selectTool);
+  
+      this.searchResultsLayer.getSource().clear();
+      this.searchResultsLayer.getSource().addFeatures(this.state.searchResults);
     },
 
     componentWillUnmount: function () {
@@ -101,6 +97,8 @@ var KirSearchView = {
 
         this.props.model.off('change:url');
         this.props.model.off('change:downloading');
+
+        this.selectTool.un("select");
     },
 
     search: function (event) {
@@ -233,7 +231,7 @@ var KirSearchView = {
       this.setState({ searchResults: []});
       this.props.model.set('kirSearchResults', []);
       this.props.model.set("kirExcelReportIsReady", false);
-      this.props.model.get("kirSearchResultsLayer").getSource().clear();
+      this.searchResultsLayer.getSource().clear();
     },
 
     expandSearchResultItem(key) {
@@ -241,7 +239,7 @@ var KirSearchView = {
         selectedFeatureKey: this.state.selectedFeatureKey !== key ? key : null
       }); 
       
-      this.props.model.get("kirSearchResultsSelectTool").getFeatures().clear()
+      this.selectTool.getFeatures().clear()
     },
 
     render: function () {
