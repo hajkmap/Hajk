@@ -226,66 +226,6 @@ var KirModel = {
         }
     },
 
-    clickedOnMap: function(event){
-        if(this.get("plusActive") || this.get("minusActive")){
-            return;
-        }
-
-        // check if clicked on feature in firResultLayer, then expand in result list
-        var that = this;
-        this.get("map").forEachFeatureAtPixel(event.pixel, function(feature, layer){
-            if (layer !== null && layer.get("caption") === "FIRSökresltat"){
-                // var get id
-                var hitId = 0;
-                var group = 0;
-                var nyckelHighLight = feature.get(that.get("realEstateLayer").fnrField);
-                var omradeHighLight = feature.get(that.get("realEstateLayer").omradeField);
-                for(var i = 0; i < that.get("items")[group].hits.length; i++){
-                    var currentNyckel = that.get("items")[group].hits[i].get(that.get("realEstateLayer").fnrField);
-                    var currentOmrade = that.get("items")[group].hits[i].get(that.get("realEstateLayer").omradeField);
-                    if(nyckelHighLight === currentNyckel && omradeHighLight === currentOmrade){
-                        hitId = i;
-                        break;
-                    }
-                }
-
-                var clickedonId = "hit-" + hitId + "-group-0";
-
-                var hitObject = $("#" + clickedonId);
-                var currentHitId = "#info-hit-" + hitId + "-group-0";
-                var infoHitObject = $(currentHitId);
-
-                // Ta bort blå färg
-                if(that.get("previousViewed") == clickedonId){
-                    that.highlightResultLayer.getSource().clear();
-                    if(hitObject.hasClass("selected")) {
-                        hitObject.toggleClass("selected");
-                    }
-                    if(infoHitObject.is(":visible")){
-                        infoHitObject.toggle();
-                    }
-                    that.set("previousViewed", undefined);
-                    return;
-                } else {
-                    if(!hitObject.hasClass("selected")) {
-                        hitObject.toggleClass("selected");
-                    }
-                    $("#" + that.get("previousViewed")).toggleClass("selected");
-                    $("#info-" + that.get("previousViewed")).toggle();
-                    that.set("previousViewed", clickedonId);
-                }
-
-                if(!infoHitObject.is(":visible")){
-                    infoHitObject.toggle();
-                }
-                that.highlightResultLayer.getSource().clear();
-                that.highlightResultLayer.getSource().addFeature(feature);
-
-                window.location.hash = clickedonId;
-            }
-        });
-  },
-
     /**
      * @instance
      * @property {XMLHttpRequest[]} requests
