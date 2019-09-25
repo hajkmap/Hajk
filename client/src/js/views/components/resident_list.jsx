@@ -184,13 +184,13 @@ var ResidentList = {
                   </button> : ""
               }
 
+              <button className={ expandButtonClass } onClick={(e) => { this.setState({ visible: !this.state.visible })}}></button>
+
               {
                 this.state.instructionVisible ?
                 <div className='panel-body-instruction'
                   dangerouslySetInnerHTML={{__html: decodeURIComponent(atob(this.props.model.get("instructionResidentList")))}} /> : ""
               }
-
-              <button className={ expandButtonClass } onClick={(e) => { this.setState({ visible: !this.state.visible })}}></button>
             </div>
 
             <div className={ this.state.visible ? "panel-body" : "panel-body hidden" }>
