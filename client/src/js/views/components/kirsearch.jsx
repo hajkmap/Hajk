@@ -21,7 +21,8 @@ var KirSearchView = {
         searchInProgress: false,
         selectedFeatureKey: null,
         searchResults: [],
-        expandedResults: []
+        expandedResults: [],
+        searchResultsVisible: true
       };
     },
 
@@ -367,13 +368,26 @@ var KirSearchView = {
           }
 
           {
-            this.state.searchResults.length > 0 ?
-            <div>
-              <h2>Invånare ({this.state.searchResults.length})</h2>
+            this.state.searchResults.length > 0 &&
+            <div className="search-tools">
+              <h3>Sökresultat</h3>
+              <div className="group" onClick={()=>{this.setState({ searchResultsVisible: !this.state.searchResultsVisible})}}>
+                Invånare<span className='label'>{this.state.searchResults.length}</span>
+                <button onClick={(e) => { e.stopPropagation(); this.setState({ instructionTextVisible: !this.state.instructionTextVisible })}} className='btn-info-fir'>
+                  <img src={this.props.model.get("infoKnappLogo")} />
+                </button>
+
+                {
+                  this.state.instructionTextVisible &&
+                  <div className='panel-body-instruction instructionsText' 
+                  dangerouslySetInnerHTML={{__html: decodeURIComponent(atob(this.props.model.get("instructionVidSokresult")))}} />
+                }
+              </div>
+              
               <ul className="kir-search-results">
-                { searchResults }
+                { this.state.searchResultsVisible && searchResults }
               </ul>
-            </div> : null
+            </div>
           }
 
         </div>

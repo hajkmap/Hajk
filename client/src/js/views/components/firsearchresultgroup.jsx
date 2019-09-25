@@ -8,6 +8,12 @@
  */
 FirSearchResultGroup = {
 
+    getInitialState: function() {
+        return {
+            instructionTextVisible: false
+        }
+    },
+
     componentDidMount: function () {
         var groups = $(ReactDOM.findDOMNode(this)).find('.group');
 
@@ -18,7 +24,9 @@ FirSearchResultGroup = {
         document.addEventListener("keyup", this.removeMinusOrPlusIfCtrlLifted);
 
         groups.click(function (e) {
-            if(e.originalEvent.target.className.indexOf("plusMinus") == -1 && e.originalEvent.target.className.indexOf("btn-info-fir") == -1) {
+            
+            if(e.originalEvent.target.className.indexOf("plusMinus") == -1 && 
+                e.originalEvent.target.className.indexOf("fir-info-btn") == -1) {
                 $(this).next().toggleClass('hidden');
             }
         });
@@ -628,45 +636,33 @@ FirSearchResultGroup = {
     );
     },
 
-    openInstruction: function(){
-        var idName = "#instructions-" + this.props.id;
-        var element = $(idName);
-        element.toggle();
-    },
-
     render: function () {
-        var id = this.props.id,
-            groupStyleClass = this.props.numGroups === 1 ? '' : 'hidden',
-            resultBox = this.resultBox(id)
-        ;
-
-        var instructionsBtn = (
-            <button onClick={(e) => {e.stopPropagation(); this.openInstruction()}} className='btn-info-fir' id={"instructionsbox-result-" + this.props.id} >
-              <img src={this.props.model.get("infoKnappLogo")} />
-            </button>
-        );
-
-        var instructionTxt = (
-          <div className='panel-body-instruction instructionsText' id={"instructions-" + this.props.id} dangerouslySetInnerHTML={{__html: decodeURIComponent(atob(this.props.instructions))}} />
-        );
-
-
-
         return (
             <div>
                 <div className='group' id={this.props.id} style={{paddingBottom:'15px'}}>{this.props.result.layer}
                     <span className='label'>{this.props.result.hits.length}</span>
-                    {instructionsBtn}
+                    
+                    <button onClick={(e) => { e.stopPropagation(); this.setState({ instructionTextVisible: !this.state.instructionTextVisible })}} className='btn-info-fir'>
+                        <img className="fir-info-btn" src={this.props.model.get("infoKnappLogo")} />
+                    </button>
+
                     <button className='btn btn-default pull-right plusMinus' onClick={(e) => this.minusLayer(this.props.result.layer,e)}>
                         <i className='fa fa-minus plusMinusIkon' />
                     </button>
+                    
                     <button className='btn btn-default pull-right plusMinus' onClick={(e) => this.plusLayer(this.props.result.layer,e)}>
                         <i className='fa fa-plus plusMinusIkon' />
                     </button>
-                    {instructionTxt}
+                    
+                    {
+                        this.state.instructionTextVisible &&
+                        <div className='panel-body-instruction instructionsText' 
+                        dangerouslySetInnerHTML={{__html: decodeURIComponent(atob(this.props.instructions))}} />
+                    }
                 </div>
-                <div className={groupStyleClass}>
-                    {resultBox}
+
+                <div className={this.props.numGroups === 1 ? '' : 'hidden'}>
+                    {this.resultBox(this.props.id)}
                 </div>
             </div>
         );
