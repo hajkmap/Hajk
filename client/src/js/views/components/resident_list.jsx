@@ -161,7 +161,7 @@ var ResidentList = {
     return personalNumber.substring(0, personalNumber.length - 4);
   },
 
-  exportToEcxel: function() {
+  exportToExcel: function() {
     if (this.props.residentData) {
       this.generateExcel(this.props.residentData);
     } else {
@@ -217,7 +217,7 @@ var ResidentList = {
 
             {
               this.props.model.get('excelExportUrl') != null ?
-              <button className='btn btn-default fir-icon-button' onClick={this.exportToEcxel} disabled={this.props.model.get("kirSearchResults").length === 0}>
+              <button className='btn btn-default fir-icon-button' onClick={this.exportToExcel}>
                 <i className='excel' />Skapa boendeförteckning
               </button> : ""
             }
