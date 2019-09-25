@@ -51,7 +51,8 @@ var KirModelProperties = {
     realEstateWMSLayer: "",
     kirSearchResults: [],
     kirSearchResultsLayer: null,
-    kirSearchResultsSelectTool: null
+    kirSearchResultsSelectTool: null,
+    kirExcelReportIsReady: false
 };
 
 var KirModel = {

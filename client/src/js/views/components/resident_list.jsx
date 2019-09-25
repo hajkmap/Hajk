@@ -217,7 +217,7 @@ var ResidentList = {
 
             {
               this.props.model.get('excelExportUrl') != null ?
-              <button className='btn btn-default fir-icon-button' onClick={this.exportToEcxel}>
+              <button className='btn btn-default fir-icon-button' onClick={this.exportToEcxel} disabled={this.props.model.get("kirSearchResults").length === 0}>
                 <i className='excel' />Skapa boendeförteckning
               </button> : ""
             }

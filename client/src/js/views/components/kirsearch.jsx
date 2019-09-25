@@ -148,8 +148,8 @@ var KirSearchView = {
           var features = wfslayer.outputFormat === "GML3" ?
             new ol.format.GML().readFeatures(response) : new ol.format.GeoJSON().readFeatures(response);
 
-          this.setState({ searchInProgress: false, searchResults: features });
           this.props.model.set("kirSearchResults", features)
+          this.setState({ searchInProgress: false, searchResults: features });
         }.bind(this),
         error: function(message) {
           this.setState({ searchInProgress: false, errorMessage: "Kunde inte hämta invånarinformation" });
