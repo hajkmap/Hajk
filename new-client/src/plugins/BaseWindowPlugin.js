@@ -93,6 +93,9 @@ class BaseWindowPlugin extends React.PureComponent {
           top={this.top}
           left={this.left}
           mode={mode}
+          layerswitcherConfig={this.props.app.config.mapConfig.tools.find(
+            t => t.type === "layerswitcher"
+          )}
         >
           {this.props.children}
         </Window>

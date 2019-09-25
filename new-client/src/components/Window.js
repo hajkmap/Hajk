@@ -138,10 +138,21 @@ class Window extends React.PureComponent {
     }
   }
 
+  areBreadcrumbsActivated() {
+    return this.props.layerswitcherConfig &&
+      this.props.layerswitcherConfig.hasOwnProperty("options")
+      ? this.props.layerswitcherConfig.options.showBreadcrumbs
+      : false;
+  }
+
   updatePosition() {
     const { width, height, position } = this.props;
     // const { width, height, left, top, position } = this.props;
     const parent = this.rnd.getSelfElement().parentElement;
+
+    // If Breadcrumbs are activated (in LayerSwitcher's config), we must make
+    // sure that our Windows leave some space at the bottom for the Breadcrumbs.
+    const spaceForBreadcrumbs = this.areBreadcrumbsActivated() ? -42 : 0;
 
     //FIXME: JW - Not the best solution for parent resize to set top/left to 0/0, but it ensures we don't get a window outside of the parent
     this.left = parent.getBoundingClientRect().left + 16;
@@ -149,7 +160,11 @@ class Window extends React.PureComponent {
     // this.left = left;
     // this.top = top;
     this.width = width;
-    this.height = -16 - 78 + (height === "auto" ? parent.clientHeight : height); // When determining height, we must take into account that we set some top value, and still want to keep some space to the bottom
+    this.height =
+      -16 -
+      78 +
+      spaceForBreadcrumbs +
+      (height === "auto" ? parent.clientHeight : height); // When determining height, we must take into account that we set some top value, and still want to keep some space to the bottom
     if (position === "right") {
       this.left = parent.getBoundingClientRect().right - width;
     }
