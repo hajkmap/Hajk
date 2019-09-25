@@ -647,7 +647,7 @@ FirSearchResultGroup = {
         );
 
         var instructionTxt = (
-          <div className='panel-body-instruction instructionsText' id={"instructions-" + this.props.id} dangerouslySetInnerHTML={{__html: atob(this.props.instructions)}} />
+          <div className='panel-body-instruction instructionsText' id={"instructions-" + this.props.id} dangerouslySetInnerHTML={{__html: decodeURIComponent(atob(this.props.instructions))}} />
         );
 
 
