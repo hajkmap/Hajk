@@ -103,12 +103,12 @@ var ResidentList = {
       columns.push(_config.alderDisplayName);
     }
 
-    if (this.state.includeGender) {
-      columns.push(_config.koenDisplayName);
-    }
-
     if (this.state.includeBirthDate) {
       columns.push(_config.fodelsedatumDisplayName);
+    }
+
+    if (this.state.includeGender) {
+      columns.push(_config.koenDisplayName);
     }
 
     features.forEach(function(f) {
@@ -127,12 +127,12 @@ var ResidentList = {
         row.push(f.get(_config.alderFieldName));
       }
 
-      if (this.state.includeGender) {
-        row.push(f.get(_config.koenFieldName));
-      }
-
       if (this.state.includeBirthDate) {
         row.push(this.dateFromPersonalNumber(f.get(_config.fodelsedatumFieldName)));
+      }
+
+      if (this.state.includeGender) {
+        row.push(f.get(_config.koenFieldName));
       }
 
       rows.push(row);
