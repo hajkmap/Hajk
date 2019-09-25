@@ -32,7 +32,6 @@ var ResidentList = {
       includeBirthDate: false,
       includeGender: false,
       fetchingExcel: false,
-      excelIsReady: false,
       excelUrl: "",
       errorMessage: null
     };
@@ -70,7 +69,8 @@ var ResidentList = {
       filter: filters.length > 1 ? ol.format.filter.or.apply(null, filters) : filters[0]
     });
 
-    this.setState({ fetchingExcel: true, excelIsReady: false, excelUrl: "", errorMessage: null });
+    this.props.model.set("kirExcelReportIsReady", false);
+    this.setState({ fetchingExcel: true, excelUrl: "", errorMessage: null });
     $.ajax({
       url: wfslayer.url,
       method: 'POST',
@@ -144,12 +144,8 @@ var ResidentList = {
       data: { json: JSON.stringify({ "columns": columns, "rows": rows }) },
       success: function(response) {
         if (response) {
-          this.setState({
-            fetchingExcel: false,
-            excelIsReady: true,
-            excelUrl: response,
-            errorMessage: null
-          });
+          this.props.model.set("kirExcelReportIsReady", true);
+          this.setState({ fetchingExcel: false, excelUrl: response, errorMessage: null });
         }
       }.bind(this),
       error: function() {
@@ -231,7 +227,7 @@ var ResidentList = {
             }
 
             {
-              this.state.excelIsReady && this.props.model.get("kirSearchResults").length > 0 ? <a href={this.state.excelUrl} target="_blank">Ladda ner</a> : ""
+              this.props.model.get("kirExcelReportIsReady") ? <a href={this.state.excelUrl} target="_blank">Ladda ner</a> : ""
             }
 
             {

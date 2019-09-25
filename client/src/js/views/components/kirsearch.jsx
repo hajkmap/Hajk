@@ -67,13 +67,13 @@ var KirSearchView = {
       if (!searchResultsLayer) {        
         searchResultsLayer = new ol.layer.Vector({
           source: new ol.source.Vector(),
-          style: this.resultsStyle.bind(this)
+          style: this.resultsStyle
         });
         this.props.model.get("map").addLayer(searchResultsLayer);
 
         selectTool = new ol.interaction.Select({
           layers: [searchResultsLayer],
-          style: this.resultsStyle.bind(this)
+          style: this.resultsStyle
         });
 
         selectTool.on("select", function(e) {
@@ -137,6 +137,7 @@ var KirSearchView = {
       });
 
       this.setState({ searchInProgress: true });
+      this.props.model.set("kirExcelReportIsReady", false);
       $.ajax({
         url: wfslayer.url,
         method: 'POST',
@@ -230,6 +231,7 @@ var KirSearchView = {
       this.props.model.get("firSelectionModel").clearSelection();
       this.setState({ searchResults: []});
       this.props.model.set('kirSearchResults', []);
+      this.props.model.set("kirExcelReportIsReady", false);
       this.props.model.get("kirSearchResultsLayer").getSource().clear();
     },
 
