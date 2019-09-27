@@ -344,19 +344,6 @@ class ToolOptions extends Component {
         }
     }
 
-    handleColorResult (color) {
-        this.state.colorResult = color.hex;
-    }
-    handleColorResultStroke (color) {
-        this.state.colorResultStroke = color.hex;
-    }
-    handleColorHighlight (color) {
-        this.state.colorHighlight = color.hex;
-    }
-    handleColorHighlightStroke (color) {
-        this.state.colorHighlightStroke = color.hex;
-    }
-
     handleResidentListVisibleForGroupsChange (e) {
       let groups = e.target.value !== "" ? e.target.value.split(',') : [];
 
@@ -711,32 +698,23 @@ class ToolOptions extends Component {
                 <div className='col-md-12'>
                   <span className='pull-left'>
                     <div>Resultat - färg för yta</div>
-                    <SketchPicker
-                        color={this.state.colorResult}
-                        onChangeComplete={(e) => this.handleColorResult(e)}
-                    />
+                    <SketchPicker color={this.state.colorResult} onChangeComplete={(e) => this.setState({colorResult: e.hex})} />
                   </span>
                   <span className='pull-left' style={{marginLeft: '10px'}}>
                     <div>Resultat - färg för kantlinje</div>
-                    <SketchPicker
-                        color={this.state.colorResultStroke}
-                        onChangeComplete={(e) => this.handleColorResultStroke(e)}
+                    <SketchPicker color={this.state.colorResultStroke} onChangeComplete={(e) => this.setState({colorResultStroke: e.hex})}
                     />
                   </span>
                 </div>
                 <div className='col-md-12'>
                   <span className='pull-left'>
                     <div>Valt objekt (hightlight) - färg för yta</div>
-                    <SketchPicker
-                        color={this.state.colorHighlight}
-                        onChangeComplete={(e) => this.handleColorHighlight(e)}
+                    <SketchPicker color={this.state.colorHighlight} onChangeComplete={(e) => this.setState({colorHighlight: e.hex})}
                     />
                   </span>
                     <span className='pull-left' style={{marginLeft: '10px'}}>
                     <div>Valt objekt (hightlight) - färg för kantlinje</div>
-                    <SketchPicker
-                        color={this.state.colorHighlightStroke}
-                        onChangeComplete={(e) => this.handleColorHighlightStroke(e)}
+                    <SketchPicker color={this.state.colorHighlightStroke} onChangeComplete={(e) => this.setState({colorHighlightStroke: e.hex})}
                     />
                   </span>
                 </div>
