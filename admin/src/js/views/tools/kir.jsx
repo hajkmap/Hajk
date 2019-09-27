@@ -41,6 +41,7 @@ var defaultState = {
     markerImg: 'http://localhost/hajk/assets/icons/marker.png',
     infoKnappLogo: '/assets/icons/hjalpknapp_FIR.png',
     instructionSokning: '',
+    instructionSearchResult: '',
     instructionResidentList: "",
     featureIDFieldName: "",
     anchorX: 16,
@@ -83,6 +84,7 @@ class ToolOptions extends Component {
                 base64Encode: tool.options.base64Encode,
                 instruction: tool.options.instruction,
                 instructionSokning: tool.options.instructionSokning,
+                instructionSearchResult: tool.options.instructionSearchResult,
                 instructionHittaGrannar: tool.options.instructionHittaGrannar,
                 instructionSkapaFastighetsforteckning: tool.options.instructionSkapaFastighetsforteckning,
                 instructionEDPVision: tool.options.instructionEDPVision,
@@ -157,7 +159,7 @@ class ToolOptions extends Component {
             value = !isNaN(Number(value)) ? Number(value) : value;
         }
 
-        if (name == 'instruction' || name == 'instructionSokning' || name == 'instructionHittaGrannar' || name == 'instructionEDPVision' ||
+        if (name == 'instruction' || name == 'instructionSokning' || name == 'instructionSearchResult' || name == 'instructionEDPVision' ||
             name == 'instructionSkapaFastighetsforteckning' || name == 'realEstateLayer_instructionVidSokresult' || name == "instructionResidentList") {
             value =  window.btoa(encodeURIComponent(value));
         }
@@ -229,6 +231,7 @@ class ToolOptions extends Component {
                 base64Encode: this.state.base64Encode,
                 instruction: this.state.instruction,
                 instructionSokning: this.state.instructionSokning,
+                instructionSearchResult: this.state.instructionSearchResult,
                 instructionHittaGrannar: this.state.instructionHittaGrannar,
                 instructionSkapaFastighetsforteckning: this.state.instructionSkapaFastighetsforteckning,
                 instructionEDPVision: this.state.instructionEDPVision,
@@ -426,6 +429,16 @@ class ToolOptions extends Component {
                   <div className="col-md-8">
                     <textarea id='instructionSokning' name='instructionSokning' onChange={this.handleInputChange.bind(this)}
                       value={this.state.instructionSokning ? decodeURIComponent(atob(this.state.instructionSokning)) : ''} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='instructionSearchResult'>Instruktion för "Sökresultat"</label>
+                  </div>
+                  <div className="col-md-8">
+                    <textarea id='instructionSearchResult' name='instructionSearchResult' onChange={this.handleInputChange.bind(this)}
+                      value={this.state.instructionSearchResult ? decodeURIComponent(atob(this.state.instructionSearchResult)) : ''} />
                   </div>
                 </div>
 
