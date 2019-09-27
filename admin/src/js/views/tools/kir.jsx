@@ -58,9 +58,7 @@ var defaultState = {
     colorResult: 'rgba(255,255,0,0.3)',
     colorResultStroke: '',
     colorHighlight: '',
-    colorHighlightStroke: '',
-    colorHittaGrannarBuffer: '',
-    colorHittaGrannarBufferStroke: ''
+    colorHighlightStroke: ''
 };
 
 class ToolOptions extends Component {
@@ -85,8 +83,6 @@ class ToolOptions extends Component {
                 instruction: tool.options.instruction,
                 instructionSokning: tool.options.instructionSokning,
                 instructionSearchResult: tool.options.instructionSearchResult,
-                instructionHittaGrannar: tool.options.instructionHittaGrannar,
-                instructionSkapaFastighetsforteckning: tool.options.instructionSkapaFastighetsforteckning,
                 instructionEDPVision: tool.options.instructionEDPVision,
                 instructionResidentList: tool.options.instructionResidentList,
                 filterVisible: tool.options.filterVisible,
@@ -111,8 +107,6 @@ class ToolOptions extends Component {
                 colorResultStroke: tool.options.colorResultStroke,
                 colorHighlight: tool.options.colorHighlight,
                 colorHighlightStroke: tool.options.colorHighlightStroke,
-                colorHittaGrannarBuffer: tool.options.colorHittaGrannarBuffer,
-                colorHittaGrannarBufferStroke: tool.options.colorHittaGrannarBufferStroke,
                 residentList: tool.options.residentList,
                 residentListDataLayer: tool.options.residentListDataLayer
             }, () => { this.loadLayers(); });
@@ -159,8 +153,8 @@ class ToolOptions extends Component {
             value = !isNaN(Number(value)) ? Number(value) : value;
         }
 
-        if (name == 'instruction' || name == 'instructionSokning' || name == 'instructionSearchResult' || name == 'instructionEDPVision' ||
-            name == 'instructionSkapaFastighetsforteckning' || name == 'realEstateLayer_instructionVidSokresult' || name == "instructionResidentList") {
+        if (name == 'instruction' || name == 'instructionSokning' || name == 'instructionSearchResult' || 
+            name == 'instructionEDPVision' || name == "instructionResidentList") {
             value =  window.btoa(encodeURIComponent(value));
         }
 
@@ -232,8 +226,6 @@ class ToolOptions extends Component {
                 instruction: this.state.instruction,
                 instructionSokning: this.state.instructionSokning,
                 instructionSearchResult: this.state.instructionSearchResult,
-                instructionHittaGrannar: this.state.instructionHittaGrannar,
-                instructionSkapaFastighetsforteckning: this.state.instructionSkapaFastighetsforteckning,
                 instructionEDPVision: this.state.instructionEDPVision,
                 instructionResidentList: this.state.instructionResidentList,
                 filterVisible: this.state.filterVisible,
@@ -250,8 +242,6 @@ class ToolOptions extends Component {
                 colorResultStroke: this.state.colorResultStroke ? this.state.colorResultStroke : 'rgba(0,0,0,0.6)',
                 colorHighlight: this.state.colorHighlight ? this.state.colorHighlight : 'rgba(0,0,255,0.2)',
                 colorHighlightStroke: this.state.colorHighlightStroke ? this.state.colorHighlightStroke : 'rgba(0,0,0,0.6)',
-                colorHittaGrannarBuffer: this.state.colorHittaGrannarBuffer ? this.state.colorHittaGrannarBuffer : 'rgba(50,200,200,0.4)',
-                colorHittaGrannarBufferStroke: this.state.colorHittaGrannarBufferStroke ? this.state.colorHittaGrannarBufferStroke : 'rgba(0,0,0,0.2)',
                 residentList: this.state.residentList,
                 residentListDataLayer: this.state.residentListDataLayer
             }
@@ -365,12 +355,6 @@ class ToolOptions extends Component {
     }
     handleColorHighlightStroke (color) {
         this.state.colorHighlightStroke = color.hex;
-    }
-    handleColorHittaGrannarBuffer (color) {
-        this.state.colorHittaGrannarBuffer = color.hex;
-    }
-    handleColorHittaGrannarBufferStroke (color) {
-        this.state.colorHittaGrannarBufferStroke = color.hex;
     }
 
     handleResidentListVisibleForGroupsChange (e) {
@@ -755,20 +739,6 @@ class ToolOptions extends Component {
                         onChangeComplete={(e) => this.handleColorHighlightStroke(e)}
                     />
                   </span>
-                </div>
-                <div className='col-md-12'>
-                  <span className='pull-left'>
-                    <div>Buffer - färg för yta</div>
-                    <SketchPicker
-                        color={this.state.colorHittaGrannarBuffer}
-                        onChangeComplete={(e) => this.handleColorHittaGrannarBuffer(e)} />
-                  </span>
-                    <span className='pull-left' style={{marginLeft: '10px'}}>
-                      <div>Buffer - färg för kantlinje</div>
-                      <SketchPicker
-                          color={this.state.colorHittaGrannarBufferStroke}
-                          onChangeComplete={(e) => this.handleColorHittaGrannarBufferStroke(e)} />
-                    </span>
                 </div>
 
                 {this.state.tree}
