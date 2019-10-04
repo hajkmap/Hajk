@@ -8,17 +8,26 @@ import CoordinatesModel from "./CoordinatesModel.js";
 import Observer from "react-event-observer";
 
 class Coordinates extends React.PureComponent {
+  state = {
+    coordinate: ""
+  };
+
   constructor(props) {
     super(props);
 
     this.localObserver = Observer();
     // this.localObserver.subscribe("layerAdded", layer => {});
+    this.localObserver.subscribe("setCoordinates", coordinates => {
+      this.setState({
+        coordinates: coordinates
+      });
+    });
 
     this.coordinatesModel = new CoordinatesModel({
       map: props.map,
       app: props.app,
       options: props.options,
-      observer: this.localObserver
+      localObserver: this.localObserver
     });
   }
 
@@ -44,7 +53,8 @@ class Coordinates extends React.PureComponent {
           map={this.props.map}
           options={this.props.options}
           model={this.coordinatesModel}
-          observer={this.localObserver}
+          localObserver={this.localObserver}
+          coordinates={this.state.coordinates}
         />
       </BaseWindowPlugin>
     );
