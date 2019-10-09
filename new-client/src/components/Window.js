@@ -138,6 +138,20 @@ class Window extends React.PureComponent {
     }
   }
 
+  /**
+   * In LayerSwitcher plugin's settings, there's an option that allows
+   * user to show or hide the so called "breadcrumbs": small boxes, one
+   * for each active layer, that show up at the bottom of the screen.
+   *
+   * If breadcrumbs are activated, we should ensure that our Windows
+   * don't hide breadcrumbs, by reducing Windows' default height slightly.
+   *
+   * This helper is used to determine whether breadcrumbs are activated
+   * or not.
+   *
+   * @returns boolean
+   * @memberof Window
+   */
   areBreadcrumbsActivated() {
     return this.props.layerswitcherConfig &&
       this.props.layerswitcherConfig.hasOwnProperty("options")
