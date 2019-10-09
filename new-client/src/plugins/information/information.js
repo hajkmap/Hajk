@@ -35,12 +35,14 @@ class Information extends React.PureComponent {
     if (this.options.visibleAtStart === true) {
       if (
         this.options.showInfoOnce === true &&
-        parseInt(window.localStorage.getItem("alreadyShown")) === 1
+        parseInt(
+          window.localStorage.getItem("pluginInformationMessageShown")
+        ) === 1
       ) {
         dialogOpen = false;
       } else {
         if (this.options.showInfoOnce === true) {
-          window.localStorage.setItem("alreadyShown", 1);
+          window.localStorage.setItem("pluginInformationMessageShown", 1);
         }
         dialogOpen = true;
       }
