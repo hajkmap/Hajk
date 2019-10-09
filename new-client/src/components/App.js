@@ -7,6 +7,7 @@ import Observer from "react-event-observer";
 
 import AppModel from "./../models/AppModel.js";
 import Window from "./Window.js";
+import CookieNotice from "./CookieNotice";
 import Alert from "./Alert";
 import Loader from "./Loader";
 import PluginWindows from "./PluginWindows";
@@ -319,6 +320,12 @@ class App extends React.PureComponent {
         }}
       >
         <>
+          <CookieNotice
+            globalObserver={this.globalObserver}
+            defaultCookieNoticeMessage={
+              this.props.config.mapConfig.map.defaultCookieNoticeMessage
+            }
+          />
           <Alert
             open={this.state.alert}
             message={this.state.alertMessage}
