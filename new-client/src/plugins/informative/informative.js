@@ -25,24 +25,34 @@ class Informative extends React.PureComponent {
     });
   }
 
+  /**
+   * Shows the Informative Window and opens a specified chapter.
+   *
+   * Opening the Window is achieved using the globalObserver. Each
+   * Plugin has a unique event (named as: "showPluginName"). See
+   * BaseWindowPlugin for subscription.
+   *
+   * @memberof Informative
+   */
   open = chapter => {
     this.localObserver.publish("changeChapter", chapter);
+    this.app.globalObserver.publish("showInformative", {
+      hideOtherPlugins: false
+    });
   };
 
   render() {
     return (
       <BaseWindowPlugin
         {...this.props}
-        open={this.open} // Expose open() so it can be used from other plugins (BreadCrumbs uses this)
         type={this.constructor.name}
         custom={{
+          open: this.open, // Expose open() so it can be used from other plugins (LayerSwitcher/BreadCrumbs uses this)
           icon: <SatelliteIcon />,
           title: "Översiktsplan",
           description: "Läs mer om vad som planeras i kommunen",
           height: "auto",
-          width: 400,
-          top: undefined,
-          left: undefined
+          width: 400
         }}
       >
         <InformativeView

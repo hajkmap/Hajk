@@ -327,7 +327,7 @@ class LayerItem extends React.PureComponent {
             const informativeWindow = app.windows.find(
               window => window.type === "informative"
             );
-            informativeWindow.props.open(chapter);
+            informativeWindow.props.custom.open(chapter);
           }}
         />
       );

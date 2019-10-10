@@ -288,7 +288,7 @@ class LayerGroup extends React.PureComponent {
                         const informativeWindow = this.props.app.windows.find(
                           window => window.type === "informative"
                         );
-                        informativeWindow.props.open(chapter);
+                        informativeWindow.props.custom.open(chapter);
                       }}
                     />
                   );

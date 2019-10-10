@@ -163,7 +163,7 @@ class BreadCrumb extends Component {
     const informativeWindow = this.props.app.windows.find(
       window => window.type === "informative"
     );
-    informativeWindow.props.open(chapter);
+    informativeWindow.props.custom.open(chapter);
   };
 
   handleClose = () => {
