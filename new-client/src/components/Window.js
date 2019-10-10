@@ -163,26 +163,33 @@ class Window extends React.PureComponent {
     const { width, height, position } = this.props;
     const parent = this.rnd.getSelfElement().parentElement;
 
-    // If Breadcrumbs are activated (in LayerSwitcher's config), we must make
-    // sure that our Windows leave some space at the bottom for the Breadcrumbs.
-    const spaceForBreadcrumbs = this.areBreadcrumbsActivated() ? -42 : 0;
-
     //FIXME: JW - Not the best solution for parent resize to set top/left to 0/0, but it ensures we don't get a window outside of the parent
     this.left = 16; // Make sure we respect padding
     this.top = 16 + 62; // Respect padding + nasty hack to ensure that Window is placed below Search bar
-    this.width = width;
-    this.height =
-      -16 -
-      78 +
-      spaceForBreadcrumbs +
-      (height === "auto" ? parent.clientHeight : height); // When determining height, we must take into account that we set some top value, and still want to keep some space to the bottom
+    this.width = width || 400;
+    this.height = height || 300;
 
+    // If "auto" height is set, it means we want the Window to take up maximum space available
+    if (this.height === "auto") {
+      // If Breadcrumbs are activated (in LayerSwitcher's config), we must make
+      // sure that our Windows leave some space at the bottom for the Breadcrumbs.
+      const spaceForBreadcrumbs = this.areBreadcrumbsActivated() ? 42 : 0;
+      this.height =
+        parent.clientHeight - // Maximum height of parent element
+        16 - // Reduce height with top margin
+        16 - // Reduce height with bottom margin
+        62 - // Reduce with space for Search bar
+        spaceForBreadcrumbs; // If Breadcrumbs are active, make space for them as well
+    }
+
+    // If Window renders on the right, there are some things that we need to compensate for
     if (position === "right") {
       this.left = parent.getBoundingClientRect().width - width - 16 - 56; // -16 to take care of usual right padding, -56 to not cover the Control buttons that are on the right
       this.top = this.top - 62; // We won't overlap Search bar if Window is placed to the right, so don't take Search bar's height into account
       this.height = this.height + 62; // Same as above
     }
 
+    // Mobile screens are another special case: here our Window should take up max space available
     if (getIsMobile()) {
       this.left = 0;
       this.top = 0;
