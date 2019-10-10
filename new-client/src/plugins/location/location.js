@@ -15,7 +15,7 @@ class Location extends React.PureComponent {
           icon: <NavigationIcon />,
           title: "Positionera",
           description: "Visa min position i kartan",
-          height: 300,
+          height: 450,
           width: 430,
           top: undefined,
           left: undefined

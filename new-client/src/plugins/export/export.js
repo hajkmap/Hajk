@@ -38,8 +38,8 @@ class Export extends React.PureComponent {
           icon: <PrintIcon />,
           title: "Exportera",
           description: "Exportera kartan till andra format",
-          height: "auto",
-          width: 400,
+          height: 245,
+          width: 315,
           top: undefined,
           left: undefined
         }}

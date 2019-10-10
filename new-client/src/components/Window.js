@@ -423,8 +423,8 @@ class Window extends React.PureComponent {
           topRight: resizeTopRight
         }}
         className={classes.window}
-        minWidth={300}
-        minHeight={this.mode === "minimized" ? 42 : 300}
+        minWidth={200}
+        minHeight={this.mode === "minimized" ? 42 : 200}
         size={{
           width: width,
           height: height
