@@ -41,6 +41,10 @@ class BaseWindowPlugin extends React.PureComponent {
         ? (window.innerWidth - this.width) / 2
         : props.theme.spacing(2);
 
+    // TODO: Add 'props.options.position' to mapservice/admin, and let the admin
+    // decide whether the Window will render on left or right side of the screen.
+    this.position = props.options.target === "left" ? "right" : "left";
+
     props.app.registerWindowPlugin(this);
   }
 
@@ -90,8 +94,16 @@ class BaseWindowPlugin extends React.PureComponent {
           onResize={this.props.custom.onResize}
           width={this.width}
           height={this.height}
-          top={this.top}
-          left={this.left}
+          /** 'top' and 'left' are not needed. The only thing
+           * we need to specify is if the window should open on
+           * left or right side of the screen. 'top' and 'left'
+           * should always be calculated depending on 'position',
+           * and not customizable as here.
+           */
+
+          // top={this.top}
+          // left={this.left}
+          position={this.position}
           mode={mode}
           layerswitcherConfig={this.props.app.config.mapConfig.tools.find(
             t => t.type === "layerswitcher"

@@ -161,7 +161,6 @@ class Window extends React.PureComponent {
 
   updatePosition() {
     const { width, height, position } = this.props;
-    // const { width, height, left, top, position } = this.props;
     const parent = this.rnd.getSelfElement().parentElement;
 
     // If Breadcrumbs are activated (in LayerSwitcher's config), we must make
@@ -169,29 +168,30 @@ class Window extends React.PureComponent {
     const spaceForBreadcrumbs = this.areBreadcrumbsActivated() ? -42 : 0;
 
     //FIXME: JW - Not the best solution for parent resize to set top/left to 0/0, but it ensures we don't get a window outside of the parent
-    this.left = parent.getBoundingClientRect().left + 16;
-    this.top = parent.getBoundingClientRect().top + 78; // Nasty hack, but ensure that Window is placed below Search bar
-    // this.left = left;
-    // this.top = top;
+    this.left = 16; // Make sure we respect padding
+    this.top = 16 + 62; // Respect padding + nasty hack to ensure that Window is placed below Search bar
     this.width = width;
     this.height =
       -16 -
       78 +
       spaceForBreadcrumbs +
       (height === "auto" ? parent.clientHeight : height); // When determining height, we must take into account that we set some top value, and still want to keep some space to the bottom
+
     if (position === "right") {
-      this.left = parent.getBoundingClientRect().right - width;
+      this.left = parent.getBoundingClientRect().width - width - 16 - 56; // -16 to take care of usual right padding, -56 to not cover the Control buttons that are on the right
+      this.top = this.top - 62; // We won't overlap Search bar if Window is placed to the right, so don't take Search bar's height into account
+      this.height = this.height + 62; // Same as above
     }
+
     if (getIsMobile()) {
       this.left = 0;
       this.top = 0;
       this.height = window.innerHeight;
       this.width = document.body.clientWidth;
     }
-    this.left = this.left !== undefined ? this.left : 8;
 
+    this.left = this.left !== undefined ? this.left : 16;
     this.mode = "window";
-    this.right = window.innerWidth - (this.left + parseFloat(this.width));
 
     this.setState(
       {
@@ -199,7 +199,7 @@ class Window extends React.PureComponent {
         top: this.top,
         width: this.width,
         height: this.height,
-        mode: "window"
+        mode: this.mode
       },
       () => {
         this.rnd.updatePosition({
