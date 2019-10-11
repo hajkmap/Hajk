@@ -1,6 +1,14 @@
 import React from "react";
 import { Button } from "@material-ui/core";
 import { useSnackbar } from "notistack";
+import { makeStyles } from "@material-ui/styles";
+
+const useStyles = makeStyles(theme => ({
+  textButton: {
+    color: theme.palette.primary.contrastText,
+    marginRight: theme.spacing(1)
+  }
+}));
 
 /**
  *  *
@@ -9,6 +17,8 @@ import { useSnackbar } from "notistack";
  * @returns React.Component
  */
 function CookieNotice({ globalObserver, defaultCookieNoticeMessage }) {
+  const classes = useStyles();
+
   const cookieNoticeMessage =
     defaultCookieNoticeMessage ||
     `Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.`;
@@ -22,12 +32,13 @@ function CookieNotice({ globalObserver, defaultCookieNoticeMessage }) {
             "https://webbriktlinjer.se/lagkrav/kaklagen-i-praktiken/";
         }}
         variant="text"
+        className={classes.textButton}
       >
         {"Mer information"}
       </Button>
       <Button
         color="primary"
-        variant="outlined"
+        variant="contained"
         onClick={() => {
           // Set a cookie that ensures that this message won't be shown again
           window.localStorage.setItem("cookieNoticeShown", 1);
@@ -44,6 +55,10 @@ function CookieNotice({ globalObserver, defaultCookieNoticeMessage }) {
     globalObserver.subscribe("appLoaded", () => {
       enqueueSnackbar(cookieNoticeMessage, {
         persist: true,
+        anchorOrigin: {
+          vertical: "bottom",
+          horizontal: "center"
+        },
         action: action
       });
     });
