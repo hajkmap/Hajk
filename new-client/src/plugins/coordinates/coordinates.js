@@ -35,7 +35,7 @@ class Coordinates extends React.PureComponent {
     return (
       <BaseWindowPlugin
         {...this.props}
-        type={this.constructor.name}
+        type="Coordinates"
         custom={{
           icon: <ExploreIcon />,
           title: "Visa koordinat",

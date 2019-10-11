@@ -33,7 +33,7 @@ class Export extends React.PureComponent {
     return (
       <BaseWindowPlugin
         {...this.props}
-        type={this.constructor.name}
+        type="Export"
         custom={{
           icon: <PrintIcon />,
           title: "Exportera",

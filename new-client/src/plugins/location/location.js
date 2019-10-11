@@ -10,7 +10,7 @@ class Location extends React.PureComponent {
     return (
       <BaseWindowPlugin
         {...this.props}
-        type={this.constructor.name}
+        type="Location"
         custom={{
           icon: <NavigationIcon />,
           title: "Positionera",

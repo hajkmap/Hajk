@@ -45,7 +45,7 @@ class Informative extends React.PureComponent {
     return (
       <BaseWindowPlugin
         {...this.props}
-        type={this.constructor.name}
+        type="Informative"
         custom={{
           open: this.open, // Expose open() so it can be used from other plugins (LayerSwitcher/BreadCrumbs uses this)
           icon: <SatelliteIcon />,
