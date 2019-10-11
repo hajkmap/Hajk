@@ -28,6 +28,7 @@ const styles = theme => {
       padding: "0 4px",
       color: "rgba(0, 0, 0, 0.87)",
       fontSize: "0.7em",
+      lineHeight: "25px",
       borderRadius: "2px",
       cursor: "default"
     }
