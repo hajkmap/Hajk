@@ -203,6 +203,9 @@ article fieldset > span > div {
   list-style: none;
   padding: 0;
   margin: 0;
+  height: 55vh;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .config-layer-list li {
@@ -329,7 +332,6 @@ body.dragging * {
 
 .tab-pane aside {
   max-height: 100vh;
-  overflow-y: auto;
 }
 
 .expanded-at-start {
