@@ -1,10 +1,8 @@
-import { MousePosition } from "ol/control";
-import { transform } from "ol/proj";
 import Feature from "ol/Feature";
 import Vector from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import Point from "ol/geom/Point.js";
-import { Circle as CircleStyle, Style, Icon } from "ol/style";
+import { Style, Icon } from "ol/style";
 
 class CoordinatesModel {
   constructor(settings) {
