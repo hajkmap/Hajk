@@ -138,7 +138,7 @@ class BufferModel {
         if (e.coordinate !== undefined) {
           let url = lyr
             .getSource()
-            .getGetFeatureInfoUrl(
+            .getFeatureInfoUrl(
               e.coordinate,
               view.getResolution(),
               view.getProjection().getCode(),

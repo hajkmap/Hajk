@@ -10,7 +10,9 @@ const fetchConfig = {
 
 function query(map, layer, evt) {
   let coordinate = evt.coordinate;
+
   let resolution = map.getView().getResolution();
+
   let subLayersToQuery = [];
   let referenceSystem = map
     .getView()
@@ -38,9 +40,10 @@ function query(map, layer, evt) {
       INFO_FORMAT: layer.getSource().getParams().INFO_FORMAT,
       QUERY_LAYERS: subLayersToQuery.join(",")
     };
+
     let url = layer
       .getSource()
-      .getGetFeatureInfoUrl(coordinate, resolution, referenceSystem, params);
+      .getFeatureInfoUrl(coordinate, resolution, referenceSystem, params);
     return fetch(url, fetchConfig);
   } else {
     return false;
@@ -137,7 +140,6 @@ export function handleClick(evt, map, callback) {
                 console.error(
                   "GetFeatureInfo couldn't retrieve correct data for the clicked object. "
                 );
-                console.error(err);
               })
           );
           break;
@@ -153,13 +155,11 @@ export function handleClick(evt, map, callback) {
                 console.error(
                   "GetFeatureInfo couldn't retrieve correct data for the clicked object. "
                 );
-                console.error(err);
               })
           );
           break;
         }
         default:
-          console.log("Unsupported response type:", type);
           break;
       }
     });

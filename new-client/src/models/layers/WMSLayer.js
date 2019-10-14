@@ -106,7 +106,7 @@ class WMSLayer {
 
       url = this.getLayer()
         .getSource()
-        .getGetFeatureInfoUrl(
+        .getFeatureInfoUrl(
           params.coordinate,
           params.resolution,
           params.projection,
@@ -157,7 +157,7 @@ class WMSLayer {
    * @instance
    */
   tileLoadError() {
-    this.status = "loaderror";
+    this.status = "loaderror"; // FIXME: JW - we must set state so it is reflected all the way up in LayerItem, line 137.
   }
 
   /**
@@ -165,7 +165,7 @@ class WMSLayer {
    * @instance
    */
   tileLoadOk() {
-    this.status = "ok";
+    this.status = "ok"; // FIXME: JW - we must set state so it is reflected all the way up in LayerItem, line 137.
   }
 
   /**
