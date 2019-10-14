@@ -1,6 +1,6 @@
 {
   "name": "new-admin",
-  "version": "3.0.0-beta.1",
+  "version": "3.0.0-beta.2",
   "private": true,
   "homepage": ".",
   "dependencies": {
@@ -12,13 +12,13 @@
     "jquery-sortable": "^0.9.13",
     "ol": "^5.3.3",
     "proj4": "^2.5.0",
-    "react": "^16.9.0",
+    "react": "^16.10.2",
     "react-color": "^2.17.3",
-    "react-dom": "^16.9.0",
+    "react-dom": "^16.10.2",
     "react-modal": "^3.10.1",
     "react-scripts": "3.0.1",
     "react-smooth-dnd": "^0.11.0",
-    "typescript": "^3.6.3",
+    "typescript": "^3.6.4",
     "x2js": "^3.3.1"
   },
   "scripts": {
@@ -29,8 +29,8 @@
   },
   "devDependencies": {
     "draft-convert": "^2.1.8",
-    "draft-extend": "^1.6.3",
-    "husky": "^3.0.5",
+    "draft-extend": "^1.6.4",
+    "husky": "^3.0.9",
     "prettier": "^1.18.2",
     "pretty-quick": "^1.11.1"
   },
