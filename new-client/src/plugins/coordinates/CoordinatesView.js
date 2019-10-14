@@ -25,6 +25,8 @@ const styles = theme => ({
 });
 
 class CoordinatesView extends React.PureComponent {
+  state = {};
+
   constructor(props) {
     super(props);
     this.model = this.props.model;
@@ -33,6 +35,15 @@ class CoordinatesView extends React.PureComponent {
     this.localObserver = this.props.localObserver;
 
     this.transformations = this.props.options.transformations;
+
+    this.localObserver.subscribe(
+      "setTransformedCoordinates",
+      transformedCoordinates => {
+        this.setState({
+          transformedCoordinates: transformedCoordinates
+        });
+      }
+    );
   }
 
   componentDidMount() {}
@@ -48,13 +59,23 @@ class CoordinatesView extends React.PureComponent {
           {this.transformations.map((coordinates, i) => {
             return (
               <TableRow key={i}>
-                <TableCell>{coordinates.code}</TableCell>
+                <TableCell>
+                  <Typography variant="subtitle2" style={{ display: "block" }}>
+                    {coordinates.title} ({coordinates.code})
+                  </Typography>
+                </TableCell>
                 <TableCell>
                   <Typography style={{ display: "block" }}>
-                    {coordinates.ytitle}:{" "}
+                    {coordinates.ytitle}:
+                    {this.state.transformedCoordinates
+                      ? this.state.transformedCoordinates[i].coordinates[1]
+                      : ""}
                   </Typography>
                   <Typography style={{ display: "block" }}>
-                    {coordinates.xtitle}:{" "}
+                    {coordinates.xtitle}:
+                    {this.state.transformedCoordinates
+                      ? this.state.transformedCoordinates[i].coordinates[0]
+                      : ""}
                   </Typography>
                 </TableCell>
               </TableRow>
@@ -66,10 +87,18 @@ class CoordinatesView extends React.PureComponent {
       return (
         <>
           <TableRow>
-            <TableCell>Sweref 99 12 00</TableCell>
             <TableCell>
-              <Typography style={{ display: "block" }}>N: </Typography>
-              <Typography style={{ display: "block" }}>E: </Typography>
+              <Typography variant="subtitle2" style={{ display: "block" }}>
+                Sweref 99 12 00
+              </Typography>
+            </TableCell>
+            <TableCell>
+              <Typography style={{ display: "block" }}>
+                N: {this.props.coordinates}
+              </Typography>
+              <Typography style={{ display: "block" }}>
+                E: {this.props.coordinates}
+              </Typography>
             </TableCell>
           </TableRow>
         </>
@@ -86,16 +115,13 @@ class CoordinatesView extends React.PureComponent {
           <Table className={classes.table}>
             <TableHead>
               <TableRow>
-                <TableCell>Koordinatsystem</TableCell>
+                <TableCell>Projektion</TableCell>
                 <TableCell>Koordinater</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>{this.renderProjections()}</TableBody>
           </Table>
         </Paper>
-        <span id="coordinatesContainer" className={classes.text}>
-          Marker coordinates: {this.props.coordinates}
-        </span>
       </>
     );
   }

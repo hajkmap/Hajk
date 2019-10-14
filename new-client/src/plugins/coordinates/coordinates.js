@@ -9,19 +9,28 @@ import Observer from "react-event-observer";
 
 class Coordinates extends React.PureComponent {
   state = {
-    coordinate: ""
+    coordinates: null,
+    transformedCoordinates: {}
   };
 
   constructor(props) {
     super(props);
 
     this.localObserver = Observer();
-    // this.localObserver.subscribe("layerAdded", layer => {});
     this.localObserver.subscribe("setCoordinates", coordinates => {
       this.setState({
         coordinates: coordinates
       });
     });
+
+    this.localObserver.subscribe(
+      "setTransformedCoordinates",
+      transformedCoordinates => {
+        this.setState({
+          transformedCoordinates: transformedCoordinates
+        });
+      }
+    );
 
     this.coordinatesModel = new CoordinatesModel({
       map: props.map,
@@ -30,6 +39,14 @@ class Coordinates extends React.PureComponent {
       localObserver: this.localObserver
     });
   }
+
+  onWindowShow = () => {
+    this.coordinatesModel.activate();
+  };
+
+  onWindowHide = () => {
+    this.coordinatesModel.deactivate();
+  };
 
   render() {
     return (
@@ -44,8 +61,8 @@ class Coordinates extends React.PureComponent {
           width: 400,
           top: undefined,
           left: undefined,
-          onWindowShow: this.coordinatesModel.activate,
-          onWindowHide: this.coordinatesModel.deactivate
+          onWindowShow: this.onWindowShow,
+          onWindowHide: this.onWindowHide
         }}
       >
         <CoordinatesView
@@ -55,6 +72,7 @@ class Coordinates extends React.PureComponent {
           model={this.coordinatesModel}
           localObserver={this.localObserver}
           coordinates={this.state.coordinates}
+          transformedCoordinates={this.state.transformedCoordinates}
         />
       </BaseWindowPlugin>
     );

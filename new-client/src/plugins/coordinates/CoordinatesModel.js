@@ -1,3 +1,4 @@
+import { transform } from "ol/proj";
 import Feature from "ol/Feature";
 import Vector from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
@@ -10,6 +11,7 @@ class CoordinatesModel {
     this.app = settings.app;
     this.options = settings.options;
     this.localObserver = settings.localObserver;
+    this.transformations = settings.options.transformations;
 
     this.source = new VectorSource();
     this.vector = new Vector({
@@ -18,6 +20,8 @@ class CoordinatesModel {
     });
 
     this.map.addLayer(this.vector);
+    this.coordinates = undefined;
+    this.transformedCoordinates = {};
   }
 
   get getMap() {
@@ -32,14 +36,12 @@ class CoordinatesModel {
     return this.vector;
   }
 
-  addMarker = evt => {
-    this.setCoordinates(evt.coordinate);
-
+  addMarker = () => {
     var source = this.getSource;
     var vectorLayer = this.getVector;
 
     var feature = new Feature({
-      geometry: new Point(evt.coordinate)
+      geometry: new Point(this.coordinates)
     });
     var styleMarker = new Style({
       image: new Icon({
@@ -53,27 +55,64 @@ class CoordinatesModel {
     source.addFeature(feature);
   };
 
-  setCoordinates(coordinates) {
-    this.localObserver.publish("setCoordinates", coordinates);
+  transform(coordinates, to) {
+    var from = this.map.getView().getProjection();
+    return transform(coordinates, from, to);
   }
 
-  activate = () => {
+  setCoordinates = () => {
+    if (!this.activated) {
+      return;
+    }
+    this.localObserver.publish("setCoordinates", this.coordinates);
+  };
+
+  presentCoordinates() {
+    var coordinates = this.coordinates;
+    var transformedCoordinates = {};
+    var transformations = this.transformations;
+
+    transformations.map((transformation, i) => {
+      transformedCoordinates = {
+        coordinates: this.transform(coordinates, transformation.code) || "",
+        xtitle: transformation.xtitle || "",
+        ytitle: transformation.ytitle || ""
+      };
+
+      this.transformedCoordinates[i] = transformedCoordinates;
+
+      return transformedCoordinates;
+    });
+
+    this.localObserver.publish(
+      "setTransformedCoordinates",
+      this.transformedCoordinates
+    );
+  }
+
+  getCoordinates() {
+    return this.coordinates;
+  }
+
+  activate() {
     var map = this.getMap;
 
+    this.activated = true;
     map.on("singleclick", e => {
       this.coordinates = e.coordinate;
-      this.addMarker(e);
+      this.setCoordinates();
+      this.addMarker();
+      this.presentCoordinates();
     });
-    this.activated = true;
-  };
+  }
 
-  deactivate = () => {
+  deactivate() {
     var map = this.getMap;
 
-    map.un("singleclick", this.addMarker);
     this.activated = false;
+    map.un("singleclick", this.setCoordinates);
     this.getVector.getSource().clear();
-  };
+  }
 }
 
 export default CoordinatesModel;
