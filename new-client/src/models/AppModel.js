@@ -248,7 +248,8 @@ class AppModel {
         layerConfig = configMapper.mapWMSConfig(layer, this.config);
         layerItem = new WMSLayer(
           layerConfig.options,
-          this.config.appConfig.proxy
+          this.config.appConfig.proxy,
+          this.globalObserver
         );
         map.addLayer(layerItem.layer);
         break;

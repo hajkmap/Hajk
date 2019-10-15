@@ -1,13 +1,12 @@
 import React, { Component } from "react";
-import Button from "@material-ui/core/Button";
+import { Button, Tooltip, Typography } from "@material-ui/core";
+import { withStyles } from "@material-ui/core/styles";
 import IconWarning from "@material-ui/icons/Warning";
 import CallMadeIcon from "@material-ui/icons/CallMade";
 import InfoIcon from "@material-ui/icons/Info";
 import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
-import { withStyles } from "@material-ui/core/styles";
-import Typography from "@material-ui/core/Typography";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import CloseIcon from "@material-ui/icons/Close";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
@@ -154,6 +153,19 @@ class LayerGroupItem extends Component {
     model.globalObserver.subscribe("showLayer", this.setVisible);
     model.observer.subscribe("showLayer", this.setVisible);
     model.observer.subscribe("toggleGroup", this.toggleGroupVisible);
+
+    // Set load status by subscribing to a global event. Expect ID (int) of layer
+    // and status (string "ok"|"loaderror"). Also, once status was set to "loaderror",
+    // don't change it back to "ok": we'll get a response for each tile, so most of
+    // the tiles might be "ok", but if only one of the tiles has "loaderror", we
+    // consider that the layer has failed loading and want to inform the user.
+    model.globalObserver.subscribe("wmsLayerLoadStatus", d => {
+      this.state.status !== "loaderror" &&
+        this.state.name === d.id &&
+        this.setState({
+          status: d.status
+        });
+    });
   }
 
   /**
@@ -162,9 +174,13 @@ class LayerGroupItem extends Component {
    * @return {external:ReactElement}
    */
   renderStatus() {
-    return this.state.status === "loaderror" ? (
-      <IconWarning title="Lagret kunde inte laddas in. Kartservern svarar inte." />
-    ) : null;
+    return (
+      this.state.status === "loaderror" && (
+        <Tooltip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
+          <IconWarning />
+        </Tooltip>
+      )
+    );
   }
 
   renderLegendImage() {

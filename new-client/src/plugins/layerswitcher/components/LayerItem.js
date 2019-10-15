@@ -1,13 +1,12 @@
 import React from "react";
-import Button from "@material-ui/core/Button";
+import { Button, Tooltip, Typography } from "@material-ui/core";
+import { withStyles } from "@material-ui/core/styles";
 import IconWarning from "@material-ui/icons/Warning";
 import CallMadeIcon from "@material-ui/icons/CallMade";
 import InfoIcon from "@material-ui/icons/Info";
 import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
-import Typography from "@material-ui/core/Typography";
-import { withStyles } from "@material-ui/core/styles";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import CloseIcon from "@material-ui/icons/Close";
 import LayerGroupItem from "./LayerGroupItem.js";
@@ -114,16 +113,31 @@ class LayerItem extends React.PureComponent {
         visible: !e.oldValue
       });
     });
+
+    // Set load status by subscribing to a global event. Expect ID (int) of layer
+    // and status (string "ok"|"loaderror"). Also, once status was set to "loaderror",
+    // don't change it back to "ok": we'll get a response for each tile, so most of
+    // the tiles might be "ok", but if only one of the tiles has "loaderror", we
+    // consider that the layer has failed loading and want to inform the user.
+    this.props.app.globalObserver.subscribe("wmsLayerLoadStatus", d => {
+      this.state.status !== "loaderror" &&
+        this.state.name === d.id &&
+        this.setState({
+          status: d.status
+        });
+    });
   }
 
   /**
    * Toggle visibility of this layer item.
+   * Also, if layer is being hidden, reset "status" (if layer loading failed,
+   * "status" is "loaderror", and it should be reset if user unchecks layer).
    * @instance
    */
   toggleVisible = layer => e => {
-    var visible = !this.state.visible;
+    const visible = !this.state.visible;
     this.setState({
-      visible: visible
+      visible
     });
     layer.setVisible(visible);
   };
@@ -134,9 +148,13 @@ class LayerItem extends React.PureComponent {
    * @return {external:ReactElement}
    */
   renderStatus() {
-    return this.state.status === "loaderror" ? (
-      <IconWarning title="Lagret kunde inte laddas in. Kartservern svarar inte." />
-    ) : null;
+    return (
+      this.state.status === "loaderror" && (
+        <Tooltip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
+          <IconWarning />
+        </Tooltip>
+      )
+    );
   }
 
   renderLegendImage() {

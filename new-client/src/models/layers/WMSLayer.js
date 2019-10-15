@@ -16,8 +16,9 @@ var WmsLayerProperties = {
 };
 
 class WMSLayer {
-  constructor(config, proxyUrl) {
+  constructor(config, proxyUrl, globalObserver) {
     this.proxyUrl = proxyUrl;
+    this.globalObserver = globalObserver;
     this.validInfo = true;
     this.defaultProperties = WmsLayerProperties;
     this.legend = config.legend;
@@ -157,7 +158,10 @@ class WMSLayer {
    * @instance
    */
   tileLoadError() {
-    this.status = "loaderror"; // FIXME: JW - we must set state so it is reflected all the way up in LayerItem, line 137.
+    this.globalObserver.publish("wmsLayerLoadStatus", {
+      id: this.layer.get("name"),
+      status: "loaderror"
+    });
   }
 
   /**
@@ -165,7 +169,10 @@ class WMSLayer {
    * @instance
    */
   tileLoadOk() {
-    this.status = "ok"; // FIXME: JW - we must set state so it is reflected all the way up in LayerItem, line 137.
+    this.globalObserver.publish("wmsLayerLoadStatus", {
+      id: this.layer.get("name"),
+      status: "ok"
+    });
   }
 
   /**
