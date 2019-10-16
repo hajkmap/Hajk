@@ -21,7 +21,7 @@ class CoordinatesModel {
 
     this.map.addLayer(this.vector);
     this.coordinates = undefined;
-    this.transformedCoordinates = {};
+    this.transformedCoordinates = [];
   }
 
   get getMap() {
@@ -69,20 +69,27 @@ class CoordinatesModel {
 
   presentCoordinates() {
     var coordinates = this.coordinates;
-    var transformedCoordinates = {};
+    var transformedCoordinates = [];
     var transformations = this.transformations;
 
-    transformations.map((transformation, i) => {
-      transformedCoordinates = {
-        coordinates: this.transform(coordinates, transformation.code) || "",
-        xtitle: transformation.xtitle || "",
-        ytitle: transformation.ytitle || ""
-      };
+    if (transformations.length) {
+      transformations.map((transformation, i) => {
+        transformedCoordinates = {
+          code: transformation.code || "",
+          default: transformation.default || false,
+          hint: transformation.hint || "",
+          title: transformation.title || "",
+          xtitle: transformation.xtitle || "",
+          ytitle: transformation.ytitle || "",
+          inverseAxis: transformation.inverseAxis || false,
+          coordinates: this.transform(coordinates, transformation.code) || ""
+        };
 
-      this.transformedCoordinates[i] = transformedCoordinates;
+        this.transformedCoordinates[i] = transformedCoordinates;
 
-      return transformedCoordinates;
-    });
+        return this.transformedCoordinates;
+      });
+    }
 
     this.localObserver.publish(
       "setTransformedCoordinates",

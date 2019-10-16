@@ -7,6 +7,7 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
+import TextField from "@material-ui/core/TextField";
 
 const styles = theme => ({
   root: {
@@ -21,7 +22,12 @@ const styles = theme => ({
       position: "unset"
     }
   },
-  table: {}
+  table: {},
+  textField: {
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+    marginTop: theme.spacing(2)
+  }
 });
 
 class CoordinatesView extends React.PureComponent {
@@ -33,8 +39,6 @@ class CoordinatesView extends React.PureComponent {
     this.app = this.props.app;
     this.options = this.props.options;
     this.localObserver = this.props.localObserver;
-
-    this.transformations = this.props.options.transformations;
 
     this.localObserver.subscribe(
       "setTransformedCoordinates",
@@ -53,57 +57,58 @@ class CoordinatesView extends React.PureComponent {
   }
 
   renderProjections() {
-    if (this.transformations.length) {
-      return (
-        <>
-          {this.transformations.map((coordinates, i) => {
-            return (
-              <TableRow key={i}>
-                <TableCell>
-                  <Typography variant="subtitle2" style={{ display: "block" }}>
-                    {coordinates.title} ({coordinates.code})
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography style={{ display: "block" }}>
-                    {coordinates.ytitle}:
-                    {this.state.transformedCoordinates
-                      ? this.state.transformedCoordinates[i].coordinates[1]
-                      : ""}
-                  </Typography>
-                  <Typography style={{ display: "block" }}>
-                    {coordinates.xtitle}:
-                    {this.state.transformedCoordinates
-                      ? this.state.transformedCoordinates[i].coordinates[0]
-                      : ""}
-                  </Typography>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </>
-      );
-    } else {
-      return (
-        <>
-          <TableRow>
-            <TableCell>
-              <Typography variant="subtitle2" style={{ display: "block" }}>
-                Sweref 99 12 00
-              </Typography>
-            </TableCell>
-            <TableCell>
-              <Typography style={{ display: "block" }}>
-                N: {this.props.coordinates}
-              </Typography>
-              <Typography style={{ display: "block" }}>
-                E: {this.props.coordinates}
-              </Typography>
-            </TableCell>
-          </TableRow>
-        </>
-      );
-    }
+    const { classes } = this.props;
+
+    return (
+      <>
+        {this.state.transformedCoordinates
+          ? this.state.transformedCoordinates.map((transformations, i) => {
+              return (
+                <TableRow key={i}>
+                  <TableCell>
+                    <Typography
+                      variant="subtitle2"
+                      style={{ display: "block" }}
+                    >
+                      {transformations.title}
+                    </Typography>
+                    <Typography
+                      variant="subtitle2"
+                      style={{ display: "block" }}
+                    >
+                      ({transformations.code})
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <TextField
+                      label={transformations.ytitle}
+                      className={classes.textField}
+                      margin="dense"
+                      variant="outlined"
+                      value={
+                        transformations.inverseAxis
+                          ? transformations.coordinates[0]
+                          : transformations.coordinates[1]
+                      }
+                    />
+                    <TextField
+                      label={transformations.xtitle}
+                      className={classes.textField}
+                      margin="dense"
+                      variant="outlined"
+                      value={
+                        transformations.inverseAxis
+                          ? transformations.coordinates[1]
+                          : transformations.coordinates[0]
+                      }
+                    />
+                  </TableCell>
+                </TableRow>
+              );
+            })
+          : null}
+      </>
+    );
   }
 
   render() {
