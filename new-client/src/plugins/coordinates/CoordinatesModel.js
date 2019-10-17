@@ -37,6 +37,9 @@ class CoordinatesModel {
   }
 
   addMarker = () => {
+    if (!this.activated) {
+      return;
+    }
     var source = this.getSource;
     var vectorLayer = this.getVector;
 
