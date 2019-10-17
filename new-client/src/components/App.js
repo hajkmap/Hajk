@@ -24,11 +24,13 @@ import {
   Drawer,
   Hidden,
   IconButton,
-  Tooltip
+  Tooltip,
+  Fab
 } from "@material-ui/core";
 
 import LockIcon from "@material-ui/icons/Lock";
 import LockOpenIcon from "@material-ui/icons/LockOpen";
+import MenuIcon from "@material-ui/icons/Menu";
 
 // A global that holds our windows, for use see components/Window.js
 document.windows = [];
@@ -308,6 +310,34 @@ class App extends React.PureComponent {
     }
   }
 
+  /**
+   * In the case of a disabled Search plugin, we must
+   * ensure that the button that toggles Drawer is still visible.
+   * We do it by providing it as a standalone button.
+   *
+   * For the FAB to show, there are 2 conditions that must be met:
+   *  - There must be some plugins enabled in application, and
+   *  - Search plugin must be disabled
+   */
+  renderStandaloneDrawerToggler() {
+    return (
+      Object.keys(this.appModel.plugins).length > 0 &&
+      this.appModel.plugins.search === undefined && (
+        <Tooltip title="Visa verktygspanelen">
+          <Fab
+            onClick={this.toggleDrawer(!this.state.drawerVisible)}
+            color="primary"
+            size="medium"
+            disabled={this.state.drawerPermanent}
+            aria-label="menu"
+          >
+            <MenuIcon />
+          </Fab>
+        </Tooltip>
+      )
+    );
+  }
+
   render() {
     const { classes, config } = this.props;
 
@@ -341,6 +371,7 @@ class App extends React.PureComponent {
             <header
               className={cslx(classes.header, classes.pointerEventsOnChildren)}
             >
+              {this.renderStandaloneDrawerToggler()}
               {this.renderSearchPlugin()}
             </header>
             <main className={classes.main}>
