@@ -19,7 +19,7 @@ using EdpConn;
 /// Vill man kompilera en mapservice utan referenser till EDP följer man instruktionerna i filen EdpConn.cs i projektet EdpConn.
 ///
 /// För att slå på kommunkationen måste man lägga till följande rader till Web.config i sektion <appSettings>
-/// <add key="edpUUID" value="421623AA-D1D3-42EE-A516-28DC2EEFA544" />
+/// <add key = "edpUUID" value="421623AA-D1D3-42EE-A516-28DC2EEFA544" />
 /// <add key = "edpClientName" value="KommunGIS" />
 /// <add key = "edpServerUrl" value="http://censrv364:64235/" />
 /// <add key = "edpRemoveDomainFromUserName" value="1" />
@@ -67,7 +67,7 @@ namespace MapService.Controllers
                     userName = userName.Split('\\')[1];
                 }
 
-                // Save real estate identifiers for this user until EDP wants them
+                // Save real estate identifiers for this user
                 if (_dictEdpConnections.ContainsKey(userName))
                 {
                     _log.DebugFormat("Found user '{0}' in queue.", userName);
@@ -85,10 +85,12 @@ namespace MapService.Controllers
 
                     if (string.IsNullOrEmpty(edpUUID) || string.IsNullOrEmpty(edpClientName) || string.IsNullOrEmpty(edpServerUrl))
                     {
-                        _log.WarnFormat("EDP is not configured in Web.config.");
+                        _log.Error("EDP is not configured in Web.config.");
                     }
                     else
                     {
+                        _log.DebugFormat("Using config params, edpUUID: {0}, edpClientName: {1}, edpServerUrl: {2}", edpUUID, edpClientName, edpServerUrl);
+
                         var edpCon = new ImplEdpConnectorPublic(userName, edpUUID, edpClientName, edpServerUrl);
 
                         edpCon.SetRealEstateIdentifiersToSend(realEstateIdentifiersToSend);

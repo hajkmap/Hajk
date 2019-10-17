@@ -12,7 +12,7 @@ using EDP.GIS.Kubb.Connector.Common.Entities;
 /// <summary>
 /// Denna klass implementerar kommunikationen med EDP. 
 /// Vill man kompilera backend utan några beroenden alls till EDP gör följande:
-/// 1. Kommentera bort raden #define USE_REF_TO_EDP överst i denna fil
+/// 1. Kommentera raden #define USE_REF_TO_EDP överst i denna fil
 /// 2. Man kan nu även ta bort referenserna till:
 ///    - EDP.GIS.Kubb.Connector.Common
 ///    - EDP.GIS.Kubb.Connector.EDP
