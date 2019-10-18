@@ -1,4 +1,32 @@
-import React from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: plugins/search/search.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: plugins/search/search.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import React from "react";
 // import LinearProgress from "@material-ui/core/LinearProgress";
 import { withStyles } from "@material-ui/core/styles";
 import Observer from "react-event-observer";
@@ -226,7 +254,7 @@ class Search extends React.PureComponent {
     });
 
     this.localObserver.subscribe("minimizeWindow", () => {
-      if (props.options.target === "header" && window.innerWidth < 960) {
+      if (props.options.target === "header" &amp;&amp; window.innerWidth &lt; 960) {
         this.setState({
           visible: false
         });
@@ -247,14 +275,14 @@ class Search extends React.PureComponent {
     const { result } = this.state;
     if (!result || this.state.activeSearchView === STARTVIEW) return null;
     return (
-      // <div className={classes.searchResults}>
-      <SearchResultList
+      // &lt;div className={classes.searchResults}>
+      &lt;SearchResultList
         result={result}
         renderAffectButton={this.activeSpatialTools.radiusSearch}
         model={this.searchModel}
         target={target}
       />
-      // </div>
+      // &lt;/div>
     );
   }
 
@@ -263,12 +291,12 @@ class Search extends React.PureComponent {
   //   if (this.state.loading) {
   //     console.log("this.state.loading: ", this.state.loading);
   //     return (
-  //       <div className={classes.loader}>
-  //         <LinearProgress variant="query" />
-  //       </div>
+  //       &lt;div className={classes.loader}>
+  //         &lt;LinearProgress variant="query" />
+  //       &lt;/div>
   //     );
   //   } else {
-  //     return <div className={classes.loader} />;
+  //     return &lt;div className={classes.loader} />;
   //   }
   // }
 
@@ -290,32 +318,32 @@ class Search extends React.PureComponent {
   //   }
 
   //   return (
-  //     <>
-  //       <div>{this.renderLoader()}</div>
-  //       <div className={classes.searchToolsContainer}>
-  //         <div className={classes.searchContainer}>
+  //     &lt;>
+  //       &lt;div>{this.renderLoader()}&lt;/div>
+  //       &lt;div className={classes.searchToolsContainer}>
+  //         &lt;div className={classes.searchContainer}>
   //           {this.state.activeSearchView ? this.renderSpatialBar() : null}
   //           {searchBar}
-  //         </div>
+  //         &lt;/div>
   //         {/* {this.searchSettings ? this.renderSearchSettingButton() : null} */}
-  //         <Tooltip title="Visa verktygspanelen">
-  //           <IconButton
+  //         &lt;Tooltip title="Visa verktygspanelen">
+  //           &lt;IconButton
   //             onClick={this.props.onMenuClick}
   //             className={classes.iconButton2}
   //             disabled={this.props.menuButtonDisabled}
   //             aria-label="menu"
   //           >
-  //             <MenuIcon />
-  //           </IconButton>
-  //         </Tooltip>
-  //       </div>
+  //             &lt;MenuIcon />
+  //           &lt;/IconButton>
+  //         &lt;/Tooltip>
+  //       &lt;/div>
   //       {this.renderSearchResultList("center")}
-  //     </>
+  //     &lt;/>
   //   );
   // }
 
   doSearch(v) {
-    if (v.length <= 3) return null;
+    if (v.length &lt;= 3) return null;
     this.searchModel.search(v, true, d => {
       this.resolve(d);
     });
@@ -325,19 +353,19 @@ class Search extends React.PureComponent {
     const { classes, onMenuClick, menuButtonDisabled } = this.props;
 
     return (
-      <>
-        <Paper className={classes.root}>
-          <Tooltip title="Visa verktygspanelen">
-            <IconButton
+      &lt;>
+        &lt;Paper className={classes.root}>
+          &lt;Tooltip title="Visa verktygspanelen">
+            &lt;IconButton
               onClick={onMenuClick}
               className={classes.iconButton}
               disabled={menuButtonDisabled}
               aria-label="menu"
             >
-              <MenuIcon />
-            </IconButton>
-          </Tooltip>
-          <InputBase
+              &lt;MenuIcon />
+            &lt;/IconButton>
+          &lt;/Tooltip>
+          &lt;InputBase
             className={classes.input}
             placeholder={this.state.searchboxPlaceholder}
             inputProps={{
@@ -346,7 +374,7 @@ class Search extends React.PureComponent {
             }}
             onChange={e => {
               const v = e.target.value;
-              if (v.length <= 3) {
+              if (v.length &lt;= 3) {
                 return;
               }
               this.doSearch(v);
@@ -357,14 +385,14 @@ class Search extends React.PureComponent {
               }
             }}
           />
-          <Tooltip
+          &lt;Tooltip
             title={
               this.state.activeSearchView === STARTVIEW
                 ? "Sök i Hajk"
                 : "Återställ sökruta"
             }
           >
-            <IconButton
+            &lt;IconButton
               className={classes.iconButton}
               aria-label="search"
               onClick={e => {
@@ -376,16 +404,16 @@ class Search extends React.PureComponent {
                 }
               }}
             >
-              {this.state.activeSearchView === STARTVIEW && <SearchIcon />}
-              {this.state.activeSearchView !== STARTVIEW &&
+              {this.state.activeSearchView === STARTVIEW &amp;&amp; &lt;SearchIcon />}
+              {this.state.activeSearchView !== STARTVIEW &amp;&amp;
                 (this.state.loading ? (
-                  <CircularProgress size={20} />
+                  &lt;CircularProgress size={20} />
                 ) : (
-                  <ClearIcon />
+                  &lt;ClearIcon />
                 ))}
-            </IconButton>
-          </Tooltip>
-          <SpatialSearchMenu
+            &lt;/IconButton>
+          &lt;/Tooltip>
+          &lt;SpatialSearchMenu
             onToolChanged={toolType => {
               this.setState({
                 activeSearchView: toolType
@@ -393,20 +421,20 @@ class Search extends React.PureComponent {
             }}
             activeSpatialTools={this.activeSpatialTools}
           />
-          {this.state.activeSearchView && this.renderSpatialBar()}
+          {this.state.activeSearchView &amp;&amp; this.renderSpatialBar()}
           {/* {this.searchSettings ? this.renderSearchSettingButton() : null} */}
-        </Paper>
+        &lt;/Paper>
         {this.renderSearchResultList("center")}
-      </>
+      &lt;/>
     );
   }
 
   // renderSearchSettingButton() {
   //   const { classes } = this.props;
   //   return (
-  //     <div className={classes.mainContainerButton}>
-  //       <SearchSettingsButton />
-  //     </div>
+  //     &lt;div className={classes.mainContainerButton}>
+  //       &lt;SearchSettingsButton />
+  //     &lt;/div>
   //   );
   // }
 
@@ -422,7 +450,7 @@ class Search extends React.PureComponent {
     switch (this.state.activeSearchView) {
       case POLYGON:
         return (
-          <SearchWithPolygonInput
+          &lt;SearchWithPolygonInput
             model={this.searchModel}
             resetToStartView={() => {
               this.resetToStartView();
@@ -435,7 +463,7 @@ class Search extends React.PureComponent {
         );
       case RADIUS: {
         return (
-          <SearchWithRadiusInput
+          &lt;SearchWithRadiusInput
             localObserver={this.localObserver}
             resetToStartView={() => {
               this.resetToStartView();
@@ -452,7 +480,7 @@ class Search extends React.PureComponent {
       }
       case SELECTION: {
         return (
-          <SearchWithSelectionInput
+          &lt;SearchWithSelectionInput
             localObserver={this.localObserver}
             resetToStartView={() => {
               this.resetToStartView();
@@ -472,7 +500,7 @@ class Search extends React.PureComponent {
 
   // renderSearchBarStart() {
   //   return (
-  //     <SearchBarStart
+  //     &lt;SearchBarStart
   //       localObserver={this.localObserver}
   //       activeSpatialTools={this.activeSpatialTools}
   //       onToolChanged={toolType => {
@@ -491,7 +519,7 @@ class Search extends React.PureComponent {
 
   // renderSearchWithText() {
   //   return (
-  //     <SearchWithTextInput
+  //     &lt;SearchWithTextInput
   //       model={this.searchModel}
   //       forceSearch={this.searchModel.search}
   //       onClear={() => {
@@ -532,3 +560,26 @@ class Search extends React.PureComponent {
 }
 
 export default withStyles(styles)(Search);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-ArcGISLayer-module.html">ArcGISLayer-module</a></li><li><a href="module-HighlightLayer-module.html">HighlightLayer-module</a></li><li><a href="module-WfsLayer-module.html">WfsLayer-module</a></li><li><a href="module-WMSLayer-module.html">WMSLayer-module</a></li></ul><h3>Classes</h3><ul><li><a href="AppModel.html">AppModel</a></li><li><a href="ArcGISLayer.html">ArcGISLayer</a></li><li><a href="HighlightLayer.html">HighlightLayer</a></li><li><a href="WfsLayer.html">WfsLayer</a></li></ul><h3>Global</h3><ul><li><a href="global.html#arePropsEqual">arePropsEqual</a></li><li><a href="global.html#CookieNotice">CookieNotice</a></li><li><a href="global.html#deepMerge">deepMerge</a></li><li><a href="global.html#getTheme">getTheme</a></li><li><a href="global.html#handleClick">handleClick</a></li><li><a href="global.html#PluginWindows">PluginWindows</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.3</a> on Fri Oct 18 2019 09:37:19 GMT+0200 (Central European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
