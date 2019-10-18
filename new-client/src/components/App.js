@@ -133,7 +133,22 @@ const styles = theme => {
   };
 };
 
+/**
+ * The main React Component of Hajk. Rendered by index.js.
+ *
+ * @class App
+ * @extends {React.PureComponent}
+ */
 class App extends React.PureComponent {
+  static propTypes = {
+    /** CSS class declarations used in this component */
+    classes: PropTypes.object.isRequired,
+    /** Contains activeMap, layersConfig as well as objects that hold appConfig and mapConfig*/
+    config: PropTypes.object.isRequired,
+    /** List of plugins that has been activated in this instance of Hajk */
+    activeTools: PropTypes.array.isRequired
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -486,9 +501,5 @@ class App extends React.PureComponent {
     );
   }
 }
-
-App.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 
 export default withStyles(styles)(App);
