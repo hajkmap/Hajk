@@ -21,6 +21,9 @@ If you plan to develop for Hajk, make sure to read the next section on code stan
 
 ## Contributing
 
+### User documentation
+There is an ongoing effort to bring the [user documentation](https://github.com/hajkmap/Hajk/wiki) up to date with the new functionality of Hajk 3. User documentation can be found in [Hajk's Wiki](https://github.com/hajkmap/Hajk/wiki). Creating user documentation is a very important way of contributing to the project and suits well for organizations that wish to contribute but lack coding capabilities.
+
 ### Git workflow
 Hajk strictly enforces the use of **Git Feature Branch Workflow** as described in [this document](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow). 
 
@@ -36,6 +39,19 @@ In short, developing a new feature, would look something like:
 1. Regulary rebase your branch from master. That means that you will incoporate recent changes in master into your local branch. **This is the really important part.** You can do it like this: `git fetch && git rebase master`.
 1. When you're done coding, go to GitHub and create a new Pull request, so that your branch can be merged up to `master`. 
 1. Administrators overlooking the project will get notified when you create your Pull request, take a look at the code and if everything looks fine merge it into `master` and delete your feature branch from GitHub. You will still have a copy of your feature branch locally, but it can be safely removed by running `git branch -d three-d-mode`. 
+
+### API documentation
+This project uses [JSDoc](https://jsdoc.app/index.html) to document JavaScript.
+
+The comment format of JSDoc is well-known and feels familiar to most coders. In addition, there are many plugins for editors (such as [Document This](https://marketplace.visualstudio.com/items?itemName=joelday.docthis) for Visual Studio Code) that simplify adding documentation.
+
+Make sure that you understand how to comment with JSDoc by reading the documentation. A good [starting point is here](https://jsdoc.app/about-getting-started.html). Additionally, a list of [all available commands is here](https://jsdoc.app/index.html#block-tags).
+
+JSDoc generates a `docs` folder (inside `new-client`) that contains browsable API documentation. 
+
+When you've added new code (**with meaningful comments**), make sure to update the API docs. It is done easily with `npm run createdocs`.
+
+However, no automatic doc generatator will do your job, which is **writing meaningful comments inside your code**.
 
 ### Code standard
 
