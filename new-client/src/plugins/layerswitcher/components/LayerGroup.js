@@ -1,15 +1,16 @@
 import React from "react";
 import LayerItem from "./LayerItem.js";
 import { withStyles } from "@material-ui/core/styles";
-import ExpansionPanel from "@material-ui/core/ExpansionPanel";
-import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
-import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
+import {
+  ExpansionPanel,
+  ExpansionPanelDetails,
+  ExpansionPanelSummary,
+  Typography
+} from "@material-ui/core";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
 import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
-import Typography from "@material-ui/core/Typography";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
-import Checkbox from "@material-ui/core/Checkbox";
 
 const styles = theme => ({
   root: {
@@ -197,9 +198,15 @@ class LayerGroup extends React.PureComponent {
         mapLayer.setVisible(visibility);
       });
   }
-
+  /**
+   * If Group has "togglable" property enabled, render the toggle all checkbox.
+   *
+   * @returns React.Component
+   * @memberof LayerGroup
+   */
   renderToggleAll() {
     const { classes } = this.props;
+    // The property below should be renamed to "togglable" or something…
     if (this.props.group.toggled) {
       return (
         <div
@@ -234,7 +241,6 @@ class LayerGroup extends React.PureComponent {
     } else {
       return (
         <div className={classes.caption}>
-          <Checkbox className={classes.checkBoxIcon} disabled />
           <Typography className={classes.heading}>{this.state.name}</Typography>
         </div>
       );
