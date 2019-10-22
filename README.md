@@ -15,7 +15,7 @@ _Note that Hajk consists of 3 applications: the main 'client' (which is the web 
 1. Deploy to IIS, make sure that everything is running (choose "Browse" from IIS to see the mapservice page that lists available commands - if you see that, you're good to go). Make sure that the URL your mapservice is running on is the same as specified in client's `appConfig.json`. 
 1. Now you should have client running on localhost:3000 and admin on localhost:3001. Open a browser window and check them out!
 
-To build admin or client, just do `npm run build` instead of `npm start`. This will create a subfolder (`build`) that you can rename and serve as static files from any webserver.
+To build admin or client, just do `npm run build` instead of `npm start`. This will create a subfolder (`build`) that you can rename and serve as static files from any web server.
 
 If you plan to develop for Hajk, make sure to read the next section on code standard for the project.
 
@@ -24,6 +24,9 @@ If you plan to develop for Hajk, make sure to read the next section on code stan
 ### User documentation
 There is an ongoing effort to bring the [user documentation](https://github.com/hajkmap/Hajk/wiki) up to date with the new functionality of Hajk 3. User documentation can be found in [Hajk's Wiki](https://github.com/hajkmap/Hajk/wiki). Creating user documentation is a very important way of contributing to the project and suits well for organizations that wish to contribute but lack coding capabilities.
 
+### Design guidelines
+Hajk is built using **Material Design** components from the [Material UI](https://material-ui.com/) project. Make sure to familiarize yourself with all the available components. It is crucial for the user experience that the design principles are followed throughout the system. 
+
 ### Git workflow
 Hajk strictly enforces the use of **Git Feature Branch Workflow** as described in [this document](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow). 
 
@@ -31,12 +34,12 @@ In short, developing a new feature, would look something like:
 1. Always fetch latest with `git fetch`.
 1. Make sure you are in master branch by `git checkout master`.
 1. Make sure that you've pulled all latest changes with `git pull`.
-1. Create a new branch, let's say `three-d-mode`, by runnig `git checkout -b three-d-mode`
+1. Create a new branch, let's say `three-d-mode`, by running `git checkout -b three-d-mode`
 1. Don't forget to set upstream so that your newly created branch is pushed to GitHub: `git push --set-upstream origin three-d-mode`
 1. Code… :neckbeard:
-1. Regulary commit changes to your branch with `git commit -S -m "A good comment, can be multiline."`. (Note, the `-S` flag [signs your commit](https://help.github.com/en/articles/signing-commits), and signing commits is something you really should be doing.)
-1. Regulary push your changes to GitHub with `git push`
-1. Regulary rebase your branch from master. That means that you will incoporate recent changes in master into your local branch. **This is the really important part.** You can do it like this: `git fetch && git rebase master`.
+1. Regularly commit changes to your branch with `git commit -S -m "A good comment, can be multiline."`. (Note, the `-S` flag [signs your commit](https://help.github.com/en/articles/signing-commits), and signing commits is something you really should be doing.)
+1. Regularly push your changes to GitHub with `git push`
+1. Regularly rebase your branch from master. That means that you will incorporate recent changes in master into your local branch. **This is the really important part.** You can do it like this: `git fetch && git rebase master`.
 1. When you're done coding, go to GitHub and create a new Pull request, so that your branch can be merged up to `master`. 
 1. Administrators overlooking the project will get notified when you create your Pull request, take a look at the code and if everything looks fine merge it into `master` and delete your feature branch from GitHub. You will still have a copy of your feature branch locally, but it can be safely removed by running `git branch -d three-d-mode`. 
 
@@ -51,7 +54,7 @@ JSDoc generates a `docs` folder (inside `new-client`) that contains browsable AP
 
 When you've added new code (**with meaningful comments**), make sure to update the API docs. It is done easily with `npm run createdocs`.
 
-However, no automatic doc generatator will do your job, which is **writing meaningful comments inside your code**.
+However, no automatic doc generator will do your job, which is **writing meaningful comments inside your code**.
 
 ### Code standard
 
