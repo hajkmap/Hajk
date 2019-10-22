@@ -89,15 +89,28 @@ class CoordinatesModel {
         };
 
         this.transformedCoordinates[i] = transformedCoordinates;
-
-        return this.transformedCoordinates;
       });
+    } else {
+      transformedCoordinates = {
+        code: "EPSG:4326",
+        default: false,
+        hint: "",
+        title: "WGS84",
+        xtitle: "Lng",
+        ytitle: "Lat",
+        inverseAxis: true,
+        coordinates: this.transform(coordinates, "EPSG:4326")
+      };
+
+      this.transformedCoordinates = [transformedCoordinates];
     }
 
     this.localObserver.publish(
       "setTransformedCoordinates",
       this.transformedCoordinates
     );
+
+    return this.transformedCoordinates;
   }
 
   getCoordinates() {
