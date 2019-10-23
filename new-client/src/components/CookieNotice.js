@@ -1,4 +1,5 @@
 import React from "react";
+import { object, string } from "prop-types";
 import { Button } from "@material-ui/core";
 import { useSnackbar } from "notistack";
 import { makeStyles } from "@material-ui/styles";
@@ -10,18 +11,22 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+CookieNotice.propTypes = {
+  cookieNoticeMessage: string,
+  globalObserver: object.isRequired
+};
+
 /**
  *  *
  * @export
  * @param {*} props
  * @returns React.Component
  */
-function CookieNotice({ globalObserver, defaultCookieNoticeMessage }) {
+function CookieNotice({
+  cookieNoticeMessage = "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+  globalObserver
+}) {
   const classes = useStyles();
-
-  const cookieNoticeMessage =
-    defaultCookieNoticeMessage ||
-    `Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.`;
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
   const action = key => (

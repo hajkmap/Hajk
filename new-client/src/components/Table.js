@@ -18,10 +18,12 @@ const styles = theme => ({
   }
 });
 
-class FeatureInfo extends React.PureComponent {
+class TableView extends React.PureComponent {
   state = {
     data: false
   };
+
+  // TODO: Add propTypes
 
   componentDidMount() {
     const { source, feature } = this.props;
@@ -98,4 +100,4 @@ class FeatureInfo extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(FeatureInfo);
+export default withStyles(styles)(TableView);

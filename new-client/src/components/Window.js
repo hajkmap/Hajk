@@ -1,5 +1,5 @@
 import React from "react";
-import PropTypes from "prop-types";
+import propTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import PanelHeader from "./PanelHeader";
 import { Rnd } from "react-rnd";
@@ -107,6 +107,25 @@ const styles = theme => {
 };
 
 class Window extends React.PureComponent {
+  static propTypes = {
+    children: propTypes.object,
+    classes: propTypes.object.isRequired,
+    features: propTypes.array,
+    globalObserver: propTypes.object.isRequired,
+    height: propTypes.oneOfType([propTypes.number, propTypes.string])
+      .isRequired,
+    layerswitcherConfig: propTypes.object,
+    map: propTypes.object,
+    mode: propTypes.string.isRequired,
+    onClose: propTypes.func.isRequired,
+    onDisplay: propTypes.func,
+    onResize: propTypes.func,
+    open: propTypes.bool.isRequired,
+    position: propTypes.string.isRequired,
+    title: propTypes.string.isRequired,
+    width: propTypes.number.isRequired
+  };
+
   constructor(props) {
     super(props);
     document.windows.push(this);
@@ -346,17 +365,10 @@ class Window extends React.PureComponent {
   }
 
   render() {
-    const {
-      classes,
-      title,
-      children,
-      features,
-      open,
-      localObserver
-    } = this.props;
+    const { children, classes, features, open, title } = this.props;
+    const { left, top, width, height } = this.state;
 
-    var { left, top, width, height } = this.state;
-    var resizeBottom = true,
+    let resizeBottom = true,
       resizeBottomLeft = true,
       resizeBottomRight = true,
       resizeLeft = true,
@@ -364,6 +376,7 @@ class Window extends React.PureComponent {
       resizeTop = true,
       resizeTopLeft = true,
       resizeTopRight = true;
+
     if (isMobile) {
       resizeBottom = resizeBottomLeft = resizeBottomRight = resizeRight = resizeTopLeft = resizeTopRight = resizeLeft = false;
     } else {
@@ -438,10 +451,8 @@ class Window extends React.PureComponent {
       >
         <div className={classes.panelContent}>
           <PanelHeader
-            localObserver={localObserver}
             onClose={this.close}
             title={title}
-            top={top}
             onMaximize={this.maximize}
             onMinimize={this.minimize}
             mode={this.mode}
@@ -467,9 +478,5 @@ class Window extends React.PureComponent {
     );
   }
 }
-
-Window.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 
 export default withStyles(styles)(Window);

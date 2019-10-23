@@ -1,4 +1,5 @@
 import React from "react";
+import propTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import {
   Card as MUICard,
@@ -29,16 +30,27 @@ const styles = theme => {
 };
 
 class Card extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      open: false,
-      text: ""
-    };
-  }
+  state = {
+    open: false,
+    text: ""
+  };
+
+  static propTypes = {
+    abstract: propTypes.string.isRequired,
+    classes: propTypes.object.isRequired,
+    icon: propTypes.object.isRequired,
+    onClick: propTypes.func.isRequired,
+    title: propTypes.string.isRequired
+  };
+
+  static defaultProps = {
+    abstract: "Beskrivning saknas",
+    title: "Titel saknas"
+  };
 
   render() {
-    const { classes, title, abstract, icon, onClick } = this.props;
+    const { abstract, classes, icon, onClick, title } = this.props;
+
     return (
       <MUICard onClick={onClick} className={classes.card}>
         <CardActionArea>

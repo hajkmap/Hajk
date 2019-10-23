@@ -1,4 +1,5 @@
 import React from "react";
+import propTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import Dialog from "@material-ui/core/Dialog";
@@ -11,10 +12,20 @@ const styles = theme => {
 };
 
 class AlertView extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
+  state = {};
+
+  static propTypes = {
+    classes: propTypes.object.isRequired,
+    message: propTypes.string.isRequired,
+    open: propTypes.bool.isRequired,
+    parent: propTypes.object.isRequired,
+    title: propTypes.string.isRequired
+  };
+
+  static defaultProps = {
+    message: "Meddelande saknas",
+    title: "Titel saknas"
+  };
 
   handleClose = e => {
     this.props.parent.setState({

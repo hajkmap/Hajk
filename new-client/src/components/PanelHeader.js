@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import propTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import CloseIcon from "@material-ui/icons/Close";
 import MaximizeIcon from "@material-ui/icons/WebAsset";
@@ -55,49 +56,41 @@ const styles = theme => {
 };
 
 class PanelHeader extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      maximized: false
-    };
-    if (this.props.localObserver) {
-      this.props.localObserver.subscribe("maximizeWindow", v => {
-        this.maximize();
-      });
-      this.props.localObserver.subscribe("minimizeWindow", v => {
-        this.minimize();
-      });
-    }
-  }
+  state = {
+    maximized: false
+  };
 
-  renderButtons(maximizable) {
+  static propTypes = {
+    classes: propTypes.object.isRequired,
+    mode: propTypes.oneOf(["window", "maximized", "minimized"]),
+    onClose: propTypes.func.isRequired,
+    onMaximize: propTypes.func.isRequired,
+    onMinimize: propTypes.func.isRequired,
+    title: propTypes.string.isRequired
+  };
+
+  renderButtons() {
     const { classes } = this.props;
-    if (maximizable === false) {
-      return (
-        <CloseIcon onClick={this.props.onClose} className={classes.icon} />
-      );
-    } else {
-      return (
-        <>
-          <MinimizeIcon
-            onClick={this.props.onMinimize}
+    return (
+      <>
+        <MinimizeIcon
+          onClick={this.props.onMinimize}
+          className={`${classes.icon} ${classes.windowControllers}`}
+        />
+        {this.props.mode === "maximized" ? (
+          <ResetIcon
+            onClick={this.props.onMaximize}
             className={`${classes.icon} ${classes.windowControllers}`}
           />
-          {this.props.mode === "maximized" ? (
-            <ResetIcon
-              onClick={this.props.onMaximize}
-              className={`${classes.icon} ${classes.windowControllers}`}
-            />
-          ) : (
-            <MaximizeIcon
-              onClick={this.props.onMaximize}
-              className={`${classes.icon} ${classes.windowControllers}`}
-            />
-          )}
-          <CloseIcon onClick={this.props.onClose} className={classes.icon} />
-        </>
-      );
-    }
+        ) : (
+          <MaximizeIcon
+            onClick={this.props.onMaximize}
+            className={`${classes.icon} ${classes.windowControllers}`}
+          />
+        )}
+        <CloseIcon onClick={this.props.onClose} className={classes.icon} />
+      </>
+    );
   }
 
   maximize = e => {
@@ -125,7 +118,7 @@ class PanelHeader extends Component {
   };
 
   render() {
-    const { classes, maximizable } = this.props;
+    const { classes } = this.props;
     return (
       <header
         className={classes.header}
@@ -150,9 +143,7 @@ class PanelHeader extends Component {
         >
           {this.props.title}
         </Typography>
-        <nav className={classes.iconsRight}>
-          {this.renderButtons(maximizable)}
-        </nav>
+        <nav className={classes.iconsRight}>{this.renderButtons()}</nav>
       </header>
     );
   }

@@ -1,4 +1,5 @@
 import React from "react";
+import propTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
 import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
@@ -50,13 +51,18 @@ class FeatureInfo extends React.PureComponent {
     visible: false
   };
 
+  static propTypes = {
+    classes: propTypes.object.isRequired,
+    features: propTypes.array.isRequired,
+    onDisplay: propTypes.func.isRequired
+  };
+
   constructor(props) {
     super(props);
     marked.setOptions({
       sanitize: false,
       xhtml: true
     });
-    this.classes = this.props.classes;
   }
 
   componentDidMount() {

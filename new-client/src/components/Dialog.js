@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import PropTypes from "prop-types";
+import propTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 
@@ -29,13 +29,17 @@ const styles = theme => ({
 });
 
 class Dialog extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      open: false,
-      text: ""
-    };
-  }
+  state = {
+    open: false,
+    text: ""
+  };
+
+  static propTypes = {
+    classes: propTypes.object.isRequired,
+    onClose: propTypes.func.isRequired,
+    open: propTypes.bool.isRequired,
+    options: propTypes.object.isRequired
+  };
 
   /*
    * If the lifecycle of the component is not controlled by itself
@@ -164,10 +168,5 @@ class Dialog extends Component {
     );
   }
 }
-
-Dialog.propTypes = {
-  options: PropTypes.object.isRequired,
-  open: PropTypes.bool.isRequired
-};
 
 export default withStyles(styles)(Dialog);

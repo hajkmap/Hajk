@@ -232,7 +232,9 @@ class App extends React.PureComponent {
     const open =
       this.state.mapClickDataResult &&
       this.state.mapClickDataResult.features &&
-      this.state.mapClickDataResult.features.length > 0;
+      this.state.mapClickDataResult.features.length > 0
+        ? true
+        : false;
     const features =
       this.state.mapClickDataResult && this.state.mapClickDataResult.features;
 
@@ -244,7 +246,7 @@ class App extends React.PureComponent {
         position="right"
         mode="window"
         width={400}
-        top={0}
+        height={300}
         features={features}
         map={this.appModel.getMap()}
         onDisplay={feature => {

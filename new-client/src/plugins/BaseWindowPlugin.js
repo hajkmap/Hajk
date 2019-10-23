@@ -1,4 +1,5 @@
 import React from "react";
+import propTypes from "prop-types";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { withTheme } from "@material-ui/styles";
@@ -18,6 +19,17 @@ const styles = theme => {
 class BaseWindowPlugin extends React.PureComponent {
   state = {
     windowVisible: false
+  };
+
+  static propTypes = {
+    app: propTypes.object.isRequired,
+    children: propTypes.object.isRequired,
+    classes: propTypes.object.isRequired,
+    custom: propTypes.object.isRequired,
+    map: propTypes.object.isRequired,
+    options: propTypes.object.isRequired,
+    theme: propTypes.object.isRequired,
+    type: propTypes.string.isRequired
   };
 
   constructor(props) {
@@ -122,15 +134,6 @@ class BaseWindowPlugin extends React.PureComponent {
           onResize={this.props.custom.onResize}
           width={this.width}
           height={this.height}
-          /** 'top' and 'left' are not needed. The only thing
-           * we need to specify is if the window should open on
-           * left or right side of the screen. 'top' and 'left'
-           * should always be calculated depending on 'position',
-           * and not customizable as here.
-           */
-
-          // top={this.top}
-          // left={this.left}
           position={this.position}
           mode={mode}
           layerswitcherConfig={this.props.app.config.mapConfig.tools.find(

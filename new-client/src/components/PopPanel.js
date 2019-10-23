@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import PropTypes from "prop-types";
+import propTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Popper from "@material-ui/core/Popper";
 import Paper from "@material-ui/core/Paper";
@@ -24,17 +24,24 @@ const styles = theme => {
   };
 };
 
+/**
+ * @summary Currently not implemented popup for infoclick. Similar to how  it worked in Hajk2.
+ *
+ * @class PopPanel
+ * @extends {Component}
+ */
 class PopPanel extends Component {
-  close = e => {
-    const { onClose } = this.props;
-    if (onClose) onClose();
-  };
-
   state = {
     panelPosition: false,
     placement: "right-start"
   };
 
+  // TODO: Implement. Add propTypes.
+
+  close = e => {
+    const { onClose } = this.props;
+    if (onClose) onClose();
+  };
   componentDidMount() {
     if (this.props.globalObserver) {
       this.props.globalObserver.subscribe("toolbarExpanded", open => {
@@ -81,9 +88,5 @@ class PopPanel extends Component {
     );
   }
 }
-
-PopPanel.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 
 export default withStyles(styles)(PopPanel);

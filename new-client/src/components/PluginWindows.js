@@ -1,4 +1,9 @@
 import React from "react";
+import { array } from "prop-types";
+
+PluginWindows.propTypes = {
+  plugins: array.isRequired
+};
 
 /**
  *  *
