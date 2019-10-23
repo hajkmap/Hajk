@@ -141,12 +141,12 @@ const styles = theme => {
  */
 class App extends React.PureComponent {
   static propTypes = {
+    /** List of plugins that has been activated in this instance of Hajk */
+    activeTools: PropTypes.array.isRequired,
     /** CSS class declarations used in this component */
     classes: PropTypes.object.isRequired,
     /** Contains activeMap, layersConfig as well as objects that hold appConfig and mapConfig*/
-    config: PropTypes.object.isRequired,
-    /** List of plugins that has been activated in this instance of Hajk */
-    activeTools: PropTypes.array.isRequired
+    config: PropTypes.object.isRequired
   };
 
   constructor(props) {
@@ -377,7 +377,6 @@ class App extends React.PureComponent {
             parent={this}
             title="Meddelande"
           />
-          <Loader visible={this.state.loading} />
           <div
             className={cslx(classes.flexBox, {
               [classes.shiftedLeft]: this.state.drawerPermanent
