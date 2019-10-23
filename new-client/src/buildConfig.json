@@ -15,8 +15,7 @@
     "measure",
     "routing",
     "search",
-    "streetview",
-    "suggest"
+    "streetview"
   ],
   "allTools": [
     "anchor",

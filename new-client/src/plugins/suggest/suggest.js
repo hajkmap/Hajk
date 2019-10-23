@@ -12,7 +12,8 @@ const styles = theme => {
 
 class Suggest extends Component {
   onClick = e => {
-    window.alert("Nu kommer ditt mailprogram öppnas.");
+    const goOn = window.confirm("Nu kommer ditt mailprogram öppnas.");
+    if (!goOn) return;
     let result = {};
     // TODO: email, as well as subject and body pretext should be grabbed from config
     let email = "some.mail@somewhere.com";
@@ -21,7 +22,6 @@ class Suggest extends Component {
     let string = `mailto:${email}?subject=HAJK3%20tips&body=write%20message%20above%20this%20string:%20${JSON.stringify(
       result
     )}`;
-    console.log(result, string);
     window.location.href = string;
   };
 
