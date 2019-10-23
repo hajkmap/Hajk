@@ -9,7 +9,6 @@ import AppModel from "./../models/AppModel.js";
 import Window from "./Window.js";
 import CookieNotice from "./CookieNotice";
 import Alert from "./Alert";
-import Loader from "./Loader";
 import PluginWindows from "./PluginWindows";
 
 import Zoom from "../controls/Zoom";
