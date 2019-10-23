@@ -206,6 +206,7 @@
     <Compile Include="Components\MapExport\SharpMapExtensions\MapThrowsException.cs" />
     <Compile Include="Components\TIFFCreator.cs" />
     <Compile Include="Components\Util.cs" />
+    <Compile Include="Controllers\EdpController.cs" />
     <Compile Include="Controllers\InformativeController.cs" />
     <Compile Include="Controllers\LayerMenuController.cs" />
     <Compile Include="Controllers\ToolSettingsController.cs" />
@@ -277,6 +278,12 @@
   <ItemGroup>
     <Folder Include="Temp\" />
     <Folder Include="Views\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EdpConn\EdpConn.csproj">
+      <Project>{f008d696-207a-4282-ae8c-0eaa670bb8fc}</Project>
+      <Name>EdpConn</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
