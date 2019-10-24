@@ -17,7 +17,6 @@ class Export extends React.PureComponent {
   };
 
   constructor(props) {
-    console.log("props: ", props);
     super(props);
 
     this.localObserver = Observer();
