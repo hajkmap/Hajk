@@ -52,8 +52,6 @@ class Collector extends React.Component {
           description: "Vi vill veta vad du tycker!",
           height: 450,
           width: 430,
-          top: 210,
-          left: undefined,
           onWindowHide: this.onWindowHide
         }}
       >
