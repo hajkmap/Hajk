@@ -52,7 +52,7 @@ class Informative extends React.PureComponent {
           title: "Översiktsplan",
           description: "Läs mer om vad som planeras i kommunen",
           height: "auto",
-          width: 400
+          width: 640
         }}
       >
         <InformativeView

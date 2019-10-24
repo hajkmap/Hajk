@@ -122,6 +122,8 @@ class Informative extends React.PureComponent {
       loading: false,
       alert: false,
       displayLegend: false,
+      tocExpanded: props.options.tocExpanded, // Should be called "legendGraphicsVisible", since it controls the legend graphic
+      tocVisible: true, // This controls the TOC's state, whether it show sub-chapters or not. TODO: Add option to admin/backend.
       chapters: [],
       chapter: {
         header: "",
