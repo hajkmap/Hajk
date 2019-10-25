@@ -68,6 +68,7 @@ class CoordinatesModel {
       return;
     }
     this.localObserver.publish("setCoordinates", this.coordinates);
+    this.localObserver.publish("showSnackbar", false);
   };
 
   presentCoordinates() {
@@ -89,6 +90,13 @@ class CoordinatesModel {
         };
 
         this.transformedCoordinates[i] = transformedCoordinates;
+
+        this.localObserver.publish(
+          "setTransformedCoordinates",
+          this.transformedCoordinates
+        );
+
+        return this.transformedCoordinates;
       });
     } else {
       transformedCoordinates = {
@@ -103,14 +111,14 @@ class CoordinatesModel {
       };
 
       this.transformedCoordinates = [transformedCoordinates];
+
+      this.localObserver.publish(
+        "setTransformedCoordinates",
+        this.transformedCoordinates
+      );
+
+      return this.transformedCoordinates;
     }
-
-    this.localObserver.publish(
-      "setTransformedCoordinates",
-      this.transformedCoordinates
-    );
-
-    return this.transformedCoordinates;
   }
 
   getCoordinates() {
@@ -119,6 +127,8 @@ class CoordinatesModel {
 
   activate() {
     var map = this.getMap;
+
+    this.localObserver.publish("showSnackbar", true);
 
     this.activated = true;
     map.on("singleclick", e => {
@@ -135,6 +145,9 @@ class CoordinatesModel {
     this.activated = false;
     map.un("singleclick", this.setCoordinates);
     this.getVector.getSource().clear();
+
+    this.localObserver.publish("showSnackbar", false);
+    this.localObserver.publish("setTransformedCoordinates", []);
   }
 }
 

@@ -9,6 +9,8 @@ import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 
+import { withSnackbar } from "notistack";
+
 const styles = theme => ({
   root: {
     display: "flex",
@@ -48,6 +50,29 @@ class CoordinatesView extends React.PureComponent {
         });
       }
     );
+
+    this.localObserver.subscribe("showSnackbar", step => {
+      switch (step) {
+        // Show Snackbar message
+        case true:
+          this.props.enqueueSnackbar(
+            "Klicka i kartan för att välja position.",
+            {
+              variant: "info",
+              persist: true
+            }
+          );
+          break;
+
+        // Remove Snackbar message
+        case false:
+          this.props.closeSnackbar();
+          break;
+
+        default:
+          break;
+      }
+    });
   }
 
   componentDidMount() {}
@@ -66,16 +91,10 @@ class CoordinatesView extends React.PureComponent {
               return (
                 <TableRow key={i}>
                   <TableCell>
-                    <Typography
-                      variant="subtitle2"
-                      style={{ display: "block" }}
-                    >
+                    <Typography variant="body1" style={{ display: "flex" }}>
                       {transformations.title}
                     </Typography>
-                    <Typography
-                      variant="subtitle2"
-                      style={{ display: "block" }}
-                    >
+                    <Typography variant="body2" style={{ display: "flex" }}>
                       ({transformations.code})
                     </Typography>
                   </TableCell>
@@ -132,4 +151,4 @@ class CoordinatesView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(CoordinatesView);
+export default withStyles(styles)(withSnackbar(CoordinatesView));
