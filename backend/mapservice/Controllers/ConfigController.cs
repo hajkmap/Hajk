@@ -442,7 +442,9 @@ namespace MapService.Controllers
 					geoserverLegendOptions = "",
                     mapselector = true,
                     mapcleaner = true,
-					logo = "",
+                    drawerVisible = false,
+                    drawerPermanent = false,
+                    logo = "",
 					colors = new Colors()
 					{
 						primaryColor = "#1B78CC",
