@@ -562,6 +562,12 @@ class MapOptions extends Component {
                 ref="input_drawerVisible"
                 onChange={e => {
                   this.setState({ drawerVisible: e.target.checked });
+                  // If visible gets unchecked, ensure that permanent is unchecked too
+                  if (e.target.checked === false) {
+                    this.setState({
+                      drawerPermanent: false
+                    });
+                  }
                 }}
                 checked={this.state.drawerVisible}
               />
@@ -584,6 +590,7 @@ class MapOptions extends Component {
                   this.setState({ drawerPermanent: e.target.checked });
                 }}
                 checked={this.state.drawerPermanent}
+                disabled={this.state.drawerVisible === false}
               />
               &nbsp;
             </div>

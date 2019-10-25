@@ -156,9 +156,12 @@ class App extends React.PureComponent {
       mapClickDataResult: {},
 
       // Drawer-related states
-      drawerVisible: props.config.mapConfig.map.drawerVisibleAtStart || false,
+      drawerVisible: props.config.mapConfig.map.drawerVisible || false,
+      // For drawerPermanent===true, drawerVisible must be true too – we can't lock the Drawer if it's invisible at start.
       drawerPermanent:
-        props.config.mapConfig.map.drawerPermanentAtStart || false,
+        (props.config.mapConfig.map.drawerVisible &&
+          props.config.mapConfig.map.drawerPermanent) ||
+        false,
       drawerMouseOverLock: false
     };
     this.globalObserver = new Observer();
