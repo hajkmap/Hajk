@@ -55,7 +55,7 @@ class CoordinatesView extends React.PureComponent {
       switch (step) {
         // Show Snackbar message
         case true:
-          this.props.enqueueSnackbar(
+          this.snackbarText = this.props.enqueueSnackbar(
             "Klicka i kartan för att välja position.",
             {
               variant: "info",
@@ -66,7 +66,7 @@ class CoordinatesView extends React.PureComponent {
 
         // Remove Snackbar message
         case false:
-          this.props.closeSnackbar();
+          this.props.closeSnackbar(this.snackbarText);
           break;
 
         default:
