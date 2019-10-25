@@ -44,6 +44,10 @@ namespace MapService.Models
 
         public bool mapcleaner { get; set; }
 
+        public bool drawerVisible { get; set; }
+
+        public bool drawerPermanent { get; set; }
+
         public Colors colors { get; set; }
     }
 }
