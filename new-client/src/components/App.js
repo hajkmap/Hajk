@@ -156,8 +156,9 @@ class App extends React.PureComponent {
       mapClickDataResult: {},
 
       // Drawer-related states
-      drawerVisible: false,
-      drawerPermanent: false,
+      drawerVisible: props.config.mapConfig.map.drawerVisibleAtStart || false,
+      drawerPermanent:
+        props.config.mapConfig.map.drawerPermanentAtStart || false,
       drawerMouseOverLock: false
     };
     this.globalObserver = new Observer();

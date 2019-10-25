@@ -52,6 +52,8 @@ class MapOptions extends Component {
         constrainOnlyCenter: config.constrainOnlyCenter,
         mapselector: config.mapselector,
         mapcleaner: config.mapcleaner,
+        drawerVisible: config.drawerVisible,
+        drawerPermanent: config.drawerPermanent,
         title: config.title ? config.title : "",
         geoserverLegendOptions: config.geoserverLegendOptions
           ? config.geoserverLegendOptions
@@ -87,6 +89,8 @@ class MapOptions extends Component {
       constrainOnlyCenter: mapConfig.constrainOnlyCenter,
       mapselector: mapConfig.mapselector,
       mapcleaner: mapConfig.mapcleaner,
+      drawerVisible: mapConfig.drawerVisible,
+      drawerPermanent: mapConfig.drawerPermanent,
       geoserverLegendOptions: mapConfig.geoserverLegendOptions
     });
   }
@@ -195,6 +199,8 @@ class MapOptions extends Component {
       case "constrainOnlyCenter":
       case "mapselector":
       case "mapcleaner":
+      case "drawerVisible":
+      case "drawerPermanent":
         if (value !== true && value !== false) {
           valid = false;
         }
@@ -235,6 +241,8 @@ class MapOptions extends Component {
         config.constrainOnlyCenter = this.getValue("constrainOnlyCenter");
         config.mapselector = this.getValue("mapselector");
         config.mapcleaner = this.getValue("mapcleaner");
+        config.drawerVisible = this.getValue("drawerVisible");
+        config.drawerPermanent = this.getValue("drawerPermanent");
         config.geoserverLegendOptions = this.getValue("geoserverLegendOptions");
         this.props.model.updateMapConfig(config, success => {
           var msg = success
@@ -536,6 +544,46 @@ class MapOptions extends Component {
                   this.setState({ mapcleaner: e.target.checked });
                 }}
                 checked={this.state.mapcleaner}
+              />
+              &nbsp;
+            </div>
+            <div>
+              <label htmlFor="input_drawerVisible">
+                Starta med sidopanelen synlig{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktiv kommer sidopanelen att vara synlig när kartan laddat"
+                />
+              </label>
+              <input
+                id="input_drawerVisible"
+                type="checkbox"
+                ref="input_drawerVisible"
+                onChange={e => {
+                  this.setState({ drawerVisible: e.target.checked });
+                }}
+                checked={this.state.drawerVisible}
+              />
+              &nbsp;
+            </div>
+            <div>
+              <label htmlFor="input_drawerPermanent">
+                Låt sidopanelen vara låst vid start{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktiv kommer sidopanelen att vara låst vid skärmens kant vid start (gäller ej mobila enheter)"
+                />
+              </label>
+              <input
+                id="input_drawerPermanent"
+                type="checkbox"
+                ref="input_drawerPermanent"
+                onChange={e => {
+                  this.setState({ drawerPermanent: e.target.checked });
+                }}
+                checked={this.state.drawerPermanent}
               />
               &nbsp;
             </div>
