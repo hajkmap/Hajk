@@ -34,6 +34,8 @@ namespace MapService.Models
 
         public double[] extent { get; set; }
 
+        public bool constrainOnlyCenter { get; set; }
+
         public string logo { get; set; }
 
         public string geoserverLegendOptions { get; set; }
