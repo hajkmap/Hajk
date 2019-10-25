@@ -1301,7 +1301,6 @@ class WMSLayerForm extends Component {
           <label>
             <b>GeoWebCache</b>
           </label>
-          <br />
           <input
             type="checkbox"
             ref="input_tiled"

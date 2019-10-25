@@ -49,6 +49,7 @@ class MapOptions extends Component {
         center: config.center,
         logo: config.logo,
         extent: config.extent,
+        constrainOnlyCenter: config.constrainOnlyCenter,
         mapselector: config.mapselector,
         mapcleaner: config.mapcleaner,
         title: config.title ? config.title : "",
@@ -83,6 +84,7 @@ class MapOptions extends Component {
       center: mapConfig.center,
       logo: mapConfig.logo,
       extent: mapConfig.extent,
+      constrainOnlyCenter: mapConfig.constrainOnlyCenter,
       mapselector: mapConfig.mapselector,
       mapcleaner: mapConfig.mapcleaner,
       geoserverLegendOptions: mapConfig.geoserverLegendOptions
@@ -190,6 +192,7 @@ class MapOptions extends Component {
           valid = false;
         }
         break;
+      case "constrainOnlyCenter":
       case "mapselector":
       case "mapcleaner":
         if (value !== true && value !== false) {
@@ -229,6 +232,7 @@ class MapOptions extends Component {
         config.center = this.getValue("center");
         config.logo = this.getValue("logo");
         config.extent = this.getValue("extent");
+        config.constrainOnlyCenter = this.getValue("constrainOnlyCenter");
         config.mapselector = this.getValue("mapselector");
         config.mapcleaner = this.getValue("mapcleaner");
         config.geoserverLegendOptions = this.getValue("geoserverLegendOptions");
@@ -449,6 +453,26 @@ class MapOptions extends Component {
                   );
                 }}
               />
+            </div>
+            <div>
+              <label htmlFor="input_constrainOnlyCenter">
+                Lätta på extent{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Styr ol.Views 'constrainOnlyCenter'-parameter. Om sant kommer endast centrumkoordinaten att begränsas till extent."
+                />
+              </label>
+              <input
+                id="input_constrainOnlyCenter"
+                type="checkbox"
+                ref="input_constrainOnlyCenter"
+                onChange={e => {
+                  this.setState({ constrainOnlyCenter: e.target.checked });
+                }}
+                checked={this.state.constrainOnlyCenter}
+              />
+              &nbsp;
             </div>
             <div>
               <label>
