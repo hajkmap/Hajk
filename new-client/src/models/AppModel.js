@@ -112,8 +112,8 @@ class AppModel {
    * Dynamically load plugins from the configured plugins folder.
    * Assumed that a folder exists with the same name as the requested plugin.
    * There must also be a file present with the same name as well.
-   * @param Array<string> - List of plugins to be loaded.
-   * @returns Array<Promise> - List of promises to be resolved for.
+   * @param {Array} - List of plugins to be loaded.
+   * @returns {Array} - List of promises to be resolved for.
    */
   loadPlugins(plugins) {
     var promises = [];
@@ -170,11 +170,6 @@ class AppModel {
   createMap() {
     var config = this.translateConfig();
     map = new Map({
-      interactions: defaultInteractions(),
-      target: config.map.target,
-      layers: [],
-      logo: false,
-      pil: false,
       controls: [
         // new FullScreen({ target: document.getElementById("controls-column") }),
         // new Rotate({ target: document.getElementById("controls-column") }),
@@ -188,16 +183,20 @@ class AppModel {
         //   })
         // })
       ],
+      interactions: defaultInteractions(),
+      layers: [],
+      target: config.map.target,
       overlays: [],
       view: new View({
-        zoom: config.map.zoom,
-        units: "m",
         center: config.map.center,
-        projection: config.map.projection,
-        extent: config.map.length !== 0 ? config.map.extent : undefined,
-        resolutions: config.map.resolutions,
+        extent: config.map.extent.length > 0 ? config.map.extent : undefined, // backend will always write extent as an Array, so basic "config.map.extent || undefined" wouldn't work here
+        constrainOnlyCenter: config.map.constrainOnlyCenter, // If true, the extent constraint will only apply to the view center and not the whole extent.
         maxZoom: config.map.maxZoom || 24,
-        minZoom: config.map.minZoom || 0
+        minZoom: config.map.minZoom || 0,
+        projection: config.map.projection,
+        resolutions: config.map.resolutions,
+        units: "m",
+        zoom: config.map.zoom
       })
     });
     setTimeout(() => {
