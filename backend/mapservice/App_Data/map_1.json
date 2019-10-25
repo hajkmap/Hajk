@@ -1,5 +1,4 @@
 {
-  "version": "1.0.5",
   "projections": [
     {
       "code": "EPSG:3006",
@@ -409,10 +408,13 @@
     ],
     "origin": [0.0, 0.0],
     "extent": [0.0, 6000000.0, 1000000.0, 9000000.0],
+    "constrainOnlyCenter": false,
     "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
     "geoserverLegendOptions": "",
-    "pil": null,
     "mapselector": false,
+    "mapcleaner": false,
+    "drawerVisible": false,
+    "drawerPermanent": false,
     "colors": {
       "primaryColor": "#333333",
       "secondaryColor": "#ffffff"

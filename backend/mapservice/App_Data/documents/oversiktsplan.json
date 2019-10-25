@@ -90,9 +90,8 @@
                     ],
                     "origin": [0, 0],
                     "extent": [0, 6000000, 1000000, 9000000],
-                    "logo": "http://logodust.com/img/free/logo33.png",
+                    "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
                     "geoserverLegendOptions": "",
-                    "pil": "",
                     "mapselector": false,
                     "colors": {
                       "primaryColor": "#0065a6",
