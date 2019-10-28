@@ -340,19 +340,24 @@ class App extends React.PureComponent {
    *  - Search plugin must be disabled
    */
   renderStandaloneDrawerToggler() {
+    const tooltipText = this.state.drawerPermanent
+      ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
+      : "Visa verktygspanelen";
     return (
       Object.keys(this.appModel.plugins).length > 0 &&
       this.appModel.plugins.search === undefined && (
-        <Tooltip title="Visa verktygspanelen">
-          <Fab
-            onClick={this.toggleDrawer(!this.state.drawerVisible)}
-            color="primary"
-            size="medium"
-            disabled={this.state.drawerPermanent}
-            aria-label="menu"
-          >
-            <MenuIcon />
-          </Fab>
+        <Tooltip title={tooltipText}>
+          <span>
+            <Fab
+              onClick={this.toggleDrawer(!this.state.drawerVisible)}
+              color="primary"
+              size="medium"
+              disabled={this.state.drawerPermanent}
+              aria-label="menu"
+            >
+              <MenuIcon />
+            </Fab>
+          </span>
         </Tooltip>
       )
     );
