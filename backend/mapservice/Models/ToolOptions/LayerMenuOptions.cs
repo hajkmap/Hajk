@@ -43,9 +43,9 @@ namespace MapService.Models.ToolOptions
 
         public string position { get; set; }
 
-        public string width { get; set; }
+        public int width { get; set; }
 
-        public string height { get; set; }
+        public int height { get; set; }
 
         public string title { get; set; }
 
