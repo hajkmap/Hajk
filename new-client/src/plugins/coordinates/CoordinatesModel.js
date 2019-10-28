@@ -8,8 +8,6 @@ import { Style, Icon } from "ol/style";
 class CoordinatesModel {
   constructor(settings) {
     this.map = settings.map;
-    this.app = settings.app;
-    this.options = settings.options;
     this.localObserver = settings.localObserver;
     this.transformations = settings.options.transformations;
 
@@ -24,29 +22,15 @@ class CoordinatesModel {
     this.transformedCoordinates = [];
   }
 
-  get getMap() {
-    return this.map;
-  }
-
-  get getSource() {
-    return this.source;
-  }
-
-  get getVector() {
-    return this.vector;
-  }
-
   addMarker = () => {
     if (!this.activated) {
       return;
     }
-    var source = this.getSource;
-    var vectorLayer = this.getVector;
 
-    var feature = new Feature({
+    let feature = new Feature({
       geometry: new Point(this.coordinates)
     });
-    var styleMarker = new Style({
+    let styleMarker = new Style({
       image: new Icon({
         anchor: [0.5, 1],
         scale: 0.15,
@@ -54,12 +38,12 @@ class CoordinatesModel {
       })
     });
     feature.setStyle(styleMarker);
-    vectorLayer.getSource().clear();
-    source.addFeature(feature);
+    this.vector.getSource().clear();
+    this.source.addFeature(feature);
   };
 
   transform(coordinates, to) {
-    var from = this.map.getView().getProjection();
+    let from = this.map.getView().getProjection();
     return transform(coordinates, from, to);
   }
 
@@ -68,13 +52,13 @@ class CoordinatesModel {
       return;
     }
     this.localObserver.publish("setCoordinates", this.coordinates);
-    this.localObserver.publish("showSnackbar", false);
+    this.localObserver.publish("hideSnackbar");
   };
 
   presentCoordinates() {
-    var coordinates = this.coordinates;
-    var transformedCoordinates = [];
-    var transformations = this.transformations;
+    let coordinates = this.coordinates;
+    let transformedCoordinates = [];
+    let transformations = this.transformations;
 
     if (transformations.length) {
       transformations.map((transformation, i) => {
@@ -126,27 +110,22 @@ class CoordinatesModel {
   }
 
   activate() {
-    var map = this.getMap;
-
-    this.localObserver.publish("showSnackbar", true);
-
-    this.activated = true;
-    map.on("singleclick", e => {
+    this.map.on("singleclick", e => {
       this.coordinates = e.coordinate;
       this.setCoordinates();
       this.addMarker();
       this.presentCoordinates();
     });
+    this.activated = true;
+    this.localObserver.publish("showSnackbar");
   }
 
   deactivate() {
-    var map = this.getMap;
+    this.map.un("singleclick", this.setCoordinates);
+    this.vector.getSource().clear();
 
     this.activated = false;
-    map.un("singleclick", this.setCoordinates);
-    this.getVector.getSource().clear();
-
-    this.localObserver.publish("showSnackbar", false);
+    this.localObserver.publish("hideSnackbar");
     this.localObserver.publish("setTransformedCoordinates", []);
   }
 }

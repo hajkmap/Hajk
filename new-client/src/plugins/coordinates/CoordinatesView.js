@@ -33,13 +33,14 @@ const styles = theme => ({
 });
 
 class CoordinatesView extends React.PureComponent {
-  state = {};
+  state = {
+    transformedCoordinates: []
+  };
 
   constructor(props) {
     super(props);
     this.model = this.props.model;
-    this.app = this.props.app;
-    this.options = this.props.options;
+    this.snackbarKey = null;
     this.localObserver = this.props.localObserver;
 
     this.localObserver.subscribe(
@@ -51,31 +52,26 @@ class CoordinatesView extends React.PureComponent {
       }
     );
 
-    this.localObserver.subscribe("showSnackbar", step => {
-      switch (step) {
-        // Show Snackbar message
-        case true:
-          this.snackbarText = this.props.enqueueSnackbar(
-            "Klicka i kartan för att välja position.",
-            {
-              variant: "info",
-              persist: true
-            }
-          );
-          break;
+    /**
+     * Setup listeners that will show/hide snackbar. The Model will publish
+     * the following events in order to show/hide Snackbar.
+     * Snackbar will show up to inform user to click in the map. When user has
+     * clicked, or changed to another tool, the snackbar will close.
+     */
+    this.localObserver.subscribe("showSnackbar", () => {
+      this.snackbarKey = this.props.enqueueSnackbar(
+        "Klicka i kartan för att välja position.",
+        {
+          variant: "info",
+          persist: true
+        }
+      );
+    });
 
-        // Remove Snackbar message
-        case false:
-          this.props.closeSnackbar(this.snackbarText);
-          break;
-
-        default:
-          break;
-      }
+    this.localObserver.subscribe("hideSnackbar", () => {
+      this.props.closeSnackbar(this.snackbarKey);
     });
   }
-
-  componentDidMount() {}
 
   componentWillUnmount() {
     this.model.deactivate();
@@ -86,46 +82,44 @@ class CoordinatesView extends React.PureComponent {
 
     return (
       <>
-        {this.state.transformedCoordinates
-          ? this.state.transformedCoordinates.map((transformations, i) => {
-              return (
-                <TableRow key={i}>
-                  <TableCell>
-                    <Typography variant="body1" style={{ display: "flex" }}>
-                      {transformations.title}
-                    </Typography>
-                    <Typography variant="body2" style={{ display: "flex" }}>
-                      ({transformations.code})
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <TextField
-                      label={transformations.ytitle}
-                      className={classes.textField}
-                      margin="dense"
-                      variant="outlined"
-                      value={
-                        transformations.inverseAxis
-                          ? transformations.coordinates[0]
-                          : transformations.coordinates[1]
-                      }
-                    />
-                    <TextField
-                      label={transformations.xtitle}
-                      className={classes.textField}
-                      margin="dense"
-                      variant="outlined"
-                      value={
-                        transformations.inverseAxis
-                          ? transformations.coordinates[1]
-                          : transformations.coordinates[0]
-                      }
-                    />
-                  </TableCell>
-                </TableRow>
-              );
-            })
-          : null}
+        {this.state.transformedCoordinates.map((transformations, i) => {
+          return (
+            <TableRow key={i}>
+              <TableCell>
+                <Typography variant="body1" style={{ display: "flex" }}>
+                  {transformations.title}
+                </Typography>
+                <Typography variant="body2" style={{ display: "flex" }}>
+                  ({transformations.code})
+                </Typography>
+              </TableCell>
+              <TableCell>
+                <TextField
+                  label={transformations.ytitle}
+                  className={classes.textField}
+                  margin="dense"
+                  variant="outlined"
+                  value={
+                    transformations.inverseAxis
+                      ? transformations.coordinates[0]
+                      : transformations.coordinates[1]
+                  }
+                />
+                <TextField
+                  label={transformations.xtitle}
+                  className={classes.textField}
+                  margin="dense"
+                  variant="outlined"
+                  value={
+                    transformations.inverseAxis
+                      ? transformations.coordinates[1]
+                      : transformations.coordinates[0]
+                  }
+                />
+              </TableCell>
+            </TableRow>
+          );
+        })}
       </>
     );
   }

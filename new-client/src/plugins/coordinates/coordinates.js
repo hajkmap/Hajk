@@ -10,7 +10,7 @@ import Observer from "react-event-observer";
 class Coordinates extends React.PureComponent {
   state = {
     coordinates: null,
-    transformedCoordinates: {}
+    transformedCoordinates: []
   };
 
   constructor(props) {
@@ -34,7 +34,6 @@ class Coordinates extends React.PureComponent {
 
     this.coordinatesModel = new CoordinatesModel({
       map: props.map,
-      app: props.app,
       options: props.options,
       localObserver: this.localObserver
     });
@@ -59,20 +58,13 @@ class Coordinates extends React.PureComponent {
           description: "Visa koordinater för given plats",
           height: 300,
           width: 400,
-          top: undefined,
-          left: undefined,
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide
         }}
       >
         <CoordinatesView
-          app={this.props.app}
-          map={this.props.map}
-          options={this.props.options}
           model={this.coordinatesModel}
           localObserver={this.localObserver}
-          coordinates={this.state.coordinates}
-          transformedCoordinates={this.state.transformedCoordinates}
         />
       </BaseWindowPlugin>
     );
