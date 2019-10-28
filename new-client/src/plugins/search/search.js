@@ -324,18 +324,24 @@ class Search extends React.PureComponent {
   renderCenter() {
     const { classes, onMenuClick, menuButtonDisabled } = this.props;
 
+    const tooltipText = menuButtonDisabled
+      ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
+      : "Visa verktygspanelen";
+
     return (
       <>
         <Paper className={classes.root}>
-          <Tooltip title="Visa verktygspanelen">
-            <IconButton
-              onClick={onMenuClick}
-              className={classes.iconButton}
-              disabled={menuButtonDisabled}
-              aria-label="menu"
-            >
-              <MenuIcon />
-            </IconButton>
+          <Tooltip title={tooltipText}>
+            <span>
+              <IconButton
+                onClick={onMenuClick}
+                className={classes.iconButton}
+                disabled={menuButtonDisabled}
+                aria-label="menu"
+              >
+                <MenuIcon />
+              </IconButton>
+            </span>
           </Tooltip>
           <InputBase
             className={classes.input}
