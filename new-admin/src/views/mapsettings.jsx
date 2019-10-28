@@ -275,6 +275,9 @@ class Menu extends Component {
       visibleForGroups: [],
       adList: null,
       target: "toolbar",
+      position: "left",
+      width: "",
+      height: "",
       title: "Innehåll",
       description: "Välj innehåll att visa i kartan"
     };
@@ -316,6 +319,9 @@ class Menu extends Component {
             ? this.props.model.get("layerMenuConfig").visibleForGroups
             : [],
           target: this.props.model.get("layerMenuConfig").target || "toolbar",
+          position: this.props.model.get("layerMenuConfig").position || "left",
+          width: this.props.model.get("layerMenuConfig").width || "",
+          height: this.props.model.get("layerMenuConfig").height || "",
           title: this.props.model.get("layerMenuConfig").title || "",
           description: this.props.model.get("layerMenuConfig").description || ""
         });
@@ -518,6 +524,9 @@ class Menu extends Component {
         String.prototype.trim
       ),
       target: this.state.target,
+      position: this.state.position,
+      width: this.state.width,
+      height: this.state.height,
       title: this.state.title,
       description: this.state.description
     };
@@ -1081,10 +1090,7 @@ class Menu extends Component {
     var value = target.type === "checkbox" ? target.checked : target.value;
 
     if (typeof value === "string" && /^[\d., ]+$/.test(value)) {
-      value = value
-        .replace(/,/g, "")
-        .replace(/ /g, "")
-        .Number(value);
+      value = Number(value.replace(/,/g, "").replace(/ /g, ""));
     }
 
     if (name === "instruction") {
@@ -1411,6 +1417,63 @@ class Menu extends Component {
                     type="text"
                     onChange={this.handleInputChange}
                     value={this.state.target}
+                  />
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-sm-12">
+                  <label htmlFor="position">
+                    Fönsterplacering{" "}
+                    <i
+                      className="fa fa-question-circle"
+                      data-toggle="tooltip"
+                      title="Placering av verktygets fönster. Anges som antingen 'left' eller 'right'."
+                    />
+                  </label>
+                  <input
+                    id="position"
+                    name="position"
+                    type="text"
+                    onChange={this.handleInputChange}
+                    value={this.state.position}
+                  />
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-sm-12">
+                  <label htmlFor="width">
+                    Fönsterbredd{" "}
+                    <i
+                      className="fa fa-question-circle"
+                      data-toggle="tooltip"
+                      title="Bredd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda standardbredd."
+                    />
+                  </label>
+                  <input
+                    id="width"
+                    name="width"
+                    type="text"
+                    onChange={this.handleInputChange}
+                    value={this.state.width}
+                  />
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-sm-12">
+                  <label htmlFor="height">
+                    Fönsterhöjd{" "}
+                    <i
+                      className="fa fa-question-circle"
+                      data-toggle="tooltip"
+                      title="Höjd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda maximal höjd."
+                    />
+                  </label>
+                  <input
+                    id="height"
+                    name="height"
+                    type="text"
+                    onChange={this.handleInputChange}
+                    value={this.state.height}
                   />
                 </div>
               </div>
