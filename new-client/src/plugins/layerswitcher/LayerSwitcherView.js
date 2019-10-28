@@ -1,13 +1,13 @@
 import React from "react";
 import { createPortal } from "react-dom";
+import propTypes from "prop-types";
+
 import { withStyles } from "@material-ui/core/styles";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
-import AppBar from "@material-ui/core/AppBar";
+import { AppBar, Tab, Tabs } from "@material-ui/core";
+
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
-import "element-scroll-polyfill";
 
 const styles = theme => ({
   windowContent: {
@@ -19,36 +19,23 @@ const styles = theme => ({
 });
 
 class LayersSwitcherView extends React.PureComponent {
+  static propTypes = {
+    app: propTypes.object.isRequired,
+    classes: propTypes.object.isRequired,
+    map: propTypes.object.isRequired,
+    model: propTypes.object.isRequired,
+    observer: propTypes.object.isRequired,
+    options: propTypes.object.isRequired
+  };
+
   constructor(props) {
     super(props);
-    this.options = this.props.app.config.mapConfig.tools.find(
-      t => t.type === "layerswitcher"
-    ).options;
+    this.options = props.options;
     this.state = {
-      windowWidth: window.innerWidth,
-      layerGroupsExpanded: true,
       chapters: [],
-      baseLayers: this.props.map
-        .getLayers()
-        .getArray()
-        .filter(
-          l =>
-            l.getProperties().layerInfo &&
-            l.getProperties().layerInfo.layerType === "base"
-        )
-        .map(l => l.getProperties()),
+      baseLayers: props.model.getBaseLayers(),
       activeTab: 0
     };
-
-    window.addEventListener("resize", () => {
-      this.setState({
-        innerWidth: window.innerWidth
-      });
-    });
-
-    // props.observer.subscribe("panelOpen", () => {
-    //   this.forceUpdate();
-    // });
 
     props.app.globalObserver.subscribe("informativeLoaded", chapters => {
       if (Array.isArray(chapters)) {
@@ -59,100 +46,100 @@ class LayersSwitcherView extends React.PureComponent {
     });
   }
 
-  handleChange = (panel, instance) => (event, expanded) => {
-    this.setState(
-      {
-        expanded: expanded ? panel : false
-      },
-      () => {
-        setTimeout(() => {
-          const parent = instance.refs.panelElement.offsetParent;
-          const topOfElement = instance.refs.panelElement.offsetTop - 145;
-          const sections = parent.getElementsByTagName("section");
-          if (sections.length > 0) {
-            sections[0].scroll({ top: topOfElement, behavior: "smooth" });
-          }
-        }, 50);
-      }
+  /**
+   * LayerSwitcher consists of two Tabs: one shows
+   * "regular" layers (as checkboxes, multi select), and the
+   * other shows background layers (as radio buttons, one-at-at-time).
+   *
+   * This method controls which of the two Tabs is visible.
+   *
+   * @memberof LayersSwitcherView
+   */
+  handleChangeTabs = (event, activeTab) => {
+    this.setState({ activeTab });
+  };
+  /**
+   * @summary Loops through map configuration and
+   * renders all groups. Visible only if @param shouldRender is true.
+   *
+   * @param {boolean} [shouldRender=true]
+   * @returns {<div>}
+   */
+  renderLayerGroups = (shouldRender = true) => {
+    return (
+      <div
+        style={{
+          display: shouldRender === true ? "block" : "none"
+        }}
+      >
+        {this.options.groups.map((group, i) => {
+          return (
+            <LayerGroup
+              key={i}
+              group={group}
+              model={this.props.model}
+              chapters={this.state.chapters}
+              app={this.props.app}
+            />
+          );
+        })}
+      </div>
     );
   };
 
-  renderLayerGroups() {
-    const { expanded } = this.state;
-    return this.options.groups.map((group, i) => {
-      return (
-        <LayerGroup
-          expanded={expanded === group.id}
-          key={i}
-          group={group}
+  /**
+   * BreadCrumbs are a feature used to "link" content between LayerSwitcher
+   * and Informative plugins. They get rendered directly to #map, as they
+   * are not part of LayerSwitcher plugin, at least not visually. To achieve
+   * that we use createPortal().
+   *
+   * @returns
+   * @memberof LayersSwitcherView
+   */
+  renderBreadCrumbs = () => {
+    return (
+      this.options.showBreadcrumbs &&
+      createPortal(
+        <BreadCrumbs
+          map={this.props.map}
           model={this.props.model}
-          handleChange={this.handleChange}
-          chapters={this.state.chapters}
           app={this.props.app}
-        />
-      );
-    });
-  }
-
-  toggleLayerGroups() {
-    this.setState({
-      layerGroupsExpanded: !this.state.layerGroupsExpanded
-    });
-  }
-
-  getArrowClass() {
-    return this.state.layerGroupsExpanded ? "expand_less" : "chevron_right";
-  }
-
-  renderBreadCrumbs() {
-    return createPortal(
-      <BreadCrumbs
-        map={this.props.map}
-        model={this.props.model}
-        app={this.props.app}
-      />,
-      document.getElementById("map")
+        />,
+        document.getElementById("map")
+      )
     );
-  }
-
-  handleChangeTabs = (event, value) => {
-    this.setState({ activeTab: value });
   };
 
   render() {
     const { classes } = this.props;
     return (
-      <div className={classes.windowContent}>
-        <AppBar position="static" color="default">
-          <Tabs
-            value={this.state.activeTab}
-            onChange={this.handleChangeTabs}
-            indicatorColor="primary"
-            textColor="primary"
-            variant="fullWidth"
-          >
-            <Tab label="Kartlager" />
-            <Tab label="Bakgrund" />
-          </Tabs>
-        </AppBar>
-        <div className={classes.tabContent}>
-          <div
-            style={{
-              display: this.state.activeTab === 0 ? "block" : "none"
-            }}
-          >
-            {this.renderLayerGroups()}
+      <>
+        <div className={classes.windowContent}>
+          <AppBar position="static" color="default">
+            <Tabs
+              value={this.state.activeTab}
+              onChange={this.handleChangeTabs}
+              indicatorColor="primary"
+              textColor="primary"
+              variant="fullWidth"
+            >
+              <Tab label="Kartlager" />
+              <Tab label="Bakgrund" />
+            </Tabs>
+          </AppBar>
+          <div className={classes.tabContent}>
+            {this.renderLayerGroups(this.state.activeTab === 0)}
+            <BackgroundSwitcher
+              display={this.state.activeTab === 1}
+              layers={this.state.baseLayers}
+              layerMap={this.props.model.layerMap}
+              backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
+              backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
+            />
           </div>
-          <BackgroundSwitcher
-            display={this.state.activeTab === 1}
-            layers={this.state.baseLayers}
-            layerMap={this.props.model.layerMap}
-            backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
-            backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
-          />
-          {this.props.breadCrumbs ? this.renderBreadCrumbs() : null}
         </div>
-      </div>
+        {this.renderBreadCrumbs()}
+      </>
     );
   }
 }

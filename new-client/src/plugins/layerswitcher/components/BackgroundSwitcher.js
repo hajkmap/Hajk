@@ -1,5 +1,7 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
+import propTypes from "prop-types";
+
 import Radio from "@material-ui/core/Radio";
 import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
 import RadioButtonCheckedIcon from "@material-ui/icons/RadioButtonChecked";
@@ -16,52 +18,73 @@ const styles = theme => ({
 });
 
 class BackgroundSwitcher extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      selectedLayer: -1
-    };
+  state = {
+    selectedLayer: -1 // By default, select special case "white background"
+  };
+
+  static propTypes = {
+    backgroundSwitcherBlack: propTypes.bool.isRequired,
+    backgroundSwitcherWhite: propTypes.bool.isRequired,
+    classes: propTypes.object.isRequired,
+    display: propTypes.bool.isRequired,
+    layerMap: propTypes.object.isRequired,
+    layers: propTypes.array.isRequired
+  };
+
+  /**
+   * @summary If there's a Background layer that is visible from start, make sure that proper radio button is selected in Background Switcher.
+   * @memberof BackgroundSwitcher
+   */
+  componentDidMount() {
+    const backgroundVisibleFromStart = this.props.layers.find(
+      layer => layer.visible
+    );
+    backgroundVisibleFromStart &&
+      this.setState({
+        selectedLayer: backgroundVisibleFromStart.name
+      });
   }
-
+  /**
+   * @summary Hides previously selected background and shows current selection.
+   * @param {Object} e The event object, contains target's value
+   */
   onChange = e => {
-    if (Number(this.state.selectedLayer) > 0) {
+    const selectedLayer = e.target.value;
+
+    // Hide previously selected layers. The if > 0 is needed because we have our
+    // special cases (black and white backgrounds), that don't exist in our layerMap,
+    // and that would cause problem when we try to call .setVisible() on them.
+    Number(this.state.selectedLayer) > 0 &&
       this.props.layerMap[Number(this.state.selectedLayer)].setVisible(false);
-    }
-    if (Number(e.target.value) > 0) {
-      this.props.layerMap[Number(e.target.value)].setVisible(true);
-    }
 
-    if (e.target.value === "-2") {
-      document.getElementById("map").style.backgroundColor = "#000";
-    } else {
-      document.getElementById("map").style.backgroundColor = "#FFF";
-    }
+    // Make the currently clicked layer visible, but also handle our special cases.
+    Number(selectedLayer) > 0 &&
+      this.props.layerMap[Number(selectedLayer)].setVisible(true);
 
+    // Take care of our special cases: negative values are reserved for them
+    selectedLayer === "-2" &&
+      (document.getElementById("map").style.backgroundColor = "#000");
+    selectedLayer === "-1" &&
+      (document.getElementById("map").style.backgroundColor = "#FFF");
+
+    // Finally, store current selection in state
     this.setState({
-      selectedLayer: e.target.value
+      selectedLayer
     });
   };
 
-  componentDidMount() {
-    const { layers } = this.props;
-    layers
-      .filter(layer => layer.visible)
-      .forEach((layer, i) => {
-        if (i !== 0 && this.props.layerMap[Number(layer.name)]) {
-          this.props.layerMap[Number(layer.name)].setVisible(false);
-        } else {
-          this.setState({
-            selectedLayer: layer.name
-          });
-        }
-      });
-  }
-
+  /**
+   * @summary Returns a <div> that contains a {React.Component} consisting of one Radio button.
+   *
+   * @param {Object} config Base layer to be rendered
+   * @param {Number} index Unique key
+   * @returns {React.Component}
+   * @memberof BackgroundSwitcher
+   */
   renderRadioButton(config, index) {
-    var caption,
-      checked,
-      mapLayer = this.props.layerMap[Number(config.name)];
-
+    let caption;
+    let checked = this.state.selectedLayer === config.name;
+    const mapLayer = this.props.layerMap[Number(config.name)];
     const { classes } = this.props;
 
     if (mapLayer) {
@@ -69,7 +92,7 @@ class BackgroundSwitcher extends React.PureComponent {
     } else {
       caption = config.caption;
     }
-    checked = this.state.selectedLayer === config.name;
+
     return (
       <div key={index} className={classes.layerItemContainer}>
         <Radio
@@ -89,11 +112,22 @@ class BackgroundSwitcher extends React.PureComponent {
     );
   }
 
+  /**
+   * Prepares an array of radio buttons with the configured base layers.
+   *
+   * @returns {React.Component[]} radioButtons Array of ready to use DOM components of Radio buttons
+   * @memberof BackgroundSwitcher
+   */
   renderBaseLayerComponents() {
     const { backgroundSwitcherWhite, backgroundSwitcherBlack } = this.props;
-    var radioButtons = [],
+    let radioButtons = [],
       defaults = [];
 
+    /**
+     * If admin wants to display white/black options for background, let's
+     * call renderRadioButton() for those two special cases. The resulting
+     * Component will be pushed into an array called @param defaults.
+     */
     if (backgroundSwitcherWhite) {
       defaults.push(
         this.renderRadioButton(
@@ -117,10 +151,13 @@ class BackgroundSwitcher extends React.PureComponent {
       );
     }
 
-    radioButtons = [...radioButtons, ...[defaults]];
-
+    /**
+     * Let's construct the final array of radio buttons. It will consists
+     * of the defaults from above, plus the result of calling renderRadioButton()
+     * for each base layer.
+     */
     radioButtons = [
-      ...radioButtons,
+      ...defaults,
       ...this.props.layers.map((layerConfig, i) =>
         this.renderRadioButton(layerConfig, i)
       )

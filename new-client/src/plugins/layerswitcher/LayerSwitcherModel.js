@@ -11,6 +11,18 @@ class LayerSwitcherModel {
         return a;
       }, {});
   }
+
+  getBaseLayers() {
+    return this.olMap
+      .getLayers()
+      .getArray()
+      .filter(
+        l =>
+          l.getProperties().layerInfo &&
+          l.getProperties().layerInfo.layerType === "base"
+      )
+      .map(l => l.getProperties());
+  }
 }
 
 export default LayerSwitcherModel;

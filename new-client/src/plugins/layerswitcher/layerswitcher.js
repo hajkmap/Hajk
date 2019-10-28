@@ -1,4 +1,5 @@
 import React from "react";
+import propTypes from "prop-types";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
 import LayersIcon from "@material-ui/icons/Layers";
@@ -7,12 +8,17 @@ import LayerSwitcherView from "./LayerSwitcherView.js";
 import LayerSwitcherModel from "./LayerSwitcherModel.js";
 import Observer from "react-event-observer";
 
-class LayerSwitcher extends React.PureComponent {
+export default class LayerSwitcher extends React.PureComponent {
+  static propTypes = {
+    app: propTypes.object.isRequired,
+    map: propTypes.object.isRequired,
+    options: propTypes.object.isRequired
+  };
+
   constructor(props) {
     super(props);
 
     this.localObserver = Observer();
-    // this.localObserver.subscribe("layerAdded", layer => {});
 
     this.layerSwitcherModel = new LayerSwitcherModel({
       map: props.map,
@@ -31,9 +37,7 @@ class LayerSwitcher extends React.PureComponent {
           title: "Visa",
           description: "Välj vad du vill se i kartan",
           height: "auto",
-          width: 400,
-          top: undefined,
-          left: undefined
+          width: 400
         }}
       >
         <LayerSwitcherView
@@ -41,11 +45,9 @@ class LayerSwitcher extends React.PureComponent {
           map={this.props.map}
           model={this.layerSwitcherModel}
           observer={this.localObserver}
-          breadCrumbs={this.props.options.showBreadcrumbs}
+          options={this.props.options}
         />
       </BaseWindowPlugin>
     );
   }
 }
-
-export default LayerSwitcher;
