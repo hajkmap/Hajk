@@ -41,6 +41,7 @@ var defaultState = {
     markerImg: 'http://localhost/hajk/assets/icons/marker.png',
     infoKnappLogo: '/assets/icons/hjalpknapp_FIR.png',
     instructionSokning: '',
+    instructionSearchResult: '',
     instructionResidentList: "",
     featureIDFieldName: "",
     anchorX: 16,
@@ -57,9 +58,7 @@ var defaultState = {
     colorResult: 'rgba(255,255,0,0.3)',
     colorResultStroke: '',
     colorHighlight: '',
-    colorHighlightStroke: '',
-    colorHittaGrannarBuffer: '',
-    colorHittaGrannarBufferStroke: ''
+    colorHighlightStroke: ''
 };
 
 class ToolOptions extends Component {
@@ -83,8 +82,7 @@ class ToolOptions extends Component {
                 base64Encode: tool.options.base64Encode,
                 instruction: tool.options.instruction,
                 instructionSokning: tool.options.instructionSokning,
-                instructionHittaGrannar: tool.options.instructionHittaGrannar,
-                instructionSkapaFastighetsforteckning: tool.options.instructionSkapaFastighetsforteckning,
+                instructionSearchResult: tool.options.instructionSearchResult,
                 instructionEDPVision: tool.options.instructionEDPVision,
                 instructionResidentList: tool.options.instructionResidentList,
                 filterVisible: tool.options.filterVisible,
@@ -109,8 +107,6 @@ class ToolOptions extends Component {
                 colorResultStroke: tool.options.colorResultStroke,
                 colorHighlight: tool.options.colorHighlight,
                 colorHighlightStroke: tool.options.colorHighlightStroke,
-                colorHittaGrannarBuffer: tool.options.colorHittaGrannarBuffer,
-                colorHittaGrannarBufferStroke: tool.options.colorHittaGrannarBufferStroke,
                 residentList: tool.options.residentList,
                 residentListDataLayer: tool.options.residentListDataLayer
             }, () => { this.loadLayers(); });
@@ -157,8 +153,8 @@ class ToolOptions extends Component {
             value = !isNaN(Number(value)) ? Number(value) : value;
         }
 
-        if (name == 'instruction' || name == 'instructionSokning' || name == 'instructionHittaGrannar' || name == 'instructionEDPVision' ||
-            name == 'instructionSkapaFastighetsforteckning' || name == 'realEstateLayer_instructionVidSokresult' || name == "instructionResidentList") {
+        if (name == 'instruction' || name == 'instructionSokning' || name == 'instructionSearchResult' || 
+            name == 'instructionEDPVision' || name == "instructionResidentList") {
             value =  window.btoa(encodeURIComponent(value));
         }
 
@@ -229,8 +225,7 @@ class ToolOptions extends Component {
                 base64Encode: this.state.base64Encode,
                 instruction: this.state.instruction,
                 instructionSokning: this.state.instructionSokning,
-                instructionHittaGrannar: this.state.instructionHittaGrannar,
-                instructionSkapaFastighetsforteckning: this.state.instructionSkapaFastighetsforteckning,
+                instructionSearchResult: this.state.instructionSearchResult,
                 instructionEDPVision: this.state.instructionEDPVision,
                 instructionResidentList: this.state.instructionResidentList,
                 filterVisible: this.state.filterVisible,
@@ -247,8 +242,6 @@ class ToolOptions extends Component {
                 colorResultStroke: this.state.colorResultStroke ? this.state.colorResultStroke : 'rgba(0,0,0,0.6)',
                 colorHighlight: this.state.colorHighlight ? this.state.colorHighlight : 'rgba(0,0,255,0.2)',
                 colorHighlightStroke: this.state.colorHighlightStroke ? this.state.colorHighlightStroke : 'rgba(0,0,0,0.6)',
-                colorHittaGrannarBuffer: this.state.colorHittaGrannarBuffer ? this.state.colorHittaGrannarBuffer : 'rgba(50,200,200,0.4)',
-                colorHittaGrannarBufferStroke: this.state.colorHittaGrannarBufferStroke ? this.state.colorHittaGrannarBufferStroke : 'rgba(0,0,0,0.2)',
                 residentList: this.state.residentList,
                 residentListDataLayer: this.state.residentListDataLayer
             }
@@ -351,25 +344,6 @@ class ToolOptions extends Component {
         }
     }
 
-    handleColorResult (color) {
-        this.state.colorResult = color.hex;
-    }
-    handleColorResultStroke (color) {
-        this.state.colorResultStroke = color.hex;
-    }
-    handleColorHighlight (color) {
-        this.state.colorHighlight = color.hex;
-    }
-    handleColorHighlightStroke (color) {
-        this.state.colorHighlightStroke = color.hex;
-    }
-    handleColorHittaGrannarBuffer (color) {
-        this.state.colorHittaGrannarBuffer = color.hex;
-    }
-    handleColorHittaGrannarBufferStroke (color) {
-        this.state.colorHittaGrannarBufferStroke = color.hex;
-    }
-
     handleResidentListVisibleForGroupsChange (e) {
       let groups = e.target.value !== "" ? e.target.value.split(',') : [];
 
@@ -426,6 +400,16 @@ class ToolOptions extends Component {
                   <div className="col-md-8">
                     <textarea id='instructionSokning' name='instructionSokning' onChange={this.handleInputChange.bind(this)}
                       value={this.state.instructionSokning ? decodeURIComponent(atob(this.state.instructionSokning)) : ''} />
+                  </div>
+                </div>
+
+                <div className="row">
+                  <div className="col-md-4">
+                    <label htmlFor='instructionSearchResult'>Instruktion för "Sökresultat"</label>
+                  </div>
+                  <div className="col-md-8">
+                    <textarea id='instructionSearchResult' name='instructionSearchResult' onChange={this.handleInputChange.bind(this)}
+                      value={this.state.instructionSearchResult ? decodeURIComponent(atob(this.state.instructionSearchResult)) : ''} />
                   </div>
                 </div>
 
@@ -714,48 +698,25 @@ class ToolOptions extends Component {
                 <div className='col-md-12'>
                   <span className='pull-left'>
                     <div>Resultat - färg för yta</div>
-                    <SketchPicker
-                        color={this.state.colorResult}
-                        onChangeComplete={(e) => this.handleColorResult(e)}
-                    />
+                    <SketchPicker color={this.state.colorResult} onChangeComplete={(e) => this.setState({colorResult: e.hex})} />
                   </span>
                   <span className='pull-left' style={{marginLeft: '10px'}}>
                     <div>Resultat - färg för kantlinje</div>
-                    <SketchPicker
-                        color={this.state.colorResultStroke}
-                        onChangeComplete={(e) => this.handleColorResultStroke(e)}
+                    <SketchPicker color={this.state.colorResultStroke} onChangeComplete={(e) => this.setState({colorResultStroke: e.hex})}
                     />
                   </span>
                 </div>
                 <div className='col-md-12'>
                   <span className='pull-left'>
                     <div>Valt objekt (hightlight) - färg för yta</div>
-                    <SketchPicker
-                        color={this.state.colorHighlight}
-                        onChangeComplete={(e) => this.handleColorHighlight(e)}
+                    <SketchPicker color={this.state.colorHighlight} onChangeComplete={(e) => this.setState({colorHighlight: e.hex})}
                     />
                   </span>
                     <span className='pull-left' style={{marginLeft: '10px'}}>
                     <div>Valt objekt (hightlight) - färg för kantlinje</div>
-                    <SketchPicker
-                        color={this.state.colorHighlightStroke}
-                        onChangeComplete={(e) => this.handleColorHighlightStroke(e)}
+                    <SketchPicker color={this.state.colorHighlightStroke} onChangeComplete={(e) => this.setState({colorHighlightStroke: e.hex})}
                     />
                   </span>
-                </div>
-                <div className='col-md-12'>
-                  <span className='pull-left'>
-                    <div>Buffer - färg för yta</div>
-                    <SketchPicker
-                        color={this.state.colorHittaGrannarBuffer}
-                        onChangeComplete={(e) => this.handleColorHittaGrannarBuffer(e)} />
-                  </span>
-                    <span className='pull-left' style={{marginLeft: '10px'}}>
-                      <div>Buffer - färg för kantlinje</div>
-                      <SketchPicker
-                          color={this.state.colorHittaGrannarBufferStroke}
-                          onChangeComplete={(e) => this.handleColorHittaGrannarBufferStroke(e)} />
-                    </span>
                 </div>
 
                 {this.state.tree}

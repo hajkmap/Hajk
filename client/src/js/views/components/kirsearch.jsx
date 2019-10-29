@@ -21,33 +21,50 @@ var KirSearchView = {
         searchInProgress: false,
         selectedFeatureKey: null,
         searchResults: [],
-        expandedResults: []
+        expandedResults: [],
+        searchResultsVisible: true
       };
     },
 
     componentDidMount: function () {
-      this.props.model.get("map").on('singleclick', this.props.model.clickedOnMap.bind(this.props.model));
-        this.value = this.props.model.get('value');
-        if (this.props.model.get('items')) {
-            this.setState({
-                showResults: true,
-                result: {
-                    status: 'success',
-                    items: this.props.model.get('items')
-                }
-            });
-        }
+      this.value = this.props.model.get('value');
+      if (this.props.model.get('kirSearchResults')) {
+          this.setState({ searchResults: this.props.model.get('kirSearchResults') });
+      }
 
-        this.props.model.on('change:url', () => {
-            this.setState({
-                downloadUrl: this.props.model.get('url')
-            });
-        });
-        this.props.model.on('change:downloading', () => {
-            this.setState({
-                downloading: this.props.model.get('downloading')
-            });
-        });
+      this.props.model.on('change:url', () => {
+          this.setState({
+              downloadUrl: this.props.model.get('url')
+          });
+      });
+      this.props.model.on('change:downloading', () => {
+          this.setState({
+              downloading: this.props.model.get('downloading')
+          });
+      });
+
+      this.searchResultsLayer = new ol.layer.Vector({
+        source: new ol.source.Vector(),
+        style: this.resultsStyle
+      });
+      this.props.model.get("map").addLayer(this.searchResultsLayer);
+      
+      this.selectTool = new ol.interaction.Select({
+        layers: [this.searchResultsLayer],
+        style: this.resultsStyle
+      });
+
+      this.selectTool.on("select", function(e) {
+        var feature = e.target.getFeatures().getArray()[0];
+        
+        if (feature) {
+          var featureId = feature.get(this.props.model.get("featureIDFieldName"));
+          this.setState({ selectedFeatureKey: featureId });
+          document.getElementById("feat-" + featureId).scrollIntoView();
+        }
+      }.bind(this));
+      
+      this.props.model.get("map").addInteraction(this.selectTool);
     },
 
     resultsStyle: function(feature, resolution) {
@@ -68,43 +85,20 @@ var KirSearchView = {
       this.props.model.get("firSelectionModel").get("drawLayer").setVisible(this.state.searchAreaVisible);
       this.props.model.firBufferFeatureLayer.setVisible(this.state.searchAreaVisible);
       this.props.model.get("firSelectionModel").get("firBufferLayer").setVisible(this.state.searchAreaVisible);
-
-      if (!this.searchResultsLayer) {
-
-        this.searchResultsSource = new ol.source.Vector();
-        this.searchResultsLayer = new ol.layer.Vector({
-          source: this.searchResultsSource,
-          style: this.resultsStyle.bind(this)
-        });
-        this.props.model.get("map").addLayer(this.searchResultsLayer);
-
-        this.selectTool = new ol.interaction.Select({
-          layers: [this.searchResultsLayer ],
-          style: this.resultsStyle.bind(this)
-        });
-        this.selectTool.on("select", function(e) {
-          var feature = e.target.getFeatures().getArray()[0];
-          if (feature) {
-            this.setState({ selectedFeatureKey: feature.get(this.props.model.get("featureIDFieldName")) });
-            document.getElementById("feat-" + this.state.selectedFeatureKey).scrollIntoView();
-          }
-        }.bind(this));
-        this.props.model.get("map").addInteraction(this.selectTool);
-      }
-
-      this.searchResultsSource.clear();
-      this.searchResultsSource.addFeatures(this.state.searchResults);
+  
+      this.searchResultsLayer.getSource().clear();
+      this.searchResultsLayer.getSource().addFeatures(this.state.searchResults);
     },
 
     componentWillUnmount: function () {
-        this.props.model.get("map").un('singleclick', this.props.model.clickedOnMap);
-
         this.props.model.get('layerCollection').each((layer) => {
             layer.off('change:visible', this.search);
         });
 
         this.props.model.off('change:url');
         this.props.model.off('change:downloading');
+
+        this.selectTool.un("select");
     },
 
     search: function (event) {
@@ -142,6 +136,7 @@ var KirSearchView = {
       });
 
       this.setState({ searchInProgress: true });
+      this.props.model.set("kirExcelReportIsReady", false);
       $.ajax({
         url: wfslayer.url,
         method: 'POST',
@@ -152,6 +147,7 @@ var KirSearchView = {
           var features = wfslayer.outputFormat === "GML3" ?
             new ol.format.GML().readFeatures(response) : new ol.format.GeoJSON().readFeatures(response);
 
+          this.props.model.set("kirSearchResults", features)
           this.setState({ searchInProgress: false, searchResults: features });
         }.bind(this),
         error: function(message) {
@@ -233,24 +229,47 @@ var KirSearchView = {
       this.props.model.get("firSelectionModel").get("firBufferLayer").getSource().clear();
       this.props.model.get("firSelectionModel").clearSelection();
       this.setState({ searchResults: []});
+      this.props.model.set('kirSearchResults', []);
+      this.props.model.set("kirExcelReportIsReady", false);
+      this.searchResultsLayer.getSource().clear();
+    },
+
+    expandSearchResultItem(key) {
+      this.setState({ 
+        selectedFeatureKey: this.state.selectedFeatureKey !== key ? key : null
+      }); 
+      
+      this.selectTool.getFeatures().clear()
     },
 
     render: function () {
         var searchResults = this.state.searchResults.map((item) => {
           var gender = item.get(this.props.model.get("residentListDataLayer").koenFieldName).toLowerCase() === "m" ? "Man" : "Kvinna";
           var key = item.get(this.props.model.get("featureIDFieldName"));
-          return <li id={"feat-"+this.state.selectedFeatureKey} key={key}
-            onClick={() => { this.setState({ selectedFeatureKey: key}); this.selectTool.getFeatures().clear()}}>
+          return <li id={"feat-" + key} key={key}
+            onClick={() => this.expandSearchResultItem(key)}>
             {gender}, {item.get(this.props.model.get("residentListDataLayer").alderFieldName)} år
+            
             <button className="btn btn-default btn-xs pull-right" onClick={() => this.deleteSearchResult(key)}>
               <i className="fa fa-trash"></i>
             </button>
+            
             <i className="fa fa-info-circle pull-right"></i>
+            
             <table className={this.state.selectedFeatureKey === key ? "" : "collapse"}>
               <tbody>
-                <tr><td><b>{this.props.model.get("residentListDataLayer").namnDisplayName}:</b></td><td>{item.get(this.props.model.get("residentListDataLayer").namnFieldName)}</td></tr>
-                <tr><td><b>{this.props.model.get("residentListDataLayer").adressDisplayName}:</b></td><td>{item.get(this.props.model.get("residentListDataLayer").adressFieldName)}</td></tr>
-                <tr><td><b>{this.props.model.get("residentListDataLayer").fodelsedatumDisplayName}:</b></td><td>{item.get(this.props.model.get("residentListDataLayer").fodelsedatumFieldName)}</td></tr>
+                <tr>
+                  <td><b>{this.props.model.get("residentListDataLayer").namnDisplayName}:</b></td>
+                  <td>{item.get(this.props.model.get("residentListDataLayer").namnFieldName)}</td>
+                </tr>
+                <tr>
+                  <td><b>{this.props.model.get("residentListDataLayer").adressDisplayName}:</b></td>
+                  <td>{item.get(this.props.model.get("residentListDataLayer").adressFieldName)}</td>
+                </tr>
+                <tr>
+                  <td><b>{this.props.model.get("residentListDataLayer").fodelsedatumDisplayName}:</b></td>
+                  <td>{item.get(this.props.model.get("residentListDataLayer").fodelsedatumFieldName).substring(0, 8)}</td>
+                </tr>
               </tbody>
             </table>
           </li>
@@ -273,7 +292,7 @@ var KirSearchView = {
                 {
                   this.state.instructionVisible ?
                   <div className="panel-body-instruction instructionsText"
-                    dangerouslySetInnerHTML={{__html: atob(this.props.model.get("instructionSokning"))}} /> : null
+                    dangerouslySetInnerHTML={{__html: decodeURIComponent(atob(this.props.model.get("instructionSokning")))}} /> : null
                 }
               </div>
 
@@ -347,13 +366,26 @@ var KirSearchView = {
           }
 
           {
-            this.state.searchResults.length > 0 ?
-            <div>
-              <h2>Invånare ({this.state.searchResults.length})</h2>
+            this.state.searchResults.length > 0 &&
+            <div className="search-tools">
+              <h3>Sökresultat</h3>
+              <div className="group" onClick={()=>{this.setState({ searchResultsVisible: !this.state.searchResultsVisible})}}>
+                Invånare<span className='label'>{this.state.searchResults.length}</span>
+                <button onClick={(e) => { e.stopPropagation(); this.setState({ instructionTextVisible: !this.state.instructionTextVisible })}} className='btn-info-fir'>
+                  <img src={this.props.model.get("infoKnappLogo")} />
+                </button>
+
+                {
+                  this.state.instructionTextVisible &&
+                  <div className='panel-body-instruction instructionsText' 
+                  dangerouslySetInnerHTML={{__html: decodeURIComponent(atob(this.props.model.get("instructionSearchResult")))}} />
+                }
+              </div>
+              
               <ul className="kir-search-results">
-                { searchResults }
+                { this.state.searchResultsVisible && searchResults }
               </ul>
-            </div> : null
+            </div>
           }
 
         </div>

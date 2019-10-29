@@ -32,7 +32,6 @@ var ResidentList = {
       includeBirthDate: false,
       includeGender: false,
       fetchingExcel: false,
-      excelIsReady: false,
       excelUrl: "",
       errorMessage: null
     };
@@ -70,7 +69,8 @@ var ResidentList = {
       filter: filters.length > 1 ? ol.format.filter.or.apply(null, filters) : filters[0]
     });
 
-    this.setState({ fetchingExcel: true, excelIsReady: false, excelUrl: "", errorMessage: null });
+    this.props.model.set("kirExcelReportIsReady", false);
+    this.setState({ fetchingExcel: true, excelUrl: "", errorMessage: null });
     $.ajax({
       url: wfslayer.url,
       method: 'POST',
@@ -103,12 +103,12 @@ var ResidentList = {
       columns.push(_config.alderDisplayName);
     }
 
-    if (this.state.includeGender) {
-      columns.push(_config.koenDisplayName);
-    }
-
     if (this.state.includeBirthDate) {
       columns.push(_config.fodelsedatumDisplayName);
+    }
+
+    if (this.state.includeGender) {
+      columns.push(_config.koenDisplayName);
     }
 
     features.forEach(function(f) {
@@ -127,29 +127,25 @@ var ResidentList = {
         row.push(f.get(_config.alderFieldName));
       }
 
-      if (this.state.includeGender) {
-        row.push(f.get(_config.koenFieldName));
-      }
-
       if (this.state.includeBirthDate) {
         row.push(this.dateFromPersonalNumber(f.get(_config.fodelsedatumFieldName)));
+      }
+
+      if (this.state.includeGender) {
+        row.push(f.get(_config.koenFieldName));
       }
 
       rows.push(row);
     }.bind(this));
 
     $.ajax({
-      url: HAJK2.servicePath + this.config.excelExportUrl,
+      url: this.config.excelExportUrl,
       method: "POST",
       data: { json: JSON.stringify({ "columns": columns, "rows": rows }) },
       success: function(response) {
         if (response) {
-          this.setState({
-            fetchingExcel: false,
-            excelIsReady: true,
-            excelUrl: response,
-            errorMessage: null
-          });
+          this.props.model.set("kirExcelReportIsReady", true);
+          this.setState({ fetchingExcel: false, excelUrl: response, errorMessage: null });
         }
       }.bind(this),
       error: function() {
@@ -165,7 +161,7 @@ var ResidentList = {
     return personalNumber.substring(0, personalNumber.length - 4);
   },
 
-  exportToEcxel: function() {
+  exportToExcel: function() {
     if (this.props.residentData) {
       this.generateExcel(this.props.residentData);
     } else {
@@ -188,13 +184,13 @@ var ResidentList = {
                   </button> : ""
               }
 
+              <button className={ expandButtonClass } onClick={(e) => { this.setState({ visible: !this.state.visible })}}></button>
+
               {
                 this.state.instructionVisible ?
                 <div className='panel-body-instruction'
                   dangerouslySetInnerHTML={{__html: decodeURIComponent(atob(this.props.model.get("instructionResidentList")))}} /> : ""
               }
-
-              <button className={ expandButtonClass } onClick={(e) => { this.setState({ visible: !this.state.visible })}}></button>
             </div>
 
             <div className={ this.state.visible ? "panel-body" : "panel-body hidden" }>
@@ -221,7 +217,7 @@ var ResidentList = {
 
             {
               this.props.model.get('excelExportUrl') != null ?
-              <button className='btn btn-default fir-icon-button' onClick={this.exportToEcxel}>
+              <button className='btn btn-default fir-icon-button' onClick={this.exportToExcel}>
                 <i className='excel' />Skapa boendeförteckning
               </button> : ""
             }
@@ -231,7 +227,7 @@ var ResidentList = {
             }
 
             {
-              this.state.excelIsReady ? <a href={this.state.excelUrl} target="_blank">Ladda ner</a> : ""
+              this.props.model.get("kirExcelReportIsReady") ? <a href={this.state.excelUrl} target="_blank">Ladda ner</a> : ""
             }
 
             {
