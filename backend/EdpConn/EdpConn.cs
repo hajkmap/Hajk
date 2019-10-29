@@ -1,4 +1,4 @@
-﻿#define USE_REF_TO_EDP
+﻿// #define USE_REF_TO_EDP // Uncomment to enable EDP integration
 
 using System;
 using System.Collections.Generic;
