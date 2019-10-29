@@ -21,6 +21,15 @@ If you plan to develop for Hajk, make sure to read the next section on code stan
 
 ## Contributing
 
+### Required tools
+* Latest Git
+* Latest LTS of Node.js
+* Visual Studio 2019 (for Hajk 3) or 2015 (for [Hajk 2](https://github.com/hajkmap/Hajk/tree/hajk2.x))
+
+`client` and `admin` can be built on any OS supported by recent Git and Node versions (tested on macOS, Windows and Linux). 
+
+The `mapservice` component, which is a .NET project, requires however Visual Studio 2019 for Windows (as it has not been ported to .NET Core yet). Please note that if you plan on working on the [Hajk 2](https://github.com/hajkmap/Hajk/tree/hajk2.x) branch, you must use Visual Studio 2015 instead. 
+
 ### User documentation
 There is an ongoing effort to bring the [user documentation](https://github.com/hajkmap/Hajk/wiki) up to date with the new functionality of Hajk 3. User documentation can be found in [Hajk's Wiki](https://github.com/hajkmap/Hajk/wiki). Creating user documentation is a very important way of contributing to the project and suits well for organizations that wish to contribute but lack coding capabilities.
 
