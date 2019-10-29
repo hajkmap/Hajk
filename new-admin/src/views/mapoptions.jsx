@@ -590,7 +590,7 @@ class MapOptions extends Component {
                   this.setState({ drawerPermanent: e.target.checked });
                 }}
                 checked={this.state.drawerPermanent}
-                disabled={this.state.drawerVisible === false}
+                disabled={this.state.drawerVisible !== true}
               />
               &nbsp;
             </div>
