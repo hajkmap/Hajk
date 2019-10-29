@@ -39,21 +39,10 @@ class BaseWindowPlugin extends React.PureComponent {
     this.title = props.options.title || props.custom.title;
     this.description = props.options.description || props.custom.description;
 
-    this.width = props.options.width || 400;
-    this.height = props.options.height || "auto";
-
-    this.top = props.custom.top || props.theme.spacing(2);
-
-    // Determine the left margin. If target=toolbar|right, set left margin
-    // to almost 0. If target=left however, we don't want to display
-    // the window on top of Widget button, so we place the window on the
-    // right side of the screen.
-    this.left =
-      props.options.target === "left"
-        ? (window.innerWidth - this.width) / 2
-        : props.theme.spacing(2);
-
-    this.position = props.options.position || "left";
+    // Try to get values from admin's option. Fallback to customs from Plugin defaults, or finally to hard-coded values.
+    this.width = props.options.width || props.custom.width || 400;
+    this.height = props.options.height || props.custom.height || "auto";
+    this.position = props.options.position || props.custom.position || "left";
 
     // Register Window in our global register
     props.app.registerWindowPlugin(this);
