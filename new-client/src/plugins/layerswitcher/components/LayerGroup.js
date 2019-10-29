@@ -1,4 +1,5 @@
 import React from "react";
+import propTypes from "prop-types";
 import LayerItem from "./LayerItem.js";
 import { withStyles } from "@material-ui/core/styles";
 import {
@@ -77,24 +78,45 @@ const StyledExpansionPanelSummary = withStyles({
 })(ExpansionPanelSummary);
 
 class LayerGroup extends React.PureComponent {
+  state = {
+    expanded: false,
+    groups: [],
+    layers: [],
+    name: "",
+    parent: "-1",
+    toggled: false,
+    chapters: []
+  };
+
+  static defaultProps = {
+    child: false,
+    expanded: false
+  };
+
+  static propTypes = {
+    app: propTypes.object.isRequired,
+    chapters: propTypes.array.isRequired,
+    child: propTypes.bool.isRequired,
+    classes: propTypes.object.isRequired,
+    expanded: propTypes.bool.isRequired,
+    group: propTypes.object.isRequired,
+    handleChange: propTypes.func,
+    model: propTypes.object.isRequired
+  };
+
   constructor(props) {
     super(props);
-    this.state = {
-      expanded: false,
-      groups: [],
-      layers: [],
-      name: "",
-      parent: "-1",
-      toggled: false,
-      chapters: []
-    };
-    this.toggleExpanded = this.toggleExpanded.bind(this);
+    this.model = this.props.model;
+
+    // Setup a listener on every layer that will force re-render on this component
+    // FIXME: The problem with this approach is that we forceUpdate ONCE PER EVERY LAYERGROUP.
     this.props.app
       .getMap()
       .getLayers()
       .getArray()
       .forEach(layer => {
         layer.on("change:visible", () => {
+          //
           this.forceUpdate();
         });
       });
@@ -102,10 +124,8 @@ class LayerGroup extends React.PureComponent {
 
   componentDidMount() {
     this.setState({
-      ...this.state,
       ...this.props.group
     });
-    this.model = this.props.model;
   }
 
   handleChange = panel => (event, expanded) => {
@@ -137,9 +157,9 @@ class LayerGroup extends React.PureComponent {
     });
   }
 
-  toggleExpanded() {
+  toggleExpanded = () => {
     this.setState({ expanded: !this.state.expanded });
-  }
+  };
 
   isToggled() {
     var layers = this.props.app
@@ -176,6 +196,38 @@ class LayerGroup extends React.PureComponent {
       }
     });
   }
+  /**
+   * @summary Loops through groups of objects and changes visibility for all layers within group.
+   *
+   * @param {boolean} visibility
+   * @param {array|object} groupsArray
+   * @memberof LayerGroup
+   */
+  toggleGroups(visibility, groupsArray) {
+    // Sometimes groupsArray is an array of objects:
+    Array.isArray(groupsArray) &&
+      groupsArray.forEach(group => {
+        // First call this function on all groups that might be inside this group
+        group.groups.length &&
+          group.groups.forEach(g => {
+            this.toggleGroups(visibility, g);
+          });
+
+        // Next, call toggleLayers on all layers in group
+        this.toggleLayers(visibility, group.layers);
+      });
+
+    // … but sometimes it's not an array but rather an object:
+    typeof groupsArray === "object" &&
+      groupsArray !== null &&
+      groupsArray.hasOwnProperty("groups") &&
+      this.toggleGroups(visibility, groupsArray.groups);
+
+    typeof groupsArray === "object" &&
+      groupsArray !== null &&
+      groupsArray.hasOwnProperty("layers") &&
+      this.toggleLayers(visibility, groupsArray.layers);
+  }
 
   toggleLayers(visibility, layers) {
     var mapLayers = this.props.app
@@ -206,6 +258,7 @@ class LayerGroup extends React.PureComponent {
    */
   renderToggleAll() {
     const { classes } = this.props;
+
     // The property below should be renamed to "togglable" or something…
     if (this.props.group.toggled) {
       return (
@@ -215,8 +268,10 @@ class LayerGroup extends React.PureComponent {
             e.preventDefault();
             e.stopPropagation();
             if (this.isToggled()) {
+              this.toggleGroups(false, this.props.group.groups);
               this.toggleLayers(false, this.props.group.layers);
             } else {
+              this.toggleGroups(true, this.props.group.groups);
               this.toggleLayers(true, this.props.group.layers);
             }
           }}
