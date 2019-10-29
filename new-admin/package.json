@@ -15,9 +15,9 @@
     "react": "^16.10.2",
     "react-color": "^2.17.3",
     "react-dom": "^16.10.2",
-    "react-modal": "^3.10.1",
+    "react-modal": "^3.11.1",
     "react-scripts": "3.0.1",
-    "react-smooth-dnd": "^0.11.0",
+    "react-smooth-dnd": "^0.11.1",
     "typescript": "^3.6.4",
     "x2js": "^3.3.1"
   },
