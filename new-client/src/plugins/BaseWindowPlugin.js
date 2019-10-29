@@ -39,8 +39,8 @@ class BaseWindowPlugin extends React.PureComponent {
     this.title = props.options.title || props.custom.title;
     this.description = props.options.description || props.custom.description;
 
-    this.width = props.custom.width || 400;
-    this.height = props.custom.height || "auto";
+    this.width = props.options.width || 400;
+    this.height = props.options.height || "auto";
 
     this.top = props.custom.top || props.theme.spacing(2);
 
@@ -53,9 +53,7 @@ class BaseWindowPlugin extends React.PureComponent {
         ? (window.innerWidth - this.width) / 2
         : props.theme.spacing(2);
 
-    // TODO: Add 'props.options.position' to mapservice/admin, and let the admin
-    // decide whether the Window will render on left or right side of the screen.
-    this.position = props.options.target === "left" ? "right" : "left";
+    this.position = props.options.position || "left";
 
     // Register Window in our global register
     props.app.registerWindowPlugin(this);

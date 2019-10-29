@@ -77,7 +77,9 @@ class ToolOptions extends Component {
                     : tool.options.tocExpanded,
                 index: tool.index,
                 target: tool.options.target,
-                panel: tool.options.panel,
+                position: tool.options.position,
+                width: tool.options.width,
+                height: tool.options.height,
                 caption: tool.options.caption,
                 title: tool.options.title,
                 abstract: tool.options.abstract,
@@ -153,7 +155,9 @@ class ToolOptions extends Component {
       index: this.state.index,
       options: {
         target: this.state.target,
-        panel: this.state.panel,
+        position: this.state.position,
+        width: this.state.width,
+        height: this.state.height,
         tocExpanded: this.state.tocExpanded,
         title: this.state.title,
         caption: this.state.caption,
@@ -323,19 +327,64 @@ class ToolOptions extends Component {
               value={this.state.target}
             />
           </div>
-          {this.renderVisibleForGroups()}
           <div>
-            <label htmlFor="panel">Panelplacering</label>
+            <label htmlFor="position">
+              Fönsterplacering{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Placering av verktygets fönster. Anges som antingen 'left' eller 'right'."
+              />
+            </label>
             <input
-              id="panel"
-              name="panel"
+              id="position"
+              name="position"
               type="text"
               onChange={e => {
                 this.handleInputChange(e);
               }}
-              value={this.state.panel}
+              value={this.state.position}
             />
           </div>
+          <div>
+            <label htmlFor="width">
+              Fönsterbredd{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Bredd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda standardbredd."
+              />
+            </label>
+            <input
+              id="width"
+              name="width"
+              type="text"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.width}
+            />
+          </div>
+          <div>
+            <label htmlFor="height">
+              Fönsterhöjd{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Höjd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda maximal höjd."
+              />
+            </label>
+            <input
+              id="height"
+              name="height"
+              type="text"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.height}
+            />
+          </div>
+          {this.renderVisibleForGroups()}
           <div>
             <label htmlFor="abstract">
               Beskrivning{" "}
