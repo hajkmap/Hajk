@@ -1,4 +1,4 @@
-﻿#define USE_REF_TO_EDP
+﻿//#define USE_REF_TO_EDP
 
 using System;
 using System.Collections.Generic;
@@ -11,9 +11,11 @@ using EDP.GIS.Kubb.Connector.Common.Entities;
 
 /// <summary>
 /// Denna klass implementerar kommunikationen med EDP. 
-/// Vill man kompilera backend utan några beroenden alls till EDP gör följande:
-/// 1. Kommentera raden #define USE_REF_TO_EDP överst i denna fil
-/// 2. Man kan nu även ta bort referenserna till:
+/// Vill man kompilera backend med kommuniaktion till EDP gör följande:
+/// 1. Ta bort kommentarstecknen på raden //#define USE_REF_TO_EDP överst i denna fil
+/// 
+/// Skulle man ha problem med att NuGet inte kan hämta referenserna, trots att man har kommenterat översta raden,
+/// kan man ta bort referenserna till:
 ///    - EDP.GIS.Kubb.Connector.Common
 ///    - EDP.GIS.Kubb.Connector.EDP
 ///    - Microsoft.AspNet.SignalR.Client
