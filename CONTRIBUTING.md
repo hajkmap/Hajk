@@ -1,11 +1,50 @@
-# Contributing
+## Contributing
 
-When contributing to this repository, please first discuss the change you wish to make via issue,
-email, or any other method with the owners of this repository before making a change.
+### Required tools
+* Latest Git
+* Latest LTS of Node.js
+* Visual Studio 2019 (for Hajk 3) or 2015 (for [Hajk 2](https://github.com/hajkmap/Hajk/tree/hajk2.x))
 
-Please note we have a code of conduct, please follow it in all your interactions with the project.
+`client` and `admin` can be built on any OS supported by recent Git and Node versions (tested on macOS, Windows and Linux). 
 
-## Code standard
+The `mapservice` component, which is a .NET project, requires however Visual Studio 2019 for Windows (as it has not been ported to .NET Core yet). Please note that if you plan on working on the [Hajk 2](https://github.com/hajkmap/Hajk/tree/hajk2.x) branch, you must use Visual Studio 2015 instead. 
+
+### User documentation
+There is an ongoing effort to bring the [user documentation](https://github.com/hajkmap/Hajk/wiki) up to date with the new functionality of Hajk 3. User documentation can be found in [Hajk's Wiki](https://github.com/hajkmap/Hajk/wiki). Creating user documentation is a very important way of contributing to the project and suits well for organizations that wish to contribute but lack coding capabilities.
+
+### Design guidelines
+Hajk is built using **Material Design** components from the [Material UI](https://material-ui.com/) project. Make sure to familiarize yourself with all the available components. It is crucial for the user experience that the design principles are followed throughout the system. 
+
+### Git workflow
+Hajk strictly enforces the use of **Git Feature Branch Workflow** as described in [this document](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow). 
+
+In short, developing a new feature, would look something like:
+1. Always fetch latest with `git fetch`.
+1. Make sure you are in master branch by `git checkout master`.
+1. Make sure that you've pulled all latest changes with `git pull`.
+1. Create a new branch, let's say `three-d-mode`, by running `git checkout -b three-d-mode`
+1. Don't forget to set upstream so that your newly created branch is pushed to GitHub: `git push --set-upstream origin three-d-mode`
+1. Code… :neckbeard:
+1. Regularly commit changes to your branch with `git commit -S -m "A good comment, can be multiline."`. (Note, the `-S` flag [signs your commit](https://help.github.com/en/articles/signing-commits), and signing commits is something you really should be doing.)
+1. Regularly push your changes to GitHub with `git push`
+1. Regularly rebase your branch from master. That means that you will incorporate recent changes in master into your local branch. **This is the really important part.** You can do it like this: `git fetch && git rebase master`.
+1. When you're done coding, go to GitHub and create a new Pull request, so that your branch can be merged up to `master`. 
+1. Administrators overlooking the project will get notified when you create your Pull request, take a look at the code and if everything looks fine merge it into `master` and delete your feature branch from GitHub. You will still have a copy of your feature branch locally, but it can be safely removed by running `git branch -d three-d-mode`. 
+
+### API documentation
+This project uses [JSDoc](https://jsdoc.app/index.html) to document JavaScript.
+
+The comment format of JSDoc is well-known and feels familiar to most coders. In addition, there are many plugins for editors (such as [Document This](https://marketplace.visualstudio.com/items?itemName=joelday.docthis) for Visual Studio Code) that simplify adding documentation.
+
+Make sure that you understand how to comment with JSDoc by reading the documentation. A good [starting point is here](https://jsdoc.app/about-getting-started.html). Additionally, a list of [all available commands is here](https://jsdoc.app/index.html#block-tags).
+
+JSDoc generates a `docs` folder (inside `new-client`) that contains browsable API documentation. 
+
+When you've added new code (**with meaningful comments**), make sure to update the API docs. It is done easily with `npm run createdocs`.
+
+However, no automatic doc generator will do your job, which is **writing meaningful comments inside your code**.
+
+### Code standard
 
 Hajk 3 uses **ESLint** and **Prettier** to enforce code formatting across the project.
 
@@ -16,78 +55,3 @@ The `new-client` directory contains `.eslint` file, so it's easy to follow the r
 **For a simple guide on setting up VSCode with ESLint, Prettier and some , see [this presentation](dokumentation/VSCodeSetup.pdf)**. (Swedish only)
 
 It is also super easy to get Prettier running with almost any editor. Please [refer to the docs](https://prettier.io/).
-
-## Code of Conduct
-
-### Our Pledge
-
-In the interest of fostering an open and welcoming environment, we as
-contributors and maintainers pledge to making participation in our project and
-our community a harassment-free experience for everyone, regardless of age, body
-size, disability, ethnicity, gender identity and expression, level of experience,
-nationality, personal appearance, race, religion, or sexual identity and
-orientation.
-
-### Our Standards
-
-Examples of behavior that contributes to creating a positive environment
-include:
-
-- Using welcoming and inclusive language
-- Being respectful of differing viewpoints and experiences
-- Gracefully accepting constructive criticism
-- Focusing on what is best for the community
-- Showing empathy towards other community members
-
-Examples of unacceptable behavior by participants include:
-
-- The use of sexualized language or imagery and unwelcome sexual attention or
-  advances
-- Trolling, insulting/derogatory comments, and personal or political attacks
-- Public or private harassment
-- Publishing others' private information, such as a physical or electronic
-  address, without explicit permission
-- Other conduct which could reasonably be considered inappropriate in a
-  professional setting
-
-### Our Responsibilities
-
-Project maintainers are responsible for clarifying the standards of acceptable
-behavior and are expected to take appropriate and fair corrective action in
-response to any instances of unacceptable behavior.
-
-Project maintainers have the right and responsibility to remove, edit, or
-reject comments, commits, code, wiki edits, issues, and other contributions
-that are not aligned to this Code of Conduct, or to ban temporarily or
-permanently any contributor for other behaviors that they deem inappropriate,
-threatening, offensive, or harmful.
-
-### Scope
-
-This Code of Conduct applies both within project spaces and in public spaces
-when an individual is representing the project or its community. Examples of
-representing a project or community include using an official project e-mail
-address, posting via an official social media account, or acting as an appointed
-representative at an online or offline event. Representation of a project may be
-further defined and clarified by project maintainers.
-
-### Enforcement
-
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported by contacting the project team at [INSERT EMAIL ADDRESS]. All
-complaints will be reviewed and investigated and will result in a response that
-is deemed necessary and appropriate to the circumstances. The project team is
-obligated to maintain confidentiality with regard to the reporter of an incident.
-Further details of specific enforcement policies may be posted separately.
-
-Project maintainers who do not follow or enforce the Code of Conduct in good
-faith may face temporary or permanent repercussions as determined by other
-members of the project's leadership.
-
-### Attribution
-
-This Code of Conduct is adapted from the [Contributor Covenant][homepage], version 1.4,
-available at [http://contributor-covenant.org/version/1/4][version]
-
-[homepage]: http://contributor-covenant.org
-[version]: http://contributor-covenant.org/version/1/4/
