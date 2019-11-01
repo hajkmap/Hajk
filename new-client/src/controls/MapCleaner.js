@@ -13,6 +13,12 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+/**
+ * @summary Hides all visible layers
+ *
+ * @param {object} props
+ * @returns {object} React
+ */
 const MapCleaner = React.memo(props => {
   const classes = useStyles();
 

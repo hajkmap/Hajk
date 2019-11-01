@@ -14,8 +14,9 @@ import PluginWindows from "./PluginWindows";
 import Zoom from "../controls/Zoom";
 import ScaleLine from "../controls/ScaleLine";
 import Attribution from "../controls/Attribution.js";
-import MapSwitcher from "../controls/MapSwitcher";
 import MapCleaner from "../controls/MapCleaner";
+import MapResetter from "../controls/MapResetter";
+import MapSwitcher from "../controls/MapSwitcher";
 
 import {
   Backdrop,
@@ -428,6 +429,12 @@ class App extends React.PureComponent {
                 <Zoom map={this.appModel.getMap()} />
                 {clean === false && <MapSwitcher appModel={this.appModel} />}
                 {clean === false && <MapCleaner appModel={this.appModel} />}
+                {clean === true && (
+                  <MapResetter
+                    mapConfig={this.appModel.config.mapConfig}
+                    map={this.appModel.getMap()}
+                  />
+                )}
               </div>
             </main>
             <footer
