@@ -400,7 +400,14 @@ class AppModel {
   }
 
   mergeConfig(a, b) {
-    var x = parseFloat(b.x),
+    // clean is used to strip the UI of all elements so we get a super clean viewport back, without any plugins
+    const clean =
+      Boolean(b.hasOwnProperty("clean")) &&
+      b.clean !== "false" &&
+      b.clean !== "0";
+
+    // Merge query params to the map config from JSON
+    let x = parseFloat(b.x),
       y = parseFloat(b.y),
       z = parseInt(b.z, 10),
       l = undefined;
@@ -418,6 +425,7 @@ class AppModel {
       z = a.map.zoom;
     }
 
+    a.map.clean = clean;
     a.map.center[0] = x;
     a.map.center[1] = y;
     a.map.zoom = z;

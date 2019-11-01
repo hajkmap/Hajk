@@ -179,7 +179,10 @@ class BaseWindowPlugin extends React.PureComponent {
   }
 
   render() {
-    return this.renderWindow();
+    return (
+      // Don't render if "clean" query param is specified, otherwise go on
+      this.props.app.config.mapConfig.map.clean !== true && this.renderWindow()
+    );
   }
 }
 

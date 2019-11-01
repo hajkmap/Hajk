@@ -345,7 +345,8 @@ class App extends React.PureComponent {
       : "Visa verktygspanelen";
     return (
       Object.keys(this.appModel.plugins).length > 0 &&
-      this.appModel.plugins.search === undefined && (
+      this.appModel.plugins.search === undefined &&
+      this.appModel.config.mapConfig.map.clean !== true && (
         <Tooltip title={tooltipText}>
           <span>
             <Fab
@@ -365,6 +366,9 @@ class App extends React.PureComponent {
 
   render() {
     const { classes, config } = this.props;
+
+    // If clean===true, some components won't be rendered below
+    const clean = config.mapConfig.map.clean;
 
     return (
       <SnackbarProvider
@@ -395,8 +399,8 @@ class App extends React.PureComponent {
             <header
               className={cslx(classes.header, classes.pointerEventsOnChildren)}
             >
-              {this.renderStandaloneDrawerToggler()}
-              {this.renderSearchPlugin()}
+              {clean === false && this.renderStandaloneDrawerToggler()}
+              {clean === false && this.renderSearchPlugin()}
             </header>
             <main className={classes.main}>
               <div
@@ -422,8 +426,8 @@ class App extends React.PureComponent {
                 )}
               >
                 <Zoom map={this.appModel.getMap()} />
-                <MapSwitcher appModel={this.appModel} />
-                <MapCleaner appModel={this.appModel} />
+                {clean === false && <MapSwitcher appModel={this.appModel} />}
+                {clean === false && <MapCleaner appModel={this.appModel} />}
               </div>
             </main>
             <footer
