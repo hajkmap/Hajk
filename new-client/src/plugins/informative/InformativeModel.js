@@ -7,6 +7,7 @@ class InformativeModel {
     this.olMap = settings.map;
     this.url = settings.app.config.appConfig.proxy + settings.url;
     this.globalObserver = settings.app.globalObserver;
+    this.localObserver = settings.localObserver;
     this.app = settings.app;
     this.exportUrl = settings.exportUrl;
   }
@@ -150,13 +151,13 @@ class InformativeModel {
       callback(data.chapters);
       this.chapters = data.chapters;
     } catch (err) {
-      // TODO: replace "alert" with something that will use the Snackbar. But first, we must find a way to bind for Snackbar in AppModel.
-      // this.globalObserver.publish(
-      //   "alert",
-      //   "Informative Plugin kunde inte ladda data korrekt. Om felet kvarstår var god och meddela administratören."
-      // );
+      this.localObserver.publish("showSnackbar", {
+        message:
+          "Laddning av Informative-pluginet misslyckades. Pluginet verkar vara felaktigt konfigurerat. Var god kontakta systemadministratören.",
+        options: { variant: "error" }
+      });
       console.error(
-        `Couldn't load data for Informative plugin. Make sure that the URL to mapservice is correctly configured. Current value: ${response.url}`
+        `Couldn't load data for Informative plugin. Make sure that the URL to mapservice is correctly configured.`
       );
     }
   }

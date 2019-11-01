@@ -18,10 +18,11 @@ class Informative extends React.PureComponent {
 
     this.localObserver = Observer();
     this.informativeModel = new InformativeModel({
-      map: props.map,
       app: props.app,
-      url: props.options.serviceUrl + "/" + props.options.document,
-      exportUrl: props.options.exportUrl
+      exportUrl: props.options.exportUrl,
+      localObserver: this.localObserver,
+      map: props.map,
+      url: props.options.serviceUrl + "/" + props.options.document
     });
   }
 

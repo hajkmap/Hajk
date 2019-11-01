@@ -15,6 +15,7 @@ import ArrowDownward from "@material-ui/icons/ArrowDownward";
 import Typography from "@material-ui/core/Typography";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import Alert from "../../components/Alert.js";
+import { withSnackbar } from "notistack";
 
 const styles = theme => ({
   rightIcon: {
@@ -168,6 +169,11 @@ class Informative extends React.PureComponent {
           displayLegend: false
         });
       }
+    });
+
+    this.props.observer.subscribe("showSnackbar", params => {
+      const { message, options } = params;
+      this.props.enqueueSnackbar(message, options);
     });
   }
 
@@ -465,4 +471,4 @@ class Informative extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(Informative);
+export default withStyles(styles)(withSnackbar(Informative));
