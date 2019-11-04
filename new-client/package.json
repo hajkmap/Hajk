@@ -48,7 +48,7 @@
     "load-google-maps-api": "^2.0.0",
     "marked": "^0.7.0",
     "notistack": "^0.9.5",
-    "ol": "^6.1.0",
+    "ol": "^6.1.1",
     "proj4": "^2.5.0",
     "react": "^16.11.0",
     "react-app-polyfill": "^1.0.4",
