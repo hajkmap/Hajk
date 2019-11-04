@@ -1,7 +1,8 @@
 class AnchorModel {
   constructor(settings) {
-    this.map = settings.map;
     this.app = settings.app;
+    this.getCleanUrl = settings.getCleanUrl;
+    this.map = settings.map;
     this.localObserver = settings.localObserver;
     var update = e => {
       setTimeout(() => {
@@ -48,13 +49,19 @@ class AnchorModel {
   }
 
   getAnchor() {
-    var str = this.toParams({
+    const str = this.toParams({
       x: this.map.getView().getCenter()[0],
       y: this.map.getView().getCenter()[1],
       z: this.map.getView().getZoom(),
-      l: this.getVisibleLayers()
+      l: this.getVisibleLayers(),
+      clean: this.getCleanUrl()
     });
-    return document.location.href + str;
+
+    // Split on "?" and get only the first segment. This prevents
+    // multiple query string situations, such as https://www.foo.com/?a=b?c=d
+    // that can happen if user enters the application using a link that already
+    // contains query parameters.
+    return document.location.href.split("?")[0] + str;
   }
 }
 

@@ -1,17 +1,44 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
 import PropTypes from "prop-types";
-import Button from "@material-ui/core/Button";
+
+import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import Typography from "@material-ui/core/Typography/Typography";
+
+import {
+  Checkbox,
+  FormGroup,
+  FormControlLabel,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Tooltip,
+  Typography
+} from "@material-ui/core";
+
+import FileCopyIcon from "@material-ui/icons/FileCopy";
 
 const styles = theme => ({
-  anchor: {
-    wordBreak: "break-all"
+  margin: {
+    marginBottom: theme.spacing(1)
+  },
+  root: {
+    "& input": {
+      fontFamily: "monospace"
+    }
   }
 });
 
 class AnchorView extends React.PureComponent {
+  static propTypes = {
+    classes: PropTypes.object.isRequired,
+    cleanUrl: PropTypes.bool.isRequired,
+    closeSnackbar: PropTypes.func.isRequired,
+    enqueueSnackbar: PropTypes.func.isRequired,
+    localObserver: PropTypes.object.isRequired,
+    model: PropTypes.object.isRequired,
+    toggleCleanUrl: PropTypes.func.isRequired
+  };
+
   state = {
     anchor: this.props.model.getAnchor()
   };
@@ -28,33 +55,64 @@ class AnchorView extends React.PureComponent {
         anchor: anchor
       });
     });
-    this.setState({
-      anchor: this.props.model.getAnchor()
-    });
   }
+
+  handleClickOnCopyToClipboard = e => {
+    const input = document.getElementById("anchorUrl");
+    input.select();
+    document.execCommand("copy") &&
+      this.props.enqueueSnackbar("Kopiering till urklipp lyckades!", {
+        variant: "info"
+      });
+  };
 
   render() {
     const { classes } = this.props;
     return (
       <>
-        <Typography>
-          Spara kartans synliga lager, aktuella zoomnivå och utbredning.
-          <br />
-          Högerklicka på knappen och välj "Kopiera länkadress" för att kopiera
-          länken till urklipp.
-        </Typography>
-        <br />
-        <Button variant="contained" target="_blank" href={this.state.anchor}>
-          Länk till karta
-        </Button>
-        <p className={classes.anchor}>{this.state.anchor}</p>
+        <FormGroup row className={classes.margin}>
+          <Typography>
+            Skapa en länk med kartans synliga lager, aktuella zoomnivå och
+            utbredning.
+          </Typography>
+        </FormGroup>
+        <FormGroup row className={classes.margin}>
+          <TextField
+            className={classes.root}
+            fullWidth
+            id="anchorUrl"
+            InputProps={{
+              // display Copy to clipboard only if browser supports copy command
+              endAdornment: document.queryCommandSupported("copy") && (
+                <InputAdornment position="end">
+                  <Tooltip title="Kopiera länk till urklipp">
+                    <IconButton onClick={this.handleClickOnCopyToClipboard}>
+                      <FileCopyIcon />
+                    </IconButton>
+                  </Tooltip>
+                </InputAdornment>
+              ),
+              readOnly: true
+            }}
+            value={this.state.anchor}
+            variant="outlined"
+          />
+        </FormGroup>
+        <FormGroup row className={classes.margin}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={this.props.cleanUrl}
+                onChange={this.props.toggleCleanUrl}
+                value="clean"
+              />
+            }
+            label="Valfritt: skapa länk till ren karta"
+          />
+        </FormGroup>
       </>
     );
   }
 }
-
-AnchorView.propTypes = {
-  classes: PropTypes.object.isRequired
-};
 
 export default withStyles(styles)(withSnackbar(AnchorView));
