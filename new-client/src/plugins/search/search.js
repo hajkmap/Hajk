@@ -533,7 +533,10 @@ class Search extends React.PureComponent {
    * @memberof Search
    */
   render() {
-    return this.renderCenter();
+    // If clean===true, some components won't be rendered below
+    const clean = this.props.app.config.mapConfig.map.clean;
+
+    return clean === false && this.renderCenter();
   }
 }
 
