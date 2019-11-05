@@ -53,6 +53,7 @@ var defaultState = {
   tooltip: "Sök...",
   searchWithinButtonText: "Markera i kartan",
   toolDescription: "<div>Sök innehåll i kartan</div>",
+  maxFeatures: 100,
   popupOffsetY: 0,
   visibleForGroups: [],
   searchableLayers: {},
@@ -114,6 +115,7 @@ class ToolOptions extends Component {
             this.state.searchWithinButtonText,
           toolDescription:
             tool.options.toolDescription || this.state.toolDescription,
+          maxFeatures: tool.options.maxFeatures || this.state.maxFeatures,
           popupOffsetY: tool.options.popupOffsetY,
           visibleForGroups: tool.options.visibleForGroups
             ? tool.options.visibleForGroups
@@ -273,6 +275,7 @@ class ToolOptions extends Component {
         tooltip: this.state.tooltip,
         searchWithinButtonText: this.state.searchWithinButtonText,
         toolDescription: this.state.toolDescription,
+        maxFeatures: this.state.maxFeatures,
         popupOffsetY: this.state.popupOffsetY,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
@@ -920,6 +923,17 @@ class ToolOptions extends Component {
               value={this.state.toolDescription}
               type="text"
               name="toolDescription"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="maxFeatures">Antal sökträffar</label>
+            <input
+              value={this.state.maxFeatures}
+              type="text"
+              name="maxFeatures"
               onChange={e => {
                 this.handleInputChange(e);
               }}
