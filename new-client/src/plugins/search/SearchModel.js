@@ -62,7 +62,7 @@ class SearchModel {
       featureTypes: source.layers,
       srsName: projCode,
       outputFormat: "JSON", //source.outputFormat,
-      maxFeatures: this.options.maxFeatures,
+      maxFeatures: this.options.maxFeatures || 100,
       geometryName: source.geometryName,
       filter: new Intersects(
         "geom", // geometryName
@@ -613,7 +613,7 @@ class SearchModel {
       srsName: projCode,
       outputFormat: "JSON", //source.outputFormat,
       geometryName: source.geometryField,
-      maxFeatures: this.options.maxFeatures,
+      maxFeatures: this.options.maxFeatures || 100,
       filter: filter
     };
 
