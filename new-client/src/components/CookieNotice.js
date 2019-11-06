@@ -12,7 +12,8 @@ const useStyles = makeStyles(theme => ({
 }));
 
 CookieNotice.propTypes = {
-  cookieNoticeMessage: string,
+  defaultCookieNoticeMessage: string,
+  defaultCookieNoticeUrl: string,
   globalObserver: object.isRequired
 };
 
@@ -23,7 +24,12 @@ CookieNotice.propTypes = {
  * @returns React.Component
  */
 function CookieNotice({
-  cookieNoticeMessage = "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+  defaultCookieNoticeMessage = defaultCookieNoticeMessage
+    ? defaultCookieNoticeMessage
+    : "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+  defaultCookieNoticeUrl = defaultCookieNoticeUrl
+    ? defaultCookieNoticeUrl
+    : "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
   globalObserver
 }) {
   const classes = useStyles();
@@ -33,8 +39,7 @@ function CookieNotice({
     <>
       <Button
         onClick={() => {
-          window.location =
-            "https://webbriktlinjer.se/lagkrav/kaklagen-i-praktiken/";
+          window.open(defaultCookieNoticeUrl);
         }}
         variant="text"
         className={classes.textButton}
@@ -58,7 +63,7 @@ function CookieNotice({
   // Display only if "cookie" hasn't been set yet
   parseInt(window.localStorage.getItem("cookieNoticeShown")) !== 1 &&
     globalObserver.subscribe("appLoaded", () => {
-      enqueueSnackbar(cookieNoticeMessage, {
+      enqueueSnackbar(defaultCookieNoticeMessage, {
         persist: true,
         anchorOrigin: {
           vertical: "bottom",

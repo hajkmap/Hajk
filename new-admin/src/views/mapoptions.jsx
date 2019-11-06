@@ -57,7 +57,9 @@ class MapOptions extends Component {
         title: config.title ? config.title : "",
         geoserverLegendOptions: config.geoserverLegendOptions
           ? config.geoserverLegendOptions
-          : ""
+          : "",
+        defaultCookieNoticeMessage: config.defaultCookieNoticeMessage,
+        defaultCookieNoticeUrl: config.defaultCookieNoticeUrl
       });
       this.validate();
     });
@@ -91,7 +93,13 @@ class MapOptions extends Component {
       mapcleaner: mapConfig.mapcleaner,
       drawerVisible: mapConfig.drawerVisible,
       drawerPermanent: mapConfig.drawerPermanent,
-      geoserverLegendOptions: mapConfig.geoserverLegendOptions
+      geoserverLegendOptions: mapConfig.geoserverLegendOptions,
+      defaultCookieNoticeMessage: mapConfig.defaultCookieNoticeMessage
+        ? mapConfig.defaultCookieNoticeMessage
+        : "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+      defaultCookieNoticeUrl: mapConfig.defaultCookieNoticeUrl
+        ? mapConfig.defaultCookieNoticeUrl
+        : "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
     });
   }
 
@@ -244,6 +252,10 @@ class MapOptions extends Component {
         config.drawerVisible = this.getValue("drawerVisible");
         config.drawerPermanent = this.getValue("drawerPermanent");
         config.geoserverLegendOptions = this.getValue("geoserverLegendOptions");
+        config.defaultCookieNoticeMessage = this.getValue(
+          "defaultCookieNoticeMessage"
+        );
+        config.defaultCookieNoticeUrl = this.getValue("defaultCookieNoticeUrl");
         this.props.model.updateMapConfig(config, success => {
           var msg = success
             ? "Uppdateringen lyckades."
@@ -504,6 +516,49 @@ class MapOptions extends Component {
                 className={this.getValidationClass("geoserverLegendOptions")}
                 onChange={e => {
                   this.setState({ geoserverLegendOptions: e.target.value });
+                }}
+              />
+            </div>
+            <div>
+              <label>
+                Cookies-meddelande{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Ange meddelande för cookies"
+                />
+              </label>
+              <textarea
+                type="text"
+                ref="input_defaultCookieNoticeMessage"
+                value={this.state.defaultCookieNoticeMessage}
+                className={this.getValidationClass(
+                  "defaultCookieNoticeMessage"
+                )}
+                onChange={e => {
+                  this.setState(
+                    { defaultCookieNoticeMessage: e.target.value },
+                    () => this.validateField("defaultCookieNoticeMessage")
+                  );
+                }}
+              />
+            </div>
+            <div>
+              <label>
+                Cookies-länk{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Valfri URL som öppnas med knappen 'Mer information'"
+                />
+              </label>
+              <input
+                type="text"
+                ref="input_defaultCookieNoticeUrl"
+                value={this.state.defaultCookieNoticeUrl}
+                className={this.getValidationClass("defaultCookieNoticeUrl")}
+                onChange={e => {
+                  this.setState({ defaultCookieNoticeUrl: e.target.value });
                 }}
               />
             </div>

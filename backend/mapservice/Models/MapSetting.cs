@@ -49,5 +49,9 @@ namespace MapService.Models
         public bool drawerPermanent { get; set; }
 
         public Colors colors { get; set; }
+
+        public string defaultCookieNoticeMessage { get; set; }
+
+        public string defaultCookieNoticeUrl { get; set; }
     }
 }

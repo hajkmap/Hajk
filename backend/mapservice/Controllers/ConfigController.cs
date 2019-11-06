@@ -469,7 +469,9 @@ namespace MapService.Controllers
 						2.0,
 						1.0,
 						0.5
-					}
+					},
+                    defaultCookieNoticeMessage = "",
+                    defaultCookieNoticeUrl = ""
 				},
 				projections = new List<Projection>()
 				{

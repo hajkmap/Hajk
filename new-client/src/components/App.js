@@ -385,6 +385,9 @@ class App extends React.PureComponent {
             defaultCookieNoticeMessage={
               this.props.config.mapConfig.map.defaultCookieNoticeMessage
             }
+            defaultCookieNoticeUrl={
+              this.props.config.mapConfig.map.defaultCookieNoticeUrl
+            }
           />
           <Alert
             open={this.state.alert}
