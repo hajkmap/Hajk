@@ -371,6 +371,18 @@ class App extends React.PureComponent {
     // If clean===true, some components won't be rendered below
     const clean = config.mapConfig.map.clean;
 
+    const defaultCookieNoticeMessage =
+      this.props.config.mapConfig.map.defaultCookieNoticeMessage
+        .toString()
+        .trim().length > 0
+        ? this.props.config.mapConfig.map.defaultCookieNoticeMessage
+        : undefined;
+    const defaultCookieNoticeUrl =
+      this.props.config.mapConfig.map.defaultCookieNoticeUrl.toString().trim()
+        .length > 0
+        ? this.props.config.mapConfig.map.defaultCookieNoticeUrl
+        : undefined;
+
     return (
       <SnackbarProvider
         maxSnack={3}
@@ -382,12 +394,8 @@ class App extends React.PureComponent {
         <>
           <CookieNotice
             globalObserver={this.globalObserver}
-            defaultCookieNoticeMessage={
-              this.props.config.mapConfig.map.defaultCookieNoticeMessage
-            }
-            defaultCookieNoticeUrl={
-              this.props.config.mapConfig.map.defaultCookieNoticeUrl
-            }
+            defaultCookieNoticeMessage={defaultCookieNoticeMessage}
+            defaultCookieNoticeUrl={defaultCookieNoticeUrl}
           />
           <Alert
             open={this.state.alert}

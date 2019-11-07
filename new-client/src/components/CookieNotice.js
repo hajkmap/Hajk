@@ -24,14 +24,11 @@ CookieNotice.propTypes = {
  * @returns React.Component
  */
 function CookieNotice({
-  defaultCookieNoticeMessage = defaultCookieNoticeMessage
-    ? defaultCookieNoticeMessage
-    : "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
-  defaultCookieNoticeUrl = defaultCookieNoticeUrl
-    ? defaultCookieNoticeUrl
-    : "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
+  defaultCookieNoticeMessage = "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+  defaultCookieNoticeUrl = "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
   globalObserver
 }) {
+  console.log("defaultCookieNoticeUrl: ", defaultCookieNoticeUrl);
   const classes = useStyles();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
