@@ -61,6 +61,24 @@ class LayersSwitcherView extends React.PureComponent {
   handleChangeTabs = (event, activeTab) => {
     this.setState({ activeTab });
   };
+
+  /**
+   * @summary Ensure that the selected Tab's indicator has correct width.
+   * @description When Tabs are mounted, the indicator (below selected button)
+   * can have incorrect width (based on calculations done prior complete render).
+   * This function is called once, on mount of <Tabs> and ensures that the
+   * indicator gets correct width.
+   *
+   * @memberof LayersSwitcherView
+   */
+  handleTabsMounted = ref => {
+    // Not beautiful but it works - timeout is needed to ensure rendering is done
+    // and parent's element are correct.
+    setTimeout(() => {
+      ref.updateIndicator();
+    }, 1);
+  };
+
   /**
    * @summary Loops through map configuration and
    * renders all groups. Visible only if @param shouldRender is true.
@@ -124,10 +142,11 @@ class LayersSwitcherView extends React.PureComponent {
             className={classes.stickyAppBar}
           >
             <Tabs
-              value={this.state.activeTab}
-              onChange={this.handleChangeTabs}
+              action={this.handleTabsMounted}
               indicatorColor="primary"
+              onChange={this.handleChangeTabs}
               textColor="primary"
+              value={this.state.activeTab}
               variant="fullWidth"
             >
               <Tab label="Kartlager" />
