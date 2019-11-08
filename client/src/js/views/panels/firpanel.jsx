@@ -25,7 +25,7 @@ var FirPanelView = {
 
     render: function () {
         return (
-            <Panel title='FIR' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={window.atob(this.props.model.get('instruction'))}>
+            <Panel title='Fastighet' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={window.atob(this.props.model.get('instruction'))}>
                 <div className='panel-content'>
                     <FirSearch model={this.props.model} navigationPanel={this.props.navigationPanel} />
                 </div>
