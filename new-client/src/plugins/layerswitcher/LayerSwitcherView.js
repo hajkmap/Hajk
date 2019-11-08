@@ -11,10 +11,13 @@ import BreadCrumbs from "./components/BreadCrumbs.js";
 
 const styles = theme => ({
   windowContent: {
-    margin: "-10px" // special case, we need to "unset" the padding for Window content that's set in Window.js
+    margin: -10 // special case, we need to "unset" the padding for Window content that's set in Window.js
+  },
+  stickyAppBar: {
+    top: -10
   },
   tabContent: {
-    padding: "10px"
+    padding: 10
   }
 });
 
@@ -115,7 +118,11 @@ class LayersSwitcherView extends React.PureComponent {
     return (
       <>
         <div className={classes.windowContent}>
-          <AppBar position="static" color="default">
+          <AppBar
+            position="sticky" // Does not work in IE11
+            color="default"
+            className={classes.stickyAppBar}
+          >
             <Tabs
               value={this.state.activeTab}
               onChange={this.handleChangeTabs}
