@@ -11,7 +11,7 @@ var KirModelProperties = {
     panel: 'kirpanel',
     toolbar: 'bottom',
     icon: 'fa fa-address-book-o icon',
-    title: 'FIR',
+    title: 'Befolkning',
     visible: false,
     value: '',
     filter: '',

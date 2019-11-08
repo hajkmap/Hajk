@@ -10,7 +10,7 @@ var KirPanelView = {
 
   render: function () {
     return (
-      <Panel title='KIR' onCloseClicked={this.props.onCloseClicked}
+      <Panel title='Befolkning' onCloseClicked={this.props.onCloseClicked}
         onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}
         instruction={decodeURIComponent(atob(this.props.model.get('instruction')))}>
           <div className='panel-content'>
