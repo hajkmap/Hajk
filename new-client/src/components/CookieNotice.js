@@ -28,7 +28,6 @@ function CookieNotice({
   defaultCookieNoticeUrl = "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
   globalObserver
 }) {
-  console.log("defaultCookieNoticeUrl: ", defaultCookieNoticeUrl);
   const classes = useStyles();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
