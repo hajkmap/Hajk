@@ -12,6 +12,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import LayerSettings from "./LayerSettings.js";
+import DownloadLink from "./DownloadLink";
 
 const styles = theme => ({
   button: {
@@ -414,6 +415,13 @@ class LayerGroupItem extends Component {
             <label className={classes.captionText}>
               {layer.layersInfo[subLayer].caption}
             </label>
+          </div>
+          <div className={classes.layerButton}>
+            <DownloadLink
+              index={index}
+              layer={this.props.layer}
+              appConfig={this.props.appConfig}
+            />
           </div>
           <div className={classes.layerButton}>
             {this.state.toggleSubLayerSettings[index] ? (

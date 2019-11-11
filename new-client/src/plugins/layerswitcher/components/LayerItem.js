@@ -11,6 +11,7 @@ import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import CloseIcon from "@material-ui/icons/Close";
 import LayerGroupItem from "./LayerGroupItem.js";
 import LayerSettings from "./LayerSettings.js";
+import DownloadLink from "./DownloadLink.js";
 
 const styles = theme => ({
   button: {
@@ -338,6 +339,7 @@ class LayerItem extends React.PureComponent {
     if (layer.layerType === "group") {
       return (
         <LayerGroupItem
+          appConfig={app.config.appConfig}
           layer={layer}
           model={model}
           chapters={chapters}
@@ -350,6 +352,7 @@ class LayerItem extends React.PureComponent {
         />
       );
     }
+
     return (
       <div className={classes.layerItemContainer}>
         <div className={classes.layerItem}>
@@ -369,6 +372,12 @@ class LayerItem extends React.PureComponent {
             </div>
           </div>
           <div className={classes.layerButtons}>
+            <div className={classes.layerButton}>
+              <DownloadLink
+                layer={this.props.layer}
+                appConfig={this.props.app.config.appConfig}
+              />
+            </div>
             <div className={classes.layerButton}>{this.renderStatus()}</div>
             <div className={classes.layerButton}>
               <div className={classes.infoContainer}>
