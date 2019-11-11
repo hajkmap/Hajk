@@ -9,7 +9,6 @@ import Observer from "react-event-observer";
 
 class Coordinates extends React.PureComponent {
   state = {
-    coordinates: null,
     transformedCoordinates: []
   };
 
@@ -17,11 +16,6 @@ class Coordinates extends React.PureComponent {
     super(props);
 
     this.localObserver = Observer();
-    this.localObserver.subscribe("setCoordinates", coordinates => {
-      this.setState({
-        coordinates: coordinates
-      });
-    });
 
     this.localObserver.subscribe(
       "setTransformedCoordinates",
