@@ -1200,56 +1200,50 @@ class Menu extends Component {
    * Renderar konfigurationsmöjlighet för temakartor-dropdown
    */
   renderThemeMapCheckbox() {
-    if (this.state.authActive) {
-      return (
-        <div className="row">
-          <div className="col-sm-1">
-            <input
-              id="dropdownThemeMaps"
-              name="dropdownThemeMaps"
-              type="checkbox"
-              onChange={this.handleInputChange}
-              checked={this.state.dropdownThemeMaps}
-            />
-            &nbsp;
-          </div>
-          <label
-            className="layer-menu-label-checkbox"
-            htmlFor="dropdownThemeMaps"
-          >
-            Visa kartan i lista över tillgängliga kartor
-          </label>
+    return (
+      <div className="row">
+        <div className="col-sm-1">
+          <input
+            id="dropdownThemeMaps"
+            name="dropdownThemeMaps"
+            type="checkbox"
+            onChange={this.handleInputChange}
+            checked={this.state.dropdownThemeMaps}
+          />
+          &nbsp;
         </div>
-      );
-    } else {
-      return null;
-    }
+        <label
+          className="layer-menu-label-checkbox"
+          htmlFor="dropdownThemeMaps"
+        >
+          Visa kartan i lista över tillgängliga kartor
+        </label>
+      </div>
+    );
   }
 
   /**
    * Renderar inmatningsfält för rubriksättning till temakartor
    */
   renderThemeMapHeaderInput() {
-    if (this.state.authActive) {
-      return (
-        <div className="row">
-          <div className="col-sm-12">
-            <label htmlFor="themeMapHeaderCaption">Rubriktext temakartor</label>
-            <input
-              id="themeMapHeaderCaption"
-              name="themeMapHeaderCaption"
-              type="text"
-              value={this.state.themeMapHeaderCaption}
-              onChange={e => {
-                this.setState({ themeMapHeaderCaption: e.target.value });
-              }}
-            />
-          </div>
+    return (
+      <div className="row">
+        <div className="col-sm-12">
+          <label htmlFor="themeMapHeaderCaption">
+            Kartans titel i listan över tillgängliga kartor
+          </label>
+          <input
+            id="themeMapHeaderCaption"
+            name="themeMapHeaderCaption"
+            type="text"
+            value={this.state.themeMapHeaderCaption}
+            onChange={e => {
+              this.setState({ themeMapHeaderCaption: e.target.value });
+            }}
+          />
         </div>
-      );
-    } else {
-      return null;
-    }
+      </div>
+    );
   }
 
   /**
