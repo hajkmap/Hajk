@@ -365,23 +365,27 @@ class App extends React.PureComponent {
     );
   }
 
+  isString(s) {
+    return s instanceof String || typeof s === "string";
+  }
+
   render() {
     const { classes, config } = this.props;
 
     // If clean===true, some components won't be rendered below
     const clean = config.mapConfig.map.clean;
 
-    const defaultCookieNoticeMessage =
+    const defaultCookieNoticeMessage = this.isString(
       this.props.config.mapConfig.map.defaultCookieNoticeMessage
-        .toString()
-        .trim().length > 0
-        ? this.props.config.mapConfig.map.defaultCookieNoticeMessage
-        : undefined;
-    const defaultCookieNoticeUrl =
-      this.props.config.mapConfig.map.defaultCookieNoticeUrl.toString().trim()
-        .length > 0
-        ? this.props.config.mapConfig.map.defaultCookieNoticeUrl
-        : undefined;
+    )
+      ? this.props.config.mapConfig.map.defaultCookieNoticeMessage
+      : undefined;
+
+    const defaultCookieNoticeUrl = this.isString(
+      this.props.config.mapConfig.map.defaultCookieNoticeUrl
+    )
+      ? this.props.config.mapConfig.map.defaultCookieNoticeUrl
+      : undefined;
 
     return (
       <SnackbarProvider
