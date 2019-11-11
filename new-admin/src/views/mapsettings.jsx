@@ -501,7 +501,7 @@ class Menu extends Component {
    */
   getLayerNameFromId(id) {
     var layer = this.props.model.get("layers").find(layer => layer.id === id);
-    return layer ? layer.caption : "";
+    return layer ? layer.caption : `---[layer id ${id} not found]---`;
   }
 
   /**
