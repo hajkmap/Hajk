@@ -323,9 +323,9 @@ var KirSearchView = {
                   {this.renderImportKml()}
 
                   <p>
-                    Lägg till buffert
+                    <span>Lägg till buffert  </span>
                     <input id="bufferSearchingInput" type='text' ref='bufferSearchingInput' defaultValue="0" onChange={this.props.model.bufferSearchingInput}/>
-                    meter till sökområde
+                    <span>  meter till sökområde</span>
                   </p>
 
                   <div className="kir-filters">

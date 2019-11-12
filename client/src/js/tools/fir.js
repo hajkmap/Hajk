@@ -11,7 +11,7 @@ var FirModelProperties = {
     panel: 'firpanel',
     toolbar: 'bottom',
     icon: 'fa fa-home icon',
-    title: 'FIR',
+    title: 'Fastighet',
     visible: false,
     value: '',
     filter: '',
