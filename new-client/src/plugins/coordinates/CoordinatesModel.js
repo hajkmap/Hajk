@@ -23,10 +23,6 @@ class CoordinatesModel {
   }
 
   addMarker = coordinates => {
-    if (!this.activated) {
-      return;
-    }
-
     let feature = new Feature({
       geometry: new Point(coordinates)
     });
@@ -49,10 +45,14 @@ class CoordinatesModel {
 
   activate() {
     let transformations = this.transformations;
+    this.activated = true;
 
     this.map.on("singleclick", e => {
+      if (!this.activated) {
+        return;
+      }
+
       this.coordinates = e.coordinate;
-      this.activated = true;
       this.addMarker(this.coordinates);
       let transformedCoordinates;
 
