@@ -267,6 +267,7 @@ class SearchModel {
   search = (searchInput, force, callback) => {
     clearTimeout(this.timeout);
 
+    this.clearRecentSpatialSearch();
     //var autoExecution = searchInput.length > 3;
 
     if (/*autoExecution ||*/ force === true) {
