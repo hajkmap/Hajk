@@ -50,6 +50,7 @@ class AnchorModel {
 
   getAnchor() {
     const str = this.toParams({
+      m: this.app.config.activeMap,
       x: this.map.getView().getCenter()[0],
       y: this.map.getView().getCenter()[1],
       z: this.map.getView().getZoom(),
