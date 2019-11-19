@@ -35,7 +35,7 @@ namespace MapService.Controllers
 
                 _log.DebugFormat("Received json: {0}", json);
 
-                var client = new System.Net.Http.HttpClient();
+                var client = new System.Net.Http.HttpClient(new System.Net.Http.HttpClientHandler { UseDefaultCredentials = true });
 
                 var content = new System.Net.Http.StringContent(json, Encoding.UTF8, "application/json");
                 var res = client.PostAsync(ConfigurationManager.AppSettings["firUrlServiceFastighetsforteckning"], content).Result;
