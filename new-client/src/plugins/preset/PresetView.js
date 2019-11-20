@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-//import Button from "@material-ui/core/Button";
 import { MenuItem } from "@material-ui/core";
 
 // Define JSS styles that will be used in this component.
@@ -60,17 +59,31 @@ class PresetView extends React.PureComponent {
   };
 
   handleOnClick = (event, item) => {
-    console.log(item);
-    let url = item.presetUrl.split("&");
-    let x = url[1].substring(2);
-    let y = url[2].substring(2);
-    let z = url[3].substring(2);
-    console.log(x, y, z);
-    const view = this.model.map.getView();
-    view.animate({
-      center: [x, y],
-      zoom: z
-    });
+    let url = item.presetUrl.toLowerCase();
+    if (
+      url.indexOf("&x=") > 0 &&
+      url.indexOf("&y=") > 0 &&
+      url.indexOf("&z=") > 0
+    ) {
+      //console.log(item);
+      let url = item.presetUrl.split("&");
+      let x = url[1].substring(2);
+      let y = url[2].substring(2);
+      let z = url[3].substring(2);
+      const view = this.model.map.getView();
+      view.animate({
+        center: [x, y],
+        zoom: z
+      });
+    } else {
+      alert(
+        "Länken: \n\n" +
+          item.presetUrl +
+          "\n\ntill: " +
+          item.name +
+          "\n\när tyvärr felaktig. Något av följande saknas: &x=, &y=, &z="
+      );
+    }
   };
 
   render() {
