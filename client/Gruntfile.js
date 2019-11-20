@@ -314,7 +314,7 @@ module.exports = function (grunt) {
         options: {
           port: 9000, // We will access debug environment through localhost:9000
           router: {
-            'localhost/mapservice': 'http://localhost:55418/', // Create a virtual route on 9000 that redirects to IIS' /mapservice. NB: Make sure to have IIS running! //localhost/mapservice must be available.
+            'localhost/mapservice': 'http://localhost:58292/', // Create a virtual route on 9000 that redirects to IIS' /mapservice. NB: Make sure to have IIS running! //localhost/mapservice must be available.
             'localhost/postProxy.aspx': 'http://localhost:80/postProxy.aspx', // proxy runs on IIS too, so it isn't available on port 9000. Since it isn't in /mapservice subdir, we need to be explicit about it
             'localhost/Temp': 'http://localhost:80/Temp/', // Similar fix for Temp where PDF/Tiff exports are placed
             'localhost/util': 'http://localhost:80/util',
