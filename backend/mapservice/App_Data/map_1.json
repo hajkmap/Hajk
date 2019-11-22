@@ -216,6 +216,17 @@
       "index": 0
     },
     {
+      "type": "vtsearch",
+      "options": {
+        "target": "toolbar",
+        "abstract": "VTSEARCH",
+        "title": "VTSEARCH",
+        "visibleAtStart": false,
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
       "type": "draw",
       "options": {
         "target": "toolbar",

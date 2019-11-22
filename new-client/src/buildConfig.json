@@ -15,7 +15,8 @@
     "measure",
     "routing",
     "search",
-    "streetview"
+    "streetview",
+    "vtsearch"
   ],
   "allTools": [
     "anchor",
@@ -34,6 +35,7 @@
     "routing",
     "search",
     "streetview",
-    "suggest"
+    "suggest",
+    "vt-search"
   ]
 }
