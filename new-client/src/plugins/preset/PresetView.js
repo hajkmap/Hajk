@@ -4,29 +4,13 @@ import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import { MenuItem } from "@material-ui/core";
 
-// Define JSS styles that will be used in this component.
-// Examle below utilizes the very powerful "theme" object
-// that gives access to some constants, see: https://material-ui.com/customization/default-theme/
-const styles = theme => ({
-  buttonWithBottomMargin: {
-    marginBottom: theme.spacing(2)
-  }
-});
+const styles = theme => ({});
 
 class PresetView extends React.PureComponent {
-  // Initialize state - this is the correct way of doing it nowadays.
-  state = {
-    counter: 0
-  };
+  state = {};
 
-  // propTypes and defaultProps are static properties, declared
-  // as high as possible within the component code. They should
-  // be immediately visible to other devs reading the file,
-  // since they serve as documentation.
   static propTypes = {
     model: PropTypes.object.isRequired,
-    app: PropTypes.object.isRequired,
-    localObserver: PropTypes.object.isRequired,
     classes: PropTypes.object.isRequired,
     enqueueSnackbar: PropTypes.func.isRequired
   };
@@ -34,12 +18,8 @@ class PresetView extends React.PureComponent {
   static defaultProps = {};
 
   constructor(props) {
-    // If you're not using some of properties defined below, remove them from your code.
-    // They are shown here for demonstration purposes only.
     super(props);
     this.model = this.props.model;
-    this.localObserver = this.props.localObserver;
-    this.globalObserver = this.props.app.globalObserver;
   }
 
   renderMenuItems = () => {
@@ -95,8 +75,4 @@ class PresetView extends React.PureComponent {
   }
 }
 
-// Exporting like this adds some props to PresetView.
-// withStyles will add a 'classes' prop, while withSnackbar
-// adds a function (enqueueSnackbar()
-// that can be used throughout the Component.
 export default withStyles(styles)(withSnackbar(PresetView));
