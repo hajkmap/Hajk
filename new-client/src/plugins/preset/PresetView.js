@@ -28,8 +28,7 @@ class PresetView extends React.PureComponent {
     app: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
     classes: PropTypes.object.isRequired,
-    enqueueSnackbar: PropTypes.func.isRequired,
-    closeSnackbar: PropTypes.func.isRequired
+    enqueueSnackbar: PropTypes.func.isRequired
   };
 
   static defaultProps = {};
@@ -65,7 +64,6 @@ class PresetView extends React.PureComponent {
       url.indexOf("&y=") > 0 &&
       url.indexOf("&z=") > 0
     ) {
-      //console.log(item);
       let url = item.presetUrl.split("&");
       let x = url[1].substring(2);
       let y = url[2].substring(2);
@@ -93,13 +91,12 @@ class PresetView extends React.PureComponent {
   };
 
   render() {
-    //const { classes } = this.props;
     return <>{this.renderMenuItems()}</>;
   }
 }
 
 // Exporting like this adds some props to PresetView.
 // withStyles will add a 'classes' prop, while withSnackbar
-// adds to functions (enqueueSnackbar() and closeSnackbar())
+// adds a function (enqueueSnackbar()
 // that can be used throughout the Component.
 export default withStyles(styles)(withSnackbar(PresetView));
