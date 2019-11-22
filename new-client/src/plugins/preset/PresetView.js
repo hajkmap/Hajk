@@ -76,12 +76,18 @@ class PresetView extends React.PureComponent {
         zoom: z
       });
     } else {
-      alert(
-        "Länken: \n\n" +
-          item.presetUrl +
-          "\n\ntill: " +
+      this.props.enqueueSnackbar(
+        "Länken till platsen är tyvärr felaktig. Kontakta administratören av karttjänsten för att åtgärda felet.",
+        {
+          variant: "warning"
+        }
+      );
+      console.error(
+        "Fel i verktyget Snabbval. Länken til : \n" +
           item.name +
-          "\n\när tyvärr felaktig. Något av följande saknas: &x=, &y=, &z="
+          "\n" +
+          item.presetUrl +
+          "\när tyvärr felaktig. Någon av följande parametrar saknas: &x=, &y=, &z= eller innehåller fel."
       );
     }
   };
