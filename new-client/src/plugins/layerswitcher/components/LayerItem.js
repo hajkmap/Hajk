@@ -406,7 +406,7 @@ class LayerItem extends React.PureComponent {
                     style={{
                       color: "gray",
                       cursor: "default",
-                      visibility: "hidden"
+                      display: "none"
                     }}
                   />
                 )}

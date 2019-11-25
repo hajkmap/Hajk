@@ -75,9 +75,8 @@ class ToolOptions extends Component {
   }
 
   componentDidMount() {
-    if (this.props.parent.props.parent.state.authActive) {
-      this.loadSearchableLayers();
-    }
+    this.loadSearchableLayers();
+
     var tool = this.getTool();
     if (tool) {
       this.setState(
@@ -200,6 +199,7 @@ class ToolOptions extends Component {
               layers={this.state.searchableLayers}
               handleAddSearchable={this.handleAddSearchable}
               loadLayers={this.loadLayers}
+              authActive={this.props.parent.props.parent.state.authActive}
             />
           )
         });
@@ -483,21 +483,20 @@ class ToolOptions extends Component {
   renderSources(sources) {
     if (!sources) return null;
     return (
-      <ul style={{ paddingLeft: 0 }}>
+      <ul>
         {sources.map((source, i) => {
           var id = "layer_" + source.id;
           var checked = this.state.selectedSources.some(id => id === source.id);
           return (
             <li key={i}>
-              <label htmlFor={id}>
-                <b>{source.name}</b>
-              </label>
               <input
                 id={id}
                 type="checkbox"
                 checked={checked}
                 onChange={this.selectedSourceChange(source.id, checked)}
               />
+              &nbsp;
+              <label htmlFor={id}>{source.name}</label>
             </li>
           );
         })}
@@ -548,7 +547,7 @@ class ToolOptions extends Component {
               value={this.state.index}
             />
           </div>
-          <div>
+          {/* <div>
             <label htmlFor="target">Verktygsplacering</label>
             <select
               id="target"
@@ -631,8 +630,8 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="onMap">Alltid synlig</label>
-          </div>
-          <div>
+          </div> */}
+          {/* <div>
             <input
               id="enableViewTogglePopupInSnabbsok"
               name="enableViewTogglePopupInSnabbsok"
@@ -659,8 +658,8 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="bothSynlig">Visa snabbsök</label>
-          </div>
-          <div>
+          </div> */}
+          {/* <div>
             <input
               id="displayPopup"
               name="displayPopup"
@@ -698,7 +697,7 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label>Verktyg för ytsökning</label>
-          </div>
+          </div> */}
 
           <div>
             <strong>
@@ -764,7 +763,7 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="searchSettings">Visa sökalternativ</label>
           </div>
-          <div>
+          {/* <div>
             <input
               id="Base64-active"
               name="base64Encode"
@@ -776,8 +775,8 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="Base64-active">Komprimera instruktionstext</label>
-          </div>
-          <div>
+          </div> */}
+          {/* <div>
             <label htmlFor="instruction">
               Instruktion{" "}
               <i
@@ -794,8 +793,11 @@ class ToolOptions extends Component {
               }}
               value={this.state.instruction ? atob(this.state.instruction) : ""}
             />
-          </div>
+          </div> */}
           {this.renderVisibleForGroups()}
+          {/* 
+          // TODO: maxZoom is currently hard-coded in SearchModel (maxZoom: 7).
+          // We should check if it's really necessary, and if not use this setting instead.
           <div>
             <label htmlFor="maxZoom">Zoomnivå</label>
             <input
@@ -806,8 +808,8 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
             />
-          </div>
-          <div>
+          </div> */}
+          {/* <div>
             <label htmlFor="excelExportUrl">URL Excel-tjänst</label>
             <input
               value={this.state.excelExportUrl}
@@ -828,7 +830,7 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
             />
-          </div>
+          </div> */}
           <div>
             <label htmlFor="markerImg">Ikon för sökträff</label>
             <input
@@ -840,6 +842,10 @@ class ToolOptions extends Component {
               }}
             />
           </div>
+
+          {/* 
+          // TODO: Edit SearchModel.js so it composes the 'anchor' attribute's
+          // values as follows: anchor = [anchorX, anchorY].
           <div>
             <label htmlFor="anchorX">Ikonförskjutning X</label>
             <input
@@ -861,8 +867,8 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
             />
-          </div>
-          <div>
+          </div> */}
+          {/* <div>
             <label htmlFor="popupOffsetY">Förskjutning popup-ruta</label>
             <input
               value={this.state.popupOffsetY}
@@ -894,9 +900,9 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
             />
-          </div>
+          </div> */}
           <div>
-            <label htmlFor="tooltip">Söktips</label>
+            <label htmlFor="tooltip">Placeholder för sökrutan</label>
             <input
               value={this.state.tooltip}
               type="text"
@@ -917,7 +923,7 @@ class ToolOptions extends Component {
               }}
             />
           </div>
-          <div>
+          {/* <div>
             <label htmlFor="toolDescription">Beskrivning (html)</label>
             <textarea
               value={this.state.toolDescription}
@@ -927,7 +933,7 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
             />
-          </div>
+          </div> */}
           <div>
             <label htmlFor="maxFeatures">Antal sökträffar</label>
             <input
@@ -940,8 +946,12 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
-            <label htmlFor="searchLayers">Visninstjänster för sök inom</label>
-            <div>{this.renderSources(this.state.sources)}</div>
+            <label htmlFor="searchLayers">
+              Radiesök söker inom följande lager:
+            </label>
+            <div className="layer-list">
+              {this.renderSources(this.state.sources)}
+            </div>
           </div>
         </form>
         {this.state.tree}

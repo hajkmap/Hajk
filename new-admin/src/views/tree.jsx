@@ -29,7 +29,10 @@ export default class Tree extends Component {
   buildList() {
     return (
       <div>
-        <label>Tillgängliga söktjänster</label>
+        <label>
+          Aktiva söktjänster (för allt utom "Sök inom radie", som konfigureras
+          separat):
+        </label>
         <div className="layer-list">
           <ul>
             {this.props.layers.map(layer => {
@@ -41,7 +44,7 @@ export default class Tree extends Component {
                     className={"checkbox_" + layer.id}
                     onChange={e => {
                       this.props.handleAddSearchable(e, layer);
-                      this.toggleHide(layer.id);
+                      this.props.authActive && this.toggleHide(layer.id);
                     }}
                   />
                   &nbsp;
@@ -49,7 +52,7 @@ export default class Tree extends Component {
                   <input
                     ref={layer.id}
                     type="text"
-                    hidden="true"
+                    hidden={true}
                     placeholder="Tillträde"
                     onChange={e => {
                       this.props.handleAddSearchable(e, layer);
