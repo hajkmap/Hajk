@@ -314,8 +314,7 @@ class App extends React.PureComponent {
     this.setState({ drawerMouseOverLock: false });
   };
 
-  renderSearchPlugin() {
-    const searchPlugin = this.appModel.plugins.search;
+  renderSearchPlugin(searchPlugin) {
     if (searchPlugin) {
       return (
         <searchPlugin.component
@@ -324,6 +323,7 @@ class App extends React.PureComponent {
           options={searchPlugin.options}
           onMenuClick={this.toggleDrawer(!this.state.drawerVisible)}
           menuButtonDisabled={this.state.drawerPermanent}
+          key={searchPlugin.type}
         />
       );
     } else {
@@ -416,7 +416,12 @@ class App extends React.PureComponent {
               className={cslx(classes.header, classes.pointerEventsOnChildren)}
             >
               {clean === false && this.renderStandaloneDrawerToggler()}
-              {clean === false && this.renderSearchPlugin()}
+              {[
+                //this.appModel.plugins.search,
+                this.appModel.plugins.vtsearch
+              ].map(plugin => {
+                return clean === false && this.renderSearchPlugin(plugin);
+              })}
             </header>
             <main className={classes.main}>
               <div
