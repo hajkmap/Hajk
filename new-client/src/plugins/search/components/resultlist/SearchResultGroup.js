@@ -86,7 +86,7 @@ class SearchResultGroup extends Component {
           feature={featureType.features[i]}
           highlightedFeatures={this.props.highlightedFeatures}
           setHighlightedFeatures={this.props.setHighlightedFeatures}
-          displayField={featureType.source.displayFields[0]}
+          displayFields={featureType.source.displayFields}
         />
       );
     });

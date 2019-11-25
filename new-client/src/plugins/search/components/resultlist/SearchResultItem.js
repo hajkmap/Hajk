@@ -124,7 +124,7 @@ class SearchResultItem extends Component {
   };
 
   render() {
-    const { feature, classes, displayField, target } = this.props;
+    const { feature, classes, displayFields, target } = this.props;
     var active =
       this.props.highlightedFeatures
         .map(highlightedFeature => {
@@ -169,7 +169,7 @@ class SearchResultItem extends Component {
         >
           <div>
             <div>
-              {feature.properties[displayField]}
+              {displayFields.map(field => feature.properties[field]).join(", ")}
               {target === "center" && this.props.renderAffectButton ? (
                 <div>
                   <Button
