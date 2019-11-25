@@ -1,16 +1,34 @@
 // Generic imports – all plugins need these
 import React from "react";
 import PropTypes from "prop-types";
-import BaseWindowPlugin from "../BaseWindowPlugin";
 
 // Plugin-specific imports. Most plugins will need a Model, View and Observer
 // but make sure to only create and import whatever you need.
 import SearchModel from "./SearchModel";
-import SearchView from "./SearchView";
+//import SearchView from "./SearchView";
 import Observer from "react-event-observer";
+import { Tooltip, Paper } from "@material-ui/core";
 
-// All plugins will need to display an icon. Make sure to pick a relevant one from Material UI Icons.
-import SearchIcon from "@material-ui/icons/Search";
+import IconButton from "@material-ui/core/IconButton";
+import MenuIcon from "@material-ui/icons/Menu";
+import { withStyles } from "@material-ui/core/styles";
+
+const styles = theme => {
+  return {
+    root: {
+      padding: "2px 4px",
+      display: "flex",
+      alignItems: "center",
+      minWidth: 200,
+      [theme.breakpoints.up("sm")]: {
+        maxWidth: 520
+      }
+    },
+    iconButton: {
+      padding: 10
+    }
+  };
+};
 
 /**
  * @summary Main class for the Dummy plugin.
@@ -47,6 +65,7 @@ class VTSearch extends React.PureComponent {
     // Unsure why we write "super(props)"?
     // See https://overreacted.io/why-do-we-write-super-props/ for explanation.
     super(props);
+    this.type = "VTSearch"; // Special case - plugins that don't use BaseWindowPlugin must specify .type here
 
     // We can setup a local observer to allow sending messages between here (controller) and model/view.
     // It's called 'localObserver' to distinguish it from AppModel's globalObserver.
@@ -83,29 +102,33 @@ class VTSearch extends React.PureComponent {
    * given implementation, such as the icon to be shown, or this plugin's title.
    */
   render() {
+    const { classes, onMenuClick, menuButtonDisabled } = this.props;
+
+    const tooltipText = menuButtonDisabled
+      ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
+      : "Visa verktygspanelen";
+
+    //OBS We need to keep the tooltip and IconButton to render menu!! //Tobias
     return (
-      <BaseWindowPlugin
-        {...this.props} // Pass on all props
-        type="VTSearch" // Unique name - each plugin needs one. Upper-case first letter, must be valid JS variable name
-        custom={{
-          icon: <SearchIcon />, // Custom icon for this plugin
-          title: "VTSearch", // Custom title (will be shown in Window's toolbar and on the Drawer/Widget button)
-          description: "S�kfunktion f�r Kartsidan", // Shown on Widget button
-          height: 450, // Custom height/width etc | Use "auto" for automatic or leave undefined
-          width: 400
-        }}
-      >
-        <SearchView
-          // Here we send some props to the plugin's View.
-          // Make sure to ONLY include props that are ACTUALLY USED in the View.
-          model={this.searchModel} // We can supply our model
-          app={this.props.app} // Or even the whole App
-          localObserver={this.localObserver} // And also the Observer, so that those 2 can talk through it
-        />
-      </BaseWindowPlugin>
+      <>
+        <Paper className={classes.root}>
+          <Tooltip title={tooltipText}>
+            <span>
+              <IconButton
+                onClick={onMenuClick}
+                className={classes.iconButton}
+                disabled={menuButtonDisabled}
+                aria-label="menu"
+              >
+                <MenuIcon />
+              </IconButton>
+            </span>
+          </Tooltip>
+        </Paper>
+      </>
     );
   }
 }
 
 // Part of API. Make a HOC of our plugin.
-export default VTSearch;
+export default withStyles(styles)(VTSearch);

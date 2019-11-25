@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
 
 // Define JSS styles that will be used in this component.
 // Examle below utilizes the very powerful "theme" object
@@ -34,19 +33,8 @@ class SearchView extends React.PureComponent {
     this.globalObserver = this.props.app.globalObserver;
   }
 
-  buttonClick() {
-    alert("Du har klickat på en knapp i VTSearch");
-  }
-
   render() {
-    //const { classes } = this.props;
-    return (
-      <>
-        <Button onClick={this.buttonClick}>
-          Klicka på mig för att visa en alert
-        </Button>
-      </>
-    );
+    return <div></div>;
   }
 }
 

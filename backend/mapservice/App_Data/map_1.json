@@ -218,11 +218,8 @@
     {
       "type": "vtsearch",
       "options": {
-        "target": "toolbar",
         "abstract": "VTSEARCH",
-        "title": "VTSEARCH",
-        "visibleAtStart": false,
-        "visibleForGroups": []
+        "title": "VTSEARCH"
       },
       "index": 0
     },
