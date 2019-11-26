@@ -175,7 +175,6 @@ class WFSVectorLayer {
       });
     }
     this.layer = new VectorLayer({
-      //featureType: config.params.typename.split(":")[1],
       information: config.information,
       caption: config.caption,
       name: config.name,
