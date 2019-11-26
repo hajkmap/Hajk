@@ -5,9 +5,10 @@ import PropTypes from "prop-types";
 // Plugin-specific imports. Most plugins will need a Model, View and Observer
 // but make sure to only create and import whatever you need.
 import SearchModel from "./SearchModel";
-import SearchSelectorView from "./SearchSelectorView";
+import Journeys from "./Journeys";
+import Stops from "./Stops";
 import Observer from "react-event-observer";
-import { Tooltip, Typography } from "@material-ui/core";
+import { Tooltip } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
@@ -17,6 +18,8 @@ import IconButton from "@material-ui/core/IconButton";
 import clsx from "clsx";
 import MenuIcon from "@material-ui/icons/Menu";
 import { withStyles } from "@material-ui/core/styles";
+import FormControl from "@material-ui/core/FormControl";
+import Select from "@material-ui/core/Select";
 
 const styles = theme => {
   return {
@@ -24,7 +27,7 @@ const styles = theme => {
       padding: "2px 4px",
       display: "flex",
       alignItems: "center",
-      minWidth: 200,
+
       [theme.breakpoints.up("sm")]: {
         maxWidth: 520
       }
@@ -34,7 +37,7 @@ const styles = theme => {
       flex: 1
     },
     searchContainer: {
-      maxWidth: 500
+      maxWidth: 250
     },
     expand: {
       transform: "rotate(0deg)",
@@ -42,11 +45,21 @@ const styles = theme => {
         duration: theme.transitions.duration.shortest
       })
     },
+    formControl: {
+      margin: theme.spacing(1),
+      minWidth: 120
+    },
+    selectEmpty: {
+      marginTop: theme.spacing(2)
+    },
     expandOpen: {
       transform: "rotate(180deg)"
     },
     searchContainerTitle: {
       marginLeft: 10
+    },
+    selectInput: {
+      padding: 10
     },
     searchModuleContainer: {
       minHeight: 200
@@ -55,6 +68,10 @@ const styles = theme => {
       padding: 10
     }
   };
+};
+const searchTypes = {
+  JOURNEYS: "Journeys",
+  STOPS: "Stops"
 };
 
 /**
@@ -72,7 +89,8 @@ const styles = theme => {
 class VTSearch extends React.PureComponent {
   // Initialize state - this is the correct way of doing it nowadays.
   state = {
-    expanded: false
+    expanded: false,
+    activeSearchTool: null
   };
 
   // propTypes and defaultProps are static properties, declared
@@ -136,8 +154,40 @@ class VTSearch extends React.PureComponent {
     });
   };
 
+  handleChange = e => {
+    this.setState({
+      activeSearchTool: e.target.value
+    });
+  };
+
+  renderSearchmodule = () => {
+    const { app } = this.props;
+    switch (searchTypes[this.state.activeSearchTool]) {
+      case searchTypes.JOURNEYS: {
+        return (
+          <Journeys
+            model={this.searchModel}
+            app={app}
+            localObserver={this.localObserver}
+          ></Journeys>
+        );
+      }
+      case searchTypes.STOPS: {
+        return (
+          <Stops
+            model={this.searchModel}
+            app={app}
+            localObserver={this.localObserver}
+          ></Stops>
+        );
+      }
+      default: {
+      }
+    }
+  };
+
   render() {
-    const { classes, onMenuClick, menuButtonDisabled, app, map } = this.props;
+    const { classes, onMenuClick, menuButtonDisabled } = this.props;
 
     const tooltipText = menuButtonDisabled
       ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
@@ -157,6 +207,33 @@ class VTSearch extends React.PureComponent {
                 <MenuIcon />
               </IconButton>
             </Tooltip>
+
+            <FormControl variant="outlined" className={classes.formControl}>
+              <Select
+                classes={{ root: classes.selectInput }}
+                native
+                value={this.state.activeSearchType}
+                onChange={this.handleChange}
+                inputProps={{
+                  name: "searchType",
+                  id: "search-type"
+                }}
+              >
+                {[
+                  <option key="default" value="">
+                    Sök
+                  </option>
+                ].concat(
+                  Object.keys(searchTypes).map(key => {
+                    return (
+                      <option key={key} value={key}>
+                        {searchTypes[key]}
+                      </option>
+                    );
+                  })
+                )}
+              </Select>
+            </FormControl>
             <IconButton
               className={clsx(classes.expand, {
                 [classes.expandOpen]: this.state.expanded
@@ -167,21 +244,13 @@ class VTSearch extends React.PureComponent {
             >
               <ExpandMoreIcon />
             </IconButton>
-            <Typography className={classes.searchContainerTitle}>
-              Sökverktyg
-            </Typography>
           </CardActions>
           <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
             <CardContent
               className={classes.searchModuleContainer}
               classes={{ root: classes.searchModuleContainerRoot }}
             >
-              <SearchSelectorView
-                localObserver={this.localObserver}
-                app={app}
-                map={map}
-                model={this.searchModel}
-              ></SearchSelectorView>
+              {this.renderSearchmodule()}
             </CardContent>
           </Collapse>
         </Card>

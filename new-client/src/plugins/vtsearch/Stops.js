@@ -1,33 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import FormControl from "@material-ui/core/FormControl";
-import NativeSelect from "@material-ui/core/NativeSelect";
 
 // Define JSS styles that will be used in this component.
 // Examle below utilizes the very powerful "theme" object
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
-const styles = theme => ({
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 120
-  },
-  selectEmpty: {
-    marginTop: theme.spacing(2)
-  }
-});
+const styles = theme => ({});
 
-//TODO - Only mockup //Tobias
-const searchTypes = {
-  JOURNEYS: "Journeys",
-  LINES: "Lines"
-};
-
-class SearchSelectorView extends React.PureComponent {
+class Stops extends React.PureComponent {
   // Initialize state - this is the correct way of doing it nowadays.
-  state = {
-    activeSearchType: "JOURNEYS"
-  };
+  state = {};
 
   // propTypes and defaultProps are static properties, declared
   // as high as possible within the component code. They should
@@ -51,34 +33,11 @@ class SearchSelectorView extends React.PureComponent {
     this.globalObserver = this.props.app.globalObserver;
   }
 
-  handleChange = e => {
-    this.setState({
-      activeSearchType: e.value
-    });
-  };
-
   render() {
-    const { classes } = this.props;
     return (
-      <FormControl variant="outlined" className={classes.formControl}>
-        <NativeSelect
-          value={this.state.activeSearchType}
-          onChange={this.handleChange}
-          inputProps={{
-            name: "searchType",
-            id: "search-type"
-          }}
-        >
-          {Object.keys(searchTypes).map(key => {
-            return (
-              <option key={key} value={key}>
-                {searchTypes[key]}
-              </option>
-            );
-          })}
-        </NativeSelect>
-      </FormControl>
-      //Depending on state.activeSearch we can render different search modules // Tobias
+      <div>
+        Här ska vi lägga till formuläret för hållplatser och hållplatsområden
+      </div>
     );
   }
 }
@@ -87,4 +46,4 @@ class SearchSelectorView extends React.PureComponent {
 // withStyles will add a 'classes' prop, while withSnackbar
 // adds to functions (enqueueSnackbar() and closeSnackbar())
 // that can be used throughout the Component.
-export default withStyles(styles)(SearchSelectorView);
+export default withStyles(styles)(Stops);
