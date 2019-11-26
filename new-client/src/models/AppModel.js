@@ -95,6 +95,12 @@ class AppModel {
    * This method filters out those plugins that should go into
    * the Drawer or Widget list and returns them.
    *
+   * It is used in AppModel to initiate all plugins' Components,
+   * so whatever is returned here will result in a render() for
+   * that plugin. That is the reason why 'search' is filtered out
+   * from the results: we render Search plugin separately in App,
+   * and we don't want a second render invoked from here.
+   *
    * @returns array of Plugins
    * @memberof AppModel
    */
@@ -102,9 +108,12 @@ class AppModel {
     const r = this.getPlugins()
       .filter(
         plugin =>
-          ["toolbar", "left", "right"].indexOf(plugin.options.target) >= 0
+          ["toolbar", "left", "right"].indexOf(plugin.options.target) >= 0 &&
+          plugin.type !== "search" &&
+          plugin.type !== "vtsearch"
       )
       .sort((a, b) => a.sortOrder - b.sortOrder);
+    console.log(r);
     return r;
   }
 
