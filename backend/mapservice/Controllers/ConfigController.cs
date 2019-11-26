@@ -266,6 +266,7 @@ namespace MapService.Controllers
                             visibleAtStart = true,
                             backgroundSwitcherBlack = true,
                             backgroundSwitcherWhite = true,
+                            panelTitle = String.Empty,
                             instruction = String.Empty,
                             themeMapHeaderCaption = String.Empty,
                             visibleForGroups = new string[0]

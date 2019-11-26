@@ -461,7 +461,7 @@ var LayerPanelView = {
     }
 
     return (
-      <Panel title='Kartlager' onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
+      <Panel title={this.props.model.get('panelTitle') || 'Kartlager'} onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized} instruction={atob(this.props.model.get('instruction'))}>
         <div className='layer-panel'>
           {dropdownThemeMaps}
           {toggleAllButton}
