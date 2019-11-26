@@ -5,11 +5,16 @@ import PropTypes from "prop-types";
 // Plugin-specific imports. Most plugins will need a Model, View and Observer
 // but make sure to only create and import whatever you need.
 import SearchModel from "./SearchModel";
-//import SearchView from "./SearchView";
+import SearchSelectorView from "./SearchSelectorView";
 import Observer from "react-event-observer";
-import { Tooltip, Paper } from "@material-ui/core";
-
+import { Tooltip, Typography } from "@material-ui/core";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import CardActions from "@material-ui/core/CardActions";
+import Collapse from "@material-ui/core/Collapse";
 import IconButton from "@material-ui/core/IconButton";
+import clsx from "clsx";
 import MenuIcon from "@material-ui/icons/Menu";
 import { withStyles } from "@material-ui/core/styles";
 
@@ -24,7 +29,29 @@ const styles = theme => {
         maxWidth: 520
       }
     },
-    iconButton: {
+    input: {
+      marginLeft: theme.spacing(1),
+      flex: 1
+    },
+    searchContainer: {
+      maxWidth: 500
+    },
+    expand: {
+      transform: "rotate(0deg)",
+      transition: theme.transitions.create("transform", {
+        duration: theme.transitions.duration.shortest
+      })
+    },
+    expandOpen: {
+      transform: "rotate(180deg)"
+    },
+    searchContainerTitle: {
+      marginLeft: 10
+    },
+    searchModuleContainer: {
+      minHeight: 200
+    },
+    searchModuleContainerRoot: {
       padding: 10
     }
   };
@@ -38,13 +65,15 @@ const styles = theme => {
  * copy the directory, rename it and all files within, and change logic
  * to create the plugin you want to.
  *
- * @class Dummy
+ * @class VTSearch
  * @extends {React.PureComponent}
  */
 
 class VTSearch extends React.PureComponent {
   // Initialize state - this is the correct way of doing it nowadays.
-  state = {};
+  state = {
+    expanded: false
+  };
 
   // propTypes and defaultProps are static properties, declared
   // as high as possible within the component code. They should
@@ -101,8 +130,14 @@ class VTSearch extends React.PureComponent {
    * Also, we add a new prop, "custom", which holds props that are specific to this
    * given implementation, such as the icon to be shown, or this plugin's title.
    */
+  handleExpandClick = () => {
+    this.setState({
+      expanded: !this.state.expanded
+    });
+  };
+
   render() {
-    const { classes, onMenuClick, menuButtonDisabled } = this.props;
+    const { classes, onMenuClick, menuButtonDisabled, app, map } = this.props;
 
     const tooltipText = menuButtonDisabled
       ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
@@ -111,20 +146,45 @@ class VTSearch extends React.PureComponent {
     //OBS We need to keep the tooltip and IconButton to render menu!! //Tobias
     return (
       <>
-        <Paper className={classes.root}>
-          <Tooltip title={tooltipText}>
-            <span>
+        <Card className={classes.searchContainer}>
+          <CardActions disableSpacing>
+            <Tooltip title={tooltipText}>
               <IconButton
                 onClick={onMenuClick}
-                className={classes.iconButton}
                 disabled={menuButtonDisabled}
                 aria-label="menu"
               >
                 <MenuIcon />
               </IconButton>
-            </span>
-          </Tooltip>
-        </Paper>
+            </Tooltip>
+            <IconButton
+              className={clsx(classes.expand, {
+                [classes.expandOpen]: this.state.expanded
+              })}
+              onClick={this.handleExpandClick}
+              aria-expanded={this.state.expanded}
+              aria-label="show more"
+            >
+              <ExpandMoreIcon />
+            </IconButton>
+            <Typography className={classes.searchContainerTitle}>
+              Sökverktyg
+            </Typography>
+          </CardActions>
+          <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
+            <CardContent
+              className={classes.searchModuleContainer}
+              classes={{ root: classes.searchModuleContainerRoot }}
+            >
+              <SearchSelectorView
+                localObserver={this.localObserver}
+                app={app}
+                map={map}
+                model={this.searchModel}
+              ></SearchSelectorView>
+            </CardContent>
+          </Collapse>
+        </Card>
       </>
     );
   }
