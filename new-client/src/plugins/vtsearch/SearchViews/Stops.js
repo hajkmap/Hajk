@@ -7,7 +7,7 @@ import { withStyles } from "@material-ui/core/styles";
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
 const styles = theme => ({});
 
-class SearchView extends React.PureComponent {
+class Stops extends React.PureComponent {
   // Initialize state - this is the correct way of doing it nowadays.
   state = {};
 
@@ -34,7 +34,11 @@ class SearchView extends React.PureComponent {
   }
 
   render() {
-    return <div></div>;
+    return (
+      <div>
+        Här ska vi lägga till formuläret för hållplatser och hållplatsområden
+      </div>
+    );
   }
 }
 
@@ -42,4 +46,4 @@ class SearchView extends React.PureComponent {
 // withStyles will add a 'classes' prop, while withSnackbar
 // adds to functions (enqueueSnackbar() and closeSnackbar())
 // that can be used throughout the Component.
-export default withStyles(styles)(SearchView);
+export default withStyles(styles)(Stops);

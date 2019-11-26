@@ -374,6 +374,10 @@ class App extends React.PureComponent {
 
     // If clean===true, some components won't be rendered below
     const clean = config.mapConfig.map.clean;
+    const searchPlugins = [
+      this.appModel.plugins.search,
+      this.appModel.plugins.vtsearch
+    ];
 
     const defaultCookieNoticeMessage = this.isString(
       this.props.config.mapConfig.map.defaultCookieNoticeMessage
@@ -415,12 +419,18 @@ class App extends React.PureComponent {
             <header
               className={cslx(classes.header, classes.pointerEventsOnChildren)}
             >
-              {clean === false && this.renderStandaloneDrawerToggler()}
-              {[
-                //this.appModel.plugins.search,
-                this.appModel.plugins.vtsearch
-              ].map(plugin => {
-                return clean === false && this.renderSearchPlugin(plugin);
+              {searchPlugins.filter(plugin => {
+                return plugin != null;
+              }).length === 0 &&
+                clean === false &&
+                this.renderStandaloneDrawerToggler()}
+
+              {searchPlugins.map(plugin => {
+                return (
+                  plugin !== null &&
+                  clean === false &&
+                  this.renderSearchPlugin(plugin)
+                );
               })}
             </header>
             <main className={classes.main}>
