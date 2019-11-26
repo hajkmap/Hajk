@@ -5,8 +5,8 @@ import PropTypes from "prop-types";
 // Plugin-specific imports. Most plugins will need a Model, View and Observer
 // but make sure to only create and import whatever you need.
 import SearchModel from "./SearchModel";
-import Journeys from "./Journeys";
-import Stops from "./Stops";
+import Journeys from "./SearchViews/Journeys";
+import Stops from "./SearchViews/Stops";
 import Observer from "react-event-observer";
 import { Tooltip } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
