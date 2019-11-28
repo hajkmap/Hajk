@@ -20,6 +20,7 @@ import MenuIcon from "@material-ui/icons/Menu";
 import { withStyles } from "@material-ui/core/styles";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
+import SearchResultList from "./SearchResultList/SearchResultList";
 
 const styles = theme => {
   return {
@@ -155,13 +156,15 @@ class VTSearch extends React.PureComponent {
   };
 
   handleChange = e => {
+    const { app } = this.props;
+    app.globalObserver.publish("showSearchresultlist", {});
     this.setState({
       activeSearchTool: e.target.value
     });
   };
 
   renderSearchmodule = () => {
-    const { app } = this.props;
+    const { app, map } = this.props;
     switch (searchTypes[this.state.activeSearchTool]) {
       case searchTypes.JOURNEYS: {
         return (
@@ -187,7 +190,7 @@ class VTSearch extends React.PureComponent {
   };
 
   render() {
-    const { classes, onMenuClick, menuButtonDisabled } = this.props;
+    const { classes, onMenuClick, menuButtonDisabled, app, map } = this.props;
 
     const tooltipText = menuButtonDisabled
       ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
@@ -196,6 +199,12 @@ class VTSearch extends React.PureComponent {
     //OBS We need to keep the tooltip and IconButton to render menu!! //Tobias
     return (
       <>
+        <SearchResultList
+          model={this.searchModel}
+          app={app}
+          localObserver={this.localObserver}
+          map={map}
+        ></SearchResultList>
         <Card className={classes.searchContainer}>
           <CardActions disableSpacing>
             <Tooltip title={tooltipText}>
