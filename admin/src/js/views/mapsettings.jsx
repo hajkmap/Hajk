@@ -269,6 +269,7 @@ class Menu extends Component {
       backgroundSwitcherBlack: true,
       backgroundSwitcherWhite: true,
       toggleAllButton: false,
+      panelTitle: "Kartlager",
       instruction: "",
       dropdownThemeMaps: false,
       themeMapHeaderCaption: "Temakartor",
@@ -304,6 +305,7 @@ class Menu extends Component {
             .backgroundSwitcherWhite,
           toggleAllButton: this.props.model.get("layerMenuConfig")
             .toggleAllButton,
+          panelTitle: this.props.model.get("layerMenuConfig").panelTitle || "Kartlager",
           instruction: this.props.model.get("layerMenuConfig").instruction,
           dropdownThemeMaps: this.props.model.get("layerMenuConfig")
             .dropdownThemeMaps,
@@ -506,6 +508,7 @@ class Menu extends Component {
       backgroundSwitcherBlack: this.state.backgroundSwitcherBlack,
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
       toggleAllButton: this.state.toggleAllButton,
+      panelTitle: this.state.panelTitle,
       instruction: this.state.instruction,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
       themeMapHeaderCaption: this.state.themeMapHeaderCaption,
@@ -1374,6 +1377,7 @@ class Menu extends Component {
                   Vit bakgrundskarta
                 </label>
               </div>
+
               <div className="row">
                 <div className="col-sm-1">
                   <input
@@ -1393,6 +1397,21 @@ class Menu extends Component {
                   Släck alla lager-knapp
                 </label>
               </div>
+
+              <div className="row">
+                <div className="col-sm-3">
+                  <label htmlFor="panelTitle">Panel Titel</label>
+                </div>
+                <div className="col-sm-1">
+                  <input id="panelTitle" 
+                    name="panelTitle" 
+                    type="text" 
+                    onChange={e => {this.handleInputChange(e);}} 
+                    value={this.state.panelTitle}
+                    />
+                </div>
+              </div>
+
               {this.renderThemeMapCheckbox()}
               {this.renderThemeMapHeaderInput()}
               <div className="row">

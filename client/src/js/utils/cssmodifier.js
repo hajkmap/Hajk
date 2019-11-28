@@ -84,6 +84,7 @@ module.exports = {
 
     var searchbarInputField = getCSSRule('#searchbar-input-field');
     var searchbarSearchButton = getCSSRule('#searchbar-search-button');
+    var searchResultGroup = getCSSRule('.search-tools .group');
 
     if (panelHeader) {
       panelHeader.style.backgroundColor = config.primaryColor;
@@ -203,6 +204,9 @@ module.exports = {
     if (searchbarSearchButton) {
       searchbarSearchButton.style.backgroundColor = config.primaryColor;
       searchbarSearchButton.style.color = config.color;
+    }
+    if (searchResultGroup) {
+      searchResultGroup.style.backgroundColor = config.primaryColor;
     }
   }
 };

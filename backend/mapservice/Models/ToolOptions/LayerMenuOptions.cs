@@ -31,6 +31,8 @@ namespace MapService.Models.ToolOptions
 
         public string instruction { get; set; }
 
+        public string panelTitle { get; set; }
+
         public bool active { get; set; }
 
         public bool visibleAtStart { get; set; }
