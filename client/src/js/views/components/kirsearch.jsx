@@ -361,7 +361,7 @@ var KirSearchView = {
           </div>
 
           {/* Boendeförteckning */
-            this.props.model.get("residentListDataLayer") &&
+            this.props.model.get("residentListDataLayer") !== null &&
             <ResidentList model={this.props.model} residentData={this.state.searchResults}></ResidentList>
           }
 
