@@ -20,7 +20,8 @@ import MenuIcon from "@material-ui/icons/Menu";
 import { withStyles } from "@material-ui/core/styles";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
-import SearchResultList from "./SearchResultList/SearchResultList";
+import SearchResultListContainer from "./SearchResultList/SearchResultListContainer";
+import ReactDOM from "react-dom";
 
 const styles = theme => {
   return {
@@ -110,6 +111,7 @@ class VTSearch extends React.PureComponent {
   };
 
   constructor(props) {
+    console.log("construct");
     // Unsure why we write "super(props)"?
     // See https://overreacted.io/why-do-we-write-super-props/ for explanation.
     super(props);
@@ -191,7 +193,6 @@ class VTSearch extends React.PureComponent {
 
   render() {
     const { classes, onMenuClick, menuButtonDisabled, app, map } = this.props;
-
     const tooltipText = menuButtonDisabled
       ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
       : "Visa verktygspanelen";
@@ -199,12 +200,6 @@ class VTSearch extends React.PureComponent {
     //OBS We need to keep the tooltip and IconButton to render menu!! //Tobias
     return (
       <>
-        <SearchResultList
-          model={this.searchModel}
-          app={app}
-          localObserver={this.localObserver}
-          map={map}
-        ></SearchResultList>
         <Card className={classes.searchContainer}>
           <CardActions disableSpacing>
             <Tooltip title={tooltipText}>
@@ -263,6 +258,11 @@ class VTSearch extends React.PureComponent {
             </CardContent>
           </Collapse>
         </Card>
+        {ReactDOM.createPortal(
+          <SearchResultListContainer app={app}></SearchResultListContainer>,
+          document.getElementById("windows-container")
+        )}
+        (
       </>
     );
   }
