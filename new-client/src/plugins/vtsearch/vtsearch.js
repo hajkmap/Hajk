@@ -76,6 +76,8 @@ const searchTypes = {
   STOPS: "Stops"
 };
 
+const windowsContainerId = "windows-container";
+
 /**
  * @summary Main class for the Dummy plugin.
  * @description The purpose of having a Dummy plugin is to exemplify
@@ -111,7 +113,6 @@ class VTSearch extends React.PureComponent {
   };
 
   constructor(props) {
-    console.log("construct");
     // Unsure why we write "super(props)"?
     // See https://overreacted.io/why-do-we-write-super-props/ for explanation.
     super(props);
@@ -192,7 +193,14 @@ class VTSearch extends React.PureComponent {
   };
 
   render() {
-    const { classes, onMenuClick, menuButtonDisabled, app, map } = this.props;
+    const {
+      classes,
+      onMenuClick,
+      menuButtonDisabled,
+      app,
+      model,
+      map
+    } = this.props;
     const tooltipText = menuButtonDisabled
       ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
       : "Visa verktygspanelen";
@@ -259,10 +267,13 @@ class VTSearch extends React.PureComponent {
           </Collapse>
         </Card>
         {ReactDOM.createPortal(
-          <SearchResultListContainer app={app}></SearchResultListContainer>,
-          document.getElementById("windows-container")
+          <SearchResultListContainer
+            windowsContainer={windowsContainerId}
+            model={this.searchModel}
+            app={app}
+          ></SearchResultListContainer>,
+          document.getElementById(windowsContainerId)
         )}
-        (
       </>
     );
   }

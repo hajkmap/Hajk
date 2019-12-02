@@ -6,11 +6,13 @@ import { withStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
-import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
-
-import Box from "@material-ui/core/Box";
 import Observer from "react-event-observer";
+import { Typography } from "@material-ui/core";
+import ReactDOM from "react-dom";
+import TabPanel from "./TabPanel";
+import IconButton from "@material-ui/core/IconButton";
+import ClearIcon from "@material-ui/icons/Clear";
 
 /**
  * @summary Main class for the Dummy plugin.
@@ -28,108 +30,149 @@ const styles = theme => {
   return {
     window: {
       zIndex: 100,
-
       background: "white",
       boxShadow:
         "2px 2px 2px rgba(0, 0, 0, 0.4), 0px 0px 4px rgba(0, 0, 0, 0.4)",
       borderRadius: "5px",
       overflow: "hidden",
       pointerEvents: "all"
+    },
+    customIcon: {
+      marginLeft: "30%"
+    },
+    tabWrapper: {
+      display: "inline-block"
     }
   };
 };
 
-const { height: windowHeight, width: windowWidth } = document
-  .getElementById("windows-container")
-  .getClientRects()[0];
+const getWindowContainerWidth = () => {
+  return document.getElementById("windows-container").getClientRects()[0].width;
+};
 
-class SearchResultListContainer extends React.PureComponent {
-  // Initialize state - this is the correct way of doing it nowadays.
+const getWindowContainerHeight = () => {
+  return document.getElementById("windows-container").getClientRects()[0]
+    .height;
+};
 
+class SearchResultListContainer extends React.Component {
+  //TODO - State is only mocked because we are missing pieces to complete the whole chain
   state = {
-    resultListHeight: 200,
-    windowWidth: windowWidth,
-    windowHeight: windowHeight,
-    value: 1
+    resultListHeight: 300,
+    windowWidth: getWindowContainerWidth(),
+    windowHeight: getWindowContainerHeight(),
+    value: 0, //mock
+    activeTab: 0, //mock
+    searchResultIds: [0, 1] //mock
   };
 
   static propTypes = {
-    app: PropTypes.object.isRequired,
-    options: PropTypes.object.isRequired
+    options: PropTypes.object.isRequired,
+    model: PropTypes.object.isRequired
   };
 
   static defaultProps = {
-    resultListHeight: 200,
-    resultListWidth: 2000,
     options: {}
   };
 
   constructor(props) {
-    // Unsure why we write "super(props)"?
-    // See https://overreacted.io/why-do-we-write-super-props/ for explanation.
     super(props);
 
-    // We can setup a local observer to allow sending messages between here (controller) and model/view.
-    // It's called 'localObserver' to distinguish it from AppModel's globalObserver.
-    // API docs, see: https://www.npmjs.com/package/react-event-observer
-    this.localObserver = Observer();
-
-    window.addEventListener("resize", x => {
-      const {
-        height: windowHeight,
-        width: windowWidth
-      } = document.getElementById("windows-container").getClientRects()[0];
-      this.setState({ windowWidth: windowWidth, windowHeight: windowHeight });
+    window.addEventListener("resize", e => {
+      this.setState({
+        windowWidth: getWindowContainerWidth(),
+        windowHeight: getWindowContainerHeight()
+      });
     });
   }
 
   handleTabChange = (event, newValue) => {
-    this.setState({ value: newValue });
+    this.setState({ activeTab: newValue });
   };
 
-  renderTabComponent = props => {
-    const { value, index } = props;
-    return (
-      <Container
-        component="div"
-        role="tabpanel"
-        hidden={value !== index}
-        id={`simple-tabpanel-${index}`}
-        aria-labelledby={`simple-tab-${index}`}
-      ></Container>
+  getSearchResultsFromIds = ids => {
+    const { model } = this.props;
+    return ids.map(id => {
+      return model.searchResults.find(result => result.id === id);
+    });
+  };
+
+  getNextTabActive = id => {
+    const { searchResultIds } = this.state;
+    if (searchResultIds[id + 1]) {
+      return searchResultIds[id + 1];
+    } else {
+      return searchResultIds[id - 1];
+    }
+  };
+
+  removeResult = id => {
+    //TODO - Update model, remove searchresult with the specified id
+
+    const { searchResultIds } = this.state;
+    const nextActiveTab = this.getNextTabActive(id);
+    const newSearchResultIds = searchResultIds.filter(result => result !== id);
+
+    this.setState(
+      state => {
+        return {
+          searchResultIds: newSearchResultIds,
+          activeTab: nextActiveTab
+        };
+      },
+      () => {
+        console.log(this.state, "state");
+      }
     );
   };
 
-  renderTab = (label, id) => {
+  renderTabs = searchResult => {
+    const { classes } = this.props;
     return (
       <Tab
-        label={label}
-        id={`search-result-${1}`}
-        aria-controls={`simple-tabpanel-${1}`}
-      />
+        classes={{ wrapper: classes.tabWrapper }}
+        label={
+          <>
+            {searchResult.label}
+
+            <ClearIcon
+              onClick={e => {
+                e.stopPropagation();
+                this.removeResult(searchResult.id);
+              }}
+              className={classes.customIcon}
+              fontSize="inherit"
+            />
+          </>
+        }
+        value={searchResult.id}
+        key={`simple-tabpanel-${searchResult.id}`}
+        id={`simple-tabpanel-${searchResult.id}`}
+        aria-controls={`simple-tabpanel-${searchResult.id}`}
+      ></Tab>
     );
   };
 
-  renderTabs = () => {
+  renderTabsSection = searchResults => {
+    console.log(this.state.activeTab, "activeT");
     return (
-      <>
-        <AppBar position="static">
-          <Tabs
-            value={this.state.value}
-            onChange={this.handleTabChange}
-            aria-label="simple tabs example"
-          >
-            {this.renderTab("Test1", 1)}
-            {this.renderTab("Test2", 2)}
-          </Tabs>
-        </AppBar>
-      </>
+      <Tabs
+        value={this.state.activeTab}
+        onChange={this.handleTabChange}
+        aria-label="search-result-tabs"
+      >
+        {searchResults.map(searchResult => {
+          return this.renderTabs(searchResult);
+        })}
+      </Tabs>
     );
   };
 
   renderSearchResultContainer = () => {
-    const { classes } = this.props;
-
+    const { classes, windowContainerId } = this.props;
+    let searchResults = this.getSearchResultsFromIds(
+      this.state.searchResultIds
+    );
     return (
       <Rnd
         className={classes.window}
@@ -153,7 +196,7 @@ class SearchResultListContainer extends React.PureComponent {
             resultListHeight: parseInt(height)
           });
         }}
-        bounds={"#window-container"}
+        bounds={`#${windowContainerId}`}
         disableDragging
         enableResizing={{
           bottom: false,
@@ -166,10 +209,24 @@ class SearchResultListContainer extends React.PureComponent {
           topRight: false
         }}
       >
-        {this.renderTabs()}
+        <AppBar position="static">
+          {searchResults.length > 0 && this.renderTabsSection(searchResults)}
+        </AppBar>
+        {searchResults.map(searchResult => {
+          return (
+            <TabPanel
+              key={searchResult.id}
+              value={this.state.activeTab}
+              index={searchResult.id}
+            >
+              {searchResult.featureCollection.type}
+            </TabPanel>
+          );
+        })}
       </Rnd>
     );
   };
+
   render() {
     return this.renderSearchResultContainer();
   }
