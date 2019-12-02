@@ -71,8 +71,11 @@ const styles = theme => {
       }
     },
     header: {
-      zIndex: 4,
-      height: theme.spacing(8)
+      zIndex: theme.zIndex.appBar,
+      height: theme.spacing(8),
+      [theme.breakpoints.down("xs")]: {
+        zIndex: 3
+      }
     },
     main: {
       zIndex: 2,

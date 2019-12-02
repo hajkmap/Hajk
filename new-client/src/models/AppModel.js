@@ -113,7 +113,7 @@ class AppModel {
           plugin.type !== "vtsearch"
       )
       .sort((a, b) => a.sortOrder - b.sortOrder);
-    console.log(r);
+
     return r;
   }
 
