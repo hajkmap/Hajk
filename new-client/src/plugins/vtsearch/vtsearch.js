@@ -167,7 +167,7 @@ class VTSearch extends React.PureComponent {
   };
 
   renderSearchmodule = () => {
-    const { app, map } = this.props;
+    const { app } = this.props;
     switch (searchTypes[this.state.activeSearchTool]) {
       case searchTypes.JOURNEYS: {
         return (
@@ -193,14 +193,7 @@ class VTSearch extends React.PureComponent {
   };
 
   render() {
-    const {
-      classes,
-      onMenuClick,
-      menuButtonDisabled,
-      app,
-      model,
-      map
-    } = this.props;
+    const { classes, onMenuClick, menuButtonDisabled, app } = this.props;
     const tooltipText = menuButtonDisabled
       ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
       : "Visa verktygspanelen";

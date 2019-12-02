@@ -6,12 +6,11 @@ import { withStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
-import Container from "@material-ui/core/Container";
+import Grid from "@material-ui/core/Grid";
+import Toolbar from "@material-ui/core/Toolbar";
+import PanelToolbox from "./PanelToolbox";
 import Observer from "react-event-observer";
-import { Typography } from "@material-ui/core";
-import ReactDOM from "react-dom";
 import TabPanel from "./TabPanel";
-import IconButton from "@material-ui/core/IconButton";
 import ClearIcon from "@material-ui/icons/Clear";
 
 /**
@@ -42,6 +41,12 @@ const styles = theme => {
     },
     tabWrapper: {
       display: "inline-block"
+    },
+    toolbar: {
+      minHeight: 0
+    },
+    appbar: {
+      height: 30
     }
   };
 };
@@ -63,8 +68,78 @@ class SearchResultListContainer extends React.Component {
     windowHeight: getWindowContainerHeight(),
     value: 0, //mock
     activeTab: 0, //mock
-    searchResultIds: [0, 1] //mock
+    searchResultIds: [0, 1],
+    maximized: false,
+    minimized: false
+    //mock
   };
+
+  searchResults = [
+    {
+      id: 0,
+      label: "Joruneys",
+      featureCollection: {
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            id: "municipalityZoneName.fid-73c97ed0_16eb1fd0de6_-24f2",
+            geometry: null,
+            properties: {
+              Gid: 9081014110000114,
+              Name: "Upplands Väsby"
+            }
+          },
+          {
+            type: "Feature",
+            id: "municipalityZoneName.fid-73c97ed0_16eb1fd0de6_-24f1",
+            geometry: null,
+            properties: {
+              Gid: 9081014110000116,
+              Name: "Vallentuna"
+            }
+          }
+        ],
+        totalFeatures: "unknown",
+        numberReturned: 50,
+        timeStamp: "2019-11-29T10:42:47.183Z",
+        crs: null
+      }
+    },
+    {
+      id: 1,
+      label: "Stops",
+      featureCollection: {
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            id: "municipalityZoneName.fid-73c97ed0_16eb1fd0de6_-24f2",
+            geometry: null,
+            properties: {
+              Gid: 9081014110000114,
+              Name: "Upplands Väsby"
+            }
+          },
+          {
+            type: "Feature",
+            id: "municipalityZoneName.fid-73c97ed0_16eb1fd0de6_-24f1",
+            geometry: null,
+            properties: {
+              Gid: 9081014110000116,
+              Name: "Vallentuna"
+            }
+          }
+        ],
+        totalFeatures: "unknown",
+        numberReturned: 50,
+        timeStamp: "2019-11-29T10:42:47.183Z",
+        crs: null
+      }
+    }
+  ];
+
+  appbarHeight = 30; //TODO - Get this from the actual Appbar-element
 
   static propTypes = {
     options: PropTypes.object.isRequired,
@@ -84,16 +159,27 @@ class SearchResultListContainer extends React.Component {
         windowHeight: getWindowContainerHeight()
       });
     });
+
+    this.localObserver = Observer();
+    this.bindSubscriptions();
   }
+
+  bindSubscriptions = () => {
+    this.localObserver.subscribe("search-result-list-minimized", () => {
+      this.setState({ minimized: true, maximized: false });
+    });
+    this.localObserver.subscribe("search-result-list-maximized", () => {
+      this.setState({ minimized: false, maximized: true });
+    });
+  };
 
   handleTabChange = (event, newValue) => {
     this.setState({ activeTab: newValue });
   };
 
   getSearchResultsFromIds = ids => {
-    const { model } = this.props;
     return ids.map(id => {
-      return model.searchResults.find(result => result.id === id);
+      return this.searchResults.find(result => result.id === id);
     });
   };
 
@@ -107,23 +193,16 @@ class SearchResultListContainer extends React.Component {
   };
 
   removeResult = id => {
-    //TODO - Update model, remove searchresult with the specified id
-
     const { searchResultIds } = this.state;
     const nextActiveTab = this.getNextTabActive(id);
     const newSearchResultIds = searchResultIds.filter(result => result !== id);
 
-    this.setState(
-      state => {
-        return {
-          searchResultIds: newSearchResultIds,
-          activeTab: nextActiveTab
-        };
-      },
-      () => {
-        console.log(this.state, "state");
-      }
-    );
+    this.setState(state => {
+      return {
+        searchResultIds: newSearchResultIds,
+        activeTab: nextActiveTab
+      };
+    });
   };
 
   renderTabs = searchResult => {
@@ -154,7 +233,6 @@ class SearchResultListContainer extends React.Component {
   };
 
   renderTabsSection = searchResults => {
-    console.log(this.state.activeTab, "activeT");
     return (
       <Tabs
         value={this.state.activeTab}
@@ -173,19 +251,28 @@ class SearchResultListContainer extends React.Component {
     let searchResults = this.getSearchResultsFromIds(
       this.state.searchResultIds
     );
+
     return (
       <Rnd
         className={classes.window}
         size={{
           width: this.state.windowWidth,
-          height: this.state.resultListHeight
+          height: this.state.maximized
+            ? this.state.windowHeight
+            : this.state.minimized
+            ? this.appbarHeight
+            : this.state.resultListHeight
         }}
         position={{
           x: 0,
-          y: this.state.windowHeight - this.state.resultListHeight
+          y: this.state.maximized
+            ? 0
+            : this.state.minimized
+            ? this.state.windowHeight - this.appbarHeight
+            : this.state.windowHeight - this.state.resultListHeight
         }}
-        ref={c => {
-          this.rnd = c;
+        ref={container => {
+          this.rnd = container;
         }}
         onResizeStop={(e, direction, ref, delta, position) => {
           var height = ref.style.height.substring(
@@ -193,7 +280,9 @@ class SearchResultListContainer extends React.Component {
             ref.style.height.length - 2
           );
           this.setState({
-            resultListHeight: parseInt(height)
+            resultListHeight: parseInt(height),
+            maximized: false,
+            minimized: false
           });
         }}
         bounds={`#${windowContainerId}`}
@@ -209,8 +298,24 @@ class SearchResultListContainer extends React.Component {
           topRight: false
         }}
       >
-        <AppBar position="static">
-          {searchResults.length > 0 && this.renderTabsSection(searchResults)}
+        <AppBar classes={{ positionStatic: classes.appbar }} position="static">
+          <Toolbar classes={{ regular: classes.toolbar }}>
+            <Grid
+              justify="space-between"
+              alignItems="center"
+              container
+              spacing={10}
+            >
+              <Grid item>
+                {searchResults.length > 0 &&
+                  this.renderTabsSection(searchResults)}
+              </Grid>
+
+              <Grid item>
+                <PanelToolbox localObserver={this.localObserver}></PanelToolbox>
+              </Grid>
+            </Grid>
+          </Toolbar>
         </AppBar>
         {searchResults.map(searchResult => {
           return (

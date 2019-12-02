@@ -1,15 +1,9 @@
 // Generic imports â€“ all plugins need these
 import React from "react";
 import PropTypes from "prop-types";
-import { Rnd } from "react-rnd";
+import AttributeTable from "./AttributeTable";
 import { withStyles } from "@material-ui/core/styles";
-import AppBar from "@material-ui/core/AppBar";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
 import Container from "@material-ui/core/Container";
-import Observer from "react-event-observer";
-import { Typography } from "@material-ui/core";
-import ReactDOM from "react-dom";
 
 /**
  * @summary Main class for the Dummy plugin.
@@ -23,7 +17,15 @@ import ReactDOM from "react-dom";
  * @extends {React.PureComponent}
  */
 
-const styles = theme => {};
+const styles = theme => {
+  return {
+    containerRoot: {
+      padding: 0,
+      margin: 0,
+      maxWidth: "none"
+    }
+  };
+};
 
 class SearchResultListContainer extends React.PureComponent {
   state = {};
@@ -36,16 +38,16 @@ class SearchResultListContainer extends React.PureComponent {
     options: {}
   };
 
-  constructor(props) {
-    super(props);
-  }
-
   render() {
-    const { value, index } = this.props;
-    console.log(index, "index");
+    const { value, index, classes } = this.props;
+
     return (
-      <Container hidden={value !== index} id={`search-result-${index}`}>
-        {this.props.children}
+      <Container
+        classes={{ root: classes.containerRoot }}
+        hidden={value !== index}
+        id={`search-result-${index}`}
+      >
+        <AttributeTable></AttributeTable>
       </Container>
     );
   }
