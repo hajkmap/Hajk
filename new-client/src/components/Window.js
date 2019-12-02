@@ -154,6 +154,11 @@ class Window extends React.PureComponent {
       globalObserver.subscribe("drawerToggled", () => {
         this.updatePosition();
       });
+      globalObserver.subscribe("dialogOpen", open => {
+        this.rnd.setState({
+          disableDrag: open
+        });
+      });
     }
   }
 

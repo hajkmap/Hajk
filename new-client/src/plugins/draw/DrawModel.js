@@ -23,6 +23,7 @@ class DrawModel {
     this.app = settings.app;
     this.options = settings.options;
     this.localObserver = settings.localObserver;
+    this.globalObserver = settings.app.globalObserver;
 
     this.source = new VectorSource();
     this.vector = new VectorLayer({
@@ -1002,6 +1003,10 @@ class DrawModel {
 
   getMap() {
     return this.map;
+  }
+
+  openDialog(open) {
+    this.globalObserver.publish("dialogOpen", open);
   }
 }
 
