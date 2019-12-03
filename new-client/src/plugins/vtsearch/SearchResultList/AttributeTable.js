@@ -1,103 +1,222 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import Paper from "@material-ui/core/Paper";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
+import PropTypes from "prop-types";
+import clsx from "clsx";
+import { withStyles } from "@material-ui/core/styles";
 import TableCell from "@material-ui/core/TableCell";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
+import Paper from "@material-ui/core/Paper";
+import { AutoSizer, Column, Table } from "react-virtualized";
 
-const columns = [
-  { id: "name", label: "Name", minWidth: 170 },
-  { id: "code", label: "ISO\u00a0Code", minWidth: 100 },
-  {
-    id: "population",
-    label: "Population",
-    minWidth: 170,
-    align: "right",
-    format: value => value.toLocaleString()
+const styles = theme => ({
+  flexContainer: {
+    display: "flex",
+    alignItems: "center",
+    boxSizing: "border-box"
   },
-  {
-    id: "size",
-    label: "Size\u00a0(km\u00b2)",
-    minWidth: 170,
-    align: "right",
-    format: value => value.toLocaleString()
+  table: {
+    // temporary right-to-left patch, waiting for
+    // https://github.com/bvaughn/react-virtualized/issues/454
+    "& .ReactVirtualized__Table__headerRow": {
+      flip: false,
+      paddingRight: theme.direction === "rtl" ? "0px !important" : undefined
+    }
   },
-  {
-    id: "density",
-    label: "Density",
-    minWidth: 170,
-    align: "right",
-    format: value => value.toFixed(2)
-  }
-];
-
-function createData(name, code, population, size) {
-  const density = population / size;
-  return { name, code, population, size, density };
-}
-
-function mockDataRows() {
-  var array = [];
-  for (var i = 0; i < 200; i++) {
-    array.push(createData("Cupcake" + i, i + 1, i + 1, i + 1, i + 1));
-  }
-  return array;
-}
-
-const rows = mockDataRows();
-
-const useStyles = makeStyles({
-  root: {
-    width: "100%"
+  tableRow: {
+    cursor: "pointer"
   },
-  tableWrapper: {
-    maxHeight: 440,
-    overflow: "auto"
+  tableRowHover: {
+    "&:hover": {
+      backgroundColor: theme.palette.grey[200]
+    }
+  },
+  tableCell: {
+    flex: 1
+  },
+  noClick: {
+    cursor: "initial"
   }
 });
 
-export default function StickyHeadTable() {
-  const classes = useStyles();
+class MuiVirtualizedTable extends React.PureComponent {
+  static defaultProps = {
+    headerHeight: 48,
+    rowHeight: 48
+  };
 
-  return (
-    <Paper className={classes.root}>
-      <div className={classes.tableWrapper}>
-        <Table size={"small"} stickyHeader aria-label="sticky table">
-          <TableHead>
-            <TableRow>
-              {columns.map(column => (
-                <TableCell
-                  key={column.id}
-                  align={column.align}
-                  style={{ minWidth: column.minWidth }}
-                >
-                  {column.label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map(row => {
+  getRowClassName = ({ index }) => {
+    const { classes, onRowClick } = this.props;
+
+    return clsx(classes.tableRow, classes.flexContainer, {
+      [classes.tableRowHover]: index !== -1 && onRowClick != null
+    });
+  };
+
+  cellRenderer = ({ cellData, columnIndex }) => {
+    const { columns, classes, rowHeight, onRowClick } = this.props;
+    return (
+      <TableCell
+        component="div"
+        className={clsx(classes.tableCell, classes.flexContainer, {
+          [classes.noClick]: onRowClick == null
+        })}
+        variant="body"
+        style={{ height: rowHeight }}
+        align={
+          (columnIndex != null && columns[columnIndex].numeric) || false
+            ? "right"
+            : "left"
+        }
+      >
+        {cellData}
+      </TableCell>
+    );
+  };
+
+  headerRenderer = ({ label, columnIndex }) => {
+    const { headerHeight, columns, classes } = this.props;
+
+    return (
+      <TableCell
+        component="div"
+        className={clsx(
+          classes.tableCell,
+          classes.flexContainer,
+          classes.noClick
+        )}
+        variant="head"
+        style={{ height: headerHeight }}
+        align={columns[columnIndex].numeric || false ? "right" : "left"}
+      >
+        <span>{label}</span>
+      </TableCell>
+    );
+  };
+
+  render() {
+    const {
+      classes,
+      columns,
+      rowHeight,
+      headerHeight,
+      ...tableProps
+    } = this.props;
+    return (
+      <AutoSizer>
+        {({ height, width }) => (
+          <Table
+            height={height}
+            width={width}
+            rowHeight={rowHeight}
+            gridStyle={{
+              direction: "inherit"
+            }}
+            headerHeight={headerHeight}
+            className={classes.table}
+            {...tableProps}
+            rowClassName={this.getRowClassName}
+          >
+            {columns.map(({ dataKey, ...other }, index) => {
               return (
-                <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
-                  {columns.map(column => {
-                    const value = row[column.id];
-                    return (
-                      <TableCell key={column.id} align={column.align}>
-                        {column.format && typeof value === "number"
-                          ? column.format(value)
-                          : value}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
+                <Column
+                  key={dataKey}
+                  headerRenderer={headerProps =>
+                    this.headerRenderer({
+                      ...headerProps,
+                      columnIndex: index
+                    })
+                  }
+                  className={classes.flexContainer}
+                  cellRenderer={this.cellRenderer}
+                  dataKey={dataKey}
+                  {...other}
+                />
               );
             })}
-          </TableBody>
-        </Table>
-      </div>
-    </Paper>
-  );
+          </Table>
+        )}
+      </AutoSizer>
+    );
+  }
 }
+
+MuiVirtualizedTable.propTypes = {
+  classes: PropTypes.object.isRequired,
+  columns: PropTypes.arrayOf(
+    PropTypes.shape({
+      dataKey: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+      numeric: PropTypes.bool,
+      width: PropTypes.number.isRequired
+    })
+  ).isRequired,
+  headerHeight: PropTypes.number,
+  onRowClick: PropTypes.func,
+  rowHeight: PropTypes.number
+};
+
+const VirtualizedTable = withStyles(styles)(MuiVirtualizedTable);
+
+// ---
+
+const sample = [
+  ["Frozen yoghurt", 159, 6.0, 24, 4.0],
+  ["Ice cream sandwich", 237, 9.0, 37, 4.3],
+  ["Eclair", 262, 16.0, 24, 6.0],
+  ["Cupcake", 305, 3.7, 67, 4.3],
+  ["Gingerbread", 356, 16.0, 49, 3.9]
+];
+
+function createData(id, dessert, calories, fat, carbs, protein) {
+  return { id, dessert, calories, fat, carbs, protein };
+}
+
+const rows = [];
+
+for (let i = 0; i < 1000; i += 1) {
+  const randomSelection = sample[Math.floor(Math.random() * sample.length)];
+  rows.push(createData(i, ...randomSelection));
+}
+
+class ReactVirtualizedTable extends React.PureComponent {
+  getFeaturePropertiesKeys(searchResult) {
+    return Object.keys(searchResult.featureCollection.features[0].properties);
+  }
+
+  getColumns() {
+    const { searchResult } = this.props;
+    return this.getFeaturePropertiesKeys(searchResult).map(key => {
+      return {
+        width: 200,
+        label: key,
+        dataKey: key
+      };
+    });
+  }
+
+  //TODO - FIX THIS
+  getRows() {
+    const { searchResult } = this.props;
+
+    return searchResult.featureCollection.features.map((feature, index) => {
+      return Object.keys(feature.properties).reduce((acc, key) => {
+        return { ...acc, key: feature.properties[key] };
+      }, {});
+    });
+  }
+
+  render() {
+    var rows = this.getRows();
+    console.log(rows, "rows");
+    const { resultListHeight } = this.props;
+    return (
+      <Paper style={{ height: resultListHeight, width: "100%" }}>
+        <VirtualizedTable
+          rowCount={rows.length}
+          rowGetter={({ index }) => rows[index]}
+          columns={this.getColumns()}
+        />
+      </Paper>
+    );
+  }
+}
+
+export default withStyles(styles)(ReactVirtualizedTable);

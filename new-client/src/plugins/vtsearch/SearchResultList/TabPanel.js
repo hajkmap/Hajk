@@ -39,15 +39,23 @@ class SearchResultListContainer extends React.PureComponent {
   };
 
   render() {
-    const { value, index, classes } = this.props;
-
+    const {
+      value,
+      index,
+      classes,
+      resultListHeight,
+      searchResult
+    } = this.props;
     return (
       <Container
         classes={{ root: classes.containerRoot }}
         hidden={value !== index}
         id={`search-result-${index}`}
       >
-        <AttributeTable></AttributeTable>
+        <AttributeTable
+          searchResult={searchResult}
+          resultListHeight={resultListHeight}
+        ></AttributeTable>
       </Container>
     );
   }

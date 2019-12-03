@@ -64,6 +64,7 @@ class SearchResultListContainer extends React.Component {
   //TODO - State is only mocked because we are missing pieces to complete the whole chain
   state = {
     resultListHeight: 300,
+    previousResultListHeight: 300,
     windowWidth: getWindowContainerWidth(),
     windowHeight: getWindowContainerHeight(),
     value: 0, //mock
@@ -166,10 +167,37 @@ class SearchResultListContainer extends React.Component {
 
   bindSubscriptions = () => {
     this.localObserver.subscribe("search-result-list-minimized", () => {
-      this.setState({ minimized: true, maximized: false });
+      this.setState((state, props) => {
+        return {
+          minimized: true,
+          maximized: false,
+          resultListHeight: getWindowContainerHeight(),
+          previousResultListHeight:
+            !state.minimized && !state.minimized
+              ? this.state.resultListHeight
+              : this.state.previousResultListHeight
+        };
+      });
     });
     this.localObserver.subscribe("search-result-list-maximized", () => {
-      this.setState({ minimized: false, maximized: true });
+      this.setState((state, props) => {
+        return {
+          minimized: false,
+          maximized: true,
+          resultListHeight: getWindowContainerHeight(),
+          previousResultListHeight:
+            !state.minimized && !state.minimized
+              ? this.state.resultListHeight
+              : this.state.previousResultListHeight
+        };
+      });
+    });
+    this.localObserver.subscribe("search-result-list-normal", height => {
+      this.setState({
+        minimized: false,
+        maximized: false,
+        resultListHeight: this.state.previousResultListHeight
+      });
     });
   };
 
@@ -282,7 +310,8 @@ class SearchResultListContainer extends React.Component {
           this.setState({
             resultListHeight: parseInt(height),
             maximized: false,
-            minimized: false
+            minimized: false,
+            previousResultListHeight: parseInt(height)
           });
         }}
         bounds={`#${windowContainerId}`}
@@ -323,9 +352,9 @@ class SearchResultListContainer extends React.Component {
               key={searchResult.id}
               value={this.state.activeTab}
               index={searchResult.id}
-            >
-              {searchResult.featureCollection.type}
-            </TabPanel>
+              resultListHeight={this.state.resultListHeight}
+              searchResult={searchResult}
+            ></TabPanel>
           );
         })}
       </Rnd>
