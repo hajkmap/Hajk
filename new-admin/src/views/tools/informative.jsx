@@ -76,7 +76,7 @@ class ToolOptions extends Component {
                     ? true
                     : tool.options.tocExpanded,
                 index: tool.index,
-                target: tool.options.target,
+                target: tool.options.target || "toolbar",
                 position: tool.options.position,
                 width: tool.options.width,
                 height: tool.options.height,

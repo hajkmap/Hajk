@@ -24,41 +24,33 @@ import React from "react";
 import { Component } from "react";
 import Tree from "../tree.jsx";
 
-var defaultState = {
-  validationErrors: [],
-  toolbar: "bottom",
+/**
+ * I've removed the following from defaultState and save:
+ * target, toolbar, onMap, bothSynlig, enableViewTogglePopupInSnabbsok,
+ * selectionTools, base64Encode, instruction, filterVisible, displayPopup,
+ * maxZoom, excelExportUrl, kmlExportUrl, anchorX, anchorY, imgSizeX,
+ * imgSizeY, toolDescription, popupOffsetY
+ *
+ * I'm leaving this comment for documentation purposes. I'll do a coupe of
+ * checks to ensure these are not used anywhere else in the code. If they are
+ * that code might as well be removed too.
+ */
+const defaultState = {
   active: false,
   index: 0,
-  target: "toolbar",
-  onMap: false,
-  bothSynlig: false,
-  enableViewTogglePopupInSnabbsok: true,
-  selectionTools: true,
-  selectionSearch: false,
-  radiusSearch: false,
   polygonSearch: false,
+  radiusSearch: false,
+  selectionSearch: false,
   searchSettings: false,
-  base64Encode: false,
-  instruction: "",
-  filterVisible: true,
-  displayPopup: true,
-  maxZoom: 14,
-  excelExportUrl: "/mapservice/export/excel",
-  kmlExportUrl: "/mapservice/export/kml",
-  markerImg: "http://localhost/hajk/assets/icons/marker.png",
-  anchorX: 16,
-  anchorY: 32,
-  imgSizeX: 32,
-  imgSizeY: 32,
+  markerImg: "marker.png",
   tooltip: "Sök...",
   searchWithinButtonText: "Markera i kartan",
-  toolDescription: "<div>Sök innehåll i kartan</div>",
   maxFeatures: 100,
-  popupOffsetY: 0,
   visibleForGroups: [],
+  layers: [],
+  validationErrors: [],
   searchableLayers: {},
-  tree: "",
-  layers: []
+  tree: ""
 };
 
 class ToolOptions extends Component {
@@ -83,46 +75,23 @@ class ToolOptions extends Component {
         {
           active: true,
           index: tool.index,
-          target: tool.options.target || "toolbar",
-          position: tool.options.position,
-          width: tool.options.width,
-          height: tool.options.height,
-          onMap: tool.options.onMap,
-          bothSynlig: tool.options.bothSynlig,
-          enableViewTogglePopupInSnabbsok:
-            tool.options.enableViewTogglePopupInSnabbsok,
-          selectionTools: tool.options.selectionTools,
-          selectionSearch: tool.options.selectionSearch,
-          radiusSearch: tool.options.radiusSearch,
           polygonSearch: tool.options.polygonSearch,
+          radiusSearch: tool.options.radiusSearch,
+          selectionSearch: tool.options.selectionSearch,
           searchSettings: tool.options.searchSettings,
-          base64Encode: tool.options.base64Encode,
-          instruction: tool.options.instruction,
-          filterVisible: tool.options.filterVisible,
-          displayPopup: tool.options.displayPopup,
-          maxZoom: tool.options.maxZoom,
-          excelExportUrl: tool.options.excelExportUrl,
-          kmlExportUrl: tool.options.kmlExportUrl,
+          visibleForGroups: tool.options.visibleForGroups
+            ? tool.options.visibleForGroups
+            : [],
           markerImg: tool.options.markerImg,
-          anchorX: tool.options.anchor[0] || this.state.anchorX,
-          anchorY: tool.options.anchor[1] || this.state.anchorY,
-          imgSizeX: tool.options.imgSize[0] || this.state.imgSizeX,
-          imgSizeY: tool.options.imgSize[1] || this.state.imgSizeX,
           tooltip: tool.options.tooltip || this.state.tooltip,
           searchWithinButtonText:
             tool.options.searchWithinButtonText ||
             this.state.searchWithinButtonText,
-          toolDescription:
-            tool.options.toolDescription || this.state.toolDescription,
           maxFeatures: tool.options.maxFeatures || this.state.maxFeatures,
-          popupOffsetY: tool.options.popupOffsetY,
-          visibleForGroups: tool.options.visibleForGroups
-            ? tool.options.visibleForGroups
-            : [],
-          layers: tool.options.layers ? tool.options.layers : [],
           selectedSources: tool.options.selectedSources
             ? tool.options.selectedSources
-            : []
+            : [],
+          layers: tool.options.layers ? tool.options.layers : []
         },
         () => {
           this.loadLayers();
@@ -157,9 +126,6 @@ class ToolOptions extends Component {
     }
 
     if (typeof childRefs !== "undefined") {
-      console.log("childRefs: ", childRefs);
-      console.log(ids);
-
       for (let i of ids) {
         childRefs["cb_" + i.id] && (childRefs["cb_" + i.id].checked = true);
         childRefs[i.id] && (childRefs[i.id].hidden = false);
@@ -169,15 +135,11 @@ class ToolOptions extends Component {
   }
 
   handleInputChange(event) {
-    var target = event.target;
-    var name = target.name;
-    var value = target.type === "checkbox" ? target.checked : target.value;
+    var t = event.target;
+    var name = t.name;
+    var value = t.type === "checkbox" ? t.checked : t.value;
     if (typeof value === "string" && value.trim() !== "") {
       value = !isNaN(Number(value)) ? Number(value) : value;
-    }
-    console.log([name], "name", value, "value");
-    if (name === "instruction") {
-      value = btoa(value);
     }
     this.setState({
       [name]: value
@@ -235,56 +197,26 @@ class ToolOptions extends Component {
   }
 
   save() {
-    var toolbar = "bottom";
-    var onMap = this.state.onMap;
-    if (this.state.bothSynlig) {
-      toolbar = "bottom";
-      onMap = true;
-    } else if (onMap) {
-      toolbar = "";
-    }
-
     var tool = {
       type: this.type,
       index: this.state.index,
       options: {
-        target: this.state.target,
-        position: this.state.position,
-        width: this.state.width,
-        height: this.state.height,
-        onMap: onMap,
-        bothSynlig: this.state.bothSynlig,
-        enableViewTogglePopupInSnabbsok: this.state
-          .enableViewTogglePopupInSnabbsok,
-        toolbar: toolbar,
-        maxZoom: this.state.maxZoom,
-        markerImg: this.state.markerImg,
-        kmlExportUrl: this.state.kmlExportUrl,
-        excelExportUrl: this.state.excelExportUrl,
-        displayPopup: this.state.displayPopup,
-        selectionTools: this.state.selectionTools,
-        selectionSearch: this.state.selectionSearch,
-        radiusSearch: this.state.radiusSearch,
         polygonSearch: this.state.polygonSearch,
+        radiusSearch: this.state.radiusSearch,
+        selectionSearch: this.state.selectionSearch,
         searchSettings: this.state.searchSettings,
-        base64Encode: this.state.base64Encode,
-        instruction: this.state.instruction,
-        filterVisible: this.state.filterVisible,
-        anchor: [this.state.anchorX, this.state.anchorY],
-        imgSize: [this.state.imgSizeX, this.state.imgSizeY],
-        tooltip: this.state.tooltip,
-        searchWithinButtonText: this.state.searchWithinButtonText,
-        toolDescription: this.state.toolDescription,
-        maxFeatures: this.state.maxFeatures,
-        popupOffsetY: this.state.popupOffsetY,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
         ),
-        layers: this.state.layers ? this.state.layers : [],
+        markerImg: this.state.markerImg,
+        tooltip: this.state.tooltip,
+        searchWithinButtonText: this.state.searchWithinButtonText,
+        maxFeatures: this.state.maxFeatures,
         selectedSources: this.state.selectedSources
           ? this.state.selectedSources
-          : []
+          : [],
+        layers: this.state.layers ? this.state.layers : []
       }
     };
 
@@ -330,8 +262,8 @@ class ToolOptions extends Component {
   }
 
   handleAuthGrpsChange(event) {
-    const target = event.target;
-    const value = target.value;
+    const t = event.target;
+    const value = t.value;
     let groups = [];
 
     try {
