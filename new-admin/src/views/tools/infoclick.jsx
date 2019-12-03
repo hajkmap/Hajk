@@ -265,6 +265,7 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="active">Aktiverad</label>
           </div>
+          <div className="separator">Fönsterinställningar</div>
           <div>
             <label htmlFor="title">
               Titel{" "}
@@ -277,6 +278,7 @@ class ToolOptions extends Component {
             <input
               id="title"
               name="title"
+              placeholder={defaultState.title}
               type="text"
               onChange={e => {
                 this.handleInputChange(e);
@@ -296,6 +298,7 @@ class ToolOptions extends Component {
             <input
               id="position"
               name="position"
+              placeholder={defaultState.position}
               type="text"
               onChange={e => {
                 this.handleInputChange(e);
@@ -315,6 +318,7 @@ class ToolOptions extends Component {
             <input
               id="width"
               name="width"
+              placeholder={defaultState.width}
               type="text"
               onChange={e => {
                 this.handleInputChange(e);
@@ -334,6 +338,7 @@ class ToolOptions extends Component {
             <input
               id="height"
               name="height"
+              placeholder={defaultState.height}
               type="text"
               onChange={e => {
                 this.handleInputChange(e);
@@ -342,12 +347,14 @@ class ToolOptions extends Component {
             />
           </div>
           {this.renderVisibleForGroups()}
+          <div className="separator">Ikon och markering</div>
           <div>
             <label htmlFor="src">URL till bild</label>
             <input
               value={this.state.src}
               type="text"
               name="src"
+              placeholder={defaultState.src}
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -358,6 +365,7 @@ class ToolOptions extends Component {
             <input
               value={this.state.anchorX}
               type="number"
+              placeholder={defaultState.anchorX}
               min="0"
               max="100"
               step="0.1"
@@ -372,6 +380,7 @@ class ToolOptions extends Component {
             <input
               value={this.state.anchorY}
               type="number"
+              placeholder={defaultState.anchorY}
               min="0"
               max="100"
               step="0.1"
@@ -386,6 +395,7 @@ class ToolOptions extends Component {
             <input
               value={this.state.scale}
               type="number"
+              placeholder={defaultState.scale}
               step="0.01"
               min="0.01"
               max="10"
@@ -414,6 +424,7 @@ class ToolOptions extends Component {
             <input
               value={this.state.strokeWidth}
               type="number"
+              placeholder={defaultState.strokeWidth}
               min="0"
               max="100"
               step="1"

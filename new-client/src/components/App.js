@@ -259,7 +259,7 @@ class App extends React.PureComponent {
     return (
       <Window
         globalObserver={this.globalObserver}
-        title={title || "Sökresultat"}
+        title={title || "Infoclick"}
         open={open}
         position={position || "right"}
         mode="window"
