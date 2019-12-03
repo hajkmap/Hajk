@@ -20,22 +20,26 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import React from "react";
-import { Component } from "react";
+import React, { Component } from "react";
+import { SketchPicker } from "react-color";
 
 var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
-  target: "toolbar",
-  markerImg: "assets/icons/marker.png",
-  displayPopup: false,
-  imgSizeX: 32,
-  imgSizeY: 32,
-  anchorX: 16,
-  anchorY: 32,
-  popupOffsetY: 0,
-  visibleForGroups: []
+  visibleForGroups: [],
+  title: "Infoclick",
+  position: "right",
+  width: 400,
+  height: 300,
+
+  src: "marker.png",
+  scale: 0.15,
+  strokeColor: { r: 200, b: 0, g: 0, a: 0.7 },
+  strokeWidth: 4,
+  fillColor: { r: 255, b: 0, g: 0, a: 0.1 },
+  anchorX: 0.5,
+  anchorY: 1
 };
 
 class ToolOptions extends Component {
@@ -54,17 +58,17 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
-        target: tool.options.target,
+        title: tool.options.title,
         position: tool.options.position,
         width: tool.options.width,
         height: tool.options.height,
-        markerImg: tool.options.markerImg,
-        displayPopup: tool.options.displayPopup,
-        imgSizeX: tool.options.imgSize[0] || this.state.imgSizeX,
-        imgSizeY: tool.options.imgSize[1] || this.state.imgSizeX,
+        src: tool.options.src,
+        scale: tool.options.scale || this.state.scale,
+        strokeColor: tool.options.strokeColor || this.state.strokeColor,
+        strokeWidth: tool.options.strokeWidth || this.state.strokeWidth,
+        fillColor: tool.options.fillColor || this.state.fillColor,
         anchorX: tool.options.anchor[0] || this.state.anchorX,
         anchorY: tool.options.anchor[1] || this.state.anchorY,
-        popupOffsetY: tool.options.popupOffsetY,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : []
@@ -126,15 +130,16 @@ class ToolOptions extends Component {
       type: this.type,
       index: this.state.index,
       options: {
-        target: this.state.target,
+        title: this.state.title,
         position: this.state.position,
         width: this.state.width,
         height: this.state.height,
-        displayPopup: this.state.displayPopup,
-        markerImg: this.state.markerImg,
         anchor: [this.state.anchorX, this.state.anchorY],
-        imgSize: [this.state.imgSizeX, this.state.imgSizeY],
-        popupOffsetY: this.state.popupOffsetY,
+        scale: this.state.scale,
+        src: this.state.src,
+        strokeColor: this.state.strokeColor,
+        strokeWidth: this.state.strokeWidth,
+        fillColor: this.state.fillColor,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -221,8 +226,17 @@ class ToolOptions extends Component {
   }
 
   /**
+   * Infoclick's stroke and fill color are set by the React
+   * color picker. This method handles change event for those
+   * two color pickers.
    *
+   * @param {*} target
+   * @param {*} color
    */
+  handleColorChange = (target, color) => {
+    this.setState({ [target]: color.rgb });
+  };
+
   render() {
     return (
       <div>
@@ -252,27 +266,22 @@ class ToolOptions extends Component {
             <label htmlFor="active">Aktiverad</label>
           </div>
           <div>
-            <label htmlFor="index">Sorteringsordning</label>
+            <label htmlFor="title">
+              Titel{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Rubrik som visas i infoclick-fönstret"
+              />
+            </label>
             <input
-              id="index"
-              name="index"
+              id="title"
+              name="title"
               type="text"
               onChange={e => {
                 this.handleInputChange(e);
               }}
-              value={this.state.index}
-            />
-          </div>
-          <div>
-            <label htmlFor="target">Verktygsplacering</label>
-            <input
-              id="target"
-              name="target"
-              type="text"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              value={this.state.target}
+              value={this.state.title}
             />
           </div>
           <div>
@@ -334,11 +343,11 @@ class ToolOptions extends Component {
           </div>
           {this.renderVisibleForGroups()}
           <div>
-            <label htmlFor="markerImg">Bild för markering</label>
+            <label htmlFor="src">URL till bild</label>
             <input
-              value={this.state.markerImg}
+              value={this.state.src}
               type="text"
-              name="markerImg"
+              name="src"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -348,7 +357,10 @@ class ToolOptions extends Component {
             <label htmlFor="anchorX">Ikonförskjutning X</label>
             <input
               value={this.state.anchorX}
-              type="text"
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
               name="anchorX"
               onChange={e => {
                 this.handleInputChange(e);
@@ -359,7 +371,10 @@ class ToolOptions extends Component {
             <label htmlFor="anchorY">Ikonförskjutning Y</label>
             <input
               value={this.state.anchorY}
-              type="text"
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
               name="anchorY"
               onChange={e => {
                 this.handleInputChange(e);
@@ -367,50 +382,62 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
-            <label htmlFor="imgSizeX">Bildbredd</label>
+            <label htmlFor="scale">Skala för icon</label>
             <input
-              value={this.state.imgSizeX}
-              type="text"
-              name="imgSizeX"
+              value={this.state.scale}
+              type="number"
+              step="0.01"
+              min="0.01"
+              max="10"
+              name="scale"
               onChange={e => {
                 this.handleInputChange(e);
               }}
             />
           </div>
           <div>
-            <label htmlFor="imgSizeY">Bildhöjd</label>
+            <label htmlFor="strokeColor">Färg på markerings ram (rgba)</label>
+            <SketchPicker
+              color={{
+                r: this.state.strokeColor.r,
+                b: this.state.strokeColor.b,
+                g: this.state.strokeColor.g,
+                a: this.state.strokeColor.a
+              }}
+              onChangeComplete={color =>
+                this.handleColorChange("strokeColor", color)
+              }
+            />
+          </div>
+          <div>
+            <label htmlFor="strokeWidth">Bredd på markeringens ram (px)</label>
             <input
-              value={this.state.imgSizeY}
-              type="text"
-              name="imgSizeY"
+              value={this.state.strokeWidth}
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              name="strokeWidth"
               onChange={e => {
                 this.handleInputChange(e);
               }}
             />
           </div>
           <div>
-            <label htmlFor="popupOffsetY">Förskjutning popup-ruta</label>
-            <input
-              value={this.state.popupOffsetY}
-              type="text"
-              name="popupOffsetY"
-              onChange={e => {
-                this.handleInputChange(e);
+            <label htmlFor="fillColor">
+              Färg på markeringens fyllnad (rgba)
+            </label>
+            <SketchPicker
+              color={{
+                r: this.state.fillColor.r,
+                b: this.state.fillColor.b,
+                g: this.state.fillColor.g,
+                a: this.state.fillColor.a
               }}
+              onChangeComplete={color =>
+                this.handleColorChange("fillColor", color)
+              }
             />
-          </div>
-          <div>
-            <input
-              id="displayPopup"
-              name="displayPopup"
-              type="checkbox"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              checked={this.state.displayPopup}
-            />
-            &nbsp;
-            <label htmlFor="displayPopup">Visa som popup</label>
           </div>
         </form>
       </div>

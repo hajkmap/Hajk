@@ -237,6 +237,14 @@ class App extends React.PureComponent {
   }
 
   renderSearchResultsWindow() {
+    const infoclickConfig = this.props.config.mapConfig.tools.find(
+      t => t.type === "infoclick"
+    );
+
+    if (infoclickConfig === undefined) {
+      return null;
+    }
+
     const open =
       this.state.mapClickDataResult &&
       this.state.mapClickDataResult.features &&
@@ -246,15 +254,17 @@ class App extends React.PureComponent {
     const features =
       this.state.mapClickDataResult && this.state.mapClickDataResult.features;
 
+    const { title, position, width, height } = infoclickConfig.options;
+
     return (
       <Window
         globalObserver={this.globalObserver}
-        title="Sökresultat"
+        title={title || "Sökresultat"}
         open={open}
-        position="right"
+        position={position || "right"}
         mode="window"
-        width={400}
-        height={300}
+        width={width || 400}
+        height={height || 300}
         features={features}
         map={this.appModel.getMap()}
         onDisplay={feature => {

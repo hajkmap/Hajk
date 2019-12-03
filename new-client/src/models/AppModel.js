@@ -85,7 +85,7 @@ class AppModel {
     }, []);
   }
   /**
-   * A plugin has a 'target' option. Currently we use three
+   * A plugin may have the 'target' option. Currently we use three
    * targets: toolbar, left and right. Toolbar means it's a
    * plugin that will be visible in Drawer list. Left and right
    * are Widget plugins, that on large displays show on left/right
@@ -106,14 +106,10 @@ class AppModel {
    */
   getBothDrawerAndWidgetPlugins() {
     const r = this.getPlugins()
-      .filter(
-        plugin =>
-          ["toolbar", "left", "right"].indexOf(plugin.options.target) >= 0 &&
-          plugin.type !== "search" &&
-          plugin.type !== "vtsearch"
-      )
+      .filter(plugin => {
+        return ["toolbar", "left", "right"].indexOf(plugin.options.target) >= 0;
+      })
       .sort((a, b) => a.sortOrder - b.sortOrder);
-
     return r;
   }
 
@@ -136,16 +132,6 @@ class AppModel {
 
           const toolOptions =
             toolConfig && toolConfig.options ? toolConfig.options : {};
-
-          // Crucial step to ensure that target is passed on as an option.
-          // First find out if target has been set in JSON config for plugin.
-          // If yes, keep it. Else, default to 'toolbar'.
-          const target = toolOptions.hasOwnProperty("target")
-            ? toolConfig.options.target
-            : "toolbar";
-          // Next, pass on this determined target to _options_ array of plugin,
-          // and not as a property of the plugin itself.
-          toolOptions.target = target;
 
           const sortOrder = toolConfig.hasOwnProperty("index")
             ? Number(toolConfig.index)
@@ -338,9 +324,14 @@ class AppModel {
   }
 
   addLayers() {
-    let layerSwitcherConfig = this.config.mapConfig.tools.find(
-      tool => tool.type === "layerswitcher"
-    );
+    const layerSwitcherConfig = this.config.mapConfig.tools.find(
+        tool => tool.type === "layerswitcher"
+      ),
+      infoclickConfig = this.config.mapConfig.tools.find(
+        t => t.type === "infoclick"
+      );
+
+    // Prepare layers
     this.layers = this.flattern(layerSwitcherConfig);
     Object.keys(this.layers)
       .sort((a, b) => this.layers[a].drawOrder - this.layers[b].drawOrder)
@@ -354,29 +345,46 @@ class AppModel {
         this.addMapLayer(layer);
       });
 
+    if (infoclickConfig !== undefined) {
+      this.addHighlightLayer(infoclickConfig.options);
+    }
+
+    return this;
+  }
+
+  addHighlightLayer(options) {
+    const { anchor, scale, src, strokeColor, strokeWidth, fillColor } = options;
+    const strokeColorAsArray = [
+      strokeColor.r,
+      strokeColor.g,
+      strokeColor.b,
+      strokeColor.a
+    ];
+    const fillColorAsArray = [
+      fillColor.r,
+      fillColor.g,
+      fillColor.b,
+      fillColor.a
+    ];
     this.highlightSource = new VectorSource();
     this.highlightLayer = new VectorLayer({
       source: this.highlightSource,
       style: new Style({
         stroke: new Stroke({
-          color: "rgba(200, 0, 0, 0.7)",
-          width: 4
+          color: strokeColorAsArray || [200, 0, 0, 0.7],
+          width: strokeWidth || 4
         }),
         fill: new Fill({
-          color: "rgba(255, 0, 0, 0.1)"
+          color: fillColorAsArray || [255, 0, 0, 0.1]
         }),
         image: new Icon({
-          anchor: [0.5, 1],
-          scale: 0.15,
-          anchorXUnits: "fraction",
-          anchorYUnits: "fraction",
-          src: "marker.png"
+          anchor: [anchor[0] || 0.5, anchor[1] || 1],
+          scale: scale || 0.15,
+          src: src || "marker.png"
         })
       })
     });
     map.addLayer(this.highlightLayer);
-
-    return this;
   }
 
   getCenter(e) {
