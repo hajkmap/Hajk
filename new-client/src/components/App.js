@@ -18,6 +18,7 @@ import MapCleaner from "../controls/MapCleaner";
 import MapResetter from "../controls/MapResetter";
 import MapSwitcher from "../controls/MapSwitcher";
 import Information from "../controls/Information";
+import PresetLinks from "../controls/PresetLinks";
 
 import {
   Backdrop,
@@ -345,6 +346,15 @@ class App extends React.PureComponent {
     }
   }
 
+  renderPresetPlugin() {
+    return (
+      this.appModel.plugins.preset !== undefined &&
+      this.appModel.plugins.preset.hasOwnProperty("options") && (
+        <PresetLinks options={this.appModel.plugins.preset.options} />
+      )
+    );
+  }
+
   /**
    * In the case of a disabled Search plugin, we must
    * ensure that the button that toggles Drawer is still visible.
@@ -469,6 +479,7 @@ class App extends React.PureComponent {
                 <Zoom map={this.appModel.getMap()} />
                 {clean === false && <MapSwitcher appModel={this.appModel} />}
                 {clean === false && <MapCleaner appModel={this.appModel} />}
+                {clean === false && this.renderPresetPlugin()}
                 {clean === false && this.renderInformationPlugin()}
                 {clean === true && (
                   <MapResetter
