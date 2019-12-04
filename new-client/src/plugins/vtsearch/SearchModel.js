@@ -5,10 +5,16 @@
  * @class SearchModel
  */
 export default class SearchModel {
+  /**
+   * Settings with labels and urls for the search functions.
+   */
+  static geoserverUrls = null;
+
   constructor(settings) {
     this.map = settings.map;
     this.app = settings.app;
     this.localObserver = settings.localObserver;
+    this.geoserver = settings.geoserver;
   }
 
   /**
@@ -41,16 +47,31 @@ export default class SearchModel {
     // Fix parentheses and so on, so that the WKT are geoserver valid.
     filterOnWkt = this.fixWktForGeoServer(filterOnWkt);
 
-    // Build up the url.
-    let url =
-      "http://sestoas256:8080/geoserver/kartsidan2/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=kartsidan2:journeys&outputFormat=application/json";
-    const viewParams = `&viewparams=filterOnFromDate:${filterOnFromDate};filterOnToDate:${filterOnToDate};filterOnWkt:${filterOnWkt}`;
-    url = url + viewParams;
+    // Build up the url with viewparams.
+    let url = this.geoserver.journeys.url;
+    let viewParams = `&viewparams=filterOnFromDate:${filterOnFromDate};filterOnToDate:${filterOnToDate};filterOnWkt:${filterOnWkt}`;
+    if (filterOnFromDate != null)
+      viewParams = viewParams + `filterOnFromDate:${filterOnFromDate};`;
+    if (filterOnToDate != null)
+      viewParams = viewParams + `filterOnToDate:${filterOnToDate};`;
+    if (filterOnWkt != null)
+      viewParams = viewParams + `filterOnWkt:${filterOnWkt};`;
+
+    if (
+      filterOnFromDate != null &&
+      filterOnToDate != null &&
+      filterOnWkt != null
+    )
+      url = url + viewParams;
 
     // Fetch the result as a promise and attach it to the event.
     fetch(url).then(res => {
-      res.json().then(jsonFeature => {
-        this.localObserver.publish("journey-result-done", jsonFeature);
+      res.json().then(jsonResult => {
+        const journeys = {
+          data: jsonResult.features,
+          label: this.geoserver.journeys.searchLabel
+        };
+        this.localObserver.publish("journey-result-done", journeys);
       });
     });
   }
@@ -58,7 +79,7 @@ export default class SearchModel {
   /**
    * Gets all municipality names sorted in alphabetic order array. Sends an event when the function is called and another one when
    * it's promise is done and sorted.
-   * @returns - Returns all municipality names sorted in alphabetic order.
+   * @returns Returns all municipality names sorted in alphabetic order.
    *
    * @memberof SearchModel
    */
@@ -66,8 +87,7 @@ export default class SearchModel {
     this.localObserver.publish("municipalityZoneNames-result-begin");
 
     // The url.
-    const url =
-      "http://sestoas256:8080/geoserver/kartsidan2/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=kartsidan2%3AmunicipalityZoneNames&outputFormat=application/json";
+    const url = this.geoserver.municipalityZoneNames.url;
 
     // Fetch the result as a promise, sort it and attach it to the event.
     fetch(url).then(res => {
@@ -79,9 +99,44 @@ export default class SearchModel {
         // Sort the array with Swedish letters
         allMunicipalitiyNames.sort(([a], [b]) => a.localeCompare(b, "swe"));
 
+        const municipalityNames = {
+          data: allMunicipalitiyNames,
+          label: this.geoserver.municipalityZoneNames.searchLabel
+        };
         this.localObserver.publish(
           "municipalityZoneNames-result-done",
-          allMunicipalitiyNames
+          municipalityNames
+        );
+      });
+    });
+  }
+
+  /**
+   * Returns then transport mode type names and numbers. Sends an event when the function is called and another one when
+   * it's promise is done.
+   * @returns Returnes all mode type names as an array of tuples.
+   */
+  getTransportModeTypeName() {
+    this.localObserver.publish("transportModeTypeNames-result-begin");
+
+    // The url.
+    const url = this.geoserver.transportModeTypeNames.url;
+
+    // Fetch the result as a promise and attach it to the event.
+    fetch(url).then(res => {
+      res.json().then(jsonFeature => {
+        let transportModeTypes = jsonFeature.features.map(feature => {
+          return [feature.properties.Number, feature.properties.Name];
+        });
+
+        const transportModeTypeNames = {
+          data: transportModeTypes,
+          label: this.geoserver.transportModeTypeNames.searchLabel
+        };
+
+        this.localObserver.publish(
+          "transportModeTypeNames-result-done",
+          transportModeTypeNames
         );
       });
     });
