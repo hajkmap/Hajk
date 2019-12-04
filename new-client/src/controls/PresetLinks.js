@@ -77,10 +77,10 @@ class Preset extends React.PureComponent {
     this.setState({ anchorEl: null });
   };
 
-  handleOnClick = (event, item) => {
-    //const { map } = this.props;
+  handleItemClick = (event, item) => {
     console.log(item);
-    //console.log(this.map);
+    console.log(this.props);
+    const map = this.props.map;
     let url = item.presetUrl.toLowerCase();
     if (
       url.indexOf("&x=") > 0 &&
@@ -91,11 +91,11 @@ class Preset extends React.PureComponent {
       let x = url[1].substring(2);
       let y = url[2].substring(2);
       let z = url[3].substring(2);
-      // const view = map.getView();
-      // view.animate({
-      //   center: [x, y],
-      //   zoom: z
-      // });
+      const view = map.getView();
+      view.animate({
+        center: [x, y],
+        zoom: z
+      });
     } else {
       this.props.enqueueSnackbar(
         "Länken till platsen är tyvärr felaktig. Kontakta administratören av karttjänsten för att åtgärda felet.",
@@ -132,7 +132,7 @@ class Preset extends React.PureComponent {
       menuItems.push(
         <MenuItem
           key={index}
-          onClick={event => this.handleOnClick(event, item)}
+          onClick={event => this.handleItemClick(event, item)}
         >
           {item.name}
         </MenuItem>
