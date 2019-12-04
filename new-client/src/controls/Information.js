@@ -27,7 +27,6 @@ class Information extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    console.log("props: ", props);
     this.type = "Information"; // Special case - plugins that don't use BaseWindowPlugin must specify .type here
     this.options = props.options;
     this.title = this.options.title || "Om kartan";
