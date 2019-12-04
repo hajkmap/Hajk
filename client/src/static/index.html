@@ -12,12 +12,12 @@
   <body>
     {js}
     <script>
-      HAJK2.wmsProxy = "";
-      HAJK2.wfsProxy = "";
-      HAJK2.searchProxy = "";
-      HAJK2.servicePath = "/mapservice/";
+      HAJK2.wmsProxy = "http://localhost/util/proxy/geturl/";
+      HAJK2.wfsProxy = "http://localhost/util/proxy/geturl/";
+      HAJK2.searchProxy = "http://localhost/util/postproxy.aspx?url=";
+      HAJK2.servicePath = "/";
       (function () {
-        var config = "kommungis";
+        var config = "map_1";
         window.location.search
           .replace('?', '')
           .split('&')
@@ -31,8 +31,8 @@
           });
         HAJK2.configFile = config;
         HAJK2.start({
-          configPath: HAJK2.servicePath + "config/" + config,
-          layersPath: HAJK2.servicePath + "config/layers"
+          configPath: HAJK2.servicePath + "/config/" + config,
+          layersPath: HAJK2.servicePath + "/config/layers"
         }, function (status, message) {
           if (!status) {
             document.write(message);

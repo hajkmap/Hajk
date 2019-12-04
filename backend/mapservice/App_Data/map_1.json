@@ -1,0 +1,554 @@
+{
+  "version": "1.0.5",
+  "projections": [
+    {
+      "code": "EPSG:3006",
+      "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [
+        181896.33,
+        6101648.07,
+        864416.0,
+        7689478.3
+      ],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3006",
+      "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [
+        181896.33,
+        6101648.07,
+        864416.0,
+        7689478.3
+      ],
+      "units": null
+    },
+    {
+      "code": "EPSG:3007",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [
+        60436.5084,
+        6192389.565,
+        217643.4713,
+        6682784.4276
+      ],
+      "units": null
+    },
+    {
+      "code": "EPSG:3008",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=13.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
+      "extent": [
+        60857.4994,
+        6120098.8505,
+        223225.0217,
+        6906693.7888
+      ],
+      "units": null
+    },
+    {
+      "code": "EPSG:3009",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=15 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [
+        56294.0365,
+        6203542.5282,
+        218719.0581,
+        6835499.2391
+      ],
+      "units": null
+    },
+    {
+      "code": "EPSG:3010",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=16.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [
+        97213.6352,
+        6228930.1419,
+        225141.8681,
+        6916524.0785
+      ],
+      "units": null
+    },
+    {
+      "code": "EPSG:3011",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=18 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [
+        96664.5565,
+        6509617.2232,
+        220146.6914,
+        6727103.5879
+      ],
+      "units": null
+    },
+    {
+      "code": "EPSG:3012",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=14.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [
+        30462.5263,
+        6829647.9842,
+        216416.1584,
+        7154168.0208
+      ],
+      "units": null
+    },
+    {
+      "code": "EPSG:3013",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=15.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
+      "extent": [
+        34056.6264,
+        6710433.2884,
+        218692.0214,
+        7224144.732
+      ],
+      "units": null
+    },
+    {
+      "code": "EPSG:3014",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=17.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [
+        -1420.28,
+        6888655.5779,
+        212669.1333,
+        7459585.3378
+      ],
+      "units": null
+    },
+    {
+      "code": "EPSG:3015",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=18.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [
+        58479.4774,
+        6304213.2147,
+        241520.5226,
+        7276832.4419
+      ],
+      "units": null
+    },
+    {
+      "code": "EPSG:3016",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=20.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [
+        -93218.3385,
+        7034909.8738,
+        261434.6246,
+        7676279.8691
+      ],
+      "units": null
+    },
+    {
+      "code": "EPSG:3016",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=21.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [
+        67451.0699,
+        7211342.8483,
+        145349.5699,
+        7254837.254
+      ],
+      "units": null
+    },
+    {
+      "code": "EPSG:3018",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=23.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [
+        38920.7048,
+        7267405.2323,
+        193050.246,
+        7597992.2419
+      ],
+      "units": null
+    },
+    {
+      "code": "EPSG:3021",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=15.80827777777778 +k=1 +x_0=1500000 +y_0=0 +ellps=bessel +units=m +no_defs",
+      "extent": [
+        1392811.0743,
+        6208496.7665,
+        1570600.8906,
+        7546077.6984
+      ],
+      "units": null
+    }
+  ],
+  "tools": [
+    {
+      "type": "layerswitcher",
+      "options": {
+        "baselayers": [
+          {
+            "id": "7",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null
+          },
+          {
+            "id": "50",
+            "visibleAtStart": true,
+            "drawOrder": 0,
+            "visibleForGroups": null
+          }
+        ],
+        "groups": [
+          {
+            "id": "96638717-9cf2-61f7-75a8-3a4859140cf7",
+            "parent": "-1",
+            "name": "Grupp 1",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "46",
+                "visibleAtStart": false,
+                "drawOrder": 0,
+                "visibleForGroups": []
+              }
+            ],
+            "groups": [
+              {
+                "id": "1bb6fbcb-9b16-d657-af9b-154a3ebc52aa",
+                "parent": "96638717-9cf2-61f7-75a8-3a4859140cf7",
+                "name": "Grupp 1.1",
+                "toggled": false,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "47",
+                    "visibleAtStart": true,
+                    "drawOrder": 1000,
+                    "visibleForGroups": []
+                  }
+                ],
+                "groups": []
+              }
+            ]
+          },
+          {
+            "id": "cae3b092-b58e-7fa8-83bd-39b179696975",
+            "parent": "-1",
+            "name": "Grupp 2",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "43",
+                "visibleAtStart": false,
+                "drawOrder": 1000,
+                "visibleForGroups": []
+              }
+            ],
+            "groups": [
+              {
+                "id": "12bd24f5-be7f-a022-4304-70e3353d3023",
+                "parent": "cae3b092-b58e-7fa8-83bd-39b179696975",
+                "name": "Grupp 2.1",
+                "toggled": false,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "23",
+                    "visibleAtStart": false,
+                    "drawOrder": 1000,
+                    "visibleForGroups": []
+                  }
+                ],
+                "groups": []
+              }
+            ]
+          }
+        ],
+        "instruction": "instruktion",
+        "active": true,
+        "visibleAtStart": true,
+        "backgroundSwitcherBlack": true,
+        "backgroundSwitcherWhite": true,
+        "toggleAllButton": false,
+        "dropdownThemeMaps": true,
+        "themeMapHeaderCaption": "Rubrik temakarta",
+        "visibleForGroups": [
+          "Office-SEKSD01",
+          "All-SE129"
+        ]
+      },
+      "index": 0
+    },
+    {
+      "type": "search",
+      "options": {
+        "onMap": true,
+        "toolbar": "",
+        "maxZoom": 15,
+        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
+        "kmlExportUrl": "/mapservice/export/kml",
+        "excelExportUrl": "/mapservice/export/excel",
+        "displayPopup": true,
+        "selectionTools": true,
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ],
+        "visibleForGroups": [
+          "Grupp1",
+          "Grupp2"
+        ],
+        "layers": [
+          {
+            "id": "51",
+            "visibleForGroups": [
+              "Grupp X",
+              " Grupp Z"
+            ]
+          }
+        ]
+      },
+      "index": 0
+    },
+    {
+      "type": "infoclick",
+      "options": {
+        "displayPopup": true,
+        "markerImg": "assets/icons/marker.png",
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ],
+        "popupOffsetY": -32
+      },
+      "index": 0
+    },
+    {
+      "type": "export",
+      "options": {
+        "exportUrl": "/mapservice/export/pdf",
+        "exportTiffUrl": "/mapservice/export/tiff",
+        "pdfActive": true,
+        "tiffActive": true,
+        "scales": [
+          250,
+          500,
+          1000,
+          2500,
+          5000,
+          10000,
+          10000,
+          25000,
+          50000,
+          100000,
+          250000
+        ]
+      },
+      "index": 0
+    },
+    {
+      "type": "edit",
+      "options": {},
+      "index": 0
+    },
+    {
+      "type": "coordinates",
+      "options": {
+        "transformations": [
+          {
+            "code": "EPSG:3007",
+            "default": true,
+            "hint": "(Standard)",
+            "title": "Sweref 99 12 00",
+            "xtitle": "E",
+            "ytitle": "N",
+            "inverseAxis": false
+          }
+        ]
+      },
+      "index": 0
+    },
+    {
+      "type": "buffer",
+      "options": {},
+      "index": 0
+    },
+    {
+      "type": "anchor",
+      "options": {},
+      "index": 0
+    },
+    {
+      "type": "draw",
+      "options": {
+        "exportUrl": "/mapservice/export/kml",
+        "importUrl": "/mapservice/import/kml",
+        "icons": "marker, marker_black, marker_green, marker_red, marker_yellow, br, pin, pin_black, pin_green, pin_red, pin_yellow"
+      },
+      "index": 0
+    },
+    {
+      "type": "location",
+      "options": {},
+      "index": 0
+    },
+    {
+      "type": "streetview",
+      "options": {
+        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4"
+      },
+      "index": 0
+    },
+    {
+      "type": "information",
+      "options": {
+        "text": "",
+        "headerText": "",
+        "visibleAtStart": false
+      },
+      "index": 0
+    },
+    {
+      "type": "bookmark",
+      "options": {},
+      "index": 0
+    },
+    {
+      "type": "fir",
+      "options": {
+        "toolbar": "bottom",
+        "maxZoom": 7,
+        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
+        "infoKnappLogo": "/assets/icons/hjalpknapp_FIR.png",
+        "kmlImportUrl": "/mapservice/import/kml",
+        "excelExportUrl": "/mapservice/fir/realEstateOwnerlist",
+        "displayPopup": false,
+        "base64Encode": false,
+        "instruction": "PHA+TWVkIGRldHRhIHZlcmt0eWcga2FuIGR1IHP2a2Egb2NoIG1hcmtlcmEgZmFzdGlnaGV0ZXIsIGhpdHRhIGdyYW5uYXIgc2FtdCBza2FwYSBmYXN0aWdoZXRzZvZydGVja25pbmcuIDxici8+PGJyLz4gCkR1IGthbiBs5HNhIG1lciBvY2ggaHVyIHZhcmplIGRlbCBmdW5nZXJhciBvbSBkdSBrbGlja2FyIHDlIHJlc3Bla3RpdmUgZnLlZ2V0ZWNrZW4uIDwvcD4=",
+        "instructionSokning": "PHA+U/ZrbmluZyBrYW4gZ/ZyYXMgZ2Vub20gYXR0IHNrcml2YSBz9mtvcmQgb2NoL2VsbGVyIHJpdGEgZXR0IHP2a29tcuVkZS4gTuRyIGR1IHRyeWNrZXIgcOUgc/ZrIGtvbW1lciBkdSBhdHQgem9vbWFzIHRpbGwgc/ZrcmVzdWx0YXRldCBpIGthcnRhbi4gPGJyLz48YnIvPiAKIAo8c3Ryb25nPlP2a29yZDwvc3Ryb25nPjxici8+IApEdSBrYW4gduRsamEgYXR0IHP2a2EgcOUgZmFzdGlnaGV0c2JldGVja25pbmcsIGFkcmVzcyBlbGxlciDkZ2FyZS4gTuRyIGR1IHNrcml2ZXIga29tbWVyIHP2a3Jlc3VsdGF0IGF1dG9tYXRpc2sgbuRyIGR1IHNrcml2aXQgbWluc3QgZnlyYSB0ZWNrZW4uICBEZXQgc3lucyBzb20gbWFya2VyYWRlIGZhc3RpZ2hldGVyIGkga2FydGFuIHNhbXQgc29tIGVuIGxpc3RhIGzkbmdzdCBuZXIgaSBwYW5lbGVuLiBEdSBrYW4gduRsamEgYXR0IHP2a2EgZXhha3QgbWF0Y2huaW5nIHNvbSBpbm5lYuRyIGF0dCBlbmRhcyByZXN1bHRhdCBzb20gZXhha3QgbWF0Y2hhciBz9mtvcmRldCBrb21tZXIgbWVkLiA8YnIvPjxici8+IAogCjxzdHJvbmc+U/Zrb21y5WRlPC9zdHJvbmc+PGJyLz4gCkR1IGthbiByaXRhIHP2a29tcuVkZSBzb20gZW4geXRhLCBwdW5rdCBlbGxlciBsaW5qZS4gRGV0IGflciBvY2tz5SBhdHQgbGFkZGEgdXBwIGVuIGttbC1maWwgb2NoIGFuduRuZGEgc29tIHP2a29tcuVkZS4gVmlsbCBkdSB0YSBib3J0IGV0dCBz9mtvbXLlZGUgYW525G5kZXIgZHUgc29wdHVubmFuLiBBbGxhIGZhc3RpZ2hldGVyIHNvbSBsaWdnZXIgaGVsdCBlbGxlciBkZWx2aXMgaW5vbSBz9mtvbXLlZGV0IGtvbW1lciBtZWQgaSBz9mtyZXN1bHRhdGV0LiA8YnIvPjxici8+IAogCkhhciBkdSByaXRhdC9sYWRkYXQgdXBwIHP2a29tcuVkZSBrYW4gZHUgbORnZ2EgcOUgZW4gYnVmZmVydCBnZW5vbSBhdHQgZnlsbGEgaSD2bnNrYXQgYnVmZmVydGF2c3TlbmQuIEFsbGEgZmFzdGlnaGV0ZXIgc29tIGxpZ2dlciBoZWx0IGVsbGVyIGRlbHZpcyBpbm9tIHP2a29tcuVkZXQgb2NoIGJ1ZmZlcnRlbiBrb21tZXIgbWVkIGkgc/ZrcmVzdWx0YXRldC4gPGJyLz48YnIvPiAKIAo8c3Ryb25nPlP2a2FsdGVybmF0aXY8L3N0cm9uZz48YnIvPiAKSORyIGthbiBkdSB25GxqYSBvbSBkdSB25GxqYSBib3J0IGF0dCBmYXN0aWdoZXRzYmV0ZWNrbmluZyB2aXNhcyBzb20gZXRpa2V0dCBw5SBtYXJrZXJhZGUgZmFzdGlnaGV0ZXIuIEf2ciBkdSBlbiBz9mtuaW5nIHDlIHP2a29tcuVkZSBvY2ggZXZlbnR1ZWxsIGJ1ZmZlcnQgcnVudCBz9mtvbXLlZGV0IGthbiBkdSB25GxqYSBib3J0IGF0dCBkZXR0YSB2aXNhcyBpIGthcnRhbi4gPC9wPiA=",
+        "instructionHittaGrannar": "PHA+TuRyIGR1IGhhciBnam9ydCBlbiBz9mtuaW5nIHPlIGF0dCBkdSBoYXIgZW4gZWxsZXIgZmxlcmEgZmFzdGlnaGV0ZXIgaSBkaXR0IHP2a3Jlc3VsdGF0IGthbiBkdSBhbnbkbmRhIGRlbm5hIGZ1bmt0aW9uLiA8YnIvPjxici8+IAogCkhpdHRhIGFuZ3LkbnNhbmRlIGdyYW5uYXIgaW5uZWLkciBhdHQgYWxsYSBmYXN0aWdoZXRlciBzb20gZGVsYXIgZmFzdGlnaGV0c2dy5G5zIGtvbW1lciBhdHQgbWFya2VyYXMgb2NoIGzkZ2dhcyB0aWxsIGkgZGl0dCBz9mtyZXN1bHRhdC4gPGJyLz48YnIvPiAKIApIaXR0YSBncmFubmFyIGlub20mIGlubmVi5HIgYXR0IGR1IHNrYXBhciBlbiBidWZmZXJ0IHJ1bnQgZmFzdGlnaGV0ZW4vZmFzdGlnaGV0ZXJuYSBpIHP2a3Jlc3VsdGF0ZXQuIEFsbGEgZmFzdGlnaGV0ZXIgc29tIGxpZ2dlciBoZWx0IGVsbGVyIGRlbHZpcyBpbm5hbmb2ciBidWZmZXJ0ZW4ga29tbWVyIGF0dCBs5GdnYXMgdGlsbCBpIHP2a3Jlc3VsdGF0ZXQuIDwvcD4=",
+        "instructionSkapaFastighetsforteckning": "PHA+TuRyIGR1IGhhciBnam9ydCBlbiBz9mtuaW5nIHPlIGF0dCBkdSBoYXIgZW4gZWxsZXIgZmxlcmEgZmFzdGlnaGV0ZXIgaSBkaXR0IHP2a3Jlc3VsdGF0IGthbiBkdSBhbnbkbmRhIGRlbm5hIGZ1bmt0aW9uLiBE5SBza2FwYXMgZW4gZXhjZWwtbGlzdGEgbWVkIGZhc3RpZ2hldGVybmEgaSBz9mtyZXN1bHRhdGV0LiA8YnIvPjxici8+IAogCjxzdHJvbmc+RvZydGVja25pbmdlbiBpbm5laOVsbGVyOjwvc3Ryb25nPjxici8+IApCZXRlY2tuaW5nPGJyLz4gClRvdGFsIGFyZWE8YnIvPiAKxGdhbmRlZm9ybSAoPWxhZ2ZhcnQgZWxsZXIgdG9tdHLkdHQpIDxici8+IApBbmRlbDxici8+IArEZ2FyZS9pbm5laGF2YXJlPGJyLz4gClBlcnNvbi0vb3JnYW5pc2F0aW9uc251bW1lciATIFZBTEJBUjxici8+IApjL288YnIvPiAKQWRyZXNzPGJyLz4gClBvc3RudW1tZXI8YnIvPiAKUG9zdGFkcmVzczxici8+PGJyLz4gCiAKPHN0cm9uZz5WYWwgYXR0IGlua2x1ZGVyYSBpIGZhc3RpZ2hldHNm9nJ0ZWNrbmluZ2VuOjwvc3Ryb25nPjxici8+IApTYW1m5GxsaWdoZXRlciATIEVHRU4gRkxJSzxici8+IApHZW1lbnNhbWhldHNhbmzkZ2duaW5nYXITIEVHRU4gRkxJSzxici8+IApS5HR0aWdoZXRlchMgRUdFTiBGTElLPGJyLz4gClBlcnNvbm51bW1lcjxici8+IApUYXhlcmFkIORnYXJlEyBFR0VOIEZMSUs8L3A+IA==",
+        "filterVisible": false,
+        "firSelectionTools": true,
+        "anchor": [
+          16,
+          32
+        ],
+        "imgSize": [
+          32,
+          32
+        ],
+        "popupOffsetY": 0,
+        "visibleForGroups": [],
+        "layers": [
+          {
+            "id": "1246",
+            "fnrField": "fnr",
+            "omradeField": "omrade",
+            "visibleForGroups": []
+          },
+          {
+            "id": "1248",
+            "fnrField": "fnr",
+            "omradeField": "omrade",
+            "visibleForGroups": ["NO_SUCH_GROUP"]
+          },
+          {
+            "id": "1249",
+            "fnrField": "nyckel",
+            "omradeField": "omrade",
+            "visibleForGroups": []
+          }
+        ],
+        "realEstateLayer": {
+          "id": "1246",
+          "omradeField": "omrade",
+          "fnrField": "fnr",
+          "labelField": "block_enhet",
+          "maxFeatures": "10000",
+          "instructionVidSokresult": "aW5zdHJ1Y3Rpb24="
+        },
+        "realEstateWMSLayer": {
+          "id": "1226",
+          "fnrField": "fnr"
+        },
+        "colorResult": "rgba(255,255,0,0.3)",
+        "colorResultStroke": "rgba(0,0,0,0.6)",
+        "colorHighlight": "rgba(0,0,255,0.2)",
+        "colorHighlightStroke": "rgba(0,0,0,0.6)",
+        "colorHittaGrannarBuffer": "rgba(50,200,200,0.4)",
+        "colorHittaGrannarBufferStroke": "rgba(0,0,0,0.2)",
+        "instructionResidentList": "aW5zdHJ1Y3Rpb24=",
+        "residentList": {
+          "visibleForGroups": ["NO_SUCH_GROUP"],
+          "excelExportUrl": "/fir/residentlist",
+          "minAge": 18,
+          "residentDataLayer": {
+            "id": "1247",
+            "namnFieldName": "tillnamn",
+            "namnDisplayName": "Namn",
+            "adressFieldName": "adress",
+            "adressDisplayName": "Adress",
+            "postnrFieldName": "postnr",
+            "postnrDisplayName": "Postnummer",
+            "postortFieldName": "ort",
+            "postortDisplayName": "Postort",
+            "alderFieldName": "personnr",
+            "alderDisplayName": "Ålder",
+            "koenFieldName": "koen",
+            "koenDisplayName": "Kön",
+            "fodelsedatumFieldName": "personnr",
+            "fodelsedatumDisplayName": "Födelsedatum"
+          }
+        }
+      },
+      "index": 13
+    }
+  ],
+  "map": {
+    "target": "map",
+    "center": [
+      414962,
+      6583005
+    ],
+    "title": "hohokarata",
+    "projection": "EPSG:3006",
+    "zoom": 3,
+    "maxZoom": 3,
+    "minZoom": 9,
+    "resolutions": [
+      4096.0,
+      2048.0,
+      1024.0,
+      512.0,
+      256.0,
+      128.0,
+      64.0,
+      32.0,
+      16.0,
+      8.0,
+      4.0,
+      2.0,
+      1.0,
+      0.5
+    ],
+    "origin": [
+      0.0,
+      0.0
+    ],
+    "extent": [
+      0.0,
+      6000000.0,
+      1000000.0,
+      9000000.0
+    ],
+    "logo": "assets/logo.png",
+    "infologo": "",
+    "mobileleft": null,
+    "mobileright": null,
+    "pil": null,
+    "mobile": false,
+    "colors": {
+      "primaryColor": "#0affc2",
+      "secondaryColor": "#ffffff"
+    },
+    "geoserverLegendOptions": ""
+  }
+}
