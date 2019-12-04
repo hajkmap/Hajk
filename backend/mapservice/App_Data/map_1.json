@@ -216,14 +216,6 @@
       "index": 0
     },
     {
-      "type": "vtsearch",
-      "options": {
-        "abstract": "VTSEARCH",
-        "title": "VTSEARCH"
-      },
-      "index": 0
-    },
-    {
       "type": "draw",
       "options": {
         "target": "toolbar",

@@ -327,7 +327,8 @@ class App extends React.PureComponent {
     this.setState({ drawerMouseOverLock: false });
   };
 
-  renderSearchPlugin(searchPlugin) {
+  renderSearchPlugin() {
+    const searchPlugin = this.appModel.plugins.search;
     if (searchPlugin) {
       return (
         <searchPlugin.component
@@ -336,7 +337,6 @@ class App extends React.PureComponent {
           options={searchPlugin.options}
           onMenuClick={this.toggleDrawer(!this.state.drawerVisible)}
           menuButtonDisabled={this.state.drawerPermanent}
-          key={searchPlugin.type}
         />
       );
     } else {
@@ -387,10 +387,6 @@ class App extends React.PureComponent {
 
     // If clean===true, some components won't be rendered below
     const clean = config.mapConfig.map.clean;
-    const searchPlugins = [
-      this.appModel.plugins.search,
-      this.appModel.plugins.vtsearch
-    ];
 
     const defaultCookieNoticeMessage = this.isString(
       this.props.config.mapConfig.map.defaultCookieNoticeMessage
@@ -432,19 +428,8 @@ class App extends React.PureComponent {
             <header
               className={cslx(classes.header, classes.pointerEventsOnChildren)}
             >
-              {searchPlugins.filter(plugin => {
-                return plugin != null;
-              }).length === 0 &&
-                clean === false &&
-                this.renderStandaloneDrawerToggler()}
-
-              {searchPlugins.map(plugin => {
-                return (
-                  plugin !== null &&
-                  clean === false &&
-                  this.renderSearchPlugin(plugin)
-                );
-              })}
+              {clean === false && this.renderStandaloneDrawerToggler()}
+              {clean === false && this.renderSearchPlugin()}
             </header>
             <main className={classes.main}>
               <div
