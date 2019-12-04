@@ -347,10 +347,15 @@ class App extends React.PureComponent {
   }
 
   renderPresetPlugin() {
+    const presetPlugin = this.appModel.plugins.preset;
+    console.log(presetPlugin);
     return (
       this.appModel.plugins.preset !== undefined &&
       this.appModel.plugins.preset.hasOwnProperty("options") && (
-        <PresetLinks options={this.appModel.plugins.preset.options} />
+        <PresetLinks
+          options={this.appModel.plugins.preset.options}
+          map={presetPlugin.map}
+        />
       )
     );
   }
