@@ -17,6 +17,7 @@ import Attribution from "../controls/Attribution.js";
 import MapCleaner from "../controls/MapCleaner";
 import MapResetter from "../controls/MapResetter";
 import MapSwitcher from "../controls/MapSwitcher";
+import Information from "../plugins/information/information.js";
 
 import {
   Backdrop,
@@ -378,6 +379,15 @@ class App extends React.PureComponent {
     );
   }
 
+  renderInformationPlugin() {
+    return (
+      this.appModel.plugins.information !== undefined &&
+      this.appModel.plugins.information.hasOwnProperty("options") && (
+        <Information options={this.appModel.plugins.information.options} />
+      )
+    );
+  }
+
   isString(s) {
     return s instanceof String || typeof s === "string";
   }
@@ -457,6 +467,7 @@ class App extends React.PureComponent {
                 <Zoom map={this.appModel.getMap()} />
                 {clean === false && <MapSwitcher appModel={this.appModel} />}
                 {clean === false && <MapCleaner appModel={this.appModel} />}
+                {clean === false && this.renderInformationPlugin()}
                 {clean === true && (
                   <MapResetter
                     mapConfig={this.appModel.config.mapConfig}

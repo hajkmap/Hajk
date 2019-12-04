@@ -1,29 +1,35 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
+import propTypes from "prop-types";
 
+import { Button, Paper, Tooltip } from "@material-ui/core";
 import InfoIcon from "@material-ui/icons/Info";
-import Card from "../../components/Card.js";
-import {
-  Hidden,
-  ListItem,
-  ListItemIcon,
-  ListItemText
-} from "@material-ui/core";
 
 import Dialog from "../../components/Dialog.js";
 
 const styles = theme => {
-  return {};
+  return {
+    paper: {
+      marginBottom: theme.spacing(1)
+    },
+    button: {
+      minWidth: "unset"
+    }
+  };
 };
 
 class Information extends React.PureComponent {
+  static propTypes = {
+    classes: propTypes.object.isRequired,
+    options: propTypes.object.isRequired
+  };
+
   constructor(props) {
     super(props);
     this.type = "Information"; // Special case - plugins that don't use BaseWindowPlugin must specify .type here
     this.options = props.options;
     this.title = this.options.title || "Om kartan";
-    this.abstract = this.options.abstract || "Visa mer information";
     this.state = {
       dialogOpen: false
     };
@@ -51,7 +57,7 @@ class Information extends React.PureComponent {
     }
 
     this.setState({
-      dialogOpen: dialogOpen
+      dialogOpen
     });
   }
 
@@ -61,65 +67,43 @@ class Information extends React.PureComponent {
     });
   };
 
-  onClick = () => {
+  handleOnClick = () => {
     this.setState({
       dialogOpen: true
     });
   };
 
   renderDialog() {
-    return (
-      <>
-        <Dialog
-          options={this.props.options}
-          open={this.state.dialogOpen}
-          onClose={this.onClose}
-        />
-        {this.renderDrawerButton()}
-        {this.props.options.target === "left" &&
-          this.renderWidgetButton("left-column")}
-        {this.props.options.target === "right" &&
-          this.renderWidgetButton("right-column")}
-      </>
-    );
-  }
+    const { headerText, text, buttonText } = this.props.options;
 
-  renderDrawerButton() {
     return createPortal(
-      <Hidden mdUp={this.props.options.target !== "toolbar"}>
-        <ListItem
-          button
-          divider={true}
-          selected={this.state.windowVisible}
-          onClick={this.onClick}
-        >
-          <ListItemIcon>
-            <InfoIcon />
-          </ListItemIcon>
-          <ListItemText primary={this.title} />
-        </ListItem>
-      </Hidden>,
-      document.getElementById("plugin-buttons")
-    );
-  }
-
-  renderWidgetButton(id) {
-    return createPortal(
-      // Hide Widget button on small screens, see renderDrawerButton too
-      <Hidden smDown>
-        <Card
-          icon={<InfoIcon />}
-          onClick={this.onClick}
-          title={this.title}
-          abstract={this.abstract}
-        />
-      </Hidden>,
-      document.getElementById(id)
+      <Dialog
+        options={{ headerText, text, buttonText }}
+        open={this.state.dialogOpen}
+        onClose={this.onClose}
+      />,
+      document.getElementById("windows-container")
     );
   }
 
   render() {
-    return this.renderDialog();
+    const { classes } = this.props;
+    return (
+      <>
+        {this.renderDialog()}
+        <Tooltip title={this.title}>
+          <Paper className={classes.paper}>
+            <Button
+              aria-label={this.title}
+              className={classes.button}
+              onClick={this.handleOnClick}
+            >
+              <InfoIcon />
+            </Button>
+          </Paper>
+        </Tooltip>
+      </>
+    );
   }
 }
 

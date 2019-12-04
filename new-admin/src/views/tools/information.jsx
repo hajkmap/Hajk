@@ -27,14 +27,12 @@ var defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
-  target: "toolbar",
   visibleAtStart: false,
-  text: "",
-  headerText: "",
-  title: "",
-  abstract: "",
   showInfoOnce: false,
-  base64EncodeForInfotext: false,
+  title: "Visa informationsruta",
+  headerText: "Om kartan",
+  text: "Information om kartan",
+  buttonText: "Stäng",
   visibleForGroups: []
 };
 
@@ -54,14 +52,12 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
-        target: tool.options.target || "toolbar",
         visibleAtStart: tool.options.visibleAtStart || false,
-        text: tool.options.text || "",
         headerText: tool.options.headerText || "",
+        text: tool.options.text || "",
+        buttonText: tool.options.buttonText || "",
         title: tool.options.title || "",
-        abstract: tool.options.abstract || "",
         showInfoOnce: tool.options.showInfoOnce,
-        base64EncodeForInfotext: tool.options.base64EncodeForInfotext,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : []
@@ -123,14 +119,12 @@ class ToolOptions extends Component {
       type: this.type,
       index: this.state.index,
       options: {
-        target: this.state.target,
-        text: this.state.text,
         headerText: this.state.headerText,
+        text: this.state.text,
+        buttonText: this.state.buttonText,
         title: this.state.title,
-        abstract: this.state.abstract,
         visibleAtStart: this.state.visibleAtStart,
         showInfoOnce: this.state.showInfoOnce,
-        base64EncodeForInfotext: this.state.base64EncodeForInfotext,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -260,18 +254,6 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
-            <label htmlFor="target">Verktygsplacering</label>
-            <input
-              id="target"
-              name="target"
-              type="text"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              value={this.state.target}
-            />
-          </div>
-          <div>
             <input
               id="visibleAtStart"
               name="visibleAtStart"
@@ -285,58 +267,6 @@ class ToolOptions extends Component {
             <label htmlFor="visibleAtStart">Synlig vid start</label>
           </div>
           <div>
-            <label htmlFor="title">Etikett</label>
-            <input
-              value={this.state.title}
-              type="text"
-              name="title"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
-          <div>
-            <label htmlFor="abstract">
-              Beskrivning{" "}
-              <i
-                className="fa fa-question-circle"
-                data-toggle="tooltip"
-                title="Om verktyget visas som widget (inställningen 'Verktygsplacering' sätts till 'left' eller 'right) så kommer denna beskrivning att visas inne i widget-knappen."
-              />
-            </label>{" "}
-            <input
-              value={this.state.abstract}
-              type="text"
-              name="abstract"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
-          <div>
-            <label htmlFor="headerText">Rubrik</label>
-            <input
-              value={this.state.headerText}
-              type="text"
-              name="headerText"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
-          <div>
-            <label htmlFor="text">Infotext</label>
-            <textarea
-              value={this.state.text}
-              type="text"
-              name="text"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
-          {this.renderVisibleForGroups()}
-          <div>
             <input
               id="showInfoOnce"
               name="showInfoOnce"
@@ -347,25 +277,57 @@ class ToolOptions extends Component {
               checked={this.state.showInfoOnce}
             />
             &nbsp;
-            <label htmlFor="showInfoOnce">
-              Visa Information endast en gång
-            </label>
+            <label htmlFor="showInfoOnce">Visa vid start endast en gång</label>
           </div>
           <div>
+            <label htmlFor="title">
+              Text vid mouse-over på informationsknappen
+            </label>
             <input
-              id="base64EncodeForInfotext"
-              name="base64EncodeForInfotext"
-              type="checkbox"
+              value={this.state.title}
+              type="text"
+              name="title"
               onChange={e => {
                 this.handleInputChange(e);
               }}
-              checked={this.state.base64EncodeForInfotext}
             />
-            &nbsp;
-            <label htmlFor="base64EncodeForInfotext">
-              Använd Base64 för Infotext
-            </label>
           </div>
+          <div>
+            <label htmlFor="headerText">Rubrik i inforutan</label>
+            <input
+              value={this.state.headerText}
+              type="text"
+              name="headerText"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="text">Text i inforutan</label>
+            <textarea
+              value={this.state.text}
+              type="text"
+              name="text"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="buttonText">
+              Text i inforutans stängningsknapp
+            </label>
+            <textarea
+              value={this.state.buttonText}
+              type="text"
+              name="buttonText"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          {this.renderVisibleForGroups()}
         </form>
       </div>
     );
