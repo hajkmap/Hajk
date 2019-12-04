@@ -30,7 +30,18 @@ namespace MapService.Controllers
     public class EdpController : Controller
     {
         ILog _log = LogManager.GetLogger(typeof(EdpController));
-        static private Dictionary<string, ImplEdpConnectorPublic> _dictEdpConnections = new Dictionary<string, ImplEdpConnectorPublic>();
+        static private Dictionary<string, ImplEdpConnectorPublic> _dictEdpConnection = new Dictionary<string, ImplEdpConnectorPublic>();
+
+        public static void CloseEdpConnections()
+        {
+            ILog _log = LogManager.GetLogger(typeof(EdpController));
+            foreach (KeyValuePair<string, ImplEdpConnectorPublic> entry in _dictEdpConnection)
+            {
+                _log.DebugFormat("EdpController: Disconnecting user: {0}", entry.Key);
+                entry.Value.Disconnect();
+            }
+            _dictEdpConnection.Clear();
+        }
 
         // json = [{"Fnr":"130121047","Fastbet":"BLÅKLINTEN 1"},{"Fnr":"130125494","Fastbet":"GETAKÄRR 4:1"},{"Fnr":"130127043","Fastbet":"GULMÅRAN 1"},{"Fnr":"130125494","Fastbet":"GETAKÄRR 4:1"},{"Fnr":"130125494","Fastbet":"GETAKÄRR 4:1"}]
         [HttpPost]
@@ -68,11 +79,11 @@ namespace MapService.Controllers
                 }
 
                 // Save real estate identifiers for this user
-                if (_dictEdpConnections.ContainsKey(userName))
+                if (_dictEdpConnection.ContainsKey(userName))
                 {
                     _log.DebugFormat("Found user '{0}' in queue.", userName);
 
-                    var edpCon = _dictEdpConnections[userName];
+                    var edpCon = _dictEdpConnection[userName];
                     edpCon.SetRealEstateIdentifiersToSend(realEstateIdentifiersToSend);
                 }
                 else
@@ -94,7 +105,7 @@ namespace MapService.Controllers
                         var edpCon = new ImplEdpConnectorPublic(userName, edpUUID, edpClientName, edpServerUrl);
 
                         edpCon.SetRealEstateIdentifiersToSend(realEstateIdentifiersToSend);
-                        _dictEdpConnections.Add(userName, edpCon);
+                        _dictEdpConnection.Add(userName, edpCon);
                     }
                 }
 

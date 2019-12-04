@@ -42,6 +42,10 @@ namespace EdpConn
         {
             _implEdpConnector = new ImplEdpConnector(user, organisation, client, serverUrl);
         }
+        public void Disconnect()
+        {
+            _implEdpConnector.Disconnect();
+        }
 
         public void SetRealEstateIdentifiersToSend(List<RealEstateIdentifierPublic> newList)
         {
@@ -68,6 +72,11 @@ namespace EdpConn
             : base(new HubConnectionFactory(), new HubProxyFactory(), user, organisation, client, serverUrl)
         {
             OpenConnection();
+        }
+
+        public void Disconnect()
+        {
+            this.HubConnection.Disconnect();
         }
 
         public List<RealEstateIdentifier> RealEstateIdentifiersToSend = null;
@@ -108,6 +117,8 @@ namespace EdpConn
         public ImplEdpConnectorPublic(string user, string organisation, string client, string serverUrl)
         {
         }
+
+        public void Disconnect() { }
 
         public void SetRealEstateIdentifiersToSend(List<RealEstateIdentifierPublic> newList)
         {
