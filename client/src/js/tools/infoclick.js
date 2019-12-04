@@ -145,7 +145,8 @@ var InfoClickModel = {
     var wmsLayers = this.layerCollection.filter((layer) => {
         return (layer.get('type') === 'wms' || layer.get('type') === 'arcgis') &&
                  layer.get('queryable') &&
-                 layer.getVisible();
+                 layer.getVisible() &&
+                 this.checkLayerResolution(layer, this.map.getView().getResolution())
       }),
       projection = this.map.getView().getProjection().getCode(),
       resolution = this.map.getView().getResolution(),
@@ -525,6 +526,32 @@ var InfoClickModel = {
    */
   clearHighlight: function () {
     this.get('highlightLayer').clearHighlight();
+  },
+
+  /**
+   * Checks if layers have a minResolution and maxResolution property
+   * and compares to the current map resolution.
+   * @param {*} layer 
+   * @param {*} resolution 
+   */
+  checkLayerResolution: function (layer, resolution) {
+    var maxResPasses = true;
+    var minResPasses = true;
+    
+    if (layer.get('minResolution') > 0 || layer.get('maxResolution') > 0) {
+      if (resolution > layer.get('maxResolution') + 0.001) {
+        maxResPasses = false;
+      }
+      if (resolution < layer.get('minResolution')) {
+        minResPasses = false;
+      } 
+    }
+   
+    if (maxResPasses === false || minResPasses === false) {
+      return false;
+    }
+
+    return true;
   }
 
 };
