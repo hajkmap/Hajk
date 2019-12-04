@@ -17,7 +17,7 @@ import Attribution from "../controls/Attribution.js";
 import MapCleaner from "../controls/MapCleaner";
 import MapResetter from "../controls/MapResetter";
 import MapSwitcher from "../controls/MapSwitcher";
-import Information from "../plugins/information/information.js";
+import Information from "../controls/Information";
 
 import {
   Backdrop,
@@ -380,11 +380,13 @@ class App extends React.PureComponent {
   }
 
   renderInformationPlugin() {
+    const c = this.appModel.config.mapConfig.tools.find(
+      t => t.type === "information"
+    );
+
     return (
-      this.appModel.plugins.information !== undefined &&
-      this.appModel.plugins.information.hasOwnProperty("options") && (
-        <Information options={this.appModel.plugins.information.options} />
-      )
+      c !== undefined &&
+      c.hasOwnProperty("options") && <Information options={c.options} />
     );
   }
 

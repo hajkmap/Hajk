@@ -6,7 +6,7 @@ import propTypes from "prop-types";
 import { Button, Paper, Tooltip } from "@material-ui/core";
 import InfoIcon from "@material-ui/icons/Info";
 
-import Dialog from "../../components/Dialog.js";
+import Dialog from "../components/Dialog.js";
 
 const styles = theme => {
   return {
@@ -27,6 +27,7 @@ class Information extends React.PureComponent {
 
   constructor(props) {
     super(props);
+    console.log("props: ", props);
     this.type = "Information"; // Special case - plugins that don't use BaseWindowPlugin must specify .type here
     this.options = props.options;
     this.title = this.options.title || "Om kartan";
