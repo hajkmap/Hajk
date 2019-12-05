@@ -81,6 +81,9 @@ class SearchResultGroup extends Component {
           key={i}
           searchResultList={this.props.parent}
           renderAffectButton={this.props.renderAffectButton}
+          searchWithinButtonText={
+            this.props.model.options.searchWithinButtonText
+          }
           model={this.props.model}
           target={this.props.target}
           feature={featureType.features[i]}

@@ -124,7 +124,13 @@ class SearchResultItem extends Component {
   };
 
   render() {
-    const { feature, classes, displayFields, target } = this.props;
+    const {
+      feature,
+      classes,
+      displayFields,
+      target,
+      searchWithinButtonText
+    } = this.props;
     var active =
       this.props.highlightedFeatures
         .map(highlightedFeature => {
@@ -176,7 +182,7 @@ class SearchResultItem extends Component {
                     color="primary"
                     onClick={this.highlightImpact(feature)}
                   >
-                    Visa påverkan
+                    {searchWithinButtonText || "Visa påverkan"}
                   </Button>
                 </div>
               ) : null}

@@ -20,8 +20,9 @@
 //
 // https://github.com/hajkmap/Hajk
 
-import React from "react";
-import { Component } from "react";
+import React, { Component } from "react";
+import { SketchPicker } from "react-color";
+
 import Tree from "../tree.jsx";
 
 /**
@@ -36,18 +37,29 @@ import Tree from "../tree.jsx";
  * that code might as well be removed too.
  */
 const defaultState = {
+  // State variables that are used in save()
   active: false,
   index: 0,
+
+  anchorX: 0.5,
+  anchorY: 1,
+  scale: 0.15,
+  src: "",
+  strokeColor: { r: 244, g: 83, b: 63, a: 1 },
+  strokeWidth: 4,
+  fillColor: { r: 244, g: 83, b: 63, a: 0.2 },
+
   polygonSearch: false,
   radiusSearch: false,
   selectionSearch: false,
-  searchSettings: false,
-  markerImg: "marker.png",
+  // searchSettings: false, // Currently not implemented in client either, though stub exists
   tooltip: "Sök...",
   searchWithinButtonText: "Markera i kartan",
   maxFeatures: 100,
-  visibleForGroups: [],
   layers: [],
+  visibleForGroups: [],
+
+  // Only local state, not used in save()
   validationErrors: [],
   searchableLayers: {},
   tree: ""
@@ -75,14 +87,23 @@ class ToolOptions extends Component {
         {
           active: true,
           index: tool.index,
+
+          anchorX:
+            (tool.options.anchor && tool.options.anchor[0]) ||
+            this.state.anchorX,
+          anchorY:
+            (tool.options.anchor && tool.options.anchor[1]) ||
+            this.state.anchorY,
+          scale: tool.options.scale || this.state.scale,
+          src: tool.options.src,
+          strokeColor: tool.options.strokeColor || this.state.strokeColor,
+          strokeWidth: tool.options.strokeWidth || this.state.strokeWidth,
+          fillColor: tool.options.fillColor || this.state.fillColor,
+
           polygonSearch: tool.options.polygonSearch,
           radiusSearch: tool.options.radiusSearch,
           selectionSearch: tool.options.selectionSearch,
-          searchSettings: tool.options.searchSettings,
-          visibleForGroups: tool.options.visibleForGroups
-            ? tool.options.visibleForGroups
-            : [],
-          markerImg: tool.options.markerImg,
+          // searchSettings: tool.options.searchSettings,
           tooltip: tool.options.tooltip || this.state.tooltip,
           searchWithinButtonText:
             tool.options.searchWithinButtonText ||
@@ -91,7 +112,11 @@ class ToolOptions extends Component {
           selectedSources: tool.options.selectedSources
             ? tool.options.selectedSources
             : [],
-          layers: tool.options.layers ? tool.options.layers : []
+
+          layers: tool.options.layers ? tool.options.layers : [],
+          visibleForGroups: tool.options.visibleForGroups
+            ? tool.options.visibleForGroups
+            : []
         },
         () => {
           this.loadLayers();
@@ -201,22 +226,28 @@ class ToolOptions extends Component {
       type: this.type,
       index: this.state.index,
       options: {
+        anchor: [this.state.anchorX, this.state.anchorY],
+        scale: this.state.scale,
+        src: this.state.src,
+        strokeColor: this.state.strokeColor,
+        strokeWidth: this.state.strokeWidth,
+        fillColor: this.state.fillColor,
+
         polygonSearch: this.state.polygonSearch,
         radiusSearch: this.state.radiusSearch,
         selectionSearch: this.state.selectionSearch,
-        searchSettings: this.state.searchSettings,
-        visibleForGroups: this.state.visibleForGroups.map(
-          Function.prototype.call,
-          String.prototype.trim
-        ),
-        markerImg: this.state.markerImg,
+        // searchSettings: this.state.searchSettings,
         tooltip: this.state.tooltip,
         searchWithinButtonText: this.state.searchWithinButtonText,
         maxFeatures: this.state.maxFeatures,
         selectedSources: this.state.selectedSources
           ? this.state.selectedSources
           : [],
-        layers: this.state.layers ? this.state.layers : []
+        layers: this.state.layers ? this.state.layers : [],
+        visibleForGroups: this.state.visibleForGroups.map(
+          Function.prototype.call,
+          String.prototype.trim
+        )
       }
     };
 
@@ -280,18 +311,21 @@ class ToolOptions extends Component {
   renderVisibleForGroups() {
     if (this.props.parent.props.parent.state.authActive) {
       return (
-        <div>
-          <label htmlFor="visibleForGroups">Tillträde</label>
-          <input
-            id="visibleForGroups"
-            value={this.state.visibleForGroups}
-            type="text"
-            name="visibleForGroups"
-            onChange={e => {
-              this.handleAuthGrpsChange(e);
-            }}
-          />
-        </div>
+        <>
+          <div className="separator">Behörighetsstyrning för verktyget</div>
+          <div>
+            <label htmlFor="visibleForGroups">Tillträde</label>
+            <input
+              id="visibleForGroups"
+              value={this.state.visibleForGroups}
+              type="text"
+              name="visibleForGroups"
+              onChange={e => {
+                this.handleAuthGrpsChange(e);
+              }}
+            />
+          </div>
+        </>
       );
     } else {
       return null;
@@ -437,6 +471,18 @@ class ToolOptions extends Component {
   }
 
   /**
+   * Infoclick's stroke and fill color are set by the React
+   * color picker. This method handles change event for those
+   * two color pickers.
+   *
+   * @param {*} target
+   * @param {*} color
+   */
+  handleColorChange = (target, color) => {
+    this.setState({ [target]: color.rgb });
+  };
+
+  /**
    *
    */
   render() {
@@ -467,6 +513,8 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="active">Aktiverad</label>
           </div>
+          {/* Currently unused as Search isn't rendered among other buttons - no need to sort
+          <div className="separator">Fönsterinställningar</div>
           <div>
             <label htmlFor="index">Sorteringsordning</label>
             <input
@@ -478,158 +526,144 @@ class ToolOptions extends Component {
               }}
               value={this.state.index}
             />
-          </div>
-          {/* <div>
-            <label htmlFor="target">Verktygsplacering</label>
-            <select
-              id="target"
-              name="target"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              value={this.state.target}
-            >
-              <option value="header">AppBar</option>
-              <option value="center">Centrerad i kartan</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="position">
-              Fönsterplacering{" "}
-              <i
-                className="fa fa-question-circle"
-                data-toggle="tooltip"
-                title="Placering av verktygets fönster. Anges som antingen 'left' eller 'right'."
-              />
-            </label>
-            <input
-              id="position"
-              name="position"
-              type="text"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              value={this.state.position}
-            />
-          </div>
-          <div>
-            <label htmlFor="width">
-              Fönsterbredd{" "}
-              <i
-                className="fa fa-question-circle"
-                data-toggle="tooltip"
-                title="Bredd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda standardbredd."
-              />
-            </label>
-            <input
-              id="width"
-              name="width"
-              type="text"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              value={this.state.width}
-            />
-          </div>
-          <div>
-            <label htmlFor="height">
-              Fönsterhöjd{" "}
-              <i
-                className="fa fa-question-circle"
-                data-toggle="tooltip"
-                title="Höjd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda maximal höjd."
-              />
-            </label>
-            <input
-              id="height"
-              name="height"
-              type="text"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              value={this.state.height}
-            />
-          </div>
-          <div>
-            <input
-              id="onMap"
-              name="onMap"
-              type="checkbox"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              checked={this.state.onMap}
-            />
-            &nbsp;
-            <label htmlFor="onMap">Alltid synlig</label>
           </div> */}
-          {/* <div>
+          <div className="separator">Generella sökinställningar</div>
+          <div>
+            <label htmlFor="tooltip">Placeholdertext för sökrutan</label>
             <input
-              id="enableViewTogglePopupInSnabbsok"
-              name="enableViewTogglePopupInSnabbsok"
-              type="checkbox"
+              value={this.state.tooltip}
+              type="text"
+              name="tooltip"
               onChange={e => {
                 this.handleInputChange(e);
               }}
-              checked={this.state.enableViewTogglePopupInSnabbsok}
             />
-            &nbsp;
-            <label htmlFor="enableViewTogglePopupInSnabbsok">
-              "Visa information" i snabbsök
+          </div>
+          <div>
+            <label htmlFor="maxFeatures">Max antal sökträffar</label>
+            <input
+              value={this.state.maxFeatures}
+              type="text"
+              name="maxFeatures"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          {this.state.tree}
+
+          <div className="separator">Träffikon och markering</div>
+
+          <div>
+            <label htmlFor="src">
+              URL till ikon för markering av träffar (punkter)
             </label>
+            <input
+              value={this.state.src}
+              type="text"
+              name="src"
+              placeholder="URL till bild eller lämna tomt för grå punkt"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
           </div>
           <div>
+            <label htmlFor="anchorX">Ikonförskjutning X</label>
             <input
-              id="bothSynlig"
-              name="bothSynlig"
-              type="checkbox"
+              value={this.state.anchorX}
+              type="number"
+              placeholder={defaultState.anchorX}
+              min="0"
+              max="100"
+              step="0.1"
+              name="anchorX"
               onChange={e => {
                 this.handleInputChange(e);
               }}
-              checked={this.state.bothSynlig}
             />
-            &nbsp;
-            <label htmlFor="bothSynlig">Visa snabbsök</label>
-          </div> */}
-          {/* <div>
-            <input
-              id="displayPopup"
-              name="displayPopup"
-              type="checkbox"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              checked={this.state.displayPopup}
-            />
-            &nbsp;
-            <label htmlFor="displayPopup">Visa popup</label>
           </div>
           <div>
+            <label htmlFor="anchorY">Ikonförskjutning Y</label>
             <input
-              id="filterVisible"
-              name="filterVisible"
-              type="checkbox"
+              value={this.state.anchorY}
+              type="number"
+              placeholder={defaultState.anchorY}
+              min="0"
+              max="100"
+              step="0.1"
+              name="anchorY"
               onChange={e => {
                 this.handleInputChange(e);
               }}
-              checked={this.state.filterVisible}
             />
-            &nbsp;
-            <label htmlFor="filterVisible">Sök i synliga lager</label>
           </div>
           <div>
+            <label htmlFor="scale">Skala för ikon (flyttal, 0-1)</label>
             <input
-              id="selectionTools"
-              name="selectionTools"
-              type="checkbox"
+              value={this.state.scale}
+              type="number"
+              placeholder={defaultState.scale}
+              step="0.01"
+              min="0.01"
+              max="10"
+              name="scale"
               onChange={e => {
                 this.handleInputChange(e);
               }}
-              checked={this.state.selectionTools}
             />
-            &nbsp;
-            <label>Verktyg för ytsökning</label>
-          </div> */}
+          </div>
+          <div>
+            <label htmlFor="strokeColor">
+              Träffmarkering (polygon) - Färg på ramen (rgba)
+            </label>
+            <SketchPicker
+              color={{
+                r: this.state.strokeColor.r,
+                g: this.state.strokeColor.g,
+                b: this.state.strokeColor.b,
+                a: this.state.strokeColor.a
+              }}
+              onChangeComplete={color =>
+                this.handleColorChange("strokeColor", color)
+              }
+            />
+          </div>
+          <div>
+            <label htmlFor="strokeWidth">
+              Träffmarkering (polygon) - Bredd på ramen (px)
+            </label>
+            <input
+              value={this.state.strokeWidth}
+              type="number"
+              placeholder={defaultState.strokeWidth}
+              min="0"
+              max="100"
+              step="1"
+              name="strokeWidth"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="fillColor">
+              Träffmarkering (polygon) - Färg på fyllningen (rgba)
+            </label>
+            <SketchPicker
+              color={{
+                r: this.state.fillColor.r,
+                g: this.state.fillColor.g,
+                b: this.state.fillColor.b,
+                a: this.state.fillColor.a
+              }}
+              onChangeComplete={color =>
+                this.handleColorChange("fillColor", color)
+              }
+            />
+          </div>
+
+          <div className="separator">Spatial sök</div>
 
           <div>
             <strong>
@@ -665,7 +699,9 @@ class ToolOptions extends Component {
                   }}
                   checked={this.state.radiusSearch}
                 />
-                <label htmlFor="radiusSearch">Radie</label>
+                <label htmlFor="radiusSearch">
+                  Radie (aktiverar även en knapp bredvid varje sökresultat)
+                </label>
               </div>
               <div>
                 <input
@@ -683,6 +719,20 @@ class ToolOptions extends Component {
             &nbsp;
           </div>
           <div>
+            <label htmlFor="searchWithinButtonText">
+              Text för knapp som visas bredvid varje sökresultat om radiesök är
+              aktivt
+            </label>
+            <input
+              value={this.state.searchWithinButtonText}
+              type="text"
+              name="searchWithinButtonText"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          {/* <div>
             <input
               id="searchSettings"
               name="searchSettings"
@@ -694,39 +744,7 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="searchSettings">Visa sökalternativ</label>
-          </div>
-          {/* <div>
-            <input
-              id="Base64-active"
-              name="base64Encode"
-              type="checkbox"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              checked={this.state.base64Encode}
-            />
-            &nbsp;
-            <label htmlFor="Base64-active">Komprimera instruktionstext</label>
           </div> */}
-          {/* <div>
-            <label htmlFor="instruction">
-              Instruktion{" "}
-              <i
-                className="fa fa-question-circle"
-                data-toggle="tooltip"
-                title="Visas som tooltip vid mouseover på verktygsknappen"
-              />
-            </label>
-            <textarea
-              id="instruction"
-              name="instruction"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              value={this.state.instruction ? atob(this.state.instruction) : ""}
-            />
-          </div> */}
-          {this.renderVisibleForGroups()}
           {/* 
           // TODO: maxZoom is currently hard-coded in SearchModel (maxZoom: 7).
           // We should check if it's really necessary, and if not use this setting instead.
@@ -741,142 +759,7 @@ class ToolOptions extends Component {
               }}
             />
           </div> */}
-          {/* <div>
-            <label htmlFor="excelExportUrl">URL Excel-tjänst</label>
-            <input
-              value={this.state.excelExportUrl}
-              type="text"
-              name="excelExportUrl"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
-          <div>
-            <label htmlFor="kmlExportUrl">URL KML-tjänst</label>
-            <input
-              value={this.state.kmlExportUrl}
-              type="text"
-              name="kmlExportUrl"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div> */}
-          <div>
-            <label htmlFor="markerImg">Ikon för sökträff</label>
-            <input
-              value={this.state.markerImg}
-              type="text"
-              name="markerImg"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
 
-          {/* 
-          // TODO: Edit SearchModel.js so it composes the 'anchor' attribute's
-          // values as follows: anchor = [anchorX, anchorY].
-          <div>
-            <label htmlFor="anchorX">Ikonförskjutning X</label>
-            <input
-              value={this.state.anchorX}
-              type="text"
-              name="anchorX"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
-          <div>
-            <label htmlFor="anchorY">Ikonförskjutning Y</label>
-            <input
-              value={this.state.anchorY}
-              type="text"
-              name="anchorY"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div> */}
-          {/* <div>
-            <label htmlFor="popupOffsetY">Förskjutning popup-ruta</label>
-            <input
-              value={this.state.popupOffsetY}
-              type="text"
-              name="popupOffsetY"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
-          <div>
-            <label htmlFor="imgSizeX">Bildbredd</label>
-            <input
-              value={this.state.imgSizeX}
-              type="text"
-              name="imgSizeX"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
-          <div>
-            <label htmlFor="imgSizeY">Bildhöjd</label>
-            <input
-              value={this.state.imgSizeY}
-              type="text"
-              name="imgSizeY"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div> */}
-          <div>
-            <label htmlFor="tooltip">Placeholder för sökrutan</label>
-            <input
-              value={this.state.tooltip}
-              type="text"
-              name="tooltip"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
-          <div>
-            <label htmlFor="searchWithinButtonText">Sök inom - snapptext</label>
-            <input
-              value={this.state.searchWithinButtonText}
-              type="text"
-              name="searchWithinButtonText"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
-          {/* <div>
-            <label htmlFor="toolDescription">Beskrivning (html)</label>
-            <textarea
-              value={this.state.toolDescription}
-              type="text"
-              name="toolDescription"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div> */}
-          <div>
-            <label htmlFor="maxFeatures">Antal sökträffar</label>
-            <input
-              value={this.state.maxFeatures}
-              type="text"
-              name="maxFeatures"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
           <div>
             <label htmlFor="searchLayers">
               Radiesök söker inom följande lager:
@@ -885,8 +768,9 @@ class ToolOptions extends Component {
               {this.renderSources(this.state.sources)}
             </div>
           </div>
+
+          {this.renderVisibleForGroups()}
         </form>
-        {this.state.tree}
       </div>
     );
   }
