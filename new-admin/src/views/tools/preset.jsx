@@ -32,9 +32,9 @@ class ToolOptions extends Component {
       validationErrors: [],
       presetList: [],
       active: false,
-      index: 0,
-      target: "toolbar",
-      instruction: "",
+      //z index: 0,
+      //z target: "toolbar",
+      //z instruction: "",
       visibleForGroups: [],
       editing: null,
       showResults: false
@@ -48,12 +48,12 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         authActive: this.props.parent.props.parent.state.authActive,
-        index: tool.index,
-        target: tool.options.target || "toolbar",
-        position: tool.options.position,
-        width: tool.options.width,
-        height: tool.options.height,
-        instruction: tool.options.instruction,
+        //z index: tool.index,
+        //z target: tool.options.target || "toolbar",
+        //z position: tool.options.position,
+        //width: tool.options.width,
+        // height: tool.options.height,
+        //z instruction: tool.options.instruction,
         presetList: tool.options.presetList || [],
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
@@ -117,14 +117,14 @@ class ToolOptions extends Component {
   save() {
     var tool = {
       type: this.type,
-      index: this.state.index,
+      //z index: this.state.index,
       options: {
-        target: this.state.target,
-        position: this.state.position,
-        width: this.state.width,
-        height: this.state.height,
+        //z target: this.state.target,
+        //z position: this.state.position,
+        //z width: this.state.width,
+        //z height: this.state.height,
         presetList: this.state.presetList,
-        instruction: this.state.instruction,
+        //z instruction: this.state.instruction,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -446,7 +446,7 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="active">Aktiverad</label>
           </div>
-          <div>
+          {/*           <div>
             <label htmlFor="index">Sorteringsordning</label>
             <input
               id="index"
@@ -458,7 +458,8 @@ class ToolOptions extends Component {
               value={this.state.index}
             />
           </div>
-          <div>
+ */}
+          {/*           <div>
             <label htmlFor="target">Verktygsplacering</label>
             <input
               id="target"
@@ -470,7 +471,8 @@ class ToolOptions extends Component {
               value={this.state.target}
             />
           </div>
-          <div>
+ */}
+          {/*           <div>
             <label htmlFor="position">
               Fönsterplacering{" "}
               <i
@@ -489,7 +491,8 @@ class ToolOptions extends Component {
               value={this.state.position}
             />
           </div>
-          <div>
+ */}
+          {/*           <div>
             <label htmlFor="width">
               Fönsterbredd{" "}
               <i
@@ -527,7 +530,8 @@ class ToolOptions extends Component {
               value={this.state.height}
             />
           </div>
-          <div>
+ */}
+          {/*           <div>
             <label htmlFor="instruction">
               Instruktion{" "}
               <i
@@ -546,6 +550,7 @@ class ToolOptions extends Component {
               value={this.state.instruction ? atob(this.state.instruction) : ""}
             />
           </div>
+ */}
           {this.renderVisibleForGroups()}
           <div>
             <div>
