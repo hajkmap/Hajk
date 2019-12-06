@@ -99,7 +99,12 @@ class Preset extends React.PureComponent {
   };
 
   render() {
-    if (this.config === undefined) {
+    // If config for Control isn't found, or if the config doesn't contain any presets, quit.
+    if (
+      this.config === undefined ||
+      (this.config.hasOwnProperty("options") &&
+        this.config.options.presetList.length < 1)
+    ) {
       return null;
     } else {
       const { anchorEl } = this.state;
