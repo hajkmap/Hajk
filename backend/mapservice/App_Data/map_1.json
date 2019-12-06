@@ -219,7 +219,29 @@
       "type": "vtsearch",
       "options": {
         "abstract": "VTSEARCH",
-        "title": "VTSEARCH"
+        "title": "VTSEARCH",
+        "geoserver": {
+          "journeys": {
+            "searchLabel": "Rutter",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=kartsidan2:journeys&outputFormat=application/json"
+          },
+          "municipalityZoneNames": {
+            "searchLabel": "Kommunnamn",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=kartsidan2%3AmunicipalityZoneNames&outputFormat=application/json"
+          },
+          "routes": {
+            "searchLabel": "Rutter",
+            "url": ""
+          },
+          "stopAreas": {
+            "searchLabel": "Hållplatsområden",
+            "url": ""
+          },
+          "transportModeTypeNames": {
+            "searchLabel": "Transportmedel",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=kartsidan2%3AtransportModeTypeNames&outputFormat=application/json"
+          }
+        }
       },
       "index": 0
     },
