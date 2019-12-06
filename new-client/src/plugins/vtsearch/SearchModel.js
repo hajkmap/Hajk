@@ -90,8 +90,8 @@ export default class SearchModel {
     const url = this.geoserver.municipalityZoneNames.url;
 
     // Fetch the result as a promise, sort it and attach it to the event.
-    fetch(url).then(res => {
-      res.json().then(jsonResult => {
+    return fetch(url).then(res => {
+      return res.json().then(jsonResult => {
         let allMunicipalitiyNames = jsonResult.features.map(feature => {
           return feature.properties.Name;
         });
@@ -107,6 +107,7 @@ export default class SearchModel {
           "municipalityZoneNames-result-done",
           municipalityNames
         );
+        return municipalityNames.data;
       });
     });
   }
@@ -123,8 +124,8 @@ export default class SearchModel {
     const url = this.geoserver.transportModeTypeNames.url;
 
     // Fetch the result as a promise and attach it to the event.
-    fetch(url).then(res => {
-      res.json().then(jsonFeature => {
+    return fetch(url).then(res => {
+      return res.json().then(jsonFeature => {
         let transportModeTypes = jsonFeature.features.map(feature => {
           return [feature.properties.Number, feature.properties.Name];
         });
@@ -138,6 +139,7 @@ export default class SearchModel {
           "transportModeTypeNames-result-done",
           transportModeTypeNames
         );
+        return transportModeTypeNames;
       });
     });
   }
