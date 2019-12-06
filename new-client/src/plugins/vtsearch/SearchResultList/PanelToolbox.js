@@ -20,6 +20,9 @@ const styles = theme => {
       padding: 0,
       marginRight: 0,
       width: 20
+    },
+    iconButtonRoot: {
+      color: "white"
     }
   };
 };
@@ -69,20 +72,33 @@ class PanelToolbox extends React.PureComponent {
   };
 
   render() {
+    const { classes } = this.props;
     return (
       <div>
         {this.state.minimizeVisible && (
-          <IconButton onClick={this.minimize} aria-label="minimize">
+          <IconButton
+            classes={{ root: classes.iconButtonRoot }}
+            onClick={this.minimize}
+            aria-label="minimize"
+          >
             <MinimizeIcon></MinimizeIcon>
           </IconButton>
         )}
         {this.state.normalVisible && (
-          <IconButton onClick={this.normal} aria-label="normal">
+          <IconButton
+            classes={{ root: classes.iconButtonRoot }}
+            onClick={this.normal}
+            aria-label="normal"
+          >
             <NormalIcon></NormalIcon>
           </IconButton>
         )}
         {this.state.maximizeVisible && (
-          <IconButton onClick={this.maximize} aria-label="maximize">
+          <IconButton
+            classes={{ root: classes.iconButtonRoot }}
+            onClick={this.maximize}
+            aria-label="maximize"
+          >
             <MaximizeIcon></MaximizeIcon>
           </IconButton>
         )}

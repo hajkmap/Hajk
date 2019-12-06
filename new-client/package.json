@@ -23,6 +23,7 @@
     "pretty-quick": "^2.0.1",
     "react-scripts": "3.2.0",
     "react-virtualized": "^9.21.2",
+    "react-virtualized-auto-sizer": "^1.0.2",
     "typescript": "^3.7.2"
   },
   "browserslist": [
@@ -58,6 +59,7 @@
     "react-event-observer": "^0.5.11",
     "react-horizontal-scrolling-menu": "^0.7.3",
     "react-rnd": "^10.1.1",
+    "react-window": "^1.8.5",
     "recharts": "^1.8.5",
     "x2js": "^3.3.1"
   }

@@ -119,7 +119,7 @@ class SearchResultListContainer extends React.Component {
             geometry: null,
             properties: {
               Gid: 9081014110000114,
-              Name: "Upplands Väsby"
+              Name: "Vad"
             }
           },
           {
@@ -166,6 +166,17 @@ class SearchResultListContainer extends React.Component {
   }
 
   bindSubscriptions = () => {
+    this.localObserver.subscribe("vtsearch-result-done", result => {
+      var highestId = 0;
+      this.state.searchResultIds.forEach(id => {
+        if (id > highestId) highestId = id;
+      });
+
+      this.searchResults.push(...result, { id: highestId + 1 });
+      var searchResultIds = this.state.searchResultIds.concat(highestId);
+      this.setState({ searchResultIds: searchResultIds });
+    });
+
     this.localObserver.subscribe("search-result-list-minimized", () => {
       this.setState((state, props) => {
         return {
