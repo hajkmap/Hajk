@@ -219,7 +219,29 @@
       "type": "vtsearch",
       "options": {
         "abstract": "VTSEARCH",
-        "title": "VTSEARCH"
+        "title": "VTSEARCH",
+        "geoserver": {
+          "journeys": {
+            "searchLabel": "Turer",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=kartsidan2:journeys&outputFormat=application/json"
+          },
+          "municipalityZoneNames": {
+            "searchLabel": "Kommunnamn",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=kartsidan2%3AmunicipalityZoneNames&outputFormat=application/json"
+          },
+          "routes": {
+            "searchLabel": "Linje",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=kartsidan2:routes&outputFormat=application/json"
+          },
+          "stopAreas": {
+            "searchLabel": "Hållplatsområden",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=stopAreas&outputFormat=application/json"
+          },
+          "transportModeTypeNames": {
+            "searchLabel": "Trafikslag",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=kartsidan2%3AtransportModeTypeNames&outputFormat=application/json"
+          }
+        }
       },
       "index": 0
     },
