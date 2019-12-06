@@ -36,7 +36,6 @@ class Journeys extends React.PureComponent {
   }
 
   render() {
-    const { classes } = this.props;
     return <div>Här ska vi lägga till formuläret för turer</div>;
   }
 }

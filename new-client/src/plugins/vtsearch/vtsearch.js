@@ -20,6 +20,8 @@ import MenuIcon from "@material-ui/icons/Menu";
 import { withStyles } from "@material-ui/core/styles";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
+import SearchResultListContainer from "./SearchResultList/SearchResultListContainer";
+import ReactDOM from "react-dom";
 
 const styles = theme => {
   return {
@@ -73,6 +75,8 @@ const searchTypes = {
   JOURNEYS: "Journeys",
   STOPS: "Stops"
 };
+
+const windowsContainerId = "windows-container";
 
 /**
  * @summary Main class for the Dummy plugin.
@@ -156,6 +160,8 @@ class VTSearch extends React.PureComponent {
   };
 
   handleChange = e => {
+    const { app } = this.props;
+    app.globalObserver.publish("showSearchresultlist", {});
     this.setState({
       activeSearchTool: e.target.value
     });
@@ -188,8 +194,7 @@ class VTSearch extends React.PureComponent {
   };
 
   render() {
-    const { classes, onMenuClick, menuButtonDisabled } = this.props;
-
+    const { classes, onMenuClick, menuButtonDisabled, app } = this.props;
     const tooltipText = menuButtonDisabled
       ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
       : "Visa verktygspanelen";
@@ -255,6 +260,14 @@ class VTSearch extends React.PureComponent {
             </CardContent>
           </Collapse>
         </Card>
+        {ReactDOM.createPortal(
+          <SearchResultListContainer
+            windowsContainer={windowsContainerId}
+            model={this.searchModel}
+            app={app}
+          ></SearchResultListContainer>,
+          document.getElementById(windowsContainerId)
+        )}
       </>
     );
   }
