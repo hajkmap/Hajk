@@ -346,20 +346,6 @@ class App extends React.PureComponent {
     }
   }
 
-  renderPresetPlugin() {
-    const presetPlugin = this.appModel.plugins.preset;
-    console.log(presetPlugin);
-    return (
-      this.appModel.plugins.preset !== undefined &&
-      this.appModel.plugins.preset.hasOwnProperty("options") && (
-        <PresetLinks
-          options={this.appModel.plugins.preset.options}
-          map={presetPlugin.map}
-        />
-      )
-    );
-  }
-
   /**
    * In the case of a disabled Search plugin, we must
    * ensure that the button that toggles Drawer is still visible.
@@ -484,7 +470,7 @@ class App extends React.PureComponent {
                 <Zoom map={this.appModel.getMap()} />
                 {clean === false && <MapSwitcher appModel={this.appModel} />}
                 {clean === false && <MapCleaner appModel={this.appModel} />}
-                {clean === false && this.renderPresetPlugin()}
+                {clean === false && <PresetLinks appModel={this.appModel} />}
                 {clean === false && this.renderInformationPlugin()}
                 {clean === true && (
                   <MapResetter

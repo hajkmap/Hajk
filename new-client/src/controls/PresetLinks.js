@@ -1,12 +1,9 @@
 import React from "react";
-import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import propTypes from "prop-types";
 
 import { Button, Paper, Tooltip, Menu, MenuItem } from "@material-ui/core";
-import InfoIcon from "@material-ui/icons/Info";
-
-import Dialog from "../components/Dialog.js";
+import Bookmarks from "@material-ui/icons/Bookmarks";
 
 const styles = theme => {
   return {
@@ -22,51 +19,26 @@ const styles = theme => {
 class Preset extends React.PureComponent {
   static propTypes = {
     classes: propTypes.object.isRequired,
-    options: propTypes.object.isRequired
+    appModel: propTypes.object.isRequired
   };
+
+  state = {};
 
   constructor(props) {
     super(props);
     this.type = "Preset"; // Special case - plugins that don't use BaseWindowPlugin must specify .type here
-    this.options = props.options;
+    this.config = props.appModel.config.mapConfig.tools.find(
+      t => t.type === "preset"
+    );
+
+    // If config wasn't found, it means that Preset is not configured. Quit.
+    if (this.config === undefined) return null;
+
+    // Else, if we're still here, go on.
+    this.options = this.config.options;
+    this.map = props.appModel.getMap();
     this.title = this.options.title || "Snabbval";
-    this.state = {
-      dialogOpen: false
-    };
   }
-
-  componentDidMount() {
-    //let dialogOpen = this.options.visibleAtStart;
-    let dialogOpen = true;
-
-    /*     if (this.options.visibleAtStart === true) {
-      if (
-        this.options.showInfoOnce === true &&
-        parseInt(
-          window.localStorage.getItem("pluginInformationMessageShown")
-        ) === 1
-      ) {
-        dialogOpen = false;
-      } else {
-        if (this.options.showInfoOnce === true) {
-          window.localStorage.setItem("pluginInformationMessageShown", 1);
-        }
-        dialogOpen = true;
-      }
-    } else {
-      dialogOpen = false;
-    }
- */
-    this.setState({
-      dialogOpen
-    });
-  }
-
-  onClose = () => {
-    this.setState({
-      dialogOpen: false
-    });
-  };
 
   // Show dropdown menu, anchored to the element clicked
   handleClick = event => {
@@ -78,20 +50,18 @@ class Preset extends React.PureComponent {
   };
 
   handleItemClick = (event, item) => {
-    console.log(item);
-    console.log(this.props);
-    const map = this.props.map;
     let url = item.presetUrl.toLowerCase();
     if (
       url.indexOf("&x=") > 0 &&
       url.indexOf("&y=") > 0 &&
       url.indexOf("&z=") > 0
     ) {
+      this.handleClose(); // Ensure that popup menu is closed
       let url = item.presetUrl.split("&");
       let x = url[1].substring(2);
       let y = url[2].substring(2);
       let z = url[3].substring(2);
-      const view = map.getView();
+      const view = this.map.getView();
       view.animate({
         center: [x, y],
         zoom: z
@@ -113,19 +83,6 @@ class Preset extends React.PureComponent {
     }
   };
 
-  renderDialog() {
-    const { headerText, text, buttonText } = this.props.options;
-
-    return createPortal(
-      <Dialog
-        options={{ headerText, text, buttonText }}
-        open={this.state.dialogOpen}
-        onClose={this.onClose}
-      />,
-      document.getElementById("windows-container")
-    );
-  }
-
   renderMenuItems = () => {
     let menuItems = [];
     this.options.presetList.forEach((item, index) => {
@@ -142,33 +99,36 @@ class Preset extends React.PureComponent {
   };
 
   render() {
-    const { anchorEl } = this.state;
-    const { classes } = this.props;
-    const open = Boolean(anchorEl);
-    return (
-      <>
-        {/* {this.renderMenuItems()} */}
-        <Tooltip title={this.title}>
-          <Paper className={classes.paper}>
-            <Button
-              aria-label={this.title}
-              className={classes.button}
-              onClick={this.handleClick}
-            >
-              <InfoIcon />
-            </Button>
-          </Paper>
-        </Tooltip>
-        <Menu
-          id="render-props-menu"
-          anchorEl={anchorEl}
-          open={open}
-          onClose={this.handleClose}
-        >
-          {this.renderMenuItems()}
-        </Menu>
-      </>
-    );
+    if (this.config === undefined) {
+      return null;
+    } else {
+      const { anchorEl } = this.state;
+      const { classes } = this.props;
+      const open = Boolean(anchorEl);
+      return (
+        <>
+          <Tooltip title={this.title}>
+            <Paper className={classes.paper}>
+              <Button
+                aria-label={this.title}
+                className={classes.button}
+                onClick={this.handleClick}
+              >
+                <Bookmarks />
+              </Button>
+            </Paper>
+          </Tooltip>
+          <Menu
+            id="render-props-menu"
+            anchorEl={anchorEl}
+            open={open}
+            onClose={this.handleClose}
+          >
+            {this.renderMenuItems()}
+          </Menu>
+        </>
+      );
+    }
   }
 }
 
