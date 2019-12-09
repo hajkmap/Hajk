@@ -432,13 +432,13 @@ class AppModel {
       l = b.l.split(",");
     }
 
-    if (isNaN(x)) {
+    if (Number.isNaN(x)) {
       x = a.map.center[0];
     }
-    if (isNaN(y)) {
+    if (Number.isNaN(y)) {
       y = a.map.center[1];
     }
-    if (isNaN(z)) {
+    if (Number.isNaN(z)) {
       z = a.map.zoom;
     }
 

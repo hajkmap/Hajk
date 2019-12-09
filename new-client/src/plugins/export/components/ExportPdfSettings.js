@@ -121,7 +121,7 @@ class ExportPdfSettings extends React.PureComponent {
 
   getScale() {
     return this.state.selectScale === "other"
-      ? !isNaN(Number(this.state.manualScale))
+      ? !Number.isNaN(Number(this.state.manualScale))
         ? this.state.manualScale
         : 0
       : this.state.selectScale;

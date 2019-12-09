@@ -319,7 +319,7 @@ class WFSVectorLayer {
           Number(feature.getProperties()[filterAttribute]) < Number(filterValue)
         );
       case "eq":
-        if (!isNaN(Number(filterValue))) {
+        if (!Number.isNaN(Number(filterValue))) {
           return (
             Number(feature.getProperties()[filterAttribute]) ===
             Number(filterValue)
@@ -327,7 +327,7 @@ class WFSVectorLayer {
         }
         return feature.getProperties()[filterAttribute] === filterValue;
       case "not":
-        if (!isNaN(Number(filterValue))) {
+        if (!Number.isNaN(Number(filterValue))) {
           return (
             Number(feature.getProperties()[filterAttribute]) !==
             Number(filterValue)
