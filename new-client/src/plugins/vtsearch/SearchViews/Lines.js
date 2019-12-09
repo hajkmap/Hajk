@@ -85,7 +85,6 @@ class Lines extends React.PureComponent {
     this.setState({
       municipalityName: e.target.value
     });
-    console.log(this.state.municipalityName);
   };
   handleTraficTransportChange = e => {
     this.setState({
@@ -94,7 +93,7 @@ class Lines extends React.PureComponent {
   };
   handleThroughStopAreaChange = event => {
     this.setState({
-      setValue: event.target.value
+      throughStopArea: event.target.value
     });
   };
 
@@ -150,7 +149,7 @@ class Lines extends React.PureComponent {
           id="standard-helperText"
           label="Via hållplatsområde"
           value={this.state.throughStopArea}
-          onChange={this.handleChange}
+          onChange={this.handleThroughStopAreaChange}
         />
         <Button className={classes.addSpaceAroundButton} variant="outlined">
           Sök
