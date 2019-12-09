@@ -8,7 +8,7 @@ export default class SearchModel {
   /**
    * Settings with labels and urls for the search functions.
    */
-  geoserverUrls = null;
+  geoserver = null;
 
   constructor(settings) {
     this.map = settings.map;
@@ -104,8 +104,7 @@ export default class SearchModel {
    */
   getMunicipalityZoneNames() {
     // The url.
-    const url =
-      "http://sestoas256:8080/geoserver/kartsidan2/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=kartsidan2%3AmunicipalityZoneNames&outputFormat=application/json";
+    const url = this.geoserver.municipalityZoneNames.url;
 
     // Fetch the result as a promise, sort it and attach it to the event.
     return fetch(url).then(res => {

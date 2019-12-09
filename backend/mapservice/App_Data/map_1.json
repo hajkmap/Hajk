@@ -217,9 +217,11 @@
     },
     {
       "type": "vtsearch",
+
       "options": {
         "abstract": "VTSEARCH",
         "title": "VTSEARCH",
+        "target": "center",
         "geoserver": {
           "journeys": {
             "searchLabel": "Turer",
