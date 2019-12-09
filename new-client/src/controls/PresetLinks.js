@@ -51,11 +51,7 @@ class Preset extends React.PureComponent {
 
   handleItemClick = (event, item) => {
     let url = item.presetUrl.toLowerCase();
-    if (
-      url.indexOf("&x=") > 0 &&
-      url.indexOf("&y=") > 0 &&
-      url.indexOf("&z=") > 0
-    ) {
+    if (url.includes("x=") && url.includes("y=") && url.includes("z=")) {
       this.handleClose(); // Ensure that popup menu is closed
       let url = item.presetUrl.split("&");
       let x = url[1].substring(2);

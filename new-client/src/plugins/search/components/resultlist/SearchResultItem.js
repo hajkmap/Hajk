@@ -131,12 +131,8 @@ class SearchResultItem extends Component {
       target,
       searchWithinButtonText
     } = this.props;
-    var active =
-      this.props.highlightedFeatures
-        .map(highlightedFeature => {
-          return highlightedFeature;
-        })
-        .indexOf(feature) > -1;
+
+    const active = this.props.highlightedFeatures.includes(feature);
 
     const ExpandIconWrapper = ({ children }) => (
       <div

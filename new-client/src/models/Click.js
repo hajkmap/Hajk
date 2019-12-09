@@ -23,12 +23,10 @@ function query(map, layer, evt) {
     let subLayers = Object.values(layer.layersInfo);
     let visibleSubLayers = layer.getSource().getParams()["LAYERS"];
     subLayersToQuery = subLayers
-      .filter(subLayer => {
-        return (
-          subLayer.queryable === true &&
-          visibleSubLayers.indexOf(subLayer.id) !== -1 // QUERY_LAYERS must not include anything that's not in LAYERS, see https://github.com/hajkmap/Hajk/issues/211
-        );
-      })
+      .filter(
+        subLayer =>
+          subLayer.queryable === true && visibleSubLayers.includes(subLayer.id)
+      ) // QUERY_LAYERS must not include anything that's not in LAYERS, see https://github.com/hajkmap/Hajk/issues/211
       .map(queryableSubLayer => {
         return queryableSubLayer.id;
       });
@@ -194,16 +192,15 @@ export function bindMapClickEvent(map, callback) {
   map.on("singleclick", evt => {
     // If Draw, Modify or Snap interaction are currently active, ignore clicks
     if (
+      map.clicklock ||
       map
         .getInteractions()
         .getArray()
-        .filter(
-          interaction =>
-            ["Draw", "Snap", "Modify", "Select", "Translate"].indexOf(
-              interaction.constructor.name
-            ) !== -1
-        ).length > 0 ||
-      map.clicklock
+        .filter(interaction =>
+          ["Draw", "Snap", "Modify", "Select", "Translate"].includes(
+            interaction.constructor.name
+          )
+        ).length > 0
     ) {
       return;
     } else {
