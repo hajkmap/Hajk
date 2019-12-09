@@ -143,9 +143,7 @@ class Stops extends React.PureComponent {
           <SquareIcon />
         </Button>
         <br />
-        <Button className={classes.floatRight} variant="outlined">
-          Sök
-        </Button>
+        <Button variant="outlined">Sök</Button>
       </div>
     );
   }
