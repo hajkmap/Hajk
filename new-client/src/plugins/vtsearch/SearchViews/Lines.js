@@ -1,35 +1,40 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import TextField from "@material-ui/core/TextField";
+import { TextField, Button, Typography } from "@material-ui/core";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
+import BorderStyleIcon from "@material-ui/icons/BorderStyle";
+import SquareIcon from "@material-ui/icons/CropSquare";
 
 // Define JSS styles that will be used in this component.
 // Examle below utilizes the very powerful "theme" object
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
 const styles = theme => ({
   publicNr: {
-    background: "linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)",
     color: "white",
-    margin: 6,
-    width: 100,
-    borderRadius: 3
+    margin: 3,
+    width: 100
   },
   technicalNr: {
-    background: "linear-gradient(45deg, #34D86B 30%, #437CE8 90%)",
     color: "white",
-    margin: 6,
     width: 100,
-    borderRadius: 3
+    margin: 3
   },
   municipal: {
     width: 200
   },
-  traficTransport: {
-    padding: "30px 0 0 0",
+  paddingAndWidth: {
+    padding: "20px 0 0 0",
     width: 200
+  },
+  traficTranspor: {
+    width: 200
+  },
+  addMargin: {
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(1)
   }
 });
 
@@ -40,7 +45,9 @@ class Lines extends React.PureComponent {
   state = {
     municipalityNames: [],
     municipalityName: "",
-    traficTransportNames: []
+    traficTransportNames: [],
+    traficTransportName: "",
+    throughStopArea: ""
   };
 
   // propTypes and defaultProps are static properties, declared
@@ -69,7 +76,7 @@ class Lines extends React.PureComponent {
       });
       this.model.getTransportModeTypeName().then(result => {
         this.setState({
-          traficTransportNames: result
+          traficTransportNames: result.length > 0 ? result : []
         });
       });
     });
@@ -78,10 +85,16 @@ class Lines extends React.PureComponent {
     this.setState({
       municipalityName: e.target.value
     });
+    console.log(this.state.municipalityName);
   };
-  handleTraficTransporChange = e => {
+  handleTraficTransportChange = e => {
     this.setState({
       traficTransportName: e.target.value
+    });
+  };
+  handleThroughStopAreaChange = event => {
+    this.setState({
+      setValue: event.target.value
     });
   };
 
@@ -101,7 +114,7 @@ class Lines extends React.PureComponent {
           label="Tekniskt nr"
           className={classes.publicNr}
         />
-        <InputLabel>Kommun</InputLabel>
+        <InputLabel className={classes.paddingAndWidth}>Kommun</InputLabel>
         <Select
           value={this.state.municipalityName}
           onChange={this.handleMunicipalChange}
@@ -110,16 +123,17 @@ class Lines extends React.PureComponent {
           {municipalityNames.map((name, index) => {
             return (
               <MenuItem key={index} value={name}>
-                {name}
+                {name.name}
               </MenuItem>
             );
           })}
         </Select>
 
-        <InputLabel className={classes.traficTransport}>Trafikslag</InputLabel>
+        <InputLabel className={classes.paddingAndWidth}>Trafikslag</InputLabel>
         <Select
+          className={classes.traficTranspor}
           value={this.state.traficTransportName}
-          onChange={this.handleTraficTransporChange}
+          onChange={this.handleTraficTransportChange}
         >
           {traficTransportNames.map((name, index) => {
             return (
@@ -129,6 +143,28 @@ class Lines extends React.PureComponent {
             );
           })}
         </Select>
+        <TextField
+          className={classes.paddingAndWidth}
+          id="standard-helperText"
+          label="Via hållplatsområde"
+          value={this.state.throughStopArea}
+          onChange={this.handleChange}
+        />
+        <Button className={classes.addMargin} variant="outlined">
+          Sök
+        </Button>
+
+        <Typography className={classes.addMargin}>
+          Markera sökområde i kartan
+        </Typography>
+        <Button variant="outlined" type="button" title="Lägg till polygon">
+          Polygon
+          <BorderStyleIcon />
+        </Button>
+        <Button variant="outlined" type="button" title="Lägg till rektangel">
+          Rektangel
+          <SquareIcon />
+        </Button>
       </div>
     );
   }
