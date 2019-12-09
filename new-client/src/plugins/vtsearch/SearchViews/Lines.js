@@ -25,14 +25,14 @@ const styles = theme => ({
   municipal: {
     width: 200
   },
-  paddingAndWidth: {
+  addSpaceAroundField: {
     padding: "20px 0 0 0",
     width: 200
   },
   traficTranspor: {
     width: 200
   },
-  addMargin: {
+  addSpaceAroundButton: {
     marginTop: theme.spacing(1),
     marginBottom: theme.spacing(1)
   }
@@ -114,7 +114,7 @@ class Lines extends React.PureComponent {
           label="Tekniskt nr"
           className={classes.publicNr}
         />
-        <InputLabel className={classes.paddingAndWidth}>Kommun</InputLabel>
+        <InputLabel className={classes.addSpaceAroundField}>Kommun</InputLabel>
         <Select
           value={this.state.municipalityName}
           onChange={this.handleMunicipalChange}
@@ -129,7 +129,9 @@ class Lines extends React.PureComponent {
           })}
         </Select>
 
-        <InputLabel className={classes.paddingAndWidth}>Trafikslag</InputLabel>
+        <InputLabel className={classes.addSpaceAroundField}>
+          Trafikslag
+        </InputLabel>
         <Select
           className={classes.traficTranspor}
           value={this.state.traficTransportName}
@@ -144,17 +146,17 @@ class Lines extends React.PureComponent {
           })}
         </Select>
         <TextField
-          className={classes.paddingAndWidth}
+          className={classes.addSpaceAroundField}
           id="standard-helperText"
           label="Via hållplatsområde"
           value={this.state.throughStopArea}
           onChange={this.handleChange}
         />
-        <Button className={classes.addMargin} variant="outlined">
+        <Button className={classes.addSpaceAroundButton} variant="outlined">
           Sök
         </Button>
 
-        <Typography className={classes.addMargin}>
+        <Typography className={classes.addSpaceAroundButton}>
           Markera sökområde i kartan
         </Typography>
         <Button variant="outlined" type="button" title="Lägg till polygon">
