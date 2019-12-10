@@ -922,9 +922,9 @@ class DrawModel {
       }
     } else {
       // https://github.com/openlayers/openlayers/issues/3262
-      let func = feature.getStyleFunction();
-      if (func) {
-        let style = func.call(feature, this.map.getView().getResolution());
+      let styleFunc = feature.getStyleFunction();
+      if (styleFunc) {
+        let style = styleFunc(feature, this.map.getView().getResolution());
         if (style[0] && style[0].getFill && style[0].getFill() === null) {
           style[0].setFill(
             new Fill({
@@ -936,6 +936,7 @@ class DrawModel {
       }
     }
   }
+
 
   calculateExtent(features) {
     var x = [];
