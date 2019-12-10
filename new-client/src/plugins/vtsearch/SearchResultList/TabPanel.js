@@ -44,7 +44,8 @@ class SearchResultListContainer extends React.PureComponent {
       index,
       classes,
       resultListHeight,
-      searchResult
+      searchResult,
+      windowWidth
     } = this.props;
     return (
       <Container
@@ -55,6 +56,7 @@ class SearchResultListContainer extends React.PureComponent {
         <AttributeTable
           searchResult={searchResult}
           resultListHeight={resultListHeight}
+          windowWidth={windowWidth}
         ></AttributeTable>
       </Container>
     );

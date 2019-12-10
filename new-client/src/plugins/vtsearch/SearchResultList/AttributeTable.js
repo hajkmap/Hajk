@@ -29,14 +29,15 @@ class AttributeTable extends React.PureComponent {
   }
 
   render() {
-    const { resultListHeight } = this.props;
+    const { resultListHeight, windowWidth } = this.props;
     var rows = this.getRows();
     return (
-      <Paper style={{ height: resultListHeight, width: "100%" }}>
+      <Paper style={{ height: resultListHeight, width: windowWidth }}>
         <VirtualizedTable
           rowCount={rows.length}
           rowGetter={({ index }) => rows[index]}
           columns={this.getColumns()}
+          windowWidth={windowWidth}
         />
       </Paper>
     );

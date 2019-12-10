@@ -3,8 +3,8 @@ import PropTypes from "prop-types";
 import clsx from "clsx";
 import { withStyles } from "@material-ui/core/styles";
 import TableCell from "@material-ui/core/TableCell";
-import Paper from "@material-ui/core/Paper";
 import { AutoSizer, Column, Table } from "react-virtualized";
+import "react-virtualized/styles.css";
 
 const styles = theme => ({
   flexContainer: {
@@ -17,22 +17,50 @@ const styles = theme => ({
     // https://github.com/bvaughn/react-virtualized/issues/454
     "& .ReactVirtualized__Table__headerRow": {
       flip: false,
+      overflow: "auto",
       paddingRight: theme.direction === "rtl" ? "0px !important" : undefined
     }
   },
   tableRow: {
-    cursor: "pointer"
+    cursor: "pointer",
+    whiteSpace: "wrap",
+    "&:hover": {
+      backgroundColor: theme.palette.grey[200]
+    }
   },
   tableRowHover: {
     "&:hover": {
       backgroundColor: theme.palette.grey[200]
     }
   },
-  tableCell: {
-    flex: 1
+  headerCells: {
+    padding: 0,
+
+    cursor: "pointer",
+    textAlign: "center",
+    fontSize: "0.8em",
+    wordBreak: "break-all",
+    flex: 1,
+    lineHeight: 1
   },
+
+  headerStyle: {},
+
+  columnStyle: {
+    whiteSpace: "pre-wrap",
+    marginRight: 0,
+    marginLeft: 0,
+    display: "flex",
+    alignItems: "center",
+    boxSizing: "border-box"
+  },
+
+  rowCell: {
+    marginRight: 0
+  },
+
   noClick: {
-    cursor: "initial"
+    cursor: "pointer"
   }
 });
 
@@ -42,12 +70,18 @@ class VirtualizedTable extends React.PureComponent {
     rowHeight: 48
   };
 
-  getRowClassName = ({ index }) => {
-    const { classes, onRowClick } = this.props;
+  rowClicked = ({ index }) => {
+    console.log(index, "index");
+  };
 
-    return clsx(classes.tableRow, classes.flexContainer, {
+  getRowClassName = ({ index }) => {
+    console.log(index, "index");
+    const { classes } = this.props;
+
+    return clsx(classes.tableRow, classes.flexContainer);
+    /*, {
       [classes.tableRowHover]: index !== -1 && onRowClick != null
-    });
+    });*/
   };
 
   cellRenderer = ({ cellData, columnIndex }) => {
@@ -55,11 +89,16 @@ class VirtualizedTable extends React.PureComponent {
     return (
       <TableCell
         component="div"
-        className={clsx(classes.tableCell, classes.flexContainer, {
+        className={clsx(classes.rowCell, {
           [classes.noClick]: onRowClick == null
         })}
         variant="body"
-        style={{ height: rowHeight }}
+        style={{
+          height: rowHeight,
+          marginLeft: 0,
+          textAlign: "center",
+          flex: 1
+        }}
         align={
           (columnIndex != null && columns[columnIndex].numeric) || false
             ? "right"
@@ -77,16 +116,12 @@ class VirtualizedTable extends React.PureComponent {
     return (
       <TableCell
         component="div"
-        className={clsx(
-          classes.tableCell,
-          classes.flexContainer,
-          classes.noClick
-        )}
+        className={clsx(classes.flexContainer, classes.headerCells)}
         variant="head"
         style={{ height: headerHeight }}
         align={columns[columnIndex].numeric || false ? "right" : "left"}
       >
-        <span>{label}</span>
+        {label}
       </TableCell>
     );
   };
@@ -97,6 +132,7 @@ class VirtualizedTable extends React.PureComponent {
       columns,
       rowHeight,
       headerHeight,
+      windowWidth,
       ...tableProps
     } = this.props;
     return (
@@ -106,13 +142,11 @@ class VirtualizedTable extends React.PureComponent {
             height={height}
             width={width}
             rowHeight={rowHeight}
-            gridStyle={{
-              direction: "inherit"
-            }}
             headerHeight={headerHeight}
+            onRowClick={this.rowClicked}
             className={classes.table}
-            {...tableProps}
             rowClassName={this.getRowClassName}
+            {...tableProps}
           >
             {columns.map(({ dataKey, ...other }, index) => {
               return (
@@ -124,7 +158,12 @@ class VirtualizedTable extends React.PureComponent {
                       columnIndex: index
                     })
                   }
-                  className={classes.flexContainer}
+                  headerStyle={{
+                    marginRight: 0,
+                    marginLeft: 0,
+                    textAlign: "center"
+                  }}
+                  className={clsx(classes.flexContainer, classes.columnStyle)}
                   cellRenderer={this.cellRenderer}
                   dataKey={dataKey}
                   {...other}

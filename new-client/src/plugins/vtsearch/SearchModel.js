@@ -15,6 +15,7 @@ export default class SearchModel {
     this.app = settings.app;
     this.localObserver = settings.localObserver;
     this.geoserver = settings.geoserver;
+    window.getJourneys = this.getJourneys; // debug
   }
 
   /**
@@ -88,7 +89,7 @@ export default class SearchModel {
     fetch(url).then(res => {
       res.json().then(jsonResult => {
         const journeys = {
-          data: jsonResult.features,
+          featureCollection: jsonResult,
           label: this.geoserver.journeys.searchLabel
         };
         this.localObserver.publish("vtsearch-result-done", journeys);
