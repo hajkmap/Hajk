@@ -4,6 +4,10 @@
  *
  * @class SearchModel
  */
+import VectorLayer from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector";
+import { Fill, Stroke, Style } from "ol/style";
+
 export default class SearchModel {
   /**
    * Settings with labels and urls for the search functions.
@@ -15,8 +19,45 @@ export default class SearchModel {
     this.app = settings.app;
     this.localObserver = settings.localObserver;
     this.geoserver = settings.geoserver;
-    window.getJourneys = this.getJourneys; // debug
+    this.addSearchResultLayerToMap();
+    this.addHighlightLayerToMap();
   }
+
+  /**
+   * Adds a layer in the map where we can add all of the search result features
+   * @memberof SearchModel
+   */
+
+  addSearchResultLayerToMap = () => {
+    this.searchResultLayer = new VectorLayer({
+      source: new VectorSource({})
+    });
+    this.searchResultLayer.set("type", "vt-search-result-layer");
+    this.map.addLayer(this.searchResultLayer);
+  };
+  /**
+   * Adds a layer in the map where we can add features to work as highlight
+   * @memberof SearchModel
+   */
+  addHighlightLayerToMap = () => {
+    var fill = new Fill({
+      color: "rgba(0,0,0,0.4)"
+    });
+    var stroke = new Stroke({
+      color: "#e83317",
+      width: 5
+    });
+
+    this.highlightLayer = new VectorLayer({
+      style: new Style({
+        fill: fill,
+        stroke: stroke
+      }),
+      source: new VectorSource({})
+    });
+    this.highlightLayer.set("type", "vt-highlight-result-layer");
+    this.map.addLayer(this.highlightLayer);
+  };
 
   /**
    * Adjusts a WKT so that it's supported for a web browser and GeoServer.
@@ -147,7 +188,7 @@ export default class SearchModel {
 
     // Build up the url with cql.
     let url = this.geoserver.routes.url;
-    let cql = "&CQL=";
+    let cql = "&cql_filter=";
     let addAndInCql = false;
     if (publicLineName != null) {
       cql = cql + `PublicLineName=${publicLineName}`;
@@ -199,7 +240,7 @@ export default class SearchModel {
         console.log("getRoutes / fetch");
 
         const routes = {
-          data: jsonResult.features,
+          featureCollection: jsonResult,
           label: this.geoserver.routes.searchLabel
         };
 
