@@ -1,16 +1,18 @@
-import { WFS } from "ol/format";
-import GeometryType from "ol/geom/GeometryType";
+import { WFS, GeoJSON } from "ol/format";
 import IsLike from "ol/format/filter/IsLike";
 import Or from "ol/format/filter/Or";
 import Intersects from "ol/format/filter/Intersects";
-import TileLayer from "ol/layer/Tile";
-import ImageLayer from "ol/layer/Image";
-import VectorLayer from "ol/layer/Vector";
-import VectorSource from "ol/source/Vector";
-import GeoJSON from "ol/format/GeoJSON";
+import GeometryType from "ol/geom/GeometryType";
 import { fromCircle } from "ol/geom/Polygon";
 import Draw from "ol/interaction/Draw.js";
-import { Stroke, Style, Circle, Fill, Icon } from "ol/style.js";
+import {
+  Tile as TileLayer,
+  Image as ImageLayer,
+  Vector as VectorLayer
+} from "ol/layer";
+import VectorSource from "ol/source/Vector";
+import { Stroke, Style, Circle, Fill, Icon } from "ol/style";
+
 import { arraySort } from "../utils/ArraySort.js";
 import { handleClick } from "./Click.js";
 
@@ -34,6 +36,120 @@ var drawStyle = new Style({
 class SearchModel {
   layerList = [];
   controllers = [];
+
+  constructor(settings, map, app, observer) {
+    // Validate
+    if (!settings || !map || !app || !observer) {
+      throw new Error(
+        "One of the required parameters for SearchModel is missing. Here are the values."
+      );
+    }
+
+    this.options = settings;
+    this.olMap = map;
+    this.app = app;
+    this.localObserver = observer;
+
+    this.wfsParser = new WFS();
+    this.globalObserver = app.globalObserver;
+
+    this.vectorLayer = new VectorLayer({
+      source: new VectorSource({}),
+      style: this.getVectorLayerStyle()
+    });
+    this.vectorLayer.set("type", "searchResultLayer");
+
+    this.drawSource = new VectorSource({ wrapX: false });
+    this.drawLayer = new VectorLayer({
+      source: this.drawSource,
+      style: drawStyle
+    });
+
+    this.olMap.addLayer(this.vectorLayer);
+    this.olMap.addLayer(this.drawLayer);
+  }
+
+  /**
+   * @summary Takes a RGBA Object as input and returns it as an Array
+   * formatted according to ol.Color. If no value is provided, the defaults
+   * are used.
+   *
+   * @param {Object} obj
+   * @param {Array} [def={ r: 100, g: 100, b: 100, a: 0.7 }]
+   * @returns {Array} RGBA values formatted as an ol.Color Array
+   */
+  convertRgbaColorObjectToArray = (
+    obj = {},
+    def = { r: 100, g: 100, b: 100, a: 0.7 }
+  ) => {
+    const mergedObject = { ...def, ...obj };
+    return [mergedObject.r, mergedObject.g, mergedObject.b, mergedObject.a];
+  };
+
+  /**
+   * @summary Prepares and returnes an ol.Style object, used to
+   * style the search results layer.
+   *
+   * @returns {Object} ol.Style
+   */
+  getVectorLayerStyle = () => {
+    const {
+      anchor,
+      scale,
+      src,
+      strokeColor,
+      strokeWidth,
+      fillColor
+    } = this.options;
+
+    const style = new Style({
+      // Polygons stroke color and width
+      stroke: new Stroke({
+        color: this.convertRgbaColorObjectToArray(strokeColor, {
+          r: 244,
+          g: 83,
+          b: 63,
+          a: 1
+        }),
+        width: strokeWidth || 4
+      }),
+      // Polygons fill color
+      fill: new Fill({
+        color: this.convertRgbaColorObjectToArray(fillColor, {
+          r: 244,
+          g: 83,
+          b: 63,
+          a: 0.2
+        })
+      })
+    });
+
+    // Point style (either a marker image or fallback to a Circle)
+
+    if (src.length > 0) {
+      // If marker image is provided, use it
+      style.setImage(
+        new Icon({
+          anchor: [anchor[0] || 0.5, anchor[1] || 1],
+          scale: scale || 0.15,
+          src: src
+        })
+      );
+    } else {
+      // Else just draw a simple Circle as marker
+      style.setImage(
+        new Circle({
+          radius: 6,
+          stroke: new Stroke({
+            color: "rgba(0, 0, 0, 0.6)",
+            width: 2
+          })
+        })
+      );
+    }
+
+    return style;
+  };
 
   mapSourceAsWFSPromise = (feature, projCode, source) => {
     let geometry = feature.getGeometry();
@@ -195,7 +311,7 @@ class SearchModel {
         this.controllers.push(controller);
       });
 
-      this.observer.publish("spatialSearchStarted");
+      this.localObserver.publish("spatialSearchStarted");
       Promise.all(promises)
         .then(responses => {
           Promise.all(responses.map(result => result.json())).then(
@@ -208,7 +324,7 @@ class SearchModel {
                 }
               });
               setTimeout(() => {
-                this.observer.publish("searchComplete");
+                this.localObserver.publish("searchComplete");
               }, 500);
               if (callback) {
                 callback(result);
@@ -240,7 +356,7 @@ class SearchModel {
     if (this.controllers.length > 0) {
       this.controllers.forEach(controller => {
         controller.abort();
-        this.observer.publish("searchComplete");
+        this.localObserver.publish("searchComplete");
       });
     }
     this.controllers.splice(0, this.controllers.length);
@@ -255,7 +371,7 @@ class SearchModel {
     if (/*autoExecution ||*/ force === true) {
       this.abortSearches();
       this.timeout = setTimeout(() => {
-        this.observer.publish("searchStarted");
+        this.localObserver.publish("searchStarted");
         var promises = [];
 
         this.controllers.splice(0, this.controllers.length);
@@ -273,7 +389,7 @@ class SearchModel {
             Promise.all(responses.map(result => result.json()))
               .then(jsonResults => {
                 if (this.timeout !== timeout) {
-                  return this.observer.publish("searchComplete");
+                  return this.localObserver.publish("searchComplete");
                 }
                 jsonResults.forEach((jsonResult, i) => {
                   if (jsonResult.features.length > 0) {
@@ -285,7 +401,7 @@ class SearchModel {
                   jsonResult.source = this.options.sources[i];
                 });
                 setTimeout(() => {
-                  this.observer.publish("searchComplete");
+                  this.localObserver.publish("searchComplete");
                 }, 500);
                 if (callback) callback(jsonResults);
               })
@@ -413,109 +529,6 @@ class SearchModel {
       this.olMap.clicklock = false;
     }
   };
-  /**
-   * @summary Takes a RGBA Object as input and returns it as an Array
-   * formatted according to ol.Color. If no value is provided, the defaults
-   * are used.
-   *
-   * @param {Object} obj
-   * @param {Array} [def={ r: 100, g: 100, b: 100, a: 0.7 }]
-   * @returns {Array} RGBA values formatted as an ol.Color Array
-   */
-  convertRgbaColorObjectToArray = (
-    obj = {},
-    def = { r: 100, g: 100, b: 100, a: 0.7 }
-  ) => {
-    const mergedObject = { ...def, ...obj };
-    return [mergedObject.r, mergedObject.g, mergedObject.b, mergedObject.a];
-  };
-  /**
-   * @summary Prepares and returnes an ol.Style object, used to
-   * style the search results layer.
-   *
-   * @returns {Object} ol.Style
-   */
-  getVectorLayerStyle = () => {
-    const {
-      anchor,
-      scale,
-      src,
-      strokeColor,
-      strokeWidth,
-      fillColor
-    } = this.options;
-
-    const style = new Style({
-      // Polygons stroke color and width
-      stroke: new Stroke({
-        color: this.convertRgbaColorObjectToArray(strokeColor, {
-          r: 244,
-          g: 83,
-          b: 63,
-          a: 1
-        }),
-        width: strokeWidth || 4
-      }),
-      // Polygons fill color
-      fill: new Fill({
-        color: this.convertRgbaColorObjectToArray(fillColor, {
-          r: 244,
-          g: 83,
-          b: 63,
-          a: 0.2
-        })
-      })
-    });
-
-    // Point style (either a marker image or fallback to a Circle)
-
-    if (src && src.length > 0) {
-      // If marker image is provided, use it
-      style.setImage(
-        new Icon({
-          anchor: [anchor[0] || 0.5, anchor[1] || 1],
-          scale: scale || 0.15,
-          src: src
-        })
-      );
-    } else {
-      // Else just draw a simple Circle as marker
-      style.setImage(
-        new Circle({
-          radius: 6,
-          stroke: new Stroke({
-            color: "rgba(0, 0, 0, 0.6)",
-            width: 2
-          })
-        })
-      );
-    }
-
-    return style;
-  };
-
-  constructor(settings, map, app, observer) {
-    this.options = settings;
-    this.olMap = map;
-    this.wfsParser = new WFS();
-
-    this.vectorLayer = new VectorLayer({
-      source: new VectorSource({}),
-      style: this.getVectorLayerStyle()
-    });
-    this.vectorLayer.set("type", "searchResultLayer");
-    this.drawSource = new VectorSource({ wrapX: false });
-    this.drawLayer = new VectorLayer({
-      source: this.drawSource,
-      style: drawStyle
-    });
-
-    this.olMap.addLayer(this.vectorLayer);
-    this.olMap.addLayer(this.drawLayer);
-    this.observer = observer;
-    this.globalObserver = app.globalObserver;
-    this.app = app;
-  }
 
   hideVisibleLayers() {
     this.olMap
