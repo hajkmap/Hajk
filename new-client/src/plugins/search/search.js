@@ -10,7 +10,7 @@ import SearchResultList from "./components/resultlist/SearchResultList.js";
 import SearchWithRadiusInput from "./components/searchviews/SearchWithRadiusInput";
 import SearchWithSelectionInput from "./components/searchviews/SearchWithSelectionInput";
 import SearchWithPolygonInput from "./components/searchviews/SearchWithPolygonInput";
-import SearchModel from "./SearchModel.js";
+import SearchModel from "../../models/SearchModel";
 // import PanelHeader from "./../../components/PanelHeader.js";
 // import { isMobile } from "../../utils/IsMobile.js";
 
