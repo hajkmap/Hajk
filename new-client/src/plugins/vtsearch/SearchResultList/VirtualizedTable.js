@@ -1,10 +1,10 @@
 import React from "react";
-import PropTypes from "prop-types";
 import clsx from "clsx";
 import { withStyles } from "@material-ui/core/styles";
 import TableCell from "@material-ui/core/TableCell";
-import Paper from "@material-ui/core/Paper";
 import { AutoSizer, Column, Table } from "react-virtualized";
+
+import "react-virtualized/styles.css";
 
 const styles = theme => ({
   flexContainer: {
@@ -17,22 +17,41 @@ const styles = theme => ({
     // https://github.com/bvaughn/react-virtualized/issues/454
     "& .ReactVirtualized__Table__headerRow": {
       flip: false,
+      overflow: "auto",
       paddingRight: theme.direction === "rtl" ? "0px !important" : undefined
     }
   },
   tableRow: {
-    cursor: "pointer"
-  },
-  tableRowHover: {
+    cursor: "pointer",
+    border: "1px solid #c3c7c7",
+    whiteSpace: "wrap",
+    outline: "none",
     "&:hover": {
       backgroundColor: theme.palette.grey[200]
     }
   },
-  tableCell: {
-    flex: 1
+  tableRowSelected: {
+    backgroundColor: "red"
   },
-  noClick: {
-    cursor: "initial"
+  columnStyle: {
+    whiteSpace: "pre-wrap",
+    alignItems: "center",
+    boxSizing: "border-box",
+    justifyContent: "center",
+    cursor: "pointer",
+    fontSize: "0.8em",
+    paddingLeft: 0,
+    wordBreak: "break-all",
+    lineHeight: 1,
+    borderBottom: 0
+  },
+
+  rowCell: {
+    marginRight: 0,
+    borderBottom: 0,
+    textAlign: "center",
+    padding: 0,
+    flex: 1
   }
 });
 
@@ -42,24 +61,34 @@ class VirtualizedTable extends React.PureComponent {
     rowHeight: 48
   };
 
-  getRowClassName = ({ index }) => {
-    const { classes, onRowClick } = this.props;
-
-    return clsx(classes.tableRow, classes.flexContainer, {
-      [classes.tableRowHover]: index !== -1 && onRowClick != null
-    });
+  state = {
+    selectedRowIndex: null
   };
 
-  cellRenderer = ({ cellData, columnIndex }) => {
-    const { columns, classes, rowHeight, onRowClick } = this.props;
+  getRowClassName = ({ index }) => {
+    const { classes } = this.props;
+
+    if (this.state.selectedRowIndex === index) {
+      return clsx(
+        classes.tableRow,
+        classes.tableRowSelected,
+        classes.flexContainer
+      );
+    }
+    return index !== -1 && clsx(classes.tableRow, classes.flexContainer);
+  };
+
+  cellRenderer = ({ cellData, columnIndex, rowData }) => {
+    const { columns, classes, rowHeight } = this.props;
+
     return (
       <TableCell
         component="div"
-        className={clsx(classes.tableCell, classes.flexContainer, {
-          [classes.noClick]: onRowClick == null
-        })}
+        className={classes.rowCell}
         variant="body"
-        style={{ height: rowHeight }}
+        style={{
+          height: rowHeight
+        }}
         align={
           (columnIndex != null && columns[columnIndex].numeric) || false
             ? "right"
@@ -77,18 +106,23 @@ class VirtualizedTable extends React.PureComponent {
     return (
       <TableCell
         component="div"
-        className={clsx(
-          classes.tableCell,
-          classes.flexContainer,
-          classes.noClick
-        )}
+        className={classes.columnStyle}
         variant="head"
-        style={{ height: headerHeight }}
+        style={{
+          height: headerHeight
+        }}
         align={columns[columnIndex].numeric || false ? "right" : "left"}
       >
-        <span>{label}</span>
+        {label}
       </TableCell>
     );
+  };
+
+  rowClicked = e => {
+    const { rowClicked } = this.props;
+
+    this.setState({ selectedRowIndex: e.index });
+    rowClicked(e);
   };
 
   render() {
@@ -96,7 +130,9 @@ class VirtualizedTable extends React.PureComponent {
       classes,
       columns,
       rowHeight,
+      rowClicked,
       headerHeight,
+      windowWidth,
       ...tableProps
     } = this.props;
     return (
@@ -106,29 +142,33 @@ class VirtualizedTable extends React.PureComponent {
             height={height}
             width={width}
             rowHeight={rowHeight}
-            gridStyle={{
-              direction: "inherit"
-            }}
             headerHeight={headerHeight}
+            onRowClick={this.rowClicked}
             className={classes.table}
-            {...tableProps}
             rowClassName={this.getRowClassName}
+            {...tableProps}
           >
             {columns.map(({ dataKey, ...other }, index) => {
               return (
-                <Column
-                  key={dataKey}
-                  headerRenderer={headerProps =>
-                    this.headerRenderer({
-                      ...headerProps,
-                      columnIndex: index
-                    })
-                  }
-                  className={classes.flexContainer}
-                  cellRenderer={this.cellRenderer}
-                  dataKey={dataKey}
-                  {...other}
-                />
+                dataKey !== "id" && (
+                  <Column
+                    key={dataKey}
+                    headerRenderer={headerProps =>
+                      this.headerRenderer({
+                        ...headerProps,
+                        columnIndex: index
+                      })
+                    }
+                    headerStyle={{
+                      marginLeft: 0
+                    }}
+                    className={classes.columnStyle}
+                    style={{ marginRight: 0, marginLeft: 0 }} //Not working with className
+                    cellRenderer={this.cellRenderer}
+                    dataKey={dataKey}
+                    {...other}
+                  />
+                )
               );
             })}
           </Table>

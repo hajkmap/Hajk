@@ -9,9 +9,9 @@ import Tab from "@material-ui/core/Tab";
 import Grid from "@material-ui/core/Grid";
 import Toolbar from "@material-ui/core/Toolbar";
 import PanelToolbox from "./PanelToolbox";
-import Observer from "react-event-observer";
 import TabPanel from "./TabPanel";
 import ClearIcon from "@material-ui/icons/Clear";
+import GeoJSON from "ol/format/GeoJSON";
 
 /**
  * @summary Main class for the Dummy plugin.
@@ -67,80 +67,16 @@ class SearchResultListContainer extends React.Component {
     previousResultListHeight: 300,
     windowWidth: getWindowContainerWidth(),
     windowHeight: getWindowContainerHeight(),
-    value: 0, //mock
-    activeTab: 0, //mock
-    searchResultIds: [0, 1],
+    value: 0,
+    activeTab: 0,
+    searchResultIds: [],
     maximized: false,
     minimized: false
-    //mock
   };
 
-  searchResults = [
-    {
-      id: 0,
-      label: "Joruneys",
-      featureCollection: {
-        type: "FeatureCollection",
-        features: [
-          {
-            type: "Feature",
-            id: "municipalityZoneName.fid-73c97ed0_16eb1fd0de6_-24f2",
-            geometry: null,
-            properties: {
-              Gid: 9081014110000114,
-              Name: "Upplands Väsby"
-            }
-          },
-          {
-            type: "Feature",
-            id: "municipalityZoneName.fid-73c97ed0_16eb1fd0de6_-24f1",
-            geometry: null,
-            properties: {
-              Gid: 9081014110000116,
-              Name: "Vallentuna"
-            }
-          }
-        ],
-        totalFeatures: "unknown",
-        numberReturned: 50,
-        timeStamp: "2019-11-29T10:42:47.183Z",
-        crs: null
-      }
-    },
-    {
-      id: 1,
-      label: "Stops",
-      featureCollection: {
-        type: "FeatureCollection",
-        features: [
-          {
-            type: "Feature",
-            id: "municipalityZoneName.fid-73c97ed0_16eb1fd0de6_-24f2",
-            geometry: null,
-            properties: {
-              Gid: 9081014110000114,
-              Name: "Vad"
-            }
-          },
-          {
-            type: "Feature",
-            id: "municipalityZoneName.fid-73c97ed0_16eb1fd0de6_-24f1",
-            geometry: null,
-            properties: {
-              Gid: 9081014110000116,
-              Name: "Vallentuna"
-            }
-          }
-        ],
-        totalFeatures: "unknown",
-        numberReturned: 50,
-        timeStamp: "2019-11-29T10:42:47.183Z",
-        crs: null
-      }
-    }
-  ];
+  searchResults = [];
 
-  appbarHeight = 30; //TODO - Get this from the actual Appbar-element
+  appbarHeight = null;
 
   static propTypes = {
     options: PropTypes.object.isRequired,
@@ -161,24 +97,64 @@ class SearchResultListContainer extends React.Component {
       });
     });
 
-    this.localObserver = Observer();
     this.bindSubscriptions();
   }
 
-  bindSubscriptions = () => {
-    this.localObserver.subscribe("vtsearch-result-done", result => {
-      var highestId = 0;
+  //BETTER TO PUT THIS SECTION IN MODEL???
+  //  -------------------------------------------------------------------------------
+
+  handleSearchResult = result => {
+    this.addSearchResult(result);
+    this.addSearchResultToMap(this.convertResultToOlFeatures(result));
+  };
+
+  convertResultToOlFeatures = result => {
+    return new GeoJSON().readFeatures(result.featureCollection);
+  };
+
+  addSearchResultToMap = olFeatures => {
+    const { model } = this.props;
+    model.searchResultLayer.getSource().addFeatures(olFeatures);
+  };
+
+  highlightFeature = id => {
+    const { model } = this.props;
+    model.highlightLayer.getSource().clear();
+    var feature = model.searchResultLayer.getSource().getFeatureById(id);
+    model.highlightLayer.getSource().addFeature(feature);
+  };
+
+  // --------------------------------------------------------------------------------
+
+  addSearchResult = result => {
+    var highestId = 0;
+    if (this.state.searchResultIds.length > 0) {
       this.state.searchResultIds.forEach(id => {
         if (id > highestId) highestId = id;
       });
+    }
 
-      this.searchResults.push(...result, { id: highestId + 1 });
-      var searchResultIds = this.state.searchResultIds.concat(highestId);
-      this.setState({ searchResultIds: searchResultIds });
+    this.searchResults.push({
+      ...result,
+      ...{ id: highestId === 0 ? 0 : highestId + 1 }
     });
 
-    this.localObserver.subscribe("search-result-list-minimized", () => {
-      this.setState((state, props) => {
+    var searchResultIds = this.state.searchResultIds.concat(highestId);
+    this.setState({ searchResultIds: searchResultIds });
+  };
+
+  bindSubscriptions = () => {
+    const { localObserver } = this.props;
+    localObserver.subscribe("vtsearch-result-done", result => {
+      this.handleSearchResult(result);
+    });
+
+    localObserver.subscribe("attribute-table-row-clicked", id => {
+      this.highlightFeature(id);
+    });
+
+    localObserver.subscribe("search-result-list-minimized", () => {
+      this.setState(state => {
         return {
           minimized: true,
           maximized: false,
@@ -190,7 +166,7 @@ class SearchResultListContainer extends React.Component {
         };
       });
     });
-    this.localObserver.subscribe("search-result-list-maximized", () => {
+    localObserver.subscribe("search-result-list-maximized", () => {
       this.setState((state, props) => {
         return {
           minimized: false,
@@ -203,11 +179,21 @@ class SearchResultListContainer extends React.Component {
         };
       });
     });
-    this.localObserver.subscribe("search-result-list-normal", height => {
+    localObserver.subscribe("search-result-list-normal", height => {
       this.setState({
         minimized: false,
         maximized: false,
         resultListHeight: this.state.previousResultListHeight
+      });
+    });
+
+    localObserver.subscribe("search-result-list-close", height => {
+      this.searchResults.length = 0;
+      this.setState({
+        minimized: false,
+        maximized: false,
+        resultListHeight: 300,
+        searchResultIds: []
       });
     });
   };
@@ -286,7 +272,7 @@ class SearchResultListContainer extends React.Component {
   };
 
   renderSearchResultContainer = () => {
-    const { classes, windowContainerId } = this.props;
+    const { classes, windowContainerId, localObserver } = this.props;
     let searchResults = this.getSearchResultsFromIds(
       this.state.searchResultIds
     );
@@ -338,7 +324,15 @@ class SearchResultListContainer extends React.Component {
           topRight: false
         }}
       >
-        <AppBar classes={{ positionStatic: classes.appbar }} position="static">
+        <AppBar
+          ref={appbar => {
+            if (this.appbarHeight === null) {
+              this.appbarHeight = appbar.offsetHeight;
+            }
+          }}
+          classes={{ positionStatic: classes.appbar }}
+          position="static"
+        >
           <Toolbar classes={{ regular: classes.toolbar }}>
             <Grid
               justify="space-between"
@@ -352,7 +346,7 @@ class SearchResultListContainer extends React.Component {
               </Grid>
 
               <Grid item>
-                <PanelToolbox localObserver={this.localObserver}></PanelToolbox>
+                <PanelToolbox localObserver={localObserver}></PanelToolbox>
               </Grid>
             </Grid>
           </Toolbar>
@@ -364,6 +358,8 @@ class SearchResultListContainer extends React.Component {
               value={this.state.activeTab}
               index={searchResult.id}
               resultListHeight={this.state.resultListHeight}
+              windowWidth={this.state.windowWidth}
+              localObserver={localObserver}
               searchResult={searchResult}
             ></TabPanel>
           );
@@ -373,7 +369,9 @@ class SearchResultListContainer extends React.Component {
   };
 
   render() {
-    return this.renderSearchResultContainer();
+    return this.state.searchResultIds.length > 0
+      ? this.renderSearchResultContainer()
+      : null;
   }
 }
 

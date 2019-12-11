@@ -144,19 +144,6 @@ class VTSearch extends React.PureComponent {
     this.localObserver.subscribe("vtsearch-result-begin", label => {
       console.log("vtsearch-result-begin, " + label.label);
     });
-
-    // Subscribes for an event when the vt-search is done.
-    this.localObserver.subscribe("vtsearch-result-done", result => {
-      this.setState(
-        {
-          result: result
-        },
-        () => {
-          console.log("vtsearch-result-done");
-          console.log(this.state.result);
-        }
-      );
-    });
   }
 
   /**
@@ -281,6 +268,7 @@ class VTSearch extends React.PureComponent {
         {ReactDOM.createPortal(
           <SearchResultListContainer
             windowsContainer={windowsContainerId}
+            localObserver={this.localObserver}
             model={this.searchModel}
             app={app}
           ></SearchResultListContainer>,
