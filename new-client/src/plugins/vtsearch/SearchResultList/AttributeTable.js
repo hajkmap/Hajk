@@ -11,6 +11,7 @@ class AttributeTable extends React.PureComponent {
   }
   getColumns() {
     const { searchResult } = this.props;
+
     return this.getFeaturePropertiesKeys(searchResult).map(key => {
       return {
         width: 200,
@@ -22,11 +23,19 @@ class AttributeTable extends React.PureComponent {
   getRows() {
     const { searchResult } = this.props;
     return searchResult.featureCollection.features.map((feature, index) => {
-      return Object.keys(feature.properties).reduce((acc, key) => {
-        return { ...acc, [key]: feature.properties[key] };
-      }, {});
+      return Object.keys(feature.properties).reduce(
+        (acc, key) => {
+          return { ...acc, [key]: feature.properties[key] };
+        },
+        { id: feature.id }
+      );
     });
   }
+
+  onRowClick = row => {
+    const { localObserver } = this.props;
+    localObserver.publish("attribute-table-row-clicked", row.rowData.id);
+  };
 
   render() {
     const { resultListHeight, windowWidth } = this.props;
@@ -36,6 +45,7 @@ class AttributeTable extends React.PureComponent {
         <VirtualizedTable
           rowCount={rows.length}
           rowGetter={({ index }) => rows[index]}
+          rowClicked={this.onRowClick}
           columns={this.getColumns()}
           windowWidth={windowWidth}
         />

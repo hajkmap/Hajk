@@ -11,6 +11,7 @@ import Toolbar from "@material-ui/core/Toolbar";
 import PanelToolbox from "./PanelToolbox";
 import TabPanel from "./TabPanel";
 import ClearIcon from "@material-ui/icons/Clear";
+import GeoJSON from "ol/format/GeoJSON";
 
 /**
  * @summary Main class for the Dummy plugin.
@@ -99,6 +100,32 @@ class SearchResultListContainer extends React.Component {
     this.bindSubscriptions();
   }
 
+  //BETTER TO PUT THIS SECTION IN MODEL???
+  //  -------------------------------------------------------------------------------
+
+  handleSearchResult = result => {
+    this.addSearchResult(result);
+    this.addSearchResultToMap(this.convertResultToOlFeatures(result));
+  };
+
+  convertResultToOlFeatures = result => {
+    return new GeoJSON().readFeatures(result.featureCollection);
+  };
+
+  addSearchResultToMap = olFeatures => {
+    const { model } = this.props;
+    model.searchResultLayer.getSource().addFeatures(olFeatures);
+  };
+
+  highlightFeature = id => {
+    const { model } = this.props;
+    model.highlightLayer.getSource().clear();
+    var feature = model.searchResultLayer.getSource().getFeatureById(id);
+    model.highlightLayer.getSource().addFeature(feature);
+  };
+
+  // --------------------------------------------------------------------------------
+
   addSearchResult = result => {
     var highestId = 0;
     if (this.state.searchResultIds.length > 0) {
@@ -119,11 +146,15 @@ class SearchResultListContainer extends React.Component {
   bindSubscriptions = () => {
     const { localObserver } = this.props;
     localObserver.subscribe("vtsearch-result-done", result => {
-      this.addSearchResult(result);
+      this.handleSearchResult(result);
+    });
+
+    localObserver.subscribe("attribute-table-row-clicked", id => {
+      this.highlightFeature(id);
     });
 
     localObserver.subscribe("search-result-list-minimized", () => {
-      this.setState((state, props) => {
+      this.setState(state => {
         return {
           minimized: true,
           maximized: false,
@@ -328,6 +359,7 @@ class SearchResultListContainer extends React.Component {
               index={searchResult.id}
               resultListHeight={this.state.resultListHeight}
               windowWidth={this.state.windowWidth}
+              localObserver={localObserver}
               searchResult={searchResult}
             ></TabPanel>
           );
