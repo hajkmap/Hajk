@@ -37,7 +37,7 @@ class SearchBarStart extends React.PureComponent {
 
   componentDidMount() {
     const { localObserver } = this.props;
-    localObserver.publish("toolchanged");
+    localObserver.publish("searchToolChanged");
   }
 
   renderSpatialSearchOptions() {

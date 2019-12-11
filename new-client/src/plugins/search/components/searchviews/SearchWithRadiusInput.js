@@ -30,7 +30,7 @@ class SearchWithRadiusInput extends React.PureComponent {
   componentDidMount() {
     const { model, onSearchWithin, localObserver } = this.props;
     localObserver.publish(
-      "toolchanged",
+      "searchToolChanged",
       "Sök genom att dra ut en cirkel i kartan"
     );
     model.withinSearch(
