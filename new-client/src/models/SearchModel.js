@@ -10,9 +10,9 @@ import VectorSource from "ol/source/Vector";
 import GeoJSON from "ol/format/GeoJSON";
 import { fromCircle } from "ol/geom/Polygon";
 import Draw from "ol/interaction/Draw.js";
-import { arraySort } from "./../../utils/ArraySort.js";
 import { Stroke, Style, Circle, Fill, Icon } from "ol/style.js";
-import { handleClick } from "../../models/Click.js";
+import { arraySort } from "../utils/ArraySort.js";
+import { handleClick } from "./Click.js";
 
 var drawStyle = new Style({
   stroke: new Stroke({
