@@ -20,6 +20,9 @@ import MenuIcon from "@material-ui/icons/Menu";
 import { withStyles } from "@material-ui/core/styles";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
+import SearchResultListContainer from "./SearchResultList/SearchResultListContainer";
+import ReactDOM from "react-dom";
+import MapViewModel from "./MapViewModel";
 
 const styles = theme => {
   return {
@@ -73,6 +76,8 @@ const searchTypes = {
   JOURNEYS: "Journeys",
   STOPS: "Stops"
 };
+
+const windowsContainerId = "windows-container";
 
 /**
  * @summary Main class for the Dummy plugin.
@@ -132,7 +137,19 @@ class VTSearch extends React.PureComponent {
     this.searchModel = new SearchModel({
       localObserver: this.localObserver,
       app: props.app,
-      map: props.map
+      map: props.map,
+      geoserver: props.options.geoserver
+    });
+
+    this.mapViewModel = new MapViewModel({
+      app: props.app,
+      map: props.map,
+      localObserver: this.localObserver
+    });
+
+    // Subscribes for an event when the vt-search has begun.
+    this.localObserver.subscribe("vtsearch-result-begin", label => {
+      console.log("vtsearch-result-begin, " + label.label);
     });
   }
 
@@ -155,6 +172,8 @@ class VTSearch extends React.PureComponent {
   };
 
   handleChange = e => {
+    const { app } = this.props;
+    app.globalObserver.publish("showSearchresultlist", {});
     this.setState({
       activeSearchTool: e.target.value
     });
@@ -187,8 +206,7 @@ class VTSearch extends React.PureComponent {
   };
 
   render() {
-    const { classes, onMenuClick, menuButtonDisabled } = this.props;
-
+    const { classes, onMenuClick, menuButtonDisabled, app } = this.props;
     const tooltipText = menuButtonDisabled
       ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
       : "Visa verktygspanelen";
@@ -254,6 +272,15 @@ class VTSearch extends React.PureComponent {
             </CardContent>
           </Collapse>
         </Card>
+        {ReactDOM.createPortal(
+          <SearchResultListContainer
+            windowsContainer={windowsContainerId}
+            localObserver={this.localObserver}
+            model={this.searchModel}
+            app={app}
+          ></SearchResultListContainer>,
+          document.getElementById(windowsContainerId)
+        )}
       </>
     );
   }
