@@ -144,8 +144,12 @@ class Search extends Component {
           }
         });
 
-        layer.layers.forEach(layer => {
-          this.refs[layer].checked = true;
+        layer.layers.map(layer => {
+          // Sometimes 'layer' has been removed and the ref is non-exiting, so there's no .checked-property to check.
+          // Do a check first, so it doesn't render as error if property isn't found.
+          if (this.refs.hasOwnProperty(layer)) {
+            this.refs[layer].checked = true;
+          }
         });
 
         this.describeLayer(undefined, layer.layers[0], layer);
