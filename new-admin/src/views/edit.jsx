@@ -144,7 +144,7 @@ class Search extends Component {
           }
         });
 
-        layer.layers.map(layer => {
+        layer.layers.forEach(layer => {
           // Sometimes 'layer' has been removed and the ref is non-exiting, so there's no .checked-property to check.
           // Do a check first, so it doesn't render as error if property isn't found.
           if (this.refs.hasOwnProperty(layer)) {
