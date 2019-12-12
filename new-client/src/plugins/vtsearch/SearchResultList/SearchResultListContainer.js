@@ -100,31 +100,18 @@ class SearchResultListContainer extends React.Component {
     this.bindSubscriptions();
   }
 
-  //BETTER TO PUT THIS SECTION IN MODEL???
-  //  -------------------------------------------------------------------------------
-
   handleSearchResult = result => {
+    const { localObserver } = this.props;
     this.addSearchResult(result);
-    this.addSearchResultToMap(this.convertResultToOlFeatures(result));
+    localObserver.publish(
+      "add-search-result",
+      this.convertResultToOlFeatures(result)
+    );
   };
 
   convertResultToOlFeatures = result => {
     return new GeoJSON().readFeatures(result.featureCollection);
   };
-
-  addSearchResultToMap = olFeatures => {
-    const { model } = this.props;
-    model.searchResultLayer.getSource().addFeatures(olFeatures);
-  };
-
-  highlightFeature = id => {
-    const { model } = this.props;
-    model.highlightLayer.getSource().clear();
-    var feature = model.searchResultLayer.getSource().getFeatureById(id);
-    model.highlightLayer.getSource().addFeature(feature);
-  };
-
-  // --------------------------------------------------------------------------------
 
   addSearchResult = result => {
     var highestId = 0;
@@ -150,7 +137,7 @@ class SearchResultListContainer extends React.Component {
     });
 
     localObserver.subscribe("attribute-table-row-clicked", id => {
-      this.highlightFeature(id);
+      localObserver.publish("highlight-search-result-feature", id);
     });
 
     localObserver.subscribe("search-result-list-minimized", () => {

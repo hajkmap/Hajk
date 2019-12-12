@@ -22,6 +22,7 @@ import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import SearchResultListContainer from "./SearchResultList/SearchResultListContainer";
 import ReactDOM from "react-dom";
+import MapViewModel from "./MapViewModel";
 
 const styles = theme => {
   return {
@@ -138,6 +139,12 @@ class VTSearch extends React.PureComponent {
       app: props.app,
       map: props.map,
       geoserver: props.options.geoserver
+    });
+
+    this.mapViewModel = new MapViewModel({
+      app: props.app,
+      map: props.map,
+      localObserver: this.localObserver
     });
 
     // Subscribes for an event when the vt-search has begun.
