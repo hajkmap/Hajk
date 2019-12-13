@@ -12,6 +12,7 @@ import PanelToolbox from "./PanelToolbox";
 import TabPanel from "./TabPanel";
 import ClearIcon from "@material-ui/icons/Clear";
 import GeoJSON from "ol/format/GeoJSON";
+import { handleClick } from "../../../models/Click";
 
 /**
  * @summary Main class for the Dummy plugin.
@@ -61,7 +62,6 @@ const getWindowContainerHeight = () => {
 };
 
 class SearchResultListContainer extends React.Component {
-  //TODO - State is only mocked because we are missing pieces to complete the whole chain
   state = {
     resultListHeight: 300,
     previousResultListHeight: 300,
@@ -132,12 +132,17 @@ class SearchResultListContainer extends React.Component {
 
   bindSubscriptions = () => {
     const { localObserver } = this.props;
+
     localObserver.subscribe("vtsearch-result-done", result => {
       this.handleSearchResult(result);
     });
 
     localObserver.subscribe("attribute-table-row-clicked", id => {
       localObserver.publish("highlight-search-result-feature", id);
+    });
+
+    localObserver.subscribe("features-clicked-in-map", features => {
+      localObserver.publish("highlight-attribute-row", features[0].getId());
     });
 
     localObserver.subscribe("search-result-list-minimized", () => {
@@ -154,7 +159,7 @@ class SearchResultListContainer extends React.Component {
       });
     });
     localObserver.subscribe("search-result-list-maximized", () => {
-      this.setState((state, props) => {
+      this.setState(state => {
         return {
           minimized: false,
           maximized: true,
@@ -166,7 +171,7 @@ class SearchResultListContainer extends React.Component {
         };
       });
     });
-    localObserver.subscribe("search-result-list-normal", height => {
+    localObserver.subscribe("search-result-list-normal", () => {
       this.setState({
         minimized: false,
         maximized: false,
@@ -174,7 +179,7 @@ class SearchResultListContainer extends React.Component {
       });
     });
 
-    localObserver.subscribe("search-result-list-close", height => {
+    localObserver.subscribe("search-result-list-close", () => {
       this.searchResults.length = 0;
       this.setState({
         minimized: false,
@@ -209,7 +214,7 @@ class SearchResultListContainer extends React.Component {
     const nextActiveTab = this.getNextTabActive(id);
     const newSearchResultIds = searchResultIds.filter(result => result !== id);
 
-    this.setState(state => {
+    this.setState(() => {
       return {
         searchResultIds: newSearchResultIds,
         activeTab: nextActiveTab
@@ -362,5 +367,4 @@ class SearchResultListContainer extends React.Component {
   }
 }
 
-// Part of API. Make a HOC of our plugin.
 export default withStyles(styles)(SearchResultListContainer);

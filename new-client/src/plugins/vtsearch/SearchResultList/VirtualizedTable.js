@@ -3,6 +3,7 @@ import clsx from "clsx";
 import { withStyles } from "@material-ui/core/styles";
 import TableCell from "@material-ui/core/TableCell";
 import { AutoSizer, Column, Table } from "react-virtualized";
+import { SortIndicator } from "react-virtualized";
 
 import "react-virtualized/styles.css";
 
@@ -61,14 +62,10 @@ class VirtualizedTable extends React.PureComponent {
     rowHeight: 48
   };
 
-  state = {
-    selectedRowIndex: null
-  };
-
   getRowClassName = ({ index }) => {
     const { classes } = this.props;
 
-    if (this.state.selectedRowIndex === index) {
+    if (this.props.selectedRowIndex === index) {
       return clsx(
         classes.tableRow,
         classes.tableRowSelected,
@@ -100,7 +97,7 @@ class VirtualizedTable extends React.PureComponent {
     );
   };
 
-  headerRenderer = ({ label, columnIndex }) => {
+  headerRenderer = ({ label, columnIndex, sortDirection }) => {
     const { headerHeight, columns, classes } = this.props;
 
     return (
@@ -114,15 +111,9 @@ class VirtualizedTable extends React.PureComponent {
         align={columns[columnIndex].numeric || false ? "right" : "left"}
       >
         {label}
+        <SortIndicator sortDirection={sortDirection} />
       </TableCell>
     );
-  };
-
-  rowClicked = e => {
-    const { rowClicked } = this.props;
-
-    this.setState({ selectedRowIndex: e.index });
-    rowClicked(e);
   };
 
   render() {
@@ -143,7 +134,7 @@ class VirtualizedTable extends React.PureComponent {
             width={width}
             rowHeight={rowHeight}
             headerHeight={headerHeight}
-            onRowClick={this.rowClicked}
+            onRowClick={rowClicked}
             className={classes.table}
             rowClassName={this.getRowClassName}
             {...tableProps}
