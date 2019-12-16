@@ -415,7 +415,14 @@ class AppModel {
       });
     return o;
   }
-
+  /**
+   * @summary Merges two objects.
+   *
+   * @param {*} a
+   * @param {*} b
+   * @returns {*} a Result of overwritting a with values from b
+   * @memberof AppModel
+   */
   mergeConfig(a, b) {
     // clean is used to strip the UI of all elements so we get a super clean viewport back, without any plugins
     const clean =
@@ -451,7 +458,26 @@ class AppModel {
       this.layersFromParams = l;
     }
 
+    // If 'v' query param is specified, it looks like we will want to search on load
+    if (b.v !== undefined && b.v.length > 0) {
+      a.map.searchOnStart = {
+        v: this.returnStringOrUndefined(b.v), // Search Value (will NOT search on start if null)
+        s: this.returnStringOrUndefined(b.s), // Search Service (will search in all, if null)
+        t: this.returnStringOrUndefined(b.t) // Search Type (controls which search plugin is used, default search if null)
+      };
+    }
+
     return a;
+  }
+  /**
+   * @summary If supplied argument, v, is a string and is longer then 0, return an encoded value of v. Else return undefined.
+   *
+   * @param {*} v
+   * @returns
+   * @memberof AppModel
+   */
+  returnStringOrUndefined(v) {
+    return typeof v === "string" && v.trim().length > 0 ? v : undefined;
   }
 
   overrideGlobalSearchConfig(searchTool, data) {
@@ -474,15 +500,15 @@ class AppModel {
       document.title = this.config.mapConfig.map.title; // TODO: add opt-out in admin to cancel this override behaviour.
     }
 
-    let layerSwitcherTool = this.config.mapConfig.tools.find(tool => {
+    const layerSwitcherTool = this.config.mapConfig.tools.find(tool => {
       return tool.type === "layerswitcher";
     });
 
-    let searchTool = this.config.mapConfig.tools.find(tool => {
+    const searchTool = this.config.mapConfig.tools.find(tool => {
       return tool.type === "search";
     });
 
-    let editTool = this.config.mapConfig.tools.find(tool => {
+    const editTool = this.config.mapConfig.tools.find(tool => {
       return tool.type === "edit";
     });
 
