@@ -184,7 +184,7 @@ class App extends React.PureComponent {
       this.setState({
         tools: this.appModel.getPlugins()
       });
-      this.globalObserver.publish("appLoaded"); // Window.js subscribes to this event
+      this.globalObserver.publish("appLoaded"); // Both Controls and Plugins can subscribe to this event and get things done
     });
     this.bindHandlers();
   }

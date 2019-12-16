@@ -88,6 +88,39 @@ class Search extends React.PureComponent {
   );
 
   componentDidMount() {
+    /**
+     * When appLoaded is triggered, we want to look see if automatic
+     * search has been requested. If query param contains values for v,
+     * as well as s or t, it means that user wants to do a search on load.
+     * In that case, AppModel has already given us a searchOnStart object.
+     *
+     * If searchOnStart exists, grab the value for v (the search value string),
+     * put the value in search box and do the search.
+     *
+     * TODO: Limit WFS sources (if s-param is present).
+     * TODO: Highlight the first feature in results list.
+     */
+
+    this.props.app.globalObserver.subscribe("appLoaded", () => {
+      const { searchOnStart } = this.props.app.config.mapConfig.map;
+      if (
+        searchOnStart !== undefined &&
+        (searchOnStart.t === undefined ||
+          searchOnStart.t.toLowerCase() === this.type.toLowerCase())
+      ) {
+        // Hence this plugin (src/plugins/search) is the default Search plugin, act on both t="search" and t=undefined
+        const { v, s } = searchOnStart;
+        const { dv, ds } = {
+          dv: v && window.decodeURI(v),
+          ds: s && window.decodeURI(s)
+        };
+        console.log("v, s: ", v, s);
+        console.log("decoded: ", dv, ds);
+        document.getElementById("searchbox").value = dv;
+        this.doSearch(dv);
+      }
+    });
+
     this.localObserver.subscribe("searchStarted", () => {
       this.setState({
         loading: true,
@@ -137,6 +170,7 @@ class Search extends React.PureComponent {
   }
 
   doSearch(v) {
+    console.log("doSearch: ", v);
     if (v.length <= 3) return null;
     this.localObserver.publish("searchToolChanged");
     this.searchModel.search(v, true, d => {
