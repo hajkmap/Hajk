@@ -2,6 +2,10 @@ import PropTypes from "prop-types";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Fill, Stroke, Style } from "ol/style";
+import "ol/ol.css";
+import Draw from "ol/interaction/Draw.js";
+import WKT from "ol/format/WKT";
+import { createBox } from "ol/interaction/Draw";
 
 /**
  * @summary ViewModel to handle interactions with map
@@ -13,17 +17,20 @@ export default class MapViewModel {
   constructor(settings) {
     this.map = settings.map;
     this.app = settings.app;
+    this.model = settings.model;
     this.localObserver = settings.localObserver;
+
     this.bindSubscriptions();
     this.addSearchResultLayerToMap();
     this.addHighlightLayerToMap();
-    //add draw-layer
+    this.addDrawSearch();
   }
   static propTypes = {
     app: PropTypes.object.isRequired,
     map: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired
   };
+
   //TODO Add comments
   highlightFeature = olFeature => {
     this.highlightLayer.getSource().addFeature(olFeature);
@@ -31,6 +38,10 @@ export default class MapViewModel {
   //TODO Add comments
   addFeatureToSearchResultLayer = olFeatures => {
     this.searchResultLayer.getSource().addFeatures(olFeatures);
+  };
+  //TOODO Add Comments
+  addDrawLayer = olFeature => {
+    this.drawlayer.getSource().addFeature(olFeature);
   };
   //TODO Add comments
   bindSubscriptions = () => {
@@ -54,6 +65,56 @@ export default class MapViewModel {
     this.localObserver.subscribe("clear-highlight", () => {
       this.highlightLayer.getSource().clear();
     });
+
+    this.localObserver.subscribe(
+      "activate-search-by-draw",
+      ({ selectedFromDate, selectedEndDate, selectedFormType }) => {
+        this.activateSearchByDraw({
+          selectedFromDate,
+          selectedEndDate,
+          selectedFormType
+        });
+      }
+    );
+  };
+
+  activateSearchByDraw = ({
+    selectedFromDate,
+    selectedEndDate,
+    selectedFormType
+  }) => {
+    var value = selectedFormType;
+    var geometryFunction = undefined;
+    if (selectedFormType === "Box") {
+      value = "Circle";
+      geometryFunction = createBox();
+    }
+    this.draw = new Draw({
+      source: this.drawlayer.getSource(),
+      type: value,
+      geometryFunction: geometryFunction
+    });
+    this.draw.on("drawend", e => {
+      this.map.removeInteraction(this.draw);
+      var format = new WKT();
+      var wktFeatureGeom = format.writeGeometry(e.feature.getGeometry());
+      if (wktFeatureGeom != null) {
+        this.model.getJourneys(
+          selectedEndDate,
+          selectedFromDate,
+          wktFeatureGeom
+        );
+      }
+    });
+    this.map.clicklock = true;
+    this.map.addInteraction(this.draw);
+  };
+
+  addDrawSearch = () => {
+    this.drawlayer = new VectorLayer({
+      source: new VectorSource({})
+    });
+    this.map.addLayer(this.drawlayer);
   };
 
   //TODO Add comments and add better styling to handle more geometry types

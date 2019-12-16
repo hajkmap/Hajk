@@ -32,8 +32,9 @@ class Journeys extends React.PureComponent {
   state = {
     fromTime: null,
     activeTool: undefined,
-    selectedFromDate: new Date(),
-    selectedEndDate: new Date()
+    selectedFromDate: new Date().toISOString().split(".")[0],
+    selectedEndDate: new Date().toISOString().split(".")[0],
+    selectedFormType: ""
   };
 
   // propTypes and defaultProps are static properties, declared
@@ -69,6 +70,22 @@ class Journeys extends React.PureComponent {
     });
   };
 
+  handlePolygonChange = () => {
+    const { selectedFromDate, selectedEndDate, selectedFormType } = this.state;
+    this.localObserver.publish("activate-search-by-draw", {
+      selectedFromDate: selectedFromDate,
+      selectedEndDate: selectedEndDate,
+      selectedFormType: "Polygon"
+    });
+  };
+  handleRectangleChange = () => {
+    const { selectedFromDate, selectedEndDate, selectedFormType } = this.state;
+    this.localObserver.publish("activate-search-by-draw", {
+      selectedFromDate: selectedFromDate,
+      selectedEndDate: selectedEndDate,
+      selectedFormType: "Box"
+    });
+  };
   render() {
     const { classes } = this.props;
 
@@ -128,6 +145,8 @@ class Journeys extends React.PureComponent {
           className={classes.button}
           type="button"
           title="Lägg till polygon"
+          value={this.state.selectedFormType}
+          onClick={this.handlePolygonChange}
         >
           Polygon
           <BorderStyleIcon className={classes.leftIcon} />
@@ -136,7 +155,9 @@ class Journeys extends React.PureComponent {
           variant="outlined"
           className={classes.button}
           type="button"
+          value={this.state.selectedFormType}
           title="Lägg till rektangel"
+          onClick={this.handleRectangleChange}
         >
           Rektangel
           <SquareIcon className={classes.leftIcon} />

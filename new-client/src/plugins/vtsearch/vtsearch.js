@@ -144,7 +144,8 @@ class VTSearch extends React.PureComponent {
     this.mapViewModel = new MapViewModel({
       app: props.app,
       map: props.map,
-      localObserver: this.localObserver
+      localObserver: this.localObserver,
+      model: this.searchModel
     });
 
     // Subscribes for an event when the vt-search has begun.
