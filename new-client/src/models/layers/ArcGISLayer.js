@@ -73,7 +73,7 @@ var ArcGISLayer = {
       extent = extent.map((c, i) => {
         const b = 1e5;
         const v = parseFloat(c);
-        return isNaN(v) ? 0 : i < 2 ? v - b : v + b;
+        return Number.isNaN(v) ? 0 : i < 2 ? v - b : v + b;
       });
     }
     if (this.get("singleTile")) {

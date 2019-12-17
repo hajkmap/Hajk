@@ -79,6 +79,8 @@ class DrawView extends React.PureComponent {
   };
 
   onCloseTextDialog = text => {
+    this.props.model.openDialog(false);
+
     const { feature } = this.state;
     feature.set("type", "Text");
     feature.set("text", text);
@@ -91,6 +93,8 @@ class DrawView extends React.PureComponent {
 
   renderDialog() {
     if (this.state.dialog) {
+      this.props.model.openDialog(true);
+
       return createPortal(
         <Dialog
           options={{

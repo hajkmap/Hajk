@@ -186,7 +186,7 @@ class Search extends React.PureComponent {
       visible: true,
       loading: false,
       activeSearchView: STARTVIEW,
-      searchboxPlaceholder: "Sök i Hajk"
+      searchboxPlaceholder: props.options.tooltip || "Sök i Hajk"
     };
 
     this.activeSpatialTools = {
@@ -216,7 +216,9 @@ class Search extends React.PureComponent {
     this.localObserver.subscribe("toolchanged", placeholderText => {
       this.setState({
         result: false,
-        searchboxPlaceholder: placeholderText ? placeholderText : "Sök i Hajk"
+        searchboxPlaceholder: placeholderText
+          ? placeholderText
+          : props.options.tooltip
       });
     });
     this.localObserver.subscribe("searchComplete", () => {
@@ -261,7 +263,7 @@ class Search extends React.PureComponent {
   // renderLoader() {
   //   const { classes } = this.props;
   //   if (this.state.loading) {
-  //     console.log("this.state.loading: ", this.state.loading);
+  //
   //     return (
   //       <div className={classes.loader}>
   //         <LinearProgress variant="query" />
@@ -367,7 +369,7 @@ class Search extends React.PureComponent {
           <Tooltip
             title={
               this.state.activeSearchView === STARTVIEW
-                ? "Sök i Hajk"
+                ? this.state.searchboxPlaceholder
                 : "Återställ sökruta"
             }
           >
