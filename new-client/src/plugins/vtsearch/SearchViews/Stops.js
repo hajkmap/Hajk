@@ -84,7 +84,7 @@ class Stops extends React.PureComponent {
     let endTime = "2019-11-25T17:00:00";
     let wkt =
       "POLYGON((319165.99791318 6393791.4071366,319165.99791318 6393918.4071366,319392.99791318 6393918.4071366,319392.99791318 6393791.4071366,319165.99791318 6393791.4071366))";
-    this.model.getJourneys(fromTime, endTime, wkt);
+    this.model.getRoutes("16");
   };
 
   render() {
