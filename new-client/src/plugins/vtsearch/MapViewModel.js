@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
-import { Fill, Stroke, Style } from "ol/style";
+import { Fill, Stroke, Style, Circle } from "ol/style";
 
 /**
  * @summary ViewModel to handle interactions with map
@@ -25,6 +25,7 @@ export default class MapViewModel {
   };
   //TODO Add comments
   highlightFeature = olFeature => {
+    this.highlightLayer.getSource().clear();
     this.highlightLayer.getSource().addFeature(olFeature);
   };
   //TODO Add comments
@@ -102,6 +103,11 @@ export default class MapViewModel {
 
     this.highlightLayer = new VectorLayer({
       style: new Style({
+        image: new Circle({
+          fill: fill,
+          stroke: stroke,
+          radius: 5
+        }),
         fill: fill,
         stroke: stroke
       }),

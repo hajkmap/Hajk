@@ -32,7 +32,8 @@ const styles = theme => ({
     }
   },
   tableRowSelected: {
-    backgroundColor: "red"
+    border: "2px solid rgba(18,120,211,0.37)",
+    background: "rgba(0,212,255,1)"
   },
   columnStyle: {
     whiteSpace: "pre-wrap",
@@ -65,7 +66,7 @@ class VirtualizedTable extends React.PureComponent {
   getRowClassName = ({ index }) => {
     const { classes } = this.props;
 
-    if (this.props.selectedRowIndex === index) {
+    if (this.props.selectedRow.index === index) {
       return clsx(
         classes.tableRow,
         classes.tableRowSelected,

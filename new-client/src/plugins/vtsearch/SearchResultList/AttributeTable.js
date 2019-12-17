@@ -6,11 +6,13 @@ import { SortDirection } from "react-virtualized";
 
 const styles = theme => ({});
 
-var rows = [];
-
 class AttributeTable extends React.Component {
   state = {
-    selectedRowIndex: null,
+    selectedRow: {
+      index: null,
+      id: null
+    },
+    focusedRow: 0,
     rows: this.getRows()
   };
 
@@ -23,15 +25,22 @@ class AttributeTable extends React.Component {
     return Object.keys(searchResult.featureCollection.features[0].properties);
   }
 
+  getRowIndexFromRowId = id => {
+    return this.state.rows
+      .map(row => {
+        return row.id;
+      })
+      .indexOf(id);
+  };
+
   bindSubscriptions = () => {
     const { localObserver } = this.props;
     localObserver.subscribe("highlight-attribute-row", id => {
-      var foundRowIndex = rows
-        .map(row => {
-          return row.id;
-        })
-        .indexOf(id);
-      this.setState({ selectedRowIndex: foundRowIndex });
+      var foundRowIndex = this.getRowIndexFromRowId(id);
+      this.setState({
+        selectedRow: { index: foundRowIndex, id: id },
+        focusedRow: foundRowIndex
+      });
     });
   };
 
@@ -48,6 +57,7 @@ class AttributeTable extends React.Component {
   }
   getRows() {
     const { searchResult } = this.props;
+
     return searchResult.featureCollection.features.map((feature, index) => {
       return Object.keys(feature.properties).reduce(
         (acc, key) => {
@@ -57,50 +67,90 @@ class AttributeTable extends React.Component {
       );
     });
   }
-  /*
-   */
-  sort = ({ sortBy, sortDirection }) => {
-    var rowsToBeSorted = this.state.rows;
 
-    rowsToBeSorted.sort(function(a, b) {
-      return a[sortBy].localeCompare(b[sortBy]);
-    });
+  sortNulls = (compareOne, compareTwo) => {
+    if (compareOne === null && compareTwo !== null) {
+      return 1;
+    } else if (compareOne !== null && compareTwo === null) {
+      return -1;
+    } else if (compareOne === compareTwo) {
+      return 0;
+    }
+  };
+
+  sort = ({ sortBy, sortDirection }) => {
+    var compareOne = null;
+    var compareTwo = null;
+    var rowsToBeSorted = this.state.rows;
+    var sortByNumber = isNaN(parseFloat(rowsToBeSorted[0][sortBy]))
+      ? false
+      : true;
+
+    if (sortByNumber) {
+      rowsToBeSorted.sort((a, b) => {
+        compareOne = a[sortBy] === "" ? null : a[sortBy]; //Handle empty string same way as null
+        compareTwo = b[sortBy] === "" ? null : b[sortBy]; //Handle empty string same way as null
+        return parseFloat(compareOne) - parseFloat(compareTwo);
+      });
+    } else {
+      rowsToBeSorted.sort((a, b) => {
+        compareOne = a[sortBy] === "" ? null : a[sortBy]; //Handle empty string same way as null
+        compareTwo = b[sortBy] === "" ? null : b[sortBy]; //Handle empty string same way as null
+        if (compareOne !== null && compareTwo !== null) {
+          return compareOne.localeCompare(compareTwo);
+        } else {
+          return this.sortNulls(compareOne, compareTwo);
+        }
+      });
+    }
 
     rowsToBeSorted =
       sortDirection === SortDirection.DESC
         ? rowsToBeSorted.reverse()
         : rowsToBeSorted;
 
-    this.setState({
-      sortBy,
-      sortDirection,
-      rows: rowsToBeSorted
+    this.setState(state => {
+      return {
+        sortBy,
+        sortDirection,
+        rows: rowsToBeSorted,
+        selectedRow: {
+          index: this.getRowIndexFromRowId(state.selectedRow.id),
+          id: state.selectedRow.id
+        }
+      };
     });
   };
 
   onRowClick = row => {
     const { localObserver } = this.props;
-
-    this.setState({ selectedRowIndex: row.index });
+    this.setState({ selectedRow: { index: row.index, id: row.rowData.id } });
     localObserver.publish("attribute-table-row-clicked", row.rowData.id);
   };
 
   render() {
-    const { resultListHeight, windowWidth } = this.props;
-
+    const { resultListHeight, windowWidth, searchResult } = this.props;
     return (
       <Paper style={{ height: resultListHeight, width: windowWidth }}>
-        <VirtualizedTable
-          rowCount={this.state.rows.length}
-          rowGetter={({ index }) => this.state.rows[index]}
-          rowClicked={this.onRowClick}
-          columns={this.getColumns()}
-          windowWidth={windowWidth}
-          sort={this.sort}
-          sortDirection={this.state.sortDirection}
-          sortBy={this.state.sortBy}
-          selectedRowIndex={this.state.selectedRowIndex}
-        />
+        {searchResult.featureCollection.features.length > 0 ? (
+          <VirtualizedTable
+            rowCount={this.state.rows.length}
+            rowGetter={({ index }) => this.state.rows[index]}
+            rowClicked={this.onRowClick}
+            columns={this.getColumns()}
+            windowWidth={windowWidth}
+            sort={this.sort}
+            sortDirection={this.state.sortDirection}
+            sortBy={this.state.sortBy}
+            scrollToIndex={this.state.focusedRow}
+            scrollToAlignment="center"
+            selectedRow={this.state.selectedRow}
+          />
+        ) : (
+          <Paper
+            style={{ height: resultListHeight, width: windowWidth }}
+          ></Paper>
+        )}
       </Paper>
     );
   }
