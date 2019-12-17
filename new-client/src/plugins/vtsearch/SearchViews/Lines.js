@@ -81,6 +81,11 @@ class Lines extends React.PureComponent {
       });
     });
   }
+
+  testDebug = e => {
+    console.log("testdebug");
+    this.model.getRoutes("300");
+  };
   handleMunicipalChange = e => {
     this.setState({
       municipalityName: e.target.value
@@ -151,7 +156,11 @@ class Lines extends React.PureComponent {
           value={this.state.throughStopArea}
           onChange={this.handleThroughStopAreaChange}
         />
-        <Button className={classes.addSpaceAroundButton} variant="outlined">
+        <Button
+          className={classes.addSpaceAroundButton}
+          onClick={this.testDebug}
+          variant="outlined"
+        >
           Sök
         </Button>
 
