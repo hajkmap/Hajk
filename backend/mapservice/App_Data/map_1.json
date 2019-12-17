@@ -225,19 +225,31 @@
         "geoserver": {
           "journeys": {
             "searchLabel": "Turer",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=kartsidan2:journeys&outputFormat=application/json"
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=journeys&outputFormat=application/json"
+          },
+          "lineNumberAndPublicLineNumber": {
+            "searchLabel": "Linjenummer",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=lineNumberAndPublicLineNumber&outputFormat=application/json"
           },
           "municipalityZoneNames": {
             "searchLabel": "Kommunnamn",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=kartsidan2%3AmunicipalityZoneNames&outputFormat=application/json"
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=municipalityZoneNames&outputFormat=application/json"
           },
           "routes": {
             "searchLabel": "Linje",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=kartsidan2:routes&outputFormat=application/json"
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.1.0&request=GetFeature&typeName=routes&outputFormat=application/json"
+          },
+          "stopAreaNameAndStopAreaNumber": {
+            "searchLabel": "Hållplatser",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=stopAreaNameAndNumber&outputFormat=application/json"
           },
           "stopAreas": {
             "searchLabel": "Hållplatsområden",
             "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=stopAreas&outputFormat=application/json"
+          },
+          "stopPoints": {
+            "searchLabel": "Hållplatslägen",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=stopPoints&outputFormat=application/json"
           },
           "transportModeTypeNames": {
             "searchLabel": "Trafikslag",
