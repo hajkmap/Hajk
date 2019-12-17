@@ -19,7 +19,7 @@ export default class SearchModel {
   }
 
   /**
-   * Adjusts the CQL filter so that it's supported for a web browser and GeoServer.
+   * Private method that a djusts the CQL filter so that it's supported for a web browser and GeoServer.
    * @param cql The CQL that needs to be adjusted.
    * @returns Returns a supported wkt for GeoServer.
    *
@@ -33,7 +33,7 @@ export default class SearchModel {
   };
 
   /**
-   * Adjusts the WKT filter so that it's supported for a web browser and GeoServer.
+   * Private method that adjusts the WKT filter so that it's supported for a web browser and GeoServer.
    * @param wkt The WKT that needs to be adjusted.
    * @returns Returns a supported wkt for GeoServer.
    *
@@ -62,7 +62,11 @@ export default class SearchModel {
   };
 
   /**
-   * Private method that is not ready yet.
+   * Private method that remotes all duplicates from a feature collection.
+   * @param featureCollection The feature collection with duplicates.
+   * @returns An array with no duplicates in it.
+   *
+   * @memberof SearchModel
    */
   removeDuplicates = featureCollection => {
     let uniqueArray = [];
