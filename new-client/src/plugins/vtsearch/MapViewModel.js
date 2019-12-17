@@ -23,17 +23,13 @@ export default class MapViewModel {
     map: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired
   };
-  //TODO Add comments
-  highlightFeature = olFeature => {
-    this.highlightLayer.getSource().clear();
-    this.highlightLayer.getSource().addFeature(olFeature);
-  };
-  //TODO Add comments
-  addFeatureToSearchResultLayer = olFeatures => {
-    this.searchResultLayer.getSource().addFeatures(olFeatures);
-  };
 
-  //TODO Add comments
+  /**
+   * Init method to listen for events from other parts of plugin
+   *
+   * @returns {null}
+   * @memberof MapViewModel
+   */
   bindSubscriptions = () => {
     this.localObserver.subscribe(
       "highlight-search-result-feature",
@@ -41,16 +37,11 @@ export default class MapViewModel {
         var olFeature = this.searchResultLayer
           .getSource()
           .getFeatureById(olFeatureId);
-        this.highlightFeature(olFeature);
+        this.highlightAndZoomToFeature(olFeature);
       }
     );
 
-    this.map.on("singleclick", e => {
-      this.localObserver.publish(
-        "features-clicked-in-map",
-        this.getFeaturesAtClickedPixel(e)
-      );
-    });
+    this.map.on("singleclick", this.onFeaturesClickedInMap);
 
     this.localObserver.subscribe("add-search-result", olFeatures => {
       this.addFeatureToSearchResultLayer(olFeatures);
@@ -64,34 +55,29 @@ export default class MapViewModel {
     });
   };
 
-  getFeaturesAtClickedPixel = evt => {
-    var features = [];
-    this.map.forEachFeatureAtPixel(
-      evt.pixel,
-      (feature, layer) => {
-        if (layer.get("type") === "vt-search-result-layer") {
-          features.push(feature);
-        }
-      },
-      {
-        hitTolerance: 10
-      }
-    );
-    return features;
-  };
-
-  //TODO Add comments and add better styling to handle more geometry types
+  /**
+   * Init method to add a searchresult layer in the map
+   * to use for temporary storing of search results
+   *
+   * @returns {null}
+   * @memberof MapViewModel
+   */
   addSearchResultLayerToMap = () => {
     this.searchResultLayer = new VectorLayer({
       source: new VectorSource({})
     });
     this.searchResultLayer.set("type", "vt-search-result-layer");
     this.searchResultLayer.set("queryable", false);
-
     this.map.addLayer(this.searchResultLayer);
   };
 
-  //TODO Add comments and add better styling to handle more geometry types
+  /**
+   * Init method to add a highlight layer in the map
+   * to use for temporary storing of features that are highlighted
+   *
+   * @returns {null}
+   * @memberof MapViewModel
+   */
   addHighlightLayerToMap = () => {
     var fill = new Fill({
       color: "rgba(0,0,0,0.4)"
@@ -115,5 +101,80 @@ export default class MapViewModel {
     });
     this.highlightLayer.set("type", "vt-highlight-layer");
     this.map.addLayer(this.highlightLayer);
+  };
+
+  /**
+   * Highlights a openlayers feature and zooms to it
+   *
+   * @returns {null}
+   * @memberof MapViewModel
+   * @param {external:"ol.Feature"}
+   */
+  highlightAndZoomToFeature = olFeature => {
+    this.highlightLayer.getSource().clear();
+    this.highlightLayer.getSource().addFeature(olFeature);
+    this.zoomToExtent(this.highlightLayer.getSource().getExtent());
+  };
+  /**
+   * Adds openlayers feature to search result layer
+   *
+   * @returns {null}
+   * @memberof MapViewModel
+   * @param {Array<{external:"ol.feature"}>}
+   */
+  addFeatureToSearchResultLayer = olFeatures => {
+    this.searchResultLayer.getSource().addFeatures(olFeatures);
+    this.zoomToExtent(this.searchResultLayer.getSource().getExtent());
+  };
+
+  /**
+   * Zooms map to extent
+   *
+   * @returns {null}
+   * @memberof MapViewModel
+   * @param {Array<{external:"ol/interaction/Extent"}>}
+   */
+  zoomToExtent = extent => {
+    this.map.getView().fit(extent, {
+      size: this.map.getSize(),
+      padding: [10, 10, 10, 10]
+    });
+  };
+
+  /**
+   * Zooms map to extent
+   *
+   * @returns {null}
+   * @memberof MapViewModel
+   * @param {*} event
+   */
+
+  onFeaturesClickedInMap = e => {
+    var featuresClicked = this.getFeaturesAtClickedPixel(e);
+    this.highlightAndZoomToFeature(featuresClicked[0]);
+    this.localObserver.publish("features-clicked-in-map", featuresClicked);
+  };
+
+  /**
+   * Returns all features "below" clicked pixel in map
+   *
+   * @returns {Array<{external:"ol.feature"}>}
+   * @memberof MapViewModel
+   * @param {*} event
+   */
+  getFeaturesAtClickedPixel = evt => {
+    var features = [];
+    this.map.forEachFeatureAtPixel(
+      evt.pixel,
+      (feature, layer) => {
+        if (layer.get("type") === "vt-search-result-layer") {
+          features.push(feature);
+        }
+      },
+      {
+        hitTolerance: 10
+      }
+    );
+    return features;
   };
 }

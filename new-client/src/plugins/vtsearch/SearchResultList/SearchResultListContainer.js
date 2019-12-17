@@ -114,19 +114,19 @@ class SearchResultListContainer extends React.Component {
   };
 
   addSearchResult = result => {
-    var highestId = 0;
+    var newId = 0;
+
     if (this.state.searchResultIds.length > 0) {
-      this.state.searchResultIds.forEach(id => {
-        if (id > highestId) highestId = id;
-      });
+      newId =
+        this.state.searchResultIds[this.state.searchResultIds.length - 1] + 1;
     }
 
     this.searchResults.push({
       ...result,
-      ...{ id: highestId === 0 ? 0 : highestId + 1 }
+      ...{ id: newId }
     });
 
-    var searchResultIds = this.state.searchResultIds.concat(highestId);
+    var searchResultIds = this.state.searchResultIds.concat(newId);
     this.setState({ searchResultIds: searchResultIds });
   };
 
@@ -138,6 +138,7 @@ class SearchResultListContainer extends React.Component {
     });
 
     localObserver.subscribe("attribute-table-row-clicked", id => {
+      console.log("WHAT");
       localObserver.publish("highlight-search-result-feature", id);
     });
 
@@ -171,6 +172,7 @@ class SearchResultListContainer extends React.Component {
         };
       });
     });
+
     localObserver.subscribe("search-result-list-normal", () => {
       this.setState({
         minimized: false,
