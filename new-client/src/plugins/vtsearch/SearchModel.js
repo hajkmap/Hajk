@@ -72,9 +72,9 @@ export default class SearchModel {
     let url = this.geoserver.journeys.url;
     let viewParams = "&viewparams=";
     if (filterOnFromDate != null)
-      viewParams = viewParams + `fromDate:${filterOnFromDate};`;
+      viewParams = viewParams + `filterOnFromDate:${filterOnFromDate};`;
     if (filterOnToDate != null)
-      viewParams = viewParams + `toDate:${filterOnToDate};`;
+      viewParams = viewParams + `filterOnToDate:${filterOnToDate};`;
     if (filterOnWkt != null)
       viewParams = viewParams + `filterOnWkt:${filterOnWkt};`;
 

@@ -100,8 +100,8 @@ export default class MapViewModel {
       var wktFeatureGeom = format.writeGeometry(e.feature.getGeometry());
       if (wktFeatureGeom != null) {
         this.model.getJourneys(
-          selectedEndDate,
           selectedFromDate,
+          selectedEndDate,
           wktFeatureGeom
         );
       }

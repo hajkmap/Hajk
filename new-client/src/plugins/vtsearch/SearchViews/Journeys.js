@@ -15,15 +15,7 @@ import {
 // Define JSS styles that will be used in this component.
 // Examle below utilizes the very powerful "theme" object
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
-const styles = theme => ({
-  KeyboardDatePicker: {
-    paddingBottom: 10
-  },
-  MuiPickersUtilsProvider: { width: 150 },
-  Button: {
-    paddingLeft: 3
-  }
-});
+const styles = theme => ({});
 
 //TODO - Only mockup //Tobias
 
@@ -32,8 +24,8 @@ class Journeys extends React.PureComponent {
   state = {
     fromTime: null,
     activeTool: undefined,
-    selectedFromDate: new Date().toISOString().split(".")[0],
-    selectedEndDate: new Date().toISOString().split(".")[0],
+    selectedFromDate: new Date(),
+    selectedEndDate: new Date(),
     selectedFormType: ""
   };
 
@@ -72,9 +64,11 @@ class Journeys extends React.PureComponent {
 
   handlePolygonChange = () => {
     const { selectedFromDate, selectedEndDate, selectedFormType } = this.state;
+    let formatFromDate = new Date(selectedFromDate).toISOString(); // format the date to yyyy-mm-ddThh-mm-ss
+    let formatEndDate = new Date(selectedEndDate).toISOString(); // format the date to yyyy-mm-ddThh-mm-ss
     this.localObserver.publish("activate-search-by-draw", {
-      selectedFromDate: selectedFromDate,
-      selectedEndDate: selectedEndDate,
+      selectedFromDate: formatFromDate,
+      selectedEndDate: formatEndDate,
       selectedFormType: "Polygon"
     });
   };
@@ -142,7 +136,6 @@ class Journeys extends React.PureComponent {
         <p>Markera sökområde i kartan</p>
         <Button
           variant="outlined"
-          className={classes.button}
           type="button"
           title="Lägg till polygon"
           value={this.state.selectedFormType}
@@ -153,7 +146,6 @@ class Journeys extends React.PureComponent {
         </Button>
         <Button
           variant="outlined"
-          className={classes.button}
           type="button"
           value={this.state.selectedFormType}
           title="Lägg till rektangel"
