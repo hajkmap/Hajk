@@ -28,6 +28,7 @@ class MapSwitcher extends React.PureComponent {
   constructor(props) {
     super(props);
     this.appModel = this.props.appModel;
+    this.map = this.props.appModel.getMap();
   }
 
   componentDidMount() {
@@ -74,18 +75,20 @@ class MapSwitcher extends React.PureComponent {
   };
 
   handleMenuItemClick = (event, index) => {
-    let selectedMap = this.maps[index].mapConfigurationName;
-
+    const selectedMap = this.maps[index].mapConfigurationName;
+    const x = this.map.getView().getCenter()[0];
+    const y = this.map.getView().getCenter()[1];
+    const z = this.map.getView().getZoom();
     // TODO: A better solution then redirecting is needed. It requires more
     // work in the App component, so that changing the value of this.appModel.config.activeMap
     // would dynamically reload configuration as needed.
     // But for now, simple redirection will do.
     window.location.assign(
-      `${window.location.origin}${window.location.pathname}?m=${selectedMap}`
+      `${window.location.origin}${window.location.pathname}?m=${selectedMap}&x=${x}&y=${y}&z=${z}`
     );
 
     // Not used as we change window.location. But in a better solution, we wouldn't reload the app,
-    // and then code below would be needed.
+    // and then code below would be needed to hide the dropdown menu.
     // this.setState({ anchorEl: null, selectedIndex: index });
   };
 
