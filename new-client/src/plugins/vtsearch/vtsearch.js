@@ -153,6 +153,11 @@ class VTSearch extends React.PureComponent {
     this.localObserver.subscribe("vtsearch-result-begin", label => {
       console.log("vtsearch-result-begin, " + label.label);
     });
+
+    this.localObserver.subscribe("vtsearch-result-done", ans => {
+      console.log("vtsearch-result-done");
+      console.log(ans);
+    });
   }
 
   /**
