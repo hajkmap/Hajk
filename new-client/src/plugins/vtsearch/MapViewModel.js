@@ -74,6 +74,7 @@ export default class MapViewModel {
           selectedEndDate,
           selectedFormType
         });
+        this.drawlayer.getSource().clear();
       }
     );
   };
@@ -92,8 +93,10 @@ export default class MapViewModel {
     this.draw = new Draw({
       source: this.drawlayer.getSource(),
       type: value,
+      stopClick: true,
       geometryFunction: geometryFunction
     });
+
     this.draw.on("drawend", e => {
       this.map.removeInteraction(this.draw);
       var format = new WKT();
@@ -106,7 +109,6 @@ export default class MapViewModel {
         );
       }
     });
-    this.map.clicklock = true;
     this.map.addInteraction(this.draw);
   };
 
