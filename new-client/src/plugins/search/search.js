@@ -98,7 +98,6 @@ class Search extends React.PureComponent {
      * put the value in search box and do the search.
      *
      * TODO: Limit WFS sources (if s-param is present).
-     * TODO: Highlight the first feature in results list.
      */
 
     this.props.app.globalObserver.subscribe("appLoaded", () => {
@@ -114,10 +113,17 @@ class Search extends React.PureComponent {
           dv: v && window.decodeURI(v),
           ds: s && window.decodeURI(s)
         };
-        console.log("v, s: ", v, s);
-        console.log("decoded: ", dv, ds);
+
+        console.log("dv, ds: ", dv, ds);
+
+        // Put decoded search phrase into the search box
         document.getElementById("searchbox").value = dv;
-        this.doSearch(dv);
+
+        // Invoke search for search phrase
+        this.searchModel.search(dv, true, d => {
+          this.resolve(d);
+          this.selectFirstFeatureInResultsList();
+        });
       }
     });
 
@@ -149,6 +155,28 @@ class Search extends React.PureComponent {
       });
     });
   }
+  /**
+   * @summary Selects the first element in results list and zooms in into the feature in map.
+   * @description This is a horrible example of how things SHOULD NOT BE DONE. I invoke click()
+   * on a couple of elements I get by running querySelector(). This is bad because of so many
+   * reasons… TODO: FIX FIX FIX.
+   * @memberof Search
+   */
+  selectFirstFeatureInResultsList() {
+    // I'm not proud of this solution, but here we go:
+    // trigger "click()" on the first result, which results
+    // in two things: 1) row is marked as "selected" in results list,
+    // and 2) the feature is selected and zoomed in.
+
+    // First, expand the first group in search result list
+    document.querySelector(".MuiExpansionPanelSummary-content").click();
+    // Next, click on the first element in the first group of results
+    document
+      .querySelector(
+        ".MuiExpansionPanelDetails-root .MuiExpansionPanelSummary-content"
+      )
+      .click();
+  }
 
   resolve = result => {
     this.setState({
@@ -170,7 +198,6 @@ class Search extends React.PureComponent {
   }
 
   doSearch(v) {
-    console.log("doSearch: ", v);
     if (v.length <= 3) return null;
     this.localObserver.publish("searchToolChanged");
     this.searchModel.search(v, true, d => {
