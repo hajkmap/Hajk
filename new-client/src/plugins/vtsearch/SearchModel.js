@@ -260,7 +260,7 @@ export default class SearchModel {
     fetch(url).then(res => {
       res.json().then(jsonResult => {
         const stopAreas = {
-          data: jsonResult.features,
+          featureCollection: jsonResult,
           label: this.geoserver.stopAreas.searchLabel
         };
         this.localObserver.publish("vtsearch-result-done", stopAreas);

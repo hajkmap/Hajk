@@ -2,13 +2,48 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import VirtualizedTable from "./VirtualizedTable";
+import { SortDirection } from "react-virtualized";
 
 const styles = theme => ({});
 
-class AttributeTable extends React.PureComponent {
+class AttributeTable extends React.Component {
+  state = {
+    selectedRow: {
+      index: null,
+      id: null
+    },
+    focusedRow: 0,
+    rows: this.getRows()
+  };
+
+  constructor(props) {
+    super(props);
+    this.bindSubscriptions();
+  }
+
   getFeaturePropertiesKeys(searchResult) {
     return Object.keys(searchResult.featureCollection.features[0].properties);
   }
+
+  getRowIndexFromRowId = id => {
+    return this.state.rows
+      .map(row => {
+        return row.id;
+      })
+      .indexOf(id);
+  };
+
+  bindSubscriptions = () => {
+    const { localObserver } = this.props;
+    localObserver.subscribe("highlight-attribute-row", id => {
+      var foundRowIndex = this.getRowIndexFromRowId(id);
+      this.setState({
+        selectedRow: { index: foundRowIndex, id: id },
+        focusedRow: foundRowIndex
+      });
+    });
+  };
+
   getColumns() {
     const { searchResult } = this.props;
 
@@ -22,6 +57,7 @@ class AttributeTable extends React.PureComponent {
   }
   getRows() {
     const { searchResult } = this.props;
+
     return searchResult.featureCollection.features.map((feature, index) => {
       return Object.keys(feature.properties).reduce(
         (acc, key) => {
@@ -32,23 +68,89 @@ class AttributeTable extends React.PureComponent {
     });
   }
 
+  sortNulls = (compareOne, compareTwo) => {
+    if (compareOne === null && compareTwo !== null) {
+      return 1;
+    } else if (compareOne !== null && compareTwo === null) {
+      return -1;
+    } else if (compareOne === compareTwo) {
+      return 0;
+    }
+  };
+
+  sort = ({ sortBy, sortDirection }) => {
+    var compareOne = null;
+    var compareTwo = null;
+    var rowsToBeSorted = this.state.rows;
+    var sortByNumber = isNaN(parseFloat(rowsToBeSorted[0][sortBy]))
+      ? false
+      : true;
+
+    if (sortByNumber) {
+      rowsToBeSorted.sort((a, b) => {
+        compareOne = a[sortBy] === "" ? null : a[sortBy]; //Handle empty string same way as null
+        compareTwo = b[sortBy] === "" ? null : b[sortBy]; //Handle empty string same way as null
+        return parseFloat(compareOne) - parseFloat(compareTwo);
+      });
+    } else {
+      rowsToBeSorted.sort((a, b) => {
+        compareOne = a[sortBy] === "" ? null : a[sortBy]; //Handle empty string same way as null
+        compareTwo = b[sortBy] === "" ? null : b[sortBy]; //Handle empty string same way as null
+        if (compareOne !== null && compareTwo !== null) {
+          return compareOne.localeCompare(compareTwo);
+        } else {
+          return this.sortNulls(compareOne, compareTwo);
+        }
+      });
+    }
+
+    rowsToBeSorted =
+      sortDirection === SortDirection.DESC
+        ? rowsToBeSorted.reverse()
+        : rowsToBeSorted;
+
+    this.setState(state => {
+      return {
+        sortBy,
+        sortDirection,
+        rows: rowsToBeSorted,
+        selectedRow: {
+          index: this.getRowIndexFromRowId(state.selectedRow.id),
+          id: state.selectedRow.id
+        }
+      };
+    });
+  };
+
   onRowClick = row => {
     const { localObserver } = this.props;
+    this.setState({ selectedRow: { index: row.index, id: row.rowData.id } });
     localObserver.publish("attribute-table-row-clicked", row.rowData.id);
   };
 
   render() {
-    const { resultListHeight, windowWidth } = this.props;
-    var rows = this.getRows();
+    const { resultListHeight, windowWidth, searchResult } = this.props;
     return (
       <Paper style={{ height: resultListHeight, width: windowWidth }}>
-        <VirtualizedTable
-          rowCount={rows.length}
-          rowGetter={({ index }) => rows[index]}
-          rowClicked={this.onRowClick}
-          columns={this.getColumns()}
-          windowWidth={windowWidth}
-        />
+        {searchResult.featureCollection.features.length > 0 ? (
+          <VirtualizedTable
+            rowCount={this.state.rows.length}
+            rowGetter={({ index }) => this.state.rows[index]}
+            rowClicked={this.onRowClick}
+            columns={this.getColumns()}
+            windowWidth={windowWidth}
+            sort={this.sort}
+            sortDirection={this.state.sortDirection}
+            sortBy={this.state.sortBy}
+            scrollToIndex={this.state.focusedRow}
+            scrollToAlignment="center"
+            selectedRow={this.state.selectedRow}
+          />
+        ) : (
+          <Paper
+            style={{ height: resultListHeight, width: windowWidth }}
+          ></Paper>
+        )}
       </Paper>
     );
   }

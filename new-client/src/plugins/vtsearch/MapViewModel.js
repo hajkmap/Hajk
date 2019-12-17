@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
-import { Fill, Stroke, Style } from "ol/style";
+import { Fill, Stroke, Style, Circle } from "ol/style";
 
 /**
  * @summary ViewModel to handle interactions with map
@@ -17,7 +17,6 @@ export default class MapViewModel {
     this.bindSubscriptions();
     this.addSearchResultLayerToMap();
     this.addHighlightLayerToMap();
-    //add draw-layer
   }
   static propTypes = {
     app: PropTypes.object.isRequired,
@@ -26,12 +25,14 @@ export default class MapViewModel {
   };
   //TODO Add comments
   highlightFeature = olFeature => {
+    this.highlightLayer.getSource().clear();
     this.highlightLayer.getSource().addFeature(olFeature);
   };
   //TODO Add comments
   addFeatureToSearchResultLayer = olFeatures => {
     this.searchResultLayer.getSource().addFeatures(olFeatures);
   };
+
   //TODO Add comments
   bindSubscriptions = () => {
     this.localObserver.subscribe(
@@ -43,6 +44,13 @@ export default class MapViewModel {
         this.highlightFeature(olFeature);
       }
     );
+
+    this.map.on("singleclick", e => {
+      this.localObserver.publish(
+        "features-clicked-in-map",
+        this.getFeaturesAtClickedPixel(e)
+      );
+    });
 
     this.localObserver.subscribe("add-search-result", olFeatures => {
       this.addFeatureToSearchResultLayer(olFeatures);
@@ -56,12 +64,30 @@ export default class MapViewModel {
     });
   };
 
+  getFeaturesAtClickedPixel = evt => {
+    var features = [];
+    this.map.forEachFeatureAtPixel(
+      evt.pixel,
+      (feature, layer) => {
+        if (layer.get("type") === "vt-search-result-layer") {
+          features.push(feature);
+        }
+      },
+      {
+        hitTolerance: 10
+      }
+    );
+    return features;
+  };
+
   //TODO Add comments and add better styling to handle more geometry types
   addSearchResultLayerToMap = () => {
     this.searchResultLayer = new VectorLayer({
       source: new VectorSource({})
     });
     this.searchResultLayer.set("type", "vt-search-result-layer");
+    this.searchResultLayer.set("queryable", false);
+
     this.map.addLayer(this.searchResultLayer);
   };
 
@@ -77,6 +103,11 @@ export default class MapViewModel {
 
     this.highlightLayer = new VectorLayer({
       style: new Style({
+        image: new Circle({
+          fill: fill,
+          stroke: stroke,
+          radius: 5
+        }),
         fill: fill,
         stroke: stroke
       }),
