@@ -469,7 +469,7 @@ class SearchModel {
 
     // Point style (either a marker image or fallback to a Circle)
 
-    if (src.length > 0) {
+    if (src && src.length > 0) {
       // If marker image is provided, use it
       style.setImage(
         new Icon({

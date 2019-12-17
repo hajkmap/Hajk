@@ -354,13 +354,13 @@ class AppModel {
 
   addHighlightLayer(options) {
     const { anchor, scale, src, strokeColor, strokeWidth, fillColor } = options;
-    const strokeColorAsArray = [
+    const strokeColorAsArray = strokeColor && [
       strokeColor.r,
       strokeColor.g,
       strokeColor.b,
       strokeColor.a
     ];
-    const fillColorAsArray = [
+    const fillColorAsArray = fillColor && [
       fillColor.r,
       fillColor.g,
       fillColor.b,
