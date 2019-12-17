@@ -151,7 +151,7 @@ class Stops extends React.PureComponent {
           <SquareIcon />
         </Button>
         <br />
-        <Button
+        <Button variant="outlined">Sök</Button>
           className={classes.floatRight}
           onClick={this.testDebug}
           variant="outlined"
