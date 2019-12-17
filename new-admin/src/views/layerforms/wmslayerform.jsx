@@ -668,7 +668,7 @@ class WMSLayerForm extends Component {
       capabilities => capabilities.version === version
     );
 
-    var singleTile = version === "1.3.0" ? false : this.state.singleTile;
+    var singleTile = this.state.singleTile;
 
     this.setState({
       capabilities,
@@ -915,7 +915,7 @@ class WMSLayerForm extends Component {
         }
         break;
       case "opacity":
-        if (isNaN(Number(value)) || (value <= 0 || value >= 1)) {
+        if (isNaN(Number(value)) || value <= 0 || value >= 1) {
           valid = false;
         }
         break;
@@ -1022,7 +1022,6 @@ class WMSLayerForm extends Component {
               ref="input_singleTile"
               onChange={e => this.setState({ singleTile: e.target.checked })}
               checked={this.state.singleTile}
-              disabled={this.state.version === "1.3.0"}
             />
           </div>
         </div>

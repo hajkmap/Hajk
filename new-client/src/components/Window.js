@@ -77,11 +77,8 @@ const styles = theme => {
       overflow: "hidden",
       pointerEvents: "all",
       [theme.breakpoints.down("xs")]: {
-        borderRadius: "0 !important",
-        width: "100% !important",
-        zIndex: 2,
-        position: "fixed !important",
-        top: "64px !important"
+        borderRadius: "0",
+        position: "fixed !important"
       }
     },
     panelContent: {
@@ -98,10 +95,7 @@ const styles = theme => {
       flex: "1",
       overflowY: "auto",
       padding: "10px",
-      cursor: "default !important",
-      [theme.breakpoints.down("xs")]: {
-        marginBottom: "64px"
-      }
+      cursor: "default !important"
     }
   };
 };
@@ -153,6 +147,11 @@ class Window extends React.PureComponent {
       });
       globalObserver.subscribe("drawerToggled", () => {
         this.updatePosition();
+      });
+      globalObserver.subscribe("dialogOpen", open => {
+        this.rnd.setState({
+          disableDrag: open
+        });
       });
     }
   }

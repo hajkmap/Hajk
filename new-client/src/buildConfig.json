@@ -8,16 +8,13 @@
     "dummy",
     "edit",
     "export",
-    "information",
     "informative",
     "layerswitcher",
     "location",
     "measure",
-    "preset",
     "routing",
     "search",
-    "streetview",
-    "vtsearch"
+    "streetview"
   ],
   "allTools": [
     "anchor",
@@ -28,16 +25,13 @@
     "dummy",
     "edit",
     "export",
-    "information",
     "informative",
     "layerswitcher",
     "location",
     "measure",
-    "preset",
     "routing",
     "search",
     "streetview",
-    "suggest",
-    "vtsearch"
+    "suggest"
   ]
 }
