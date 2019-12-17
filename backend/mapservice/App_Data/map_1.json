@@ -1,4 +1,5 @@
 {
+  "version": null,
   "projections": [
     {
       "code": "EPSG:3006",
@@ -97,96 +98,42 @@
       "options": {
         "baselayers": [
           {
+            "id": "37",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
+          },
+          {
             "id": "35",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
+          },
+          {
+            "id": "36",
             "visibleAtStart": true,
             "drawOrder": 0,
             "visibleForGroups": null,
             "infobox": null
           }
         ],
-        "groups": [
-          {
-            "id": "3a18c697-a52a-e5c9-cb77-2a7f03c648ec",
-            "parent": "-1",
-            "name": "Kartlager",
-            "toggled": true,
-            "expanded": true,
-            "layers": [
-              {
-                "id": "32",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "16",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "17",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "18",
-                "visibleAtStart": true,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "14",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "33",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "34",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "27",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "30",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              }
-            ],
-            "groups": []
-          }
-        ],
-        "instruction": "",
+        "groups": [],
         "active": true,
         "visibleAtStart": false,
         "backgroundSwitcherBlack": false,
         "backgroundSwitcherWhite": true,
-        "toggleAllButton": true,
+        "showBreadcrumbs": false,
+        "target": "toolbar",
+        "position": "left",
+        "width": 0,
+        "height": 0,
+        "title": "",
+        "description": "",
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Rubrik temakarta",
+        "instruction": "",
         "visibleForGroups": ["Office-SEKSD01", "All-SE129"]
       },
       "index": 0
@@ -194,12 +141,21 @@
     {
       "type": "infoclick",
       "options": {
-        "target": "",
-        "displayPopup": false,
-        "markerImg": "assets/icons/marker.png",
         "anchor": [16, 32],
-        "imgSize": [32, 32],
-        "popupOffsetY": 0,
+        "scale": 0.15,
+        "strokeColor": {
+          "r": 200,
+          "b": 0,
+          "g": 0,
+          "a": 0.7
+        },
+        "strokeWidth": 4,
+        "fillColor": {
+          "r": 255,
+          "b": 0,
+          "g": 0,
+          "a": 0.1
+        },
         "visibleForGroups": []
       },
       "index": 0
@@ -217,11 +173,10 @@
     },
     {
       "type": "vtsearch",
-
       "options": {
         "abstract": "VTSEARCH",
         "title": "VTSEARCH",
-        "target": "center",
+        "target": "left",
         "geoserver": {
           "journeys": {
             "searchLabel": "Turer",
@@ -335,100 +290,11 @@
         "visibleForGroups": []
       },
       "index": 0
-    },
-    {
-      "type": "information",
-      "options": {
-        "target": "right",
-        "text": "Hej",
-        "headerText": "Om kartan",
-        "title": "",
-        "abstract": "",
-        "visibleAtStart": false,
-        "showInfoOnce": false,
-        "base64EncodeForInfotext": false,
-        "visibleForGroups": []
-      },
-      "index": 0
-    },
-    {
-      "type": "edit",
-      "options": {
-        "target": "toolbar",
-        "instruction": "",
-        "activeServices": ["25"],
-        "visibleForGroups": []
-      },
-      "index": 0
-    },
-    {
-      "type": "collector",
-      "options": {
-        "target": "left",
-        "url": "",
-        "featureType": "hpl",
-        "title": "Tyck till",
-        "abstract": "Vi vill veta vad du tycker!",
-        "featureNS": "",
-        "showThankYou": false,
-        "visibleAtStart": false,
-        "thankYou": "Tack",
-        "visibleForGroups": [],
-        "form": [
-          {
-            "id": 303302667498,
-            "order": 0,
-            "header": "Vem är du?",
-            "text": "<p>Ålder:</p>\n<div label=\"Namn\" field=\"name\"></div>\n<p>Namn:</p>\n<div label=\"Namn\" field=\"image\"></div>\n\n"
-          },
-          {
-            "id": 979784104217,
-            "order": 1,
-            "header": "Tyck till om en plats",
-            "text": "<p>Välj typ av plats, klicka sedan i kartan för att markera den</p>\n<div type=\"toolbar\"></div>"
-          }
-        ],
-        "serviceId": "25"
-      },
-      "index": 0
-    },
-    {
-      "type": "search",
-      "options": {
-        "target": "center",
-        "onMap": true,
-        "bothSynlig": true,
-        "enableViewTogglePopupInSnabbsok": true,
-        "toolbar": "bottom",
-        "maxZoom": 14,
-        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
-        "kmlExportUrl": "/mapservice/export/kml",
-        "excelExportUrl": "/mapservice/export/excel",
-        "displayPopup": true,
-        "selectionTools": true,
-        "selectionSearch": true,
-        "radiusSearch": true,
-        "polygonSearch": true,
-        "searchSettings": true,
-        "base64Encode": false,
-        "instruction": "",
-        "filterVisible": true,
-        "anchor": [16, 32],
-        "imgSize": [32, 32],
-        "tooltip": "Sök...",
-        "searchWithinButtonText": "Markera i kartan",
-        "toolDescription": "<div>Sök innehåll i kartan</div>",
-        "popupOffsetY": 0,
-        "visibleForGroups": [],
-        "layers": [],
-        "selectedSources": ["30", "27", "32", "34", "33", "14", "18"]
-      },
-      "index": 7
     }
   ],
   "map": {
     "target": "map",
-    "center": [415000, 6585000],
+    "center": [319378, 6398504],
     "title": "Hajk 3",
     "projection": "EPSG:3006",
     "zoom": 10,
@@ -462,6 +328,8 @@
     "colors": {
       "primaryColor": "#333333",
       "secondaryColor": "#ffffff"
-    }
+    },
+    "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+    "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
   }
 }
