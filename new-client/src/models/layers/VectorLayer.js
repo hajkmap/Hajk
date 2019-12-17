@@ -175,7 +175,6 @@ class WFSVectorLayer {
       });
     }
     this.layer = new VectorLayer({
-      featureType: config.params.typename.split(":")[1],
       information: config.information,
       caption: config.caption,
       name: config.name,
@@ -189,6 +188,11 @@ class WFSVectorLayer {
       source: this.vectorSource,
       url: config.url
     });
+    if (config.dataFormat === "GeoJSON") {
+      this.layer.featureType = "";
+    } else {
+      this.layer.featureType = config.params.typename.split(":")[1];
+    }
     this.type = "vector";
   }
 
@@ -315,7 +319,7 @@ class WFSVectorLayer {
           Number(feature.getProperties()[filterAttribute]) < Number(filterValue)
         );
       case "eq":
-        if (!isNaN(Number(filterValue))) {
+        if (!Number.isNaN(Number(filterValue))) {
           return (
             Number(feature.getProperties()[filterAttribute]) ===
             Number(filterValue)
@@ -323,7 +327,7 @@ class WFSVectorLayer {
         }
         return feature.getProperties()[filterAttribute] === filterValue;
       case "not":
-        if (!isNaN(Number(filterValue))) {
+        if (!Number.isNaN(Number(filterValue))) {
           return (
             Number(feature.getProperties()[filterAttribute]) !==
             Number(filterValue)

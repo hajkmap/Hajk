@@ -23,6 +23,7 @@ class DrawModel {
     this.app = settings.app;
     this.options = settings.options;
     this.localObserver = settings.localObserver;
+    this.globalObserver = settings.app.globalObserver;
 
     this.source = new VectorSource();
     this.vector = new VectorLayer({
@@ -909,8 +910,8 @@ class DrawModel {
   setStyleFromProperties(feature) {
     if (feature.getProperties().style) {
       try {
-        let style = JSON.parse(feature.getProperties().style);
-        var isText = feature.getProperties().geometryType === "Text";
+        const style = JSON.parse(feature.getProperties().style);
+        const isText = feature.getProperties().geometryType === "Text";
         if (isText) {
           this.setFeaturePropertiesFromText(feature, style.text);
         } else {
@@ -921,10 +922,9 @@ class DrawModel {
         console.error("Style attribute could not be parsed.", ex);
       }
     } else {
-      // https://github.com/openlayers/openlayers/issues/3262
-      let func = feature.getStyleFunction();
-      if (func) {
-        let style = func.call(feature, this.map.getView().getResolution());
+      const styleFunc = feature.getStyleFunction();
+      if (styleFunc) {
+        let style = styleFunc(feature, this.map.getView().getResolution());
         if (style[0] && style[0].getFill && style[0].getFill() === null) {
           style[0].setFill(
             new Fill({
@@ -1002,6 +1002,10 @@ class DrawModel {
 
   getMap() {
     return this.map;
+  }
+
+  openDialog(open) {
+    this.globalObserver.publish("dialogOpen", open);
   }
 }
 

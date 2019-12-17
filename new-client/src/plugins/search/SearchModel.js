@@ -14,24 +14,6 @@ import { arraySort } from "./../../utils/ArraySort.js";
 import { Stroke, Style, Circle, Fill, Icon } from "ol/style.js";
 import { handleClick } from "../../models/Click.js";
 
-var style = new Style({
-  stroke: new Stroke({
-    color: "rgba(244, 83, 63, 1)",
-    width: 4
-  }),
-  fill: new Fill({
-    color: "rgba(244, 83, 63, 0.2)"
-  }),
-  //Setting image in constructor to MarkerImage - this is default style
-  image: new Circle({
-    radius: 6,
-    stroke: new Stroke({
-      color: "rgba(0, 0, 0, 0.6)",
-      width: 2
-    })
-  })
-});
-
 var drawStyle = new Style({
   stroke: new Stroke({
     color: "rgba(255, 214, 91, 0.6)",
@@ -431,6 +413,86 @@ class SearchModel {
       this.olMap.clicklock = false;
     }
   };
+  /**
+   * @summary Takes a RGBA Object as input and returns it as an Array
+   * formatted according to ol.Color. If no value is provided, the defaults
+   * are used.
+   *
+   * @param {Object} obj
+   * @param {Array} [def={ r: 100, g: 100, b: 100, a: 0.7 }]
+   * @returns {Array} RGBA values formatted as an ol.Color Array
+   */
+  convertRgbaColorObjectToArray = (
+    obj = {},
+    def = { r: 100, g: 100, b: 100, a: 0.7 }
+  ) => {
+    const mergedObject = { ...def, ...obj };
+    return [mergedObject.r, mergedObject.g, mergedObject.b, mergedObject.a];
+  };
+  /**
+   * @summary Prepares and returnes an ol.Style object, used to
+   * style the search results layer.
+   *
+   * @returns {Object} ol.Style
+   */
+  getVectorLayerStyle = () => {
+    const {
+      anchor,
+      scale,
+      src,
+      strokeColor,
+      strokeWidth,
+      fillColor
+    } = this.options;
+
+    const style = new Style({
+      // Polygons stroke color and width
+      stroke: new Stroke({
+        color: this.convertRgbaColorObjectToArray(strokeColor, {
+          r: 244,
+          g: 83,
+          b: 63,
+          a: 1
+        }),
+        width: strokeWidth || 4
+      }),
+      // Polygons fill color
+      fill: new Fill({
+        color: this.convertRgbaColorObjectToArray(fillColor, {
+          r: 244,
+          g: 83,
+          b: 63,
+          a: 0.2
+        })
+      })
+    });
+
+    // Point style (either a marker image or fallback to a Circle)
+
+    if (src.length > 0) {
+      // If marker image is provided, use it
+      style.setImage(
+        new Icon({
+          anchor: [anchor[0] || 0.5, anchor[1] || 1],
+          scale: scale || 0.15,
+          src: src
+        })
+      );
+    } else {
+      // Else just draw a simple Circle as marker
+      style.setImage(
+        new Circle({
+          radius: 6,
+          stroke: new Stroke({
+            color: "rgba(0, 0, 0, 0.6)",
+            width: 2
+          })
+        })
+      );
+    }
+
+    return style;
+  };
 
   constructor(settings, map, app, observer) {
     this.options = settings;
@@ -439,16 +501,7 @@ class SearchModel {
 
     this.vectorLayer = new VectorLayer({
       source: new VectorSource({}),
-      style: () => {
-        if (this.options.markerImg && this.options.markerImg !== "") {
-          style.setImage(
-            new Icon({
-              src: this.options.markerImg
-            })
-          );
-        }
-        return style;
-      }
+      style: this.getVectorLayerStyle()
     });
     this.vectorLayer.set("type", "searchResultLayer");
     this.drawSource = new VectorSource({ wrapX: false });

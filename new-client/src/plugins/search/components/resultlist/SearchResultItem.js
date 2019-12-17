@@ -124,13 +124,15 @@ class SearchResultItem extends Component {
   };
 
   render() {
-    const { feature, classes, displayField, target } = this.props;
-    var active =
-      this.props.highlightedFeatures
-        .map(highlightedFeature => {
-          return highlightedFeature;
-        })
-        .indexOf(feature) > -1;
+    const {
+      feature,
+      classes,
+      displayFields,
+      target,
+      searchWithinButtonText
+    } = this.props;
+
+    const active = this.props.highlightedFeatures.includes(feature);
 
     const ExpandIconWrapper = ({ children }) => (
       <div
@@ -169,14 +171,14 @@ class SearchResultItem extends Component {
         >
           <div>
             <div>
-              {feature.properties[displayField]}
+              {displayFields.map(field => feature.properties[field]).join(", ")}
               {target === "center" && this.props.renderAffectButton ? (
                 <div>
                   <Button
                     color="primary"
                     onClick={this.highlightImpact(feature)}
                   >
-                    Visa påverkan
+                    {searchWithinButtonText || "Visa påverkan"}
                   </Button>
                 </div>
               ) : null}

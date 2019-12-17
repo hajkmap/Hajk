@@ -381,8 +381,8 @@ class LayerItem extends React.PureComponent {
             <div className={classes.layerButton}>{this.renderStatus()}</div>
             <div className={classes.layerButton}>
               <div className={classes.infoContainer}>
-                {!this.isInfoEmpty() ? (
-                  this.state.infoVisible ? (
+                {!this.isInfoEmpty() &&
+                  (this.state.infoVisible ? (
                     <RemoveCircleIcon
                       className={classes.infoButton}
                       onClick={() => this.toggleInfo()}
@@ -398,18 +398,7 @@ class LayerItem extends React.PureComponent {
                         borderRadius: "100%"
                       }}
                     />
-                  )
-                ) : (
-                  <InfoIcon
-                    onClick={() => this.toggleInfo()}
-                    className={classes.infoButton}
-                    style={{
-                      color: "gray",
-                      cursor: "default",
-                      display: "none"
-                    }}
-                  />
-                )}
+                  ))}
               </div>
             </div>
             <div className={classes.layerButton}>

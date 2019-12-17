@@ -607,8 +607,8 @@ class LayerGroupItem extends Component {
               <div className={classes.layerButton}>{this.renderStatus()}</div>
               <div className={classes.layerButton}>
                 <div className={classes.infoContainer}>
-                  {!this.isInfoEmpty() ? (
-                    this.state.infoVisible ? (
+                  {!this.isInfoEmpty() &&
+                    (this.state.infoVisible ? (
                       <RemoveCircleIcon
                         className={classes.infoButton}
                         onClick={() => this.toggleInfo()}
@@ -624,17 +624,7 @@ class LayerGroupItem extends Component {
                           borderRadius: "100%"
                         }}
                       />
-                    )
-                  ) : (
-                    <InfoIcon
-                      onClick={() => this.toggleInfo()}
-                      className={classes.infoButton}
-                      style={{
-                        color: "#999",
-                        cursor: "default"
-                      }}
-                    />
-                  )}
+                    ))}
                 </div>
               </div>
               <div className={classes.layerButton}>

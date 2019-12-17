@@ -42,7 +42,7 @@ class AnchorModel {
         layer =>
           layer.getVisible() &&
           layer.getProperties().name &&
-          !isNaN(parseInt(layer.getProperties().name))
+          !Number.isNaN(parseInt(layer.getProperties().name))
       )
       .map(layer => layer.getProperties().name)
       .join(",");

@@ -7,6 +7,7 @@ import PropTypes from "prop-types";
 import SearchModel from "./SearchModel";
 import Journeys from "./SearchViews/Journeys";
 import Stops from "./SearchViews/Stops";
+import Lines from "./SearchViews/Lines";
 import Observer from "react-event-observer";
 import { Tooltip } from "@material-ui/core";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
@@ -74,7 +75,8 @@ const styles = theme => {
 };
 const searchTypes = {
   JOURNEYS: "Journeys",
-  STOPS: "Stops"
+  STOPS: "Stops",
+  LINES: "Lines"
 };
 
 const windowsContainerId = "windows-container";
@@ -152,6 +154,11 @@ class VTSearch extends React.PureComponent {
     this.localObserver.subscribe("vtsearch-result-begin", label => {
       console.log("vtsearch-result-begin, " + label.label);
     });
+
+    this.localObserver.subscribe("vtsearch-result-done", ans => {
+      console.log("vtsearch-result-done");
+      console.log(ans);
+    });
   }
 
   /**
@@ -199,6 +206,15 @@ class VTSearch extends React.PureComponent {
             app={app}
             localObserver={this.localObserver}
           ></Stops>
+        );
+      }
+      case searchTypes.LINES: {
+        return (
+          <Lines
+            model={this.searchModel}
+            app={app}
+            localObserver={this.localObserver}
+          ></Lines>
         );
       }
       default: {
