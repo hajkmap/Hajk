@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import MinimizeIcon from "@material-ui/icons/Minimize";
 import NormalIcon from "@material-ui/icons/FlipToFront";
 import MaximizeIcon from "@material-ui/icons/WebAsset";
+import CloseIcon from "@material-ui/icons/Close";
 import { withStyles } from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
 
@@ -71,6 +72,16 @@ class PanelToolbox extends React.PureComponent {
     localObserver.publish("search-result-list-normal");
   };
 
+  close = () => {
+    const { localObserver } = this.props;
+    this.setState({
+      maximizeVisible: false,
+      minimizeVisible: false,
+      normalVisible: true
+    });
+    localObserver.publish("search-result-list-close");
+  };
+
   render() {
     const { classes } = this.props;
     return (
@@ -102,6 +113,13 @@ class PanelToolbox extends React.PureComponent {
             <MaximizeIcon></MaximizeIcon>
           </IconButton>
         )}
+        <IconButton
+          classes={{ root: classes.iconButtonRoot }}
+          onClick={this.close}
+          aria-label="close"
+        >
+          <CloseIcon></CloseIcon>
+        </IconButton>
       </div>
     );
   }

@@ -17,6 +17,8 @@ import Attribution from "../controls/Attribution.js";
 import MapCleaner from "../controls/MapCleaner";
 import MapResetter from "../controls/MapResetter";
 import MapSwitcher from "../controls/MapSwitcher";
+import Information from "../controls/Information";
+import PresetLinks from "../controls/PresetLinks";
 
 import {
   Backdrop,
@@ -71,8 +73,11 @@ const styles = theme => {
       }
     },
     header: {
-      zIndex: 4,
-      height: theme.spacing(8)
+      zIndex: theme.zIndex.appBar,
+      height: theme.spacing(8),
+      [theme.breakpoints.down("xs")]: {
+        zIndex: 3
+      }
     },
     main: {
       zIndex: 2,
@@ -234,6 +239,14 @@ class App extends React.PureComponent {
   }
 
   renderSearchResultsWindow() {
+    const infoclickConfig = this.props.config.mapConfig.tools.find(
+      t => t.type === "infoclick"
+    );
+
+    if (infoclickConfig === undefined) {
+      return null;
+    }
+
     const open =
       this.state.mapClickDataResult &&
       this.state.mapClickDataResult.features &&
@@ -243,15 +256,17 @@ class App extends React.PureComponent {
     const features =
       this.state.mapClickDataResult && this.state.mapClickDataResult.features;
 
+    const { title, position, width, height } = infoclickConfig.options;
+
     return (
       <Window
         globalObserver={this.globalObserver}
-        title="Sökresultat"
+        title={title || "Infoclick"}
         open={open}
-        position="right"
+        position={position || "right"}
         mode="window"
-        width={400}
-        height={300}
+        width={width || 400}
+        height={height || 300}
         features={features}
         map={this.appModel.getMap()}
         onDisplay={feature => {
@@ -365,6 +380,17 @@ class App extends React.PureComponent {
     );
   }
 
+  renderInformationPlugin() {
+    const c = this.appModel.config.mapConfig.tools.find(
+      t => t.type === "information"
+    );
+
+    return (
+      c !== undefined &&
+      c.hasOwnProperty("options") && <Information options={c.options} />
+    );
+  }
+
   isString(s) {
     return s instanceof String || typeof s === "string";
   }
@@ -374,6 +400,7 @@ class App extends React.PureComponent {
 
     // If clean===true, some components won't be rendered below
     const clean = config.mapConfig.map.clean;
+
     const searchPlugins = [
       this.appModel.plugins.search,
       this.appModel.plugins.vtsearch
@@ -420,6 +447,7 @@ class App extends React.PureComponent {
               className={cslx(classes.header, classes.pointerEventsOnChildren)}
             >
               {searchPlugins.filter(plugin => {
+                console.log(plugin, "plugin");
                 return plugin != null;
               }).length === 0 &&
                 clean === false &&
@@ -459,6 +487,8 @@ class App extends React.PureComponent {
                 <Zoom map={this.appModel.getMap()} />
                 {clean === false && <MapSwitcher appModel={this.appModel} />}
                 {clean === false && <MapCleaner appModel={this.appModel} />}
+                {clean === false && <PresetLinks appModel={this.appModel} />}
+                {clean === false && this.renderInformationPlugin()}
                 {clean === true && (
                   <MapResetter
                     mapConfig={this.appModel.config.mapConfig}

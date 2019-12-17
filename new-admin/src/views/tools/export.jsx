@@ -56,7 +56,7 @@ class ToolOptions extends Component {
       this.setState({
         active: true,
         index: tool.index,
-        target: tool.options.target,
+        target: tool.options.target || "toolbar",
         position: tool.options.position,
         width: tool.options.width,
         height: tool.options.height,

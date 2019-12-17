@@ -44,7 +44,7 @@ const layers = ["Alla lager"];
 
 function getStyles(layer, that) {
   return {
-    fontWeight: that.state.layers.indexOf(layer) === -1 ? 5 : 4
+    fontWeight: that.state.layers.includes(layer) ? 5 : 4
   };
 }
 

@@ -251,6 +251,92 @@ namespace MapService.Components
 
                 return bytes;
             }
+            else if (layout == 3)
+            {
+                List<string> copyrights = new List<string>();
+                if (ConfigurationManager.AppSettings["exportCopyrightText"] != null)
+                {
+                    copyrights = ConfigurationManager.AppSettings["exportCopyrightText"].Split(',').ToList();
+                }
+
+                string infoText = String.Empty;
+                if (ConfigurationManager.AppSettings["exportInfoText"] != null)
+                {
+                    infoText = ConfigurationManager.AppSettings["exportInfoText"];
+                }
+
+                // Get logoimage
+                XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "assets", "logo.png"));
+
+                // Set positions, areas, brushes and pens
+                XRect margins = new XRect(33, 33, 33, 33);
+                XSize stampSize = new XSize(200, 120);
+
+                // Calculate positions and areas
+                XRect drawingArea = new XRect(margins.Left, margins.Top, page.Width - (margins.Left + margins.Width), page.Height - (margins.Top + margins.Height));
+                XRect stampArea = new XRect(new XPoint(drawingArea.Left + 15, drawingArea.Bottom - stampSize.Height -15), stampSize );
+                XRect logoArea = new XRect(new XPoint(stampArea.Left + 10, stampArea.Top + 10), new XPoint(stampArea.Right-10, stampArea.Top + 50));
+                XPoint signingLine = new XPoint(stampArea.Left + 10, logoArea.Bottom+ 30);
+                XPoint copyrightPosition =  new XPoint(drawingArea.Right -3,drawingArea.Bottom -3);
+                XPoint scalLegendPosition = new XPoint(stampArea.Left + 10, signingLine.Y + 20);
+
+                double scaling;
+                var scalingY = logo.PointHeight / logoArea.Height;
+                var scalingX = logo.PointWidth/ logoArea.Width;
+                if (scalingX < scalingY) scaling = scalingX; else scaling = scalingY;
+
+                // Pens, Brushes and colors
+                XColor mainColor = XColor.FromArgb(0, 119, 188);
+                XPen thickPen = new XPen(mainColor, 1);
+                XPen thinPen = new XPen(mainColor, 0.5);
+
+                // Draw map
+                this.drawImage(gfx, img, drawingArea.Left,drawingArea.Top, page);
+
+                // Put a border around map
+                gfx.DrawRectangle(thickPen, drawingArea);
+
+                // Draw a white "stamparea"
+                gfx.DrawRectangle(thickPen, XBrushes.White, stampArea);
+                // Draw logo
+                gfx.DrawImage(logo, logoArea.Left,logoArea.Top, logo.PointWidth / scaling, logo.PointHeight / scaling); 
+                // Draw "signing line"
+
+                gfx.DrawLine(thinPen, signingLine, new XPoint(stampArea.Right-10,signingLine.Y));
+
+                // Draw scale legend                       
+                gfx.DrawLine(XPens.Black, new XPoint(scalLegendPosition.X, scalLegendPosition.Y ),  new XPoint(scalLegendPosition.X  + displayLength, scalLegendPosition.Y));
+                gfx.DrawLine(XPens.Black, new XPoint(scalLegendPosition.X, scalLegendPosition.Y -3), new XPoint(scalLegendPosition.X, scalLegendPosition.Y + 3));
+                gfx.DrawLine(XPens.Black, new XPoint(scalLegendPosition.X + displayLength / 2, scalLegendPosition.Y -2), new XPoint(scalLegendPosition.X + displayLength /2, scalLegendPosition.Y +2));
+                gfx.DrawLine(XPens.Black, new XPoint(scalLegendPosition.X + displayLength, scalLegendPosition.Y -3), new XPoint(scalLegendPosition.X + displayLength, scalLegendPosition.Y +3));
+                XFont font = new XFont(fontName, 6);
+                gfx.DrawString(String.Format("Skala 1:{0}", exportItem.scale), font, XBrushes.Black, new XRect(new XPoint(scalLegendPosition.X, scalLegendPosition.Y - 12), new XPoint(scalLegendPosition.X + displayLength, scalLegendPosition.Y -2)), XStringFormats.TopLeft);
+                gfx.DrawString(displayText, font, XBrushes.Black, (int)scalLegendPosition.X + displayLength + 10, (int)scalLegendPosition.Y+2 );
+
+                // Draw infotext
+                this.drawText(gfx, fontName, infoText, (int)stampArea.Left + 10, (int)stampArea.Bottom - 5, 5);
+                
+                // Draw copyright notes
+                int i = 0;
+                copyrights.ForEach(copyright =>
+                {
+                    if (i >0) copyrightPosition.Offset(0, -10);
+                    gfx.DrawString(String.Format("© {0}", copyright), font, XBrushes.Black, copyrightPosition, XStringFormats.BottomRight);
+
+                    i++;
+                });
+              
+
+                byte[] bytes;
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    document.Save(ms);
+                    bytes = ReadFully(ms);
+                }
+
+                return bytes;
+            }
 
             return null;
         }

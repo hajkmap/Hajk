@@ -23,6 +23,7 @@ import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import SearchResultListContainer from "./SearchResultList/SearchResultListContainer";
 import ReactDOM from "react-dom";
+import MapViewModel from "./MapViewModel";
 
 const styles = theme => {
   return {
@@ -142,22 +143,15 @@ class VTSearch extends React.PureComponent {
       geoserver: props.options.geoserver
     });
 
+    this.mapViewModel = new MapViewModel({
+      app: props.app,
+      map: props.map,
+      localObserver: this.localObserver
+    });
+
     // Subscribes for an event when the vt-search has begun.
     this.localObserver.subscribe("vtsearch-result-begin", label => {
       console.log("vtsearch-result-begin, " + label.label);
-    });
-
-    // Subscribes for an event when the vt-search is done.
-    this.localObserver.subscribe("vtsearch-result-done", result => {
-      this.setState(
-        {
-          result: result
-        },
-        () => {
-          console.log("vtsearch-result-done");
-          console.log(this.state.result);
-        }
-      );
     });
   }
 
@@ -292,6 +286,7 @@ class VTSearch extends React.PureComponent {
         {ReactDOM.createPortal(
           <SearchResultListContainer
             windowsContainer={windowsContainerId}
+            localObserver={this.localObserver}
             model={this.searchModel}
             app={app}
           ></SearchResultListContainer>,

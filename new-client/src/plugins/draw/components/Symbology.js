@@ -71,9 +71,9 @@ class Symbology extends React.PureComponent {
     }
 
     if (typeof value === "string") {
-      value = !isNaN(parseFloat(value))
+      value = !Number.isNaN(parseFloat(value))
         ? parseFloat(value)
-        : !isNaN(parseInt(value))
+        : !Number.isNaN(parseInt(value))
         ? parseInt(value)
         : value;
     }

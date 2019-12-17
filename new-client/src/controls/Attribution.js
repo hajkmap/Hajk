@@ -29,6 +29,7 @@ class AttributionControl extends React.PureComponent {
     if (this.props.map) {
       const attributionControl = new Attribution({
         target: this.refs.attributions,
+        tipLabel: "Visa/dölj copyrightinformation för kartdata",
         label: "©"
       });
       this.props.map.addControl(attributionControl);

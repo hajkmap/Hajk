@@ -4,6 +4,7 @@
  *
  * @class SearchModel
  */
+
 export default class SearchModel {
   /**
    * Settings with labels and urls for the search functions.
@@ -88,7 +89,7 @@ export default class SearchModel {
     fetch(url).then(res => {
       res.json().then(jsonResult => {
         const journeys = {
-          data: jsonResult.features,
+          featureCollection: jsonResult,
           label: this.geoserver.journeys.searchLabel
         };
         this.localObserver.publish("vtsearch-result-done", journeys);
@@ -146,7 +147,7 @@ export default class SearchModel {
 
     // Build up the url with cql.
     let url = this.geoserver.routes.url;
-    let cql = "&CQL=";
+    let cql = "&cql_filter=";
     let addAndInCql = false;
     if (publicLineName != null) {
       cql = cql + `PublicLineName=${publicLineName}`;
@@ -198,7 +199,7 @@ export default class SearchModel {
         console.log("getRoutes / fetch");
 
         const routes = {
-          data: jsonResult.features,
+          featureCollection: jsonResult,
           label: this.geoserver.routes.searchLabel
         };
 
@@ -259,7 +260,7 @@ export default class SearchModel {
     fetch(url).then(res => {
       res.json().then(jsonResult => {
         const stopAreas = {
-          data: jsonResult.features,
+          featureCollection: jsonResult,
           label: this.geoserver.stopAreas.searchLabel
         };
         this.localObserver.publish("vtsearch-result-done", stopAreas);
