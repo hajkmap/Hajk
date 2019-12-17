@@ -2,6 +2,10 @@ import PropTypes from "prop-types";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Fill, Stroke, Style, Circle } from "ol/style";
+import "ol/ol.css";
+import Draw from "ol/interaction/Draw.js";
+import WKT from "ol/format/WKT";
+import { createBox } from "ol/interaction/Draw";
 
 /**
  * @summary ViewModel to handle interactions with map
@@ -13,16 +17,20 @@ export default class MapViewModel {
   constructor(settings) {
     this.map = settings.map;
     this.app = settings.app;
+    this.model = settings.model;
     this.localObserver = settings.localObserver;
+
     this.bindSubscriptions();
     this.addSearchResultLayerToMap();
     this.addHighlightLayerToMap();
+    this.addDrawSearch();
   }
   static propTypes = {
     app: PropTypes.object.isRequired,
     map: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired
   };
+
   //TODO Add comments
   highlightFeature = olFeature => {
     this.highlightLayer.getSource().clear();
@@ -32,7 +40,10 @@ export default class MapViewModel {
   addFeatureToSearchResultLayer = olFeatures => {
     this.searchResultLayer.getSource().addFeatures(olFeatures);
   };
-
+  //TOODO Add Comments
+  addDrawLayer = olFeature => {
+    this.drawlayer.getSource().addFeature(olFeature);
+  };
   //TODO Add comments
   bindSubscriptions = () => {
     this.localObserver.subscribe(
@@ -62,6 +73,58 @@ export default class MapViewModel {
     this.localObserver.subscribe("clear-highlight", () => {
       this.highlightLayer.getSource().clear();
     });
+
+    this.localObserver.subscribe(
+      "activate-search-by-draw",
+      ({ selectedFromDate, selectedEndDate, selectedFormType }) => {
+        this.activateSearchByDraw({
+          selectedFromDate,
+          selectedEndDate,
+          selectedFormType
+        });
+        this.drawlayer.getSource().clear();
+      }
+    );
+  };
+
+  activateSearchByDraw = ({
+    selectedFromDate,
+    selectedEndDate,
+    selectedFormType
+  }) => {
+    var value = selectedFormType;
+    var geometryFunction = undefined;
+    if (selectedFormType === "Box") {
+      value = "Circle";
+      geometryFunction = createBox();
+    }
+    this.draw = new Draw({
+      source: this.drawlayer.getSource(),
+      type: value,
+      stopClick: true,
+      geometryFunction: geometryFunction
+    });
+
+    this.draw.on("drawend", e => {
+      this.map.removeInteraction(this.draw);
+      var format = new WKT();
+      var wktFeatureGeom = format.writeGeometry(e.feature.getGeometry());
+      if (wktFeatureGeom != null) {
+        this.model.getJourneys(
+          selectedFromDate,
+          selectedEndDate,
+          wktFeatureGeom
+        );
+      }
+    });
+    this.map.addInteraction(this.draw);
+  };
+
+  addDrawSearch = () => {
+    this.drawlayer = new VectorLayer({
+      source: new VectorSource({})
+    });
+    this.map.addLayer(this.drawlayer);
   };
 
   getFeaturesAtClickedPixel = evt => {

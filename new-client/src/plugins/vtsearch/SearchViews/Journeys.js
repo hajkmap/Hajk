@@ -1,6 +1,16 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
+import { Button } from "@material-ui/core";
+import Grid from "@material-ui/core/Grid";
+import BorderStyleIcon from "@material-ui/icons/BorderStyle";
+import SquareIcon from "@material-ui/icons/CropSquare";
+import DateFnsUtils from "@date-io/date-fns";
+import {
+  MuiPickersUtilsProvider,
+  KeyboardTimePicker,
+  KeyboardDatePicker
+} from "@material-ui/pickers";
 
 // Define JSS styles that will be used in this component.
 // Examle below utilizes the very powerful "theme" object
@@ -11,7 +21,13 @@ const styles = theme => ({});
 
 class Journeys extends React.PureComponent {
   // Initialize state - this is the correct way of doing it nowadays.
-  state = {};
+  state = {
+    fromTime: null,
+    activeTool: undefined,
+    selectedFromDate: new Date(),
+    selectedEndDate: new Date(),
+    selectedFormType: ""
+  };
 
   // propTypes and defaultProps are static properties, declared
   // as high as possible within the component code. They should
@@ -35,8 +51,111 @@ class Journeys extends React.PureComponent {
     this.globalObserver = this.props.app.globalObserver;
   }
 
+  handleFromDateChange = date => {
+    this.setState({
+      selectedFromDate: date
+    });
+  };
+  handleEndDateChange = date => {
+    this.setState({
+      selectedEndDate: date
+    });
+  };
+
+  handlePolygonChange = () => {
+    const { selectedFromDate, selectedEndDate, selectedFormType } = this.state;
+    let formatFromDate = new Date(selectedFromDate).toISOString(); // format the date to yyyy-mm-ddThh-mm-ss
+    let formatEndDate = new Date(selectedEndDate).toISOString(); // format the date to yyyy-mm-ddThh-mm-ss
+    this.localObserver.publish("activate-search-by-draw", {
+      selectedFromDate: formatFromDate,
+      selectedEndDate: formatEndDate,
+      selectedFormType: "Polygon"
+    });
+  };
+  handleRectangleChange = () => {
+    const { selectedFromDate, selectedEndDate, selectedFormType } = this.state;
+    this.localObserver.publish("activate-search-by-draw", {
+      selectedFromDate: selectedFromDate,
+      selectedEndDate: selectedEndDate,
+      selectedFormType: "Box"
+    });
+  };
   render() {
-    return <div>Här ska vi lägga till formuläret för turer</div>;
+    const { classes } = this.props;
+
+    return (
+      <div>
+        <div>Här ska vi lägga till formuläret för turer</div>
+
+        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+          <Grid container justify="space-around">
+            <KeyboardDatePicker
+              format="yyyy-MM-dd"
+              margin="normal"
+              id="date-picker-inline"
+              label="Från och med"
+              value={this.state.selectedFromDate}
+              onChange={this.handleFromDateChange}
+              KeyboardButtonProps={{
+                "aria-label": "change date"
+              }}
+            />
+            <KeyboardTimePicker
+              margin="normal"
+              id="time-picker"
+              ampm={false}
+              value={this.state.selectedFromDate}
+              onChange={this.handleFromDateChange}
+              KeyboardButtonProps={{
+                "aria-label": "change time"
+              }}
+            />
+            <KeyboardDatePicker
+              format="yyyy-MM-dd"
+              margin="normal"
+              id="date-picker-inline"
+              label="Till och med"
+              value={this.state.selectedEndDate}
+              onChange={this.handleEndDateChange}
+              KeyboardButtonProps={{
+                "aria-label": "change date"
+              }}
+            />
+            <KeyboardTimePicker
+              margin="normal"
+              id="time-picker"
+              ampm={false}
+              value={this.state.selectedEndDate}
+              onChange={this.handleEndDateChange}
+              KeyboardButtonProps={{
+                "aria-label": "change time"
+              }}
+            />
+          </Grid>
+        </MuiPickersUtilsProvider>
+        <p>Markera sökområde i kartan</p>
+        <Button
+          variant="outlined"
+          type="button"
+          title="Lägg till polygon"
+          value={this.state.selectedFormType}
+          onClick={this.handlePolygonChange}
+        >
+          Polygon
+          <BorderStyleIcon className={classes.leftIcon} />
+        </Button>
+        <Button
+          variant="outlined"
+          type="button"
+          value={this.state.selectedFormType}
+          title="Lägg till rektangel"
+          onClick={this.handleRectangleChange}
+        >
+          Rektangel
+          <SquareIcon className={classes.leftIcon} />
+        </Button>
+      </div>
+    );
   }
 }
 
