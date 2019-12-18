@@ -12,6 +12,7 @@ import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
 
 import Zoom from "../controls/Zoom";
+import Rotate from "../controls/Rotate";
 import ScaleLine from "../controls/ScaleLine";
 import Attribution from "../controls/Attribution.js";
 import MapCleaner from "../controls/MapCleaner";
@@ -468,6 +469,7 @@ class App extends React.PureComponent {
                 )}
               >
                 <Zoom map={this.appModel.getMap()} />
+                <Rotate map={this.appModel.getMap()} />
                 {clean === false && <MapSwitcher appModel={this.appModel} />}
                 {clean === false && <MapCleaner appModel={this.appModel} />}
                 {clean === false && <PresetLinks appModel={this.appModel} />}
