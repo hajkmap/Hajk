@@ -21,7 +21,6 @@ export default class MapViewModel {
     this.localObserver = settings.localObserver;
 
     this.bindSubscriptions();
-    this.addSearchResultLayerToMap();
     this.addHighlightLayerToMap();
     this.addDrawSearch();
   }
@@ -31,11 +30,6 @@ export default class MapViewModel {
     localObserver: PropTypes.object.isRequired
   };
 
-  //TOODO Add Comments
-  addDrawLayer = olFeature => {
-    this.drawlayer.getSource().addFeature(olFeature);
-  };
-
   /**
    * Init method to listen for events from other parts of plugin
    *
@@ -43,24 +37,25 @@ export default class MapViewModel {
    * @memberof MapViewModel
    */
   bindSubscriptions = () => {
-    this.localObserver.subscribe(
-      "highlight-search-result-feature",
-      olFeatureId => {
-        var olFeature = this.searchResultLayer
-          .getSource()
-          .getFeatureById(olFeatureId);
-        this.highlightAndZoomToFeature(olFeature);
-      }
-    );
+    this.localObserver.subscribe("highlight-search-result-feature", payload => {
+      var olFeature = this.getSearchResultLayerFromId(payload.searchResultId)
+        .getSource()
+        .getFeatureById(payload.olFeatureId);
+      this.highlightAndZoomToFeature(olFeature);
+    });
 
     this.map.on("singleclick", this.onFeaturesClickedInMap);
 
-    this.localObserver.subscribe("add-search-result", olFeatures => {
-      this.addFeatureToSearchResultLayer(olFeatures);
-    });
+    this.localObserver.subscribe(
+      "add-search-result",
+      ({ searchResultId, olFeatures }) => {
+        var searchResultLayer = this.addSearchResultLayerToMap(searchResultId);
+        this.addFeatureToSearchResultLayer(olFeatures, searchResultLayer);
+      }
+    );
 
-    this.localObserver.subscribe("clear-search-result", () => {
-      this.searchResultLayer.getSource().clear();
+    this.localObserver.subscribe("clear-search-result", searchResultId => {
+      this.map.removeLayer(this.getSearchResultLayerFromId(searchResultId));
     });
     this.localObserver.subscribe("clear-highlight", () => {
       this.highlightLayer.getSource().clear();
@@ -77,6 +72,19 @@ export default class MapViewModel {
         this.drawlayer.getSource().clear();
       }
     );
+  };
+
+  getSearchResultLayerFromId = searchResultId => {
+    console.log(this.map.getLayers().getArray());
+    return this.map
+      .getLayers()
+      .getArray()
+      .filter(layer => {
+        return (
+          layer.get("type") === "vt-search-result-layer" &&
+          layer.get("searchResultId") === searchResultId
+        );
+      })[0];
   };
 
   activateSearchByDraw = ({
@@ -126,13 +134,17 @@ export default class MapViewModel {
    * @returns {null}
    * @memberof MapViewModel
    */
-  addSearchResultLayerToMap = () => {
-    this.searchResultLayer = new VectorLayer({
+  addSearchResultLayerToMap = searchResultId => {
+    var searchResultLayer = new VectorLayer({
       source: new VectorSource({})
     });
-    this.searchResultLayer.set("type", "vt-search-result-layer");
-    this.searchResultLayer.set("queryable", false);
-    this.map.addLayer(this.searchResultLayer);
+    console.log(this.map, "map");
+    searchResultLayer.set("type", "vt-search-result-layer");
+    searchResultLayer.set("searchResultId", searchResultId);
+    searchResultLayer.set("queryable", false);
+
+    this.map.addLayer(searchResultLayer);
+    return searchResultLayer;
   };
 
   /**
@@ -186,9 +198,9 @@ export default class MapViewModel {
    * @memberof MapViewModel
    * @param {Array<{external:"ol.feature"}>}
    */
-  addFeatureToSearchResultLayer = olFeatures => {
-    this.searchResultLayer.getSource().addFeatures(olFeatures);
-    this.zoomToExtent(this.searchResultLayer.getSource().getExtent());
+  addFeatureToSearchResultLayer = (olFeatures, searchResultLayer) => {
+    searchResultLayer.getSource().addFeatures(olFeatures);
+    this.zoomToExtent(searchResultLayer.getSource().getExtent());
   };
 
   /**

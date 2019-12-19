@@ -34,11 +34,11 @@ class AttributeTable extends React.Component {
   };
 
   bindSubscriptions = () => {
-    const { localObserver } = this.props;
-    localObserver.subscribe("highlight-attribute-row", id => {
-      var foundRowIndex = this.getRowIndexFromRowId(id);
+    const { localObserver, searchResult } = this.props;
+    localObserver.subscribe("highlight-attribute-row", olFeatureId => {
+      var foundRowIndex = this.getRowIndexFromRowId(olFeatureId);
       this.setState({
-        selectedRow: { index: foundRowIndex, id: id },
+        selectedRow: { index: foundRowIndex, id: olFeatureId },
         focusedRow: foundRowIndex
       });
     });
@@ -123,9 +123,12 @@ class AttributeTable extends React.Component {
   };
 
   onRowClick = row => {
-    const { localObserver } = this.props;
+    const { localObserver, searchResult } = this.props;
     this.setState({ selectedRow: { index: row.index, id: row.rowData.id } });
-    localObserver.publish("attribute-table-row-clicked", row.rowData.id);
+    localObserver.publish("attribute-table-row-clicked", {
+      olFeatureId: row.rowData.id,
+      searchResultId: searchResult.id
+    });
   };
 
   render() {
