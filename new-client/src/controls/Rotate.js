@@ -57,7 +57,7 @@ const RotateControl = React.memo(props => {
             className={classes.button}
             onClick={rotateNorth}
           >
-            <NavigationIcon />
+            <NavigationIcon style={{ transform: `rotate(${rotation}rad)` }} />
           </Button>
         </Paper>
       </Tooltip>
