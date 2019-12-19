@@ -57,6 +57,13 @@ export default class MapViewModel {
     this.localObserver.subscribe("clear-search-result", searchResultId => {
       this.map.removeLayer(this.getSearchResultLayerFromId(searchResultId));
     });
+
+    this.map.on("singleclick", this.onFeaturesClickedInMap);
+
+    this.localObserver.subscribe("add-search-result", olFeatures => {
+      this.addFeatureToSearchResultLayer(olFeatures);
+    });
+
     this.localObserver.subscribe("clear-highlight", () => {
       this.highlightLayer.getSource().clear();
     });
