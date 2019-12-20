@@ -447,7 +447,6 @@ class App extends React.PureComponent {
               className={cslx(classes.header, classes.pointerEventsOnChildren)}
             >
               {searchPlugins.filter(plugin => {
-                console.log(plugin, "plugin");
                 return plugin != null;
               }).length === 0 &&
                 clean === false &&

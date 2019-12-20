@@ -15,14 +15,11 @@ import GeoJSON from "ol/format/GeoJSON";
 import { handleClick } from "../../../models/Click";
 
 /**
- * @summary Main class for the Dummy plugin.
- * @description The purpose of having a Dummy plugin is to exemplify
- * and document how plugins should be constructed in Hajk.
- * The plugins can also serve as a scaffold for other plugins: simply
- * copy the directory, rename it and all files within, and change logic
- * to create the plugin you want to.
- *
- * @class Dummy
+ * @summary Base in the search result list
+ * @description This component is the base in the search result list in vtsearch.
+ * there is a one-to-one relation between a searchresult, searchResultLayer and a tab and the key is searchResultId
+ * This means that for every new searchResult, we will create one new tab and one new searchresultlayer
+ * @class SearchResultListContainer
  * @extends {React.PureComponent}
  */
 
@@ -102,32 +99,35 @@ class SearchResultListContainer extends React.Component {
 
   handleSearchResult = result => {
     const { localObserver } = this.props;
-    this.addSearchResult(result);
-    localObserver.publish(
-      "add-search-result",
-      this.convertResultToOlFeatures(result)
-    );
+    var searchResultId = this.addSearchResult(result);
+    localObserver.publish("add-search-result", {
+      searchResultId: searchResultId,
+      olFeatures: this.convertResultToOlFeatures(result)
+    });
   };
 
   convertResultToOlFeatures = result => {
     return new GeoJSON().readFeatures(result.featureCollection);
   };
 
+  removeSearchResult = () => {};
+
   addSearchResult = result => {
-    var highestId = 0;
+    var newId = 0;
+
     if (this.state.searchResultIds.length > 0) {
-      this.state.searchResultIds.forEach(id => {
-        if (id > highestId) highestId = id;
-      });
+      newId =
+        this.state.searchResultIds[this.state.searchResultIds.length - 1] + 1;
     }
 
     this.searchResults.push({
       ...result,
-      ...{ id: highestId === 0 ? 0 : highestId + 1 }
+      ...{ id: newId }
     });
 
-    var searchResultIds = this.state.searchResultIds.concat(highestId);
+    var searchResultIds = this.state.searchResultIds.concat(newId);
     this.setState({ searchResultIds: searchResultIds });
+    return newId;
   };
 
   bindSubscriptions = () => {
@@ -137,8 +137,8 @@ class SearchResultListContainer extends React.Component {
       this.handleSearchResult(result);
     });
 
-    localObserver.subscribe("attribute-table-row-clicked", id => {
-      localObserver.publish("highlight-search-result-feature", id);
+    localObserver.subscribe("attribute-table-row-clicked", payload => {
+      localObserver.publish("highlight-search-result-feature", payload);
     });
 
     localObserver.subscribe("features-clicked-in-map", features => {
@@ -171,6 +171,7 @@ class SearchResultListContainer extends React.Component {
         };
       });
     });
+
     localObserver.subscribe("search-result-list-normal", () => {
       this.setState({
         minimized: false,
@@ -194,36 +195,56 @@ class SearchResultListContainer extends React.Component {
     this.setState({ activeTab: newValue });
   };
 
-  getSearchResultsFromIds = ids => {
-    return ids.map(id => {
+  getSearchResults = () => {
+    return this.state.searchResultIds.map(id => {
       return this.searchResults.find(result => result.id === id);
     });
   };
 
-  getNextTabActive = id => {
+  getNextTabActive = searchResultId => {
     const { searchResultIds } = this.state;
-    if (searchResultIds[id + 1]) {
-      return searchResultIds[id + 1];
+    var index = searchResultIds.indexOf(searchResultId);
+    if (searchResultIds[index + 1]) {
+      return searchResultIds[index + 1];
     } else {
-      return searchResultIds[id - 1];
+      return searchResultIds[index - 1] ? searchResultIds[index - 1] : 0;
     }
   };
 
-  removeResult = id => {
+  removeSearchResult = searchResultId => {
     const { searchResultIds } = this.state;
-    const nextActiveTab = this.getNextTabActive(id);
-    const newSearchResultIds = searchResultIds.filter(result => result !== id);
+    const { localObserver } = this.props;
+    const newSearchResultIds = searchResultIds.filter(
+      result => result !== searchResultId
+    );
+    return new Promise((resolve, reject) => {
+      this.setState(
+        () => {
+          return {
+            searchResultIds: newSearchResultIds
+          };
+        },
+        () => {
+          this.searchResults = this.searchResults.filter(searchResult => {
+            return searchResult.id !== searchResultId;
+          });
+          localObserver.publish("clear-search-result", searchResultId);
+          resolve();
+        }
+      );
+    });
+  };
 
-    this.setState(() => {
-      return {
-        searchResultIds: newSearchResultIds,
-        activeTab: nextActiveTab
-      };
+  removeResult = searchResultId => {
+    const nextActiveTab = this.getNextTabActive(searchResultId);
+    this.removeSearchResult(searchResultId).then(() => {
+      this.setState({ activeTab: nextActiveTab });
     });
   };
 
   renderTabs = searchResult => {
     const { classes } = this.props;
+    var searchResultId = searchResult.id;
     return (
       <Tab
         classes={{ wrapper: classes.tabWrapper }}
@@ -234,22 +255,23 @@ class SearchResultListContainer extends React.Component {
             <ClearIcon
               onClick={e => {
                 e.stopPropagation();
-                this.removeResult(searchResult.id);
+                this.removeResult(searchResultId);
               }}
               className={classes.customIcon}
               fontSize="inherit"
             />
           </>
         }
-        value={searchResult.id}
-        key={`simple-tabpanel-${searchResult.id}`}
-        id={`simple-tabpanel-${searchResult.id}`}
-        aria-controls={`simple-tabpanel-${searchResult.id}`}
+        value={searchResultId}
+        key={`simple-tabpanel-${searchResultId}`}
+        id={`simple-tabpanel-${searchResultId}`}
+        aria-controls={`simple-tabpanel-${searchResultId}`}
       ></Tab>
     );
   };
 
   renderTabsSection = searchResults => {
+    console.log(this.state.activeTab, "activeTab");
     return (
       <Tabs
         value={this.state.activeTab}
@@ -265,9 +287,7 @@ class SearchResultListContainer extends React.Component {
 
   renderSearchResultContainer = () => {
     const { classes, windowContainerId, localObserver } = this.props;
-    let searchResults = this.getSearchResultsFromIds(
-      this.state.searchResultIds
-    );
+    let searchResults = this.getSearchResults();
 
     return (
       <Rnd
