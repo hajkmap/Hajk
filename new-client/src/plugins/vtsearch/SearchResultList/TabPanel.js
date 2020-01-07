@@ -45,15 +45,15 @@ class TabPanel extends React.PureComponent {
       index,
       resultListHeight,
       searchResult,
-      localObserver
+      localObserver,
+      toolConfig
     } = this.props;
 
-    var renderSummary = false;
-    //searchResult.label === "Hållplatsområden" ? true : false; //TODO - DEBUG ONLY
+    var renderSummary = searchResult.type === "journeys" ? true : false;
 
     return (
       <Grid
-        hidden={value !== index}
+        style={{ display: value !== index ? "none" : "block" }}
         id={`search-result-${index}`}
         container
         alignContent="stretch"
@@ -71,6 +71,7 @@ class TabPanel extends React.PureComponent {
         <Grid item xs={renderSummary ? 9 : 12}>
           <AttributeTable
             searchResult={searchResult}
+            toolConfig={toolConfig}
             resultListHeight={resultListHeight}
             localObserver={localObserver}
           ></AttributeTable>

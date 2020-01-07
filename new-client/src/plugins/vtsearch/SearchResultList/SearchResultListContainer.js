@@ -156,6 +156,10 @@ class SearchResultListContainer extends React.Component {
       localObserver.publish("highlight-search-result-feature", payload);
     });
 
+    localObserver.subscribe("set-active-tab", searchResultId => {
+      this.handleTabChange(null, searchResultId);
+    });
+
     localObserver.subscribe("features-clicked-in-map", features => {
       localObserver.publish("highlight-attribute-row", features[0].getId());
     });
@@ -289,6 +293,7 @@ class SearchResultListContainer extends React.Component {
 
   renderTabsSection = searchResults => {
     const { classes } = this.props;
+    console.log(this.state, "state");
     return (
       <Tabs
         classes={{
@@ -307,7 +312,12 @@ class SearchResultListContainer extends React.Component {
   };
 
   renderSearchResultContainer = () => {
-    const { classes, windowContainerId, localObserver } = this.props;
+    const {
+      classes,
+      windowContainerId,
+      localObserver,
+      toolConfig
+    } = this.props;
     let searchResults = this.getSearchResults();
 
     return (
@@ -382,6 +392,7 @@ class SearchResultListContainer extends React.Component {
           return (
             <TabPanel
               key={searchResult.id}
+              toolConfig={toolConfig}
               value={this.state.activeTab}
               index={searchResult.id}
               resultListHeight={this.state.resultListHeight}
