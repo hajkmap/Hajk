@@ -3,7 +3,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import AttributeTable from "./AttributeTable";
 import { withStyles } from "@material-ui/core/styles";
-import Container from "@material-ui/core/Container";
 import SummaryTable from "./SummaryTable";
 import Grid from "@material-ui/core/Grid";
 
@@ -49,8 +48,8 @@ class TabPanel extends React.PureComponent {
       localObserver
     } = this.props;
 
-    var renderSummary =
-      searchResult.label === "Hållplatsområden" ? true : false; //TODO - DEBUG ONLY
+    var renderSummary = false;
+    //searchResult.label === "Hållplatsområden" ? true : false; //TODO - DEBUG ONLY
 
     return (
       <Grid

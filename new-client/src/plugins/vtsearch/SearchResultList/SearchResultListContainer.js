@@ -12,6 +12,7 @@ import PanelToolbox from "./PanelToolbox";
 import TabPanel from "./TabPanel";
 import ClearIcon from "@material-ui/icons/Clear";
 import GeoJSON from "ol/format/GeoJSON";
+import { Typography } from "@material-ui/core";
 
 /**
  * @summary Base in the search result list
@@ -34,16 +35,31 @@ const styles = theme => {
       pointerEvents: "all"
     },
     customIcon: {
-      marginLeft: "30%"
+      flex: "0 auto",
+      marginLeft: "2%"
     },
-    tabWrapper: {
-      display: "inline-block"
+    flexItem: {
+      flex: "auto"
     },
-    toolbar: {
+    tabRoot: {
+      padding: 0,
+      minHeight: 0,
+      textTransform: "none"
+    },
+    tabsRoot: {
       minHeight: 0
     },
-    appbar: {
-      height: 30
+    tabWrapper: {
+      display: "flex",
+      flexDirection: "row"
+    },
+    tabsFlexContainer: {
+      flexWrap: "wrap"
+    },
+    toolbar: {
+      minHeight: 0,
+
+      padding: 0
     }
   };
 };
@@ -246,10 +262,12 @@ class SearchResultListContainer extends React.Component {
     var searchResultId = searchResult.id;
     return (
       <Tab
-        classes={{ wrapper: classes.tabWrapper }}
+        classes={{ root: classes.tabRoot, wrapper: classes.tabWrapper }}
         label={
           <>
-            {searchResult.label}
+            <Typography variant="subtitle2" className={classes.flexItem}>
+              {searchResult.label}
+            </Typography>
 
             <ClearIcon
               onClick={e => {
@@ -270,9 +288,13 @@ class SearchResultListContainer extends React.Component {
   };
 
   renderTabsSection = searchResults => {
-    console.log(this.state.activeTab, "activeTab");
+    const { classes } = this.props;
     return (
       <Tabs
+        classes={{
+          root: classes.tabsRoot,
+          flexContainer: classes.tabsFlexContainer
+        }}
         value={this.state.activeTab}
         onChange={this.handleTabChange}
         aria-label="search-result-tabs"
@@ -341,22 +363,16 @@ class SearchResultListContainer extends React.Component {
               this.appbarHeight = appbar.offsetHeight;
             }
           }}
-          classes={{ positionStatic: classes.appbar }}
           position="static"
         >
           <Toolbar classes={{ regular: classes.toolbar }}>
-            <Grid
-              justify="space-between"
-              alignItems="center"
-              container
-              spacing={10}
-            >
-              <Grid item>
+            <Grid justify="space-between" alignItems="center" container>
+              <Grid style={{ paddingLeft: 10 }} item>
                 {searchResults.length > 0 &&
                   this.renderTabsSection(searchResults)}
               </Grid>
 
-              <Grid item>
+              <Grid style={{ paddingLeft: 0 }} item>
                 <PanelToolbox localObserver={localObserver}></PanelToolbox>
               </Grid>
             </Grid>

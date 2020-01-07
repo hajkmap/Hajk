@@ -46,6 +46,7 @@ class AttributeTable extends React.Component {
 
   getColumns() {
     const { searchResult } = this.props;
+
     return this.getFeaturePropertiesKeys(searchResult).map(key => {
       return {
         width: 200,

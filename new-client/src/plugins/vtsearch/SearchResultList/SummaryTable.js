@@ -29,7 +29,7 @@ class AttributeTable extends React.Component {
   }
 
   render() {
-    const { resultListHeight, windowWidth, searchResult } = this.props;
+    const { resultListHeight, windowWidth } = this.props;
 
     return (
       <Paper style={{ height: resultListHeight, width: windowWidth }}>
