@@ -22,14 +22,18 @@ const styles = theme => ({
       paddingRight: theme.direction === "rtl" ? "0px !important" : undefined
     }
   },
+
+  tableRowHover: {
+    "&:hover": {
+      backgroundColor: theme.palette.grey[200]
+    }
+  },
+
   tableRow: {
     cursor: "pointer",
     border: "1px solid #c3c7c7",
     whiteSpace: "wrap",
-    outline: "none",
-    "&:hover": {
-      backgroundColor: theme.palette.grey[200]
-    }
+    outline: "none"
   },
   tableRowSelected: {
     border: "2px solid rgba(18,120,211,0.37)",
@@ -47,7 +51,6 @@ const styles = theme => ({
     lineHeight: 1,
     borderBottom: 0
   },
-
   rowCell: {
     marginRight: 0,
     borderBottom: 0,
@@ -60,17 +63,19 @@ const styles = theme => ({
 class VirtualizedTable extends React.PureComponent {
   static defaultProps = {
     headerHeight: 48,
-    rowHeight: 48
+    rowHeight: 48,
+    sortable: true,
+    selectedRow: -1
   };
 
   getRowClassName = ({ index }) => {
     const { classes } = this.props;
-
     if (this.props.selectedRow.index === index) {
       return clsx(
         classes.tableRow,
         classes.tableRowSelected,
-        classes.flexContainer
+        classes.flexContainer,
+        classes.tableRowHover
       );
     }
     return index !== -1 && clsx(classes.tableRow, classes.flexContainer);
@@ -99,7 +104,7 @@ class VirtualizedTable extends React.PureComponent {
   };
 
   headerRenderer = ({ label, columnIndex, sortDirection }) => {
-    const { headerHeight, columns, classes } = this.props;
+    const { headerHeight, columns, classes, sortable } = this.props;
 
     return (
       <TableCell
@@ -112,7 +117,7 @@ class VirtualizedTable extends React.PureComponent {
         align={columns[columnIndex].numeric || false ? "right" : "left"}
       >
         {label}
-        <SortIndicator sortDirection={sortDirection} />
+        {sortable && <SortIndicator sortDirection={sortDirection} />}
       </TableCell>
     );
   };
@@ -124,7 +129,6 @@ class VirtualizedTable extends React.PureComponent {
       rowHeight,
       rowClicked,
       headerHeight,
-      windowWidth,
       ...tableProps
     } = this.props;
     return (

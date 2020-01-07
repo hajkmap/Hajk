@@ -12,7 +12,6 @@ import PanelToolbox from "./PanelToolbox";
 import TabPanel from "./TabPanel";
 import ClearIcon from "@material-ui/icons/Clear";
 import GeoJSON from "ol/format/GeoJSON";
-import { handleClick } from "../../../models/Click";
 
 /**
  * @summary Base in the search result list

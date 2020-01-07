@@ -4,6 +4,8 @@ import PropTypes from "prop-types";
 import AttributeTable from "./AttributeTable";
 import { withStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
+import SummaryTable from "./SummaryTable";
+import Grid from "@material-ui/core/Grid";
 
 /**
  * @summary Main class for the Dummy plugin.
@@ -27,7 +29,7 @@ const styles = theme => {
   };
 };
 
-class SearchResultListContainer extends React.PureComponent {
+class TabPanel extends React.PureComponent {
   state = {};
 
   static propTypes = {
@@ -42,28 +44,42 @@ class SearchResultListContainer extends React.PureComponent {
     const {
       value,
       index,
-      classes,
       resultListHeight,
       searchResult,
-      localObserver,
-      windowWidth
+      localObserver
     } = this.props;
+
+    var renderSummary =
+      searchResult.label === "Hållplatsområden" ? true : false; //TODO - DEBUG ONLY
+
     return (
-      <Container
-        classes={{ root: classes.containerRoot }}
+      <Grid
         hidden={value !== index}
         id={`search-result-${index}`}
+        container
+        alignContent="stretch"
+        alignItems="flex-start"
+        spacing={0}
       >
-        <AttributeTable
-          searchResult={searchResult}
-          resultListHeight={resultListHeight}
-          windowWidth={windowWidth}
-          localObserver={localObserver}
-        ></AttributeTable>
-      </Container>
+        {renderSummary && (
+          <Grid item xs={3}>
+            <SummaryTable
+              localObserver={localObserver}
+              resultListHeight={resultListHeight}
+            ></SummaryTable>
+          </Grid>
+        )}
+        <Grid item xs={renderSummary ? 9 : 12}>
+          <AttributeTable
+            searchResult={searchResult}
+            resultListHeight={resultListHeight}
+            localObserver={localObserver}
+          ></AttributeTable>
+        </Grid>
+      </Grid>
     );
   }
 }
 
 // Part of API. Make a HOC of our plugin.
-export default withStyles(styles)(SearchResultListContainer);
+export default withStyles(styles)(TabPanel);

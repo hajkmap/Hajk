@@ -1,7 +1,7 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import VirtualizedTable from "./VirtualizedTable";
+import { withStyles } from "@material-ui/core/styles";
 import { SortDirection } from "react-virtualized";
 
 const styles = theme => ({});
@@ -34,7 +34,7 @@ class AttributeTable extends React.Component {
   };
 
   bindSubscriptions = () => {
-    const { localObserver, searchResult } = this.props;
+    const { localObserver } = this.props;
     localObserver.subscribe("highlight-attribute-row", olFeatureId => {
       var foundRowIndex = this.getRowIndexFromRowId(olFeatureId);
       this.setState({
@@ -46,7 +46,6 @@ class AttributeTable extends React.Component {
 
   getColumns() {
     const { searchResult } = this.props;
-
     return this.getFeaturePropertiesKeys(searchResult).map(key => {
       return {
         width: 200,
@@ -57,7 +56,6 @@ class AttributeTable extends React.Component {
   }
   getRows() {
     const { searchResult } = this.props;
-
     return searchResult.featureCollection.features.map((feature, index) => {
       return Object.keys(feature.properties).reduce(
         (acc, key) => {
@@ -134,14 +132,13 @@ class AttributeTable extends React.Component {
   render() {
     const { resultListHeight, windowWidth, searchResult } = this.props;
     return (
-      <Paper style={{ height: resultListHeight, width: windowWidth }}>
+      <Paper style={{ height: resultListHeight }}>
         {searchResult.featureCollection.features.length > 0 ? (
           <VirtualizedTable
             rowCount={this.state.rows.length}
             rowGetter={({ index }) => this.state.rows[index]}
             rowClicked={this.onRowClick}
             columns={this.getColumns()}
-            windowWidth={windowWidth}
             sort={this.sort}
             sortDirection={this.state.sortDirection}
             sortBy={this.state.sortBy}
