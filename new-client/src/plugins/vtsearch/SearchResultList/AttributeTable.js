@@ -10,11 +10,18 @@ class AttributeTable extends React.Component {
   state = {
     selectedRow: {
       index: null,
-      id: null
+      olFeatureId: null
     },
+    sortBy: this.props.toolConfig.geoserver[this.props.searchResult.type]
+      .defaultSortAttribute,
     focusedRow: 0,
     rows: this.getRows()
   };
+
+  //Most efficient way to do it?
+  componentDidMount() {
+    this.sort({ sortBy: this.state.sortBy, sortDirection: SortDirection.ASC });
+  }
 
   constructor(props) {
     super(props);
@@ -25,20 +32,24 @@ class AttributeTable extends React.Component {
     return Object.keys(searchResult.featureCollection.features[0].properties);
   }
 
-  getRowIndexFromRowId = id => {
+  getRowIndexFromOlFeatureId = olFeatureId => {
     return this.state.rows
       .map(row => {
-        return row.id;
+        return row.olFeatureId;
       })
-      .indexOf(id);
+      .indexOf(olFeatureId);
   };
 
   bindSubscriptions = () => {
     const { localObserver } = this.props;
     localObserver.subscribe("highlight-attribute-row", olFeatureId => {
-      var foundRowIndex = this.getRowIndexFromRowId(olFeatureId);
+      var foundRowIndex = this.getRowIndexFromOlFeatureId(olFeatureId);
+      localObserver.publish(
+        "set-active-tab",
+        this.state.rows[foundRowIndex].searchResultId
+      );
       this.setState({
-        selectedRow: { index: foundRowIndex, id: olFeatureId },
+        selectedRow: { index: foundRowIndex, olFeatureId: olFeatureId },
         focusedRow: foundRowIndex
       });
     });
@@ -57,12 +68,14 @@ class AttributeTable extends React.Component {
   }
   getRows() {
     const { searchResult } = this.props;
+
     return searchResult.featureCollection.features.map((feature, index) => {
+      console.log(feature, "feature");
       return Object.keys(feature.properties).reduce(
         (acc, key) => {
           return { ...acc, [key]: feature.properties[key] };
         },
-        { id: feature.id }
+        { olFeatureId: feature.id, searchResultId: searchResult.id }
       );
     });
   }
@@ -114,8 +127,8 @@ class AttributeTable extends React.Component {
         sortDirection,
         rows: rowsToBeSorted,
         selectedRow: {
-          index: this.getRowIndexFromRowId(state.selectedRow.id),
-          id: state.selectedRow.id
+          index: this.getRowIndexFromOlFeatureId(state.selectedRow.id),
+          olFeatureId: state.selectedRow.olFeatureId
         }
       };
     });
@@ -123,15 +136,19 @@ class AttributeTable extends React.Component {
 
   onRowClick = row => {
     const { localObserver, searchResult } = this.props;
-    this.setState({ selectedRow: { index: row.index, id: row.rowData.id } });
+
+    this.setState({
+      selectedRow: { index: row.index, olFeatureId: row.rowData.olFeatureId }
+    });
     localObserver.publish("attribute-table-row-clicked", {
-      olFeatureId: row.rowData.id,
+      olFeatureId: row.rowData.olFeatureId,
       searchResultId: searchResult.id
     });
   };
 
   render() {
     const { resultListHeight, windowWidth, searchResult } = this.props;
+
     return (
       <Paper style={{ height: resultListHeight }}>
         {searchResult.featureCollection.features.length > 0 ? (

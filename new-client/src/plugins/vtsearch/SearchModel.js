@@ -213,7 +213,8 @@ export default class SearchModel {
         res.json().then(jsonResult => {
           let journeys = {
             featureCollection: jsonResult,
-            label: this.geoserver.journeys.searchLabel
+            label: this.geoserver.journeys.searchLabel,
+            type: "journeys"
           };
 
           journeys.featureCollection = this.removeUnnecessaryAttributes(
@@ -385,7 +386,8 @@ export default class SearchModel {
         res.json().then(jsonResult => {
           const routes = {
             featureCollection: jsonResult,
-            label: this.geoserver.routes.searchLabel
+            label: this.geoserver.routes.searchLabel,
+            type: "routes"
           };
 
           routes.featureCollection = this.removeUnnecessaryAttributes(
@@ -506,7 +508,8 @@ export default class SearchModel {
       res.json().then(jsonResult => {
         const stopAreas = {
           featureCollection: jsonResult,
-          label: this.geoserver.stopAreas.searchLabel
+          label: this.geoserver.stopAreas.searchLabel,
+          type: "stopAreas"
         };
         this.localObserver.publish("vtsearch-result-done", stopAreas);
       });
