@@ -58,7 +58,6 @@ const styles = theme => {
     },
     toolbar: {
       minHeight: 0,
-
       padding: 0
     }
   };
@@ -73,6 +72,12 @@ const getWindowContainerHeight = () => {
     .height;
 };
 
+/**
+ * @summary SearchResultListContainer is the core container for the GUI used for showing search results
+ * @description GUI-component that wraps all the other GUI-components used to show search results in vtsearch
+ * @class SearchResultListContainer
+ * @extends {React.Component}
+ */
 class SearchResultListContainer extends React.Component {
   state = {
     resultListHeight: 300,
@@ -285,7 +290,6 @@ class SearchResultListContainer extends React.Component {
         }
         value={searchResultId}
         key={`simple-tabpanel-${searchResultId}`}
-        id={`simple-tabpanel-${searchResultId}`}
         aria-controls={`simple-tabpanel-${searchResultId}`}
       ></Tab>
     );
@@ -293,7 +297,6 @@ class SearchResultListContainer extends React.Component {
 
   renderTabsSection = searchResults => {
     const { classes } = this.props;
-    console.log(this.state, "state");
     return (
       <Tabs
         classes={{
@@ -393,8 +396,8 @@ class SearchResultListContainer extends React.Component {
             <TabPanel
               key={searchResult.id}
               toolConfig={toolConfig}
-              value={this.state.activeTab}
-              index={searchResult.id}
+              activeTabId={this.state.activeTab}
+              tabId={searchResult.id}
               resultListHeight={this.state.resultListHeight}
               windowWidth={this.state.windowWidth}
               localObserver={localObserver}
