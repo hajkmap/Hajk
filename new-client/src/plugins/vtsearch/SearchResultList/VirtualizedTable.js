@@ -78,6 +78,13 @@ const styles = theme => ({
 
 const headerRowIndex = -1;
 
+/**
+ * @summary VirtualizedTable is the core class to handle the table used in Attribute Table
+ * @description VirtualizedTable uses React Virtualized to render large lists in a smart way to boost performance.
+ * @class VirtualizedTable
+ * @extends {React.PureComponent}
+ */
+
 class VirtualizedTable extends React.PureComponent {
   static defaultProps = {
     headerHeight: 35,

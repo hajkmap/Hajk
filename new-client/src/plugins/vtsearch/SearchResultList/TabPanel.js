@@ -2,49 +2,29 @@
 import React from "react";
 import PropTypes from "prop-types";
 import AttributeTable from "./AttributeTable";
-import { withStyles } from "@material-ui/core/styles";
 import SummaryTable from "./SummaryTable";
 import Grid from "@material-ui/core/Grid";
 
 /**
- * @summary Main class for the Dummy plugin.
- * @description The purpose of having a Dummy plugin is to exemplify
- * and document how plugins should be constructed in Hajk.
- * The plugins can also serve as a scaffold for other plugins: simply
- * copy the directory, rename it and all files within, and change logic
- * to create the plugin you want to.
- *
- * @class Dummy
+ * @summary Panel for handling multiple search result using tabs
+ * @description Panel handles multiple search results with tabs.
+ * Every tab maps to a searchresultId
+ * @class TabPanel
  * @extends {React.PureComponent}
  */
 
-const styles = theme => {
-  return {
-    containerRoot: {
-      padding: 0,
-      margin: 0,
-      maxWidth: "none"
-    }
-  };
-};
-
 class TabPanel extends React.PureComponent {
-  state = {};
-
   static propTypes = {
-    options: PropTypes.object.isRequired
-  };
-
-  static defaultProps = {
-    options: {}
+    activeTabId: PropTypes.number.isRequired,
+    tabId: PropTypes.number.isRequired
   };
 
   render() {
     const {
-      value,
-      index,
+      activeTabId,
       resultListHeight,
       searchResult,
+      tabId,
       localObserver,
       toolConfig
     } = this.props;
@@ -53,8 +33,7 @@ class TabPanel extends React.PureComponent {
 
     return (
       <Grid
-        style={{ display: value !== index ? "none" : "block" }}
-        id={`search-result-${index}`}
+        style={{ display: activeTabId !== tabId ? "none" : "block" }}
         container
         alignContent="stretch"
         alignItems="flex-start"
@@ -81,5 +60,4 @@ class TabPanel extends React.PureComponent {
   }
 }
 
-// Part of API. Make a HOC of our plugin.
-export default withStyles(styles)(TabPanel);
+export default TabPanel;

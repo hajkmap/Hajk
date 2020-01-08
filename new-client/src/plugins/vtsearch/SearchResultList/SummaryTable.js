@@ -2,9 +2,15 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import VirtualizedTable from "./VirtualizedTable";
-const styles = theme => ({});
 
-class AttributeTable extends React.Component {
+/**
+ * @summary Table used to show summary for journeys
+ * @description Table used to show a summary when the user search
+ * for the type Journeys
+ * @class SummaryTable
+ * @extends {React.Component}
+ */
+class SummaryTable extends React.Component {
   state = {
     rows: this.getRows()
   };
@@ -44,4 +50,4 @@ class AttributeTable extends React.Component {
   }
 }
 
-export default withStyles(styles)(AttributeTable);
+export default SummaryTable;

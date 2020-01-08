@@ -6,6 +6,15 @@ import { SortDirection } from "react-virtualized";
 
 const styles = theme => ({});
 
+/**
+ * @summary Attribute table for objects in the map
+ * @description Table with functionality to interact with the map
+ * the class is a wrapper around the VirtualizedTable class which uses
+ * React Virtualized to render large lists in a smart way to boost performance
+ * @class Attributetable
+ * @extends {React.Component}
+ */
+
 class AttributeTable extends React.Component {
   state = {
     selectedRow: {
@@ -68,9 +77,7 @@ class AttributeTable extends React.Component {
   }
   getRows() {
     const { searchResult } = this.props;
-
     return searchResult.featureCollection.features.map((feature, index) => {
-      console.log(feature, "feature");
       return Object.keys(feature.properties).reduce(
         (acc, key) => {
           return { ...acc, [key]: feature.properties[key] };
