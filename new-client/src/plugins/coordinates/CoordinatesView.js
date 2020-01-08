@@ -63,7 +63,11 @@ class CoordinatesView extends React.PureComponent {
         "Klicka i kartan för att välja position.",
         {
           variant: "info",
-          persist: true
+          persist: true,
+          anchorOrigin: {
+            vertical: "bottom",
+            horizontal: "center"
+          }
         }
       );
     });
