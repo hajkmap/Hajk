@@ -63,13 +63,16 @@ const styles = theme => {
   };
 };
 
+const windowsContainer = document.getElementById("windows-container");
+const mapContainer = document.getElementById("map");
+const appContainer = document.getElementById("app-container");
+
 const getWindowContainerWidth = () => {
-  return document.getElementById("windows-container").getClientRects()[0].width;
+  return windowsContainer.getClientRects()[0].width;
 };
 
 const getWindowContainerHeight = () => {
-  return document.getElementById("windows-container").getClientRects()[0]
-    .height;
+  return windowsContainer.getClientRects()[0].height;
 };
 
 /**
@@ -151,7 +154,14 @@ class SearchResultListContainer extends React.Component {
   };
 
   bindSubscriptions = () => {
-    const { localObserver } = this.props;
+    const { localObserver, app } = this.props;
+
+    app.globalObserver.subscribe("drawerToggled", () => {
+      this.setState({
+        windowWidth: getWindowContainerWidth(),
+        windowHeight: getWindowContainerHeight()
+      });
+    });
 
     localObserver.subscribe("vtsearch-result-done", result => {
       this.handleSearchResult(result);
@@ -266,6 +276,15 @@ class SearchResultListContainer extends React.Component {
     });
   };
 
+  resizeMap = height => {
+    const { app } = this.props;
+    //Not so "reacty" but no other solution possible because if we dont want to rewrite core functionality in Hajk3
+    [appContainer, mapContainer].forEach(container => {
+      container.style.bottom = height;
+    });
+    app.getMap().updateSize();
+  };
+
   renderTabs = searchResult => {
     const { classes } = this.props;
     var searchResultId = searchResult.id;
@@ -350,6 +369,7 @@ class SearchResultListContainer extends React.Component {
             0,
             ref.style.height.length - 2
           );
+          this.resizeMap(ref.style.height);
           this.setState({
             resultListHeight: parseInt(height),
             maximized: false,

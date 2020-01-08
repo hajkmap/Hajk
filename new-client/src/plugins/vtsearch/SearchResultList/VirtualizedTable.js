@@ -19,8 +19,7 @@ const styles = theme => ({
     "& .ReactVirtualized__Table__headerRow": {
       flip: false,
       overflow: "auto",
-      borderBottom: "solid",
-
+      borderBottom: "1px solid #000000",
       textTransform: "none",
       padding: 0,
       paddingRight: theme.direction === "rtl" ? "0px !important" : undefined
@@ -46,9 +45,12 @@ const styles = theme => ({
     whiteSpace: "pre-wrap",
     alignItems: "center",
     boxSizing: "border-box",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     cursor: "pointer",
-    padding: 0,
+    display: "flex",
+    paddingTop: 0,
+    paddingRight: 0,
+    paddingBottom: 0,
     minWidth: 0,
     wordBreak: "break-all",
     lineHeight: 1,
@@ -61,7 +63,7 @@ const styles = theme => ({
     justifyContent: "center",
     cursor: "pointer",
     fontSize: "0.8em",
-    paddingLeft: 0,
+
     minWidth: 0,
     wordBreak: "break-all",
     lineHeight: 1,
@@ -70,8 +72,9 @@ const styles = theme => ({
   rowCell: {
     marginRight: 0,
     borderBottom: 0,
+
     textAlign: "center",
-    padding: 0,
+
     flex: 1
   }
 });
@@ -87,8 +90,8 @@ const headerRowIndex = -1;
 
 class VirtualizedTable extends React.PureComponent {
   static defaultProps = {
-    headerHeight: 35,
-    rowHeight: 30,
+    headerHeight: 30,
+    rowHeight: 25,
     sortable: true,
     selectedRow: headerRowIndex
   };
