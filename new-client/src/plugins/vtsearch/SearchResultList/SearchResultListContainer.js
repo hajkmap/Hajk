@@ -280,7 +280,7 @@ class SearchResultListContainer extends React.Component {
     const { app } = this.props;
     //Not so "reacty" but no other solution possible because if we dont want to rewrite core functionality in Hajk3
     [appContainer, mapContainer].forEach(container => {
-      container.style.bottom = height;
+      container.style.bottom = `${height}px`;
     });
     app.getMap().updateSize();
   };
@@ -369,7 +369,7 @@ class SearchResultListContainer extends React.Component {
             0,
             ref.style.height.length - 2
           );
-          this.resizeMap(ref.style.height);
+
           this.setState({
             resultListHeight: parseInt(height),
             maximized: false,
@@ -412,6 +412,8 @@ class SearchResultListContainer extends React.Component {
           </Toolbar>
         </AppBar>
         {searchResults.map(searchResult => {
+          this.resizeMap(this.state.resultListHeight);
+
           return (
             <TabPanel
               key={searchResult.id}
