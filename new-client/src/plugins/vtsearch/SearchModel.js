@@ -48,6 +48,19 @@ export default class SearchModel {
   };
 
   /**
+   * Private method that gets all attributes that should remain from GeoServer.
+   * @param attributesToDisplay An array of attributes to be displayed.
+   * @returns An array with only attribute names, stripped of all other data.
+   *
+   * @memberof SearchModel
+   */
+  getAttributesToKeepFromSettings = attributesToDisplay => {
+    return attributesToDisplay.map(attribute => {
+      return attribute.key;
+    });
+  };
+
+  /**
    * Private method that determines if a we have a line number or a line name.
    * @param lineNameOrNumber The text string to check.
    * @returns Returns true if the text string is a line number.
@@ -198,14 +211,6 @@ export default class SearchModel {
     )
       url = url + viewParams;
 
-    console.log("url: ", url);
-
-    let attributesToKeep = this.geoserver.journeys.attributesToDisplay.map(
-      attribute => {
-        return attribute.key;
-      }
-    );
-
     // Fetch the result as a promise and attach it to the event.
     fetch(url)
       .then(res => {
@@ -218,7 +223,9 @@ export default class SearchModel {
 
           journeys.featureCollection = this.removeUnnecessaryAttributes(
             journeys.featureCollection,
-            attributesToKeep
+            this.getAttributesToKeepFromSettings(
+              this.geoserver.journeys.attributesToDisplay
+            )
           );
           journeys.featureCollection = this.removeDuplicates(
             journeys.featureCollection
@@ -271,7 +278,6 @@ export default class SearchModel {
             }
           );
 
-          console.log(lineNumberOrPublicLineNumber);
           return lineNumberOrPublicLineNumber;
         });
       })
@@ -373,12 +379,6 @@ export default class SearchModel {
     )
       url = url + cql;
 
-    let attributesToKeep = this.geoserver.routes.attributesToDisplay.map(
-      attribute => {
-        return attribute.key;
-      }
-    );
-
     // Fetch the result as a promise and attach it to the event.
     fetch(url)
       .then(res => {
@@ -391,7 +391,9 @@ export default class SearchModel {
 
           routes.featureCollection = this.removeUnnecessaryAttributes(
             routes.featureCollection,
-            attributesToKeep
+            this.getAttributesToKeepFromSettings(
+              this.geoserver.routes.attributesToDisplay
+            )
           );
           routes.featureCollection = this.removeDuplicates(
             routes.featureCollection
@@ -452,8 +454,8 @@ export default class SearchModel {
       });
   }
 
-  /***
-   * Get all stop areas. Sends  Sends an event when the function is called and another one when it's promise is done.
+  /**
+   * Get all stop areas. Sends an event when the function is called and another one when it's promise is done.
    * @param filterOnName The public name of the stop area, pass null of no name is given.
    * @param filterOnPublicLine The public line number, pass null of no line is given.
    * @param filterOnMunicipalName The municipality name, pass null of no municipality name is given.
@@ -500,29 +502,111 @@ export default class SearchModel {
     )
       url = url + viewParams;
 
-    console.log(url);
-
     // Fetch the result as a promise and attach it to the event.
     fetch(url).then(res => {
-      res.json().then(jsonResult => {
-        const stopAreas = {
-          featureCollection: jsonResult,
-          label: this.geoserver.stopAreas.searchLabel,
-          type: "stopAreas"
-        };
-        this.localObserver.publish("vtsearch-result-done", stopAreas);
-      });
+      res
+        .json()
+        .then(jsonResult => {
+          let stopAreas = {
+            featureCollection: jsonResult,
+            label: this.geoserver.stopAreas.searchLabel,
+            type: "stopAreas"
+          };
+
+          stopAreas.featureCollection = this.removeUnnecessaryAttributes(
+            stopAreas.featureCollection,
+            this.getAttributesToKeepFromSettings(
+              this.geoserver.stopAreas.attributesToDisplay
+            )
+          );
+          stopAreas.featureCollection = this.removeDuplicates(
+            stopAreas.featureCollection
+          );
+
+          this.localObserver.publish("vtsearch-result-done", stopAreas);
+        })
+        .catch(err => {
+          console.log(err);
+        });
     });
   }
 
-  // /**
-  //  * Kommentar.
-  //  *
-  //  * @memberof SearchModel
-  //  */
-  // getStopPoints(stopPointNameOrNumber, isInMunicipalityZoneGid) {
-  //   return null;
-  // }
+  /**
+   * Get all stop points. Sends an event when the function is called and another one when it's promise is done.
+   * @param filterOnName The public name of the stop point, pass null of no name is given.
+   * @param filterOnPublicLine The public line number, pass null of no line is given.
+   * @param filterOnMunicipalName The municipality name, pass null of no municipality name is given.
+   * @param filterOnNumber The number of the stop point, pass null of no number is given.
+   * @param filterOnWkt A polygon as a WKT, pass null of no polygon is given.
+   *
+   * @memberof SearchModel
+   */
+  getStopPoints(
+    filterOnName,
+    filterOnPublicLine,
+    filterOnMunicipalName,
+    filterOnNumber,
+    filterOnWkt
+  ) {
+    this.localObserver.publish("vtsearch-result-begin", {
+      label: this.geoserver.stopPoints.searchLabel
+    });
+
+    // Fix parentheses and so on, so that the WKT are geoserver valid.
+    if (filterOnWkt != null) filterOnWkt = this.fixWktForGeoServer(filterOnWkt);
+
+    // Build up the url with viewparams.
+    let url = this.geoserver.stopPoints.url;
+    let viewParams = "&viewparams=";
+    if (filterOnName != null)
+      viewParams = viewParams + `filterOnName:${filterOnName};`;
+    if (filterOnPublicLine != null)
+      viewParams = viewParams + `filterOnPublicLine:${filterOnPublicLine};`;
+    if (filterOnMunicipalName != null)
+      viewParams =
+        viewParams + `filterOnMunicipalName:${filterOnMunicipalName};`;
+    if (filterOnNumber != null)
+      viewParams = viewParams + `filterOnNumber:${filterOnNumber};`;
+    if (filterOnWkt != null)
+      viewParams = viewParams + `filterOnWkt:${filterOnWkt};`;
+
+    if (
+      filterOnName != null ||
+      filterOnPublicLine != null ||
+      filterOnMunicipalName != null ||
+      filterOnNumber != null ||
+      filterOnWkt != null
+    )
+      url = url + viewParams;
+
+    // Fetch the result as a promise and attach it to the event.
+    fetch(url).then(res => {
+      res
+        .json()
+        .then(jsonResult => {
+          let stopPoints = {
+            featureCollection: jsonResult,
+            label: this.geoserver.stopPoints.searchLabel,
+            type: "stopPoints"
+          };
+
+          stopPoints.featureCollection = this.removeUnnecessaryAttributes(
+            stopPoints.featureCollection,
+            this.getAttributesToKeepFromSettings(
+              this.geoserver.stopPoints.attributesToDisplay
+            )
+          );
+          stopPoints.featureCollection = this.removeDuplicates(
+            stopPoints.featureCollection
+          );
+
+          this.localObserver.publish("vtsearch-result-done", stopPoints);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    });
+  }
 
   /**
    * Returns then transport mode type names and numbers.

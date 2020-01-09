@@ -264,7 +264,80 @@
           "stopAreas": {
             "searchLabel": "Hållplatsområden",
             "defaultSortAttribute": "StopAreaNumber",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=stopAreas&outputFormat=application/json"
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=stopAreas&outputFormat=application/json",
+            "attributesToDisplay": [
+              {
+                "displayName": "Hållplatsnummer",
+                "key": "StopAreaNumber"
+              },
+              {
+                "displayName": "Namn",
+                "key": "Name"
+              },
+              {
+                "displayName": "Bytesprio",
+                "key": "InterchangePriorityMessage"
+              },
+              {
+                "displayName": "Kommun",
+                "key": "MunicipalityName"
+              },
+              {
+                "displayName": "Taxezon 1",
+                "key": "TariffZone1Name"
+              },
+              {
+                "displayName": "Taxezon 2",
+                "key": "TariffZone2Name"
+              }
+            ]
+          },
+          "stopPoints": {
+            "searchLabel": "Hållplatslägen",
+            "defaultSortAttribute": "StopPointNumber",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=kartsidan2%3AstopPoints&maxFeatures=50&outputFormat=application/json",
+            "attributesToDisplay": [
+              {
+                "displayName": "Hållplatsnummer",
+                "key": "StopAreaNumber"
+              },
+              {
+                "displayName": "Namn",
+                "key": "Name"
+              },
+              {
+                "displayName": "Beteckning",
+                "key": "Designation"
+              },
+              {
+                "displayName": "Påstigning",
+                "key": "IsForBoarding"
+              },
+              {
+                "displayName": "Avstigning",
+                "key": "IsForAlighting"
+              },
+              {
+                "displayName": "Virtuellt",
+                "key": "IsFictitious"
+              },
+              {
+                "displayName": "Kommun",
+                "key": "XXX"
+              },
+              {
+                "displayName": "Linjetrafik",
+                "key": "IsRegularTraffic"
+              },
+              {
+                "displayName": "Flexlinje",
+                "key": "IsFlexibleBusService"
+              },
+              {
+                "displayName": "Närtrafik",
+                "key": "IsFlexibleTaxiService"
+              }
+            ]
           },
           "transportModeTypeNames": {
             "searchLabel": "Trafikslag",
