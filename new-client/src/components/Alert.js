@@ -16,7 +16,7 @@ class AlertView extends React.PureComponent {
 
   static propTypes = {
     classes: propTypes.object.isRequired,
-    message: propTypes.string.isRequired,
+    message: propTypes.any.isRequired,
     open: propTypes.bool.isRequired,
     parent: propTypes.object.isRequired,
     title: propTypes.string.isRequired
