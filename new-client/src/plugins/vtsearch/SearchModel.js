@@ -41,11 +41,10 @@ export default class SearchModel {
    */
   fixWktForGeoServer = wkt => {
     return wkt
-      .replace(/,/g, "\\,")
       .replace(/\(/g, "%28")
       .replace(/\)/g, "%29")
       .replace(/,/g, "%5C,")
-      .replace(/%/g, "%25");
+      .replace(/ /g, "%20");
   };
 
   /**
@@ -201,7 +200,7 @@ export default class SearchModel {
 
     console.log("url: ", url);
 
-    let attributesToKeep = this.geoserver.routes.attributesToDisplay.map(
+    let attributesToKeep = this.geoserver.journeys.attributesToDisplay.map(
       attribute => {
         return attribute.key;
       }
