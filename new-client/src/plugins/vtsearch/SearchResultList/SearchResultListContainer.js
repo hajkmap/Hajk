@@ -12,7 +12,7 @@ import PanelToolbox from "./PanelToolbox";
 import TabPanel from "./TabPanel";
 import ClearIcon from "@material-ui/icons/Clear";
 import GeoJSON from "ol/format/GeoJSON";
-import { handleClick } from "../../../models/Click";
+import { Typography } from "@material-ui/core";
 
 /**
  * @summary Base in the search result list
@@ -35,16 +35,30 @@ const styles = theme => {
       pointerEvents: "all"
     },
     customIcon: {
-      marginLeft: "30%"
+      flex: "0 auto",
+      marginLeft: "2%"
     },
-    tabWrapper: {
-      display: "inline-block"
+    flexItem: {
+      flex: "auto"
     },
-    toolbar: {
+    tabRoot: {
+      padding: 0,
+      minHeight: 0,
+      textTransform: "none"
+    },
+    tabsRoot: {
       minHeight: 0
     },
-    appbar: {
-      height: 30
+    tabWrapper: {
+      display: "flex",
+      flexDirection: "row"
+    },
+    tabsFlexContainer: {
+      flexWrap: "wrap"
+    },
+    toolbar: {
+      minHeight: 0,
+      padding: 0
     }
   };
 };
@@ -58,6 +72,12 @@ const getWindowContainerHeight = () => {
     .height;
 };
 
+/**
+ * @summary SearchResultListContainer is the core container for the GUI used for showing search results
+ * @description GUI-component that wraps all the other GUI-components used to show search results in vtsearch
+ * @class SearchResultListContainer
+ * @extends {React.Component}
+ */
 class SearchResultListContainer extends React.Component {
   state = {
     resultListHeight: 300,
@@ -139,6 +159,10 @@ class SearchResultListContainer extends React.Component {
 
     localObserver.subscribe("attribute-table-row-clicked", payload => {
       localObserver.publish("highlight-search-result-feature", payload);
+    });
+
+    localObserver.subscribe("set-active-tab", searchResultId => {
+      this.handleTabChange(null, searchResultId);
     });
 
     localObserver.subscribe("features-clicked-in-map", features => {
@@ -247,10 +271,12 @@ class SearchResultListContainer extends React.Component {
     var searchResultId = searchResult.id;
     return (
       <Tab
-        classes={{ wrapper: classes.tabWrapper }}
+        classes={{ root: classes.tabRoot, wrapper: classes.tabWrapper }}
         label={
           <>
-            {searchResult.label}
+            <Typography variant="subtitle2" className={classes.flexItem}>
+              {searchResult.label}
+            </Typography>
 
             <ClearIcon
               onClick={e => {
@@ -264,16 +290,19 @@ class SearchResultListContainer extends React.Component {
         }
         value={searchResultId}
         key={`simple-tabpanel-${searchResultId}`}
-        id={`simple-tabpanel-${searchResultId}`}
         aria-controls={`simple-tabpanel-${searchResultId}`}
       ></Tab>
     );
   };
 
   renderTabsSection = searchResults => {
-    console.log(this.state.activeTab, "activeTab");
+    const { classes } = this.props;
     return (
       <Tabs
+        classes={{
+          root: classes.tabsRoot,
+          flexContainer: classes.tabsFlexContainer
+        }}
         value={this.state.activeTab}
         onChange={this.handleTabChange}
         aria-label="search-result-tabs"
@@ -286,7 +315,12 @@ class SearchResultListContainer extends React.Component {
   };
 
   renderSearchResultContainer = () => {
-    const { classes, windowContainerId, localObserver } = this.props;
+    const {
+      classes,
+      windowContainerId,
+      localObserver,
+      toolConfig
+    } = this.props;
     let searchResults = this.getSearchResults();
 
     return (
@@ -342,22 +376,16 @@ class SearchResultListContainer extends React.Component {
               this.appbarHeight = appbar.offsetHeight;
             }
           }}
-          classes={{ positionStatic: classes.appbar }}
           position="static"
         >
           <Toolbar classes={{ regular: classes.toolbar }}>
-            <Grid
-              justify="space-between"
-              alignItems="center"
-              container
-              spacing={10}
-            >
-              <Grid item>
+            <Grid justify="space-between" alignItems="center" container>
+              <Grid style={{ paddingLeft: 10 }} item>
                 {searchResults.length > 0 &&
                   this.renderTabsSection(searchResults)}
               </Grid>
 
-              <Grid item>
+              <Grid style={{ paddingLeft: 0 }} item>
                 <PanelToolbox localObserver={localObserver}></PanelToolbox>
               </Grid>
             </Grid>
@@ -367,8 +395,9 @@ class SearchResultListContainer extends React.Component {
           return (
             <TabPanel
               key={searchResult.id}
-              value={this.state.activeTab}
-              index={searchResult.id}
+              toolConfig={toolConfig}
+              activeTabId={this.state.activeTab}
+              tabId={searchResult.id}
               resultListHeight={this.state.resultListHeight}
               windowWidth={this.state.windowWidth}
               localObserver={localObserver}

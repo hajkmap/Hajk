@@ -2,68 +2,62 @@
 import React from "react";
 import PropTypes from "prop-types";
 import AttributeTable from "./AttributeTable";
-import { withStyles } from "@material-ui/core/styles";
-import Container from "@material-ui/core/Container";
+import SummaryTable from "./SummaryTable";
+import Grid from "@material-ui/core/Grid";
 
 /**
- * @summary Main class for the Dummy plugin.
- * @description The purpose of having a Dummy plugin is to exemplify
- * and document how plugins should be constructed in Hajk.
- * The plugins can also serve as a scaffold for other plugins: simply
- * copy the directory, rename it and all files within, and change logic
- * to create the plugin you want to.
- *
- * @class Dummy
+ * @summary Panel for handling multiple search result using tabs
+ * @description Panel handles multiple search results with tabs.
+ * Every tab maps to a searchresultId
+ * @class TabPanel
  * @extends {React.PureComponent}
  */
 
-const styles = theme => {
-  return {
-    containerRoot: {
-      padding: 0,
-      margin: 0,
-      maxWidth: "none"
-    }
-  };
-};
-
-class SearchResultListContainer extends React.PureComponent {
-  state = {};
-
+class TabPanel extends React.PureComponent {
   static propTypes = {
-    options: PropTypes.object.isRequired
-  };
-
-  static defaultProps = {
-    options: {}
+    activeTabId: PropTypes.number.isRequired,
+    tabId: PropTypes.number.isRequired
   };
 
   render() {
     const {
-      value,
-      index,
-      classes,
+      activeTabId,
       resultListHeight,
       searchResult,
+      tabId,
       localObserver,
-      windowWidth
+      toolConfig
     } = this.props;
+
+    var renderSummary = searchResult.type === "journeys" ? true : false;
+
     return (
-      <Container
-        classes={{ root: classes.containerRoot }}
-        hidden={value !== index}
-        id={`search-result-${index}`}
+      <Grid
+        style={{ display: activeTabId !== tabId ? "none" : "block" }}
+        container
+        alignContent="stretch"
+        alignItems="flex-start"
+        spacing={0}
       >
-        <AttributeTable
-          searchResult={searchResult}
-          resultListHeight={resultListHeight}
-          windowWidth={windowWidth}
-          localObserver={localObserver}
-        ></AttributeTable>
-      </Container>
+        {renderSummary && (
+          <Grid item xs={3}>
+            <SummaryTable
+              localObserver={localObserver}
+              resultListHeight={resultListHeight}
+            ></SummaryTable>
+          </Grid>
+        )}
+        <Grid item xs={renderSummary ? 9 : 12}>
+          <AttributeTable
+            searchResult={searchResult}
+            toolConfig={toolConfig}
+            resultListHeight={resultListHeight}
+            localObserver={localObserver}
+          ></AttributeTable>
+        </Grid>
+      </Grid>
     );
   }
 }
 
-// Part of API. Make a HOC of our plugin.
-export default withStyles(styles)(SearchResultListContainer);
+export default TabPanel;

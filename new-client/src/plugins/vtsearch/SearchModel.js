@@ -27,9 +27,9 @@ export default class SearchModel {
    */
   fixCqlForGeoServer = cql => {
     return cql
-      .replace(/\%/g, "%25")
-      .replace(/\ /g, "%20")
-      .replace(/\'/g, "%27");
+      .replace(/%/g, "%25")
+      .replace(/ /g, "%20")
+      .replace(/'/g, "%27");
   };
 
   /**
@@ -43,8 +43,8 @@ export default class SearchModel {
     return wkt
       .replace(/\(/g, "%28")
       .replace(/\)/g, "%29")
-      .replace(/\,/g, "%5C,")
-      .replace(/\%/g, "%25");
+      .replace(/,/g, "%5C,")
+      .replace(/ /g, "%20");
   };
 
   /**
@@ -62,51 +62,70 @@ export default class SearchModel {
   };
 
   /**
-   * Private method that remotes all duplicates from a feature collection.
+   * Private method that removes all unnecessary attributes from a collection.
+   * @param featureCollection The feature collection with unnecessary attributes.
+   * @param attributesToKeep An array with the attributes that will remain.
+   * @returns A feature collection with no unnecessary attributes in it.
+   *
+   * @memberof SearchModel
+   */
+  removeUnnecessaryAttributes = (featureCollection, attributesToKeep) => {
+    featureCollection.features = featureCollection.features.map(feature => {
+      let names = Object.keys(feature.properties);
+      for (let iName = 0; iName < names.length; iName++) {
+        if (!attributesToKeep.includes(names[iName]))
+          delete feature.properties[names[iName]];
+      }
+
+      return feature;
+    });
+
+    return featureCollection;
+  };
+
+  /**
+   * Private method that remotes all duplicates from a feature collection and
+   * updates the number return value.
    * @param featureCollection The feature collection with duplicates.
-   * @returns An array with no duplicates in it.
+   * @returns A feature collection with no duplicates in it.
    *
    * @memberof SearchModel
    */
   removeDuplicates = featureCollection => {
+    let features = featureCollection.features;
+    let uniqueArray = this.removeDuplicatesItems(features);
+    featureCollection.features = uniqueArray;
+    featureCollection.numberReturned = uniqueArray.length;
+    return featureCollection;
+  };
+
+  /**
+   * Private method that remotes all duplicates from an array of featrues.
+   * The function checks if properties diverges.
+   * @param features The feature collection with duplicates.
+   * @returns An array with no duplicates in it.
+   *
+   * @memberof SearchModel
+   */
+  removeDuplicatesItems = features => {
     let uniqueArray = [];
-    for (
-      let iFeatureCollection = 0;
-      iFeatureCollection < featureCollection.length;
-      iFeatureCollection++
-    ) {
-      if (uniqueArray.indexOf(featureCollection[iFeatureCollection]) === -1) {
-        let isUnique = true;
+    for (let iFeature = 0; iFeature < features.length; iFeature++) {
+      if (uniqueArray.indexOf(features[iFeature]) === -1) {
+        let shouldAddFeature = true;
         for (
           let iUniqueArray = 0;
           iUniqueArray < uniqueArray.length;
           iUniqueArray++
         ) {
-          if (
-            uniqueArray[iUniqueArray].properties.DirectionOfLineId ===
-              featureCollection[iFeatureCollection].properties
-                .DirectionOfLineId &&
-            uniqueArray[iUniqueArray].properties.InternalLineNumber ===
-              featureCollection[iFeatureCollection].properties
-                .InternalLineNumber &&
-            uniqueArray[iUniqueArray].properties.PublicLineName ===
-              featureCollection[iFeatureCollection].properties.PublicLineName &&
-            uniqueArray[iUniqueArray].properties.Description ===
-              featureCollection[iFeatureCollection].properties.Description &&
-            uniqueArray[iUniqueArray].properties.Direction ===
-              featureCollection[iFeatureCollection].properties.Direction &&
-            uniqueArray[iUniqueArray].properties.TransportModeType ===
-              featureCollection[iFeatureCollection].properties
-                .TransportModeType &&
-            uniqueArray[iUniqueArray].properties.TransportCompany ===
-              featureCollection[iFeatureCollection].properties.TransportCompany
-          ) {
-            isUnique = false;
-            break;
-          }
+          shouldAddFeature =
+            shouldAddFeature &&
+            !this.hasSameProperties(
+              uniqueArray[iUniqueArray].properties,
+              features[iFeature].properties
+            );
         }
 
-        if (isUnique) uniqueArray.push(featureCollection[iFeatureCollection]);
+        if (shouldAddFeature) uniqueArray.push(features[iFeature]);
       }
     }
 
@@ -114,10 +133,43 @@ export default class SearchModel {
   };
 
   /**
+   * Private help method for removeDuplicates, that checks if two objects are the same or not.
+   * The comparision looks at propertiy name and values.
+   * @param {object} objectOne The first object to compare.
+   * @param {object} objectTwo The second object to compare.
+   * @returns Returns true if two object has the same propertiy name and values.
+   *
+   * @memberof SearchModel
+   */
+  hasSameProperties(objectOne, objectTwo) {
+    const propertyNamesOne = Object.keys(objectOne);
+    const propertyNamesTwo = Object.keys(objectTwo);
+
+    // Checks if the number of properties
+    if (propertyNamesOne.length !== propertyNamesTwo.length) return false;
+
+    // Checks if the property names are the same or not.
+    if (
+      propertyNamesOne.some((value, index) => {
+        return value !== propertyNamesTwo[index];
+      })
+    )
+      return false;
+
+    const propertyValuesOne = Object.values(objectOne);
+    const propertyValuesTwo = Object.values(objectTwo);
+
+    // Checks if the property values are the same or not.
+    return !propertyValuesOne.some((value, index) => {
+      return value !== propertyValuesTwo[index];
+    });
+  }
+
+  /**
    * Gets requested journeys. Sends an event when the function is called and another one when it's promise is done.
    * @param fromTime Start time, pass null if no start time is given.
    * @param endTime End time, pass null of no end time is given.
-   * @param wktPolygon A polygon as a WKT, pass null of no polygon is given.
+   * @param filterOnWkt A polygon as a WKT, pass null of no polygon is given.
    *
    * @memberof SearchModel
    */
@@ -146,16 +198,32 @@ export default class SearchModel {
     )
       url = url + viewParams;
 
-    console.log(url);
+    console.log("url: ", url);
+
+    let attributesToKeep = this.geoserver.journeys.attributesToDisplay.map(
+      attribute => {
+        return attribute.key;
+      }
+    );
 
     // Fetch the result as a promise and attach it to the event.
     fetch(url)
       .then(res => {
         res.json().then(jsonResult => {
-          const journeys = {
+          let journeys = {
             featureCollection: jsonResult,
-            label: this.geoserver.journeys.searchLabel
+            label: this.geoserver.journeys.searchLabel,
+            type: "journeys"
           };
+
+          journeys.featureCollection = this.removeUnnecessaryAttributes(
+            journeys.featureCollection,
+            attributesToKeep
+          );
+          journeys.featureCollection = this.removeDuplicates(
+            journeys.featureCollection
+          );
+
           this.localObserver.publish("vtsearch-result-done", journeys);
         });
       })
@@ -305,7 +373,11 @@ export default class SearchModel {
     )
       url = url + cql;
 
-    console.log("url", url);
+    let attributesToKeep = this.geoserver.routes.attributesToDisplay.map(
+      attribute => {
+        return attribute.key;
+      }
+    );
 
     // Fetch the result as a promise and attach it to the event.
     fetch(url)
@@ -313,27 +385,17 @@ export default class SearchModel {
         res.json().then(jsonResult => {
           const routes = {
             featureCollection: jsonResult,
-            label: this.geoserver.routes.searchLabel
+            label: this.geoserver.routes.searchLabel,
+            type: "routes"
           };
 
-          // Removes attributes from properties that is unnecessary
-          routes.featureCollection.features.map(feature => {
-            delete feature.properties.StopAreaName;
-            delete feature.properties.StopAreaNumber;
-            delete feature.properties.IsInMunicipalityZoneGid;
-            delete feature.properties.DirectionOfLineGid;
-            delete feature.properties.bbox;
-
-            return feature;
-          });
-
-          // Fix this later
-          // console.log("r2", routes.featureCollection);
-
-          // let featureCollection = routes.featureCollection.features;
-          // let uniqueArray = this.removeDuplicates(featureCollection);
-
-          // console.log("u1", uniqueArray);
+          routes.featureCollection = this.removeUnnecessaryAttributes(
+            routes.featureCollection,
+            attributesToKeep
+          );
+          routes.featureCollection = this.removeDuplicates(
+            routes.featureCollection
+          );
 
           this.localObserver.publish("vtsearch-result-done", routes);
         });
@@ -438,12 +500,15 @@ export default class SearchModel {
     )
       url = url + viewParams;
 
+    console.log(url);
+
     // Fetch the result as a promise and attach it to the event.
     fetch(url).then(res => {
       res.json().then(jsonResult => {
         const stopAreas = {
           featureCollection: jsonResult,
-          label: this.geoserver.stopAreas.searchLabel
+          label: this.geoserver.stopAreas.searchLabel,
+          type: "stopAreas"
         };
         this.localObserver.publish("vtsearch-result-done", stopAreas);
       });

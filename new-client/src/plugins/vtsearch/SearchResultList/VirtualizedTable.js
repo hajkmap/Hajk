@@ -19,21 +19,40 @@ const styles = theme => ({
     "& .ReactVirtualized__Table__headerRow": {
       flip: false,
       overflow: "auto",
+      borderBottom: "solid",
+
+      textTransform: "none",
+      padding: 0,
       paddingRight: theme.direction === "rtl" ? "0px !important" : undefined
     }
   },
-  tableRow: {
-    cursor: "pointer",
-    border: "1px solid #c3c7c7",
-    whiteSpace: "wrap",
-    outline: "none",
+  tableRowHover: {
     "&:hover": {
       backgroundColor: theme.palette.grey[200]
     }
   },
+
+  tableRow: {
+    cursor: "pointer",
+    border: "1px solid #c3c7c7",
+    whiteSpace: "wrap",
+    outline: "none"
+  },
   tableRowSelected: {
     border: "2px solid rgba(18,120,211,0.37)",
     background: "rgba(0,212,255,1)"
+  },
+  headerColumn: {
+    whiteSpace: "pre-wrap",
+    alignItems: "center",
+    boxSizing: "border-box",
+    justifyContent: "center",
+    cursor: "pointer",
+    padding: 0,
+    minWidth: 0,
+    wordBreak: "break-all",
+    lineHeight: 1,
+    borderBottom: 0
   },
   columnStyle: {
     whiteSpace: "pre-wrap",
@@ -43,11 +62,11 @@ const styles = theme => ({
     cursor: "pointer",
     fontSize: "0.8em",
     paddingLeft: 0,
+    minWidth: 0,
     wordBreak: "break-all",
     lineHeight: 1,
     borderBottom: 0
   },
-
   rowCell: {
     marginRight: 0,
     borderBottom: 0,
@@ -57,23 +76,36 @@ const styles = theme => ({
   }
 });
 
+const headerRowIndex = -1;
+
+/**
+ * @summary VirtualizedTable is the core class to handle the table used in Attribute Table
+ * @description VirtualizedTable uses React Virtualized to render large lists in a smart way to boost performance.
+ * @class VirtualizedTable
+ * @extends {React.PureComponent}
+ */
+
 class VirtualizedTable extends React.PureComponent {
   static defaultProps = {
-    headerHeight: 48,
-    rowHeight: 48
+    headerHeight: 35,
+    rowHeight: 30,
+    sortable: true,
+    selectedRow: headerRowIndex
   };
 
   getRowClassName = ({ index }) => {
     const { classes } = this.props;
-
-    if (this.props.selectedRow.index === index) {
+    if (index !== headerRowIndex && this.props.selectedRow.index === index) {
       return clsx(
         classes.tableRow,
         classes.tableRowSelected,
         classes.flexContainer
       );
     }
-    return index !== -1 && clsx(classes.tableRow, classes.flexContainer);
+    return (
+      index !== headerRowIndex &&
+      clsx(classes.tableRow, classes.tableRowHover, classes.flexContainer)
+    );
   };
 
   cellRenderer = ({ cellData, columnIndex, rowData }) => {
@@ -99,20 +131,17 @@ class VirtualizedTable extends React.PureComponent {
   };
 
   headerRenderer = ({ label, columnIndex, sortDirection }) => {
-    const { headerHeight, columns, classes } = this.props;
+    const { columns, classes, sortable } = this.props;
 
     return (
       <TableCell
         component="div"
-        className={classes.columnStyle}
+        className={classes.headerColumn}
         variant="head"
-        style={{
-          height: headerHeight
-        }}
         align={columns[columnIndex].numeric || false ? "right" : "left"}
       >
         {label}
-        <SortIndicator sortDirection={sortDirection} />
+        {sortable && <SortIndicator sortDirection={sortDirection} />}
       </TableCell>
     );
   };
@@ -124,7 +153,6 @@ class VirtualizedTable extends React.PureComponent {
       rowHeight,
       rowClicked,
       headerHeight,
-      windowWidth,
       ...tableProps
     } = this.props;
     return (
@@ -151,11 +179,7 @@ class VirtualizedTable extends React.PureComponent {
                         columnIndex: index
                       })
                     }
-                    headerStyle={{
-                      marginLeft: 0
-                    }}
                     className={classes.columnStyle}
-                    style={{ marginRight: 0, marginLeft: 0 }} //Not working with className
                     cellRenderer={this.cellRenderer}
                     dataKey={dataKey}
                     {...other}

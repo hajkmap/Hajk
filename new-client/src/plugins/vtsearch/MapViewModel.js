@@ -41,7 +41,7 @@ export default class MapViewModel {
       var olFeature = this.getSearchResultLayerFromId(payload.searchResultId)
         .getSource()
         .getFeatureById(payload.olFeatureId);
-      this.highlightAndZoomToFeature(olFeature);
+      this.highlightFeature(olFeature);
     });
 
     this.map.on("singleclick", this.onFeaturesClickedInMap);
@@ -193,10 +193,10 @@ export default class MapViewModel {
    * @memberof MapViewModel
    * @param {external:"ol.Feature"}
    */
-  highlightAndZoomToFeature = olFeature => {
+
+  highlightFeature = olFeature => {
     this.highlightLayer.getSource().clear();
     this.highlightLayer.getSource().addFeature(olFeature);
-    this.zoomToExtent(this.highlightLayer.getSource().getExtent());
   };
   /**
    * Adds openlayers feature to search result layer
@@ -234,7 +234,7 @@ export default class MapViewModel {
 
   onFeaturesClickedInMap = e => {
     var featuresClicked = this.getFeaturesAtClickedPixel(e);
-    this.highlightAndZoomToFeature(featuresClicked[0]);
+    this.highlightFeature(featuresClicked[0]);
     this.localObserver.publish("features-clicked-in-map", featuresClicked);
   };
 

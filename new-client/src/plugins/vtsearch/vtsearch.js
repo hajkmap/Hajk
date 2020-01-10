@@ -223,7 +223,13 @@ class VTSearch extends React.PureComponent {
   };
 
   render() {
-    const { classes, onMenuClick, menuButtonDisabled, app } = this.props;
+    const {
+      classes,
+      onMenuClick,
+      menuButtonDisabled,
+      app,
+      options
+    } = this.props;
     const tooltipText = menuButtonDisabled
       ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
       : "Visa verktygspanelen";
@@ -294,6 +300,7 @@ class VTSearch extends React.PureComponent {
             windowsContainer={windowsContainerId}
             localObserver={this.localObserver}
             model={this.searchModel}
+            toolConfig={options}
             app={app}
           ></SearchResultListContainer>,
           document.getElementById(windowsContainerId)
