@@ -7,10 +7,14 @@
 
 export default class SearchModel {
   /**
-   * Settings with labels and urls for the search functions.
+   * Settings with labels, urls etc. for the search functions.
    */
   geoserver = null;
 
+  /**
+   * Constructor for the search model.
+   * @param {object} settings The settings from the json settings file.
+   */
   constructor(settings) {
     this.map = settings.map;
     this.app = settings.app;
@@ -20,8 +24,8 @@ export default class SearchModel {
 
   /**
    * Private method that a djusts the CQL filter so that it's supported for a web browser and GeoServer.
-   * @param cql The CQL that needs to be adjusted.
-   * @returns Returns a supported wkt for GeoServer.
+   * @param {string} cql The CQL that needs to be adjusted.
+   * @returns {string} Returns a supported wkt for GeoServer.
    *
    * @memberof SerachModel
    */
@@ -34,8 +38,8 @@ export default class SearchModel {
 
   /**
    * Private method that adjusts the WKT filter so that it's supported for a web browser and GeoServer.
-   * @param wkt The WKT that needs to be adjusted.
-   * @returns Returns a supported wkt for GeoServer.
+   * @param {string} wkt The WKT that needs to be adjusted.
+   * @returns {string} Returns a supported wkt for GeoServer.
    *
    * @memberof SerachModel
    */
@@ -49,7 +53,7 @@ export default class SearchModel {
 
   /**
    * Private method that gets all attributes that should remain from GeoServer.
-   * @param attributesToDisplay An array of attributes to be displayed.
+   * @param {array(string, string)} attributesToDisplay An array of attributes to be displayed.
    * @returns An array with only attribute names, stripped of all other data.
    *
    * @memberof SearchModel
@@ -62,7 +66,7 @@ export default class SearchModel {
 
   /**
    * Private method that determines if a we have a line number or a line name.
-   * @param lineNameOrNumber The text string to check.
+   * @param {string} lineNameOrNumber The text string to check.
    * @returns Returns true if the text string is a line number.
    *
    * @memberof SearchModel
@@ -76,8 +80,8 @@ export default class SearchModel {
 
   /**
    * Private method that removes all unnecessary attributes from a collection.
-   * @param featureCollection The feature collection with unnecessary attributes.
-   * @param attributesToKeep An array with the attributes that will remain.
+   * @param {object} featureCollection The feature collection with unnecessary attributes.
+   * @param {array(string)} attributesToKeep An array with the attributes that will remain.
    * @returns A feature collection with no unnecessary attributes in it.
    *
    * @memberof SearchModel
@@ -99,7 +103,7 @@ export default class SearchModel {
   /**
    * Private method that remotes all duplicates from a feature collection and
    * updates the number return value.
-   * @param featureCollection The feature collection with duplicates.
+   * @param {featureCollection} featureCollection The feature collection with duplicates.
    * @returns A feature collection with no duplicates in it.
    *
    * @memberof SearchModel
@@ -115,7 +119,7 @@ export default class SearchModel {
   /**
    * Private method that remotes all duplicates from an array of featrues.
    * The function checks if properties diverges.
-   * @param features The feature collection with duplicates.
+   * @param {feature} features The feature collection with duplicates.
    * @returns An array with no duplicates in it.
    *
    * @memberof SearchModel
@@ -179,10 +183,154 @@ export default class SearchModel {
   }
 
   /**
+   * Autocompelete function that gets the line numbers or public line numbers that match a search text.
+   * @param {string} searchText The search text for a line number or public line number.
+   * @returns {array(string)} Returns an array of matching line numbers or public line numbers.
+   *
+   * @memberof SearchModel
+   */
+  autocompleteLineNumbersOrPublicLineNumbers(searchText) {
+    // If the search is empty no result will be found.
+    if (searchText == null) return null;
+
+    // Build up the url with cql.
+    let url = this.geoserver.lineNumberAndPublicLineNumber.url;
+    let cql = "&CQL_FILTER=";
+
+    // Checks if the argument is a line number or a public line number
+    const isLineNumber = this.isLineNumber(searchText);
+
+    if (searchText != null) {
+      if (isLineNumber) cql = cql + `LineNumber like '${searchText}%'`;
+      else cql = cql + `PublicLineNumber like '${searchText}%'`;
+    }
+
+    // Fix percent and so on, so that the CQL filters are geoserver valid.
+    if (searchText != null) cql = this.fixCqlForGeoServer(cql);
+
+    // Fetch the result as a promise, sort it and attach it to the event.
+    url = url + cql;
+    return fetch(url)
+      .then(res => {
+        return res.json().then(jsonResult => {
+          let lineNumberOrPublicLineNumber = jsonResult.features.map(
+            feature => {
+              if (isLineNumber) return feature.properties.LineNumber;
+
+              return feature.properties.PublicLineNumber;
+            }
+          );
+
+          return lineNumberOrPublicLineNumber;
+        });
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
+
+  /**
+   * Autocompelete function that gets all municipality names sorted in alphabetic order array.
+   * @returns {array(string)} Returns all municipality names sorted in alphabetic order.
+   *
+   * @memberof SearchModel
+   */
+  autocompleteMunicipalityZoneNames() {
+    // Fetch the result as a promise, sort it and attach it to the event.
+    const url = this.geoserver.municipalityZoneNames.url;
+    return fetch(url)
+      .then(res => {
+        return res.json().then(jsonResult => {
+          let transportModeTypes = jsonResult.features.map(feature => {
+            return feature.properties.Name;
+          });
+
+          return transportModeTypes;
+        });
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
+
+  /**
+   * Autocompelete function that gets the stop area names or stop area numbers that match a search text.
+   * @param {string} searchText The search text for a line number or public line number.
+   * @returns {array(string)} Returns an array of matching line numbers or public line numbers.
+   *
+   * @memberof SearchModel
+   */
+  autocompleteStopAreaNamesOrNumbers(searchText) {
+    // If the search is empty no result will be found.
+    if (searchText == null) return null;
+
+    // Build up the url with cql.
+    let url = this.geoserver.stopAreaNameAndStopAreaNumber.url;
+    let cql = "&cql_filter=";
+
+    // Checks if the argument is a line number or a public line number
+    const isLineNumber = this.isLineNumber(searchText);
+
+    if (searchText != null) {
+      if (isLineNumber) cql = cql + `Number like '${searchText}%'`;
+      else cql = cql + `Name like '${searchText}%'`;
+    }
+
+    // Fix percent and so on, so that the CQL filters are geoserver valid.
+    if (searchText != null) cql = this.fixCqlForGeoServer(cql);
+
+    // Fetch the result as a promise, sort it and attach it to the event.
+    url = url + cql;
+
+    return fetch(url)
+      .then(res => {
+        return res.json().then(jsonResult => {
+          let stopAreaNamesOrNumbers = jsonResult.features.map(feature => {
+            if (isLineNumber) return feature.properties.Number;
+
+            return feature.properties.Name;
+          });
+
+          console.log(stopAreaNamesOrNumbers);
+          return stopAreaNamesOrNumbers;
+        });
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
+
+  /**
+   * Autocompelete function that gets then transport mode type names and numbers.
+   * @returns {array(string, int) Returnes all mode type names as an array of tuples.
+   *
+   * @memberof SearchModel
+   */
+  autocompelteTransportModeTypeName() {
+    this.localObserver.publish("transportModeTypeNames-result-begin", {
+      label: this.geoserver.transportModeTypeNames.searchLabel
+    });
+
+    // The url.
+    const url = this.geoserver.transportModeTypeNames.url;
+
+    // Fetch the result as a promise and attach it to the event.
+    return fetch(url).then(res => {
+      return res.json().then(jsonResult => {
+        let transportModeTypes = jsonResult.features.map(feature => {
+          return feature.properties.Name;
+        });
+
+        return transportModeTypes;
+      });
+    });
+  }
+
+  /**
    * Gets requested journeys. Sends an event when the function is called and another one when it's promise is done.
-   * @param fromTime Start time, pass null if no start time is given.
-   * @param endTime End time, pass null of no end time is given.
-   * @param filterOnWkt A polygon as a WKT, pass null of no polygon is given.
+   * @param {string} fromTime Start time, pass null if no start time is given.
+   * @param {string} endTime End time, pass null of no end time is given.
+   * @param {string} filterOnWkt A polygon as a WKT, pass null of no polygon is given.
    *
    * @memberof SearchModel
    */
@@ -240,84 +388,13 @@ export default class SearchModel {
   }
 
   /**
-   * Gets the line numbers or public line numbers that match a search text.
-   * @param searchText The search text for a line number or public line number.
-   * @returns Returns an array of matching line numbers or public line numbers.
-   *
-   * @memberof SearchModel
-   */
-  getLineNumbersOrPublicLineNumbers(searchText) {
-    // If the search is empty no result will be found.
-    if (searchText == null) return null;
-
-    // Build up the url with cql.
-    let url = this.geoserver.lineNumberAndPublicLineNumber.url;
-    let cql = "&CQL_FILTER=";
-
-    // Checks if the argument is a line number or a public line number
-    const isLineNumber = this.isLineNumber(searchText);
-
-    if (searchText != null) {
-      if (isLineNumber) cql = cql + `LineNumber like '${searchText}%'`;
-      else cql = cql + `PublicLineNumber like '${searchText}%'`;
-    }
-
-    // Fix percent and so on, so that the CQL filters are geoserver valid.
-    if (searchText != null) cql = this.fixCqlForGeoServer(cql);
-
-    // Fetch the result as a promise, sort it and attach it to the event.
-    url = url + cql;
-    return fetch(url)
-      .then(res => {
-        return res.json().then(jsonResult => {
-          let lineNumberOrPublicLineNumber = jsonResult.features.map(
-            feature => {
-              if (isLineNumber) return feature.properties.LineNumber;
-
-              return feature.properties.PublicLineNumber;
-            }
-          );
-
-          return lineNumberOrPublicLineNumber;
-        });
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  }
-
-  /**
-   * Gets all municipality names sorted in alphabetic order array.
-   * @returns Returns all municipality names sorted in alphabetic order.
-   *
-   * @memberof SearchModel
-   */
-  getMunicipalityZoneNames() {
-    // Fetch the result as a promise, sort it and attach it to the event.
-    const url = this.geoserver.municipalityZoneNames.url;
-    return fetch(url)
-      .then(res => {
-        return res.json().then(jsonResult => {
-          let transportModeTypes = jsonResult.features.map(feature => {
-            return feature.properties.Name;
-          });
-
-          return transportModeTypes;
-        });
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  }
-
-  /**
-   * Gets all Routs. Sends an event when the function is called and another one when it's promise is done.
-   * @param publicLineName Public line name.
-   * @param internalLineNumber The internal line number.
-   * @param isInMunicipalityZoneGid The Gid number of a municipality
-   * @param transportModeType The transport type of lines.
-   * @param stopAreaNameOrNumber The stop area name or stop area number.
-   * @param polygonAsWkt A polygon, as a WKT, to intersects with.
+   * Gets all Routes. Sends an event when the function is called and another one when it's promise is done.
+   * @param {string} publicLineName Public line name.
+   * @param {string} internalLineNumber The internal line number.
+   * @param {string} isInMunicipalityZoneGid The Gid number of a municipality
+   * @param {string} transportModeType The transport type of lines.
+   * @param {string} stopAreaNameOrNumber The stop area name or stop area number.
+   * @param {string} polygonAsWkt A polygon, as a WKT, to intersects with.
    *
    * @memberof SearchModel
    */
@@ -408,59 +485,12 @@ export default class SearchModel {
   }
 
   /**
-   * Gets the stop area names or stop area numbers that match a search text.
-   * @param searchText The search text for a line number or public line number.
-   * @returns Returns an array of matching line numbers or public line numbers.
-   *
-   * @memberof SearchModel
-   */
-  getStopAreaNamesOrNumbers(searchText) {
-    // If the search is empty no result will be found.
-    if (searchText == null) return null;
-
-    // Build up the url with cql.
-    let url = this.geoserver.stopAreaNameAndStopAreaNumber.url;
-    let cql = "&cql_filter=";
-
-    // Checks if the argument is a line number or a public line number
-    const isLineNumber = this.isLineNumber(searchText);
-
-    if (searchText != null) {
-      if (isLineNumber) cql = cql + `Number like '${searchText}%'`;
-      else cql = cql + `Name like '${searchText}%'`;
-    }
-
-    // Fix percent and so on, so that the CQL filters are geoserver valid.
-    if (searchText != null) cql = this.fixCqlForGeoServer(cql);
-
-    // Fetch the result as a promise, sort it and attach it to the event.
-    url = url + cql;
-
-    return fetch(url)
-      .then(res => {
-        return res.json().then(jsonResult => {
-          let stopAreaNamesOrNumbers = jsonResult.features.map(feature => {
-            if (isLineNumber) return feature.properties.Number;
-
-            return feature.properties.Name;
-          });
-
-          console.log(stopAreaNamesOrNumbers);
-          return stopAreaNamesOrNumbers;
-        });
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  }
-
-  /**
    * Get all stop areas. Sends an event when the function is called and another one when it's promise is done.
-   * @param filterOnName The public name of the stop area, pass null of no name is given.
-   * @param filterOnPublicLine The public line number, pass null of no line is given.
-   * @param filterOnMunicipalName The municipality name, pass null of no municipality name is given.
-   * @param filterOnNumber The number of the stop area, pass null of no number is given.
-   * @param filterOnWkt A polygon as a WKT, pass null of no polygon is given.
+   * @param {string} filterOnName The public name of the stop area, pass null of no name is given.
+   * @param {string} filterOnPublicLine The public line number, pass null of no line is given.
+   * @param {string} filterOnMunicipalName The municipality name, pass null of no municipality name is given.
+   * @param {string} filterOnNumber The number of the stop area, pass null of no number is given.
+   * @param {string} filterOnWkt A polygon as a WKT, pass null of no polygon is given.
    *
    * @memberof SearchModel
    */
@@ -533,11 +563,11 @@ export default class SearchModel {
 
   /**
    * Get all stop points. Sends an event when the function is called and another one when it's promise is done.
-   * @param filterOnName The public name of the stop point, pass null of no name is given.
-   * @param filterOnPublicLine The public line number, pass null of no line is given.
-   * @param filterOnMunicipalName The municipality name, pass null of no municipality name is given.
-   * @param filterOnNumber The number of the stop point, pass null of no number is given.
-   * @param filterOnWkt A polygon as a WKT, pass null of no polygon is given.
+   * @param {string} filterOnName The public name of the stop point, pass null of no name is given.
+   * @param {string} filterOnPublicLine The public line number, pass null of no line is given.
+   * @param {string} filterOnMunicipalName The municipality name, pass null of no municipality name is given.
+   * @param {string} filterOnNumber The number of the stop point, pass null of no number is given.
+   * @param {string} filterOnWkt A polygon as a WKT, pass null of no polygon is given.
    *
    * @memberof SearchModel
    */
@@ -609,35 +639,9 @@ export default class SearchModel {
   }
 
   /**
-   * Returns then transport mode type names and numbers.
-   * @returns Returnes all mode type names as an array of tuples.
-   *
-   * @memberof SearchModel
-   */
-  getTransportModeTypeName() {
-    this.localObserver.publish("transportModeTypeNames-result-begin", {
-      label: this.geoserver.transportModeTypeNames.searchLabel
-    });
-
-    // The url.
-    const url = this.geoserver.transportModeTypeNames.url;
-
-    // Fetch the result as a promise and attach it to the event.
-    return fetch(url).then(res => {
-      return res.json().then(jsonResult => {
-        let transportModeTypes = jsonResult.features.map(feature => {
-          return feature.properties.Name;
-        });
-
-        return transportModeTypes;
-      });
-    });
-  }
-
-  /**
    * Returns the global Map object.
-   *
    * @returns {object} Map
+   *
    * @memberof SearchModel
    */
   getMap() {

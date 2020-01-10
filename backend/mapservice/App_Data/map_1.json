@@ -178,6 +178,23 @@
         "title": "VTSEARCH",
         "target": "left",
         "geoserver": {
+          "lineNumberAndPublicLineNumber": {
+            "searchLabel": "Linjenummer",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=lineNumberAndPublicLineNumber&outputFormat=application/json"
+          },
+          "municipalityZoneNames": {
+            "searchLabel": "Kommunnamn",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=municipalityZoneNames&outputFormat=application/json"
+          },
+          "stopAreaNameAndStopAreaNumber": {
+            "searchLabel": "Hållplats",
+            "defaultSortAttribute": "StopAreaNumber",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=stopAreaNameAndNumber&outputFormat=application/json"
+          },
+          "transportModeTypeNames": {
+            "searchLabel": "Trafikslag",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=transportModeTypeNames&outputFormat=application/json"
+          },
           "journeys": {
             "searchLabel": "Turer",
             "defaultSortAttribute": "EarliestDepartureTimeAtToStopPoint",
@@ -217,14 +234,6 @@
               }
             ]
           },
-          "lineNumberAndPublicLineNumber": {
-            "searchLabel": "Linjenummer",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=lineNumberAndPublicLineNumber&outputFormat=application/json"
-          },
-          "municipalityZoneNames": {
-            "searchLabel": "Kommunnamn",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=municipalityZoneNames&outputFormat=application/json"
-          },
           "routes": {
             "searchLabel": "Linje",
             "defaultSortAttribute": "InternalLineNumber",
@@ -255,11 +264,6 @@
                 "key": "TransportCompany"
               }
             ]
-          },
-          "stopAreaNameAndStopAreaNumber": {
-            "searchLabel": "Hållplats",
-            "defaultSortAttribute": "StopAreaNumber",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=stopAreaNameAndNumber&outputFormat=application/json"
           },
           "stopAreas": {
             "searchLabel": "Hållplatsområden",
@@ -323,7 +327,7 @@
               },
               {
                 "displayName": "Kommun",
-                "key": "XXX"
+                "key": "MunicipalityName"
               },
               {
                 "displayName": "Linjetrafik",
@@ -338,10 +342,6 @@
                 "key": "IsFlexibleTaxiService"
               }
             ]
-          },
-          "transportModeTypeNames": {
-            "searchLabel": "Trafikslag",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=transportModeTypeNames&outputFormat=application/json"
           }
         }
       },
