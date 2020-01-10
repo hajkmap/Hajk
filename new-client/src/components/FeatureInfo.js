@@ -21,7 +21,9 @@ const styles = theme => ({
   },
   featureList: {
     flex: 1,
-    overflow: "auto"
+    overflow: "auto",
+    userSelect: "text",
+    cursor: "auto"
   },
   textContent: {},
   toggler: {
