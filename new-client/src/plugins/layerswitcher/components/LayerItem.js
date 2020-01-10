@@ -149,11 +149,14 @@ class LayerItem extends React.PureComponent {
    * @return {external:ReactElement}
    */
   renderStatus() {
+    const { classes } = this.props;
     return (
       this.state.status === "loaderror" && (
-        <Tooltip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
-          <IconWarning />
-        </Tooltip>
+        <div className={classes.layerButton}>
+          <Tooltip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
+            <IconWarning />
+          </Tooltip>
+        </div>
       )
     );
   }
@@ -372,17 +375,15 @@ class LayerItem extends React.PureComponent {
             </div>
           </div>
           <div className={classes.layerButtons}>
-            <div className={classes.layerButton}>
-              <DownloadLink
-                layer={this.props.layer}
-                appConfig={this.props.app.config.appConfig}
-              />
-            </div>
-            <div className={classes.layerButton}>{this.renderStatus()}</div>
-            <div className={classes.layerButton}>
-              <div className={classes.infoContainer}>
-                {!this.isInfoEmpty() &&
-                  (this.state.infoVisible ? (
+            <DownloadLink
+              layer={this.props.layer}
+              appConfig={this.props.app.config.appConfig}
+            />
+            {this.renderStatus()}
+            {!this.isInfoEmpty() && (
+              <div className={classes.layerButton}>
+                <div className={classes.infoContainer}>
+                  {this.state.infoVisible ? (
                     <RemoveCircleIcon
                       className={classes.infoButton}
                       onClick={() => this.toggleInfo()}
@@ -398,9 +399,10 @@ class LayerItem extends React.PureComponent {
                         borderRadius: "100%"
                       }}
                     />
-                  ))}
+                  )}
+                </div>
               </div>
-            </div>
+            )}
             <div className={classes.layerButton}>
               {this.state.toggleSettings ? (
                 <CloseIcon onClick={() => this.toggleSettings()} />
