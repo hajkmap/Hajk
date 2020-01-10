@@ -54,11 +54,11 @@ export default class SearchModel {
   /**
    * Private method that gets all attributes that should remain from GeoServer.
    * @param {array(string, string)} attributesToDisplay An array of attributes to be displayed.
-   * @returns An array with only attribute names, stripped of all other data.
+   * @returns {array(string)} An array with only attribute names, stripped of all other data.
    *
    * @memberof SearchModel
    */
-  getAttributesToKeepFromSettings = attributesToDisplay => {
+  attributesToKeepFromSettings = attributesToDisplay => {
     return attributesToDisplay.map(attribute => {
       return attribute.key;
     });
@@ -67,7 +67,7 @@ export default class SearchModel {
   /**
    * Private method that determines if a we have a line number or a line name.
    * @param {string} lineNameOrNumber The text string to check.
-   * @returns Returns true if the text string is a line number.
+   * @returns {boolean} Returns true if the text string is a line number.
    *
    * @memberof SearchModel
    */
@@ -79,10 +79,19 @@ export default class SearchModel {
   };
 
   /**
+   * Private method that tests if a string is null or empty
+   * @param {string} stringValue The string to test.
+   * @returns {boolean} Returns true if the string is empty or null.
+   */
+  isNullOrEmpty = stringValue => {
+    return stringValue == null || stringValue === "";
+  };
+
+  /**
    * Private method that removes all unnecessary attributes from a collection.
    * @param {object} featureCollection The feature collection with unnecessary attributes.
    * @param {array(string)} attributesToKeep An array with the attributes that will remain.
-   * @returns A feature collection with no unnecessary attributes in it.
+   * @returns {featureCollection} A feature collection with no unnecessary attributes in it.
    *
    * @memberof SearchModel
    */
@@ -104,7 +113,7 @@ export default class SearchModel {
    * Private method that remotes all duplicates from a feature collection and
    * updates the number return value.
    * @param {featureCollection} featureCollection The feature collection with duplicates.
-   * @returns A feature collection with no duplicates in it.
+   * @returns {featureCollection} A feature collection with no duplicates in it.
    *
    * @memberof SearchModel
    */
@@ -120,7 +129,7 @@ export default class SearchModel {
    * Private method that remotes all duplicates from an array of featrues.
    * The function checks if properties diverges.
    * @param {feature} features The feature collection with duplicates.
-   * @returns An array with no duplicates in it.
+   * @returns {feature} An array with no duplicates in it.
    *
    * @memberof SearchModel
    */
@@ -191,7 +200,7 @@ export default class SearchModel {
    */
   autocompleteLineNumbersOrPublicLineNumbers(searchText) {
     // If the search is empty no result will be found.
-    if (searchText == null) return null;
+    if (this.isNullOrEmpty(searchText)) return null;
 
     // Build up the url with cql.
     let url = this.geoserver.lineNumberAndPublicLineNumber.url;
@@ -200,13 +209,13 @@ export default class SearchModel {
     // Checks if the argument is a line number or a public line number
     const isLineNumber = this.isLineNumber(searchText);
 
-    if (searchText != null) {
+    if (!this.isNullOrEmpty(searchText)) {
       if (isLineNumber) cql = cql + `LineNumber like '${searchText}%'`;
       else cql = cql + `PublicLineNumber like '${searchText}%'`;
     }
 
     // Fix percent and so on, so that the CQL filters are geoserver valid.
-    if (searchText != null) cql = this.fixCqlForGeoServer(cql);
+    if (!this.isNullOrEmpty(searchText)) cql = this.fixCqlForGeoServer(cql);
 
     // Fetch the result as a promise, sort it and attach it to the event.
     url = url + cql;
@@ -262,7 +271,7 @@ export default class SearchModel {
    */
   autocompleteStopAreaNamesOrNumbers(searchText) {
     // If the search is empty no result will be found.
-    if (searchText == null) return null;
+    if (this.isNullOrEmpty(searchText)) return null;
 
     // Build up the url with cql.
     let url = this.geoserver.stopAreaNameAndStopAreaNumber.url;
@@ -271,13 +280,13 @@ export default class SearchModel {
     // Checks if the argument is a line number or a public line number
     const isLineNumber = this.isLineNumber(searchText);
 
-    if (searchText != null) {
+    if (!this.isNullOrEmpty(searchText)) {
       if (isLineNumber) cql = cql + `Number like '${searchText}%'`;
       else cql = cql + `Name like '${searchText}%'`;
     }
 
     // Fix percent and so on, so that the CQL filters are geoserver valid.
-    if (searchText != null) cql = this.fixCqlForGeoServer(cql);
+    if (!this.isNullOrEmpty(searchText)) cql = this.fixCqlForGeoServer(cql);
 
     // Fetch the result as a promise, sort it and attach it to the event.
     url = url + cql;
@@ -340,22 +349,23 @@ export default class SearchModel {
     });
 
     // Fix parentheses and so on, so that the WKT are geoserver valid.
-    if (filterOnWkt != null) filterOnWkt = this.fixWktForGeoServer(filterOnWkt);
+    if (!this.isNullOrEmpty(filterOnWkt))
+      filterOnWkt = this.fixWktForGeoServer(filterOnWkt);
 
     // Build up the url with viewparams.
     let url = this.geoserver.journeys.url;
     let viewParams = "&viewparams=";
-    if (filterOnFromDate != null)
+    if (!this.isNullOrEmpty(filterOnFromDate))
       viewParams = viewParams + `filterOnFromDate:${filterOnFromDate};`;
-    if (filterOnToDate != null)
+    if (!this.isNullOrEmpty(filterOnToDate))
       viewParams = viewParams + `filterOnToDate:${filterOnToDate};`;
-    if (filterOnWkt != null)
+    if (!this.isNullOrEmpty(filterOnWkt))
       viewParams = viewParams + `filterOnWkt:${filterOnWkt};`;
 
     if (
-      filterOnFromDate != null ||
-      filterOnToDate != null ||
-      filterOnWkt != null
+      !this.isNullOrEmpty(filterOnFromDate) ||
+      !this.isNullOrEmpty(filterOnToDate) ||
+      !this.isNullOrEmpty(filterOnWkt)
     )
       url = url + viewParams;
 
@@ -371,7 +381,7 @@ export default class SearchModel {
 
           journeys.featureCollection = this.removeUnnecessaryAttributes(
             journeys.featureCollection,
-            this.getAttributesToKeepFromSettings(
+            this.attributesToKeepFromSettings(
               this.geoserver.journeys.attributesToDisplay
             )
           );
@@ -414,45 +424,45 @@ export default class SearchModel {
     let url = this.geoserver.routes.url;
     let cql = "&CQL_FILTER=";
     let addAndInCql = false;
-    if (publicLineName != null) {
+    if (!this.isNullOrEmpty(publicLineName)) {
       cql = cql + `PublicLineName like '${publicLineName}'`;
       addAndInCql = true;
     }
-    if (internalLineNumber != null) {
+    if (!this.isNullOrEmpty(internalLineNumber)) {
       if (addAndInCql) cql = cql + " AND ";
       cql = cql + `InternalLineNumber like '${internalLineNumber}'`;
       addAndInCql = true;
     }
-    if (isInMunicipalityZoneGid != null) {
+    if (!this.isNullOrEmpty(isInMunicipalityZoneGid)) {
       if (addAndInCql) cql = cql + " AND ";
       cql = cql + `IsInMunicipalityZoneGid like '${isInMunicipalityZoneGid}'`;
       addAndInCql = true;
     }
-    if (transportModeType != null) {
+    if (!this.isNullOrEmpty(transportModeType)) {
       if (addAndInCql) cql = cql + " AND ";
       cql = cql + `TransportModeType like '${transportModeType}'`;
       addAndInCql = true;
     }
-    if (stopAreaNameOrNumber != null) {
+    if (!this.isNullOrEmpty(stopAreaNameOrNumber)) {
       if (addAndInCql) cql = cql + " AND ";
       if (this.isLineNumber(stopAreaNameOrNumber))
         cql = cql + `StopAreaNumber like '${stopAreaNameOrNumber}'`;
       else cql = cql + `StopAreaName like '${stopAreaNameOrNumber}'`;
       addAndInCql = true;
     }
-    if (polygonAsWkt != null) {
+    if (!this.isNullOrEmpty(polygonAsWkt)) {
       if (addAndInCql) cql = cql + " AND ";
       cql = cql + `Geom like '${polygonAsWkt}'`;
       addAndInCql = true;
     }
 
     if (
-      publicLineName != null ||
-      internalLineNumber != null ||
-      isInMunicipalityZoneGid != null ||
-      transportModeType != null ||
-      stopAreaNameOrNumber != null ||
-      polygonAsWkt != null
+      !this.isNullOrEmpty(publicLineName) ||
+      !this.isNullOrEmpty(internalLineNumber) ||
+      !this.isNullOrEmpty(isInMunicipalityZoneGid) ||
+      !this.isNullOrEmpty(transportModeType) ||
+      !this.isNullOrEmpty(stopAreaNameOrNumber) ||
+      !this.isNullOrEmpty(polygonAsWkt)
     )
       url = url + cql;
 
@@ -468,7 +478,7 @@ export default class SearchModel {
 
           routes.featureCollection = this.removeUnnecessaryAttributes(
             routes.featureCollection,
-            this.getAttributesToKeepFromSettings(
+            this.attributesToKeepFromSettings(
               this.geoserver.routes.attributesToDisplay
             )
           );
@@ -506,29 +516,30 @@ export default class SearchModel {
     });
 
     // Fix parentheses and so on, so that the WKT are geoserver valid.
-    if (filterOnWkt != null) filterOnWkt = this.fixWktForGeoServer(filterOnWkt);
+    if (!this.isNullOrEmpty(filterOnWkt))
+      filterOnWkt = this.fixWktForGeoServer(filterOnWkt);
 
     // Build up the url with viewparams.
     let url = this.geoserver.stopAreas.url;
     let viewParams = "&viewparams=";
-    if (filterOnName != null)
+    if (!this.isNullOrEmpty(filterOnName))
       viewParams = viewParams + `filterOnName:${filterOnName};`;
-    if (filterOnPublicLine != null)
+    if (!this.isNullOrEmpty(filterOnPublicLine))
       viewParams = viewParams + `filterOnPublicLine:${filterOnPublicLine};`;
-    if (filterOnMunicipalName != null)
+    if (!this.isNullOrEmpty(filterOnMunicipalName))
       viewParams =
         viewParams + `filterOnMunicipalName:${filterOnMunicipalName};`;
-    if (filterOnNumber != null)
+    if (!this.isNullOrEmpty(filterOnNumber))
       viewParams = viewParams + `filterOnNumber:${filterOnNumber};`;
-    if (filterOnWkt != null)
+    if (!this.isNullOrEmpty(filterOnWkt))
       viewParams = viewParams + `filterOnWkt:${filterOnWkt};`;
 
     if (
-      filterOnName != null ||
-      filterOnPublicLine != null ||
-      filterOnMunicipalName != null ||
-      filterOnNumber != null ||
-      filterOnWkt != null
+      !this.isNullOrEmpty(filterOnName) ||
+      !this.isNullOrEmpty(filterOnPublicLine) ||
+      !this.isNullOrEmpty(filterOnMunicipalName) ||
+      !this.isNullOrEmpty(filterOnNumber) ||
+      !this.isNullOrEmpty(filterOnWkt)
     )
       url = url + viewParams;
 
@@ -545,7 +556,7 @@ export default class SearchModel {
 
           stopAreas.featureCollection = this.removeUnnecessaryAttributes(
             stopAreas.featureCollection,
-            this.getAttributesToKeepFromSettings(
+            this.attributesToKeepFromSettings(
               this.geoserver.stopAreas.attributesToDisplay
             )
           );
@@ -583,29 +594,30 @@ export default class SearchModel {
     });
 
     // Fix parentheses and so on, so that the WKT are geoserver valid.
-    if (filterOnWkt != null) filterOnWkt = this.fixWktForGeoServer(filterOnWkt);
+    if (!this.isNullOrEmpty(filterOnWkt))
+      filterOnWkt = this.fixWktForGeoServer(filterOnWkt);
 
     // Build up the url with viewparams.
     let url = this.geoserver.stopPoints.url;
     let viewParams = "&viewparams=";
-    if (filterOnName != null)
+    if (!this.isNullOrEmpty(filterOnName))
       viewParams = viewParams + `filterOnName:${filterOnName};`;
-    if (filterOnPublicLine != null)
+    if (!this.isNullOrEmpty(filterOnPublicLine))
       viewParams = viewParams + `filterOnPublicLine:${filterOnPublicLine};`;
-    if (filterOnMunicipalName != null)
+    if (!this.isNullOrEmpty(filterOnMunicipalName))
       viewParams =
         viewParams + `filterOnMunicipalName:${filterOnMunicipalName};`;
-    if (filterOnNumber != null)
+    if (!this.isNullOrEmpty(filterOnNumber))
       viewParams = viewParams + `filterOnNumber:${filterOnNumber};`;
-    if (filterOnWkt != null)
+    if (!this.isNullOrEmpty(filterOnWkt))
       viewParams = viewParams + `filterOnWkt:${filterOnWkt};`;
 
     if (
-      filterOnName != null ||
-      filterOnPublicLine != null ||
-      filterOnMunicipalName != null ||
-      filterOnNumber != null ||
-      filterOnWkt != null
+      !this.isNullOrEmpty(filterOnName) ||
+      !this.isNullOrEmpty(filterOnPublicLine) ||
+      !this.isNullOrEmpty(filterOnMunicipalName) ||
+      !this.isNullOrEmpty(filterOnNumber) ||
+      !this.isNullOrEmpty(filterOnWkt)
     )
       url = url + viewParams;
 
@@ -622,7 +634,7 @@ export default class SearchModel {
 
           stopPoints.featureCollection = this.removeUnnecessaryAttributes(
             stopPoints.featureCollection,
-            this.getAttributesToKeepFromSettings(
+            this.attributesToKeepFromSettings(
               this.geoserver.stopPoints.attributesToDisplay
             )
           );
