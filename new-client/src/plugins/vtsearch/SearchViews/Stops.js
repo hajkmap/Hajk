@@ -85,50 +85,50 @@ class Stops extends React.PureComponent {
 
   doSpetialChange = () => {
     const {
-      setBusSopAreaValue,
       stopNameOrNr,
       publicLine,
       municipalityName,
+      setBusSopAreaValue,
       selectedFormType
     } = this.state;
     this.localObserver.publish("stops-search", {
-      setBusSopAreaValue: setBusSopAreaValue,
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
       municipalityName: municipalityName,
+      setBusSopAreaValue: setBusSopAreaValue,
       selectedFormType: ""
     });
   };
 
   handlePolygonChange = () => {
     const {
-      setBusSopAreaValue,
       stopNameOrNr,
       publicLine,
       municipalityName,
+      setBusSopAreaValue,
       selectedFormType
     } = this.state;
     this.localObserver.publish("stops-search", {
-      setBusSopAreaValue: setBusSopAreaValue,
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
       municipalityName: municipalityName,
+      setBusSopAreaValue: setBusSopAreaValue,
       selectedFormType: "Polygon"
     });
   };
   handleRectangleChange = () => {
     const {
-      setBusSopAreaValue,
       stopNameOrNr,
       publicLine,
       municipalityName,
+      setBusSopAreaValue,
       selectedFormType
     } = this.state;
     this.localObserver.publish("stops-search", {
-      setBusSopAreaValue: setBusSopAreaValue,
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
       municipalityName: municipalityName,
+      setBusSopAreaValue: setBusSopAreaValue,
       selectedFormType: "Box"
     });
   };

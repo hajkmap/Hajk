@@ -69,11 +69,31 @@ export default class MapViewModel {
     });
 
     this.localObserver.subscribe(
-      "activate-search-by-draw",
+      "journeys-search",
       ({ selectedFromDate, selectedEndDate, selectedFormType }) => {
-        this.activateSearchByDraw({
+        this.journeySearch({
           selectedFromDate,
           selectedEndDate,
+          selectedFormType
+        });
+        this.drawlayer.getSource().clear();
+      }
+    );
+
+    this.localObserver.subscribe(
+      "stops-search",
+      ({
+        stopNameOrNr,
+        publicLine,
+        municipalityName,
+        setBusSopAreaValue,
+        selectedFormType
+      }) => {
+        this.stopSearch({
+          stopNameOrNr,
+          publicLine,
+          municipalityName,
+          setBusSopAreaValue,
           selectedFormType
         });
         this.drawlayer.getSource().clear();
@@ -92,6 +112,72 @@ export default class MapViewModel {
           layer.get("searchResultId") === searchResultId
         );
       })[0];
+  };
+
+  journeySearch = ({ selectedFromDate, selectedEndDate, selectedFormType }) => {
+    var value = selectedFormType;
+    var geometryFunction = undefined;
+    if (selectedFormType === "Box") {
+      value = "Circle";
+      geometryFunction = createBox();
+    }
+    this.draw = new Draw({
+      source: this.drawlayer.getSource(),
+      type: value,
+      stopClick: true,
+      geometryFunction: geometryFunction
+    });
+
+    this.draw.on("drawend", e => {
+      this.map.removeInteraction(this.draw);
+      var format = new WKT();
+      var wktFeatureGeom = format.writeGeometry(e.feature.getGeometry());
+      if (wktFeatureGeom != null) {
+        this.model.getJourneys(
+          selectedFromDate,
+          selectedEndDate,
+          wktFeatureGeom
+        );
+      }
+    });
+    this.map.addInteraction(this.draw);
+  };
+
+  stopSearch = ({
+    stopNameOrNr,
+    publicLine,
+    municipalityName,
+    setBusSopAreaValue,
+    selectedFormType
+  }) => {
+    var value = selectedFormType;
+    var geometryFunction = undefined;
+    if (selectedFormType === "Box") {
+      value = "Circle";
+      geometryFunction = createBox();
+    }
+    this.draw = new Draw({
+      source: this.drawlayer.getSource(),
+      type: value,
+      stopClick: true,
+      geometryFunction: geometryFunction
+    });
+
+    this.draw.on("drawend", e => {
+      this.map.removeInteraction(this.draw);
+      var format = new WKT();
+      var wktFeatureGeom = format.writeGeometry(e.feature.getGeometry());
+      if (wktFeatureGeom != null) {
+        this.model.getStopAreas(
+          stopNameOrNr,
+          publicLine,
+          municipalityName,
+          setBusSopAreaValue,
+          wktFeatureGeom
+        );
+      }
+    });
+    this.map.addInteraction(this.draw);
   };
 
   activateSearchByDraw = ({
