@@ -7,7 +7,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormControl from "@material-ui/core/FormControl";
 import BorderStyleIcon from "@material-ui/icons/BorderStyle";
 import SquareIcon from "@material-ui/icons/CropSquare";
-import { TextField, Button } from "@material-ui/core";
+import { TextField, Button, Typography } from "@material-ui/core";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
@@ -15,17 +15,21 @@ import Select from "@material-ui/core/Select";
 // Define JSS styles that will be used in this component.
 // Examle below utilizes the very powerful "theme" object
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
-const styles = theme => ({});
+const styles = theme => ({
+  setStandardWidth: { width: 200 },
+  button: { marginTop: 8 }
+});
 
 class Stops extends React.PureComponent {
   // Initialize state - this is the correct way of doing it nowadays.
   state = {
-    value: "hpo",
-    setValue: "hpo",
+    setBusSopAreaValue: "stopAreas",
     stopNameOrNr: "",
     publicLine: "",
     municipalityNames: [],
-    municipalityName: ""
+    municipalityName: "",
+    selectedFormType: "",
+    doSpetial: false
   };
 
   // propTypes and defaultProps are static properties, declared
@@ -57,7 +61,7 @@ class Stops extends React.PureComponent {
 
   handleChange = event => {
     this.setState({
-      setValue: event.target.value
+      setBusSopAreaValue: event.target.value
     });
   };
 
@@ -79,12 +83,54 @@ class Stops extends React.PureComponent {
     });
   };
 
-  testDebug = e => {
-    let fromTime = "2019-11-25T16:00:00";
-    let endTime = "2019-11-25T17:00:00";
-    let wkt =
-      "POLYGON((319165.99791318 6393791.4071366,319165.99791318 6393918.4071366,319392.99791318 6393918.4071366,319392.99791318 6393791.4071366,319165.99791318 6393791.4071366))";
-    this.model.getStopAreas(null, null, "Göteborg");
+  doSpetialChange = () => {
+    const {
+      stopNameOrNr,
+      publicLine,
+      municipalityName,
+      setBusSopAreaValue,
+      selectedFormType
+    } = this.state;
+    this.localObserver.publish("stops-search", {
+      stopNameOrNr: stopNameOrNr,
+      publicLine: publicLine,
+      municipalityName: municipalityName,
+      setBusSopAreaValue: setBusSopAreaValue,
+      selectedFormType: ""
+    });
+  };
+
+  handlePolygonChange = () => {
+    const {
+      stopNameOrNr,
+      publicLine,
+      municipalityName,
+      setBusSopAreaValue,
+      selectedFormType
+    } = this.state;
+    this.localObserver.publish("stops-search", {
+      stopNameOrNr: stopNameOrNr,
+      publicLine: publicLine,
+      municipalityName: municipalityName,
+      setBusSopAreaValue: setBusSopAreaValue,
+      selectedFormType: "Polygon"
+    });
+  };
+  handleRectangleChange = () => {
+    const {
+      stopNameOrNr,
+      publicLine,
+      municipalityName,
+      setBusSopAreaValue,
+      selectedFormType
+    } = this.state;
+    this.localObserver.publish("stops-search", {
+      stopNameOrNr: stopNameOrNr,
+      publicLine: publicLine,
+      municipalityName: municipalityName,
+      setBusSopAreaValue: setBusSopAreaValue,
+      selectedFormType: "Box"
+    });
   };
 
   render() {
@@ -95,64 +141,91 @@ class Stops extends React.PureComponent {
         <div>
           Här ska vi lägga till formuläret för hållplatser och hållplatsområden
         </div>
-        <FormControl component="fieldset" className={classes.formControl}>
+        <FormControl component="fieldset">
           <RadioGroup
             aria-label="Stops"
             name="Stop"
-            value={this.state.setValue}
+            value={this.state.setBusSopAreaValue}
             onChange={this.handleChange}
           >
             <FormControlLabel
-              value="hpo"
+              value="stopAreas"
               control={<Radio color="primary" />}
               label="Hållplatsområden"
             />
             <FormControlLabel
-              value="hpl"
+              value="stopPoints"
               control={<Radio color="primary" />}
               label="Hållplatslägen"
             />
           </RadioGroup>
         </FormControl>
-        <FormControl className={classes.formControl}>
+        <TextField
+          id="standard-basic"
+          label="Hållplatsnamn eller -nr"
+          value={this.state.stopNameOrNr}
+          onChange={this.handleStopNameOrNrChange}
+          className={classes.setStandardWidth}
+        ></TextField>
+        <TextField
+          id="standard-basic"
+          label="Längs publik linje"
+          value={this.state.publicLine}
+          onChange={this.handlePublicLineChange}
+          className={classes.setStandardWidth}
+        />
+        <FormControl>
           <InputLabel>Kommun</InputLabel>
           <Select
             value={this.state.municipalityName}
             onChange={this.handleMunicipalChange}
+            className={classes.setStandardWidth}
           >
             {municipalityNames.map((name, index) => {
               return (
-                <MenuItem key={index} value={name}>
+                <MenuItem
+                  key={index}
+                  value={name}
+                  className={classes.setStandardWidth}
+                >
                   {name}
                 </MenuItem>
               );
             })}
           </Select>
-          <TextField
-            id="standard-basic"
-            label="Hållplatsnamn eller -nr"
-            value={this.state.stopNameOrNr}
-            onChange={this.handleStopNameOrNrChange}
-          ></TextField>
-          <TextField
-            id="standard-basic"
-            label="Längs publik linje"
-            value={this.state.publicLine}
-            onChange={this.handlePublicLineChange}
-          />
         </FormControl>
-        <p>Markera sökområde i kartan</p>
-        <Button variant="outlined" type="button" title="Lägg till polygon">
+        <Button
+          className={classes.button}
+          variant="outlined"
+          type="button"
+          title="Sök"
+          value={this.state.doSpetial}
+          onClick={this.doSpetialChange}
+        >
+          Sök
+          <BorderStyleIcon />
+        </Button>
+        <Typography className={classes.button}>
+          Markera sökområde i kartan
+        </Typography>
+        <Button
+          className={classes.button}
+          variant="outlined"
+          type="button"
+          value={this.state.selectedFormType}
+          onClick={this.handlePolygonChange}
+        >
           Polygon
           <BorderStyleIcon />
         </Button>
-        <Button variant="outlined" type="button" title="Lägg till rektangel">
+        <Button
+          variant="outlined"
+          type="button"
+          value={this.state.selectedFormType}
+          onClick={this.handleRectangleChange}
+        >
           Rektangel
           <SquareIcon />
-        </Button>
-        <br />
-        <Button variant="outlined" onClick={this.testDebug} variant="outlined">
-          Sök
         </Button>
       </div>
     );

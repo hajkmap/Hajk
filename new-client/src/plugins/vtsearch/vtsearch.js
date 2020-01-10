@@ -74,9 +74,9 @@ const styles = theme => {
   };
 };
 const searchTypes = {
-  JOURNEYS: "Journeys",
-  STOPS: "Stops",
-  LINES: "Lines"
+  JOURNEYS: "Sök Turer",
+  STOPS: "Sök Hållplats",
+  LINES: "Sök Linjer"
 };
 
 const windowsContainerId = "windows-container";
@@ -199,15 +199,6 @@ class VTSearch extends React.PureComponent {
           ></Journeys>
         );
       }
-      case searchTypes.STOPS: {
-        return (
-          <Stops
-            model={this.searchModel}
-            app={app}
-            localObserver={this.localObserver}
-          ></Stops>
-        );
-      }
       case searchTypes.LINES: {
         return (
           <Lines
@@ -215,6 +206,15 @@ class VTSearch extends React.PureComponent {
             app={app}
             localObserver={this.localObserver}
           ></Lines>
+        );
+      }
+      case searchTypes.STOPS: {
+        return (
+          <Stops
+            model={this.searchModel}
+            app={app}
+            localObserver={this.localObserver}
+          ></Stops>
         );
       }
       default: {

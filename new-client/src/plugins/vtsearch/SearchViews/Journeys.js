@@ -66,7 +66,7 @@ class Journeys extends React.PureComponent {
     const { selectedFromDate, selectedEndDate, selectedFormType } = this.state;
     let formatFromDate = new Date(selectedFromDate).toISOString(); // format the date to yyyy-mm-ddThh-mm-ss
     let formatEndDate = new Date(selectedEndDate).toISOString(); // format the date to yyyy-mm-ddThh-mm-ss
-    this.localObserver.publish("activate-search-by-draw", {
+    this.localObserver.publish("journeys-search", {
       selectedFromDate: formatFromDate,
       selectedEndDate: formatEndDate,
       selectedFormType: "Polygon"
@@ -74,7 +74,7 @@ class Journeys extends React.PureComponent {
   };
   handleRectangleChange = () => {
     const { selectedFromDate, selectedEndDate, selectedFormType } = this.state;
-    this.localObserver.publish("activate-search-by-draw", {
+    this.localObserver.publish("journeys-search", {
       selectedFromDate: selectedFromDate,
       selectedEndDate: selectedEndDate,
       selectedFormType: "Box"
