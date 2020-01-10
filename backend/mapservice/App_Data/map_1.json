@@ -178,6 +178,23 @@
         "title": "VTSEARCH",
         "target": "left",
         "geoserver": {
+          "lineNumberAndPublicLineNumber": {
+            "searchLabel": "Linjenummer",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=lineNumberAndPublicLineNumber&outputFormat=application/json"
+          },
+          "municipalityZoneNames": {
+            "searchLabel": "Kommunnamn",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=municipalityZoneNames&outputFormat=application/json"
+          },
+          "stopAreaNameAndStopAreaNumber": {
+            "searchLabel": "Hållplats",
+            "defaultSortAttribute": "StopAreaNumber",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=stopAreaNameAndNumber&outputFormat=application/json"
+          },
+          "transportModeTypeNames": {
+            "searchLabel": "Trafikslag",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=transportModeTypeNames&outputFormat=application/json"
+          },
           "journeys": {
             "searchLabel": "Turer",
             "defaultSortAttribute": "EarliestDepartureTimeAtToStopPoint",
@@ -217,14 +234,6 @@
               }
             ]
           },
-          "lineNumberAndPublicLineNumber": {
-            "searchLabel": "Linjenummer",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=lineNumberAndPublicLineNumber&outputFormat=application/json"
-          },
-          "municipalityZoneNames": {
-            "searchLabel": "Kommunnamn",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=municipalityZoneNames&outputFormat=application/json"
-          },
           "routes": {
             "searchLabel": "Linje",
             "defaultSortAttribute": "InternalLineNumber",
@@ -256,19 +265,83 @@
               }
             ]
           },
-          "stopAreaNameAndStopAreaNumber": {
-            "searchLabel": "Hållplats",
-            "defaultSortAttribute": "StopAreaNumber",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=stopAreaNameAndNumber&outputFormat=application/json"
-          },
           "stopAreas": {
             "searchLabel": "Hållplatsområden",
             "defaultSortAttribute": "StopAreaNumber",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=stopAreas&outputFormat=application/json"
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=stopAreas&outputFormat=application/json",
+            "attributesToDisplay": [
+              {
+                "displayName": "Hållplatsnummer",
+                "key": "StopAreaNumber"
+              },
+              {
+                "displayName": "Namn",
+                "key": "Name"
+              },
+              {
+                "displayName": "Bytesprio",
+                "key": "InterchangePriorityMessage"
+              },
+              {
+                "displayName": "Kommun",
+                "key": "MunicipalityName"
+              },
+              {
+                "displayName": "Taxezon 1",
+                "key": "TariffZone1Name"
+              },
+              {
+                "displayName": "Taxezon 2",
+                "key": "TariffZone2Name"
+              }
+            ]
           },
-          "transportModeTypeNames": {
-            "searchLabel": "Trafikslag",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=transportModeTypeNames&outputFormat=application/json"
+          "stopPoints": {
+            "searchLabel": "Hållplatslägen",
+            "defaultSortAttribute": "StopPointNumber",
+            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=kartsidan2%3AstopPoints&maxFeatures=50&outputFormat=application/json",
+            "attributesToDisplay": [
+              {
+                "displayName": "Hållplatsnummer",
+                "key": "StopAreaNumber"
+              },
+              {
+                "displayName": "Namn",
+                "key": "Name"
+              },
+              {
+                "displayName": "Beteckning",
+                "key": "Designation"
+              },
+              {
+                "displayName": "Påstigning",
+                "key": "IsForBoarding"
+              },
+              {
+                "displayName": "Avstigning",
+                "key": "IsForAlighting"
+              },
+              {
+                "displayName": "Virtuellt",
+                "key": "IsFictitious"
+              },
+              {
+                "displayName": "Kommun",
+                "key": "MunicipalityName"
+              },
+              {
+                "displayName": "Linjetrafik",
+                "key": "IsRegularTraffic"
+              },
+              {
+                "displayName": "Flexlinje",
+                "key": "IsFlexibleBusService"
+              },
+              {
+                "displayName": "Närtrafik",
+                "key": "IsFlexibleTaxiService"
+              }
+            ]
           }
         }
       },
