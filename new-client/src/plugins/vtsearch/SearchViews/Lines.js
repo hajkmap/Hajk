@@ -70,7 +70,7 @@ class Lines extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
-    this.model.getMunicipalityZoneNames().then(result => {
+    this.model.autocompleteMunicipalityZoneNames().then(result => {
       this.setState({
         municipalityNames: result.length > 0 ? result : []
       });
