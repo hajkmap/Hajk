@@ -27,7 +27,7 @@ export default class SearchModel {
    * @param {string} cql The CQL that needs to be adjusted.
    * @returns {string} Returns a supported wkt for GeoServer.
    *
-   * @memberof SerachModel
+   * @memberof SearchModel
    */
   fixCqlForGeoServer = cql => {
     return cql
@@ -41,7 +41,7 @@ export default class SearchModel {
    * @param {string} wkt The WKT that needs to be adjusted.
    * @returns {string} Returns a supported wkt for GeoServer.
    *
-   * @memberof SerachModel
+   * @memberof SearchModel
    */
   fixWktForGeoServer = wkt => {
     return wkt
@@ -54,7 +54,7 @@ export default class SearchModel {
   /**
    * Private method that gets all attributes that should remain from GeoServer.
    * @param {array(string, string)} attributesToDisplay An array of attributes to be displayed.
-   * @returns {array(string)} An array with only attribute names, stripped of all other data.
+   * @returns {array(string)} Returns an array with only attribute names, stripped of all other data.
    *
    * @memberof SearchModel
    */
@@ -91,7 +91,7 @@ export default class SearchModel {
    * Private method that removes all unnecessary attributes from a collection.
    * @param {object} featureCollection The feature collection with unnecessary attributes.
    * @param {array(string)} attributesToKeep An array with the attributes that will remain.
-   * @returns {featureCollection} A feature collection with no unnecessary attributes in it.
+   * @returns {featureCollection} Returns a feature collection with no unnecessary attributes in it.
    *
    * @memberof SearchModel
    */
@@ -129,7 +129,7 @@ export default class SearchModel {
    * Private method that remotes all duplicates from an array of featrues.
    * The function checks if properties diverges.
    * @param {feature} features The feature collection with duplicates.
-   * @returns {feature} An array with no duplicates in it.
+   * @returns {feature} Returns an array with no duplicates in it.
    *
    * @memberof SearchModel
    */
@@ -163,7 +163,7 @@ export default class SearchModel {
    * The comparision looks at propertiy name and values.
    * @param {object} objectOne The first object to compare.
    * @param {object} objectTwo The second object to compare.
-   * @returns Returns true if two object has the same propertiy name and values.
+   * @returns {boolean} Returns true if two object has the same propertiy name and values.
    *
    * @memberof SearchModel
    */
@@ -311,7 +311,7 @@ export default class SearchModel {
 
   /**
    * Autocompelete function that gets then transport mode type names and numbers.
-   * @returns {array(string, int) Returnes all mode type names as an array of tuples.
+   * @returns {array(string, int)} Returnes all mode type names as an array of tuples.
    *
    * @memberof SearchModel
    */
@@ -496,19 +496,17 @@ export default class SearchModel {
 
   /**
    * Get all stop areas. Sends an event when the function is called and another one when it's promise is done.
-   * @param {string} filterOnName The public name of the stop area, pass null of no name is given.
+   * @param {string} filterOnNameOrNumber The public name or the number of the stop point, pass null of no name is given.
    * @param {string} filterOnPublicLine The public line number, pass null of no line is given.
    * @param {string} filterOnMunicipalName The municipality name, pass null of no municipality name is given.
-   * @param {string} filterOnNumber The number of the stop area, pass null of no number is given.
    * @param {string} filterOnWkt A polygon as a WKT, pass null of no polygon is given.
    *
    * @memberof SearchModel
    */
   getStopAreas(
-    filterOnName,
+    filterOnNameOrNumber,
     filterOnPublicLine,
     filterOnMunicipalName,
-    filterOnNumber,
     filterOnWkt
   ) {
     this.localObserver.publish("vtsearch-result-begin", {
@@ -522,23 +520,23 @@ export default class SearchModel {
     // Build up the url with viewparams.
     let url = this.geoserver.stopAreas.url;
     let viewParams = "&viewparams=";
-    if (!this.isNullOrEmpty(filterOnName))
-      viewParams = viewParams + `filterOnName:${filterOnName};`;
+    if (!this.isNullOrEmpty(filterOnNameOrNumber)) {
+      if (this.isLineNumber(filterOnNameOrNumber))
+        viewParams = viewParams + `filterOnName:${filterOnNameOrNumber};`;
+      else viewParams = viewParams + `filterOnNumber:${filterOnNameOrNumber};`;
+    }
     if (!this.isNullOrEmpty(filterOnPublicLine))
       viewParams = viewParams + `filterOnPublicLine:${filterOnPublicLine};`;
     if (!this.isNullOrEmpty(filterOnMunicipalName))
       viewParams =
         viewParams + `filterOnMunicipalName:${filterOnMunicipalName};`;
-    if (!this.isNullOrEmpty(filterOnNumber))
-      viewParams = viewParams + `filterOnNumber:${filterOnNumber};`;
     if (!this.isNullOrEmpty(filterOnWkt))
       viewParams = viewParams + `filterOnWkt:${filterOnWkt};`;
 
     if (
-      !this.isNullOrEmpty(filterOnName) ||
+      !this.isNullOrEmpty(filterOnNameOrNumber) ||
       !this.isNullOrEmpty(filterOnPublicLine) ||
       !this.isNullOrEmpty(filterOnMunicipalName) ||
-      !this.isNullOrEmpty(filterOnNumber) ||
       !this.isNullOrEmpty(filterOnWkt)
     )
       url = url + viewParams;
@@ -574,19 +572,17 @@ export default class SearchModel {
 
   /**
    * Get all stop points. Sends an event when the function is called and another one when it's promise is done.
-   * @param {string} filterOnName The public name of the stop point, pass null of no name is given.
+   * @param {string} filterOnNameOrNumber The public name or the number of the stop point, pass null of no name is given.
    * @param {string} filterOnPublicLine The public line number, pass null of no line is given.
    * @param {string} filterOnMunicipalName The municipality name, pass null of no municipality name is given.
    * @param {string} filterOnNumber The number of the stop point, pass null of no number is given.
-   * @param {string} filterOnWkt A polygon as a WKT, pass null of no polygon is given.
    *
    * @memberof SearchModel
    */
   getStopPoints(
-    filterOnName,
+    filterOnNameOrNumber,
     filterOnPublicLine,
     filterOnMunicipalName,
-    filterOnNumber,
     filterOnWkt
   ) {
     this.localObserver.publish("vtsearch-result-begin", {
@@ -600,23 +596,23 @@ export default class SearchModel {
     // Build up the url with viewparams.
     let url = this.geoserver.stopPoints.url;
     let viewParams = "&viewparams=";
-    if (!this.isNullOrEmpty(filterOnName))
-      viewParams = viewParams + `filterOnName:${filterOnName};`;
+    if (!this.isNullOrEmpty(filterOnNameOrNumber)) {
+      if (this.isLineNumber(filterOnNameOrNumber))
+        viewParams = viewParams + `filterOnName:${filterOnNameOrNumber};`;
+      else viewParams = viewParams + `filterOnNumber:${filterOnNameOrNumber};`;
+    }
     if (!this.isNullOrEmpty(filterOnPublicLine))
       viewParams = viewParams + `filterOnPublicLine:${filterOnPublicLine};`;
     if (!this.isNullOrEmpty(filterOnMunicipalName))
       viewParams =
         viewParams + `filterOnMunicipalName:${filterOnMunicipalName};`;
-    if (!this.isNullOrEmpty(filterOnNumber))
-      viewParams = viewParams + `filterOnNumber:${filterOnNumber};`;
     if (!this.isNullOrEmpty(filterOnWkt))
       viewParams = viewParams + `filterOnWkt:${filterOnWkt};`;
 
     if (
-      !this.isNullOrEmpty(filterOnName) ||
+      !this.isNullOrEmpty(filterOnNameOrNumber) ||
       !this.isNullOrEmpty(filterOnPublicLine) ||
       !this.isNullOrEmpty(filterOnMunicipalName) ||
-      !this.isNullOrEmpty(filterOnNumber) ||
       !this.isNullOrEmpty(filterOnWkt)
     )
       url = url + viewParams;
