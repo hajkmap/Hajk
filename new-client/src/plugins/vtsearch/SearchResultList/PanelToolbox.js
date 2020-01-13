@@ -58,7 +58,7 @@ class PanelToolbox extends React.PureComponent {
     localObserver.publish("search-result-list-maximized");
   };
 
-  normal = () => {
+  normalize = () => {
     const { localObserver } = this.props;
     this.setState({
       maximizeVisible: true,
@@ -78,44 +78,36 @@ class PanelToolbox extends React.PureComponent {
     localObserver.publish("search-result-list-close");
   };
 
-  render() {
+  renderButton = (onClickCallback, iconElement) => {
     const { classes } = this.props;
     return (
+      <IconButton
+        classes={{ root: classes.iconButtonRoot }}
+        onClick={onClickCallback}
+      >
+        {iconElement === "minimize" ? (
+          <MinimizeIcon />
+        ) : iconElement === "maximize" ? (
+          <MaximizeIcon />
+        ) : iconElement === "normalize" ? (
+          <NormalIcon />
+        ) : iconElement === "close" ? (
+          <CloseIcon />
+        ) : null}
+      </IconButton>
+    );
+  };
+
+  render() {
+    return (
       <div>
-        {this.state.minimizeVisible && (
-          <IconButton
-            classes={{ root: classes.iconButtonRoot }}
-            onClick={this.minimize}
-            aria-label="minimize"
-          >
-            <MinimizeIcon></MinimizeIcon>
-          </IconButton>
-        )}
-        {this.state.normalVisible && (
-          <IconButton
-            classes={{ root: classes.iconButtonRoot }}
-            onClick={this.normal}
-            aria-label="normal"
-          >
-            <NormalIcon></NormalIcon>
-          </IconButton>
-        )}
-        {this.state.maximizeVisible && (
-          <IconButton
-            classes={{ root: classes.iconButtonRoot }}
-            onClick={this.maximize}
-            aria-label="maximize"
-          >
-            <MaximizeIcon></MaximizeIcon>
-          </IconButton>
-        )}
-        <IconButton
-          classes={{ root: classes.iconButtonRoot }}
-          onClick={this.close}
-          aria-label="close"
-        >
-          <CloseIcon></CloseIcon>
-        </IconButton>
+        {this.state.minimizeVisible &&
+          this.renderButton(this.minimize, "minimize")}
+        {this.state.normalVisible &&
+          this.renderButton(this.normal, "normalize")}
+        {this.state.maximizeVisible &&
+          this.renderButton(this.maximize, "maximize")}
+        {this.renderButton(this.close, "close")}
       </div>
     );
   }

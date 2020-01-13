@@ -439,6 +439,7 @@ class App extends React.PureComponent {
             title="Meddelande"
           />
           <div
+            id="app-container"
             className={cslx(classes.flexBox, {
               [classes.shiftedLeft]: this.state.drawerPermanent
             })}
