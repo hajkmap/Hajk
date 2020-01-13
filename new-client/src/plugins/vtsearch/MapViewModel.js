@@ -89,6 +89,14 @@ export default class MapViewModel {
         municipalityName,
         selectedFormType
       }) => {
+        if (selectedFormType === "") {
+          this.doStopSpetial({
+            busStopValue,
+            stopNameOrNr,
+            publicLine,
+            municipalityName
+          });
+        }
         this.stopSearch({
           busStopValue,
           stopNameOrNr,
@@ -143,6 +151,20 @@ export default class MapViewModel {
     this.map.addInteraction(this.draw);
   };
 
+  doStopSpetial = ({
+    busStopValue,
+    stopNameOrNr,
+    publicLine,
+    municipalityName
+  }) => {
+    if (busStopValue === "stopAreas") {
+      this.model.getStopAreas(stopNameOrNr, publicLine, municipalityName);
+    }
+    if (busStopValue === "stopPoints") {
+      this.model.getStopPoints(stopNameOrNr, publicLine, municipalityName);
+    }
+  };
+
   stopSearch = ({
     busStopValue,
     stopNameOrNr,
@@ -176,7 +198,7 @@ export default class MapViewModel {
         );
       }
       if (wktFeatureGeom != null && busStopValue === "stopPoints") {
-        this.model.getStopAreas(
+        this.model.getStopPoints(
           stopNameOrNr,
           publicLine,
           municipalityName,
