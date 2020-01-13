@@ -83,17 +83,17 @@ export default class MapViewModel {
     this.localObserver.subscribe(
       "stops-search",
       ({
+        busStopValue,
         stopNameOrNr,
         publicLine,
         municipalityName,
-        setBusSopAreaValue,
         selectedFormType
       }) => {
         this.stopSearch({
+          busStopValue,
           stopNameOrNr,
           publicLine,
           municipalityName,
-          setBusSopAreaValue,
           selectedFormType
         });
         this.drawlayer.getSource().clear();
@@ -144,10 +144,10 @@ export default class MapViewModel {
   };
 
   stopSearch = ({
+    busStopValue,
     stopNameOrNr,
     publicLine,
     municipalityName,
-    setBusSopAreaValue,
     selectedFormType
   }) => {
     var value = selectedFormType;
@@ -167,12 +167,19 @@ export default class MapViewModel {
       this.map.removeInteraction(this.draw);
       var format = new WKT();
       var wktFeatureGeom = format.writeGeometry(e.feature.getGeometry());
-      if (wktFeatureGeom != null) {
+      if (wktFeatureGeom != null && busStopValue === "stopAreas") {
         this.model.getStopAreas(
           stopNameOrNr,
           publicLine,
           municipalityName,
-          setBusSopAreaValue,
+          wktFeatureGeom
+        );
+      }
+      if (wktFeatureGeom != null && busStopValue === "stopPoints") {
+        this.model.getStopAreas(
+          stopNameOrNr,
+          publicLine,
+          municipalityName,
           wktFeatureGeom
         );
       }
@@ -281,8 +288,11 @@ export default class MapViewModel {
    */
 
   highlightFeature = olFeature => {
-    this.highlightLayer.getSource().clear();
-    this.highlightLayer.getSource().addFeature(olFeature);
+    if (olFeature != null) {
+      // remove error when clicking on map, prob not the best solution
+      this.highlightLayer.getSource().clear();
+      this.highlightLayer.getSource().addFeature(olFeature);
+    }
   };
   /**
    * Adds openlayers feature to search result layer
