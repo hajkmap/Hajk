@@ -99,6 +99,38 @@ export default class MapViewModel {
         this.drawlayer.getSource().clear();
       }
     );
+    this.localObserver.subscribe(
+      "routes-search",
+      ({
+        publicLineName,
+        internalLineNumber,
+        municipalityName,
+        traficTransportName,
+        throughStopArea,
+        selectedFormType
+      }) => {
+        if (selectedFormType === "") {
+          this.doSpatialRoutesSearch({
+            publicLineName,
+            internalLineNumber,
+            municipalityName,
+            traficTransportName,
+            throughStopArea,
+            selectedFormType
+          });
+        } else {
+          this.routesSearch({
+            publicLineName,
+            internalLineNumber,
+            municipalityName,
+            traficTransportName,
+            throughStopArea,
+            selectedFormType
+          });
+        }
+        this.drawlayer.getSource().clear();
+      }
+    );
   };
 
   getSearchResultLayerFromId = searchResultId => {
@@ -180,9 +212,28 @@ export default class MapViewModel {
     this.map.addInteraction(this.draw);
   };
 
-  activateSearchByDraw = ({
-    selectedFromDate,
-    selectedEndDate,
+  doSpatialRoutesSearch = ({
+    publicLineName,
+    internalLineNumber,
+    municipalityName,
+    traficTransportName,
+    throughStopArea
+  }) => {
+    this.model.getRoutes(
+      publicLineName,
+      internalLineNumber,
+      municipalityName,
+      traficTransportName,
+      throughStopArea
+    );
+  };
+
+  routesSearch = ({
+    publicLineName,
+    internalLineNumber,
+    municipalityName,
+    traficTransportName,
+    throughStopArea,
     selectedFormType
   }) => {
     var value = selectedFormType;
@@ -203,9 +254,12 @@ export default class MapViewModel {
       var format = new WKT();
       var wktFeatureGeom = format.writeGeometry(e.feature.getGeometry());
       if (wktFeatureGeom != null) {
-        this.model.getJourneys(
-          selectedFromDate,
-          selectedEndDate,
+        this.model.getRoutes(
+          publicLineName,
+          internalLineNumber,
+          municipalityName,
+          traficTransportName,
+          throughStopArea,
           wktFeatureGeom
         );
       }
@@ -281,8 +335,10 @@ export default class MapViewModel {
    */
 
   highlightFeature = olFeature => {
-    this.highlightLayer.getSource().clear();
-    this.highlightLayer.getSource().addFeature(olFeature);
+    if (olFeature != null) {
+      this.highlightLayer.getSource().clear();
+      this.highlightLayer.getSource().addFeature(olFeature);
+    }
   };
   /**
    * Adds openlayers feature to search result layer
