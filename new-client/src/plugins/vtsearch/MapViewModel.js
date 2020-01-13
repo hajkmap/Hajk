@@ -288,8 +288,11 @@ export default class MapViewModel {
    */
 
   highlightFeature = olFeature => {
-    this.highlightLayer.getSource().clear();
-    this.highlightLayer.getSource().addFeature(olFeature);
+    if (olFeature != null) {
+      // remove error when clicking on map, prob not the best solution
+      this.highlightLayer.getSource().clear();
+      this.highlightLayer.getSource().addFeature(olFeature);
+    }
   };
   /**
    * Adds openlayers feature to search result layer
