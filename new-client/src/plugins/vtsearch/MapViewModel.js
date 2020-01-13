@@ -13,6 +13,9 @@ import { createBox } from "ol/interaction/Draw";
  * This functionality does not fit in either the searchModel or the actual view.
  * @class MapViewModel
  */
+
+const mapContainer = document.getElementById("map");
+const appContainer = document.getElementById("app-container");
 export default class MapViewModel {
   constructor(settings) {
     this.map = settings.map;
@@ -47,7 +50,7 @@ export default class MapViewModel {
     this.map.on("singleclick", this.onFeaturesClickedInMap);
 
     this.localObserver.subscribe(
-      "add-search-result",
+      "add-search-result-to-map",
       ({ searchResultId, olFeatures }) => {
         var searchResultLayer = this.addSearchResultLayerToMap(searchResultId);
         this.addFeatureToSearchResultLayer(olFeatures, searchResultLayer);
@@ -68,6 +71,10 @@ export default class MapViewModel {
       this.highlightLayer.getSource().clear();
     });
 
+    this.localObserver.subscribe("resize-map", height => {
+      this.resizeMap(height);
+    });
+
     this.localObserver.subscribe(
       "activate-search-by-draw",
       ({ selectedFromDate, selectedEndDate, selectedFormType }) => {
@@ -81,8 +88,16 @@ export default class MapViewModel {
     );
   };
 
+  resizeMap = height => {
+    //Not so "reacty" but no other solution possible because if we don't want to rewrite core functionality in Hajk3
+    [appContainer, mapContainer].forEach(container => {
+      container.style.bottom = `${height}px`;
+    });
+
+    this.app.getMap().updateSize();
+  };
+
   getSearchResultLayerFromId = searchResultId => {
-    console.log(this.map.getLayers().getArray());
     return this.map
       .getLayers()
       .getArray()
@@ -234,8 +249,10 @@ export default class MapViewModel {
 
   onFeaturesClickedInMap = e => {
     var featuresClicked = this.getFeaturesAtClickedPixel(e);
-    this.highlightFeature(featuresClicked[0]);
-    this.localObserver.publish("features-clicked-in-map", featuresClicked);
+    if (featuresClicked.length > 0) {
+      this.highlightFeature(featuresClicked[0]);
+      this.localObserver.publish("features-clicked-in-map", featuresClicked);
+    }
   };
 
   /**

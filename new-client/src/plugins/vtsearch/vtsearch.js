@@ -73,13 +73,12 @@ const styles = theme => {
     }
   };
 };
+
 const searchTypes = {
   JOURNEYS: "Journeys",
   STOPS: "Stops",
   LINES: "Lines"
 };
-
-const windowsContainerId = "windows-container";
 
 /**
  * @summary Main class for the Dummy plugin.
@@ -100,11 +99,6 @@ class VTSearch extends React.PureComponent {
     activeSearchTool: null
   };
 
-  // propTypes and defaultProps are static properties, declared
-  // as high as possible within the component code. They should
-  // be immediately visible to other devs reading the file,
-  // since they serve as documentation.
-  // If unsure of what propTypes are or how to use them, see https://reactjs.org/docs/typechecking-with-proptypes.html.
   static propTypes = {
     app: PropTypes.object.isRequired,
     map: PropTypes.object.isRequired,
@@ -116,26 +110,10 @@ class VTSearch extends React.PureComponent {
   };
 
   constructor(props) {
-    // Unsure why we write "super(props)"?
-    // See https://overreacted.io/why-do-we-write-super-props/ for explanation.
     super(props);
     this.type = "VTSearch"; // Special case - plugins that don't use BaseWindowPlugin must specify .type here
-
-    // We can setup a local observer to allow sending messages between here (controller) and model/view.
-    // It's called 'localObserver' to distinguish it from AppModel's globalObserver.
-    // API docs, see: https://www.npmjs.com/package/react-event-observer
     this.localObserver = Observer();
 
-    // Once created, the observer can subscribe to events with a distinct name. In this example
-    // we subscribe to "dummyEvent" When "dummyEvent" is published (from somewhere else)
-    // the callback below will be run, with "message" as an optional param.
-    // this.localObserver.subscribe("dummyEvent", message => {
-    //   console.log(message);
-    // });
-
-    // Initiate a model. Although optional, it will probably be used for all except the most simple plugins.
-    // In this example, we make our localObserver available for the model as well. This makes it possible
-    // to send events between model and main plugin controller.
     this.searchModel = new SearchModel({
       localObserver: this.localObserver,
       app: props.app,
@@ -149,7 +127,10 @@ class VTSearch extends React.PureComponent {
       localObserver: this.localObserver,
       model: this.searchModel
     });
+    this.bindSubscriptions();
+  }
 
+  bindSubscriptions = () => {
     // Subscribes for an event when the vt-search has begun.
     this.localObserver.subscribe("vtsearch-result-begin", label => {
       console.log("vtsearch-result-begin, " + label.label);
@@ -159,20 +140,8 @@ class VTSearch extends React.PureComponent {
       console.log("vtsearch-result-done");
       console.log(ans);
     });
-  }
+  };
 
-  /**
-   * Render is now super-simplified compared to previous versions of Hajk3.
-   *
-   * All common functionality that has to do with showing a Window, and rendering
-   * Drawer or Widget buttons, as well as keeping the state of Window, are now
-   * abstracted away to BaseWindowPlugin Component.
-   *
-   * It's important to pass on all the props from here to our "parent" component.
-   *
-   * Also, we add a new prop, "custom", which holds props that are specific to this
-   * given implementation, such as the icon to be shown, or this plugin's title.
-   */
   handleExpandClick = () => {
     this.setState({
       expanded: !this.state.expanded
@@ -222,69 +191,83 @@ class VTSearch extends React.PureComponent {
     }
   };
 
-  render() {
-    const {
-      classes,
-      onMenuClick,
-      menuButtonDisabled,
-      app,
-      options
-    } = this.props;
+  renderDropDown() {
+    const { classes } = this.props;
+    return (
+      <FormControl variant="outlined" className={classes.formControl}>
+        <Select
+          classes={{ root: classes.selectInput }}
+          native
+          value={this.state.activeSearchType}
+          onChange={this.handleChange}
+          inputProps={{
+            name: "searchType",
+            id: "search-type"
+          }}
+        >
+          {[
+            <option key="default" value="">
+              Sök
+            </option>
+          ].concat(
+            Object.keys(searchTypes).map(key => {
+              return (
+                <option key={key} value={key}>
+                  {searchTypes[key]}
+                </option>
+              );
+            })
+          )}
+        </Select>
+      </FormControl>
+    );
+  }
+
+  renderExpansionButton() {
+    const { classes } = this.props;
+    return (
+      <IconButton
+        className={clsx(classes.expand, {
+          [classes.expandOpen]: this.state.expanded
+        })}
+        onClick={this.handleExpandClick}
+        aria-expanded={this.state.expanded}
+        aria-label="show more"
+      >
+        <ExpandMoreIcon />
+      </IconButton>
+    );
+  }
+
+  renderMenuButton() {
+    const { onMenuClick, menuButtonDisabled } = this.props;
     const tooltipText = menuButtonDisabled
       ? "Du måste först låsa upp verktygspanelen för kunna klicka på den här knappen. Tryck på hänglåset till vänster."
       : "Visa verktygspanelen";
+    return (
+      <Tooltip title={tooltipText}>
+        <IconButton
+          onClick={onMenuClick}
+          disabled={menuButtonDisabled}
+          aria-label="menu"
+        >
+          <MenuIcon />
+        </IconButton>
+      </Tooltip>
+    );
+  }
+
+  render() {
+    const { classes, app, options } = this.props;
 
     //OBS We need to keep the tooltip and IconButton to render menu!! //Tobias
     return (
       <>
         <Card className={classes.searchContainer}>
           <CardActions disableSpacing>
-            <Tooltip title={tooltipText}>
-              <IconButton
-                onClick={onMenuClick}
-                disabled={menuButtonDisabled}
-                aria-label="menu"
-              >
-                <MenuIcon />
-              </IconButton>
-            </Tooltip>
-
-            <FormControl variant="outlined" className={classes.formControl}>
-              <Select
-                classes={{ root: classes.selectInput }}
-                native
-                value={this.state.activeSearchType}
-                onChange={this.handleChange}
-                inputProps={{
-                  name: "searchType",
-                  id: "search-type"
-                }}
-              >
-                {[
-                  <option key="default" value="">
-                    Sök
-                  </option>
-                ].concat(
-                  Object.keys(searchTypes).map(key => {
-                    return (
-                      <option key={key} value={key}>
-                        {searchTypes[key]}
-                      </option>
-                    );
-                  })
-                )}
-              </Select>
-            </FormControl>
-            <IconButton
-              className={clsx(classes.expand, {
-                [classes.expandOpen]: this.state.expanded
-              })}
-              onClick={this.handleExpandClick}
-              aria-expanded={this.state.expanded}
-              aria-label="show more"
-            >
-              <ExpandMoreIcon />
-            </IconButton>
+            {this.renderMenuButton()}
+            {this.renderDropDown()}
+            {this.renderExpansionButton()}
           </CardActions>
           <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
             <CardContent
@@ -297,18 +280,16 @@ class VTSearch extends React.PureComponent {
         </Card>
         {ReactDOM.createPortal(
           <SearchResultListContainer
-            windowsContainer={windowsContainerId}
             localObserver={this.localObserver}
             model={this.searchModel}
             toolConfig={options}
             app={app}
           ></SearchResultListContainer>,
-          document.getElementById(windowsContainerId)
+          document.getElementById("windows-container")
         )}
       </>
     );
   }
 }
 
-// Part of API. Make a HOC of our plugin.
 export default withStyles(styles)(VTSearch);

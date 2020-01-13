@@ -1,4 +1,4 @@
-// Generic imports – all plugins need these
+// Generic imports â€“ all plugins need these
 import React from "react";
 import PropTypes from "prop-types";
 import { Rnd } from "react-rnd";
@@ -64,8 +64,6 @@ const styles = theme => {
 };
 
 const windowsContainer = document.getElementById("windows-container");
-const mapContainer = document.getElementById("map");
-const appContainer = document.getElementById("app-container");
 
 const getWindowContainerWidth = () => {
   return windowsContainer.getClientRects()[0].width;
@@ -120,37 +118,17 @@ class SearchResultListContainer extends React.Component {
     this.bindSubscriptions();
   }
 
-  handleSearchResult = result => {
+  onSearchDone = result => {
     const { localObserver } = this.props;
-    var searchResultId = this.addSearchResult(result);
-    localObserver.publish("add-search-result", {
+    var searchResultId = this.addResultToSearchResultList(result);
+    localObserver.publish("add-search-result-to-map", {
       searchResultId: searchResultId,
-      olFeatures: this.convertResultToOlFeatures(result)
+      olFeatures: this.convertToGeoJson(result.featureCollection)
     });
   };
 
-  convertResultToOlFeatures = result => {
-    return new GeoJSON().readFeatures(result.featureCollection);
-  };
-
-  removeSearchResult = () => {};
-
-  addSearchResult = result => {
-    var newId = 0;
-
-    if (this.state.searchResultIds.length > 0) {
-      newId =
-        this.state.searchResultIds[this.state.searchResultIds.length - 1] + 1;
-    }
-
-    this.searchResults.push({
-      ...result,
-      ...{ id: newId }
-    });
-
-    var searchResultIds = this.state.searchResultIds.concat(newId);
-    this.setState({ searchResultIds: searchResultIds });
-    return newId;
+  convertToGeoJson = featureCollectionAsString => {
+    return new GeoJSON().readFeatures(featureCollectionAsString);
   };
 
   bindSubscriptions = () => {
@@ -164,7 +142,7 @@ class SearchResultListContainer extends React.Component {
     });
 
     localObserver.subscribe("vtsearch-result-done", result => {
-      this.handleSearchResult(result);
+      this.onSearchDone(result);
     });
 
     localObserver.subscribe("attribute-table-row-clicked", payload => {
@@ -229,12 +207,6 @@ class SearchResultListContainer extends React.Component {
     this.setState({ activeTab: newValue });
   };
 
-  getSearchResults = () => {
-    return this.state.searchResultIds.map(id => {
-      return this.searchResults.find(result => result.id === id);
-    });
-  };
-
   getNextTabActive = searchResultId => {
     const { searchResultIds } = this.state;
     var index = searchResultIds.indexOf(searchResultId);
@@ -243,6 +215,31 @@ class SearchResultListContainer extends React.Component {
     } else {
       return searchResultIds[index - 1] ? searchResultIds[index - 1] : 0;
     }
+  };
+
+  onTabClose = searchResultId => {
+    const nextActiveTab = this.getNextTabActive(searchResultId);
+    this.removeSearchResult(searchResultId).then(() => {
+      this.setState({ activeTab: nextActiveTab });
+    });
+  };
+
+  addResultToSearchResultList = result => {
+    var newId = 0;
+
+    if (this.state.searchResultIds.length > 0) {
+      newId =
+        this.state.searchResultIds[this.state.searchResultIds.length - 1] + 1;
+    }
+
+    this.searchResults.push({
+      ...result,
+      ...{ id: newId }
+    });
+
+    var searchResultIds = this.state.searchResultIds.concat(newId);
+    this.setState({ searchResultIds: searchResultIds });
+    return newId;
   };
 
   removeSearchResult = searchResultId => {
@@ -269,20 +266,10 @@ class SearchResultListContainer extends React.Component {
     });
   };
 
-  removeResult = searchResultId => {
-    const nextActiveTab = this.getNextTabActive(searchResultId);
-    this.removeSearchResult(searchResultId).then(() => {
-      this.setState({ activeTab: nextActiveTab });
+  getSearchResults = () => {
+    return this.state.searchResultIds.map(id => {
+      return this.searchResults.find(result => result.id === id);
     });
-  };
-
-  resizeMap = height => {
-    const { app } = this.props;
-    //Not so "reacty" but no other solution possible because if we dont want to rewrite core functionality in Hajk3
-    [appContainer, mapContainer].forEach(container => {
-      container.style.bottom = `${height}px`;
-    });
-    app.getMap().updateSize();
   };
 
   renderTabs = searchResult => {
@@ -300,7 +287,7 @@ class SearchResultListContainer extends React.Component {
             <ClearIcon
               onClick={e => {
                 e.stopPropagation();
-                this.removeResult(searchResultId);
+                this.onTabClose(searchResultId);
               }}
               className={classes.customIcon}
               fontSize="inherit"
@@ -314,7 +301,7 @@ class SearchResultListContainer extends React.Component {
     );
   };
 
-  renderTabsSection = searchResults => {
+  renderTabsController = searchResults => {
     const { classes } = this.props;
     return (
       <Tabs
@@ -333,14 +320,58 @@ class SearchResultListContainer extends React.Component {
     );
   };
 
+  renderTabsHeader = searchResults => {
+    const { classes, localObserver } = this.props;
+    return (
+      <AppBar
+        ref={appbar => {
+          if (this.appbarHeight === null) {
+            this.appbarHeight = appbar.offsetHeight;
+          }
+        }}
+        position="static"
+      >
+        <Toolbar classes={{ regular: classes.toolbar }}>
+          <Grid justify="space-between" alignItems="center" container>
+            <Grid style={{ paddingLeft: 10 }} item>
+              {searchResults.length > 0 &&
+                this.renderTabsController(searchResults)}
+            </Grid>
+
+            <Grid style={{ paddingLeft: 0 }} item>
+              <PanelToolbox localObserver={localObserver}></PanelToolbox>
+            </Grid>
+          </Grid>
+        </Toolbar>
+      </AppBar>
+    );
+  };
+
+  renderSearchResultAsTabContent = searchResult => {
+    const { toolConfig, localObserver } = this.props;
+    return (
+      <TabPanel
+        key={searchResult.id}
+        toolConfig={toolConfig}
+        activeTabId={this.state.activeTab}
+        tabId={searchResult.id}
+        resultListHeight={this.state.resultListHeight}
+        windowWidth={this.state.windowWidth}
+        localObserver={localObserver}
+        searchResult={searchResult}
+      ></TabPanel>
+    );
+  };
+
+  handleMapSizeWhenAddingSearchResultList = () => {
+    const { localObserver } = this.props;
+    localObserver.publish("resize-map", this.state.resultListHeight);
+  };
+
   renderSearchResultContainer = () => {
-    const {
-      classes,
-      windowContainerId,
-      localObserver,
-      toolConfig
-    } = this.props;
+    const { classes, windowContainerId } = this.props;
     let searchResults = this.getSearchResults();
+    this.handleMapSizeWhenAddingSearchResultList();
 
     return (
       <Rnd
@@ -390,42 +421,9 @@ class SearchResultListContainer extends React.Component {
           topRight: false
         }}
       >
-        <AppBar
-          ref={appbar => {
-            if (this.appbarHeight === null) {
-              this.appbarHeight = appbar.offsetHeight;
-            }
-          }}
-          position="static"
-        >
-          <Toolbar classes={{ regular: classes.toolbar }}>
-            <Grid justify="space-between" alignItems="center" container>
-              <Grid style={{ paddingLeft: 10 }} item>
-                {searchResults.length > 0 &&
-                  this.renderTabsSection(searchResults)}
-              </Grid>
-
-              <Grid style={{ paddingLeft: 0 }} item>
-                <PanelToolbox localObserver={localObserver}></PanelToolbox>
-              </Grid>
-            </Grid>
-          </Toolbar>
-        </AppBar>
+        {this.renderTabsHeader(searchResults)}
         {searchResults.map(searchResult => {
-          this.resizeMap(this.state.resultListHeight);
-
-          return (
-            <TabPanel
-              key={searchResult.id}
-              toolConfig={toolConfig}
-              activeTabId={this.state.activeTab}
-              tabId={searchResult.id}
-              resultListHeight={this.state.resultListHeight}
-              windowWidth={this.state.windowWidth}
-              localObserver={localObserver}
-              searchResult={searchResult}
-            ></TabPanel>
-          );
+          return this.renderSearchResultAsTabContent(searchResult);
         })}
       </Rnd>
     );
