@@ -105,7 +105,7 @@ export default class MapViewModel {
         publicLineName,
         internalLineNumber,
         municipalityName,
-        traficTransportName,
+        trafficTransportName,
         throughStopArea,
         selectedFormType
       }) => {
@@ -114,7 +114,7 @@ export default class MapViewModel {
             publicLineName,
             internalLineNumber,
             municipalityName,
-            traficTransportName,
+            trafficTransportName,
             throughStopArea,
             selectedFormType
           });
@@ -123,7 +123,7 @@ export default class MapViewModel {
             publicLineName,
             internalLineNumber,
             municipalityName,
-            traficTransportName,
+            trafficTransportName,
             throughStopArea,
             selectedFormType
           });
@@ -216,14 +216,14 @@ export default class MapViewModel {
     publicLineName,
     internalLineNumber,
     municipalityName,
-    traficTransportName,
+    trafficTransportName,
     throughStopArea
   }) => {
     this.model.getRoutes(
       publicLineName,
       internalLineNumber,
       municipalityName,
-      traficTransportName,
+      trafficTransportName,
       throughStopArea
     );
   };

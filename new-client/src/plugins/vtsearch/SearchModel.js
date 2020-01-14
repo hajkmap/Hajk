@@ -315,7 +315,7 @@ export default class SearchModel {
    *
    * @memberof SearchModel
    */
-  autocompelteTransportModeTypeName() {
+  autocompleteTransportModeTypeName() {
     this.localObserver.publish("transportModeTypeNames-result-begin", {
       label: this.geoserver.transportModeTypeNames.searchLabel
     });

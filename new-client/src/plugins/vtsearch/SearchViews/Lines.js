@@ -29,7 +29,7 @@ const styles = theme => ({
     padding: "20px 0 0 0",
     width: 200
   },
-  traficTranspor: {
+  trafficTransport: {
     width: 200
   },
   addSpaceAroundButton: {
@@ -47,8 +47,8 @@ class Lines extends React.PureComponent {
     internalLineNumber: "",
     municipalityNames: [],
     municipalityName: "",
-    traficTransportNames: [],
-    traficTransportName: "",
+    trafficTransportNames: [],
+    trafficTransportName: "",
     throughStopArea: ""
   };
 
@@ -76,9 +76,9 @@ class Lines extends React.PureComponent {
       this.setState({
         municipalityNames: result.length > 0 ? result : []
       });
-      this.model.autocompelteTransportModeTypeName().then(result => {
+      this.model.autocompleteTransportModeTypeName().then(result => {
         this.setState({
-          traficTransportNames: result.length > 0 ? result : []
+          trafficTransportName: result.length > 0 ? result : []
         });
       });
     });
@@ -88,14 +88,14 @@ class Lines extends React.PureComponent {
       publicLineName,
       internalLineNumber,
       municipalityName,
-      traficTransportName,
+      trafficTransportName,
       throughStopArea
     } = this.state;
     this.localObserver.publish("routes-search", {
       publicLineName: publicLineName,
       internalLineNumber: internalLineNumber,
       municipalityName: municipalityName,
-      traficTransportName: traficTransportName,
+      trafficTransportName: trafficTransportName,
       throughStopArea: throughStopArea,
       selectedFormType: ""
     });
@@ -106,14 +106,14 @@ class Lines extends React.PureComponent {
       publicLineName,
       internalLineNumber,
       municipalityName,
-      traficTransportName,
+      trafficTransportName,
       throughStopArea
     } = this.state;
     this.localObserver.publish("routes-search", {
       publicLineName: publicLineName,
       internalLineNumber: internalLineNumber,
       municipalityName: municipalityName,
-      traficTransportName: traficTransportName,
+      trafficTransportName: trafficTransportName,
       throughStopArea: throughStopArea,
       selectedFormType: "Polygon"
     });
@@ -123,14 +123,14 @@ class Lines extends React.PureComponent {
       publicLineName,
       internalLineNumber,
       municipalityName,
-      traficTransportName,
+      trafficTransportName,
       throughStopArea
     } = this.state;
     this.localObserver.publish("routes-search", {
       publicLineName: publicLineName,
       internalLineNumber: internalLineNumber,
       municipalityName: municipalityName,
-      traficTransportName: traficTransportName,
+      trafficTransportName: trafficTransportName,
       throughStopArea: throughStopArea,
       selectedFormType: "Box"
     });
@@ -155,9 +155,9 @@ class Lines extends React.PureComponent {
       municipalityName: e.target.value
     });
   };
-  handleTraficTransportChange = e => {
+  handleTrafficTransportChange = e => {
     this.setState({
-      traficTransportName: e.target.value
+      trafficTransportName: e.target.value
     });
   };
   handleThroughStopAreaChange = event => {
@@ -168,7 +168,7 @@ class Lines extends React.PureComponent {
 
   render() {
     const { classes } = this.props;
-    const { municipalityNames, traficTransportNames } = this.state;
+    const { municipalityNames, trafficTransportNames } = this.state;
     return (
       <div>
         <div>Här ska vi lägga till formuläret för linjer</div>
@@ -205,11 +205,11 @@ class Lines extends React.PureComponent {
           Trafikslag
         </InputLabel>
         <Select
-          className={classes.traficTranspor}
-          value={this.state.traficTransportName}
-          onChange={this.handleTraficTransportChange}
+          className={classes.trafficTransport}
+          value={this.state.trafficTransportName}
+          onChange={this.handleTrafficTransportChange}
         >
-          {traficTransportNames.map((name, index) => {
+          {trafficTransportNames.map((name, index) => {
             return (
               <MenuItem key={index} value={name}>
                 {name}
