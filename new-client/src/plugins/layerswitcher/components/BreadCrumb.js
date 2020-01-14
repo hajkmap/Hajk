@@ -6,7 +6,7 @@ import LaunchIcon from "@material-ui/icons/Launch";
 import Button from "@material-ui/core/Button";
 import CallMadeIcon from "@material-ui/icons/CallMade";
 import { withStyles } from "@material-ui/core/styles";
-import classnames from "classnames";
+import clsx from "clsx";
 import Popover from "@material-ui/core/Popover";
 
 const styles = theme => ({
@@ -217,7 +217,7 @@ class BreadCrumb extends Component {
     var { hidden } = this.state;
     var cls =
       this.props.type === "flat"
-        ? classnames(classes.breadCrumb, classes.breadCrumbFlat)
+        ? clsx(classes.breadCrumb, classes.breadCrumbFlat)
         : classes.breadCrumb;
     return (
       <div className={cls} data-type="bread-crumb">
