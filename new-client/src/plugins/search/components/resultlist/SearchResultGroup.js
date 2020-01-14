@@ -13,13 +13,13 @@ const styles = theme => ({
   heading: {
     padding: 0,
     paddingRight: "14px",
-    color: "white",
+    color: theme.palette.primary.contrastText,
     fontWeight: "500"
   },
   secondaryHeading: {
     fontSize: "10pt",
-    color: "black",
-    backgroundColor: "white",
+    color: theme.palette.primary.main,
+    backgroundColor: theme.palette.primary.contrastText,
     padding: "3px 6px 3px 6px",
     borderRadius: "30%"
   },
@@ -47,8 +47,8 @@ const styles = theme => ({
   expansionPanel: {
     borderRadius: "0 !important",
     height: "30%",
-    margin: "5px",
-    backgroundColor: "#0076bc"
+    margin: "5px 0",
+    backgroundColor: theme.palette.primary.main
   }
 });
 
@@ -104,6 +104,7 @@ class SearchResultGroup extends Component {
               this.refs.panelElement.scrollIntoView();
             }, 100);
           }}
+          TransitionProps={{ timeout: 200 }}
         >
           <ExpansionPanelSummary
             classes={{
