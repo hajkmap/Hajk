@@ -63,7 +63,7 @@ class Journeys extends React.PureComponent {
   };
 
   handlePolygonChange = () => {
-    const { selectedFromDate, selectedEndDate, selectedFormType } = this.state;
+    const { selectedFromDate, selectedEndDate } = this.state;
     let formatFromDate = new Date(selectedFromDate).toISOString(); // format the date to yyyy-mm-ddThh-mm-ss
     let formatEndDate = new Date(selectedEndDate).toISOString(); // format the date to yyyy-mm-ddThh-mm-ss
     this.localObserver.publish("journeys-search", {
@@ -73,7 +73,7 @@ class Journeys extends React.PureComponent {
     });
   };
   handleRectangleChange = () => {
-    const { selectedFromDate, selectedEndDate, selectedFormType } = this.state;
+    const { selectedFromDate, selectedEndDate } = this.state;
     this.localObserver.publish("journeys-search", {
       selectedFromDate: selectedFromDate,
       selectedEndDate: selectedEndDate,
@@ -137,7 +137,6 @@ class Journeys extends React.PureComponent {
         <Button
           variant="outlined"
           type="button"
-          title="Lägg till polygon"
           value={this.state.selectedFormType}
           onClick={this.handlePolygonChange}
         >
@@ -148,7 +147,6 @@ class Journeys extends React.PureComponent {
           variant="outlined"
           type="button"
           value={this.state.selectedFormType}
-          title="Lägg till rektangel"
           onClick={this.handleRectangleChange}
         >
           Rektangel

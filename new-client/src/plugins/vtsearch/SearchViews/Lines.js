@@ -89,8 +89,7 @@ class Lines extends React.PureComponent {
       internalLineNumber,
       municipalityName,
       traficTransportName,
-      throughStopArea,
-      selectedFormType
+      throughStopArea
     } = this.state;
     this.localObserver.publish("routes-search", {
       publicLineName: publicLineName,
@@ -108,8 +107,7 @@ class Lines extends React.PureComponent {
       internalLineNumber,
       municipalityName,
       traficTransportName,
-      throughStopArea,
-      selectedFormType
+      throughStopArea
     } = this.state;
     this.localObserver.publish("routes-search", {
       publicLineName: publicLineName,
@@ -126,8 +124,7 @@ class Lines extends React.PureComponent {
       internalLineNumber,
       municipalityName,
       traficTransportName,
-      throughStopArea,
-      selectedFormType
+      throughStopArea
     } = this.state;
     this.localObserver.publish("routes-search", {
       publicLineName: publicLineName,
@@ -198,7 +195,7 @@ class Lines extends React.PureComponent {
           {municipalityNames.map((name, index) => {
             return (
               <MenuItem key={index} value={name}>
-                {name.name}
+                {name}
               </MenuItem>
             );
           })}
