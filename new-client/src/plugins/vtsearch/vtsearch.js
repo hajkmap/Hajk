@@ -183,6 +183,9 @@ class VTSearch extends React.PureComponent {
             model={this.searchModel}
             app={app}
             localObserver={this.localObserver}
+            className={clsx(this.state.expand, {
+              [this.state.expandOpen]: this.state.expanded
+            })}
           ></Stops>
         );
       }
