@@ -1,7 +1,6 @@
 import React from "react";
 import propTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import IconButton from "@material-ui/core/IconButton";
 import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import Typography from "@material-ui/core/Typography";
@@ -11,7 +10,16 @@ import {
   extractPropertiesFromJson
 } from "../utils/FeaturePropsParsing";
 import Diagram from "./Diagram";
-import Table from "./Table";
+import HajkTable from "./Table";
+import {
+  Table,
+  TableContainer,
+  TableRow,
+  TableCell,
+  TableBody,
+  ButtonGroup,
+  Button
+} from "@material-ui/core";
 
 const styles = theme => ({
   windowSection: {
@@ -23,27 +31,16 @@ const styles = theme => ({
     flex: 1,
     overflow: "auto",
     userSelect: "text",
-    cursor: "auto"
+    cursor: "auto",
+    marginTop: theme.spacing(1)
   },
-  textContent: {},
-  toggler: {
-    display: "flex"
-  },
-  togglerText: {
-    flex: 1,
-    textAlign: "center",
-    lineHeight: "3rem"
-  },
-  closeButton: {
-    position: "absolute",
-    top: "5px",
-    right: "5px",
-    cursor: "pointer",
-    padding: "5px"
-  },
-  caption: {
-    marginBottom: "5px",
-    fontWeight: 500
+  fullWidthButton: {
+    "&:hover": {
+      background: theme.palette.primary.main,
+      boxShadow: "none",
+      cursor: "default"
+    },
+    width: "100%"
   }
 });
 
@@ -80,18 +77,32 @@ class FeatureInfo extends React.PureComponent {
     }
   }
 
-  table(data) {
-    return Object.keys(data).map((key, i) => {
+  renderFeaturesAsDefaultTable(data, caption) {
+    // We can't use "i" for coloring every second row, as some rows
+    // will be removed (Objects are not printed), so there's a need
+    // for a separate counter of rows that actually get printed.
+    let j = 0;
+    const tableBody = Object.keys(data).map((key, i) => {
       if (typeof data[key] !== "object") {
+        ++j;
         return (
-          <div key={i}>
-            <strong>{key}</strong>: <span>{data[key]}</span>
-          </div>
+          <TableRow key={i} selected={j % 2 === 0}>
+            <TableCell variant="head">{key}</TableCell>
+            <TableCell>{data[key]}</TableCell>
+          </TableRow>
         );
       } else {
         return null;
       }
     });
+
+    return (
+      <TableContainer component="div">
+        <Table size="small" aria-label="Table with infoclick details">
+          <TableBody>{tableBody}</TableBody>
+        </Table>
+      </TableContainer>
+    );
   }
 
   changeSelectedIndex(amount) {
@@ -162,22 +173,32 @@ class FeatureInfo extends React.PureComponent {
         height: "100%"
       };
     };
-    let toggler = null;
-    if (features.length > 1) {
-      toggler = (
-        <header className={classes.toggler}>
-          <IconButton aria-label="Previous" color="primary" id="step-left">
+
+    const toggler = features.length > 1 && (
+      <>
+        <ButtonGroup
+          aria-label="Browse through infoclick results"
+          color="primary"
+          size="small"
+          variant="contained"
+        >
+          <Button aria-label="Previous" id="step-left">
             <ArrowLeftIcon />
-          </IconButton>
-          <Typography variant="button" className={classes.togglerText}>
+          </Button>
+          <Button
+            className={classes.fullWidthButton}
+            disableFocusRipple
+            disableTouchRipple
+            disableRipple
+          >
             {this.state.selectedIndex} av {features.length}
-          </Typography>
-          <IconButton aria-label="Next" color="primary" id="step-right">
+          </Button>
+          <Button aria-label="Next" id="step-right">
             <ArrowRightIcon />
-          </IconButton>
-        </header>
-      );
-    }
+          </Button>
+        </ButtonGroup>
+      </>
+    );
 
     const featureList = features.map((feature, i) => {
       if (i === 0) this.props.onDisplay(feature);
@@ -227,29 +248,27 @@ class FeatureInfo extends React.PureComponent {
           markdown = transformed.str;
         }
       }
-      var value = markdown
+      const value = markdown
         ? mergeFeaturePropsWithMarkdown(markdown, properties)
-        : this.table(properties);
+        : this.renderFeaturesAsDefaultTable(properties, caption);
 
-      if (markdown) {
-        return (
-          <div key={i} style={visibleStyle(i)}>
-            <div className={classes.caption}>{caption}</div>
+      return (
+        <div key={i} style={visibleStyle(i)}>
+          <Typography variant="button" align="center" component="h6">
+            {caption}
+          </Typography>
+          {markdown ? (
             <div
               className={classes.textContent}
               dangerouslySetInnerHTML={value}
             />
-            {this.renderShortcodes(shortcodes, feature)}
-          </div>
-        );
-      } else {
-        return (
-          <div key={i} style={visibleStyle(i)}>
-            <div className={classes.caption}>{caption}</div>
+          ) : (
             <div className={classes.textContent}>{value}</div>
-          </div>
-        );
-      }
+          )}
+
+          {shortcodes.length > 0 && this.renderShortcodes(shortcodes, feature)}
+        </div>
+      );
     });
 
     return (
@@ -268,7 +287,9 @@ class FeatureInfo extends React.PureComponent {
             <Diagram key={i} source={shortcode.source} feature={feature} />
           );
         case "table":
-          return <Table key={i} source={shortcode.source} feature={feature} />;
+          return (
+            <HajkTable key={i} source={shortcode.source} feature={feature} />
+          );
         default:
           return null;
       }
