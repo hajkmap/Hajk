@@ -89,7 +89,7 @@ class Stops extends React.PureComponent {
       stopNameOrNr,
       publicLine,
       municipalityName,
-      selectedFormType
+      setBusSopAreaValue
     } = this.state;
     this.localObserver.publish("stops-search", {
       busStopValue: busStopValue,
@@ -106,7 +106,7 @@ class Stops extends React.PureComponent {
       stopNameOrNr,
       publicLine,
       municipalityName,
-      selectedFormType
+      setBusSopAreaValue
     } = this.state;
     this.localObserver.publish("stops-search", {
       busStopValue: busStopValue,
@@ -122,7 +122,7 @@ class Stops extends React.PureComponent {
       stopNameOrNr,
       publicLine,
       municipalityName,
-      selectedFormType
+      setBusSopAreaValue
     } = this.state;
     this.localObserver.publish("stops-search", {
       busStopValue: busStopValue,

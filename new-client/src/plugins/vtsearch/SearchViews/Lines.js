@@ -29,7 +29,7 @@ const styles = theme => ({
     padding: "20px 0 0 0",
     width: 200
   },
-  traficTranspor: {
+  trafficTransport: {
     width: 200
   },
   addSpaceAroundButton: {
@@ -43,10 +43,12 @@ const styles = theme => ({
 class Lines extends React.PureComponent {
   // Initialize state - this is the correct way of doing it nowadays.
   state = {
+    publicLineName: "",
+    internalLineNumber: "",
     municipalityNames: [],
     municipalityName: "",
-    traficTransportNames: [],
-    traficTransportName: "",
+    trafficTransportNames: [],
+    trafficTransportName: "",
     throughStopArea: ""
   };
 
@@ -76,24 +78,86 @@ class Lines extends React.PureComponent {
       });
       this.model.autocompelteTransportModeTypeName().then(result => {
         this.setState({
-          traficTransportNames: result.length > 0 ? result : []
+          trafficTransportName: result.length > 0 ? result : []
         });
       });
     });
   }
+  doSpetialChange = () => {
+    const {
+      publicLineName,
+      internalLineNumber,
+      municipalityName,
+      trafficTransportName,
+      throughStopArea
+    } = this.state;
+    this.localObserver.publish("routes-search", {
+      publicLineName: publicLineName,
+      internalLineNumber: internalLineNumber,
+      municipalityName: municipalityName,
+      trafficTransportName: trafficTransportName,
+      throughStopArea: throughStopArea,
+      selectedFormType: ""
+    });
+  };
 
-  testDebug = e => {
-    console.log("testdebug");
-    this.model.getRoutes("300");
+  handlePolygonChange = () => {
+    const {
+      publicLineName,
+      internalLineNumber,
+      municipalityName,
+      trafficTransportName,
+      throughStopArea
+    } = this.state;
+    this.localObserver.publish("routes-search", {
+      publicLineName: publicLineName,
+      internalLineNumber: internalLineNumber,
+      municipalityName: municipalityName,
+      trafficTransportName: trafficTransportName,
+      throughStopArea: throughStopArea,
+      selectedFormType: "Polygon"
+    });
+  };
+  handleRectangleChange = () => {
+    const {
+      publicLineName,
+      internalLineNumber,
+      municipalityName,
+      trafficTransportName,
+      throughStopArea
+    } = this.state;
+    this.localObserver.publish("routes-search", {
+      publicLineName: publicLineName,
+      internalLineNumber: internalLineNumber,
+      municipalityName: municipalityName,
+      trafficTransportName: trafficTransportName,
+      throughStopArea: throughStopArea,
+      selectedFormType: "Box"
+    });
+  };
+
+  // testDebug = e => {
+  //   console.log("testdebug");
+  //   this.model.getRoutes("300");
+  // };
+  handleInternalLineNrChange = event => {
+    this.setState({
+      internalLineNumber: event.target.value
+    });
+  };
+  handlePublicLineNameChange = event => {
+    this.setState({
+      publicLineName: event.target.value
+    });
   };
   handleMunicipalChange = e => {
     this.setState({
       municipalityName: e.target.value
     });
   };
-  handleTraficTransportChange = e => {
+  handleTrafficTransportChange = e => {
     this.setState({
-      traficTransportName: e.target.value
+      trafficTransportName: e.target.value
     });
   };
   handleThroughStopAreaChange = event => {
@@ -104,7 +168,7 @@ class Lines extends React.PureComponent {
 
   render() {
     const { classes } = this.props;
-    const { municipalityNames, traficTransportNames } = this.state;
+    const { municipalityNames, trafficTransportNames } = this.state;
     return (
       <div>
         <div>Här ska vi lägga till formuläret för linjer</div>
@@ -112,11 +176,15 @@ class Lines extends React.PureComponent {
           id="standard-helperText"
           label="Publikt nr"
           className={classes.technicalNr}
+          onChange={this.handlePublicLineNameChange}
+          value={this.state.publicLineName}
         />
         <TextField
           id="standard-helperText"
           label="Tekniskt nr"
           className={classes.publicNr}
+          onChange={this.handleInternalLineNrChange}
+          value={this.state.internalLineNumber}
         />
         <InputLabel className={classes.addSpaceAroundField}>Kommun</InputLabel>
         <Select
@@ -127,7 +195,7 @@ class Lines extends React.PureComponent {
           {municipalityNames.map((name, index) => {
             return (
               <MenuItem key={index} value={name}>
-                {name.name}
+                {name}
               </MenuItem>
             );
           })}
@@ -137,11 +205,11 @@ class Lines extends React.PureComponent {
           Trafikslag
         </InputLabel>
         <Select
-          className={classes.traficTranspor}
-          value={this.state.traficTransportName}
-          onChange={this.handleTraficTransportChange}
+          className={classes.trafficTransport}
+          value={this.state.trafficTransportName}
+          onChange={this.handleTrafficTransportChange}
         >
-          {traficTransportNames.map((name, index) => {
+          {trafficTransportNames.map((name, index) => {
             return (
               <MenuItem key={index} value={name}>
                 {name}
@@ -158,7 +226,7 @@ class Lines extends React.PureComponent {
         />
         <Button
           className={classes.addSpaceAroundButton}
-          onClick={this.testDebug}
+          onClick={this.doSpetialChange}
           variant="outlined"
         >
           Sök
@@ -167,11 +235,23 @@ class Lines extends React.PureComponent {
         <Typography className={classes.addSpaceAroundButton}>
           Markera sökområde i kartan
         </Typography>
-        <Button variant="outlined" type="button" title="Lägg till polygon">
+        <Button
+          variant="outlined"
+          type="button"
+          title="Lägg till polygon"
+          value={this.state.selectedFormType}
+          onClick={this.handlePolygonChange}
+        >
           Polygon
           <BorderStyleIcon />
         </Button>
-        <Button variant="outlined" type="button" title="Lägg till rektangel">
+        <Button
+          variant="outlined"
+          type="button"
+          title="Lägg till rektangel"
+          value={this.state.selectedFormType}
+          onClick={this.handleRectangleChange}
+        >
           Rektangel
           <SquareIcon />
         </Button>
