@@ -83,17 +83,25 @@ export default class MapViewModel {
     this.localObserver.subscribe(
       "stops-search",
       ({
+        busStopValue,
         stopNameOrNr,
         publicLine,
         municipalityName,
-        setBusSopAreaValue,
         selectedFormType
       }) => {
+        if (selectedFormType === "") {
+          this.doStopSpetial({
+            busStopValue,
+            stopNameOrNr,
+            publicLine,
+            municipalityName
+          });
+        }
         this.stopSearch({
+          busStopValue,
           stopNameOrNr,
           publicLine,
           municipalityName,
-          setBusSopAreaValue,
           selectedFormType
         });
         this.drawlayer.getSource().clear();
@@ -175,11 +183,25 @@ export default class MapViewModel {
     this.map.addInteraction(this.draw);
   };
 
+  doStopSpetial = ({
+    busStopValue,
+    stopNameOrNr,
+    publicLine,
+    municipalityName
+  }) => {
+    if (busStopValue === "stopAreas") {
+      this.model.getStopAreas(stopNameOrNr, publicLine, municipalityName);
+    }
+    if (busStopValue === "stopPoints") {
+      this.model.getStopPoints(stopNameOrNr, publicLine, municipalityName);
+    }
+  };
+
   stopSearch = ({
+    busStopValue,
     stopNameOrNr,
     publicLine,
     municipalityName,
-    setBusSopAreaValue,
     selectedFormType
   }) => {
     var value = selectedFormType;
@@ -199,12 +221,19 @@ export default class MapViewModel {
       this.map.removeInteraction(this.draw);
       var format = new WKT();
       var wktFeatureGeom = format.writeGeometry(e.feature.getGeometry());
-      if (wktFeatureGeom != null) {
+      if (wktFeatureGeom != null && busStopValue === "stopAreas") {
         this.model.getStopAreas(
           stopNameOrNr,
           publicLine,
           municipalityName,
-          setBusSopAreaValue,
+          wktFeatureGeom
+        );
+      }
+      if (wktFeatureGeom != null && busStopValue === "stopPoints") {
+        this.model.getStopPoints(
+          stopNameOrNr,
+          publicLine,
+          municipalityName,
           wktFeatureGeom
         );
       }

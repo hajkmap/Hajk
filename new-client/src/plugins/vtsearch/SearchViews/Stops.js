@@ -23,7 +23,7 @@ const styles = theme => ({
 class Stops extends React.PureComponent {
   // Initialize state - this is the correct way of doing it nowadays.
   state = {
-    setBusSopAreaValue: "stopAreas",
+    busStopValue: "stopAreas",
     stopNameOrNr: "",
     publicLine: "",
     municipalityNames: [],
@@ -52,7 +52,7 @@ class Stops extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
-    this.model.getMunicipalityZoneNames().then(result => {
+    this.model.autocompleteMunicipalityZoneNames().then(result => {
       this.setState({
         municipalityNames: result.length > 0 ? result : []
       });
@@ -61,7 +61,7 @@ class Stops extends React.PureComponent {
 
   handleChange = event => {
     this.setState({
-      setBusSopAreaValue: event.target.value
+      busStopValue: event.target.value
     });
   };
 
@@ -85,47 +85,50 @@ class Stops extends React.PureComponent {
 
   doSpetialChange = () => {
     const {
+      busStopValue,
       stopNameOrNr,
       publicLine,
       municipalityName,
       setBusSopAreaValue
     } = this.state;
     this.localObserver.publish("stops-search", {
+      busStopValue: busStopValue,
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
       municipalityName: municipalityName,
-      setBusSopAreaValue: setBusSopAreaValue,
       selectedFormType: ""
     });
   };
 
   handlePolygonChange = () => {
     const {
+      busStopValue,
       stopNameOrNr,
       publicLine,
       municipalityName,
       setBusSopAreaValue
     } = this.state;
     this.localObserver.publish("stops-search", {
+      busStopValue: busStopValue,
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
       municipalityName: municipalityName,
-      setBusSopAreaValue: setBusSopAreaValue,
       selectedFormType: "Polygon"
     });
   };
   handleRectangleChange = () => {
     const {
+      busStopValue,
       stopNameOrNr,
       publicLine,
       municipalityName,
       setBusSopAreaValue
     } = this.state;
     this.localObserver.publish("stops-search", {
+      busStopValue: busStopValue,
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
       municipalityName: municipalityName,
-      setBusSopAreaValue: setBusSopAreaValue,
       selectedFormType: "Box"
     });
   };
@@ -142,7 +145,7 @@ class Stops extends React.PureComponent {
           <RadioGroup
             aria-label="Stops"
             name="Stop"
-            value={this.state.setBusSopAreaValue}
+            value={this.state.busStopValue}
             onChange={this.handleChange}
           >
             <FormControlLabel
