@@ -153,8 +153,8 @@ class FeatureInfo extends React.PureComponent {
 
     if (!features) return "";
 
-    var visibleStyle = currentIndex => {
-      var displayValue =
+    const visibleStyle = currentIndex => {
+      const displayValue =
         this.state.selectedIndex === currentIndex + 1 ? "flex" : "none";
       return {
         display: displayValue,
@@ -162,7 +162,7 @@ class FeatureInfo extends React.PureComponent {
         height: "100%"
       };
     };
-    var toggler = null;
+    let toggler = null;
     if (features.length > 1) {
       toggler = (
         <header className={classes.toggler}>
@@ -179,40 +179,43 @@ class FeatureInfo extends React.PureComponent {
       );
     }
 
-    var featureList = features.map((feature, i) => {
+    const featureList = features.map((feature, i) => {
       if (i === 0) this.props.onDisplay(feature);
-      var markdown =
-        feature.layer.get("layerInfo") &&
-        feature.layer.get("layerInfo").information;
+      const layerInfo = feature.layer.get("layerInfo");
 
-      var caption =
-        feature.layer.get("layerInfo") &&
-        feature.layer.get("layerInfo").caption;
-      var layer,
+      let markdown = layerInfo?.information;
+      let caption = layerInfo?.caption;
+
+      let layer,
         shortcodes = [];
 
       //Problem with geojson returned from AGS - Missing id on feature - how to handle?
       if (feature.layer.layersInfo && feature.getId()) {
         layer = Object.keys(feature.layer.layersInfo).find(id => {
-          var fid = feature.getId().split(".")[0];
-          var layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
+          const fid = feature.getId().split(".")[0];
+          const layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
           return fid === layerId;
         });
       }
 
-      if (
-        layer &&
-        feature.layer.layersInfo &&
-        feature.layer.layersInfo[layer] &&
-        feature.layer.layersInfo[layer].infobox
-      ) {
-        markdown = feature.layer.layersInfo[layer].infobox;
-      }
-      //Features coming from searchresult has infobox set on Feature instead of layer due to different features sharing same vectorlayer
-      if (feature.infobox) {
-        markdown = feature.infobox;
-      }
-      var properties = feature.getProperties();
+      // Deal with layer groups that have a caption on sublayer. Layer groups will
+      // have a 'layersInfo' (NB pluralis on layerSInfo), and if it exists,
+      // let's overwrite the previously saved caption.
+      // Below I'm using the new optional chaining operator (
+      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining),
+      // which will return the new caption, if exists, or a falsy value. If falsy value is returned,
+      // just fall back to the previous value of caption.
+      caption = feature.layer?.layersInfo?.[layer]?.caption || caption;
+
+      // Same goes for infobox, I'm shortening the code significantly using the optional chaining.
+      // Features coming from search result have infobox set on Feature instead of Layer due to
+      // different features sharing same vector layer.
+      markdown =
+        feature?.infobox ||
+        feature.layer?.layersInfo?.[layer]?.infobox ||
+        markdown;
+
+      let properties = feature.getProperties();
       properties = extractPropertiesFromJson(properties);
 
       feature.setProperties(properties);

@@ -239,7 +239,7 @@ class App extends React.PureComponent {
       });
   }
 
-  renderSearchResultsWindow() {
+  renderInfoclickWindow() {
     const infoclickConfig = this.props.config.mapConfig.tools.find(
       t => t.type === "infoclick"
     );
@@ -505,7 +505,7 @@ class App extends React.PureComponent {
               }
             )}
           >
-            {this.renderSearchResultsWindow()}
+            {this.renderInfoclickWindow()}
             <PluginWindows
               plugins={this.appModel.getBothDrawerAndWidgetPlugins()}
             />
