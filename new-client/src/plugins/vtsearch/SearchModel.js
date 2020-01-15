@@ -315,7 +315,7 @@ export default class SearchModel {
    *
    * @memberof SearchModel
    */
-  autocompelteTransportModeTypeName() {
+  autocompleteTransportModeTypeName() {
     this.localObserver.publish("transportModeTypeNames-result-begin", {
       label: this.geoserver.transportModeTypeNames.searchLabel
     });
@@ -464,7 +464,7 @@ export default class SearchModel {
       !this.isNullOrEmpty(stopAreaNameOrNumber) ||
       !this.isNullOrEmpty(polygonAsWkt)
     )
-      url = url + cql;
+      url = url + this.fixCqlForGeoServer(cql);
 
     // Fetch the result as a promise and attach it to the event.
     fetch(url)

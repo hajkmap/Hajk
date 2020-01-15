@@ -107,6 +107,38 @@ export default class MapViewModel {
         this.drawlayer.getSource().clear();
       }
     );
+    this.localObserver.subscribe(
+      "routes-search",
+      ({
+        publicLineName,
+        internalLineNumber,
+        municipalityName,
+        trafficTransportName,
+        throughStopArea,
+        selectedFormType
+      }) => {
+        if (selectedFormType === "") {
+          this.doSpatialRoutesSearch({
+            publicLineName,
+            internalLineNumber,
+            municipalityName,
+            trafficTransportName,
+            throughStopArea,
+            selectedFormType
+          });
+        } else {
+          this.routesSearch({
+            publicLineName,
+            internalLineNumber,
+            municipalityName,
+            trafficTransportName,
+            throughStopArea,
+            selectedFormType
+          });
+        }
+        this.drawlayer.getSource().clear();
+      }
+    );
   };
 
   getSearchResultLayerFromId = searchResultId => {
@@ -209,9 +241,28 @@ export default class MapViewModel {
     this.map.addInteraction(this.draw);
   };
 
-  activateSearchByDraw = ({
-    selectedFromDate,
-    selectedEndDate,
+  doSpatialRoutesSearch = ({
+    publicLineName,
+    internalLineNumber,
+    municipalityName,
+    trafficTransportName,
+    throughStopArea
+  }) => {
+    this.model.getRoutes(
+      publicLineName,
+      internalLineNumber,
+      municipalityName,
+      trafficTransportName,
+      throughStopArea
+    );
+  };
+
+  routesSearch = ({
+    publicLineName,
+    internalLineNumber,
+    municipalityName,
+    traficTransportName,
+    throughStopArea,
     selectedFormType
   }) => {
     var value = selectedFormType;
@@ -232,9 +283,12 @@ export default class MapViewModel {
       var format = new WKT();
       var wktFeatureGeom = format.writeGeometry(e.feature.getGeometry());
       if (wktFeatureGeom != null) {
-        this.model.getJourneys(
-          selectedFromDate,
-          selectedEndDate,
+        this.model.getRoutes(
+          publicLineName,
+          internalLineNumber,
+          municipalityName,
+          traficTransportName,
+          throughStopArea,
           wktFeatureGeom
         );
       }
@@ -311,7 +365,6 @@ export default class MapViewModel {
 
   highlightFeature = olFeature => {
     if (olFeature != null) {
-      // remove error when clicking on map, prob not the best solution
       this.highlightLayer.getSource().clear();
       this.highlightLayer.getSource().addFeature(olFeature);
     }
