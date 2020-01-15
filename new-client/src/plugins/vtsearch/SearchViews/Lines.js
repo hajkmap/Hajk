@@ -1,12 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import { TextField, Button, Typography } from "@material-ui/core";
+import { TextField, Button, Typography, Divider } from "@material-ui/core";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
-import BorderStyleIcon from "@material-ui/icons/BorderStyle";
-import SquareIcon from "@material-ui/icons/CropSquare";
+import PolygonIcon from "../img/polygonmarkering.png";
+import RectangleIcon from "../img/rektangelmarkering.png";
 
 // Define JSS styles that will be used in this component.
 // Examle below utilizes the very powerful "theme" object
@@ -14,15 +14,15 @@ import SquareIcon from "@material-ui/icons/CropSquare";
 const styles = theme => ({
   publicNr: {
     color: "white",
-    margin: 3,
-    width: 100
+    width: 94,
+    margin: 3
   },
   technicalNr: {
     color: "white",
-    width: 100,
+    width: 94,
     margin: 3
   },
-  municipal: {
+  standardWidth: {
     width: 200
   },
   addSpaceAroundField: {
@@ -32,9 +32,21 @@ const styles = theme => ({
   trafficTransport: {
     width: 200
   },
-  addSpaceAroundButton: {
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(1)
+  textFieldBox: {
+    marginBottom: 10
+  },
+  divider: {
+    margin: theme.spacing(3)
+  },
+  textFields: {
+    marginLeft: 10
+  },
+  fontSize: { fontSize: 12 },
+
+  polygonAndRectangleForm: {
+    verticalAlign: "baseline",
+    float: "left",
+    marginBottom: 15
   }
 });
 
@@ -76,7 +88,7 @@ class Lines extends React.PureComponent {
       this.setState({
         municipalityNames: result.length > 0 ? result : []
       });
-      this.model.autocompelteTransportModeTypeName().then(result => {
+      this.model.autocompleteTransportModeTypeName().then(result => {
         this.setState({
           trafficTransportName: result.length > 0 ? result : []
         });
@@ -171,90 +183,105 @@ class Lines extends React.PureComponent {
     const { municipalityNames, trafficTransportNames } = this.state;
     return (
       <div>
-        <div>Här ska vi lägga till formuläret för linjer</div>
-        <TextField
-          id="standard-helperText"
-          label="Publikt nr"
-          className={classes.technicalNr}
-          onChange={this.handlePublicLineNameChange}
-          value={this.state.publicLineName}
-        />
-        <TextField
-          id="standard-helperText"
-          label="Tekniskt nr"
-          className={classes.publicNr}
-          onChange={this.handleInternalLineNrChange}
-          value={this.state.internalLineNumber}
-        />
-        <InputLabel className={classes.addSpaceAroundField}>Kommun</InputLabel>
-        <Select
-          value={this.state.municipalityName}
-          onChange={this.handleMunicipalChange}
-          className={classes.municipal}
-        >
-          {municipalityNames.map((name, index) => {
-            return (
-              <MenuItem key={index} value={name}>
-                {name}
-              </MenuItem>
-            );
-          })}
-        </Select>
-
-        <InputLabel className={classes.addSpaceAroundField}>
-          Trafikslag
-        </InputLabel>
-        <Select
-          className={classes.trafficTransport}
-          value={this.state.trafficTransportName}
-          onChange={this.handleTrafficTransportChange}
-        >
-          {trafficTransportNames.map((name, index) => {
-            return (
-              <MenuItem key={index} value={name}>
-                {name}
-              </MenuItem>
-            );
-          })}
-        </Select>
-        <TextField
-          className={classes.addSpaceAroundField}
-          id="standard-helperText"
-          label="Via hållplatsområde"
-          value={this.state.throughStopArea}
-          onChange={this.handleThroughStopAreaChange}
-        />
-        <Button
-          className={classes.addSpaceAroundButton}
-          onClick={this.doSpetialChange}
-          variant="outlined"
-        >
+        <div className={classes.textFieldBox}>
+          <TextField
+            id="standard-helperText"
+            label="Publikt nr"
+            className={classes.technicalNr}
+            onChange={this.handlePublicLineNameChange}
+            value={this.state.publicLineName}
+            InputLabelProps={{
+              shrink: true
+            }}
+          />
+          <TextField
+            id="standard-helperText"
+            label="Tekniskt nr"
+            className={classes.publicNr}
+            onChange={this.handleInternalLineNrChange}
+            value={this.state.internalLineNumber}
+            InputLabelProps={{
+              shrink: true
+            }}
+          />
+        </div>
+        <div className={classes.textFieldBox}>
+          <TextField
+            className={classes.standardWidth}
+            id="standard-helperText"
+            label="Via hållplatsområde"
+            value={this.state.throughStopArea}
+            onChange={this.handleThroughStopAreaChange}
+            InputLabelProps={{
+              shrink: true
+            }}
+          />
+        </div>
+        <div className={classes.textFieldBox}>
+          <InputLabel className={classes.fontSize}>Trafikslag</InputLabel>
+          <Select
+            className={classes.trafficTransport}
+            value={this.state.trafficTransportName}
+            onChange={this.handleTrafficTransportChange}
+          >
+            {trafficTransportNames.map((name, index) => {
+              return (
+                <MenuItem key={index} value={name}>
+                  {name}
+                </MenuItem>
+              );
+            })}
+          </Select>
+        </div>
+        <div className={classes.textFieldBox}>
+          <InputLabel className={classes.fontSize}>Kommun</InputLabel>
+          <Select
+            value={this.state.municipalityName}
+            onChange={this.handleMunicipalChange}
+          >
+            {municipalityNames.map((name, index) => {
+              return (
+                <MenuItem key={index} value={name}>
+                  {name}
+                </MenuItem>
+              );
+            })}
+          </Select>
+        </div>
+        <Button onClick={this.doSpetialChange} variant="outlined">
           Sök
         </Button>
 
-        <Typography className={classes.addSpaceAroundButton}>
-          Markera sökområde i kartan
-        </Typography>
-        <Button
-          variant="outlined"
-          type="button"
-          title="Lägg till polygon"
-          value={this.state.selectedFormType}
-          onClick={this.handlePolygonChange}
-        >
-          Polygon
-          <BorderStyleIcon />
-        </Button>
-        <Button
-          variant="outlined"
-          type="button"
-          title="Lägg till rektangel"
-          value={this.state.selectedFormType}
-          onClick={this.handleRectangleChange}
-        >
-          Rektangel
-          <SquareIcon />
-        </Button>
+        <Divider variant="inset" className={classes.divider} />
+        <Typography>Markera sökområde i kartan</Typography>
+        <div className={classes.polygonAndRectangleForm}>
+          <a href="/#">
+            <img
+              src={PolygonIcon}
+              value={this.state.selectedFormType}
+              onClick={this.handlePolygonChange}
+              alt="#"
+            ></img>
+          </a>
+          <br />
+          <Typography className={classes.textFields} variant="body2">
+            Polygon
+          </Typography>
+        </div>
+        <div className={classes.polygonAndRectangleForm}>
+          <a href="/#">
+            <img
+              src={RectangleIcon}
+              value={this.state.selectedFormType}
+              onClick={this.handleRectangleChange}
+              alt="#"
+            ></img>
+          </a>
+          <br />
+          <Typography className={classes.textFields} variant="body2">
+            Rektangel
+          </Typography>
+        </div>
       </div>
     );
   }

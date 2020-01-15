@@ -96,14 +96,15 @@ export default class MapViewModel {
             publicLine,
             municipalityName
           });
+        } else {
+          this.stopSearch({
+            busStopValue,
+            stopNameOrNr,
+            publicLine,
+            municipalityName,
+            selectedFormType
+          });
         }
-        this.stopSearch({
-          busStopValue,
-          stopNameOrNr,
-          publicLine,
-          municipalityName,
-          selectedFormType
-        });
         this.drawlayer.getSource().clear();
       }
     );
@@ -183,20 +184,6 @@ export default class MapViewModel {
     this.map.addInteraction(this.draw);
   };
 
-  doStopSpetial = ({
-    busStopValue,
-    stopNameOrNr,
-    publicLine,
-    municipalityName
-  }) => {
-    if (busStopValue === "stopAreas") {
-      this.model.getStopAreas(stopNameOrNr, publicLine, municipalityName);
-    }
-    if (busStopValue === "stopPoints") {
-      this.model.getStopPoints(stopNameOrNr, publicLine, municipalityName);
-    }
-  };
-
   stopSearch = ({
     busStopValue,
     stopNameOrNr,
@@ -241,20 +228,18 @@ export default class MapViewModel {
     this.map.addInteraction(this.draw);
   };
 
-  doSpatialRoutesSearch = ({
-    publicLineName,
-    internalLineNumber,
-    municipalityName,
-    trafficTransportName,
-    throughStopArea
+  doStopSpetial = ({
+    busStopValue,
+    stopNameOrNr,
+    publicLine,
+    municipalityName
   }) => {
-    this.model.getRoutes(
-      publicLineName,
-      internalLineNumber,
-      municipalityName,
-      trafficTransportName,
-      throughStopArea
-    );
+    if (busStopValue === "stopAreas") {
+      this.model.getStopAreas(stopNameOrNr, publicLine, municipalityName);
+    }
+    if (busStopValue === "stopPoints") {
+      this.model.getStopPoints(stopNameOrNr, publicLine, municipalityName);
+    }
   };
 
   routesSearch = ({
@@ -294,6 +279,22 @@ export default class MapViewModel {
       }
     });
     this.map.addInteraction(this.draw);
+  };
+
+  doSpatialRoutesSearch = ({
+    publicLineName,
+    internalLineNumber,
+    municipalityName,
+    trafficTransportName,
+    throughStopArea
+  }) => {
+    this.model.getRoutes(
+      publicLineName,
+      internalLineNumber,
+      municipalityName,
+      trafficTransportName,
+      throughStopArea
+    );
   };
 
   addDrawSearch = () => {

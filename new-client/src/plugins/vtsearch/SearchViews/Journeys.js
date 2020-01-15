@@ -1,21 +1,50 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import { Button } from "@material-ui/core";
+import { Button, Typography, Divider } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
-import BorderStyleIcon from "@material-ui/icons/BorderStyle";
-import SquareIcon from "@material-ui/icons/CropSquare";
 import DateFnsUtils from "@date-io/date-fns";
+import AccessTimeIcon from "@material-ui/icons/AccessTime";
+import PolygonIcon from "../img/polygonmarkering.png";
+import RectangleIcon from "../img/rektangelmarkering.png";
+
 import {
   MuiPickersUtilsProvider,
   KeyboardTimePicker,
   KeyboardDatePicker
 } from "@material-ui/pickers";
+import { inlineLexer } from "marked";
 
 // Define JSS styles that will be used in this component.
 // Examle below utilizes the very powerful "theme" object
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
-const styles = theme => ({});
+const styles = theme => ({
+  journeysForm: {
+    marginTop: 10
+  },
+  dateFrom: {
+    marginTop: 0,
+    marginBottom: -4
+  },
+  timeFrom: {
+    marginBottom: 40
+  },
+  iconText: {
+    fontSize: 10,
+    width: 50
+  },
+  divider: {
+    margin: theme.spacing(3, 3)
+  },
+  textFields: {
+    marginLeft: 10
+  },
+  polygonAndRectangleForm: {
+    verticalAlign: "baseline",
+    float: "left",
+    marginBottom: 10
+  }
+});
 
 //TODO - Only mockup //Tobias
 
@@ -85,11 +114,13 @@ class Journeys extends React.PureComponent {
 
     return (
       <div>
-        <div>Här ska vi lägga till formuläret för turer</div>
-
-        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+        <MuiPickersUtilsProvider
+          className={classes.journeysForm}
+          utils={DateFnsUtils}
+        >
           <Grid container justify="space-around">
             <KeyboardDatePicker
+              className={classes.dateFrom}
               format="yyyy-MM-dd"
               margin="normal"
               id="date-picker-inline"
@@ -99,11 +130,16 @@ class Journeys extends React.PureComponent {
               KeyboardButtonProps={{
                 "aria-label": "change date"
               }}
+              InputLabelProps={{
+                shrink: true
+              }}
             />
             <KeyboardTimePicker
+              className={classes.timeFrom}
               margin="normal"
               id="time-picker"
               ampm={false}
+              keyboardIcon={<AccessTimeIcon></AccessTimeIcon>}
               value={this.state.selectedFromDate}
               onChange={this.handleFromDateChange}
               KeyboardButtonProps={{
@@ -111,6 +147,7 @@ class Journeys extends React.PureComponent {
               }}
             />
             <KeyboardDatePicker
+              className={classes.dateFrom}
               format="yyyy-MM-dd"
               margin="normal"
               id="date-picker-inline"
@@ -120,11 +157,15 @@ class Journeys extends React.PureComponent {
               KeyboardButtonProps={{
                 "aria-label": "change date"
               }}
+              InputLabelProps={{
+                shrink: true
+              }}
             />
             <KeyboardTimePicker
               margin="normal"
               id="time-picker"
               ampm={false}
+              keyboardIcon={<AccessTimeIcon></AccessTimeIcon>}
               value={this.state.selectedEndDate}
               onChange={this.handleEndDateChange}
               KeyboardButtonProps={{
@@ -133,25 +174,36 @@ class Journeys extends React.PureComponent {
             />
           </Grid>
         </MuiPickersUtilsProvider>
-        <p>Markera sökområde i kartan</p>
-        <Button
-          variant="outlined"
-          type="button"
-          value={this.state.selectedFormType}
-          onClick={this.handlePolygonChange}
-        >
-          Polygon
-          <BorderStyleIcon className={classes.leftIcon} />
-        </Button>
-        <Button
-          variant="outlined"
-          type="button"
-          value={this.state.selectedFormType}
-          onClick={this.handleRectangleChange}
-        >
-          Rektangel
-          <SquareIcon className={classes.leftIcon} />
-        </Button>
+        <Divider className={classes.divider} />
+        <Typography>Markera sökområde i kartan</Typography>
+        <div className={classes.polygonAndRectangleForm}>
+          <a href="/#">
+            <img
+              src={PolygonIcon}
+              value={this.state.selectedFormType}
+              onClick={this.handlePolygonChange}
+              alt="#"
+            ></img>
+          </a>
+          <br />
+          <Typography className={classes.textFields} variant="body2">
+            Polygon
+          </Typography>
+        </div>
+        <div className={classes.polygonAndRectangleForm}>
+          <a href="/#">
+            <img
+              src={RectangleIcon}
+              value={this.state.selectedFormType}
+              onClick={this.handleRectangleChange}
+              alt="#"
+            ></img>
+          </a>
+          <br />
+          <Typography className={classes.textFields} variant="body2">
+            Rektangel
+          </Typography>
+        </div>
       </div>
     );
   }

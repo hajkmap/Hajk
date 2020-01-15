@@ -5,19 +5,28 @@ import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormControl from "@material-ui/core/FormControl";
-import BorderStyleIcon from "@material-ui/icons/BorderStyle";
-import SquareIcon from "@material-ui/icons/CropSquare";
-import { TextField, Button, Typography } from "@material-ui/core";
+import { TextField, Button, Typography, Divider } from "@material-ui/core";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
+import PolygonIcon from "../img/polygonmarkering.png";
+import RectangleIcon from "../img/rektangelmarkering.png";
 
 // Define JSS styles that will be used in this component.
 // Examle below utilizes the very powerful "theme" object
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
 const styles = theme => ({
   setStandardWidth: { width: 200 },
-  button: { marginTop: 8 }
+  button: { marginTop: 8 },
+  fontSize: { fontSize: 12 },
+  textFieldBox: { marginBottom: 10 },
+  divider: { margin: theme.spacing(3) },
+  textFields: { marginLeft: 10 },
+  polygonAndRectangleForm: {
+    verticalAlign: "baseline",
+    float: "left",
+    marginBottom: 15
+  }
 });
 
 class Stops extends React.PureComponent {
@@ -88,8 +97,7 @@ class Stops extends React.PureComponent {
       busStopValue,
       stopNameOrNr,
       publicLine,
-      municipalityName,
-      setBusSopAreaValue
+      municipalityName
     } = this.state;
     this.localObserver.publish("stops-search", {
       busStopValue: busStopValue,
@@ -105,8 +113,7 @@ class Stops extends React.PureComponent {
       busStopValue,
       stopNameOrNr,
       publicLine,
-      municipalityName,
-      setBusSopAreaValue
+      municipalityName
     } = this.state;
     this.localObserver.publish("stops-search", {
       busStopValue: busStopValue,
@@ -121,8 +128,7 @@ class Stops extends React.PureComponent {
       busStopValue,
       stopNameOrNr,
       publicLine,
-      municipalityName,
-      setBusSopAreaValue
+      municipalityName
     } = this.state;
     this.localObserver.publish("stops-search", {
       busStopValue: busStopValue,
@@ -138,9 +144,6 @@ class Stops extends React.PureComponent {
     const { municipalityNames } = this.state;
     return (
       <div>
-        <div>
-          Här ska vi lägga till formuläret för hållplatser och hållplatsområden
-        </div>
         <FormControl component="fieldset">
           <RadioGroup
             aria-label="Stops"
@@ -160,22 +163,32 @@ class Stops extends React.PureComponent {
             />
           </RadioGroup>
         </FormControl>
-        <TextField
-          id="standard-basic"
-          label="Hållplatsnamn eller -nr"
-          value={this.state.stopNameOrNr}
-          onChange={this.handleStopNameOrNrChange}
-          className={classes.setStandardWidth}
-        ></TextField>
-        <TextField
-          id="standard-basic"
-          label="Längs publik linje"
-          value={this.state.publicLine}
-          onChange={this.handlePublicLineChange}
-          className={classes.setStandardWidth}
-        />
-        <FormControl>
-          <InputLabel>Kommun</InputLabel>
+        <div className={classes.textFieldBox}>
+          <TextField
+            id="standard-basic"
+            label="Hållplatsnamn eller -nr"
+            value={this.state.stopNameOrNr}
+            onChange={this.handleStopNameOrNrChange}
+            className={classes.setStandardWidth}
+            InputLabelProps={{
+              shrink: true
+            }}
+          ></TextField>
+        </div>
+        <div className={classes.textFieldBox}>
+          <TextField
+            id="standard-basic"
+            label="Längs publik linje"
+            value={this.state.publicLine}
+            onChange={this.handlePublicLineChange}
+            className={classes.setStandardWidth}
+            InputLabelProps={{
+              shrink: true
+            }}
+          />
+        </div>
+        <div className={classes.textFieldBox}>
+          <InputLabel className={classes.fontSize}>Kommun</InputLabel>
           <Select
             value={this.state.municipalityName}
             onChange={this.handleMunicipalChange}
@@ -183,17 +196,13 @@ class Stops extends React.PureComponent {
           >
             {municipalityNames.map((name, index) => {
               return (
-                <MenuItem
-                  key={index}
-                  value={name}
-                  className={classes.setStandardWidth}
-                >
+                <MenuItem key={index} value={name}>
                   {name}
                 </MenuItem>
               );
             })}
           </Select>
-        </FormControl>
+        </div>
         <Button
           className={classes.button}
           variant="outlined"
@@ -203,30 +212,37 @@ class Stops extends React.PureComponent {
           onClick={this.doSpetialChange}
         >
           Sök
-          <BorderStyleIcon />
         </Button>
-        <Typography className={classes.button}>
-          Markera sökområde i kartan
-        </Typography>
-        <Button
-          className={classes.button}
-          variant="outlined"
-          type="button"
-          value={this.state.selectedFormType}
-          onClick={this.handlePolygonChange}
-        >
-          Polygon
-          <BorderStyleIcon />
-        </Button>
-        <Button
-          variant="outlined"
-          type="button"
-          value={this.state.selectedFormType}
-          onClick={this.handleRectangleChange}
-        >
-          Rektangel
-          <SquareIcon />
-        </Button>
+        <Divider variant="inset" className={classes.divider} />
+        <Typography>Markera sökområde i kartan</Typography>
+        <div className={classes.polygonAndRectangleForm}>
+          <a href="/#">
+            <img
+              src={PolygonIcon}
+              value={this.state.selectedFormType}
+              onClick={this.handlePolygonChange}
+              alt="#"
+            ></img>
+          </a>
+          <br />
+          <Typography className={classes.textFields} variant="body2">
+            Polygon
+          </Typography>
+        </div>
+        <div className={classes.polygonAndRectangleForm}>
+          <a href="/#">
+            <img
+              src={RectangleIcon}
+              value={this.state.selectedFormType}
+              onClick={this.handleRectangleChange}
+              alt="#"
+            ></img>
+          </a>
+          <br />
+          <Typography className={classes.textFields} variant="body2">
+            Rektangel
+          </Typography>
+        </div>
       </div>
     );
   }

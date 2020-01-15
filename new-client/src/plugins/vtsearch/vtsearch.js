@@ -33,7 +33,7 @@ const styles = theme => {
       alignItems: "center",
 
       [theme.breakpoints.up("sm")]: {
-        maxWidth: 520
+        maxWidth: 620
       }
     },
     input: {
@@ -43,6 +43,9 @@ const styles = theme => {
     searchContainer: {
       maxWidth: 250
     },
+    searchContainerBox: {
+      padding: 0 // override current padding
+    },
     expand: {
       transform: "rotate(0deg)",
       transition: theme.transitions.create("transform", {
@@ -51,7 +54,7 @@ const styles = theme => {
     },
     formControl: {
       margin: theme.spacing(1),
-      minWidth: 120
+      minWidth: 150
     },
     selectEmpty: {
       marginTop: theme.spacing(2)
@@ -62,6 +65,8 @@ const styles = theme => {
     searchContainerTitle: {
       marginLeft: 10
     },
+    iconButton: { padding: 7 },
+
     selectInput: {
       padding: 10
     },
@@ -74,9 +79,10 @@ const styles = theme => {
   };
 };
 const searchTypes = {
+  DEFAULT: "Sök",
   JOURNEYS: "Sök Turer",
-  STOPS: "Sök Hållplats",
-  LINES: "Sök Linjer"
+  LINES: "Sök Linjer",
+  STOPS: "Sök Hållplatser"
 };
 
 const windowsContainerId = "windows-container";
@@ -97,7 +103,7 @@ class VTSearch extends React.PureComponent {
   // Initialize state - this is the correct way of doing it nowadays.
   state = {
     expanded: false,
-    activeSearchTool: null
+    activeSearchTool: searchTypes.DEFAULT
   };
 
   // propTypes and defaultProps are static properties, declared
@@ -180,16 +186,16 @@ class VTSearch extends React.PureComponent {
   };
 
   handleChange = e => {
-    const { app } = this.props;
-    app.globalObserver.publish("showSearchresultlist", {});
+    var typeOfSearch = searchTypes[e.target.value];
     this.setState({
-      activeSearchTool: e.target.value
+      activeSearchTool: typeOfSearch,
+      expanded: typeOfSearch === searchTypes.DEFAULT ? false : true
     });
   };
 
   renderSearchmodule = () => {
     const { app } = this.props;
-    switch (searchTypes[this.state.activeSearchTool]) {
+    switch (this.state.activeSearchTool) {
       case searchTypes.JOURNEYS: {
         return (
           <Journeys
@@ -214,9 +220,6 @@ class VTSearch extends React.PureComponent {
             model={this.searchModel}
             app={app}
             localObserver={this.localObserver}
-            className={clsx(this.state.expand, {
-              [this.state.expandOpen]: this.state.expanded
-            })}
           ></Stops>
         );
       }
@@ -241,9 +244,10 @@ class VTSearch extends React.PureComponent {
     return (
       <>
         <Card className={classes.searchContainer}>
-          <CardActions disableSpacing>
+          <CardActions disableSpacing className={classes.searchContainerBox}>
             <Tooltip title={tooltipText}>
               <IconButton
+                className={classes.iconButton}
                 onClick={onMenuClick}
                 disabled={menuButtonDisabled}
                 aria-label="menu"
@@ -256,38 +260,33 @@ class VTSearch extends React.PureComponent {
               <Select
                 classes={{ root: classes.selectInput }}
                 native
-                value={this.state.activeSearchType}
                 onChange={this.handleChange}
                 inputProps={{
                   name: "searchType",
                   id: "search-type"
                 }}
               >
-                {[
-                  <option key="default" value="">
-                    Sök
-                  </option>
-                ].concat(
-                  Object.keys(searchTypes).map(key => {
-                    return (
-                      <option key={key} value={key}>
-                        {searchTypes[key]}
-                      </option>
-                    );
-                  })
-                )}
+                {Object.keys(searchTypes).map(key => {
+                  return (
+                    <option key={key} value={key}>
+                      {searchTypes[key]}
+                    </option>
+                  );
+                })}
               </Select>
             </FormControl>
-            <IconButton
-              className={clsx(classes.expand, {
-                [classes.expandOpen]: this.state.expanded
-              })}
-              onClick={this.handleExpandClick}
-              aria-expanded={this.state.expanded}
-              aria-label="show more"
-            >
-              <ExpandMoreIcon />
-            </IconButton>
+            {this.state.activeSearchTool !== searchTypes.DEFAULT && (
+              <IconButton
+                className={clsx(classes.expand, {
+                  [classes.expandOpen]: this.state.expanded
+                })}
+                onClick={this.handleExpandClick}
+                aria-expanded={this.state.expanded}
+                aria-label="show more"
+              >
+                <ExpandMoreIcon />
+              </IconButton>
+            )}
           </CardActions>
           <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
             <CardContent
