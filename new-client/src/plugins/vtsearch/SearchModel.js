@@ -23,17 +23,14 @@ export default class SearchModel {
   }
 
   /**
-   * Private method that a djusts the CQL filter so that it's supported for a web browser and GeoServer.
+   * Private method that a adjusts the CQL filter so that it's supported for a web browser and GeoServer.
    * @param {string} cql The CQL that needs to be adjusted.
    * @returns {string} Returns a supported wkt for GeoServer.
    *
    * @memberof SearchModel
    */
-  fixCqlForGeoServer = cql => {
-    return cql
-      .replace(/%/g, "%25")
-      .replace(/ /g, "%20")
-      .replace(/'/g, "%27");
+  encodeCqlForGeoServer = cql => {
+    return cql.replace(/ /g, "%20").replace(/'/g, "%27");
   };
 
   /**
@@ -43,7 +40,7 @@ export default class SearchModel {
    *
    * @memberof SearchModel
    */
-  fixWktForGeoServer = wkt => {
+  encodeWktForGeoServer = wkt => {
     return wkt
       .replace(/\(/g, "%28")
       .replace(/\)/g, "%29")
@@ -53,8 +50,8 @@ export default class SearchModel {
 
   /**
    * Private method that gets all attributes that should remain from GeoServer.
-   * @param {array(string, string)} attributesToDisplay An array of attributes to be displayed.
-   * @returns {array(string)} Returns an array with only attribute names, stripped of all other data.
+   * @param {Array<string, string>} attributesToDisplay An array of attributes to be displayed.
+   * @returns {Array<string>} Returns an array with only attribute names, stripped of all other data.
    *
    * @memberof SearchModel
    */
@@ -78,7 +75,7 @@ export default class SearchModel {
     return false;
   };
 
-  /**
+  /**-
    * Private method that tests if a string is null or empty
    * @param {string} stringValue The string to test.
    * @returns {boolean} Returns true if the string is empty or null.
@@ -89,8 +86,8 @@ export default class SearchModel {
 
   /**
    * Private method that removes all unnecessary attributes from a collection.
-   * @param {object} featureCollection The feature collection with unnecessary attributes.
-   * @param {array(string)} attributesToKeep An array with the attributes that will remain.
+   * @param {Object<featureCollection>} featureCollection The feature collection with unnecessary attributes.
+   * @param {Array<string>} attributesToKeep An array with the attributes that will remain.
    * @returns {featureCollection} Returns a feature collection with no unnecessary attributes in it.
    *
    * @memberof SearchModel
@@ -98,9 +95,9 @@ export default class SearchModel {
   removeUnnecessaryAttributes = (featureCollection, attributesToKeep) => {
     featureCollection.features = featureCollection.features.map(feature => {
       let names = Object.keys(feature.properties);
-      for (let iName = 0; iName < names.length; iName++) {
-        if (!attributesToKeep.includes(names[iName]))
-          delete feature.properties[names[iName]];
+      for (let indexName = 0; indexName < names.length; indexName++) {
+        if (!attributesToKeep.includes(names[indexName]))
+          delete feature.properties[names[indexName]];
       }
 
       return feature;
@@ -110,7 +107,7 @@ export default class SearchModel {
   };
 
   /**
-   * Private method that remotes all duplicates from a feature collection and
+   * Private method that removes all duplicates from a feature collection and
    * updates the number return value.
    * @param {featureCollection} featureCollection The feature collection with duplicates.
    * @returns {featureCollection} A feature collection with no duplicates in it.
@@ -119,39 +116,39 @@ export default class SearchModel {
    */
   removeDuplicates = featureCollection => {
     let features = featureCollection.features;
-    let uniqueArray = this.removeDuplicatesItems(features);
+    let uniqueArray = this.removeDuplicatedItems(features);
     featureCollection.features = uniqueArray;
     featureCollection.numberReturned = uniqueArray.length;
     return featureCollection;
   };
 
   /**
-   * Private method that remotes all duplicates from an array of featrues.
+   * Private method that removes all duplicates from an array of features.
    * The function checks if properties diverges.
    * @param {feature} features The feature collection with duplicates.
    * @returns {feature} Returns an array with no duplicates in it.
    *
    * @memberof SearchModel
    */
-  removeDuplicatesItems = features => {
+  removeDuplicatedItems = features => {
     let uniqueArray = [];
-    for (let iFeature = 0; iFeature < features.length; iFeature++) {
-      if (uniqueArray.indexOf(features[iFeature]) === -1) {
+    for (let indexFeature = 0; indexFeature < features.length; indexFeature++) {
+      if (uniqueArray.indexOf(features[indexFeature]) === -1) {
         let shouldAddFeature = true;
         for (
-          let iUniqueArray = 0;
-          iUniqueArray < uniqueArray.length;
-          iUniqueArray++
+          let indexUniqueArray = 0;
+          indexUniqueArray < uniqueArray.length;
+          indexUniqueArray++
         ) {
           shouldAddFeature =
             shouldAddFeature &&
             !this.hasSameProperties(
-              uniqueArray[iUniqueArray].properties,
-              features[iFeature].properties
+              uniqueArray[indexUniqueArray].properties,
+              features[indexFeature].properties
             );
         }
 
-        if (shouldAddFeature) uniqueArray.push(features[iFeature]);
+        if (shouldAddFeature) uniqueArray.push(features[indexFeature]);
       }
     }
 
@@ -160,39 +157,76 @@ export default class SearchModel {
 
   /**
    * Private help method for removeDuplicates, that checks if two objects are the same or not.
-   * The comparision looks at propertiy name and values.
-   * @param {object} objectOne The first object to compare.
-   * @param {object} objectTwo The second object to compare.
-   * @returns {boolean} Returns true if two object has the same propertiy name and values.
+   * The comparison looks at property name and values.
+   * @param {Object} objectOne The first object to compare.
+   * @param {Object} objectTwo The second object to compare.
+   * @returns {boolean} Returns true if two object has the same property name and values.
    *
    * @memberof SearchModel
    */
   hasSameProperties(objectOne, objectTwo) {
     const propertyNamesOne = Object.keys(objectOne);
     const propertyNamesTwo = Object.keys(objectTwo);
+    if (!this.propertiesHasTheSameLength(propertyNamesOne, propertyNamesTwo))
+      return false;
 
-    // Checks if the number of properties
-    if (propertyNamesOne.length !== propertyNamesTwo.length) return false;
-
-    // Checks if the property names are the same or not.
-    if (
-      propertyNamesOne.some((value, index) => {
-        return value !== propertyNamesTwo[index];
-      })
-    )
+    if (!this.propertyNamesAreTheSame(propertyNamesOne, propertyNamesTwo))
       return false;
 
     const propertyValuesOne = Object.values(objectOne);
     const propertyValuesTwo = Object.values(objectTwo);
-
-    // Checks if the property values are the same or not.
-    return !propertyValuesOne.some((value, index) => {
-      return value !== propertyValuesTwo[index];
-    });
+    return this.propertyValuesAreTheSame(propertyValuesOne, propertyValuesTwo);
   }
 
   /**
-   * Autocompelete function that gets the line numbers or public line numbers that match a search text.
+   * Private help method that checks if two array have the same length. The reason for this
+   * help method is to check if two objects have the same properties and if the number of
+   * properties diverges they can not be the same.
+   * @param {Array<string>} propertyNamesOne An array of object one's property names.
+   * @param {Array<string>} propertyNamesTwo An array of object two's property names.
+   * @returns Returns true if the two properties arrays have the same length.
+   *
+   * @memberof SearchModel
+   */
+  propertiesHasTheSameLength(propertyNamesOne, propertyNamesTwo) {
+    return propertyNamesOne.length === propertyNamesTwo.length;
+  }
+
+  /**
+   * Private help method that checks if two arrays of property names are the same. The reason
+   * for this is to check if the property names diverges. If the do, the objects can not be
+   * the same.
+   * @param {Array<string>} propertyNamesOne An array of object one's property names.
+   * @param {Array<string>} propertyNamesTwo An array of object two's property names.
+   * @returns Returns true if the two properties arrays have the exact same names.
+   *
+   * @memberof SearchModel
+   */
+  propertyNamesAreTheSame(propertyNamesOne, propertyNamesTwo) {
+    let someDifference = propertyNamesOne.some((value, index) => {
+      return value !== propertyNamesTwo[index];
+    });
+
+    return !someDifference;
+  }
+
+  /**
+   * Private help method that checks if two arrays of property values are the same. The reason
+   * for this is to check if the property values diverges. If the do, the objects can not be
+   * the same.
+   * @param {Array<string>} propertyValuesOne An array of object one's property values.
+   * @param {Array<string>} propertyValuesTwo An array of object two's property values.
+   */
+  propertyValuesAreTheSame(propertyValuesOne, propertyValuesTwo) {
+    let someDifference = propertyValuesOne.some((value, index) => {
+      return value !== propertyValuesTwo[index];
+    });
+
+    return !someDifference;
+  }
+
+  /**
+   * Autocomplete function that gets the line numbers or public line numbers that match a search text.
    * @param {string} searchText The search text for a line number or public line number.
    * @returns {array(string)} Returns an array of matching line numbers or public line numbers.
    *
@@ -215,9 +249,8 @@ export default class SearchModel {
     }
 
     // Fix percent and so on, so that the CQL filters are geoserver valid.
-    if (!this.isNullOrEmpty(searchText)) cql = this.fixCqlForGeoServer(cql);
+    if (!this.isNullOrEmpty(searchText)) cql = this.encodeCqlForGeoServer(cql);
 
-    // Fetch the result as a promise, sort it and attach it to the event.
     url = url + cql;
     return fetch(url)
       .then(res => {
@@ -239,22 +272,23 @@ export default class SearchModel {
   }
 
   /**
-   * Autocompelete function that gets all municipality names sorted in alphabetic order array.
-   * @returns {array(string)} Returns all municipality names sorted in alphabetic order.
+   * Autocomplete function that gets all municipality names sorted in alphabetic order array.
+   * @returns {Array<string>)} Returns all municipality names sorted in alphabetic order.
    *
    * @memberof SearchModel
    */
   autocompleteMunicipalityZoneNames() {
-    // Fetch the result as a promise, sort it and attach it to the event.
     const url = this.geoserver.municipalityZoneNames.url;
     return fetch(url)
       .then(res => {
         return res.json().then(jsonResult => {
-          let transportModeTypes = jsonResult.features.map(feature => {
+          let municipalityNames = jsonResult.features.map(feature => {
             return feature.properties.Name;
           });
 
-          return transportModeTypes;
+          // TODO: Lägg till sortering
+
+          return municipalityNames;
         });
       })
       .catch(err => {
@@ -263,7 +297,7 @@ export default class SearchModel {
   }
 
   /**
-   * Autocompelete function that gets the stop area names or stop area numbers that match a search text.
+   * Autocomplete function that gets the stop area names or stop area numbers that match a search text.
    * @param {string} searchText The search text for a line number or public line number.
    * @returns {array(string)} Returns an array of matching line numbers or public line numbers.
    *
@@ -286,7 +320,7 @@ export default class SearchModel {
     }
 
     // Fix percent and so on, so that the CQL filters are geoserver valid.
-    if (!this.isNullOrEmpty(searchText)) cql = this.fixCqlForGeoServer(cql);
+    if (!this.isNullOrEmpty(searchText)) cql = this.encodeCqlForGeoServer(cql);
 
     // Fetch the result as a promise, sort it and attach it to the event.
     url = url + cql;
@@ -310,12 +344,12 @@ export default class SearchModel {
   }
 
   /**
-   * Autocompelete function that gets then transport mode type names and numbers.
-   * @returns {array(string, int)} Returnes all mode type names as an array of tuples.
+   * Autocomplete function that gets then transport mode type names and numbers.
+   * @returns {array(string, int)} Returns all mode type names as an array of tuples.
    *
    * @memberof SearchModel
    */
-  autocompelteTransportModeTypeName() {
+  autocompleteTransportModeTypeName() {
     this.localObserver.publish("transportModeTypeNames-result-begin", {
       label: this.geoserver.transportModeTypeNames.searchLabel
     });
@@ -350,7 +384,7 @@ export default class SearchModel {
 
     // Fix parentheses and so on, so that the WKT are geoserver valid.
     if (!this.isNullOrEmpty(filterOnWkt))
-      filterOnWkt = this.fixWktForGeoServer(filterOnWkt);
+      filterOnWkt = this.encodeWktForGeoServer(filterOnWkt);
 
     // Build up the url with viewparams.
     let url = this.geoserver.journeys.url;
@@ -420,6 +454,10 @@ export default class SearchModel {
       label: this.geoserver.routes.searchLabel
     });
 
+    // Fix parentheses and so on, so that the WKT are geoserver valid.
+    // if (!this.isNullOrEmpty(polygonAsWkt))
+    //   polygonAsWkt = this.encodeWktForGeoServer(polygonAsWkt);
+
     // Build up the url with cql.
     let url = this.geoserver.routes.url;
     let cql = "&CQL_FILTER=";
@@ -452,7 +490,7 @@ export default class SearchModel {
     }
     if (!this.isNullOrEmpty(polygonAsWkt)) {
       if (addAndInCql) cql = cql + " AND ";
-      cql = cql + `Geom like '${polygonAsWkt}'`;
+      cql = cql + `INTERSECTS(Geom, '${polygonAsWkt}')`;
       addAndInCql = true;
     }
 
@@ -464,7 +502,7 @@ export default class SearchModel {
       !this.isNullOrEmpty(stopAreaNameOrNumber) ||
       !this.isNullOrEmpty(polygonAsWkt)
     )
-      url = url + cql;
+      url = url + cql; //this.encodeCqlForGeoServer(cql);
 
     // Fetch the result as a promise and attach it to the event.
     fetch(url)
@@ -515,7 +553,7 @@ export default class SearchModel {
 
     // Fix parentheses and so on, so that the WKT are geoserver valid.
     if (!this.isNullOrEmpty(filterOnWkt))
-      filterOnWkt = this.fixWktForGeoServer(filterOnWkt);
+      filterOnWkt = this.encodeWktForGeoServer(filterOnWkt);
 
     // Build up the url with viewparams.
     let url = this.geoserver.stopAreas.url;
@@ -591,7 +629,7 @@ export default class SearchModel {
 
     // Fix parentheses and so on, so that the WKT are geoserver valid.
     if (!this.isNullOrEmpty(filterOnWkt))
-      filterOnWkt = this.fixWktForGeoServer(filterOnWkt);
+      filterOnWkt = this.encodeWktForGeoServer(filterOnWkt);
 
     // Build up the url with viewparams.
     let url = this.geoserver.stopPoints.url;
