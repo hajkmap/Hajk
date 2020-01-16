@@ -177,7 +177,7 @@
         "abstract": "VTSEARCH",
         "title": "VTSEARCH",
         "target": "left",
-        "geoserver": {
+        "geoServer": {
           "lineNumberAndPublicLineNumber": {
             "searchLabel": "Linjenummer",
             "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=lineNumberAndPublicLineNumber&outputFormat=application/json"
@@ -277,6 +277,10 @@
               {
                 "displayName": "Namn",
                 "key": "Name"
+              },
+              {
+                "displayName": "Kod",
+                "key": "Abbreviation"
               },
               {
                 "displayName": "Bytesprio",

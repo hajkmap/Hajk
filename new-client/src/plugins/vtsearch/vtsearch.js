@@ -140,7 +140,7 @@ class VTSearch extends React.PureComponent {
       localObserver: this.localObserver,
       app: props.app,
       map: props.map,
-      geoserver: props.options.geoserver
+      geoServer: props.options.geoServer
     });
 
     this.mapViewModel = new MapViewModel({
