@@ -40,18 +40,18 @@ class TabPanel extends React.PureComponent {
         spacing={0}
       >
         {renderSummary && (
-          <Grid item xs={3}>
+          <Grid item xs={12}>
             <SummaryTable
               localObserver={localObserver}
-              resultListHeight={resultListHeight}
+              height={100}
             ></SummaryTable>
           </Grid>
         )}
-        <Grid item xs={renderSummary ? 9 : 12}>
+        <Grid item xs={12}>
           <AttributeTable
             searchResult={searchResult}
             toolConfig={toolConfig}
-            resultListHeight={resultListHeight}
+            resultListHeight={resultListHeight - 100}
             localObserver={localObserver}
           ></AttributeTable>
         </Grid>
