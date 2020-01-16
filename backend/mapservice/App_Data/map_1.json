@@ -98,20 +98,6 @@
       "options": {
         "baselayers": [
           {
-            "id": "37",
-            "visibleAtStart": false,
-            "drawOrder": 0,
-            "visibleForGroups": null,
-            "infobox": null
-          },
-          {
-            "id": "35",
-            "visibleAtStart": false,
-            "drawOrder": 0,
-            "visibleForGroups": null,
-            "infobox": null
-          },
-          {
             "id": "36",
             "visibleAtStart": true,
             "drawOrder": 0,

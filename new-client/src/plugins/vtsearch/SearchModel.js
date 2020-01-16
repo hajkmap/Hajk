@@ -358,7 +358,7 @@ export default class SearchModel {
   /**
    * Autocomplete function that gets the line numbers or public line numbers that match a search text.
    * @param {string} searchText The search text for a line number or public line number.
-   * @returns {array(string)} Returns an array of matching line numbers or public line numbers.
+   * @returns {Array(string)} Returns an array of matching line numbers or public line numbers.
    *
    * @memberof SearchModel
    */
@@ -689,8 +689,8 @@ export default class SearchModel {
     let viewParams = "&viewparams=";
     if (!this.isNullOrEmpty(filterOnNameOrNumber)) {
       if (this.isLineNumber(filterOnNameOrNumber))
-        viewParams = viewParams + `filterOnName:${filterOnNameOrNumber};`;
-      else viewParams = viewParams + `filterOnNumber:${filterOnNameOrNumber};`;
+        viewParams = viewParams + `filterOnNumber:${filterOnNameOrNumber};`;
+      else viewParams = viewParams + `filterOnName:${filterOnNameOrNumber};`;
     }
     if (!this.isNullOrEmpty(filterOnPublicLine))
       viewParams = viewParams + `filterOnPublicLine:${filterOnPublicLine};`;
