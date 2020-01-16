@@ -416,7 +416,9 @@ export default class SearchModel {
             return feature.properties.Name;
           });
 
-          // TODO: Lägg till sortering
+          municipalityNames = municipalityNames.sort(function(a, b) {
+            return a.localeCompare(b);
+          });
 
           return municipalityNames;
         });
