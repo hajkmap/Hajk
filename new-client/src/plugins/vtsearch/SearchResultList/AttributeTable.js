@@ -29,7 +29,12 @@ class AttributeTable extends React.Component {
 
   //Most efficient way to do it?
   componentDidMount() {
-    this.sort({ sortBy: this.state.sortBy, sortDirection: SortDirection.ASC });
+    if (this.state.rows.length > 0) {
+      this.sort({
+        sortBy: this.state.sortBy,
+        sortDirection: SortDirection.ASC
+      });
+    }
   }
 
   constructor(props) {
@@ -184,9 +189,9 @@ class AttributeTable extends React.Component {
             selectedRow={this.state.selectedRow}
           />
         ) : (
-          <Paper
-            style={{ height: resultListHeight, width: windowWidth }}
-          ></Paper>
+          <Paper style={{ height: resultListHeight, width: windowWidth }}>
+            Inga sökresultat
+          </Paper>
         )}
       </Paper>
     );

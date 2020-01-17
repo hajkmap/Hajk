@@ -327,7 +327,23 @@ export default class MapViewModel {
    * @memberof MapViewModel
    */
   addSearchResultLayerToMap = searchResultId => {
+    var fill = new Fill({
+      color: "rgba(0,150,237,0.7)"
+    });
+    var stroke = new Stroke({
+      color: "rgba(0,150,237,0.7)",
+      width: 5
+    });
     var searchResultLayer = new VectorLayer({
+      style: new Style({
+        image: new Circle({
+          fill: fill,
+          stroke: stroke,
+          radius: 5
+        }),
+        fill: fill,
+        stroke: stroke
+      }),
       source: new VectorSource({})
     });
     console.log(this.map, "map");
@@ -351,8 +367,8 @@ export default class MapViewModel {
       color: "rgba(0,0,0,0.4)"
     });
     var stroke = new Stroke({
-      color: "#e83317",
-      width: 5
+      color: "rgba(0,57,77,0.4)",
+      width: 8
     });
 
     this.highlightLayer = new VectorLayer({
@@ -368,6 +384,7 @@ export default class MapViewModel {
       source: new VectorSource({})
     });
     this.highlightLayer.set("type", "vt-highlight-layer");
+    this.highlightLayer.setZIndex(50);
     this.map.addLayer(this.highlightLayer);
   };
 

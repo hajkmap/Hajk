@@ -42,8 +42,7 @@ const styles = theme => {
       flex: "auto"
     },
     typography: {
-      flex: "auto",
-      color: "white"
+      flex: "auto"
     },
     tabRoot: {
       padding: 0,
@@ -64,7 +63,8 @@ const styles = theme => {
     },
     toolbar: {
       minHeight: 0,
-      padding: 0
+      padding: 0,
+      backgroundColor: "#00394D"
     }
   };
 };

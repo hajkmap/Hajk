@@ -41,7 +41,7 @@ const styles = theme => ({
   },
   tableRowSelected: {
     border: "2px solid rgba(0,57,77,1)",
-    background: "rgba(226,242,250,1)"
+    background: "rgba(0,150,237,1)"
   },
   headerColumn: {
     whiteSpace: "pre-wrap",
