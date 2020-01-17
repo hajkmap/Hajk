@@ -29,9 +29,6 @@ const styles = theme => ({
     padding: "20px 0 0 0",
     width: 200
   },
-  trafficTransport: {
-    width: 200
-  },
   textFieldBox: {
     marginBottom: 10
   },
@@ -220,7 +217,7 @@ class Lines extends React.PureComponent {
         <div className={classes.textFieldBox}>
           <InputLabel className={classes.fontSize}>Trafikslag</InputLabel>
           <Select
-            className={classes.trafficTransport}
+            className={classes.standardWidth}
             value={this.state.trafficTransportName}
             onChange={this.handleTrafficTransportChange}
           >
@@ -238,6 +235,7 @@ class Lines extends React.PureComponent {
           <Select
             value={this.state.municipalityName}
             onChange={this.handleMunicipalChange}
+            className={classes.standardWidth}
           >
             {municipalityNames.map((name, index) => {
               return (

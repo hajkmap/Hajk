@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import { Button, Typography, Divider } from "@material-ui/core";
+import { Typography, Divider } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
 import DateFnsUtils from "@date-io/date-fns";
 import AccessTimeIcon from "@material-ui/icons/AccessTime";
@@ -13,7 +13,6 @@ import {
   KeyboardTimePicker,
   KeyboardDatePicker
 } from "@material-ui/pickers";
-import { inlineLexer } from "marked";
 
 // Define JSS styles that will be used in this component.
 // Examle below utilizes the very powerful "theme" object

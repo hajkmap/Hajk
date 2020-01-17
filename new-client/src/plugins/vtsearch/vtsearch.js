@@ -264,7 +264,7 @@ class VTSearch extends React.PureComponent {
     return (
       <>
         <Card className={classes.searchContainer}>
-          <CardActions disableSpacing>
+          <CardActions className={classes.searchContainerBox}>
             {this.renderMenuButton()}
             {this.renderDropDown()}
             {this.state.activeSearchTool !== searchTypes.DEFAULT &&
