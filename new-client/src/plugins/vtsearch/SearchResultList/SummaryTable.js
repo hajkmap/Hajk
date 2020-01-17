@@ -35,10 +35,10 @@ class SummaryTable extends React.Component {
   }
 
   render() {
-    const { resultListHeight, windowWidth } = this.props;
+    const { height, windowWidth } = this.props;
 
     return (
-      <Paper style={{ height: resultListHeight, width: windowWidth }}>
+      <Paper style={{ height: 100, width: windowWidth }}>
         <VirtualizedTable
           rowCount={this.state.rows.length}
           rowGetter={({ index }) => this.state.rows[index]}

@@ -13,6 +13,7 @@ const styles = theme => ({
     alignItems: "center",
     boxSizing: "border-box"
   },
+
   table: {
     // temporary right-to-left patch, waiting for
     // https://github.com/bvaughn/react-virtualized/issues/454
@@ -25,6 +26,7 @@ const styles = theme => ({
       paddingRight: theme.direction === "rtl" ? "0px !important" : undefined
     }
   },
+
   tableRowHover: {
     "&:hover": {
       backgroundColor: theme.palette.grey[200]
@@ -38,8 +40,8 @@ const styles = theme => ({
     outline: "none"
   },
   tableRowSelected: {
-    border: "2px solid rgba(18,120,211,0.37)",
-    background: "rgba(0,212,255,1)"
+    border: "2px solid rgba(0,57,77,1)",
+    background: "rgba(226,242,250,1)"
   },
   headerColumn: {
     whiteSpace: "pre-wrap",
@@ -63,8 +65,6 @@ const styles = theme => ({
     justifyContent: "center",
     cursor: "pointer",
     fontSize: "0.8em",
-
-    minWidth: 0,
     wordBreak: "break-all",
     lineHeight: 1,
     borderBottom: 0
@@ -72,10 +72,13 @@ const styles = theme => ({
   rowCell: {
     marginRight: 0,
     borderBottom: 0,
-
+    borderLeft: "solid",
+    borderColor: "rgba(195,199,199,1)",
     textAlign: "center",
-
     flex: 1
+  },
+  firstRowCell: {
+    borderLeft: "none"
   }
 });
 
@@ -111,17 +114,23 @@ class VirtualizedTable extends React.PureComponent {
     );
   };
 
+  getCellClassName = columnIndex => {
+    const { classes } = this.props;
+    if (columnIndex !== 0) {
+      return classes.rowCell;
+    } else {
+      return clsx(classes.firstRowCell, classes.rowCell);
+    }
+  };
+
   cellRenderer = ({ cellData, columnIndex, rowData }) => {
     const { columns, classes, rowHeight } = this.props;
 
     return (
       <TableCell
         component="div"
-        className={classes.rowCell}
+        className={this.getCellClassName(columnIndex)}
         variant="body"
-        style={{
-          height: rowHeight
-        }}
         align={
           (columnIndex != null && columns[columnIndex].numeric) || false
             ? "right"

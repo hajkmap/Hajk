@@ -21,7 +21,7 @@ class AttributeTable extends React.Component {
       index: null,
       olFeatureId: null
     },
-    sortBy: this.props.toolConfig.geoserver[this.props.searchResult.type]
+    sortBy: this.props.toolConfig.geoServer[this.props.searchResult.type]
       .defaultSortAttribute,
     focusedRow: 0,
     rows: this.getRows()
@@ -64,14 +64,26 @@ class AttributeTable extends React.Component {
     });
   };
 
+  getDisplayName = key => {
+    const { toolConfig, searchResult } = this.props;
+    var attributesMappingArray =
+      toolConfig.geoServer[searchResult.type].attributesToDisplay;
+
+    var displayName = attributesMappingArray.find(entry => {
+      return entry.key === key;
+    }).displayName;
+    return displayName;
+  };
+
   getColumns() {
     const { searchResult } = this.props;
-
     return this.getFeaturePropertiesKeys(searchResult).map(key => {
+      var displayName = this.getDisplayName(key);
+      console.log(displayName, "displayName");
       return {
-        width: 200,
-        label: key,
-        dataKey: key
+        label: displayName || key,
+        dataKey: key,
+        width: 300
       };
     });
   }
