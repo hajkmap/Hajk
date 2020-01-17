@@ -36,45 +36,23 @@ const styles = theme => {
         maxWidth: 620
       }
     },
-    input: {
-      marginLeft: theme.spacing(1),
-      flex: 1
-    },
-    searchContainer: {
-      maxWidth: 250
-    },
-    searchContainerBox: {
-      padding: 0 // override current padding
-    },
+    input: { marginLeft: theme.spacing(1), flex: 1 },
+    searchContainer: { maxWidth: 250 },
+    searchContainerBox: { padding: 0 /*override current padding*/ },
+    formControl: { margin: theme.spacing(1), minWidth: 150 },
+    selectEmpty: { marginTop: theme.spacing(2) },
+    expandOpen: { transform: "rotate(180deg)" },
+    searchContainerTitle: { marginLeft: 10 },
+    iconButton: { padding: 7 },
+    dropDownIconButton: { padding: 4 },
+    selectInput: { padding: 10 },
+    searchModuleContainer: { minHeight: 200 },
+    searchModuleContainerRoot: { padding: 10 },
     expand: {
       transform: "rotate(0deg)",
       transition: theme.transitions.create("transform", {
         duration: theme.transitions.duration.shortest
       })
-    },
-    formControl: {
-      margin: theme.spacing(1),
-      minWidth: 150
-    },
-    selectEmpty: {
-      marginTop: theme.spacing(2)
-    },
-    expandOpen: {
-      transform: "rotate(180deg)"
-    },
-    searchContainerTitle: {
-      marginLeft: 10
-    },
-    iconButton: { padding: 7 },
-
-    selectInput: {
-      padding: 10
-    },
-    searchModuleContainer: {
-      minHeight: 200
-    },
-    searchModuleContainerRoot: {
-      padding: 10
     }
   };
 };
@@ -226,9 +204,12 @@ class VTSearch extends React.PureComponent {
     const { classes } = this.props;
     return (
       <IconButton
-        className={clsx(classes.expand, {
-          [classes.expandOpen]: this.state.expanded
-        })}
+        className={
+          (clsx(classes.expand, {
+            [classes.expandOpen]: this.state.expanded
+          }),
+          classes.dropDownIconButton)
+        }
         onClick={this.handleExpandClick}
         aria-expanded={this.state.expanded}
         aria-label="show more"

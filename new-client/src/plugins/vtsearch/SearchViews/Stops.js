@@ -17,7 +17,7 @@ import RectangleIcon from "../img/rektangelmarkering.png";
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
 const styles = theme => ({
   setStandardWidth: { width: 200 },
-  searchButton: { marginTop: 8, width: 200 },
+  searchButton: { marginTop: 8 },
   fontSize: { fontSize: 12 },
   textFieldBox: { marginBottom: 10 },
   divider: { margin: theme.spacing(3) },
@@ -96,10 +96,13 @@ class Stops extends React.PureComponent {
     });
   };
 
-  handleMunicipalChange = e => {
-    this.setState({
-      municipalityName: e.target.value
-    });
+  handleMunicipalChange = event => {
+    this.setState(
+      {
+        municipalityName: event.target.value
+      },
+      console.log(this.state.municipalityName)
+    );
   };
 
   doSpatialChange = () => {
@@ -113,7 +116,7 @@ class Stops extends React.PureComponent {
       busStopValue: busStopValue,
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
-      municipalityName: municipalityName,
+      municipalityName: municipalityName.gid,
       selectedFormType: ""
     });
   };
@@ -129,7 +132,7 @@ class Stops extends React.PureComponent {
       busStopValue: busStopValue,
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
-      municipalityName: municipalityName,
+      municipalityName: municipalityName.gid,
       selectedFormType: "Polygon"
     });
   };
@@ -144,7 +147,7 @@ class Stops extends React.PureComponent {
       busStopValue: busStopValue,
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
-      municipalityName: municipalityName,
+      municipalityName: municipalityName.gid,
       selectedFormType: "Box"
     });
   };
@@ -210,7 +213,7 @@ class Stops extends React.PureComponent {
             {municipalityNames.map((name, index) => {
               return (
                 <MenuItem key={index} value={name}>
-                  {name}
+                  {name.name}
                 </MenuItem>
               );
             })}

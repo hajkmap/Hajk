@@ -261,7 +261,7 @@ export default class MapViewModel {
     publicLineName,
     internalLineNumber,
     municipalityName,
-    traficTransportName,
+    trafficTransportName,
     throughStopArea,
     selectedFormType
   }) => {
@@ -287,7 +287,7 @@ export default class MapViewModel {
           publicLineName,
           internalLineNumber,
           municipalityName,
-          traficTransportName,
+          trafficTransportName,
           throughStopArea,
           wktFeatureGeom
         );

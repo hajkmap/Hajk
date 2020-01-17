@@ -13,6 +13,7 @@ import RectangleIcon from "../img/rektangelmarkering.png";
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
 const styles = theme => ({
   publicAndTechNr: { width: 94, margin: 3 },
+  searchButton: { marginTop: 8 },
   standardWidth: { width: 200 },
   addSpaceAroundField: { padding: "20px 0 0 0", width: 200 },
   textFieldBox: { marginBottom: 10 },
@@ -82,7 +83,7 @@ class Lines extends React.PureComponent {
     this.localObserver.publish("routes-search", {
       publicLineName: publicLineName,
       internalLineNumber: internalLineNumber,
-      municipalityName: municipalityName,
+      municipalityName: municipalityName.gid,
       trafficTransportName: trafficTransportName,
       throughStopArea: throughStopArea,
       selectedFormType: ""
@@ -100,7 +101,7 @@ class Lines extends React.PureComponent {
     this.localObserver.publish("routes-search", {
       publicLineName: publicLineName,
       internalLineNumber: internalLineNumber,
-      municipalityName: municipalityName,
+      municipalityName: municipalityName.gid,
       trafficTransportName: trafficTransportName,
       throughStopArea: throughStopArea,
       selectedFormType: "Polygon"
@@ -117,17 +118,13 @@ class Lines extends React.PureComponent {
     this.localObserver.publish("routes-search", {
       publicLineName: publicLineName,
       internalLineNumber: internalLineNumber,
-      municipalityName: municipalityName,
+      municipalityName: municipalityName.gid,
       trafficTransportName: trafficTransportName,
       throughStopArea: throughStopArea,
       selectedFormType: "Box"
     });
   };
 
-  // testDebug = e => {
-  //   console.log("testdebug");
-  //   this.model.getRoutes("300");
-  // };
   handleInternalLineNrChange = event => {
     this.setState({
       internalLineNumber: event.target.value
@@ -219,7 +216,7 @@ class Lines extends React.PureComponent {
             {municipalityNames.map((name, index) => {
               return (
                 <MenuItem key={index} value={name}>
-                  {name}
+                  {name.name}
                 </MenuItem>
               );
             })}
