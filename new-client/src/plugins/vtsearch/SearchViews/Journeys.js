@@ -18,26 +18,12 @@ import {
 // Examle below utilizes the very powerful "theme" object
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
 const styles = theme => ({
-  journeysForm: {
-    marginTop: 10
-  },
-  dateFrom: {
-    marginTop: 0,
-    marginBottom: -4
-  },
-  timeFrom: {
-    marginBottom: 40
-  },
-  iconText: {
-    fontSize: 10,
-    width: 50
-  },
-  divider: {
-    margin: theme.spacing(3, 3)
-  },
-  textFields: {
-    marginLeft: 10
-  },
+  journeysForm: { marginTop: 10 },
+  dateFrom: { marginTop: 0, marginBottom: -4 },
+  timeFrom: { marginBottom: 40 },
+  iconText: { fontSize: 10, width: 50 },
+  divider: { margin: theme.spacing(3, 3) },
+  textFields: { marginLeft: 10 },
   polygonAndRectangleForm: {
     verticalAlign: "baseline",
     float: "left",
@@ -80,9 +66,12 @@ class Journeys extends React.PureComponent {
   }
 
   handleFromDateChange = date => {
-    this.setState({
-      selectedFromDate: date
-    });
+    this.setState(
+      {
+        selectedFromDate: date
+      },
+      console.log(date + " date")
+    );
   };
   handleEndDateChange = date => {
     this.setState({
@@ -122,8 +111,8 @@ class Journeys extends React.PureComponent {
               className={classes.dateFrom}
               format="yyyy-MM-dd"
               margin="normal"
-              id="date-picker-inline"
               label="Från och med"
+              invalidDateMessage="Fel värde på datum"
               value={this.state.selectedFromDate}
               onChange={this.handleFromDateChange}
               KeyboardButtonProps={{
@@ -138,6 +127,7 @@ class Journeys extends React.PureComponent {
               margin="normal"
               id="time-picker"
               ampm={false}
+              invalidDateMessage="Fel värde på tid"
               keyboardIcon={<AccessTimeIcon></AccessTimeIcon>}
               value={this.state.selectedFromDate}
               onChange={this.handleFromDateChange}
@@ -149,8 +139,8 @@ class Journeys extends React.PureComponent {
               className={classes.dateFrom}
               format="yyyy-MM-dd"
               margin="normal"
-              id="date-picker-inline"
               label="Till och med"
+              invalidDateMessage="Fel värde på datum"
               value={this.state.selectedEndDate}
               onChange={this.handleEndDateChange}
               KeyboardButtonProps={{
@@ -162,8 +152,8 @@ class Journeys extends React.PureComponent {
             />
             <KeyboardTimePicker
               margin="normal"
-              id="time-picker"
               ampm={false}
+              invalidDateMessage="Fel värde på tid"
               keyboardIcon={<AccessTimeIcon></AccessTimeIcon>}
               value={this.state.selectedEndDate}
               onChange={this.handleEndDateChange}
