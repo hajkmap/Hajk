@@ -450,6 +450,50 @@
       "version": "1.1.1",
       "infoFormat": "application/json",
       "zIndex": null
+    },
+    {
+      "id": "36",
+      "caption": "Västtrafik WMS",
+      "url": "http://vt.wms.kartena.se/mp/service",
+      "owner": "",
+      "date": "1576076273455",
+      "content": "",
+      "legend": "",
+      "projection": "EPSG:3006",
+      "layers": ["vt"],
+      "layersInfo": [
+        {
+          "id": "vt",
+          "caption": "",
+          "legend": "",
+          "infobox": "",
+          "style": "",
+          "queryable": false
+        }
+      ],
+      "searchFields": null,
+      "displayFields": null,
+      "visibleAtStart": false,
+      "tiled": false,
+      "opacity": 1.0,
+      "singleTile": false,
+      "imageFormat": "image/png",
+      "serverType": "geoserver",
+      "attribution": "",
+      "searchUrl": "",
+      "searchPropertyName": "",
+      "searchDisplayName": "",
+      "searchOutputFormat": "",
+      "searchGeometryField": "",
+      "infoVisible": false,
+      "infoTitle": "",
+      "infoText": "",
+      "infoUrl": "",
+      "infoUrlText": "",
+      "infoOwner": "",
+      "version": "1.1.1",
+      "infoFormat": "",
+      "zIndex": null
     }
   ],
   "wfslayers": [

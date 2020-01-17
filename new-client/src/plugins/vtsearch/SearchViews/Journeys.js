@@ -53,7 +53,7 @@ class Journeys extends React.PureComponent {
     fromTime: null,
     activeTool: undefined,
     selectedFromDate: new Date(),
-    selectedEndDate: new Date(),
+    selectedEndDate: new Date().setHours(new Date().getHours() + 2),
     selectedFormType: ""
   };
 
