@@ -772,8 +772,8 @@ export default class SearchModel {
     let viewParams = "&viewparams=";
     if (!this.isNullOrEmpty(filterOnNameOrNumber)) {
       if (this.isLineNumber(filterOnNameOrNumber))
-        viewParams = viewParams + `filterOnName:${filterOnNameOrNumber};`;
-      else viewParams = viewParams + `filterOnNumber:${filterOnNameOrNumber};`;
+        viewParams = viewParams + `filterOnNumber:${filterOnNameOrNumber};`;
+      else viewParams = viewParams + `filterOnName:${filterOnNameOrNumber};`;
     }
     if (!this.isNullOrEmpty(filterOnPublicLine))
       viewParams = viewParams + `filterOnPublicLine:${filterOnPublicLine};`;
