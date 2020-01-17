@@ -87,7 +87,7 @@ class Lines extends React.PureComponent {
       });
       this.model.autocompleteTransportModeTypeName().then(result => {
         this.setState({
-          trafficTransportName: result.length > 0 ? result : []
+          trafficTransportNames: result.length > 0 ? result : []
         });
       });
     });
