@@ -26,6 +26,7 @@ const styles = theme => ({
       paddingRight: theme.direction === "rtl" ? "0px !important" : undefined
     }
   },
+
   tableRowHover: {
     "&:hover": {
       backgroundColor: theme.palette.grey[200]
@@ -39,8 +40,8 @@ const styles = theme => ({
     outline: "none"
   },
   tableRowSelected: {
-    border: "2px solid rgba(18,120,211,0.37)",
-    background: "rgba(0,212,255,1)"
+    border: "2px solid rgba(0,57,77,1)",
+    background: "rgba(226,242,250,1)"
   },
   headerColumn: {
     whiteSpace: "pre-wrap",
@@ -64,7 +65,6 @@ const styles = theme => ({
     justifyContent: "center",
     cursor: "pointer",
     fontSize: "0.8em",
-    minWidth: 0,
     wordBreak: "break-all",
     lineHeight: 1,
     borderBottom: 0
@@ -131,9 +131,6 @@ class VirtualizedTable extends React.PureComponent {
         component="div"
         className={this.getCellClassName(columnIndex)}
         variant="body"
-        style={{
-          height: rowHeight
-        }}
         align={
           (columnIndex != null && columns[columnIndex].numeric) || false
             ? "right"
@@ -196,7 +193,6 @@ class VirtualizedTable extends React.PureComponent {
                     }
                     className={classes.columnStyle}
                     cellRenderer={this.cellRenderer}
-                    width={20}
                     dataKey={dataKey}
                     {...other}
                   />

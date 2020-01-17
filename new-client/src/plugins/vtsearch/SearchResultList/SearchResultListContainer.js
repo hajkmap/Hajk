@@ -41,6 +41,10 @@ const styles = theme => {
     flexItem: {
       flex: "auto"
     },
+    typography: {
+      flex: "auto",
+      color: "white"
+    },
     tabRoot: {
       padding: 0,
       minHeight: 0,
@@ -51,7 +55,9 @@ const styles = theme => {
     },
     tabWrapper: {
       display: "flex",
-      flexDirection: "row"
+      flexDirection: "row",
+      borderRadius: "5px",
+      backgroundColor: "rgba(0,150,237,1)"
     },
     tabsFlexContainer: {
       flexWrap: "wrap"
@@ -280,7 +286,7 @@ class SearchResultListContainer extends React.Component {
         classes={{ root: classes.tabRoot, wrapper: classes.tabWrapper }}
         label={
           <>
-            <Typography variant="subtitle2" className={classes.flexItem}>
+            <Typography variant="subtitle2" className={classes.typography}>
               {searchResult.label}
             </Typography>
 

@@ -78,10 +78,12 @@ class AttributeTable extends React.Component {
   getColumns() {
     const { searchResult } = this.props;
     return this.getFeaturePropertiesKeys(searchResult).map(key => {
+      var displayName = this.getDisplayName(key);
+      console.log(displayName, "displayName");
       return {
-        width: 200,
-        label: this.getDisplayName(key) || key,
-        dataKey: key
+        label: displayName || key,
+        dataKey: key,
+        width: 300
       };
     });
   }
