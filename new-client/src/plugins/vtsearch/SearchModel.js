@@ -34,6 +34,7 @@ export default class SearchModel {
       .replace(/\(/g, "%28")
       .replace(/\)/g, "%29")
       .replace(/ /g, "%20")
+      .replace(/,/g, "%5C,")
       .replace(/'/g, "%27");
   };
 
@@ -403,11 +404,12 @@ export default class SearchModel {
 
   /**
    * Autocomplete function that gets all municipality names sorted in alphabetic order array.
+   * @param {boolean} addEmptyMunicipality <option value="true">Adds an empty municipality at the beginning of the array. </option>
    * @returns {Array<string>} Returns all municipality names sorted in alphabetic order.
    *
    * @memberof SearchModel
    */
-  autocompleteMunicipalityZoneNames() {
+  autocompleteMunicipalityZoneNames(addEmptyMunicipality = true) {
     const url = this.geoServer.municipalityZoneNames.url;
     return fetch(url)
       .then(res => {
@@ -419,6 +421,8 @@ export default class SearchModel {
           municipalityNames = municipalityNames.sort(function(a, b) {
             return a.localeCompare(b);
           });
+
+          if (addEmptyMunicipality) municipalityNames.unshift("");
 
           return municipalityNames;
         });
@@ -477,11 +481,12 @@ export default class SearchModel {
 
   /**
    * Autocomplete function that gets then transport mode type names and numbers.
+   * @param {boolean} addEmptyMunicipality <option value="true">Adds an empty transport mode at the beginning of the array. </option>
    * @returns {array(string, int)} Returns all mode type names as an array of tuples.
    *
    * @memberof SearchModel
    */
-  autocompleteTransportModeTypeName() {
+  autocompleteTransportModeTypeName(addEmptyTransportMode = true) {
     this.localObserver.publish("transportModeTypeNames-result-begin", {
       label: this.geoServer.transportModeTypeNames.searchLabel
     });
@@ -492,6 +497,8 @@ export default class SearchModel {
         let transportModeTypes = jsonResult.features.map(feature => {
           return feature.properties.Name;
         });
+
+        if (addEmptyTransportMode) transportModeTypes.unshift("");
 
         return transportModeTypes;
       });

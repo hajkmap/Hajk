@@ -13,6 +13,7 @@ import {
   KeyboardTimePicker,
   KeyboardDatePicker
 } from "@material-ui/pickers";
+import svLocale from "date-fns/locale/sv";
 import { inlineLexer } from "marked";
 
 // Define JSS styles that will be used in this component.
@@ -54,7 +55,7 @@ class Journeys extends React.PureComponent {
     fromTime: null,
     activeTool: undefined,
     selectedFromDate: new Date(),
-    selectedEndDate: new Date(),
+    selectedEndDate: new Date().setHours(new Date().getHours() + 2),
     selectedFormType: ""
   };
 
