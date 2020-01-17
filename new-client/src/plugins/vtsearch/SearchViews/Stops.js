@@ -17,15 +17,26 @@ import RectangleIcon from "../img/rektangelmarkering.png";
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
 const styles = theme => ({
   setStandardWidth: { width: 200 },
-  button: { marginTop: 8 },
+  searchButton: { marginTop: 8, width: 200 },
   fontSize: { fontSize: 12 },
   textFieldBox: { marginBottom: 10 },
   divider: { margin: theme.spacing(3) },
   textFields: { marginLeft: 10 },
+  checkBox: { marginTop: -10 },
+  sizeSmall: { fontSize: 14, marginTop: -8 },
+  radioButtonText: { fontSize: 14 },
   polygonAndRectangleForm: {
     verticalAlign: "baseline",
     float: "left",
     marginBottom: 15
+  },
+  overrides: {
+    MuiTypographyBody1: {
+      root: {
+        color: "red",
+        fontSize: 13
+      }
+    }
   }
 });
 
@@ -37,8 +48,7 @@ class Stops extends React.PureComponent {
     publicLine: "",
     municipalityNames: [],
     municipalityName: "",
-    selectedFormType: "",
-    doSpetial: false
+    selectedFormType: ""
   };
 
   // propTypes and defaultProps are static properties, declared
@@ -92,7 +102,7 @@ class Stops extends React.PureComponent {
     });
   };
 
-  doSpetialChange = () => {
+  doSpatialChange = () => {
     const {
       busStopValue,
       stopNameOrNr,
@@ -155,14 +165,17 @@ class Stops extends React.PureComponent {
               value="stopAreas"
               control={<Radio color="primary" />}
               label="Hållplatsområden"
+              classes={{ label: classes.radioButtonText }}
             />
             <FormControlLabel
               value="stopPoints"
-              control={<Radio color="primary" />}
+              control={<Radio color="primary" className={classes.checkBox} />}
               label="Hållplatslägen"
+              classes={{ label: classes.sizeSmall }}
             />
           </RadioGroup>
         </FormControl>
+        <Divider className={classes.divider} />
         <div className={classes.textFieldBox}>
           <TextField
             id="standard-basic"
@@ -204,12 +217,11 @@ class Stops extends React.PureComponent {
           </Select>
         </div>
         <Button
-          className={classes.button}
+          className={classes.searchButton}
           variant="outlined"
           type="button"
           title="Sök"
-          value={this.state.doSpetial}
-          onClick={this.doSpetialChange}
+          onClick={this.doSpatialChange}
         >
           Sök
         </Button>

@@ -12,34 +12,13 @@ import RectangleIcon from "../img/rektangelmarkering.png";
 // Examle below utilizes the very powerful "theme" object
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
 const styles = theme => ({
-  publicNr: {
-    color: "white",
-    width: 94,
-    margin: 3
-  },
-  technicalNr: {
-    color: "white",
-    width: 94,
-    margin: 3
-  },
-  standardWidth: {
-    width: 200
-  },
-  addSpaceAroundField: {
-    padding: "20px 0 0 0",
-    width: 200
-  },
-  textFieldBox: {
-    marginBottom: 10
-  },
-  divider: {
-    margin: theme.spacing(3)
-  },
-  textFields: {
-    marginLeft: 10
-  },
+  publicAndTechNr: { width: 94, margin: 3 },
+  standardWidth: { width: 200 },
+  addSpaceAroundField: { padding: "20px 0 0 0", width: 200 },
+  textFieldBox: { marginBottom: 10 },
+  divider: { margin: theme.spacing(3) },
+  textFields: { marginLeft: 10 },
   fontSize: { fontSize: 12 },
-
   polygonAndRectangleForm: {
     verticalAlign: "baseline",
     float: "left",
@@ -92,7 +71,7 @@ class Lines extends React.PureComponent {
       });
     });
   }
-  doSpetialChange = () => {
+  doSpatialChange = () => {
     const {
       publicLineName,
       internalLineNumber,
@@ -184,7 +163,7 @@ class Lines extends React.PureComponent {
           <TextField
             id="standard-helperText"
             label="Publikt nr"
-            className={classes.technicalNr}
+            className={classes.publicAndTechNr}
             onChange={this.handlePublicLineNameChange}
             value={this.state.publicLineName}
             InputLabelProps={{
@@ -194,7 +173,7 @@ class Lines extends React.PureComponent {
           <TextField
             id="standard-helperText"
             label="Tekniskt nr"
-            className={classes.publicNr}
+            className={classes.publicAndTechNr}
             onChange={this.handleInternalLineNrChange}
             value={this.state.internalLineNumber}
             InputLabelProps={{
@@ -246,7 +225,11 @@ class Lines extends React.PureComponent {
             })}
           </Select>
         </div>
-        <Button onClick={this.doSpetialChange} variant="outlined">
+        <Button
+          className={classes.searchButton}
+          onClick={this.doSpatialChange}
+          variant="outlined"
+        >
           Sök
         </Button>
 
