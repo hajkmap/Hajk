@@ -55,6 +55,20 @@ export default class SearchModel {
   };
 
   /**
+   * Private method that encodes the swedish characters å, ä and ö.
+   * @param {string} url The url that needs to be encoded.
+   * @returns {string} Returns an encoded url.
+   *
+   * @memberof SearchModel
+   */
+  encodeUrlForGeoServer = url => {
+    return url
+      .replace(/å/g, "%C3%A5")
+      .replace(/ä/g, "%C3%A4")
+      .replace(/ö/g, "%C3%B6");
+  };
+
+  /**
    * Private method that gets all attributes that should remain from GeoServer.
    * @param {Array<string, string>} attributesToDisplay An array of attributes to be displayed.
    * @returns {Array<string>} Returns an array with only attribute names, stripped of all other data.
@@ -383,6 +397,7 @@ export default class SearchModel {
     if (!this.isNullOrEmpty(searchText)) cql = this.encodeCqlForGeoServer(cql);
 
     url = url + cql;
+    url = this.encodeUrlForGeoServer(url);
     return fetch(url)
       .then(res => {
         return res.json().then(jsonResult => {
@@ -415,14 +430,18 @@ export default class SearchModel {
       .then(res => {
         return res.json().then(jsonResult => {
           let municipalityNames = jsonResult.features.map(feature => {
-            return feature.properties.Name;
+            return {
+              name: feature.properties.Name,
+              gid: feature.properties.Gid
+            };
           });
 
           municipalityNames = municipalityNames.sort(function(a, b) {
-            return a.localeCompare(b);
+            return a.name.localeCompare(b.name);
           });
 
-          if (addEmptyMunicipality) municipalityNames.unshift("");
+          if (addEmptyMunicipality)
+            municipalityNames.unshift({ name: "", gid: null });
 
           return municipalityNames;
         });
@@ -460,7 +479,7 @@ export default class SearchModel {
 
     // Fetch the result as a promise, sort it and attach it to the event.
     url = url + cql;
-
+    url = this.encodeUrlForGeoServer(url);
     return fetch(url)
       .then(res => {
         return res.json().then(jsonResult => {
@@ -539,7 +558,7 @@ export default class SearchModel {
     )
       url = url + viewParams;
 
-    // Fetch the result as a promise and attach it to the event.
+    url = this.encodeUrlForGeoServer(url);
     fetch(url)
       .then(res => {
         res.json().then(jsonResult => {
@@ -640,7 +659,7 @@ export default class SearchModel {
     )
       url = url + this.encodeCqlForGeoServer(cql);
 
-    // Fetch the result as a promise and attach it to the event.
+    url = this.encodeUrlForGeoServer(url);
     fetch(url)
       .then(res => {
         res.json().then(jsonResult => {
@@ -715,7 +734,7 @@ export default class SearchModel {
     )
       url = url + viewParams;
 
-    // Fetch the result as a promise and attach it to the event.
+    url = this.encodeUrlForGeoServer(url);
     fetch(url).then(res => {
       res
         .json()
@@ -791,7 +810,7 @@ export default class SearchModel {
     )
       url = url + viewParams;
 
-    // Fetch the result as a promise and attach it to the event.
+    url = this.encodeUrlForGeoServer(url);
     fetch(url).then(res => {
       res
         .json()
