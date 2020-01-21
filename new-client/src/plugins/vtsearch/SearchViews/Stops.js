@@ -71,7 +71,7 @@ class Stops extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
-    this.model.autocompleteMunicipalityZoneNames().then(result => {
+    this.model.fetchAllPossibleMunicipalityZoneNames().then(result => {
       this.setState({
         municipalityNames: result.length > 0 ? result : []
       });

@@ -31,6 +31,7 @@ export default class SearchModel {
    */
   encodeCqlForGeoServer = cql => {
     return cql
+      .replace(/%/g, "%25")
       .replace(/\(/g, "%28")
       .replace(/\)/g, "%29")
       .replace(/ /g, "%20")
@@ -84,25 +85,16 @@ export default class SearchModel {
   /**
    * Private method that determines if a we have a line number or a line name, i,e, only
    * consists of numbers.
-   * @param {string} lineNameOrNumber The text string to check.
+   * @param {string} stringValue The text string to check.
    * @returns {boolean} Returns true if the text string is a line number.
    *
    * @memberof SearchModel
    */
-  isLineNumber = lineNameOrNumber => {
+  containsOnlyNumbers = stringValue => {
     // Checks for only digits.
-    if (lineNameOrNumber.match(/^[0-9]+$/) != null) return true;
+    if (stringValue.match(/^[0-9]+$/) != null) return true;
 
     return false;
-  };
-
-  /**
-   * Private method that tests if a string is null or empty
-   * @param {string} stringValue The string to test.
-   * @returns {boolean} Returns true if the string is empty or null.
-   */
-  isNullOrEmpty = stringValue => {
-    return stringValue == null || stringValue === "";
   };
 
   /**
@@ -371,45 +363,33 @@ export default class SearchModel {
   };
 
   /**
-   * Autocomplete function that gets the line numbers or public line numbers that match a search text.
+   * Autocomplete function that gets the line numbers that match a search text.
    * @param {string} searchText The search text for a line number or public line number.
    * @returns {Array(string)} Returns an array of matching line numbers or public line numbers.
    *
    * @memberof SearchModel
    */
-  autocompleteLineNumbersOrPublicLineNumbers(searchText) {
+  autocompleteLineNumbers(searchText) {
     // If the search is empty no result will be found.
-    if (this.isNullOrEmpty(searchText)) return null;
+    if (!searchText) return null;
 
     // Build up the url with cql.
     let url = this.geoServer.lineNumberAndPublicLineNumber.url;
     let cql = "&CQL_FILTER=";
-
-    // Checks if the argument is a line number or a public line number
-    const isLineNumber = this.isLineNumber(searchText);
-
-    if (!this.isNullOrEmpty(searchText)) {
-      if (isLineNumber) cql = cql + `LineNumber like '${searchText}%'`;
-      else cql = cql + `PublicLineNumber like '${searchText}%'`;
-    }
-
-    // Fix percent and so on, so that the CQL filters are GeoServer valid.
-    if (!this.isNullOrEmpty(searchText)) cql = this.encodeCqlForGeoServer(cql);
-
+    cql = cql + `LineNumber like '${searchText}%'`;
+    cql = this.encodeCqlForGeoServer(cql);
     url = url + cql;
     url = this.encodeUrlForGeoServer(url);
+
     return fetch(url)
       .then(res => {
         return res.json().then(jsonResult => {
-          let lineNumberOrPublicLineNumber = jsonResult.features.map(
-            feature => {
-              if (isLineNumber) return feature.properties.LineNumber;
+          let lineNumber = jsonResult.features.map(feature => {
+            return feature.properties.LineNumber;
+          });
 
-              return feature.properties.PublicLineNumber;
-            }
-          );
-
-          return lineNumberOrPublicLineNumber;
+          console.log(lineNumber);
+          return lineNumber;
         });
       })
       .catch(err => {
@@ -418,13 +398,100 @@ export default class SearchModel {
   }
 
   /**
-   * Autocomplete function that gets all municipality names sorted in alphabetic order array.
+   * Autocomplete function that gets the public line numbers that match a search text.
+   * @param {string} searchText The search text for a line number or public line number.
+   * @returns {Array(string)} Returns an array of matching line numbers or public line numbers.
+   *
+   * @memberof SearchModel
+   */
+  autocompletePublicLineNumbers(searchText) {
+    // If the search is empty no result will be found.
+    if (!searchText) return null;
+
+    // Build up the url with cql.
+    let url = this.geoServer.lineNumberAndPublicLineNumber.url;
+    let cql = "&CQL_FILTER=";
+    cql = cql + `PublicLineNumber like '${searchText}%'`;
+    cql = this.encodeCqlForGeoServer(cql);
+    url = url + cql;
+    url = this.encodeUrlForGeoServer(url);
+
+    return fetch(url)
+      .then(res => {
+        return res.json().then(jsonResult => {
+          let publicLineNumber = jsonResult.features.map(feature => {
+            return feature.properties.PublicLineNumber;
+          });
+
+          console.log(publicLineNumber);
+          return publicLineNumber;
+        });
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
+
+  /**
+   * Autocomplete function that gets the stop area names that match a search text.
+   * @param {string} searchText The search text for a line number or public line number.
+   * @returns {array(string)} Returns an array of matching line numbers or public line numbers.
+   *
+   * @memberof SearchModel
+   */
+  autocompleteStopAreaNamesOrNumbers(searchText) {
+    // If the search is empty no result will be found.
+    if (!searchText) return null;
+
+    // Build up the url with cql.
+    let url = this.geoServer.stopAreaNameAndStopAreaNumber.url;
+    let cql = "&CQL_FILTER=";
+
+    const isStopAreaNumber = this.containsOnlyNumbers(searchText);
+    if (searchText) {
+      if (isStopAreaNumber) cql = cql + `Number like '${searchText}%'`;
+      else cql = cql + `Name like '${searchText}%'`;
+    }
+
+    // Fix percent and so on, so that the CQL filters are GeoServer valid.
+    if (searchText) cql = this.encodeCqlForGeoServer(cql);
+    url = url + cql;
+    url = this.encodeUrlForGeoServer(url);
+
+    return fetch(url)
+      .then(res => {
+        return res.json().then(jsonResult => {
+          let stopAreaNameOrNumber = jsonResult.features.map(feature => {
+            if (isStopAreaNumber) return feature.properties.Number;
+
+            return feature.properties.Name;
+          });
+
+          if (isStopAreaNumber) {
+            stopAreaNameOrNumber = stopAreaNameOrNumber.sort((a, b) => a - b);
+          } else {
+            stopAreaNameOrNumber = stopAreaNameOrNumber.sort(function(a, b) {
+              return a.localeCompare(b);
+            });
+          }
+
+          console.log(stopAreaNameOrNumber);
+          return stopAreaNameOrNumber;
+        });
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
+
+  /**
+   * Function that fetch all municipality names sorted in alphabetic order array.
    * @param {boolean} addEmptyMunicipality <option value="true">Adds an empty municipality at the beginning of the array. </option>
    * @returns {Array<string>} Returns all municipality names sorted in alphabetic order.
    *
    * @memberof SearchModel
    */
-  autocompleteMunicipalityZoneNames(addEmptyMunicipality = true) {
+  fetchAllPossibleMunicipalityZoneNames(addEmptyMunicipality = true) {
     const url = this.geoServer.municipalityZoneNames.url;
     return fetch(url)
       .then(res => {
@@ -452,60 +519,13 @@ export default class SearchModel {
   }
 
   /**
-   * Autocomplete function that gets the stop area names or stop area numbers that match a search text.
-   * @param {string} searchText The search text for a line number or public line number.
-   * @returns {array(string)} Returns an array of matching line numbers or public line numbers.
-   *
-   * @memberof SearchModel
-   */
-  autocompleteStopAreaNamesOrNumbers(searchText) {
-    // If the search is empty no result will be found.
-    if (this.isNullOrEmpty(searchText)) return null;
-
-    // Build up the url with cql.
-    let url = this.geoServer.stopAreaNameAndStopAreaNumber.url;
-    let cql = "&cql_filter=";
-
-    // Checks if the argument is a line number or a public line number
-    const isLineNumber = this.isLineNumber(searchText);
-
-    if (!this.isNullOrEmpty(searchText)) {
-      if (isLineNumber) cql = cql + `Number like '${searchText}%'`;
-      else cql = cql + `Name like '${searchText}%'`;
-    }
-
-    // Fix percent and so on, so that the CQL filters are GeoServer valid.
-    if (!this.isNullOrEmpty(searchText)) cql = this.encodeCqlForGeoServer(cql);
-
-    // Fetch the result as a promise, sort it and attach it to the event.
-    url = url + cql;
-    url = this.encodeUrlForGeoServer(url);
-    return fetch(url)
-      .then(res => {
-        return res.json().then(jsonResult => {
-          let stopAreaNamesOrNumbers = jsonResult.features.map(feature => {
-            if (isLineNumber) return feature.properties.Number;
-
-            return feature.properties.Name;
-          });
-
-          console.log(stopAreaNamesOrNumbers);
-          return stopAreaNamesOrNumbers;
-        });
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  }
-
-  /**
-   * Autocomplete function that gets then transport mode type names and numbers.
+   * Function that fetch all transport mode type names and numbers.
    * @param {boolean} addEmptyMunicipality <option value="true">Adds an empty transport mode at the beginning of the array. </option>
    * @returns {array(string, int)} Returns all mode type names as an array of tuples.
    *
    * @memberof SearchModel
    */
-  autocompleteTransportModeTypeName(addEmptyTransportMode = true) {
+  fetchAllPossibleTransportModeTypeName(addEmptyTransportMode = true) {
     this.localObserver.publish("transportModeTypeNames-result-begin", {
       label: this.geoServer.transportModeTypeNames.searchLabel
     });
@@ -538,27 +558,20 @@ export default class SearchModel {
     });
 
     // Fix parentheses and so on, so that the WKT are GeoServer valid.
-    if (!this.isNullOrEmpty(filterOnWkt))
-      filterOnWkt = this.encodeWktForGeoServer(filterOnWkt);
+    if (filterOnWkt) filterOnWkt = this.encodeWktForGeoServer(filterOnWkt);
 
     // Build up the url with viewparams.
     let url = this.geoServer.journeys.url;
     let viewParams = "&viewparams=";
-    if (!this.isNullOrEmpty(filterOnFromDate))
+    if (filterOnFromDate)
       viewParams = viewParams + `filterOnFromDate:${filterOnFromDate};`;
-    if (!this.isNullOrEmpty(filterOnToDate))
+    if (filterOnToDate)
       viewParams = viewParams + `filterOnToDate:${filterOnToDate};`;
-    if (!this.isNullOrEmpty(filterOnWkt))
-      viewParams = viewParams + `filterOnWkt:${filterOnWkt};`;
-
-    if (
-      !this.isNullOrEmpty(filterOnFromDate) ||
-      !this.isNullOrEmpty(filterOnToDate) ||
-      !this.isNullOrEmpty(filterOnWkt)
-    )
+    if (filterOnWkt) viewParams = viewParams + `filterOnWkt:${filterOnWkt};`;
+    if (filterOnFromDate || filterOnToDate || filterOnWkt)
       url = url + viewParams;
-
     url = this.encodeUrlForGeoServer(url);
+
     fetch(url)
       .then(res => {
         res.json().then(jsonResult => {
@@ -612,54 +625,53 @@ export default class SearchModel {
     if (polygonAsWkt)
       polygonAsWkt = this.swapWktCoordinatesForSqlServer(polygonAsWkt);
 
-    // Build up the url with cql.
+    // Build up the url with viewparams.
     let url = this.geoServer.routes.url;
     let cql = "&CQL_FILTER=";
     let addAndInCql = false;
-    if (!this.isNullOrEmpty(publicLineName)) {
+    if (publicLineName) {
       cql = cql + `PublicLineName like '${publicLineName}'`;
       addAndInCql = true;
     }
-    if (!this.isNullOrEmpty(internalLineNumber)) {
+    if (internalLineNumber) {
       if (addAndInCql) cql = cql + " AND ";
       cql = cql + `InternalLineNumber like '${internalLineNumber}'`;
       addAndInCql = true;
     }
-    if (!this.isNullOrEmpty(isInMunicipalityZoneGid)) {
+    if (isInMunicipalityZoneGid) {
       if (addAndInCql) cql = cql + " AND ";
       cql = cql + `IsInMunicipalityZoneGid like '${isInMunicipalityZoneGid}'`;
       addAndInCql = true;
     }
-    if (!this.isNullOrEmpty(transportModeType)) {
+    if (transportModeType) {
       if (addAndInCql) cql = cql + " AND ";
       cql = cql + `TransportModeType like '${transportModeType}'`;
       addAndInCql = true;
     }
-    if (!this.isNullOrEmpty(stopAreaNameOrNumber)) {
+    if (stopAreaNameOrNumber) {
       if (addAndInCql) cql = cql + " AND ";
-      if (this.isLineNumber(stopAreaNameOrNumber))
+      if (this.containsOnlyNumbers(stopAreaNameOrNumber))
         cql = cql + `StopAreaNumber like '${stopAreaNameOrNumber}'`;
       else cql = cql + `StopAreaName like '${stopAreaNameOrNumber}'`;
       addAndInCql = true;
     }
-    if (!this.isNullOrEmpty(polygonAsWkt)) {
+    if (polygonAsWkt) {
       if (addAndInCql) cql = cql + " AND ";
       polygonAsWkt = this.encodeWktForGeoServer(polygonAsWkt);
       cql = cql + `INTERSECTS(Geom, '${polygonAsWkt}')`;
       addAndInCql = true;
     }
-
     if (
-      !this.isNullOrEmpty(publicLineName) ||
-      !this.isNullOrEmpty(internalLineNumber) ||
-      !this.isNullOrEmpty(isInMunicipalityZoneGid) ||
-      !this.isNullOrEmpty(transportModeType) ||
-      !this.isNullOrEmpty(stopAreaNameOrNumber) ||
-      !this.isNullOrEmpty(polygonAsWkt)
+      publicLineName ||
+      internalLineNumber ||
+      isInMunicipalityZoneGid ||
+      transportModeType ||
+      stopAreaNameOrNumber ||
+      polygonAsWkt
     )
       url = url + this.encodeCqlForGeoServer(cql);
-
     url = this.encodeUrlForGeoServer(url);
+
     fetch(url)
       .then(res => {
         res.json().then(jsonResult => {
@@ -707,34 +719,32 @@ export default class SearchModel {
     });
 
     // Fix parentheses and so on, so that the WKT are GeoServer valid.
-    if (!this.isNullOrEmpty(filterOnWkt))
-      filterOnWkt = this.encodeWktForGeoServer(filterOnWkt);
+    if (filterOnWkt) filterOnWkt = this.encodeWktForGeoServer(filterOnWkt);
 
     // Build up the url with viewparams.
     let url = this.geoServer.stopAreas.url;
     let viewParams = "&viewparams=";
-    if (!this.isNullOrEmpty(filterOnNameOrNumber)) {
-      if (this.isLineNumber(filterOnNameOrNumber))
+    if (filterOnNameOrNumber) {
+      if (this.containsOnlyNumbers(filterOnNameOrNumber))
         viewParams = viewParams + `filterOnNumber:${filterOnNameOrNumber};`;
       else viewParams = viewParams + `filterOnName:${filterOnNameOrNumber};`;
     }
-    if (!this.isNullOrEmpty(filterOnPublicLine))
+    if (filterOnPublicLine)
       viewParams = viewParams + `filterOnPublicLine:${filterOnPublicLine};`;
-    if (!this.isNullOrEmpty(filterOnMunicipalName))
+    if (filterOnMunicipalName)
       viewParams =
         viewParams + `filterOnMunicipalName:${filterOnMunicipalName};`;
-    if (!this.isNullOrEmpty(filterOnWkt))
-      viewParams = viewParams + `filterOnWkt:${filterOnWkt};`;
+    if (filterOnWkt) viewParams = viewParams + `filterOnWkt:${filterOnWkt};`;
 
     if (
-      !this.isNullOrEmpty(filterOnNameOrNumber) ||
-      !this.isNullOrEmpty(filterOnPublicLine) ||
-      !this.isNullOrEmpty(filterOnMunicipalName) ||
-      !this.isNullOrEmpty(filterOnWkt)
+      filterOnNameOrNumber ||
+      filterOnPublicLine ||
+      filterOnMunicipalName ||
+      filterOnWkt
     )
       url = url + viewParams;
-
     url = this.encodeUrlForGeoServer(url);
+
     fetch(url).then(res => {
       res
         .json()
@@ -783,34 +793,32 @@ export default class SearchModel {
     });
 
     // Fix parentheses and so on, so that the WKT are GeoServer valid.
-    if (!this.isNullOrEmpty(filterOnWkt))
-      filterOnWkt = this.encodeWktForGeoServer(filterOnWkt);
+    if (filterOnWkt) filterOnWkt = this.encodeWktForGeoServer(filterOnWkt);
 
     // Build up the url with viewparams.
     let url = this.geoServer.stopPoints.url;
     let viewParams = "&viewparams=";
-    if (!this.isNullOrEmpty(filterOnNameOrNumber)) {
-      if (this.isLineNumber(filterOnNameOrNumber))
+    if (filterOnNameOrNumber) {
+      if (this.containsOnlyNumbers(filterOnNameOrNumber))
         viewParams = viewParams + `filterOnNumber:${filterOnNameOrNumber};`;
       else viewParams = viewParams + `filterOnName:${filterOnNameOrNumber};`;
     }
-    if (!this.isNullOrEmpty(filterOnPublicLine))
+    if (filterOnPublicLine)
       viewParams = viewParams + `filterOnPublicLine:${filterOnPublicLine};`;
-    if (!this.isNullOrEmpty(filterOnMunicipalName))
+    if (filterOnMunicipalName)
       viewParams =
         viewParams + `filterOnMunicipalName:${filterOnMunicipalName};`;
-    if (!this.isNullOrEmpty(filterOnWkt))
-      viewParams = viewParams + `filterOnWkt:${filterOnWkt};`;
+    if (filterOnWkt) viewParams = viewParams + `filterOnWkt:${filterOnWkt};`;
 
     if (
-      !this.isNullOrEmpty(filterOnNameOrNumber) ||
-      !this.isNullOrEmpty(filterOnPublicLine) ||
-      !this.isNullOrEmpty(filterOnMunicipalName) ||
-      !this.isNullOrEmpty(filterOnWkt)
+      filterOnNameOrNumber ||
+      filterOnPublicLine ||
+      filterOnMunicipalName ||
+      filterOnWkt
     )
       url = url + viewParams;
-
     url = this.encodeUrlForGeoServer(url);
+
     fetch(url).then(res => {
       res
         .json()
