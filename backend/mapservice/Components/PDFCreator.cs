@@ -63,10 +63,10 @@ namespace MapService.Components
         /// <param name="text"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        private void drawTextTitle(XGraphics gfx, string fontName, string text, int x, int y, int height = 20)
+        private void drawTextTitle(XGraphics gfx, string fontNameTitle, string text, int x, int y, int height = 20)
         {
             XColor color = XColors.Black;
-            XFont font = new XFont(fontName, height, XFontStyle.Bold);
+            XFont font = new XFont(fontNameTitle, height, XFontStyle.Bold);
             XBrush brush = new XSolidBrush(color);
             gfx.DrawString(text, font, brush, x, y);
         }
@@ -97,7 +97,7 @@ namespace MapService.Components
         /// <param name="path"></param>
         /// <param name="exportItem"></param>
         /// <returns>byte[]</returns>
-        private byte[] createPdf(Image img, MapExportItem exportItem, string fontName)
+        private byte[] createPdf(Image img, MapExportItem exportItem, string fontName, string fontNameTitle)
         {
             PdfDocument document = new PdfDocument();
             PdfPage page = document.AddPage();
@@ -159,6 +159,7 @@ namespace MapService.Components
 
             // adding support for different layouts
             int layout = ConfigurationManager.AppSettings["exportLayout"] != null ? int.Parse(ConfigurationManager.AppSettings["exportLayout"]) : 1;
+            //string fontNameForText = string.IsNullOrEmpty(ConfigurationManager.AppSettings["exportFontNameText"])?"Verdana" : ConfigurationManager.AppSettings["exportFonNameText"];
             if (layout == 1)//original layout
             {
                 //origina code from github
@@ -201,7 +202,7 @@ namespace MapService.Components
                 var y = (int)page.Height.Point - 15;
                 var printText = commentText + "   " + pdfDate;
                 this.drawText(gfx, fontName, printText, 15, y - 20);
-                
+
                 this.drawText(gfx, fontName, infoText, 15, y);
 
                 int i = 0;
@@ -228,7 +229,8 @@ namespace MapService.Components
             else if (layout == 2)//new layout
             {
                 // x and y 0 0(top left corner?)-> change
-                this.drawImage(gfx, img, 33, 33, page);
+                double whiteScale = 0.04; // 4% margin on each side. This has to be the same as the margin in export.js!!! Otherwise the scale will be incorrect!
+                this.drawImage(gfx, img, page.Width.Point * whiteScale, page.Height.Point * whiteScale, page);
 
                 List<string> copyrights = new List<string>();
                 if (ConfigurationManager.AppSettings["exportCopyrightText"] != null)
@@ -241,8 +243,8 @@ namespace MapService.Components
                 {
                     infoText = ConfigurationManager.AppSettings["exportInfoText"];
                 }
-                
-                this.drawTextTitle(gfx, fontName, titleText, 30, 27);
+
+                this.drawTextTitle(gfx, fontNameTitle, titleText, 30, 30); //changed from 27 to 30
 
                 int height = 1;
 
@@ -263,9 +265,9 @@ namespace MapService.Components
                 gfx.DrawLine(XPens.Black, new XPoint(33 + displayLength / 2, (int)page.Height.Point - 17), new XPoint(33 + displayLength / 2, (int)page.Height.Point - 19));
                 gfx.DrawLine(XPens.Black, new XPoint(33 + displayLength, (int)page.Height.Point - 15), new XPoint(33 + displayLength, (int)page.Height.Point - 21));
                 this.drawText(gfx, fontName, displayText, 38 + displayLength, (int)page.Height.Point - 16, 8);
-                
+
                 var y = (int)page.Height.Point - 2;
-                
+
                 var printText = commentText + "   " + pdfDate;
                 this.drawText(gfx, fontName, printText, 40, y - 40);
 
@@ -301,13 +303,13 @@ namespace MapService.Components
             int scaleBarLength = 0;
             if (scaleBarLengths.TryGetValue(scale, out scaleBarLength))
             {
-                return (int) (unitLength * scaleBarLength);
+                return (int)(unitLength * scaleBarLength);
             }
             if (scale <= 500)
             {
-                return (int) (unitLength * (scale / 10));
+                return (int)(unitLength * (scale / 10));
             }
-            return (int)(unitLength * (scale * 0.05)); 
+            return (int)(unitLength * (scale * 0.05));
 
         }
 
@@ -318,7 +320,8 @@ namespace MapService.Components
             {
                 return scaleBarText;
             }
-            if (scale <= 500) {
+            if (scale <= 500)
+            {
                 return (scale / 10) + " m";
             }
             if (scale < 25000)
@@ -327,7 +330,7 @@ namespace MapService.Components
             }
             return Math.Ceiling(scale * 0.05 / 1000) + " km";
         }
-          
+
         private PageSize GetPageSize(MapExportItem exportItem)
         {
             PageSize p;
@@ -338,9 +341,9 @@ namespace MapService.Components
             throw new ApplicationException("Unknown page size");
         }
 
-        public byte[] Create(MapExportItem exportItem, string fontName)
+        public byte[] Create(MapExportItem exportItem, string fontName, string fontNameTitle)
         {
-            return this.createPdf(MapImageCreator.GetImage(exportItem), exportItem, fontName);
+            return this.createPdf(MapImageCreator.GetImage(exportItem), exportItem, fontName, fontNameTitle);
         }
     }
 }
