@@ -244,7 +244,7 @@ namespace MapService.Components
                     infoText = ConfigurationManager.AppSettings["exportInfoText"];
                 }
 
-                this.drawTextTitle(gfx, fontNameTitle, titleText, 30, 30); //changed from 27 to 30
+                this.drawTextTitle(gfx, fontNameTitle, titleText, 30, 33); //changed from 27 to 33 (y)
 
                 int height = 1;
 
@@ -282,7 +282,7 @@ namespace MapService.Components
                 });
 
                 XImage logo = XImage.FromFile(Path.Combine(HostingEnvironment.ApplicationPhysicalPath, "assets", "logo.png"));
-                gfx.DrawImage(logo, (gfx.PageSize.Width - logo.PixelWidth / 5) - 33, 3.5, logo.PixelWidth / 5, logo.PixelHeight / 5);
+                gfx.DrawImage(logo, (gfx.PageSize.Width - logo.PixelWidth / 5) - 33, 4.5, logo.PixelWidth / 5, logo.PixelHeight / 5); //change fro, 3.5 to 4.5 (y)
 
                 byte[] bytes;
 
