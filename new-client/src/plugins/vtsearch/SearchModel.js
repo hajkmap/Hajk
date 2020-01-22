@@ -31,12 +31,25 @@ export default class SearchModel {
    */
   encodeCqlForGeoServer = cql => {
     return cql
-      .replace(/%/g, "%25")
       .replace(/\(/g, "%28")
       .replace(/\)/g, "%29")
       .replace(/ /g, "%20")
-      .replace(/,/g, "%5C,")
       .replace(/'/g, "%27");
+  };
+
+  /**
+   * Private method that adjusts the WKT filter in a cql so that it's supported for a web browser and GeoServer.
+   * Fix parentheses and so on, so that the WKT are GeoServer valid.
+   * @param {string} wkt The WKT that needs to be adjusted.
+   * @returns {string} Returns a supported wkt for GeoServer.
+   *
+   * @memberof SearchModel
+   */
+  encodeWktInCqlForGeoServer = wkt => {
+    return wkt
+      .replace(/\(/g, "%28")
+      .replace(/\)/g, "%29")
+      .replace(/ /g, "%20");
   };
 
   /**
@@ -48,11 +61,7 @@ export default class SearchModel {
    * @memberof SearchModel
    */
   encodeWktForGeoServer = wkt => {
-    return wkt
-      .replace(/\(/g, "%28")
-      .replace(/\)/g, "%29")
-      .replace(/ /g, "%20")
-      .replace(/,/g, "%5C,");
+    return this.encodeWktInCqlForGeoServer(wkt).replace(/,/g, "%5C,");
   };
 
   /**
@@ -657,8 +666,8 @@ export default class SearchModel {
     }
     if (polygonAsWkt) {
       if (addAndInCql) cql = cql + " AND ";
-      polygonAsWkt = this.encodeWktForGeoServer(polygonAsWkt);
-      cql = cql + `INTERSECTS(Geom, '${polygonAsWkt}')`;
+      polygonAsWkt = this.encodeWktInCqlForGeoServer(polygonAsWkt);
+      cql = cql + `INTERSECTS(Geom, ${polygonAsWkt})`;
       addAndInCql = true;
     }
     if (
@@ -668,8 +677,9 @@ export default class SearchModel {
       transportModeType ||
       stopAreaNameOrNumber ||
       polygonAsWkt
-    )
+    ) {
       url = url + this.encodeCqlForGeoServer(cql);
+    }
     url = this.encodeUrlForGeoServer(url);
 
     fetch(url)
