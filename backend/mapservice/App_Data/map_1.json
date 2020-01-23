@@ -349,6 +349,13 @@
       "index": 0
     },
     {
+      "type": "documenthandler",
+      "options": {
+        "target": "toolbar"
+      },
+      "index": 8
+    },
+    {
       "type": "search",
       "options": {
         "target": "center",

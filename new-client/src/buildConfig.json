@@ -14,7 +14,8 @@
     "measure",
     "routing",
     "search",
-    "streetview"
+    "streetview",
+    "documenthandler"
   ],
   "allTools": [
     "anchor",
@@ -32,6 +33,7 @@
     "routing",
     "search",
     "streetview",
-    "suggest"
+    "suggest",
+    "documenthandler"
   ]
 }
