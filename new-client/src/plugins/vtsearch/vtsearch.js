@@ -20,6 +20,7 @@ import clsx from "clsx";
 import MenuIcon from "@material-ui/icons/Menu";
 import { withStyles } from "@material-ui/core/styles";
 import FormControl from "@material-ui/core/FormControl";
+import LinearProgress from "@material-ui/core/LinearProgress";
 import Select from "@material-ui/core/Select";
 import SearchResultListContainer from "./SearchResultList/SearchResultListContainer";
 import ReactDOM from "react-dom";
@@ -41,10 +42,13 @@ const styles = theme => {
       flex: 1
     },
     searchContainer: {
-      maxWidth: 250
+      maxWidth: 260
     },
     searchContainerBox: {
-      padding: 0 // override current padding
+      display: "flex",
+      padding: 0, // override current padding
+      flexWrap: "wrap",
+      minHeight: 60
     },
     expand: {
       transform: "rotate(0deg)",
@@ -75,6 +79,10 @@ const styles = theme => {
     },
     searchModuleContainerRoot: {
       padding: 10
+    },
+    loaderContainer: {
+      flexBasis: "100%",
+      minHeight: "5px"
     }
   };
 };
@@ -102,7 +110,8 @@ class VTSearch extends React.PureComponent {
   // Initialize state - this is the correct way of doing it nowadays.
   state = {
     expanded: false,
-    activeSearchTool: searchTypes.DEFAULT
+    activeSearchTool: searchTypes.DEFAULT,
+    loading: false
   };
 
   static propTypes = {
@@ -139,12 +148,11 @@ class VTSearch extends React.PureComponent {
   bindSubscriptions = () => {
     // Subscribes for an event when the vt-search has begun.
     this.localObserver.subscribe("vtsearch-result-begin", label => {
-      console.log("vtsearch-result-begin, " + label.label);
+      this.setState({ loading: true });
     });
 
     this.localObserver.subscribe("vtsearch-result-done", ans => {
-      console.log("vtsearch-result-done");
-      console.log(ans);
+      this.setState({ loading: false });
     });
   };
 
@@ -257,6 +265,10 @@ class VTSearch extends React.PureComponent {
     );
   }
 
+  renderLoader() {
+    return this.state.loading ? <LinearProgress /> : null;
+  }
+
   render() {
     const { classes, app, options } = this.props;
 
@@ -264,12 +276,14 @@ class VTSearch extends React.PureComponent {
     return (
       <>
         <Card className={classes.searchContainer}>
-          <CardActions className={classes.searchContainerBox}>
+          <CardActions disableSpacing className={classes.searchContainerBox}>
             {this.renderMenuButton()}
             {this.renderDropDown()}
             {this.state.activeSearchTool !== searchTypes.DEFAULT &&
               this.renderExpansionButton()}
+            <div className={classes.loaderContainer}>{this.renderLoader()}</div>
           </CardActions>
+
           <Collapse in={this.state.expanded} timeout="auto" unmountOnExit>
             <CardContent
               className={classes.searchModuleContainer}
