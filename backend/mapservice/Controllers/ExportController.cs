@@ -78,6 +78,7 @@ namespace MapService.Controllers
                 _log.DebugFormat("Received json: {0}", json);
 
                 string fontName = string.IsNullOrEmpty(ConfigurationManager.AppSettings["exportFontName"]) ? "Verdana" : ConfigurationManager.AppSettings["exportFontName"];
+                string fontNameTitle = string.IsNullOrEmpty(ConfigurationManager.AppSettings["exportFontNameTitle"]) ? "Verdana" : ConfigurationManager.AppSettings["exportFontNameTitle"];
 
                 // try to decode input string to see if it is base64 encoded
                 try
@@ -95,7 +96,7 @@ namespace MapService.Controllers
                 AsyncManager.OutstandingOperations.Increment();
                 PDFCreator pdfCreator = new PDFCreator();
                 _log.Debug("Inited pdfcreator");
-                byte[] blob = pdfCreator.Create(exportItem, fontName);
+                byte[] blob = pdfCreator.Create(exportItem, fontName, fontNameTitle);
                 _log.Debug("created blob in pdfcreator");
                 string[] fileInfo = byteArrayToFileInfo(blob, "pdf");
                 _log.DebugFormat("Created fileinfo: {0}", fileInfo[1]);
@@ -186,9 +187,12 @@ namespace MapService.Controllers
             outStream.ToArray();
 
             string[] fileInfo = byteArrayToFileInfo(outStream.ToArray(), "zip");
-            if (exportItem.proxyUrl != "") {
+            if (exportItem.proxyUrl != "")
+            {
                 return exportItem.proxyUrl + "/Temp/" + fileInfo[1];
-            } else {
+            }
+            else
+            {
                 return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
             }
         }
@@ -206,7 +210,8 @@ namespace MapService.Controllers
                 byte[] decoded = Convert.FromBase64String(json);
                 json = System.Text.Encoding.UTF8.GetString(decoded);
                 _log.DebugFormat("json after decode: {0}", json);
-            } catch(Exception e)
+            }
+            catch (Exception e)
             {
                 _log.DebugFormat("Could not decode base64. Will treat as non-base64 encoded: {0}", e.Message);
             }

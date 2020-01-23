@@ -86,8 +86,8 @@ var ExportTiffSettings = React.createClass({
 });
 
 var ExportPdfSettings = React.createClass({
-  resolutions: [72, 96, 150, 200, 300],
-  paperFormats: ['A2', 'A3', 'A4'],
+    resolutions: [72, 96, 150, 200],
+    paperFormats: ["A3", "A4"],
 
   getInitialState: function () {
     return {
@@ -135,11 +135,20 @@ var ExportPdfSettings = React.createClass({
     var width = pageSize(this.getFormat()).width,
       height = pageSize(this.getFormat()).height;
 
-    return {
-      width: ((width / 25.4)),
-      height: ((height / 25.4))
-    };
-  },
+        if (this.props.model.get("layout") == 2) {
+            // The "Varberg" version has four percent margins. If the value is changed in mapservice, it has to be
+            // changed here too.
+            return {
+                width: ((width / 25.4)) * (1 - 0.04 * 2),
+                height: ((height / 25.4)) * (1 - 0.04 * 2)
+            }
+        } else {
+            return {
+                width: ((width / 25.4)),
+                height: ((height / 25.4))
+            }
+        }
+    },
 
   getPreviewPaperMeasures: function () {
     var size = this.getPaperMeasures(),
@@ -199,7 +208,7 @@ var ExportPdfSettings = React.createClass({
       center: val
     });
   },
- 
+
   setCommentText: function(e) {
     val = e.target.value;
     //}
@@ -342,22 +351,30 @@ var ExportPdfSettings = React.createClass({
     options = scales.map((s, i) => <option key={i} value={s}>1:{s}</option>);
 
     resolutionOptions = this.resolutions.map((s, i) => {
-      if (this.state.selectFormat === 'A2') {
+    if (this.state.selectFormat === 'A2') {
         return s !== 300
-          ? <option key={i} value={s}>{s}</option>
-          : <option key={i} value={s} disabled>{s}</option>;
-      } else {
+            ? <option key={i} value={s}>{s}</option>
+            : <option key={i} value={s} disabled>{s}</option>;
+    } else if (this.state.selectFormat === 'A3') {
+        return s !== 200
+            ? <option key={i} value={s}>{s}</option>
+            : <option key={i} value={s} disabled>{s}</option>;
+    } else {
         return <option key={i} value={s}>{s}</option>;
-      }
-    });
-    paperFormatOptions = this.paperFormats.map((s, i) => {
-      if (this.state.selectResolution === '300') {
+    }
+});
+paperFormatOptions = this.paperFormats.map((s, i) => {
+    if (this.state.selectResolution === '300') {
         return s !== 'A2'
-          ? <option key={i} value={s}>{s}</option>
-          : <option key={i} value={s} disabled>{s}</option>;
-      } else {
+            ? <option key={i} value={s}>{s}</option>
+            : <option key={i} value={s} disabled>{s}</option>;
+    } else if (this.state.selectResolution === '200') {
+        return s !== 'A3'
+            ? <option key={i} value={s}>{s}</option>
+            : <option key={i} value={s} disabled>{s}</option>;
+    } else {
         return <option key={i} value={s}>{s}</option>;
-      }
+    }
     });
 
     this.addPreview(map);
