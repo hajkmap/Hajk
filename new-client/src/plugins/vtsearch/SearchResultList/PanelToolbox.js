@@ -1,11 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
-import MinimizeIcon from "@material-ui/icons/Minimize";
+
 import NormalIcon from "@material-ui/icons/FlipToFront";
-import MaximizeIcon from "@material-ui/icons/WebAsset";
+
 import CloseIcon from "@material-ui/icons/Close";
 import { withStyles } from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 /**
  * @summary Window size handling
@@ -20,6 +21,9 @@ const styles = theme => {
     iconButtonRoot: {
       color: theme.palette.common.white,
       padding: 0
+    },
+    expandOpen: {
+      transform: "rotate(180deg)"
     }
   };
 };
@@ -86,9 +90,9 @@ class PanelToolbox extends React.PureComponent {
         onClick={onClickCallback}
       >
         {iconElement === "minimize" ? (
-          <MinimizeIcon />
+          <ExpandMoreIcon />
         ) : iconElement === "maximize" ? (
-          <MaximizeIcon />
+          <ExpandMoreIcon className={classes.expandOpen} />
         ) : iconElement === "normalize" ? (
           <NormalIcon />
         ) : iconElement === "close" ? (
@@ -103,10 +107,11 @@ class PanelToolbox extends React.PureComponent {
       <div>
         {this.state.minimizeVisible &&
           this.renderButton(this.minimize, "minimize")}
-        {this.state.normalVisible &&
-          this.renderButton(this.normalize, "normalize")}
+
         {this.state.maximizeVisible &&
           this.renderButton(this.maximize, "maximize")}
+        {this.state.normalVisible &&
+          this.renderButton(this.normalize, "normalize")}
         {this.renderButton(this.close, "close")}
       </div>
     );

@@ -73,6 +73,8 @@ const getWindowContainerHeight = () => {
   return windowsContainer.getClientRects()[0].height;
 };
 
+const initialResultListHeight = 350;
+
 /**
  * @summary SearchResultListContainer is the core container for the GUI used for showing search results
  * @description GUI-component that wraps all the other GUI-components used to show search results in vtsearch
@@ -81,8 +83,8 @@ const getWindowContainerHeight = () => {
  */
 class SearchResultListContainer extends React.Component {
   state = {
-    resultListHeight: 300,
-    previousResultListHeight: 300,
+    resultListHeight: initialResultListHeight,
+
     windowWidth: getWindowContainerWidth(),
     windowHeight: getWindowContainerHeight(),
     value: 0,
@@ -162,11 +164,7 @@ class SearchResultListContainer extends React.Component {
         return {
           minimized: true,
           maximized: false,
-          resultListHeight: getWindowContainerHeight(),
-          previousResultListHeight:
-            !state.minimized && !state.minimized
-              ? this.state.resultListHeight
-              : this.state.previousResultListHeight
+          resultListHeight: getWindowContainerHeight()
         };
       });
     });
@@ -175,11 +173,7 @@ class SearchResultListContainer extends React.Component {
         return {
           minimized: false,
           maximized: true,
-          resultListHeight: getWindowContainerHeight(),
-          previousResultListHeight:
-            !state.minimized && !state.minimized
-              ? this.state.resultListHeight
-              : this.state.previousResultListHeight
+          resultListHeight: getWindowContainerHeight()
         };
       });
     });
@@ -188,7 +182,7 @@ class SearchResultListContainer extends React.Component {
       this.setState({
         minimized: false,
         maximized: false,
-        resultListHeight: this.state.previousResultListHeight
+        resultListHeight: initialResultListHeight
       });
     });
 
@@ -406,8 +400,7 @@ class SearchResultListContainer extends React.Component {
           this.setState({
             resultListHeight: parseInt(height),
             maximized: false,
-            minimized: false,
-            previousResultListHeight: parseInt(height)
+            minimized: false
           });
         }}
         bounds={`#${windowContainerId}`}
