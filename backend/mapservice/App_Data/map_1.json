@@ -186,35 +186,35 @@
             "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=journeys&outputFormat=application/json",
             "attributesToDisplay": [
               {
-                "displayName": "Publik linje",
+                "displayName": "PUBLIK LINJE",
                 "key": "PublicLineName"
               },
               {
-                "displayName": "Teknisk linje",
+                "displayName": "TEKNISK LINJE",
                 "key": "InternalLineNumber"
               },
               {
-                "displayName": "Trafikföretag",
+                "displayName": "TRAFIKFÖRETAG",
                 "key": "TransportCompany"
               },
               {
-                "displayName": "Från hållplatsområde",
+                "displayName": "FRÅN HÅLLPLATSOMRÅDE",
                 "key": "FromStopPointName"
               },
               {
-                "displayName": "Från hållplatsläge",
+                "displayName": "FRÅN HÅLLPLATSLÄGE",
                 "key": "FromStopPointDesignation"
               },
               {
-                "displayName": "Till hållplatsområde",
+                "displayName": "TILL HÅLLPLATSOMRÅDE",
                 "key": "ToStopPointName"
               },
               {
-                "displayName": "Från hållplatsläge",
+                "displayName": "TILL HÅLLPLATSLÄGE",
                 "key": "ToStopPointDesignation"
               },
               {
-                "displayName": "Avgång",
+                "displayName": "AVGÅNG",
                 "key": "EarliestDepartureTimeAtToStopPoint"
               }
             ]
@@ -225,27 +225,27 @@
             "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.1.0&request=GetFeature&typeName=routes&outputFormat=application/json",
             "attributesToDisplay": [
               {
-                "displayName": "Teknisk linje",
+                "displayName": "TEKNISK LINJE",
                 "key": "InternalLineNumber"
               },
               {
-                "displayName": "Publik linje",
+                "displayName": "PUBLIK LINJE",
                 "key": "PublicLineName"
               },
               {
-                "displayName": "Beskrivning",
+                "displayName": "BESKRIVNING",
                 "key": "Description"
               },
               {
-                "displayName": "Riktning",
+                "displayName": "RIKTNING",
                 "key": "Direction"
               },
               {
-                "displayName": "Trafikslag",
+                "displayName": "TRAFIKSLAG",
                 "key": "TransportModeType"
               },
               {
-                "displayName": "Trafikföretag",
+                "displayName": "TRAFIKFÖRETAG",
                 "key": "TransportCompany"
               }
             ]
@@ -256,31 +256,31 @@
             "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=stopAreas&outputFormat=application/json",
             "attributesToDisplay": [
               {
-                "displayName": "Hållplatsnummer",
+                "displayName": "HÅLLPLATSNUMMER",
                 "key": "StopAreaNumber"
               },
               {
-                "displayName": "Namn",
+                "displayName": "NAMN",
                 "key": "Name"
               },
               {
-                "displayName": "Kod",
+                "displayName": "KOD",
                 "key": "Abbreviation"
               },
               {
-                "displayName": "Bytesprio",
+                "displayName": "BYTESPRIO",
                 "key": "InterchangePriorityMessage"
               },
               {
-                "displayName": "Kommun",
+                "displayName": "KOMMUN",
                 "key": "MunicipalityName"
               },
               {
-                "displayName": "Taxezon 1",
+                "displayName": "TAXEZON 1",
                 "key": "TariffZone1Name"
               },
               {
-                "displayName": "Taxezon 2",
+                "displayName": "TAXEZON 2",
                 "key": "TariffZone2Name"
               }
             ]
@@ -291,43 +291,43 @@
             "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=kartsidan2%3AstopPoints&maxFeatures=50&outputFormat=application/json",
             "attributesToDisplay": [
               {
-                "displayName": "Hållplatsnummer",
+                "displayName": "HÅLLPLATSNUMMER",
                 "key": "StopAreaNumber"
               },
               {
-                "displayName": "Namn",
+                "displayName": "NAMN",
                 "key": "Name"
               },
               {
-                "displayName": "Beteckning",
+                "displayName": "BETECKNING",
                 "key": "Designation"
               },
               {
-                "displayName": "Påstigning",
+                "displayName": "PÅSTIGNING",
                 "key": "IsForBoarding"
               },
               {
-                "displayName": "Avstigning",
+                "displayName": "AVSTIGNING",
                 "key": "IsForAlighting"
               },
               {
-                "displayName": "Virtuellt",
+                "displayName": "VIRTUELLT",
                 "key": "IsFictitious"
               },
               {
-                "displayName": "Kommun",
+                "displayName": "KOMMUN",
                 "key": "MunicipalityName"
               },
               {
-                "displayName": "Linjetrafik",
+                "displayName": "LINJETRAFIK",
                 "key": "IsRegularTraffic"
               },
               {
-                "displayName": "Flexlinje",
+                "displayName": "FLEXLINJE",
                 "key": "IsFlexibleBusService"
               },
               {
-                "displayName": "Närtrafik",
+                "displayName": "NÄRTRAFIK",
                 "key": "IsFlexibleTaxiService"
               }
             ]
