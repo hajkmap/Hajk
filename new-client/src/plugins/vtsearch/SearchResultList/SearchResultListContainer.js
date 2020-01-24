@@ -33,31 +33,19 @@ const styles = theme => {
       overflow: "hidden",
       pointerEvents: "all"
     },
-
-    flexItem: {
-      flex: "auto"
-    },
-
-    tabRoot: {
-      padding: 0,
-      minHeight: 0,
-      textTransform: "none"
-    },
     tabsRoot: {
       minHeight: 0
     },
-    tabWrapper: {
-      display: "flex",
-      flexDirection: "row",
-      borderRadius: "5px",
-      backgroundColor: theme.palette.primary.main
-    },
-    tabsFlexContainer: {
-      flexWrap: "wrap"
+    tabRoot: {
+      minHeight: 0,
+      height: theme.spacing(4),
+      padding: theme.spacing(0),
+      borderRadius: "5px 5px 0px 0px",
+      margin: theme.spacing(0.3),
+      backgroundColor: theme.palette.primary.light
     },
     toolbar: {
       minHeight: 0,
-      padding: theme.spacing(0),
       backgroundColor: theme.palette.primary.dark
     }
   };
@@ -88,7 +76,7 @@ class SearchResultListContainer extends React.Component {
     windowWidth: getWindowContainerWidth(),
     windowHeight: getWindowContainerHeight(),
     value: 0,
-    activeTab: 0,
+    activeTabId: 0,
     searchResultIds: [],
     maximized: false,
     minimized: false
@@ -120,13 +108,27 @@ class SearchResultListContainer extends React.Component {
     this.bindSubscriptions();
   }
 
+  resetHeightOfResultList = () => {
+    const { localObserver } = this.props;
+    localObserver.publish("search-result-list-normal");
+  };
+
+  setactiveTabId = searchResultId => {
+    this.setState({ activeTabId: searchResultId });
+  };
+
   onSearchDone = result => {
     const { localObserver } = this.props;
     var searchResultId = this.addResultToSearchResultList(result);
+    console.log(searchResultId, "searchResultID");
+    this.setactiveTabId(searchResultId);
     localObserver.publish("add-search-result-to-map", {
       searchResultId: searchResultId,
       olFeatures: this.convertToGeoJson(result.featureCollection)
     });
+    if (result.type === "journeys") {
+      this.resetHeightOfResultList();
+    }
   };
 
   convertToGeoJson = featureCollectionAsString => {
@@ -164,7 +166,7 @@ class SearchResultListContainer extends React.Component {
         return {
           minimized: true,
           maximized: false,
-          resultListHeight: getWindowContainerHeight()
+          resultListHeight: this.appbarHeight
         };
       });
     });
@@ -198,7 +200,7 @@ class SearchResultListContainer extends React.Component {
   };
 
   handleTabChange = (event, newValue) => {
-    this.setState({ activeTab: newValue });
+    this.setactiveTabId(newValue);
   };
 
   getNextTabActive = searchResultId => {
@@ -212,9 +214,9 @@ class SearchResultListContainer extends React.Component {
   };
 
   onTabClose = searchResultId => {
-    const nextActiveTab = this.getNextTabActive(searchResultId);
+    const nextactiveTabId = this.getNextTabActive(searchResultId);
     this.removeSearchResult(searchResultId).then(() => {
-      this.setState({ activeTab: nextActiveTab });
+      this.setState({ activeTabId: nextactiveTabId });
     });
   };
 
@@ -271,13 +273,11 @@ class SearchResultListContainer extends React.Component {
     var searchResultId = searchResult.id;
     return (
       <Tab
-        classes={{ root: classes.tabRoot, wrapper: classes.tabWrapper }}
+        classes={{ root: classes.tabRoot }}
         label={
           <Grid container>
             <Grid item xs={10}>
-              <Typography variant="subtitle2" className={classes.typography}>
-                {searchResult.label}
-              </Typography>
+              <Typography variant="subtitle2">{searchResult.label}</Typography>
             </Grid>
             <Grid item xs={2}>
               <ClearIcon
@@ -302,10 +302,9 @@ class SearchResultListContainer extends React.Component {
     return (
       <Tabs
         classes={{
-          root: classes.tabsRoot,
-          flexContainer: classes.tabsFlexContainer
+          root: classes.tabsRoot
         }}
-        value={this.state.activeTab}
+        value={this.state.activeTabId}
         onChange={this.handleTabChange}
         aria-label="search-result-tabs"
       >
@@ -349,7 +348,7 @@ class SearchResultListContainer extends React.Component {
       <TabPanel
         key={searchResult.id}
         toolConfig={toolConfig}
-        activeTabId={this.state.activeTab}
+        activeTabId={this.state.activeTabId}
         tabId={searchResult.id}
         resultListHeight={this.state.resultListHeight}
         windowWidth={this.state.windowWidth}
@@ -359,7 +358,7 @@ class SearchResultListContainer extends React.Component {
     );
   };
 
-  handleMapSizeWhenAddingSearchResultList = () => {
+  handleMapResizeWhenRendering = () => {
     const { localObserver } = this.props;
     localObserver.publish("resize-map", this.state.resultListHeight);
   };
@@ -367,7 +366,7 @@ class SearchResultListContainer extends React.Component {
   renderSearchResultContainer = () => {
     const { classes, windowContainerId } = this.props;
     let searchResults = this.getSearchResults();
-    this.handleMapSizeWhenAddingSearchResultList();
+    this.handleMapResizeWhenRendering();
 
     return (
       <Rnd
