@@ -20,6 +20,7 @@ export default class SearchModel {
     this.app = settings.app;
     this.localObserver = settings.localObserver;
     this.geoServer = settings.geoServer;
+    this.mapColors = settings.mapColors;
   }
 
   /**
@@ -713,7 +714,7 @@ export default class SearchModel {
    * Get all stop areas. Sends an event when the function is called and another one when it's promise is done.
    * @param {string} filterOnNameOrNumber The public name or the number of the stop point, pass null of no name is given.
    * @param {string} filterOnPublicLine The public line number, pass null of no line is given.
-   * @param {string} filterOnMunicipalName The municipality name, pass null of no municipality name is given.
+   * @param {string} filterOnMunicipalGuid The municipality guid corresponding to the name, pass null of no municipality guid is given.
    * @param {string} filterOnWkt A polygon as a WKT, pass null of no polygon is given.
    *
    * @memberof SearchModel
@@ -721,7 +722,7 @@ export default class SearchModel {
   getStopAreas(
     filterOnNameOrNumber,
     filterOnPublicLine,
-    filterOnMunicipalName,
+    filterOnMunicipalGuid,
     filterOnWkt
   ) {
     this.localObserver.publish("vtsearch-result-begin", {
@@ -741,15 +742,15 @@ export default class SearchModel {
     }
     if (filterOnPublicLine)
       viewParams = viewParams + `filterOnPublicLine:${filterOnPublicLine};`;
-    if (filterOnMunicipalName)
+    if (filterOnMunicipalGuid)
       viewParams =
-        viewParams + `filterOnMunicipalName:${filterOnMunicipalName};`;
+        viewParams + `filterOnMunicipalName:${filterOnMunicipalGuid};`;
     if (filterOnWkt) viewParams = viewParams + `filterOnWkt:${filterOnWkt};`;
 
     if (
       filterOnNameOrNumber ||
       filterOnPublicLine ||
-      filterOnMunicipalName ||
+      filterOnMunicipalGuid ||
       filterOnWkt
     )
       url = url + viewParams;
@@ -787,7 +788,7 @@ export default class SearchModel {
    * Get all stop points. Sends an event when the function is called and another one when it's promise is done.
    * @param {string} filterOnNameOrNumber The public name or the number of the stop point, pass null of no name is given.
    * @param {string} filterOnPublicLine The public line number, pass null of no line is given.
-   * @param {string} filterOnMunicipalName The municipality name, pass null of no municipality name is given.
+   * @param {string} filterOnMunicipalGuid The municipality guid corresponding to the name, pass null of no municipality guid is given.
    * @param {string} filterOnNumber The number of the stop point, pass null of no number is given.
    *
    * @memberof SearchModel
@@ -795,7 +796,7 @@ export default class SearchModel {
   getStopPoints(
     filterOnNameOrNumber,
     filterOnPublicLine,
-    filterOnMunicipalName,
+    filterOnMunicipalGuid,
     filterOnWkt
   ) {
     this.localObserver.publish("vtsearch-result-begin", {
@@ -815,15 +816,15 @@ export default class SearchModel {
     }
     if (filterOnPublicLine)
       viewParams = viewParams + `filterOnPublicLine:${filterOnPublicLine};`;
-    if (filterOnMunicipalName)
+    if (filterOnMunicipalGuid)
       viewParams =
-        viewParams + `filterOnMunicipalName:${filterOnMunicipalName};`;
+        viewParams + `filterOnMunicipalName:${filterOnMunicipalGuid};`;
     if (filterOnWkt) viewParams = viewParams + `filterOnWkt:${filterOnWkt};`;
 
     if (
       filterOnNameOrNumber ||
       filterOnPublicLine ||
-      filterOnMunicipalName ||
+      filterOnMunicipalGuid ||
       filterOnWkt
     )
       url = url + viewParams;
