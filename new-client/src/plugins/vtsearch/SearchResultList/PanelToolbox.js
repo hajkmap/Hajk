@@ -104,7 +104,7 @@ class PanelToolbox extends React.PureComponent {
         {this.state.minimizeVisible &&
           this.renderButton(this.minimize, "minimize")}
         {this.state.normalVisible &&
-          this.renderButton(this.normal, "normalize")}
+          this.renderButton(this.normalize, "normalize")}
         {this.state.maximizeVisible &&
           this.renderButton(this.maximize, "maximize")}
         {this.renderButton(this.close, "close")}
