@@ -6,6 +6,7 @@ import { AutoSizer, Column, Table } from "react-virtualized";
 import { SortIndicator } from "react-virtualized";
 
 import "react-virtualized/styles.css";
+import { Typography } from "@material-ui/core";
 
 const styles = theme => ({
   flexContainer: {
@@ -20,9 +21,9 @@ const styles = theme => ({
     "& .ReactVirtualized__Table__headerRow": {
       flip: false,
       overflow: "auto",
-      borderBottom: "1px solid #000000",
+      borderBottom: `1px solid ${theme.palette.common.black}`,
       textTransform: "none",
-      padding: 0,
+      padding: theme.spacing(0),
       paddingRight: theme.direction === "rtl" ? "0px !important" : undefined
     }
   },
@@ -35,13 +36,12 @@ const styles = theme => ({
 
   tableRow: {
     cursor: "pointer",
-    border: "1px solid #c3c7c7",
+    border: `1px solid ${theme.palette.grey[200]}`,
     whiteSpace: "wrap",
     outline: "none"
   },
   tableRowSelected: {
-    border: "2px solid rgba(0,57,77,1)",
-    background: "rgba(0,150,237,1)"
+    background: theme.palette.primary.main
   },
   headerColumn: {
     whiteSpace: "pre-wrap",
@@ -50,13 +50,13 @@ const styles = theme => ({
     justifyContent: "flex-start",
     cursor: "pointer",
     display: "flex",
-    paddingTop: 0,
-    paddingRight: 0,
-    paddingBottom: 0,
-    minWidth: 0,
+    paddingTop: theme.spacing(0),
+    paddingRight: theme.spacing(0),
+    paddingBottom: theme.spacing(0),
+    minWidth: theme.spacing(0),
     wordBreak: "break-all",
     lineHeight: 1,
-    borderBottom: 0
+    borderBottom: theme.spacing(0)
   },
   columnStyle: {
     whiteSpace: "pre-wrap",
@@ -64,21 +64,15 @@ const styles = theme => ({
     boxSizing: "border-box",
     justifyContent: "center",
     cursor: "pointer",
-    fontSize: "0.8em",
     wordBreak: "break-all",
-    lineHeight: 1,
-    borderBottom: 0
+    borderBottom: theme.spacing(0)
   },
   rowCell: {
     marginRight: 0,
+    border: "none",
     borderBottom: 0,
-    borderLeft: "solid",
-    borderColor: "rgba(195,199,199,1)",
     textAlign: "center",
     flex: 1
-  },
-  firstRowCell: {
-    borderLeft: "none"
   }
 });
 
@@ -114,22 +108,18 @@ class VirtualizedTable extends React.PureComponent {
     );
   };
 
-  getCellClassName = columnIndex => {
+  getCellClassName = () => {
     const { classes } = this.props;
-    if (columnIndex !== 0) {
-      return classes.rowCell;
-    } else {
-      return clsx(classes.firstRowCell, classes.rowCell);
-    }
+    return classes.rowCell;
   };
 
   cellRenderer = ({ cellData, columnIndex, rowData }) => {
-    const { columns, classes, rowHeight } = this.props;
+    const { columns } = this.props;
 
     return (
       <TableCell
         component="div"
-        className={this.getCellClassName(columnIndex)}
+        className={this.getCellClassName()}
         variant="body"
         align={
           (columnIndex != null && columns[columnIndex].numeric) || false
@@ -152,7 +142,8 @@ class VirtualizedTable extends React.PureComponent {
         variant="head"
         align={columns[columnIndex].numeric || false ? "right" : "left"}
       >
-        {label}
+        <Typography variant="caption">{label}</Typography>
+
         {sortable && <SortIndicator sortDirection={sortDirection} />}
       </TableCell>
     );

@@ -51,7 +51,7 @@ class TabPanel extends React.PureComponent {
           <AttributeTable
             searchResult={searchResult}
             toolConfig={toolConfig}
-            resultListHeight={resultListHeight - 100}
+            resultListHeight={resultListHeight}
             localObserver={localObserver}
           ></AttributeTable>
         </Grid>

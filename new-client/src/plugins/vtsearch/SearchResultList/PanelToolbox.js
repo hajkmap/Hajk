@@ -18,7 +18,7 @@ import IconButton from "@material-ui/core/IconButton";
 const styles = theme => {
   return {
     iconButtonRoot: {
-      color: "white",
+      color: theme.palette.common.white,
       padding: 0
     }
   };
