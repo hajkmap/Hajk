@@ -328,18 +328,24 @@ export default class MapViewModel {
    */
   addSearchResultLayerToMap = searchResultId => {
     var fill = new Fill({
-      color: `rgba(${this.model.mapColors.fillColorRed},${this.model.mapColors.fillColorGreen},${this.model.mapColors.fillColorBlue},${this.model.mapColors.fillColorOpacity})`
+      color: `rgba(${this.model.mapColors.searchColor.fillColorRed},
+        ${this.model.mapColors.searchColor.fillColorGreen},
+        ${this.model.mapColors.searchColor.fillColorBlue},
+        ${this.model.mapColors.searchColor.fillColorOpacity})`
     });
     var stroke = new Stroke({
-      color: `rgba(${this.model.mapColors.strokeColorRed},${this.model.mapColors.strokeColorGreen},${this.model.mapColors.strokeColorBlue},${this.model.mapColors.strokeColorOpacity})`,
-      width: 5
+      color: `rgba(${this.model.mapColors.searchColor.strokeColorRed},
+        ${this.model.mapColors.searchColor.strokeColorGreen},
+        ${this.model.mapColors.searchColor.strokeColorBlue},
+        ${this.model.mapColors.searchColor.strokeColorOpacity})`,
+      width: this.model.mapColors.searchColor.strokeLineWidth
     });
     var searchResultLayer = new VectorLayer({
       style: new Style({
         image: new Circle({
           fill: fill,
           stroke: stroke,
-          radius: 5
+          radius: this.model.mapColors.searchColor.strokePointWidth
         }),
         fill: fill,
         stroke: stroke
@@ -364,11 +370,17 @@ export default class MapViewModel {
    */
   addHighlightLayerToMap = () => {
     var fill = new Fill({
-      color: "rgba(0,0,0,0.4)"
+      color: `rgba(${this.model.mapColors.highlightColor.fillColorRed},
+        ${this.model.mapColors.highlightColor.fillColorGreen},
+        ${this.model.mapColors.highlightColor.fillColorBlue},
+        ${this.model.mapColors.highlightColor.fillColorOpacity})`
     });
     var stroke = new Stroke({
-      color: "rgba(0,57,77,0.4)",
-      width: 8
+      color: `rgba(${this.model.mapColors.highlightColor.strokeColorRed},
+        ${this.model.mapColors.highlightColor.strokeColorGreen},
+        ${this.model.mapColors.highlightColor.strokeColorBlue},
+        ${this.model.mapColors.highlightColor.strokeColorOpacity})`,
+      width: this.model.mapColors.highlightColor.strokeLineWidth
     });
 
     this.highlightLayer = new VectorLayer({
@@ -376,7 +388,7 @@ export default class MapViewModel {
         image: new Circle({
           fill: fill,
           stroke: stroke,
-          radius: 5
+          radius: this.model.mapColors.highlightColor.strokePointWidth
         }),
         fill: fill,
         stroke: stroke

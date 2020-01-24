@@ -164,14 +164,30 @@
         "title": "VTSEARCH",
         "target": "left",
         "mapColors": {
-          "fillColorRed": "220",
-          "fillColorGreen": "10",
-          "fillColorBlue": "90",
-          "fillColorOpacity": "0.7",
-          "strokeColorRed": "220",
-          "strokeColorGreen": "10",
-          "strokeColorBlue": "90",
-          "strokeColorOpacity": "0.7"
+          "searchColor": {
+            "fillColorRed": "220",
+            "fillColorGreen": "10",
+            "fillColorBlue": "90",
+            "fillColorOpacity": "0.7",
+            "strokeColorRed": "220",
+            "strokeColorGreen": "10",
+            "strokeColorBlue": "90",
+            "strokeColorOpacity": "0.7",
+            "strokePointWidth": 5,
+            "strokeLineWidth": 2
+          },
+          "highlightColor": {
+            "fillColorRed": "130",
+            "fillColorGreen": "35",
+            "fillColorBlue": "150",
+            "fillColorOpacity": "0.4",
+            "strokeColorRed": "130",
+            "strokeColorGreen": "35",
+            "strokeColorBlue": "150",
+            "strokeColorOpacity": "0.4",
+            "strokePointWidth": 8,
+            "strokeLineWidth": 8
+          }
         },
         "geoServer": {
           "lineNumberAndPublicLineNumber": {
@@ -236,12 +252,12 @@
             "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.1.0&request=GetFeature&typeName=routes&outputFormat=application/json",
             "attributesToDisplay": [
               {
-                "displayName": "Teknisk linje",
-                "key": "InternalLineNumber"
-              },
-              {
                 "displayName": "Publik linje",
                 "key": "PublicLineName"
+              },
+              {
+                "displayName": "Teknisk linje",
+                "key": "InternalLineNumber"
               },
               {
                 "displayName": "Beskrivning",
