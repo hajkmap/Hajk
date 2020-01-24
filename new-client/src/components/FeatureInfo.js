@@ -1,7 +1,6 @@
 import React from "react";
 import propTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
-import IconButton from "@material-ui/core/IconButton";
 import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import Typography from "@material-ui/core/Typography";
@@ -11,7 +10,16 @@ import {
   extractPropertiesFromJson
 } from "../utils/FeaturePropsParsing";
 import Diagram from "./Diagram";
-import Table from "./Table";
+import HajkTable from "./Table";
+import {
+  Table,
+  TableContainer,
+  TableRow,
+  TableCell,
+  TableBody,
+  ButtonGroup,
+  Button
+} from "@material-ui/core";
 
 const styles = theme => ({
   windowSection: {
@@ -21,27 +29,18 @@ const styles = theme => ({
   },
   featureList: {
     flex: 1,
-    overflow: "auto"
+    overflow: "auto",
+    userSelect: "text",
+    cursor: "auto",
+    marginTop: theme.spacing(1)
   },
-  textContent: {},
-  toggler: {
-    display: "flex"
-  },
-  togglerText: {
-    flex: 1,
-    textAlign: "center",
-    lineHeight: "3rem"
-  },
-  closeButton: {
-    position: "absolute",
-    top: "5px",
-    right: "5px",
-    cursor: "pointer",
-    padding: "5px"
-  },
-  caption: {
-    marginBottom: "5px",
-    fontWeight: 500
+  fullWidthButton: {
+    "&:hover": {
+      background: theme.palette.primary.main,
+      boxShadow: "none",
+      cursor: "default"
+    },
+    width: "100%"
   }
 });
 
@@ -78,18 +77,32 @@ class FeatureInfo extends React.PureComponent {
     }
   }
 
-  table(data) {
-    return Object.keys(data).map((key, i) => {
+  renderFeaturesAsDefaultTable(data, caption) {
+    // We can't use "i" for coloring every second row, as some rows
+    // will be removed (Objects are not printed), so there's a need
+    // for a separate counter of rows that actually get printed.
+    let j = 0;
+    const tableBody = Object.keys(data).map((key, i) => {
       if (typeof data[key] !== "object") {
+        ++j;
         return (
-          <div key={i}>
-            <strong>{key}</strong>: <span>{data[key]}</span>
-          </div>
+          <TableRow key={i} selected={j % 2 === 0}>
+            <TableCell variant="head">{key}</TableCell>
+            <TableCell>{data[key]}</TableCell>
+          </TableRow>
         );
       } else {
         return null;
       }
     });
+
+    return (
+      <TableContainer component="div">
+        <Table size="small" aria-label="Table with infoclick details">
+          <TableBody>{tableBody}</TableBody>
+        </Table>
+      </TableContainer>
+    );
   }
 
   changeSelectedIndex(amount) {
@@ -151,8 +164,8 @@ class FeatureInfo extends React.PureComponent {
 
     if (!features) return "";
 
-    var visibleStyle = currentIndex => {
-      var displayValue =
+    const visibleStyle = currentIndex => {
+      const displayValue =
         this.state.selectedIndex === currentIndex + 1 ? "flex" : "none";
       return {
         display: displayValue,
@@ -160,57 +173,70 @@ class FeatureInfo extends React.PureComponent {
         height: "100%"
       };
     };
-    var toggler = null;
-    if (features.length > 1) {
-      toggler = (
-        <header className={classes.toggler}>
-          <IconButton aria-label="Previous" color="primary" id="step-left">
+
+    const toggler = features.length > 1 && (
+      <>
+        <ButtonGroup
+          aria-label="Browse through infoclick results"
+          color="primary"
+          size="small"
+          variant="contained"
+        >
+          <Button aria-label="Previous" id="step-left">
             <ArrowLeftIcon />
-          </IconButton>
-          <Typography variant="button" className={classes.togglerText}>
+          </Button>
+          <Button
+            className={classes.fullWidthButton}
+            disableFocusRipple
+            disableTouchRipple
+            disableRipple
+          >
             {this.state.selectedIndex} av {features.length}
-          </Typography>
-          <IconButton aria-label="Next" color="primary" id="step-right">
+          </Button>
+          <Button aria-label="Next" id="step-right">
             <ArrowRightIcon />
-          </IconButton>
-        </header>
-      );
-    }
+          </Button>
+        </ButtonGroup>
+      </>
+    );
 
-    var featureList = features.map((feature, i) => {
+    const featureList = features.map((feature, i) => {
       if (i === 0) this.props.onDisplay(feature);
-      var markdown =
-        feature.layer.get("layerInfo") &&
-        feature.layer.get("layerInfo").information;
+      const layerInfo = feature.layer.get("layerInfo");
 
-      var caption =
-        feature.layer.get("layerInfo") &&
-        feature.layer.get("layerInfo").caption;
-      var layer,
+      let markdown = layerInfo?.information;
+      let caption = layerInfo?.caption;
+
+      let layer,
         shortcodes = [];
 
       //Problem with geojson returned from AGS - Missing id on feature - how to handle?
       if (feature.layer.layersInfo && feature.getId()) {
         layer = Object.keys(feature.layer.layersInfo).find(id => {
-          var fid = feature.getId().split(".")[0];
-          var layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
+          const fid = feature.getId().split(".")[0];
+          const layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
           return fid === layerId;
         });
       }
 
-      if (
-        layer &&
-        feature.layer.layersInfo &&
-        feature.layer.layersInfo[layer] &&
-        feature.layer.layersInfo[layer].infobox
-      ) {
-        markdown = feature.layer.layersInfo[layer].infobox;
-      }
-      //Features coming from searchresult has infobox set on Feature instead of layer due to different features sharing same vectorlayer
-      if (feature.infobox) {
-        markdown = feature.infobox;
-      }
-      var properties = feature.getProperties();
+      // Deal with layer groups that have a caption on sublayer. Layer groups will
+      // have a 'layersInfo' (NB pluralis on layerSInfo), and if it exists,
+      // let's overwrite the previously saved caption.
+      // Below I'm using the new optional chaining operator (
+      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining),
+      // which will return the new caption, if exists, or a falsy value. If falsy value is returned,
+      // just fall back to the previous value of caption.
+      caption = feature.layer?.layersInfo?.[layer]?.caption || caption;
+
+      // Same goes for infobox, I'm shortening the code significantly using the optional chaining.
+      // Features coming from search result have infobox set on Feature instead of Layer due to
+      // different features sharing same vector layer.
+      markdown =
+        feature?.infobox ||
+        feature.layer?.layersInfo?.[layer]?.infobox ||
+        markdown;
+
+      let properties = feature.getProperties();
       properties = extractPropertiesFromJson(properties);
 
       feature.setProperties(properties);
@@ -222,29 +248,27 @@ class FeatureInfo extends React.PureComponent {
           markdown = transformed.str;
         }
       }
-      var value = markdown
+      const value = markdown
         ? mergeFeaturePropsWithMarkdown(markdown, properties)
-        : this.table(properties);
+        : this.renderFeaturesAsDefaultTable(properties, caption);
 
-      if (markdown) {
-        return (
-          <div key={i} style={visibleStyle(i)}>
-            <div className={classes.caption}>{caption}</div>
+      return (
+        <div key={i} style={visibleStyle(i)}>
+          <Typography variant="button" align="center" component="h6">
+            {caption}
+          </Typography>
+          {markdown ? (
             <div
               className={classes.textContent}
               dangerouslySetInnerHTML={value}
             />
-            {this.renderShortcodes(shortcodes, feature)}
-          </div>
-        );
-      } else {
-        return (
-          <div key={i} style={visibleStyle(i)}>
-            <div className={classes.caption}>{caption}</div>
+          ) : (
             <div className={classes.textContent}>{value}</div>
-          </div>
-        );
-      }
+          )}
+
+          {shortcodes.length > 0 && this.renderShortcodes(shortcodes, feature)}
+        </div>
+      );
     });
 
     return (
@@ -263,7 +287,9 @@ class FeatureInfo extends React.PureComponent {
             <Diagram key={i} source={shortcode.source} feature={feature} />
           );
         case "table":
-          return <Table key={i} source={shortcode.source} feature={feature} />;
+          return (
+            <HajkTable key={i} source={shortcode.source} feature={feature} />
+          );
         default:
           return null;
       }

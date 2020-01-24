@@ -130,13 +130,16 @@ class EditModel {
   }
 
   save(done) {
-    var find = mode =>
+    const find = mode =>
       this.vectorSource
         .getFeatures()
         .filter(feature => feature.modification === mode);
 
-    var features = {
-      updates: find("updated"),
+    const features = {
+      updates: find("updated").map(feature => {
+        feature.unset("boundedBy");
+        return feature;
+      }),
       inserts: find("added"),
       deletes: find("removed")
     };

@@ -1,7 +1,7 @@
 import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
-import NavigationIcon from "@material-ui/icons/Navigation";
+import CenterFocusWeakIcon from "@material-ui/icons/CenterFocusWeak";
 
 import LocationView from "./LocationView";
 
@@ -12,7 +12,7 @@ class Location extends React.PureComponent {
         {...this.props}
         type="Location"
         custom={{
-          icon: <NavigationIcon />,
+          icon: <CenterFocusWeakIcon />,
           title: "Positionera",
           description: "Visa min position i kartan",
           height: 450,

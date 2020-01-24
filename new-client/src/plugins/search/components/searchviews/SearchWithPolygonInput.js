@@ -27,7 +27,7 @@ class SearchWithPolygonInput extends React.PureComponent {
   componentDidMount() {
     const { model, onSearchDone, localObserver } = this.props;
     localObserver.publish(
-      "toolchanged",
+      "searchToolChanged",
       "Sök genom att rita en polygon i kartan"
     );
     model.polygonSearch(

@@ -175,11 +175,14 @@ class LayerGroupItem extends Component {
    * @return {external:ReactElement}
    */
   renderStatus() {
+    const { classes } = this.props;
     return (
       this.state.status === "loaderror" && (
-        <Tooltip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
-          <IconWarning />
-        </Tooltip>
+        <div className={classes.layerButton}>
+          <Tooltip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
+            <IconWarning />
+          </Tooltip>
+        </div>
       )
     );
   }
@@ -416,25 +419,27 @@ class LayerGroupItem extends Component {
               {layer.layersInfo[subLayer].caption}
             </label>
           </div>
-          <div className={classes.layerButton}>
-            <DownloadLink
-              index={index}
-              layer={this.props.layer}
-              appConfig={this.props.appConfig}
-            />
-          </div>
-          <div className={classes.layerButton}>
-            {this.state.toggleSubLayerSettings[index] ? (
-              <CloseIcon
-                className={classes.settingsButton}
-                onClick={toggleSettings}
+          <div className={classes.layerButtons}>
+            <div className={classes.layerButton}>
+              <DownloadLink
+                index={index}
+                layer={this.props.layer}
+                appConfig={this.props.appConfig}
               />
-            ) : (
-              <MoreHorizIcon
-                className={classes.settingsButton}
-                onClick={toggleSettings}
-              />
-            )}
+            </div>
+            <div className={classes.layerButton}>
+              {this.state.toggleSubLayerSettings[index] ? (
+                <CloseIcon
+                  className={classes.settingsButton}
+                  onClick={toggleSettings}
+                />
+              ) : (
+                <MoreHorizIcon
+                  className={classes.settingsButton}
+                  onClick={toggleSettings}
+                />
+              )}
+            </div>
           </div>
         </div>
         <div className={classes.legend}>
@@ -547,6 +552,36 @@ class LayerGroupItem extends Component {
     this.setState({ toggleSubLayerSettings: selected });
   }
 
+  renderInfoToggler = () => {
+    const { classes } = this.props;
+
+    return (
+      !this.isInfoEmpty() && (
+        <div className={classes.layerButton}>
+          <div className={classes.infoContainer}>
+            {this.state.infoVisible ? (
+              <RemoveCircleIcon
+                className={classes.infoButton}
+                onClick={() => this.toggleInfo()}
+              />
+            ) : (
+              <InfoIcon
+                onClick={() => this.toggleInfo()}
+                className={classes.infoButton}
+                style={{
+                  boxShadow: this.state.infoVisible
+                    ? "rgb(204, 204, 204) 2px 3px 1px"
+                    : "inherit",
+                  borderRadius: "100%"
+                }}
+              />
+            )}
+          </div>
+        </div>
+      )
+    );
+  };
+
   render() {
     const { layer } = this.props;
     const { open, visible, visibleSubLayers } = this.state;
@@ -604,29 +639,8 @@ class LayerGroupItem extends Component {
               </div>
             </div>
             <div className={classes.layerButtons}>
-              <div className={classes.layerButton}>{this.renderStatus()}</div>
-              <div className={classes.layerButton}>
-                <div className={classes.infoContainer}>
-                  {!this.isInfoEmpty() &&
-                    (this.state.infoVisible ? (
-                      <RemoveCircleIcon
-                        className={classes.infoButton}
-                        onClick={() => this.toggleInfo()}
-                      />
-                    ) : (
-                      <InfoIcon
-                        onClick={() => this.toggleInfo()}
-                        className={classes.infoButton}
-                        style={{
-                          boxShadow: this.state.infoVisible
-                            ? "rgb(204, 204, 204) 2px 3px 1px"
-                            : "inherit",
-                          borderRadius: "100%"
-                        }}
-                      />
-                    ))}
-                </div>
-              </div>
+              {this.renderStatus()}
+              {this.renderInfoToggler()}
               <div className={classes.layerButton}>
                 {this.state.toggleSettings ? (
                   <CloseIcon onClick={() => this.toggleSettings()} />

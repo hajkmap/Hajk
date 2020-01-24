@@ -12,6 +12,7 @@ import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
 
 import Zoom from "../controls/Zoom";
+import Rotate from "../controls/Rotate";
 import ScaleLine from "../controls/ScaleLine";
 import Attribution from "../controls/Attribution.js";
 import MapCleaner from "../controls/MapCleaner";
@@ -183,7 +184,7 @@ class App extends React.PureComponent {
       this.setState({
         tools: this.appModel.getPlugins()
       });
-      this.globalObserver.publish("appLoaded"); // Window.js subscribes to this event
+      this.globalObserver.publish("appLoaded"); // Both Controls and Plugins can subscribe to this event and get things done
     });
     this.bindHandlers();
   }
@@ -238,7 +239,7 @@ class App extends React.PureComponent {
       });
   }
 
-  renderSearchResultsWindow() {
+  renderInfoclickWindow() {
     const infoclickConfig = this.props.config.mapConfig.tools.find(
       t => t.type === "infoclick"
     );
@@ -485,6 +486,7 @@ class App extends React.PureComponent {
                 )}
               >
                 <Zoom map={this.appModel.getMap()} />
+                <Rotate map={this.appModel.getMap()} />
                 {clean === false && <MapSwitcher appModel={this.appModel} />}
                 {clean === false && <MapCleaner appModel={this.appModel} />}
                 {clean === false && <PresetLinks appModel={this.appModel} />}
@@ -520,7 +522,7 @@ class App extends React.PureComponent {
               }
             )}
           >
-            {this.renderSearchResultsWindow()}
+            {this.renderInfoclickWindow()}
             <PluginWindows
               plugins={this.appModel.getBothDrawerAndWidgetPlugins()}
             />
