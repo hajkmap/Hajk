@@ -328,10 +328,10 @@ export default class MapViewModel {
    */
   addSearchResultLayerToMap = searchResultId => {
     var fill = new Fill({
-      color: "rgba(0,150,237,0.7)"
+      color: `rgba(${this.model.mapColors.fillColorRed},${this.model.mapColors.fillColorGreen},${this.model.mapColors.fillColorBlue},${this.model.mapColors.fillColorOpacity})`
     });
     var stroke = new Stroke({
-      color: "rgba(0,150,237,0.7)",
+      color: `rgba(${this.model.mapColors.strokeColorRed},${this.model.mapColors.strokeColorGreen},${this.model.mapColors.strokeColorBlue},${this.model.mapColors.strokeColorOpacity})`,
       width: 5
     });
     var searchResultLayer = new VectorLayer({

@@ -163,6 +163,16 @@
         "abstract": "VTSEARCH",
         "title": "VTSEARCH",
         "target": "left",
+        "mapColors": {
+          "fillColorRed": "220",
+          "fillColorGreen": "10",
+          "fillColorBlue": "90",
+          "fillColorOpacity": "0.7",
+          "strokeColorRed": "220",
+          "strokeColorGreen": "10",
+          "strokeColorBlue": "90",
+          "strokeColorOpacity": "0.7"
+        },
         "geoServer": {
           "lineNumberAndPublicLineNumber": {
             "searchLabel": "Linjenummer",

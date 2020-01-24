@@ -20,6 +20,7 @@ export default class SearchModel {
     this.app = settings.app;
     this.localObserver = settings.localObserver;
     this.geoServer = settings.geoServer;
+    this.mapColors = settings.mapColors;
   }
 
   /**
