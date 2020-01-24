@@ -26,24 +26,18 @@ import { Typography } from "@material-ui/core";
 const styles = theme => {
   return {
     window: {
-      zIndex: 100,
-      background: "white",
-      boxShadow:
-        "2px 2px 2px rgba(0, 0, 0, 0.4), 0px 0px 4px rgba(0, 0, 0, 0.4)",
+      zIndex: theme.zIndex.appBar,
+      background: theme.palette.common.white,
+      boxShadow: theme.shadows[24],
       borderRadius: "5px",
       overflow: "hidden",
       pointerEvents: "all"
     },
-    customIcon: {
-      flex: "0 auto",
-      marginLeft: "2%"
-    },
+
     flexItem: {
       flex: "auto"
     },
-    typography: {
-      flex: "auto"
-    },
+
     tabRoot: {
       padding: 0,
       minHeight: 0,
@@ -56,15 +50,15 @@ const styles = theme => {
       display: "flex",
       flexDirection: "row",
       borderRadius: "5px",
-      backgroundColor: "rgba(0,150,237,1)"
+      backgroundColor: theme.palette.primary.main
     },
     tabsFlexContainer: {
       flexWrap: "wrap"
     },
     toolbar: {
       minHeight: 0,
-      padding: 0,
-      backgroundColor: "#00394D"
+      padding: theme.spacing(0),
+      backgroundColor: theme.palette.primary.dark
     }
   };
 };
@@ -285,20 +279,22 @@ class SearchResultListContainer extends React.Component {
       <Tab
         classes={{ root: classes.tabRoot, wrapper: classes.tabWrapper }}
         label={
-          <>
-            <Typography variant="subtitle2" className={classes.typography}>
-              {searchResult.label}
-            </Typography>
-
-            <ClearIcon
-              onClick={e => {
-                e.stopPropagation();
-                this.onTabClose(searchResultId);
-              }}
-              className={classes.customIcon}
-              fontSize="inherit"
-            />
-          </>
+          <Grid container>
+            <Grid item xs={10}>
+              <Typography variant="subtitle2" className={classes.typography}>
+                {searchResult.label}
+              </Typography>
+            </Grid>
+            <Grid item xs={2}>
+              <ClearIcon
+                onClick={e => {
+                  e.stopPropagation();
+                  this.onTabClose(searchResultId);
+                }}
+                fontSize="inherit"
+              />
+            </Grid>
+          </Grid>
         }
         value={searchResultId}
         key={`simple-tabpanel-${searchResultId}`}

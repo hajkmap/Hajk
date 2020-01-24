@@ -18,7 +18,7 @@ import IconButton from "@material-ui/core/IconButton";
 const styles = theme => {
   return {
     iconButtonRoot: {
-      color: "white",
+      color: theme.palette.common.white,
       padding: 0
     }
   };
@@ -104,7 +104,7 @@ class PanelToolbox extends React.PureComponent {
         {this.state.minimizeVisible &&
           this.renderButton(this.minimize, "minimize")}
         {this.state.normalVisible &&
-          this.renderButton(this.normal, "normalize")}
+          this.renderButton(this.normalize, "normalize")}
         {this.state.maximizeVisible &&
           this.renderButton(this.maximize, "maximize")}
         {this.renderButton(this.close, "close")}
