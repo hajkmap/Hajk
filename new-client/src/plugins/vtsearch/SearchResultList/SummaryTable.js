@@ -14,7 +14,7 @@ class SummaryTable extends React.Component {
   state = {
     rows: this.getRows()
   };
-
+  //MOCK
   getColumns() {
     return [
       {
@@ -30,15 +30,24 @@ class SummaryTable extends React.Component {
     ];
   }
 
+  //MOCK
   getRows() {
-    return [{ id: 0, operator: "SJ Götalandståg", lines: "TÅG" }];
+    return [
+      { id: 0, operator: "SJ Götalandståg", lines: "TÅG" },
+      { id: 0, operator: "SJ Götalandståg", lines: "TÅG" },
+      { id: 0, operator: "SJ Götalandståg", lines: "TÅG" },
+      { id: 0, operator: "SJ Götalandståg", lines: "TÅG" },
+      { id: 0, operator: "SJ Götalandståg", lines: "TÅG" },
+      { id: 0, operator: "SJ Götalandståg", lines: "TÅG" },
+      { id: 0, operator: "SJ Götalandståg", lines: "TÅG" }
+    ];
   }
 
   render() {
-    const { height, windowWidth } = this.props;
+    const { windowWidth } = this.props;
 
     return (
-      <Paper style={{ height: 100, width: windowWidth }}>
+      <Paper style={{ height: 240, width: windowWidth }}>
         <VirtualizedTable
           rowCount={this.state.rows.length}
           rowGetter={({ index }) => this.state.rows[index]}

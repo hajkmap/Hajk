@@ -88,7 +88,7 @@ const headerRowIndex = -1;
 class VirtualizedTable extends React.PureComponent {
   static defaultProps = {
     headerHeight: 30,
-    rowHeight: 25,
+    rowHeight: 30,
     sortable: true,
     selectedRow: headerRowIndex
   };
