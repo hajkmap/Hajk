@@ -42,7 +42,8 @@ const styles = theme => {
       flex: 1
     },
     searchContainer: {
-      maxWidth: 260
+      maxWidth: 260,
+      boxShadow: theme.shadows[10]
     },
     searchContainerBox: {
       display: "flex",
