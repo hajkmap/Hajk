@@ -24,6 +24,9 @@ const styles = theme => ({
     verticalAlign: "baseline",
     float: "left",
     marginBottom: 15
+  },
+  firstMenuItem: {
+    minHeight: 36
   }
 });
 
@@ -34,7 +37,7 @@ class Lines extends React.PureComponent {
   state = {
     publicLineName: "",
     internalLineNumber: "",
-    municipalityNames: [],
+    municipalities: [],
     municipalityName: "",
     trafficTransportNames: [],
     trafficTransportName: "",
@@ -61,11 +64,11 @@ class Lines extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
-    this.model.autocompleteMunicipalityZoneNames().then(result => {
+    this.model.fetchAllPossibleMunicipalityZoneNames().then(result => {
       this.setState({
-        municipalityNames: result.length > 0 ? result : []
+        municipalities: result.length > 0 ? result : []
       });
-      this.model.autocompleteTransportModeTypeName().then(result => {
+      this.model.fetchAllPossibleTransportModeTypeName().then(result => {
         this.setState({
           trafficTransportNames: result.length > 0 ? result : []
         });
@@ -153,7 +156,7 @@ class Lines extends React.PureComponent {
 
   render() {
     const { classes } = this.props;
-    const { municipalityNames, trafficTransportNames } = this.state;
+    const { municipalities, trafficTransportNames } = this.state;
     return (
       <div>
         <div className={classes.textFieldBox}>
@@ -213,12 +216,24 @@ class Lines extends React.PureComponent {
             onChange={this.handleMunicipalChange}
             className={classes.standardWidth}
           >
-            {municipalityNames.map((name, index) => {
-              return (
-                <MenuItem key={index} value={name}>
-                  {name.name}
-                </MenuItem>
-              );
+            {municipalities.map((municipality, index) => {
+              if (municipality.name == "") {
+                return (
+                  <MenuItem
+                    className={classes.firstMenuItem}
+                    key={index}
+                    value={municipality.name}
+                  >
+                    <Typography>{municipality.name}</Typography>
+                  </MenuItem>
+                );
+              } else {
+                return (
+                  <MenuItem key={index} value={municipality.name}>
+                    <Typography>{municipality.name}</Typography>
+                  </MenuItem>
+                );
+              }
             })}
           </Select>
         </div>

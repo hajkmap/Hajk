@@ -30,6 +30,9 @@ const styles = theme => ({
     float: "left",
     marginBottom: 15
   },
+  firstMenuItem: {
+    minHeight: 36
+  },
   overrides: {
     MuiTypographyBody1: {
       root: {
@@ -46,7 +49,7 @@ class Stops extends React.PureComponent {
     busStopValue: "stopAreas",
     stopNameOrNr: "",
     publicLine: "",
-    municipalityNames: [],
+    municipalities: [],
     municipalityName: "",
     selectedFormType: ""
   };
@@ -71,9 +74,9 @@ class Stops extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
-    this.model.autocompleteMunicipalityZoneNames().then(result => {
+    this.model.fetchAllPossibleMunicipalityZoneNames().then(result => {
       this.setState({
-        municipalityNames: result.length > 0 ? result : []
+        municipalities: result.length > 0 ? result : []
       });
     });
   }
@@ -154,7 +157,7 @@ class Stops extends React.PureComponent {
 
   render() {
     const { classes } = this.props;
-    const { municipalityNames } = this.state;
+    const { municipalities } = this.state;
     return (
       <div>
         <FormControl component="fieldset">
@@ -210,12 +213,24 @@ class Stops extends React.PureComponent {
             onChange={this.handleMunicipalChange}
             className={classes.setStandardWidth}
           >
-            {municipalityNames.map((name, index) => {
-              return (
-                <MenuItem key={index} value={name}>
-                  {name.name}
-                </MenuItem>
-              );
+            {municipalities.map((municipality, index) => {
+              if (municipality.name == "") {
+                return (
+                  <MenuItem
+                    className={classes.firstMenuItem}
+                    key={index}
+                    value={municipality.name}
+                  >
+                    <Typography>{municipality.name}</Typography>
+                  </MenuItem>
+                );
+              } else {
+                return (
+                  <MenuItem key={index} value={municipality.name}>
+                    <Typography>{municipality.name}</Typography>
+                  </MenuItem>
+                );
+              }
             })}
           </Select>
         </div>

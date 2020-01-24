@@ -162,7 +162,6 @@
       "options": {
         "abstract": "VTSEARCH",
         "title": "VTSEARCH",
-        "target": "left",
         "geoServer": {
           "lineNumberAndPublicLineNumber": {
             "searchLabel": "Linjenummer",
@@ -288,7 +287,7 @@
           },
           "stopPoints": {
             "searchLabel": "Hållplatslägen",
-            "defaultSortAttribute": "StopPointNumber",
+            "defaultSortAttribute": "StopAreaNumber",
             "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=kartsidan2%3AstopPoints&maxFeatures=50&outputFormat=application/json",
             "attributesToDisplay": [
               {
