@@ -5,10 +5,16 @@ import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormControl from "@material-ui/core/FormControl";
-import { TextField, Button, Typography, Divider } from "@material-ui/core";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
+import {
+  TextField,
+  Button,
+  Typography,
+  Divider,
+  Grid
+} from "@material-ui/core";
 import PolygonIcon from "../img/polygonmarkering.png";
 import RectangleIcon from "../img/rektangelmarkering.png";
 
@@ -16,30 +22,9 @@ import RectangleIcon from "../img/rektangelmarkering.png";
 // Examle below utilizes the very powerful "theme" object
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
 const styles = theme => ({
-  setStandardWidth: { width: 200 },
-  searchButton: { marginTop: 8 },
-  fontSize: { fontSize: 12 },
-  textFieldBox: { marginBottom: 10 },
-  divider: { margin: theme.spacing(3) },
-  textFields: { marginLeft: 10 },
-  checkBox: { marginTop: -10 },
-  sizeSmall: { fontSize: 14, marginTop: -8 },
-  radioButtonText: { fontSize: 14 },
-  polygonAndRectangleForm: {
-    verticalAlign: "baseline",
-    float: "left",
-    marginBottom: 15
-  },
+  divider: { marginTop: theme.spacing(2), marginBottom: theme.spacing(2) },
   firstMenuItem: {
     minHeight: 36
-  },
-  overrides: {
-    MuiTypographyBody1: {
-      root: {
-        color: "red",
-        fontSize: 13
-      }
-    }
   }
 });
 
@@ -50,7 +35,7 @@ class Stops extends React.PureComponent {
     stopNameOrNr: "",
     publicLine: "",
     municipalities: [],
-    municipalityName: "",
+    municipality: "",
     selectedFormType: ""
   };
 
@@ -102,177 +87,201 @@ class Stops extends React.PureComponent {
   handleMunicipalChange = event => {
     this.setState(
       {
-        municipalityName: event.target.value
+        municipality: event.target.value
       },
-      console.log(this.state.municipalityName)
+      console.log(this.state.municipality)
     );
   };
 
   doSpatialChange = () => {
-    const {
-      busStopValue,
-      stopNameOrNr,
-      publicLine,
-      municipalityName
-    } = this.state;
+    const { busStopValue, stopNameOrNr, publicLine, municipality } = this.state;
     this.localObserver.publish("stops-search", {
       busStopValue: busStopValue,
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
-      municipalityName: municipalityName.gid,
+      municipality: municipality.gid,
       selectedFormType: ""
     });
   };
 
   handlePolygonChange = () => {
-    const {
-      busStopValue,
-      stopNameOrNr,
-      publicLine,
-      municipalityName
-    } = this.state;
+    const { busStopValue, stopNameOrNr, publicLine, municipality } = this.state;
     this.localObserver.publish("stops-search", {
       busStopValue: busStopValue,
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
-      municipalityName: municipalityName.gid,
+      municipality: municipality.gid,
       selectedFormType: "Polygon"
     });
   };
   handleRectangleChange = () => {
-    const {
-      busStopValue,
-      stopNameOrNr,
-      publicLine,
-      municipalityName
-    } = this.state;
+    const { busStopValue, stopNameOrNr, publicLine, municipality } = this.state;
     this.localObserver.publish("stops-search", {
       busStopValue: busStopValue,
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
-      municipalityName: municipalityName.gid,
+      municipality: municipality.gid,
       selectedFormType: "Box"
     });
   };
 
-  render() {
-    const { classes } = this.props;
-    const { municipalities } = this.state;
+  renderRadioButtonSection = () => {
     return (
-      <div>
-        <FormControl component="fieldset">
-          <RadioGroup
-            aria-label="Stops"
-            name="Stop"
-            value={this.state.busStopValue}
-            onChange={this.handleChange}
-          >
-            <FormControlLabel
-              value="stopAreas"
-              control={<Radio color="primary" />}
-              label="Hållplatsområden"
-              classes={{ label: classes.radioButtonText }}
-            />
-            <FormControlLabel
-              value="stopPoints"
-              control={<Radio color="primary" className={classes.checkBox} />}
-              label="Hållplatslägen"
-              classes={{ label: classes.sizeSmall }}
-            />
-          </RadioGroup>
-        </FormControl>
-        <Divider className={classes.divider} />
-        <div className={classes.textFieldBox}>
+      <Grid item xs={12}>
+        <RadioGroup
+          aria-label="Stops"
+          name="Stop"
+          value={this.state.busStopValue}
+          onChange={this.handleChange}
+        >
+          <Grid justify="flex-start" alignItems="center" container>
+            <Grid item xs={2}>
+              <FormControlLabel
+                value="stopAreas"
+                control={<Radio color="primary" />}
+              />
+            </Grid>
+            <Grid item xs={10}>
+              <Typography variant="body2">Hållplatsområden</Typography>
+            </Grid>
+            <Grid item xs={2}>
+              <FormControlLabel
+                value="stopPoints"
+                control={<Radio color="primary" />}
+              />
+            </Grid>
+
+            <Grid item xs={10}>
+              <Typography variant="body2">Hållplatslägen</Typography>
+            </Grid>
+          </Grid>
+        </RadioGroup>
+      </Grid>
+    );
+  };
+
+  renderTextParameterSection = () => {
+    const { municipalities } = this.state;
+    const { classes } = this.props;
+    return (
+      <>
+        <Grid item xs={12}>
+          <Divider />
+        </Grid>
+        <Grid item xs={12}>
+          <Typography variant="caption">Hållplatsnamn eller -nr</Typography>
           <TextField
+            fullWidth
             id="standard-basic"
-            label="Hållplatsnamn eller -nr"
             value={this.state.stopNameOrNr}
             onChange={this.handleStopNameOrNrChange}
-            className={classes.setStandardWidth}
-            InputLabelProps={{
-              shrink: true
-            }}
           ></TextField>
-        </div>
-        <div className={classes.textFieldBox}>
+        </Grid>
+        <Grid item xs={12}>
+          <Typography variant="caption">Längs publik linje</Typography>
           <TextField
+            fullWidth
             id="standard-basic"
-            label="Längs publik linje"
             value={this.state.publicLine}
             onChange={this.handlePublicLineChange}
-            className={classes.setStandardWidth}
-            InputLabelProps={{
-              shrink: true
-            }}
           />
-        </div>
-        <div className={classes.textFieldBox}>
-          <InputLabel className={classes.fontSize}>Kommun</InputLabel>
-          <Select
-            value={this.state.municipalityName}
-            onChange={this.handleMunicipalChange}
-            className={classes.setStandardWidth}
-          >
-            {municipalities.map((municipality, index) => {
-              if (municipality.name == "") {
-                return (
-                  <MenuItem
-                    className={classes.firstMenuItem}
-                    key={index}
-                    value={municipality.name}
-                  >
-                    <Typography>{municipality.name}</Typography>
-                  </MenuItem>
-                );
-              } else {
-                return (
-                  <MenuItem key={index} value={municipality.name}>
-                    <Typography>{municipality.name}</Typography>
-                  </MenuItem>
-                );
-              }
-            })}
-          </Select>
-        </div>
-        <Button
-          className={classes.searchButton}
-          variant="outlined"
-          type="button"
-          title="Sök"
-          onClick={this.doSpatialChange}
-        >
+        </Grid>
+        <Grid item xs={12}>
+          <FormControl fullWidth>
+            <Typography variant="caption">Kommun</Typography>
+            <Select
+              value={this.state.municipality}
+              onChange={this.handleMunicipalChange}
+            >
+              {municipalities.map((municipality, index) => {
+                if (municipality.name === "") {
+                  return (
+                    <MenuItem
+                      className={classes.firstMenuItem}
+                      key={index}
+                      value={municipality}
+                    >
+                      <Typography>{municipality.name}</Typography>
+                    </MenuItem>
+                  );
+                } else {
+                  return (
+                    <MenuItem key={index} value={municipality}>
+                      <Typography>{municipality.name}</Typography>
+                    </MenuItem>
+                  );
+                }
+              })}
+            </Select>
+          </FormControl>
+        </Grid>
+      </>
+    );
+  };
+
+  renderSearchButton = () => {
+    return (
+      <Grid item xs={12}>
+        <Button onClick={this.doSpatialChange} variant="outlined">
           Sök
         </Button>
-        <Divider variant="inset" className={classes.divider} />
-        <Typography>Markera sökområde i kartan</Typography>
-        <div className={classes.polygonAndRectangleForm}>
-          <a href="/#">
-            <img
-              src={PolygonIcon}
-              value={this.state.selectedFormType}
-              onClick={this.handlePolygonChange}
-              alt="#"
-            ></img>
-          </a>
-          <br />
-          <Typography className={classes.textFields} variant="body2">
-            Polygon
+      </Grid>
+    );
+  };
+
+  renderSpatialSearchSection = () => {
+    const { classes } = this.props;
+    return (
+      <>
+        <Grid item xs={12}>
+          <Divider className={classes.divider} />
+        </Grid>
+        <Grid item xs={12}>
+          <Typography align="center" variant="body2">
+            Markera sökområde i kartan
           </Typography>
-        </div>
-        <div className={classes.polygonAndRectangleForm}>
-          <a href="/#">
-            <img
-              src={RectangleIcon}
-              value={this.state.selectedFormType}
-              onClick={this.handleRectangleChange}
-              alt="#"
-            ></img>
-          </a>
-          <br />
-          <Typography className={classes.textFields} variant="body2">
-            Rektangel
-          </Typography>
-        </div>
+        </Grid>
+        <Grid justify="center" container>
+          <Grid item xs={3}>
+            <a href="/#">
+              <img
+                src={PolygonIcon}
+                value={this.state.selectedFormType}
+                onClick={this.handlePolygonChange}
+                alt="#"
+              ></img>
+            </a>
+            <Grid item xs={3}>
+              <Typography variant="body2">Polygon</Typography>
+            </Grid>
+          </Grid>
+          <Grid item xs={3}>
+            <a href="/#">
+              <img
+                src={RectangleIcon}
+                value={this.state.selectedFormType}
+                onClick={this.handleRectangleChange}
+                alt="#"
+              ></img>
+            </a>
+            <Grid item xs={3}>
+              <Typography variant="body2">Rektangel</Typography>
+            </Grid>
+          </Grid>
+        </Grid>
+      </>
+    );
+  };
+
+  render() {
+    return (
+      <div>
+        <Grid container justify="center" spacing={2}>
+          {this.renderRadioButtonSection()}
+          {this.renderTextParameterSection()}
+          {this.renderSearchButton()}
+          {this.renderSpatialSearchSection()}
+        </Grid>
       </div>
     );
   }
