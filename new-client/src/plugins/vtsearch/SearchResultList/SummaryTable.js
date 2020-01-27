@@ -23,11 +23,11 @@ class SummaryTable extends React.Component {
   getColumns() {
     return [
       {
-        width: 200,
+        width: 300,
         label: "Operatör",
         dataKey: "operator"
       },
-      { width: 200, label: "Linjer", dataKey: "lines" }
+      { width: 800, label: "Linjer", dataKey: "lines" }
     ];
   }
 
