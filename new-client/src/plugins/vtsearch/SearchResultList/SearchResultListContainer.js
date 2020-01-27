@@ -113,19 +113,23 @@ class SearchResultListContainer extends React.Component {
     localObserver.publish("search-result-list-normal");
   };
 
-  setactiveTabId = searchResultId => {
+  setActiveTabId = searchResultId => {
+    const { localObserver } = this.props;
+    localObserver.publish("hide-all-layers");
+    localObserver.publish("toggle-visibility", searchResultId);
+
     this.setState({ activeTabId: searchResultId });
   };
 
   onSearchDone = result => {
     const { localObserver } = this.props;
     var searchResultId = this.addResultToSearchResultList(result);
-    console.log(searchResultId, "searchResultID");
-    this.setactiveTabId(searchResultId);
     localObserver.publish("add-search-result-to-map", {
       searchResultId: searchResultId,
       olFeatures: this.convertToGeoJson(result.featureCollection)
     });
+    this.setActiveTabId(searchResultId);
+
     if (result.type === "journeys") {
       this.resetHeightOfResultList();
     }
@@ -200,7 +204,7 @@ class SearchResultListContainer extends React.Component {
   };
 
   handleTabChange = (event, newValue) => {
-    this.setactiveTabId(newValue);
+    this.setActiveTabId(newValue);
   };
 
   getNextTabActive = searchResultId => {
