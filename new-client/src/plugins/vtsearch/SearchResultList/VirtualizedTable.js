@@ -54,7 +54,6 @@ const styles = theme => ({
     paddingRight: theme.spacing(0),
     paddingBottom: theme.spacing(0),
     minWidth: theme.spacing(0),
-    wordBreak: "break-all",
     lineHeight: 1,
     borderBottom: theme.spacing(0)
   },
@@ -87,7 +86,7 @@ const headerRowIndex = -1;
 
 class VirtualizedTable extends React.PureComponent {
   static defaultProps = {
-    headerHeight: 30,
+    headerHeight: 40,
     rowHeight: 30,
     sortable: true,
     selectedRow: headerRowIndex
