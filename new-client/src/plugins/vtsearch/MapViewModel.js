@@ -61,6 +61,13 @@ export default class MapViewModel {
       this.map.removeLayer(this.getSearchResultLayerFromId(searchResultId));
     });
 
+    this.localObserver.subscribe("hide-all-layers", () => {
+      this.hideAllLayers();
+    });
+    this.localObserver.subscribe("toggle-visibility", searchResultID => {
+      this.toggleLayerVisibility(searchResultID);
+    });
+
     this.map.on("singleclick", this.onFeaturesClickedInMap);
 
     this.localObserver.subscribe("add-search-result", olFeatures => {
@@ -356,6 +363,7 @@ export default class MapViewModel {
     searchResultLayer.set("type", "vt-search-result-layer");
     searchResultLayer.set("searchResultId", searchResultId);
     searchResultLayer.set("queryable", false);
+    searchResultLayer.set("visible", false);
 
     this.map.addLayer(searchResultLayer);
     return searchResultLayer;
@@ -441,8 +449,34 @@ export default class MapViewModel {
   };
 
   /**
+   * Toggles visibility for layer in map with the specified id
+   * @returns {null}
+   * @param {integer : searchResultId}
+   * @memberof MapViewModel
+   */
+  toggleLayerVisibility = searchResultId => {
+    this.map.getLayers().forEach(layer => {
+      if (layer.get("searchResultId") === searchResultId) {
+        layer.set("visible", !layer.get("visible"));
+      }
+    });
+  };
+
+  /**
+   * Sets visible to false for all layers in the map
+   * @returns {null}
+   * @memberof MapViewModel
+   */
+  hideAllLayers = () => {
+    this.map.getLayers().forEach(layer => {
+      if (layer.get("type") === "vt-search-result-layer") {
+        layer.set("visible", false);
+      }
+    });
+  };
+
+  /**
    * Zooms map to extent
-   *
    * @returns {null}
    * @memberof MapViewModel
    * @param {*} event
