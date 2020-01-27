@@ -19,10 +19,9 @@ import {
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
 const styles = theme => ({
   journeysForm: { marginTop: 10 },
-  dateFrom: { marginTop: 0, marginBottom: -4 },
-  timeFrom: { marginBottom: 40 },
-  iconText: { fontSize: 10, width: 50 },
-  divider: { margin: theme.spacing(3, 3) },
+  dateForm: { marginTop: 0, marginBottom: -4 },
+  spaceToFromDate: { marginBottom: 40 },
+  divider: { marginTop: theme.spacing(3), marginBottom: theme.spacing(3) },
   textFields: { marginLeft: 10 },
   polygonAndRectangleForm: {
     verticalAlign: "baseline",
@@ -39,7 +38,9 @@ class Journeys extends React.PureComponent {
     fromTime: null,
     activeTool: undefined,
     selectedFromDate: new Date(),
-    selectedEndDate: new Date().setHours(new Date().getHours() + 2),
+    selectedFromTime: new Date().setHours(new Date().getHours()),
+    selectedEndDate: new Date(),
+    selectedEndDTime: new Date().setHours(new Date().getHours() + 1),
     selectedFormType: ""
   };
 
@@ -64,14 +65,20 @@ class Journeys extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
   }
-
+  handleFromTimeChange = time => {
+    this.setState({
+      selectedFromTime: time
+    });
+  };
   handleFromDateChange = date => {
-    this.setState(
-      {
-        selectedFromDate: date
-      },
-      console.log(date + " date")
-    );
+    this.setState({
+      selectedFromDate: date
+    });
+  };
+  handleEndTimeChange = time => {
+    this.setState({
+      selectedEndDTime: time
+    });
   };
   handleEndDateChange = date => {
     this.setState({
@@ -79,10 +86,44 @@ class Journeys extends React.PureComponent {
     });
   };
 
+  getFormattedDate = () => {
+    const {
+      selectedFromDate,
+      selectedEndDate,
+      selectedEndDTime,
+      selectedFromTime
+    } = this.state;
+    let fromTime = new Date(selectedFromTime);
+    let endTime = new Date(selectedEndDTime);
+
+    let formatFromDate = new Date(
+      selectedFromDate.getFullYear(),
+      selectedFromDate.getMonth(),
+      selectedFromDate.getDate(),
+      fromTime.getHours(),
+      fromTime.getMinutes() - fromTime.getTimezoneOffset(),
+      fromTime.getSeconds()
+    ).toISOString();
+
+    let formatEndDate = new Date(
+      selectedEndDate.getFullYear(),
+      selectedEndDate.getMonth(),
+      selectedEndDate.getDate(),
+      endTime.getHours(),
+      endTime.getMinutes() - endTime.getTimezoneOffset(),
+      endTime.getSeconds()
+    ).toISOString();
+
+    var result = {
+      formatFromDate: formatFromDate,
+      formatEndDate: formatEndDate
+    };
+
+    return result;
+  };
+
   handlePolygonChange = () => {
-    const { selectedFromDate, selectedEndDate } = this.state;
-    let formatFromDate = new Date(selectedFromDate).toISOString(); // format the date to yyyy-mm-ddThh-mm-ss
-    let formatEndDate = new Date(selectedEndDate).toISOString(); // format the date to yyyy-mm-ddThh-mm-ss
+    const { formatFromDate, formatEndDate } = this.getFormattedDate();
     this.localObserver.publish("journeys-search", {
       selectedFromDate: formatFromDate,
       selectedEndDate: formatEndDate,
@@ -106,93 +147,96 @@ class Journeys extends React.PureComponent {
           className={classes.journeysForm}
           utils={DateFnsUtils}
         >
-          <Grid container justify="space-around">
+          <Grid container justify="center" spacing={2}>
+            <Grid item xs={12}>
+              <Typography variant="caption">Från och med</Typography>
+              <KeyboardTimePicker
+                margin="normal"
+                id="time-picker"
+                ampm={false}
+                className={classes.dateForm}
+                invalidDateMessage="Fel värde på tid"
+                keyboardIcon={<AccessTimeIcon></AccessTimeIcon>}
+                value={this.state.selectedFromTime}
+                onChange={this.handleFromTimeChange}
+                KeyboardButtonProps={{
+                  "aria-label": "change time"
+                }}
+              />
+            </Grid>
             <KeyboardDatePicker
-              className={classes.dateFrom}
+              className={classes.spaceToFromDate}
               format="yyyy-MM-dd"
               margin="normal"
-              label="Från och med"
               invalidDateMessage="Fel värde på datum"
               value={this.state.selectedFromDate}
               onChange={this.handleFromDateChange}
               KeyboardButtonProps={{
                 "aria-label": "change date"
               }}
-              InputLabelProps={{
-                shrink: true
-              }}
             />
-            <KeyboardTimePicker
-              className={classes.timeFrom}
-              margin="normal"
-              id="time-picker"
-              ampm={false}
-              invalidDateMessage="Fel värde på tid"
-              keyboardIcon={<AccessTimeIcon></AccessTimeIcon>}
-              value={this.state.selectedFromDate}
-              onChange={this.handleFromDateChange}
-              KeyboardButtonProps={{
-                "aria-label": "change time"
-              }}
-            />
+            <Grid item xs={12}>
+              <Typography variant="caption">Till och med</Typography>
+              <KeyboardTimePicker
+                margin="normal"
+                ampm={false}
+                className={classes.dateForm}
+                invalidDateMessage="Fel värde på tid"
+                keyboardIcon={<AccessTimeIcon></AccessTimeIcon>}
+                value={this.state.selectedEndDTime}
+                onChange={this.handleEndTimeChange}
+                KeyboardButtonProps={{
+                  "aria-label": "change time"
+                }}
+              />
+            </Grid>
             <KeyboardDatePicker
-              className={classes.dateFrom}
               format="yyyy-MM-dd"
               margin="normal"
-              label="Till och med"
               invalidDateMessage="Fel värde på datum"
               value={this.state.selectedEndDate}
+              className={classes.spaceToFromDate}
               onChange={this.handleEndDateChange}
               KeyboardButtonProps={{
                 "aria-label": "change date"
-              }}
-              InputLabelProps={{
-                shrink: true
-              }}
-            />
-            <KeyboardTimePicker
-              margin="normal"
-              ampm={false}
-              invalidDateMessage="Fel värde på tid"
-              keyboardIcon={<AccessTimeIcon></AccessTimeIcon>}
-              value={this.state.selectedEndDate}
-              onChange={this.handleEndDateChange}
-              KeyboardButtonProps={{
-                "aria-label": "change time"
               }}
             />
           </Grid>
         </MuiPickersUtilsProvider>
-        <Divider className={classes.divider} />
-        <Typography>Markera sökområde i kartan</Typography>
-        <div className={classes.polygonAndRectangleForm}>
-          <a href="/#">
-            <img
-              src={PolygonIcon}
-              value={this.state.selectedFormType}
-              onClick={this.handlePolygonChange}
-              alt="#"
-            ></img>
-          </a>
-          <br />
-          <Typography className={classes.textFields} variant="body2">
-            Polygon
-          </Typography>
-        </div>
-        <div className={classes.polygonAndRectangleForm}>
-          <a href="/#">
-            <img
-              src={RectangleIcon}
-              value={this.state.selectedFormType}
-              onClick={this.handleRectangleChange}
-              alt="#"
-            ></img>
-          </a>
-          <br />
-          <Typography className={classes.textFields} variant="body2">
-            Rektangel
-          </Typography>
-        </div>
+        <Grid item xs={12}>
+          <Divider className={classes.divider} />
+        </Grid>
+        <Grid item xs={12}>
+          <Typography variant="body2">Markera sökområde i kartan</Typography>
+        </Grid>
+        <Grid justify="center" container>
+          <Grid item xs={3}>
+            <a href="/#">
+              <img
+                src={PolygonIcon}
+                value={this.state.selectedFormType}
+                onClick={this.handlePolygonChange}
+                alt="#"
+              ></img>
+            </a>
+            <Grid item xs={3}>
+              <Typography variant="body2">Polygon</Typography>
+            </Grid>
+          </Grid>
+          <Grid item xs={3}>
+            <a href="/#">
+              <img
+                src={RectangleIcon}
+                value={this.state.selectedFormType}
+                onClick={this.handleRectangleChange}
+                alt="#"
+              ></img>
+            </a>
+            <Grid item xs={3}>
+              <Typography variant="body2">Rektangel</Typography>
+            </Grid>
+          </Grid>
+        </Grid>
       </div>
     );
   }

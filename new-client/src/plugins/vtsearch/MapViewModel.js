@@ -100,7 +100,7 @@ export default class MapViewModel {
         busStopValue,
         stopNameOrNr,
         publicLine,
-        municipalityName,
+        municipality,
         selectedFormType
       }) => {
         if (selectedFormType === "") {
@@ -108,14 +108,14 @@ export default class MapViewModel {
             busStopValue,
             stopNameOrNr,
             publicLine,
-            municipalityName
+            municipality
           });
         } else {
           this.stopSearch({
             busStopValue,
             stopNameOrNr,
             publicLine,
-            municipalityName,
+            municipality,
             selectedFormType
           });
         }
@@ -210,7 +210,7 @@ export default class MapViewModel {
     busStopValue,
     stopNameOrNr,
     publicLine,
-    municipalityName,
+    municipality,
     selectedFormType
   }) => {
     var value = selectedFormType;
@@ -234,7 +234,7 @@ export default class MapViewModel {
         this.model.getStopAreas(
           stopNameOrNr,
           publicLine,
-          municipalityName,
+          municipality,
           wktFeatureGeom
         );
       }
@@ -242,7 +242,7 @@ export default class MapViewModel {
         this.model.getStopPoints(
           stopNameOrNr,
           publicLine,
-          municipalityName,
+          municipality,
           wktFeatureGeom
         );
       }
@@ -254,20 +254,20 @@ export default class MapViewModel {
     busStopValue,
     stopNameOrNr,
     publicLine,
-    municipalityName
+    municipality
   }) => {
     if (busStopValue === "stopAreas") {
-      this.model.getStopAreas(stopNameOrNr, publicLine, municipalityName);
+      this.model.getStopAreas(stopNameOrNr, publicLine, municipality);
     }
     if (busStopValue === "stopPoints") {
-      this.model.getStopPoints(stopNameOrNr, publicLine, municipalityName);
+      this.model.getStopPoints(stopNameOrNr, publicLine, municipality);
     }
   };
 
   routesSearch = ({
     publicLineName,
     internalLineNumber,
-    municipalityName,
+    municipality,
     trafficTransportName,
     throughStopArea,
     selectedFormType
@@ -293,7 +293,7 @@ export default class MapViewModel {
         this.model.getRoutes(
           publicLineName,
           internalLineNumber,
-          municipalityName,
+          municipality,
           trafficTransportName,
           throughStopArea,
           wktFeatureGeom
