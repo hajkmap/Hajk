@@ -44,6 +44,7 @@ class TabPanel extends React.PureComponent {
             <SummaryTable
               localObserver={localObserver}
               height={100}
+              searchResult={searchResult}
             ></SummaryTable>
           </Grid>
         )}
