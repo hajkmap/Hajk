@@ -4,9 +4,10 @@ import { withStyles } from "@material-ui/core/styles";
 import TableCell from "@material-ui/core/TableCell";
 import { AutoSizer, Column, Table } from "react-virtualized";
 import { SortIndicator } from "react-virtualized";
+import ChildrenComponent from "@material-ui/core";
 
 import "react-virtualized/styles.css";
-import { Typography } from "@material-ui/core";
+import { Typography, Tooltip } from "@material-ui/core";
 
 const styles = theme => ({
   flexContainer: {
@@ -117,18 +118,22 @@ class VirtualizedTable extends React.PureComponent {
     const { columns } = this.props;
 
     return (
-      <TableCell
-        component="div"
-        className={this.getCellClassName()}
-        variant="body"
-        align={
-          (columnIndex != null && columns[columnIndex].numeric) || false
-            ? "right"
-            : "left"
-        }
-      >
-        {cellData}
-      </TableCell>
+      <>
+        <Tooltip title={cellData}>
+          <TableCell
+            component="div"
+            className={this.getCellClassName()}
+            variant="body"
+            align={
+              (columnIndex != null && columns[columnIndex].numeric) || false
+                ? "right"
+                : "left"
+            }
+          >
+            {cellData}
+          </TableCell>
+        </Tooltip>
+      </>
     );
   };
 
