@@ -24,22 +24,19 @@ class SummaryTable extends React.Component {
     return [
       {
         width: 300,
-        label: "Operatör",
+        label: "OPERATÖR",
         dataKey: "operator"
       },
-      { width: 800, label: "Linjer", dataKey: "lines" }
+      { width: 800, label: "LINJER", dataKey: "lines" }
     ];
   }
 
-  getConcatenatedLinesString(transportCompany) {
-    return `${transportCompany.publicLineNames.map(name => {
-      return `${name}`;
-    })} (${transportCompany.internalLineNumbers.map(name => {
-      return `${name}`;
-    })})`;
+  getConcatenatedLinesString({ publicLineNames, internalLineNumbers }) {
+    return ` ${publicLineNames.map((name, index) => {
+      return ` ${name} (${internalLineNumbers[index]})`;
+    })}`;
   }
 
-  //MOCK
   getRows() {
     return this.getSummarization().map(transportCompany => {
       return {

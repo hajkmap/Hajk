@@ -219,9 +219,9 @@ class SearchResultListContainer extends React.Component {
 
   onTabClose = searchResultId => {
     const nextactiveTabId = this.getNextTabActive(searchResultId);
-    this.removeSearchResult(searchResultId).then(() => {
-      this.setState({ activeTabId: nextactiveTabId });
-    });
+    console.log(nextactiveTabId, "nextActiveTabId");
+    this.setState({ activeTabId: nextactiveTabId });
+    this.removeSearchResult(searchResultId);
   };
 
   addResultToSearchResultList = result => {
@@ -303,6 +303,7 @@ class SearchResultListContainer extends React.Component {
 
   renderTabsController = searchResults => {
     const { classes } = this.props;
+    console.log(this.state.activeTabId, "activeTabId");
     return (
       <Tabs
         classes={{
