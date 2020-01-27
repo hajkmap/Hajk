@@ -162,7 +162,6 @@
       "options": {
         "abstract": "VTSEARCH",
         "title": "VTSEARCH",
-        "target": "left",
         "mapColors": {
           "searchColor": {
             "fillColorRed": "220",
@@ -225,7 +224,7 @@
                 "key": "TransportCompany"
               },
               {
-                "displayName": "FRÅN HÅLLPLATSOMRÅDE",
+                "displayName": "FRÅN HÅLLPLATSOMR",
                 "key": "FromStopPointName"
               },
               {
@@ -233,7 +232,7 @@
                 "key": "FromStopPointDesignation"
               },
               {
-                "displayName": "TILL HÅLLPLATSOMRÅDE",
+                "displayName": "TILL HÅLLPLATSOMR",
                 "key": "ToStopPointName"
               },
               {
