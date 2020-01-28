@@ -104,7 +104,7 @@ export default class MapViewModel {
         selectedFormType
       }) => {
         if (selectedFormType === "") {
-          this.doStopSpetial({
+          this.doStopSpatial({
             busStopValue,
             stopNameOrNr,
             publicLine,
@@ -155,7 +155,9 @@ export default class MapViewModel {
       }
     );
   };
-
+  componentWillUnmount() {
+    document.removeEventListener("click", this.drawlayer.getSource().clear());
+  }
   resizeMap = height => {
     //Not so "reacty" but no other solution possible because if we don't want to rewrite core functionality in Hajk3
     [appContainer, mapContainer].forEach(container => {
@@ -250,7 +252,7 @@ export default class MapViewModel {
     this.map.addInteraction(this.draw);
   };
 
-  doStopSpetial = ({
+  doStopSpatial = ({
     busStopValue,
     stopNameOrNr,
     publicLine,

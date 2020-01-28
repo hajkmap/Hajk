@@ -154,126 +154,167 @@ class Lines extends React.PureComponent {
     });
   };
 
-  render() {
+  renderPublicAndTechnicalNrSection = () => {
+    return (
+      <>
+        <Grid item xs={6}>
+          <Typography variant="caption">Publikt nr</Typography>
+          <TextField
+            id="standard-helperText"
+            onChange={this.handlePublicLineNameChange}
+            value={this.state.publicLineName}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <Typography variant="caption">Tekniskt nr</Typography>
+          <TextField
+            id="standard-helperText"
+            onChange={this.handleInternalLineNrChange}
+            value={this.state.internalLineNumber}
+          />
+        </Grid>
+      </>
+    );
+  };
+
+  renderInputValueSection = () => {
+    return (
+      <Grid item xs={12}>
+        <Typography variant="caption">Via Hållplats</Typography>
+        <TextField
+          fullWidth
+          id="standard-helperText"
+          value={this.state.throughStopArea}
+          onChange={this.handleThroughStopAreaChange}
+        />
+      </Grid>
+    );
+  };
+
+  renderTrafficTypeSection = () => {
+    const { trafficTransportNames } = this.state;
+    return (
+      <Grid item xs={12}>
+        <FormControl fullWidth>
+          <Typography variant="caption">Trafikslag</Typography>
+          <Select
+            value={this.state.trafficTransportName}
+            onChange={this.handleTrafficTransportChange}
+          >
+            {trafficTransportNames.map((name, index) => {
+              return (
+                <MenuItem key={index} value={name}>
+                  {name}
+                </MenuItem>
+              );
+            })}
+          </Select>
+        </FormControl>
+      </Grid>
+    );
+  };
+  renderMunicipalitySection = () => {
     const { classes } = this.props;
-    const { municipalities, trafficTransportNames } = this.state;
+    const { municipalities } = this.state;
+    return (
+      <Grid item xs={12}>
+        <FormControl fullWidth>
+          <Typography variant="caption">Kommun</Typography>
+          <Select
+            value={this.state.municipalityName}
+            onChange={this.handleMunicipalChange}
+          >
+            {municipalities.map((municipality, index) => {
+              if (municipality.name === "") {
+                return (
+                  <MenuItem
+                    className={classes.firstMenuItem}
+                    key={index}
+                    value={municipality.name}
+                  >
+                    <Typography>{municipality.name}</Typography>
+                  </MenuItem>
+                );
+              } else {
+                return (
+                  <MenuItem key={index} value={municipality.name}>
+                    <Typography>{municipality.name}</Typography>
+                  </MenuItem>
+                );
+              }
+            })}
+          </Select>
+        </FormControl>
+      </Grid>
+    );
+  };
+
+  renderSearchButtonSection = () => {
+    const { classes } = this.props;
+    return (
+      <Grid item xs={12}>
+        <Button
+          className={classes.searchButton}
+          onClick={this.doSpatialChange}
+          variant="outlined"
+        >
+          Sök
+        </Button>
+      </Grid>
+    );
+  };
+
+  renderSpatialSearchSection = () => {
+    const { classes } = this.props;
+    return (
+      <>
+        <Grid item xs={12}>
+          <Divider className={classes.divider} />
+        </Grid>
+        <Grid item xs={12}>
+          <Typography variant="body2">Markera sökområde i kartan</Typography>
+        </Grid>
+        <Grid justify="center" container>
+          <Grid item xs={3}>
+            <a href="/#">
+              <img
+                src={PolygonIcon}
+                value={this.state.selectedFormType}
+                onClick={this.handlePolygonChange}
+                alt="#"
+              ></img>
+            </a>
+            <Grid item xs={3}>
+              <Typography variant="body2">Polygon</Typography>
+            </Grid>
+          </Grid>
+          <Grid item xs={3}>
+            <a href="/#">
+              <img
+                src={RectangleIcon}
+                value={this.state.selectedFormType}
+                onClick={this.handleRectangleChange}
+                alt="#"
+              ></img>
+            </a>
+            <Grid item xs={3}>
+              <Typography variant="body2">Rektangel</Typography>
+            </Grid>
+          </Grid>
+        </Grid>
+      </>
+    );
+  };
+  render() {
     return (
       <div>
         <Grid container justify="center" spacing={2}>
-          <Grid item xs={6}>
-            <Typography variant="caption">Publikt nr</Typography>
-            <TextField
-              id="standard-helperText"
-              onChange={this.handlePublicLineNameChange}
-              value={this.state.publicLineName}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <Typography variant="caption">Tekniskt nr</Typography>
-            <TextField
-              id="standard-helperText"
-              onChange={this.handleInternalLineNrChange}
-              value={this.state.internalLineNumber}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <Typography variant="caption">Via Hållplats</Typography>
-            <TextField
-              fullWidth
-              id="standard-helperText"
-              value={this.state.throughStopArea}
-              onChange={this.handleThroughStopAreaChange}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <FormControl fullWidth>
-              <Typography variant="caption">Trafikslag</Typography>
-              <Select
-                value={this.state.trafficTransportName}
-                onChange={this.handleTrafficTransportChange}
-              >
-                {trafficTransportNames.map((name, index) => {
-                  return (
-                    <MenuItem key={index} value={name}>
-                      {name}
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12}>
-            <FormControl fullWidth>
-              <Typography variant="caption">Kommun</Typography>
-              <Select
-                value={this.state.municipalityName}
-                onChange={this.handleMunicipalChange}
-              >
-                {municipalities.map((municipality, index) => {
-                  if (municipality.name == "") {
-                    return (
-                      <MenuItem
-                        className={classes.firstMenuItem}
-                        key={index}
-                        value={municipality.name}
-                      >
-                        <Typography>{municipality.name}</Typography>
-                      </MenuItem>
-                    );
-                  } else {
-                    return (
-                      <MenuItem key={index} value={municipality.name}>
-                        <Typography>{municipality.name}</Typography>
-                      </MenuItem>
-                    );
-                  }
-                })}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12}>
-            <Button
-              className={classes.searchButton}
-              onClick={this.doSpatialChange}
-              variant="outlined"
-            >
-              Sök
-            </Button>
-          </Grid>
-          <Grid item xs={12}>
-            <Divider className={classes.divider} />
-          </Grid>
-          <Grid item xs={12}>
-            <Typography variant="body2">Markera sökområde i kartan</Typography>
-          </Grid>
-          <Grid justify="center" container>
-            <Grid item xs={3}>
-              <a href="/#">
-                <img
-                  src={PolygonIcon}
-                  value={this.state.selectedFormType}
-                  onClick={this.handlePolygonChange}
-                  alt="#"
-                ></img>
-              </a>
-              <Grid item xs={3}>
-                <Typography variant="body2">Polygon</Typography>
-              </Grid>
-            </Grid>
-            <Grid item xs={3}>
-              <a href="/#">
-                <img
-                  src={RectangleIcon}
-                  value={this.state.selectedFormType}
-                  onClick={this.handleRectangleChange}
-                  alt="#"
-                ></img>
-              </a>
-              <Grid item xs={3}>
-                <Typography variant="body2">Rektangel</Typography>
-              </Grid>
-            </Grid>
-          </Grid>
+          {this.renderPublicAndTechnicalNrSection()}
+          {this.renderInputValueSection()}
+          {this.renderTrafficTypeSection()}
+          {this.renderMunicipalitySection()}
+          {this.renderSearchButtonSection()}
+          {this.renderSpatialSearchSection()}
         </Grid>
       </div>
     );

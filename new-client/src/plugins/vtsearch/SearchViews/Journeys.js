@@ -138,71 +138,80 @@ class Journeys extends React.PureComponent {
       selectedFormType: "Box"
     });
   };
-  render() {
-    const { classes } = this.props;
 
+  renderFromDateSection = () => {
+    const { classes } = this.props;
     return (
-      <div>
-        <MuiPickersUtilsProvider
-          className={classes.journeysForm}
-          utils={DateFnsUtils}
-        >
-          <Grid container justify="center" spacing={2}>
-            <Grid item xs={12}>
-              <Typography variant="caption">Från och med</Typography>
-              <KeyboardTimePicker
-                margin="normal"
-                id="time-picker"
-                ampm={false}
-                className={classes.dateForm}
-                invalidDateMessage="Fel värde på tid"
-                keyboardIcon={<AccessTimeIcon></AccessTimeIcon>}
-                value={this.state.selectedFromTime}
-                onChange={this.handleFromTimeChange}
-                KeyboardButtonProps={{
-                  "aria-label": "change time"
-                }}
-              />
-            </Grid>
-            <KeyboardDatePicker
-              className={classes.spaceToFromDate}
-              format="yyyy-MM-dd"
-              margin="normal"
-              invalidDateMessage="Fel värde på datum"
-              value={this.state.selectedFromDate}
-              onChange={this.handleFromDateChange}
-              KeyboardButtonProps={{
-                "aria-label": "change date"
-              }}
-            />
-            <Grid item xs={12}>
-              <Typography variant="caption">Till och med</Typography>
-              <KeyboardTimePicker
-                margin="normal"
-                ampm={false}
-                className={classes.dateForm}
-                invalidDateMessage="Fel värde på tid"
-                keyboardIcon={<AccessTimeIcon></AccessTimeIcon>}
-                value={this.state.selectedEndDTime}
-                onChange={this.handleEndTimeChange}
-                KeyboardButtonProps={{
-                  "aria-label": "change time"
-                }}
-              />
-            </Grid>
-            <KeyboardDatePicker
-              format="yyyy-MM-dd"
-              margin="normal"
-              invalidDateMessage="Fel värde på datum"
-              value={this.state.selectedEndDate}
-              className={classes.spaceToFromDate}
-              onChange={this.handleEndDateChange}
-              KeyboardButtonProps={{
-                "aria-label": "change date"
-              }}
-            />
-          </Grid>
-        </MuiPickersUtilsProvider>
+      <>
+        <Grid item xs={12}>
+          <Typography variant="caption">Från och med</Typography>
+          <KeyboardTimePicker
+            margin="normal"
+            id="time-picker"
+            ampm={false}
+            className={classes.dateForm}
+            invalidDateMessage="Fel värde på tid"
+            keyboardIcon={<AccessTimeIcon></AccessTimeIcon>}
+            value={this.state.selectedFromTime}
+            onChange={this.handleFromTimeChange}
+            KeyboardButtonProps={{
+              "aria-label": "change time"
+            }}
+          />
+        </Grid>
+        <KeyboardDatePicker
+          className={classes.spaceToFromDate}
+          format="yyyy-MM-dd"
+          margin="normal"
+          invalidDateMessage="Fel värde på datum"
+          value={this.state.selectedFromDate}
+          onChange={this.handleFromDateChange}
+          KeyboardButtonProps={{
+            "aria-label": "change date"
+          }}
+        />
+      </>
+    );
+  };
+
+  renderEndDateSection = () => {
+    const { classes } = this.props;
+    return (
+      <Grid container justify="center" spacing={2}>
+        <Grid item xs={12}>
+          <Typography variant="caption">Till och med</Typography>
+          <KeyboardTimePicker
+            margin="normal"
+            ampm={false}
+            className={classes.dateForm}
+            invalidDateMessage="Fel värde på tid"
+            keyboardIcon={<AccessTimeIcon></AccessTimeIcon>}
+            value={this.state.selectedEndDTime}
+            onChange={this.handleEndTimeChange}
+            KeyboardButtonProps={{
+              "aria-label": "change time"
+            }}
+          />
+        </Grid>
+        <KeyboardDatePicker
+          format="yyyy-MM-dd"
+          margin="normal"
+          invalidDateMessage="Fel värde på datum"
+          value={this.state.selectedEndDate}
+          className={classes.spaceToFromDate}
+          onChange={this.handleEndDateChange}
+          KeyboardButtonProps={{
+            "aria-label": "change date"
+          }}
+        />
+      </Grid>
+    );
+  };
+
+  renderSpatialSearchSection = () => {
+    const { classes } = this.props;
+    return (
+      <>
         <Grid item xs={12}>
           <Divider className={classes.divider} />
         </Grid>
@@ -237,6 +246,22 @@ class Journeys extends React.PureComponent {
             </Grid>
           </Grid>
         </Grid>
+      </>
+    );
+  };
+  render() {
+    const { classes } = this.props;
+
+    return (
+      <div>
+        <MuiPickersUtilsProvider
+          className={classes.journeysForm}
+          utils={DateFnsUtils}
+        >
+          {this.renderFromDateSection()}
+          {this.renderEndDateSection()}
+        </MuiPickersUtilsProvider>
+        {this.renderSpatialSearchSection()}
       </div>
     );
   }
