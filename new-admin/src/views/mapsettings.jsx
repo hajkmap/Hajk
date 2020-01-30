@@ -1405,13 +1405,25 @@ class Menu extends Component {
                       title="Avgör om verktyget visas som en Widget Plugin (om 'left' eller 'right' anges här) eller Drawer Plugin (om 'toolbar' anges här)."
                     />
                   </label>
-                  <input
+                  <select
+                    id="target"
+                    name="target"
+                    onChange={e => {
+                      this.handleInputChange(e);
+                    }}
+                    value={this.state.target}
+                  >
+                    <option value="toolbar">Drawer</option>
+                    <option value="left">Widget left</option>
+                    <option value="right">Widget right</option>
+                  </select>
+                  {/* <input
                     id="target"
                     name="target"
                     type="text"
                     onChange={this.handleInputChange}
                     value={this.state.target}
-                  />
+                  /> */}
                 </div>
               </div>
               <div className="row">
