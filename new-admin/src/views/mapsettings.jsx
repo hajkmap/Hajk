@@ -1406,6 +1406,7 @@ class Menu extends Component {
                     />
                   </label>
                   <select
+                    id="target"
                     name="target"
                     onChange={e => {
                       this.handleInputChange(e);

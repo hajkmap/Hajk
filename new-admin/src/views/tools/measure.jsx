@@ -216,6 +216,7 @@ class ToolOptions extends Component {
           <div>
             <label htmlFor="target">Verktygsplacering</label>
             <select
+              id="target"
               name="target"
               onChange={e => {
                 this.handleInputChange(e);
