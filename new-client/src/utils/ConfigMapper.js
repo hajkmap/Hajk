@@ -62,13 +62,17 @@ export default class ConfigMapper {
       });
     }
 
-    function mapLayersInfo(layersInfo) {
+    function mapLayersInfo(layersInfo, infobox) {
       if (Array.isArray(layersInfo)) {
         return layersInfo.reduce((layersInfoObject, layerInfo) => {
           layersInfoObject[layerInfo.id] = layerInfo;
           if (!layerInfo.legend) {
             layersInfoObject[layerInfo.id].legend = getLegendUrl(layerInfo.id);
           }
+          if (infobox.length) {
+            layersInfoObject[layerInfo.id].infobox = infobox;
+          }
+
           return layersInfoObject;
         }, {});
       }
@@ -133,7 +137,7 @@ export default class ConfigMapper {
             ? args.layersInfo.map(l => l.style || "").join(",")
             : null
         },
-        layersInfo: mapLayersInfo(args.layersInfo),
+        layersInfo: mapLayersInfo(args.layersInfo, args.infobox),
         infoVisible: args.infoVisible || false,
         infoTitle: args.infoTitle,
         infoText: args.infoText,
