@@ -251,6 +251,7 @@ class ToolOptions extends Component {
               onChange={e => {
                 this.handleInputChange(e);
               }}
+              value={this.state.target}
             >
               <option value="toolbar" target="toolbar">
                 Drawer
