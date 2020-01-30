@@ -56,6 +56,7 @@ const defaultState = {
   tooltip: "Sök...",
   searchWithinButtonText: "Markera i kartan",
   maxFeatures: 100,
+  delayBeforeAutoSearch: 500,
   layers: [],
   visibleForGroups: [],
 
@@ -109,6 +110,9 @@ class ToolOptions extends Component {
             tool.options.searchWithinButtonText ||
             this.state.searchWithinButtonText,
           maxFeatures: tool.options.maxFeatures || this.state.maxFeatures,
+          delayBeforeAutoSearch:
+            tool.options.delayBeforeAutoSearch ||
+            this.state.delayBeforeAutoSearch,
           selectedSources: tool.options.selectedSources
             ? tool.options.selectedSources
             : [],
@@ -240,6 +244,7 @@ class ToolOptions extends Component {
         tooltip: this.state.tooltip,
         searchWithinButtonText: this.state.searchWithinButtonText,
         maxFeatures: this.state.maxFeatures,
+        delayBeforeAutoSearch: this.state.delayBeforeAutoSearch,
         selectedSources: this.state.selectedSources
           ? this.state.selectedSources
           : [],
@@ -543,8 +548,26 @@ class ToolOptions extends Component {
             <label htmlFor="maxFeatures">Max antal sökträffar</label>
             <input
               value={this.state.maxFeatures}
-              type="text"
+              type="number"
+              min="0"
+              step="10"
               name="maxFeatures"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="delayBeforeAutoSearch">
+              Fördröjning innan autosök (i millisekunder)
+            </label>
+            <input
+              value={this.state.delayBeforeAutoSearch}
+              type="number"
+              min="0"
+              max="5000"
+              step="100"
+              name="delayBeforeAutoSearch"
               onChange={e => {
                 this.handleInputChange(e);
               }}

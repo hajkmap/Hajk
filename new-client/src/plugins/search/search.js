@@ -73,6 +73,13 @@ class Search extends React.PureComponent {
 
   tooltip = this.props.options.tooltip;
 
+  // Used for setTimeout/clearTimeout, in order to delay auto-search when user is typing
+  timer = null;
+  delayBeforeAutoSearch =
+    Number.isNaN(this.props.options.delayBeforeAutoSearch) === false
+      ? this.props.options.delayBeforeAutoSearch
+      : 500;
+
   activeSpatialTools = {
     radiusSearch: this.props.options.radiusSearch,
     selectionSearch: this.props.options.selectionSearch,
@@ -205,6 +212,25 @@ class Search extends React.PureComponent {
     });
   }
 
+  handleSearchBoxInputChange = e => {
+    const v = e.target.value;
+    if (v.length <= 3) {
+      return;
+    }
+    if (this.delayBeforeAutoSearch > 0) {
+      clearTimeout(this.timer);
+      this.timer = setTimeout(() => {
+        this.doSearch(v);
+      }, this.delayBeforeAutoSearch);
+    } else {
+      this.doSearch(v);
+    }
+  };
+
+  handleSearchBoxKeyPress = e => {
+    e.key === "Enter" && this.doSearch(e.target.value);
+  };
+
   renderSearchBox() {
     const { classes, onMenuClick, menuButtonDisabled } = this.props;
 
@@ -234,18 +260,8 @@ class Search extends React.PureComponent {
               "aria-label": "search hajk maps",
               id: "searchbox"
             }}
-            onChange={e => {
-              const v = e.target.value;
-              if (v.length <= 3) {
-                return;
-              }
-              this.doSearch(v);
-            }}
-            onKeyPress={e => {
-              if (e.key === "Enter") {
-                this.doSearch(e.target.value);
-              }
-            }}
+            onChange={this.handleSearchBoxInputChange}
+            onKeyPress={this.handleSearchBoxKeyPress}
           />
           <Tooltip
             title={
