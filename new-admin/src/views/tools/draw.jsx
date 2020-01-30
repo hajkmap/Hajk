@@ -268,15 +268,22 @@ class ToolOptions extends Component {
           </div>
           <div>
             <label htmlFor="target">Verktygsplacering</label>
-            <input
-              id="target"
+            <select
               name="target"
-              type="text"
               onChange={e => {
                 this.handleInputChange(e);
               }}
-              value={this.state.target}
-            />
+            >
+              <option value="toolbar" target="toolbar">
+                Drawer
+              </option>
+              <option value="left" target="left">
+                Widget left
+              </option>
+              <option value="right" taget="right">
+                Widget right
+              </option>
+            </select>
           </div>
           <div>
             <label htmlFor="position">
