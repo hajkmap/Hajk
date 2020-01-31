@@ -76,7 +76,7 @@ namespace EdpConn
 
         public void Disconnect()
         {
-            this.HubConnection.Disconnect();
+            this.HubConnection.Stop();
         }
 
         public List<RealEstateIdentifier> RealEstateIdentifiersToSend = null;
