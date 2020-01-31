@@ -1413,15 +1413,9 @@ class Menu extends Component {
                     }}
                     value={this.state.target}
                   >
-                    <option value="toolbar" target="toolbar">
-                      Drawer
-                    </option>
-                    <option value="left" target="left">
-                      Widget left
-                    </option>
-                    <option value="right" taget="right">
-                      Widget right
-                    </option>
+                    <option value="toolbar">Drawer</option>
+                    <option value="left">Widget left</option>
+                    <option value="right">Widget right</option>
                   </select>
                   {/* <input
                     id="target"
