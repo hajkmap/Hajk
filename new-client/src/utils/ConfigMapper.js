@@ -69,7 +69,7 @@ export default class ConfigMapper {
           if (!layerInfo.legend) {
             layersInfoObject[layerInfo.id].legend = getLegendUrl(layerInfo.id);
           }
-          if (infobox.length) {
+          if (infobox?.length) {
             layersInfoObject[layerInfo.id].infobox = infobox;
           }
 
