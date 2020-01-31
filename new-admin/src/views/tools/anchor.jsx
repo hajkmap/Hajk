@@ -289,8 +289,8 @@ class ToolOptions extends Component {
               }}
               value={this.state.position}
             >
-              <option value="left">left</option>
-              <option value="right">right</option>
+              <option value="left">Left</option>
+              <option value="right">Right</option>
             </select>
           </div>
           <div>
