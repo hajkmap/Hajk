@@ -1436,13 +1436,17 @@ class Menu extends Component {
                       title="Placering av verktygets fönster. Anges som antingen 'left' eller 'right'."
                     />
                   </label>
-                  <input
+                  <select
                     id="position"
                     name="position"
-                    type="text"
-                    onChange={this.handleInputChange}
+                    onChange={e => {
+                      this.handleInputChange(e);
+                    }}
                     value={this.state.position}
-                  />
+                  >
+                    <option value="left">Left</option>
+                    <option value="right">Right</option>
+                  </select>
                 </div>
               </div>
               <div className="row">
