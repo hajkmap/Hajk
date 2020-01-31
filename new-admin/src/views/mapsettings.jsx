@@ -185,7 +185,7 @@ $.fn.editable = function(component) {
     });
 
     input
-      .val(node.html())
+      .val(node.parent()[0].attributes.getNamedItem("data-name").value)
       .keydown(e => {
         if (e.keyCode === 13) {
           store();
