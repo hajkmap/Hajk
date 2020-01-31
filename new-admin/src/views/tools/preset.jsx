@@ -469,15 +469,9 @@ class ToolOptions extends Component {
               }}
               value={this.state.target}
             >
-              <option value="toolbar" target="toolbar">
-                Drawer
-              </option>
-              <option value="left" target="left">
-                Widget left
-              </option>
-              <option value="right" taget="right">
-                Widget right
-              </option>
+              <option value="toolbar">Drawer</option>
+              <option value="left">Widget left</option>
+              <option value="right">Widget right</option>
             </select>
           </div>
  */}
@@ -490,15 +484,17 @@ class ToolOptions extends Component {
                 title="Placering av verktygets fönster. Anges som antingen 'left' eller 'right'."
               />
             </label>
-            <input
+           <select
               id="position"
               name="position"
-              type="text"
               onChange={e => {
                 this.handleInputChange(e);
               }}
               value={this.state.position}
-            />
+            >
+              <option value="left">left</option>
+              <option value="right">right</option>
+            </select>
           </div>
  */}
           {/*           <div>
