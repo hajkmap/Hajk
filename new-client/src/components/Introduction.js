@@ -1,13 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Steps } from "intro.js-react";
-import { bool, object } from "prop-types";
+import PropTypes from "prop-types";
 
 import "intro.js/introjs.css";
-
-Introduction.propTypes = {
-  experimentalShowIntroduction: bool.isRequired,
-  globalObserver: object.isRequired
-};
 
 /**
  * @summary Renders a guide that introduces new users to features present in Hajk.
@@ -17,11 +12,24 @@ Introduction.propTypes = {
  * @param {bool} { experimentalShowIntroduction }
  * @returns React.Component
  */
-function Introduction({ experimentalShowIntroduction, globalObserver }) {
-  const [stepsEnabled, setStepsEnabled] = useState(true);
+class Introduction extends React.PureComponent {
+  state = {
+    initialStep: 0,
+    stepsEnabled: true,
+    steps: []
+  };
 
-  // eslint-disable-next-line
-  const [steps, setSteps] = useState([
+  static propTypes = {
+    experimentalShowIntroduction: PropTypes.bool.isRequired,
+    globalObserver: PropTypes.object.isRequired
+  };
+
+  static defaultProps = {
+    experimentalShowIntroduction: false,
+    globalObserver: {}
+  };
+
+  predefinedSteps = [
     {
       element: "#map > div",
       intro:
@@ -51,63 +59,67 @@ function Introduction({ experimentalShowIntroduction, globalObserver }) {
       intro:
         "Ibland kan det finns så kallade Widget-knappar. De används för de mest använda verktygen och gör att du inte behöver öppna verktygspanelen för att nå verktyget. <br><br>Det var det hela. Hoppas du kommer tycka om att använda Hajk!"
     }
-  ]);
+  ];
 
-  // eslint-disable-next-line
-  const [initialStep, setInitialStep] = useState(0);
+  constructor(props) {
+    super(props);
 
-  const [readyForRender, setReadyForRender] = useState(false);
-  let localSteps;
+    /**
+     * When appLoaded is fired, let's filter through the provided 'steps'.
+     * We must remove any steps that don't have corresponding DOM elements.
+     * Otherwise, we would show intro steps even for non-existing elements,
+     * which wouldn't be nice.
+     */
+    this.props.globalObserver.subscribe("appLoaded", () => {
+      const filteredSteps = this.predefinedSteps.filter(
+        s => document.querySelector(s.element) !== null
+      );
+      console.log("filteredSteps: ", filteredSteps);
+      this.setState({ steps: filteredSteps });
+      // this.localSteps.updateStepElement(0);
+    });
+  }
 
-  const disableSteps = () => {
-    setStepsEnabled(false);
+  disableSteps = () => {
+    this.setState({ stepsEnabled: false });
     // Upon completion/closing, set a flag that won't show this guide again
     window.localStorage.setItem("introductionShown", 1);
   };
 
-  /**
-   * When appLoaded is fired, let's filter through the provided 'steps'.
-   * We must remove any steps that don't have corresponding DOM elements.
-   * Otherwise, we would show intro steps even for non-existing elements,
-   * which wouldn't be nice.
-   */
-  globalObserver.subscribe("appLoaded", l => {
-    setSteps(steps.filter(s => document.querySelector(s.element) !== null));
-    localSteps.updateStepElement(0);
-    console.log("ready");
-    setReadyForRender(true);
-  });
+  render() {
+    const { experimentalShowIntroduction } = this.props;
+    const { initialStep, steps, stepsEnabled } = this.state;
 
-  return (
-    readyForRender &&
-    experimentalShowIntroduction &&
-    parseInt(window.localStorage.getItem("introductionShown")) !== 1 && (
-      <Steps
-        enabled={stepsEnabled}
-        steps={steps}
-        initialStep={initialStep}
-        onExit={disableSteps}
-        ref={steps => (localSteps = steps)}
-        onBeforeChange={nextStepIndex => {
-          if (nextStepIndex) {
-            localSteps.updateStepElement(nextStepIndex);
-          }
-          if (nextStepIndex === localSteps?.props.steps.length - 1) {
-            console.log(
-              "This is the last step, hide prev/next buttons and ensure correct CSS for done button"
-            );
-          }
-        }}
-        options={{
-          exitOnOverlayClick: false,
-          nextLabel: "Nästa",
-          prevLabel: "Föregående",
-          skipLabel: "Hoppa över",
-          doneLabel: "Klart"
-        }}
-      />
-    )
-  );
+    return (
+      experimentalShowIntroduction &&
+      parseInt(window.localStorage.getItem("introductionShown")) !== 1 && (
+        <Steps
+          enabled={stepsEnabled}
+          steps={steps}
+          initialStep={initialStep}
+          onExit={this.disableSteps}
+          ref={steps => (this.localSteps = steps)}
+          onBeforeChange={nextStepIndex => {
+            if (nextStepIndex) {
+              this.localSteps.updateStepElement(nextStepIndex);
+            }
+            if (nextStepIndex === this.localSteps?.props.steps.length - 1) {
+              console.log(
+                "This is the last step, hide prev/next buttons and ensure correct CSS for done button"
+              );
+            }
+          }}
+          options={{
+            exitOnOverlayClick: false,
+            nextLabel: "Nästa",
+            prevLabel: "Föregående",
+            skipLabel: "Hoppa över",
+            doneLabel: "Klart"
+          }}
+        />
+      )
+    );
+  }
 }
 
 export default Introduction;
