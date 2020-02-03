@@ -242,7 +242,7 @@ class Search extends React.PureComponent {
       <>
         <Paper className={classes.root}>
           <Tooltip title={tooltipText}>
-            <span>
+            <span id="drawerToggler">
               <IconButton
                 onClick={onMenuClick}
                 className={classes.iconButton}

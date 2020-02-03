@@ -137,6 +137,7 @@ class SpatialSearchOptions extends React.Component {
               color="primary"
               className={classes.iconButton}
               onClick={this.handleDropdownClick}
+              id="spatialSearchMenu"
             >
               <MoreHorizIcon />
             </IconButton>
