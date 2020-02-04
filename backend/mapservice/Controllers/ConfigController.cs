@@ -263,6 +263,7 @@ namespace MapService.Controllers
                             visibleAtStart = true,
                             backgroundSwitcherBlack = true,
                             backgroundSwitcherWhite = true,
+                            panelTitle = String.Empty,
                             instruction = String.Empty,
                             themeMapHeaderCaption = String.Empty,
                             visibleForGroups = new string[0]
@@ -664,6 +665,25 @@ namespace MapService.Controllers
 
             return mapConfiguration;
         }
+        private JToken FilterKirToolByAD(ActiveDirectoryLookup adLookup, JToken mapConfiguration)
+        {
+            var childrenToRemove = new List<string>();
+            var userGroups = adLookup.GetGroups();
+            var firTool = mapConfiguration.SelectToken("$.tools[?(@.type == 'kir')]");
+
+            var residentList = firTool.SelectToken("$.options.residentList");
+            if (residentList != null)
+            {
+                var visibleForGroups = residentList.SelectToken("$.visibleForGroups");
+
+                if (HasValidVisibleForGroups(visibleForGroups) && !IsGroupAllowedAccess(userGroups, visibleForGroups))
+                {
+                    (firTool.SelectToken("$.options") as JObject).Remove("residentList");
+                }
+            }
+
+            return mapConfiguration;
+        }
         private bool HasValidVisibleForGroups(JToken visibleForGroups)
         {
             if (visibleForGroups != null)
@@ -788,6 +808,13 @@ namespace MapService.Controllers
                         if (firTool != null)
                         {
                             filteredMapConfiguration = FilterFirToolByAD(adLookup, filteredMapConfiguration);
+                        }
+                                              
+                        // Filter KIR tool
+                        var kirTool = filteredMapConfiguration.SelectToken("$.tools[?(@.type == 'kir')]");
+                        if (kirTool != null)
+                        {
+                            filteredMapConfiguration = FilterKirToolByAD(adLookup, filteredMapConfiguration);
                         }
 
                         return filteredMapConfiguration.ToString();
