@@ -4,7 +4,6 @@ import { withStyles } from "@material-ui/core/styles";
 import TableCell from "@material-ui/core/TableCell";
 import { AutoSizer, Column, Table } from "react-virtualized";
 import { SortIndicator } from "react-virtualized";
-import ChildrenComponent from "@material-ui/core";
 
 import "react-virtualized/styles.css";
 import { Typography, Tooltip } from "@material-ui/core";
@@ -115,6 +114,9 @@ class VirtualizedTable extends React.PureComponent {
 
   cellRenderer = ({ cellData, columnIndex, rowData }) => {
     const { columns } = this.props;
+    if (cellData == null) {
+      return "";
+    }
 
     return (
       <>

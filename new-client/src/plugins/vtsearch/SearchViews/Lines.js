@@ -272,7 +272,7 @@ class Lines extends React.PureComponent {
           <Divider className={classes.divider} />
         </Grid>
         <Grid item xs={12}>
-          <Typography variant="body2">Markera sökområde i kartan</Typography>
+          <Typography variant="body2">Avgränsa sökområde i kartan</Typography>
         </Grid>
         <Grid justify="center" container>
           <Grid item xs={3}>

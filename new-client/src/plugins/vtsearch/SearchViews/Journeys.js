@@ -131,10 +131,10 @@ class Journeys extends React.PureComponent {
     });
   };
   handleRectangleChange = () => {
-    const { selectedFromDate, selectedEndDate } = this.state;
+    const { formatFromDate, formatEndDate } = this.getFormattedDate();
     this.localObserver.publish("journeys-search", {
-      selectedFromDate: selectedFromDate,
-      selectedEndDate: selectedEndDate,
+      selectedFromDate: formatFromDate,
+      selectedEndDate: formatEndDate,
       selectedFormType: "Box"
     });
   };
@@ -216,7 +216,7 @@ class Journeys extends React.PureComponent {
           <Divider className={classes.divider} />
         </Grid>
         <Grid item xs={12}>
-          <Typography variant="body2">Markera sökområde i kartan</Typography>
+          <Typography variant="body2">Avgränsa sökområde i kartan</Typography>
         </Grid>
         <Grid justify="center" container>
           <Grid item xs={3}>
