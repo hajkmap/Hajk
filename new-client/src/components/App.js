@@ -8,6 +8,7 @@ import Observer from "react-event-observer";
 import AppModel from "./../models/AppModel.js";
 import Window from "./Window.js";
 import CookieNotice from "./CookieNotice";
+import Introduction from "./Introduction";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
 
@@ -365,7 +366,7 @@ class App extends React.PureComponent {
       this.appModel.plugins.search === undefined &&
       this.appModel.config.mapConfig.map.clean !== true && (
         <Tooltip title={tooltipText}>
-          <span>
+          <span id="drawerToggler">
             <Fab
               onClick={this.toggleDrawer(!this.state.drawerVisible)}
               color="primary"
@@ -435,6 +436,7 @@ class App extends React.PureComponent {
             title="Meddelande"
           />
           <div
+            id="appBox"
             className={cslx(classes.flexBox, {
               [classes.shiftedLeft]: this.state.drawerPermanent
             })}
@@ -560,6 +562,12 @@ class App extends React.PureComponent {
             open={this.state.drawerVisible && !this.state.drawerPermanent}
             className={classes.backdrop}
             onClick={this.toggleDrawer(!this.state.drawerVisible)}
+          />
+          <Introduction
+            experimentalShowIntroduction={
+              this.appModel.config.appConfig.experimentalShowIntroduction
+            }
+            globalObserver={this.globalObserver}
           />
         </>
       </SnackbarProvider>
