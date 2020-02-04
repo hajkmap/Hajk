@@ -14,6 +14,7 @@ import "intro.js/introjs.css";
  */
 class Introduction extends React.PureComponent {
   state = {
+    forceShow: false, // Used to force showing the Intro, overrides the LocalStorage value
     initialStep: 0,
     stepsEnabled: true,
     steps: []
@@ -81,10 +82,18 @@ class Introduction extends React.PureComponent {
       );
       this.setState({ steps: filteredSteps });
     });
+
+    this.props.globalObserver.subscribe("showIntroduction", () => {
+      this.setState({
+        initialStep: 0,
+        stepsEnabled: true,
+        forceShow: true
+      });
+    });
   }
 
   disableSteps = () => {
-    this.setState({ stepsEnabled: false });
+    this.setState({ stepsEnabled: false, forceShow: false });
     // Upon completion/closing, set a flag that won't show this guide again
     window.localStorage.setItem("introductionShown", 1);
   };
@@ -94,8 +103,11 @@ class Introduction extends React.PureComponent {
     const { initialStep, steps, stepsEnabled } = this.state;
 
     return (
+      // TODO: Remove check once the experimental flag is lifted. Remember to remove the unneeded prop from here and App.js too.
       experimentalShowIntroduction &&
-      parseInt(window.localStorage.getItem("introductionShown")) !== 1 && (
+      // Show only once per browser, or override if forced by a user action.
+      (parseInt(window.localStorage.getItem("introductionShown")) !== 1 ||
+        this.state.forceShow === true) && (
         <Steps
           enabled={stepsEnabled}
           steps={steps}
@@ -103,14 +115,16 @@ class Introduction extends React.PureComponent {
           onExit={this.disableSteps}
           ref={steps => (this.localSteps = steps)}
           onBeforeChange={nextStepIndex => {
+            // Ensure that we always use the updated list of steps, necessary for dynamic elements
             if (nextStepIndex) {
               this.localSteps.updateStepElement(nextStepIndex);
             }
-            if (nextStepIndex === this.localSteps?.props.steps.length - 1) {
-              console.log(
-                "This is the last step, hide prev/next buttons and ensure correct CSS for done button"
-              );
-            }
+            // TODO: Below is a great place to handle the last step, we could e.g. show a special goodbye message
+            // if (nextStepIndex === this.localSteps?.props.steps.length - 1) {
+            //   console.log(
+            //     "This is the last step, hide prev/next buttons and ensure correct CSS for done button"
+            //   );
+            // }
           }}
           options={{
             exitOnOverlayClick: false,
