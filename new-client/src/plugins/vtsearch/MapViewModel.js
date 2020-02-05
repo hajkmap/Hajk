@@ -66,6 +66,7 @@ export default class MapViewModel {
     });
     this.localObserver.subscribe("toggle-visibility", searchResultID => {
       this.toggleLayerVisibility(searchResultID);
+      this.highlightLayer.getSource().clear();
     });
 
     this.map.on("singleclick", this.onFeaturesClickedInMap);
@@ -155,9 +156,7 @@ export default class MapViewModel {
       }
     );
   };
-  componentWillUnmount() {
-    document.removeEventListener("click", this.drawlayer.getSource().clear());
-  }
+
   resizeMap = height => {
     //Not so "reacty" but no other solution possible because if we don't want to rewrite core functionality in Hajk3
     [appContainer, mapContainer].forEach(container => {

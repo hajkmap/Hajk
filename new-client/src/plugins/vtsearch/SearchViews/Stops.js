@@ -12,19 +12,22 @@ import {
   Button,
   Typography,
   Divider,
-  Grid
+  Grid,
+  ButtonGroup
 } from "@material-ui/core";
-import PolygonIcon from "../img/polygonmarkering.png";
-import RectangleIcon from "../img/rektangelmarkering.png";
+import InactivePolygon from "../img/polygonmarkering.png";
+import InactiveRectangle from "../img/rektangelmarkering.png";
+import ActivePolygon from "../img/polygonmarkering-blue.png";
+import ActiveRectangle from "../img/rektangelmarkering-blue.png";
 
 // Define JSS styles that will be used in this component.
 // Examle below utilizes the very powerful "theme" object
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
 const styles = theme => ({
   divider: { marginTop: theme.spacing(2), marginBottom: theme.spacing(2) },
-  firstMenuItem: {
-    minHeight: 36
-  }
+  firstMenuItem: { minHeight: 36 },
+  searchButtonColor: { borderColor: theme.palette.primary.main },
+  searchButtonText: { color: theme.palette.primary.main }
 });
 
 class Stops extends React.PureComponent {
@@ -58,12 +61,30 @@ class Stops extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
+    this.bindSubscriptions();
     this.model.fetchAllPossibleMunicipalityZoneNames().then(result => {
       this.setState({
         municipalities: result.length > 0 ? result : []
       });
     });
   }
+
+  bindSubscriptions = () => {
+    const { localObserver } = this.props;
+    localObserver.subscribe("vtsearch-result-begin", () => {
+      this.setState({ isPolygonActive: false, isRectangleActive: false });
+    });
+  };
+  togglePolygonState = () => {
+    this.setState({ isPolygonActive: !this.state.isPolygonActive }, () => {
+      this.handlePolygonChange();
+    });
+  };
+  toggleRectangleState = () => {
+    this.setState({ isRectangleActive: !this.state.isRectangleActive }, () => {
+      this.handleRectangleChange();
+    });
+  };
 
   handleChange = event => {
     this.setState({
@@ -141,7 +162,7 @@ class Stops extends React.PureComponent {
               />
             </Grid>
             <Grid item xs={10}>
-              <Typography variant="body2">Hållplatsområden</Typography>
+              <Typography variant="body2">HÅLLPLATSOMRÅDE</Typography>
             </Grid>
             <Grid item xs={2}>
               <FormControlLabel
@@ -151,7 +172,7 @@ class Stops extends React.PureComponent {
             </Grid>
 
             <Grid item xs={10}>
-              <Typography variant="body2">Hållplatslägen</Typography>
+              <Typography variant="body2">HÅLLPLATSLÄGEN</Typography>
             </Grid>
           </Grid>
         </RadioGroup>
@@ -168,7 +189,7 @@ class Stops extends React.PureComponent {
           <Divider />
         </Grid>
         <Grid item xs={12}>
-          <Typography variant="caption">Hållplatsnamn eller -nr</Typography>
+          <Typography variant="caption">HÅLLPLATSNAMN ELLER -NR</Typography>
           <TextField
             fullWidth
             id="standard-basic"
@@ -177,7 +198,7 @@ class Stops extends React.PureComponent {
           ></TextField>
         </Grid>
         <Grid item xs={12}>
-          <Typography variant="caption">Längs publik linje</Typography>
+          <Typography variant="caption">LÄNGS PUBLIK LINJE</Typography>
           <TextField
             fullWidth
             id="standard-basic"
@@ -187,7 +208,7 @@ class Stops extends React.PureComponent {
         </Grid>
         <Grid item xs={12}>
           <FormControl fullWidth>
-            <Typography variant="caption">Kommun</Typography>
+            <Typography variant="caption">KOMMUN</Typography>
             <Select
               value={this.state.municipality}
               onChange={this.handleMunicipalChange}
@@ -219,11 +240,18 @@ class Stops extends React.PureComponent {
   };
 
   renderSearchButton = () => {
+    const { classes } = this.props;
     return (
       <Grid item xs={12}>
-        <Button onClick={this.doSpatialChange} variant="outlined">
-          Sök
-        </Button>
+        <ButtonGroup className={classes.searchButtonColor}>
+          <Button
+            className={classes.searchButtonColor}
+            onClick={this.doSpatialChange}
+            variant="outlined"
+          >
+            <Typography className={classes.searchButtonText}>SÖK</Typography>
+          </Button>
+        </ButtonGroup>
       </Grid>
     );
   };
@@ -236,35 +264,39 @@ class Stops extends React.PureComponent {
           <Divider className={classes.divider} />
         </Grid>
         <Grid item xs={12}>
-          <Typography align="center" variant="body2">
-            Avgränsa sökområde i kartan
-          </Typography>
+          <Typography variant="body2">AVGRÄNSA SÖKOMRÅDE I KARTAN</Typography>
         </Grid>
         <Grid justify="center" container>
-          <Grid item xs={3}>
-            <a href="/#">
+          <Grid item xs={4}>
+            <div>
               <img
-                src={PolygonIcon}
+                src={
+                  this.state.isPolygonActive ? ActivePolygon : InactivePolygon
+                }
+                onClick={this.togglePolygonState}
                 value={this.state.selectedFormType}
-                onClick={this.handlePolygonChange}
                 alt="#"
               ></img>
-            </a>
-            <Grid item xs={3}>
-              <Typography variant="body2">Polygon</Typography>
+            </div>
+            <Grid item xs={4}>
+              <Typography variant="body2">POLYGON</Typography>
             </Grid>
           </Grid>
-          <Grid item xs={3}>
-            <a href="/#">
+          <Grid item xs={4}>
+            <div>
               <img
-                src={RectangleIcon}
+                src={
+                  this.state.isRectangleActive
+                    ? ActiveRectangle
+                    : InactiveRectangle
+                }
+                onClick={this.toggleRectangleState}
                 value={this.state.selectedFormType}
-                onClick={this.handleRectangleChange}
                 alt="#"
               ></img>
-            </a>
-            <Grid item xs={3}>
-              <Typography variant="body2">Rektangel</Typography>
+            </div>
+            <Grid item xs={4}>
+              <Typography variant="body2">REKTANGEL</Typography>
             </Grid>
           </Grid>
         </Grid>
