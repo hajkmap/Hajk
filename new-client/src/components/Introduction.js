@@ -9,7 +9,6 @@ import "intro.js/introjs.css";
  * @description The introduction will only be rendered once. This is achieved by setting
  * a flag in the browser's local storage.
  *
- * @param {bool} { experimentalShowIntroduction }
  * @returns React.Component
  */
 class Introduction extends React.PureComponent {
@@ -21,12 +20,14 @@ class Introduction extends React.PureComponent {
   };
 
   static propTypes = {
-    experimentalShowIntroduction: PropTypes.bool.isRequired,
+    experimentalIntroductionEnabled: PropTypes.bool.isRequired,
+    experimentalIntroductionSteps: PropTypes.array,
     globalObserver: PropTypes.object.isRequired
   };
 
   static defaultProps = {
-    experimentalShowIntroduction: false,
+    experimentalIntroductionEnabled: false,
+    experimentalIntroductionSteps: [],
     globalObserver: {}
   };
 
@@ -77,8 +78,16 @@ class Introduction extends React.PureComponent {
      * which wouldn't be nice.
      */
     this.props.globalObserver.subscribe("appLoaded", () => {
-      const filteredSteps = this.predefinedSteps.filter(
-        s => document.querySelector(s.element) !== null
+      // First check if we have any steps in our config
+      const { experimentalIntroductionSteps } = this.props;
+      // We must have at least 2 elements in the array in order to properly show intro guide
+      const steps =
+        experimentalIntroductionSteps.length >= 2
+          ? experimentalIntroductionSteps
+          : this.predefinedSteps;
+
+      const filteredSteps = steps.filter(
+        s => document.querySelector(s?.element) !== null
       );
       this.setState({ steps: filteredSteps });
     });
@@ -99,12 +108,14 @@ class Introduction extends React.PureComponent {
   };
 
   render() {
-    const { experimentalShowIntroduction } = this.props;
+    const { experimentalIntroductionEnabled } = this.props;
     const { initialStep, steps, stepsEnabled } = this.state;
 
     return (
       // TODO: Remove check once the experimental flag is lifted. Remember to remove the unneeded prop from here and App.js too.
-      experimentalShowIntroduction &&
+      experimentalIntroductionEnabled &&
+      // Don't show unless we have 2 or more elements in array - too short guides are not meaningful!
+      steps.length >= 2 &&
       // Show only once per browser, or override if forced by a user action.
       (parseInt(window.localStorage.getItem("introductionShown")) !== 1 ||
         this.state.forceShow === true) && (

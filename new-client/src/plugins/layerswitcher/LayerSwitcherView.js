@@ -75,7 +75,7 @@ class LayersSwitcherView extends React.PureComponent {
     // Not beautiful but it works - timeout is needed to ensure rendering is done
     // and parent's element are correct.
     setTimeout(() => {
-      ref.updateIndicator();
+      ref !== null && ref.updateIndicator();
     }, 1);
   };
 

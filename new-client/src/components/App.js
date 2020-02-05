@@ -564,8 +564,11 @@ class App extends React.PureComponent {
             onClick={this.toggleDrawer(!this.state.drawerVisible)}
           />
           <Introduction
-            experimentalShowIntroduction={
-              this.appModel.config.appConfig.experimentalShowIntroduction
+            experimentalIntroductionEnabled={
+              this.appModel.config.appConfig.experimentalIntroductionEnabled
+            }
+            experimentalIntroductionSteps={
+              this.appModel.config.appConfig.experimentalIntroductionSteps
             }
             globalObserver={this.globalObserver}
           />
