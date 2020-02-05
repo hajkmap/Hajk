@@ -5,8 +5,11 @@ import { Typography, Divider } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
 import DateFnsUtils from "@date-io/date-fns";
 import AccessTimeIcon from "@material-ui/icons/AccessTime";
-import PolygonIcon from "../img/polygonmarkering.png";
-import RectangleIcon from "../img/rektangelmarkering.png";
+import EventIcon from "@material-ui/icons/Event";
+import InactivePolygon from "../img/polygonmarkering.png";
+import InactiveRectangle from "../img/rektangelmarkering.png";
+import ActivePolygon from "../img/polygonmarkering-blue.png";
+import ActiveRectangle from "../img/rektangelmarkering-blue.png";
 
 import {
   MuiPickersUtilsProvider,
@@ -19,10 +22,15 @@ import {
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
 const styles = theme => ({
   journeysForm: { marginTop: 10 },
-  dateForm: { marginTop: 0, marginBottom: -4 },
+  dateForm: {
+    marginTop: 0,
+    marginBottom: -4,
+    color: theme.palette.primary.main
+  },
   spaceToFromDate: { marginBottom: 40 },
   divider: { marginTop: theme.spacing(3), marginBottom: theme.spacing(3) },
   textFields: { marginLeft: 10 },
+  colorOnIcon: { color: theme.palette.primary.main },
   polygonAndRectangleForm: {
     verticalAlign: "baseline",
     float: "left",
@@ -64,7 +72,25 @@ class Journeys extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
+    this.bindSubscriptions();
   }
+
+  bindSubscriptions = () => {
+    const { localObserver } = this.props;
+    localObserver.subscribe("vtsearch-result-begin", () => {
+      this.setState({ isPolygonActive: false, isRectangleActive: false });
+    });
+  };
+  togglePolygonState = () => {
+    this.setState({ isPolygonActive: !this.state.isPolygonActive }, () => {
+      this.handlePolygonChange();
+    });
+  };
+  toggleRectangleState = () => {
+    this.setState({ isRectangleActive: !this.state.isRectangleActive }, () => {
+      this.handleRectangleChange();
+    });
+  };
   handleFromTimeChange = time => {
     this.setState({
       selectedFromTime: time
@@ -144,14 +170,16 @@ class Journeys extends React.PureComponent {
     return (
       <>
         <Grid item xs={12}>
-          <Typography variant="caption">Från och med</Typography>
+          <Typography variant="caption">FRÅN OCH MED</Typography>
           <KeyboardTimePicker
             margin="normal"
             id="time-picker"
             ampm={false}
             className={classes.dateForm}
-            invalidDateMessage="Fel värde på tid"
-            keyboardIcon={<AccessTimeIcon></AccessTimeIcon>}
+            invalidDateMessage="FEL VÄRDE PÅ TID"
+            keyboardIcon={
+              <AccessTimeIcon className={classes.colorOnIcon}></AccessTimeIcon>
+            }
             value={this.state.selectedFromTime}
             onChange={this.handleFromTimeChange}
             KeyboardButtonProps={{
@@ -163,7 +191,8 @@ class Journeys extends React.PureComponent {
           className={classes.spaceToFromDate}
           format="yyyy-MM-dd"
           margin="normal"
-          invalidDateMessage="Fel värde på datum"
+          keyboardIcon={<EventIcon className={classes.colorOnIcon}></EventIcon>}
+          invalidDateMessage="FEL VÄRDE PÅ DATUM"
           value={this.state.selectedFromDate}
           onChange={this.handleFromDateChange}
           KeyboardButtonProps={{
@@ -179,12 +208,12 @@ class Journeys extends React.PureComponent {
     return (
       <Grid container justify="center" spacing={2}>
         <Grid item xs={12}>
-          <Typography variant="caption">Till och med</Typography>
+          <Typography variant="caption">TILL OCH MED</Typography>
           <KeyboardTimePicker
             margin="normal"
             ampm={false}
             className={classes.dateForm}
-            invalidDateMessage="Fel värde på tid"
+            invalidDateMessage="FEL VÄRDE PÅ TID"
             keyboardIcon={<AccessTimeIcon></AccessTimeIcon>}
             value={this.state.selectedEndDTime}
             onChange={this.handleEndTimeChange}
@@ -196,7 +225,7 @@ class Journeys extends React.PureComponent {
         <KeyboardDatePicker
           format="yyyy-MM-dd"
           margin="normal"
-          invalidDateMessage="Fel värde på datum"
+          invalidDateMessage="FEL VÄRDE PÅ DATUM"
           value={this.state.selectedEndDate}
           className={classes.spaceToFromDate}
           onChange={this.handleEndDateChange}
@@ -216,33 +245,39 @@ class Journeys extends React.PureComponent {
           <Divider className={classes.divider} />
         </Grid>
         <Grid item xs={12}>
-          <Typography variant="body2">Avgränsa sökområde i kartan</Typography>
+          <Typography variant="body2">AVGRÄNSA SÖKOMRÅDE I KARTAN</Typography>
         </Grid>
         <Grid justify="center" container>
-          <Grid item xs={3}>
-            <a href="/#">
+          <Grid item xs={4}>
+            <div>
               <img
-                src={PolygonIcon}
+                src={
+                  this.state.isPolygonActive ? ActivePolygon : InactivePolygon
+                }
+                onClick={this.togglePolygonState}
                 value={this.state.selectedFormType}
-                onClick={this.handlePolygonChange}
                 alt="#"
               ></img>
-            </a>
-            <Grid item xs={3}>
-              <Typography variant="body2">Polygon</Typography>
+            </div>
+            <Grid item xs={4}>
+              <Typography variant="body2">POLYGON</Typography>
             </Grid>
           </Grid>
-          <Grid item xs={3}>
-            <a href="/#">
+          <Grid item xs={4}>
+            <div>
               <img
-                src={RectangleIcon}
+                src={
+                  this.state.isRectangleActive
+                    ? ActiveRectangle
+                    : InactiveRectangle
+                }
+                onClick={this.toggleRectangleState}
                 value={this.state.selectedFormType}
-                onClick={this.handleRectangleChange}
                 alt="#"
               ></img>
-            </a>
-            <Grid item xs={3}>
-              <Typography variant="body2">Rektangel</Typography>
+            </div>
+            <Grid item xs={4}>
+              <Typography variant="body2">REKTANGEL</Typography>
             </Grid>
           </Grid>
         </Grid>

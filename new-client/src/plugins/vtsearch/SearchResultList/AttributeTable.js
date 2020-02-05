@@ -56,6 +56,11 @@ class AttributeTable extends React.Component {
 
   bindSubscriptions = () => {
     const { localObserver } = this.props;
+    localObserver.subscribe("remove-highlight-attribute-row", () => {
+      this.setState({
+        selectedRow: { index: null, olFeatureId: null }
+      });
+    });
     localObserver.subscribe("highlight-attribute-row", olFeatureId => {
       var foundRowIndex = this.getRowIndexFromOlFeatureId(olFeatureId);
       localObserver.publish(
@@ -160,7 +165,6 @@ class AttributeTable extends React.Component {
 
   onRowClick = row => {
     const { localObserver, searchResult } = this.props;
-
     this.setState({
       selectedRow: { index: row.index, olFeatureId: row.rowData.olFeatureId }
     });

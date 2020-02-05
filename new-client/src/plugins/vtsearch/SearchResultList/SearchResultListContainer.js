@@ -107,7 +107,6 @@ class SearchResultListContainer extends React.Component {
 
     this.bindSubscriptions();
   }
-
   resetHeightOfResultList = () => {
     const { localObserver } = this.props;
     localObserver.publish("search-result-list-normal");
@@ -204,6 +203,8 @@ class SearchResultListContainer extends React.Component {
   };
 
   handleTabChange = (event, newValue) => {
+    const { localObserver } = this.props;
+    localObserver.publish("remove-highlight-attribute-row");
     this.setActiveTabId(newValue);
   };
 
