@@ -130,12 +130,20 @@ class Introduction extends React.PureComponent {
             if (nextStepIndex) {
               this.localSteps.updateStepElement(nextStepIndex);
             }
-            // TODO: Below is a great place to handle the last step, we could e.g. show a special goodbye message
-            // if (nextStepIndex === this.localSteps?.props.steps.length - 1) {
-            //   console.log(
-            //     "This is the last step, hide prev/next buttons and ensure correct CSS for done button"
-            //   );
-            // }
+          }}
+          onAfterChange={nextStepIndex => {
+            // TODO: When https://github.com/HiDeoo/intro.js-react/issues/35 is solved, we can remove this nasty hack.
+            // It should be easier to hide prev/next buttons, but this works for now.
+            if (nextStepIndex === this.localSteps?.props.steps.length - 1) {
+              document
+                .querySelector(".introjs-donebutton")
+                .classList.remove("introjs-skipbutton");
+              document.querySelector(".introjs-prevbutton").style.display =
+                "none";
+              document.querySelector(".introjs-nextbutton").style.display =
+                "none";
+              document.querySelector(".introjs-bullets").style.display = "none";
+            }
           }}
           options={{
             exitOnOverlayClick: false,
