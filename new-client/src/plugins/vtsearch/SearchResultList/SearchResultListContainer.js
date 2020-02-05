@@ -192,6 +192,8 @@ class SearchResultListContainer extends React.Component {
     });
 
     localObserver.subscribe("search-result-list-close", () => {
+      localObserver.publish("hide-all-layers");
+      localObserver.publish("clear-highlight");
       this.searchResults.length = 0;
       this.setState({
         minimized: false,
@@ -219,6 +221,9 @@ class SearchResultListContainer extends React.Component {
   };
 
   onTabClose = searchResultId => {
+    const { localObserver } = this.props;
+    localObserver.publish("hide-all-layers");
+    localObserver.publish("clear-highlight");
     const nextactiveTabId = this.getNextTabActive(searchResultId);
     console.log(nextactiveTabId, "nextActiveTabId");
     this.setState({ activeTabId: nextactiveTabId });

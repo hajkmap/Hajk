@@ -69,6 +69,10 @@ export default class MapViewModel {
       this.highlightLayer.getSource().clear();
     });
 
+    this.localObserver.subscribe("hide-current-layer", () => {
+      this.hideCurrentLayer();
+    });
+
     this.map.on("singleclick", this.onFeaturesClickedInMap);
 
     this.localObserver.subscribe("add-search-result", olFeatures => {
@@ -459,6 +463,13 @@ export default class MapViewModel {
     this.map.getLayers().forEach(layer => {
       if (layer.get("searchResultId") === searchResultId) {
         layer.set("visible", !layer.get("visible"));
+      }
+    });
+  };
+  hideCurrentLayer = searchResultId => {
+    this.map.getLayers().forEach(layer => {
+      if (layer.get("searchResultId") === searchResultId) {
+        layer.set("visible", false);
       }
     });
   };
