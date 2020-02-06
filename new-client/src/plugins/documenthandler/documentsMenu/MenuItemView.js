@@ -9,8 +9,15 @@ import AccessAlarmIcon from "@material-ui/icons/AccessAlarm";
 
 const styles = theme => ({
   menuItem: {
-    height: theme.spacing(16),
-    margin: theme.spacing(1)
+    height: theme.spacing(20),
+    maxWidth: theme.spacing(36),
+    minWidth: theme.spacing(22),
+    margin: theme.spacing(1),
+    opacity: "0.8",
+    cursor: "pointer",
+    [theme.breakpoints.down("xs")]: {
+      maxWidth: "none"
+    }
   },
   gridContainer: {
     height: "100%"
@@ -18,10 +25,6 @@ const styles = theme => ({
 });
 
 class MenuItemView extends React.PureComponent {
-  state = {
-    counter: 0
-  };
-
   static propTypes = {};
 
   static defaultProps = {};
@@ -33,7 +36,7 @@ class MenuItemView extends React.PureComponent {
   }
 
   handleMenuButtonClick = e => {
-    console.log(e, "e");
+    this.localObserver.publish("document-clicked");
   };
 
   render() {
@@ -41,10 +44,12 @@ class MenuItemView extends React.PureComponent {
     return (
       <>
         <Paper
-          onClick={this.handleMenuButtonClick}
+          onClick={() => {
+            this.handleMenuButtonClick(title);
+          }}
           style={{ backgroundColor: color }}
           className={classes.menuItem}
-          square="true"
+          square={true}
           elevation={0}
         >
           <Grid
@@ -57,7 +62,12 @@ class MenuItemView extends React.PureComponent {
               <AccessAlarmIcon style={{ fontSize: 60 }} color="primary" />
             </Grid>
             <Grid xs={12} item>
-              <Typography variant="h5" align="center" color="textSecondary">
+              <Typography
+                style={{ wordWrap: "break-word" }}
+                variant="subtitle1"
+                align="center"
+                color="textSecondary"
+              >
                 {title}
               </Typography>
             </Grid>

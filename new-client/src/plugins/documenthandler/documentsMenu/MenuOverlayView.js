@@ -2,20 +2,35 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import MenuItemView from "./MenuItemView";
+import LogoItemView from "./LogoItemView";
 import Modal from "@material-ui/core/Modal";
 import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
 
 const styles = theme => ({
-  backdrop: {
-    zIndex: theme.zIndex.drawer + 1
-  },
   container: {
-    marginTop: "10%",
-    marginBottom: "10%"
+    backgroundColor: "rgba(38, 44, 44, 0.4)",
+    outline: "none",
+    minHeight: "80%",
+    marginTop: "5%",
+    marginBottom: "5%",
+    [theme.breakpoints.down("xs")]: {
+      height: "100%",
+      overflow: "scroll",
+      marginTop: 0,
+      marginBottom: 0
+    }
   },
-  grid: {
-    backgroundColor: "rgba(38, 44, 44, 0.4)"
+  menuItem: {
+    height: theme.spacing(20),
+    maxWidth: theme.spacing(30),
+    minWidth: theme.spacing(22),
+    margin: theme.spacing(1),
+    backgroundColor: "rgba(38, 44, 44, 0)",
+    cursor: "pointer",
+    [theme.breakpoints.down("xs")]: {
+      height: "100%"
+    }
   }
 });
 
@@ -30,17 +45,16 @@ const mockedMenuItems = [
 
 const xs = 12,
   sm = 4,
-  md = 4,
-  lg = 3;
+  md = 3,
+  lg = 2,
+  fullWidth = 12;
 
 class MenuOverlayView extends React.PureComponent {
-  // Initialize state - this is the correct way of doing it nowadays.
   state = {
-    counter: 0
+    open: true
   };
 
   static propTypes = {};
-
   static defaultProps = {};
 
   constructor(props) {
@@ -49,9 +63,21 @@ class MenuOverlayView extends React.PureComponent {
     this.globalObserver = this.props.app.globalObserver;
   }
 
+  close = () => {
+    this.setState({ open: false });
+  };
+
   renderMenuItem = menuItem => {
     return (
-      <Grid item xs={xs} sm={sm} md={md} lg={lg}>
+      <Grid
+        key={menuItem.title}
+        zeroMinWidth
+        item
+        xs={xs}
+        sm={sm}
+        md={md}
+        lg={lg}
+      >
         <MenuItemView
           model={this.DocumentHandlerModel}
           app={this.props.app}
@@ -65,19 +91,18 @@ class MenuOverlayView extends React.PureComponent {
 
   render() {
     const { classes } = this.props;
-
     return (
       <>
-        <Modal open="true">
-          <Container className={classes.container}>
-            <Grid
-              className={classes.grid}
-              zeroMinWidth="true"
-              container
-              alignItems="center"
-              justify="left"
-              spacing={1}
-            >
+        <Modal
+          className={classes.modal}
+          onBackdropClick={this.close}
+          open={this.state.open}
+        >
+          <Container className={classes.container} fixed>
+            <Grid className={classes.grid} container>
+              <Grid zeroMinWidth item xs={fullWidth}>
+                <LogoItemView></LogoItemView>
+              </Grid>
               {mockedMenuItems.map(menuItem => {
                 return this.renderMenuItem(menuItem);
               })}

@@ -1,4 +1,5 @@
 {
+  "version": null,
   "projections": [
     {
       "code": "EPSG:3006",
@@ -97,7 +98,7 @@
       "options": {
         "baselayers": [
           {
-            "id": "35",
+            "id": "36",
             "visibleAtStart": true,
             "drawOrder": 0,
             "visibleForGroups": null,
@@ -111,82 +112,24 @@
             "name": "Kartlager",
             "toggled": true,
             "expanded": true,
-            "layers": [
-              {
-                "id": "32",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "16",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "17",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "18",
-                "visibleAtStart": true,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "14",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "33",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "34",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "27",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              },
-              {
-                "id": "30",
-                "visibleAtStart": false,
-                "drawOrder": 1000,
-                "visibleForGroups": null,
-                "infobox": null
-              }
-            ],
+            "layers": [],
             "groups": []
           }
         ],
-        "instruction": "",
         "active": true,
         "visibleAtStart": false,
         "backgroundSwitcherBlack": false,
         "backgroundSwitcherWhite": true,
-        "toggleAllButton": true,
+        "showBreadcrumbs": false,
+        "target": "toolbar",
+        "position": "left",
+        "width": 0,
+        "height": 0,
+        "title": "",
+        "description": "",
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Rubrik temakarta",
+        "instruction": "",
         "visibleForGroups": ["Office-SEKSD01", "All-SE129"]
       },
       "index": 0
@@ -391,10 +334,10 @@
   ],
   "map": {
     "target": "map",
-    "center": [415000, 6585000],
+    "center": [319771, 6399959],
     "title": "Hajk 3",
     "projection": "EPSG:3006",
-    "zoom": 10,
+    "zoom": 8,
     "maxZoom": 18,
     "minZoom": 3,
     "resolutions": [
@@ -425,6 +368,8 @@
     "colors": {
       "primaryColor": "#333333",
       "secondaryColor": "#ffffff"
-    }
+    },
+    "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+    "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
   }
 }
