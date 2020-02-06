@@ -1,1 +1,16 @@
-{}
+{
+  "palette": {
+    "primary": { "main": "#005799" },
+    "text": { "secondary": "white" },
+    "secondary": {
+      "dark": "#a51848",
+      "light": "#eceded",
+      "main": "#ffcc00",
+      "mainLight": "#ffeeaa",
+      "complement": "#79ac54"
+    }
+  },
+  "typography": {
+    "fontFamily": "'Open Sans', sans-serif"
+  }
+}
