@@ -119,7 +119,7 @@ class Stops extends React.PureComponent {
       busStopValue: busStopValue,
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
-      municipality: municipality.gid,
+      municipality: municipality.name,
       selectedFormType: ""
     });
   };
@@ -130,7 +130,7 @@ class Stops extends React.PureComponent {
       busStopValue: busStopValue,
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
-      municipality: municipality.gid,
+      municipality: municipality.name,
       selectedFormType: "Polygon"
     });
   };
@@ -140,7 +140,7 @@ class Stops extends React.PureComponent {
       busStopValue: busStopValue,
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
-      municipality: municipality.gid,
+      municipality: municipality.name,
       selectedFormType: "Box"
     });
   };
