@@ -4,6 +4,9 @@ import { withSnackbar } from "notistack";
 import Paper from "@material-ui/core/Paper";
 import CardMedia from "@material-ui/core/CardMedia";
 import Grid from "@material-ui/core/Grid";
+import Divider from "@material-ui/core/Divider";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import { Typography } from "@material-ui/core";
 
 const styles = theme => ({
   logoItem: {
@@ -22,13 +25,14 @@ const styles = theme => ({
   }
 });
 
-class LogoItemView extends React.PureComponent {
+class HeaderView extends React.PureComponent {
   static propTypes = {};
 
   static defaultProps = {};
 
   render() {
-    const { classes } = this.props;
+    const { classes, subMenu } = this.props;
+    console.log(subMenu, "subMenu");
     return (
       <>
         <Paper className={classes.logoItem} square={true} elevation={0}>
@@ -40,16 +44,24 @@ class LogoItemView extends React.PureComponent {
             justify="center"
           >
             <Grid item xs={12}>
-              <CardMedia
-                style={{ width: "302px", height: "113px" }}
-                image={"http://localhost:3000/logo-share.png"}
-              ></CardMedia>
+              {subMenu ? (
+                <>
+                  <ArrowBackIcon></ArrowBackIcon>
+                  <Typography>TEST</Typography>
+                </>
+              ) : (
+                <CardMedia
+                  style={{ width: "302px", height: "113px" }}
+                  image={"http://localhost:3000/logo-share.png"}
+                ></CardMedia>
+              )}
             </Grid>
           </Grid>
         </Paper>
+        <Divider variant="fullWidth"></Divider>
       </>
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(LogoItemView));
+export default withStyles(styles)(withSnackbar(HeaderView));

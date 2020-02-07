@@ -6,8 +6,6 @@ import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import clsx from "clsx";
 
-import AccessAlarmIcon from "@material-ui/icons/AccessAlarm";
-
 const styles = theme => ({
   menuItem: {
     height: theme.spacing(20),
@@ -17,7 +15,8 @@ const styles = theme => ({
     opacity: "0.8",
     cursor: "pointer",
     [theme.breakpoints.down("xs")]: {
-      maxWidth: "none"
+      maxWidth: "none",
+      height: theme.spacing(10)
     }
   },
   noTransparency: {
@@ -48,12 +47,13 @@ class MenuItemView extends React.PureComponent {
     this.setState({ highlighted: !this.state.highlighted });
   };
 
-  handleMenuButtonClick = e => {
-    this.localObserver.publish("document-clicked");
+  handleMenuButtonClick = title => {
+    this.localObserver.publish("document-clicked", title);
   };
 
   render() {
     const { classes, color, title } = this.props;
+
     return (
       <>
         <Paper
@@ -74,12 +74,10 @@ class MenuItemView extends React.PureComponent {
           <Grid
             className={classes.gridContainer}
             justify="center"
-            alignItems="flex-end"
+            alignItems="center"
             container
           >
-            <Grid align="center" xs={12} item>
-              <AccessAlarmIcon style={{ fontSize: 60 }} color="primary" />
-            </Grid>
+            <Grid align="center" xs={12} item></Grid>
             <Grid xs={12} item>
               <Typography
                 style={{ wordWrap: "break-word" }}

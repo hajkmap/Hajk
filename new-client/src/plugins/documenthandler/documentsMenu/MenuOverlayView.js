@@ -2,7 +2,8 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import MenuItemView from "./MenuItemView";
-import LogoItemView from "./LogoItemView";
+import HeaderView from "./HeaderView";
+import MenuView from "./MenuView";
 import Modal from "@material-ui/core/Modal";
 import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
@@ -37,12 +38,18 @@ const styles = theme => ({
 });
 
 const mockedMenuItems = [
-  { color: "#b7e1c8", title: "Utgångspunkter" },
-  { color: "#faceb9", title: "Geografisk inriktning" },
-  { color: "#e0d0e7", title: "Utvecklingsstrategi" },
-  { color: "#bfe4f2", title: "Tematiska inriktningar" },
-  { color: "#008767", title: "Riksintressen" },
-  { color: "#d1d9dc", title: "Hållbarhetsbedömning" }
+  { mainDocument: true, color: "#b7e1c8", title: "Utgångspunkter" },
+  { mainDocument: true, color: "#e0d0e7", title: "Utvecklingsstrategi" },
+  { mainDocument: true, color: "#faceb9", title: "Geografisk inriktning" },
+  { mainDocument: true, color: "#bfe4f2", title: "Tematiska inriktningar" },
+  { mainDocument: true, color: "#008767", title: "Riksintressen" },
+  { mainDocument: true, color: "#d1d9dc", title: "Hållbarhetsbedömning" },
+  { mainDocument: true, color: "#ffffff", title: "Fördjupningar" },
+  { mainDocument: true, color: "#ffffff", title: "Tematiska tillägg" },
+  { mainDocument: true, color: "#ffffff", title: "Markanvändningskarta" },
+  { color: "#b7e1c8", mainTitle: "Utgångspunkter", title: "Submenyval1" },
+  { color: "#e0d0e7", mainTitle: "Utgångspunkter", title: "Submenyval2" },
+  { color: "#faceb9", mainTitle: "Utgångspunkter", title: "Submenyval3" }
 ];
 
 const xs = 12,
@@ -53,7 +60,11 @@ const xs = 12,
 
 class MenuOverlayView extends React.PureComponent {
   state = {
-    open: true
+    open: true,
+    subMenu: false,
+    menuItems: mockedMenuItems.filter(document => {
+      return document.mainDocument;
+    })
   };
 
   static propTypes = {};
@@ -63,45 +74,21 @@ class MenuOverlayView extends React.PureComponent {
     super(props);
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
+    this.localObserver.subscribe("document-clicked", title => {
+      var menuItems = mockedMenuItems.filter(document => {
+        return document.mainTitle === title;
+      });
+      this.setState({ menuItems: menuItems, subMenu: true });
+    });
   }
 
   close = () => {
     this.setState({ open: false });
   };
 
-  renderMenuItem = menuItem => {
-    return (
-      <Grid
-        key={menuItem.title}
-        zeroMinWidth
-        item
-        xs={xs}
-        sm={sm}
-        md={md}
-        lg={lg}
-      >
-        <MenuItemView
-          model={this.DocumentHandlerModel}
-          app={this.props.app}
-          title={menuItem.title}
-          color={menuItem.color}
-          localObserver={this.localObserver}
-        ></MenuItemView>
-      </Grid>
-    );
-  };
-
-  handleMapBlur = () => {
-    if (this.state.open) {
-      mapDiv.setAttribute("style", "filter : blur(5px)");
-    } else {
-      mapDiv.removeAttribute("style", "filter : blur(5px)");
-    }
-  };
-
   render() {
     const { classes } = this.props;
-    this.handleMapBlur();
+
     return (
       <>
         <Modal
@@ -112,11 +99,14 @@ class MenuOverlayView extends React.PureComponent {
           <Container className={classes.container} fixed>
             <Grid className={classes.grid} container>
               <Grid zeroMinWidth item xs={fullWidth}>
-                <LogoItemView></LogoItemView>
+                <HeaderView subMenu={this.state.subMenu}></HeaderView>
               </Grid>
-              {mockedMenuItems.map(menuItem => {
-                return this.renderMenuItem(menuItem);
-              })}
+              <MenuView
+                menuItems={this.state.menuItems}
+                model={this.DocumentHandlerModel}
+                app={this.props.app}
+                localObserver={this.localObserver}
+              ></MenuView>
             </Grid>
           </Container>
         </Modal>
