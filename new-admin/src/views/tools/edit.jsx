@@ -296,12 +296,14 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="active">Aktiverad</label>
           </div>
+          <div className="separator">Fönsterinställningar</div>
           <div>
             <label htmlFor="index">Sorteringsordning</label>
             <input
               id="index"
               name="index"
-              type="text"
+              type="number"
+              min="0"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -356,7 +358,8 @@ class ToolOptions extends Component {
             <input
               id="width"
               name="width"
-              type="text"
+              type="number"
+              min="0"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -375,13 +378,15 @@ class ToolOptions extends Component {
             <input
               id="height"
               name="height"
-              type="text"
+              type="number"
+              min="0"
               onChange={e => {
                 this.handleInputChange(e);
               }}
               value={this.state.height}
             />
           </div>
+          <div className="separator">Övriga inställningar</div>
           <div>
             <label htmlFor="instruction">
               Instruktion{" "}

@@ -328,6 +328,9 @@ class MapOptions extends Component {
               />
             </div>
             <div>
+              <div className="separator">
+                Grundinställningar för kartvisning
+              </div>
               <label>
                 Projektion{" "}
                 <i
@@ -434,27 +437,6 @@ class MapOptions extends Component {
             </div>
             <div>
               <label>
-                Logo{" "}
-                <i
-                  className="fa fa-question-circle"
-                  data-toggle="tooltip"
-                  title="Sökväg till logga att använda i <img>-taggen. Kan vara relativ Hajk-root eller absolut."
-                />
-              </label>
-              <input
-                type="text"
-                ref="input_logo"
-                value={this.state.logo}
-                className={this.getValidationClass("logo")}
-                onChange={e => {
-                  this.setState({ logo: e.target.value }, () =>
-                    this.validateField("logo")
-                  );
-                }}
-              />
-            </div>
-            <div>
-              <label>
                 Extent{" "}
                 <i
                   className="fa fa-question-circle"
@@ -475,14 +457,6 @@ class MapOptions extends Component {
               />
             </div>
             <div>
-              <label htmlFor="input_constrainOnlyCenter">
-                Lätta på extent{" "}
-                <i
-                  className="fa fa-question-circle"
-                  data-toggle="tooltip"
-                  title="Styr ol.Views 'constrainOnlyCenter'-parameter. Om sant kommer endast centrumkoordinaten att begränsas till extent."
-                />
-              </label>
               <input
                 id="input_constrainOnlyCenter"
                 type="checkbox"
@@ -493,6 +467,36 @@ class MapOptions extends Component {
                 checked={this.state.constrainOnlyCenter}
               />
               &nbsp;
+              <label className="long-label" htmlFor="input_constrainOnlyCenter">
+                Lätta på extent{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Styr ol.Views 'constrainOnlyCenter'-parameter. Om sant kommer endast centrumkoordinaten att begränsas till extent."
+                />
+              </label>
+            </div>
+            <div className="separator">Extra inställningar</div>
+            <div>
+              <label>
+                Logo{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Sökväg till logga att använda i <img>-taggen. Kan vara relativ Hajk-root eller absolut."
+                />
+              </label>
+              <input
+                type="text"
+                ref="input_logo"
+                value={this.state.logo}
+                className={this.getValidationClass("logo")}
+                onChange={e => {
+                  this.setState({ logo: e.target.value }, () =>
+                    this.validateField("logo")
+                  );
+                }}
+              />
             </div>
             <div>
               <label>
@@ -562,15 +566,8 @@ class MapOptions extends Component {
                 }}
               />
             </div>
+            <div className="separator">Extra kontroller i kartan</div>
             <div>
-              <label htmlFor="input_mapselector">
-                Visa kartväljare{" "}
-                <i
-                  className="fa fa-question-circle"
-                  data-toggle="tooltip"
-                  title="Om aktiv kommer en väljare med andra tillgängliga kartor att visas för användaren"
-                />
-              </label>
               <input
                 id="input_mapselector"
                 type="checkbox"
@@ -581,16 +578,16 @@ class MapOptions extends Component {
                 checked={this.state.mapselector}
               />
               &nbsp;
-            </div>
-            <div>
-              <label htmlFor="input_mapcleaner">
-                Visa knapp för att rensa kartan{" "}
+              <label className="long-label" htmlFor="input_mapselector">
+                Visa kartväljare{" "}
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Om aktiv kommer en väljare med andra tillgängliga kartor att visas för användaren"
                 />
               </label>
+            </div>
+            <div>
               <input
                 id="input_mapcleaner"
                 type="checkbox"
@@ -601,16 +598,17 @@ class MapOptions extends Component {
                 checked={this.state.mapcleaner}
               />
               &nbsp;
-            </div>
-            <div>
-              <label htmlFor="input_drawerVisible">
-                Starta med sidopanelen synlig{" "}
+              <label className="long-label" htmlFor="input_mapcleaner">
+                Visa knapp för att rensa kartan{" "}
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
-                  title="Om aktiv kommer sidopanelen att vara synlig när kartan laddat"
+                  title="Om aktiv kommer en väljare med andra tillgängliga kartor att visas för användaren"
                 />
               </label>
+            </div>
+            <div className="separator">Inställningar för sidopanel</div>
+            <div>
               <input
                 id="input_drawerVisible"
                 type="checkbox"
@@ -627,16 +625,16 @@ class MapOptions extends Component {
                 checked={this.state.drawerVisible}
               />
               &nbsp;
-            </div>
-            <div>
-              <label htmlFor="input_drawerPermanent">
-                Låt sidopanelen vara låst vid start{" "}
+              <label className="long-label" htmlFor="input_drawerVisible">
+                Starta med sidopanelen synlig{" "}
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
-                  title="Om aktiv kommer sidopanelen att vara låst vid skärmens kant vid start (gäller ej mobila enheter)"
+                  title="Om aktiv kommer sidopanelen att vara synlig när kartan laddat"
                 />
               </label>
+            </div>
+            <div>
               <input
                 id="input_drawerPermanent"
                 type="checkbox"
@@ -648,7 +646,16 @@ class MapOptions extends Component {
                 disabled={this.state.drawerVisible !== true}
               />
               &nbsp;
+              <label className="long-label" htmlFor="input_drawerPermanent">
+                Låt sidopanelen vara låst vid start{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktiv kommer sidopanelen att vara låst vid skärmens kant vid start (gäller ej mobila enheter)"
+                />
+              </label>
             </div>
+            <div className="separator">Färginställningar för kartan</div>
             <div className="clearfix">
               <span className="pull-left">
                 <div>Huvudfärg</div>

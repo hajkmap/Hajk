@@ -306,12 +306,14 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="active">Aktiverad</label>
           </div>
+          <div className="separator">Fönsterinställningar</div>
           <div>
             <label htmlFor="index">Sorteringsordning</label>
             <input
               id="index"
               name="index"
-              type="text"
+              type="number"
+              min="0"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -366,7 +368,8 @@ class ToolOptions extends Component {
             <input
               id="width"
               name="width"
-              type="text"
+              type="number"
+              min="0"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -385,13 +388,15 @@ class ToolOptions extends Component {
             <input
               id="height"
               name="height"
-              type="text"
+              type="number"
+              min="0"
               onChange={e => {
                 this.handleInputChange(e);
               }}
               value={this.state.height}
             />
           </div>
+          <div className="separator">Övriga inställningar</div>
           <div>
             <label htmlFor="instruction">
               Instruktion{" "}
@@ -429,8 +434,9 @@ class ToolOptions extends Component {
                 <input name="code" type="text" />
               </div>
               <div>
-                <label>Standard*</label>
                 <input name="default" type="checkbox" />
+                &nbsp;
+                <label>Standard*</label>
               </div>
               <div>
                 <label>Beskrivning*</label>
@@ -449,8 +455,9 @@ class ToolOptions extends Component {
                 <input name="ytitle" type="text" />
               </div>
               <div>
-                <label>Inverterad</label>
                 <input name="inverseAxis" type="checkbox" />
+                &nbsp;
+                <label>Inverterad</label>
               </div>
               <button className="btn btn-success">Lägg till</button>
             </form>

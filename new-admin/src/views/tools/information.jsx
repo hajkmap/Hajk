@@ -241,18 +241,21 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="active">Aktiverad</label>
           </div>
+          <div className="separator">Fönsterinställningar</div>
           <div>
             <label htmlFor="index">Sorteringsordning</label>
             <input
               id="index"
               name="index"
-              type="text"
+              type="number"
+              min="0"
               onChange={e => {
                 this.handleInputChange(e);
               }}
               value={this.state.index}
             />
           </div>
+          <div className="separator">Övriga inställningar</div>
           <div>
             <input
               id="visibleAtStart"
@@ -277,11 +280,13 @@ class ToolOptions extends Component {
               checked={this.state.showInfoOnce}
             />
             &nbsp;
-            <label htmlFor="showInfoOnce">Visa vid start endast en gång</label>
+            <label className="long-label" htmlFor="showInfoOnce">
+              Visa vid start endast en gång
+            </label>
           </div>
           <div>
             <label htmlFor="title">
-              Text vid mouse-over på informationsknappen
+              Text vid mouse-over på informations-knappen
             </label>
             <input
               value={this.state.title}

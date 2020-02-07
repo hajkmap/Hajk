@@ -525,7 +525,8 @@ class ToolOptions extends Component {
             <input
               id="index"
               name="index"
-              type="text"
+              type="number"
+              min="0"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -622,7 +623,11 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
-            <label htmlFor="scale">Skala för ikon (flyttal, 0-1)</label>
+            <label htmlFor="scale">
+              Skala för ikon
+              <br />
+              (flyttal, 0-1)
+            </label>
             <input
               value={this.state.scale}
               type="number"
@@ -636,26 +641,9 @@ class ToolOptions extends Component {
               }}
             />
           </div>
+          <div className="separator">Träffmarkering (polygon)</div>
           <div>
-            <label htmlFor="strokeColor">
-              Träffmarkering (polygon) - Färg på ramen (rgba)
-            </label>
-            <SketchPicker
-              color={{
-                r: this.state.strokeColor.r,
-                g: this.state.strokeColor.g,
-                b: this.state.strokeColor.b,
-                a: this.state.strokeColor.a
-              }}
-              onChangeComplete={color =>
-                this.handleColorChange("strokeColor", color)
-              }
-            />
-          </div>
-          <div>
-            <label htmlFor="strokeWidth">
-              Träffmarkering (polygon) - Bredd på ramen (px)
-            </label>
+            <label htmlFor="strokeWidth">Bredd på ramen (px)</label>
             <input
               value={this.state.strokeWidth}
               type="number"
@@ -669,21 +657,43 @@ class ToolOptions extends Component {
               }}
             />
           </div>
-          <div>
-            <label htmlFor="fillColor">
-              Träffmarkering (polygon) - Färg på fyllningen (rgba)
-            </label>
-            <SketchPicker
-              color={{
-                r: this.state.fillColor.r,
-                g: this.state.fillColor.g,
-                b: this.state.fillColor.b,
-                a: this.state.fillColor.a
-              }}
-              onChangeComplete={color =>
-                this.handleColorChange("fillColor", color)
-              }
-            />
+          <div className="clearfix">
+            <span className="pull-left">
+              <div>
+                <label htmlFor="strokeColor">Färg på ramen (rgba)</label>
+              </div>
+              <SketchPicker
+                color={{
+                  r: this.state.strokeColor.r,
+                  g: this.state.strokeColor.g,
+                  b: this.state.strokeColor.b,
+                  a: this.state.strokeColor.a
+                }}
+                onChangeComplete={color =>
+                  this.handleColorChange("strokeColor", color)
+                }
+              />
+            </span>
+            <span className="pull-left" style={{ marginLeft: "10px" }}>
+              <div>
+                <div>
+                  <label className="long-label" htmlFor="fillColor">
+                    Färg på fyllningen (rgba)
+                  </label>
+                </div>
+                <SketchPicker
+                  color={{
+                    r: this.state.fillColor.r,
+                    g: this.state.fillColor.g,
+                    b: this.state.fillColor.b,
+                    a: this.state.fillColor.a
+                  }}
+                  onChangeComplete={color =>
+                    this.handleColorChange("fillColor", color)
+                  }
+                />
+              </div>
+            </span>
           </div>
 
           <div className="separator">Spatial sök</div>
@@ -711,6 +721,7 @@ class ToolOptions extends Component {
                 }}
                 checked={this.state.polygonSearch}
               />
+              &nbsp;
               <label htmlFor="polygonSearch">Polygon</label>
               <div>
                 <input
@@ -722,7 +733,8 @@ class ToolOptions extends Component {
                   }}
                   checked={this.state.radiusSearch}
                 />
-                <label htmlFor="radiusSearch">
+                &nbsp;
+                <label className="long-label" htmlFor="radiusSearch">
                   Radie (aktiverar även en knapp bredvid varje sökresultat)
                 </label>
               </div>
@@ -736,6 +748,7 @@ class ToolOptions extends Component {
                   }}
                   checked={this.state.selectionSearch}
                 />
+                &nbsp;
                 <label htmlFor="selectionSearch">Selektion</label>
               </div>
             </div>
