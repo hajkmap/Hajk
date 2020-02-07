@@ -140,6 +140,11 @@ class Journeys extends React.PureComponent {
     return result;
   };
 
+  /**
+   * Method that in actives both spatial buttons.
+   *
+   * @memberof Journeys
+   */
   inactivateSpatialSearchButtons = () => {
     this.setState({ isPolygonActive: false, isRectangleActive: false });
   };
@@ -150,7 +155,7 @@ class Journeys extends React.PureComponent {
       selectedFromDate: formatFromDate,
       selectedEndDate: formatEndDate,
       selectedFormType: "Polygon",
-      drawCallback: this.inactivateSpatialSearchButtons
+      searchCallback: this.inactivateSpatialSearchButtons
     });
   };
   handleRectangleClick = () => {
@@ -159,7 +164,7 @@ class Journeys extends React.PureComponent {
       selectedFromDate: formatFromDate,
       selectedEndDate: formatEndDate,
       selectedFormType: "Box",
-      drawCallback: this.inactivateSpatialSearchButtons
+      searchCallback: this.inactivateSpatialSearchButtons
     });
   };
 

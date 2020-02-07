@@ -103,8 +103,19 @@ class Stops extends React.PureComponent {
     });
   };
 
-  inactivateSpatialSearchButtons = () => {
+  /**
+   * Method that in actives all search inputs and both spatial buttons.
+   *
+   * @memberof Stops
+   */
+  clearSearchInputAndButtons = () => {
     this.setState({ isPolygonActive: false, isRectangleActive: false });
+    this.setState({
+      stopNameOrNr: "",
+      publicLine: "",
+      municipality: "",
+      selectedFormType: ""
+    });
   };
 
   doSpatialChange = () => {
@@ -115,7 +126,7 @@ class Stops extends React.PureComponent {
       publicLine: publicLine,
       municipality: municipality.name,
       selectedFormType: "",
-      drawCallback: this.inactivateSpatialSearchButtons
+      searchCallback: this.clearSearchInputAndButtons
     });
   };
 
@@ -127,7 +138,7 @@ class Stops extends React.PureComponent {
       publicLine: publicLine,
       municipality: municipality.name,
       selectedFormType: "Polygon",
-      drawCallback: this.inactivateSpatialSearchButtons
+      searchCallback: this.inactivateSpatialSearchButtons
     });
   };
   handleRectangleChange = () => {
@@ -137,7 +148,8 @@ class Stops extends React.PureComponent {
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
       municipality: municipality.name,
-      selectedFormType: "Box"
+      selectedFormType: "Box",
+      searchCallback: this.inactivateSpatialSearchButtons
     });
   };
 

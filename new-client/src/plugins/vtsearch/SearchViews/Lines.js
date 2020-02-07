@@ -90,8 +90,21 @@ class Lines extends React.PureComponent {
       this.handleRectangleClick();
     });
   };
-  inactivateSpatialSearchButtons = () => {
+
+  /**
+   * Method that in actives all search inputs and both spatial buttons.
+   *
+   * @memberof Lines
+   */
+  clearSearchInputAndButtons = () => {
     this.setState({ isPolygonActive: false, isRectangleActive: false });
+    this.setState({
+      publicLineName: "",
+      internalLineNumber: "",
+      municipalityName: "",
+      trafficTransportName: "",
+      throughStopArea: ""
+    });
   };
 
   searchButtonClick = () => {
@@ -108,7 +121,8 @@ class Lines extends React.PureComponent {
       municipalityName: municipalityName.gid,
       trafficTransportName: trafficTransportName,
       throughStopArea: throughStopArea,
-      selectedFormType: ""
+      selectedFormType: "",
+      searchCallback: this.clearSearchInputAndButtons
     });
   };
 
@@ -127,7 +141,7 @@ class Lines extends React.PureComponent {
       trafficTransportName: trafficTransportName,
       throughStopArea: throughStopArea,
       selectedFormType: "Polygon",
-      drawCallback: this.inactivateSpatialSearchButtons
+      searchCallback: this.clearSearchInputAndButtons
     });
   };
   handleRectangleClick = () => {
@@ -145,7 +159,7 @@ class Lines extends React.PureComponent {
       trafficTransportName: trafficTransportName,
       throughStopArea: throughStopArea,
       selectedFormType: "Box",
-      drawCallback: this.inactivateSpatialSearchButtons
+      searchCallback: this.clearSearchInputAndButtons
     });
   };
 

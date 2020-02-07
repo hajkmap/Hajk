@@ -118,7 +118,7 @@ export default class MapViewModel {
     selectedFromDate,
     selectedEndDate,
     selectedFormType,
-    drawCallback
+    searchCallback
   }) => {
     var value = selectedFormType;
     var geometryFunction = undefined;
@@ -127,7 +127,7 @@ export default class MapViewModel {
       geometryFunction = createBox();
     }
     this.getWktFromUser(value, geometryFunction).then(wktFeatureGeom => {
-      drawCallback();
+      searchCallback();
       if (wktFeatureGeom != null) {
         this.model.getJourneys(
           selectedFromDate,
@@ -166,7 +166,7 @@ export default class MapViewModel {
     publicLine,
     municipality,
     selectedFormType,
-    drawCallback
+    searchCallback
   }) => {
     var value = selectedFormType;
     var geometryFunction = undefined;
@@ -175,6 +175,7 @@ export default class MapViewModel {
       geometryFunction = createBox();
     }
 
+    searchCallback();
     if (selectedFormType === "") {
       if (busStopValue === "stopAreas") {
         this.model.getStopAreas(stopNameOrNr, publicLine, municipality);
@@ -183,7 +184,6 @@ export default class MapViewModel {
       }
     } else {
       this.getWktFromUser(value, geometryFunction).then(wktFeatureGeom => {
-        drawCallback();
         if (busStopValue === "stopAreas") {
           this.model.getStopAreas(
             stopNameOrNr,
@@ -210,7 +210,7 @@ export default class MapViewModel {
     trafficTransportName,
     throughStopArea,
     selectedFormType,
-    drawCallback
+    searchCallback
   }) => {
     var value = selectedFormType;
     var geometryFunction = undefined;
@@ -218,6 +218,8 @@ export default class MapViewModel {
       value = "Circle";
       geometryFunction = createBox();
     }
+
+    searchCallback();
     if (selectedFormType === "") {
       this.model.getRoutes(
         publicLineName,
@@ -228,7 +230,6 @@ export default class MapViewModel {
       );
     } else {
       this.getWktFromUser(value, geometryFunction).then(wktFeatureGeom => {
-        drawCallback();
         this.model.getRoutes(
           publicLineName,
           internalLineNumber,
