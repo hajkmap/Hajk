@@ -61,7 +61,6 @@ class Stops extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
-    this.bindSubscriptions();
     this.model.fetchAllPossibleMunicipalityZoneNames().then(result => {
       this.setState({
         municipalities: result.length > 0 ? result : []
@@ -69,12 +68,6 @@ class Stops extends React.PureComponent {
     });
   }
 
-  bindSubscriptions = () => {
-    const { localObserver } = this.props;
-    localObserver.subscribe("vtsearch-result-begin", () => {
-      this.setState({ isPolygonActive: false, isRectangleActive: false });
-    });
-  };
   togglePolygonState = () => {
     this.setState({ isPolygonActive: !this.state.isPolygonActive }, () => {
       this.handlePolygonChange();
@@ -105,12 +98,13 @@ class Stops extends React.PureComponent {
   };
 
   handleMunicipalChange = event => {
-    this.setState(
-      {
-        municipality: event.target.value
-      },
-      console.log(this.state.municipality)
-    );
+    this.setState({
+      municipality: event.target.value
+    });
+  };
+
+  inactivateSpatialSearchButtons = () => {
+    this.setState({ isPolygonActive: false, isRectangleActive: false });
   };
 
   doSpatialChange = () => {
@@ -120,7 +114,8 @@ class Stops extends React.PureComponent {
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
       municipality: municipality.name,
-      selectedFormType: ""
+      selectedFormType: "",
+      drawCallback: this.inactivateSpatialSearchButtons
     });
   };
 
@@ -131,7 +126,8 @@ class Stops extends React.PureComponent {
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
       municipality: municipality.name,
-      selectedFormType: "Polygon"
+      selectedFormType: "Polygon",
+      drawCallback: this.inactivateSpatialSearchButtons
     });
   };
   handleRectangleChange = () => {

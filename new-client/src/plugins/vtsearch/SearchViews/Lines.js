@@ -68,7 +68,6 @@ class Lines extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
-    this.bindSubscriptions();
     this.model.fetchAllPossibleMunicipalityZoneNames().then(result => {
       this.setState({
         municipalities: result.length > 0 ? result : []
@@ -81,25 +80,21 @@ class Lines extends React.PureComponent {
     });
   }
 
-  bindSubscriptions = () => {
-    const { localObserver } = this.props;
-    localObserver.subscribe("vtsearch-result-begin", () => {
-      this.setState({ isPolygonActive: false, isRectangleActive: false });
-    });
-  };
-
   togglePolygonState = () => {
     this.setState({ isPolygonActive: !this.state.isPolygonActive }, () => {
-      this.handlePolygonChange();
+      this.handlePolygonClick();
     });
   };
   toggleRectangleState = () => {
     this.setState({ isRectangleActive: !this.state.isRectangleActive }, () => {
-      this.handleRectangleChange();
+      this.handleRectangleClick();
     });
   };
+  inactivateSpatialSearchButtons = () => {
+    this.setState({ isPolygonActive: false, isRectangleActive: false });
+  };
 
-  doSpatialChange = () => {
+  searchButtonClick = () => {
     const {
       publicLineName,
       internalLineNumber,
@@ -117,7 +112,7 @@ class Lines extends React.PureComponent {
     });
   };
 
-  handlePolygonChange = () => {
+  handlePolygonClick = () => {
     const {
       publicLineName,
       internalLineNumber,
@@ -131,10 +126,11 @@ class Lines extends React.PureComponent {
       municipalityName: municipalityName.gid,
       trafficTransportName: trafficTransportName,
       throughStopArea: throughStopArea,
-      selectedFormType: "Polygon"
+      selectedFormType: "Polygon",
+      drawCallback: this.inactivateSpatialSearchButtons
     });
   };
-  handleRectangleChange = () => {
+  handleRectangleClick = () => {
     const {
       publicLineName,
       internalLineNumber,
@@ -148,7 +144,8 @@ class Lines extends React.PureComponent {
       municipalityName: municipalityName.gid,
       trafficTransportName: trafficTransportName,
       throughStopArea: throughStopArea,
-      selectedFormType: "Box"
+      selectedFormType: "Box",
+      drawCallback: this.inactivateSpatialSearchButtons
     });
   };
 
@@ -279,7 +276,7 @@ class Lines extends React.PureComponent {
       <Grid item xs={12}>
         <Button
           className={classes.searchButton}
-          onClick={this.doSpatialChange}
+          onClick={this.searchButtonClick}
           variant="outlined"
         >
           <Typography className={classes.searchButtonText}>SÖK</Typography>

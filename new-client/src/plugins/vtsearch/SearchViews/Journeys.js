@@ -30,7 +30,6 @@ const styles = theme => ({
   spaceToFromDate: { marginBottom: 40 },
   divider: { marginTop: theme.spacing(3), marginBottom: theme.spacing(3) },
   textFields: { marginLeft: 10 },
-  colorOnIcon: { color: theme.palette.primary.main },
   polygonAndRectangleForm: {
     verticalAlign: "baseline",
     float: "left",
@@ -72,23 +71,16 @@ class Journeys extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
-    this.bindSubscriptions();
   }
 
-  bindSubscriptions = () => {
-    const { localObserver } = this.props;
-    localObserver.subscribe("vtsearch-result-begin", () => {
-      this.setState({ isPolygonActive: false, isRectangleActive: false });
-    });
-  };
   togglePolygonState = () => {
     this.setState({ isPolygonActive: !this.state.isPolygonActive }, () => {
-      this.handlePolygonChange();
+      this.handlePolygonClick();
     });
   };
   toggleRectangleState = () => {
     this.setState({ isRectangleActive: !this.state.isRectangleActive }, () => {
-      this.handleRectangleChange();
+      this.handleRectangleClick();
     });
   };
   handleFromTimeChange = time => {
@@ -148,20 +140,26 @@ class Journeys extends React.PureComponent {
     return result;
   };
 
-  handlePolygonChange = () => {
+  inactivateSpatialSearchButtons = () => {
+    this.setState({ isPolygonActive: false, isRectangleActive: false });
+  };
+
+  handlePolygonClick = () => {
     const { formatFromDate, formatEndDate } = this.getFormattedDate();
     this.localObserver.publish("journeys-search", {
       selectedFromDate: formatFromDate,
       selectedEndDate: formatEndDate,
-      selectedFormType: "Polygon"
+      selectedFormType: "Polygon",
+      drawCallback: this.inactivateSpatialSearchButtons
     });
   };
-  handleRectangleChange = () => {
+  handleRectangleClick = () => {
     const { formatFromDate, formatEndDate } = this.getFormattedDate();
     this.localObserver.publish("journeys-search", {
       selectedFromDate: formatFromDate,
       selectedEndDate: formatEndDate,
-      selectedFormType: "Box"
+      selectedFormType: "Box",
+      drawCallback: this.inactivateSpatialSearchButtons
     });
   };
 
@@ -177,9 +175,7 @@ class Journeys extends React.PureComponent {
             ampm={false}
             className={classes.dateForm}
             invalidDateMessage="FEL VÄRDE PÅ TID"
-            keyboardIcon={
-              <AccessTimeIcon className={classes.colorOnIcon}></AccessTimeIcon>
-            }
+            keyboardIcon={<AccessTimeIcon></AccessTimeIcon>}
             value={this.state.selectedFromTime}
             onChange={this.handleFromTimeChange}
             KeyboardButtonProps={{
@@ -191,7 +187,7 @@ class Journeys extends React.PureComponent {
           className={classes.spaceToFromDate}
           format="yyyy-MM-dd"
           margin="normal"
-          keyboardIcon={<EventIcon className={classes.colorOnIcon}></EventIcon>}
+          keyboardIcon={<EventIcon></EventIcon>}
           invalidDateMessage="FEL VÄRDE PÅ DATUM"
           value={this.state.selectedFromDate}
           onChange={this.handleFromDateChange}
