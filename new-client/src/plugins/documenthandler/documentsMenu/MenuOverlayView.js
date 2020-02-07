@@ -7,6 +7,8 @@ import Modal from "@material-ui/core/Modal";
 import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
 
+const mapDiv = document.getElementById("map");
+
 const styles = theme => ({
   container: {
     backgroundColor: "rgba(38, 44, 44, 0.4)",
@@ -89,8 +91,17 @@ class MenuOverlayView extends React.PureComponent {
     );
   };
 
+  handleMapBlur = () => {
+    if (this.state.open) {
+      mapDiv.setAttribute("style", "filter : blur(5px)");
+    } else {
+      mapDiv.removeAttribute("style", "filter : blur(5px)");
+    }
+  };
+
   render() {
     const { classes } = this.props;
+    this.handleMapBlur();
     return (
       <>
         <Modal

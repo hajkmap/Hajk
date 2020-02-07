@@ -41,7 +41,7 @@ class LogoItemView extends React.PureComponent {
           >
             <Grid item xs={12}>
               <CardMedia
-                style={{ width: "204px", height: "75px" }}
+                style={{ width: "302px", height: "113px" }}
                 image={"http://localhost:3000/logo-share.png"}
               ></CardMedia>
             </Grid>
