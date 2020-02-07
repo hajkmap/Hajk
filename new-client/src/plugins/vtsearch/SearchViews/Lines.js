@@ -254,14 +254,14 @@ class Lines extends React.PureComponent {
                   <MenuItem
                     className={classes.firstMenuItem}
                     key={index}
-                    value={municipality.name}
+                    value={municipality}
                   >
                     <Typography>{municipality.name}</Typography>
                   </MenuItem>
                 );
               } else {
                 return (
-                  <MenuItem key={index} value={municipality.name}>
+                  <MenuItem key={index} value={municipality}>
                     <Typography>{municipality.name}</Typography>
                   </MenuItem>
                 );
