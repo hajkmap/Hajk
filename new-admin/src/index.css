@@ -56,6 +56,10 @@ article label.full {
   width: 300px;
 }
 
+.long-label {
+  white-space: nowrap;
+}
+
 article input[type="text"] {
   width: 400px;
   margin-right: 5px;
