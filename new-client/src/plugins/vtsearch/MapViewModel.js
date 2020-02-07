@@ -6,7 +6,6 @@ import "ol/ol.css";
 import Draw from "ol/interaction/Draw.js";
 import WKT from "ol/format/WKT";
 import { createBox } from "ol/interaction/Draw";
-
 /**
  * @summary ViewModel to handle interactions with map
  * @description Functionality used to interact with map.
@@ -87,78 +86,11 @@ export default class MapViewModel {
       this.resizeMap(height);
     });
 
-    this.localObserver.subscribe(
-      "journeys-search",
-      ({ selectedFromDate, selectedEndDate, selectedFormType }) => {
-        this.journeySearch({
-          selectedFromDate,
-          selectedEndDate,
-          selectedFormType
-        });
-        this.drawlayer.getSource().clear();
-      }
-    );
+    this.localObserver.subscribe("journeys-search", this.journeySearch);
 
-    this.localObserver.subscribe(
-      "stops-search",
-      ({
-        busStopValue,
-        stopNameOrNr,
-        publicLine,
-        municipality,
-        selectedFormType
-      }) => {
-        if (selectedFormType === "") {
-          this.doStopSpatial({
-            busStopValue,
-            stopNameOrNr,
-            publicLine,
-            municipality
-          });
-        } else {
-          this.stopSearch({
-            busStopValue,
-            stopNameOrNr,
-            publicLine,
-            municipality,
-            selectedFormType
-          });
-        }
-        this.drawlayer.getSource().clear();
-      }
-    );
-    this.localObserver.subscribe(
-      "routes-search",
-      ({
-        publicLineName,
-        internalLineNumber,
-        municipalityName,
-        trafficTransportName,
-        throughStopArea,
-        selectedFormType
-      }) => {
-        if (selectedFormType === "") {
-          this.doSpatialRoutesSearch({
-            publicLineName,
-            internalLineNumber,
-            municipalityName,
-            trafficTransportName,
-            throughStopArea,
-            selectedFormType
-          });
-        } else {
-          this.routesSearch({
-            publicLineName,
-            internalLineNumber,
-            municipalityName,
-            trafficTransportName,
-            throughStopArea,
-            selectedFormType
-          });
-        }
-        this.drawlayer.getSource().clear();
-      }
-    );
+    this.localObserver.subscribe("stops-search", this.stopSearch);
+
+    this.localObserver.subscribe("routes-search", this.routesSearch);
   };
 
   resizeMap = height => {
@@ -182,24 +114,20 @@ export default class MapViewModel {
       })[0];
   };
 
-  journeySearch = ({ selectedFromDate, selectedEndDate, selectedFormType }) => {
+  journeySearch = ({
+    selectedFromDate,
+    selectedEndDate,
+    selectedFormType,
+    drawCallback
+  }) => {
     var value = selectedFormType;
     var geometryFunction = undefined;
     if (selectedFormType === "Box") {
       value = "Circle";
       geometryFunction = createBox();
     }
-    this.draw = new Draw({
-      source: this.drawlayer.getSource(),
-      type: value,
-      stopClick: true,
-      geometryFunction: geometryFunction
-    });
-
-    this.draw.on("drawend", e => {
-      this.map.removeInteraction(this.draw);
-      var format = new WKT();
-      var wktFeatureGeom = format.writeGeometry(e.feature.getGeometry());
+    this.getWktFromUser(value, geometryFunction).then(wktFeatureGeom => {
+      drawCallback();
       if (wktFeatureGeom != null) {
         this.model.getJourneys(
           selectedFromDate,
@@ -208,22 +136,12 @@ export default class MapViewModel {
         );
       }
     });
+
     this.map.addInteraction(this.draw);
   };
 
-  stopSearch = ({
-    busStopValue,
-    stopNameOrNr,
-    publicLine,
-    municipality,
-    selectedFormType
-  }) => {
-    var value = selectedFormType;
-    var geometryFunction = undefined;
-    if (selectedFormType === "Box") {
-      value = "Circle";
-      geometryFunction = createBox();
-    }
+  getWktFromUser = (value, geometryFunction) => {
+    this.drawlayer.getSource().clear();
     this.draw = new Draw({
       source: this.drawlayer.getSource(),
       type: value,
@@ -231,41 +149,57 @@ export default class MapViewModel {
       geometryFunction: geometryFunction
     });
 
-    this.draw.on("drawend", e => {
-      this.map.removeInteraction(this.draw);
-      var format = new WKT();
-      var wktFeatureGeom = format.writeGeometry(e.feature.getGeometry());
-      if (wktFeatureGeom != null && busStopValue === "stopAreas") {
-        this.model.getStopAreas(
-          stopNameOrNr,
-          publicLine,
-          municipality,
-          wktFeatureGeom
-        );
-      }
-      if (wktFeatureGeom != null && busStopValue === "stopPoints") {
-        this.model.getStopPoints(
-          stopNameOrNr,
-          publicLine,
-          municipality,
-          wktFeatureGeom
-        );
-      }
-    });
     this.map.addInteraction(this.draw);
+    return new Promise(resolve => {
+      this.draw.on("drawend", e => {
+        this.map.removeInteraction(this.draw);
+        var format = new WKT();
+        var wktFeatureGeom = format.writeGeometry(e.feature.getGeometry());
+        resolve(wktFeatureGeom);
+      });
+    });
   };
 
-  doStopSpatial = ({
+  stopSearch = ({
     busStopValue,
     stopNameOrNr,
     publicLine,
-    municipality
+    municipality,
+    selectedFormType,
+    drawCallback
   }) => {
-    if (busStopValue === "stopAreas") {
-      this.model.getStopAreas(stopNameOrNr, publicLine, municipality);
+    var value = selectedFormType;
+    var geometryFunction = undefined;
+    if (selectedFormType === "Box") {
+      value = "Circle";
+      geometryFunction = createBox();
     }
-    if (busStopValue === "stopPoints") {
-      this.model.getStopPoints(stopNameOrNr, publicLine, municipality);
+
+    if (selectedFormType === "") {
+      if (busStopValue === "stopAreas") {
+        this.model.getStopAreas(stopNameOrNr, publicLine, municipality);
+      } else {
+        this.model.getStopPoints(stopNameOrNr, publicLine, municipality);
+      }
+    } else {
+      this.getWktFromUser(value, geometryFunction).then(wktFeatureGeom => {
+        drawCallback();
+        if (busStopValue === "stopAreas") {
+          this.model.getStopAreas(
+            stopNameOrNr,
+            publicLine,
+            municipality,
+            wktFeatureGeom
+          );
+        } else {
+          this.model.getStopPoints(
+            stopNameOrNr,
+            publicLine,
+            municipality,
+            wktFeatureGeom
+          );
+        }
+      });
     }
   };
 
@@ -275,7 +209,8 @@ export default class MapViewModel {
     municipality,
     trafficTransportName,
     throughStopArea,
-    selectedFormType
+    selectedFormType,
+    drawCallback
   }) => {
     var value = selectedFormType;
     var geometryFunction = undefined;
@@ -283,18 +218,17 @@ export default class MapViewModel {
       value = "Circle";
       geometryFunction = createBox();
     }
-    this.draw = new Draw({
-      source: this.drawlayer.getSource(),
-      type: value,
-      stopClick: true,
-      geometryFunction: geometryFunction
-    });
-
-    this.draw.on("drawend", e => {
-      this.map.removeInteraction(this.draw);
-      var format = new WKT();
-      var wktFeatureGeom = format.writeGeometry(e.feature.getGeometry());
-      if (wktFeatureGeom != null) {
+    if (selectedFormType === "") {
+      this.model.getRoutes(
+        publicLineName,
+        internalLineNumber,
+        municipality,
+        trafficTransportName,
+        throughStopArea
+      );
+    } else {
+      this.getWktFromUser(value, geometryFunction).then(wktFeatureGeom => {
+        drawCallback();
         this.model.getRoutes(
           publicLineName,
           internalLineNumber,
@@ -303,25 +237,8 @@ export default class MapViewModel {
           throughStopArea,
           wktFeatureGeom
         );
-      }
-    });
-    this.map.addInteraction(this.draw);
-  };
-
-  doSpatialRoutesSearch = ({
-    publicLineName,
-    internalLineNumber,
-    municipalityName,
-    trafficTransportName,
-    throughStopArea
-  }) => {
-    this.model.getRoutes(
-      publicLineName,
-      internalLineNumber,
-      municipalityName,
-      trafficTransportName,
-      throughStopArea
-    );
+      });
+    }
   };
 
   addDrawSearch = () => {
