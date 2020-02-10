@@ -27,7 +27,7 @@ const styles = theme => ({
   }
 });
 
-class MenuItemView extends React.PureComponent {
+class MenuItem extends React.PureComponent {
   state = {
     highlighted: false
   };
@@ -95,4 +95,4 @@ class MenuItemView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(MenuItemView));
+export default withStyles(styles)(withSnackbar(MenuItem));

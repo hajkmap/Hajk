@@ -1,12 +1,10 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import MenuItemView from "./MenuItemView";
+import MenuItemView from "./MenuItem";
 
 import Divider from "@material-ui/core/Divider";
 import Grid from "@material-ui/core/Grid";
-
-const mapDiv = document.getElementById("map");
 
 const styles = theme => ({
   container: {
@@ -41,7 +39,7 @@ const xs = 12,
   lg = 2,
   fullWidth = 12;
 
-class MenuOverlayView extends React.PureComponent {
+class MenuView extends React.PureComponent {
   state = {
     activeDocumentMenu: null
   };
@@ -77,17 +75,9 @@ class MenuOverlayView extends React.PureComponent {
     );
   };
 
-  handleMapBlur = () => {
-    if (this.state.open) {
-      mapDiv.setAttribute("style", "filter : blur(5px)");
-    } else {
-      mapDiv.removeAttribute("style", "filter : blur(5px)");
-    }
-  };
-
   render() {
     const { menuItems, subMenuItems } = this.props;
-    this.handleMapBlur();
+
     return (
       <>
         {this.state.activeDocumentMenu != null &&
@@ -103,4 +93,4 @@ class MenuOverlayView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(MenuOverlayView));
+export default withStyles(styles)(withSnackbar(MenuView));

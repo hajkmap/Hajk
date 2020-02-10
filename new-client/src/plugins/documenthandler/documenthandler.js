@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import DocumentHandlerModel from "./DocumentHandlerModel";
 import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
-import MenuOverlayView from "./documentsMenu/MenuOverlayView";
+import OverlayView from "./documentsMenu/OverlayView";
 import Observer from "react-event-observer";
 
 class DocumentHandler extends React.PureComponent {
@@ -36,11 +36,11 @@ class DocumentHandler extends React.PureComponent {
   render() {
     return (
       <>
-        <MenuOverlayView
+        <OverlayView
           model={this.DocumentHandlerModel}
           app={this.props.app}
           localObserver={this.localObserver}
-        ></MenuOverlayView>
+        ></OverlayView>
         <DocumentWindowBase
           {...this.props}
           model={this.DocumentHandlerModel}

@@ -1,14 +1,11 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import MenuItemView from "./MenuItemView";
 import HeaderView from "./HeaderView";
 import MenuView from "./MenuView";
 import Modal from "@material-ui/core/Modal";
 import Container from "@material-ui/core/Container";
 import Grid from "@material-ui/core/Grid";
-
-const mapDiv = document.getElementById("map");
 
 const styles = theme => ({
   container: {
@@ -52,13 +49,10 @@ const mockedMenuItems = [
   { color: "#faceb9", mainTitle: "Utgångspunkter", title: "Submenyval3" }
 ];
 
-const xs = 12,
-  sm = 4,
-  md = 3,
-  lg = 2,
-  fullWidth = 12;
+const fullWidth = 12;
+const mapDiv = document.getElementById("map");
 
-class MenuOverlayView extends React.PureComponent {
+class OverlayView extends React.PureComponent {
   state = {
     open: true,
     subMenu: false,
@@ -78,17 +72,41 @@ class MenuOverlayView extends React.PureComponent {
       var menuItems = mockedMenuItems.filter(document => {
         return document.mainTitle === title;
       });
-      this.setState({ menuItems: menuItems, subMenu: true });
+      this.setState({
+        menuItems: menuItems,
+        subMenu: true,
+        activeTitle: title
+      });
+    });
+    this.localObserver.subscribe("reset", title => {
+      this.reset();
     });
   }
+
+  handleMapBlur = () => {
+    if (this.state.open) {
+      mapDiv.setAttribute("style", "filter : blur(5px)");
+    } else {
+      mapDiv.removeAttribute("style", "filter : blur(5px)");
+    }
+  };
 
   close = () => {
     this.setState({ open: false });
   };
 
+  reset = () => {
+    this.setState({
+      menuItems: mockedMenuItems.filter(document => {
+        return document.mainDocument;
+      }),
+      subMenu: false
+    });
+  };
+
   render() {
     const { classes } = this.props;
-
+    this.handleMapBlur();
     return (
       <>
         <Modal
@@ -99,7 +117,11 @@ class MenuOverlayView extends React.PureComponent {
           <Container className={classes.container} fixed>
             <Grid className={classes.grid} container>
               <Grid zeroMinWidth item xs={fullWidth}>
-                <HeaderView subMenu={this.state.subMenu}></HeaderView>
+                <HeaderView
+                  title={this.state.activeTitle}
+                  subMenu={this.state.subMenu}
+                  localObserver={this.localObserver}
+                ></HeaderView>
               </Grid>
               <MenuView
                 menuItems={this.state.menuItems}
@@ -115,4 +137,4 @@ class MenuOverlayView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(MenuOverlayView));
+export default withStyles(styles)(withSnackbar(OverlayView));

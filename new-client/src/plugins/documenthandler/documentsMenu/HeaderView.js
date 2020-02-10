@@ -30,8 +30,16 @@ class HeaderView extends React.PureComponent {
 
   static defaultProps = {};
 
+  constructor(props) {
+    super(props);
+  }
+
+  reset = () => {
+    const { localObserver } = this.props;
+    localObserver.publish("reset");
+  };
   render() {
-    const { classes, subMenu } = this.props;
+    const { classes, subMenu, title } = this.props;
     console.log(subMenu, "subMenu");
     return (
       <>
@@ -40,14 +48,14 @@ class HeaderView extends React.PureComponent {
             className={classes.gridContainer}
             container
             spacing={0}
-            alignItems="center"
+            alignItems="flex-end"
             justify="center"
           >
             <Grid item xs={12}>
               {subMenu ? (
                 <>
-                  <ArrowBackIcon></ArrowBackIcon>
-                  <Typography>TEST</Typography>
+                  <ArrowBackIcon onClick={this.reset}></ArrowBackIcon>
+                  <Typography>{title}</Typography>
                 </>
               ) : (
                 <CardMedia
